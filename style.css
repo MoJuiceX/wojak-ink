@@ -409,3 +409,29 @@ button {
   90%   { transform: translateX(-50%) translate(-3px, 5px); }
   100%  { transform: translateX(-50%) translate(0px, 0px); }
 }
+
+/* --- Accessibility fixes: touch targets --- */
+
+/* Increase title-bar button hit area (98.css buttons are tiny) */
+.title-bar-controls button {
+  min-width: 34px;
+  min-height: 34px;
+  padding: 0;
+  margin-left: 4px; /* spacing between buttons */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Give a bit more breathing room on touch devices */
+@media (pointer: coarse) {
+  .title-bar {
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+  .title-bar-controls button {
+    min-width: 40px;
+    min-height: 40px;
+    margin-left: 6px;
+  }
+}
