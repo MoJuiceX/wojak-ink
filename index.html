@@ -30,55 +30,7 @@
     <link rel="icon" type="image/png" href="/assets/logo.png" />
 
     <!-- Win98 UI CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/98.css" />
-
-    <!-- Your overrides -->
-    <link rel="stylesheet" href="style.css" />
-  </head>
-
-  <body>
-    <div class="bg-fixed" aria-hidden="true"></div>
-    <div class="desktop">
-      <!-- Taskbar -->
-      <div class="taskbar">
-        <button class="start-btn">Start</button>
-        <div class="taskbar-spacer"></div>
-        <div class="clock">WET</div>
-      </div>
-
-      <!-- README -->
-      <div class="window draggable" style="width: 820px; position:absolute; left: 20px; top: 20px;">
-        <div class="title-bar">
-          <div class="title-bar-text">README.TXT</div>
-          <div class="title-bar-controls">
-            <button aria-label="Minimize"></button>
-            <button aria-label="Maximize"></button>
-            <button aria-label="Close" class="close-window"></button>
-          </div>
-        </div>
-        <div class="window-body">
-          <div class="banner">
-            <img src="https://bafybeihnxg76ikdnqmenuabfyujgsrrdiqek2fmmhbnjy4y35bd633thma.ipfs.w3s.link/Wojak%20Farmers%20Plot%20Banner%202.png" alt="Wojak Farmers Plot banner" />
-          </div>
-
-          <p><b>Wojak Farmers Plot — Art for the Grove</b></p>
-          <p>
-            Wojak Farmers Plot is my personal contribution to TangGang culture — a collection built from my journey inside this community. These NFTs are handcrafted one by one, made with intention, humour, and a lot of love for the culture we’re all building together.
-          </p>
-
-          <p>
-            The art explores many different sides of crypto culture. Some pieces are playful, some are more cyberpunk, some are pure meme energy — but every single NFT tells a story. And they’re meant to be used. Meme them. Screenshot them. Right-click save them. That’s the point. Memes are cultural weapons, and this collection gives the community more tools to express this. This is my way of adding to the lore of the TangGang.
-          </p>
-
-          <p><b>The goal is simple:</b><br />Create art, share it with the gang, and bring it back to the grove. This is how we build user aligned incentives.</p>
-
-          <ul>
-            <li><b>Supply:</b> 4200</li>
-            <li><b>Chain:</b> <a href="https://www.chia.net/" target="_blank" rel="noreferrer">Chia.net</a></li>
-            <li><b>Mint:</b> Friday Dec 19th, 2025</li>
-          </ul>
-
-          <hr />
+    <link rel="stylesheet" href="https://unpkg.com/98.css@0.1.21/dist/98.css" />
 
           <p><b>Marketplace</b></p>
           <p>
@@ -103,74 +55,22 @@
         </div>
       </div>
 
-      <!-- RIGHT SIDE STACK (TangGang + Memetic) -->
-      <div class="side-stack">
-        <!-- TangGang window -->
-        <div class="window draggable" id="win-tanggang" data-nostack="true" style="left: 0px; top: 0px;">
-          <div class="title-bar">
-            <div class="title-bar-text">TangGang</div>
-            <div class="title-bar-controls">
-              <button aria-label="Minimize"></button>
-              <button aria-label="Maximize"></button>
-              <button aria-label="Close" class="close-window"></button>
-            </div>
-          </div>
-          <div class="window-body">
-            <img
-              src="https://bafybeihbaqn7omk55qi3vfrht76qa53kz4dx75anzwtjkcggi2v3jql4tm.ipfs.w3s.link/?filename=HOA+logo.png"
-              alt="TangGang"
-              class="fit-img"
-            />
+      <!-- TangGang window -->
+      <div class="window draggable" id="win-tanggang" data-nostack="true" style="left: 0px; top: 0px;">
+        <div class="title-bar">
+          <div class="title-bar-text">TangGang</div>
+          <div class="title-bar-controls">
+            <button aria-label="Minimize"></button>
+            <button aria-label="Maximize"></button>
+            <button aria-label="Close" class="close-window"></button>
           </div>
         </div>
-
-        <!-- Memetic Energy window -->
-        <div class="window draggable" id="memetic-energy" data-nostack="true" style="left: 0px; top: 460px;">
-          <div class="title-bar">
-            <div class="title-bar-text">MEMETIC_ENERGY.ZIP</div>
-            <div class="title-bar-controls">
-              <button aria-label="Minimize"></button>
-              <button aria-label="Maximize"></button>
-              <button aria-label="Close" class="close-window"></button>
-            </div>
-          </div>
-
-          <div class="window-body">
-            <p style="margin: 0 0 10px 0;">Download Memetic Energy 👇</p>
-
-            <div class="memetic-box">
-              <!-- Pic 1: base -->
-              <img
-                class="memetic-base"
-                src="https://bafybeicztoeh22dvgcvuvwb54zza4q3mbcq5ittienu5chvbmfodgg4jji.ipfs.w3s.link/memetic%20energy%20box%201.png"
-                alt="Memetic Energy Box Base"
-              />
-
-              <!-- Pic 2: fades in/out on top -->
-              <img
-                class="memetic-fade"
-                src="https://bafybeiaqtvmwd7s75ghyn4yvi6s7gf5txx4pl33qr5wiu3qhpsimdjuw7q.ipfs.w3s.link/memetic%20energy%20box%202.png"
-                alt="Memetic Energy Glow"
-              />
-
-              <!-- Pic 3: always visible + clickable (downloads ZIP) -->
-              <a
-                class="memetic-click"
-                href="https://drive.google.com/file/d/1ZLx3YtW7R5BWXvG_5wN97PJc4vDgNp23/view?usp=sharing"
-                target="_blank"
-                rel="noreferrer"
-              >
-                <img
-                  src="https://bafybeihuamb75mlnsyvwdyyg4bpogeenlfh32krumvz6whspr2r7fzvtca.ipfs.w3s.link/memetic%20energy%20box%203.png"
-                  alt="Download Memetic Energy ZIP"
-                />
-              </a>
-            </div>
-
-            <p style="margin: 10px 0 0 0;">
-              File: <b>Memetic_Energy_v1.zip</b>
-            </p>
-          </div>
+        <div class="window-body">
+          <img
+            src="https://bafybeihbaqn7omk55qi3vfrht76qa53kz4dx75anzwtjkcggi2v3jql4tm.ipfs.w3s.link/?filename=HOA+logo.png"
+            alt="TangGang"
+            class="fit-img"
+          />
         </div>
       </div>
 
@@ -505,7 +405,7 @@
         <div class="window-body">
   <p><b>What is this?</b> A handcrafted Wojak NFT collection made for the Grove — meme culture, not museum art.</p>
 
-  <p><b>Can I use the art?</b>  Absolutely! Right-click, save it, turn it into a meme, remix it, share it — go wild and make it your own. 😎 I even made it easy for you, just <a href="#memetic-energy">download</a> the memetic energy 🍊</p>
+  <p><b>Can I use the art?</b>  Absolutely! Right-click, save it, turn it into a meme, remix it, share it — go wild and make it your own. 😎</p>
 
   <p>
     <b>Where is the mint?</b>
