@@ -1,0 +1,411 @@
+/* Simple Win98 desktop vibe */
+/* Scale fonts up globally (root override below will take effect) */
+
+body {
+  margin: 0;
+  background-color: #008080; /* classic teal fallback */
+  line-height: 1.5;
+}
+
+/* Fixed background layer to keep it visually stable without repaint glitches */
+.bg-fixed {
+  position: fixed;
+  inset: 0;
+  background-image: url("https://bafybeibz4cxxg2ouqw4p45gj4zl7qahvczmdcdqxcconl6xcozylf2uxwu.ipfs.w3s.link/windows-98-background-mvrmy77vuyblzxba.jpg");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  z-index: -1;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.desktop {
+  padding: 18px;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  height: 1400px; /* adjust if needed */
+}
+
+/* “Taskbar” */
+.taskbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  background: silver;
+  border-top: 2px solid #fff;
+  box-shadow: inset 1px 1px #dfdfdf, inset -1px -1px gray;
+}
+
+.start-btn {
+  min-width: 90px;
+}
+
+.taskbar-spacer {
+  flex: 1;
+}
+
+.clock {
+  padding: 4px 10px;
+  background: #c0c0c0;
+  box-shadow: inset -1px -1px #fff, inset 1px 1px gray;
+  font-size: 12px;
+}
+
+/* Gallery grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.grid img {
+  width: 100%;
+  height: auto;
+  display: block;
+  image-rendering: pixelated; /* keeps it retro if you want */
+  border: 2px solid #000;
+}
+
+/* prevent browser image dragging which can cause ghost images and background glitches */
+.grid img,
+img { -webkit-user-drag: none; user-drag: none; draggable: false; }
+
+/* promote desktop to its own layer to avoid background repaint glitches */
+.desktop { -webkit-transform: translateZ(0); transform: translateZ(0); }
+
+/* emoji box styling */
+.emoji-box .emoji {
+  font-size: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.emoji-box img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  margin: 0 auto;
+  object-fit: contain;
+}
+
+/* ensure image fits inside TangGang window and is centered */
+.emoji-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 16px; /* give space around the image */
+  box-sizing: border-box;
+}
+
+.emoji-box img {
+  max-width: 92%;
+  max-height: 92%;
+  width: auto;
+  height: auto;
+  display: block;
+}
+
+/* banner in README window */
+.banner img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 8px;
+}
+
+.window.draggable {
+  will-change: transform;
+  touch-action: none;
+}
+
+/* hide start button and clock and remove taskbar top border */
+.taskbar {
+  border-top: none;
+  background: transparent;
+  box-shadow: none;
+}
+.taskbar .start-btn,
+.taskbar .clock {
+  display: none;
+}
+
+.links a {
+  text-decoration: underline;
+}
+
+.fineprint {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+/* Strong overrides to ensure larger readable text across the Win98 theme
+   Some external CSS sets pixel sizes; force key UI elements to use rems
+   so they scale with the root font-size. */
+.root { }
+:root { font-size: 140% !important; }
+.window, .window * , .title-bar-text, .title-bar, .window-body, p, li, a, button, .field-row, .fineprint {
+  font-size: 1rem !important;
+}
+
+/* Premium spacing for window content */
+.window-body {
+  line-height: 1.45;
+  padding: 16px;
+}
+.window-body p { margin: 10px 0; }
+
+/* Add breathing room to window titles */
+.title-bar-text {
+  padding: 6px 10px;
+}
+
+/* Notify modal */
+.notify-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.6);
+  z-index: 9999;
+}
+.notify-modal.hidden { display: none; }
+.notify-modal .modal-card {
+  background: #fff;
+  border: 4px solid #000;
+  padding: 12px;
+  box-shadow: 6px 6px 0 rgba(0,0,0,0.2);
+  max-width: 92%;
+  max-height: 92%;
+  position: relative;
+}
+.notify-modal img { display:block; max-width:100%; max-height:80vh; }
+.notify-modal .close-btn {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  background: #eee;
+  border: 2px solid #000;
+  width: 28px;
+  height: 28px;
+  line-height: 22px;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* Popup sizing: shrink window-body to image and remove extra grey baseline space */
+.popup { height: auto !important; z-index: 99999 !important; }
+.popup .popup-body { padding: 6px; }
+.popup .popup-img { display: block; width: 100%; height: auto; object-fit: contain; }
+
+/* In case legacy inline rules exist, ensure popup image doesn't leave baseline gap */
+.popup img { vertical-align: top; }
+
+/* ensure popup is visually above everything */
+.popup { position: fixed; }
+
+/* Bigger buttons with more padding */
+button {
+  padding: 10px 20px !important;
+  min-height: 36px !important;
+  font-size: 1rem !important;
+}
+
+/* Make the CTA buttons in MINT_INFO even bigger */
+.field-row button {
+  padding: 18px 32px !important;
+  min-height: 50px !important;
+  font-size: 1.15rem !important;
+  line-height: 1.2 !important;
+}
+
+/* Restore Win98 title-bar control buttons (min/max/close) to default */
+.title-bar-controls button {
+  padding: 2px !important;
+  min-height: 14px !important;
+  height: 14px !important;
+  width: 16px !important;
+  font-size: 11px !important;
+  line-height: 1 !important;
+  display: inline-block !important;
+}
+
+/* --- Gallery fade hover --- */
+.gallery-grid .thumb {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1 / 1; /* keeps tiles consistent */
+  border: 2px solid #000;
+}
+
+.gallery-grid .thumb .img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  position: absolute;
+  inset: 0;
+  transition: opacity 220ms ease-in-out;
+  border: 0;
+}
+
+.gallery-grid .thumb .front { opacity: 1; }
+.gallery-grid .thumb .back  { opacity: 0; }
+
+.gallery-grid .thumb:hover .front { opacity: 0; }
+.gallery-grid .thumb:hover .back  { opacity: 1; }
+
+/* mobile: tap shows hover-ish */
+.gallery-grid .thumb:active .front { opacity: 0; }
+.gallery-grid .thumb:active .back  { opacity: 1; }
+
+/* accessibility: reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .gallery-grid .thumb .img { transition: none; }
+}
+
+/* Fallback if aspect-ratio isn't supported */
+@supports not (aspect-ratio: 1 / 1) {
+  .gallery-grid .thumb { height: 0; padding-top: 100%; }
+}
+
+/* label tooltip on hover */
+.thumb::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  z-index: 5;
+
+  padding: 6px 18px;
+  font-size: 36px;
+  line-height: 1.2;
+
+  background: rgba(192, 192, 192, 0.92); /* win98-ish */
+  border: 1px solid #000;
+  box-shadow: 1px 1px 0 #fff inset, -1px -1px 0 #808080 inset;
+
+  opacity: 0;
+  transform: translateY(2px);
+  transition: opacity 160ms ease, transform 160ms ease;
+  pointer-events: none;
+}
+
+.thumb:hover::after,
+.thumb:active::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Right-side stack: TangGang on top, Memetic under it */
+.side-stack {
+  position: absolute;
+  left: 860px; /* ~20px gap to README's 840px right edge */
+  top: 20px; /* aligns with README's top */
+  display: block; /* no flex stacking; children will be absolutely positioned */
+  z-index: 9999;
+}
+
+/* Allow child windows to be placed freely and keep their drop positions */
+.side-stack .window {
+  position: absolute;
+}
+
+/* Make both windows the same size */
+#win-tanggang,
+#win-memetic {
+  width: 360px; /* adjust if you want narrower/wider */
+}
+
+/* Make images scale down to fit the window (prevents cut-off) */
+.fit-img,
+#win-tanggang img,
+#win-memetic img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Memetic layered box (base + fade + clickable overlay) */
+.memetic-box {
+  position: relative;
+  width: 270px; /* pics 1 & 2 now 50% bigger than 180px */
+}
+
+/* Base image defines the box height */
+.memetic-base {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Fading overlay */
+.memetic-fade {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+
+  filter: blur(0.4px);
+  transform-origin: center;
+
+  /* SLOWER + calmer */
+  animation: flameDrift 3.6s ease-in-out infinite;
+}
+
+/* Clickable overlay on top */
+.memetic-click {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: auto;
+}
+
+.memetic-click img {
+  position: absolute;
+  left: 50%;
+  bottom: 6px; /* small bottom padding */
+  transform-origin: center;
+  will-change: transform;
+  width: 50%;
+  height: auto;
+  max-width: 50%;
+  animation: memeticFloat 8s linear infinite;
+}
+
+@keyframes flameDrift {
+  0%   { opacity: 0.12; transform: translateY(2px)  translateX(-1px) scale(1.002) skewX(-0.15deg); }
+  25%  { opacity: 0.45; transform: translateY(-1px) translateX(1px)  scale(1.004) skewX(0.15deg); }
+  50%  { opacity: 0.18; transform: translateY(1px)  translateX(-1px) scale(1.003) skewX(-0.10deg); }
+  75%  { opacity: 0.55; transform: translateY(-2px) translateX(1px)  scale(1.005) skewX(0.18deg); }
+  100% { opacity: 0.12; transform: translateY(2px)  translateX(-1px) scale(1.002) skewX(-0.15deg); }
+}
+
+/* Pic 3: wider calm float */
+@keyframes memeticFloat {
+  0%    { transform: translateX(-50%) translate(0px, 0px); }
+  10%   { transform: translateX(-50%) translate(3px, -2px); }
+  20%   { transform: translateX(-50%) translate(5px, -5px); }
+  30%   { transform: translateX(-50%) translate(2px, -6px); }
+  40%   { transform: translateX(-50%) translate(-3px, -5px); }
+  50%   { transform: translateX(-50%) translate(0px, 0px); }
+  60%   { transform: translateX(-50%) translate(3px, 2px); }
+  70%   { transform: translateX(-50%) translate(5px, 5px); }
+  80%   { transform: translateX(-50%) translate(2px, 6px); }
+  90%   { transform: translateX(-50%) translate(-3px, 5px); }
+  100%  { transform: translateX(-50%) translate(0px, 0px); }
+}
