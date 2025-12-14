@@ -219,14 +219,10 @@
     </ul>
 
       <div class="field-row" style="margin-top: 10px;">
-      <button onclick="window.open('https://crate.ink/#/collection-detail/WOJAKFARMERSPLOT','_blank')">
-        Open Crate
-      </button>
-      <button onclick="window.open('https://x.com/MoJuiceX','_blank')">
-        Follow Updates
-      </button>
-      <button id="notify-btn">Notify me</button>
-    </div>
+        <button class="button default-btn" onclick="window.open('https://wojakfarmersplot.crate.ink/#/','_blank')">Open Crate</button>
+        <button class="button" onclick="window.open('https://x.com/MoJuiceX','_blank')">Follow Updates</button>
+        <button class="button cancel-btn" id="notify-btn">Notify me</button>
+      </div>
 
           </div>
       </div>
@@ -720,7 +716,24 @@
 
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
+          // Close popup if open
           closePopup('win-notify');
+          // Also close the topmost visible window
+          const windows = Array.from(document.querySelectorAll('.window.draggable'))
+            .filter(w => w.style.display !== 'none');
+          if (windows.length) {
+            const topmost = windows.reduce((a, b) => {
+              const za = parseInt(getComputedStyle(a).zIndex || '0', 10);
+              const zb = parseInt(getComputedStyle(b).zIndex || '0', 10);
+              return za >= zb ? a : b;
+            });
+            const closeBtn = topmost.querySelector('.close-window');
+            if (closeBtn) {
+              closeBtn.click();
+            } else {
+              topmost.style.display = 'none';
+            }
+          }
         }
       });
 

@@ -410,6 +410,28 @@ button {
   100%  { transform: translateX(-50%) translate(0px, 0px); }
 }
 
+/* --- Win98 button styling enhancements --- */
+.button {
+  padding: 6px 16px;
+  background: #c0c0c0;
+  border: 2px solid #fff;
+  box-shadow: inset 1px 1px #dfdfdf, inset -1px -1px gray;
+  color: #000;
+}
+.button:active {
+  box-shadow: inset -1px -1px #dfdfdf, inset 1px 1px gray;
+}
+.button:focus {
+  outline: 1px dotted #000;
+  outline-offset: -4px;
+}
+.default-btn {
+  font-weight: 700;
+}
+.cancel-btn {
+  color: #222;
+}
+
 /* --- Accessibility fixes: touch targets --- */
 
 /* Increase title-bar button hit area (98.css buttons are tiny) */
