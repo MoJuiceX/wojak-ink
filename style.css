@@ -432,6 +432,163 @@ button {
   color: #222;
 }
 
+/* =========================
+   Windows 98 button styling
+   ========================= */
+
+:root {
+  --w98-face: #c0c0c0;
+  --w98-face-2: #dfdfdf;
+  --w98-shadow: #808080;
+  --w98-dark: #000000;
+  --w98-light: #ffffff;
+  --w98-mid: #a0a0a0;
+}
+
+/* Optional: Win98-ish font */
+body {
+  font-family: "MS Sans Serif", "Microsoft Sans Serif", Tahoma, Arial, sans-serif;
+}
+
+/* --- Titlebar control buttons (Min / Max / Close) --- */
+/* Targets the exact buttons you showed in Lighthouse: aria-label="Minimize|Maximize|Close" */
+.titlebar button[aria-label="Minimize"],
+.titlebar button[aria-label="Maximize"],
+.titlebar button[aria-label="Close"],
+.title-bar button[aria-label="Minimize"],
+.title-bar button[aria-label="Maximize"],
+.title-bar button[aria-label="Close"],
+button[aria-label="Minimize"],
+button[aria-label="Maximize"],
+button[aria-label="Close"] {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--w98-face);
+  color: var(--w98-dark);
+
+  /* Touch target size (fixes Lighthouse) */
+  width: 26px;
+  height: 22px;
+
+  padding: 0;
+  margin-left: 3px;
+
+  /* Classic Win98 bevel */
+  border-top: 2px solid var(--w98-light);
+  border-left: 2px solid var(--w98-light);
+  border-right: 2px solid var(--w98-shadow);
+  border-bottom: 2px solid var(--w98-shadow);
+
+  box-shadow: inset 1px 1px 0 var(--w98-face-2);
+  cursor: pointer;
+  position: relative;
+}
+
+/* Focus ring (keyboard) */
+.titlebar button[aria-label]:focus-visible,
+.title-bar button[aria-label]:focus-visible,
+button[aria-label]:focus-visible {
+  outline: 1px dotted var(--w98-dark);
+  outline-offset: -4px;
+}
+
+/* Pressed state (inverted bevel) */
+.titlebar button[aria-label]:active,
+.title-bar button[aria-label]:active,
+button[aria-label]:active {
+  border-top: 2px solid var(--w98-shadow);
+  border-left: 2px solid var(--w98-shadow);
+  border-right: 2px solid var(--w98-light);
+  border-bottom: 2px solid var(--w98-light);
+  box-shadow: inset 1px 1px 0 var(--w98-mid);
+}
+
+/* --- Icons (CSS-drawn) --- */
+.titlebar button[aria-label]::before,
+.title-bar button[aria-label]::before,
+button[aria-label]::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Minimize: small line */
+.titlebar button[aria-label="Minimize"]::before,
+.title-bar button[aria-label="Minimize"]::before,
+button[aria-label="Minimize"]::before {
+  width: 10px;
+  height: 2px;
+  background: var(--w98-dark);
+  top: 60%;
+}
+
+/* Maximize: square outline */
+.titlebar button[aria-label="Maximize"]::before,
+.title-bar button[aria-label="Maximize"]::before,
+button[aria-label="Maximize"]::before {
+  width: 10px;
+  height: 8px;
+  border: 2px solid var(--w98-dark);
+  box-sizing: border-box;
+}
+
+/* Close: X */
+.titlebar button[aria-label="Close"]::before,
+.title-bar button[aria-label="Close"]::before,
+button[aria-label="Close"]::before {
+  width: 12px;
+  height: 12px;
+  background:
+    linear-gradient(45deg, transparent 45%, var(--w98-dark) 45%, var(--w98-dark) 55%, transparent 55%),
+    linear-gradient(-45deg, transparent 45%, var(--w98-dark) 45%, var(--w98-dark) 55%, transparent 55%);
+}
+
+/* If your close buttons already have .close-window, keep them consistent */
+button.close-window {
+  /* no extra needed; this ensures it matches the aria-label styling */
+}
+
+/* --- Dialog buttons (OK / Cancel / etc) --- */
+.btn-98,
+button.btn-98,
+a.btn-98 {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 2px 14px;
+
+  background: var(--w98-face);
+  color: var(--w98-dark);
+  text-decoration: none;
+
+  border-top: 2px solid var(--w98-light);
+  border-left: 2px solid var(--w98-light);
+  border-right: 2px solid var(--w98-shadow);
+  border-bottom: 2px solid var(--w98-shadow);
+
+  box-shadow: inset 1px 1px 0 var(--w98-face-2);
+  cursor: pointer;
+}
+
+.btn-98:active,
+button.btn-98:active,
+a.btn-98:active {
+  border-top: 2px solid var(--w98-shadow);
+  border-left: 2px solid var(--w98-shadow);
+  border-right: 2px solid var(--w98-light);
+  border-bottom: 2px solid var(--w98-light);
+  box-shadow: inset 1px 1px 0 var(--w98-mid);
+}
+
+.btn-98:focus-visible,
+button.btn-98:focus-visible,
+a.btn-98:focus-visible {
+  outline: 1px dotted var(--w98-dark);
+  outline-offset: -4px;
+}
 /* --- Accessibility fixes: touch targets --- */
 
 /* Increase title-bar button hit area (98.css buttons are tiny) */
