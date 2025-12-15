@@ -1,0 +1,64 @@
+# Node modules (not needed in Docker build)
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+README_*.md
+*.md
+
+# Development files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Environment files (will be passed via docker-compose)
+.env
+.env.local
+.env.*.local
+
+# Build artifacts (we only need dist/)
+# Note: dist/ is NOT ignored - it's needed for the Docker build
+
+# Source files (we only need dist/)
+src/
+public/
+scripts/
+index.html
+vite.config.js
+
+# Test files
+test/
+tests/
+*.test.js
+*.test.jsx
+*.spec.js
+*.spec.jsx
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+

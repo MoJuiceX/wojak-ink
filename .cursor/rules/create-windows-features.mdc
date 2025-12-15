@@ -1,0 +1,520 @@
+---
+alwaysApply: true
+---
+
+# Creating New UI Windows and Features
+
+## Overview
+
+This rule guides the creation of new window components and features in the Wojak Ink application. All windows use the base `Window` component and follow Windows 98 UI patterns.
+
+## Step-by-Step: Creating a New Window
+
+### 1. Create the Window Component File
+
+**Location:** `src/components/windows/[WindowName]Window.jsx`
+
+**Template:**
+```javascript
+import Window from './Window'
+import { useState } from 'react'
+// Import other dependencies as needed
+
+export default function [WindowName]Window({ isOpen, onClose }) {
+  // State management
+  const [state, setState] = useState(null)
+
+  // Conditional rendering (if needed)
+  if (!isOpen) return null
+
+  return (
+    <Window
+      id="[window-id]"
+      title="[WINDOW_TITLE]"
+      style={{ 
+        width: '800px', 
+        maxWidth: 'calc(100vw - 40px)', 
+        left: '20px', 
+        top: '20px' 
+      }}
+      onClose={onClose}
+    >
+      <div className="window-body">
+        {/* Window content here */}
+      </div>
+    </Window>
+  )
+}
+```
+
+### 2. Window Component Requirements
+
+**Required Props:**
+- `title` (string) - Window title in UPPERCASE (Windows 98 style)
+- `children` (ReactNode) - Window content
+
+**Optional Props:**
+- `id` (string) - Unique window ID (auto-generated from title if not provided)
+- `style` (object) - Inline styles for positioning/sizing
+- `onClose` (function) - Callback when window closes
+- `noStack` (boolean) - Prevent auto-stacking (default: false)
+- `className` (string) - Additional CSS classes
+
+**Window ID Format:**
+- Use kebab-case: `my-window`, `stats-window`, `settings-window`
+- Must be unique across all windows
+- Auto-generated from title if not provided (sanitized)
+
+### 3. Window Styling Guidelines
+
+**Default Styles:**
+```javascript
+style={{
+  width: '800px',                    // Default width
+  maxWidth: 'calc(100vw - 40px)',    // Responsive max width
+  left: '20px',                       // Default left position
+  top: '20px',                        // Default top position
+}}
+```
+
+**Positioning Strategy:**
+- First window: `left: '20px', top: '20px'`
+- Second window: `left: '40px', top: '40px'`
+- Third window: `left: '60px', top: '60px'`
+- Or use specific positions based on window purpose
+
+**Windows 98 UI Elements:**
+- Use 98.css classes: `.window`, `.title-bar`, `.window-body`
+- Use UI components from `src/components/ui/`: `Button`, `Select`, etc.
+- Maintain Windows 98 color scheme: `#c0c0c0`, `#d4d0c8`, etc.
+- Font: MS Sans Serif (already in global styles)
+
+### 4. Add Window to App.jsx
+
+**Import the window:**
+```javascript
+import [WindowName]Window from './components/windows/[WindowName]Window'
+```
+
+**Add state management (if needed):**
+```javascript
+const [[windowName]Open, set[WindowName]Open] = useState(false)
+```
+
+**Render the window:**
+```javascript
+{[windowName]Open && (
+  <[WindowName]Window 
+    isOpen={[windowName]Open} 
+    onClose={() => set[WindowName]Open(false)} 
+  />
+)}
+```
+
+**Or for always-visible windows:**
+```javascript
+<[WindowName]Window />
+```
+
+### 5. Add to Taskbar (if needed)
+
+If the window should be openable from the taskbar:
+
+**Location:** `src/components/Taskbar.jsx`
+
+**Add taskbar button:**
+```javascript
+<button
+  onClick={() => set[WindowName]Open(![windowName]Open)}
+  className={[windowName]Open ? 'active' : ''}
+>
+  [Window Name]
+</button>
+```
+
+## Creating New Features (Non-Window)
+
+### Feature Components
+
+**Location:** `src/components/[feature-name]/`
+
+**Structure:**
+```
+src/components/
+  [feature-name]/
+    [FeatureName].jsx          # Main component
+    [FeatureName]Panel.jsx     # Sub-components if needed
+    [FeatureName]Utils.js      # Utility functions if needed
+```
+
+**Template:**
+```javascript
+import { useState } from 'react'
+
+export default function [FeatureName]({ prop1, prop2 }) {
+  const [state, setState] = useState(null)
+
+  return (
+    <div className="[feature-name]">
+      {/* Feature content */}
+    </div>
+  )
+}
+```
+
+### Custom Hooks
+
+**Location:** `src/hooks/use[FeatureName].js`
+
+**Template:**
+```javascript
+import { useState, useEffect } from 'react'
+
+export function use[FeatureName](initialValue) {
+  const [value, setValue] = useState(initialValue)
+
+  // Hook logic here
+
+  return { value, setValue }
+}
+```
+
+### Services/API Integration
+
+**Location:** `src/services/[serviceName]Api.js`
+
+**Template:**
+```javascript
+const API_BASE = 'https://api.example.com'
+
+export async function fetch[Resource]() {
+  try {
+    const response = await fetch(`${API_BASE}/resource`)
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`)
+    }
+    return await response.json()
+  } catch (error) {
+    console.error('Failed to fetch resource:', error)
+    throw error
+  }
+}
+```
+
+## Code Patterns and Best Practices
+
+### State Management
+
+**For simple state:**
+```javascript
+const [value, setValue] = useState(initialValue)
+```
+
+**For complex state:**
+```javascript
+const [state, setState] = useState({
+  field1: value1,
+  field2: value2,
+})
+
+// Update:
+setState(prev => ({ ...prev, field1: newValue }))
+```
+
+**For shared state:**
+- Use React Context (create in `src/contexts/`)
+- Wrap app with Provider in `App.jsx`
+
+### Event Handlers
+
+**Prevent window dragging conflicts:**
+```javascript
+<button
+  onClick={handleClick}
+  onMouseDown={(e) => e.stopPropagation()}
+  onPointerDown={(e) => e.stopPropagation()}
+>
+  Click Me
+</button>
+```
+
+### Error Handling
+
+**Always handle errors:**
+```javascript
+try {
+  const data = await fetchData()
+  // Use data
+} catch (error) {
+  console.error('Error:', error)
+  // Show user-friendly error message
+  showToast('Failed to load data', 'error')
+}
+```
+
+### Loading States
+
+**Show loading indicators:**
+```javascript
+const [loading, setLoading] = useState(false)
+
+if (loading) {
+  return <LoadingSpinner />
+}
+
+// Or inline:
+{loading ? <LoadingSpinner /> : <Content />}
+```
+
+## Integration Checklist
+
+When creating a new window or feature:
+
+- [ ] **Component Created**
+  - [ ] File in correct location (`src/components/windows/` or `src/components/[feature]/`)
+  - [ ] Uses base `Window` component (for windows)
+  - [ ] Follows naming conventions (PascalCase for components)
+
+- [ ] **Integrated into App**
+  - [ ] Imported in `App.jsx`
+  - [ ] Added to render tree
+  - [ ] State management added (if needed)
+  - [ ] Taskbar button added (if needed)
+
+- [ ] **Styling**
+  - [ ] Uses 98.css classes
+  - [ ] Windows 98 color scheme maintained
+  - [ ] Responsive (maxWidth, etc.)
+  - [ ] Proper positioning
+
+- [ ] **Functionality**
+  - [ ] All features work
+  - [ ] Error handling implemented
+  - [ ] Loading states handled
+  - [ ] Event handlers don't conflict with window dragging
+
+- [ ] **Testing**
+  - [ ] Window opens/closes correctly
+  - [ ] Minimize/maximize/restore works
+  - [ ] Dragging works
+  - [ ] Z-index stacking works
+  - [ ] No console errors
+  - [ ] Works on Mac
+
+- [ ] **Documentation**
+  - [ ] README.md updated (Features section)
+  - [ ] README.md updated (Using the App section)
+  - [ ] Project structure updated (if new folders)
+  - [ ] Code comments added (complex logic)
+
+## Common Patterns
+
+### Modal Windows
+
+```javascript
+function ModalWindow({ isOpen, onClose, children }) {
+  if (!isOpen) return null
+
+  return (
+    <Window
+      id="modal-window"
+      title="MODAL"
+      onClose={onClose}
+      style={{ width: '500px' }}
+    >
+      <div className="window-body">
+        {children}
+        <Button onClick={onClose}>Close</Button>
+      </div>
+    </Window>
+  )
+}
+```
+
+### Windows with Forms
+
+```javascript
+function FormWindow({ isOpen, onClose, onSubmit }) {
+  const [formData, setFormData] = useState({})
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    onSubmit(formData)
+    onClose()
+  }
+
+  return (
+    <Window title="FORM" onClose={onClose}>
+      <div className="window-body">
+        <form onSubmit={handleSubmit}>
+          {/* Form fields */}
+          <Button type="submit">Submit</Button>
+        </form>
+      </div>
+    </Window>
+  )
+}
+```
+
+### Windows with API Data
+
+```javascript
+function DataWindow({ isOpen, onClose }) {
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchData()
+    }
+  }, [isOpen])
+
+  const fetchData = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const result = await fetchDataFromAPI()
+      setData(result)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <Window title="DATA" onClose={onClose}>
+      <div className="window-body">
+        {loading && <LoadingSpinner />}
+        {error && <div className="error">{error}</div>}
+        {data && <DataDisplay data={data} />}
+      </div>
+    </Window>
+  )
+}
+```
+
+## Mac-Specific Considerations
+
+- **Test on Mac Terminal** - All commands must work on Mac
+- **File Paths** - Use forward slashes (`/`)
+- **Terminal Commands** - Use `lsof` not `netstat`
+- **Keyboard Shortcuts** - Reference Cmd key (not Ctrl)
+
+## README Update Requirements
+
+**MUST update README.md when:**
+- Adding new window component
+- Adding new feature
+- Changing window behavior
+- Adding new dependencies
+
+**Sections to update:**
+- Features section (add new feature)
+- Using the App section (add usage instructions)
+- Project Structure (if new folders/files)
+- Troubleshooting (if issues found)
+
+**Use command:** `/update-readme` after creating window/feature
+
+## Example: Complete Window Creation
+
+**1. Create file:** `src/components/windows/StatsWindow.jsx`
+
+```javascript
+import Window from './Window'
+import { useState, useEffect } from 'react'
+import { fetchStats } from '../../services/statsApi'
+import { LoadingSpinner } from '../ui'
+
+export default function StatsWindow({ isOpen, onClose }) {
+  const [stats, setStats] = useState(null)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (isOpen) {
+      loadStats()
+    }
+  }, [isOpen])
+
+  const loadStats = async () => {
+    setLoading(true)
+    try {
+      const data = await fetchStats()
+      setStats(data)
+    } catch (error) {
+      console.error('Failed to load stats:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <Window
+      id="stats-window"
+      title="STATISTICS"
+      style={{ 
+        width: '600px', 
+        maxWidth: 'calc(100vw - 40px)', 
+        left: '100px', 
+        top: '100px' 
+      }}
+      onClose={onClose}
+    >
+      <div className="window-body">
+        {loading ? (
+          <LoadingSpinner />
+        ) : stats ? (
+          <div>
+            <h3>NFT Statistics</h3>
+            <p>Total NFTs: {stats.total}</p>
+            <p>Listed: {stats.listed}</p>
+            <p>Sold: {stats.sold}</p>
+          </div>
+        ) : (
+          <p>No statistics available</p>
+        )}
+      </div>
+    </Window>
+  )
+}
+```
+
+**2. Add to App.jsx:**
+
+```javascript
+import StatsWindow from './components/windows/StatsWindow'
+
+function App() {
+  const [statsOpen, setStatsOpen] = useState(false)
+
+  return (
+    // ... existing code
+    {statsOpen && (
+      <StatsWindow 
+        isOpen={statsOpen} 
+        onClose={() => setStatsOpen(false)} 
+      />
+    )}
+  )
+}
+```
+
+**3. Update README.md:**
+- Add "Statistics Window" to Features section
+- Add usage instructions to "Using the App" section
+
+## Remember
+
+- ✅ Always use base `Window` component for windows
+- ✅ Follow Windows 98 UI patterns (98.css)
+- ✅ Test on Mac before committing
+- ✅ Update README.md immediately
+- ✅ Keep code beginner-friendly (for Abit)
+- ✅ Maintain Tang Gang vibes
+- ✅ Handle errors gracefully
+- ✅ Use proper state management
+- ✅ Prevent event handler conflicts

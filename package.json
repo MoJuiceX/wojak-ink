@@ -1,0 +1,35 @@
+{
+  "name": "wojak-ink",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run generate-meme-manifest && vite build",
+    "preview": "vite preview",
+    "download-wojak-images": "node scripts/download-wojak-images.js",
+    "discover-wojak-images": "node scripts/discover-wojak-images.js",
+    "generate-meme-manifest": "node scripts/generate-meme-manifest.js"
+  },
+  "dependencies": {
+    "98.css": "0.1.21",
+    "bech32": "^2.0.0",
+    "bech32m-chia": "^1.0.2",
+    "buffer": "^6.0.3",
+    "html2canvas": "^1.4.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "react-error-boundary": "^4.0.13",
+    "react-router-dom": "^6.28.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.7.0",
+    "eslint": "^9.0.0",
+    "eslint-plugin-react": "^7.37.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "prettier": "^3.3.0",
+    "vite": "^5.4.21"
+  }
+}

@@ -1,0 +1,58 @@
+---
+alwaysApply: true
+---
+
+# Project Context - Wojak Ink
+
+## What This Project Is
+A Windows 98-style web application for showcasing Wojak NFT collection on Chia blockchain. Built with React 19, Vite, and Docker support.
+
+## Who It's For
+- **Primary User**: Abit (beginner in AI development, Mac user)
+- **Gifted By**: Bullish0xCrypto
+- **Community**: Tang Gang
+
+## Key Technologies
+- React 19
+- Vite
+- 98.css (Windows 98 UI)
+- Docker Desktop for Mac
+- Chia blockchain integration
+- MintGarden API
+- Dexie API
+
+## Project Goals
+1. Showcase Wojak NFT collection
+2. Generate memes (Memetic Energy Generator)
+3. Manage P2P offers for NFTs
+4. Provide Windows 98 nostalgic experience
+5. Be beginner-friendly for Abit
+
+## Important Files
+- `README.md` - Main documentation (MUST stay updated)
+- `README_WORKFLOW.md` - Update workflow guidelines
+- `README_UPDATE_CHECKLIST.md` - Quick update reference
+- `.cursor/rules/` - Cursor AI rules (this file)
+- `.cursor/commands/` - Custom Cursor commands
+
+## Development Environment
+- **OS**: macOS (Mac-focused)
+- **Terminal**: Mac Terminal
+- **IDE**: Cursor
+- **Package Manager**: npm
+- **Container**: Docker Desktop for Mac
+
+## Current Status
+- Active development by Bullish0xCrypto
+- Features being added regularly
+- Docker setup in progress
+- README must be updated with each change
+- Preparing for handoff to Abit
+
+## When Making Changes
+Always consider:
+1. Does this need README update?
+2. Is it Mac-compatible?
+3. Is it beginner-friendly?
+4. Does it match Tang Gang vibes?
+5. Will Abit understand this?
