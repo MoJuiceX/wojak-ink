@@ -1,0 +1,121 @@
+@import "./classic.css";
+@import url("https://fonts.googleapis.com/css?family=Charm|Princess+Sofia&display=swap");
+
+:root {
+	--theme-loaded: "winter.css";
+}
+
+/* Advent calendar-style tool buttons that flip to reveal thematic pixel art for each tool */
+/* .tool-icon::before is a flap, and .tool-icon::after is an icon visible on the front of the flap, showing the classic theme's icons for usability */
+/* The .tool-icon is used to show the revealed thematic icon. */
+.tool-icon,
+.tool-icon.use-svg { /* specificity needed for overriding classic theme; SVG is not supported yet for this theme */
+	background-image: url("../../images/winter/tools.png");
+	background-repeat: no-repeat;
+	background-position: calc(-16px * var(--icon-index)) 0;
+}
+/* .tool-icon.use-svg {
+	background-image: url("../../images/winter/tools.svg");
+	background-position: calc(-16px * (var(--icon-index) * 2 + 1)) -16px;
+} */
+.tool-icon::before,
+.tool-icon::after {
+	content: " ";
+	position: absolute;
+	--border-width: 3px;
+	/* inset doesn't have enough browser support for me */
+	top: calc(-1 * var(--border-width));
+	left: calc(-1 * var(--border-width));
+	right: calc(-1 * var(--border-width));
+	bottom: calc(-1 * var(--border-width));
+	border-top: var(--border-width) solid var(--ButtonHilight);
+	border-left: var(--border-width) solid var(--ButtonHilight);
+	border-right: var(--border-width) solid var(--ButtonShadow);
+	border-bottom: var(--border-width) solid var(--ButtonShadow);
+	--transition-duration: 0.2s;
+	transition: transform var(--transition-duration) ease-in-out;
+	transform-origin: left;
+	--side: -1;
+}
+.tool-icon::after {
+	z-index: 3;
+	background-image: url("../../images/classic/tools.png");
+	background-repeat: no-repeat;
+	background-position: calc(-16px * var(--icon-index)) 0;
+	backface-visibility: hidden;
+}
+.tool-icon.use-svg::after {
+	background-image: url("../../images/classic/tools.svg");
+	background-position: calc(-16px * (var(--icon-index) * 2 + 1)) -16px;
+}
+
+.tool .tool-icon::before {
+	border-width: 1px;
+	background: linear-gradient(var(--gradient-direction), var(--ButtonFace), var(--ButtonShadow) 190%);
+	background-position: 20px 0; /* starting gradient not visible */
+	background-repeat: no-repeat; /* mustn't wrap to be invisible */
+	background-color: var(--ButtonFace);
+	transition: transform var(--transition-duration) ease-in-out, background-position var(--transition-duration) ease-in-out;
+	z-index: 2;
+	--gradient-direction: to left;
+}
+.tool.selected .tool-icon::before,
+.tool.selected .tool-icon::after {
+	transform: rotateY(calc(120deg * var(--side))) skewY(calc(-20deg * var(--side)));
+}
+.tool.selected .tool-icon::before {
+	background-position: 0% 0% !important; /* !important to override .tool:nth-child(2n+1) .tool-icon::before */
+}
+
+.tool:nth-child(2n) .tool-icon::before,
+.tool:nth-child(2n) .tool-icon::after {
+	--side: 1;
+	transform-origin: right;
+	--gradient-direction: to right;
+}
+.tool:nth-child(2n+1) .tool-icon::before {
+	background-position: -20px 0; /* opposite for transition to work right */
+}
+
+/* Show pixel art tool icons as pixelated. */
+/* Note: also inheriting image-rendering logic from classic.css */
+.enlarge-ui .tool-icon {
+	image-rendering: -moz-crisp-edges;
+	image-rendering: crisp-edges;
+	image-rendering: pixelated;
+}
+
+
+/* Fancy cursive menus */
+.menus * {
+	font-family: 'MS Sans Serif', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+	font-size: 20px;
+	font-weight: 400;
+}
+.menu-button {
+	padding: 5px 10px;
+	height: 30px;
+	font-family: 'MS Sans Serif', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+	font-weight: 400;
+}
+.menu-popup * {
+	font-family: 'MS Sans Serif', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+	font-size: 18px;
+	font-weight: 400;
+}
+
+/* Snowflake decorations removed for wojak-ink integration */
+
+/* a button to leave the Winter theme */
+button.grinch-button {
+	position: absolute;
+	bottom: 0px;
+	right: 0px;
+	width: 100px;
+	height: 179px;
+	z-index: 2;
+	background-image: url("../../images/winter/grinch-smile-spritesheet.png");
+	border: 0;
+	background-color: transparent;
+	cursor: pointer;
+}
