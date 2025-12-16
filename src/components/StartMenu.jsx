@@ -188,7 +188,7 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint }) {
         <button 
           className="start-menu-item"
           onClick={() => {
-            window.open('https://crate.ink/#/collection-detail/WOJAKFARMERSPLOT', '_blank')
+            window.open('https://wojakfarmersplot.crate.ink/#/', '_blank')
             onClose()
           }}
           role="menuitem"

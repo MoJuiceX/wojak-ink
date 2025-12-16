@@ -949,7 +949,7 @@ docker-compose down
 wojak-ink/
 ├── public/                 # Static assets (served as-is)
 │   ├── assets/            # Images, logos, etc.
-│   ├── memetic-energy/    # Meme generator layer images
+│   ├── wojak-creator/    # Wojak creator layer images
 │   ├── wojak-creator/     # Alternative wojak assets
 │   ├── jspaint/           # JS Paint application
 │   └── fonts/             # MS Sans Serif fonts
@@ -1004,7 +1004,7 @@ wojak-ink/
 - **`src/App.jsx`** - Main app component, renders all windows
 - **`src/components/windows/Window.jsx`** - Base window component (dragging, z-index)
 - **`src/components/windows/MarketplaceWindow.jsx`** - Marketplace functionality
-- **`src/components/windows/MemeticEnergyGenerator.jsx`** - Meme generator
+- **`src/components/windows/WojakCreator.jsx`** - Wojak creator/meme generator
 - **`src/components/windows/TangGangWindow.jsx`** - Tang Gang community window
 - **`src/services/mintgardenApi.js`** - MintGarden API integration
 - **`src/data/offerFiles.csv`** - Offer file data (NFT IDs and offer files)
@@ -1075,7 +1075,7 @@ npm run build
 
 #### Meme generator not working
 
-- Verify images exist in `public/memetic-energy/`
+- Verify images exist in `public/wojak-creator/`
 - Check layer configuration in `src/lib/memeLayers.js`
 - Ensure canvas is rendering (check browser console)
 - Run `npm run generate-meme-manifest` to regenerate manifest if layers aren't showing

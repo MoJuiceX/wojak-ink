@@ -70,7 +70,7 @@ export default function MintInfoWindow({ onNotifyClick }) {
         <Button
           onClick={() =>
             window.open(
-              'https://crate.ink/#/collection-detail/WOJAKFARMERSPLOT',
+              'https://wojakfarmersplot.crate.ink/#/',
               '_blank'
             )
           }

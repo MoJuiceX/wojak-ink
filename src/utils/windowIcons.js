@@ -12,8 +12,7 @@ const windowIconMap = {
   'window-faq': 'help_question_mark-0',
   'window-marketplace': 'briefcase-0',
   'window-tanggang': 'application_hourglass-0',
-  'window-memetic-energy-paint-exe': 'paint_file-0',
-  'window-wojak-creator-exe': 'paint_file-0',
+  'window-wojak-creator': 'paint_file-0',
   'window-notify-me': 'msg_information-0',
   'window-admin-panel': 'settings_gear-0',
 }
@@ -26,7 +25,6 @@ const titleIconMap = {
   'FAQ': 'help_question_mark-0',
   'MARKETPLACE': 'briefcase-0',
   'TangGang': 'application_hourglass-0',
-  'MEMETIC_ENERGY_PAINT.EXE': 'paint_file-0',
   'WOJAK_CREATOR.EXE': 'paint_file-0',
   'NOTIFY_ME': 'msg_information-0',
   'ADMIN PANEL': 'settings_gear-0',

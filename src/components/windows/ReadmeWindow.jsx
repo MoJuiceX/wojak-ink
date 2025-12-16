@@ -72,11 +72,11 @@ export default function ReadmeWindow() {
       <p>
         View the collection on Crate:
         <a
-          href="https://crate.ink/#/collection-detail/WOJAKFARMERSPLOT"
+          href="https://wojakfarmersplot.crate.ink/#/"
           target="_blank"
           rel="noreferrer"
         >
-          https://crate.ink/#/collection-detail/WOJAKFARMERSPLOT
+          https://wojakfarmersplot.crate.ink/#/
         </a>
       </p>
 

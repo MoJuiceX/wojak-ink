@@ -19,7 +19,7 @@ export default function FaqWindow() {
       <p>
         <b>Where is the mint?</b>
         <a
-          href="https://crate.ink/#/collection-detail/WOJAKFARMERSPLOT"
+          href="https://wojakfarmersplot.crate.ink/#/"
           target="_blank"
           rel="noreferrer"
         >

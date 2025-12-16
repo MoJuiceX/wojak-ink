@@ -6,7 +6,7 @@ import LayerSelector from '../meme/LayerSelector'
 import LayerPanel from '../meme/LayerPanel'
 import ExportControls from '../meme/ExportControls'
 
-export default function MemeticEnergyGenerator() {
+export default function WojakCreator() {
   const {
     selectedLayers,
     layerVisibility,
@@ -17,7 +17,7 @@ export default function MemeticEnergyGenerator() {
 
   return (
     <Window
-      id="memetic-energy-generator"
+      id="wojak-creator"
       title="WOJAK_CREATOR.EXE"
       noStack={true}
       style={{ 

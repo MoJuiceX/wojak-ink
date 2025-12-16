@@ -9,7 +9,7 @@ import SideStack from './components/SideStack'
 import NotifyPopup from './components/windows/NotifyPopup'
 import AdminPanel from './components/windows/AdminPanel'
 import MarketplaceWindow from './components/windows/MarketplaceWindow'
-import MemeticEnergyGenerator from './components/windows/MemeticEnergyGenerator'
+import WojakCreator from './components/windows/WojakCreator'
 import PaintWindow from './components/windows/PaintWindow'
 import Taskbar from './components/Taskbar'
 import { MarketplaceProvider } from './contexts/MarketplaceContext'
@@ -83,7 +83,7 @@ function App() {
             </Routes>
             <MarketplaceWindow />
             <SideStack />
-            <MemeticEnergyGenerator />
+            <WojakCreator />
             {paintOpen && <PaintWindow onClose={() => setPaintOpen(false)} />}
             <NotifyPopup isOpen={notifyOpen} onClose={() => setNotifyOpen(false)} />
           </main>

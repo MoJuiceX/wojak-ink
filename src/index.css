@@ -244,8 +244,8 @@ a,
   overflow: hidden;
 }
 
-/* Memetic Energy Generator window needs no padding to prevent bottom cutoff */
-#memetic-energy-generator .window-body {
+/* Wojak Creator window needs no padding to prevent bottom cutoff */
+#wojak-creator .window-body {
   padding: 0 !important;
   display: flex;
   flex-direction: column;

@@ -1,10 +1,12 @@
-export const MEMETIC_ENERGY_BASE_PATH = '/memetic-energy'
+export const WOJAK_CREATOR_BASE_PATH = '/wojak-creator'
 
 export const LAYER_FOLDERS = {
-  Background: 'Background',
-  Base: 'Base',
-  Eyes: 'Eyes',
-  Head: 'Head',
-  Mouth: 'Mouth',
+  Background: 'BACKGROUND',
+  Base: 'BASE',
+  Eyes: 'EYE',
+  Head: 'HEAD',
+  Mouth: 'MOUTH',
+  Clothes: 'CLOTHES',
+  Extra: 'EXTRA',
 }
 

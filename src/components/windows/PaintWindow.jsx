@@ -16,7 +16,7 @@ export default function PaintWindow({ onClose }) {
       const blob = await response.blob()
       
       // Create a File object from the blob
-      const file = new File([blob], 'memetic-energy.png', { type: 'image/png' })
+      const file = new File([blob], 'wojak-creator.png', { type: 'image/png' })
       
       // Try multiple methods to insert the image into JS Paint
       
