@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
+import React from 'react'
 import StartMenu from './StartMenu'
 import { useWindow } from '../contexts/WindowContext'
 import { getWindowIcon } from '../utils/windowIcons'
 
-export default function Taskbar() {
+export default function Taskbar({ onOpenWojakCreator, wojakCreatorOpen }) {
   const [startMenuOpen, setStartMenuOpen] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
   const { getAllWindows, isWindowMinimized, restoreWindow, bringToFront, isWindowActive } = useWindow()
@@ -44,6 +45,28 @@ export default function Taskbar() {
   }
 
   const allWindows = getAllWindows()
+  
+  // Check if Wojak Creator window is open and active
+  const wojakCreatorWindow = allWindows.find(w => w.id === 'wojak-creator')
+  const isWojakCreatorActive = wojakCreatorWindow ? isWindowActive('wojak-creator') : false
+  const isWojakCreatorMinimized = wojakCreatorWindow ? isWindowMinimized('wojak-creator') : false
+  
+  const handleWojakGeneratorClick = () => {
+    if (wojakCreatorWindow) {
+      // Window exists - restore or bring to front
+      if (isWojakCreatorMinimized) {
+        restoreWindow('wojak-creator')
+      } else {
+        bringToFront('wojak-creator')
+      }
+    } else {
+      // Window doesn't exist - open it
+      if (onOpenWojakCreator) {
+        onOpenWojakCreator()
+      }
+    }
+    setStartMenuOpen(false)
+  }
 
   return (
     <>
@@ -67,24 +90,46 @@ export default function Taskbar() {
             const minimized = isWindowMinimized(window.id)
             const active = isWindowActive(window.id)
             const iconPath = getWindowIcon(window.id, window.title)
+            
+            // Insert WOJAK GENERATOR button right after MARKETPLACE
+            const shouldInsertWojakGenerator = window.title === 'MARKETPLACE'
+            
             return (
-              <button
-                key={window.id}
-                className={`taskbar-window-button ${minimized ? 'minimized' : ''} ${active ? 'active' : ''}`}
-                onClick={() => handleWindowClick(window.id)}
-                aria-label={`${window.title} - ${minimized ? 'Restore' : 'Activate'}`}
-                title={window.title}
-              >
-                {iconPath && (
-                  <img 
-                    src={iconPath} 
-                    alt="" 
-                    className="taskbar-window-button-icon"
-                    onError={(e) => { e.target.style.display = 'none' }}
-                  />
+              <React.Fragment key={window.id}>
+                <button
+                  className={`taskbar-window-button ${minimized ? 'minimized' : ''} ${active ? 'active' : ''}`}
+                  onClick={() => handleWindowClick(window.id)}
+                  aria-label={`${window.title} - ${minimized ? 'Restore' : 'Activate'}`}
+                  title={window.title}
+                >
+                  {iconPath && (
+                    <img 
+                      src={iconPath} 
+                      alt="" 
+                      className="taskbar-window-button-icon"
+                      onError={(e) => { e.target.style.display = 'none' }}
+                    />
+                  )}
+                  <span className="taskbar-window-button-text">{window.title}</span>
+                </button>
+                {shouldInsertWojakGenerator && (
+                  <button
+                    key="wojak-generator-static"
+                    className={`taskbar-window-button ${isWojakCreatorMinimized ? 'minimized' : ''} ${isWojakCreatorActive ? 'active' : ''}`}
+                    onClick={handleWojakGeneratorClick}
+                    aria-label="WOJAK GENERATOR - Open Wojak Creator"
+                    title="WOJAK GENERATOR"
+                  >
+                    <img 
+                      src={getWindowIcon('wojak-creator', 'WOJAK_CREATOR.EXE')} 
+                      alt="" 
+                      className="taskbar-window-button-icon"
+                      onError={(e) => { e.target.style.display = 'none' }}
+                    />
+                    <span className="taskbar-window-button-text">WOJAK GENERATOR</span>
+                  </button>
                 )}
-                <span className="taskbar-window-button-text">{window.title}</span>
-              </button>
+              </React.Fragment>
             )
           })}
         </div>
@@ -99,6 +144,7 @@ export default function Taskbar() {
           window.dispatchEvent(new CustomEvent('openPaintWindow'))
           setStartMenuOpen(false)
         }}
+        onOpenWojakCreator={onOpenWojakCreator}
       />
     </>
   )

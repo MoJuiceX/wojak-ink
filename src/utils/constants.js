@@ -3,10 +3,14 @@ export const WOJAK_CREATOR_BASE_PATH = '/wojak-creator'
 export const LAYER_FOLDERS = {
   Background: 'BACKGROUND',
   Base: 'BASE',
+  Clothes: 'CLOTHES',
+  ClothesAddon: 'CLOTHESADDON',
   Eyes: 'EYE',
   Head: 'HEAD',
-  Mouth: 'MOUTH',
-  Clothes: 'CLOTHES',
+  MouthBase: 'MOUTHBASE',
+  MouthItem: 'MOUTHITEM',
+  FacialHair: 'FACIALHAIR',
+  Mask: 'MASK',
   Extra: 'EXTRA',
 }
 

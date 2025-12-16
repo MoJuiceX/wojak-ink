@@ -13,18 +13,8 @@ export default function ReadmeWindow() {
         />
       </div>
 
-      <div style={{
-        padding: '8px',
-        marginBottom: '12px',
-        backgroundColor: '#ffffcc',
-        border: '1px solid #c0c0c0',
-        fontSize: '11px'
-      }}>
-        <b>💡 Tip:</b> Use the <b>Start Menu</b> or <b>Taskbar</b> to open more windows and explore the collection!
-      </div>
-
       <p>
-        <b>Wojak Farmers Plot — Art for the Grove</b>
+        <b>Wojak Farmers Plot — Art for the Grove 🍊</b>
       </p>
       <p>
         Wojak Farmers Plot is my personal contribution to TangGang culture — a

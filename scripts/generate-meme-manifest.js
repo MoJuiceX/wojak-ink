@@ -26,8 +26,41 @@ const FOLDER_TO_LAYER_MAP = {
   'CLOTHES': 'Clothes',
   'EYE': 'Eyes',
   'HEAD': 'Head',
-  'MOUTH': 'Mouth',
-  'EXTRA': 'Extra',
+  'MOUTH': 'Mouth', // Legacy - will be split into new layers
+  'EXTRA': 'Extra', // Legacy - will be split into new layers
+}
+
+// New layer mappings from existing folders
+// These create virtual layers by filtering files from MOUTH and EXTRA
+const NEW_LAYER_MAPPINGS = {
+  'MouthBase': {
+    sourceFolder: 'MOUTH',
+    filePatterns: ['numb', 'Teeth', 'Gold-Teeth', 'smile', 'screeming', 'Pizza', 'Bubble-Gum']
+  },
+  'MouthItem': {
+    sourceFolder: 'MOUTH',
+    filePatterns: ['Pipe'],
+    additionalSource: {
+      folder: 'EXTRA',
+      patterns: ['Cig', 'Joint', 'Cohiba']
+    }
+  },
+  'FacialHair': {
+    sourceFolder: 'EXTRA',
+    filePatterns: ['Neckbeard', 'stach']
+  },
+  'Mask': {
+    sourceFolder: 'MOUTH',
+    filePatterns: ['Bandana-Mask', 'Hannibal-Mask'],
+    additionalSource: {
+      folder: 'EXTRA',
+      patterns: ['Copium-Mask']
+    }
+  },
+  'ClothesAddon': {
+    sourceFolder: 'EXTRA',
+    filePatterns: ['Chia-Farmer']
+  }
 }
 
 /**
@@ -102,6 +135,50 @@ function scanLayerFolder(layerName) {
 }
 
 /**
+ * Create a virtual layer by filtering files from source folders
+ * @param {string} newLayerName - Name of the new layer
+ * @param {Object} mapping - Mapping configuration
+ * @returns {Object} Manifest structure for the new layer
+ */
+function createVirtualLayer(newLayerName, mapping) {
+  const manifest = {}
+  const allFiles = []
+  
+  // Get files from primary source folder
+  const sourceDir = path.join(WOJAK_CREATOR_DIR, mapping.sourceFolder)
+  if (fs.existsSync(sourceDir)) {
+    const files = getPngFiles(sourceDir)
+    // Filter files that match patterns
+    const matchingFiles = files.filter(file => 
+      mapping.filePatterns.some(pattern => 
+        file.toLowerCase().includes(pattern.toLowerCase())
+      )
+    )
+    allFiles.push(...matchingFiles)
+  }
+  
+  // Get files from additional source if specified
+  if (mapping.additionalSource) {
+    const additionalDir = path.join(WOJAK_CREATOR_DIR, mapping.additionalSource.folder)
+    if (fs.existsSync(additionalDir)) {
+      const files = getPngFiles(additionalDir)
+      const matchingFiles = files.filter(file => 
+        mapping.additionalSource.patterns.some(pattern => 
+          file.toLowerCase().includes(pattern.toLowerCase())
+        )
+      )
+      allFiles.push(...matchingFiles)
+    }
+  }
+  
+  if (allFiles.length > 0) {
+    manifest[''] = allFiles.sort()
+  }
+  
+  return manifest
+}
+
+/**
  * Generate the manifest file content
  */
 function generateManifestContent(manifest) {
@@ -157,21 +234,45 @@ function cleanDisplayName(fileName, layerName) {
 }
 
 // Map layer names back to folder names for paths
+// For virtual layers, map to their source folders
 const LAYER_TO_FOLDER_MAP = {
   'Background': 'BACKGROUND',
   'Base': 'BASE',
   'Clothes': 'CLOTHES',
+  'ClothesAddon': 'EXTRA', // Virtual layer from EXTRA
   'Eyes': 'EYE',
   'Head': 'HEAD',
-  'Mouth': 'MOUTH',
-  'Extra': 'EXTRA',
+  'MouthBase': 'MOUTH', // Virtual layer from MOUTH
+  'MouthItem': 'MOUTH', // Virtual layer from MOUTH and EXTRA
+  'FacialHair': 'EXTRA', // Virtual layer from EXTRA
+  'Mask': 'MOUTH', // Virtual layer from MOUTH and EXTRA
+  'Mouth': 'MOUTH', // Legacy
+  'Extra': 'EXTRA', // Legacy
+}
+
+// Map for virtual layers that need to check multiple source folders
+const VIRTUAL_LAYER_SOURCES = {
+  'MouthItem': ['MOUTH', 'EXTRA'],
+  'Mask': ['MOUTH', 'EXTRA'],
 }
 
 // Helper function to get image path
 function getImagePath(layerName, subfolder, fileName) {
   // Use /wojak-creator/ path (actual folder structure)
   // Convert layer name to folder name
-  const folderName = LAYER_TO_FOLDER_MAP[layerName] || layerName
+  let folderName = LAYER_TO_FOLDER_MAP[layerName] || layerName
+  
+  // For virtual layers with multiple sources, determine which folder based on file prefix
+  if (VIRTUAL_LAYER_SOURCES[layerName]) {
+    // Files from EXTRA typically have EXTRA_ prefix
+    if (fileName.startsWith('EXTRA_')) {
+      folderName = 'EXTRA'
+    } else {
+      // Default to the primary source folder
+      folderName = LAYER_TO_FOLDER_MAP[layerName] || 'MOUTH'
+    }
+  }
+  
   const path = subfolder 
     ? \`/wojak-creator/\${folderName}/\${subfolder}/\${fileName}\`
     : \`/wojak-creator/\${folderName}/\${fileName}\`
@@ -246,7 +347,7 @@ function main() {
   
   const manifest = {}
   
-  // Scan each layer folder
+  // Scan each physical layer folder
   for (const folderName of FOLDER_NAMES) {
     const layerName = FOLDER_TO_LAYER_MAP[folderName]
     console.log(`Scanning ${folderName} (as ${layerName})...`)
@@ -255,6 +356,20 @@ function main() {
       manifest[layerName] = layerData
       const totalFiles = Object.values(layerData).flat().length
       console.log(`  Found ${totalFiles} files in ${Object.keys(layerData).length} subfolder(s)`)
+    } else {
+      console.log(`  No files found`)
+    }
+  }
+  
+  // Create virtual layers from existing folders
+  console.log('\nCreating virtual layers from existing folders...')
+  for (const [newLayerName, mapping] of Object.entries(NEW_LAYER_MAPPINGS)) {
+    console.log(`Creating ${newLayerName}...`)
+    const layerData = createVirtualLayer(newLayerName, mapping)
+    if (Object.keys(layerData).length > 0) {
+      manifest[newLayerName] = layerData
+      const totalFiles = Object.values(layerData).flat().length
+      console.log(`  Found ${totalFiles} files`)
     } else {
       console.log(`  No files found`)
     }

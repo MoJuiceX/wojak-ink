@@ -71,6 +71,8 @@ body {
   backface-visibility: hidden;
   transform: translateZ(0);
   contain: layout style paint;
+  /* Disable transitions during drag for maximum performance */
+  transition: none !important;
 }
 
 .window.draggable {
@@ -197,8 +199,10 @@ a,
 
 /* Window drag feedback */
 .window.dragging {
-  opacity: 0.9;
+  /* Opacity removed for better drag performance */
   cursor: move;
+  /* Ensure no transitions during drag */
+  transition: none !important;
 }
 
 .window.dragging .title-bar {
@@ -209,6 +213,12 @@ a,
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Pulse animation for treasure window */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
 }
 
 /* Skeleton Shimmer Animation */
@@ -249,9 +259,19 @@ a,
   padding: 0 !important;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden; /* Container doesn't scroll, inner content does */
   min-height: 0;
+  max-height: calc(90vh - 60px); /* Account for title bar */
+  height: auto;
+}
+
+/* Ensure Wojak Creator window stays within viewport */
+.wojak-creator-window {
+  max-height: 90vh !important;
+}
+
+.wojak-creator-window .window-body {
+  max-height: calc(90vh - 60px) !important; /* Title bar is ~60px */
 }
 
 .banner img {

@@ -12,6 +12,7 @@ import MarketplaceWindow from './components/windows/MarketplaceWindow'
 import WojakCreator from './components/windows/WojakCreator'
 import PaintWindow from './components/windows/PaintWindow'
 import Taskbar from './components/Taskbar'
+import OrangeTrail from './components/OrangeTrail'
 import { MarketplaceProvider } from './contexts/MarketplaceContext'
 import { WindowProvider, useWindow } from './contexts/WindowContext'
 import { ToastProvider } from './contexts/ToastContext'
@@ -25,14 +26,15 @@ function WindowInitializer() {
   useEffect(() => {
     if (initialized) return
 
-    // Wait a bit for all windows to register, then minimize all except ReadmeWindow
+    // Wait a bit for all windows to register, then minimize all except ReadmeWindow and TangGang
     const timer = setTimeout(() => {
       const allWindows = getAllWindows()
       const readmeWindowId = 'window-readme-txt' // Based on title "README.TXT"
+      const tanggangWindowId = 'tanggang' // TangGang window ID
       
       allWindows.forEach((window) => {
-        // Don't minimize ReadmeWindow - minimize all others including TangGang
-        if (window.id !== readmeWindowId) {
+        // Don't minimize ReadmeWindow or TangGang - minimize all others
+        if (window.id !== readmeWindowId && window.id !== tanggangWindowId) {
           minimizeWindow(window.id)
         }
       })
@@ -49,6 +51,7 @@ function WindowInitializer() {
 function App() {
   const [notifyOpen, setNotifyOpen] = useState(false)
   const [paintOpen, setPaintOpen] = useState(false)
+  const [wojakCreatorOpen, setWojakCreatorOpen] = useState(false)
 
   // Use the extracted window stacking hook
   useWindowStacking()
@@ -72,6 +75,7 @@ function App() {
           <a href="#main-content" className="skip-link">Skip to main content</a>
           <div className="bg-fixed" aria-hidden="true"></div>
           <main id="main-content" className="desktop" aria-label="Desktop">
+            <OrangeTrail />
             <ReadmeWindow />
             <MintInfoWindow onNotifyClick={() => setNotifyOpen(true)} />
             <GalleryWindow />
@@ -83,11 +87,14 @@ function App() {
             </Routes>
             <MarketplaceWindow />
             <SideStack />
-            <WojakCreator />
+            {wojakCreatorOpen && <WojakCreator onClose={() => setWojakCreatorOpen(false)} />}
             {paintOpen && <PaintWindow onClose={() => setPaintOpen(false)} />}
             <NotifyPopup isOpen={notifyOpen} onClose={() => setNotifyOpen(false)} />
           </main>
-          <Taskbar />
+          <Taskbar 
+            onOpenWojakCreator={() => setWojakCreatorOpen(true)} 
+            wojakCreatorOpen={wojakCreatorOpen}
+          />
         </MarketplaceProvider>
       </WindowProvider>
     </ToastProvider>

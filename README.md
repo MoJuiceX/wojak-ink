@@ -10,8 +10,6 @@ Built with React, Vite, and a whole lot of memetic energy. Let's get you set up,
 
 ---
 
----
-
 ## 📋 Table of Contents
 
 - [What is This?](#-what-is-this)
@@ -38,7 +36,7 @@ Built with React, Vite, and a whole lot of memetic energy. Let's get you set up,
 Wojak Ink is a full-featured NFT showcase application that:
 
 - **Displays your Wojak NFT collection** in a nostalgic Windows 98 interface
-- **Generates custom memes** using the Memetic Energy Generator
+- **Creates custom wojaks** using the Wojak Creator with smart layer rules
 - **Manages P2P offers** for your NFTs via Chia offer files
 - **Integrates with MintGarden and Dexie** APIs for real-time NFT data
 - **Includes a built-in Paint app** (JS Paint) for meme editing
@@ -53,7 +51,7 @@ Perfect for showcasing your collection, managing sales, and creating memes - all
 ### Core Features
 
 - **🪟 Windows 98 UI**: Authentic retro interface using [98.css](https://github.com/jdan/98.css)
-- **🎨 Memetic Energy Generator**: Layer-based meme creator with real-time preview
+- **🎨 Wojak Creator**: Layer-based wojak creator with real-time preview and smart rules
 - **🛒 Marketplace Integration**: P2P offer file management with MintGarden/Dexie APIs
 - **🖼️ Gallery**: Browse your NFT collection with hover effects
 - **🎨 Paint Window**: Full JS Paint integration for meme editing
@@ -62,6 +60,7 @@ Perfect for showcasing your collection, managing sales, and creating memes - all
 - **📱 Responsive Windows**: Draggable, resizable windows with proper z-index stacking
 - **👥 Tang Gang Window**: Community information and links
 - **⚙️ Admin Panel**: Administrative features (accessible via route)
+- **🍊 TangGang Smash Mini-Game**: Drag the TangGang window to spawn oranges that accumulate on the ground. Smash them with the window to create epic juice splashes! Score resets on refresh, and the Treasure message is just a joke.
 
 ### Technical Features
 
@@ -71,7 +70,8 @@ Perfect for showcasing your collection, managing sales, and creating memes - all
 - **Intersection Observer** for lazy loading
 - **Error Boundaries** for graceful error handling
 - **IPFS Integration** for image hosting
-- **Meme Manifest Generation**: Automated manifest generation for meme layers
+- **Meme Manifest Generation**: Automated manifest generation for wojak creator layers
+- **Smart Layer Rules**: Extensible rules system that prevents incompatible layer combinations
 - **Docker Support**: Full Docker setup with Cloudflare tunnel integration
 
 ---
@@ -173,7 +173,7 @@ npm list --depth=0
 
 You should see all your dependencies listed without errors.
 
-**Optional:** Generate the meme manifest to ensure everything is set up:
+**Optional:** Generate the wojak creator manifest to ensure everything is set up:
 ```bash
 npm run generate-meme-manifest
 ```
@@ -299,13 +299,24 @@ Since this is a visual/interactive app, here's what to test:
 - [ ] Multiple windows stack correctly (z-index)
 - [ ] Taskbar shows active windows
 
-#### ✅ Meme Generator
+#### ✅ Wojak Creator
 
-- [ ] Open "MEMETIC_ENERGY.ZIP" window
-- [ ] Select different layers (Background, Base, Eyes, Head, Mouth)
+- [ ] Open "WOJAK_CREATOR.EXE" window
+- [ ] Select different layers (Background, Base, Clothes, Eyes, Head, Mouth(Base), Mouth(Item), Facial Hair, Mask)
 - [ ] Preview updates in real-time
+- [ ] Test layer rules (e.g., select Astronaut clothes - Head layer should be disabled)
 - [ ] Export as PNG works
 - [ ] Copy to clipboard works
+
+#### ✅ TangGang Smash Mini-Game
+
+- [ ] Drag TangGang window to spawn oranges
+- [ ] Oranges fall and accumulate on the ground (do not fade out)
+- [ ] Oranges can be picked up and thrown with mouse
+- [ ] Smashing oranges with TangGang window creates juice splashes
+- [ ] Spawn pauses when too many oranges on ground (80+), resumes when below threshold
+- [ ] Score resets on page refresh
+- [ ] Treasure window message is a joke (hard-coded text)
 
 #### ✅ Marketplace
 
@@ -320,7 +331,7 @@ Since this is a visual/interactive app, here's what to test:
 
 - [ ] Paint window opens from taskbar
 - [ ] JS Paint loads correctly
-- [ ] Can insert images from Memetic Energy library
+- [ ] Can insert images from Wojak Creator library
 - [ ] Paint tools work
 
 #### ✅ Other Windows
@@ -359,18 +370,22 @@ Always check the browser console (F12 → Console tab) for errors:
 - **Minimize/Maximize** using the window controls
 - **Close windows** with the X button
 
-### Memetic Energy Generator
+### Wojak Creator
 
-1. Open the **"MEMETIC_ENERGY.ZIP"** window
+1. Open the **"WOJAK_CREATOR.EXE"** window
 2. Select layers from the dropdowns:
-   - Background
-   - Base
-   - Eyes
-   - Head
-   - Mouth
-3. Toggle layer visibility with checkboxes
-4. Preview updates automatically
-5. Export your meme:
+   - **Background** - Choose from scenes, plain backgrounds, or $CASHTAG backgrounds
+   - **Base** - Select the base wojak body
+   - **Clothes** - Choose clothing/outfits (some may disable other layers)
+   - **Eyes** - Select eye accessories (glasses, shades, etc.)
+   - **Head** - Choose head traits (may be disabled by certain clothes)
+   - **Mouth(Base)** - Select base mouth traits
+   - **Mouth(Item)** - Select mouth items (cigarettes, joints, etc.)
+   - **Facial Hair** - Choose facial hair options
+   - **Mask** - Select mask overlays
+3. **Smart Rules**: The creator automatically enforces compatibility rules to prevent incompatible layer combinations. Disabled layers show a reason message, and previously selected items are automatically cleared when rules apply.
+4. Preview updates automatically as you select layers
+5. Export your creation:
    - Click **"Export as PNG"** to download
    - Click **"Copy to Clipboard"** to copy
 
@@ -394,6 +409,10 @@ Always check the browser console (F12 → Console tab) for errors:
 1. The **Tang Gang** window displays community information
 2. Shows links and resources for the Tang Gang community
 3. Automatically visible on desktop (not minimized on startup)
+
+### Wojak Creator Rules System
+
+The Wojak Creator includes a smart rules system that prevents incompatible layer combinations. Rules are defined in `src/utils/wojakRules.js` and are automatically enforced when selecting layers. Disabled layers show a reason message, and previously selected items in disabled layers are automatically cleared when rules apply.
 
 ### Admin Panel
 
@@ -508,7 +527,7 @@ This project includes custom Cursor commands to help with development:
 - Fix z-index or event handling
 - Test the fix
 
-**"Add error handling to the meme generator"**
+**"Add error handling to the Wojak Creator"**
 - Cursor will add try-catch blocks
 - Add user-friendly error messages
 - Update error boundaries
@@ -532,13 +551,13 @@ npm run build
 This creates an optimized production build in the `dist/` folder.
 
 **What happens:**
-- Meme manifest is generated automatically (runs `generate-meme-manifest` script)
+- Wojak creator manifest is generated automatically (runs `generate-meme-manifest` script)
 - Code is minified and optimized
 - Assets are processed and optimized
 - Source maps are generated (for debugging)
 - Build output is ready for deployment
 
-**Note:** The build script automatically runs `generate-meme-manifest` before building. This ensures the meme layer manifest is up-to-date.
+**Note:** The build script automatically runs `generate-meme-manifest` before building. This ensures the wojak creator layer manifest is up-to-date.
 
 ### Preview Production Build
 
@@ -689,7 +708,7 @@ If you need environment variables in your code (for API URLs, etc.):
 - [ ] Site loads without errors
 - [ ] All images load correctly
 - [ ] Windows can be dragged
-- [ ] Meme generator works
+- [ ] Wojak Creator works
 - [ ] Marketplace loads (if you have offer files)
 - [ ] Mobile responsive (test on phone)
 - [ ] HTTPS is enabled
@@ -949,21 +968,20 @@ docker-compose down
 wojak-ink/
 ├── public/                 # Static assets (served as-is)
 │   ├── assets/            # Images, logos, etc.
-│   ├── wojak-creator/    # Wojak creator layer images
-│   ├── wojak-creator/     # Alternative wojak assets
+│   ├── wojak-creator/    # Wojak creator layer images (BACKGROUND, BASE, CLOTHES, EYE, HEAD, MOUTH, FACIAL_HAIR, MASK)
 │   ├── jspaint/           # JS Paint application
 │   └── fonts/             # MS Sans Serif fonts
 ├── src/                    # Source code
 │   ├── components/        # React components
 │   │   ├── ui/            # Reusable UI components
 │   │   ├── windows/       # Window components
-│   │   ├── meme/          # Meme generator components
+│   │   ├── meme/          # Wojak creator components (LayerSelector, LayerPanel, etc.)
 │   │   └── paint/         # Paint window components
 │   ├── contexts/          # React contexts (state management)
 │   ├── hooks/             # Custom React hooks
 │   ├── lib/               # Library code (configs, manifests)
 │   ├── services/          # API services (MintGarden, Dexie)
-│   ├── utils/             # Utility functions
+│   ├── utils/             # Utility functions (wojakRules.js for layer compatibility rules)
 │   ├── data/              # Data files (CSV, etc.)
 │   ├── App.jsx            # Main app component
 │   ├── main.jsx           # Entry point
@@ -1008,7 +1026,8 @@ wojak-ink/
 - **`src/components/windows/TangGangWindow.jsx`** - Tang Gang community window
 - **`src/services/mintgardenApi.js`** - MintGarden API integration
 - **`src/data/offerFiles.csv`** - Offer file data (NFT IDs and offer files)
-- **`scripts/generate-meme-manifest.js`** - Generates meme layer manifest (runs before build)
+- **`scripts/generate-meme-manifest.js`** - Generates wojak creator layer manifest (runs before build)
+- **`src/utils/wojakRules.js`** - Rules system for layer compatibility (prevents incompatible combinations)
 - **`vite.config.js`** - Build configuration
 - **`deploy.sh`** - Automated Docker deployment script
 - **`docker-compose.yml`** - Docker Compose configuration for production
@@ -1073,12 +1092,14 @@ npm run build
 - Ensure MarketplaceContext is loading the CSV correctly
 - Check browser console for errors
 
-#### Meme generator not working
+#### Wojak Creator not working
 
 - Verify images exist in `public/wojak-creator/`
 - Check layer configuration in `src/lib/memeLayers.js`
 - Ensure canvas is rendering (check browser console)
 - Run `npm run generate-meme-manifest` to regenerate manifest if layers aren't showing
+- Check that layer rules are working (e.g., Astronaut clothes should disable Head layer)
+- Verify rules in `src/utils/wojakRules.js` if layer combinations aren't working as expected
 
 #### Docker container health check fails
 

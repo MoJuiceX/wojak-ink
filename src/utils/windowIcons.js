@@ -12,6 +12,7 @@ const windowIconMap = {
   'window-faq': 'help_question_mark-0',
   'window-marketplace': 'briefcase-0',
   'window-tanggang': 'application_hourglass-0',
+  'tanggang': 'application_hourglass-0', // TangGang window uses explicit ID
   'window-wojak-creator': 'paint_file-0',
   'window-notify-me': 'msg_information-0',
   'window-admin-panel': 'settings_gear-0',
@@ -69,6 +70,7 @@ export function getStartMenuIcon(action) {
     'scroll-to-marketplace': 'briefcase-0',
     'open-paint': 'paint_file-0',
     'open-tanggang': 'application_hourglass-0',
+    'wojak-creator': 'paint_file-0',
   }
   
   const iconName = actionIconMap[action] || 'application_hourglass-0'

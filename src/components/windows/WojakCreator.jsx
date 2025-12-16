@@ -1,34 +1,67 @@
 import Window from './Window'
 import { useMemeGenerator } from '../../hooks/useMemeGenerator'
-import { LAYER_ORDER } from '../../lib/memeLayers'
+import { UI_LAYER_ORDER } from '../../lib/memeLayers'
 import MemeCanvas from '../meme/MemeCanvas'
 import LayerSelector from '../meme/LayerSelector'
-import LayerPanel from '../meme/LayerPanel'
 import ExportControls from '../meme/ExportControls'
+import { useEffect } from 'react'
 
-export default function WojakCreator() {
+export default function WojakCreator({ onClose }) {
   const {
     selectedLayers,
-    layerVisibility,
     selectLayer,
-    toggleLayerVisibility,
     canvasRef,
     disabledLayers
   } = useMemeGenerator()
+
+  // Calculate centered position for initial render
+  const getCenteredPosition = () => {
+    const windowWidth = Math.min(1000, window.innerWidth - 40)
+    const windowHeight = Math.min(800, window.innerHeight - 100)
+    const left = Math.max(20, (window.innerWidth - windowWidth) / 2)
+    const top = Math.max(20, (window.innerHeight - windowHeight) / 2)
+    return { left: Math.round(left), top: Math.round(top) }
+  }
+
+  const centeredPos = getCenteredPosition()
+
+  // Center window after mount (fallback in case initial style doesn't apply)
+  useEffect(() => {
+    const win = document.getElementById('wojak-creator')
+    if (!win) return
+
+    const rect = win.getBoundingClientRect()
+    const currentLeft = rect.left
+    const currentTop = rect.top
+    
+    // Only center if window is at default position (top-left corner)
+    if (currentLeft <= 40 && currentTop <= 40) {
+      const windowWidth = rect.width || Math.min(1000, window.innerWidth - 40)
+      const windowHeight = rect.height || Math.min(800, window.innerHeight - 100)
+      const left = Math.max(20, (window.innerWidth - windowWidth) / 2)
+      const top = Math.max(20, (window.innerHeight - windowHeight) / 2)
+      
+      win.style.left = `${Math.round(left)}px`
+      win.style.top = `${Math.round(top)}px`
+    }
+  }, [])
 
   return (
     <Window
       id="wojak-creator"
       title="WOJAK_CREATOR.EXE"
       noStack={true}
+      onClose={onClose}
       style={{ 
         width: '1000px',
         height: 'auto',
         maxWidth: 'calc(100vw - 40px)',
-        maxHeight: 'calc(100vh - 70px)',
-        left: '20px', 
-        top: '460px'
+        maxHeight: '90vh',
+        left: `${centeredPos.left}px`,
+        top: `${centeredPos.top}px`,
+        position: 'absolute',
       }}
+      className="wojak-creator-window"
     >
       <div className="meme-generator-container" style={{ 
         display: 'flex', 
@@ -53,7 +86,7 @@ export default function WojakCreator() {
           </p>
           <MemeCanvas canvasRef={canvasRef} width={400} height={400} />
           <div style={{ marginTop: '12px' }}>
-            <ExportControls canvasRef={canvasRef} />
+            <ExportControls canvasRef={canvasRef} selectedLayers={selectedLayers} />
           </div>
         </div>
 
@@ -76,7 +109,7 @@ export default function WojakCreator() {
             overflowX: 'hidden',
             minHeight: 0
           }}>
-            {LAYER_ORDER.map(layer => (
+            {UI_LAYER_ORDER.map(layer => (
               <LayerSelector
                 key={layer.name}
                 layerName={layer.name}
@@ -86,14 +119,6 @@ export default function WojakCreator() {
                 selectedLayers={selectedLayers}
               />
             ))}
-
-            <div style={{ marginTop: '16px' }}>
-              <LayerPanel
-                layerVisibility={layerVisibility}
-                onToggleVisibility={toggleLayerVisibility}
-                selectedLayers={selectedLayers}
-              />
-            </div>
           </div>
         </div>
       </div>

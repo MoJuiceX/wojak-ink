@@ -199,6 +199,46 @@ const HARDCODED_MANIFEST = {
       'EXTRA_MOUTH_Neckbeard_.png',
       'EXTRA_MOUTH_stach.png'
     ]
+  },
+  'MouthBase': {
+    '': [
+      'MOUTH_Bubble-Gum_.png',
+      'MOUTH_Gold-Teeth.png',
+      'MOUTH_Pizza.png',
+      'MOUTH_Teeth.png',
+      'MOUTH_numb.png',
+      'MOUTH_screeming.png',
+      'MOUTH_smile.png'
+    ]
+  },
+  'MouthItem': {
+    '': [
+      'EXTRA_MOUTH_Cig_.png',
+      'EXTRA_MOUTH_Cohiba_.png',
+      'EXTRA_MOUTH_Joint_.png',
+      'MOUTH_Pipe.png'
+    ]
+  },
+  'FacialHair': {
+    '': [
+      'EXTRA_MOUTH_Neckbeard_.png',
+      'EXTRA_MOUTH_stach.png'
+    ]
+  },
+  'Mask': {
+    '': [
+      'EXTRA_MOUTH_Copium-Mask.png',
+      'MOUTH_Bandana-Mask_.png',
+      'MOUTH_Hannibal-Mask.png'
+    ]
+  },
+  'ClothesAddon': {
+    '': [
+      'EXTRA-on-tee,tank-top_CLOTHES_Chia-Farmer_blue.png',
+      'EXTRA-on-tee,tank-top_CLOTHES_Chia-Farmer_brown.png',
+      'EXTRA-on-tee,tank-top_CLOTHES_Chia-Farmer_orange.png',
+      'EXTRA-on-tee,tank-top_CLOTHES_Chia-Farmer_red.png'
+    ]
   }
 }
 
@@ -224,21 +264,45 @@ function cleanDisplayName(fileName, layerName) {
 }
 
 // Map layer names back to folder names for paths
+// For virtual layers, map to their source folders
 const LAYER_TO_FOLDER_MAP = {
   'Background': 'BACKGROUND',
   'Base': 'BASE',
   'Clothes': 'CLOTHES',
+  'ClothesAddon': 'EXTRA', // Virtual layer from EXTRA
   'Eyes': 'EYE',
   'Head': 'HEAD',
-  'Mouth': 'MOUTH',
-  'Extra': 'EXTRA',
+  'MouthBase': 'MOUTH', // Virtual layer from MOUTH
+  'MouthItem': 'MOUTH', // Virtual layer from MOUTH and EXTRA
+  'FacialHair': 'EXTRA', // Virtual layer from EXTRA
+  'Mask': 'MOUTH', // Virtual layer from MOUTH and EXTRA
+  'Mouth': 'MOUTH', // Legacy
+  'Extra': 'EXTRA', // Legacy
+}
+
+// Map for virtual layers that need to check multiple source folders
+const VIRTUAL_LAYER_SOURCES = {
+  'MouthItem': ['MOUTH', 'EXTRA'],
+  'Mask': ['MOUTH', 'EXTRA'],
 }
 
 // Helper function to get image path
 function getImagePath(layerName, subfolder, fileName) {
   // Use /wojak-creator/ path (actual folder structure)
   // Convert layer name to folder name
-  const folderName = LAYER_TO_FOLDER_MAP[layerName] || layerName
+  let folderName = LAYER_TO_FOLDER_MAP[layerName] || layerName
+  
+  // For virtual layers with multiple sources, determine which folder based on file prefix
+  if (VIRTUAL_LAYER_SOURCES[layerName]) {
+    // Files from EXTRA typically have EXTRA_ prefix
+    if (fileName.startsWith('EXTRA_')) {
+      folderName = 'EXTRA'
+    } else {
+      // Default to the primary source folder
+      folderName = LAYER_TO_FOLDER_MAP[layerName] || 'MOUTH'
+    }
+  }
+  
   const path = subfolder 
     ? `/wojak-creator/${folderName}/${subfolder}/${fileName}`
     : `/wojak-creator/${folderName}/${fileName}`

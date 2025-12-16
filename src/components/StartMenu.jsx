@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useWindow } from '../contexts/WindowContext'
 import { getStartMenuIcon } from '../utils/windowIcons'
 
-export default function StartMenu({ isOpen, onClose, onOpenPaint }) {
+export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCreator }) {
   const { getAllWindows, isWindowMinimized, restoreWindow, bringToFront } = useWindow()
   const menuRef = useRef(null)
 
@@ -43,7 +43,7 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint }) {
       'scroll-to-gallery': 'window-gallery',
       'scroll-to-faq': 'window-faq',
       'scroll-to-marketplace': 'window-marketplace',
-      'open-tanggang': 'window-tanggang',
+      'open-tanggang': 'tanggang',
     }
 
     if (action === 'open-paint') {
@@ -56,28 +56,54 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint }) {
 
     const windowId = actionToWindowId[action]
     if (windowId) {
-      // Always try to restore the window - it should exist since windows are always rendered
-      // If minimized, restore it. If not minimized, bring to front.
-      try {
-        if (isWindowMinimized(windowId)) {
-          restoreWindow(windowId)
-        } else {
-          bringToFront(windowId)
+      // Check if window exists in the window context
+      const allWindows = getAllWindows()
+      const windowExists = allWindows.some(w => w.id === windowId)
+      
+      if (windowExists) {
+        // Window is registered - restore or bring to front
+        try {
+          if (isWindowMinimized(windowId)) {
+            restoreWindow(windowId)
+          } else {
+            bringToFront(windowId)
+          }
+        } catch (e) {
+          console.debug('Error restoring/bringing to front window:', windowId, e)
         }
-      } catch (e) {
-        // If window doesn't exist in context yet, try to find it in DOM and trigger restore
+      } else {
+        // Window not registered yet - wait a bit and try again
         // This can happen if the window hasn't registered yet
         const windowElement = document.getElementById(windowId)
         if (windowElement) {
-          // Window exists in DOM, try to restore it by clicking the taskbar button
-          // or directly manipulating it
+          // Window exists in DOM, wait for registration and then restore
           setTimeout(() => {
             try {
-              restoreWindow(windowId)
+              const retryWindows = getAllWindows()
+              const retryExists = retryWindows.some(w => w.id === windowId)
+              if (retryExists) {
+                if (isWindowMinimized(windowId)) {
+                  restoreWindow(windowId)
+                } else {
+                  bringToFront(windowId)
+                }
+              } else {
+                // Still not registered - force bring to front via DOM
+                windowElement.style.display = 'block'
+                windowElement.style.zIndex = '9999'
+                // Try to trigger a click on the window to bring it to front
+                const titleBar = windowElement.querySelector('.title-bar')
+                if (titleBar) {
+                  titleBar.click()
+                }
+              }
             } catch (err) {
-              console.debug('Could not restore window:', windowId, err)
+              console.debug('Could not restore window after retry:', windowId, err)
             }
-          }, 50)
+          }, 100)
+        } else {
+          // Window doesn't exist in DOM either - log for debugging
+          console.debug('Window not found in DOM or context:', windowId)
         }
       }
     }
@@ -183,6 +209,24 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint }) {
             onError={(e) => { e.target.style.display = 'none' }}
           />
           <span className="start-menu-item-text">Paint</span>
+        </button>
+        <button 
+          className="start-menu-item"
+          onClick={() => {
+            if (onOpenWojakCreator) {
+              onOpenWojakCreator()
+            }
+            onClose()
+          }}
+          role="menuitem"
+        >
+          <img 
+            src={getStartMenuIcon('wojak-creator')} 
+            alt="" 
+            className="start-menu-item-icon"
+            onError={(e) => { e.target.style.display = 'none' }}
+          />
+          <span className="start-menu-item-text">Wojak Creator</span>
         </button>
         <hr className="start-menu-separator" role="separator" />
         <button 

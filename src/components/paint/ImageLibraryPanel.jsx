@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { getAllLayerImages } from '../../lib/memeImageManifest'
-import { LAYER_ORDER } from '../../lib/memeLayers'
+import { UI_LAYER_ORDER } from '../../lib/memeLayers'
 import { Select, Button } from '../ui'
 
 export default function ImageLibraryPanel({ onImageSelect }) {
-  const [selectedCategory, setSelectedCategory] = useState(LAYER_ORDER[0]?.name || '')
+  const [selectedCategory, setSelectedCategory] = useState(UI_LAYER_ORDER[0]?.name || '')
   const [images, setImages] = useState({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -14,13 +14,13 @@ export default function ImageLibraryPanel({ onImageSelect }) {
     setError(null)
     try {
       const loadedImages = {}
-      LAYER_ORDER.forEach(layer => {
+      UI_LAYER_ORDER.forEach(layer => {
         loadedImages[layer.name] = getAllLayerImages(layer.name)
       })
       setImages(loadedImages)
       setLoading(false)
     } catch (err) {
-      console.error("Failed to load memetic energy images:", err)
+      console.error("Failed to load wojak creator images:", err)
       setError(err)
       setLoading(false)
     }
@@ -47,7 +47,7 @@ export default function ImageLibraryPanel({ onImageSelect }) {
         <Select 
           value={selectedCategory} 
           onChange={handleCategoryChange}
-          options={LAYER_ORDER.map(layer => ({
+          options={UI_LAYER_ORDER.map(layer => ({
             value: layer.name,
             label: layer.name
           }))}
