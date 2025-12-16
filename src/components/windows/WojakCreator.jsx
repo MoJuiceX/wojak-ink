@@ -12,7 +12,8 @@ export default function WojakCreator() {
     layerVisibility,
     selectLayer,
     toggleLayerVisibility,
-    canvasRef
+    canvasRef,
+    disabledLayers
   } = useMemeGenerator()
 
   return (
@@ -81,6 +82,8 @@ export default function WojakCreator() {
                 layerName={layer.name}
                 onSelect={selectLayer}
                 selectedValue={selectedLayers[layer.name]}
+                disabled={disabledLayers.includes(layer.name)}
+                selectedLayers={selectedLayers}
               />
             ))}
 

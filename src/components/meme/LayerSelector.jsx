@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Select, Label } from '../ui'
 import { useImageLoader } from '../../hooks/useImageLoader'
+import { getDisabledReason } from '../../utils/wojakRules'
 
-export default function LayerSelector({ layerName, onSelect, selectedValue }) {
+export default function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, selectedLayers = {} }) {
   const { images, loading } = useImageLoader(layerName)
   const [options, setOptions] = useState([])
   const [selectedOption, setSelectedOption] = useState('')
@@ -43,18 +44,29 @@ export default function LayerSelector({ layerName, onSelect, selectedValue }) {
   }
 
   const displayName = layerName.charAt(0).toUpperCase() + layerName.slice(1)
+  const disabledReason = disabled ? getDisabledReason(layerName, selectedLayers) : null
 
   return (
-    <div style={{ marginBottom: '12px' }}>
+    <div style={{ marginBottom: '12px', opacity: disabled ? 0.5 : 1 }}>
       <Label htmlFor={`select-${layerName}`}>
         {displayName}:
+        {disabled && disabledReason && (
+          <span style={{ 
+            fontSize: '9px', 
+            color: '#808080', 
+            marginLeft: '8px',
+            fontStyle: 'italic'
+          }}>
+            ({disabledReason})
+          </span>
+        )}
       </Label>
       <Select
         id={`select-${layerName}`}
         value={selectedOption}
         onChange={handleChange}
         options={loading ? [{ value: '', label: 'Loading...' }] : options}
-        disabled={loading}
+        disabled={loading || disabled}
         style={{ width: '100%', minWidth: '200px' }}
       />
     </div>

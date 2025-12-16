@@ -1,6 +1,7 @@
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { LAYER_ORDER } from '../lib/memeLayers'
 import { loadImage } from '../utils/imageUtils'
+import { getDisabledLayers } from '../utils/wojakRules'
 
 export function useMemeGenerator() {
   const [selectedLayers, setSelectedLayers] = useState({})
@@ -18,10 +19,25 @@ export function useMemeGenerator() {
   }, [])
 
   const selectLayer = useCallback((layerName, imagePath) => {
-    setSelectedLayers(prev => ({
-      ...prev,
-      [layerName]: imagePath
-    }))
+    setSelectedLayers(prev => {
+      const newLayers = {
+        ...prev,
+        [layerName]: imagePath
+      }
+      
+      // Check if any layers should be disabled after this selection
+      const { disabledLayers } = getDisabledLayers(newLayers)
+      
+      // Clear selections for layers that are now disabled
+      const clearedLayers = { ...newLayers }
+      disabledLayers.forEach(disabledLayer => {
+        if (clearedLayers[disabledLayer]) {
+          clearedLayers[disabledLayer] = ''
+        }
+      })
+      
+      return clearedLayers
+    })
   }, [])
 
   const toggleLayerVisibility = useCallback((layerName) => {
@@ -93,6 +109,12 @@ export function useMemeGenerator() {
     renderCanvas()
   }, [selectedLayers, layerVisibility, renderCanvas])
 
+  // Compute disabled layers based on rules
+  const disabledLayers = useMemo(() => {
+    const { disabledLayers: disabled } = getDisabledLayers(selectedLayers)
+    return disabled
+  }, [selectedLayers])
+
   return {
     selectedLayers,
     layerVisibility,
@@ -100,7 +122,8 @@ export function useMemeGenerator() {
     toggleLayerVisibility,
     canvasRef,
     renderCanvas,
-    isRendering
+    isRendering,
+    disabledLayers
   }
 }
 
