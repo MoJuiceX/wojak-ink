@@ -30,3 +30,6 @@ dist-ssr
 
 # Icons
 /public/icon
+
+# ignore installer files
+*.pkg
