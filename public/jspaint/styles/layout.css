@@ -8,25 +8,6 @@
 |*| so the way to make a piece of UI left-to-right-only is with an ignore directive.
 \*/
 
-/* MS Sans Serif Font Faces - Custom font for wojak-ink integration */
-@font-face {
-	font-family: 'MS Sans Serif';
-	src: url('../../fonts/converted/ms_sans_serif.woff2') format('woff2'),
-		 url('../../fonts/converted/ms_sans_serif.woff') format('woff');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'MS Sans Serif';
-	src: url('../../fonts/converted/ms_sans_serif_bold.woff2') format('woff2'),
-		 url('../../fonts/converted/ms_sans_serif_bold.woff') format('woff');
-	font-weight: 700;
-	font-style: normal;
-	font-display: swap;
-}
-
 html, body, .jspaint {
 	width: 100%;
 	height: 100%;
@@ -34,9 +15,6 @@ html, body, .jspaint {
 	padding: 0;
 	border: 0;
 	overflow: hidden;
-	font-family: 'MS Sans Serif', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-	-webkit-font-smoothing: none;
-	-moz-osx-font-smoothing: auto;
 }
 .jspaint {
 	direction: ltr;
@@ -490,7 +468,7 @@ whereas it breaks component docking calculations if used to shift the colors box
 	display: flex;
 }
 .edit-colors-window .window-content {
-	font-family: 'MS Sans Serif', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+	font-family: Tahoma, sans-serif;
 	font-size: 12px;
 }
 .edit-colors-window .swatch {
@@ -1047,7 +1025,7 @@ input[type="radio"] + label::before {
 
 .news-indicator {
 	display: flex;
-	font-family: 'MS Sans Serif', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+	font-family: sans-serif;
 }
 .news-indicator > img {
 	margin-right: 5px;

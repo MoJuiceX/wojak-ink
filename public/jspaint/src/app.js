@@ -451,22 +451,6 @@ $G.on("hashchange popstate change-url-params", update_from_url_params);
 // We can maintain backwards compatibility with the old URL param by mapping it to the new features.
 // (BTW: Eye Gaze Mode never included an actual eye tracker (instead relying on external software),
 // but if I added that as a feature I could call the feature Eye Tracker, so it wouldn't be too confusing.)
-// Detect embedded mode for wojak-ink integration
-const isEmbedded = location.search.includes('embedded=true') || location.hash.includes('embedded=true')
-if (isEmbedded) {
-	$("body").addClass("embedded");
-	// Enable embedded CSS
-	const embeddedCSSLink = document.getElementById("embedded-css-link");
-	if (embeddedCSSLink) {
-		embeddedCSSLink.media = "all";
-	}
-	// Force classic theme when embedded
-	try {
-		localStorage["jspaint theme"] = "classic.css";
-		localStorage["jspaint disable seasonal theme"] = "true";
-	} catch (_error) { /* ignore */ }
-}
-
 if (location.search.match(/eye-gaze-mode/) || location.hash.match(/eye-gaze-mode/)) {
 	change_some_url_params({
 		"eye-gaze-mode": false,

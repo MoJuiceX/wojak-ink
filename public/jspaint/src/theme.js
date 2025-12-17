@@ -25,25 +25,13 @@ try {
 	const grinch = localStorage[disable_seasonal_theme_key] === "true";
 	const is_december = new Date().getMonth() === 11;
 	const running_tests = "Cypress" in window;
-	// Disable winter theme auto-enable for wojak-ink integration
-	if (false && is_december && !grinch && !running_tests) {
+	if (is_december && !grinch && !running_tests) {
 		current_theme = "winter.css"; // overriding theme preference until you disable the seasonal theme
 		wait_for_theme_loaded(current_theme, () => { // could just wait for DOM to load, but theme is needed for the button styling
 			make_grinch_button();
 		});
 	} else {
-		// Force classic theme when embedded (for wojak-ink integration)
-		const urlParams = new URLSearchParams(window.location.search)
-		const isEmbedded = urlParams.get('embedded') === 'true'
-		if (isEmbedded) {
-			current_theme = default_theme // Force classic theme
-			try {
-				localStorage[theme_storage_key] = default_theme
-				localStorage[disable_seasonal_theme_key] = 'true'
-			} catch (_error) { /* ignore */ }
-		} else {
-			current_theme = localStorage[theme_storage_key] || default_theme
-		}
+		current_theme = localStorage[theme_storage_key] || default_theme;
 	}
 } catch (error) {
 	console.error(error);
