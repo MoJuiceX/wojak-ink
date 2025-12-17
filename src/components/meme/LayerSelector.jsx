@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, memo, useMemo, useCallback } from 'react'
 import { Select, Label } from '../ui'
+import Tooltip from '../ui/Tooltip'
 import { useImageLoader } from '../../hooks/useImageLoader'
 import { getDisabledReason, getDisabledLayers } from '../../utils/wojakRules'
 
@@ -74,12 +75,26 @@ function formatDisplayLabel(rawLabel) {
     .join(' ')
 }
 
-export default function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, selectedLayers = {} }) {
+function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, selectedLayers = {}, navigation, traitIndex = -1 }) {
   const { images, loading } = useImageLoader(layerName)
   const [options, setOptions] = useState([])
   const [selectedOption, setSelectedOption] = useState('')
+  const selectRef = useRef(null)
+  const [focusedIndex, setFocusedIndex] = useState(-1)
+  const isFocusedTrait = navigation && traitIndex >= 0 && navigation.focusedTraitIndex === traitIndex
 
+  // Register/unregister with navigation system
   useEffect(() => {
+    if (navigation && selectRef.current && options.length > 0) {
+      navigation.registerSelector(layerName, selectRef, options, selectedOption)
+      return () => {
+        navigation.unregisterSelector(layerName)
+      }
+    }
+  }, [navigation, layerName, options, selectedOption])
+
+  // Memoize options computation to prevent unnecessary recalculations
+  const computedOptions = useMemo(() => {
     const allOptions = []
     
     // Get disabled options from rules
@@ -182,58 +197,92 @@ export default function LayerSelector({ layerName, onSelect, selectedValue, disa
       allOptions.unshift({ value: '', label: 'None', disabled: false })
     }
 
-    setOptions(allOptions)
+    return allOptions
+  }, [images, selectedLayers, layerName])
+
+  useEffect(() => {
+    setOptions(computedOptions)
     
     // Set selected value
     if (selectedValue) {
-      const found = allOptions.find(opt => opt.value === selectedValue)
+      const found = computedOptions.find(opt => opt.value === selectedValue)
       setSelectedOption(found ? found.value : '')
     } else {
       setSelectedOption('')
     }
-  }, [images, selectedValue, selectedLayers, layerName])
+  }, [computedOptions, selectedValue])
 
-  const handleChange = (e) => {
+  // Memoize change handler to prevent recreation
+  const handleChange = useCallback((e) => {
     const value = e.target.value
     setSelectedOption(value)
     onSelect(layerName, value)
-  }
+  }, [layerName, onSelect])
 
-  // Handle keyboard navigation for immediate preview updates
-  const handleKeyDown = (e) => {
-    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return
-
-    e.preventDefault()
-
-    const currentIndex = options.findIndex(opt => opt.value === selectedOption)
-    const dir = e.key === "ArrowDown" ? 1 : -1
-    
-    // If current option not found, start from first/last enabled option
-    let startIndex = currentIndex
-    if (currentIndex === -1) {
-      startIndex = dir === 1 ? 0 : options.length - 1
+  // Memoize keyboard handler to prevent recreation on every render
+  const handleKeyDown = useCallback((e) => {
+    // If navigation system is active and this trait is focused, handle option navigation
+    if (navigation && isFocusedTrait && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
+      navigation.navigateOptions(e.key === "ArrowDown" ? 'down' : 'up', (layerName, value) => {
+        setSelectedOption(value)
+        onSelect(layerName, value)
+      })
+      e.preventDefault()
+      e.stopPropagation()
+      return
     }
-    
-    const nextIndex = Math.max(0, Math.min(options.length - 1, startIndex + dir))
-    const nextOption = options[nextIndex]
 
-    // Skip disabled options
-    if (nextOption && !nextOption.disabled && nextOption.value !== selectedOption) {
-      setSelectedOption(nextOption.value)
-      onSelect(layerName, nextOption.value)
-    } else if (nextOption && nextOption.disabled) {
-      // If next option is disabled, try to find the next enabled option
-      let searchIndex = nextIndex + dir
-      while (searchIndex >= 0 && searchIndex < options.length) {
-        const candidate = options[searchIndex]
+    // Fallback: local navigation if no global navigation system or not focused
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault()
+      e.stopPropagation()
+
+      const currentIndex = options.findIndex(opt => opt.value === selectedOption)
+      const dir = e.key === "ArrowDown" ? 1 : -1
+      
+      // If current option not found, start from first/last enabled option
+      let startIndex = currentIndex >= 0 ? currentIndex : (dir === 1 ? -1 : options.length)
+      let nextIndex = startIndex + dir
+      
+      // Find next enabled option
+      while (nextIndex >= 0 && nextIndex < options.length) {
+        const candidate = options[nextIndex]
         if (candidate && !candidate.disabled) {
           setSelectedOption(candidate.value)
+          setFocusedIndex(nextIndex)
           onSelect(layerName, candidate.value)
           break
         }
-        searchIndex += dir
+        nextIndex += dir
+      }
+    } else if (e.key === "Enter") {
+      // Enter selects the focused option
+      if (navigation && isFocusedTrait) {
+        navigation.selectFocusedOption((layerName, value) => {
+          setSelectedOption(value)
+          onSelect(layerName, value)
+        })
+      } else if (focusedIndex >= 0) {
+        const focusedOption = options[focusedIndex]
+        if (focusedOption && !focusedOption.disabled) {
+          setSelectedOption(focusedOption.value)
+          onSelect(layerName, focusedOption.value)
+        }
+      }
+      if (selectRef.current) {
+        selectRef.current.blur()
       }
     }
+  }, [navigation, isFocusedTrait, options, selectedOption, layerName, onSelect, focusedIndex])
+
+  // Handle focus to track which selector is active
+  const handleFocus = () => {
+    const currentIndex = options.findIndex(opt => opt.value === selectedOption)
+    setFocusedIndex(currentIndex >= 0 ? currentIndex : 0)
+  }
+
+  const handleBlur = () => {
+    setFocusedIndex(-1)
   }
 
   // Map layer names to display names
@@ -250,32 +299,64 @@ export default function LayerSelector({ layerName, onSelect, selectedValue, disa
   // Check if ClothesAddon needs hint text (when Tee/Tank-top is not selected)
   const needsBaseClothes = layerName === 'ClothesAddon' && disabled && disabledReason === 'Choose Tee or Tank Top first'
 
+  // Get tooltip content
+  const tooltipContent = disabled && disabledReason 
+    ? `${displayName}: ${disabledReason}`
+    : selectedOption && options.find(opt => opt.value === selectedOption)
+    ? `${displayName}: ${options.find(opt => opt.value === selectedOption)?.label || 'Selected'}`
+    : `${displayName}: Select a trait`
+
   return (
-    <div style={{ marginBottom: '12px', opacity: disabled ? 0.5 : 1 }}>
-      <Label htmlFor={`select-${layerName}`}>
-        {displayName}:
-        {disabled && disabledReason && (
-          <span style={{ 
-            fontSize: '9px', 
-            color: '#808080', 
-            marginLeft: '8px',
-            fontStyle: 'italic'
-          }}>
-            ({disabledReason})
-          </span>
-        )}
-      </Label>
-      <Select
-        id={`select-${layerName}`}
-        value={selectedOption}
-        onChange={handleChange}
-        onInput={handleChange}
-        onKeyDown={handleKeyDown}
-        options={loading ? [{ value: '', label: 'Loading...' }] : options}
-        disabled={loading || disabled}
-        style={{ width: '100%', minWidth: '200px' }}
-      />
-    </div>
+    <Tooltip content={tooltipContent} position="right" delay={200}>
+      <div 
+        className={`trait-selector-wrapper ${isFocusedTrait ? 'trait-focused' : ''}`}
+        style={{ marginBottom: '12px', opacity: disabled ? 0.5 : 1 }}
+      >
+        <Label htmlFor={`select-${layerName}`}>
+          {displayName}:
+          {disabled && disabledReason && (
+            <span style={{ 
+              fontSize: '9px', 
+              color: '#808080', 
+              marginLeft: '8px',
+              fontStyle: 'italic'
+            }}>
+              ({disabledReason})
+            </span>
+          )}
+        </Label>
+        <Select
+          ref={selectRef}
+          id={`select-${layerName}`}
+          value={selectedOption}
+          onChange={handleChange}
+          onInput={handleChange}
+          onKeyDown={handleKeyDown}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          options={loading ? [{ value: '', label: 'Loading...' }] : options}
+          disabled={loading || disabled}
+          className={isFocusedTrait ? 'trait-select-focused' : ''}
+          style={{ width: '100%', minWidth: '200px' }}
+        />
+      </div>
+    </Tooltip>
   )
 }
+
+// Memoize LayerSelector to prevent unnecessary re-renders
+// Only re-render if props actually change
+export default memo(LayerSelector, (prevProps, nextProps) => {
+  // Re-render if these props change
+  return (
+    prevProps.layerName === nextProps.layerName &&
+    prevProps.selectedValue === nextProps.selectedValue &&
+    prevProps.disabled === nextProps.disabled &&
+    prevProps.traitIndex === nextProps.traitIndex &&
+    // Deep compare selectedLayers (only relevant layers for this selector)
+    prevProps.selectedLayers?.[prevProps.layerName] === nextProps.selectedLayers?.[nextProps.layerName] &&
+    // Compare navigation focused trait index
+    prevProps.navigation?.focusedTraitIndex === nextProps.navigation?.focusedTraitIndex
+  )
+})
 

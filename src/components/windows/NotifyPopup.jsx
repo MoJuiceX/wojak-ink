@@ -1,38 +1,52 @@
 import Window from './Window'
 import { useEffect } from 'react'
+import { useKeyboardHandler, KEYBOARD_PRIORITY } from '../../contexts/KeyboardPriorityContext'
 
 export default function NotifyPopup({ isOpen, onClose }) {
-  useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === 'Escape') {
-        onClose()
-      }
+  // Register modal keyboard handler (highest priority)
+  const handleEscape = (e) => {
+    if (e.key === 'Escape') {
+      onClose()
+      e.preventDefault()
+      e.stopPropagation()
     }
+  }
 
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape)
-      return () => document.removeEventListener('keydown', handleEscape)
-    }
-  }, [isOpen, onClose])
+  useKeyboardHandler(KEYBOARD_PRIORITY.MODAL, 'notify-popup', handleEscape, isOpen)
 
   useEffect(() => {
     if (isOpen) {
-      const el = document.getElementById('win-notify')
-      if (el) {
-        // Force layout calculation
+      // Batch all layout reads, then all writes to prevent layout thrashing
+      requestAnimationFrame(() => {
+        const el = document.getElementById('win-notify')
+        if (!el) return
+        
+        // Batch all reads first (no writes yet)
+        const viewportWidth = window.innerWidth
+        const viewportHeight = window.innerHeight
+        
+        // Temporarily make visible to measure (but batch this with writes)
+        const wasVisible = el.style.visibility !== 'hidden'
         el.style.visibility = 'hidden'
         el.style.display = 'block'
+        
+        // Read layout properties (batch all reads)
         const w = el.offsetWidth
         const h = el.offsetHeight
-        el.style.visibility = 'visible'
         
-        // Use viewport-relative positioning (fixed positioning)
-        // This ensures it appears centered in the visible viewport, not at bottom of page
-        const left = Math.max(12, (window.innerWidth - w) / 2)
-        const top = Math.max(12, (window.innerHeight - h) / 2)
-        el.style.left = Math.round(left) + 'px'
-        el.style.top = Math.round(top) + 'px'
-      }
+        // Calculate positions (no DOM writes yet)
+        const left = Math.max(12, (viewportWidth - w) / 2)
+        const top = Math.max(12, (viewportHeight - h) / 2)
+        
+        // Now batch all writes together (after all reads are done)
+        requestAnimationFrame(() => {
+          const el2 = document.getElementById('win-notify')
+          if (!el2) return
+          el2.style.visibility = wasVisible ? 'visible' : ''
+          el2.style.left = Math.round(left) + 'px'
+          el2.style.top = Math.round(top) + 'px'
+        })
+      })
     }
   }, [isOpen])
 

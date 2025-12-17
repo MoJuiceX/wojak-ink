@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense, lazy } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import ReadmeWindow from './components/windows/ReadmeWindow'
 import MintInfoWindow from './components/windows/MintInfoWindow'
@@ -7,7 +7,6 @@ import FaqWindow from './components/windows/FaqWindow'
 import TangGangWindow from './components/windows/TangGangWindow'
 import SideStack from './components/SideStack'
 import NotifyPopup from './components/windows/NotifyPopup'
-import AdminPanel from './components/windows/AdminPanel'
 import MarketplaceWindow from './components/windows/MarketplaceWindow'
 import WojakCreator from './components/windows/WojakCreator'
 import PaintWindow from './components/windows/PaintWindow'
@@ -15,10 +14,17 @@ import Taskbar from './components/Taskbar'
 import OrangeTrail from './components/OrangeTrail'
 import OrangeGameErrorBoundary from './components/OrangeGameErrorBoundary'
 import BackgroundMusic from './components/BackgroundMusic'
+import LoadingSpinner from './components/ui/LoadingSpinner'
+import PerformanceDebug from './components/dev/PerformanceDebug'
+
+// Lazy load non-critical routes
+const AdminPanel = lazy(() => import('./components/windows/AdminPanel'))
+const QAPage = lazy(() => import('./components/dev/QAPage'))
 import { MarketplaceProvider } from './contexts/MarketplaceContext'
 import { WindowProvider, useWindow } from './contexts/WindowContext'
 import { ToastProvider } from './contexts/ToastContext'
 import { OrangeGameProvider } from './contexts/OrangeGameContext'
+import { KeyboardPriorityProvider } from './contexts/KeyboardPriorityContext'
 import { useWindowStacking } from './hooks/useWindowStacking'
 
 // Global scroll lock - prevent all page scrolling
@@ -176,10 +182,11 @@ function App() {
 
   return (
     <ToastProvider>
-      <WindowProvider>
-        <WindowInitializer />
-        <MarketplaceProvider>
-          <OrangeGameProvider>
+      <KeyboardPriorityProvider>
+        <WindowProvider>
+          <WindowInitializer />
+          <MarketplaceProvider>
+            <OrangeGameProvider>
             {/* Background music - starts after first user interaction */}
             <BackgroundMusic />
             <a href="#main-content" className="skip-link">Skip to main content</a>
@@ -196,21 +203,38 @@ function App() {
             <TangGangWindow />
             <Routes>
               <Route path="/" element={null} />
-              <Route path="/admin-enable" element={<AdminPanel />} />
+              <Route 
+                path="/admin-enable" 
+                element={
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <AdminPanel />
+                  </Suspense>
+                } 
+              />
+              <Route 
+                path="/dev/qa" 
+                element={
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <QAPage />
+                  </Suspense>
+                } 
+              />
             </Routes>
             <MarketplaceWindow />
             <SideStack />
             {wojakCreatorOpen && <WojakCreator onClose={() => setWojakCreatorOpen(false)} />}
             {paintOpen && <PaintWindow onClose={() => setPaintOpen(false)} />}
             <NotifyPopup isOpen={notifyOpen} onClose={() => setNotifyOpen(false)} />
+            <PerformanceDebug />
           </main>
             <Taskbar 
               onOpenWojakCreator={() => setWojakCreatorOpen(true)} 
               wojakCreatorOpen={wojakCreatorOpen}
             />
-          </OrangeGameProvider>
-        </MarketplaceProvider>
-      </WindowProvider>
+            </OrangeGameProvider>
+          </MarketplaceProvider>
+        </WindowProvider>
+      </KeyboardPriorityProvider>
     </ToastProvider>
   )
 }

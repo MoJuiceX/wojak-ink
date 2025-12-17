@@ -10,7 +10,9 @@ export default function TangGangWindow() {
       style={{ 
         left: '860px', // Positioned next to README.TXT (20px + 820px + 20px gap)
         top: '20px',
-        width: '400px',
+        width: 'var(--window-size-tanggang)',
+        maxWidth: 'var(--window-max-width)',
+        minWidth: 'var(--window-min-width)',
         height: 'auto'
       }}
     >

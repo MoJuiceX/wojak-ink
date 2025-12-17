@@ -1,0 +1,412 @@
+.mobile-trait-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10001;
+  background: #c0c0c0;
+  border-top: 2px outset #ffffff;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
+  /* Native app-like smooth transitions - transform + opacity only (GPU-friendly) */
+  transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+  max-height: 70dvh; /* Use dynamic viewport height */
+  display: flex;
+  flex-direction: column;
+  /* Safe-area padding for notched devices */
+  padding-bottom: var(--safe-area-inset-bottom);
+  padding-left: var(--safe-area-inset-left);
+  padding-right: var(--safe-area-inset-right);
+  box-sizing: border-box;
+  /* Prevent scroll traps */
+  overscroll-behavior: contain;
+  /* GPU acceleration for smooth animations */
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  opacity: 1;
+}
+
+/* Collapsed state height - matches CSS variable for consistency */
+.mobile-trait-sheet.collapsed {
+  height: var(--mobile-sheet-collapsed-height, calc(140px + var(--safe-area-inset-bottom)));
+  opacity: 1;
+}
+
+.mobile-trait-sheet.expanded {
+  max-height: 70dvh; /* Use dynamic viewport height */
+  opacity: 1;
+}
+
+/* Draggable Handle - More prominent visual */
+.sheet-handle {
+  width: 100%;
+  padding: 12px 0;
+  cursor: grab;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  touch-action: none;
+  user-select: none;
+  background: #c0c0c0;
+  border-bottom: 1px inset #808080;
+  /* Haptic feedback - opacity only */
+  transition: opacity 0.1s ease;
+}
+
+.sheet-handle:active {
+  cursor: grabbing;
+  opacity: 0.7;
+}
+
+.sheet-handle:focus,
+.sheet-handle:focus-visible {
+  outline: var(--focus-outline-style-dotted);
+  outline-offset: var(--focus-outline-offset-dotted);
+  background-color: var(--focus-bg-highlight);
+}
+
+.handle-bar {
+  width: 48px;
+  height: 5px;
+  background: #808080;
+  border-radius: 3px;
+  /* Subtle shadow for depth */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Collapsed State */
+.sheet-collapsed {
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.primary-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.primary-button {
+  padding: var(--spacing-md) var(--spacing-sm);
+  border: 2px outset #c0c0c0;
+  background: #c0c0c0;
+  color: #000000;
+  font-family: 'MS Sans Serif', sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-height: 60px; /* Already above 44px thumb target */
+  min-width: 44px; /* Ensure thumb-friendly width */
+  justify-content: center;
+  touch-action: manipulation; /* Remove 300ms tap delay */
+  /* Haptic feedback - transform scale + opacity only */
+  transition: transform 0.1s ease, opacity 0.1s ease;
+  will-change: transform, opacity;
+}
+
+.primary-button:hover:not(:disabled) {
+  background: #d4d0c8;
+}
+
+.primary-button:active:not(:disabled) {
+  border-style: inset;
+  background: #a0a0a0;
+  /* Haptic feedback - scale down slightly + opacity */
+  transform: scale(0.95);
+  opacity: 0.9;
+}
+
+.primary-button:focus-visible {
+  outline: var(--focus-outline-width) solid var(--focus-outline-color);
+  outline-offset: var(--focus-outline-offset);
+  background-color: var(--focus-bg-highlight-strong);
+}
+
+/* Action button variants */
+.primary-button-traits {
+  background: #0080ff;
+  color: #ffffff;
+  border-color: #004080;
+}
+
+.primary-button-traits:hover:not(:disabled) {
+  background: #0090ff;
+}
+
+.primary-button-random {
+  background: #c0c0c0;
+  color: #000000;
+}
+
+.primary-button-random:hover:not(:disabled) {
+  background: #d4d0c8;
+}
+
+.primary-button-save {
+  background: #008000;
+  color: #ffffff;
+  border-color: #004000;
+}
+
+.primary-button-save:hover:not(:disabled) {
+  background: #009000;
+}
+
+.primary-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button-label {
+  font-size: 11px;
+}
+
+.button-badge {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.trait-summary {
+  padding: var(--spacing-sm);
+  background: #f0f0f0;
+  border: 1px inset #c0c0c0;
+  font-size: 10px;
+}
+
+.summary-label {
+  font-weight: bold;
+  margin-bottom: 4px;
+  color: #000000;
+}
+
+.summary-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.summary-item {
+  color: #404040;
+  font-size: 9px;
+}
+
+.summary-more {
+  color: #808080;
+  font-style: italic;
+  margin-top: 4px;
+}
+
+.expand-button {
+  width: 100%;
+  padding: var(--spacing-md);
+  border: 2px outset #c0c0c0;
+  background: #c0c0c0;
+  color: #000000;
+  font-family: 'MS Sans Serif', sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  touch-action: manipulation; /* Remove 300ms tap delay */
+  /* Haptic feedback - transform scale + opacity only */
+  transition: transform 0.1s ease, opacity 0.1s ease;
+  will-change: transform, opacity;
+}
+
+.expand-button:hover {
+  background: #d4d0c8;
+}
+
+.expand-button:active {
+  border-style: inset;
+  background: #a0a0a0;
+  /* Haptic feedback - scale down slightly + opacity */
+  transform: scale(0.97);
+  opacity: 0.9;
+}
+
+.expand-button:focus-visible {
+  outline: var(--focus-outline-width) solid var(--focus-outline-color);
+  outline-offset: var(--focus-outline-offset);
+  background-color: var(--focus-bg-highlight);
+}
+
+/* Export Controls in Bottom Sheet */
+.export-controls-mobile {
+  padding: var(--spacing-sm) 0;
+  border-top: 1px inset #c0c0c0;
+  margin-top: var(--spacing-xs);
+}
+
+.export-controls-mobile-expanded {
+  padding: var(--spacing-md);
+  border-top: 1px inset #c0c0c0;
+  background: #f0f0f0;
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+/* Ensure export buttons are thumb-friendly on mobile */
+.export-controls-mobile button,
+.export-controls-mobile-expanded button {
+  min-height: 44px;
+  min-width: 44px;
+  touch-action: manipulation;
+}
+
+/* Mobile export controls - stack buttons vertically for better thumb access */
+.export-controls-mobile .field-row,
+.export-controls-mobile-expanded .field-row {
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.export-controls-mobile .field-row > *,
+.export-controls-mobile-expanded .field-row > * {
+  width: 100%;
+}
+
+/* Expanded State */
+.sheet-expanded {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 70dvh; /* Use dynamic viewport height */
+  overflow: hidden;
+}
+
+.sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  border-bottom: 1px inset #808080;
+  background: #c0c0c0;
+  flex-shrink: 0;
+  cursor: pointer;
+  /* Haptic feedback - opacity only */
+  transition: opacity 0.1s ease;
+  touch-action: manipulation;
+}
+
+.sheet-header:active {
+  opacity: 0.8;
+}
+
+.sheet-header:focus,
+.sheet-header:focus-visible {
+  outline: var(--focus-outline-style-dotted);
+  outline-offset: var(--focus-outline-offset-dotted);
+  background-color: var(--focus-bg-highlight);
+}
+
+.sheet-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: bold;
+  color: #000000;
+  font-family: 'MS Sans Serif', sans-serif;
+}
+
+.close-button {
+  width: 44px; /* Thumb-friendly touch target */
+  height: 44px; /* Thumb-friendly touch target */
+  min-width: 44px;
+  min-height: 44px;
+  border: 2px outset #c0c0c0;
+  background: #c0c0c0;
+  color: #000000;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+  touch-action: manipulation; /* Remove 300ms tap delay */
+  /* Haptic feedback - transform scale + opacity only */
+  transition: transform 0.1s ease, opacity 0.1s ease;
+  will-change: transform, opacity;
+}
+
+.close-button:hover {
+  background: #d4d0c8;
+}
+
+.close-button:active {
+  border-style: inset;
+  background: #a0a0a0;
+  /* Haptic feedback - scale down slightly + opacity */
+  transform: scale(0.9);
+  opacity: 0.8;
+}
+
+.close-button:focus-visible {
+  outline: var(--focus-outline-width) solid var(--focus-outline-color);
+  outline-offset: var(--focus-outline-offset);
+  background-color: var(--focus-bg-highlight);
+}
+
+.sheet-search {
+  padding: var(--spacing-md);
+  border-bottom: 1px inset #808080;
+  background: #f0f0f0;
+  flex-shrink: 0;
+}
+
+.search-input {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 2px inset #c0c0c0;
+  background: #ffffff;
+  color: #000000;
+  font-family: 'MS Sans Serif', sans-serif;
+  font-size: 12px;
+  box-sizing: border-box;
+}
+
+.search-input:focus,
+.search-input:focus-visible {
+  outline: var(--focus-outline-width) solid var(--focus-outline-color);
+  outline-offset: var(--focus-outline-offset);
+  background-color: var(--focus-bg-highlight);
+}
+
+.sheet-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--spacing-md);
+  background: #f0f0f0;
+}
+
+.trait-item {
+  margin-bottom: var(--spacing-md);
+}
+
+.no-results {
+  padding: var(--spacing-xl);
+  text-align: center;
+  color: #808080;
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* Mobile-specific adjustments */
+@media (min-width: 641px) {
+  .mobile-trait-sheet {
+    display: none;
+  }
+}
+
+/* Ensure scrolling works in expanded state */
+.sheet-content.scroll-allowed {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+

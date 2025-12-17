@@ -1,21 +1,26 @@
 import React from 'react'
 
-export default function Select({ 
+const Select = React.forwardRef(({ 
   value, 
   onChange, 
   onInput,
   onKeyDown,
+  onFocus,
+  onBlur,
   options = [], 
   disabled = false,
   className = '',
   ...props 
-}) {
+}, ref) => {
   return (
     <select
+      ref={ref}
       value={value}
       onChange={onChange}
       onInput={onInput}
       onKeyDown={onKeyDown}
+      onFocus={onFocus}
+      onBlur={onBlur}
       disabled={disabled}
       className={className}
       style={{
@@ -36,5 +41,9 @@ export default function Select({
       ))}
     </select>
   )
-}
+})
+
+Select.displayName = 'Select'
+
+export default Select
 

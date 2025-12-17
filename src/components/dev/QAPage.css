@@ -1,0 +1,510 @@
+.qa-page {
+  min-height: 100dvh; /* Use dynamic viewport height */
+  width: 100vw;
+  max-width: 100vw; /* Prevent horizontal overflow */
+  background: #c0c0c0;
+  padding: 20px;
+  font-family: 'MS Sans Serif', sans-serif;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+  z-index: 10000;
+  box-sizing: border-box;
+}
+
+.qa-grid-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 255, 0.1) 1px, transparent 1px);
+  background-size: var(--grid-size, 8px) var(--grid-size, 8px);
+  background-position: 0 0;
+}
+
+.qa-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 2px outset #c0c0c0;
+  padding: 20px;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.qa-header {
+  border-bottom: 2px solid #c0c0c0;
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+
+.qa-header h1 {
+  margin: 0 0 12px 0;
+  font-size: 24px;
+  font-weight: bold;
+  color: #000000;
+}
+
+.qa-instructions {
+  margin: 0;
+  color: #404040;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.qa-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.qa-section {
+  border: 1px solid #c0c0c0;
+  padding: 16px;
+  background: #f0f0f0;
+}
+
+.qa-section h2 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: bold;
+  color: #000000;
+}
+
+.qa-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.qa-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  background: #ffffff;
+  border: 1px inset #c0c0c0;
+}
+
+.qa-label {
+  font-size: 12px;
+  color: #808080;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.qa-value {
+  font-size: 18px;
+  font-weight: bold;
+  color: #000000;
+  font-family: 'Courier New', monospace;
+}
+
+.qa-value-small {
+  font-size: 11px;
+  color: #000000;
+  font-family: 'Courier New', monospace;
+  word-break: break-all;
+}
+
+.qa-device-badge {
+  display: inline-block;
+  padding: 8px 16px;
+  font-size: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
+  border: 2px solid;
+  margin: 8px 0;
+}
+
+.qa-device-badge[data-device="mobile"] {
+  background: #ffcccc;
+  border-color: #ff0000;
+  color: #800000;
+}
+
+.qa-device-badge[data-device="tablet"] {
+  background: #ffffcc;
+  border-color: #ffaa00;
+  color: #804000;
+}
+
+.qa-device-badge[data-device="desktop"] {
+  background: #ccffcc;
+  border-color: #00aa00;
+  color: #004000;
+}
+
+.qa-note {
+  margin: 8px 0 0 0;
+  font-size: 12px;
+  color: #606060;
+  font-style: italic;
+}
+
+.qa-route-display {
+  background: #ffffff;
+  border: 1px inset #c0c0c0;
+  padding: 12px;
+  margin: 8px 0;
+}
+
+.qa-route-display code {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  color: #000000;
+  background: #f0f0f0;
+  padding: 4px 8px;
+  border: 1px solid #c0c0c0;
+}
+
+.qa-grid-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.qa-button {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: bold;
+  border: 2px outset #c0c0c0;
+  background: #c0c0c0;
+  color: #000000;
+  cursor: pointer;
+  font-family: 'MS Sans Serif', sans-serif;
+}
+
+.qa-button:hover {
+  background: #d4d0c8;
+}
+
+.qa-button:active {
+  border-style: inset;
+  background: #a0a0a0;
+}
+
+.qa-button-active {
+  background: #0080ff;
+  color: #ffffff;
+  border-color: #004080;
+}
+
+.qa-button-active:hover {
+  background: #0090ff;
+}
+
+.qa-grid-size-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.qa-grid-size-selector label {
+  font-size: 14px;
+  font-weight: bold;
+  color: #000000;
+}
+
+.qa-grid-size-selector select {
+  padding: 4px 8px;
+  font-size: 14px;
+  border: 1px inset #c0c0c0;
+  background: #ffffff;
+  font-family: 'MS Sans Serif', sans-serif;
+  cursor: pointer;
+}
+
+.qa-grid-size-selector select:focus {
+  outline: 1px dotted #000000;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+/* QA Checklist Styles */
+.qa-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.qa-checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: #f0f0f0;
+  border: 1px solid #c0c0c0;
+  border-radius: 2px;
+}
+
+.qa-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.qa-checklist-item label {
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Issues Log Styles */
+.qa-issues-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.qa-issues-stats {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.qa-stat {
+  padding: 4px 12px;
+  border-radius: 2px;
+  font-size: 12px;
+  font-weight: bold;
+  border: 1px solid #c0c0c0;
+}
+
+.qa-stat-must-fix {
+  background: #ffcccc;
+  color: #cc0000;
+}
+
+.qa-stat-acceptable {
+  background: #ffffcc;
+  color: #666600;
+}
+
+.qa-stat-fixed {
+  background: #ccffcc;
+  color: #006600;
+}
+
+.qa-add-issue {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f8f8f8;
+  border: 1px solid #c0c0c0;
+  border-radius: 2px;
+}
+
+.qa-add-issue h3 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.qa-issue-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.qa-issue-form-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.qa-textarea,
+.qa-input,
+.qa-select {
+  font-family: 'MS Sans Serif', sans-serif;
+  font-size: 12px;
+  padding: 4px 8px;
+  border: 1px inset #c0c0c0;
+  background: white;
+  border-radius: 0;
+}
+
+.qa-textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 60px;
+}
+
+.qa-input {
+  flex: 1;
+  min-width: 120px;
+}
+
+.qa-select {
+  min-width: 120px;
+}
+
+.qa-select-small {
+  font-family: 'MS Sans Serif', sans-serif;
+  font-size: 11px;
+  padding: 2px 6px;
+  border: 1px inset #c0c0c0;
+  background: white;
+  border-radius: 0;
+}
+
+.qa-button-small {
+  padding: 4px 12px;
+  font-size: 11px;
+}
+
+.qa-button-danger {
+  background: #ffcccc;
+  color: #cc0000;
+}
+
+.qa-button-danger:hover {
+  background: #ffaaaa;
+}
+
+.qa-button-danger:active {
+  background: #ff8888;
+}
+
+.qa-issues-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.qa-issue {
+  padding: 12px;
+  border: 1px solid #c0c0c0;
+  border-radius: 2px;
+  background: white;
+}
+
+.qa-issue-must-fix {
+  border-left: 4px solid #cc0000;
+  background: #fff5f5;
+}
+
+.qa-issue-acceptable {
+  border-left: 4px solid #666600;
+  background: #fffff5;
+}
+
+.qa-issue-fixed {
+  border-left: 4px solid #006600;
+  background: #f5fff5;
+  opacity: 0.7;
+}
+
+.qa-issue-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.qa-issue-viewport {
+  font-weight: bold;
+  font-size: 11px;
+  color: #666;
+  background: #e0e0e0;
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+
+.qa-issue-status {
+  font-size: 11px;
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid #c0c0c0;
+}
+
+.qa-issue-status-must-fix {
+  background: #ffcccc;
+  color: #cc0000;
+}
+
+.qa-issue-status-acceptable {
+  background: #ffffcc;
+  color: #666600;
+}
+
+.qa-issue-status-fixed {
+  background: #ccffcc;
+  color: #006600;
+}
+
+.qa-issue-description {
+  margin: 8px 0;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.qa-issue-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.qa-issue-timestamp {
+  font-size: 10px;
+  color: #999;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e0e0e0;
+}
+
+  .qa-page {
+    padding: 12px;
+  }
+
+  .qa-container {
+    padding: 12px;
+  }
+
+  .qa-header h1 {
+    font-size: 20px;
+  }
+
+  .qa-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .qa-grid-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .qa-grid-size-selector {
+    width: 100%;
+  }
+
+  .qa-grid-size-selector select {
+    flex: 1;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .qa-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+

@@ -165,10 +165,11 @@ export default function PaintWindow({ onClose }) {
       id="paint-window"
       title="MEMETIC_ENERGY_PAINT.EXE"
       style={{
-        width: '1000px',
-        height: '750px',
-        minWidth: '800px',
-        minHeight: '600px',
+          width: 'var(--window-width-xlarge)',
+          height: '750px',
+        maxWidth: 'var(--window-max-width)',
+        minWidth: 'var(--window-min-width)',
+        minHeight: 'var(--window-min-height)',
       }}
       onClose={onClose}
     >

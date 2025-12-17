@@ -92,7 +92,7 @@ export default function FakeOSMessage() {
         fontSize: '11px',
         color: '#000',
         opacity: isVisible ? 1 : 0,
-        transition: 'opacity 0.3s ease',
+        transition: 'opacity 0.2s ease',
         userSelect: 'none',
         textAlign: 'center',
         boxShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',

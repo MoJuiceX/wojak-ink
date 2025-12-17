@@ -21,13 +21,11 @@ export default function TreasureWindow({ isOpen = false, onClose }) {
 
   // Calculate centered position using CSS transform for perfect centering
   const centeredStyle = useMemo(() => {
-    const windowWidth = 500
-    const padding = 24
-    
     return {
-      width: `${windowWidth}px`,
-      maxWidth: `calc(100vw - ${padding * 2}px)`, // Ensure padding on both sides
-      maxHeight: `calc(100vh - ${padding * 2}px)`, // Ensure padding top and bottom
+      width: 'var(--window-size-treasure)',
+      maxWidth: 'var(--window-max-width)', // Use standardized max-width token
+      minWidth: 'var(--window-min-width)',
+      maxHeight: 'var(--window-max-height)', // Use standardized max-height token
       position: 'fixed', // Fixed positioning within viewport (not document flow)
       left: '50%', // Center horizontally
       top: '50%', // Center vertically
@@ -35,7 +33,7 @@ export default function TreasureWindow({ isOpen = false, onClose }) {
       bottom: 'auto',
       transform: 'translate(-50%, -50%)', // Perfect centering using transform
       // Ensure window doesn't cause scrollbars
-      overflow: 'visible',
+      overflow: 'hidden',
       // Ensure it's within desktop layer (z-index handled by Window component)
     }
   }, [isOpen]) // Recalculate when window opens (in case viewport changed)

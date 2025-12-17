@@ -427,7 +427,7 @@ function OfferFileModal({ nft, offerFile, onClose, onCopy }) {
           padding: '16px',
           width: '90%',
           maxWidth: 'min(600px, calc(100vw - 40px))',
-          maxHeight: '80vh',
+          maxHeight: '80dvh', /* Use dynamic viewport height for mobile */
           overflow: 'auto',
           boxShadow: '4px 4px 8px rgba(0,0,0,0.5)',
         }}
@@ -689,7 +689,11 @@ export default function MarketplaceWindow() {
     return (
       <Window
         title="MARKETPLACE"
-        style={{ width: '800px', maxWidth: 'calc(100vw - 40px)', left: '20px', top: '300px' }}
+        style={{ 
+          width: 'var(--window-width-large)', 
+          maxWidth: 'var(--window-max-width)',
+          minWidth: 'var(--window-min-width)'
+        }}
       >
         <div style={{ padding: '20px', textAlign: 'center' }}>
           <p style={{ fontSize: '12px' }}>Marketplace is currently disabled.</p>
@@ -752,7 +756,11 @@ export default function MarketplaceWindow() {
     <Window
       ref={windowRef}
       title="MARKETPLACE - P2P OFFERS"
-      style={{ width: '1200px', maxWidth: 'calc(100vw - 40px)', left: '20px', top: '600px' }}
+      style={{ 
+        width: 'var(--window-size-marketplace)', 
+        maxWidth: 'var(--window-max-width)',
+        minWidth: 'var(--window-min-width)'
+      }}
     >
       <div style={{ padding: '8px' }}>
         <div style={{ marginBottom: '16px' }}>

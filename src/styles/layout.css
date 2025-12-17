@@ -1,0 +1,236 @@
+/**
+ * Responsive Layout System
+ * 
+ * Breakpoints:
+ * - Mobile: <= 640px
+ * - Tablet: 641px - 1024px
+ * - Desktop: >= 1025px
+ * 
+ * All layout tokens are defined as CSS custom properties (variables)
+ * and automatically adjust based on viewport size.
+ */
+
+:root {
+  /* ============================================
+     BREAKPOINTS (for reference, use in media queries)
+     ============================================ */
+  --breakpoint-mobile-max: 640px;
+  --breakpoint-tablet-min: 641px;
+  --breakpoint-tablet-max: 1024px;
+  --breakpoint-desktop-min: 1025px;
+
+  /* ============================================
+     SPACING TOKENS
+     ============================================ */
+  
+  /* Base spacing unit (4px) */
+  --spacing-unit: 4px;
+  
+  /* Spacing scale - Mobile (<= 640px) */
+  --spacing-xs: calc(var(--spacing-unit) * 1);    /* 4px */
+  --spacing-sm: calc(var(--spacing-unit) * 2);    /* 8px */
+  --spacing-md: calc(var(--spacing-unit) * 3);    /* 12px */
+  --spacing-lg: calc(var(--spacing-unit) * 4);    /* 16px */
+  --spacing-xl: calc(var(--spacing-unit) * 5);    /* 20px */
+  --spacing-2xl: calc(var(--spacing-unit) * 6);   /* 24px */
+  --spacing-3xl: calc(var(--spacing-unit) * 8);   /* 32px */
+  --spacing-4xl: calc(var(--spacing-unit) * 10);  /* 40px */
+  --spacing-5xl: calc(var(--spacing-unit) * 12);  /* 48px */
+
+  /* ============================================
+     LAYOUT DIMENSIONS
+     ============================================ */
+  
+  /* Header/Title bar height */
+  --header-height: 30px;
+  
+  /* Bottom bar (taskbar) height */
+  --taskbar-height: 30px;
+  
+  /* Window title bar height (98.css default) */
+  --window-title-bar-height: 30px;
+  
+  /* Desktop padding (space around content) */
+  --desktop-padding: var(--spacing-lg); /* 16px */
+  
+  /* Window minimum dimensions */
+  --window-min-width: 200px;
+  --window-min-height: 100px;
+  
+  /* Window maximum dimensions (with padding) */
+  --window-max-width: calc(100vw - var(--desktop-padding) * 2);
+  --window-max-width-wide: min(1400px, calc(100vw - var(--desktop-padding) * 2)); /* Max width for wide monitors */
+  --window-max-height: calc(100dvh - var(--taskbar-height) - var(--desktop-padding) * 2); /* Use dynamic viewport height */
+
+  /* ============================================
+     PANEL WIDTHS
+     ============================================ */
+  
+  /* Side panels (e.g., sidebar, start menu) */
+  --panel-sidebar-width: 200px;
+  --panel-start-menu-width: 200px;
+  
+  /* Window default widths */
+  --window-width-small: 400px;
+  --window-width-medium: 600px;
+  --window-width-large: 800px;
+  --window-width-xlarge: 1200px;
+  
+  /* Standard window sizes for common components */
+  --window-size-readme: 820px;
+  --window-size-mint-info: 1200px;
+  --window-size-faq: 1200px;
+  --window-size-gallery: 1200px;
+  --window-size-marketplace: 1200px;
+  --window-size-treasure: 500px;
+  --window-size-tanggang: 400px;
+
+  /* ============================================
+     BORDER & SHADOW
+     ============================================ */
+  
+  --border-width: 2px;
+  --border-radius: 0; /* Windows 98 style - no rounded corners */
+  --shadow-size: 2px;
+
+  /* ============================================
+     FOCUS INDICATORS (Keyboard Navigation)
+     ============================================ */
+  
+  /* Focus outline color - Windows 98 blue */
+  --focus-outline-color: #0080ff;
+  --focus-outline-color-dark: #000080;
+  
+  /* Focus outline width */
+  --focus-outline-width: 2px;
+  --focus-outline-offset: 2px;
+  
+  /* Focus outline style for dotted borders (Windows 98 style) */
+  --focus-outline-style-dotted: 1px dotted #000000;
+  --focus-outline-offset-dotted: -2px;
+  
+  /* Focus background highlight (for selected items) */
+  --focus-bg-highlight: rgba(0, 128, 255, 0.1);
+  --focus-bg-highlight-strong: rgba(0, 128, 255, 0.2);
+}
+
+/* ============================================
+   TABLET BREAKPOINT (641px - 1024px)
+   ============================================ */
+@media (min-width: 641px) and (max-width: 1024px) {
+  :root {
+    /* Spacing - slightly larger on tablet */
+    --spacing-xs: calc(var(--spacing-unit) * 1.5);  /* 6px */
+    --spacing-sm: calc(var(--spacing-unit) * 2.5);  /* 10px */
+    --spacing-md: calc(var(--spacing-unit) * 3.5);  /* 14px */
+    --spacing-lg: calc(var(--spacing-unit) * 5);    /* 20px */
+    --spacing-xl: calc(var(--spacing-unit) * 6);    /* 24px */
+    --spacing-2xl: calc(var(--spacing-unit) * 8);   /* 32px */
+    --spacing-3xl: calc(var(--spacing-unit) * 10);  /* 40px */
+    --spacing-4xl: calc(var(--spacing-unit) * 12);  /* 48px */
+    --spacing-5xl: calc(var(--spacing-unit) * 16);  /* 64px */
+
+    /* Layout dimensions */
+    --header-height: 36px;
+    --taskbar-height: 40px;
+    --window-title-bar-height: 36px;
+    --desktop-padding: var(--spacing-xl); /* 24px */
+    
+    /* Panel widths */
+    --panel-sidebar-width: 250px;
+    --panel-start-menu-width: 250px;
+    
+    /* Window widths */
+    --window-width-small: 450px;
+    --window-width-medium: 700px;
+    --window-width-large: 900px;
+    --window-width-xlarge: 1200px;
+  }
+}
+
+/* ============================================
+   DESKTOP BREAKPOINT (>= 1025px)
+   ============================================ */
+@media (min-width: 1025px) {
+  :root {
+    /* Spacing - full desktop spacing */
+    --spacing-xs: calc(var(--spacing-unit) * 2);    /* 8px */
+    --spacing-sm: calc(var(--spacing-unit) * 3);    /* 12px */
+    --spacing-md: calc(var(--spacing-unit) * 4);     /* 16px */
+    --spacing-lg: calc(var(--spacing-unit) * 5);     /* 20px */
+    --spacing-xl: calc(var(--spacing-unit) * 6);     /* 24px */
+    --spacing-2xl: calc(var(--spacing-unit) * 8);    /* 32px */
+    --spacing-3xl: calc(var(--spacing-unit) * 10);   /* 40px */
+    --spacing-4xl: calc(var(--spacing-unit) * 12);    /* 48px */
+    --spacing-5xl: calc(var(--spacing-unit) * 16);    /* 64px */
+
+    /* Layout dimensions */
+    --header-height: 30px;
+    --taskbar-height: 30px;
+    --window-title-bar-height: 30px;
+    --desktop-padding: var(--spacing-xl); /* 24px */
+    
+  /* Panel widths */
+  --panel-sidebar-width: 200px;
+  --panel-start-menu-width: 200px;
+  
+  /* Wojak Creator panel widths (desktop) */
+  --wojak-controls-panel-width: 400px;
+  --wojak-controls-panel-max-width: 450px;
+  --wojak-preview-panel-width: 500px;
+  --wojak-preview-panel-max-width: 600px;
+    
+    /* Window widths */
+    --window-width-small: 400px;
+    --window-width-medium: 600px;
+    --window-width-large: 800px;
+    --window-width-xlarge: 1200px;
+  }
+}
+
+/* ============================================
+   MOBILE BREAKPOINT (<= 640px)
+   ============================================ */
+@media (max-width: 640px) {
+  :root {
+    /* Spacing - compact for mobile */
+    --spacing-xs: calc(var(--spacing-unit) * 1);    /* 4px */
+    --spacing-sm: calc(var(--spacing-unit) * 1.5);  /* 6px */
+    --spacing-md: calc(var(--spacing-unit) * 2);    /* 8px */
+    --spacing-lg: calc(var(--spacing-unit) * 2.5);  /* 10px */
+    --spacing-xl: calc(var(--spacing-unit) * 3);    /* 12px */
+    --spacing-2xl: calc(var(--spacing-unit) * 4);   /* 16px */
+    --spacing-3xl: calc(var(--spacing-unit) * 5);   /* 20px */
+    --spacing-4xl: calc(var(--spacing-unit) * 6);   /* 24px */
+    --spacing-5xl: calc(var(--spacing-unit) * 8);   /* 32px */
+
+    /* Layout dimensions */
+    --header-height: 36px;
+    --taskbar-height: 40px;
+    --window-title-bar-height: 36px;
+    --desktop-padding: var(--spacing-md); /* 8px */
+    
+    /* Panel widths - full width on mobile */
+    --panel-sidebar-width: 100vw;
+    --panel-start-menu-width: 100vw;
+    
+  /* Window widths - full width on mobile */
+  --window-width-small: calc(100vw - var(--desktop-padding) * 2);
+  --window-width-medium: calc(100vw - var(--desktop-padding) * 2);
+  --window-width-large: calc(100vw - var(--desktop-padding) * 2);
+  --window-width-xlarge: calc(100vw - var(--desktop-padding) * 2);
+  
+  /* Mobile Bottom Sheet - Collapsed Height
+   * Calculated from:
+   * - .sheet-collapsed padding top: var(--spacing-md) = 8px
+   * - .primary-buttons (3 buttons, min-height 60px each): 60px
+   * - Gap between sections: var(--spacing-md) = 8px
+   * - .export-controls-mobile: padding 6px + button 44px + padding 6px = ~56px
+   * - .sheet-collapsed padding bottom: var(--spacing-md) = 8px
+   * - Sheet padding-bottom (safe area): var(--safe-area-inset-bottom)
+   * Total: 8 + 60 + 8 + 56 + 8 = 140px + safe-area
+   */
+  --mobile-sheet-collapsed-height: calc(140px + var(--safe-area-inset-bottom));
+  }
+}
+

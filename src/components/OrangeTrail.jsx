@@ -1683,9 +1683,11 @@ export default function OrangeTrail() {
             {/* Fill bar - visual fill from 0% to 100% based on juice count */}
             <div style={{
               width: '100%',
-              height: `${juicePercentage}%`,
+              height: '100%',
               backgroundColor: '#ff8c00', // Orange juice color
-              transition: 'height 0.2s ease',
+              transform: `scaleY(${juicePercentage / 100})`,
+              transformOrigin: 'bottom',
+              transition: 'transform 0.2s ease',
               minHeight: juicePercentage > 0 ? '2px' : '0',
               borderTop: juicePercentage > 0 ? '1px solid #ffa500' : 'none', // Highlight at top
             }} />

@@ -10,7 +10,7 @@ export default function Toast({ message, type = 'info', duration = 3000, onClose
         setIsVisible(false)
         setTimeout(() => {
           if (onClose) onClose()
-        }, 300) // Wait for fade out animation
+        }, 200) // Wait for fade out animation
       }, duration)
 
       return () => clearTimeout(timer)
@@ -58,7 +58,7 @@ export default function Toast({ message, type = 'info', duration = 3000, onClose
         boxShadow: '4px 4px 8px rgba(0,0,0,0.5)',
         border: '2px outset #c0c0c0',
         opacity: isVisible ? 1 : 0,
-        transition: 'opacity 0.3s ease',
+        transition: 'opacity 0.2s ease',
         maxWidth: '90%',
         textAlign: 'center',
       }}

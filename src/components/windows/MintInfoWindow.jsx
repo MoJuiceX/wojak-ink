@@ -5,7 +5,11 @@ export default function MintInfoWindow({ onNotifyClick }) {
   return (
     <Window
       title="MINT_INFO.EXE"
-      style={{ width: '1200px', maxWidth: 'calc(100vw - 40px)' }}
+      style={{ 
+        width: 'var(--window-size-mint-info)', 
+        maxWidth: 'var(--window-max-width)',
+        minWidth: 'var(--window-min-width)'
+      }}
     >
       <p>
         <b>Launch Phases</b>

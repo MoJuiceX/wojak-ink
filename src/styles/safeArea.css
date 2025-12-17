@@ -1,0 +1,104 @@
+/**
+ * Safe Area CSS Utilities
+ * Provides CSS variables and utility classes for safe-area insets
+ */
+
+:root {
+  /* Safe-area inset variables (fallback to 0 if not supported) */
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
+
+  /* Combined safe-area utilities */
+  --safe-area-inset-vertical: calc(var(--safe-area-inset-top) + var(--safe-area-inset-bottom));
+  --safe-area-inset-horizontal: calc(var(--safe-area-inset-right) + var(--safe-area-inset-left));
+}
+
+/* Utility class for elements that need safe-area padding */
+.safe-area-padding {
+  padding-top: var(--safe-area-inset-top);
+  padding-right: var(--safe-area-inset-right);
+  padding-bottom: var(--safe-area-inset-bottom);
+  padding-left: var(--safe-area-inset-left);
+}
+
+/* Utility class for bottom elements (like taskbar, bottom sheets) */
+.safe-area-bottom {
+  padding-bottom: calc(var(--safe-area-inset-bottom) + var(--spacing-md, 12px));
+  padding-left: var(--safe-area-inset-left);
+  padding-right: var(--safe-area-inset-right);
+}
+
+/* Utility class for top elements (like headers) */
+.safe-area-top {
+  padding-top: calc(var(--safe-area-inset-top) + var(--spacing-md, 12px));
+  padding-left: var(--safe-area-inset-left);
+  padding-right: var(--safe-area-inset-right);
+}
+
+/* Utility class for horizontal safe-area */
+.safe-area-horizontal {
+  padding-left: var(--safe-area-inset-left);
+  padding-right: var(--safe-area-inset-right);
+}
+
+/* Utility class for vertical safe-area */
+.safe-area-vertical {
+  padding-top: var(--safe-area-inset-top);
+  padding-bottom: var(--safe-area-inset-bottom);
+}
+
+/* Prevent horizontal overflow on mobile (especially iOS Safari) */
+html,
+body,
+#root {
+  overflow-x: hidden;
+  max-width: 100vw;
+  /* Prevent iOS Safari from allowing horizontal scroll */
+  position: relative;
+  width: 100%;
+}
+
+/* Enhanced overflow prevention for iOS Safari */
+@media (max-width: 640px) {
+  html,
+  body,
+  #root {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    /* Prevent iOS Safari rubber-band scrolling */
+    overscroll-behavior-x: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  * {
+    max-width: 100%;
+    /* Prevent elements from causing horizontal overflow */
+    box-sizing: border-box;
+  }
+
+  /* Ensure images don't cause overflow */
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* Prevent tables and pre elements from causing overflow */
+  table,
+  pre {
+    max-width: 100%;
+    overflow-x: auto;
+    display: block;
+  }
+
+  /* Ensure all containers respect viewport width */
+  .window,
+  .window-body,
+  .desktop {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+}
+

@@ -34,6 +34,25 @@ export function WindowProvider({ children }) {
       return
     }
 
+    // Mobile-only: Auto-close other windows when a new one opens
+    const isMobile = window.innerWidth <= 640
+    if (isMobile) {
+      setWindows(prev => {
+        const next = new Map(prev)
+        // Minimize all other windows (mobile: only one window visible at a time)
+        prev.forEach((win, id) => {
+          if (id !== windowId && !win.isMinimized) {
+            setMinimizedWindows(prevMin => {
+              const nextMin = new Set(prevMin)
+              nextMin.add(id)
+              return nextMin
+            })
+          }
+        })
+        return next
+      })
+    }
+
     setWindows(prev => {
       // Check for duplicate window IDs
       const existingWindow = prev.get(windowId)
@@ -73,10 +92,14 @@ export function WindowProvider({ children }) {
             }
           }
           
+          // Detect mobile viewport (<= 640px)
+          const isMobile = window.innerWidth <= 640
+          
           position = getCenteredPosition({ 
             width: windowWidth,
             height: windowHeight,
-            padding: 24 // Explicit padding for desktop OS feel
+            padding: 24, // Explicit padding for desktop OS feel
+            isMobile: isMobile
           })
           
           // Don't apply position to DOM here during registration - let the Window component's effect handle it
@@ -174,6 +197,22 @@ export function WindowProvider({ children }) {
    * @param {string} windowId - Unique identifier for the window to bring to front
    */
   const bringToFront = useCallback((windowId) => {
+    // Mobile-only: Auto-minimize other windows when bringing one to front
+    const isMobile = window.innerWidth <= 640
+    if (isMobile) {
+      setWindows(prev => {
+        prev.forEach((win, id) => {
+          if (id !== windowId && !win.isMinimized) {
+            setMinimizedWindows(prevMin => {
+              const nextMin = new Set(prevMin)
+              nextMin.add(id)
+              return nextMin
+            })
+          }
+        })
+        return prev
+      })
+    }
     setWindows(prev => {
       const next = new Map(prev)
       const window = next.get(windowId)
@@ -187,12 +226,13 @@ export function WindowProvider({ children }) {
             const { getCenteredPosition, getDefaultWindowSize } = require('../utils/windowPosition')
             const defaultSize = getDefaultWindowSize(windowId)
             
-            // Try to get actual rendered size from DOM element
+            // Batch all layout reads first (prevent layout thrashing)
             const windowElement = document.getElementById(windowId)
             let windowWidth = defaultSize.width
             let windowHeight = defaultSize.height
             
             if (windowElement) {
+              // Read layout properties (batch all reads)
               const rect = windowElement.getBoundingClientRect()
               if (rect.width > 0) windowWidth = rect.width
               if (rect.height > 0) windowHeight = rect.height
@@ -254,7 +294,7 @@ export function WindowProvider({ children }) {
       return next
     })
     setActiveWindowId(windowId)
-  }, [hasUserMoved])
+  }, [hasUserMoved, setMinimizedWindows])
 
   /**
    * Restore a minimized window (show it and remove from minimized set).
@@ -264,6 +304,22 @@ export function WindowProvider({ children }) {
    * @param {string} windowId - Unique identifier for the window to restore
    */
   const restoreWindow = useCallback((windowId) => {
+    // Mobile-only: Auto-minimize other windows when restoring one
+    const isMobile = window.innerWidth <= 640
+    if (isMobile) {
+      setWindows(prev => {
+        prev.forEach((win, id) => {
+          if (id !== windowId && !win.isMinimized) {
+            setMinimizedWindows(prevMin => {
+              const nextMin = new Set(prevMin)
+              nextMin.add(id)
+              return nextMin
+            })
+          }
+        })
+        return prev
+      })
+    }
     if (!windowId) {
       if (process.env.NODE_ENV === 'development') {
         console.warn('[WindowContext] restoreWindow: Invalid windowId provided', windowId)
@@ -315,10 +371,14 @@ export function WindowProvider({ children }) {
             }
           }
           
+          // Detect mobile viewport (<= 640px)
+          const isMobile = window.innerWidth <= 640
+          
           const centeredPos = getCenteredPosition({
             width: windowWidth,
             height: windowHeight,
-            padding: 24 // Explicit padding for desktop OS feel
+            padding: 24, // Explicit padding for desktop OS feel
+            isMobile: isMobile
           })
           
           // Apply position to DOM element using requestAnimationFrame to batch updates

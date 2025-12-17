@@ -1,0 +1,44 @@
+.performance-debug-toggle {
+  position: fixed;
+  bottom: 60px;
+  right: 10px;
+  width: 60px;
+  height: 30px;
+  border: 2px outset #c0c0c0;
+  background: #c0c0c0;
+  color: #000000;
+  font-family: 'MS Sans Serif', sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 999998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  will-change: transform;
+}
+
+.performance-debug-toggle:hover {
+  background: #d4d0c8;
+  transform: translateY(-1px);
+}
+
+.performance-debug-toggle:active {
+  border-style: inset;
+  background: #a0a0a0;
+  transform: scale(0.98);
+}
+
+/* Hide on mobile to avoid clutter */
+@media (max-width: 640px) {
+  .performance-debug-toggle {
+    bottom: 80px; /* Above taskbar + safe area */
+    right: 10px;
+    width: 50px;
+    height: 28px;
+    font-size: 10px;
+  }
+}
+

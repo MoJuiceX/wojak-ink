@@ -2,6 +2,8 @@ import { useDraggable } from '../../hooks/useDraggable'
 import { useState, useRef, useEffect } from 'react'
 import { useWindow } from '../../contexts/WindowContext'
 import { getWindowIcon } from '../../utils/windowIcons'
+import { getWindowSizeConstraints, clampWindowPosition } from '../../utils/windowPosition'
+import { useKeyboardHandler, KEYBOARD_PRIORITY } from '../../contexts/KeyboardPriorityContext'
 
 /**
  * Window component that provides a draggable, resizable window with minimize, maximize, and close functionality.
@@ -70,7 +72,19 @@ export default function Window({
     isWindowActive,
   } = useWindow()
   
-  const { windowRef, zIndex, bringToFront: bringToFrontDrag } = useDraggable(noStack)
+  // Detect mobile viewport
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 640)
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 640)
+    }
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  // Disable dragging on mobile
+  const { windowRef, zIndex, bringToFront: bringToFrontDrag } = useDraggable(noStack || isMobile)
   const [isVisible, setIsVisible] = useState(true)
   const savedPositionRef = useRef({ x: 0, y: 0 })
   const savedSizeRef = useRef({ width: '', height: '' })
@@ -240,8 +254,18 @@ export default function Window({
         return
       }
       
-      const rect = win.getBoundingClientRect()
-      updateWindowPosition(windowId, { x: rect.left, y: rect.top })
+      // Batch layout reads and defer writes to prevent layout thrashing
+      // Use requestAnimationFrame to batch with other DOM updates
+      requestAnimationFrame(() => {
+        const win2 = windowRef.current
+        if (!win2 || win2.classList.contains('dragging') || win2.style.transform !== '') {
+          return
+        }
+        
+        // Read layout (after batching with other reads)
+        const rect = win2.getBoundingClientRect()
+        updateWindowPosition(windowId, { x: rect.left, y: rect.top })
+      })
     })
 
     observer.observe(win, {
@@ -344,7 +368,7 @@ export default function Window({
         }
         maximizeWindow(windowId)
         win.style.width = 'calc(100vw - 40px)'
-        win.style.height = 'calc(100vh - 70px)' // Account for taskbar
+        win.style.height = 'calc(100dvh - var(--taskbar-height) - var(--safe-area-inset-bottom) - 40px)' // Use dynamic viewport height, account for taskbar and safe area
         win.style.left = '20px'
         win.style.top = '20px'
       }
@@ -355,26 +379,44 @@ export default function Window({
     }
   }
 
-  // Handle keyboard navigation
-  useEffect(() => {
+  // Handle keyboard navigation (priority 3: active window)
+  const handleWindowKeyboard = (e) => {
     if (!isActive) return
 
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && isActive) {
+    // Don't interfere with input fields
+    const target = e.target
+    if (
+      target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      target.isContentEditable ||
+      target.closest('input, textarea, [contenteditable="true"]')
+    ) {
+      // Allow normal input, but handle Esc
+      if (e.key === 'Escape') {
         handleClose()
+        e.preventDefault()
+        e.stopPropagation()
       }
+      return
     }
 
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isActive])
+    // Handle Escape to close window
+    if (e.key === 'Escape' && isActive) {
+      handleClose()
+      e.preventDefault()
+      e.stopPropagation()
+    }
+  }
+
+  useKeyboardHandler(KEYBOARD_PRIORITY.ACTIVE_WINDOW, windowId, handleWindowKeyboard, isActive)
 
   // Handle window resizing from bottom-right corner
+  // Disabled on mobile (mobile windows are fullscreen)
   const resizeHandleRef = useRef(null)
   useEffect(() => {
     const win = windowRef.current
     const handle = resizeHandleRef.current
-    if (!win || !handle || isMaximized || isMinimized) return
+    if (!win || !handle || isMaximized || isMinimized || isMobile) return
 
     let isResizing = false
     let startX = 0
@@ -390,6 +432,8 @@ export default function Window({
       e.stopPropagation()
       
       isResizing = true
+      
+      // Batch all layout reads first (prevent layout thrashing)
       const rect = win.getBoundingClientRect()
       startX = e.clientX
       startY = e.clientY
@@ -398,6 +442,7 @@ export default function Window({
       startLeft = rect.left
       startTop = rect.top
 
+      // All reads done - now set up event listeners (no DOM writes yet)
       document.addEventListener('mousemove', handleMouseMove)
       document.addEventListener('mouseup', handleMouseUp)
       bringToFront(windowId)
@@ -410,18 +455,55 @@ export default function Window({
       const deltaX = e.clientX - startX
       const deltaY = e.clientY - startY
 
-      const minWidth = parseInt(style.minWidth) || 300
-      const minHeight = parseInt(style.minHeight) || 200
-      const maxWidth = style.maxWidth ? parseInt(style.maxWidth) : window.innerWidth - 40
-      const maxHeight = style.maxHeight ? parseInt(style.maxHeight) : window.innerHeight - 70
+      // Get size constraints from layout tokens
+      const constraints = getWindowSizeConstraints({
+        minWidth: style.minWidth ? parseInt(style.minWidth) : undefined,
+        minHeight: style.minHeight ? parseInt(style.minHeight) : undefined,
+        maxWidth: style.maxWidth ? parseInt(style.maxWidth) : undefined,
+        maxHeight: style.maxHeight ? parseInt(style.maxHeight) : undefined,
+      })
 
-      let newWidth = Math.max(minWidth, Math.min(maxWidth, startWidth + deltaX))
-      let newHeight = Math.max(minHeight, Math.min(maxHeight, startHeight + deltaY))
+      let newWidth = Math.max(constraints.minWidth, Math.min(constraints.maxWidth, startWidth + deltaX))
+      let newHeight = Math.max(constraints.minHeight, Math.min(constraints.maxHeight, startHeight + deltaY))
 
-      win.style.width = `${newWidth}px`
-      win.style.height = `${newHeight}px`
-
-      updateWindowSize(windowId, { width: `${newWidth}px`, height: `${newHeight}px` })
+      // Batch all layout reads first (prevent layout thrashing)
+      const rect = win.getBoundingClientRect()
+      const isMobile = window.innerWidth <= 768
+      
+      // Calculate clamped position (no DOM writes yet)
+      let clampedX = rect.left
+      let clampedY = rect.top
+      if (!isMobile) {
+        const clamped = clampWindowPosition({
+          x: rect.left,
+          y: rect.top,
+          width: newWidth,
+          height: newHeight,
+          isMobile: false
+        })
+        clampedX = clamped.x
+        clampedY = clamped.y
+      }
+      
+      // Now batch all DOM writes together (after all reads are done)
+      // Use requestAnimationFrame to batch with other DOM updates
+      requestAnimationFrame(() => {
+        const win2 = windowRef.current
+        if (!win2) return
+        
+        // Apply size changes (GPU-friendly, no layout reflow)
+        win2.style.width = `${newWidth}px`
+        win2.style.height = `${newHeight}px`
+        
+        // Adjust position if needed (after size is set)
+        if (clampedX !== rect.left || clampedY !== rect.top) {
+          win2.style.left = `${clampedX}px`
+          win2.style.top = `${clampedY}px`
+          updateWindowPosition(windowId, { x: clampedX, y: clampedY })
+        }
+        
+        updateWindowSize(windowId, { width: `${newWidth}px`, height: `${newHeight}px` })
+      })
     }
 
     const handleMouseUp = () => {
@@ -457,8 +539,19 @@ export default function Window({
         ...style,
         zIndex: windowData?.zIndex || zIndex,
         display: isMinimized ? 'none' : 'block',
-        // Only set position: relative if not explicitly set in style prop (for fixed positioning support)
-        position: style?.position || 'relative',
+        // Mobile: force fullscreen behavior (position: relative, full width/height)
+        // Desktop: use style prop or default to relative
+        position: isMobile ? 'relative' : (style?.position || 'relative'),
+        // Mobile: force fullscreen dimensions (overridden by CSS, but ensures consistency)
+        ...(isMobile && !isMinimized ? {
+          width: '100vw',
+          maxWidth: '100vw',
+          height: '100dvh',
+          maxHeight: '100dvh',
+          left: '0',
+          top: '0',
+          margin: '0',
+        } : {}),
       }}
     >
       <div className="title-bar">
@@ -477,17 +570,22 @@ export default function Window({
           <span>{title}</span>
         </div>
         <div className="title-bar-controls">
-          <button 
-            aria-label={`Minimize ${title}`}
-            onClick={handleMinimize}
-            onMouseDown={(e) => e.stopPropagation()}
-          ></button>
-          <button 
-            aria-label={`Maximize ${title}`}
-            className={isMaximized ? 'maximized' : ''}
-            onClick={handleMaximize}
-            onMouseDown={(e) => e.stopPropagation()}
-          ></button>
+          {/* Mobile: Hide minimize/maximize buttons (only show close) */}
+          {!isMobile && (
+            <>
+              <button 
+                aria-label={`Minimize ${title}`}
+                onClick={handleMinimize}
+                onMouseDown={(e) => e.stopPropagation()}
+              ></button>
+              <button 
+                aria-label={`Maximize ${title}`}
+                className={isMaximized ? 'maximized' : ''}
+                onClick={handleMaximize}
+                onMouseDown={(e) => e.stopPropagation()}
+              ></button>
+            </>
+          )}
           <button
             aria-label={`Close ${title}`}
             onClick={handleClose}
@@ -498,7 +596,8 @@ export default function Window({
       {!isMinimized && (
         <>
           <div className={`window-body ${allowScroll ? 'scroll-allowed' : ''}`}>{children}</div>
-          {!isMaximized && (
+          {/* Resize handle - desktop only (mobile windows are fullscreen) */}
+          {!isMaximized && !isMobile && (
             <div
               ref={resizeHandleRef}
               className="window-resize-handle"

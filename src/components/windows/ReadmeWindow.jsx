@@ -144,18 +144,18 @@ function BannerComposite({ smashed, onReset }) {
           setNextOpacity(1) // Fade in next
           
           // After transition completes, commit next as current
-          transitionTimerRef.current = setTimeout(() => {
-            setCurrentStage(targetStage)
-            setNextStage(null)
-            setNextOpacity(0)
-            setIsTransitioning(false)
-            transitionTimerRef.current = null
-            
-            // Release cooldown after transition
-            setTimeout(() => {
-              transitionCooldownRef.current = false
-            }, 200) // 200ms cooldown after transition
-          }, 400) // 400ms crossfade duration (smoother)
+            transitionTimerRef.current = setTimeout(() => {
+              setCurrentStage(targetStage)
+              setNextStage(null)
+              setNextOpacity(0)
+              setIsTransitioning(false)
+              transitionTimerRef.current = null
+              
+              // Release cooldown after transition
+              setTimeout(() => {
+                transitionCooldownRef.current = false
+              }, 200) // 200ms cooldown after transition
+            }, 200) // 200ms crossfade duration
         })
       })
     }
@@ -212,7 +212,7 @@ function BannerComposite({ smashed, onReset }) {
                 setTimeout(() => {
                   transitionCooldownRef.current = false
                 }, 200)
-              }, 400) // 400ms crossfade duration
+              }, 200) // 200ms crossfade duration
             })
           })
         }
@@ -285,7 +285,7 @@ function BannerComposite({ smashed, onReset }) {
           objectFit: 'cover',
           display: 'block',
           opacity: isTransitioning ? 0 : 1,
-          transition: isTransitioning ? 'opacity 400ms cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
+          transition: isTransitioning ? 'opacity 200ms cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
           zIndex: 3,
           imageRendering: 'auto',
           filter: 'drop-shadow(0 1px 0 rgba(0,0,0,0.25))',
@@ -317,7 +317,7 @@ function BannerComposite({ smashed, onReset }) {
             objectFit: 'cover',
             display: 'block',
             opacity: nextOpacity,
-            transition: 'opacity 400ms cubic-bezier(0.4, 0, 0.2, 1)',
+            transition: 'opacity 200ms cubic-bezier(0.4, 0, 0.2, 1)',
             zIndex: 4, // Always above current during transition
             imageRendering: 'auto',
             filter: 'drop-shadow(0 1px 0 rgba(0,0,0,0.25))',
@@ -345,7 +345,11 @@ export default function ReadmeWindow() {
   return (
     <Window
       title="README.TXT"
-      style={{ width: '820px', maxWidth: 'calc(100vw - 40px)', left: '20px', top: '20px' }}
+      style={{ 
+        width: 'var(--window-size-readme)', 
+        maxWidth: 'var(--window-max-width)',
+        minWidth: 'var(--window-min-width)'
+      }}
       className="readme-window"
       allowScroll={true}
     >

@@ -74,8 +74,15 @@ export default function Taskbar({ onOpenWojakCreator, wojakCreatorOpen }) {
         <button 
           className="start-button"
           onClick={handleStartClick}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              handleStartClick()
+            }
+          }}
           aria-label="Start menu"
           aria-expanded={startMenuOpen}
+          tabIndex={0}
         >
           <img 
             src="/BASE_Wojak_Sports Jacket.png" 

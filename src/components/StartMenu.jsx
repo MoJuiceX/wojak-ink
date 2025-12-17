@@ -111,6 +111,36 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
     onClose()
   }
 
+  // Keyboard navigation for menu items
+  useEffect(() => {
+    if (!isOpen) return
+
+    const menuItems = menuRef.current?.querySelectorAll('.start-menu-item')
+    if (!menuItems || menuItems.length === 0) return
+
+    let focusedIndex = -1
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        focusedIndex = focusedIndex < menuItems.length - 1 ? focusedIndex + 1 : 0
+        menuItems[focusedIndex]?.focus()
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        focusedIndex = focusedIndex > 0 ? focusedIndex - 1 : menuItems.length - 1
+        menuItems[focusedIndex]?.focus()
+      } else if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        if (focusedIndex >= 0 && menuItems[focusedIndex]) {
+          menuItems[focusedIndex].click()
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen])
+
   if (!isOpen) return null
 
   return (
@@ -123,6 +153,7 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
           className="start-menu-item"
           onClick={() => handleMenuItemClick('scroll-to-readme')}
           role="menuitem"
+          tabIndex={0}
         >
           <img 
             src={getStartMenuIcon('scroll-to-readme')} 
@@ -136,6 +167,7 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
           className="start-menu-item"
           onClick={() => handleMenuItemClick('scroll-to-mint')}
           role="menuitem"
+          tabIndex={0}
         >
           <img 
             src={getStartMenuIcon('scroll-to-mint')} 
@@ -149,6 +181,7 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
           className="start-menu-item"
           onClick={() => handleMenuItemClick('scroll-to-gallery')}
           role="menuitem"
+          tabIndex={0}
         >
           <img 
             src={getStartMenuIcon('scroll-to-gallery')} 
@@ -162,6 +195,7 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
           className="start-menu-item"
           onClick={() => handleMenuItemClick('scroll-to-faq')}
           role="menuitem"
+          tabIndex={0}
         >
           <img 
             src={getStartMenuIcon('scroll-to-faq')} 
@@ -175,6 +209,7 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
           className="start-menu-item"
           onClick={() => handleMenuItemClick('scroll-to-marketplace')}
           role="menuitem"
+          tabIndex={0}
         >
           <img 
             src={getStartMenuIcon('scroll-to-marketplace')} 
@@ -188,6 +223,7 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
           className="start-menu-item"
           onClick={() => handleMenuItemClick('open-tanggang')}
           role="menuitem"
+          tabIndex={0}
         >
           <img 
             src={getStartMenuIcon('open-tanggang')} 
@@ -201,6 +237,7 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
           className="start-menu-item"
           onClick={() => handleMenuItemClick('open-paint')}
           role="menuitem"
+          tabIndex={0}
         >
           <img 
             src={getStartMenuIcon('open-paint')} 
@@ -219,6 +256,7 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
             onClose()
           }}
           role="menuitem"
+          tabIndex={0}
         >
           <img 
             src={getStartMenuIcon('wojak-creator')} 
@@ -236,6 +274,7 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
             onClose()
           }}
           role="menuitem"
+          tabIndex={0}
         >
           <span className="start-menu-item-text">Open Crate</span>
         </button>
@@ -246,6 +285,7 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
             onClose()
           }}
           role="menuitem"
+          tabIndex={0}
         >
           <span className="start-menu-item-text">Follow Updates</span>
         </button>

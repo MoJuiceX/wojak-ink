@@ -20,6 +20,15 @@ Built with React, Vite, and a whole lot of memetic energy. Let's get you set up,
   - [Option 1: Standard Development](#option-1-standard-development-recommended)
   - [Option 2: Docker Development](#option-2-docker-development-alternative)
 - [Testing](#-testing)
+- [QA Testing Guide](#-qa-testing-guide)
+  - [Quick Start QA Scripts](#quick-start-qa-scripts)
+  - [iPhone-Sized Viewport Testing](#-iphone-sized-viewport-testing)
+  - [Android Testing](#-android-testing)
+  - [iPad Testing](#-ipad-testing)
+  - [Desktop Testing](#️-desktop-testing)
+  - [Keyboard Navigation Testing](#️-keyboard-navigation-testing)
+  - [Bottom Sheet Behavior Testing](#-bottom-sheet-behavior-testing)
+  - [Lighthouse Performance Testing](#-lighthouse-performance-testing)
 - [Using the App](#-using-the-app)
 - [Development with Cursor](#-development-with-cursor)
 - [Building for Production](#-building-for-production)
@@ -358,6 +367,437 @@ Always check the browser console (F12 → Console tab) for errors:
 
 - Red errors = problems to fix
 - Yellow warnings = usually okay, but worth checking
+
+---
+
+## 🔍 QA Testing Guide
+
+This section provides detailed steps for testing the app across different devices and viewports. Use the QA scripts to start the dev server with appropriate context.
+
+### Quick Start QA Scripts
+
+```bash
+# Mobile QA testing (iPhone/Android viewport)
+npm run qa:mobile
+
+# Desktop QA testing
+npm run qa:desktop
+
+# Lighthouse performance testing
+npm run qa:lighthouse
+```
+
+**Note:** These scripts start the dev server. You'll need to open the browser and follow the testing steps below.
+
+### 📱 iPhone-Sized Viewport Testing
+
+**Viewport Size:** 390px × 844px (iPhone 12/13/14 Pro)
+
+#### Setup Steps:
+
+1. **Start the dev server:**
+   ```bash
+   npm run qa:mobile
+   ```
+
+2. **Open Chrome DevTools:**
+   - Press `Cmd + Option + I` (Mac) or `F12` (Windows/Linux)
+   - Or right-click → "Inspect"
+
+3. **Enable Device Toolbar:**
+   - Click the device icon (📱) in the top-left of DevTools
+   - Or press `Cmd + Shift + M` (Mac) / `Ctrl + Shift + M` (Windows/Linux)
+
+4. **Select iPhone preset:**
+   - Click the device dropdown (top toolbar)
+   - Select "iPhone 12 Pro" or "iPhone 13 Pro"
+   - Or enter custom: `390 × 844`
+
+5. **Set zoom level:**
+   - Ensure zoom is set to 100% (not scaled)
+   - Check "Show device frame" if you want visual reference
+
+#### Testing Checklist:
+
+##### ✅ Layout & Responsiveness
+- [ ] App loads without horizontal scroll
+- [ ] Taskbar is visible at bottom with safe-area padding
+- [ ] Windows are properly sized (not cut off)
+- [ ] Text is readable (not too small)
+- [ ] Buttons are tappable (min 44px touch target)
+
+##### ✅ Bottom Sheet (Wojak Creator)
+- [ ] Open Wojak Creator window
+- [ ] Bottom sheet appears at bottom of screen
+- [ ] Collapsed state shows 3 primary buttons (Base, Head, Clothes)
+- [ ] Collapsed state shows trait summary
+- [ ] Tap "View All Traits" to expand
+- [ ] Expanded sheet shows full trait list
+- [ ] Search input works
+- [ ] Can scroll trait list
+- [ ] Drag handle works (drag down to close)
+- [ ] Tap close button (✕) closes sheet
+- [ ] Background page doesn't scroll when sheet is open
+- [ ] Safe-area padding respects notch (if applicable)
+
+##### ✅ Touch Interactions
+- [ ] All buttons respond to tap (no 300ms delay)
+- [ ] Windows can be dragged by title bar
+- [ ] Taskbar buttons are tappable
+- [ ] Long-press shows tooltips (500ms)
+- [ ] No accidental scrolling when interacting
+
+##### ✅ Keyboard Navigation
+- [ ] Focus trait selector (tap a dropdown)
+- [ ] Arrow Up/Down navigates options
+- [ ] Enter selects current option
+- [ ] Esc closes bottom sheet
+- [ ] Keyboard doesn't interfere with input fields
+
+##### ✅ Performance
+- [ ] Trait switching is smooth (debounced)
+- [ ] Canvas preview updates without lag
+- [ ] No jank during interactions
+- [ ] FPS stays above 55 (check FPS debug toggle in dev mode)
+
+---
+
+### 🤖 Android Testing
+
+**Viewport Sizes to Test:**
+- **Small:** 360px × 640px (Android small)
+- **Medium:** 412px × 915px (Pixel 5)
+- **Large:** 428px × 926px (Pixel 6 Pro)
+
+#### Setup Steps:
+
+1. **Start the dev server:**
+   ```bash
+   npm run qa:mobile
+   ```
+
+2. **Open Chrome DevTools** (`Cmd + Option + I`)
+
+3. **Enable Device Toolbar** (`Cmd + Shift + M`)
+
+4. **Select Android preset:**
+   - Choose "Pixel 5" (412 × 915)
+   - Or "Samsung Galaxy S20" (360 × 800)
+   - Or enter custom dimensions
+
+#### Testing Checklist:
+
+##### ✅ All iPhone Tests (Same as above)
+- [ ] Layout & Responsiveness
+- [ ] Bottom Sheet behavior
+- [ ] Touch Interactions
+- [ ] Keyboard Navigation
+- [ ] Performance
+
+##### ✅ Android-Specific
+- [ ] Safe-area insets work (if device has notch)
+- [ ] Back button behavior (if testing on real device)
+- [ ] System UI doesn't overlap content
+- [ ] Status bar doesn't cover content
+
+---
+
+### 📱 iPad Testing
+
+**Viewport Sizes:**
+- **iPad Mini:** 768px × 1024px
+- **iPad Air/Pro:** 820px × 1180px
+- **iPad Pro 12.9":** 1024px × 1366px
+
+#### Setup Steps:
+
+1. **Start the dev server:**
+   ```bash
+   npm run qa:mobile
+   ```
+
+2. **Open Chrome DevTools** (`Cmd + Option + I`)
+
+3. **Enable Device Toolbar** (`Cmd + Shift + M`)
+
+4. **Select iPad preset:**
+   - Choose "iPad Air" (820 × 1180)
+   - Or "iPad Pro 12.9"" (1024 × 1366)
+   - Or enter custom dimensions
+
+#### Testing Checklist:
+
+##### ✅ Tablet Layout
+- [ ] App uses tablet layout (not mobile bottom sheet)
+- [ ] Windows are properly sized
+- [ ] Side-by-side layout works (if applicable)
+- [ ] Text is appropriately sized
+- [ ] Touch targets are adequate
+
+##### ✅ Orientation
+- [ ] Test portrait mode (768 × 1024)
+- [ ] Test landscape mode (1024 × 768)
+- [ ] Layout adapts correctly
+- [ ] No content cut off
+
+##### ✅ Touch & Gestures
+- [ ] Multi-touch works (if applicable)
+- [ ] Pinch-to-zoom disabled (if intended)
+- [ ] Scroll gestures work smoothly
+
+---
+
+### 🖥️ Desktop Testing
+
+**Viewport Sizes:**
+- **Small Desktop:** 1024px × 768px
+- **Standard:** 1920px × 1080px
+- **Large:** 2560px × 1440px
+
+#### Setup Steps:
+
+1. **Start the dev server:**
+   ```bash
+   npm run qa:desktop
+   ```
+
+2. **Open browser** at `http://localhost:5173`
+
+3. **Resize browser window** to test different sizes:
+   - Use DevTools device toolbar
+   - Or manually resize browser window
+
+#### Testing Checklist:
+
+##### ✅ Layout & Windows
+- [ ] Windows can be dragged freely
+- [ ] Windows stack correctly (z-index)
+- [ ] Multiple windows can be open simultaneously
+- [ ] Taskbar shows all open windows
+- [ ] Start menu works
+- [ ] Window controls (minimize/maximize/close) work
+
+##### ✅ Keyboard Navigation
+- [ ] Tab key navigates between interactive elements
+- [ ] Enter activates buttons/links
+- [ ] Esc closes modals/windows
+- [ ] Arrow keys navigate trait lists (when focused)
+- [ ] Keyboard shortcuts work (if any)
+
+##### ✅ Mouse Interactions
+- [ ] Hover effects work (tooltips, button states)
+- [ ] Click interactions are responsive
+- [ ] Drag and drop works (windows, oranges)
+- [ ] Right-click context menus (if any)
+
+##### ✅ Performance
+- [ ] Smooth animations (60fps)
+- [ ] No lag when switching traits rapidly
+- [ ] Canvas preview updates smoothly
+- [ ] No memory leaks (check DevTools Memory tab)
+
+---
+
+### ⌨️ Keyboard Navigation Testing
+
+Test keyboard accessibility across all viewports:
+
+#### Setup:
+
+1. **Start dev server:**
+   ```bash
+   npm run qa:desktop  # or qa:mobile
+   ```
+
+2. **Open browser** and navigate to app
+
+3. **Disable mouse** (or just don't use it)
+
+#### Testing Checklist:
+
+##### ✅ Focus Management
+- [ ] Tab key moves focus between elements
+- [ ] Focus indicator is visible (outline)
+- [ ] Focus order is logical
+- [ ] Focus doesn't get trapped
+
+##### ✅ Trait Panel Navigation
+- [ ] Focus a trait selector (Tab to it)
+- [ ] Arrow Up/Down navigates options
+- [ ] Enter selects current option
+- [ ] Esc closes bottom sheet (mobile) or blurs (desktop)
+- [ ] Tab moves to next selector
+
+##### ✅ Window Navigation
+- [ ] Tab navigates window controls
+- [ ] Enter activates buttons
+- [ ] Esc closes windows/modals
+- [ ] Arrow keys don't interfere with window dragging
+
+##### ✅ Form Elements
+- [ ] Input fields are keyboard accessible
+- [ ] Select dropdowns work with keyboard
+- [ ] Search inputs work with keyboard
+- [ ] Buttons are keyboard accessible
+
+---
+
+### 📋 Bottom Sheet Behavior Testing
+
+**Mobile Only** (≤ 640px viewport width)
+
+#### Setup:
+
+1. **Start mobile QA:**
+   ```bash
+   npm run qa:mobile
+   ```
+
+2. **Set viewport to mobile** (390px × 844px)
+
+3. **Open Wojak Creator** window
+
+#### Testing Checklist:
+
+##### ✅ Collapsed State
+- [ ] Shows 3 primary buttons (Base, Head, Clothes)
+- [ ] Buttons show selection indicator (✓) when trait selected
+- [ ] Trait summary shows selected traits (up to 3)
+- [ ] "View All Traits" button visible
+- [ ] Safe-area padding applied (notch/gesture bar)
+
+##### ✅ Expanded State
+- [ ] Tap "View All Traits" expands sheet
+- [ ] Sheet animates smoothly (max-height: 70dvh)
+- [ ] Draggable handle visible at top
+- [ ] Header shows "Select Traits" title
+- [ ] Close button (✕) visible
+- [ ] Search input visible and functional
+- [ ] Trait list scrolls smoothly
+- [ ] Background page is locked (no scroll)
+
+##### ✅ Interactions
+- [ ] Drag handle down closes sheet (threshold: 100px)
+- [ ] Tap close button closes sheet
+- [ ] Tap outside sheet (if implemented) closes sheet
+- [ ] Esc key closes sheet
+- [ ] Search filters traits correctly
+- [ ] Selecting trait updates preview
+- [ ] Primary button tap scrolls to trait in expanded view
+
+##### ✅ Performance
+- [ ] Sheet opens/closes without jank
+- [ ] Scrolling is smooth (60fps)
+- [ ] No layout shifts
+- [ ] Touch interactions are responsive
+
+##### ✅ Edge Cases
+- [ ] Very long trait names don't break layout
+- [ ] Many traits scroll correctly
+- [ ] Empty search shows "No results" message
+- [ ] Disabled traits are visually distinct
+- [ ] Safe-area insets work on notched devices
+
+---
+
+### 🔍 Lighthouse Performance Testing
+
+**Automated performance, accessibility, and best practices audit.**
+
+#### Setup:
+
+1. **Install Lighthouse** (if not already installed):
+   ```bash
+   npm install -g lighthouse
+   ```
+
+2. **Start the dev server:**
+   ```bash
+   npm run qa:lighthouse
+   ```
+
+3. **In a new terminal, run Lighthouse:**
+   ```bash
+   # Basic audit
+   npx lighthouse http://localhost:5173 --view
+
+   # Mobile audit
+   npx lighthouse http://localhost:5173 --view --preset=mobile
+
+   # Desktop audit
+   npx lighthouse http://localhost:5173 --view --preset=desktop
+
+   # Generate HTML report
+   npx lighthouse http://localhost:5173 --output=html --output-path=./lighthouse-report.html
+   ```
+
+#### What to Check:
+
+##### ✅ Performance Score
+- [ ] Score ≥ 90 (aim for 95+)
+- [ ] First Contentful Paint < 1.8s
+- [ ] Largest Contentful Paint < 2.5s
+- [ ] Time to Interactive < 3.8s
+- [ ] Cumulative Layout Shift < 0.1
+
+##### ✅ Accessibility Score
+- [ ] Score ≥ 90
+- [ ] All images have alt text
+- [ ] Color contrast meets WCAG AA
+- [ ] Interactive elements are keyboard accessible
+- [ ] ARIA labels are used correctly
+
+##### ✅ Best Practices Score
+- [ ] Score ≥ 90
+- [ ] No console errors
+- [ ] HTTPS (in production)
+- [ ] No deprecated APIs
+- [ ] Images are optimized
+
+##### ✅ SEO Score
+- [ ] Score ≥ 90
+- [ ] Meta tags present
+- [ ] Descriptive titles
+- [ ] Proper heading structure
+
+---
+
+### 🐛 Common Issues & Solutions
+
+#### Issue: Bottom sheet doesn't appear on mobile
+**Solution:** Check viewport width is ≤ 640px. Clear browser cache and reload.
+
+#### Issue: Keyboard navigation doesn't work
+**Solution:** Ensure trait panel has focus. Check browser console for errors.
+
+#### Issue: Horizontal scroll on mobile
+**Solution:** Check safe-area CSS. Verify `overflow-x: hidden` is applied.
+
+#### Issue: Performance issues
+**Solution:** Enable FPS debug toggle (dev mode). Check for memory leaks. Verify debouncing is working.
+
+#### Issue: Lighthouse scores low
+**Solution:** Run production build (`npm run build && npm run preview`). Check image optimization. Verify lazy loading is working.
+
+---
+
+### 📝 QA Report Template
+
+When reporting issues, include:
+
+```markdown
+**Device/Viewport:** iPhone 12 Pro (390 × 844)
+**Browser:** Chrome 120
+**Issue:** [Description]
+**Steps to Reproduce:**
+1. Step one
+2. Step two
+3. Step three
+**Expected:** [What should happen]
+**Actual:** [What actually happens]
+**Screenshots:** [If applicable]
+**Console Errors:** [If any]
+```
 
 ---
 
@@ -1207,6 +1647,11 @@ docker-compose down            # Stop containers
 
 # Utilities
 npm run generate-meme-manifest # Generate meme manifest
+
+# QA Testing
+npm run qa:mobile      # Start dev server for mobile QA testing
+npm run qa:desktop    # Start dev server for desktop QA testing
+npm run qa:lighthouse # Start dev server for Lighthouse audit
 ```
 
 ---

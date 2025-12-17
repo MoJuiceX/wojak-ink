@@ -1,24 +1,67 @@
 /**
  * Calculate centered position for a window with safe margins
+ * Accounts for taskbar height on desktop to prevent overlap
  * @param {Object} options - Positioning options
  * @param {number} options.width - Window width in pixels
  * @param {number} options.height - Window height in pixels
  * @param {number} [options.padding=24] - Minimum padding from viewport edges
+ * @param {boolean} [options.isMobile=false] - Whether this is a mobile viewport
  * @returns {{x: number, y: number}} Centered position with clamping
  */
-export function getCenteredPosition({ width, height, padding = 24 }) {
+// Cache for getComputedStyle results to prevent repeated layout reads
+const styleCache = {
+  taskbarHeight: null,
+  safeAreaBottom: null,
+  desktopPadding: null,
+  titleBarHeight: null,
+  windowMinWidth: null,
+  windowMinHeight: null,
+  windowMaxWidthWide: null,
+  windowMaxHeight: null,
+  cacheTime: 0,
+  cacheDuration: 100, // Cache for 100ms
+}
+
+function getCachedStyleProperty(property, defaultValue = 0) {
+  const now = performance.now()
+  // Invalidate cache if too old
+  if (now - styleCache.cacheTime > styleCache.cacheDuration) {
+    styleCache.cacheTime = now
+    // Batch all getComputedStyle reads together (prevent layout thrashing)
+    const rootStyle = getComputedStyle(document.documentElement)
+    styleCache.taskbarHeight = parseFloat(rootStyle.getPropertyValue('--taskbar-height')) || 30
+    styleCache.safeAreaBottom = parseFloat(rootStyle.getPropertyValue('--safe-area-inset-bottom')) || 0
+    styleCache.desktopPadding = parseFloat(rootStyle.getPropertyValue('--desktop-padding')) || 24
+    styleCache.titleBarHeight = parseFloat(rootStyle.getPropertyValue('--window-title-bar-height')) || 30
+    styleCache.windowMinWidth = parseFloat(rootStyle.getPropertyValue('--window-min-width')) || 200
+    styleCache.windowMinHeight = parseFloat(rootStyle.getPropertyValue('--window-min-height')) || 100
+    styleCache.windowMaxWidthWide = parseFloat(rootStyle.getPropertyValue('--window-max-width-wide')) || 1400
+    styleCache.windowMaxHeight = parseFloat(rootStyle.getPropertyValue('--window-max-height')) || Infinity
+  }
+  
+  return styleCache[property] ?? defaultValue
+}
+
+export function getCenteredPosition({ width, height, padding = 24, isMobile = false }) {
+  // Batch all layout reads first (prevent layout thrashing)
   const viewportWidth = window.innerWidth
   const viewportHeight = window.innerHeight
   
+  // Use cached style values (batched reads)
+  const taskbarHeight = getCachedStyleProperty('taskbarHeight', 30)
+  const safeAreaBottom = isMobile ? getCachedStyleProperty('safeAreaBottom', 0) : 0
+  const availableHeight = viewportHeight - taskbarHeight - safeAreaBottom
+  
   // Calculate center position
   let x = Math.floor((viewportWidth - width) / 2)
-  let y = Math.floor((viewportHeight - height) / 2)
+  let y = Math.floor((availableHeight - height) / 2)
   
   // Clamp with padding (minimum 24px, or 8px if window is larger than viewport)
-  const minPadding = viewportWidth < width || viewportHeight < height ? 8 : padding
+  const minPadding = viewportWidth < width || availableHeight < height ? 8 : padding
   
   x = Math.max(minPadding, Math.min(x, viewportWidth - width - minPadding))
-  y = Math.max(minPadding, Math.min(y, viewportHeight - height - minPadding))
+  // Ensure window doesn't overlap taskbar - clamp y to stay above taskbar
+  y = Math.max(minPadding, Math.min(y, availableHeight - height - minPadding))
   
   return { x, y }
 }
@@ -42,5 +85,104 @@ export function getDefaultWindowSize(windowId) {
   }
   
   return defaults[windowId] || { width: 600, height: 400 }
+}
+
+/**
+ * Clamp window position to ensure it stays within viewport bounds
+ * Ensures title bar is always reachable (at least title bar height visible)
+ * @param {Object} options - Clamping options
+ * @param {number} options.x - Desired X position
+ * @param {number} options.y - Desired Y position
+ * @param {number} options.width - Window width
+ * @param {number} options.height - Window height
+ * @param {boolean} [options.isMobile=false] - Whether this is a mobile viewport
+ * @returns {{x: number, y: number}} Clamped position
+ */
+export function clampWindowPosition({ x, y, width, height, isMobile = false }) {
+  // Batch all layout reads first (prevent layout thrashing)
+  const viewportWidth = window.innerWidth
+  const viewportHeight = window.innerHeight
+  
+  // Use cached style values (batched reads, no repeated getComputedStyle calls)
+  const desktopPadding = getCachedStyleProperty('desktopPadding', 24)
+  const taskbarHeight = getCachedStyleProperty('taskbarHeight', 30)
+  const titleBarHeight = getCachedStyleProperty('titleBarHeight', 30)
+  
+  // On desktop, ensure title bar is always reachable (at least title bar height visible)
+  // On mobile, windows are positioned relatively, so no clamping needed
+  if (isMobile) {
+    return { x, y }
+  }
+  
+  // Available viewport (accounting for taskbar)
+  const availableHeight = viewportHeight - taskbarHeight
+  
+  // Minimum X: window can go off-screen but must keep at least title bar visible
+  // If window is 800px wide and titleBarHeight is 30px:
+  //   minX = -(800 - 30) = -770 means window can be 770px off-screen, leaving 30px visible
+  const minX = -(width - titleBarHeight)
+  
+  // Maximum X: window must keep at least title bar visible on right
+  // Window at position x extends from x to x+width
+  // We want: x + width - titleBarHeight <= viewportWidth (at least titleBarHeight visible)
+  // So: x <= viewportWidth - width + titleBarHeight
+  // Example: viewport=1920, width=800, titleBarHeight=30
+  //   maxX = 1920 - 800 + 30 = 1150
+  //   At x=1150, window extends from 1150 to 1950, with 30px (1890-1920) visible
+  const maxX = viewportWidth - width + titleBarHeight
+  
+  // Minimum Y: window can go off-screen but must keep at least title bar visible
+  const minY = -(height - titleBarHeight)
+  
+  // Maximum Y: window must keep title bar above taskbar
+  // Window at position y extends from y to y+height
+  // We want: y + height - titleBarHeight <= availableHeight (title bar above taskbar)
+  // So: y <= availableHeight - height + titleBarHeight
+  // Example: availableHeight=1050, height=600, titleBarHeight=30
+  //   maxY = 1050 - 600 + 30 = 480
+  //   At y=480, window extends from 480 to 1080, with title bar ending at 1050 (above taskbar at 1050)
+  const maxY = availableHeight - height + titleBarHeight
+  
+  // Clamp position
+  const clampedX = Math.max(minX, Math.min(maxX, x))
+  const clampedY = Math.max(minY, Math.min(maxY, y))
+  
+  return { x: clampedX, y: clampedY }
+}
+
+/**
+ * Get window size constraints from layout tokens
+ * @param {Object} [options={}] - Options
+ * @param {number} [options.minWidth] - Override min width
+ * @param {number} [options.minHeight] - Override min height
+ * @param {number} [options.maxWidth] - Override max width
+ * @param {number} [options.maxHeight] - Override max height
+ * @returns {{minWidth: number, minHeight: number, maxWidth: number, maxHeight: number}} Size constraints
+ */
+export function getWindowSizeConstraints(options = {}) {
+  // Batch all layout reads first (prevent layout thrashing)
+  const viewportWidth = window.innerWidth
+  const viewportHeight = window.innerHeight
+  
+  // Use cached style values (batched reads, no repeated getComputedStyle calls)
+  const minWidth = options.minWidth || getCachedStyleProperty('windowMinWidth', 200)
+  const minHeight = options.minHeight || getCachedStyleProperty('windowMinHeight', 100)
+  const desktopPadding = getCachedStyleProperty('desktopPadding', 24)
+  const taskbarHeight = getCachedStyleProperty('taskbarHeight', 30)
+  const titleBarHeight = getCachedStyleProperty('titleBarHeight', 30)
+  
+  // Max width: viewport minus padding on both sides
+  const maxWidth = options.maxWidth || Math.min(
+    getCachedStyleProperty('windowMaxWidthWide', 1400),
+    viewportWidth - (desktopPadding * 2)
+  )
+  
+  // Max height: viewport minus taskbar, title bar, and padding
+  const maxHeight = options.maxHeight || Math.min(
+    getCachedStyleProperty('windowMaxHeight', Infinity),
+    viewportHeight - taskbarHeight - titleBarHeight - (desktopPadding * 2)
+  )
+  
+  return { minWidth, minHeight, maxWidth, maxHeight }
 }
 

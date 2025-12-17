@@ -1,13 +1,31 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { LAYER_ORDER } from '../lib/memeLayers'
-import { loadImage } from '../utils/imageUtils'
+import { loadImage, preloadImages } from '../utils/imageUtils'
 import { getDisabledLayers } from '../utils/wojakRules'
+import { debounce } from '../utils/debounce'
+import { getAllLayerImages } from '../lib/memeImageManifest'
 
 export function useMemeGenerator() {
   const [selectedLayers, setSelectedLayers] = useState({})
   const [layerVisibility, setLayerVisibility] = useState({})
   const canvasRef = useRef(null)
   const [isRendering, setIsRendering] = useState(false)
+  
+  // Memoize layer composition for faster lookups
+  const layerComposition = useMemo(() => {
+    return LAYER_ORDER.map(layer => ({
+      name: layer.name,
+      folder: layer.folder,
+      zIndex: layer.zIndex
+    }))
+  }, [])
+  
+  // Memoize image paths for currently selected layers (for faster rendering)
+  const selectedImagePaths = useMemo(() => {
+    return Object.entries(selectedLayers)
+      .filter(([_, path]) => path && path !== '')
+      .map(([_, path]) => path)
+  }, [selectedLayers])
 
   // Initialize visibility for all layers
   useEffect(() => {
@@ -18,7 +36,8 @@ export function useMemeGenerator() {
     setLayerVisibility(initialVisibility)
   }, [])
 
-  const selectLayer = useCallback((layerName, imagePath) => {
+  // Internal selectLayer function (not debounced for immediate state updates)
+  const selectLayerInternal = useCallback((layerName, imagePath) => {
     setSelectedLayers(prev => {
       const newLayers = {
         ...prev,
@@ -98,6 +117,19 @@ export function useMemeGenerator() {
       return clearedLayers
     })
   }, [])
+  
+  // Debounced selectLayer to prevent rapid state updates (100ms delay)
+  const selectLayer = useMemo(
+    () => debounce(selectLayerInternal, 100),
+    [selectLayerInternal]
+  )
+  
+  // Cleanup debounced function on unmount
+  useEffect(() => {
+    return () => {
+      selectLayer.cancel?.()
+    }
+  }, [selectLayer])
 
   const toggleLayerVisibility = useCallback((layerName) => {
     setLayerVisibility(prev => ({
@@ -106,24 +138,41 @@ export function useMemeGenerator() {
     }))
   }, [])
 
-  const renderCanvas = useCallback(async () => {
+  // Memoize canvas dimensions to prevent layout reflow
+  const canvasDimensions = useMemo(() => ({
+    width: 800,
+    height: 800
+  }), [])
+  
+  // Memoize layer rendering order for consistent composition
+  const renderOrder = useMemo(() => {
+    return layerComposition.slice().sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
+  }, [layerComposition])
+  
+  // Debounced render function to prevent rapid re-renders
+  const renderCanvasInternal = useCallback(async () => {
     const canvas = canvasRef.current
     if (!canvas) return
 
     setIsRendering(true)
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d', { 
+      willReadFrequently: false, // Optimize for drawing, not reading
+      alpha: true 
+    })
     
-    // Set canvas size if not set
-    if (canvas.width === 0 || canvas.height === 0) {
-      canvas.width = 800
-      canvas.height = 800
+    // Set canvas size if not set (prevent layout reflow by setting once)
+    // Use memoized dimensions to ensure consistency
+    if (canvas.width !== canvasDimensions.width || canvas.height !== canvasDimensions.height) {
+      canvas.width = canvasDimensions.width
+      canvas.height = canvasDimensions.height
     }
     
+    // Clear canvas efficiently (use GPU-accelerated clear)
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     try {
-      // Render layers in order
-      for (const layer of LAYER_ORDER) {
+      // Render layers in memoized order (prevents re-sorting on every render)
+      for (const layer of renderOrder) {
         const layerName = layer.name
         const isVisible = layerVisibility[layerName] !== false
         let imagePath = selectedLayers[layerName]
@@ -219,11 +268,85 @@ export function useMemeGenerator() {
     } finally {
       setIsRendering(false)
     }
-  }, [selectedLayers, layerVisibility])
+  }, [selectedLayers, layerVisibility, renderOrder, canvasDimensions])
+  
+  // Preload next likely assets based on current selection
+  useEffect(() => {
+    // Preload images for currently selected layers (they're already cached, but ensure they're ready)
+    if (selectedImagePaths.length > 0) {
+      preloadImages(selectedImagePaths).catch(() => {
+        // Silently fail - individual loads will handle errors
+      })
+    }
+    
+    // Predict and preload likely next selections:
+    // - If user is selecting Base, preload Eyes layer images
+    // - If user is selecting Eyes, preload Head layer images
+    // - If user is selecting Clothes, preload ClothesAddon images
+    const preloadPredictive = async () => {
+      const predictions = []
+      
+      if (selectedLayers['Base']) {
+        // User has Base selected - likely to select Eyes next
+        const eyesImages = getAllLayerImages('Eyes')
+        if (eyesImages.length > 0) {
+          // Preload first 5 Eyes images (most common)
+          const topEyes = eyesImages.slice(0, 5).map(img => img.path)
+          predictions.push(...topEyes)
+        }
+      }
+      
+      if (selectedLayers['Eyes']) {
+        // User has Eyes selected - likely to select Head next
+        const headImages = getAllLayerImages('Head')
+        if (headImages.length > 0) {
+          const topHead = headImages.slice(0, 5).map(img => img.path)
+          predictions.push(...topHead)
+        }
+      }
+      
+      if (selectedLayers['Clothes']) {
+        // User has Clothes selected - likely to select ClothesAddon next
+        const addonImages = getAllLayerImages('ClothesAddon')
+        if (addonImages.length > 0) {
+          const topAddon = addonImages.slice(0, 5).map(img => img.path)
+          predictions.push(...topAddon)
+        }
+      }
+      
+      // Preload predicted images in background (low priority)
+      if (predictions.length > 0) {
+        // Use requestIdleCallback if available, otherwise setTimeout
+        const preloadFn = () => {
+          preloadImages(predictions).catch(() => {
+            // Silently fail - these are just predictions
+          })
+        }
+        
+        if (window.requestIdleCallback) {
+          requestIdleCallback(preloadFn, { timeout: 2000 })
+        } else {
+          setTimeout(preloadFn, 100)
+        }
+      }
+    }
+    
+    preloadPredictive()
+  }, [selectedLayers, selectedImagePaths])
 
-  // Auto-render when layers change
+  // Debounced render function (150ms delay for rapid trait switching)
+  const renderCanvas = useMemo(
+    () => debounce(renderCanvasInternal, 150),
+    [renderCanvasInternal]
+  )
+
+  // Auto-render when layers change (debounced)
   useEffect(() => {
     renderCanvas()
+    // Cleanup on unmount
+    return () => {
+      renderCanvas.cancel?.()
+    }
   }, [selectedLayers, layerVisibility, renderCanvas])
 
   // Compute disabled layers based on rules

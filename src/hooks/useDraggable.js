@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
+import { clampWindowPosition } from '../utils/windowPosition'
 
 export function useDraggable(noStack = false) {
   const windowRef = useRef(null)
@@ -26,6 +27,9 @@ export function useDraggable(noStack = false) {
   useEffect(() => {
     const win = windowRef.current
     if (!win) return
+
+    // Disable dragging if noStack is true (used for mobile)
+    if (noStack) return
 
     const handle = win.querySelector('.title-bar')
     if (!handle) return
@@ -87,6 +91,7 @@ export function useDraggable(noStack = false) {
 
       bringToFront()
 
+      // Batch all layout reads first (prevent layout thrashing)
       const rect = win.getBoundingClientRect()
       const container = win.offsetParent || document.body
       const containerRect = container.getBoundingClientRect()
@@ -189,16 +194,32 @@ export function useDraggable(noStack = false) {
       
       const containerRect = containerRectRef.current
       const isMobile = win.__isMobile
-      const taskbarHeight = isMobile ? 40 : 30
       
-      // Constrain to viewport bounds (cached values for performance)
-      const minX = 0
-      const minY = 0
-      const maxX = Math.max(0, containerRect.width - win.__originalWidth)
-      const maxY = Math.max(0, containerRect.height - win.__originalHeight - (isMobile ? 0 : taskbarHeight))
+      // Use strict clamping utility for desktop (ensures title bar is always reachable)
+      if (!isMobile) {
+        const clamped = clampWindowPosition({
+          x: targetViewportX,
+          y: targetViewportY,
+          width: win.__originalWidth,
+          height: win.__originalHeight,
+          isMobile: false
+        })
+        targetViewportX = clamped.x
+        targetViewportY = clamped.y
+      } else {
+        // Mobile: simple bounds checking
+        const taskbarHeight = 40
+        const minX = 0
+        const minY = 0
+        const maxX = Math.max(0, containerRect.width - win.__originalWidth)
+        const maxY = Math.max(0, containerRect.height - win.__originalHeight)
+        
+        targetViewportX = Math.max(minX, Math.min(maxX, targetViewportX))
+        targetViewportY = Math.max(minY, Math.min(maxY, targetViewportY))
+      }
 
-      const constrainedViewportX = Math.max(minX, Math.min(maxX, targetViewportX))
-      const constrainedViewportY = Math.max(minY, Math.min(maxY, targetViewportY))
+      const constrainedViewportX = targetViewportX
+      const constrainedViewportY = targetViewportY
 
       // Calculate transform offset from initial viewport position
       const dx = constrainedViewportX - win.__dragStartViewportX
@@ -226,6 +247,9 @@ export function useDraggable(noStack = false) {
 
     const endDrag = (e) => {
       if (!isDraggingRef.current || (e && e.pointerId !== activePointerId)) return
+      
+      const win = windowRef.current
+      if (!win) return
       
       // Release pointer capture FIRST to fix mouse sticking issue
       try {
@@ -259,60 +283,92 @@ export function useDraggable(noStack = false) {
         const finalViewportX = win.__dragStartViewportX + dx
         const finalViewportY = win.__dragStartViewportY + dy
         
-        // Constrain to viewport bounds
+        // Constrain to viewport bounds using strict clamping utility
         const containerRect = containerRectRef.current
         const isMobile = win.__isMobile
-        const taskbarHeight = isMobile ? 40 : 30
         
-        const minX = 0
-        const minY = 0
-        const maxX = Math.max(0, containerRect.width - win.__originalWidth)
-        const maxY = Math.max(0, containerRect.height - win.__originalHeight - (isMobile ? 0 : taskbarHeight))
+        if (!isMobile) {
+          // Desktop: use strict clamping (ensures title bar is always reachable)
+          const clamped = clampWindowPosition({
+            x: finalViewportX,
+            y: finalViewportY,
+            width: win.__originalWidth,
+            height: win.__originalHeight,
+            isMobile: false
+          })
+          constrainedViewportX = clamped.x
+          constrainedViewportY = clamped.y
+        } else {
+          // Mobile: simple bounds checking
+          const taskbarHeight = 40
+          const minX = 0
+          const minY = 0
+          const maxX = Math.max(0, containerRect.width - win.__originalWidth)
+          const maxY = Math.max(0, containerRect.height - win.__originalHeight)
+          
+          constrainedViewportX = Math.max(minX, Math.min(maxX, finalViewportX))
+          constrainedViewportY = Math.max(minY, Math.min(maxY, finalViewportY))
+        }
         
-        constrainedViewportX = Math.max(minX, Math.min(maxX, finalViewportX))
-        constrainedViewportY = Math.max(minY, Math.min(maxY, finalViewportY))
-        
-        // Convert viewport coordinates to container-relative coordinates
+        // Batch all layout reads first (prevent layout thrashing)
+        let containerBoundingRect = null
         if (win.__containerRef) {
           const container = win.__containerRef
-          const containerBoundingRect = container.getBoundingClientRect()
-          const containerRelativeLeft = constrainedViewportX - containerBoundingRect.left + (container.scrollLeft || 0)
-          const containerRelativeTop = constrainedViewportY - containerBoundingRect.top + (container.scrollTop || 0)
-          
-          setPosition({ x: containerRelativeLeft, y: containerRelativeTop })
-          win.style.left = `${containerRelativeLeft}px`
-          win.style.top = `${containerRelativeTop}px`
-        } else {
-          setPosition({ x: constrainedViewportX, y: constrainedViewportY })
-          win.style.left = `${constrainedViewportX}px`
-          win.style.top = `${constrainedViewportY}px`
+          containerBoundingRect = container.getBoundingClientRect()
         }
         
-        // Mark as user-dragged to prevent auto-stacking
-        if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
-          win.dataset.userDragged = 'true'
+        // Calculate final positions (no DOM writes yet)
+        let finalLeft, finalTop
+        if (win.__containerRef && containerBoundingRect) {
+          finalLeft = constrainedViewportX - containerBoundingRect.left + (win.__containerRef.scrollLeft || 0)
+          finalTop = constrainedViewportY - containerBoundingRect.top + (win.__containerRef.scrollTop || 0)
+        } else {
+          finalLeft = constrainedViewportX
+          finalTop = constrainedViewportY
         }
-      }
-      
-      win.style.transform = ''
-      win.classList.remove('dragging')
-      
-      // Stop orange trail if this is TangGang - trigger smash on drag end
-      // Do this AFTER calculating constrainedViewportX/Y so we have the values
-      if (win.id === 'tanggang' && window.__orangeTrail) {
-        const rect = win.getBoundingClientRect()
-        // Get previous rect from orange trail ref
-        const prevRect = window.__orangeTrail.prevWindowRectRef?.current || null
-        window.__orangeTrail.stopDragging({
-          x: constrainedViewportX,
-          y: constrainedViewportY,
-          width: win.__originalWidth,
-          height: win.__originalHeight,
-          left: rect.left,
-          right: rect.right,
-          top: rect.top,
-          bottom: rect.bottom
-        }, prevRect)
+        
+        // Store orange trail rect read (batch all reads)
+        let orangeTrailRect = null
+        if (win.id === 'tanggang' && window.__orangeTrail) {
+          orangeTrailRect = win.getBoundingClientRect()
+        }
+        
+        // Now batch all DOM writes together (after all reads are done)
+        // Use requestAnimationFrame to batch with other DOM updates
+        requestAnimationFrame(() => {
+          const win2 = windowRef.current
+          if (!win2) return
+          
+          setPosition({ x: finalLeft, y: finalTop })
+          win2.style.left = `${finalLeft}px`
+          win2.style.top = `${finalTop}px`
+          win2.style.transform = ''
+          win2.classList.remove('dragging')
+          
+          if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+            win2.dataset.userDragged = 'true'
+          }
+          
+          // Stop orange trail if this is TangGang - trigger smash on drag end
+          if (win2.id === 'tanggang' && window.__orangeTrail && orangeTrailRect) {
+            // Get previous rect from orange trail ref
+            const prevRect = window.__orangeTrail.prevWindowRectRef?.current || null
+            window.__orangeTrail.stopDragging({
+              x: constrainedViewportX,
+              y: constrainedViewportY,
+              width: win2.__originalWidth,
+              height: win2.__originalHeight,
+              left: orangeTrailRect.left,
+              right: orangeTrailRect.right,
+              top: orangeTrailRect.top,
+              bottom: orangeTrailRect.bottom
+            }, prevRect)
+          }
+        })
+      } else {
+        // No transform - just clean up
+        win.style.transform = ''
+        win.classList.remove('dragging')
       }
     }
 

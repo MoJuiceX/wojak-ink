@@ -117,6 +117,14 @@ function GalleryThumb({ item }) {
           setIsHovering(false)
         }, 2000)
       }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          // Gallery thumbs are visual only, no action needed
+        }
+      }}
+      role="img"
+      tabIndex={0}
       style={{ position: 'relative' }}
     >
       {(frontLoading || backLoading) && (
@@ -142,7 +150,7 @@ function GalleryThumb({ item }) {
           onLoad={handleFrontLoad}
           style={{ 
             opacity: frontLoading ? 0 : (isHovering ? 0 : 1), 
-            transition: 'opacity 0.3s ease-in-out',
+            transition: 'opacity 0.2s ease-in-out',
             position: 'absolute',
             top: 0,
             left: 0,
@@ -164,7 +172,7 @@ function GalleryThumb({ item }) {
           onLoad={handleBackLoad}
           style={{ 
             opacity: backLoading ? 0 : (isHovering ? 1 : 0), 
-            transition: 'opacity 0.3s ease-in-out',
+            transition: 'opacity 0.2s ease-in-out',
             position: 'absolute',
             top: 0,
             left: 0,
@@ -201,7 +209,11 @@ export default function GalleryWindow() {
   return (
     <Window
       title="GALLERY"
-      style={{ width: '1200px', maxWidth: 'calc(100vw - 40px)' }}
+      style={{ 
+        width: 'var(--window-size-gallery)', 
+        maxWidth: 'var(--window-max-width)',
+        minWidth: 'var(--window-min-width)'
+      }}
     >
       <div className="grid gallery-grid" role="grid" aria-label="Gallery of Wojak NFTs">
         {GALLERY_ITEMS.map((item, index) => (

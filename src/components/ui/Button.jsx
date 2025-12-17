@@ -21,7 +21,7 @@ export default function Button({
         cursor: disabled ? 'not-allowed' : 'pointer',
         fontSize: '11px',
         fontFamily: 'inherit',
-        transition: 'all 0.2s ease',
+        transition: 'transform 0.2s ease, opacity 0.2s ease',
         ...props.style
       }}
       onMouseEnter={(e) => {

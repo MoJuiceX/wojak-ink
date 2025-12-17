@@ -29,6 +29,7 @@ html {
   padding: 0;
   width: 100%;
   height: 100%;
+  height: 100dvh; /* Use dynamic viewport height for mobile */
   overflow: hidden;
   overscroll-behavior: none;
 }
@@ -38,6 +39,7 @@ body {
   padding: 0;
   width: 100%;
   height: 100%;
+  height: 100dvh; /* Use dynamic viewport height for mobile */
   overflow: hidden;
   overscroll-behavior: none;
   font-family: 'MS Sans Serif', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -52,6 +54,7 @@ body {
   padding: 0;
   width: 100%;
   height: 100%;
+  height: 100dvh; /* Use dynamic viewport height for mobile */
   overflow: hidden;
 }
 
@@ -60,7 +63,7 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 100dvh; /* Use dynamic viewport height for mobile */
   background: #c0c0c0 url('https://bafybeibz4cxxg2ouqw4p45gj4zl7qahvczmdcdqxcconl6xcozylf2uxwu.ipfs.w3s.link/windows-98-background-mvrmy77vuyblzxba.jpg') no-repeat center center;
   background-size: cover;
   z-index: -1;
@@ -71,15 +74,20 @@ body {
   inset: 0;
   width: 100%;
   height: 100%;
+  height: 100dvh; /* Use dynamic viewport height for mobile */
   overflow: hidden;
   background: transparent;
+  padding-bottom: calc(var(--taskbar-height) + var(--safe-area-inset-bottom));
+  box-sizing: border-box;
 }
 
 
 /* Window styling - let 98.css handle most of it, only override what's needed for positioning */
 .window {
   position: absolute;
-  max-width: calc(100vw - 20px);
+  max-width: var(--window-max-width);
+  min-width: var(--window-min-width);
+  min-height: var(--window-min-height);
   box-sizing: border-box;
   will-change: transform;
   backface-visibility: hidden;
@@ -87,6 +95,30 @@ body {
   contain: layout style paint;
   /* Disable transitions during drag for maximum performance */
   transition: none !important;
+  /* Ensure windows never overflow viewport */
+  overflow: hidden;
+}
+
+/* Wide monitor optimization - prevent windows from being too wide */
+@media (min-width: 1920px) {
+  .window {
+    max-width: min(1400px, var(--window-max-width));
+  }
+  
+  .desktop {
+    max-width: 1920px;
+    margin: 0 auto;
+  }
+}
+
+/* Desktop: Ensure windows clamp within screen bounds */
+@media (min-width: 1025px) {
+  .window {
+    /* Prevent windows from going off-screen - max-width already set globally */
+    max-width: var(--window-max-width-wide);
+    /* Max height ensures windows fit within viewport */
+    max-height: var(--window-max-height);
+  }
 }
 
 .window.draggable {
@@ -97,6 +129,18 @@ body {
 .title-bar {
   cursor: move;
   user-select: none;
+  /* Standardized title bar height using CSS variable */
+  min-height: var(--window-title-bar-height);
+  height: var(--window-title-bar-height);
+  /* Safe-area padding for notched devices - add to existing padding */
+  padding-top: calc(2px + var(--safe-area-inset-top));
+  padding-left: calc(2px + var(--safe-area-inset-left));
+  padding-right: calc(2px + var(--safe-area-inset-right));
+  padding-bottom: 2px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 /* Title bar icon */
@@ -152,6 +196,16 @@ body {
   background-size: 8px 7px !important;
 }
 
+/* Mobile: Larger touch targets for title bar controls */
+@media (max-width: 640px) {
+  .title-bar-controls button {
+    width: 44px !important; /* Thumb-friendly touch target */
+    height: 44px !important; /* Thumb-friendly touch target */
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+}
+
 .title-bar-controls button:active {
   border: 1px inset #c0c0c0;
 }
@@ -160,6 +214,11 @@ body {
   background: #d4d0c8;
 }
 
+/* ============================================
+   FOCUS INDICATORS (Keyboard Navigation)
+   ============================================ */
+
+/* Standard focus outline for interactive elements */
 .title-bar-controls button:focus-visible,
 .taskbar-window-button:focus-visible,
 .start-button:focus-visible,
@@ -169,25 +228,110 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid #000080;
-  outline-offset: 2px;
+  outline: var(--focus-outline-width) solid var(--focus-outline-color-dark);
+  outline-offset: var(--focus-outline-offset);
+}
+
+/* Mobile: Use lighter blue for better visibility */
+@media (max-width: 640px) {
+  .title-bar-controls button:focus-visible,
+  .taskbar-window-button:focus-visible,
+  .start-button:focus-visible,
+  .field-row button:focus-visible,
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: var(--focus-outline-width) solid var(--focus-outline-color) !important;
+    outline-offset: var(--focus-outline-offset) !important;
+  }
+}
+
+/* ============================================
+   TRAIT SELECTOR FOCUS INDICATORS
+   ============================================ */
+
+/* Visual focus indication for trait selectors (keyboard navigation) */
+.trait-selector-wrapper.trait-focused {
+  position: relative;
+}
+
+.trait-selector-wrapper.trait-focused::before {
+  content: '';
+  position: absolute;
+  top: calc(-1 * var(--focus-outline-offset));
+  left: calc(-1 * var(--focus-outline-offset));
+  right: calc(-1 * var(--focus-outline-offset));
+  bottom: calc(-1 * var(--focus-outline-offset));
+  border: var(--focus-outline-width) solid var(--focus-outline-color);
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Focused trait select element */
+.trait-select-focused:focus-visible,
+select.trait-select-focused:focus-visible {
+  outline: var(--focus-outline-width) solid var(--focus-outline-color);
+  outline-offset: var(--focus-outline-offset);
+  background-color: var(--focus-bg-highlight);
+}
+
+/* Selected option in dropdown (when navigating with keyboard) */
+.trait-select-focused option:checked {
+  background-color: var(--focus-bg-highlight-strong);
+  color: var(--focus-outline-color-dark);
+  font-weight: bold;
+}
+
+.trait-select-focused {
+  outline: var(--focus-outline-width) solid var(--focus-outline-color) !important;
+  outline-offset: var(--focus-outline-offset) !important;
+  background-color: var(--focus-bg-highlight) !important;
+}
+
+@keyframes trait-focus-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
 }
 
 .window.active {
   box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4);
-  transition: box-shadow 0.2s ease;
+  /* Note: box-shadow is not GPU-accelerated, but it's minimal and necessary for visual feedback */
+  /* Note: box-shadow transition removed - not GPU-friendly, minimal visual impact */
 }
 
-/* Transitions for interactive elements */
+/* GPU-friendly transitions (transform and opacity only) */
 button,
 a,
-.thumb,
-.window,
 .title-bar-controls button,
 .taskbar-window-button,
 .start-button,
 .start-menu-item {
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  will-change: transform;
+}
+
+.thumb {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  will-change: transform;
+}
+
+/* Touch optimization for buttons */
+button,
+a,
+.taskbar-window-button,
+.start-button,
+.start-menu-item,
+.primary-button,
+.expand-button,
+.close-button {
+  touch-action: manipulation; /* Remove 300ms tap delay on mobile */
 }
 
 /* Enhanced hover states */
@@ -235,10 +379,10 @@ a,
   50% { transform: scale(1.2); }
 }
 
-/* Skeleton Shimmer Animation */
+/* Skeleton Shimmer Animation - GPU-friendly using transform */
 @keyframes shimmer {
-  0% { left: -100%; }
-  100% { left: 100%; }
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 .sr-only {
@@ -263,7 +407,7 @@ a,
 .readme-window .window-body,
 #window-readme-txt .window-body,
 .window-body.scroll-allowed {
-  max-height: calc(90vh - 60px); /* Account for title bar */
+  max-height: calc(90dvh - 60px); /* Use dynamic viewport height, account for title bar */
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -299,17 +443,99 @@ a,
   flex-direction: column;
   overflow: hidden; /* Container doesn't scroll, inner content does */
   min-height: 0;
-  max-height: calc(90vh - 60px); /* Account for title bar */
+  max-height: calc(90dvh - 60px); /* Use dynamic viewport height, account for title bar */
   height: auto;
 }
 
 /* Ensure Wojak Creator window stays within viewport */
 .wojak-creator-window {
-  max-height: 90vh !important;
+  max-height: 90dvh !important; /* Use dynamic viewport height */
 }
 
 .wojak-creator-window .window-body {
-  max-height: calc(90vh - 60px) !important; /* Title bar is ~60px */
+  max-height: calc(90dvh - 60px) !important; /* Use dynamic viewport height, title bar is ~60px */
+}
+
+/* Desktop Layout: Two-panel layout with max-width constraints */
+@media (min-width: 1025px) {
+  .meme-generator-desktop {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: var(--spacing-xl) !important; /* 24px on desktop */
+    align-items: flex-start !important;
+    flex-wrap: nowrap !important;
+    padding: var(--spacing-lg) !important; /* 20px on desktop */
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Left panel: Controls (Trait Selectors) */
+  .meme-generator-controls {
+    flex: 0 0 var(--wojak-controls-panel-width) !important;
+    min-width: 300px !important;
+    max-width: var(--wojak-controls-panel-max-width) !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    outline: none !important;
+  }
+
+  .trait-selectors-scroll {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    min-height: 0 !important;
+    padding-right: var(--spacing-sm) !important; /* Space for scrollbar */
+  }
+
+  /* Right panel: Generator Preview */
+  .meme-generator-preview {
+    flex: 0 0 var(--wojak-preview-panel-width) !important;
+    min-width: 400px !important;
+    max-width: var(--wojak-preview-panel-max-width) !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .panel-label {
+    margin: 0 0 var(--spacing-md) 0 !important;
+    font-size: 11px !important;
+    font-weight: bold !important;
+    flex-shrink: 0 !important;
+  }
+
+  .export-controls-wrapper {
+    margin-top: var(--spacing-md) !important;
+    width: 100% !important;
+  }
+
+  /* Ensure clean snapping - no overlap */
+  .meme-generator-desktop > * {
+    box-sizing: border-box !important;
+  }
+}
+
+/* Mobile: Fullscreen canvas-first layout */
+.wojak-creator-mobile {
+  border: none !important;
+  box-shadow: none !important;
+  max-height: 100dvh !important;
+}
+
+.wojak-creator-mobile .window-body {
+  padding: 0 !important;
+  margin: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+}
+
+.meme-generator-mobile {
+  height: 100%;
+  width: 100%;
 }
 
 .banner {
@@ -363,7 +589,9 @@ a,
   position: absolute;
   top: 0;
   left: 0;
-  transition: opacity 0.3s;
+  transition: opacity 0.2s ease;
+  will-change: opacity;
+  transform: translateZ(0); /* Force GPU acceleration */
 }
 
 .thumb .img.back {
@@ -433,7 +661,7 @@ a,
 }
 
 .memetic-fade {
-  animation: fadeInOut 3s ease-in-out infinite;
+  animation: fadeInOut 0.2s ease-in-out infinite;
 }
 
 @keyframes fadeInOut {
@@ -575,28 +803,42 @@ p {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   .desktop {
-    padding-bottom: 50px;
+    padding-bottom: calc(var(--taskbar-height) + var(--safe-area-inset-bottom));
   }
 
   .window {
     position: relative !important;
-    left: 10px !important;
-    right: 10px !important;
-    width: calc(100vw - 20px) !important;
-    max-width: calc(100vw - 20px) !important;
-    margin: 10px auto;
-    top: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    margin: 0 !important;
+    top: 0 !important;
+    /* Disable dragging on mobile */
+    pointer-events: auto;
+  }
+
+  /* Disable drag cursor on mobile */
+  .window .title-bar {
+    cursor: default !important;
+  }
+
+  /* Hide resize handle on mobile */
+  .window-resize-handle {
+    display: none !important;
   }
 
   .side-stack {
     position: relative !important;
     right: auto !important;
     top: auto !important;
-    width: calc(100vw - 20px) !important;
-    max-width: calc(100vw - 20px) !important;
-    margin: 10px;
+    width: var(--window-max-width) !important;
+    max-width: var(--window-max-width) !important;
+    margin: var(--spacing-lg);
   }
 
   .side-stack .window {
@@ -610,9 +852,12 @@ p {
 
 
   .title-bar {
-    padding: 6px 8px;
+    padding-top: calc(var(--spacing-sm) + var(--safe-area-inset-top));
+    padding-right: calc(var(--spacing-lg) + var(--safe-area-inset-right));
+    padding-bottom: var(--spacing-sm);
+    padding-left: calc(var(--spacing-lg) + var(--safe-area-inset-left));
     font-size: 10px;
-    min-height: 36px;
+    min-height: calc(var(--header-height) + var(--safe-area-inset-top));
   }
 
   .title-bar-controls button {
@@ -645,13 +890,13 @@ p {
     margin-bottom: 4px;
   }
 
-  /* Meme generator responsive */
-  .meme-generator-container {
+  /* Meme generator responsive - mobile only (exclude desktop) */
+  .meme-generator-container:not(.meme-generator-desktop) {
     flex-direction: column !important;
     flex-wrap: wrap !important;
   }
 
-  .meme-generator-container > div {
+  .meme-generator-container:not(.meme-generator-desktop) > div {
     flex: 1 1 100% !important;
     min-width: 100% !important;
     width: 100% !important;
@@ -670,56 +915,62 @@ p {
   }
 }
 
+/* Additional mobile adjustments for very small screens */
 @media (max-width: 480px) {
   .window {
-    left: 5px !important;
-    right: 5px !important;
-    width: calc(100vw - 10px) !important;
-    max-width: calc(100vw - 10px) !important;
-    margin: 5px auto;
+    left: var(--spacing-sm) !important;
+    right: var(--spacing-sm) !important;
+    width: calc(100vw - var(--spacing-sm) * 2 - var(--safe-area-inset-left) - var(--safe-area-inset-right)) !important;
+    max-width: calc(100vw - var(--spacing-sm) * 2 - var(--safe-area-inset-left) - var(--safe-area-inset-right)) !important;
+    margin: var(--spacing-sm) auto;
+    box-sizing: border-box; /* Prevent overflow */
+    overflow-x: hidden; /* Prevent horizontal scroll */
   }
 
   .side-stack {
-    width: calc(100vw - 10px) !important;
-    max-width: calc(100vw - 10px) !important;
-    margin: 5px;
+    width: calc(100vw - var(--spacing-sm) * 2) !important;
+    max-width: calc(100vw - var(--spacing-sm) * 2) !important;
+    margin: var(--spacing-sm);
   }
 
   .gallery-grid {
     grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    gap: 6px;
+    gap: var(--spacing-sm);
   }
 
   .title-bar-controls button {
-    width: 14px;
-    height: 12px;
+    width: 44px; /* Thumb-friendly touch target */
+    height: 44px; /* Thumb-friendly touch target */
+    min-width: 44px;
+    min-height: 44px;
+    padding: 8px; /* Ensure content is centered */
   }
 
   .window-body {
-    padding: 4px;
+    padding: var(--spacing-sm);
     font-size: 10px;
   }
 
   p {
     font-size: 11px;
-    margin-bottom: 8px;
+    margin-bottom: var(--spacing-lg);
   }
 
   ul {
-    margin-left: 16px;
+    margin-left: var(--spacing-2xl);
     font-size: 11px;
   }
 }
 
 /* Tablet adjustments */
-@media (min-width: 769px) and (max-width: 1024px) {
+@media (min-width: 641px) and (max-width: 1024px) {
   .window {
-    max-width: calc(100vw - 40px);
+    max-width: var(--window-max-width);
   }
 
   .side-stack {
-    width: 350px;
-    max-width: calc(100vw - 40px);
+    width: var(--panel-sidebar-width);
+    max-width: var(--window-max-width);
   }
 }
 
@@ -749,13 +1000,15 @@ p {
   }
 
   .taskbar-window-button {
-    min-height: 36px;
-    padding: 6px 12px;
+    min-height: 44px; /* Thumb-friendly touch target */
+    min-width: 44px; /* Thumb-friendly touch target */
+    padding: 8px 12px;
     font-size: 12px;
   }
 
   .start-button {
-    min-height: 36px;
+    min-height: 44px; /* Thumb-friendly touch target */
+    min-width: 44px; /* Thumb-friendly touch target */
     padding: 0 16px;
   }
 
@@ -776,19 +1029,25 @@ p {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 30px;
+  height: calc(var(--taskbar-height) + var(--safe-area-inset-bottom));
+  padding-bottom: var(--safe-area-inset-bottom);
+  padding-left: var(--safe-area-inset-left);
+  padding-right: var(--safe-area-inset-right);
   background: #c0c0c0;
-  border-top: 2px solid #ffffff;
+  border-top: var(--border-width) solid #ffffff;
   display: flex;
   align-items: center;
   z-index: 10000;
-  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 calc(var(--shadow-size) * -1) calc(var(--shadow-size) * 2) rgba(0, 0, 0, 0.3);
+  /* Ensure taskbar never overlaps content - always on top */
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .start-button {
-  height: 22px;
-  margin: 2px 4px;
-  padding: 0 8px;
+  height: calc(var(--taskbar-height) - var(--spacing-sm));
+  margin: var(--spacing-xs) var(--spacing-sm);
+  padding: 0 var(--spacing-lg);
   border: 1px outset #c0c0c0;
   background: #c0c0c0;
   cursor: pointer;
@@ -870,8 +1129,23 @@ p {
 }
 
 .taskbar-window-button.active {
-  border: 1px inset #c0c0c0;
+  border: 1px inset #808080;
   background: #c0c0c0;
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.2);
+  font-weight: bold;
+  /* Visual indicator that this window is active */
+  position: relative;
+}
+
+.taskbar-window-button.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #000080; /* Windows 98 blue accent */
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .taskbar-window-button.minimized {
@@ -972,24 +1246,24 @@ p {
 }
 
 /* Mobile taskbar adjustments */
-@media (max-width: 768px) {
+@media (min-width: 641px) and (max-width: 1024px) {
   .desktop {
-    padding-bottom: 40px;
+    padding-bottom: var(--taskbar-height);
   }
 
   .taskbar {
-    height: 40px;
+    height: var(--taskbar-height);
   }
 
   .start-button {
-    height: 32px;
-    padding: 0 12px;
+    height: calc(var(--taskbar-height) - var(--spacing-sm));
+    padding: 0 var(--spacing-xl);
     font-size: 12px;
   }
 
   .start-menu {
-    bottom: 40px;
-    width: 180px;
+    bottom: var(--taskbar-height);
+    width: var(--panel-start-menu-width);
   }
 }
 

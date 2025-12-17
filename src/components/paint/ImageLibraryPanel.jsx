@@ -60,7 +60,7 @@ export default function ImageLibraryPanel({ onImageSelect }) {
         backgroundColor: '#ffffff',
         padding: '4px',
         minHeight: '150px',
-        maxHeight: 'calc(100vh - 250px)',
+        maxHeight: 'calc(100dvh - 250px)', /* Use dynamic viewport height */
         overflowY: 'auto',
         display: 'grid',
         gridTemplateColumns: 'repeat(2, 1fr)',

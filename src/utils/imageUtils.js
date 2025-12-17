@@ -65,18 +65,81 @@ export async function copyCanvasToClipboard(canvas) {
   }
 }
 
+// Image cache to prevent reloading the same images
+const imageCache = new Map()
+
 /**
- * Loads an image from a URL
+ * Loads an image from a URL with caching
  * @param {string} url - Image URL
  * @returns {Promise<HTMLImageElement>}
  */
 export function loadImage(url) {
+  if (!url) {
+    return Promise.reject(new Error('Image URL is required'))
+  }
+
+  // Return cached image if available and loaded
+  if (imageCache.has(url)) {
+    const cached = imageCache.get(url)
+    // If cached image is already loaded, clone it for reuse
+    if (cached.complete && cached.naturalWidth > 0) {
+      return Promise.resolve(cached)
+    }
+    // If still loading, wait for it
+    return new Promise((resolve, reject) => {
+      cached.onload = () => resolve(cached)
+      cached.onerror = reject
+    })
+  }
+
+  // Load new image
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.crossOrigin = 'anonymous'
-    img.onload = () => resolve(img)
-    img.onerror = (error) => reject(error)
+    
+    const cleanup = () => {
+      img.onload = null
+      img.onerror = null
+    }
+    
+    img.onload = () => {
+      cleanup()
+      // Cache the image
+      imageCache.set(url, img)
+      resolve(img)
+    }
+    
+    img.onerror = (error) => {
+      cleanup()
+      // Don't cache failed images
+      reject(error)
+    }
+    
     img.src = url
   })
+}
+
+/**
+ * Preload images for faster rendering
+ * @param {string[]} urls - Array of image URLs to preload
+ * @returns {Promise<void>}
+ */
+export async function preloadImages(urls) {
+  const promises = urls.map(url => {
+    if (!imageCache.has(url)) {
+      return loadImage(url).catch(() => {
+        // Silently fail for preload - individual loads will handle errors
+      })
+    }
+    return Promise.resolve()
+  })
+  await Promise.all(promises)
+}
+
+/**
+ * Clear the image cache (useful for memory management)
+ */
+export function clearImageCache() {
+  imageCache.clear()
 }
 
