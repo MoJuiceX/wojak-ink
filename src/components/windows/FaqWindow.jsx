@@ -4,7 +4,7 @@ export default function FaqWindow() {
   return (
     <Window
       title="FAQ"
-      style={{ width: '1200px', maxWidth: 'calc(100vw - 40px)', left: '20px', top: '980px' }}
+      style={{ width: '1200px', maxWidth: 'calc(100vw - 40px)' }}
     >
       <p>
         <b>What is this?</b> A handcrafted Wojak NFT collection made for the

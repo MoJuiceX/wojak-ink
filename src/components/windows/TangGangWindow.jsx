@@ -4,7 +4,8 @@ export default function TangGangWindow() {
   return (
     <Window
       id="tanggang"
-      title="TangGang"
+      title="🍊 TangGang"
+      icon={null}
       noStack={true}
       style={{ 
         left: '860px', // Positioned next to README.TXT (20px + 820px + 20px gap)

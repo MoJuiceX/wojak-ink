@@ -145,7 +145,11 @@ export function useDraggable(noStack = false) {
           x: rect.left,
           y: rect.top,
           width: rect.width,
-          height: rect.height
+          height: rect.height,
+          left: rect.left,
+          right: rect.right,
+          top: rect.top,
+          bottom: rect.bottom
         })
       }
       
@@ -206,33 +210,47 @@ export function useDraggable(noStack = false) {
       
       // Update orange trail window position if this is TangGang
       if (win.id === 'tanggang' && window.__orangeTrail) {
+        const rect = win.getBoundingClientRect()
         window.__orangeTrail.updateWindowRect({
           x: constrainedViewportX,
           y: constrainedViewportY,
           width: win.__originalWidth,
-          height: win.__originalHeight
+          height: win.__originalHeight,
+          left: rect.left,
+          right: rect.right,
+          top: rect.top,
+          bottom: rect.bottom
         })
       }
     }
 
     const endDrag = (e) => {
       if (!isDraggingRef.current || (e && e.pointerId !== activePointerId)) return
-      isDraggingRef.current = false
       
-      // Stop orange trail if this is TangGang
-      if (win.id === 'tanggang' && window.__orangeTrail) {
-        window.__orangeTrail.stopDragging()
-      }
+      // Release pointer capture FIRST to fix mouse sticking issue
       try {
         if (activePointerId !== null) {
           handle.releasePointerCapture(activePointerId)
         }
       } catch (err) {}
       activePointerId = null
+      
+      // Reset drag state
+      isDraggingRef.current = false
+      document.body.style.userSelect = ''
+      document.documentElement.style.touchAction = ''
+      if (win.__preventDrag) {
+        document.removeEventListener('dragstart', win.__preventDrag)
+        delete win.__preventDrag
+      }
 
       const transform = win.style.transform || ''
       // Match both translate and translate3d formats
       const match = transform.match(/translate(?:3d)?\(([-0-9.]+)px[,\s]+([-0-9.]+)px/)
+      
+      let constrainedViewportX = 0
+      let constrainedViewportY = 0
+      
       if (match) {
         const dx = parseFloat(match[1])
         const dy = parseFloat(match[2])
@@ -251,8 +269,8 @@ export function useDraggable(noStack = false) {
         const maxX = Math.max(0, containerRect.width - win.__originalWidth)
         const maxY = Math.max(0, containerRect.height - win.__originalHeight - (isMobile ? 0 : taskbarHeight))
         
-        const constrainedViewportX = Math.max(minX, Math.min(maxX, finalViewportX))
-        const constrainedViewportY = Math.max(minY, Math.min(maxY, finalViewportY))
+        constrainedViewportX = Math.max(minX, Math.min(maxX, finalViewportX))
+        constrainedViewportY = Math.max(minY, Math.min(maxY, finalViewportY))
         
         // Convert viewport coordinates to container-relative coordinates
         if (win.__containerRef) {
@@ -275,14 +293,26 @@ export function useDraggable(noStack = false) {
           win.dataset.userDragged = 'true'
         }
       }
+      
       win.style.transform = ''
       win.classList.remove('dragging')
-
-      document.body.style.userSelect = ''
-      document.documentElement.style.touchAction = ''
-      if (win.__preventDrag) {
-        document.removeEventListener('dragstart', win.__preventDrag)
-        delete win.__preventDrag
+      
+      // Stop orange trail if this is TangGang - trigger smash on drag end
+      // Do this AFTER calculating constrainedViewportX/Y so we have the values
+      if (win.id === 'tanggang' && window.__orangeTrail) {
+        const rect = win.getBoundingClientRect()
+        // Get previous rect from orange trail ref
+        const prevRect = window.__orangeTrail.prevWindowRectRef?.current || null
+        window.__orangeTrail.stopDragging({
+          x: constrainedViewportX,
+          y: constrainedViewportY,
+          width: win.__originalWidth,
+          height: win.__originalHeight,
+          left: rect.left,
+          right: rect.right,
+          top: rect.top,
+          bottom: rect.bottom
+        }, prevRect)
       }
     }
 

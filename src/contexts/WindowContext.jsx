@@ -13,6 +13,7 @@ export function WindowProvider({ children }) {
   const [windows, setWindows] = useState(new Map())
   const [minimizedWindows, setMinimizedWindows] = useState(new Set())
   const [activeWindowId, setActiveWindowId] = useState(null)
+  const [hasUserMoved, setHasUserMoved] = useState(new Map()) // Track if user has moved each window
   const nextZIndexRef = useRef(1000)
 
   /**
@@ -23,6 +24,7 @@ export function WindowProvider({ children }) {
    * @param {string} [windowData.title] - Window title
    * @param {Object} [windowData.position] - Initial window position {x, y}
    * @param {Object} [windowData.size] - Initial window size {width, height}
+   * @param {boolean} [windowData.centerOnOpen=true] - Whether to center window on first open
    */
   const registerWindow = useCallback((windowId, windowData) => {
     if (!windowId || typeof windowId !== 'string') {
@@ -35,16 +37,61 @@ export function WindowProvider({ children }) {
     setWindows(prev => {
       // Check for duplicate window IDs
       const existingWindow = prev.get(windowId)
+      const isNewWindow = !existingWindow
+      
       if (existingWindow && process.env.NODE_ENV === 'development') {
         console.warn(`[WindowContext] registerWindow: Window with ID "${windowId}" already exists. Preserving existing state.`)
       }
 
       const next = new Map(prev)
+      
+      // Determine position: center on first open if new window and centerOnOpen is true
+      let position = windowData?.position || existingWindow?.position
+      const centerOnOpen = windowData?.centerOnOpen !== false // Default to true
+      
+      // For new windows, calculate centered position synchronously if possible
+      if (isNewWindow && centerOnOpen && !windowData?.position) {
+        try {
+          const { getCenteredPosition, getDefaultWindowSize } = require('../utils/windowPosition')
+          const defaultSize = getDefaultWindowSize(windowId)
+          
+          // Parse window size from windowData or use defaults
+          let windowWidth = defaultSize.width
+          let windowHeight = defaultSize.height
+          
+          if (windowData?.size) {
+            if (typeof windowData.size.width === 'number') {
+              windowWidth = windowData.size.width
+            } else if (typeof windowData.size.width === 'string' && windowData.size.width.includes('px')) {
+              windowWidth = parseInt(windowData.size.width) || defaultSize.width
+            }
+            
+            if (typeof windowData.size.height === 'number') {
+              windowHeight = windowData.size.height
+            } else if (typeof windowData.size.height === 'string' && windowData.size.height.includes('px')) {
+              windowHeight = parseInt(windowData.size.height) || defaultSize.height
+            }
+          }
+          
+          position = getCenteredPosition({ 
+            width: windowWidth,
+            height: windowHeight,
+            padding: 24 // Explicit padding for desktop OS feel
+          })
+          
+          // Don't apply position to DOM here during registration - let the Window component's effect handle it
+          // This prevents glitches when multiple windows register at once on page load
+        } catch (e) {
+          // Fallback to default position if centering fails
+          position = { x: 20, y: 20 }
+        }
+      }
+      
       // Preserve existing window state (isMaximized, zIndex) when re-registering
       const windowEntry = {
         id: windowId,
         title: windowData?.title || existingWindow?.title || windowId,
-        position: windowData?.position || existingWindow?.position || { x: 20, y: 20 },
+        position: position,
         size: windowData?.size || existingWindow?.size || { width: 'auto', height: 'auto' },
         // Preserve zIndex from existing window, or assign new one for new windows
         zIndex: existingWindow?.zIndex ?? nextZIndexRef.current++,
@@ -55,6 +102,12 @@ export function WindowProvider({ children }) {
       // Only increment zIndex if this is a new window
       if (!existingWindow) {
         windowEntry.zIndex = nextZIndexRef.current++
+        // Reset hasUserMoved for new windows
+        setHasUserMoved(prev => {
+          const next = new Map(prev)
+          next.set(windowId, false)
+          return next
+        })
       }
       next.set(windowId, windowEntry)
       return next
@@ -115,6 +168,8 @@ export function WindowProvider({ children }) {
 
   /**
    * Bring a window to the front (highest z-index).
+   * Also centers the window if it hasn't been moved by the user.
+   * This is called when clicking a window in the taskbar or Start menu.
    * 
    * @param {string} windowId - Unique identifier for the window to bring to front
    */
@@ -123,18 +178,88 @@ export function WindowProvider({ children }) {
       const next = new Map(prev)
       const window = next.get(windowId)
       if (window) {
-        next.set(windowId, {
-          ...window,
-          zIndex: nextZIndexRef.current++,
-        })
+        const wasMoved = hasUserMoved.get(windowId)
+        
+        // Center window if it hasn't been moved by user
+        // This ensures windows opened from Start menu/taskbar appear centered
+        if (!wasMoved && !window.isMaximized) {
+          try {
+            const { getCenteredPosition, getDefaultWindowSize } = require('../utils/windowPosition')
+            const defaultSize = getDefaultWindowSize(windowId)
+            
+            // Try to get actual rendered size from DOM element
+            const windowElement = document.getElementById(windowId)
+            let windowWidth = defaultSize.width
+            let windowHeight = defaultSize.height
+            
+            if (windowElement) {
+              const rect = windowElement.getBoundingClientRect()
+              if (rect.width > 0) windowWidth = rect.width
+              if (rect.height > 0) windowHeight = rect.height
+            } else {
+              // Fallback to stored size or defaults
+              if (window.size) {
+                if (typeof window.size.width === 'number') {
+                  windowWidth = window.size.width
+                } else if (typeof window.size.width === 'string' && window.size.width.includes('px')) {
+                  windowWidth = parseInt(window.size.width) || defaultSize.width
+                }
+                
+                if (typeof window.size.height === 'number') {
+                  windowHeight = window.size.height
+                } else if (typeof window.size.height === 'string' && window.size.height.includes('px')) {
+                  windowHeight = parseInt(window.size.height) || defaultSize.height
+                }
+              }
+            }
+            
+            const centeredPos = getCenteredPosition({
+              width: windowWidth,
+              height: windowHeight,
+              padding: 24 // Explicit padding for desktop OS feel
+            })
+            
+            // Apply position to DOM element using requestAnimationFrame to batch updates
+            // This prevents glitches when multiple windows are centered at once
+            if (windowElement && (!windowElement.style.position || windowElement.style.position === 'relative')) {
+              requestAnimationFrame(() => {
+                const el = document.getElementById(windowId)
+                if (el && (!el.style.position || el.style.position === 'relative')) {
+                  el.style.left = `${centeredPos.x}px`
+                  el.style.top = `${centeredPos.y}px`
+                }
+              })
+            }
+            
+            next.set(windowId, {
+              ...window,
+              position: centeredPos,
+              zIndex: nextZIndexRef.current++,
+            })
+          } catch (e) {
+            // If centering fails, just update z-index
+            next.set(windowId, {
+              ...window,
+              zIndex: nextZIndexRef.current++,
+            })
+          }
+        } else {
+          // Just update z-index if window was moved or is maximized
+          next.set(windowId, {
+            ...window,
+            zIndex: nextZIndexRef.current++,
+          })
+        }
       }
       return next
     })
     setActiveWindowId(windowId)
-  }, [])
+  }, [hasUserMoved])
 
   /**
    * Restore a minimized window (show it and remove from minimized set).
+   * Centers window if it has never been moved by the user.
+   * This is called when opening a window from Start menu or taskbar.
    * 
    * @param {string} windowId - Unique identifier for the window to restore
    */
@@ -153,6 +278,69 @@ export function WindowProvider({ children }) {
         }
         return prev
       }
+      
+      const window = prev.get(windowId)
+      const wasMoved = hasUserMoved.get(windowId)
+      
+      // Center on restore only if window has never been moved by user
+      // This ensures windows opened from Start menu/taskbar appear centered
+      if (!wasMoved && !window.isMaximized) {
+        try {
+          const { getCenteredPosition, getDefaultWindowSize } = require('../utils/windowPosition')
+          const defaultSize = getDefaultWindowSize(windowId)
+          
+          // Try to get actual rendered size from DOM element
+          const windowElement = document.getElementById(windowId)
+          let windowWidth = defaultSize.width
+          let windowHeight = defaultSize.height
+          
+          if (windowElement) {
+            const rect = windowElement.getBoundingClientRect()
+            if (rect.width > 0) windowWidth = rect.width
+            if (rect.height > 0) windowHeight = rect.height
+          } else {
+            // Fallback to stored size or defaults
+            if (window.size) {
+              if (typeof window.size.width === 'number') {
+                windowWidth = window.size.width
+              } else if (typeof window.size.width === 'string' && window.size.width.includes('px')) {
+                windowWidth = parseInt(window.size.width) || defaultSize.width
+              }
+              
+              if (typeof window.size.height === 'number') {
+                windowHeight = window.size.height
+              } else if (typeof window.size.height === 'string' && window.size.height.includes('px')) {
+                windowHeight = parseInt(window.size.height) || defaultSize.height
+              }
+            }
+          }
+          
+          const centeredPos = getCenteredPosition({
+            width: windowWidth,
+            height: windowHeight,
+            padding: 24 // Explicit padding for desktop OS feel
+          })
+          
+          // Apply position to DOM element using requestAnimationFrame to batch updates
+          // This prevents glitches when multiple windows are restored at once
+          if (windowElement && (!windowElement.style.position || windowElement.style.position === 'relative')) {
+            requestAnimationFrame(() => {
+              const el = document.getElementById(windowId)
+              if (el && (!el.style.position || el.style.position === 'relative')) {
+                el.style.left = `${centeredPos.x}px`
+                el.style.top = `${centeredPos.y}px`
+              }
+            })
+          }
+          
+          const next = new Map(prev)
+          next.set(windowId, { ...window, position: centeredPos })
+          return next
+        } catch (e) {
+          // Continue with existing position if centering fails
+        }
+      }
+      
       return prev
     })
 
@@ -163,7 +351,7 @@ export function WindowProvider({ children }) {
     })
     setActiveWindowId(windowId)
     bringToFront(windowId)
-  }, [bringToFront])
+  }, [bringToFront, hasUserMoved])
 
   /**
    * Maximize a window (fill the screen).
@@ -225,6 +413,12 @@ export function WindowProvider({ children }) {
         next.set(windowId, {
           ...window,
           position,
+        })
+        // Mark window as moved by user
+        setHasUserMoved(prev => {
+          const next = new Map(prev)
+          next.set(windowId, true)
+          return next
         })
       }
       return next

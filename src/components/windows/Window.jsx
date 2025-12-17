@@ -15,6 +15,7 @@ import { getWindowIcon } from '../../utils/windowIcons'
  * @param {Function} [props.onClose] - Callback function called when the window is closed.
  * @param {string} [props.className=''] - Additional CSS classes to apply to the window container.
  * @param {string} [props.icon] - Optional icon path. If not provided, will be auto-determined from window ID/title.
+ * @param {boolean} [props.allowScroll=false] - If true, adds scroll-allowed class to window-body for internal scrolling.
  * @returns {React.ReactElement|null} The window component or null if not visible.
  * 
  * @example
@@ -37,6 +38,7 @@ export default function Window({
   onClose,
   className = '',
   icon,
+  allowScroll = false, // If true, adds scroll-allowed class to window-body
 }) {
   // Generate stable window ID - sanitize title to only allow alphanumeric, hyphens, and underscores
   const sanitizeWindowId = (title) => {
@@ -50,7 +52,8 @@ export default function Window({
   const windowId = windowIdRef.current
   
   // Get icon path - use provided icon or auto-determine from window ID/title
-  const iconPath = icon || getWindowIcon(windowId, title)
+  // If icon is explicitly null or false, don't render any icon
+  const iconPath = icon === null || icon === false ? null : (icon || getWindowIcon(windowId, title))
   
   const { 
     registerWindow, 
@@ -110,10 +113,14 @@ export default function Window({
         if (retryWin && !hasRegisteredRef.current && isMountedRef.current) {
           try {
             const rect = retryWin.getBoundingClientRect()
+            // Parse size from style or use defaults
+            const width = retryWin.style.width || style.width || 'auto'
+            const height = retryWin.style.height || style.height || 'auto'
             registerWindow(windowId, {
               title,
-              position: { x: rect.left, y: rect.top },
-              size: { width: retryWin.style.width || style.width || 'auto', height: retryWin.style.height || style.height || 'auto' },
+              // Don't pass position - let registerWindow center it
+              size: { width, height },
+              centerOnOpen: true,
             })
             hasRegisteredRef.current = true
           } catch (error) {
@@ -130,10 +137,14 @@ export default function Window({
 
     try {
       const rect = win.getBoundingClientRect()
+      // Parse size from style or use defaults
+      const width = win.style.width || style.width || 'auto'
+      const height = win.style.height || style.height || 'auto'
       registerWindow(windowId, {
         title,
-        position: { x: rect.left, y: rect.top },
-        size: { width: win.style.width || style.width || 'auto', height: win.style.height || style.height || 'auto' },
+        // Don't pass position - let registerWindow center it
+        size: { width, height },
+        centerOnOpen: true,
       })
       hasRegisteredRef.current = true
     } catch (error) {
@@ -176,12 +187,59 @@ export default function Window({
     }
   }, [windowData, zIndex])
 
+  // Sync position from windowData to DOM element
+  // Use requestAnimationFrame to batch updates and prevent glitches on page load
+  // IMPORTANT: Skip this effect when window is being dragged to avoid conflicts
+  // IMPORTANT: Skip this effect for fixed-positioned windows (like TreasureWindow)
+  useEffect(() => {
+    const win = windowRef.current
+    if (!win || isMaximized || !windowData?.position) return
+
+    // Skip position sync for fixed-positioned windows (they manage their own position)
+    if (style?.position === 'fixed') return
+
+    // Check if window is currently being dragged (has dragging class or transform)
+    const isDragging = win.classList.contains('dragging') || win.style.transform !== ''
+    
+    // Don't sync position during drag - let drag handler manage position
+    if (isDragging) return
+
+    // Use requestAnimationFrame to ensure DOM is ready and batch updates
+    // This prevents visual glitches when multiple windows position at once on page load
+    const rafId = requestAnimationFrame(() => {
+      // Double-check window still exists and is mounted, and still not dragging
+      if (!win || !isMountedRef.current) return
+      if (win.classList.contains('dragging') || win.style.transform !== '') return
+      
+      const { x, y } = windowData.position
+      // Only update if position actually changed to avoid unnecessary updates
+      const currentLeft = parseInt(win.style.left) || 0
+      const currentTop = parseInt(win.style.top) || 0
+      
+      if (Math.abs(currentLeft - x) > 1 || Math.abs(currentTop - y) > 1) {
+        // Apply position directly (no double RAF needed - already in RAF)
+        win.style.left = `${x}px`
+        win.style.top = `${y}px`
+      }
+    })
+
+    return () => cancelAnimationFrame(rafId)
+  }, [windowData?.position, isMaximized, windowId])
+
   // Handle window position updates from dragging
   useEffect(() => {
     const win = windowRef.current
     if (!win || isMaximized) return
 
+    // Skip position tracking for fixed-positioned windows (they manage their own position)
+    if (style?.position === 'fixed') return
+
     const observer = new MutationObserver(() => {
+      // Don't update position if window is currently being dragged
+      if (win.classList.contains('dragging') || win.style.transform !== '') {
+        return
+      }
+      
       const rect = win.getBoundingClientRect()
       updateWindowPosition(windowId, { x: rect.left, y: rect.top })
     })
@@ -192,7 +250,7 @@ export default function Window({
     })
 
     return () => observer.disconnect()
-  }, [windowId, isMaximized, updateWindowPosition])
+  }, [windowId, isMaximized, updateWindowPosition, style?.position])
 
   // Bring to front when clicked - improved handler
   useEffect(() => {
@@ -399,7 +457,8 @@ export default function Window({
         ...style,
         zIndex: windowData?.zIndex || zIndex,
         display: isMinimized ? 'none' : 'block',
-        position: 'relative',
+        // Only set position: relative if not explicitly set in style prop (for fixed positioning support)
+        position: style?.position || 'relative',
       }}
     >
       <div className="title-bar">
@@ -438,7 +497,7 @@ export default function Window({
       </div>
       {!isMinimized && (
         <>
-          <div className="window-body">{children}</div>
+          <div className={`window-body ${allowScroll ? 'scroll-allowed' : ''}`}>{children}</div>
           {!isMaximized && (
             <div
               ref={resizeHandleRef}

@@ -28,9 +28,9 @@ export default function Taskbar({ onOpenWojakCreator, wojakCreatorOpen }) {
 
   const handleWindowClick = (windowId) => {
     if (isWindowMinimized(windowId)) {
-      restoreWindow(windowId)
+      restoreWindow(windowId) // restoreWindow already centers if not moved
     } else {
-      bringToFront(windowId)
+      bringToFront(windowId) // bringToFront now also centers if not moved
     }
     setStartMenuOpen(false)
   }
