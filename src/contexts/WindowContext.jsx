@@ -74,33 +74,76 @@ export function WindowProvider({ children }) {
           const { getCenteredPosition, getDefaultWindowSize } = require('../utils/windowPosition')
           const defaultSize = getDefaultWindowSize(windowId)
           
-          // Parse window size from windowData or use defaults
-          let windowWidth = defaultSize.width
-          let windowHeight = defaultSize.height
-          
-          if (windowData?.size) {
-            if (typeof windowData.size.width === 'number') {
-              windowWidth = windowData.size.width
-            } else if (typeof windowData.size.width === 'string' && windowData.size.width.includes('px')) {
-              windowWidth = parseInt(windowData.size.width) || defaultSize.width
-            }
-            
-            if (typeof windowData.size.height === 'number') {
-              windowHeight = windowData.size.height
-            } else if (typeof windowData.size.height === 'string' && windowData.size.height.includes('px')) {
-              windowHeight = parseInt(windowData.size.height) || defaultSize.height
-            }
-          }
-          
-          // Detect mobile viewport (<= 640px)
+          // Detect mobile viewport (<= 640px) - only center on desktop/tablet
           const isMobile = window.innerWidth <= 640
           
-          position = getCenteredPosition({ 
-            width: windowWidth,
-            height: windowHeight,
-            padding: 24, // Explicit padding for desktop OS feel
-            isMobile: isMobile
-          })
+          // Only center on desktop/tablet, not mobile
+          if (!isMobile) {
+            // Parse window size from windowData or use defaults
+            let windowWidth = defaultSize.width
+            let windowHeight = defaultSize.height
+            
+            if (windowData?.size) {
+              if (typeof windowData.size.width === 'number') {
+                windowWidth = windowData.size.width
+              } else if (typeof windowData.size.width === 'string') {
+                // Handle CSS variables (e.g., 'var(--window-size-tanggang)')
+                if (windowData.size.width.includes('var(')) {
+                  // Try to get computed value from DOM if available
+                  const windowElement = document.getElementById(windowId)
+                  if (windowElement) {
+                    const computedWidth = window.getComputedStyle(windowElement).width
+                    const parsedWidth = parseFloat(computedWidth)
+                    if (!isNaN(parsedWidth) && parsedWidth > 0) {
+                      windowWidth = parsedWidth
+                    }
+                  }
+                  // If element not found yet, use default - position will be updated later
+                } else if (windowData.size.width.includes('px')) {
+                  windowWidth = parseInt(windowData.size.width) || defaultSize.width
+                }
+              }
+              
+              if (typeof windowData.size.height === 'number') {
+                windowHeight = windowData.size.height
+              } else if (typeof windowData.size.height === 'string') {
+                // Handle CSS variables
+                if (windowData.size.height.includes('var(')) {
+                  const windowElement = document.getElementById(windowId)
+                  if (windowElement) {
+                    const computedHeight = window.getComputedStyle(windowElement).height
+                    const parsedHeight = parseFloat(computedHeight)
+                    if (!isNaN(parsedHeight) && parsedHeight > 0) {
+                      windowHeight = parsedHeight
+                    }
+                  }
+                  // If element not found yet, use default - position will be updated later
+                } else if (windowData.size.height.includes('px')) {
+                  windowHeight = parseInt(windowData.size.height) || defaultSize.height
+                } else if (windowData.size.height === 'auto') {
+                  // For auto height, try to measure from DOM
+                  const windowElement = document.getElementById(windowId)
+                  if (windowElement) {
+                    const computedHeight = window.getComputedStyle(windowElement).height
+                    const parsedHeight = parseFloat(computedHeight)
+                    if (!isNaN(parsedHeight) && parsedHeight > 0) {
+                      windowHeight = parsedHeight
+                    }
+                  }
+                }
+              }
+            }
+            
+            position = getCenteredPosition({ 
+              width: windowWidth,
+              height: windowHeight,
+              padding: 24, // Explicit padding for desktop OS feel
+              isMobile: false
+            })
+          } else {
+            // Mobile: use default position
+            position = { x: 20, y: 20 }
+          }
           
           // Don't apply position to DOM here during registration - let the Window component's effect handle it
           // This prevents glitches when multiple windows register at once on page load
@@ -340,7 +383,9 @@ export function WindowProvider({ children }) {
       
       // Center on restore only if window has never been moved by user
       // This ensures windows opened from Start menu/taskbar appear centered
-      if (!wasMoved && !window.isMaximized) {
+      // Only center on desktop/tablet, not mobile
+      const isMobile = window.innerWidth <= 640
+      if (!wasMoved && !window.isMaximized && !isMobile) {
         try {
           const { getCenteredPosition, getDefaultWindowSize } = require('../utils/windowPosition')
           const defaultSize = getDefaultWindowSize(windowId)
@@ -595,6 +640,7 @@ export function WindowProvider({ children }) {
         isWindowActive,
         cascadeWindows,
         tileWindows,
+        hasUserMoved, // Expose hasUserMoved map for components that need to check if user moved a window
       }}
     >
       {children}

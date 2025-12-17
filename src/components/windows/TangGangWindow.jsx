@@ -8,11 +8,11 @@ export default function TangGangWindow() {
       icon={null}
       noStack={true}
       style={{ 
-        left: '860px', // Positioned next to README.TXT (20px + 820px + 20px gap)
-        top: '20px',
+        // Don't set left/top - let centerOnOpen handle positioning
         width: 'var(--window-size-tanggang)',
         maxWidth: 'var(--window-max-width)',
         minWidth: 'var(--window-min-width)',
+        minHeight: '300px', // Stable height for accurate centering
         height: 'auto'
       }}
     >

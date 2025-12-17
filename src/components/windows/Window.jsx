@@ -70,6 +70,7 @@ export default function Window({
     getWindow,
     isWindowMinimized,
     isWindowActive,
+    hasUserMoved,
   } = useWindow()
   
   // Detect mobile viewport
@@ -152,13 +153,19 @@ export default function Window({
     try {
       const rect = win.getBoundingClientRect()
       // Parse size from style or use defaults
+      // For CSS variables, we'll let the registration logic handle it
       const width = win.style.width || style.width || 'auto'
       const height = win.style.height || style.height || 'auto'
+      
+      // Check if this window should be centered (default is true, but can be overridden)
+      // TangGang window should be centered on desktop/tablet
+      const shouldCenter = windowId === 'tanggang' ? (window.innerWidth > 640) : true
+      
       registerWindow(windowId, {
         title,
-        // Don't pass position - let registerWindow center it
+        // Don't pass position - let registerWindow center it if centerOnOpen is true
         size: { width, height },
-        centerOnOpen: true,
+        centerOnOpen: shouldCenter,
       })
       hasRegisteredRef.current = true
     } catch (error) {
@@ -218,6 +225,11 @@ export default function Window({
     // Don't sync position during drag - let drag handler manage position
     if (isDragging) return
 
+    // For TangGang window with CSS variables, we may need to recalculate position
+    // after the window is rendered to get accurate size (only on first open, not after user drags)
+    const needsRecalculation = windowId === 'tanggang' && 
+      (style?.width?.includes('var(') || style?.height === 'auto')
+    
     // Use requestAnimationFrame to ensure DOM is ready and batch updates
     // This prevents visual glitches when multiple windows position at once on page load
     const rafId = requestAnimationFrame(() => {
@@ -225,7 +237,39 @@ export default function Window({
       if (!win || !isMountedRef.current) return
       if (win.classList.contains('dragging') || win.style.transform !== '') return
       
-      const { x, y } = windowData.position
+      let { x, y } = windowData.position
+      
+      // If this is TangGang and we need to recalculate, do it now that DOM is ready
+      // Only recalculate if window hasn't been moved by user (first open)
+      if (needsRecalculation) {
+        try {
+          // Check if user has moved this window - if so, don't recalculate
+          const wasMoved = hasUserMoved?.get(windowId) || win.dataset.userDragged === 'true'
+          
+          if (!wasMoved) {
+            const { getCenteredPosition } = require('../../utils/windowPosition')
+            const rect = win.getBoundingClientRect()
+            if (rect.width > 0 && rect.height > 0) {
+              const isMobile = window.innerWidth <= 640
+              if (!isMobile) {
+                const centeredPos = getCenteredPosition({
+                  width: rect.width,
+                  height: rect.height,
+                  padding: 24,
+                  isMobile: false
+                })
+                x = centeredPos.x
+                y = centeredPos.y
+                // Update the position in context (this will trigger a re-render)
+                updateWindowPosition(windowId, { x, y })
+              }
+            }
+          }
+        } catch (e) {
+          // Fallback to existing position if recalculation fails
+        }
+      }
+      
       // Only update if position actually changed to avoid unnecessary updates
       const currentLeft = parseInt(win.style.left) || 0
       const currentTop = parseInt(win.style.top) || 0
@@ -238,7 +282,7 @@ export default function Window({
     })
 
     return () => cancelAnimationFrame(rafId)
-  }, [windowData?.position, isMaximized, windowId])
+  }, [windowData?.position, isMaximized, windowId, style?.width, style?.height, updateWindowPosition, getWindow])
 
   // Handle window position updates from dragging
   useEffect(() => {
