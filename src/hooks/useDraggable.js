@@ -29,7 +29,9 @@ export function useDraggable(noStack = false) {
     if (!win) return
 
     // Disable dragging if noStack is true (used for mobile)
-    if (noStack) return
+    // EXCEPTION: TangGang window needs dragging for orange smash game
+    const isTangGang = win.id === 'tanggang'
+    if (noStack && !isTangGang) return
 
     const handle = win.querySelector('.title-bar')
     if (!handle) return
