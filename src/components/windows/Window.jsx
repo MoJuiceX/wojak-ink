@@ -41,6 +41,7 @@ export default function Window({
   className = '',
   icon,
   allowScroll = false, // If true, adds scroll-allowed class to window-body
+  forceDraggable = false, // If true, forces dragging even if noStack or isMobile would disable it
 }) {
   // Generate stable window ID - sanitize title to only allow alphanumeric, hyphens, and underscores
   const sanitizeWindowId = (title) => {
@@ -84,8 +85,10 @@ export default function Window({
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Disable dragging on mobile
-  const { windowRef, zIndex, bringToFront: bringToFrontDrag } = useDraggable(noStack || isMobile)
+  // Disable dragging on mobile, unless forceDraggable is true
+  // forceDraggable allows specific windows (like TangGang) to be draggable even on mobile/with noStack
+  const shouldDisableDrag = forceDraggable ? false : (noStack || isMobile)
+  const { windowRef, zIndex, bringToFront: bringToFrontDrag } = useDraggable(shouldDisableDrag)
   const [isVisible, setIsVisible] = useState(true)
   const savedPositionRef = useRef({ x: 0, y: 0 })
   const savedSizeRef = useRef({ width: '', height: '' })

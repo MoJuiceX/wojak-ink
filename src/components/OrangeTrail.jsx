@@ -26,6 +26,24 @@ export default function OrangeTrail() {
   const [juiceParticles, setJuiceParticles] = useState([]) // Temporary with TTL - fade out over time
   const [splashStains, setSplashStains] = useState([])
   
+  // Refs to store latest state values for animation loop (prevents stale closures and infinite loops)
+  const groundOrangesRef = useRef([])
+  const juiceParticlesRef = useRef([])
+  const splashStainsRef = useRef([])
+  
+  // Keep refs in sync with state (but don't trigger re-renders)
+  useEffect(() => {
+    groundOrangesRef.current = groundOranges
+  }, [groundOranges])
+  
+  useEffect(() => {
+    juiceParticlesRef.current = juiceParticles
+  }, [juiceParticles])
+  
+  useEffect(() => {
+    splashStainsRef.current = splashStains
+  }, [splashStains])
+  
   // Dev-only: Track groundOranges count for invariant checking
   const prevGroundOrangesCountRef = useRef(0)
   const [smashedCount, setSmashedCount] = useState(0) // Always start at 0 (no persistence)
@@ -202,18 +220,23 @@ export default function OrangeTrail() {
         const now = Date.now()
         
         // Count unsmashed oranges for spawn gate logic
-        // Use functional check to avoid stale closures
-        const unsmashedCount = groundOranges.filter(o => !o.smashed).length
+        // Use ref to get latest value without causing re-renders
+        const unsmashedCount = groundOrangesRef.current.filter(o => !o.smashed).length
         
         // Update spawn paused state (both state for UI and ref for animation loop)
         // Stop spawning when unsmashed oranges >= cap, resume when all are smashed
+        // CRITICAL: Only update state if it actually changed to prevent infinite loops
         if (unsmashedCount >= MAX_ORANGES_ON_GROUND) {
-          spawnPausedRef.current = true
-          setSpawnPaused(true)
+          if (!spawnPausedRef.current) {
+            spawnPausedRef.current = true
+            setSpawnPaused(true)
+          }
         } else if (unsmashedCount === 0) {
           // Start spawning again when all oranges are smashed
-          spawnPausedRef.current = false
-          setSpawnPaused(false)
+          if (spawnPausedRef.current) {
+            spawnPausedRef.current = false
+            setSpawnPaused(false)
+          }
         }
         
         // Spawn particles while dragging (only if not paused)
@@ -265,8 +288,10 @@ export default function OrangeTrail() {
       }
 
       // Update splash stains (fade out over time)
-      setSplashStains(prev => {
-        return prev
+      // CRITICAL: Only update if there are stains to process (prevents unnecessary state updates)
+      const currentStains = splashStainsRef.current
+      if (currentStains.length > 0) {
+        const updatedStains = currentStains
           .map(stain => {
             const newAge = (stain.age || 0) + 16
             const progress = newAge / stain.lifetime
@@ -283,13 +308,21 @@ export default function OrangeTrail() {
             }
           })
           .filter(stain => stain !== null)
-      })
+        
+        // Only update state if the array actually changed
+        if (updatedStains.length !== currentStains.length || 
+            updatedStains.some((stain, i) => stain.opacity !== currentStains[i]?.opacity)) {
+          setSplashStains(updatedStains)
+        }
+      }
 
       // Process juice particles (temporary with TTL - fade out over time)
-      setJuiceParticles(prev => {
+      // CRITICAL: Only update if there are particles to process (prevents unnecessary state updates)
+      const currentParticles = juiceParticlesRef.current
+      if (currentParticles.length > 0) {
         const bottomBoundary = viewportHeight - taskbarHeight
         
-        return prev
+        const updatedParticles = currentParticles
           .map(particle => {
             // Update age and check lifetime
             const newAge = (particle.age || 0) + 16
@@ -330,7 +363,12 @@ export default function OrangeTrail() {
           })
           .filter(particle => particle !== null)
           .slice(-MAX_DROPLETS) // Limit juice particles
-      })
+        
+        // Only update state if the array actually changed
+        if (updatedParticles.length !== currentParticles.length) {
+          setJuiceParticles(updatedParticles)
+        }
+      }
 
       // Process ground oranges (persistent - no TTL, no fade)
       // CRASH-PROOF: Wrap entire callback in try/catch

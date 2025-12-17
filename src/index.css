@@ -129,6 +129,7 @@ body {
 .title-bar {
   cursor: move;
   user-select: none;
+  touch-action: none; /* Prevent touch scrolling on title bar - allow drag gestures */
   /* Standardized title bar height using CSS variable */
   min-height: var(--window-title-bar-height);
   height: var(--window-title-bar-height);
@@ -141,6 +142,44 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  /* Ensure title bar is above window body content for pointer events */
+  position: relative;
+  z-index: 1;
+}
+
+/* Drag surface - allows dragging from content area */
+[data-drag-surface] {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  position: relative;
+  z-index: 0;
+  /* Ensure drag surface receives pointer events */
+  pointer-events: auto;
+}
+
+[data-drag-surface]:active {
+  cursor: grabbing;
+}
+
+/* Images inside drag surface should allow dragging through them */
+[data-drag-surface] img {
+  pointer-events: none; /* Allow drag events to pass through to parent drag surface */
+  user-select: none;
+}
+
+/* Interactive elements inside drag surface should not trigger drag */
+[data-drag-surface] [data-no-drag],
+[data-drag-surface] button,
+[data-drag-surface] a,
+[data-drag-surface] input,
+[data-drag-surface] select,
+[data-drag-surface] textarea,
+[data-drag-surface] canvas {
+  cursor: default;
+  pointer-events: auto;
+  position: relative;
+  z-index: 1;
 }
 
 /* Title bar icon */

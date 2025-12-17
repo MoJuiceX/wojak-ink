@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react'
+import { createContext, useContext, useCallback, useRef, useEffect } from 'react'
 
 const KeyboardPriorityContext = createContext()
 
@@ -21,7 +21,8 @@ export const KEYBOARD_PRIORITY = {
  * Ensures only the highest-priority layer receives keyboard events
  */
 export function KeyboardPriorityProvider({ children }) {
-  const [activePriorities, setActivePriorities] = useState(new Map())
+  // Removed activePriorities state - we use handlersRef directly to avoid infinite loops
+  // handlersRef stores all handler info including isActive, so we don't need separate state
   const handlersRef = useRef(new Map())
 
   /**
@@ -32,17 +33,8 @@ export function KeyboardPriorityProvider({ children }) {
    * @param {boolean} isActive - Whether this handler is currently active
    */
   const registerHandler = useCallback((priority, id, handler, isActive) => {
+    // Store handler in ref - no state update needed, prevents infinite loops
     handlersRef.current.set(id, { priority, handler, isActive })
-    
-    setActivePriorities(prev => {
-      const next = new Map(prev)
-      if (isActive) {
-        next.set(id, priority)
-      } else {
-        next.delete(id)
-      }
-      return next
-    })
   }, [])
 
   /**
@@ -51,11 +43,6 @@ export function KeyboardPriorityProvider({ children }) {
    */
   const unregisterHandler = useCallback((id) => {
     handlersRef.current.delete(id)
-    setActivePriorities(prev => {
-      const next = new Map(prev)
-      next.delete(id)
-      return next
-    })
   }, [])
 
   /**
@@ -63,9 +50,15 @@ export function KeyboardPriorityProvider({ children }) {
    * @returns {number|null} The highest priority level, or null if none active
    */
   const getHighestPriority = useCallback(() => {
-    if (activePriorities.size === 0) return null
-    return Math.min(...Array.from(activePriorities.values()))
-  }, [activePriorities])
+    // Use handlersRef to avoid dependency on activePriorities state
+    // This prevents infinite loops when activePriorities changes
+    const activeIds = Array.from(handlersRef.current.entries())
+      .filter(([id, handler]) => handler.isActive)
+      .map(([id, handler]) => handler.priority)
+    
+    if (activeIds.length === 0) return null
+    return Math.min(...activeIds)
+  }, [])
 
   /**
    * Check if a handler with the given ID should process keyboard events
@@ -90,11 +83,11 @@ export function KeyboardPriorityProvider({ children }) {
       if (highestPriority === null) return
 
       // Find all handlers at the highest priority level
+      // Use handlersRef directly to avoid dependency on activePriorities state
       const topPriorityHandlers = Array.from(handlersRef.current.entries())
         .filter(([id, handler]) => 
           handler.isActive && 
-          handler.priority === highestPriority &&
-          activePriorities.has(id)
+          handler.priority === highestPriority
         )
 
       // Only call handlers at the highest priority
@@ -112,7 +105,7 @@ export function KeyboardPriorityProvider({ children }) {
     return () => {
       document.removeEventListener('keydown', handleKeyDown, true)
     }
-  }, [activePriorities, getHighestPriority])
+  }, [getHighestPriority]) // Removed activePriorities dependency - use handlersRef instead
 
   const value = {
     registerHandler,
@@ -148,10 +141,17 @@ export function useKeyboardPriority() {
  */
 export function useKeyboardHandler(priority, id, handler, isActive) {
   const { registerHandler, unregisterHandler, shouldHandle } = useKeyboardPriority()
+  
+  // Store handler in ref to avoid dependency on handler function (which may change every render)
+  const handlerRef = useRef(handler)
+  useEffect(() => {
+    handlerRef.current = handler
+  }, [handler])
 
   useEffect(() => {
-    if (isActive && handler) {
-      registerHandler(priority, id, handler, isActive)
+    if (isActive && handlerRef.current) {
+      // Use ref to get latest handler without including it in dependencies
+      registerHandler(priority, id, handlerRef.current, isActive)
     } else {
       unregisterHandler(id)
     }
@@ -159,7 +159,7 @@ export function useKeyboardHandler(priority, id, handler, isActive) {
     return () => {
       unregisterHandler(id)
     }
-  }, [priority, id, handler, isActive, registerHandler, unregisterHandler])
+  }, [priority, id, isActive, registerHandler, unregisterHandler]) // Removed handler from deps
 
   return { shouldHandle: shouldHandle(id) }
 }

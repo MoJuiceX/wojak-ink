@@ -8,6 +8,7 @@ export function useDraggable(noStack = false) {
   const isDraggingRef = useRef(false)
   const offsetRef = useRef({ x: 0, y: 0 })
   const containerRectRef = useRef(null)
+  const capturedHandleRef = useRef(null) // Track which handle captured the pointer
 
   const bringToFront = () => {
     const win = windowRef.current
@@ -30,11 +31,51 @@ export function useDraggable(noStack = false) {
 
     // Disable dragging if noStack is true (used for mobile)
     // EXCEPTION: TangGang window needs dragging for orange smash game
+    // Note: When forceDraggable is used, noStack will be false, so this check won't block
     const isTangGang = win.id === 'tanggang'
     if (noStack && !isTangGang) return
 
-    const handle = win.querySelector('.title-bar')
-    if (!handle) return
+    // Find drag handles: title bar OR elements with [data-drag-surface]
+    const titleBar = win.querySelector('.title-bar')
+    const dragSurfaces = win.querySelectorAll('[data-drag-surface]')
+    
+    // Combine all drag handles
+    const handleElements = []
+    if (titleBar) handleElements.push(titleBar)
+    if (dragSurfaces && dragSurfaces.length > 0) {
+      handleElements.push(...Array.from(dragSurfaces))
+    }
+    
+    // Debug logging for TangGang
+    if (isTangGang) {
+      console.log('[useDraggable] TangGang setup:', {
+        noStack,
+        titleBar: !!titleBar,
+        dragSurfaces: dragSurfaces?.length || 0,
+        handleElements: handleElements.length
+      })
+    }
+    
+    if (handleElements.length === 0) {
+      // For TangGang, wait a bit for DOM to be ready (children might not be rendered yet)
+      if (isTangGang) {
+        console.warn('[useDraggable] TangGang: No drag handles found, retrying...')
+        const timeoutId = setTimeout(() => {
+          const retryTitleBar = win.querySelector('.title-bar')
+          const retryDragSurfaces = win.querySelectorAll('[data-drag-surface]')
+          const retryHandles = []
+          if (retryTitleBar) retryHandles.push(retryTitleBar)
+          if (retryDragSurfaces?.length > 0) retryHandles.push(...Array.from(retryDragSurfaces))
+          console.log('[useDraggable] TangGang retry:', {
+            titleBar: !!retryTitleBar,
+            dragSurfaces: retryDragSurfaces?.length || 0,
+            handles: retryHandles.length
+          })
+        }, 100)
+        return () => clearTimeout(timeoutId)
+      }
+      return
+    }
 
     const preventDrag = (ev) => ev.preventDefault()
     let activePointerId = null
@@ -82,9 +123,29 @@ export function useDraggable(noStack = false) {
       if (e.target.closest('.title-bar-controls')) {
         return
       }
+      
+      // Don't start drag if clicking on elements marked with data-no-drag
+      if (e.target.closest('[data-no-drag]')) {
+        return
+      }
+      
+      // Find which drag handle was clicked (for pointer capture)
+      let clickedHandle = null
+      for (const h of handleElements) {
+        if (h === e.target || h.contains(e.target)) {
+          clickedHandle = h
+          break
+        }
+      }
+      
+      if (!clickedHandle) {
+        // Not clicking on any drag handle
+        return
+      }
 
       activePointerId = e.pointerId
-      handle.setPointerCapture(activePointerId)
+      clickedHandle.setPointerCapture(activePointerId)
+      capturedHandleRef.current = clickedHandle // Store which handle captured the pointer
 
       // Store initial touch position for threshold calculation
       win.__touchStartX = e.clientX
@@ -191,8 +252,8 @@ export function useDraggable(noStack = false) {
 
       // Direct DOM update for maximum performance - no RAF delay
       // Calculate target position in viewport coordinates
-      const targetViewportX = e.clientX - offsetRef.current.x
-      const targetViewportY = e.clientY - offsetRef.current.y
+      let targetViewportX = e.clientX - offsetRef.current.x
+      let targetViewportY = e.clientY - offsetRef.current.y
       
       const containerRect = containerRectRef.current
       const isMobile = win.__isMobile
@@ -256,10 +317,11 @@ export function useDraggable(noStack = false) {
       // Release pointer capture FIRST to fix mouse sticking issue
       try {
         if (activePointerId !== null) {
-          handle.releasePointerCapture(activePointerId)
+          capturedHandleRef.current?.releasePointerCapture(activePointerId)
         }
       } catch (err) {}
       activePointerId = null
+      capturedHandleRef.current = null // Clear the captured handle reference
       
       // Reset drag state
       isDraggingRef.current = false
@@ -276,10 +338,12 @@ export function useDraggable(noStack = false) {
       
       let constrainedViewportX = 0
       let constrainedViewportY = 0
+      let dx = 0
+      let dy = 0
       
       if (match) {
-        const dx = parseFloat(match[1])
-        const dy = parseFloat(match[2])
+        dx = parseFloat(match[1])
+        dy = parseFloat(match[2])
         
         // Calculate final viewport position
         const finalViewportX = win.__dragStartViewportX + dx
@@ -374,14 +438,22 @@ export function useDraggable(noStack = false) {
       }
     }
 
-    handle.style.cursor = 'move'
-    handle.style.touchAction = 'none'
-    handle.addEventListener('dragstart', (e) => e.preventDefault())
-    handle.addEventListener('pointerdown', handlePointerDown)
+    // Attach event listeners to all drag handles
+    handleElements.forEach(handle => {
+      // Set cursor style - title bar uses 'move', drag surfaces use 'grab' (set via CSS)
+      if (handle.classList.contains('title-bar')) {
+        handle.style.cursor = 'move'
+      } else {
+        handle.style.cursor = 'grab'
+      }
+      handle.style.touchAction = 'none'
+      handle.addEventListener('dragstart', (e) => e.preventDefault())
+      handle.addEventListener('pointerdown', handlePointerDown, { passive: false })
+      handle.addEventListener('pointerup', endDrag)
+      handle.addEventListener('pointercancel', endDrag)
+    })
 
     document.addEventListener('pointermove', handlePointerMove, { passive: false })
-    handle.addEventListener('pointerup', endDrag)
-    handle.addEventListener('pointercancel', endDrag)
     window.addEventListener('pointerup', endDrag)
 
     // Add document-level click handler to bring windows to front
@@ -406,10 +478,13 @@ export function useDraggable(noStack = false) {
     win.addEventListener('mousedown', handleWindowClick, true)
 
     return () => {
-      handle.removeEventListener('pointerdown', handlePointerDown)
+      // Remove event listeners from all drag handles
+      handleElements.forEach(handle => {
+        handle.removeEventListener('pointerdown', handlePointerDown)
+        handle.removeEventListener('pointerup', endDrag)
+        handle.removeEventListener('pointercancel', endDrag)
+      })
       document.removeEventListener('pointermove', handlePointerMove)
-      handle.removeEventListener('pointerup', endDrag)
-      handle.removeEventListener('pointercancel', endDrag)
       window.removeEventListener('pointerup', endDrag)
       document.removeEventListener('mousedown', handleDocumentClick, true)
       document.removeEventListener('pointerdown', handleDocumentClick, true)

@@ -4,6 +4,8 @@
 
 Welcome to **Wojak Ink** - a retro Windows 98-style web application that showcases your Wojak NFT collection with style, memes, and pure Tang Gang energy. This app brings together the best of both worlds: nostalgic Windows 98 aesthetics and modern web3 functionality for the Chia blockchain.
 
+> **🔒 Wallet Note:** This site is **Chia-only** and does **not** use MetaMask or any EVM wallet providers. All NFT interactions are through the Chia blockchain.
+
 Built with React, Vite, and a whole lot of memetic energy. Let's get you set up, Abit! 💪
 
 > **📝 Note:** This README is actively maintained and updated as features are added. If you're reading this and something doesn't match, check the latest version or reach out!
