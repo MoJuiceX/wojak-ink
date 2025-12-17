@@ -240,3 +240,4 @@ Before committing code, verify:
 - Test on real devices when possible, not just browser DevTools
 - Performance testing should be done on actual hardware, not just DevTools throttling
 
+

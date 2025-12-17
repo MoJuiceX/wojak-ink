@@ -57,3 +57,4 @@ The canvas now reserves space equal to:
 4. Test canvas spacing when sheet is expanded (should be same or more)
 5. Verify no layout shift when safe-area insets change (device rotation)
 
+

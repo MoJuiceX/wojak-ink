@@ -31,3 +31,4 @@ The README.TXT window automatically switches banners based on your orange smashi
 Banners crossfade smoothly when switching (300ms transition).
 
 
+
