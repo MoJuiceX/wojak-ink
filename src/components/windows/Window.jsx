@@ -129,13 +129,19 @@ export default function Window({
           try {
             const rect = retryWin.getBoundingClientRect()
             // Parse size from style or use defaults
+            // For CSS variables, we'll let the registration logic handle it
             const width = retryWin.style.width || style.width || 'auto'
             const height = retryWin.style.height || style.height || 'auto'
+            
+            // Check if this window should be centered (default is true, but can be overridden)
+            // TangGang window should be centered on desktop/tablet
+            const shouldCenter = windowId === 'tanggang' ? (window.innerWidth > 640) : true
+            
             registerWindow(windowId, {
               title,
-              // Don't pass position - let registerWindow center it
+              // Don't pass position - let registerWindow center it if centerOnOpen is true
               size: { width, height },
-              centerOnOpen: true,
+              centerOnOpen: shouldCenter,
             })
             hasRegisteredRef.current = true
           } catch (error) {
