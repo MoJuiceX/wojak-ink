@@ -233,6 +233,77 @@ git reset --hard origin/main
 git checkout feat/fix-accidental-commit
 ```
 
+## GitHub Branch Protection Setup
+
+**⚠️ Strongly Recommended:** Protect the `main` branch in GitHub to prevent accidental direct pushes.
+
+### Step-by-Step Setup
+
+1. **Open the repo in GitHub**
+   - Go to: `https://github.com/MoJuiceX/wojak-ink`
+
+2. **Go to Settings**
+   - Click "Settings" in the top navigation of the repo
+
+3. **Go to Branch Protection**
+   - In the left sidebar, click "Branches"
+   - Under "Branch protection rules", click "Add rule"
+
+4. **Set the branch name pattern**
+   - In "Branch name pattern", type: `main`
+
+5. **Enable these settings (recommended):**
+
+   **✅ Require PRs**
+   - Check "Require a pull request before merging"
+   - (Optional but recommended) Check "Require approvals" and set to `1`
+   - (Optional but nice) Check "Dismiss stale pull request approvals when new commits are pushed"
+   - (Optional) Check "Require review from Code Owners" (only if you add CODEOWNERS)
+
+   **✅ Require status checks (only if you have checks running)**
+   - Check "Require status checks to pass before merging"
+   - Check "Require branches to be up to date before merging"
+   - In the status check list, select your checks (e.g., "build", "lint", "test")
+   - ⚠️ Only enable this if those checks actually exist, otherwise merges will get blocked
+
+   **✅ Block bypassing**
+   - Check "Do not allow bypassing the above settings"
+   - (If your GitHub UI shows this as "Include administrators", enable it)
+
+   **✅ Block direct pushes**
+   - Check "Restrict who can push to matching branches"
+   - Add only yourself (and any trusted maintainer)
+   - This ensures random pushes can't happen
+
+   **✅ (Strongly recommended) Lock force pushes + deletions**
+   - Ensure "Allow force pushes" is **OFF**
+   - Ensure "Allow deletions" is **OFF**
+
+6. **Save it**
+   - Click "Create" or "Save changes" at the bottom
+
+### Result (What It Enforces)
+
+- ✅ Nobody can push directly to `main`
+- ✅ Changes must go through PRs
+- ✅ Optional approvals required
+- ✅ Optional CI checks required
+- ✅ Even admins can't bypass (if enabled)
+
+### Combined Protection Layers
+
+With both local git hook and GitHub branch protection:
+
+1. **Local Git Hook** (`.githooks/pre-push`)
+   - Blocks `git push origin main` from your terminal
+   - Provides immediate feedback
+
+2. **GitHub Branch Protection**
+   - Blocks pushes via web UI
+   - Blocks pushes via API
+   - Requires PRs for all changes
+   - Enforces reviews/approvals if configured
+
 ## Questions?
 
 - Check `README.md` for project overview
