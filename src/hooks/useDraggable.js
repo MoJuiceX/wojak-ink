@@ -110,7 +110,7 @@ export function useDraggable(noStack = false) {
         }
       }
 
-      // Store initial mouse offset from window top-left
+      // Store initial mouse offset from window top-left (cached for performance)
       offsetRef.current = {
         x: e.clientX - rect.left,
         y: e.clientY - rect.top,
@@ -120,11 +120,13 @@ export function useDraggable(noStack = false) {
       win.__dragStartViewportX = rect.left
       win.__dragStartViewportY = rect.top
       
-      // Store initial container-relative position (for final positioning)
-      win.__dragStartLeft = parseFloat(win.style.left || (rect.left - containerRect.left + (container.scrollLeft || 0))) || 0
-      win.__dragStartTop = parseFloat(win.style.top || (rect.top - containerRect.top + (container.scrollTop || 0))) || 0
+      // Store initial container-relative position (for final positioning) - simplified calculation
+      const currentLeft = parseFloat(win.style.left) || rect.left - containerRect.left
+      const currentTop = parseFloat(win.style.top) || rect.top - containerRect.top
+      win.__dragStartLeft = currentLeft
+      win.__dragStartTop = currentTop
 
-      // Store original dimensions
+      // Store original dimensions (cached)
       win.__originalWidth = rect.width
       win.__originalHeight = rect.height
 
@@ -136,21 +138,32 @@ export function useDraggable(noStack = false) {
       win.style.transform = 'translate(0px, 0px)'
       isDraggingRef.current = true
       document.body.style.userSelect = 'none'
+      
+      // Check if this is the TangGang window and start orange trail
+      if (win.id === 'tanggang' && window.__orangeTrail) {
+        window.__orangeTrail.startDragging({
+          x: rect.left,
+          y: rect.top,
+          width: rect.width,
+          height: rect.height,
+          left: rect.left,
+          right: rect.right,
+          top: rect.top,
+          bottom: rect.bottom
+        })
+      }
+      
       e.preventDefault()
       e.stopPropagation()
     }
 
-    let rafId = null
-    let lastMoveTime = 0
-    const throttleDelay = 16 // ~60fps
-
     const handlePointerMove = (e) => {
       if (e.pointerId !== activePointerId) return
 
-      // Check if we should start dragging (touch threshold)
+      // Check if we should start dragging (minimal threshold for immediate response)
       if (!isDraggingRef.current) {
         const isTouch = e.pointerType === 'touch'
-        const threshold = isTouch ? 10 : 5 // Larger threshold for touch devices
+        const threshold = isTouch ? 3 : 1 // Minimal threshold - almost immediate drag start
         const dx = Math.abs(e.clientX - win.__touchStartX)
         const dy = Math.abs(e.clientY - win.__touchStartY)
         
@@ -169,64 +182,75 @@ export function useDraggable(noStack = false) {
       e.preventDefault()
       e.stopPropagation()
 
-      // Throttle updates using requestAnimationFrame
-      const now = Date.now()
-      if (now - lastMoveTime < throttleDelay && rafId !== null) {
-        return
+      // Direct DOM update for maximum performance - no RAF delay
+      // Calculate target position in viewport coordinates
+      const targetViewportX = e.clientX - offsetRef.current.x
+      const targetViewportY = e.clientY - offsetRef.current.y
+      
+      const containerRect = containerRectRef.current
+      const isMobile = win.__isMobile
+      const taskbarHeight = isMobile ? 40 : 30
+      
+      // Constrain to viewport bounds (cached values for performance)
+      const minX = 0
+      const minY = 0
+      const maxX = Math.max(0, containerRect.width - win.__originalWidth)
+      const maxY = Math.max(0, containerRect.height - win.__originalHeight - (isMobile ? 0 : taskbarHeight))
+
+      const constrainedViewportX = Math.max(minX, Math.min(maxX, targetViewportX))
+      const constrainedViewportY = Math.max(minY, Math.min(maxY, targetViewportY))
+
+      // Calculate transform offset from initial viewport position
+      const dx = constrainedViewportX - win.__dragStartViewportX
+      const dy = constrainedViewportY - win.__dragStartViewportY
+
+      // Direct DOM update - no RAF, immediate response
+      win.style.transform = `translate3d(${dx}px, ${dy}px, 0)`
+      win.classList.add('dragging')
+      
+      // Update orange trail window position if this is TangGang
+      if (win.id === 'tanggang' && window.__orangeTrail) {
+        const rect = win.getBoundingClientRect()
+        window.__orangeTrail.updateWindowRect({
+          x: constrainedViewportX,
+          y: constrainedViewportY,
+          width: win.__originalWidth,
+          height: win.__originalHeight,
+          left: rect.left,
+          right: rect.right,
+          top: rect.top,
+          bottom: rect.bottom
+        })
       }
-      lastMoveTime = now
-
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId)
-      }
-
-      rafId = requestAnimationFrame(() => {
-        // Calculate target position in viewport coordinates
-        const targetViewportX = e.clientX - offsetRef.current.x
-        const targetViewportY = e.clientY - offsetRef.current.y
-        
-        const containerRect = containerRectRef.current
-        const isMobile = win.__isMobile
-        const taskbarHeight = isMobile ? 40 : 30
-        
-        // Constrain to viewport bounds
-        const minX = 0
-        const minY = 0
-        const maxX = Math.max(0, containerRect.width - win.__originalWidth)
-        const maxY = Math.max(0, containerRect.height - win.__originalHeight - (isMobile ? 0 : taskbarHeight))
-
-        const constrainedViewportX = Math.max(minX, Math.min(maxX, targetViewportX))
-        const constrainedViewportY = Math.max(minY, Math.min(maxY, targetViewportY))
-
-        // Calculate transform offset from initial viewport position
-        const dx = constrainedViewportX - win.__dragStartViewportX
-        const dy = constrainedViewportY - win.__dragStartViewportY
-
-        // Use transform for better performance
-        win.style.transform = `translate3d(${dx}px, ${dy}px, 0)`
-        win.classList.add('dragging')
-        rafId = null
-      })
     }
 
     const endDrag = (e) => {
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId)
-        rafId = null
-      }
-      
       if (!isDraggingRef.current || (e && e.pointerId !== activePointerId)) return
-      isDraggingRef.current = false
+      
+      // Release pointer capture FIRST to fix mouse sticking issue
       try {
         if (activePointerId !== null) {
           handle.releasePointerCapture(activePointerId)
         }
       } catch (err) {}
       activePointerId = null
+      
+      // Reset drag state
+      isDraggingRef.current = false
+      document.body.style.userSelect = ''
+      document.documentElement.style.touchAction = ''
+      if (win.__preventDrag) {
+        document.removeEventListener('dragstart', win.__preventDrag)
+        delete win.__preventDrag
+      }
 
       const transform = win.style.transform || ''
       // Match both translate and translate3d formats
       const match = transform.match(/translate(?:3d)?\(([-0-9.]+)px[,\s]+([-0-9.]+)px/)
+      
+      let constrainedViewportX = 0
+      let constrainedViewportY = 0
+      
       if (match) {
         const dx = parseFloat(match[1])
         const dy = parseFloat(match[2])
@@ -245,8 +269,8 @@ export function useDraggable(noStack = false) {
         const maxX = Math.max(0, containerRect.width - win.__originalWidth)
         const maxY = Math.max(0, containerRect.height - win.__originalHeight - (isMobile ? 0 : taskbarHeight))
         
-        const constrainedViewportX = Math.max(minX, Math.min(maxX, finalViewportX))
-        const constrainedViewportY = Math.max(minY, Math.min(maxY, finalViewportY))
+        constrainedViewportX = Math.max(minX, Math.min(maxX, finalViewportX))
+        constrainedViewportY = Math.max(minY, Math.min(maxY, finalViewportY))
         
         // Convert viewport coordinates to container-relative coordinates
         if (win.__containerRef) {
@@ -269,14 +293,26 @@ export function useDraggable(noStack = false) {
           win.dataset.userDragged = 'true'
         }
       }
+      
       win.style.transform = ''
       win.classList.remove('dragging')
-
-      document.body.style.userSelect = ''
-      document.documentElement.style.touchAction = ''
-      if (win.__preventDrag) {
-        document.removeEventListener('dragstart', win.__preventDrag)
-        delete win.__preventDrag
+      
+      // Stop orange trail if this is TangGang - trigger smash on drag end
+      // Do this AFTER calculating constrainedViewportX/Y so we have the values
+      if (win.id === 'tanggang' && window.__orangeTrail) {
+        const rect = win.getBoundingClientRect()
+        // Get previous rect from orange trail ref
+        const prevRect = window.__orangeTrail.prevWindowRectRef?.current || null
+        window.__orangeTrail.stopDragging({
+          x: constrainedViewportX,
+          y: constrainedViewportY,
+          width: win.__originalWidth,
+          height: win.__originalHeight,
+          left: rect.left,
+          right: rect.right,
+          top: rect.top,
+          bottom: rect.bottom
+        }, prevRect)
       }
     }
 

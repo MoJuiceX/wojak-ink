@@ -3,6 +3,8 @@ import React from 'react'
 export default function Select({ 
   value, 
   onChange, 
+  onInput,
+  onKeyDown,
   options = [], 
   disabled = false,
   className = '',
@@ -12,6 +14,8 @@ export default function Select({
     <select
       value={value}
       onChange={onChange}
+      onInput={onInput}
+      onKeyDown={onKeyDown}
       disabled={disabled}
       className={className}
       style={{
@@ -26,7 +30,7 @@ export default function Select({
       {...props}
     >
       {options.map((option) => (
-        <option key={option.value} value={option.value}>
+        <option key={option.value} value={option.value} disabled={option.disabled}>
           {option.label}
         </option>
       ))}

@@ -3,9 +3,16 @@ import Window from './Window'
 export default function TangGangWindow() {
   return (
     <Window
-      title="TangGang"
+      id="tanggang"
+      title="🍊 TangGang"
+      icon={null}
       noStack={true}
-      style={{ left: '0px', top: '0px' }}
+      style={{ 
+        left: '860px', // Positioned next to README.TXT (20px + 820px + 20px gap)
+        top: '20px',
+        width: '400px',
+        height: 'auto'
+      }}
     >
       <img
         src="https://bafybeihbaqn7omk55qi3vfrht76qa53kz4dx75anzwtjkcggi2v3jql4tm.ipfs.w3s.link/?filename=HOA+logo.png"

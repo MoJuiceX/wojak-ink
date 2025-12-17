@@ -1,4 +1,4 @@
-import { MEMETIC_ENERGY_BASE_PATH, LAYER_FOLDERS } from './constants'
+import { WOJAK_CREATOR_BASE_PATH, LAYER_FOLDERS } from './constants'
 
 /**
  * Loads all images from a specific layer folder
@@ -10,7 +10,7 @@ export async function loadLayerImages(layerName) {
   if (!folder) return {}
 
   // For public folder assets, we need to construct URLs directly
-  // Vite serves public folder at root, so /memetic-energy/... works
+  // Vite serves public folder at root, so /wojak-creator/... works
   return {}
 }
 
@@ -24,8 +24,8 @@ export function getImagePath(layerName, imageName) {
   const folder = LAYER_FOLDERS[layerName]
   if (!folder || !imageName) return null
 
-  // Handle subfolders (e.g., Background/$CASHTAG/, Background/Plain Backgrounds/, Background/Scene/)
-  let fullPath = `${MEMETIC_ENERGY_BASE_PATH}/${folder}`
+  // Handle subfolders (e.g., BACKGROUND/$CASHTAG/, BACKGROUND/Plain Backgrounds/, BACKGROUND/Scene/)
+  let fullPath = `${WOJAK_CREATOR_BASE_PATH}/${folder}`
   
   // Check if image is in a subfolder
   if (imageName.includes('/')) {
@@ -66,7 +66,7 @@ export function getPublicImageUrl(layerName, subfolder, fileName) {
   const folder = LAYER_FOLDERS[layerName]
   if (!folder) return null
   
-  let path = `${MEMETIC_ENERGY_BASE_PATH}/${folder}`
+  let path = `${WOJAK_CREATOR_BASE_PATH}/${folder}`
   if (subfolder) {
     path += `/${subfolder}`
   }

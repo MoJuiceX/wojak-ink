@@ -2,12 +2,19 @@ import { useState } from 'react'
 import { Button, FieldRow } from '../ui'
 import { downloadCanvasAsPNG, copyCanvasToClipboard } from '../../utils/imageUtils'
 
-export default function ExportControls({ canvasRef }) {
+export default function ExportControls({ canvasRef, selectedLayers = {} }) {
   const [isExporting, setIsExporting] = useState(false)
   const [exportStatus, setExportStatus] = useState('')
 
+  // Check if at least one meaningful layer is selected
+  const canDownload = 
+    (selectedLayers['Base'] && selectedLayers['Base'] !== 'None') ||
+    (selectedLayers['Clothes'] && selectedLayers['Clothes'] !== 'None') ||
+    (selectedLayers['Eyes'] && selectedLayers['Eyes'] !== 'None') ||
+    (selectedLayers['MouthBase'] && selectedLayers['MouthBase'] !== 'None')
+
   const handleDownload = async () => {
-    if (!canvasRef.current) return
+    if (!canvasRef.current || !canDownload) return
 
     setIsExporting(true)
     setExportStatus('Downloading...')
@@ -47,12 +54,24 @@ export default function ExportControls({ canvasRef }) {
   return (
     <div>
       <FieldRow>
-        <Button 
-          onClick={handleDownload} 
-          disabled={isExporting || !canvasRef.current}
-        >
-          Download PNG
-        </Button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <Button 
+            onClick={handleDownload} 
+            disabled={isExporting || !canvasRef.current || !canDownload}
+          >
+            Download PNG
+          </Button>
+          {!canDownload && (
+            <p style={{ 
+              margin: '0', 
+              fontSize: '9px', 
+              color: '#666',
+              fontStyle: 'italic'
+            }}>
+              Select a base, clothes, eyes, or mouth first.
+            </p>
+          )}
+        </div>
         <Button 
           onClick={handleCopy} 
           disabled={isExporting || !canvasRef.current}

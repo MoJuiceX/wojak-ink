@@ -18,7 +18,7 @@ dist-ssr
 .env.*.local
 
 # Editor directories and files
-.vscode/*
+/.vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
@@ -27,6 +27,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Ignore editor/config files inside jspaint
+/public/jspaint/.vscode/
+/public/jspaint/.github/
+/public/jspaint/.gitignore
 
 # Icons
 /public/icon

@@ -5,7 +5,7 @@ export default function MintInfoWindow({ onNotifyClick }) {
   return (
     <Window
       title="MINT_INFO.EXE"
-      style={{ width: '1200px', maxWidth: 'calc(100vw - 40px)', left: '20px', top: '320px' }}
+      style={{ width: '1200px', maxWidth: 'calc(100vw - 40px)' }}
     >
       <p>
         <b>Launch Phases</b>
@@ -70,7 +70,7 @@ export default function MintInfoWindow({ onNotifyClick }) {
         <Button
           onClick={() =>
             window.open(
-              'https://crate.ink/#/collection-detail/WOJAKFARMERSPLOT',
+              'https://wojakfarmersplot.crate.ink/#/',
               '_blank'
             )
           }

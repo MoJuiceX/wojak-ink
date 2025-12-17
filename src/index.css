@@ -23,21 +23,36 @@
   padding: 0;
 }
 
+/* Global scroll lock - disable all page scrolling (desktop OS feel) */
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 body {
   margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
   font-family: 'MS Sans Serif', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: auto;
-  overflow-x: hidden;
-  overflow-y: auto;
-  min-height: 100vh;
 }
 
 #root {
+  margin: 0;
+  padding: 0;
   width: 100%;
   height: 100%;
+  overflow: hidden;
 }
 
 .bg-fixed {
@@ -52,13 +67,12 @@ body {
 }
 
 .desktop {
-  position: relative;
+  position: fixed;
+  inset: 0;
   width: 100%;
-  min-height: 100vh;
-  overflow-x: hidden;
-  overflow-y: auto;
+  height: 100%;
+  overflow: hidden;
   background: transparent;
-  padding-bottom: 30px; /* Space for taskbar */
 }
 
 
@@ -71,6 +85,8 @@ body {
   backface-visibility: hidden;
   transform: translateZ(0);
   contain: layout style paint;
+  /* Disable transitions during drag for maximum performance */
+  transition: none !important;
 }
 
 .window.draggable {
@@ -197,8 +213,10 @@ a,
 
 /* Window drag feedback */
 .window.dragging {
-  opacity: 0.9;
+  /* Opacity removed for better drag performance */
   cursor: move;
+  /* Ensure no transitions during drag */
+  transition: none !important;
 }
 
 .window.dragging .title-bar {
@@ -209,6 +227,12 @@ a,
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Pulse animation for treasure window */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
 }
 
 /* Skeleton Shimmer Animation */
@@ -235,6 +259,30 @@ a,
   min-height: 100px;
 }
 
+/* Windows that need internal scrolling - add scroll-allowed class */
+.readme-window .window-body,
+#window-readme-txt .window-body,
+.window-body.scroll-allowed {
+  max-height: calc(90vh - 60px); /* Account for title bar */
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Allow scrolling inside specific elements */
+.scroll-allowed {
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+/* Prevent scrolling on everything else by default */
+* {
+  overscroll-behavior: none;
+}
+
+.scroll-allowed * {
+  overscroll-behavior: auto;
+}
+
 /* Paint window needs no padding to prevent bottom cutoff */
 #paint-window .window-body {
   padding: 0 !important;
@@ -244,20 +292,40 @@ a,
   overflow: hidden;
 }
 
-/* Memetic Energy Generator window needs no padding to prevent bottom cutoff */
-#memetic-energy-generator .window-body {
+/* Wojak Creator window needs no padding to prevent bottom cutoff */
+#wojak-creator .window-body {
   padding: 0 !important;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden; /* Container doesn't scroll, inner content does */
   min-height: 0;
+  max-height: calc(90vh - 60px); /* Account for title bar */
+  height: auto;
+}
+
+/* Ensure Wojak Creator window stays within viewport */
+.wojak-creator-window {
+  max-height: 90vh !important;
+}
+
+.wojak-creator-window .window-body {
+  max-height: calc(90vh - 60px) !important; /* Title bar is ~60px */
+}
+
+.banner {
+  /* Optimize for smooth transitions */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: contents;
 }
 
 .banner img {
   width: 100%;
   height: auto;
   display: block;
+  /* Hardware acceleration for smoother transitions */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
 .fit-img {

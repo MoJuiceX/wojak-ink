@@ -38,6 +38,7 @@ function GalleryThumb({ item }) {
   const [frontAttempted, setFrontAttempted] = useState(false)
   const [backAttempted, setBackAttempted] = useState(false)
   const [showLabel, setShowLabel] = useState(false)
+  const [isHovering, setIsHovering] = useState(false)
   const [frontLoading, setFrontLoading] = useState(true)
   const [backLoading, setBackLoading] = useState(true)
   const [frontError, setFrontError] = useState(false)
@@ -98,10 +99,24 @@ function GalleryThumb({ item }) {
       className="thumb" 
       data-title={item.title} 
       aria-label={item.label}
-      onMouseEnter={() => setShowLabel(true)}
-      onMouseLeave={() => setShowLabel(false)}
-      onTouchStart={() => setShowLabel(true)}
-      onTouchEnd={() => setTimeout(() => setShowLabel(false), 2000)}
+      onMouseEnter={() => {
+        setShowLabel(true)
+        setIsHovering(true)
+      }}
+      onMouseLeave={() => {
+        setShowLabel(false)
+        setIsHovering(false)
+      }}
+      onTouchStart={() => {
+        setShowLabel(true)
+        setIsHovering(true)
+      }}
+      onTouchEnd={() => {
+        setTimeout(() => {
+          setShowLabel(false)
+          setIsHovering(false)
+        }, 2000)
+      }}
       style={{ position: 'relative' }}
     >
       {(frontLoading || backLoading) && (
@@ -125,7 +140,17 @@ function GalleryThumb({ item }) {
           decoding="async"
           onError={handleFrontError}
           onLoad={handleFrontLoad}
-          style={{ opacity: frontLoading ? 0 : 1, transition: 'opacity 0.3s' }}
+          style={{ 
+            opacity: frontLoading ? 0 : (isHovering ? 0 : 1), 
+            transition: 'opacity 0.3s ease-in-out',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            zIndex: 1,
+          }}
         />
       )}
       {!backError && (
@@ -137,7 +162,17 @@ function GalleryThumb({ item }) {
           decoding="async"
           onError={handleBackError}
           onLoad={handleBackLoad}
-          style={{ opacity: backLoading ? 0 : 1, transition: 'opacity 0.3s' }}
+          style={{ 
+            opacity: backLoading ? 0 : (isHovering ? 1 : 0), 
+            transition: 'opacity 0.3s ease-in-out',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            zIndex: 2,
+          }}
         />
       )}
       {(frontError && backError) && (
@@ -166,7 +201,7 @@ export default function GalleryWindow() {
   return (
     <Window
       title="GALLERY"
-      style={{ width: '1200px', maxWidth: 'calc(100vw - 40px)', left: '20px', top: '920px' }}
+      style={{ width: '1200px', maxWidth: 'calc(100vw - 40px)' }}
     >
       <div className="grid gallery-grid" role="grid" aria-label="Gallery of Wojak NFTs">
         {GALLERY_ITEMS.map((item, index) => (

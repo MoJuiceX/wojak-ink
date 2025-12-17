@@ -1,0 +1,38 @@
+/* Embedded mode CSS - hides JS Paint's internal window frame when embedded in iframe */
+
+/* When embedded, JS Paint doesn't create a main os-window, but we ensure body/html fill iframe */
+body.embedded {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+body.embedded .jspaint {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Hide any os-window title bars that might appear (for tool windows, etc.) */
+body.embedded .os-window .window-titlebar {
+  /* Keep title bars for tool windows - they should still show */
+  /* Only hide if there's a main window title bar */
+}
+
+/* Ensure components fill available space when embedded */
+body.embedded .jspaint > .vertical {
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Ensure status bar and color palette are always visible */
+body.embedded .status-area {
+  flex-shrink: 0 !important;
+  visibility: visible !important;
+  display: flex !important;
+}
+

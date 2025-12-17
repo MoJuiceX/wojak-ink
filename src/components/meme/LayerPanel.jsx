@@ -1,5 +1,5 @@
 import { Checkbox } from '../ui'
-import { LAYER_ORDER } from '../../lib/memeLayers'
+import { UI_LAYER_ORDER } from '../../lib/memeLayers'
 
 export default function LayerPanel({ layerVisibility, onToggleVisibility, selectedLayers }) {
   return (
@@ -12,7 +12,7 @@ export default function LayerPanel({ layerVisibility, onToggleVisibility, select
       <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', fontSize: '11px' }}>
         Layer Visibility:
       </p>
-      {LAYER_ORDER.map(layer => {
+      {UI_LAYER_ORDER.map(layer => {
         const layerName = layer.name
         const isVisible = layerVisibility[layerName] !== false
         const hasSelection = !!selectedLayers[layerName]
