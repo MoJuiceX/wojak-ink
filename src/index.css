@@ -737,8 +737,24 @@ a {
   text-decoration: underline;
 }
 
-a:hover {
+.readme-launch-space-link {
+  margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: underline;
+  vertical-align: middle;
+}
+
+.readme-launch-space-link:hover {
   color: #000080;
+}
+
+.readme-launch-space-thumb {
+  height: 20px;
+  width: auto;
+  border: 1px solid #000;
+  image-rendering: auto;
 }
 
 ul {
