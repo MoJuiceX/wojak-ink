@@ -86,6 +86,7 @@ function MarketplaceNFT({ nft, offerFile, onCopyOffer, onViewOffer }) {
   // nft.thumbnail might be set from getNFTsByGroup merge
   const imageUrl = nftDetail?.thumbnail || nft.thumbnail || `${BASE_URL}${extractTokenNumber(nft.id)}.png`
   const displayName = nftDetail?.name || nft.name || nft.id
+  const priceText = nftDetail?.priceText
 
   return (
     <div
@@ -164,7 +165,12 @@ function MarketplaceNFT({ nft, offerFile, onCopyOffer, onViewOffer }) {
         )}
       </div>
       <div style={{ marginTop: '4px', fontSize: '10px', position: 'relative', minHeight: '20px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '4px' }}>{displayName}</div>
+        <div style={{ textAlign: 'center', marginBottom: '2px' }}>{displayName}</div>
+        {priceText && (
+          <div style={{ textAlign: 'center', marginBottom: '4px', fontSize: '10px' }}>
+            Price: {priceText}
+          </div>
+        )}
         {offerFile && (
           <button
             onClick={(e) => {
@@ -653,7 +659,7 @@ function OfferFileModal({ nft, offerFile, onClose, onCopy }) {
   )
 }
 
-export default function MarketplaceWindow() {
+export default function MarketplaceWindow({ onClose }) {
   const { marketplaceEnabled, getNFTsByGroup, getTokenGroups, getOfferFile, nftEntries, nftDetailsLoading, fetchNFTDetailsForId } = useMarketplace()
   const { showToast } = useToast()
   const tokenGroups = getTokenGroups()
@@ -688,15 +694,17 @@ export default function MarketplaceWindow() {
   if (!marketplaceEnabled) {
     return (
       <Window
+        id="window-marketplace"
         title="MARKETPLACE"
         style={{ 
           width: 'var(--window-width-large)', 
           maxWidth: 'var(--window-max-width)',
           minWidth: 'var(--window-min-width)'
         }}
+        onClose={onClose}
       >
         <div style={{ padding: '20px', textAlign: 'center' }}>
-          <p style={{ fontSize: '12px' }}>Marketplace is currently disabled.</p>
+          <p style={{ fontSize: '12px' }}>Marketplace not active yet.</p>
         </div>
       </Window>
     )
@@ -755,12 +763,14 @@ export default function MarketplaceWindow() {
   return (
     <Window
       ref={windowRef}
+      id="window-marketplace"
       title="MARKETPLACE - P2P OFFERS"
       style={{ 
         width: 'var(--window-size-marketplace)', 
         maxWidth: 'var(--window-max-width)',
         minWidth: 'var(--window-min-width)'
       }}
+      onClose={onClose}
     >
       <div style={{ padding: '8px' }}>
         <div style={{ marginBottom: '16px' }}>

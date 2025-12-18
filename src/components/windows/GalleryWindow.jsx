@@ -205,15 +205,17 @@ function GalleryThumb({ item }) {
   )
 }
 
-export default function GalleryWindow() {
+export default function GalleryWindow({ onClose }) {
   return (
     <Window
+      id="window-gallery"
       title="GALLERY"
       style={{ 
         width: 'var(--window-size-gallery)', 
         maxWidth: 'var(--window-max-width)',
         minWidth: 'var(--window-min-width)'
       }}
+      onClose={onClose}
     >
       <div className="grid gallery-grid" role="grid" aria-label="Gallery of Wojak NFTs">
         {GALLERY_ITEMS.map((item, index) => (

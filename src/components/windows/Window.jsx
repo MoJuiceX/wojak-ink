@@ -84,8 +84,27 @@ export default function Window({
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Disable dragging on mobile
-  const { windowRef, zIndex, bringToFront: bringToFrontDrag } = useDraggable(noStack || isMobile)
+  // Make window draggable (dragging disabled on mobile; WindowContext owns stacking)
+  const { windowRef } = useDraggable(isMobile, {
+    onActivate: () => {
+      try {
+        bringToFront(windowId)
+      } catch (error) {
+        if (process.env.NODE_ENV === 'development') {
+          console.error('[Window] Error bringing window to front on activate:', error, 'windowId:', windowId)
+        }
+      }
+    },
+    onDragEnd: (pos) => {
+      try {
+        updateWindowPosition(windowId, pos)
+      } catch (error) {
+        if (process.env.NODE_ENV === 'development') {
+          console.error('[Window] Error updating position on drag end:', error, 'windowId:', windowId)
+        }
+      }
+    },
+  })
   const [isVisible, setIsVisible] = useState(true)
   const savedPositionRef = useRef({ x: 0, y: 0 })
   const savedSizeRef = useRef({ width: '', height: '' })
@@ -204,127 +223,31 @@ export default function Window({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // Empty deps - only run cleanup on unmount
 
-  // Sync z-index with context
-  useEffect(() => {
-    if (windowData && windowData.zIndex !== zIndex) {
-      const win = windowRef.current
-      if (win) {
-        win.style.zIndex = windowData.zIndex
-      }
-    }
-  }, [windowData, zIndex])
-
   // Sync position from windowData to DOM element
-  // Use requestAnimationFrame to batch updates and prevent glitches on page load
-  // IMPORTANT: Skip this effect when window is being dragged to avoid conflicts
-  // IMPORTANT: Skip this effect for fixed-positioned windows (like TreasureWindow)
+  // IMPORTANT: Skip this effect when window is being dragged or on mobile
   useEffect(() => {
     const win = windowRef.current
-    if (!win || isMaximized || !windowData?.position) return
-
-    // Skip position sync for fixed-positioned windows (they manage their own position)
+    if (!win) return
+    if (isMobile) return
+    if (isMinimized || isMaximized) return
     if (style?.position === 'fixed') return
 
-    // Check if window is currently being dragged (has dragging class or transform)
-    const isDragging = win.classList.contains('dragging') || win.style.transform !== ''
-    
-    // Don't sync position during drag - let drag handler manage position
-    if (isDragging) return
+    const pos = windowData?.position
+    if (!pos) return
 
-    // For TangGang window with CSS variables, we may need to recalculate position
-    // after the window is rendered to get accurate size (only on first open, not after user drags)
-    const needsRecalculation = windowId === 'tanggang' && 
-      (style?.width?.includes('var(') || style?.height === 'auto')
-    
-    // Use requestAnimationFrame to ensure DOM is ready and batch updates
-    // This prevents visual glitches when multiple windows position at once on page load
-    const rafId = requestAnimationFrame(() => {
-      // Double-check window still exists and is mounted, and still not dragging
-      if (!win || !isMountedRef.current) return
-      if (win.classList.contains('dragging') || win.style.transform !== '') return
-      
-      let { x, y } = windowData.position
-      
-      // If this is TangGang and we need to recalculate, do it now that DOM is ready
-      // Only recalculate if window hasn't been moved by user (first open)
-      if (needsRecalculation) {
-        try {
-          // Check if user has moved this window - if so, don't recalculate
-          const wasMoved = hasUserMoved?.get(windowId) || win.dataset.userDragged === 'true'
-          
-          if (!wasMoved) {
-            const { getCenteredPosition } = require('../../utils/windowPosition')
-            const rect = win.getBoundingClientRect()
-            if (rect.width > 0 && rect.height > 0) {
-              const isMobile = window.innerWidth <= 640
-              if (!isMobile) {
-                const centeredPos = getCenteredPosition({
-                  width: rect.width,
-                  height: rect.height,
-                  padding: 24,
-                  isMobile: false
-                })
-                x = centeredPos.x
-                y = centeredPos.y
-                // Update the position in context (this will trigger a re-render)
-                updateWindowPosition(windowId, { x, y })
-              }
-            }
-          }
-        } catch (e) {
-          // Fallback to existing position if recalculation fails
-        }
-      }
-      
-      // Only update if position actually changed to avoid unnecessary updates
-      const currentLeft = parseInt(win.style.left) || 0
-      const currentTop = parseInt(win.style.top) || 0
-      
-      if (Math.abs(currentLeft - x) > 1 || Math.abs(currentTop - y) > 1) {
-        // Apply position directly (no double RAF needed - already in RAF)
-        win.style.left = `${x}px`
-        win.style.top = `${y}px`
-      }
-    })
+    // Don't fight dragging
+    if (win.classList.contains('dragging') || win.style.transform) return
 
-    return () => cancelAnimationFrame(rafId)
-  }, [windowData?.position, isMaximized, windowId, style?.width, style?.height, updateWindowPosition, getWindow])
-
-  // Handle window position updates from dragging
-  useEffect(() => {
-    const win = windowRef.current
-    if (!win || isMaximized) return
-
-    // Skip position tracking for fixed-positioned windows (they manage their own position)
-    if (style?.position === 'fixed') return
-
-    const observer = new MutationObserver(() => {
-      // Don't update position if window is currently being dragged
-      if (win.classList.contains('dragging') || win.style.transform !== '') {
-        return
-      }
-      
-      // Batch layout reads and defer writes to prevent layout thrashing
-      // Use requestAnimationFrame to batch with other DOM updates
-      requestAnimationFrame(() => {
-        const win2 = windowRef.current
-        if (!win2 || win2.classList.contains('dragging') || win2.style.transform !== '') {
-          return
-        }
-        
-        // Read layout (after batching with other reads)
-        const rect = win2.getBoundingClientRect()
-        updateWindowPosition(windowId, { x: rect.left, y: rect.top })
-      })
-    })
-
-    observer.observe(win, {
-      attributes: true,
-      attributeFilter: ['style'],
-    })
-
-    return () => observer.disconnect()
-  }, [windowId, isMaximized, updateWindowPosition, style?.position])
+    win.style.left = `${pos.x}px`
+    win.style.top = `${pos.y}px`
+  }, [
+    windowData?.position?.x,
+    windowData?.position?.y,
+    isMobile,
+    isMinimized,
+    isMaximized,
+    style?.position,
+  ])
 
   // Bring to front when clicked - improved handler
   useEffect(() => {
@@ -339,7 +262,6 @@ export default function Window({
       
       // Bring to front immediately on mousedown
       bringToFront(windowId)
-      bringToFrontDrag()
       
       // Also focus the window element
       if (win.tabIndex !== undefined) {
@@ -361,14 +283,23 @@ export default function Window({
         titleBar.removeEventListener('mousedown', handleMouseDown, true)
       }
     }
-  }, [windowId, bringToFront, bringToFrontDrag])
+  }, [windowId, bringToFront])
 
   const handleClose = () => {
     try {
       setIsVisible(false)
-      unregisterWindow(windowId)
       if (onClose) {
         onClose()
+      } else {
+        // Fallback: if no onClose handler is provided, unregister immediately
+        // so we never end up with a taskbar button for an invisible window.
+        try {
+          unregisterWindow(windowId)
+        } catch (error) {
+          if (process.env.NODE_ENV === 'development') {
+            console.error('[Window] Error unregistering window on close:', error, 'windowId:', windowId)
+          }
+        }
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
@@ -496,7 +427,6 @@ export default function Window({
       document.addEventListener('mousemove', handleMouseMove)
       document.addEventListener('mouseup', handleMouseUp)
       bringToFront(windowId)
-      bringToFrontDrag()
     }
 
     const handleMouseMove = (e) => {
@@ -571,9 +501,33 @@ export default function Window({
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
     }
-  }, [windowId, isMaximized, isMinimized, style, bringToFront, bringToFrontDrag, updateWindowSize])
+  }, [windowId, isMaximized, isMinimized, style, bringToFront, updateWindowSize])
 
   if (!isVisible) return null
+
+  // Merge base styles and ensure consistent positioning behavior
+  const baseStyle = {
+    ...style,
+    // Prefer WindowContext z-index; fall back to a high value for the active window
+    zIndex: windowData?.zIndex ?? (isActive ? 9999 : undefined),
+    display: isMinimized ? 'none' : 'block',
+    // Mobile: force fullscreen behavior (position: relative, full width/height)
+    // Desktop: use style prop or default to absolute for proper left/top positioning
+    position: isMobile ? 'relative' : (style?.position || 'absolute'),
+    // Mobile: force fullscreen dimensions (overridden by CSS, but ensures consistency)
+    ...(isMobile && !isMinimized ? {
+      width: '100vw',
+      maxWidth: '100vw',
+      height: '100dvh',
+      maxHeight: '100dvh',
+      left: '0',
+      top: '0',
+      margin: '0',
+    } : {}),
+    // Deterministic visibility: if mounted and not minimized, it must be visible
+    visibility: isMinimized ? 'hidden' : 'visible',
+    opacity: 1,
+  }
 
   return (
     <div
@@ -585,24 +539,7 @@ export default function Window({
       aria-modal="true"
       aria-labelledby={`${windowId}-title`}
       tabIndex={-1}
-      style={{
-        ...style,
-        zIndex: windowData?.zIndex || zIndex,
-        display: isMinimized ? 'none' : 'block',
-        // Mobile: force fullscreen behavior (position: relative, full width/height)
-        // Desktop: use style prop or default to relative
-        position: isMobile ? 'relative' : (style?.position || 'relative'),
-        // Mobile: force fullscreen dimensions (overridden by CSS, but ensures consistency)
-        ...(isMobile && !isMinimized ? {
-          width: '100vw',
-          maxWidth: '100vw',
-          height: '100dvh',
-          maxHeight: '100dvh',
-          left: '0',
-          top: '0',
-          margin: '0',
-        } : {}),
-      }}
+      style={baseStyle}
     >
       <div className="title-bar">
         <div className="title-bar-text" id={`${windowId}-title`}>

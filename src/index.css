@@ -1095,6 +1095,35 @@ p {
   white-space: nowrap;
 }
 
+/* Start button "tip" tooltip (Win98-style helper bubble) */
+.start-tip-overlay {
+  position: fixed;
+  z-index: 11000; /* Above taskbar but below modals that may go higher */
+  pointer-events: none; /* Never block clicks on Start or other UI */
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.start-tip-overlay-visible {
+  opacity: 1;
+}
+
+.start-tip-bubble {
+  position: relative;
+  display: inline-block;
+  background: #d4d0c8;
+  border: 1px solid #000000;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: #000000;
+  white-space: nowrap;
+  box-shadow: 2px 2px 0 #000000;
+}
+
+.start-tip-text {
+  user-select: none;
+}
+
 .taskbar-window-button {
   height: 22px;
   margin: 2px 4px;

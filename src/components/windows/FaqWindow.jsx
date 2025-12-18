@@ -1,14 +1,16 @@
 import Window from './Window'
 
-export default function FaqWindow() {
+export default function FaqWindow({ onClose }) {
   return (
     <Window
+      id="window-faq"
       title="FAQ"
       style={{ 
         width: 'var(--window-size-faq)', 
         maxWidth: 'var(--window-max-width)',
         minWidth: 'var(--window-min-width)'
       }}
+      onClose={onClose}
     >
       <p>
         <b>What is this?</b> A handcrafted Wojak NFT collection made for the

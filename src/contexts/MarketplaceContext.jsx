@@ -15,35 +15,130 @@ const STORAGE_KEYS = {
 
 // Removed: generateNFTs() and TOKEN_GROUPS - now loaded from CSV
 
-// Parse CSV text into array of NFT entries and map of nftId -> offerFile
+// Parse CSV text into array of NFT entries and map of id -> offerFile
+// Supports both legacy format (nftId,offerFile,group) and new simple formats:
+// - Header + one column: "offerFile"
+// - No header, one offer string per line
 const parseOfferFilesCSV = (csvText) => {
   const nftEntries = []
   const offerFiles = {}
-  const lines = csvText.trim().split('\n')
-  
-  // Skip header row (first line)
+  const rawLines = csvText.trim().split('\n')
+  const lines = rawLines.map(line => line.trim()).filter(line => line.length > 0)
+
+  if (lines.length === 0) {
+    return { nftEntries, offerFiles }
+  }
+
+  const header = lines[0]
+  const hasComma = header.includes(',')
+
+  // Helper to generate stable synthetic IDs when CSV doesn't provide one
+  let syntheticCounter = 0
+  const nextSyntheticId = () => {
+    syntheticCounter += 1
+    return `OFFER-${String(syntheticCounter).padStart(4, '0')}`
+  }
+
+  // Case 1: No commas at all -> treat as simple list of offer files
+  if (!hasComma) {
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]
+      const lower = line.toLowerCase()
+
+      // If the first line looks like a header ("offerfile"), skip it
+      if (i === 0 && (lower === 'offerfile' || lower === 'offer')) {
+        continue
+      }
+
+      const offerFile = line
+      if (!offerFile) continue
+
+      const id = nextSyntheticId()
+      nftEntries.push({
+        id,
+        offerFile,
+        group: null,
+      })
+      offerFiles[id] = offerFile
+    }
+
+    return { nftEntries, offerFiles }
+  }
+
+  // Case 2: Comma-separated with a header row
+  const headerParts = header.split(',').map(p => p.trim())
+  const headerLower = headerParts.map(p => p.toLowerCase())
+
+  const offerFileIdx = headerLower.findIndex(
+    (name) => name === 'offerfile' || name === 'offer' || name === 'offer_file'
+  )
+  const nftIdIdx = headerLower.findIndex(
+    (name) => name === 'nftid' || name === 'id'
+  )
+  const groupIdx = headerLower.findIndex(
+    (name) => name === 'group' || name === 'currency'
+  )
+
+  // Case 2a: New headered format with an explicit offerFile column
+  if (offerFileIdx !== -1) {
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i]
+      if (!line) continue
+
+      const parts = line.split(',').map(p => p.trim())
+      if (parts.length <= offerFileIdx) continue
+
+      const offerFile = parts[offerFileIdx]
+      if (!offerFile) continue
+
+      let id = null
+      if (nftIdIdx !== -1 && parts.length > nftIdIdx) {
+        id = parts[nftIdIdx] || null
+      }
+
+      const group =
+        groupIdx !== -1 && parts.length > groupIdx
+          ? (parts[groupIdx] || null)
+          : null
+
+      if (!id) {
+        id = nextSyntheticId()
+      }
+
+      nftEntries.push({
+        id,
+        offerFile,
+        group,
+      })
+      offerFiles[id] = offerFile
+    }
+
+    return { nftEntries, offerFiles }
+  }
+
+  // Case 2b: Legacy format with positional columns: nftId,offerFile,group
+  // Keep existing behavior for backward compatibility.
   for (let i = 1; i < lines.length; i++) {
-    const line = lines[i].trim()
+    const line = lines[i]
     if (!line) continue
-    
-    // Split by comma - format: nftId,offerFile,group
+
     const parts = line.split(',').map(p => p.trim())
     if (parts.length < 2) continue
-    
+
     const nftId = parts[0]
     const offerFile = parts[1]
-    const group = parts[2] || null // Optional group column
-    
+    const group = parts[2] || null
+
     if (nftId && offerFile) {
       nftEntries.push({
         id: nftId,
-        offerFile: offerFile,
-        group: group,
+        offerFile,
+        group,
       })
       offerFiles[nftId] = offerFile
     }
   }
-  
+
   return { nftEntries, offerFiles }
 }
 
@@ -268,7 +363,7 @@ export function MarketplaceProvider({ children }) {
     pendingRequestsRef.current.set(nftId, nftEntry)
     
     try {
-      // Step 1: Get offer details from Dexie API (includes currency info and status)
+      // Step 1: Get offer details from Dexie API (includes currency info, price, and status)
       const offerData = await getOfferFromDexie(nftEntry.offerFile)
       
       // Check if offer is taken/completed
@@ -306,6 +401,31 @@ export function MarketplaceProvider({ children }) {
             : uniqueCurrencies.join(',') // Multiple currencies
         }
       }
+
+      // Build human-readable price text from Dexie offer data
+      let priceText = null
+      if (offerData) {
+        const formatTokens = (items = []) => {
+          return items
+            .filter(item => item && item.amount && item.code)
+            .map(item => {
+              const amountNum = parseFloat(item.amount)
+              const amountStr = Number.isFinite(amountNum)
+                ? amountNum.toLocaleString()
+                : String(item.amount)
+              return `${amountStr} ${item.code}`
+            })
+        }
+
+        // Most marketplaces treat "requested" as what the buyer pays.
+        const requestedTokens = formatTokens(offerData.requested || [])
+        const offeredTokens = formatTokens(offerData.offered || [])
+
+        const tokens = requestedTokens.length > 0 ? requestedTokens : offeredTokens
+        if (tokens.length > 0) {
+          priceText = tokens.join(' + ')
+        }
+      }
       
       // Step 2: Resolve NFT launcher ID from offer file
       const launcherId = await resolveNFTFromOfferFile(nftEntry.offerFile)
@@ -330,6 +450,7 @@ export function MarketplaceProvider({ children }) {
         launcherId: launcherId,
         offerTaken: isOfferTaken, // Store offer status
         offerData: offerData, // Store full offer data for reference
+        priceText,
         ...mintGardenDetails, // Include all MintGarden data
       }
       

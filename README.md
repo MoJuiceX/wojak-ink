@@ -37,6 +37,7 @@ Built with React, Vite, and a whole lot of memetic energy. Let's get you set up,
 - [Project Structure](#-project-structure)
 - [Troubleshooting](#-troubleshooting)
 - [Credits & Community](#-credits--community)
+- [Wojak Creator Internals Reference](#-wojak-creator-internals-reference)
 
 ---
 
@@ -354,12 +355,20 @@ Since this is a visual/interactive app, here's what to test:
 
 ### Testing Offer Files
 
-If you have offer files in `src/data/offerFiles.csv`:
+If you have offer files in `src/data/offerFiles.csv` or `public/offerFiles.csv`:
 
 1. The marketplace should automatically load them
 2. NFTs should appear in the marketplace window
 3. Clicking an NFT should show the offer file modal
 4. Copying the offer file should work
+
+Supported CSV formats:
+
+- **Simple (recommended):**
+  - With header: `offerFile` on the first line, then one offer string per line
+  - Or without header: one offer string per line
+- **Legacy (still supported):**
+  - `nftId,offerFile,group`
 
 ### Browser Console
 
@@ -831,11 +840,24 @@ When reporting issues, include:
 
 ### Marketplace
 
-1. Open the **"MARKETPLACE - P2P OFFERS"** window
+The marketplace UI is gated behind an admin-controlled flag:
+
+1. Open the **"MARKETPLACE - P2P OFFERS"** window (when enabled)
 2. Filter by token group using the buttons
 3. Toggle **"Show only NFTs with offers"** to filter
 4. Click any NFT card to view details and offer file
 5. Copy offer files to use in Chia wallet
+
+If the marketplace is **not enabled**:
+
+- Clicking **MARKETPLACE** in the Start menu will show a Windows 98-style dialog saying **"Marketplace not active yet."**
+- The main marketplace window will not open from the Start menu while disabled.
+
+To enable the marketplace as an admin:
+
+1. Navigate to `/admin-enable` in your browser and log in with the admin password  
+2. Or, click **MARKETPLACE** in the Start menu while it is disabled, then use the admin login + toggle in the dialog window  
+3. Once enabled, the marketplace entry point in the Start menu will open the marketplace window normally
 
 ### Paint Window
 
@@ -853,6 +875,26 @@ When reporting issues, include:
 ### Wojak Creator Rules System
 
 The Wojak Creator includes a smart rules system that prevents incompatible layer combinations. Rules are defined in `src/utils/wojakRules.js` and are automatically enforced when selecting layers. Disabled layers show a reason message, and previously selected items in disabled layers are automatically cleared when rules apply.
+
+---
+
+## 🧠 Wojak Creator Internals Reference
+
+If you need to understand or change how the **Wojak Creator** works under the hood (layer order, rules, virtual layers, randomization, etc.), see:
+
+- `WOJAK_CREATOR_LOGIC.md`
+  - Explains where each part of the system lives:
+    - Window + layout: `src/components/windows/WojakCreator.jsx`
+    - State + rendering: `src/hooks/useMemeGenerator.js` and `MemeCanvas`
+    - Layer order and virtual layers: `src/lib/memeLayers.js`
+    - Image manifest and trait options: `src/lib/memeImageManifest.js`
+    - Rules engine: `src/utils/wojakRules.js`
+  - Includes guidelines for:
+    - Adding new traits
+    - Changing trait compatibility rules
+    - Adjusting draw order / visual stacking
+
+Treat `WOJAK_CREATOR_LOGIC.md` as the **canonical map** of how the Wojak Creator logic fits together so you never lose track of the important pieces.
 
 ### Admin Panel
 
@@ -1465,7 +1507,7 @@ wojak-ink/
 - **`src/components/windows/WojakCreator.jsx`** - Wojak creator/meme generator
 - **`src/components/windows/TangGangWindow.jsx`** - Tang Gang community window
 - **`src/services/mintgardenApi.js`** - MintGarden API integration
-- **`src/data/offerFiles.csv`** - Offer file data (NFT IDs and offer files)
+- **`src/data/offerFiles.csv`** - Offer file data (one offer per line; legacy multi-column format also supported)
 - **`scripts/generate-meme-manifest.js`** - Generates wojak creator layer manifest (runs before build)
 - **`src/utils/wojakRules.js`** - Rules system for layer compatibility (prevents incompatible combinations)
 - **`vite.config.js`** - Build configuration
@@ -1527,8 +1569,9 @@ npm run build
 
 #### Marketplace not showing NFTs
 
-- Verify `src/data/offerFiles.csv` exists and has data
-- Check CSV format: `nftId,offerFile,group`
+- Verify `src/data/offerFiles.csv` or `public/offerFiles.csv` exists and has data
+- For the **simple format**, ensure each non-empty line contains a valid offer string (with optional `offerFile` header)
+- For the **legacy format**, use `nftId,offerFile,group`
 - Ensure MarketplaceContext is loading the CSV correctly
 - Check browser console for errors
 

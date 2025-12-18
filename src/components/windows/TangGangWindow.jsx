@@ -1,6 +1,6 @@
 import Window from './Window'
 
-export default function TangGangWindow() {
+export default function TangGangWindow({ onClose }) {
   return (
     <Window
       id="tanggang"
@@ -15,6 +15,7 @@ export default function TangGangWindow() {
         minHeight: '300px', // Stable height for accurate centering
         height: 'auto'
       }}
+      onClose={onClose}
     >
       <img
         src="https://bafybeihbaqn7omk55qi3vfrht76qa53kz4dx75anzwtjkcggi2v3jql4tm.ipfs.w3s.link/?filename=HOA+logo.png"

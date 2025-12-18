@@ -1,19 +1,52 @@
 import { useEffect, useRef } from 'react'
 import { useWindow } from '../contexts/WindowContext'
+import { useMarketplace } from '../contexts/MarketplaceContext'
 import { getStartMenuIcon } from '../utils/windowIcons'
 
-export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCreator }) {
-  const { getAllWindows, isWindowMinimized, restoreWindow, bringToFront } = useWindow()
-  const menuRef = useRef(null)
+export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCreator, onOpenApp, onShowMarketplaceNotActive, menuRef, startButtonRef }) {
+  const { getAllWindows, isWindowMinimized, restoreWindow, bringToFront, activeWindowId, isWindowActive } = useWindow()
+  const { marketplaceEnabled } = useMarketplace()
+  const internalMenuRef = useRef(null)
+  const resolvedMenuRef = menuRef || internalMenuRef
+  const deferredFocusRafRef = useRef(null)
+
+  // Clear any pending deferred focus rAF on unmount
+  useEffect(() => {
+    return () => {
+      if (deferredFocusRafRef.current) {
+        cancelAnimationFrame(deferredFocusRafRef.current)
+        deferredFocusRafRef.current = null
+      }
+    }
+  }, [])
+
+  // Also clear deferred focus when menu closes, even if component isn't unmounted yet
+  useEffect(() => {
+    if (!isOpen && deferredFocusRafRef.current) {
+      cancelAnimationFrame(deferredFocusRafRef.current)
+      deferredFocusRafRef.current = null
+    }
+  }, [isOpen])
 
   useEffect(() => {
     if (!isOpen) return
 
     const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target) && 
-          !e.target.closest('.start-button')) {
-        onClose()
+      const target = e.target
+      const menuEl = resolvedMenuRef.current
+      const startBtnEl = startButtonRef?.current
+
+      // Ignore clicks inside the start menu
+      if (menuEl && menuEl.contains(target)) {
+        return
       }
+
+      // Ignore clicks on the start button (handled separately)
+      if (startBtnEl && startBtnEl.contains(target)) {
+        return
+      }
+
+      onClose()
     }
 
     const handleEscape = (e) => {
@@ -45,6 +78,20 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
       'scroll-to-marketplace': 'window-marketplace',
       'open-tanggang': 'tanggang',
     }
+    const windowId = actionToWindowId[action]
+
+    // Gate marketplace entry behind marketplaceEnabled using window ID
+    if (windowId === 'window-marketplace' && !marketplaceEnabled) {
+      if (onShowMarketplaceNotActive) {
+        onShowMarketplaceNotActive()
+      }
+      onClose()
+      return
+    }
+
+    // Capture the active window before we start, so we can detect if the user
+    // changes focus before our deferred bringToFront runs.
+    const priorActiveId = activeWindowId
 
     if (action === 'open-paint') {
       if (onOpenPaint) {
@@ -53,8 +100,6 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
       onClose()
       return
     }
-
-    const windowId = actionToWindowId[action]
     if (windowId) {
       // Check if window exists in the window context
       const allWindows = getAllWindows()
@@ -71,40 +116,55 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
         } catch (e) {
           console.debug('Error restoring/bringing to front window:', windowId, e)
         }
-      } else {
-        // Window not registered yet - wait a bit and try again
-        // This can happen if the window hasn't registered yet
-        const windowElement = document.getElementById(windowId)
-        if (windowElement) {
-          // Window exists in DOM, wait for registration and then restore
-          setTimeout(() => {
+      } else if (onOpenApp) {
+        // Window is not open yet - ask parent to open/mount it
+        onOpenApp(windowId)
+
+        // After opening, retry until the window is registered, then restore + bring to front.
+        const focusWhenRegistered = (remainingTries) => {
+          if (remainingTries <= 0) {
+            deferredFocusRafRef.current = null
+            return
+          }
+
+          deferredFocusRafRef.current = requestAnimationFrame(() => {
             try {
-              const retryWindows = getAllWindows()
-              const retryExists = retryWindows.some(w => w.id === windowId)
-              if (retryExists) {
-                if (isWindowMinimized(windowId)) {
-                  restoreWindow(windowId)
-                } else {
-                  bringToFront(windowId)
-                }
-              } else {
-                // Still not registered - force bring to front via DOM
-                windowElement.style.display = 'block'
-                windowElement.style.zIndex = '9999'
-                // Try to trigger a click on the window to bring it to front
-                const titleBar = windowElement.querySelector('.title-bar')
-                if (titleBar) {
-                  titleBar.click()
-                }
+              const allWindowsAfterOpen = getAllWindows()
+              const existsNow = allWindowsAfterOpen.some(w => w.id === windowId)
+
+              if (!existsNow) {
+                focusWhenRegistered(remainingTries - 1)
+                return
               }
-            } catch (err) {
-              console.debug('Could not restore window after retry:', windowId, err)
+
+              // TEMP DEBUG: verify registration + minimized/position state before restore
+              console.log('[focusWhenRegistered]', {
+                windowId,
+                existsNow,
+                minimized: isWindowMinimized(windowId),
+                all: allWindowsAfterOpen.map(w => ({
+                  id: w.id,
+                  pos: w.position,
+                  z: w.zIndex,
+                })),
+              })
+
+              restoreWindow(windowId)
+              bringToFront(windowId)
+              deferredFocusRafRef.current = null
+            } catch (e) {
+              console.debug('Error restoring/bringing newly opened window to front:', windowId, e)
+              deferredFocusRafRef.current = null
             }
-          }, 100)
-        } else {
-          // Window doesn't exist in DOM either - log for debugging
-          console.debug('Window not found in DOM or context:', windowId)
+          })
         }
+
+        // Cancel any previous focus attempts before starting a new sequence
+        if (deferredFocusRafRef.current) {
+          cancelAnimationFrame(deferredFocusRafRef.current)
+          deferredFocusRafRef.current = null
+        }
+        focusWhenRegistered(10)
       }
     }
     
@@ -115,7 +175,7 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
   useEffect(() => {
     if (!isOpen) return
 
-    const menuItems = menuRef.current?.querySelectorAll('.start-menu-item')
+    const menuItems = resolvedMenuRef.current?.querySelectorAll('.start-menu-item')
     if (!menuItems || menuItems.length === 0) return
 
     let focusedIndex = -1
@@ -144,7 +204,15 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
   if (!isOpen) return null
 
   return (
-    <div className="start-menu" ref={menuRef} role="menu" aria-label="Start menu" aria-orientation="vertical">
+    <div
+      className="start-menu"
+      ref={resolvedMenuRef}
+      role="menu"
+      aria-label="Start menu"
+      aria-orientation="vertical"
+      onMouseDown={(e) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
+    >
       <div className="start-menu-header">
         <span className="start-menu-title">Wojak Farmers Plot</span>
       </div>

@@ -149,9 +149,19 @@ export function useKeyboardPriority() {
 export function useKeyboardHandler(priority, id, handler, isActive) {
   const { registerHandler, unregisterHandler, shouldHandle } = useKeyboardPriority()
 
+  // Keep the latest handler without re-registering every render
+  const handlerRef = useRef(handler)
+
   useEffect(() => {
-    if (isActive && handler) {
-      registerHandler(priority, id, handler, isActive)
+    handlerRef.current = handler
+  }, [handler])
+
+  useEffect(() => {
+    if (!id) return
+
+    if (isActive) {
+      // Register a stable wrapper once; it always calls the latest handlerRef
+      registerHandler(priority, id, (e) => handlerRef.current?.(e), true)
     } else {
       unregisterHandler(id)
     }
@@ -159,7 +169,8 @@ export function useKeyboardHandler(priority, id, handler, isActive) {
     return () => {
       unregisterHandler(id)
     }
-  }, [priority, id, handler, isActive, registerHandler, unregisterHandler])
+    // IMPORTANT: handler is intentionally NOT a dependency to avoid infinite loops
+  }, [priority, id, isActive, registerHandler, unregisterHandler])
 
   return { shouldHandle: shouldHandle(id) }
 }

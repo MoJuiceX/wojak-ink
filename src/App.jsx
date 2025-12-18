@@ -8,24 +8,22 @@ import TangGangWindow from './components/windows/TangGangWindow'
 import SideStack from './components/SideStack'
 import NotifyPopup from './components/windows/NotifyPopup'
 import MarketplaceWindow from './components/windows/MarketplaceWindow'
+import MarketplaceNotActiveDialog from './components/windows/MarketplaceNotActiveDialog'
 import WojakCreator from './components/windows/WojakCreator'
 import PaintWindow from './components/windows/PaintWindow'
 import Taskbar from './components/Taskbar'
-import OrangeTrail from './components/OrangeTrail'
-import OrangeGameErrorBoundary from './components/OrangeGameErrorBoundary'
 import BackgroundMusic from './components/BackgroundMusic'
 import LoadingSpinner from './components/ui/LoadingSpinner'
-import PerformanceDebug from './components/dev/PerformanceDebug'
 
 // Lazy load non-critical routes
 const AdminPanel = lazy(() => import('./components/windows/AdminPanel'))
 const QAPage = lazy(() => import('./components/dev/QAPage'))
 import { MarketplaceProvider } from './contexts/MarketplaceContext'
-import { WindowProvider, useWindow } from './contexts/WindowContext'
+import { WindowProvider } from './contexts/WindowContext'
 import { ToastProvider } from './contexts/ToastContext'
-import { OrangeGameProvider } from './contexts/OrangeGameContext'
 import { KeyboardPriorityProvider } from './contexts/KeyboardPriorityContext'
 import { useWindowStacking } from './hooks/useWindowStacking'
+import GlobalErrorBoundary from './components/GlobalErrorBoundary'
 
 // Global scroll lock - prevent all page scrolling
 function useGlobalScrollLock() {
@@ -128,46 +126,48 @@ function useGlobalScrollLock() {
   }, [])
 }
 
-// Component to handle initial window minimization
-function WindowInitializer() {
-  const { getAllWindows, minimizeWindow } = useWindow()
-  const [initialized, setInitialized] = useState(false)
-
-  useEffect(() => {
-    if (initialized) return
-
-    // Wait a bit for all windows to register, then minimize all except ReadmeWindow and TangGang
-    const timer = setTimeout(() => {
-      const allWindows = getAllWindows()
-      const readmeWindowId = 'window-readme-txt' // Based on title "README.TXT"
-      const tanggangWindowId = 'tanggang' // TangGang window ID
-      
-      allWindows.forEach((window) => {
-        // Don't minimize ReadmeWindow or TangGang - minimize all others
-        if (window.id !== readmeWindowId && window.id !== tanggangWindowId) {
-          minimizeWindow(window.id)
-        }
-      })
-      
-      setInitialized(true)
-    }, 100) // Small delay to ensure all windows are registered
-
-    return () => clearTimeout(timer)
-  }, [getAllWindows, minimizeWindow, initialized])
-
-  return null
-}
-
 function App() {
   const [notifyOpen, setNotifyOpen] = useState(false)
   const [paintOpen, setPaintOpen] = useState(false)
   const [wojakCreatorOpen, setWojakCreatorOpen] = useState(false)
+  const [openWindows, setOpenWindows] = useState({
+    'window-readme-txt': false,
+    'window-mint-info-exe': false,
+    'window-gallery': false,
+    'window-faq': false,
+    'window-marketplace': false,
+    'tanggang': false,
+  })
+  const [marketplaceDialogOpen, setMarketplaceDialogOpen] = useState(false)
 
   // Global scroll lock - prevent all page scrolling
   useGlobalScrollLock()
   
   // Use the extracted window stacking hook
   useWindowStacking()
+
+  // Global error logging for uncaught errors and unhandled promise rejections (DEV only)
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'development') return
+
+    const handleWindowError = (event) => {
+      // eslint-disable-next-line no-console
+      console.error('[window.onerror]', event.message, event.error || event)
+    }
+
+    const handleUnhandledRejection = (event) => {
+      // eslint-disable-next-line no-console
+      console.error('[unhandledrejection]', event.reason || event)
+    }
+
+    window.addEventListener('error', handleWindowError)
+    window.addEventListener('unhandledrejection', handleUnhandledRejection)
+
+    return () => {
+      window.removeEventListener('error', handleWindowError)
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection)
+    }
+  }, [])
 
   // Listen for paint window open event
   useEffect(() => {
@@ -180,59 +180,99 @@ function App() {
     }
   }, [])
 
+  // Ensure README.TXT window is open when the app loads
+  // We intentionally avoid relying on localStorage here so that
+  // the README is always visible, even in browsers/environments
+  // where storage access is blocked or throws.
+  useEffect(() => {
+    setOpenWindows(prev => ({
+      ...prev,
+      'window-readme-txt': true,
+    }))
+  }, [])
+
+  const openWindow = (windowId) => {
+    setOpenWindows(prev => ({
+      ...prev,
+      [windowId]: true,
+    }))
+  }
+
+  const closeWindow = (windowId) => {
+    setOpenWindows(prev => ({
+      ...prev,
+      [windowId]: false,
+    }))
+  }
+
   return (
     <ToastProvider>
       <KeyboardPriorityProvider>
         <WindowProvider>
-          <WindowInitializer />
-          <MarketplaceProvider>
-            <OrangeGameProvider>
-            {/* Background music - starts after first user interaction */}
-            <BackgroundMusic />
-            <a href="#main-content" className="skip-link">Skip to main content</a>
-            <div className="bg-fixed" aria-hidden="true"></div>
-            <main id="main-content" className="desktop" aria-label="Desktop">
-              {/* Orange game layer wrapped in error boundary - if it crashes, show error window and disable game */}
-              <OrangeGameErrorBoundary>
-                <OrangeTrail />
-              </OrangeGameErrorBoundary>
-              <ReadmeWindow />
-            <MintInfoWindow onNotifyClick={() => setNotifyOpen(true)} />
-            <GalleryWindow />
-            <FaqWindow />
-            <TangGangWindow />
-            <Routes>
-              <Route path="/" element={null} />
-              <Route 
-                path="/admin-enable" 
-                element={
-                  <Suspense fallback={<LoadingSpinner />}>
-                    <AdminPanel />
-                  </Suspense>
-                } 
+          <GlobalErrorBoundary>
+            <MarketplaceProvider>
+              {/* Background music - starts after first user interaction */}
+              <BackgroundMusic />
+              <a href="#main-content" className="skip-link">Skip to main content</a>
+              <div className="bg-fixed" aria-hidden="true"></div>
+              <main id="main-content" className="desktop" aria-label="Desktop">
+                {openWindows['window-readme-txt'] && (
+                  <ReadmeWindow onClose={() => closeWindow('window-readme-txt')} />
+                )}
+                {openWindows['window-mint-info-exe'] && (
+                  <MintInfoWindow
+                    onNotifyClick={() => setNotifyOpen(true)}
+                    onClose={() => closeWindow('window-mint-info-exe')}
+                  />
+                )}
+                {openWindows['window-gallery'] && (
+                  <GalleryWindow onClose={() => closeWindow('window-gallery')} />
+                )}
+                {openWindows['window-faq'] && (
+                  <FaqWindow onClose={() => closeWindow('window-faq')} />
+                )}
+                {openWindows['tanggang'] && (
+                  <TangGangWindow onClose={() => closeWindow('tanggang')} />
+                )}
+              <Routes>
+                <Route path="/" element={null} />
+                <Route 
+                  path="/admin-enable" 
+                  element={
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <AdminPanel />
+                    </Suspense>
+                  } 
+                />
+                <Route 
+                  path="/dev/qa" 
+                  element={
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <QAPage />
+                    </Suspense>
+                  } 
+                />
+              </Routes>
+              {openWindows['window-marketplace'] && (
+                <MarketplaceWindow onClose={() => closeWindow('window-marketplace')} />
+              )}
+              <MarketplaceNotActiveDialog
+                isOpen={marketplaceDialogOpen}
+                onClose={() => setMarketplaceDialogOpen(false)}
               />
-              <Route 
-                path="/dev/qa" 
-                element={
-                  <Suspense fallback={<LoadingSpinner />}>
-                    <QAPage />
-                  </Suspense>
-                } 
-              />
-            </Routes>
-            <MarketplaceWindow />
-            <SideStack />
-            {wojakCreatorOpen && <WojakCreator onClose={() => setWojakCreatorOpen(false)} />}
-            {paintOpen && <PaintWindow onClose={() => setPaintOpen(false)} />}
-            <NotifyPopup isOpen={notifyOpen} onClose={() => setNotifyOpen(false)} />
-            <PerformanceDebug />
-          </main>
+              <SideStack />
+              {wojakCreatorOpen && <WojakCreator onClose={() => setWojakCreatorOpen(false)} />}
+              {paintOpen && <PaintWindow onClose={() => setPaintOpen(false)} />}
+              <NotifyPopup isOpen={notifyOpen} onClose={() => setNotifyOpen(false)} />
+            </main>
             <Taskbar 
               onOpenWojakCreator={() => setWojakCreatorOpen(true)} 
               wojakCreatorOpen={wojakCreatorOpen}
+              onOpenApp={openWindow}
+              onShowMarketplaceNotActive={() => setMarketplaceDialogOpen(true)}
             />
-            </OrangeGameProvider>
-          </MarketplaceProvider>
+            </MarketplaceProvider>
+          </GlobalErrorBoundary>
         </WindowProvider>
       </KeyboardPriorityProvider>
     </ToastProvider>

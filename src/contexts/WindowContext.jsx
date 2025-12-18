@@ -16,6 +16,59 @@ export function WindowProvider({ children }) {
   const [hasUserMoved, setHasUserMoved] = useState(new Map()) // Track if user has moved each window
   const nextZIndexRef = useRef(1000)
 
+  // Clamp a window's position so it stays within the visible desktop viewport
+  // on desktop/tablet. This prevents windows from ending up completely off-screen.
+  const clampToViewport = useCallback((pos, size) => {
+    // SSR / non-browser safety
+    if (typeof window === 'undefined') {
+      return pos || { x: 20, y: 20 }
+    }
+
+    // Mobile: windows are fullscreen/stacked; don't clamp here.
+    if (window.innerWidth <= 640) {
+      return pos || { x: 20, y: 20 }
+    }
+
+    const padding = 8
+    let taskbarH = 48 // Default fallback
+    try {
+      if (typeof document !== 'undefined' && document.documentElement) {
+        const rootStyles = getComputedStyle(document.documentElement)
+        const fromCss = parseInt(rootStyles.getPropertyValue('--taskbar-height') || '48', 10)
+        if (!Number.isNaN(fromCss) && fromCss > 0) {
+          taskbarH = fromCss
+        }
+      }
+    } catch {
+      // Ignore and use fallback
+    }
+    const vw = window.innerWidth || 1024
+    const vh = window.innerHeight || 768
+
+    const parseSize = (value, fallback) => {
+      if (typeof value === 'number') return value
+      if (typeof value === 'string') {
+        const n = parseInt(value, 10)
+        if (!Number.isNaN(n) && n > 0) return n
+      }
+      return fallback
+    }
+
+    const w = parseSize(size?.width, 600)
+    const h = parseSize(size?.height, 400)
+
+    const maxX = Math.max(padding, vw - w - padding)
+    const maxY = Math.max(padding, vh - taskbarH - h - padding)
+
+    const baseX = typeof pos?.x === 'number' ? pos.x : padding
+    const baseY = typeof pos?.y === 'number' ? pos.y : padding
+
+    return {
+      x: Math.min(Math.max(baseX, padding), maxX),
+      y: Math.min(Math.max(baseY, padding), maxY),
+    }
+  }, [])
+
   /**
    * Register a new window in the window manager.
    * 
@@ -157,7 +210,7 @@ export function WindowProvider({ children }) {
       const windowEntry = {
         id: windowId,
         title: windowData?.title || existingWindow?.title || windowId,
-        position: position,
+        position: clampToViewport(position, windowData?.size || existingWindow?.size),
         size: windowData?.size || existingWindow?.size || { width: 'auto', height: 'auto' },
         // Preserve zIndex from existing window, or assign new one for new windows
         zIndex: existingWindow?.zIndex ?? nextZIndexRef.current++,
@@ -178,8 +231,14 @@ export function WindowProvider({ children }) {
       next.set(windowId, windowEntry)
       return next
     })
+    // Ensure a (re)registered window is not left in minimized state
+    setMinimizedWindows(prev => {
+      const next = new Set(prev)
+      next.delete(windowId)
+      return next
+    })
     setActiveWindowId(windowId)
-  }, [])
+  }, [clampToViewport])
 
   /**
    * Unregister a window from the window manager.
@@ -187,9 +246,25 @@ export function WindowProvider({ children }) {
    * @param {string} windowId - Unique identifier for the window to remove
    */
   const unregisterWindow = useCallback((windowId) => {
+    // Compute the next active window ID based on the windows map AFTER removal.
+    // Use a local variable populated inside setWindows to avoid stale closures.
+    let computedNextActiveId = null
+
     setWindows(prev => {
       const next = new Map(prev)
       next.delete(windowId)
+
+      // Choose the remaining window with the highest zIndex as the next active candidate
+      let bestId = null
+      let bestZ = -Infinity
+      next.forEach((win) => {
+        if (typeof win.zIndex === 'number' && win.zIndex > bestZ) {
+          bestZ = win.zIndex
+          bestId = win.id
+        }
+      })
+      computedNextActiveId = bestId || null
+
       return next
     })
     setMinimizedWindows(prev => {
@@ -197,10 +272,15 @@ export function WindowProvider({ children }) {
       next.delete(windowId)
       return next
     })
-    if (activeWindowId === windowId) {
-      setActiveWindowId(null)
-    }
-  }, [activeWindowId])
+
+    // Use functional update to avoid capturing a stale activeWindowId
+    setActiveWindowId(prevActiveId => {
+      if (prevActiveId === windowId) {
+        return computedNextActiveId
+      }
+      return prevActiveId
+    })
+  }, [])
 
   /**
    * Minimize a window (hide it and show it in the taskbar).
@@ -241,7 +321,7 @@ export function WindowProvider({ children }) {
    */
   const bringToFront = useCallback((windowId) => {
     // Mobile-only: Auto-minimize other windows when bringing one to front
-    const isMobile = window.innerWidth <= 640
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 640
     if (isMobile) {
       setWindows(prev => {
         prev.forEach((win, id) => {
@@ -258,13 +338,13 @@ export function WindowProvider({ children }) {
     }
     setWindows(prev => {
       const next = new Map(prev)
-      const window = next.get(windowId)
-      if (window) {
+      const winEntry = next.get(windowId)
+      if (winEntry) {
         const wasMoved = hasUserMoved.get(windowId)
         
         // Center window if it hasn't been moved by user
         // This ensures windows opened from Start menu/taskbar appear centered
-        if (!wasMoved && !window.isMaximized) {
+        if (!wasMoved && !winEntry.isMaximized) {
           try {
             const { getCenteredPosition, getDefaultWindowSize } = require('../utils/windowPosition')
             const defaultSize = getDefaultWindowSize(windowId)
@@ -273,7 +353,7 @@ export function WindowProvider({ children }) {
             const windowElement = document.getElementById(windowId)
             let windowWidth = defaultSize.width
             let windowHeight = defaultSize.height
-            
+
             if (windowElement) {
               // Read layout properties (batch all reads)
               const rect = windowElement.getBoundingClientRect()
@@ -281,17 +361,17 @@ export function WindowProvider({ children }) {
               if (rect.height > 0) windowHeight = rect.height
             } else {
               // Fallback to stored size or defaults
-              if (window.size) {
-                if (typeof window.size.width === 'number') {
-                  windowWidth = window.size.width
-                } else if (typeof window.size.width === 'string' && window.size.width.includes('px')) {
-                  windowWidth = parseInt(window.size.width) || defaultSize.width
+              if (winEntry.size) {
+                if (typeof winEntry.size.width === 'number') {
+                  windowWidth = winEntry.size.width
+                } else if (typeof winEntry.size.width === 'string' && winEntry.size.width.includes('px')) {
+                  windowWidth = parseInt(winEntry.size.width, 10) || defaultSize.width
                 }
                 
-                if (typeof window.size.height === 'number') {
-                  windowHeight = window.size.height
-                } else if (typeof window.size.height === 'string' && window.size.height.includes('px')) {
-                  windowHeight = parseInt(window.size.height) || defaultSize.height
+                if (typeof winEntry.size.height === 'number') {
+                  windowHeight = winEntry.size.height
+                } else if (typeof winEntry.size.height === 'string' && winEntry.size.height.includes('px')) {
+                  windowHeight = parseInt(winEntry.size.height, 10) || defaultSize.height
                 }
               }
             }
@@ -302,34 +382,26 @@ export function WindowProvider({ children }) {
               padding: 24 // Explicit padding for desktop OS feel
             })
             
-            // Apply position to DOM element using requestAnimationFrame to batch updates
-            // This prevents glitches when multiple windows are centered at once
-            if (windowElement && (!windowElement.style.position || windowElement.style.position === 'relative')) {
-              requestAnimationFrame(() => {
-                const el = document.getElementById(windowId)
-                if (el && (!el.style.position || el.style.position === 'relative')) {
-                  el.style.left = `${centeredPos.x}px`
-                  el.style.top = `${centeredPos.y}px`
-                }
-              })
-            }
-            
+            const clampedPos = clampToViewport(centeredPos, winEntry.size)
             next.set(windowId, {
-              ...window,
-              position: centeredPos,
+              ...winEntry,
+              position: clampedPos,
               zIndex: nextZIndexRef.current++,
             })
           } catch (e) {
             // If centering fails, just update z-index
             next.set(windowId, {
-              ...window,
+              ...winEntry,
               zIndex: nextZIndexRef.current++,
             })
           }
         } else {
-          // Just update z-index if window was moved or is maximized
+          // Just update z-index if window was moved or is maximized,
+          // but still clamp its stored position into the viewport.
+          const clampedPos = clampToViewport(winEntry.position, winEntry.size)
           next.set(windowId, {
-            ...window,
+            ...winEntry,
+            position: clampedPos,
             zIndex: nextZIndexRef.current++,
           })
         }
@@ -337,7 +409,7 @@ export function WindowProvider({ children }) {
       return next
     })
     setActiveWindowId(windowId)
-  }, [hasUserMoved, setMinimizedWindows])
+  }, [hasUserMoved, setMinimizedWindows, clampToViewport])
 
   /**
    * Restore a minimized window (show it and remove from minimized set).
@@ -348,7 +420,7 @@ export function WindowProvider({ children }) {
    */
   const restoreWindow = useCallback((windowId) => {
     // Mobile-only: Auto-minimize other windows when restoring one
-    const isMobile = window.innerWidth <= 640
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 640
     if (isMobile) {
       setWindows(prev => {
         prev.forEach((win, id) => {
@@ -378,14 +450,14 @@ export function WindowProvider({ children }) {
         return prev
       }
       
-      const window = prev.get(windowId)
+      const winEntry = prev.get(windowId)
       const wasMoved = hasUserMoved.get(windowId)
       
       // Center on restore only if window has never been moved by user
       // This ensures windows opened from Start menu/taskbar appear centered
       // Only center on desktop/tablet, not mobile
-      const isMobile = window.innerWidth <= 640
-      if (!wasMoved && !window.isMaximized && !isMobile) {
+      const isDesktop = typeof window !== 'undefined' && window.innerWidth > 640
+      if (!wasMoved && !winEntry.isMaximized && isDesktop) {
         try {
           const { getCenteredPosition, getDefaultWindowSize } = require('../utils/windowPosition')
           const defaultSize = getDefaultWindowSize(windowId)
@@ -394,52 +466,41 @@ export function WindowProvider({ children }) {
           const windowElement = document.getElementById(windowId)
           let windowWidth = defaultSize.width
           let windowHeight = defaultSize.height
-          
+
           if (windowElement) {
             const rect = windowElement.getBoundingClientRect()
             if (rect.width > 0) windowWidth = rect.width
             if (rect.height > 0) windowHeight = rect.height
           } else {
             // Fallback to stored size or defaults
-            if (window.size) {
-              if (typeof window.size.width === 'number') {
-                windowWidth = window.size.width
-              } else if (typeof window.size.width === 'string' && window.size.width.includes('px')) {
-                windowWidth = parseInt(window.size.width) || defaultSize.width
+            if (winEntry.size) {
+              if (typeof winEntry.size.width === 'number') {
+                windowWidth = winEntry.size.width
+              } else if (typeof winEntry.size.width === 'string' && winEntry.size.width.includes('px')) {
+                windowWidth = parseInt(winEntry.size.width, 10) || defaultSize.width
               }
               
-              if (typeof window.size.height === 'number') {
-                windowHeight = window.size.height
-              } else if (typeof window.size.height === 'string' && window.size.height.includes('px')) {
-                windowHeight = parseInt(window.size.height) || defaultSize.height
+              if (typeof winEntry.size.height === 'number') {
+                windowHeight = winEntry.size.height
+              } else if (typeof winEntry.size.height === 'string' && winEntry.size.height.includes('px')) {
+                windowHeight = parseInt(winEntry.size.height, 10) || defaultSize.height
               }
             }
           }
           
           // Detect mobile viewport (<= 640px)
-          const isMobile = window.innerWidth <= 640
+          const isMobileViewport = typeof window !== 'undefined' && window.innerWidth <= 640
           
           const centeredPos = getCenteredPosition({
             width: windowWidth,
             height: windowHeight,
             padding: 24, // Explicit padding for desktop OS feel
-            isMobile: isMobile
+            isMobile: isMobileViewport
           })
           
-          // Apply position to DOM element using requestAnimationFrame to batch updates
-          // This prevents glitches when multiple windows are restored at once
-          if (windowElement && (!windowElement.style.position || windowElement.style.position === 'relative')) {
-            requestAnimationFrame(() => {
-              const el = document.getElementById(windowId)
-              if (el && (!el.style.position || el.style.position === 'relative')) {
-                el.style.left = `${centeredPos.x}px`
-                el.style.top = `${centeredPos.y}px`
-              }
-            })
-          }
-          
+          const clampedPos = clampToViewport(centeredPos, winEntry.size)
           const next = new Map(prev)
-          next.set(windowId, { ...window, position: centeredPos })
+          next.set(windowId, { ...winEntry, position: clampedPos })
           return next
         } catch (e) {
           // Continue with existing position if centering fails
@@ -456,7 +517,7 @@ export function WindowProvider({ children }) {
     })
     setActiveWindowId(windowId)
     bringToFront(windowId)
-  }, [bringToFront, hasUserMoved])
+  }, [bringToFront, hasUserMoved, clampToViewport])
 
   /**
    * Maximize a window (fill the screen).
