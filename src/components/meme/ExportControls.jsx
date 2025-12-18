@@ -6,12 +6,20 @@ export default function ExportControls({ canvasRef, selectedLayers = {} }) {
   const [isExporting, setIsExporting] = useState(false)
   const [exportStatus, setExportStatus] = useState('')
 
-  // Check if at least one meaningful layer is selected
-  const canDownload = 
-    (selectedLayers['Base'] && selectedLayers['Base'] !== 'None') ||
-    (selectedLayers['Clothes'] && selectedLayers['Clothes'] !== 'None') ||
-    (selectedLayers['Eyes'] && selectedLayers['Eyes'] !== 'None') ||
-    (selectedLayers['MouthBase'] && selectedLayers['MouthBase'] !== 'None')
+  // Require a complete base Wojak before allowing download:
+  // - Base
+  // - Mouth (Base)
+  // - Clothing
+  const hasBase =
+    selectedLayers['Base'] && selectedLayers['Base'] !== 'None'
+  const hasMouthBase =
+    selectedLayers['MouthBase'] && selectedLayers['MouthBase'] !== 'None'
+  const hasClothes =
+    selectedLayers['Clothes'] && selectedLayers['Clothes'] !== 'None'
+
+  const canDownload = hasBase && hasMouthBase && hasClothes
+  const isDownloadDisabled =
+    !canDownload || isExporting || !canvasRef.current
 
   const handleDownload = async () => {
     if (!canvasRef.current || !canDownload) return
@@ -57,9 +65,15 @@ export default function ExportControls({ canvasRef, selectedLayers = {} }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <Button 
             onClick={handleDownload} 
-            disabled={isExporting || !canvasRef.current || !canDownload}
+            disabled={isDownloadDisabled}
+            className={`generator-download-btn ${!canDownload ? 'is-disabled' : ''}`}
+            title={
+              !canDownload
+                ? 'Select Base, Mouth (Base), and Clothing to download'
+                : 'Download'
+            }
           >
-            Download PNG
+            Download
           </Button>
           {!canDownload && (
             <p style={{ 
@@ -68,7 +82,7 @@ export default function ExportControls({ canvasRef, selectedLayers = {} }) {
               color: '#666',
               fontStyle: 'italic'
             }}>
-              Select a base, clothes, eyes, or mouth first.
+              Select Base, Mouth (Base), and Clothing before downloading.
             </p>
           )}
         </div>

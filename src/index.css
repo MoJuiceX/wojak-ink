@@ -459,6 +459,13 @@ a,
   max-height: 90dvh !important; /* Use dynamic viewport height */
 }
 
+/* Wojak Generator: disabled Download button state */
+.generator-download-btn.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
 .wojak-creator-window .window-body {
   max-height: calc(90dvh - 60px) !important; /* Use dynamic viewport height, title bar is ~60px */
 }
