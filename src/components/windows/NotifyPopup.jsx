@@ -35,8 +35,8 @@ export default function NotifyPopup({ isOpen, onClose }) {
         const h = el.offsetHeight
         
         // Calculate positions (no DOM writes yet)
-        const left = Math.max(12, (viewportWidth - w) / 2)
-        const top = Math.max(12, (viewportHeight - h) / 2)
+        const left = Math.max(16, (viewportWidth - w) / 2)
+        const top = Math.max(48, (viewportHeight - h) / 2)
         
         // Now batch all writes together (after all reads are done)
         requestAnimationFrame(() => {

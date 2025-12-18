@@ -104,7 +104,11 @@ export default function MintInfoWindow({ onNotifyClick, onClose }) {
         <FieldRow style={{ marginTop: '10px' }}>
           <Button
             onClick={() =>
-              window.open('https://wojakfarmersplot.crate.ink/#/', '_blank')
+              window.open(
+                'https://wojakfarmersplot.crate.ink/#/collection-detail/WOJAKFARMERSPLOT',
+                '_blank',
+                'noopener,noreferrer'
+              )
             }
           >
             Open Crate

@@ -1,33 +1,74 @@
 import Window from './Window'
+import { useEffect, useRef, useState } from 'react'
 
-const CONSTANT_BANNER_PATH = '/assets/images/banners/NEWconstantbanner1.png'
-
-function StaticBanner() {
-  return (
-    <div 
-      className="banner" 
-      style={{ 
-        position: 'relative', 
-        width: '100%', 
-        overflow: 'hidden',
-        backgroundColor: '#c0c0c0',
-      }}
-    >
-      <img
-        src={CONSTANT_BANNER_PATH}
-        alt="Wojak Farmers Plot banner"
-        style={{
-          width: '100%',
-          height: 'auto',
-          display: 'block',
-          objectFit: 'cover',
-        }}
-      />
-    </div>
-  )
-}
+const overlayBanners = [
+  '/assets/images/banners/base1.png',
+  '/assets/images/banners/base2.png',
+  '/assets/images/banners/base3.png',
+  '/assets/images/banners/base4.png',
+]
 
 export default function ReadmeWindow({ onClose }) {
+  const layerIdRef = useRef(0)
+  const newLayer = (src) => ({ id: ++layerIdRef.current, src, isNew: true })
+
+  const [overlayStack, setOverlayStack] = useState(() => [newLayer(overlayBanners[0])]) // base1 visible immediately
+  const [nextIndex, setNextIndex] = useState(1) // next click adds base2
+  const clearAfterFadeRef = useRef(null)
+
+  const FADE_MS = 200
+
+  useEffect(() => {
+    const onClick = () => {
+      setNextIndex((currentIndex) => {
+        const src = overlayBanners[currentIndex]
+
+        setOverlayStack((prev) => {
+          // Clear previous "new" flags and add a new top layer with a stable id
+          const clearedPrev = prev.map((layer) => ({ ...layer, isNew: false }))
+          const stacked = [...clearedPrev, newLayer(src)].slice(-5) // allow one extra during wrap transition
+
+          const isWrapToBase1 = currentIndex === 0 && prev.length > 0
+
+          if (isWrapToBase1) {
+            // base4 (and older) stay visible underneath while base1 fades in on top
+            // After fade completes, clear old stack and keep only base1
+            if (clearAfterFadeRef.current) {
+              clearTimeout(clearAfterFadeRef.current)
+            }
+            clearAfterFadeRef.current = setTimeout(() => {
+              setOverlayStack((prev) => {
+                const top = prev[prev.length - 1]
+                if (!top) return [newLayer(overlayBanners[0])]
+                // keep the same element, just mark it not-new so it won’t re-animate
+                return [{ ...top, isNew: false }]
+              })
+            }, FADE_MS + 30)
+
+            return stacked
+          }
+
+          // Normal case: keep a max of 4 layers in the stack
+          return stacked
+            .map((layer, idx) => ({
+              ...layer,
+              isNew: idx === stacked.length - 1,
+            }))
+            .slice(-4)
+        })
+
+        return (currentIndex + 1) % overlayBanners.length
+      })
+    }
+
+    window.addEventListener('pointerdown', onClick, true)
+    return () => {
+      window.removeEventListener('pointerdown', onClick, true)
+      if (clearAfterFadeRef.current) {
+        clearTimeout(clearAfterFadeRef.current)
+      }
+    }
+  }, [])
 
   return (
     <Window
@@ -42,10 +83,25 @@ export default function ReadmeWindow({ onClose }) {
       allowScroll={true}
       onClose={onClose}
     >
-      <StaticBanner />
+      <div className="readme-banner-stack">
+        <img
+          src="/assets/images/banners/NEWconstantbanner1.png"
+          alt="Wojak Farmers Plot banner"
+          className="readme-banner-base"
+        />
+        {overlayStack.map((layer) => (
+          <img
+            key={layer.id}
+            src={layer.src}
+            alt=""
+            className={`readme-banner-overlay ${layer.isNew ? 'is-new' : ''}`}
+            draggable="false"
+          />
+        ))}
+      </div>
 
-      <p>
-        <b>Wojak Farmers Plot — Art for the Grove 🍊</b>
+      <p className="readme-title">
+        <b>Art for the Grove 🍊</b>
       </p>
       <p>
         Wojak Farmers Plot is my personal contribution to TangGang culture — a
@@ -81,7 +137,22 @@ export default function ReadmeWindow({ onClose }) {
           </a>
         </li>
         <li>
-          <b>Mint:</b> Friday Dec 19th, 2025
+          <span className="readme-mint-row">
+            <b>Mint:</b> Friday Dec 19th, 2025
+            <a
+              href="https://x.com/MoJuiceX/status/2000923383891157444"
+              target="_blank"
+              rel="noreferrer"
+              className="readme-launch-space-link"
+              title="Open Launch X Space"
+            >
+              <img
+                src="/assets/images/banners/x-space-launch.png?v=2"
+                alt="Launch Space"
+                className="readme-launch-space-thumb"
+              />
+            </a>
+          </span>
         </li>
       </ul>
 
@@ -93,11 +164,11 @@ export default function ReadmeWindow({ onClose }) {
       <p>
         View the collection on Crate:
         <a
-          href="https://wojakfarmersplot.crate.ink/#/"
+          href="https://wojakfarmersplot.crate.ink/#/collection-detail/WOJAKFARMERSPLOT"
           target="_blank"
           rel="noreferrer"
         >
-          https://wojakfarmersplot.crate.ink/#/
+          wojakfarmersplot.crate.ink
         </a>
       </p>
 
