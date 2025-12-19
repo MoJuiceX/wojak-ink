@@ -9,8 +9,6 @@ import { Skeleton, LoadingSpinner } from '../ui'
 import { resolveNFTToMintGarden } from '../../utils/nftResolver'
 import { fetchNFTDetails, getNFTThumbnailUrl, getOfferFromDexie } from '../../services/mintgardenApi'
 
-const BASE_URL = 'https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/'
-
 function MarketplaceNFT({ nft, offerFile, onCopyOffer, onViewOffer }) {
   const { fetchNFTDetailsForId, nftDetails, nftDetailsLoading } = useMarketplace()
   const { showToast } = useToast()
@@ -72,21 +70,19 @@ function MarketplaceNFT({ nft, offerFile, onCopyOffer, onViewOffer }) {
     }
   }
 
-  // Get image URL from API details or fallback
+  // Get enrichment data from API (optional)
   const nftDetail = nftDetails[nft.id]
   const isLoading = nftDetailsLoading.has(nft.id)
   
-  // Extract number from NFT ID (e.g., "HOA-001" -> "001")
-  const extractTokenNumber = (id) => {
-    const match = id.match(/-(\d+)$/)
-    return match ? match[1].padStart(4, '0') : '0001'
-  }
-  
-  // Use thumbnail from API details, or fallback to IPFS URL
-  // nft.thumbnail might be set from getNFTsByGroup merge
-  const imageUrl = nftDetail?.thumbnail || nft.thumbnail || `${BASE_URL}${extractTokenNumber(nft.id)}.png`
+  // Use thumbnail from CSV ONLY (IPFS link) - no fallbacks, no tokenId, no BASE_URL
+  const imgSrc = nft.thumbnail || null
   const displayName = nftDetail?.name || nft.name || nft.id
   const priceText = nftDetail?.priceText
+  
+  // Dev-only: Warn if thumbnail missing
+  if (import.meta.env.DEV && !imgSrc && nft.id) {
+    console.warn(`[Marketplace] Missing thumbnail for NFT: id=${nft.id}, group=${nft.group}`)
+  }
 
   return (
     <div
@@ -126,9 +122,9 @@ function MarketplaceNFT({ nft, offerFile, onCopyOffer, onViewOffer }) {
           >
             <Skeleton width="100%" height="100%" />
           </div>
-        ) : (
+        ) : imgSrc ? (
           <img
-            src={hasIntersected ? imageUrl : undefined}
+            src={hasIntersected ? imgSrc : undefined}
             alt={displayName}
             loading="lazy"
             decoding="async"
@@ -141,9 +137,21 @@ function MarketplaceNFT({ nft, offerFile, onCopyOffer, onViewOffer }) {
               objectFit: 'cover',
             }}
             onError={(e) => {
-              // Fallback to a placeholder if image fails
+              // Hide image and show placeholder if image fails
               e.target.style.display = 'none'
               e.target.parentElement.style.background = '#d4d0c8'
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              background: '#d4d0c8',
+              border: '1px inset #c0c0c0',
             }}
           />
         )}
@@ -400,15 +408,8 @@ function OfferFileModal({ nft, offerFile, onClose, onCopy }) {
     return new Date(nftDetails.events[0].timestamp).toLocaleDateString()
   }
 
-  // Get thumbnail URL
-  const extractTokenNumber = (id) => {
-    const match = id.match(/-(\d+)$/)
-    return match ? match[1].padStart(4, '0') : '0001'
-  }
-  
-  const thumbnailUrl = nftDetails?.id 
-    ? getNFTThumbnailUrl(nftDetails.id)
-    : `${BASE_URL}${extractTokenNumber(nft.id)}.png`
+  // Use thumbnail from CSV (IPFS link) - same as preview cards
+  const thumbnailUrl = nft.thumbnail || (nftDetails?.data?.thumbnail_uri ? nftDetails.data.thumbnail_uri : null)
 
   return (
     <div
@@ -486,23 +487,32 @@ function OfferFileModal({ nft, offerFile, onClose, onCopy }) {
             
             {/* Thumbnail */}
             <div style={{ marginBottom: '8px', textAlign: 'center' }}>
-              <img
-                src={thumbnailUrl}
-                alt={nftDetails.data?.metadata_json?.name || nft.name}
-                style={{
-                  maxWidth: '200px',
-                  maxHeight: '200px',
-                  border: '1px solid #c0c0c0',
-                  background: '#ffffff',
-                }}
-                onError={(e) => {
-                  const extractTokenNumber = (id) => {
-                    const match = id.match(/-(\d+)$/)
-                    return match ? match[1].padStart(4, '0') : '0001'
-                  }
-                  e.target.src = `${BASE_URL}${extractTokenNumber(nft.id)}.png`
-                }}
-              />
+              {thumbnailUrl ? (
+                <img
+                  src={thumbnailUrl}
+                  alt={nftDetails.data?.metadata_json?.name || nft.name}
+                  style={{
+                    maxWidth: '200px',
+                    maxHeight: '200px',
+                    border: '1px solid #c0c0c0',
+                    background: '#ffffff',
+                  }}
+                  onError={(e) => {
+                    // Hide image if it fails to load
+                    e.target.style.display = 'none'
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: '200px',
+                    height: '200px',
+                    background: '#d4d0c8',
+                    border: '1px inset #c0c0c0',
+                    display: 'inline-block',
+                  }}
+                />
+              )}
             </div>
 
             {/* NFT Name & Description */}
@@ -667,7 +677,7 @@ export default function MarketplaceWindow({ onClose }) {
   const [showOnlyWithOffers, setShowOnlyWithOffers] = useState(false)
   const [selectedOffer, setSelectedOffer] = useState(null)
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 24
+  const itemsPerPage = 1000 // Show all NFTs (no pagination limit)
   const windowRef = useRef(null)
   
   // Determine if we should show skeleton loading (initial load, no groups yet, or loading NFTs)

@@ -3,7 +3,7 @@ import { getOfferFromDexie } from '../services/mintgardenApi'
 import { resolveNFTFromOfferFile } from '../utils/nftResolver'
 import { fetchNFTDetails, getNFTThumbnailUrl } from '../services/mintgardenApi'
 
-const MarketplaceContext = createContext()
+export const MarketplaceContext = createContext()
 
 // IMPORTANT: Change this password before deploying to production!
 const ADMIN_PASSWORD = 'admin123' // Change this to your desired password
@@ -15,10 +15,8 @@ const STORAGE_KEYS = {
 
 // Removed: generateNFTs() and TOKEN_GROUPS - now loaded from CSV
 
-// Parse CSV text into array of NFT entries and map of id -> offerFile
-// Supports both legacy format (nftId,offerFile,group) and new simple formats:
-// - Header + one column: "offerFile"
-// - No header, one offer string per line
+// Parse CSV text with header: group,offerfile,id,tokenId4,ipfsLink,nftId,name,source
+// Returns array of NFT entries with: { id, group, offerFile, thumbnail }
 const parseOfferFilesCSV = (csvText) => {
   const nftEntries = []
   const offerFiles = {}
@@ -29,143 +27,116 @@ const parseOfferFilesCSV = (csvText) => {
     return { nftEntries, offerFiles }
   }
 
+  // Parse header row (case-insensitive, trimmed)
   const header = lines[0]
-  const hasComma = header.includes(',')
-
-  // Helper to generate stable synthetic IDs when CSV doesn't provide one
-  let syntheticCounter = 0
-  const nextSyntheticId = () => {
-    syntheticCounter += 1
-    return `OFFER-${String(syntheticCounter).padStart(4, '0')}`
-  }
-
-  // Case 1: No commas at all -> treat as simple list of offer files
-  if (!hasComma) {
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i]
-      const lower = line.toLowerCase()
-
-      // If the first line looks like a header ("offerfile"), skip it
-      if (i === 0 && (lower === 'offerfile' || lower === 'offer')) {
-        continue
-      }
-
-      const offerFile = line
-      if (!offerFile) continue
-
-      const id = nextSyntheticId()
-      nftEntries.push({
-        id,
-        offerFile,
-        group: null,
-      })
-      offerFiles[id] = offerFile
-    }
-
-    return { nftEntries, offerFiles }
-  }
-
-  // Case 2: Comma-separated with a header row
   const headerParts = header.split(',').map(p => p.trim())
   const headerLower = headerParts.map(p => p.toLowerCase())
 
-  const offerFileIdx = headerLower.findIndex(
-    (name) => name === 'offerfile' || name === 'offer' || name === 'offer_file'
-  )
-  const nftIdIdx = headerLower.findIndex(
-    (name) => name === 'nftid' || name === 'id'
-  )
-  const groupIdx = headerLower.findIndex(
-    (name) => name === 'group' || name === 'currency'
-  )
+  // Find column indexes (case-insensitive matching)
+  const groupIdx = headerLower.findIndex(name => name === 'group')
+  const idIdx = headerLower.findIndex(name => name === 'id')
+  const ipfsLinkIdx = headerLower.findIndex(name => name === 'ipfslink' || name === 'ipfs link')
+  const offerFileIdx = headerLower.findIndex(name => name === 'offerfile' || name === 'offer_file' || name === 'offer')
+  const nftIdIdx = headerLower.findIndex(name => name === 'nftid' || name === 'nft_id')
 
-  // Case 2a: New headered format with an explicit offerFile column
-  if (offerFileIdx !== -1) {
-    for (let i = 1; i < lines.length; i++) {
-      const line = lines[i]
-      if (!line) continue
-
-      const parts = line.split(',').map(p => p.trim())
-      if (parts.length <= offerFileIdx) continue
-
-      const offerFile = parts[offerFileIdx]
-      if (!offerFile) continue
-
-      let id = null
-      if (nftIdIdx !== -1 && parts.length > nftIdIdx) {
-        id = parts[nftIdIdx] || null
-      }
-
-      const group =
-        groupIdx !== -1 && parts.length > groupIdx
-          ? (parts[groupIdx] || null)
-          : null
-
-      if (!id) {
-        id = nextSyntheticId()
-      }
-
-      nftEntries.push({
-        id,
-        offerFile,
-        group,
-      })
-      offerFiles[id] = offerFile
-    }
-
+  // Validate required columns
+  if (groupIdx === -1 || offerFileIdx === -1) {
+    console.error('CSV missing required columns: Group and offerfile must be present')
     return { nftEntries, offerFiles }
   }
 
-  // Case 2b: Legacy format with positional columns: nftId,offerFile,group
-  // Keep existing behavior for backward compatibility.
+  // Helper to generate stable hash-based ID when CSV ID is empty
+  const hashOfferString = (offer) => {
+    let hash = 5381
+    for (let i = 0; i < offer.length; i++) {
+      hash = ((hash << 5) + hash) + offer.charCodeAt(i)
+      hash |= 0
+    }
+    const unsigned = hash >>> 0
+    return unsigned.toString(16).padStart(8, '0')
+  }
+
+  // Parse data rows
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i]
     if (!line) continue
 
-    const parts = line.split(',').map(p => p.trim())
-    if (parts.length < 2) continue
-
-    const nftId = parts[0]
-    const offerFile = parts[1]
-    const group = parts[2] || null
-
-    if (nftId && offerFile) {
-      nftEntries.push({
-        id: nftId,
-        offerFile,
-        group,
-      })
-      offerFiles[nftId] = offerFile
+    // Handle CSV values that may contain commas (quoted values)
+    const parts = []
+    let current = ''
+    let inQuotes = false
+    for (let j = 0; j < line.length; j++) {
+      const char = line[j]
+      if (char === '"') {
+        if (inQuotes && line[j + 1] === '"') {
+          current += '"'
+          j++ // Skip next quote
+        } else {
+          inQuotes = !inQuotes
+        }
+      } else if (char === ',' && !inQuotes) {
+        parts.push(current.trim())
+        current = ''
+      } else {
+        current += char
+      }
     }
+    parts.push(current.trim()) // Add last part
+
+    // Extract required fields
+    const group = groupIdx < parts.length ? parts[groupIdx].trim().toUpperCase() : null
+    const offerFile = offerFileIdx < parts.length ? parts[offerFileIdx].trim() : null
+
+    // Validate offer file
+    if (!offerFile || !offerFile.startsWith('offer1')) {
+      continue // Skip invalid rows
+    }
+
+    // Extract fields
+    // Use id column if present, otherwise fallback to hash
+    const id = (idIdx !== -1 && idIdx < parts.length && parts[idIdx]) 
+      ? parts[idIdx].trim() 
+      : `OFFER-${hashOfferString(offerFile)}` // Fallback to hash-based ID
+    
+    // Extract IPFS link (thumbnail)
+    const thumbnail = (ipfsLinkIdx !== -1 && ipfsLinkIdx < parts.length && parts[ipfsLinkIdx])
+      ? parts[ipfsLinkIdx].trim()
+      : null // Can be empty
+
+    // Extract nftId (for reference, not used as primary ID)
+    const nftId = (nftIdIdx !== -1 && nftIdIdx < parts.length && parts[nftIdIdx])
+      ? parts[nftIdIdx].trim()
+      : null
+
+    // Build entry
+    nftEntries.push({
+      id, // Stable OFFER-<hash> identifier
+      group,
+      offerFile,
+      thumbnail, // IPFS link for preview image (never override from API)
+      nftId, // MintGarden launcher_bech32 (for reference)
+    })
+    offerFiles[id] = offerFile
   }
 
   return { nftEntries, offerFiles }
 }
 
-// Load offer files from CSV
-// Note: This will be replaced with dynamic import at runtime
-let csvTextCache = null
+// Fixed token groups in preferred order
+const PREFERRED_TOKEN_GROUPS = ['PP', 'SP', 'HOA', 'BEPE', 'CHIA', 'NECKCOIN', 'XCH']
 
+// Load offer files from CSV
 const loadOfferFilesFromCSV = async () => {
   try {
-    if (csvTextCache) {
-      return parseOfferFilesCSV(csvTextCache)
+    // Load from /assets/offers_enriched.csv with cache-busting
+    const response = await fetch(`/assets/offers_enriched.csv?v=${Date.now()}`)
+    if (!response.ok) {
+      console.error(`Failed to load marketplace CSV: ${response.status}`)
+      return { nftEntries: [], offerFiles: {} }
     }
     
-    // Try to import CSV as raw text using Vite's ?raw suffix
-    try {
-      const csvModule = await import('../data/offerFiles.csv?raw')
-      csvTextCache = csvModule.default
-      return parseOfferFilesCSV(csvTextCache)
-    } catch (importError) {
-      // Fallback: try fetching from public folder
-      const response = await fetch('/offerFiles.csv')
-      if (response.ok) {
-        csvTextCache = await response.text()
-        return parseOfferFilesCSV(csvTextCache)
-      }
-      throw new Error('CSV file not found')
-    }
+    const csvText = await response.text()
+    return parseOfferFilesCSV(csvText)
   } catch (err) {
     console.error('Failed to load offer files from CSV:', err)
     return { nftEntries: [], offerFiles: {} }
@@ -211,6 +182,15 @@ export function MarketplaceProvider({ children }) {
         
         if (csvData.nftEntries && csvData.nftEntries.length > 0) {
           setNftEntries(csvData.nftEntries)
+          
+          // Dev-only: Log group counts
+          if (import.meta.env.DEV) {
+            const groupCounts = csvData.nftEntries.reduce((acc, entry) => {
+              acc[entry.group] = (acc[entry.group] || 0) + 1
+              return acc
+            }, {})
+            console.log('[Marketplace] Group counts:', groupCounts)
+          }
         }
         
         // Merge CSV offer files with stored ones (CSV takes precedence)
@@ -427,31 +407,40 @@ export function MarketplaceProvider({ children }) {
         }
       }
       
-      // Step 2: Resolve NFT launcher ID from offer file
-      const launcherId = await resolveNFTFromOfferFile(nftEntry.offerFile)
+      // Step 2: If we have thumbnail from CSV, we can skip MintGarden API for faster loading
+      // But we still need basic NFT info, so try to get launcher ID if we don't have it
+      let launcherId = nftEntry.nftId || null
+      let mintGardenDetails = {}
+      let nftName = nftId
       
-      if (!launcherId) {
-        throw new Error('Could not resolve NFT from offer file')
+      // Only fetch from MintGarden if we don't have launcher ID or thumbnail
+      if (!nftEntry.thumbnail || !launcherId) {
+        // Resolve NFT launcher ID from offer file
+        launcherId = launcherId || await resolveNFTFromOfferFile(nftEntry.offerFile)
+        
+        if (launcherId) {
+          // Fetch NFT details from MintGarden
+          mintGardenDetails = await fetchNFTDetails(launcherId)
+          nftName = mintGardenDetails.data?.metadata_json?.name || mintGardenDetails.name || nftId
+        }
       }
       
-      // Step 3: Fetch NFT details from MintGarden
-      const mintGardenDetails = await fetchNFTDetails(launcherId)
-      
-      // Step 4: Build NFT details object
-      // Use MintGarden thumbnail URL - prefer thumbnail_uri from data, fallback to API endpoint
-      const thumbnailUrl = mintGardenDetails.data?.thumbnail_uri 
-        ? mintGardenDetails.data.thumbnail_uri 
-        : getNFTThumbnailUrl(launcherId)
+      // Step 3: Build NFT details object
+      // NEVER override thumbnail from CSV - use CSV thumbnail if available, otherwise use API
+      const thumbnailUrl = nftEntry.thumbnail || 
+        (mintGardenDetails.data?.thumbnail_uri 
+          ? mintGardenDetails.data.thumbnail_uri 
+          : (launcherId ? getNFTThumbnailUrl(launcherId) : null))
       
       const details = {
-        name: mintGardenDetails.data?.metadata_json?.name || mintGardenDetails.name || nftId,
-        thumbnail: thumbnailUrl,
+        name: nftName,
+        thumbnail: thumbnailUrl, // CSV thumbnail takes precedence
         currency: currency || nftEntry.group || 'UNKNOWN',
         launcherId: launcherId,
-        offerTaken: isOfferTaken, // Store offer status
+        offerTaken: isOfferTaken, // Store offer status - this is the key fix!
         offerData: offerData, // Store full offer data for reference
         priceText,
-        ...mintGardenDetails, // Include all MintGarden data
+        ...mintGardenDetails, // Include all MintGarden data (may be empty if skipped)
       }
       
       // Update state and cache
@@ -483,15 +472,8 @@ export function MarketplaceProvider({ children }) {
   
   // Get token groups dynamically from currency symbols (preferred) or CSV group column (fallback)
   const getTokenGroups = useCallback(() => {
-    const groups = new Set()
-    
-    // First, collect groups from fetched NFT details (currency symbols from API)
-    // This is the preferred source as it comes from the actual offer files
-    Object.values(nftDetails).forEach(details => {
-      if (details.currency && details.currency !== 'UNKNOWN') {
-        groups.add(details.currency)
-      }
-    })
+    // Return fixed groups in preferred order (CSV is source of truth for grouping)
+    return PREFERRED_TOKEN_GROUPS
     
     // Only add CSV groups for entries that haven't been fetched yet
     // This prevents showing groups that will be replaced by API currency
@@ -507,58 +489,29 @@ export function MarketplaceProvider({ children }) {
     return Array.from(groups).sort()
   }, [nftDetails, nftEntries])
   
-  // Get NFTs by group, merging CSV data with API details
+  // Get NFTs by group - CSV group is the ONLY source of truth for filtering
   const getNFTsByGroup = useCallback((group) => {
     if (!group) return []
     
-    const filtered = nftEntries
-      .filter(entry => {
-        // Check if we have fetched details with currency
-        const details = nftDetails[entry.id]
-        
-        // If we have fetched details, use the currency from API
-        if (details) {
-          // Only include if currency matches and is not UNKNOWN
-          if (details.currency && details.currency !== 'UNKNOWN') {
-            return details.currency === group
-          }
-          // If we have details but currency is UNKNOWN or missing, exclude it
-          // (it's being fetched or failed, don't show it yet)
-          return false
-        }
-        
-        // Only use CSV group as fallback if we haven't fetched details yet
-        // This allows showing NFTs while they're loading, but they'll be filtered
-        // out once their currency is fetched if it doesn't match
-        if (entry.group) {
-          return entry.group === group
-        }
-        
-        return false
-      })
+    // Filter ONLY by CSV group column (never use decoded currency for grouping)
+    return nftEntries
+      .filter(entry => entry.group === group)
       .map(entry => {
-        // Merge CSV entry with API details
+        // Merge CSV entry with API details (enrichment only, doesn't override CSV data)
         const details = nftDetails[entry.id] || {}
-        // Extract token number from ID (e.g., "HOA-001" -> 1)
-        const tokenIdMatch = entry.id.match(/-(\d+)$/)
-        const tokenId = tokenIdMatch ? parseInt(tokenIdMatch[1]) : 1
-        
-        // Extract details but preserve the CSV entry ID (don't let launcher ID overwrite it)
-        const { id: _, ...detailsWithoutId } = details
+        const { id: _id, thumbnail: _thumbnail, ...detailsWithoutIdAndThumbnail } = details
         
         return {
-          id: entry.id, // Always use CSV entry ID, not launcher ID
+          id: entry.id, // Always use CSV entry ID
           offerFile: entry.offerFile,
-          group: details.currency || entry.group,
+          group: entry.group, // CSV group is source of truth
+          // CSV thumbnail takes precedence (never override with API thumbnail)
+          thumbnail: entry.thumbnail || null,
           name: details.name || entry.id,
-          thumbnail: details.thumbnail,
           launcherId: details.launcherId,
-          tokenId: tokenId, // Add tokenId for backward compatibility
-          ...detailsWithoutId, // Include all API details except id
+          ...detailsWithoutIdAndThumbnail, // Include API enrichment (price, currency, etc) but not thumbnail
         }
       })
-    
-    return filtered
   }, [nftEntries, nftDetails])
 
   return (

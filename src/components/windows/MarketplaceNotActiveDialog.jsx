@@ -1,11 +1,17 @@
-import { useState } from 'react'
+import { useState, useContext } from 'react'
 import Window from './Window'
-import { useMarketplace } from '../../contexts/MarketplaceContext'
+import { MarketplaceContext } from '../../contexts/MarketplaceContext'
 import Button from '../ui/Button'
 import Input from '../ui/Input'
 
 export default function MarketplaceNotActiveDialog({ isOpen, onClose }) {
-  const { isAdmin, marketplaceEnabled, setMarketplaceEnabled, loginAsAdmin } = useMarketplace()
+  // Access context directly - if not available, it will be null/undefined
+  const marketplaceContext = useContext(MarketplaceContext)
+  
+  const isAdmin = marketplaceContext?.isAdmin || false
+  const marketplaceEnabled = marketplaceContext?.marketplaceEnabled || false
+  const setMarketplaceEnabled = marketplaceContext?.setMarketplaceEnabled || (() => {})
+  const loginAsAdmin = marketplaceContext?.loginAsAdmin || (() => false)
   const [password, setPassword] = useState('')
   const [loginError, setLoginError] = useState('')
 
