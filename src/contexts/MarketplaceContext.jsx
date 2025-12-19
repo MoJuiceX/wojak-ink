@@ -9,7 +9,6 @@ export const MarketplaceContext = createContext()
 const ADMIN_PASSWORD = 'admin123' // Change this to your desired password
 const STORAGE_KEYS = {
   IS_ADMIN: 'marketplace_is_admin',
-  MARKETPLACE_ENABLED: 'marketplace_enabled',
   OFFER_FILES: 'marketplace_offer_files',
 }
 
@@ -147,9 +146,6 @@ export function MarketplaceProvider({ children }) {
   const [isAdmin, setIsAdmin] = useState(() => {
     return localStorage.getItem(STORAGE_KEYS.IS_ADMIN) === 'true'
   })
-  const [marketplaceEnabled, setMarketplaceEnabled] = useState(() => {
-    return localStorage.getItem(STORAGE_KEYS.MARKETPLACE_ENABLED) === 'true'
-  })
   const [offerFiles, setOfferFiles] = useState({})
   const [nftEntries, setNftEntries] = useState([]) // NFT entries from CSV
   const [nftDetails, setNftDetails] = useState({}) // Map of nftId -> { name, thumbnail, currency, launcherId, ... }
@@ -216,14 +212,6 @@ export function MarketplaceProvider({ children }) {
     }
   }, [isAdmin])
 
-  // Persist marketplace enabled state
-  useEffect(() => {
-    if (marketplaceEnabled) {
-      localStorage.setItem(STORAGE_KEYS.MARKETPLACE_ENABLED, 'true')
-    } else {
-      localStorage.removeItem(STORAGE_KEYS.MARKETPLACE_ENABLED)
-    }
-  }, [marketplaceEnabled])
 
   // Persist offer files
   useEffect(() => {
@@ -518,8 +506,6 @@ export function MarketplaceProvider({ children }) {
     <MarketplaceContext.Provider
       value={{
         isAdmin,
-        marketplaceEnabled,
-        setMarketplaceEnabled,
         loginAsAdmin,
         logoutAdmin,
         nftEntries, // NFT entries from CSV

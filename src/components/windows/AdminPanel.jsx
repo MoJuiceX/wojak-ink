@@ -8,8 +8,6 @@ import Checkbox from '../ui/Checkbox'
 export default function AdminPanel() {
   const {
     isAdmin,
-    marketplaceEnabled,
-    setMarketplaceEnabled,
     loginAsAdmin,
     logoutAdmin,
     nfts,
@@ -93,26 +91,13 @@ export default function AdminPanel() {
       style={{ width: '600px', maxWidth: 'calc(100vw - 40px)', left: '20px', top: '20px' }}
     >
       <div style={{ padding: '8px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <Checkbox
-            checked={marketplaceEnabled}
-            onChange={(e) => setMarketplaceEnabled(e.target.checked)}
-            label="Enable Marketplace"
-          />
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '16px' }}>
           <Button onClick={logoutAdmin} style={{ fontSize: '10px' }}>
             Logout
           </Button>
         </div>
 
         <div style={{ marginBottom: '16px', padding: '8px', background: '#d4d0c8', border: '1px inset #c0c0c0' }}>
-          <p style={{ fontSize: '11px', marginBottom: '8px', fontWeight: 'bold' }}>
-            Marketplace Status: {marketplaceEnabled ? 'ENABLED' : 'DISABLED'}
-          </p>
-          <p style={{ fontSize: '10px', color: '#666', marginBottom: '4px' }}>
-            {marketplaceEnabled
-              ? 'Users can view and copy offer files'
-              : 'Offer files are hidden from users'}
-          </p>
           <p style={{ fontSize: '10px', color: '#666' }}>
             Total NFTs: {nfts.length} | NFTs with offers: {Object.keys(offerFiles).length} | 
             Coverage: {Math.round((Object.keys(offerFiles).length / nfts.length) * 100)}%

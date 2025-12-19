@@ -6,7 +6,7 @@ import { useWindow } from '../contexts/WindowContext'
 import { useMarketplace } from '../contexts/MarketplaceContext'
 import { getWindowIcon } from '../utils/windowIcons'
 
-export default function Taskbar({ onOpenWojakCreator, wojakCreatorOpen, onOpenApp, onShowMarketplaceNotActive }) {
+export default function Taskbar({ onOpenWojakCreator, wojakCreatorOpen, onOpenApp }) {
   const [startMenuOpen, setStartMenuOpen] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
   const { getAllWindows, isWindowMinimized, restoreWindow, bringToFront, isWindowActive, minimizeWindow } = useWindow()
@@ -16,7 +16,6 @@ export default function Taskbar({ onOpenWojakCreator, wojakCreatorOpen, onOpenAp
   const [isAutoHintVisible, setIsAutoHintVisible] = useState(false)
   const [autoHintDismissed, setAutoHintDismissed] = useState(false)
   const [startHintPosition, setStartHintPosition] = useState({ top: 0, left: 0 })
-  const { marketplaceEnabled } = useMarketplace()
 
   // Update clock every second
   useEffect(() => {
@@ -172,14 +171,6 @@ export default function Taskbar({ onOpenWojakCreator, wojakCreatorOpen, onOpenAp
   }
 
   const handleWindowClick = (windowId) => {
-    // Gate marketplace taskbar button behind marketplaceEnabled
-    if (windowId === 'window-marketplace' && !marketplaceEnabled) {
-      if (onShowMarketplaceNotActive) {
-        onShowMarketplaceNotActive()
-      }
-      setStartMenuOpen(false)
-      return
-    }
 
     const minimized = isWindowMinimized(windowId)
     const active = isWindowActive(windowId)
@@ -317,7 +308,6 @@ export default function Taskbar({ onOpenWojakCreator, wojakCreatorOpen, onOpenAp
         }}
         onOpenWojakCreator={onOpenWojakCreator}
         onOpenApp={onOpenApp}
-        onShowMarketplaceNotActive={onShowMarketplaceNotActive}
         menuRef={startMenuRef}
         startButtonRef={startButtonRef}
       />

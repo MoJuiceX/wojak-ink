@@ -670,7 +670,7 @@ function OfferFileModal({ nft, offerFile, onClose, onCopy }) {
 }
 
 export default function MarketplaceWindow({ onClose }) {
-  const { marketplaceEnabled, getNFTsByGroup, getTokenGroups, getOfferFile, nftEntries, nftDetailsLoading, fetchNFTDetailsForId } = useMarketplace()
+  const { getNFTsByGroup, getTokenGroups, getOfferFile, nftEntries, nftDetailsLoading, fetchNFTDetailsForId } = useMarketplace()
   const { showToast } = useToast()
   const tokenGroups = getTokenGroups()
   const [selectedGroup, setSelectedGroup] = useState(tokenGroups[0] || null)
@@ -701,24 +701,6 @@ export default function MarketplaceWindow({ onClose }) {
     }
   }, [nftEntries.length]) // Only run when entries count changes, not when fetchNFTDetailsForId changes
 
-  if (!marketplaceEnabled) {
-    return (
-      <Window
-        id="window-marketplace"
-        title="MARKETPLACE"
-        style={{ 
-          width: 'var(--window-width-large)', 
-          maxWidth: 'var(--window-max-width)',
-          minWidth: 'var(--window-min-width)'
-        }}
-        onClose={onClose}
-      >
-        <div style={{ padding: '20px', textAlign: 'center' }}>
-          <p style={{ fontSize: '12px' }}>Marketplace not active yet.</p>
-        </div>
-      </Window>
-    )
-  }
 
   // Update selected group if current selection is not available
   useEffect(() => {

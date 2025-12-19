@@ -8,7 +8,6 @@ import TangGangWindow from './components/windows/TangGangWindow'
 import SideStack from './components/SideStack'
 import NotifyPopup from './components/windows/NotifyPopup'
 import MarketplaceWindow from './components/windows/MarketplaceWindow'
-import MarketplaceNotActiveDialog from './components/windows/MarketplaceNotActiveDialog'
 import WojakCreator from './components/windows/WojakCreator'
 import PaintWindow from './components/windows/PaintWindow'
 import Taskbar from './components/Taskbar'
@@ -138,7 +137,6 @@ function App() {
     'window-marketplace': false,
     'tanggang': false,
   })
-  const [marketplaceDialogOpen, setMarketplaceDialogOpen] = useState(false)
 
   // Global scroll lock - prevent all page scrolling
   useGlobalScrollLock()
@@ -256,10 +254,6 @@ function App() {
               {openWindows['window-marketplace'] && (
                 <MarketplaceWindow onClose={() => closeWindow('window-marketplace')} />
               )}
-              <MarketplaceNotActiveDialog
-                isOpen={marketplaceDialogOpen}
-                onClose={() => setMarketplaceDialogOpen(false)}
-              />
               <SideStack />
               {wojakCreatorOpen && <WojakCreator onClose={() => setWojakCreatorOpen(false)} />}
               {paintOpen && <PaintWindow onClose={() => setPaintOpen(false)} />}
@@ -269,7 +263,6 @@ function App() {
               onOpenWojakCreator={() => setWojakCreatorOpen(true)} 
               wojakCreatorOpen={wojakCreatorOpen}
               onOpenApp={openWindow}
-              onShowMarketplaceNotActive={() => setMarketplaceDialogOpen(true)}
             />
             </MarketplaceProvider>
           </GlobalErrorBoundary>

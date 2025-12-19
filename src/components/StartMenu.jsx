@@ -3,9 +3,8 @@ import { useWindow } from '../contexts/WindowContext'
 import { useMarketplace } from '../contexts/MarketplaceContext'
 import { getStartMenuIcon } from '../utils/windowIcons'
 
-export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCreator, onOpenApp, onShowMarketplaceNotActive, menuRef, startButtonRef }) {
+export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCreator, onOpenApp, menuRef, startButtonRef }) {
   const { getAllWindows, isWindowMinimized, restoreWindow, bringToFront, activeWindowId, isWindowActive } = useWindow()
-  const { marketplaceEnabled } = useMarketplace()
   const internalMenuRef = useRef(null)
   const resolvedMenuRef = menuRef || internalMenuRef
   const deferredFocusRafRef = useRef(null)
@@ -80,14 +79,6 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
     }
     const windowId = actionToWindowId[action]
 
-    // Gate marketplace entry behind marketplaceEnabled using window ID
-    if (windowId === 'window-marketplace' && !marketplaceEnabled) {
-      if (onShowMarketplaceNotActive) {
-        onShowMarketplaceNotActive()
-      }
-      onClose()
-      return
-    }
 
     // Capture the active window before we start, so we can detect if the user
     // changes focus before our deferred bringToFront runs.
