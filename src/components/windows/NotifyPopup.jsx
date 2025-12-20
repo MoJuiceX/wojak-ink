@@ -1,8 +1,15 @@
 import Window from './Window'
-import { useEffect } from 'react'
+import { useRef, useLayoutEffect } from 'react'
 import { useKeyboardHandler, KEYBOARD_PRIORITY } from '../../contexts/KeyboardPriorityContext'
+import { useWindow } from '../../contexts/WindowContext'
+import { clampWindowPosition } from '../../utils/windowPosition'
 
 export default function NotifyPopup({ isOpen, onClose }) {
+  // Track if we've centered once (per session)
+  const hasCenteredOnceRef = useRef(false)
+  const { updateWindowPosition, getWindow } = useWindow()
+  const windowId = 'win-notify'
+
   // Register modal keyboard handler (highest priority)
   const handleEscape = (e) => {
     if (e.key === 'Escape') {
@@ -14,61 +21,68 @@ export default function NotifyPopup({ isOpen, onClose }) {
 
   useKeyboardHandler(KEYBOARD_PRIORITY.MODAL, 'notify-popup', handleEscape, isOpen)
 
-  useEffect(() => {
+  // Center window on first open only
+  useLayoutEffect(() => {
     if (!isOpen) return
+    if (hasCenteredOnceRef.current) return
 
-    const centerPopup = () => {
-      // Batch all layout reads, then all writes to prevent layout thrashing
+    // Wait for window to be rendered and measurable
+    // Use double RAF to ensure layout is complete
+    requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        const el = document.getElementById('win-notify')
+        const el = document.getElementById(windowId)
         if (!el) return
+
+        // Check if window already has a saved position from dragging
+        const windowData = getWindow(windowId)
+        const hasSavedPosition = windowData?.position && 
+          (windowData.position.x !== 0 || windowData.position.y !== 0)
         
-        // Batch all reads first (no writes yet)
+        if (hasSavedPosition) {
+          // Window has been positioned before, don't center
+          hasCenteredOnceRef.current = true
+          return
+        }
+
+        // Batch all layout reads first (prevent layout thrashing)
         const viewportWidth = window.innerWidth
         const viewportHeight = window.innerHeight
         
-        // Get taskbar height from CSS variable
-        const rootStyle = getComputedStyle(document.documentElement)
-        const taskbarHeight = parseFloat(rootStyle.getPropertyValue('--taskbar-height')) || 30
+        // Measure window dimensions (it should already be visible/rendered)
+        const rect = el.getBoundingClientRect()
+        const w = rect.width || el.offsetWidth
+        const h = rect.height || el.offsetHeight
         
-        // Calculate available height (viewport minus taskbar)
-        const availableHeight = viewportHeight - taskbarHeight
+        // Only proceed if we have valid dimensions
+        if (w <= 0 || h <= 0) return
         
-        // Temporarily make visible to measure (but batch this with writes)
-        const wasVisible = el.style.visibility !== 'hidden'
-        el.style.visibility = 'hidden'
-        el.style.display = 'block'
+        // Calculate centered position
+        const x = Math.round((viewportWidth - w) / 2)
+        const y = Math.round((viewportHeight - h) / 2)
         
-        // Read layout properties (batch all reads)
-        const w = el.offsetWidth
-        const h = el.offsetHeight
-        
-        // Calculate positions (no DOM writes yet)
-        // Center horizontally
-        const left = Math.max(16, (viewportWidth - w) / 2)
-        // Center vertically in available space (with gap on top and bottom)
-        const top = Math.max(48, (availableHeight - h) / 2)
-        
-        // Now batch all writes together (after all reads are done)
-        requestAnimationFrame(() => {
-          const el2 = document.getElementById('win-notify')
-          if (!el2) return
-          el2.style.visibility = wasVisible ? 'visible' : ''
-          el2.style.left = Math.round(left) + 'px'
-          el2.style.top = Math.round(top) + 'px'
+        // Clamp to viewport bounds (ensures title bar stays visible)
+        const clamped = clampWindowPosition({
+          x,
+          y,
+          width: w,
+          height: h,
+          isMobile: false
         })
+        
+        // Since this window uses position: fixed, we need to set DOM directly
+        // Also update WindowContext to track the position
+        el.style.left = `${clamped.x}px`
+        el.style.top = `${clamped.y}px`
+        
+        // Update position in WindowContext for tracking
+        // This marks it as moved, which prevents re-centering on subsequent opens
+        updateWindowPosition(windowId, clamped)
+        
+        // Mark as centered so we don't do this again
+        hasCenteredOnceRef.current = true
       })
-    }
-
-    // Center on open
-    centerPopup()
-
-    // Re-center on resize
-    window.addEventListener('resize', centerPopup)
-    return () => {
-      window.removeEventListener('resize', centerPopup)
-    }
-  }, [isOpen])
+    })
+  }, [isOpen, getWindow, updateWindowPosition, windowId])
 
   if (!isOpen) return null
 

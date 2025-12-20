@@ -83,6 +83,10 @@ export function OrangeToyProvider({ children }) {
     setScore(prev => prev + 1)
   }, [])
 
+  const addPoints = useCallback((delta) => {
+    setScore(prev => prev + delta)
+  }, [])
+
   const claimPrize = useCallback(() => {
     // Early exit if can't claim
     if (score < requiredScore) return
@@ -115,6 +119,7 @@ export function OrangeToyProvider({ children }) {
     fillPct,
     tryAgainOpen,
     incrementScore,
+    addPoints,
     claimPrize,
     spawnOrange,
     closeTryAgain,

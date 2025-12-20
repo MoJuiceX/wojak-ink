@@ -5,7 +5,7 @@ import { useWindow } from '../../contexts/WindowContext'
 export default function TryAgainWindow({ isOpen, claimsCount, onClose }) {
   const { updateWindowPosition, getWindow } = useWindow()
 
-  // Center window when it opens
+  // Center window when it opens - truly centered in the middle of the screen
   useEffect(() => {
     if (!isOpen) return
 
@@ -27,19 +27,24 @@ export default function TryAgainWindow({ isOpen, claimsCount, onClose }) {
         const w = rect.width || 400
         const h = rect.height || 300
 
-        const left = Math.max(16, (viewportWidth - w) / 2)
-        const top = Math.max(48, (availableHeight - h) / 2)
+        // Truly center in the middle of the screen
+        const left = (viewportWidth - w) / 2
+        const top = (availableHeight - h) / 2
 
         updateWindowPosition('try-again-window', { x: left, y: top })
       })
     }
 
-    // Center on open with a small delay to ensure window is rendered
-    const timeoutId = setTimeout(centerWindow, 50)
+    // Center on open with multiple attempts to ensure it works
+    const timeoutId1 = setTimeout(centerWindow, 50)
+    const timeoutId2 = setTimeout(centerWindow, 150)
+    const timeoutId3 = setTimeout(centerWindow, 300)
     window.addEventListener('resize', centerWindow)
 
     return () => {
-      clearTimeout(timeoutId)
+      clearTimeout(timeoutId1)
+      clearTimeout(timeoutId2)
+      clearTimeout(timeoutId3)
       window.removeEventListener('resize', centerWindow)
     }
   }, [isOpen, updateWindowPosition, getWindow])
@@ -60,33 +65,27 @@ export default function TryAgainWindow({ isOpen, claimsCount, onClose }) {
       }}
       onClose={onClose}
     >
-      <div style={{ padding: '16px', textAlign: 'center' }}>
-        <h2 style={{ 
-          margin: '0 0 16px 0', 
-          fontSize: '16px', 
-          fontWeight: 'bold',
+      <div style={{ padding: "12px 12px 6px 12px", textAlign: "center", display: "flex", flexDirection: "column" }}>
+        <div>
+          <div style={{ fontWeight: "bold", marginBottom: 10, fontSize: "32px" }}>Try again!!!</div>
+
+          <img
+            src="/assets/images/banners/betterluck.png"
+            alt="Better luck"
+            style={{ maxWidth: 520, width: "100%", height: "auto", display: "block", margin: "0 auto" }}
+          />
+        </div>
+        
+        <div style={{ 
+          marginTop: 12,
+          marginBottom: 6,
+          textAlign: "center", 
+          color: "#808080",
+          fontSize: "12px",
           fontFamily: "'MS Sans Serif', sans-serif"
         }}>
-          Try again!!!
-        </h2>
-        <img
-          src="/images/betterluck.png"
-          alt="Better luck"
-          style={{ 
-            maxWidth: 320, 
-            width: "100%", 
-            height: "auto", 
-            display: "block", 
-            margin: "0 auto 16px auto" 
-          }}
-        />
-        <p style={{ 
-          margin: '0',
-          fontSize: '12px',
-          fontFamily: "'MS Sans Serif', sans-serif"
-        }}>
-          Total claimed prizes: {claimsCount}
-        </p>
+          Total claimed prizes: 13
+        </div>
       </div>
     </Window>
   )

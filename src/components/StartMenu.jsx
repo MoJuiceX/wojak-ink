@@ -281,17 +281,6 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
         </button>
         <button 
           className="start-menu-item"
-          onClick={() => handleMenuItemClick('open-tanggang')}
-          role="menuitem"
-          tabIndex={0}
-        >
-          <span className="start-menu-item-icon start-menu-emoji-icon" aria-hidden="true">
-            🍊
-          </span>
-          <span className="start-menu-item-text">TangGang</span>
-        </button>
-        <button 
-          className="start-menu-item"
           onClick={() => handleMenuItemClick('open-paint')}
           role="menuitem"
           tabIndex={0}
@@ -337,6 +326,17 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
         >
           Games
         </div>
+        <button 
+          className="start-menu-item"
+          onClick={() => handleMenuItemClick('open-tanggang')}
+          role="menuitem"
+          tabIndex={0}
+        >
+          <span className="start-menu-item-icon start-menu-emoji-icon" aria-hidden="true">
+            🍊
+          </span>
+          <span className="start-menu-item-text">TangGang</span>
+        </button>
         <button 
           className="start-menu-item"
           onClick={() => handleMenuItemClick('open-pinball')}

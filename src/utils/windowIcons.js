@@ -17,6 +17,7 @@ const windowIconMap = {
   'window-notify-me': 'msg_information-0',
   'window-admin-panel': 'settings_gear-0',
   'pinball-window': 'pinball_ball-0',
+  'try-again-window': 'msg_question-0',
 }
 
 // Map window titles to icon filenames (fallback)
@@ -32,6 +33,7 @@ const titleIconMap = {
   'ADMIN PANEL': 'settings_gear-0',
   'Paint': 'paint_file-0',
   '3D Pinball for Windows - Space Cadet': 'pinball_ball-0',
+  'Try again!!!': 'msg_question-0',
 }
 
 /**
@@ -41,6 +43,16 @@ const titleIconMap = {
  * @returns {string} Icon path
  */
 export function getWindowIcon(windowId, title) {
+  // Special case: pinball window uses banner image
+  if (windowId === 'pinball-window' || title === '3D Pinball for Windows - Space Cadet') {
+    return '/assets/images/banners/pinball.png'
+  }
+  
+  // Special case: TangGang uses emoji only, no icon
+  if (windowId === 'tanggang' || title === '🍊 TangGang' || title === 'TangGang') {
+    return null
+  }
+  
   // Try window ID first
   let iconName = windowIconMap[windowId]
   
@@ -74,6 +86,16 @@ export function getStartMenuIcon(action) {
     'open-tanggang': 'application_hourglass-0',
     'wojak-creator': 'paint_file-0',
     'open-pinball': 'pinball_ball-0',
+  }
+  
+  // Special case: pinball uses banner image
+  if (action === 'open-pinball') {
+    return '/assets/images/banners/pinball.png'
+  }
+  
+  // Special case: Wojak Creator uses website logo/favicon
+  if (action === 'wojak-creator') {
+    return '/assets/logo.png'
   }
   
   const iconName = actionIconMap[action] || 'application_hourglass-0'

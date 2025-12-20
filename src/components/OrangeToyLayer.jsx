@@ -18,7 +18,7 @@ const WAKE_UP_DISTANCE = 100 // Distance from mouse to wake up sleeping orange
 
 export default function OrangeToyLayer() {
   const { getWindow, isWindowMinimized } = useWindow()
-  const { score, incrementScore, requiredScore, fillPct, orangeExistsRef } = useOrangeToy()
+  const { score, incrementScore, addPoints, requiredScore, fillPct, orangeExistsRef } = useOrangeToy()
   const orangeRef = useRef(null)
   const rafRef = useRef(null)
   const isSleepingRef = useRef(false)
@@ -31,6 +31,7 @@ export default function OrangeToyLayer() {
   const lastScoredBounceAtRef = useRef(0) // performance.now() timestamp of last scored bounce
   const wasInContactRef = useRef(false) // Was mouse in contact last frame
   const airBounceStreakRef = useRef(0) // Counts consecutive mouse bounces since last ground touch
+  const lastScoredStreakRef = useRef(0) // Track points already awarded in current streak
   
   const [orangeExists, setOrangeExists] = useState(false)
   const [splashAnimations, setSplashAnimations] = useState([])
@@ -79,6 +80,7 @@ export default function OrangeToyLayer() {
       lastScoredBounceAtRef.current = 0
       wasInContactRef.current = false
       airBounceStreakRef.current = 0
+      lastScoredStreakRef.current = 0
       
       setOrangeExists(true)
       // Reset the spawn flag after spawning
@@ -104,7 +106,8 @@ export default function OrangeToyLayer() {
   }, [isTangGangOpen, orangeExists, orangeExistsRef])
 
   // Handle mouse bounce callback - defined early so it can be used in animation loop
-  const handleMouseBounce = useCallback((x, y) => {
+  // Visuals only - no scoring (scoring happens separately via addPoints)
+  const handleMouseBounce = useCallback((x, y, delta) => {
     // Add splash animation
     const splashId = performance.now()
     setSplashAnimations(prev => [...prev, { id: splashId, x, y }])
@@ -113,17 +116,14 @@ export default function OrangeToyLayer() {
     }, 600)
     animationTimeoutsRef.current.push(splashTimeout)
 
-    // Add +1 animation
+    // Add +{delta} animation with value stored
     const plusOneId = performance.now() + 1
-    setPlusOneAnimations(prev => [...prev, { id: plusOneId, x, y }])
+    setPlusOneAnimations(prev => [...prev, { id: plusOneId, x, y, value: delta }])
     const plusOneTimeout = setTimeout(() => {
       setPlusOneAnimations(prev => prev.filter(p => p.id !== plusOneId))
     }, 1000)
     animationTimeoutsRef.current.push(plusOneTimeout)
-
-    // Increment score (via context)
-    incrementScore()
-  }, [incrementScore])
+  }, [])
 
   // Start animation loop - defined before wakeUp
   const startAnimationLoop = useCallback(() => {
@@ -176,6 +176,7 @@ export default function OrangeToyLayer() {
         // Ground collision resets combo and juggle streak
         comboAliveRef.current = false
         airBounceStreakRef.current = 0
+        lastScoredStreakRef.current = 0
       }
 
       // Mouse paddle collision + bounce (always bounces when overlapping)
@@ -220,7 +221,7 @@ export default function OrangeToyLayer() {
         // Add small "paddle push" upward to make juggling easier
         state.vy -= MOUSE_UPWARD_BONUS
 
-        // 3-hit juggle scoring: only score after 3 consecutive mouse bounces
+        // Scoring: points = max(0, streak - 1)
         const contactEntered = !wasInContactRef.current
         const airborne = orangeBottom < (floor - AIRBORNE_THRESHOLD)
         const cooldownOk = (now - lastScoredBounceAtRef.current) >= MOUSE_BOUNCE_COOLDOWN_MS
@@ -230,12 +231,21 @@ export default function OrangeToyLayer() {
           // Increment juggle streak
           airBounceStreakRef.current += 1
 
-          // Award point only on 3rd consecutive bounce
-          if (airBounceStreakRef.current >= 3) {
-            incrementScore()
-            handleMouseBounce(state.x, state.y)
-            // Reset streak after scoring
-            airBounceStreakRef.current = 0
+          // Calculate total points that should be awarded for this streak
+          const totalPointsForStreak = Math.max(0, airBounceStreakRef.current - 1)
+
+          // Award only the delta compared to what we already awarded
+          const delta = totalPointsForStreak - lastScoredStreakRef.current
+          
+          if (delta > 0) {
+            // Award points in single state update
+            addPoints(delta)
+            
+            // Show animation with delta value (visuals only, no scoring)
+            handleMouseBounce(state.x, state.y, delta)
+            
+            // Update last scored streak
+            lastScoredStreakRef.current = totalPointsForStreak
           }
 
           // Activate/continue combo
@@ -269,7 +279,7 @@ export default function OrangeToyLayer() {
     }
 
     rafRef.current = requestAnimationFrame(animate)
-  }, [orangeExists, getWindow, isWindowMinimized, handleMouseBounce, incrementScore])
+  }, [orangeExists, getWindow, isWindowMinimized, handleMouseBounce, addPoints])
 
   // Wake up function - defined after startAnimationLoop
   const wakeUp = useCallback(() => {
@@ -370,7 +380,7 @@ export default function OrangeToyLayer() {
         </div>
       ))}
 
-      {/* +1 animations */}
+      {/* +{delta} animations */}
       {plusOneAnimations.map(plusOne => (
         <div
           key={plusOne.id}
@@ -383,7 +393,7 @@ export default function OrangeToyLayer() {
             zIndex: 10002,
           }}
         >
-          +1
+          +{plusOne.value}
         </div>
       ))}
 

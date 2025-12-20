@@ -230,13 +230,6 @@ export default function TangGangWindow({ onClose }) {
           className="fit-img"
         />
         <div style={{ padding: '12px', textAlign: 'center' }}>
-          <div style={{ 
-            marginBottom: '8px',
-            fontSize: '12px',
-            fontFamily: "'MS Sans Serif', sans-serif"
-          }}>
-            Juice: {score} / {requiredScore}
-          </div>
           {canClaim && (
             <button 
               onClick={handleClaimPrize}
@@ -252,16 +245,6 @@ export default function TangGangWindow({ onClose }) {
             >
               Claim Prize
             </button>
-          )}
-          {claimsCount > 0 && (
-            <div style={{ 
-              marginTop: '8px',
-              fontSize: '11px',
-              fontFamily: "'MS Sans Serif', sans-serif",
-              color: '#808080'
-            }}>
-              Total claimed prizes: {claimsCount}
-            </div>
           )}
         </div>
       </div>
