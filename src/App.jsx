@@ -11,6 +11,9 @@ import MarketplaceWindow from './components/windows/MarketplaceWindow'
 import WojakCreator from './components/windows/WojakCreator'
 import PaintWindow from './components/windows/PaintWindow'
 import PinballWindow from './components/windows/PinballWindow'
+import SolitaireWindow from './components/windows/SolitaireWindow'
+import MinesweeperWindow from './components/windows/MinesweeperWindow'
+import SkiFreeWindow from './components/windows/SkiFreeWindow'
 import DesktopIcons from './components/DesktopIcons'
 import Taskbar from './components/Taskbar'
 import BackgroundMusic from './components/BackgroundMusic'
@@ -267,6 +270,15 @@ function App() {
               {paintOpen && <PaintWindow onClose={() => setPaintOpen(false)} />}
               {openWindows['pinball-window'] && (
                 <PinballWindow onClose={() => closeWindow('pinball-window')} />
+              )}
+              {openWindows['window-solitaire'] && (
+                <SolitaireWindow onClose={() => closeWindow('window-solitaire')} />
+              )}
+              {openWindows['window-minesweeper'] && (
+                <MinesweeperWindow onClose={() => closeWindow('window-minesweeper')} />
+              )}
+              {openWindows['window-skifree'] && (
+                <SkiFreeWindow onClose={() => closeWindow('window-skifree')} />
               )}
               <NotifyPopup isOpen={notifyOpen} onClose={() => setNotifyOpen(false)} />
               <TryAgainWindowWrapper />

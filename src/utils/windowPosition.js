@@ -150,6 +150,9 @@ export function getDefaultWindowSize(windowId) {
     'paint-window': { width: 800, height: 600 },
     'treasure-window': { width: 500, height: 500 },
     'pinball-window': { width: 1024, height: 768 },
+    'window-solitaire': { width: 900, height: 700 },
+    'window-minesweeper': { width: 520, height: 640 },
+    'window-skifree': { width: 900, height: 700 },
     'try-again-window': { width: 400, height: 500 },
   }
   

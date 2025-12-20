@@ -17,6 +17,9 @@ const windowIconMap = {
   'window-notify-me': 'msg_information-0',
   'window-admin-panel': 'settings_gear-0',
   'pinball-window': 'pinball_ball-0',
+  'window-solitaire': 'game_solitaire-0',
+  'window-minesweeper': 'game_mine_1-0',
+  'window-skifree': 'game_solitaire-0', // Overridden by special case in getWindowIcon
   'try-again-window': 'msg_question-0',
 }
 
@@ -33,6 +36,9 @@ const titleIconMap = {
   'ADMIN PANEL': 'settings_gear-0',
   'Paint': 'paint_file-0',
   '3D Pinball for Windows - Space Cadet': 'pinball_ball-0',
+  'SOLITAIRE.EXE': 'game_solitaire-0',
+  'MINESWEEPER.EXE': 'game_mine_1-0',
+  'SKIFREE.EXE': 'game_solitaire-0', // Overridden by special case in getWindowIcon
   'Try again!!!': 'msg_question-0',
 }
 
@@ -46,6 +52,11 @@ export function getWindowIcon(windowId, title) {
   // Special case: pinball window uses banner image
   if (windowId === 'pinball-window' || title === '3D Pinball for Windows - Space Cadet') {
     return '/assets/images/banners/pinball.png'
+  }
+  
+  // Special case: SkiFree uses local ski.png image
+  if (windowId === 'window-skifree' || title === 'SKIFREE.EXE') {
+    return '/assets/images/ski.png'
   }
   
   // Special case: TangGang uses emoji only, no icon
@@ -91,11 +102,19 @@ export function getStartMenuIcon(action) {
     'open-tanggang': 'application_hourglass-0',
     'wojak-creator': 'paint_file-0',
     'open-pinball': 'pinball_ball-0',
+    'open-solitaire': 'game_solitaire-0',
+    'open-minesweeper': 'game_mine_1-0',
+    'open-skifree': 'game_solitaire-0', // Overridden by special case in getStartMenuIcon
   }
   
   // Special case: pinball uses banner image
   if (action === 'open-pinball') {
     return '/assets/images/banners/pinball.png'
+  }
+  
+  // Special case: SkiFree uses local ski.png image
+  if (action === 'open-skifree') {
+    return '/assets/images/ski.png'
   }
   
   // Special case: Wojak Creator uses website logo/favicon

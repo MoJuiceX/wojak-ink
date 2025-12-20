@@ -377,6 +377,11 @@ a,
 }
 
 /* Window drag feedback */
+/* Disable iframe pointer events during window dragging */
+.window.dragging iframe {
+  pointer-events: none !important;
+}
+
 .window.dragging {
   /* Opacity removed for better drag performance */
   cursor: move;
@@ -543,6 +548,30 @@ a,
   padding: 0 !important;
   height: 100%;
   position: relative;
+  overflow: hidden;
+}
+
+#window-solitaire .window-body {
+  padding: 0 !important;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#window-minesweeper .window-body {
+  padding: 0 !important;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#window-skifree .window-body {
+  padding: 0 !important;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 

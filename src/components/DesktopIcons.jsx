@@ -30,6 +30,21 @@ export default function DesktopIcons({ onOpenApp }) {
       label: '3D Pinball',
       icon: getWindowIcon('pinball-window', '3D Pinball for Windows - Space Cadet'),
     },
+    {
+      id: 'window-solitaire',
+      label: 'Solitaire',
+      icon: getWindowIcon('window-solitaire', 'SOLITAIRE.EXE'),
+    },
+    {
+      id: 'window-minesweeper',
+      label: 'Minesweeper',
+      icon: getWindowIcon('window-minesweeper', 'MINESWEEPER.EXE'),
+    },
+    {
+      id: 'window-skifree',
+      label: 'SkiFree',
+      icon: getWindowIcon('window-skifree', 'SKIFREE.EXE'),
+    },
   ]
 
   return (

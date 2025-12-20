@@ -77,6 +77,9 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
       'scroll-to-marketplace': 'window-marketplace',
       'open-tanggang': 'tanggang',
       'open-pinball': 'pinball-window',
+      'open-solitaire': 'window-solitaire',
+      'open-minesweeper': 'window-minesweeper',
+      'open-skifree': 'window-skifree',
     }
     const windowId = actionToWindowId[action]
 
@@ -350,6 +353,48 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
             onError={(e) => { e.target.style.display = 'none' }}
           />
           <span className="start-menu-item-text">3D Pinball</span>
+        </button>
+        <button 
+          className="start-menu-item"
+          onClick={() => handleMenuItemClick('open-solitaire')}
+          role="menuitem"
+          tabIndex={0}
+        >
+          <img 
+            src={getStartMenuIcon('open-solitaire')} 
+            alt="" 
+            className="start-menu-item-icon"
+            onError={(e) => { e.target.style.display = 'none' }}
+          />
+          <span className="start-menu-item-text">Solitaire</span>
+        </button>
+        <button 
+          className="start-menu-item"
+          onClick={() => handleMenuItemClick('open-minesweeper')}
+          role="menuitem"
+          tabIndex={0}
+        >
+          <img 
+            src={getStartMenuIcon('open-minesweeper')} 
+            alt="" 
+            className="start-menu-item-icon"
+            onError={(e) => { e.target.style.display = 'none' }}
+          />
+          <span className="start-menu-item-text">Minesweeper</span>
+        </button>
+        <button 
+          className="start-menu-item"
+          onClick={() => handleMenuItemClick('open-skifree')}
+          role="menuitem"
+          tabIndex={0}
+        >
+          <img 
+            src={getStartMenuIcon('open-skifree')} 
+            alt="" 
+            className="start-menu-item-icon"
+            onError={(e) => { e.target.style.display = 'none' }}
+          />
+          <span className="start-menu-item-text">SkiFree</span>
         </button>
         <hr className="start-menu-separator" role="separator" />
         <button 
