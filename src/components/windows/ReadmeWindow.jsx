@@ -100,7 +100,7 @@ export default function ReadmeWindow({ onClose }) {
         ))}
       </div>
 
-      <p className="readme-title">
+      <p className="readme-title" style={{ marginTop: '1em' }}>
         <b>Art for the Grove 🍊</b>
       </p>
       <p>
@@ -136,24 +136,6 @@ export default function ReadmeWindow({ onClose }) {
             Chia.net
           </a>
         </li>
-        <li>
-          <span className="readme-mint-row">
-            <b>Mint:</b> Friday Dec 19th, 2025
-            <a
-              href="https://x.com/MoJuiceX/status/2000923383891157444"
-              target="_blank"
-              rel="noreferrer"
-              className="readme-launch-space-link"
-              title="Open Launch X Space"
-            >
-              <img
-                src="/assets/images/banners/x-space-launch.png?v=2"
-                alt="Launch Space"
-                className="readme-launch-space-thumb"
-              />
-            </a>
-          </span>
-        </li>
       </ul>
 
       <hr />
@@ -170,6 +152,10 @@ export default function ReadmeWindow({ onClose }) {
         >
           wojakfarmersplot.crate.ink
         </a>
+      </p>
+
+      <p style={{ fontSize: '2em', fontWeight: 'bold', color: 'red' }}>
+        Minting paused due to platform issues. Resuming shortly.
       </p>
 
       <p>
