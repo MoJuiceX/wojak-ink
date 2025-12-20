@@ -79,6 +79,10 @@ function MarketplaceNFT({ nft, offerFile, onCopyOffer, onViewOffer }) {
   const displayName = nftDetail?.name || nft.name || nft.id
   const priceText = nftDetail?.priceText
   
+  // Use nft.offerTaken (from getNFTsByGroup merge) as primary source
+  // This ensures badge shows correct status even if nftDetail hasn't loaded yet
+  const isOfferTaken = nft.offerTaken ?? nftDetail?.offerTaken ?? false
+  
   // Dev-only: Warn if thumbnail missing
   if (import.meta.env.DEV && !imgSrc && nft.id) {
     console.warn(`[Marketplace] Missing thumbnail for NFT: id=${nft.id}, group=${nft.group}`)
@@ -161,14 +165,14 @@ function MarketplaceNFT({ nft, offerFile, onCopyOffer, onViewOffer }) {
               position: 'absolute',
               top: '4px',
               right: '4px',
-              background: nftDetail?.offerTaken ? 'rgba(204, 0, 0, 0.8)' : 'rgba(0, 128, 0, 0.8)',
+              background: isOfferTaken ? 'rgba(204, 0, 0, 0.8)' : 'rgba(0, 128, 0, 0.8)',
               color: 'white',
               padding: '2px 6px',
               fontSize: '9px',
               borderRadius: '2px',
             }}
           >
-            {nftDetail?.offerTaken ? 'Sold' : 'Offer Available'}
+            {isOfferTaken ? 'Sold' : 'Offer Available'}
           </div>
         )}
       </div>
@@ -686,17 +690,18 @@ export default function MarketplaceWindow({ onClose }) {
   // Start fetching NFT details for all entries when component mounts or entries change
   useEffect(() => {
     if (nftEntries.length > 0) {
-      // Fetch details for all NFTs (stagger requests to avoid overwhelming the API)
+      // Fetch details for all NFTs (stagger requests to avoid rate limits)
+      // Use longer delay to avoid hitting API rate limits (500ms = 2 requests/second)
       nftEntries.forEach((entry, index) => {
-        // Stagger the requests slightly
+        // Stagger the requests with longer delay to respect rate limits
         setTimeout(() => {
           if (entry.offerFile) {
             fetchNFTDetailsForId(entry.id).catch(err => {
               // Silently handle errors - they're already logged in fetchNFTDetailsForId
-              console.error(`Failed to fetch details for ${entry.id}:`, err)
+              // Retry logic will handle rate-limited requests automatically
             })
           }
-        }, index * 200) // 200ms delay between each request
+        }, index * 500) // 500ms delay between each request (2 req/sec to avoid rate limits)
       })
     }
   }, [nftEntries.length]) // Only run when entries count changes, not when fetchNFTDetailsForId changes

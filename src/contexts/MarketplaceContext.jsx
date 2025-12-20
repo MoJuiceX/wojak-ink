@@ -12,6 +12,19 @@ const STORAGE_KEYS = {
   OFFER_FILES: 'marketplace_offer_files',
 }
 
+// Constants for hiding sold NFTs - sold NFTs disappear immediately (no delay)
+const HIDE_SOLD_AFTER_MS = 0  // 0 = sold NFTs disappear immediately
+
+// Reusable visibility helper (top-level to avoid re-creation)
+// If hideAfterMs is 0, sold NFTs disappear immediately (no time delay)
+const isNFTVisible = (details, now, hideAfterMs) => {
+  if (details?.offerTaken !== true) return true
+  if (!Number.isFinite(details?.soldAtMs)) return true
+  // If hideAfterMs is 0, hide immediately (soldAtMs is in the past)
+  if (hideAfterMs === 0) return false
+  return (now - details.soldAtMs) <= hideAfterMs
+}
+
 // Removed: generateNFTs() and TOKEN_GROUPS - now loaded from CSV
 
 // Parse CSV text with header: group,offerfile,id,tokenId4,ipfsLink,nftId,name,source
@@ -121,8 +134,8 @@ const parseOfferFilesCSV = (csvText) => {
   return { nftEntries, offerFiles }
 }
 
-// Fixed token groups in preferred order
-const PREFERRED_TOKEN_GROUPS = ['PP', 'SP', 'HOA', 'BEPE', 'CHIA', 'NECKCOIN', 'XCH']
+// Fixed token groups in preferred order - only XCH is active, others are all sold
+const PREFERRED_TOKEN_GROUPS = ['XCH']
 
 // Load offer files from CSV
 const loadOfferFilesFromCSV = async () => {
@@ -153,10 +166,13 @@ export function MarketplaceProvider({ children }) {
   const [nftDetailsErrors, setNftDetailsErrors] = useState({}) // Map of nftId -> error message
   const requestCacheRef = useRef(new Map()) // Cache for API requests with TTL
   const pendingRequestsRef = useRef(new Map()) // Track pending requests to batch/debounce
+  const retryTimeoutsRef = useRef(new Map()) // Track retry timeouts for rate-limited requests
   const batchTimeoutRef = useRef(null)
-  const MAX_CONCURRENT_REQUESTS = 5
+  const MAX_CONCURRENT_REQUESTS = 2 // Reduced to avoid rate limits
   const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
   const BATCH_DELAY = 100 // 100ms batching window
+  const RETRY_DELAY_BASE = 5000 // 5 seconds base delay for retries
+  const MAX_RETRY_DELAY = 60000 // 60 seconds max delay
 
   // Load NFT entries and offer files from CSV on mount
   useEffect(() => {
@@ -282,6 +298,24 @@ export function MarketplaceProvider({ children }) {
     const cached = getCachedResult(cacheKey)
     if (cached) {
       setNftDetails(prev => ({ ...prev, [nftId]: cached }))
+      
+      // If cached NFT is sold and past threshold, remove it immediately
+      const now = Date.now()
+      if (cached.offerTaken && cached.soldAtMs && Number.isFinite(cached.soldAtMs)) {
+        const ageMs = now - cached.soldAtMs
+        if (ageMs > HIDE_SOLD_AFTER_MS) {
+          setNftEntries(prev => prev.filter(entry => entry.id !== nftId))
+          setOfferFiles(prev => {
+            const next = { ...prev }
+            delete next[nftId]
+            return next
+          })
+          if (import.meta.env.DEV) {
+            console.log(`[Marketplace] Removed sold NFT from marketplace (cached): id=${nftId}, age=${Math.round(ageMs / 1000 / 60)}min`)
+          }
+        }
+      }
+      
       return cached
     }
     
@@ -290,8 +324,39 @@ export function MarketplaceProvider({ children }) {
       return null // Return null if already loading, don't start another fetch
     }
     
-    // Check if there was an error (don't retry immediately)
+    // Check if there was an error - retry rate-limited requests after delay
     if (nftDetailsErrors[nftId]) {
+      const errorMsg = nftDetailsErrors[nftId]
+      // Retry 429 (rate limit) errors after exponential backoff
+      if (errorMsg.includes('429') || errorMsg.includes('rate limit') || errorMsg.includes('Too Many Requests')) {
+        // Check if we already have a retry scheduled
+        if (!retryTimeoutsRef.current.has(nftId)) {
+          // Calculate retry delay (exponential backoff, capped at MAX_RETRY_DELAY)
+          const retryCount = (retryTimeoutsRef.current.get(nftId + '_count') || 0) + 1
+          const delay = Math.min(RETRY_DELAY_BASE * Math.pow(2, retryCount - 1), MAX_RETRY_DELAY)
+          
+          // Schedule retry
+          const timeoutId = setTimeout(() => {
+            retryTimeoutsRef.current.delete(nftId)
+            retryTimeoutsRef.current.delete(nftId + '_count')
+            // Clear error so we can retry
+            setNftDetailsErrors(prev => {
+              const next = { ...prev }
+              delete next[nftId]
+              return next
+            })
+            // Retry the fetch
+            fetchNFTDetailsForId(nftId).catch(() => {})
+          }, delay)
+          
+          retryTimeoutsRef.current.set(nftId, timeoutId)
+          retryTimeoutsRef.current.set(nftId + '_count', retryCount)
+          
+          if (import.meta.env.DEV) {
+            console.log(`[Marketplace] Scheduled retry for ${nftId} after ${delay}ms (attempt ${retryCount})`)
+          }
+        }
+      }
       return null
     }
     
@@ -338,6 +403,27 @@ export function MarketplaceProvider({ children }) {
       // Dexie API status: 0 = pending/active, other values = completed/taken
       // Also check date_completed field
       const isOfferTaken = offerData ? (offerData.status !== 0 || offerData.date_completed !== null) : false
+      
+      // Parse and normalize sold timestamp (soldAtMs) - do this ONCE here
+      let soldAtMs = null
+      if (isOfferTaken && offerData?.date_completed) {
+        const dateCompleted = offerData.date_completed
+        
+        if (typeof dateCompleted === 'string') {
+          const ms = Date.parse(dateCompleted)
+          soldAtMs = Number.isFinite(ms) ? ms : null
+        } else if (typeof dateCompleted === 'number') {
+          // Handle seconds vs milliseconds
+          // Timestamps > 10_000_000_000 are likely milliseconds (year 2286+)
+          // Timestamps < 10_000_000_000 are likely seconds (year 2001-2286)
+          soldAtMs = dateCompleted > 10_000_000_000 ? dateCompleted : dateCompleted * 1000
+        }
+        
+        // Validate the final value is a finite positive number
+        if (!Number.isFinite(soldAtMs) || soldAtMs <= 0) {
+          soldAtMs = null
+        }
+      }
       
       // Extract currency symbol(s) from Dexie offer response
       // Handle multiple currencies (e.g., offers with 2+ tokens)
@@ -425,7 +511,8 @@ export function MarketplaceProvider({ children }) {
         thumbnail: thumbnailUrl, // CSV thumbnail takes precedence
         currency: currency || nftEntry.group || 'UNKNOWN',
         launcherId: launcherId,
-        offerTaken: isOfferTaken, // Store offer status - this is the key fix!
+        offerTaken: isOfferTaken, // Store offer status
+        soldAtMs: soldAtMs, // Normalized timestamp in milliseconds (null if not sold or invalid)
         offerData: offerData, // Store full offer data for reference
         priceText,
         ...mintGardenDetails, // Include all MintGarden data (may be empty if skipped)
@@ -434,6 +521,27 @@ export function MarketplaceProvider({ children }) {
       // Update state and cache
       setNftDetails(prev => ({ ...prev, [nftId]: details }))
       setCachedResult(cacheKey, details)
+      
+      // If NFT is sold and past the threshold, remove it from nftEntries immediately
+      // This prevents it from showing in the marketplace and avoids future API calls
+      const now = Date.now()
+      if (isOfferTaken && soldAtMs && Number.isFinite(soldAtMs)) {
+        const ageMs = now - soldAtMs
+        if (ageMs > HIDE_SOLD_AFTER_MS) {
+          // Remove from nftEntries - sold and past threshold
+          setNftEntries(prev => prev.filter(entry => entry.id !== nftId))
+          // Also remove from offerFiles
+          setOfferFiles(prev => {
+            const next = { ...prev }
+            delete next[nftId]
+            return next
+          })
+          if (import.meta.env.DEV) {
+            console.log(`[Marketplace] Removed sold NFT from marketplace: id=${nftId}, age=${Math.round(ageMs / 1000 / 60)}min`)
+          }
+        }
+      }
+      
       setNftDetailsLoading(prev => {
         const next = new Set(prev)
         next.delete(nftId)
@@ -443,10 +551,11 @@ export function MarketplaceProvider({ children }) {
       
       return details
     } catch (error) {
+      const errorMsg = error.message || String(error)
       console.error(`Failed to fetch NFT details for ${nftId}:`, error)
       
       // Store error and clear loading state
-      setNftDetailsErrors(prev => ({ ...prev, [nftId]: error.message }))
+      setNftDetailsErrors(prev => ({ ...prev, [nftId]: errorMsg }))
       setNftDetailsLoading(prev => {
         const next = new Set(prev)
         next.delete(nftId)
@@ -454,32 +563,73 @@ export function MarketplaceProvider({ children }) {
       })
       pendingRequestsRef.current.delete(nftId)
       
+      // For rate limit errors, retry will be handled on next call (see check above)
+      // For other errors, we'll keep the error state
+      
       return null
     }
   }, [nftEntries, nftDetails, nftDetailsLoading, nftDetailsErrors])
+
+  // Periodically retry failed rate-limited requests (moved after fetchNFTDetailsForId definition)
+  useEffect(() => {
+    const retryInterval = setInterval(() => {
+      // Find NFTs with rate limit errors that aren't currently loading
+      const rateLimitedNFTs = Object.entries(nftDetailsErrors)
+        .filter(([nftId, errorMsg]) => {
+          const isRateLimit = errorMsg.includes('429') || errorMsg.includes('rate limit') || errorMsg.includes('Too Many Requests')
+          const notLoading = !nftDetailsLoading.has(nftId)
+          const noRetryScheduled = !retryTimeoutsRef.current.has(nftId)
+          return isRateLimit && notLoading && noRetryScheduled
+        })
+        .map(([nftId]) => nftId)
+
+      // Retry up to 5 at a time to avoid overwhelming the API
+      rateLimitedNFTs.slice(0, 5).forEach(nftId => {
+        // Clear error and retry
+        setNftDetailsErrors(prev => {
+          const next = { ...prev }
+          delete next[nftId]
+          return next
+        })
+        fetchNFTDetailsForId(nftId).catch(() => {})
+      })
+    }, 30000) // Check every 30 seconds
+
+    return () => clearInterval(retryInterval)
+  }, [nftDetailsErrors, nftDetailsLoading, fetchNFTDetailsForId])
   
-  // Get token groups dynamically from currency symbols (preferred) or CSV group column (fallback)
-  const getTokenGroups = useCallback(() => {
-    // Return fixed groups in preferred order (CSV is source of truth for grouping)
-    return PREFERRED_TOKEN_GROUPS
-    
-    // Only add CSV groups for entries that haven't been fetched yet
-    // This prevents showing groups that will be replaced by API currency
-    nftEntries.forEach(entry => {
-      const details = nftDetails[entry.id]
-      // Only use CSV group if we don't have fetched details for this entry
-      if (!details && entry.group) {
-        groups.add(entry.group)
+  // Helper to count visible NFTs per group (without calling getNFTsByGroup)
+  const getVisibleCountByGroup = useCallback(() => {
+    const now = Date.now()
+    const counts = Object.fromEntries(PREFERRED_TOKEN_GROUPS.map(g => [g, 0]))
+
+    for (const entry of nftEntries) {
+      const group = entry.group
+      if (!counts.hasOwnProperty(group)) continue
+
+      const details = nftDetails[entry.id] || {}
+      
+      // Use shared visibility helper with details
+      // Note: entry doesn't have merged offerTaken/soldAtMs, so we rely on nftDetails
+      if (isNFTVisible(details, now, HIDE_SOLD_AFTER_MS)) {
+        counts[group] += 1
       }
-    })
-    
-    // Return sorted array
-    return Array.from(groups).sort()
-  }, [nftDetails, nftEntries])
+    }
+
+    return counts
+  }, [nftEntries, nftDetails])
+
+  // Get token groups dynamically - only return groups with visible NFTs
+  const getTokenGroups = useCallback(() => {
+    const counts = getVisibleCountByGroup()
+    return PREFERRED_TOKEN_GROUPS.filter(g => (counts[g] || 0) > 0)
+  }, [getVisibleCountByGroup])
   
   // Get NFTs by group - CSV group is the ONLY source of truth for filtering
   const getNFTsByGroup = useCallback((group) => {
     if (!group) return []
+    
+    const now = Date.now()
     
     // Filter ONLY by CSV group column (never use decoded currency for grouping)
     return nftEntries
@@ -499,6 +649,25 @@ export function MarketplaceProvider({ children }) {
           launcherId: details.launcherId,
           ...detailsWithoutIdAndThumbnail, // Include API enrichment (price, currency, etc) but not thumbnail
         }
+      })
+      .filter(nft => {
+        // Always use nftDetails as source of truth (reactive state, always up-to-date)
+        // The nft object from map() is for display, but filtering uses nftDetails state
+        const details = nftDetails[nft.id]
+        
+        // If details haven't loaded yet, show the NFT (optimistic - assume available until we know otherwise)
+        if (!details) {
+          return true
+        }
+        
+        const isVisible = isNFTVisible(details, now, HIDE_SOLD_AFTER_MS)
+        
+        // Dev-only: Log hidden NFTs for debugging
+        if (import.meta.env.DEV && !isVisible) {
+          console.log(`[Marketplace] Hiding NFT: id=${nft.id}, offerTaken=${details.offerTaken}, soldAtMs=${details.soldAtMs}, age=${details.soldAtMs ? Math.round((now - details.soldAtMs) / 1000 / 60) : 'N/A'}min, group=${group}`)
+        }
+        
+        return isVisible
       })
   }, [nftEntries, nftDetails])
 

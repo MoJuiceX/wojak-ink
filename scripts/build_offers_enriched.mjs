@@ -336,13 +336,43 @@ function extractTokenId(metadata, data) {
 async function processOffer(group, offerFile, cache) {
   const offerHash = hashOfferString(offerFile)
   
-  // Check cache first
-  if (cache[offerFile]) {
+  // Always check if offer is sold first (even for cached entries, status may have changed)
+  const offerData = await getOfferFromDexie(offerFile)
+  if (offerData) {
+    // Check if offer is taken/completed
+    // Dexie API status: 0 = pending/active, other values = completed/taken
+    // Also check date_completed field
+    const isOfferTaken = offerData.status !== 0 || offerData.date_completed !== null
+    
+    if (isOfferTaken) {
+      // Mark as sold in cache and skip
+      cache[offerFile] = { isSold: true }
+      console.log(`  [SKIP SOLD] ${group} - ${offerHash} (offer taken)`)
+      return { success: false, reason: 'Offer is sold' }
+    }
+  }
+  
+  // Check cache after verifying offer is still available
+  if (cache[offerFile] && !cache[offerFile].isSold) {
     console.log(`  [CACHED] ${group} - ${offerHash}`)
     return { success: true, data: cache[offerFile] }
   }
   
   try {
+    if (offerData) {
+      // Check if offer is taken/completed
+      // Dexie API status: 0 = pending/active, other values = completed/taken
+      // Also check date_completed field
+      const isOfferTaken = offerData.status !== 0 || offerData.date_completed !== null
+      
+      if (isOfferTaken) {
+        // Mark as sold in cache and skip
+        cache[offerFile] = { isSold: true }
+        console.log(`  [SKIP SOLD] ${group} - ${offerHash} (offer taken)`)
+        return { success: false, reason: 'Offer is sold' }
+      }
+    }
+    
     // Step 1: Resolve NFT launcher ID
     const nftId = await resolveNFTFromOfferFile(offerFile)
     if (!nftId) {
