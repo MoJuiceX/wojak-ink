@@ -256,7 +256,7 @@ export default function WojakCreator({ onClose }) {
 
       <div style={{ 
         margin: '0',
-        padding: '12px',
+        padding: '6px 12px 12px 12px',
         backgroundColor: '#f0f0f0', 
         borderTop: '1px inset #c0c0c0',
         fontSize: '11px',

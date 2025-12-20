@@ -10,9 +10,13 @@ import NotifyPopup from './components/windows/NotifyPopup'
 import MarketplaceWindow from './components/windows/MarketplaceWindow'
 import WojakCreator from './components/windows/WojakCreator'
 import PaintWindow from './components/windows/PaintWindow'
+import PinballWindow from './components/windows/PinballWindow'
+import DesktopIcons from './components/DesktopIcons'
 import Taskbar from './components/Taskbar'
 import BackgroundMusic from './components/BackgroundMusic'
 import LoadingSpinner from './components/ui/LoadingSpinner'
+import OrangeToyLayer from './components/OrangeToyLayer'
+import TryAgainWindowWrapper from './components/windows/TryAgainWindowWrapper'
 
 // Lazy load non-critical routes
 const AdminPanel = lazy(() => import('./components/windows/AdminPanel'))
@@ -21,6 +25,7 @@ import { MarketplaceProvider } from './contexts/MarketplaceContext'
 import { WindowProvider } from './contexts/WindowContext'
 import { ToastProvider } from './contexts/ToastContext'
 import { KeyboardPriorityProvider } from './contexts/KeyboardPriorityContext'
+import { OrangeToyProvider } from './contexts/OrangeToyContext'
 import { useWindowStacking } from './hooks/useWindowStacking'
 import GlobalErrorBoundary from './components/GlobalErrorBoundary'
 
@@ -207,13 +212,16 @@ function App() {
     <ToastProvider>
       <KeyboardPriorityProvider>
         <WindowProvider>
-          <GlobalErrorBoundary>
-            <MarketplaceProvider>
+          <OrangeToyProvider>
+            <GlobalErrorBoundary>
+              <MarketplaceProvider>
               {/* Background music - starts after first user interaction */}
               <BackgroundMusic />
               <a href="#main-content" className="skip-link">Skip to main content</a>
               <div className="bg-fixed" aria-hidden="true"></div>
               <main id="main-content" className="desktop" aria-label="Desktop">
+                <OrangeToyLayer />
+                <DesktopIcons onOpenApp={openWindow} />
                 {openWindows['window-readme-txt'] && (
                   <ReadmeWindow onClose={() => closeWindow('window-readme-txt')} />
                 )}
@@ -257,7 +265,11 @@ function App() {
               <SideStack />
               {wojakCreatorOpen && <WojakCreator onClose={() => setWojakCreatorOpen(false)} />}
               {paintOpen && <PaintWindow onClose={() => setPaintOpen(false)} />}
+              {openWindows['pinball-window'] && (
+                <PinballWindow onClose={() => closeWindow('pinball-window')} />
+              )}
               <NotifyPopup isOpen={notifyOpen} onClose={() => setNotifyOpen(false)} />
+              <TryAgainWindowWrapper />
             </main>
             <Taskbar 
               onOpenWojakCreator={() => setWojakCreatorOpen(true)} 
@@ -266,6 +278,7 @@ function App() {
             />
             </MarketplaceProvider>
           </GlobalErrorBoundary>
+          </OrangeToyProvider>
         </WindowProvider>
       </KeyboardPriorityProvider>
     </ToastProvider>

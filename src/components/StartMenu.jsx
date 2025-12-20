@@ -76,6 +76,7 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
       'scroll-to-faq': 'window-faq',
       'scroll-to-marketplace': 'window-marketplace',
       'open-tanggang': 'tanggang',
+      'open-pinball': 'pinball-window',
     }
     const windowId = actionToWindowId[action]
 
@@ -284,12 +285,9 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
           role="menuitem"
           tabIndex={0}
         >
-          <img 
-            src={getStartMenuIcon('open-tanggang')} 
-            alt="" 
-            className="start-menu-item-icon"
-            onError={(e) => { e.target.style.display = 'none' }}
-          />
+          <span className="start-menu-item-icon start-menu-emoji-icon" aria-hidden="true">
+            🍊
+          </span>
           <span className="start-menu-item-text">TangGang</span>
         </button>
         <button 
@@ -324,6 +322,34 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
             onError={(e) => { e.target.style.display = 'none' }}
           />
           <span className="start-menu-item-text">Wojak Creator</span>
+        </button>
+        <hr className="start-menu-separator" role="separator" />
+        <div 
+          className="start-menu-section-header"
+          style={{
+            padding: '4px 8px',
+            fontSize: '10px',
+            fontWeight: 'bold',
+            color: '#000',
+            background: '#c0c0c0',
+            textTransform: 'uppercase',
+          }}
+        >
+          Games
+        </div>
+        <button 
+          className="start-menu-item"
+          onClick={() => handleMenuItemClick('open-pinball')}
+          role="menuitem"
+          tabIndex={0}
+        >
+          <img 
+            src={getStartMenuIcon('open-pinball')} 
+            alt="" 
+            className="start-menu-item-icon"
+            onError={(e) => { e.target.style.display = 'none' }}
+          />
+          <span className="start-menu-item-text">3D Pinball</span>
         </button>
         <hr className="start-menu-separator" role="separator" />
         <button 

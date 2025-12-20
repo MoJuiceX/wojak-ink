@@ -15,7 +15,9 @@ export default function NotifyPopup({ isOpen, onClose }) {
   useKeyboardHandler(KEYBOARD_PRIORITY.MODAL, 'notify-popup', handleEscape, isOpen)
 
   useEffect(() => {
-    if (isOpen) {
+    if (!isOpen) return
+
+    const centerPopup = () => {
       // Batch all layout reads, then all writes to prevent layout thrashing
       requestAnimationFrame(() => {
         const el = document.getElementById('win-notify')
@@ -24,6 +26,13 @@ export default function NotifyPopup({ isOpen, onClose }) {
         // Batch all reads first (no writes yet)
         const viewportWidth = window.innerWidth
         const viewportHeight = window.innerHeight
+        
+        // Get taskbar height from CSS variable
+        const rootStyle = getComputedStyle(document.documentElement)
+        const taskbarHeight = parseFloat(rootStyle.getPropertyValue('--taskbar-height')) || 30
+        
+        // Calculate available height (viewport minus taskbar)
+        const availableHeight = viewportHeight - taskbarHeight
         
         // Temporarily make visible to measure (but batch this with writes)
         const wasVisible = el.style.visibility !== 'hidden'
@@ -35,8 +44,10 @@ export default function NotifyPopup({ isOpen, onClose }) {
         const h = el.offsetHeight
         
         // Calculate positions (no DOM writes yet)
+        // Center horizontally
         const left = Math.max(16, (viewportWidth - w) / 2)
-        const top = Math.max(48, (viewportHeight - h) / 2)
+        // Center vertically in available space (with gap on top and bottom)
+        const top = Math.max(48, (availableHeight - h) / 2)
         
         // Now batch all writes together (after all reads are done)
         requestAnimationFrame(() => {
@@ -47,6 +58,15 @@ export default function NotifyPopup({ isOpen, onClose }) {
           el2.style.top = Math.round(top) + 'px'
         })
       })
+    }
+
+    // Center on open
+    centerPopup()
+
+    // Re-center on resize
+    window.addEventListener('resize', centerPopup)
+    return () => {
+      window.removeEventListener('resize', centerPopup)
     }
   }, [isOpen])
 

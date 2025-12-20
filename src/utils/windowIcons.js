@@ -16,6 +16,7 @@ const windowIconMap = {
   'window-wojak-creator': 'paint_file-0',
   'window-notify-me': 'msg_information-0',
   'window-admin-panel': 'settings_gear-0',
+  'pinball-window': 'pinball_ball-0',
 }
 
 // Map window titles to icon filenames (fallback)
@@ -30,6 +31,7 @@ const titleIconMap = {
   'NOTIFY_ME': 'msg_information-0',
   'ADMIN PANEL': 'settings_gear-0',
   'Paint': 'paint_file-0',
+  '3D Pinball for Windows - Space Cadet': 'pinball_ball-0',
 }
 
 /**
@@ -71,6 +73,7 @@ export function getStartMenuIcon(action) {
     'open-paint': 'paint_file-0',
     'open-tanggang': 'application_hourglass-0',
     'wojak-creator': 'paint_file-0',
+    'open-pinball': 'pinball_ball-0',
   }
   
   const iconName = actionIconMap[action] || 'application_hourglass-0'

@@ -1,0 +1,171 @@
+.orange-toy-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10000;
+}
+
+.orange {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle at 30% 30%, #ff8c00, #ff6600);
+  border-radius: 50%;
+  border: 3px solid #ff5500;
+  box-shadow: 
+    inset -10px -10px 20px rgba(0, 0, 0, 0.3),
+    0 4px 8px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Splash animation */
+.splash {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 140, 0, 0.6) 0%, rgba(255, 102, 0, 0.3) 50%, transparent 100%);
+  pointer-events: none;
+  z-index: 10001;
+  animation: splashExpand 0.5s ease-out forwards;
+}
+
+@keyframes splashExpand {
+  0% {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* Plus one animation */
+.plus-one {
+  position: absolute;
+  font-family: 'MS Sans Serif', sans-serif;
+  font-size: 24px;
+  font-weight: bold;
+  color: #ff6600;
+  text-shadow: 
+    2px 2px 0 #fff,
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000;
+  pointer-events: none;
+  z-index: 10002;
+  animation: plusOneFloat 1s ease-out forwards;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes plusOneFloat {
+  0% {
+    transform: translate(-50%, -50%) translateY(0);
+    opacity: 1;
+    scale: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) translateY(-50px);
+    opacity: 0;
+    scale: 1.5;
+  }
+}
+
+/* Juice meter (for future use) */
+.juice-meter {
+  position: fixed;
+  bottom: calc(var(--taskbar-height) + 20px);
+  right: 20px;
+  width: 200px;
+  height: 30px;
+  border: 2px inset #c0c0c0;
+  background: #c0c0c0;
+  z-index: 10003;
+  padding: 2px;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.juice-meter-fill {
+  height: 100%;
+  background: linear-gradient(to right, #ff6600, #ff8c00);
+  transition: width 0.3s ease;
+  border: 1px solid #ff5500;
+}
+
+.juice-meter-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'MS Sans Serif', sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  color: #000;
+  text-shadow: 1px 1px 0 #fff;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Claim prize button (Windows 98 style) */
+.claim-prize-button {
+  position: fixed;
+  bottom: calc(var(--taskbar-height) + 20px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 16px;
+  border: 2px outset #c0c0c0;
+  background: #c0c0c0;
+  font-family: 'MS Sans Serif', sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  color: #000;
+  cursor: pointer;
+  z-index: 10003;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  pointer-events: auto;
+}
+
+.claim-prize-button:hover {
+  background: #d4d0c8;
+}
+
+.claim-prize-button:active {
+  border: 2px inset #c0c0c0;
+  transform: translateX(-50%) translateY(1px);
+}
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+  .orange {
+    width: 120px;
+    height: 120px;
+  }
+
+  .splash {
+    width: 120px;
+    height: 120px;
+  }
+
+  .plus-one {
+    font-size: 20px;
+  }
+
+  .juice-meter {
+    width: 150px;
+    bottom: calc(var(--taskbar-height) + 10px);
+    right: 10px;
+  }
+
+  .claim-prize-button {
+    bottom: calc(var(--taskbar-height) + 10px);
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+}

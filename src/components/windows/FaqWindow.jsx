@@ -23,15 +23,15 @@ export default function FaqWindow({ onClose }) {
       </p>
 
       <p>
-        <b>Where is the mint?</b>
+        <b>Where is the mint?</b>{' '}
         <a
           href="https://wojakfarmersplot.crate.ink/#/"
           target="_blank"
           rel="noreferrer"
         >
-          Crate Marketplace
+          Crate.ink
         </a>
-        (Chia).
+        {' '}(Chia).
       </p>
     </Window>
   )

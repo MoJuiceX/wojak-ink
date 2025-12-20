@@ -443,6 +443,13 @@ a,
   overflow: hidden;
 }
 
+#pinball-window .window-body {
+  padding: 0 !important;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
 /* Wojak Creator window needs no padding to prevent bottom cutoff */
 #wojak-creator .window-body {
   padding: 0 !important;
@@ -600,6 +607,20 @@ a,
   }
   to {
     opacity: 1;
+  }
+}
+
+/* previous layer fades out */
+.readme-banner-overlay.fade-out {
+  animation: readmeFadeOut 0.2s ease-in-out forwards;
+}
+
+@keyframes readmeFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
   }
 }
 
@@ -1334,9 +1355,36 @@ p {
   image-rendering: crisp-edges;
 }
 
+/* Keep emoji colorful (for TangGang orange emoji) */
+.start-menu-emoji-icon {
+  display: inline-block;
+  line-height: 1;
+  font-size: 16px;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  color: initial;
+  filter: none;
+  text-shadow: none;
+  -webkit-text-stroke: 0;
+  -webkit-text-fill-color: initial;
+  image-rendering: auto;
+}
+
+/* Override any Win98 theme filters on icons */
+.start-menu-item-icon.start-menu-emoji-icon {
+  filter: none;
+  image-rendering: auto;
+}
+
 .start-menu-item:hover {
   background: #000080;
   color: white;
+}
+
+/* Neutralize filters on emoji in all button states */
+.start-menu-item:hover .start-menu-emoji-icon,
+.start-menu-item:focus-visible .start-menu-emoji-icon,
+.start-menu-item.active .start-menu-emoji-icon {
+  filter: none;
 }
 
 .start-menu-item-text {

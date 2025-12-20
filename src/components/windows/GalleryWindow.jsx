@@ -3,23 +3,14 @@ import { useState } from 'react'
 import { Skeleton } from '../ui'
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver'
 
+// All gallery items - restored to original list
 const GALLERY_ITEMS = [
   { title: 'Wojak', front: '0001.png', back: '0579.png', label: 'Wojak #0001' },
-  { title: 'Wojak', front: '0768.png', back: '0797.png', label: 'Wojak #0768' },
-  { title: 'Wojak', front: '0807.png', back: '1725.png', label: 'Wojak #0807' },
-  { title: 'Wojak', front: '1527.png', back: '1553.png', label: 'Wojak #1527' },
   { title: 'Soyjak', front: '2201.png', back: '2750.png', label: 'Wojak #2201' },
-  { title: 'Soyjak', front: '2506.png', back: '2489.png', label: 'Wojak #2506' },
-  { title: 'Soyjak', front: '2529.png', back: '2547.png', label: 'Wojak #2529' },
-  { title: 'Soyjak', front: '2652.png', back: '2667.png', label: 'Wojak #2652' },
-  { title: 'Waifu', front: '2926.png', back: '2987.png', label: 'Wojak #2926' },
   { title: 'Waifu', front: '2974.png', back: '2832.png', label: 'Wojak #2974' },
   { title: 'Baddie', front: '3139.png', back: '3085.png', label: 'Wojak #3139' },
-  { title: 'Baddie', front: '3161.png', back: '3018.png', label: 'Wojak #3161' },
-  { title: 'Papa Tang', front: '3262.png', back: '3441.png', label: 'Wojak #3262' },
   { title: 'Papa Tang', front: '3340.png', back: '3365.png', label: 'Wojak #3340' },
   { title: 'Monkey Zoo', front: '3499.png', back: '3640.png', label: 'Wojak #3499' },
-  { title: 'Monkey Zoo', front: '3627.png', back: '3473.png', label: 'Wojak #3627' },
   { title: 'Alien Wojak', front: '3705.png', back: '3653.png', label: 'Wojak #3705' },
   { title: 'Alien Soyjak', front: '3794.png', back: '3738.png', label: 'Wojak #3794' },
   { title: 'Alien Waifu', front: '3842.png', back: '3845.png', label: 'Wojak #3842' },

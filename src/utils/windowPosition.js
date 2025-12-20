@@ -76,12 +76,13 @@ export function getDefaultWindowSize(windowId) {
     'window-readme-txt': { width: 820, height: 600 },
     'window-mint-info-exe': { width: 1200, height: 500 }, // Updated to match actual width
     'window-gallery': { width: 1200, height: 600 }, // Updated to match actual width
-    'window-faq': { width: 1200, height: 500 }, // Updated to match actual width
+    'window-faq': { width: 600, height: 400 }, // Updated to match actual width
     'window-marketplace': { width: 900, height: 700 },
     'tanggang': { width: 400, height: 300 },
     'wojak-creator': { width: 1000, height: 800 },
     'paint-window': { width: 800, height: 600 },
     'treasure-window': { width: 500, height: 500 },
+    'pinball-window': { width: 1024, height: 768 },
   }
   
   return defaults[windowId] || { width: 600, height: 400 }
