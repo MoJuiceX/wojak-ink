@@ -1,5 +1,5 @@
 import Window from './Window'
-import { useMemo, useEffect } from 'react'
+import { useMemo, useEffect, useLayoutEffect, useRef, useCallback } from 'react'
 import { getPrizesClaimedToday } from '../../lib/prizeCounter'
 import { getCenteredPosition } from '../../utils/windowPosition'
 
@@ -37,6 +37,66 @@ export default function TreasureWindow({ isOpen = false, onClose }) {
       // Ensure it's within desktop layer (z-index handled by Window component)
     }
   }, [isOpen]) // Recalculate when window opens (in case viewport changed)
+
+  // Use MutationObserver to ensure window stays centered - watches for any style changes
+  useEffect(() => {
+    if (!isOpen) return
+    
+    const windowEl = document.getElementById('treasure-window')
+    if (!windowEl) return
+    
+    // Apply centered position immediately
+    const applyCenteredPosition = () => {
+      if (windowEl.style.position !== 'fixed' || 
+          windowEl.style.left !== '50%' || 
+          windowEl.style.top !== '50%' ||
+          windowEl.style.transform !== 'translate(-50%, -50%)') {
+        windowEl.style.position = 'fixed'
+        windowEl.style.left = '50%'
+        windowEl.style.top = '50%'
+        windowEl.style.right = 'auto'
+        windowEl.style.bottom = 'auto'
+        windowEl.style.transform = 'translate(-50%, -50%)'
+      }
+    }
+    
+    // Apply immediately
+    applyCenteredPosition()
+    
+    // Watch for style attribute changes and re-apply centered position
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+          // Small delay to let other code finish, then re-apply
+          requestAnimationFrame(() => {
+            applyCenteredPosition()
+          })
+        }
+      }
+    })
+    
+    observer.observe(windowEl, {
+      attributes: true,
+      attributeFilter: ['style'],
+      attributeOldValue: false
+    })
+    
+    // Also use requestAnimationFrame to continuously ensure it's centered (for first few frames)
+    let frameCount = 0
+    const maxFrames = 10 // Check for first 10 frames
+    const checkFrame = () => {
+      if (frameCount < maxFrames) {
+        applyCenteredPosition()
+        frameCount++
+        requestAnimationFrame(checkFrame)
+      }
+    }
+    requestAnimationFrame(checkFrame)
+    
+    return () => {
+      observer.disconnect()
+    }
+  }, [isOpen])
 
   // Ensure body/html overflow stays hidden when window opens (prevent scrollbars)
   useEffect(() => {
@@ -79,6 +139,7 @@ export default function TreasureWindow({ isOpen = false, onClose }) {
       title="🎁 TREASURE"
       icon={null}
       style={centeredStyle}
+      noStack={true}
       onClose={handleClose}
     >
       <div className="window-body" style={{ 
@@ -88,18 +149,18 @@ export default function TreasureWindow({ isOpen = false, onClose }) {
         justifyContent: 'center',
         padding: '20px',
         textAlign: 'center',
-        minHeight: '400px'
+        minHeight: '400px',
+        position: 'relative' // For absolute positioning of emoji
       }}>
-        {/* Headline - always "TRY AGAIN" - ON TOP OF PICTURE */}
+        {/* 🎁 emoji in top left */}
         <div style={{
-          fontSize: '24px',
-          fontWeight: 'bold',
-          color: '#000',
-          marginBottom: '16px',
+          fontSize: '48px',
+          position: 'absolute',
+          top: '20px',
+          left: '20px',
           fontFamily: 'MS Sans Serif, sans-serif',
-          textTransform: 'uppercase',
         }}>
-          TRY AGAIN
+          🎁
         </div>
         
         <img 

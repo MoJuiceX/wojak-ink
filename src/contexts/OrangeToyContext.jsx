@@ -4,9 +4,21 @@ const OrangeToyContext = createContext()
 
 // Constants
 const BASE_REQUIRED_SCORE = 10
-const GROWTH_FACTOR = 1.6
+const GROWTH_FACTOR = 1.15 // Reduced from 1.6 to 1.3 to 1.15 for much less steep progression
 const STORAGE_KEY_CLAIMS_COUNT = 'orangeGame_claimsCount'
 const STORAGE_KEY_SCORE = 'orangeGame_score' // Optional
+
+// Glass frame paths - exact paths as specified (g1-g7 only, clamp to g7 when full)
+const GLASS_MAX = 7
+const GLASS_FRAMES = Array.from({ length: GLASS_MAX }, (_, i) => `/assets/images/banners/g${i + 1}.png`);
+
+// Helper function to get glass frame based on score progress
+function getGlassFrame(score, requiredScore) {
+  const denom = Math.max(1, requiredScore || 1);
+  const progress = Math.max(0, Math.min(1, score / denom));
+  const idx = 1 + Math.floor(progress * (GLASS_MAX - 1)); // 1..7
+  return GLASS_FRAMES[Math.min(GLASS_MAX - 1, Math.max(0, idx - 1))];
+}
 
 /**
  * OrangeToyProvider component that manages orange game state and provides game functions.
@@ -44,11 +56,9 @@ export function OrangeToyProvider({ children }) {
   const [tryAgainOpen, setTryAgainOpen] = useState(false)
   const orangeExistsRef = useRef(false)
 
-  // Derived: requiredScore from claimsCount using useMemo
-  const requiredScore = useMemo(() => 
-    Math.ceil(BASE_REQUIRED_SCORE * Math.pow(GROWTH_FACTOR, claimsCount)), 
-    [claimsCount]
-  )
+  // Derived: requiredScore is now a fixed constant (no growth)
+  const REQUIRED_SCORE = 10 // Fixed constant
+  const requiredScore = REQUIRED_SCORE // Simple constant, no useMemo needed
 
   // Derived: totalClaimedPrizes is same as claimsCount
   const totalClaimedPrizes = claimsCount
@@ -58,6 +68,9 @@ export function OrangeToyProvider({ children }) {
 
   // Derived: fillPct for juice meter
   const fillPct = Math.min(1, score / requiredScore)
+
+  // Derived: glassSrc for glass fill display
+  const glassSrc = useMemo(() => getGlassFrame(score, requiredScore), [score, requiredScore])
 
   // Save claimsCount to localStorage whenever it changes
   useEffect(() => {
@@ -117,6 +130,7 @@ export function OrangeToyProvider({ children }) {
     requiredScore,
     canClaim,
     fillPct,
+    glassSrc,
     tryAgainOpen,
     incrementScore,
     addPoints,

@@ -10,11 +10,17 @@ export default function MintInfoWindow({ onNotifyClick, onClose }) {
     const el = contentRef.current
     if (!el) return
 
-      const compute = () => {
-        const contentW = el.scrollWidth
-        const padding = 40 // window inner padding + borders buffer
-        const maxW = Math.min(1100, window.innerWidth - 80) // clamp for desktop
-        const minW = 420
+    const compute = () => {
+      // Don't recalculate during drag to prevent layout shifts
+      const windowEl = el.closest('.window')
+      if (windowEl && windowEl.classList.contains('dragging')) {
+        return
+      }
+
+      const contentW = el.scrollWidth
+      const padding = 40 // window inner padding + borders buffer
+      const maxW = Math.min(1100, window.innerWidth - 80) // clamp for desktop
+      const minW = 420
 
       const target = Math.max(minW, Math.min(maxW, contentW + padding))
       setWinWidth(target)
@@ -23,8 +29,18 @@ export default function MintInfoWindow({ onNotifyClick, onClose }) {
     compute()
 
     // Recompute on resize (and after fonts/layout changes via resize)
-    window.addEventListener('resize', compute)
-    return () => window.removeEventListener('resize', compute)
+    // Use debounce to prevent excessive recalculations
+    let resizeTimeout
+    const handleResize = () => {
+      clearTimeout(resizeTimeout)
+      resizeTimeout = setTimeout(compute, 100)
+    }
+    
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      clearTimeout(resizeTimeout)
+    }
   }, [])
 
   return (

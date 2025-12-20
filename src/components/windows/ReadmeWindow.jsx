@@ -119,10 +119,6 @@ export default function ReadmeWindow({ onClose }) {
         </a>
       </p>
 
-      <p style={{ fontSize: '2em', fontWeight: 'bold', color: 'red' }}>
-        Minting paused due to platform issues. Resuming shortly.
-      </p>
-
       <p>
         <b>X / Twitter</b>
       </p>

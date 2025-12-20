@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react'
+import { getCenteredPosition, getDefaultWindowSize, getCascadePosition } from '../utils/windowPosition'
 
 const WindowContext = createContext()
 
@@ -15,6 +16,11 @@ export function WindowProvider({ children }) {
   const [activeWindowId, setActiveWindowId] = useState(null)
   const [hasUserMoved, setHasUserMoved] = useState(new Map()) // Track if user has moved each window
   const nextZIndexRef = useRef(1000)
+  
+  // Cascade layout constants
+  const CASCADE_STEP = 30
+  const README_ID = 'window-readme-txt'
+  const cascadeOrderRef = useRef([README_ID]) // README always index 0
 
   // Clamp a window's position so it stays within the visible desktop viewport
   // on desktop/tablet. This prevents windows from ending up completely off-screen.
@@ -68,6 +74,66 @@ export function WindowProvider({ children }) {
       y: Math.min(Math.max(baseY, padding), maxY),
     }
   }, [])
+
+  // Helper to get stable cascade index for a window
+  const getCascadeIndex = useCallback((windowId) => {
+    const id = String(windowId || '')
+    if (id === README_ID) return 0
+
+    const list = cascadeOrderRef.current
+    const existing = list.indexOf(id)
+    if (existing >= 0) return existing
+
+    // Ensure README is at index 0
+    if (list.length === 0 || list[0] !== README_ID) {
+      list.unshift(README_ID)
+    }
+    
+    list.push(id)
+    cascadeOrderRef.current = list
+    // Return index in array (README is 0, first other window is 1, etc.)
+    return list.indexOf(id)
+  }, [])
+
+  // Helper to compute README anchor position (base for cascade)
+  // Accepts windows map as parameter to work correctly inside setWindows callbacks
+  const getReadmeAnchor = useCallback((windowsMap = null) => {
+    // Use provided map or fall back to current windows state
+    const windowsToUse = windowsMap || windows
+    
+    // If README is already registered and has a position, use its actual position
+    const readme = windowsToUse.get(README_ID)
+    if (readme?.position && typeof readme.position.x === 'number' && typeof readme.position.y === 'number') {
+      // Use actual README position as base
+      return { x: readme.position.x, y: readme.position.y }
+    }
+    
+    // Otherwise, calculate centered position for README
+    const size = readme?.size || getDefaultWindowSize(README_ID)
+    
+    // Parse size if needed
+    let width = size.width
+    let height = size.height
+    if (typeof width === 'string' && width.includes('px')) {
+      width = parseInt(width, 10) || 820
+    } else if (typeof width !== 'number') {
+      width = 820
+    }
+    if (typeof height === 'string' && height.includes('px')) {
+      height = parseInt(height, 10) || 600
+    } else if (typeof height !== 'number') {
+      height = 600
+    }
+    
+    const isMobile = window.innerWidth <= 640
+    return getCenteredPosition({
+      width,
+      height,
+      padding: 24,
+      isMobile,
+      windowId: README_ID,
+    })
+  }, [windows])
 
   /**
    * Register a new window in the window manager.
@@ -123,8 +189,10 @@ export function WindowProvider({ children }) {
       
       // For new windows, calculate centered position synchronously if possible
       if (isNewWindow && centerOnOpen && !windowData?.position) {
+        // #region agent log
+        if (windowId === 'try-again-window') fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:125',message:'registerWindow - calculating center position',data:{windowId,isNewWindow,centerOnOpen,hasWindowDataPosition:!!windowData?.position},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
         try {
-          const { getCenteredPosition, getDefaultWindowSize } = require('../utils/windowPosition')
           const defaultSize = getDefaultWindowSize(windowId)
           
           // Detect mobile viewport (<= 640px) - only center on desktop/tablet
@@ -187,12 +255,65 @@ export function WindowProvider({ children }) {
               }
             }
             
-            position = getCenteredPosition({ 
-              width: windowWidth,
-              height: windowHeight,
-              padding: 24, // Explicit padding for desktop OS feel
-              isMobile: false
-            })
+            const isReadme = windowId === README_ID || windowId === 'readme' || windowId?.includes('readme')
+            
+            if (isReadme) {
+              // README: always centered
+              position = getCenteredPosition({ 
+                width: windowWidth,
+                height: windowHeight,
+                padding: 24, // Explicit padding for desktop OS feel
+                isMobile: false,
+                windowId
+              })
+              // Ensure README is at index 0 in cascade order
+              if (cascadeOrderRef.current[0] !== README_ID) {
+                cascadeOrderRef.current = [README_ID, ...cascadeOrderRef.current.filter(id => id !== README_ID)]
+              }
+            } else {
+              // Other windows: cascade from README
+              // Pass prev (current windows state) to getReadmeAnchor to get accurate README position
+              const base = getReadmeAnchor(prev)
+              const idx = getCascadeIndex(windowId) // First non-readme becomes index 1
+              
+              // Debug: ensure we have valid base position
+              if (!base || typeof base.x !== 'number' || typeof base.y !== 'number') {
+                console.warn('[WindowContext] Invalid README anchor position:', base)
+                // Fallback to centered position
+                position = getCenteredPosition({
+                  width: windowWidth,
+                  height: windowHeight,
+                  padding: 24,
+                  isMobile: false,
+                  windowId
+                })
+              } else {
+                position = getCascadePosition({
+                  width: windowWidth,
+                  height: windowHeight,
+                  baseX: base.x,
+                  baseY: base.y,
+                  index: idx,
+                  padding: 24,
+                  isMobile: false
+                })
+                
+                // Special adjustment for MINT_INFO window: 1px left, 1px down
+                if (windowId === 'window-mint-info-exe') {
+                  position.x -= 1 // 1px to the left
+                  position.y += 1 // 1px down
+                }
+              }
+            }
+            
+            // #region agent log
+            if (windowId === 'try-again-window') {
+              const viewportHeight = window.innerHeight
+              const taskbarHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--taskbar-height')) || 48
+              const availableHeight = viewportHeight - taskbarHeight
+              fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:195',message:'WindowContext calculated centered position',data:{windowId,position,windowWidth,windowHeight,viewportHeight,taskbarHeight,availableHeight,calculatedY:position.y,expectedCenterY:(availableHeight - windowHeight) / 2},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'F'})}).catch(()=>{});
+            }
+            // #endregion
           } else {
             // Mobile: use default position
             position = { x: 20, y: 20 }
@@ -203,8 +324,15 @@ export function WindowProvider({ children }) {
         } catch (e) {
           // Fallback to default position if centering fails
           position = { x: 20, y: 20 }
+          // #region agent log
+          if (windowId === 'try-again-window') fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:205',message:'WindowContext fallback to default position',data:{windowId,position,error:e.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+          // #endregion
         }
       }
+      
+      // #region agent log
+      if (windowId === 'try-again-window') fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:212',message:'registerWindow final position',data:{windowId,position,hasWindowDataPosition:!!windowData?.position,existingWindowPosition:existingWindow?.position},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
       
       // Preserve existing window state (isMaximized, zIndex) when re-registering
       const windowEntry = {
@@ -238,7 +366,7 @@ export function WindowProvider({ children }) {
       return next
     })
     setActiveWindowId(windowId)
-  }, [clampToViewport])
+  }, [clampToViewport, getReadmeAnchor, getCascadeIndex])
 
   /**
    * Unregister a window from the window manager.
@@ -314,7 +442,8 @@ export function WindowProvider({ children }) {
 
   /**
    * Bring a window to the front (highest z-index).
-   * Also centers the window if it hasn't been moved by the user.
+   * Does NOT reposition windows (only updates z-index).
+   * Exception: assigns cascade position if window has no position at all.
    * This is called when clicking a window in the taskbar or Start menu.
    * 
    * @param {string} windowId - Unique identifier for the window to bring to front
@@ -340,68 +469,93 @@ export function WindowProvider({ children }) {
       const next = new Map(prev)
       const winEntry = next.get(windowId)
       if (winEntry) {
-        const wasMoved = hasUserMoved.get(windowId)
-        
-        // Center window if it hasn't been moved by user
-        // This ensures windows opened from Start menu/taskbar appear centered
-        if (!wasMoved && !winEntry.isMaximized) {
+        // Only update z-index, do NOT reposition
+        // Exception: if window has no position at all, assign cascade position once
+        if (!winEntry.position || (winEntry.position.x === undefined && winEntry.position.y === undefined)) {
+          // Window has no position - assign cascade position once
           try {
-            const { getCenteredPosition, getDefaultWindowSize } = require('../utils/windowPosition')
             const defaultSize = getDefaultWindowSize(windowId)
-            
-            // Batch all layout reads first (prevent layout thrashing)
-            const windowElement = document.getElementById(windowId)
             let windowWidth = defaultSize.width
             let windowHeight = defaultSize.height
-
+            
+            // Try to get actual size from DOM or stored size
+            const windowElement = document.getElementById(windowId)
             if (windowElement) {
-              // Read layout properties (batch all reads)
               const rect = windowElement.getBoundingClientRect()
               if (rect.width > 0) windowWidth = rect.width
               if (rect.height > 0) windowHeight = rect.height
-            } else {
-              // Fallback to stored size or defaults
-              if (winEntry.size) {
-                if (typeof winEntry.size.width === 'number') {
-                  windowWidth = winEntry.size.width
-                } else if (typeof winEntry.size.width === 'string' && winEntry.size.width.includes('px')) {
-                  windowWidth = parseInt(winEntry.size.width, 10) || defaultSize.width
-                }
-                
-                if (typeof winEntry.size.height === 'number') {
-                  windowHeight = winEntry.size.height
-                } else if (typeof winEntry.size.height === 'string' && winEntry.size.height.includes('px')) {
-                  windowHeight = parseInt(winEntry.size.height, 10) || defaultSize.height
-                }
+            } else if (winEntry.size) {
+              // Parse from stored size
+              if (typeof winEntry.size.width === 'number') {
+                windowWidth = winEntry.size.width
+              } else if (typeof winEntry.size.width === 'string' && winEntry.size.width.includes('px')) {
+                windowWidth = parseInt(winEntry.size.width, 10) || defaultSize.width
+              }
+              if (typeof winEntry.size.height === 'number') {
+                windowHeight = winEntry.size.height
+              } else if (typeof winEntry.size.height === 'string' && winEntry.size.height.includes('px')) {
+                windowHeight = parseInt(winEntry.size.height, 10) || defaultSize.height
               }
             }
             
-            const centeredPos = getCenteredPosition({
+            const isReadme = windowId === README_ID || windowId === 'readme' || windowId?.includes('readme')
+            let newPos
+            
+            if (isReadme) {
+              newPos = getCenteredPosition({
+                width: windowWidth,
+                height: windowHeight,
+                padding: 24,
+                windowId
+              })
+        } else {
+          // Get README anchor from current windows state
+          const base = getReadmeAnchor(prev)
+          const idx = getCascadeIndex(windowId)
+          
+          if (!base || typeof base.x !== 'number' || typeof base.y !== 'number') {
+            // Fallback to centered if README anchor is invalid
+            newPos = getCenteredPosition({
               width: windowWidth,
               height: windowHeight,
-              padding: 24 // Explicit padding for desktop OS feel
+              padding: 24,
+              windowId
+            })
+          } else {
+            newPos = getCascadePosition({
+              width: windowWidth,
+              height: windowHeight,
+              baseX: base.x,
+              baseY: base.y,
+              index: idx,
+              padding: 24
             })
             
-            const clampedPos = clampToViewport(centeredPos, winEntry.size)
+              // Special adjustment for MINT_INFO window: 1px left, 1px down
+              if (windowId === 'window-mint-info-exe') {
+                newPos.x -= 1 // 1px to the left
+                newPos.y += 1 // 1px down
+              }
+          }
+        }
+            
+            const clampedPos = clampToViewport(newPos, winEntry.size)
             next.set(windowId, {
               ...winEntry,
               position: clampedPos,
               zIndex: nextZIndexRef.current++,
             })
           } catch (e) {
-            // If centering fails, just update z-index
+            // If positioning fails, just update z-index
             next.set(windowId, {
               ...winEntry,
               zIndex: nextZIndexRef.current++,
             })
           }
         } else {
-          // Just update z-index if window was moved or is maximized,
-          // but still clamp its stored position into the viewport.
-          const clampedPos = clampToViewport(winEntry.position, winEntry.size)
+          // Window has position - only update z-index
           next.set(windowId, {
             ...winEntry,
-            position: clampedPos,
             zIndex: nextZIndexRef.current++,
           })
         }
@@ -409,7 +563,7 @@ export function WindowProvider({ children }) {
       return next
     })
     setActiveWindowId(windowId)
-  }, [hasUserMoved, setMinimizedWindows, clampToViewport])
+  }, [hasUserMoved, setMinimizedWindows, clampToViewport, getReadmeAnchor, getCascadeIndex])
 
   /**
    * Restore a minimized window (show it and remove from minimized set).
@@ -459,7 +613,7 @@ export function WindowProvider({ children }) {
       const isDesktop = typeof window !== 'undefined' && window.innerWidth > 640
       if (!wasMoved && !winEntry.isMaximized && isDesktop) {
         try {
-          const { getCenteredPosition, getDefaultWindowSize } = require('../utils/windowPosition')
+          // Functions already imported at top of file
           const defaultSize = getDefaultWindowSize(windowId)
           
           // Try to get actual rendered size from DOM element
@@ -491,14 +645,53 @@ export function WindowProvider({ children }) {
           // Detect mobile viewport (<= 640px)
           const isMobileViewport = typeof window !== 'undefined' && window.innerWidth <= 640
           
-          const centeredPos = getCenteredPosition({
-            width: windowWidth,
-            height: windowHeight,
-            padding: 24, // Explicit padding for desktop OS feel
-            isMobile: isMobileViewport
-          })
+          const isReadme = windowId === README_ID || windowId === 'readme' || windowId?.includes('readme')
           
-          const clampedPos = clampToViewport(centeredPos, winEntry.size)
+          let newPos
+          if (isReadme) {
+            // README: center
+            newPos = getCenteredPosition({
+              width: windowWidth,
+              height: windowHeight,
+              padding: 24, // Explicit padding for desktop OS feel
+              isMobile: isMobileViewport,
+              windowId
+            })
+          } else {
+            // Other windows: cascade (only if not moved by user)
+            // Pass prev (current windows state) to getReadmeAnchor
+            const base = getReadmeAnchor(prev)
+            const idx = getCascadeIndex(windowId)
+            
+            if (!base || typeof base.x !== 'number' || typeof base.y !== 'number') {
+              // Fallback to centered if README anchor is invalid
+              newPos = getCenteredPosition({
+                width: windowWidth,
+                height: windowHeight,
+                padding: 24,
+                isMobile: isMobileViewport,
+                windowId
+              })
+            } else {
+              newPos = getCascadePosition({
+                width: windowWidth,
+                height: windowHeight,
+                baseX: base.x,
+                baseY: base.y,
+                index: idx,
+                padding: 24,
+                isMobile: isMobileViewport
+              })
+              
+              // Special adjustment for MINT_INFO window: 1px left, 1px down
+              if (windowId === 'window-mint-info-exe') {
+                newPos.x -= 1 // 1px to the left
+                newPos.y += 1 // 1px down
+              }
+            }
+          }
+          
+          const clampedPos = clampToViewport(newPos, winEntry.size)
           const next = new Map(prev)
           next.set(windowId, { ...winEntry, position: clampedPos })
           return next
@@ -517,7 +710,7 @@ export function WindowProvider({ children }) {
     })
     setActiveWindowId(windowId)
     bringToFront(windowId)
-  }, [bringToFront, hasUserMoved, clampToViewport])
+  }, [bringToFront, hasUserMoved, clampToViewport, getReadmeAnchor, getCascadeIndex])
 
   /**
    * Maximize a window (fill the screen).
@@ -572,10 +765,20 @@ export function WindowProvider({ children }) {
 
   // Update window position
   const updateWindowPosition = useCallback((windowId, position) => {
+    // #region agent log
+    if (windowId === 'window-readme-txt' || windowId?.includes('readme')) {
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:596',message:'updateWindowPosition called',data:{windowId,position},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
+    }
+    // #endregion
     setWindows(prev => {
       const next = new Map(prev)
       const window = next.get(windowId)
       if (window && !window.isMaximized) {
+        // #region agent log
+        if (windowId === 'window-readme-txt' || windowId?.includes('readme')) {
+          fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:603',message:'updateWindowPosition - updating window state',data:{windowId,oldPosition:window.position,newPosition:position},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
+        }
+        // #endregion
         next.set(windowId, {
           ...window,
           position,

@@ -253,20 +253,6 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
         </button>
         <button 
           className="start-menu-item"
-          onClick={() => handleMenuItemClick('scroll-to-faq')}
-          role="menuitem"
-          tabIndex={0}
-        >
-          <img 
-            src={getStartMenuIcon('scroll-to-faq')} 
-            alt="" 
-            className="start-menu-item-icon"
-            onError={(e) => { e.target.style.display = 'none' }}
-          />
-          <span className="start-menu-item-text">FAQ</span>
-        </button>
-        <button 
-          className="start-menu-item"
           onClick={() => handleMenuItemClick('scroll-to-marketplace')}
           role="menuitem"
           tabIndex={0}
@@ -311,6 +297,20 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
             onError={(e) => { e.target.style.display = 'none' }}
           />
           <span className="start-menu-item-text">Wojak Creator</span>
+        </button>
+        <button 
+          className="start-menu-item"
+          onClick={() => handleMenuItemClick('scroll-to-faq')}
+          role="menuitem"
+          tabIndex={0}
+        >
+          <img 
+            src={getStartMenuIcon('scroll-to-faq')} 
+            alt="" 
+            className="start-menu-item-icon"
+            onError={(e) => { e.target.style.display = 'none' }}
+          />
+          <span className="start-menu-item-text">FAQ</span>
         </button>
         <hr className="start-menu-separator" role="separator" />
         <div 

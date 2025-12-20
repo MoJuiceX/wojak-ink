@@ -12,12 +12,9 @@
   position: absolute;
   width: 150px;
   height: 150px;
-  background: radial-gradient(circle at 30% 30%, #ff8c00, #ff6600);
-  border-radius: 50%;
-  border: 3px solid #ff5500;
-  box-shadow: 
-    inset -10px -10px 20px rgba(0, 0, 0, 0.3),
-    0 4px 8px rgba(0, 0, 0, 0.4);
+  background: transparent;
+  border: none;
+  box-shadow: none;
   pointer-events: none;
   will-change: transform;
   transform: translateZ(0);
@@ -59,6 +56,24 @@
     -1px -1px 0 #000,
     1px -1px 0 #000,
     -1px 1px 0 #000;
+  pointer-events: none;
+  z-index: 10002;
+  animation: plusOneFloat 1s ease-out forwards;
+  transform: translate(-50%, -50%);
+}
+
+.plus-one-animation {
+  position: fixed;
+  font-family: 'MS Sans Serif', sans-serif;
+  font-size: 40px;
+  font-weight: bold;
+  color: #ffd700;
+  text-shadow: 
+    2px 2px 0 #000,
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    0 0 10px rgba(255, 215, 0, 0.8);
   pointer-events: none;
   z-index: 10002;
   animation: plusOneFloat 1s ease-out forwards;
@@ -155,6 +170,10 @@
 
   .plus-one {
     font-size: 20px;
+  }
+
+  .plus-one-animation {
+    font-size: 32px;
   }
 
   .juice-meter {

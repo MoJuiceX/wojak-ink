@@ -56,6 +56,7 @@ export function useDraggable(noStack = false, options = {}) {
       const { dx, dy } = pendingDeltaRef.current
       pendingDeltaRef.current.has = false
 
+      // Use translate3d for GPU acceleration and smooth dragging
       win2.style.transform = `translate3d(${dx}px, ${dy}px, 0)`
       win2.classList.add('dragging')
 
@@ -113,8 +114,12 @@ export function useDraggable(noStack = false, options = {}) {
       win.__originalWidth = rect.width
       win.__originalHeight = rect.height
 
-      // Set initial drag state (but we won’t “move” until threshold exceeded)
+      // Set initial drag state (but we won't "move" until threshold exceeded)
       isDraggingRef.current = false
+
+      // Enable GPU acceleration for smooth dragging
+      win.style.willChange = 'transform'
+      win.style.transform = 'translateZ(0)'
 
       // Disable native text selection / touch scrolling during drag
       document.documentElement.style.touchAction = 'none'
@@ -257,17 +262,36 @@ export function useDraggable(noStack = false, options = {}) {
         const win3 = windowRef.current
         if (!win3) return
 
+        // #region agent log
+        const windowId = win3.id
+        if (windowId === 'window-readme-txt' || windowId?.includes('readme')) {
+          fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useDraggable.js:256',message:'finishDrag - before setting position',data:{windowId,dx,dy,finalViewportX,finalViewportY,constrainedViewportX,constrainedViewportY,finalLeft,finalTop,currentStyleLeft:win3.style.left,currentStyleTop:win3.style.top,hasTransform:!!win3.style.transform},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
+        }
+        // #endregion
+
         setPosition({ x: finalLeft, y: finalTop })
         win3.style.left = `${finalLeft}px`
         win3.style.top = `${finalTop}px`
         win3.style.transform = ''
+        win3.style.willChange = ''
         win3.classList.remove('dragging')
+
+        // #region agent log
+        if (windowId === 'window-readme-txt' || windowId?.includes('readme')) {
+          fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useDraggable.js:270',message:'finishDrag - after setting position, before onDragEnd',data:{windowId,newStyleLeft:win3.style.left,newStyleTop:win3.style.top},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
+        }
+        // #endregion
 
         if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
           win3.dataset.userDragged = 'true'
         }
 
         if (typeof onDragEnd === 'function') {
+          // #region agent log
+          if (windowId === 'window-readme-txt' || windowId?.includes('readme')) {
+            fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useDraggable.js:277',message:'Calling onDragEnd',data:{windowId,position:{x:finalLeft,y:finalTop}},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
+          }
+          // #endregion
           onDragEnd({ x: finalLeft, y: finalTop })
         }
       })

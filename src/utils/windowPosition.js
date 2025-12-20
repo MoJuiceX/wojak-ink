@@ -6,8 +6,12 @@
  * @param {number} options.height - Window height in pixels
  * @param {number} [options.padding=24] - Minimum padding from viewport edges
  * @param {boolean} [options.isMobile=false] - Whether this is a mobile viewport
+ * @param {string} [options.windowId] - Window identifier for special positioning (e.g., README offset)
  * @returns {{x: number, y: number}} Centered position with clamping
  */
+// README-specific X offset to center content column (not window frame) on screen
+const README_CENTER_OFFSET_X = -170
+
 // Cache for getComputedStyle results to prevent repeated layout reads
 const styleCache = {
   taskbarHeight: null,
@@ -42,7 +46,12 @@ function getCachedStyleProperty(property, defaultValue = 0) {
   return styleCache[property] ?? defaultValue
 }
 
-export function getCenteredPosition({ width, height, padding = 24, isMobile = false }) {
+export function getCenteredPosition({ width, height, padding = 24, isMobile = false, windowId }) {
+  // SSR / non-browser safety
+  if (typeof window === 'undefined') {
+    return { x: 20, y: 20 }
+  }
+  
   // Batch all layout reads first (prevent layout thrashing)
   const viewportWidth = window.innerWidth
   const viewportHeight = window.innerHeight
@@ -52,18 +61,76 @@ export function getCenteredPosition({ width, height, padding = 24, isMobile = fa
   const safeAreaBottom = isMobile ? getCachedStyleProperty('safeAreaBottom', 0) : 0
   const availableHeight = viewportHeight - taskbarHeight - safeAreaBottom
   
+  // #region agent log
+  if (windowId === 'window-readme-txt' || windowId?.includes('readme')) {
+    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'windowPosition.js:49',message:'getCenteredPosition entry',data:{windowId,width,height,padding,isMobile,viewportWidth,viewportHeight,taskbarHeight,safeAreaBottom,availableHeight},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+  }
+  // #endregion
+  
   // Calculate center position
+  // Center X in viewport
   let x = Math.floor((viewportWidth - width) / 2)
-  let y = Math.floor((availableHeight - height) / 2)
+  // Center Y in full viewport (not availableHeight) for better visual centering
+  let y = Math.floor((viewportHeight - height) / 2)
+  
+  // #region agent log
+  if (windowId === 'window-readme-txt' || windowId?.includes('readme')) {
+    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'windowPosition.js:66',message:'After initial Y calculation',data:{windowId,calculatedY:y,availableHeight,height,viewportHeight,taskbarHeight},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'H1'})}).catch(()=>{});
+  }
+  // #endregion
+  
+  // Apply README-specific offset to X position only (Y remains unchanged)
+  const isReadme = windowId === 'window-readme-txt' || windowId === 'readme' || windowId?.includes('readme')
+  if (isReadme) {
+    x += README_CENTER_OFFSET_X
+  }
   
   // Clamp with padding (minimum 24px, or 8px if window is larger than viewport)
-  const minPadding = viewportWidth < width || availableHeight < height ? 8 : padding
+  const minPadding = viewportWidth < width || viewportHeight < height ? 8 : padding
   
+  const yBeforeClamp = y
   x = Math.max(minPadding, Math.min(x, viewportWidth - width - minPadding))
-  // Ensure window doesn't overlap taskbar - clamp y to stay above taskbar
-  y = Math.max(minPadding, Math.min(y, availableHeight - height - minPadding))
+  // Clamp Y: ensure minimum padding from top, and ensure window doesn't overlap taskbar at bottom
+  // Use full viewport for centering, but clamp bottom to stay above taskbar
+  const maxY = availableHeight - height - minPadding
+  y = Math.max(minPadding, Math.min(y, maxY))
+  
+  // #region agent log
+  if (windowId === 'window-readme-txt' || windowId?.includes('readme')) {
+    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'windowPosition.js:79',message:'After clamping',data:{windowId,yBeforeClamp,yAfterClamp:y,minPadding,availableHeight,height,calculatedCenterY:Math.floor((viewportHeight - height) / 2),maxY},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'H1'})}).catch(()=>{});
+  }
+  // #endregion
   
   return { x, y }
+}
+
+/**
+ * Calculate cascade position relative to a base position
+ * Applies 30px offset per index (Windows-style cascade)
+ * @param {Object} options - Positioning options
+ * @param {number} options.width - Window width in pixels
+ * @param {number} options.height - Window height in pixels
+ * @param {number} options.baseX - Base X position (typically README centered position)
+ * @param {number} options.baseY - Base Y position (typically README centered position)
+ * @param {number} options.index - Cascade index (0 = base, 1 = +30px, 2 = +60px, etc.)
+ * @param {number} [options.padding=24] - Minimum padding from viewport edges
+ * @param {boolean} [options.isMobile=false] - Whether this is a mobile viewport
+ * @returns {{x: number, y: number}} Cascade position with clamping
+ */
+const CASCADE_STEP = 30
+
+export function getCascadePosition({ width, height, baseX, baseY, index, padding = 24, isMobile = false }) {
+  // SSR safety
+  if (typeof window === 'undefined') {
+    return { x: 20, y: 20 }
+  }
+  
+  // Apply cascade offset
+  const x = baseX + (index * CASCADE_STEP)
+  const y = baseY + (index * CASCADE_STEP)
+  
+  // Clamp to viewport using existing clampWindowPosition
+  return clampWindowPosition({ x, y, width, height, isMobile })
 }
 
 /**
@@ -83,6 +150,7 @@ export function getDefaultWindowSize(windowId) {
     'paint-window': { width: 800, height: 600 },
     'treasure-window': { width: 500, height: 500 },
     'pinball-window': { width: 1024, height: 768 },
+    'try-again-window': { width: 400, height: 500 },
   }
   
   return defaults[windowId] || { width: 600, height: 400 }

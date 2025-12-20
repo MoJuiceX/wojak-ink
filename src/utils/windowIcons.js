@@ -53,6 +53,11 @@ export function getWindowIcon(windowId, title) {
     return null
   }
   
+  // Special case: Try Again uses emoji only, no icon
+  if (windowId === 'try-again-window' || title === '🎁') {
+    return null
+  }
+  
   // Try window ID first
   let iconName = windowIconMap[windowId]
   

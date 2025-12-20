@@ -1,6 +1,7 @@
 import { useDraggable } from '../../hooks/useDraggable'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useLayoutEffect } from 'react'
 import { useWindow } from '../../contexts/WindowContext'
+import { getCenteredPosition } from '../../utils/windowPosition'
 import { getWindowIcon } from '../../utils/windowIcons'
 import { getWindowSizeConstraints, clampWindowPosition } from '../../utils/windowPosition'
 import { useKeyboardHandler, KEYBOARD_PRIORITY } from '../../contexts/KeyboardPriorityContext'
@@ -40,7 +41,8 @@ export default function Window({
   onClose,
   className = '',
   icon,
-  allowScroll = false, // If true, adds scroll-allowed class to window-body
+  allowScroll = false, // If true, adds scroll-allowed class to window-body for internal scrolling
+  contentAutoHeight = false, // If true, window-body will size to content instead of stretching
 }) {
   // Generate stable window ID - sanitize title to only allow alphanumeric, hyphens, and underscores
   const sanitizeWindowId = (title) => {
@@ -97,17 +99,27 @@ export default function Window({
     },
     onDragEnd: (pos) => {
       try {
+        // Mark that we just finished dragging to prevent position sync race
+        justFinishedDragRef.current = true
         updateWindowPosition(windowId, pos)
+        // Clear the flag after state update completes (next frame)
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            justFinishedDragRef.current = false
+          }, 50) // Small delay to ensure state update propagates
+        })
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
           console.error('[Window] Error updating position on drag end:', error, 'windowId:', windowId)
         }
+        justFinishedDragRef.current = false
       }
     },
   })
   const [isVisible, setIsVisible] = useState(true)
   const savedPositionRef = useRef({ x: 0, y: 0 })
   const savedSizeRef = useRef({ width: '', height: '' })
+  const justFinishedDragRef = useRef(false) // Track if we just finished dragging to prevent position sync race
   const windowData = getWindow(windowId)
   const isMinimized = windowData ? isWindowMinimized(windowId) : false
   const isMaximized = windowData?.isMaximized || false
@@ -186,6 +198,10 @@ export default function Window({
       // TangGang window should be centered on desktop/tablet
       const shouldCenter = windowId === 'tanggang' ? (window.innerWidth > 640) : true
       
+      // #region agent log
+      if (windowId === 'try-again-window') fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:189',message:'Window component calling registerWindow',data:{windowId,shouldCenter,size:{width,height},stylePosition:style?.position,styleLeft:style?.left,styleTop:style?.top},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
+      
       registerWindow(windowId, {
         title,
         // Don't pass position - let registerWindow center it if centerOnOpen is true
@@ -193,6 +209,18 @@ export default function Window({
         centerOnOpen: shouldCenter,
       })
       hasRegisteredRef.current = true
+      
+      // #region agent log
+      if (windowId === 'try-again-window') {
+        setTimeout(() => {
+          const el = windowRef.current
+          if (el) {
+            const rect = el.getBoundingClientRect()
+            fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:197',message:'After registerWindow - DOM element position',data:{windowId,domLeft:el.style.left,domTop:el.style.top,rectLeft:rect.left,rectTop:rect.top},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+          }
+        }, 50)
+      }
+      // #endregion
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
         console.error('[Window] Failed to register window:', error, 'windowId:', windowId)
@@ -225,6 +253,7 @@ export default function Window({
 
   // Sync position from windowData to DOM element
   // IMPORTANT: Skip this effect when window is being dragged or on mobile
+  // For try-again-window, skip initial sync to let the ResizeObserver handle it after image loads
   useEffect(() => {
     const win = windowRef.current
     if (!win) return
@@ -236,10 +265,66 @@ export default function Window({
     if (!pos) return
 
     // Don't fight dragging
-    if (win.classList.contains('dragging') || win.style.transform) return
+    if (win.classList.contains('dragging') || win.style.transform) {
+      // #region agent log
+      if (windowId === 'window-readme-txt' || windowId?.includes('readme')) {
+        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:258',message:'Position sync skipped - dragging',data:{windowId,hasDraggingClass:win.classList.contains('dragging'),hasTransform:!!win.style.transform,windowDataPos:pos,currentStyleLeft:win.style.left,currentStyleTop:win.style.top},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'H6'})}).catch(()=>{});
+      }
+      // #endregion
+      return
+    }
+
+    // Don't sync immediately after drag ends - wait for state to update
+    if (justFinishedDragRef.current) {
+      // #region agent log
+      if (windowId === 'window-readme-txt' || windowId?.includes('readme')) {
+        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:268',message:'Position sync skipped - just finished drag',data:{windowId,windowDataPos:pos,currentStyleLeft:win.style.left,currentStyleTop:win.style.top},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'H6'})}).catch(()=>{});
+      }
+      // #endregion
+      return
+    }
+
+    // Check if DOM position already matches state position (no sync needed)
+    const currentLeft = parseFloat(win.style.left) || 0
+    const currentTop = parseFloat(win.style.top) || 0
+    const posX = pos.x || 0
+    const posY = pos.y || 0
+    const tolerance = 1 // Allow 1px difference for rounding
+    if (Math.abs(currentLeft - posX) < tolerance && Math.abs(currentTop - posY) < tolerance) {
+      // #region agent log
+      if (windowId === 'window-readme-txt' || windowId?.includes('readme')) {
+        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:279',message:'Position sync skipped - positions match',data:{windowId,currentLeft,currentTop,posX,posY},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'H6'})}).catch(()=>{});
+      }
+      // #endregion
+      return
+    }
+
+    // For try-again-window, only sync if we've already recalculated (to avoid overwriting the corrected position)
+    // We'll track this with a data attribute
+    if (windowId === 'try-again-window') {
+      const hasRecalculated = win.dataset.recalculated === 'true'
+      if (!hasRecalculated) {
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:250',message:'Skipping position sync for try-again-window - waiting for recalculation',data:{windowId,windowDataPos:pos,currentStyleLeft:win.style.left,currentStyleTop:win.style.top},timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'I'})}).catch(()=>{});
+        // #endregion
+        return
+      }
+    }
+
+    // #region agent log
+    if (windowId === 'window-readme-txt' || windowId?.includes('readme')) {
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:290',message:'Position sync effect - setting position from windowData',data:{windowId,windowDataPos:pos,currentStyleLeft:win.style.left,currentStyleTop:win.style.top,hasTransform:!!win.style.transform,hasDraggingClass:win.classList.contains('dragging')},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'H6'})}).catch(()=>{});
+    }
+    // #endregion
 
     win.style.left = `${pos.x}px`
     win.style.top = `${pos.y}px`
+    
+    // #region agent log
+    if (windowId === 'window-readme-txt' || windowId?.includes('readme')) {
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:297',message:'After setting position from windowData',data:{windowId,newStyleLeft:win.style.left,newStyleTop:win.style.top,windowDataPos:pos},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'H6'})}).catch(()=>{});
+    }
+    // #endregion
   }, [
     windowData?.position?.x,
     windowData?.position?.y,
@@ -248,6 +333,118 @@ export default function Window({
     isMaximized,
     style?.position,
   ])
+
+  // For try-again-window with auto height: measure actual height and recalculate center position
+  // Use ResizeObserver to detect when content (especially images) has loaded and window size changes
+  useEffect(() => {
+    if (windowId !== 'try-again-window') return
+    if (isMobile || isMinimized || isMaximized) return
+    if (style?.position === 'fixed') return
+    
+    const win = windowRef.current
+    if (!win) return
+    
+    // Only recalculate if height is auto and window hasn't been moved by user
+    if (style?.height !== 'auto' && win.style.height !== 'auto') return
+    if (hasUserMoved?.get?.(windowId)) return
+    
+    let lastHeight = 0
+    let recalculateTimeout = null
+    let hasRecalculated = false
+    
+    const recalculatePosition = (source = 'unknown') => {
+      // Clear any pending recalculation
+      if (recalculateTimeout) {
+        clearTimeout(recalculateTimeout)
+      }
+      
+      // Debounce to avoid too many recalculations
+      recalculateTimeout = setTimeout(() => {
+        const rect = win.getBoundingClientRect()
+        const actualHeight = rect.height
+        const actualWidth = rect.width
+        
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:290',message:'recalculatePosition called',data:{windowId,source,actualHeight,lastHeight,currentTop:win.style.top,currentLeft:win.style.left},timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'H'})}).catch(()=>{});
+        // #endregion
+        
+        // Always recalculate if height has changed significantly OR if we haven't recalculated yet
+        if (!hasRecalculated || Math.abs(actualHeight - lastHeight) >= 10) {
+          lastHeight = actualHeight
+          
+          const newPos = getCenteredPosition({
+            width: actualWidth,
+            height: actualHeight,
+            padding: 24,
+            isMobile: false,
+            windowId: 'try-again-window'
+          })
+          
+          // #region agent log
+          fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:305',message:'Recalculating center position for try-again-window',data:{windowId,actualHeight,actualWidth,newPos,oldTop:win.style.top,oldLeft:win.style.left,source},timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'H'})}).catch(()=>{});
+          // #endregion
+          
+          // Update position immediately
+          win.style.left = `${newPos.x}px`
+          win.style.top = `${newPos.y}px`
+          updateWindowPosition(windowId, newPos)
+          hasRecalculated = true
+          // Mark that we've recalculated so position sync effect doesn't overwrite
+          win.dataset.recalculated = 'true'
+          
+          // #region agent log
+          fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:320',message:'Position updated',data:{windowId,newTop:win.style.top,newLeft:win.style.left,newPos,recalculatedFlag:win.dataset.recalculated},timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'H'})}).catch(()=>{});
+          // #endregion
+        }
+      }, 50) // 50ms debounce
+    }
+    
+    // Use ResizeObserver to detect when window size changes (e.g., when image loads)
+    const resizeObserver = new ResizeObserver(() => {
+      recalculatePosition('ResizeObserver')
+    })
+    resizeObserver.observe(win)
+    
+    // Also trigger immediately in case content is already loaded
+    recalculatePosition('initial')
+    
+    // Also wait for images to load
+    const images = win.querySelectorAll('img')
+    let imagesLoaded = 0
+    const totalImages = images.length
+    
+    if (totalImages > 0) {
+      images.forEach(img => {
+        if (img.complete) {
+          imagesLoaded++
+          // #region agent log
+          fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:335',message:'Image already loaded',data:{windowId,imgSrc:img.src,imgComplete:img.complete,imgNaturalHeight:img.naturalHeight},timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'H'})}).catch(()=>{});
+          // #endregion
+        } else {
+          img.addEventListener('load', () => {
+            imagesLoaded++
+            // #region agent log
+            fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:340',message:'Image loaded',data:{windowId,imgSrc:img.src,imagesLoaded,totalImages,imgNaturalHeight:img.naturalHeight},timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'H'})}).catch(()=>{});
+            // #endregion
+            if (imagesLoaded === totalImages) {
+              recalculatePosition('image-load')
+            }
+          }, { once: true })
+        }
+      })
+      
+      if (imagesLoaded === totalImages) {
+        recalculatePosition('all-images-loaded')
+      }
+    }
+    
+    return () => {
+      resizeObserver.disconnect()
+      if (recalculateTimeout) {
+        clearTimeout(recalculateTimeout)
+      }
+    }
+  }, [windowId, isMobile, isMinimized, isMaximized, style?.height, style?.position, getWindow, updateWindowPosition])
 
   // Bring to front when clicked - improved handler
   useEffect(() => {
@@ -528,6 +725,29 @@ export default function Window({
     visibility: isMinimized ? 'hidden' : 'visible',
     opacity: 1,
   }
+  
+  // #region agent log
+  if (windowId === 'try-again-window') {
+    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:557',message:'baseStyle computed',data:{windowId,styleLeft:style?.left,styleTop:style?.top,baseStyleLeft:baseStyle.left,baseStyleTop:baseStyle.top,windowDataPos:windowData?.position},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+  }
+  
+  // Check DOM element position after effects run
+  useEffect(() => {
+    if (windowId === 'try-again-window') {
+      const el = windowRef.current
+      if (el) {
+        const checkPos = () => {
+          const rect = el.getBoundingClientRect()
+          fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:565',message:'DOM element final position check',data:{windowId,domLeft:el.style.left,domTop:el.style.top,rectLeft:rect.left,rectTop:rect.top,computedLeft:getComputedStyle(el).left,computedTop:getComputedStyle(el).top},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+        }
+        // Check immediately and after delays
+        checkPos()
+        setTimeout(checkPos, 100)
+        setTimeout(checkPos, 300)
+      }
+    }
+  }, [windowId, baseStyle.left, baseStyle.top, windowData?.position])
+  // #endregion
 
   return (
     <div
@@ -582,7 +802,21 @@ export default function Window({
       </div>
       {!isMinimized && (
         <>
-          <div className={`window-body ${allowScroll ? 'scroll-allowed' : ''}`}>{children}</div>
+          <div 
+            className={`window-body ${allowScroll ? 'scroll-allowed' : ''} ${contentAutoHeight ? 'window-body-auto' : ''}`}
+            data-content-auto-height={contentAutoHeight ? 'true' : undefined}
+            ref={(el) => {
+              if (windowId === 'try-again-window' && el && contentAutoHeight) {
+                // Log after a brief delay to ensure styles are applied
+                setTimeout(() => {
+                  const styles = getComputedStyle(el)
+                  fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:762',message:'TryAgain window-body computed styles',data:{windowId,contentAutoHeight,className:el.className,computedHeight:styles.height,computedMinHeight:styles.minHeight,computedDisplay:styles.display,actualHeight:el.offsetHeight,actualScrollHeight:el.scrollHeight,hasWindowBodyAuto:el.classList.contains('window-body-auto')},timestamp:Date.now(),sessionId:'debug-session',runId:'run4',hypothesisId:'J'})}).catch(()=>{});
+                }, 100)
+              }
+            }}
+          >
+            {children}
+          </div>
           {/* Resize handle - desktop only (mobile windows are fullscreen) */}
           {!isMaximized && !isMobile && (
             <div

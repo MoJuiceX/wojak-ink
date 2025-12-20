@@ -1,24 +1,27 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useWindow } from '../contexts/WindowContext'
 import { useOrangeToy } from '../contexts/OrangeToyContext'
+import { ensureOrangeAudioUnlocked, playOrangeClickSound } from '../utils/orangeSound'
+import OrangeGlassWindow from './orange/OrangeGlassWindow'
 import './OrangeToyLayer.css'
 
 const ORANGE_SIZE = 150
 const ORANGE_RADIUS = ORANGE_SIZE / 2
-const GRAVITY = 0.8
+const GRAVITY = 0.8976 * 0.95 // Reduced by 5% from 0.8976 (keep expressed for maintainability)
 const BOUNCE_DAMPING = 0.88 // 0.85-0.92 = super bouncy, always stays bouncy
 const FRICTION = 0.98
 const MOUSE_RADIUS = 20 // Mouse paddle radius
 const MOUSE_BOUNCE_RESTITUTION = 0.9 // Very bouncy off mouse paddle
-const MOUSE_UPWARD_BONUS = 6 // Upward push to make juggling easier
+const MOUSE_UPWARD_BONUS = 6.12 // Upward push to make juggling easier (increased by 2%)
 const MOUSE_BOUNCE_COOLDOWN_MS = 140 // Cooldown between scored bounces
+const SOUND_COOLDOWN_MS = 100 // Cooldown between sound effects
 const AIRBORNE_THRESHOLD = 6 // Pixels above floor to be considered airborne
 const SETTLE_THRESHOLD = 0.5
 const WAKE_UP_DISTANCE = 100 // Distance from mouse to wake up sleeping orange
 
 export default function OrangeToyLayer() {
   const { getWindow, isWindowMinimized } = useWindow()
-  const { score, incrementScore, addPoints, requiredScore, fillPct, orangeExistsRef } = useOrangeToy()
+  const { score, incrementScore, addPoints, requiredScore, fillPct, glassSrc, orangeExistsRef } = useOrangeToy()
   const orangeRef = useRef(null)
   const rafRef = useRef(null)
   const isSleepingRef = useRef(false)
@@ -32,6 +35,7 @@ export default function OrangeToyLayer() {
   const wasInContactRef = useRef(false) // Was mouse in contact last frame
   const airBounceStreakRef = useRef(0) // Counts consecutive mouse bounces since last ground touch
   const lastScoredStreakRef = useRef(0) // Track points already awarded in current streak
+  const soundCooldownRef = useRef(0) // Cooldown for sound effects
   
   const [orangeExists, setOrangeExists] = useState(false)
   const [splashAnimations, setSplashAnimations] = useState([])
@@ -45,8 +49,8 @@ export default function OrangeToyLayer() {
     return {
       x: spawnX,
       y: spawnY,
-      vx: (Math.random() - 0.5) * 2, // Random small horizontal velocity
-      vy: -6, // Upward velocity to start bouncing
+      vx: (Math.random() - 0.5) * 2.04, // Random small horizontal velocity (increased by 2%)
+      vy: -6.12, // Upward velocity to start bouncing (increased by 2%)
       rotation: 0,
       rotationVel: 0
     }
@@ -57,6 +61,18 @@ export default function OrangeToyLayer() {
     const rootStyle = getComputedStyle(document.documentElement)
     const taskbarHeight = parseFloat(rootStyle.getPropertyValue('--taskbar-height')) || 48
     taskbarHeightRef.current = taskbarHeight
+  }, [])
+
+  // Initialize audio on first user interaction
+  useEffect(() => {
+    const initAudio = () => {
+      ensureOrangeAudioUnlocked();
+      // Remove listeners after first interaction
+      document.removeEventListener('pointerdown', initAudio);
+      document.removeEventListener('click', initAudio);
+    };
+    document.addEventListener('pointerdown', initAudio, { once: true });
+    document.addEventListener('click', initAudio, { once: true });
   }, [])
 
   // Check if TangGang window is open
@@ -225,6 +241,14 @@ export default function OrangeToyLayer() {
         const contactEntered = !wasInContactRef.current
         const airborne = orangeBottom < (floor - AIRBORNE_THRESHOLD)
         const cooldownOk = (now - lastScoredBounceAtRef.current) >= MOUSE_BOUNCE_COOLDOWN_MS
+
+        // Play boing sound when orange is touched (with cooldown to prevent spam)
+        if (contactEntered) {
+          if ((now - soundCooldownRef.current) >= SOUND_COOLDOWN_MS) {
+            playOrangeClickSound();
+            soundCooldownRef.current = now;
+          }
+        }
 
         // On valid mouse bounce (contact enter + airborne + cooldown)
         if (contactEntered && airborne && cooldownOk) {
@@ -397,19 +421,8 @@ export default function OrangeToyLayer() {
         </div>
       ))}
 
-      {/* Juice box meter */}
-      <div className="orange-game-ui" style={{ zIndex: 10003 }}>
-        <div className="juice-meter">
-          <div className="juice-meter-label">🧃 Juice</div>
-          <div className="juice-meter-bar">
-            <div 
-              className="juice-meter-fill"
-              style={{ width: `${fillPct * 100}%` }}
-            />
-          </div>
-          <div className="juice-meter-text">{score} / {requiredScore}</div>
-        </div>
-      </div>
+      {/* Glass fill window */}
+      <OrangeGlassWindow glassSrc={glassSrc} />
     </div>
   )
 }
