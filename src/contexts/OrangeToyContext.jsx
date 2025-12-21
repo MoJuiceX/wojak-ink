@@ -57,7 +57,8 @@ export function OrangeToyProvider({ children }) {
   const orangeExistsRef = useRef(false)
 
   // Derived: requiredScore is now a fixed constant (no growth)
-  const REQUIRED_SCORE = 10 // Fixed constant
+  // Increased by 75%: 15 * 1.75 = 26.25, rounded to 26
+  const REQUIRED_SCORE = 26 // Fixed constant (increased from 15 by 75%)
   const requiredScore = REQUIRED_SCORE // Simple constant, no useMemo needed
 
   // Derived: totalClaimedPrizes is same as claimsCount

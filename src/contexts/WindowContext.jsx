@@ -184,14 +184,18 @@ export function WindowProvider({ children }) {
       const next = new Map(prev)
       
       // Determine position: center on first open if new window and centerOnOpen is true
+      // Special case: try-again-window should always center when opened (it's a modal)
+      const isTryAgainWindow = windowId === 'try-again-window'
       let position = windowData?.position || existingWindow?.position
       const centerOnOpen = windowData?.centerOnOpen !== false // Default to true
       
+      
       // For new windows, calculate centered position synchronously if possible
-      if (isNewWindow && centerOnOpen && !windowData?.position) {
-        // #region agent log
-        if (windowId === 'try-again-window') fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:125',message:'registerWindow - calculating center position',data:{windowId,isNewWindow,centerOnOpen,hasWindowDataPosition:!!windowData?.position},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
+      // For try-again-window, always center on open (even if reopening) - force recentering
+      const shouldCenter = (isNewWindow && centerOnOpen && !windowData?.position) || (isTryAgainWindow && centerOnOpen)
+      
+      
+      if (shouldCenter) {
         try {
           const defaultSize = getDefaultWindowSize(windowId)
           
@@ -270,6 +274,15 @@ export function WindowProvider({ children }) {
               if (cascadeOrderRef.current[0] !== README_ID) {
                 cascadeOrderRef.current = [README_ID, ...cascadeOrderRef.current.filter(id => id !== README_ID)]
               }
+            } else if (isTryAgainWindow) {
+              // Try-again-window: always centered (modal popup)
+              position = getCenteredPosition({
+                width: windowWidth,
+                height: windowHeight,
+                padding: 24,
+                isMobile: false,
+                windowId
+              })
             } else {
               // Other windows: cascade from README
               // Pass prev (current windows state) to getReadmeAnchor to get accurate README position
@@ -306,14 +319,6 @@ export function WindowProvider({ children }) {
               }
             }
             
-            // #region agent log
-            if (windowId === 'try-again-window') {
-              const viewportHeight = window.innerHeight
-              const taskbarHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--taskbar-height')) || 48
-              const availableHeight = viewportHeight - taskbarHeight
-              fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:195',message:'WindowContext calculated centered position',data:{windowId,position,windowWidth,windowHeight,viewportHeight,taskbarHeight,availableHeight,calculatedY:position.y,expectedCenterY:(availableHeight - windowHeight) / 2},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'F'})}).catch(()=>{});
-            }
-            // #endregion
           } else {
             // Mobile: use default position
             position = { x: 20, y: 20 }
@@ -324,21 +329,18 @@ export function WindowProvider({ children }) {
         } catch (e) {
           // Fallback to default position if centering fails
           position = { x: 20, y: 20 }
-          // #region agent log
-          if (windowId === 'try-again-window') fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:205',message:'WindowContext fallback to default position',data:{windowId,position,error:e.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-          // #endregion
         }
       }
       
-      // #region agent log
-      if (windowId === 'try-again-window') fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:212',message:'registerWindow final position',data:{windowId,position,hasWindowDataPosition:!!windowData?.position,existingWindowPosition:existingWindow?.position},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
-      
       // Preserve existing window state (isMaximized, zIndex) when re-registering
+      const positionBeforeClamp = position
+      const clampedPosition = clampToViewport(position, windowData?.size || existingWindow?.size)
+      
+      
       const windowEntry = {
         id: windowId,
         title: windowData?.title || existingWindow?.title || windowId,
-        position: clampToViewport(position, windowData?.size || existingWindow?.size),
+        position: clampedPosition,
         size: windowData?.size || existingWindow?.size || { width: 'auto', height: 'auto' },
         // Preserve zIndex from existing window, or assign new one for new windows
         zIndex: existingWindow?.zIndex ?? nextZIndexRef.current++,
@@ -346,10 +348,26 @@ export function WindowProvider({ children }) {
         // Preserve isMaximized from existing window if not explicitly provided in windowData
         isMaximized: windowData?.isMaximized !== undefined ? windowData.isMaximized : (existingWindow?.isMaximized ?? false),
       }
+      
+      // #region agent log
+      if (isTryAgainWindow) {
+        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:391',message:'registerWindow final windowEntry',data:{windowId,windowEntryPosition:windowEntry.position,windowEntrySize:windowEntry.size},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+      }
+      // #endregion
+      
       // Only increment zIndex if this is a new window
       if (!existingWindow) {
         windowEntry.zIndex = nextZIndexRef.current++
         // Reset hasUserMoved for new windows
+        setHasUserMoved(prev => {
+          const next = new Map(prev)
+          next.set(windowId, false)
+          return next
+        })
+      }
+      
+      // For try-again-window (modal), always reset hasUserMoved so it can recenter on each open
+      if (isTryAgainWindow) {
         setHasUserMoved(prev => {
           const next = new Map(prev)
           next.set(windowId, false)

@@ -61,6 +61,8 @@ export default function ReadmeWindow({ onClose }) {
       }}
       className="readme-window"
       allowScroll={true}
+      // Prevent auto-stacking so README stays precisely centered on first open
+      noStack={true}
       onClose={onClose}
     >
       <ReadmeBanner baseIdx={baseIdx} />

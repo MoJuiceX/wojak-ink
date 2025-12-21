@@ -11,6 +11,8 @@
  */
 // README-specific X offset to center content column (not window frame) on screen
 const README_CENTER_OFFSET_X = -170
+// README-specific Y offset to move window up slightly for better visual centering
+const README_CENTER_OFFSET_Y = -40
 
 // Cache for getComputedStyle results to prevent repeated layout reads
 const styleCache = {
@@ -79,10 +81,11 @@ export function getCenteredPosition({ width, height, padding = 24, isMobile = fa
   }
   // #endregion
   
-  // Apply README-specific offset to X position only (Y remains unchanged)
+  // Apply README-specific offsets for better visual centering
   const isReadme = windowId === 'window-readme-txt' || windowId === 'readme' || windowId?.includes('readme')
   if (isReadme) {
     x += README_CENTER_OFFSET_X
+    y += README_CENTER_OFFSET_Y
   }
   
   // Clamp with padding (minimum 24px, or 8px if window is larger than viewport)

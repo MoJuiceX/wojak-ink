@@ -20,6 +20,7 @@ import BackgroundMusic from './components/BackgroundMusic'
 import LoadingSpinner from './components/ui/LoadingSpinner'
 import OrangeToyLayer from './components/OrangeToyLayer'
 import TryAgainWindowWrapper from './components/windows/TryAgainWindowWrapper'
+import PapaEasterEgg from './components/PapaEasterEgg'
 
 // Lazy load non-critical routes
 const AdminPanel = lazy(() => import('./components/windows/AdminPanel'))
@@ -224,6 +225,7 @@ function App() {
               <div className="bg-fixed" aria-hidden="true"></div>
               <main id="main-content" className="desktop" aria-label="Desktop">
                 <OrangeToyLayer />
+                <PapaEasterEgg />
                 <DesktopIcons onOpenApp={openWindow} />
                 {openWindows['window-readme-txt'] && (
                   <ReadmeWindow onClose={() => closeWindow('window-readme-txt')} />

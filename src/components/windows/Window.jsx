@@ -198,10 +198,6 @@ export default function Window({
       // TangGang window should be centered on desktop/tablet
       const shouldCenter = windowId === 'tanggang' ? (window.innerWidth > 640) : true
       
-      // #region agent log
-      if (windowId === 'try-again-window') fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:189',message:'Window component calling registerWindow',data:{windowId,shouldCenter,size:{width,height},stylePosition:style?.position,styleLeft:style?.left,styleTop:style?.top},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-      // #endregion
-      
       registerWindow(windowId, {
         title,
         // Don't pass position - let registerWindow center it if centerOnOpen is true
@@ -209,18 +205,6 @@ export default function Window({
         centerOnOpen: shouldCenter,
       })
       hasRegisteredRef.current = true
-      
-      // #region agent log
-      if (windowId === 'try-again-window') {
-        setTimeout(() => {
-          const el = windowRef.current
-          if (el) {
-            const rect = el.getBoundingClientRect()
-            fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:197',message:'After registerWindow - DOM element position',data:{windowId,domLeft:el.style.left,domTop:el.style.top,rectLeft:rect.left,rectTop:rect.top},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-          }
-        }, 50)
-      }
-      // #endregion
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
         console.error('[Window] Failed to register window:', error, 'windowId:', windowId)
@@ -253,34 +237,29 @@ export default function Window({
 
   // Sync position from windowData to DOM element
   // IMPORTANT: Skip this effect when window is being dragged or on mobile
-  // For try-again-window, skip initial sync to let the ResizeObserver handle it after image loads
-  useEffect(() => {
+  // Use useLayoutEffect to set position before paint to prevent visual flash
+  useLayoutEffect(() => {
     const win = windowRef.current
     if (!win) return
     if (isMobile) return
     if (isMinimized || isMaximized) return
     if (style?.position === 'fixed') return
+    
+    // For try-again-window: completely skip position sync - handled by CSS transform centering in useEffect
+    if (windowId === 'try-again-window') {
+      return
+    }
 
     const pos = windowData?.position
     if (!pos) return
 
     // Don't fight dragging
     if (win.classList.contains('dragging') || win.style.transform) {
-      // #region agent log
-      if (windowId === 'window-readme-txt' || windowId?.includes('readme')) {
-        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:258',message:'Position sync skipped - dragging',data:{windowId,hasDraggingClass:win.classList.contains('dragging'),hasTransform:!!win.style.transform,windowDataPos:pos,currentStyleLeft:win.style.left,currentStyleTop:win.style.top},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'H6'})}).catch(()=>{});
-      }
-      // #endregion
       return
     }
 
     // Don't sync immediately after drag ends - wait for state to update
     if (justFinishedDragRef.current) {
-      // #region agent log
-      if (windowId === 'window-readme-txt' || windowId?.includes('readme')) {
-        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:268',message:'Position sync skipped - just finished drag',data:{windowId,windowDataPos:pos,currentStyleLeft:win.style.left,currentStyleTop:win.style.top},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'H6'})}).catch(()=>{});
-      }
-      // #endregion
       return
     }
 
@@ -291,40 +270,11 @@ export default function Window({
     const posY = pos.y || 0
     const tolerance = 1 // Allow 1px difference for rounding
     if (Math.abs(currentLeft - posX) < tolerance && Math.abs(currentTop - posY) < tolerance) {
-      // #region agent log
-      if (windowId === 'window-readme-txt' || windowId?.includes('readme')) {
-        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:279',message:'Position sync skipped - positions match',data:{windowId,currentLeft,currentTop,posX,posY},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'H6'})}).catch(()=>{});
-      }
-      // #endregion
       return
     }
 
-    // For try-again-window, only sync if we've already recalculated (to avoid overwriting the corrected position)
-    // We'll track this with a data attribute
-    if (windowId === 'try-again-window') {
-      const hasRecalculated = win.dataset.recalculated === 'true'
-      if (!hasRecalculated) {
-        // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:250',message:'Skipping position sync for try-again-window - waiting for recalculation',data:{windowId,windowDataPos:pos,currentStyleLeft:win.style.left,currentStyleTop:win.style.top},timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'I'})}).catch(()=>{});
-        // #endregion
-        return
-      }
-    }
-
-    // #region agent log
-    if (windowId === 'window-readme-txt' || windowId?.includes('readme')) {
-      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:290',message:'Position sync effect - setting position from windowData',data:{windowId,windowDataPos:pos,currentStyleLeft:win.style.left,currentStyleTop:win.style.top,hasTransform:!!win.style.transform,hasDraggingClass:win.classList.contains('dragging')},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'H6'})}).catch(()=>{});
-    }
-    // #endregion
-
     win.style.left = `${pos.x}px`
     win.style.top = `${pos.y}px`
-    
-    // #region agent log
-    if (windowId === 'window-readme-txt' || windowId?.includes('readme')) {
-      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:297',message:'After setting position from windowData',data:{windowId,newStyleLeft:win.style.left,newStyleTop:win.style.top,windowDataPos:pos},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'H6'})}).catch(()=>{});
-    }
-    // #endregion
   }, [
     windowData?.position?.x,
     windowData?.position?.y,
@@ -334,23 +284,40 @@ export default function Window({
     style?.position,
   ])
 
-  // For try-again-window with auto height: measure actual height and recalculate center position
-  // Use ResizeObserver to detect when content (especially images) has loaded and window size changes
+  // For try-again-window: use simple CSS transform centering (like TreasureWindow)
+  // This avoids all the complexity of calculating positions and prevents infinite loops
   useEffect(() => {
     if (windowId !== 'try-again-window') return
+    if (isMobile || isMinimized || isMaximized) return
+    
+    const win = windowRef.current
+    if (!win) return
+    
+    // Simply ensure it's centered using CSS transform (no state updates needed)
+    win.style.position = 'fixed'
+    win.style.left = '50%'
+    win.style.top = '50%'
+    win.style.transform = 'translate(-50%, -50%)'
+    win.style.opacity = '1'
+    win.style.visibility = 'visible'
+  }, [windowId, isMobile, isMinimized, isMaximized])
+
+  // For README window: recalculate center position after content loads (e.g., images)
+  // Only recenter if user hasn't moved the window
+  useEffect(() => {
+    if (windowId !== 'window-readme-txt') return
     if (isMobile || isMinimized || isMaximized) return
     if (style?.position === 'fixed') return
     
     const win = windowRef.current
     if (!win) return
     
-    // Only recalculate if height is auto and window hasn't been moved by user
-    if (style?.height !== 'auto' && win.style.height !== 'auto') return
+    // Don't recenter if user has moved the window
     if (hasUserMoved?.get?.(windowId)) return
     
+    let lastWidth = 0
     let lastHeight = 0
     let recalculateTimeout = null
-    let hasRecalculated = false
     
     const recalculatePosition = (source = 'unknown') => {
       // Clear any pending recalculation
@@ -361,82 +328,54 @@ export default function Window({
       // Debounce to avoid too many recalculations
       recalculateTimeout = setTimeout(() => {
         const rect = win.getBoundingClientRect()
-        const actualHeight = rect.height
         const actualWidth = rect.width
+        const actualHeight = rect.height
         
-        // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:290',message:'recalculatePosition called',data:{windowId,source,actualHeight,lastHeight,currentTop:win.style.top,currentLeft:win.style.left},timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'H'})}).catch(()=>{});
-        // #endregion
+        // Only recalculate if size has changed significantly (> 5px)
+        if (lastWidth > 0 && lastHeight > 0 && 
+            Math.abs(actualWidth - lastWidth) < 5 && 
+            Math.abs(actualHeight - lastHeight) < 5) {
+          return
+        }
         
-        // Always recalculate if height has changed significantly OR if we haven't recalculated yet
-        if (!hasRecalculated || Math.abs(actualHeight - lastHeight) >= 10) {
-          lastHeight = actualHeight
-          
-          const newPos = getCenteredPosition({
-            width: actualWidth,
-            height: actualHeight,
-            padding: 24,
-            isMobile: false,
-            windowId: 'try-again-window'
-          })
-          
-          // #region agent log
-          fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:305',message:'Recalculating center position for try-again-window',data:{windowId,actualHeight,actualWidth,newPos,oldTop:win.style.top,oldLeft:win.style.left,source},timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'H'})}).catch(()=>{});
-          // #endregion
-          
-          // Update position immediately
+        lastWidth = actualWidth
+        lastHeight = actualHeight
+        
+        // Only proceed if we have valid dimensions
+        if (actualWidth <= 0 || actualHeight <= 0) return
+        
+        const newPos = getCenteredPosition({
+          width: actualWidth,
+          height: actualHeight,
+          padding: 24,
+          isMobile: false,
+          windowId: 'window-readme-txt'
+        })
+        
+        // Only update if position differs significantly (> 1px)
+        const currentLeft = parseFloat(win.style.left) || 0
+        const currentTop = parseFloat(win.style.top) || 0
+        if (Math.abs(currentLeft - newPos.x) > 1 || Math.abs(currentTop - newPos.y) > 1) {
           win.style.left = `${newPos.x}px`
           win.style.top = `${newPos.y}px`
           updateWindowPosition(windowId, newPos)
-          hasRecalculated = true
-          // Mark that we've recalculated so position sync effect doesn't overwrite
           win.dataset.recalculated = 'true'
-          
-          // #region agent log
-          fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:320',message:'Position updated',data:{windowId,newTop:win.style.top,newLeft:win.style.left,newPos,recalculatedFlag:win.dataset.recalculated},timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'H'})}).catch(()=>{});
-          // #endregion
         }
       }, 50) // 50ms debounce
     }
     
-    // Use ResizeObserver to detect when window size changes (e.g., when image loads)
+    // Use ResizeObserver to detect when window size changes (e.g., when images load)
     const resizeObserver = new ResizeObserver(() => {
       recalculatePosition('ResizeObserver')
     })
     resizeObserver.observe(win)
     
-    // Also trigger immediately in case content is already loaded
-    recalculatePosition('initial')
-    
-    // Also wait for images to load
-    const images = win.querySelectorAll('img')
-    let imagesLoaded = 0
-    const totalImages = images.length
-    
-    if (totalImages > 0) {
-      images.forEach(img => {
-        if (img.complete) {
-          imagesLoaded++
-          // #region agent log
-          fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:335',message:'Image already loaded',data:{windowId,imgSrc:img.src,imgComplete:img.complete,imgNaturalHeight:img.naturalHeight},timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'H'})}).catch(()=>{});
-          // #endregion
-        } else {
-          img.addEventListener('load', () => {
-            imagesLoaded++
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:340',message:'Image loaded',data:{windowId,imgSrc:img.src,imagesLoaded,totalImages,imgNaturalHeight:img.naturalHeight},timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'H'})}).catch(()=>{});
-            // #endregion
-            if (imagesLoaded === totalImages) {
-              recalculatePosition('image-load')
-            }
-          }, { once: true })
-        }
+    // Also trigger after initial render to ensure correct centering
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        recalculatePosition('initial')
       })
-      
-      if (imagesLoaded === totalImages) {
-        recalculatePosition('all-images-loaded')
-      }
-    }
+    })
     
     return () => {
       resizeObserver.disconnect()
@@ -444,7 +383,7 @@ export default function Window({
         clearTimeout(recalculateTimeout)
       }
     }
-  }, [windowId, isMobile, isMinimized, isMaximized, style?.height, style?.position, getWindow, updateWindowPosition])
+  }, [windowId, isMobile, isMinimized, isMaximized, style?.position, hasUserMoved, updateWindowPosition])
 
   // Bring to front when clicked - improved handler
   useEffect(() => {
@@ -703,6 +642,7 @@ export default function Window({
   if (!isVisible) return null
 
   // Merge base styles and ensure consistent positioning behavior
+  // For try-again-window, include position in baseStyle to prevent flash (set before first paint)
   const baseStyle = {
     ...style,
     // Prefer WindowContext z-index; fall back to a high value for the active window
@@ -721,33 +661,22 @@ export default function Window({
       top: '0',
       margin: '0',
     } : {}),
+    // For try-again-window: use CSS transform centering (simple, no flash)
+    ...(windowId === 'try-again-window' && !isMobile && !isMinimized && !isMaximized ? {
+      position: 'fixed', // Use fixed positioning for proper centering
+      left: '50%',
+      top: '50%',
+      transform: 'translate(-50%, -50%)', // CSS centering - works immediately
+      right: 'auto',
+      bottom: 'auto',
+    } : {}),
     // Deterministic visibility: if mounted and not minimized, it must be visible
-    visibility: isMinimized ? 'hidden' : 'visible',
-    opacity: 1,
+    // For try-again-window, visibility is set above to 'hidden' initially, so don't override it here
+    ...(windowId !== 'try-again-window' ? { visibility: isMinimized ? 'hidden' : 'visible' } : {}),
+    // Opacity: default to 1, but try-again-window overrides above to start at 0
+    ...(windowId !== 'try-again-window' ? { opacity: 1 } : {}),
   }
   
-  // #region agent log
-  if (windowId === 'try-again-window') {
-    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:557',message:'baseStyle computed',data:{windowId,styleLeft:style?.left,styleTop:style?.top,baseStyleLeft:baseStyle.left,baseStyleTop:baseStyle.top,windowDataPos:windowData?.position},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-  }
-  
-  // Check DOM element position after effects run
-  useEffect(() => {
-    if (windowId === 'try-again-window') {
-      const el = windowRef.current
-      if (el) {
-        const checkPos = () => {
-          const rect = el.getBoundingClientRect()
-          fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:565',message:'DOM element final position check',data:{windowId,domLeft:el.style.left,domTop:el.style.top,rectLeft:rect.left,rectTop:rect.top,computedLeft:getComputedStyle(el).left,computedTop:getComputedStyle(el).top},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-        }
-        // Check immediately and after delays
-        checkPos()
-        setTimeout(checkPos, 100)
-        setTimeout(checkPos, 300)
-      }
-    }
-  }, [windowId, baseStyle.left, baseStyle.top, windowData?.position])
-  // #endregion
 
   return (
     <div
@@ -805,15 +734,6 @@ export default function Window({
           <div 
             className={`window-body ${allowScroll ? 'scroll-allowed' : ''} ${contentAutoHeight ? 'window-body-auto' : ''}`}
             data-content-auto-height={contentAutoHeight ? 'true' : undefined}
-            ref={(el) => {
-              if (windowId === 'try-again-window' && el && contentAutoHeight) {
-                // Log after a brief delay to ensure styles are applied
-                setTimeout(() => {
-                  const styles = getComputedStyle(el)
-                  fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:762',message:'TryAgain window-body computed styles',data:{windowId,contentAutoHeight,className:el.className,computedHeight:styles.height,computedMinHeight:styles.minHeight,computedDisplay:styles.display,actualHeight:el.offsetHeight,actualScrollHeight:el.scrollHeight,hasWindowBodyAuto:el.classList.contains('window-body-auto')},timestamp:Date.now(),sessionId:'debug-session',runId:'run4',hypothesisId:'J'})}).catch(()=>{});
-                }, 100)
-              }
-            }}
           >
             {children}
           </div>
