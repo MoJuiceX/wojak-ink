@@ -462,7 +462,7 @@ const PapaEasterEgg = forwardRef(function PapaEasterEgg(props, ref) {
   }, [selectThreeVariants, startAnimation])
   
   // Use hook for threshold detection and session gating
-  usePapaEggTriggers(fillPct, handleTrigger)
+  usePapaEggTriggers(fillPct, PAPA_CONFIG, handleTrigger)
   
   // DEV-only: Test trigger helper (doesn't mark thresholds in sessionStorage)
   const triggerTest = (papaType) => {
