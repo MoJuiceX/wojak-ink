@@ -6,6 +6,7 @@
  * Papa3: Triggers when juice glass reaches 85% (upward crossing) + rage shake
  * 
  * Each animation plays sound once when it reaches the top
+ * Animation durations reduced by 20% for snappier feel (Dec 2025)
  * 
  * MOUNTING: Render in App.jsx inside <main> element, after <OrangeToyLayer /> (around line 226)
  * 
