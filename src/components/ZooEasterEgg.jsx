@@ -1,79 +1,48 @@
 /**
- * PapaEasterEgg - Session-only Easter egg that triggers at specific juice level thresholds
+ * ZooEasterEgg - Session-only Easter egg that triggers at specific juice level thresholds
  * 
- * Papa1: Triggers when juice glass reaches 5% (upward crossing)
- * Papa2: Triggers when juice glass reaches 45% (upward crossing)
- * Papa3: Triggers when juice glass reaches 85% (upward crossing) + rage shake
+ * Zoo appears on the RIGHT side of the screen, rises from bottom, exits down, and faces LEFT (images already face left).
+ * Uses the same trigger thresholds as Papa (5%, 45%, 85%) but is selected randomly per trigger.
+ * 
+ * Zoo1: Triggers when juice glass reaches 5% (upward crossing)
+ * Zoo2: Triggers when juice glass reaches 45% (upward crossing)
+ * Zoo3: Triggers when juice glass reaches 85% (upward crossing) + rage shake
  * 
  * Each animation plays sound once when it reaches the top
- * Animation durations reduced by 20% for snappier feel (Dec 2025)
+ * Animation durations same as Papa (reduced by 20% for snappier feel)
  * 
- * MOUNTING: Render in App.jsx inside <main> element, after <OrangeToyLayer /> (around line 226)
- * 
- * Example:
- *   <OrangeToyLayer />
- *   <PapaEasterEgg />
+ * MOUNTING: Rendered via EasterEggCoordinator in App.jsx
  */
 
 import { useState, useEffect, useRef, useImperativeHandle, forwardRef, useCallback } from 'react'
 import { useShuffleBag } from '../hooks/useShuffleBag'
+import { PAPA_CONFIG } from './PapaEasterEgg'
 
-// Configuration for Papa types
-// Version: 2025-12-21 - 20% faster animations, hooks refactored
-export const PAPA_CONFIG = {
-  1: { threshold: 0.05, stayMs: 191, shakeClass: 'calm' },
-  2: { threshold: 0.45, stayMs: 916, shakeClass: 'medium' },
-  3: { threshold: 0.85, stayMs: 1448, shakeClass: 'raging' },
-  timing: { soundDelay: 160, riseMs: 2160, fallMs: 1440, ampUpMs: 280, ampDownMs: 280 }
-}
-
-// Image sets for variant selection using shuffle bag system
-// Shuffle bag ensures even distribution of variants over time, avoiding streaks
-// Note: All sets except Papa are in papaeffect/ subdirectory
-const IMAGE_SETS = [
-  // Set 0: Original Papa set
-  ['/assets/images/Papa1.png', '/assets/images/Papa2.png', '/assets/images/Papa3.png'],
-  // Set 1: pt set
-  ['/assets/images/papaeffect/pt1.png', '/assets/images/papaeffect/pt2.png', '/assets/images/papaeffect/pt3.png'],
-  // Set 2: ph set
-  ['/assets/images/papaeffect/ph1.png', '/assets/images/papaeffect/ph2.png', '/assets/images/papaeffect/ph3.png'],
-  // Set 3: pmb set
-  ['/assets/images/papaeffect/pmb1.png', '/assets/images/papaeffect/pmb2.png', '/assets/images/papaeffect/pmb3.png'],
-  // Set 4: ptin set
-  ['/assets/images/papaeffect/ptin1.png', '/assets/images/papaeffect/ptin2.png', '/assets/images/papaeffect/ptin3.png'],
-  // Set 5: pwiz set
-  ['/assets/images/papaeffect/pwiz1.png', '/assets/images/papaeffect/pwiz2.png', '/assets/images/papaeffect/pwiz3.png'],
-  // Set 6: pwizB set
-  ['/assets/images/papaeffect/pwizB1.png', '/assets/images/papaeffect/pwizB2.png', '/assets/images/papaeffect/pwizB3.png'],
-  // Set 7: pwizO set
-  ['/assets/images/papaeffect/pwizO1.png', '/assets/images/papaeffect/pwizO2.png', '/assets/images/papaeffect/pwizO3.png'],
-  // Set 8: pp set
-  ['/assets/images/papaeffect/pp1.png', '/assets/images/papaeffect/pp2.png', '/assets/images/papaeffect/pp3.png'],
-  // Set 9: pv set
-  ['/assets/images/papaeffect/pv1.png', '/assets/images/papaeffect/pv2.png', '/assets/images/papaeffect/pv3.png'],
-  // Set 10: ps set
-  ['/assets/images/papaeffect/ps1.png', '/assets/images/papaeffect/ps2.png', '/assets/images/papaeffect/ps3.png'],
-  // Set 11: psup set
-  ['/assets/images/papaeffect/psup1.png', '/assets/images/papaeffect/psup2.png', '/assets/images/papaeffect/psup3.png'],
-  // Set 12: psm set
-  ['/assets/images/papaeffect/psm1.png', '/assets/images/papaeffect/psm2.png', '/assets/images/papaeffect/psm3.png'],
-  // Set 13: ppr set
-  ['/assets/images/papaeffect/ppr1.png', '/assets/images/papaeffect/ppr2.png', '/assets/images/papaeffect/ppr3.png'],
-  // Set 14: pc set
-  ['/assets/images/papaeffect/pc1.png', '/assets/images/papaeffect/pc2.png', '/assets/images/papaeffect/pc3.png'],
+// Zoo image sets - all sets have 3 frames (*1, *2, *3)
+const IMAGE_SETS_ZOO = [
+  ['/assets/images/papaeffect/zoo/Zoo1.png', '/assets/images/papaeffect/zoo/Zoo2.png', '/assets/images/papaeffect/zoo/Zoo3.png'],
+  ['/assets/images/papaeffect/zoo/ZooB1.png', '/assets/images/papaeffect/zoo/ZooB2.png', '/assets/images/papaeffect/zoo/ZooB3.png'],
+  ['/assets/images/papaeffect/zoo/ZooC1.png', '/assets/images/papaeffect/zoo/ZooC2.png', '/assets/images/papaeffect/zoo/ZooC3.png'],
+  ['/assets/images/papaeffect/zoo/ZooCap1.png', '/assets/images/papaeffect/zoo/ZooCap2.png', '/assets/images/papaeffect/zoo/ZooCap3.png'],
+  ['/assets/images/papaeffect/zoo/ZooCow1.png', '/assets/images/papaeffect/zoo/ZooCow2.png', '/assets/images/papaeffect/zoo/ZooCow3.png'],
+  ['/assets/images/papaeffect/zoo/ZooF1.png', '/assets/images/papaeffect/zoo/ZooF2.png', '/assets/images/papaeffect/zoo/ZooF3.png'],
+  ['/assets/images/papaeffect/zoo/ZooField1.png', '/assets/images/papaeffect/zoo/ZooField2.png', '/assets/images/papaeffect/zoo/ZooField3.png'],
+  ['/assets/images/papaeffect/zoo/ZooFire1.png', '/assets/images/papaeffect/zoo/ZooFire2.png', '/assets/images/papaeffect/zoo/ZooFire3.png'],
+  ['/assets/images/papaeffect/zoo/ZooH1.png', '/assets/images/papaeffect/zoo/ZooH2.png', '/assets/images/papaeffect/zoo/ZooH3.png'],
+  ['/assets/images/papaeffect/zoo/ZooHH1.png', '/assets/images/papaeffect/zoo/ZooHH2.png', '/assets/images/papaeffect/zoo/ZooHH3.png'],
+  ['/assets/images/papaeffect/zoo/Zoox2p1.png', '/assets/images/papaeffect/zoo/Zoox2p2.png', '/assets/images/papaeffect/zoo/Zoox2p3.png'],
 ]
 
-
-const PapaEasterEgg = forwardRef(function PapaEasterEgg(props, ref) {
+const ZooEasterEgg = forwardRef(function ZooEasterEgg(props, ref) {
   // DEV mode check (Vite-safe expression)
   const isDev = (import.meta?.env?.DEV) ?? (process.env.NODE_ENV === 'development')
   
-  // State machine: 'hidden' | 'papa1' | 'papa2' | 'papa3' | 'falling'
+  // State machine: 'hidden' | 'zoo1' | 'zoo2' | 'zoo3' | 'falling'
   const [state, setState] = useState('hidden')
-  const [papa1Opacity, setPapa1Opacity] = useState(0)
-  const [papa2Opacity, setPapa2Opacity] = useState(0)
-  const [papa3Opacity, setPapa3Opacity] = useState(0)
-  // Banana burst effect state
+  const [zoo1Opacity, setZoo1Opacity] = useState(0)
+  const [zoo2Opacity, setZoo2Opacity] = useState(0)
+  const [zoo3Opacity, setZoo3Opacity] = useState(0)
+  // Banana burst effect state (reused from Papa)
   const [showBananaBurst, setShowBananaBurst] = useState(false)
   const bananaBurstShownRef = useRef(false)
   
@@ -84,30 +53,55 @@ const PapaEasterEgg = forwardRef(function PapaEasterEgg(props, ref) {
   // Audio fade-out refs
   const fadeRafRef = useRef(null)
   const fadeTimeoutRef = useRef(null)
-  const papa1ImgRef = useRef(null)
-  const papa2ImgRef = useRef(null)
-  const papa3ImgRef = useRef(null)
-  // Current variant indices for this run (used for micro-offset and DEV readout)
-  const currentVariant1Ref = useRef(null)
-  const currentVariant2Ref = useRef(null)
-  const currentVariant3Ref = useRef(null)
-  // Entrance and exit directions (randomized per trigger, independent)
-  const entranceDirRef = useRef('bottom') // 'bottom' | 'left'
-  const exitDirRef = useRef('bottom') // 'bottom' | 'left'
+  const zoo1ImgRef = useRef(null)
+  const zoo2ImgRef = useRef(null)
+  const zoo3ImgRef = useRef(null)
+  // Current variant index for this session (used for DEV readout)
+  const currentVariantRef = useRef(null)
   // Motion amplitude control (0 to 1, smoothly ramped)
   const motionAmpRef = useRef(0)
   const motionAmpRafRef = useRef(null)
   const shakeWrapperRef = useRef(null)
   
-  // Shuffle bag hooks for three independent bags
-  const bag1 = useShuffleBag({ bagKey: 'papaEggBag1', lastKey: 'papaEggLast1', N: IMAGE_SETS.length })
-  const bag2 = useShuffleBag({ bagKey: 'papaEggBag2', lastKey: 'papaEggLast2', N: IMAGE_SETS.length })
-  const bag3 = useShuffleBag({ bagKey: 'papaEggBag3', lastKey: 'papaEggLast3', N: IMAGE_SETS.length })
+  // Shuffle bag hook for Zoo set selection (one bag for all types, simpler than Papa)
+  const bag = useShuffleBag({ bagKey: 'zooEggBag', lastKey: 'zooEggLast', N: IMAGE_SETS_ZOO.length })
   
   // State for current image paths (defaults to first set, updated when variant is selected on first trigger)
-  const [imagePaths, setImagePaths] = useState(IMAGE_SETS[0]) // Default to first set, will be updated from bag on first trigger
-  // State for rarity: 'normal' | 'rare' | 'legendary'
-  const [rarity, setRarity] = useState('normal')
+  const [imagePaths, setImagePaths] = useState(IMAGE_SETS_ZOO[0])
+  
+  // Expose trigger and selectVariant methods via ref (for coordinator)
+  const selectZooVariant = useCallback(() => {
+    const N = IMAGE_SETS_ZOO.length
+    
+    if (N <= 1) {
+      // Fallback: use set 0 for all
+      setImagePaths(IMAGE_SETS_ZOO[0])
+      currentVariantRef.current = 0
+      return
+    }
+    
+    // Select one index using shuffle bag
+    const idx = bag.getNextIndex()
+    
+    // Build imagePaths: Zoo1 from idx, Zoo2 from idx, Zoo3 from idx (all from same set)
+    setImagePaths([
+      IMAGE_SETS_ZOO[idx][0], // Zoo1 from set idx
+      IMAGE_SETS_ZOO[idx][1], // Zoo2 from set idx
+      IMAGE_SETS_ZOO[idx][2]  // Zoo3 from set idx
+    ])
+    
+    // Store for DEV readout
+    currentVariantRef.current = idx
+  }, [bag])
+  
+  useImperativeHandle(ref, () => ({
+    trigger: (papaType = 1) => {
+      startAnimation(papaType)
+    },
+    selectVariant: () => {
+      selectZooVariant()
+    }
+  }), [selectZooVariant])
   
   // Timer helper: track all timers for cleanup
   const addTimer = (cb, delay) => {
@@ -124,7 +118,7 @@ const PapaEasterEgg = forwardRef(function PapaEasterEgg(props, ref) {
     timersRef.current = []
   }
   
-  // Smoothly tween motion amplitude using requestAnimationFrame
+  // Smoothly tween motion amplitude using requestAnimationFrame (same as Papa)
   const setMotionAmpSmooth = (target, duration = PAPA_CONFIG.timing.ampUpMs) => {
     // Cancel any existing animation
     if (motionAmpRafRef.current) {
@@ -165,18 +159,7 @@ const PapaEasterEgg = forwardRef(function PapaEasterEgg(props, ref) {
     motionAmpRafRef.current = requestAnimationFrame(animate)
   }
   
-  // Get deterministic micro-offset factor based on variant index (±1.5%)
-  const getVariantMicroOffsetFactor = (variantIndex) => {
-    if (variantIndex === null || variantIndex === undefined) {
-      return 1
-    }
-    // Deterministic hash-like method for stable offset per variant
-    const t = (variantIndex * 9301 + 49297) % 233280
-    const r = t / 233280 // 0..1
-    return 0.985 + r * (1.015 - 0.985) // Range: 0.985 to 1.015 (±1.5%)
-  }
-  
-  // Audio fade-out helpers
+  // Audio fade-out helpers (same as Papa)
   const cancelAudioFades = () => {
     if (fadeRafRef.current) {
       cancelAnimationFrame(fadeRafRef.current)
@@ -231,14 +214,14 @@ const PapaEasterEgg = forwardRef(function PapaEasterEgg(props, ref) {
     el.volume = baseVolume
   }
   
-  // Get sound source path for given papaType
+  // Get sound source path for given papaType (Zoo uses same sounds as Papa)
   const getSoundSrcForPapa = (papaType) => `/assets/audio/Gorilla${papaType}.mp3`
 
   // Audio fade constants
   const BASE_VOL = 0.4
   const FADE_MS = 300
 
-  // Play sound for specific papaType (uses existing audio element)
+  // Play sound for specific papaType (uses existing audio element, same as Papa)
   const playSoundForPapa = (papaType) => {
     try {
       const el = audioRef.current
@@ -262,12 +245,12 @@ const PapaEasterEgg = forwardRef(function PapaEasterEgg(props, ref) {
         scheduleEndFade(el, BASE_VOL, FADE_MS)
       }).catch(err => {
         if (process.env.NODE_ENV === 'development') {
-          console.debug('[PapaEasterEgg] Audio play failed:', err)
+          console.debug('[ZooEasterEgg] Audio play failed:', err)
         }
       })
     } catch (err) {
       if (process.env.NODE_ENV === 'development') {
-        console.debug('[PapaEasterEgg] Audio error:', err)
+        console.debug('[ZooEasterEgg] Audio error:', err)
       }
     }
   }
@@ -284,13 +267,13 @@ const PapaEasterEgg = forwardRef(function PapaEasterEgg(props, ref) {
       el.play().catch(err => {
         // Gracefully skip if file doesn't exist or play fails
         if (process.env.NODE_ENV === 'development') {
-          console.debug('[PapaEasterEgg] Banana pop sound not available:', err)
+          console.debug('[ZooEasterEgg] Banana pop sound not available:', err)
         }
       })
     } catch (err) {
       // Gracefully skip if audio creation fails
       if (process.env.NODE_ENV === 'development') {
-        console.debug('[PapaEasterEgg] Banana pop audio error:', err)
+        console.debug('[ZooEasterEgg] Banana pop audio error:', err)
       }
     }
   }
@@ -310,9 +293,9 @@ const PapaEasterEgg = forwardRef(function PapaEasterEgg(props, ref) {
     }
     
     // Reset all opacities
-    setPapa1Opacity(0)
-    setPapa2Opacity(0)
-    setPapa3Opacity(0)
+    setZoo1Opacity(0)
+    setZoo2Opacity(0)
+    setZoo3Opacity(0)
     
     // Reset banana burst flag for new animation
     bananaBurstShownRef.current = false
@@ -321,31 +304,17 @@ const PapaEasterEgg = forwardRef(function PapaEasterEgg(props, ref) {
     // Get config for this papaType
     const config = PAPA_CONFIG[papaType]
     const stayDuration = config.stayMs
-    const imageState = `papa${papaType}`
+    const imageState = `zoo${papaType}`
     
-    // Set opacity for the correct papa type
+    // Set opacity for the correct zoo type
     if (papaType === 1) {
-      setPapa1Opacity(1)
+      setZoo1Opacity(1)
     } else if (papaType === 2) {
-      setPapa2Opacity(1)
+      setZoo2Opacity(1)
     } else if (papaType === 3) {
-      setPapa3Opacity(1)
+      setZoo3Opacity(1)
     }
     
-    // Randomly choose entrance direction
-    entranceDirRef.current = Math.random() < 0.5 ? 'left' : 'bottom'
-    
-    // Choose exit direction with 60% bias toward opposite of entrance
-    if (Math.random() < 0.6) {
-      // 60%: exit opposite of entrance (intentional mismatch)
-      exitDirRef.current = entranceDirRef.current === 'left' ? 'bottom' : 'left'
-    } else {
-      // 40%: exit same as entrance
-      exitDirRef.current = entranceDirRef.current
-    }
-    
-    // Set to hidden first with the new entrance direction to ensure correct starting position
-    // Set amplitude to 0 immediately before showing
     // Generate random seed for shake direction intensity (0.7 to 1.3 range for variation)
     const seedX = 0.7 + Math.random() * 0.6 // 0.7 to 1.3
     const seedY = 0.7 + Math.random() * 0.6 // 0.7 to 1.3
@@ -388,9 +357,9 @@ const PapaEasterEgg = forwardRef(function PapaEasterEgg(props, ref) {
         // After transition completes, go to hidden
         addTimer(() => {
           setState('hidden')
-          setPapa1Opacity(0)
-          setPapa2Opacity(0)
-          setPapa3Opacity(0)
+          setZoo1Opacity(0)
+          setZoo2Opacity(0)
+          setZoo3Opacity(0)
         }, PAPA_CONFIG.timing.fallMs)
       }, PAPA_CONFIG.timing.ampDownMs)
     }, fallStartTime)
@@ -438,9 +407,9 @@ const PapaEasterEgg = forwardRef(function PapaEasterEgg(props, ref) {
     setShowBananaBurst(false)
     
     // Reset opacities
-    setPapa1Opacity(0)
-    setPapa2Opacity(0)
-    setPapa3Opacity(0)
+    setZoo1Opacity(0)
+    setZoo2Opacity(0)
+    setZoo3Opacity(0)
     
     // Ramp amplitude down before exit
     setMotionAmpSmooth(0, PAPA_CONFIG.timing.ampDownMs)
@@ -459,169 +428,31 @@ const PapaEasterEgg = forwardRef(function PapaEasterEgg(props, ref) {
     }, PAPA_CONFIG.timing.ampDownMs)
   }
   
-  // Roll rarity on first trigger: 2% rare, 0.3% legendary
-  const rollRarity = useCallback(() => {
-    if (typeof window === 'undefined') return 'normal'
-    
-    const roll = Math.random()
-    let newRarity = 'normal'
-    
-    if (roll < 0.003) {
-      // 0.3% chance: legendary
-      newRarity = 'legendary'
-    } else if (roll < 0.023) {
-      // 2% chance: rare (0.3% + 1.7% = 2%)
-      newRarity = 'rare'
-    }
-    
-    // Store in sessionStorage
-    try {
-      sessionStorage.setItem('papaEggRarity', newRarity)
-    } catch (err) {
-      if (process.env.NODE_ENV === 'development') {
-        console.debug('[PapaEasterEgg] Error saving rarity:', err)
-      }
-    }
-    
-    setRarity(newRarity)
-    return newRarity
-  }, [])
-  
-  // Helper to select three independent variants (only on first trigger of session)
-  const selectThreeVariants = useCallback(() => {
-    const N = IMAGE_SETS.length
-    
-    if (N <= 1) {
-      // Fallback: use set 0 for all
-      setImagePaths([IMAGE_SETS[0][0], IMAGE_SETS[0][1], IMAGE_SETS[0][2]])
-      currentVariant1Ref.current = 0
-      currentVariant2Ref.current = 0
-      currentVariant3Ref.current = 0
-      return
-    }
-    
-    // Select three independent indices using hooks
-    const idx1 = bag1.getNextIndex()
-    const idx2 = bag2.getNextIndex()
-    const idx3 = bag3.getNextIndex()
-    
-    // Build mixed imagePaths: Papa1 from idx1, Papa2 from idx2, Papa3 from idx3
-    setImagePaths([
-      IMAGE_SETS[idx1][0], // Papa1 from set idx1
-      IMAGE_SETS[idx2][1], // Papa2 from set idx2
-      IMAGE_SETS[idx3][2]  // Papa3 from set idx3
-    ])
-    
-    // Store for DEV readout and micro-offset
-    currentVariant1Ref.current = idx1
-    currentVariant2Ref.current = idx2
-    currentVariant3Ref.current = idx3
-    
-    // Roll rarity on first trigger
-    rollRarity()
-  }, [bag1, bag2, bag3, rollRarity])
-  
-  // Reset rarity state (called by coordinator on session reset)
-  const resetRarity = useCallback(() => {
-    setRarity('normal')
-  }, [])
-  
-  // Expose trigger, selectVariants, and resetRarity methods via ref (for coordinator)
-  // Must be defined after selectThreeVariants and resetRarity are defined
-  useImperativeHandle(ref, () => ({
-    trigger: (papaType = 1) => {
-      startAnimation(papaType)
-    },
-    selectVariants: () => {
-      selectThreeVariants()
-    },
-    resetRarity: () => {
-      resetRarity()
-    }
-  }), [selectThreeVariants, resetRarity])
-  
-  // Note: Threshold detection and session gating now handled by EasterEggCoordinator
-  // This component is triggered via ref.trigger() from the coordinator
-  
-  // DEV-only: Test trigger helper (doesn't mark thresholds in sessionStorage)
-  const triggerTest = (papaType) => {
-    // Always call variant selection and start animation (but don't mark thresholds)
-    selectThreeVariants()
-    startAnimation(papaType)
-  }
-  
-  // Load rarity from sessionStorage on mount
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    
-    try {
-      const stored = sessionStorage.getItem('papaEggRarity')
-      if (stored && ['normal', 'rare', 'legendary'].includes(stored)) {
-        setRarity(stored)
-      }
-    } catch (err) {
-      if (process.env.NODE_ENV === 'development') {
-        console.debug('[PapaEasterEgg] Error loading rarity:', err)
-      }
-    }
-  }, [])
-  
-  // Note: Rarity reset on session reset is now handled by EasterEggCoordinator
-  
-  // DEV-only: Clear session gating
-  const clearSession = () => {
-    try {
-      sessionStorage.removeItem('papaEasterEggTriggered')
-      sessionStorage.removeItem('papaEggRarity')
-      setRarity('normal')
-    } catch (err) {
-      console.debug('[PapaEasterEgg] Error clearing sessionStorage:', err)
-    }
-    // Note: Hook will reload on next fillPct change
-  }
-  
-  // DEV-only: Reset variant bags
-  const resetVariants = () => {
-    // Optional cleanup: Remove old single-bag keys if they exist
-    localStorage.removeItem('papaEasterEggVariantBag')
-    localStorage.removeItem('papaEasterEggLastVariantIndex')
-    
-    // Reset all three bags by clearing localStorage
-    localStorage.removeItem('papaEggBag1')
-    localStorage.removeItem('papaEggLast1')
-    localStorage.removeItem('papaEggBag2')
-    localStorage.removeItem('papaEggLast2')
-    localStorage.removeItem('papaEggBag3')
-    localStorage.removeItem('papaEggLast3')
-    
-    // Force reload by creating new hook instances (component will need to remount to fully reset)
-    // For now, just clear localStorage - hooks will regenerate on next use
-  }
   
   // Preload images for current variant
   useEffect(() => {
     const currentPaths = imagePaths
     
     // Preload image 1
-    papa1ImgRef.current = new Image()
-    papa1ImgRef.current.onerror = () => {
-      console.warn(`[PapaEasterEgg] Failed to preload image: ${currentPaths[0]}`)
+    zoo1ImgRef.current = new Image()
+    zoo1ImgRef.current.onerror = () => {
+      console.warn(`[ZooEasterEgg] Failed to preload image: ${currentPaths[0]}`)
     }
-    papa1ImgRef.current.src = currentPaths[0]
+    zoo1ImgRef.current.src = currentPaths[0]
     
     // Preload image 2
-    papa2ImgRef.current = new Image()
-    papa2ImgRef.current.onerror = () => {
-      console.warn(`[PapaEasterEgg] Failed to preload image: ${currentPaths[1]}`)
+    zoo2ImgRef.current = new Image()
+    zoo2ImgRef.current.onerror = () => {
+      console.warn(`[ZooEasterEgg] Failed to preload image: ${currentPaths[1]}`)
     }
-    papa2ImgRef.current.src = currentPaths[1]
+    zoo2ImgRef.current.src = currentPaths[1]
     
     // Preload image 3
-    papa3ImgRef.current = new Image()
-    papa3ImgRef.current.onerror = () => {
-      console.warn(`[PapaEasterEgg] Failed to preload image: ${currentPaths[2]}`)
+    zoo3ImgRef.current = new Image()
+    zoo3ImgRef.current.onerror = () => {
+      console.warn(`[ZooEasterEgg] Failed to preload image: ${currentPaths[2]}`)
     }
-    papa3ImgRef.current.src = currentPaths[2]
+    zoo3ImgRef.current.src = currentPaths[2]
   }, [imagePaths])
   
   // Cleanup timers on unmount
@@ -646,34 +477,26 @@ const PapaEasterEgg = forwardRef(function PapaEasterEgg(props, ref) {
     }
   }, [])
   
-  // Get transform based on state (base Y position) - using translate3d for GPU acceleration
+  // Get transform based on state (base Y position) - Zoo ALWAYS uses bottom entrance/exit
   const getTransform = () => {
     switch (state) {
       case 'hidden':
-        // Use entranceDir to determine hidden position (where entrance will start from)
-        return entranceDirRef.current === 'left' 
-          ? 'translate3d(-120vw, -23px, 0)'  // Off-screen left, same Y as final position
-          : 'translate3d(0, 450px, 0)'        // Off-screen bottom
+        return 'translate3d(0, 450px, 0)'  // Off-screen bottom
       case 'falling':
-        // Use exitDir to determine exit position (where it will exit to)
-        return exitDirRef.current === 'left'
-          ? 'translate3d(-120vw, -23px, 0)'  // Exit to left
-          : 'translate3d(0, 450px, 0)'        // Exit to bottom
-      case 'papa1':
-      case 'papa2':
-      case 'papa3':
-        return 'translate3d(-34px, -23px, 0)'  // Final position (moved down 7px from original -30px)
+        return 'translate3d(0, 450px, 0)'   // Exit to bottom
+      case 'zoo1':
+      case 'zoo2':
+      case 'zoo3':
+        return 'translate3d(35px, -23px, 0)'   // Final position (positive X moves further right)
       default:
-        return entranceDirRef.current === 'left'
-          ? 'translate3d(-120vw, -30px, 0)'
-          : 'translate3d(0, 450px, 0)'
+        return 'translate3d(0, 450px, 0)'
     }
   }
   
-  // Get transition duration and easing based on state
+  // Get transition duration and easing based on state (same as Papa)
   const getTransitionStyle = () => {
-    if (state === 'papa1' || state === 'papa2' || state === 'papa3') {
-      // Rise: smooth ease-out (applies when transitioning from hidden to any papa state)
+    if (state === 'zoo1' || state === 'zoo2' || state === 'zoo3') {
+      // Rise: smooth ease-out (applies when transitioning from hidden to any zoo state)
       return {
         duration: `${PAPA_CONFIG.timing.riseMs / 1000}s`,
         easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
@@ -748,20 +571,20 @@ const PapaEasterEgg = forwardRef(function PapaEasterEgg(props, ref) {
           25% { 
             --mx: 3;
             --my: -3;
-            --rot: 1.5;  // Rotation
-            --scale: 1.015;  // Forward lean
+            --rot: 1.5;
+            --scale: 1.015;
           }
           50% { 
             --mx: 0;
             --my: 0;
             --rot: 0;
-            --scale: 1.02;  // Stronger forward lean
+            --scale: 1.02;
           }
           75% { 
             --mx: -3;
             --my: 3;
-            --rot: -1.5;  // Rotation opposite
-            --scale: 1.015;  // Forward lean
+            --rot: -1.5;
+            --scale: 1.015;
           }
         }
         
@@ -827,32 +650,26 @@ const PapaEasterEgg = forwardRef(function PapaEasterEgg(props, ref) {
           }
         }
         
-        .papa-easter-egg-wrapper {
+        .zoo-easter-egg-wrapper {
           position: fixed;
-          left: 30px;
+          right: 30px;
           bottom: 0;
+          left: auto;
           z-index: 9999; /* Behind taskbar at 10000, above desktop content */
           height: 300px;
           width: auto;
+          max-width: calc(100vw - 60px); /* Prevent overflow on small screens */
           will-change: transform;
         }
         
-        .papa-easter-egg-wrapper.rare {
-          filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6)) drop-shadow(0 0 12px rgba(255, 215, 0, 0.4));
-        }
-        
-        .papa-easter-egg-wrapper.legendary {
-          filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 20px rgba(255, 140, 0, 0.6)) hue-rotate(5deg);
-        }
-        
-        .papa-easter-egg-shake-wrapper {
+        .zoo-easter-egg-shake-wrapper {
           position: relative;
           height: 100%;
           width: 100%;
           will-change: transform;
         }
         
-        .papa-easter-egg-shake-wrapper.calm {
+        .zoo-easter-egg-shake-wrapper.calm {
           animation: calmBob 1.0s ease-in-out infinite;
           transform: translate3d(
             calc(var(--mx, 0) * var(--amp, 0) * var(--sx, 1) * 1px),
@@ -862,7 +679,7 @@ const PapaEasterEgg = forwardRef(function PapaEasterEgg(props, ref) {
           scale(calc(1 + (var(--scale, 1) - 1) * var(--amp, 0)));
         }
         
-        .papa-easter-egg-shake-wrapper.medium {
+        .zoo-easter-egg-shake-wrapper.medium {
           animation: pulseJitter 0.22s ease-in-out infinite;
           transform: translate3d(
             calc(var(--mx, 0) * var(--amp, 0) * var(--sx, 1) * 1px),
@@ -872,7 +689,7 @@ const PapaEasterEgg = forwardRef(function PapaEasterEgg(props, ref) {
           scale(calc(1 + (var(--scale, 1) - 1) * var(--amp, 0)));
         }
         
-        .papa-easter-egg-shake-wrapper.raging {
+        .zoo-easter-egg-shake-wrapper.raging {
           animation: vibrate 0.1s infinite, ragePulse 0.3s ease-in-out infinite;
           transform: translate3d(
             calc(var(--mx, 0) * var(--amp, 0) * var(--sx, 1) * 1px),
@@ -881,39 +698,41 @@ const PapaEasterEgg = forwardRef(function PapaEasterEgg(props, ref) {
           ) rotate(calc(var(--rot, 0) * var(--amp, 0) * 1deg)) scale(calc(var(--pulseScale, 1) * var(--amp, 0) + (1 - var(--amp, 0))));
         }
         
-        .papa-easter-egg-inner {
+        .zoo-easter-egg-inner {
           position: relative;
           height: 100%;
           width: 100%;
+          /* Zoo images already face left, no mirroring needed */
         }
         
-        .papa-easter-egg-inner img {
+        .zoo-easter-egg-inner img {
           position: absolute;
           top: 0;
-          left: 0;
+          right: 0;
+          left: auto;
           height: 100%;
           width: auto;
           object-fit: contain;
-          object-position: left bottom;
+          object-position: right bottom;
           display: block;
           transition: opacity 0.2s ease-in-out;
           pointer-events: none;
         }
         
-        .papa-easter-egg-inner img.papa1 {
+        .zoo-easter-egg-inner img.zoo1 {
           z-index: 1;
         }
         
-        .papa-easter-egg-inner img.papa2 {
+        .zoo-easter-egg-inner img.zoo2 {
           z-index: 2;
         }
         
-        .papa-easter-egg-inner img.papa3 {
+        .zoo-easter-egg-inner img.zoo3 {
           z-index: 3;
         }
         
         @media (min-width: 768px) {
-          .papa-easter-egg-wrapper {
+          .zoo-easter-egg-wrapper {
             height: 450px;
           }
         }
@@ -981,7 +800,7 @@ const PapaEasterEgg = forwardRef(function PapaEasterEgg(props, ref) {
         .banana-burst {
           position: absolute;
           bottom: 20px;
-          left: 40px;
+          right: 40px;
           width: 32px;
           height: 32px;
           pointer-events: none;
@@ -1023,7 +842,7 @@ const PapaEasterEgg = forwardRef(function PapaEasterEgg(props, ref) {
       `}</style>
       
       <div
-        className={`papa-easter-egg-wrapper ${rarity !== 'normal' ? rarity : ''}`}
+        className="zoo-easter-egg-wrapper"
         style={{
           transform: getTransform(),
           transitionProperty: 'transform',
@@ -1034,50 +853,50 @@ const PapaEasterEgg = forwardRef(function PapaEasterEgg(props, ref) {
         onClick={handleDismiss}
         onTouchStart={handleDismiss}
         role="button"
-        aria-label="Papa Easter Egg"
+        aria-label="Zoo Easter Egg"
         tabIndex={state === 'hidden' ? -1 : 0}
       >
         {/* Inner wrapper for shake animation (separate from slide transform) */}
         <div 
           ref={shakeWrapperRef}
-          className={`papa-easter-egg-shake-wrapper ${
-            state === 'papa1' ? PAPA_CONFIG[1].shakeClass :
-            state === 'papa2' ? PAPA_CONFIG[2].shakeClass :
-            state === 'papa3' ? PAPA_CONFIG[3].shakeClass : ''
+          className={`zoo-easter-egg-shake-wrapper ${
+            state === 'zoo1' ? PAPA_CONFIG[1].shakeClass :
+            state === 'zoo2' ? PAPA_CONFIG[2].shakeClass :
+            state === 'zoo3' ? PAPA_CONFIG[3].shakeClass : ''
           }`}>
-          <div className="papa-easter-egg-inner">
+          <div className="zoo-easter-egg-inner">
             {/* All three images stacked, opacity controlled for smooth crossfade */}
             {/* Images use current variant's paths from imagePaths state */}
             <img
               src={imagePaths[0]}
-              alt="Papa"
+              alt="Zoo"
               draggable="false"
-              className="papa1"
-              style={{ opacity: papa1Opacity }}
+              className="zoo1"
+              style={{ opacity: zoo1Opacity }}
               onError={(e) => {
-                console.warn(`[PapaEasterEgg] Failed to load image: ${imagePaths[0]}`)
+                console.warn(`[ZooEasterEgg] Failed to load image: ${imagePaths[0]}`)
               }}
             />
             <img
               src={imagePaths[1]}
               alt=""
               draggable="false"
-              className="papa2"
-              style={{ opacity: papa2Opacity }}
+              className="zoo2"
+              style={{ opacity: zoo2Opacity }}
               aria-hidden="true"
               onError={(e) => {
-                console.warn(`[PapaEasterEgg] Failed to load image: ${imagePaths[1]}`)
+                console.warn(`[ZooEasterEgg] Failed to load image: ${imagePaths[1]}`)
               }}
             />
             <img
               src={imagePaths[2]}
               alt=""
               draggable="false"
-              className="papa3"
-              style={{ opacity: papa3Opacity }}
+              className="zoo3"
+              style={{ opacity: zoo3Opacity }}
               aria-hidden="true"
               onError={(e) => {
-                console.warn(`[PapaEasterEgg] Failed to load image: ${imagePaths[2]}`)
+                console.warn(`[ZooEasterEgg] Failed to load image: ${imagePaths[2]}`)
               }}
             />
           </div>
@@ -1101,5 +920,5 @@ const PapaEasterEgg = forwardRef(function PapaEasterEgg(props, ref) {
   )
 })
 
-export default PapaEasterEgg
+export default ZooEasterEgg
 

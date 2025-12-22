@@ -5,6 +5,9 @@ const DEXIE_API_BASE = 'https://api.dexie.space/v1'
 export async function fetchNFTDetails(launcherBech32) {
   try {
     const response = await fetch(`${MINTGARDEN_API_BASE}/nfts/${launcherBech32}`)
+    if (response.status === 429) {
+      throw new Error('429 rate limit - MintGarden API')
+    }
     if (!response.ok) {
       throw new Error(`MintGarden API error: ${response.status}`)
     }
@@ -15,9 +18,153 @@ export async function fetchNFTDetails(launcherBech32) {
   }
 }
 
-// Get NFT thumbnail URL
+// Get NFT thumbnail URL (MintGarden API)
 export function getNFTThumbnailUrl(launcherBech32) {
   return `${MINTGARDEN_API_BASE}/nfts/${launcherBech32}/thumbnail`
+}
+
+// IPFS base URL for Wojak NFT images
+const IPFS_BASE = 'https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link'
+
+/**
+ * Extract token ID from MintGarden API response
+ * @param {Object} mintGardenData - MintGarden API response
+ * @returns {string|null} - Token ID as string or null
+ */
+function extractTokenIdFromMintGarden(mintGardenData) {
+  if (!mintGardenData) {
+    if (import.meta.env.DEV) {
+      console.warn('[IPFS Thumbnail] No MintGarden data provided')
+    }
+    return null
+  }
+  
+  const metadataJson = mintGardenData.data?.metadata_json || {}
+  const dataObj = mintGardenData.data || {}
+  
+  // Priority 1: Explicit token_id field from metadata_json
+  if (metadataJson.token_id !== undefined && metadataJson.token_id !== null) {
+    const tokenId = String(metadataJson.token_id)
+    if (import.meta.env.DEV) {
+      console.log(`[IPFS Thumbnail] Found token_id in metadata_json: ${tokenId}`)
+    }
+    return tokenId
+  }
+  
+  // Priority 2: token_id from data object
+  if (dataObj.token_id !== undefined && dataObj.token_id !== null) {
+    const tokenId = String(dataObj.token_id)
+    if (import.meta.env.DEV) {
+      console.log(`[IPFS Thumbnail] Found token_id in data object: ${tokenId}`)
+    }
+    return tokenId
+  }
+  
+  // Priority 3: Extract from metadata_json.image if it contains /####.png
+  if (metadataJson.image) {
+    const imageMatch = metadataJson.image.match(/\/(\d+)\.png/)
+    if (imageMatch && imageMatch[1]) {
+      const tokenId = imageMatch[1]
+      if (import.meta.env.DEV) {
+        console.log(`[IPFS Thumbnail] Extracted token_id from image URL: ${tokenId}`)
+      }
+      return tokenId
+    }
+  }
+  
+  // Priority 4: Extract from metadata_json.name pattern #123 or "NFT #123" or "123"
+  if (metadataJson.name) {
+    // Try pattern #123 first
+    let nameMatch = metadataJson.name.match(/#\s*(\d+)/)
+    if (!nameMatch) {
+      // Try pattern "NFT 123" or just "123"
+      nameMatch = metadataJson.name.match(/\b(\d+)\b/)
+    }
+    if (nameMatch && nameMatch[1]) {
+      const tokenId = nameMatch[1]
+      if (import.meta.env.DEV) {
+        console.log(`[IPFS Thumbnail] Extracted token_id from name: ${tokenId} (from "${metadataJson.name}")`)
+      }
+      return tokenId
+    }
+  }
+  
+  // Priority 5: edition_number
+  if (metadataJson.edition_number !== undefined && metadataJson.edition_number !== null) {
+    const tokenId = String(metadataJson.edition_number)
+    if (import.meta.env.DEV) {
+      console.log(`[IPFS Thumbnail] Found edition_number: ${tokenId}`)
+    }
+    return tokenId
+  }
+  
+  if (import.meta.env.DEV) {
+    console.warn('[IPFS Thumbnail] Could not extract token ID from MintGarden data:', {
+      hasMetadataJson: !!mintGardenData.data?.metadata_json,
+      hasData: !!mintGardenData.data,
+      name: metadataJson.name,
+      image: metadataJson.image,
+    })
+  }
+  
+  return null
+}
+
+/**
+ * Extract numeric token ID from NFT name (e.g., "Wojak #123" -> "123")
+ * @param {string} nftName - NFT name that may contain token ID
+ * @returns {string|null} - Token ID as string or null if not found
+ */
+export function extractTokenIdFromName(nftName) {
+  if (!nftName) return null
+  
+  // Try pattern #123 first (most common)
+  let match = nftName.match(/#\s*(\d+)/)
+  if (match && match[1]) {
+    return match[1]
+  }
+  
+  // Try pattern "NFT 123" or just standalone number
+  match = nftName.match(/\b(\d{1,5})\b/)
+  if (match && match[1]) {
+    return match[1]
+  }
+  
+  return null
+}
+
+/**
+ * Create IPFS thumbnail URL directly from token ID (numeric)
+ * Format: https://...ipfs.w3s.link/{tokenId4}.png (token ID padded to 4 digits)
+ * @param {string|number} tokenId - Numeric token ID (e.g., "123" or 123)
+ * @returns {string|null} - IPFS thumbnail URL or null if token ID invalid
+ */
+export function createIPFSThumbnailUrl(tokenId) {
+  if (!tokenId) return null
+  
+  const tokenIdStr = String(tokenId).trim()
+  // Validate it's a numeric string
+  if (!/^\d+$/.test(tokenIdStr)) {
+    return null
+  }
+  
+  // Pad token ID to 4 digits (e.g., 1 -> 0001, 2345 -> 2345) to match IPFS file naming
+  const tokenId4 = tokenIdStr.padStart(4, '0')
+  return `${IPFS_BASE}/${tokenId4}.png`
+}
+
+/**
+ * Get IPFS thumbnail URL for Wojak NFT using token ID from MintGarden
+ * Format: https://...ipfs.w3s.link/{tokenId4}.png (token ID padded to 4 digits)
+ * @param {Object} mintGardenData - MintGarden API response
+ * @returns {string|null} - IPFS thumbnail URL or null if token ID not found
+ */
+export function getIPFSThumbnailUrl(mintGardenData) {
+  const tokenId = extractTokenIdFromMintGarden(mintGardenData)
+  if (!tokenId) {
+    return null
+  }
+  return createIPFSThumbnailUrl(tokenId)
 }
 
 // Search for NFTs by name/collection
@@ -70,6 +217,10 @@ export async function getOfferFromDexie(offerFileString) {
       },
       body: JSON.stringify({ offer: offerFileString }),
     })
+    
+    if (response.status === 429) {
+      throw new Error('429 rate limit - Dexie API')
+    }
     
     if (!response.ok) {
       throw new Error(`Dexie API error: ${response.status}`)

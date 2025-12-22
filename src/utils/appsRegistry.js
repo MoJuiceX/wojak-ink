@@ -15,7 +15,7 @@ export const APPS = [
   {
     id: 'window-mint-info-exe',
     windowId: 'window-mint-info-exe',
-    title: 'MINT_INFO.EXE',
+    title: 'MINT_INFO.TXT',
     icon: 'scroll-to-mint',
     action: 'scroll-to-mint',
     alwaysVisible: true,

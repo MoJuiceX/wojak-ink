@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useWindow } from '../contexts/WindowContext'
 import { useOrangeToy } from '../contexts/OrangeToyContext'
 import { ensureOrangeAudioUnlocked, playOrangeClickSound } from '../utils/orangeSound'
-import OrangeGlassWindow from './orange/OrangeGlassWindow'
 import './OrangeToyLayer.css'
 
 const ORANGE_SIZE = 150
@@ -18,16 +17,31 @@ const SOUND_COOLDOWN_MS = 100 // Cooldown between sound effects
 const AIRBORNE_THRESHOLD = 6 // Pixels above floor to be considered airborne
 const SETTLE_THRESHOLD = 0.5
 const WAKE_UP_DISTANCE = 100 // Distance from mouse to wake up sleeping orange
+const SCORE_FLUSH_INTERVAL_MS = 150 // Score batching interval
 
 export default function OrangeToyLayer() {
   const { getWindow, isWindowMinimized } = useWindow()
-  const { score, incrementScore, addPoints, requiredScore, fillPct, glassSrc, orangeExistsRef } = useOrangeToy()
+  const { addPoints, orangeExistsRef } = useOrangeToy()
   const orangeRef = useRef(null)
-  const rafRef = useRef(null)
+  const loopRef = useRef(null)
   const isSleepingRef = useRef(false)
   const lastMousePosRef = useRef({ x: 0, y: 0 })
   const taskbarHeightRef = useRef(48) // Default fallback
-  const animationTimeoutsRef = useRef([])
+  
+  // Callback refs (stabilize loop dependencies)
+  const addPointsRef = useRef(null)
+  const handleMouseBounceRef = useRef(null)
+  const getWindowRef = useRef(null)
+  const isWindowMinimizedRef = useRef(null)
+  
+  // Score batching refs
+  const pendingScoreDeltaRef = useRef(0)
+  const lastScoreFlushMsRef = useRef(0)
+  
+  // Animation refs (replace React state)
+  const splashAnimationsRef = useRef([])
+  const plusOneAnimationsRef = useRef([])
+  const animationsContainerRef = useRef(null)
   
   // Combo state refs
   const comboAliveRef = useRef(false) // True if no ground touch since last scored mouse bounce
@@ -38,8 +52,6 @@ export default function OrangeToyLayer() {
   const soundCooldownRef = useRef(0) // Cooldown for sound effects
   
   const [orangeExists, setOrangeExists] = useState(false)
-  const [splashAnimations, setSplashAnimations] = useState([])
-  const [plusOneAnimations, setPlusOneAnimations] = useState([])
 
   // Orange state: { x, y, vx, vy, rotation }
   const orangeStateRef = useRef(null)
@@ -55,6 +67,27 @@ export default function OrangeToyLayer() {
       rotationVel: 0
     }
   }, [])
+
+  // Handle mouse bounce callback - updates animation refs directly (no setState)
+  // Visuals only - no scoring (scoring happens separately via addPoints)
+  // Defined early so it can be used in ref updates
+  const handleMouseBounce = useCallback((x, y, delta) => {
+    // Add splash animation to ref
+    const splashId = performance.now()
+    splashAnimationsRef.current.push({ id: splashId, x, y, createdAt: performance.now() })
+
+    // Add +{delta} animation to ref
+    const plusOneId = performance.now() + 1
+    plusOneAnimationsRef.current.push({ id: plusOneId, x, y, value: delta, createdAt: performance.now() })
+  }, [])
+
+  // Update callback refs when callbacks change (stabilize loop dependencies)
+  useEffect(() => {
+    addPointsRef.current = addPoints
+    handleMouseBounceRef.current = handleMouseBounce
+    getWindowRef.current = getWindow
+    isWindowMinimizedRef.current = isWindowMinimized
+  }, [addPoints, handleMouseBounce, getWindow, isWindowMinimized])
 
   // Read taskbar height once on mount
   useEffect(() => {
@@ -114,49 +147,41 @@ export default function OrangeToyLayer() {
       if (orangeExistsRef) {
         orangeExistsRef.current = false
       }
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current)
-        rafRef.current = null
+      if (loopRef.current) {
+        cancelAnimationFrame(loopRef.current)
+        loopRef.current = null
       }
     }
   }, [isTangGangOpen, orangeExists, orangeExistsRef])
 
-  // Handle mouse bounce callback - defined early so it can be used in animation loop
-  // Visuals only - no scoring (scoring happens separately via addPoints)
-  const handleMouseBounce = useCallback((x, y, delta) => {
-    // Add splash animation
-    const splashId = performance.now()
-    setSplashAnimations(prev => [...prev, { id: splashId, x, y }])
-    const splashTimeout = setTimeout(() => {
-      setSplashAnimations(prev => prev.filter(s => s.id !== splashId))
-    }, 600)
-    animationTimeoutsRef.current.push(splashTimeout)
 
-    // Add +{delta} animation with value stored
-    const plusOneId = performance.now() + 1
-    setPlusOneAnimations(prev => [...prev, { id: plusOneId, x, y, value: delta }])
-    const plusOneTimeout = setTimeout(() => {
-      setPlusOneAnimations(prev => prev.filter(p => p.id !== plusOneId))
-    }, 1000)
-    animationTimeoutsRef.current.push(plusOneTimeout)
-  }, [])
-
-  // Start animation loop - defined before wakeUp
-  const startAnimationLoop = useCallback(() => {
-    if (rafRef.current) return // Already running
-
+  // Start animation loop once - never restarts (reads all values from refs)
+  useEffect(() => {
     const animate = () => {
-      if (!orangeStateRef.current || !orangeRef.current) {
-        rafRef.current = null
+      // Only animate if orange exists and is not sleeping
+      if (!orangeStateRef.current || !orangeRef.current || isSleepingRef.current) {
+        loopRef.current = requestAnimationFrame(animate)
         return
       }
 
       const state = orangeStateRef.current
       const floor = window.innerHeight - taskbarHeightRef.current
+      const now = performance.now()
 
-      // Check if TangGang window is open (check dynamically, not from closure)
-      const tanggangWindow = getWindow('tanggang')
-      const isTangGangOpenNow = tanggangWindow && !isWindowMinimized('tanggang')
+      // Check if TangGang window is open (read from refs)
+      const getWindowFn = getWindowRef.current
+      const isWindowMinimizedFn = isWindowMinimizedRef.current
+      if (!getWindowFn || !isWindowMinimizedFn) {
+        loopRef.current = requestAnimationFrame(animate)
+        return
+      }
+
+      const tanggangWindow = getWindowFn('tanggang')
+      const isTangGangOpenNow = tanggangWindow && !isWindowMinimizedFn('tanggang')
+      if (!isTangGangOpenNow) {
+        loopRef.current = requestAnimationFrame(animate)
+        return
+      }
 
       // Apply gravity
       state.vy += GRAVITY
@@ -196,7 +221,6 @@ export default function OrangeToyLayer() {
       }
 
       // Mouse paddle collision + bounce (always bounces when overlapping)
-      const now = performance.now()
       const mouseX = lastMousePosRef.current.x
       const mouseY = lastMousePosRef.current.y
       const dx = state.x - mouseX
@@ -208,9 +232,8 @@ export default function OrangeToyLayer() {
       // Wake up sleeping orange if mouse is nearby (during active animation)
       if (isSleepingRef.current && dist < WAKE_UP_DISTANCE) {
         isSleepingRef.current = false
-        // Continue animation loop
-        rafRef.current = requestAnimationFrame(animate)
-        return // Skip rest of frame, will continue next frame
+        loopRef.current = requestAnimationFrame(animate)
+        return
       }
 
       if (isInContact && dist > 0.001) {
@@ -262,11 +285,14 @@ export default function OrangeToyLayer() {
           const delta = totalPointsForStreak - lastScoredStreakRef.current
           
           if (delta > 0) {
-            // Award points in single state update
-            addPoints(delta)
+            // Accumulate score delta for batching (instead of calling addPoints directly)
+            pendingScoreDeltaRef.current += delta
             
             // Show animation with delta value (visuals only, no scoring)
-            handleMouseBounce(state.x, state.y, delta)
+            const handleMouseBounceFn = handleMouseBounceRef.current
+            if (handleMouseBounceFn) {
+              handleMouseBounceFn(state.x, state.y, delta)
+            }
             
             // Update last scored streak
             lastScoredStreakRef.current = totalPointsForStreak
@@ -280,6 +306,25 @@ export default function OrangeToyLayer() {
 
       // Update contact state for next frame
       wasInContactRef.current = isInContact
+
+      // Score batching: flush accumulated score every 150ms
+      if (now - lastScoreFlushMsRef.current >= SCORE_FLUSH_INTERVAL_MS && pendingScoreDeltaRef.current > 0) {
+        const addPointsFn = addPointsRef.current
+        if (addPointsFn) {
+          addPointsFn(pendingScoreDeltaRef.current)
+        }
+        pendingScoreDeltaRef.current = 0
+        lastScoreFlushMsRef.current = now
+      }
+
+      // Clean up expired animations from refs
+      const nowMs = performance.now()
+      splashAnimationsRef.current = splashAnimationsRef.current.filter(
+        splash => (nowMs - splash.createdAt) < 600
+      )
+      plusOneAnimationsRef.current = plusOneAnimationsRef.current.filter(
+        plusOne => (nowMs - plusOne.createdAt) < 1000
+      )
 
       // Apply friction
       state.vx *= FRICTION
@@ -295,30 +340,28 @@ export default function OrangeToyLayer() {
 
       if (isSettled) {
         isSleepingRef.current = true
-        rafRef.current = null
+        loopRef.current = requestAnimationFrame(animate)
         return
       }
 
-      rafRef.current = requestAnimationFrame(animate)
+      loopRef.current = requestAnimationFrame(animate)
     }
 
-    rafRef.current = requestAnimationFrame(animate)
-  }, [orangeExists, getWindow, isWindowMinimized, handleMouseBounce, addPoints])
-
-  // Wake up function - defined after startAnimationLoop
-  const wakeUp = useCallback(() => {
-    if (isSleepingRef.current) {
-      isSleepingRef.current = false
-      startAnimationLoop()
+    loopRef.current = requestAnimationFrame(animate)
+    return () => {
+      if (loopRef.current) {
+        cancelAnimationFrame(loopRef.current)
+        loopRef.current = null
+      }
     }
-  }, [startAnimationLoop])
+  }, []) // Empty deps - starts once, never restarts
 
   // Lightweight mousemove listener - updates position ref and wakes up sleeping orange
   useEffect(() => {
     const handleMouseMove = (e) => {
       lastMousePosRef.current = { x: e.clientX, y: e.clientY }
       
-      // Wake up sleeping orange if mouse is nearby
+      // Wake up sleeping orange if mouse is nearby (loop will handle animation)
       if (isSleepingRef.current && orangeStateRef.current && orangeRef.current) {
         const dx = orangeStateRef.current.x - e.clientX
         const dy = orangeStateRef.current.y - e.clientY
@@ -326,34 +369,67 @@ export default function OrangeToyLayer() {
         
         if (dist < WAKE_UP_DISTANCE) {
           isSleepingRef.current = false
-          startAnimationLoop()
         }
       }
     }
 
     document.addEventListener('mousemove', handleMouseMove)
     return () => document.removeEventListener('mousemove', handleMouseMove)
-  }, [startAnimationLoop])
+  }, [])
 
-  // Start animation when orange exists
+  // Imperative animation rendering - separate rAF loop for DOM updates
   useEffect(() => {
-    if (orangeExists && !isSleepingRef.current) {
-      startAnimationLoop()
-    }
-    return () => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current)
-        rafRef.current = null
+    const renderAnimations = () => {
+      const container = animationsContainerRef.current
+      if (!container) {
+        requestAnimationFrame(renderAnimations)
+        return
       }
+
+      // Clear container
+      container.innerHTML = ''
+
+      // Render splash animations from ref
+      splashAnimationsRef.current.forEach(splash => {
+        const splashEl = document.createElement('div')
+        splashEl.className = 'splash-animation'
+        splashEl.style.position = 'fixed'
+        splashEl.style.left = `${splash.x}px`
+        splashEl.style.top = `${splash.y}px`
+        splashEl.style.transform = 'translate(-50%, -50%)'
+        splashEl.style.zIndex = '10001'
+        splashEl.style.pointerEvents = 'none'
+        splashEl.style.userSelect = 'none'
+        
+        const splashCircle = document.createElement('div')
+        splashCircle.className = 'splash-circle'
+        splashEl.appendChild(splashCircle)
+        
+        container.appendChild(splashEl)
+      })
+
+      // Render +{delta} animations from ref
+      plusOneAnimationsRef.current.forEach(plusOne => {
+        const plusOneEl = document.createElement('div')
+        plusOneEl.className = 'plus-one-animation'
+        plusOneEl.style.position = 'fixed'
+        plusOneEl.style.left = `${plusOne.x}px`
+        plusOneEl.style.top = `${plusOne.y}px`
+        plusOneEl.style.transform = 'translate(-50%, -50%)'
+        plusOneEl.style.zIndex = '10002'
+        plusOneEl.style.pointerEvents = 'none'
+        plusOneEl.style.userSelect = 'none'
+        plusOneEl.textContent = `+${plusOne.value}`
+        
+        container.appendChild(plusOneEl)
+      })
+
+      requestAnimationFrame(renderAnimations)
     }
-  }, [orangeExists, startAnimationLoop])
 
-
-  // Cleanup animation timeouts on unmount
-  useEffect(() => {
+    const animationRafId = requestAnimationFrame(renderAnimations)
     return () => {
-      animationTimeoutsRef.current.forEach(timeout => clearTimeout(timeout))
-      animationTimeoutsRef.current = []
+      cancelAnimationFrame(animationRafId)
     }
   }, [])
 
@@ -387,42 +463,20 @@ export default function OrangeToyLayer() {
         </div>
       )}
 
-      {/* Splash animations */}
-      {splashAnimations.map(splash => (
-        <div
-          key={splash.id}
-          className="splash-animation"
-          style={{
-            position: 'fixed',
-            left: `${splash.x}px`,
-            top: `${splash.y}px`,
-            transform: 'translate(-50%, -50%)',
-            zIndex: 10001,
-          }}
-        >
-          <div className="splash-circle"></div>
-        </div>
-      ))}
-
-      {/* +{delta} animations */}
-      {plusOneAnimations.map(plusOne => (
-        <div
-          key={plusOne.id}
-          className="plus-one-animation"
-          style={{
-            position: 'fixed',
-            left: `${plusOne.x}px`,
-            top: `${plusOne.y}px`,
-            transform: 'translate(-50%, -50%)',
-            zIndex: 10002,
-          }}
-        >
-          +{plusOne.value}
-        </div>
-      ))}
-
-      {/* Glass fill window */}
-      <OrangeGlassWindow glassSrc={glassSrc} />
+      {/* Animations overlay container (imperative rendering) */}
+      <div
+        ref={animationsContainerRef}
+        className="animations-overlay"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+          zIndex: 10001,
+        }}
+      />
     </div>
   )
 }

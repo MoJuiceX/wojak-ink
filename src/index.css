@@ -253,6 +253,35 @@ textarea:focus-visible {
   box-shadow: none !important;
 }
 
+/* Shortcut arrow overlay for LINKS icons (Windows 98 style) */
+.desktop-icon-shortcut-arrow {
+  position: absolute;
+  bottom: -2px;
+  left: -2px;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border: 1px outset #c0c0c0;
+  font-size: 9px;
+  line-height: 12px;
+  text-align: center;
+  color: #000;
+  font-family: 'MS Sans Serif', sans-serif;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: none;
+  user-select: none;
+  text-shadow: none;
+  /* Windows 98 style border */
+  box-shadow: 
+    inset 1px 1px 0 #fff,
+    inset -1px -1px 0 #808080,
+    1px 1px 0 #000;
+}
+
 /* Mobile: Use lighter blue for better visibility */
 @media (max-width: 640px) {
   .title-bar-controls button:focus-visible,
@@ -426,11 +455,6 @@ a,
 
 /* Orange glass fill window - Win98 style */
 .orange-glass-window {
-  position: fixed;
-  right: 14px;
-  bottom: 60px; /* above taskbar */
-  top: auto;
-  z-index: 10050;
   background: #c0c0c0;
   border: 2px outset #c0c0c0;
   padding: 8px;
@@ -453,6 +477,53 @@ a,
   height: auto;
   display: block;
   pointer-events: none;
+}
+
+/* HOA logo wrapper for glass overlay */
+.hoa-logo-wrapper {
+  position: relative;
+  display: inline-block;
+  line-height: 0; /* prevents baseline whitespace */
+}
+
+/* TangGang HOA logo image */
+.hoa-logo-img {
+  display: block; /* remove inline baseline spacing */
+  width: 100%;
+  height: auto;
+}
+
+.hoa-glass-overlay {
+  position: absolute;
+  left: 55%;   /* moved a fraction LEFT */
+  top: 60%;    /* moved a little UP */
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Overlay mode: strip window chrome, keep meter visuals intact */
+.orange-glass-window[data-variant="overlay"] {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  width: auto;
+}
+
+/* Strip inner chrome wrappers in overlay mode */
+.orange-glass-window[data-variant="overlay"] .orange-glass-window-inner {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+/* Ensure the actual glass image/meter remains visible */
+.orange-glass-window[data-variant="overlay"] img {
+  display: block;
+  width: clamp(140px, 35%, 220px); /* bigger */
+  height: auto;
+  image-rendering: pixelated;
+  background: transparent;
 }
 
 /* Skeleton Shimmer Animation - GPU-friendly using transform */

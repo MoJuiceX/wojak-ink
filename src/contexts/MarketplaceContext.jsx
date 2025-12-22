@@ -1,7 +1,6 @@
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
-import { getOfferFromDexie } from '../services/mintgardenApi'
+import { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { resolveNFTFromOfferFile } from '../utils/nftResolver'
-import { fetchNFTDetails, getNFTThumbnailUrl } from '../services/mintgardenApi'
+import { getNFTThumbnailUrl, getIPFSThumbnailUrl, createIPFSThumbnailUrl, extractTokenIdFromName, getOfferFromDexie } from '../services/mintgardenApi'
 
 export const MarketplaceContext = createContext()
 
@@ -27,8 +26,29 @@ const isNFTVisible = (details, now, hideAfterMs) => {
 
 // Removed: generateNFTs() and TOKEN_GROUPS - now loaded from CSV
 
-// Parse CSV text with header: group,offerfile,id,tokenId4,ipfsLink,nftId,name,source
-// Returns array of NFT entries with: { id, group, offerFile, thumbnail }
+// Helper to generate stable hash-based ID from offer string
+const hashOfferString = (offer) => {
+  let hash = 5381
+  for (let i = 0; i < offer.length; i++) {
+    hash = ((hash << 5) + hash) + offer.charCodeAt(i)
+    hash |= 0
+  }
+  const unsigned = hash >>> 0
+  return unsigned.toString(16).padStart(8, '0')
+}
+
+// Compute fingerprint (djb2 hash) of CSV content for cache busting
+const computeCSVFingerprint = (csvText) => {
+  let hash = 5381
+  for (let i = 0; i < csvText.length; i++) {
+    hash = ((hash << 5) + hash) + csvText.charCodeAt(i)
+    hash |= 0
+  }
+  return hash >>> 0
+}
+
+// Parse CSV text - supports 2-column format (no header): GROUP,offer1...
+// Returns array of NFT entries with: { id, group, offerFile, thumbnail, nftId }
 const parseOfferFilesCSV = (csvText) => {
   const nftEntries = []
   const offerFiles = {}
@@ -39,37 +59,13 @@ const parseOfferFilesCSV = (csvText) => {
     return { nftEntries, offerFiles }
   }
 
-  // Parse header row (case-insensitive, trimmed)
-  const header = lines[0]
-  const headerParts = header.split(',').map(p => p.trim())
-  const headerLower = headerParts.map(p => p.toLowerCase())
+  // Check if first line is a header (contains "group" or "offerfile" case-insensitive)
+  const firstLine = lines[0].toLowerCase()
+  const hasHeader = firstLine.includes('group') || firstLine.includes('offerfile') || firstLine.includes('offer_file')
+  const startIdx = hasHeader ? 1 : 0
 
-  // Find column indexes (case-insensitive matching)
-  const groupIdx = headerLower.findIndex(name => name === 'group')
-  const idIdx = headerLower.findIndex(name => name === 'id')
-  const ipfsLinkIdx = headerLower.findIndex(name => name === 'ipfslink' || name === 'ipfs link')
-  const offerFileIdx = headerLower.findIndex(name => name === 'offerfile' || name === 'offer_file' || name === 'offer')
-  const nftIdIdx = headerLower.findIndex(name => name === 'nftid' || name === 'nft_id')
-
-  // Validate required columns
-  if (groupIdx === -1 || offerFileIdx === -1) {
-    console.error('CSV missing required columns: Group and offerfile must be present')
-    return { nftEntries, offerFiles }
-  }
-
-  // Helper to generate stable hash-based ID when CSV ID is empty
-  const hashOfferString = (offer) => {
-    let hash = 5381
-    for (let i = 0; i < offer.length; i++) {
-      hash = ((hash << 5) + hash) + offer.charCodeAt(i)
-      hash |= 0
-    }
-    const unsigned = hash >>> 0
-    return unsigned.toString(16).padStart(8, '0')
-  }
-
-  // Parse data rows
-  for (let i = 1; i < lines.length; i++) {
+  // Parse data rows (skip header if present)
+  for (let i = startIdx; i < lines.length; i++) {
     const line = lines[i]
     if (!line) continue
 
@@ -95,38 +91,25 @@ const parseOfferFilesCSV = (csvText) => {
     }
     parts.push(current.trim()) // Add last part
 
-    // Extract required fields
-    const group = groupIdx < parts.length ? parts[groupIdx].trim().toUpperCase() : null
-    const offerFile = offerFileIdx < parts.length ? parts[offerFileIdx].trim() : null
+    // Extract group (column 0) and offerFile (column 1)
+    const group = parts.length > 0 ? parts[0].trim().toUpperCase() : null
+    const offerFile = parts.length > 1 ? parts[1].trim() : null
 
-    // Validate offer file
-    if (!offerFile || !offerFile.startsWith('offer1')) {
+    // Validate required fields
+    if (!group || !offerFile || !offerFile.startsWith('offer1')) {
       continue // Skip invalid rows
     }
 
-    // Extract fields
-    // Use id column if present, otherwise fallback to hash
-    const id = (idIdx !== -1 && idIdx < parts.length && parts[idIdx]) 
-      ? parts[idIdx].trim() 
-      : `OFFER-${hashOfferString(offerFile)}` // Fallback to hash-based ID
-    
-    // Extract IPFS link (thumbnail)
-    const thumbnail = (ipfsLinkIdx !== -1 && ipfsLinkIdx < parts.length && parts[ipfsLinkIdx])
-      ? parts[ipfsLinkIdx].trim()
-      : null // Can be empty
+    // Generate stable ID from offer file hash
+    const id = `OFFER-${hashOfferString(offerFile)}`
 
-    // Extract nftId (for reference, not used as primary ID)
-    const nftId = (nftIdIdx !== -1 && nftIdIdx < parts.length && parts[nftIdIdx])
-      ? parts[nftIdIdx].trim()
-      : null
-
-    // Build entry
+    // Build entry (thumbnail and nftId will be null, populated from API later)
     nftEntries.push({
       id, // Stable OFFER-<hash> identifier
       group,
       offerFile,
-      thumbnail, // IPFS link for preview image (never override from API)
-      nftId, // MintGarden launcher_bech32 (for reference)
+      thumbnail: null, // Will be populated from API
+      nftId: null, // Will be populated from API
     })
     offerFiles[id] = offerFile
   }
@@ -137,21 +120,44 @@ const parseOfferFilesCSV = (csvText) => {
 // Fixed token groups in preferred order - only XCH is active, others are all sold
 const PREFERRED_TOKEN_GROUPS = ['XCH']
 
-// Load offer files from CSV
+// Marketplace CSV configuration
+const MARKETPLACE_CSV_URL = '/assets/images/newestoffers.csv'
+const FINGERPRINT_KEY = 'marketplace_csv_fingerprint'
+
+// Load offer files from CSV with fingerprint-based cache busting
+// Returns { nftEntries, offerFiles, fingerprintChanged }
 const loadOfferFilesFromCSV = async () => {
   try {
-    // Load from /assets/offers_enriched.csv with cache-busting
-    const response = await fetch(`/assets/offers_enriched.csv?v=${Date.now()}`)
+    // Fetch with no-store to always get fresh content
+    const response = await fetch(MARKETPLACE_CSV_URL, { cache: 'no-store' })
     if (!response.ok) {
       console.error(`Failed to load marketplace CSV: ${response.status}`)
-      return { nftEntries: [], offerFiles: {} }
+      return { nftEntries: [], offerFiles: {}, fingerprintChanged: false }
     }
     
     const csvText = await response.text()
-    return parseOfferFilesCSV(csvText)
+    
+    // Compute fingerprint of current CSV
+    const currentFingerprint = computeCSVFingerprint(csvText)
+    const storedFingerprint = localStorage.getItem(FINGERPRINT_KEY)
+    const fingerprintChanged = storedFingerprint && storedFingerprint !== String(currentFingerprint)
+    
+    // If fingerprint changed, clear localStorage caches
+    if (fingerprintChanged) {
+      localStorage.removeItem(STORAGE_KEYS.OFFER_FILES)
+      console.log('[Marketplace] CSV fingerprint changed, cleared localStorage caches')
+    }
+    
+    // Parse CSV
+    const parsed = parseOfferFilesCSV(csvText)
+    
+    // Store new fingerprint only after successful parse
+    localStorage.setItem(FINGERPRINT_KEY, String(currentFingerprint))
+    
+    return { ...parsed, fingerprintChanged }
   } catch (err) {
     console.error('Failed to load offer files from CSV:', err)
-    return { nftEntries: [], offerFiles: {} }
+    return { nftEntries: [], offerFiles: {}, fingerprintChanged: false }
   }
 }
 
@@ -164,52 +170,74 @@ export function MarketplaceProvider({ children }) {
   const [nftDetails, setNftDetails] = useState({}) // Map of nftId -> { name, thumbnail, currency, launcherId, ... }
   const [nftDetailsLoading, setNftDetailsLoading] = useState(new Set()) // Set of NFT IDs currently loading
   const [nftDetailsErrors, setNftDetailsErrors] = useState({}) // Map of nftId -> error message
-  const requestCacheRef = useRef(new Map()) // Cache for API requests with TTL
-  const pendingRequestsRef = useRef(new Map()) // Track pending requests to batch/debounce
-  const retryTimeoutsRef = useRef(new Map()) // Track retry timeouts for rate-limited requests
-  const batchTimeoutRef = useRef(null)
-  const MAX_CONCURRENT_REQUESTS = 2 // Reduced to avoid rate limits
-  const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
-  const BATCH_DELAY = 100 // 100ms batching window
-  const RETRY_DELAY_BASE = 5000 // 5 seconds base delay for retries
-  const MAX_RETRY_DELAY = 60000 // 60 seconds max delay
+  const requestCacheRef = useRef(new Map()) // In-memory cache for API requests with TTL
+  const pendingRequestsRef = useRef(new Map()) // Track pending requests (for loading state only, throttling handled by queue)
+  
+  // MintGarden API rate limiting constants
+  const MG_CONCURRENCY = 2 // Max concurrent MintGarden API requests
+  const MG_MIN_DELAY_MS = 500 // Minimum delay between starting requests (ms)
+  const MG_MAX_RETRIES = 4 // Max retry attempts for rate-limited requests
+  const MG_BACKOFF_CAP_MS = 15000 // Maximum backoff delay (ms)
+  const MG_CACHE_TTL = 24 * 60 * 60 * 1000 // 24 hours cache TTL (or "forever" for static metadata)
+  
+  // Throttled request queue for MintGarden API calls
+  const mgQueueRef = useRef({
+    queue: [],           // Array of { fn, resolve, reject, key }
+    activeCount: 0,      // Number of active requests
+    nextStartAt: 0,      // Timestamp when next request can start
+    timerId: null,       // Track single scheduled timer
+  })
 
   // Load NFT entries and offer files from CSV on mount
   useEffect(() => {
     const loadNFTData = async () => {
       try {
-        const stored = localStorage.getItem(STORAGE_KEYS.OFFER_FILES)
-        let offerFilesMap = {}
-        
-        if (stored) {
-          const parsed = JSON.parse(stored)
-          // Check if parsed object has any keys - if empty, load from CSV
-          if (Object.keys(parsed).length > 0) {
-            offerFilesMap = parsed
-          }
-        }
-        
-        // Always load from CSV to get NFT entries and ensure offer files are up to date
+        // Load ONLY from CSV - no localStorage merge
         const csvData = await loadOfferFilesFromCSV()
+        
+        // Clear in-memory caches if fingerprint changed
+        if (csvData.fingerprintChanged) {
+          // Clear all in-memory caches
+          requestCacheRef.current = new Map()
+          pendingRequestsRef.current.clear()
+          mgQueueRef.current.queue = []
+          mgQueueRef.current.activeCount = 0
+          mgQueueRef.current.nextStartAt = 0
+          if (mgQueueRef.current.timerId) {
+            clearTimeout(mgQueueRef.current.timerId)
+            mgQueueRef.current.timerId = null
+          }
+          setNftDetails({})
+          setNftDetailsErrors({})
+          setNftDetailsLoading(new Set())
+        }
         
         if (csvData.nftEntries && csvData.nftEntries.length > 0) {
           setNftEntries(csvData.nftEntries)
           
-          // Dev-only: Log group counts
+          // Dev-only: Log parsing results
           if (import.meta.env.DEV) {
             const groupCounts = csvData.nftEntries.reduce((acc, entry) => {
               acc[entry.group] = (acc[entry.group] || 0) + 1
               return acc
             }, {})
-            console.log('[Marketplace] Group counts:', groupCounts)
+            console.log('[Marketplace] Loaded CSV:', {
+              totalRows: csvData.nftEntries.length,
+              groupCounts,
+              sampleEntries: csvData.nftEntries.slice(0, 2).map(e => ({
+                id: e.id,
+                group: e.group,
+                offerFilePrefix: e.offerFile.substring(0, 20) + '...'
+              }))
+            })
           }
         }
         
-        // Merge CSV offer files with stored ones (CSV takes precedence)
-        const mergedOfferFiles = { ...offerFilesMap, ...csvData.offerFiles }
-        if (Object.keys(mergedOfferFiles).length > 0) {
-          setOfferFiles(mergedOfferFiles)
-          localStorage.setItem(STORAGE_KEYS.OFFER_FILES, JSON.stringify(mergedOfferFiles))
+        // Set offer files from CSV ONLY (no merge with localStorage)
+        if (csvData.offerFiles && Object.keys(csvData.offerFiles).length > 0) {
+          setOfferFiles(csvData.offerFiles)
+          // Cache in localStorage for performance, but CSV is source of truth
+          localStorage.setItem(STORAGE_KEYS.OFFER_FILES, JSON.stringify(csvData.offerFiles))
         }
       } catch (err) {
         console.error('Failed to initialize NFT data:', err)
@@ -229,62 +257,311 @@ export function MarketplaceProvider({ children }) {
   }, [isAdmin])
 
 
-  // Persist offer files
+  // Persist offer files (cache only - CSV is source of truth)
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.OFFER_FILES, JSON.stringify(offerFiles))
+    // Only persist if we have a valid fingerprint match
+    const storedFingerprint = localStorage.getItem(FINGERPRINT_KEY)
+    if (storedFingerprint && Object.keys(offerFiles).length > 0) {
+      localStorage.setItem(STORAGE_KEYS.OFFER_FILES, JSON.stringify(offerFiles))
+    }
   }, [offerFiles])
 
-  const loginAsAdmin = (password) => {
+  const loginAsAdmin = useCallback((password) => {
     if (password === ADMIN_PASSWORD) {
       setIsAdmin(true)
       return true
     }
     return false
-  }
+  }, [])
 
-  const logoutAdmin = () => {
+  const logoutAdmin = useCallback(() => {
     setIsAdmin(false)
-  }
+  }, [])
 
-  const setOfferFile = (nftId, offerFile) => {
+  const setOfferFile = useCallback((nftId, offerFile) => {
     setOfferFiles((prev) => {
       const newFiles = { ...prev, [nftId]: offerFile }
       return newFiles
     })
-  }
+  }, [])
 
-  const removeOfferFile = (nftId) => {
+  const removeOfferFile = useCallback((nftId) => {
     setOfferFiles((prev) => {
       const newFiles = { ...prev }
       delete newFiles[nftId]
       return newFiles
     })
-  }
+  }, [])
 
-  const getOfferFile = (nftId) => {
+  const getOfferFile = useCallback((nftId) => {
     const result = offerFiles[nftId] || null
     return result
-  }
+  }, [offerFiles])
 
-  // Check cache with TTL
+  // Check cache with TTL (in-memory + localStorage)
   const getCachedResult = useCallback((cacheKey) => {
+    // Check in-memory cache first
     const cached = requestCacheRef.current.get(cacheKey)
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    if (cached && Date.now() - cached.timestamp < MG_CACHE_TTL) {
       return cached.data
     }
     if (cached) {
       requestCacheRef.current.delete(cacheKey)
     }
+    
+    // Check localStorage cache
+    try {
+      const storageKey = `mg_cache_${cacheKey}`
+      const stored = localStorage.getItem(storageKey)
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (parsed.timestamp && Date.now() - parsed.timestamp < MG_CACHE_TTL) {
+          // Restore to in-memory cache
+          requestCacheRef.current.set(cacheKey, parsed)
+          return parsed.data
+        } else {
+          // Expired, remove from localStorage
+          localStorage.removeItem(storageKey)
+        }
+      }
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.warn('[Marketplace] Error reading cache from localStorage:', err)
+      }
+    }
+    
     return null
   }, [])
 
-  // Set cache with TTL
-  const setCachedResult = useCallback((cacheKey, data) => {
-    requestCacheRef.current.set(cacheKey, {
+  // Set cache with TTL (in-memory + localStorage)
+  const setCachedResult = useCallback((cacheKey, data, options = { persist: true }) => {
+    const cacheEntry = {
       data,
       timestamp: Date.now(),
-    })
+    }
+    
+    // Store in-memory cache (always)
+    requestCacheRef.current.set(cacheKey, cacheEntry)
+    
+    // Only store in localStorage if persist option is true
+    // MintGarden raw responses (mintgarden_${launcher}) are large and can hit quota
+    // Final nft-${id} details are smaller and safe to store
+    if (options.persist !== false) {
+      try {
+        const storageKey = `mg_cache_${cacheKey}`
+        localStorage.setItem(storageKey, JSON.stringify(cacheEntry))
+      } catch (err) {
+        if (import.meta.env.DEV) {
+          console.warn('[Marketplace] Error writing cache to localStorage:', err)
+        }
+      }
+    }
   }, [])
+
+  // Robust queue scheduler with single timer management
+  const runQueue = useCallback(() => {
+    const queue = mgQueueRef.current
+    const now = Date.now()
+    
+    // Clear any existing timer (idempotent)
+    if (queue.timerId) {
+      clearTimeout(queue.timerId)
+      queue.timerId = null
+    }
+    
+    // Stop if at capacity
+    if (queue.activeCount >= MG_CONCURRENCY) {
+      return
+    }
+    
+    // Stop if queue empty
+    if (queue.queue.length === 0) {
+      return
+    }
+    
+    // Enforce minimum delay
+    if (now < queue.nextStartAt) {
+      const delay = queue.nextStartAt - now
+      if (import.meta.env.DEV) {
+        console.log(`[Marketplace Queue] Waiting ${delay}ms before next request (min delay: ${MG_MIN_DELAY_MS}ms, active: ${queue.activeCount}/${MG_CONCURRENCY}, queued: ${queue.queue.length})`)
+      }
+      queue.timerId = setTimeout(runQueue, delay)
+      return
+    }
+    
+    // Start as many jobs as allowed (while loop)
+    while (queue.activeCount < MG_CONCURRENCY && queue.queue.length > 0) {
+      const item = queue.queue.shift()
+      if (!item) break
+      
+      queue.activeCount++
+      queue.nextStartAt = Date.now() + MG_MIN_DELAY_MS
+      
+      if (import.meta.env.DEV) {
+        console.log(`[Marketplace Queue] Starting request (key: ${item.key}, active: ${queue.activeCount}/${MG_CONCURRENCY}, queued: ${queue.queue.length})`)
+      }
+      
+      // Execute the request
+      Promise.resolve(item.fn())
+        .then((result) => {
+          queue.activeCount--
+          item.resolve(result)
+          runQueue() // Schedule next batch
+        })
+        .catch((error) => {
+          queue.activeCount--
+          item.reject(error)
+          runQueue() // Schedule next batch
+        })
+    }
+    
+    // If more items queued and we have capacity, schedule another run
+    if (queue.queue.length > 0 && queue.activeCount < MG_CONCURRENCY) {
+      queue.timerId = setTimeout(runQueue, 0)
+    }
+  }, [])
+
+  // Generic queue function for both Dexie and MintGarden calls
+  const queueRequest = useCallback(async (fn, key) => {
+    return new Promise((resolve, reject) => {
+      const queue = mgQueueRef.current
+      queue.queue.push({ fn, resolve, reject, key })
+      
+      // Trigger queue processing if not already running
+      if (queue.activeCount < MG_CONCURRENCY && !queue.timerId) {
+        runQueue()
+      }
+    })
+  }, [runQueue])
+
+  // Throttled wrapper for Dexie API calls
+  const fetchOfferFromDexieThrottled = useCallback(async (offerFile) => {
+    const cacheKey = `dexie_${hashOfferString(offerFile)}`
+    
+    // Check cache first
+    const cached = getCachedResult(cacheKey)
+    if (cached) {
+      if (import.meta.env.DEV) {
+        console.log(`[Marketplace] Cache hit for Dexie: ${cacheKey}`)
+      }
+      return cached
+    }
+    
+    // Queue the request
+    return queueRequest(async () => {
+      const result = await getOfferFromDexie(offerFile)
+      if (result) {
+        setCachedResult(cacheKey, result)
+      }
+      return result
+    }, cacheKey)
+  }, [getCachedResult, setCachedResult, queueRequest])
+
+  // Wrapper for fetchNFTDetails with throttling, caching, and retry logic
+  const fetchNFTDetailsThrottled = useCallback(async (launcherBech32) => {
+    const cacheKey = `mintgarden_${launcherBech32}`
+    
+    // Check cache first (in-memory only for MintGarden raw responses)
+    const cached = getCachedResult(cacheKey)
+    if (cached) {
+      if (import.meta.env.DEV) {
+        console.log(`[Marketplace] Cache hit for MintGarden: ${launcherBech32.substring(0, 20)}...`)
+      }
+      return cached
+    }
+    
+    // Queue the request with retry logic inside
+    return queueRequest(async () => {
+      // Retry loop: for-loop instead of while-loop (per requirements)
+      let lastStatus = null
+      for (let attempt = 0; attempt <= MG_MAX_RETRIES; attempt++) {
+        try {
+          const response = await fetch(`https://api.mintgarden.io/nfts/${launcherBech32}`)
+          lastStatus = response.status
+          
+          // Handle retryable HTTP errors with exponential backoff
+          // Retry only for: 429 (rate limit), 502 (bad gateway), 503 (service unavailable), 504 (gateway timeout)
+          const isRetryableStatus = response.status === 429 || response.status === 502 || response.status === 503 || response.status === 504
+          
+          if (isRetryableStatus) {
+            let retryDelay = MG_BACKOFF_CAP_MS
+            
+            // Check Retry-After header
+            const retryAfter = response.headers.get('Retry-After')
+            if (retryAfter) {
+              const retryAfterSeconds = parseInt(retryAfter, 10)
+              if (!isNaN(retryAfterSeconds) && retryAfterSeconds > 0) {
+                retryDelay = Math.min(retryAfterSeconds * 1000, MG_BACKOFF_CAP_MS)
+              }
+            } else {
+              // Exponential backoff: 1000ms * 2^attempt, capped
+              retryDelay = Math.min(1000 * Math.pow(2, attempt), MG_BACKOFF_CAP_MS)
+            }
+            
+            if (attempt < MG_MAX_RETRIES) {
+              if (import.meta.env.DEV) {
+                console.warn(`[Marketplace] Retryable error (${response.status}) for ${launcherBech32.substring(0, 20)}..., retrying after ${retryDelay}ms (attempt ${attempt + 1}/${MG_MAX_RETRIES + 1})`)
+              }
+              await new Promise(resolve => setTimeout(resolve, retryDelay))
+              continue // Retry next iteration
+            } else {
+              // Max retries exceeded - use actual status code in error
+              throw new Error(`${response.status} - MintGarden API (max retries reached)`)
+            }
+          }
+          
+          // Non-retryable HTTP errors (400, 404, etc.) - throw immediately, don't retry
+          if (!response.ok) {
+            throw new Error(`MintGarden API error: ${response.status}`)
+          }
+          
+          const data = await response.json()
+          
+          // Cache successful response (in-memory only, no localStorage)
+          setCachedResult(cacheKey, data, { persist: false })
+          
+          if (import.meta.env.DEV && attempt > 0) {
+            console.log(`[Marketplace] Successfully fetched MintGarden details after ${attempt} retries: ${launcherBech32.substring(0, 20)}...`)
+          }
+          
+          return data
+        } catch (error) {
+          // catch block handles network errors (when fetch throws) - these are retryable
+          // Non-retryable HTTP errors (400/404/etc) are thrown above and will propagate without retry
+          // Check if this is a non-retryable HTTP error we threw (contains 'MintGarden API error' but not retryable status)
+          const isNonRetryableHttpError = error.message?.includes('MintGarden API error') && 
+            !error.message?.includes('429') && 
+            !error.message?.includes('502') && 
+            !error.message?.includes('503') && 
+            !error.message?.includes('504')
+          
+          if (isNonRetryableHttpError) {
+            // Non-retryable HTTP error - throw immediately, don't retry
+            console.error('Failed to fetch NFT details:', error)
+            throw error
+          }
+          
+          // Network error (fetch threw) or max retries error - retry if we haven't exceeded max
+          if (attempt < MG_MAX_RETRIES) {
+            const retryDelay = Math.min(1000 * Math.pow(2, attempt), MG_BACKOFF_CAP_MS)
+            if (import.meta.env.DEV) {
+              console.warn(`[Marketplace] Network error fetching MintGarden (${launcherBech32.substring(0, 20)}...): ${error.message}, retrying after ${retryDelay}ms (attempt ${attempt + 1}/${MG_MAX_RETRIES + 1})`)
+            }
+            await new Promise(resolve => setTimeout(resolve, retryDelay))
+            continue
+          }
+          
+          // Max retries exceeded
+          console.error('Failed to fetch NFT details:', error)
+          throw error
+        }
+      }
+      
+      // Should never reach here, but if it does, use lastStatus if available
+      const statusMsg = lastStatus ? `${lastStatus}` : 'unknown'
+      throw new Error(`${statusMsg} - MintGarden API (max retries reached)`)
+    }, cacheKey)
+  }, [getCachedResult, setCachedResult, queueRequest])
 
   // Fetch NFT details lazily for a given NFT ID with caching and batching
   const fetchNFTDetailsForId = useCallback(async (nftId) => {
@@ -324,70 +601,14 @@ export function MarketplaceProvider({ children }) {
       return null // Return null if already loading, don't start another fetch
     }
     
-    // Check if there was an error - retry rate-limited requests after delay
-    if (nftDetailsErrors[nftId]) {
-      const errorMsg = nftDetailsErrors[nftId]
-      // Retry 429 (rate limit) errors after exponential backoff
-      if (errorMsg.includes('429') || errorMsg.includes('rate limit') || errorMsg.includes('Too Many Requests')) {
-        // Check if we already have a retry scheduled
-        if (!retryTimeoutsRef.current.has(nftId)) {
-          // Calculate retry delay (exponential backoff, capped at MAX_RETRY_DELAY)
-          const retryCount = (retryTimeoutsRef.current.get(nftId + '_count') || 0) + 1
-          const delay = Math.min(RETRY_DELAY_BASE * Math.pow(2, retryCount - 1), MAX_RETRY_DELAY)
-          
-          // Schedule retry
-          const timeoutId = setTimeout(() => {
-            retryTimeoutsRef.current.delete(nftId)
-            retryTimeoutsRef.current.delete(nftId + '_count')
-            // Clear error so we can retry
-            setNftDetailsErrors(prev => {
-              const next = { ...prev }
-              delete next[nftId]
-              return next
-            })
-            // Retry the fetch
-            fetchNFTDetailsForId(nftId).catch(() => {})
-          }, delay)
-          
-          retryTimeoutsRef.current.set(nftId, timeoutId)
-          retryTimeoutsRef.current.set(nftId + '_count', retryCount)
-          
-          if (import.meta.env.DEV) {
-            console.log(`[Marketplace] Scheduled retry for ${nftId} after ${delay}ms (attempt ${retryCount})`)
-          }
-        }
-      }
-      return null
-    }
-    
     // Get NFT entry from CSV data
     const nftEntry = nftEntries.find(entry => entry.id === nftId)
     if (!nftEntry || !nftEntry.offerFile) {
       return null
     }
     
-    // Check pending requests
+    // Check pending requests (prevent duplicate concurrent fetches for same NFT)
     if (pendingRequestsRef.current.has(nftId)) {
-      return null
-    }
-    
-    // Limit concurrent requests
-    if (pendingRequestsRef.current.size >= MAX_CONCURRENT_REQUESTS) {
-      // Queue for later
-      pendingRequestsRef.current.set(nftId, nftEntry)
-      
-      // Process queue after delay
-      if (batchTimeoutRef.current) {
-        clearTimeout(batchTimeoutRef.current)
-      }
-      batchTimeoutRef.current = setTimeout(() => {
-        const queued = Array.from(pendingRequestsRef.current.entries())
-        pendingRequestsRef.current.clear()
-        queued.forEach(([id, entry]) => {
-          fetchNFTDetailsForId(id).catch(() => {})
-        })
-      }, BATCH_DELAY)
-      
       return null
     }
     
@@ -397,7 +618,7 @@ export function MarketplaceProvider({ children }) {
     
     try {
       // Step 1: Get offer details from Dexie API (includes currency info, price, and status)
-      const offerData = await getOfferFromDexie(nftEntry.offerFile)
+      const offerData = await fetchOfferFromDexieThrottled(nftEntry.offerFile)
       
       // Check if offer is taken/completed
       // Dexie API status: 0 = pending/active, other values = completed/taken
@@ -481,30 +702,59 @@ export function MarketplaceProvider({ children }) {
         }
       }
       
-      // Step 2: If we have thumbnail from CSV, we can skip MintGarden API for faster loading
-      // But we still need basic NFT info, so try to get launcher ID if we don't have it
+      // Step 2: Create IPFS thumbnail URL from MintGarden metadata (same approach as modal)
+      // Flow: Skip if thumbnail exists → Resolve launcher ID → Fetch MintGarden metadata → Extract token ID from name → Create IPFS URL
+      // IMPORTANT: Skip MintGarden API calls if we already have a thumbnail/IPFS link to reduce API load
+      let thumbnailUrl = nftEntry.thumbnail // Start with CSV thumbnail if available
+      let nftName = nftId
       let launcherId = nftEntry.nftId || null
       let mintGardenDetails = {}
-      let nftName = nftId
       
-      // Only fetch from MintGarden if we don't have launcher ID or thumbnail
-      if (!nftEntry.thumbnail || !launcherId) {
-        // Resolve NFT launcher ID from offer file
-        launcherId = launcherId || await resolveNFTFromOfferFile(nftEntry.offerFile)
-        
-        if (launcherId) {
-          // Fetch NFT details from MintGarden
-          mintGardenDetails = await fetchNFTDetails(launcherId)
-          nftName = mintGardenDetails.data?.metadata_json?.name || mintGardenDetails.name || nftId
+      // Step 2a: Only fetch MintGarden metadata if we don't have a thumbnail yet
+      // This significantly reduces API calls since many NFTs already have thumbnails from CSV
+      if (!thumbnailUrl && nftEntry.offerFile) {
+        try {
+          // Resolve launcher ID from offer file
+          if (!launcherId) {
+            launcherId = await resolveNFTFromOfferFile(nftEntry.offerFile)
+            if (import.meta.env.DEV && launcherId) {
+              console.log(`[Marketplace] Resolved launcher ID for ${nftId}: ${launcherId.substring(0, 20)}...`)
+            }
+          }
+          
+          // Fetch MintGarden metadata using throttled queue (with caching and retry logic)
+          if (launcherId) {
+            mintGardenDetails = await fetchNFTDetailsThrottled(launcherId)
+            nftName = mintGardenDetails.data?.metadata_json?.name || mintGardenDetails.name || nftId
+            
+            if (import.meta.env.DEV) {
+              console.log(`[Marketplace] Fetched MintGarden details for ${nftId}, name: ${nftName}`)
+            }
+            
+            // Extract token ID from MintGarden metadata name and create IPFS URL (same as modal)
+            thumbnailUrl = getIPFSThumbnailUrl(mintGardenDetails)
+            if (import.meta.env.DEV && thumbnailUrl) {
+              console.log(`[Marketplace] Generated IPFS thumbnail for ${nftId} from MintGarden metadata: ${thumbnailUrl}`)
+            } else if (import.meta.env.DEV && !thumbnailUrl) {
+              console.warn(`[Marketplace] Could not extract token ID from MintGarden metadata for ${nftId}`)
+            }
+          }
+        } catch (error) {
+          // Handle rate limits gracefully - preview will show without thumbnail
+          if (import.meta.env.DEV) {
+            const errorMsg = error.message || String(error)
+            if (errorMsg.includes('429') || errorMsg.includes('rate limit')) {
+              console.warn(`[Marketplace] Rate limited while fetching thumbnail for ${nftId}, skipping preview (error handled by retry logic)`)
+            } else {
+              console.warn(`[Marketplace] Error fetching thumbnail for ${nftId}:`, error.message)
+            }
+          }
+          // Continue without thumbnail - preview will show placeholder
+          // Note: Error is not stored in nftDetailsErrors here to avoid spam
         }
+      } else if (import.meta.env.DEV && thumbnailUrl) {
+        console.log(`[Marketplace] Skipping MintGarden API call for ${nftId} - already have thumbnail`)
       }
-      
-      // Step 3: Build NFT details object
-      // NEVER override thumbnail from CSV - use CSV thumbnail if available, otherwise use API
-      const thumbnailUrl = nftEntry.thumbnail || 
-        (mintGardenDetails.data?.thumbnail_uri 
-          ? mintGardenDetails.data.thumbnail_uri 
-          : (launcherId ? getNFTThumbnailUrl(launcherId) : null))
       
       const details = {
         name: nftName,
@@ -568,35 +818,10 @@ export function MarketplaceProvider({ children }) {
       
       return null
     }
-  }, [nftEntries, nftDetails, nftDetailsLoading, nftDetailsErrors])
+  }, [nftEntries, nftDetails, nftDetailsLoading, nftDetailsErrors, fetchOfferFromDexieThrottled, fetchNFTDetailsThrottled, getCachedResult, setCachedResult, getIPFSThumbnailUrl])
 
-  // Periodically retry failed rate-limited requests (moved after fetchNFTDetailsForId definition)
-  useEffect(() => {
-    const retryInterval = setInterval(() => {
-      // Find NFTs with rate limit errors that aren't currently loading
-      const rateLimitedNFTs = Object.entries(nftDetailsErrors)
-        .filter(([nftId, errorMsg]) => {
-          const isRateLimit = errorMsg.includes('429') || errorMsg.includes('rate limit') || errorMsg.includes('Too Many Requests')
-          const notLoading = !nftDetailsLoading.has(nftId)
-          const noRetryScheduled = !retryTimeoutsRef.current.has(nftId)
-          return isRateLimit && notLoading && noRetryScheduled
-        })
-        .map(([nftId]) => nftId)
-
-      // Retry up to 5 at a time to avoid overwhelming the API
-      rateLimitedNFTs.slice(0, 5).forEach(nftId => {
-        // Clear error and retry
-        setNftDetailsErrors(prev => {
-          const next = { ...prev }
-          delete next[nftId]
-          return next
-        })
-        fetchNFTDetailsForId(nftId).catch(() => {})
-      })
-    }, 30000) // Check every 30 seconds
-
-    return () => clearInterval(retryInterval)
-  }, [nftDetailsErrors, nftDetailsLoading, fetchNFTDetailsForId])
+  // Note: Rate limiting, retries, and throttling are now handled by the throttled queue system
+  // No periodic retry interval needed - retries happen automatically within the queue
   
   // Helper to count visible NFTs per group (without calling getNFTsByGroup)
   const getVisibleCountByGroup = useCallback(() => {
@@ -637,17 +862,17 @@ export function MarketplaceProvider({ children }) {
       .map(entry => {
         // Merge CSV entry with API details (enrichment only, doesn't override CSV data)
         const details = nftDetails[entry.id] || {}
-        const { id: _id, thumbnail: _thumbnail, ...detailsWithoutIdAndThumbnail } = details
+        const { id: _id, thumbnail: _detailsThumbnail, ...detailsWithoutIdAndThumbnail } = details
         
         return {
           id: entry.id, // Always use CSV entry ID
           offerFile: entry.offerFile,
           group: entry.group, // CSV group is source of truth
-          // CSV thumbnail takes precedence (never override with API thumbnail)
-          thumbnail: entry.thumbnail || null,
+          // CSV thumbnail takes precedence, but use API thumbnail if CSV doesn't have one
+          thumbnail: entry.thumbnail || _detailsThumbnail || null,
           name: details.name || entry.id,
           launcherId: details.launcherId,
-          ...detailsWithoutIdAndThumbnail, // Include API enrichment (price, currency, etc) but not thumbnail
+          ...detailsWithoutIdAndThumbnail, // Include API enrichment (price, currency, etc) but handle thumbnail explicitly above
         }
       })
       .filter(nft => {
@@ -671,28 +896,81 @@ export function MarketplaceProvider({ children }) {
       })
   }, [nftEntries, nftDetails])
 
-  return (
-    <MarketplaceContext.Provider
-      value={{
+  // Compute token groups safely (wrap in try-catch to prevent provider from failing)
+  const tokenGroupsValue = useMemo(() => {
+    try {
+      return getTokenGroups()
+    } catch (error) {
+      console.error('[Marketplace] Error computing token groups:', error)
+      return []
+    }
+  }, [getTokenGroups])
+
+  // Memoize context value to prevent unnecessary re-renders
+  // Wrap in try-catch to ensure we always return a valid context value
+  const contextValue = useMemo(() => {
+    try {
+      return {
         isAdmin,
         loginAsAdmin,
         logoutAdmin,
         nftEntries, // NFT entries from CSV
-        getNFTsByGroup,
-        getTokenGroups, // Dynamic groups function
+        getNFTsByGroup: getNFTsByGroup || (() => []),
+        getTokenGroups: getTokenGroups || (() => []),
         offerFiles,
         setOfferFile,
         removeOfferFile,
         getOfferFile,
-        fetchNFTDetailsForId, // Lazy fetch function
+        fetchNFTDetailsForId: fetchNFTDetailsForId || (async () => null),
         nftDetails, // Fetched NFT details
         nftDetailsLoading, // Loading state
         nftDetailsErrors, // Error state
         // Backward compatibility
         nfts: nftEntries, // Alias for backward compatibility
-        TOKEN_GROUPS: getTokenGroups(), // Computed groups for backward compatibility
-      }}
-    >
+        TOKEN_GROUPS: tokenGroupsValue || [], // Computed groups for backward compatibility
+      }
+    } catch (error) {
+      console.error('[Marketplace] Error creating context value:', error)
+      // Return minimal valid context value as fallback
+      return {
+        isAdmin: false,
+        loginAsAdmin: () => false,
+        logoutAdmin: () => {},
+        nftEntries: [],
+        getNFTsByGroup: () => [],
+        getTokenGroups: () => [],
+        offerFiles: {},
+        setOfferFile: () => {},
+        removeOfferFile: () => {},
+        getOfferFile: () => null,
+        fetchNFTDetailsForId: async () => null,
+        nftDetails: {},
+        nftDetailsLoading: new Set(),
+        nftDetailsErrors: {},
+        nfts: [],
+        TOKEN_GROUPS: [],
+      }
+    }
+  }, [
+    isAdmin,
+    loginAsAdmin,
+    logoutAdmin,
+    nftEntries,
+    getNFTsByGroup,
+    getTokenGroups,
+    offerFiles,
+    setOfferFile,
+    removeOfferFile,
+    getOfferFile,
+    fetchNFTDetailsForId,
+    nftDetails,
+    nftDetailsLoading,
+    nftDetailsErrors,
+    tokenGroupsValue,
+  ])
+
+  return (
+    <MarketplaceContext.Provider value={contextValue}>
       {children}
     </MarketplaceContext.Provider>
   )

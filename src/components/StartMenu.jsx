@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { useWindow } from '../contexts/WindowContext'
 import { useMarketplace } from '../contexts/MarketplaceContext'
-import { getStartMenuIcon } from '../utils/windowIcons'
+import { APPS } from '../constants/apps'
+import AppIcon from './ui/AppIcon'
 
 export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCreator, onOpenApp, menuRef, startButtonRef }) {
   const { getAllWindows, isWindowMinimized, restoreWindow, bringToFront, activeWindowId, isWindowActive } = useWindow()
@@ -67,100 +68,117 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
     }
   }, [isOpen, onClose])
 
-  const handleMenuItemClick = (action) => {
-    // Map actions to window IDs
-    const actionToWindowId = {
-      'scroll-to-readme': 'window-readme-txt',
-      'scroll-to-mint': 'window-mint-info-exe',
-      'scroll-to-gallery': 'window-gallery',
-      'scroll-to-faq': 'window-faq',
-      'scroll-to-marketplace': 'window-marketplace',
-      'open-tanggang': 'tanggang',
-      'open-pinball': 'pinball-window',
-      'open-solitaire': 'window-solitaire',
-      'open-minesweeper': 'window-minesweeper',
-      'open-skifree': 'window-skifree',
-    }
-    const windowId = actionToWindowId[action]
-
-
+  const handleAppClick = (app) => {
     // Capture the active window before we start, so we can detect if the user
     // changes focus before our deferred bringToFront runs.
     const priorActiveId = activeWindowId
 
-    if (action === 'open-paint') {
-      if (onOpenPaint) {
-        onOpenPaint()
-      }
-      onClose()
-      return
-    }
-    if (windowId) {
-      // Check if window exists in the window context
-      const allWindows = getAllWindows()
-      const windowExists = allWindows.some(w => w.id === windowId)
-      
-      if (windowExists) {
-        // Window is registered - restore or bring to front
-        try {
-          if (isWindowMinimized(windowId)) {
-            restoreWindow(windowId)
-          } else {
-            bringToFront(windowId)
-          }
-        } catch (e) {
-          console.debug('Error restoring/bringing to front window:', windowId, e)
+    // Switch on app.open.type
+    switch (app.open.type) {
+      case 'external':
+        window.open(app.open.href, '_blank', 'noopener,noreferrer')
+        onClose()
+        return
+
+      case 'callback':
+        if (app.open.name === 'open-paint' && onOpenPaint) {
+          onOpenPaint()
+        } else if (app.open.name === 'open-wojak-creator' && onOpenWojakCreator) {
+          onOpenWojakCreator()
         }
-      } else if (onOpenApp) {
-        // Window is not open yet - ask parent to open/mount it
-        onOpenApp(windowId)
+        onClose()
+        return
 
-        // After opening, retry until the window is registered, then restore + bring to front.
-        const focusWhenRegistered = (remainingTries) => {
-          if (remainingTries <= 0) {
-            deferredFocusRafRef.current = null
-            return
-          }
+      case 'scroll':
+      case 'window': {
+        // Map scroll targets to window IDs (scroll behavior opens windows)
+        const scrollToWindowId = {
+          'scroll-to-readme': 'window-readme-txt',
+          'scroll-to-mint': 'window-mint-info-exe',
+          'scroll-to-gallery': 'window-gallery',
+          'scroll-to-faq': 'window-faq',
+          'scroll-to-marketplace': 'window-marketplace',
+        }
+        
+        const windowId = app.open.type === 'window' 
+          ? app.open.windowId 
+          : scrollToWindowId[app.open.target]
 
-          deferredFocusRafRef.current = requestAnimationFrame(() => {
-            try {
-              const allWindowsAfterOpen = getAllWindows()
-              const existsNow = allWindowsAfterOpen.some(w => w.id === windowId)
+        if (!windowId) {
+          onClose()
+          return
+        }
 
-              if (!existsNow) {
-                focusWhenRegistered(remainingTries - 1)
-                return
-              }
-
-              // TEMP DEBUG: verify registration + minimized/position state before restore
-              console.log('[focusWhenRegistered]', {
-                windowId,
-                existsNow,
-                minimized: isWindowMinimized(windowId),
-                all: allWindowsAfterOpen.map(w => ({
-                  id: w.id,
-                  pos: w.position,
-                  z: w.zIndex,
-                })),
-              })
-
+        // Check if window exists in the window context
+        const allWindows = getAllWindows()
+        const windowExists = allWindows.some(w => w.id === windowId)
+        
+        if (windowExists) {
+          // Window is registered - restore or bring to front
+          try {
+            if (isWindowMinimized(windowId)) {
               restoreWindow(windowId)
+            } else {
               bringToFront(windowId)
-              deferredFocusRafRef.current = null
-            } catch (e) {
-              console.debug('Error restoring/bringing newly opened window to front:', windowId, e)
-              deferredFocusRafRef.current = null
             }
-          })
-        }
+          } catch (e) {
+            console.debug('Error restoring/bringing to front window:', windowId, e)
+          }
+        } else if (onOpenApp) {
+          // Window is not open yet - ask parent to open/mount it
+          onOpenApp(windowId)
 
-        // Cancel any previous focus attempts before starting a new sequence
-        if (deferredFocusRafRef.current) {
-          cancelAnimationFrame(deferredFocusRafRef.current)
-          deferredFocusRafRef.current = null
+          // After opening, retry until the window is registered, then restore + bring to front.
+          const focusWhenRegistered = (remainingTries) => {
+            if (remainingTries <= 0) {
+              deferredFocusRafRef.current = null
+              return
+            }
+
+            deferredFocusRafRef.current = requestAnimationFrame(() => {
+              try {
+                const allWindowsAfterOpen = getAllWindows()
+                const existsNow = allWindowsAfterOpen.some(w => w.id === windowId)
+
+                if (!existsNow) {
+                  focusWhenRegistered(remainingTries - 1)
+                  return
+                }
+
+                // TEMP DEBUG: verify registration + minimized/position state before restore
+                console.log('[focusWhenRegistered]', {
+                  windowId,
+                  existsNow,
+                  minimized: isWindowMinimized(windowId),
+                  all: allWindowsAfterOpen.map(w => ({
+                    id: w.id,
+                    pos: w.position,
+                    z: w.zIndex,
+                  })),
+                })
+
+                restoreWindow(windowId)
+                bringToFront(windowId)
+                deferredFocusRafRef.current = null
+              } catch (e) {
+                console.debug('Error restoring/bringing newly opened window to front:', windowId, e)
+                deferredFocusRafRef.current = null
+              }
+            })
+          }
+
+          // Cancel any previous focus attempts before starting a new sequence
+          if (deferredFocusRafRef.current) {
+            cancelAnimationFrame(deferredFocusRafRef.current)
+            deferredFocusRafRef.current = null
+          }
+          focusWhenRegistered(10)
         }
-        focusWhenRegistered(10)
+        break
       }
+
+      default:
+        console.warn('Unknown app.open.type:', app.open.type)
     }
     
     onClose()
@@ -212,111 +230,30 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
         <span className="start-menu-title">Wojak Farmers Plot</span>
       </div>
       <div className="start-menu-items">
-        <button 
-          className="start-menu-item"
-          onClick={() => handleMenuItemClick('scroll-to-readme')}
-          role="menuitem"
-          tabIndex={0}
-        >
-          <img 
-            src={getStartMenuIcon('scroll-to-readme')} 
-            alt="" 
-            className="start-menu-item-icon"
-            onError={(e) => { e.target.style.display = 'none' }}
-          />
-          <span className="start-menu-item-text">README.TXT</span>
-        </button>
-        <button 
-          className="start-menu-item"
-          onClick={() => handleMenuItemClick('scroll-to-mint')}
-          role="menuitem"
-          tabIndex={0}
-        >
-          <img 
-            src={getStartMenuIcon('scroll-to-mint')} 
-            alt="" 
-            className="start-menu-item-icon"
-            onError={(e) => { e.target.style.display = 'none' }}
-          />
-          <span className="start-menu-item-text">MINT_INFO.EXE</span>
-        </button>
-        <button 
-          className="start-menu-item"
-          onClick={() => handleMenuItemClick('scroll-to-gallery')}
-          role="menuitem"
-          tabIndex={0}
-        >
-          <img 
-            src={getStartMenuIcon('scroll-to-gallery')} 
-            alt="" 
-            className="start-menu-item-icon"
-            onError={(e) => { e.target.style.display = 'none' }}
-          />
-          <span className="start-menu-item-text">GALLERY</span>
-        </button>
-        <button 
-          className="start-menu-item"
-          onClick={() => handleMenuItemClick('scroll-to-marketplace')}
-          role="menuitem"
-          tabIndex={0}
-        >
-          <img 
-            src={getStartMenuIcon('scroll-to-marketplace')} 
-            alt="" 
-            className="start-menu-item-icon"
-            onError={(e) => { e.target.style.display = 'none' }}
-          />
-          <span className="start-menu-item-text">MARKETPLACE</span>
-        </button>
-        <button 
-          className="start-menu-item"
-          onClick={() => handleMenuItemClick('open-paint')}
-          role="menuitem"
-          tabIndex={0}
-        >
-          <img 
-            src={getStartMenuIcon('open-paint')} 
-            alt="" 
-            className="start-menu-item-icon"
-            onError={(e) => { e.target.style.display = 'none' }}
-          />
-          <span className="start-menu-item-text">Paint</span>
-        </button>
-        <button 
-          className="start-menu-item"
-          onClick={() => {
-            if (onOpenWojakCreator) {
-              onOpenWojakCreator()
-            }
-            onClose()
-          }}
-          role="menuitem"
-          tabIndex={0}
-        >
-          <img 
-            src={getStartMenuIcon('wojak-creator')} 
-            alt="" 
-            className="start-menu-item-icon"
-            onError={(e) => { e.target.style.display = 'none' }}
-          />
-          <span className="start-menu-item-text">Wojak Creator</span>
-        </button>
-        <button 
-          className="start-menu-item"
-          onClick={() => handleMenuItemClick('scroll-to-faq')}
-          role="menuitem"
-          tabIndex={0}
-        >
-          <img 
-            src={getStartMenuIcon('scroll-to-faq')} 
-            alt="" 
-            className="start-menu-item-icon"
-            onError={(e) => { e.target.style.display = 'none' }}
-          />
-          <span className="start-menu-item-text">FAQ</span>
-        </button>
+        {/* MAIN group apps */}
+        {Object.values(APPS)
+          .filter(app => app.group === 'MAIN')
+          .map(app => (
+            <button
+              key={app.id}
+              className="start-menu-item"
+              onClick={() => handleAppClick(app)}
+              role="menuitem"
+              tabIndex={0}
+            >
+              <AppIcon
+                icon={app.icon}
+                className="start-menu-item-icon"
+                size={16}
+              />
+              <span className="start-menu-item-text">{app.label}</span>
+            </button>
+          ))}
+        
         <hr className="start-menu-separator" role="separator" />
-        <div 
+        
+        {/* GAMES group header */}
+        <div
           className="start-menu-section-header"
           style={{
             padding: '4px 8px',
@@ -329,96 +266,63 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
         >
           Games
         </div>
-        <button 
-          className="start-menu-item"
-          onClick={() => handleMenuItemClick('open-tanggang')}
-          role="menuitem"
-          tabIndex={0}
-        >
-          <span className="start-menu-item-icon start-menu-emoji-icon" aria-hidden="true">
-            🍊
-          </span>
-          <span className="start-menu-item-text">TangGang</span>
-        </button>
-        <button 
-          className="start-menu-item"
-          onClick={() => handleMenuItemClick('open-pinball')}
-          role="menuitem"
-          tabIndex={0}
-        >
-          <img 
-            src={getStartMenuIcon('open-pinball')} 
-            alt="" 
-            className="start-menu-item-icon"
-            onError={(e) => { e.target.style.display = 'none' }}
-          />
-          <span className="start-menu-item-text">3D Pinball</span>
-        </button>
-        <button 
-          className="start-menu-item"
-          onClick={() => handleMenuItemClick('open-solitaire')}
-          role="menuitem"
-          tabIndex={0}
-        >
-          <img 
-            src={getStartMenuIcon('open-solitaire')} 
-            alt="" 
-            className="start-menu-item-icon"
-            onError={(e) => { e.target.style.display = 'none' }}
-          />
-          <span className="start-menu-item-text">Solitaire</span>
-        </button>
-        <button 
-          className="start-menu-item"
-          onClick={() => handleMenuItemClick('open-minesweeper')}
-          role="menuitem"
-          tabIndex={0}
-        >
-          <img 
-            src={getStartMenuIcon('open-minesweeper')} 
-            alt="" 
-            className="start-menu-item-icon"
-            onError={(e) => { e.target.style.display = 'none' }}
-          />
-          <span className="start-menu-item-text">Minesweeper</span>
-        </button>
-        <button 
-          className="start-menu-item"
-          onClick={() => handleMenuItemClick('open-skifree')}
-          role="menuitem"
-          tabIndex={0}
-        >
-          <img 
-            src={getStartMenuIcon('open-skifree')} 
-            alt="" 
-            className="start-menu-item-icon"
-            onError={(e) => { e.target.style.display = 'none' }}
-          />
-          <span className="start-menu-item-text">SkiFree</span>
-        </button>
+        
+        {/* GAMES group apps */}
+        {Object.values(APPS)
+          .filter(app => app.group === 'GAMES')
+          .map(app => (
+            <button
+              key={app.id}
+              className="start-menu-item"
+              onClick={() => handleAppClick(app)}
+              role="menuitem"
+              tabIndex={0}
+            >
+              <AppIcon
+                icon={app.icon}
+                className="start-menu-item-icon"
+                size={16}
+              />
+              <span className="start-menu-item-text">{app.label}</span>
+            </button>
+          ))}
+        
         <hr className="start-menu-separator" role="separator" />
-        <button 
-          className="start-menu-item"
-          onClick={() => {
-            window.open('https://wojakfarmersplot.crate.ink/#/', '_blank')
-            onClose()
+        
+        {/* LINKS group header */}
+        <div
+          className="start-menu-section-header"
+          style={{
+            padding: '4px 8px',
+            fontSize: '10px',
+            fontWeight: 'bold',
+            color: '#000',
+            background: '#c0c0c0',
+            textTransform: 'uppercase',
           }}
-          role="menuitem"
-          tabIndex={0}
         >
-          <span className="start-menu-item-text">Open Crate</span>
-        </button>
-        <button 
-          className="start-menu-item"
-          onClick={() => {
-            window.open('https://x.com/MoJuiceX', '_blank')
-            onClose()
-          }}
-          role="menuitem"
-          tabIndex={0}
-        >
-          <span className="start-menu-item-text">Follow Updates</span>
-        </button>
+          Links
+        </div>
+        
+        {/* LINKS group apps */}
+        {Object.values(APPS)
+          .filter(app => app.group === 'LINKS')
+          .map(app => (
+            <button
+              key={app.id}
+              className="start-menu-item"
+              onClick={() => handleAppClick(app)}
+              role="menuitem"
+              tabIndex={0}
+            >
+              <AppIcon
+                icon={app.icon}
+                className="start-menu-item-icon"
+                size={16}
+              />
+              <span className="start-menu-item-text">{app.label}</span>
+            </button>
+          ))}
       </div>
     </div>
   )

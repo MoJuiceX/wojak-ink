@@ -11,6 +11,7 @@
     "discover-wojak-images": "node scripts/discover-wojak-images.js",
     "generate-meme-manifest": "node scripts/generate-meme-manifest.js",
     "build:offers": "node scripts/build_offers_enriched.mjs",
+    "test:marketplace": "node scripts/test-marketplace.mjs",
     "qa:mobile": "echo '📱 Mobile QA Testing - Open http://localhost:5173 in browser and follow README QA section' && npm run dev",
     "qa:desktop": "echo '🖥️ Desktop QA Testing - Open http://localhost:5173 in browser and follow README QA section' && npm run dev",
     "qa:lighthouse": "echo '🔍 Lighthouse QA - Run: npx lighthouse http://localhost:5173 --view' && npm run dev"

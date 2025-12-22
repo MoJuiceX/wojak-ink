@@ -20,7 +20,7 @@ import BackgroundMusic from './components/BackgroundMusic'
 import LoadingSpinner from './components/ui/LoadingSpinner'
 import OrangeToyLayer from './components/OrangeToyLayer'
 import TryAgainWindowWrapper from './components/windows/TryAgainWindowWrapper'
-import PapaEasterEgg from './components/PapaEasterEgg'
+import EasterEggCoordinator from './components/EasterEggCoordinator'
 
 // Lazy load non-critical routes
 const AdminPanel = lazy(() => import('./components/windows/AdminPanel'))
@@ -146,7 +146,6 @@ function App() {
     'window-marketplace': false,
     'tanggang': false,
   })
-  const papaEasterEggRef = useRef(null)
 
   // Global scroll lock - prevent all page scrolling
   useGlobalScrollLock()
@@ -226,77 +225,7 @@ function App() {
               <div className="bg-fixed" aria-hidden="true"></div>
               <main id="main-content" className="desktop" aria-label="Desktop">
                 <OrangeToyLayer />
-                <PapaEasterEgg ref={papaEasterEggRef} />
-                {/* Test button for Papa Easter Egg animation (dev only) */}
-                {process.env.NODE_ENV === 'development' && (
-                  <div style={{
-                    position: 'fixed',
-                    top: '10px',
-                    right: '10px',
-                    zIndex: 10002,
-                    display: 'flex',
-                    gap: '5px',
-                    flexDirection: 'column'
-                  }}>
-                    <button
-                      onClick={() => papaEasterEggRef.current?.trigger(1)}
-                      style={{
-                        padding: '8px 12px',
-                        fontSize: '12px',
-                        cursor: 'pointer',
-                        backgroundColor: '#c0c0c0',
-                        border: '2px outset #c0c0c0',
-                        fontFamily: 'MS Sans Serif, sans-serif'
-                      }}
-                      onMouseDown={(e) => {
-                        e.currentTarget.style.border = '2px inset #c0c0c0'
-                      }}
-                      onMouseUp={(e) => {
-                        e.currentTarget.style.border = '2px outset #c0c0c0'
-                      }}
-                    >
-                      Test Papa1
-                    </button>
-                    <button
-                      onClick={() => papaEasterEggRef.current?.trigger(2)}
-                      style={{
-                        padding: '8px 12px',
-                        fontSize: '12px',
-                        cursor: 'pointer',
-                        backgroundColor: '#c0c0c0',
-                        border: '2px outset #c0c0c0',
-                        fontFamily: 'MS Sans Serif, sans-serif'
-                      }}
-                      onMouseDown={(e) => {
-                        e.currentTarget.style.border = '2px inset #c0c0c0'
-                      }}
-                      onMouseUp={(e) => {
-                        e.currentTarget.style.border = '2px outset #c0c0c0'
-                      }}
-                    >
-                      Test Papa2
-                    </button>
-                    <button
-                      onClick={() => papaEasterEggRef.current?.trigger(3)}
-                      style={{
-                        padding: '8px 12px',
-                        fontSize: '12px',
-                        cursor: 'pointer',
-                        backgroundColor: '#c0c0c0',
-                        border: '2px outset #c0c0c0',
-                        fontFamily: 'MS Sans Serif, sans-serif'
-                      }}
-                      onMouseDown={(e) => {
-                        e.currentTarget.style.border = '2px inset #c0c0c0'
-                      }}
-                      onMouseUp={(e) => {
-                        e.currentTarget.style.border = '2px outset #c0c0c0'
-                      }}
-                    >
-                      Test Papa3
-                    </button>
-                  </div>
-                )}
+                <EasterEggCoordinator />
                 <DesktopIcons onOpenApp={openWindow} />
                 {openWindows['window-readme-txt'] && (
                   <ReadmeWindow onClose={() => closeWindow('window-readme-txt')} />

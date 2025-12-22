@@ -6,8 +6,8 @@ import { useToast } from '../../contexts/ToastContext'
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver'
 import Button from '../ui/Button'
 import { Skeleton, LoadingSpinner } from '../ui'
-import { resolveNFTToMintGarden } from '../../utils/nftResolver'
-import { fetchNFTDetails, getNFTThumbnailUrl, getOfferFromDexie } from '../../services/mintgardenApi'
+import { resolveNFTToMintGarden, resolveNFTFromOfferFile } from '../../utils/nftResolver'
+import { fetchNFTDetails, getNFTThumbnailUrl, getOfferFromDexie, getIPFSThumbnailUrl } from '../../services/mintgardenApi'
 
 function MarketplaceNFT({ nft, offerFile, onCopyOffer, onViewOffer }) {
   const { fetchNFTDetailsForId, nftDetails, nftDetailsLoading } = useMarketplace()
@@ -256,12 +256,30 @@ function OfferFileModal({ nft, offerFile, onClose, onCopy }) {
         setLoadingStage('Resolving NFT from offer file...')
         
         // Step 2: Resolve NFT to MintGarden launcher_bech32 from offer file
-        const launcherBech32 = await resolveNFTToMintGarden(nft, offerFile)
+        // Try resolveNFTFromOfferFile first (more reliable), then fallback to resolveNFTToMintGarden
+        let launcherBech32 = null
+        try {
+          // First try: Use resolveNFTFromOfferFile (more direct)
+          launcherBech32 = await resolveNFTFromOfferFile(offerFile)
+          
+          // If that fails, try resolveNFTToMintGarden as fallback
+          if (!launcherBech32) {
+            launcherBech32 = await resolveNFTToMintGarden(nft, offerFile)
+          }
+        } catch (err) {
+          console.error('Error resolving NFT:', err)
+          // Try fallback
+          try {
+            launcherBech32 = await resolveNFTToMintGarden(nft, offerFile)
+          } catch (fallbackErr) {
+            console.error('Fallback resolution also failed:', fallbackErr)
+          }
+        }
         
         if (!launcherBech32) {
           setError('NFT not found on MintGarden. Could not extract NFT ID from offer file.')
           setLoading(false)
-          return
+          // Don't return - continue to show modal with error and fallback thumbnail
         }
         
         setLoadingStage('Fetching details...')
@@ -270,6 +288,8 @@ function OfferFileModal({ nft, offerFile, onClose, onCopy }) {
         const details = await fetchNFTDetails(launcherBech32)
         setNftDetails(details)
         setLoadingStage('Loading thumbnail...')
+        
+        // Details are now set, thumbnail URL will be computed below
         
       } catch (err) {
         console.error('Failed to fetch NFT details:', err)
@@ -412,8 +432,20 @@ function OfferFileModal({ nft, offerFile, onClose, onCopy }) {
     return new Date(nftDetails.events[0].timestamp).toLocaleDateString()
   }
 
-  // Use thumbnail from CSV (IPFS link) - same as preview cards
-  const thumbnailUrl = nft.thumbnail || (nftDetails?.data?.thumbnail_uri ? nftDetails.data.thumbnail_uri : null)
+  // Generate thumbnail URL: Use IPFS URL from token ID (primary), then fallback to MintGarden thumbnail
+  let thumbnailUrl = nft.thumbnail // Start with thumbnail from marketplace context (IPFS URL)
+  
+  // If we don't have a thumbnail yet but have MintGarden details, generate IPFS URL from token ID
+  if (!thumbnailUrl && nftDetails) {
+    thumbnailUrl = getIPFSThumbnailUrl(nftDetails)
+  }
+  
+  // Fallback to MintGarden thumbnail API if IPFS URL not available
+  if (!thumbnailUrl && nftDetails?.data?.thumbnail_uri) {
+    thumbnailUrl = nftDetails?.data?.thumbnail_uri
+  }
+  
+  // Final fallback: Use MintGarden thumbnail API URL (requires launcher ID, which we might not have here)
 
   return (
     <div
@@ -484,8 +516,8 @@ function OfferFileModal({ nft, offerFile, onClose, onCopy }) {
           </div>
         )}
 
-        {/* NFT Details Section */}
-        {nftDetails && !loading && (
+        {/* NFT Details Section - Show if we have details OR if we have a thumbnail from marketplace */}
+        {(nftDetails || thumbnailUrl) && !loading && (
           <div style={{ marginBottom: '12px', padding: '12px', background: '#f0f0f0', border: '1px inset #c0c0c0' }}>
             <div style={{ fontSize: '11px', fontWeight: 'bold', marginBottom: '8px' }}>NFT Details</div>
             
@@ -494,7 +526,7 @@ function OfferFileModal({ nft, offerFile, onClose, onCopy }) {
               {thumbnailUrl ? (
                 <img
                   src={thumbnailUrl}
-                  alt={nftDetails.data?.metadata_json?.name || nft.name}
+                  alt={nftDetails?.data?.metadata_json?.name || nft.name}
                   style={{
                     maxWidth: '200px',
                     maxHeight: '200px',
@@ -520,16 +552,16 @@ function OfferFileModal({ nft, offerFile, onClose, onCopy }) {
             </div>
 
             {/* NFT Name & Description */}
-            {(nftDetails.data?.metadata_json?.name || nftDetails.data?.metadata_json?.description) && (
+            {(nftDetails?.data?.metadata_json?.name || nftDetails?.data?.metadata_json?.description) && (
               <div style={{ marginBottom: '8px' }}>
-                {nftDetails.data.metadata_json.name && (
+                {nftDetails?.data?.metadata_json?.name && (
                   <div style={{ fontSize: '11px', fontWeight: 'bold', marginBottom: '4px' }}>
-                    {nftDetails.data.metadata_json.name}
+                    {nftDetails?.data?.metadata_json?.name}
                   </div>
                 )}
-                {nftDetails.data.metadata_json.description && (
+                {nftDetails?.data?.metadata_json?.description && (
                   <div style={{ fontSize: '10px', color: '#666', marginBottom: '4px' }}>
-                    {nftDetails.data.metadata_json.description}
+                    {nftDetails?.data?.metadata_json?.description}
                   </div>
                 )}
               </div>
@@ -556,10 +588,10 @@ function OfferFileModal({ nft, offerFile, onClose, onCopy }) {
             })()}
 
             {/* Collection */}
-            {nftDetails.collection && (
+            {nftDetails?.collection && (
               <div style={{ marginBottom: '8px', fontSize: '10px' }}>
                 <span style={{ fontWeight: 'bold' }}>Collection: </span>
-                {nftDetails.collection.name || nftDetails.collection.id}
+                {nftDetails?.collection?.name || nftDetails?.collection?.id}
               </div>
             )}
 
@@ -580,7 +612,7 @@ function OfferFileModal({ nft, offerFile, onClose, onCopy }) {
             </div>
 
             {/* Auction Details */}
-            {nftDetails.auctions && nftDetails.auctions.length > 0 && (
+            {nftDetails?.auctions && nftDetails.auctions.length > 0 && (
               <div style={{ marginBottom: '8px', padding: '4px 8px', background: '#ffffff', border: '1px inset #c0c0c0' }}>
                 <div style={{ fontSize: '10px', fontWeight: 'bold', marginBottom: '4px' }}>Auction Details:</div>
                 {nftDetails.auctions.map((auction, idx) => (
@@ -603,11 +635,11 @@ function OfferFileModal({ nft, offerFile, onClose, onCopy }) {
             )}
 
             {/* Metadata Attributes */}
-            {nftDetails.data?.metadata_json?.attributes && Array.isArray(nftDetails.data.metadata_json.attributes) && nftDetails.data.metadata_json.attributes.length > 0 && (
+            {nftDetails?.data?.metadata_json?.attributes && Array.isArray(nftDetails?.data?.metadata_json?.attributes) && nftDetails?.data?.metadata_json?.attributes?.length > 0 && (
               <div style={{ marginBottom: '8px', fontSize: '10px' }}>
                 <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>Attributes:</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                  {nftDetails.data.metadata_json.attributes.map((attr, idx) => (
+                  {nftDetails?.data?.metadata_json?.attributes?.map((attr, idx) => (
                     <div key={idx} style={{ padding: '2px 6px', background: '#ffffff', border: '1px solid #c0c0c0', fontSize: '9px' }}>
                       {attr.trait_type}: {attr.value}
                     </div>
@@ -688,10 +720,12 @@ export default function MarketplaceWindow({ onClose }) {
   const isLoadingInitial = nftEntries.length === 0 || (tokenGroups.length === 0 && nftEntries.length > 0)
   
   // Start fetching NFT details for all entries when component mounts or entries change
+  // Use longer delays to avoid rate limits (each NFT fetch requires multiple API calls)
   useEffect(() => {
     if (nftEntries.length > 0) {
-      // Fetch details for all NFTs (stagger requests to avoid rate limits)
-      // Use longer delay to avoid hitting API rate limits (500ms = 2 requests/second)
+      // Fetch details for all NFTs with aggressive throttling to avoid rate limits
+      // Each NFT requires: Dexie API call + MintGarden API call(s), so we need longer delays
+      // Use 2 second delay = 0.5 NFTs/second = ~1-2 API calls/second max
       nftEntries.forEach((entry, index) => {
         // Stagger the requests with longer delay to respect rate limits
         setTimeout(() => {
@@ -701,7 +735,7 @@ export default function MarketplaceWindow({ onClose }) {
               // Retry logic will handle rate-limited requests automatically
             })
           }
-        }, index * 500) // 500ms delay between each request (2 req/sec to avoid rate limits)
+        }, index * 2000) // 2 second delay between each NFT (accounts for multiple API calls per NFT)
       })
     }
   }, [nftEntries.length]) // Only run when entries count changes, not when fetchNFTDetailsForId changes

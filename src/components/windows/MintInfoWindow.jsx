@@ -46,7 +46,7 @@ export default function MintInfoWindow({ onNotifyClick, onClose }) {
   return (
     <Window
       id="window-mint-info-exe"
-      title="MINT_INFO.EXE"
+      title="MINT_INFO.TXT"
       style={{
         width: winWidth ? `${winWidth}px` : 'auto',
         maxWidth: 'min(1100px, calc(100vw - 80px))',

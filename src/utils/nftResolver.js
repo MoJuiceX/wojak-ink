@@ -98,12 +98,23 @@ function hexToBech32Launcher(hexId) {
  */
 export async function resolveNFTFromOfferFile(offerFileString) {
   try {
+    if (!offerFileString || !offerFileString.startsWith('offer1')) {
+      if (import.meta.env.DEV) {
+        console.warn('[NFT Resolver] Invalid offer file format:', offerFileString?.substring(0, 50))
+      }
+      return null
+    }
+    
     // Step 1: Query Dexie API to parse the offer file and get offer details
     const offerData = await getOfferFromDexie(offerFileString)
     
     if (offerData) {
       // Step 2: Extract NFT IDs from Dexie offer response
       const nftIds = extractNFTIdsFromDexieOffer(offerData)
+      
+      if (import.meta.env.DEV && nftIds.length > 0) {
+        console.log(`[NFT Resolver] Extracted ${nftIds.length} NFT IDs from Dexie offer`)
+      }
       
       if (nftIds.length > 0) {
         // Step 3: Try each NFT ID with MintGarden API
@@ -112,9 +123,16 @@ export async function resolveNFTFromOfferFile(offerFileString) {
           try {
             // MintGarden API accepts both hex and bech32 (nft1...) formats
             const response = await fetch(`https://api.mintgarden.io/nfts/${nftId}`)
+            if (response.status === 429) {
+              // Rate limited - throw error to be caught by retry logic
+              throw new Error('429 rate limit')
+            }
             if (response.ok) {
               const data = await response.json()
               if (data.id) {
+                if (import.meta.env.DEV) {
+                  console.log(`[NFT Resolver] Found NFT on MintGarden: ${data.id}`)
+                }
                 // Return the launcher_bech32 (id field) or encoded_id
                 return data.id || data.encoded_id
               }
@@ -122,38 +140,72 @@ export async function resolveNFTFromOfferFile(offerFileString) {
             // Silently continue on 404 - not all IDs will be valid NFTs
             // Don't log 404s as they're expected for invalid IDs
           } catch (err) {
-            // Silently continue to next candidate
-            // Network errors are rare, but we don't want to spam console
+            // Log network errors in dev mode
+            if (import.meta.env.DEV) {
+              console.warn(`[NFT Resolver] Error checking NFT ID ${nftId}:`, err.message)
+            }
             continue
           }
         }
+      } else if (import.meta.env.DEV) {
+        console.warn('[NFT Resolver] No NFT IDs extracted from Dexie offer data')
       }
+    } else if (import.meta.env.DEV) {
+      console.warn('[NFT Resolver] Dexie API returned no offer data')
     }
     
     // Fallback: If Dexie API fails or doesn't return NFT IDs, try heuristic parsing
+    if (import.meta.env.DEV) {
+      console.log('[NFT Resolver] Attempting heuristic parsing of offer file')
+    }
     const potentialIds = parseOfferFileForNFTIds(offerFileString)
     
     if (potentialIds.length === 0) {
+      if (import.meta.env.DEV) {
+        console.warn('[NFT Resolver] No potential IDs found in offer file')
+      }
       return null
+    }
+    
+    if (import.meta.env.DEV) {
+      console.log(`[NFT Resolver] Found ${potentialIds.length} potential IDs from heuristic parsing`)
     }
     
     // Try each potential ID with MintGarden API
     for (const hexId of potentialIds.slice(0, 10)) {
       try {
         const response = await fetch(`https://api.mintgarden.io/nfts/${hexId}`)
+        if (response.status === 429) {
+          // Rate limited - throw error to be caught by retry logic
+          throw new Error('429 rate limit')
+        }
         if (response.ok) {
           const data = await response.json()
           if (data.id) {
+            if (import.meta.env.DEV) {
+              console.log(`[NFT Resolver] Found NFT via heuristic parsing: ${data.id}`)
+            }
             return data.id || data.encoded_id
           }
         }
       } catch (err) {
+        // Re-throw rate limit errors so they can be handled by retry logic
+        if (err.message.includes('429') || err.message.includes('rate limit')) {
+          throw err
+        }
+        if (import.meta.env.DEV) {
+          console.warn(`[NFT Resolver] Error checking hex ID ${hexId.substring(0, 16)}...:`, err.message)
+        }
         continue
       }
     }
+    
+    if (import.meta.env.DEV) {
+      console.warn('[NFT Resolver] Failed to resolve NFT from offer file after all attempts')
+    }
     return null
   } catch (error) {
-    console.error('Failed to resolve NFT from offer file:', error)
+    console.error('[NFT Resolver] Failed to resolve NFT from offer file:', error)
     return null
   }
 }

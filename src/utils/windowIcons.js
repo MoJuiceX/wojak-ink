@@ -26,7 +26,7 @@ const windowIconMap = {
 // Map window titles to icon filenames (fallback)
 const titleIconMap = {
   'README.TXT': 'notepad-0',
-  'MINT_INFO.EXE': 'msg_information-0',
+  'MINT_INFO.TXT': 'msg_information-0',
   'GALLERY': 'directory_closed-0',
   'FAQ': 'help_question_mark-0',
   'MARKETPLACE': 'briefcase-0',

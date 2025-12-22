@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from 'react'
 import Window from './Window'
 import { useOrangeToy } from '../../contexts/OrangeToyContext'
 import { useWindow } from '../../contexts/WindowContext'
+import OrangeGlassWindow from '../orange/OrangeGlassWindow'
 
 export default function TangGangWindow({ onClose }) {
   const { 
@@ -224,11 +225,16 @@ export default function TangGangWindow({ onClose }) {
       onClose={onClose}
     >
       <div>
-        <img
-          src="https://bafybeihbaqn7omk55qi3vfrht76qa53kz4dx75anzwtjkcggi2v3jql4tm.ipfs.w3s.link/?filename=HOA+logo.png"
-          alt="TangGang"
-          className="fit-img"
-        />
+        <div className="hoa-logo-wrapper">
+          <img
+            src="https://bafybeihbaqn7omk55qi3vfrht76qa53kz4dx75anzwtjkcggi2v3jql4tm.ipfs.w3s.link/?filename=HOA+logo.png"
+            alt="TangGang"
+            className="hoa-logo-img"
+          />
+          <div className="hoa-glass-overlay" aria-hidden="true">
+            <OrangeGlassWindow variant="overlay" />
+          </div>
+        </div>
         <div style={{ padding: '12px', textAlign: 'center' }}>
           {canClaim && (
             <button 
