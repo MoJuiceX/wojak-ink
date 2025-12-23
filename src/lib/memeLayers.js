@@ -49,6 +49,7 @@ export const LAYER_ORDER = [
   { name: 'ClothesAddon', folder: 'CLOTHESADDON', zIndex: 3 }, // Internal layer for Chia Farmer (shown in Clothes dropdown)
   { name: 'FacialHair', folder: 'FACIALHAIR', zIndex: 4 }, // MUST ALWAYS render UNDER Astronaut, Mouth(Base), and Mouth(Item)
   { name: 'MouthBase', folder: 'MOUTHBASE', zIndex: 5 }, // ALL Mouth(Base) traits including Screaming (renders before Mask and Astronaut)
+  { name: 'BubbleGumRekt', folder: 'MOUTH', zIndex: 5.1 }, // Virtual layer: Bubble Gum rekt variant renders on top of regular bubble gum when rekt base is selected
   { name: 'MouthItem', folder: 'MOUTHITEM', zIndex: 6 }, // Renders after MouthBase (MouthItem overlays MouthBase), before Mask (Mask overlays MouthItem)
   { name: 'TysonTattoo', folder: 'TYSONTATTOO', zIndex: 6.5 }, // Virtual layer: ONLY when ANY mask exists, renders UNDER mask (must be < Mask zIndex)
   { name: 'NinjaTurtleUnderMask', folder: 'VIRTUAL', zIndex: 6.6 }, // Virtual layer: ONLY when covering mask (Copium/Hannibal/Bandana) exists, renders UNDER mask (must be < Mask zIndex)
@@ -57,6 +58,8 @@ export const LAYER_ORDER = [
   { name: 'Eyes', folder: 'EYE', zIndex: 10 }, // Renders after Mask and HannibalMask (Eyes overlay all masks), before Head (Head overlays eyes), before Astronaut (Astronaut covers eyes) (highest of the three)
   { name: 'Astronaut', folder: 'ASTRONAUT', zIndex: 11 }, // Virtual layer: MUST ALWAYS render OVER Eyes, FacialHair, and ALL Mouth(Base) traits
   { name: 'Head', folder: 'HEAD', zIndex: 12 }, // MUST ALWAYS render OVER Eyes and Mask (Head overlays eyes and mask)
+  { name: 'EyesOverHead', folder: 'EYES', zIndex: 14 }, // Virtual layer: right half of eyes on top of specific head traits (Clown, Pirate, Ronin, Super Saiyan)
+  { name: 'BubbleGumOverEyes', folder: 'MOUTH', zIndex: 60 }, // Virtual layer: Bubble Gum absolutely on top of everything
 ]
 
 // Layers that should appear in the UI (excludes Extra, ClothesAddon, and virtual layers)
@@ -66,7 +69,10 @@ export const UI_LAYER_ORDER = LAYER_ORDER.filter(layer =>
   layer.name !== 'HannibalMask' && 
   layer.name !== 'TysonTattoo' &&
   layer.name !== 'NinjaTurtleUnderMask' &&
-  layer.name !== 'Astronaut'
+  layer.name !== 'Astronaut' && 
+  layer.name !== 'EyesOverHead' &&
+  layer.name !== 'BubbleGumOverEyes' &&
+  layer.name !== 'BubbleGumRekt'
 )
 
 export const LAYER_NAMES = LAYER_ORDER.map(layer => layer.name)

@@ -4,6 +4,7 @@ import { loadImage, preloadImages } from '../utils/imageUtils'
 import { getDisabledLayers } from '../utils/wojakRules'
 import { debounce } from '../utils/debounce'
 import { getAllLayerImages } from '../lib/memeImageManifest'
+import { parseColorVariant } from '../lib/traitOptions'
 
 export function useMemeGenerator() {
   const [selectedLayers, setSelectedLayers] = useState({})
@@ -221,19 +222,28 @@ export function useMemeGenerator() {
         }
       }
       
-      // Special handling: Centurion vs Centurion_mask based on Mask selection
-      // When Mask changes, adjust Head selection if needed
+      // Special handling: Centurion vs Centurion_mask based on Mask, MouthItem, or MouthBase (Pipe/Pizza/Bubble Gum) selection
+      // When Mask changes, adjust Head selection if needed (checking also MouthItem and MouthBase)
       if (layerName === 'Mask') {
         const headPath = newLayers['Head'] || ''
         const hasMask = imagePath && imagePath !== '' && imagePath !== 'None'
+        
+        // Check if MouthItem is selected (Cig, Joint, Cohiba)
+        const mouthItemActive = newLayers['MouthItem'] && newLayers['MouthItem'] !== '' && newLayers['MouthItem'] !== 'None'
+        
+        // Check if MouthBase contains Pipe, Pizza, or Bubble Gum
+        const mouthBasePath = (newLayers['MouthBase'] || '').toLowerCase()
+        const mouthBaseHasPipePizzaBubble = mouthBasePath.includes('pipe') || mouthBasePath.includes('pizza') || mouthBasePath.includes('bubble')
+        
+        // Combined condition: Centurion_mask required if ANY of these are true
+        const requiresCenturionMask = hasMask || mouthItemActive || mouthBaseHasPipePizzaBubble
+        
         const pathLower = (headPath || '').toLowerCase()
         const isCenturion = pathLower.includes('centurion') && !pathLower.includes('centurion_mask')
         const isCenturionMask = pathLower.includes('centurion_mask')
         
-        if (hasMask && isCenturion) {
-          // Mask selected but Head is Centurion (not mask version) - switch to Centurion_mask
-          const centurionMaskPath = headPath.replace(/centurion/i, 'Centurion_mask').replace(/\.png/i, '.png')
-          // Try to find the actual Centurion_mask path from manifest
+        if (requiresCenturionMask && isCenturion) {
+          // Mask/MouthItem/PipePizzaBubble active but Head is Centurion (not mask version) - switch to Centurion_mask
           const headImages = getAllLayerImages('Head') || []
           const centurionMaskImage = headImages.find(img => 
             (img.path || '').toLowerCase().includes('centurion_mask')
@@ -244,10 +254,8 @@ export function useMemeGenerator() {
             // Fallback: clear Head if Centurion_mask not found
             newLayers['Head'] = ''
           }
-        } else if (!hasMask && isCenturionMask) {
-          // Mask cleared but Head is Centurion_mask - switch to Centurion
-          const centurionPath = headPath.replace(/centurion_mask/i, 'Centurion').replace(/\.png/i, '.png')
-          // Try to find the actual Centurion path from manifest
+        } else if (!requiresCenturionMask && isCenturionMask) {
+          // Mask/MouthItem/PipePizzaBubble all cleared but Head is Centurion_mask - switch to Centurion
           const headImages = getAllLayerImages('Head') || []
           const centurionImage = headImages.find(img => {
             const path = (img.path || '').toLowerCase()
@@ -262,16 +270,27 @@ export function useMemeGenerator() {
         }
       }
       
-      // When Head changes, ensure it matches Mask selection
+      // When Head changes, ensure it matches Mask, MouthItem, or MouthBase (Pipe/Pizza/Bubble Gum) selection
       if (layerName === 'Head' && imagePath) {
         const maskPath = newLayers['Mask'] || ''
         const hasMask = maskPath && maskPath !== '' && maskPath !== 'None'
+        
+        // Check if MouthItem is selected (Cig, Joint, Cohiba)
+        const mouthItemActive = newLayers['MouthItem'] && newLayers['MouthItem'] !== '' && newLayers['MouthItem'] !== 'None'
+        
+        // Check if MouthBase contains Pipe, Pizza, or Bubble Gum
+        const mouthBasePath = (newLayers['MouthBase'] || '').toLowerCase()
+        const mouthBaseHasPipePizzaBubble = mouthBasePath.includes('pipe') || mouthBasePath.includes('pizza') || mouthBasePath.includes('bubble')
+        
+        // Combined condition: Centurion_mask required if ANY of these are true
+        const requiresCenturionMask = hasMask || mouthItemActive || mouthBaseHasPipePizzaBubble
+        
         const pathLower = (imagePath || '').toLowerCase()
         const isCenturion = pathLower.includes('centurion') && !pathLower.includes('centurion_mask')
         const isCenturionMask = pathLower.includes('centurion_mask')
         
-        if (hasMask && isCenturion) {
-          // Mask exists but Head is Centurion (not mask version) - switch to Centurion_mask
+        if (requiresCenturionMask && isCenturion) {
+          // Mask/MouthItem/PipePizzaBubble active but Head is Centurion (not mask version) - switch to Centurion_mask
           const headImages = getAllLayerImages('Head') || []
           const centurionMaskImage = headImages.find(img => 
             (img.path || '').toLowerCase().includes('centurion_mask')
@@ -281,8 +300,98 @@ export function useMemeGenerator() {
           } else {
             newLayers['Head'] = ''
           }
-        } else if (!hasMask && isCenturionMask) {
-          // No mask but Head is Centurion_mask - switch to Centurion
+        } else if (!requiresCenturionMask && isCenturionMask) {
+          // Mask/MouthItem/PipePizzaBubble all cleared but Head is Centurion_mask - switch to Centurion
+          const headImages = getAllLayerImages('Head') || []
+          const centurionImage = headImages.find(img => {
+            const path = (img.path || '').toLowerCase()
+            return path.includes('centurion') && !path.includes('centurion_mask')
+          })
+          if (centurionImage) {
+            newLayers['Head'] = centurionImage.path
+          } else {
+            newLayers['Head'] = ''
+          }
+        }
+      }
+      
+      // When MouthItem changes, adjust Head selection if needed (checking also Mask and MouthBase)
+      if (layerName === 'MouthItem') {
+        const headPath = newLayers['Head'] || ''
+        const mouthItemActive = imagePath && imagePath !== '' && imagePath !== 'None'
+        
+        // Check if Mask is selected
+        const hasMask = newLayers['Mask'] && newLayers['Mask'] !== '' && newLayers['Mask'] !== 'None'
+        
+        // Check if MouthBase contains Pipe, Pizza, or Bubble Gum
+        const mouthBasePath = (newLayers['MouthBase'] || '').toLowerCase()
+        const mouthBaseHasPipePizzaBubble = mouthBasePath.includes('pipe') || mouthBasePath.includes('pizza') || mouthBasePath.includes('bubble')
+        
+        // Combined condition: Centurion_mask required if ANY of these are true
+        const requiresCenturionMask = hasMask || mouthItemActive || mouthBaseHasPipePizzaBubble
+        
+        const pathLower = (headPath || '').toLowerCase()
+        const isCenturion = pathLower.includes('centurion') && !pathLower.includes('centurion_mask')
+        const isCenturionMask = pathLower.includes('centurion_mask')
+        
+        if (requiresCenturionMask && isCenturion) {
+          // Mask/MouthItem/PipePizzaBubble active but Head is Centurion (not mask version) - switch to Centurion_mask
+          const headImages = getAllLayerImages('Head') || []
+          const centurionMaskImage = headImages.find(img => 
+            (img.path || '').toLowerCase().includes('centurion_mask')
+          )
+          if (centurionMaskImage) {
+            newLayers['Head'] = centurionMaskImage.path
+          } else {
+            newLayers['Head'] = ''
+          }
+        } else if (!requiresCenturionMask && isCenturionMask) {
+          // Mask/MouthItem/PipePizzaBubble all cleared but Head is Centurion_mask - switch to Centurion
+          const headImages = getAllLayerImages('Head') || []
+          const centurionImage = headImages.find(img => {
+            const path = (img.path || '').toLowerCase()
+            return path.includes('centurion') && !path.includes('centurion_mask')
+          })
+          if (centurionImage) {
+            newLayers['Head'] = centurionImage.path
+          } else {
+            newLayers['Head'] = ''
+          }
+        }
+      }
+      
+      // When MouthBase changes, adjust Head selection if it's Pipe/Pizza/Bubble Gum (checking also Mask and MouthItem)
+      if (layerName === 'MouthBase') {
+        const headPath = newLayers['Head'] || ''
+        const mouthBasePath = (imagePath || '').toLowerCase()
+        const mouthBaseHasPipePizzaBubble = mouthBasePath.includes('pipe') || mouthBasePath.includes('pizza') || mouthBasePath.includes('bubble')
+        
+        // Check if Mask is selected
+        const hasMask = newLayers['Mask'] && newLayers['Mask'] !== '' && newLayers['Mask'] !== 'None'
+        
+        // Check if MouthItem is selected (Cig, Joint, Cohiba)
+        const mouthItemActive = newLayers['MouthItem'] && newLayers['MouthItem'] !== '' && newLayers['MouthItem'] !== 'None'
+        
+        // Combined condition: Centurion_mask required if ANY of these are true
+        const requiresCenturionMask = hasMask || mouthItemActive || mouthBaseHasPipePizzaBubble
+        
+        const pathLower = (headPath || '').toLowerCase()
+        const isCenturion = pathLower.includes('centurion') && !pathLower.includes('centurion_mask')
+        const isCenturionMask = pathLower.includes('centurion_mask')
+        
+        if (requiresCenturionMask && isCenturion) {
+          // Mask/MouthItem/PipePizzaBubble active but Head is Centurion (not mask version) - switch to Centurion_mask
+          const headImages = getAllLayerImages('Head') || []
+          const centurionMaskImage = headImages.find(img => 
+            (img.path || '').toLowerCase().includes('centurion_mask')
+          )
+          if (centurionMaskImage) {
+            newLayers['Head'] = centurionMaskImage.path
+          } else {
+            newLayers['Head'] = ''
+          }
+        } else if (!requiresCenturionMask && isCenturionMask) {
+          // Mask/MouthItem/PipePizzaBubble all cleared but Head is Centurion_mask - switch to Centurion
           const headImages = getAllLayerImages('Head') || []
           const centurionImage = headImages.find(img => {
             const path = (img.path || '').toLowerCase()
@@ -586,6 +695,67 @@ export function useMemeGenerator() {
           // NinjaTurtleUnderMask virtual layer: ONLY render when covering mask exists AND Eyes is Ninja Turtle Mask
           // This virtual layer exists ONLY to draw Ninja Turtle Mask under covering masks (Copium, Hannibal, Bandana)
           imagePath = (isMaskThatCoversNinja && isNinjaSelected) ? eyesPath : null
+        } else if (layerName === 'BubbleGumOverEyes') {
+          // BubbleGumOverEyes virtual layer: ONLY render when Bubble Gum is selected in MouthBase
+          const mouthBasePath = selectedLayers['MouthBase']
+          const isBubbleGum = mouthBasePath && (
+            mouthBasePath.toLowerCase().includes('bubble-gum') ||
+            mouthBasePath.toLowerCase().includes('bubble gum') ||
+            mouthBasePath.toLowerCase().includes('bubblegum')
+          )
+          
+          if (isBubbleGum) {
+            // Get current MouthBase (Bubble Gum) selection
+            // Only render if Eyes are selected (need something to cover)
+            if (eyesPath && eyesPath !== '' && eyesPath !== 'None') {
+              imagePath = mouthBasePath // Render Bubble Gum on top of eyes
+            } else {
+              imagePath = null // No eyes selected, no need for overlay
+            }
+          } else {
+            imagePath = null // Bubble Gum not selected, skip this layer
+          }
+        } else if (layerName === 'BubbleGumRekt') {
+          // BubbleGumRekt virtual layer: ONLY render when rekt base is selected AND Bubble Gum is selected in MouthBase
+          const basePath = selectedLayers['Base']
+          const mouthBasePath = selectedLayers['MouthBase']
+          const isRektBase = basePath && (
+            basePath.toLowerCase().includes('rekt')
+          )
+          const isBubbleGum = mouthBasePath && (
+            mouthBasePath.toLowerCase().includes('bubble-gum') ||
+            mouthBasePath.toLowerCase().includes('bubble gum') ||
+            mouthBasePath.toLowerCase().includes('bubblegum')
+          )
+          
+          if (isRektBase && isBubbleGum) {
+            // Render the rekt variant of bubble gum on top of regular bubble gum
+            imagePath = '/wojak-creator/MOUTH/MOUTH_Bubble-Gum_rekt.png'
+          } else {
+            imagePath = null // Not rekt base or not bubble gum, skip this layer
+          }
+        } else if (layerName === 'EyesOverHead') {
+          // EyesOverHead virtual layer: Render right half of eyes on top of specific head traits
+          // Applies to: Clown, Pirate Head, Ronin Helmet, Super Saiyan
+          const headPath = selectedLayers['Head']
+          const needsEyesOverlay = headPath && (
+            headPath.toLowerCase().includes('clown') ||
+            headPath.toLowerCase().includes('pirate') ||
+            headPath.toLowerCase().includes('ronin') ||
+            headPath.toLowerCase().includes('supa') ||
+            headPath.toLowerCase().includes('saiyan')
+          )
+          
+          if (needsEyesOverlay) {
+            // Get current Eyes selection
+            if (eyesPath && eyesPath !== '' && eyesPath !== 'None') {
+              imagePath = eyesPath // Reuse the same eyes image
+            } else {
+              imagePath = null // No eyes selected, skip
+            }
+          } else {
+            imagePath = null // Head doesn't need eye overlay, skip this layer
+          }
         } else if (layerName === 'Clothes') {
           // Exclude Astronaut from regular Clothes rendering (it's handled by virtual layer)
           const clothesPath = selectedLayers['Clothes']
@@ -613,6 +783,10 @@ export function useMemeGenerator() {
 
         if (isVisible && imagePath) {
           try {
+            // Debug: Log MouthBase rendering attempts
+            if (layerName === 'MouthBase' && import.meta.env.DEV) {
+              console.log(`[DEV] Rendering MouthBase: ${imagePath}`)
+            }
             const img = await loadImage(imagePath)
             // Calculate aspect ratio to fit canvas
             const imgAspect = img.width / img.height
@@ -633,9 +807,37 @@ export function useMemeGenerator() {
               drawX = (canvas.width - drawWidth) / 2
             }
             
-            ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight)
+            // Apply clipping for EyesOverHead layer (right half only)
+            if (layerName === 'EyesOverHead') {
+              // Save canvas state
+              ctx.save()
+              
+              // Create clipping region for right half only
+              const clipX = canvas.width / 2 // Start from center (50%)
+              const clipY = 0
+              const clipWidth = canvas.width / 2 // Right half width (50%)
+              const clipHeight = canvas.height
+              
+              // Set up rectangular clip region
+              ctx.beginPath()
+              ctx.rect(clipX, clipY, clipWidth, clipHeight)
+              ctx.clip()
+              
+              // Draw the image (only right half will be visible due to clip)
+              ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight)
+              
+              // Restore canvas state (remove clipping)
+              ctx.restore()
+            } else {
+              // Normal rendering for all other layers
+              ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight)
+            }
           } catch (error) {
             console.error(`Error loading image for ${layerName}:`, error)
+            // Enhanced error logging for MouthBase to debug Teeth issue
+            if (layerName === 'MouthBase') {
+              console.error(`[MouthBase Error] Path: ${imagePath}`, error)
+            }
           }
         }
       }
@@ -1173,9 +1375,21 @@ export function useMemeGenerator() {
         return
       }
       
-      // Special handling for Head: filter Centurion options based on Mask selection
+      // Special handling for Head: filter Centurion options based on Mask, MouthItem, or MouthBase (Pipe/Pizza/Bubble Gum) selection
       if (layerName === 'Head') {
+        // Check if Mask is selected
         const hasMask = newLayers['Mask'] && newLayers['Mask'] !== '' && newLayers['Mask'] !== 'None'
+        
+        // Check if MouthItem is selected (Cig, Joint, Cohiba)
+        const mouthItemActive = newLayers['MouthItem'] && newLayers['MouthItem'] !== '' && newLayers['MouthItem'] !== 'None'
+        
+        // Check if MouthBase contains Pipe, Pizza, or Bubble Gum
+        const mouthBasePath = (newLayers['MouthBase'] || '').toLowerCase()
+        const mouthBaseHasPipePizzaBubble = mouthBasePath.includes('pipe') || mouthBasePath.includes('pizza') || mouthBasePath.includes('bubble')
+        
+        // Combined condition: Centurion_mask required if ANY of these are true
+        const requiresCenturionMask = hasMask || mouthItemActive || mouthBaseHasPipePizzaBubble
+        
         const validImages = images.filter(img => {
           const path = (img?.path || '').trim()
           const displayName = (img?.displayName || img?.name || '').trim().toLowerCase()
@@ -1190,11 +1404,13 @@ export function useMemeGenerator() {
           const isCenturion = pathLower.includes('centurion') && !pathLower.includes('centurion_mask')
           const isCenturionMask = pathLower.includes('centurion_mask')
           
-          if (hasMask) {
-            // When Mask != None: show Centurion_mask, hide Centurion
+          if (requiresCenturionMask) {
+            // When Mask != None OR MouthItem != None OR MouthBase has Pipe/Pizza/Bubble Gum:
+            // show Centurion_mask, hide normal Centurion
             return !isCenturion
           } else {
-            // When Mask == None: show Centurion, hide Centurion_mask
+            // When Mask == None AND MouthItem == None AND MouthBase doesn't have Pipe/Pizza/Bubble Gum:
+            // show normal Centurion, hide Centurion_mask
             return !isCenturionMask
           }
         })
@@ -1204,21 +1420,141 @@ export function useMemeGenerator() {
           return
         }
         
-        // Pick random valid image
-        let idx = 0
+        // Group Head options by base name (color variants)
+        const groupsMap = new Map() // Map<baseName, variants[]>
+        const standaloneItems = []
+        
+        validImages.forEach(img => {
+          const parsed = parseColorVariant(img.displayName || img.name)
+          if (parsed && parsed.base) {
+            // This is a color variant - add to group
+            if (!groupsMap.has(parsed.base)) {
+              groupsMap.set(parsed.base, [])
+            }
+            groupsMap.get(parsed.base).push(img)
+          } else {
+            // Standalone item (no variants)
+            standaloneItems.push(img)
+          }
+        })
+        
+        // Weight groups and standalones equally
+        const allChoices = [...Array.from(groupsMap.entries()), ...standaloneItems.map(item => ['standalone', [item]])]
+        
+        if (allChoices.length === 0) {
+          newLayers[layerName] = ''
+          return
+        }
+        
+        // Pick random group or standalone
+        let choiceIdx = 0
         try {
           if (window?.crypto?.getRandomValues) {
             const arr = new Uint32Array(1)
             window.crypto.getRandomValues(arr)
-            idx = arr[0] % validImages.length
+            choiceIdx = arr[0] % allChoices.length
           } else {
-            idx = Math.floor(Math.random() * validImages.length)
+            choiceIdx = Math.floor(Math.random() * allChoices.length)
           }
         } catch {
-          idx = Math.floor(Math.random() * validImages.length)
+          choiceIdx = Math.floor(Math.random() * allChoices.length)
         }
         
-        newLayers[layerName] = validImages[idx]?.path || ''
+        const [choiceType, choiceItems] = allChoices[choiceIdx]
+        
+        // Pick random variant from chosen group
+        let itemIdx = 0
+        try {
+          if (window?.crypto?.getRandomValues) {
+            const arr = new Uint32Array(1)
+            window.crypto.getRandomValues(arr)
+            itemIdx = arr[0] % choiceItems.length
+          } else {
+            itemIdx = Math.floor(Math.random() * choiceItems.length)
+          }
+        } catch {
+          itemIdx = Math.floor(Math.random() * choiceItems.length)
+        }
+        
+        newLayers[layerName] = choiceItems[itemIdx]?.path || ''
+        return
+      }
+      
+      // Special handling for Eyes: group-based picking (same as Head)
+      if (layerName === 'Eyes') {
+        const validImages = images.filter(img => {
+          const path = (img?.path || '').trim()
+          const displayName = (img?.displayName || img?.name || '').trim().toLowerCase()
+          if (!path) return false
+          // Filter out disabled options based on current selections
+          if (isOptionDisabledByRules(img, layerName, newLayers)) {
+            return false
+          }
+          return true
+        })
+        
+        if (validImages.length === 0) {
+          newLayers[layerName] = ''
+          return
+        }
+        
+        // Group Eyes options by base name (color variants)
+        const groupsMap = new Map() // Map<baseName, variants[]>
+        const standaloneItems = []
+        
+        validImages.forEach(img => {
+          const parsed = parseColorVariant(img.displayName || img.name)
+          if (parsed && parsed.base) {
+            // This is a color variant - add to group
+            if (!groupsMap.has(parsed.base)) {
+              groupsMap.set(parsed.base, [])
+            }
+            groupsMap.get(parsed.base).push(img)
+          } else {
+            // Standalone item (no variants)
+            standaloneItems.push(img)
+          }
+        })
+        
+        // Weight groups and standalones equally
+        const allChoices = [...Array.from(groupsMap.entries()), ...standaloneItems.map(item => ['standalone', [item]])]
+        
+        if (allChoices.length === 0) {
+          newLayers[layerName] = ''
+          return
+        }
+        
+        // Pick random group or standalone
+        let choiceIdx = 0
+        try {
+          if (window?.crypto?.getRandomValues) {
+            const arr = new Uint32Array(1)
+            window.crypto.getRandomValues(arr)
+            choiceIdx = arr[0] % allChoices.length
+          } else {
+            choiceIdx = Math.floor(Math.random() * allChoices.length)
+          }
+        } catch {
+          choiceIdx = Math.floor(Math.random() * allChoices.length)
+        }
+        
+        const [choiceType, choiceItems] = allChoices[choiceIdx]
+        
+        // Pick random variant from chosen group
+        let itemIdx = 0
+        try {
+          if (window?.crypto?.getRandomValues) {
+            const arr = new Uint32Array(1)
+            window.crypto.getRandomValues(arr)
+            itemIdx = arr[0] % choiceItems.length
+          } else {
+            itemIdx = Math.floor(Math.random() * choiceItems.length)
+          }
+        } catch {
+          itemIdx = Math.floor(Math.random() * choiceItems.length)
+        }
+        
+        newLayers[layerName] = choiceItems[itemIdx]?.path || ''
         return
       }
       

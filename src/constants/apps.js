@@ -116,6 +116,7 @@ export const DESKTOP_MAIN_ORDER = [
   'WOJAK_GENERATOR',
   'FAQ',
   'TANGGANG',
+  'MINESWEEPER',
 ]
 
 export const DESKTOP_GAMES_ORDER = [

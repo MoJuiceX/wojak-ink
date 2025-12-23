@@ -142,4 +142,3 @@ export async function preloadImages(urls) {
 export function clearImageCache() {
   imageCache.clear()
 }
-

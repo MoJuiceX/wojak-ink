@@ -4,162 +4,9 @@ import Tooltip from '../ui/Tooltip'
 import { useImageLoader } from '../../hooks/useImageLoader'
 import { getDisabledReason, getDisabledLayers } from '../../utils/wojakRules'
 import { getAllLayerImages } from '../../lib/memeImageManifest'
+import { COLOR_TOKENS, parseColorVariant, normalizeHeadLabel, formatDisplayLabel, parseSuitVariant, parseChiaFarmerVariant } from '../../lib/traitOptions'
 
-// Color tokens for variant grouping (case-insensitive)
-const COLOR_TOKENS = {
-  'blue': '#1e5bd7',
-  'red': '#d71818',
-  'green': '#2a9d3c',
-  'pink': '#ff4fd8',
-  'purple': '#7a2cff',
-  'orange': '#ff8a00',
-  'black': '#111111',
-  'brown': '#8b5a2b',
-  'blond': '#d9b56d',
-  'yellow': '#ffd200',
-  'grey': '#808080',
-  'gray': '#808080',
-  'white': '#ffffff',
-  'neon green': '#39ff14'
-}
-
-/**
- * Parse raw display name to extract base name and color token
- * Returns { base, color, hex } or null if no recognized color found
- * @param {string} rawDisplayName - Raw display name from manifest (before formatting)
- * @returns {Object|null} Parsed result with base, color, and hex, or null
- */
-function parseColorVariant(rawDisplayName) {
-  if (!rawDisplayName) return null
-  
-  const lowerName = rawDisplayName.toLowerCase().trim()
-  
-  // Pattern 1: "Name (color)" - paren color
-  const parenMatch = rawDisplayName.match(/^(.+?)\s*\((.+?)\)\s*$/)
-  if (parenMatch) {
-    const base = parenMatch[1].trim()
-    const colorToken = parenMatch[2].trim().toLowerCase()
-    if (COLOR_TOKENS[colorToken]) {
-      return { base, color: colorToken, hex: COLOR_TOKENS[colorToken] }
-    }
-  }
-  
-  // Pattern 2: "Name, color" - comma color
-  const commaMatch = rawDisplayName.match(/^(.+?),\s*(.+?)\s*$/)
-  if (commaMatch) {
-    const base = commaMatch[1].trim()
-    const colorToken = commaMatch[2].trim().toLowerCase()
-    if (COLOR_TOKENS[colorToken]) {
-      return { base, color: colorToken, hex: COLOR_TOKENS[colorToken] }
-    }
-  }
-  
-  // Pattern 3: "Name neon green" - last two tokens (special case)
-  if (lowerName.endsWith(' neon green')) {
-    const base = rawDisplayName.slice(0, -11).trim()
-    if (base) {
-      return { base, color: 'neon green', hex: COLOR_TOKENS['neon green'] }
-    }
-  }
-  
-  // Pattern 4: "Name color" - last token
-  const words = rawDisplayName.trim().split(/\s+/)
-  if (words.length >= 2) {
-    const lastToken = words[words.length - 1].toLowerCase()
-    if (COLOR_TOKENS[lastToken]) {
-      const base = words.slice(0, -1).join(' ').trim()
-      if (base) {
-        return { base, color: lastToken, hex: COLOR_TOKENS[lastToken] }
-      }
-    }
-  }
-  
-  return null
-}
-
-/**
- * Parse suit variant to extract suit color, accessory type, and accessory color
- * Pattern: "Suit {suitColor} {accessoryColor} {accessoryType}"
- * Examples: "Suit black blue tie" => {suitColor: "black", accessoryColor: "blue", accessoryType: "tie"}
- * Note: cleanDisplayName converts hyphens to spaces, so "blue-tie" becomes "blue tie"
- * @param {string} rawDisplayName - Raw display name from manifest
- * @returns {Object|null} Parsed result with suitColor, accessoryType, accessoryColor, or null
- */
-function parseSuitVariant(rawDisplayName) {
-  if (!rawDisplayName) return null
-  
-  const lowerName = rawDisplayName.toLowerCase().trim()
-  
-  // Must start with "suit"
-  if (!lowerName.startsWith('suit')) return null
-  
-  // Pattern: "Suit {suitColor} {accessoryColor} {accessoryType}"
-  // Examples: "Suit black blue tie", "Suit orange red bow"
-  // Note: cleanDisplayName converts hyphens to spaces, so "blue-tie" becomes "blue tie"
-  const match = lowerName.match(/^suit\s+(\w+)\s+(\w+)\s+(tie|bow)$/)
-  if (match) {
-    const suitColor = match[1].toLowerCase()
-    const accessoryColor = match[2].toLowerCase()
-    const accessoryType = match[3].toLowerCase()
-    
-    // Validate suit colors (black, orange)
-    if (suitColor !== 'black' && suitColor !== 'orange') return null
-    
-    // Validate accessory types (tie, bow)
-    if (accessoryType !== 'tie' && accessoryType !== 'bow') return null
-    
-    return {
-      suitColor,
-      accessoryType,
-      accessoryColor
-    }
-  }
-  
-  return null
-}
-
-/**
- * Parse Chia Farmer variant to extract color
- * Pattern: "Chia-Farmer_{color}" or "Chia Farmer {color}"
- * Examples: "Chia-Farmer_blue" => {color: "blue"}
- * @param {string} path - Image path
- * @param {string} rawDisplayName - Raw display name
- * @returns {Object|null} Parsed result with color, or null
- */
-function parseChiaFarmerVariant(path, rawDisplayName) {
-  if (!path && !rawDisplayName) return null
-  
-  const pathLower = (path || '').toLowerCase()
-  const nameLower = (rawDisplayName || '').toLowerCase()
-  
-  // Must contain "chia" and "farmer"
-  if (!pathLower.includes('chia') || !pathLower.includes('farmer')) {
-    if (!nameLower.includes('chia') || !nameLower.includes('farmer')) {
-      return null
-    }
-  }
-  
-  // Extract color from path: "Chia-Farmer_blue", "Chia-Farmer_brown", etc.
-  const pathMatch = pathLower.match(/chia[- ]?farmer[-_]?(\w+)/)
-  if (pathMatch) {
-    const color = pathMatch[1]
-    // Validate color (blue, brown, orange, red)
-    if (['blue', 'brown', 'orange', 'red'].includes(color)) {
-      return { color }
-    }
-  }
-  
-  // Fallback: extract from display name
-  const nameMatch = nameLower.match(/chia[- ]?farmer[- ]?(\w+)/)
-  if (nameMatch) {
-    const color = nameMatch[1]
-    if (['blue', 'brown', 'orange', 'red'].includes(color)) {
-      return { color }
-    }
-  }
-  
-  return null
-}
+// parseColorVariant, normalizeHeadLabel, formatDisplayLabel, parseSuitVariant, and parseChiaFarmerVariant are now imported from traitOptions
 
 /**
  * Check if an item should be excluded from color grouping
@@ -343,278 +190,7 @@ function getDefaultSuitVariant(suitVariants) {
   return sorted[0]
 }
 
-/**
- * Normalize Head layer labels (display only)
- * Fixes capitalization and removes unwanted text
- * @param {string} label - Already formatted label
- * @param {string} layerName - Layer name to check
- * @returns {string} Normalized label
- */
-function normalizeHeadLabel(label, layerName) {
-  if (!label || layerName !== 'Head') return label
-  
-  let normalized = label
-  
-  // Fix Tupac/2Pac capitalization
-  normalized = normalized.replace(/^tupac\b/i, 'Tupac')
-  normalized = normalized.replace(/^2pac\b/i, '2Pac')
-  
-  // Uppercase SWAT
-  normalized = normalized.replace(/\bswat\b/gi, 'SWAT')
-  
-  // Remove "man" from Wizard Hat/Head labels (trailing patterns)
-  if (normalized.toLowerCase().includes('wizard')) {
-    normalized = normalized.replace(/\s*,\s*man\s*$/i, '')
-    normalized = normalized.replace(/\s*:\s*man\s*$/i, '')
-    normalized = normalized.replace(/\s*\(\s*man\s*\)\s*$/i, '')
-    normalized = normalized.replace(/\s+man\s*$/i, '')
-  }
-  
-  return normalized
-}
-
-/**
- * Format display label for dropdown options
- * Applies title-case and specific overrides without changing the underlying value
- * @param {string} rawLabel - The raw label from the manifest
- * @returns {string} Formatted display label
- */
-function formatDisplayLabel(rawLabel) {
-  if (!rawLabel) return rawLabel
-
-  // Special case: Cashtag labels (e.g., $BEPE, $CASTER) - preserve full uppercase
-  if (rawLabel.startsWith('$')) {
-    return rawLabel.toUpperCase()
-  }
-
-  // Special case: Chia Farmer items
-  // Note: Chia Farmer variants are extracted before formatting, so this should rarely be called
-  // But keep for backward compatibility - return base name without color since variants are grouped
-  const chiaFarmerMatch = rawLabel.match(/chia[- ]?farmer/i)
-  if (chiaFarmerMatch) {
-    // Return base name only - color selection happens via dots, not dropdown
-    return 'Chia Farmer'
-  }
-
-  // Special case: Mom's Basement (handle special characters like Momyçôs, MomΓÇÖs, etc.)
-  if (rawLabel.toLowerCase().includes('mom') && rawLabel.toLowerCase().includes('basement')) {
-    return 'Mom Basement'
-  }
-
-  // Special case: NYSE labels (preserve NYSE as all caps, handle both "NYSE" and "Nyse")
-  const nyseDumpMatch = rawLabel.match(/nyse\s+dump/i)
-  if (nyseDumpMatch) {
-    return 'NYSE Dump'
-  }
-  const nysePumpMatch = rawLabel.match(/nyse\s+pump/i)
-  if (nysePumpMatch) {
-    return 'NYSE Pump'
-  }
-
-  // Special case: 2Pac Bandana - ensure proper capitalization (with or without color variant)
-  const pacBandanaMatch = rawLabel.match(/^(2pac\s+bandana)(?:\s+(.+))?$/i)
-  if (pacBandanaMatch) {
-    const colorPart = pacBandanaMatch[2]
-    if (colorPart) {
-      // Has color variant - format as "2Pac Bandana (Color)"
-      const colorCapitalized = colorPart
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(' ')
-      return `2Pac Bandana (${colorCapitalized})`
-    }
-    return '2Pac Bandana'
-  }
-
-  // Special case: Wizard Hat Man - remove "Man" and format as "Wizard Hat" (with or without color variant)
-  const wizardHatMatch = rawLabel.match(/^(wizard\s+hat(?:\s+man)?)(?:\s+(.+))?$/i)
-  if (wizardHatMatch) {
-    const colorPart = wizardHatMatch[2]
-    if (colorPart) {
-      // Has color variant - format as "Wizard Hat (Color)"
-      const colorCapitalized = colorPart
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(' ')
-      return `Wizard Hat (${colorCapitalized})`
-    }
-    return 'Wizard Hat'
-  }
-
-  // Special case: Tin Foil - format as "Tin Foil Hat"
-  const tinFoilMatch = rawLabel.match(/^tin\s+foil(?:\s+(.+))?$/i)
-  if (tinFoilMatch) {
-    const colorPart = tinFoilMatch[1]
-    if (colorPart && !colorPart.toLowerCase().includes('hat')) {
-      // Has color variant - format as "Tin Foil Hat (Color)"
-      const colorCapitalized = colorPart
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(' ')
-      return `Tin Foil Hat (${colorCapitalized})`
-    }
-    return 'Tin Foil Hat'
-  }
-
-  // Special case: Head layer naming adjustments to match marketplace
-  const headLabelLower = rawLabel.toLowerCase()
-  
-  // Anarchy Spikes → Spikes
-  if (headLabelLower.includes('anarchy') && headLabelLower.includes('spikes')) {
-    const colorPart = rawLabel.match(/anarchy\s+spikes(?:\s+(.+))?$/i)?.[1]
-    if (colorPart) {
-      const colorCapitalized = colorPart
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(' ')
-      return `Spikes (${colorCapitalized})`
-    }
-    return 'Spikes'
-  }
-  
-  // Comrade Cap → Comrade Hat
-  if (headLabelLower.includes('comrade') && headLabelLower.includes('cap')) {
-    return 'Comrade Hat'
-  }
-  
-  // Firefigther Helmet → Firefighter Helmet (fix typo)
-  if (headLabelLower.includes('firefigther')) {
-    return rawLabel.replace(/firefigther/gi, 'Firefighter')
-  }
-  
-  // Piccolo Hat → Piccolo Turban
-  if (headLabelLower.includes('piccolo') && headLabelLower.includes('hat')) {
-    return 'Piccolo Turban'
-  }
-  
-  // Vikings Hat → Viking Helmet
-  if (headLabelLower.includes('vikings') && headLabelLower.includes('hat')) {
-    return 'Viking Helmet'
-  }
-  
-  // Super Mario → Super Wojak Hat (with or without color variant)
-  const superMarioMatch = rawLabel.match(/^(super\s+mario)(?:\s+(.+))?$/i)
-  if (superMarioMatch) {
-    const colorPart = superMarioMatch[2]
-    if (colorPart) {
-      // Has color variant - format as "Super Wojak Hat (Color)"
-      const colorCapitalized = colorPart
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(' ')
-      return `Super Wojak Hat (${colorCapitalized})`
-    }
-    return 'Super Wojak Hat'
-  }
-
-  // Special case: Wizard Glasses New - remove "New" from display name
-  const wizardGlassesLower = rawLabel.toLowerCase()
-  if (wizardGlassesLower.includes('wizard') && wizardGlassesLower.includes('glasses') && wizardGlassesLower.includes('new')) {
-    // Remove "new" (case-insensitive) from anywhere in the string
-    let cleaned = rawLabel.replace(/\s+new\s*/gi, ' ').replace(/\s+new$/gi, '').trim()
-    // Apply title-case formatting
-    return cleaned
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ')
-  }
-
-  // Special case: Eyes/Face Wear layer naming adjustments to match marketplace
-  const eyesLabelLower = rawLabel.toLowerCase()
-  
-  // 3D Glasses - ensure D is capital
-  if (eyesLabelLower.includes('3d') && eyesLabelLower.includes('glasses')) {
-    return '3D Glasses'
-  }
-  
-  // MOG Glasses - ensure M-O-G are all capitals
-  if (eyesLabelLower.includes('mog') && eyesLabelLower.includes('glasses')) {
-    return 'MOG Glasses'
-  }
-  
-  // Matrix Lenses - format base name correctly, but preserve color for grouping
-  // The grouping logic uses rawLabel, so we need to ensure the base name is correct
-  // but not remove the color here (grouping will handle color variants)
-  if (eyesLabelLower.includes('matrix') && eyesLabelLower.includes('lenses')) {
-    // Don't remove color here - let grouping handle it
-    // Just ensure "Matrix" and "Lenses" are properly capitalized
-    // The rawLabel will be used for grouping, which will parse the color correctly
-    const parsed = parseColorVariant(rawLabel)
-    if (parsed && parsed.color) {
-      // Has color variant - format as "Matrix Lenses (Color)" for display
-      // But grouping will use rawLabel which has the color
-      const colorCapitalized = parsed.color.charAt(0).toUpperCase() + parsed.color.slice(1).toLowerCase()
-      return `Matrix Lenses (${colorCapitalized})`
-    }
-    // No color - just return base name
-    return 'Matrix Lenses'
-  }
-  
-  // Ninja Turtle mask → Ninja Turtle Mask (capitalize Mask)
-  if (eyesLabelLower.includes('ninja') && eyesLabelLower.includes('turtle') && eyesLabelLower.includes('mask')) {
-    return 'Ninja Turtle Mask'
-  }
-
-  // Special case: Clothes layer naming adjustments to match marketplace
-  const clothesLabelLower = rawLabel.toLowerCase()
-  
-  // Firefigther Uniform → Firefighter Uniform (fix typo)
-  if (clothesLabelLower.includes('firefigther')) {
-    return rawLabel.replace(/firefigther/gi, 'Firefighter')
-  }
-  
-  // Super Saiyan → Super Saiyan Uniform (add "Uniform")
-  if (clothesLabelLower.includes('super') && clothesLabelLower.includes('saiyan') && !clothesLabelLower.includes('uniform')) {
-    return 'Super Saiyan Uniform'
-  }
-  
-  // god rope → God's Robe (fix capitalization and add apostrophe)
-  if (clothesLabelLower.includes('god') && clothesLabelLower.includes('rope')) {
-    return "God's Robe"
-  }
-  
-  // Military Jacket → El Presidente (rename)
-  if (clothesLabelLower.includes('military') && clothesLabelLower.includes('jacket')) {
-    return 'El Presidente'
-  }
-  
-  // Swat Gear → SWAT Gear (ensure SWAT is fully capitalized)
-  if (clothesLabelLower.includes('swat') && clothesLabelLower.includes('gear')) {
-    return 'SWAT Gear'
-  }
-
-  // Apply specific overrides (case-insensitive whole word or exact match)
-  const overrides = {
-    'stach': 'Stache',
-    'numb': 'Numb',
-    'screeming': 'Screaming',
-    'neckbeard': 'Neckbeard',
-  }
-
-  const lowerLabel = rawLabel.toLowerCase().trim()
-  
-  // Check for exact matches first (e.g., "numb" -> "Numb")
-  if (overrides[lowerLabel]) {
-    return overrides[lowerLabel]
-  }
-  
-  // Check for word boundaries (e.g., "stach" in "stach beard" -> "Stache beard")
-  for (const [key, value] of Object.entries(overrides)) {
-    const regex = new RegExp(`\\b${key}\\b`, 'gi')
-    if (regex.test(rawLabel)) {
-      return rawLabel.replace(regex, value)
-    }
-  }
-
-  // Title-case words by default (capitalize first letter of each word)
-  return rawLabel
-    .split(' ')
-    .map(word => {
-      if (!word) return word
-      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-    })
-    .join(' ')
-}
+// normalizeHeadLabel and formatDisplayLabel are now imported from traitOptions
 
 function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, selectedLayers = {}, navigation, traitIndex = -1, disableTooltip = false }) {
   const { images, loading } = useImageLoader(layerName)
@@ -635,6 +211,7 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
   const lastCapNormalRef = useRef(null)
   const chiaFarmerVariantsRef = useRef([])
   const pathToChiaFarmerVariantRef = useRef(new Map())
+  const centurionPathsRef = useRef({ normal: null, masked: null })
 
   // Register/unregister with navigation system
   useEffect(() => {
@@ -720,16 +297,6 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
           if ((pathLower.includes('wizard') && pathLower.includes('glasses')) && 
               !pathLower.includes('new') && !rawLabelLower.includes('new')) {
             return // Skip old Wizard Glasses
-          }
-        }
-        
-        // Filter out items not in marketplace list for Head layer
-        if (layerName === 'Head') {
-          const pathLower = (img.path || '').toLowerCase()
-          const rawLabelLower = (rawLabel || '').toLowerCase()
-          // Exclude Centurion mask (keep only Centurion)
-          if (pathLower.includes('centurion') && pathLower.includes('mask')) {
-            return // Skip Centurion mask
           }
         }
         
@@ -841,23 +408,63 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
       }
     }
 
-    // Filter Head options based on Mask selection (Centurion vs Centurion_mask)
-    // This must happen after all options are collected but before grouping
+    // Handle Centurion proxy option for Head layer
+    // Replace both Centurion options with a single "__CENTURION__" proxy that always displays as "Centurion"
+    let normalCenturionValue = null
+    let maskedCenturionValue = null
+    let centurionInsertIndex = -1
+    
     if (layerName === 'Head') {
-      const hasMask = selectedLayers['Mask'] && selectedLayers['Mask'] !== '' && selectedLayers['Mask'] !== 'None'
+      // Find both Centurion asset values before filtering
+      allOptions.forEach((option, index) => {
+        const pathLower = (option.value || '').toLowerCase()
+        if (pathLower.includes('centurion_mask')) {
+          maskedCenturionValue = option.value
+        } else if (pathLower.includes('centurion') && !pathLower.includes('centurion_mask')) {
+          normalCenturionValue = option.value
+          centurionInsertIndex = index // Track where to insert the proxy
+        }
+      })
+      
+      // Remove both Centurion options from the list
       allOptions = allOptions.filter(option => {
         const pathLower = (option.value || '').toLowerCase()
         const isCenturion = pathLower.includes('centurion') && !pathLower.includes('centurion_mask')
         const isCenturionMask = pathLower.includes('centurion_mask')
-        
-        if (hasMask) {
-          // When Mask != None: show Centurion_mask, hide Centurion
-          return !isCenturion
-        } else {
-          // When Mask == None: show Centurion, hide Centurion_mask
-          return !isCenturionMask
-        }
+        return !isCenturion && !isCenturionMask
       })
+      
+      // Store Centurion paths in ref for use in handlers
+      centurionPathsRef.current = {
+        normal: normalCenturionValue,
+        masked: maskedCenturionValue
+      }
+      
+      // Insert single Centurion proxy option at the original position (or append if not found)
+      if (normalCenturionValue || maskedCenturionValue) {
+        const centurionProxyOption = {
+          value: '__CENTURION__',
+          label: 'Centurion',
+          rawLabel: 'Centurion',
+          fullName: 'Centurion',
+          disabled: false,
+          isCenturionProxy: true,
+          normalCenturionValue: normalCenturionValue,
+          maskedCenturionValue: maskedCenturionValue
+        }
+        
+        if (centurionInsertIndex >= 0 && centurionInsertIndex < allOptions.length) {
+          allOptions.splice(centurionInsertIndex, 0, centurionProxyOption)
+        } else {
+          // Find insertion point alphabetically (before "Chia" or at appropriate position)
+          let insertIdx = allOptions.findIndex(opt => {
+            const label = (opt.label || '').toLowerCase()
+            return label > 'centurion'
+          })
+          if (insertIdx < 0) insertIdx = allOptions.length
+          allOptions.splice(insertIdx, 0, centurionProxyOption)
+        }
+      }
     }
 
     // Extract suit variants and Chia Farmer variants BEFORE color grouping (only for Clothes layer)
@@ -1125,6 +732,18 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
     
     // Set selected value - handle grouped selections
     if (effectiveSelectedValue) {
+      // Special handling for Head layer: map Centurion paths to "__CENTURION__" proxy
+      if (layerName === 'Head') {
+        const centurionPaths = centurionPathsRef.current
+        if (effectiveSelectedValue === centurionPaths.normal || effectiveSelectedValue === centurionPaths.masked) {
+          const centurionProxy = optionsList.find(opt => opt.value === '__CENTURION__')
+          if (centurionProxy) {
+            setSelectedOption('__CENTURION__')
+            return
+          }
+        }
+      }
+      
       // First check if this is a suit variant
       const suitVariant = pathToSuitVariantRef.current.get(effectiveSelectedValue)
       if (suitVariant && layerName === 'Clothes') {
@@ -1247,6 +866,30 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
       return
     }
     
+    // Handle Centurion proxy selection (Head layer only)
+    if (layerName === 'Head' && value === '__CENTURION__') {
+      // Compute if Centurion_mask is required based on current state
+      const maskActive = selectedLayers['Mask'] && selectedLayers['Mask'] !== '' && selectedLayers['Mask'] !== 'None'
+      const mouthItemActive = selectedLayers['MouthItem'] && selectedLayers['MouthItem'] !== '' && selectedLayers['MouthItem'] !== 'None'
+      const mouthBasePath = (selectedLayers['MouthBase'] || '').toLowerCase()
+      const mouthBaseHasPipePizzaBubble = mouthBasePath.includes('pipe') || mouthBasePath.includes('pizza') || mouthBasePath.includes('bubble')
+      
+      const centurionMaskRequired = maskActive || mouthItemActive || mouthBaseHasPipePizzaBubble
+      
+      // Resolve to correct asset path
+      const centurionPaths = centurionPathsRef.current
+      const actualValue = centurionMaskRequired 
+        ? (centurionPaths.masked || centurionPaths.normal)
+        : (centurionPaths.normal || centurionPaths.masked)
+      
+      if (actualValue) {
+        onSelect(layerName, actualValue)
+      } else {
+        onSelect(layerName, '')
+      }
+      return
+    }
+    
     // Handle grouped base selection
     if (shouldGroup && value.startsWith('__GROUP__')) {
       // Extract base name
@@ -1292,6 +935,28 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
     if (navigation && isFocusedTrait && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
       navigation.navigateOptions(e.key === "ArrowDown" ? 'down' : 'up', (layerName, value) => {
         setSelectedOption(value)
+        
+        // Handle Centurion proxy selection (Head layer only)
+        if (layerName === 'Head' && value === '__CENTURION__') {
+          const maskActive = selectedLayers['Mask'] && selectedLayers['Mask'] !== '' && selectedLayers['Mask'] !== 'None'
+          const mouthItemActive = selectedLayers['MouthItem'] && selectedLayers['MouthItem'] !== '' && selectedLayers['MouthItem'] !== 'None'
+          const mouthBasePath = (selectedLayers['MouthBase'] || '').toLowerCase()
+          const mouthBaseHasPipePizzaBubble = mouthBasePath.includes('pipe') || mouthBasePath.includes('pizza') || mouthBasePath.includes('bubble')
+          
+          const centurionMaskRequired = maskActive || mouthItemActive || mouthBaseHasPipePizzaBubble
+          const centurionPaths = centurionPathsRef.current
+          const actualValue = centurionMaskRequired 
+            ? (centurionPaths.masked || centurionPaths.normal)
+            : (centurionPaths.normal || centurionPaths.masked)
+          
+          if (actualValue) {
+            onSelect(layerName, actualValue)
+          } else {
+            onSelect(layerName, '')
+          }
+          return
+        }
+        
         // Handle grouped base selection
         if (shouldGroup && value.startsWith('__GROUP__')) {
           const baseName = value.replace('__GROUP__', '')
@@ -1351,6 +1016,27 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
         if (candidate && !candidate.disabled) {
           setSelectedOption(candidate.value)
           setFocusedIndex(nextIndex)
+          
+          // Handle Centurion proxy selection (Head layer only)
+          if (layerName === 'Head' && candidate.value === '__CENTURION__') {
+            const maskActive = selectedLayers['Mask'] && selectedLayers['Mask'] !== '' && selectedLayers['Mask'] !== 'None'
+            const mouthItemActive = selectedLayers['MouthItem'] && selectedLayers['MouthItem'] !== '' && selectedLayers['MouthItem'] !== 'None'
+            const mouthBasePath = (selectedLayers['MouthBase'] || '').toLowerCase()
+            const mouthBaseHasPipePizzaBubble = mouthBasePath.includes('pipe') || mouthBasePath.includes('pizza') || mouthBasePath.includes('bubble')
+            
+            const centurionMaskRequired = maskActive || mouthItemActive || mouthBaseHasPipePizzaBubble
+            const centurionPaths = centurionPathsRef.current
+            const actualValue = centurionMaskRequired 
+              ? (centurionPaths.masked || centurionPaths.normal)
+              : (centurionPaths.normal || centurionPaths.masked)
+            
+            if (actualValue) {
+              onSelect(layerName, actualValue)
+            } else {
+              onSelect(layerName, '')
+            }
+            break
+          }
           
           // Handle grouped base selection (same as handleChange)
           if (shouldGroup && candidate.value.startsWith('__GROUP__')) {
@@ -1429,8 +1115,26 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
         if (focusedOption && !focusedOption.disabled) {
           setSelectedOption(focusedOption.value)
           
+          // Handle Centurion proxy selection (Head layer only)
+          if (layerName === 'Head' && focusedOption.value === '__CENTURION__') {
+            const maskActive = selectedLayers['Mask'] && selectedLayers['Mask'] !== '' && selectedLayers['Mask'] !== 'None'
+            const mouthItemActive = selectedLayers['MouthItem'] && selectedLayers['MouthItem'] !== '' && selectedLayers['MouthItem'] !== 'None'
+            const mouthBasePath = (selectedLayers['MouthBase'] || '').toLowerCase()
+            const mouthBaseHasPipePizzaBubble = mouthBasePath.includes('pipe') || mouthBasePath.includes('pizza') || mouthBasePath.includes('bubble')
+            
+            const centurionMaskRequired = maskActive || mouthItemActive || mouthBaseHasPipePizzaBubble
+            const centurionPaths = centurionPathsRef.current
+            const actualValue = centurionMaskRequired 
+              ? (centurionPaths.masked || centurionPaths.normal)
+              : (centurionPaths.normal || centurionPaths.masked)
+            
+            if (actualValue) {
+              onSelect(layerName, actualValue)
+            } else {
+              onSelect(layerName, '')
+            }
+          } else if (shouldGroup && focusedOption.value.startsWith('__GROUP__')) {
           // Handle grouped base selection (same as handleChange)
-          if (shouldGroup && focusedOption.value.startsWith('__GROUP__')) {
             const baseName = focusedOption.value.replace('__GROUP__', '')
             
             // Special handling for Head Cap: prefer last normal cap, never default to McD
@@ -1602,10 +1306,38 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
   // Determine active group for color dots (non-suit groups)
   // Note: When Chia Farmer is selected, we still want to show Tee/Tank-top color dots
   const activeGroup = useMemo(() => {
-    if (!shouldGroup || !selectedValue || shouldShowSuitPicker) return null
+    if (!shouldGroup || shouldShowSuitPicker) return null
     
-    // Check if selectedValue path belongs to a group
-    const groupInfo = pathToGroupRef.current.get(selectedValue)
+    // When Chia Farmer is selected, check selectedLayers['Clothes'] to find Tee/Tank-top base
+    let valueToCheck = selectedValue
+    if (layerName === 'Clothes' && shouldShowChiaFarmerPicker) {
+      // Chia Farmer is active - check Clothes layer for Tee/Tank-top base
+      const clothesPath = selectedLayers['Clothes'] || ''
+      if (clothesPath && !clothesPath.includes('Chia-Farmer')) {
+        valueToCheck = clothesPath
+      }
+    }
+    
+    if (!valueToCheck) {
+      // Also check if dropdown shows a grouped base
+      if (selectedOption && selectedOption.startsWith('__GROUP__') && selectedOption !== '__GROUP__SUIT' && selectedOption !== '__GROUP__CHIA_FARMER') {
+        const baseName = selectedOption.replace('__GROUP__', '')
+        const variants = groupsRef.current.get(baseName)
+        if (variants && variants.length > 1) {
+          const groupOption = options.find(opt => opt.isGrouped && opt.baseName === baseName)
+          return {
+            baseName: baseName,
+            variants: variants,
+            activePath: selectedValue || variants[0]?.value,
+            capMcdVariant: groupOption?.capMcdVariant || null
+          }
+        }
+      }
+      return null
+    }
+    
+    // Check if valueToCheck path belongs to a group
+    const groupInfo = pathToGroupRef.current.get(valueToCheck)
     if (groupInfo) {
       const variants = groupsRef.current.get(groupInfo.baseName)
       if (variants && variants.length > 1) {
@@ -1613,7 +1345,7 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
         return {
           baseName: groupInfo.baseName,
           variants: variants,
-          activePath: selectedValue,
+          activePath: valueToCheck,
           capMcdVariant: groupOption?.capMcdVariant || null
         }
       }
@@ -1628,14 +1360,14 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
         return {
           baseName: baseName,
           variants: variants,
-          activePath: selectedValue || variants[0]?.value,
+          activePath: valueToCheck || variants[0]?.value,
           capMcdVariant: groupOption?.capMcdVariant || null
         }
       }
     }
     
     return null
-  }, [shouldGroup, selectedValue, selectedOption, shouldShowSuitPicker, options])
+  }, [shouldGroup, selectedValue, selectedOption, shouldShowSuitPicker, options, layerName, selectedLayers, shouldShowChiaFarmerPicker])
 
   // Helper function to find suit variant matching criteria
   const findSuitVariant = useCallback((suitColor, accessoryType, accessoryColor) => {
@@ -1901,10 +1633,28 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
           </div>
         )}
         {/* Visual divider between Tee/Tank-top dots and Chia Farmer dots */}
-        {shouldGroup && shouldShowChiaFarmerPicker && currentChiaFarmerState && !shouldShowSuitPicker && activeGroup && activeGroup.variants.length > 1 && (
-          <div className="chia-farmer-divider">
-            <div className="divider-line"></div>
-          </div>
+        {shouldGroup && shouldShowChiaFarmerPicker && currentChiaFarmerState && !shouldShowSuitPicker && (
+          (() => {
+            // Check if there's a Tee/Tank-top base with variants to show divider
+            const clothesPath = selectedLayers['Clothes'] || ''
+            const hasTeeOrTankBase = clothesPath && (
+              clothesPath.includes('Tee') || 
+              clothesPath.includes('Tank-Top') || 
+              clothesPath.includes('tank-top')
+            ) && !clothesPath.includes('Chia-Farmer')
+            
+            if (!hasTeeOrTankBase) return null
+            
+            // Check if this base has variants
+            const groupInfo = pathToGroupRef.current.get(clothesPath)
+            const hasVariants = groupInfo && groupsRef.current.get(groupInfo.baseName)?.length > 1
+            
+            return hasVariants ? (
+              <div className="chia-farmer-divider">
+                <div className="divider-line"></div>
+              </div>
+            ) : null
+          })()
         )}
         {/* Chia Farmer variant picker - single row color dots (rendered AFTER Tee/Tank-top dots) */}
         {shouldGroup && shouldShowChiaFarmerPicker && currentChiaFarmerState && !shouldShowSuitPicker && (
