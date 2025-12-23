@@ -732,6 +732,42 @@ export function useMemeGenerator() {
   }, [selectedLayers])
 
   // Helper to parse suit variant (duplicated from LayerSelector for use here)
+  // Helper to parse Chia Farmer variant from path or display name
+  const parseChiaFarmerVariant = (path, rawDisplayName) => {
+    if (!path && !rawDisplayName) return null
+    
+    const pathLower = (path || '').toLowerCase()
+    const nameLower = (rawDisplayName || '').toLowerCase()
+    
+    // Must contain "chia" and "farmer"
+    if (!pathLower.includes('chia') || !pathLower.includes('farmer')) {
+      if (!nameLower.includes('chia') || !nameLower.includes('farmer')) {
+        return null
+      }
+    }
+    
+    // Extract color from path: "Chia-Farmer_blue", "Chia-Farmer_brown", etc.
+    const pathMatch = pathLower.match(/chia[- ]?farmer[-_]?(\w+)/)
+    if (pathMatch) {
+      const color = pathMatch[1]
+      // Validate color (blue, brown, orange, red)
+      if (['blue', 'brown', 'orange', 'red'].includes(color)) {
+        return { color }
+      }
+    }
+    
+    // Fallback: extract from display name
+    const nameMatch = nameLower.match(/chia[- ]?farmer[- ]?(\w+)/)
+    if (nameMatch) {
+      const color = nameMatch[1]
+      if (['blue', 'brown', 'orange', 'red'].includes(color)) {
+        return { color }
+      }
+    }
+    
+    return null
+  }
+  
   const parseSuitVariant = (rawDisplayName) => {
     if (!rawDisplayName) return null
     const lowerName = rawDisplayName.toLowerCase().trim()
@@ -848,23 +884,23 @@ export function useMemeGenerator() {
         return
       }
       
-      // Special handling for Mask: weighted to pick "None" 85% of the time
+      // Special handling for Mask: weighted to pick "None" 80% of the time
       if (layerName === 'Mask') {
         const noneOption = { path: '', displayName: 'None' } // Treat empty as "None"
         const maskOptions = images.filter(img => !isNoneOption(img))
         
-        // 85% chance for None, 15% chance for a mask
+        // 80% chance for None, 20% chance for a mask
         const useNone = (() => {
           try {
             if (window?.crypto?.getRandomValues) {
               const arr = new Uint32Array(1)
               window.crypto.getRandomValues(arr)
-              return (arr[0] / 0xFFFFFFFF) < 0.85
+              return (arr[0] / 0xFFFFFFFF) < 0.8
             } else {
-              return Math.random() < 0.85
+              return Math.random() < 0.8
             }
           } catch {
-            return Math.random() < 0.85
+            return Math.random() < 0.8
           }
         })()
         
@@ -885,6 +921,56 @@ export function useMemeGenerator() {
             idx = Math.floor(Math.random() * maskOptions.length)
           }
           newLayers[layerName] = maskOptions[idx]?.path || ''
+        }
+        return
+      }
+      
+      // Special handling for FacialHair: weighted to pick "None" 80% of the time
+      if (layerName === 'FacialHair') {
+        const facialHairOptions = images.filter(img => {
+          const path = (img?.path || '').trim()
+          const displayName = (img?.displayName || img?.name || '').trim().toLowerCase()
+          if (!path) return false
+          if (path.toLowerCase().includes('none') || displayName.includes('none')) return false
+          // Filter out disabled options based on current selections
+          if (isOptionDisabledByRules(img, layerName, newLayers)) {
+            return false
+          }
+          return true
+        })
+        
+        // 80% chance for None, 20% chance for facial hair
+        const useNone = (() => {
+          try {
+            if (window?.crypto?.getRandomValues) {
+              const arr = new Uint32Array(1)
+              window.crypto.getRandomValues(arr)
+              return (arr[0] / 0xFFFFFFFF) < 0.8
+            } else {
+              return Math.random() < 0.8
+            }
+          } catch {
+            return Math.random() < 0.8
+          }
+        })()
+        
+        if (useNone || facialHairOptions.length === 0) {
+          newLayers[layerName] = ''
+        } else {
+          // Pick random facial hair
+          let idx = 0
+          try {
+            if (window?.crypto?.getRandomValues) {
+              const arr = new Uint32Array(1)
+              window.crypto.getRandomValues(arr)
+              idx = arr[0] % facialHairOptions.length
+            } else {
+              idx = Math.floor(Math.random() * facialHairOptions.length)
+            }
+          } catch {
+            idx = Math.floor(Math.random() * facialHairOptions.length)
+          }
+          newLayers[layerName] = facialHairOptions[idx]?.path || ''
         }
         return
       }
@@ -963,12 +1049,17 @@ export function useMemeGenerator() {
         return
       }
       
-      // Special handling for Clothes: separate suit variants from regular options
+      // Special handling for Clothes: separate suit variants, Chia Farmer variants, and regular options
       if (layerName === 'Clothes') {
         const suitVariants = []
+        const chiaFarmerVariants = []
         const regularOptions = []
         
-        images.forEach(img => {
+        // Also get ClothesAddon images for Chia Farmer variants
+        const addonImages = getAllLayerImages('ClothesAddon') || []
+        const allClothesImages = [...images, ...addonImages]
+        
+        allClothesImages.forEach(img => {
           const path = (img?.path || '').trim()
           const displayName = (img?.displayName || img?.name || '').trim()
           if (!path) return
@@ -979,46 +1070,106 @@ export function useMemeGenerator() {
             return
           }
           
-          const parsed = parseSuitVariant(displayName)
-          if (parsed) {
+          // Check if it's a Suit variant
+          const suitParsed = parseSuitVariant(displayName)
+          if (suitParsed) {
             suitVariants.push(img)
-          } else {
+            return
+          }
+          
+          // Check if it's a Chia Farmer variant
+          const chiaParsed = parseChiaFarmerVariant(path, displayName)
+          if (chiaParsed) {
+            chiaFarmerVariants.push(img)
+            return
+          }
+          
+          // Regular option (only from Clothes layer, not ClothesAddon)
+          if (images.includes(img)) {
             regularOptions.push(img)
           }
         })
         
-        // Randomly decide: 50% chance to pick suit, 50% chance to pick regular option
-        // But only if both are available
+        // Randomly decide: 33% suit, 33% Chia Farmer (if Tee/Tank available), 33% regular
+        // But only if prerequisites are met
         let candidates = []
-        if (suitVariants.length > 0 && regularOptions.length > 0) {
-          const useSuit = Math.random() < 0.5
-          candidates = useSuit ? suitVariants : regularOptions
-        } else if (suitVariants.length > 0) {
-          candidates = suitVariants
-        } else if (regularOptions.length > 0) {
-          candidates = regularOptions
-        }
         
-        if (candidates.length === 0) {
+        // Check if Chia Farmer is allowed (requires Tee or Tank-top)
+        const hasTeeOrTank = regularOptions.some(img => {
+          const path = (img?.path || '').toLowerCase()
+          return path.includes('tee') || path.includes('tank-top')
+        })
+        const canUseChiaFarmer = hasTeeOrTank && chiaFarmerVariants.length > 0
+        
+        const availableOptions = []
+        if (suitVariants.length > 0) availableOptions.push({ type: 'suit', items: suitVariants })
+        if (canUseChiaFarmer) availableOptions.push({ type: 'chiaFarmer', items: chiaFarmerVariants })
+        if (regularOptions.length > 0) availableOptions.push({ type: 'regular', items: regularOptions })
+        
+        if (availableOptions.length === 0) {
           newLayers[layerName] = ''
           return
         }
         
-        // Pick random from candidates
+        // Pick random option type
         let idx = 0
         try {
           if (window?.crypto?.getRandomValues) {
             const arr = new Uint32Array(1)
             window.crypto.getRandomValues(arr)
-            idx = arr[0] % candidates.length
+            idx = arr[0] % availableOptions.length
           } else {
-            idx = Math.floor(Math.random() * candidates.length)
+            idx = Math.floor(Math.random() * availableOptions.length)
           }
         } catch {
-          idx = Math.floor(Math.random() * candidates.length)
+          idx = Math.floor(Math.random() * availableOptions.length)
         }
         
-        newLayers[layerName] = candidates[idx]?.path || ''
+        const selectedOption = availableOptions[idx]
+        const selectedItems = selectedOption.items
+        
+        // Pick random item from selected type
+        let itemIdx = 0
+        try {
+          if (window?.crypto?.getRandomValues) {
+            const arr = new Uint32Array(1)
+            window.crypto.getRandomValues(arr)
+            itemIdx = arr[0] % selectedItems.length
+          } else {
+            itemIdx = Math.floor(Math.random() * selectedItems.length)
+          }
+        } catch {
+          itemIdx = Math.floor(Math.random() * selectedItems.length)
+        }
+        
+        const selectedItem = selectedItems[itemIdx]
+        
+        if (selectedOption.type === 'chiaFarmer') {
+          // Chia Farmer: write to ClothesAddon (canonical layer)
+          // Also ensure a Tee or Tank-top is selected in Clothes
+          const teeOrTank = regularOptions.find(img => {
+            const path = (img?.path || '').toLowerCase()
+            return path.includes('tee') || path.includes('tank-top')
+          })
+          if (teeOrTank) {
+            newLayers[layerName] = teeOrTank.path
+            newLayers['ClothesAddon'] = selectedItem.path
+          } else {
+            // No Tee/Tank available - can't use Chia Farmer
+            newLayers[layerName] = ''
+            newLayers['ClothesAddon'] = ''
+          }
+        } else {
+          // Suit or regular: write to Clothes
+          newLayers[layerName] = selectedItem.path
+          // Clear ClothesAddon if it was Chia Farmer
+          if (newLayers['ClothesAddon']) {
+            const addonPath = (newLayers['ClothesAddon'] || '').toLowerCase()
+            if (addonPath.includes('chia') && addonPath.includes('farmer')) {
+              newLayers['ClothesAddon'] = ''
+            }
+          }
+        }
         return
       }
       

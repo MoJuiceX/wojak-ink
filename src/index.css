@@ -506,6 +506,7 @@ textarea:focus-visible {
   min-height: 20px !important;
   max-height: 20px !important;
   display: flex;
+  flex-wrap: nowrap !important;
   align-items: center;
   margin: 0 !important; /* remove margin-top: 3px */
   padding-left: 6px !important;
@@ -515,7 +516,8 @@ textarea:focus-visible {
 
 /* Ensure variant pickers don't add extra margins */
 #wojak-generator .trait-dot-slot .suit-variant-picker,
-#wojak-generator .trait-dot-slot .color-variant-picker {
+#wojak-generator .trait-dot-slot .color-variant-picker,
+#wojak-generator .trait-dot-slot .chia-farmer-variant-picker {
   margin: 0 !important;
 }
 
@@ -552,14 +554,34 @@ textarea:focus-visible {
 }
 
 #wojak-generator .color-variant-picker .color-dots,
-#wojak-generator .suit-variant-picker .color-dots {
+#wojak-generator .suit-variant-picker .color-dots,
+#wojak-generator .chia-farmer-variant-picker .color-dots {
   display: flex;
+  flex-wrap: nowrap !important;
   align-items: center;
   gap: 6px;
+  overflow: hidden;
+}
+
+/* Visual divider between Tee/Tank-top dots and Chia Farmer dots */
+#wojak-generator .chia-farmer-divider {
+  display: flex;
+  align-items: center;
+  margin: 0 8px;
+  height: 100%;
+}
+
+#wojak-generator .chia-farmer-divider .divider-line {
+  width: 1px;
+  height: 12px;
+  background-color: #808080;
+  border-left: 1px solid #000;
+  border-right: 1px solid #ffffff;
 }
 
 #wojak-generator .color-variant-picker .color-dot,
-#wojak-generator .suit-variant-picker .color-dot {
+#wojak-generator .suit-variant-picker .color-dot,
+#wojak-generator .chia-farmer-variant-picker .color-dot {
   width: 15px !important;
   height: 15px !important;
   min-width: 15px !important;
@@ -587,29 +609,34 @@ textarea:focus-visible {
 }
 
 #wojak-generator .color-variant-picker .color-dot:focus,
-#wojak-generator .suit-variant-picker .color-dot:focus {
+#wojak-generator .suit-variant-picker .color-dot:focus,
+#wojak-generator .chia-farmer-variant-picker .color-dot:focus {
   outline: 1px dotted #000 !important;
   outline-offset: 1px !important;
 }
 
 /* Tone down modern-feeling animation */
 #wojak-generator .color-variant-picker .color-dot:hover:not(:disabled),
-#wojak-generator .suit-variant-picker .color-dot:hover:not(:disabled) {
+#wojak-generator .suit-variant-picker .color-dot:hover:not(:disabled),
+#wojak-generator .chia-farmer-variant-picker .color-dot:hover:not(:disabled) {
   transform: scale(1.05) !important; /* was 1.1 */
 }
 
 #wojak-generator .color-variant-picker .color-dot:active:not(:disabled),
-#wojak-generator .suit-variant-picker .color-dot:active:not(:disabled) {
+#wojak-generator .suit-variant-picker .color-dot:active:not(:disabled),
+#wojak-generator .chia-farmer-variant-picker .color-dot:active:not(:disabled) {
   transform: scale(0.97) !important; /* was 0.95 */
 }
 
 #wojak-generator .color-variant-picker .color-dot.active,
-#wojak-generator .suit-variant-picker .color-dot.active {
+#wojak-generator .suit-variant-picker .color-dot.active,
+#wojak-generator .chia-farmer-variant-picker .color-dot.active {
   border: 2px solid #000 !important;
 }
 
 #wojak-generator .color-variant-picker .color-dot:disabled,
-#wojak-generator .suit-variant-picker .color-dot:disabled {
+#wojak-generator .suit-variant-picker .color-dot:disabled,
+#wojak-generator .chia-farmer-variant-picker .color-dot:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -617,6 +644,12 @@ textarea:focus-visible {
 /* Optional: mute color dots when McD is active */
 #wojak-generator .color-dots.is-muted .color-dot {
   opacity: 0.45;
+}
+
+/* Base variant dot styling - gray dot to return to base (no color) */
+#wojak-generator .color-variant-picker .color-dot.base-variant {
+  /* Inline styles handle the gray background and border, but ensure border override works */
+  border: 2px solid #808080 !important;
 }
 
 /* =========================

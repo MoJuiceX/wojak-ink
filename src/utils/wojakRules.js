@@ -96,6 +96,20 @@ function ruleFacialHairRequiresMouthBase(selectedLayers) {
   // Allowed MouthBase options for FacialHair
   const allowedMouthBases = ['numb', 'teeth', 'gold', 'smile', 'screeming', 'screaming', 'pizza', 'pipe']
   
+  // Check if MouthBase is selected and it's not allowed with FacialHair
+  // This check happens first to prioritize MouthBase selection over FacialHair
+  if (mouthBasePath && mouthBasePath !== '') {
+    const isAllowed = allowedMouthBases.some(allowed => pathContains(mouthBasePath, allowed))
+    if (!isAllowed && facialHairPath) {
+      // MouthBase changed to disallowed option (like Bubble Gum), clear FacialHair
+      return {
+        disabledLayers: ['FacialHair'],
+        reason: 'Facial hair requires mouth base: numb, teeth, golden teeth, smile, screaming, pizza, or pipe',
+        clearSelections: ['FacialHair'], // Clear if incompatible
+      }
+    }
+  }
+  
   // Check if FacialHair is selected
   if (facialHairPath) {
     // Check if MouthBase is one of the allowed options
@@ -103,8 +117,21 @@ function ruleFacialHairRequiresMouthBase(selectedLayers) {
       pathContains(mouthBasePath, allowed)
     )
     
-    // If FacialHair is selected but MouthBase is None or not allowed, auto-set to Numb
-    if (!hasAllowedMouthBase) {
+    // If FacialHair is selected but MouthBase is not allowed (e.g., Bubble Gum), change to Numb
+    if (!hasAllowedMouthBase && mouthBasePath && mouthBasePath !== '' && mouthBasePath !== 'None') {
+      // MouthBase is incompatible (like Bubble Gum) - change it to Numb
+      const numbPath = "/wojak-creator/MOUTH/MOUTH_numb.png"
+      return {
+        disabledLayers: [], // Don't disable FacialHair - allow selection
+        reason: 'Facial hair requires mouth base - changing to Numb',
+        forceSelections: {
+          MouthBase: numbPath, // Change incompatible MouthBase (Bubble Gum) to Numb
+        },
+      }
+    }
+    
+    // If FacialHair is selected but MouthBase is None or empty, auto-set to Numb
+    if (!hasAllowedMouthBase && (!mouthBasePath || mouthBasePath === '' || mouthBasePath === 'None')) {
       const numbPath = "/wojak-creator/MOUTH/MOUTH_numb.png"
       return {
         disabledLayers: [], // Don't disable FacialHair - allow selection
@@ -112,20 +139,6 @@ function ruleFacialHairRequiresMouthBase(selectedLayers) {
         forceSelections: {
           MouthBase: numbPath, // Auto-set MouthBase to Numb
         },
-      }
-    }
-  }
-  
-  // If MouthBase is selected and it's not allowed, disable and clear FacialHair
-  // (This handles the case where user changes MouthBase to disallowed option after selecting FacialHair)
-  if (mouthBasePath && mouthBasePath !== '') {
-    const isAllowed = allowedMouthBases.some(allowed => pathContains(mouthBasePath, allowed))
-    if (!isAllowed && facialHairPath) {
-      // MouthBase changed to disallowed option, clear FacialHair
-      return {
-        disabledLayers: ['FacialHair'],
-        reason: 'Facial hair requires mouth base: numb, teeth, golden teeth, smile, screaming, pizza, or pipe',
-        clearSelections: ['FacialHair'], // Clear if incompatible
       }
     }
   }
@@ -221,16 +234,18 @@ function ruleClothesAddonRequiresTeeOrTanktop(selectedLayers) {
     }
   }
   
-  // 4. If Chia Farmer is active (in ClothesAddon), disable OTHER clothes but keep Tee/Tank-top selectable
+  // 4. If Chia Farmer is active (in ClothesAddon), allow all clothes to be selectable
+  // When user selects a non-Tee/Tank-top item, Chia Farmer will be automatically cleared
+  // (handled by useMemeGenerator.js selectLayerInternal logic)
   if (hasChiaFarmerAddon && isTeeOrTanktop) {
     // Chia Farmer is selected + Tee/Tank-top exists
-    // Disable OTHER clothes (Astronaut, Hoodie, etc.) but keep Tee/Tank selectable
+    // Allow all clothing items to be selectable - selecting non-Tee/Tank-top will clear Chia Farmer
     return {
       disabledLayers: [],
-      disabledOptions: {
-        Clothes: ['Astronaut', 'Hoodie', 'Jacket', 'Sweater'], // Disable non-Tee/Tank options
-        // NOTE: Tee and Tank-Top are NOT in this list - they remain selectable
-      },
+      clearSelections: [], // No need to clear here - useMemeGenerator.js handles it when selection changes
+      // NOTE: All clothing items remain selectable, including non-Tee/Tank-top items
+      // When user selects a non-Tee/Tank-top item, the existing logic in useMemeGenerator.js
+      // will automatically clear ClothesAddon (Chia Farmer)
     }
   }
   
@@ -331,7 +346,7 @@ function rulePipeDisablesMouthItem(selectedLayers) {
 
   return {
     disabledLayers: ["MouthItem"],
-    reason: "Pipe is a full mouth base — cannot combine with Cig/Joint/Cohiba.",
+    reason: "Remove Pipe.",
     clearSelections: ["MouthItem"],
   }
 }
@@ -387,7 +402,7 @@ function rulePizzaDisablesMouthItem(selectedLayers) {
 
   return {
     disabledLayers: ["MouthItem"],
-    reason: "Pizza is a full mouth item — cannot combine with Cig/Joint/Cohiba.",
+    reason: "Remove Pizza.",
     clearSelections: ["MouthItem"],
   }
 }
@@ -406,10 +421,8 @@ function ruleBubbleGumDisablesMouthItem(selectedLayers) {
 
   return {
     disabledLayers: ["MouthItem"],
-    reason: "Bubble gum uses the mouth slot — no mouth items allowed.",
-    forceSelections: {
-      MouthItem: "", // Empty string represents "None"
-    },
+    reason: "Remove Bubble Gum.",
+    clearSelections: ["MouthItem"],
   }
 }
 
@@ -628,6 +641,30 @@ export function isLayerDisabled(layerName, selectedLayers) {
  */
 export function getDisabledReason(layerName, selectedLayers) {
   const { reasons } = getDisabledLayers(selectedLayers)
+  
+  // General rule: If MouthItem is disabled due to a MouthBase selection, show "Remove [item name]"
+  if (layerName === 'MouthItem' && reasons[layerName]) {
+    const mouthBase = selectedLayers['MouthBase']
+    
+    if (mouthBase && typeof mouthBase === "string") {
+      const mouthBaseLower = mouthBase.toLowerCase()
+      
+      // Check for Pipe
+      if (pathContains(mouthBase, "Pipe")) {
+        return 'Remove Pipe.'
+      }
+      
+      // Check for Pizza
+      if (mouthBaseLower.includes("pizza")) {
+        return 'Remove Pizza.'
+      }
+      
+      // Check for Bubble Gum
+      if (pathContains(mouthBase, "Bubble-Gum") || mouthBaseLower.includes("bubble gum")) {
+        return 'Remove Bubble Gum.'
+      }
+    }
+  }
   
   // Special handling for MouthItem and FacialHair when mask is selected
   if ((layerName === 'MouthItem' || layerName === 'FacialHair') && reasons[layerName]) {

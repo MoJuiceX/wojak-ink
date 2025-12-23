@@ -119,6 +119,49 @@ function parseSuitVariant(rawDisplayName) {
 }
 
 /**
+ * Parse Chia Farmer variant to extract color
+ * Pattern: "Chia-Farmer_{color}" or "Chia Farmer {color}"
+ * Examples: "Chia-Farmer_blue" => {color: "blue"}
+ * @param {string} path - Image path
+ * @param {string} rawDisplayName - Raw display name
+ * @returns {Object|null} Parsed result with color, or null
+ */
+function parseChiaFarmerVariant(path, rawDisplayName) {
+  if (!path && !rawDisplayName) return null
+  
+  const pathLower = (path || '').toLowerCase()
+  const nameLower = (rawDisplayName || '').toLowerCase()
+  
+  // Must contain "chia" and "farmer"
+  if (!pathLower.includes('chia') || !pathLower.includes('farmer')) {
+    if (!nameLower.includes('chia') || !nameLower.includes('farmer')) {
+      return null
+    }
+  }
+  
+  // Extract color from path: "Chia-Farmer_blue", "Chia-Farmer_brown", etc.
+  const pathMatch = pathLower.match(/chia[- ]?farmer[-_]?(\w+)/)
+  if (pathMatch) {
+    const color = pathMatch[1]
+    // Validate color (blue, brown, orange, red)
+    if (['blue', 'brown', 'orange', 'red'].includes(color)) {
+      return { color }
+    }
+  }
+  
+  // Fallback: extract from display name
+  const nameMatch = nameLower.match(/chia[- ]?farmer[- ]?(\w+)/)
+  if (nameMatch) {
+    const color = nameMatch[1]
+    if (['blue', 'brown', 'orange', 'red'].includes(color)) {
+      return { color }
+    }
+  }
+  
+  return null
+}
+
+/**
  * Check if an item should be excluded from color grouping
  * @param {string} path - Image path
  * @param {string} rawDisplayName - Raw display name
@@ -345,12 +388,12 @@ function formatDisplayLabel(rawLabel) {
   }
 
   // Special case: Chia Farmer items
-  // Handle patterns like "Chia Farmer blue", "Chia-Farmer blue", "chia farmer blue"
-  const chiaFarmerMatch = rawLabel.match(/chia[- ]?farmer[- ]?(\w+)/i)
+  // Note: Chia Farmer variants are extracted before formatting, so this should rarely be called
+  // But keep for backward compatibility - return base name without color since variants are grouped
+  const chiaFarmerMatch = rawLabel.match(/chia[- ]?farmer/i)
   if (chiaFarmerMatch) {
-    const color = chiaFarmerMatch[1]
-    const colorCapitalized = color.charAt(0).toUpperCase() + color.slice(1).toLowerCase()
-    return `Chia Farmer (${colorCapitalized})`
+    // Return base name only - color selection happens via dots, not dropdown
+    return 'Chia Farmer'
   }
 
   // Special case: Mom's Basement (handle special characters like Momyçôs, MomΓÇÖs, etc.)
@@ -368,6 +411,102 @@ function formatDisplayLabel(rawLabel) {
     return 'NYSE Pump'
   }
 
+  // Special case: 2Pac Bandana - ensure proper capitalization (with or without color variant)
+  const pacBandanaMatch = rawLabel.match(/^(2pac\s+bandana)(?:\s+(.+))?$/i)
+  if (pacBandanaMatch) {
+    const colorPart = pacBandanaMatch[2]
+    if (colorPart) {
+      // Has color variant - format as "2Pac Bandana (Color)"
+      const colorCapitalized = colorPart
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ')
+      return `2Pac Bandana (${colorCapitalized})`
+    }
+    return '2Pac Bandana'
+  }
+
+  // Special case: Wizard Hat Man - remove "Man" and format as "Wizard Hat" (with or without color variant)
+  const wizardHatMatch = rawLabel.match(/^(wizard\s+hat(?:\s+man)?)(?:\s+(.+))?$/i)
+  if (wizardHatMatch) {
+    const colorPart = wizardHatMatch[2]
+    if (colorPart) {
+      // Has color variant - format as "Wizard Hat (Color)"
+      const colorCapitalized = colorPart
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ')
+      return `Wizard Hat (${colorCapitalized})`
+    }
+    return 'Wizard Hat'
+  }
+
+  // Special case: Tin Foil - format as "Tin Foil Hat"
+  const tinFoilMatch = rawLabel.match(/^tin\s+foil(?:\s+(.+))?$/i)
+  if (tinFoilMatch) {
+    const colorPart = tinFoilMatch[1]
+    if (colorPart && !colorPart.toLowerCase().includes('hat')) {
+      // Has color variant - format as "Tin Foil Hat (Color)"
+      const colorCapitalized = colorPart
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ')
+      return `Tin Foil Hat (${colorCapitalized})`
+    }
+    return 'Tin Foil Hat'
+  }
+
+  // Special case: Head layer naming adjustments to match marketplace
+  const headLabelLower = rawLabel.toLowerCase()
+  
+  // Anarchy Spikes → Spikes
+  if (headLabelLower.includes('anarchy') && headLabelLower.includes('spikes')) {
+    const colorPart = rawLabel.match(/anarchy\s+spikes(?:\s+(.+))?$/i)?.[1]
+    if (colorPart) {
+      const colorCapitalized = colorPart
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ')
+      return `Spikes (${colorCapitalized})`
+    }
+    return 'Spikes'
+  }
+  
+  // Comrade Cap → Comrade Hat
+  if (headLabelLower.includes('comrade') && headLabelLower.includes('cap')) {
+    return 'Comrade Hat'
+  }
+  
+  // Firefigther Helmet → Firefighter Helmet (fix typo)
+  if (headLabelLower.includes('firefigther')) {
+    return rawLabel.replace(/firefigther/gi, 'Firefighter')
+  }
+  
+  // Piccolo Hat → Piccolo Turban
+  if (headLabelLower.includes('piccolo') && headLabelLower.includes('hat')) {
+    return 'Piccolo Turban'
+  }
+  
+  // Vikings Hat → Viking Helmet
+  if (headLabelLower.includes('vikings') && headLabelLower.includes('hat')) {
+    return 'Viking Helmet'
+  }
+  
+  // Super Mario → Super Wojak Hat (with or without color variant)
+  const superMarioMatch = rawLabel.match(/^(super\s+mario)(?:\s+(.+))?$/i)
+  if (superMarioMatch) {
+    const colorPart = superMarioMatch[2]
+    if (colorPart) {
+      // Has color variant - format as "Super Wojak Hat (Color)"
+      const colorCapitalized = colorPart
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ')
+      return `Super Wojak Hat (${colorCapitalized})`
+    }
+    return 'Super Wojak Hat'
+  }
+
   // Special case: Wizard Glasses New - remove "New" from display name
   const wizardGlassesLower = rawLabel.toLowerCase()
   if (wizardGlassesLower.includes('wizard') && wizardGlassesLower.includes('glasses') && wizardGlassesLower.includes('new')) {
@@ -378,6 +517,70 @@ function formatDisplayLabel(rawLabel) {
       .split(' ')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ')
+  }
+
+  // Special case: Eyes/Face Wear layer naming adjustments to match marketplace
+  const eyesLabelLower = rawLabel.toLowerCase()
+  
+  // 3D Glasses - ensure D is capital
+  if (eyesLabelLower.includes('3d') && eyesLabelLower.includes('glasses')) {
+    return '3D Glasses'
+  }
+  
+  // MOG Glasses - ensure M-O-G are all capitals
+  if (eyesLabelLower.includes('mog') && eyesLabelLower.includes('glasses')) {
+    return 'MOG Glasses'
+  }
+  
+  // Matrix Lenses - format base name correctly, but preserve color for grouping
+  // The grouping logic uses rawLabel, so we need to ensure the base name is correct
+  // but not remove the color here (grouping will handle color variants)
+  if (eyesLabelLower.includes('matrix') && eyesLabelLower.includes('lenses')) {
+    // Don't remove color here - let grouping handle it
+    // Just ensure "Matrix" and "Lenses" are properly capitalized
+    // The rawLabel will be used for grouping, which will parse the color correctly
+    const parsed = parseColorVariant(rawLabel)
+    if (parsed && parsed.color) {
+      // Has color variant - format as "Matrix Lenses (Color)" for display
+      // But grouping will use rawLabel which has the color
+      const colorCapitalized = parsed.color.charAt(0).toUpperCase() + parsed.color.slice(1).toLowerCase()
+      return `Matrix Lenses (${colorCapitalized})`
+    }
+    // No color - just return base name
+    return 'Matrix Lenses'
+  }
+  
+  // Ninja Turtle mask → Ninja Turtle Mask (capitalize Mask)
+  if (eyesLabelLower.includes('ninja') && eyesLabelLower.includes('turtle') && eyesLabelLower.includes('mask')) {
+    return 'Ninja Turtle Mask'
+  }
+
+  // Special case: Clothes layer naming adjustments to match marketplace
+  const clothesLabelLower = rawLabel.toLowerCase()
+  
+  // Firefigther Uniform → Firefighter Uniform (fix typo)
+  if (clothesLabelLower.includes('firefigther')) {
+    return rawLabel.replace(/firefigther/gi, 'Firefighter')
+  }
+  
+  // Super Saiyan → Super Saiyan Uniform (add "Uniform")
+  if (clothesLabelLower.includes('super') && clothesLabelLower.includes('saiyan') && !clothesLabelLower.includes('uniform')) {
+    return 'Super Saiyan Uniform'
+  }
+  
+  // god rope → God's Robe (fix capitalization and add apostrophe)
+  if (clothesLabelLower.includes('god') && clothesLabelLower.includes('rope')) {
+    return "God's Robe"
+  }
+  
+  // Military Jacket → El Presidente (rename)
+  if (clothesLabelLower.includes('military') && clothesLabelLower.includes('jacket')) {
+    return 'El Presidente'
+  }
+  
+  // Swat Gear → SWAT Gear (ensure SWAT is fully capitalized)
+  if (clothesLabelLower.includes('swat') && clothesLabelLower.includes('gear')) {
+    return 'SWAT Gear'
   }
 
   // Apply specific overrides (case-insensitive whole word or exact match)
@@ -430,6 +633,8 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
   const suitMatrixLoggedRef = useRef(false)
   const capMcdVariantsRef = useRef(new Map())
   const lastCapNormalRef = useRef(null)
+  const chiaFarmerVariantsRef = useRef([])
+  const pathToChiaFarmerVariantRef = useRef(new Map())
 
   // Register/unregister with navigation system
   useEffect(() => {
@@ -517,10 +722,41 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
             return // Skip old Wizard Glasses
           }
         }
-        let formattedLabel = formatDisplayLabel(rawLabel)
-        // Apply Head-specific normalization (after formatting, before grouping)
+        
+        // Filter out items not in marketplace list for Head layer
         if (layerName === 'Head') {
-          formattedLabel = normalizeHeadLabel(formattedLabel, layerName)
+          const pathLower = (img.path || '').toLowerCase()
+          const rawLabelLower = (rawLabel || '').toLowerCase()
+          // Exclude Centurion mask (keep only Centurion)
+          if (pathLower.includes('centurion') && pathLower.includes('mask')) {
+            return // Skip Centurion mask
+          }
+        }
+        
+        // Apply Head-specific normalization (before formatting, for grouping)
+        let normalizedRawLabel = rawLabel
+        if (layerName === 'Head') {
+          normalizedRawLabel = normalizeHeadLabel(rawLabel, layerName)
+        }
+        
+        let formattedLabel = formatDisplayLabel(normalizedRawLabel)
+        
+        // Filter out items that formatDisplayLabel returns null for (e.g., Super Mario)
+        if (!formattedLabel) {
+          return // Skip this option
+        }
+        
+        // For grouping, we need to use the rawLabel (before special formatting)
+        // But for display, we use formattedLabel
+        // The issue: Matrix Lenses special case removes color, breaking grouping
+        // Solution: Don't apply Matrix Lenses special case if it has a color variant
+        if (layerName === 'Eyes') {
+          const parsed = parseColorVariant(rawLabel)
+          if (parsed && parsed.base.toLowerCase().includes('matrix') && parsed.base.toLowerCase().includes('lenses')) {
+            // This is a color variant of Matrix Lenses - keep the color for grouping
+            // But format the base name correctly
+            formattedLabel = `Matrix Lenses (${parsed.color.charAt(0).toUpperCase() + parsed.color.slice(1)})`
+          }
         }
         
         // Check if this is a Tee or Tank item
@@ -624,26 +860,41 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
       })
     }
 
-    // Extract suit variants BEFORE color grouping (only for Clothes layer)
+    // Extract suit variants and Chia Farmer variants BEFORE color grouping (only for Clothes layer)
     let suitVariants = []
+    let chiaFarmerVariants = []
     let filteredOptions = allOptions
     if (shouldGroup && layerName === 'Clothes') {
       suitVariants = []
+      chiaFarmerVariants = []
       filteredOptions = []
       
       allOptions.forEach(option => {
-        const parsed = parseSuitVariant(option.rawLabel || option.label)
-        if (parsed) {
+        // Check if it's a Suit variant
+        const suitParsed = parseSuitVariant(option.rawLabel || option.label)
+        if (suitParsed) {
           // This is a suit variant - add to suitVariants with parsed metadata
           suitVariants.push({
             ...option,
-            suitColor: parsed.suitColor,
-            accessoryType: parsed.accessoryType,
-            accessoryColor: parsed.accessoryColor
+            suitColor: suitParsed.suitColor,
+            accessoryType: suitParsed.accessoryType,
+            accessoryColor: suitParsed.accessoryColor
           })
         } else {
-          // Not a suit variant - keep in filteredOptions for normal grouping
-          filteredOptions.push(option)
+          // Check if it's a Chia Farmer variant
+          const chiaParsed = parseChiaFarmerVariant(option.value, option.rawLabel || option.label)
+          if (chiaParsed) {
+            // This is a Chia Farmer variant - add to chiaFarmerVariants with parsed metadata
+            const colorHex = COLOR_TOKENS[chiaParsed.color] || '#000000'
+            chiaFarmerVariants.push({
+              ...option,
+              color: chiaParsed.color,
+              hex: colorHex
+            })
+          } else {
+            // Not a suit or Chia Farmer variant - keep in filteredOptions for normal grouping
+            filteredOptions.push(option)
+          }
         }
       })
       
@@ -707,12 +958,45 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
         })
       }
       
-      // Add grouped bases (only if >1 variant)
+      // Add CHIA_FARMER group option if we have Chia Farmer variants (only for Clothes)
+      if (layerName === 'Clothes' && chiaFarmerVariants.length > 0) {
+        // Default to blue variant, or first available
+        const defaultChiaFarmerVariant = chiaFarmerVariants.find(v => v.color === 'blue') || chiaFarmerVariants[0]
+        const allChiaFarmerDisabled = chiaFarmerVariants.every(v => v.disabled)
+        
+        // Add hint text if disabled
+        let chiaFarmerLabel = 'Chia Farmer'
+        if (allChiaFarmerDisabled && noTeeOrTank) {
+          chiaFarmerLabel = `${chiaFarmerLabel} ⓘ choose Tee or Tank Top first`
+        }
+        
+        finalOptions.push({
+          value: '__GROUP__CHIA_FARMER',
+          label: chiaFarmerLabel,
+          rawLabel: 'Chia Farmer',
+          fullName: 'Chia Farmer',
+          disabled: allChiaFarmerDisabled,
+          isGrouped: true,
+          baseName: 'Chia Farmer',
+          defaultVariantPath: defaultChiaFarmerVariant?.value || chiaFarmerVariants[0]?.value || '',
+          variants: chiaFarmerVariants,
+          isChiaFarmerGroup: true // Special marker for Chia Farmer group
+        })
+      }
+      
+      // Add grouped bases (only if >1 variant, OR if it's Matrix Lenses which should always be grouped)
       groups.forEach((variants, baseName) => {
-        if (variants.length > 1) {
+        const isMatrixLenses = baseName.toLowerCase().includes('matrix') && baseName.toLowerCase().includes('lenses')
+        if (variants.length > 1 || isMatrixLenses) {
           // Multi-variant group: create single dropdown option
+          // OR single-variant Matrix Lenses (special case to ensure it shows as grouped)
           const defaultVariant = getDefaultVariant(variants)
-          const baseFormattedLabel = formatDisplayLabel(baseName)
+          
+          // Special handling for Matrix Lenses - show without color in group label
+          let baseFormattedLabel = formatDisplayLabel(baseName)
+          if (isMatrixLenses) {
+            baseFormattedLabel = 'Matrix Lenses'
+          }
           
           // Check if any variant is disabled (group is disabled if all are disabled)
           const allDisabled = variants.every(v => v.disabled)
@@ -759,6 +1043,14 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
         })
       }
       
+      // Create path-to-chia-farmer-variant map for quick lookup
+      const pathToChiaFarmerVariant = new Map()
+      if (layerName === 'Clothes' && chiaFarmerVariants.length > 0) {
+        chiaFarmerVariants.forEach(variant => {
+          pathToChiaFarmerVariant.set(variant.value, variant)
+        })
+      }
+      
       // Add capMcdVariant to Cap group metadata if it exists
       if (layerName === 'Head' && capMcdVariants.has('Cap')) {
         const capGroupOption = finalOptions.find(opt => opt.isGrouped && opt.baseName === 'Cap')
@@ -774,6 +1066,8 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
         pathToGroup,
         suitVariants: suitVariants,
         pathToSuitVariant: pathToSuitVariant,
+        chiaFarmerVariants: chiaFarmerVariants,
+        pathToChiaFarmerVariant: pathToChiaFarmerVariant,
         capMcdVariants: capMcdVariants
       }
     }
@@ -789,6 +1083,8 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
       pathToGroup: new Map(),
       suitVariants: [],
       pathToSuitVariant: new Map(),
+      chiaFarmerVariants: [],
+      pathToChiaFarmerVariant: new Map(),
       capMcdVariants: new Map()
     }
   }, [images, selectedLayers, layerName])
@@ -799,6 +1095,8 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
     pathToGroupRef.current = computedOptions.pathToGroup || new Map()
     suitVariantsRef.current = computedOptions.suitVariants || []
     pathToSuitVariantRef.current = computedOptions.pathToSuitVariant || new Map()
+    chiaFarmerVariantsRef.current = computedOptions.chiaFarmerVariants || []
+    pathToChiaFarmerVariantRef.current = computedOptions.pathToChiaFarmerVariant || new Map()
     capMcdVariantsRef.current = computedOptions.capMcdVariants || new Map()
     
     // Track last normal Cap selection (not McD)
@@ -837,21 +1135,99 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
         } else {
           setSelectedOption('')
         }
-      } else {
-        // Check if this path belongs to a regular group
-        const groupInfo = pathToGroupRef.current.get(effectiveSelectedValue)
-        if (groupInfo && shouldGroup) {
-          // This is a variant in a group - show the base in dropdown
-          const groupOption = optionsList.find(opt => opt.isGrouped && opt.baseName === groupInfo.baseName)
-          if (groupOption) {
-            setSelectedOption(groupOption.value)
+      } else if (layerName === 'Clothes') {
+        // Check if this is a Chia Farmer variant
+        const chiaFarmerVariant = pathToChiaFarmerVariantRef.current.get(effectiveSelectedValue)
+        if (chiaFarmerVariant) {
+          // This is a Chia Farmer variant - show CHIA_FARMER group in dropdown
+          const chiaFarmerGroupOption = optionsList.find(opt => opt.isGrouped && opt.isChiaFarmerGroup)
+          if (chiaFarmerGroupOption) {
+            setSelectedOption(chiaFarmerGroupOption.value)
           } else {
             setSelectedOption('')
           }
         } else {
-          // Normal ungrouped option
-          const found = optionsList.find(opt => opt.value === effectiveSelectedValue)
-          setSelectedOption(found ? found.value : '')
+          // Not a suit or Chia Farmer variant - check regular groups
+          const groupInfo = pathToGroupRef.current.get(effectiveSelectedValue)
+          if (groupInfo && shouldGroup) {
+            // This is a variant in a group - show the base in dropdown
+            // Use case-insensitive comparison for baseName matching
+            const groupOption = optionsList.find(opt => {
+              if (!opt.isGrouped) return false
+              const optBaseName = (opt.baseName || '').toLowerCase().trim()
+              const groupBaseName = (groupInfo.baseName || '').toLowerCase().trim()
+              return optBaseName === groupBaseName
+            })
+            if (groupOption) {
+              setSelectedOption(groupOption.value)
+            } else {
+              // Fallback: try to find by checking if any variant path matches
+              const fallbackGroup = Array.from(optionsList).find(opt => {
+                if (!opt.isGrouped || !opt.variants) return false
+                return opt.variants.some(v => v.value === effectiveSelectedValue)
+              })
+              if (fallbackGroup) {
+                setSelectedOption(fallbackGroup.value)
+              } else {
+                setSelectedOption('')
+              }
+            }
+          } else {
+            // Fallback: check if selected value matches any variant in any group (for all layers)
+            // This handles cases where pathToGroup lookup failed but grouping exists
+            const fallbackGroup = Array.from(optionsList).find(opt => {
+              if (!opt.isGrouped || !opt.variants) return false
+              return opt.variants.some(v => v.value === effectiveSelectedValue)
+            })
+            if (fallbackGroup) {
+              setSelectedOption(fallbackGroup.value)
+            } else {
+              // Normal ungrouped option
+              const found = optionsList.find(opt => opt.value === effectiveSelectedValue)
+              setSelectedOption(found ? found.value : '')
+            }
+          }
+        }
+      } else {
+        // For non-Clothes layers, check regular groups
+        const groupInfo = pathToGroupRef.current.get(effectiveSelectedValue)
+        if (groupInfo && shouldGroup) {
+          // This is a variant in a group - show the base in dropdown
+          // Use case-insensitive comparison for baseName matching
+          const groupOption = optionsList.find(opt => {
+            if (!opt.isGrouped) return false
+            const optBaseName = (opt.baseName || '').toLowerCase().trim()
+            const groupBaseName = (groupInfo.baseName || '').toLowerCase().trim()
+            return optBaseName === groupBaseName
+          })
+          if (groupOption) {
+            setSelectedOption(groupOption.value)
+          } else {
+            // Fallback: try to find by checking if any variant path matches
+            const fallbackGroup = Array.from(optionsList).find(opt => {
+              if (!opt.isGrouped || !opt.variants) return false
+              return opt.variants.some(v => v.value === effectiveSelectedValue)
+            })
+            if (fallbackGroup) {
+              setSelectedOption(fallbackGroup.value)
+            } else {
+              setSelectedOption('')
+            }
+          }
+        } else {
+          // Fallback: check if selected value matches any variant in any group (for all layers)
+          // This handles cases where pathToGroup lookup failed but grouping exists
+          const fallbackGroup = Array.from(optionsList).find(opt => {
+            if (!opt.isGrouped || !opt.variants) return false
+            return opt.variants.some(v => v.value === effectiveSelectedValue)
+          })
+          if (fallbackGroup) {
+            setSelectedOption(fallbackGroup.value)
+          } else {
+            // Normal ungrouped option
+            const found = optionsList.find(opt => opt.value === effectiveSelectedValue)
+            setSelectedOption(found ? found.value : '')
+          }
         }
       }
     } else {
@@ -864,11 +1240,25 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
     const value = e.target.value
     setSelectedOption(value)
     
+    // Check if the selected option is disabled
+    const selectedOpt = options.find(opt => opt.value === value)
+    if (selectedOpt && selectedOpt.disabled) {
+      // Don't proceed with selection if disabled
+      return
+    }
+    
     // Handle grouped base selection
     if (shouldGroup && value.startsWith('__GROUP__')) {
       // Extract base name
       const baseName = value.replace('__GROUP__', '')
-      const groupOption = options.find(opt => opt.isGrouped && opt.baseName === baseName)
+      // Find group option - handle special cases like CHIA_FARMER vs "Chia Farmer"
+      let groupOption = options.find(opt => {
+        if (!opt.isGrouped) return false
+        // Special case for Chia Farmer: match by isChiaFarmerGroup or by value
+        if (baseName === 'CHIA_FARMER' && opt.isChiaFarmerGroup) return true
+        // For other groups, match by baseName
+        return opt.baseName === baseName
+      })
       
       // Special handling for Head Cap: prefer last normal cap, never default to McD
       if (layerName === 'Head' && baseName === 'Cap') {
@@ -880,8 +1270,14 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
           onSelect(layerName, '')
         }
       } else if (groupOption && groupOption.defaultVariantPath) {
-        // Auto-select default variant
-        onSelect(layerName, groupOption.defaultVariantPath)
+        // Special handling for Chia Farmer: write to ClothesAddon (canonical layer)
+        if (groupOption.isChiaFarmerGroup) {
+          onSelect('ClothesAddon', groupOption.defaultVariantPath)
+          // Also ensure a Tee or Tank-top is selected in Clothes (rules will handle this)
+        } else {
+          // Auto-select default variant
+          onSelect(layerName, groupOption.defaultVariantPath)
+        }
       } else {
         onSelect(layerName, '')
       }
@@ -899,7 +1295,14 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
         // Handle grouped base selection
         if (shouldGroup && value.startsWith('__GROUP__')) {
           const baseName = value.replace('__GROUP__', '')
-          const groupOption = options.find(opt => opt.isGrouped && opt.baseName === baseName)
+          // Find group option - handle special cases like CHIA_FARMER vs "Chia Farmer"
+          let groupOption = options.find(opt => {
+            if (!opt.isGrouped) return false
+            // Special case for Chia Farmer: match by isChiaFarmerGroup or by value
+            if (baseName === 'CHIA_FARMER' && opt.isChiaFarmerGroup) return true
+            // For other groups, match by baseName
+            return opt.baseName === baseName
+          })
           
           // Special handling for Head Cap: prefer last normal cap, never default to McD
           if (layerName === 'Head' && baseName === 'Cap') {
@@ -911,7 +1314,13 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
               onSelect(layerName, '')
             }
           } else if (groupOption && groupOption.defaultVariantPath) {
-            onSelect(layerName, groupOption.defaultVariantPath)
+            // Special handling for Chia Farmer: write to ClothesAddon (canonical layer)
+            if (groupOption.isChiaFarmerGroup) {
+              onSelect('ClothesAddon', groupOption.defaultVariantPath)
+              // Also ensure a Tee or Tank-top is selected in Clothes (rules will handle this)
+            } else {
+              onSelect(layerName, groupOption.defaultVariantPath)
+            }
           } else {
             onSelect(layerName, '')
           }
@@ -957,7 +1366,13 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
                 onSelect(layerName, '')
               }
             } else if (candidate.defaultVariantPath) {
-              onSelect(layerName, candidate.defaultVariantPath)
+              // Special handling for Chia Farmer: write to ClothesAddon (canonical layer)
+              if (candidate.isChiaFarmerGroup) {
+                onSelect('ClothesAddon', candidate.defaultVariantPath)
+                // Also ensure a Tee or Tank-top is selected in Clothes (rules will handle this)
+              } else {
+                onSelect(layerName, candidate.defaultVariantPath)
+              }
             } else {
               onSelect(layerName, '')
             }
@@ -976,7 +1391,14 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
           // Handle grouped base selection
           if (shouldGroup && value.startsWith('__GROUP__')) {
             const baseName = value.replace('__GROUP__', '')
-            const groupOption = options.find(opt => opt.isGrouped && opt.baseName === baseName)
+            // Find group option - handle special cases like CHIA_FARMER vs "Chia Farmer"
+            let groupOption = options.find(opt => {
+              if (!opt.isGrouped) return false
+              // Special case for Chia Farmer: match by isChiaFarmerGroup or by value
+              if (baseName === 'CHIA_FARMER' && opt.isChiaFarmerGroup) return true
+              // For other groups, match by baseName
+              return opt.baseName === baseName
+            })
             
             // Special handling for Head Cap: prefer last normal cap, never default to McD
             if (layerName === 'Head' && baseName === 'Cap') {
@@ -988,7 +1410,13 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
                 onSelect(layerName, '')
               }
             } else if (groupOption && groupOption.defaultVariantPath) {
-              onSelect(layerName, groupOption.defaultVariantPath)
+              // Special handling for Chia Farmer: write to ClothesAddon (canonical layer)
+              if (groupOption.isChiaFarmerGroup) {
+                onSelect('ClothesAddon', groupOption.defaultVariantPath)
+                // Also ensure a Tee or Tank-top is selected in Clothes (rules will handle this)
+              } else {
+                onSelect(layerName, groupOption.defaultVariantPath)
+              }
             } else {
               onSelect(layerName, '')
             }
@@ -1066,6 +1494,22 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
     return isSuitVariant || isSuitGroup
   }, [layerName, selectedValue, selectedOption])
   
+  // Determine if we should show Chia Farmer variant picker
+  const shouldShowChiaFarmerPicker = useMemo(() => {
+    if (layerName !== 'Clothes') return false
+    if (shouldShowSuitPicker) return false // Mutually exclusive with Suit picker
+    
+    // Check if ClothesAddon has Chia Farmer (canonical layer)
+    const clothesAddonPath = selectedLayers['ClothesAddon'] || ''
+    const hasChiaFarmerInAddon = clothesAddonPath && pathToChiaFarmerVariantRef.current.has(clothesAddonPath)
+    
+    // Show if selectedValue is a Chia Farmer variant OR if dropdown shows CHIA_FARMER group
+    const isChiaFarmerVariant = pathToChiaFarmerVariantRef.current.has(selectedValue) || hasChiaFarmerInAddon
+    const isChiaFarmerGroup = selectedOption === '__GROUP__CHIA_FARMER'
+    
+    return (isChiaFarmerVariant || isChiaFarmerGroup) && !shouldShowSuitPicker
+  }, [layerName, selectedValue, selectedOption, selectedLayers, shouldShowSuitPicker])
+  
   // Get current suit selection state
   const currentSuitState = useMemo(() => {
     if (!shouldShowSuitPicker) return null
@@ -1121,7 +1565,42 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
     }
   }, [shouldShowSuitPicker, selectedValue])
   
+  // Get current Chia Farmer selection state
+  const currentChiaFarmerState = useMemo(() => {
+    if (!shouldShowChiaFarmerPicker) return null
+    
+    const chiaFarmerVariants = chiaFarmerVariantsRef.current
+    if (chiaFarmerVariants.length === 0) return null
+    
+    // Get current selection from ClothesAddon (canonical layer)
+    const clothesAddonPath = selectedLayers['ClothesAddon'] || ''
+    let currentColor = null
+    
+    if (clothesAddonPath) {
+      const chiaFarmerVariant = pathToChiaFarmerVariantRef.current.get(clothesAddonPath)
+      if (chiaFarmerVariant) {
+        currentColor = chiaFarmerVariant.color
+      }
+    }
+    
+    // If no current selection, use default (blue)
+    if (!currentColor && chiaFarmerVariants.length > 0) {
+      const blueVariant = chiaFarmerVariants.find(v => v.color === 'blue')
+      currentColor = blueVariant ? blueVariant.color : chiaFarmerVariants[0].color
+    }
+    
+    // Get available colors
+    const availableColors = [...new Set(chiaFarmerVariants.map(v => v.color))].sort()
+    
+    return {
+      variants: chiaFarmerVariants,
+      currentColor,
+      availableColors
+    }
+  }, [shouldShowChiaFarmerPicker, selectedLayers])
+  
   // Determine active group for color dots (non-suit groups)
+  // Note: When Chia Farmer is selected, we still want to show Tee/Tank-top color dots
   const activeGroup = useMemo(() => {
     if (!shouldGroup || !selectedValue || shouldShowSuitPicker) return null
     
@@ -1141,7 +1620,7 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
     }
     
     // Also check if dropdown shows a grouped base
-    if (selectedOption && selectedOption.startsWith('__GROUP__') && selectedOption !== '__GROUP__SUIT') {
+    if (selectedOption && selectedOption.startsWith('__GROUP__') && selectedOption !== '__GROUP__SUIT' && selectedOption !== '__GROUP__CHIA_FARMER') {
       const baseName = selectedOption.replace('__GROUP__', '')
       const variants = groupsRef.current.get(baseName)
       if (variants && variants.length > 1) {
@@ -1232,6 +1711,19 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
       onSelect(layerName, targetVariant.value)
     }
   }, [currentSuitState, layerName, onSelect, findSuitVariant])
+  
+  // Handler for Chia Farmer color dot click
+  const handleChiaFarmerColorClick = useCallback((color) => {
+    if (!currentChiaFarmerState) return
+    
+    const { variants } = currentChiaFarmerState
+    const targetVariant = variants.find(v => v.color === color)
+    
+    if (targetVariant) {
+      // Write to ClothesAddon (canonical layer)
+      onSelect('ClothesAddon', targetVariant.value)
+    }
+  }, [currentChiaFarmerState, onSelect])
 
   // Get tooltip content (only if tooltip is enabled)
   const tooltipContent = !disableTooltip ? (
@@ -1276,7 +1768,7 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
       {/* Fixed-height slot for variant pickers - ALWAYS rendered to prevent layout shift */}
       <div className="trait-dot-slot">
           {/* Suit variant picker - single row compact layout */}
-          {shouldGroup && shouldShowSuitPicker && currentSuitState && (
+          {shouldGroup && shouldShowSuitPicker && currentSuitState && !shouldShowChiaFarmerPicker && (
           <div className="suit-variant-picker">
             <div className="suit-variant-row">
               <div className="color-dots">
@@ -1344,26 +1836,47 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
             </div>
           </div>
         )}
-        {/* Color variant picker - only show for grouped selections with >1 variant (non-suit) */}
+        {/* Color variant picker - show for grouped selections with >1 variant (Tee/Tank-top, etc.)
+            Show even when Chia Farmer is selected (Tee/Tank-top dots come first) */}
         {shouldGroup && activeGroup && activeGroup.variants.length > 1 && !shouldShowSuitPicker && (
           <div className="color-variant-picker">
             <div className={`color-dots ${layerName === 'Head' && activeGroup.baseName === 'Cap' && activeGroup.capMcdVariant && selectedValue === activeGroup.capMcdVariant.value ? 'is-muted' : ''}`}>
               {activeGroup.variants.map(variant => {
-                // Skip variants without color (base entry) - they're handled by dropdown
-                if (!variant.color || !variant.hex) return null
+                // Include base variants (no color) as well as color variants
+                const isBaseVariant = !variant.color || !variant.hex
+                const isColorVariant = variant.color && variant.hex
+                
+                // Skip if neither base nor color variant (shouldn't happen, but safety check)
+                if (!isBaseVariant && !isColorVariant) return null
                 
                 const isActive = variant.value === activeGroup.activePath
                 const variantDisabled = variant.disabled || disabled
+                
+                // Determine dot style: base variant gets special styling
+                const dotStyle = isBaseVariant 
+                  ? { 
+                      backgroundColor: '#e0e0e0', // Light gray for base
+                      border: '2px solid #808080', // Darker gray border
+                      ['--dot-color']: '#e0e0e0'
+                    }
+                  : { 
+                      backgroundColor: variant.hex, 
+                      ['--dot-color']: variant.hex 
+                    }
+                
+                const ariaLabel = isBaseVariant
+                  ? 'Set to base variant (remove color)'
+                  : `Set color: ${variant.color.charAt(0).toUpperCase() + variant.color.slice(1)}`
                 
                 return (
                   <button
                     key={variant.value}
                     type="button"
-                    className={`color-dot ${isActive ? 'active' : ''}`}
-                    style={{ backgroundColor: variant.hex, ['--dot-color']: variant.hex }}
+                    className={`color-dot ${isActive ? 'active' : ''} ${isBaseVariant ? 'base-variant' : ''}`}
+                    style={dotStyle}
                     onClick={() => !variantDisabled && onSelect(layerName, variant.value)}
                     disabled={variantDisabled}
-                    aria-label={`Set color: ${variant.color.charAt(0).toUpperCase() + variant.color.slice(1)}`}
+                    aria-label={ariaLabel}
                     onMouseDown={(e) => e.stopPropagation()}
                     onPointerDown={(e) => e.stopPropagation()}
                   />
@@ -1385,6 +1898,37 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
                 <img src="/wojak-creator/CLOTHES/McD.png" alt="McD" />
               </button>
             )}
+          </div>
+        )}
+        {/* Visual divider between Tee/Tank-top dots and Chia Farmer dots */}
+        {shouldGroup && shouldShowChiaFarmerPicker && currentChiaFarmerState && !shouldShowSuitPicker && activeGroup && activeGroup.variants.length > 1 && (
+          <div className="chia-farmer-divider">
+            <div className="divider-line"></div>
+          </div>
+        )}
+        {/* Chia Farmer variant picker - single row color dots (rendered AFTER Tee/Tank-top dots) */}
+        {shouldGroup && shouldShowChiaFarmerPicker && currentChiaFarmerState && !shouldShowSuitPicker && (
+          <div className="chia-farmer-variant-picker">
+            <div className="color-dots">
+              {currentChiaFarmerState.availableColors.map(color => {
+                const isActive = color === currentChiaFarmerState.currentColor
+                const colorHex = COLOR_TOKENS[color] || '#000000'
+                
+                return (
+                  <button
+                    key={color}
+                    type="button"
+                    className={`color-dot ${isActive ? 'active' : ''}`}
+                    style={{ backgroundColor: colorHex, ['--dot-color']: colorHex }}
+                    onClick={() => handleChiaFarmerColorClick(color)}
+                    disabled={disabled}
+                    aria-label={`Set Chia Farmer color: ${color.charAt(0).toUpperCase() + color.slice(1)}`}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                  />
+                )
+              })}
+            </div>
           </div>
         )}
       </div>

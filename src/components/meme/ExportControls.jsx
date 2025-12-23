@@ -62,6 +62,17 @@ export default function ExportControls({ canvasRef, selectedLayers = {}, onRando
   return (
     <div>
       <div className="export-controls-row">
+        {onRandomize && (
+          <Button onClick={onRandomize}>
+            Randomize
+          </Button>
+        )}
+        <Button 
+          onClick={handleCopy} 
+          disabled={isExporting || !canvasRef.current}
+        >
+          Copy to Clipboard
+        </Button>
         <Button 
           onClick={handleDownload} 
           disabled={isDownloadDisabled}
@@ -75,21 +86,10 @@ export default function ExportControls({ canvasRef, selectedLayers = {}, onRando
           Download
         </Button>
         <Button 
-          onClick={handleCopy} 
-          disabled={isExporting || !canvasRef.current}
-        >
-          Copy to Clipboard
-        </Button>
-        <Button 
           disabled={true}
         >
           Mint
         </Button>
-        {onRandomize && (
-          <Button onClick={onRandomize}>
-            Randomize
-          </Button>
-        )}
       </div>
       {!canDownload && (
         <p style={{ 
