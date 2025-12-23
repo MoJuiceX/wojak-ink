@@ -35,11 +35,11 @@ const FOLDER_TO_LAYER_MAP = {
 const NEW_LAYER_MAPPINGS = {
   'MouthBase': {
     sourceFolder: 'MOUTH',
-    filePatterns: ['numb', 'Teeth', 'Gold-Teeth', 'smile', 'screeming', 'Pizza', 'Bubble-Gum']
+    filePatterns: ['numb', 'Teeth', 'Gold-Teeth', 'smile', 'screeming', 'Pizza', 'Bubble-Gum', 'Pipe']
   },
   'MouthItem': {
     sourceFolder: 'MOUTH',
-    filePatterns: ['Pipe'],
+    filePatterns: [],
     additionalSource: {
       folder: 'EXTRA',
       patterns: ['Cig', 'Joint', 'Cohiba']
