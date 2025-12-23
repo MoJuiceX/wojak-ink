@@ -164,6 +164,63 @@ export function useMemeGenerator() {
         }
       }
       
+      // Migration: Move Pipe from MouthItem to MouthBase
+      if (layerName === 'MouthItem' && imagePath) {
+        const pathLower = (imagePath || '').toLowerCase()
+        if (pathLower.includes('pipe')) {
+          // Move Pipe to MouthBase and clear MouthItem
+          newLayers['MouthBase'] = imagePath
+          newLayers['MouthItem'] = ''
+        }
+      }
+      
+      // Also check if MouthItem has Pipe and migrate it
+      if (newLayers['MouthItem']) {
+        const mouthItemPathLower = (newLayers['MouthItem'] || '').toLowerCase()
+        if (mouthItemPathLower.includes('pipe')) {
+          // Move Pipe to MouthBase and clear MouthItem
+          newLayers['MouthBase'] = newLayers['MouthItem']
+          newLayers['MouthItem'] = ''
+        }
+      }
+      
+      // Migration: Replace old Wizard Glasses with Wizard Glasses New
+      if (layerName === 'Eyes' && imagePath) {
+        const pathLower = (imagePath || '').toLowerCase()
+        // Check if this is the old Wizard Glasses (has wizard and glasses but NOT new)
+        if (pathLower.includes('wizard') && pathLower.includes('glasses') && !pathLower.includes('new')) {
+          // Find the new Wizard Glasses path
+          const eyesImages = getAllLayerImages('Eyes') || []
+          const wizardGlassesNew = eyesImages.find(img => {
+            const imgPath = (img.path || '').toLowerCase()
+            return imgPath.includes('wizard') && imgPath.includes('glasses') && imgPath.includes('new')
+          })
+          if (wizardGlassesNew) {
+            newLayers['Eyes'] = wizardGlassesNew.path
+          } else {
+            // Fallback: clear Eyes if new version not found
+            newLayers['Eyes'] = ''
+          }
+        }
+      }
+      
+      // Also check and migrate existing Eyes selection if it's the old Wizard Glasses
+      if (newLayers['Eyes']) {
+        const eyesPathLower = (newLayers['Eyes'] || '').toLowerCase()
+        if (eyesPathLower.includes('wizard') && eyesPathLower.includes('glasses') && !eyesPathLower.includes('new')) {
+          const eyesImages = getAllLayerImages('Eyes') || []
+          const wizardGlassesNew = eyesImages.find(img => {
+            const imgPath = (img.path || '').toLowerCase()
+            return imgPath.includes('wizard') && imgPath.includes('glasses') && imgPath.includes('new')
+          })
+          if (wizardGlassesNew) {
+            newLayers['Eyes'] = wizardGlassesNew.path
+          } else {
+            newLayers['Eyes'] = ''
+          }
+        }
+      }
+      
       // Special handling: Centurion vs Centurion_mask based on Mask selection
       // When Mask changes, adjust Head selection if needed
       if (layerName === 'Mask') {
@@ -267,6 +324,36 @@ export function useMemeGenerator() {
       return clearedLayers
     })
   }, [])
+
+  // Migration: Move Pipe from MouthItem to MouthBase on initialization
+  useEffect(() => {
+    if (selectedLayers?.MouthItem) {
+      const mouthItemPathLower = (selectedLayers.MouthItem || '').toLowerCase()
+      if (mouthItemPathLower.includes('pipe')) {
+        // Move Pipe to MouthBase and clear MouthItem
+        selectLayerInternal('MouthBase', selectedLayers.MouthItem)
+        selectLayerInternal('MouthItem', '')
+      }
+    }
+  }, [selectedLayers?.MouthItem, selectLayerInternal])
+
+  // Migration: Replace old Wizard Glasses with Wizard Glasses New on initialization
+  useEffect(() => {
+    if (selectedLayers?.Eyes) {
+      const eyesPathLower = (selectedLayers.Eyes || '').toLowerCase()
+      // Check if this is the old Wizard Glasses (has wizard and glasses but NOT new)
+      if (eyesPathLower.includes('wizard') && eyesPathLower.includes('glasses') && !eyesPathLower.includes('new')) {
+        const eyesImages = getAllLayerImages('Eyes') || []
+        const wizardGlassesNew = eyesImages.find(img => {
+          const imgPath = (img.path || '').toLowerCase()
+          return imgPath.includes('wizard') && imgPath.includes('glasses') && imgPath.includes('new')
+        })
+        if (wizardGlassesNew) {
+          selectLayerInternal('Eyes', wizardGlassesNew.path)
+        }
+      }
+    }
+  }, [selectedLayers?.Eyes, selectLayerInternal])
 
   // Enforce generator defaults on open:
   // - Base => Classic
@@ -720,6 +807,24 @@ export function useMemeGenerator() {
     return options[options.length - 1]
   }, [])
 
+  // Helper: Check if an option is disabled based on current selections
+  const isOptionDisabledByRules = useCallback((img, layerName, selectedLayers) => {
+    if (!img || !img.path) return false
+    
+    const { disabledOptions } = getDisabledLayers(selectedLayers)
+    const layerDisabledOptions = disabledOptions?.[layerName] || []
+    
+    if (layerDisabledOptions.length === 0) return false
+    
+    const pathLower = (img.path || '').toLowerCase()
+    const displayNameLower = ((img.displayName || img.name) || '').toLowerCase()
+    
+    return layerDisabledOptions.some(disabledIdentifier => {
+      const identifierLower = disabledIdentifier.toLowerCase()
+      return pathLower.includes(identifierLower) || displayNameLower.includes(identifierLower)
+    })
+  }, [])
+
   // Randomize all layers - picks random valid option for each layer
   const randomizeAllLayers = useCallback(() => {
     // Generator layer order (respects dependencies: Base/Head/Eyes/MouthBase first, then Mask, then dependent layers)
@@ -730,6 +835,13 @@ export function useMemeGenerator() {
     
     // First pass: pick random valid option for each layer
     GENERATOR_LAYER_ORDER.forEach(layerName => {
+      // Check if this layer is disabled by current selections
+      const { disabledLayers } = getDisabledLayers(newLayers)
+      if (disabledLayers.includes(layerName)) {
+        newLayers[layerName] = ''
+        return
+      }
+      
       const images = getAllLayerImages(layerName) || []
       if (!images.length) {
         newLayers[layerName] = ''
@@ -784,6 +896,10 @@ export function useMemeGenerator() {
           const displayName = (img?.displayName || img?.name || '').trim().toLowerCase()
           if (!path) return false
           if (path.toLowerCase().includes('none') || displayName.includes('none')) return false
+          // Filter out disabled options based on current selections
+          if (isOptionDisabledByRules(img, layerName, newLayers)) {
+            return false
+          }
           return true
         })
         
@@ -858,6 +974,11 @@ export function useMemeGenerator() {
           if (!path) return
           if (path.toLowerCase().includes('none') || displayName.toLowerCase().includes('none')) return
           
+          // Filter out disabled options based on current selections
+          if (isOptionDisabledByRules(img, layerName, newLayers)) {
+            return
+          }
+          
           const parsed = parseSuitVariant(displayName)
           if (parsed) {
             suitVariants.push(img)
@@ -909,6 +1030,11 @@ export function useMemeGenerator() {
           const displayName = (img?.displayName || img?.name || '').trim().toLowerCase()
           if (!path) return false
           
+          // Filter out disabled options based on current selections
+          if (isOptionDisabledByRules(img, layerName, newLayers)) {
+            return false
+          }
+          
           const pathLower = path.toLowerCase()
           const isCenturion = pathLower.includes('centurion') && !pathLower.includes('centurion_mask')
           const isCenturionMask = pathLower.includes('centurion_mask')
@@ -945,13 +1071,17 @@ export function useMemeGenerator() {
         return
       }
       
-      // For other layers: filter valid images (exclude "None" for Base)
+      // For other layers: filter valid images (exclude "None" for Base, exclude disabled options)
       const excludeNone = layerName === 'Base'
       const validImages = images.filter(img => {
         const path = (img?.path || '').trim()
         const displayName = (img?.displayName || img?.name || '').trim().toLowerCase()
         if (!path) return false
         if (excludeNone && (path.toLowerCase().includes('none') || displayName.includes('none'))) {
+          return false
+        }
+        // Filter out disabled options based on current selections
+        if (isOptionDisabledByRules(img, layerName, newLayers)) {
           return false
         }
         return true
@@ -982,7 +1112,7 @@ export function useMemeGenerator() {
     })
     
     // Apply rules (clearSelections, forceSelections) to ensure valid state
-    const { disabledLayers: disabled, clearSelections, forceSelections } = getDisabledLayers(newLayers)
+    let { disabledLayers: disabled, clearSelections, forceSelections } = getDisabledLayers(newLayers)
     
     // Clear disabled layers
     disabled.forEach(layerName => {
@@ -1002,6 +1132,80 @@ export function useMemeGenerator() {
         newLayers[layerName] = value
       })
     }
+    
+    // Re-check rules after forced selections (rules may have changed)
+    const finalRulesCheck = getDisabledLayers(newLayers)
+    disabled = finalRulesCheck.disabledLayers
+    clearSelections = finalRulesCheck.clearSelections
+    forceSelections = finalRulesCheck.forceSelections
+    
+    // Clear any layers that became disabled after forced selections
+    disabled.forEach(layerName => {
+      newLayers[layerName] = ''
+    })
+    
+    if (clearSelections && clearSelections.length > 0) {
+      clearSelections.forEach(layerName => {
+        newLayers[layerName] = ''
+      })
+    }
+    
+    if (forceSelections && Object.keys(forceSelections).length > 0) {
+      Object.entries(forceSelections).forEach(([layerName, value]) => {
+        newLayers[layerName] = value
+      })
+    }
+    
+    // Second pass: For layers that were cleared but should have values, try to pick valid options
+    // This handles cases where a layer was cleared due to rule conflicts but should still have a selection
+    GENERATOR_LAYER_ORDER.forEach(layerName => {
+      // Skip if layer already has a value or is intentionally disabled
+      if (newLayers[layerName] && newLayers[layerName] !== '') return
+      
+      const { disabledLayers: currentDisabled } = getDisabledLayers(newLayers)
+      if (currentDisabled.includes(layerName)) return // Layer is disabled, keep it empty
+      
+      // Skip layers that should be empty (Base, MouthBase, Clothes should always have values)
+      // But Background, Mask, MouthItem, FacialHair can be empty
+      const canBeEmpty = ['Background', 'Mask', 'MouthItem', 'FacialHair'].includes(layerName)
+      if (canBeEmpty) return // These can stay empty
+      
+      // Try to pick a valid option for this layer
+      const images = getAllLayerImages(layerName) || []
+      if (!images.length) return
+      
+      // Filter valid images (exclude None, exclude disabled options)
+      const excludeNone = layerName === 'Base'
+      const validImages = images.filter(img => {
+        const path = (img?.path || '').trim()
+        const displayName = (img?.displayName || img?.name || '').trim().toLowerCase()
+        if (!path) return false
+        if (excludeNone && (path.toLowerCase().includes('none') || displayName.includes('none'))) {
+          return false
+        }
+        if (isOptionDisabledByRules(img, layerName, newLayers)) {
+          return false
+        }
+        return true
+      })
+      
+      if (validImages.length > 0) {
+        // Pick random valid image
+        let idx = 0
+        try {
+          if (window?.crypto?.getRandomValues) {
+            const arr = new Uint32Array(1)
+            window.crypto.getRandomValues(arr)
+            idx = arr[0] % validImages.length
+          } else {
+            idx = Math.floor(Math.random() * validImages.length)
+          }
+        } catch {
+          idx = Math.floor(Math.random() * validImages.length)
+        }
+        newLayers[layerName] = validImages[idx]?.path || ''
+      }
+    })
     
     // Set final state (use selectLayerInternal pattern for Chia Farmer handling)
     setSelectedLayers(prev => {

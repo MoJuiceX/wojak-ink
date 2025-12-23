@@ -368,6 +368,18 @@ function formatDisplayLabel(rawLabel) {
     return 'NYSE Pump'
   }
 
+  // Special case: Wizard Glasses New - remove "New" from display name
+  const wizardGlassesLower = rawLabel.toLowerCase()
+  if (wizardGlassesLower.includes('wizard') && wizardGlassesLower.includes('glasses') && wizardGlassesLower.includes('new')) {
+    // Remove "new" (case-insensitive) from anywhere in the string
+    let cleaned = rawLabel.replace(/\s+new\s*/gi, ' ').replace(/\s+new$/gi, '').trim()
+    // Apply title-case formatting
+    return cleaned
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ')
+  }
+
   // Apply specific overrides (case-insensitive whole word or exact match)
   const overrides = {
     'stach': 'Stache',
@@ -492,7 +504,19 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
           }
         }
         
+        // Get rawLabel early for use in filters
         const rawLabel = img.displayName || img.name
+        
+        // Filter out old Wizard Glasses for Eyes layer (keep only Wizard Glasses New)
+        if (layerName === 'Eyes') {
+          const pathLower = (img.path || '').toLowerCase()
+          const rawLabelLower = (rawLabel || '').toLowerCase()
+          // Exclude old Wizard Glasses (has wizard and glasses but NOT new)
+          if ((pathLower.includes('wizard') && pathLower.includes('glasses')) && 
+              !pathLower.includes('new') && !rawLabelLower.includes('new')) {
+            return // Skip old Wizard Glasses
+          }
+        }
         let formattedLabel = formatDisplayLabel(rawLabel)
         // Apply Head-specific normalization (after formatting, before grouping)
         if (layerName === 'Head') {

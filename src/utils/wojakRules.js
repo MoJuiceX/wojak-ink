@@ -318,23 +318,21 @@ function ruleMaskForcesNumbMouth(selectedLayers) {
 }
 
 /**
- * Rule: Pipe forces MouthBase to None
- * If Pipe is selected in MouthItem, automatically set MouthBase to None (empty)
+ * Rule: Pipe disables MouthItem
+ * If Pipe is selected in MouthBase, disable and clear MouthItem
  * @param {Object} selectedLayers - Object mapping layer names to selected image paths
- * @returns {Object} Object with forceSelections
+ * @returns {Object} Object with disabledLayers array and clearSelections
  */
-function rulePipeForcesNoMouthBase(selectedLayers) {
-  const mouthItem = selectedLayers?.MouthItem
-  const isPipe = typeof mouthItem === "string" && pathContains(mouthItem, "Pipe")
+function rulePipeDisablesMouthItem(selectedLayers) {
+  const mouthBase = selectedLayers?.MouthBase
+  const isPipe = typeof mouthBase === "string" && pathContains(mouthBase, "Pipe")
 
   if (!isPipe) return { disabledLayers: [] }
 
   return {
-    disabledLayers: [],
-    reason: "Pipe selected — base mouth must be None.",
-    forceSelections: {
-      MouthBase: "", // Empty string represents "None"
-    },
+    disabledLayers: ["MouthItem"],
+    reason: "Pipe is a full mouth base — cannot combine with Cig/Joint/Cohiba.",
+    clearSelections: ["MouthItem"],
   }
 }
 
@@ -389,7 +387,7 @@ function rulePizzaDisablesMouthItem(selectedLayers) {
 
   return {
     disabledLayers: ["MouthItem"],
-    reason: "Pizza is a full mouth item — cannot combine with Cig/Joint/Cohiba/Pipe.",
+    reason: "Pizza is a full mouth item — cannot combine with Cig/Joint/Cohiba.",
     clearSelections: ["MouthItem"],
   }
 }
@@ -528,7 +526,7 @@ const RULES = [
   ruleBaseNeverNone,                  // ✅ Base normalization: auto-set Classic when any trait selected (must be first)
   ruleCopiumMaskForcesValidMouthBase, // ✅ Copium Mask special handling
   ruleMaskForcesNumbMouth,            // ✅ other masks force MouthBase to Numb
-  rulePipeForcesNoMouthBase,          // ✅ pipe forces base mouth off
+  rulePipeDisablesMouthItem,          // ✅ pipe in MouthBase blocks MouthItem
   ruleCigJointCohibaRequiresMouthBase, // ✅ Cig/Joint/Cohiba auto-sets MouthBase to Numb if None
   rulePizzaDisablesMouthItem,         // ✅ pizza blocks MouthItem
   ruleBubbleGumDisablesMouthItem,     // ✅ bubble gum blocks MouthItem
