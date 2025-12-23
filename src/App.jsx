@@ -8,7 +8,7 @@ import TangGangWindow from './components/windows/TangGangWindow'
 import SideStack from './components/SideStack'
 import NotifyPopup from './components/windows/NotifyPopup'
 import MarketplaceWindow from './components/windows/MarketplaceWindow'
-import WojakCreator from './components/windows/WojakCreator'
+import WojakGenerator from './components/windows/WojakGenerator'
 import PaintWindow from './components/windows/PaintWindow'
 import PinballWindow from './components/windows/PinballWindow'
 import SolitaireWindow from './components/windows/SolitaireWindow'
@@ -136,8 +136,6 @@ function useGlobalScrollLock() {
 
 function App() {
   const [notifyOpen, setNotifyOpen] = useState(false)
-  const [paintOpen, setPaintOpen] = useState(false)
-  const [wojakCreatorOpen, setWojakCreatorOpen] = useState(false)
   const [openWindows, setOpenWindows] = useState({
     'window-readme-txt': false,
     'window-mint-info-exe': false,
@@ -145,6 +143,8 @@ function App() {
     'window-faq': false,
     'window-marketplace': false,
     'tanggang': false,
+    'wojak-generator': false,
+    'paint': false,
   })
 
   // Global scroll lock - prevent all page scrolling
@@ -179,7 +179,10 @@ function App() {
   // Listen for paint window open event
   useEffect(() => {
     const handleOpenPaint = () => {
-      setPaintOpen(true)
+      setOpenWindows(prev => ({
+        ...prev,
+        'paint': true,
+      }))
     }
     window.addEventListener('openPaintWindow', handleOpenPaint)
     return () => {
@@ -199,6 +202,10 @@ function App() {
   }, [])
 
   const openWindow = (windowId) => {
+    // Backward compatibility: map old wojak-creator to wojak-generator
+    if (windowId === 'wojak-creator') {
+      windowId = 'wojak-generator'
+    }
     setOpenWindows(prev => ({
       ...prev,
       [windowId]: true,
@@ -206,6 +213,10 @@ function App() {
   }
 
   const closeWindow = (windowId) => {
+    // Backward compatibility: map old wojak-creator to wojak-generator
+    if (windowId === 'wojak-creator') {
+      windowId = 'wojak-generator'
+    }
     setOpenWindows(prev => ({
       ...prev,
       [windowId]: false,
@@ -268,8 +279,8 @@ function App() {
                 <MarketplaceWindow onClose={() => closeWindow('window-marketplace')} />
               )}
               <SideStack />
-              {wojakCreatorOpen && <WojakCreator onClose={() => setWojakCreatorOpen(false)} />}
-              {paintOpen && <PaintWindow onClose={() => setPaintOpen(false)} />}
+              {openWindows['wojak-generator'] && <WojakGenerator onClose={() => closeWindow('wojak-generator')} />}
+              {openWindows['paint'] && <PaintWindow onClose={() => closeWindow('paint')} />}
               {openWindows['pinball-window'] && (
                 <PinballWindow onClose={() => closeWindow('pinball-window')} />
               )}
@@ -286,8 +297,8 @@ function App() {
               <TryAgainWindowWrapper />
             </main>
             <Taskbar 
-              onOpenWojakCreator={() => setWojakCreatorOpen(true)} 
-              wojakCreatorOpen={wojakCreatorOpen}
+              onOpenWojakGenerator={() => openWindow('wojak-generator')} 
+              wojakGeneratorOpen={!!openWindows['wojak-generator']}
               onOpenApp={openWindow}
             />
             </MarketplaceProvider>

@@ -3,8 +3,8 @@
  * 1. Head/Base Face
  * 2. Eyes
  * 3. Mask (ALL masks including Copium)
- * 4. Tyson Tattoo (virtual layer, extracted from Eyes, ONLY if Hannibal Mask exists)
- * 5. Hannibal Mask (virtual layer, extracted from Mask)
+ * 4. Tyson Tattoo (virtual layer, extracted from Eyes, ONLY if Hannibal Mask exists, renders UNDER mask)
+ * 5. Hannibal Mask (virtual layer, extracted from Mask, renders ABOVE TysonTattoo)
  * 6. Mouth(Item)
  * 7. Mouth(Base) - ALL traits including Screaming (normal layer)
  * 8. Astronaut (virtual layer, extracted from Clothes)
@@ -50,11 +50,12 @@ export const LAYER_ORDER = [
   { name: 'FacialHair', folder: 'FACIALHAIR', zIndex: 4 }, // MUST ALWAYS render UNDER Astronaut, Mouth(Base), and Mouth(Item)
   { name: 'MouthBase', folder: 'MOUTHBASE', zIndex: 5 }, // ALL Mouth(Base) traits including Screaming (renders before Mask and Astronaut)
   { name: 'MouthItem', folder: 'MOUTHITEM', zIndex: 6 }, // Renders after MouthBase (MouthItem overlays MouthBase), before Mask (Mask overlays MouthItem)
+  { name: 'TysonTattoo', folder: 'TYSONTATTOO', zIndex: 6.5 }, // Virtual layer: ONLY when ANY mask exists, renders UNDER mask (must be < Mask zIndex)
+  { name: 'NinjaTurtleUnderMask', folder: 'VIRTUAL', zIndex: 6.6 }, // Virtual layer: ONLY when covering mask (Copium/Hannibal/Bandana) exists, renders UNDER mask (must be < Mask zIndex)
   { name: 'Mask', folder: 'MASK', zIndex: 7 }, // ALL masks including Copium (renders after MouthBase and MouthItem so Mask overlays mouth layers, before Eyes so Eyes overlay Mask)
-  { name: 'Eyes', folder: 'EYE', zIndex: 8 }, // Renders after Mask (Eyes overlay all masks), before Head (Head overlays eyes), before Astronaut (Astronaut covers eyes)
-  { name: 'Astronaut', folder: 'ASTRONAUT', zIndex: 9 }, // Virtual layer: MUST ALWAYS render OVER Eyes, FacialHair, and ALL Mouth(Base) traits
-  { name: 'HannibalMask', folder: 'HANNIBALMASK', zIndex: 10 }, // Virtual layer: MUST ALWAYS render OVER Mouth(Base) and Mouth(Item)
-  { name: 'TysonTattoo', folder: 'TYSONTATTOO', zIndex: 11 }, // Virtual layer: ONLY allowed directly under Hannibal Mask, NEVER above Eyes, NEVER below Mouth
+  { name: 'HannibalMask', folder: 'HANNIBALMASK', zIndex: 9 }, // Virtual layer: MUST ALWAYS render OVER Mouth(Base) and Mouth(Item), above TysonTattoo (middle)
+  { name: 'Eyes', folder: 'EYE', zIndex: 10 }, // Renders after Mask and HannibalMask (Eyes overlay all masks), before Head (Head overlays eyes), before Astronaut (Astronaut covers eyes) (highest of the three)
+  { name: 'Astronaut', folder: 'ASTRONAUT', zIndex: 11 }, // Virtual layer: MUST ALWAYS render OVER Eyes, FacialHair, and ALL Mouth(Base) traits
   { name: 'Head', folder: 'HEAD', zIndex: 12 }, // MUST ALWAYS render OVER Eyes and Mask (Head overlays eyes and mask)
 ]
 
@@ -64,6 +65,7 @@ export const UI_LAYER_ORDER = LAYER_ORDER.filter(layer =>
   layer.name !== 'ClothesAddon' && 
   layer.name !== 'HannibalMask' && 
   layer.name !== 'TysonTattoo' &&
+  layer.name !== 'NinjaTurtleUnderMask' &&
   layer.name !== 'Astronaut'
 )
 

@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { Button, FieldRow } from '../ui'
+import { Button } from '../ui'
 import { downloadCanvasAsPNG, copyCanvasToClipboard } from '../../utils/imageUtils'
 
-export default function ExportControls({ canvasRef, selectedLayers = {} }) {
+export default function ExportControls({ canvasRef, selectedLayers = {}, onRandomize }) {
   const [isExporting, setIsExporting] = useState(false)
   const [exportStatus, setExportStatus] = useState('')
 
@@ -61,31 +61,19 @@ export default function ExportControls({ canvasRef, selectedLayers = {} }) {
 
   return (
     <div>
-      <FieldRow>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <Button 
-            onClick={handleDownload} 
-            disabled={isDownloadDisabled}
-            className={`generator-download-btn ${!canDownload ? 'is-disabled' : ''}`}
-            title={
-              !canDownload
-                ? 'Select Base, Mouth (Base), and Clothing to download'
-                : 'Download'
-            }
-          >
-            Download
-          </Button>
-          {!canDownload && (
-            <p style={{ 
-              margin: '0', 
-              fontSize: '9px', 
-              color: '#666',
-              fontStyle: 'italic'
-            }}>
-              Select Base, Mouth (Base), and Clothing before downloading.
-            </p>
-          )}
-        </div>
+      <div className="export-controls-row">
+        <Button 
+          onClick={handleDownload} 
+          disabled={isDownloadDisabled}
+          className={`generator-download-btn ${!canDownload ? 'is-disabled' : ''}`}
+          title={
+            !canDownload
+              ? 'Select Base, Mouth (Base), and Clothing to download'
+              : 'Download'
+          }
+        >
+          Download
+        </Button>
         <Button 
           onClick={handleCopy} 
           disabled={isExporting || !canvasRef.current}
@@ -97,10 +85,25 @@ export default function ExportControls({ canvasRef, selectedLayers = {} }) {
         >
           Mint
         </Button>
-      </FieldRow>
+        {onRandomize && (
+          <Button onClick={onRandomize}>
+            Randomize
+          </Button>
+        )}
+      </div>
+      {!canDownload && (
+        <p style={{ 
+          margin: '4px 0 0 0', 
+          fontSize: '9px', 
+          color: '#666',
+          fontStyle: 'italic'
+        }}>
+          Select Base, Mouth (Base), and Clothing before downloading.
+        </p>
+      )}
       {exportStatus && (
         <p style={{ 
-          margin: '8px 0 0 0', 
+          margin: '4px 0 0 0', 
           fontSize: '10px', 
           color: exportStatus.includes('Error') ? '#c00' : '#008000' 
         }}>

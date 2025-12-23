@@ -434,6 +434,10 @@ export function WindowProvider({ children }) {
    * @param {string} windowId - Unique identifier for the window to minimize
    */
   const minimizeWindow = useCallback((windowId) => {
+    // Backward compatibility: map old wojak-creator to wojak-generator
+    if (windowId === 'wojak-creator') {
+      windowId = 'wojak-generator'
+    }
     if (!windowId) {
       if (process.env.NODE_ENV === 'development') {
         console.warn('[WindowContext] minimizeWindow: Invalid windowId provided', windowId)
@@ -467,6 +471,10 @@ export function WindowProvider({ children }) {
    * @param {string} windowId - Unique identifier for the window to bring to front
    */
   const bringToFront = useCallback((windowId) => {
+    // Backward compatibility: map old wojak-creator to wojak-generator
+    if (windowId === 'wojak-creator') {
+      windowId = 'wojak-generator'
+    }
     // Mobile-only: Auto-minimize other windows when bringing one to front
     const isMobile = typeof window !== 'undefined' && window.innerWidth <= 640
     if (isMobile) {
@@ -591,6 +599,10 @@ export function WindowProvider({ children }) {
    * @param {string} windowId - Unique identifier for the window to restore
    */
   const restoreWindow = useCallback((windowId) => {
+    // Backward compatibility: map old wojak-creator to wojak-generator
+    if (windowId === 'wojak-creator') {
+      windowId = 'wojak-generator'
+    }
     // Mobile-only: Auto-minimize other windows when restoring one
     const isMobile = typeof window !== 'undefined' && window.innerWidth <= 640
     if (isMobile) {
@@ -846,11 +858,19 @@ export function WindowProvider({ children }) {
 
   // Check if window is minimized
   const isWindowMinimized = useCallback((windowId) => {
+    // Backward compatibility: map old wojak-creator to wojak-generator
+    if (windowId === 'wojak-creator') {
+      windowId = 'wojak-generator'
+    }
     return minimizedWindows.has(windowId)
   }, [minimizedWindows])
 
   // Check if window is active
   const isWindowActive = useCallback((windowId) => {
+    // Backward compatibility: map old wojak-creator to wojak-generator
+    if (windowId === 'wojak-creator') {
+      windowId = 'wojak-generator'
+    }
     return activeWindowId === windowId
   }, [activeWindowId])
 

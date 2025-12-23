@@ -4,7 +4,7 @@ import { useMarketplace } from '../contexts/MarketplaceContext'
 import { APPS } from '../constants/apps'
 import AppIcon from './ui/AppIcon'
 
-export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCreator, onOpenApp, menuRef, startButtonRef }) {
+export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakGenerator, onOpenApp, menuRef, startButtonRef }) {
   const { getAllWindows, isWindowMinimized, restoreWindow, bringToFront, activeWindowId, isWindowActive } = useWindow()
   const internalMenuRef = useRef(null)
   const resolvedMenuRef = menuRef || internalMenuRef
@@ -83,8 +83,8 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakCre
       case 'callback':
         if (app.open.name === 'open-paint' && onOpenPaint) {
           onOpenPaint()
-        } else if (app.open.name === 'open-wojak-creator' && onOpenWojakCreator) {
-          onOpenWojakCreator()
+        } else if (app.open.name === 'open-wojak-generator' && onOpenWojakGenerator) {
+          onOpenWojakGenerator()
         }
         onClose()
         return

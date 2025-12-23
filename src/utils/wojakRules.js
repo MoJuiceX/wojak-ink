@@ -532,7 +532,7 @@ const RULES = [
   ruleCigJointCohibaRequiresMouthBase, // ✅ Cig/Joint/Cohiba auto-sets MouthBase to Numb if None
   rulePizzaDisablesMouthItem,         // ✅ pizza blocks MouthItem
   ruleBubbleGumDisablesMouthItem,     // ✅ bubble gum blocks MouthItem
-  ruleTysonTattooRequiresHannibalMask, // ✅ Tyson Tattoo requires Hannibal Mask
+  // ruleTysonTattooRequiresHannibalMask, // DISABLED: Tyson Tattoo can now be used without mask
   ruleAstronautDisablesMouthItem,     // ✅ Astronaut disables all MouthItem traits
   ruleAstronautMaskMutualExclusion,   // ✅ Astronaut and Mask are mutually exclusive
   ruleAstronautNoHead,
@@ -630,6 +630,15 @@ export function isLayerDisabled(layerName, selectedLayers) {
  */
 export function getDisabledReason(layerName, selectedLayers) {
   const { reasons } = getDisabledLayers(selectedLayers)
+  
+  // Special handling for MouthItem and FacialHair when mask is selected
+  if ((layerName === 'MouthItem' || layerName === 'FacialHair') && reasons[layerName]) {
+    const maskPath = selectedLayers['Mask']
+    if (maskPath && maskPath !== '' && maskPath !== 'None') {
+      return 'Remove Mask.'
+    }
+  }
+  
   return reasons[layerName] || null
 }
 

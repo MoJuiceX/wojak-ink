@@ -1,3 +1,36 @@
+/* =========================================================
+   WOJAK GENERATOR — REMOVE HEAD/FACE/BODY GROUP BOX BACKGROUNDS
+   Flat list layout (no fieldsets)
+   ========================================================= */
+
+/* Controls panel stays classic Win98 gray */
+#wojak-generator .meme-generator-controls {
+  background: #c0c0c0 !important;
+}
+
+/* Flat list spacing: small padding so controls don't touch edges */
+#wojak-generator .meme-generator-controls .trait-selectors-scroll {
+  padding: 8px 8px 6px 8px !important;
+}
+
+/* Ensure nothing paints a "white card" behind rows */
+#wojak-generator .trait-row,
+#wojak-generator .trait-selector-wrapper,
+#wojak-generator .trait-dot-slot {
+  background: transparent !important;
+}
+
+/* Keep inputs Win98 light gray (not white) */
+#wojak-generator .trait-selector-wrapper .trait-select {
+  background-color: #f2f2f2 !important;
+}
+
+/* If any old fieldset styles remain elsewhere, make them inert in generator */
+#wojak-generator fieldset.win98-group,
+#wojak-generator fieldset.win98-group legend {
+  background: transparent !important;
+}
+
 /* MS Sans Serif Font Faces */
 @font-face {
   font-family: 'MS Sans Serif';
@@ -298,16 +331,203 @@ textarea:focus-visible {
   }
 }
 
-/* ============================================
-   TRAIT SELECTOR FOCUS INDICATORS
-   ============================================ */
+/* =========================================================
+   WOJAK GENERATOR — WIN98 DENSITY + POLISH (CONSOLIDATED)
+   - No UX changes
+   - Remove conflicting duplicates
+   - Establish consistent vertical rhythm + less harsh whites
+   ========================================================= */
 
-/* Visual focus indication for trait selectors (keyboard navigation) */
-.trait-selector-wrapper.trait-focused {
+/* Tokens */
+#wojak-generator {
+  --wg-group-bg: #d4d0c8;
+  --wg-input-bg: #f2f2f2;
+  --wg-input-bg-disabled: #e0e0e0;
+  --wg-label: #222;
+  --wg-label-disabled: 0.6;
+
+  /* focus ring vars must already exist; keep using them */
+}
+
+/* =========================
+   TRAIT ROW + WRAPPER RHYTHM
+   ========================= */
+
+#wojak-generator .trait-row {
+  margin-bottom: 4px !important; /* move dropdowns closer together */
+}
+
+#wojak-generator .trait-selector-wrapper {
+  display: grid !important;
+  grid-template-rows: 12px 14px 22px 20px; /* message, label, select, dot-slot */
+  row-gap: 0 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  margin: -4px 0 0 0 !important; /* Move entire wrapper up more to move label and dropdown together */
+}
+
+/* Label: tighter + slightly darker Win98 read */
+#wojak-generator .trait-selector-wrapper .trait-label {
+  grid-row: 2;
+  display: block;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 10.5px !important;
+  color: #333 !important;
+  height: 14px !important;
+  min-height: 14px !important;
+  max-height: 14px !important;
+  line-height: 14px !important;
+  margin: -6px 0 0 0 !important; /* Move label up to align with dropdown text */
+  padding-left: 4px !important; /* Align label with dropdown text (matches dropdown padding-left) */
+  padding-right: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Disabled reason text - always reserves space to prevent layout shift */
+#wojak-generator .trait-label-reason {
+  min-height: 1em !important;
+  line-height: 1.2 !important;
+}
+
+/* Select wrapper to contain select and disabled message */
+#wojak-generator .trait-selector-wrapper .trait-select-wrapper {
+  grid-row: 3;
+  position: relative;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  margin: -4px 0 0 0 !important; /* Move dropdown up more */
+}
+
+/* Select: consistent height + Win98 light gray */
+#wojak-generator .trait-selector-wrapper .trait-select {
+  display: block;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  height: 22px !important;
+  line-height: 20px !important;
+  padding: 1px 18px 1px 4px !important;
+  background-color: var(--wg-input-bg) !important;
+  color: #000 !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Hide select text when showing disabled message */
+#wojak-generator .trait-selector-wrapper .trait-select.has-disabled-message {
+  color: transparent !important;
+}
+
+/* Disabled message centered inside select */
+#wojak-generator .trait-selector-wrapper .trait-disabled-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  font-size: 10px !important;
+  line-height: 22px !important;
+  color: #555 !important;
+  white-space: nowrap;
+  z-index: 1;
+}
+
+/* Constrain option text width in dropdown popup (limited effectiveness with native selects) */
+#wojak-generator .trait-selector-wrapper .trait-select option {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Disabled select styling - NO geometry changes - height, padding, line-height stay identical */
+#wojak-generator .trait-selector-wrapper .trait-select:disabled {
+  /* NO geometry changes - height, padding, line-height stay identical */
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  height: 22px !important;
+  line-height: 20px !important;
+  padding: 1px 18px 1px 4px !important;
+  background-color: var(--wg-input-bg-disabled) !important;
+  color: #7a7a7a !important;
+  cursor: not-allowed;
+  opacity: 0.5 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* REMOVED: Disabled row compacting that changes layout */
+/* Override any rules that change padding/margins when select:disabled */
+#wojak-generator .trait-row:has(select:disabled) .trait-selector-wrapper {
+  padding: 0 !important;
+  margin: -4px 0 0 0 !important; /* Maintain same margin as enabled state */
+}
+
+/* Ensure select wrapper maintains position when disabled */
+#wojak-generator .trait-row:has(select:disabled) .trait-selector-wrapper .trait-select-wrapper {
+  margin: -4px 0 0 0 !important; /* Maintain same margin as enabled state */
+}
+
+#wojak-generator .trait-row:has(select:disabled) .trait-label {
+  opacity: var(--wg-label-disabled) !important;
+  margin: -6px 0 0 0 !important; /* Maintain same margin as enabled state */
+  padding-left: 4px !important; /* Maintain same padding as enabled state */
+  padding-right: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  height: 14px !important; /* maintain fixed height */
+  line-height: 14px !important;
+  box-sizing: border-box !important;
+}
+
+/* =========================
+   DOT SLOT (RESERVED SPACE)
+   ========================= */
+
+/* Keep reserved area to prevent layout shift, but slightly tighter */
+#wojak-generator .trait-dot-slot {
+  grid-row: 4;
+  height: 20px !important;
+  min-height: 20px !important;
+  max-height: 20px !important;
+  display: flex;
+  align-items: center;
+  margin: 0 !important; /* remove margin-top: 3px */
+  padding-left: 6px !important;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+/* Ensure variant pickers don't add extra margins */
+#wojak-generator .trait-dot-slot .suit-variant-picker,
+#wojak-generator .trait-dot-slot .color-variant-picker {
+  margin: 0 !important;
+}
+
+/* =========================
+   FOCUS INDICATOR (WRAPPER)
+   ========================= */
+
+#wojak-generator .trait-selector-wrapper.trait-focused {
   position: relative;
 }
 
-.trait-selector-wrapper.trait-focused::before {
+#wojak-generator .trait-selector-wrapper.trait-focused::before {
   content: '';
   position: absolute;
   top: calc(-1 * var(--focus-outline-offset));
@@ -318,6 +538,210 @@ textarea:focus-visible {
   border-radius: 2px;
   pointer-events: none;
   z-index: 1;
+}
+
+/* =========================
+   COLOR DOTS (GENERIC)
+   ========================= */
+
+#wojak-generator .color-variant-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+
+#wojak-generator .color-variant-picker .color-dots,
+#wojak-generator .suit-variant-picker .color-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#wojak-generator .color-variant-picker .color-dot,
+#wojak-generator .suit-variant-picker .color-dot {
+  width: 15px !important;
+  height: 15px !important;
+  min-width: 15px !important;
+  max-width: 15px !important;
+  min-height: 15px !important;
+  max-height: 15px !important;
+  border-radius: 9999px !important;
+
+  flex: 0 0 15px !important;
+  display: inline-block !important;
+
+  background-color: var(--dot-color, #000) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+
+  appearance: none !important;
+  -webkit-appearance: none !important;
+
+  border: 1px inset #c0c0c0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  line-height: 0 !important;
+  cursor: pointer;
+}
+
+#wojak-generator .color-variant-picker .color-dot:focus,
+#wojak-generator .suit-variant-picker .color-dot:focus {
+  outline: 1px dotted #000 !important;
+  outline-offset: 1px !important;
+}
+
+/* Tone down modern-feeling animation */
+#wojak-generator .color-variant-picker .color-dot:hover:not(:disabled),
+#wojak-generator .suit-variant-picker .color-dot:hover:not(:disabled) {
+  transform: scale(1.05) !important; /* was 1.1 */
+}
+
+#wojak-generator .color-variant-picker .color-dot:active:not(:disabled),
+#wojak-generator .suit-variant-picker .color-dot:active:not(:disabled) {
+  transform: scale(0.97) !important; /* was 0.95 */
+}
+
+#wojak-generator .color-variant-picker .color-dot.active,
+#wojak-generator .suit-variant-picker .color-dot.active {
+  border: 2px solid #000 !important;
+}
+
+#wojak-generator .color-variant-picker .color-dot:disabled,
+#wojak-generator .suit-variant-picker .color-dot:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Optional: mute color dots when McD is active */
+#wojak-generator .color-dots.is-muted .color-dot {
+  opacity: 0.45;
+}
+
+/* =========================
+   SUIT VARIANT PICKER
+   ========================= */
+
+#wojak-generator .suit-variant-picker {
+  font-size: 11px;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+#wojak-generator .suit-variant-picker .suit-variant-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+#wojak-generator .suit-variant-picker .type-toggle {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+#wojak-generator .suit-variant-picker .type-toggle-button {
+  font-family: "MS Sans Serif", sans-serif;
+  font-size: 10px;
+  padding: 2px 6px;
+  min-width: 32px;
+  height: 18px;
+  border: 1px solid #000;
+  background: #c0c0c0;
+  cursor: pointer;
+  font-weight: normal;
+  text-align: center;
+  box-shadow: inset -1px -1px 0 0 #000, inset 1px 1px 0 0 #fff;
+}
+
+#wojak-generator .suit-variant-picker .type-toggle-button:hover:not(:disabled) {
+  background: #d4d0c8;
+}
+
+#wojak-generator .suit-variant-picker .type-toggle-button:active:not(:disabled) {
+  box-shadow: inset 1px 1px 0 0 #000, inset -1px -1px 0 0 #fff;
+}
+
+#wojak-generator .suit-variant-picker .type-toggle-button.active {
+  background: #808080;
+  color: #fff;
+  box-shadow: inset 1px 1px 0 0 #000, inset -1px -1px 0 0 #fff;
+}
+
+#wojak-generator .suit-variant-picker .type-toggle-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#wojak-generator .suit-variant-picker .type-toggle-button:focus {
+  outline: 1px dotted #000;
+  outline-offset: 1px;
+}
+
+/* =========================
+   CAP MCD ICON BUTTON
+   ========================= */
+
+#wojak-generator .cap-mcd-button {
+  width: 15px !important;
+  height: 15px !important;
+  min-width: 15px !important;
+  max-width: 15px !important;
+  min-height: 15px !important;
+  max-height: 15px !important;
+
+  padding: 0 !important;
+  margin-left: 6px;
+
+  background: transparent !important;
+  border: 1px inset #c0c0c0 !important;
+
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: none !important;
+}
+
+#wojak-generator .cap-mcd-button img {
+  width: 13px;
+  height: 13px;
+  display: block;
+  image-rendering: pixelated;
+  object-fit: contain;
+}
+
+#wojak-generator .cap-mcd-button:hover:not(:disabled) {
+  transform: scale(1.05) !important; /* toned down */
+}
+
+#wojak-generator .cap-mcd-button:active:not(:disabled) {
+  transform: scale(0.97) !important;
+}
+
+#wojak-generator .cap-mcd-button.active {
+  border: 2px solid #000 !important;
+}
+
+#wojak-generator .cap-mcd-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#wojak-generator .cap-mcd-button:focus {
+  outline: 1px dotted #000;
+  outline-offset: 1px;
 }
 
 /* Focused trait select element */
@@ -646,67 +1070,80 @@ a,
   overflow: hidden;
 }
 
-/* Wojak Creator window needs no padding to prevent bottom cutoff */
-#wojak-creator .window-body {
+/* =========================
+   WINDOW BODY + VIEWPORT
+   ========================= */
+
+#wojak-generator .window-body {
   padding: 0 !important;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Container doesn't scroll, inner content does */
+  overflow: hidden;
   min-height: 0;
-  max-height: calc(90dvh - 60px); /* Use dynamic viewport height, account for title bar */
+  max-height: calc(90dvh - 60px);
   height: auto;
 }
 
-/* Ensure Wojak Creator window stays within viewport */
-.wojak-creator-window {
-  max-height: 90dvh !important; /* Use dynamic viewport height */
+.wojak-generator-window {
+  max-height: 90dvh !important;
 }
 
-/* Wojak Generator: disabled Download button state */
+/* Disabled Download button state */
 .generator-download-btn.is-disabled {
   opacity: 0.5;
   cursor: not-allowed;
   filter: grayscale(1);
 }
 
-.wojak-creator-window .window-body {
-  max-height: calc(90dvh - 60px) !important; /* Use dynamic viewport height, title bar is ~60px */
-}
+/* =========================
+   DESKTOP LAYOUT + GROUP BOXES
+   ========================= */
 
-/* Desktop Layout: Two-panel layout with max-width constraints */
 @media (min-width: 1025px) {
   .meme-generator-desktop {
     display: flex !important;
     flex-direction: row !important;
-    gap: var(--spacing-xl) !important; /* 24px on desktop */
+    gap: 16px !important; /* was 24px */
     align-items: flex-start !important;
     flex-wrap: nowrap !important;
-    padding: var(--spacing-lg) !important; /* 20px on desktop */
+    padding: 16px !important; /* was ~20px */
     min-height: 0 !important;
     overflow: hidden !important;
+    flex: 1 1 auto !important;
   }
 
-  /* Left panel: Controls (Trait Selectors) */
   .meme-generator-controls {
     flex: 0 0 var(--wojak-controls-panel-width) !important;
-    min-width: 300px !important;
+    min-width: 150px !important;
     max-width: var(--wojak-controls-panel-max-width) !important;
     flex-shrink: 0 !important;
     display: flex !important;
     flex-direction: column !important;
+    min-height: 0 !important;
     overflow: hidden !important;
     outline: none !important;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  #wojak-generator .meme-generator-controls fieldset.win98-group:first-child {
+    margin-top: 0 !important;
   }
 
   .trait-selectors-scroll {
-    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    flex: 1 1 auto !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
     min-height: 0 !important;
-    padding-right: var(--spacing-sm) !important; /* Space for scrollbar */
+    padding-right: 10px !important;
+    gap: 0px !important;
+    padding-top: 0 !important;
+    padding-bottom: 6px !important;
   }
 
-  /* Right panel: Generator Preview */
   .meme-generator-preview {
     flex: 0 0 var(--wojak-preview-panel-width) !important;
     min-width: 400px !important;
@@ -715,34 +1152,264 @@ a,
     display: flex !important;
     flex-direction: column !important;
     align-items: flex-start !important;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
   }
 
   .panel-label {
-    margin: 0 0 var(--spacing-md) 0 !important;
-    font-size: 11px !important;
-    font-weight: bold !important;
-    flex-shrink: 0 !important;
+    display: none !important;
   }
 
-  .export-controls-wrapper {
-    margin-top: var(--spacing-md) !important;
+  /* Win98 Group Boxes (tighter) */
+  #wojak-generator .win98-group {
+    border: 1px inset #c0c0c0;
+    margin: 6px 0 !important;                 /* was 8px */
+    padding: 5px 4px 3px 4px !important;      /* tighter */
+    background: var(--wg-group-bg) !important;
+  }
+
+  #wojak-generator .win98-group legend {
+    font-size: 10px;
+    font-weight: normal;
+    color: #000;
+    padding: 0 4px;
+    font-family: "MS Sans Serif", sans-serif;
+    margin-bottom: 1px !important;
+    background: var(--wg-group-bg) !important;
+  }
+
+  #wojak-generator .win98-group .trait-selector-wrapper,
+  #wojak-generator .win98-group .trait-row {
+    background: transparent !important;
+  }
+
+  /* FACE group: reduce bottom padding for vertical balance */
+  #wojak-generator .meme-generator-controls .trait-selectors-scroll fieldset.win98-group:nth-of-type(2) {
+    padding-bottom: 2px !important; /* was 3px in parent rule */
+  }
+
+  /* Preview Canvas Wrapper (remove harsh white) */
+  #wojak-generator .meme-generator-preview-canvas-wrapper {
+    border: 2px inset #c0c0c0;
+    background: #e6e6e6 !important; /* was #ffffff */
+    padding: 2px;
+    display: inline-block;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* Export controls row stays identical */
+  #wojak-generator .export-controls-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: nowrap;
+    width: 100%;
+  }
+
+  #wojak-generator .export-controls-row button {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 22px;
+    white-space: nowrap;
+  }
+
+  #wojak-generator .export-controls-row button:disabled {
+    opacity: 0.5;
+    color: #808080;
+    cursor: not-allowed;
+    border: 1px inset #c0c0c0;
+  }
+
+  #wojak-generator .wojak-generator-status-bar {
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+    padding: 4px 8px !important;
+    background-color: #f0f0f0 !important;
+    border-top: 1px inset #c0c0c0 !important;
+    font-size: 10px !important;
+    line-height: 1.3 !important;
+    color: #000 !important;
     width: 100% !important;
-  }
-
-  /* Ensure clean snapping - no overlap */
-  .meme-generator-desktop > * {
     box-sizing: border-box !important;
+    font-family: "MS Sans Serif", sans-serif !important;
   }
 }
 
-/* Mobile: Fullscreen canvas-first layout */
-.wojak-creator-mobile {
+/* =========================================================
+   WOJAK GENERATOR — FIX SUIT WIDTH SHIFT + WIN98 SURFACES + EXPORT ROW
+   Paste at END of generator CSS so it overrides earlier rules.
+   ========================================================= */
+
+/* A) Win98 surface cleanup: remove "white islands" inside group boxes */
+#wojak-generator .meme-generator-controls {
+  background: #c0c0c0 !important; /* classic panel gray */
+}
+
+/* PROOF: Browser default fieldset background (#fff) was overriding variable.
+   Fix: Explicit background-color with !important on both fieldset and legend.
+   Also set immediate children to transparent so group bg shows through. */
+#wojak-generator fieldset.win98-group {
+  background: var(--wg-group-bg) !important;
+}
+
+#wojak-generator fieldset.win98-group legend {
+  background: var(--wg-group-bg) !important;
+}
+
+/* Ensure fieldset content area doesn't have white background bleeding through */
+#wojak-generator fieldset.win98-group > *:not(legend) {
+  background-color: transparent !important;
+}
+
+/* Scoped surface enforcement: prevent white bleed from inner wrappers */
+#wojak-generator fieldset.win98-group .trait-row,
+#wojak-generator fieldset.win98-group .trait-selector-wrapper,
+#wojak-generator fieldset.win98-group .trait-dot-slot,
+#wojak-generator .trait-selectors-scroll {
+  background-color: transparent !important;
+}
+
+/* Keep selects as light gray edit fields (not pure white) */
+#wojak-generator .trait-selector-wrapper .trait-select {
+  background-color: #f2f2f2 !important;
+}
+
+/* Fixed message slot to prevent layout shift when blocked info appears */
+#wojak-generator .trait-message-slot {
+  grid-row: 1;
+  height: 12px !important;
+  min-height: 12px !important;
+  max-height: 12px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+#wojak-generator .trait-message-text {
+  font-size: 10px !important;
+  line-height: 12px !important;
+  color: #555 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* B) Prevent Suit variants from widening the window
+   Key: allow flex items to shrink and cap min-content width propagation */
+#wojak-generator .trait-row,
+#wojak-generator .trait-selector-wrapper,
+#wojak-generator .trait-dot-slot,
+#wojak-generator .suit-variant-picker,
+#wojak-generator .suit-variant-picker .suit-variant-row,
+#wojak-generator .suit-variant-picker .color-dots {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+
+/* Suit row: do NOT influence layout width; clip overflow safely WITHOUT resizing window */
+#wojak-generator .trait-dot-slot {
+  overflow: hidden !important;
+}
+
+/* Suit picker: tighter UI so everything fits more often */
+#wojak-generator .suit-variant-picker .type-toggle-button {
+  min-width: 28px !important;   /* was 32 */
+  padding: 2px 5px !important;  /* slightly tighter */
+}
+
+/* Suit picker dots: slightly smaller to prevent overflow on narrow panels */
+#wojak-generator .suit-variant-picker .color-dot {
+  width: 13px !important;
+  height: 13px !important;
+  min-width: 13px !important;
+  max-width: 13px !important;
+  min-height: 13px !important;
+  max-height: 13px !important;
+  flex: 0 0 13px !important;
+}
+
+/* Reduce spacing only for suit dots row */
+#wojak-generator .suit-variant-picker .color-dots {
+  gap: 4px !important;
+}
+
+/* C) Preview + Export controls: fill width, fit Copy to Clipboard, remove right gray dead space */
+@media (min-width: 1025px) {
+  /* Give the preview more room; reduce empty gray on right */
+  .meme-generator-preview {
+    flex: 1 1 auto !important;     /* was fixed basis */
+    min-width: 520px !important;
+  }
+
+  /* Make preview wrapper consume full preview width */
+  #wojak-generator .meme-generator-preview-canvas-wrapper {
+    width: 100% !important;
+    display: block !important;
+  }
+
+  /* Canvas should scale to wrapper width (your MemeCanvas sets explicit width/height; this helps if it renders a canvas element) */
+  #wojak-generator .meme-generator-preview-canvas-wrapper canvas {
+    display: block;
+    max-width: 100%;
+  }
+
+  /* Export controls row must match preview width and keep text inside */
+  #wojak-generator .export-controls-wrapper,
+  #wojak-generator .export-controls-preview,
+  #wojak-generator .export-controls-row {
+    width: 100% !important;
+  }
+
+  /* Make buttons wide enough + keep label inside button */
+  #wojak-generator .export-controls-row button {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    padding: 2px 6px !important;
+    font-size: 11px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important; /* safety, should not trigger after preview resize */
+    white-space: nowrap !important;
+  }
+}
+
+/* FINAL GUARD: prevent mask selections from widening any dropdown */
+#wojak-generator .trait-row,
+#wojak-generator .trait-selector-wrapper,
+#wojak-generator .meme-generator-controls,
+#wojak-generator .trait-selectors-scroll {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+
+#wojak-generator .trait-selector-wrapper {
+  width: 100% !important;
+  overflow: hidden; /* stop intrinsic sizing leaks from message slot/variant UI */
+}
+
+#wojak-generator .trait-selector-wrapper .trait-select {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+
+/* =========================
+   MOBILE (UNCHANGED)
+   ========================= */
+
+.wojak-generator-mobile {
   border: none !important;
   box-shadow: none !important;
   max-height: 100dvh !important;
 }
 
-.wojak-creator-mobile .window-body {
+.wojak-generator-mobile .window-body {
   padding: 0 !important;
   margin: 0 !important;
   height: 100% !important;

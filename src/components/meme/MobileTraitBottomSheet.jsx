@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { UI_LAYER_ORDER } from '../../lib/memeLayers'
 import { getAllLayerImages } from '../../lib/memeImageManifest'
@@ -7,6 +7,9 @@ import ExportControls from './ExportControls'
 import { useGlobalKeyboard } from '../../hooks/useGlobalKeyboard'
 import { useKeyboardHandler, KEYBOARD_PRIORITY } from '../../contexts/KeyboardPriorityContext'
 import './MobileTraitBottomSheet.css'
+
+// Custom order for generator dropdowns (matches desktop generator)
+const GENERATOR_LAYER_ORDER = ['Head','Eyes','Base','MouthBase','MouthItem','FacialHair','Mask','Clothes','Background']
 
 /**
  * Mobile bottom sheet for trait controls
@@ -116,8 +119,24 @@ export default function MobileTraitBottomSheet({
 
   const traitSummary = getTraitSummary()
 
+  // Build reordered layer array for generator UI (matches desktop generator)
+  const generatorLayerOrder = useMemo(() => {
+    // Create a map of layer name to layer object from UI_LAYER_ORDER
+    const layerMap = new Map(UI_LAYER_ORDER.map(layer => [layer.name, layer]))
+    
+    // Build ordered array based on GENERATOR_LAYER_ORDER
+    const ordered = GENERATOR_LAYER_ORDER
+      .map(name => layerMap.get(name))
+      .filter(Boolean) // Filter out any missing ones (defensive)
+    
+    // Append any remaining UI_LAYER_ORDER layers not in GENERATOR_LAYER_ORDER at the end (optional safety)
+    const remaining = UI_LAYER_ORDER.filter(layer => !GENERATOR_LAYER_ORDER.includes(layer.name))
+    
+    return [...ordered, ...remaining]
+  }, [])
+
   // Filter layers by search query
-  const filteredLayers = UI_LAYER_ORDER.filter(layer => {
+  const filteredLayers = generatorLayerOrder.filter(layer => {
     if (!searchQuery) return true
     const query = searchQuery.toLowerCase()
     return layer.name.toLowerCase().includes(query)
@@ -583,6 +602,7 @@ export default function MobileTraitBottomSheet({
                     selectedValue={selectedLayers[layer.name]}
                     disabled={disabledLayers.includes(layer.name)}
                     selectedLayers={selectedLayers}
+                    disableTooltip={true}
                   />
                 </div>
               ))

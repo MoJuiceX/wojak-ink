@@ -39,14 +39,14 @@ export const APPS = {
     label: 'Paint',
     icon: { type: 'img', src: '/icon/paint_file-0.png' },
     group: 'MAIN',
-    open: { type: 'callback', name: 'open-paint' },
+    open: { type: 'window', windowId: 'paint' },
   },
   WOJAK_GENERATOR: {
     id: 'WOJAK_GENERATOR',
     label: 'Wojak Generator.exe',
     icon: { type: 'img', src: '/assets/logo.png' },
     group: 'MAIN',
-    open: { type: 'callback', name: 'open-wojak-creator' },
+    open: { type: 'window', windowId: 'wojak-generator' },
   },
   FAQ: {
     id: 'FAQ',
@@ -95,7 +95,7 @@ export const APPS = {
     label: 'Crate.ink',
     icon: { type: 'img', src: '/assets/images/cratelogo.png' },
     group: 'LINKS',
-    open: { type: 'external', href: 'https://wojakfarmersplot.crate.ink/#/' },
+    open: { type: 'external', href: 'https://crate.ink/#/collection-detail/WOJAKFARMERSPLOT' },
   },
   FOLLOW_UPDATES: {
     id: 'FOLLOW_UPDATES',

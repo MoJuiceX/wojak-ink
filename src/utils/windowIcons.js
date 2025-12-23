@@ -13,7 +13,7 @@ const windowIconMap = {
   'window-marketplace': 'briefcase-0',
   'window-tanggang': 'application_hourglass-0',
   'tanggang': 'application_hourglass-0', // TangGang window uses explicit ID
-  'window-wojak-creator': 'paint_file-0',
+  'window-wojak-generator': 'paint_file-0',
   'window-notify-me': 'msg_information-0',
   'window-admin-panel': 'settings_gear-0',
   'pinball-window': 'pinball_ball-0',
@@ -31,7 +31,7 @@ const titleIconMap = {
   'FAQ': 'help_question_mark-0',
   'MARKETPLACE': 'briefcase-0',
   'TangGang': 'application_hourglass-0',
-  'WOJAK_CREATOR.EXE': 'paint_file-0',
+  'WOJAK_GENERATOR.EXE': 'paint_file-0',
   'NOTIFY_ME': 'msg_information-0',
   'ADMIN PANEL': 'settings_gear-0',
   'Paint': 'paint_file-0',
@@ -100,7 +100,7 @@ export function getStartMenuIcon(action) {
     'scroll-to-marketplace': 'briefcase-0',
     'open-paint': 'paint_file-0',
     'open-tanggang': 'application_hourglass-0',
-    'wojak-creator': 'paint_file-0',
+    'wojak-generator': 'paint_file-0',
     'open-pinball': 'pinball_ball-0',
     'open-solitaire': 'game_solitaire-0',
     'open-minesweeper': 'game_mine_1-0',
@@ -117,8 +117,8 @@ export function getStartMenuIcon(action) {
     return '/assets/images/ski.png'
   }
   
-  // Special case: Wojak Creator uses website logo/favicon
-  if (action === 'wojak-creator') {
+  // Special case: Wojak Generator uses website logo/favicon
+  if (action === 'wojak-generator') {
     return '/assets/logo.png'
   }
   

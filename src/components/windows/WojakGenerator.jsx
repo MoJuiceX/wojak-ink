@@ -1,52 +1,35 @@
 import Window from './Window'
 import { useMemeGenerator } from '../../hooks/useMemeGenerator'
 import { UI_LAYER_ORDER } from '../../lib/memeLayers'
-import { getAllLayerImages } from '../../lib/memeImageManifest'
 import MemeCanvas from '../meme/MemeCanvas'
 import LayerSelector from '../meme/LayerSelector'
 import ExportControls from '../meme/ExportControls'
 import MobileTraitBottomSheet from '../meme/MobileTraitBottomSheet'
 import { useTraitPanelFocus } from '../../hooks/useGlobalKeyboard'
 import { useGlobalKeyboardNavigation, useTraitListNavigation } from '../../hooks/useGlobalKeyboardNavigation'
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 
-export default function WojakCreator({ onClose }) {
+// Custom order for generator dropdowns (different from render order)
+const GENERATOR_LAYER_ORDER = ['Head','Eyes','Base','MouthBase','MouthItem','FacialHair','Mask','Clothes','Background']
+
+export default function WojakGenerator({ onClose }) {
   const {
     selectedLayers,
     selectLayer,
     canvasRef,
-    disabledLayers
+    disabledLayers,
+    randomizeAllLayers
   } = useMemeGenerator()
   
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 640)
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false)
   const traitPanelRef = useRef(null)
+  const didCenterRef = useRef(false)
 
-  // Randomize all traits function
+  // Use generator hook's randomize to avoid divergent logic.
   const handleRandomize = useCallback(() => {
-    UI_LAYER_ORDER.forEach(layer => {
-      // Skip disabled layers
-      if (disabledLayers.includes(layer.name)) {
-        return
-      }
-
-      const images = getAllLayerImages(layer.name)
-      if (images.length > 0) {
-        // Filter out "None" and invalid options
-        const validImages = images.filter(img => 
-          img.path && 
-          !img.path.toLowerCase().includes('none') &&
-          !img.displayName.toLowerCase().includes('none') &&
-          img.path.trim() !== ''
-        )
-        
-        if (validImages.length > 0) {
-          const randomImage = validImages[Math.floor(Math.random() * validImages.length)]
-          selectLayer(layer.name, randomImage.path)
-        }
-      }
-    })
-  }, [selectLayer, disabledLayers])
+    randomizeAllLayers()
+  }, [randomizeAllLayers])
   
   // Detect mobile viewport
   useEffect(() => {
@@ -71,6 +54,22 @@ export default function WojakCreator({ onClose }) {
 
   // Trait list navigation
   const traitNavigation = useTraitListNavigation()
+
+  // Build reordered layer array for generator UI
+  const generatorLayerOrder = useMemo(() => {
+    // Create a map of layer name to layer object from UI_LAYER_ORDER
+    const layerMap = new Map(UI_LAYER_ORDER.map(layer => [layer.name, layer]))
+    
+    // Build ordered array based on GENERATOR_LAYER_ORDER
+    const ordered = GENERATOR_LAYER_ORDER
+      .map(name => layerMap.get(name))
+      .filter(Boolean) // Filter out any missing ones (defensive)
+    
+    // Append any remaining UI_LAYER_ORDER layers not in GENERATOR_LAYER_ORDER at the end (optional safety)
+    const remaining = UI_LAYER_ORDER.filter(layer => !GENERATOR_LAYER_ORDER.includes(layer.name))
+    
+    return [...ordered, ...remaining]
+  }, [])
 
   // Global keyboard navigation
   useGlobalKeyboardNavigation({
@@ -97,9 +96,11 @@ export default function WojakCreator({ onClose }) {
 
   // Calculate centered position for initial render
   const getCenteredPosition = () => {
-    // Desktop: wider window (1200px), mobile/tablet: narrower
+    // This is only for initial inline style; real centering happens after mount.
+    // Keep conservative defaults to avoid off-screen flash.
+    // Desktop: use conservative default (920px) for initial positioning only
     const isDesktop = window.innerWidth >= 1025
-    const windowWidth = isDesktop ? Math.min(1200, window.innerWidth - 40) : Math.min(1000, window.innerWidth - 40)
+    const windowWidth = isDesktop ? Math.min(920, window.innerWidth - 40) : Math.min(1000, window.innerWidth - 40)
     const windowHeight = Math.min(800, window.innerHeight - 100)
     const left = Math.max(20, (window.innerWidth - windowWidth) / 2)
     const top = Math.max(20, (window.innerHeight - windowHeight) / 2)
@@ -108,25 +109,35 @@ export default function WojakCreator({ onClose }) {
 
   const centeredPos = getCenteredPosition()
 
-  // Center window after mount (fallback in case initial style doesn't apply)
+  // Center window after mount (measure actual DOM dimensions and center based on that)
+  // Only once per open to avoid fighting user dragging.
   useEffect(() => {
-    const win = document.getElementById('wojak-creator')
-    if (!win) return
+    if (didCenterRef.current) return
 
-    const rect = win.getBoundingClientRect()
-    const currentLeft = rect.left
-    const currentTop = rect.top
-    
-    // Only center if window is at default position (top-left corner)
-    if (currentLeft <= 40 && currentTop <= 40) {
-      const windowWidth = rect.width || Math.min(1000, window.innerWidth - 40)
-      const windowHeight = rect.height || Math.min(800, window.innerHeight - 100)
-      const left = Math.max(20, (window.innerWidth - windowWidth) / 2)
-      const top = Math.max(20, (window.innerHeight - windowHeight) / 2)
-      
-      win.style.left = `${Math.round(left)}px`
-      win.style.top = `${Math.round(top)}px`
-    }
+    const el = document.getElementById('wojak-generator')
+    if (!el) return
+
+    // Defer 1 frame so Window has applied layout + fonts
+    const raf = requestAnimationFrame(() => {
+      const rect = el.getBoundingClientRect()
+      if (!rect.width || !rect.height) return
+
+      const left = Math.max(20, (window.innerWidth - rect.width) / 2)
+      const top = Math.max(20, (window.innerHeight - rect.height) / 2)
+
+      // Only auto-center if the element is still near the inline initial position.
+      // If user already dragged it, don't override.
+      const deltaX = Math.abs(rect.left - centeredPos.left)
+      const deltaY = Math.abs(rect.top - centeredPos.top)
+      const userLikelyMoved = deltaX > 8 || deltaY > 8
+      if (userLikelyMoved) return
+
+      el.style.left = `${Math.round(left)}px`
+      el.style.top = `${Math.round(top)}px`
+      didCenterRef.current = true
+    })
+
+    return () => cancelAnimationFrame(raf)
   }, [])
 
   // Mobile-first layout: Canvas fills screen, controls in bottom sheet
@@ -134,8 +145,8 @@ export default function WojakCreator({ onClose }) {
     return (
       <>
         <Window
-          id="wojak-creator"
-          title="WOJAK_CREATOR.EXE"
+          id="wojak-generator"
+          title="WOJAK_GENERATOR.EXE"
           noStack={true}
           onClose={onClose}
           style={{ 
@@ -148,7 +159,7 @@ export default function WojakCreator({ onClose }) {
             position: 'fixed',
             zIndex: 10000,
           }}
-          className="wojak-creator-window wojak-creator-mobile"
+          className="wojak-generator-window wojak-generator-mobile"
         >
           {/* Mobile: Canvas fills screen */}
           <div className="meme-generator-mobile" style={{ 
@@ -160,13 +171,6 @@ export default function WojakCreator({ onClose }) {
             padding: 0,
             margin: 0,
           }}>
-            {/* Minimal header area (just title bar) */}
-            <div style={{ 
-              flexShrink: 0,
-              height: 'var(--window-title-bar-height)',
-              minHeight: 'var(--window-title-bar-height)',
-            }} />
-            
             {/* Canvas fills remaining space */}
             <div style={{ 
               flex: 1,
@@ -205,12 +209,13 @@ export default function WojakCreator({ onClose }) {
   // Desktop layout: Side-by-side canvas and controls
   return (
     <Window
-      id="wojak-creator"
-      title="WOJAK_CREATOR.EXE"
+      id="wojak-generator"
+      title="WOJAK_GENERATOR.EXE"
       noStack={true}
       onClose={onClose}
       style={{ 
-        width: '1200px',
+        width: '920px',
+        minWidth: 0,
         height: 'auto',
         maxWidth: 'calc(100vw - 40px)',
         maxHeight: '90dvh',
@@ -218,7 +223,7 @@ export default function WojakCreator({ onClose }) {
         top: `${centeredPos.top}px`,
         position: 'absolute',
       }}
-      className="wojak-creator-window"
+      className="wojak-generator-window"
     >
       <div className="meme-generator-container meme-generator-desktop">
         {/* Left side: Controls (Trait Selectors) */}
@@ -227,49 +232,46 @@ export default function WojakCreator({ onClose }) {
           ref={combinedPanelRef}
           tabIndex={-1}
         >
-          <p className="panel-label">Select Layers:</p>
           <div className="trait-selectors-scroll">
-            {UI_LAYER_ORDER.map((layer, index) => (
-              <LayerSelector
-                key={layer.name}
-                layerName={layer.name}
-                onSelect={selectLayer}
-                selectedValue={selectedLayers[layer.name]}
-                disabled={disabledLayers.includes(layer.name)}
-                selectedLayers={selectedLayers}
-                navigation={traitNavigation}
-                traitIndex={index}
-              />
-            ))}
+            {/* Flat list (no HEAD/FACE/BODY categories) */}
+            {generatorLayerOrder.map((layer) => {
+              const originalIndex = generatorLayerOrder.findIndex(l => l.name === layer.name)
+              const hasVariants = layer.name === 'Head' || layer.name === 'Eyes' || layer.name === 'Clothes'
+
+              return (
+                <div
+                  key={layer.name}
+                  className={`trait-row ${hasVariants ? 'has-variants' : ''}`}
+                >
+                  <LayerSelector
+                    layerName={layer.name}
+                    onSelect={selectLayer}
+                    selectedValue={selectedLayers[layer.name]}
+                    disabled={disabledLayers.includes(layer.name)}
+                    selectedLayers={selectedLayers}
+                    navigation={traitNavigation}
+                    traitIndex={originalIndex}
+                    disableTooltip={true}
+                  />
+                </div>
+              )
+            })}
           </div>
         </div>
 
         {/* Right side: Generator Preview */}
         <div className="meme-generator-preview">
-          <p className="panel-label">Meme Preview:</p>
-          <MemeCanvas canvasRef={canvasRef} width={400} height={400} />
-          <div className="export-controls-wrapper">
-            <ExportControls canvasRef={canvasRef} selectedLayers={selectedLayers} />
+          <div className="meme-generator-preview-canvas-wrapper">
+            <MemeCanvas canvasRef={canvasRef} width={560} height={560} />
+          </div>
+          <div className="export-controls-wrapper export-controls-preview">
+            <ExportControls canvasRef={canvasRef} selectedLayers={selectedLayers} onRandomize={randomizeAllLayers} />
           </div>
         </div>
       </div>
 
-      <div style={{ 
-        margin: '0',
-        padding: '6px 12px 12px 12px',
-        backgroundColor: '#f0f0f0', 
-        borderTop: '1px inset #c0c0c0',
-        fontSize: '11px',
-        lineHeight: '1.4',
-        flexShrink: 0
-      }}>
-        <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', fontSize: '12px' }}>
-          Custom Wojak Minting Coming Soon
-        </p>
-        <p style={{ margin: '0', color: '#000000' }}>
-          Create your custom Wojak meme by selecting layers. Export as PNG or copy to clipboard. 
-          <strong> Custom Wojak NFT will be available after the initial collection mints out.</strong> Some proceeds from custom Wojak mints will be reinvested back into the collection to support the community.
-        </p>
+      <div className="wojak-generator-status-bar">
+        Custom Wojak Minting Coming Soon — Create your custom Wojak meme by selecting layers. Export as PNG or copy to clipboard.
       </div>
     </Window>
   )

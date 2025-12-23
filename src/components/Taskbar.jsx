@@ -6,7 +6,7 @@ import { useWindow } from '../contexts/WindowContext'
 import { useMarketplace } from '../contexts/MarketplaceContext'
 import { getWindowIcon } from '../utils/windowIcons'
 
-export default function Taskbar({ onOpenWojakCreator, wojakCreatorOpen, onOpenApp }) {
+export default function Taskbar({ onOpenWojakGenerator, wojakGeneratorOpen, onOpenApp }) {
   const [startMenuOpen, setStartMenuOpen] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
   const { getAllWindows, isWindowMinimized, restoreWindow, bringToFront, isWindowActive, minimizeWindow } = useWindow()
@@ -200,23 +200,23 @@ export default function Taskbar({ onOpenWojakCreator, wojakCreatorOpen, onOpenAp
 
   const allWindows = getAllWindows()
   
-  // Check if Wojak Creator window is open and active
-  const wojakCreatorWindow = allWindows.find(w => w.id === 'wojak-creator')
-  const isWojakCreatorActive = wojakCreatorWindow ? isWindowActive('wojak-creator') : false
-  const isWojakCreatorMinimized = wojakCreatorWindow ? isWindowMinimized('wojak-creator') : false
+  // Check if Wojak Generator window is open and active
+  const wojakGeneratorWindow = allWindows.find(w => w.id === 'wojak-generator')
+  const isWojakGeneratorActive = wojakGeneratorWindow ? isWindowActive('wojak-generator') : false
+  const isWojakGeneratorMinimized = wojakGeneratorWindow ? isWindowMinimized('wojak-generator') : false
   
   const handleWojakGeneratorClick = () => {
-    if (wojakCreatorWindow) {
+    if (wojakGeneratorWindow) {
       // Window exists - restore or bring to front
-      if (isWojakCreatorMinimized) {
-        restoreWindow('wojak-creator')
+      if (isWojakGeneratorMinimized) {
+        restoreWindow('wojak-generator')
       } else {
-        bringToFront('wojak-creator')
+        bringToFront('wojak-generator')
       }
     } else {
       // Window doesn't exist - open it
-      if (onOpenWojakCreator) {
-        onOpenWojakCreator()
+      if (onOpenWojakGenerator) {
+        onOpenWojakGenerator()
       }
     }
     setStartMenuOpen(false)
@@ -306,7 +306,7 @@ export default function Taskbar({ onOpenWojakCreator, wojakCreatorOpen, onOpenAp
           window.dispatchEvent(new CustomEvent('openPaintWindow'))
           setStartMenuOpen(false)
         }}
-        onOpenWojakCreator={onOpenWojakCreator}
+        onOpenWojakGenerator={onOpenWojakGenerator}
         onOpenApp={onOpenApp}
         menuRef={startMenuRef}
         startButtonRef={startButtonRef}

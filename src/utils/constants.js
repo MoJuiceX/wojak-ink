@@ -1,4 +1,4 @@
-export const WOJAK_CREATOR_BASE_PATH = '/wojak-creator'
+export const WOJAK_GENERATOR_BASE_PATH = '/wojak-creator'
 
 export const LAYER_FOLDERS = {
   Background: 'BACKGROUND',

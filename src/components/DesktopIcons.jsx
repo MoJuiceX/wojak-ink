@@ -13,7 +13,7 @@ export default function DesktopIcons({ onOpenApp }) {
         return
 
       case 'callback':
-        // Desktop doesn't support callbacks (Paint, Wojak Creator)
+        // Desktop doesn't support callbacks (Paint, Wojak Generator)
         // These are handled via Start Menu only
         console.warn('Callback actions not supported on desktop:', app.open.name)
         return

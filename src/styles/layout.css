@@ -175,8 +175,8 @@
   --panel-start-menu-width: 200px;
   
   /* Wojak Creator panel widths (desktop) */
-  --wojak-controls-panel-width: 400px;
-  --wojak-controls-panel-max-width: 450px;
+  --wojak-controls-panel-width: 200px;
+  --wojak-controls-panel-max-width: 225px;
   --wojak-preview-panel-width: 500px;
   --wojak-preview-panel-max-width: 600px;
     

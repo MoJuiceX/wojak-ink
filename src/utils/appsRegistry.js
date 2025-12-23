@@ -45,12 +45,12 @@ export const APPS = [
     alwaysVisible: true,
   },
   {
-    id: 'wojak-creator',
-    windowId: 'wojak-creator',
+    id: 'wojak-generator',
+    windowId: 'wojak-generator',
     title: 'WOJAK GENERATOR',
-    icon: 'wojak-creator',
-    action: 'open-wojak-creator',
-    requiresState: true, // Requires wojakCreatorOpen state
+    icon: 'wojak-generator',
+    action: 'open-wojak-generator',
+    requiresState: true, // Requires wojakGeneratorOpen state
   },
   {
     id: 'window-tanggang',
