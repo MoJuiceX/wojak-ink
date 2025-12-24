@@ -42,7 +42,7 @@ export default function ImageLibraryPanel({ onImageSelect }) {
 
   return (
     <div style={{ fontFamily: "'MS Sans Serif', sans-serif" }}>
-      <h3 style={{ fontSize: '12px', marginBottom: '8px' }}>Memetic Energy</h3>
+      <h3 className="section-heading" style={{ marginBottom: '8px' }}>Memetic Energy</h3>
       <div className="field-row" style={{ marginBottom: '8px' }}>
         <Select 
           value={selectedCategory} 
@@ -78,7 +78,6 @@ export default function ImageLibraryPanel({ onImageSelect }) {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '9px',
               lineHeight: '1.1',
               textAlign: 'center',
               overflow: 'hidden',
@@ -96,7 +95,7 @@ export default function ImageLibraryPanel({ onImageSelect }) {
           </Button>
         ))}
       </div>
-      <p style={{ fontSize: '10px', marginTop: '8px', color: 'var(--text-2)' }}>
+      <p className="helper-text" style={{ marginTop: '8px', color: 'var(--text-2)' }}>
         Click an image to copy it to your clipboard, then paste into Paint.
       </p>
     </div>

@@ -37,7 +37,7 @@ export default function ThemeQAWindow({ isOpen, onClose }) {
         <div style={{ padding: '16px' }}>
           {/* Theme Toggle */}
           <div style={{ marginBottom: '24px', padding: '12px', border: '1px inset var(--border-dark)', background: 'var(--panel-face)' }}>
-            <h3 style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 'bold', color: 'var(--text-1)' }}>Theme Selector</h3>
+            <h3 className="section-heading" style={{ margin: '0 0 12px 0', fontWeight: 'bold', color: 'var(--text-1)' }}>Theme Selector</h3>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               <button
                 onClick={() => setTheme('classic')}
@@ -79,21 +79,20 @@ export default function ThemeQAWindow({ isOpen, onClose }) {
                 Light
               </button>
             </div>
-            <p style={{ margin: '8px 0 0 0', fontSize: '11px', color: 'var(--text-2)' }}>
+            <p className="helper-text" style={{ margin: '8px 0 0 0', color: 'var(--text-2)' }}>
               Current theme: <strong>{currentTheme}</strong>
             </p>
           </div>
 
           {/* Taskbar Preview */}
           <div style={{ marginBottom: '24px', padding: '12px', border: '1px inset var(--border-dark)', background: 'var(--panel-face)' }}>
-            <h3 style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 'bold', color: 'var(--text-1)' }}>Taskbar Buttons</h3>
+            <h3 className="section-heading" style={{ margin: '0 0 12px 0', fontWeight: 'bold', color: 'var(--text-1)' }}>Taskbar Buttons</h3>
             <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
               <div style={{ 
                 padding: '4px 12px', 
                 border: '1px outset var(--border-light)', 
                 background: 'var(--taskbar-btn-face)', 
                 color: 'var(--taskbar-btn-text)',
-                fontSize: '11px',
                 minWidth: '100px'
               }}>
                 Normal
@@ -103,7 +102,6 @@ export default function ThemeQAWindow({ isOpen, onClose }) {
                 border: '1px outset var(--border-light)', 
                 background: 'var(--taskbar-btn-hover-face)', 
                 color: 'var(--taskbar-btn-hover-text)',
-                fontSize: '11px',
                 minWidth: '100px'
               }}>
                 Hover
@@ -113,7 +111,6 @@ export default function ThemeQAWindow({ isOpen, onClose }) {
                 border: '1px inset var(--border-dark)', 
                 background: 'var(--taskbar-btn-active-face)', 
                 color: 'var(--taskbar-btn-active-text)',
-                fontSize: '11px',
                 fontWeight: 'bold',
                 minWidth: '100px',
                 boxShadow: 'inset 1px 1px 2px rgba(0, 0, 0, 0.2)'
@@ -125,57 +122,54 @@ export default function ThemeQAWindow({ isOpen, onClose }) {
                 border: '1px outset var(--border-light)', 
                 background: 'var(--btn-disabled-face)', 
                 color: 'var(--btn-disabled-text)',
-                fontSize: '11px',
                 opacity: 0.6,
                 minWidth: '100px'
               }}>
                 Disabled
               </div>
             </div>
-            <p style={{ margin: '8px 0 0 0', fontSize: '10px', color: 'var(--text-2)' }}>
+            <p className="helper-text" style={{ margin: '8px 0 0 0', color: 'var(--text-2)' }}>
               All taskbar buttons must be readable in all themes. Check: README.TXT button text is white in dark mode.
             </p>
           </div>
 
           {/* Window Title Bars */}
           <div style={{ marginBottom: '24px', padding: '12px', border: '1px inset var(--border-dark)', background: 'var(--panel-face)' }}>
-            <h3 style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 'bold', color: 'var(--text-1)' }}>Window Title Bars</h3>
+            <h3 className="section-heading" style={{ margin: '0 0 12px 0', fontWeight: 'bold', color: 'var(--text-1)' }}>Window Title Bars</h3>
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <div style={{ flex: '1', minWidth: '200px' }}>
-                <div style={{ 
+                <div className="panel-header" style={{ 
                   padding: '4px 8px', 
                   background: 'var(--title-active-bg)', 
                   color: 'var(--title-active-text)',
-                  fontSize: '11px',
                   fontWeight: 'bold',
                   marginBottom: '4px'
                 }}>
                   Active Window Title
                 </div>
-                <p style={{ margin: '4px 0 0 0', fontSize: '10px', color: 'var(--text-2)' }}>Active</p>
+                <p className="helper-text" style={{ margin: '4px 0 0 0', color: 'var(--text-2)' }}>Active</p>
               </div>
               <div style={{ flex: '1', minWidth: '200px' }}>
-                <div style={{ 
+                <div className="panel-header" style={{ 
                   padding: '4px 8px', 
                   background: 'var(--title-inactive-bg)', 
                   color: 'var(--title-inactive-text)',
-                  fontSize: '11px',
                   marginBottom: '4px'
                 }}>
                   Inactive Window Title
                 </div>
-                <p style={{ margin: '4px 0 0 0', fontSize: '10px', color: 'var(--text-2)' }}>Inactive</p>
+                <p className="helper-text" style={{ margin: '4px 0 0 0', color: 'var(--text-2)' }}>Inactive</p>
               </div>
             </div>
           </div>
 
           {/* Buttons Matrix */}
           <div style={{ marginBottom: '24px', padding: '12px', border: '1px inset var(--border-dark)', background: 'var(--panel-face)' }}>
-            <h3 style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 'bold', color: 'var(--text-1)' }}>Buttons - All States</h3>
+            <h3 className="section-heading" style={{ margin: '0 0 12px 0', fontWeight: 'bold', color: 'var(--text-1)' }}>Buttons - All States</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '8px' }}>
               <div>
                 <button style={{ width: '100%', marginBottom: '4px' }}>Default</button>
-                <p style={{ margin: '0', fontSize: '10px', color: 'var(--text-2)' }}>Normal</p>
+                <p className="helper-text" style={{ margin: '0', color: 'var(--text-2)' }}>Normal</p>
               </div>
               <div>
                 <button 
@@ -185,7 +179,7 @@ export default function ThemeQAWindow({ isOpen, onClose }) {
                 >
                   Hover
                 </button>
-                <p style={{ margin: '0', fontSize: '10px', color: 'var(--text-2)' }}>Hover</p>
+                <p className="helper-text" style={{ margin: '0', color: 'var(--text-2)' }}>Hover</p>
               </div>
               <div>
                 <button 
@@ -198,11 +192,11 @@ export default function ThemeQAWindow({ isOpen, onClose }) {
                 >
                   Pressed
                 </button>
-                <p style={{ margin: '0', fontSize: '10px', color: 'var(--text-2)' }}>Pressed</p>
+                <p className="helper-text" style={{ margin: '0', color: 'var(--text-2)' }}>Pressed</p>
               </div>
               <div>
                 <button disabled style={{ width: '100%', marginBottom: '4px' }}>Disabled</button>
-                <p style={{ margin: '0', fontSize: '10px', color: 'var(--text-2)' }}>Disabled</p>
+                <p className="helper-text" style={{ margin: '0', color: 'var(--text-2)' }}>Disabled</p>
               </div>
               <div>
                 <button 
@@ -213,18 +207,18 @@ export default function ThemeQAWindow({ isOpen, onClose }) {
                 >
                   Focus
                 </button>
-                <p style={{ margin: '0', fontSize: '10px', color: 'var(--text-2)' }}>Focus</p>
+                <p className="helper-text" style={{ margin: '0', color: 'var(--text-2)' }}>Focus</p>
               </div>
             </div>
           </div>
 
           {/* Inputs Matrix */}
           <div style={{ marginBottom: '24px', padding: '12px', border: '1px inset var(--border-dark)', background: 'var(--panel-face)' }}>
-            <h3 style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 'bold', color: 'var(--text-1)' }}>Inputs - All States</h3>
+            <h3 className="section-heading" style={{ margin: '0 0 12px 0', fontWeight: 'bold', color: 'var(--text-1)' }}>Inputs - All States</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
               <div>
                 <input type="text" defaultValue="Default" style={{ width: '100%', marginBottom: '4px' }} />
-                <p style={{ margin: '0', fontSize: '10px', color: 'var(--text-2)' }}>Normal</p>
+                <p className="helper-text" style={{ margin: '0', color: 'var(--text-2)' }}>Normal</p>
               </div>
               <div>
                 <input 
@@ -235,74 +229,70 @@ export default function ThemeQAWindow({ isOpen, onClose }) {
                   onBlur={(e) => e.target.style.outline = 'none'}
                   tabIndex={0}
                 />
-                <p style={{ margin: '0', fontSize: '10px', color: 'var(--text-2)' }}>Focus</p>
+                <p className="helper-text" style={{ margin: '0', color: 'var(--text-2)' }}>Focus</p>
               </div>
               <div>
                 <input type="text" placeholder="Placeholder" disabled={false} style={{ width: '100%', marginBottom: '4px' }} />
-                <p style={{ margin: '0', fontSize: '10px', color: 'var(--text-2)' }}>Placeholder</p>
+                <p className="helper-text" style={{ margin: '0', color: 'var(--text-2)' }}>Placeholder</p>
               </div>
               <div>
                 <input type="text" defaultValue="Disabled" disabled style={{ width: '100%', marginBottom: '4px' }} />
-                <p style={{ margin: '0', fontSize: '10px', color: 'var(--text-2)' }}>Disabled</p>
+                <p className="helper-text" style={{ margin: '0', color: 'var(--text-2)' }}>Disabled</p>
               </div>
             </div>
           </div>
 
           {/* Lists and Selection */}
           <div style={{ marginBottom: '24px', padding: '12px', border: '1px inset var(--border-dark)', background: 'var(--panel-face)' }}>
-            <h3 style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 'bold', color: 'var(--text-1)' }}>Lists and Selection</h3>
+            <h3 className="section-heading" style={{ margin: '0 0 12px 0', fontWeight: 'bold', color: 'var(--text-1)' }}>Lists and Selection</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
               <div>
-                <div style={{ 
+                <div className="panel-header" style={{ 
                   padding: '4px 8px', 
                   background: 'var(--panel-face)', 
                   color: 'var(--text)',
-                  fontSize: '11px',
                   marginBottom: '4px'
                 }}>
                   Default Item
                 </div>
-                <p style={{ margin: '0', fontSize: '10px', color: 'var(--text-2)' }}>Default</p>
+                <p className="helper-text" style={{ margin: '0', color: 'var(--text-2)' }}>Default</p>
               </div>
               <div>
-                <div style={{ 
+                <div className="panel-header" style={{ 
                   padding: '4px 8px', 
                   background: 'var(--menu-hover-bg)', 
                   color: 'var(--menu-hover-text)',
-                  fontSize: '11px',
                   marginBottom: '4px'
                 }}>
                   Hover Item
                 </div>
-                <p style={{ margin: '0', fontSize: '10px', color: 'var(--text-2)' }}>Hover</p>
+                <p className="helper-text" style={{ margin: '0', color: 'var(--text-2)' }}>Hover</p>
               </div>
               <div>
-                <div style={{ 
+                <div className="panel-header" style={{ 
                   padding: '4px 8px', 
                   background: 'var(--selection-bg)', 
                   color: 'var(--selection-text)',
-                  fontSize: '11px',
                   marginBottom: '4px'
                 }}>
                   Selected Item
                 </div>
-                <p style={{ margin: '0', fontSize: '10px', color: 'var(--text-2)' }}>Selected</p>
+                <p className="helper-text" style={{ margin: '0', color: 'var(--text-2)' }}>Selected</p>
               </div>
               <div>
-                <div style={{ 
+                <div className="panel-header" style={{ 
                   padding: '4px 8px', 
                   background: 'var(--panel-face)', 
                   color: 'var(--text-disabled)',
-                  fontSize: '11px',
                   marginBottom: '4px'
                 }}>
                   Disabled Item
                 </div>
-                <p style={{ margin: '0', fontSize: '10px', color: 'var(--text-2)' }}>Disabled</p>
+                <p className="helper-text" style={{ margin: '0', color: 'var(--text-2)' }}>Disabled</p>
               </div>
             </div>
             <div style={{ marginTop: '12px', padding: '8px', background: 'var(--input-face)', border: '1px inset var(--border-dark)' }}>
-              <p style={{ margin: '0', fontSize: '11px', color: 'var(--text-1)' }}>
+              <p className="status-text" style={{ margin: '0', color: 'var(--text-1)' }}>
                 <span style={{ background: 'var(--selection-bg)', color: 'var(--selection-text)', padding: '2px 4px' }}>Selected text</span> in a paragraph
               </p>
             </div>
@@ -310,7 +300,7 @@ export default function ThemeQAWindow({ isOpen, onClose }) {
 
           {/* Menu Preview */}
           <div style={{ marginBottom: '24px', padding: '12px', border: '1px inset var(--border-dark)', background: 'var(--panel-face)' }}>
-            <h3 style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 'bold', color: 'var(--text-1)' }}>Menu Items</h3>
+            <h3 className="section-heading" style={{ margin: '0 0 12px 0', fontWeight: 'bold', color: 'var(--text-1)' }}>Menu Items</h3>
             <div style={{ 
               display: 'inline-block',
               border: '2px outset var(--border-light)',
@@ -318,20 +308,18 @@ export default function ThemeQAWindow({ isOpen, onClose }) {
               padding: '2px',
               minWidth: '200px'
             }}>
-              <div style={{ padding: '4px 8px', color: 'var(--menu-text)', fontSize: '11px' }}>Default Item</div>
-              <div style={{ 
+              <div className="start-menu-item" style={{ padding: '4px 8px', color: 'var(--menu-text)' }}>Default Item</div>
+              <div className="start-menu-item" style={{ 
                 padding: '4px 8px', 
                 background: 'var(--menu-hover-bg)', 
-                color: 'var(--menu-hover-text)',
-                fontSize: '11px'
+                color: 'var(--menu-hover-text)'
               }}>
                 Hover Item
               </div>
-              <div style={{ 
+              <div className="start-menu-item" style={{ 
                 padding: '4px 8px', 
                 background: 'var(--selection-bg)', 
-                color: 'var(--selection-text)',
-                fontSize: '11px'
+                color: 'var(--selection-text)'
               }}>
                 Selected Item
               </div>
@@ -341,10 +329,9 @@ export default function ThemeQAWindow({ isOpen, onClose }) {
                 margin: '2px 0',
                 borderBottom: '1px solid var(--border-light)'
               }}></div>
-              <div style={{ 
+              <div className="start-menu-item" style={{ 
                 padding: '4px 8px', 
-                color: 'var(--text-disabled)',
-                fontSize: '11px'
+                color: 'var(--text-disabled)'
               }}>
                 Disabled Item
               </div>
@@ -353,7 +340,7 @@ export default function ThemeQAWindow({ isOpen, onClose }) {
 
           {/* Focus Indicators */}
           <div style={{ marginBottom: '24px', padding: '12px', border: '1px inset var(--border-dark)', background: 'var(--panel-face)' }}>
-            <h3 style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 'bold', color: 'var(--text-1)' }}>Focus Indicators</h3>
+            <h3 className="section-heading" style={{ margin: '0 0 12px 0', fontWeight: 'bold', color: 'var(--text-1)' }}>Focus Indicators</h3>
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
               <button 
                 tabIndex={0}
@@ -386,15 +373,15 @@ export default function ThemeQAWindow({ isOpen, onClose }) {
                 <option>Select Focus</option>
               </select>
             </div>
-            <p style={{ margin: '8px 0 0 0', fontSize: '10px', color: 'var(--text-2)' }}>
+            <p className="helper-text" style={{ margin: '8px 0 0 0', color: 'var(--text-2)' }}>
               Tab through elements to see focus indicators. All should be visible.
             </p>
           </div>
 
           {/* Verification Checklist */}
           <div style={{ padding: '12px', border: '1px inset var(--border-dark)', background: 'var(--panel-face)' }}>
-            <h3 style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 'bold', color: 'var(--text-1)' }}>Verification Checklist</h3>
-            <ul style={{ margin: '0', paddingLeft: '20px', fontSize: '11px', color: 'var(--text-1)', lineHeight: '1.6' }}>
+            <h3 className="section-heading" style={{ margin: '0 0 12px 0', fontWeight: 'bold', color: 'var(--text-1)' }}>Verification Checklist</h3>
+            <ul className="status-text" style={{ margin: '0', paddingLeft: '20px', color: 'var(--text-1)', lineHeight: '1.6' }}>
               <li>All taskbar buttons readable (especially README.TXT in dark mode)</li>
               <li>Start button readable in all themes</li>
               <li>Active/inactive title bars distinct and readable</li>

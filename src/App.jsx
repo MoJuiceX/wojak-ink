@@ -1183,7 +1183,6 @@ function AppContent() {
                     padding: '16px 24px',
                     zIndex: 10000,
                     fontFamily: 'MS Sans Serif, sans-serif',
-                    fontSize: '12px'
                   }}>
                     Loading gallery...
                   </div>

@@ -12,7 +12,7 @@
   /* Use token-based shadow */
   box-shadow: 2px 2px 4px var(--border-dark);
   font-family: 'MS Sans Serif', sans-serif;
-  font-size: 11px;
+  font-size: var(--font-size-caption);
   color: var(--text-1);
   white-space: nowrap;
   pointer-events: none;

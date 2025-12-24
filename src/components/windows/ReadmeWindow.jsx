@@ -65,73 +65,75 @@ export default function ReadmeWindow({ onClose }) {
       noStack={true}
       onClose={onClose}
     >
-      <ReadmeBanner baseIdx={baseIdx} />
+      <div className="readme-content">
+        <ReadmeBanner baseIdx={baseIdx} />
 
-      <p className="readme-title" style={{ marginTop: '1em' }}>
-        <b>Art for the Grove 🍊</b>
-      </p>
-      <p>
-        Wojak Farmers Plot is my personal contribution to TangGang culture — a
-        collection built from my journey inside this community. These NFTs are
-        handcrafted one by one, made with intention, humour, and a lot of love
-        for the culture we're all building together.
-      </p>
+        <p className="readme-title" style={{ marginTop: '1em' }}>
+          <b>Art for the Grove 🍊</b>
+        </p>
+        <p>
+          Wojak Farmers Plot is my personal contribution to TangGang culture — a
+          collection built from my journey inside this community. These NFTs are
+          handcrafted one by one, made with intention, humour, and a lot of love
+          for the culture we're all building together.
+        </p>
 
-      <p>
-        The art explores many different sides of crypto culture. Some pieces are
-        playful, some are more cyberpunk, some are pure meme energy — but every
-        single NFT tells a story. And they're meant to be used. Meme them.
-        Screenshot them. Right-click save them. That's the point. Memes are
-        cultural weapons, and this collection gives the community more tools to
-        express this. This is my way of adding to the lore of the TangGang.
-      </p>
+        <p>
+          The art explores many different sides of crypto culture. Some pieces are
+          playful, some are more cyberpunk, some are pure meme energy — but every
+          single NFT tells a story. And they're meant to be used. Meme them.
+          Screenshot them. Right-click save them. That's the point. Memes are
+          cultural weapons, and this collection gives the community more tools to
+          express this. This is my way of adding to the lore of the TangGang.
+        </p>
 
-      <p>
-        <b>The goal is simple:</b>
-        <br />
-        Create art, share it with the gang, and bring it back to the grove. This
-        is how we build user aligned incentives.
-      </p>
+        <p>
+          <b>The goal is simple:</b>
+          <br />
+          Create art, share it with the gang, and bring it back to the grove. This
+          is how we build user aligned incentives.
+        </p>
 
-      <ul>
-        <li>
-          <b>Supply:</b> 4200
-        </li>
-        <li>
-          <b>Chain:</b>{' '}
-          <a href="https://www.chia.net/" target="_blank" rel="noreferrer">
-            Chia.net
+        <ul>
+          <li>
+            <b>Supply:</b> 4200
+          </li>
+          <li>
+            <b>Chain:</b>{' '}
+            <a href="https://www.chia.net/" target="_blank" rel="noreferrer">
+              Chia.net
+            </a>
+          </li>
+        </ul>
+
+        <hr />
+
+        <p>
+          <b>Marketplace</b>
+        </p>
+        <p>
+          View the collection on Crate:
+          <a
+            href="https://wojakfarmersplot.crate.ink/#/collection-detail/WOJAKFARMERSPLOT"
+            target="_blank"
+                rel="noopener noreferrer"
+          >
+            wojakfarmersplot.crate.ink
           </a>
-        </li>
-      </ul>
+        </p>
 
-      <hr />
+        <p>
+          <b>X / Twitter</b>
+        </p>
+        <p>
+          Follow updates here:
+            <a href="https://x.com/MoJuiceX" target="_blank" rel="noopener noreferrer">
+            https://x.com/MoJuiceX
+          </a>
+        </p>
 
-      <p>
-        <b>Marketplace</b>
-      </p>
-      <p>
-        View the collection on Crate:
-        <a
-          href="https://wojakfarmersplot.crate.ink/#/collection-detail/WOJAKFARMERSPLOT"
-          target="_blank"
-              rel="noopener noreferrer"
-        >
-          wojakfarmersplot.crate.ink
-        </a>
-      </p>
-
-      <p>
-        <b>X / Twitter</b>
-      </p>
-      <p>
-        Follow updates here:
-          <a href="https://x.com/MoJuiceX" target="_blank" rel="noopener noreferrer">
-          https://x.com/MoJuiceX
-        </a>
-      </p>
-
-      <hr />
+        <hr />
+      </div>
     </Window>
   )
 }

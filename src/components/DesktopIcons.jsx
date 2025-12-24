@@ -80,7 +80,6 @@ export default function DesktopIcons({ onOpenApp }) {
         cursor: 'pointer',
         padding: '4px',
         fontFamily: "'MS Sans Serif', sans-serif",
-        fontSize: '11px',
         color: '#fff',
         textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
         width: '96px',
@@ -142,7 +141,6 @@ export default function DesktopIcons({ onOpenApp }) {
 
   const sectionHeaderStyle = {
     padding: '4px 8px',
-    fontSize: '10px',
     fontWeight: 'bold',
     color: '#000',
     background: '#c0c0c0',

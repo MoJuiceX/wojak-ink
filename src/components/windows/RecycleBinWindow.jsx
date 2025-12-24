@@ -86,8 +86,7 @@ export default function RecycleBinWindow({
               onChange={handleFileChange}
             />
           </div>
-          <div style={{
-            fontSize: '11px',
+          <div className="status-text" style={{
             fontFamily: 'MS Sans Serif, sans-serif'
           }}>
             {recycleBin.length} item(s)
@@ -95,12 +94,11 @@ export default function RecycleBinWindow({
         </div>
 
         {/* Storage Usage Indicator */}
-        <div style={{
+        <div className="storage-info-box" style={{
           padding: '8px',
           background: 'var(--surface-3)',
           border: '1px inset var(--border-dark)',
           marginBottom: '8px',
-          fontSize: '10px',
           fontFamily: 'MS Sans Serif, sans-serif',
           color: 'var(--text-1)'
         }}>
@@ -130,11 +128,10 @@ export default function RecycleBinWindow({
 
         {/* Grid of deleted images */}
         {recycleBin.length === 0 ? (
-          <div style={{
+          <div className="empty-state-text" style={{
             padding: '40px',
             textAlign: 'center',
             color: 'var(--text-muted)',
-            fontSize: '12px',
             fontFamily: 'MS Sans Serif, sans-serif'
           }}>
             Recycle Bin is empty
@@ -173,8 +170,7 @@ export default function RecycleBinWindow({
                     padding: '2px'
                   }}
                 />
-                <div style={{
-                  fontSize: '9px',
+                <div className="item-label" style={{
                   fontFamily: 'MS Sans Serif, sans-serif',
                   textAlign: 'center',
                   wordBreak: 'break-word',
@@ -191,7 +187,6 @@ export default function RecycleBinWindow({
                       onRestore(item.id)
                     }}
                     style={{
-                      fontSize: '9px',
                       padding: '2px 6px',
                       flex: 1
                     }}
@@ -201,7 +196,6 @@ export default function RecycleBinWindow({
                   <Button
                     onClick={() => onDeleteForever(item.id)}
                     style={{
-                      fontSize: '9px',
                       padding: '2px 6px',
                       flex: 1
                     }}

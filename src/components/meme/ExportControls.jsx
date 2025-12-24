@@ -665,8 +665,7 @@ export default function ExportControls({
           justifyContent: 'flex-start',
           width: '100%',
         }}>
-          <span style={{
-            fontSize: '10px',
+          <span className="helper-text" style={{
             fontFamily: 'MS Sans Serif, sans-serif',
             color: 'var(--text-1)',
             marginRight: '2px',
@@ -678,7 +677,6 @@ export default function ExportControls({
               if (setShowTangified) setShowTangified(false)
             }}
             style={{
-              fontSize: '10px',
               padding: '2px 6px',
               flex: '0 0 auto',
               background: showTangified ? 'var(--btn-face-pressed)' : 'var(--btn-face-hover)',
@@ -692,7 +690,6 @@ export default function ExportControls({
               if (setShowTangified) setShowTangified(true)
             }}
             style={{
-              fontSize: '10px',
               padding: '2px 6px',
               flex: '0 0 auto',
               background: showTangified ? 'var(--btn-face-hover)' : 'var(--btn-face-pressed)',
@@ -705,9 +702,8 @@ export default function ExportControls({
       )}
       
       {!canDownload && (
-        <p style={{ 
+        <p className="helper-text" style={{ 
           margin: '4px 0 0 0', 
-          fontSize: '9px', 
           color: '#666',
           fontStyle: 'italic'
         }}>
@@ -715,19 +711,17 @@ export default function ExportControls({
         </p>
       )}
       {exportStatus && (
-        <p style={{ 
+        <p className="export-status" style={{ 
           margin: '4px 0 0 0', 
-          fontSize: '10px', 
           color: exportStatus.includes('Error') ? '#c00' : '#008000' 
         }}>
           {exportStatus}
         </p>
       )}
       {/* Fallback hint - reserve space to prevent layout shift */}
-      <div style={{ 
+      <div className="helper-text" style={{ 
         height: showFallbackHint ? 'auto' : '14px', // Reserve space (approx line height)
         margin: '4px 0 0 0',
-        fontSize: '9px',
         color: '#666',
         fontStyle: 'italic',
         visibility: showFallbackHint ? 'visible' : 'hidden',
@@ -757,8 +751,7 @@ export default function ExportControls({
             flexDirection: 'column',
             gap: '16px'
           }}>
-            <p style={{
-              fontSize: '11px',
+            <p className="error-message-text" style={{
               fontFamily: 'MS Sans Serif, sans-serif',
               color: '#000',
               margin: 0

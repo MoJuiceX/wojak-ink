@@ -18,7 +18,8 @@
   background: none;
   border: none;
   font-family: 'MS Sans Serif', sans-serif;
-  font-size: 11px;
+  font-size: var(--font-size-ui);
+  letter-spacing: var(--letter-spacing-tight);
   text-align: left;
   cursor: pointer;
   color: var(--menu-text);
@@ -48,7 +49,7 @@
 .context-menu-shortcut {
   margin-left: 16px;
   color: var(--text-muted);
-  font-size: 10px;
+  font-size: var(--font-size-caption);
 }
 
 .context-menu-item:hover:not(.disabled) .context-menu-shortcut {

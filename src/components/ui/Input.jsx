@@ -35,7 +35,6 @@ export default function Input({
             : '1px inset var(--input-border)',
           background: disabled ? 'var(--input-disabled-face)' : 'var(--input-face)',
           color: disabled ? 'var(--input-disabled-text)' : 'var(--input-text)',
-          fontSize: '11px',
           fontFamily: 'inherit',
           ...props.style
         }}
@@ -46,8 +45,8 @@ export default function Input({
           id={errorId}
           role="alert"
           aria-live="polite"
+          className="input-error-message"
           style={{
-            fontSize: '11px',
             color: 'var(--state-error)',
             marginTop: '4px',
           }}

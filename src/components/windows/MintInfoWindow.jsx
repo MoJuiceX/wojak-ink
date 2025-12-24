@@ -56,6 +56,7 @@ export default function MintInfoWindow({ onNotifyClick, onClose }) {
     >
       <div
         ref={contentRef}
+        className="readme-content"
         style={{
           display: 'inline-block',
         }}

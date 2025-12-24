@@ -49,7 +49,6 @@ const DesktopIcon = memo(({
         cursor: isDragging ? 'grabbing' : 'pointer',
         padding: '4px',
         fontFamily: "'MS Sans Serif', sans-serif",
-        fontSize: '11px',
         color: '#fff',
         textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
         width: '80px',
@@ -95,10 +94,9 @@ const DesktopIcon = memo(({
       </div>
       <span
         className="desktop-image-icon-label"
-        style={{
+          style={{
           color: '#fff',
           textShadow: '1px 1px 1px black',
-          fontSize: '11px',
           textAlign: 'center',
           marginTop: '4px',
           wordBreak: 'break-word',
@@ -547,7 +545,6 @@ export default function DesktopImageIcons({
             pointerEvents: 'auto',
             transition: 'background 0.2s, border 0.2s',
             fontFamily: "'MS Sans Serif', sans-serif",
-            fontSize: '11px',
             color: '#fff',
             textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
           }}
@@ -583,7 +580,6 @@ export default function DesktopImageIcons({
           </div>
           <span
             style={{
-              fontSize: '11px',
               color: '#fff',
               textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
               textAlign: 'center',

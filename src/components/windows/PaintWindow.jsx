@@ -221,10 +221,10 @@ export default function PaintWindow({ onClose }) {
           }}
         >
           <div
+            className="panel-header"
             style={{
               padding: '8px',
               borderBottom: '1px solid #808080',
-              fontSize: '11px',
               fontWeight: 'bold',
               background: '#c0c0c0',
             }}
@@ -235,9 +235,9 @@ export default function PaintWindow({ onClose }) {
             <ImageLibraryPanel onImageSelect={handleImageInsert} />
           </div>
           <div
+            className="panel-footer"
             style={{
               padding: '8px',
-              fontSize: '10px',
               color: '#808080',
               borderTop: '1px solid #808080',
               background: '#c0c0c0',

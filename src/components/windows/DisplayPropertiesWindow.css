@@ -15,7 +15,8 @@
   border: 1px solid;
   border-color: var(--border-light) var(--border-dark) var(--border-dark) var(--border-light);
   font-family: 'MS Sans Serif', sans-serif;
-  font-size: 11px;
+  font-size: var(--font-size-ui);
+  letter-spacing: var(--letter-spacing-tight);
   cursor: pointer;
   position: relative;
 }
@@ -85,7 +86,8 @@
 }
 
 .display-wallpaper-section label {
-  font-size: 11px;
+  font-size: var(--font-size-ui);
+  letter-spacing: var(--letter-spacing-tight);
   display: block;
   margin-bottom: 4px;
   font-family: 'MS Sans Serif', sans-serif;
@@ -108,7 +110,8 @@
   gap: 8px;
   padding: 4px;
   cursor: pointer;
-  font-size: 11px;
+  font-size: var(--font-size-ui);
+  letter-spacing: var(--letter-spacing-tight);
   font-family: 'MS Sans Serif', sans-serif;
   color: var(--text-1);
 }
@@ -146,7 +149,8 @@
 .display-properties-buttons button {
   padding: 4px 20px;
   font-family: 'MS Sans Serif', sans-serif;
-  font-size: 11px;
+  font-size: var(--font-size-ui);
+  letter-spacing: var(--letter-spacing-tight);
   background: var(--btn-face);
   border: 2px solid;
   border-color: var(--border-light) var(--border-dark) var(--border-dark) var(--border-light);
@@ -180,7 +184,8 @@
 }
 
 .settings-label {
-  font-size: 11px;
+  font-size: var(--font-size-ui);
+  letter-spacing: var(--letter-spacing-tight);
   font-family: 'MS Sans Serif', sans-serif;
   font-weight: bold;
   color: var(--text-1);
@@ -189,7 +194,8 @@
 .settings-input,
 .settings-select {
   padding: 4px;
-  font-size: 11px;
+  font-size: var(--font-size-ui);
+  letter-spacing: var(--letter-spacing-tight);
   font-family: 'MS Sans Serif', sans-serif;
   border: 1px inset var(--border-dark);
   background: var(--input-bg);
@@ -208,7 +214,8 @@
 }
 
 .settings-checkbox-label {
-  font-size: 11px;
+  font-size: var(--font-size-ui);
+  letter-spacing: var(--letter-spacing-tight);
   font-family: 'MS Sans Serif', sans-serif;
   cursor: pointer;
   user-select: none;
@@ -217,7 +224,7 @@
 
 .settings-info-box {
   padding: 8px;
-  font-size: 10px;
+  font-size: var(--font-size-caption);
   font-family: 'MS Sans Serif', sans-serif;
   color: var(--text-2);
   background: var(--surface-3);
@@ -226,7 +233,8 @@
 
 .settings-button {
   padding: 6px 12px;
-  font-size: 11px;
+  font-size: var(--font-size-ui);
+  letter-spacing: var(--letter-spacing-tight);
   font-family: 'MS Sans Serif', sans-serif;
   border: 1px outset var(--border-light);
   background: var(--btn-face);

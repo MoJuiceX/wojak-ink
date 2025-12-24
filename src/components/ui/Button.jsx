@@ -28,7 +28,6 @@ export default function Button({
         background: disabled ? 'var(--btn-disabled)' : 'var(--btn-face)',
         color: 'var(--btn-text)',
         cursor: disabled ? 'not-allowed' : 'pointer',
-        fontSize: '11px',
         fontFamily: 'inherit',
         transition: 'transform 0.2s ease, opacity 0.2s ease',
         position: className.includes('win98-tooltip') ? 'relative' : undefined, // Ensure tooltips work

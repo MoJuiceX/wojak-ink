@@ -186,6 +186,29 @@
   
   /* Link Tokens */
   --link: #0000ff;
+  
+  /* ═══════════════════════════════════════════════════════════════
+     TYPOGRAPHY SYSTEM
+     Base: 16px | Scale: 0.75 / 0.85 / 1 / 1.1 / 1.25
+     ═══════════════════════════════════════════════════════════════ */
+
+  --base-font-size: 16px;
+
+  /* Core scale */
+  --font-size-caption: 0.75rem;   /* 10.5px — fineprint, helper text, tooltips */
+  --font-size-ui: 0.85rem;        /* 11.9px — buttons, labels, menus, inputs */
+  --font-size-body: 1rem;         /* 14px   — readme content, descriptions */
+  --font-size-title: 1.1rem;      /* 15.4px — section headings, modal titles */
+  --font-size-heading: 1.25rem;   /* 17.5px — window titles, major headings */
+
+  /* Line heights */
+  --line-height-tight: 1.2;       /* UI chrome, buttons */
+  --line-height-normal: 1.4;      /* Body text */
+  --line-height-relaxed: 1.6;     /* Long-form reading */
+
+  /* Letter spacing - preserves Win98 dense feel at larger sizes */
+  --letter-spacing-tight: -0.01em;  /* UI chrome */
+  --letter-spacing-normal: 0;       /* Body text */
 }
 
 /* Theme Presets */
@@ -580,6 +603,7 @@
 
 /* Global scroll lock - disable all page scrolling (desktop OS feel) */
 html {
+  font-size: var(--base-font-size);
   margin: 0;
   padding: 0;
   width: 100%;
@@ -597,9 +621,10 @@ body {
   height: 100dvh; /* Use dynamic viewport height for mobile */
   overflow: hidden;
   overscroll-behavior: none;
-  font-family: 'MS Sans Serif', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'MS Sans Serif', 'Tahoma', system-ui, sans-serif;
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--letter-spacing-normal);
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: auto;
 }
@@ -718,6 +743,9 @@ body {
   display: flex;
   align-items: center;
   gap: 4px;
+  font-size: 12px; /* fallback for older browsers */
+  font-size: var(--font-size-ui);
+  letter-spacing: var(--letter-spacing-tight);
 }
 
 .title-bar-icon {
@@ -850,6 +878,17 @@ textarea:focus-visible {
   border: 2px dashed var(--state-error) !important;
 }
 
+/* Desktop icon labels */
+.desktop-icon-label,
+.desktop-icon-button {
+  font-size: var(--font-size-ui);
+}
+
+/* Desktop icon section header */
+.desktop-icon-section-header {
+  font-size: var(--font-size-caption);
+}
+
 /* Shortcut arrow overlay for LINKS icons (Windows 98 style) */
 .desktop-icon-shortcut-arrow {
   position: absolute;
@@ -859,7 +898,7 @@ textarea:focus-visible {
   height: 14px;
   background: var(--border-light);
   border: 1px outset var(--border-light);
-  font-size: 9px;
+  font-size: var(--font-size-caption);
   line-height: 12px;
   text-align: center;
   color: var(--text-1);
@@ -903,6 +942,9 @@ textarea {
   color: var(--input-text);
   border: 1px inset var(--input-border);
   font-family: inherit;
+  font-size: var(--font-size-ui);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
 }
 
 input[type="text"]:disabled,
@@ -922,11 +964,18 @@ textarea::placeholder {
   color: var(--input-placeholder);
 }
 
+/* Input error message */
+.input-error-message {
+  font-size: var(--font-size-ui);
+}
+
 /* Button base styles using tokens */
 button {
   background: var(--btn-face);
   color: var(--btn-text);
   border: 1px outset var(--border-light);
+  font-size: var(--font-size-ui);
+  letter-spacing: var(--letter-spacing-tight);
 }
 
 button:hover:not(:disabled) {
@@ -1004,7 +1053,8 @@ button:disabled {
   grid-row: 2;
   display: block;
   font-family: "MS Sans Serif", sans-serif !important;
-  font-size: 10.5px !important;
+  font-size: var(--font-size-ui) !important;
+  letter-spacing: var(--letter-spacing-tight) !important;
   color: var(--text-1) !important;
   height: 14px !important;
   min-height: 14px !important;
@@ -1065,7 +1115,7 @@ button:disabled {
   left: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
-  font-size: 10px !important;
+  font-size: var(--font-size-caption) !important;
   line-height: 22px !important;
   color: var(--text-2) !important;
   white-space: nowrap;
@@ -1179,7 +1229,8 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
+  font-size: var(--font-size-ui);
+  letter-spacing: var(--letter-spacing-tight);
 }
 
 #wojak-generator .color-variant-picker .color-dots,
@@ -1286,7 +1337,8 @@ button:disabled {
    ========================= */
 
 #wojak-generator .suit-variant-picker {
-  font-size: 11px;
+  font-size: var(--font-size-ui);
+  letter-spacing: var(--letter-spacing-tight);
   max-width: 100%;
   width: 100%;
   box-sizing: border-box;
@@ -1312,7 +1364,7 @@ button:disabled {
 
 #wojak-generator .suit-variant-picker .type-toggle-button {
   font-family: "MS Sans Serif", sans-serif;
-  font-size: 10px;
+  font-size: var(--font-size-caption);
   padding: 2px 6px;
   min-width: 32px;
   height: 18px;
@@ -1545,7 +1597,7 @@ a,
 .screensaver-overlay .screensaver-hint {
   position: absolute;
   bottom: 60px;
-  font-size: 14px;
+  font-size: var(--font-size-body);
   opacity: 0.8;
   text-align: center;
   transition: opacity 0.5s ease;
@@ -2009,7 +2061,7 @@ a,
   }
 
   #wojak-generator .win98-group legend {
-    font-size: 10px;
+    font-size: var(--font-size-caption);
     font-weight: normal;
     color: var(--text-1);
     padding: 0 4px;
@@ -2075,7 +2127,7 @@ a,
 
   .tangify-progress-label {
     font-family: 'VT323', monospace;
-    font-size: 14px;
+    font-size: var(--font-size-body);
     color: var(--text-1);
   }
 
@@ -2109,7 +2161,7 @@ a,
 
   .tangify-progress-percent {
     font-family: 'VT323', monospace;
-    font-size: 14px;
+    font-size: var(--font-size-body);
     text-align: right;
   }
 
@@ -2144,14 +2196,14 @@ a,
 }
 
 #wojak-generator .info-banner-title {
-  font-size: 14px;
+  font-size: var(--font-size-body);
   font-weight: bold;
   color: var(--text-1);
   margin-bottom: 2px;
 }
 
 #wojak-generator .info-banner-subtitle {
-  font-size: 11px;
+  font-size: var(--font-size-ui);
   font-weight: normal;
   color: var(--text-2);
 }
@@ -2164,7 +2216,7 @@ a,
   border-color: var(--border-light) var(--border-dark) var(--border-dark) var(--border-light);
   width: 22px;
   height: 22px;
-  font-size: 12px;
+  font-size: var(--font-size-ui);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -2218,7 +2270,7 @@ a,
   justify-content: space-between;
   align-items: center;
   font-weight: bold;
-  font-size: 13px;
+  font-size: var(--font-size-title);
 }
 
 .welcome-modal-titlebar button {
@@ -2228,7 +2280,7 @@ a,
   border-color: var(--border-light) var(--border-dark) var(--border-dark) var(--border-light);
   width: 20px;
   height: 20px;
-  font-size: 12px;
+  font-size: var(--font-size-ui);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -2250,14 +2302,14 @@ a,
 .welcome-modal-content {
   padding: 16px;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
-  font-size: 12px;
+  font-size: var(--font-size-body);
   line-height: 1.5;
   background: var(--input-bg);
   color: var(--text-1);
 }
 
 .welcome-modal-content h2 {
-  font-size: 14px;
+  font-size: var(--font-size-title);
   font-weight: bold;
   color: var(--accent);
   margin: 0 0 8px 0;
@@ -2292,7 +2344,7 @@ a,
   border: 1px solid var(--state-warning);
   padding: 8px;
   margin: 12px 0;
-  font-size: 11px;
+  font-size: var(--font-size-ui);
   color: var(--text-1);
 }
 
@@ -2304,7 +2356,7 @@ a,
   border-color: var(--border-light) var(--border-dark) var(--border-dark) var(--border-light);
   padding: 8px 24px;
   font-family: inherit;
-  font-size: 13px;
+  font-size: var(--font-size-title);
   font-weight: bold;
   cursor: pointer;
   display: block;
@@ -2426,7 +2478,7 @@ a,
   color: var(--text-1);
   border: 1px solid var(--text-1);
   padding: 4px 8px;
-  font-size: 11px;
+  font-size: var(--font-size-caption);
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   white-space: nowrap;
   max-width: 280px;
@@ -2516,11 +2568,11 @@ a,
 .readme-content {
   padding: 16px 20px 24px 20px;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
-  font-size: 12px;
-  line-height: 1.6;
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-normal);
   overflow-y: auto;
   height: calc(100% - 16px);
-  background: var(--input-bg);
+  background: transparent;
   color: var(--text-1);
   margin: 4px;
   border: 1px solid;
@@ -2529,7 +2581,7 @@ a,
 }
 
 .readme-content h2 {
-  font-size: 13px;
+  font-size: var(--font-size-title);
   font-weight: bold;
   margin: 20px 0 10px 0;
   color: var(--accent);
@@ -2545,6 +2597,7 @@ a,
   margin: 0 0 10px 0;
   color: var(--text-1);
   text-align: left;
+  font-size: var(--font-size-body);
 }
 
 .readme-content ul {
@@ -2555,6 +2608,7 @@ a,
 .readme-content li {
   margin-bottom: 6px;
   color: var(--text-1);
+  font-size: var(--font-size-body);
 }
 
 .readme-content strong {
@@ -2590,7 +2644,7 @@ a,
 /* Teaser text */
 .readme-teaser {
   text-align: center;
-  font-size: 14px;
+  font-size: var(--font-size-body);
   margin: 16px 0;
   color: var(--text-2);
 }
@@ -2603,7 +2657,7 @@ a,
   text-align: center;
   color: var(--text-2);
   font-style: italic;
-  font-size: 11px;
+  font-size: var(--font-size-ui);
 }
 
 /* README Window specific fixes */
@@ -2694,7 +2748,7 @@ a,
 }
 
 #wojak-generator .trait-message-text {
-  font-size: 10px !important;
+  font-size: var(--font-size-caption) !important;
   line-height: 12px !important;
   color: var(--text-2) !important;
   white-space: nowrap;
@@ -2778,7 +2832,7 @@ a,
     flex: 1 1 0 !important;
     min-width: 0 !important;
     padding: 2px 6px !important;
-    font-size: 11px !important;
+    font-size: var(--font-size-ui) !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important; /* safety, should not trigger after preview resize */
     white-space: nowrap !important;
@@ -3027,7 +3081,7 @@ a,
   background: var(--panel-face);
   color: var(--text-1);
   padding: 4px 6px;
-  font-size: 10px;
+  font-size: var(--font-size-caption);
   font-weight: bold;
   text-align: center;
   z-index: 10;
@@ -3040,6 +3094,58 @@ a,
   text-overflow: ellipsis;
 }
 
+.gallery-error-text {
+  font-size: var(--font-size-caption);
+}
+
+/* Error message text */
+.error-message-text {
+  font-size: var(--font-size-ui);
+}
+
+.error-stack-trace {
+  font-size: var(--font-size-caption);
+}
+
+/* Panel headers and footers */
+.panel-header {
+  font-size: var(--font-size-ui);
+}
+
+.panel-footer {
+  font-size: var(--font-size-caption);
+}
+
+/* Section headings */
+.section-heading {
+  font-size: var(--font-size-title);
+}
+
+/* Helper/instruction text */
+.helper-text {
+  font-size: var(--font-size-caption);
+}
+
+/* Status/count text */
+.status-text {
+  font-size: var(--font-size-ui);
+}
+
+/* Storage/info boxes */
+.storage-info-box {
+  font-size: var(--font-size-caption);
+}
+
+/* Empty state messages */
+.empty-state-text {
+  font-size: var(--font-size-body);
+}
+
+/* Item labels */
+.item-label {
+  font-size: var(--font-size-caption);
+}
+
 /* Footer / Fine-print spacing - visually separated from grid and bottom border */
 #window-gallery .fineprint {
   flex-shrink: 0;
@@ -3049,7 +3155,7 @@ a,
   padding-left: 0;
   padding-right: 0;
   border-top: 1px solid var(--border-mid); /* subtle Win98-style separator line */
-  font-size: 10px;
+  font-size: var(--font-size-caption);
   color: var(--text-2);
   text-align: center;
   background: transparent; /* transparent - window-body background shows through */
@@ -3141,7 +3247,8 @@ a,
   background: var(--btn-face);
   color: var(--btn-text);
   cursor: pointer;
-  font-size: 11px;
+  font-size: var(--font-size-ui);
+  letter-spacing: var(--letter-spacing-tight);
 }
 
 .field-row button:active {
@@ -3203,7 +3310,7 @@ p {
 }
 
 .readme-title {
-  font-size: 16px;
+  font-size: var(--font-size-heading);
 }
 
 /* Meme Generator Styles */
@@ -3241,7 +3348,7 @@ p {
 
 .export-status {
   margin: 8px 0 0 0;
-  font-size: 10px;
+  font-size: var(--font-size-caption);
 }
 
 .export-status.success {
@@ -3306,7 +3413,7 @@ p {
     padding-right: calc(var(--spacing-lg) + var(--safe-area-inset-right));
     padding-bottom: var(--spacing-sm);
     padding-left: calc(var(--spacing-lg) + var(--safe-area-inset-left));
-    font-size: 10px;
+    font-size: var(--font-size-caption);
     min-height: calc(var(--header-height) + var(--safe-area-inset-top));
   }
 
@@ -3318,12 +3425,12 @@ p {
   }
 
   .title-bar-text {
-    font-size: 10px;
+    font-size: var(--font-size-caption);
   }
 
   .window-body {
     padding: 6px;
-    font-size: 11px;
+    font-size: var(--font-size-ui);
   }
 
   .gallery-grid {
@@ -3398,7 +3505,7 @@ p {
 
   #window-gallery .fineprint {
     margin-top: 6px; /* maintain spacing on small screens */
-    font-size: 9px;
+    font-size: var(--font-size-caption);
   }
 
   .title-bar-controls button {
@@ -3411,17 +3518,29 @@ p {
 
   .window-body {
     padding: var(--spacing-sm);
-    font-size: 10px;
+    font-size: var(--font-size-caption);
   }
 
   p {
-    font-size: 11px;
+    font-size: var(--font-size-ui);
     margin-bottom: var(--spacing-lg);
   }
 
   ul {
     margin-left: var(--spacing-2xl);
-    font-size: 11px;
+    font-size: var(--font-size-ui);
+  }
+
+  .title-bar-text {
+    font-size: var(--font-size-caption); /* tighter on mobile for space */
+  }
+  
+  .start-menu-item {
+    font-size: var(--font-size-caption);
+  }
+  
+  .taskbar-window-button {
+    font-size: var(--font-size-caption);
   }
 }
 
@@ -3452,7 +3571,7 @@ p {
   .field-row button {
     min-height: 44px;
     padding: 10px 18px;
-    font-size: 12px;
+    font-size: var(--font-size-ui);
   }
 
   .thumb {
@@ -3469,7 +3588,7 @@ p {
     min-height: 44px; /* Thumb-friendly touch target */
     min-width: 44px; /* Thumb-friendly touch target */
     padding: 8px 12px;
-    font-size: 12px;
+    font-size: var(--font-size-ui);
   }
 
   .start-button {
@@ -3522,7 +3641,8 @@ p {
   align-items: center;
   gap: 4px;
   font-weight: bold;
-  font-size: 11px;
+  font-size: var(--font-size-ui);
+  letter-spacing: var(--letter-spacing-tight);
 }
 
 .start-button-icon {
@@ -3569,7 +3689,7 @@ p {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 14px;
+  font-size: var(--font-size-body);
   padding: 2px 4px;
   display: flex;
   align-items: center;
@@ -3592,7 +3712,7 @@ p {
 
 .taskbar-clock {
   padding: 0 8px;
-  font-size: 11px;
+  font-size: var(--font-size-ui);
   color: var(--taskbar-text);
   user-select: none;
   white-space: nowrap;
@@ -3617,7 +3737,7 @@ p {
   background: var(--surface-3);
   border: 1px solid var(--text-1);
   padding: 4px 10px;
-  font-size: 11px;
+  font-size: var(--font-size-ui);
   color: var(--text-1);
   white-space: nowrap;
   box-shadow: 2px 2px 0 var(--text-1);
@@ -3638,7 +3758,8 @@ p {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 11px;
+  font-size: var(--font-size-ui);
+  letter-spacing: var(--letter-spacing-tight);
   min-width: 100px;
   max-width: 200px;
   position: relative;
@@ -3747,7 +3868,7 @@ p {
   background: var(--menu-header-bg);
   color: var(--menu-header-text);
   padding: 4px 8px;
-  font-size: 11px;
+  font-size: var(--font-size-ui);
   font-weight: bold;
   border-bottom: 1px solid var(--accent);
 }
@@ -3770,10 +3891,15 @@ p {
   color: var(--menu-text);
   text-align: left;
   cursor: pointer;
-  font-size: 11px;
+  font-size: var(--font-size-ui);
+  letter-spacing: var(--letter-spacing-tight);
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.start-menu-section-header {
+  font-size: var(--font-size-caption);
 }
 
 .start-menu-item-icon {
@@ -3842,7 +3968,7 @@ p {
   .start-button {
     height: calc(var(--taskbar-height) - var(--spacing-sm));
     padding: 0 var(--spacing-xl);
-    font-size: 12px;
+    font-size: var(--font-size-ui);
   }
 
   .start-menu {

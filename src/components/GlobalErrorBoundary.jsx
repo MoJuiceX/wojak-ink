@@ -51,11 +51,12 @@ class GlobalErrorBoundary extends React.Component {
               <p style={{ marginBottom: '8px' }}>
                 An uncaught error occurred in the React tree.
               </p>
-              <p style={{ fontFamily: 'monospace', fontSize: '11px', whiteSpace: 'pre-wrap' }}>
+              <p className="error-message-text" style={{ fontFamily: 'monospace', whiteSpace: 'pre-wrap' }}>
                 {this.state.error && this.state.error.toString()}
               </p>
               {this.state.errorInfo?.componentStack && (
                 <pre
+                  className="error-stack-trace"
                   style={{
                     marginTop: '8px',
                     maxHeight: '200px',
@@ -63,7 +64,6 @@ class GlobalErrorBoundary extends React.Component {
                     background: '#ffffff',
                     border: '1px solid #c0c0c0',
                     padding: '4px',
-                    fontSize: '10px',
                   }}
                 >
                   {this.state.errorInfo.componentStack}

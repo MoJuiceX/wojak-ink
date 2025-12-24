@@ -207,12 +207,11 @@ function GalleryThumb({ item, index, allItems }) {
         />
       )}
       {(frontError && backError) && (
-        <div style={{
+        <div className="gallery-error-text" style={{
           position: 'absolute',
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          fontSize: '9px',
           color: 'var(--text-2)',
           textAlign: 'center',
         }}>

@@ -307,7 +307,6 @@ export default function PinballWindow({ onClose }) {
             background: 'var(--btn-face)',
             color: 'var(--btn-text)',
             cursor: 'pointer',
-            fontSize: '10px',
             fontFamily: "'MS Sans Serif', sans-serif",
             padding: '2px',
             display: 'flex',
@@ -456,7 +455,7 @@ export default function PinballWindow({ onClose }) {
                     maxWidth: '300px',
                   }}
                 >
-                  <p style={{ margin: '0 0 16px 0', fontSize: '12px' }}>
+                  <p className="helper-text" style={{ margin: '0 0 16px 0' }}>
                     Best on desktop (keyboard)
                   </p>
                   <button
@@ -473,7 +472,6 @@ export default function PinballWindow({ onClose }) {
                       color: 'var(--btn-text)',
                       padding: '4px 12px',
                       fontFamily: "'MS Sans Serif', sans-serif",
-                      fontSize: '11px',
                       cursor: 'pointer',
                     }}
                   >
@@ -511,7 +509,6 @@ export default function PinballWindow({ onClose }) {
                   color: 'var(--btn-text)',
                   border: '1px outset var(--border-light)',
                   fontFamily: "'MS Sans Serif', sans-serif",
-                  fontSize: '10px',
                   padding: '2px 8px',
                   cursor: 'pointer',
                   pointerEvents: 'auto',
@@ -616,7 +613,6 @@ export default function PinballWindow({ onClose }) {
                 display: 'flex',
                 flexDirection: 'column',
                 fontFamily: "'MS Sans Serif', sans-serif",
-                fontSize: '11px',
                 color: 'var(--text)',
                 position: 'relative',
                 order: 2,
@@ -624,11 +620,11 @@ export default function PinballWindow({ onClose }) {
             >
               {/* Header */}
               <div
+                className="panel-header"
                 style={{
                   background: 'var(--title-active-bg)',
                   color: 'var(--title-active-text)',
                   padding: '6px 8px',
-                  fontSize: '12px',
                   fontWeight: 'bold',
                 }}
               >
@@ -680,7 +676,6 @@ export default function PinballWindow({ onClose }) {
                     color: 'var(--btn-text)',
                     padding: '4px 16px',
                     fontFamily: "'MS Sans Serif', sans-serif",
-                    fontSize: '11px',
                     cursor: 'pointer',
                     width: '100%',
                   }}
@@ -707,7 +702,6 @@ export default function PinballWindow({ onClose }) {
                     color: 'var(--btn-text)',
                     padding: '4px 16px',
                     fontFamily: "'MS Sans Serif', sans-serif",
-                    fontSize: '11px',
                     cursor: 'pointer',
                     width: '100%',
                   }}
@@ -731,7 +725,6 @@ export default function PinballWindow({ onClose }) {
             paddingLeft: '8px',
             paddingRight: '8px',
             fontFamily: "'MS Sans Serif', sans-serif",
-            fontSize: '11px',
             color: 'var(--text)',
           }}
         >

@@ -287,7 +287,6 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakGen
           className="start-menu-section-header"
           style={{
             padding: '4px 8px',
-            fontSize: '10px',
             fontWeight: 'bold',
                     color: 'var(--menu-text)',
                     background: 'var(--menu-bg)',
@@ -324,7 +323,6 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakGen
           className="start-menu-section-header"
           style={{
             padding: '4px 8px',
-            fontSize: '10px',
             fontWeight: 'bold',
                     color: 'var(--menu-text)',
                     background: 'var(--menu-bg)',

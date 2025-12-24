@@ -61,13 +61,13 @@ export default function AdminPanel() {
         style={{ width: '400px', maxWidth: 'calc(100vw - 40px)', left: '20px', top: '20px' }}
       >
         <div style={{ padding: '8px' }}>
-          <p style={{ marginBottom: '8px', fontSize: '11px', fontWeight: 'bold' }}>
+          <p className="panel-header" style={{ marginBottom: '8px', fontWeight: 'bold' }}>
             Admin Access Required
           </p>
-          <p style={{ marginBottom: '12px', fontSize: '10px', color: 'var(--text-2)' }}>
+          <p className="helper-text" style={{ marginBottom: '12px', color: 'var(--text-2)' }}>
             This panel is only accessible at <code style={{ background: 'var(--surface-3)', padding: '2px 4px', color: 'var(--text-1)' }}>/admin-enable</code>
           </p>
-          <p style={{ marginBottom: '8px', fontSize: '11px' }}>Enter admin password:</p>
+          <p className="panel-header" style={{ marginBottom: '8px' }}>Enter admin password:</p>
           <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
               <Input
@@ -91,9 +91,9 @@ export default function AdminPanel() {
                   id={passwordErrorId}
                   role="alert"
                   aria-live="polite"
+                  className="input-error-message"
                   style={{ 
                     color: 'var(--state-error)', 
-                    fontSize: '11px', 
                     marginTop: '4px' 
                   }}
                 >
@@ -115,13 +115,13 @@ export default function AdminPanel() {
     >
       <div style={{ padding: '8px' }}>
         <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '16px' }}>
-          <Button onClick={logoutAdmin} style={{ fontSize: '10px' }}>
+          <Button onClick={logoutAdmin}>
             Logout
           </Button>
         </div>
 
         <div style={{ marginBottom: '16px', padding: '8px', background: 'var(--surface-3)', border: '1px inset var(--border-dark)' }}>
-          <p style={{ fontSize: '10px', color: 'var(--text-2)' }}>
+          <p className="storage-info-box" style={{ color: 'var(--text-2)' }}>
             Total NFTs: {nfts.length} | NFTs with offers: {Object.keys(offerFiles).length} | 
             Coverage: {Math.round((Object.keys(offerFiles).length / nfts.length) * 100)}%
           </p>
@@ -129,7 +129,7 @@ export default function AdminPanel() {
 
         <div style={{ marginBottom: '16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <p style={{ fontSize: '11px', fontWeight: 'bold' }}>
+            <p className="panel-header" style={{ fontWeight: 'bold' }}>
               Manage Offer Files ({Object.keys(offerFiles).length} saved)
             </p>
             <select
@@ -146,7 +146,6 @@ export default function AdminPanel() {
               }}
               style={{
                 padding: '2px 4px',
-                fontSize: '10px',
                 border: '1px inset #c0c0c0',
               }}
             >
@@ -163,9 +162,9 @@ export default function AdminPanel() {
               <div
                 key={nft.id}
                 onClick={() => handleSelectNFT(nft)}
+                className="item-label"
                 style={{
                   padding: '4px 8px',
-                  fontSize: '10px',
                   cursor: 'pointer',
                   border: selectedNFT?.id === nft.id ? '2px solid #000080' : '1px solid #c0c0c0',
                   background: selectedNFT?.id === nft.id ? '#d4d0c8' : offerFiles[nft.id] ? '#e8f5e9' : '#ffffff',
@@ -179,18 +178,18 @@ export default function AdminPanel() {
 
         {selectedNFT && (
           <div style={{ padding: '8px', background: 'var(--surface-3)', border: '1px inset var(--border-dark)' }}>
-            <p style={{ fontSize: '11px', marginBottom: '8px', fontWeight: 'bold' }}>
+            <p className="panel-header" style={{ marginBottom: '8px', fontWeight: 'bold' }}>
               {selectedNFT.name}
             </p>
             <textarea
               value={offerFileInput}
               onChange={(e) => setOfferFileInput(e.target.value)}
               placeholder="Paste offer file here..."
+              className="error-stack-trace"
               style={{
                 width: '100%',
                 minHeight: '100px',
                 padding: '4px',
-                fontSize: '10px',
                 fontFamily: 'monospace',
                 border: '1px inset #c0c0c0',
                 background: '#ffffff',
