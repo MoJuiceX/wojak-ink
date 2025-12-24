@@ -1,0 +1,92 @@
+.screensaver {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #000080 0%, #000040 100%); /* Windows 98 blue/dark background */
+  z-index: 999999;
+  cursor: none;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-inverse);
+  font-family: 'MS Sans Serif', sans-serif;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  opacity: 1;
+  transition: opacity 0.3s ease-out;
+}
+
+.screensaver.dismissing {
+  opacity: 0;
+}
+
+.screensaver-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.screensaver-orange {
+  position: absolute;
+  pointer-events: none;
+  text-shadow: 0 0 20px rgba(255, 165, 0, 0.8);
+  will-change: transform, left, top;
+  user-select: none;
+}
+
+.screensaver-text {
+  font-size: 48px;
+  font-weight: bold;
+  color: #ff6600;
+  text-shadow: 3px 3px 0 #000, 0 0 30px rgba(255, 102, 0, 0.5);
+  font-family: 'MS Sans Serif', sans-serif;
+  animation: bounceText 8s linear infinite;
+  z-index: 1;
+  user-select: none;
+}
+
+@keyframes bounceText {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(calc(50vw - 200px), calc(50vh - 24px));
+  }
+  50% {
+    transform: translate(calc(100vw - 400px), calc(100vh - 48px));
+  }
+  75% {
+    transform: translate(calc(50vw - 200px), calc(50vh - 24px));
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+.screensaver-hint {
+  position: absolute;
+  bottom: 60px;
+  font-size: 14px;
+  color: var(--text-2);
+  opacity: 0.8;
+  text-align: center;
+  font-family: 'MS Sans Serif', sans-serif;
+  animation: fadeInOut 3s ease-in-out infinite;
+  user-select: none;
+}
+
+@keyframes fadeInOut {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+

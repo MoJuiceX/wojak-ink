@@ -98,8 +98,8 @@ function MarketplaceNFT({ nft, offerFile, onCopyOffer, onViewOffer }) {
       }}
       style={{
         position: 'relative',
-        border: '1px solid #c0c0c0',
-        background: '#ffffff',
+        border: '1px solid var(--border-dark)',
+        background: 'var(--input-face)',
         padding: '4px',
         cursor: offerFile ? 'pointer' : 'default',
       }}
@@ -154,8 +154,8 @@ function MarketplaceNFT({ nft, offerFile, onCopyOffer, onViewOffer }) {
               left: 0,
               width: '100%',
               height: '100%',
-              background: '#d4d0c8',
-              border: '1px inset #c0c0c0',
+              background: 'var(--btn-hover-face)',
+              border: '1px inset var(--border-dark)',
             }}
           />
         )}
@@ -494,23 +494,23 @@ function OfferFileModal({ nft, offerFile, onClose, onCopy }) {
 
         {/* Loading State */}
         {loading && (
-          <div style={{ marginBottom: '12px', padding: '12px', background: '#f0f0f0', border: '1px inset #c0c0c0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ marginBottom: '12px', padding: '12px', background: 'var(--surface-3)', border: '1px inset var(--border-dark)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <LoadingSpinner size="small" />
             <div>
-              <div style={{ fontSize: '11px', marginBottom: '4px' }}>{loadingStage}</div>
-              <div style={{ fontSize: '10px', color: '#666' }}>Please wait...</div>
+              <div style={{ fontSize: '11px', marginBottom: '4px', color: 'var(--text-1)' }}>{loadingStage}</div>
+              <div style={{ fontSize: '10px', color: 'var(--text-2)' }}>Please wait...</div>
             </div>
           </div>
         )}
 
         {/* Error State */}
         {error && !loading && (
-          <div style={{ marginBottom: '12px', padding: '12px', background: '#ffe0e0', border: '1px inset #c0c0c0' }}>
-            <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#cc0000', marginBottom: '4px' }}>
+          <div style={{ marginBottom: '12px', padding: '12px', background: 'var(--surface-3)', border: '1px inset var(--border-dark)' }}>
+            <div style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--state-error)', marginBottom: '4px' }}>
               Error loading NFT details
             </div>
-            <div style={{ fontSize: '10px', color: '#666' }}>{error}</div>
-            <div style={{ fontSize: '10px', color: '#666', marginTop: '4px' }}>
+            <div style={{ fontSize: '10px', color: 'var(--text-2)' }}>{error}</div>
+            <div style={{ fontSize: '10px', color: 'var(--text-2)', marginTop: '4px' }}>
               Using marketplace NFT image as fallback.
             </div>
           </div>
@@ -518,7 +518,7 @@ function OfferFileModal({ nft, offerFile, onClose, onCopy }) {
 
         {/* NFT Details Section - Show if we have details OR if we have a thumbnail from marketplace */}
         {(nftDetails || thumbnailUrl) && !loading && (
-          <div style={{ marginBottom: '12px', padding: '12px', background: '#f0f0f0', border: '1px inset #c0c0c0' }}>
+          <div style={{ marginBottom: '12px', padding: '12px', background: 'var(--surface-3)', border: '1px inset var(--border-dark)' }}>
             <div style={{ fontSize: '11px', fontWeight: 'bold', marginBottom: '8px' }}>NFT Details</div>
             
             {/* Thumbnail */}
@@ -530,8 +530,8 @@ function OfferFileModal({ nft, offerFile, onClose, onCopy }) {
                   style={{
                     maxWidth: '200px',
                     maxHeight: '200px',
-                    border: '1px solid #c0c0c0',
-                    background: '#ffffff',
+                    border: '1px solid var(--border-dark)',
+                    background: 'var(--input-face)',
                   }}
                   onError={(e) => {
                     // Hide image if it fails to load
@@ -543,8 +543,8 @@ function OfferFileModal({ nft, offerFile, onClose, onCopy }) {
                   style={{
                     width: '200px',
                     height: '200px',
-                    background: '#d4d0c8',
-                    border: '1px inset #c0c0c0',
+                    background: 'var(--btn-hover-face)',
+                    border: '1px inset var(--border-dark)',
                     display: 'inline-block',
                   }}
                 />
@@ -560,7 +560,7 @@ function OfferFileModal({ nft, offerFile, onClose, onCopy }) {
                   </div>
                 )}
                 {nftDetails?.data?.metadata_json?.description && (
-                  <div style={{ fontSize: '10px', color: '#666', marginBottom: '4px' }}>
+                  <div style={{ fontSize: '10px', color: 'var(--text-2)', marginBottom: '4px' }}>
                     {nftDetails?.data?.metadata_json?.description}
                   </div>
                 )}
@@ -577,7 +577,7 @@ function OfferFileModal({ nft, offerFile, onClose, onCopy }) {
                     marginBottom: '8px', 
                     padding: '4px 8px', 
                     background: isTaken ? '#ffe0e0' : '#ffffff', 
-                    border: '1px inset #c0c0c0',
+                    border: '1px inset var(--border-dark)',
                     color: isTaken ? '#cc0000' : '#000000'
                   }}>
                     <div style={{ fontSize: '10px', fontWeight: 'bold' }}>Status: {status.text}</div>
@@ -613,7 +613,7 @@ function OfferFileModal({ nft, offerFile, onClose, onCopy }) {
 
             {/* Auction Details */}
             {nftDetails?.auctions && nftDetails.auctions.length > 0 && (
-              <div style={{ marginBottom: '8px', padding: '4px 8px', background: '#ffffff', border: '1px inset #c0c0c0' }}>
+              <div style={{ marginBottom: '8px', padding: '4px 8px', background: 'var(--input-face)', border: '1px inset var(--border-dark)' }}>
                 <div style={{ fontSize: '10px', fontWeight: 'bold', marginBottom: '4px' }}>Auction Details:</div>
                 {nftDetails.auctions.map((auction, idx) => (
                   <div key={idx} style={{ fontSize: '9px', marginBottom: '4px' }}>
@@ -640,7 +640,7 @@ function OfferFileModal({ nft, offerFile, onClose, onCopy }) {
                 <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>Attributes:</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                   {nftDetails?.data?.metadata_json?.attributes?.map((attr, idx) => (
-                    <div key={idx} style={{ padding: '2px 6px', background: '#ffffff', border: '1px solid #c0c0c0', fontSize: '9px' }}>
+                    <div key={idx} style={{ padding: '2px 6px', background: 'var(--input-face)', border: '1px solid var(--border-dark)', fontSize: '9px' }}>
                       {attr.trait_type}: {attr.value}
                     </div>
                   ))}
@@ -683,8 +683,8 @@ function OfferFileModal({ nft, offerFile, onClose, onCopy }) {
               padding: '8px',
               fontSize: '10px',
               fontFamily: 'monospace',
-              border: '1px inset #c0c0c0',
-              background: '#ffffff',
+              border: '1px inset var(--border-dark)',
+              background: 'var(--input-face)',
               resize: 'vertical',
               wordBreak: 'break-all',
             }}
@@ -697,7 +697,7 @@ function OfferFileModal({ nft, offerFile, onClose, onCopy }) {
         <div style={{ display: 'flex', gap: '8px' }}>
           <Button onClick={onClose} style={{ flex: 1 }}>Close</Button>
         </div>
-        <p style={{ fontSize: '10px', color: '#666', marginTop: '8px', marginBottom: 0 }}>
+        <p style={{ fontSize: '10px', color: 'var(--text-2)', marginTop: '8px', marginBottom: 0 }}>
           Tip: You can also click in the text area above to select all text, then copy manually (Ctrl+C / Cmd+C)
         </p>
       </div>
@@ -823,7 +823,7 @@ export default function MarketplaceWindow({ onClose }) {
                 </Button>
               ))
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: '#666' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: 'var(--text-2)' }}>
                 <LoadingSpinner size="small" />
                 <span>Loading groups...</span>
               </div>
@@ -859,8 +859,8 @@ export default function MarketplaceWindow({ onClose }) {
               maxHeight: '600px',
               overflowY: 'auto',
               padding: '8px',
-              background: '#d4d0c8',
-              border: '1px inset #c0c0c0',
+              background: 'var(--btn-hover-face)',
+              border: '1px inset var(--border-dark)',
             }}
           >
             {Array.from({ length: 12 }).map((_, idx) => (
@@ -868,8 +868,8 @@ export default function MarketplaceWindow({ onClose }) {
                 key={`skeleton-${idx}`}
                 style={{
                   position: 'relative',
-                  border: '1px solid #c0c0c0',
-                  background: '#ffffff',
+                  border: '1px solid var(--border-dark)',
+                  background: 'var(--input-face)',
                   padding: '4px',
                   aspectRatio: '1',
                 }}
@@ -887,8 +887,8 @@ export default function MarketplaceWindow({ onClose }) {
               maxHeight: '600px',
               overflowY: 'auto',
               padding: '8px',
-              background: '#d4d0c8',
-              border: '1px inset #c0c0c0',
+              background: 'var(--btn-hover-face)',
+              border: '1px inset var(--border-dark)',
             }}
           >
             {nfts.map((nft) => {

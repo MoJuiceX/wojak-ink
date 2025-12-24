@@ -3,6 +3,7 @@ import { useWindow } from '../contexts/WindowContext'
 import { useMarketplace } from '../contexts/MarketplaceContext'
 import { APPS } from '../constants/apps'
 import AppIcon from './ui/AppIcon'
+import { playSound } from '../utils/soundManager'
 
 export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakGenerator, onOpenApp, menuRef, startButtonRef }) {
   const { getAllWindows, isWindowMinimized, restoreWindow, bringToFront, activeWindowId, isWindowActive } = useWindow()
@@ -25,6 +26,13 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakGen
     if (!isOpen && deferredFocusRafRef.current) {
       cancelAnimationFrame(deferredFocusRafRef.current)
       deferredFocusRafRef.current = null
+    }
+  }, [isOpen])
+
+  // Play menu popup sound when menu opens
+  useEffect(() => {
+    if (isOpen) {
+      playSound('menuPopup')
     }
   }, [isOpen])
 
@@ -69,6 +77,9 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakGen
   }, [isOpen, onClose])
 
   const handleAppClick = (app) => {
+    // Play menu command sound when item is clicked
+    playSound('menuCommand')
+    
     // Capture the active window before we start, so we can detect if the user
     // changes focus before our deferred bringToFront runs.
     const priorActiveId = activeWindowId
@@ -184,7 +195,7 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakGen
     onClose()
   }
 
-  // Keyboard navigation for menu items
+  // Keyboard navigation for menu items with improved arrow key support
   useEffect(() => {
     if (!isOpen) return
 
@@ -193,7 +204,18 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakGen
 
     let focusedIndex = -1
 
+    // Focus first item when menu opens
+    if (menuItems.length > 0) {
+      focusedIndex = 0
+      menuItems[0]?.focus()
+    }
+
     const handleKeyDown = (e) => {
+      // Only handle if focus is within the menu
+      if (!resolvedMenuRef.current?.contains(document.activeElement)) {
+        return
+      }
+
       if (e.key === 'ArrowDown') {
         e.preventDefault()
         focusedIndex = focusedIndex < menuItems.length - 1 ? focusedIndex + 1 : 0
@@ -207,6 +229,14 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakGen
         if (focusedIndex >= 0 && menuItems[focusedIndex]) {
           menuItems[focusedIndex].click()
         }
+      } else if (e.key === 'Home') {
+        e.preventDefault()
+        focusedIndex = 0
+        menuItems[0]?.focus()
+      } else if (e.key === 'End') {
+        e.preventDefault()
+        focusedIndex = menuItems.length - 1
+        menuItems[focusedIndex]?.focus()
       }
     }
 
@@ -259,8 +289,8 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakGen
             padding: '4px 8px',
             fontSize: '10px',
             fontWeight: 'bold',
-            color: '#000',
-            background: '#c0c0c0',
+                    color: 'var(--menu-text)',
+                    background: 'var(--menu-bg)',
             textTransform: 'uppercase',
           }}
         >
@@ -296,8 +326,8 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakGen
             padding: '4px 8px',
             fontSize: '10px',
             fontWeight: 'bold',
-            color: '#000',
-            background: '#c0c0c0',
+                    color: 'var(--menu-text)',
+                    background: 'var(--menu-bg)',
             textTransform: 'uppercase',
           }}
         >

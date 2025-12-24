@@ -177,8 +177,8 @@
   /* Wojak Creator panel widths (desktop) */
   --wojak-controls-panel-width: 200px;
   --wojak-controls-panel-max-width: 225px;
-  --wojak-preview-panel-width: 500px;
-  --wojak-preview-panel-max-width: 600px;
+  --wojak-preview-panel-width: 460px; /* Reduced from 500px to reduce gray space */
+  --wojak-preview-panel-max-width: 520px; /* Reduced from 600px */
     
     /* Window widths */
     --window-width-small: 400px;

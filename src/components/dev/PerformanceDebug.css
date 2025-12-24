@@ -4,9 +4,9 @@
   right: 10px;
   width: 60px;
   height: 30px;
-  border: 2px outset #c0c0c0;
-  background: #c0c0c0;
-  color: #000000;
+  border: 2px outset var(--border-light);
+  background: var(--btn-face);
+  color: var(--btn-text);
   font-family: 'MS Sans Serif', sans-serif;
   font-size: 11px;
   font-weight: bold;
@@ -21,13 +21,13 @@
 }
 
 .performance-debug-toggle:hover {
-  background: #d4d0c8;
+  background: var(--btn-hover-face);
   transform: translateY(-1px);
 }
 
 .performance-debug-toggle:active {
   border-style: inset;
-  background: #a0a0a0;
+  background: var(--btn-active-face);
   transform: scale(0.98);
 }
 

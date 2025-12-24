@@ -520,10 +520,15 @@ export function useMemeGenerator() {
   }, [])
 
   // Memoize canvas dimensions to prevent layout reflow
-  const canvasDimensions = useMemo(() => ({
-    width: 800,
-    height: 800
-  }), [])
+  // Optimize for mobile: use smaller canvas on mobile devices
+  const canvasDimensions = useMemo(() => {
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 640
+    // Use smaller canvas on mobile to reduce memory pressure
+    return {
+      width: isMobile ? 600 : 800,
+      height: isMobile ? 600 : 800
+    }
+  }, [])
   
   // Memoize layer rendering order for consistent composition
   const renderOrder = useMemo(() => {
@@ -778,6 +783,18 @@ export function useMemeGenerator() {
             imagePath = null // Skip Hannibal Mask in regular Mask layer
           }
           // All other masks (including Copium) render normally here
+        } else if (layerName === 'Head') {
+          // Prevent McD.png (logo file from CLOTHES folder) from being rendered as Head layer
+          // Only HEAD_Cap_McD.png should be rendered, not the standalone McD.png logo
+          if (imagePath) {
+            const pathLower = imagePath.toLowerCase()
+            // Block if it's the standalone McD.png logo (not the cap image)
+            // Check for paths that point to CLOTHES/McD.png or just McD.png without HEAD_Cap_ prefix
+            if (pathLower.includes('/clothes/mcd.png') || 
+                (pathLower.endsWith('mcd.png') && !pathLower.includes('head_cap_mcd') && !pathLower.includes('cap_mcd'))) {
+              imagePath = null // Skip rendering the logo file
+            }
+          }
         }
         // MouthBase renders normally (all traits including Screaming render in normal layer)
 
@@ -837,6 +854,28 @@ export function useMemeGenerator() {
             // Enhanced error logging for MouthBase to debug Teeth issue
             if (layerName === 'MouthBase') {
               console.error(`[MouthBase Error] Path: ${imagePath}`, error)
+            }
+            
+            // Show user-friendly error if callback provided
+            if (onError && typeof onError === 'function') {
+              onError(`Failed to load ${layerName} image. Using fallback.`)
+            }
+            
+            // Draw placeholder rectangle to indicate missing image
+            try {
+              ctx.fillStyle = '#d4d0c8' // Windows 98 gray
+              ctx.fillRect(drawX, drawY, drawWidth, drawHeight)
+              // Draw a simple "X" to indicate error
+              ctx.strokeStyle = '#808080'
+              ctx.lineWidth = 2
+              ctx.beginPath()
+              ctx.moveTo(drawX + 5, drawY + 5)
+              ctx.lineTo(drawX + drawWidth - 5, drawY + drawHeight - 5)
+              ctx.moveTo(drawX + drawWidth - 5, drawY + 5)
+              ctx.lineTo(drawX + 5, drawY + drawHeight - 5)
+              ctx.stroke()
+            } catch (drawError) {
+              console.error('Error drawing placeholder:', drawError)
             }
           }
         }

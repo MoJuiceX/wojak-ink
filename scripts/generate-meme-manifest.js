@@ -149,11 +149,16 @@ function createVirtualLayer(newLayerName, mapping) {
   if (fs.existsSync(sourceDir)) {
     const files = getPngFiles(sourceDir)
     // Filter files that match patterns
-    const matchingFiles = files.filter(file => 
-      mapping.filePatterns.some(pattern => 
-        file.toLowerCase().includes(pattern.toLowerCase())
+    const matchingFiles = files.filter(file => {
+      const fileLower = file.toLowerCase()
+      // Exclude rekt/rect variants from MouthBase (these are virtual layers)
+      if (newLayerName === 'MouthBase' && (fileLower.includes('rekt') || fileLower.includes('rect'))) {
+        return false
+      }
+      return mapping.filePatterns.some(pattern => 
+        fileLower.includes(pattern.toLowerCase())
       )
-    )
+    })
     allFiles.push(...matchingFiles)
   }
   
@@ -162,11 +167,16 @@ function createVirtualLayer(newLayerName, mapping) {
     const additionalDir = path.join(WOJAK_CREATOR_DIR, mapping.additionalSource.folder)
     if (fs.existsSync(additionalDir)) {
       const files = getPngFiles(additionalDir)
-      const matchingFiles = files.filter(file => 
-        mapping.additionalSource.patterns.some(pattern => 
-          file.toLowerCase().includes(pattern.toLowerCase())
+      const matchingFiles = files.filter(file => {
+        const fileLower = file.toLowerCase()
+        // Exclude rekt/rect variants from MouthBase (these are virtual layers)
+        if (newLayerName === 'MouthBase' && (fileLower.includes('rekt') || fileLower.includes('rect'))) {
+          return false
+        }
+        return mapping.additionalSource.patterns.some(pattern => 
+          fileLower.includes(pattern.toLowerCase())
         )
-      )
+      })
       allFiles.push(...matchingFiles)
     }
   }

@@ -105,7 +105,7 @@ export default function MintInfoWindow({ onNotifyClick, onClose }) {
             (<a
               href="https://x.com/MoJuiceX/status/2002063961378939094"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
               click here
             </a>
@@ -116,7 +116,7 @@ export default function MintInfoWindow({ onNotifyClick, onClose }) {
             (<a
               href="https://x.com/MoJuiceX/status/2002216553605914952"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
               click here
             </a>
@@ -131,7 +131,7 @@ export default function MintInfoWindow({ onNotifyClick, onClose }) {
             (<a
               href="https://x.com/MoJuiceX/status/2001989285017473486"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
               click here
             </a>
@@ -139,7 +139,7 @@ export default function MintInfoWindow({ onNotifyClick, onClose }) {
             (<a
               href="https://x.com/MoJuiceX/status/2001990410240176610"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
               click here
             </a>
@@ -155,7 +155,7 @@ export default function MintInfoWindow({ onNotifyClick, onClose }) {
           <Button
             onClick={() =>
               window.open(
-                'https://wojakfarmersplot.crate.ink/#/collection-detail/WOJAKFARMERSPLOT',
+                'https://crate.ink/#/collection-detail/WOJAKFARMERSPLOT',
                 '_blank',
                 'noopener,noreferrer'
               )
@@ -164,7 +164,7 @@ export default function MintInfoWindow({ onNotifyClick, onClose }) {
             Open Crate
           </Button>
           <Button
-            onClick={() => window.open('https://x.com/MoJuiceX', '_blank')}
+            onClick={() => window.open('https://x.com/MoJuiceX', '_blank', 'noopener,noreferrer')}
           >
             Follow Updates
           </Button>

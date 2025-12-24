@@ -1,10 +1,12 @@
 export { default as Button } from './Button'
 export { default as Select } from './Select'
+export { default as ContextMenu } from './ContextMenu'
 export { default as Checkbox } from './Checkbox'
 export { default as Input } from './Input'
 export { default as FieldRow } from './FieldRow'
 export { default as Label } from './Label'
 export { default as LoadingSpinner } from './LoadingSpinner'
+export { default as ProgressBar } from './ProgressBar'
 export { default as Skeleton } from './Skeleton'
 export { default as Toast } from './Toast'
 

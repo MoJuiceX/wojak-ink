@@ -1,0 +1,95 @@
+.clippy-container {
+  position: fixed;
+  bottom: 60px;
+  right: 20px;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  z-index: 99999;
+}
+
+.clippy-container.animate {
+  animation: clippyBounce 0.5s ease-out;
+}
+
+@keyframes clippyBounce {
+  0% { transform: translateY(100px); opacity: 0; }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.clippy-character {
+  font-size: 64px;
+  animation: clippyWiggle 2s ease-in-out infinite;
+}
+
+@keyframes clippyWiggle {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+
+.clippy-bubble {
+  background: #ffffcc;
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 12px;
+  max-width: 250px;
+  position: relative;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+}
+
+.clippy-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: 20px;
+  left: -10px;
+  border: 8px solid transparent;
+  border-right-color: #000;
+}
+
+.clippy-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: 22px;
+  left: -6px;
+  border: 6px solid transparent;
+  border-right-color: #ffffcc;
+}
+
+.clippy-close {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #666;
+}
+
+.clippy-bubble p {
+  margin: 0 0 12px 0;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.clippy-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.clippy-buttons button {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 11px;
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  cursor: pointer;
+}
+
+.clippy-buttons button:active {
+  border-color: #808080 #ffffff #ffffff #808080;
+}
+
+

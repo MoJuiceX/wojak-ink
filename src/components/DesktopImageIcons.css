@@ -1,0 +1,113 @@
+/* Desktop Image Icon Animations and Styles */
+
+.desktop-image-icons-container {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 46px; /* Above taskbar */
+  z-index: 10;
+  pointer-events: none; /* Let clicks pass through, children will have pointer-events */
+}
+
+.desktop-image-icon {
+  transition: transform 0.15s ease-out, opacity 0.2s, background 0.2s;
+  user-select: none;
+}
+
+.desktop-image-icon:hover:not(.dragging) {
+  transform: scale(1.05);
+}
+
+.desktop-image-icon.selected {
+  background: rgba(0, 0, 128, 0.3) !important;
+}
+
+[data-theme="dark"] .desktop-image-icon.selected {
+  background: rgba(33, 150, 243, 0.3) !important;
+}
+
+[data-theme="light"] .desktop-image-icon.selected {
+  background: rgba(0, 102, 204, 0.3) !important;
+}
+
+.desktop-image-icon.selected .desktop-image-icon-label {
+  background: var(--accent);
+  color: var(--text-inverse);
+}
+
+.desktop-image-icon.dragging {
+  cursor: grabbing !important;
+  opacity: 0.7;
+  transition: none !important; /* Disable transitions during drag for smooth movement */
+  z-index: 1000; /* Bring to front while dragging */
+}
+
+.desktop-image-icon-thumbnail {
+  transition: border-color 0.15s, transform 0.15s ease-out;
+}
+
+.desktop-image-icon-thumbnail.selected {
+  border-color: var(--accent) !important;
+}
+
+.desktop-image-icon-label {
+  transition: background 0.15s, color 0.15s;
+}
+
+.desktop-image-icon-label.selected {
+  background: var(--accent);
+  color: var(--text-inverse);
+}
+
+/* Recycle bin hover when dragging over */
+.recycle-bin.drag-hover {
+  transform: scale(1.1);
+  background: rgba(255, 100, 100, 0.3) !important;
+  border: 2px solid #ff0000 !important;
+  border-radius: 4px;
+  transition: transform 0.2s ease-out, background 0.2s, border 0.2s;
+}
+
+.recycle-bin.drag-hover svg {
+  animation: shake 0.3s ease-in-out infinite;
+}
+
+@keyframes shake {
+  0%, 100% { 
+    transform: rotate(0deg) translate(0, 0); 
+  }
+  25% { 
+    transform: rotate(-5deg) translate(-2px, -2px); 
+  }
+  75% { 
+    transform: rotate(5deg) translate(2px, -2px); 
+  }
+}
+
+/* Snap animation when dropped */
+@keyframes snapToGrid {
+  0% { 
+    transform: scale(1.1); 
+  }
+  50% { 
+    transform: scale(0.95); 
+  }
+  100% { 
+    transform: scale(1); 
+  }
+}
+
+.desktop-image-icon.just-dropped {
+  animation: snapToGrid 0.2s ease-out;
+}
+
+/* Ghost drag image styling */
+.desktop-image-icon.ghost {
+  opacity: 0.8;
+  transform: scale(1.1);
+  filter: drop-shadow(4px 4px 8px rgba(0, 0, 0, 0.4));
+  pointer-events: none;
+  z-index: 99999;
+}
+

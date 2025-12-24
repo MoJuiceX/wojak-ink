@@ -1,0 +1,13 @@
+# Wrangler configuration for Cloudflare Pages Functions
+# This file is used for local development with `wrangler dev`
+
+name = "wojak-ink"
+compatibility_date = "2024-01-01"
+
+# Pages Functions configuration
+pages_build_output_dir = "dist"
+
+# Environment variables are loaded from .env file automatically
+# Make sure OPENAI_API_KEY is set in your .env file for local development
+
+

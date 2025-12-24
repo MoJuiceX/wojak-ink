@@ -335,8 +335,8 @@ export function formatDisplayLabel(rawLabel) {
     return 'El Presidente'
   }
   
-  // Swat Gear → SWAT Gear (ensure SWAT is fully capitalized)
-  if (clothesLabelLower.includes('swat') && clothesLabelLower.includes('gear')) {
+  // Swat Gear → SWAT Gear (ensure SWAT is fully capitalized and always include "Gear")
+  if (clothesLabelLower.includes('swat')) {
     return 'SWAT Gear'
   }
 

@@ -95,8 +95,8 @@ export default function NotifyPopup({ isOpen, onClose }) {
       style={{
         width: '640px',
         position: 'fixed',
-        left: '0px',
-        top: '0px',
+        // Don't set left/top here - let centering logic handle it
+        // left and top will be set by useLayoutEffect centering logic
         zIndex: 1000000,
       }}
       onClose={onClose}

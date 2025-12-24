@@ -57,7 +57,7 @@ export default function PaintWindow({ onClose }) {
         
         // Method 3: Fallback - open image in new window for manual copy
         const imageUrl = URL.createObjectURL(blob)
-        const newWindow = window.open(imageUrl, '_blank')
+        const newWindow = window.open(imageUrl, '_blank', 'noopener,noreferrer')
         if (newWindow) {
           alert('Image opened in new window. Right-click and copy the image, then paste it into Paint (Ctrl+V).')
         } else {

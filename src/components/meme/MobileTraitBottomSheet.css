@@ -4,8 +4,8 @@
   left: 0;
   right: 0;
   z-index: 10001;
-  background: #c0c0c0;
-  border-top: 2px outset #ffffff;
+  background: var(--panel-face);
+  border-top: 2px outset var(--border-light);
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
   /* Native app-like smooth transitions - transform + opacity only (GPU-friendly) */
   transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
@@ -46,8 +46,8 @@
   align-items: center;
   touch-action: none;
   user-select: none;
-  background: #c0c0c0;
-  border-bottom: 1px inset #808080;
+  background: var(--panel-face);
+  border-bottom: 1px inset var(--border-dark);
   /* Haptic feedback - opacity only */
   transition: opacity 0.1s ease;
 }
@@ -67,7 +67,7 @@
 .handle-bar {
   width: 48px;
   height: 5px;
-  background: #808080;
+  background: var(--border-dark);
   border-radius: 3px;
   /* Subtle shadow for depth */
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
@@ -89,9 +89,9 @@
 
 .primary-button {
   padding: var(--spacing-md) var(--spacing-sm);
-  border: 2px outset #c0c0c0;
-  background: #c0c0c0;
-  color: #000000;
+  border: 2px outset var(--border-light);
+  background: var(--btn-face);
+  color: var(--btn-text);
   font-family: 'MS Sans Serif', sans-serif;
   font-size: 12px;
   font-weight: bold;
@@ -110,12 +110,12 @@
 }
 
 .primary-button:hover:not(:disabled) {
-  background: #d4d0c8;
+  background: var(--btn-hover-face);
 }
 
 .primary-button:active:not(:disabled) {
   border-style: inset;
-  background: #a0a0a0;
+  background: var(--btn-active-face);
   /* Haptic feedback - scale down slightly + opacity */
   transform: scale(0.95);
   opacity: 0.9;
@@ -129,32 +129,32 @@
 
 /* Action button variants */
 .primary-button-traits {
-  background: #0080ff;
-  color: #ffffff;
-  border-color: #004080;
+  background: var(--accent);
+  color: var(--text-inverse);
+  border-color: var(--accent);
 }
 
 .primary-button-traits:hover:not(:disabled) {
-  background: #0090ff;
+  background: var(--accent-2);
 }
 
 .primary-button-random {
   background: #c0c0c0;
-  color: #000000;
+  color: var(--text-1);
 }
 
 .primary-button-random:hover:not(:disabled) {
-  background: #d4d0c8;
+  background: var(--btn-hover-face);
 }
 
 .primary-button-save {
-  background: #008000;
-  color: #ffffff;
-  border-color: #004000;
+  background: var(--state-success);
+  color: var(--text-inverse);
+  border-color: var(--state-success);
 }
 
 .primary-button-save:hover:not(:disabled) {
-  background: #009000;
+  background: var(--state-success);
 }
 
 .primary-button.disabled {
@@ -173,15 +173,15 @@
 
 .trait-summary {
   padding: var(--spacing-sm);
-  background: #f0f0f0;
-  border: 1px inset #c0c0c0;
+  background: var(--surface-3);
+  border: 1px inset var(--border-dark);
   font-size: 10px;
 }
 
 .summary-label {
   font-weight: bold;
   margin-bottom: 4px;
-  color: #000000;
+  color: var(--text-1);
 }
 
 .summary-items {
@@ -191,12 +191,12 @@
 }
 
 .summary-item {
-  color: #404040;
+  color: var(--text-2);
   font-size: 9px;
 }
 
 .summary-more {
-  color: #808080;
+  color: var(--text-muted);
   font-style: italic;
   margin-top: 4px;
 }
@@ -204,9 +204,9 @@
 .expand-button {
   width: 100%;
   padding: var(--spacing-md);
-  border: 2px outset #c0c0c0;
-  background: #c0c0c0;
-  color: #000000;
+  border: 2px outset var(--border-light);
+  background: var(--btn-face);
+  color: var(--btn-text);
   font-family: 'MS Sans Serif', sans-serif;
   font-size: 12px;
   font-weight: bold;
@@ -218,12 +218,12 @@
 }
 
 .expand-button:hover {
-  background: #d4d0c8;
+  background: var(--btn-hover-face);
 }
 
 .expand-button:active {
   border-style: inset;
-  background: #a0a0a0;
+  background: var(--btn-active-face);
   /* Haptic feedback - scale down slightly + opacity */
   transform: scale(0.97);
   opacity: 0.9;
@@ -245,7 +245,7 @@
 .export-controls-mobile-expanded {
   padding: var(--spacing-md);
   border-top: 1px inset #c0c0c0;
-  background: #f0f0f0;
+  background: var(--surface-3);
   flex-shrink: 0;
   margin-top: auto;
 }
@@ -308,7 +308,7 @@
   margin: 0;
   font-size: 14px;
   font-weight: bold;
-  color: #000000;
+  color: var(--text-1);
   font-family: 'MS Sans Serif', sans-serif;
 }
 
@@ -317,9 +317,9 @@
   height: 44px; /* Thumb-friendly touch target */
   min-width: 44px;
   min-height: 44px;
-  border: 2px outset #c0c0c0;
-  background: #c0c0c0;
-  color: #000000;
+  border: 2px outset var(--border-light);
+  background: var(--btn-face);
+  color: var(--btn-text);
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
@@ -335,12 +335,12 @@
 }
 
 .close-button:hover {
-  background: #d4d0c8;
+  background: var(--btn-hover-face);
 }
 
 .close-button:active {
   border-style: inset;
-  background: #a0a0a0;
+  background: var(--btn-active-face);
   /* Haptic feedback - scale down slightly + opacity */
   transform: scale(0.9);
   opacity: 0.8;
@@ -355,16 +355,16 @@
 .sheet-search {
   padding: var(--spacing-md);
   border-bottom: 1px inset #808080;
-  background: #f0f0f0;
+  background: var(--surface-3);
   flex-shrink: 0;
 }
 
 .search-input {
   width: 100%;
   padding: var(--spacing-sm) var(--spacing-md);
-  border: 2px inset #c0c0c0;
-  background: #ffffff;
-  color: #000000;
+  border: 2px inset var(--border-dark);
+  background: var(--input-face);
+  color: var(--text-1);
   font-family: 'MS Sans Serif', sans-serif;
   font-size: 12px;
   box-sizing: border-box;
@@ -382,7 +382,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding: var(--spacing-md);
-  background: #f0f0f0;
+  background: var(--surface-3);
 }
 
 .trait-item {
@@ -392,7 +392,7 @@
 .no-results {
   padding: var(--spacing-xl);
   text-align: center;
-  color: #808080;
+  color: var(--text-muted);
   font-size: 12px;
   font-style: italic;
 }

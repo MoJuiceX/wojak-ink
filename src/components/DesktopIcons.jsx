@@ -1,6 +1,7 @@
 import { useWindow } from '../contexts/WindowContext'
 import { APPS, DESKTOP_MAIN_ORDER, DESKTOP_GAMES_ORDER, DESKTOP_LINKS_ORDER } from '../constants/apps'
 import AppIcon from './ui/AppIcon'
+import { playSound } from '../utils/soundManager'
 
 export default function DesktopIcons({ onOpenApp }) {
   const { getAllWindows, isWindowMinimized, restoreWindow, bringToFront } = useWindow()
@@ -66,6 +67,7 @@ export default function DesktopIcons({ onOpenApp }) {
   const renderIconButton = (app, isLink = false) => (
     <button
       key={app.id}
+      onClick={() => playSound('click')}
       onDoubleClick={() => handleAppClick(app)}
       className={isLink ? 'desktop-icon-button desktop-icon-link' : 'desktop-icon-button'}
       style={{
@@ -149,7 +151,7 @@ export default function DesktopIcons({ onOpenApp }) {
     marginBottom: '8px',
     width: '96px',
     textAlign: 'center',
-    border: '1px inset #c0c0c0',
+    border: '1px inset var(--border-dark)',
   }
 
   return (

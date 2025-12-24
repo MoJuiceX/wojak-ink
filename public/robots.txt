@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin-enable
+Disallow: /dev/
+
+Sitemap: https://wojak.ink/sitemap.xml
+

@@ -286,6 +286,16 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
           }
         }
         
+        // Filter out McD.png from Clothes layer (it's only used as a cap color option, not a clothing item)
+        if (layerName === 'Clothes') {
+          const pathLower = (img.path || '').toLowerCase()
+          const displayNameLower = ((img.displayName || img.name) || '').toLowerCase()
+          if (pathLower.includes('mcd.png') || displayNameLower.includes('mcd') || 
+              (pathLower.endsWith('mcd.png') && !pathLower.includes('head'))) {
+            return // Skip McD.png logo - it's not a clothing item
+          }
+        }
+        
         // Get rawLabel early for use in filters
         const rawLabel = img.displayName || img.name
         
@@ -1471,9 +1481,9 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
       className={`trait-selector-wrapper ${isFocusedTrait ? 'trait-focused' : ''}`}
       style={{ opacity: disabled ? 0.5 : 1 }}
     >
-      {/* Fixed-height message slot - always rendered for ALL rows to prevent layout shift, but now empty */}
+      {/* Fixed-height message slot - always rendered for ALL rows to prevent layout shift */}
       <div className="trait-message-slot">
-        {/* Message moved to inside dropdown */}
+        {/* Reserved space - message shown inside select when disabled */}
       </div>
       <Label htmlFor={`select-${layerName}`} className="trait-label">
         {displayName}:

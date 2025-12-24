@@ -27,7 +27,7 @@ export default function FaqWindow({ onClose }) {
         <a
           href="https://wojakfarmersplot.crate.ink/#/"
           target="_blank"
-          rel="noreferrer"
+              rel="noopener noreferrer"
         >
           Crate.ink
         </a>

@@ -122,8 +122,8 @@
   font-family: 'MS Sans Serif', sans-serif;
   font-size: 11px;
   font-weight: bold;
-  color: #000;
-  text-shadow: 1px 1px 0 #fff;
+  color: var(--text-1);
+  text-shadow: 1px 1px 0 var(--border-light);
   pointer-events: none;
   z-index: 1;
 }
@@ -135,12 +135,12 @@
   left: 50%;
   transform: translateX(-50%);
   padding: 8px 16px;
-  border: 2px outset #c0c0c0;
-  background: #c0c0c0;
+  border: 2px outset var(--border-light);
+  background: var(--btn-face);
   font-family: 'MS Sans Serif', sans-serif;
   font-size: 12px;
   font-weight: bold;
-  color: #000;
+  color: var(--btn-text);
   cursor: pointer;
   z-index: 10003;
   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);

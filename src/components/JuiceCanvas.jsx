@@ -195,6 +195,25 @@ export default function JuiceCanvas() {
     shakeEndTimeRef.current = Date.now() + 120
   }
 
+  // Track visibility to pause animation when off-screen
+  const isVisibleRef = useRef(true)
+  
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    // Use IntersectionObserver to pause animation when canvas is off-screen
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisibleRef.current = entry.isIntersecting && entry.intersectionRatio > 0
+      },
+      { threshold: 0 }
+    )
+    observer.observe(canvas)
+
+    return () => observer.disconnect()
+  }, [])
+
   // Animation loop
   useEffect(() => {
     const canvas = canvasRef.current
@@ -212,6 +231,11 @@ export default function JuiceCanvas() {
     let lastTime = Date.now()
     
     const animate = () => {
+      // Skip frame if canvas is not visible
+      if (!isVisibleRef.current) {
+        rafIdRef.current = requestAnimationFrame(animate)
+        return
+      }
       const now = Date.now()
       const deltaTime = now - lastTime
       lastTime = now

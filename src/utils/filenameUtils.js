@@ -212,3 +212,57 @@ export function generateWojakFilename({ selectedLayers }) {
   return filename.replace(/[-_]+\.png$/, '.png')
 }
 
+/**
+ * Build image name from selected layers for desktop storage
+ * Simpler format than generateWojakFilename - just trait names joined with underscores
+ * Format: "Wojak_[traits].png" or "CyberTang_[traits].png"
+ * @param {Object} selectedLayers - Object mapping layer names to image paths
+ * @param {string} type - Image type: 'original' or 'cybertang'
+ * @returns {string} Filename
+ */
+export function buildImageName(selectedLayers, type = 'original') {
+  if (!selectedLayers) {
+    return type === 'cybertang' ? 'CyberTang.png' : 'Wojak.png'
+  }
+
+  const prefix = type === 'cybertang' ? 'CyberTang' : 'Wojak'
+  const traits = []
+
+  // Extract trait names from each layer
+  for (const layerName of GENERATOR_LAYER_ORDER) {
+    const value = selectedLayers[layerName]
+    if (!value || value === '' || value === 'None') continue
+    
+    // Check if filename contains 'none' (case-insensitive)
+    const basename = value.split('/').pop() || ''
+    if (basename.toLowerCase().includes('none')) continue
+
+    // Get display label from manifest
+    const displayLabel = getDisplayLabelForPath(layerName, value)
+    if (!displayLabel || displayLabel.toLowerCase() === 'none') continue
+
+    // Format trait name: remove spaces, special chars, keep alphanumeric and hyphens
+    let traitName = displayLabel
+      .replace(/\([^)]+\)/g, '') // Remove parentheses and content
+      .replace(/[^a-zA-Z0-9\s-]/g, '') // Remove special chars
+      .replace(/\s+/g, '') // Remove spaces
+      .replace(/-+/g, '') // Remove hyphens
+    
+    if (traitName && traitName.length > 0) {
+      traits.push(traitName)
+    }
+  }
+
+  // Build filename
+  let filename = traits.length > 0 
+    ? `${prefix}_${traits.join('_')}` 
+    : prefix
+
+  // Limit filename length to 50 characters (excluding extension)
+  if (filename.length > 50) {
+    filename = filename.substring(0, 50)
+  }
+
+  return `${filename}.png`
+}
+

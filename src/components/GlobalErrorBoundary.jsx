@@ -12,7 +12,7 @@ class GlobalErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     this.setState({ error, errorInfo })
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       // Surface full details in dev tools
       // eslint-disable-next-line no-console
       console.error('[GlobalErrorBoundary] Uncaught error:', error, errorInfo)
@@ -24,7 +24,7 @@ class GlobalErrorBoundary extends React.Component {
       return this.props.children
     }
 
-    const isDev = process.env.NODE_ENV === 'development'
+    const isDev = import.meta.env.DEV
 
     return (
       <div
@@ -82,6 +82,7 @@ class GlobalErrorBoundary extends React.Component {
 }
 
 export default GlobalErrorBoundary
+
 
 
 

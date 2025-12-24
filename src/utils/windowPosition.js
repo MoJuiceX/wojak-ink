@@ -64,7 +64,7 @@ export function getCenteredPosition({ width, height, padding = 24, isMobile = fa
   const availableHeight = viewportHeight - taskbarHeight - safeAreaBottom
   
   // #region agent log
-  if (windowId === 'window-readme-txt' || windowId?.includes('readme')) {
+  if ((windowId === 'window-readme-txt' || windowId?.includes('readme')) && import.meta.env.DEV) {
     fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'windowPosition.js:49',message:'getCenteredPosition entry',data:{windowId,width,height,padding,isMobile,viewportWidth,viewportHeight,taskbarHeight,safeAreaBottom,availableHeight},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
   }
   // #endregion
@@ -76,7 +76,7 @@ export function getCenteredPosition({ width, height, padding = 24, isMobile = fa
   let y = Math.floor((viewportHeight - height) / 2)
   
   // #region agent log
-  if (windowId === 'window-readme-txt' || windowId?.includes('readme')) {
+  if ((windowId === 'window-readme-txt' || windowId?.includes('readme')) && import.meta.env.DEV) {
     fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'windowPosition.js:66',message:'After initial Y calculation',data:{windowId,calculatedY:y,availableHeight,height,viewportHeight,taskbarHeight},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'H1'})}).catch(()=>{});
   }
   // #endregion
@@ -99,7 +99,7 @@ export function getCenteredPosition({ width, height, padding = 24, isMobile = fa
   y = Math.max(minPadding, Math.min(y, maxY))
   
   // #region agent log
-  if (windowId === 'window-readme-txt' || windowId?.includes('readme')) {
+  if ((windowId === 'window-readme-txt' || windowId?.includes('readme')) && import.meta.env.DEV) {
     fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'windowPosition.js:79',message:'After clamping',data:{windowId,yBeforeClamp,yAfterClamp:y,minPadding,availableHeight,height,calculatedCenterY:Math.floor((viewportHeight - height) / 2),maxY},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'H1'})}).catch(()=>{});
   }
   // #endregion

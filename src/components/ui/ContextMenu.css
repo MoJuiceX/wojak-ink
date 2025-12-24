@@ -1,0 +1,65 @@
+.context-menu {
+  position: fixed;
+  z-index: 99999;
+  background: var(--menu-bg);
+  border: 2px solid;
+  border-color: var(--border-light) var(--border-dark) var(--border-dark) var(--border-light);
+  /* Use token-based shadow - create shadow token if needed, or use border-dark for now */
+  box-shadow: 2px 2px 5px var(--border-dark);
+  min-width: 150px;
+  padding: 2px;
+}
+
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 4px 24px 4px 8px;
+  background: none;
+  border: none;
+  font-family: 'MS Sans Serif', sans-serif;
+  font-size: 11px;
+  text-align: left;
+  cursor: pointer;
+  color: var(--menu-text);
+}
+
+.context-menu-item:hover:not(.disabled) {
+  background: var(--menu-hover-bg);
+  color: var(--menu-hover-text);
+}
+
+.context-menu-item.disabled {
+  color: var(--text-disabled);
+  cursor: default;
+}
+
+.context-menu-icon {
+  width: 16px;
+  margin-right: 8px;
+  display: inline-block;
+  text-align: center;
+}
+
+.context-menu-label {
+  flex: 1;
+}
+
+.context-menu-shortcut {
+  margin-left: 16px;
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.context-menu-item:hover:not(.disabled) .context-menu-shortcut {
+  color: var(--menu-hover-text);
+}
+
+.context-menu-separator {
+  height: 1px;
+  background: var(--menu-separator);
+  margin: 4px 2px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+

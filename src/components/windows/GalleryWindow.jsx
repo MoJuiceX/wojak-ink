@@ -1,5 +1,5 @@
 import Window from './Window'
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Skeleton } from '../ui'
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver'
 
@@ -23,7 +23,7 @@ const GALLERY_ITEMS = [
 
 const BASE_URL = 'https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/'
 
-function GalleryThumb({ item }) {
+function GalleryThumb({ item, index, allItems }) {
   const [frontSrc, setFrontSrc] = useState(`${BASE_URL}${item.front}`)
   const [backSrc, setBackSrc] = useState(`${BASE_URL}${item.back}`)
   const [frontAttempted, setFrontAttempted] = useState(false)
@@ -35,6 +35,38 @@ function GalleryThumb({ item }) {
   const [frontError, setFrontError] = useState(false)
   const [backError, setBackError] = useState(false)
   const { elementRef, hasIntersected } = useIntersectionObserver()
+
+  // Preload adjacent images when this item becomes visible
+  useEffect(() => {
+    if (!hasIntersected) return
+
+    // Preload next 2 items
+    const preloadNext = []
+    for (let i = 1; i <= 2 && index + i < allItems.length; i++) {
+      const nextItem = allItems[index + i]
+      if (nextItem) {
+        preloadNext.push(`${BASE_URL}${nextItem.front}`)
+        preloadNext.push(`${BASE_URL}${nextItem.back}`)
+      }
+    }
+
+    // Preload previous 2 items
+    const preloadPrev = []
+    for (let i = 1; i <= 2 && index - i >= 0; i++) {
+      const prevItem = allItems[index - i]
+      if (prevItem) {
+        preloadPrev.push(`${BASE_URL}${prevItem.front}`)
+        preloadPrev.push(`${BASE_URL}${prevItem.back}`)
+      }
+    }
+
+    // Preload all adjacent images
+    const allPreload = [...preloadNext, ...preloadPrev]
+    allPreload.forEach(url => {
+      const img = new Image()
+      img.src = url
+    })
+  }, [hasIntersected, index, allItems])
 
   const handleFrontError = () => {
     setFrontLoading(false)
@@ -181,7 +213,7 @@ function GalleryThumb({ item }) {
           left: '50%',
           transform: 'translate(-50%, -50%)',
           fontSize: '9px',
-          color: '#666',
+          color: 'var(--text-2)',
           textAlign: 'center',
         }}>
           Failed to load
@@ -197,21 +229,39 @@ function GalleryThumb({ item }) {
 }
 
 export default function GalleryWindow({ onClose }) {
+  // Calculate responsive default window size (memoized to avoid recalculation on every render)
+  // Desktop: 82% width (max 1150px), 81% height (max 900px)
+  // Taller/wider defaults for better visual balance and breathing room
+  const defaultDimensions = useMemo(() => {
+    const viewportWidth = window.innerWidth
+    const viewportHeight = window.innerHeight
+    
+    const defaultWidth = Math.min(1150, Math.floor(viewportWidth * 0.82))
+    const defaultHeight = Math.min(900, Math.floor(viewportHeight * 0.81))
+    
+    return {
+      width: `${Math.round(defaultWidth)}px`,
+      height: `${Math.round(defaultHeight)}px`,
+      maxWidth: 'calc(100vw - 50px)',
+      minWidth: '760px',
+      minHeight: '560px'
+    }
+  }, []) // Empty dependency array - calculate once on mount
+
   return (
     <Window
       id="window-gallery"
       title="GALLERY"
-      style={{ 
-        width: 'var(--window-size-gallery)', 
-        maxWidth: 'var(--window-max-width)',
-        minWidth: 'var(--window-min-width)'
-      }}
+      allowScroll={false}
+      style={defaultDimensions}
       onClose={onClose}
     >
-      <div className="grid gallery-grid" role="grid" aria-label="Gallery of Wojak NFTs">
-        {GALLERY_ITEMS.map((item, index) => (
-          <GalleryThumb key={index} item={item} />
-        ))}
+      <div className="gallery-content-wrapper">
+        <div className="grid gallery-grid" role="grid" aria-label="Gallery of Wojak NFTs">
+          {GALLERY_ITEMS.map((item, index) => (
+            <GalleryThumb key={index} item={item} index={index} allItems={GALLERY_ITEMS} />
+          ))}
+        </div>
       </div>
       <p className="fineprint">Random previews from the collection.</p>
     </Window>

@@ -350,7 +350,7 @@ export function WindowProvider({ children }) {
       }
       
       // #region agent log
-      if (isTryAgainWindow) {
+      if (isTryAgainWindow && import.meta.env.DEV) {
         fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:391',message:'registerWindow final windowEntry',data:{windowId,windowEntryPosition:windowEntry.position,windowEntrySize:windowEntry.size},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
       }
       // #endregion
@@ -796,7 +796,7 @@ export function WindowProvider({ children }) {
   // Update window position
   const updateWindowPosition = useCallback((windowId, position) => {
     // #region agent log
-    if (windowId === 'window-readme-txt' || windowId?.includes('readme')) {
+    if ((windowId === 'window-readme-txt' || windowId?.includes('readme')) && import.meta.env.DEV) {
       fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:596',message:'updateWindowPosition called',data:{windowId,position},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
     }
     // #endregion
@@ -805,7 +805,7 @@ export function WindowProvider({ children }) {
       const window = next.get(windowId)
       if (window && !window.isMaximized) {
         // #region agent log
-        if (windowId === 'window-readme-txt' || windowId?.includes('readme')) {
+        if ((windowId === 'window-readme-txt' || windowId?.includes('readme')) && import.meta.env.DEV) {
           fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:603',message:'updateWindowPosition - updating window state',data:{windowId,oldPosition:window.position,newPosition:position},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
         }
         // #endregion

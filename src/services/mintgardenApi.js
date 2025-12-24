@@ -1,19 +1,33 @@
+import { fetchWithRetry } from '../utils/apiRetry'
+
 const MINTGARDEN_API_BASE = 'https://api.mintgarden.io'
 const DEXIE_API_BASE = 'https://api.dexie.space/v1'
 
 // Get NFT by launcher_bech32 - returns NftWithAuctions
 export async function fetchNFTDetails(launcherBech32) {
   try {
-    const response = await fetch(`${MINTGARDEN_API_BASE}/nfts/${launcherBech32}`)
-    if (response.status === 429) {
-      throw new Error('429 rate limit - MintGarden API')
-    }
-    if (!response.ok) {
-      throw new Error(`MintGarden API error: ${response.status}`)
-    }
+    const response = await fetchWithRetry(`${MINTGARDEN_API_BASE}/nfts/${launcherBech32}`, {}, {
+      maxRetries: 3,
+      timeout: 10000,
+      baseDelay: 1000,
+      retryStatuses: [429, 502, 503, 504] // Retry on rate limits and server errors
+    })
+
     return await response.json()
   } catch (error) {
     console.error('Failed to fetch NFT details:', error)
+    
+    // Provide user-friendly error messages
+    if (error.message.includes('timeout')) {
+      throw new Error('Request timed out. Please try again.')
+    }
+    if (error.message.includes('offline')) {
+      throw new Error('You are offline. Please check your internet connection.')
+    }
+    if (error.message.includes('429')) {
+      throw new Error('Rate limit exceeded. Please wait a moment and try again.')
+    }
+    
     throw error
   }
 }

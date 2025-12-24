@@ -1,0 +1,29 @@
+.orange-rain {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 999998;
+  overflow: hidden;
+}
+
+.orange-rain-drop {
+  position: absolute;
+  top: -50px;
+  animation: rainFall linear forwards;
+}
+
+@keyframes rainFall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+

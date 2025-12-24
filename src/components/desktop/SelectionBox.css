@@ -1,0 +1,17 @@
+.selection-box {
+  position: absolute;
+  border: 1px dashed var(--accent);
+  background: rgba(0, 0, 128, 0.2);
+  pointer-events: none;
+  z-index: 100;
+}
+
+[data-theme="dark"] .selection-box {
+  background: rgba(33, 150, 243, 0.2);
+}
+
+[data-theme="light"] .selection-box {
+  background: rgba(0, 102, 204, 0.2);
+}
+
+

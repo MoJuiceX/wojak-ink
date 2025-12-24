@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback } from 'react'
 import Toast from '../components/ui/Toast'
+import { playSound } from '../utils/soundManager'
 
 const ToastContext = createContext()
 
@@ -9,6 +10,25 @@ export function ToastProvider({ children }) {
   const showToast = useCallback((message, type = 'info', duration = 3000) => {
     const id = Date.now() + Math.random()
     setToasts(prev => [...prev, { id, message, type, duration }])
+    
+    // Play sound based on toast type
+    switch (type) {
+      case 'success':
+        playSound('notify')
+        break
+      case 'error':
+        playSound('error')
+        break
+      case 'warning':
+        playSound('exclamation')
+        break
+      case 'info':
+        playSound('asterisk')
+        break
+      default:
+        playSound('notify')
+    }
+    
     return id
   }, [])
 

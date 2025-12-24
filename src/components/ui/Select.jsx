@@ -25,8 +25,9 @@ const Select = React.forwardRef(({
       className={className}
       style={{
         padding: '2px 4px',
-        border: '1px inset #c0c0c0',
-        background: disabled ? '#d4d0c8' : '#ffffff',
+        border: '1px inset var(--input-border)',
+        background: disabled ? 'var(--input-disabled-face)' : 'var(--input-face)',
+        color: disabled ? 'var(--input-disabled-text)' : 'var(--input-text)',
         fontSize: '11px',
         fontFamily: 'inherit',
         cursor: disabled ? 'not-allowed' : 'pointer',

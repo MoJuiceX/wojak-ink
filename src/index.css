@@ -5,12 +5,14 @@
 
 /* Controls panel stays classic Win98 gray */
 #wojak-generator .meme-generator-controls {
-  background: #c0c0c0 !important;
+  background: var(--surface-1) !important;
+  /* Ensure tooltips can overflow */
+  overflow: visible !important;
 }
 
 /* Flat list spacing: small padding so controls don't touch edges */
 #wojak-generator .meme-generator-controls .trait-selectors-scroll {
-  padding: 8px 8px 6px 8px !important;
+  padding: 2px 8px 8px 8px !important; /* Reduced top padding from 4px to 2px to move dropdowns up more */
 }
 
 /* Ensure nothing paints a "white card" behind rows */
@@ -22,7 +24,7 @@
 
 /* Keep inputs Win98 light gray (not white) */
 #wojak-generator .trait-selector-wrapper .trait-select {
-  background-color: #f2f2f2 !important;
+  background-color: var(--input-bg) !important;
 }
 
 /* If any old fieldset styles remain elsewhere, make them inert in generator */
@@ -54,6 +56,526 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+/* =========================================================
+   THEME TOKEN SYSTEM
+   Token-based theming with Theme (Classic/Light/Dark) and Accent (Default/Neon)
+   ========================================================= */
+
+/* Default token values (Classic theme, Default accent) */
+:root {
+  /* Surface Tokens */
+  --surface-0: #c0c0c0;
+  --surface-1: #c0c0c0;
+  --surface-2: #c0c0c0;
+  --surface-3: #d4d0c8;
+  --desktop-bg: #c0c0c0;
+  --window-frame: #c0c0c0;
+  --window-face: #c0c0c0;
+  --panel-face: #c0c0c0;
+  --inset-face: #ffffff;
+  
+  /* Text Tokens */
+  --text: #000000;
+  --text-1: #000000;
+  --text-2: #808080;
+  --text-muted: #808080;
+  --text-disabled: #808080;
+  --text-inverse: #ffffff;
+  
+  /* Border Tokens */
+  --border-light: #ffffff;
+  --border-mid: #c0c0c0;
+  --border-dark: #808080;
+  --border-inset-light: #ffffff;
+  --border-inset-dark: #808080;
+  
+  /* Title Bar Tokens */
+  --title-active-bg: #000080;
+  --title-active-text: #ffffff;
+  --title-inactive-bg: #808080;
+  --title-inactive-text: #ffffff;
+  
+  /* Button Tokens */
+  --btn-face: #c0c0c0;
+  --btn-text: #000000;
+  --btn-hover-face: #d4d0c8;
+  --btn-hover-text: #000000;
+  --btn-active-face: #808080;
+  --btn-active-text: #000000;
+  --btn-disabled-face: #c0c0c0;
+  --btn-disabled-text: #808080;
+  /* Legacy aliases for backward compatibility */
+  --btn-face-hover: #d4d0c8;
+  --btn-face-pressed: #808080;
+  --btn-disabled: #c0c0c0;
+  
+  /* Accent Tokens (Default - Win98 Blue) */
+  --accent: #000080;
+  --accent-2: #1084d0;
+  --accent-selection: #000080;
+  --accent-focus: #000080;
+  --accent-link: #0000ff;
+  --accent-active: #000080;
+  
+  /* State Tokens */
+  --state-hover: #d4d0c8;
+  --state-active: #808080;
+  --state-disabled: #c0c0c0;
+  --state-error: #ff0000;
+  --state-warning: #ff8800;
+  --state-success: #008000;
+  
+  /* Desktop/Base Tokens */
+  --ui-bg: #c0c0c0;
+  
+  /* Taskbar Tokens */
+  --taskbar-bg: #c0c0c0;
+  --taskbar-border: #ffffff;
+  --taskbar-text: #000000;
+  --taskbar-btn-face: #c0c0c0;
+  --taskbar-btn-text: #000000;
+  --taskbar-btn-hover-face: #d4d0c8;
+  --taskbar-btn-hover-text: #000000;
+  --taskbar-btn-active-face: #c0c0c0;
+  --taskbar-btn-active-text: #000000;
+  /* Legacy aliases for backward compatibility */
+  --taskbar-button-bg: #c0c0c0;
+  --taskbar-button-text: #000000;
+  --taskbar-button-hover-bg: #d4d0c8;
+  --taskbar-button-active-bg: #c0c0c0;
+  --taskbar-button-active-border: #808080;
+  
+  /* Start Menu Tokens */
+  --menu-bg: #c0c0c0;
+  --menu-text: #000000;
+  --menu-border: #c0c0c0;
+  --menu-hover-bg: #000080;
+  --menu-hover-text: #ffffff;
+  --menu-separator: #808080;
+  --menu-header-bg: linear-gradient(to right, #000080, #1084d0);
+  --menu-header-text: #ffffff;
+  --menu-item-hover-bg: #000080;
+  --menu-item-hover-text: #ffffff;
+  
+  /* Input/Form Tokens */
+  --input-face: #ffffff;
+  --input-text: #000000;
+  --input-placeholder: #808080;
+  --input-disabled-face: #e0e0e0;
+  --input-disabled-text: #808080;
+  --input-border: #808080;
+  /* Legacy aliases for backward compatibility */
+  --input-bg: #ffffff;
+  --input-disabled-bg: #e0e0e0;
+  --fieldset-bg: #d4d0c8;
+  --fieldset-border: #c0c0c0;
+  --fieldset-legend-bg: #d4d0c8;
+  
+  /* Scrollbar Tokens */
+  --scrollbar-track-bg: #c0c0c0;
+  --scrollbar-thumb-bg: #d4d0c8;
+  --scrollbar-thumb-hover-bg: #e0e0e0;
+  
+  /* Focus/Selection Tokens */
+  --focus: #000080;
+  --focus-outline: #000080;
+  --selection-bg: #000080;
+  --selection-text: #ffffff;
+  
+  /* Link Tokens */
+  --link: #0000ff;
+}
+
+/* Theme Presets */
+[data-theme="classic"] {
+  --surface-0: #c0c0c0;
+  --surface-1: #c0c0c0;
+  --surface-2: #c0c0c0;
+  --surface-3: #d4d0c8;
+  --desktop-bg: #c0c0c0;
+  --window-frame: #c0c0c0;
+  --window-face: #c0c0c0;
+  --panel-face: #c0c0c0;
+  --inset-face: #ffffff;
+  --text: #000000;
+  --text-1: #000000;
+  --text-2: #808080;
+  --text-muted: #808080;
+  --text-disabled: #808080;
+  --text-inverse: #ffffff;
+  --border-light: #ffffff;
+  --border-mid: #c0c0c0;
+  --border-dark: #808080;
+  --border-inset-light: #ffffff;
+  --border-inset-dark: #808080;
+  --title-active-bg: linear-gradient(to right, #000080, #1084d0); /* Win98 blue gradient */
+  --title-active-text: #ffffff;
+  --title-inactive-bg: #808080;
+  --title-inactive-text: #ffffff;
+  --btn-face: #c0c0c0;
+  --btn-text: #000000;
+  --btn-hover-face: #d4d0c8;
+  --btn-hover-text: #000000;
+  --btn-active-face: #808080;
+  --btn-active-text: #000000;
+  --btn-disabled-face: #c0c0c0;
+  --btn-disabled-text: #808080;
+  --btn-face-hover: #d4d0c8;
+  --btn-face-pressed: #808080;
+  --btn-disabled: #c0c0c0;
+  --ui-bg: #c0c0c0;
+  --taskbar-bg: #c0c0c0;
+  --taskbar-border: #ffffff;
+  --taskbar-text: #000000;
+  --taskbar-btn-face: #c0c0c0;
+  --taskbar-btn-text: #000000;
+  --taskbar-btn-hover-face: #d4d0c8;
+  --taskbar-btn-hover-text: #000000;
+  --taskbar-btn-active-face: #c0c0c0;
+  --taskbar-btn-active-text: #000000;
+  --taskbar-button-bg: #c0c0c0;
+  --taskbar-button-text: #000000;
+  --taskbar-button-hover-bg: #d4d0c8;
+  --taskbar-button-active-bg: #c0c0c0;
+  --taskbar-button-active-border: #808080;
+  --menu-bg: #c0c0c0;
+  --menu-text: #000000;
+  --menu-border: #c0c0c0;
+  --menu-hover-bg: #000080;
+  --menu-hover-text: #ffffff;
+  --menu-separator: #808080;
+  --menu-header-bg: linear-gradient(to right, #000080, #1084d0);
+  --menu-header-text: #ffffff;
+  --menu-item-hover-bg: #000080;
+  --menu-item-hover-text: #ffffff;
+  --input-face: #ffffff;
+  --input-text: #000000;
+  --input-placeholder: #808080;
+  --input-disabled-face: #e0e0e0;
+  --input-disabled-text: #808080;
+  --input-border: #808080;
+  --input-bg: #ffffff;
+  --input-disabled-bg: #e0e0e0;
+  --fieldset-bg: #d4d0c8;
+  --fieldset-border: #c0c0c0;
+  --fieldset-legend-bg: #d4d0c8;
+  --scrollbar-track-bg: #c0c0c0;
+  --scrollbar-thumb-bg: #d4d0c8;
+  --scrollbar-thumb-hover-bg: #e0e0e0;
+  --focus: #000080;
+  --focus-outline: #000080;
+  --selection-bg: #000080;
+  --selection-text: #ffffff;
+  --link: #0000ff;
+}
+
+[data-theme="light"] {
+  --surface-0: #e0e0e0;
+  --surface-1: #f0f0f0;
+  --surface-2: #ffffff;
+  --surface-3: #f5f5f5;
+  --desktop-bg: #e0e0e0;
+  --window-frame: #e0e0e0;
+  --window-face: #f0f0f0;
+  --panel-face: #f0f0f0;
+  --inset-face: #ffffff;
+  --text: #000000;
+  --text-1: #000000;
+  --text-2: #666666;
+  --text-muted: #666666;
+  --text-disabled: #666666;
+  --text-inverse: #ffffff;
+  --border-light: #ffffff;
+  --border-mid: #e0e0e0;
+  --border-dark: #b0b0b0;
+  --border-inset-light: #ffffff;
+  --border-inset-dark: #b0b0b0;
+  --title-active-bg: linear-gradient(to right, #d0d0d0, #e0e0e0);
+  --title-active-text: #000000;
+  --title-inactive-bg: #c0c0c0;
+  --title-inactive-text: #000000;
+  --btn-face: #f0f0f0;
+  --btn-text: #000000;
+  --btn-hover-face: #e8e8e8;
+  --btn-hover-text: #000000;
+  --btn-active-face: #d0d0d0;
+  --btn-active-text: #000000;
+  --btn-disabled-face: #e0e0e0;
+  --btn-disabled-text: #666666;
+  --btn-face-hover: #e8e8e8;
+  --btn-face-pressed: #d0d0d0;
+  --btn-disabled: #e0e0e0;
+  --ui-bg: #e0e0e0;
+  --taskbar-bg: #e0e0e0;
+  --taskbar-border: #ffffff;
+  --taskbar-text: #000000;
+  --taskbar-btn-face: #e0e0e0;
+  --taskbar-btn-text: #000000;
+  --taskbar-btn-hover-face: #d0d0d0;
+  --taskbar-btn-hover-text: #000000;
+  --taskbar-btn-active-face: #c0c0c0;
+  --taskbar-btn-active-text: #000000;
+  --taskbar-button-bg: #e0e0e0;
+  --taskbar-button-text: #000000;
+  --taskbar-button-hover-bg: #d0d0d0;
+  --taskbar-button-active-bg: #c0c0c0;
+  --taskbar-button-active-border: #b0b0b0;
+  --menu-bg: #f0f0f0;
+  --menu-text: #000000;
+  --menu-border: #b0b0b0;
+  --menu-hover-bg: #d0d0d0;
+  --menu-hover-text: #000000;
+  --menu-separator: #b0b0b0;
+  --menu-header-bg: linear-gradient(to right, #d0d0d0, #c0c0c0);
+  --menu-header-text: #000000;
+  --menu-item-hover-bg: #d0d0d0;
+  --menu-item-hover-text: #000000;
+  --input-face: #ffffff;
+  --input-text: #000000;
+  --input-placeholder: #666666;
+  --input-disabled-face: #f0f0f0;
+  --input-disabled-text: #666666;
+  --input-border: #b0b0b0;
+  --input-bg: #ffffff;
+  --input-disabled-bg: #f0f0f0;
+  --fieldset-bg: #f5f5f5;
+  --fieldset-border: #b0b0b0;
+  --fieldset-legend-bg: #f5f5f5;
+  --scrollbar-track-bg: #e0e0e0;
+  --scrollbar-thumb-bg: #d0d0d0;
+  --scrollbar-thumb-hover-bg: #c0c0c0;
+  --focus: #0000ff;
+  --focus-outline: #0000ff;
+  --selection-bg: #0066cc;
+  --selection-text: #ffffff;
+  --link: #0000ff;
+}
+
+[data-theme="dark"] {
+  --surface-0: #1a1a1a;
+  --surface-1: #2d2d2d;
+  --surface-2: #3a3a3a;
+  --surface-3: #4a4a4a;
+  --desktop-bg: #1a1a1a;
+  --window-frame: #2d2d2d;
+  --window-face: #2d2d2d;
+  --panel-face: #2d2d2d;
+  --inset-face: #3a3a3a;
+  --text: #ffffff;
+  --text-1: #ffffff;
+  --text-2: #b0b0b0;
+  --text-muted: #b0b0b0;
+  --text-disabled: #808080;
+  --text-inverse: #000000;
+  --border-light: #4a4a4a; /* Maintain 3D effect */
+  --border-mid: #2d2d2d;
+  --border-dark: #1a1a1a;
+  --border-inset-light: #4a4a4a;
+  --border-inset-dark: #1a1a1a;
+  --title-active-bg: linear-gradient(to right, #000000, #1a1a1a);
+  --title-active-text: #ffffff;
+  --title-inactive-bg: #2d2d2d;
+  --title-inactive-text: #b0b0b0;
+  --btn-face: #2d2d2d;
+  --btn-text: #ffffff;
+  --btn-hover-face: #3a3a3a;
+  --btn-hover-text: #ffffff;
+  --btn-active-face: #1a1a1a;
+  --btn-active-text: #ffffff;
+  --btn-disabled-face: #2d2d2d;
+  --btn-disabled-text: #808080;
+  --btn-face-hover: #3a3a3a;
+  --btn-face-pressed: #1a1a1a;
+  --btn-disabled: #2d2d2d;
+  --ui-bg: #1a1a1a;
+  --taskbar-bg: #2d2d2d;
+  --taskbar-border: #4a4a4a;
+  --taskbar-text: #ffffff;
+  --taskbar-btn-face: #2d2d2d;
+  --taskbar-btn-text: #ffffff;
+  --taskbar-btn-hover-face: #3a3a3a;
+  --taskbar-btn-hover-text: #ffffff;
+  --taskbar-btn-active-face: #2d2d2d;
+  --taskbar-btn-active-text: #ffffff;
+  --taskbar-button-bg: #2d2d2d;
+  --taskbar-button-text: #ffffff;
+  --taskbar-button-hover-bg: #3a3a3a;
+  --taskbar-button-active-bg: #2d2d2d;
+  --taskbar-button-active-border: #4a4a4a;
+  --menu-bg: #2d2d2d;
+  --menu-text: #ffffff;
+  --menu-border: #4a4a4a;
+  --menu-hover-bg: #3a3a3a;
+  --menu-hover-text: #ffffff;
+  --menu-separator: #4a4a4a;
+  --menu-header-bg: linear-gradient(to right, #000000, #1a1a1a);
+  --menu-header-text: #ffffff;
+  --menu-item-hover-bg: #3a3a3a;
+  --menu-item-hover-text: #ffffff;
+  --input-face: #3a3a3a;
+  --input-text: #ffffff;
+  --input-placeholder: #808080;
+  --input-disabled-face: #2d2d2d;
+  --input-disabled-text: #808080;
+  --input-border: #4a4a4a;
+  --input-bg: #3a3a3a;
+  --input-disabled-bg: #2d2d2d;
+  --fieldset-bg: #2d2d2d;
+  --fieldset-border: #4a4a4a;
+  --fieldset-legend-bg: #2d2d2d;
+  --scrollbar-track-bg: #2d2d2d;
+  --scrollbar-thumb-bg: #4a4a4a;
+  --scrollbar-thumb-hover-bg: #5a5a5a;
+  --focus: #0066cc;
+  --focus-outline: #0066cc;
+  --selection-bg: #0066cc;
+  --selection-text: #ffffff;
+  --link: #66b3ff;
+}
+
+[data-theme="green"] {
+  /* Surface Tokens - Green-tinted Win98 scheme */
+  --surface-0: #a0d0a0;
+  --surface-1: #a0d0a0;
+  --surface-2: #a0d0a0;
+  --surface-3: #b0e0b0;
+  --desktop-bg: #a0d0a0;
+  --window-frame: #a0d0a0;
+  --window-face: #a0d0a0;
+  --panel-face: #a0d0a0;
+  --inset-face: #ffffff;
+  
+  /* Text Tokens */
+  --text: #000000;
+  --text-1: #000000;
+  --text-2: #006622;
+  --text-muted: #006622;
+  --text-disabled: #006622;
+  --text-inverse: #ffffff;
+  
+  /* Border Tokens - Green-tinted 3D borders */
+  --border-light: #c8f0c8;
+  --border-mid: #a0d0a0;
+  --border-dark: #006622;
+  --border-inset-light: #c8f0c8;
+  --border-inset-dark: #006622;
+  
+  /* Title Bar Tokens - Authentic Win98 Spruce gradient */
+  --title-active-bg: linear-gradient(to right, #008844, #00cc66);
+  --title-active-text: #000000;
+  --title-inactive-bg: #00aa55;
+  --title-inactive-text: #000000;
+  
+  /* Button Tokens - Green-tinted button faces */
+  --btn-face: #a0d0a0;
+  --btn-text: #000000;
+  --btn-hover-face: #b0e0b0;
+  --btn-hover-text: #000000;
+  --btn-active-face: #008844;
+  --btn-active-text: #000000;
+  --btn-disabled-face: #a0d0a0;
+  --btn-disabled-text: #006622;
+  /* Legacy aliases for backward compatibility */
+  --btn-face-hover: #b0e0b0;
+  --btn-face-pressed: #008844;
+  --btn-disabled: #a0d0a0;
+  
+  /* Accent Tokens - Green accent */
+  --accent: #00cc66;
+  --accent-2: #00ff88;
+  --accent-selection: #00cc66;
+  --accent-focus: #00cc66;
+  --accent-link: #006622;
+  --accent-active: #00cc66;
+  
+  /* State Tokens */
+  --state-hover: #b0e0b0;
+  --state-active: #008844;
+  --state-disabled: #a0d0a0;
+  --state-error: #ff0000;
+  --state-warning: #ff8800;
+  --state-success: #008000;
+  
+  /* Desktop/Base Tokens */
+  --ui-bg: #a0d0a0;
+  
+  /* Taskbar Tokens - Green-tinted taskbar */
+  --taskbar-bg: #a0d0a0;
+  --taskbar-border: #c8f0c8;
+  --taskbar-text: #000000;
+  --taskbar-btn-face: #a0d0a0;
+  --taskbar-btn-text: #000000;
+  --taskbar-btn-hover-face: #b0e0b0;
+  --taskbar-btn-hover-text: #000000;
+  --taskbar-btn-active-face: #a0d0a0;
+  --taskbar-btn-active-text: #000000;
+  /* Legacy aliases for backward compatibility */
+  --taskbar-button-bg: #a0d0a0;
+  --taskbar-button-text: #000000;
+  --taskbar-button-hover-bg: #b0e0b0;
+  --taskbar-button-active-bg: #a0d0a0;
+  --taskbar-button-active-border: #006622;
+  
+  /* Start Menu Tokens - Green-tinted menu */
+  --menu-bg: #a0d0a0;
+  --menu-text: #000000;
+  --menu-border: #a0d0a0;
+  --menu-hover-bg: #00cc66;
+  --menu-hover-text: #000000;
+  --menu-separator: #006622;
+  --menu-header-bg: linear-gradient(to right, #008844, #00cc66);
+  --menu-header-text: #000000;
+  --menu-item-hover-bg: #00cc66;
+  --menu-item-hover-text: #000000;
+  
+  /* Input/Form Tokens */
+  --input-face: #ffffff;
+  --input-text: #000000;
+  --input-placeholder: #006622;
+  --input-disabled-face: #e0f0e0;
+  --input-disabled-text: #006622;
+  --input-border: #006622;
+  /* Legacy aliases for backward compatibility */
+  --input-bg: #ffffff;
+  --input-disabled-bg: #e0f0e0;
+  --fieldset-bg: #b0e0b0;
+  --fieldset-border: #a0d0a0;
+  --fieldset-legend-bg: #b0e0b0;
+  
+  /* Scrollbar Tokens */
+  --scrollbar-track-bg: #a0d0a0;
+  --scrollbar-thumb-bg: #b0e0b0;
+  --scrollbar-thumb-hover-bg: #c0f0c0;
+  
+  /* Focus and Selection Tokens */
+  --focus: #00cc66;
+  --focus-outline: #00cc66;
+  --selection-bg: #00cc66;
+  --selection-text: #000000;
+  
+  /* Link Tokens */
+  --link: #006622;
+}
+
+/* Accent Presets */
+[data-accent="default"] {
+  --accent: #000080;
+  --accent-2: #1084d0;
+  --accent-selection: #000080;
+  --accent-focus: #000080;
+  --accent-link: #0000ff;
+  --accent-active: #000080;
+}
+
+[data-accent="neon"] {
+  --accent: #00ff41;
+  --accent-2: #00ff88;
+  --accent-selection: #00ff41;
+  --accent-focus: #00ff88;
+  --accent-link: #00ff88;
+  --accent-active: #00ff41;
 }
 
 /* Global scroll lock - disable all page scrolling (desktop OS feel) */
@@ -97,7 +619,7 @@ body {
   left: 0;
   width: 100%;
   height: 100dvh; /* Use dynamic viewport height for mobile */
-  background: #c0c0c0 url('https://bafybeibz4cxxg2ouqw4p45gj4zl7qahvczmdcdqxcconl6xcozylf2uxwu.ipfs.w3s.link/windows-98-background-mvrmy77vuyblzxba.jpg') no-repeat center center;
+  background: var(--surface-0) url('https://bafybeibz4cxxg2ouqw4p45gj4zl7qahvczmdcdqxcconl6xcozylf2uxwu.ipfs.w3s.link/windows-98-background-mvrmy77vuyblzxba.jpg') no-repeat center center;
   background-size: cover;
   z-index: -1;
 }
@@ -130,6 +652,14 @@ body {
   transition: none !important;
   /* Ensure windows never overflow viewport */
   overflow: hidden;
+  background: var(--window-face);
+  color: var(--text);
+  border: 1px solid var(--border-dark);
+  box-shadow: 
+    inset 0 1px 0 var(--border-light),
+    inset 1px 0 0 var(--border-light),
+    inset 0 -1px 0 var(--border-dark),
+    inset -1px 0 0 var(--border-dark);
 }
 
 /* Wide monitor optimization - prevent windows from being too wide */
@@ -162,6 +692,8 @@ body {
 .title-bar {
   cursor: move;
   user-select: none;
+  background: var(--title-active-bg);
+  color: var(--title-active-text);
   /* Standardized title bar height using CSS variable */
   min-height: var(--window-title-bar-height);
   height: var(--window-title-bar-height);
@@ -174,6 +706,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.title-bar.inactive {
+  background: var(--title-inactive-bg);
+  color: var(--title-inactive-text);
 }
 
 /* Title bar icon */
@@ -240,11 +777,11 @@ body {
 }
 
 .title-bar-controls button:active {
-  border: 1px inset #c0c0c0;
+  border: 1px inset var(--border-dark);
 }
 
 .title-bar-controls button:hover {
-  background: #d4d0c8;
+  background: var(--btn-hover-face);
 }
 
 /* ============================================
@@ -261,8 +798,8 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: var(--focus-outline-width) solid var(--focus-outline-color-dark);
-  outline-offset: var(--focus-outline-offset);
+  outline: 2px dotted var(--focus);
+  outline-offset: 2px;
 }
 
 /* Desktop icon: remove selection stroke/border */
@@ -286,6 +823,33 @@ textarea:focus-visible {
   box-shadow: none !important;
 }
 
+/* Desktop image icons: remove borders (except when selected) */
+.desktop-image-icon,
+.desktop-image-icon:focus,
+.desktop-image-icon:focus-visible,
+.desktop-image-icon:active,
+.desktop-image-icon:hover {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Recycle Bin icon: remove borders (except when dragging over) */
+.desktop-trash-icon,
+.desktop-trash-icon:focus,
+.desktop-trash-icon:focus-visible,
+.desktop-trash-icon:active,
+.desktop-trash-icon:hover {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.desktop-trash-icon.drag-hover {
+  /* Allow border when dragging over */
+  border: 2px dashed var(--state-error) !important;
+}
+
 /* Shortcut arrow overlay for LINKS icons (Windows 98 style) */
 .desktop-icon-shortcut-arrow {
   position: absolute;
@@ -293,12 +857,12 @@ textarea:focus-visible {
   left: -2px;
   width: 14px;
   height: 14px;
-  background: #fff;
-  border: 1px outset #c0c0c0;
+  background: var(--border-light);
+  border: 1px outset var(--border-light);
   font-size: 9px;
   line-height: 12px;
   text-align: center;
-  color: #000;
+  color: var(--text-1);
   font-family: 'MS Sans Serif', sans-serif;
   font-weight: bold;
   display: flex;
@@ -310,12 +874,77 @@ textarea:focus-visible {
   text-shadow: none;
   /* Windows 98 style border */
   box-shadow: 
-    inset 1px 1px 0 #fff,
-    inset -1px -1px 0 #808080,
-    1px 1px 0 #000;
+    inset 1px 1px 0 var(--border-light),
+    inset -1px -1px 0 var(--border-dark),
+    1px 1px 0 var(--text-1);
 }
 
-/* Mobile: Use lighter blue for better visibility */
+/* Selection styling */
+::selection {
+  background: var(--accent-selection);
+  color: var(--text-inverse);
+}
+
+/* Link styling */
+a {
+  color: var(--link);
+}
+
+/* Global input/select/textarea styles */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="search"],
+input[type="url"],
+select,
+textarea {
+  background: var(--input-face);
+  color: var(--input-text);
+  border: 1px inset var(--input-border);
+  font-family: inherit;
+}
+
+input[type="text"]:disabled,
+input[type="password"]:disabled,
+input[type="email"]:disabled,
+input[type="number"]:disabled,
+input[type="search"]:disabled,
+input[type="url"]:disabled,
+select:disabled,
+textarea:disabled {
+  background: var(--input-disabled-face);
+  color: var(--input-disabled-text);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--input-placeholder);
+}
+
+/* Button base styles using tokens */
+button {
+  background: var(--btn-face);
+  color: var(--btn-text);
+  border: 1px outset var(--border-light);
+}
+
+button:hover:not(:disabled) {
+  background: var(--btn-face-hover);
+}
+
+button:active:not(:disabled) {
+  background: var(--btn-active-face);
+  color: var(--btn-active-text);
+  border: 1px inset var(--border-dark);
+}
+
+button:disabled {
+  background: var(--btn-disabled-face);
+  color: var(--btn-disabled-text);
+}
+
+/* Mobile: Use accent focus for better visibility */
 @media (max-width: 640px) {
   .title-bar-controls button:focus-visible,
   .taskbar-window-button:focus-visible,
@@ -326,8 +955,8 @@ textarea:focus-visible {
   input:focus-visible,
   select:focus-visible,
   textarea:focus-visible {
-    outline: var(--focus-outline-width) solid var(--focus-outline-color) !important;
-    outline-offset: var(--focus-outline-offset) !important;
+    outline: 2px dotted var(--focus) !important;
+    outline-offset: 2px !important;
   }
 }
 
@@ -340,10 +969,10 @@ textarea:focus-visible {
 
 /* Tokens */
 #wojak-generator {
-  --wg-group-bg: #d4d0c8;
-  --wg-input-bg: #f2f2f2;
-  --wg-input-bg-disabled: #e0e0e0;
-  --wg-label: #222;
+  --wg-group-bg: var(--fieldset-bg);
+  --wg-input-bg: var(--input-bg);
+  --wg-input-bg-disabled: var(--input-disabled-bg);
+  --wg-label: var(--text-1);
   --wg-label-disabled: 0.6;
 
   /* focus ring vars must already exist; keep using them */
@@ -367,7 +996,7 @@ textarea:focus-visible {
   box-sizing: border-box !important;
   overflow: hidden !important;
   padding: 0 !important;
-  margin: -4px 0 0 0 !important; /* Move entire wrapper up more to move label and dropdown together */
+  margin: -6px 0 0 0 !important; /* Move entire wrapper up more (from -4px to -6px) */
 }
 
 /* Label: tighter + slightly darker Win98 read */
@@ -376,12 +1005,12 @@ textarea:focus-visible {
   display: block;
   font-family: "MS Sans Serif", sans-serif !important;
   font-size: 10.5px !important;
-  color: #333 !important;
+  color: var(--text-1) !important;
   height: 14px !important;
   min-height: 14px !important;
   max-height: 14px !important;
   line-height: 14px !important;
-  margin: -6px 0 0 0 !important; /* Move label up to align with dropdown text */
+  margin: -8px 0 0 0 !important; /* Move label up more (from -6px to -8px) to align with picture head */
   padding-left: 4px !important; /* Align label with dropdown text (matches dropdown padding-left) */
   padding-right: 0 !important;
   padding-top: 0 !important;
@@ -418,7 +1047,7 @@ textarea:focus-visible {
   line-height: 20px !important;
   padding: 1px 18px 1px 4px !important;
   background-color: var(--wg-input-bg) !important;
-  color: #000 !important;
+  color: var(--input-text) !important;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -438,7 +1067,7 @@ textarea:focus-visible {
   pointer-events: none;
   font-size: 10px !important;
   line-height: 22px !important;
-  color: #555 !important;
+  color: var(--text-2) !important;
   white-space: nowrap;
   z-index: 1;
 }
@@ -463,7 +1092,7 @@ textarea:focus-visible {
   line-height: 20px !important;
   padding: 1px 18px 1px 4px !important;
   background-color: var(--wg-input-bg-disabled) !important;
-  color: #7a7a7a !important;
+  color: var(--input-disabled-text) !important;
   cursor: not-allowed;
   opacity: 0.5 !important;
   overflow: hidden !important;
@@ -574,9 +1203,9 @@ textarea:focus-visible {
 #wojak-generator .chia-farmer-divider .divider-line {
   width: 1px;
   height: 12px;
-  background-color: #808080;
-  border-left: 1px solid #000;
-  border-right: 1px solid #ffffff;
+  background-color: var(--border-dark);
+  border-left: 1px solid var(--text-1);
+  border-right: 1px solid var(--border-light);
 }
 
 #wojak-generator .color-variant-picker .color-dot,
@@ -601,7 +1230,7 @@ textarea:focus-visible {
   appearance: none !important;
   -webkit-appearance: none !important;
 
-  border: 1px inset #c0c0c0 !important;
+  border: 1px inset var(--border-dark) !important;
   padding: 0 !important;
   margin: 0 !important;
   line-height: 0 !important;
@@ -611,7 +1240,7 @@ textarea:focus-visible {
 #wojak-generator .color-variant-picker .color-dot:focus,
 #wojak-generator .suit-variant-picker .color-dot:focus,
 #wojak-generator .chia-farmer-variant-picker .color-dot:focus {
-  outline: 1px dotted #000 !important;
+  outline: 1px dotted var(--text-1) !important;
   outline-offset: 1px !important;
 }
 
@@ -631,7 +1260,7 @@ textarea:focus-visible {
 #wojak-generator .color-variant-picker .color-dot.active,
 #wojak-generator .suit-variant-picker .color-dot.active,
 #wojak-generator .chia-farmer-variant-picker .color-dot.active {
-  border: 2px solid #000 !important;
+  border: 2px solid var(--text-1) !important;
 }
 
 #wojak-generator .color-variant-picker .color-dot:disabled,
@@ -649,7 +1278,7 @@ textarea:focus-visible {
 /* Base variant dot styling - gray dot to return to base (no color) */
 #wojak-generator .color-variant-picker .color-dot.base-variant {
   /* Inline styles handle the gray background and border, but ensure border override works */
-  border: 2px solid #808080 !important;
+  border: 2px solid var(--border-dark) !important;
 }
 
 /* =========================
@@ -687,26 +1316,27 @@ textarea:focus-visible {
   padding: 2px 6px;
   min-width: 32px;
   height: 18px;
-  border: 1px solid #000;
-  background: #c0c0c0;
+  border: 1px solid var(--text-1);
+  background: var(--btn-face);
+  color: var(--btn-text);
   cursor: pointer;
   font-weight: normal;
   text-align: center;
-  box-shadow: inset -1px -1px 0 0 #000, inset 1px 1px 0 0 #fff;
+  box-shadow: inset -1px -1px 0 0 var(--text-1), inset 1px 1px 0 0 var(--border-light);
 }
 
 #wojak-generator .suit-variant-picker .type-toggle-button:hover:not(:disabled) {
-  background: #d4d0c8;
+  background: var(--btn-face-hover);
 }
 
 #wojak-generator .suit-variant-picker .type-toggle-button:active:not(:disabled) {
-  box-shadow: inset 1px 1px 0 0 #000, inset -1px -1px 0 0 #fff;
+  box-shadow: inset 1px 1px 0 0 var(--text-1), inset -1px -1px 0 0 var(--border-light);
 }
 
 #wojak-generator .suit-variant-picker .type-toggle-button.active {
-  background: #808080;
-  color: #fff;
-  box-shadow: inset 1px 1px 0 0 #000, inset -1px -1px 0 0 #fff;
+  background: var(--btn-face-pressed);
+  color: var(--text-inverse);
+  box-shadow: inset 1px 1px 0 0 var(--text-1), inset -1px -1px 0 0 var(--border-light);
 }
 
 #wojak-generator .suit-variant-picker .type-toggle-button:disabled {
@@ -715,7 +1345,7 @@ textarea:focus-visible {
 }
 
 #wojak-generator .suit-variant-picker .type-toggle-button:focus {
-  outline: 1px dotted #000;
+  outline: 1px dotted var(--text-1);
   outline-offset: 1px;
 }
 
@@ -735,7 +1365,7 @@ textarea:focus-visible {
   margin-left: 6px;
 
   background: transparent !important;
-  border: 1px inset #c0c0c0 !important;
+  border: 1px inset var(--border-dark) !important;
 
   box-sizing: border-box;
   display: inline-flex;
@@ -764,7 +1394,7 @@ textarea:focus-visible {
 }
 
 #wojak-generator .cap-mcd-button.active {
-  border: 2px solid #000 !important;
+  border: 2px solid var(--text-1) !important;
 }
 
 #wojak-generator .cap-mcd-button:disabled {
@@ -773,7 +1403,7 @@ textarea:focus-visible {
 }
 
 #wojak-generator .cap-mcd-button:focus {
-  outline: 1px dotted #000;
+  outline: 1px dotted var(--text-1);
   outline-offset: 1px;
 }
 
@@ -854,6 +1484,73 @@ a,
   transform: translateX(2px);
 }
 
+/* =========================================================
+   SCREENSAVER STYLES
+   ========================================================= */
+
+.screensaver-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 999999 !important;
+  background: linear-gradient(135deg, #000080 0%, #000033 100%);
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: 'MS Sans Serif', sans-serif !important;
+  color: var(--text-inverse) !important;
+  user-select: none !important;
+  cursor: none !important;
+  overflow: hidden !important;
+}
+
+.screensaver-overlay * {
+  pointer-events: none;
+}
+
+.screensaver-overlay .screensaver-emoji {
+  position: absolute;
+  font-size: 48px;
+  will-change: transform;
+  animation: float 20s infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(10px, -10px) rotate(5deg);
+  }
+  50% {
+    transform: translate(-10px, 10px) rotate(-5deg);
+  }
+  75% {
+    transform: translate(10px, 10px) rotate(3deg);
+  }
+}
+
+.screensaver-overlay .screensaver-text {
+  font-size: 48px;
+  font-weight: bold;
+  text-align: center;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  z-index: 1;
+  margin-bottom: 40px;
+}
+
+.screensaver-overlay .screensaver-hint {
+  position: absolute;
+  bottom: 60px;
+  font-size: 14px;
+  opacity: 0.8;
+  text-align: center;
+  transition: opacity 0.5s ease;
+}
+
 /* Active states */
 .title-bar-controls button:active,
 .taskbar-window-button:active,
@@ -912,8 +1609,8 @@ a,
 
 /* Orange glass fill window - Win98 style */
 .orange-glass-window {
-  background: #c0c0c0;
-  border: 2px outset #c0c0c0;
+  background: var(--surface-1);
+  border: 2px outset var(--border-light);
   padding: 8px;
   width: 128px; /* 20% smaller than 160px */
   user-select: none;
@@ -921,8 +1618,8 @@ a,
 }
 
 .orange-glass-window-inner {
-  background: #bdbdbd;
-  border: 2px inset #808080;
+  background: var(--surface-3);
+  border: 2px inset var(--border-dark);
   padding: 6px;
   display: flex;
   align-items: center;
@@ -957,6 +1654,20 @@ a,
   transform: translate(-50%, -50%);
   z-index: 10;
   pointer-events: none;
+  /* Subtle fade-in animation that starts from correct position (not from outside) */
+  animation: hoa-glass-fade-in 0.4s ease-out forwards;
+}
+
+/* Fade-in animation that starts from correct position (not from outside) */
+@keyframes hoa-glass-fade-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 
 /* Overlay mode: strip window chrome, keep meter visuals intact */
@@ -1003,8 +1714,20 @@ a,
 
 .window-body {
   padding: 8px;
-  background: #c0c0c0;
+  background: var(--window-face);
+  color: var(--text);
   min-height: 100px;
+}
+
+/* TangGang window: transparent background, keep window frame */
+#tanggang .window-body {
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+/* Ensure HOA logo wrapper doesn't have background */
+#tanggang .hoa-logo-wrapper {
+  background: transparent;
 }
 
 /* Window body that sizes to content (no forced stretching) */
@@ -1046,6 +1769,84 @@ a,
 .readme-window .window-body,
 #window-readme-txt .window-body {
   max-height: calc(95dvh - 60px);
+  min-height: 0; /* Remove default min-height to eliminate gray space at bottom */
+  height: auto; /* Let content determine height */
+}
+
+/* Window Resize Handles - All Edges and Corners */
+.window-resize-handle {
+  position: absolute;
+  z-index: 10000; /* High z-index to ensure handles are above window content */
+  background: transparent;
+  pointer-events: auto;
+  /* Ensure handles are always interactive */
+  touch-action: none;
+}
+
+/* Edge handles - increased size for easier hover */
+.resize-handle.resize-n {
+  top: 0;
+  left: 4px;
+  right: 4px;
+  height: 6px;
+  cursor: n-resize;
+}
+
+.resize-handle.resize-s {
+  bottom: 0;
+  left: 4px;
+  right: 4px;
+  height: 6px;
+  cursor: s-resize;
+}
+
+.resize-handle.resize-e {
+  right: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 6px;
+  cursor: e-resize;
+}
+
+.resize-handle.resize-w {
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 6px;
+  cursor: w-resize;
+}
+
+/* Corner handles - increased size for easier hover */
+.resize-handle.resize-ne {
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  cursor: ne-resize;
+}
+
+.resize-handle.resize-se {
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  cursor: se-resize;
+}
+
+.resize-handle.resize-sw {
+  bottom: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  cursor: sw-resize;
+}
+
+.resize-handle.resize-nw {
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  cursor: nw-resize;
 }
 
 /* Allow scrolling inside specific elements */
@@ -1111,10 +1912,12 @@ a,
   padding: 0 !important;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto; /* Changed from hidden to auto to allow scrolling when content exceeds height */
+  overflow-x: hidden; /* Changed from visible to hidden to prevent horizontal scrollbar */
   min-height: 0;
-  max-height: calc(90dvh - 60px);
-  height: auto;
+  max-height: calc(92dvh - 60px); /* Reduced from 95dvh to 92dvh to prevent scrollbar */
+  height: 100%;
+  position: relative !important;
 }
 
 .wojak-generator-window {
@@ -1136,12 +1939,13 @@ a,
   .meme-generator-desktop {
     display: flex !important;
     flex-direction: row !important;
-    gap: 16px !important; /* was 24px */
+    gap: 10px !important; /* Reduced from 12px to 10px to reduce right side spacing */
     align-items: flex-start !important;
     flex-wrap: nowrap !important;
-    padding: 16px !important; /* was ~20px */
+    padding: 8px !important; /* Reduced from 12px to 8px */
     min-height: 0 !important;
-    overflow: hidden !important;
+    overflow-y: auto !important; /* Changed from hidden to auto to allow scrolling when content exceeds height */
+    overflow-x: visible !important; /* Allow tooltips to overflow horizontally */
     flex: 1 1 auto !important;
   }
 
@@ -1154,6 +1958,7 @@ a,
     flex-direction: column !important;
     min-height: 0 !important;
     overflow: hidden !important;
+    overflow-x: visible !important; /* Allow tooltips to overflow horizontally */
     outline: none !important;
     padding-top: 0 !important;
     margin-top: 0 !important;
@@ -1174,12 +1979,13 @@ a,
     padding-right: 10px !important;
     gap: 0px !important;
     padding-top: 0 !important;
-    padding-bottom: 6px !important;
+    padding-bottom: 4px !important; /* Reduced from 6px to 4px */
+    margin-top: -2px !important; /* Move dropdowns up a bit more */
   }
 
   .meme-generator-preview {
     flex: 0 0 var(--wojak-preview-panel-width) !important;
-    min-width: 400px !important;
+    min-width: 380px !important; /* Reduced from 400px to reduce gray space */
     max-width: var(--wojak-preview-panel-max-width) !important;
     flex-shrink: 0 !important;
     display: flex !important;
@@ -1187,6 +1993,7 @@ a,
     align-items: flex-start !important;
     padding-top: 0 !important;
     margin-top: 0 !important;
+    padding-bottom: 0 !important; /* Remove bottom padding */
   }
 
   .panel-label {
@@ -1195,7 +2002,7 @@ a,
 
   /* Win98 Group Boxes (tighter) */
   #wojak-generator .win98-group {
-    border: 1px inset #c0c0c0;
+    border: 1px inset var(--border-dark);
     margin: 6px 0 !important;                 /* was 8px */
     padding: 5px 4px 3px 4px !important;      /* tighter */
     background: var(--wg-group-bg) !important;
@@ -1204,7 +2011,7 @@ a,
   #wojak-generator .win98-group legend {
     font-size: 10px;
     font-weight: normal;
-    color: #000;
+    color: var(--text-1);
     padding: 0 4px;
     font-family: "MS Sans Serif", sans-serif;
     margin-bottom: 1px !important;
@@ -1223,18 +2030,18 @@ a,
 
   /* Preview Canvas Wrapper (remove harsh white) */
   #wojak-generator .meme-generator-preview-canvas-wrapper {
-    border: 2px inset #c0c0c0;
-    background: #e6e6e6 !important; /* was #ffffff */
-    padding: 2px;
+    border: 2px inset var(--border-dark);
+    background: var(--surface-3) !important;
+    padding: 4px; /* Even padding on all sides for Win98 image viewer look */
     display: inline-block;
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
+    margin-top: 8px !important; /* Move picture down to align head with dropdown titles */
+    margin-bottom: 4px !important; /* Reduced spacing below canvas */
   }
 
   /* Export controls row stays identical */
   #wojak-generator .export-controls-row {
     display: flex;
-    gap: 8px;
+    gap: 4px; /* Reduced from 8px to 4px */
     align-items: center;
     flex-wrap: nowrap;
     width: 100%;
@@ -1249,24 +2056,585 @@ a,
 
   #wojak-generator .export-controls-row button:disabled {
     opacity: 0.5;
-    color: #808080;
+    color: var(--text-2);
     cursor: not-allowed;
-    border: 1px inset #c0c0c0;
+    border: 1px inset var(--border-dark);
   }
 
-  #wojak-generator .wojak-generator-status-bar {
-    flex: 0 0 auto !important;
-    margin: 0 !important;
-    padding: 4px 8px !important;
-    background-color: #f0f0f0 !important;
-    border-top: 1px inset #c0c0c0 !important;
-    font-size: 10px !important;
-    line-height: 1.3 !important;
-    color: #000 !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-    font-family: "MS Sans Serif", sans-serif !important;
+  /* Tangify Progress Bar Styles */
+  .tangify-progress-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px;
+    background: var(--surface-1);
+    border: 1px solid;
+    border-color: var(--border-dark) var(--border-light) var(--border-light) var(--border-dark);
+    margin-bottom: 4px; /* Reduced from 8px to 4px */
   }
+
+  .tangify-progress-label {
+    font-family: 'VT323', monospace;
+    font-size: 14px;
+    color: var(--text-1);
+  }
+
+  .tangify-progress-bar {
+    height: 20px;
+    background: var(--input-bg);
+    border: 2px solid;
+    border-color: var(--border-dark) var(--border-light) var(--border-light) var(--border-dark);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .tangify-progress-fill {
+    height: 100%;
+    display: flex;
+    gap: 2px;
+    padding: 2px;
+    transition: width 0.3s;
+    position: absolute;
+    left: 0;
+    top: 0;
+    box-sizing: border-box;
+  }
+
+  .tangify-progress-block {
+    width: 10px;
+    height: 100%;
+    background: var(--accent-active);
+    flex-shrink: 0;
+  }
+
+  .tangify-progress-percent {
+    font-family: 'VT323', monospace;
+    font-size: 14px;
+    text-align: right;
+  }
+
+  #wojak-generator .meme-generator-container {
+    order: 0 !important;
+  }
+}
+
+/* Info Banner - Windows 98 Style */
+#wojak-generator .wojak-generator-info-banner {
+  background: var(--surface-3);
+  color: var(--text-1);
+  padding: 6px 12px;
+  text-align: center;
+  border-bottom: 2px solid;
+  border-color: var(--border-light) var(--border-dark) var(--border-dark) var(--border-light);
+  font-family: 'MS Sans Serif', Tahoma, sans-serif;
+  flex-shrink: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+#wojak-generator .wojak-generator-info-banner .info-banner-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#wojak-generator .info-banner-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--text-1);
+  margin-bottom: 2px;
+}
+
+#wojak-generator .info-banner-subtitle {
+  font-size: 11px;
+  font-weight: normal;
+  color: var(--text-2);
+}
+
+/* Info button in yellow banner */
+#wojak-generator .wojak-generator-info-banner .info-button {
+  background: var(--btn-face);
+  color: var(--btn-text);
+  border: 2px solid;
+  border-color: var(--border-light) var(--border-dark) var(--border-dark) var(--border-light);
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  flex-shrink: 0;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif;
+}
+
+#wojak-generator .wojak-generator-info-banner .info-button:hover {
+  background: var(--btn-face-hover);
+}
+
+#wojak-generator .wojak-generator-info-banner .info-button:active {
+  border-color: var(--border-dark) var(--border-light) var(--border-light) var(--border-dark);
+  background: var(--btn-face-pressed);
+}
+
+/* Welcome Modal Overlay */
+.welcome-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Welcome Modal Window */
+.welcome-modal {
+  background: var(--surface-1);
+  border: 2px solid;
+  border-color: var(--border-light) var(--border-dark) var(--border-dark) var(--border-light);
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
+  width: 450px;
+  max-width: 90vw;
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Title Bar */
+.welcome-modal-titlebar {
+  background: var(--menu-header-bg);
+  color: var(--menu-header-text);
+  padding: 4px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.welcome-modal-titlebar button {
+  background: var(--btn-face);
+  color: var(--btn-text);
+  border: 2px solid;
+  border-color: var(--border-light) var(--border-dark) var(--border-dark) var(--border-light);
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif;
+}
+
+.welcome-modal-titlebar button:hover {
+  background: var(--btn-face-hover);
+}
+
+.welcome-modal-titlebar button:active {
+  border-color: var(--border-dark) var(--border-light) var(--border-light) var(--border-dark);
+  background: var(--btn-face-pressed);
+}
+
+/* Content */
+.welcome-modal-content {
+  padding: 16px;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  background: var(--input-bg);
+  color: var(--text-1);
+}
+
+.welcome-modal-content h2 {
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--accent);
+  margin: 0 0 8px 0;
+  border-bottom: 1px solid var(--border-dark);
+  padding-bottom: 4px;
+}
+
+.welcome-modal-content h2:not(:first-child) {
+  margin-top: 16px;
+}
+
+.welcome-modal-content p {
+  margin: 0 0 12px 0;
+  color: var(--text-1);
+}
+
+.welcome-modal-content ul {
+  margin: 0 0 12px 0;
+  padding-left: 20px;
+}
+
+.welcome-modal-content li {
+  margin-bottom: 6px;
+}
+
+.welcome-modal-content strong {
+  color: var(--accent);
+}
+
+.welcome-tip {
+  background: var(--surface-3);
+  border: 1px solid var(--state-warning);
+  padding: 8px;
+  margin: 12px 0;
+  font-size: 11px;
+  color: var(--text-1);
+}
+
+/* Start Button */
+.welcome-start-btn {
+  background: var(--btn-face);
+  color: var(--btn-text);
+  border: 2px solid;
+  border-color: var(--border-light) var(--border-dark) var(--border-dark) var(--border-light);
+  padding: 8px 24px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  display: block;
+  margin: 16px auto 0;
+}
+
+.welcome-start-btn:hover {
+  background: var(--btn-face-hover);
+}
+
+.welcome-start-btn:active {
+  border-color: var(--border-dark) var(--border-light) var(--border-light) var(--border-dark);
+  background: var(--btn-face-pressed);
+}
+
+/* Welcome Modal Animations */
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+  }
+  to { 
+    opacity: 1; 
+  }
+}
+
+@keyframes slideIn {
+  from { 
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* README window content */
+/* Info Button - Bottom Left */
+.info-button-bottom {
+  background: var(--btn-face);
+  color: var(--accent);
+  border: 2px solid;
+  border-color: var(--border-light) var(--border-dark) var(--border-dark) var(--border-light);
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  max-width: 28px;
+  max-height: 28px;
+  /* Ensure tooltip can overflow container */
+  overflow: visible !important;
+  aspect-ratio: 1 / 1;
+  border-radius: 0;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px; /* Reduced from 16px to move button up */
+  margin-bottom: 8px;
+  padding: 0;
+  box-sizing: border-box;
+  overflow: visible;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif;
+}
+
+.info-button-bottom:hover {
+  background: var(--btn-face-hover);
+}
+
+.info-button-bottom:active {
+  border-color: var(--border-dark) var(--border-light) var(--border-light) var(--border-dark);
+  background: var(--btn-face-pressed);
+}
+
+.info-icon {
+  font-family: 'Times New Roman', Georgia, serif;
+  font-style: italic;
+  font-weight: bold;
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Windows 98 Tooltip */
+.win98-tooltip {
+  position: relative !important;
+  overflow: visible !important; /* Ensure tooltip can overflow container */
+}
+
+/* Ensure disabled buttons can still show tooltips */
+.win98-tooltip:disabled,
+.win98-tooltip[disabled] {
+  pointer-events: auto; /* Allow hover events even when disabled */
+}
+
+.win98-tooltip:disabled:hover::after,
+.win98-tooltip[disabled]:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+.win98-tooltip:disabled:hover::before,
+.win98-tooltip[disabled]:hover::before {
+  opacity: 1;
+  visibility: visible;
+}
+
+.win98-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface-3);
+  color: var(--text-1);
+  border: 1px solid var(--text-1);
+  padding: 4px 8px;
+  font-size: 11px;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif;
+  white-space: nowrap;
+  max-width: 280px;
+  white-space: normal;
+  text-align: left;
+  z-index: 999999; /* Very high z-index to appear above everything */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease-in-out;
+  pointer-events: none;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  line-height: 1.4;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  /* Prevent clipping - adjust if near edges */
+  min-width: 100px;
+}
+
+/* Adjust tooltip position if it would be cut off on the left */
+.win98-tooltip[data-tooltip-adjust="left"]::after {
+  left: 50%;
+  transform: translateX(calc(-50% + var(--tooltip-offset, 0px)));
+}
+
+/* Adjust tooltip position if it would be cut off on the right */
+.win98-tooltip[data-tooltip-adjust="right"]::after {
+  left: 50%;
+  transform: translateX(calc(-50% + var(--tooltip-offset, 0px)));
+}
+
+.win98-tooltip:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Mobile: Show tooltip on tap/long-press (touch devices) */
+@media (hover: none) and (pointer: coarse) {
+  .win98-tooltip:active::after,
+  .win98-tooltip[data-tooltip-touched="true"]::after {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .win98-tooltip:active::before,
+  .win98-tooltip[data-tooltip-touched="true"]::before {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+/* Tooltip arrow */
+.win98-tooltip::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--text-1);
+  z-index: 1000000; /* Even higher z-index */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease-in-out;
+}
+
+/* Adjust arrow position to match tooltip */
+.win98-tooltip[data-tooltip-adjust="left"]::before,
+.win98-tooltip[data-tooltip-adjust="right"]::before {
+  left: 50%;
+  transform: translateX(calc(-50% + var(--tooltip-offset, 0px)));
+}
+
+.win98-tooltip:hover::before {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Tooltip appears above (default) - already set */
+
+/* For buttons near bottom of screen, tooltip still appears above */
+.win98-tooltip.tooltip-above::after {
+  bottom: calc(100% + 8px);
+  top: auto;
+}
+
+/* README Window Content - Enhanced Styles */
+.readme-content {
+  padding: 16px 20px 24px 20px;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-y: auto;
+  height: calc(100% - 16px);
+  background: var(--input-bg);
+  color: var(--text-1);
+  margin: 4px;
+  border: 1px solid;
+  border-color: var(--border-dark) var(--border-light) var(--border-light) var(--border-dark);
+  box-sizing: border-box;
+}
+
+.readme-content h2 {
+  font-size: 13px;
+  font-weight: bold;
+  margin: 20px 0 10px 0;
+  color: var(--accent);
+  border-bottom: 1px solid var(--border-dark);
+  padding-bottom: 4px;
+}
+
+.readme-content h2:first-child {
+  margin-top: 0;
+}
+
+.readme-content p {
+  margin: 0 0 10px 0;
+  color: var(--text-1);
+  text-align: left;
+}
+
+.readme-content ul {
+  margin: 8px 0 12px 0;
+  padding-left: 24px;
+}
+
+.readme-content li {
+  margin-bottom: 6px;
+  color: var(--text-1);
+}
+
+.readme-content strong {
+  color: var(--accent);
+}
+
+.readme-content em {
+  font-style: italic;
+  color: var(--text-2);
+}
+
+/* Subtle emphasis style instead of yellow highlight box */
+.readme-emphasis {
+  font-style: italic;
+  margin: 16px 0;
+  padding-left: 12px;
+  border-left: 3px solid var(--accent);
+  color: var(--text-1);
+}
+
+.readme-emphasis strong {
+  font-style: normal;
+  color: var(--accent);
+}
+
+/* Normal text style (no special emphasis) - for "Pick traits" text */
+.readme-content p {
+  margin: 0 0 10px 0;
+  color: var(--text-1);
+  text-align: left;
+}
+
+/* Teaser text */
+.readme-teaser {
+  text-align: center;
+  font-size: 14px;
+  margin: 16px 0;
+  color: var(--text-2);
+}
+
+/* Footer */
+.readme-footer {
+  margin-top: 24px;
+  padding-top: 12px;
+  border-top: 2px solid var(--border-dark);
+  text-align: center;
+  color: var(--text-2);
+  font-style: italic;
+  font-size: 11px;
+}
+
+/* README Window specific fixes */
+#wojak-readme {
+  display: flex;
+  flex-direction: column;
+}
+
+#wojak-readme .window-body {
+  flex: 1;
+  padding: 4px;
+  background: var(--surface-1);
+  overflow: hidden;
+}
+
+#wojak-readme .readme-content {
+  height: 100%;
+  margin: 0;
+  padding: 16px 20px 20px 20px; /* Reduced bottom padding from 24px to 20px for better spacing */
+  background: var(--window-face); /* Use window face color instead of input-bg for proper theme support */
+  border: 1px solid;
+  border-color: var(--border-dark) var(--border-light) var(--border-light) var(--border-dark);
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+/* Content Container - Allow content to extend, window-body handles scrolling */
+#wojak-generator .meme-generator-container {
+  flex: 1;
+  overflow: visible; /* Changed from overflow-y: auto to visible - let window-body handle scrolling */
+  overflow-x: visible; /* Allow tooltips to overflow horizontally */
 }
 
 /* =========================================================
@@ -1276,7 +2644,7 @@ a,
 
 /* A) Win98 surface cleanup: remove "white islands" inside group boxes */
 #wojak-generator .meme-generator-controls {
-  background: #c0c0c0 !important; /* classic panel gray */
+  background: var(--surface-1) !important; /* classic panel gray */
 }
 
 /* PROOF: Browser default fieldset background (#fff) was overriding variable.
@@ -1305,7 +2673,7 @@ a,
 
 /* Keep selects as light gray edit fields (not pure white) */
 #wojak-generator .trait-selector-wrapper .trait-select {
-  background-color: #f2f2f2 !important;
+  background-color: var(--input-bg) !important;
 }
 
 /* Fixed message slot to prevent layout shift when blocked info appears */
@@ -1316,6 +2684,10 @@ a,
   max-height: 12px !important;
   margin: 0 !important;
   padding: 0 !important;
+  box-sizing: border-box !important;
+  /* Always reserve space - even when empty */
+  display: block !important;
+  padding: 0 !important;
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -1324,7 +2696,7 @@ a,
 #wojak-generator .trait-message-text {
   font-size: 10px !important;
   line-height: 12px !important;
-  color: #555 !important;
+  color: var(--text-2) !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1376,7 +2748,7 @@ a,
   /* Give the preview more room; reduce empty gray on right */
   .meme-generator-preview {
     flex: 1 1 auto !important;     /* was fixed basis */
-    min-width: 520px !important;
+    min-width: 480px !important; /* Reduced from 520px to reduce gray space */
   }
 
   /* Make preview wrapper consume full preview width */
@@ -1393,7 +2765,10 @@ a,
 
   /* Export controls row must match preview width and keep text inside */
   #wojak-generator .export-controls-wrapper,
-  #wojak-generator .export-controls-preview,
+  #wojak-generator .export-controls-preview {
+    width: 100% !important;
+    margin-top: 4px !important; /* Reduced spacing above export controls */
+  }
   #wojak-generator .export-controls-row {
     width: 100% !important;
   }
@@ -1568,11 +2943,37 @@ a,
   display: block;
 }
 
-.gallery-grid {
+/* Gallery Window Layout */
+/* Gallery window body layout & padding - small "air gap" between inner border and content */
+#window-gallery .window-body {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 8px 8px 8px; /* top, right, bottom, left - Win98-style padding */
+  overflow: hidden;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+/* Scrollable content wrapper - provides inner padding and scroll area */
+#window-gallery .gallery-content-wrapper {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--window-face);
+  padding: 8px 8px 18px 8px; /* extra bottom space so last row never feels cut off */
+  box-sizing: border-box;
+  min-height: 0;
+}
+
+/* Grid padding & gap - wrapper handles padding, grid only needs gap between items */
+#window-gallery .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 12px;
-  margin: 12px 0;
+  align-content: flex-start;
+  margin: 0; /* no outer margin – wrapper handles padding */
+  padding: 0; /* keep padding on wrapper, not grid */
+  box-sizing: border-box;
 }
 
 .thumb {
@@ -1580,19 +2981,20 @@ a,
   width: 100%;
   aspect-ratio: 1;
   cursor: pointer;
-  border: 2px outset #c0c0c0;
-  background: #c0c0c0;
+  border: 2px outset var(--border-light);
+  background: var(--panel-face);
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .thumb:hover {
-  border: 2px inset #c0c0c0;
+  border: 2px inset var(--border-dark);
 }
 
 .thumb .img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   display: block;
   position: absolute;
   top: 0;
@@ -1600,6 +3002,9 @@ a,
   transition: opacity 0.2s ease;
   will-change: opacity;
   transform: translateZ(0); /* Force GPU acceleration */
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
 }
 
 .thumb .img.back {
@@ -1619,27 +3024,35 @@ a,
   bottom: 0;
   left: 0;
   right: 0;
-  background: #c0c0c0;
-  color: #000000;
+  background: var(--panel-face);
+  color: var(--text-1);
   padding: 4px 6px;
   font-size: 10px;
   font-weight: bold;
   text-align: center;
   z-index: 10;
   pointer-events: none;
-  border: 1px inset #c0c0c0;
-  border-top: 2px solid #808080;
+  border: 1px inset var(--border-dark);
+  border-top: 2px solid var(--border-dark);
   box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.3);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.fineprint {
+/* Footer / Fine-print spacing - visually separated from grid and bottom border */
+#window-gallery .fineprint {
+  flex-shrink: 0;
+  margin-top: 6px; /* space between grid and text */
+  padding-top: 3px;
+  padding-bottom: 0;
+  padding-left: 0;
+  padding-right: 0;
+  border-top: 1px solid var(--border-mid); /* subtle Win98-style separator line */
   font-size: 10px;
-  color: #808080;
-  margin-top: 8px;
+  color: var(--text-2);
   text-align: center;
+  background: transparent; /* transparent - window-body background shows through */
 }
 
 .memetic-box {
@@ -1724,24 +3137,26 @@ a,
 
 .field-row button {
   padding: 4px 12px;
-  border: 1px outset #c0c0c0;
-  background: #c0c0c0;
+  border: 1px outset var(--border-light);
+  background: var(--btn-face);
+  color: var(--btn-text);
   cursor: pointer;
   font-size: 11px;
 }
 
 .field-row button:active {
-  border: 1px inset #c0c0c0;
+  border: 1px inset var(--border-dark);
+  background: var(--btn-face-pressed);
 }
 
 hr {
   border: none;
-  border-top: 1px solid #808080;
+  border-top: 1px solid var(--border-dark);
   margin: 12px 0;
 }
 
 a {
-  color: #0000ff;
+  color: var(--accent-link);
   text-decoration: underline;
 }
 
@@ -1761,13 +3176,13 @@ a {
 }
 
 .readme-launch-space-link:hover {
-  color: #000080;
+  color: var(--link);
 }
 
 .readme-launch-space-thumb {
   height: 72px;                 /* larger preview while still fitting layout */
   width: auto;
-  border: 1px solid #000;
+  border: 1px solid var(--text-1);
   display: block;
   image-rendering: auto;
 }
@@ -1793,8 +3208,8 @@ p {
 
 /* Meme Generator Styles */
 .meme-canvas-container {
-  border: 2px inset #c0c0c0;
-  background: #ffffff;
+  border: 2px inset var(--border-dark);
+  background: var(--input-bg);
   display: inline-block;
   padding: 4px;
 }
@@ -1814,9 +3229,9 @@ p {
 }
 
 .layer-panel {
-  border: 1px inset #c0c0c0;
+  border: 1px inset var(--border-dark);
   padding: 8px;
-  background: #ffffff;
+  background: var(--input-bg);
   min-height: 200px;
 }
 
@@ -1830,11 +3245,11 @@ p {
 }
 
 .export-status.success {
-  color: #008000;
+  color: var(--state-success, #008000);
 }
 
 .export-status.error {
-  color: #c00;
+  color: var(--state-error);
 }
 
 /* Responsive Design */
@@ -1862,7 +3277,7 @@ p {
     cursor: default !important;
   }
 
-  /* Hide resize handle on mobile */
+  /* Hide resize handles on mobile */
   .window-resize-handle {
     display: none !important;
   }
@@ -1912,8 +3327,12 @@ p {
   }
 
   .gallery-grid {
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 8px;
+  }
+
+  #window-gallery .gallery-content-wrapper {
+    padding: 6px 6px 10px 6px; /* maintain extra bottom padding on mobile too */
   }
 
   .field-row {
@@ -1969,8 +3388,17 @@ p {
   }
 
   .gallery-grid {
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    gap: var(--spacing-sm);
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+  }
+
+  #window-gallery .gallery-content-wrapper {
+    padding: 6px 6px 10px 6px; /* maintain extra bottom padding on very small screens */
+  }
+
+  #window-gallery .fineprint {
+    margin-top: 6px; /* maintain spacing on small screens */
+    font-size: 9px;
   }
 
   .title-bar-controls button {
@@ -2009,6 +3437,9 @@ p {
   }
 }
 
+/* Color Schemes */
+/* Old color scheme definitions removed - now using token-based system above */
+
 /* Touch device optimizations */
 @media (hover: none) and (pointer: coarse) {
   .title-bar-controls button {
@@ -2030,7 +3461,7 @@ p {
   }
 
   .thumb:active {
-    border: 2px inset #c0c0c0;
+    border: 2px inset var(--border-dark);
     transform: scale(0.98);
   }
 
@@ -2068,8 +3499,8 @@ p {
   padding-bottom: var(--safe-area-inset-bottom);
   padding-left: var(--safe-area-inset-left);
   padding-right: var(--safe-area-inset-right);
-  background: #c0c0c0;
-  border-top: var(--border-width) solid #ffffff;
+  background: var(--taskbar-bg);
+  border-top: var(--border-width) solid var(--taskbar-border);
   display: flex;
   align-items: center;
   z-index: 10000;
@@ -2083,8 +3514,9 @@ p {
   height: calc(var(--taskbar-height) - var(--spacing-sm));
   margin: var(--spacing-xs) var(--spacing-sm);
   padding: 0 var(--spacing-lg);
-  border: 1px outset #c0c0c0;
-  background: #c0c0c0;
+  border: 1px outset var(--border-light);
+  background: var(--taskbar-button-bg);
+  color: var(--taskbar-button-text);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -2104,15 +3536,18 @@ p {
 }
 
 .start-button:active {
-  border: 1px inset #c0c0c0;
+  border: 1px inset var(--border-dark);
 }
 
 .start-button:hover {
-  background: #d4d0c8;
+  background: var(--taskbar-button-hover-bg);
 }
 
 .start-button-text {
   user-select: none;
+  /* Explicit token usage - ensure Start button text is always readable */
+  color: var(--taskbar-button-text) !important;
+  -webkit-text-fill-color: var(--taskbar-button-text);
 }
 
 .taskbar-tray {
@@ -2122,10 +3557,43 @@ p {
   padding: 0 4px;
 }
 
+.taskbar-system-tray {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 4px;
+  border-left: 1px solid var(--border-dark);
+}
+
+.system-tray-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+}
+
+.system-tray-icon:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .system-tray-icon:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.system-tray-icon:active {
+  background: var(--taskbar-bg);
+}
+
 .taskbar-clock {
   padding: 0 8px;
   font-size: 11px;
-  color: #000000;
+  color: var(--taskbar-text);
   user-select: none;
   white-space: nowrap;
 }
@@ -2146,13 +3614,13 @@ p {
 .start-tip-bubble {
   position: relative;
   display: inline-block;
-  background: #d4d0c8;
-  border: 1px solid #000000;
+  background: var(--surface-3);
+  border: 1px solid var(--text-1);
   padding: 4px 10px;
   font-size: 11px;
-  color: #000000;
+  color: var(--text-1);
   white-space: nowrap;
-  box-shadow: 2px 2px 0 #000000;
+  box-shadow: 2px 2px 0 var(--text-1);
 }
 
 .start-tip-text {
@@ -2163,8 +3631,9 @@ p {
   height: 22px;
   margin: 2px 4px;
   padding: 0 8px;
-  border: 1px outset #c0c0c0;
-  background: #c0c0c0;
+  border: 1px outset var(--border-light);
+  background: var(--taskbar-btn-face);
+  color: var(--taskbar-btn-text);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -2185,17 +3654,20 @@ p {
 }
 
 .taskbar-window-button:hover {
-  background: #d4d0c8;
+  background: var(--taskbar-btn-hover-face);
+  color: var(--taskbar-btn-hover-text);
 }
 
 .taskbar-window-button:active {
-  border: 1px inset #c0c0c0;
+  border: 1px inset var(--border-dark);
 }
 
 .taskbar-window-button.active {
-  border: 1px inset #808080;
-  background: #c0c0c0;
-  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.2);
+  border: 1px inset var(--border-dark);
+  background: var(--taskbar-btn-active-face);
+  color: var(--taskbar-btn-active-text);
+  /* Use token-based shadow instead of hardcoded rgba */
+  box-shadow: inset 1px 1px 2px var(--border-dark);
   font-weight: bold;
   /* Visual indicator that this window is active */
   position: relative;
@@ -2208,12 +3680,13 @@ p {
   left: 0;
   right: 0;
   height: 2px;
-  background: #000080; /* Windows 98 blue accent */
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+  background: var(--accent-active);
+  /* Use border-light token instead of hardcoded rgba */
+  box-shadow: 0 1px 0 var(--border-light);
 }
 
 .taskbar-window-button.minimized {
-  border: 1px inset #c0c0c0;
+  border: 1px inset var(--border-dark);
 }
 
 .taskbar-window-button-text {
@@ -2223,16 +3696,30 @@ p {
   user-select: none;
   /* Keep emoji colorful (for TangGang orange emoji) */
   font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "MS Sans Serif", sans-serif;
-  color: initial;
+  /* Explicit token usage - do not inherit, always use token */
+  color: var(--taskbar-btn-text) !important;
   filter: none;
+  /* Ensure text is always readable - no browser defaults */
+  -webkit-text-fill-color: var(--taskbar-btn-text);
+}
+
+/* Ensure text color updates on hover/active states */
+.taskbar-window-button:hover .taskbar-window-button-text {
+  color: var(--taskbar-btn-hover-text) !important;
+  -webkit-text-fill-color: var(--taskbar-btn-hover-text);
+}
+
+.taskbar-window-button.active .taskbar-window-button-text {
+  color: var(--taskbar-btn-active-text) !important;
+  -webkit-text-fill-color: var(--taskbar-btn-active-text);
 }
 
 .skip-link {
   position: absolute;
   top: -40px;
   left: 0;
-  background: #000080;
-  color: white;
+  background: var(--accent);
+  color: var(--text-inverse);
   padding: 8px;
   text-decoration: none;
   z-index: 100000;
@@ -2248,8 +3735,8 @@ p {
   bottom: 30px;
   left: 4px;
   width: 200px;
-  background: #c0c0c0;
-  border: 2px outset #c0c0c0;
+  background: var(--menu-bg);
+  border: 2px outset var(--menu-border);
   box-shadow: 2px -2px 4px rgba(0, 0, 0, 0.3);
   z-index: 10001;
   display: flex;
@@ -2257,12 +3744,12 @@ p {
 }
 
 .start-menu-header {
-  background: linear-gradient(to right, #000080, #1084d0);
-  color: white;
+  background: var(--menu-header-bg);
+  color: var(--menu-header-text);
   padding: 4px 8px;
   font-size: 11px;
   font-weight: bold;
-  border-bottom: 1px solid #000080;
+  border-bottom: 1px solid var(--accent);
 }
 
 .start-menu-title {
@@ -2280,6 +3767,7 @@ p {
   padding: 4px 8px;
   border: none;
   background: transparent;
+  color: var(--menu-text);
   text-align: left;
   cursor: pointer;
   font-size: 11px;
@@ -2303,11 +3791,11 @@ p {
   line-height: 1;
   font-size: 16px;
   font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
-  color: initial;
+  /* Emoji color stays natural (no color property) - text uses tokens via parent */
   filter: none;
   text-shadow: none;
   -webkit-text-stroke: 0;
-  -webkit-text-fill-color: initial;
+  /* Remove -webkit-text-fill-color to allow natural emoji colors */
   image-rendering: auto;
 }
 
@@ -2318,8 +3806,8 @@ p {
 }
 
 .start-menu-item:hover {
-  background: #000080;
-  color: white;
+  background: var(--menu-item-hover-bg);
+  color: var(--menu-item-hover-text);
 }
 
 /* Neutralize filters on emoji in all button states */
@@ -2331,12 +3819,13 @@ p {
 
 .start-menu-item-text {
   user-select: none;
+  color: var(--menu-text);
 }
 
 .start-menu-separator {
   margin: 2px 0;
   border: none;
-  border-top: 1px solid #808080;
+  border-top: 1px solid var(--menu-separator);
   height: 0;
 }
 
@@ -2378,4 +3867,111 @@ p {
 .paint-window-sidebar div {
   font-family: 'MS Sans Serif', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif !important;
 }
+
+/* =========================================================
+   DESKTOP IMAGE ICONS STYLES
+   ========================================================= */
+
+.desktop-image-icons {
+  /* Scrollbar styling for Windows 98 */
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg);
+}
+
+.desktop-image-icons::-webkit-scrollbar {
+  width: 16px;
+}
+
+.desktop-image-icons::-webkit-scrollbar-track {
+  background: var(--scrollbar-track-bg);
+  border: 1px inset var(--border-dark);
+}
+
+.desktop-image-icons::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-bg);
+  border: 1px outset var(--border-light);
+}
+
+.desktop-image-icons::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover-bg);
+}
+
+.desktop-image-icon {
+  position: absolute;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  transition: transform 0.15s ease-out, opacity 0.2s, background 0.2s;
+}
+
+.desktop-image-icon:hover:not(.dragging) {
+  transform: scale(1.05);
+}
+
+.desktop-image-icon.selected {
+  background: rgba(0, 0, 128, 0.3) !important; /* Windows 98 blue selection background */
+}
+
+.desktop-image-icon.dragging {
+  cursor: grabbing !important;
+  opacity: 0.7;
+  transition: none !important; /* Disable transitions during drag for smooth movement */
+  z-index: 1000; /* Bring to front while dragging */
+}
+
+.desktop-image-icon:active:not(.dragging) {
+  transform: scale(0.98);
+}
+
+.desktop-image-icon img {
+  pointer-events: none;
+}
+
+.desktop-image-icon-thumbnail {
+  transition: border-color 0.15s, transform 0.15s ease-out;
+}
+
+.desktop-image-icon-label {
+  transition: background 0.15s, color 0.15s;
+}
+
+.desktop-trash-icon {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.desktop-trash-icon:active {
+  transform: scale(0.98);
+}
+
+/* Drag and drop visual feedback */
+.desktop-image-icon[draggable="true"] {
+  cursor: move;
+}
+
+.desktop-image-icon[draggable="true"]:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Trash can drag over state */
+.desktop-trash-icon.drag-over {
+  background: rgba(255, 0, 0, 0.3) !important;
+  border: 2px dashed #ff0000 !important;
+}
+
+/* Desktop Image Icons - Draggable with Absolute Positioning */
+.desktop-image-icons-container {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 46px; /* Above taskbar */
+  z-index: 10;
+  pointer-events: none; /* Let clicks pass through, children will have pointer-events */
+}
+
+
 

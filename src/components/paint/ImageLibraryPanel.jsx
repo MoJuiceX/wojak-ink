@@ -96,7 +96,7 @@ export default function ImageLibraryPanel({ onImageSelect }) {
           </Button>
         ))}
       </div>
-      <p style={{ fontSize: '10px', marginTop: '8px', color: '#808080' }}>
+      <p style={{ fontSize: '10px', marginTop: '8px', color: 'var(--text-2)' }}>
         Click an image to copy it to your clipboard, then paste into Paint.
       </p>
     </div>

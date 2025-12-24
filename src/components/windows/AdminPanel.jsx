@@ -20,6 +20,8 @@ export default function AdminPanel() {
   const [loginError, setLoginError] = useState('')
   const [selectedNFT, setSelectedNFT] = useState(null)
   const [offerFileInput, setOfferFileInput] = useState('')
+  const passwordInputId = 'admin-password-input'
+  const passwordErrorId = 'admin-password-error'
 
   const handleLogin = () => {
     setLoginError('')
@@ -62,24 +64,45 @@ export default function AdminPanel() {
           <p style={{ marginBottom: '8px', fontSize: '11px', fontWeight: 'bold' }}>
             Admin Access Required
           </p>
-          <p style={{ marginBottom: '12px', fontSize: '10px', color: '#666' }}>
-            This panel is only accessible at <code style={{ background: '#d4d0c8', padding: '2px 4px' }}>/admin-enable</code>
+          <p style={{ marginBottom: '12px', fontSize: '10px', color: 'var(--text-2)' }}>
+            This panel is only accessible at <code style={{ background: 'var(--surface-3)', padding: '2px 4px', color: 'var(--text-1)' }}>/admin-enable</code>
           </p>
           <p style={{ marginBottom: '8px', fontSize: '11px' }}>Enter admin password:</p>
           <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
-              placeholder="Password"
-              style={{ flex: 1 }}
-            />
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <Input
+                id={passwordInputId}
+                type="password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value)
+                  if (loginError) setLoginError('') // Clear error when user types
+                }}
+                onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                placeholder="Password"
+                invalid={!!loginError}
+                errorMessageId={passwordErrorId}
+                required={true}
+                aria-label="Admin password"
+                style={{ width: '100%' }}
+              />
+              {loginError && (
+                <div
+                  id={passwordErrorId}
+                  role="alert"
+                  aria-live="polite"
+                  style={{ 
+                    color: 'var(--state-error)', 
+                    fontSize: '11px', 
+                    marginTop: '4px' 
+                  }}
+                >
+                  {loginError}
+                </div>
+              )}
+            </div>
             <Button onClick={handleLogin}>Login</Button>
           </div>
-          {loginError && (
-            <p style={{ color: 'red', fontSize: '11px', marginTop: '4px' }}>{loginError}</p>
-          )}
         </div>
       </Window>
     )
@@ -97,8 +120,8 @@ export default function AdminPanel() {
           </Button>
         </div>
 
-        <div style={{ marginBottom: '16px', padding: '8px', background: '#d4d0c8', border: '1px inset #c0c0c0' }}>
-          <p style={{ fontSize: '10px', color: '#666' }}>
+        <div style={{ marginBottom: '16px', padding: '8px', background: 'var(--surface-3)', border: '1px inset var(--border-dark)' }}>
+          <p style={{ fontSize: '10px', color: 'var(--text-2)' }}>
             Total NFTs: {nfts.length} | NFTs with offers: {Object.keys(offerFiles).length} | 
             Coverage: {Math.round((Object.keys(offerFiles).length / nfts.length) * 100)}%
           </p>
@@ -155,7 +178,7 @@ export default function AdminPanel() {
         </div>
 
         {selectedNFT && (
-          <div style={{ padding: '8px', background: '#f0f0f0', border: '1px inset #c0c0c0' }}>
+          <div style={{ padding: '8px', background: 'var(--surface-3)', border: '1px inset var(--border-dark)' }}>
             <p style={{ fontSize: '11px', marginBottom: '8px', fontWeight: 'bold' }}>
               {selectedNFT.name}
             </p>

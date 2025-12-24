@@ -1,4 +1,5 @@
 import React from 'react'
+import { playSound } from '../../utils/soundManager'
 
 export default function Button({ 
   children, 
@@ -8,42 +9,67 @@ export default function Button({
   className = '',
   ...props 
 }) {
+  const handleClick = (e) => {
+    if (!disabled) {
+      playSound('click')
+      onClick?.(e)
+    }
+  }
+
   return (
     <button
       type={type}
-      onClick={onClick}
+      onClick={handleClick}
       disabled={disabled}
       className={className}
       style={{
         padding: '4px 12px',
-        border: '1px outset #c0c0c0',
-        background: disabled ? '#d4d0c8' : '#c0c0c0',
+        border: `1px outset var(--border-light)`,
+        background: disabled ? 'var(--btn-disabled)' : 'var(--btn-face)',
+        color: 'var(--btn-text)',
         cursor: disabled ? 'not-allowed' : 'pointer',
         fontSize: '11px',
         fontFamily: 'inherit',
         transition: 'transform 0.2s ease, opacity 0.2s ease',
+        position: className.includes('win98-tooltip') ? 'relative' : undefined, // Ensure tooltips work
         ...props.style
       }}
       onMouseEnter={(e) => {
         if (!disabled) {
-          e.currentTarget.style.background = '#d4d0c8'
+          e.currentTarget.style.background = 'var(--btn-face-hover)'
         }
       }}
       onMouseLeave={(e) => {
         if (!disabled) {
-          e.currentTarget.style.background = '#c0c0c0'
-          e.currentTarget.style.border = '1px outset #c0c0c0'
+          e.currentTarget.style.background = 'var(--btn-face)'
+          e.currentTarget.style.border = '1px outset var(--border-light)'
         }
       }}
       onMouseDown={(e) => {
         if (!disabled) {
-          e.currentTarget.style.border = '1px inset #c0c0c0'
+          e.currentTarget.style.border = '1px inset var(--border-dark)'
           e.currentTarget.style.transform = 'scale(0.98)'
         }
       }}
       onMouseUp={(e) => {
         if (!disabled) {
-          e.currentTarget.style.border = '1px outset #c0c0c0'
+          e.currentTarget.style.border = '1px outset var(--border-light)'
+          e.currentTarget.style.transform = 'scale(1)'
+        }
+      }}
+      onTouchStart={(e) => {
+        if (!disabled) {
+          // Visual feedback for touch
+          e.currentTarget.style.background = 'var(--btn-face-hover)'
+          e.currentTarget.style.border = '1px inset var(--border-dark)'
+          e.currentTarget.style.transform = 'scale(0.98)'
+        }
+      }}
+      onTouchEnd={(e) => {
+        if (!disabled) {
+          // Reset visual feedback
+          e.currentTarget.style.background = 'var(--btn-face)'
+          e.currentTarget.style.border = '1px outset var(--border-light)'
           e.currentTarget.style.transform = 'scale(1)'
         }
       }}

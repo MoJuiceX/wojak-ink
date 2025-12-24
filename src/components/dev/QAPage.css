@@ -2,7 +2,7 @@
   min-height: 100dvh; /* Use dynamic viewport height */
   width: 100vw;
   max-width: 100vw; /* Prevent horizontal overflow */
-  background: #c0c0c0;
+  background: var(--panel-face);
   padding: 20px;
   font-family: 'MS Sans Serif', sans-serif;
   position: fixed;
@@ -33,8 +33,8 @@
 .qa-container {
   max-width: 1200px;
   margin: 0 auto;
-  background: #ffffff;
-  border: 2px outset #c0c0c0;
+  background: var(--input-face);
+  border: 2px outset var(--border-light);
   padding: 20px;
   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
@@ -49,12 +49,12 @@
   margin: 0 0 12px 0;
   font-size: 24px;
   font-weight: bold;
-  color: #000000;
+  color: var(--text-1);
 }
 
 .qa-instructions {
   margin: 0;
-  color: #404040;
+  color: var(--text-2);
   line-height: 1.5;
   font-size: 14px;
 }
@@ -66,16 +66,16 @@
 }
 
 .qa-section {
-  border: 1px solid #c0c0c0;
+  border: 1px solid var(--border-dark);
   padding: 16px;
-  background: #f0f0f0;
+  background: var(--surface-3);
 }
 
 .qa-section h2 {
   margin: 0 0 12px 0;
   font-size: 18px;
   font-weight: bold;
-  color: #000000;
+  color: var(--text-1);
 }
 
 .qa-info-grid {
@@ -90,13 +90,13 @@
   flex-direction: column;
   gap: 4px;
   padding: 8px;
-  background: #ffffff;
-  border: 1px inset #c0c0c0;
+  background: var(--input-face);
+  border: 1px inset var(--border-dark);
 }
 
 .qa-label {
   font-size: 12px;
-  color: #808080;
+  color: var(--text-muted);
   font-weight: bold;
   text-transform: uppercase;
 }
@@ -104,13 +104,13 @@
 .qa-value {
   font-size: 18px;
   font-weight: bold;
-  color: #000000;
+  color: var(--text-1);
   font-family: 'Courier New', monospace;
 }
 
 .qa-value-small {
   font-size: 11px;
-  color: #000000;
+  color: var(--text-1);
   font-family: 'Courier New', monospace;
   word-break: break-all;
 }
@@ -151,8 +151,8 @@
 }
 
 .qa-route-display {
-  background: #ffffff;
-  border: 1px inset #c0c0c0;
+  background: var(--input-face);
+  border: 1px inset var(--border-dark);
   padding: 12px;
   margin: 8px 0;
 }
@@ -160,10 +160,10 @@
 .qa-route-display code {
   font-family: 'Courier New', monospace;
   font-size: 14px;
-  color: #000000;
-  background: #f0f0f0;
+  color: var(--text-1);
+  background: var(--surface-3);
   padding: 4px 8px;
-  border: 1px solid #c0c0c0;
+  border: 1px solid var(--border-dark);
 }
 
 .qa-grid-controls {
@@ -178,20 +178,20 @@
   padding: 8px 16px;
   font-size: 14px;
   font-weight: bold;
-  border: 2px outset #c0c0c0;
-  background: #c0c0c0;
-  color: #000000;
+  border: 2px outset var(--border-light);
+  background: var(--panel-face);
+  color: var(--text-1);
   cursor: pointer;
   font-family: 'MS Sans Serif', sans-serif;
 }
 
 .qa-button:hover {
-  background: #d4d0c8;
+  background: var(--btn-hover-face);
 }
 
 .qa-button:active {
   border-style: inset;
-  background: #a0a0a0;
+  background: var(--btn-active-face);
 }
 
 .qa-button-active {
@@ -213,14 +213,14 @@
 .qa-grid-size-selector label {
   font-size: 14px;
   font-weight: bold;
-  color: #000000;
+  color: var(--text-1);
 }
 
 .qa-grid-size-selector select {
   padding: 4px 8px;
   font-size: 14px;
-  border: 1px inset #c0c0c0;
-  background: #ffffff;
+  border: 1px inset var(--border-dark);
+  background: var(--input-face);
   font-family: 'MS Sans Serif', sans-serif;
   cursor: pointer;
 }
@@ -244,8 +244,8 @@
   align-items: center;
   gap: 8px;
   padding: 8px;
-  background: #f0f0f0;
-  border: 1px solid #c0c0c0;
+  background: var(--surface-3);
+  border: 1px solid var(--border-dark);
   border-radius: 2px;
 }
 
@@ -282,7 +282,7 @@
   border-radius: 2px;
   font-size: 12px;
   font-weight: bold;
-  border: 1px solid #c0c0c0;
+  border: 1px solid var(--border-dark);
 }
 
 .qa-stat-must-fix {
@@ -304,7 +304,7 @@
   margin-bottom: 24px;
   padding: 16px;
   background: #f8f8f8;
-  border: 1px solid #c0c0c0;
+  border: 1px solid var(--border-dark);
   border-radius: 2px;
 }
 
@@ -332,7 +332,7 @@
   font-family: 'MS Sans Serif', sans-serif;
   font-size: 12px;
   padding: 4px 8px;
-  border: 1px inset #c0c0c0;
+  border: 1px inset var(--border-dark);
   background: white;
   border-radius: 0;
 }
@@ -356,7 +356,7 @@
   font-family: 'MS Sans Serif', sans-serif;
   font-size: 11px;
   padding: 2px 6px;
-  border: 1px inset #c0c0c0;
+  border: 1px inset var(--border-dark);
   background: white;
   border-radius: 0;
 }
@@ -387,7 +387,7 @@
 
 .qa-issue {
   padding: 12px;
-  border: 1px solid #c0c0c0;
+  border: 1px solid var(--border-dark);
   border-radius: 2px;
   background: white;
 }
@@ -431,7 +431,7 @@
   font-weight: bold;
   padding: 2px 8px;
   border-radius: 2px;
-  border: 1px solid #c0c0c0;
+  border: 1px solid var(--border-dark);
 }
 
 .qa-issue-status-must-fix {

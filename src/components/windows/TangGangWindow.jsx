@@ -5,6 +5,7 @@ import { useWindow } from '../../contexts/WindowContext'
 import OrangeGlassWindow from '../orange/OrangeGlassWindow'
 
 export default function TangGangWindow({ onClose }) {
+  const [imageLoaded, setImageLoaded] = useState(false)
   const { 
     score, 
     requiredScore, 
@@ -230,10 +231,16 @@ export default function TangGangWindow({ onClose }) {
             src="https://bafybeihbaqn7omk55qi3vfrht76qa53kz4dx75anzwtjkcggi2v3jql4tm.ipfs.w3s.link/?filename=HOA+logo.png"
             alt="TangGang"
             className="hoa-logo-img"
+            onLoad={() => {
+              // Mark image as loaded - glass overlay will appear in correct position
+              setImageLoaded(true)
+            }}
           />
-          <div className="hoa-glass-overlay" aria-hidden="true">
-            <OrangeGlassWindow variant="overlay" />
-          </div>
+          {imageLoaded && (
+            <div className="hoa-glass-overlay" aria-hidden="true">
+              <OrangeGlassWindow variant="overlay" />
+            </div>
+          )}
         </div>
         <div style={{ padding: '12px', textAlign: 'center' }}>
           {canClaim && (

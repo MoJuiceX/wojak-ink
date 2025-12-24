@@ -73,11 +73,11 @@ export default function MinesweeperWindow({ onClose }) {
       id="window-minesweeper"
       title="MINESWEEPER.EXE"
       style={{
-        width: '520px',
-        height: '640px',
+        width: '400px',
+        height: '500px',
         maxWidth: 'var(--window-max-width)',
-        minWidth: 'var(--window-min-width)',
-        minHeight: 'var(--window-min-height)',
+        minWidth: '350px',
+        minHeight: '450px',
       }}
       onClose={onClose}
     >
@@ -108,6 +108,7 @@ export default function MinesweeperWindow({ onClose }) {
     </Window>
   )
 }
+
 
 
 

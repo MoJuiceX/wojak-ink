@@ -51,6 +51,9 @@
     <meta name="theme-color" content="#c0c0c0" />
     <meta name="msapplication-TileColor" content="#c0c0c0" />
     
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    
     <!-- Preconnect for Performance -->
     <link rel="preconnect" href="https://unpkg.com" crossorigin />
     <link rel="dns-prefetch" href="https://unpkg.com" />
@@ -60,36 +63,54 @@
     <link rel="preload" href="/fonts/converted/ms_sans_serif_bold.woff2" as="font" type="font/woff2" crossorigin />
     
     <!-- Structured Data (JSON-LD) -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "CollectionPage",
-      "name": "Wojak Farmers Plot",
-      "description": "Handcrafted NFT art collection for the Grove. 4200 NFTs on Chia blockchain featuring memes, culture, and community.",
-      "url": "https://wojak.ink/",
-      "image": "https://wojak.ink/assets/og.jpg",
-      "author": {
-        "@type": "Person",
-        "name": "MoJuiceX",
-        "sameAs": "https://x.com/MoJuiceX"
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "Wojak Farmers Plot"
-      },
-      "mainEntity": {
-        "@type": "ItemList",
-        "name": "Wojak Farmers Plot NFT Collection",
-        "description": "4200 handcrafted NFT artworks",
-        "numberOfItems": 4200
-      },
-      "offers": {
-        "@type": "Offer",
-        "availability": "https://schema.org/InStock",
-        "priceCurrency": "XCH"
-      }
-    }
-    </script>
+            <script type="application/ld+json">
+            {
+              "@context": "https://schema.org",
+              "@type": "CollectionPage",
+              "name": "Wojak Farmers Plot",
+              "description": "Handcrafted NFT art collection for the Grove. 4200 NFTs on Chia blockchain featuring memes, culture, and community.",
+              "url": "https://wojak.ink/",
+              "image": "https://wojak.ink/assets/og.jpg",
+              "author": {
+                "@type": "Person",
+                "name": "MoJuiceX",
+                "sameAs": "https://x.com/MoJuiceX"
+              },
+              "publisher": {
+                "@type": "Organization",
+                "name": "Wojak Farmers Plot",
+                "logo": {
+                  "@type": "ImageObject",
+                  "url": "https://wojak.ink/assets/logo.png"
+                }
+              },
+              "mainEntity": {
+                "@type": "ItemList",
+                "name": "Wojak Farmers Plot NFT Collection",
+                "description": "4200 handcrafted NFT artworks",
+                "numberOfItems": 4200,
+                "itemListElement": {
+                  "@type": "CreativeWork",
+                  "name": "Wojak NFT",
+                  "description": "Handcrafted Wojak NFT artwork"
+                }
+              },
+              "offers": {
+                "@type": "Offer",
+                "availability": "https://schema.org/InStock",
+                "priceCurrency": "XCH"
+              },
+              "applicationCategory": "WebApplication",
+              "operatingSystem": "Web Browser",
+              "softwareVersion": "2.0",
+              "featureList": [
+                "Wojak Creator",
+                "NFT Gallery",
+                "Marketplace",
+                "Desktop Environment"
+              ]
+            }
+            </script>
     
     <!-- Win98 UI CSS -->
     <link rel="stylesheet" href="https://unpkg.com/98.css@0.1.21/dist/98.css" />

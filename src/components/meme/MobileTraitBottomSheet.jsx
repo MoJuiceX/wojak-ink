@@ -25,6 +25,15 @@ export default function MobileTraitBottomSheet({
   onExpandedChange,
   canvasRef,
   onRandomize,
+  tangifiedImage,
+  setTangifiedImage,
+  showTangified,
+  setShowTangified,
+  onAddToGallery,
+  onUpdateGalleryEntry,
+  onRemoveGalleryEntry,
+  onAddDesktopImage,
+  desktopImages = [],
 }) {
   const [internalIsExpanded, setInternalIsExpanded] = useState(false)
   const isExpanded = controlledIsExpanded !== undefined ? controlledIsExpanded : internalIsExpanded
@@ -526,7 +535,19 @@ export default function MobileTraitBottomSheet({
           {/* Export Controls - Always reachable */}
           {canvasRef && (
             <div className="export-controls-mobile">
-              <ExportControls canvasRef={canvasRef} selectedLayers={selectedLayers} />
+              <ExportControls 
+                canvasRef={canvasRef} 
+                selectedLayers={selectedLayers}
+                tangifiedImage={tangifiedImage}
+                setTangifiedImage={setTangifiedImage}
+                showTangified={showTangified}
+                setShowTangified={setShowTangified}
+                onAddToGallery={onAddToGallery}
+                onUpdateGalleryEntry={onUpdateGalleryEntry}
+                onRemoveGalleryEntry={onRemoveGalleryEntry}
+                onAddDesktopImage={onAddDesktopImage}
+                desktopImages={desktopImages}
+              />
             </div>
           )}
 
@@ -612,7 +633,19 @@ export default function MobileTraitBottomSheet({
           {/* Export Controls - Always reachable in expanded state too */}
           {canvasRef && (
             <div className="export-controls-mobile-expanded">
-              <ExportControls canvasRef={canvasRef} selectedLayers={selectedLayers} />
+              <ExportControls 
+                canvasRef={canvasRef} 
+                selectedLayers={selectedLayers}
+                tangifiedImage={tangifiedImage}
+                setTangifiedImage={setTangifiedImage}
+                showTangified={showTangified}
+                setShowTangified={setShowTangified}
+                onAddToGallery={onAddToGallery}
+                onUpdateGalleryEntry={onUpdateGalleryEntry}
+                onRemoveGalleryEntry={onRemoveGalleryEntry}
+                onAddDesktopImage={onAddDesktopImage}
+                desktopImages={desktopImages}
+              />
             </div>
           )}
         </div>

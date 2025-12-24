@@ -7,12 +7,13 @@
   position: absolute;
   z-index: 10002;
   padding: 6px 10px;
-  background: #ffffe1;
-  border: 1px solid #000000;
-  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  background: var(--surface-3);
+  border: 1px solid var(--border-dark);
+  /* Use token-based shadow */
+  box-shadow: 2px 2px 4px var(--border-dark);
   font-family: 'MS Sans Serif', sans-serif;
   font-size: 11px;
-  color: #000000;
+  color: var(--text-1);
   white-space: nowrap;
   pointer-events: none;
   max-width: 250px;
@@ -34,27 +35,27 @@
   bottom: -12px;
   left: 50%;
   transform: translateX(-50%);
-  border-top-color: #000000;
+  border-top-color: var(--border-dark);
 }
 
 .tooltip-bottom::before {
   top: -12px;
   left: 50%;
   transform: translateX(-50%);
-  border-bottom-color: #000000;
+  border-bottom-color: var(--border-dark);
 }
 
 .tooltip-left::before {
   right: -12px;
   top: 50%;
   transform: translateY(-50%);
-  border-left-color: #000000;
+  border-left-color: var(--border-dark);
 }
 
 .tooltip-right::before {
   left: -12px;
   top: 50%;
   transform: translateY(-50%);
-  border-right-color: #000000;
+  border-right-color: var(--border-dark);
 }
 

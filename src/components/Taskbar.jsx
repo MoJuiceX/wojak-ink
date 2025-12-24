@@ -5,26 +5,52 @@ import StartMenu from './StartMenu'
 import { useWindow } from '../contexts/WindowContext'
 import { useMarketplace } from '../contexts/MarketplaceContext'
 import { getWindowIcon } from '../utils/windowIcons'
+import { trackClockClick } from '../utils/easterEggs'
+import { toggleMute, getMuteState } from '../utils/soundManager'
 
-export default function Taskbar({ onOpenWojakGenerator, wojakGeneratorOpen, onOpenApp }) {
+export default function Taskbar({ onOpenWojakGenerator, wojakGeneratorOpen, onOpenApp, onClockClick, isOnline = true }) {
   const [startMenuOpen, setStartMenuOpen] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
+  const [isMuted, setIsMuted] = useState(getMuteState())
   const { getAllWindows, isWindowMinimized, restoreWindow, bringToFront, isWindowActive, minimizeWindow } = useWindow()
   const startButtonRef = useRef(null)
   const startMenuRef = useRef(null)
+  const clockRef = useRef(null)
   const [isStartHovered, setIsStartHovered] = useState(false)
   const [isAutoHintVisible, setIsAutoHintVisible] = useState(false)
   const [autoHintDismissed, setAutoHintDismissed] = useState(false)
   const [startHintPosition, setStartHintPosition] = useState({ top: 0, left: 0 })
 
-  // Update clock every second
+  // Update clock every second - use ref to avoid re-renders
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentTime(new Date())
+      if (clockRef.current) {
+        // Direct DOM update to avoid re-render
+        const now = new Date()
+        const hours = now.getHours()
+        const minutes = now.getMinutes()
+        const ampm = hours >= 12 ? 'PM' : 'AM'
+        const hours12 = hours % 12 || 12
+        const minutesStr = minutes.toString().padStart(2, '0')
+        clockRef.current.textContent = `${hours12}:${minutesStr} ${ampm}`
+      } else {
+        // Fallback: update state if ref not available
+        setCurrentTime(new Date())
+      }
     }, 1000)
 
     return () => clearInterval(timer)
   }, [])
+
+  // Sync mute state with localStorage
+  useEffect(() => {
+    setIsMuted(getMuteState())
+  }, [])
+
+  const handleMuteToggle = () => {
+    const newMutedState = toggleMute()
+    setIsMuted(newMutedState)
+  }
 
   // Read persisted dismissal state on mount (safe-guarded for environments without localStorage)
   useEffect(() => {
@@ -200,6 +226,41 @@ export default function Taskbar({ onOpenWojakGenerator, wojakGeneratorOpen, onOp
 
   const allWindows = getAllWindows()
   
+  // #region agent log
+  // Instrumentation: Check theme state and computed styles for taskbar buttons
+  useEffect(() => {
+    const htmlEl = document.documentElement
+    const themeAttr = htmlEl.getAttribute('data-theme')
+    const accentAttr = htmlEl.getAttribute('data-accent')
+    
+    // Check taskbar button computed styles
+    const taskbarButtons = document.querySelectorAll('.taskbar-window-button')
+    const taskbarButtonTexts = document.querySelectorAll('.taskbar-window-button-text')
+    
+    const buttonData = Array.from(taskbarButtons).map((btn, idx) => {
+      const textEl = taskbarButtonTexts[idx]
+      const computedStyle = window.getComputedStyle(btn)
+      const textComputedStyle = textEl ? window.getComputedStyle(textEl) : null
+      
+      return {
+        index: idx,
+        className: btn.className,
+        buttonColor: computedStyle.color,
+        buttonBg: computedStyle.backgroundColor,
+        buttonToken: computedStyle.getPropertyValue('--taskbar-btn-text'),
+        textColor: textComputedStyle?.color || 'N/A',
+        textToken: textComputedStyle?.getPropertyValue('--taskbar-btn-text') || 'N/A',
+        hasInlineStyle: btn.hasAttribute('style'),
+        textHasInlineStyle: textEl?.hasAttribute('style') || false
+      }
+    })
+    
+    if (import.meta.env.DEV) {
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Taskbar.jsx:useEffect',message:'Theme state and taskbar button computed styles',data:{themeAttr,accentAttr,taskbarButtonCount:taskbarButtons.length,buttonData,htmlClasses:htmlEl.className},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    }
+  }, [allWindows])
+  // #endregion
+  
   // Check if Wojak Generator window is open and active
   const wojakGeneratorWindow = allWindows.find(w => w.id === 'wojak-generator')
   const isWojakGeneratorActive = wojakGeneratorWindow ? isWindowActive('wojak-generator') : false
@@ -253,8 +314,8 @@ export default function Taskbar({ onOpenWojakGenerator, wojakGeneratorOpen, onOp
           />
           <span className="start-button-text">Start</span>
         </button>
-        <div className="taskbar-tray">
-          {allWindows.map((window) => {
+        <div className="taskbar-tray" role="group" aria-label="Open windows">
+          {allWindows.map((window, index) => {
             const minimized = isWindowMinimized(window.id)
             const active = isWindowActive(window.id)
             const iconPath = getWindowIcon(window.id, window.title)
@@ -264,8 +325,30 @@ export default function Taskbar({ onOpenWojakGenerator, wojakGeneratorOpen, onOp
                 key={window.id}
                 className={`taskbar-window-button ${minimized ? 'minimized' : ''} ${active ? 'active' : ''}`}
                 onClick={() => handleWindowClick(window.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    handleWindowClick(window.id)
+                  }
+                  // Arrow key navigation
+                  if (e.key === 'ArrowLeft' && index > 0) {
+                    e.preventDefault()
+                    const prevButton = document.querySelectorAll('.taskbar-window-button')[index - 1]
+                    prevButton?.focus()
+                  }
+                  if (e.key === 'ArrowRight' && index < allWindows.length - 1) {
+                    e.preventDefault()
+                    const nextButton = document.querySelectorAll('.taskbar-window-button')[index + 1]
+                    nextButton?.focus()
+                  }
+                  if (e.key === 'ArrowLeft' && index === 0) {
+                    e.preventDefault()
+                    startButtonRef.current?.focus()
+                  }
+                }}
                 aria-label={`${window.title} - ${minimized ? 'Restore' : 'Activate'}`}
                 title={window.title}
+                tabIndex={0}
               >
                 {iconPath && (
                   <img 
@@ -280,7 +363,35 @@ export default function Taskbar({ onOpenWojakGenerator, wojakGeneratorOpen, onOp
             )
           })}
         </div>
-        <div className="taskbar-clock" role="timer" aria-live="polite" aria-label="Current time">
+        <div className="taskbar-system-tray">
+          {!isOnline && (
+            <div
+              className="system-tray-icon"
+              title="Offline"
+              aria-label="Offline"
+              style={{ cursor: 'default', opacity: 0.7 }}
+            >
+              ⚠️
+            </div>
+          )}
+          <button
+            className="system-tray-icon"
+            onClick={handleMuteToggle}
+            title={isMuted ? 'Unmute' : 'Mute'}
+            aria-label={isMuted ? 'Unmute' : 'Mute'}
+          >
+            {isMuted ? '🔇' : '🔊'}
+          </button>
+        </div>
+        <div 
+          ref={clockRef}
+          className="taskbar-clock" 
+          role="timer" 
+          aria-live="polite" 
+          aria-label="Current time"
+          onClick={onClockClick || undefined}
+          style={onClockClick ? { cursor: 'pointer' } : undefined}
+        >
           {formatTime(currentTime)}
         </div>
       </nav>

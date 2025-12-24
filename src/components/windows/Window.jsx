@@ -5,6 +5,7 @@ import { getCenteredPosition } from '../../utils/windowPosition'
 import { getWindowIcon } from '../../utils/windowIcons'
 import { getWindowSizeConstraints, clampWindowPosition } from '../../utils/windowPosition'
 import { useKeyboardHandler, KEYBOARD_PRIORITY } from '../../contexts/KeyboardPriorityContext'
+import { playSound } from '../../utils/soundManager'
 
 /**
  * Window component that provides a draggable, resizable window with minimize, maximize, and close functionality.
@@ -205,6 +206,9 @@ export default function Window({
         centerOnOpen: shouldCenter,
       })
       hasRegisteredRef.current = true
+      
+      // Play window open sound (Party Mode only - not in STANDARD_MODE_SOUNDS)
+      playSound('windowOpen')
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
         console.error('[Window] Failed to register window:', error, 'windowId:', windowId)
@@ -385,6 +389,27 @@ export default function Window({
     }
   }, [windowId, isMobile, isMinimized, isMaximized, style?.position, hasUserMoved, updateWindowPosition])
 
+  // Focus window when it becomes active
+  useEffect(() => {
+    if (isActive && !isMinimized && windowRef.current) {
+      // Focus window container for keyboard navigation
+      windowRef.current.focus()
+      
+      // Announce window state change to screen readers
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        const announcement = document.createElement('div')
+        announcement.setAttribute('role', 'status')
+        announcement.setAttribute('aria-live', 'polite')
+        announcement.setAttribute('aria-atomic', 'true')
+        announcement.className = 'sr-only'
+        announcement.style.cssText = 'position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden;'
+        announcement.textContent = `${title} window is now active`
+        document.body.appendChild(announcement)
+        setTimeout(() => document.body.removeChild(announcement), 1000)
+      }
+    }
+  }, [isActive, isMinimized, title])
+
   // Bring to front when clicked - improved handler
   useEffect(() => {
     const win = windowRef.current
@@ -400,9 +425,7 @@ export default function Window({
       bringToFront(windowId)
       
       // Also focus the window element
-      if (win.tabIndex !== undefined) {
-        win.focus()
-      }
+      win.focus()
     }
 
     // Use capture phase to ensure we catch the event early
@@ -423,6 +446,9 @@ export default function Window({
 
   const handleClose = () => {
     try {
+      // Play window close sound (Party Mode only - not in STANDARD_MODE_SOUNDS)
+      playSound('windowClose')
+      
       setIsVisible(false)
       if (onClose) {
         onClose()
@@ -447,8 +473,12 @@ export default function Window({
   const handleMinimize = () => {
     try {
       if (isMinimized) {
+        // Party mode only - restore sound
+        playSound('windowRestoreUp')
         restoreWindow(windowId)
       } else {
+        // Party mode only - minimize sound
+        playSound('windowMinimize')
         minimizeWindow(windowId)
       }
     } catch (error) {
@@ -469,14 +499,16 @@ export default function Window({
       }
 
       if (isMaximized) {
-        // Restore
+        // Restore - Party mode only
+        playSound('windowRestoreDown')
         restoreWindowSize(windowId)
         win.style.width = savedSizeRef.current.width || style.width || 'auto'
         win.style.height = savedSizeRef.current.height || style.height || 'auto'
         win.style.left = `${savedPositionRef.current.x}px`
         win.style.top = `${savedPositionRef.current.y}px`
       } else {
-        // Maximize
+        // Maximize - Party mode only
+        playSound('windowMaximize')
         const rect = win.getBoundingClientRect()
         savedPositionRef.current = { x: rect.left, y: rect.top }
         savedSizeRef.current = { 
@@ -527,15 +559,28 @@ export default function Window({
 
   useKeyboardHandler(KEYBOARD_PRIORITY.ACTIVE_WINDOW, windowId, handleWindowKeyboard, isActive)
 
-  // Handle window resizing from bottom-right corner
+  // Handle window resizing from all edges and corners
   // Disabled on mobile (mobile windows are fullscreen)
-  const resizeHandleRef = useRef(null)
+  const resizeRefs = {
+    n: useRef(null),   // North (top)
+    s: useRef(null),   // South (bottom)
+    e: useRef(null),   // East (right)
+    w: useRef(null),   // West (left)
+    ne: useRef(null),  // Northeast (top-right)
+    se: useRef(null),  // Southeast (bottom-right)
+    sw: useRef(null),  // Southwest (bottom-left)
+    nw: useRef(null),  // Northwest (top-left)
+  }
+
   useEffect(() => {
     const win = windowRef.current
-    const handle = resizeHandleRef.current
-    if (!win || !handle || isMaximized || isMinimized || isMobile) return
+    if (!win || isMaximized || isMinimized || isMobile) return
+
+    const MIN_WIDTH = 250
+    const MIN_HEIGHT = 200
 
     let isResizing = false
+    let resizeDirection = ''
     let startX = 0
     let startY = 0
     let startWidth = 0
@@ -543,12 +588,13 @@ export default function Window({
     let startLeft = 0
     let startTop = 0
 
-    const handleMouseDown = (e) => {
+    const handleResizeStart = (e, direction) => {
       if (e.button !== 0) return // Only left mouse button
       e.preventDefault()
       e.stopPropagation()
       
       isResizing = true
+      resizeDirection = direction
       
       // Batch all layout reads first (prevent layout thrashing)
       const rect = win.getBoundingClientRect()
@@ -573,26 +619,48 @@ export default function Window({
 
       // Get size constraints from layout tokens
       const constraints = getWindowSizeConstraints({
-        minWidth: style.minWidth ? parseInt(style.minWidth) : undefined,
-        minHeight: style.minHeight ? parseInt(style.minHeight) : undefined,
+        minWidth: style.minWidth ? parseInt(style.minWidth) : MIN_WIDTH,
+        minHeight: style.minHeight ? parseInt(style.minHeight) : MIN_HEIGHT,
         maxWidth: style.maxWidth ? parseInt(style.maxWidth) : undefined,
         maxHeight: style.maxHeight ? parseInt(style.maxHeight) : undefined,
       })
 
-      let newWidth = Math.max(constraints.minWidth, Math.min(constraints.maxWidth, startWidth + deltaX))
-      let newHeight = Math.max(constraints.minHeight, Math.min(constraints.maxHeight, startHeight + deltaY))
+      let newWidth = startWidth
+      let newHeight = startHeight
+      let newLeft = startLeft
+      let newTop = startTop
+
+      // Handle horizontal resizing (east/west)
+      if (resizeDirection.includes('e')) {
+        newWidth = Math.max(constraints.minWidth, Math.min(constraints.maxWidth || Infinity, startWidth + deltaX))
+      }
+      if (resizeDirection.includes('w')) {
+        const widthChange = startWidth - Math.max(constraints.minWidth, Math.min(constraints.maxWidth || Infinity, startWidth - deltaX))
+        newWidth = startWidth - widthChange
+        newLeft = startLeft + widthChange
+      }
+
+      // Handle vertical resizing (north/south)
+      if (resizeDirection.includes('s')) {
+        newHeight = Math.max(constraints.minHeight, Math.min(constraints.maxHeight || Infinity, startHeight + deltaY))
+      }
+      if (resizeDirection.includes('n')) {
+        const heightChange = startHeight - Math.max(constraints.minHeight, Math.min(constraints.maxHeight || Infinity, startHeight - deltaY))
+        newHeight = startHeight - heightChange
+        newTop = startTop + heightChange
+      }
 
       // Batch all layout reads first (prevent layout thrashing)
       const rect = win.getBoundingClientRect()
-      const isMobile = window.innerWidth <= 768
+      const isMobileCheck = window.innerWidth <= 768
       
       // Calculate clamped position (no DOM writes yet)
-      let clampedX = rect.left
-      let clampedY = rect.top
-      if (!isMobile) {
+      let clampedX = newLeft
+      let clampedY = newTop
+      if (!isMobileCheck) {
         const clamped = clampWindowPosition({
-          x: rect.left,
-          y: rect.top,
+          x: newLeft,
+          y: newTop,
           width: newWidth,
           height: newHeight,
           isMobile: false
@@ -611,8 +679,12 @@ export default function Window({
         win2.style.width = `${newWidth}px`
         win2.style.height = `${newHeight}px`
         
-        // Adjust position if needed (after size is set)
-        if (clampedX !== rect.left || clampedY !== rect.top) {
+        // Apply position changes if resizing from west or north (or if clamp adjusted position)
+        const currentLeft = parseFloat(win2.style.left) || startLeft
+        const currentTop = parseFloat(win2.style.top) || startTop
+        const positionChanged = Math.abs(clampedX - currentLeft) > 0.5 || Math.abs(clampedY - currentTop) > 0.5
+        
+        if (resizeDirection.includes('w') || resizeDirection.includes('n') || positionChanged) {
           win2.style.left = `${clampedX}px`
           win2.style.top = `${clampedY}px`
           updateWindowPosition(windowId, { x: clampedX, y: clampedY })
@@ -625,19 +697,42 @@ export default function Window({
     const handleMouseUp = () => {
       if (isResizing) {
         isResizing = false
+        resizeDirection = ''
         document.removeEventListener('mousemove', handleMouseMove)
         document.removeEventListener('mouseup', handleMouseUp)
       }
     }
 
-    handle.addEventListener('mousedown', handleMouseDown)
+    // Attach event listeners to all resize handles
+    const handles = [
+      { ref: resizeRefs.n, dir: 'n' },
+      { ref: resizeRefs.s, dir: 's' },
+      { ref: resizeRefs.e, dir: 'e' },
+      { ref: resizeRefs.w, dir: 'w' },
+      { ref: resizeRefs.ne, dir: 'ne' },
+      { ref: resizeRefs.se, dir: 'se' },
+      { ref: resizeRefs.sw, dir: 'sw' },
+      { ref: resizeRefs.nw, dir: 'nw' },
+    ]
+
+    const cleanupFunctions = handles.map(({ ref, dir }) => {
+      const handle = ref.current
+      if (!handle) return null
+      
+      const handler = (e) => handleResizeStart(e, dir)
+      handle.addEventListener('mousedown', handler)
+      
+      return () => {
+        handle.removeEventListener('mousedown', handler)
+      }
+    }).filter(Boolean)
 
     return () => {
-      handle.removeEventListener('mousedown', handleMouseDown)
+      cleanupFunctions.forEach(cleanup => cleanup())
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
     }
-  }, [windowId, isMaximized, isMinimized, style, bringToFront, updateWindowSize])
+  }, [windowId, isMaximized, isMinimized, style, bringToFront, updateWindowSize, updateWindowPosition])
 
   if (!isVisible) return null
 
@@ -687,10 +782,16 @@ export default function Window({
       role="dialog"
       aria-modal="true"
       aria-labelledby={`${windowId}-title`}
-      tabIndex={-1}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        // Close window with Escape
+        if (e.key === 'Escape' && onClose) {
+          onClose()
+        }
+      }}
       style={baseStyle}
     >
-      <div className="title-bar">
+      <div className={`title-bar ${!isActive ? 'inactive' : ''}`}>
         <div className="title-bar-text" id={`${windowId}-title`}>
           {iconPath && (
             <img 
@@ -737,23 +838,20 @@ export default function Window({
           >
             {children}
           </div>
-          {/* Resize handle - desktop only (mobile windows are fullscreen) */}
+          {/* Resize handles - all edges and corners (desktop only, mobile windows are fullscreen) */}
           {!isMaximized && !isMobile && (
-            <div
-              ref={resizeHandleRef}
-              className="window-resize-handle"
-              style={{
-                position: 'absolute',
-                bottom: 0,
-                right: 0,
-                width: '16px',
-                height: '16px',
-                cursor: 'nwse-resize',
-                zIndex: 1000,
-                background: 'transparent',
-              }}
-              aria-label="Resize window"
-            />
+            <>
+              {/* Edge handles */}
+              <div ref={resizeRefs.n} className="window-resize-handle resize-handle resize-n" aria-label="Resize window (top)" />
+              <div ref={resizeRefs.s} className="window-resize-handle resize-handle resize-s" aria-label="Resize window (bottom)" />
+              <div ref={resizeRefs.e} className="window-resize-handle resize-handle resize-e" aria-label="Resize window (right)" />
+              <div ref={resizeRefs.w} className="window-resize-handle resize-handle resize-w" aria-label="Resize window (left)" />
+              {/* Corner handles */}
+              <div ref={resizeRefs.ne} className="window-resize-handle resize-handle resize-ne" aria-label="Resize window (top-right)" />
+              <div ref={resizeRefs.se} className="window-resize-handle resize-handle resize-se" aria-label="Resize window (bottom-right)" />
+              <div ref={resizeRefs.sw} className="window-resize-handle resize-handle resize-sw" aria-label="Resize window (bottom-left)" />
+              <div ref={resizeRefs.nw} className="window-resize-handle resize-handle resize-nw" aria-label="Resize window (top-left)" />
+            </>
           )}
         </>
       )}

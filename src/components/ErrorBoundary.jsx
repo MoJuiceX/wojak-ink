@@ -7,13 +7,13 @@ function ErrorFallback({ error, resetErrorBoundary }) {
       style={{
         padding: '20px',
         margin: '20px',
-        border: '2px solid #c00',
-        backgroundColor: '#ffe6e6',
+        border: '2px solid var(--state-error)',
+        backgroundColor: 'var(--surface-3)',
         borderRadius: '4px',
       }}
     >
-      <h2 style={{ color: '#c00', marginTop: 0 }}>Something went wrong</h2>
-      <pre style={{ color: '#c00', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+      <h2 style={{ color: 'var(--state-error)', marginTop: 0 }}>Something went wrong</h2>
+      <pre style={{ color: 'var(--state-error)', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
         {error.message}
       </pre>
       <button
@@ -21,8 +21,8 @@ function ErrorFallback({ error, resetErrorBoundary }) {
         style={{
           marginTop: '10px',
           padding: '8px 16px',
-          backgroundColor: '#0066cc',
-          color: 'white',
+          backgroundColor: 'var(--accent)',
+          color: 'var(--text-inverse)',
           border: 'none',
           borderRadius: '4px',
           cursor: 'pointer',

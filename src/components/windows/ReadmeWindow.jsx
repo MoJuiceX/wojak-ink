@@ -115,7 +115,7 @@ export default function ReadmeWindow({ onClose }) {
         <a
           href="https://wojakfarmersplot.crate.ink/#/collection-detail/WOJAKFARMERSPLOT"
           target="_blank"
-          rel="noreferrer"
+              rel="noopener noreferrer"
         >
           wojakfarmersplot.crate.ink
         </a>
@@ -126,7 +126,7 @@ export default function ReadmeWindow({ onClose }) {
       </p>
       <p>
         Follow updates here:
-        <a href="https://x.com/MoJuiceX" target="_blank" rel="noreferrer">
+          <a href="https://x.com/MoJuiceX" target="_blank" rel="noopener noreferrer">
           https://x.com/MoJuiceX
         </a>
       </p>

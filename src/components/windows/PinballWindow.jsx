@@ -144,12 +144,14 @@ export default function PinballWindow({ onClose }) {
         runId: 'run1',
         hypothesisId: 'A,B,C,D,E',
       }
-      console.log('[DEBUG]', logData)
-      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(logData),
-      }).catch((err) => console.error('[DEBUG] Fetch failed:', err))
+      if (import.meta.env.DEV) {
+        console.log('[DEBUG]', logData)
+        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(logData),
+        }).catch((err) => console.error('[DEBUG] Fetch failed:', err))
+      }
     }
     
     // Log after a small delay to ensure DOM is updated
@@ -281,18 +283,18 @@ export default function PinballWindow({ onClose }) {
           onClick={handleFullscreen}
           onMouseDown={(e) => {
             e.stopPropagation()
-            e.currentTarget.style.border = '1px inset #c0c0c0'
+            e.currentTarget.style.border = '1px inset var(--border-dark)'
           }}
           onMouseUp={(e) => {
-            e.currentTarget.style.border = '1px outset #c0c0c0'
+            e.currentTarget.style.border = '1px outset var(--border-light)'
           }}
           onMouseEnter={(e) => {
             if (e.buttons === 0) {
-              e.currentTarget.style.border = '1px outset #c0c0c0'
+              e.currentTarget.style.border = '1px outset var(--border-light)'
             }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.border = '1px outset #c0c0c0'
+            e.currentTarget.style.border = '1px outset var(--border-light)'
           }}
           style={{
             position: 'absolute',
@@ -301,8 +303,9 @@ export default function PinballWindow({ onClose }) {
             zIndex: 1000,
             width: '20px',
             height: '20px',
-            border: '1px outset #c0c0c0',
-            background: '#c0c0c0',
+            border: '1px outset var(--border-light)',
+            background: 'var(--btn-face)',
+            color: 'var(--btn-text)',
             cursor: 'pointer',
             fontSize: '10px',
             fontFamily: "'MS Sans Serif', sans-serif",
@@ -438,7 +441,7 @@ export default function PinballWindow({ onClose }) {
                   alignItems: 'center',
                   justifyContent: 'center',
                   zIndex: 1002,
-                  color: '#fff',
+                  color: 'var(--text-inverse)',
                   fontFamily: "'MS Sans Serif', sans-serif",
                   padding: '20px',
                   textAlign: 'center',
@@ -446,10 +449,10 @@ export default function PinballWindow({ onClose }) {
               >
                 <div
                   style={{
-                    background: '#c0c0c0',
-                    border: '2px outset #c0c0c0',
+                    background: 'var(--panel-face)',
+                    border: '2px outset var(--border-light)',
                     padding: '20px',
-                    color: '#000',
+                    color: 'var(--text)',
                     maxWidth: '300px',
                   }}
                 >
@@ -459,14 +462,15 @@ export default function PinballWindow({ onClose }) {
                   <button
                     onClick={() => setShowMobileOverlay(false)}
                     onMouseDown={(e) => {
-                      e.currentTarget.style.border = '2px inset #c0c0c0'
+                      e.currentTarget.style.border = '2px inset var(--border-dark)'
                     }}
                     onMouseUp={(e) => {
-                      e.currentTarget.style.border = '2px outset #c0c0c0'
+                      e.currentTarget.style.border = '2px outset var(--border-light)'
                     }}
                     style={{
-                      border: '2px outset #c0c0c0',
-                      background: '#c0c0c0',
+                      border: '2px outset var(--border-light)',
+                      background: 'var(--btn-face)',
+                      color: 'var(--btn-text)',
                       padding: '4px 12px',
                       fontFamily: "'MS Sans Serif', sans-serif",
                       fontSize: '11px',
@@ -485,26 +489,27 @@ export default function PinballWindow({ onClose }) {
                 onClick={() => setShowControlsPopup(true)}
                 onMouseDown={(e) => {
                   e.stopPropagation()
-                  e.currentTarget.style.border = '1px inset #c0c0c0'
+                  e.currentTarget.style.border = '1px inset var(--border-dark)'
                 }}
                 onMouseUp={(e) => {
-                  e.currentTarget.style.border = '1px outset #c0c0c0'
+                  e.currentTarget.style.border = '1px outset var(--border-light)'
                 }}
                 onMouseEnter={(e) => {
                   if (e.buttons === 0) {
-                    e.currentTarget.style.border = '1px outset #c0c0c0'
+                    e.currentTarget.style.border = '1px outset var(--border-light)'
                   }
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.border = '1px outset #c0c0c0'
+                  e.currentTarget.style.border = '1px outset var(--border-light)'
                 }}
                 style={{
                   position: 'absolute',
                   top: '4px',
                   right: '4px',
                   zIndex: 100,
-                  background: '#c0c0c0',
-                  border: '1px outset #c0c0c0',
+                  background: 'var(--btn-face)',
+                  color: 'var(--btn-text)',
+                  border: '1px outset var(--border-light)',
                   fontFamily: "'MS Sans Serif', sans-serif",
                   fontSize: '10px',
                   padding: '2px 8px',
@@ -605,14 +610,14 @@ export default function PinballWindow({ onClose }) {
                 flexShrink: 0,
                 flexGrow: 0,
                 height: '100%',
-                background: '#c0c0c0',
-                border: '2px outset #c0c0c0',
-                borderLeft: '1px inset #c0c0c0',
+                background: 'var(--panel-face)',
+                border: '2px outset var(--border-light)',
+                borderLeft: '1px inset var(--border-dark)',
                 display: 'flex',
                 flexDirection: 'column',
                 fontFamily: "'MS Sans Serif', sans-serif",
                 fontSize: '11px',
-                color: '#000',
+                color: 'var(--text)',
                 position: 'relative',
                 order: 2,
               }}
@@ -620,8 +625,8 @@ export default function PinballWindow({ onClose }) {
               {/* Header */}
               <div
                 style={{
-                  background: '#000080',
-                  color: '#fff',
+                  background: 'var(--title-active-bg)',
+                  color: 'var(--title-active-text)',
                   padding: '6px 8px',
                   fontSize: '12px',
                   fontWeight: 'bold',
@@ -636,6 +641,7 @@ export default function PinballWindow({ onClose }) {
                   padding: '12px',
                   lineHeight: '1.6',
                   flex: 1,
+                  color: 'var(--text)',
                 }}
               >
                 <div style={{ marginBottom: '8px' }}>Left flipper: Left Shift or Z</div>
@@ -660,17 +666,18 @@ export default function PinballWindow({ onClose }) {
                     setShowControlsPopup(false)
                   }}
                   onMouseDown={(e) => {
-                    e.currentTarget.style.border = '2px inset #c0c0c0'
+                    e.currentTarget.style.border = '2px inset var(--border-dark)'
                   }}
                   onMouseUp={(e) => {
-                    e.currentTarget.style.border = '2px outset #c0c0c0'
+                    e.currentTarget.style.border = '2px outset var(--border-light)'
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.border = '2px outset #c0c0c0'
+                    e.currentTarget.style.border = '2px outset var(--border-light)'
                   }}
                   style={{
-                    border: '2px outset #c0c0c0',
-                    background: '#c0c0c0',
+                    border: '2px outset var(--border-light)',
+                    background: 'var(--btn-face)',
+                    color: 'var(--btn-text)',
                     padding: '4px 16px',
                     fontFamily: "'MS Sans Serif', sans-serif",
                     fontSize: '11px',
@@ -686,17 +693,18 @@ export default function PinballWindow({ onClose }) {
                     setShowControlsPopup(false)
                   }}
                   onMouseDown={(e) => {
-                    e.currentTarget.style.border = '2px inset #c0c0c0'
+                    e.currentTarget.style.border = '2px inset var(--border-dark)'
                   }}
                   onMouseUp={(e) => {
-                    e.currentTarget.style.border = '2px outset #c0c0c0'
+                    e.currentTarget.style.border = '2px outset var(--border-light)'
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.border = '2px outset #c0c0c0'
+                    e.currentTarget.style.border = '2px outset var(--border-light)'
                   }}
                   style={{
-                    border: '2px outset #c0c0c0',
-                    background: '#c0c0c0',
+                    border: '2px outset var(--border-light)',
+                    background: 'var(--btn-face)',
+                    color: 'var(--btn-text)',
                     padding: '4px 16px',
                     fontFamily: "'MS Sans Serif', sans-serif",
                     fontSize: '11px',
@@ -716,15 +724,15 @@ export default function PinballWindow({ onClose }) {
           style={{
             height: `${STATUS_BAR_HEIGHT}px`,
             flexShrink: 0,
-            background: '#c0c0c0',
-            borderTop: '1px inset #c0c0c0',
+            background: 'var(--window-face)',
+            borderTop: '1px inset var(--border-dark)',
             display: 'flex',
             alignItems: 'center',
             paddingLeft: '8px',
             paddingRight: '8px',
             fontFamily: "'MS Sans Serif', sans-serif",
             fontSize: '11px',
-            color: '#000',
+            color: 'var(--text)',
           }}
         >
           <span style={{ whiteSpace: 'nowrap' }}>

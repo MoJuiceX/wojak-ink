@@ -62,6 +62,7 @@ Perfect for showcasing your collection, managing sales, and creating memes - all
 
 - **🪟 Windows 98 UI**: Authentic retro interface using [98.css](https://github.com/jdan/98.css)
 - **🎨 Wojak Creator**: Layer-based wojak creator with real-time preview and smart rules
+- **✨ Tangify Feature**: Transform your wojak into a realistic AI-generated version using OpenAI's DALL-E 3
 - **🛒 Marketplace Integration**: P2P offer file management with MintGarden/Dexie APIs
 - **🖼️ Gallery**: Browse your NFT collection with hover effects
 - **🎨 Paint Window**: Full JS Paint integration for meme editing
@@ -71,6 +72,17 @@ Perfect for showcasing your collection, managing sales, and creating memes - all
 - **👥 Tang Gang Window**: Community information and links
 - **⚙️ Admin Panel**: Administrative features (accessible via route)
 - **🍊 TangGang Smash Mini-Game**: Drag the TangGang window to spawn oranges that accumulate on the ground. Smash them with the window to create epic juice splashes! Score resets on refresh, and the Treasure message is just a joke.
+- **💤 Windows 98 Screensaver**: Activates after 2 minutes of idle time with orange-themed emojis and Tang Gang branding. Automatically disables during CyberTang generation, when typing in inputs, or when windows are open. Features fade-out animation, responsive emoji count (8/12/20 based on screen size), and pauses when browser tab is hidden.
+- **🔊 Sound Effects**: Authentic Windows 98-style sound effects for button clicks, window operations, drag-and-drop, and actions. Includes mute toggle in the system tray with localStorage persistence.
+- **🚀 Startup Sequence**: Classic Windows 98 startup screen with Tang Gang branding, animated logo, and loading bar. Shows once per session (can be skipped with any key).
+- **🖱️ Right-Click Context Menu**: Windows 98-style context menus on desktop icons, desktop background, and recycle bin with options for Open, Download, Delete, and Properties.
+- **📋 Properties Window**: View detailed properties of desktop icons including file size, creation date, and trait information (for wojak images) in a tabbed interface.
+- **🔲 Selection Box (Marquee)**: Click and drag on the desktop to create a selection box and select multiple icons at once. Works seamlessly with keyboard shortcuts.
+- **⌨️ Keyboard Shortcuts**: Full keyboard navigation support - Delete to move to recycle bin, Ctrl+A to select all, F5 to refresh, Enter to open selected, Ctrl+Z to undo, F2 to rename, and Escape to deselect.
+- **🎯 Enhanced Drag Animations**: Smooth drag animations with ghost icons, fade effects, and recycle bin shake animation when dragging items over it.
+- **🖼️ Wallpaper Selector**: Customize your desktop background with various wallpapers through the Display Properties window.
+- **🥚 Easter Eggs**: Fun hidden features including Konami code, orange rain effect, and Clippy-style helper. Try clicking the clock 10 times or typing "tang" or "orange"!
+- **🔊 Windows 98 Sound Effects**: Authentic retro sound effects for button clicks, window operations, system events, and user actions. Includes mute toggle in the system tray with localStorage persistence.
 
 ### Technical Features
 
@@ -292,6 +304,68 @@ docker-compose up -d
 - Ensuring production environment works correctly
 
 **For active development:** Stick with `npm run dev` (Option 1) for faster iteration!
+
+### Option 3: Local Development with Tangify Feature (Wrangler)
+
+**Note:** The Tangify feature uses a Cloudflare Pages Function (`/api/tangify`). To test it locally, you need to use Wrangler instead of the standard Vite dev server.
+
+#### Prerequisites
+
+1. **Create `.env` file** (if you haven't already):
+   ```bash
+   # Create .env file in project root
+   echo "OPENAI_API_KEY=your-api-key-here" > .env
+   ```
+   
+   **Important:** Replace `your-api-key-here` with your actual OpenAI API key. The `.env` file is gitignored, so your key is safe!
+
+2. **Install Wrangler** (if not already installed):
+   ```bash
+   npm install -g wrangler
+   # Or use the local version:
+   npx wrangler --version
+   ```
+
+#### Start Development Server with Wrangler
+
+```bash
+# Build the project first
+npm run build
+
+# Start Wrangler dev server (runs Cloudflare Pages Functions locally)
+npx wrangler pages dev dist --compatibility-date=2024-01-01
+```
+
+You should see output like:
+```
+⬣ Wrangler v4.x.x
+⎔ Starting local server...
+[wrangler:inf] Ready on http://localhost:8788
+```
+
+#### Access the App
+
+1. Open your browser
+2. Navigate to `http://localhost:8788`
+3. The Tangify feature should now work! 🎉
+
+**Important Notes:**
+- ⚠️ **Tangify only works with Wrangler dev server** - the standard `npm run dev` won't work for Tangify because it doesn't run Cloudflare Pages Functions
+- The `.env` file must contain `OPENAI_API_KEY` for local development
+- Wrangler automatically loads environment variables from `.env`
+- For production, set `OPENAI_API_KEY` in Cloudflare Pages dashboard (see Deployment section)
+
+#### When to Use Each Option
+
+- **`npm run dev`** (Option 1): Use for general development (faster, hot-reload, but Tangify won't work)
+- **`wrangler pages dev`** (Option 3): Use when you need to test the Tangify feature locally
+- **Docker** (Option 2): Use for testing production builds
+
+**Pro Tip:** You can run both servers simultaneously:
+- Terminal 1: `npm run dev` (for general development)
+- Terminal 2: `npx wrangler pages dev dist` (for testing Tangify)
+
+Just remember to use the Wrangler URL (`http://localhost:8788`) when testing Tangify!
 
 ---
 
@@ -591,13 +665,21 @@ npm run qa:lighthouse
 - [ ] Enter activates buttons/links
 - [ ] Esc closes modals/windows
 - [ ] Arrow keys navigate trait lists (when focused)
-- [ ] Keyboard shortcuts work (if any)
+- [ ] Keyboard shortcuts work:
+  - [ ] Delete key moves selected icons to Recycle Bin
+  - [ ] Ctrl+A selects all icons
+  - [ ] F5 refreshes the page
+  - [ ] Enter opens selected icon
+  - [ ] Ctrl+Z undoes last action
+  - [ ] F2 renames selected icon
+  - [ ] Escape deselects all icons
 
 ##### ✅ Mouse Interactions
 - [ ] Hover effects work (tooltips, button states)
 - [ ] Click interactions are responsive
 - [ ] Drag and drop works (windows, oranges)
-- [ ] Right-click context menus (if any)
+- [ ] Right-click context menus work on desktop icons, desktop background, and recycle bin
+- [ ] Context menu items are accessible and clickable
 
 ##### ✅ Performance
 - [ ] Smooth animations (60fps)
@@ -812,12 +894,177 @@ When reporting issues, include:
 
 ## 🎮 Using the App
 
+### Screensaver 💤
+
+The app includes a Windows 98-style screensaver that activates after 2 minutes of idle time:
+
+- **Activation**: Screensaver appears automatically after 2 minutes (120 seconds) of idle time with no mouse movement, keyboard input, or touch
+- **Dismissal**: 
+  - Move mouse anywhere
+  - Click anywhere on the screen
+  - Press any key (except modifier keys: Ctrl, Alt, Shift, Meta)
+  - Touch the screen (mobile)
+  - A dismiss hint appears after 2 seconds: "Click or press any key to return"
+  - Plays click sound on dismiss (if sounds are enabled)
+- **Visual**: 
+  - Full-screen overlay with Windows 98 blue background (#000080)
+  - Floating animated orange-themed emojis (🍊, 🍋, 🥤, 🌴, ☀️, 🧡, 🔶, 🟠, 🌅, 🏝️)
+  - Bouncing "Tang Gang" text with Windows 98 font styling
+  - Smooth animations using CSS and requestAnimationFrame
+- **Auto-Disable**: Screensaver automatically disables when:
+  - CyberTang generation is in progress (`isTangifying`)
+  - Any window is open and focused (`hasActiveWindows`)
+  - User is typing in an input or textarea field (`isInputFocused`)
+  - A modal or dialog is open (`isModalOpen`)
+
+**Important Notes:**
+- The idle timer tracks: `mousedown`, `mousemove`, `keydown`, `touchstart` events
+- The timer does NOT reset on: `scroll` or `visibilitychange` (tab switching doesn't reset the timer)
+- Screensaver has `aria-hidden="true"` for accessibility (screen readers ignore it)
+- Idle timeout is configurable (default: 120000ms / 2 minutes)
+
+### Sound Effects 🔊
+
+The app includes Windows 98-style sound effects that enhance the nostalgic experience:
+
+- **Startup Sound**: Plays when the app loads (after user interaction, per browser audio policy)
+- **Button Clicks**: Play a click sound when clicking any button
+- **Window Operations**: 
+  - `window-open.mp3` plays when opening windows
+  - `window-close.mp3` plays when closing windows
+- **System Events**:
+  - `success.mp3` plays when CyberTang generation succeeds
+  - `error.mp3` plays when CyberTang generation fails
+  - `trash.mp3` plays when moving items to the recycle bin
+  - `empty-trash.mp3` plays when emptying the recycle bin
+- **Mute Toggle**: Click the speaker icon (🔊/🔇) in the system tray to mute/unmute all sounds
+- **Persistence**: Mute preference is saved in localStorage and persists across sessions
+
+**Adding Sound Files:**
+
+Sound files should be placed in the `public/sounds/` directory:
+- `click.mp3` - Short click sound (~50ms)
+- `success.mp3` - Success chime (~500ms)
+- `error.mp3` - Error bonk (~300ms)
+- `trash.mp3` - Trash/crumple sound (~400ms)
+- `empty-trash.mp3` - Empty recycle bin sound (~600ms)
+- `startup.mp3` - Windows 98 startup sound (~3s)
+- `window-open.mp3` - Window opening whoosh (~200ms)
+- `window-close.mp3` - Window closing sound (~200ms)
+
+**Note:** If sound files are missing, the app will continue to work normally - sounds simply won't play. You can use free Windows 98 sound files or create custom retro sounds. The sound manager handles missing files gracefully.
+
+**Troubleshooting:**
+- If sounds don't play, check that:
+  - Sound files exist in `public/sounds/`
+  - Browser audio isn't muted at the system level
+  - Mute toggle isn't enabled in the system tray
+  - Browser allows audio playback (some browsers require user interaction first)
+
+### Startup Sequence
+
+- On first load, you'll see a Windows 98-style startup sequence with Tang Gang branding
+- **Press any key** to skip the startup sequence
+- The sequence shows once per browser session (uses sessionStorage)
+- After startup, the desktop appears with all your icons and windows
+
+### Keyboard Shortcuts ⌨️
+
+The app supports Windows 98-style keyboard shortcuts that work when the desktop is focused (no windows are active):
+
+- **`Delete`** - Delete selected icons (moves to Recycle Bin)
+- **`Ctrl+A` / `Cmd+A`** - Select all desktop icons
+- **`F5`** - Refresh page
+- **`Enter`** - Open first selected icon
+- **`Ctrl+Z` / `Cmd+Z`** - Undo last deletion (restores last deleted icon)
+- **`F2`** - Rename selected icon (single selection only, placeholder - TODO)
+- **`Escape`** - Deselect all icons
+
+**Important Notes:**
+- Shortcuts only work when the desktop is focused (no windows are active)
+- Shortcuts are disabled when typing in input fields or textareas
+- Selection state is lost when page refreshes
+- Undo only supports single undo (last deleted icon)
+- Multi-select is supported via `Ctrl+Click` / `Cmd+Click` and `Shift+Click` on icons
+
 ### Opening Windows
 
 - **Click window titles** in the taskbar to open/close windows
 - **Drag windows** by clicking and holding the title bar
 - **Minimize/Maximize** using the window controls
 - **Close windows** with the X button
+- **Select desktop icons** by clicking them (hold `Ctrl`/`Cmd` or `Shift` for multi-select)
+- Windows play sounds when opening and closing (if sounds are enabled)
+
+### Desktop Icons & Selection
+
+- **Double-click** desktop icons to open applications or view images
+- **Right-click** icons for context menu with options:
+  - Open (or double-click)
+  - Download - Save the image to your computer
+  - Rename (F2) - Rename the icon (coming soon)
+  - Delete (Del key or drag to Recycle Bin) - Move to Recycle Bin
+  - Properties - View file details, size, creation date, and traits
+- **Click and drag** on empty desktop space to create a selection box (marquee) for selecting multiple icons
+- **Shift+Click** or **Ctrl+Click** (Cmd+Click on Mac) to add icons to selection
+- Selected icons show a blue highlight - use keyboard shortcuts to perform batch operations
+- **Escape** key deselects all icons
+
+### Keyboard Shortcuts ⌨️
+
+The app supports Windows 98-style keyboard shortcuts for desktop operations:
+
+- **`Delete`** - Delete selected icons (moves to Recycle Bin)
+- **`Ctrl+A` / `Cmd+A`** - Select all icons
+- **`F5`** - Refresh page
+- **`Enter`** - Open first selected icon
+- **`Ctrl+Z` / `Cmd+Z`** - Undo last deletion (restores last deleted icon)
+- **`F2`** - Rename selected icon (single selection only, placeholder - TODO)
+- **`Escape`** - Deselect all icons
+
+**Important Notes:**
+- Shortcuts only work when the desktop is focused (no windows are active)
+- Shortcuts are disabled when typing in input fields or textareas
+- Selection state is lost when page refreshes
+- Undo only supports single undo (last deleted icon)
+- Multi-select is supported via `Ctrl+Click` / `Cmd+Click` and `Shift+Click` on icons
+
+### Sound Effects
+
+The app includes authentic Windows 98-style sound effects:
+
+- **Button clicks** - Plays on all button interactions
+- **Window open/close** - Plays when opening or closing windows
+- **System events** - Success/error sounds for operations
+- **Drag and drop** - Trash sound when deleting items
+- **Mute toggle** - Click the speaker icon (🔊/🔇) in the system tray to mute/unmute
+- Mute state is saved in localStorage and persists across sessions
+
+**Note:** Sound files need to be placed in `public/sounds/` directory. If sounds are missing, the app works normally but silently fails (graceful degradation).
+
+### Properties Window
+
+- Right-click any desktop icon and select **"Properties"**
+- View detailed information:
+  - **General tab**: Icon preview, filename, file size, creation date
+  - **Traits tab**: Detailed trait information (for wojak images)
+- Click **OK** to close the properties window
+
+### Wallpaper Selector
+
+- Access through the **Start menu** → Settings (or right-click desktop → Properties → Display)
+- Choose from various wallpapers or solid colors
+- Preview your selection before applying
+- Click **Apply** to see changes without closing
+- Click **OK** to apply and close
+- Wallpaper choice is saved in localStorage and persists across sessions
+
+### Drag and Drop
+
+- **Drag icons** on the desktop to move them
+- **Drag icons to Recycle Bin** to delete them
+- The Recycle Bin animates (shakes) when you drag items over it
+- Icons fade slightly while dragging for visual feedback
 
 ### Wojak Creator
 
@@ -837,6 +1084,12 @@ When reporting issues, include:
 5. Export your creation:
    - Click **"Export as PNG"** to download
    - Click **"Copy to Clipboard"** to copy
+6. **Tangify your wojak** (AI transformation):
+   - Click the **"Tangify"** button (between Download and Mint)
+   - Watch the Windows 98-style progress bar as your wojak is transformed
+   - Toggle between **"Show Original"** and **"Show Tangified"** to compare views
+   - The original canvas is preserved - you can always switch back
+   - Note: Requires OpenAI API key configured in Cloudflare Pages (see Deployment section)
 
 ### Marketplace
 
@@ -1147,7 +1400,57 @@ Vercel is perfect for React apps and has great free tier:
 
 See the [Docker Setup](#-docker-setup) section for complete instructions on deploying with Docker Compose and Cloudflare tunnel.
 
-### Option 5: Traditional Hosting (cPanel, etc.)
+### Option 5: Cloudflare Pages (Recommended for Tangify Feature)
+
+Cloudflare Pages is recommended if you want to use the **Tangify feature** (AI-generated realistic wojak transformations).
+
+1. **Install Wrangler CLI:**
+   ```bash
+   npm install -g wrangler
+   ```
+
+2. **Login to Cloudflare:**
+   ```bash
+   wrangler login
+   ```
+
+3. **Build the project:**
+   ```bash
+   npm run build
+   ```
+
+4. **Deploy to Cloudflare Pages:**
+   ```bash
+   wrangler pages deploy dist
+   ```
+
+5. **Set OpenAI API Key:**
+   - Go to your Cloudflare Pages dashboard
+   - Navigate to your project → Settings → Environment Variables
+   - Add environment variable:
+     - **Name:** `OPENAI_API_KEY`
+     - **Value:** Your OpenAI API key (starts with `sk-`)
+   - Save the environment variable
+
+6. **Verify the Tangify function:**
+   - The Cloudflare Pages Function at `functions/api/tangify.js` will automatically be deployed
+   - Test by using the Tangify button in the Wojak Creator
+
+**Important Notes:**
+- ⚠️ **REQUIRED:** After deploying to Cloudflare Pages, you MUST add the `OPENAI_API_KEY` environment variable:
+  1. Go to your Cloudflare Pages dashboard
+  2. Navigate to your project → Settings → Environment Variables
+  3. Add a new environment variable:
+     - **Name:** `OPENAI_API_KEY`
+     - **Value:** Your OpenAI API key (starts with `sk-`)
+     - **Environment:** Production (and Preview if you want to test)
+  4. Save and redeploy if necessary
+- The Tangify feature requires a valid OpenAI API key with DALL-E 3 access
+- API calls are made server-side through the Cloudflare Pages Function (your API key stays secure)
+- The function handles CORS automatically
+- Each Tangify operation uses one DALL-E 3 API call (check OpenAI pricing)
+
+### Option 6: Traditional Hosting (cPanel, etc.)
 
 1. **Build the project:**
    ```bash
@@ -1163,6 +1466,17 @@ See the [Docker Setup](#-docker-setup) section for complete instructions on depl
 **For Docker Deployment:**
 - Required: `CLOUDFLARE_TUNNEL_TOKEN` (see Docker Setup section)
 - Optional: `ENABLE_NO_CACHE` (for no-cache headers)
+
+**For Cloudflare Pages (Tangify Feature):**
+- Required: `OPENAI_API_KEY` - Your OpenAI API key for DALL-E 3 image generation
+  - Get your API key from [OpenAI Platform](https://platform.openai.com/api-keys)
+  - **For local development:** Create a `.env` file in the project root with:
+    ```env
+    OPENAI_API_KEY=your-api-key-here
+    ```
+    Wrangler will automatically load this when running `wrangler pages dev`
+  - **For production:** Set in Cloudflare Pages dashboard → Settings → Environment Variables
+  - The key is used server-side only (never exposed to the browser)
 
 **For Vite Build-Time Variables:**
 If you need environment variables in your code (for API URLs, etc.):
@@ -1450,20 +1764,24 @@ docker-compose down
 wojak-ink/
 ├── public/                 # Static assets (served as-is)
 │   ├── assets/            # Images, logos, etc.
+│   ├── sounds/            # Sound effect files (click.mp3, window-open.mp3, etc.)
+│   ├── wallpapers/        # Desktop wallpaper images
 │   ├── wojak-creator/    # Wojak creator layer images (BACKGROUND, BASE, CLOTHES, EYE, HEAD, MOUTH, FACIAL_HAIR, MASK)
 │   ├── jspaint/           # JS Paint application
 │   └── fonts/             # MS Sans Serif fonts
 ├── src/                    # Source code
 │   ├── components/        # React components
-│   │   ├── ui/            # Reusable UI components
-│   │   ├── windows/       # Window components
+│   │   ├── ui/            # Reusable UI components (Button, ContextMenu, Toast, etc.)
+│   │   ├── windows/       # Window components (PropertiesWindow, DisplayPropertiesWindow, etc.)
+│   │   ├── desktop/       # Desktop-specific components (SelectionBox)
+│   │   ├── effects/       # Visual effects (OrangeRain, Clippy)
 │   │   ├── meme/          # Wojak creator components (LayerSelector, LayerPanel, etc.)
 │   │   └── paint/         # Paint window components
 │   ├── contexts/          # React contexts (state management)
-│   ├── hooks/             # Custom React hooks
+│   ├── hooks/             # Custom React hooks (useContextMenu, useKeyboardShortcuts, etc.)
 │   ├── lib/               # Library code (configs, manifests)
 │   ├── services/          # API services (MintGarden, Dexie)
-│   ├── utils/             # Utility functions (wojakRules.js for layer compatibility rules)
+│   ├── utils/             # Utility functions (soundManager, easterEggs, wojakRules, etc.)
 │   ├── data/              # Data files (CSV, etc.)
 │   ├── App.jsx            # Main app component
 │   ├── main.jsx           # Entry point
@@ -1521,6 +1839,41 @@ wojak-ink/
 ---
 
 ## 🔧 Troubleshooting
+
+### Sound Effects Not Playing
+
+- Sound effects require audio files in `public/sounds/` directory
+- If sound files are missing, the app will work but silently fail (graceful degradation)
+- Check the mute toggle in the system tray (speaker icon) - sounds are muted if the icon shows 🔇
+- Mute state is saved in localStorage and persists across sessions
+- To add sounds, place `.mp3` files in `public/sounds/` with these names:
+  - `click.mp3` - Button clicks
+  - `window-open.mp3` - Window opening
+  - `window-close.mp3` - Window closing
+  - `trash.mp3` - Deleting items
+  - `empty-trash.mp3` - Emptying recycle bin
+  - `success.mp3` - Successful operations
+  - `error.mp3` - Error notifications
+  - `startup.mp3` - Startup sequence
+
+### Selection Box Not Working
+
+- Make sure you're clicking directly on the desktop background (not on icons or windows)
+- Selection box only activates on empty desktop space
+- Try clicking and dragging from a clear area of the desktop
+- Selection is disabled while the gallery is loading
+
+### Keyboard Shortcuts Not Working
+
+- Keyboard shortcuts don't work when typing in input fields or text areas
+- Make sure no window is focused that might be capturing keyboard events
+- Some shortcuts require icons to be selected first (Delete, Enter, F2)
+
+### Startup Sequence Showing Every Time
+
+- Startup sequence should only show once per browser session
+- If it shows every time, clear your browser's sessionStorage
+- You can skip the startup sequence by pressing any key
 
 ### Common Issues
 

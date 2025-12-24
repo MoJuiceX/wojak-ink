@@ -1,0 +1,15 @@
+# Sound files directory
+# Windows 98 sound files are located in the w98sounds/ subdirectory
+# 
+# Current sound mappings:
+# - click: Utopia Menu Command.mp3 (short menu click)
+# - success: TADA.mp3 (classic Windows success sound)
+# - error: Utopia Error.mp3 (error notification)
+# - trash: Utopia Recycle.mp3 (recycle bin sound)
+# - emptyTrash: RECYCLE.mp3 (empty recycle bin sound)
+# - startup: The Microsoft Sound.mp3 (classic Windows 95/98 startup)
+# - windowOpen: Utopia Open.mp3 (window opening)
+# - windowClose: Utopia Close.mp3 (window closing)
+#
+# All sound files are in public/sounds/w98sounds/
+

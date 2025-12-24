@@ -100,7 +100,8 @@ const HARDCODED_MANIFEST = {
       'CLOTHES_Wizard-Drip_pink.png',
       'CLOTHES_Wizard-Drip_purple.png',
       'CLOTHES_Wizard-Drip_red.png',
-      'CLOTHES_god-rope.png'
+      'CLOTHES_god-rope.png',
+      'McD.png'
     ]
   },
   'Eyes': {
@@ -123,6 +124,7 @@ const HARDCODED_MANIFEST = {
       'EYE_Shades_neon-green.png',
       'EYE_Shades_red.png',
       'EYE_Tyson-Tattoo_.png',
+      'EYE_Wizard-Glasses_.png',
       'EYE_Wizard-Glasses_NEW.png'
     ]
   },
@@ -180,6 +182,7 @@ const HARDCODED_MANIFEST = {
     '': [
       'MOUTH_Bandana-Mask_.png',
       'MOUTH_Bubble-Gum_.png',
+      'MOUTH_Bubble-Gum_rekt.png',
       'MOUTH_Gold-Teeth.png',
       'MOUTH_Hannibal-Mask.png',
       'MOUTH_Pipe.png',
@@ -354,17 +357,6 @@ export function getAllLayerImages(layerName) {
     files.forEach(fileName => {
       const name = fileName.replace('.png', '')
       const path = getImagePath(layerName, subfolder, fileName)
-      
-      // Filter out old Wizard Glasses for Eyes layer (keep only Wizard Glasses New)
-      if (layerName === 'Eyes') {
-        const pathLower = path.toLowerCase()
-        const nameLower = name.toLowerCase()
-        // Exclude old Wizard Glasses (has wizard and glasses but NOT new)
-        if ((pathLower.includes('wizard') && pathLower.includes('glasses')) && 
-            !pathLower.includes('new') && !nameLower.includes('new')) {
-          return // Skip old Wizard Glasses
-        }
-      }
       
       allImages.push({
         name,
