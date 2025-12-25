@@ -100,8 +100,7 @@ const HARDCODED_MANIFEST = {
       'CLOTHES_Wizard-Drip_pink.png',
       'CLOTHES_Wizard-Drip_purple.png',
       'CLOTHES_Wizard-Drip_red.png',
-      'CLOTHES_god-rope.png',
-      'McD.png'
+      'CLOTHES_god-rope.png'
     ]
   },
   'Eyes': {

@@ -122,20 +122,37 @@ export default function DesktopIcons({ onOpenApp }) {
           </span>
         )}
       </div>
-      <span
-        style={{
-          display: 'block',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          maxWidth: '96px',
-          lineHeight: '14px',
-          height: '14px',
-          textAlign: 'center',
-        }}
-      >
-        {app.label}
-      </span>
+      {app.id === 'WOJAK_GENERATOR' ? (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            lineHeight: '14px',
+            textAlign: 'center',
+            width: '96px',
+          }}
+        >
+          <span style={{ display: 'block', height: '14px' }}>Wojak</span>
+          <span style={{ display: 'block', height: '14px' }}>Generator.EXE</span>
+        </div>
+      ) : (
+        <span
+          style={{
+            display: 'block',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            maxWidth: '96px',
+            width: '96px',
+            lineHeight: '14px',
+            height: '14px',
+            textAlign: 'center',
+          }}
+        >
+          {app.label}
+        </span>
+      )}
     </button>
   )
 

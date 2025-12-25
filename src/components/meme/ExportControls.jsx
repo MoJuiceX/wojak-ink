@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Button } from '../ui'
 import Window from '../windows/Window'
-import { downloadCanvasAsPNG, copyCanvasToClipboard, canvasToBlob, blobUrlToDataUrl, compressImage } from '../../utils/imageUtils'
+import { downloadCanvasAsPNG, copyCanvasToClipboard, canvasToBlob, blobUrlToDataUrl, compressImage, copyBlobUrlToClipboard, downloadBlobUrlAsPNG } from '../../utils/imageUtils'
 import { generateWojakFilename, buildImageName } from '../../utils/filenameUtils'
 import { buildCyberTangPrompt } from '../../utils/tangifyPrompts'
 import { useToast } from '../../contexts/ToastContext'
@@ -556,6 +556,64 @@ export default function ExportControls({
     }
   }
 
+  const handleShareOnX = async () => {
+    // Build X Web Intent URL with just text (no image URL)
+    const tweetText = "Check out my CyberTang Wojak created with the Wojak Generator @ Wojak.ink 🍊"
+    
+    const params = new URLSearchParams({
+      text: tweetText
+    })
+    
+    const twitterUrl = `https://twitter.com/intent/tweet?${params.toString()}`
+    window.open(twitterUrl, '_blank', 'noopener,noreferrer')
+    
+    showToast('X opened! Copy your image and paste it into the post 🙏', 'info', 4000)
+  }
+
+  const handleCopyCyberTang = async () => {
+    if (!tangifiedImage) return
+
+    setIsExporting(true)
+    setExportStatus('Copying CyberTang...')
+
+    try {
+      await copyBlobUrlToClipboard(tangifiedImage)
+      setExportStatus('CyberTang copied to clipboard!')
+      showToast('✅ CyberTang copied to clipboard!', 'success', 2000)
+      setTimeout(() => setExportStatus(''), 2000)
+    } catch (error) {
+      setExportStatus('Error copying CyberTang')
+      console.error('Copy CyberTang error:', error)
+      showToast('Failed to copy CyberTang to clipboard', 'error', 3000)
+      setTimeout(() => setExportStatus(''), 2000)
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  const handleDownloadCyberTang = async () => {
+    if (!tangifiedImage) return
+
+    setIsExporting(true)
+    setExportStatus('Downloading CyberTang...')
+
+    try {
+      // Generate filename using buildImageName for consistency with desktop storage
+      const filename = buildImageName(selectedLayers, 'cybertang')
+      await downloadBlobUrlAsPNG(tangifiedImage, filename)
+      setExportStatus('CyberTang downloaded!')
+      showToast('✅ CyberTang downloaded!', 'success', 2000)
+      setTimeout(() => setExportStatus(''), 2000)
+    } catch (error) {
+      setExportStatus('Error downloading CyberTang')
+      console.error('Download CyberTang error:', error)
+      showToast('Failed to download CyberTang', 'error', 3000)
+      setTimeout(() => setExportStatus(''), 2000)
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
   return (
     <div>
       <div className="export-controls-row" style={{
@@ -563,6 +621,7 @@ export default function ExportControls({
         gap: '4px',
         width: '100%',
       }}>
+        {/* Row 1: Main Actions */}
         {onRandomize && (
           <Button 
             className="win98-tooltip"
@@ -599,10 +658,45 @@ export default function ExportControls({
           className="win98-tooltip"
           data-tooltip="Transform your Wojak with AI-powered cyberpunk effects. Both original and CyberTang versions save to desktop automatically."
           onClick={handleTangify}
-          disabled={isTangifying || isExporting || !canvasRef.current}
+          disabled={!canDownload || isTangifying || !canvasRef.current}
           style={{ flex: 1 }}
         >
-          {isTangifying ? 'Cyberfying...' : 'CyberTang'}
+          CyberTang
+        </Button>
+        
+        {/* Row 2: CyberTang Actions (conditional) */}
+        {tangifiedImage && (
+          <>
+            <Button 
+              className="win98-tooltip"
+              data-tooltip="Copy CyberTang to clipboard — paste directly into memes!"
+              onClick={handleCopyCyberTang}
+              disabled={!tangifiedImage || isExporting || isTangifying}
+              style={{ flex: 1 }}
+            >
+              Copy CyberTang
+            </Button>
+            <Button 
+              className="win98-tooltip"
+              data-tooltip="Download CyberTang as PNG"
+              onClick={handleDownloadCyberTang}
+              disabled={!tangifiedImage || isExporting || isTangifying}
+              style={{ flex: 1 }}
+            >
+              Download CyberTang
+            </Button>
+          </>
+        )}
+        
+        {/* Row 3: Sharing & Other */}
+        <Button 
+          className="win98-tooltip"
+          data-tooltip="Copy picture to clipboard or download it and put it into the x post please 🙏"
+          onClick={handleShareOnX}
+          disabled={!canvasRef.current || isExporting || isTangifying}
+          style={{ flex: 1 }}
+        >
+          𝕏 Share
         </Button>
         {isIOS() && (
           <Button 

@@ -1,4 +1,33 @@
 /**
+ * Get initial spawn position for a window based on its type
+ * Centralizes window positioning logic - each window type can have its own spawn behavior
+ * @param {Object} options - Positioning options
+ * @param {string} [options.type] - Window type identifier (e.g., 'readme')
+ * @param {number} options.width - Window width in pixels
+ * @param {number} options.height - Window height in pixels
+ * @param {boolean} [options.isMobile=false] - Whether this is a mobile viewport
+ * @returns {{x: number, y: number}} Initial position with clamping
+ */
+export function getInitialPosition({ type, width, height, isMobile = false }) {
+  // SSR / non-browser safety
+  if (typeof window === 'undefined') {
+    return { x: 20, y: 20 }
+  }
+
+  // Special case: README window has a fixed spawn position
+  if (type === 'readme') {
+    // Start at fixed coordinates
+    const x = 120
+    const y = 20
+    // Use existing clamping logic so it never spawns off-screen
+    return clampWindowPosition({ x, y, width, height, isMobile })
+  }
+
+  // Default: centered (existing behavior)
+  return getCenteredPosition({ width, height, isMobile })
+}
+
+/**
  * Calculate centered position for a window with safe margins
  * Accounts for taskbar height on desktop to prevent overlap
  * @param {Object} options - Positioning options
@@ -6,13 +35,8 @@
  * @param {number} options.height - Window height in pixels
  * @param {number} [options.padding=24] - Minimum padding from viewport edges
  * @param {boolean} [options.isMobile=false] - Whether this is a mobile viewport
- * @param {string} [options.windowId] - Window identifier for special positioning (e.g., README offset)
  * @returns {{x: number, y: number}} Centered position with clamping
  */
-// README-specific X offset to center content column (not window frame) on screen
-const README_CENTER_OFFSET_X = -140
-// README-specific Y offset to move window up slightly for better visual centering
-const README_CENTER_OFFSET_Y = -40
 
 // Cache for getComputedStyle results to prevent repeated layout reads
 const styleCache = {
@@ -48,7 +72,7 @@ function getCachedStyleProperty(property, defaultValue = 0) {
   return styleCache[property] ?? defaultValue
 }
 
-export function getCenteredPosition({ width, height, padding = 24, isMobile = false, windowId }) {
+export function getCenteredPosition({ width, height, padding = 24, isMobile = false }) {
   // SSR / non-browser safety
   if (typeof window === 'undefined') {
     return { x: 20, y: 20 }
@@ -63,48 +87,22 @@ export function getCenteredPosition({ width, height, padding = 24, isMobile = fa
   const safeAreaBottom = isMobile ? getCachedStyleProperty('safeAreaBottom', 0) : 0
   const availableHeight = viewportHeight - taskbarHeight - safeAreaBottom
   
-  // #region agent log
-  if ((windowId === 'window-readme-txt' || windowId?.includes('readme')) && import.meta.env.DEV) {
-    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'windowPosition.js:49',message:'getCenteredPosition entry',data:{windowId,width,height,padding,isMobile,viewportWidth,viewportHeight,taskbarHeight,safeAreaBottom,availableHeight},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-  }
-  // #endregion
-  
   // Calculate center position
   // Center X in viewport
-  let x = Math.floor((viewportWidth - width) / 2)
+  const x = Math.floor((viewportWidth - width) / 2)
   // Center Y in full viewport (not availableHeight) for better visual centering
-  let y = Math.floor((viewportHeight - height) / 2)
-  
-  // #region agent log
-  if ((windowId === 'window-readme-txt' || windowId?.includes('readme')) && import.meta.env.DEV) {
-    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'windowPosition.js:66',message:'After initial Y calculation',data:{windowId,calculatedY:y,availableHeight,height,viewportHeight,taskbarHeight},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'H1'})}).catch(()=>{});
-  }
-  // #endregion
-  
-  // Apply README-specific offsets for better visual centering
-  const isReadme = windowId === 'window-readme-txt' || windowId === 'readme' || windowId?.includes('readme')
-  if (isReadme) {
-    x += README_CENTER_OFFSET_X
-    y += README_CENTER_OFFSET_Y
-  }
+  const y = Math.floor((viewportHeight - height) / 2)
   
   // Clamp with padding (minimum 24px, or 8px if window is larger than viewport)
   const minPadding = viewportWidth < width || viewportHeight < height ? 8 : padding
   
-  const yBeforeClamp = y
-  x = Math.max(minPadding, Math.min(x, viewportWidth - width - minPadding))
+  const clampedX = Math.max(minPadding, Math.min(x, viewportWidth - width - minPadding))
   // Clamp Y: ensure minimum padding from top, and ensure window doesn't overlap taskbar at bottom
   // Use full viewport for centering, but clamp bottom to stay above taskbar
   const maxY = availableHeight - height - minPadding
-  y = Math.max(minPadding, Math.min(y, maxY))
+  const clampedY = Math.max(minPadding, Math.min(y, maxY))
   
-  // #region agent log
-  if ((windowId === 'window-readme-txt' || windowId?.includes('readme')) && import.meta.env.DEV) {
-    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'windowPosition.js:79',message:'After clamping',data:{windowId,yBeforeClamp,yAfterClamp:y,minPadding,availableHeight,height,calculatedCenterY:Math.floor((viewportHeight - height) / 2),maxY},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'H1'})}).catch(()=>{});
-  }
-  // #endregion
-  
-  return { x, y }
+  return { x: clampedX, y: clampedY }
 }
 
 /**
@@ -143,7 +141,7 @@ export function getCascadePosition({ width, height, baseX, baseY, index, padding
  */
 export function getDefaultWindowSize(windowId) {
   const defaults = {
-    'window-readme-txt': { width: 820, height: 600 },
+    'window-readme-txt': { width: 1200, height: 600 },
     'window-mint-info-exe': { width: 1200, height: 500 }, // Updated to match actual width
     'window-gallery': { width: 1200, height: 600 }, // Updated to match actual width
     'window-faq': { width: 600, height: 400 }, // Updated to match actual width

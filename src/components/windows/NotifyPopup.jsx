@@ -1,13 +1,11 @@
 import Window from './Window'
-import { useRef, useLayoutEffect } from 'react'
+import { useLayoutEffect } from 'react'
 import { useKeyboardHandler, KEYBOARD_PRIORITY } from '../../contexts/KeyboardPriorityContext'
 import { useWindow } from '../../contexts/WindowContext'
-import { clampWindowPosition } from '../../utils/windowPosition'
+import { getCenteredPosition } from '../../utils/windowPosition'
 
 export default function NotifyPopup({ isOpen, onClose }) {
-  // Track if we've centered once (per session)
-  const hasCenteredOnceRef = useRef(false)
-  const { updateWindowPosition, getWindow } = useWindow()
+  const { updateWindowPosition } = useWindow()
   const windowId = 'win-notify'
 
   // Register modal keyboard handler (highest priority)
@@ -21,10 +19,9 @@ export default function NotifyPopup({ isOpen, onClose }) {
 
   useKeyboardHandler(KEYBOARD_PRIORITY.MODAL, 'notify-popup', handleEscape, isOpen)
 
-  // Center window on first open only
+  // Always center window when it opens
   useLayoutEffect(() => {
     if (!isOpen) return
-    if (hasCenteredOnceRef.current) return
 
     // Wait for window to be rendered and measurable
     // Use double RAF to ensure layout is complete
@@ -32,17 +29,6 @@ export default function NotifyPopup({ isOpen, onClose }) {
       requestAnimationFrame(() => {
         const el = document.getElementById(windowId)
         if (!el) return
-
-        // Check if window already has a saved position from dragging
-        const windowData = getWindow(windowId)
-        const hasSavedPosition = windowData?.position && 
-          (windowData.position.x !== 0 || windowData.position.y !== 0)
-        
-        if (hasSavedPosition) {
-          // Window has been positioned before, don't center
-          hasCenteredOnceRef.current = true
-          return
-        }
 
         // Batch all layout reads first (prevent layout thrashing)
         const viewportWidth = window.innerWidth
@@ -56,35 +42,31 @@ export default function NotifyPopup({ isOpen, onClose }) {
         // Only proceed if we have valid dimensions
         if (w <= 0 || h <= 0) return
         
-        // Calculate centered position
-        const x = Math.round((viewportWidth - w) / 2)
-        const y = Math.round((viewportHeight - h) / 2)
-        
-        // Clamp to viewport bounds (ensures title bar stays visible)
-        const clamped = clampWindowPosition({
-          x,
-          y,
+        // Calculate centered position using utility function
+        const centered = getCenteredPosition({
           width: w,
           height: h,
           isMobile: false
         })
         
         // Since this window uses position: fixed, we need to set DOM directly
-        // Also update WindowContext to track the position
-        el.style.left = `${clamped.x}px`
-        el.style.top = `${clamped.y}px`
+        el.style.left = `${centered.x}px`
+        el.style.top = `${centered.y}px`
         
         // Update position in WindowContext for tracking
-        // This marks it as moved, which prevents re-centering on subsequent opens
-        updateWindowPosition(windowId, clamped)
-        
-        // Mark as centered so we don't do this again
-        hasCenteredOnceRef.current = true
+        updateWindowPosition(windowId, centered)
       })
     })
-  }, [isOpen, getWindow, updateWindowPosition, windowId])
+  }, [isOpen, updateWindowPosition, windowId])
 
   if (!isOpen) return null
+
+  // Calculate initial centered position (approximate, will be fine-tuned by useLayoutEffect)
+  const windowWidth = 640
+  const estimatedHeight = 500 // Approximate height, will be adjusted
+  const initialPos = typeof window !== 'undefined' 
+    ? getCenteredPosition({ width: windowWidth, height: estimatedHeight, isMobile: false })
+    : { x: 0, y: 0 }
 
   return (
     <Window
@@ -95,8 +77,8 @@ export default function NotifyPopup({ isOpen, onClose }) {
       style={{
         width: '640px',
         position: 'fixed',
-        // Don't set left/top here - let centering logic handle it
-        // left and top will be set by useLayoutEffect centering logic
+        left: `${initialPos.x}px`,
+        top: `${initialPos.y}px`,
         zIndex: 1000000,
       }}
       onClose={onClose}

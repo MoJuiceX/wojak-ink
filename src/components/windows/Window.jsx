@@ -1,7 +1,7 @@
 import { useDraggable } from '../../hooks/useDraggable'
 import { useState, useRef, useEffect, useLayoutEffect } from 'react'
 import { useWindow } from '../../contexts/WindowContext'
-import { getCenteredPosition } from '../../utils/windowPosition'
+import { getInitialPosition, getCenteredPosition } from '../../utils/windowPosition'
 import { getWindowIcon } from '../../utils/windowIcons'
 import { getWindowSizeConstraints, clampWindowPosition } from '../../utils/windowPosition'
 import { useKeyboardHandler, KEYBOARD_PRIORITY } from '../../contexts/KeyboardPriorityContext'
@@ -44,6 +44,7 @@ export default function Window({
   icon,
   allowScroll = false, // If true, adds scroll-allowed class to window-body for internal scrolling
   contentAutoHeight = false, // If true, window-body will size to content instead of stretching
+  type, // Window type identifier (e.g., 'readme') for special positioning
 }) {
   // Generate stable window ID - sanitize title to only allow alphanumeric, hyphens, and underscores
   const sanitizeWindowId = (title) => {
@@ -306,17 +307,17 @@ export default function Window({
     win.style.visibility = 'visible'
   }, [windowId, isMobile, isMinimized, isMaximized])
 
-  // For README window: recalculate center position after content loads (e.g., images)
-  // Only recenter if user hasn't moved the window
+  // For README window: recalculate position after content loads (e.g., images)
+  // Only recalculate if user hasn't moved the window
   useEffect(() => {
-    if (windowId !== 'window-readme-txt') return
+    if (type !== 'readme') return
     if (isMobile || isMinimized || isMaximized) return
     if (style?.position === 'fixed') return
     
     const win = windowRef.current
     if (!win) return
     
-    // Don't recenter if user has moved the window
+    // Don't recalculate if user has moved the window
     if (hasUserMoved?.get?.(windowId)) return
     
     let lastWidth = 0
@@ -348,12 +349,12 @@ export default function Window({
         // Only proceed if we have valid dimensions
         if (actualWidth <= 0 || actualHeight <= 0) return
         
-        const newPos = getCenteredPosition({
+        // Use getInitialPosition to get the fixed spawn position (120, 20)
+        const newPos = getInitialPosition({
+          type: 'readme',
           width: actualWidth,
           height: actualHeight,
-          padding: 24,
-          isMobile: false,
-          windowId: 'window-readme-txt'
+          isMobile: false
         })
         
         // Only update if position differs significantly (> 1px)
@@ -374,7 +375,7 @@ export default function Window({
     })
     resizeObserver.observe(win)
     
-    // Also trigger after initial render to ensure correct centering
+    // Also trigger after initial render to ensure correct positioning
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         recalculatePosition('initial')
@@ -387,7 +388,7 @@ export default function Window({
         clearTimeout(recalculateTimeout)
       }
     }
-  }, [windowId, isMobile, isMinimized, isMaximized, style?.position, hasUserMoved, updateWindowPosition])
+  }, [type, windowId, isMobile, isMinimized, isMaximized, style?.position, hasUserMoved, updateWindowPosition])
 
   // Focus window when it becomes active
   useEffect(() => {

@@ -43,7 +43,7 @@ export const APPS = {
   },
   WOJAK_GENERATOR: {
     id: 'WOJAK_GENERATOR',
-    label: 'Wojak Generator.exe',
+    label: 'Wojak Generator.EXE',
     icon: { type: 'img', src: '/assets/logo.png' },
     group: 'MAIN',
     open: { type: 'window', windowId: 'wojak-generator' },

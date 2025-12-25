@@ -126,8 +126,12 @@ function scanLayerFolder(layerName) {
   } else {
     // No subdirectories, files are directly in the layer folder
     const files = getPngFiles(layerDir)
-    if (files.length > 0) {
-      manifest[''] = files
+    // Filter out McD.png from CLOTHES folder (it's only a color asset for Cap, not a clothing item)
+    const filteredFiles = layerName === 'CLOTHES' 
+      ? files.filter(file => file.toLowerCase() !== 'mcd.png')
+      : files
+    if (filteredFiles.length > 0) {
+      manifest[''] = filteredFiles
     }
   }
   

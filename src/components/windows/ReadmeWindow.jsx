@@ -53,6 +53,7 @@ export default function ReadmeWindow({ onClose }) {
   return (
     <Window
       id="window-readme-txt"
+      type="readme"
       title="README.TXT"
       style={{ 
         width: 'var(--window-size-readme)', 
@@ -61,7 +62,7 @@ export default function ReadmeWindow({ onClose }) {
       }}
       className="readme-window"
       allowScroll={true}
-      // Prevent auto-stacking so README stays precisely centered on first open
+      // Prevent auto-stacking so README stays at fixed position on first open
       noStack={true}
       onClose={onClose}
     >

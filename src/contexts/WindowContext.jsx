@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react'
-import { getCenteredPosition, getDefaultWindowSize, getCascadePosition } from '../utils/windowPosition'
+import { getInitialPosition, getCenteredPosition, getDefaultWindowSize, getCascadePosition } from '../utils/windowPosition'
 
 const WindowContext = createContext()
 
@@ -262,13 +262,12 @@ export function WindowProvider({ children }) {
             const isReadme = windowId === README_ID || windowId === 'readme' || windowId?.includes('readme')
             
             if (isReadme) {
-              // README: always centered
-              position = getCenteredPosition({ 
+              // README: fixed spawn position (120px, 20px) via getInitialPosition
+              position = getInitialPosition({ 
+                type: 'readme',
                 width: windowWidth,
                 height: windowHeight,
-                padding: 24, // Explicit padding for desktop OS feel
-                isMobile: false,
-                windowId
+                isMobile: false
               })
               // Ensure README is at index 0 in cascade order
               if (cascadeOrderRef.current[0] !== README_ID) {

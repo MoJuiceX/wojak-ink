@@ -50,10 +50,15 @@ export async function downloadCanvasAsPNG(canvas, filename = null) {
  */
 export async function copyCanvasToClipboard(canvas) {
   try {
-    const blob = await canvasToBlob(canvas)
+    const blob = await canvasToBlob(canvas, 'image/png')
+    
+    // Ensure blob has correct MIME type
+    const imageBlob = blob.type === 'image/png' 
+      ? blob 
+      : new Blob([blob], { type: 'image/png' })
     
     if (navigator.clipboard && navigator.clipboard.write) {
-      const item = new ClipboardItem({ 'image/png': blob })
+      const item = new ClipboardItem({ 'image/png': imageBlob })
       await navigator.clipboard.write([item])
     } else {
       // Fallback for older browsers
@@ -61,6 +66,37 @@ export async function copyCanvasToClipboard(canvas) {
     }
   } catch (error) {
     console.error('Error copying to clipboard:', error)
+    throw error
+  }
+}
+
+/**
+ * Copies an image from a blob URL to clipboard
+ * @param {string} blobUrl - Blob URL of the image to copy
+ * @returns {Promise<void>}
+ */
+export async function copyBlobUrlToClipboard(blobUrl) {
+  try {
+    const response = await fetch(blobUrl)
+    if (!response.ok) {
+      throw new Error('Failed to fetch image')
+    }
+    const blob = await response.blob()
+    
+    // Ensure blob has correct MIME type
+    const imageBlob = blob.type.startsWith('image/') 
+      ? blob 
+      : new Blob([blob], { type: 'image/png' })
+    
+    if (navigator.clipboard && navigator.clipboard.write) {
+      // Create ClipboardItem with explicit PNG type
+      const item = new ClipboardItem({ 'image/png': imageBlob })
+      await navigator.clipboard.write([item])
+    } else {
+      throw new Error('Clipboard API not supported')
+    }
+  } catch (error) {
+    console.error('Error copying blob URL to clipboard:', error)
     throw error
   }
 }
@@ -186,6 +222,43 @@ export function downloadImageFromDataUrl(dataUrl, filename = 'image.png') {
     document.body.removeChild(link)
   } catch (error) {
     console.error('Error downloading image:', error)
+    throw error
+  }
+}
+
+/**
+ * Downloads an image from a blob URL
+ * @param {string} blobUrl - Blob URL of the image
+ * @param {string} filename - Filename for download
+ * @returns {Promise<void>}
+ */
+export async function downloadBlobUrlAsPNG(blobUrl, filename = 'image.png') {
+  try {
+    const response = await fetch(blobUrl)
+    if (!response.ok) {
+      throw new Error('Failed to fetch blob')
+    }
+    const blob = await response.blob()
+    
+    // Ensure blob has correct MIME type
+    const imageBlob = blob.type.startsWith('image/') 
+      ? blob 
+      : new Blob([blob], { type: 'image/png' })
+    
+    const url = URL.createObjectURL(imageBlob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    
+    // Clean up object URL after a short delay
+    setTimeout(() => {
+      URL.revokeObjectURL(url)
+    }, 100)
+  } catch (error) {
+    console.error('Error downloading blob URL:', error)
     throw error
   }
 }
