@@ -16,7 +16,7 @@ export const TANGY_BOOT_LINES = [
   "  Primary Master : ORANGE_CITRUS_SERVER (IDE) ............. OK",
   "  Primary Slave  : PEEL_DRIVE (CD-ROM) .................... OK",
   "  Secondary Master : PULP_CACHE (SCSI) .................... OK",
-  "  Accepting Cookies  : <none>",
+  "  Accepting Cookies  : <true>",
   "",
   "Loading boot sector...",
   "Peel to peel : TANGBOOT.SYS ................................ OK",
