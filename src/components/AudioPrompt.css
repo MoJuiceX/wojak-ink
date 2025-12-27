@@ -1,0 +1,45 @@
+.audio-prompt {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999998;
+  cursor: pointer;
+  animation: slideInRight 0.3s ease-out;
+}
+
+.audio-prompt-content {
+  background: #ffaa00;
+  border: 2px solid;
+  border-color: #ffffff #cc7700 #cc7700 #ffffff;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  font-family: 'MS Sans Serif', sans-serif;
+  min-width: 200px;
+}
+
+.audio-prompt-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.audio-prompt-message {
+  font-size: 12px;
+  font-weight: bold;
+  color: #000;
+  white-space: nowrap;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+

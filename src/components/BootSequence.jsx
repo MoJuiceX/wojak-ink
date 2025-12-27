@@ -63,9 +63,15 @@ export default function BootSequence({
   const [currentLineIndex, setCurrentLineIndex] = useState(0)
   const [currentCharIndex, setCurrentCharIndex] = useState(0)
   const [isFading, setIsFading] = useState(false)
+  const [showClickPrompt, setShowClickPrompt] = useState(true)
   const containerRef = useRef(null)
 
   useEffect(() => {
+    // Don't start sequence until user clicks
+    if (showClickPrompt) {
+      return
+    }
+
     // Check if already shown (if showOnce is true)
     if (showOnce) {
       const hasSeenBoot = sessionStorage.getItem('hasSeenBoot')
@@ -75,16 +81,16 @@ export default function BootSequence({
       }
     }
 
-    // Play PC boot sound at the start (10% slower)
+    // Play PC boot sound at the start (20% slower - was 10%, now 20%)
     const bootAudio = new Audio('/assets/audio/PC-boot.mp3')
-    bootAudio.volume = 0.7
-    bootAudio.playbackRate = 0.9 // 10% slower (0.9 = 90% speed)
+    bootAudio.volume = 0.75 // 75% volume
+    bootAudio.playbackRate = 0.8 // 20% slower (0.8 = 80% speed)
     
     // Get audio duration and start crossfade earlier so PS1 is fully faded in before PC-boot ends
     bootAudio.addEventListener('loadedmetadata', () => {
       const originalDuration = bootAudio.duration
-      const adjustedDuration = originalDuration / 0.9 // Adjust for slower playback rate (10% slower = longer duration)
-      const fadeStartTime = adjustedDuration - 4000 // Start fade 4 seconds before end (500ms earlier, gives PS1 time to fully fade in)
+      const adjustedDuration = originalDuration / 0.8 // Adjust for slower playback rate (20% slower = longer duration)
+      const fadeStartTime = adjustedDuration - 4500 // Start fade 4.5 seconds before end (starts PS1 audio a fraction earlier)
       const fadeDuration = 3000 // 3 second fade (PS1 needs 2 seconds to fade in, starting 4s before end ensures it's done)
       
       // Start crossfade when we reach fade start time
@@ -93,7 +99,7 @@ export default function BootSequence({
         
         if (currentTime >= fadeStartTime && currentTime < adjustedDuration) {
           const fadeProgress = (currentTime - fadeStartTime) / fadeDuration
-          bootAudio.volume = 0.7 * (1 - fadeProgress) // Fade out PC-boot
+          bootAudio.volume = 0.75 * (1 - fadeProgress) // Fade out PC-boot (75% volume)
           
           // Trigger PS1 audio fade in immediately when fade starts
           if (onAudioEnd && fadeProgress > 0) {
@@ -178,7 +184,7 @@ export default function BootSequence({
     }
 
     sequence()
-  }, [lines, onDone, showOnce, typingSpeed])
+  }, [lines, onDone, showOnce, typingSpeed, showClickPrompt, onAudioEnd])
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -187,8 +193,25 @@ export default function BootSequence({
     }
   }, [visibleLines])
 
+  const handleClickToStart = () => {
+    setShowClickPrompt(false)
+  }
+
   return (
     <div className={`boot-sequence ${isFading ? 'fade-out' : ''}`}>
+      {showClickPrompt && (
+        <div className="boot-click-prompt" onClick={handleClickToStart}>
+          <div className="boot-click-prompt-content">
+            <div className="boot-click-prompt-title">ℹ️</div>
+            <div className="boot-click-prompt-message">
+              Click now for the full immersive experience
+            </div>
+            <div className="boot-click-prompt-subtitle">
+              (Audio and animations require user interaction)
+            </div>
+          </div>
+        </div>
+      )}
       <img
         className="boot-sequence-right-art"
         src="/assets/penguin_win95_256.png"

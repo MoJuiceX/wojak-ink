@@ -774,7 +774,7 @@ export default function Window({
           {!isMobile && (
             <button
               aria-label={`Minimize ${title}`}
-              className="title-bar-button"
+              className="title-bar-button win98-caption-btn win98-caption-btn--min"
               onClick={(e) => {
                 e.stopPropagation()
                 e.preventDefault()
@@ -790,7 +790,7 @@ export default function Window({
           {!isMobile && (
             <button
               aria-label={`Maximize ${title}`}
-              className={`title-bar-button ${isMaximized ? 'maximized' : ''}`}
+              className={`title-bar-button win98-caption-btn ${isMaximized ? 'win98-caption-btn--restore' : 'win98-caption-btn--max'}`}
               onClick={(e) => {
                 e.stopPropagation()
                 e.preventDefault()
@@ -798,7 +798,7 @@ export default function Window({
               }}
               onMouseDown={(e) => e.stopPropagation()}
             >
-              <span aria-hidden="true">□</span>
+              <span aria-hidden="true">{isMaximized ? '⧉' : '□'}</span>
             </button>
           )}
           
@@ -829,7 +829,7 @@ export default function Window({
           {/* 4. CLOSE BUTTON [×] - Always visible */}
           <button
             aria-label={`Close ${title}`}
-            className="title-bar-button"
+            className="title-bar-button win98-caption-btn win98-caption-btn--close"
             onClick={(e) => {
               e.stopPropagation()
               e.preventDefault()

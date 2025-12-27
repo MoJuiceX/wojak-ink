@@ -536,63 +536,6 @@ export default function WojakGenerator({ onClose, onAddDesktopImage, desktopImag
             padding: 0,
             margin: 0,
           }}>
-            {/* DevPanel - Test CyberTang button - Mobile */}
-            {(window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (
-              <div style={{
-                margin: '8px',
-                padding: '4px 8px',
-                background: 'var(--surface-2)',
-                border: '1px solid',
-                borderColor: 'var(--border-dark) var(--border-light) var(--border-light) var(--border-dark)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-              }}>
-                <span style={{
-                  fontFamily: 'MS Sans Serif, sans-serif',
-                  fontSize: '10px',
-                  color: 'var(--text-1)',
-                  marginRight: '4px',
-                }}>
-                  Dev:
-                </span>
-                <Button
-                  onClick={() => {
-                    // Create a test CyberTang image (colored rectangle for testing)
-                    const testCanvas = document.createElement('canvas')
-                    testCanvas.width = 500
-                    testCanvas.height = 500
-                    const ctx = testCanvas.getContext('2d')
-                    // Create a test image with gradient
-                    const gradient = ctx.createLinearGradient(0, 0, 500, 500)
-                    gradient.addColorStop(0, '#ff6600')
-                    gradient.addColorStop(1, '#ffaa00')
-                    ctx.fillStyle = gradient
-                    ctx.fillRect(0, 0, 500, 500)
-                    ctx.fillStyle = '#ffffff'
-                    ctx.font = '48px Arial'
-                    ctx.textAlign = 'center'
-                    ctx.textBaseline = 'middle'
-                    ctx.fillText('TEST CyberTang', 250, 250)
-                    // Convert to blob URL
-                    testCanvas.toBlob((blob) => {
-                      if (blob) {
-                        const url = URL.createObjectURL(blob)
-                        setTangifiedImage(url)
-                        setShowTangified(true)
-                        showToast('✅ Test CyberTang created!', 'success', 2000)
-                      }
-                    }, 'image/png')
-                  }}
-                  style={{
-                    padding: '2px 6px',
-                    fontSize: '10px',
-                  }}
-                >
-                  Test CyberTang
-                </Button>
-              </div>
-            )}
             {/* Canvas fills remaining space */}
             <div style={{ 
               flex: 1,
@@ -678,65 +621,6 @@ export default function WojakGenerator({ onClose, onAddDesktopImage, desktopImag
             ref={combinedPanelRef}
             tabIndex={-1}
           >
-            {/* DevPanel - Test CyberTang button - Always visible for testing */}
-            <div style={{
-              marginBottom: '8px',
-              marginTop: '4px',
-              padding: '6px 8px',
-              background: '#ffff00', // Bright yellow to make it obvious
-              border: '2px solid #000000',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              width: '100%',
-              boxSizing: 'border-box',
-              zIndex: 1000,
-              position: 'relative',
-            }}>
-                <span style={{
-                  fontFamily: 'MS Sans Serif, sans-serif',
-                  fontSize: '10px',
-                  color: 'var(--text-1)',
-                  marginRight: '4px',
-                }}>
-                  Dev:
-                </span>
-                <Button
-                  onClick={() => {
-                    // Create a test CyberTang image (colored rectangle for testing)
-                    const testCanvas = document.createElement('canvas')
-                    testCanvas.width = 500
-                    testCanvas.height = 500
-                    const ctx = testCanvas.getContext('2d')
-                    // Create a test image with gradient
-                    const gradient = ctx.createLinearGradient(0, 0, 500, 500)
-                    gradient.addColorStop(0, '#ff6600')
-                    gradient.addColorStop(1, '#ffaa00')
-                    ctx.fillStyle = gradient
-                    ctx.fillRect(0, 0, 500, 500)
-                    ctx.fillStyle = '#ffffff'
-                    ctx.font = '48px Arial'
-                    ctx.textAlign = 'center'
-                    ctx.textBaseline = 'middle'
-                    ctx.fillText('TEST CyberTang', 250, 250)
-                    // Convert to blob URL
-                    testCanvas.toBlob((blob) => {
-                      if (blob) {
-                        const url = URL.createObjectURL(blob)
-                        setTangifiedImage(url)
-                        setShowTangified(true)
-                        showToast('✅ Test CyberTang created!', 'success', 2000)
-                      }
-                    }, 'image/png')
-                  }}
-                  style={{
-                    padding: '2px 6px',
-                    fontSize: '10px',
-                  }}
-                >
-                  Test CyberTang
-                </Button>
-            </div>
             
             <div className="trait-selectors-scroll">
               {/* Flat list (no HEAD/FACE/BODY categories) */}

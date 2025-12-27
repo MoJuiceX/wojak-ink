@@ -621,6 +621,130 @@ img {
   --link: #006622;
 }
 
+[data-theme="orange"] {
+  /* Surface Tokens - Stronger orange-tinted Win98 scheme */
+  --surface-0: #ff9933;
+  --surface-1: #ff9933;
+  --surface-2: #ff9933;
+  --surface-3: #ffaa55;
+  --desktop-bg: #ff9933;
+  --window-frame: #ff9933;
+  --window-face: #ff9933;
+  --panel-face: #ff9933;
+  --inset-face: #ffffff;
+  
+  /* Text Tokens */
+  --text: #000000;
+  --text-1: #000000;
+  --text-2: #cc5500;
+  --text-muted: #cc5500;
+  --text-disabled: #cc5500;
+  --text-inverse: #ffffff;
+  
+  /* Border Tokens - Stronger orange-tinted 3D borders */
+  --border-light: #ffcc88;
+  --border-mid: #ff9933;
+  --border-dark: #cc5500;
+  --border-inset-light: #ffcc88;
+  --border-inset-dark: #cc5500;
+  
+  /* Title Bar Tokens - Orange gradient */
+  --title-active-bg: linear-gradient(to right, #ff8800, #ffaa44);
+  --title-active-text: #000000;
+  --title-inactive-bg: #ff9900;
+  --title-inactive-text: #000000;
+  
+  /* Button Tokens - Stronger orange-tinted button faces */
+  --btn-face: #ff9933;
+  --btn-text: #000000;
+  --btn-hover-face: #ffaa55;
+  --btn-hover-text: #000000;
+  --btn-active-face: #ff8800;
+  --btn-active-text: #000000;
+  --btn-disabled-face: #ff9933;
+  --btn-disabled-text: #cc5500;
+  /* Legacy aliases for backward compatibility */
+  --btn-face-hover: #ffaa55;
+  --btn-face-pressed: #ff8800;
+  --btn-disabled: #ff9933;
+  
+  /* Accent Tokens - Orange accent */
+  --accent: #ff8800;
+  --accent-2: #ffaa44;
+  --accent-selection: #ff8800;
+  --accent-focus: #ff8800;
+  --accent-link: #cc5500;
+  --accent-active: #ff8800;
+  
+  /* State Tokens */
+  --state-hover: #ffaa55;
+  --state-active: #ff8800;
+  --state-disabled: #ff9933;
+  --state-error: #ff0000;
+  --state-warning: #ff8800;
+  --state-success: #008000;
+  
+  /* Desktop/Base Tokens */
+  --ui-bg: #ff9933;
+  
+  /* Taskbar Tokens - Orange-tinted taskbar (keep lighter as user likes it) */
+  --taskbar-bg: #ffcc99;
+  --taskbar-border: #ffe6cc;
+  --taskbar-text: #000000;
+  --taskbar-btn-face: #ffcc99;
+  --taskbar-btn-text: #000000;
+  --taskbar-btn-hover-face: #ffd9b3;
+  --taskbar-btn-hover-text: #000000;
+  --taskbar-btn-active-face: #ffcc99;
+  --taskbar-btn-active-text: #000000;
+  /* Legacy aliases for backward compatibility */
+  --taskbar-button-bg: #ffcc99;
+  --taskbar-button-text: #000000;
+  --taskbar-button-hover-bg: #ffd9b3;
+  --taskbar-button-active-bg: #ffcc99;
+  --taskbar-button-active-border: #cc5500;
+  
+  /* Start Menu Tokens - Stronger orange-tinted menu */
+  --menu-bg: #ff9933;
+  --menu-text: #000000;
+  --menu-border: #ff9933;
+  --menu-hover-bg: #ff8800;
+  --menu-hover-text: #000000;
+  --menu-separator: #cc5500;
+  --menu-header-bg: linear-gradient(to right, #ff8800, #ffaa44);
+  --menu-header-text: #000000;
+  --menu-item-hover-bg: #ff8800;
+  --menu-item-hover-text: #000000;
+  
+  /* Input/Form Tokens */
+  --input-face: #ffffff;
+  --input-text: #000000;
+  --input-placeholder: #cc5500;
+  --input-disabled-face: #ffcc88;
+  --input-disabled-text: #cc5500;
+  --input-border: #cc5500;
+  /* Legacy aliases for backward compatibility */
+  --input-bg: #ffffff;
+  --input-disabled-bg: #ffcc88;
+  --fieldset-bg: #ffaa55;
+  --fieldset-border: #ff9933;
+  --fieldset-legend-bg: #ffaa55;
+  
+  /* Scrollbar Tokens */
+  --scrollbar-track-bg: #ff9933;
+  --scrollbar-thumb-bg: #ffaa55;
+  --scrollbar-thumb-hover-bg: #ffcc88;
+  
+  /* Focus and Selection Tokens */
+  --focus: #ff8800;
+  --focus-outline: #ff8800;
+  --selection-bg: #ff8800;
+  --selection-text: #000000;
+  
+  /* Link Tokens */
+  --link: #cc5500;
+}
+
 /* Accent Presets */
 [data-accent="default"] {
   --accent: #000080;
@@ -638,6 +762,18 @@ img {
   --accent-focus: #00ff88;
   --accent-link: #00ff88;
   --accent-active: #00ff41;
+}
+
+[data-accent="orange"] {
+  --accent: #ff6600;
+  --accent-2: #ff8800;
+  --accent-selection: #ff6600;
+  --accent-focus: #ff8800;
+  --accent-link: #cc5500;
+  --accent-active: #ff6600;
+  /* Dark orange text for accent */
+  --accent-text: #cc5500;
+  --accent-selection-text: #cc5500;
 }
 
 /* Global scroll lock - disable all page scrolling (desktop OS feel) */
@@ -824,53 +960,191 @@ body {
   padding-right: 2px;
 }
 
+/* Win98 Caption Buttons - Base Styles */
 .title-bar-controls button,
 .title-bar-button {
-  /* Larger size for better visibility */
-  width: 18px;
-  height: 16px;
-  min-width: 18px;
-  min-height: 16px;
-  max-width: 18px;
-  max-height: 16px;
+  /* Win98 authentic button size */
+  width: 16px;
+  height: 14px;
+  min-width: 16px;
+  min-height: 14px;
+  max-width: 16px;
+  max-height: 14px;
   padding: 0;
   margin: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
-  line-height: 1;
-  font-family: Arial, sans-serif;
-  font-weight: bold;
-  background: #c0c0c0;
-  border: 2px outset #c0c0c0;
-  border-top-color: #ffffff;
-  border-left-color: #ffffff;
-  border-right-color: #808080;
-  border-bottom-color: #808080;
+  background: var(--btn-face);
+  /* Win98 3D bevel: light top/left, dark bottom/right */
+  border: 1px solid;
+  border-top-color: var(--border-light);
+  border-left-color: var(--border-light);
+  border-right-color: var(--border-dark);
+  border-bottom-color: var(--border-dark);
   cursor: pointer;
   box-sizing: border-box;
   flex-shrink: 0;
-  /* Override 98.css default - allow text content */
-  font-size: 13px !important;
-  font-weight: bold !important;
-  line-height: 1 !important;
-  /* Remove background images when using text */
-  background-image: none !important;
+  position: relative;
+  /* Remove text content styling - icons are drawn with CSS */
+  font-size: 0;
+  line-height: 0;
+  /* Ensure crisp rendering */
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
 }
 
+/* Win98 Caption Buttons - Active/Pressed State */
 .title-bar-controls button:active,
 .title-bar-button:active {
-  border-style: inset;
+  /* Invert bevel for pressed effect */
+  border-top-color: var(--border-dark);
+  border-left-color: var(--border-dark);
+  border-right-color: var(--border-light);
+  border-bottom-color: var(--border-light);
+  background: var(--btn-active-face);
 }
 
-/* Ensure characters render correctly */
-.title-bar-controls button span,
-.title-bar-button span {
+/* Win98 Caption Buttons - Hover State */
+.title-bar-controls button:hover:not(:active),
+.title-bar-button:hover:not(:active) {
+  background: var(--btn-hover-face);
+}
+
+/* Win98 Caption Buttons - Focus Visible (Win98 dotted outline) */
+.title-bar-controls button:focus-visible,
+.title-bar-button:focus-visible {
+  outline: 1px dotted var(--text);
+  outline-offset: -2px;
+}
+
+/* Hide text spans - icons are drawn with CSS pseudo-elements */
+/* Exception: Help and Escape buttons use text, so show their spans */
+.title-bar-controls button:not(.title-bar-help-button):not(.title-bar-escape-button) span,
+.title-bar-button:not(.title-bar-help-button):not(.title-bar-escape-button) span {
+  display: none;
+}
+
+/* Help and Escape buttons - show text content */
+.title-bar-help-button span,
+.title-bar-escape-button span {
   display: block;
   text-align: center;
   line-height: 1;
   width: 100%;
+}
+
+/* Win98 Caption Button Icons - Using CSS Pseudo-elements for crisp pixel rendering */
+
+/* Minimize Button - Horizontal Line */
+.win98-caption-btn--min::before {
+  content: '';
+  display: block;
+  width: 6px;
+  height: 1px;
+  background: var(--text);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+.win98-caption-btn--min:active::before {
+  transform: translate(calc(-50% + 1px), calc(-50% + 1px));
+}
+
+/* Maximize Button - Square Outline */
+.win98-caption-btn--max::before {
+  content: '';
+  display: block;
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--text);
+  background: transparent;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  box-sizing: border-box;
+}
+
+.win98-caption-btn--max:active::before {
+  transform: translate(calc(-50% + 1px), calc(-50% + 1px));
+}
+
+/* Restore Button - Overlapping Squares */
+.win98-caption-btn--restore::before,
+.win98-caption-btn--restore::after {
+  content: '';
+  display: block;
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--text);
+  background: transparent;
+  position: absolute;
+  box-sizing: border-box;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+.win98-caption-btn--restore::before {
+  top: 50%;
+  left: 50%;
+  transform: translate(calc(-50% - 2px), calc(-50% - 2px));
+}
+
+.win98-caption-btn--restore::after {
+  top: 50%;
+  left: 50%;
+  transform: translate(calc(-50% + 2px), calc(-50% + 2px));
+}
+
+.win98-caption-btn--restore:active::before {
+  transform: translate(calc(-50% - 2px + 1px), calc(-50% - 2px + 1px));
+}
+
+.win98-caption-btn--restore:active::after {
+  transform: translate(calc(-50% + 2px + 1px), calc(-50% + 2px + 1px));
+}
+
+/* Close Button - X Icon */
+.win98-caption-btn--close::before,
+.win98-caption-btn--close::after {
+  content: '';
+  display: block;
+  width: 7px;
+  height: 1px;
+  background: var(--text);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+.win98-caption-btn--close::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.win98-caption-btn--close::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.win98-caption-btn--close:active::before {
+  transform: translate(calc(-50% + 1px), calc(-50% + 1px)) rotate(45deg);
+}
+
+.win98-caption-btn--close:active::after {
+  transform: translate(calc(-50% + 1px), calc(-50% + 1px)) rotate(-45deg);
 }
 
 /* Help button - use serif font for better question mark */
@@ -1027,8 +1301,8 @@ body {
     max-height: 12px;
     padding: 0;
     margin: 0;
-    font-size: 9px !important;
-    line-height: 1 !important;
+    font-size: 0;
+    line-height: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1037,8 +1311,35 @@ body {
     background-image: none !important;
   }
   
-  .title-bar-controls button span,
-  .title-bar-button span {
+  /* Mobile: Scale down icons proportionally */
+  .win98-caption-btn--min::before {
+    width: 5px;
+  }
+  
+  .win98-caption-btn--max::before {
+    width: 5px;
+    height: 5px;
+  }
+  
+  .win98-caption-btn--restore::before,
+  .win98-caption-btn--restore::after {
+    width: 5px;
+    height: 5px;
+  }
+  
+  .win98-caption-btn--close::before,
+  .win98-caption-btn--close::after {
+    width: 6px;
+  }
+  
+  /* Mobile: Hide text spans except for help/escape buttons */
+  .title-bar-controls button:not(.title-bar-help-button):not(.title-bar-escape-button) span,
+  .title-bar-button:not(.title-bar-help-button):not(.title-bar-escape-button) span {
+    display: none;
+  }
+  
+  .title-bar-help-button span,
+  .title-bar-escape-button span {
     display: block;
     text-align: center;
     line-height: 1;
@@ -1247,13 +1548,7 @@ body {
   }
 }
 
-.title-bar-controls button:active {
-  border: 1px inset var(--border-dark);
-}
-
-.title-bar-controls button:hover {
-  background: var(--btn-hover-face);
-}
+/* Active and hover states are now defined in the base Win98 caption button styles above */
 
 /* ============================================
    FOCUS INDICATORS (Keyboard Navigation)
@@ -1412,7 +1707,7 @@ textarea:focus-visible {
 /* Selection styling */
 ::selection {
   background: var(--accent-selection);
-  color: var(--text-inverse);
+  color: var(--accent-selection-text, var(--text-inverse));
 }
 
 /* Link styling */

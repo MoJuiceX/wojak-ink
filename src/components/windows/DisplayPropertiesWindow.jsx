@@ -3,20 +3,27 @@ import Window from './Window'
 import './DisplayPropertiesWindow.css'
 import { setSoundTheme, getSoundTheme, getMuteState, setMuteState, toggleMute, playSound, getSoundMode, setSoundMode } from '../../utils/soundManager'
 
-const WALLPAPERS = [
-  { id: 'jungle', name: 'Jungle', url: '/wallpapers/jungle.png', color: null },
+// Separate image wallpapers and solid colors
+const IMAGE_WALLPAPERS = [
   { id: 'chia', name: 'Chia', url: '/wallpapers/chia.png', color: null },
-  { id: 'orange-waves', name: 'Orange Waves', url: '/wallpapers/orange-waves.png', color: null },
+  { id: 'jungle', name: 'Jungle', url: '/wallpapers/jungle.png', color: null },
   { id: 'orange-grove', name: 'Orange Grove', url: '/wallpapers/orangeGrove.png', color: null },
+  { id: 'orange-waves', name: 'Orange Waves', url: '/wallpapers/orange-waves.png', color: null },
   { id: 'tanggang-life', name: 'Tang Gang Life', url: '/wallpapers/tanggang.life.png', color: null },
   { id: 'windows-98', name: 'Windows 98', url: '/wallpapers/windows-98.png', color: null },
   { id: 'windows-98bg', name: 'Windows 98 Background', url: '/wallpapers/windows-98bg.jpg', color: null },
   { id: 'windows-orange', name: 'Windows Orange', url: '/wallpapers/windows-orange.png', color: null },
-  { id: 'solid-teal', name: 'Teal (Classic)', url: null, color: '#008080' },
-  { id: 'solid-orange', name: 'Orange', url: null, color: '#ff6600' },
+]
+
+const SOLID_COLORS = [
   { id: 'solid-black', name: 'Black', url: null, color: '#000000' },
   { id: 'solid-navy', name: 'Navy', url: null, color: '#000080' },
+  { id: 'solid-orange', name: 'Orange', url: null, color: '#ff6600' },
+  { id: 'solid-teal', name: 'Teal (Classic)', url: null, color: '#008080' },
 ]
+
+// Sort image wallpapers alphabetically, then append solid colors
+const WALLPAPERS = [...IMAGE_WALLPAPERS.sort((a, b) => a.name.localeCompare(b.name)), ...SOLID_COLORS]
 
 const SOUND_THEMES = [
   { id: 'Jungle', name: 'Jungle (Classic)' },
@@ -34,15 +41,17 @@ const SCREENSAVER_TIMEOUTS = [
 ]
 
 const THEMES = [
-  { id: 'classic', name: 'Classic' },
-  { id: 'light', name: 'Light Mode' },
-  { id: 'dark', name: 'Dark Mode' },
-  { id: 'green', name: 'Seedling Mode' },
+  { id: 'classic', name: '🖥️' },
+  { id: 'light', name: '⚪' },
+  { id: 'dark', name: '⚫' },
+  { id: 'green', name: '🌱' },
+  { id: 'orange', name: '🍊' },
 ]
 
 const ACCENTS = [
   { id: 'default', name: 'Default' },
   { id: 'neon', name: 'Neon Green' },
+  { id: 'orange', name: 'Orange' },
 ]
 
 // Helper functions for screensaver settings
@@ -135,7 +144,7 @@ const setAccent = (accent) => {
 }
 
 export default function DisplayPropertiesWindow({ isOpen, onClose, currentWallpaper, onChangeWallpaper }) {
-  const [selectedWallpaper, setSelectedWallpaper] = useState(currentWallpaper || 'jungle')
+  const [selectedWallpaper, setSelectedWallpaper] = useState(currentWallpaper || 'tanggang-life')
   const [activeTab, setActiveTab] = useState('background')
   const [soundTheme, setSoundThemeState] = useState(() => getSoundTheme())
   const [soundMode, setSoundModeState] = useState(() => getSoundMode())
@@ -281,36 +290,30 @@ export default function DisplayPropertiesWindow({ isOpen, onClose, currentWallpa
                 <label>Wallpaper:</label>
                 <div className="display-wallpaper-list">
                   {WALLPAPERS.map(wallpaper => (
-                    <div
+                    <button
                       key={wallpaper.id}
-                      className={`display-wallpaper-item ${selectedWallpaper === wallpaper.id ? 'selected' : ''}`}
+                      className={`display-wallpaper-button ${selectedWallpaper === wallpaper.id ? 'selected' : ''}`}
                       onClick={() => setSelectedWallpaper(wallpaper.id)}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onPointerDown={(e) => e.stopPropagation()}
                     >
                       {wallpaper.url ? (
                         <img src={wallpaper.url} alt={wallpaper.name} onError={(e) => {
-                          // Fallback to placeholder - use safe DOM manipulation instead of innerHTML
+                          // Fallback to color swatch if image fails
                           e.target.style.display = 'none'
                           if (wallpaper.color) {
                             const parent = e.target.parentElement
-                            // Clear existing content safely
-                            while (parent.firstChild) {
-                              parent.removeChild(parent.firstChild)
-                            }
-                            // Create elements safely
                             const swatch = document.createElement('div')
                             swatch.className = 'color-swatch'
                             swatch.style.background = wallpaper.color
-                            const span = document.createElement('span')
-                            span.textContent = wallpaper.name
-                            parent.appendChild(swatch)
-                            parent.appendChild(span)
+                            parent.insertBefore(swatch, e.target)
                           }
                         }} />
                       ) : (
                         <div className="color-swatch" style={{ background: wallpaper.color }} />
                       )}
                       <span>{wallpaper.name}</span>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>

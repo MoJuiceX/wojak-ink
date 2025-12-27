@@ -39,7 +39,7 @@ export default function StartupSequence({ onComplete }) {
         // Play PS1 startup sound for Stage 1 and 2
         if (!ps1AudioRef.current) {
           ps1AudioRef.current = new Audio('/assets/audio/Ps1-startup.mp3')
-          ps1AudioRef.current.volume = 0.7
+          ps1AudioRef.current.volume = 0.75 // 75% volume
           ps1AudioRef.current.play().catch(e => {
             console.debug('[StartupSequence] PS1 audio play failed (may need user interaction):', e)
           })
@@ -126,7 +126,7 @@ export default function StartupSequence({ onComplete }) {
       // If not, start it now as fallback
       if (!ps1AudioRef.current || ps1AudioRef.current.paused) {
         ps1AudioRef.current = new Audio('/assets/audio/Ps1-startup.mp3')
-        ps1AudioRef.current.volume = 0.7
+        ps1AudioRef.current.volume = 0.75 // 75% volume
         ps1AudioRef.current.play().catch(e => {
           console.debug('[StartupSequence] PS1 audio play failed (may need user interaction):', e)
         })
@@ -238,7 +238,7 @@ export default function StartupSequence({ onComplete }) {
               // Fade in PS1 audio over 2 seconds
               const fadeInDuration = 2000
               const startTime = Date.now()
-              const targetVolume = 0.7
+              const targetVolume = 0.75 // 75% volume
               
               const fadeIn = () => {
                 if (!ps1AudioRef.current) return
@@ -262,7 +262,7 @@ export default function StartupSequence({ onComplete }) {
             } else if (!ps1AudioRef.current.paused) {
               // If already playing, continue fade in
               const currentVol = ps1AudioRef.current.volume
-              const targetVol = 0.7
+              const targetVol = 0.75 // 75% volume
               const fadeInDuration = 2000
               const startVol = currentVol
               const startTime = Date.now()

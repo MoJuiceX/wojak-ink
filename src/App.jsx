@@ -44,6 +44,7 @@ import OrangeToyLayer from './components/OrangeToyLayer'
 import TryAgainWindowWrapper from './components/windows/TryAgainWindowWrapper'
 import EasterEggCoordinator from './components/EasterEggCoordinator'
 import StartupSequence from './components/StartupSequence'
+import AudioPrompt from './components/AudioPrompt'
 import OrangeRain from './components/effects/OrangeRain'
 import Clippy from './components/effects/Clippy'
 import { checkKonamiCode, trackClockClick, checkSecretWord } from './utils/easterEggs'
@@ -297,14 +298,15 @@ function AppContent() {
   })
 
   const [wallpaper, setWallpaper] = useState(() => {
+    // Default to Tang Gang Life
     try {
       if (typeof window !== 'undefined') {
-        return localStorage.getItem('wallpaper') || 'jungle'
+        return localStorage.getItem('wallpaper') || 'tanggang-life'
       }
     } catch (e) {
       // localStorage not available
     }
-    return 'jungle'
+    return 'tanggang-life'
   })
   const [isDisplayPropertiesOpen, setIsDisplayPropertiesOpen] = useState(false)
   const { showToast } = useToast()
@@ -1172,6 +1174,9 @@ function AppContent() {
 
               {isStartupComplete && (
                 <>
+                  {/* Audio prompt */}
+                  <AudioPrompt />
+                  
                   {/* Background music - starts after first user interaction */}
                   <BackgroundMusic />
               <a href="#main-content" className="skip-link">Skip to main content</a>

@@ -648,37 +648,81 @@ export default function DesktopImageIcons({
   // Determine if Recycle Bin is full (has items)
   const isRecycleBinFull = recycleBin.length > 0
 
-  // Calculate folder positions (right column, top to bottom) - matches reference image
-  // Order from top to bottom: Memetic Energy, My Favorite Wojaks, Community Resources, Recycle Bin
-  // Right column X position: 200px from left (2 grid columns at 100px each)
-  // Y positions: Start at BASE_Y (20px) and space vertically using grid (80px spacing)
-  const RIGHT_COLUMN_X = 200 // Right column X position (2 grid columns from left)
+  // Constants for positioning
+  const ICON_WIDTH = 96
+  const ICON_HEIGHT = 80 // 32px icon + ~48px label + gap
+  const TASKBAR_HEIGHT = 46
   const GRID_SIZE_Y = 80 // Vertical grid spacing
+  const RIGHT_MARGIN = 20 // Margin from right edge
+  const BOTTOM_MARGIN = 20 // Margin from bottom (above taskbar)
   
-  // Load saved positions or use defaults
+  // Load saved positions
   const savedPositions = loadIconPositions()
-  // Right column positions (top to bottom, matching reference image)
-  // Snap to grid to ensure consistent spacing
-  const defaultMemeticEnergyPos = snapToGrid(RIGHT_COLUMN_X, 20) // Top
-  const defaultFavoriteWojaksPos = snapToGrid(RIGHT_COLUMN_X, 100) // Second
-  const defaultCommunityResourcesPos = snapToGrid(RIGHT_COLUMN_X, 180) // Third
-  const defaultTrashBinPos = snapToGrid(RIGHT_COLUMN_X, 260) // Bottom
+  
+  // Calculate default positions from bottom right corner
+  // Order from bottom to top: Recycle Bin (bottom), Community Resources, My Favorite Wojaks, Memetic Energy (top)
+  const calculateDefaultPositions = () => {
+    // Recycle Bin (bottom) - positioned at bottom right
+    const recycleBinY = window.innerHeight - TASKBAR_HEIGHT - BOTTOM_MARGIN - ICON_HEIGHT
+    const recycleBinX = window.innerWidth - RIGHT_MARGIN - ICON_WIDTH
+    
+    // Community Resources (above Recycle Bin)
+    const communityResourcesY = recycleBinY - GRID_SIZE_Y
+    
+    // My Favorite Wojaks (above Community Resources)
+    const favoriteWojaksY = communityResourcesY - GRID_SIZE_Y
+    
+    // Memetic Energy (top)
+    const memeticEnergyY = favoriteWojaksY - GRID_SIZE_Y
+    
+    return {
+      trashBin: snapToGrid(recycleBinX, recycleBinY),
+      communityResources: snapToGrid(recycleBinX, communityResourcesY),
+      favoriteWojaks: snapToGrid(recycleBinX, favoriteWojaksY),
+      memeticEnergy: snapToGrid(recycleBinX, memeticEnergyY),
+    }
+  }
+  
+  const defaultPositions = calculateDefaultPositions()
   
   const [memeticEnergyPos, setMemeticEnergyPos] = useState(
-    savedPositions.MEMETIC_ENERGY || defaultMemeticEnergyPos
+    savedPositions.MEMETIC_ENERGY || defaultPositions.memeticEnergy
   )
   const [communityResourcesPos, setCommunityResourcesPos] = useState(
-    savedPositions.COMMUNITY_RESOURCES || defaultCommunityResourcesPos
+    savedPositions.COMMUNITY_RESOURCES || defaultPositions.communityResources
   )
   const [favoriteWojaksPos, setFavoriteWojaksPos] = useState(
-    savedPositions.MY_FAVORITE_WOJAKS || defaultFavoriteWojaksPos
+    savedPositions.MY_FAVORITE_WOJAKS || defaultPositions.favoriteWojaks
   )
   const [trashBinPos, setTrashBinPos] = useState(
-    savedPositions.RECYCLE_BIN || defaultTrashBinPos
+    savedPositions.RECYCLE_BIN || defaultPositions.trashBin
   )
   
-  // Note: Removed resize handler - positions are now fixed relative to grid, not screen size
-  // This matches the reference image layout where folders are in a fixed right column
+  // Update positions on window resize if they haven't been manually moved (not saved)
+  useEffect(() => {
+    const handleResize = () => {
+      // Only update if position hasn't been saved (user hasn't moved it)
+      if (!savedPositions.MEMETIC_ENERGY) {
+        const newDefaults = calculateDefaultPositions()
+        setMemeticEnergyPos(newDefaults.memeticEnergy)
+      }
+      if (!savedPositions.COMMUNITY_RESOURCES) {
+        const newDefaults = calculateDefaultPositions()
+        setCommunityResourcesPos(newDefaults.communityResources)
+      }
+      if (!savedPositions.MY_FAVORITE_WOJAKS) {
+        const newDefaults = calculateDefaultPositions()
+        setFavoriteWojaksPos(newDefaults.favoriteWojaks)
+      }
+      if (!savedPositions.RECYCLE_BIN) {
+        const newDefaults = calculateDefaultPositions()
+        setTrashBinPos(newDefaults.trashBin)
+      }
+    }
+    
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [savedPositions])
 
   // Always render container - use relative positioning for absolute children
   return (

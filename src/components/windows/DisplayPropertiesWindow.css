@@ -6,10 +6,15 @@
   display: flex;
   gap: 0;
   margin-bottom: -1px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  width: fit-content;
+  max-width: 100%;
+  background: transparent;
 }
 
 .display-tab {
-  padding: 4px 12px;
+  padding: 4px 8px;
   background: var(--btn-face);
   color: var(--btn-text);
   border: 1px solid;
@@ -19,6 +24,9 @@
   letter-spacing: var(--letter-spacing-tight);
   cursor: pointer;
   position: relative;
+  white-space: nowrap;
+  flex: 0 0 auto;
+  text-align: center;
 }
 
 .display-tab.active {
@@ -95,38 +103,69 @@
 }
 
 .display-wallpaper-list {
-  height: 120px;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   background: var(--surface-2);
   border: 1px solid;
   border-color: var(--border-dark) var(--border-light) var(--border-light) var(--border-dark);
-  padding: 4px;
+  padding: 8px;
   box-sizing: border-box;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
-.display-wallpaper-item {
+.display-wallpaper-button {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px;
+  padding: 8px;
   cursor: pointer;
   font-size: var(--font-size-ui);
   letter-spacing: var(--letter-spacing-tight);
   font-family: 'MS Sans Serif', sans-serif;
   color: var(--text-1);
+  background: none;
+  border: none;
+  outline: none;
+  width: 100%;
+  text-align: left;
+  box-sizing: border-box;
+  min-width: fit-content;
+  width: auto;
+  align-self: flex-start;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  margin: 0;
+  box-shadow: none;
 }
 
-.display-wallpaper-item:hover:not(.selected) {
-  background: var(--state-hover);
+.display-wallpaper-button:hover:not(.selected) {
+  background: none;
+  box-shadow: none;
 }
 
-.display-wallpaper-item.selected {
-  background: var(--accent-selection);
-  color: var(--text-inverse);
+.display-wallpaper-button.selected {
+  background: none;
+  color: var(--text-1);
+  font-weight: bold;
+  box-shadow: none;
 }
 
-.display-wallpaper-item img,
-.display-wallpaper-item .color-swatch {
+.display-wallpaper-button:active {
+  background: none;
+  box-shadow: none;
+  outline: none;
+}
+
+.display-wallpaper-button:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.display-wallpaper-button img,
+.display-wallpaper-button .color-swatch {
   width: 32px;
   height: 24px;
   border: 1px solid var(--border-dark);
@@ -135,7 +174,7 @@
   display: block;
 }
 
-.display-wallpaper-item .color-swatch {
+.display-wallpaper-button .color-swatch {
   border: 1px solid var(--text-1);
 }
 
@@ -201,8 +240,8 @@
   background: var(--input-bg);
   width: 100%;
   color: var(--input-text);
-  min-height: 28px;
-  height: 28px;
+  min-height: 32px;
+  height: 32px;
   line-height: 1.4;
   box-sizing: border-box;
   -webkit-appearance: none;
