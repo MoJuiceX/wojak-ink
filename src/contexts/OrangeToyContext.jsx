@@ -105,6 +105,11 @@ export function OrangeToyProvider({ children }) {
     // Early exit if can't claim
     if (score < requiredScore) return
 
+    // DEV: Log claim
+    if (import.meta?.env?.DEV || process.env.NODE_ENV === 'development') {
+      console.log('[OrangeToyContext] Claim prize triggered, resetting score')
+    }
+
     // Reset score to 0 (explicit rule: always reset to 0, never subtract)
     setScore(0)
 

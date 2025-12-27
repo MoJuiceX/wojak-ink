@@ -20,6 +20,14 @@
   --breakpoint-desktop-min: 1025px;
 
   /* ============================================
+     SAFE-AREA INSETS (reuse everywhere)
+     ============================================ */
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+
+  /* ============================================
      SPACING TOKENS
      ============================================ */
   
@@ -57,10 +65,10 @@
   --window-min-width: 200px;
   --window-min-height: 100px;
   
-  /* Window maximum dimensions (with padding) */
-  --window-max-width: calc(100vw - var(--desktop-padding) * 2);
+  /* Window maximum dimensions (with padding) - use clamp for fluid sizing */
+  --window-max-width: min(calc(100vw - var(--desktop-padding) * 2), 1400px);
   --window-max-width-wide: min(1400px, calc(100vw - var(--desktop-padding) * 2)); /* Max width for wide monitors */
-  --window-max-height: calc(100dvh - var(--taskbar-height) - var(--desktop-padding) * 2); /* Use dynamic viewport height */
+  --window-max-height: calc(100dvh - var(--taskbar-height) - var(--safe-area-bottom) - var(--desktop-padding) * 2); /* Use dynamic viewport height with safe-area */
 
   /* ============================================
      PANEL WIDTHS
@@ -175,10 +183,10 @@
   --panel-start-menu-width: 200px;
   
   /* Wojak Creator panel widths (desktop) */
-  --wojak-controls-panel-width: 200px;
-  --wojak-controls-panel-max-width: 225px;
-  --wojak-preview-panel-width: 460px; /* Reduced from 500px to reduce gray space */
-  --wojak-preview-panel-max-width: 520px; /* Reduced from 600px */
+  --wojak-controls-panel-width: 280px; /* Increased to accommodate wider dropdowns with full text */
+  --wojak-controls-panel-max-width: 300px; /* Increased max width */
+  --wojak-preview-panel-width: 510px; /* Frame width for 500px canvas */
+  --wojak-preview-panel-max-width: 510px; /* Match frame width */
     
     /* Window widths */
     --window-width-small: 400px;
@@ -228,9 +236,10 @@
    * - .export-controls-mobile: padding 6px + button 44px + padding 6px = ~56px
    * - .sheet-collapsed padding bottom: var(--spacing-md) = 8px
    * - Sheet padding-bottom (safe area): var(--safe-area-inset-bottom)
-   * Total: 8 + 60 + 8 + 56 + 8 = 140px + safe-area
+   * Total: 6 + 52 + 6 + 52 + 6 = 122px + safe-area (reduced from 140px)
+   * Reduced to 90px for less height
    */
-  --mobile-sheet-collapsed-height: calc(140px + var(--safe-area-inset-bottom));
+  --mobile-sheet-collapsed-height: calc(90px + var(--safe-area-inset-bottom));
   }
 }
 

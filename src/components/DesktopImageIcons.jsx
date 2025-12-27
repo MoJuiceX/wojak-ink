@@ -1,11 +1,163 @@
-import { useState, useRef, memo, useEffect } from 'react'
+import React, { useState, useRef, memo, useEffect } from 'react'
 import { viewImage, downloadImageFromDataUrl } from '../utils/imageUtils'
 import { playSound } from '../utils/soundManager'
 import { useContextMenu } from '../hooks/useContextMenu'
 import { getPairImages } from '../utils/desktopUtils'
 import ContextMenu from './ui/ContextMenu'
 import AppIcon from './ui/AppIcon'
+import { useDraggableIcon } from '../hooks/useDraggableIcon'
+import { loadIconPositions, saveIconPosition } from '../utils/iconPositionStorage'
+import { snapToGrid } from '../utils/iconGrid'
 import './DesktopImageIcons.css'
+
+// Draggable Folder/Recycle Bin Icon Component
+const DraggableFolderIcon = React.forwardRef(function DraggableFolderIcon({ 
+  iconId,
+  position, 
+  onPositionChange,
+  onDoubleClick,
+  onClick,
+  onContextMenu,
+  onMouseEnter,
+  onMouseLeave,
+  className,
+  style,
+  title,
+  ariaLabel,
+  children,
+  iconSrc,
+  isRecycleBin = false,
+  isRecycleBinFull = false,
+  dragOverTrash = false
+}, ref) {
+  React.useEffect(() => {
+    // Component lifecycle tracking removed
+  }, [iconId])
+  // Remove isDragging state to avoid React re-renders during drag (performance optimization)
+  // The hook manages dragging state internally via dataset.dragging and CSS classes
+  const buttonElementRef = React.useRef(null)
+  const isInitialMountRef = React.useRef(true)
+  
+  const { handleMouseDown, handleTouchStart, iconElementRef } = useDraggableIcon({
+    appId: iconId,
+    initialPosition: position,
+    // Remove onDragStart/onDragEnd to avoid React re-renders during drag
+    // The hook manages dragging state internally via dataset.dragging and CSS classes
+    onPositionChange: (x, y) => {
+      // Update parent state - hook already set DOM position
+      onPositionChange(x, y)
+    }
+  })
+
+  // Prevent onClick if drag occurred (Windows 98 behavior)
+  const handleClick = (e) => {
+    // If dragging flag is set, prevent click
+    if (e.currentTarget.dataset.dragging === 'true') {
+      e.preventDefault()
+      e.stopPropagation()
+      return
+    }
+    if (onClick) {
+      onClick(e)
+    }
+  }
+  
+  // Wrapper for mouseDown events
+  const handleMouseDownWrapper = (e) => {
+    if (handleMouseDown) {
+      handleMouseDown(e)
+    }
+  }
+
+  // Use a ref callback to forward ref and store element reference
+  // Also set iconElementRef from hook so it can access the DOM element
+  const buttonRef = React.useCallback((el) => {
+    buttonElementRef.current = el
+    iconElementRef.current = el // Set hook's ref
+    if (ref) {
+      if (typeof ref === 'function') {
+        ref(el)
+      } else {
+        ref.current = el
+      }
+    }
+  }, [ref, iconElementRef])
+
+
+  return (
+    <button
+      ref={buttonRef}
+      data-icon-type={isRecycleBin ? "recycle-bin" : "folder"}
+      data-icon-id={iconId}
+      className={className}
+      onMouseDown={handleMouseDownWrapper}
+      onTouchStart={handleTouchStart}
+      onDragStart={(e) => e.preventDefault()}
+      onDoubleClick={onDoubleClick}
+      onClick={handleClick}
+      onContextMenu={onContextMenu}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      style={{
+        ...style,
+        position: 'absolute',
+        // Set position from prop - hook will update it during drag
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        userSelect: 'none',
+        zIndex: 1, // z-index managed by hook via CSS class
+        pointerEvents: 'auto',
+      }}
+      // Hook manages position during drag via transform, then sets left/top on drag end
+      // React's position prop provides the base position
+      // Hook adds/removes 'dragging' class directly on the element (no React state needed)
+      // This avoids React re-renders during drag for better performance
+      title={title}
+      aria-label={ariaLabel}
+    >
+      {children || (
+        <>
+          <div 
+            className="desktop-folder-icon-wrapper"
+            style={{ 
+              position: 'relative', 
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '32px',
+              height: '32px',
+              minWidth: '32px',
+              minHeight: '32px',
+              flexShrink: 0,
+              border: 'none',
+              outline: 'none',
+            }}
+          >
+            <AppIcon
+              icon={{ 
+                type: 'img', 
+                src: iconSrc || (isRecycleBin 
+                  ? (isRecycleBinFull ? '/icon/recycle_bin_full_2k-0.png' : '/icon/recycle_bin_file.png')
+                  : '/icon/directory_closed-0.png')
+              }}
+              size={32}
+              className="desktop-folder-icon-image"
+              style={{
+                imageRendering: 'pixelated',
+                display: 'block',
+                border: 'none',
+                outline: 'none',
+                boxShadow: 'none',
+                filter: dragOverTrash ? 'drop-shadow(0 0 8px #ff0000)' : 'none',
+                transition: 'filter 0.2s',
+              }}
+            />
+          </div>
+        </>
+      )}
+    </button>
+  )
+})
 
 // Memoized Desktop Icon Component (defined outside to avoid recreation)
 const DesktopIcon = memo(({ 
@@ -28,10 +180,23 @@ const DesktopIcon = memo(({
     <button
       key={image.id}
       data-icon-id={image.id}
-      onMouseDown={(e) => onMouseDown(e, image)}
-      onDoubleClick={() => onDoubleClick(imageUrl)}
-      onContextMenu={(e) => onContextMenu(e, image)}
-      onClick={(e) => onClick(e, image.id)}
+      onMouseDown={(e) => {
+        e.stopPropagation()
+        onMouseDown(e, image)
+      }}
+      onDoubleClick={(e) => {
+        e.stopPropagation()
+        e.preventDefault()
+        onDoubleClick(imageUrl, imageName)
+      }}
+      onContextMenu={(e) => {
+        e.stopPropagation()
+        onContextMenu(e, image)
+      }}
+      onClick={(e) => {
+        e.stopPropagation()
+        onClick(e, image.id)
+      }}
       onMouseEnter={() => onMouseEnter(image.id)}
       onMouseLeave={onMouseLeave}
       draggable={false}
@@ -130,6 +295,10 @@ export default function DesktopImageIcons({
   onRemoveImage,
   onUpdatePosition,
   onOpenRecycleBin,
+  onOpenFavoriteWojaks,
+  onOpenMemeticEnergy,
+  onOpenCommunityResources,
+  onViewImage,
   selectedIconIds = [],
   setSelectedIconIds,
   onShowProperties,
@@ -411,26 +580,105 @@ export default function DesktopImageIcons({
     document.addEventListener('mouseup', handleMouseUp)
   }
 
-  const handleDoubleClick = (imageDataUrl) => {
-    if (imageDataUrl) {
-      viewImage(imageDataUrl)
+  const handleDoubleClick = (imageDataUrl, filename) => {
+    if (!imageDataUrl) {
+      console.warn('[DesktopImageIcons] No image data URL provided')
+      return
+    }
+    
+    // Validate it's a data URL
+    if (!imageDataUrl.startsWith('data:image/')) {
+      console.warn('[DesktopImageIcons] Invalid image data URL format:', imageDataUrl?.substring(0, 50))
+      return
+    }
+    
+    // On mobile, open directly in new tab for better save functionality
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 640
+    if (isMobile) {
+      // Open image in new tab - mobile browsers can save via long-press
+      const newWindow = window.open('', '_blank', 'noopener,noreferrer')
+      if (newWindow) {
+        const doc = newWindow.document
+        doc.open()
+        doc.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>${filename || 'Image'}</title>
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body {
+                  background: #000;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  min-height: 100vh;
+                  padding: 20px;
+                }
+                img {
+                  max-width: 100%;
+                  max-height: 100vh;
+                  object-fit: contain;
+                  display: block;
+                }
+              </style>
+            </head>
+            <body>
+              <img src="${imageDataUrl}" alt="${filename || 'Image'}" />
+            </body>
+          </html>
+        `)
+        doc.close()
+      }
+    } else {
+      // Desktop: use window component
+      if (onViewImage) {
+        onViewImage(imageDataUrl, filename)
+      } else {
+        // Fallback to old method if onViewImage not provided
+        viewImage(imageDataUrl)
+      }
     }
   }
+  
+  // Detect mobile for single-click support
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 640
 
   // Determine if Recycle Bin is full (has items)
   const isRecycleBinFull = recycleBin.length > 0
 
-  // Calculate Recycle Bin position (bottom right, fixed) - update on window resize
-  const [trashBinPos, setTrashBinPos] = useState({ x: window.innerWidth - 116, y: window.innerHeight - 86 })
+  // Calculate folder positions (right column, top to bottom) - matches reference image
+  // Order from top to bottom: Memetic Energy, My Favorite Wojaks, Community Resources, Recycle Bin
+  // Right column X position: 200px from left (2 grid columns at 100px each)
+  // Y positions: Start at BASE_Y (20px) and space vertically using grid (80px spacing)
+  const RIGHT_COLUMN_X = 200 // Right column X position (2 grid columns from left)
+  const GRID_SIZE_Y = 80 // Vertical grid spacing
   
-  useEffect(() => {
-    const updateTrashBinPos = () => {
-      setTrashBinPos({ x: window.innerWidth - 116, y: window.innerHeight - 86 })
-    }
-    
-    window.addEventListener('resize', updateTrashBinPos)
-    return () => window.removeEventListener('resize', updateTrashBinPos)
-  }, [])
+  // Load saved positions or use defaults
+  const savedPositions = loadIconPositions()
+  // Right column positions (top to bottom, matching reference image)
+  // Snap to grid to ensure consistent spacing
+  const defaultMemeticEnergyPos = snapToGrid(RIGHT_COLUMN_X, 20) // Top
+  const defaultFavoriteWojaksPos = snapToGrid(RIGHT_COLUMN_X, 100) // Second
+  const defaultCommunityResourcesPos = snapToGrid(RIGHT_COLUMN_X, 180) // Third
+  const defaultTrashBinPos = snapToGrid(RIGHT_COLUMN_X, 260) // Bottom
+  
+  const [memeticEnergyPos, setMemeticEnergyPos] = useState(
+    savedPositions.MEMETIC_ENERGY || defaultMemeticEnergyPos
+  )
+  const [communityResourcesPos, setCommunityResourcesPos] = useState(
+    savedPositions.COMMUNITY_RESOURCES || defaultCommunityResourcesPos
+  )
+  const [favoriteWojaksPos, setFavoriteWojaksPos] = useState(
+    savedPositions.MY_FAVORITE_WOJAKS || defaultFavoriteWojaksPos
+  )
+  const [trashBinPos, setTrashBinPos] = useState(
+    savedPositions.RECYCLE_BIN || defaultTrashBinPos
+  )
+  
+  // Note: Removed resize handler - positions are now fixed relative to grid, not screen size
+  // This matches the reference image layout where folders are in a fixed right column
 
   // Always render container - use relative positioning for absolute children
   return (
@@ -474,12 +722,23 @@ export default function DesktopImageIcons({
               isDragging={isIconDragging}
               isHovered={isHovered}
               onMouseDown={handleMouseDown}
-              onDoubleClick={handleDoubleClick}
+              onDoubleClick={(imageUrl, filename) => {
+                if (!isDragging && imageUrl) {
+                  handleDoubleClick(imageUrl, filename || image.filename)
+                }
+              }}
               onContextMenu={handleContextMenu}
               onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
                 // Only handle click if not dragging
                 if (!isDragging) {
-                  handleIconClick(e, image.id)
+                  // On mobile, single click opens the image (double-click doesn't work well)
+                  if (isMobile && (image.image || image.imageDataUrl)) {
+                    handleDoubleClick(image.image || image.imageDataUrl, image.filename)
+                  } else {
+                    handleIconClick(e, image.id)
+                  }
                 }
               }}
               onMouseEnter={setHoveredImageId}
@@ -488,17 +747,353 @@ export default function DesktopImageIcons({
           )
         })}
 
-        {/* Recycle Bin - Fixed position at bottom right */}
-        <button
+        {/* Memetic Energy - Draggable folder */}
+        <DraggableFolderIcon
+          key="MEMETIC_ENERGY"
+          iconId="MEMETIC_ENERGY"
+          position={memeticEnergyPos}
+          onPositionChange={(x, y) => {
+            setMemeticEnergyPos({ x, y })
+            saveIconPosition('MEMETIC_ENERGY', x, y)
+          }}
+          onDoubleClick={() => {
+            playSound('click')
+            if (onOpenMemeticEnergy) {
+              onOpenMemeticEnergy()
+            }
+          }}
+          onClick={() => {
+            playSound('click')
+            if (onOpenMemeticEnergy) {
+              onOpenMemeticEnergy()
+            }
+          }}
+          onContextMenu={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            showContextMenu(e, [
+              { 
+                icon: '📂', 
+                label: 'Open', 
+                onClick: () => {
+                  if (onOpenMemeticEnergy) {
+                    onOpenMemeticEnergy()
+                  }
+                }
+              },
+            ])
+          }}
+          className="desktop-icon-button desktop-folder-icon"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '4px',
+            background: 'transparent',
+            border: 'none',
+            borderRadius: '4px',
+            padding: '4px',
+            cursor: 'pointer',
+            width: '96px',
+            fontFamily: "'MS Sans Serif', sans-serif",
+            color: '#fff',
+            textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
+          }}
+          title="MEMETIC ENERGY - Double-click to open"
+          ariaLabel="MEMETIC ENERGY"
+          iconSrc="/icon/directory_closed-0.png"
+        >
+          <div 
+            className="desktop-folder-icon-wrapper"
+            style={{ 
+              position: 'relative', 
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '32px',
+              height: '32px',
+              minWidth: '32px',
+              minHeight: '32px',
+              flexShrink: 0,
+              border: 'none',
+              outline: 'none',
+            }}
+          >
+            <AppIcon
+              icon={{ 
+                type: 'img', 
+                src: '/icon/directory_closed-0.png'
+              }}
+              size={32}
+              className="desktop-folder-icon-image"
+              style={{
+                imageRendering: 'pixelated',
+                display: 'block',
+                border: 'none',
+                outline: 'none',
+                boxShadow: 'none',
+              }}
+            />
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              lineHeight: '14px',
+              textAlign: 'center',
+              width: '96px',
+            }}
+          >
+            <span style={{ display: 'block', height: '14px', lineHeight: '14px' }}>MEMETIC</span>
+            <span style={{ display: 'block', height: '14px', lineHeight: '14px' }}>ENERGY</span>
+          </div>
+        </DraggableFolderIcon>
+
+        {/* Community Resources - Draggable folder */}
+        <DraggableFolderIcon
+          key="COMMUNITY_RESOURCES"
+          iconId="COMMUNITY_RESOURCES"
+          position={communityResourcesPos}
+          onPositionChange={(x, y) => {
+            setCommunityResourcesPos({ x, y })
+            saveIconPosition('COMMUNITY_RESOURCES', x, y)
+          }}
+          onDoubleClick={() => {
+            playSound('click')
+            if (onOpenCommunityResources) {
+              onOpenCommunityResources()
+            }
+          }}
+          onClick={() => {
+            playSound('click')
+            if (onOpenCommunityResources) {
+              onOpenCommunityResources()
+            }
+          }}
+          onContextMenu={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            showContextMenu(e, [
+              { 
+                icon: '📂', 
+                label: 'Open', 
+                onClick: () => {
+                  if (onOpenCommunityResources) {
+                    onOpenCommunityResources()
+                  }
+                }
+              },
+            ])
+          }}
+          className="desktop-icon-button desktop-folder-icon"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '4px',
+            background: 'transparent',
+            border: 'none',
+            borderRadius: '4px',
+            padding: '4px',
+            cursor: 'pointer',
+            width: '96px',
+            fontFamily: "'MS Sans Serif', sans-serif",
+            color: '#fff',
+            textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
+          }}
+          title="COMMUNITY RESOURCES - Double-click to open"
+          ariaLabel="COMMUNITY RESOURCES"
+          iconSrc="/icon/notepad-0.png"
+        >
+          <div 
+            className="desktop-folder-icon-wrapper"
+            style={{ 
+              position: 'relative', 
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '32px',
+              height: '32px',
+              minWidth: '32px',
+              minHeight: '32px',
+              flexShrink: 0,
+              border: 'none',
+              outline: 'none',
+            }}
+          >
+            <AppIcon
+              icon={{ 
+                type: 'img', 
+                src: '/icon/notepad-0.png'
+              }}
+              size={32}
+              className="desktop-folder-icon-image"
+              style={{
+                imageRendering: 'pixelated',
+                display: 'block',
+                border: 'none',
+                outline: 'none',
+                boxShadow: 'none',
+              }}
+            />
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              lineHeight: '14px',
+              textAlign: 'center',
+              width: '96px',
+            }}
+          >
+            <span style={{ 
+              display: 'block', 
+              height: '14px', 
+              lineHeight: '14px',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              maxWidth: '96px',
+            }}>COMMUNITY</span>
+            <span style={{ 
+              display: 'block', 
+              height: '14px', 
+              lineHeight: '14px',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              maxWidth: '96px',
+            }}>RESOURCES.TXT</span>
+          </div>
+        </DraggableFolderIcon>
+
+        {/* My Favorite Wojaks - Draggable folder */}
+        <DraggableFolderIcon
+          key="MY_FAVORITE_WOJAKS"
+          iconId="MY_FAVORITE_WOJAKS"
+          position={favoriteWojaksPos}
+          onPositionChange={(x, y) => {
+            setFavoriteWojaksPos({ x, y })
+            saveIconPosition('MY_FAVORITE_WOJAKS', x, y)
+          }}
+          onDoubleClick={() => {
+            playSound('click')
+            if (onOpenFavoriteWojaks) {
+              onOpenFavoriteWojaks()
+            }
+          }}
+          onClick={() => {
+            playSound('click')
+            if (onOpenFavoriteWojaks) {
+              onOpenFavoriteWojaks()
+            }
+          }}
+          onContextMenu={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            showContextMenu(e, [
+              { 
+                icon: '📂', 
+                label: 'Open', 
+                onClick: () => {
+                  if (onOpenFavoriteWojaks) {
+                    onOpenFavoriteWojaks()
+                  }
+                }
+              },
+            ])
+          }}
+          className="desktop-icon-button desktop-folder-icon"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '4px',
+            background: 'transparent',
+            border: 'none',
+            borderRadius: '4px',
+            padding: '4px',
+            cursor: 'pointer',
+            width: '96px',
+            fontFamily: "'MS Sans Serif', sans-serif",
+            color: '#fff',
+            textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
+          }}
+          title="MY FAVORITE WOJAKS - Double-click to open"
+          ariaLabel="MY FAVORITE WOJAKS"
+          iconSrc="/icon/directory_closed-0.png"
+        >
+          <div 
+            className="desktop-folder-icon-wrapper"
+            style={{ 
+              position: 'relative', 
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '32px',
+              height: '32px',
+              minWidth: '32px',
+              minHeight: '32px',
+              flexShrink: 0,
+              border: 'none',
+              outline: 'none',
+            }}
+          >
+            <AppIcon
+              icon={{ 
+                type: 'img', 
+                src: '/icon/directory_closed-0.png'
+              }}
+              size={32}
+              className="desktop-folder-icon-image"
+              style={{
+                imageRendering: 'pixelated',
+                display: 'block',
+                border: 'none',
+                outline: 'none',
+                boxShadow: 'none',
+              }}
+            />
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              lineHeight: '14px',
+              textAlign: 'center',
+              width: '96px',
+            }}
+          >
+            <span style={{ display: 'block', height: '14px', lineHeight: '14px' }}>MY FAVORITE</span>
+            <span style={{ display: 'block', height: '14px', lineHeight: '14px' }}>WOJAKS</span>
+          </div>
+        </DraggableFolderIcon>
+
+        {/* Recycle Bin - Draggable */}
+        <DraggableFolderIcon
+          key="RECYCLE_BIN"
           ref={trashBinRef}
-          className={`desktop-icon-button desktop-trash-icon recycle-bin ${dragOverTrash ? 'drag-hover' : ''}`}
+          iconId="RECYCLE_BIN"
+          position={trashBinPos}
+          onPositionChange={(x, y) => {
+            setTrashBinPos({ x, y })
+            saveIconPosition('RECYCLE_BIN', x, y)
+          }}
           onDoubleClick={() => {
             playSound('click')
             if (onOpenRecycleBin) {
               onOpenRecycleBin()
             }
           }}
-          onClick={() => playSound('click')}
+          onClick={() => {
+            playSound('click')
+            if (onOpenRecycleBin) {
+              onOpenRecycleBin()
+            }
+          }}
           onContextMenu={(e) => {
             e.preventDefault()
             e.stopPropagation()
@@ -526,10 +1121,8 @@ export default function DesktopImageIcons({
           }}
           onMouseEnter={() => setIsRecycleBinHovered(true)}
           onMouseLeave={() => setIsRecycleBinHovered(false)}
+          className={`desktop-icon-button desktop-trash-icon recycle-bin ${dragOverTrash ? 'drag-hover' : ''}`}
           style={{
-            position: 'absolute',
-            left: `${trashBinPos.x}px`,
-            top: `${trashBinPos.y}px`,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -542,26 +1135,33 @@ export default function DesktopImageIcons({
             padding: '4px',
             cursor: 'pointer',
             width: '96px',
-            pointerEvents: 'auto',
             transition: 'background 0.2s, border 0.2s',
             fontFamily: "'MS Sans Serif', sans-serif",
             color: '#fff',
             textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
           }}
           title="Recycle Bin - Drag images here to delete"
-          aria-label="Recycle Bin"
+          ariaLabel="Recycle Bin"
+          isRecycleBin={true}
+          isRecycleBinFull={isRecycleBinFull}
+          dragOverTrash={dragOverTrash}
         >
-          <div style={{ 
-            position: 'relative', 
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '32px',
-            height: '32px',
-            minWidth: '32px',
-            minHeight: '32px',
-            flexShrink: 0,
-          }}>
+          <div 
+            className="desktop-folder-icon-wrapper"
+            style={{ 
+              position: 'relative', 
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '32px',
+              height: '32px',
+              minWidth: '32px',
+              minHeight: '32px',
+              flexShrink: 0,
+              border: 'none',
+              outline: 'none',
+            }}
+          >
             <AppIcon
               icon={{ 
                 type: 'img', 
@@ -580,14 +1180,22 @@ export default function DesktopImageIcons({
           </div>
           <span
             style={{
+              display: 'block',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              maxWidth: '96px',
+              width: '96px',
+              lineHeight: '14px',
+              height: '14px',
+              textAlign: 'center',
               color: '#fff',
               textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
-              textAlign: 'center',
             }}
           >
-            Recycle Bin
+            RECYCLE BIN
           </span>
-        </button>
+        </DraggableFolderIcon>
       </div>
       
       {contextMenu && (

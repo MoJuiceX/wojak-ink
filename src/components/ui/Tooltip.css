@@ -16,10 +16,12 @@
   color: var(--text-1);
   white-space: nowrap;
   pointer-events: none;
-  max-width: 250px;
+  max-width: min(250px, 90vw); /* Clamp to viewport to prevent overflow */
   word-wrap: break-word;
   white-space: normal;
   line-height: 1.4;
+  /* Ensure tooltip doesn't overflow viewport */
+  overflow-wrap: anywhere;
 }
 
 /* Tooltip arrow */

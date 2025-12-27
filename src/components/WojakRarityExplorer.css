@@ -1,0 +1,294 @@
+/* Rarity Explorer Emoji Badge Styles */
+
+/* Ensure scrolling works */
+.traits-list-scrollable.scroll-allowed {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+  pointer-events: auto !important;
+}
+
+.rarityRankTile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: visible !important;
+  position: relative;
+  z-index: 1;
+}
+
+.rarityEmojiRow {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  padding: 4px 0;
+  align-self: center;
+  position: relative;
+  z-index: 9998 !important;
+  overflow: visible;
+}
+
+.rarityEmojiBox {
+  background: transparent !important;
+  border: none !important;
+  padding: 4px 2px !important;
+  margin: 0 !important;
+  cursor: pointer;
+  font-size: clamp(20px, 4vw, 28px);
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter 0.2s ease;
+  box-sizing: border-box;
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  position: relative;
+  z-index: 9998 !important;
+  overflow: visible;
+}
+
+.rarityEmojiBox:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 2px;
+}
+
+.rarityEmojiBox:hover {
+  filter: brightness(1.1);
+}
+
+.rarityEmojiBox span {
+  display: inline-block;
+  position: relative;
+  z-index: 9998 !important;
+}
+
+.rarityRankNumber {
+  font-size: clamp(17px, 4.5vw, 27px);
+  font-weight: bold;
+  line-height: 1.2;
+  padding: 0;
+  margin: 0 0 8px 0;
+  position: relative;
+  z-index: 9999 !important;
+  display: block;
+}
+
+/* Mobile first - larger sizes */
+.rarityRankOf {
+  font-size: clamp(14px, 3.75vw, 20px) !important;
+  opacity: 0.9;
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+/* Score tile styles */
+.rarityScoreTile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.rarityScoreItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.rarityScoreLabel {
+  font-size: clamp(10px, 2.4vw, 14px) !important;
+  font-weight: bold;
+}
+
+.rarityScoreValue {
+  font-size: clamp(14px, 4vw, 20px) !important;
+  font-weight: bold;
+  margin-top: 4px;
+  line-height: 1.1;
+}
+
+/* Desktop specific adjustments - smaller sizes */
+@media (min-width: 641px) {
+  .rarityRankNumber {
+    font-size: 20px !important;
+  }
+  
+  .rarityRankOf {
+    font-size: 10px !important;
+  }
+  
+  .rarityScoreLabel {
+    font-size: 9px !important;
+  }
+  
+  .rarityScoreValue {
+    font-size: 16px !important;
+  }
+  
+  /* Reduce emoji size on desktop */
+  .rarityEmojiBox {
+    font-size: 18px !important;
+  }
+  
+  .rarityEmojiRow {
+    margin-bottom: 6px !important;
+    padding: 2px 0 !important;
+  }
+}
+
+/* Alternating pulse animation - true back-and-forth */
+@keyframes emojiPulse {
+  0%, 50%, 100% { 
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+  }
+  25% { 
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.9));
+  }
+  75% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+  }
+}
+
+.rarityEmojiBox--a span {
+  animation: emojiPulse 1.2s ease-in-out infinite;
+}
+
+.rarityEmojiBox--b span {
+  animation: emojiPulse 1.2s ease-in-out infinite;
+  animation-delay: 0.6s;
+}
+
+/* Reduced motion - stop animations */
+@media (prefers-reduced-motion: reduce) {
+  .rarityEmojiBox--a span,
+  .rarityEmojiBox--b span {
+    animation: none;
+  }
+}
+
+/* Rarity Explorer Mobile Enhancements */
+
+/* Hide scrollbar on horizontal tabs */
+.category-tabs-scrollable::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide count column on very small screens */
+@media screen and (max-width: 380px) {
+  .trait-count-column {
+    display: none !important;
+  }
+}
+
+/* Ensure touch targets are 36px minimum (compact but usable) */
+@media screen and (max-width: 640px) {
+  .rarity-explorer-mobile button,
+  .rarity-explorer-mobile input {
+    min-height: 36px;
+    min-width: 36px;
+  }
+}
+
+/* Yellow pulse animation for legendary tier badges */
+@keyframes legendaryPulse {
+  0%, 100% {
+    box-shadow: 
+      inset 1px 1px 0 rgba(255,255,255,0.3), 
+      inset -1px -1px 0 rgba(0,0,0,0.3),
+      0 0 0 0 rgba(255, 215, 0, 0);
+  }
+  50% {
+    box-shadow: 
+      inset 1px 1px 0 rgba(255,255,255,0.3), 
+      inset -1px -1px 0 rgba(0,0,0,0.3),
+      0 0 8px 3px rgba(255, 215, 0, 0.8);
+  }
+}
+
+.legendary-tier-badge {
+  animation: legendaryPulse 2s ease-in-out infinite;
+}
+
+/* Reduced motion - stop pulse animation */
+@media (prefers-reduced-motion: reduce) {
+  .legendary-tier-badge {
+    animation: none;
+  }
+}
+
+/* Mobile NFT Details Table - Ensure full width */
+@media screen and (max-width: 640px) {
+  .rarity-explorer-traits-table {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .rarity-explorer-traits-table th,
+  .rarity-explorer-traits-table td {
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    min-width: 0 !important;
+  }
+  
+  .rarity-explorer-traits-table th:first-child {
+    padding: 4px 4px 4px 6px !important;
+  }
+  
+  .rarity-explorer-traits-table th:last-child {
+    padding: 4px 8px 4px 4px !important;
+  }
+  
+  .rarity-explorer-traits-table th:not(:first-child):not(:last-child) {
+    padding: 4px 4px !important;
+  }
+  
+  .rarity-explorer-traits-table td:first-child {
+    padding: 4px 4px 4px 6px !important;
+  }
+  
+  .rarity-explorer-traits-table td:last-child {
+    padding: 4px 8px 4px 4px !important;
+  }
+  
+  .rarity-explorer-traits-table td:not(:first-child):not(:last-child) {
+    padding: 4px 4px !important;
+  }
+  
+  /* Ensure table container extends to edges */
+  .rarity-explorer-panel-content > div:last-child {
+    position: relative !important;
+    left: -9px !important;
+    right: -9px !important;
+    width: calc(100% + 18px) !important;
+    max-width: calc(100% + 18px) !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  
+  .rarity-explorer-panel-content {
+    overflow-x: visible !important;
+  }
+}

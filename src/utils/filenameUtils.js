@@ -2,31 +2,45 @@
 // Ensures consistent filename generation across desktop and mobile
 
 import { getAllLayerImages } from '../lib/memeImageManifest'
-import { parseSuitVariant, parseChiaFarmerVariant, parseColorVariant } from '../lib/traitOptions'
+import { parseSuitVariant, parseChiaFarmerVariant, parseColorVariant, formatDisplayLabel, normalizeHeadLabel, getLabelForLayerValue } from '../lib/traitOptions'
 
 // Custom order for generator dropdowns (matches desktop generator)
-const GENERATOR_LAYER_ORDER = ['Head','Eyes','Base','MouthBase','MouthItem','FacialHair','Mask','Clothes','Background']
+// Filename order: Head, Eyes, MouthBase, MouthItem, FacialHair, Mask, Clothes, Background
+// Note: Base is excluded from filename but still used for rendering
+const GENERATOR_LAYER_ORDER = ['Head','Eyes','MouthBase','MouthItem','FacialHair','Mask','Clothes','Background']
 
 /**
- * Get display label for a path from manifest data
- * @param {string} layerName - Layer name (e.g., 'Head', 'Eyes', 'Base')
- * @param {string} path - Image path
- * @returns {string|null} Display label or null if not found
+ * Convert layer name to filename format (lowercase with hyphens)
+ * @param {string} layerName - Layer name (e.g., 'MouthBase', 'FacialHair')
+ * @returns {string} Formatted layer name (e.g., 'mouth-base', 'face-hair')
  */
-function getDisplayLabelForPath(layerName, path) {
-  if (!path) return null
+function layerNameToFilename(layerName) {
+  if (!layerName) return ''
   
-  // Get all images for this layer from manifest
-  const images = getAllLayerImages(layerName)
-  if (!images || images.length === 0) return null
+  // Special cases
+  const mapping = {
+    'Head': 'head',
+    'Eyes': 'eye',
+    'MouthBase': 'mouth-base',
+    'MouthItem': 'mouth-item',
+    'FacialHair': 'face-hair',
+    'Mask': 'mask',
+    'Clothes': 'clothes',
+    'Background': 'background'
+  }
   
-  // Find the image with matching path
-  const image = images.find(img => img.path === path)
-  if (!image) return null
+  if (mapping[layerName]) {
+    return mapping[layerName]
+  }
   
-  // Return display name (already formatted by manifest)
-  return image.displayName || image.name || null
+  // Default: convert camelCase to kebab-case
+  return layerName
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .toLowerCase()
 }
+
+// Use the formatted display label function from traitOptions to match dropdown labels
+// This ensures filename uses the exact same label shown in the dropdown menu
 
 /**
  * Format a token for filename (replace spaces with hyphens, preserve case)
@@ -76,6 +90,11 @@ function toTitleCase(str) {
 function getFilenameTokenForLayer(layerName, value, selectedLayers) {
   if (!value || value === '' || value === 'None') return null
   
+  // Handle Centurion proxy (Head layer) - dropdown shows "Centurion" but value is "__CENTURION__"
+  if (layerName === 'Head' && value === '__CENTURION__') {
+    return 'Centurion'
+  }
+  
   // Check if filename contains 'none' (case-insensitive)
   const basename = value.split('/').pop() || ''
   if (basename.toLowerCase().includes('none')) {
@@ -88,7 +107,10 @@ function getFilenameTokenForLayer(layerName, value, selectedLayers) {
     // Chia Farmer takes priority over Suit
     const clothesAddonPath = selectedLayers['ClothesAddon'] || ''
     if (clothesAddonPath) {
-      const chiaFarmerRawLabel = getDisplayLabelForPath('ClothesAddon', clothesAddonPath)
+      // Get raw label for parsing (need to get from manifest directly)
+      const addonImages = getAllLayerImages('ClothesAddon')
+      const addonImage = addonImages.find(img => img.path === clothesAddonPath)
+      const chiaFarmerRawLabel = addonImage ? (addonImage.displayName || addonImage.name) : null
       if (chiaFarmerRawLabel) {
         const chiaParsed = parseChiaFarmerVariant(clothesAddonPath, chiaFarmerRawLabel)
         if (chiaParsed) {
@@ -99,9 +121,11 @@ function getFilenameTokenForLayer(layerName, value, selectedLayers) {
       }
     }
     
-    // Check if this is a Suit variant
-    const rawLabel = getDisplayLabelForPath(layerName, value)
-    if (rawLabel) {
+    // Check if this is a Suit variant - get raw label for parsing
+    const clothesImages = getAllLayerImages(layerName)
+    const clothesImage = clothesImages.find(img => img.path === value)
+    if (clothesImage) {
+      const rawLabel = clothesImage.displayName || clothesImage.name
       const suitParsed = parseSuitVariant(rawLabel)
       if (suitParsed) {
         // Format: "Suit-{suitColor}-{accessoryType}-{accessoryColor}"
@@ -111,8 +135,8 @@ function getFilenameTokenForLayer(layerName, value, selectedLayers) {
     }
   }
   
-  // Get display label from dropdown (uses getDisplayLabelForPath which handles formatting)
-  const displayLabel = getDisplayLabelForPath(layerName, value)
+  // Get formatted display label from dropdown (same as what user sees in dropdown)
+  const displayLabel = getLabelForLayerValue(layerName, value, selectedLayers)
   if (!displayLabel || displayLabel.toLowerCase() === 'none') {
     return null
   }
@@ -151,8 +175,10 @@ function getFilenameTokenForLayer(layerName, value, selectedLayers) {
 export function generateWojakFilename({ selectedLayers }) {
   if (!selectedLayers) return 'Wojak.png'
   
-  const tokens = []
-  const tokenLayers = [] // Track which layer each token came from
+  // Build parts array: [layer1, trait1, layer2, trait2, ...]
+  // Each layer contributes 2 parts: layer name and trait token
+  const parts = []
+  const layerIndices = [] // Track which layer each part pair belongs to
   
   // Iterate through GENERATOR_LAYER_ORDER
   for (const layerName of GENERATOR_LAYER_ORDER) {
@@ -163,39 +189,40 @@ export function generateWojakFilename({ selectedLayers }) {
     
     // Skip if token is null or empty
     if (token && token.trim() !== '') {
-      tokens.push(token)
-      tokenLayers.push(layerName)
+      const layerFilename = layerNameToFilename(layerName)
+      parts.push(layerFilename)
+      parts.push(token)
+      layerIndices.push(layerName) // Track which layer this pair belongs to
     }
   }
   
-  // Build filename: Wojak_{trait1}_{trait2}_{trait3}..._{traitN}.png
-  const base = tokens.length > 0 ? `Wojak_${tokens.join('_')}` : 'Wojak'
+  // Build filename: Wojak_{layer1}_{trait1}_{layer2}_{trait2}..._{layerN}_{traitN}.png
+  const base = parts.length > 0 ? `Wojak_${parts.join('_')}` : 'Wojak'
   let filename = `${base}.png`
   
   // Length cap: cap base name (without .png) to 120 chars
   const baseName = filename.replace(/\.png$/, '')
   if (baseName.length > 120) {
     // Drop tokens from END (Background first, then Clothes, then Mask...)
-    const reverseOrder = ['Background', 'Clothes', 'Mask', 'FacialHair', 'MouthItem', 'MouthBase', 'Base', 'Eyes', 'Head']
-    let remainingTokens = [...tokens]
-    let remainingLayers = [...tokenLayers]
+    const reverseOrder = ['Background', 'Clothes', 'Mask', 'FacialHair', 'MouthItem', 'MouthBase', 'Eyes', 'Head']
+    let remainingParts = [...parts]
+    let remainingLayers = [...layerIndices]
     
     for (const layerName of reverseOrder) {
-      // Find last occurrence of this layer's token
-      for (let i = remainingTokens.length - 1; i >= 0; i--) {
-        if (remainingLayers[i] === layerName) {
-          remainingTokens.splice(i, 1)
-          remainingLayers.splice(i, 1)
-          const truncatedBase = remainingTokens.length > 0 ? `Wojak_${remainingTokens.join('_')}` : 'Wojak'
-          const testFilename = `${truncatedBase}.png`
-          if (testFilename.replace(/\.png$/, '').length <= 120) {
-            filename = testFilename
-            break
-          }
+      // Find last occurrence of this layer in remainingLayers
+      const lastIndex = remainingLayers.lastIndexOf(layerName)
+      if (lastIndex >= 0) {
+        // Remove both layer name and token (2 elements at position lastIndex * 2)
+        const startIndex = lastIndex * 2
+        remainingParts.splice(startIndex, 2) // Remove layer name and token
+        remainingLayers.splice(lastIndex, 1) // Remove layer from tracking
+        
+        const truncatedBase = remainingParts.length > 0 ? `Wojak_${remainingParts.join('_')}` : 'Wojak'
+        const testFilename = `${truncatedBase}.png`
+        if (testFilename.replace(/\.png$/, '').length <= 120) {
+          filename = testFilename
+          break
         }
-      }
-      if (filename.replace(/\.png$/, '').length <= 120) {
-        break
       }
     }
     
@@ -237,8 +264,8 @@ export function buildImageName(selectedLayers, type = 'original') {
     const basename = value.split('/').pop() || ''
     if (basename.toLowerCase().includes('none')) continue
 
-    // Get display label from manifest
-    const displayLabel = getDisplayLabelForPath(layerName, value)
+    // Get formatted display label from dropdown (same as what user sees)
+    const displayLabel = getLabelForLayerValue(layerName, value, selectedLayers)
     if (!displayLabel || displayLabel.toLowerCase() === 'none') continue
 
     // Format trait name: remove spaces, special chars, keep alphanumeric and hyphens

@@ -1,11 +1,14 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { UI_LAYER_ORDER } from '../../lib/memeLayers'
 import { getAllLayerImages } from '../../lib/memeImageManifest'
 import LayerSelector from './LayerSelector'
 import ExportControls from './ExportControls'
+import { Button } from '../ui'
 import { useGlobalKeyboard } from '../../hooks/useGlobalKeyboard'
 import { useKeyboardHandler, KEYBOARD_PRIORITY } from '../../contexts/KeyboardPriorityContext'
+import { useToast } from '../../contexts/ToastContext'
+import { buildImageName } from '../../utils/filenameUtils'
 import './MobileTraitBottomSheet.css'
 
 // Custom order for generator dropdowns (matches desktop generator)
@@ -13,8 +16,8 @@ const GENERATOR_LAYER_ORDER = ['Head','Eyes','Base','MouthBase','MouthItem','Fac
 
 /**
  * Mobile bottom sheet for trait controls
- * - Collapsed: 3 primary buttons + current selected trait summary
- * - Expanded: Full trait list with search
+ * - Collapsed: 3 primary buttons (Traits, Random, Save)
+ * - Expanded: Full trait list
  * - Prevents background scrolling when open
  */
 export default function MobileTraitBottomSheet({
@@ -25,6 +28,10 @@ export default function MobileTraitBottomSheet({
   onExpandedChange,
   canvasRef,
   onRandomize,
+  onDownload,
+  onCyberTang,
+  onShareX,
+  // ExportControls props for CyberTang functionality
   tangifiedImage,
   setTangifiedImage,
   showTangified,
@@ -34,6 +41,8 @@ export default function MobileTraitBottomSheet({
   onRemoveGalleryEntry,
   onAddDesktopImage,
   desktopImages = [],
+  onSaveToFavorites,
+  onUndo,
 }) {
   const [internalIsExpanded, setInternalIsExpanded] = useState(false)
   const isExpanded = controlledIsExpanded !== undefined ? controlledIsExpanded : internalIsExpanded
@@ -44,7 +53,6 @@ export default function MobileTraitBottomSheet({
       setInternalIsExpanded(value)
     }
   }
-  const [searchQuery, setSearchQuery] = useState('')
   const sheetRef = useRef(null)
   const dragStartY = useRef(0)
   const currentY = useRef(0)
@@ -77,6 +85,14 @@ export default function MobileTraitBottomSheet({
     }
   }, [isExpanded])
 
+  const { showToast } = useToast()
+
+  // Check if required layers are selected for download/save
+  const hasBase = selectedLayers['Base'] && selectedLayers['Base'] !== 'None'
+  const hasMouthBase = selectedLayers['MouthBase'] && selectedLayers['MouthBase'] !== 'None'
+  const hasClothes = selectedLayers['Clothes'] && selectedLayers['Clothes'] !== 'None'
+  const canDownload = hasBase && hasMouthBase && hasClothes
+
   // Randomize all traits
   const handleRandomize = () => {
     if (onRandomize) {
@@ -101,32 +117,39 @@ export default function MobileTraitBottomSheet({
     }
   }
 
-  // Get current trait summary (non-empty selections)
-  const getTraitSummary = () => {
-    const selected = Object.entries(selectedLayers)
-      .filter(([_, value]) => value && value !== '' && value !== 'None')
-      .map(([layerName, value]) => {
-        const layer = UI_LAYER_ORDER.find(l => l.name === layerName)
-        if (!layer) return null
-        
-        // Extract display name from path
-        const fileName = value.split('/').pop() || ''
-        const displayName = fileName
-          .replace(/\.(png|jpg|jpeg)$/i, '')
-          .replace(/^[A-Z_]+_/, '')
-          .replace(/_/g, ' ')
-          .split(' ')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-          .join(' ')
-        
-        return { layerName, displayName }
-      })
-      .filter(Boolean)
-    
-    return selected
-  }
+  // Handle save to favorites
+  const handleSaveToFavorites = useCallback(async () => {
+    if (!canvasRef.current || !canDownload) {
+      showToast('⚠️ Please select Base, Mouth (Base), and Clothing before saving to favorites.', 'warning', 4000)
+      return
+    }
 
-  const traitSummary = getTraitSummary()
+    if (!onSaveToFavorites) {
+      showToast('⚠️ Save to favorites is not available', 'error', 3000)
+      return
+    }
+
+    try {
+      const canvas = canvasRef.current
+      const dataUrl = canvas.toDataURL('image/png')
+      const filename = buildImageName(selectedLayers, 'original')
+      
+      const wojak = {
+        id: `wojak-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        name: filename,
+        dataUrl: dataUrl,
+        selectedLayers: { ...selectedLayers },
+        type: 'original',
+        savedAt: new Date().toISOString()
+      }
+
+      await onSaveToFavorites(wojak)
+      showToast('✅ Wojak saved to My Favorite Wojaks!', 'success', 3000)
+    } catch (error) {
+      console.error('Save to favorites error:', error)
+      showToast('Failed to save to favorites', 'error', 3000)
+    }
+  }, [canvasRef, canDownload, selectedLayers, onSaveToFavorites, showToast])
 
   // Build reordered layer array for generator UI (matches desktop generator)
   const generatorLayerOrder = useMemo(() => {
@@ -143,13 +166,6 @@ export default function MobileTraitBottomSheet({
     
     return [...ordered, ...remaining]
   }, [])
-
-  // Filter layers by search query
-  const filteredLayers = generatorLayerOrder.filter(layer => {
-    if (!searchQuery) return true
-    const query = searchQuery.toLowerCase()
-    return layer.name.toLowerCase().includes(query)
-  })
 
   // Global keyboard handler for bottom sheet (legacy, kept for compatibility)
   useGlobalKeyboard({
@@ -277,16 +293,11 @@ export default function MobileTraitBottomSheet({
       // Small delay to ensure sheet is fully rendered
       setTimeout(() => {
         updateFocusableElements() // Refresh before focusing
-        const firstInput = focusableElementsRef.current.find(el => el.tagName === 'INPUT')
-        if (firstInput) {
-          firstInput.focus()
-        } else {
-          focusableElementsRef.current[0]?.focus()
-        }
+        focusableElementsRef.current[0]?.focus()
       }, 100)
     }
 
-    // Update focusable elements when search query changes (content may change)
+    // Update focusable elements when content changes
     const observer = new MutationObserver(() => {
       updateFocusableElements()
     })
@@ -298,11 +309,11 @@ export default function MobileTraitBottomSheet({
 
     document.addEventListener('keydown', handleTabKey)
 
-    return () => {
-      observer.disconnect()
-      document.removeEventListener('keydown', handleTabKey)
-    }
-  }, [isExpanded, searchQuery])
+      return () => {
+        observer.disconnect()
+        document.removeEventListener('keydown', handleTabKey)
+      }
+    }, [isExpanded])
 
   // Handle drag to close
   useEffect(() => {
@@ -455,199 +466,203 @@ export default function MobileTraitBottomSheet({
       {/* Collapsed State */}
       {!isExpanded && (
         <div className="sheet-collapsed">
-          {/* Primary Action Buttons: Traits, Random, Save */}
-          <div className="primary-buttons">
-            {/* Traits Button - Expands sheet */}
-            <button
-              className="primary-button primary-button-traits"
-              onClick={() => setIsExpanded(true)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  setIsExpanded(true)
-                }
+          {/* All buttons in one row */}
+          <div className="mobile-button-row">
+            <Button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                setIsExpanded(true)
               }}
-              tabIndex={0}
+              className="mobile-action-button"
               aria-label="View all traits"
             >
-              <span className="button-label">Traits</span>
-            </button>
+              👕
+            </Button>
 
-            {/* Random Button - Randomizes all traits */}
-            <button
-              className="primary-button primary-button-random"
-              onClick={handleRandomize}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  handleRandomize()
-                }
+            <Button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                handleRandomize()
               }}
-              tabIndex={0}
+              className="mobile-action-button"
               aria-label="Randomize all traits"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
-              <span className="button-label">Random</span>
-            </button>
-
-            {/* Save Button - Triggers export (handled by ExportControls) */}
-            <button
-              className="primary-button primary-button-save"
-              onClick={() => {
-                // Trigger download from ExportControls - find the Download PNG button
-                const downloadBtn = document.querySelector('.export-controls-mobile button, .export-controls-mobile-expanded button')
-                if (downloadBtn && !downloadBtn.disabled) {
-                  downloadBtn.click()
-                }
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  const downloadBtn = document.querySelector('.export-controls-mobile button, .export-controls-mobile-expanded button')
-                  if (downloadBtn && !downloadBtn.disabled) {
-                    downloadBtn.click()
-                  }
-                }
-              }}
-              tabIndex={0}
-              aria-label="Save wojak"
-            >
-              <span className="button-label">Save</span>
-            </button>
-          </div>
-
-          {/* Trait Summary */}
-          {traitSummary.length > 0 && (
-            <div className="trait-summary">
-              <div className="summary-label">Selected Traits:</div>
-              <div className="summary-items">
-                {traitSummary.slice(0, 3).map(({ layerName, displayName }) => (
-                  <span key={layerName} className="summary-item">
-                    {layerName}: {displayName.length > 15 ? displayName.substring(0, 15) + '...' : displayName}
-                  </span>
-                ))}
-                {traitSummary.length > 3 && (
-                  <span className="summary-more">+{traitSummary.length - 3} more</span>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Export Controls - Always reachable */}
-          {canvasRef && (
-            <div className="export-controls-mobile">
-              <ExportControls 
-                canvasRef={canvasRef} 
-                selectedLayers={selectedLayers}
-                tangifiedImage={tangifiedImage}
-                setTangifiedImage={setTangifiedImage}
-                showTangified={showTangified}
-                setShowTangified={setShowTangified}
-                onAddToGallery={onAddToGallery}
-                onUpdateGalleryEntry={onUpdateGalleryEntry}
-                onRemoveGalleryEntry={onRemoveGalleryEntry}
-                onAddDesktopImage={onAddDesktopImage}
-                desktopImages={desktopImages}
+              <img 
+                src="/assets/images/randomemoji.png" 
+                alt="Randomize" 
+                style={{ 
+                  width: '18px', 
+                  height: '18px', 
+                  objectFit: 'contain',
+                  imageRendering: 'auto'
+                }} 
               />
-            </div>
-          )}
+            </Button>
 
+            <Button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                if (onDownload) onDownload()
+              }}
+              className="mobile-action-button"
+              aria-label="Download wojak"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <img 
+                src="/assets/images/downloadicon.png" 
+                alt="Download" 
+                style={{ 
+                  width: '18px', 
+                  height: '18px', 
+                  objectFit: 'contain',
+                  imageRendering: 'auto'
+                }} 
+              />
+            </Button>
+
+            <Button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                if (onCyberTang) onCyberTang()
+              }}
+              className="mobile-action-button"
+              aria-label="Create CyberTang"
+            >
+              👽
+            </Button>
+
+            <Button
+              type="button"
+              onClick={(e) => {
+                console.log('[MobileTraitBottomSheet] ShareX button clicked')
+                e.preventDefault()
+                e.stopPropagation()
+                if (onShareX) {
+                  console.log('[MobileTraitBottomSheet] Calling onShareX handler')
+                  onShareX()
+                } else {
+                  console.warn('[MobileTraitBottomSheet] onShareX handler not provided')
+                }
+              }}
+              className="mobile-action-button"
+              aria-label="Share on X"
+            >
+              𝕏
+            </Button>
+
+            <Button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                handleSaveToFavorites()
+              }}
+              className="mobile-action-button win98-tooltip"
+              data-tooltip={
+                !canDownload
+                  ? 'Select Base, Mouth, and Clothing to save to favorites'
+                  : 'Save to My Favorite Wojaks'
+              }
+              disabled={!canDownload || !onSaveToFavorites}
+              aria-label="Save to My Favorite Wojaks"
+            >
+              ⭐️
+            </Button>
+
+            <Button
+              type="button"
+              className="mobile-action-button win98-tooltip"
+              data-tooltip="Soon"
+              disabled={true}
+              aria-label="Mint"
+            >
+              🌱
+            </Button>
+          </div>
         </div>
       )}
 
       {/* Expanded State */}
       {isExpanded && (
         <div className="sheet-expanded">
-          {/* Header - Clickable to toggle collapse */}
-          <div 
-            className="sheet-header"
-            onClick={handleHeaderClick}
-            role="button"
-            tabIndex={0}
-            aria-label="Tap to collapse"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                handleHeaderClick()
-              }
-            }}
-          >
-            <h3 className="sheet-title">Select Traits</h3>
-            <button
-              className="close-button"
-              onClick={(e) => {
-                e.stopPropagation() // Prevent header click
-                setIsExpanded(false)
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  setIsExpanded(false)
-                }
-              }}
-              tabIndex={0}
-              aria-label="Close trait selector"
-            >
-              ✕
-            </button>
-          </div>
-
-          {/* Search */}
-          <div className="sheet-search">
-            <input
-              type="text"
-              placeholder="Search traits..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="search-input"
-            />
-          </div>
-
-          {/* Trait List */}
+          {/* Header removed on mobile - users can swipe down to close */}
+          {/* Trait List - starts immediately for more space */}
           <div 
             ref={sheetContentRef}
             className="sheet-content scroll-allowed"
           >
-            {filteredLayers.length === 0 ? (
-              <div className="no-results">No traits found matching "{searchQuery}"</div>
-            ) : (
-              filteredLayers.map(layer => (
-                <div
-                  key={layer.name}
-                  id={`trait-${layer.name}`}
-                  className="trait-item"
-                >
-                  <LayerSelector
-                    layerName={layer.name}
-                    onSelect={selectLayer}
-                    selectedValue={selectedLayers[layer.name]}
-                    disabled={disabledLayers.includes(layer.name)}
-                    selectedLayers={selectedLayers}
-                    disableTooltip={true}
-                  />
-                </div>
-              ))
-            )}
-          </div>
+            {generatorLayerOrder.map(layer => (
+              <div
+                key={layer.name}
+                id={`trait-${layer.name}`}
+                className="trait-item"
+              >
+                <LayerSelector
+                  layerName={layer.name}
+                  onSelect={selectLayer}
+                  selectedValue={selectedLayers[layer.name]}
+                  disabled={disabledLayers.includes(layer.name)}
+                  selectedLayers={selectedLayers}
+                  disableTooltip={true}
+                />
+              </div>
+            ))}
+            
+            {/* Only Randomizer and Back buttons when expanded */}
+            <div style={{ 
+              marginTop: '16px', 
+              padding: '8px',
+              display: 'flex',
+              gap: '8px',
+              justifyContent: 'center'
+            }}>
+              <Button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  handleRandomize()
+                }}
+                className="mobile-action-button"
+                aria-label="Randomize all traits"
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <img 
+                  src="/assets/images/randomemoji.png" 
+                  alt="Randomize" 
+                  style={{ 
+                    width: '18px', 
+                    height: '18px', 
+                    objectFit: 'contain',
+                    imageRendering: 'auto'
+                  }} 
+                />
+              </Button>
 
-          {/* Export Controls - Always reachable in expanded state too */}
-          {canvasRef && (
-            <div className="export-controls-mobile-expanded">
-              <ExportControls 
-                canvasRef={canvasRef} 
-                selectedLayers={selectedLayers}
-                tangifiedImage={tangifiedImage}
-                setTangifiedImage={setTangifiedImage}
-                showTangified={showTangified}
-                setShowTangified={setShowTangified}
-                onAddToGallery={onAddToGallery}
-                onUpdateGalleryEntry={onUpdateGalleryEntry}
-                onRemoveGalleryEntry={onRemoveGalleryEntry}
-                onAddDesktopImage={onAddDesktopImage}
-                desktopImages={desktopImages}
-              />
+              <Button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  setIsExpanded(false)
+                }}
+                className="mobile-action-button"
+                aria-label="Back"
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                ⬅️
+              </Button>
             </div>
-          )}
+          </div>
         </div>
       )}
     </div>

@@ -55,7 +55,9 @@ export default function ImageLibraryPanel({ onImageSelect }) {
         />
       </div>
 
-      <div style={{
+      <div 
+        className="image-library-scrollable"
+        style={{
         border: '1px inset #c0c0c0',
         backgroundColor: '#ffffff',
         padding: '4px',

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useWindow } from '../contexts/WindowContext'
 import { useOrangeToy } from '../contexts/OrangeToyContext'
 import { ensureOrangeAudioUnlocked, playOrangeClickSound } from '../utils/orangeSound'
@@ -21,7 +21,7 @@ const SCORE_FLUSH_INTERVAL_MS = 150 // Score batching interval
 
 export default function OrangeToyLayer() {
   const { getWindow, isWindowMinimized } = useWindow()
-  const { addPoints, orangeExistsRef } = useOrangeToy()
+  const { addPoints, orangeExistsRef, score, fillPct } = useOrangeToy()
   const orangeRef = useRef(null)
   const loopRef = useRef(null)
   const isSleepingRef = useRef(false)
@@ -124,6 +124,17 @@ export default function OrangeToyLayer() {
       // Use consistent initialization (always bouncy)
       orangeStateRef.current = initOrangeState(spawnX, spawnY)
       
+      // DEV: Log spawn with state details
+      if (import.meta.env.DEV) {
+        console.log('[OrangeToyLayer] Orange spawned:', {
+          position: { x: spawnX, y: spawnY },
+          velocity: { vx: orangeStateRef.current.vx, vy: orangeStateRef.current.vy },
+          orangeExists,
+          loopRefExists: !!loopRef.current,
+          orangeStateRefExists: !!orangeStateRef.current,
+        })
+      }
+      
       // Reset combo refs on spawn
       comboAliveRef.current = false
       lastScoredBounceAtRef.current = 0
@@ -136,6 +147,89 @@ export default function OrangeToyLayer() {
       orangeExistsRef.current = false
       // Start animation loop directly
       isSleepingRef.current = false
+
+      // DEV: Verify invariants and gather evidence after spawn
+      if (import.meta.env.DEV) {
+        // Check invariants after a brief delay to allow state to settle
+        setTimeout(() => {
+          const state = orangeStateRef.current
+          const orangeEl = orangeRef.current
+          const wrapperEl = orangeEl?.parentElement
+          
+          // Gather DOM evidence
+          let domEvidence = null
+          if (orangeEl) {
+            const rect = orangeEl.getBoundingClientRect()
+            const computedStyle = window.getComputedStyle(orangeEl)
+            const wrapperComputedStyle = wrapperEl ? window.getComputedStyle(wrapperEl) : null
+            
+            // Check what's on top at orange center
+            const centerX = rect.left + rect.width / 2
+            const centerY = rect.top + rect.height / 2
+            const elementsAtPoint = document.elementsFromPoint(centerX, centerY).slice(0, 8)
+            
+            domEvidence = {
+              rect: {
+                x: rect.x,
+                y: rect.y,
+                width: rect.width,
+                height: rect.height,
+                top: rect.top,
+                left: rect.left,
+                bottom: rect.bottom,
+                right: rect.right,
+              },
+              computedStyles: {
+                zIndex: computedStyle.zIndex,
+                opacity: computedStyle.opacity,
+                visibility: computedStyle.visibility,
+                display: computedStyle.display,
+                transform: computedStyle.transform,
+                position: computedStyle.position,
+              },
+              wrapperZIndex: wrapperComputedStyle?.zIndex || 'N/A',
+              wrapperHasTransform: wrapperComputedStyle ? (
+                wrapperComputedStyle.transform !== 'none' ||
+                wrapperComputedStyle.filter !== 'none' ||
+                wrapperComputedStyle.isolation !== 'auto'
+              ) : false,
+              elementsAtPoint: elementsAtPoint.map(el => ({
+                tag: el.tagName,
+                className: el.className,
+                id: el.id,
+                zIndex: window.getComputedStyle(el).zIndex,
+              })),
+              viewport: {
+                width: window.innerWidth,
+                height: window.innerHeight,
+              },
+            }
+          }
+          
+          const invariants = {
+            rafIdExists: !!loopRef.current,
+            orangeStateRefExists: !!state,
+            orangeExistsState: orangeExists,
+            velocityFinite: state ? (isFinite(state.vx) && isFinite(state.vy)) : false,
+            velocityNonZero: state ? (state.vx !== 0 || state.vy !== 0) : false,
+          }
+          console.log('[OrangeToyLayer] Post-spawn invariants:', invariants)
+          if (domEvidence) {
+            console.log('[OrangeToyLayer] DOM evidence:', domEvidence)
+          }
+          
+          // Warn if invariants are violated
+          if (!invariants.rafIdExists) {
+            console.warn('[OrangeToyLayer] WARNING: RAF loop not running after spawn')
+          }
+          if (!invariants.orangeStateRefExists) {
+            console.warn('[OrangeToyLayer] WARNING: orangeStateRef is null after spawn')
+          }
+          if (invariants.orangeStateRefExists && !invariants.velocityFinite) {
+            console.warn('[OrangeToyLayer] WARNING: Velocity is not finite')
+          }
+        }, 100)
+      }
     }
   }, [isTangGangOpen, orangeExists, orangeExistsRef, initOrangeState])
 
@@ -154,15 +248,95 @@ export default function OrangeToyLayer() {
     }
   }, [isTangGangOpen, orangeExists, orangeExistsRef])
 
+  // Track previous score/fillPct to gate cleanup (only cleanup on transition from >0 to 0, not on initial mount)
+  const prevScoreRef = useRef(null)
+  const prevFillPctRef = useRef(null)
+  
+  // Clean up orange state when score/fillPct resets to 0 (after claim)
+  // This ensures a clean state for the next round
+  // Gated: only cleanup if transitioning from >0 to 0 (after claim), not on initial mount
+  useEffect(() => {
+    // Only cleanup if transitioning from >0 to 0 (after claim), not on initial mount
+    const wasClaiming = (prevScoreRef.current !== null && 
+                        prevScoreRef.current > 0 && score === 0) ||
+                       (prevFillPctRef.current !== null && 
+                        prevFillPctRef.current > 0 && fillPct === 0)
+    
+    if (wasClaiming && score === 0 && fillPct === 0 && orangeExists) {
+      // DEV: Log score reset cleanup with context
+      if (import.meta.env.DEV) {
+        console.log('[OrangeToyLayer] Score reset to 0, cleaning up orange state', {
+          prevScore: prevScoreRef.current,
+          prevFillPct: prevFillPctRef.current,
+          currentScore: score,
+          currentFillPct: fillPct,
+          orangeExists,
+          wasClaiming,
+          callStack: 'cleanup fired because score/fillPct transitioned from >0 to 0',
+        })
+      }
+      
+      // Clean up orange state but keep the loop running
+      orangeStateRef.current = null
+      setOrangeExists(false)
+      
+      // Reset combo/streak refs
+      comboAliveRef.current = false
+      lastScoredBounceAtRef.current = 0
+      wasInContactRef.current = false
+      airBounceStreakRef.current = 0
+      lastScoredStreakRef.current = 0
+      pendingScoreDeltaRef.current = 0
+      
+      // After cleanup, trigger respawn so game can continue
+      if (orangeExistsRef) {
+        orangeExistsRef.current = true
+      }
+      
+      // DEV: Verify cleanup
+      if (import.meta.env.DEV) {
+        console.log('[OrangeToyLayer] Orange state cleaned up, respawn triggered:', {
+          orangeStateRefIsNull: orangeStateRef.current === null,
+          orangeExistsState: false,
+          loopRefExists: !!loopRef.current,
+          orangeExistsRefCurrent: orangeExistsRef?.current,
+        })
+      }
+    } else if (import.meta.env.DEV && score === 0 && fillPct === 0 && orangeExists) {
+      // DEV: Log when cleanup would fire but is gated
+      console.log('[OrangeToyLayer] Cleanup gated (not claiming):', {
+        prevScore: prevScoreRef.current,
+        prevFillPct: prevFillPctRef.current,
+        currentScore: score,
+        currentFillPct: fillPct,
+        orangeExists,
+        wasClaiming,
+        reason: prevScoreRef.current === null || prevFillPctRef.current === null 
+          ? 'initial mount (prev values null)' 
+          : 'score/fillPct did not transition from >0 to 0',
+      })
+    }
+    
+    // Update previous values for next render
+    prevScoreRef.current = score
+    prevFillPctRef.current = fillPct
+  }, [score, fillPct, orangeExists, orangeExistsRef])
 
   // Start animation loop once - never restarts (reads all values from refs)
   useEffect(() => {
+    // DEV: Log RAF start
+    if (import.meta.env.DEV) {
+      console.log('[OrangeToyLayer] RAF loop started')
+    }
+
     const animate = () => {
-      // Only animate if orange exists and is not sleeping
-      if (!orangeStateRef.current || !orangeRef.current || isSleepingRef.current) {
-        loopRef.current = requestAnimationFrame(animate)
-        return
-      }
+      // DEV: Wrap in try-catch to catch exceptions
+      try {
+        // Only animate if orange exists and is not sleeping
+        if (!orangeStateRef.current || !orangeRef.current || isSleepingRef.current) {
+          loopRef.current = requestAnimationFrame(animate)
+          return
+        }
 
       const state = orangeStateRef.current
       const floor = window.innerHeight - taskbarHeightRef.current
@@ -344,7 +518,15 @@ export default function OrangeToyLayer() {
         return
       }
 
-      loopRef.current = requestAnimationFrame(animate)
+          loopRef.current = requestAnimationFrame(animate)
+      } catch (error) {
+        // DEV: Log exceptions in animate loop
+        if (import.meta.env.DEV) {
+          console.error('[OrangeToyLayer] Error in animate loop:', error)
+        }
+        // Continue loop even on error
+        loopRef.current = requestAnimationFrame(animate)
+      }
     }
 
     loopRef.current = requestAnimationFrame(animate)
@@ -352,13 +534,17 @@ export default function OrangeToyLayer() {
       if (loopRef.current) {
         cancelAnimationFrame(loopRef.current)
         loopRef.current = null
+        // DEV: Log RAF stop
+        if (import.meta.env.DEV) {
+          console.log('[OrangeToyLayer] RAF loop stopped')
+        }
       }
     }
   }, []) // Empty deps - starts once, never restarts
 
-  // Lightweight mousemove listener - updates position ref and wakes up sleeping orange
+  // Lightweight pointermove/mousemove listener - updates position ref and wakes up sleeping orange
   useEffect(() => {
-    const handleMouseMove = (e) => {
+    const handlePointerMove = (e) => {
       lastMousePosRef.current = { x: e.clientX, y: e.clientY }
       
       // Wake up sleeping orange if mouse is nearby (loop will handle animation)
@@ -373,8 +559,40 @@ export default function OrangeToyLayer() {
       }
     }
 
-    document.addEventListener('mousemove', handleMouseMove)
-    return () => document.removeEventListener('mousemove', handleMouseMove)
+    const handlePointerCancel = (e) => {
+      // Clear pointer position on cancel (mobile gesture interruption)
+      // DEV: Log pointer cancel
+      if (import.meta.env.DEV) {
+        console.log('[OrangeToyLayer] Pointer cancelled:', e.pointerId)
+      }
+      // Reset to safe position (center of screen)
+      lastMousePosRef.current = { x: window.innerWidth / 2, y: window.innerHeight / 2 }
+    }
+
+    // Use pointermove for better mobile support (includes touch)
+    document.addEventListener('pointermove', handlePointerMove)
+    document.addEventListener('pointercancel', handlePointerCancel)
+    // Keep mousemove for desktop compatibility
+    document.addEventListener('mousemove', handlePointerMove)
+    
+    return () => {
+      document.removeEventListener('pointermove', handlePointerMove)
+      document.removeEventListener('pointercancel', handlePointerCancel)
+      document.removeEventListener('mousemove', handlePointerMove)
+    }
+  }, [])
+
+  // Read z-index for React inline styles
+  const zIndexGame = useMemo(() => {
+    if (typeof window === 'undefined') return 2000
+    const rootStyle = getComputedStyle(document.documentElement)
+    return parseFloat(rootStyle.getPropertyValue('--z-game')) || 2000
+  }, [])
+
+  const zIndexGameFx = useMemo(() => {
+    if (typeof window === 'undefined') return 3000
+    const rootStyle = getComputedStyle(document.documentElement)
+    return parseFloat(rootStyle.getPropertyValue('--z-game-fx')) || 3000
   }, [])
 
   // Imperative animation rendering - separate rAF loop for DOM updates
@@ -388,6 +606,7 @@ export default function OrangeToyLayer() {
 
       // Clear container
       container.innerHTML = ''
+      const zGameFx = zIndexGameFx
 
       // Render splash animations from ref
       splashAnimationsRef.current.forEach(splash => {
@@ -397,7 +616,7 @@ export default function OrangeToyLayer() {
         splashEl.style.left = `${splash.x}px`
         splashEl.style.top = `${splash.y}px`
         splashEl.style.transform = 'translate(-50%, -50%)'
-        splashEl.style.zIndex = '10001'
+        splashEl.style.zIndex = String(zGameFx)
         splashEl.style.pointerEvents = 'none'
         splashEl.style.userSelect = 'none'
         
@@ -416,7 +635,7 @@ export default function OrangeToyLayer() {
         plusOneEl.style.left = `${plusOne.x}px`
         plusOneEl.style.top = `${plusOne.y}px`
         plusOneEl.style.transform = 'translate(-50%, -50%)'
-        plusOneEl.style.zIndex = '10002'
+        plusOneEl.style.zIndex = String(zGameFx)
         plusOneEl.style.pointerEvents = 'none'
         plusOneEl.style.userSelect = 'none'
         plusOneEl.textContent = `+${plusOne.value}`
@@ -431,7 +650,7 @@ export default function OrangeToyLayer() {
     return () => {
       cancelAnimationFrame(animationRafId)
     }
-  }, [])
+  }, [zIndexGameFx])
 
   if (!isTangGangOpen && !orangeExists) {
     return null
@@ -456,7 +675,7 @@ export default function OrangeToyLayer() {
             userSelect: 'none',
             willChange: 'transform',
             transform: 'translate(0, 0)',
-            zIndex: 10000,
+            zIndex: zIndexGame,
           }}
         >
           🍊
@@ -474,7 +693,7 @@ export default function OrangeToyLayer() {
           width: '100%',
           height: '100%',
           pointerEvents: 'none',
-          zIndex: 10001,
+          zIndex: zIndexGameFx,
         }}
       />
     </div>

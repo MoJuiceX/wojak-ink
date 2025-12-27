@@ -1,5 +1,5 @@
 import Window from './Window'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { Skeleton } from '../ui'
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver'
 
@@ -130,16 +130,6 @@ function GalleryThumb({ item, index, allItems }) {
         setShowLabel(false)
         setIsHovering(false)
       }}
-      onTouchStart={() => {
-        setShowLabel(true)
-        setIsHovering(true)
-      }}
-      onTouchEnd={() => {
-        setTimeout(() => {
-          setShowLabel(false)
-          setIsHovering(false)
-        }, 2000)
-      }}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
@@ -229,21 +219,26 @@ function GalleryThumb({ item, index, allItems }) {
 
 export default function GalleryWindow({ onClose }) {
   // Calculate responsive default window size (memoized to avoid recalculation on every render)
-  // Desktop: 82% width (max 1150px), 81% height (max 900px)
-  // Taller/wider defaults for better visual balance and breathing room
+  // Desktop: 82% width (max 1150px), taller height to utilize space closer to taskbar
   const defaultDimensions = useMemo(() => {
     const viewportWidth = window.innerWidth
     const viewportHeight = window.innerHeight
     
+    // Get taskbar height from CSS variable
+    const taskbarHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--taskbar-height')) || 30
+    const padding = 20 // Padding from taskbar
+    
     const defaultWidth = Math.min(1150, Math.floor(viewportWidth * 0.82))
-    const defaultHeight = Math.min(900, Math.floor(viewportHeight * 0.81))
+    // Use more of viewport height, getting closer to taskbar (90% of viewport minus taskbar and padding)
+    const maxHeight = viewportHeight - taskbarHeight - padding
+    const defaultHeight = Math.min(maxHeight, Math.floor(viewportHeight * 0.9))
     
     return {
       width: `${Math.round(defaultWidth)}px`,
       height: `${Math.round(defaultHeight)}px`,
       maxWidth: 'calc(100vw - 50px)',
-      minWidth: '760px',
-      minHeight: '560px'
+      minWidth: '200px',
+      minHeight: '150px'
     }
   }, []) // Empty dependency array - calculate once on mount
 

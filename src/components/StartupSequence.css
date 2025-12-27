@@ -8,20 +8,70 @@
   background: #000;
 }
 
-.startup-black {
-  width: 100%;
-  height: 100%;
-  background: #000;
-}
-
 .startup-logo-screen {
   width: 100%;
   height: 100%;
-  background: linear-gradient(180deg, #000080 0%, #000040 100%);
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: fadeIn 0.5s ease-out;
+  animation: fadeIn 0.8s ease-out, orangePulse 2s ease-in-out infinite;
+  overflow: hidden;
+}
+
+.startup-logo-screen::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Brighter orange background */
+  background: linear-gradient(180deg, #ffaa00 0%, #ff7700 100%);
+  z-index: 1;
+}
+
+.startup-logo-screen::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Vignette effect - red in center transitioning to black at edges */
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 0, 0, 0.2) 0%,
+    rgba(255, 0, 0, 0.3) 20%,
+    rgba(200, 0, 0, 0.5) 40%,
+    rgba(100, 0, 0, 0.7) 60%,
+    rgba(0, 0, 0, 0.8) 80%,
+    rgba(0, 0, 0, 0.95) 100%
+  ),
+  /* Black pixel pattern on top */
+  repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.2) 0px,
+    rgba(0, 0, 0, 0.2) 1px,
+    transparent 1px,
+    transparent 2px
+  ),
+  repeating-linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.2) 0px,
+    rgba(0, 0, 0, 0.2) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.startup-logo-screen.fade-out {
+  animation: fadeOut 1.5s ease-out forwards;
 }
 
 @keyframes fadeIn {
@@ -29,11 +79,18 @@
   to { opacity: 1; }
 }
 
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
 .startup-logo {
   display: flex;
   flex-direction: column;
   align-items: center;
   animation: logoZoom 1s ease-out;
+  position: relative;
+  z-index: 3;
 }
 
 @keyframes logoZoom {
@@ -45,6 +102,7 @@
   font-size: 120px;
   text-shadow: 0 0 50px rgba(255, 165, 0, 0.8);
   animation: pulse 2s ease-in-out infinite;
+  margin-bottom: -20px; /* Move orange up */
 }
 
 @keyframes pulse {
@@ -52,19 +110,43 @@
   50% { transform: scale(1.1); }
 }
 
+@keyframes orangePulse {
+  0%, 100% { 
+    filter: brightness(1);
+  }
+  50% { 
+    filter: brightness(1.2);
+  }
+}
+
+@keyframes textPulse {
+  0%, 100% { 
+    transform: scale(1);
+    text-shadow: 3px 3px 0 #000, 0 0 30px rgba(204, 68, 0, 0.7);
+  }
+  50% { 
+    transform: scale(1.05);
+    text-shadow: 3px 3px 0 #000, 0 0 50px rgba(204, 68, 0, 0.9);
+  }
+}
+
+
 .startup-logo-text {
   font-size: 64px;
   font-weight: bold;
-  color: #ff6600;
-  text-shadow: 3px 3px 0 #000, 0 0 30px rgba(255, 102, 0, 0.5);
-  margin-top: 20px;
+  color: #cc4400;
+  text-shadow: 3px 3px 0 #000, 0 0 30px rgba(204, 68, 0, 0.7);
+  margin-top: 100px; /* Moved down a little bit more from 80px */
   font-family: 'Arial Black', sans-serif;
+  position: relative;
+  animation: textPulse 2s ease-in-out infinite; /* Same frequency as emoji */
 }
 
 .startup-logo-subtitle {
   font-size: 24px;
   color: #c0c0c0;
   margin-top: 10px;
+  animation: textPulse 2s ease-in-out infinite;
 }
 
 .startup-loading-screen {
@@ -76,14 +158,37 @@
   align-items: center;
   justify-content: space-between;
   padding: 40px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.startup-loading-screen.fade-out {
+  animation: fadeToBlack 1s ease-out forwards;
+}
+
+@keyframes fadeToBlack {
+  from { 
+    opacity: 1;
+    background: #000;
+  }
+  to { 
+    opacity: 0;
+    background: #000;
+  }
 }
 
 .startup-logo-small {
-  font-size: 24px;
+  font-size: 48px; /* 2x bigger (24px * 2 = 48px) */
   color: #ff6600;
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-top: 20px; /* Move down a little bit */
+}
+
+.startup-logo-small span {
+  font-size: 64px; /* Make emoji bigger (48px * 1.33 ≈ 64px) */
+  display: inline-block;
+  transform: translateY(8px); /* Move emoji down a little bit */
 }
 
 .startup-loading-container {
@@ -91,6 +196,7 @@
   flex-direction: column;
   align-items: center;
   gap: 16px;
+  margin-top: -60px; /* Move loading bar and text up */
 }
 
 .startup-loading-text {
@@ -118,6 +224,26 @@
   height: 100%;
   background: #ff6600;
   flex-shrink: 0;
+}
+
+.startup-loading-subtitle {
+  font-size: 24px;
+  color: #c0c0c0;
+  animation: textPulse 2s ease-in-out infinite;
+}
+
+/* Subtitle container for Stage 1 (logo) - positioned to match Stage 2 */
+.startup-logo-subtitle-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, calc(-50% + 70px)); /* Moved down a bit more for sequence 1 */
+  z-index: 99999999;
+  pointer-events: none;
+}
+
+.startup-logo-subtitle-container.fade-out {
+  animation: fadeOut 1s ease-out forwards;
 }
 
 .startup-copyright {

@@ -25,8 +25,8 @@ export default function ThemeQAWindow({ isOpen, onClose }) {
       id="theme-qa-window"
       title="THEME QA"
       style={{ 
-        width: '900px', 
-        maxWidth: 'calc(100vw - 40px)', 
+        width: 'clamp(280px, 92vw, 900px)', 
+        maxWidth: 'min(calc(100% - 16px), 900px)', 
         left: '50px', 
         top: '50px' 
       }}

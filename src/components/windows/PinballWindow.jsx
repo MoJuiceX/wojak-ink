@@ -76,90 +76,6 @@ export default function PinballWindow({ onClose }) {
     }
   }, [showControlsPopup])
 
-  // #region agent log
-  // Debug: Log layout information when controls panel visibility changes
-  useEffect(() => {
-    if (!rowContainerRef.current) return
-    
-    const logLayout = () => {
-      const rowContainer = rowContainerRef.current
-      if (!rowContainer) return
-      
-      const rowRect = rowContainer.getBoundingClientRect()
-      const rowStyles = window.getComputedStyle(rowContainer)
-      
-      const gameArea = rowContainer.querySelector('[style*="flex:"]')
-      let gameRect = null
-      let gameStyles = null
-      if (gameArea) {
-        gameRect = gameArea.getBoundingClientRect()
-        gameStyles = window.getComputedStyle(gameArea)
-      }
-      
-      const controlsPanel = rowContainer.querySelector('[style*="flex: 0 0 240px"]')
-      let controlsRect = null
-      let controlsStyles = null
-      if (controlsPanel) {
-        controlsRect = controlsPanel.getBoundingClientRect()
-        controlsStyles = window.getComputedStyle(controlsPanel)
-      }
-      
-      const logData = {
-        location: 'PinballWindow.jsx:useEffect:layout',
-        message: 'Layout debug - controls panel visibility changed',
-        data: {
-          showControlsPopup,
-          rowContainer: {
-            width: rowRect.width,
-            height: rowRect.height,
-            left: rowRect.left,
-            top: rowRect.top,
-            display: rowStyles.display,
-            flexDirection: rowStyles.flexDirection,
-            position: rowStyles.position,
-          },
-          gameArea: gameRect ? {
-            width: gameRect.width,
-            height: gameRect.height,
-            left: gameRect.left,
-            top: gameRect.top,
-            right: gameRect.right,
-            flex: gameStyles?.flex,
-            position: gameStyles?.position,
-            maxWidth: gameStyles?.maxWidth,
-          } : null,
-          controlsPanel: controlsRect ? {
-            width: controlsRect.width,
-            height: controlsRect.height,
-            left: controlsRect.left,
-            top: controlsRect.top,
-            right: controlsRect.right,
-            flex: controlsStyles?.flex,
-            position: controlsStyles?.position,
-            zIndex: controlsStyles?.zIndex,
-          } : null,
-        },
-        timestamp: Date.now(),
-        sessionId: 'debug-session',
-        runId: 'run1',
-        hypothesisId: 'A,B,C,D,E',
-      }
-      if (import.meta.env.DEV) {
-        console.log('[DEBUG]', logData)
-        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(logData),
-        }).catch((err) => console.error('[DEBUG] Fetch failed:', err))
-      }
-    }
-    
-    // Log after a small delay to ensure DOM is updated
-    const timeoutId = setTimeout(logLayout, 100)
-    return () => clearTimeout(timeoutId)
-  }, [showControlsPopup])
-  // #endregion
-
   // Focus iframe when window becomes active (best-effort, cross-origin safe)
   useEffect(() => {
     if (isActive && iframeRef.current) {
@@ -257,11 +173,11 @@ export default function PinballWindow({ onClose }) {
       id={windowId}
       title="3D Pinball for Windows - Space Cadet"
       style={{
-        width: '1024px',
-        height: '768px',
-        maxWidth: 'var(--window-max-width)',
-        minWidth: 'var(--window-min-width)',
-        minHeight: 'var(--window-min-height)',
+        width: 'clamp(280px, 92vw, 1024px)',
+        height: 'clamp(400px, 80vh, 768px)',
+        maxWidth: 'min(calc(100% - 16px), var(--window-max-width))',
+        minWidth: '280px',
+        minHeight: '400px',
       }}
       onClose={onClose}
     >
@@ -325,38 +241,6 @@ export default function PinballWindow({ onClose }) {
         <div
           ref={(el) => {
             rowContainerRef.current = el
-            // #region agent log
-            if (el) {
-              setTimeout(() => {
-                const rect = el.getBoundingClientRect()
-                const styles = window.getComputedStyle(el)
-            const logData = {
-              location: 'PinballWindow.jsx:rowContainerRef',
-              message: 'Row container mounted',
-              data: {
-                width: rect.width,
-                height: rect.height,
-                computedDisplay: styles.display,
-                computedFlexDirection: styles.flexDirection,
-                computedPosition: styles.position,
-                computedWidth: styles.width,
-                inlineStyle: el.getAttribute('style'),
-                showControlsPopup,
-              },
-              timestamp: Date.now(),
-              sessionId: 'debug-session',
-              runId: 'run1',
-              hypothesisId: 'A',
-            }
-            console.log('[DEBUG]', logData)
-            fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(logData),
-            }).catch((err) => console.error('[DEBUG] Fetch failed:', err))
-              }, 50)
-            }
-            // #endregion
           }}
           style={{
             flex: '1 1 0%',
@@ -374,38 +258,7 @@ export default function PinballWindow({ onClose }) {
           {/* Game area - flex: 1 to fill remaining space */}
           <div
             ref={(el) => {
-              // #region agent log
-              if (el) {
-                setTimeout(() => {
-                  const rect = el.getBoundingClientRect()
-                  const styles = window.getComputedStyle(el)
-                  const logData = {
-                    location: 'PinballWindow.jsx:gameAreaRef',
-                    message: 'Game area mounted',
-                    data: {
-                      width: rect.width,
-                      height: rect.height,
-                      left: rect.left,
-                      right: rect.right,
-                      computedFlex: styles.flex,
-                      computedPosition: styles.position,
-                      computedMaxWidth: styles.maxWidth,
-                      computedWidth: styles.width,
-                    },
-                    timestamp: Date.now(),
-                    sessionId: 'debug-session',
-                    runId: 'run1',
-                    hypothesisId: 'C',
-                  }
-                  console.log('[DEBUG]', logData)
-                  fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(logData),
-                  }).catch((err) => console.error('[DEBUG] Fetch failed:', err))
-                }, 50)
-              }
-              // #endregion
+              // ref assignment only
             }}
             onMouseDown={(e) => {
               // Focus iframe when clicking game area (cross-origin safe)
@@ -560,46 +413,7 @@ export default function PinballWindow({ onClose }) {
           {showControlsPopup && (
             <div
               ref={(el) => {
-                // #region agent log
-                if (el) {
-                  setTimeout(() => {
-                    const rect = el.getBoundingClientRect()
-                    const styles = window.getComputedStyle(el)
-                    const rowContainer = rowContainerRef.current
-                    const rowRect = rowContainer?.getBoundingClientRect()
-                    const logData = {
-                      location: 'PinballWindow.jsx:controlsPanelRef',
-                      message: 'Controls panel mounted',
-                      data: {
-                        width: rect.width,
-                        height: rect.height,
-                        left: rect.left,
-                        right: rect.right,
-                        top: rect.top,
-                        bottom: rect.bottom,
-                        computedFlex: styles.flex,
-                        computedPosition: styles.position,
-                        computedZIndex: styles.zIndex,
-                        computedWidth: styles.width,
-                        rowContainerWidth: rowRect?.width,
-                        rowContainerLeft: rowRect?.left,
-                        rowContainerRight: rowRect?.right,
-                        isOverlapping: rowRect ? (rect.left < rowRect.left || rect.right > rowRect.right) : null,
-                      },
-                      timestamp: Date.now(),
-                      sessionId: 'debug-session',
-                      runId: 'run1',
-                      hypothesisId: 'B,D,E',
-                    }
-                    console.log('[DEBUG]', logData)
-                    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(logData),
-                    }).catch((err) => console.error('[DEBUG] Fetch failed:', err))
-                  }, 50)
-                }
-                // #endregion
+                // ref assignment only
               }}
               style={{
                 width: '240px',

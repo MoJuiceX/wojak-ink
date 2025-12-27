@@ -58,7 +58,7 @@ export default function AdminPanel() {
     return (
       <Window
         title="ADMIN PANEL - /admin-enable"
-        style={{ width: '400px', maxWidth: 'calc(100vw - 40px)', left: '20px', top: '20px' }}
+        style={{ width: 'clamp(280px, 92vw, 400px)', maxWidth: 'min(calc(100% - 16px), 400px)', left: '20px', top: '20px' }}
       >
         <div style={{ padding: '8px' }}>
           <p className="panel-header" style={{ marginBottom: '8px', fontWeight: 'bold' }}>
@@ -111,7 +111,7 @@ export default function AdminPanel() {
   return (
     <Window
       title="ADMIN PANEL"
-      style={{ width: '600px', maxWidth: 'calc(100vw - 40px)', left: '20px', top: '20px' }}
+      style={{ width: 'clamp(280px, 92vw, 600px)', maxWidth: 'min(calc(100% - 16px), 600px)', left: '20px', top: '20px' }}
     >
       <div style={{ padding: '8px' }}>
         <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '16px' }}>

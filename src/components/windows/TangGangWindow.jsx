@@ -220,7 +220,7 @@ export default function TangGangWindow({ onClose }) {
         width: 'var(--window-size-tanggang)',
         maxWidth: 'var(--window-max-width)',
         minWidth: 'var(--window-min-width)',
-        minHeight: '300px', // Stable height for accurate centering
+        minHeight: '150px',
         height: 'auto'
       }}
       onClose={onClose}

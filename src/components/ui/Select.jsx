@@ -24,12 +24,17 @@ const Select = React.forwardRef(({
       disabled={disabled}
       className={className}
       style={{
-        padding: '2px 4px',
+        padding: '6px 12px',
         border: '1px inset var(--input-border)',
         background: disabled ? 'var(--input-disabled-face)' : 'var(--input-face)',
         color: disabled ? 'var(--input-disabled-text)' : 'var(--input-text)',
         fontFamily: 'inherit',
         cursor: disabled ? 'not-allowed' : 'pointer',
+        textAlign: 'left',
+        minHeight: '28px',
+        height: '28px',
+        lineHeight: '1.4',
+        boxSizing: 'border-box',
         ...props.style
       }}
       {...props}

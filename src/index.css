@@ -8,11 +8,14 @@
   background: var(--surface-1) !important;
   /* Ensure tooltips can overflow */
   overflow: visible !important;
+  position: relative;
+  z-index: 1;
+  padding-right: 4px !important; /* Minimal right padding to reduce gap */
 }
 
 /* Flat list spacing: small padding so controls don't touch edges */
 #wojak-generator .meme-generator-controls .trait-selectors-scroll {
-  padding: 2px 8px 8px 8px !important; /* Reduced top padding from 4px to 2px to move dropdowns up more */
+  padding: 2px 8px 8px 8px !important; /* Reduced right padding to minimize gap */
 }
 
 /* Ensure nothing paints a "white card" behind rows */
@@ -56,6 +59,26 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  /* Global text wrapping - prevent overflow */
+  overflow-wrap: anywhere;
+  /* DO NOT apply word-break globally - only use on long-token fields (IDs/hashes) */
+}
+
+/* Remove borders from all images by default (folder icons should have none) */
+img {
+  border: none;
+  outline: none;
+}
+
+/* Prevent flex overflow - critical for scrollable containers */
+.flex-child,
+[class*="flex"] > * {
+  min-width: 0;
+}
+
+.flex-parent,
+[class*="flex"] {
+  min-height: 0;
 }
 
 /* =========================================================
@@ -129,6 +152,18 @@
   
   /* Desktop/Base Tokens */
   --ui-bg: #c0c0c0;
+  
+  /* Z-Index Contract - Windows 98 OS hierarchy */
+  /* Contract: taskbar must always be topmost, easter eggs above game, game below easter eggs */
+  --z-taskbar: 10000;
+  --z-easter-eggs: 9999;
+  --z-start-hint: 11000;
+  --z-game: 2000;
+  --z-game-fx: 3000;
+  
+  /* Easter Egg Positioning */
+  --easter-egg-bottom-offset: 0px; /* Desktop: behind taskbar (Win98 illusion) */
+  --easter-egg-gap: 0px; /* Desktop: no extra gap */
   
   /* Taskbar Tokens */
   --taskbar-bg: #c0c0c0;
@@ -209,6 +244,10 @@
   /* Letter spacing - preserves Win98 dense feel at larger sizes */
   --letter-spacing-tight: -0.01em;  /* UI chrome */
   --letter-spacing-normal: 0;       /* Body text */
+  
+  /* Layout Sizing */
+  --taskbar-height: 40px;           /* Desktop taskbar height */
+  --window-title-bar-height: 22px;   /* Window title bar height */
 }
 
 /* Theme Presets */
@@ -657,7 +696,7 @@ body {
   height: 100dvh; /* Use dynamic viewport height for mobile */
   overflow: hidden;
   background: transparent;
-  padding-bottom: calc(var(--taskbar-height) + var(--safe-area-inset-bottom));
+  padding-bottom: calc(var(--taskbar-height) + var(--safe-area-bottom));
   box-sizing: border-box;
 }
 
@@ -665,9 +704,13 @@ body {
 /* Window styling - let 98.css handle most of it, only override what's needed for positioning */
 .window {
   position: absolute;
-  max-width: var(--window-max-width);
+  /* Fluid width window - use clamp for responsive sizing */
+  width: clamp(var(--window-min-width), 92vw, var(--window-max-width));
+  max-width: min(calc(100% - 16px), var(--window-max-width));
   min-width: var(--window-min-width);
   min-height: var(--window-min-height);
+  /* Bounded height for scroll contract - outer window has max-height */
+  max-height: var(--window-max-height);
   box-sizing: border-box;
   will-change: transform;
   backface-visibility: hidden;
@@ -677,6 +720,9 @@ body {
   transition: none !important;
   /* Ensure windows never overflow viewport */
   overflow: hidden;
+  /* Window scroll contract: outer window is flex column, bounded height */
+  display: flex;
+  flex-direction: column;
   background: var(--window-face);
   color: var(--text);
   border: 1px solid var(--border-dark);
@@ -713,6 +759,15 @@ body {
   cursor: default;
 }
 
+/* README windows: Use flexbox for proper height calculation */
+.readme-window,
+#window-readme-txt,
+.readme-window.window,
+#window-readme-txt.window {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
 /* Ensure title bar is draggable */
 .title-bar {
   cursor: move;
@@ -723,9 +778,9 @@ body {
   min-height: var(--window-title-bar-height);
   height: var(--window-title-bar-height);
   /* Safe-area padding for notched devices - add to existing padding */
-  padding-top: calc(2px + var(--safe-area-inset-top));
-  padding-left: calc(2px + var(--safe-area-inset-left));
-  padding-right: calc(2px + var(--safe-area-inset-right));
+  padding-top: calc(2px + var(--safe-area-top));
+  padding-left: calc(2px + var(--safe-area-left));
+  padding-right: calc(2px + var(--safe-area-right));
   padding-bottom: 2px;
   box-sizing: border-box;
   display: flex;
@@ -758,49 +813,437 @@ body {
 }
 
 /* Use SVG icons from public folder, override 98.css default icons */
-.title-bar-controls button {
+/* Title bar control buttons - base styling */
+.title-bar-controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  height: 100%;
+  padding: 0;
+  padding-right: 2px;
+}
+
+.title-bar-controls button,
+.title-bar-button {
+  /* Larger size for better visibility */
+  width: 18px;
+  height: 16px;
+  min-width: 18px;
+  min-height: 16px;
+  max-width: 18px;
+  max-height: 16px;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  line-height: 1;
+  font-family: Arial, sans-serif;
+  font-weight: bold;
+  background: #c0c0c0;
+  border: 2px outset #c0c0c0;
+  border-top-color: #ffffff;
+  border-left-color: #ffffff;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
   cursor: pointer;
-  /* Remove 98.css default icon content */
-  font-size: 0 !important;
-  line-height: 0 !important;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  /* Override 98.css default - allow text content */
+  font-size: 13px !important;
+  font-weight: bold !important;
+  line-height: 1 !important;
+  /* Remove background images when using text */
+  background-image: none !important;
 }
 
-/* First button (minimize) */
-.title-bar-controls button:first-child {
-  background-image: url('/icon/minimize.svg') !important;
-  background-repeat: no-repeat !important;
-  background-position: center !important;
-  background-size: 6px 2px !important;
+.title-bar-controls button:active,
+.title-bar-button:active {
+  border-style: inset;
 }
 
-/* Second button (maximize/restore) */
-.title-bar-controls button:nth-child(2) {
-  background-image: url('/icon/maximize.svg') !important;
-  background-repeat: no-repeat !important;
-  background-position: center !important;
-  background-size: 9px 9px !important;
+/* Ensure characters render correctly */
+.title-bar-controls button span,
+.title-bar-button span {
+  display: block;
+  text-align: center;
+  line-height: 1;
+  width: 100%;
 }
 
-.title-bar-controls button:nth-child(2).maximized {
-  background-image: url('/icon/restore.svg') !important;
-  background-size: 8px 9px !important;
+/* Help button - use serif font for better question mark */
+.title-bar-help-button,
+.title-bar-controls button[aria-label="Help"],
+.title-bar-button[aria-label="Help"] {
+  font-family: "Times New Roman", serif !important;
+  font-weight: bold !important;
+  font-size: 12px !important;
 }
 
-/* Third button (close) */
-.title-bar-controls button:last-child {
-  background-image: url('/icon/close.svg') !important;
-  background-repeat: no-repeat !important;
-  background-position: center !important;
-  background-size: 8px 7px !important;
+.title-bar-escape-button,
+.title-bar-controls button[aria-label="Escape"],
+.title-bar-button[aria-label="Escape"] {
+  font-family: 'MS Sans Serif', 'Tahoma', system-ui, sans-serif !important;
+  font-weight: bold !important;
+  font-size: 10px !important;
+  width: 30px !important;
+  min-width: 30px !important;
+  max-width: 30px !important;
+  letter-spacing: -0.3px !important;
+  display: flex !important;
+  visibility: visible !important;
 }
 
-/* Mobile: Larger touch targets for title bar controls */
+/* Mobile: Smaller title bar buttons to fit within title bar */
 @media (max-width: 640px) {
-  .title-bar-controls button {
-    width: 44px !important; /* Thumb-friendly touch target */
-    height: 44px !important; /* Thumb-friendly touch target */
-    min-width: 44px !important;
-    min-height: 44px !important;
+  :root {
+    /* Mobile taskbar height - slightly smaller */
+    --taskbar-height: 36px;
+  }
+  
+  /* Mobile: Desktop container should not have horizontal padding */
+  .desktop {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  
+  /* Mobile: ALL windows must be fullscreen - but sit above taskbar */
+  .window {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: var(--taskbar-height) !important;
+    /* Use 100% instead of 100vw to prevent overflow */
+    width: 100% !important;
+    height: calc(100dvh - var(--taskbar-height)) !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    max-height: calc(100dvh - var(--taskbar-height)) !important;
+    min-height: calc(100dvh - var(--taskbar-height)) !important;
+    margin: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    transform: none !important;
+    box-sizing: border-box !important;
+    /* Remove all borders on mobile to ensure edge-to-edge */
+    border: none !important;
+    /* Remove all box-shadows to prevent visual gaps */
+    box-shadow: none !important;
+    /* Use flexbox so window-body can fill remaining space after title bar */
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  /* Mobile: Ensure readme-window still uses flexbox for proper scrollbar */
+  .readme-window,
+  #window-readme-txt,
+  .readme-window.window,
+  #window-readme-txt.window {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  /* Mobile: Ensure RarityExplorer window is fullscreen but sits above taskbar */
+  #rarity-explorer,
+  #rarity-explorer.window {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: var(--taskbar-height) !important;
+    width: 100% !important;
+    height: calc(100dvh - var(--taskbar-height)) !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    max-height: calc(100dvh - var(--taskbar-height)) !important;
+    min-height: calc(100dvh - var(--taskbar-height)) !important;
+    margin: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    transform: none !important;
+    box-sizing: border-box !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Mobile: Solitaire window - override fixed widths to fit screen */
+  #window-solitaire {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: var(--taskbar-height) !important;
+    width: 100% !important;
+    height: calc(100dvh - var(--taskbar-height)) !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    max-height: calc(100dvh - var(--taskbar-height)) !important;
+    min-height: calc(100dvh - var(--taskbar-height)) !important;
+    margin: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    box-sizing: border-box !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Mobile: Solitaire game container - make responsive */
+  #window-solitaire .window-body > div {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    flex-shrink: 1 !important;
+  }
+
+  /* Mobile: Solitaire iframe - make responsive */
+  #window-solitaire .window-body iframe {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 auto !important;
+  }
+  
+  .title-bar-controls {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 100%;
+    padding: 0;
+    padding-right: 2px;
+    margin: 0;
+    flex-shrink: 0;
+  }
+  
+  .title-bar-controls button,
+  .title-bar-button {
+    width: 14px;
+    height: 12px;
+    min-width: 14px;
+    min-height: 12px;
+    max-width: 14px;
+    max-height: 12px;
+    padding: 0;
+    margin: 0;
+    font-size: 9px !important;
+    line-height: 1 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    background-image: none !important;
+  }
+  
+  .title-bar-controls button span,
+  .title-bar-button span {
+    display: block;
+    text-align: center;
+    line-height: 1;
+    width: 100%;
+  }
+  
+  .title-bar-controls button:last-child {
+    margin-right: 1px;
+  }
+  
+  /* Ensure help button also respects size */
+  .title-bar-help-button {
+    width: 14px !important;
+    height: 12px !important;
+    font-size: 9px !important;
+  }
+
+  /* Ensure escape button also respects size on mobile - make it more visible */
+  .title-bar-escape-button,
+  #window-skifree .title-bar-escape-button,
+  #window-skifree .title-bar-controls button[aria-label="Escape"] {
+    width: 32px !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
+    height: 16px !important;
+    min-height: 16px !important;
+    max-height: 16px !important;
+    font-size: 10px !important;
+    font-weight: bold !important;
+    padding: 0 3px !important;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: #c0c0c0 !important;
+    border: 2px outset #c0c0c0 !important;
+    color: #000000 !important;
+    z-index: 10 !important;
+    position: relative !important;
+  }
+  
+  /* Remove any extra padding/margin causing overflow */
+  .window .title-bar {
+    padding-right: 2px;
+    overflow: hidden;
+  }
+
+  /* Mobile: SkiFree window - ensure title bar is visible and doesn't conflict with game UI, but sit above taskbar */
+  #window-skifree {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: var(--taskbar-height) !important;
+    width: 100% !important;
+    height: calc(100dvh - var(--taskbar-height)) !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    max-height: calc(100dvh - var(--taskbar-height)) !important;
+    min-height: calc(100dvh - var(--taskbar-height)) !important;
+    margin: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    box-sizing: border-box !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Mobile: SkiFree title bar - ensure it's always visible with high z-index, overlay the game */
+  #window-skifree .title-bar {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1000 !important;
+    overflow: visible !important;
+    background: var(--title-active-bg) !important;
+    min-height: 22px !important;
+    height: 22px !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+
+  /* Mobile: SkiFree title bar text - position on left, ensure it doesn't overlap buttons */
+  #window-skifree .title-bar-text {
+    flex: 1 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+    z-index: 1001 !important;
+  }
+  
+  /* Mobile: SkiFree title bar controls - ensure buttons are visible and positioned at top right */
+  #window-skifree .title-bar-controls {
+    overflow: visible !important;
+    z-index: 1001 !important;
+    position: relative !important;
+    height: 22px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 2px !important;
+    padding-right: 2px !important;
+    flex-shrink: 0 !important;
+  }
+  
+  /* Mobile: SkiFree escape button - make it prominent and visible at top right */
+  #window-skifree .title-bar-escape-button {
+    flex-shrink: 0 !important;
+    order: 1 !important;
+    z-index: 1002 !important;
+    position: relative !important;
+    width: 32px !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
+    height: 16px !important;
+    min-height: 16px !important;
+    max-height: 16px !important;
+  }
+  
+  /* Mobile: SkiFree close button - ensure it's visible at top right */
+  #window-skifree .title-bar-controls button:last-child {
+    order: 2 !important;
+    z-index: 1002 !important;
+    position: relative !important;
+  }
+
+  /* Mobile: SkiFree window body - full height, title bar overlays it, but sit above taskbar */
+  #window-skifree .window-body {
+    padding: 0 !important;
+    margin: 0 !important;
+    height: calc(100dvh - var(--taskbar-height)) !important;
+    max-height: calc(100dvh - var(--taskbar-height)) !important;
+    position: relative !important;
+    z-index: 1 !important;
+    overflow: hidden !important;
+  }
+
+  /* Mobile: SkiFree iframe container - ensure proper sizing */
+  #window-skifree .window-body > div {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    flex-shrink: 1 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Mobile: SkiFree iframe - adjust to fit within window body, add small padding to prevent UI overlap */
+  #window-skifree .window-body iframe {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Mobile: Make desktop icons smaller so all icons fit without scrolling */
+  .desktop-icons button {
+    width: 72px !important;
+    padding: 3px !important;
+    gap: 3px !important;
+  }
+
+  .desktop-icons button > div {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+  }
+
+  .desktop-icons button img,
+  .desktop-icons button .icon-image,
+  .desktop-icons button .icon-img {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .desktop-icons button span,
+  .desktop-icons button > div > div {
+    font-size: 11px !important;
+    line-height: 13px !important;
+    max-width: 72px !important;
+    width: 72px !important;
+    /* Remove ellipsis on mobile to show full text */
+    text-overflow: clip !important;
+    overflow: visible !important;
+    white-space: normal !important;
+  }
+
+  .desktop-icons > div {
+    gap: 4px !important;
+  }
+
+  .desktop-icons > div:last-child {
+    margin-top: 8px !important;
+  }
+
+  /* Mobile: Make TangGang icon bigger using transform to prevent offset */
+  .desktop-icons button[aria-label="Open TANGGANG"] > div {
+    transform: scale(1.3) !important; /* Scale icon 30% bigger while keeping it centered */
   }
 }
 
@@ -842,6 +1285,17 @@ textarea:focus-visible {
   box-shadow: none !important;
 }
 
+/* Folder icons in bottom row: remove all borders and strokes */
+.desktop-image-icons-container button.desktop-folder-icon,
+.desktop-image-icons-container button.desktop-folder-icon:focus,
+.desktop-image-icons-container button.desktop-folder-icon:focus-visible,
+.desktop-image-icons-container button.desktop-folder-icon:active,
+.desktop-image-icons-container button.desktop-folder-icon:hover {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
 /* If the stroke is on the inner image wrapper */
 .desktop-icons button img,
 .desktop-icons button .icon-image,
@@ -849,6 +1303,17 @@ textarea:focus-visible {
   outline: none !important;
   border: none !important;
   box-shadow: none !important;
+}
+
+/* Remove borders from all desktop folder icons (bottom row) */
+.desktop-image-icons-container .desktop-folder-icon img,
+.desktop-image-icons-container button.desktop-folder-icon img,
+.desktop-folder-icon img {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
 }
 
 /* Desktop image icons: remove borders (except when selected) */
@@ -887,6 +1352,32 @@ textarea:focus-visible {
 /* Desktop icon section header */
 .desktop-icon-section-header {
   font-size: var(--font-size-caption);
+}
+
+/* Desktop icon drag feedback */
+.desktop-icon-button.dragging,
+.desktop-icons button.dragging {
+  opacity: 0.8 !important;
+  cursor: grabbing !important;
+  user-select: none !important;
+  /* Disable transitions during drag for smooth movement */
+  transition: none !important;
+  /* GPU acceleration for smooth dragging */
+  will-change: transform !important;
+  /* Prevent layout shifts */
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+.desktop-icon-button.selected,
+.desktop-icons button.selected {
+  background: rgba(0, 0, 255, 0.2) !important;
+  border: 1px dashed rgba(0, 0, 255, 0.5) !important;
+}
+
+/* Prevent text selection during drag */
+.desktop-icons button:active {
+  user-select: none;
 }
 
 /* Shortcut arrow overlay for LINKS icons (Windows 98 style) */
@@ -1032,20 +1523,21 @@ button:disabled {
    ========================= */
 
 #wojak-generator .trait-row {
-  margin-bottom: 4px !important; /* move dropdowns closer together */
+  margin-bottom: 6px !important; /* Tighter spacing between dropdown sections */
+  margin-top: 0 !important; /* Remove any negative margins */
 }
 
 #wojak-generator .trait-selector-wrapper {
   display: grid !important;
-  grid-template-rows: 12px 14px 22px 20px; /* message, label, select, dot-slot */
+  grid-template-rows: 12px 20px 22px 20px; /* message, label (increased from 14px), select, dot-slot */
   row-gap: 0 !important;
   width: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
-  overflow: hidden !important;
+  overflow: visible !important; /* Allow label to be visible */
   padding: 0 !important;
-  margin: -6px 0 0 0 !important; /* Move entire wrapper up more (from -4px to -6px) */
+  margin: -18px 0 0 0 !important; /* Move entire wrapper higher */
 }
 
 /* Label: tighter + slightly darker Win98 read */
@@ -1060,12 +1552,13 @@ button:disabled {
   min-height: 14px !important;
   max-height: 14px !important;
   line-height: 14px !important;
-  margin: -8px 0 0 0 !important; /* Move label up more (from -6px to -8px) to align with picture head */
+  margin: 0 0 0 0 !important; /* Reset margins */
   padding-left: 4px !important; /* Align label with dropdown text (matches dropdown padding-left) */
-  padding-right: 0 !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
+  padding-right: 4px !important; /* Add right padding */
+  padding-top: 3px !important; /* Add top padding to prevent blocking */
+  padding-bottom: 3px !important; /* Add bottom padding to prevent blocking */
   box-sizing: border-box !important;
+  align-self: start !important; /* Keep label at top of its grid cell */
 }
 
 /* Disabled reason text - always reserves space to prevent layout shift */
@@ -1078,17 +1571,18 @@ button:disabled {
 #wojak-generator .trait-selector-wrapper .trait-select-wrapper {
   grid-row: 3;
   position: relative;
-  width: 100% !important;
+  width: 100% !important; /* Use full width of controls panel */
   min-width: 0 !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
-  margin: -4px 0 0 0 !important; /* Move dropdown up more */
+  margin: 0 0 0 0 !important; /* Remove negative margin to prevent overlap */
+  overflow: visible !important; /* Allow dropdown to show */
 }
 
 /* Select: consistent height + Win98 light gray */
 #wojak-generator .trait-selector-wrapper .trait-select {
   display: block;
-  width: 100% !important;
+  width: 100% !important; /* Use full width of controls panel */
   min-width: 0 !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
@@ -1098,9 +1592,9 @@ button:disabled {
   padding: 1px 18px 1px 4px !important;
   background-color: var(--wg-input-bg) !important;
   color: var(--input-text) !important;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow: visible !important; /* Show full text */
+  text-overflow: clip !important; /* Remove ellipsis */
+  white-space: nowrap !important; /* Keep text on one line */
 }
 
 /* Hide select text when showing disabled message */
@@ -1124,18 +1618,19 @@ button:disabled {
 
 /* Constrain option text width in dropdown popup (limited effectiveness with native selects) */
 #wojak-generator .trait-selector-wrapper .trait-select option {
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  max-width: none !important; /* Allow full width for options */
+  overflow: visible !important; /* Show full text */
+  text-overflow: clip !important; /* Remove ellipsis */
+  white-space: normal !important; /* Allow text to wrap if needed */
 }
 
 /* Disabled select styling - NO geometry changes - height, padding, line-height stay identical */
 #wojak-generator .trait-selector-wrapper .trait-select:disabled {
   /* NO geometry changes - height, padding, line-height stay identical */
   display: block !important;
-  width: 100% !important;
+  width: 100% !important; /* Match enabled width */
   min-width: 0 !important;
-  max-width: 100% !important;
+  max-width: 100% !important; /* Match enabled max-width */
   box-sizing: border-box !important;
   margin: 0 !important;
   height: 22px !important;
@@ -1145,31 +1640,42 @@ button:disabled {
   color: var(--input-disabled-text) !important;
   cursor: not-allowed;
   opacity: 0.5 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
+  overflow: visible !important; /* Show full text even when disabled */
+  text-overflow: clip !important; /* Remove ellipsis */
   white-space: nowrap !important;
 }
 
 /* REMOVED: Disabled row compacting that changes layout */
 /* Override any rules that change padding/margins when select:disabled */
+/* Fixate positions to match enabled state exactly */
 #wojak-generator .trait-row:has(select:disabled) .trait-selector-wrapper {
   padding: 0 !important;
-  margin: -4px 0 0 0 !important; /* Maintain same margin as enabled state */
+  margin: -18px 0 0 0 !important; /* Match enabled state margin exactly */
+  display: grid !important;
+  grid-template-rows: 12px 20px 22px 20px !important; /* Match enabled grid */
+  row-gap: 0 !important;
+  overflow: visible !important; /* Match enabled overflow */
 }
 
 /* Ensure select wrapper maintains position when disabled */
 #wojak-generator .trait-row:has(select:disabled) .trait-selector-wrapper .trait-select-wrapper {
-  margin: -4px 0 0 0 !important; /* Maintain same margin as enabled state */
+  margin: 0 0 0 0 !important; /* Match enabled state margin exactly */
+  grid-row: 3 !important; /* Match enabled grid position */
+  width: 100% !important; /* Match enabled state width */
+  max-width: 100% !important; /* Match enabled state max-width */
+  overflow: visible !important; /* Match enabled overflow */
 }
 
 #wojak-generator .trait-row:has(select:disabled) .trait-label {
   opacity: var(--wg-label-disabled) !important;
-  margin: -6px 0 0 0 !important; /* Maintain same margin as enabled state */
-  padding-left: 4px !important; /* Maintain same padding as enabled state */
-  padding-right: 0 !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
+  margin: 0 0 0 0 !important; /* Match enabled state margin exactly */
+  padding-left: 4px !important; /* Match enabled padding */
+  padding-right: 4px !important; /* Match enabled padding */
+  padding-top: 3px !important; /* Match enabled padding */
+  padding-bottom: 3px !important; /* Match enabled padding */
   height: 14px !important; /* maintain fixed height */
+  grid-row: 2 !important; /* Match enabled grid position */
+  align-self: start !important; /* Match enabled alignment */
   line-height: 14px !important;
   box-sizing: border-box !important;
 }
@@ -1237,10 +1743,21 @@ button:disabled {
 #wojak-generator .suit-variant-picker .color-dots,
 #wojak-generator .chia-farmer-variant-picker .color-dots {
   display: flex;
+  flex-direction: row;
   flex-wrap: nowrap !important;
   align-items: center;
   gap: 6px;
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  padding: 4px 0;
+}
+
+/* Hide scrollbar for Chrome/Safari */
+#wojak-generator .color-variant-picker .color-dots::-webkit-scrollbar,
+#wojak-generator .suit-variant-picker .color-dots::-webkit-scrollbar,
+#wojak-generator .chia-farmer-variant-picker .color-dots::-webkit-scrollbar {
+  display: none;
 }
 
 /* Visual divider between Tee/Tank-top dots and Chia Farmer dots */
@@ -1259,33 +1776,35 @@ button:disabled {
   border-right: 1px solid var(--border-light);
 }
 
+/* Round color swatches - desktop (32px) */
 #wojak-generator .color-variant-picker .color-dot,
 #wojak-generator .suit-variant-picker .color-dot,
 #wojak-generator .chia-farmer-variant-picker .color-dot {
-  width: 15px !important;
-  height: 15px !important;
-  min-width: 15px !important;
-  max-width: 15px !important;
-  min-height: 15px !important;
-  max-height: 15px !important;
-  border-radius: 9999px !important;
-
-  flex: 0 0 15px !important;
-  display: inline-block !important;
-
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  max-width: 32px !important;
+  min-height: 32px !important;
+  max-height: 32px !important;
+  border-radius: 50% !important; /* Round circles */
+  border: 2px solid #808080 !important;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.1s ease, border-color 0.1s ease;
   background-color: var(--dot-color, #000) !important;
   background-image: none !important;
-  box-shadow: none !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  overflow: hidden !important;
   outline: none !important;
-
   appearance: none !important;
   -webkit-appearance: none !important;
-
-  border: 1px inset var(--border-dark) !important;
   padding: 0 !important;
   margin: 0 !important;
   line-height: 0 !important;
-  cursor: pointer;
+  display: inline-block !important;
+  flex: 0 0 32px !important;
 }
 
 #wojak-generator .color-variant-picker .color-dot:focus,
@@ -1295,23 +1814,86 @@ button:disabled {
   outline-offset: 1px !important;
 }
 
-/* Tone down modern-feeling animation */
+/* Hover effect */
 #wojak-generator .color-variant-picker .color-dot:hover:not(:disabled),
 #wojak-generator .suit-variant-picker .color-dot:hover:not(:disabled),
 #wojak-generator .chia-farmer-variant-picker .color-dot:hover:not(:disabled) {
-  transform: scale(1.05) !important; /* was 1.1 */
+  transform: scale(1.1) !important;
+  border-color: #000000 !important;
 }
 
-#wojak-generator .color-variant-picker .color-dot:active:not(:disabled),
-#wojak-generator .suit-variant-picker .color-dot:active:not(:disabled),
-#wojak-generator .chia-farmer-variant-picker .color-dot:active:not(:disabled) {
-  transform: scale(0.97) !important; /* was 0.95 */
-}
-
+/* Selected state with box-shadow */
 #wojak-generator .color-variant-picker .color-dot.active,
 #wojak-generator .suit-variant-picker .color-dot.active,
 #wojak-generator .chia-farmer-variant-picker .color-dot.active {
-  border: 2px solid var(--text-1) !important;
+  border-color: #000000 !important;
+  border-width: 3px !important;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #000000 !important;
+}
+
+/* Active/pressed state */
+#wojak-generator .color-variant-picker .color-dot:active:not(:disabled),
+#wojak-generator .suit-variant-picker .color-dot:active:not(:disabled),
+#wojak-generator .chia-farmer-variant-picker .color-dot:active:not(:disabled) {
+  transform: scale(0.95) !important;
+}
+
+/* Mobile specific - smaller circles (28px) */
+@media screen and (max-width: 640px) {
+  #wojak-generator .color-variant-picker .color-dot,
+  #wojak-generator .suit-variant-picker .color-dot,
+  #wojak-generator .chia-farmer-variant-picker .color-dot {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    max-width: 28px !important;
+    min-height: 28px !important;
+    max-height: 28px !important;
+    border-width: 2px !important;
+    flex: 0 0 28px !important;
+  }
+  
+  #wojak-generator .color-variant-picker .color-dot.active,
+  #wojak-generator .suit-variant-picker .color-dot.active,
+  #wojak-generator .chia-farmer-variant-picker .color-dot.active {
+    border-width: 2px !important;
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 3px #000000 !important;
+  }
+  
+  #wojak-generator .color-variant-picker .color-dots,
+  #wojak-generator .suit-variant-picker .color-dots,
+  #wojak-generator .chia-farmer-variant-picker .color-dots {
+    gap: 8px;
+  }
+  
+  /* Cap McD button - mobile size */
+  #wojak-generator .cap-mcd-button {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    max-width: 28px !important;
+    min-height: 28px !important;
+    max-height: 28px !important;
+  }
+  
+  /* Mobile adjustments for single-row variants */
+  #wojak-generator .variants-single-row,
+  #wojak-generator .suit-variant-picker .suit-variant-row {
+    gap: 10px;
+    padding: 6px 0;
+  }
+  
+  #wojak-generator .accessory-toggle,
+  #wojak-generator .suit-variant-picker .type-toggle-button {
+    padding: 3px 8px;
+    font-size: 9px;
+    border-radius: 10px;
+  }
+  
+  #wojak-generator .variant-divider {
+    height: 20px;
+    margin: 0 3px;
+  }
 }
 
 #wojak-generator .color-variant-picker .color-dot:disabled,
@@ -1345,14 +1927,45 @@ button:disabled {
   overflow: hidden;
 }
 
-#wojak-generator .suit-variant-picker .suit-variant-row {
+/* Force ALL suit variant elements into single row */
+#wojak-generator .suit-variant-picker,
+#wojak-generator .suit-variant-picker .suit-variant-row,
+#wojak-generator .variants-single-row {
   display: flex;
-  flex-wrap: nowrap;
+  flex-direction: row;
+  flex-wrap: nowrap !important;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+#wojak-generator .suit-variant-picker::-webkit-scrollbar,
+#wojak-generator .suit-variant-picker .suit-variant-row::-webkit-scrollbar,
+#wojak-generator .variants-single-row::-webkit-scrollbar {
+  display: none;
+}
+
+/* Ensure child containers don't create new rows */
+#wojak-generator .suit-variant-picker .color-dots,
+#wojak-generator .suit-variant-picker .type-toggle {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+#wojak-generator .suit-variant-picker .suit-variant-row {
   width: 100%;
   box-sizing: border-box;
   min-width: 0;
+}
+
+/* Ensure all direct children of suit-variant-row don't shrink */
+#wojak-generator .suit-variant-picker .suit-variant-row > * {
+  flex-shrink: 0;
 }
 
 #wojak-generator .suit-variant-picker .type-toggle {
@@ -1362,33 +1975,51 @@ button:disabled {
   flex-shrink: 0;
 }
 
+/* Divider between variant groups */
+#wojak-generator .variant-divider {
+  width: 1px;
+  height: 24px;
+  background-color: #808080;
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+/* Pill-style TIE/BOW toggle buttons (replaces large Win98 buttons) */
+#wojak-generator .accessory-toggle,
 #wojak-generator .suit-variant-picker .type-toggle-button {
-  font-family: "MS Sans Serif", sans-serif;
-  font-size: var(--font-size-caption);
-  padding: 2px 6px;
-  min-width: 32px;
-  height: 18px;
-  border: 1px solid var(--text-1);
-  background: var(--btn-face);
-  color: var(--btn-text);
+  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: bold;
+  font-family: 'MS Sans Serif', sans-serif;
+  background: #c0c0c0;
+  border: 2px outset #ffffff;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: normal;
+  white-space: nowrap;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: auto;
+  height: auto;
+  color: var(--btn-text);
   text-align: center;
-  box-shadow: inset -1px -1px 0 0 var(--text-1), inset 1px 1px 0 0 var(--border-light);
 }
 
+#wojak-generator .accessory-toggle:hover,
 #wojak-generator .suit-variant-picker .type-toggle-button:hover:not(:disabled) {
-  background: var(--btn-face-hover);
+  background: #d4d4d4;
 }
 
-#wojak-generator .suit-variant-picker .type-toggle-button:active:not(:disabled) {
-  box-shadow: inset 1px 1px 0 0 var(--text-1), inset -1px -1px 0 0 var(--border-light);
-}
-
+#wojak-generator .accessory-toggle.selected,
 #wojak-generator .suit-variant-picker .type-toggle-button.active {
-  background: var(--btn-face-pressed);
-  color: var(--text-inverse);
-  box-shadow: inset 1px 1px 0 0 var(--text-1), inset -1px -1px 0 0 var(--border-light);
+  background: #000080;
+  color: #ffffff;
+  border-style: inset;
+}
+
+#wojak-generator .accessory-toggle:active,
+#wojak-generator .suit-variant-picker .type-toggle-button:active:not(:disabled) {
+  border-style: inset;
 }
 
 #wojak-generator .suit-variant-picker .type-toggle-button:disabled {
@@ -1406,18 +2037,20 @@ button:disabled {
    ========================= */
 
 #wojak-generator .cap-mcd-button {
-  width: 15px !important;
-  height: 15px !important;
-  min-width: 15px !important;
-  max-width: 15px !important;
-  min-height: 15px !important;
-  max-height: 15px !important;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  max-width: 32px !important;
+  min-height: 32px !important;
+  max-height: 32px !important;
 
   padding: 0 !important;
   margin-left: 6px;
 
   background: transparent !important;
-  border: 1px inset var(--border-dark) !important;
+  border: 2px solid #808080 !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
 
   box-sizing: border-box;
   display: inline-flex;
@@ -1430,11 +2063,12 @@ button:disabled {
 }
 
 #wojak-generator .cap-mcd-button img {
-  width: 13px;
-  height: 13px;
+  width: 100% !important;
+  height: 100% !important;
   display: block;
   image-rendering: pixelated;
-  object-fit: contain;
+  object-fit: cover !important;
+  border-radius: 50%;
 }
 
 #wojak-generator .cap-mcd-button:hover:not(:disabled) {
@@ -1446,7 +2080,16 @@ button:disabled {
 }
 
 #wojak-generator .cap-mcd-button.active {
-  border: 2px solid var(--text-1) !important;
+  border-color: #000000 !important;
+  border-width: 3px !important;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #000000 !important;
+}
+
+@media screen and (max-width: 640px) {
+  #wojak-generator .cap-mcd-button.active {
+    border-width: 2px !important;
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 3px #000000 !important;
+  }
 }
 
 #wojak-generator .cap-mcd-button:disabled {
@@ -1704,10 +2347,25 @@ a,
   left: 55%;   /* moved a fraction LEFT */
   top: 60%;    /* moved a little UP */
   transform: translate(-50%, -50%);
+  width: 30%; /* Scale with container */
+  height: auto; /* Maintain aspect ratio */
+  max-width: 200px; /* Prevent too large on big screens */
   z-index: 10;
   pointer-events: none;
   /* Subtle fade-in animation that starts from correct position (not from outside) */
   animation: hoa-glass-fade-in 0.4s ease-out forwards;
+}
+
+/* Ensure the glass window image inside scales with the overlay */
+.hoa-glass-overlay .orange-glass-window {
+  width: 100%;
+  height: auto;
+}
+
+.hoa-glass-overlay .orange-glass-window img {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 /* Fade-in animation that starts from correct position (not from outside) */
@@ -1727,7 +2385,8 @@ a,
   background: transparent !important;
   border: none !important;
   padding: 0 !important;
-  width: auto;
+  width: 100%; /* Scale with parent container (.hoa-glass-overlay) */
+  height: auto;
 }
 
 /* Strip inner chrome wrappers in overlay mode */
@@ -1740,7 +2399,7 @@ a,
 /* Ensure the actual glass image/meter remains visible */
 .orange-glass-window[data-variant="overlay"] img {
   display: block;
-  width: clamp(140px, 35%, 220px); /* bigger */
+  width: 100%; /* Scale with container, not viewport */
   height: auto;
   image-rendering: pixelated;
   background: transparent;
@@ -1769,6 +2428,11 @@ a,
   background: var(--window-face);
   color: var(--text);
   min-height: 100px;
+  /* Window scroll contract: inner content wrapper is the ONLY scroll container */
+  flex: 1;
+  min-height: 0; /* Critical: allow flex item to shrink below content size */
+  overflow: auto; /* Single scroll region per window */
+  overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 /* TangGang window: transparent background, keep window frame */
@@ -1807,99 +2471,519 @@ a,
   padding: 0 !important; /* Remove default 8px padding - content has its own padding */
 }
 
+/* =========================================================
+   TYPE A: SCROLLABLE DOCUMENT WINDOWS
+   Content has natural size, doesn't stretch
+   When window gets bigger: more content visible, scrollbar gets smaller
+   When window gets smaller: less content visible, scrollbar gets bigger
+   ========================================================= */
+
 /* Windows that need internal scrolling - add scroll-allowed class */
+/* Window scroll contract: window-body is the scroll container */
 .readme-window .window-body,
 #window-readme-txt .window-body,
 .window-body.scroll-allowed {
-  max-height: calc(90dvh - 60px); /* Use dynamic viewport height, account for title bar */
-  overflow-y: auto;
+  overflow: auto !important; /* Single scroll region - window-body scrolls */
   overflow-x: hidden;
+  display: flex !important; /* Use flexbox for proper height calculation */
+  flex-direction: column;
+  flex: 1 1 0% !important; /* Fill remaining space in flex container (instead of height: 100%) */
+  min-height: 0 !important; /* Critical: allow flex item to shrink below content size */
+  max-height: 100% !important; /* Ensure window-body doesn't exceed window height */
+  padding: 4px !important; /* Match readme-content margin */
 }
 
 /* README window: allow a bit more height so the large Launch Space preview
    doesn't introduce an unnecessary scrollbar on typical desktop viewports */
 .readme-window .window-body,
 #window-readme-txt .window-body {
-  max-height: calc(95dvh - 60px);
   min-height: 0; /* Remove default min-height to eliminate gray space at bottom */
-  height: auto; /* Let content determine height */
+}
+
+/* FAQ window - Type A: Scrollable */
+#window-faq .window-body {
+  overflow: auto !important;
+  overflow-x: hidden;
+  display: block !important;
+  height: 100% !important;
+  min-height: 0;
+}
+
+/* MintInfo window - Type A: Scrollable */
+#window-mint-info-exe .window-body {
+  overflow: auto !important;
+  overflow-x: hidden;
+  display: block !important;
+  height: 100% !important;
+  min-height: 0;
+}
+
+/* TangGang window - Type A: Scrollable (transparent background, keep window frame) */
+#tanggang .window-body {
+  overflow: auto !important;
+  overflow-x: hidden;
+  display: block !important;
+  height: 100% !important;
+  min-height: 0;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+/* Marketplace window - Type A: Scrollable */
+#window-marketplace .window-body {
+  overflow: auto !important;
+  overflow-x: hidden;
+  display: block !important;
+  height: 100% !important;
+  min-height: 0;
+}
+
+/* Rarity Explorer window - Now scrollable (window-body handles scrolling) */
+#rarity-explorer .window-body {
+  padding: 8px 20px 8px 8px !important; /* Extra right padding for scrollbar (16px scrollbar + 4px buffer) */
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0;
+  box-sizing: border-box !important;
+  /* Account for window border (1px each side) to prevent overflow */
+  width: calc(100% - 2px) !important;
+  max-width: calc(100% - 2px) !important;
+  margin: 0 !important; /* Ensure no margins causing overflow */
+}
+
+/* When scroll-allowed is present, enable scrolling */
+#rarity-explorer .window-body.scroll-allowed {
+  overflow-y: scroll !important;
+  overflow-x: hidden !important;
+  scrollbar-gutter: stable both-edges !important;
+  scroll-behavior: smooth !important;
+  /* Padding is set in base rule above - don't override it */
+}
+
+/* Desktop: Ensure Rarity Explorer window-body scrollbar is always visible with thumb */
+@media (min-width: 641px) {
+  /* Window body has padding like other windows - extra right padding for scrollbar */
+  #rarity-explorer .window-body {
+    padding: 8px 20px 8px 8px !important; /* Top, Right (16px scrollbar + 4px buffer), Bottom, Left */
+    box-sizing: border-box !important;
+    /* Account for window border (1px each side) to prevent overflow */
+    width: calc(100% - 2px) !important;
+    max-width: calc(100% - 2px) !important;
+    margin: 0 !important; /* Ensure no margins causing overflow */
+  }
+  
+  /* Window body scrolls, not traits list */
+  #rarity-explorer .window-body.scroll-allowed {
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
+    scrollbar-gutter: stable both-edges !important;
+    scrollbar-width: thin !important; /* Firefox */
+    scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg) !important; /* Firefox */
+    box-sizing: border-box !important;
+    /* Account for window borders (2px) and title bar (22px) - use flex instead of explicit height */
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    /* Padding ensures scrollbar has space (16px scrollbar + 4px buffer) and content doesn't touch edges */
+    padding: 8px 20px 8px 8px !important; /* Top, Right (16px scrollbar + 4px buffer), Bottom, Left */
+    /* Account for window border to prevent overflow - need to account for margins if any */
+    width: calc(100% - 2px) !important;
+    max-width: calc(100% - 2px) !important;
+    margin: 0 !important; /* Ensure no margins causing overflow */
+  }
+  
+  /* Force scrollbar thumb to be visible */
+  #rarity-explorer .window-body.scroll-allowed::-webkit-scrollbar {
+    -webkit-appearance: none !important;
+    display: block !important;
+    width: 16px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  #rarity-explorer .window-body.scroll-allowed::-webkit-scrollbar-track {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: repeating-conic-gradient(var(--scrollbar-track-bg) 0% 25%, var(--inset-face) 0% 50%) 50% / 2px 2px !important;
+    width: 16px !important;
+  }
+  
+  #rarity-explorer .window-body.scroll-allowed::-webkit-scrollbar-thumb {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: var(--scrollbar-thumb-bg) !important;
+    border: 1px outset var(--inset-face) !important;
+    min-height: 20px !important;
+    border-radius: 0 !important;
+  }
+  
+  #rarity-explorer .window-body.scroll-allowed::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover-bg) !important;
+  }
+  
+  /* Desktop: Panel content - Set explicit height for equal sizing */
+  #rarity-explorer .rarity-explorer-panel-content {
+    align-items: stretch !important;
+    height: min(270px, 27vh) !important;
+    min-height: min(270px, 27vh) !important;
+    max-height: min(600px, 60vh) !important;
+  }
+  
+  /* Desktop: Left rail - Dynamic width based on box sizes */
+  #rarity-explorer .re-leftRail {
+    width: auto !important;
+    flex-shrink: 0 !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+    align-items: stretch !important;
+    height: 100% !important;
+  }
+  
+  /* Desktop: Right table - Matches height automatically via flexbox */
+  #rarity-explorer .re-rightTable {
+    flex: 1 !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  /* Desktop: Preview box - Square, matches container height */
+  #rarity-explorer .re-preview-box {
+    height: 100% !important;
+    aspect-ratio: 1 !important;
+    width: auto !important;
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
+    border: 2px solid !important;
+    border-color: var(--border-dark) var(--border-light) var(--border-light) var(--border-dark) !important;
+    overflow: hidden !important;
+  }
+  
+  #rarity-explorer .re-preview-box img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+  }
+  
+  /* Desktop: Stats box - Square, same size as preview */
+  #rarity-explorer .re-stats-box {
+    height: 100% !important;
+    aspect-ratio: 1 !important;
+    width: auto !important;
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
+    border: 2px inset !important;
+    border-color: var(--border-dark) var(--border-light) var(--border-light) var(--border-dark) !important;
+    padding: clamp(8px, 1vw, 12px) !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: clamp(4px, 0.5vw, 8px) !important;
+  }
+  
+  #rarity-explorer .re-badge-row {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: clamp(4px, 0.5vw, 6px) !important;
+    margin-bottom: clamp(2px, 0.3vw, 4px) !important;
+  }
+  
+  #rarity-explorer .re-badge-row .rarityEmojiRow {
+    margin-bottom: 0 !important;
+  }
+  
+  /* Desktop: Responsive emojis for dynamic square box */
+  #rarity-explorer .re-stats-box .rarityEmojiBox {
+    font-size: clamp(14px, 1.5vw, 22px) !important;
+  }
+  
+  #rarity-explorer .re-rank-line {
+    font-size: clamp(16px, 2vw, 28px) !important;
+    font-weight: bold !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+    font-variant-numeric: tabular-nums !important;
+    text-align: center !important;
+    width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  
+  #rarity-explorer .re-sub-line {
+    font-size: clamp(9px, 1vw, 14px) !important;
+    opacity: 0.9 !important;
+    line-height: 1.1 !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+  }
+  
+  #rarity-explorer .re-stats-bottom-row {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: clamp(2px, 0.3vw, 4px) !important;
+    width: 100% !important;
+    font-size: clamp(11px, 1.2vw, 18px) !important;
+    font-weight: bold !important;
+    font-variant-numeric: tabular-nums !important;
+    white-space: nowrap !important;
+    text-align: center !important;
+  }
+  
+  /* Desktop: Ensure window-body accounts for scrollbar width */
+  #rarity-explorer .window-body.scroll-allowed {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Desktop: Ensure content area doesn't extend under scrollbar */
+  #rarity-explorer .rarity-explorer-content-area {
+    box-sizing: border-box !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Mobile: Rarity Explorer - Make entire app scrollable */
+@media (max-width: 640px) {
+  /* Responsive logo/favicon size using clamp() */
+  #rarity-explorer .rarity-explorer-logo {
+    width: clamp(40px, 15vw, 56px) !important;
+    height: clamp(40px, 15vw, 56px) !important;
+  }
+  
+  /* Responsive header padding */
+  #rarity-explorer .wojak-rarity-explorer-root > div:first-child {
+    padding: clamp(8px, 2.5vw, 12px) clamp(10px, 4vw, 16px) !important;
+  }
+  
+  /* Allow root component to expand naturally on mobile so content can scroll */
+  #rarity-explorer .wojak-rarity-explorer-root {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    min-height: 100% !important;
+  }
+  
+  /* Make entire window-body scrollable on mobile instead of inner scrollable area */
+  #rarity-explorer .window-body {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    scroll-behavior: smooth !important;
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+  }
+  
+  /* Allow content area to expand naturally on mobile */
+  #rarity-explorer .rarity-explorer-content-area {
+    flex: none !important;
+    max-height: none !important;
+    overflow: visible !important;
+    min-height: auto !important;
+  }
+  
+  /* Responsive padding on NFT details panel using clamp() */
+  #rarity-explorer .rarity-explorer-panel-content {
+    padding: clamp(6px, 2vw, 12px) !important;
+    gap: clamp(6px, 2vw, 12px) !important;
+    margin: clamp(4px, 1.5vw, 8px) !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Responsive margin on NFT details panel wrapper */
+  #rarity-explorer .wojak-rarity-explorer-root > div > div[style*="margin"] {
+    margin: clamp(6px, 2vw, 8px) !important;
+  }
+  
+  /* Responsive border width */
+  #rarity-explorer .rarity-explorer-panel-content,
+  #rarity-explorer .rarity-explorer-preview-container > div {
+    border-width: clamp(1px, 0.5vw, 2px) !important;
+  }
+  
+  /* Ensure no horizontal overflow - contain all content */
+  #rarity-explorer .rarity-explorer-content-area {
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Responsive margin on content area */
+  #rarity-explorer .rarity-explorer-content-area {
+    margin: 0 clamp(6px, 2vw, 8px) clamp(6px, 2vw, 8px) clamp(6px, 2vw, 8px) !important;
+  }
+  
+  /* Ensure traits table container doesn't overflow */
+  #rarity-explorer .rarity-explorer-content-area > div:last-child {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Ensure no overflow in boxes */
+  #rarity-explorer .rarity-explorer-preview-container > div > div {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  
+  /* Disable inner scrolling on mobile - let the whole window scroll */
+  #rarity-explorer .traits-list-scrollable {
+    overflow-y: visible !important;
+    max-height: none !important;
+    -webkit-overflow-scrolling: auto !important;
+  }
+  
+  /* Responsive traits table columns - percentage-based for perfect fit */
+  #rarity-explorer .rarity-explorer-traits-table {
+    table-layout: fixed !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* Column widths that add up to 100% - percentages are already responsive */
+  #rarity-explorer .rarity-explorer-traits-table .trait-col {
+    width: 20% !important;
+    max-width: 20% !important;
+  }
+  
+  #rarity-explorer .rarity-explorer-traits-table .value-col {
+    width: 30% !important;
+    max-width: 30% !important;
+  }
+  
+  #rarity-explorer .rarity-explorer-traits-table .rarity-col {
+    width: 15% !important;
+    max-width: 15% !important;
+  }
+  
+  #rarity-explorer .rarity-explorer-traits-table .percent-col {
+    width: 15% !important;
+    max-width: 15% !important;
+  }
+  
+  #rarity-explorer .rarity-explorer-traits-table .count-col {
+    width: 20% !important;
+    max-width: 20% !important;
+  }
+  
+  /* Table header background - use theme color */
+  #rarity-explorer .rarity-explorer-traits-table thead tr,
+  #rarity-explorer .rarity-explorer-traits-table thead tr th {
+    background: var(--surface-3) !important;
+    background-color: var(--surface-3) !important;
+  }
+  
+  /* Responsive padding and font sizes using clamp() for 320px-1024px */
+  #rarity-explorer .rarity-explorer-traits-table th,
+  #rarity-explorer .rarity-explorer-traits-table td {
+    padding: clamp(3px, 1vw, 6px) clamp(3px, 1.5vw, 8px) !important;
+    font-size: clamp(8px, 2.2vw, 11px) !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Responsive rarity badge size */
+  #rarity-explorer .rarity-explorer-traits-table .rarity-col span {
+    padding: clamp(1px, 0.5vw, 2px) clamp(4px, 1.5vw, 6px) !important;
+    font-size: clamp(7px, 2vw, 9px) !important;
+  }
+}
+
+/* Table header background - use theme color (applies to all screen sizes) */
+#rarity-explorer .rarity-explorer-traits-table thead tr,
+#rarity-explorer .rarity-explorer-traits-table thead tr th {
+  background: var(--surface-3) !important;
+  background-color: var(--surface-3) !important;
 }
 
 /* Window Resize Handles - All Edges and Corners */
 .window-resize-handle {
   position: absolute;
-  z-index: 10000; /* High z-index to ensure handles are above window content */
+  z-index: 100; /* Must be above window-body */
+  pointer-events: auto !important; /* Force clickable */
   background: transparent;
-  pointer-events: auto;
-  /* Ensure handles are always interactive */
   touch-action: none;
 }
 
-/* Edge handles - increased size for easier hover */
+/* Edge handles - thin strips along edges */
 .resize-handle.resize-n {
   top: 0;
-  left: 4px;
-  right: 4px;
-  height: 6px;
+  left: 8px;
+  right: 8px;
+  height: 4px;
   cursor: n-resize;
 }
 
 .resize-handle.resize-s {
   bottom: 0;
-  left: 4px;
-  right: 4px;
-  height: 6px;
+  left: 8px;
+  right: 8px;
+  height: 4px;
   cursor: s-resize;
 }
 
 .resize-handle.resize-e {
   right: 0;
-  top: 4px;
-  bottom: 4px;
-  width: 6px;
+  top: 8px;
+  bottom: 8px;
+  width: 4px;
   cursor: e-resize;
 }
 
 .resize-handle.resize-w {
   left: 0;
-  top: 4px;
-  bottom: 4px;
-  width: 6px;
+  top: 8px;
+  bottom: 8px;
+  width: 4px;
   cursor: w-resize;
 }
 
-/* Corner handles - increased size for easier hover */
+/* Corner handles - small squares at corners */
 .resize-handle.resize-ne {
   top: 0;
   right: 0;
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   cursor: ne-resize;
 }
 
 .resize-handle.resize-se {
   bottom: 0;
   right: 0;
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   cursor: se-resize;
 }
 
 .resize-handle.resize-sw {
   bottom: 0;
   left: 0;
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   cursor: sw-resize;
 }
 
 .resize-handle.resize-nw {
   top: 0;
   left: 0;
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   cursor: nw-resize;
 }
+
+/* Debug: uncomment to visualize handles */
+/*
+.window-resize-handle {
+  background: rgba(255, 0, 0, 0.3);
+}
+*/
 
 /* Allow scrolling inside specific elements */
 .scroll-allowed {
@@ -1916,60 +3000,183 @@ a,
   overscroll-behavior: auto;
 }
 
-/* Paint window needs no padding to prevent bottom cutoff */
+/* =========================================================
+   TYPE B: APPLICATION WINDOWS (STRETCHY)
+   Main work area (canvas, gallery grid) stretches to fill available space
+   Toolbars/controls stay fixed size at top or bottom
+   ========================================================= */
+
+/* Paint window - Type B: Stretchy */
 #paint-window .window-body {
   padding: 0 !important;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  min-height: 0;
+}
+
+/* Paint window work area (iframe container) */
+#paint-window .window-body > div {
+  flex: 1 1 auto;
+  min-height: 0;
   overflow: hidden;
+}
+
+/* =========================================================
+   TYPE C: FIXED SIZE WINDOWS (GAMES)
+   Game area is fixed size, never stretches
+   Extra space shows gray Windows 98 background color (#c0c0c0)
+   Window can't resize smaller than game area
+   ========================================================= */
+
+/* Pinball window - Type C: Fixed size */
+#pinball-window {
+  min-width: 1024px !important;
+  min-height: 768px !important;
 }
 
 #pinball-window .window-body {
   padding: 0 !important;
-  height: 100%;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #c0c0c0 !important;
   position: relative;
   overflow: hidden;
 }
 
+/* Pinball game container - fixed size */
+#pinball-window .window-body > div:first-child {
+  width: 1024px;
+  height: 768px;
+  flex-shrink: 0;
+}
+
+/* Solitaire window - Type C: Fixed size */
+#window-solitaire {
+  min-width: 640px !important;
+  min-height: 480px !important;
+}
+
 #window-solitaire .window-body {
   padding: 0 !important;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #c0c0c0 !important;
   overflow: hidden;
+}
+
+/* Solitaire game container - fixed size */
+#window-solitaire .window-body > div {
+  width: 640px !important;
+  height: 480px !important;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#window-solitaire .window-body iframe {
+  width: 640px !important;
+  height: 480px !important;
+  flex: none !important;
+}
+
+/* Minesweeper window - Type C: Fixed size */
+#window-minesweeper {
+  min-width: 640px !important;
+  min-height: 480px !important;
 }
 
 #window-minesweeper .window-body {
   padding: 0 !important;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #c0c0c0 !important;
   overflow: hidden;
+}
+
+/* Minesweeper game container - fixed size */
+#window-minesweeper .window-body > div {
+  width: 640px !important;
+  height: 480px !important;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#window-minesweeper .window-body iframe {
+  width: 640px !important;
+  height: 480px !important;
+  flex: none !important;
+}
+
+/* SkiFree window - Type C: Fixed size */
+#window-skifree {
+  min-width: 640px !important;
+  min-height: 480px !important;
 }
 
 #window-skifree .window-body {
   padding: 0 !important;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #c0c0c0 !important;
   overflow: hidden;
+}
+
+/* SkiFree game container - fixed size */
+#window-skifree .window-body > div {
+  width: 640px !important;
+  height: 480px !important;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#window-skifree .window-body iframe {
+  width: 640px !important;
+  height: 480px !important;
+  flex: none !important;
 }
 
 /* =========================
    WINDOW BODY + VIEWPORT
    ========================= */
 
+/* WojakGenerator window - Type B: Stretchy */
 #wojak-generator .window-body {
   padding: 0 !important;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto; /* Changed from hidden to auto to allow scrolling when content exceeds height */
-  overflow-x: hidden; /* Changed from visible to hidden to prevent horizontal scrollbar */
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  overflow-x: hidden !important; /* Prevent horizontal scrollbar */
   min-height: 0;
-  max-height: calc(92dvh - 60px); /* Reduced from 95dvh to 92dvh to prevent scrollbar */
-  height: 100%;
+  height: 100% !important;
   position: relative !important;
+}
+
+/* WojakGenerator work area (stretches to fill) */
+#wojak-generator .window-body .meme-generator-desktop,
+#wojak-generator .window-body > div {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* WojakGenerator controls (fixed size) */
+#wojak-generator .meme-generator-controls {
+  flex-shrink: 0;
 }
 
 .wojak-generator-window {
@@ -2013,6 +3220,7 @@ a,
     overflow-x: visible !important; /* Allow tooltips to overflow horizontally */
     outline: none !important;
     padding-top: 0 !important;
+    padding-right: 4px !important; /* Minimal right padding to reduce gap */
     margin-top: 0 !important;
   }
 
@@ -2028,7 +3236,7 @@ a,
     overflow-y: auto !important;
     overflow-x: hidden !important;
     min-height: 0 !important;
-    padding-right: 10px !important;
+    padding-right: 8px !important; /* Reduced padding to minimize gap */
     gap: 0px !important;
     padding-top: 0 !important;
     padding-bottom: 4px !important; /* Reduced from 6px to 4px */
@@ -2085,9 +3293,9 @@ a,
     border: 2px inset var(--border-dark);
     background: var(--surface-3) !important;
     padding: 4px; /* Even padding on all sides for Win98 image viewer look */
-    display: inline-block;
-    margin-top: 8px !important; /* Move picture down to align head with dropdown titles */
-    margin-bottom: 4px !important; /* Reduced spacing below canvas */
+    display: block;
+    margin: 8px auto 4px auto !important; /* Center the canvas wrapper */
+    width: fit-content; /* Fit to canvas size */
   }
 
   /* Export controls row stays identical */
@@ -2099,11 +3307,22 @@ a,
     width: 100%;
   }
 
+  #wojak-generator .export-controls-row {
+    width: 500px !important; /* Match canvas width */
+    max-width: 100% !important; /* Prevent overflow on smaller windows */
+    box-sizing: border-box;
+  }
+  
+  /* Buttons flex to fill 500px width, maintaining square aspect ratio */
   #wojak-generator .export-controls-row button {
     flex: 1 1 0;
     min-width: 0;
-    height: 22px;
+    aspect-ratio: 1 / 1;
+    padding: 4px;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   #wojak-generator .export-controls-row button:disabled {
@@ -2123,6 +3342,13 @@ a,
     border: 1px solid;
     border-color: var(--border-dark) var(--border-light) var(--border-light) var(--border-dark);
     margin-bottom: 4px; /* Reduced from 8px to 4px */
+  }
+
+  .tangify-progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
   }
 
   .tangify-progress-label {
@@ -2235,164 +3461,6 @@ a,
   background: var(--btn-face-pressed);
 }
 
-/* Welcome Modal Overlay */
-.welcome-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 99999;
-  animation: fadeIn 0.2s ease-out;
-}
-
-/* Welcome Modal Window */
-.welcome-modal {
-  background: var(--surface-1);
-  border: 2px solid;
-  border-color: var(--border-light) var(--border-dark) var(--border-dark) var(--border-light);
-  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
-  width: 450px;
-  max-width: 90vw;
-  animation: slideIn 0.3s ease-out;
-}
-
-/* Title Bar */
-.welcome-modal-titlebar {
-  background: var(--menu-header-bg);
-  color: var(--menu-header-text);
-  padding: 4px 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: bold;
-  font-size: var(--font-size-title);
-}
-
-.welcome-modal-titlebar button {
-  background: var(--btn-face);
-  color: var(--btn-text);
-  border: 2px solid;
-  border-color: var(--border-light) var(--border-dark) var(--border-dark) var(--border-light);
-  width: 20px;
-  height: 20px;
-  font-size: var(--font-size-ui);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  font-family: 'MS Sans Serif', Tahoma, sans-serif;
-}
-
-.welcome-modal-titlebar button:hover {
-  background: var(--btn-face-hover);
-}
-
-.welcome-modal-titlebar button:active {
-  border-color: var(--border-dark) var(--border-light) var(--border-light) var(--border-dark);
-  background: var(--btn-face-pressed);
-}
-
-/* Content */
-.welcome-modal-content {
-  padding: 16px;
-  font-family: 'MS Sans Serif', Tahoma, sans-serif;
-  font-size: var(--font-size-body);
-  line-height: 1.5;
-  background: var(--input-bg);
-  color: var(--text-1);
-}
-
-.welcome-modal-content h2 {
-  font-size: var(--font-size-title);
-  font-weight: bold;
-  color: var(--accent);
-  margin: 0 0 8px 0;
-  border-bottom: 1px solid var(--border-dark);
-  padding-bottom: 4px;
-}
-
-.welcome-modal-content h2:not(:first-child) {
-  margin-top: 16px;
-}
-
-.welcome-modal-content p {
-  margin: 0 0 12px 0;
-  color: var(--text-1);
-}
-
-.welcome-modal-content ul {
-  margin: 0 0 12px 0;
-  padding-left: 20px;
-}
-
-.welcome-modal-content li {
-  margin-bottom: 6px;
-}
-
-.welcome-modal-content strong {
-  color: var(--accent);
-}
-
-.welcome-tip {
-  background: var(--surface-3);
-  border: 1px solid var(--state-warning);
-  padding: 8px;
-  margin: 12px 0;
-  font-size: var(--font-size-ui);
-  color: var(--text-1);
-}
-
-/* Start Button */
-.welcome-start-btn {
-  background: var(--btn-face);
-  color: var(--btn-text);
-  border: 2px solid;
-  border-color: var(--border-light) var(--border-dark) var(--border-dark) var(--border-light);
-  padding: 8px 24px;
-  font-family: inherit;
-  font-size: var(--font-size-title);
-  font-weight: bold;
-  cursor: pointer;
-  display: block;
-  margin: 16px auto 0;
-}
-
-.welcome-start-btn:hover {
-  background: var(--btn-face-hover);
-}
-
-.welcome-start-btn:active {
-  border-color: var(--border-dark) var(--border-light) var(--border-light) var(--border-dark);
-  background: var(--btn-face-pressed);
-}
-
-/* Welcome Modal Animations */
-@keyframes fadeIn {
-  from { 
-    opacity: 0; 
-  }
-  to { 
-    opacity: 1; 
-  }
-}
-
-@keyframes slideIn {
-  from { 
-    opacity: 0;
-    transform: translateY(-20px) scale(0.95);
-  }
-  to { 
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
 /* README window content */
 /* Info Button - Bottom Left */
 .info-button-bottom {
@@ -2420,8 +3488,9 @@ a,
   margin-bottom: 8px;
   padding: 0;
   box-sizing: border-box;
-  overflow: visible;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
+  position: relative;
+  z-index: 1;
 }
 
 .info-button-bottom:hover {
@@ -2497,6 +3566,15 @@ a,
   min-width: 100px;
 }
 
+/* Special positioning for info button at bottom - show tooltip to the right */
+.info-button-bottom.win98-tooltip::after {
+  bottom: auto;
+  top: 50%;
+  left: calc(100% + 8px);
+  right: auto;
+  transform: translateY(-50%);
+}
+
 /* Adjust tooltip position if it would be cut off on the left */
 .win98-tooltip[data-tooltip-adjust="left"]::after {
   left: 50%;
@@ -2544,6 +3622,19 @@ a,
   transition: opacity 0.2s ease-in-out;
 }
 
+/* Special arrow positioning for info button - point left */
+.info-button-bottom.win98-tooltip::before {
+  bottom: auto;
+  top: 50%;
+  left: calc(100% + 2px);
+  right: auto;
+  transform: translateY(-50%);
+  border-top-color: transparent;
+  border-right-color: var(--text-1);
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+}
+
 /* Adjust arrow position to match tooltip */
 .win98-tooltip[data-tooltip-adjust="left"]::before,
 .win98-tooltip[data-tooltip-adjust="right"]::before {
@@ -2570,14 +3661,106 @@ a,
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-size: var(--font-size-body);
   line-height: var(--line-height-normal);
-  overflow-y: auto;
-  height: calc(100% - 16px);
+  overflow-y: scroll !important; /* Always show scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: #c0c0c0 #c0c0c0;
+  flex: 1; /* Fill available space in flex container */
+  height: 100%; /* Ensure element respects parent height from start */
+  max-height: 100%; /* Prevent expansion beyond parent height */
+  min-height: 0; /* Allow shrinking below content size */
   background: transparent;
   color: var(--text-1);
-  margin: 4px;
+  margin: 0; /* Remove margin since window-body now has padding */
   border: 1px solid;
   border-color: var(--border-dark) var(--border-light) var(--border-light) var(--border-dark);
   box-sizing: border-box;
+  /* Force scrollbar to always reserve space (prevents Mac overlay scrollbars) */
+  scrollbar-gutter: stable !important;
+  -webkit-overflow-scrolling: auto !important; /* Disable touch scrolling overlay */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg); /* Firefox */
+}
+
+/* Rarity Explorer - Traits List Scrollable Area */
+.traits-list-scrollable {
+  /* Mobile: auto (only show when needed), Desktop: scroll (always show) */
+  overflow-y: auto; /* Default to auto for mobile */
+  scrollbar-gutter: stable; /* Force scrollbar to always reserve space (prevents Mac overlay scrollbars) */
+  scrollbar-width: auto; /* Firefox */
+  scrollbar-color: #c0c0c0 #d4d0c8; /* Firefox */
+  -webkit-overflow-scrolling: touch; /* Enable smooth scrolling on touch devices */
+}
+
+/* Windows 98 style scrollbar for traits list (WebKit browsers) */
+.traits-list-scrollable::-webkit-scrollbar {
+  width: 16px;
+  background: var(--scrollbar-track-bg);
+  /* Force scrollbar to always be visible on desktop (override Mac overlay scrollbars) */
+  display: block !important;
+  -webkit-appearance: none;
+}
+
+.traits-list-scrollable::-webkit-scrollbar-track {
+  background: repeating-conic-gradient(var(--scrollbar-track-bg) 0% 25%, var(--inset-face) 0% 50%) 50% / 2px 2px;
+  /* Force track to always be visible */
+  display: block !important;
+}
+
+.traits-list-scrollable::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-bg);
+  border: 1px outset var(--inset-face);
+  border-top-color: var(--inset-face);
+  border-left-color: var(--inset-face);
+  border-right-color: var(--border-dark);
+  border-bottom-color: var(--border-dark);
+  /* Force thumb to always be visible */
+  display: block !important;
+}
+
+.traits-list-scrollable::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover-bg);
+}
+
+/* Desktop: Window body scrolls, not traits list - consolidated rules */
+@media (min-width: 641px) {
+  /* Ensure window container allows scrollbar to be visible - override base .window overflow:hidden */
+  #rarity-explorer.window {
+    overflow: visible !important;
+    box-sizing: border-box !important;
+    /* Ensure window border doesn't clip scrollbar */
+    border-right: 1px solid var(--border-dark) !important;
+  }
+  
+  /* Window-body has padding like other windows - extra right padding for scrollbar */
+  #rarity-explorer .window-body {
+    box-sizing: border-box !important;
+    /* Account for window border (1px each side) to prevent overflow */
+    width: calc(100% - 2px) !important;
+    max-width: calc(100% - 2px) !important;
+    /* Use flex to automatically size height (accounts for title bar) */
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    padding: 8px 20px 8px 8px !important; /* Top, Right (16px scrollbar + 4px buffer), Bottom, Left */
+    margin: 0 !important; /* Ensure no margins causing overflow */
+  }
+  
+  /* Window-body with scrollbar - padding ensures scrollbar has space */
+  #rarity-explorer .window-body.scroll-allowed {
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
+    scrollbar-gutter: stable both-edges !important;
+    box-sizing: border-box !important;
+    /* Account for window border to prevent overflow */
+    width: calc(100% - 2px) !important;
+    max-width: calc(100% - 2px) !important;
+    /* Use flex to automatically size height (accounts for title bar) */
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    padding: 8px 20px 8px 8px !important; /* Top, Right (16px scrollbar + 4px buffer), Bottom, Left */
+    margin: 0 !important; /* Ensure no margins causing overflow */
+  }
 }
 
 .readme-content h2 {
@@ -2681,7 +3864,44 @@ a,
   border: 1px solid;
   border-color: var(--border-dark) var(--border-light) var(--border-light) var(--border-dark);
   overflow-y: auto;
+  overflow-x: hidden;
+  max-height: calc(100vh - 150px); /* Leave room for title bar and margins */
   box-sizing: border-box;
+}
+
+/* Windows 98 style scrollbar for readme window */
+#wojak-readme .readme-content::-webkit-scrollbar {
+  width: 16px;
+  background: #c0c0c0;
+}
+
+#wojak-readme .readme-content::-webkit-scrollbar-track {
+  background: repeating-conic-gradient(#c0c0c0 0% 25%, #ffffff 0% 50%) 50% / 2px 2px;
+}
+
+#wojak-readme .readme-content::-webkit-scrollbar-thumb {
+  background: #c0c0c0;
+  border: 1px outset #ffffff;
+  border-top-color: #ffffff;
+  border-left-color: #ffffff;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+}
+
+#wojak-readme .readme-content::-webkit-scrollbar-button {
+  background: #c0c0c0;
+  border: 1px outset #ffffff;
+  height: 16px;
+}
+
+#wojak-readme .readme-content::-webkit-scrollbar-button:vertical:decrement {
+  border-top-color: #808080;
+  border-left-color: #808080;
+}
+
+#wojak-readme .readme-content::-webkit-scrollbar-button:vertical:increment {
+  border-bottom-color: #808080;
+  border-right-color: #808080;
 }
 
 /* Content Container - Allow content to extend, window-body handles scrolling */
@@ -2775,40 +3995,23 @@ a,
   overflow: hidden !important;
 }
 
-/* Suit picker: tighter UI so everything fits more often */
-#wojak-generator .suit-variant-picker .type-toggle-button {
-  min-width: 28px !important;   /* was 32 */
-  padding: 2px 5px !important;  /* slightly tighter */
-}
-
-/* Suit picker dots: slightly smaller to prevent overflow on narrow panels */
-#wojak-generator .suit-variant-picker .color-dot {
-  width: 13px !important;
-  height: 13px !important;
-  min-width: 13px !important;
-  max-width: 13px !important;
-  min-height: 13px !important;
-  max-height: 13px !important;
-  flex: 0 0 13px !important;
-}
-
-/* Reduce spacing only for suit dots row */
-#wojak-generator .suit-variant-picker .color-dots {
-  gap: 4px !important;
-}
+/* Note: Suit picker now uses uniform color dot sizes (32px desktop / 28px mobile) */
+/* and pill-style accessory-toggle buttons - see styles above */
 
 /* C) Preview + Export controls: fill width, fit Copy to Clipboard, remove right gray dead space */
 @media (min-width: 1025px) {
   /* Give the preview more room; reduce empty gray on right */
   .meme-generator-preview {
     flex: 1 1 auto !important;     /* was fixed basis */
-    min-width: 480px !important; /* Reduced from 520px to reduce gray space */
+    min-width: 510px !important; /* Match frame width */
+    align-items: center !important; /* Center canvas and frame */
   }
 
-  /* Make preview wrapper consume full preview width */
+  /* Center canvas wrapper */
   #wojak-generator .meme-generator-preview-canvas-wrapper {
-    width: 100% !important;
+    width: fit-content !important;
     display: block !important;
+    margin: 8px auto 4px auto !important; /* Center the canvas */
   }
 
   /* Canvas should scale to wrapper width (your MemeCanvas sets explicit width/height; this helps if it renders a canvas element) */
@@ -2820,22 +4023,40 @@ a,
   /* Export controls row must match preview width and keep text inside */
   #wojak-generator .export-controls-wrapper,
   #wojak-generator .export-controls-preview {
-    width: 100% !important;
-    margin-top: 4px !important; /* Reduced spacing above export controls */
+    width: 522px !important; /* Match canvas wrapper width (500px canvas + 8px padding + 4px border + 10px extra for button fit) */
+    max-width: 100% !important; /* Prevent overflow on smaller windows */
+    margin: 4px auto 0 auto !important; /* Center the frame under canvas */
+    padding: 8px;
+    border: 2px solid;
+    border-color: var(--border-dark) var(--border-light) var(--border-light) var(--border-dark);
+    background: var(--surface-1);
+    box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.1);
+    box-sizing: border-box !important; /* Include padding and border in width calculation */
   }
   #wojak-generator .export-controls-row {
     width: 100% !important;
   }
 
-  /* Make buttons wide enough + keep label inside button */
+  /* Make buttons square (1:1 ratio) - match canvas width (500px) */
+  #wojak-generator .export-controls-row {
+    width: 500px !important;
+    max-width: 100% !important; /* Prevent overflow on smaller windows */
+    box-sizing: border-box !important;
+  }
+  
+  /* Buttons flex to fill 500px width, maintaining square aspect ratio */
   #wojak-generator .export-controls-row button {
     flex: 1 1 0 !important;
     min-width: 0 !important;
-    padding: 2px 6px !important;
+    aspect-ratio: 1 / 1 !important;
+    padding: 4px !important;
     font-size: var(--font-size-ui) !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important; /* safety, should not trigger after preview resize */
+    overflow: visible !important; /* Allow full text */
+    text-overflow: clip !important; /* Remove ellipsis */
     white-space: nowrap !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
 }
 
@@ -2855,10 +4076,12 @@ a,
 }
 
 #wojak-generator .trait-selector-wrapper .trait-select {
-  width: 100% !important;
+  width: 100% !important; /* Use full width of controls panel */
   min-width: 0 !important;
   max-width: 100% !important;
   box-sizing: border-box;
+  overflow: visible !important; /* Show full text */
+  text-overflow: clip !important; /* Remove ellipsis */
 }
 
 /* =========================
@@ -2882,6 +4105,38 @@ a,
 .meme-generator-mobile {
   height: 100%;
   width: 100%;
+}
+
+/* Mobile canvas container - reduce padding */
+@media screen and (max-width: 640px) {
+  .wojak-generator-content,
+  .meme-canvas-container,
+  #wojak-generator .window-body {
+    padding: 4px;
+    gap: 4px;
+  }
+  
+  /* Canvas wrapper - minimal margin */
+  .canvas-wrapper,
+  .meme-canvas-wrapper {
+    margin: 4px auto;
+    padding: 0;
+  }
+  
+  /* Reduce space below canvas */
+  .canvas-preview-container {
+    margin-bottom: 4px;
+  }
+  
+  /* Reduce top spacing of button sheet */
+  .mobile-trait-sheet.collapsed {
+    padding-top: 8px;
+  }
+  
+  .mobile-trait-sheet .sheet-collapsed {
+    padding: 8px;
+    gap: 8px;
+  }
 }
 
 .banner {
@@ -2997,26 +4252,90 @@ a,
   display: block;
 }
 
-/* Gallery Window Layout */
-/* Gallery window body layout & padding - small "air gap" between inner border and content */
+/* Gallery Window - Type B: Stretchy */
 #window-gallery .window-body {
-  display: flex;
-  flex-direction: column;
+  display: flex !important;
+  flex-direction: column !important;
   padding: 6px 8px 8px 8px; /* top, right, bottom, left - Win98-style padding */
-  overflow: hidden;
+  overflow: hidden !important; /* Keep hidden to prevent window-body from scrolling - content-wrapper handles scrolling */
   min-height: 0;
   box-sizing: border-box;
+  height: 100% !important;
+}
+
+/* Ensure fineprint doesn't prevent scrolling - it should be fixed at bottom */
+#window-gallery .fineprint {
+  flex-shrink: 0; /* Don't shrink, stay at bottom */
+}
+
+/* RecycleBin window - Type B: Stretchy */
+#recycle-bin-window .window-body {
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  min-height: 0;
+  height: 100% !important;
+}
+
+/* RecycleBin toolbar and storage info (fixed size) */
+#recycle-bin-window .window-body > div:first-child,
+#recycle-bin-window .window-body > div:nth-child(2) {
+  flex-shrink: 0;
+}
+
+/* RecycleBin work area (item list/grid stretches to fill) */
+#recycle-bin-window .window-body > div:last-child {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
 }
 
 /* Scrollable content wrapper - provides inner padding and scroll area */
 #window-gallery .gallery-content-wrapper {
   flex: 1 1 auto;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow-y: auto !important; /* Force scrollbar when content overflows */
+  overflow-x: hidden !important;
   background: var(--window-face);
   padding: 8px 8px 18px 8px; /* extra bottom space so last row never feels cut off */
   box-sizing: border-box;
-  min-height: 0;
+  min-height: 0 !important; /* Critical: allow flex item to shrink below content size */
+  max-height: 100%; /* Constrain height to parent */
+  /* Removed height: 0 - flex: 1 1 auto with min-height: 0 is sufficient */
+  /* Ensure touch scrolling works on mobile */
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  /* Windows 98-style scrollbar styling - ensure scrollbar is visible */
+  scrollbar-width: thin !important; /* Force scrollbar visibility */
+  scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg);
+}
+
+/* Windows 98-style scrollbar for gallery (WebKit browsers) - ensure it's always visible when needed */
+/* Desktop: Always show scrollbar when content overflows */
+@media (min-width: 641px) {
+  #window-gallery .gallery-content-wrapper::-webkit-scrollbar {
+    width: 16px !important;
+    display: block !important; /* Force scrollbar to be visible on desktop */
+  }
+  
+  #window-gallery .gallery-content-wrapper::-webkit-scrollbar-track {
+    background: var(--scrollbar-track-bg);
+    border: 1px inset var(--border-dark);
+  }
+  
+  #window-gallery .gallery-content-wrapper::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb-bg);
+    border: 1px outset var(--border-light);
+  }
+  
+  #window-gallery .gallery-content-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover-bg);
+  }
+  
+  /* Ensure scrollbar is visible in Firefox on desktop */
+  #window-gallery .gallery-content-wrapper {
+    scrollbar-width: thin !important;
+    scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg);
+  }
 }
 
 /* Grid padding & gap - wrapper handles padding, grid only needs gap between items */
@@ -3039,6 +4358,8 @@ a,
   background: var(--panel-face);
   overflow: hidden;
   box-sizing: border-box;
+  /* Allow touch events to propagate for scrolling - don't block pan gestures */
+  touch-action: pan-y;
 }
 
 .thumb:hover {
@@ -3220,7 +4541,7 @@ a,
   right: 20px;
   top: 20px;
   width: 400px;
-  max-width: calc(100vw - 40px);
+  max-width: calc(100% - 40px);
 }
 
 .side-stack .window {
@@ -3360,23 +4681,38 @@ p {
 }
 
 /* Responsive Design */
-@media (max-width: 640px) {
+@media (max-width: 640px) and (hover: none) and (pointer: coarse) {
+  :root {
+    --easter-egg-bottom-offset: 0px; /* Mobile: flush at bottom, appear from behind taskbar (Win98 illusion) */
+    --easter-egg-gap: 0px; /* Mobile: flush with taskbar top edge (no gap) */
+  }
+  
   .desktop {
-    padding-bottom: calc(var(--taskbar-height) + var(--safe-area-inset-bottom));
+    padding-bottom: calc(var(--taskbar-height) + var(--safe-area-bottom));
   }
 
   .window {
-    position: relative !important;
+    position: fixed !important;
+    top: 0 !important;
     left: 0 !important;
     right: 0 !important;
-    width: 100vw !important;
-    max-width: 100vw !important;
-    height: 100dvh !important;
-    max-height: 100dvh !important;
+    bottom: var(--taskbar-height) !important;
+    width: 100% !important;
+    height: calc(100dvh - var(--taskbar-height)) !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    max-height: calc(100dvh - var(--taskbar-height)) !important;
+    min-height: calc(100dvh - var(--taskbar-height)) !important;
     margin: 0 !important;
-    top: 0 !important;
+    /* Remove all borders on mobile to ensure edge-to-edge */
+    border: none !important;
+    /* Remove all box-shadows to prevent visual gaps */
+    box-shadow: none !important;
     /* Disable dragging on mobile */
     pointer-events: auto;
+    /* Use flexbox so window-body can fill remaining space after title bar */
+    display: flex !important;
+    flex-direction: column !important;
   }
 
   /* Disable drag cursor on mobile */
@@ -3387,6 +4723,43 @@ p {
   /* Hide resize handles on mobile */
   .window-resize-handle {
     display: none !important;
+  }
+
+  /* Mobile: Solitaire window - override fixed widths to fit screen */
+  #window-solitaire {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: var(--taskbar-height) !important;
+    width: 100% !important;
+    height: calc(100dvh - var(--taskbar-height)) !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    max-height: calc(100dvh - var(--taskbar-height)) !important;
+    min-height: calc(100dvh - var(--taskbar-height)) !important;
+    margin: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    box-sizing: border-box !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Mobile: Solitaire game container - make responsive */
+  #window-solitaire .window-body > div {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    flex-shrink: 1 !important;
+  }
+
+  /* Mobile: Solitaire iframe - make responsive */
+  #window-solitaire .window-body iframe {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 auto !important;
   }
 
   .side-stack {
@@ -3409,12 +4782,12 @@ p {
 
 
   .title-bar {
-    padding-top: calc(var(--spacing-sm) + var(--safe-area-inset-top));
-    padding-right: calc(var(--spacing-lg) + var(--safe-area-inset-right));
+    padding-top: calc(var(--spacing-sm) + var(--safe-area-top));
+    padding-right: calc(var(--spacing-lg) + var(--safe-area-right));
     padding-bottom: var(--spacing-sm);
-    padding-left: calc(var(--spacing-lg) + var(--safe-area-inset-left));
+    padding-left: calc(var(--spacing-lg) + var(--safe-area-left));
     font-size: var(--font-size-caption);
-    min-height: calc(var(--header-height) + var(--safe-area-inset-top));
+    min-height: calc(var(--header-height) + var(--safe-area-top));
   }
 
   .title-bar-controls button {
@@ -3431,15 +4804,132 @@ p {
   .window-body {
     padding: 6px;
     font-size: var(--font-size-ui);
+    /* Fill remaining space after title bar */
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Mobile: Make desktop icons smaller so all icons fit without scrolling */
+  .desktop-icons button {
+    width: 72px !important;
+    padding: 3px !important;
+    gap: 3px !important;
+  }
+
+  .desktop-icons button > div {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+  }
+
+  .desktop-icons button img,
+  .desktop-icons button .icon-image,
+  .desktop-icons button .icon-img {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .desktop-icons button span,
+  .desktop-icons button > div > div {
+    font-size: 11px !important;
+    line-height: 13px !important;
+    max-width: 72px !important;
+    width: 72px !important;
+    /* Remove ellipsis on mobile to show full text */
+    text-overflow: clip !important;
+    overflow: visible !important;
+    white-space: normal !important;
+  }
+
+  .desktop-icons > div {
+    gap: 4px !important;
+  }
+
+  .desktop-icons > div:last-child {
+    margin-top: 8px !important;
+  }
+
+  /* Mobile: Make TangGang icon bigger using transform to prevent offset */
+  .desktop-icons button[aria-label="Open TANGGANG"] > div {
+    transform: scale(1.3) !important; /* Scale icon 30% bigger while keeping it centered */
   }
 
   .gallery-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: 1fr; /* Single column on mobile - full width */
     gap: 8px;
+    width: 100%; /* Full width instead of max-content */
+    max-width: 100%;
+    margin: 0; /* Remove auto margin - no centering needed */
+    padding: 0; /* Ensure no padding on grid itself */
+  }
+
+  /* Mobile: Fix gallery window scrolling and fullscreen layout */
+  #window-gallery {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: var(--taskbar-height) !important;
+    width: 100% !important;
+    height: calc(100dvh - var(--taskbar-height)) !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    max-height: calc(100dvh - var(--taskbar-height)) !important;
+    min-height: calc(100dvh - var(--taskbar-height)) !important;
+    margin: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    box-sizing: border-box !important;
+    /* Remove border and box-shadow on mobile to eliminate asymmetry */
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  #window-gallery .window-body {
+    /* Ensure window-body allows content to scroll */
+    overflow: hidden; /* Keep hidden - content-wrapper handles scrolling */
+    min-height: 0;
+    flex: 1 1 auto;
+    /* Remove side padding on mobile for full-width images */
+    padding-top: 0;
+    padding-right: 0; /* Remove right padding for full-width images */
+    padding-bottom: 0;
+    padding-left: 0; /* Remove left padding for full-width images */
   }
 
   #window-gallery .gallery-content-wrapper {
-    padding: 6px 6px 10px 6px; /* maintain extra bottom padding on mobile too */
+    /* Minimal padding on mobile for full-width images */
+    padding-top: 2px;
+    padding-right: 0; /* Remove right padding for full-width images */
+    padding-bottom: 10px;
+    padding-left: 0; /* Remove left padding for full-width images */
+    /* Ensure scrolling works on mobile */
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    touch-action: pan-y; /* Allow vertical panning (scrolling) */
+    flex: 1 1 auto;
+    min-height: 0; /* Allow flex item to shrink below content size */
+    /* Ensure proper height calculation - use viewport height minus taskbar and window chrome */
+    height: 100%;
+    max-height: calc(100dvh - var(--taskbar-height) - 60px); /* Account for taskbar and window title bar */
+    position: relative; /* Ensure proper scrolling context */
+    /* Hide scrollbar on mobile to prevent asymmetry (scrolling still works) */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  #window-gallery .gallery-content-wrapper::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+  
+  /* Mobile: Ensure thumb elements don't block scrolling and are full width */
+  .thumb {
+    touch-action: pan-y; /* Allow vertical panning to pass through for scrolling */
+    width: 100% !important; /* Ensure full width on mobile */
+    max-width: 100% !important; /* Prevent any max-width constraints */
   }
 
   .field-row {
@@ -3479,33 +4969,170 @@ p {
 /* Additional mobile adjustments for very small screens */
 @media (max-width: 480px) {
   .window {
-    left: var(--spacing-sm) !important;
-    right: var(--spacing-sm) !important;
-    width: calc(100vw - var(--spacing-sm) * 2 - var(--safe-area-inset-left) - var(--safe-area-inset-right)) !important;
-    max-width: calc(100vw - var(--spacing-sm) * 2 - var(--safe-area-inset-left) - var(--safe-area-inset-right)) !important;
-    margin: var(--spacing-sm) auto;
-    box-sizing: border-box; /* Prevent overflow */
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: var(--taskbar-height) !important;
+    width: 100% !important;
+    height: calc(100dvh - var(--taskbar-height)) !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    max-height: calc(100dvh - var(--taskbar-height)) !important;
+    min-height: calc(100dvh - var(--taskbar-height)) !important;
+    margin: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    box-sizing: border-box !important;
+    /* Remove all borders on mobile to ensure edge-to-edge */
+    border: none !important;
+    /* Remove all box-shadows to prevent visual gaps */
+    box-shadow: none !important;
     overflow-x: hidden; /* Prevent horizontal scroll */
   }
 
   .side-stack {
-    width: calc(100vw - var(--spacing-sm) * 2) !important;
-    max-width: calc(100vw - var(--spacing-sm) * 2) !important;
+    width: calc(100% - var(--spacing-sm) * 2) !important;
+    max-width: calc(100% - var(--spacing-sm) * 2) !important;
     margin: var(--spacing-sm);
   }
 
   .gallery-grid {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    grid-template-columns: 1fr; /* Single column on very small screens - full width */
     gap: 8px;
+    width: 100%; /* Full width instead of max-content */
+    max-width: 100%;
+    margin: 0; /* Remove auto margin - no centering needed */
+    padding: 0; /* Ensure no padding on grid itself */
+  }
+
+  /* Very small screens: Ensure gallery is fullscreen */
+  #window-gallery {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: var(--taskbar-height) !important;
+    width: 100% !important;
+    height: calc(100dvh - var(--taskbar-height)) !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    max-height: calc(100dvh - var(--taskbar-height)) !important;
+    min-height: calc(100dvh - var(--taskbar-height)) !important;
+    margin: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    box-sizing: border-box !important;
+    /* Remove border and box-shadow on mobile to eliminate asymmetry */
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  #window-gallery .window-body {
+    overflow: hidden; /* Keep hidden - content-wrapper handles scrolling */
+    min-height: 0;
+    flex: 1 1 auto;
+    /* Remove side padding on very small screens for full-width images */
+    padding-top: 0;
+    padding-right: 0; /* Remove right padding for full-width images */
+    padding-bottom: 0;
+    padding-left: 0; /* Remove left padding for full-width images */
   }
 
   #window-gallery .gallery-content-wrapper {
-    padding: 6px 6px 10px 6px; /* maintain extra bottom padding on very small screens */
+    /* Minimal padding on very small screens for full-width images */
+    padding-top: 2px;
+    padding-right: 0; /* Remove right padding for full-width images */
+    padding-bottom: 10px;
+    padding-left: 0; /* Remove left padding for full-width images */
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y; /* Allow vertical panning (scrolling) */
+    flex: 1 1 auto;
+    min-height: 0;
+    /* Ensure proper height calculation - use viewport height minus taskbar and window chrome */
+    height: 100%;
+    max-height: calc(100dvh - var(--taskbar-height) - 60px); /* Account for taskbar and window title bar */
+    position: relative; /* Ensure proper scrolling context */
+    /* Hide scrollbar on mobile to prevent asymmetry (scrolling still works) */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  #window-gallery .gallery-content-wrapper::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+  
+  /* Very small screens: Ensure thumb elements don't block scrolling and are full width */
+  .thumb {
+    touch-action: pan-y; /* Allow vertical panning to pass through for scrolling */
+    width: 100% !important; /* Ensure full width on very small screens */
+    max-width: 100% !important; /* Prevent any max-width constraints */
   }
 
   #window-gallery .fineprint {
     margin-top: 6px; /* maintain spacing on small screens */
     font-size: var(--font-size-caption);
+  }
+
+  /* Very small screens: Solitaire window - override fixed widths to fit screen */
+  #window-solitaire {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: var(--taskbar-height) !important;
+    width: 100% !important;
+    height: calc(100dvh - var(--taskbar-height)) !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    max-height: calc(100dvh - var(--taskbar-height)) !important;
+    min-height: calc(100dvh - var(--taskbar-height)) !important;
+    margin: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    box-sizing: border-box !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Very small screens: Solitaire game container - make responsive */
+  #window-solitaire .window-body > div {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    flex-shrink: 1 !important;
+  }
+
+  /* Very small screens: Solitaire iframe - make responsive */
+  #window-solitaire .window-body iframe {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 auto !important;
+  }
+
+  /* Very small screens: Ensure RarityExplorer window is full-width */
+  #rarity-explorer,
+  #rarity-explorer.window {
+    left: 0 !important;
+    right: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    transform: none !important;
+    position: relative !important;
+    box-sizing: border-box !important;
+    /* Remove left/right borders and box-shadows on mobile to ensure edge-to-edge */
+    border-left: none !important;
+    border-right: none !important;
+    /* Remove left/right box-shadow to prevent visual gap */
+    box-shadow: 
+      inset 0 1px 0 var(--border-light),
+      inset 0 -1px 0 var(--border-dark) !important;
   }
 
   .title-bar-controls button {
@@ -3614,19 +5241,25 @@ p {
   bottom: 0;
   left: 0;
   right: 0;
-  height: calc(var(--taskbar-height) + var(--safe-area-inset-bottom));
-  padding-bottom: var(--safe-area-inset-bottom);
-  padding-left: var(--safe-area-inset-left);
-  padding-right: var(--safe-area-inset-right);
+  /* Taskbar height + safe-area bottom for total height */
+  height: calc(var(--taskbar-height) + var(--safe-area-bottom));
+  /* Safe-area padding-bottom ONLY (do NOT add taskbar height) */
+  padding-bottom: var(--safe-area-bottom);
+  padding-left: var(--safe-area-left);
+  padding-right: var(--safe-area-right);
+  /* Ensure taskbar never exceeds viewport width */
+  width: 100%;
+  max-width: 100%;
   background: var(--taskbar-bg);
   border-top: var(--border-width) solid var(--taskbar-border);
   display: flex;
   align-items: center;
-  z-index: 10000;
+  z-index: var(--z-taskbar);
   box-shadow: 0 calc(var(--shadow-size) * -1) calc(var(--shadow-size) * 2) rgba(0, 0, 0, 0.3);
   /* Ensure taskbar never overlaps content - always on top */
   will-change: transform;
   backface-visibility: hidden;
+  box-sizing: border-box;
 }
 
 .start-button {
@@ -3643,6 +5276,7 @@ p {
   font-weight: bold;
   font-size: var(--font-size-ui);
   letter-spacing: var(--letter-spacing-tight);
+  flex-shrink: 0; /* Prevent Start button from shrinking - must always be fully visible */
 }
 
 .start-button-icon {
@@ -3683,6 +5317,7 @@ p {
   gap: 4px;
   padding: 0 4px;
   border-left: 1px solid var(--border-dark);
+  flex-shrink: 0; /* Prevent system tray from shrinking - must always be visible */
 }
 
 .system-tray-icon {
@@ -3716,12 +5351,13 @@ p {
   color: var(--taskbar-text);
   user-select: none;
   white-space: nowrap;
+  flex-shrink: 0; /* Prevent clock from shrinking - must always be visible */
 }
 
 /* Start button "tip" tooltip (Win98-style helper bubble) */
 .start-tip-overlay {
   position: fixed;
-  z-index: 11000; /* Above taskbar but below modals that may go higher */
+  z-index: var(--z-start-hint); /* Above taskbar but below modals that may go higher */
   pointer-events: none; /* Never block clicks on Start or other UI */
   opacity: 0;
   transition: opacity 0.2s ease-in-out;
@@ -3871,6 +5507,7 @@ p {
   font-size: var(--font-size-ui);
   font-weight: bold;
   border-bottom: 1px solid var(--accent);
+  flex-shrink: 0; /* Prevent header from shrinking in flex container */
 }
 
 .start-menu-title {
@@ -3881,6 +5518,11 @@ p {
   display: flex;
   flex-direction: column;
   padding: 2px 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* Smooth scrolling on mobile */
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y; /* Allow vertical panning (scrolling) */
 }
 
 .start-menu-item {
@@ -3896,6 +5538,8 @@ p {
   display: flex;
   align-items: center;
   gap: 6px;
+  /* Override touch-action to allow vertical scrolling while still allowing clicks */
+  touch-action: pan-y;
 }
 
 .start-menu-section-header {
@@ -3955,8 +5599,143 @@ p {
   height: 0;
 }
 
+/* Mobile: Start menu adjustments - ensure it fits on screen and is scrollable */
+@media (max-width: 640px) {
+  .start-menu {
+    /* Position menu above taskbar with gaps */
+    top: 8px;
+    bottom: calc(var(--taskbar-height) + 8px);
+    /* Explicit height needed for flex children scrolling to work */
+    /* Height = viewport - top gap - taskbar - bottom gap */
+    height: calc(100vh - var(--taskbar-height) - 16px);
+    /* Prevent menu from overflowing */
+    overflow: hidden;
+    /* Ensure flexbox layout for proper child sizing */
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  /* Ensure header doesn't shrink */
+  .start-menu-header {
+    flex-shrink: 0;
+  }
+  
+  .start-menu-items {
+    /* Use flex: 1 to take remaining space after header */
+    flex: 1 1 0%;
+    min-height: 0; /* CRITICAL: Allow flex item to shrink below content size */
+    max-height: 100%; /* Ensure it doesn't exceed parent */
+    /* Enable scrolling when content exceeds available space */
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y; /* Allow vertical panning (scrolling) */
+    /* Ensure proper flex behavior */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Mobile: Make taskbar tray scrollable when too many windows are open */
+  .taskbar-tray {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    min-width: 0; /* Allow flex item to shrink below content size */
+    flex: 1 1 0%; /* Allow tray to take available space but shrink when needed */
+    padding: 0 4px;
+    /* Smooth scrolling behavior */
+    scroll-behavior: smooth;
+    /* Hide scrollbar on mobile for cleaner look (optional - can be removed if scrollbar is desired) */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+  }
+  
+  .taskbar-tray::-webkit-scrollbar {
+    height: 2px;
+  }
+  
+  .taskbar-tray::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .taskbar-tray::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 1px;
+  }
+  
+  /* Mobile: Taskbar container - ensure consistent height with safe-area */
+  .taskbar {
+    height: calc(var(--taskbar-height, 36px) + var(--safe-area-bottom));
+    min-height: calc(var(--taskbar-height, 36px) + var(--safe-area-bottom));
+    max-height: calc(var(--taskbar-height, 36px) + var(--safe-area-bottom));
+    padding: 2px 4px;
+    /* Safe-area padding-bottom ONLY (do NOT add taskbar height) */
+    padding-bottom: calc(2px + var(--safe-area-bottom));
+    padding-left: calc(4px + var(--safe-area-left));
+    padding-right: calc(4px + var(--safe-area-right));
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+  
+  /* Mobile: Reduce window button sizes to fit more buttons before scrolling */
+  .taskbar-window-button {
+    height: 24px;
+    max-height: 24px;
+    min-height: 24px;
+    min-width: 70px; /* Reduced from 100px to allow more buttons to fit */
+    max-width: 130px; /* Reduced from 200px to allow more buttons to fit */
+    padding: 2px 6px;
+    font-size: 11px;
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    box-sizing: border-box;
+  }
+  
+  /* Mobile: Ensure taskbar buttons don't exceed taskbar height */
+  .taskbar-button,
+  .taskbar-window-button {
+    height: 24px;
+    max-height: 24px;
+    padding: 2px 6px;
+    font-size: 11px;
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Mobile: Start button height constraint */
+  .start-button {
+    height: 26px;
+    max-height: 26px;
+    padding: 2px 8px;
+    font-size: 11px;
+  }
+  
+  /* Mobile: Clock/system tray area */
+  .taskbar-clock,
+  .system-tray {
+    height: 24px;
+    padding: 2px 6px;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+  }
+}
+
 /* Mobile taskbar adjustments */
-@media (min-width: 641px) and (max-width: 1024px) {
+@media (min-width: 641px) and (max-width: 1024px) and (hover: none) and (pointer: coarse) {
+  :root {
+    --easter-egg-bottom-offset: 0px; /* Tablet: flush at bottom, appear from behind taskbar (Win98 illusion) */
+    --easter-egg-gap: 0px; /* Tablet: flush with taskbar top edge (no gap) */
+  }
+  
   .desktop {
     padding-bottom: var(--taskbar-height);
   }
@@ -3974,6 +5753,27 @@ p {
   .start-menu {
     bottom: var(--taskbar-height);
     width: var(--panel-start-menu-width);
+    /* Tablet: also ensure menu fits on screen */
+    height: calc(100dvh - var(--taskbar-height) - 8px);
+    max-height: calc(100dvh - var(--taskbar-height) - 8px);
+    /* Prevent menu from overflowing */
+    overflow: hidden;
+  }
+  
+  /* Ensure header doesn't shrink */
+  .start-menu-header {
+    flex-shrink: 0;
+  }
+  
+  .start-menu-items {
+    /* Use flex: 1 to take remaining space after header */
+    flex: 1;
+    min-height: 0; /* Allow flex item to shrink below content size */
+    /* Enable scrolling on tablet if needed */
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y; /* Allow vertical panning (scrolling) */
   }
 }
 
@@ -4052,6 +5852,89 @@ p {
 
 .desktop-image-icon img {
   pointer-events: none;
+}
+
+/* Remove borders from folder icons in bottom row - comprehensive rules */
+.desktop-folder-icon img,
+.desktop-folder-icon .icon-image,
+.desktop-folder-icon button img,
+.desktop-image-icons-container .desktop-folder-icon img,
+.desktop-image-icons-container button.desktop-folder-icon img,
+.desktop-image-icons-container .desktop-folder-icon div img,
+.desktop-image-icons-container .desktop-folder-icon div,
+.desktop-folder-icon-image,
+.desktop-folder-icon-image img,
+.desktop-folder-icon > div,
+.desktop-folder-icon > div > * {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  border-color: transparent !important;
+}
+
+/* Also target AppIcon images inside folder icons */
+.desktop-folder-icon [class*="AppIcon"] img,
+.desktop-image-icons-container .desktop-folder-icon [class*="AppIcon"] img,
+.desktop-folder-icon-image img,
+.desktop-folder-icon-image,
+button.desktop-folder-icon img,
+button.desktop-folder-icon div img {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  border-color: transparent !important;
+}
+
+/* Remove any borders from the wrapper div around folder icons */
+.desktop-folder-icon > div[style*="position: relative"],
+.desktop-folder-icon > div[style*="inline-flex"],
+.desktop-folder-icon-wrapper,
+.desktop-folder-icon-wrapper img,
+.desktop-folder-icon-wrapper *,
+.desktop-image-icons-container .desktop-folder-icon-wrapper,
+.desktop-image-icons-container .desktop-folder-icon-wrapper img,
+.desktop-image-icons-container .desktop-folder-icon-wrapper * {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  border-color: transparent !important;
+}
+
+/* Universal rule for all images inside folder icon buttons */
+button.desktop-folder-icon * img,
+button.desktop-folder-icon img,
+.desktop-folder-icon button img,
+.desktop-folder-icon img,
+button.desktop-folder-icon:focus img,
+button.desktop-folder-icon:focus * img,
+button.desktop-folder-icon:active img,
+button.desktop-folder-icon:active * img,
+button.desktop-folder-icon:hover img,
+button.desktop-folder-icon:hover * img {
+  border: 0 !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  border-color: transparent !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Remove borders from folder icon buttons themselves */
+button.desktop-folder-icon,
+button.desktop-folder-icon:focus,
+button.desktop-folder-icon:active,
+button.desktop-folder-icon:hover {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .desktop-image-icon-thumbnail {

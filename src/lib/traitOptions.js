@@ -468,6 +468,11 @@ export function parseChiaFarmerVariant(path, rawDisplayName) {
 export function getLabelForLayerValue(layerName, value, selectedLayers = {}) {
   if (!value || !layerName) return null
 
+  // Handle Centurion proxy (Head layer) - dropdown shows "Centurion" but value is "__CENTURION__"
+  if (layerName === 'Head' && value === '__CENTURION__') {
+    return 'Centurion'
+  }
+
   // Handle ClothesAddon (Chia Farmer) - it's shown in Clothes dropdown
   if (layerName === 'Clothes') {
     const clothesAddonPath = selectedLayers['ClothesAddon'] || ''

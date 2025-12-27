@@ -16,14 +16,16 @@ export function positionTooltip(element) {
   temp.style.position = 'fixed'
   temp.style.visibility = 'hidden'
   temp.style.whiteSpace = 'nowrap'
-  temp.style.maxWidth = '280px'
+  // Use clamp to viewport: min(250px, 90vw) matches CSS
+  const maxTooltipWidth = Math.min(250, window.innerWidth * 0.9)
+  temp.style.maxWidth = `${maxTooltipWidth}px`
   temp.style.whiteSpace = 'normal'
   temp.style.padding = '4px 8px'
   temp.style.fontSize = '11px'
   temp.style.fontFamily = 'MS Sans Serif, Tahoma, sans-serif'
   temp.textContent = tooltipText
   document.body.appendChild(temp)
-  const tooltipWidth = Math.max(100, temp.offsetWidth)
+  const tooltipWidth = Math.max(100, Math.min(temp.offsetWidth, maxTooltipWidth))
   const tooltipHeight = temp.offsetHeight
   document.body.removeChild(temp)
   
@@ -32,7 +34,7 @@ export function positionTooltip(element) {
   let tooltipLeft = buttonCenterX - tooltipWidth / 2
   const tooltipTop = rect.top - tooltipHeight - 10 // 8px gap + 2px arrow
   
-  // Check if tooltip would be cut off
+  // Check if tooltip would be cut off - clamp to viewport
   const viewportPadding = 10
   const minLeft = viewportPadding
   const maxRight = window.innerWidth - viewportPadding

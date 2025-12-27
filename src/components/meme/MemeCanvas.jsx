@@ -42,69 +42,77 @@ const MemeCanvas = memo(function MemeCanvas({
   }, [actualRef, width, height])
 
   // Memoize style objects to prevent re-creation (critical for performance)
-  const containerStyle = useMemo(() => ({
-    border: '2px inset var(--border-dark)',
-    background: 'var(--input-bg)',
-    display: 'inline-block',
-    padding: '4px', // Even padding on all sides for Win98 image viewer look
-    width: '100%',
-    maxWidth: '100%',
+  // Outer border wrapper: 610px x 610px (10px larger than canvas, creates 5px light gray on each side)
+  const borderWrapperStyle = useMemo(() => ({
+    width: `${width + 10}px`,
+    height: `${height + 10}px`,
+    background: 'var(--surface-1)', // Light gray background
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     boxSizing: 'border-box',
+    aspectRatio: `${width + 10} / ${height + 10}`,
+    position: 'relative',
+  }), [width, height])
+
+  // Inner container with 3px dark gray border around the canvas
+  // Canvas is 600px, border is 3px on each side (6px total), so container is 606px
+  const containerStyle = useMemo(() => ({
+    border: '3px solid var(--border-dark)', // 3px dark gray border
+    background: 'transparent',
+    display: 'inline-block',
+    padding: 0,
+    boxSizing: 'border-box',
+    // Set explicit size: canvas (600px) + border (3px * 2 = 6px) = 606px
+    width: `${width + 6}px`,
+    height: `${height + 6}px`,
     // Prevent layout shift by reserving space (critical for no reflow)
-    aspectRatio: `${width} / ${height}`,
+    aspectRatio: `${width + 6} / ${height + 6}`,
     position: 'relative',
     // GPU acceleration for smoother rendering
     willChange: 'contents',
     contain: 'layout style paint',
-    // Prevent layout reflow during trait switching
-    minHeight: `${height}px`,
-    minWidth: `${width}px`
   }), [width, height])
 
   const canvasStyle = useMemo(() => ({
     display: 'block',
-    width: '100%',
-    maxWidth: '100%',
-    height: '100%',
+    width: `${width}px`,
+    height: `${height}px`,
     objectFit: 'contain',
     // Prevent layout shift (critical for no reflow)
     aspectRatio: `${width} / ${height}`,
     // GPU acceleration
     willChange: 'contents',
     imageRendering: 'auto',
-    // Prevent layout reflow
-    minHeight: `${height}px`,
-    minWidth: `${width}px`
   }), [width, height])
 
   return (
-    <div 
-      ref={containerRef}
-      style={containerStyle}
-    >
-      <canvas
-        ref={actualRef}
-        style={{
-          ...canvasStyle,
-          display: showTangified ? 'none' : 'block',
-        }}
-      />
-      {showTangified && tangifiedImage && (
-        <img
-          src={tangifiedImage}
-          alt="Tangified Wojak"
+    <div style={borderWrapperStyle}>
+      <div 
+        ref={containerRef}
+        style={containerStyle}
+      >
+        <canvas
+          ref={actualRef}
           style={{
-            display: 'block',
-            width: '100%',
-            maxWidth: '100%',
-            height: '100%',
-            objectFit: 'contain',
-            aspectRatio: `${width} / ${height}`,
-            minHeight: `${height}px`,
-            minWidth: `${width}px`,
+            ...canvasStyle,
+            display: showTangified ? 'none' : 'block',
           }}
         />
-      )}
+        {showTangified && tangifiedImage && (
+          <img
+            src={tangifiedImage}
+            alt="Tangified Wojak"
+            style={{
+              display: 'block',
+              width: `${width}px`,
+              height: `${height}px`,
+              objectFit: 'contain',
+              aspectRatio: `${width} / ${height}`,
+            }}
+          />
+        )}
+      </div>
     </div>
   )
 }, (prevProps, nextProps) => {

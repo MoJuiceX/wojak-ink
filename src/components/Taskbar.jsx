@@ -226,41 +226,6 @@ export default function Taskbar({ onOpenWojakGenerator, wojakGeneratorOpen, onOp
 
   const allWindows = getAllWindows()
   
-  // #region agent log
-  // Instrumentation: Check theme state and computed styles for taskbar buttons
-  useEffect(() => {
-    const htmlEl = document.documentElement
-    const themeAttr = htmlEl.getAttribute('data-theme')
-    const accentAttr = htmlEl.getAttribute('data-accent')
-    
-    // Check taskbar button computed styles
-    const taskbarButtons = document.querySelectorAll('.taskbar-window-button')
-    const taskbarButtonTexts = document.querySelectorAll('.taskbar-window-button-text')
-    
-    const buttonData = Array.from(taskbarButtons).map((btn, idx) => {
-      const textEl = taskbarButtonTexts[idx]
-      const computedStyle = window.getComputedStyle(btn)
-      const textComputedStyle = textEl ? window.getComputedStyle(textEl) : null
-      
-      return {
-        index: idx,
-        className: btn.className,
-        buttonColor: computedStyle.color,
-        buttonBg: computedStyle.backgroundColor,
-        buttonToken: computedStyle.getPropertyValue('--taskbar-btn-text'),
-        textColor: textComputedStyle?.color || 'N/A',
-        textToken: textComputedStyle?.getPropertyValue('--taskbar-btn-text') || 'N/A',
-        hasInlineStyle: btn.hasAttribute('style'),
-        textHasInlineStyle: textEl?.hasAttribute('style') || false
-      }
-    })
-    
-    if (import.meta.env.DEV) {
-      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Taskbar.jsx:useEffect',message:'Theme state and taskbar button computed styles',data:{themeAttr,accentAttr,taskbarButtonCount:taskbarButtons.length,buttonData,htmlClasses:htmlEl.className},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-    }
-  }, [allWindows])
-  // #endregion
-  
   // Check if Wojak Generator window is open and active
   const wojakGeneratorWindow = allWindows.find(w => w.id === 'wojak-generator')
   const isWojakGeneratorActive = wojakGeneratorWindow ? isWindowActive('wojak-generator') : false

@@ -55,8 +55,8 @@
 }
 
 .display-preview-monitor {
-  width: 180px;
-  height: 140px;
+  width: clamp(120px, 25vw, 180px); /* Responsive width */
+  height: clamp(90px, 20vh, 140px); /* Responsive height */
   margin: 0 auto 16px;
   background: #000;
   border: 8px solid #404040;
@@ -193,7 +193,7 @@
 
 .settings-input,
 .settings-select {
-  padding: 4px;
+  padding: 6px 4px;
   font-size: var(--font-size-ui);
   letter-spacing: var(--letter-spacing-tight);
   font-family: 'MS Sans Serif', sans-serif;
@@ -201,6 +201,10 @@
   background: var(--input-bg);
   width: 100%;
   color: var(--input-text);
+  min-height: 28px;
+  height: 28px;
+  line-height: 1.4;
+  box-sizing: border-box;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;

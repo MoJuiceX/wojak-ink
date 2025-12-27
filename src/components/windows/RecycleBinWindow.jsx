@@ -49,8 +49,8 @@ export default function RecycleBinWindow({
       id="recycle-bin-window"
       title="RECYCLE BIN"
       style={{
-        width: '600px',
-        maxWidth: 'calc(100vw - 40px)',
+        width: 'clamp(280px, 92vw, 600px)',
+        maxWidth: 'min(calc(100% - 16px), 600px)',
         left: '100px',
         top: '100px'
       }}
@@ -137,7 +137,9 @@ export default function RecycleBinWindow({
             Recycle Bin is empty
           </div>
         ) : (
-          <div style={{
+          <div 
+            className="recycle-bin-grid-scrollable"
+            style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
             gap: '12px',

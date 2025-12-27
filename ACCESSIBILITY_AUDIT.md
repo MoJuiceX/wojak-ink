@@ -958,3 +958,17 @@ The application needs **critical accessibility improvements** but has a **solid 
 
 **Expected outcome:** WCAG 2.1 AA compliance, full keyboard accessibility, screen reader support.
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+

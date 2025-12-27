@@ -75,7 +75,7 @@ export default function NotifyPopup({ isOpen, onClose }) {
       noStack={true}
       className="popup"
       style={{
-        width: '640px',
+        width: 'clamp(280px, 92vw, 640px)',
         position: 'fixed',
         left: `${initialPos.x}px`,
         top: `${initialPos.y}px`,

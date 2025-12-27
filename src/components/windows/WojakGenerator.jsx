@@ -5,22 +5,30 @@ import MemeCanvas from '../meme/MemeCanvas'
 import LayerSelector from '../meme/LayerSelector'
 import ExportControls from '../meme/ExportControls'
 import MobileTraitBottomSheet from '../meme/MobileTraitBottomSheet'
+import { Button } from '../ui'
 import { useTraitPanelFocus } from '../../hooks/useGlobalKeyboard'
 import { useGlobalKeyboardNavigation, useTraitListNavigation } from '../../hooks/useGlobalKeyboardNavigation'
 import { useToast } from '../../contexts/ToastContext'
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
+import { copyCanvasToClipboard, downloadCanvasAsPNG, canvasToBlob, blobUrlToDataUrl, compressImage } from '../../utils/imageUtils'
+import { generateWojakFilename, buildImageName } from '../../utils/filenameUtils'
+import { isDuplicateImage, generatePairId, findExistingOriginalByTraits } from '../../utils/desktopUtils'
+import { buildCyberTangPrompt } from '../../utils/tangifyPrompts'
+import { playSound } from '../../utils/soundManager'
 
 // Custom order for generator dropdowns (different from render order)
 const GENERATOR_LAYER_ORDER = ['Head','Eyes','Base','MouthBase','MouthItem','FacialHair','Mask','Clothes','Background']
 
-export default function WojakGenerator({ onClose, onAddDesktopImage, desktopImages = [] }) {
+export default function WojakGenerator({ onClose, onAddDesktopImage, desktopImages = [], onSaveToFavorites }) {
   const {
     selectedLayers,
     selectLayer,
     canvasRef,
     disabledLayers,
     randomizeAllLayers,
-    isRendering
+    isRendering,
+    undoRandomize,
+    canUndo
   } = useMemeGenerator()
   
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 640)
@@ -40,18 +48,6 @@ export default function WojakGenerator({ onClose, onAddDesktopImage, desktopImag
   
   // README window state
   const [showReadme, setShowReadme] = useState(false)
-  
-  // Welcome modal state with version tracking
-  const WELCOME_VERSION = '1.0'
-  const [showWelcome, setShowWelcome] = useState(() => {
-    return localStorage.getItem('wojak-welcome-version') !== WELCOME_VERSION
-  })
-  const startButtonRef = useRef(null)
-  
-  const dismissWelcome = useCallback(() => {
-    setShowWelcome(false)
-    localStorage.setItem('wojak-welcome-version', WELCOME_VERSION)
-  }, [])
   
   const handleToggleView = useCallback(() => {
     setShowTangified(prev => !prev)
@@ -173,8 +169,231 @@ export default function WojakGenerator({ onClose, onAddDesktopImage, desktopImag
 
   // Use generator hook's randomize to avoid divergent logic.
   const handleRandomize = useCallback(() => {
+    // History saving happens inside randomizeAllLayers hook
     randomizeAllLayers()
   }, [randomizeAllLayers])
+
+  // Mobile button handlers
+  const handleCopy = useCallback(async () => {
+    console.log('[Mobile Copy] Handler called', { hasCanvas: !!canvasRef.current })
+    if (!canvasRef.current) {
+      console.warn('[Mobile Copy] No canvas ref')
+      return
+    }
+    try {
+      await copyCanvasToClipboard(canvasRef.current)
+      showToast('✅ Copied to clipboard!', 'success', 2000)
+    } catch (error) {
+      console.error('Copy error:', error)
+      showToast('Failed to copy to clipboard', 'error', 3000)
+    }
+  }, [canvasRef, showToast])
+  
+  const handleCyberTang = useCallback(async () => {
+    // Check if required layers are selected
+    const hasBase = selectedLayers['Base'] && selectedLayers['Base'] !== 'None'
+    const hasMouthBase = selectedLayers['MouthBase'] && selectedLayers['MouthBase'] !== 'None'
+    const hasClothes = selectedLayers['Clothes'] && selectedLayers['Clothes'] !== 'None'
+    const canDownload = hasBase && hasMouthBase && hasClothes
+    
+    if (!canvasRef.current) {
+      showToast('⚠️ Canvas not ready. Please wait a moment and try again.', 'warning', 3000)
+      return
+    }
+    
+    if (!canDownload) {
+      showToast('⚠️ Please select Base, Mouth (Base), and Clothing before creating CyberTang.', 'warning', 4000)
+      return
+    }
+    
+    // Start tangify process directly (works on both mobile and desktop)
+    try {
+      playSound('ding')
+      showToast('🎨 Creating CyberTang...', 'info', 2000)
+      
+      // Capture original canvas
+      const canvas = canvasRef.current
+      const blob = await canvasToBlob(canvas, 'image/png')
+      const originalCanvasDataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onloadend = () => resolve(reader.result)
+        reader.onerror = () => reject(new Error('Failed to read canvas'))
+        reader.readAsDataURL(blob)
+      })
+      
+      // Build prompt and send to API
+      const prompt = buildCyberTangPrompt(selectedLayers)
+      const formData = new FormData()
+      formData.append('image', blob, 'wojak.png')
+      formData.append('prompt', prompt)
+      
+      showToast('🤖 AI is transforming your Wojak...', 'info', 3000)
+      
+      const response = await fetch('/api/tangify', {
+        method: 'POST',
+        body: formData,
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(errorData.error || 'CyberTang failed')
+      }
+      
+      const outBlob = await response.blob()
+      const url = URL.createObjectURL(outBlob)
+      setTangifiedImage(url)
+      setShowTangified(true)
+      
+      // Detect mobile
+      const isMobile = typeof window !== 'undefined' && window.innerWidth <= 640
+      
+      if (isMobile && onSaveToFavorites) {
+        // Mobile: Save both original and CyberTang to My Favorite Wojaks
+        try {
+          const cybertangDataUrl = await blobUrlToDataUrl(url)
+          const originalFilename = buildImageName(selectedLayers, 'original')
+          const cybertangFilename = buildImageName(selectedLayers, 'cybertang')
+          
+          // Save original to favorites
+          const originalWojak = {
+            id: `wojak-original-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            name: originalFilename,
+            dataUrl: originalCanvasDataUrl,
+            selectedLayers: { ...selectedLayers },
+            type: 'original',
+            savedAt: new Date().toISOString()
+          }
+          await onSaveToFavorites(originalWojak)
+          
+          // Save CyberTang to favorites
+          const cybertangWojak = {
+            id: `wojak-cybertang-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            name: cybertangFilename,
+            dataUrl: cybertangDataUrl,
+            selectedLayers: { ...selectedLayers },
+            type: 'cybertang',
+            savedAt: new Date().toISOString()
+          }
+          await onSaveToFavorites(cybertangWojak)
+          
+          playSound('tada')
+          showToast('✅ CyberTang pair saved to My Favorite Wojaks!', 'success', 3000)
+        } catch (error) {
+          console.error('Error saving to favorites:', error)
+          showToast('✅ CyberTang created! (Save to favorites failed)', 'info', 3000)
+        }
+      } else if (!isMobile && onAddDesktopImage) {
+        // Desktop: Save both original and CyberTang to desktop
+        const existingOriginal = findExistingOriginalByTraits(desktopImages, selectedLayers)
+        let pairId
+        let savedOriginal = false
+        
+        if (existingOriginal) {
+          pairId = existingOriginal.pairId
+        } else {
+          pairId = generatePairId()
+          const originalCompressed = await compressImage(originalCanvasDataUrl).catch(() => originalCanvasDataUrl)
+          const originalFilename = buildImageName(selectedLayers, 'original')
+          onAddDesktopImage(originalCompressed, originalFilename, 'original', selectedLayers, pairId)
+          savedOriginal = true
+        }
+        
+        // Save CyberTang
+        const cybertangDataUrl = await blobUrlToDataUrl(url)
+        const cybertangCompressed = await compressImage(cybertangDataUrl).catch(() => cybertangDataUrl)
+        const cybertangFilename = buildImageName(selectedLayers, 'cybertang')
+        onAddDesktopImage(cybertangCompressed, cybertangFilename, 'cybertang', selectedLayers, pairId)
+        
+        playSound('tada')
+        if (savedOriginal) {
+          showToast('✅ CyberTang pair saved to desktop!', 'success', 3000)
+        } else {
+          showToast('✅ CyberTang saved to desktop!', 'success', 3000)
+        }
+      } else {
+        showToast('✅ CyberTang created!', 'success', 3000)
+      }
+    } catch (error) {
+      console.error('CyberTang error:', error)
+      showToast(`❌ ${error.message || 'Failed to create CyberTang'}`, 'error', 4000)
+    }
+  }, [canvasRef, selectedLayers, desktopImages, onAddDesktopImage, showToast, setTangifiedImage, setShowTangified])
+  
+  const handleShareX = useCallback(async () => {
+    console.log('[Mobile ShareX] Handler called', { hasCanvas: !!canvasRef.current })
+    if (!canvasRef.current) {
+      console.warn('[Mobile ShareX] No canvas ref')
+      return
+    }
+    try {
+      await copyCanvasToClipboard(canvasRef.current)
+      const tweetText = "Check out my Wojak created with the Wojak Generator @ Wojak.ink 🍊"
+      const params = new URLSearchParams({ text: tweetText })
+      const twitterUrl = `https://twitter.com/intent/tweet?${params.toString()}`
+      showToast('✅ Image copied to clipboard! Opening X...', 'success', 3000)
+      window.open(twitterUrl, '_blank', 'noopener,noreferrer')
+    } catch (error) {
+      console.error('Share on X error:', error)
+      // Fallback: just open Twitter
+      const tweetText = "Check out my Wojak created with the Wojak Generator @ Wojak.ink 🍊"
+      const params = new URLSearchParams({ text: tweetText })
+      const twitterUrl = `https://twitter.com/intent/tweet?${params.toString()}`
+      window.open(twitterUrl, '_blank', 'noopener,noreferrer')
+      showToast('Open X and paste your image', 'info', 3000)
+    }
+  }, [canvasRef, showToast])
+  
+  // Download handler for mobile
+  const handleDownload = useCallback(async () => {
+    // Check if download is allowed (Base, MouthBase, Clothes must be selected)
+    const hasBase = selectedLayers['Base'] && selectedLayers['Base'] !== 'None'
+    const hasMouthBase = selectedLayers['MouthBase'] && selectedLayers['MouthBase'] !== 'None'
+    const hasClothes = selectedLayers['Clothes'] && selectedLayers['Clothes'] !== 'None'
+    const canDownload = hasBase && hasMouthBase && hasClothes
+    
+    if (!canvasRef.current || !canDownload) {
+      showToast('⚠️ Please select Base, Mouth (Base), and Clothing before downloading.', 'warning', 4000)
+      return
+    }
+
+    try {
+      // Check for duplicate before saving
+      if (isDuplicateImage(desktopImages, selectedLayers, 'original')) {
+        showToast('ℹ️ This Wojak is already on your desktop', 'info', 3000)
+        return
+      }
+
+      // Generate filename using buildImageName for desktop storage
+      const filename = buildImageName(selectedLayers, 'original')
+      // Use generateWojakFilename for actual download
+      const downloadFilename = generateWojakFilename({ selectedLayers })
+      
+      // Capture canvas as data URL before download
+      const canvasDataUrl = canvasRef.current.toDataURL('image/png')
+      
+      // Download the file
+      await downloadCanvasAsPNG(canvasRef.current, downloadFilename)
+      
+      // Add to desktop icons - compress image before storing
+      if (onAddDesktopImage) {
+        try {
+          const compressedDataUrl = await compressImage(canvasDataUrl)
+          const pairId = generatePairId()
+          onAddDesktopImage(compressedDataUrl, filename, 'original', selectedLayers, pairId)
+          showToast('✅ Wojak saved to desktop!', 'success', 3000)
+        } catch (error) {
+          console.error('Error compressing/saving to desktop:', error)
+          // Still show success for download
+          showToast('✅ Wojak downloaded!', 'success', 3000)
+        }
+      } else {
+        showToast('✅ Wojak downloaded!', 'success', 3000)
+      }
+    } catch (error) {
+      console.error('Download error:', error)
+      showToast('Failed to download image', 'error', 3000)
+    }
+  }, [canvasRef, selectedLayers, desktopImages, onAddDesktopImage, showToast])
   
   // Detect mobile viewport
   useEffect(() => {
@@ -294,6 +513,7 @@ export default function WojakGenerator({ onClose, onAddDesktopImage, desktopImag
           title="WOJAK_GENERATOR.EXE"
           noStack={true}
           onClose={onClose}
+          onHelpClick={() => setShowReadme(true)}
           style={{ 
             width: '100vw',
             height: '100dvh',
@@ -316,6 +536,63 @@ export default function WojakGenerator({ onClose, onAddDesktopImage, desktopImag
             padding: 0,
             margin: 0,
           }}>
+            {/* DevPanel - Test CyberTang button - Mobile */}
+            {(window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (
+              <div style={{
+                margin: '8px',
+                padding: '4px 8px',
+                background: 'var(--surface-2)',
+                border: '1px solid',
+                borderColor: 'var(--border-dark) var(--border-light) var(--border-light) var(--border-dark)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}>
+                <span style={{
+                  fontFamily: 'MS Sans Serif, sans-serif',
+                  fontSize: '10px',
+                  color: 'var(--text-1)',
+                  marginRight: '4px',
+                }}>
+                  Dev:
+                </span>
+                <Button
+                  onClick={() => {
+                    // Create a test CyberTang image (colored rectangle for testing)
+                    const testCanvas = document.createElement('canvas')
+                    testCanvas.width = 500
+                    testCanvas.height = 500
+                    const ctx = testCanvas.getContext('2d')
+                    // Create a test image with gradient
+                    const gradient = ctx.createLinearGradient(0, 0, 500, 500)
+                    gradient.addColorStop(0, '#ff6600')
+                    gradient.addColorStop(1, '#ffaa00')
+                    ctx.fillStyle = gradient
+                    ctx.fillRect(0, 0, 500, 500)
+                    ctx.fillStyle = '#ffffff'
+                    ctx.font = '48px Arial'
+                    ctx.textAlign = 'center'
+                    ctx.textBaseline = 'middle'
+                    ctx.fillText('TEST CyberTang', 250, 250)
+                    // Convert to blob URL
+                    testCanvas.toBlob((blob) => {
+                      if (blob) {
+                        const url = URL.createObjectURL(blob)
+                        setTangifiedImage(url)
+                        setShowTangified(true)
+                        showToast('✅ Test CyberTang created!', 'success', 2000)
+                      }
+                    }, 'image/png')
+                  }}
+                  style={{
+                    padding: '2px 6px',
+                    fontSize: '10px',
+                  }}
+                >
+                  Test CyberTang
+                </Button>
+              </div>
+            )}
             {/* Canvas fills remaining space */}
             <div style={{ 
               flex: 1,
@@ -325,8 +602,10 @@ export default function WojakGenerator({ onClose, onAddDesktopImage, desktopImag
               justifyContent: 'center',
               minHeight: 0,
               overflow: 'hidden',
-              padding: 'var(--spacing-md)',
-              paddingBottom: 'calc(var(--spacing-md) + var(--mobile-sheet-collapsed-height, calc(140px + var(--safe-area-inset-bottom))))', /* Space for collapsed bottom sheet + safe area */
+              paddingTop: 'var(--spacing-sm)', /* Reduced top padding to move content higher */
+              paddingLeft: 'var(--spacing-md)',
+              paddingRight: 'var(--spacing-md)',
+              paddingBottom: 'calc(var(--spacing-md) + var(--mobile-sheet-collapsed-height, calc(122px + var(--safe-area-bottom))))', /* Space for collapsed bottom sheet + safe area */
             }}>
               <MemeCanvas 
                 canvasRef={canvasRef} 
@@ -341,7 +620,7 @@ export default function WojakGenerator({ onClose, onAddDesktopImage, desktopImag
           </div>
         </Window>
         
-        {/* Mobile Bottom Sheet with Export Controls */}
+        {/* Mobile Bottom Sheet */}
         <MobileTraitBottomSheet
           selectedLayers={selectedLayers}
           selectLayer={selectLayer}
@@ -350,6 +629,9 @@ export default function WojakGenerator({ onClose, onAddDesktopImage, desktopImag
           onExpandedChange={setIsBottomSheetExpanded}
           canvasRef={canvasRef}
           onRandomize={handleRandomize}
+          onDownload={handleDownload}
+          onCyberTang={handleCyberTang}
+          onShareX={handleShareX}
           tangifiedImage={tangifiedImage}
           setTangifiedImage={setTangifiedImage}
           showTangified={showTangified}
@@ -359,33 +641,14 @@ export default function WojakGenerator({ onClose, onAddDesktopImage, desktopImag
           onRemoveGalleryEntry={removeGalleryEntry}
           onAddDesktopImage={onAddDesktopImage}
           desktopImages={desktopImages}
+          onSaveToFavorites={onSaveToFavorites}
+          onUndo={undoRandomize}
         />
       </>
     )
   }
 
   // Desktop layout: Side-by-side canvas and controls
-  
-  // Keyboard support for welcome modal (ESC to close)
-  useEffect(() => {
-    if (!showWelcome) return
-    
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        dismissWelcome()
-      }
-    }
-    
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [showWelcome, dismissWelcome])
-  
-  // Auto-focus welcome modal button when it opens
-  useEffect(() => {
-    if (showWelcome && startButtonRef.current) {
-      startButtonRef.current.focus()
-    }
-  }, [showWelcome])
   
   return (
     <>
@@ -394,13 +657,14 @@ export default function WojakGenerator({ onClose, onAddDesktopImage, desktopImag
         title="WOJAK_GENERATOR.EXE"
         noStack={true}
         onClose={onClose}
+        onHelpClick={() => setShowReadme(true)}
         style={{ 
-          width: '950px', // Reduced from 1000px to reduce wasted space
-          minWidth: 0,
+          width: 'clamp(300px, 85vw, 860px)', // Desktop width with responsive clamp
+          minWidth: '300px',
           height: 'auto',
-          maxWidth: 'calc(100vw - 40px)',
-          maxHeight: 'calc(100dvh - 100px)', // More space from bottom
-          minHeight: '720px', // Reduced from 750px to make window tighter
+          maxWidth: 'min(calc(100% - 16px), 860px)',
+          maxHeight: 'calc(100dvh - var(--taskbar-height) - var(--safe-area-bottom) - 100px)', // More space from bottom
+          minHeight: '150px',
           left: `${centeredPos.left}px`,
           top: `${centeredPos.top}px`,
           position: 'absolute',
@@ -414,40 +678,149 @@ export default function WojakGenerator({ onClose, onAddDesktopImage, desktopImag
             ref={combinedPanelRef}
             tabIndex={-1}
           >
+            {/* DevPanel - Test CyberTang button - Always visible for testing */}
+            <div style={{
+              marginBottom: '8px',
+              marginTop: '4px',
+              padding: '6px 8px',
+              background: '#ffff00', // Bright yellow to make it obvious
+              border: '2px solid #000000',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              width: '100%',
+              boxSizing: 'border-box',
+              zIndex: 1000,
+              position: 'relative',
+            }}>
+                <span style={{
+                  fontFamily: 'MS Sans Serif, sans-serif',
+                  fontSize: '10px',
+                  color: 'var(--text-1)',
+                  marginRight: '4px',
+                }}>
+                  Dev:
+                </span>
+                <Button
+                  onClick={() => {
+                    // Create a test CyberTang image (colored rectangle for testing)
+                    const testCanvas = document.createElement('canvas')
+                    testCanvas.width = 500
+                    testCanvas.height = 500
+                    const ctx = testCanvas.getContext('2d')
+                    // Create a test image with gradient
+                    const gradient = ctx.createLinearGradient(0, 0, 500, 500)
+                    gradient.addColorStop(0, '#ff6600')
+                    gradient.addColorStop(1, '#ffaa00')
+                    ctx.fillStyle = gradient
+                    ctx.fillRect(0, 0, 500, 500)
+                    ctx.fillStyle = '#ffffff'
+                    ctx.font = '48px Arial'
+                    ctx.textAlign = 'center'
+                    ctx.textBaseline = 'middle'
+                    ctx.fillText('TEST CyberTang', 250, 250)
+                    // Convert to blob URL
+                    testCanvas.toBlob((blob) => {
+                      if (blob) {
+                        const url = URL.createObjectURL(blob)
+                        setTangifiedImage(url)
+                        setShowTangified(true)
+                        showToast('✅ Test CyberTang created!', 'success', 2000)
+                      }
+                    }, 'image/png')
+                  }}
+                  style={{
+                    padding: '2px 6px',
+                    fontSize: '10px',
+                  }}
+                >
+                  Test CyberTang
+                </Button>
+            </div>
+            
             <div className="trait-selectors-scroll">
               {/* Flat list (no HEAD/FACE/BODY categories) */}
-              {generatorLayerOrder.map((layer) => {
+              {generatorLayerOrder.map((layer, index) => {
                 const originalIndex = generatorLayerOrder.findIndex(l => l.name === layer.name)
                 const hasVariants = layer.name === 'Head' || layer.name === 'Eyes' || layer.name === 'Clothes'
+                const isFirstRow = index === 0
+                const isLastLayer = index === generatorLayerOrder.length - 1 // Background is last
 
                 return (
-                  <div
-                    key={layer.name}
-                    className={`trait-row ${hasVariants ? 'has-variants' : ''}`}
-                  >
-                    <LayerSelector
-                      layerName={layer.name}
-                      onSelect={selectLayer}
-                      selectedValue={selectedLayers[layer.name]}
-                      disabled={disabledLayers.includes(layer.name)}
-                      selectedLayers={selectedLayers}
-                      navigation={traitNavigation}
-                      traitIndex={originalIndex}
-                      disableTooltip={true}
-                    />
-                  </div>
+                  <>
+                    <div
+                      key={layer.name}
+                      className={`trait-row ${hasVariants ? 'has-variants' : ''} ${isFirstRow ? 'trait-row-first' : ''}`}
+                    >
+                      <LayerSelector
+                        layerName={layer.name}
+                        onSelect={selectLayer}
+                        selectedValue={selectedLayers[layer.name]}
+                        disabled={disabledLayers.includes(layer.name)}
+                        selectedLayers={selectedLayers}
+                        navigation={traitNavigation}
+                        traitIndex={originalIndex}
+                        disableTooltip={true}
+                        isFirstRow={isFirstRow}
+                      />
+                    </div>
+                    {/* Toggle switch for Original/CyberTang view - right after Background dropdown */}
+                    {isLastLayer && tangifiedImage && (
+                      <div key="view-toggle" style={{
+                        marginTop: '0px',
+                        padding: '4px 8px',
+                        background: 'var(--surface-1)',
+                        border: '1px solid',
+                        borderColor: 'var(--border-dark) var(--border-light) var(--border-light) var(--border-dark)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        justifyContent: 'flex-start',
+                        width: '100%',
+                        boxSizing: 'border-box',
+                      }}>
+                        <span className="helper-text" style={{
+                          fontFamily: 'MS Sans Serif, sans-serif',
+                          fontSize: '11px',
+                          color: 'var(--text-1)',
+                          marginRight: '4px',
+                        }}>
+                          View:
+                        </span>
+                        <Button
+                          onClick={() => {
+                            setShowTangified(false)
+                          }}
+                          style={{
+                            padding: '2px 6px',
+                            flex: '0 0 auto',
+                            fontSize: '11px',
+                            background: showTangified ? 'var(--btn-face-pressed)' : 'var(--btn-face-hover)',
+                            border: showTangified ? '1px inset var(--border-dark)' : '1px outset var(--border-light)',
+                          }}
+                        >
+                          Original
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            setShowTangified(true)
+                          }}
+                          style={{
+                            padding: '2px 6px',
+                            flex: '0 0 auto',
+                            fontSize: '11px',
+                            background: showTangified ? 'var(--btn-face-hover)' : 'var(--btn-face-pressed)',
+                            border: showTangified ? '1px outset var(--border-light)' : '1px inset var(--border-dark)',
+                          }}
+                        >
+                          CyberTang
+                        </Button>
+                      </div>
+                    )}
+                  </>
                 )
               })}
             </div>
-            <button 
-              className="info-button-bottom win98-tooltip"
-              data-tooltip="About Wojak Generator"
-              onClick={() => setShowReadme(true)}
-              onMouseDown={(e) => e.stopPropagation()}
-              onPointerDown={(e) => e.stopPropagation()}
-            >
-              <span className="info-icon">ℹ</span>
-            </button>
           </div>
 
           {/* Right side: Generator Preview */}
@@ -455,8 +828,8 @@ export default function WojakGenerator({ onClose, onAddDesktopImage, desktopImag
             <div className="meme-generator-preview-canvas-wrapper">
               <MemeCanvas 
                 canvasRef={canvasRef} 
-                width={520} 
-                height={520}
+                width={500} 
+                height={500}
                 tangifiedImage={tangifiedImage}
                 showTangified={showTangified}
                 onToggleView={handleToggleView}
@@ -467,7 +840,8 @@ export default function WojakGenerator({ onClose, onAddDesktopImage, desktopImag
               <ExportControls 
                 canvasRef={canvasRef} 
                 selectedLayers={selectedLayers} 
-                onRandomize={randomizeAllLayers}
+                onRandomize={handleRandomize}
+                onUndo={undoRandomize}
                 tangifiedImage={tangifiedImage}
                 setTangifiedImage={setTangifiedImage}
                 showTangified={showTangified}
@@ -477,65 +851,12 @@ export default function WojakGenerator({ onClose, onAddDesktopImage, desktopImag
                 onRemoveGalleryEntry={removeGalleryEntry}
                 onAddDesktopImage={onAddDesktopImage}
                 desktopImages={desktopImages}
+                onSaveToFavorites={onSaveToFavorites}
               />
             </div>
           </div>
         </div>
       </Window>
-      
-      {/* Welcome Modal */}
-      {showWelcome && (
-        <div 
-          className="welcome-modal-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="welcome-title"
-        >
-          <div className="welcome-modal">
-            <div className="welcome-modal-titlebar">
-              <span id="welcome-title">👋 Welcome to Wojak Generator!</span>
-              <button 
-                onClick={dismissWelcome}
-                onMouseDown={(e) => e.stopPropagation()}
-                onPointerDown={(e) => e.stopPropagation()}
-                aria-label="Close welcome modal"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="welcome-modal-content">
-              <h2>🎨 Create Your Own Wojak</h2>
-              <p>
-                Use the dropdown menus on the left to customize your Wojak's 
-                head, eyes, clothes, and more. Mix and match to create the 
-                perfect meme character!
-              </p>
-              
-              <h2>⚡ Key Features</h2>
-              <ul>
-                <li><strong>Randomize</strong> — Generate random trait combinations</li>
-                <li><strong>Download</strong> — Save your Wojak as PNG (transparent background!)</li>
-                <li><strong>CyberTang</strong> — Transform with AI-powered cyberpunk effects</li>
-                <li><strong>Mint</strong> — Coming soon: Mint as NFT on Chia blockchain</li>
-              </ul>
-              
-              <p className="welcome-tip">
-                💡 Tip: Your creations save to the desktop automatically!
-              </p>
-              
-              <button 
-                ref={startButtonRef}
-                className="welcome-start-btn" 
-                onClick={dismissWelcome}
-                onMouseDown={(e) => e.stopPropagation()}
-                onPointerDown={(e) => e.stopPropagation()}
-              >
-                Let's Create! 🚀
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
       
       {/* README Window */}
       {showReadme && (
@@ -544,14 +865,20 @@ export default function WojakGenerator({ onClose, onAddDesktopImage, desktopImag
           title="About the Wojak Generator"
           onClose={() => setShowReadme(false)}
           style={{ 
-            width: '560px', 
-            height: '520px', 
+            width: 'clamp(280px, 92vw, 560px)', 
+            height: 'clamp(400px, 80vh, 520px)', 
             zIndex: 10000,
-            left: '150px',
-            top: '40px' // Moved up from 60px
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)'
           }}
         >
-          <div className="readme-content" style={{ padding: '16px 20px 20px 20px' }}>
+          <div className="readme-content" style={{ 
+            padding: '16px 20px 20px 20px',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            maxHeight: 'calc(100vh - 150px)'
+          }}>
             
             <h2>🎨 What is the Wojak Generator?</h2>
             <p>

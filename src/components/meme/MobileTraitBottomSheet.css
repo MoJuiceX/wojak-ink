@@ -3,7 +3,8 @@
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 10001;
+  /* z-index: 9998 - below easter eggs (9999), above game (2000) */
+  z-index: 9998;
   background: var(--panel-face);
   border-top: 2px outset var(--border-light);
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
@@ -12,10 +13,10 @@
   max-height: 70dvh; /* Use dynamic viewport height */
   display: flex;
   flex-direction: column;
-  /* Safe-area padding for notched devices */
-  padding-bottom: var(--safe-area-inset-bottom);
-  padding-left: var(--safe-area-inset-left);
-  padding-right: var(--safe-area-inset-right);
+  /* Safe-area padding for notched devices - use layout.css variables */
+  padding-bottom: var(--safe-area-bottom);
+  padding-left: var(--safe-area-left);
+  padding-right: var(--safe-area-right);
   box-sizing: border-box;
   /* Prevent scroll traps */
   overscroll-behavior: contain;
@@ -25,14 +26,26 @@
   opacity: 1;
 }
 
+/* Ensure sheet doesn't overlap taskbar */
+@media screen and (max-width: 640px) {
+  .mobile-trait-sheet {
+    bottom: calc(var(--taskbar-height, 46px) + var(--safe-area-bottom));
+  }
+}
+
 /* Collapsed state height - matches CSS variable for consistency */
+/* Added extra bottom padding to prevent buttons being cut off by taskbar */
 .mobile-trait-sheet.collapsed {
-  height: var(--mobile-sheet-collapsed-height, calc(140px + var(--safe-area-inset-bottom)));
+  height: var(--mobile-sheet-collapsed-height, calc(122px + var(--safe-area-bottom)));
   opacity: 1;
+  /* Add safe area for taskbar - use layout.css variables */
+  padding-bottom: calc(var(--taskbar-height, 46px) + var(--safe-area-bottom) + 6px);
+  margin-bottom: 0;
 }
 
 .mobile-trait-sheet.expanded {
-  max-height: 70dvh; /* Use dynamic viewport height */
+  max-height: calc(100dvh - 60px); /* Full height minus taskbar/header space */
+  height: calc(100dvh - 60px); /* Set explicit height to fill screen */
   opacity: 1;
 }
 
@@ -75,130 +88,100 @@
 
 /* Collapsed State */
 .sheet-collapsed {
-  padding: var(--spacing-md);
+  padding: 4px 0;
+  padding-bottom: calc(var(--taskbar-height, 46px) + var(--safe-area-bottom) + 4px);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
-}
-
-.primary-buttons {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--spacing-sm);
-}
-
-.primary-button {
-  padding: var(--spacing-md) var(--spacing-sm);
-  border: 2px outset var(--border-light);
-  background: var(--btn-face);
-  color: var(--btn-text);
-  font-family: 'MS Sans Serif', sans-serif;
-  font-size: 12px;
-  font-weight: bold;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   gap: 4px;
-  min-height: 60px; /* Already above 44px thumb target */
-  min-width: 44px; /* Ensure thumb-friendly width */
-  justify-content: center;
-  touch-action: manipulation; /* Remove 300ms tap delay */
-  /* Haptic feedback - transform scale + opacity only */
-  transition: transform 0.1s ease, opacity 0.1s ease;
-  will-change: transform, opacity;
 }
 
-.primary-button:hover:not(:disabled) {
-  background: var(--btn-hover-face);
+/* Mobile button rows */
+.mobile-button-row {
+  display: flex;
+  gap: 4px;
+  width: 100%;
+  margin: 0;
+  padding: 0 4px;
+  box-sizing: border-box;
 }
 
-.primary-button:active:not(:disabled) {
-  border-style: inset;
-  background: var(--btn-active-face);
-  /* Haptic feedback - scale down slightly + opacity */
-  transform: scale(0.95);
-  opacity: 0.9;
-}
-
-.primary-button:focus-visible {
-  outline: var(--focus-outline-width) solid var(--focus-outline-color);
-  outline-offset: var(--focus-outline-offset);
-  background-color: var(--focus-bg-highlight-strong);
-}
-
-/* Action button variants */
-.primary-button-traits {
-  background: var(--accent);
-  color: var(--text-inverse);
-  border-color: var(--accent);
-}
-
-.primary-button-traits:hover:not(:disabled) {
-  background: var(--accent-2);
-}
-
-.primary-button-random {
-  background: #c0c0c0;
-  color: var(--text-1);
-}
-
-.primary-button-random:hover:not(:disabled) {
-  background: var(--btn-hover-face);
-}
-
-.primary-button-save {
-  background: var(--state-success);
-  color: var(--text-inverse);
-  border-color: var(--state-success);
-}
-
-.primary-button-save:hover:not(:disabled) {
-  background: var(--state-success);
-}
-
-.primary-button.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.button-label {
+.mobile-button-row .mobile-action-button {
+  flex: 1 1 0; /* Grow equally to fill available space */
+  min-width: 0; /* Allow shrinking below content size */
+  height: 42px; /* 50% bigger (28px * 1.5) */
+  padding: 6px; /* 50% bigger padding (4px * 1.5) */
   font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1 / 1; /* Ensure 1:1 ratio */
+}
+
+/* Two rows stacked */
+.primary-buttons {
+  order: 1;
+  margin-bottom: 0;
+  margin: 0 4px;
+  gap: 6px;
+}
+
+.secondary-buttons {
+  order: 2;
+  margin-bottom: 0;
+  margin: 0 4px;
+  gap: 6px;
+}
+
+/* Primary buttons container - now uses standard Button components */
+.primary-buttons button {
+  min-height: 42px; /* 50% bigger (28px * 1.5) */
+  min-width: 42px; /* 50% bigger (28px * 1.5) */
+  width: 42px; /* 50% bigger (28px * 1.5) */
+  height: 42px; /* 50% bigger (28px * 1.5) */
+}
+
+/* Smaller buttons on mobile - square (1:1 ratio) - 50% bigger */
+.mobile-button-row button {
+  flex: 1 1 0; /* Grow equally to fill available space */
+  min-width: 0; /* Allow shrinking below content size */
+  padding: 6px; /* 50% bigger padding (4px * 1.5) */
+  font-size: 11px;
+  min-height: 42px; /* 50% bigger (28px * 1.5) */
+  height: 42px; /* 50% bigger (28px * 1.5) */
+  width: 42px; /* Ensure square - same as height */
+  aspect-ratio: 1 / 1; /* Ensure 1:1 ratio */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.primary-buttons button,
+.secondary-buttons button {
+  padding: 6px; /* 50% bigger padding (4px * 1.5) */
+  font-size: 11px;
+  min-height: 42px; /* 50% bigger (28px * 1.5) */
+  min-width: 42px; /* 50% bigger (28px * 1.5) */
+  width: 42px; /* 50% bigger (28px * 1.5) */
+  height: 42px; /* 50% bigger (28px * 1.5) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ensure buttons don't touch window edges */
+@media screen and (max-width: 640px) {
+  .mobile-trait-sheet .sheet-collapsed {
+    padding-left: 0;
+    padding-right: 0;
+  }
 }
 
 .button-badge {
   font-size: 14px;
   font-weight: bold;
-}
-
-.trait-summary {
-  padding: var(--spacing-sm);
-  background: var(--surface-3);
-  border: 1px inset var(--border-dark);
-  font-size: 10px;
-}
-
-.summary-label {
-  font-weight: bold;
-  margin-bottom: 4px;
-  color: var(--text-1);
-}
-
-.summary-items {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.summary-item {
-  color: var(--text-2);
-  font-size: 9px;
-}
-
-.summary-more {
-  color: var(--text-muted);
-  font-style: italic;
-  margin-top: 4px;
 }
 
 .expand-button {
@@ -238,16 +221,20 @@
 /* Export Controls in Bottom Sheet */
 .export-controls-mobile {
   padding: var(--spacing-sm) 0;
+  padding-bottom: calc(var(--spacing-sm) + 30px); /* Extra bottom padding to prevent taskbar cutoff */
   border-top: 1px inset #c0c0c0;
   margin-top: var(--spacing-xs);
 }
 
 .export-controls-mobile-expanded {
   padding: var(--spacing-md);
+  padding-bottom: calc(var(--spacing-md) + 20px); /* Extra bottom padding to prevent taskbar cutoff */
   border-top: 1px inset #c0c0c0;
   background: var(--surface-3);
-  flex-shrink: 0;
-  margin-top: auto;
+  flex-shrink: 0; /* Never shrink - always visible */
+  margin-top: auto; /* Push to bottom */
+  position: relative;
+  z-index: 1; /* Ensure buttons are above scrollable content */
 }
 
 /* Ensure export buttons are thumb-friendly on mobile */
@@ -274,8 +261,8 @@
 .sheet-expanded {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  max-height: 70dvh; /* Use dynamic viewport height */
+  height: 100%; /* Fill parent container */
+  max-height: 100%; /* Use full parent height */
   overflow: hidden;
 }
 
@@ -352,41 +339,105 @@
   background-color: var(--focus-bg-highlight);
 }
 
-.sheet-search {
-  padding: var(--spacing-md);
-  border-bottom: 1px inset #808080;
-  background: var(--surface-3);
-  flex-shrink: 0;
-}
-
-.search-input {
-  width: 100%;
-  padding: var(--spacing-sm) var(--spacing-md);
-  border: 2px inset var(--border-dark);
-  background: var(--input-face);
-  color: var(--text-1);
-  font-family: 'MS Sans Serif', sans-serif;
-  font-size: 12px;
-  box-sizing: border-box;
-}
-
-.search-input:focus,
-.search-input:focus-visible {
-  outline: var(--focus-outline-width) solid var(--focus-outline-color);
-  outline-offset: var(--focus-outline-offset);
-  background-color: var(--focus-bg-highlight);
-}
-
 .sheet-content {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
   padding: var(--spacing-md);
+  padding-top: var(--spacing-sm); /* Reduced top padding since header is removed */
   background: var(--surface-3);
+  min-height: 0; /* Allow flex shrinking for proper full-height layout */
 }
 
 .trait-item {
   margin-bottom: var(--spacing-md);
+}
+
+/* Mobile-specific: Add more padding between dropdown menus and make them taller for touch */
+@media screen and (max-width: 640px) {
+  .trait-item {
+    margin-bottom: 8px; /* Reduced spacing between dropdowns for better density */
+  }
+  
+  /* Reset negative margins and transforms for labels on mobile to ensure they're visible */
+  /* Use high specificity to override inline styles */
+  .trait-item .trait-selector-wrapper .trait-label,
+  .trait-item .trait-selector-wrapper label.trait-label,
+  .trait-item label.trait-label,
+  .trait-item .trait-label {
+    margin-top: 0 !important; /* Reset negative margins */
+    margin-bottom: 4px !important; /* Reduced spacing below label (was 8px) */
+    transform: none !important; /* Reset transforms */
+    padding-bottom: 0 !important;
+    display: block !important;
+    position: relative !important;
+  }
+  
+  /* Reset negative margins for select wrapper on mobile and ensure it's positioned relative for absolute children */
+  .trait-item .trait-selector-wrapper .trait-select-wrapper,
+  .trait-item .trait-select-wrapper {
+    margin-top: 0 !important; /* Reset negative margins */
+    transform: none !important; /* Reset transforms */
+    position: relative !important; /* Ensure absolute positioning works for disabled message */
+  }
+  
+  /* Make dropdowns taller and more touch-friendly on mobile */
+  .trait-item select,
+  .trait-item .trait-select,
+  .trait-item .trait-select-wrapper select,
+  .trait-item .trait-select-wrapper .trait-select,
+  .trait-item .trait-color-select,
+  .trait-item .trait-suit-select {
+    min-height: 36px !important; /* Reduced from 38px */
+    height: auto !important; /* Allow height to grow */
+    padding: 10px 12px !important; /* Reduced padding (was 12px) */
+    font-size: 14px !important; /* Slightly larger text for readability (was 12px) */
+    line-height: 1.4 !important; /* Better line height for readability */
+  }
+  
+  /* Ensure disabled message is centered inside the first/main dropdown on mobile */
+  .trait-item .trait-select-wrapper .trait-disabled-message {
+    position: absolute !important;
+    top: 50% !important;
+    left: 0 !important;
+    transform: translateY(-50%) !important; /* Vertical centering */
+    pointer-events: none !important;
+    z-index: 10 !important; /* Above the select element */
+    font-size: 13px !important;
+    color: var(--text-2, #808080) !important;
+    white-space: nowrap !important;
+    text-align: center !important;
+    width: 100% !important; /* Default: full width for single select */
+    padding: 0 16px !important; /* Match select padding */
+    box-sizing: border-box !important;
+    margin: 0 !important;
+  }
+  
+  /* When multiple selects (flex layout), position message over the first select only */
+  /* For color variant selects (first select is 50% width) */
+  .trait-item .trait-select-wrapper[style*="display: flex"]:not(:has(.trait-suit-select)) .trait-disabled-message,
+  .trait-item .trait-select-wrapper[style*="display:flex"]:not(:has(.trait-suit-select)) .trait-disabled-message {
+    width: 50% !important; /* Match first select width (color variants) */
+    right: auto !important;
+  }
+  
+  /* For suit selects (first select is 25% width) */
+  .trait-item .trait-select-wrapper[style*="display: flex"]:has(.trait-suit-select) .trait-disabled-message,
+  .trait-item .trait-select-wrapper[style*="display:flex"]:has(.trait-suit-select) .trait-disabled-message {
+    width: calc(25% - 3px) !important; /* Match first suit select width */
+    right: auto !important;
+  }
+  
+  /* Fallback for browsers that don't support :has() - target by sibling selector */
+  .trait-item .trait-select-wrapper .trait-suit-select ~ .trait-disabled-message {
+    width: calc(25% - 3px) !important;
+    right: auto !important;
+  }
+  
+  /* Make select text transparent when disabled message is shown */
+  .trait-item .trait-select.has-disabled-message {
+    color: transparent !important;
+  }
 }
 
 .no-results {

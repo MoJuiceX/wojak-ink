@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 export default function MintInfoWindow({ onNotifyClick, onClose }) {
   const contentRef = useRef(null)
   const [winWidth, setWinWidth] = useState(null)
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 640)
 
   useEffect(() => {
     const el = contentRef.current
@@ -14,6 +15,12 @@ export default function MintInfoWindow({ onNotifyClick, onClose }) {
       // Don't recalculate during drag to prevent layout shifts
       const windowEl = el.closest('.window')
       if (windowEl && windowEl.classList.contains('dragging')) {
+        return
+      }
+
+      // On mobile, always use full width
+      if (window.innerWidth <= 640) {
+        setWinWidth(null) // Let CSS handle full width on mobile
         return
       }
 
@@ -32,6 +39,7 @@ export default function MintInfoWindow({ onNotifyClick, onClose }) {
     // Use debounce to prevent excessive recalculations
     let resizeTimeout
     const handleResize = () => {
+      setIsMobile(window.innerWidth <= 640)
       clearTimeout(resizeTimeout)
       resizeTimeout = setTimeout(compute, 100)
     }
@@ -48,17 +56,52 @@ export default function MintInfoWindow({ onNotifyClick, onClose }) {
       id="window-mint-info-exe"
       title="MINT_INFO.TXT"
       style={{
-        width: winWidth ? `${winWidth}px` : 'auto',
-        maxWidth: 'min(1100px, calc(100vw - 80px))',
-        minWidth: '420px',
+        ...(isMobile ? {} : {
+          width: winWidth ? `${winWidth}px` : 'auto',
+          maxWidth: 'min(1100px, calc(100vw - 80px))',
+          minWidth: '420px',
+        }),
+        position: 'relative',
       }}
       onClose={onClose}
     >
+      {/* Escape button in top right corner of title bar */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation()
+          e.preventDefault()
+          onClose()
+        }}
+        style={{
+          position: 'absolute',
+          top: '2px',
+          right: '24px', /* Position before the close button (×) */
+          zIndex: 1001,
+          padding: '2px 6px',
+          fontSize: '10px',
+          fontFamily: 'MS Sans Serif, Tahoma, sans-serif',
+          backgroundColor: 'var(--btn-face, #c0c0c0)',
+          color: 'var(--btn-text, #000000)',
+          border: '1px outset var(--border-light, #ffffff)',
+          cursor: 'pointer',
+          boxShadow: 'inset -1px -1px 0 var(--border-dark, #808080)',
+          height: '16px',
+          lineHeight: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+        onMouseDown={(e) => e.stopPropagation()}
+        aria-label="Escape - Close window"
+        className="title-bar-button"
+      >
+        Escape
+      </button>
       <div
         ref={contentRef}
         className="readme-content"
         style={{
-          display: 'inline-block',
+          display: 'block',
         }}
       >
         <p>

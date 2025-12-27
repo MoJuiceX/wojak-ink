@@ -5,6 +5,7 @@
 
 const DESKTOP_IMAGES_KEY = 'wojak_desktop_images'
 const RECYCLE_BIN_KEY = 'wojak_recycle_bin'
+const FAVORITE_WOJAKS_KEY = 'wojak_favorite_wojaks'
 
 /**
  * Check if localStorage is available
@@ -229,5 +230,98 @@ export function importGallery(file) {
     reader.readAsText(file)
   })
 }
+
+/**
+ * Load favorite wojaks from localStorage
+ * @returns {Array} Array of favorite wojak objects
+ */
+export function loadFavoriteWojaks() {
+  if (!isLocalStorageAvailable()) {
+    return []
+  }
+
+  try {
+    const stored = localStorage.getItem(FAVORITE_WOJAKS_KEY)
+    if (!stored) return []
+    
+    const parsed = JSON.parse(stored)
+    return Array.isArray(parsed) ? parsed : []
+  } catch (error) {
+    console.error('Error loading favorite wojaks:', error)
+    return []
+  }
+}
+
+/**
+ * Save favorite wojaks to localStorage
+ * @param {Array} wojaks - Array of favorite wojak objects
+ * @returns {{ success: boolean, error?: string }} Result object
+ */
+export function saveFavoriteWojaks(wojaks) {
+  if (!isLocalStorageAvailable()) {
+    return { success: false, error: 'localStorage not available' }
+  }
+
+  try {
+    const json = JSON.stringify(wojaks)
+    localStorage.setItem(FAVORITE_WOJAKS_KEY, json)
+    return { success: true }
+  } catch (error) {
+    if (error.name === 'QuotaExceededError') {
+      return { success: false, error: 'QuotaExceededError' }
+    }
+    console.error('Error saving favorite wojaks:', error)
+    return { success: false, error: error.message }
+  }
+}
+
+/**
+ * Add a wojak to favorites
+ * @param {Object} wojak - Wojak object with image data and metadata
+ * @returns {{ success: boolean, error?: string }} Result object
+ */
+export function addFavoriteWojak(wojak) {
+  const favorites = loadFavoriteWojaks()
+  
+  // Check for duplicates (by image data URL or ID if available)
+  const isDuplicate = favorites.some(fav => {
+    if (wojak.id && fav.id) {
+      return fav.id === wojak.id
+    }
+    if (wojak.dataUrl && fav.dataUrl) {
+      return fav.dataUrl === wojak.dataUrl
+    }
+    return false
+  })
+
+  if (isDuplicate) {
+    return { success: false, error: 'Wojak already in favorites' }
+  }
+
+  // Add timestamp and ID if not present
+  const newWojak = {
+    ...wojak,
+    id: wojak.id || `wojak-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    savedAt: new Date().toISOString()
+  }
+
+  favorites.push(newWojak)
+  return saveFavoriteWojaks(favorites)
+}
+
+/**
+ * Remove a wojak from favorites
+ * @param {string} wojakId - ID of wojak to remove
+ * @returns {{ success: boolean, error?: string }} Result object
+ */
+export function removeFavoriteWojak(wojakId) {
+  const favorites = loadFavoriteWojaks()
+  const filtered = favorites.filter(fav => fav.id !== wojakId)
+  return saveFavoriteWojaks(filtered)
+}
+
+
+
+
 
 

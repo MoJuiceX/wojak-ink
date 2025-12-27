@@ -1,0 +1,15 @@
+{
+  "Face Wear": {
+    "no face wear": ["none", "no eyewear", "no facewear"]
+  },
+  "Head": {
+    "no headgear": ["none", "no head", "no hat", "no head gear"]
+  },
+  "Mouth": {
+    "gold teeth": ["golden teeth"],
+    "cohiba": ["cigar cohiba", "cigar"],
+    "cig": ["cigarette"],
+    "stach": ["Stache", "stache"]
+  }
+}
+

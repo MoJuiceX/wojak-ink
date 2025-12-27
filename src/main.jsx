@@ -11,18 +11,18 @@ import './index.css'
 // Preload critical assets on app initialization
 preloadCriticalAssets()
 
+// Temporarily disable StrictMode to prevent double renders that cause duplicate icons
+// StrictMode intentionally double-renders in development, which conflicts with our drag-and-drop
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <ErrorBoundary>
-      <BrowserRouter
-        future={{
-          v7_startTransition: true,
-          v7_relativeSplatPath: true,
-        }}
-      >
-        <App />
-      </BrowserRouter>
-    </ErrorBoundary>
-  </React.StrictMode>,
+  <ErrorBoundary>
+    <BrowserRouter
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
+      <App />
+    </BrowserRouter>
+  </ErrorBoundary>
 )
 

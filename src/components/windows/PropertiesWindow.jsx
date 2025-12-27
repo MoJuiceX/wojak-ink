@@ -30,7 +30,7 @@ export default function PropertiesWindow({ isOpen, onClose, icon }) {
       id="properties-window"
       title={`${icon.filename || icon.name || 'Icon'} Properties`}
       onClose={onClose}
-      style={{ width: '380px', height: 'auto' }}
+      style={{ width: 'clamp(280px, 92vw, 380px)', height: 'auto' }}
       className="properties-window"
     >
       <div className="properties-content">
@@ -144,5 +144,12 @@ export default function PropertiesWindow({ isOpen, onClose, icon }) {
     </Window>
   )
 }
+
+
+
+
+
+
+
 
 

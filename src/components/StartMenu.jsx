@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useWindow } from '../contexts/WindowContext'
 import { useMarketplace } from '../contexts/MarketplaceContext'
 import { APPS } from '../constants/apps'
@@ -10,6 +10,7 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakGen
   const internalMenuRef = useRef(null)
   const resolvedMenuRef = menuRef || internalMenuRef
   const deferredFocusRafRef = useRef(null)
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth <= 640)
 
   // Clear any pending deferred focus rAF on unmount
   useEffect(() => {
@@ -35,6 +36,16 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakGen
       playSound('menuPopup')
     }
   }, [isOpen])
+
+  // Detect mobile viewport
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 640)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useEffect(() => {
     if (!isOpen) return
@@ -65,16 +76,21 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakGen
 
     // Small delay to prevent immediate close on click
     const timeoutId = setTimeout(() => {
+      // Listen for both mouse and touch/pointer events to support mobile
       document.addEventListener('mousedown', handleClickOutside)
+      document.addEventListener('touchstart', handleClickOutside, { passive: true })
+      document.addEventListener('pointerdown', handleClickOutside)
       document.addEventListener('keydown', handleEscape)
     }, 10)
 
     return () => {
       clearTimeout(timeoutId)
       document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('touchstart', handleClickOutside)
+      document.removeEventListener('pointerdown', handleClickOutside)
       document.removeEventListener('keydown', handleEscape)
     }
-  }, [isOpen, onClose])
+  }, [isOpen, onClose, resolvedMenuRef, startButtonRef])
 
   const handleAppClick = (app) => {
     // Play menu command sound when item is clicked
@@ -244,6 +260,9 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakGen
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [isOpen])
 
+  const menuItemsRef = useRef(null)
+
+
   if (!isOpen) return null
 
   return (
@@ -259,10 +278,10 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakGen
       <div className="start-menu-header">
         <span className="start-menu-title">Wojak Farmers Plot</span>
       </div>
-      <div className="start-menu-items">
+      <div className="start-menu-items" ref={menuItemsRef}>
         {/* MAIN group apps */}
         {Object.values(APPS)
-          .filter(app => app.group === 'MAIN')
+          .filter(app => app.group === 'MAIN' && (!isMobile || app.id !== 'PAINT') && app.id !== 'COMMUNITY_RESOURCES')
           .map(app => (
             <button
               key={app.id}
@@ -351,6 +370,29 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakGen
               <span className="start-menu-item-text">{app.label}</span>
             </button>
           ))}
+        
+        {/* Dev Panel - only in development */}
+        {import.meta.env.DEV && (
+          <>
+            <hr className="start-menu-separator" role="separator" />
+            <button
+              className="start-menu-item"
+              onClick={() => {
+                onOpenApp('dev-panel')
+                onClose()
+              }}
+              role="menuitem"
+              tabIndex={0}
+            >
+              <AppIcon
+                icon="🔧"
+                className="start-menu-item-icon"
+                size={16}
+              />
+              <span className="start-menu-item-text">Dev Panel</span>
+            </button>
+          </>
+        )}
       </div>
     </div>
   )

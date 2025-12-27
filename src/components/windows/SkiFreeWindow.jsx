@@ -73,13 +73,14 @@ export default function SkiFreeWindow({ onClose }) {
       id="window-skifree"
       title="SKIFREE.EXE"
       style={{
-        width: '900px',
-        height: '700px',
-        maxWidth: 'var(--window-max-width)',
-        minWidth: 'var(--window-min-width)',
-        minHeight: 'var(--window-min-height)',
+        width: 'clamp(280px, 92vw, 900px)',
+        height: 'clamp(400px, 80vh, 700px)',
+        maxWidth: 'min(calc(100% - 16px), var(--window-max-width))',
+        minWidth: '280px',
+        minHeight: '400px',
       }}
       onClose={onClose}
+      showEscapeButton={true}
     >
       <div
         style={{

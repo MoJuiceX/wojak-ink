@@ -301,3 +301,17 @@ Mark each test with priority if issues are found:
 
 *Last Updated: After desktop icon hover effects implementation*
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+

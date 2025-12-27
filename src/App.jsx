@@ -4,6 +4,10 @@ import {
   saveDesktopImages, 
   loadRecycleBin, 
   saveRecycleBin,
+  loadFavoriteWojaks,
+  saveFavoriteWojaks,
+  addFavoriteWojak,
+  removeFavoriteWojak,
   isLocalStorageAvailable,
   getStorageUsage,
   exportGallery as exportGalleryUtil,
@@ -21,14 +25,18 @@ import SideStack from './components/SideStack'
 import NotifyPopup from './components/windows/NotifyPopup'
 import MarketplaceWindow from './components/windows/MarketplaceWindow'
 import WojakGenerator from './components/windows/WojakGenerator'
+import RarityExplorerWindow from './components/windows/RarityExplorerWindow'
 import PaintWindow from './components/windows/PaintWindow'
-import PinballWindow from './components/windows/PinballWindow'
 import SolitaireWindow from './components/windows/SolitaireWindow'
 import MinesweeperWindow from './components/windows/MinesweeperWindow'
 import SkiFreeWindow from './components/windows/SkiFreeWindow'
 import DesktopIcons from './components/DesktopIcons'
 import DesktopImageIcons from './components/DesktopImageIcons'
 import RecycleBinWindow from './components/windows/RecycleBinWindow'
+import MyFavoriteWojaksWindow from './components/windows/MyFavoriteWojaksWindow'
+import MemeticEnergyWindow from './components/windows/MemeticEnergyWindow'
+import CommunityResourcesWindow from './components/windows/CommunityResourcesWindow'
+import ImageViewerWindow from './components/windows/ImageViewerWindow'
 import Taskbar from './components/Taskbar'
 import BackgroundMusic from './components/BackgroundMusic'
 import LoadingSpinner from './components/ui/LoadingSpinner'
@@ -56,6 +64,7 @@ const isIOS = () => {
 // Lazy load non-critical routes
 const AdminPanel = lazy(() => import('./components/windows/AdminPanel'))
 const QAPage = lazy(() => import('./components/dev/QAPage'))
+import DevPanel from './components/windows/DevPanel'
 import { MarketplaceProvider } from './contexts/MarketplaceContext'
 import { WindowProvider } from './contexts/WindowContext'
 import { ToastProvider } from './contexts/ToastContext'
@@ -71,6 +80,7 @@ import ContextMenu from './components/ui/ContextMenu'
 import PropertiesWindow from './components/windows/PropertiesWindow'
 import DisplayPropertiesWindow from './components/windows/DisplayPropertiesWindow'
 import ThemeQAWindow from './components/windows/ThemeQAWindow'
+import { clearAllIconPositions } from './utils/iconPositionStorage'
 
 // Wallpaper definitions - exported for use in DisplayPropertiesWindow
 export const WALLPAPERS = [
@@ -129,9 +139,17 @@ function useGlobalScrollLock() {
     }
     
     // Prevent touch scrolling on document (except in scroll-allowed elements)
-    // Use passive: true for iOS to avoid performance issues
-    const touchMoveOptions = isIOS() ? { passive: true } : { passive: false }
+    // Check if we're dragging an icon - if so, don't prevent default (let icon handler do it)
     const handleTouchMove = (e) => {
+      // Check if we're dragging an icon - if so, skip preventing default
+      // The icon's drag handler will handle preventDefault with passive: false
+      const isDraggingIcon = e.target.closest('[data-icon-id]')?.dataset.dragging === 'true' ||
+                            e.target.closest('.dragging')
+      
+      if (isDraggingIcon) {
+        return // Let the icon's drag handler manage preventDefault
+      }
+      
       let element = e.target
       let isScrollAllowed = false
       
@@ -144,9 +162,20 @@ function useGlobalScrollLock() {
       }
       
       if (!isScrollAllowed) {
-        e.preventDefault()
+        // Only prevent default if listener is not passive
+        // On iOS, we use passive: true, so we can't prevent default here
+        // But we can still try (it will just be ignored on iOS)
+        try {
+          e.preventDefault()
+        } catch (err) {
+          // Ignore - passive listener can't prevent default
+        }
       }
     }
+    
+    // Use passive: false to allow preventDefault when not dragging icons
+    // But we check for dragging icons first, so this should work
+    const touchMoveOptions = { passive: false }
     
     // Prevent keyboard scrolling (arrow keys, space, page up/down)
     const handleKeyDown = (e) => {
@@ -206,7 +235,13 @@ function AppContent() {
   const [notifyOpen, setNotifyOpen] = useState(false)
   const [desktopImages, setDesktopImages] = useState([])
   const [recycleBin, setRecycleBin] = useState([])
+  const [favoriteWojaks, setFavoriteWojaks] = useState([])
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false)
+  const [isFavoriteWojaksOpen, setIsFavoriteWojaksOpen] = useState(false)
+  const [isMemeticEnergyOpen, setIsMemeticEnergyOpen] = useState(false)
+  const [isCommunityResourcesOpen, setIsCommunityResourcesOpen] = useState(false)
+  const [isDevPanelOpen, setIsDevPanelOpen] = useState(false)
+  const [imageViewer, setImageViewer] = useState({ isOpen: false, imageDataUrl: null, filename: null })
   const [lastAction, setLastAction] = useState(null) // { type: 'delete', item: {...}, timestamp: Date.now() }
   const [selectedIconIds, setSelectedIconIds] = useState([])
   const [isLoadingGallery, setIsLoadingGallery] = useState(true)
@@ -220,55 +255,15 @@ function AppContent() {
       const accent = localStorage.getItem('accent') || 'default'
       document.documentElement.setAttribute('data-theme', theme)
       document.documentElement.setAttribute('data-accent', accent)
-      
-      // #region agent log
-      // Instrumentation: Log theme initialization (DEV only)
-      if (import.meta.env.DEV) {
-        const htmlEl = document.documentElement
-        const actualTheme = htmlEl.getAttribute('data-theme')
-        const actualAccent = htmlEl.getAttribute('data-accent')
-        const taskbarBtnTextToken = getComputedStyle(htmlEl).getPropertyValue('--taskbar-btn-text')
-        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.jsx:useEffect',message:'Theme initialization',data:{storedTheme:theme,storedAccent:accent,actualTheme,actualAccent,taskbarBtnTextToken},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-      }
-      // #endregion
     } catch (e) {
       // localStorage not available, use defaults
       document.documentElement.setAttribute('data-theme', 'classic')
       document.documentElement.setAttribute('data-accent', 'default')
-      
-      // #region agent log
-      if (import.meta.env.DEV) {
-        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.jsx:useEffect',message:'Theme initialization failed, using defaults',data:{error:e.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-      }
-      // #endregion
     }
     
     // Listen for theme changes
     const handleThemeChange = (e) => {
       document.documentElement.setAttribute('data-theme', e.detail.theme)
-      
-      // #region agent log
-      // Instrumentation: Log theme change and check token resolution (including green scheme)
-      const htmlEl = document.documentElement
-      const actualTheme = htmlEl.getAttribute('data-theme')
-      const taskbarBtnTextToken = getComputedStyle(htmlEl).getPropertyValue('--taskbar-btn-text')
-      const taskbarBtnFaceToken = getComputedStyle(htmlEl).getPropertyValue('--taskbar-btn-face')
-      const taskbarBgToken = getComputedStyle(htmlEl).getPropertyValue('--taskbar-bg')
-      const windowFaceToken = getComputedStyle(htmlEl).getPropertyValue('--window-face')
-      const btnFaceToken = getComputedStyle(htmlEl).getPropertyValue('--btn-face')
-      
-      // Check a taskbar button if it exists
-      const firstButton = document.querySelector('.taskbar-window-button')
-      const firstButtonText = document.querySelector('.taskbar-window-button-text')
-      const taskbar = document.querySelector('.taskbar')
-      const buttonComputed = firstButton ? getComputedStyle(firstButton) : null
-      const textComputed = firstButtonText ? getComputedStyle(firstButtonText) : null
-      const taskbarComputed = taskbar ? getComputedStyle(taskbar) : null
-      
-      if (import.meta.env.DEV) {
-        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.jsx:handleThemeChange',message:'Theme changed - checking green scheme application',data:{newTheme:e.detail.theme,actualTheme,taskbarBtnTextToken,taskbarBtnFaceToken,taskbarBgToken,windowFaceToken,btnFaceToken,buttonColor:buttonComputed?.color,textColor:textComputed?.color,buttonBg:buttonComputed?.backgroundColor,taskbarBg:taskbarComputed?.backgroundColor},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'GREEN_SCHEME'})}).catch(()=>{});
-      }
-      // #endregion
       
       // Dev helper: log theme changes
       if (import.meta.env.DEV) {
@@ -358,8 +353,13 @@ function AppContent() {
     'window-marketplace': false,
     'tanggang': false,
     'wojak-generator': false,
+    'rarity-explorer': false,
     'paint': false,
     'theme-qa-window': false,
+    'my-favorite-wojaks': false,
+    'memetic-energy': false,
+    'community-resources': false,
+    'dev-panel': false,
   })
 
   // Check if modal/dialog is open
@@ -373,6 +373,29 @@ function AppContent() {
   const { setInputFocused } = useScreensaver()
   const { contextMenu, showContextMenu, hideContextMenu } = useContextMenu()
   const desktopRef = useRef(null)
+  const [iconResetKey, setIconResetKey] = useState(0)
+
+  // Reset all icon positions to defaults
+  const resetIconPositions = useCallback(() => {
+    // Clear all saved icon positions from localStorage
+    clearAllIconPositions()
+    
+    // Reset desktop image icon positions (remove position property so they use defaults)
+    setDesktopImages(prev => 
+      prev.map(img => {
+        const { position, ...rest } = img
+        return rest
+      })
+    )
+    
+    // Force re-mount of DesktopImageIcons only (DesktopIcons doesn't use key anymore)
+    // This will make them reload positions from localStorage (which is now empty)
+    // and use default positions
+    // Note: DesktopIcons no longer uses key prop, so it won't remount
+    setIconResetKey(prev => prev + 1)
+    
+    playSound('click')
+  }, [])
 
   // Desktop context menu handler
   const handleDesktopContextMenu = (e) => {
@@ -408,24 +431,10 @@ function AppContent() {
             shortcut: 'F5' 
           },
           { separator: true },
-          {
-            icon: '📐',
-            label: 'Arrange Icons',
-            onClick: () => {
-              // TODO: Implement arrange icons
-              console.log('Arrange icons')
-            },
-            disabled: true
-          },
-          { separator: true },
           { 
-            icon: '📁', 
-            label: 'New Folder', 
-            onClick: () => {
-              // TODO: Implement new folder
-              console.log('New folder')
-            }, 
-            disabled: true 
+            icon: '📐', 
+            label: 'Reset icons.', 
+            onClick: resetIconPositions
           },
           { separator: true },
           { 
@@ -529,8 +538,10 @@ function AppContent() {
       try {
         const loaded = loadDesktopImages()
         const loadedBin = loadRecycleBin()
+        const loadedFavorites = loadFavoriteWojaks()
         setDesktopImages(loaded)
         setRecycleBin(loadedBin)
+        setFavoriteWojaks(loadedFavorites)
       } catch (error) {
         console.error('Failed to load gallery:', error)
         showToast('⚠️ Failed to load gallery', 'error', 3000)
@@ -571,6 +582,18 @@ function AppContent() {
       ...prev,
       [windowId]: false,
     }))
+  }
+
+  const handleResetStartup = () => {
+    // Reset startup sequence by clearing sessionStorage and resetting state
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        window.sessionStorage.removeItem('hasSeenStartup')
+      }
+      setIsStartupComplete(false)
+    } catch (error) {
+      console.error('Error resetting startup sequence:', error)
+    }
   }
 
   const addDesktopImage = useCallback((imageDataUrl, filename, type = 'original', selectedLayers = {}, pairId = null) => {
@@ -660,10 +683,6 @@ function AppContent() {
       
       // Final clamp to ensure visibility
       startY = Math.min(startY, maxY)
-      
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.jsx:520',message:'Final icon position',data:{screenWidth,screenHeight,prevLength:prev.length,startX,startY,maxY,maxVisibleY,iconHeight,taskbarHeight},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
 
       const newImage = {
         id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${type}`,
@@ -1014,8 +1033,10 @@ function AppContent() {
         // Reload from localStorage
         const loaded = loadDesktopImages()
         const loadedBin = loadRecycleBin()
+        const loadedFavorites = loadFavoriteWojaks()
         setDesktopImages(loaded)
         setRecycleBin(loadedBin)
+        setFavoriteWojaks(loadedFavorites)
         showToast(`✅ Gallery imported: ${result.count} images`, 'success', 3000)
       })
       .catch((error) => {
@@ -1067,24 +1088,41 @@ function AppContent() {
   // Global tooltip positioning - prevent clipping
   useEffect(() => {
     const handleMouseEnter = (e) => {
-      const element = e.target.closest('.win98-tooltip')
-      if (element) {
-        positionTooltip(element)
+      // Bulletproof guard - check for null, check for closest method existence
+      if (!e.target || !e.target.closest) {
+        return
+      }
+      
+      try {
+        const element = e.target.closest('.win98-tooltip')
+        if (element) {
+          positionTooltip(element)
+        }
+      } catch (err) {
+        // Silently ignore - not a valid element
       }
     }
 
     // Mobile: Show tooltips on touch (long-press or tap)
     const handleTouchStart = (e) => {
-      const element = e.target.closest('.win98-tooltip')
-      if (element && element.dataset.tooltip) {
-        // Mark as touched to show tooltip
-        element.dataset.tooltipTouched = 'true'
-        positionTooltip(element)
-        
-        // Hide after 3 seconds
-        setTimeout(() => {
-          element.dataset.tooltipTouched = 'false'
-        }, 3000)
+      if (!e.target || !e.target.closest) {
+        return
+      }
+      
+      try {
+        const element = e.target.closest('.win98-tooltip')
+        if (element && element.dataset.tooltip) {
+          // Mark as touched to show tooltip
+          element.dataset.tooltipTouched = 'true'
+          positionTooltip(element)
+          
+          // Hide after 3 seconds
+          setTimeout(() => {
+            element.dataset.tooltipTouched = 'false'
+          }, 3000)
+        }
+      } catch (err) {
+        // Silently ignore
       }
     }
 
@@ -1195,10 +1233,23 @@ function AppContent() {
                 />
                 <DesktopIcons onOpenApp={openWindow} />
                 <DesktopImageIcons 
+                  key={iconResetKey}
                   desktopImages={desktopImages}
                   onRemoveImage={moveToRecycleBin}
                   onUpdatePosition={updateIconPosition}
                   onOpenRecycleBin={() => setIsRecycleBinOpen(true)}
+                  onOpenFavoriteWojaks={() => {
+                    setIsFavoriteWojaksOpen(true)
+                    setOpenWindows(prev => ({ ...prev, 'my-favorite-wojaks': true }))
+                  }}
+                  onOpenMemeticEnergy={() => {
+                    setIsMemeticEnergyOpen(true)
+                    setOpenWindows(prev => ({ ...prev, 'memetic-energy': true }))
+                  }}
+                  onOpenCommunityResources={() => {
+                    setIsCommunityResourcesOpen(true)
+                    setOpenWindows(prev => ({ ...prev, 'community-resources': true }))
+                  }}
                   selectedIconIds={selectedIconIds}
                   setSelectedIconIds={setSelectedIconIds}
                   onShowProperties={setPropertiesIcon}
@@ -1250,6 +1301,20 @@ function AppContent() {
                   onClose={() => closeWindow('wojak-generator')}
                   onAddDesktopImage={addDesktopImage}
                   desktopImages={desktopImages}
+                  onSaveToFavorites={async (wojak) => {
+                    const result = addFavoriteWojak(wojak)
+                    if (result.success) {
+                      setFavoriteWojaks(loadFavoriteWojaks())
+                      return Promise.resolve()
+                    } else {
+                      return Promise.reject(new Error(result.error || 'Failed to save to favorites'))
+                    }
+                  }}
+                />
+              )}
+              {openWindows['rarity-explorer'] && (
+                <RarityExplorerWindow 
+                  onClose={() => closeWindow('rarity-explorer')} 
                 />
               )}
               {isRecycleBinOpen && (
@@ -1265,9 +1330,6 @@ function AppContent() {
                 />
               )}
               {openWindows['paint'] && <PaintWindow onClose={() => closeWindow('paint')} />}
-              {openWindows['pinball-window'] && (
-                <PinballWindow onClose={() => closeWindow('pinball-window')} />
-              )}
               {openWindows['window-solitaire'] && (
                 <SolitaireWindow onClose={() => closeWindow('window-solitaire')} />
               )}
@@ -1276,6 +1338,12 @@ function AppContent() {
               )}
               {openWindows['window-skifree'] && (
                 <SkiFreeWindow onClose={() => closeWindow('window-skifree')} />
+              )}
+              {openWindows['dev-panel'] && (
+                <DevPanel 
+                  onResetStartup={handleResetStartup}
+                  onClose={() => closeWindow('dev-panel')}
+                />
               )}
               <NotifyPopup isOpen={notifyOpen} onClose={() => setNotifyOpen(false)} />
               <TryAgainWindowWrapper />
@@ -1292,6 +1360,41 @@ function AppContent() {
                   onClose={() => setIsDisplayPropertiesOpen(false)}
                   currentWallpaper={wallpaper}
                   onChangeWallpaper={handleWallpaperChange}
+                />
+              )}
+              {openWindows['my-favorite-wojaks'] && (
+                <MyFavoriteWojaksWindow
+                  isOpen={openWindows['my-favorite-wojaks']}
+                  onClose={() => {
+                    setIsFavoriteWojaksOpen(false)
+                    closeWindow('my-favorite-wojaks')
+                  }}
+                  favoriteWojaks={favoriteWojaks}
+                  onRemove={(wojakId) => {
+                    const result = removeFavoriteWojak(wojakId)
+                    if (result.success) {
+                      setFavoriteWojaks(loadFavoriteWojaks())
+                    }
+                  }}
+                />
+              )}
+              {openWindows['memetic-energy'] && (
+                <MemeticEnergyWindow
+                  isOpen={openWindows['memetic-energy']}
+                  onClose={() => closeWindow('memetic-energy')}
+                />
+              )}
+              {openWindows['community-resources'] && (
+                <CommunityResourcesWindow
+                  isOpen={openWindows['community-resources']}
+                  onClose={() => closeWindow('community-resources')}
+                />
+              )}
+              {imageViewer.isOpen && (
+                <ImageViewerWindow
+                  imageDataUrl={imageViewer.imageDataUrl}
+                  filename={imageViewer.filename}
+                  onClose={() => setImageViewer({ isOpen: false, imageDataUrl: null, filename: null })}
                 />
               )}
               {openWindows['theme-qa-window'] && (

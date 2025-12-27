@@ -147,7 +147,7 @@ export function getDefaultWindowSize(windowId) {
     'window-faq': { width: 600, height: 400 }, // Updated to match actual width
     'window-marketplace': { width: 900, height: 700 },
     'tanggang': { width: 400, height: 300 },
-    'wojak-generator': { width: 1000, height: 800 },
+    'wojak-generator': { width: 900, height: 800 },
     'paint-window': { width: 800, height: 600 },
     'treasure-window': { width: 500, height: 500 },
     'pinball-window': { width: 1024, height: 768 },

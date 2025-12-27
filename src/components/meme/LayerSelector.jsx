@@ -192,7 +192,7 @@ function getDefaultSuitVariant(suitVariants) {
 
 // normalizeHeadLabel and formatDisplayLabel are now imported from traitOptions
 
-function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, selectedLayers = {}, navigation, traitIndex = -1, disableTooltip = false }) {
+function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, selectedLayers = {}, navigation, traitIndex = -1, disableTooltip = false, isFirstRow = false }) {
   const { images, loading } = useImageLoader(layerName)
   const [options, setOptions] = useState([])
   const [selectedOption, setSelectedOption] = useState('')
@@ -200,6 +200,14 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
   const [focusedIndex, setFocusedIndex] = useState(-1)
   const isFocusedTrait = navigation && traitIndex >= 0 && navigation.focusedTraitIndex === traitIndex
   const shouldGroup = ['Head', 'Eyes', 'Clothes'].includes(layerName)
+  
+  // Detect mobile viewport for inline styles (inline styles override CSS)
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 640)
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 640)
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
   
   // Store grouping metadata
   const groupsRef = useRef(new Map())
@@ -222,6 +230,7 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
       }
     }
   }, [navigation, layerName, options, selectedOption])
+
 
   // Memoize options computation to prevent unnecessary recalculations
   const computedOptions = useMemo(() => {
@@ -904,14 +913,36 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
     if (shouldGroup && value.startsWith('__GROUP__')) {
       // Extract base name
       const baseName = value.replace('__GROUP__', '')
-      // Find group option - handle special cases like CHIA_FARMER vs "Chia Farmer"
+      // Find group option - handle special cases like CHIA_FARMER vs "Chia Farmer" and SUIT vs "Suit"
       let groupOption = options.find(opt => {
         if (!opt.isGrouped) return false
+        // Special case for Suit: match by isSuitGroup
+        if (baseName === 'SUIT' && opt.isSuitGroup) return true
         // Special case for Chia Farmer: match by isChiaFarmerGroup or by value
         if (baseName === 'CHIA_FARMER' && opt.isChiaFarmerGroup) return true
-        // For other groups, match by baseName
-        return opt.baseName === baseName
+        // For other groups, match by baseName (case-insensitive)
+        const optBaseName = (opt.baseName || '').toLowerCase().trim()
+        const searchBaseName = baseName.toLowerCase().trim()
+        return optBaseName === searchBaseName
       })
+      
+      // Debug logging (dev mode only)
+      if (import.meta.env.DEV && baseName === 'SUIT') {
+        console.log('[Suit Selection]', {
+          baseName,
+          groupOption: groupOption ? {
+            value: groupOption.value,
+            baseName: groupOption.baseName,
+            isSuitGroup: groupOption.isSuitGroup,
+            defaultVariantPath: groupOption.defaultVariantPath
+          } : null,
+          allOptions: options.filter(opt => opt.isGrouped).map(opt => ({
+            value: opt.value,
+            baseName: opt.baseName,
+            isSuitGroup: opt.isSuitGroup
+          }))
+        })
+      }
       
       // Special handling for Head Cap: prefer last normal cap, never default to McD
       if (layerName === 'Head' && baseName === 'Cap') {
@@ -927,6 +958,10 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
         if (groupOption.isChiaFarmerGroup) {
           onSelect('ClothesAddon', groupOption.defaultVariantPath)
           // Also ensure a Tee or Tank-top is selected in Clothes (rules will handle this)
+        } else if (groupOption.isSuitGroup) {
+          // Special handling for Suit: ensure we select the default variant path
+          // This should NOT change the dropdown selection - it should stay as "Suit"
+          onSelect(layerName, groupOption.defaultVariantPath)
         } else {
           // Auto-select default variant
           onSelect(layerName, groupOption.defaultVariantPath)
@@ -1192,6 +1227,7 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
   }
   const displayName = layerDisplayNames[layerName] || layerName.charAt(0).toUpperCase() + layerName.slice(1)
   const disabledReason = disabled ? getDisabledReason(layerName, selectedLayers) : null
+
 
   // Check if ClothesAddon needs hint text (when Tee/Tank-top is not selected)
   const needsBaseClothes = layerName === 'ClothesAddon' && disabled && disabledReason === 'Choose Tee or Tank Top first'
@@ -1476,6 +1512,20 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
       : `${displayName}: Select a trait`
   ) : null
 
+  // Debug: Log computed styles after render
+  useEffect(() => {
+    if (shouldGroup && shouldShowSuitPicker && currentSuitState && !shouldShowChiaFarmerPicker) {
+      setTimeout(() => {
+        const picker = document.querySelector('#wojak-generator .suit-variant-picker');
+        const row = document.querySelector('#wojak-generator .suit-variant-row');
+        const slot = document.querySelector('#wojak-generator .trait-dot-slot');
+        if (picker && row && slot) {
+          // Styles are now enforced via inline styles on mobile
+        }
+      }, 100);
+    }
+  }, [shouldGroup, shouldShowSuitPicker, currentSuitState, shouldShowChiaFarmerPicker]);
+
   const selectorContent = (
     <div 
       className={`trait-selector-wrapper ${isFocusedTrait ? 'trait-focused' : ''}`}
@@ -1485,10 +1535,37 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
       <div className="trait-message-slot">
         {/* Reserved space - message shown inside select when disabled */}
       </div>
-      <Label htmlFor={`select-${layerName}`} className="trait-label">
+      <Label 
+        htmlFor={`select-${layerName}`} 
+        className="trait-label"
+        style={{ 
+          marginTop: isFirstRow ? '-6px' : '-14px', // First row stays in place, others move higher
+          marginBottom: '0px', // Spacing below label (reduced to 0)
+          transform: isFirstRow ? 'translateY(0)' : 'translateY(-4px)', // Additional transform for non-first rows
+          paddingBottom: '0px' // Reduced padding below label to 0
+        }}
+      >
         {displayName}:
       </Label>
-      <div className="trait-select-wrapper">
+      <div 
+        className="trait-select-wrapper"
+        style={{
+          marginTop: isFirstRow ? '0px' : '-4px', // First row stays in place, others move higher - MUST match CSS (reduced from -12px to bring closer to label)
+          transform: isFirstRow ? 'translateY(0)' : 'translateY(-4px)', // Additional transform for non-first rows
+          ...((shouldGroup && activeGroup && activeGroup.variants.length > 1 && !shouldShowSuitPicker) ? {
+            display: 'flex',
+            gap: '8px',
+            width: '100%'
+          } : (shouldGroup && shouldShowSuitPicker && currentSuitState && !shouldShowChiaFarmerPicker) ? {
+            display: 'flex',
+            gap: '4px',
+            width: '100%',
+            minWidth: 0,
+            overflow: 'visible'
+          } : undefined)
+        }}
+      >
+        {/* Main dropdown - always show, but smaller when suit is selected */}
         <Select
           ref={selectRef}
           id={`select-${layerName}`}
@@ -1501,88 +1578,164 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
           options={loading ? [{ value: '', label: 'Loading...' }] : options}
           disabled={loading || disabled}
           className={`trait-select ${isFocusedTrait ? 'trait-select-focused' : ''} ${disabled && disabledReason ? 'has-disabled-message' : ''}`}
-          style={{ width: '100%', minWidth: 0, boxSizing: 'border-box' }}
+          style={(shouldGroup && activeGroup && activeGroup.variants.length > 1 && !shouldShowSuitPicker) ? {
+            width: '50%',
+            minWidth: 0,
+            boxSizing: 'border-box',
+            flex: '0 0 50%'
+          } : (shouldGroup && shouldShowSuitPicker && currentSuitState && !shouldShowChiaFarmerPicker) ? {
+            width: 'calc(25% - 3px)',
+            minWidth: 0,
+            maxWidth: 'calc(25% - 3px)',
+            boxSizing: 'border-box',
+            flex: '0 0 calc(25% - 3px)'
+          } : { width: '100%', minWidth: 0, boxSizing: 'border-box' }}
         />
+        {/* Color dropdown - shown when color options are available */}
+        {shouldGroup && activeGroup && activeGroup.variants.length > 1 && !shouldShowSuitPicker && (
+          <Select
+            id={`select-${layerName}-color`}
+            value={activeGroup.activePath || ''}
+            onChange={(e) => {
+              const selectedColorValue = e.target.value
+              if (selectedColorValue) {
+                onSelect(layerName, selectedColorValue)
+              }
+            }}
+            options={activeGroup.variants.map(variant => {
+              const isBaseVariant = !variant.color || !variant.hex
+              const label = isBaseVariant 
+                ? 'Base' 
+                : variant.color ? variant.color.charAt(0).toUpperCase() + variant.color.slice(1) 
+                : 'Default'
+              return {
+                value: variant.value,
+                label: label
+              }
+            })}
+            disabled={loading || disabled}
+            className="trait-select trait-color-select"
+            style={{
+              width: '50%',
+              minWidth: 0,
+              boxSizing: 'border-box',
+              flex: '0 0 50%'
+            }}
+          />
+        )}
+        {/* Suit dropdowns - three dropdowns: suit color, accessory type (Tie/Bow), and accessory color */}
+        {shouldGroup && shouldShowSuitPicker && currentSuitState && !shouldShowChiaFarmerPicker && (
+          <>
+            {/* Suit color dropdown */}
+            <Select
+              id={`select-${layerName}-suit-color`}
+              value={currentSuitState.currentSuitColor || ''}
+              onChange={(e) => {
+                const suitColor = e.target.value
+                if (suitColor && currentSuitState) {
+                  handleSuitColorClick(suitColor)
+                }
+              }}
+              options={currentSuitState.availableSuitColors.map(color => ({
+                value: color,
+                label: color.charAt(0).toUpperCase() + color.slice(1)
+              }))}
+              disabled={loading || disabled}
+              className="trait-select trait-suit-select"
+              style={{
+                width: 'calc(25% - 3px)',
+                minWidth: 0,
+                maxWidth: 'calc(25% - 3px)',
+                boxSizing: 'border-box',
+                flex: '0 0 calc(25% - 3px)'
+              }}
+            />
+            {/* Accessory type dropdown (Tie/Bow) */}
+            <Select
+              id={`select-${layerName}-accessory-type`}
+              value={currentSuitState.currentAccessoryType || ''}
+              onChange={(e) => {
+                const accessoryType = e.target.value
+                if (accessoryType && currentSuitState) {
+                  handleAccessoryTypeToggle(accessoryType)
+                }
+              }}
+              options={currentSuitState.availableTypes.map(type => ({
+                value: type,
+                label: type.charAt(0).toUpperCase() + type.slice(1).toUpperCase()
+              }))}
+              disabled={loading || disabled || currentSuitState.availableTypes.length === 0}
+              className="trait-select trait-suit-select"
+              style={{
+                width: 'calc(25% - 3px)',
+                minWidth: 0,
+                maxWidth: 'calc(25% - 3px)',
+                boxSizing: 'border-box',
+                flex: '0 0 calc(25% - 3px)'
+              }}
+            />
+            {/* Accessory color dropdown */}
+            <Select
+              id={`select-${layerName}-accessory-color`}
+              value={currentSuitState.currentAccessoryColor || ''}
+              onChange={(e) => {
+                const accessoryColor = e.target.value
+                if (accessoryColor && currentSuitState) {
+                  handleAccessoryColorClick(accessoryColor)
+                }
+              }}
+              options={currentSuitState.availableAccessoryColors && currentSuitState.availableAccessoryColors.length > 0 ? currentSuitState.availableAccessoryColors.map(color => ({
+                value: color,
+                label: color.charAt(0).toUpperCase() + color.slice(1)
+              })) : []}
+              disabled={loading || disabled || !currentSuitState.availableAccessoryColors || currentSuitState.availableAccessoryColors.length === 0}
+              className="trait-select trait-suit-select"
+              style={{
+                width: 'calc(25% - 3px)',
+                minWidth: 0,
+                maxWidth: 'calc(25% - 3px)',
+                boxSizing: 'border-box',
+                flex: '0 0 calc(25% - 3px)'
+              }}
+            />
+          </>
+        )}
         {disabled && disabledReason && (
           <span className="trait-disabled-message">{disabledReason}</span>
         )}
       </div>
       {/* Fixed-height slot for variant pickers - ALWAYS rendered to prevent layout shift */}
-      <div className="trait-dot-slot">
-          {/* Suit variant picker - single row compact layout */}
-          {shouldGroup && shouldShowSuitPicker && currentSuitState && !shouldShowChiaFarmerPicker && (
-          <div className="suit-variant-picker">
-            <div className="suit-variant-row">
-              <div className="color-dots">
-                {currentSuitState.availableSuitColors.map(suitColor => {
-                  const isActive = suitColor === currentSuitState.currentSuitColor
-                  const suitColorHex = suitColor === 'black' ? COLOR_TOKENS['black'] : COLOR_TOKENS['orange']
-                  
-                  return (
-                    <button
-                      key={suitColor}
-                      type="button"
-                      className={`color-dot ${isActive ? 'active' : ''}`}
-                      style={{ backgroundColor: suitColorHex, ['--dot-color']: suitColorHex }}
-                      onClick={() => handleSuitColorClick(suitColor)}
-                      disabled={disabled}
-                      aria-label={`Set suit color: ${suitColor}`}
-                      onMouseDown={(e) => e.stopPropagation()}
-                      onPointerDown={(e) => e.stopPropagation()}
-                    />
-                  )
-                })}
-              </div>
-              <div className="type-toggle">
-                <button
-                  type="button"
-                  className={`type-toggle-button ${currentSuitState.currentAccessoryType === 'tie' ? 'active' : ''}`}
-                  onClick={() => handleAccessoryTypeToggle('tie')}
-                  disabled={disabled || !currentSuitState.availableTypes.includes('tie')}
-                  onMouseDown={(e) => e.stopPropagation()}
-                  onPointerDown={(e) => e.stopPropagation()}
-                >
-                  TIE
-                </button>
-                <button
-                  type="button"
-                  className={`type-toggle-button ${currentSuitState.currentAccessoryType === 'bow' ? 'active' : ''}`}
-                  onClick={() => handleAccessoryTypeToggle('bow')}
-                  disabled={disabled || !currentSuitState.availableTypes.includes('bow')}
-                  onMouseDown={(e) => e.stopPropagation()}
-                  onPointerDown={(e) => e.stopPropagation()}
-                >
-                  BOW
-                </button>
-              </div>
-              <div className="color-dots">
-                {currentSuitState.availableAccessoryColors.map(accessoryColor => {
-                  const isActive = accessoryColor === currentSuitState.currentAccessoryColor
-                  const accessoryColorHex = COLOR_TOKENS[accessoryColor] || '#000000'
-                  
-                  return (
-                    <button
-                      key={accessoryColor}
-                      type="button"
-                      className={`color-dot ${isActive ? 'active' : ''}`}
-                      style={{ backgroundColor: accessoryColorHex, ['--dot-color']: accessoryColorHex }}
-                      onClick={() => handleAccessoryColorClick(accessoryColor)}
-                      disabled={disabled}
-                      aria-label={`Set accessory color: ${accessoryColor}`}
-                      onMouseDown={(e) => e.stopPropagation()}
-                      onPointerDown={(e) => e.stopPropagation()}
-                    />
-                  )
-                })}
-              </div>
-            </div>
-          </div>
-        )}
-        {/* Color variant picker - show for grouped selections with >1 variant (Tee/Tank-top, etc.)
+      <div 
+        className="trait-dot-slot"
+        style={isMobile ? { display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', alignItems: 'center', paddingLeft: '4px', paddingRight: '4px' } : undefined}
+      >
+          {/* Suit variant picker - REMOVED: Now using three dropdowns instead of color dots and buttons */}
+        {/* Color variant picker - HIDDEN: Now using color dropdown instead of dots
             Show even when Chia Farmer is selected (Tee/Tank-top dots come first) */}
-        {shouldGroup && activeGroup && activeGroup.variants.length > 1 && !shouldShowSuitPicker && (
-          <div className="color-variant-picker">
-            <div className={`color-dots ${layerName === 'Head' && activeGroup.baseName === 'Cap' && activeGroup.capMcdVariant && selectedValue === activeGroup.capMcdVariant.value ? 'is-muted' : ''}`}>
+        {false && shouldGroup && activeGroup && activeGroup.variants.length > 1 && !shouldShowSuitPicker && (
+          <div 
+            className="color-variant-picker"
+            style={isMobile ? { 
+              display: 'flex', 
+              flexDirection: 'row', 
+              flexWrap: 'nowrap', 
+              alignItems: 'center', 
+              width: '100%', 
+              minWidth: 0,
+              maxWidth: 'none',
+              overflowX: 'auto', 
+              overflowY: 'hidden', 
+              gap: '8px', 
+              paddingLeft: '4px', 
+              paddingRight: '4px',
+              position: 'relative',
+              zIndex: 1
+            } : undefined}
+          >
+            <div 
+              className={`color-dots ${layerName === 'Head' && activeGroup.baseName === 'Cap' && activeGroup.capMcdVariant && selectedValue === activeGroup.capMcdVariant.value ? 'is-muted' : ''}`}
+              style={isMobile ? { display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', alignItems: 'center', width: '100%', overflowX: 'auto', overflowY: 'hidden', gap: '8px', padding: '6px 4px' } : undefined}
+            >
               {activeGroup.variants.map(variant => {
                 // Include base variants (no color) as well as color variants
                 const isBaseVariant = !variant.color || !variant.hex
@@ -1668,8 +1821,14 @@ function LayerSelector({ layerName, onSelect, selectedValue, disabled = false, s
         )}
         {/* Chia Farmer variant picker - single row color dots (rendered AFTER Tee/Tank-top dots) */}
         {shouldGroup && shouldShowChiaFarmerPicker && currentChiaFarmerState && !shouldShowSuitPicker && (
-          <div className="chia-farmer-variant-picker">
-            <div className="color-dots">
+          <div 
+            className="chia-farmer-variant-picker"
+            style={isMobile ? { display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', alignItems: 'center', width: '100%', overflowX: 'auto', overflowY: 'hidden', gap: '8px', paddingLeft: '4px', paddingRight: '4px' } : undefined}
+          >
+            <div 
+              className="color-dots"
+              style={isMobile ? { display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', alignItems: 'center', width: '100%', overflowX: 'auto', overflowY: 'hidden', gap: '8px', padding: '6px 4px' } : undefined}
+            >
               {currentChiaFarmerState.availableColors.map(color => {
                 const isActive = color === currentChiaFarmerState.currentColor
                 const colorHex = COLOR_TOKENS[color] || '#000000'

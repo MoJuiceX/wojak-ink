@@ -47,10 +47,12 @@ export function setSoundMode(mode) {
 
 // Standard mode sounds (Windows 98 Classic) - TRULY MINIMAL
 // Classic Windows 98 had very few sounds - most users kept sounds disabled or minimal
-// Only system-level sounds and critical errors, NO window interaction sounds, NO boot sounds
+// Only system-level sounds and critical errors, NO window interaction sounds
 const STANDARD_MODE_SOUNDS = [
-  // Critical system sounds only (no startup/boot sound for website)
+  // Critical system sounds only
   'shutdown',
+  // Boot/startup sound (for boot sequence)
+  'windowsStart',
   // Critical errors only (system-level, not UI errors)
   'error',
   'criticalError',

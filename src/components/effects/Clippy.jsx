@@ -41,3 +41,17 @@ export default function Clippy({ isVisible, onClose }) {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+

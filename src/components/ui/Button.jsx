@@ -58,6 +58,10 @@ export default function Button({
       }}
       onTouchStart={(e) => {
         if (!disabled) {
+          // Only handle if touch started on this exact element or its children
+          if (e.target !== e.currentTarget && !e.currentTarget.contains(e.target)) {
+            return
+          }
           // Visual feedback for touch
           e.currentTarget.style.background = 'var(--btn-face-hover)'
           e.currentTarget.style.border = '1px inset var(--border-dark)'
@@ -66,6 +70,10 @@ export default function Button({
       }}
       onTouchEnd={(e) => {
         if (!disabled) {
+          // Only handle if touch ended on this exact element or its children
+          if (e.target !== e.currentTarget && !e.currentTarget.contains(e.target)) {
+            return
+          }
           // Reset visual feedback
           e.currentTarget.style.background = 'var(--btn-face)'
           e.currentTarget.style.border = '1px outset var(--border-light)'

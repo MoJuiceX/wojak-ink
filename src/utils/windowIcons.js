@@ -14,6 +14,8 @@ const windowIconMap = {
   'window-tanggang': 'application_hourglass-0',
   'tanggang': 'application_hourglass-0', // TangGang window uses explicit ID
   'window-wojak-generator': 'paint_file-0',
+  'wojak-generator': 'paint_file-0',
+  'rarity-explorer': 'chart1-0',
   'window-notify-me': 'msg_information-0',
   'window-admin-panel': 'settings_gear-0',
   'pinball-window': 'pinball_ball-0',
@@ -32,6 +34,7 @@ const titleIconMap = {
   'MARKETPLACE': 'briefcase-0',
   'TangGang': 'application_hourglass-0',
   'WOJAK_GENERATOR.EXE': 'paint_file-0',
+  'RARITY EXPLORER.EXE': 'chart1-0',
   'NOTIFY_ME': 'msg_information-0',
   'ADMIN PANEL': 'settings_gear-0',
   'Paint': 'paint_file-0',

@@ -348,12 +348,6 @@ export function WindowProvider({ children }) {
         isMaximized: windowData?.isMaximized !== undefined ? windowData.isMaximized : (existingWindow?.isMaximized ?? false),
       }
       
-      // #region agent log
-      if (isTryAgainWindow && import.meta.env.DEV) {
-        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:391',message:'registerWindow final windowEntry',data:{windowId,windowEntryPosition:windowEntry.position,windowEntrySize:windowEntry.size},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-      }
-      // #endregion
-      
       // Only increment zIndex if this is a new window
       if (!existingWindow) {
         windowEntry.zIndex = nextZIndexRef.current++
@@ -794,20 +788,10 @@ export function WindowProvider({ children }) {
 
   // Update window position
   const updateWindowPosition = useCallback((windowId, position) => {
-    // #region agent log
-    if ((windowId === 'window-readme-txt' || windowId?.includes('readme')) && import.meta.env.DEV) {
-      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:596',message:'updateWindowPosition called',data:{windowId,position},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
-    }
-    // #endregion
     setWindows(prev => {
       const next = new Map(prev)
       const window = next.get(windowId)
       if (window && !window.isMaximized) {
-        // #region agent log
-        if ((windowId === 'window-readme-txt' || windowId?.includes('readme')) && import.meta.env.DEV) {
-          fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:603',message:'updateWindowPosition - updating window state',data:{windowId,oldPosition:window.position,newPosition:position},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
-        }
-        // #endregion
         next.set(windowId, {
           ...window,
           position,

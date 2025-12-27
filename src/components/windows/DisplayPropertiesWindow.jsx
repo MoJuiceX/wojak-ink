@@ -37,7 +37,7 @@ const THEMES = [
   { id: 'classic', name: 'Classic' },
   { id: 'light', name: 'Light Mode' },
   { id: 'dark', name: 'Dark Mode' },
-  { id: 'green', name: 'Spruce' },
+  { id: 'green', name: 'Seedling Mode' },
 ]
 
 const ACCENTS = [
@@ -221,7 +221,7 @@ export default function DisplayPropertiesWindow({ isOpen, onClose, currentWallpa
       title="Display Properties"
       onClose={onClose}
       style={{ 
-        width: '420px', 
+        width: 'clamp(280px, 92vw, 420px)', 
         height: 'auto',
         left: '20px',
         top: '20px'

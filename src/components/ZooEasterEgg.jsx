@@ -62,6 +62,7 @@ const ZooEasterEgg = forwardRef(function ZooEasterEgg(props, ref) {
   const motionAmpRef = useRef(0)
   const motionAmpRafRef = useRef(null)
   const shakeWrapperRef = useRef(null)
+  const wrapperRef = useRef(null)
   
   // Shuffle bag hook for Zoo set selection (one bag for all types, simpler than Papa)
   const bag = useShuffleBag({ bagKey: 'zooEggBag', lastKey: 'zooEggLast', N: IMAGE_SETS_ZOO.length })
@@ -331,6 +332,135 @@ const ZooEasterEgg = forwardRef(function ZooEasterEgg(props, ref) {
       setState(imageState)
       // Start ramping amplitude to 1 after state is visible
       setMotionAmpSmooth(1, PAPA_CONFIG.timing.ampUpMs)
+      
+      // DEV: Log state transition to visible and gather evidence
+      if (import.meta.env.DEV) {
+        // Wait for state to update and DOM to reflect it
+        setTimeout(() => {
+          const wrapperEl = wrapperRef.current
+          if (wrapperEl) {
+            const rect = wrapperEl.getBoundingClientRect()
+            const computedStyle = window.getComputedStyle(wrapperEl)
+            
+            // Get CSS variable values
+            const rootStyle = window.getComputedStyle(document.documentElement)
+            const bottomOffset = rootStyle.getPropertyValue('--easter-egg-bottom-offset').trim()
+            const gap = rootStyle.getPropertyValue('--easter-egg-gap').trim()
+            const taskbarHeight = rootStyle.getPropertyValue('--taskbar-height').trim()
+            
+            // Check media query matches
+            const matchesMobile = window.matchMedia('(max-width: 640px)').matches
+            const matchesTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches
+            const matchesCombined = window.matchMedia('(max-width: 640px) and (hover: none) and (pointer: coarse)').matches
+            
+            // Viewport dimensions
+            const viewportWidth = window.innerWidth
+            const viewportHeight = window.innerHeight
+            
+            // Check if wrapper is in viewport
+            const isInViewport = rect.top >= 0 && rect.bottom <= viewportHeight && rect.left >= 0 && rect.right <= viewportWidth
+            const isAboveViewport = rect.bottom < 0
+            const isBelowViewport = rect.top > viewportHeight
+            const isLeftOfViewport = rect.right < 0
+            const isRightOfViewport = rect.left > viewportWidth
+            
+            // Check what's on top at wrapper center (only if in viewport)
+            let centerX = rect.left + rect.width / 2
+            let centerY = rect.top + rect.height / 2
+            let elementsAtPoint = []
+            
+            // Only query elementsFromPoint if center is within viewport bounds
+            if (centerX >= 0 && centerX <= viewportWidth && centerY >= 0 && centerY <= viewportHeight) {
+              elementsAtPoint = document.elementsFromPoint(centerX, centerY).slice(0, 10)
+            }
+            
+            // Get parent layer z-indexes for context
+            const orangeToyLayerEl = document.querySelector('.orange-toy-layer')
+            const taskbarEl = document.querySelector('.taskbar')
+            const mobileSheetEl = document.querySelector('.mobile-trait-sheet')
+            
+            const parentLayers = {}
+            if (orangeToyLayerEl) {
+              const cs = window.getComputedStyle(orangeToyLayerEl)
+              parentLayers['.orange-toy-layer'] = cs.zIndex
+            }
+            if (taskbarEl) {
+              const cs = window.getComputedStyle(taskbarEl)
+              parentLayers['.taskbar'] = cs.zIndex
+            }
+            if (mobileSheetEl) {
+              const cs = window.getComputedStyle(mobileSheetEl)
+              parentLayers['.mobile-trait-sheet'] = cs.zIndex
+            }
+            
+            // Get expected transform from getTransform() function
+            const expectedTransform = getTransform()
+            
+            console.debug('[Zoo visible]', {
+              state: imageState,
+              rect: {
+                top: rect.top,
+                right: rect.right,
+                bottom: rect.bottom,
+                left: rect.left,
+                width: rect.width,
+                height: rect.height,
+              },
+              computedStyles: {
+                zIndex: computedStyle.zIndex,
+                opacity: computedStyle.opacity,
+                display: computedStyle.display,
+                visibility: computedStyle.visibility,
+                transform: computedStyle.transform,
+                position: computedStyle.position,
+                bottom: computedStyle.bottom,
+                top: computedStyle.top,
+                height: computedStyle.height,
+              },
+              transformCheck: {
+                expectedTransform: expectedTransform,
+                computedTransform: computedStyle.transform,
+              },
+              viewport: {
+                width: viewportWidth,
+                height: viewportHeight,
+              },
+              viewportCheck: {
+                isInViewport,
+                isAboveViewport,
+                isBelowViewport,
+                isLeftOfViewport,
+                isRightOfViewport,
+              },
+              centerPoint: {
+                x: centerX,
+                y: centerY,
+              },
+            })
+            
+            console.debug('[Zoo CSS Variables]', {
+              '--easter-egg-bottom-offset': bottomOffset,
+              '--easter-egg-gap': gap,
+              '--taskbar-height': taskbarHeight,
+              mediaQueries: {
+                matchesMobile,
+                matchesTouch,
+                matchesCombined,
+              },
+            })
+            
+            const stack = elementsAtPoint.map(n => ({
+              tag: n.tagName,
+              id: n.id || '',
+              cls: (n.className && n.className.toString ? n.className.toString() : ''),
+              z: window.getComputedStyle(n).zIndex,
+              pos: window.getComputedStyle(n).position,
+            }))
+            console.debug('[Zoo elementsFromPoint]', stack)
+            console.debug('[Zoo parent layers]', parentLayers)
+          }
+        }, 50)
+      }
     })
     
     // Sound: Play shortly after animation starts
@@ -653,12 +783,17 @@ const ZooEasterEgg = forwardRef(function ZooEasterEgg(props, ref) {
         .zoo-easter-egg-wrapper {
           position: fixed;
           right: 30px;
-          bottom: 0;
+          bottom: calc(var(--easter-egg-bottom-offset) + var(--easter-egg-gap));
           left: auto;
-          z-index: 9999; /* Behind taskbar at 10000, above desktop content */
-          height: 300px;
-          width: auto;
-          max-width: calc(100vw - 60px); /* Prevent overflow on small screens */
+          /* Contract: taskbar (z-index 10000) must always be above easter eggs (z-index 9999) */
+          z-index: var(--z-easter-eggs); /* Behind taskbar at 10000, above desktop content */
+          /* Fallback for older browsers, then 100dvh for modern browsers */
+          height: min(300px, calc(100vh - var(--taskbar-height) - var(--safe-area-bottom) - 12px));
+          height: min(300px, calc(100dvh - var(--taskbar-height) - var(--safe-area-bottom) - 12px));
+          min-height: 140px; /* Safety floor prevents squishing on tiny landscape viewports */
+          width: clamp(200px, 30vw, 300px); /* Responsive width with clamp */
+          max-width: calc(100% - 60px); /* Clamp on small screens - use 100% instead of 100vw */
+          min-width: 200px; /* Minimum width to prevent too narrow */
           will-change: transform;
         }
         
@@ -729,6 +864,12 @@ const ZooEasterEgg = forwardRef(function ZooEasterEgg(props, ref) {
         
         .zoo-easter-egg-inner img.zoo3 {
           z-index: 3;
+        }
+        
+        @media (max-width: 480px) {
+          .zoo-easter-egg-wrapper {
+            right: 12px;
+          }
         }
         
         @media (min-width: 768px) {
@@ -842,13 +983,14 @@ const ZooEasterEgg = forwardRef(function ZooEasterEgg(props, ref) {
       `}</style>
       
       <div
+        ref={wrapperRef}
         className="zoo-easter-egg-wrapper"
         style={{
           transform: getTransform(),
           transitionProperty: 'transform',
           transitionDuration: getTransitionStyle().duration,
           transitionTimingFunction: getTransitionStyle().easing,
-          pointerEvents: state === 'hidden' ? 'none' : 'auto',
+          pointerEvents: state === 'hidden' || state === 'falling' ? 'none' : 'auto',
         }}
         onClick={handleDismiss}
         onTouchStart={handleDismiss}

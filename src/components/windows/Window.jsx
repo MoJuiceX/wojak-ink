@@ -1,5 +1,5 @@
 import { useDraggable } from '../../hooks/useDraggable'
-import { useState, useRef, useEffect, useLayoutEffect } from 'react'
+import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react'
 import { useWindow } from '../../contexts/WindowContext'
 import { getInitialPosition, getCenteredPosition } from '../../utils/windowPosition'
 import { getWindowIcon } from '../../utils/windowIcons'
@@ -40,6 +40,8 @@ export default function Window({
   style = {},
   noStack = false,
   onClose,
+  onHelpClick, // NEW: callback for help button click
+  showEscapeButton = false, // NEW: show Escape button in title bar
   className = '',
   icon,
   allowScroll = false, // If true, adds scroll-allowed class to window-body for internal scrolling
@@ -77,15 +79,22 @@ export default function Window({
     hasUserMoved,
   } = useWindow()
   
-  // Detect mobile viewport
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 640)
+  // Detect mobile viewport - use matchMedia to match CSS breakpoints
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.matchMedia('(max-width: 640px)').matches
+  })
   
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 640)
+    const mediaQuery = window.matchMedia('(max-width: 640px)')
+    const checkMobile = (e) => {
+      setIsMobile(e.matches)
     }
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
+    // Check immediately
+    setIsMobile(mediaQuery.matches)
+    // Listen for changes
+    mediaQuery.addEventListener('change', checkMobile)
+    return () => mediaQuery.removeEventListener('change', checkMobile)
   }, [])
 
   // Make window draggable (dragging disabled on mobile; WindowContext owns stacking)
@@ -101,6 +110,22 @@ export default function Window({
     },
     onDragEnd: (pos) => {
       try {
+        // Clamp window position so it can't end up off-screen
+        const win = windowRef.current
+        if (win) {
+          const rect = win.getBoundingClientRect()
+          const viewportWidth = window.innerWidth
+          const viewportHeight = window.innerHeight
+          const taskbarHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--taskbar-height')) || 30
+          const safeAreaBottom = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--safe-area-bottom')) || 0
+          
+          // Clamp position to keep window visible
+          const clampedX = Math.max(0, Math.min(pos.x, viewportWidth - rect.width))
+          const clampedY = Math.max(0, Math.min(pos.y, viewportHeight - taskbarHeight - safeAreaBottom - rect.height))
+          
+          pos = { x: clampedX, y: clampedY }
+        }
+        
         // Mark that we just finished dragging to prevent position sync race
         justFinishedDragRef.current = true
         updateWindowPosition(windowId, pos)
@@ -420,7 +445,8 @@ export default function Window({
       // Don't bring to front if clicking on control buttons
       if (e.target.closest('.title-bar-controls')) return
       // Don't bring to front if clicking on interactive elements inside window (but allow title bar)
-      if (e.target.closest('.window-body button, .window-body a, .window-body input, .window-body select, .window-body textarea')) return
+      // Include table elements (table, tbody, tr, td) to prevent title bar issues when clicking on trait rows
+      if (e.target.closest('.window-body button, .window-body a, .window-body input, .window-body select, .window-body textarea, .window-body table, .window-body tbody, .window-body tr, .window-body td')) return
       
       // Bring to front immediately on mousedown
       bringToFront(windowId)
@@ -517,10 +543,11 @@ export default function Window({
           height: win.style.height || style.height || 'auto' 
         }
         maximizeWindow(windowId)
-        win.style.width = 'calc(100vw - 40px)'
-        win.style.height = 'calc(100dvh - var(--taskbar-height) - var(--safe-area-inset-bottom) - 40px)' // Use dynamic viewport height, account for taskbar and safe area
-        win.style.left = '20px'
-        win.style.top = '20px'
+        // Use viewport-aware clamps with safe-area offsets
+        win.style.width = 'calc(100% - 32px)' // Use 100% instead of 100vw to prevent overflow
+        win.style.height = 'calc(100dvh - var(--taskbar-height) - var(--safe-area-bottom) - 32px)' // Use dynamic viewport height, account for taskbar and safe area
+        win.style.left = '16px'
+        win.style.top = '16px'
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
@@ -562,178 +589,86 @@ export default function Window({
 
   // Handle window resizing from all edges and corners
   // Disabled on mobile (mobile windows are fullscreen)
-  const resizeRefs = {
-    n: useRef(null),   // North (top)
-    s: useRef(null),   // South (bottom)
-    e: useRef(null),   // East (right)
-    w: useRef(null),   // West (left)
-    ne: useRef(null),  // Northeast (top-right)
-    se: useRef(null),  // Southeast (bottom-right)
-    sw: useRef(null),  // Southwest (bottom-left)
-    nw: useRef(null),  // Northwest (top-left)
-  }
+  const MIN_WIDTH = 250
+  const MIN_HEIGHT = 200
 
-  useEffect(() => {
+  // Component-level resize start handler (can be called from inline event handlers)
+  const handleResizeStart = (e, direction) => {
+    if (isMaximized || isMinimized || isMobile) return
+    if (e.button !== 0) return
+    
     const win = windowRef.current
-    if (!win || isMaximized || isMinimized || isMobile) return
+    if (!win) return
 
-    const MIN_WIDTH = 250
-    const MIN_HEIGHT = 200
+    e.preventDefault()
+    e.stopPropagation()
 
-    let isResizing = false
-    let resizeDirection = ''
-    let startX = 0
-    let startY = 0
-    let startWidth = 0
-    let startHeight = 0
-    let startLeft = 0
-    let startTop = 0
+    const rect = win.getBoundingClientRect()
+    const startX = e.clientX
+    const startY = e.clientY
+    const startWidth = rect.width
+    const startHeight = rect.height
+    const startLeft = rect.left
+    const startTop = rect.top
 
-    const handleResizeStart = (e, direction) => {
-      if (e.button !== 0) return // Only left mouse button
-      e.preventDefault()
-      e.stopPropagation()
-      
-      isResizing = true
-      resizeDirection = direction
-      
-      // Batch all layout reads first (prevent layout thrashing)
-      const rect = win.getBoundingClientRect()
-      startX = e.clientX
-      startY = e.clientY
-      startWidth = rect.width
-      startHeight = rect.height
-      startLeft = rect.left
-      startTop = rect.top
-
-      // All reads done - now set up event listeners (no DOM writes yet)
-      document.addEventListener('mousemove', handleMouseMove)
-      document.addEventListener('mouseup', handleMouseUp)
-      bringToFront(windowId)
-    }
-
-    const handleMouseMove = (e) => {
-      if (!isResizing) return
-
+    const onMouseMove = (e) => {
       const deltaX = e.clientX - startX
       const deltaY = e.clientY - startY
-
-      // Get size constraints from layout tokens
-      const constraints = getWindowSizeConstraints({
-        minWidth: style.minWidth ? parseInt(style.minWidth) : MIN_WIDTH,
-        minHeight: style.minHeight ? parseInt(style.minHeight) : MIN_HEIGHT,
-        maxWidth: style.maxWidth ? parseInt(style.maxWidth) : undefined,
-        maxHeight: style.maxHeight ? parseInt(style.maxHeight) : undefined,
-      })
 
       let newWidth = startWidth
       let newHeight = startHeight
       let newLeft = startLeft
       let newTop = startTop
 
-      // Handle horizontal resizing (east/west)
-      if (resizeDirection.includes('e')) {
-        newWidth = Math.max(constraints.minWidth, Math.min(constraints.maxWidth || Infinity, startWidth + deltaX))
+      if (direction.includes('e')) newWidth = Math.max(250, startWidth + deltaX)
+      if (direction.includes('w')) {
+        const w = startWidth - deltaX
+        if (w >= 250) { newWidth = w; newLeft = startLeft + deltaX }
       }
-      if (resizeDirection.includes('w')) {
-        const widthChange = startWidth - Math.max(constraints.minWidth, Math.min(constraints.maxWidth || Infinity, startWidth - deltaX))
-        newWidth = startWidth - widthChange
-        newLeft = startLeft + widthChange
-      }
-
-      // Handle vertical resizing (north/south)
-      if (resizeDirection.includes('s')) {
-        newHeight = Math.max(constraints.minHeight, Math.min(constraints.maxHeight || Infinity, startHeight + deltaY))
-      }
-      if (resizeDirection.includes('n')) {
-        const heightChange = startHeight - Math.max(constraints.minHeight, Math.min(constraints.maxHeight || Infinity, startHeight - deltaY))
-        newHeight = startHeight - heightChange
-        newTop = startTop + heightChange
+      if (direction.includes('s')) newHeight = Math.max(200, startHeight + deltaY)
+      if (direction.includes('n')) {
+        const h = startHeight - deltaY
+        if (h >= 200) { newHeight = h; newTop = startTop + deltaY }
       }
 
-      // Batch all layout reads first (prevent layout thrashing)
+      win.style.width = newWidth + 'px'
+      win.style.height = newHeight + 'px'
+      win.style.left = newLeft + 'px'
+      win.style.top = newTop + 'px'
+    }
+
+    const onMouseUp = () => {
+      // Clamp window position and size on resize end
       const rect = win.getBoundingClientRect()
-      const isMobileCheck = window.innerWidth <= 768
+      const viewportWidth = window.innerWidth
+      const viewportHeight = window.innerHeight
+      const taskbarHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--taskbar-height')) || 30
+      const safeAreaBottom = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--safe-area-bottom')) || 0
       
-      // Calculate clamped position (no DOM writes yet)
-      let clampedX = newLeft
-      let clampedY = newTop
-      if (!isMobileCheck) {
-        const clamped = clampWindowPosition({
-          x: newLeft,
-          y: newTop,
-          width: newWidth,
-          height: newHeight,
-          isMobile: false
-        })
-        clampedX = clamped.x
-        clampedY = clamped.y
-      }
+      // Clamp position to keep window visible
+      const clampedLeft = Math.max(0, Math.min(rect.left, viewportWidth - rect.width))
+      const clampedTop = Math.max(0, Math.min(rect.top, viewportHeight - taskbarHeight - safeAreaBottom - rect.height))
       
-      // Now batch all DOM writes together (after all reads are done)
-      // Use requestAnimationFrame to batch with other DOM updates
-      requestAnimationFrame(() => {
-        const win2 = windowRef.current
-        if (!win2) return
-        
-        // Apply size changes (GPU-friendly, no layout reflow)
-        win2.style.width = `${newWidth}px`
-        win2.style.height = `${newHeight}px`
-        
-        // Apply position changes if resizing from west or north (or if clamp adjusted position)
-        const currentLeft = parseFloat(win2.style.left) || startLeft
-        const currentTop = parseFloat(win2.style.top) || startTop
-        const positionChanged = Math.abs(clampedX - currentLeft) > 0.5 || Math.abs(clampedY - currentTop) > 0.5
-        
-        if (resizeDirection.includes('w') || resizeDirection.includes('n') || positionChanged) {
-          win2.style.left = `${clampedX}px`
-          win2.style.top = `${clampedY}px`
-          updateWindowPosition(windowId, { x: clampedX, y: clampedY })
-        }
-        
-        updateWindowSize(windowId, { width: `${newWidth}px`, height: `${newHeight}px` })
-      })
+      // Clamp size to viewport bounds
+      const clampedWidth = Math.min(rect.width, viewportWidth - clampedLeft)
+      const clampedHeight = Math.min(rect.height, viewportHeight - taskbarHeight - safeAreaBottom - clampedTop)
+      
+      win.style.left = clampedLeft + 'px'
+      win.style.top = clampedTop + 'px'
+      win.style.width = Math.max(250, clampedWidth) + 'px'
+      win.style.height = Math.max(200, clampedHeight) + 'px'
+      
+      // Update window position in context
+      updateWindowPosition(windowId, { x: clampedLeft, y: clampedTop })
+      updateWindowSize(windowId, { width: Math.max(250, clampedWidth), height: Math.max(200, clampedHeight) })
+      
+      document.removeEventListener('mousemove', onMouseMove)
+      document.removeEventListener('mouseup', onMouseUp)
     }
 
-    const handleMouseUp = () => {
-      if (isResizing) {
-        isResizing = false
-        resizeDirection = ''
-        document.removeEventListener('mousemove', handleMouseMove)
-        document.removeEventListener('mouseup', handleMouseUp)
-      }
-    }
-
-    // Attach event listeners to all resize handles
-    const handles = [
-      { ref: resizeRefs.n, dir: 'n' },
-      { ref: resizeRefs.s, dir: 's' },
-      { ref: resizeRefs.e, dir: 'e' },
-      { ref: resizeRefs.w, dir: 'w' },
-      { ref: resizeRefs.ne, dir: 'ne' },
-      { ref: resizeRefs.se, dir: 'se' },
-      { ref: resizeRefs.sw, dir: 'sw' },
-      { ref: resizeRefs.nw, dir: 'nw' },
-    ]
-
-    const cleanupFunctions = handles.map(({ ref, dir }) => {
-      const handle = ref.current
-      if (!handle) return null
-      
-      const handler = (e) => handleResizeStart(e, dir)
-      handle.addEventListener('mousedown', handler)
-      
-      return () => {
-        handle.removeEventListener('mousedown', handler)
-      }
-    }).filter(Boolean)
-
-    return () => {
-      cleanupFunctions.forEach(cleanup => cleanup())
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
-    }
-  }, [windowId, isMaximized, isMinimized, style, bringToFront, updateWindowSize, updateWindowPosition])
+    document.addEventListener('mousemove', onMouseMove)
+    document.addEventListener('mouseup', onMouseUp)
+  }
 
   if (!isVisible) return null
 
@@ -749,8 +684,8 @@ export default function Window({
     position: isMobile ? 'relative' : (style?.position || 'absolute'),
     // Mobile: force fullscreen dimensions (overridden by CSS, but ensures consistency)
     ...(isMobile && !isMinimized ? {
-      width: '100vw',
-      maxWidth: '100vw',
+      width: '100%',
+      maxWidth: '100%',
       height: '100dvh',
       maxHeight: '100dvh',
       left: '0',
@@ -808,27 +743,102 @@ export default function Window({
           <span>{title}</span>
         </div>
         <div className="title-bar-controls">
-          {/* Mobile: Hide minimize/maximize buttons (only show close) */}
-          {!isMobile && (
-            <>
-              <button 
-                aria-label={`Minimize ${title}`}
-                onClick={handleMinimize}
-                onMouseDown={(e) => e.stopPropagation()}
-              ></button>
-              <button 
-                aria-label={`Maximize ${title}`}
-                className={isMaximized ? 'maximized' : ''}
-                onClick={handleMaximize}
-                onMouseDown={(e) => e.stopPropagation()}
-              ></button>
-            </>
+          {/* 1. HELP BUTTON [?] - Only show if onHelpClick is provided */}
+          {onHelpClick && (
+            <button
+              aria-label="Help"
+              className="title-bar-button title-bar-help-button"
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                onHelpClick()
+              }}
+              onMouseDown={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+              }}
+              onPointerDown={(e) => {
+                e.stopPropagation()
+              }}
+              onTouchEnd={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                onHelpClick()
+              }}
+            >
+              <span aria-hidden="true">?</span>
+            </button>
           )}
+          
+          {/* 2. MINIMIZE BUTTON [−] - Only on desktop, not mobile */}
+          {!isMobile && (
+            <button
+              aria-label={`Minimize ${title}`}
+              className="title-bar-button"
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                handleMinimize()
+              }}
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              <span aria-hidden="true">−</span>
+            </button>
+          )}
+          
+          {/* 3. MAXIMIZE BUTTON [□] - Only on desktop, not mobile */}
+          {!isMobile && (
+            <button
+              aria-label={`Maximize ${title}`}
+              className={`title-bar-button ${isMaximized ? 'maximized' : ''}`}
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                handleMaximize()
+              }}
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              <span aria-hidden="true">□</span>
+            </button>
+          )}
+          
+          {/* 3.5. ESCAPE BUTTON [Esc] - Only show if showEscapeButton is true */}
+          {showEscapeButton && (
+            <button
+              aria-label="Escape"
+              className="title-bar-button title-bar-escape-button"
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                handleClose()
+              }}
+              onMouseDown={(e) => e.stopPropagation()}
+              onPointerDown={(e) => {
+                e.stopPropagation()
+              }}
+              onTouchEnd={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                handleClose()
+              }}
+            >
+              <span aria-hidden="true">Esc</span>
+            </button>
+          )}
+          
+          {/* 4. CLOSE BUTTON [×] - Always visible */}
           <button
             aria-label={`Close ${title}`}
-            onClick={handleClose}
+            className="title-bar-button"
+            onClick={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
+              handleClose()
+            }}
             onMouseDown={(e) => e.stopPropagation()}
-          ></button>
+          >
+            <span aria-hidden="true">×</span>
+          </button>
         </div>
       </div>
       {!isMinimized && (
@@ -836,6 +846,7 @@ export default function Window({
           <div 
             className={`window-body ${allowScroll ? 'scroll-allowed' : ''} ${contentAutoHeight ? 'window-body-auto' : ''}`}
             data-content-auto-height={contentAutoHeight ? 'true' : undefined}
+            tabIndex={isMobile && allowScroll ? 0 : undefined}
           >
             {children}
           </div>
@@ -843,15 +854,47 @@ export default function Window({
           {!isMaximized && !isMobile && (
             <>
               {/* Edge handles */}
-              <div ref={resizeRefs.n} className="window-resize-handle resize-handle resize-n" aria-label="Resize window (top)" />
-              <div ref={resizeRefs.s} className="window-resize-handle resize-handle resize-s" aria-label="Resize window (bottom)" />
-              <div ref={resizeRefs.e} className="window-resize-handle resize-handle resize-e" aria-label="Resize window (right)" />
-              <div ref={resizeRefs.w} className="window-resize-handle resize-handle resize-w" aria-label="Resize window (left)" />
+              <div 
+                className="window-resize-handle resize-handle resize-n" 
+                onMouseDown={(e) => handleResizeStart(e, 'n')}
+                aria-label="Resize window (top)" 
+              />
+              <div 
+                className="window-resize-handle resize-handle resize-s" 
+                onMouseDown={(e) => handleResizeStart(e, 's')}
+                aria-label="Resize window (bottom)" 
+              />
+              <div 
+                className="window-resize-handle resize-handle resize-e" 
+                onMouseDown={(e) => handleResizeStart(e, 'e')}
+                aria-label="Resize window (right)" 
+              />
+              <div 
+                className="window-resize-handle resize-handle resize-w" 
+                onMouseDown={(e) => handleResizeStart(e, 'w')}
+                aria-label="Resize window (left)" 
+              />
               {/* Corner handles */}
-              <div ref={resizeRefs.ne} className="window-resize-handle resize-handle resize-ne" aria-label="Resize window (top-right)" />
-              <div ref={resizeRefs.se} className="window-resize-handle resize-handle resize-se" aria-label="Resize window (bottom-right)" />
-              <div ref={resizeRefs.sw} className="window-resize-handle resize-handle resize-sw" aria-label="Resize window (bottom-left)" />
-              <div ref={resizeRefs.nw} className="window-resize-handle resize-handle resize-nw" aria-label="Resize window (top-left)" />
+              <div 
+                className="window-resize-handle resize-handle resize-ne" 
+                onMouseDown={(e) => handleResizeStart(e, 'ne')}
+                aria-label="Resize window (top-right)" 
+              />
+              <div 
+                className="window-resize-handle resize-handle resize-se" 
+                onMouseDown={(e) => handleResizeStart(e, 'se')}
+                aria-label="Resize window (bottom-right)" 
+              />
+              <div 
+                className="window-resize-handle resize-handle resize-sw" 
+                onMouseDown={(e) => handleResizeStart(e, 'sw')}
+                aria-label="Resize window (bottom-left)" 
+              />
+              <div 
+                className="window-resize-handle resize-handle resize-nw" 
+                onMouseDown={(e) => handleResizeStart(e, 'nw')}
+                aria-label="Resize window (top-left)" 
+              />
             </>
           )}
         </>

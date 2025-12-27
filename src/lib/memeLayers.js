@@ -58,6 +58,7 @@ export const LAYER_ORDER = [
   { name: 'Eyes', folder: 'EYE', zIndex: 10 }, // Renders after Mask and HannibalMask (Eyes overlay all masks), before Head (Head overlays eyes), before Astronaut (Astronaut covers eyes) (highest of the three)
   { name: 'Astronaut', folder: 'ASTRONAUT', zIndex: 11 }, // Virtual layer: MUST ALWAYS render OVER Eyes, FacialHair, and ALL Mouth(Base) traits
   { name: 'Head', folder: 'HEAD', zIndex: 12 }, // MUST ALWAYS render OVER Eyes and Mask (Head overlays eyes and mask)
+  { name: 'BandanaMaskOverRonin', folder: 'MASK', zIndex: 13 }, // Virtual layer: right half of Bandana Mask on top of Ronin Helmet
   { name: 'EyesOverHead', folder: 'EYES', zIndex: 14 }, // Virtual layer: right half of eyes on top of specific head traits (Clown, Pirate, Ronin, Super Saiyan)
   { name: 'BubbleGumOverEyes', folder: 'MOUTH', zIndex: 60 }, // Virtual layer: Bubble Gum absolutely on top of everything
 ]
@@ -70,6 +71,7 @@ export const UI_LAYER_ORDER = LAYER_ORDER.filter(layer =>
   layer.name !== 'TysonTattoo' &&
   layer.name !== 'NinjaTurtleUnderMask' &&
   layer.name !== 'Astronaut' && 
+  layer.name !== 'BandanaMaskOverRonin' &&
   layer.name !== 'EyesOverHead' &&
   layer.name !== 'BubbleGumOverEyes' &&
   layer.name !== 'BubbleGumRekt'

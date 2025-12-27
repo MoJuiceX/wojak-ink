@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { Button } from '../ui'
 import Window from '../windows/Window'
 import { downloadCanvasAsPNG, copyCanvasToClipboard, canvasToBlob, blobUrlToDataUrl, compressImage, copyBlobUrlToClipboard, downloadBlobUrlAsPNG } from '../../utils/imageUtils'
@@ -38,10 +38,17 @@ const isIOS = () => {
          (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
 }
 
+// Mobile detection helper (for hiding duplicate Save to Photos button)
+const isMobile = () => {
+  if (typeof window === 'undefined') return false
+  return window.innerWidth <= 640
+}
+
 export default function ExportControls({ 
   canvasRef, 
   selectedLayers = {}, 
   onRandomize,
+  onUndo,
   tangifiedImage,
   setTangifiedImage,
   showTangified,
@@ -50,7 +57,10 @@ export default function ExportControls({
   onUpdateGalleryEntry,
   onRemoveGalleryEntry,
   onAddDesktopImage,
-  desktopImages = [] // Array of current desktop images for duplicate/existing checks
+  desktopImages = [], // Array of current desktop images for duplicate/existing checks
+  onSaveToPhotosReady, // Callback to expose handleSaveToPhotos function
+  onDownloadReady, // Callback to expose handleDownload function
+  onSaveToFavorites // Callback to save wojak to favorites
 }) {
   const { showToast } = useToast()
   const [isExporting, setIsExporting] = useState(false)
@@ -65,6 +75,8 @@ export default function ExportControls({
   const tangifiedImageUrlRef = useRef(null) // Track blob URL for cleanup
   const [showDuplicateConfirm, setShowDuplicateConfirm] = useState(false)
   const lastTangifiedTraitsRef = useRef(null) // Track last tangified traits
+  const saveButtonClickedRef = useRef(false) // Track if Save button was explicitly clicked
+  const downloadButtonClickedRef = useRef(false) // Track if Download button was explicitly clicked
 
   // Update screensaver context when tangifying state changes
   // Always call the hook unconditionally to avoid React hooks rule violations
@@ -128,7 +140,22 @@ export default function ExportControls({
   }, [selectedLayers])
 
   const handleTangify = async () => {
-    if (!canvasRef.current || isTangifying) return
+    // Check prerequisites and provide feedback
+    if (!canvasRef.current) {
+      showToast('⚠️ Canvas not ready. Please wait a moment and try again.', 'warning', 3000)
+      return
+    }
+    
+    if (isTangifying) {
+      showToast('⏳ CyberTang generation already in progress...', 'info', 2000)
+      return
+    }
+    
+    // Check if required layers are selected
+    if (!canDownload) {
+      showToast('⚠️ Please select Base, Mouth (Base), and Clothing before creating CyberTang.', 'warning', 4000)
+      return
+    }
     
     // Check if this is a duplicate (same traits as last tangified)
     if (lastTangifiedTraitsRef.current && areTraitsEqual(selectedLayers, lastTangifiedTraitsRef.current)) {
@@ -198,6 +225,16 @@ export default function ExportControls({
       // At this point, canvas definitely has the original Wojak rendered
       const canvas = canvasRef.current
       
+      // Validate canvas before converting
+      if (!canvas || canvas.width === 0 || canvas.height === 0) {
+        throw new Error('Canvas is invalid or empty. Please ensure a Wojak is displayed.')
+      }
+      
+      console.log('[CyberTang] Canvas dimensions:', {
+        width: canvas.width,
+        height: canvas.height
+      })
+      
       const blob = await new Promise((resolve, reject) => {
         canvas.toBlob((blob) => {
           if (blob) {
@@ -205,8 +242,12 @@ export default function ExportControls({
             // A valid Wojak PNG should be at least a few KB
             const minBlobSize = 5000 // 5KB minimum for a valid image
             if (blob.size < minBlobSize) {
-              console.warn('Canvas blob is suspiciously small - may be black/invalid', blob.size, 'bytes')
+              console.warn('[CyberTang] Canvas blob is suspiciously small - may be black/invalid', blob.size, 'bytes')
             }
+            console.log('[CyberTang] Canvas converted to blob:', {
+              size: blob.size,
+              type: blob.type
+            })
             resolve(blob)
           } else {
             reject(new Error('Failed to convert canvas to blob'))
@@ -247,30 +288,100 @@ export default function ExportControls({
       formData.append('image', blob, 'wojak.png')
       formData.append('prompt', prompt)
       
-      // Call API
-      const response = await fetch('/api/tangify', {
-        method: 'POST',
-        body: formData, // No Content-Type header - browser sets it with boundary
+      // Log request details for debugging
+      console.log('[CyberTang] Sending request to /api/tangify', {
+        imageSize: blob.size,
+        promptLength: prompt.length,
+        promptPreview: prompt.substring(0, 100) + '...'
       })
+      
+      // Call API with better error handling
+      let response
+      try {
+        response = await fetch('/api/tangify', {
+          method: 'POST',
+          body: formData, // No Content-Type header - browser sets it with boundary
+        })
+      } catch (fetchError) {
+        // Network error - API endpoint not reachable
+        console.error('[CyberTang] Network error:', fetchError)
+        const isNetworkError = fetchError.name === 'TypeError' || 
+                              fetchError.message?.includes('Failed to fetch') ||
+                              fetchError.message?.includes('NetworkError')
+        
+        if (isNetworkError) {
+          throw new Error(
+            'CyberTang API not available. ' +
+            'Make sure you\'re running with Wrangler: ' +
+            'npx wrangler pages dev dist --compatibility-date=2024-01-01 ' +
+            'and that OPENAI_API_KEY is set in .env file.'
+          )
+        }
+        throw fetchError
+      }
       
       if (!response.ok) {
         let errorMessage = 'CyberTang failed'
+        
+        // Clone response before reading to avoid "body stream already read" error
+        const responseClone = response.clone()
+        
         try {
           const errorJson = await response.json()
           errorMessage = errorJson.error || errorMessage
+          console.error('[CyberTang] API error response:', errorJson)
         } catch (e) {
+          // If JSON parsing fails, try text
           try {
-            const errorText = await response.text()
+            const errorText = await responseClone.text()
             errorMessage = errorText || errorMessage
+            console.error('[CyberTang] API error text:', errorText)
           } catch (e2) {
-            // Use default error message
+            // If both fail, use status-based error message
+            console.error('[CyberTang] Failed to parse error response:', e2)
+            // Don't set errorMessage here - let status-based handling below set it
           }
         }
+        
+        // Provide helpful error messages for common issues
+        if (response.status === 503) {
+          errorMessage = 'CyberTang API is unavailable. Make sure Wrangler is running: npx wrangler pages dev dist --compatibility-date=2024-01-01\n\nIf using production, check Cloudflare Pages deployment status.'
+        } else if (response.status === 500 && errorMessage.includes('API key')) {
+          errorMessage = 'OpenAI API key not configured. Please set OPENAI_API_KEY in .env file or Cloudflare Pages environment variables.'
+        } else if (response.status === 500) {
+          errorMessage = `Server error: ${errorMessage || 'Internal server error. Check that OPENAI_API_KEY is set correctly.'}`
+        } else if (response.status === 400) {
+          errorMessage = `Invalid request: ${errorMessage}`
+        } else if (response.status === 0 || response.status === 404) {
+          errorMessage = 'CyberTang API endpoint not found. Make sure Wrangler is running: npx wrangler pages dev dist'
+        } else if (response.status === 401 || response.status === 403) {
+          errorMessage = 'OpenAI API authentication failed. Check your OPENAI_API_KEY is valid and has proper permissions.'
+        } else {
+          errorMessage = `CyberTang failed (${response.status}): ${errorMessage}`
+        }
+        
         throw new Error(errorMessage)
       }
       
       // Get PNG blob from response
+      console.log('[CyberTang] Response received:', {
+        status: response.status,
+        statusText: response.statusText,
+        contentType: response.headers.get('content-type'),
+        model: response.headers.get('X-Tangify-Model')
+      })
+      
       const outBlob = await response.blob()
+      
+      // Validate response blob
+      if (!outBlob || outBlob.size === 0) {
+        throw new Error('Received empty image from API')
+      }
+      
+      console.log('[CyberTang] Response blob received:', {
+        size: outBlob.size,
+        type: outBlob.type
+      })
       
       // Clean up old blob URL if it exists
       if (tangifiedImageUrlRef.current) {
@@ -281,6 +392,7 @@ export default function ExportControls({
       // Create new blob URL
       const url = URL.createObjectURL(outBlob)
       tangifiedImageUrlRef.current = url
+      console.log('[CyberTang] Created blob URL:', url.substring(0, 50) + '...')
       
       // Convert blob URL to data URL for gallery storage (data URLs don't need cleanup)
       let resultDataUrl = null
@@ -381,7 +493,12 @@ export default function ExportControls({
       
     } catch (error) {
       clearInterval(progressInterval)
-      console.error('CyberTang error:', error)
+      console.error('[CyberTang] Error details:', {
+        error: error,
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      })
       playSound('error')
       
       // Remove placeholder entry on error
@@ -389,13 +506,30 @@ export default function ExportControls({
         onRemoveGalleryEntry(placeholderId)
       }
       
-      alert('Failed to cyberfy: ' + error.message)
+      // Show user-friendly error message
+      const errorMessage = error.message || 'Unknown error occurred'
+      showToast(`❌ ${errorMessage}`, 'error', 6000)
+      
+      // Also show alert for critical errors (user might miss toast)
+      alert(`CyberTang failed: ${errorMessage}\n\nCheck browser console for details.`)
       setIsTangifying(false)
     }
   }
   
-  const handleDownload = async () => {
-    if (!canvasRef.current || !canDownload) {
+  const handleDownload = useCallback(async () => {
+    // Guard: Only proceed if Download button was explicitly clicked
+    // This prevents accidental calls from initialization or other triggers
+    if (!downloadButtonClickedRef.current) {
+      // Silently return - don't log or show any messages
+      return
+    }
+    
+    // Reset the flag immediately to prevent accidental re-triggers
+    downloadButtonClickedRef.current = false
+    
+    // Guard: canDownload must be explicitly true (not undefined)
+    if (!canvasRef.current || canDownload !== true) {
+      showToast('⚠️ Please select Base, Mouth (Base), and Clothing before downloading.', 'warning', 4000)
       return
     }
 
@@ -451,7 +585,7 @@ export default function ExportControls({
     } finally {
       setIsExporting(false)
     }
-  }
+  }, [canDownload, canvasRef, selectedLayers, desktopImages, onAddDesktopImage, showToast])
 
   const handleCopy = async () => {
     if (!canvasRef.current) return
@@ -472,9 +606,79 @@ export default function ExportControls({
     }
   }
 
+  const handlePaste = async () => {
+    setIsExporting(true)
+    setExportStatus('Reading clipboard...')
 
-  const handleSaveToPhotos = async () => {
-    if (!canvasRef.current || !canDownload) return
+    try {
+      if (!navigator.clipboard || !navigator.clipboard.read) {
+        throw new Error('Clipboard API not supported')
+      }
+
+      const clipboardItems = await navigator.clipboard.read()
+      
+      // Find image item in clipboard
+      let imageBlob = null
+      for (const item of clipboardItems) {
+        for (const type of item.types) {
+          if (type.startsWith('image/')) {
+            imageBlob = await item.getType(type)
+            break
+          }
+        }
+        if (imageBlob) break
+      }
+
+      if (!imageBlob) {
+        throw new Error('No image found in clipboard')
+      }
+
+      // Create image from blob
+      const imageUrl = URL.createObjectURL(imageBlob)
+      const img = new Image()
+      
+      await new Promise((resolve, reject) => {
+        img.onload = resolve
+        img.onerror = reject
+        img.src = imageUrl
+      })
+
+      // Show success message
+      setExportStatus('Image found in clipboard!')
+      showToast('✅ Image found in clipboard! You can paste it into other apps.', 'success', 3000)
+      setTimeout(() => setExportStatus(''), 2000)
+      
+      // Cleanup
+      URL.revokeObjectURL(imageUrl)
+    } catch (error) {
+      setExportStatus('No image in clipboard')
+      console.error('Paste error:', error)
+      showToast('No image found in clipboard. Copy an image first!', 'info', 3000)
+      setTimeout(() => setExportStatus(''), 2000)
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  const handleSaveToPhotos = useCallback(async () => {
+    // Guard: Only proceed if Save button was explicitly clicked
+    // This prevents accidental calls from other buttons or initialization
+    if (!saveButtonClickedRef.current) {
+      // Silently return - don't log or show any messages
+      return
+    }
+    
+    // Reset the flag immediately to prevent accidental re-triggers
+    saveButtonClickedRef.current = false
+    
+    // Guard: canDownload must be explicitly true (not undefined)
+    if (!canvasRef.current || canDownload !== true) {
+      console.warn('handleSaveToPhotos called but conditions not met:', {
+        hasCanvas: !!canvasRef.current,
+        canDownload
+      })
+      return
+    }
 
     setIsExporting(true)
     setExportStatus('Preparing...')
@@ -490,7 +694,7 @@ export default function ExportControls({
       // Create File object for Web Share API
       const file = new File([blob], filename, { type: 'image/png' })
 
-      // Try Web Share API
+      // Try Web Share API (works on all mobile devices, not just iOS)
       if (navigator.share) {
         // Check if files can be shared (canShare may not exist in all browsers)
         const canShareFiles = navigator.canShare ? navigator.canShare({ files: [file] }) : true
@@ -503,71 +707,129 @@ export default function ExportControls({
             })
             setExportStatus('Shared!')
             setTimeout(() => setExportStatus(''), 2000)
+            return // Success - exit early
           } catch (shareError) {
-            // User cancelled or share failed - fall through to fallback
-            if (shareError.name !== 'AbortError') {
-              throw shareError
+            // User cancelled - just return silently, no download
+            if (shareError.name === 'AbortError') {
+              setExportStatus('')
+              return
             }
-            // AbortError means user cancelled - just return silently
-            setExportStatus('')
+            // Share failed after being attempted - offer download as fallback
+            setExportStatus('Share failed, downloading instead...')
+            const downloadFilename = generateWojakFilename({ selectedLayers })
+            await downloadCanvasAsPNG(canvasRef.current, downloadFilename)
+            setExportStatus('Downloaded!')
+            showToast('✅ Image downloaded! You can save it to your photos from your downloads.', 'success', 3000)
+            setTimeout(() => setExportStatus(''), 2000)
             return
           }
         } else {
-          // Files cannot be shared - use fallback
-          throw new Error('Files cannot be shared')
+          // Files cannot be shared - API exists but can't share files
+          setExportStatus('Files cannot be shared, downloading instead...')
+          const downloadFilename = generateWojakFilename({ selectedLayers })
+          await downloadCanvasAsPNG(canvasRef.current, downloadFilename)
+          setExportStatus('Downloaded!')
+          showToast('✅ Image downloaded! You can save it to your photos from your downloads.', 'success', 3000)
+          setTimeout(() => setExportStatus(''), 2000)
+          return
         }
       } else {
-        // Web Share API not available - use fallback
-        throw new Error('Web Share API not available')
+        // Web Share API not available - return silently
+        // User will use Download button instead, no need to inform them
+        setExportStatus('')
+        return
       }
     } catch (error) {
-      // Fallback: open image in new tab
-      try {
-        const blob = await canvasToBlob(canvasRef.current)
-        const url = URL.createObjectURL(blob)
-        const newWindow = window.open(url, '_blank', 'noopener,noreferrer')
-        
-        if (newWindow) {
-          setShowFallbackHint(true)
-          setExportStatus('Image opened - long-press to save')
-          
-          // Clean up URL after a delay
-          setTimeout(() => {
-            URL.revokeObjectURL(url)
-          }, 10000)
-          
-          // Auto-hide hint after 5 seconds
-          setTimeout(() => {
-            setShowFallbackHint(false)
-            setExportStatus('')
-          }, 5000)
-        } else {
-          // Popup blocked
-          setExportStatus('Please allow popups to save image')
-          setTimeout(() => setExportStatus(''), 3000)
+      // Unexpected error - don't auto-download, just show error
+      setExportStatus('Error saving to Photos')
+      console.error('Save to Photos error:', error)
+      showToast('Failed to save image. Please try the Download button instead.', 'error', 3000)
+      setTimeout(() => setExportStatus(''), 3000)
+    } finally {
+      setIsExporting(false)
+    }
+  }, [canDownload, canvasRef, selectedLayers, showToast])
+
+  // Wrapper function that sets the flag and calls handleSaveToPhotos
+  const handleSaveToPhotosWithFlag = useCallback(() => {
+    saveButtonClickedRef.current = true
+    handleSaveToPhotos()
+  }, [handleSaveToPhotos])
+
+  // Expose handleSaveToPhotos wrapper to parent component
+  useEffect(() => {
+    if (onSaveToPhotosReady) {
+      onSaveToPhotosReady(handleSaveToPhotosWithFlag)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onSaveToPhotosReady]) // Remove handleSaveToPhotosWithFlag from deps
+
+  // Wrapper function that sets the flag and calls handleDownload
+  const handleDownloadWithFlag = useCallback(() => {
+    downloadButtonClickedRef.current = true
+    handleDownload()
+  }, [handleDownload])
+
+  // Expose handleDownload wrapper to parent component
+  useEffect(() => {
+    if (onDownloadReady) {
+      onDownloadReady(handleDownloadWithFlag)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onDownloadReady]) // Remove handleDownloadWithFlag from deps
+
+  const handleShareOnX = async () => {
+    if (!canvasRef.current) return
+
+    setIsExporting(true)
+    setExportStatus('Copying to clipboard...')
+
+    // Build X URL (needed for both success and fallback)
+    const tweetText = "Check out my CyberTang Wojak created with the Wojak Generator @ Wojak.ink 🍊"
+    const params = new URLSearchParams({
+      text: tweetText
+    })
+    const twitterUrl = `https://twitter.com/intent/tweet?${params.toString()}`
+
+    try {
+      // Copy image to clipboard automatically
+      await copyCanvasToClipboard(canvasRef.current)
+      setExportStatus('Copied to clipboard!')
+      showToast('✅ Image copied to clipboard! Paste it into your X post 🍊', 'success', 4000)
+      
+      // Open X in new tab (image is already in clipboard)
+      window.open(twitterUrl, '_blank', 'noopener,noreferrer')
+      
+      setTimeout(() => setExportStatus(''), 2000)
+    } catch (error) {
+      setExportStatus('Error copying')
+      console.error('Copy to clipboard error:', error)
+      
+      // On mobile, clipboard often fails - fallback to download
+      if (isMobile()) {
+        try {
+          setExportStatus('Downloading instead...')
+          const filename = generateWojakFilename({ selectedLayers })
+          await downloadCanvasAsPNG(canvasRef.current, filename)
+          setExportStatus('Downloaded!')
+          showToast('✅ Image downloaded! You can paste it into your X post 🍊', 'success', 4000)
+          // Still open X
+          window.open(twitterUrl, '_blank', 'noopener,noreferrer')
+          setTimeout(() => setExportStatus(''), 2000)
+        } catch (downloadError) {
+          setExportStatus('Error')
+          console.error('Download error:', downloadError)
+          showToast('Failed to copy or download. Please try the Download button.', 'error', 3000)
+          setTimeout(() => setExportStatus(''), 2000)
         }
-      } catch (fallbackError) {
-        setExportStatus('Error saving to Photos')
-        console.error('Save to Photos error:', fallbackError)
-        setTimeout(() => setExportStatus(''), 3000)
+      } else {
+        // Desktop: show original error
+        showToast('Failed to copy image. Please try the Copy/Paste button first.', 'error', 3000)
+        setTimeout(() => setExportStatus(''), 2000)
       }
     } finally {
       setIsExporting(false)
     }
-  }
-
-  const handleShareOnX = async () => {
-    // Build X Web Intent URL with just text (no image URL)
-    const tweetText = "Check out my CyberTang Wojak created with the Wojak Generator @ Wojak.ink 🍊"
-    
-    const params = new URLSearchParams({
-      text: tweetText
-    })
-    
-    const twitterUrl = `https://twitter.com/intent/tweet?${params.toString()}`
-    window.open(twitterUrl, '_blank', 'noopener,noreferrer')
-    
-    showToast('X opened! Copy your image and paste it into the post 🙏', 'info', 4000)
   }
 
   const handleCopyCyberTang = async () => {
@@ -614,6 +876,48 @@ export default function ExportControls({
     }
   }
 
+  const handleSaveToFavorites = useCallback(async () => {
+    if (!canvasRef.current || !canDownload) {
+      showToast('⚠️ Please select Base, Mouth (Base), and Clothing before saving to favorites.', 'warning', 4000)
+      return
+    }
+
+    if (!onSaveToFavorites) {
+      showToast('⚠️ Save to favorites is not available', 'error', 3000)
+      return
+    }
+
+    setIsExporting(true)
+    setExportStatus('Saving to favorites...')
+
+    try {
+      const canvas = canvasRef.current
+      const dataUrl = canvas.toDataURL('image/png')
+      const filename = buildImageName(selectedLayers, 'original')
+      
+      const wojak = {
+        id: `wojak-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        name: filename,
+        dataUrl: dataUrl,
+        selectedLayers: { ...selectedLayers },
+        type: 'original',
+        savedAt: new Date().toISOString()
+      }
+
+      await onSaveToFavorites(wojak)
+      setExportStatus('Saved to favorites!')
+      showToast('✅ Wojak saved to My Favorite Wojaks!', 'success', 3000)
+      setTimeout(() => setExportStatus(''), 2000)
+    } catch (error) {
+      setExportStatus('Error saving to favorites')
+      console.error('Save to favorites error:', error)
+      showToast('Failed to save to favorites', 'error', 3000)
+      setTimeout(() => setExportStatus(''), 2000)
+    } finally {
+      setIsExporting(false)
+    }
+  }, [canvasRef, canDownload, selectedLayers, onSaveToFavorites, showToast])
+
   return (
     <div>
       <div className="export-controls-row" style={{
@@ -624,110 +928,182 @@ export default function ExportControls({
         {/* Row 1: Main Actions */}
         {onRandomize && (
           <Button 
+            type="button"
             className="win98-tooltip"
             data-tooltip="Generate a random combination of traits"
-            onClick={onRandomize}
-            style={{ flex: 1 }}
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              onRandomize()
+            }}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            Randomize
+            <img 
+              src="/assets/images/randomemoji.png" 
+              alt="Randomize" 
+              style={{ 
+                width: '18px', 
+                height: '18px', 
+                objectFit: 'contain',
+                imageRendering: 'auto'
+              }} 
+            />
+          </Button>
+        )}
+        {onUndo && (
+          <Button 
+            type="button"
+            className="win98-tooltip"
+            data-tooltip="Revert to previous configuration"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              onUndo()
+            }}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            ⬅️
           </Button>
         )}
         <Button 
+          type="button"
           className="win98-tooltip"
-          data-tooltip="Copy your Wojak to clipboard — paste directly into memes!"
-          onClick={handleCopy} 
+          data-tooltip="Copy to clipboard"
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            handleCopy()
+          }} 
           disabled={isExporting || !canvasRef.current}
-          style={{ flex: 1 }}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
-          Copy to Clipboard
+          📎
         </Button>
-        <Button 
-          className={`win98-tooltip generator-download-btn ${!canDownload ? 'is-disabled' : ''}`}
-          data-tooltip={
-            !canDownload
-              ? 'Select Base, Mouth (Base), and Clothing to download'
-              : 'Download as PNG with transparent background. Saves to desktop (max 20). Oldest images move to Recycle Bin automatically.'
-          }
-          onClick={handleDownload} 
-          disabled={isDownloadDisabled}
-          style={{ flex: 1 }}
-        >
-          Download
-        </Button>
-        <Button 
-          className="win98-tooltip"
-          data-tooltip="Transform your Wojak with AI-powered cyberpunk effects. Both original and CyberTang versions save to desktop automatically."
-          onClick={handleTangify}
-          disabled={!canDownload || isTangifying || !canvasRef.current}
-          style={{ flex: 1 }}
-        >
-          CyberTang
-        </Button>
-        
-        {/* Row 2: CyberTang Actions (conditional) */}
-        {tangifiedImage && (
-          <>
-            <Button 
-              className="win98-tooltip"
-              data-tooltip="Copy CyberTang to clipboard — paste directly into memes!"
-              onClick={handleCopyCyberTang}
-              disabled={!tangifiedImage || isExporting || isTangifying}
-              style={{ flex: 1 }}
-            >
-              Copy CyberTang
-            </Button>
-            <Button 
-              className="win98-tooltip"
-              data-tooltip="Download CyberTang as PNG"
-              onClick={handleDownloadCyberTang}
-              disabled={!tangifiedImage || isExporting || isTangifying}
-              style={{ flex: 1 }}
-            >
-              Download CyberTang
-            </Button>
-          </>
-        )}
-        
-        {/* Row 3: Sharing & Other */}
-        <Button 
-          className="win98-tooltip"
-          data-tooltip="Copy picture to clipboard or download it and put it into the x post please 🙏"
-          onClick={handleShareOnX}
-          disabled={!canvasRef.current || isExporting || isTangifying}
-          style={{ flex: 1 }}
-        >
-          𝕏 Share
-        </Button>
-        {isIOS() && (
+        {/* Hide Download button on mobile - it's in the first row of MobileTraitBottomSheet */}
+        {!isMobile() && (
           <Button 
+            type="button"
+            className={`win98-tooltip generator-download-btn ${!canDownload ? 'is-disabled' : ''}`}
+            data-tooltip={
+              !canDownload
+                ? 'Select Base, Mouth, and Clothing to download'
+                : 'Download as PNG.'
+            }
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              // Mark that Download button was explicitly clicked
+              downloadButtonClickedRef.current = true
+              handleDownload()
+            }} 
+            disabled={isDownloadDisabled}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            <img 
+              src="/assets/images/downloadicon.png" 
+              alt="Download" 
+              style={{ 
+                width: '18px', 
+                height: '18px', 
+                objectFit: 'contain',
+                imageRendering: 'auto'
+              }} 
+            />
+          </Button>
+        )}
+        <Button 
+          type="button"
+          className="win98-tooltip"
+          data-tooltip="Transform your Wojak to a cyberpunk. Both versions save to desktop automatically."
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            handleTangify()
+          }}
+          disabled={!canDownload || isTangifying || !canvasRef.current}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          👽
+        </Button>
+        
+        {/* Row 2: Sharing & Other */}
+        <Button 
+          type="button"
+          className="win98-tooltip"
+          data-tooltip="Auto-copied to clipboard. Click X Share and paste into your post."
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            handleShareOnX()
+          }}
+          disabled={!canvasRef.current || isExporting || isTangifying}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          𝕏
+        </Button>
+        {/* Only show Save to Photos button on desktop iOS - mobile has its own Save button */}
+        {isIOS() && !isMobile() && (
+          <Button 
+            type="button"
             className={`win98-tooltip generator-save-photos-btn ${!canDownload ? 'is-disabled' : ''}`}
             data-tooltip={
               !canDownload
                 ? 'Select Base, Mouth (Base), and Clothing to save'
                 : 'Save to Photos'
             }
-            onClick={handleSaveToPhotos} 
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              // Mark that Save button was explicitly clicked
+              saveButtonClickedRef.current = true
+              handleSaveToPhotos()
+            }} 
             disabled={isDownloadDisabled}
-            style={{ flex: 1 }}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
             Save to Photos
           </Button>
         )}
+        {/* Save to My Favorite Wojaks */}
+        <Button 
+          type="button"
+          className="win98-tooltip"
+          data-tooltip={
+            !canDownload
+              ? 'Select Base, Mouth, and Clothing to save to favorites'
+              : 'Save to My Favorite Wojaks'
+          }
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            handleSaveToFavorites()
+          }}
+          disabled={isDownloadDisabled || isExporting || !onSaveToFavorites}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          ⭐️
+        </Button>
+        {/* Mint button - shown on both desktop and mobile */}
         <Button 
           className="win98-tooltip"
-          data-tooltip="Coming soon! Mint your Wojak as an NFT on Chia. Brings value to Tang Gang and Wojak Farmers Plot holders."
+          data-tooltip="Soon"
           disabled={true}
-          style={{ flex: 1 }}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
-          Mint
+          🌱
         </Button>
       </div>
       
       {/* Windows 98 Progress Bar */}
       {isTangifying && (
         <div className="tangify-progress-container" style={{ marginTop: '8px', marginBottom: '4px' }}>
-          <div className="tangify-progress-label">
-            {tangifyLabel}
+          <div className="tangify-progress-header">
+            <div className="tangify-progress-label">
+              {tangifyLabel}
+            </div>
+            <div className="tangify-progress-percent">
+              {Math.round(tangifyProgress)}%
+            </div>
           </div>
           <div className="tangify-progress-bar">
             <div 
@@ -739,59 +1115,6 @@ export default function ExportControls({
               ))}
             </div>
           </div>
-          <div className="tangify-progress-percent">
-            {Math.round(tangifyProgress)}%
-          </div>
-        </div>
-      )}
-      
-      {/* Toggle switch for Original/CyberTang view - compact button group aligned with preview */}
-      {tangifiedImage && !isTangifying && (
-        <div style={{
-          marginTop: '4px',
-          padding: '2px 4px',
-          background: 'var(--surface-1)',
-          border: '1px solid',
-          borderColor: 'var(--border-dark) var(--border-light) var(--border-light) var(--border-dark)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '4px',
-          justifyContent: 'flex-start',
-          width: '100%',
-        }}>
-          <span className="helper-text" style={{
-            fontFamily: 'MS Sans Serif, sans-serif',
-            color: 'var(--text-1)',
-            marginRight: '2px',
-          }}>
-            View:
-          </span>
-          <Button
-            onClick={() => {
-              if (setShowTangified) setShowTangified(false)
-            }}
-            style={{
-              padding: '2px 6px',
-              flex: '0 0 auto',
-              background: showTangified ? 'var(--btn-face-pressed)' : 'var(--btn-face-hover)',
-              border: showTangified ? '1px inset var(--border-dark)' : '1px outset var(--border-light)',
-            }}
-          >
-            Original
-          </Button>
-          <Button
-            onClick={() => {
-              if (setShowTangified) setShowTangified(true)
-            }}
-            style={{
-              padding: '2px 6px',
-              flex: '0 0 auto',
-              background: showTangified ? 'var(--btn-face-hover)' : 'var(--btn-face-pressed)',
-              border: showTangified ? '1px outset var(--border-light)' : '1px inset var(--border-dark)',
-            }}
-          >
-            CyberTang
-          </Button>
         </div>
       )}
       

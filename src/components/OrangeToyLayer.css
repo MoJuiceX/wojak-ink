@@ -5,13 +5,14 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 10000;
+  /* Use z-index token to maintain contract: game (2000) below easter eggs (9999) and taskbar (10000) */
+  z-index: var(--z-game);
 }
 
 .orange {
   position: absolute;
-  width: 150px;
-  height: 150px;
+  width: clamp(80px, 15vw, 150px); /* Responsive width */
+  height: clamp(80px, 15vw, 150px); /* Responsive height */
   background: transparent;
   border: none;
   box-shadow: none;
@@ -24,8 +25,8 @@
 /* Splash animation */
 .splash {
   position: absolute;
-  width: 150px;
-  height: 150px;
+  width: clamp(80px, 15vw, 150px); /* Responsive width */
+  height: clamp(80px, 15vw, 150px); /* Responsive height */
   border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 140, 0, 0.6) 0%, rgba(255, 102, 0, 0.3) 50%, transparent 100%);
   pointer-events: none;
@@ -96,9 +97,9 @@
 /* Juice meter (for future use) */
 .juice-meter {
   position: fixed;
-  bottom: calc(var(--taskbar-height) + 20px);
+  bottom: calc(var(--taskbar-height) + var(--safe-area-bottom) + 20px);
   right: 20px;
-  width: 200px;
+  width: clamp(120px, 30vw, 200px); /* Responsive width */
   height: 30px;
   border: 2px inset #c0c0c0;
   background: #c0c0c0;
@@ -177,13 +178,13 @@
   }
 
   .juice-meter {
-    width: 150px;
-    bottom: calc(var(--taskbar-height) + 10px);
+    width: clamp(120px, 30vw, 150px); /* Responsive width */
+    bottom: calc(var(--taskbar-height) + var(--safe-area-bottom) + 10px);
     right: 10px;
   }
 
   .claim-prize-button {
-    bottom: calc(var(--taskbar-height) + 10px);
+    bottom: calc(var(--taskbar-height) + var(--safe-area-bottom) + 10px);
     padding: 10px 20px;
     font-size: 14px;
   }

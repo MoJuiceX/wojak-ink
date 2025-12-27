@@ -54,7 +54,7 @@ html,
 body,
 #root {
   overflow-x: hidden;
-  max-width: 100vw;
+  max-width: 100%;
   /* Prevent iOS Safari from allowing horizontal scroll */
   position: relative;
   width: 100%;
@@ -66,7 +66,7 @@ body,
   body,
   #root {
     overflow-x: hidden !important;
-    max-width: 100vw !important;
+    max-width: 100% !important;
     /* Prevent iOS Safari rubber-band scrolling */
     overscroll-behavior-x: none;
     -webkit-overflow-scrolling: touch;
@@ -97,7 +97,7 @@ body,
   .window,
   .window-body,
   .desktop {
-    max-width: 100vw;
+    max-width: 100%;
     overflow-x: hidden;
   }
 }

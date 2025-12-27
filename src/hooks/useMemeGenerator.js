@@ -5,12 +5,18 @@ import { getDisabledLayers } from '../utils/wojakRules'
 import { debounce } from '../utils/debounce'
 import { getAllLayerImages } from '../lib/memeImageManifest'
 import { parseColorVariant } from '../lib/traitOptions'
+import { buildWeightedMaps, getImageKey } from '../utils/buildWeightedMaps'
+import { weightedPick, getRand01 } from '../utils/weightedPick'
 
 export function useMemeGenerator() {
   const [selectedLayers, setSelectedLayers] = useState({})
   const [layerVisibility, setLayerVisibility] = useState({})
   const canvasRef = useRef(null)
   const [isRendering, setIsRendering] = useState(false)
+  const [history, setHistory] = useState([]) // Undo stack: array of snapshots, newest at end
+  const HISTORY_LIMIT = 25
+  // Track last 3 FacialHair selections from randomizations (to enforce max 3 "None" in a row)
+  const facialHairHistoryRef = useRef([]) // Array of strings: '' for None, or path for actual selection
   
   // Memoize layer composition for faster lookups
   const layerComposition = useMemo(() => {
@@ -27,6 +33,36 @@ export function useMemeGenerator() {
       .filter(([_, path]) => path && path !== '')
       .map(([_, path]) => path)
   }, [selectedLayers])
+
+  // Build manifests by layer (not memoized - they're stable or change rarely)
+  const manifestsByLayer = {
+    Background: getAllLayerImages('Background'),
+    Head: getAllLayerImages('Head'),
+    Clothes: getAllLayerImages('Clothes'),
+    Base: getAllLayerImages('Base'),
+    Eyes: getAllLayerImages('Eyes'),
+    Mask: getAllLayerImages('Mask'),
+    MouthBase: getAllLayerImages('MouthBase'),
+    MouthItem: getAllLayerImages('MouthItem'),
+    FacialHair: getAllLayerImages('FacialHair')
+  }
+
+  // Create stable signature for memo dependency (includes length + sample paths to catch changes)
+  // Using just length can miss changes if images are renamed/reordered but count stays same
+  // Compute inline (not memoized) - it's just string concatenation
+  const manifestSignature = Object.entries(manifestsByLayer)
+    .map(([layer, images]) => {
+      const firstPath = images[0]?.path ?? ''
+      const lastPath = images.length > 0 ? (images[images.length - 1]?.path ?? '') : ''
+      return `${layer}:${images.length}:${firstPath}:${lastPath}`
+    })
+    .join('|')
+
+  // Build weighted maps once with stable dependency
+  const { imageWeightByLayer, faceWearTraitWeights, faceWearToLayerRouting } = useMemo(() => 
+    buildWeightedMaps({ manifestsByLayer }), 
+    [manifestSignature]
+  )
 
   // Initialize visibility for all layers
   useEffect(() => {
@@ -761,6 +797,23 @@ export function useMemeGenerator() {
           } else {
             imagePath = null // Head doesn't need eye overlay, skip this layer
           }
+        } else if (layerName === 'BandanaMaskOverRonin') {
+          // BandanaMaskOverRonin virtual layer: Render right half of Bandana Mask on top of Ronin Helmet
+          const headPath = selectedLayers['Head']
+          const maskPath = selectedLayers['Mask']
+          const hasRoninHelmet = headPath && headPath.toLowerCase().includes('ronin')
+          const hasBandanaMask = maskPath && maskPath.toLowerCase().includes('bandana')
+          
+          if (hasRoninHelmet && hasBandanaMask) {
+            // Get current Mask selection (Bandana Mask)
+            if (maskPath && maskPath !== '' && maskPath !== 'None') {
+              imagePath = maskPath // Reuse the same mask image
+            } else {
+              imagePath = null // No mask selected, skip
+            }
+          } else {
+            imagePath = null // Ronin Helmet or Bandana Mask not selected, skip this layer
+          }
         } else if (layerName === 'Clothes') {
           // Exclude Astronaut from regular Clothes rendering (it's handled by virtual layer)
           const clothesPath = selectedLayers['Clothes']
@@ -826,6 +879,27 @@ export function useMemeGenerator() {
             
             // Apply clipping for EyesOverHead layer (right half only)
             if (layerName === 'EyesOverHead') {
+              // Save canvas state
+              ctx.save()
+              
+              // Create clipping region for right half only
+              const clipX = canvas.width / 2 // Start from center (50%)
+              const clipY = 0
+              const clipWidth = canvas.width / 2 // Right half width (50%)
+              const clipHeight = canvas.height
+              
+              // Set up rectangular clip region
+              ctx.beginPath()
+              ctx.rect(clipX, clipY, clipWidth, clipHeight)
+              ctx.clip()
+              
+              // Draw the image (only right half will be visible due to clip)
+              ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight)
+              
+              // Restore canvas state (remove clipping)
+              ctx.restore()
+            } else if (layerName === 'BandanaMaskOverRonin') {
+              // Apply clipping for BandanaMaskOverRonin layer (right half only)
               // Save canvas state
               ctx.save()
               
@@ -1102,13 +1176,193 @@ export function useMemeGenerator() {
     })
   }, [])
 
+  // Helper: Get previous selection key for a layer
+  const getPrevKeyForLayer = useCallback((layerName, prevLayers) => {
+    const prevPath = prevLayers[layerName]
+    if (prevPath === undefined || prevPath === null) {
+      return null
+    }
+    // Return the path string directly ('' is valid for None)
+    return typeof prevPath === 'string' ? prevPath : ''
+  }, [])
+
+  // Helper: Filter out previous selection from candidates
+  const filterNoRepeat = useCallback((candidates, prevKey) => {
+    if (!prevKey && prevKey !== '') {
+      return candidates // No previous selection to avoid
+    }
+    return candidates.filter(img => {
+      const key = getImageKey(img)
+      return key !== prevKey
+    })
+  }, [])
+
+  // Helper: Pick layer with weighted selection (includes None as regular candidate, excludes prevKey)
+  const pickLayerWeighted = useCallback((layerName, validImages, prevKey = null) => {
+    const map = imageWeightByLayer[layerName]
+    if (!map || map.size === 0) {
+      // Fallback to uniform random
+      const candidates = filterNoRepeat(validImages, prevKey)
+      if (candidates.length === 0) {
+        // No valid candidates after filtering, allow previous selection
+        if (import.meta.env.DEV && prevKey !== null) {
+          console.warn(`[pickLayerWeighted] ${layerName}: No candidates after excluding previous, allowing repeat`)
+        }
+        const idx = Math.floor(getRand01() * validImages.length)
+        return validImages[idx] || { path: '', displayName: 'None' }
+      }
+      const idx = Math.floor(getRand01() * candidates.length)
+      return candidates[idx] || { path: '', displayName: 'None' }
+    }
+    
+    // Build validCandidates that includes None option if layer supports it
+    const validCandidates = []
+    
+    // Derive layer support for None from the weights map (don't hardcode)
+    // If weights map has '' key, layer supports None
+    const layerSupportsNone = map.has('')
+    
+    // Check if validImages already includes a None option (empty string path)
+    const hasNoneInManifest = validImages.some(img => {
+      const path = img.path
+      return typeof path === 'string' && path === '' // Explicitly check for empty string
+    })
+    
+    if (layerSupportsNone && !hasNoneInManifest) {
+      // Synthesize None candidate - MUST have path: '' (empty string, not undefined/null)
+      // getImageKey treats typeof path === 'string' (including '') as valid
+      validCandidates.push({ path: '', displayName: 'None' })
+    } else if (hasNoneInManifest) {
+      // Use existing None option from manifest
+      const noneOption = validImages.find(img => typeof img.path === 'string' && img.path === '')
+      if (noneOption) {
+        validCandidates.push(noneOption)
+      }
+    }
+    
+    // Add all real images (non-empty paths)
+    validCandidates.push(...validImages.filter(img => {
+      const path = img.path
+      return typeof path === 'string' && path !== '' // Only non-empty strings
+    }))
+    
+    if (validCandidates.length === 0) {
+      return { path: '', displayName: 'None' }
+    }
+    
+    // Filter out previous selection
+    let candidatesNoRepeat = filterNoRepeat(validCandidates, prevKey)
+    
+    // If filtering out previous leaves no candidates, allow previous (fallback)
+    if (candidatesNoRepeat.length === 0) {
+      if (import.meta.env.DEV && prevKey !== null) {
+        console.warn(`[pickLayerWeighted] ${layerName}: No candidates after excluding previous key '${prevKey}', allowing repeat`)
+      }
+      candidatesNoRepeat = validCandidates // Use all candidates (allow repeat)
+    }
+    
+    // Single weightedPick call handles all options including None
+    // No separate "none roll" - this prevents double-counting randomness
+    return weightedPick(candidatesNoRepeat, (img) => {
+      const key = getImageKey(img) // Use same key function as buildWeightedMaps
+      return map.get(key) ?? 0
+    }) || { path: '', displayName: 'None' }
+  }, [imageWeightByLayer, filterNoRepeat])
+
   // Randomize all layers - picks random valid option for each layer
   const randomizeAllLayers = useCallback(() => {
-    // Generator layer order (respects dependencies: Base/Head/Eyes/MouthBase first, then Mask, then dependent layers)
-    // Note: Mask is processed before Head to enable Head filtering based on Mask selection
-    const GENERATOR_LAYER_ORDER = ['Eyes', 'Base', 'MouthBase', 'Mask', 'Head', 'MouthItem', 'FacialHair', 'Clothes', 'Background']
+    setSelectedLayers(prev => {
+      // Save snapshot BEFORE computing newLayers (critical for rapid clicks - uses same prev)
+      setHistory(h => {
+        const snapshot = { ...prev } // Immutable clone (all values are strings, so shallow clone is sufficient)
+        const next = [...h, snapshot]
+        if (next.length > HISTORY_LIMIT) next.shift() // Remove oldest if over limit
+        return next
+      })
+      
+      // Capture previous layers state for no-repeat logic (use prev from callback, not closure)
+      const prevLayers = { ...prev }
+      
+      // Generator layer order (respects dependencies: Base/Head/Eyes/MouthBase first, then Mask, then dependent layers)
+      // Note: Mask is processed before Head to enable Head filtering based on Mask selection
+      const GENERATOR_LAYER_ORDER = ['Eyes', 'Base', 'MouthBase', 'Mask', 'Head', 'MouthItem', 'FacialHair', 'Clothes', 'Background']
+      
+      const newLayers = {}
     
-    const newLayers = {}
+    // CRITICAL: Face Wear meta-layer decision FIRST (before processing Eyes and Mask)
+    // This ensures "No Face Wear" controls BOTH Eyes and Mask simultaneously (correlated event)
+    // Note: weightedPick accepts string items (trait names) for meta-layer decisions
+    // NO REPEAT: Avoid repeating the same (Eyes, Mask) pair from previous randomize
+    if (faceWearTraitWeights && faceWearTraitWeights.size > 0) {
+      const prevEyesKey = getPrevKeyForLayer('Eyes', prevLayers) || ''
+      const prevMaskKey = getPrevKeyForLayer('Mask', prevLayers) || ''
+      const prevFaceWearPairKey = `${prevEyesKey}||${prevMaskKey}`
+      
+      // Build face wear traits that would NOT produce the same pair
+      const MAX_ATTEMPTS_FACEWEAR = 12
+      let faceWearTrait = null
+      let attempts = 0
+      
+      while (attempts < MAX_ATTEMPTS_FACEWEAR) {
+        const candidateTrait = weightedPick(
+          Array.from(faceWearTraitWeights.keys()),
+          (trait) => faceWearTraitWeights.get(trait)
+        )
+        
+        const routing = faceWearToLayerRouting.get(candidateTrait)
+        if (routing) {
+          let candidateEyesKey = ''
+          let candidateMaskKey = ''
+          
+          if (routing.layer === 'Both') {
+            candidateEyesKey = ''
+            candidateMaskKey = ''
+          } else if (routing.layer === 'Eyes') {
+            candidateEyesKey = routing.imagePath || ''
+            candidateMaskKey = ''
+          } else if (routing.layer === 'Mask') {
+            candidateEyesKey = ''
+            candidateMaskKey = routing.imagePath || ''
+          }
+          
+          const candidatePairKey = `${candidateEyesKey}||${candidateMaskKey}`
+          
+          // Accept if different from previous pair
+          if (candidatePairKey !== prevFaceWearPairKey) {
+            faceWearTrait = candidateTrait
+            break
+          }
+        }
+        
+        attempts++
+      }
+      
+      // If couldn't find different pair, use any trait (fallback)
+      if (!faceWearTrait) {
+        if (import.meta.env.DEV) {
+          console.warn('[randomizeAllLayers] Face Wear: Could not find different pair, allowing repeat')
+        }
+        faceWearTrait = weightedPick(
+          Array.from(faceWearTraitWeights.keys()),
+          (trait) => faceWearTraitWeights.get(trait)
+        )
+      }
+      
+      const routing = faceWearToLayerRouting.get(faceWearTrait)
+      if (routing) {
+        if (routing.layer === 'Both') {
+          // "No Face Wear" - set both to None
+          newLayers['Eyes'] = ''
+          newLayers['Mask'] = ''
+        } else if (routing.layer === 'Eyes') {
+          newLayers['Eyes'] = routing.imagePath || ''
+          newLayers['Mask'] = '' // Eyes selected, Mask is None
+        } else if (routing.layer === 'Mask') {
+          newLayers['Eyes'] = '' // Mask selected, Eyes is None (or might be compatible)
+          newLayers['Mask'] = routing.imagePath || ''
+        }
+      }
+    }
     
     // First pass: pick random valid option for each layer
     GENERATOR_LAYER_ORDER.forEach(layerName => {
@@ -1125,50 +1379,14 @@ export function useMemeGenerator() {
         return
       }
       
-      // Special handling for Mask: weighted to pick "None" 80% of the time
+      // Special handling for Mask: use weighted selection (Face Wear meta-decision may have already set it)
       if (layerName === 'Mask') {
-        const noneOption = { path: '', displayName: 'None' } // Treat empty as "None"
-        const maskOptions = images.filter(img => !isNoneOption(img))
-        
-        // 80% chance for None, 20% chance for a mask
-        const useNone = (() => {
-          try {
-            if (window?.crypto?.getRandomValues) {
-              const arr = new Uint32Array(1)
-              window.crypto.getRandomValues(arr)
-              return (arr[0] / 0xFFFFFFFF) < 0.8
-            } else {
-              return Math.random() < 0.8
-            }
-          } catch {
-            return Math.random() < 0.8
-          }
-        })()
-        
-        if (useNone || maskOptions.length === 0) {
-          newLayers[layerName] = ''
-        } else {
-          // Pick random mask
-          let idx = 0
-          try {
-            if (window?.crypto?.getRandomValues) {
-              const arr = new Uint32Array(1)
-              window.crypto.getRandomValues(arr)
-              idx = arr[0] % maskOptions.length
-            } else {
-              idx = Math.floor(Math.random() * maskOptions.length)
-            }
-          } catch {
-            idx = Math.floor(Math.random() * maskOptions.length)
-          }
-          newLayers[layerName] = maskOptions[idx]?.path || ''
+        // If Face Wear meta-decision already set Mask, skip
+        if (newLayers['Mask'] !== undefined) {
+          return
         }
-        return
-      }
-      
-      // Special handling for FacialHair: weighted to pick "None" 80% of the time
-      if (layerName === 'FacialHair') {
-        const facialHairOptions = images.filter(img => {
+        
+        const validImages = images.filter(img => {
           const path = (img?.path || '').trim()
           const displayName = (img?.displayName || img?.name || '').trim().toLowerCase()
           if (!path) return false
@@ -1180,43 +1398,83 @@ export function useMemeGenerator() {
           return true
         })
         
-        // 80% chance for None, 20% chance for facial hair
-        const useNone = (() => {
-          try {
-            if (window?.crypto?.getRandomValues) {
-              const arr = new Uint32Array(1)
-              window.crypto.getRandomValues(arr)
-              return (arr[0] / 0xFFFFFFFF) < 0.8
-            } else {
-              return Math.random() < 0.8
-            }
-          } catch {
-            return Math.random() < 0.8
-          }
-        })()
-        
-        if (useNone || facialHairOptions.length === 0) {
+        if (validImages.length === 0) {
           newLayers[layerName] = ''
-        } else {
-          // Pick random facial hair
+          return
+        }
+        
+        // Get previous selection key for no-repeat
+        const prevKey = getPrevKeyForLayer(layerName, prevLayers)
+        
+        // Use weighted selection (weights include None from Mouth routing + Face Wear handled separately)
+        const selectedImage = pickLayerWeighted(layerName, validImages, prevKey)
+        newLayers[layerName] = selectedImage?.path || ''
+        return
+      }
+      
+      // Special handling for FacialHair: use weighted selection
+      if (layerName === 'FacialHair') {
+        const validImages = images.filter(img => {
+          const path = (img?.path || '').trim()
+          const displayName = (img?.displayName || img?.name || '').trim().toLowerCase()
+          if (!path) return false
+          if (path.toLowerCase().includes('none') || displayName.includes('none')) return false
+          // Filter out disabled options based on current selections
+          if (isOptionDisabledByRules(img, layerName, newLayers)) {
+            return false
+          }
+          return true
+        })
+        
+        // Check if last 3 FacialHair randomizations were all "None"
+        const lastThree = facialHairHistoryRef.current.slice(-3)
+        const lastThreeWereNone = lastThree.length === 3 && lastThree.every(val => val === '' || val === null || val === undefined)
+        
+        // Get previous selection key for no-repeat
+        const prevKey = getPrevKeyForLayer(layerName, prevLayers)
+        
+        // Use weighted selection, but if last 3 were None, force a non-None selection
+        let selectedImage
+        if (lastThreeWereNone && validImages.length > 0) {
+          // Last 3 were None, force a non-None selection this time
+          // Filter out previous selection from validImages (for no-repeat)
+          const candidatesNoRepeat = filterNoRepeat(validImages, prevKey)
+          const candidatesToUse = candidatesNoRepeat.length > 0 ? candidatesNoRepeat : validImages
+          
+          // Pick uniformly from non-None options (since we're forcing non-None)
+          // This ensures we definitely get a non-None option
           let idx = 0
           try {
             if (window?.crypto?.getRandomValues) {
               const arr = new Uint32Array(1)
               window.crypto.getRandomValues(arr)
-              idx = arr[0] % facialHairOptions.length
+              idx = arr[0] % candidatesToUse.length
             } else {
-              idx = Math.floor(Math.random() * facialHairOptions.length)
+              idx = Math.floor(Math.random() * candidatesToUse.length)
             }
           } catch {
-            idx = Math.floor(Math.random() * facialHairOptions.length)
+            idx = Math.floor(Math.random() * candidatesToUse.length)
           }
-          newLayers[layerName] = facialHairOptions[idx]?.path || ''
+          selectedImage = candidatesToUse[idx]
+          
+          if (import.meta.env.DEV) {
+            console.log('[FacialHair] Last 3 were None, forcing non-None selection (uniform pick from non-None options)')
+          }
+        } else {
+          // Normal weighted selection (None can be selected)
+          selectedImage = pickLayerWeighted(layerName, validImages, prevKey)
         }
+        
+        const selectedPath = selectedImage?.path || ''
+        newLayers[layerName] = selectedPath
+        
+        // Update FacialHair history (track last 3 randomizations)
+        facialHairHistoryRef.current = [...facialHairHistoryRef.current, selectedPath].slice(-3)
+        
         return
       }
       
-      // Special handling for MouthBase: weighted to pick "Numb" 70% of the time
+      // Special handling for MouthBase: use weighted selection (REMOVED 70% Numb hardcoded bias)
       if (layerName === 'MouthBase') {
         const validImages = images.filter(img => {
           const path = (img?.path || '').trim()
@@ -1235,58 +1493,12 @@ export function useMemeGenerator() {
           return
         }
         
-        // Find Numb option
-        const numbOption = findOptionByDisplayName(validImages, 'Numb')
-        const otherOptions = validImages.filter(img => img !== numbOption)
+        // Get previous selection key for no-repeat
+        const prevKey = getPrevKeyForLayer(layerName, prevLayers)
         
-        // 70% chance for Numb, 30% chance for other options
-        const useNumb = (() => {
-          try {
-            if (window?.crypto?.getRandomValues) {
-              const arr = new Uint32Array(1)
-              window.crypto.getRandomValues(arr)
-              return (arr[0] / 0xFFFFFFFF) < 0.7
-            } else {
-              return Math.random() < 0.7
-            }
-          } catch {
-            return Math.random() < 0.7
-          }
-        })()
-        
-        if (useNumb && numbOption) {
-          newLayers[layerName] = numbOption.path || ''
-        } else if (otherOptions.length > 0) {
-          // Pick random from other options
-          let idx = 0
-          try {
-            if (window?.crypto?.getRandomValues) {
-              const arr = new Uint32Array(1)
-              window.crypto.getRandomValues(arr)
-              idx = arr[0] % otherOptions.length
-            } else {
-              idx = Math.floor(Math.random() * otherOptions.length)
-            }
-          } catch {
-            idx = Math.floor(Math.random() * otherOptions.length)
-          }
-          newLayers[layerName] = otherOptions[idx]?.path || ''
-        } else {
-          // Fallback to any valid image
-          let idx = 0
-          try {
-            if (window?.crypto?.getRandomValues) {
-              const arr = new Uint32Array(1)
-              window.crypto.getRandomValues(arr)
-              idx = arr[0] % validImages.length
-            } else {
-              idx = Math.floor(Math.random() * validImages.length)
-            }
-          } catch {
-            idx = Math.floor(Math.random() * validImages.length)
-          }
-          newLayers[layerName] = validImages[idx]?.path || ''
-        }
+        // Use weighted selection (weights from TRAIT_FREQUENCIES['Mouth'] routed to MouthBase)
+        const selectedImage = pickLayerWeighted(layerName, validImages, prevKey)
+        newLayers[layerName] = selectedImage?.path || ''
         return
       }
       
@@ -1331,78 +1543,67 @@ export function useMemeGenerator() {
           }
         })
         
-        // Randomly decide: 33% suit, 33% Chia Farmer (if Tee/Tank available), 33% regular
-        // But only if prerequisites are met
-        let candidates = []
+        // Use weighted selection for all Clothes options (including suit variants and Chia Farmer)
+        // Weighted maps handle color variants via trait matching in buildWeightedMaps
+        const allClothesValid = [...suitVariants, ...regularOptions]
         
-        // Check if Chia Farmer is allowed (requires Tee or Tank-top)
-        const hasTeeOrTank = regularOptions.some(img => {
-          const path = (img?.path || '').toLowerCase()
-          return path.includes('tee') || path.includes('tank-top')
-        })
-        const canUseChiaFarmer = hasTeeOrTank && chiaFarmerVariants.length > 0
-        
-        const availableOptions = []
-        if (suitVariants.length > 0) availableOptions.push({ type: 'suit', items: suitVariants })
-        if (canUseChiaFarmer) availableOptions.push({ type: 'chiaFarmer', items: chiaFarmerVariants })
-        if (regularOptions.length > 0) availableOptions.push({ type: 'regular', items: regularOptions })
-        
-        if (availableOptions.length === 0) {
+        if (allClothesValid.length === 0) {
           newLayers[layerName] = ''
+          newLayers['ClothesAddon'] = ''
           return
         }
         
-        // Pick random option type
-        let idx = 0
-        try {
-          if (window?.crypto?.getRandomValues) {
-            const arr = new Uint32Array(1)
-            window.crypto.getRandomValues(arr)
-            idx = arr[0] % availableOptions.length
-          } else {
-            idx = Math.floor(Math.random() * availableOptions.length)
-          }
-        } catch {
-          idx = Math.floor(Math.random() * availableOptions.length)
-        }
+        // Get previous selection key for no-repeat
+        const prevKey = getPrevKeyForLayer(layerName, prevLayers)
         
-        const selectedOption = availableOptions[idx]
-        const selectedItems = selectedOption.items
+        // Use weighted selection for Clothes
+        const selectedImage = pickLayerWeighted(layerName, allClothesValid, prevKey)
+        const selectedPath = selectedImage?.path || ''
         
-        // Pick random item from selected type
-        let itemIdx = 0
-        try {
-          if (window?.crypto?.getRandomValues) {
-            const arr = new Uint32Array(1)
-            window.crypto.getRandomValues(arr)
-            itemIdx = arr[0] % selectedItems.length
-          } else {
-            itemIdx = Math.floor(Math.random() * selectedItems.length)
-          }
-        } catch {
-          itemIdx = Math.floor(Math.random() * selectedItems.length)
-        }
+        // Check if selected item is a Chia Farmer variant
+        const selectedPathLower = selectedPath.toLowerCase()
+        const isChiaFarmer = selectedPathLower.includes('chia') && selectedPathLower.includes('farmer')
         
-        const selectedItem = selectedItems[itemIdx]
-        
-        if (selectedOption.type === 'chiaFarmer') {
+        if (isChiaFarmer) {
           // Chia Farmer: write to ClothesAddon (canonical layer)
           // Also ensure a Tee or Tank-top is selected in Clothes
-          const teeOrTank = regularOptions.find(img => {
+          const hasTeeOrTank = regularOptions.some(img => {
             const path = (img?.path || '').toLowerCase()
             return path.includes('tee') || path.includes('tank-top')
           })
-          if (teeOrTank) {
-            newLayers[layerName] = teeOrTank.path
-            newLayers['ClothesAddon'] = selectedItem.path
+          if (hasTeeOrTank) {
+            // Pick a Tee or Tank-top for Clothes base
+            const teeOrTank = regularOptions.find(img => {
+              const path = (img?.path || '').toLowerCase()
+              return path.includes('tee') || path.includes('tank-top')
+            })
+            if (teeOrTank) {
+              newLayers[layerName] = teeOrTank.path
+              newLayers['ClothesAddon'] = selectedPath
+            } else {
+              // Fallback: pick weighted Tee/Tank-top (use prevKey to avoid repeat)
+              const teeTankOptions = regularOptions.filter(img => {
+                const path = (img?.path || '').toLowerCase()
+                return path.includes('tee') || path.includes('tank-top')
+              })
+              if (teeTankOptions.length > 0) {
+                const baseImage = pickLayerWeighted(layerName, teeTankOptions, prevKey)
+                newLayers[layerName] = baseImage?.path || ''
+                newLayers['ClothesAddon'] = selectedPath
+              } else {
+                newLayers[layerName] = ''
+                newLayers['ClothesAddon'] = ''
+              }
+            }
           } else {
-            // No Tee/Tank available - can't use Chia Farmer
-            newLayers[layerName] = ''
+            // No Tee/Tank available - can't use Chia Farmer, pick regular Clothes instead (use prevKey to avoid repeat)
+            const regularImage = pickLayerWeighted(layerName, regularOptions, prevKey)
+            newLayers[layerName] = regularImage?.path || ''
             newLayers['ClothesAddon'] = ''
           }
         } else {
           // Suit or regular: write to Clothes
-          newLayers[layerName] = selectedItem.path
+          newLayers[layerName] = selectedPath
           // Clear ClothesAddon if it was Chia Farmer
           if (newLayers['ClothesAddon']) {
             const addonPath = (newLayers['ClothesAddon'] || '').toLowerCase()
@@ -1477,50 +1678,22 @@ export function useMemeGenerator() {
           }
         })
         
-        // Weight groups and standalones equally
-        const allChoices = [...Array.from(groupsMap.entries()), ...standaloneItems.map(item => ['standalone', [item]])]
+        // Get previous selection key for no-repeat
+        const prevKey = getPrevKeyForLayer(layerName, prevLayers)
         
-        if (allChoices.length === 0) {
-          newLayers[layerName] = ''
-          return
-        }
-        
-        // Pick random group or standalone
-        let choiceIdx = 0
-        try {
-          if (window?.crypto?.getRandomValues) {
-            const arr = new Uint32Array(1)
-            window.crypto.getRandomValues(arr)
-            choiceIdx = arr[0] % allChoices.length
-          } else {
-            choiceIdx = Math.floor(Math.random() * allChoices.length)
-          }
-        } catch {
-          choiceIdx = Math.floor(Math.random() * allChoices.length)
-        }
-        
-        const [choiceType, choiceItems] = allChoices[choiceIdx]
-        
-        // Pick random variant from chosen group
-        let itemIdx = 0
-        try {
-          if (window?.crypto?.getRandomValues) {
-            const arr = new Uint32Array(1)
-            window.crypto.getRandomValues(arr)
-            itemIdx = arr[0] % choiceItems.length
-          } else {
-            itemIdx = Math.floor(Math.random() * choiceItems.length)
-          }
-        } catch {
-          itemIdx = Math.floor(Math.random() * choiceItems.length)
-        }
-        
-        newLayers[layerName] = choiceItems[itemIdx]?.path || ''
+        // Use weighted selection (weights handle color variants via trait matching in buildWeightedMaps)
+        const selectedImage = pickLayerWeighted(layerName, validImages, prevKey)
+        newLayers[layerName] = selectedImage?.path || ''
         return
       }
       
-      // Special handling for Eyes: group-based picking (same as Head)
+      // Special handling for Eyes: use weighted selection (Face Wear meta-decision may have already set it)
       if (layerName === 'Eyes') {
+        // If Face Wear meta-decision already set Eyes, skip
+        if (newLayers['Eyes'] !== undefined) {
+          return
+        }
+        
         const validImages = images.filter(img => {
           const path = (img?.path || '').trim()
           const displayName = (img?.displayName || img?.name || '').trim().toLowerCase()
@@ -1537,67 +1710,16 @@ export function useMemeGenerator() {
           return
         }
         
-        // Group Eyes options by base name (color variants)
-        const groupsMap = new Map() // Map<baseName, variants[]>
-        const standaloneItems = []
+        // Get previous selection key for no-repeat
+        const prevKey = getPrevKeyForLayer(layerName, prevLayers)
         
-        validImages.forEach(img => {
-          const parsed = parseColorVariant(img.displayName || img.name)
-          if (parsed && parsed.base) {
-            // This is a color variant - add to group
-            if (!groupsMap.has(parsed.base)) {
-              groupsMap.set(parsed.base, [])
-            }
-            groupsMap.get(parsed.base).push(img)
-          } else {
-            // Standalone item (no variants)
-            standaloneItems.push(img)
-          }
-        })
-        
-        // Weight groups and standalones equally
-        const allChoices = [...Array.from(groupsMap.entries()), ...standaloneItems.map(item => ['standalone', [item]])]
-        
-        if (allChoices.length === 0) {
-          newLayers[layerName] = ''
-          return
-        }
-        
-        // Pick random group or standalone
-        let choiceIdx = 0
-        try {
-          if (window?.crypto?.getRandomValues) {
-            const arr = new Uint32Array(1)
-            window.crypto.getRandomValues(arr)
-            choiceIdx = arr[0] % allChoices.length
-          } else {
-            choiceIdx = Math.floor(Math.random() * allChoices.length)
-          }
-        } catch {
-          choiceIdx = Math.floor(Math.random() * allChoices.length)
-        }
-        
-        const [choiceType, choiceItems] = allChoices[choiceIdx]
-        
-        // Pick random variant from chosen group
-        let itemIdx = 0
-        try {
-          if (window?.crypto?.getRandomValues) {
-            const arr = new Uint32Array(1)
-            window.crypto.getRandomValues(arr)
-            itemIdx = arr[0] % choiceItems.length
-          } else {
-            itemIdx = Math.floor(Math.random() * choiceItems.length)
-          }
-        } catch {
-          itemIdx = Math.floor(Math.random() * choiceItems.length)
-        }
-        
-        newLayers[layerName] = choiceItems[itemIdx]?.path || ''
+        // Use weighted selection (weights from Face Wear Eyes traits)
+        const selectedImage = pickLayerWeighted(layerName, validImages, prevKey)
+        newLayers[layerName] = selectedImage?.path || ''
         return
       }
       
-      // For other layers: filter valid images (exclude "None" for Base, exclude disabled options)
+      // For other layers (Background, Base, Head, Clothes, MouthItem): use weighted selection
       const excludeNone = layerName === 'Base'
       const validImages = images.filter(img => {
         const path = (img?.path || '').trim()
@@ -1618,23 +1740,13 @@ export function useMemeGenerator() {
         return
       }
       
-      // Pick random valid image
-      let idx = 0
-      try {
-        if (window?.crypto?.getRandomValues) {
-          const arr = new Uint32Array(1)
-          window.crypto.getRandomValues(arr)
-          idx = arr[0] % validImages.length
-        } else {
-          idx = Math.floor(Math.random() * validImages.length)
-        }
-      } catch {
-        idx = Math.floor(Math.random() * validImages.length)
-      }
+      // Get previous selection key for no-repeat
+      const prevKey = getPrevKeyForLayer(layerName, prevLayers)
       
-      // For grouped layers (Head, Eyes), we need to pick actual variant paths
-      // For now, just use the path - selectLayerInternal will handle grouping logic
-      newLayers[layerName] = validImages[idx]?.path || ''
+      // Use weighted selection for all layers
+      // For grouped layers (Head), weighted selection handles color variants via trait matching
+      const selectedImage = pickLayerWeighted(layerName, validImages, prevKey)
+      newLayers[layerName] = selectedImage?.path || ''
     })
     
     // Apply rules (clearSelections, forceSelections) to ensure valid state
@@ -1716,32 +1828,22 @@ export function useMemeGenerator() {
       })
       
       if (validImages.length > 0) {
-        // Pick random valid image
-        let idx = 0
-        try {
-          if (window?.crypto?.getRandomValues) {
-            const arr = new Uint32Array(1)
-            window.crypto.getRandomValues(arr)
-            idx = arr[0] % validImages.length
-          } else {
-            idx = Math.floor(Math.random() * validImages.length)
-          }
-        } catch {
-          idx = Math.floor(Math.random() * validImages.length)
-        }
-        newLayers[layerName] = validImages[idx]?.path || ''
+        // Get previous selection key for no-repeat
+        const prevKey = getPrevKeyForLayer(layerName, prevLayers)
+        
+        // Use weighted selection (not uniform random) with no-repeat
+        const selectedImage = pickLayerWeighted(layerName, validImages, prevKey)
+        newLayers[layerName] = selectedImage?.path || ''
       }
     })
     
-    // Set final state (use selectLayerInternal pattern for Chia Farmer handling)
-    setSelectedLayers(prev => {
+      // Handle Chia Farmer special case (same logic as selectLayerInternal)
       const finalLayers = { ...newLayers }
       
-      // Handle Chia Farmer special case (same logic as selectLayerInternal)
       if (finalLayers['Clothes'] && finalLayers['Clothes'].includes('Chia-Farmer')) {
         finalLayers['ClothesAddon'] = finalLayers['Clothes']
         // Check if we need to add Tee/Tank-top base
-        const prevClothes = prev['Clothes']
+        const prevClothes = prevLayers['Clothes']
         const prevIsTeeOrTank = prevClothes && (
           prevClothes.includes('Tee') || 
           prevClothes.includes('Tank-Top') ||
@@ -1754,7 +1856,7 @@ export function useMemeGenerator() {
         // Otherwise rules will force Tee Blue
       } else {
         // Non-Chia-Farmer: clear ClothesAddon if it was Chia Farmer
-        const prevClothesAddon = prev['ClothesAddon']
+        const prevClothesAddon = prevLayers['ClothesAddon']
         const prevWasChiaFarmer = prevClothesAddon && (
           prevClothesAddon.includes('Chia-Farmer') || 
           prevClothesAddon.includes('EXTRA-on-tee,tank-top_CLOTHES_Chia-Farmer')
@@ -1775,7 +1877,35 @@ export function useMemeGenerator() {
       
       return finalLayers
     })
+  }, [faceWearTraitWeights, faceWearToLayerRouting, getPrevKeyForLayer, filterNoRepeat, pickLayerWeighted, getDisabledLayers, getAllLayerImages, isOptionDisabledByRules, parseColorVariant, parseChiaFarmerVariant, findOptionByDisplayName, setHistory])
+
+  // Undo/Back function - restores the previous randomized state
+  const undoRandomize = useCallback(() => {
+    setHistory(h => {
+      if (h.length === 0) {
+        if (import.meta.env.DEV) {
+          console.warn('[undoRandomize] History is empty, nothing to undo')
+        }
+        return h
+      }
+      
+      // Pop the most recent snapshot
+      const snapshot = h[h.length - 1]
+      
+      // Atomically restore the entire state
+      setSelectedLayers(() => ({ ...snapshot }))
+      
+      if (import.meta.env.DEV) {
+        console.log(`[undoRandomize] Restored state, ${h.length - 1} snapshots remaining`)
+      }
+      
+      // Return history without the popped snapshot
+      return h.slice(0, -1)
+    })
   }, [])
+
+  // Computed value: can undo if history has snapshots
+  const canUndo = history.length > 0
 
   return {
     selectedLayers,
@@ -1786,7 +1916,9 @@ export function useMemeGenerator() {
     renderCanvas,
     isRendering,
     disabledLayers,
-    randomizeAllLayers
+    randomizeAllLayers,
+    undoRandomize,
+    canUndo
   }
 }
 
