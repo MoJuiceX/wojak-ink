@@ -255,7 +255,7 @@ export default function Taskbar({ onOpenWojakGenerator, wojakGeneratorOpen, onOp
     <>
       <nav className="taskbar" role="toolbar" aria-label="Application toolbar">
         <button 
-          className="start-button"
+          className={`start-button ${startMenuOpen ? 'pressed' : ''}`}
           ref={startButtonRef}
           onClick={handleStartClick}
           onMouseEnter={handleStartHoverIn}
@@ -263,6 +263,10 @@ export default function Taskbar({ onOpenWojakGenerator, wojakGeneratorOpen, onOp
           onMouseDown={(e) => e.stopPropagation()}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              handleStartClick()
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Escape') {
               e.preventDefault()
               handleStartClick()
             }

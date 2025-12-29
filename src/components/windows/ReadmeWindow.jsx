@@ -51,60 +51,6 @@ export default function ReadmeWindow({ onClose }) {
     }
   }, [])
 
-  // Force scrollbar to always be visible (Windows 98 behavior - scrollbars always show)
-  useEffect(() => {
-    const contentEl = contentRef.current
-    if (!contentEl) return
-    
-    let isScrolling = false
-    let scrollTimeout
-    
-    // Track user scrolling to avoid interference
-    const handleScroll = () => {
-      isScrolling = true
-      clearTimeout(scrollTimeout)
-      scrollTimeout = setTimeout(() => {
-        isScrolling = false
-      }, 150)
-    }
-    
-    contentEl.addEventListener('scroll', handleScroll, { passive: true })
-    
-    // Force scrollbar to appear by doing a minimal scroll manipulation
-    const forceScrollbarVisible = () => {
-      if (isScrolling) return // Prevent interference with user scrolling
-      
-      const currentScroll = contentEl.scrollTop
-      const maxScroll = contentEl.scrollHeight - contentEl.clientHeight
-      
-      // At top - scroll down 0.5px then back (imperceptible)
-      if (currentScroll === 0 && maxScroll > 0) {
-        contentEl.scrollTop = 0.5
-        requestAnimationFrame(() => {
-          contentEl.scrollTop = 0
-        })
-      } else if (currentScroll > 0 && currentScroll < maxScroll) {
-        // Not at extremes - move by 0.5px and back
-        contentEl.scrollTop = currentScroll + 0.5
-        requestAnimationFrame(() => {
-          contentEl.scrollTop = currentScroll
-        })
-      }
-    }
-    
-    // Force immediately
-    forceScrollbarVisible()
-    
-    // Keep it visible periodically (every 2 seconds)
-    const interval = setInterval(forceScrollbarVisible, 2000)
-    
-    return () => {
-      clearInterval(interval)
-      clearTimeout(scrollTimeout)
-      contentEl.removeEventListener('scroll', handleScroll)
-    }
-  }, [])
-
   return (
     <Window
       id="window-readme-txt"

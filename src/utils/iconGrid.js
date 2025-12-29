@@ -3,10 +3,11 @@
  * Provides grid snapping functionality similar to Windows 98
  */
 
-const GRID_SIZE_X = 100 // Horizontal grid spacing (96px icon + 4px gap)
-const GRID_SIZE_Y = 80 // Vertical grid spacing (matches icon height)
-const GRID_OFFSET_X = 20 // Grid offset from desktop left edge
-const GRID_OFFSET_Y = 20 // Grid offset from desktop top edge
+const GRID_SIZE = 64 // Grid spacing in pixels (increased from 48px for better spacing)
+const GRID_SIZE_X = GRID_SIZE // Horizontal grid spacing
+const GRID_SIZE_Y = GRID_SIZE // Vertical grid spacing
+const GRID_OFFSET_X = 0 // Grid offset from desktop left edge
+const GRID_OFFSET_Y = 0 // Grid offset from desktop top edge
 
 const GRID_SNAPPING_KEY = 'wojak_desktop_grid_snapping'
 

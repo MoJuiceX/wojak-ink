@@ -6,6 +6,7 @@ import { getWindowIcon } from '../../utils/windowIcons'
 import { getWindowSizeConstraints, clampWindowPosition } from '../../utils/windowPosition'
 import { useKeyboardHandler, KEYBOARD_PRIORITY } from '../../contexts/KeyboardPriorityContext'
 import { playSound } from '../../utils/soundManager'
+import SystemMenu from '../ui/SystemMenu'
 
 /**
  * Window component that provides a draggable, resizable window with minimize, maximize, and close functionality.
@@ -144,9 +145,13 @@ export default function Window({
     },
   })
   const [isVisible, setIsVisible] = useState(true)
+  const [systemMenuOpen, setSystemMenuOpen] = useState(false)
+  const [systemMenuPosition, setSystemMenuPosition] = useState({ x: 0, y: 0 })
+  const [isMinimizing, setIsMinimizing] = useState(false)
   const savedPositionRef = useRef({ x: 0, y: 0 })
   const savedSizeRef = useRef({ width: '', height: '' })
   const justFinishedDragRef = useRef(false) // Track if we just finished dragging to prevent position sync race
+  const lastTitleBarClickRef = useRef({ time: 0, target: null }) // Track last click for double-click detection
   const windowData = getWindow(windowId)
   const isMinimized = windowData ? isWindowMinimized(windowId) : false
   const isMaximized = windowData?.isMaximized || false
@@ -436,6 +441,123 @@ export default function Window({
     }
   }, [isActive, isMinimized, title])
 
+  // Handle double-click on titlebar to maximize/restore
+  const handleTitleBarDoubleClick = (e) => {
+    // Don't double-click on control buttons
+    if (e.target.closest('.title-bar-controls')) return
+    // Don't double-click if window is minimized
+    if (isMinimized) return
+    
+    const now = Date.now()
+    const lastClick = lastTitleBarClickRef.current
+    
+    // Check if this is a double-click (within 300ms and same target)
+    if (now - lastClick.time < 300 && lastClick.target === e.target) {
+      e.preventDefault()
+      e.stopPropagation()
+      handleMaximize()
+      // Reset click tracking after double-click
+      lastTitleBarClickRef.current = { time: 0, target: null }
+    } else {
+      // Update last click time and target
+      lastTitleBarClickRef.current = { time: now, target: e.target }
+    }
+  }
+
+  // Handle right-click on titlebar to show system menu
+  const handleTitleBarRightClick = (e) => {
+    // Don't show system menu if clicking on control buttons
+    if (e.target.closest('.title-bar-controls')) return
+    
+    e.preventDefault()
+    e.stopPropagation()
+    
+    setSystemMenuPosition({ x: e.clientX, y: e.clientY })
+    setSystemMenuOpen(true)
+  }
+
+  // Build system menu items based on window state
+  const getSystemMenuItems = () => {
+    const items = []
+    
+    // Restore - only if maximized
+    if (isMaximized) {
+      items.push({
+        label: 'Restore',
+        shortcut: 'Alt+Space, R',
+        action: 'restore',
+        disabled: false,
+        onClick: () => {
+          handleMaximize()
+        }
+      })
+    }
+    
+    // Move - always enabled (but not functional in web, so we'll just close menu)
+    items.push({
+      label: 'Move',
+      shortcut: 'Alt+Space, M',
+      action: 'move',
+      disabled: false,
+      onClick: () => {
+        // Move functionality not implemented in web version
+        // In real Windows 98, this would allow moving window with arrow keys
+      }
+    })
+    
+    // Size - disabled if maximized
+    items.push({
+      label: 'Size',
+      shortcut: 'Alt+Space, S',
+      action: 'size',
+      disabled: isMaximized,
+      onClick: () => {
+        // Size functionality not implemented in web version
+        // In real Windows 98, this would allow resizing window with arrow keys
+      }
+    })
+    
+    // Minimize - always enabled
+    items.push({
+      label: 'Minimize',
+      shortcut: 'Alt+Space, N',
+      action: 'minimize',
+      disabled: false,
+      onClick: () => {
+        handleMinimize()
+      }
+    })
+    
+    // Maximize - disabled if maximized
+    if (!isMaximized) {
+      items.push({
+        label: 'Maximize',
+        shortcut: 'Alt+Space, X',
+        action: 'maximize',
+        disabled: false,
+        onClick: () => {
+          handleMaximize()
+        }
+      })
+    }
+    
+    // Separator
+    items.push({ separator: true })
+    
+    // Close - always enabled
+    items.push({
+      label: 'Close',
+      shortcut: 'Alt+F4',
+      action: 'close',
+      disabled: false,
+      onClick: () => {
+        handleClose()
+      }
+    })
+    
+    return items
+  }
+
   // Bring to front when clicked - improved handler
   useEffect(() => {
     const win = windowRef.current
@@ -461,15 +583,21 @@ export default function Window({
     const titleBar = win.querySelector('.title-bar')
     if (titleBar) {
       titleBar.addEventListener('mousedown', handleMouseDown, true)
+      // Add double-click handler to titlebar
+      titleBar.addEventListener('dblclick', handleTitleBarDoubleClick)
+      // Add right-click handler to titlebar for system menu
+      titleBar.addEventListener('contextmenu', handleTitleBarRightClick)
     }
 
     return () => {
       win.removeEventListener('mousedown', handleMouseDown, true)
       if (titleBar) {
         titleBar.removeEventListener('mousedown', handleMouseDown, true)
+        titleBar.removeEventListener('dblclick', handleTitleBarDoubleClick)
+        titleBar.removeEventListener('contextmenu', handleTitleBarRightClick)
       }
     }
-  }, [windowId, bringToFront])
+  }, [windowId, bringToFront, isMinimized, isMaximized])
 
   const handleClose = () => {
     try {
@@ -506,12 +634,19 @@ export default function Window({
       } else {
         // Party mode only - minimize sound
         playSound('windowMinimize')
-        minimizeWindow(windowId)
+        // Start minimize animation
+        setIsMinimizing(true)
+        // After animation completes, actually minimize
+        setTimeout(() => {
+          minimizeWindow(windowId)
+          setIsMinimizing(false)
+        }, 200) // Match animation duration
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
         console.error('[Window] Error minimizing/restoring window:', error, 'windowId:', windowId)
       }
+      setIsMinimizing(false)
     }
   }
 
@@ -713,7 +848,7 @@ export default function Window({
     <div
       id={windowId}
       ref={windowRef}
-      className={`window draggable ${className} ${isMinimized ? 'minimized' : ''} ${isActive ? 'active' : ''}`}
+      className={`window draggable ${className} ${isMinimized ? 'minimized' : ''} ${isMinimizing ? 'minimizing' : ''} ${isActive ? 'active' : ''}`}
       data-nostack={noStack ? 'true' : undefined}
       role="dialog"
       aria-modal="true"
@@ -898,6 +1033,14 @@ export default function Window({
             </>
           )}
         </>
+      )}
+      {systemMenuOpen && (
+        <SystemMenu
+          x={systemMenuPosition.x}
+          y={systemMenuPosition.y}
+          items={getSystemMenuItems()}
+          onClose={() => setSystemMenuOpen(false)}
+        />
       )}
     </div>
   )

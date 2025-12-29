@@ -23,6 +23,8 @@ const windowIconMap = {
   'window-minesweeper': 'game_mine_1-0',
   'window-skifree': 'game_solitaire-0', // Overridden by special case in getWindowIcon
   'try-again-window': 'msg_question-0',
+  'window-chia-network': 'msg_information-0', // Will be overridden by icon prop
+  'roadmap-window': 'notepad-0',
 }
 
 // Map window titles to icon filenames (fallback)
@@ -43,6 +45,9 @@ const titleIconMap = {
   'MINESWEEPER.EXE': 'game_mine_1-0',
   'SKIFREE.EXE': 'game_solitaire-0', // Overridden by special case in getWindowIcon
   'Try again!!!': 'msg_question-0',
+  'CHIA_NETWORK.TXT': 'msg_information-0', // Will be overridden by icon prop
+  '@chubzxmeta': 'msg_information-0', // Will be overridden by icon prop
+  'Wojak_Farmers_Plot_Roadmap.TXT': 'notepad-0',
 }
 
 /**
@@ -70,6 +75,11 @@ export function getWindowIcon(windowId, title) {
   // Special case: Try Again uses emoji only, no icon
   if (windowId === 'try-again-window' || title === '🎁') {
     return null
+  }
+  
+  // Special case: Chia Network window uses chubz.jpg image
+  if (windowId === 'window-chia-network' || title === 'CHIA_NETWORK.TXT' || title === '@chubzxmeta') {
+    return '/assets/images/chubz.jpg'
   }
   
   // Try window ID first

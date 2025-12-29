@@ -11,7 +11,7 @@ const IMAGE_WALLPAPERS = [
   { id: 'orange-waves', name: 'Orange Waves', url: '/wallpapers/orange-waves.png', color: null },
   { id: 'tanggang-life', name: 'Tang Gang Life', url: '/wallpapers/tanggang.life.png', color: null },
   { id: 'windows-98', name: 'Windows 98', url: '/wallpapers/windows-98.png', color: null },
-  { id: 'windows-98bg', name: 'Windows 98 Background', url: '/wallpapers/windows-98bg.jpg', color: null },
+  { id: 'windows-98bg', name: 'Bliss', url: '/wallpapers/windows-98bg.jpg', color: null },
   { id: 'windows-orange', name: 'Windows Orange', url: '/wallpapers/windows-orange.png', color: null },
 ]
 

@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:tangify": "npm run build && npx wrangler pages dev dist --compatibility-date=2024-01-01",
     "build": "npm run generate-meme-manifest && vite build",
     "preview": "vite preview",
     "download-wojak-images": "node scripts/download-wojak-images.js",

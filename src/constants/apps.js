@@ -125,6 +125,20 @@ export const APPS = {
     group: 'MAIN',
     open: { type: 'window', windowId: 'community-resources' },
   },
+  '@chubzxmeta': {
+    id: '@chubzxmeta',
+    label: 'CHIA_NETWORK',
+    icon: { type: 'img', src: '/assets/images/chubz.jpg' },
+    group: 'MAIN',
+    open: { type: 'window', windowId: 'window-chia-network' },
+  },
+  ROADMAP: {
+    id: 'ROADMAP',
+    label: 'ROADMAP.TXT',
+    icon: { type: 'img', src: '/icon/Roadmap.png' },
+    group: 'MAIN',
+    open: { type: 'window', windowId: 'roadmap-window' },
+  },
 }
 
 // Desktop icon order (single source of truth)
@@ -138,6 +152,8 @@ export const DESKTOP_MAIN_ORDER = [
   'FAQ',
   'TANGGANG',
   'CRATE',
+  'ROADMAP',
+  '@chubzxmeta',
 ]
 
 export const DESKTOP_GAMES_ORDER = [

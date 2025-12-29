@@ -45,12 +45,20 @@ export default function ContextMenu({ x, y, items, onClose }) {
       className="context-menu"
       style={{ left: adjustedX, top: adjustedY }}
     >
-      {items.map((item, index) => (
-        item.separator ? (
-          <div key={index} className="context-menu-separator" />
+      {items.map((item, index) => {
+        // Generate a unique key that can never be 0 or a number
+        // Use item.label or item.icon if available, otherwise use index with prefix
+        const uniqueKey = item.label 
+          ? `context-menu-item-${item.label}-${index}` 
+          : item.icon 
+          ? `context-menu-item-${item.icon}-${index}`
+          : `context-menu-item-separator-${index}`
+        
+        return item.separator ? (
+          <div key={uniqueKey} className="context-menu-separator" />
         ) : (
           <button
-            key={index}
+            key={uniqueKey}
             className={`context-menu-item ${item.disabled ? 'disabled' : ''}`}
             onClick={() => {
               if (!item.disabled) {
@@ -66,7 +74,7 @@ export default function ContextMenu({ x, y, items, onClose }) {
             {item.shortcut && <span className="context-menu-shortcut">{item.shortcut}</span>}
           </button>
         )
-      ))}
+      })}
     </div>
   )
 }

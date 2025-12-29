@@ -345,11 +345,22 @@ export default function ExportControls({
         
         // Provide helpful error messages for common issues
         if (response.status === 503) {
-          errorMessage = 'CyberTang API is unavailable. Make sure Wrangler is running: npx wrangler pages dev dist --compatibility-date=2024-01-01\n\nIf using production, check Cloudflare Pages deployment status.'
+          if (errorMessage.includes('Network') || errorMessage.includes('connection')) {
+            errorMessage = `Network connection error: ${errorMessage}. Please check your internet connection and try again.`
+          } else {
+            errorMessage = 'CyberTang API is unavailable. Make sure Wrangler is running: npx wrangler pages dev dist --compatibility-date=2024-01-01\n\nIf using production, check Cloudflare Pages deployment status.'
+          }
+        } else if (response.status === 504) {
+          errorMessage = 'Request timed out. The image generation is taking too long. Please try again with a smaller image or simpler prompt.'
         } else if (response.status === 500 && errorMessage.includes('API key')) {
-          errorMessage = 'OpenAI API key not configured. Please set OPENAI_API_KEY in .env file or Cloudflare Pages environment variables.'
+          errorMessage = 'OpenAI API key not configured. Please set OPENAI_API_KEY in .dev.vars file (for local) or Cloudflare Pages environment variables (for production).'
         } else if (response.status === 500) {
-          errorMessage = `Server error: ${errorMessage || 'Internal server error. Check that OPENAI_API_KEY is set correctly.'}`
+          // Don't wrap network errors with "Server error:" prefix - show the actual error
+          if (errorMessage.includes('Network') || errorMessage.includes('connection') || errorMessage.includes('timeout')) {
+            // Keep the original error message
+          } else {
+            errorMessage = `Server error: ${errorMessage || 'Internal server error. Check that OPENAI_API_KEY is set correctly in .dev.vars file.'}`
+          }
         } else if (response.status === 400) {
           errorMessage = `Invalid request: ${errorMessage}`
         } else if (response.status === 0 || response.status === 404) {

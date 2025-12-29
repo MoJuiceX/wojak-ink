@@ -1,0 +1,88 @@
+.big-pulp-window-body {
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  background: #c0c0c0;
+}
+
+.big-pulp-image-container {
+  position: relative;
+  width: 100%;
+  /* Maintain aspect ratio: 1200h / 800w = 1.5 */
+  aspect-ratio: 800 / 1200;
+}
+
+.big-pulp-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  position: relative;
+  z-index: 1;
+}
+
+/* Speech bubble text overlay */
+.big-pulp-speech-text {
+  position: absolute;
+  /* Position within the speech bubble area */
+  top: 10%;
+  left: 8%;
+  right: 8%;
+  height: 36%;
+  
+  /* Ensure text appears above the image */
+  z-index: 10;
+  
+  /* Text styling */
+  overflow: hidden;
+  padding: 10px;
+  box-sizing: border-box;
+  
+  /* Typography */
+  font-family: 'MS Sans Serif', 'Segoe UI', Tahoma, sans-serif;
+  font-size: 14px;
+  line-height: 1.35;
+  color: #000000;
+  text-align: left;
+  
+  /* Flexbox for vertical distribution */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 6px;
+  
+  /* Ensure text is visible */
+  pointer-events: none;
+}
+
+.big-pulp-speech-text p {
+  margin: 0;
+  padding: 0;
+}
+
+/* First paragraph slightly bolder */
+.big-pulp-speech-text p:first-child {
+  font-weight: 600;
+}
+
+/* NFT ID badge */
+.big-pulp-nft-badge {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(255, 102, 0, 0.9);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  font-family: 'MS Sans Serif', sans-serif;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+  z-index: 10;
+}
+
+/* Hide resize handles for Big Pulp windows */
+.big-pulp-window-no-resize .window-resize-handle {
+  display: none;
+}
+

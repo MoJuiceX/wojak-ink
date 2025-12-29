@@ -307,32 +307,45 @@ docker-compose up -d
 
 ### Option 3: Local Development with Tangify Feature (Wrangler)
 
-**Note:** The Tangify feature uses a Cloudflare Pages Function (`/api/tangify`). To test it locally, you need to use Wrangler instead of the standard Vite dev server.
+**Note:** The CyberTang/Tangify feature uses a Cloudflare Pages Function (`/api/tangify`). To test it locally, you need to use Wrangler instead of the standard Vite dev server.
 
 #### Prerequisites
 
-1. **Create `.env` file** (if you haven't already):
+1. **Create `.dev.vars` file** with your OpenAI API key:
    ```bash
-   # Create .env file in project root
-   echo "OPENAI_API_KEY=your-api-key-here" > .env
+   # Create .dev.vars file in project root (for Wrangler Pages Functions)
+   echo "OPENAI_API_KEY=your-api-key-here" > .dev.vars
    ```
    
-   **Important:** Replace `your-api-key-here` with your actual OpenAI API key. The `.env` file is gitignored, so your key is safe!
+   **Important:** 
+   - Replace `your-api-key-here` with your actual OpenAI API key
+   - Get your API key from: https://platform.openai.com/api-keys
+   - The `.dev.vars` file is gitignored, so your key is safe!
+   - **Note:** For Wrangler Pages Functions, use `.dev.vars` (not `.env`) - Wrangler uses this file to populate the `env` context for Functions
 
-2. **Install Wrangler** (if not already installed):
+2. **Verify your `.dev.vars` file:**
    ```bash
-   npm install -g wrangler
-   # Or use the local version:
-   npx wrangler --version
+   # Check that the file exists and has the key
+   cat .dev.vars
+   # Should show: OPENAI_API_KEY=sk-...
    ```
 
 #### Start Development Server with Wrangler
 
+**Quick Start (Recommended):**
+
 ```bash
-# Build the project first
+# This builds the project and starts Wrangler in one command
+npm run dev:tangify
+```
+
+**Or manually:**
+
+```bash
+# Step 1: Build the project first
 npm run build
 
-# Start Wrangler dev server (runs Cloudflare Pages Functions locally)
+# Step 2: Start Wrangler dev server (runs Cloudflare Pages Functions locally)
 npx wrangler pages dev dist --compatibility-date=2024-01-01
 ```
 
@@ -347,25 +360,44 @@ You should see output like:
 
 1. Open your browser
 2. Navigate to `http://localhost:8788`
-3. The Tangify feature should now work! 🎉
+3. Open the Wojak Generator window
+4. Click the **"CyberTang"** button - it should now work! 🎉
+
+**Troubleshooting:**
+
+- ❌ **"OpenAI API key not configured" error?**
+  - Make sure your `.dev.vars` file exists: `cat .dev.vars`
+  - Make sure it contains: `OPENAI_API_KEY=sk-...`
+  - **Important:** Use `.dev.vars` (not `.env`) for Wrangler Pages Functions
+  - Restart Wrangler after creating/editing `.dev.vars`
+
+- ❌ **"Failed to load resource: 500" error?**
+  - Check that Wrangler is running (you should see the terminal output)
+  - Check that `OPENAI_API_KEY` is set correctly in `.dev.vars`
+  - Try restarting Wrangler: Press `Ctrl+C` and run `npm run dev:tangify` again
+
+- ❌ **"CyberTang API endpoint not found" error?**
+  - Make sure you're using `http://localhost:8788` (Wrangler), not `http://localhost:5173` (Vite)
+  - Make sure Wrangler is running in a terminal
 
 **Important Notes:**
-- ⚠️ **Tangify only works with Wrangler dev server** - the standard `npm run dev` won't work for Tangify because it doesn't run Cloudflare Pages Functions
-- The `.env` file must contain `OPENAI_API_KEY` for local development
-- Wrangler automatically loads environment variables from `.env`
+- ⚠️ **CyberTang only works with Wrangler dev server** - the standard `npm run dev` won't work for CyberTang because it doesn't run Cloudflare Pages Functions
+- The `.dev.vars` file must contain `OPENAI_API_KEY` for local development (Wrangler Pages Functions use `.dev.vars`, not `.env`)
+- Wrangler automatically loads environment variables from `.dev.vars` for Pages Functions
 - For production, set `OPENAI_API_KEY` in Cloudflare Pages dashboard (see Deployment section)
+- Changes to source code require rebuilding: Stop Wrangler (`Ctrl+C`), then run `npm run dev:tangify` again
 
 #### When to Use Each Option
 
-- **`npm run dev`** (Option 1): Use for general development (faster, hot-reload, but Tangify won't work)
-- **`wrangler pages dev`** (Option 3): Use when you need to test the Tangify feature locally
+- **`npm run dev`** (Option 1): Use for general development (faster, hot-reload, but CyberTang won't work)
+- **`npm run dev:tangify`** (Option 3): Use when you need to test the CyberTang feature locally
 - **Docker** (Option 2): Use for testing production builds
 
-**Pro Tip:** You can run both servers simultaneously:
-- Terminal 1: `npm run dev` (for general development)
-- Terminal 2: `npx wrangler pages dev dist` (for testing Tangify)
+**Pro Tip:** You can run both servers simultaneously if you want:
+- Terminal 1: `npm run dev` (for general development at `http://localhost:5173`)
+- Terminal 2: `npm run dev:tangify` (for testing CyberTang at `http://localhost:8788`)
 
-Just remember to use the Wrangler URL (`http://localhost:8788`) when testing Tangify!
+Just remember to use the Wrangler URL (`http://localhost:8788`) when testing CyberTang!
 
 ---
 

@@ -56,7 +56,7 @@ export default function BootSequence({
   showOnce = true,
   maxVisibleLines = 18,
   typingSpeed = 9, // 15% longer (8 * 1.15 ≈ 9)
-  onAudioEnd
+  onBootAudioReady // Callback to pass bootAudio reference to parent
 }) {
   const [visibleLines, setVisibleLines] = useState([])
   const [completedLines, setCompletedLines] = useState(new Set())
@@ -72,61 +72,20 @@ export default function BootSequence({
       return
     }
 
-    // Check if already shown (if showOnce is true)
-    if (showOnce) {
-      const hasSeenBoot = sessionStorage.getItem('hasSeenBoot')
-      if (hasSeenBoot) {
-        onDone?.()
-        return
-      }
-    }
+    // Boot sequence always plays - cannot be skipped
 
     // Play PC boot sound at the start (20% slower - was 10%, now 20%)
     const bootAudio = new Audio('/assets/audio/PC-boot.mp3')
     bootAudio.volume = 0.75 // 75% volume
     bootAudio.playbackRate = 0.8 // 20% slower (0.8 = 80% speed)
     
-    // Get audio duration and start crossfade earlier so PS1 is fully faded in before PC-boot ends
-    bootAudio.addEventListener('loadedmetadata', () => {
-      const originalDuration = bootAudio.duration
-      const adjustedDuration = originalDuration / 0.8 // Adjust for slower playback rate (20% slower = longer duration)
-      const fadeStartTime = adjustedDuration - 4500 // Start fade 4.5 seconds before end (starts PS1 audio a fraction earlier)
-      const fadeDuration = 3000 // 3 second fade (PS1 needs 2 seconds to fade in, starting 4s before end ensures it's done)
-      
-      // Start crossfade when we reach fade start time
-      const checkFade = () => {
-        const currentTime = bootAudio.currentTime
-        
-        if (currentTime >= fadeStartTime && currentTime < adjustedDuration) {
-          const fadeProgress = (currentTime - fadeStartTime) / fadeDuration
-          bootAudio.volume = 0.75 * (1 - fadeProgress) // Fade out PC-boot (75% volume)
-          
-          // Trigger PS1 audio fade in immediately when fade starts
-          if (onAudioEnd && fadeProgress > 0) {
-            onAudioEnd(fadeProgress) // Pass fade progress for crossfade
-          }
-        }
-        
-        if (!bootAudio.paused && currentTime < adjustedDuration) {
-          requestAnimationFrame(checkFade)
-        }
-      }
-      
-      bootAudio.addEventListener('play', () => {
-        if (bootAudio.currentTime >= fadeStartTime) {
-          checkFade()
-        } else {
-          setTimeout(() => checkFade(), (fadeStartTime - bootAudio.currentTime) * 1000)
-        }
-      })
-    })
+    // Pass bootAudio reference to parent so it can control fade out timing
+    if (onBootAudioReady) {
+      onBootAudioReady(bootAudio)
+    }
     
-    // When PC-boot ends, ensure PS1 audio is at full volume
-    bootAudio.addEventListener('ended', () => {
-      if (onAudioEnd) {
-        onAudioEnd(1) // Full fade complete
-      }
-    })
+    // PC-boot audio plays at full volume during boot sequence
+    // Fade out will be controlled by parent component (StartupSequence)
     
     bootAudio.play().catch(e => {
       console.debug('[BootSequence] Audio play failed (may need user interaction):', e)
@@ -169,10 +128,7 @@ export default function BootSequence({
         await delay(15)
       }
 
-      // Mark as seen
-      if (showOnce) {
-        sessionStorage.setItem('hasSeenBoot', 'true')
-      }
+      // Boot sequence always plays - no sessionStorage marking
       
       await delay(282) // Brief pause at the end (15% longer: 245 * 1.15 ≈ 282)
       
@@ -184,7 +140,7 @@ export default function BootSequence({
     }
 
     sequence()
-  }, [lines, onDone, showOnce, typingSpeed, showClickPrompt, onAudioEnd])
+  }, [lines, onDone, showOnce, typingSpeed, showClickPrompt, onBootAudioReady])
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -212,12 +168,6 @@ export default function BootSequence({
           </div>
         </div>
       )}
-      <img
-        className="boot-sequence-right-art"
-        src="/assets/penguin_win95_256.png"
-        alt=""
-        aria-hidden="true"
-      />
       <div className="boot-sequence-container" ref={containerRef}>
         {visibleLines.slice(-maxVisibleLines).map((line, displayIndex) => {
           const actualIndex = Math.max(0, visibleLines.length - maxVisibleLines) + displayIndex

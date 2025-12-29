@@ -9,6 +9,7 @@ export function useKeyboardShortcuts({
   onOpen,
   onUndo,
   onRename,
+  onCopy,
   isWindowFocused = true,
 }) {
   const handleKeyDown = useCallback((e) => {
@@ -59,12 +60,18 @@ export function useKeyboardShortcuts({
       onRename?.(selectedIcons[0])
     }
 
+    // Ctrl+C / Cmd+C - Copy selected icons
+    if (isCtrl && key === 'c' && selectedIcons.length > 0) {
+      e.preventDefault()
+      onCopy?.(selectedIcons)
+    }
+
     // Escape - Deselect all
     if (key === 'escape') {
       e.preventDefault()
       onDeselectAll?.()
     }
-  }, [selectedIcons, onDelete, onSelectAll, onDeselectAll, onRefresh, onOpen, onUndo, onRename, isWindowFocused])
+  }, [selectedIcons, onDelete, onSelectAll, onDeselectAll, onRefresh, onOpen, onUndo, onRename, onCopy, isWindowFocused])
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown)

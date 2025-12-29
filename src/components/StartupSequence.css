@@ -8,6 +8,26 @@
   background: #000;
 }
 
+.startup-sequence.fade-out-black {
+  animation: fadeToWebsite 1.5s ease-in-out forwards;
+  pointer-events: none; /* Prevent interaction after fade */
+}
+
+@keyframes fadeToWebsite {
+  0% {
+    opacity: 1;
+    background: #000;
+  }
+  50% {
+    opacity: 0.3;
+    background: #000; /* Keep black background during fade */
+  }
+  100% {
+    opacity: 0;
+    background: #000; /* Keep black background - opacity fade reveals website without white flash */
+  }
+}
+
 .startup-logo-screen {
   width: 100%;
   height: 100%;
@@ -102,7 +122,8 @@
   font-size: 120px;
   text-shadow: 0 0 50px rgba(255, 165, 0, 0.8);
   animation: pulse 2s ease-in-out infinite;
-  margin-bottom: -20px; /* Move orange up */
+  margin-bottom: 0px; /* Moved down - was -20px */
+  margin-top: 20px; /* Added top margin to push orange down */
 }
 
 @keyframes pulse {
@@ -136,7 +157,7 @@
   font-weight: bold;
   color: #cc4400;
   text-shadow: 3px 3px 0 #000, 0 0 30px rgba(204, 68, 0, 0.7);
-  margin-top: 100px; /* Moved down a little bit more from 80px */
+  margin-top: 150px; /* Pushed down more from 100px */
   font-family: 'Arial Black', sans-serif;
   position: relative;
   animation: textPulse 2s ease-in-out infinite; /* Same frequency as emoji */
@@ -159,20 +180,34 @@
   justify-content: space-between;
   padding: 40px;
   animation: fadeIn 0.5s ease-out;
+  position: relative;
 }
 
 .startup-loading-screen.fade-out {
-  animation: fadeToBlack 1s ease-out forwards;
+  /* Don't fade the loading screen separately - let the main container handle the fade */
+  opacity: 1;
+  background: #000 !important; /* Keep black background */
 }
 
-@keyframes fadeToBlack {
+.startup-loading-screen.fade-out::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  z-index: -1;
+}
+
+@keyframes fadeContentOut {
   from { 
     opacity: 1;
     background: #000;
   }
   to { 
     opacity: 0;
-    background: #000;
+    background: #000; /* Keep black background during fade */
   }
 }
 
@@ -230,6 +265,10 @@
   font-size: 24px;
   color: #c0c0c0;
   animation: textPulse 2s ease-in-out infinite;
+}
+
+.startup-loading-subtitle.no-pulse {
+  animation: none; /* Stop pulsing when loading bar appears (Scene 2) */
 }
 
 /* Subtitle container for Stage 1 (logo) - positioned to match Stage 2 */

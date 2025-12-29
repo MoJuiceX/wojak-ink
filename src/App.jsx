@@ -21,6 +21,7 @@ import MintInfoWindow from './components/windows/MintInfoWindow'
 import GalleryWindow from './components/windows/GalleryWindow'
 import FaqWindow from './components/windows/FaqWindow'
 import TangGangWindow from './components/windows/TangGangWindow'
+import ChubzWindow from './components/windows/ChubzWindow'
 import SideStack from './components/SideStack'
 import NotifyPopup from './components/windows/NotifyPopup'
 import MarketplaceWindow from './components/windows/MarketplaceWindow'
@@ -81,6 +82,7 @@ import ContextMenu from './components/ui/ContextMenu'
 import PropertiesWindow from './components/windows/PropertiesWindow'
 import DisplayPropertiesWindow from './components/windows/DisplayPropertiesWindow'
 import ThemeQAWindow from './components/windows/ThemeQAWindow'
+import RoadmapWindow from './components/windows/RoadmapWindow'
 import { clearAllIconPositions } from './utils/iconPositionStorage'
 
 // Wallpaper definitions - exported for use in DisplayPropertiesWindow
@@ -91,7 +93,7 @@ export const WALLPAPERS = [
   { id: 'orange-grove', name: 'Orange Grove', url: '/wallpapers/orangeGrove.png', color: null },
   { id: 'tanggang-life', name: 'Tang Gang Life', url: '/wallpapers/tanggang.life.png', color: null },
   { id: 'windows-98', name: 'Windows 98', url: '/wallpapers/windows-98.png', color: null },
-  { id: 'windows-98bg', name: 'Windows 98 Background', url: '/wallpapers/windows-98bg.jpg', color: null },
+  { id: 'windows-98bg', name: 'Bliss', url: '/wallpapers/windows-98bg.jpg', color: null },
   { id: 'windows-orange', name: 'Windows Orange', url: '/wallpapers/windows-orange.png', color: null },
   { id: 'solid-teal', name: 'Teal (Classic)', url: null, color: '#008080' },
   { id: 'solid-orange', name: 'Orange', url: null, color: '#ff6600' },
@@ -361,6 +363,7 @@ function AppContent() {
     'my-favorite-wojaks': false,
     'memetic-energy': false,
     'community-resources': false,
+    'window-chia-network': false,
     'dev-panel': false,
   })
 
@@ -375,7 +378,7 @@ function AppContent() {
   const { setInputFocused } = useScreensaver()
   const { contextMenu, showContextMenu, hideContextMenu } = useContextMenu()
   const desktopRef = useRef(null)
-  const [iconResetKey, setIconResetKey] = useState(0)
+  const [iconResetKey, setIconResetKey] = useState(1) // Start at 1 to avoid key={0} issues
 
   // Reset all icon positions to defaults
   const resetIconPositions = useCallback(() => {
@@ -390,66 +393,78 @@ function AppContent() {
       })
     )
     
-    // Force re-mount of DesktopImageIcons only (DesktopIcons doesn't use key anymore)
+    // Force re-mount of both DesktopIcons and DesktopImageIcons
     // This will make them reload positions from localStorage (which is now empty)
     // and use default positions
-    // Note: DesktopIcons no longer uses key prop, so it won't remount
     setIconResetKey(prev => prev + 1)
     
     playSound('click')
   }, [])
 
+  // Reset startup handler - must be defined before handleDesktopContextMenu
+  const handleResetStartup = useCallback(() => {
+    // Reset startup sequence by clearing sessionStorage and resetting state
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        window.sessionStorage.removeItem('hasSeenStartup')
+      }
+      setIsStartupComplete(false)
+    } catch (error) {
+      console.error('Error resetting startup sequence:', error)
+    }
+  }, [setIsStartupComplete])
+
   // Desktop context menu handler
-  const handleDesktopContextMenu = (e) => {
-    // Only if clicking on desktop itself, not on icons, windows, or other elements
-    const target = e.target
+  const handleDesktopContextMenu = useCallback((e) => {
+    // Prevent default browser context menu
+    e.preventDefault()
+    e.stopPropagation()
     
-    // Check if we clicked on desktop background or bg-fixed element
-    const isDesktopBackground = 
-      target.classList.contains('desktop') || 
-      target.classList.contains('bg-fixed') ||
-      (target.tagName === 'MAIN' && target.id === 'main-content')
+    // Check if we're clicking on desktop background (not on windows, icons, or taskbar)
+    const clickedElement = document.elementFromPoint(e.clientX, e.clientY)
     
-    if (isDesktopBackground) {
-      // Double-check: ensure we're not clicking on child elements (icons, windows, etc.)
-      // Windows have z-index, icons are positioned, so if we hit desktop or bg-fixed, it's safe
-      const clickedElement = document.elementFromPoint(e.clientX, e.clientY)
-      const isActuallyDesktop = 
-        clickedElement &&
-        (clickedElement.classList.contains('desktop') ||
-         clickedElement.classList.contains('bg-fixed') ||
-         clickedElement.id === 'main-content') &&
-        !clickedElement.closest('.window') &&
-        !clickedElement.closest('.desktop-icons') &&
-        !clickedElement.closest('.desktop-image-icons') &&
-        !clickedElement.closest('.taskbar')
+    // If we clicked on a window, icon, or taskbar, don't show desktop menu
+    if (clickedElement) {
+      // Check if clicking directly on an icon button or inside icon containers
+      const isOnIconButton = clickedElement.closest('.desktop-icon-button') || 
+                            clickedElement.closest('.desktop-image-icon') ||
+                            clickedElement.closest('[data-icon-id]')
+      const isOnWindow = clickedElement.closest('.window')
+      const isOnTaskbar = clickedElement.closest('.taskbar')
+      const isOnStartMenu = clickedElement.closest('.start-menu')
       
-      if (isActuallyDesktop) {
-        showContextMenu(e, [
-          { 
-            icon: '🔄', 
-            label: 'Refresh', 
-            onClick: () => window.location.reload(), 
-            shortcut: 'F5' 
-          },
-          { separator: true },
-          { 
-            icon: '📐', 
-            label: 'Reset icons.', 
-            onClick: resetIconPositions
-          },
-          { separator: true },
-          { 
-            icon: '⚙️', 
-            label: 'Properties', 
-            onClick: () => {
-              setIsDisplayPropertiesOpen(true)
-            }
-          },
-        ])
+      // Only block if we're actually clicking on an interactive element, not just the container
+      if (isOnIconButton || isOnWindow || isOnTaskbar || isOnStartMenu) {
+        return // Let other context menus handle it
       }
     }
-  }
+    
+    // Show desktop context menu
+    showContextMenu(e, [
+      { 
+        icon: '⚡', 
+        label: 'Reboot', 
+        onClick: () => {
+          handleResetStartup()
+          window.location.reload()
+        }
+      },
+      { separator: true },
+      { 
+        icon: '📐', 
+        label: 'Reset icons.', 
+        onClick: resetIconPositions
+      },
+      { separator: true },
+      { 
+        icon: '⚙️', 
+        label: 'Properties', 
+        onClick: () => {
+          setIsDisplayPropertiesOpen(true)
+        }
+      },
+    ])
+  }, [showContextMenu, handleResetStartup, resetIconPositions, setIsDisplayPropertiesOpen])
 
   // Track input focus
   useEffect(() => {
@@ -485,6 +500,47 @@ function AppContent() {
   
   // Use the extracted window stacking hook
   useWindowStacking()
+
+  // Fallback context menu handler on document (capture phase) to catch desktop right-clicks
+  useEffect(() => {
+    const handleDocumentContextMenu = (e) => {
+      // Only handle if clicking on desktop background
+      const clickedElement = document.elementFromPoint(e.clientX, e.clientY)
+      
+      if (!clickedElement) return
+      
+      // Check if clicking on an interactive element
+      const isOnIconButton = clickedElement.closest('.desktop-icon-button') || 
+                            clickedElement.closest('.desktop-image-icon') ||
+                            clickedElement.closest('[data-icon-id]')
+      const isOnWindow = clickedElement.closest('.window')
+      const isOnTaskbar = clickedElement.closest('.taskbar')
+      const isOnStartMenu = clickedElement.closest('.start-menu')
+      const isOnContextMenu = clickedElement.closest('.context-menu')
+      
+      // If clicking on desktop background (not on any interactive element), show menu
+      if (!isOnIconButton && !isOnWindow && !isOnTaskbar && !isOnStartMenu && !isOnContextMenu) {
+        // Check if we're actually on the desktop
+        const isOnDesktop = clickedElement.closest('.desktop') || 
+                           clickedElement.classList.contains('desktop') ||
+                           clickedElement.id === 'main-content' ||
+                           clickedElement.classList.contains('bg-fixed')
+        
+        if (isOnDesktop) {
+          e.preventDefault()
+          e.stopPropagation()
+          handleDesktopContextMenu(e)
+        }
+      }
+    }
+
+    // Use capture phase to catch events before they're stopped
+    document.addEventListener('contextmenu', handleDocumentContextMenu, true)
+
+    return () => {
+      document.removeEventListener('contextmenu', handleDocumentContextMenu, true)
+    }
+  }, [handleDesktopContextMenu])
 
   // Global error logging for uncaught errors and unhandled promise rejections (DEV only)
   useEffect(() => {
@@ -586,17 +642,6 @@ function AppContent() {
     }))
   }
 
-  const handleResetStartup = () => {
-    // Reset startup sequence by clearing sessionStorage and resetting state
-    try {
-      if (typeof window !== 'undefined' && window.sessionStorage) {
-        window.sessionStorage.removeItem('hasSeenStartup')
-      }
-      setIsStartupComplete(false)
-    } catch (error) {
-      console.error('Error resetting startup sequence:', error)
-    }
-  }
 
   const addDesktopImage = useCallback((imageDataUrl, filename, type = 'original', selectedLayers = {}, pairId = null) => {
     if (!imageDataUrl) {
@@ -993,6 +1038,55 @@ function AppContent() {
     }
   }, [selectedIconIds, moveToRecycleBin, showToast])
 
+  // Copy selected icons to clipboard
+  const copySelectedIcons = useCallback(async () => {
+    if (selectedIconIds.length === 0) return
+
+    try {
+      // For single selection, copy the image
+      if (selectedIconIds.length === 1) {
+        const icon = desktopImages.find(img => img.id === selectedIconIds[0])
+        if (!icon) return
+
+        const imageUrl = icon.image || icon.imageDataUrl
+        if (!imageUrl) return
+
+        // Convert data URL to blob and copy
+        const response = await fetch(imageUrl)
+        const blob = await response.blob()
+        
+        if (navigator.clipboard && navigator.clipboard.write) {
+          const item = new ClipboardItem({ [blob.type || 'image/png']: blob })
+          await navigator.clipboard.write([item])
+          showToast(`📋 Copied ${icon.name || 'image'} to clipboard`, 'success', 2000)
+        } else {
+          showToast('Clipboard API not supported in this browser', 'error', 3000)
+        }
+      } else {
+        // For multiple selections, copy the first one (Windows 98 behavior)
+        const icon = desktopImages.find(img => img.id === selectedIconIds[0])
+        if (!icon) return
+
+        const imageUrl = icon.image || icon.imageDataUrl
+        if (!imageUrl) return
+
+        const response = await fetch(imageUrl)
+        const blob = await response.blob()
+        
+        if (navigator.clipboard && navigator.clipboard.write) {
+          const item = new ClipboardItem({ [blob.type || 'image/png']: blob })
+          await navigator.clipboard.write([item])
+          showToast(`📋 Copied ${selectedIconIds.length} items to clipboard`, 'success', 2000)
+        } else {
+          showToast('Clipboard API not supported in this browser', 'error', 3000)
+        }
+      }
+    } catch (error) {
+      console.error('Error copying to clipboard:', error)
+      showToast('Failed to copy to clipboard', 'error', 3000)
+    }
+  }, [selectedIconIds, desktopImages, showToast])
+
   // Keyboard shortcuts
   useKeyboardShortcuts({
     selectedIcons: selectedIconIds,
@@ -1014,6 +1108,7 @@ function AppContent() {
       // TODO: Implement rename
       console.log('Rename:', iconId)
     },
+    onCopy: copySelectedIcons,
     isWindowFocused: activeWindowId === null, // Only active when desktop is focused (no active windows)
   })
 
@@ -1172,24 +1267,55 @@ function AppContent() {
                 <StartupSequence onComplete={() => setIsStartupComplete(true)} />
               )}
 
-              {isStartupComplete && (
-                <>
-                  {/* Audio prompt */}
-                  <AudioPrompt />
-                  
-                  {/* Background music - starts after first user interaction */}
-                  <BackgroundMusic />
-              <a href="#main-content" className="skip-link">Skip to main content</a>
-              <div className="bg-fixed" aria-hidden="true" style={getWallpaperStyle()}></div>
-              <main 
+              {/* Render desktop behind startup sequence so it's ready when fade completes */}
+              <div style={{ 
+                opacity: isStartupComplete ? 1 : 0, 
+                pointerEvents: isStartupComplete ? 'auto' : 'none',
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                zIndex: isStartupComplete ? 1 : 0,
+                transition: 'opacity 1.5s ease-in-out',
+                visibility: isStartupComplete ? 'visible' : 'hidden'
+              }}>
+                {/* Audio prompt */}
+                <AudioPrompt />
+                
+                {/* Background music - starts after first user interaction */}
+                <BackgroundMusic />
+                <a href="#main-content" className="skip-link">Skip to main content</a>
+                <div className="bg-fixed" aria-hidden="true" style={getWallpaperStyle()}></div>
+                <main 
                 id="main-content" 
                 className="desktop" 
                 aria-label="Desktop"
                 style={getWallpaperStyle()}
                 onContextMenu={handleDesktopContextMenu}
                 onClick={(e) => {
-                  // Click on desktop background to deselect icons
+                  // #region agent log
                   const target = e.target
+                  const isIconClick = target.closest('button[data-icon-id]') || 
+                                     target.closest('.desktop-icon-button') ||
+                                     target.closest('.desktop-image-icon')
+                  const logData = {
+                    target: target.tagName,
+                    targetClass: target.className,
+                    isIconClick: !!isIconClick,
+                    isDesktop: target.classList.contains('desktop'),
+                    isMainContent: target.id === 'main-content',
+                    timestamp: Date.now()
+                  }
+                  fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.jsx:1295',message:'Desktop onClick fired',data:logData,timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'J'})}).catch(()=>{});
+                  // #endregion
+                  
+                  // Don't handle clicks on icons - let them handle their own clicks
+                  if (isIconClick) {
+                    return
+                  }
+                  
+                  // Click on desktop background to deselect icons
                   if (
                     target.classList.contains('desktop') || 
                     target.id === 'main-content' ||
@@ -1208,6 +1334,10 @@ function AppContent() {
                       !clickedElement.closest('.taskbar')
                     
                     if (isActuallyDesktop) {
+                      // #region agent log
+                      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.jsx:1336',message:'Desktop onClick - calling deselectAll',data:{currentSelection:selectedIconIds},timestamp:Date.now(),sessionId:'debug-session',runId:'run5',hypothesisId:'L'})}).catch(()=>{});
+                      console.log('[App] Desktop onClick - calling deselectAll', { currentSelection: selectedIconIds })
+                      // #endregion
                       deselectAll()
                     }
                   }
@@ -1231,14 +1361,92 @@ function AppContent() {
                   </div>
                 )}
                 <SelectionBox
+                  key="selection-box"
                   containerRef={desktopRef}
-                  icons={desktopImages.map(img => ({ id: img.id }))}
-                  onSelectionChange={(selectedIds) => setSelectedIconIds(selectedIds)}
+                  icons={(() => {
+                    // #region agent log
+                    const imageIds = desktopImages.map(img => img.id)
+                    const allIds = [
+                      ...imageIds,
+                      'RECYCLE_BIN',
+                      'MEMETIC_ENERGY',
+                      'COMMUNITY_RESOURCES',
+                      'MY_FAVORITE_WOJAKS',
+                    ]
+                    const duplicateIds = allIds.filter((id, idx) => allIds.indexOf(id) !== idx)
+                    if (duplicateIds.length > 0) {
+                      console.error('[App] SelectionBox icons array has duplicate IDs:', duplicateIds)
+                    }
+                    const zeroIds = allIds.filter(id => id === 0 || id === '0')
+                    if (zeroIds.length > 0) {
+                      console.warn('[App] SelectionBox icons array has id=0:', zeroIds.length, 'occurrences')
+                    }
+                    console.log('[App] SelectionBox icons array', {
+                      totalIcons: allIds.length,
+                      imageIds: imageIds,
+                      allIds: allIds
+                    })
+                    // #endregion
+                    // CRITICAL: Filter out any images with id: 0, undefined, or null before mapping
+                    // This prevents React from seeing duplicate keys
+                    const validImageIds = desktopImages
+                      .filter(img => img && img.id !== undefined && img.id !== null && img.id !== 0 && img.id !== '0')
+                      .map(img => ({ id: img.id }))
+                    
+                    return [
+                      ...validImageIds,
+                      // Include folder icons so they can be selected with drag-to-select
+                      { id: 'RECYCLE_BIN' },
+                      { id: 'MEMETIC_ENERGY' },
+                      { id: 'COMMUNITY_RESOURCES' },
+                      { id: 'MY_FAVORITE_WOJAKS' },
+                    ]
+                  })()}
+                  onSelectionChange={(selectedIds) => {
+                    // #region agent log
+                    const logData = {
+                      selectedIds,
+                      selectedCount: selectedIds.length,
+                      currentSelection: selectedIconIds,
+                      willUpdate: JSON.stringify(selectedIds) !== JSON.stringify(selectedIconIds),
+                      timestamp: Date.now()
+                    }
+                    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.jsx:1404',message:'SelectionBox onSelectionChange called',data:logData,timestamp:Date.now(),sessionId:'debug-session',runId:'run5',hypothesisId:'L'})}).catch(()=>{});
+                    console.log('[App] SelectionBox onSelectionChange called', logData)
+                    // #endregion
+                    setSelectedIconIds(selectedIds)
+                  }}
                   isEnabled={!isLoadingGallery}
                 />
-                <DesktopIcons onOpenApp={openWindow} />
+                {/* #region agent log */}
+                {(() => {
+                  const logData = {
+                    iconResetKey,
+                    desktopIconsKey: `desktop-icons-${iconResetKey}`,
+                    desktopImageIconsKey: `desktop-image-icons-${iconResetKey}`,
+                    selectionBoxKey: 'selection-box',
+                    timestamp: Date.now()
+                  }
+                  fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.jsx:1392',message:'Rendering DesktopIcons and DesktopImageIcons with keys',data:logData,timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+                  console.log('[App] Rendering DesktopIcons and DesktopImageIcons with keys', logData)
+                  return null
+                })()}
+                {/* #endregion */}
+                <DesktopIcons key={`desktop-icons-${iconResetKey}`} onOpenApp={openWindow} />
+                {/* #region agent log */}
+                {(() => {
+                  const logData = {
+                    desktopImagesLength: desktopImages.length,
+                    desktopImagesIds: desktopImages.map(img => ({ id: img.id, idType: typeof img.id, name: img.name?.substring(0, 20) })),
+                    timestamp: Date.now()
+                  }
+                  fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.jsx:1407',message:'Passing desktopImages to DesktopImageIcons',data:logData,timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'I'})}).catch(()=>{});
+                  console.log('[App] Passing desktopImages to DesktopImageIcons', logData)
+                  return null
+                })()}
+                {/* #endregion */}
                 <DesktopImageIcons 
-                  key={iconResetKey}
+                  key={`desktop-image-icons-${iconResetKey}`}
                   desktopImages={desktopImages}
                   onRemoveImage={moveToRecycleBin}
                   onUpdatePosition={updateIconPosition}
@@ -1274,6 +1482,9 @@ function AppContent() {
                 )}
                 {openWindows['window-faq'] && (
                   <FaqWindow onClose={() => closeWindow('window-faq')} />
+                )}
+                {openWindows['window-chia-network'] && (
+                  <ChubzWindow onClose={() => closeWindow('window-chia-network')} />
                 )}
                 {openWindows['tanggang'] && (
                   <TangGangWindow onClose={() => closeWindow('tanggang')} />
@@ -1408,6 +1619,12 @@ function AppContent() {
                   onClose={() => closeWindow('theme-qa-window')}
                 />
               )}
+              {openWindows['roadmap-window'] && (
+                <RoadmapWindow
+                  isOpen={openWindows['roadmap-window']}
+                  onClose={() => closeWindow('roadmap-window')}
+                />
+              )}
             </main>
                   <Taskbar 
                     onOpenWojakGenerator={() => openWindow('wojak-generator')} 
@@ -1446,8 +1663,7 @@ function AppContent() {
                       onClose={hideContextMenu}
                     />
                   )}
-                </>
-              )}
+              </div>
         </MarketplaceProvider>
       </GlobalErrorBoundary>
     </OrangeToyProvider>

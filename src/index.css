@@ -622,15 +622,15 @@ img {
 }
 
 [data-theme="orange"] {
-  /* Surface Tokens - Stronger orange-tinted Win98 scheme */
-  --surface-0: #ff9933;
-  --surface-1: #ff9933;
-  --surface-2: #ff9933;
-  --surface-3: #ffaa55;
-  --desktop-bg: #ff9933;
-  --window-frame: #ff9933;
-  --window-face: #ff9933;
-  --panel-face: #ff9933;
+  /* Surface Tokens - Orange-tinted Win98 scheme with #FF7900 base */
+  --surface-0: #FF7900;
+  --surface-1: #FF7900;
+  --surface-2: #FF7900;
+  --surface-3: #ff9933;
+  --desktop-bg: #FF7900;
+  --window-frame: #FF7900;
+  --window-face: #FF7900;
+  --panel-face: #FF7900;
   --inset-face: #ffffff;
   
   /* Text Tokens */
@@ -641,104 +641,104 @@ img {
   --text-disabled: #cc5500;
   --text-inverse: #ffffff;
   
-  /* Border Tokens - Stronger orange-tinted 3D borders */
-  --border-light: #ffcc88;
-  --border-mid: #ff9933;
+  /* Border Tokens - Orange-tinted 3D borders */
+  --border-light: #ffb366;
+  --border-mid: #FF7900;
   --border-dark: #cc5500;
-  --border-inset-light: #ffcc88;
+  --border-inset-light: #ffb366;
   --border-inset-dark: #cc5500;
   
   /* Title Bar Tokens - Orange gradient */
-  --title-active-bg: linear-gradient(to right, #ff8800, #ffaa44);
+  --title-active-bg: linear-gradient(to right, #ff6600, #ff9933);
   --title-active-text: #000000;
-  --title-inactive-bg: #ff9900;
+  --title-inactive-bg: #FF7900;
   --title-inactive-text: #000000;
   
-  /* Button Tokens - Stronger orange-tinted button faces */
-  --btn-face: #ff9933;
+  /* Button Tokens - Orange-tinted button faces */
+  --btn-face: #FF7900;
   --btn-text: #000000;
-  --btn-hover-face: #ffaa55;
+  --btn-hover-face: #ff9933;
   --btn-hover-text: #000000;
-  --btn-active-face: #ff8800;
+  --btn-active-face: #ff6600;
   --btn-active-text: #000000;
-  --btn-disabled-face: #ff9933;
+  --btn-disabled-face: #FF7900;
   --btn-disabled-text: #cc5500;
   /* Legacy aliases for backward compatibility */
-  --btn-face-hover: #ffaa55;
-  --btn-face-pressed: #ff8800;
-  --btn-disabled: #ff9933;
+  --btn-face-hover: #ff9933;
+  --btn-face-pressed: #ff6600;
+  --btn-disabled: #FF7900;
   
   /* Accent Tokens - Orange accent */
-  --accent: #ff8800;
-  --accent-2: #ffaa44;
-  --accent-selection: #ff8800;
-  --accent-focus: #ff8800;
+  --accent: #ff6600;
+  --accent-2: #ff9933;
+  --accent-selection: #ff6600;
+  --accent-focus: #ff6600;
   --accent-link: #cc5500;
-  --accent-active: #ff8800;
+  --accent-active: #ff6600;
   
   /* State Tokens */
-  --state-hover: #ffaa55;
-  --state-active: #ff8800;
-  --state-disabled: #ff9933;
+  --state-hover: #ff9933;
+  --state-active: #ff6600;
+  --state-disabled: #FF7900;
   --state-error: #ff0000;
-  --state-warning: #ff8800;
+  --state-warning: #ff6600;
   --state-success: #008000;
   
   /* Desktop/Base Tokens */
-  --ui-bg: #ff9933;
+  --ui-bg: #FF7900;
   
-  /* Taskbar Tokens - Orange-tinted taskbar (keep lighter as user likes it) */
-  --taskbar-bg: #ffcc99;
-  --taskbar-border: #ffe6cc;
+  /* Taskbar Tokens - Match same orange as windows */
+  --taskbar-bg: #FF7900;
+  --taskbar-border: #ffb366;
   --taskbar-text: #000000;
-  --taskbar-btn-face: #ffcc99;
+  --taskbar-btn-face: #FF7900;
   --taskbar-btn-text: #000000;
-  --taskbar-btn-hover-face: #ffd9b3;
+  --taskbar-btn-hover-face: #ff9933;
   --taskbar-btn-hover-text: #000000;
-  --taskbar-btn-active-face: #ffcc99;
+  --taskbar-btn-active-face: #ff6600;
   --taskbar-btn-active-text: #000000;
   /* Legacy aliases for backward compatibility */
-  --taskbar-button-bg: #ffcc99;
+  --taskbar-button-bg: #FF7900;
   --taskbar-button-text: #000000;
-  --taskbar-button-hover-bg: #ffd9b3;
-  --taskbar-button-active-bg: #ffcc99;
+  --taskbar-button-hover-bg: #ff9933;
+  --taskbar-button-active-bg: #ff6600;
   --taskbar-button-active-border: #cc5500;
   
-  /* Start Menu Tokens - Stronger orange-tinted menu */
-  --menu-bg: #ff9933;
+  /* Start Menu Tokens - Orange-tinted menu */
+  --menu-bg: #FF7900;
   --menu-text: #000000;
-  --menu-border: #ff9933;
-  --menu-hover-bg: #ff8800;
+  --menu-border: #FF7900;
+  --menu-hover-bg: #ff6600;
   --menu-hover-text: #000000;
   --menu-separator: #cc5500;
-  --menu-header-bg: linear-gradient(to right, #ff8800, #ffaa44);
+  --menu-header-bg: linear-gradient(to right, #ff6600, #ff9933);
   --menu-header-text: #000000;
-  --menu-item-hover-bg: #ff8800;
+  --menu-item-hover-bg: #ff6600;
   --menu-item-hover-text: #000000;
   
   /* Input/Form Tokens */
   --input-face: #ffffff;
   --input-text: #000000;
   --input-placeholder: #cc5500;
-  --input-disabled-face: #ffcc88;
+  --input-disabled-face: #ffb366;
   --input-disabled-text: #cc5500;
   --input-border: #cc5500;
   /* Legacy aliases for backward compatibility */
   --input-bg: #ffffff;
-  --input-disabled-bg: #ffcc88;
-  --fieldset-bg: #ffaa55;
-  --fieldset-border: #ff9933;
-  --fieldset-legend-bg: #ffaa55;
+  --input-disabled-bg: #ffb366;
+  --fieldset-bg: #ff9933;
+  --fieldset-border: #FF7900;
+  --fieldset-legend-bg: #ff9933;
   
   /* Scrollbar Tokens */
-  --scrollbar-track-bg: #ff9933;
-  --scrollbar-thumb-bg: #ffaa55;
-  --scrollbar-thumb-hover-bg: #ffcc88;
+  --scrollbar-track-bg: #FF7900;
+  --scrollbar-thumb-bg: #ff9933;
+  --scrollbar-thumb-hover-bg: #ffb366;
   
   /* Focus and Selection Tokens */
-  --focus: #ff8800;
-  --focus-outline: #ff8800;
-  --selection-bg: #ff8800;
+  --focus: #ff6600;
+  --focus-outline: #ff6600;
+  --selection-bg: #ff6600;
   --selection-text: #000000;
   
   /* Link Tokens */
@@ -766,9 +766,9 @@ img {
 
 [data-accent="orange"] {
   --accent: #ff6600;
-  --accent-2: #ff8800;
+  --accent-2: #FF7900;
   --accent-selection: #ff6600;
-  --accent-focus: #ff8800;
+  --accent-focus: #FF7900;
   --accent-link: #cc5500;
   --accent-active: #ff6600;
   /* Dark orange text for accent */
@@ -786,6 +786,7 @@ html {
   height: 100dvh; /* Use dynamic viewport height for mobile */
   overflow: hidden;
   overscroll-behavior: none;
+  background: #000; /* Black background to match startup sequence */
 }
 
 body {
@@ -802,6 +803,7 @@ body {
   letter-spacing: var(--letter-spacing-normal);
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: auto;
+  background: #000; /* Black background to match startup sequence - will be overridden by wallpaper when desktop loads */
 }
 
 #root {
@@ -811,6 +813,7 @@ body {
   height: 100%;
   height: 100dvh; /* Use dynamic viewport height for mobile */
   overflow: hidden;
+  background: #000; /* Black background to match startup sequence */
 }
 
 .bg-fixed {
@@ -922,6 +925,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  /* Smooth transition between active/inactive states */
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .title-bar.inactive {
@@ -1664,10 +1669,49 @@ textarea:focus-visible {
   transform: translateZ(0);
 }
 
+/* Windows 98-style selected icon: navy background on label, white text */
 .desktop-icon-button.selected,
 .desktop-icons button.selected {
-  background: rgba(0, 0, 255, 0.2) !important;
-  border: 1px dashed rgba(0, 0, 255, 0.5) !important;
+  /* Don't change button background - only label gets navy */
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Selected icon label: Win98 navy background (#000080) with white text */
+.desktop-icon-button.selected span,
+.desktop-icons button.selected span,
+.desktop-icon-button.selected > div > span,
+.desktop-icons button.selected > div > span,
+.desktop-icons button.selected > span {
+  background: #000080 !important; /* Win98 navy */
+  color: #ffffff !important; /* White text */
+  padding: 1px 2px;
+  /* Ensure text is readable */
+  text-shadow: none !important;
+}
+
+/* Focused icon: dotted outline around label (Win98 "marching ants" focus cue) */
+.desktop-icon-button.focused span,
+.desktop-icons button.focused span,
+.desktop-icon-button.focused > div > span,
+.desktop-icons button.focused > div > span,
+.desktop-icons button.focused > span {
+  outline: 1px dotted #000000 !important;
+  outline-offset: 1px;
+}
+
+/* If icon is both selected and focused, show both styles */
+.desktop-icon-button.selected.focused span,
+.desktop-icons button.selected.focused span,
+.desktop-icon-button.selected.focused > div > span,
+.desktop-icons button.selected.focused > div > span,
+.desktop-icons button.selected.focused > span {
+  background: #000080 !important;
+  color: #ffffff !important;
+  outline: 1px dotted #ffffff !important; /* White dotted outline on navy */
+  outline-offset: 1px;
+  padding: 1px 2px;
+  text-shadow: none !important;
 }
 
 /* Prevent text selection during drag */
@@ -2775,10 +2819,11 @@ a,
 
 /* Windows that need internal scrolling - add scroll-allowed class */
 /* Window scroll contract: window-body is the scroll container */
+/* Windows 98 behavior: scrollbars always visible */
 .readme-window .window-body,
 #window-readme-txt .window-body,
 .window-body.scroll-allowed {
-  overflow: auto !important; /* Single scroll region - window-body scrolls */
+  overflow-y: scroll !important; /* Force scrollbar to always be visible (Windows 98 behavior) */
   overflow-x: hidden;
   display: flex !important; /* Use flexbox for proper height calculation */
   flex-direction: column;
@@ -2797,7 +2842,7 @@ a,
 
 /* FAQ window - Type A: Scrollable */
 #window-faq .window-body {
-  overflow: auto !important;
+  overflow-y: scroll !important; /* Force scrollbar to always be visible (Windows 98 behavior) */
   overflow-x: hidden;
   display: block !important;
   height: 100% !important;
@@ -2806,7 +2851,7 @@ a,
 
 /* MintInfo window - Type A: Scrollable */
 #window-mint-info-exe .window-body {
-  overflow: auto !important;
+  overflow-y: scroll !important; /* Force scrollbar to always be visible (Windows 98 behavior) */
   overflow-x: hidden;
   display: block !important;
   height: 100% !important;
@@ -2815,7 +2860,7 @@ a,
 
 /* TangGang window - Type A: Scrollable (transparent background, keep window frame) */
 #tanggang .window-body {
-  overflow: auto !important;
+  overflow-y: scroll !important; /* Force scrollbar to always be visible (Windows 98 behavior) */
   overflow-x: hidden;
   display: block !important;
   height: 100% !important;
@@ -2826,7 +2871,7 @@ a,
 
 /* Marketplace window - Type A: Scrollable */
 #window-marketplace .window-body {
-  overflow: auto !important;
+  overflow-y: scroll !important; /* Force scrollbar to always be visible (Windows 98 behavior) */
   overflow-x: hidden;
   display: block !important;
   height: 100% !important;
@@ -2915,6 +2960,74 @@ a,
   }
   
   #rarity-explorer .window-body.scroll-allowed::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover-bg) !important;
+  }
+}
+
+/* Desktop: Ensure CHIA_NETWORK window-body scrollbar is always visible with thumb */
+@media (min-width: 641px) {
+  /* Window body has padding like other windows - extra right padding for scrollbar */
+  #window-chia-network .window-body {
+    padding: 8px 20px 8px 8px !important; /* Top, Right (16px scrollbar + 4px buffer), Bottom, Left */
+    box-sizing: border-box !important;
+    /* Account for window border (1px each side) to prevent overflow */
+    width: calc(100% - 2px) !important;
+    max-width: calc(100% - 2px) !important;
+    margin: 0 !important; /* Ensure no margins causing overflow */
+  }
+  
+  /* Window body scrolls */
+  #window-chia-network .window-body.scroll-allowed {
+    overflow-y: scroll !important; /* Always show scrollbar (Windows 98 behavior) */
+    overflow-x: hidden !important;
+    scrollbar-gutter: stable both-edges !important;
+    scrollbar-width: thin !important; /* Firefox */
+    scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg) !important; /* Firefox */
+    box-sizing: border-box !important;
+    /* Account for window borders (2px) and title bar (22px) - use flex instead of explicit height */
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    /* CRITICAL: Force height constraint to ensure scrollbar appears immediately */
+    height: 0 !important; /* Flex trick: height 0 with flex: 1 forces it to respect max-height */
+    /* Padding ensures scrollbar has space (16px scrollbar + 4px buffer) and content doesn't touch edges */
+    padding: 8px 20px 8px 8px !important; /* Top, Right (16px scrollbar + 4px buffer), Bottom, Left */
+    /* Account for window border to prevent overflow - need to account for margins if any */
+    width: calc(100% - 2px) !important;
+    max-width: calc(100% - 2px) !important;
+    margin: 0 !important; /* Ensure no margins causing overflow */
+  }
+  
+  /* Force scrollbar thumb to be visible */
+  #window-chia-network .window-body.scroll-allowed::-webkit-scrollbar {
+    -webkit-appearance: none !important;
+    display: block !important;
+    width: 16px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    /* Force scrollbar to always render */
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  #window-chia-network .window-body.scroll-allowed::-webkit-scrollbar-track {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: repeating-conic-gradient(var(--scrollbar-track-bg) 0% 25%, var(--inset-face) 0% 50%) 50% / 2px 2px !important;
+    width: 16px !important;
+  }
+  
+  #window-chia-network .window-body.scroll-allowed::-webkit-scrollbar-thumb {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: var(--scrollbar-thumb-bg) !important;
+    border: 1px outset var(--inset-face) !important;
+    min-height: 20px !important;
+    border-radius: 0 !important;
+  }
+  
+  #window-chia-network .window-body.scroll-allowed::-webkit-scrollbar-thumb:hover {
     background: var(--scrollbar-thumb-hover-bg) !important;
   }
   
@@ -3956,24 +4069,24 @@ a,
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-size: var(--font-size-body);
   line-height: var(--line-height-normal);
-  overflow-y: scroll !important; /* Always show scrollbar */
-  scrollbar-width: thin;
-  scrollbar-color: #c0c0c0 #c0c0c0;
-  flex: 1; /* Fill available space in flex container */
-  height: 100%; /* Ensure element respects parent height from start */
-  max-height: 100%; /* Prevent expansion beyond parent height */
-  min-height: 0; /* Allow shrinking below content size */
+  /* Don't set overflow here - let window-body.scroll-allowed handle scrolling */
   background: transparent;
   color: var(--text-1);
   margin: 0; /* Remove margin since window-body now has padding */
   border: 1px solid;
   border-color: var(--border-dark) var(--border-light) var(--border-light) var(--border-dark);
   box-sizing: border-box;
-  /* Force scrollbar to always reserve space (prevents Mac overlay scrollbars) */
-  scrollbar-gutter: stable !important;
-  -webkit-overflow-scrolling: auto !important; /* Disable touch scrolling overlay */
-  scrollbar-width: thin; /* Firefox */
-  scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg); /* Firefox */
+}
+
+/* When readme-content is inside a scrollable window-body, don't create nested scroll */
+.window-body.scroll-allowed .readme-content {
+  overflow: visible !important; /* Let parent window-body handle scrolling */
+  height: auto !important; /* Allow content to expand naturally */
+  max-height: none !important; /* Remove height constraints */
+  flex: none !important; /* Don't use flex sizing */
+  display: block !important; /* Ensure content is visible */
+  visibility: visible !important; /* Ensure content is visible */
+  opacity: 1 !important; /* Ensure content is visible */
 }
 
 /* Rarity Explorer - Traits List Scrollable Area */
@@ -3982,7 +4095,7 @@ a,
   overflow-y: auto; /* Default to auto for mobile */
   scrollbar-gutter: stable; /* Force scrollbar to always reserve space (prevents Mac overlay scrollbars) */
   scrollbar-width: auto; /* Firefox */
-  scrollbar-color: #c0c0c0 #d4d0c8; /* Firefox */
+  scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg); /* Firefox */
   -webkit-overflow-scrolling: touch; /* Enable smooth scrolling on touch devices */
 }
 
@@ -4151,7 +4264,9 @@ a,
   overflow: hidden;
 }
 
-#wojak-readme .readme-content {
+#wojak-readme .readme-content,
+#window-readme-txt .readme-content,
+.readme-window .readme-content {
   height: 100%;
   margin: 0;
   padding: 16px 20px 20px 20px; /* Reduced bottom padding from 24px to 20px for better spacing */
@@ -4164,39 +4279,65 @@ a,
   box-sizing: border-box;
 }
 
-/* Windows 98 style scrollbar for readme window */
-#wojak-readme .readme-content::-webkit-scrollbar {
+/* Windows 98 style scrollbar for readme window - use theme variables */
+#wojak-readme .readme-content::-webkit-scrollbar,
+#window-readme-txt .readme-content::-webkit-scrollbar,
+.readme-window .readme-content::-webkit-scrollbar {
   width: 16px;
-  background: #c0c0c0;
+  background: var(--scrollbar-track-bg);
 }
 
-#wojak-readme .readme-content::-webkit-scrollbar-track {
-  background: repeating-conic-gradient(#c0c0c0 0% 25%, #ffffff 0% 50%) 50% / 2px 2px;
+#wojak-readme .readme-content::-webkit-scrollbar-track,
+#window-readme-txt .readme-content::-webkit-scrollbar-track,
+.readme-window .readme-content::-webkit-scrollbar-track {
+  background: repeating-conic-gradient(var(--scrollbar-track-bg) 0% 25%, var(--inset-face) 0% 50%) 50% / 2px 2px;
 }
 
-#wojak-readme .readme-content::-webkit-scrollbar-thumb {
-  background: #c0c0c0;
-  border: 1px outset #ffffff;
-  border-top-color: #ffffff;
-  border-left-color: #ffffff;
-  border-right-color: #808080;
-  border-bottom-color: #808080;
+#wojak-readme .readme-content::-webkit-scrollbar-thumb,
+#window-readme-txt .readme-content::-webkit-scrollbar-thumb,
+.readme-window .readme-content::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-bg);
+  border: 1px outset var(--border-light);
+  border-top-color: var(--border-light);
+  border-left-color: var(--border-light);
+  border-right-color: var(--border-dark);
+  border-bottom-color: var(--border-dark);
 }
 
-#wojak-readme .readme-content::-webkit-scrollbar-button {
-  background: #c0c0c0;
-  border: 1px outset #ffffff;
+#wojak-readme .readme-content::-webkit-scrollbar-thumb:hover,
+#window-readme-txt .readme-content::-webkit-scrollbar-thumb:hover,
+.readme-window .readme-content::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover-bg);
+}
+
+#wojak-readme .readme-content::-webkit-scrollbar-button,
+#window-readme-txt .readme-content::-webkit-scrollbar-button,
+.readme-window .readme-content::-webkit-scrollbar-button {
+  background: var(--scrollbar-track-bg);
+  border: 1px outset var(--border-light);
   height: 16px;
 }
 
-#wojak-readme .readme-content::-webkit-scrollbar-button:vertical:decrement {
-  border-top-color: #808080;
-  border-left-color: #808080;
+#wojak-readme .readme-content::-webkit-scrollbar-button:vertical:decrement,
+#window-readme-txt .readme-content::-webkit-scrollbar-button:vertical:decrement,
+.readme-window .readme-content::-webkit-scrollbar-button:vertical:decrement {
+  border-top-color: var(--border-dark);
+  border-left-color: var(--border-dark);
 }
 
-#wojak-readme .readme-content::-webkit-scrollbar-button:vertical:increment {
-  border-bottom-color: #808080;
-  border-right-color: #808080;
+#wojak-readme .readme-content::-webkit-scrollbar-button:vertical:increment,
+#window-readme-txt .readme-content::-webkit-scrollbar-button:vertical:increment,
+.readme-window .readme-content::-webkit-scrollbar-button:vertical:increment {
+  border-bottom-color: var(--border-dark);
+  border-right-color: var(--border-dark);
+}
+
+/* Firefox scrollbar for readme window - use theme variables */
+#wojak-readme .readme-content,
+#window-readme-txt .readme-content,
+.readme-window .readme-content {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg);
 }
 
 /* Content Container - Allow content to extend, window-body handles scrolling */
@@ -5592,6 +5733,12 @@ p {
   background: var(--taskbar-button-hover-bg);
 }
 
+.start-button.pressed,
+.start-button[aria-expanded="true"] {
+  border: 1px inset var(--border-dark);
+  background: var(--taskbar-button-active-bg);
+}
+
 .start-button-text {
   user-select: none;
   /* Explicit token usage - ensure Start button text is always readable */
@@ -5741,6 +5888,23 @@ p {
   border: 1px inset var(--border-dark);
 }
 
+/* Minimize animation */
+@keyframes minimizeToTaskbar {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.1);
+    opacity: 0;
+  }
+}
+
+.window.minimizing {
+  animation: minimizeToTaskbar 200ms ease-in forwards;
+  pointer-events: none;
+}
+
 .taskbar-window-button-text {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5870,7 +6034,8 @@ p {
   image-rendering: auto;
 }
 
-.start-menu-item:hover {
+.start-menu-item:hover,
+.start-menu-item.selected {
   background: var(--menu-item-hover-bg);
   color: var(--menu-item-hover-text);
 }
@@ -5885,6 +6050,22 @@ p {
 .start-menu-item-text {
   user-select: none;
   color: var(--menu-text);
+  flex: 1;
+}
+
+.start-menu-folder {
+  font-weight: bold;
+}
+
+.start-menu-arrow {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: 10px;
+  padding-left: 8px;
+}
+
+.start-menu-item:hover .start-menu-arrow {
+  color: var(--menu-hover-text);
 }
 
 .start-menu-separator {
@@ -5892,6 +6073,135 @@ p {
   border: none;
   border-top: 1px solid var(--menu-separator);
   height: 0;
+}
+
+/* Start menu panel structure */
+.start-menu-content {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.start-menu-panel-root {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.start-menu-panel-flyout {
+  position: fixed;
+  background: var(--menu-bg);
+  border: 2px outset var(--menu-border);
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  z-index: 10002;
+}
+
+.start-menu-panel-drill {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.start-menu-panel-items {
+  display: flex;
+  flex-direction: column;
+  padding: 2px 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  flex: 1;
+  min-height: 0;
+}
+
+.start-menu-drill-header {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: var(--menu-header-bg);
+  color: var(--menu-header-text);
+  border-bottom: 1px solid var(--menu-separator);
+  flex-shrink: 0;
+}
+
+.start-menu-drill-back {
+  background: transparent;
+  border: 1px outset var(--border-light);
+  color: var(--menu-text);
+  padding: 2px 6px;
+  cursor: pointer;
+  font-size: var(--font-size-ui);
+  margin-right: 8px;
+}
+
+.start-menu-drill-back:hover {
+  background: var(--btn-face-hover);
+}
+
+.start-menu-drill-back:active {
+  border: 1px inset var(--border-dark);
+}
+
+.start-menu-drill-title {
+  font-weight: bold;
+  user-select: none;
+}
+
+/* Scroll arrows for overflow menus */
+.start-menu-scroll-arrow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 16px;
+  background: var(--menu-bg);
+  border-left: 2px solid var(--menu-border);
+  border-right: 2px solid var(--menu-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1;
+  user-select: none;
+  font-size: 10px;
+  color: var(--menu-text);
+}
+
+.start-menu-scroll-arrow-up {
+  top: 0;
+  border-top: 2px solid var(--menu-border);
+  border-bottom: 1px solid var(--menu-separator);
+}
+
+.start-menu-scroll-arrow-down {
+  bottom: 0;
+  border-bottom: 2px solid var(--menu-border);
+  border-top: 1px solid var(--menu-separator);
+}
+
+.start-menu-scroll-arrow:hover {
+  background: var(--menu-item-hover-bg);
+  color: var(--menu-item-hover-text);
+}
+
+.start-menu-panel-flyout .start-menu-panel-items {
+  max-height: calc(100vh - var(--taskbar-height) - 60px);
+}
+
+/* Keyboard focus indicator */
+.start-menu-item.keyboard-focus {
+  outline: 1px dotted var(--menu-text);
+  outline-offset: -1px;
+}
+
+.start-menu-item.keyboard-focus:focus-visible {
+  outline: 1px dotted var(--menu-text);
+  outline-offset: -1px;
 }
 
 /* Mobile: Start menu adjustments - ensure it fits on screen and is scrollable */

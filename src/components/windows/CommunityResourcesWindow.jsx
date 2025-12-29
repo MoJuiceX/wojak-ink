@@ -3,9 +3,19 @@ import { playSound } from '../../utils/soundManager'
 
 const COMMUNITY_LINKS = [
   {
-    name: 'Tang Gang Twitter',
-    url: 'https://x.com/MoJuiceX',
-    description: 'Follow @MoJuiceX for updates'
+    name: 'Chia Network',
+    url: 'https://www.chia.net/',
+    description: 'Learn about Chia blockchain'
+  },
+  {
+    name: 'Circuit Protocol',
+    url: 'https://circuitdao.com/',
+    description: 'DeFi protocol on Chia - mint Bytecash stablecoin'
+  },
+  {
+    name: 'Chordifun',
+    url: 'https://chordifun.com/',
+    description: 'Token & Chordinal Experiencer - ChiRC-20 tokens and Chordinals NFTs on Chia'
   },
   {
     name: 'Crate.ink Collection',
@@ -13,9 +23,19 @@ const COMMUNITY_LINKS = [
     description: 'View the Wojak collection on Crate'
   },
   {
-    name: 'Chia Network',
-    url: 'https://www.chia.net/',
-    description: 'Learn about Chia blockchain'
+    name: 'Dexie',
+    url: 'https://dexie.space/',
+    description: 'Decentralized exchange for Chia'
+  },
+  {
+    name: 'go4.me',
+    url: 'https://go4.me/',
+    description: 'Claim your free custom PFP and earn royalties'
+  },
+  {
+    name: 'HEX Orange Address',
+    url: 'https://hexoacoin.com/',
+    description: 'Where citrus humor meets crypto brilliance - $HOA token'
   },
   {
     name: 'MintGarden',
@@ -23,9 +43,44 @@ const COMMUNITY_LINKS = [
     description: 'NFT marketplace for Chia'
   },
   {
-    name: 'Dexie',
-    url: 'https://dexie.space/',
-    description: 'Decentralized exchange for Chia'
+    name: 'Sage Wallet',
+    url: 'https://sagewallet.net/',
+    description: 'Chia wallet application'
+  },
+  {
+    name: 'Tang Gang Twitter',
+    url: 'https://x.com/MoJuiceX',
+    description: 'Follow @MoJuiceX for updates'
+  },
+  {
+    name: 'TangGang Life',
+    url: 'https://tanggang.life/',
+    description: 'TangGang hub - HOA, 9MM Pro, and ecosystem resources'
+  },
+  {
+    name: 'TangGang on Chia',
+    url: 'https://www.tanggangchia.com/',
+    description: 'Empowering artists and creators on Chia blockchain'
+  },
+  {
+    name: 'TangTalk',
+    url: 'https://tangtalk.io/#/home',
+    description: 'Fresh-squeezed communication with zesty encryption'
+  },
+  {
+    name: 'TibetSwap',
+    url: 'https://v2.tibetswap.io/',
+    description: 'Decentralized exchange on Chia'
+  },
+  {
+    name: 'warp.green',
+    url: 'https://www.warp.green/',
+    description: 'Cross-chain messaging protocol'
+  },
+  {
+    name: 'XCH.trade',
+    url: 'https://xch.trade/',
+    description: 'Token trading and analytics platform'
   },
 ]
 

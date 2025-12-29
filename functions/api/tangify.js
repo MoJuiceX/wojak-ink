@@ -37,20 +37,52 @@ async function callEdits({ model, apiKey, imageFile, prompt }) {
     fd.append('response_format', 'b64_json')
   }
 
-  const response = await fetch('https://api.openai.com/v1/images/edits', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}` },
-    body: fd,
-  })
-
-  let json = null
   try {
-    json = await response.json()
-  } catch (e) {
-    console.warn('OpenAI response was not JSON')
-  }
+    // Add timeout using AbortController (Cloudflare Workers support this)
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 120000) // 120 second timeout
 
-  return { ok: response.ok, status: response.status, json }
+    const response = await fetch('https://api.openai.com/v1/images/edits', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}` },
+      body: fd,
+      signal: controller.signal,
+    })
+
+    clearTimeout(timeoutId)
+
+    let json = null
+    try {
+      json = await response.json()
+    } catch (e) {
+      console.warn('OpenAI response was not JSON:', e)
+      // Try to get text response for debugging
+      try {
+        const text = await response.text()
+        console.warn('OpenAI response text:', text.substring(0, 500))
+      } catch (e2) {
+        console.warn('Could not read response as text either')
+      }
+    }
+
+    return { ok: response.ok, status: response.status, json }
+  } catch (error) {
+    // Handle network errors, timeouts, etc.
+    if (error.name === 'AbortError') {
+      console.error('OpenAI API request timed out after 120 seconds')
+      return { 
+        ok: false, 
+        status: 504, 
+        json: { error: { message: 'Request timed out. The image generation is taking too long.' } } 
+      }
+    }
+    console.error('OpenAI API request failed:', error)
+    return { 
+      ok: false, 
+      status: 500, 
+      json: { error: { message: `Network error: ${error.message || 'Connection failed'}` } } 
+    }
+  }
 }
 
 function isVerificationOrPermissionError(json, status) {
@@ -265,6 +297,9 @@ export async function onRequestPost(context) {
       let errorMessage = 'Failed to edit image'
       if (r1.json?.error?.message) {
         errorMessage = r1.json.error.message
+      } else if (r1.json?.error) {
+        // Handle case where error is directly in json.error (not json.error.message)
+        errorMessage = typeof r1.json.error === 'string' ? r1.json.error : JSON.stringify(r1.json.error)
       } else if (!r1.json) {
         errorMessage = 'OpenAI request failed (non-JSON response)'
       }
@@ -272,7 +307,7 @@ export async function onRequestPost(context) {
       return new Response(
         JSON.stringify({ error: errorMessage }),
         { 
-          status: r1.status, 
+          status: r1.status || 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       )
@@ -280,10 +315,23 @@ export async function onRequestPost(context) {
 
   } catch (error) {
     console.error('Tangify error:', error)
+    // Provide more detailed error messages
+    let errorMessage = error.message || 'Internal server error'
+    let statusCode = 500
+    
+    // Handle specific error types
+    if (error.message?.includes('timeout') || error.message?.includes('AbortError')) {
+      errorMessage = 'Request timed out. The image generation is taking too long. Please try again with a smaller image or simpler prompt.'
+      statusCode = 504
+    } else if (error.message?.includes('network') || error.message?.includes('fetch') || error.message?.includes('connection')) {
+      errorMessage = `Network connection error: ${error.message}. Please check your internet connection and try again.`
+      statusCode = 503
+    }
+    
     return new Response(
-      JSON.stringify({ error: error.message || 'Internal server error' }),
+      JSON.stringify({ error: errorMessage }),
       { 
-        status: 500, 
+        status: statusCode, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     )

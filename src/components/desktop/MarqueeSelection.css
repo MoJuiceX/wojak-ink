@@ -1,0 +1,20 @@
+/* Windows 98-style marquee selection rectangle */
+.marquee-selection {
+  position: absolute;
+  /* Classic Win98 focus rectangle: 1px dotted border, no fill by default */
+  border: 1px dotted #000000;
+  background: transparent;
+  /* Optional: very faint fill (can be enabled via feature flag) */
+  /* background: rgba(0, 0, 128, 0.05); */
+  pointer-events: none;
+  z-index: 1000;
+  box-sizing: border-box;
+  /* No rounded corners, no shadows - classic Win98 look */
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Ensure marquee doesn't interfere with icon interactions */
+.marquee-selection * {
+  pointer-events: none;
+}

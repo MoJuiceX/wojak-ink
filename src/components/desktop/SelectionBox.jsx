@@ -25,9 +25,41 @@ export default function SelectionBox({
 
   // Use provided checkIconInSelection function or default implementation
   const defaultCheckIconInSelection = useCallback((iconId, selectionRect, containerRect) => {
-    // Find the icon element by its data attribute
-    const iconElement = containerRef.current?.querySelector(`[data-icon-id="${iconId}"]`)
-    if (!iconElement) return false
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'SelectionBox.jsx:27',message:'checkIconInSelection called',data:{iconId,selectionRect,containerRect:{left:containerRect.left,top:containerRect.top,width:containerRect.width,height:containerRect.height}},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
+    // Find the icon element by its data attribute - search in entire document
+    // This ensures we find icons regardless of which container they're in
+    const iconElement = document.querySelector(`[data-icon-id="${iconId}"]`)
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'SelectionBox.jsx:31',message:'Icon element lookup result',data:{iconId,found:!!iconElement,elementTag:iconElement?.tagName,elementClass:iconElement?.className},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
+    if (!iconElement) {
+      // Try alternative selectors for folder icons
+      const folderIcon = document.querySelector(`button[data-icon-id="${iconId}"]`)
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'SelectionBox.jsx:35',message:'Fallback folderIcon lookup',data:{iconId,found:!!folderIcon},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
+      if (!folderIcon) return false
+      // Use folderIcon if found
+      const iconRect = folderIcon.getBoundingClientRect()
+      const iconRectRelative = {
+        left: iconRect.left - containerRect.left,
+        top: iconRect.top - containerRect.top,
+        right: iconRect.right - containerRect.left,
+        bottom: iconRect.bottom - containerRect.top,
+      }
+      const intersects = !(
+        iconRectRelative.right < selectionRect.left ||
+        iconRectRelative.left > selectionRect.right ||
+        iconRectRelative.bottom < selectionRect.top ||
+        iconRectRelative.top > selectionRect.bottom
+      )
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'SelectionBox.jsx:48',message:'Folder icon intersection check',data:{iconId,intersects,iconRectRelative,selectionRect},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
+      return intersects
+    }
 
     const iconRect = iconElement.getBoundingClientRect()
     
@@ -39,12 +71,16 @@ export default function SelectionBox({
       bottom: iconRect.bottom - containerRect.top,
     }
 
-    return !(
+    const intersects = !(
       iconRectRelative.right < selectionRect.left ||
       iconRectRelative.left > selectionRect.right ||
       iconRectRelative.bottom < selectionRect.top ||
       iconRectRelative.top > selectionRect.bottom
     )
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'SelectionBox.jsx:66',message:'Image icon intersection check',data:{iconId,intersects,iconRectRelative,selectionRect},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
+    return intersects
   }, [containerRef])
 
   const iconInSelection = checkIconInSelection || defaultCheckIconInSelection
@@ -55,15 +91,42 @@ export default function SelectionBox({
     const container = containerRef.current
 
     const handleMouseDown = (e) => {
-      // Only start selection if clicking directly on desktop (not on icons or windows)
-      if (!e.target.classList.contains('desktop') && !e.target.classList.contains('bg-fixed')) return
-      
-      // Don't start if clicking on windows or icons
-      if (e.target.closest('.window') || e.target.closest('.desktop-icons') || e.target.closest('.desktop-image-icons')) {
+      // Don't start if clicking on windows or taskbar
+      if (e.target.closest('.window') || e.target.closest('.taskbar')) {
         return
       }
       
+      // Don't start if clicking directly on an icon button - let icon handle its own clicks
+      if (e.target.closest('button[data-icon-id]') || 
+          e.target.closest('.desktop-icon-button') ||
+          e.target.closest('.desktop-image-icon')) {
+        // #region agent log
+        console.log('[SelectionBox] MouseDown on icon - not starting selection', { 
+          target: e.target.tagName,
+          closestIcon: e.target.closest('.desktop-image-icon')?.className
+        })
+        // #endregion
+        return
+      }
+      
+      // Allow starting selection on desktop background or empty container space
+      const isOnDesktop = e.target.classList.contains('desktop') || 
+                          e.target.classList.contains('bg-fixed') || 
+                          e.target.id === 'main-content' ||
+                          (e.target.classList.contains('desktop-image-icons-container') && 
+                           !e.target.closest('.desktop-image-icon') &&
+                           !e.target.closest('.desktop-icon-button'))
+      
+      if (!isOnDesktop) {
+        return
+      }
+      
+      // #region agent log
+      console.log('[SelectionBox] Starting marquee selection on empty desktop')
+      // #endregion
+      
       e.preventDefault()
+      e.stopPropagation()
       const rect = container.getBoundingClientRect()
       const x = e.clientX - rect.left
       const y = e.clientY - rect.top
@@ -94,10 +157,74 @@ export default function SelectionBox({
         .filter(icon => iconInSelection(icon.id, selectionRect, rect))
         .map(icon => icon.id)
       
+      // #region agent log
+      // Only log occasionally to avoid spam
+      if (Math.random() < 0.1) {
+        console.log('[SelectionBox] handleMouseMove - updating selection', {
+          selectedIds,
+          selectionRect
+        })
+      }
+      // #endregion
+      
       onSelectionChange?.(selectedIds)
     }
 
-    const handleMouseUp = () => {
+    const handleMouseUp = (e) => {
+      // #region agent log
+      const isIconClick = e.target.closest('button[data-icon-id]') || 
+                         e.target.closest('.desktop-icon-button') ||
+                         e.target.closest('.desktop-image-icon')
+      console.log('[SelectionBox] handleMouseUp', {
+        isSelecting,
+        isIconClick: !!isIconClick,
+        target: e.target.tagName,
+        targetClass: e.target.className
+      })
+      // #endregion
+      
+      // Don't clear selection if clicking on an icon - let icon handle its own clicks
+      if (isIconClick && !isSelecting) {
+        // Icon click - don't interfere, just reset selecting state
+        // #region agent log
+        console.log('[SelectionBox] Icon click detected - not interfering')
+        // #endregion
+        setIsSelecting(false)
+        return
+      }
+      
+      // Final selection update on mouse up (only if we were actually selecting)
+      if (isSelecting) {
+        const rect = container.getBoundingClientRect()
+        const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width))
+        const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height))
+        
+        const selectionRect = {
+          left: Math.min(startPos.x, x),
+          top: Math.min(startPos.y, y),
+          right: Math.max(startPos.x, x),
+          bottom: Math.max(startPos.y, y),
+        }
+
+        const selectedIds = icons
+          .filter(icon => iconInSelection(icon.id, selectionRect, rect))
+          .map(icon => icon.id)
+        
+        // #region agent log
+        console.log('[SelectionBox] Final selection update', {
+          selectedIds,
+          selectionRect,
+          iconCount: icons.length
+        })
+        // #endregion
+        
+        // Final selection update - this should persist
+        onSelectionChange?.(selectedIds)
+      } else {
+        // #region agent log
+        console.log('[SelectionBox] Not selecting - not updating selection')
+        // #endregion
+      }
       setIsSelecting(false)
     }
 

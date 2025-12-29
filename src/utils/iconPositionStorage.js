@@ -110,8 +110,9 @@ export function clearAllIconPositions() {
 
 /**
  * Get default position for an icon based on its order
- * Matches the reference image layout:
- * - Left column: Main apps and games (README, MINT_INFO, GALLERY, MARKETPLACE, WOJAK_GENERATOR, RARITY_EXPLORER, FAQ, TANGGANG, CRATE)
+ * Matches the screenshot layout pattern:
+ * - Left column: x = 20, y starts at 20 and increments by grid spacing (64px)
+ * - Positions are calculated dynamically to stay visible when viewport changes
  * - Right column: Folders and Recycle Bin (handled separately in DesktopImageIcons.jsx)
  * @param {string} appId - App ID
  * @param {number} index - Index in its section
@@ -120,6 +121,7 @@ export function clearAllIconPositions() {
  * @returns {{x: number, y: number}} Default position
  */
 export function getDefaultPosition(appId, index, section, isMobile = false) {
+  // Left column: x = 20 (always visible), y calculated based on order
   let y = BASE_Y
 
   if (section === 'main') {
@@ -129,7 +131,7 @@ export function getDefaultPosition(appId, index, section, isMobile = false) {
       : DESKTOP_MAIN_ORDER
     const actualIndex = mainOrder.indexOf(appId)
     if (actualIndex >= 0) {
-      // Use grid spacing (80px) for consistent vertical alignment
+      // Use grid spacing for consistent vertical alignment (matches screenshot pattern)
       y = BASE_Y + (actualIndex * GRID_SIZE_Y)
     }
   } else if (section === 'games') {

@@ -1,0 +1,16 @@
+.drag-ghost-container {
+  pointer-events: none;
+  user-select: none;
+}
+
+.drag-ghost-icon {
+  pointer-events: none;
+  user-select: none;
+}
+
+.drag-ghost-count {
+  pointer-events: none;
+  user-select: none;
+  text-shadow: none;
+}
+

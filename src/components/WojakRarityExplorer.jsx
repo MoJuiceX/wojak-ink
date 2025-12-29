@@ -462,7 +462,7 @@ const tierEmojiPairs = {
 // Row 2: Head, Clothes, Background (3 tabs)
 const categories = ['Base', 'Face', 'Mouth', 'Face Wear', 'Head', 'Clothes', 'Background'];
 
-function WojakRarityExplorer({ onClose }) {
+function WojakRarityExplorer({ onClose, onOpenBigPulp }) {
   const [activeTab, setActiveTab] = useState('Base');
   const [hoveredTrait, setHoveredTrait] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -470,6 +470,17 @@ function WojakRarityExplorer({ onClose }) {
   const [selectedNft, setSelectedNft] = useState(null);
   const [showError, setShowError] = useState(false);
   const [nftRarityData, setNftRarityData] = useState(null);
+  const [bigPulpData, setBigPulpData] = useState({});
+  
+  // Check if current NFT has Big Pulp commentary
+  const normalizedNftId = nftId ? String(parseInt(nftId) || 0) : null;
+  const hasBigPulp = normalizedNftId && bigPulpData[normalizedNftId];
+  
+  const handleBigPulpClick = () => {
+    if (hasBigPulp && onOpenBigPulp) {
+      onOpenBigPulp(normalizedNftId, bigPulpData[normalizedNftId]);
+    }
+  };
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 640);
@@ -513,6 +524,22 @@ function WojakRarityExplorer({ onClose }) {
       }
     };
     loadNftData();
+  }, []);
+
+  // Load Big Pulp commentary data on mount
+  useEffect(() => {
+    const loadBigPulpData = async () => {
+      try {
+        const response = await fetch('/data/bigPulpSentences.json');
+        if (response.ok) {
+          const data = await response.json();
+          setBigPulpData(data);
+        }
+      } catch (error) {
+        console.log('Big Pulp data not loaded:', error);
+      }
+    };
+    loadBigPulpData();
   }, []);
 
   // Reset image loading state when nftId changes
@@ -923,6 +950,43 @@ function WojakRarityExplorer({ onClose }) {
             alignItems: 'center', 
             gap: '4px'
           }}>
+            {hasBigPulp && (
+              <button
+                onClick={handleBigPulpClick}
+                onPointerDown={(e) => e.stopPropagation()}
+                title="Get Big Pulp's take on this NFT"
+                style={{
+                  background: 'linear-gradient(180deg, #ffaa44 0%, #ff8800 100%)',
+                  border: '2px outset #ffcc88',
+                  color: 'white',
+                  fontWeight: 'bold',
+                  fontSize: '10px',
+                  padding: '3px 8px',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  textShadow: '1px 1px 0 #995500',
+                  fontFamily: "'MS Sans Serif', sans-serif",
+                  flexShrink: 0
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(180deg, #ffbb55 0%, #ff9922 100%)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(180deg, #ffaa44 0%, #ff8800 100%)';
+                }}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  e.currentTarget.style.borderStyle = 'inset';
+                  e.currentTarget.style.background = 'linear-gradient(180deg, #ff8800 0%, #ff6600 100%)';
+                }}
+                onMouseUp={(e) => {
+                  e.currentTarget.style.borderStyle = 'outset';
+                  e.currentTarget.style.background = 'linear-gradient(180deg, #ffaa44 0%, #ff8800 100%)';
+                }}
+              >
+                Ask Big Pulp 🍊
+              </button>
+            )}
             <span style={{ 
               color: 'var(--text-1, #000000)', 
               fontFamily: 'monospace', 
@@ -1000,6 +1064,43 @@ function WojakRarityExplorer({ onClose }) {
             border: '2px solid',
             borderColor: 'var(--border-light) var(--border-dark) var(--border-dark) var(--border-light)'
           }}>
+            {hasBigPulp && (
+              <button
+                onClick={handleBigPulpClick}
+                onPointerDown={(e) => e.stopPropagation()}
+                title="Get Big Pulp's take on this NFT"
+                style={{
+                  background: 'linear-gradient(180deg, #ffaa44 0%, #ff8800 100%)',
+                  border: '2px outset #ffcc88',
+                  color: 'white',
+                  fontWeight: 'bold',
+                  fontSize: '11px',
+                  padding: '4px 10px',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  textShadow: '1px 1px 0 #995500',
+                  fontFamily: "'MS Sans Serif', sans-serif",
+                  flexShrink: 0
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(180deg, #ffbb55 0%, #ff9922 100%)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(180deg, #ffaa44 0%, #ff8800 100%)';
+                }}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  e.currentTarget.style.borderStyle = 'inset';
+                  e.currentTarget.style.background = 'linear-gradient(180deg, #ff8800 0%, #ff6600 100%)';
+                }}
+                onMouseUp={(e) => {
+                  e.currentTarget.style.borderStyle = 'outset';
+                  e.currentTarget.style.background = 'linear-gradient(180deg, #ffaa44 0%, #ff8800 100%)';
+                }}
+              >
+                Ask Big Pulp 🍊
+              </button>
+            )}
             <span style={{ 
               color: 'var(--title-active-text, #00ff00)', 
               fontFamily: 'monospace', 
@@ -1702,6 +1803,7 @@ function WojakRarityExplorer({ onClose }) {
                 </div>
               </>
             )}
+            
           </div>
         </div>
       )}

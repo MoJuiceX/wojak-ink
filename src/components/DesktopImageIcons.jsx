@@ -8,6 +8,7 @@ import AppIcon from './ui/AppIcon'
 import { useDraggableIcon } from '../hooks/useDraggableIcon'
 import { loadIconPositions, saveIconPosition } from '../utils/iconPositionStorage'
 import { snapToGrid } from '../utils/iconGrid'
+import MarqueeSelection from './desktop/MarqueeSelection'
 import './DesktopImageIcons.css'
 
 // Draggable Folder/Recycle Bin Icon Component
@@ -28,7 +29,10 @@ const DraggableFolderIcon = React.forwardRef(function DraggableFolderIcon({
   iconSrc,
   isRecycleBin = false,
   isRecycleBinFull = false,
-  dragOverTrash = false
+  dragOverTrash = false,
+  selectedIconIds = [], // Pass selectedIconIds to check for group drag
+  isGroupDragging = false, // Pass group drag state
+  setSelectedIconIds = null // Pass setSelectedIconIds directly for mousedown handling
 }, ref) {
   React.useEffect(() => {
     // Component lifecycle tracking removed
@@ -51,9 +55,107 @@ const DraggableFolderIcon = React.forwardRef(function DraggableFolderIcon({
 
   // Prevent onClick if drag occurred (Windows 98 behavior)
   const handleClick = (e) => {
+    // #region agent log - ENTRY POINT
+    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:57',message:'DraggableFolderIcon handleClick ENTRY',data:{iconId,target:e.target.tagName,currentTarget:e.currentTarget?.tagName,shiftKey:e.shiftKey,ctrlKey:e.ctrlKey,metaKey:e.metaKey,hasSetSelectedIconIds:!!setSelectedIconIds},timestamp:Date.now(),sessionId:'debug-session',runId:'run14',hypothesisId:'V'})}).catch(()=>{});
+    console.log('[DesktopImageIcons] DraggableFolderIcon handleClick ENTRY', { iconId, target: e.target.tagName, currentTarget: e.currentTarget?.tagName, shiftKey: e.shiftKey, ctrlKey: e.ctrlKey, metaKey: e.metaKey, hasSetSelectedIconIds: !!setSelectedIconIds })
+    // #endregion
+    
+    // Get the button element - use currentTarget (the button) not target (might be child element)
+    const buttonEl = e.currentTarget
+    // Also try to find the button by climbing up from target if currentTarget isn't the button
+    const actualButton = buttonEl?.tagName === 'BUTTON' ? buttonEl : e.target.closest('button[data-icon-id]')
+    
+    // Check modifier keys from the click event (they should be present here)
+    const clickShiftKey = e.shiftKey
+    const clickCtrlKey = e.ctrlKey
+    const clickMetaKey = e.metaKey
+    const clickIsMultiSelectKey = clickShiftKey || clickCtrlKey || clickMetaKey
+    
+    // Also check stored modifier keys from mousedown (as fallback)
+    const storedModifierKeys = typeof window !== 'undefined' && window.__lastMousedownModifierKeys
+    const storedIsMultiSelectKey = storedModifierKeys && (
+      storedModifierKeys.shiftKey || storedModifierKeys.ctrlKey || storedModifierKeys.metaKey
+    ) && storedModifierKeys.iconId === iconId && (Date.now() - storedModifierKeys.timestamp) < 1000
+    
+    // Use click event modifier keys first, fallback to stored if click doesn't have them
+    const finalIsMultiSelectKey = clickIsMultiSelectKey || storedIsMultiSelectKey
+    
+    // #region agent log
+    const logData = {
+      iconId,
+      isDragging: buttonEl?.dataset.dragging === 'true',
+      selectionHandledInMousedown: buttonEl?.dataset.selectionHandledInMousedown === 'true',
+      actualButtonSelectionHandled: actualButton?.dataset.selectionHandledInMousedown === 'true',
+      hasOnClick: !!onClick,
+      target: e.target.tagName,
+      currentTarget: e.currentTarget?.tagName,
+      actualButtonTag: actualButton?.tagName,
+      clickShiftKey,
+      clickCtrlKey,
+      clickMetaKey,
+      clickIsMultiSelectKey,
+      storedIsMultiSelectKey,
+      finalIsMultiSelectKey,
+      timestamp: Date.now()
+    }
+    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:57',message:'DraggableFolderIcon handleClick fired',data:logData,timestamp:Date.now(),sessionId:'debug-session',runId:'run11',hypothesisId:'S'})}).catch(()=>{});
+    console.log('[DesktopImageIcons] DraggableFolderIcon handleClick', logData)
+    // #endregion
+    
     // If dragging flag is set, prevent click
-    if (e.currentTarget.dataset.dragging === 'true') {
+    if (buttonEl?.dataset.dragging === 'true') {
       e.preventDefault()
+      e.stopPropagation()
+      return
+    }
+    
+    // CRITICAL: If modifier keys are present in click event, handle selection here
+    // This is the same approach as image icons - check modifier keys in click, not mousedown
+    // IMPORTANT: We handle selection here, NOT in the parent's onClick prop
+    // This prevents double-handling of selection
+    if (finalIsMultiSelectKey && setSelectedIconIds) {
+      // #region agent log
+      console.log('[DesktopImageIcons] Multi-select key detected in click - handling selection in DraggableFolderIcon', { iconId, finalIsMultiSelectKey, clickIsMultiSelectKey, storedIsMultiSelectKey })
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:95',message:'Multi-select key detected in click - handling selection',data:{iconId,finalIsMultiSelectKey,clickIsMultiSelectKey,storedIsMultiSelectKey,currentSelection:selectedIconIds},timestamp:Date.now(),sessionId:'debug-session',runId:'run12',hypothesisId:'T'})}).catch(()=>{});
+      // #endregion
+      // Handle selection directly - toggle this icon in the selection
+      setSelectedIconIds(prev => {
+        const newSelection = prev.includes(iconId)
+          ? prev.filter(id => id !== iconId)
+          : [...prev, iconId]
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:115',message:'Multi-select update in click - DraggableFolderIcon',data:{iconId,prevSelection:prev,newSelection,wasIncluded:prev.includes(iconId),newSelectionLength:newSelection.length,isFolderIcon:true},timestamp:Date.now(),sessionId:'debug-session',runId:'run13',hypothesisId:'U'})}).catch(()=>{});
+        console.log('[DesktopImageIcons] Multi-select update in click - DraggableFolderIcon', { iconId, prevSelection: prev, newSelection, wasIncluded: prev.includes(iconId), newSelectionLength: newSelection.length, isFolderIcon: true })
+        // #endregion
+        return newSelection
+      })
+      // Stop propagation to prevent desktop onClick from clearing selection
+      e.stopPropagation()
+      // CRITICAL: Don't call parent's onClick prop - we've already handled selection here
+      // The parent's onClick handlers also try to handle selection, which would cause conflicts
+      return
+    }
+    
+    // If no modifier keys, check if this is a single click for selection
+    // Only handle single selection if setSelectedIconIds is available and onClick prop doesn't handle it
+    // But actually, the parent's onClick handlers handle single selection, so we should call them
+    // However, we need to ensure the parent's onClick doesn't interfere with multi-select
+    // For now, let's always call the parent's onClick for single clicks (no modifier keys)
+    
+    // If selection was already handled in mousedown (when modifier keys were pressed), skip it here
+    // Check both buttonEl and actualButton to handle cases where target is a child element
+    const selectionHandled = buttonEl?.dataset.selectionHandledInMousedown === 'true' || 
+                             actualButton?.dataset.selectionHandledInMousedown === 'true'
+    if (selectionHandled) {
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:77',message:'Selection already handled in mousedown - skipping onClick',data:{iconId,selectionHandled,buttonElFlag:buttonEl?.dataset.selectionHandledInMousedown,actualButtonFlag:actualButton?.dataset.selectionHandledInMousedown},timestamp:Date.now(),sessionId:'debug-session',runId:'run11',hypothesisId:'S'})}).catch(()=>{});
+      console.log('[DesktopImageIcons] Selection already handled in mousedown - skipping onClick', { iconId, selectionHandled, buttonElFlag: buttonEl?.dataset.selectionHandledInMousedown, actualButtonFlag: actualButton?.dataset.selectionHandledInMousedown })
+      // #endregion
+      // Clear the flag on both elements
+      if (buttonEl) buttonEl.dataset.selectionHandledInMousedown = 'false'
+      if (actualButton) actualButton.dataset.selectionHandledInMousedown = 'false'
+      // Selection was already handled in mousedown, so don't call onClick again
+      // But still stop propagation to prevent desktop onClick from clearing selection
       e.stopPropagation()
       return
     }
@@ -64,6 +166,148 @@ const DraggableFolderIcon = React.forwardRef(function DraggableFolderIcon({
   
   // Wrapper for mouseDown events
   const handleMouseDownWrapper = (e) => {
+    // Check modifier keys from the event AND from global keyboard state (as fallback)
+    // Sometimes the event doesn't have modifier keys, but we can check the global state
+    const eventShiftKey = e.shiftKey
+    const eventCtrlKey = e.ctrlKey
+    const eventMetaKey = e.metaKey
+    // Fallback: check global keyboard state (this is a workaround for when event doesn't have modifier keys)
+    const globalShiftKey = typeof window !== 'undefined' && (window.event?.shiftKey || false)
+    const globalCtrlKey = typeof window !== 'undefined' && (window.event?.ctrlKey || false)
+    const globalMetaKey = typeof window !== 'undefined' && (window.event?.metaKey || false)
+    // Use event keys first, fallback to global if event keys are false
+    const shiftKey = eventShiftKey || globalShiftKey
+    const ctrlKey = eventCtrlKey || globalCtrlKey
+    const metaKey = eventMetaKey || globalMetaKey
+    const isMultiSelectKey = shiftKey || ctrlKey || metaKey
+    
+    // #region agent log
+    const selectedCount = selectedIconIds?.length || 0
+    const isThisIconSelected = selectedIconIds?.includes(iconId)
+    const hasSetSelectedIconIds = !!setSelectedIconIds
+    const logData = {
+      iconId,
+      selectedCount,
+      isThisIconSelected,
+      isGroupDragging,
+      isMultiSelectKey,
+      hasSetSelectedIconIds,
+      eventShiftKey,
+      eventCtrlKey,
+      eventMetaKey,
+      globalShiftKey,
+      globalCtrlKey,
+      globalMetaKey,
+      finalShiftKey: shiftKey,
+      finalCtrlKey: ctrlKey,
+      finalMetaKey: metaKey,
+      willStartIndividualDrag: selectedCount <= 1 || !isThisIconSelected || isGroupDragging,
+      willHandleMultiSelect: isMultiSelectKey && hasSetSelectedIconIds,
+      timestamp: Date.now()
+    }
+    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:107',message:'DraggableFolderIcon handleMouseDownWrapper',data:logData,timestamp:Date.now(),sessionId:'debug-session',runId:'run10',hypothesisId:'R'})}).catch(()=>{});
+    console.log('[DesktopImageIcons] DraggableFolderIcon handleMouseDownWrapper', logData)
+    // #endregion
+    
+    // If multiple icons are selected and this icon is selected, don't start individual drag
+    // Let group drag handle it instead (group drag uses capture phase so it fires first)
+    if (selectedCount > 1 && isThisIconSelected && !isGroupDragging) {
+      // #region agent log
+      console.log('[DesktopImageIcons] Skipping individual drag - group drag will handle', { iconId, selectedCount })
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:200',message:'Skipping individual drag - group drag will handle',data:{iconId,selectedCount},timestamp:Date.now(),sessionId:'debug-session',runId:'run11',hypothesisId:'S'})}).catch(()=>{});
+      // #endregion
+      // Don't call handleMouseDown - let group drag handle it
+      // Don't stop propagation - let the group drag capture phase listener catch it
+      return
+    }
+    
+    // CRITICAL FIX: Store modifier key state for use in click handler
+    // Even if modifier keys aren't detected in mousedown, they might be in click
+    if (typeof window !== 'undefined') {
+      window.__lastMousedownModifierKeys = {
+        shiftKey: shiftKey,
+        ctrlKey: ctrlKey,
+        metaKey: metaKey,
+        iconId: iconId,
+        timestamp: Date.now()
+      }
+    }
+    
+    // CRITICAL: If modifier keys are detected, skip handleMouseDown to allow click to fire
+    // useDraggableIcon's handleMouseDown calls e.preventDefault(), which prevents click events
+    if (isMultiSelectKey) {
+      // #region agent log
+      console.log('[DesktopImageIcons] Multi-select key detected in mousedown - skipping handleMouseDown to allow click event', { iconId, isMultiSelectKey, shiftKey, ctrlKey, metaKey })
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:220',message:'Multi-select key detected - skipping handleMouseDown',data:{iconId,isMultiSelectKey,shiftKey,ctrlKey,metaKey,hasSetSelectedIconIds:!!setSelectedIconIds},timestamp:Date.now(),sessionId:'debug-session',runId:'run11',hypothesisId:'S'})}).catch(()=>{});
+      // #endregion
+      // Don't call handleMouseDown - this allows the click event to fire with modifier keys
+      // The handleClick will handle the selection (like image icons do)
+      // If the user actually drags, the group drag handler will catch it
+      return
+    }
+    
+    // CRITICAL: Even if modifier keys aren't detected in mousedown, they might be in click
+    // But if we call handleMouseDown, it will call e.preventDefault() and prevent the click
+    // Solution: Skip handleMouseDown if we think this might be a selection click
+    // We can detect this by checking if other icons are already selected
+    // If other icons are selected, user is likely trying to multi-select
+    const mightBeSelectionClick = selectedCount > 0 || isThisIconSelected
+    
+    if (mightBeSelectionClick && !isGroupDragging) {
+      // #region agent log
+      console.log('[DesktopImageIcons] Might be selection click - skipping handleMouseDown to allow click', { iconId, mightBeSelectionClick, selectedCount, isThisIconSelected })
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:235',message:'Might be selection click - skipping handleMouseDown',data:{iconId,mightBeSelectionClick,selectedCount,isThisIconSelected},timestamp:Date.now(),sessionId:'debug-session',runId:'run11',hypothesisId:'S'})}).catch(()=>{});
+      // #endregion
+      // Don't call handleMouseDown - allow click to fire
+      // If user actually drags, group drag will handle it
+      return
+    }
+    
+    // CRITICAL FIX: Always allow click events to fire, even when dragging might occur
+    // The problem: useDraggableIcon's handleMouseDown calls e.preventDefault(), which prevents click events
+    // Solution: Store modifier key state in a ref, and check it in handleClick
+    // This way, even if handleMouseDown is called, we can still handle selection in click
+    // Store modifier key state for use in click handler
+    if (typeof window !== 'undefined') {
+      window.__lastMousedownModifierKeys = {
+        shiftKey: shiftKey,
+        ctrlKey: ctrlKey,
+        metaKey: metaKey,
+        iconId: iconId,
+        timestamp: Date.now()
+      }
+    }
+    
+    // If modifier keys are detected, don't call handleMouseDown to allow click to fire
+    // But if modifier keys aren't detected in mousedown, we still need to allow click to check them
+    // So we'll always allow click to fire, but skip handleMouseDown if modifier keys are present
+    if (isMultiSelectKey) {
+      // #region agent log
+      console.log('[DesktopImageIcons] Multi-select key detected in mousedown - skipping handleMouseDown to allow click event', { iconId, isMultiSelectKey, shiftKey, ctrlKey, metaKey })
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:143',message:'Multi-select key detected - skipping handleMouseDown',data:{iconId,isMultiSelectKey,shiftKey,ctrlKey,metaKey,hasSetSelectedIconIds:!!setSelectedIconIds},timestamp:Date.now(),sessionId:'debug-session',runId:'run11',hypothesisId:'S'})}).catch(()=>{});
+      // #endregion
+      // Don't call handleMouseDown - this allows the click event to fire with modifier keys
+      // The onClick handler will handle the selection (like image icons do)
+      // If the user actually drags, the group drag handler will catch it
+      return
+    }
+    
+    // Even if modifier keys aren't detected in mousedown, they might be in click
+    // So we need to ensure click can fire. But useDraggableIcon's handleMouseDown calls e.preventDefault()
+    // Solution: Don't call handleMouseDown if we want to allow clicks for selection
+    // But we still need drag to work... so we need a different approach
+    
+    // NEW APPROACH: Always call handleMouseDown, but modify useDraggableIcon to not prevent default
+    // Actually, that's not possible without modifying the hook. So instead:
+    // Check if this might be a selection click (no drag movement) and skip handleMouseDown
+    // But we can't know if it's a click vs drag until mouseup...
+    
+    // BETTER APPROACH: Check modifier keys in click event, not mousedown
+    // But click won't fire if handleMouseDown calls e.preventDefault()
+    // So we need to conditionally call handleMouseDown based on whether we think it's a selection click
+    
+    // For now, let's try: if no modifier keys detected, call handleMouseDown normally
+    // But also store the modifier key state so click can check it
     if (handleMouseDown) {
       handleMouseDown(e)
     }
@@ -175,27 +419,116 @@ const DesktopIcon = memo(({
   const imageUrl = image.image || image.imageDataUrl
   const imageName = image.name || image.filename
   const position = image.position || { x: 0, y: 0 }
+  // #region agent log
+  const renderLogData = {
+    imageId: image.id,
+    hasImageUrl: !!imageUrl,
+    imageUrlType: typeof imageUrl,
+    hasImage: !!image.image,
+    hasImageDataUrl: !!image.imageDataUrl,
+    hasOnDoubleClick: !!onDoubleClick,
+    hasOnClick: !!onClick,
+    hasOnMouseDown: !!onMouseDown,
+    position: position,
+    timestamp: Date.now()
+  }
+  fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:177',message:'DesktopIcon render',data:renderLogData,timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'J'})}).catch(()=>{});
+  // #endregion
+  
+  // CRITICAL: Don't set key here - the parent component (DesktopImageIcons) sets the key
+  // Setting key here can cause duplicate key errors if multiple icons have the same id
+  // We only need data-icon-id for selection/drag functionality
+  const iconId = image.id !== undefined && image.id !== null && image.id !== ''
+    ? image.id 
+    : `icon-${image.name || 'unknown'}`
   
   return (
     <button
-      key={image.id}
-      data-icon-id={image.id}
+      // NO KEY HERE - parent handles key uniqueness
+      data-icon-id={iconId}
       onMouseDown={(e) => {
-        e.stopPropagation()
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:194',message:'DesktopIcon onMouseDown fired',data:{imageId:image.id,hasOnMouseDown:!!onMouseDown,target:e.target.tagName,currentTarget:e.currentTarget?.tagName},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'H'})}).catch(()=>{});
+        // #endregion
+        // Don't stop propagation immediately - let handleMouseDown decide
+        // This allows double-click events to work properly
         onMouseDown(e, image)
+        // Only stop propagation if we're actually starting a drag (handled in handleMouseDown)
       }}
       onDoubleClick={(e) => {
+        // #region agent log
+        console.log('[DesktopIcon] onDoubleClick fired', { imageId: image.id, hasOnDoubleClick: !!onDoubleClick, hasImageUrl: !!imageUrl, imageUrlType: typeof imageUrl, hasImage: !!image.image, hasImageDataUrl: !!image.imageDataUrl, image: image });
+        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:191',message:'DesktopIcon onDoubleClick fired',data:{imageId:image.id,hasOnDoubleClick:!!onDoubleClick,hasImageUrl:!!imageUrl,imageUrlType:typeof imageUrl,imageUrlLength:imageUrl?.length,hasImage:!!image.image,hasImageDataUrl:!!image.imageDataUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
+        
+        // CRITICAL: Mark that double-click occurred to prevent drag
+        // This must happen BEFORE calling the parent callback
+        // Use window global to communicate with handleMouseMove
+        if (typeof window !== 'undefined') {
+          window.__lastDoubleClickIconId = image.id
+          window.__lastDoubleClickTime = Date.now()
+          console.log('[DesktopIcon] Marked double-click in window', { imageId: image.id });
+        }
+        
         e.stopPropagation()
-        e.preventDefault()
-        onDoubleClick(imageUrl, imageName)
+        e.preventDefault() // Prevent default to ensure our handler runs
+        
+        // Get the actual image URL from the image object directly (don't rely on imageUrl prop)
+        // This ensures we always have the URL even if imageUrl is undefined
+        const actualImageUrl = imageUrl || image.image || image.imageDataUrl
+        const actualImageName = imageName || image.name || image.filename
+        
+        console.log('[DesktopIcon] Resolved image data', { imageId: image.id, actualImageUrl: actualImageUrl?.substring(0, 50), actualImageName, hasActualImageUrl: !!actualImageUrl });
+        
+        // Always call onDoubleClick - pass the resolved URL
+        if (onDoubleClick) {
+          // #region agent log
+          console.log('[DesktopIcon] Calling onDoubleClick callback', { imageId: image.id, actualImageUrl: actualImageUrl?.substring(0, 50), actualImageName });
+          fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:203',message:'Calling onDoubleClick callback',data:{imageId:image.id,actualImageUrl:actualImageUrl?.substring(0,50),actualImageName},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+          // #endregion
+          // Pass the resolved URL - parent will use it directly
+          onDoubleClick(actualImageUrl, actualImageName)
+        } else {
+          // #region agent log
+          console.warn('[DesktopIcon] onDoubleClick callback not provided', { imageId: image.id });
+          fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:211',message:'onDoubleClick NOT called - no callback',data:{imageId:image.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+          // #endregion
+        }
       }}
       onContextMenu={(e) => {
         e.stopPropagation()
         onContextMenu(e, image)
       }}
       onClick={(e) => {
-        e.stopPropagation()
-        onClick(e, image.id)
+        // #region agent log
+        const logData = {
+          imageId: image.id,
+          hasOnClick: !!onClick,
+          target: e.target.tagName,
+          currentTarget: e.currentTarget?.tagName,
+          targetClass: e.target.className,
+          currentTargetClass: e.currentTarget?.className,
+          isImageIcon: true,
+          detail: e.detail,
+          timestamp: Date.now()
+        }
+        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:244',message:'DesktopIcon onClick fired',data:logData,timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'H'})}).catch(()=>{});
+        console.log('[DesktopIcon] onClick fired', logData)
+        // #endregion
+        // Don't stop propagation - let the parent handle it
+        // The parent's handleIconClick will manage selection
+        // If this is part of a double-click, don't process as single click
+        if (e.detail === 2) {
+          console.log('[DesktopIcon] onClick skipped - part of double-click', { imageId: image.id })
+          return
+        }
+        if (onClick) {
+          onClick(e, image.id)
+        } else {
+          // #region agent log
+          fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:244',message:'DesktopIcon onClick - no onClick handler provided',data:{imageId:image.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'H'})}).catch(()=>{});
+          // #endregion
+        }
       }}
       onMouseEnter={() => onMouseEnter(image.id)}
       onMouseLeave={onMouseLeave}
@@ -302,7 +635,8 @@ export default function DesktopImageIcons({
   selectedIconIds = [],
   setSelectedIconIds,
   onShowProperties,
-  recycleBin = [] // Pass recycleBin to determine empty/full state
+  recycleBin = [], // Pass recycleBin to determine empty/full state
+  onSelectIcon // Optional callback for icon selection
 }) {
   const [draggedImageId, setDraggedImageId] = useState(null)
   const [dragOverTrash, setDragOverTrash] = useState(false)
@@ -310,8 +644,15 @@ export default function DesktopImageIcons({
   const [isRecycleBinHovered, setIsRecycleBinHovered] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [draggingIconId, setDraggingIconId] = useState(null)
+  const [isGroupDragging, setIsGroupDragging] = useState(false) // Track if dragging selected group
   const dragRef = useRef({ startX: 0, startY: 0, iconX: 0, iconY: 0 })
   const trashBinRef = useRef(null) // Ref to Recycle Bin element for hit testing
+  const containerRef = useRef(null) // Ref to container for marquee selection
+  const desktopRefForGroupDrag = useRef(null) // Ref to desktop element for group drag (passed from parent)
+  const folderIconRefs = useRef({}) // Refs to folder icons for marquee selection
+  const groupDragStartRef = useRef({ x: 0, y: 0, iconPositions: {}, desktopRect: null }) // Store initial positions for group drag
+  const isGroupDraggingRef = useRef(false)
+  const lastClickRef = useRef({ time: 0, iconId: null }) // Track last click for double-click detection
   const { contextMenu, showContextMenu, hideContextMenu } = useContextMenu()
 
   const handleDownload = async (image) => {
@@ -417,17 +758,43 @@ export default function DesktopImageIcons({
   }
 
   const handleIconClick = (e, imageId) => {
+    // #region agent log
+    const logData = {
+      imageId,
+      shiftKey: e.shiftKey,
+      ctrlKey: e.ctrlKey,
+      metaKey: e.metaKey,
+      currentSelection: selectedIconIds,
+      timestamp: Date.now()
+    }
+    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:495',message:'handleIconClick called',data:logData,timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+    console.log('[DesktopImageIcons] handleIconClick called', logData)
+    // #endregion
+    
     if (e.shiftKey || e.ctrlKey || e.metaKey) {
       // Toggle selection
       setSelectedIconIds(prev => {
-        if (prev.includes(imageId)) {
-          return prev.filter(id => id !== imageId)
-        } else {
-          return [...prev, imageId]
-        }
+        const newSelection = prev.includes(imageId)
+          ? prev.filter(id => id !== imageId)
+          : [...prev, imageId]
+        // #region agent log
+        console.log('[DesktopImageIcons] Multi-select toggle', {
+          imageId,
+          wasSelected: prev.includes(imageId),
+          oldSelection: prev,
+          newSelection
+        })
+        // #endregion
+        return newSelection
       })
     } else {
       // Select single
+      // #region agent log
+      console.log('[DesktopImageIcons] Single select', {
+        imageId,
+        newSelection: [imageId]
+      })
+      // #endregion
       setSelectedIconIds([imageId])
     }
   }
@@ -487,10 +854,51 @@ export default function DesktopImageIcons({
 
   // Handle mouse down for drag-to-position
   const handleMouseDown = (e, icon) => {
-    // Don't start drag on right-click (context menu) or if modifier keys are pressed
-    if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) {
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:513',message:'handleMouseDown called',data:{iconId:icon.id,button:e.button,ctrlKey:e.ctrlKey,metaKey:e.metaKey,shiftKey:e.shiftKey,selectedCount:selectedIconIds.length,isSelected:selectedIconIds.includes(icon.id)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+    // #endregion
+    // Don't start drag on right-click (context menu)
+    // Allow modifier keys for multi-select (they're handled in onClick)
+    if (e.button !== 0) {
+      // #region agent log
+      console.log('[DesktopImageIcons] handleMouseDown early return - right click', { iconId: icon.id });
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:533',message:'handleMouseDown early return - right click',data:{iconId:icon.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
       return
     }
+    
+    // CRITICAL FIX: Don't start drag on double-click
+    // Check if this is a potential double-click by looking at timing
+    const now = Date.now()
+    const lastClick = lastClickRef.current
+    const timeSinceLastClick = now - lastClick.time
+    const isPotentialDoubleClick = timeSinceLastClick < 400 && lastClick.iconId === icon.id
+    
+    if (isPotentialDoubleClick) {
+      // #region agent log
+      console.log('[DesktopImageIcons] handleMouseDown early return - potential double-click detected', { iconId: icon.id, timeSinceLastClick, lastClickIconId: lastClick.iconId });
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:540',message:'handleMouseDown early return - potential double-click',data:{iconId:icon.id,timeSinceLastClick,lastClickIconId:lastClick.iconId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
+      // Don't set up drag listeners - let double-click event fire naturally
+      // Reset click tracking so double-click can be handled
+      lastClickRef.current = { time: 0, iconId: null }
+      return
+    }
+    
+    // Don't start individual drag if multiple icons are selected and this icon is selected
+    // (let group drag handle it)
+    if (selectedIconIds.length > 1 && selectedIconIds.includes(icon.id)) {
+      // #region agent log
+      console.log('[DesktopImageIcons] handleMouseDown early return - group drag', { iconId: icon.id });
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:548',message:'handleMouseDown early return - group drag',data:{iconId:icon.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
+      return
+    }
+    
+    // Update last click time for double-click detection
+    // This happens after we've confirmed it's not a potential double-click
+    // 'now' was already declared in the double-click detection block above
+    lastClickRef.current = { time: now, iconId: icon.id }
     
     // Don't prevent default - allow normal click behavior for selection
     // Only start dragging after mouse moves
@@ -500,25 +908,47 @@ export default function DesktopImageIcons({
     const threshold = 5 // pixels to move before starting drag
     let wasOverTrash = false
     
-    setIsDragging(true)
-    setDraggingIconId(icon.id)
+    // DON'T set isDragging immediately - only set it after mouse moves
+    // This allows clicks to work properly
     
     dragRef.current = {
       startX: e.clientX,
       startY: e.clientY,
       iconX: icon.position?.x || 0,
-      iconY: icon.position?.y || 0
+      iconY: icon.position?.y || 0,
+      iconId: icon.id // Store icon ID for double-click detection
     }
     
     const handleMouseMove = (e) => {
+      // Check if double-click occurred for this icon - if so, cancel drag
+      if (typeof window !== 'undefined' && 
+          window.__lastDoubleClickIconId === icon.id && 
+          Date.now() - (window.__lastDoubleClickTime || 0) < 500) {
+        // #region agent log
+        console.log('[DesktopImageIcons] handleMouseMove - double-click detected, canceling drag', { iconId: icon.id });
+        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:606',message:'handleMouseMove - double-click detected, canceling drag',data:{iconId:icon.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+        // #endregion
+        // Clean up listeners
+        document.removeEventListener('mousemove', handleMouseMove)
+        document.removeEventListener('mouseup', handleMouseUp)
+        // Clear double-click flag
+        window.__lastDoubleClickIconId = null
+        window.__lastDoubleClickTime = 0
+        return
+      }
+      
       const deltaX = Math.abs(e.clientX - startX)
       const deltaY = Math.abs(e.clientY - startY)
       
       // Only start dragging if mouse moved beyond threshold
       if (!hasMoved && (deltaX > threshold || deltaY > threshold)) {
         hasMoved = true
+        setIsDragging(true)
+        setDraggingIconId(icon.id)
         e.preventDefault()
         e.stopPropagation()
+        // Now stop propagation on the original mousedown event
+        // This prevents clicks from firing when dragging
       }
       
       if (hasMoved) {
@@ -569,9 +999,16 @@ export default function DesktopImageIcons({
         }
       }
       
-      setIsDragging(false)
-      setDraggingIconId(null)
-      setDragOverTrash(false)
+      // Only reset dragging state if we were actually dragging
+      if (hasMoved) {
+        setIsDragging(false)
+        setDraggingIconId(null)
+        setDragOverTrash(false)
+      } else {
+        // If we didn't move, this was just a click - update last click time for double-click detection
+        const now = Date.now()
+        lastClickRef.current = { time: now, iconId: icon.id }
+      }
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
     }
@@ -581,15 +1018,30 @@ export default function DesktopImageIcons({
   }
 
   const handleDoubleClick = (imageDataUrl, filename) => {
+    // #region agent log
+    console.log('[DesktopImageIcons] handleDoubleClick called', { hasImageDataUrl: !!imageDataUrl, imageDataUrlType: typeof imageDataUrl, imageDataUrlLength: imageDataUrl?.length, filename });
+    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:651',message:'handleDoubleClick called',data:{hasImageDataUrl:!!imageDataUrl,imageDataUrlType:typeof imageDataUrl,imageDataUrlLength:imageDataUrl?.length,filename},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     if (!imageDataUrl) {
+      // #region agent log
+      console.warn('[DesktopImageIcons] handleDoubleClick - no imageDataUrl provided', { filename });
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:656',message:'handleDoubleClick early return - no imageDataUrl',data:{filename},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
       console.warn('[DesktopImageIcons] No image data URL provided')
       return
     }
     
-    // Validate it's a data URL
-    if (!imageDataUrl.startsWith('data:image/')) {
-      console.warn('[DesktopImageIcons] Invalid image data URL format:', imageDataUrl?.substring(0, 50))
-      return
+    // Validate it's an image URL (data URL, blob URL, or regular URL)
+    // Don't be too strict - allow blob URLs and regular URLs too
+    const isImageUrl = imageDataUrl.startsWith('data:image/') || 
+                       imageDataUrl.startsWith('blob:') ||
+                       imageDataUrl.startsWith('http://') ||
+                       imageDataUrl.startsWith('https://') ||
+                       imageDataUrl.startsWith('/')
+    
+    if (!isImageUrl) {
+      console.warn('[DesktopImageIcons] Invalid image URL format:', imageDataUrl?.substring(0, 50))
+      // Don't return - try to open it anyway, might still work
     }
     
     // On mobile, open directly in new tab for better save functionality
@@ -660,7 +1112,8 @@ export default function DesktopImageIcons({
   const savedPositions = loadIconPositions()
   
   // Calculate default positions from bottom right corner
-  // Order from bottom to top: Recycle Bin (bottom), Community Resources, My Favorite Wojaks, Memetic Energy (top)
+  // Matches screenshot layout: Recycle Bin (bottom), Community Resources, My Favorite Wojaks, Memetic Energy (top)
+  // Positions are calculated relative to viewport so icons stay visible when console opens
   const calculateDefaultPositions = () => {
     // Recycle Bin (bottom) - positioned at bottom right
     const recycleBinY = window.innerHeight - TASKBAR_HEIGHT - BOTTOM_MARGIN - ICON_HEIGHT
@@ -697,8 +1150,9 @@ export default function DesktopImageIcons({
   const [trashBinPos, setTrashBinPos] = useState(
     savedPositions.RECYCLE_BIN || defaultPositions.trashBin
   )
-  
+
   // Update positions on window resize if they haven't been manually moved (not saved)
+  // This ensures icons stay visible when console opens or viewport changes
   useEffect(() => {
     const handleResize = () => {
       // Only update if position hasn't been saved (user hasn't moved it)
@@ -724,16 +1178,195 @@ export default function DesktopImageIcons({
     return () => window.removeEventListener('resize', handleResize)
   }, [savedPositions])
 
+  // Handle group drag (dragging selected icons together)
+  useEffect(() => {
+    if (selectedIconIds.length <= 1) {
+      setIsGroupDragging(false)
+      isGroupDraggingRef.current = false
+      return
+    }
+
+    const handleGroupDragStart = (e) => {
+      // Only handle if multiple icons are selected
+      if (selectedIconIds.length <= 1) return
+      
+      // Check if dragging a selected icon
+      const target = e.target.closest('[data-icon-id]')
+      if (!target) return
+      
+      const iconId = target.getAttribute('data-icon-id')
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:1189',message:'Group drag start - checking icon',data:{iconId,selectedIconIds,isSelected:selectedIconIds.includes(iconId),selectedCount:selectedIconIds.length,isFolderIcon:['MEMETIC_ENERGY','COMMUNITY_RESOURCES','MY_FAVORITE_WOJAKS','RECYCLE_BIN'].includes(iconId)},timestamp:Date.now(),sessionId:'debug-session',runId:'run13',hypothesisId:'U'})}).catch(()=>{});
+      console.log('[DesktopImageIcons] Group drag start - checking icon', { iconId, selectedIconIds, isSelected: selectedIconIds.includes(iconId), selectedCount: selectedIconIds.length, isFolderIcon: ['MEMETIC_ENERGY','COMMUNITY_RESOURCES','MY_FAVORITE_WOJAKS','RECYCLE_BIN'].includes(iconId) })
+      // #endregion
+      if (!selectedIconIds.includes(iconId)) return
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:987',message:'Group drag start detected',data:{iconId,selectedIconIds,selectedCount:selectedIconIds.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run4',hypothesisId:'K'})}).catch(()=>{});
+      console.log('[DesktopImageIcons] Group drag start detected', { iconId, selectedIconIds, selectedCount: selectedIconIds.length })
+      // #endregion
+      
+      // Prevent individual drag from starting - group drag will handle it
+      e.stopPropagation()
+      e.preventDefault()
+
+      // Get desktop container for coordinate conversion
+      const desktop = e.target.closest('.desktop') || e.target.closest('#main-content')
+      if (!desktop) return
+      const desktopRect = desktop.getBoundingClientRect()
+
+      // Store initial positions of all selected icons
+      const positions = {}
+      const foundIcons = []
+      const missingIcons = []
+      selectedIconIds.forEach(id => {
+        // Check both image icons and folder icons
+        const iconEl = document.querySelector(`[data-icon-id="${id}"]`)
+        if (iconEl) {
+          foundIcons.push(id)
+          const rect = iconEl.getBoundingClientRect()
+          // Convert to desktop-relative coordinates
+          const desktopRelativeX = rect.left - desktopRect.left
+          const desktopRelativeY = rect.top - desktopRect.top
+          positions[id] = { x: desktopRelativeX, y: desktopRelativeY }
+        } else {
+          missingIcons.push(id)
+        }
+      })
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:1215',message:'Group drag start - icon positions stored',data:{selectedIconIds,foundIcons,missingIcons,iconPositionsCount:Object.keys(positions).length,isFolderIcon:['MEMETIC_ENERGY','COMMUNITY_RESOURCES','MY_FAVORITE_WOJAKS','RECYCLE_BIN'].some(id => selectedIconIds.includes(id))},timestamp:Date.now(),sessionId:'debug-session',runId:'run13',hypothesisId:'U'})}).catch(()=>{});
+      console.log('[DesktopImageIcons] Group drag start - icon positions stored', { selectedIconIds, foundIcons, missingIcons, iconPositionsCount: Object.keys(positions).length, isFolderIcon: ['MEMETIC_ENERGY','COMMUNITY_RESOURCES','MY_FAVORITE_WOJAKS','RECYCLE_BIN'].some(id => selectedIconIds.includes(id)) })
+      // #endregion
+
+      groupDragStartRef.current = {
+        x: e.clientX,
+        y: e.clientY,
+        iconPositions: positions,
+        desktopRect: desktopRect,
+      }
+
+      isGroupDraggingRef.current = true
+      setIsGroupDragging(true)
+    }
+
+    const handleGroupDragMove = (e) => {
+      if (!isGroupDraggingRef.current) return
+
+      const desktopRect = groupDragStartRef.current.desktopRect
+      if (!desktopRect) return
+
+      // Calculate delta
+      const deltaX = e.clientX - groupDragStartRef.current.x
+      const deltaY = e.clientY - groupDragStartRef.current.y
+
+      // Move all selected icons together
+      selectedIconIds.forEach(id => {
+        const iconEl = document.querySelector(`[data-icon-id="${id}"]`)
+        if (iconEl && groupDragStartRef.current.iconPositions[id]) {
+          const startPos = groupDragStartRef.current.iconPositions[id]
+          const newX = startPos.x + deltaX
+          const newY = startPos.y + deltaY
+          
+          // Clamp to desktop bounds
+          const ICON_WIDTH = 96
+          const ICON_HEIGHT = 80
+          const TASKBAR_HEIGHT = 46
+          const maxX = desktopRect.width - ICON_WIDTH
+          const maxY = desktopRect.height - TASKBAR_HEIGHT - ICON_HEIGHT
+          const clampedX = Math.max(0, Math.min(newX, maxX))
+          const clampedY = Math.max(0, Math.min(newY, maxY))
+          
+          // Update position via DOM
+          iconEl.style.setProperty('left', `${clampedX}px`, 'important')
+          iconEl.style.setProperty('top', `${clampedY}px`, 'important')
+        }
+      })
+    }
+
+    const handleGroupDragEnd = () => {
+      if (!isGroupDraggingRef.current) return
+
+      // Save final positions for all dragged icons
+      selectedIconIds.forEach(id => {
+        const iconEl = document.querySelector(`[data-icon-id="${id}"]`)
+        if (iconEl && groupDragStartRef.current.iconPositions[id]) {
+          const finalLeft = parseFloat(iconEl.style.left) || groupDragStartRef.current.iconPositions[id].x
+          const finalTop = parseFloat(iconEl.style.top) || groupDragStartRef.current.iconPositions[id].y
+          
+          // Update position
+          iconEl.style.setProperty('left', `${finalLeft}px`, 'important')
+          iconEl.style.setProperty('top', `${finalTop}px`, 'important')
+          
+          // Notify parent for persistence
+          requestAnimationFrame(() => {
+            if (onUpdatePosition) {
+              onUpdatePosition(id, finalLeft, finalTop)
+            }
+            // Also update folder icon positions if needed
+            if (id === 'MEMETIC_ENERGY' || id === 'COMMUNITY_RESOURCES' || 
+                id === 'MY_FAVORITE_WOJAKS' || id === 'RECYCLE_BIN') {
+              saveIconPosition(id, finalLeft, finalTop)
+            }
+          })
+        }
+      })
+
+      isGroupDraggingRef.current = false
+      setIsGroupDragging(false)
+      groupDragStartRef.current = { x: 0, y: 0, iconPositions: {}, desktopRect: null }
+    }
+
+    // Attach to document instead of container since container has pointerEvents: 'none'
+    // Use capture phase to catch events before they reach individual icon handlers
+    document.addEventListener('pointerdown', handleGroupDragStart, true)
+    document.addEventListener('pointermove', handleGroupDragMove)
+    document.addEventListener('pointerup', handleGroupDragEnd)
+
+    return () => {
+      document.removeEventListener('pointerdown', handleGroupDragStart, true)
+      document.removeEventListener('pointermove', handleGroupDragMove)
+      document.removeEventListener('pointerup', handleGroupDragEnd)
+    }
+  }, [selectedIconIds, onUpdatePosition])
+
   // Always render container - use relative positioning for absolute children
+  // #region agent log
+  console.log('[DesktopImageIcons] Rendering component', {
+    desktopImagesLength: desktopImages.length,
+    folderIconsCount: 4, // MEMETIC_ENERGY, COMMUNITY_RESOURCES, MY_FAVORITE_WOJAKS, RECYCLE_BIN
+    hasContextMenu: !!contextMenu
+  })
+  
+  // CRITICAL: Check if any desktopImages have id: 0 or duplicate ids
+  const imageIds = desktopImages.map(img => img.id)
+  const zeroIds = imageIds.filter(id => id === 0 || id === '0')
+  const duplicateIds = imageIds.filter((id, idx) => imageIds.indexOf(id) !== idx)
+  if (zeroIds.length > 0 || duplicateIds.length > 0) {
+    console.error('[DesktopImageIcons] PROBLEM DETECTED:', {
+      zeroIds,
+      duplicateIds,
+      allImageIds: imageIds
+    })
+  }
+  // #endregion
+  
+  // CRITICAL: Don't use Fragment - React might be inferring keys from Fragment children
+  // Instead, wrap everything in a single div container
+  // NOTE: Root element should NOT have a key - keys are only for elements in arrays
   return (
-    <>
+    <div
+      style={{ position: 'relative', width: '100%', height: '100%' }}
+    >
       {/* Desktop Icons Container - relative positioning for absolute children */}
+      {/* NOTE: Container div should NOT have a key - keys are only for elements in arrays */}
       <div
+        ref={containerRef}
         className="desktop-image-icons-container"
-        onClick={(e) => {
-          // Prevent deselecting when clicking inside the icons container
-          e.stopPropagation()
-        }}
+        // REMOVED all event handlers - container has pointerEvents: 'none' so clicks pass through to icons
+        // Icons handle their own clicks, and SelectionBox handles empty space clicks via desktopRef
+        // REMOVED onMouseDown handler - it was interfering with icon clicks
+        // SelectionBox handles empty space clicks, and icons handle their own clicks
         style={{
           position: 'absolute',
           left: 0,
@@ -741,11 +1374,52 @@ export default function DesktopImageIcons({
           right: 0,
           bottom: '46px', // Above taskbar
           zIndex: 10,
-          pointerEvents: 'none', // Let clicks pass through, children will have pointer-events
+          pointerEvents: 'none', // Let clicks pass through to icons - SelectionBox handles empty space via desktopRef
+          // Icons have pointerEvents: 'auto' so they receive clicks
         }}
       >
         {/* Render each icon with absolute positioning - using memoized component */}
-        {desktopImages.map((image, index) => {
+        {/* Render desktop images - use conditional render instead of IIFE to avoid key inference issues */}
+        {/* #region agent log */}
+        {(() => {
+          const logData = {
+            desktopImagesLength: desktopImages.length,
+            willRender: desktopImages.length > 0,
+            containerChildrenCount: 'unknown',
+            timestamp: Date.now()
+          }
+          fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:1114',message:'About to render desktop images',data:logData,timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+          console.log('[DesktopImageIcons] About to render desktop images', logData)
+          return null
+        })()}
+        {/* #endregion */}
+        {/* Render desktop images - use direct .map() result */}
+        {/* CRITICAL: Filter out any images with id: 0 or undefined/null before mapping to prevent key conflicts */}
+        {/* CRITICAL: Empty array from .map() is fine - React handles it correctly */}
+        {/* CRITICAL: When desktopImages is empty, .map() returns empty array [] which React treats as no children */}
+        {/* CRITICAL: To prevent React from inferring keys, we need to ensure the container's children are not treated as an array */}
+        {/* #region agent log */}
+        {(() => {
+          const willRender = desktopImages.length > 0
+          const filteredCount = willRender ? desktopImages.filter(img => img && img.id !== undefined && img.id !== null && img.id !== 0 && img.id !== '0').length : 0
+          fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:1131',message:'Desktop images render decision',data:{desktopImagesLength:desktopImages.length,willRender,filteredCount,willReturnNull:!willRender},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
+          return null
+        })()}
+        {/* #endregion */}
+        {/* Wrap in Fragment with explicit key to prevent React from inferring keys */}
+        <React.Fragment key="desktop-images-wrapper">
+          {desktopImages.length > 0 ? desktopImages
+            .filter(img => img && img.id !== undefined && img.id !== null && img.id !== 0 && img.id !== '0')
+            .map((image, index) => {
+          // #region agent log
+          if (index === 0) {
+            console.log('[DesktopImageIcons] Rendering desktop images array', {
+              count: desktopImages.length,
+              imageIds: desktopImages.map(img => ({ id: img.id, idType: typeof img.id }))
+            })
+          }
+          // #endregion
+          
           const isIconDragging = draggingIconId === image.id
           const isHovered = hoveredImageId === image.id
           const isSelected = selectedIconIds.includes(image.id)
@@ -758,44 +1432,133 @@ export default function DesktopImageIcons({
           }
           const imageWithPosition = { ...image, position }
 
+          // CRITICAL: Use index-based key that's ALWAYS unique and ALWAYS a string
+          // This fixes React warning about duplicate keys (some images might have id: 0 or duplicate ids)
+          // Index is always unique in the array, so use it as the primary identifier
+          // Use a prefix that can NEVER be parsed as a number, even by React's internal logic
+          const renderKey = `desktop-img-${String(index)}-${String(desktopImages.length)}`
+          
+          // #region agent log
+          if (index < 3) {
+            console.log('[DesktopImageIcons] Key generated', { 
+              index, 
+              imageId: image.id, 
+              renderKey,
+              keyType: typeof renderKey
+            })
+          }
+          // #endregion
+          
           return (
             <DesktopIcon
-              key={image.id}
+              key={renderKey}
               image={imageWithPosition}
               isSelected={isSelected}
               isDragging={isIconDragging}
               isHovered={isHovered}
               onMouseDown={handleMouseDown}
               onDoubleClick={(imageUrl, filename) => {
-                if (!isDragging && imageUrl) {
-                  handleDoubleClick(imageUrl, filename || image.filename)
+                // #region agent log
+                console.log('[DesktopImageIcons] Parent onDoubleClick callback', { imageId: image.id, imageUrl: imageUrl?.substring(0, 50), filename, hasImage: !!image.image, hasImageDataUrl: !!image.imageDataUrl });
+                // #endregion
+                // Always allow double-click to open - don't check dragging state
+                // Make sure we have a valid image URL - check all possible sources
+                const urlToUse = imageUrl || image.image || image.imageDataUrl
+                console.log('[DesktopImageIcons] urlToUse result', { urlToUse: urlToUse?.substring(0, 50), hasUrlToUse: !!urlToUse, imageId: image.id });
+                if (urlToUse) {
+                  console.log('[DesktopImageIcons] Calling handleDoubleClick', { urlToUse: urlToUse?.substring(0, 50), filename: filename || image.filename });
+                  handleDoubleClick(urlToUse, filename || image.filename)
+                } else {
+                  console.error('[DesktopImageIcons] No image URL found for icon', { imageId: image.id, image: image, imageUrl, hasImage: !!image.image, hasImageDataUrl: !!image.imageDataUrl });
                 }
               }}
               onContextMenu={handleContextMenu}
               onClick={(e) => {
-                e.stopPropagation()
-                e.preventDefault()
-                // Only handle click if not dragging
-                if (!isDragging) {
+                // #region agent log
+                const logData = {
+                  imageId: image.id,
+                  draggingIconId,
+                  isDraggingThisIcon: draggingIconId === image.id,
+                  isMobile,
+                  shiftKey: e.shiftKey,
+                  ctrlKey: e.ctrlKey,
+                  metaKey: e.metaKey,
+                  detail: e.detail, // 1 for single click, 2 for double click
+                  target: e.target.tagName,
+                  currentTarget: e.currentTarget?.tagName,
+                  timestamp: Date.now()
+                }
+                fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:1206',message:'Parent onClick fired',data:logData,timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+                console.log('[DesktopImageIcons] Parent onClick fired', logData)
+                // #endregion
+                
+                // Don't handle clicks if this is part of a double-click
+                // e.detail === 2 means this click is part of a double-click
+                if (e.detail === 2) {
+                  console.log('[DesktopImageIcons] onClick ignored - part of double-click', { imageId: image.id })
+                  return
+                }
+                
+                // Don't stop propagation - let selection box work
+                // Only handle click if not currently dragging this specific icon
+                // Allow clicks even if isDragging is true (might be dragging another icon)
+                if (draggingIconId !== image.id) {
+                  // #region agent log
+                  console.log('[DesktopImageIcons] onClick handler executing', { 
+                    imageId: image.id, 
+                    isMobile, 
+                    hasImage: !!(image.image || image.imageDataUrl)
+                  })
+                  // #endregion
                   // On mobile, single click opens the image (double-click doesn't work well)
                   if (isMobile && (image.image || image.imageDataUrl)) {
                     handleDoubleClick(image.image || image.imageDataUrl, image.filename)
                   } else {
+                    // Handle selection - don't prevent default, let it bubble
                     handleIconClick(e, image.id)
                   }
+                } else {
+                  // #region agent log
+                  console.log('[DesktopImageIcons] onClick handler blocked - icon is dragging', { imageId: image.id })
+                  // #endregion
                 }
               }}
               onMouseEnter={setHoveredImageId}
               onMouseLeave={() => setHoveredImageId(null)}
             />
           )
-        })}
+        }) : null}
+        </React.Fragment>
 
+        {/* Folder icons - render directly without Fragment to prevent React from inferring keys */}
         {/* Memetic Energy - Draggable folder */}
+        {/* #region agent log */}
+        {(() => {
+          const logData = {
+            keys: ['MEMETIC_ENERGY', 'COMMUNITY_RESOURCES', 'MY_FAVORITE_WOJAKS', 'RECYCLE_BIN'],
+            desktopImagesLength: desktopImages.length,
+            willRenderDesktopImages: desktopImages.length > 0,
+            timestamp: Date.now()
+          }
+          fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:1247',message:'Rendering folder icons with keys',data:logData,timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
+          console.log('[DesktopImageIcons] Rendering folder icons with keys:', logData)
+          return null
+        })()}
+        {/* #endregion */}
         <DraggableFolderIcon
           key="MEMETIC_ENERGY"
           iconId="MEMETIC_ENERGY"
           position={memeticEnergyPos}
+          selectedIconIds={selectedIconIds}
+          isGroupDragging={isGroupDragging}
+          setSelectedIconIds={setSelectedIconIds}
+          ref={(el) => {
+            if (el) {
+              folderIconRefs.current['MEMETIC_ENERGY'] = el
+            } else {
+              delete folderIconRefs.current['MEMETIC_ENERGY']
+            }
+          }}
           onPositionChange={(x, y) => {
             setMemeticEnergyPos({ x, y })
             saveIconPosition('MEMETIC_ENERGY', x, y)
@@ -806,10 +1569,51 @@ export default function DesktopImageIcons({
               onOpenMemeticEnergy()
             }
           }}
-          onClick={() => {
-            playSound('click')
-            if (onOpenMemeticEnergy) {
-              onOpenMemeticEnergy()
+          onClick={(e) => {
+            // #region agent log
+            const logData = {
+              iconId: 'MEMETIC_ENERGY',
+              target: e.target.tagName,
+              currentTarget: e.currentTarget?.tagName,
+              hasSetSelectedIconIds: !!setSelectedIconIds,
+              shiftKey: e.shiftKey,
+              ctrlKey: e.ctrlKey,
+              metaKey: e.metaKey,
+              currentSelection: selectedIconIds,
+              selectionHandledInMousedown: e.currentTarget?.dataset.selectionHandledInMousedown === 'true',
+              timestamp: Date.now()
+            }
+            fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:1414',message:'DraggableFolderIcon onClick fired - MEMETIC_ENERGY',data:logData,timestamp:Date.now(),sessionId:'debug-session',runId:'run10',hypothesisId:'R'})}).catch(()=>{});
+            console.log('[DesktopImageIcons] DraggableFolderIcon onClick - MEMETIC_ENERGY', logData)
+            // #endregion
+            
+            // If selection was already handled in mousedown, skip it here
+            if (e.currentTarget?.dataset.selectionHandledInMousedown === 'true') {
+              // Clear the flag
+              e.currentTarget.dataset.selectionHandledInMousedown = 'false'
+              // Stop propagation to prevent desktop onClick from clearing selection
+              e.stopPropagation()
+              return
+            }
+            
+            // Stop propagation to prevent desktop onClick from clearing selection
+            e.stopPropagation()
+            // CRITICAL: Selection is now handled in DraggableFolderIcon's handleClick
+            // So we don't need to handle it here in the parent's onClick
+            // Just call onSelectIcon if provided (for other purposes)
+            if (onSelectIcon) {
+              onSelectIcon('MEMETIC_ENERGY', e.shiftKey || e.ctrlKey || e.metaKey)
+            }
+          }}
+          onMouseEnter={(e) => {
+            // Don't change background if dragging
+            if (!e.currentTarget.style.opacity || e.currentTarget.style.opacity === '1') {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!e.currentTarget.style.opacity || e.currentTarget.style.opacity === '1') {
+              e.currentTarget.style.background = 'transparent'
             }
           }}
           onContextMenu={(e) => {
@@ -827,13 +1631,13 @@ export default function DesktopImageIcons({
               },
             ])
           }}
-          className="desktop-icon-button desktop-folder-icon"
+          className={`desktop-icon-button desktop-folder-icon ${selectedIconIds.includes('MEMETIC_ENERGY') ? 'selected' : ''}`}
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             gap: '4px',
-            background: 'transparent',
+            background: selectedIconIds.includes('MEMETIC_ENERGY') ? 'rgba(0, 0, 128, 0.3)' : 'transparent',
             border: 'none',
             borderRadius: '4px',
             padding: '4px',
@@ -899,6 +1703,16 @@ export default function DesktopImageIcons({
           key="COMMUNITY_RESOURCES"
           iconId="COMMUNITY_RESOURCES"
           position={communityResourcesPos}
+          selectedIconIds={selectedIconIds}
+          isGroupDragging={isGroupDragging}
+          setSelectedIconIds={setSelectedIconIds}
+          ref={(el) => {
+            if (el) {
+              folderIconRefs.current['COMMUNITY_RESOURCES'] = el
+            } else {
+              delete folderIconRefs.current['COMMUNITY_RESOURCES']
+            }
+          }}
           onPositionChange={(x, y) => {
             setCommunityResourcesPos({ x, y })
             saveIconPosition('COMMUNITY_RESOURCES', x, y)
@@ -909,10 +1723,49 @@ export default function DesktopImageIcons({
               onOpenCommunityResources()
             }
           }}
-          onClick={() => {
-            playSound('click')
-            if (onOpenCommunityResources) {
-              onOpenCommunityResources()
+          onClick={(e) => {
+            // #region agent log
+            const logData = {
+              iconId: 'COMMUNITY_RESOURCES',
+              target: e.target.tagName,
+              currentTarget: e.currentTarget?.tagName,
+              hasSetSelectedIconIds: !!setSelectedIconIds,
+              shiftKey: e.shiftKey,
+              ctrlKey: e.ctrlKey,
+              metaKey: e.metaKey,
+              currentSelection: selectedIconIds,
+              selectionHandledInMousedown: e.currentTarget?.dataset.selectionHandledInMousedown === 'true',
+              timestamp: Date.now()
+            }
+            fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:1517',message:'DraggableFolderIcon onClick fired - COMMUNITY_RESOURCES',data:logData,timestamp:Date.now(),sessionId:'debug-session',runId:'run10',hypothesisId:'R'})}).catch(()=>{});
+            console.log('[DesktopImageIcons] DraggableFolderIcon onClick - COMMUNITY_RESOURCES', logData)
+            // #endregion
+            
+            // If selection was already handled in mousedown, skip it here
+            if (e.currentTarget?.dataset.selectionHandledInMousedown === 'true') {
+              e.currentTarget.dataset.selectionHandledInMousedown = 'false'
+              e.stopPropagation()
+              return
+            }
+            
+            // Stop propagation to prevent desktop onClick from clearing selection
+            e.stopPropagation()
+            // CRITICAL: Selection is now handled in DraggableFolderIcon's handleClick
+            // So we don't need to handle it here in the parent's onClick
+            // Just call onSelectIcon if provided (for other purposes)
+            if (onSelectIcon) {
+              onSelectIcon('COMMUNITY_RESOURCES', e.shiftKey || e.ctrlKey || e.metaKey)
+            }
+          }}
+          onMouseEnter={(e) => {
+            // Don't change background if dragging
+            if (!e.currentTarget.style.opacity || e.currentTarget.style.opacity === '1') {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!e.currentTarget.style.opacity || e.currentTarget.style.opacity === '1') {
+              e.currentTarget.style.background = 'transparent'
             }
           }}
           onContextMenu={(e) => {
@@ -930,13 +1783,13 @@ export default function DesktopImageIcons({
               },
             ])
           }}
-          className="desktop-icon-button desktop-folder-icon"
+          className={`desktop-icon-button desktop-folder-icon ${selectedIconIds.includes('COMMUNITY_RESOURCES') ? 'selected' : ''}`}
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             gap: '4px',
-            background: 'transparent',
+            background: selectedIconIds.includes('COMMUNITY_RESOURCES') ? 'rgba(0, 0, 128, 0.3)' : 'transparent',
             border: 'none',
             borderRadius: '4px',
             padding: '4px',
@@ -1009,7 +1862,7 @@ export default function DesktopImageIcons({
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               maxWidth: '96px',
-            }}>RESOURCES.TXT</span>
+            }}>RESOURCES</span>
           </div>
         </DraggableFolderIcon>
 
@@ -1018,6 +1871,16 @@ export default function DesktopImageIcons({
           key="MY_FAVORITE_WOJAKS"
           iconId="MY_FAVORITE_WOJAKS"
           position={favoriteWojaksPos}
+          selectedIconIds={selectedIconIds}
+          isGroupDragging={isGroupDragging}
+          setSelectedIconIds={setSelectedIconIds}
+          ref={(el) => {
+            if (el) {
+              folderIconRefs.current['MY_FAVORITE_WOJAKS'] = el
+            } else {
+              delete folderIconRefs.current['MY_FAVORITE_WOJAKS']
+            }
+          }}
           onPositionChange={(x, y) => {
             setFavoriteWojaksPos({ x, y })
             saveIconPosition('MY_FAVORITE_WOJAKS', x, y)
@@ -1028,10 +1891,49 @@ export default function DesktopImageIcons({
               onOpenFavoriteWojaks()
             }
           }}
-          onClick={() => {
-            playSound('click')
-            if (onOpenFavoriteWojaks) {
-              onOpenFavoriteWojaks()
+          onClick={(e) => {
+            // #region agent log
+            const logData = {
+              iconId: 'MY_FAVORITE_WOJAKS',
+              target: e.target.tagName,
+              currentTarget: e.currentTarget?.tagName,
+              hasSetSelectedIconIds: !!setSelectedIconIds,
+              shiftKey: e.shiftKey,
+              ctrlKey: e.ctrlKey,
+              metaKey: e.metaKey,
+              currentSelection: selectedIconIds,
+              selectionHandledInMousedown: e.currentTarget?.dataset.selectionHandledInMousedown === 'true',
+              timestamp: Date.now()
+            }
+            fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:1671',message:'DraggableFolderIcon onClick fired - MY_FAVORITE_WOJAKS',data:logData,timestamp:Date.now(),sessionId:'debug-session',runId:'run10',hypothesisId:'R'})}).catch(()=>{});
+            console.log('[DesktopImageIcons] DraggableFolderIcon onClick - MY_FAVORITE_WOJAKS', logData)
+            // #endregion
+            
+            // If selection was already handled in mousedown, skip it here
+            if (e.currentTarget?.dataset.selectionHandledInMousedown === 'true') {
+              e.currentTarget.dataset.selectionHandledInMousedown = 'false'
+              e.stopPropagation()
+              return
+            }
+            
+            // Stop propagation to prevent desktop onClick from clearing selection
+            e.stopPropagation()
+            // CRITICAL: Selection is now handled in DraggableFolderIcon's handleClick
+            // So we don't need to handle it here in the parent's onClick
+            // Just call onSelectIcon if provided (for other purposes)
+            if (onSelectIcon) {
+              onSelectIcon('MY_FAVORITE_WOJAKS', e.shiftKey || e.ctrlKey || e.metaKey)
+            }
+          }}
+          onMouseEnter={(e) => {
+            // Don't change background if dragging
+            if (!e.currentTarget.style.opacity || e.currentTarget.style.opacity === '1') {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!e.currentTarget.style.opacity || e.currentTarget.style.opacity === '1') {
+              e.currentTarget.style.background = 'transparent'
             }
           }}
           onContextMenu={(e) => {
@@ -1049,13 +1951,13 @@ export default function DesktopImageIcons({
               },
             ])
           }}
-          className="desktop-icon-button desktop-folder-icon"
+          className={`desktop-icon-button desktop-folder-icon ${selectedIconIds.includes('MY_FAVORITE_WOJAKS') ? 'selected' : ''}`}
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             gap: '4px',
-            background: 'transparent',
+            background: selectedIconIds.includes('MY_FAVORITE_WOJAKS') ? 'rgba(0, 0, 128, 0.3)' : 'transparent',
             border: 'none',
             borderRadius: '4px',
             padding: '4px',
@@ -1119,7 +2021,17 @@ export default function DesktopImageIcons({
         {/* Recycle Bin - Draggable */}
         <DraggableFolderIcon
           key="RECYCLE_BIN"
-          ref={trashBinRef}
+          selectedIconIds={selectedIconIds}
+          isGroupDragging={isGroupDragging}
+          setSelectedIconIds={setSelectedIconIds}
+          ref={(el) => {
+            trashBinRef.current = el
+            if (el) {
+              folderIconRefs.current['RECYCLE_BIN'] = el
+            } else {
+              delete folderIconRefs.current['RECYCLE_BIN']
+            }
+          }}
           iconId="RECYCLE_BIN"
           position={trashBinPos}
           onPositionChange={(x, y) => {
@@ -1132,10 +2044,38 @@ export default function DesktopImageIcons({
               onOpenRecycleBin()
             }
           }}
-          onClick={() => {
-            playSound('click')
-            if (onOpenRecycleBin) {
-              onOpenRecycleBin()
+          onClick={(e) => {
+            // #region agent log
+            const logData = {
+              iconId: 'RECYCLE_BIN',
+              target: e.target.tagName,
+              currentTarget: e.currentTarget?.tagName,
+              hasSetSelectedIconIds: !!setSelectedIconIds,
+              shiftKey: e.shiftKey,
+              ctrlKey: e.ctrlKey,
+              metaKey: e.metaKey,
+              currentSelection: selectedIconIds,
+              selectionHandledInMousedown: e.currentTarget?.dataset.selectionHandledInMousedown === 'true',
+              timestamp: Date.now()
+            }
+            fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopImageIcons.jsx:1810',message:'DraggableFolderIcon onClick fired - RECYCLE_BIN',data:logData,timestamp:Date.now(),sessionId:'debug-session',runId:'run10',hypothesisId:'R'})}).catch(()=>{});
+            console.log('[DesktopImageIcons] DraggableFolderIcon onClick - RECYCLE_BIN', logData)
+            // #endregion
+            
+            // If selection was already handled in mousedown, skip it here
+            if (e.currentTarget?.dataset.selectionHandledInMousedown === 'true') {
+              e.currentTarget.dataset.selectionHandledInMousedown = 'false'
+              e.stopPropagation()
+              return
+            }
+            
+            // Stop propagation to prevent desktop onClick from clearing selection
+            e.stopPropagation()
+            // CRITICAL: Selection is now handled in DraggableFolderIcon's handleClick
+            // So we don't need to handle it here in the parent's onClick
+            // Just call onSelectIcon if provided (for other purposes)
+            if (onSelectIcon) {
+              onSelectIcon('RECYCLE_BIN', e.shiftKey || e.ctrlKey || e.metaKey)
             }
           }}
           onContextMenu={(e) => {
@@ -1165,7 +2105,7 @@ export default function DesktopImageIcons({
           }}
           onMouseEnter={() => setIsRecycleBinHovered(true)}
           onMouseLeave={() => setIsRecycleBinHovered(false)}
-          className={`desktop-icon-button desktop-trash-icon recycle-bin ${dragOverTrash ? 'drag-hover' : ''}`}
+          className={`desktop-icon-button desktop-trash-icon recycle-bin ${dragOverTrash ? 'drag-hover' : ''} ${selectedIconIds.includes('RECYCLE_BIN') ? 'selected' : ''}`}
           style={{
             display: 'flex',
             flexDirection: 'column',
@@ -1173,7 +2113,9 @@ export default function DesktopImageIcons({
             gap: '4px',
             background: dragOverTrash 
               ? 'rgba(255, 0, 0, 0.3)' 
-              : (isRecycleBinHovered ? 'rgba(255, 255, 255, 0.1)' : 'transparent'),
+              : (selectedIconIds.includes('RECYCLE_BIN') 
+                ? 'rgba(0, 0, 128, 0.3)' 
+                : (isRecycleBinHovered ? 'rgba(255, 255, 255, 0.1)' : 'transparent')),
             border: dragOverTrash ? '2px dashed var(--state-error)' : 'none',
             borderRadius: '4px',
             padding: '4px',
@@ -1240,16 +2182,56 @@ export default function DesktopImageIcons({
             RECYCLE BIN
           </span>
         </DraggableFolderIcon>
+
+        {/* Marquee Selection for DesktopImageIcons */}
+        <MarqueeSelection
+          onSelectionChange={(selectedIds, isAdditive, isFinal, isToggle) => {
+            if (setSelectedIconIds) {
+              if (isToggle) {
+                // Toggle selection
+                setSelectedIconIds(prev => {
+                  const next = new Set(prev)
+                  selectedIds.forEach(id => {
+                    if (next.has(id)) {
+                      next.delete(id)
+                    } else {
+                      next.add(id)
+                    }
+                  })
+                  return Array.from(next)
+                })
+              } else if (isAdditive) {
+                // Add to selection
+                setSelectedIconIds(prev => {
+                  const next = new Set([...prev, ...selectedIds])
+                  return Array.from(next)
+                })
+              } else {
+                // Replace selection
+                setSelectedIconIds(selectedIds)
+              }
+            }
+          }}
+          iconElements={[
+            // Get all icon elements from the container using querySelector
+            ...(containerRef.current ? Array.from(containerRef.current.querySelectorAll('[data-icon-id]')) : []),
+            ...Object.values(folderIconRefs.current).filter(Boolean)
+          ]}
+          containerRef={containerRef}
+          onFocusChange={(iconId) => {
+            // Optional: handle focus change
+          }}
+        />
       </div>
       
-      {contextMenu && (
+      {contextMenu ? (
         <ContextMenu
           x={contextMenu.x}
           y={contextMenu.y}
           items={contextMenu.items}
           onClose={hideContextMenu}
         />
-      )}
-    </>
+      ) : null}
+    </div>
   )
 }

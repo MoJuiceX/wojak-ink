@@ -1,72 +1,66 @@
-.context-menu {
+.system-menu {
   position: fixed;
   z-index: 99999;
   background: var(--menu-bg);
   border: 2px solid;
   border-color: var(--border-light) var(--border-dark) var(--border-dark) var(--border-light);
-  /* Use token-based shadow - create shadow token if needed, or use border-dark for now */
   box-shadow: 2px 2px 5px var(--border-dark);
-  min-width: clamp(150px, 50vw, 300px); /* Responsive min-width */
-  max-width: min(300px, 90vw); /* Prevent overflow */
+  min-width: 140px;
   padding: 2px;
+  font-family: 'MS Sans Serif', sans-serif;
 }
 
-.context-menu-item {
+.system-menu-item {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
-  padding: 4px 24px 4px 8px;
+  padding: 2px 20px 2px 8px;
   background: none;
   border: none;
   font-family: 'MS Sans Serif', sans-serif;
-  font-size: var(--font-size-ui);
-  letter-spacing: var(--letter-spacing-tight);
+  font-size: 11px;
+  letter-spacing: 0;
   text-align: left;
   cursor: pointer;
   color: var(--menu-text);
+  height: 20px;
+  line-height: 16px;
 }
 
-.context-menu-item:hover:not(.disabled) {
+.system-menu-item:hover:not(.disabled) {
   background: var(--menu-hover-bg);
   color: var(--menu-hover-text);
 }
 
-.context-menu-item.disabled {
+.system-menu-item.disabled {
   color: #808080;
   cursor: not-allowed;
   opacity: 0.6;
 }
 
-.context-menu-item.disabled:hover {
+.system-menu-item.disabled:hover {
   background: none;
 }
 
-.context-menu-icon {
-  width: 16px;
-  margin-right: 8px;
-  display: inline-block;
-  text-align: center;
-}
-
-.context-menu-label {
+.system-menu-label {
   flex: 1;
 }
 
-.context-menu-shortcut {
+.system-menu-shortcut {
   margin-left: 16px;
   color: var(--text-muted);
-  font-size: var(--font-size-caption);
+  font-size: 10px;
 }
 
-.context-menu-item:hover:not(.disabled) .context-menu-shortcut {
+.system-menu-item:hover:not(.disabled) .system-menu-shortcut {
   color: var(--menu-hover-text);
 }
 
-.context-menu-separator {
+.system-menu-separator {
   height: 1px;
   background: var(--menu-separator);
-  margin: 4px 2px;
+  margin: 2px;
   border-bottom: 1px solid var(--border-light);
 }
-
 
