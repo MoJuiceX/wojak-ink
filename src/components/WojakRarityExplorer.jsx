@@ -478,7 +478,19 @@ function WojakRarityExplorer({ onClose, onOpenBigPulp }) {
   
   const handleBigPulpClick = () => {
     if (hasBigPulp && onOpenBigPulp) {
-      onOpenBigPulp(normalizedNftId, bigPulpData[normalizedNftId]);
+      // Extract NFT traits from selectedNft array
+      // selectedNft structure: [rank, ?, tier, Base, Face, Mouth, Face Wear, Head, Clothes, Background]
+      const nftTraits = selectedNft ? [
+        selectedNft[3], // Base
+        selectedNft[4], // Face
+        selectedNft[5], // Mouth
+        selectedNft[6], // Face Wear
+        selectedNft[7], // Head
+        selectedNft[8], // Clothes
+        selectedNft[9], // Background
+      ].filter(Boolean) : null // Filter out undefined/null values
+      
+      onOpenBigPulp(normalizedNftId, bigPulpData[normalizedNftId], nftTraits);
     }
   };
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -530,7 +542,7 @@ function WojakRarityExplorer({ onClose, onOpenBigPulp }) {
   useEffect(() => {
     const loadBigPulpData = async () => {
       try {
-        const response = await fetch('/data/bigPulpSentences.json');
+        const response = await fetch('/assets/big_pulp_top_420.json');
         if (response.ok) {
           const data = await response.json();
           setBigPulpData(data);

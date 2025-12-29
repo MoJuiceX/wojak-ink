@@ -4,13 +4,14 @@ import { loadFavoriteWojaks, removeFavoriteWojak } from '../../utils/desktopStor
 import { Button } from '../ui'
 import { playSound } from '../../utils/soundManager'
 import { downloadCanvasAsPNG, canvasToBlob } from '../../utils/imageUtils'
-import { viewImage } from '../../utils/imageUtils'
+import { blobUrlToDataUrl } from '../../utils/imageUtils'
 
 export default function MyFavoriteWojaksWindow({
   isOpen,
   onClose,
   favoriteWojaks,
-  onRemove
+  onRemove,
+  onViewImage
 }) {
   const [wojaks, setWojaks] = useState(favoriteWojaks || [])
 
@@ -38,10 +39,37 @@ export default function MyFavoriteWojaksWindow({
 
   const handleView = async (wojak) => {
     playSound('click')
-    if (wojak.dataUrl) {
-      viewImage(wojak.dataUrl, wojak.name || 'Favorite Wojak')
-    } else if (wojak.image) {
-      viewImage(wojak.image, wojak.name || 'Favorite Wojak')
+    const imageData = wojak.dataUrl || wojak.image
+    
+    if (!imageData) {
+      alert('No image data available')
+      return
+    }
+    
+    try {
+      let dataUrl = imageData
+      
+      // Convert blob URL to data URL if needed
+      if (imageData.startsWith('blob:')) {
+        dataUrl = await blobUrlToDataUrl(imageData)
+      }
+      
+      // Validate data URL
+      if (!dataUrl || !dataUrl.startsWith('data:image/')) {
+        alert('Invalid image data format')
+        return
+      }
+      
+      // Call callback to open ImageViewerWindow
+      if (onViewImage) {
+        onViewImage(dataUrl, wojak.name || 'Favorite Wojak')
+      } else {
+        console.warn('onViewImage callback not provided')
+        alert('View functionality is not available')
+      }
+    } catch (error) {
+      console.error('Error viewing wojak:', error)
+      alert('Failed to view image: ' + error.message)
     }
   }
 

@@ -86,3 +86,31 @@
   display: none;
 }
 
+/* Share on X button */
+.big-pulp-share-button {
+  position: absolute;
+  bottom: 45px;
+  left: 8px;
+  background: #000000;
+  color: #ffffff;
+  border: 2px outset #333333;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: 'MS Sans Serif', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 20;
+}
+
+.big-pulp-share-button:hover {
+  background: #1a1a1a;
+}
+
+.big-pulp-share-button:active {
+  border-style: inset;
+  background: #0a0a0a;
+}
+

@@ -228,10 +228,18 @@ function useGlobalScrollLock() {
   }, [])
 }
 
+// Check if we're on localhost (skip boot sequence for development)
+const isLocalhost = () => {
+  if (typeof window === 'undefined') return false
+  const hostname = window.location.hostname
+  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]'
+}
+
 function AppContent() {
   const { isTangifying, isInputFocused } = useScreensaver()
   const { activeWindowId, getAllWindows } = useWindow()
-  const [isStartupComplete, setIsStartupComplete] = useState(false)
+  // Skip startup sequence on localhost, show it on production (wojrk.in)
+  const [isStartupComplete, setIsStartupComplete] = useState(isLocalhost())
   const [showOrangeRain, setShowOrangeRain] = useState(false)
   const [showClippy, setShowClippy] = useState(false)
   const [secretWallpaper, setSecretWallpaper] = useState(false)
@@ -1591,6 +1599,9 @@ function AppContent() {
                     if (result.success) {
                       setFavoriteWojaks(loadFavoriteWojaks())
                     }
+                  }}
+                  onViewImage={(imageDataUrl, filename) => {
+                    setImageViewer({ isOpen: true, imageDataUrl, filename })
                   }}
                 />
               )}

@@ -1,5 +1,5 @@
 import React, { useState, useRef, memo, useEffect } from 'react'
-import { viewImage, downloadImageFromDataUrl } from '../utils/imageUtils'
+import { viewImage, downloadImageFromDataUrl, downloadBlobUrlAsPNG, blobUrlToDataUrl } from '../utils/imageUtils'
 import { playSound } from '../utils/soundManager'
 import { useContextMenu } from '../hooks/useContextMenu'
 import { getPairImages } from '../utils/desktopUtils'
@@ -1084,12 +1084,40 @@ export default function DesktopImageIcons({
         doc.close()
       }
     } else {
-      // Desktop: use window component
-      if (onViewImage) {
-        onViewImage(imageDataUrl, filename)
+      // Desktop: download the image automatically
+      const downloadFilename = filename || 'wojak.png'
+      
+      if (imageDataUrl.startsWith('blob:')) {
+        // Handle blob URLs
+        downloadBlobUrlAsPNG(imageDataUrl, downloadFilename).catch((error) => {
+          console.error('Error downloading blob URL:', error)
+          // Fallback: try to convert to data URL first
+          blobUrlToDataUrl(imageDataUrl).then((dataUrl) => {
+            downloadImageFromDataUrl(dataUrl, downloadFilename)
+          }).catch((err) => {
+            console.error('Error converting blob to data URL:', err)
+          })
+        })
+      } else if (imageDataUrl.startsWith('data:image/')) {
+        // Handle data URLs
+        downloadImageFromDataUrl(imageDataUrl, downloadFilename)
       } else {
-        // Fallback to old method if onViewImage not provided
-        viewImage(imageDataUrl)
+        // Handle regular URLs - fetch and download
+        fetch(imageDataUrl)
+          .then(response => response.blob())
+          .then(blob => {
+            const url = URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.href = url
+            link.download = downloadFilename
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            URL.revokeObjectURL(url)
+          })
+          .catch((error) => {
+            console.error('Error downloading image from URL:', error)
+          })
       }
     }
   }

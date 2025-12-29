@@ -5,9 +5,9 @@ import BigPulpWindow from './BigPulpWindow'
 
 export default function RarityExplorerWindow({ onClose }) {
   const [openBigPulpWindows, setOpenBigPulpWindows] = useState([])
-  // Each item: { nftId: string, commentary: string }
+  // Each item: { nftId: string, commentary: string, nftTraits: string[] }
 
-  const handleOpenBigPulp = (nftId, commentary) => {
+  const handleOpenBigPulp = (nftId, commentary, nftTraits) => {
     // Check if already open for this NFT - bring to front instead of opening duplicate
     if (openBigPulpWindows.some(w => w.nftId === nftId)) {
       // Optionally: bring existing window to front
@@ -17,7 +17,7 @@ export default function RarityExplorerWindow({ onClose }) {
     
     setOpenBigPulpWindows(prev => [
       ...prev,
-      { nftId, commentary }
+      { nftId, commentary, nftTraits }
     ])
   }
 
@@ -42,13 +42,14 @@ export default function RarityExplorerWindow({ onClose }) {
         <WojakRarityExplorer onClose={onClose} onOpenBigPulp={handleOpenBigPulp} />
       </Window>
       
-      {openBigPulpWindows.map(({ nftId, commentary }) => (
+      {openBigPulpWindows.map(({ nftId, commentary, nftTraits }) => (
         <BigPulpWindow
           key={nftId}
           isOpen={true}
           onClose={() => handleCloseBigPulp(nftId)}
           nftId={nftId}
           commentary={commentary}
+          nftTraits={nftTraits}
         />
       ))}
     </>
