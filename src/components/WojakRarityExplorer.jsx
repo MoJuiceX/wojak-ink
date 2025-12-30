@@ -470,27 +470,16 @@ function WojakRarityExplorer({ onClose, onOpenBigPulp }) {
   const [selectedNft, setSelectedNft] = useState(null);
   const [showError, setShowError] = useState(false);
   const [nftRarityData, setNftRarityData] = useState(null);
-  const [bigPulpData, setBigPulpData] = useState({});
   
-  // Check if current NFT has Big Pulp commentary
+  // Check if current NFT has data (for Big Pulp button visibility)
   const normalizedNftId = nftId ? String(parseInt(nftId) || 0) : null;
-  const hasBigPulp = normalizedNftId && bigPulpData[normalizedNftId];
+  const hasNftData = normalizedNftId && selectedNft;
   
   const handleBigPulpClick = () => {
-    if (hasBigPulp && onOpenBigPulp) {
-      // Extract NFT traits from selectedNft array
+    if (hasNftData && onOpenBigPulp) {
+      // Pass full NFT data to parent
       // selectedNft structure: [rank, ?, tier, Base, Face, Mouth, Face Wear, Head, Clothes, Background]
-      const nftTraits = selectedNft ? [
-        selectedNft[3], // Base
-        selectedNft[4], // Face
-        selectedNft[5], // Mouth
-        selectedNft[6], // Face Wear
-        selectedNft[7], // Head
-        selectedNft[8], // Clothes
-        selectedNft[9], // Background
-      ].filter(Boolean) : null // Filter out undefined/null values
-      
-      onOpenBigPulp(normalizedNftId, bigPulpData[normalizedNftId], nftTraits);
+      onOpenBigPulp(normalizedNftId, selectedNft);
     }
   };
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -538,21 +527,6 @@ function WojakRarityExplorer({ onClose, onOpenBigPulp }) {
     loadNftData();
   }, []);
 
-  // Load Big Pulp commentary data on mount
-  useEffect(() => {
-    const loadBigPulpData = async () => {
-      try {
-        const response = await fetch('/assets/big_pulp_top_420.json');
-        if (response.ok) {
-          const data = await response.json();
-          setBigPulpData(data);
-        }
-      } catch (error) {
-        console.log('Big Pulp data not loaded:', error);
-      }
-    };
-    loadBigPulpData();
-  }, []);
 
   // Reset image loading state when nftId changes
   useEffect(() => {
@@ -962,7 +936,7 @@ function WojakRarityExplorer({ onClose, onOpenBigPulp }) {
             alignItems: 'center', 
             gap: '4px'
           }}>
-            {hasBigPulp && (
+            {hasNftData && (
               <button
                 onClick={handleBigPulpClick}
                 onPointerDown={(e) => e.stopPropagation()}
@@ -1076,7 +1050,7 @@ function WojakRarityExplorer({ onClose, onOpenBigPulp }) {
             border: '2px solid',
             borderColor: 'var(--border-light) var(--border-dark) var(--border-dark) var(--border-light)'
           }}>
-            {hasBigPulp && (
+            {hasNftData && (
               <button
                 onClick={handleBigPulpClick}
                 onPointerDown={(e) => e.stopPropagation()}

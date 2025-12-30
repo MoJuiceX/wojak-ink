@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Window from './Window'
 import { getCenteredPosition } from '../../utils/windowPosition'
 import './BigPulpWindow.css'
@@ -67,15 +67,27 @@ const selectBigPulpImage = (nftTraits) => {
   return ALL_IMAGES[Math.floor(Math.random() * ALL_IMAGES.length)]
 }
 
-const BigPulpWindow = ({ isOpen, onClose, nftId, commentary, nftTraits }) => {
-  // Select Big Pulp image based on NFT traits (or random if no match)
-  const [bigPulpImage] = useState(() => selectBigPulpImage(nftTraits))
+const BigPulpWindow = ({ 
+  isOpen, 
+  onClose, 
+  nftId, 
+  commentary, 
+  nftTraits,
+  currentVersion,      // NEW: which version (A, B, or C)
+  currentImage,       // NEW: which Big Pulp image to show
+  onRotate,           // NEW: callback to rotate version
+}) => {
+  const [isRotating, setIsRotating] = useState(false)
   
   // Track image load state - only show text after image loads
   const [imageLoaded, setImageLoaded] = useState(false)
   
   // Position state for right-side placement
   const [position, setPosition] = useState({ left: 0, top: 0 })
+  
+  // Dynamic font size state - adjusts to fit text without scrollbar
+  const [fontSize, setFontSize] = useState(21)
+  const textRef = useRef(null)
   
   // Play sound effect when window opens
   useEffect(() => {
@@ -92,7 +104,54 @@ const BigPulpWindow = ({ isOpen, onClose, nftId, commentary, nftTraits }) => {
   // Reset image loaded state when image changes
   useEffect(() => {
     setImageLoaded(false)
-  }, [bigPulpImage])
+    setFontSize(21) // Reset font size when image changes
+  }, [currentImage])
+  
+  // Adjust font size to fit text without scrollbar
+  useEffect(() => {
+    if (!imageLoaded || !textRef.current || !commentary) return
+    
+    const adjustFontSize = () => {
+      const textElement = textRef.current
+      if (!textElement) return
+      
+      // Start with base font size
+      let currentSize = 21
+      textElement.style.fontSize = `${currentSize}px`
+      
+      // Check if text overflows
+      const checkOverflow = () => {
+        // Force reflow
+        textElement.offsetHeight
+        
+        // Check if content overflows
+        const hasOverflow = textElement.scrollHeight > textElement.clientHeight
+        
+        if (hasOverflow && currentSize > 10) {
+          // Reduce font size by 1px and check again
+          currentSize -= 1
+          textElement.style.fontSize = `${currentSize}px`
+          // Use requestAnimationFrame to ensure DOM has updated
+          requestAnimationFrame(() => {
+            requestAnimationFrame(checkOverflow)
+          })
+        } else {
+          // Text fits, save the font size
+          setFontSize(currentSize)
+        }
+      }
+      
+      // Wait for layout to settle
+      requestAnimationFrame(() => {
+        requestAnimationFrame(checkOverflow)
+      })
+    }
+    
+    // Small delay to ensure element is fully rendered
+    const timeout = setTimeout(adjustFontSize, 50)
+    
+    return () => clearTimeout(timeout)
+  }, [imageLoaded, commentary, currentImage, currentVersion])
   
   // Calculate centered position when window opens
   useEffect(() => {
@@ -101,7 +160,7 @@ const BigPulpWindow = ({ isOpen, onClose, nftId, commentary, nftTraits }) => {
     // Wait for window to be rendered
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        const windowWidth = 480 // Big Pulp window width
+        const windowWidth = 500 // Reduced window size
         const windowHeight = windowWidth * (1200 / 800) // Calculate height from aspect ratio
         
         // Get centered position with padding
@@ -117,16 +176,26 @@ const BigPulpWindow = ({ isOpen, onClose, nftId, commentary, nftTraits }) => {
     })
   }, [isOpen])
   
-  // Calculate font size based on text length to fit in bubble
-  // Note: These breakpoints may need tuning after testing with actual commentary lengths
-  const getFontSize = (text) => {
-    if (!text) return '15px'
-    const length = text.length
-    if (length > 800) return '11px'
-    if (length > 600) return '12px'
-    if (length > 400) return '13px'
-    if (length > 300) return '14px'
-    return '15px'
+  // Base font size - will be adjusted dynamically to fit without scrollbar
+  const getFontSize = () => {
+    return `${fontSize}px`
+  }
+
+  // Handle rotation with brief animation
+  const handleRotate = () => {
+    setIsRotating(true)
+    // Brief delay for visual feedback
+    setTimeout(() => {
+      onRotate()
+      setIsRotating(false)
+    }, 150)
+  }
+
+  // Version indicator labels
+  const versionLabels = {
+    'A': '🔥 Hype Mode',
+    'B': '😎 Street Smart',
+    'C': '📖 Storyteller',
   }
 
   // Handle share on X button click
@@ -143,7 +212,7 @@ const BigPulpWindow = ({ isOpen, onClose, nftId, commentary, nftTraits }) => {
       // Load Big Pulp image
       const img = new Image()
       img.crossOrigin = 'anonymous'
-      img.src = `/images/BigPulp/${bigPulpImage}`
+      img.src = `/images/BigPulp/${currentImage}`
       
       await new Promise((resolve, reject) => {
         img.onload = resolve
@@ -257,45 +326,71 @@ const BigPulpWindow = ({ isOpen, onClose, nftId, commentary, nftTraits }) => {
       onClose={onClose}
       className="big-pulp-window-no-resize"
       style={{ 
-        width: '480px',  // Scaled up for better text visibility in speech bubble
+        width: '500px',  // Reduced window size
         left: `${position.left}px`,
         top: `${position.top}px`
       }}
     >
-      <div className="big-pulp-window-body">
+      <div className="big-pulp-window-content">
+        {/* Image container - image renders first */}
         <div className="big-pulp-image-container">
+          {/* Big Pulp character image - renders first as base layer */}
           <img 
-            src={`/images/BigPulp/${bigPulpImage}`}
+            src={`/images/BigPulp/${currentImage}`}
             alt="Big Pulp"
-            className="big-pulp-image"
+            className={`big-pulp-character ${isRotating ? 'rotating' : ''}`}
             draggable={false}
             onLoad={() => setImageLoaded(true)}
           />
+
+          {/* Speech bubble text overlay - renders above image */}
           {imageLoaded && displayText && (
             <div 
-              className="big-pulp-speech-text"
-              style={{ fontSize: getFontSize(displayText) }}
+              ref={textRef}
+              className={`big-pulp-speech-text ${isRotating ? 'rotating' : ''}`}
+              style={{ fontSize: getFontSize() }}
             >
-              {displayText.split('\n\n').map((paragraph, idx) => (
-                <p key={idx}>{paragraph}</p>
-              ))}
+              {displayText}
             </div>
           )}
+
+          {/* Version indicator - bottom left, above buttons */}
+          {imageLoaded && currentVersion && (
+            <div className="big-pulp-version-indicator">
+              {versionLabels[currentVersion]}
+            </div>
+          )}
+
+          {/* Buttons - bottom left of image */}
+          {imageLoaded && (
+            <>
+              <button
+                className="big-pulp-rotate-btn"
+                onClick={handleRotate}
+                disabled={isRotating}
+                onMouseDown={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
+                title="Get a different take from Big Pulp"
+              >
+                Ask Big Pulp Again 🔄
+              </button>
+              <button
+                className="big-pulp-share-btn"
+                onClick={handleShareOnX}
+                onMouseDown={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
+                title="Share on X (Twitter)"
+              >
+                Share on 𝕏
+              </button>
+            </>
+          )}
+
+          {/* NFT badge - bottom right */}
           {imageLoaded && (
             <div className="big-pulp-nft-badge">
               NFT #{nftId}
             </div>
-          )}
-          {imageLoaded && (
-            <button 
-              className="big-pulp-share-button"
-              onClick={handleShareOnX}
-              onMouseDown={(e) => e.stopPropagation()}
-              onPointerDown={(e) => e.stopPropagation()}
-              title="Download image and share on X"
-            >
-              Share on 𝕏
-            </button>
           )}
         </div>
       </div>

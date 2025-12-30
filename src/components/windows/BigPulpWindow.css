@@ -1,3 +1,4 @@
+/* Window body container */
 .big-pulp-window-body {
   padding: 0;
   margin: 0;
@@ -5,80 +6,132 @@
   background: #c0c0c0;
 }
 
+/* Container */
+.big-pulp-window-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #c0c0c0;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+/* Image container - fills available space, maintains aspect ratio */
 .big-pulp-image-container {
   position: relative;
   width: 100%;
-  /* Maintain aspect ratio: 1200h / 800w = 1.5 */
+  height: 100%;
+  /* Maintain aspect ratio: 800w / 1200h = 2/3 */
   aspect-ratio: 800 / 1200;
+  overflow: visible;
 }
 
-.big-pulp-image {
+/* Big Pulp character image - base layer, renders first */
+.big-pulp-character {
   width: 100%;
   height: 100%;
-  display: block;
   object-fit: contain;
-  position: relative;
+  image-rendering: pixelated;
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
   z-index: 1;
+  transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
-/* Speech bubble text overlay */
+.big-pulp-character.rotating {
+  transform: scale(0.95);
+  opacity: 0.7;
+}
+
+/* Speech bubble text overlay - renders above image */
 .big-pulp-speech-text {
   position: absolute;
-  /* Position within the speech bubble area */
-  top: 10%;
-  left: 8%;
-  right: 8%;
+  top: 9.5%;
+  left: 9%;
+  right: 9%;
   height: 36%;
-  
-  /* Ensure text appears above the image */
-  z-index: 10;
-  
-  /* Text styling */
   overflow: hidden;
-  padding: 10px;
-  box-sizing: border-box;
-  
-  /* Typography */
-  font-family: 'MS Sans Serif', 'Segoe UI', Tahoma, sans-serif;
-  font-size: 14px;
-  line-height: 1.35;
+  line-height: 1.5;
   color: #000000;
-  text-align: left;
-  
-  /* Flexbox for vertical distribution */
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  gap: 6px;
-  
-  /* Ensure text is visible */
-  pointer-events: none;
-}
-
-.big-pulp-speech-text p {
+  font-family: 'Comic Sans MS', 'Comic Sans', cursive, sans-serif;
   margin: 0;
-  padding: 0;
+  padding: 8px;
+  z-index: 100;
+  pointer-events: auto;
+  transition: opacity 0.15s ease;
+  font-weight: 500;
+  text-align: justify;
 }
 
-/* First paragraph slightly bolder */
-.big-pulp-speech-text p:first-child {
-  font-weight: 600;
+.big-pulp-speech-text.rotating {
+  opacity: 0.5;
 }
 
-/* NFT ID badge */
+/* NFT badge */
 .big-pulp-nft-badge {
   position: absolute;
   bottom: 8px;
   right: 8px;
-  background: rgba(255, 102, 0, 0.9);
-  color: white;
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 12px;
+  background: #000080;
+  color: #ffffff;
+  font-size: 10px;
   font-weight: bold;
-  font-family: 'MS Sans Serif', sans-serif;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
-  z-index: 10;
+  padding: 2px 6px;
+  border: 1px outset #4040ff;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif;
+  z-index: 100;
+}
+
+/* Version indicator - bottom left, above buttons */
+.big-pulp-version-indicator {
+  position: absolute;
+  bottom: 60px;
+  left: 8px;
+  background: #ff8c00;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border: 1px outset #ffaa44;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif;
+  z-index: 100;
+}
+
+/* Ask Big Pulp Again button - bottom left, in row with Share button */
+.big-pulp-rotate-btn {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: linear-gradient(180deg, #ff9933 0%, #ff6600 100%);
+  border: 2px outset #ffcc88;
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 11px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif;
+  text-shadow: 1px 1px 0 #994400;
+  z-index: 100;
+  white-space: nowrap;
+  min-width: 140px;
+  display: block;
+}
+
+.big-pulp-rotate-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #ffaa44 0%, #ff7711 100%);
+}
+
+.big-pulp-rotate-btn:active:not(:disabled) {
+  border-style: inset;
+  background: linear-gradient(180deg, #ee8822 0%, #dd5500 100%);
+}
+
+.big-pulp-rotate-btn:disabled {
+  opacity: 0.7;
+  cursor: wait;
 }
 
 /* Hide resize handles for Big Pulp windows */
@@ -86,31 +139,31 @@
   display: none;
 }
 
-/* Share on X button */
-.big-pulp-share-button {
+/* Share on X button - bottom, to the right of rotate button */
+.big-pulp-share-btn {
   position: absolute;
-  bottom: 45px;
-  left: 8px;
-  background: #000000;
+  bottom: 8px;
+  left: 160px;
+  background: linear-gradient(180deg, #333333 0%, #000000 100%);
+  border: 2px outset #555555;
   color: #ffffff;
-  border: 2px outset #333333;
-  padding: 6px 14px;
-  font-size: 12px;
   font-weight: bold;
+  font-size: 11px;
+  padding: 6px 10px;
   cursor: pointer;
-  font-family: 'MS Sans Serif', sans-serif;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  z-index: 20;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif;
+  z-index: 100;
+  white-space: nowrap;
+  min-width: 100px;
+  display: block;
 }
 
-.big-pulp-share-button:hover {
-  background: #1a1a1a;
+.big-pulp-share-btn:hover {
+  background: linear-gradient(180deg, #444444 0%, #1a1a1a 100%);
 }
 
-.big-pulp-share-button:active {
+.big-pulp-share-btn:active {
   border-style: inset;
-  background: #0a0a0a;
 }
+
 
