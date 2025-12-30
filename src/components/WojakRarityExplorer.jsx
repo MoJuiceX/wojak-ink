@@ -1,6 +1,7 @@
 import React, { useState, useEffect, memo, useRef } from 'react';
 import { useWindow } from '../contexts/WindowContext';
 import { useToast } from '../contexts/ToastContext';
+import { ensureOrangeAudioUnlocked, playOrangeClickSound } from '../utils/orangeSound';
 import './WojakRarityExplorer.css';
 
 // Cluster-based tier assignments - tiers determined by natural gaps within each category
@@ -477,6 +478,11 @@ function WojakRarityExplorer({ onClose, onOpenBigPulp }) {
   
   const handleBigPulpClick = () => {
     if (hasNftData && onOpenBigPulp) {
+      // Play orange click sound
+      ensureOrangeAudioUnlocked().then(() => {
+        playOrangeClickSound()
+      })
+      
       // Pass full NFT data to parent
       // selectedNft structure: [rank, ?, tier, Base, Face, Mouth, Face Wear, Head, Clothes, Background]
       onOpenBigPulp(normalizedNftId, selectedNft);

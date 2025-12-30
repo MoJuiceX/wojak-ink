@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Window from './Window'
 import { getCenteredPosition } from '../../utils/windowPosition'
+import { ensureOrangeAudioUnlocked, playOrangeClickSound } from '../../utils/orangeSound'
 import './BigPulpWindow.css'
 
 const ALL_IMAGES = [
@@ -89,27 +90,29 @@ const BigPulpWindow = ({
   const [fontSize, setFontSize] = useState(21)
   const textRef = useRef(null)
   
-  // Play sound effect when window opens
-  useEffect(() => {
-    if (!isOpen) return
-    
-    const audio = new Audio('/sounds/w98sounds/DING.mp3')
-    audio.volume = 0.5 // Adjust volume (0.0 to 1.0)
-    audio.play().catch(err => {
-      // Ignore autoplay errors (browser may block)
-      console.log('Audio autoplay blocked:', err)
-    })
-  }, [isOpen])
   
   // Reset image loaded state when image changes
   useEffect(() => {
-    setImageLoaded(false)
-    setFontSize(21) // Reset font size when image changes
+    // Don't reset imageLoaded to false - keep text visible during image changes
+    // The img onLoad will handle setting it to true when new image loads
+    if (currentImage) {
+      setFontSize(21) // Reset font size when image changes
+      // Preload the new image but don't hide text
+      const img = new Image()
+      img.onload = () => {
+        setImageLoaded(true)
+      }
+      img.onerror = () => {
+        setImageLoaded(true) // Still show text even if image fails
+      }
+      img.src = `/images/BigPulp/${currentImage}`
+    }
   }, [currentImage])
   
   // Adjust font size to fit text without scrollbar
   useEffect(() => {
-    if (!imageLoaded || !textRef.current || !commentary) return
+    // Allow font adjustment even if image hasn't loaded yet (text should always be visible)
+    if (!textRef.current || !commentary) return
     
     const adjustFontSize = () => {
       const textElement = textRef.current
@@ -183,6 +186,11 @@ const BigPulpWindow = ({
 
   // Handle rotation with brief animation
   const handleRotate = () => {
+    // Play orange click sound
+    ensureOrangeAudioUnlocked().then(() => {
+      playOrangeClickSound()
+    })
+    
     setIsRotating(true)
     // Brief delay for visual feedback
     setTimeout(() => {
@@ -344,7 +352,8 @@ const BigPulpWindow = ({
           />
 
           {/* Speech bubble text overlay - renders above image */}
-          {imageLoaded && displayText && (
+          {/* Show text if we have commentary, even if image is still loading */}
+          {displayText && (
             <div 
               ref={textRef}
               className={`big-pulp-speech-text ${isRotating ? 'rotating' : ''}`}

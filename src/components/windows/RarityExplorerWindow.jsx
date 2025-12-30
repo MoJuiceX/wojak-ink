@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Window from './Window'
 import WojakRarityExplorer from '../WojakRarityExplorer'
 import BigPulpWindow from './BigPulpWindow'
@@ -39,7 +39,10 @@ export default function RarityExplorerWindow({ onClose }) {
 
   // Each open Big Pulp window tracks its own current version and image
   const [openBigPulpWindows, setOpenBigPulpWindows] = useState([])
-  // Each item: { nftId: string, nftData: array, currentVersion: 'A'|'B'|'C', currentImage: string }
+  // Each item: { nftId: string, nftData: array, currentVersion: 'A'|'B'|'C', currentImage: string, clickCount: number }
+  
+  // Track auto-rotation intervals per window
+  const autoRotateIntervalsRef = useRef({})
 
   // Big Pulp image variants
   const BIG_PULP_IMAGES = [
@@ -80,6 +83,7 @@ export default function RarityExplorerWindow({ onClose }) {
         nftData,
         currentVersion: initialVersion,
         currentImage: initialImage,
+        clickCount: 0, // Track clicks for auto-rotation
       }
     ])
   }
@@ -87,28 +91,108 @@ export default function RarityExplorerWindow({ onClose }) {
   // Rotate to next version AND pick new image
   const rotateBigPulpVersion = (nftId) => {
     let nextVersion
+    let shouldStartAutoRotate = false
+    
     setOpenBigPulpWindows(prev => prev.map(w => {
       if (w.nftId !== nftId) return w
 
-      // Rotate version: A → B → C → A
-      const versionOrder = { 'A': 'B', 'B': 'C', 'C': 'A' }
-      nextVersion = versionOrder[w.currentVersion]
+      // Increment click count
+      const newClickCount = (w.clickCount || 0) + 1
+      
+      // Check if we should start auto-rotation (after 10 clicks)
+      if (newClickCount >= 10 && !autoRotateIntervalsRef.current[nftId]) {
+        shouldStartAutoRotate = true
+      }
+
+      // Rotate version: A → B → C → A (only if not auto-rotating)
+      let nextVersionToUse
+      if (shouldStartAutoRotate) {
+        // Random version for auto-rotation
+        const versions = ['A', 'B', 'C']
+        nextVersionToUse = versions[Math.floor(Math.random() * versions.length)]
+      } else {
+        // Sequential rotation: A → B → C → A
+        const versionOrder = { 'A': 'B', 'B': 'C', 'C': 'A' }
+        // Ensure currentVersion is valid, default to 'A' if not
+        const currentVer = w.currentVersion && ['A', 'B', 'C'].includes(w.currentVersion) 
+          ? w.currentVersion 
+          : 'A'
+        nextVersionToUse = versionOrder[currentVer] || 'A'
+      }
+      
+      // Store for updating lastShownVersion
+      nextVersion = nextVersionToUse
       
       // Pick new image (exclude current to guarantee change)
       const nextImage = pickRandomImage(w.currentImage)
 
       return {
         ...w,
-        currentVersion: nextVersion,
+        currentVersion: nextVersionToUse,
         currentImage: nextImage,
+        clickCount: newClickCount,
       }
     }))
+    
     if (nextVersion) setLastShownVersion(nextVersion)
+    
+    // Start auto-rotation if needed
+    if (shouldStartAutoRotate) {
+      startAutoRotation(nftId)
+    }
+  }
+  
+  // Start automatic random rotation (A, B, C) forever
+  const startAutoRotation = (nftId) => {
+    // Clear any existing interval for this window
+    if (autoRotateIntervalsRef.current[nftId]) {
+      clearInterval(autoRotateIntervalsRef.current[nftId])
+    }
+    
+    // Start new interval - rotate randomly every 1.5 seconds
+    autoRotateIntervalsRef.current[nftId] = setInterval(() => {
+      setOpenBigPulpWindows(prev => prev.map(w => {
+        if (w.nftId !== nftId) return w
+        
+        // Pick random version (A, B, or C)
+        const versions = ['A', 'B', 'C']
+        const randomVersion = versions[Math.floor(Math.random() * versions.length)]
+        
+        // Pick new image
+        const nextImage = pickRandomImage(w.currentImage)
+        
+        // Preserve all window data including nftId, nftData, and clickCount
+        return {
+          ...w,
+          nftId: w.nftId, // Explicitly preserve
+          nftData: w.nftData, // Explicitly preserve
+          currentVersion: randomVersion,
+          currentImage: nextImage,
+          clickCount: w.clickCount || 0, // Preserve click count
+        }
+      }))
+    }, 1500) // Rotate every 1.5 seconds
   }
 
   const handleCloseBigPulp = (nftId) => {
+    // Clear auto-rotation interval if it exists
+    if (autoRotateIntervalsRef.current[nftId]) {
+      clearInterval(autoRotateIntervalsRef.current[nftId])
+      delete autoRotateIntervalsRef.current[nftId]
+    }
+    
     setOpenBigPulpWindows(prev => prev.filter(w => w.nftId !== nftId))
   }
+  
+  // Cleanup intervals on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(autoRotateIntervalsRef.current).forEach(interval => {
+        clearInterval(interval)
+      })
+      autoRotateIntervalsRef.current = {}
+    }
+  }, [])
 
   return (
     <>
@@ -127,7 +211,7 @@ export default function RarityExplorerWindow({ onClose }) {
         <WojakRarityExplorer onClose={onClose} onOpenBigPulp={handleOpenBigPulp} />
       </Window>
       
-      {openBigPulpWindows.map(({ nftId, nftData, currentVersion, currentImage }) => {
+      {openBigPulpWindows.map(({ nftId, nftData, currentVersion, currentImage, clickCount }) => {
         // Extract NFT traits from nftData array for image selection
         // nftData structure: [rank, ?, tier, Base, Face, Mouth, Face Wear, Head, Clothes, Background]
         const nftTraits = nftData ? [
@@ -140,8 +224,26 @@ export default function RarityExplorerWindow({ onClose }) {
           nftData[9], // Background
         ].filter(Boolean) : null
 
-        // Get commentary for current version
-        const commentary = bigPulpData[currentVersion]?.[nftId] || 'No commentary available for this NFT.'
+        // Get commentary for current version - ensure nftId is a string for lookup
+        // JSON keys are strings, so convert nftId to string
+        const nftIdStr = String(nftId)
+        const versionData = bigPulpData[currentVersion] || {}
+        let commentary = versionData[nftIdStr] || versionData[String(parseInt(nftIdStr))]
+        
+        // Fallback message if no commentary found
+        if (!commentary) {
+          commentary = 'No commentary available for this NFT.'
+          // Debug: log when commentary is missing
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('Big Pulp: No commentary found', { 
+              nftId, 
+              nftIdStr, 
+              currentVersion, 
+              hasVersionData: !!bigPulpData[currentVersion],
+              sampleKeys: Object.keys(versionData).slice(0, 3)
+            })
+          }
+        }
 
         return (
           <BigPulpWindow
