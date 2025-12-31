@@ -4,7 +4,9 @@ import { useEffect, useRef, useState } from 'react'
 export default function ChubzWindow({ onClose }) {
   // #region agent log
   useEffect(() => {
-    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChubzWindow.jsx:4',message:'ChubzWindow mounted',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+    if (import.meta.env.DEV) {
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChubzWindow.jsx:4',message:'ChubzWindow mounted',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+    }
     
     // Track viewport/scroll position changes to identify layout shifts
     const checkPositions = (label) => {
@@ -124,12 +126,16 @@ export default function ChubzWindow({ onClose }) {
         };
       }
       
-      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChubzWindow.jsx:10',message:`Position check: ${label}`,data:result,timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'R'})}).catch(()=>{});
+      if (import.meta.env.DEV) {
+        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChubzWindow.jsx:10',message:`Position check: ${label}`,data:result,timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'R'})}).catch(()=>{});
+      }
     };
     
     // Monitor scroll events to detect viewport shifts
     const handleScroll = () => {
-      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChubzWindow.jsx:scroll',message:'Page scroll detected',data:{scrollX:window.scrollX,scrollY:window.scrollY,bodyScrollTop:document.body.scrollTop,htmlScrollTop:document.documentElement.scrollTop},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'R'})}).catch(()=>{});
+      if (import.meta.env.DEV) {
+        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChubzWindow.jsx:scroll',message:'Page scroll detected',data:{scrollX:window.scrollX,scrollY:window.scrollY,bodyScrollTop:document.body.scrollTop,htmlScrollTop:document.documentElement.scrollTop},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'R'})}).catch(()=>{});
+      }
     };
     
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -186,7 +192,9 @@ export default function ChubzWindow({ onClose }) {
 
         const target = Math.max(minW, Math.min(maxW, contentW + padding))
         // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChubzWindow.jsx:161',message:'ChubzWindow compute width',data:{contentW,innerWidth:window.innerWidth,target,scrollY:window.scrollY},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'S'})}).catch(()=>{});
+        if (import.meta.env.DEV) {
+          fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChubzWindow.jsx:161',message:'ChubzWindow compute width',data:{contentW,innerWidth:window.innerWidth,target,scrollY:window.scrollY},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'S'})}).catch(()=>{});
+        }
         // #endregion
         setWinWidth(target)
         isCalculatingWidthRef.current = false
@@ -212,7 +220,9 @@ export default function ChubzWindow({ onClose }) {
     let resizeTimeout
     const handleResize = () => {
       // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChubzWindow.jsx:169',message:'ChubzWindow resize handler fired',data:{innerWidth:window.innerWidth,innerHeight:window.innerHeight,scrollY:window.scrollY},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'S'})}).catch(()=>{});
+      if (import.meta.env.DEV) {
+        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChubzWindow.jsx:169',message:'ChubzWindow resize handler fired',data:{innerWidth:window.innerWidth,innerHeight:window.innerHeight,scrollY:window.scrollY},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'S'})}).catch(()=>{});
+      }
       // #endregion
       setIsMobile(window.innerWidth <= 640)
       clearTimeout(resizeTimeout)
@@ -348,7 +358,9 @@ export default function ChubzWindow({ onClose }) {
                       }
                       
                       // #region agent log
-                      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChubzWindow.jsx:186',message:'ChubzWindow scroll reset',data:{afterScrollTop:windowBody.scrollTop,beforeScroll,pageScrollY:window.scrollY,pageScrollX:window.scrollX},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'Q'})}).catch(()=>{});
+                      if (import.meta.env.DEV) {
+                        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChubzWindow.jsx:186',message:'ChubzWindow scroll reset',data:{afterScrollTop:windowBody.scrollTop,beforeScroll,pageScrollY:window.scrollY,pageScrollX:window.scrollX},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'Q'})}).catch(()=>{});
+                      }
                       // #endregion
                     } catch (e) {
                       console.error('[ChubzWindow] Error in scrollbar reset:', e)

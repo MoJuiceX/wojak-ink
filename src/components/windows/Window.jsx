@@ -383,7 +383,9 @@ export default function Window({
     // Add a delay to ensure other window has finished mounting and positioning
     if (isOtherWindowOpening) {
       // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:353',message:'README position recalculation skipped - other window opening',data:{windowId,otherWindowsCount:document.querySelectorAll('.window').length - 1},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'V'})}).catch(()=>{});
+      if (import.meta.env.DEV) {
+        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:353',message:'README position recalculation skipped - other window opening',data:{windowId,otherWindowsCount:document.querySelectorAll('.window').length - 1},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'V'})}).catch(()=>{});
+      }
       // #endregion
       // Don't just return - also set up a guard to prevent recalculation for a period after window opens
       // This ensures README stays stable even if effects re-run
@@ -415,7 +417,9 @@ export default function Window({
       // If already at correct position (within 5px tolerance), skip recalculation
       if (Math.abs(currentLeft - expectedPos.x) < 5 && Math.abs(currentTop - expectedPos.y) < 5) {
         // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:367',message:'README position recalculation skipped - already at correct position',data:{source,currentLeft,currentTop,expectedX:expectedPos.x,expectedY:expectedPos.y},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'V'})}).catch(()=>{});
+        if (import.meta.env.DEV) {
+          fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:367',message:'README position recalculation skipped - already at correct position',data:{source,currentLeft,currentTop,expectedX:expectedPos.x,expectedY:expectedPos.y},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'V'})}).catch(()=>{});
+        }
         // #endregion
         return
       }
@@ -452,7 +456,9 @@ export default function Window({
         const currentTopAfter = parseFloat(win.style.top) || 0
         if (Math.abs(currentLeftAfter - newPos.x) > 1 || Math.abs(currentTopAfter - newPos.y) > 1) {
           // #region agent log
-          fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:399',message:'README position being updated',data:{source,currentLeft:currentLeftAfter,currentTop:currentTopAfter,newX:newPos.x,newY:newPos.y},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'V'})}).catch(()=>{});
+          if (import.meta.env.DEV) {
+            fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:399',message:'README position being updated',data:{source,currentLeft:currentLeftAfter,currentTop:currentTopAfter,newX:newPos.x,newY:newPos.y},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'V'})}).catch(()=>{});
+          }
           // #endregion
           win.style.left = `${newPos.x}px`
           win.style.top = `${newPos.y}px`

@@ -52,7 +52,9 @@ export function WindowProvider({ children }) {
     const vh = window.innerHeight || 768
 
     // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:52',message:'clampToViewport called',data:{vw,vh,scrollY:window.scrollY,scrollX:window.scrollX,posX:pos?.x,posY:pos?.y,sizeWidth:size?.width,sizeHeight:size?.height},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'T'})}).catch(()=>{});
+    if (import.meta.env.DEV) {
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:52',message:'clampToViewport called',data:{vw,vh,scrollY:window.scrollY,scrollX:window.scrollX,posX:pos?.x,posY:pos?.y,sizeWidth:size?.width,sizeHeight:size?.height},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'T'})}).catch(()=>{});
+    }
     // #endregion
 
     const parseSize = (value, fallback) => {
@@ -79,7 +81,9 @@ export function WindowProvider({ children }) {
     }
     
     // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:75',message:'clampToViewport result',data:{clampedX:clamped.x,clampedY:clamped.y,baseX,baseY,maxX,maxY},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'T'})}).catch(()=>{});
+    if (import.meta.env.DEV) {
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:75',message:'clampToViewport result',data:{clampedX:clamped.x,clampedY:clamped.y,baseX,baseY,maxX,maxY},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'T'})}).catch(()=>{});
+    }
     // #endregion
 
     return clamped
@@ -346,7 +350,9 @@ export function WindowProvider({ children }) {
       const clampedPosition = clampToViewport(position, windowData?.size || existingWindow?.size)
       
       // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:374',message:'registerWindow - position calculated',data:{windowId,positionBeforeClampX:positionBeforeClamp?.x,positionBeforeClampY:positionBeforeClamp?.y,clampedX:clampedPosition?.x,clampedY:clampedPosition?.y,existingWindow:!!existingWindow,viewportWidth:window.innerWidth,viewportHeight:window.innerHeight,scrollY:window.scrollY},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'T'})}).catch(()=>{});
+      if (import.meta.env.DEV) {
+        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:374',message:'registerWindow - position calculated',data:{windowId,positionBeforeClampX:positionBeforeClamp?.x,positionBeforeClampY:positionBeforeClamp?.y,clampedX:clampedPosition?.x,clampedY:clampedPosition?.y,existingWindow:!!existingWindow,viewportWidth:window.innerWidth,viewportHeight:window.innerHeight,scrollY:window.scrollY},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'T'})}).catch(()=>{});
+      }
       // #endregion
       
       const windowEntry = {
