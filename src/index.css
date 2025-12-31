@@ -837,6 +837,8 @@ body {
   background: transparent;
   padding-bottom: calc(var(--taskbar-height) + var(--safe-area-bottom));
   box-sizing: border-box;
+  z-index: 1; /* Desktop is below windows (z-index 1000+) but above background */
+  /* Desktop icons container has z-index: 10, which is still below windows but ensures proper stacking */
 }
 
 
@@ -870,6 +872,8 @@ body {
     inset 1px 0 0 var(--border-light),
     inset 0 -1px 0 var(--border-dark),
     inset -1px 0 0 var(--border-dark);
+  /* Ensure windows are above desktop icons but don't create a new stacking context that hides them */
+  isolation: isolate; /* Create stacking context without affecting parent */
 }
 
 /* Wide monitor optimization - prevent windows from being too wide */
@@ -2980,7 +2984,7 @@ a,
   #window-chia-network .window-body.scroll-allowed {
     overflow-y: scroll !important; /* Always show scrollbar (Windows 98 behavior) */
     overflow-x: hidden !important;
-    scrollbar-gutter: stable both-edges !important;
+    scrollbar-gutter: stable !important; /* Use stable (not both-edges) to prevent layout shifts */
     scrollbar-width: thin !important; /* Firefox */
     scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg) !important; /* Firefox */
     box-sizing: border-box !important;
@@ -3030,8 +3034,69 @@ a,
   #window-chia-network .window-body.scroll-allowed::-webkit-scrollbar-thumb:hover {
     background: var(--scrollbar-thumb-hover-bg) !important;
   }
-  
-  /* Desktop: Panel content - Set explicit height for equal sizing */
+}
+
+/* Memetic Energy Window - Select Dropdown Styling */
+#memetic-energy select {
+  color: var(--text) !important;
+  background-color: var(--input-bg) !important;
+}
+
+#memetic-energy select option {
+  color: var(--text) !important;
+  background-color: var(--input-bg) !important;
+}
+
+#memetic-energy select:focus {
+  color: var(--text) !important;
+  background-color: var(--input-bg) !important;
+}
+
+/* Memetic Energy Window - Scrollbar Styling */
+#memetic-energy .memetic-energy-grid.scroll-allowed {
+  scrollbar-width: thin !important; /* Firefox */
+  scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg) !important; /* Firefox */
+  scrollbar-gutter: stable !important; /* Reserve space for scrollbar */
+}
+
+/* Chrome/Safari scrollbar styling for Memetic Energy grid */
+#memetic-energy .memetic-energy-grid.scroll-allowed {
+  overflow-y: scroll !important; /* Force scrollbar to always be visible */
+}
+
+#memetic-energy .memetic-energy-grid.scroll-allowed::-webkit-scrollbar {
+  -webkit-appearance: none !important;
+  display: block !important;
+  width: 16px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+#memetic-energy .memetic-energy-grid.scroll-allowed::-webkit-scrollbar-track {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background: repeating-conic-gradient(var(--scrollbar-track-bg) 0% 25%, var(--inset-face) 0% 50%) 50% / 2px 2px !important;
+  width: 16px !important;
+}
+
+#memetic-energy .memetic-energy-grid.scroll-allowed::-webkit-scrollbar-thumb {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background: var(--scrollbar-thumb-bg) !important;
+  border: 1px outset var(--inset-face) !important;
+  min-height: 20px !important;
+  border-radius: 0 !important;
+}
+
+#memetic-energy .memetic-energy-grid.scroll-allowed::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover-bg) !important;
+}
+
+/* Desktop: Panel content - Set explicit height for equal sizing */
+@media (min-width: 641px) {
   #rarity-explorer .rarity-explorer-panel-content {
     align-items: stretch !important;
     height: min(270px, 27vh) !important;
@@ -6585,6 +6650,43 @@ button.desktop-folder-icon:hover {
   bottom: 46px; /* Above taskbar */
   z-index: 10;
   pointer-events: none; /* Let clicks pass through, children will have pointer-events */
+}
+
+/* =========================================================
+   TRACKPAD SCROLLING SUPPORT
+   Enable smooth trackpad scrolling for all scrollable elements
+   ========================================================= */
+
+/* Enable smooth trackpad scrolling for all scrollable elements */
+.scroll-allowed,
+.favorite-wojaks-grid,
+.memetic-energy-grid,
+.recycle-bin-grid-scrollable,
+.marketplace-nft-grid-scrollable,
+.trait-selectors-scroll {
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS/Mac trackpad */
+  overscroll-behavior: contain; /* Prevent scroll chaining */
+  touch-action: pan-y; /* Allow vertical panning (trackpad scrolling) */
+}
+
+/* Ensure nested scrollable divs work properly */
+.window-body [style*="overflow-y: auto"],
+.window-body [style*="overflow-y: scroll"],
+.window-body [style*="overflow: auto"],
+.window-body [style*="overflow: scroll"] {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+
+/* Apply to elements with inline overflow styles (attribute selector fallback) */
+[style*="overflow-y: auto"],
+[style*="overflow-y: scroll"],
+[style*="overflow: auto"]:not([style*="overflow: hidden"]),
+[style*="overflow: scroll"]:not([style*="overflow: hidden"]) {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 

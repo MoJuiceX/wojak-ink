@@ -28,6 +28,7 @@ import { useWindow } from '../contexts/WindowContext'
 import { APPS } from '../constants/apps'
 import AppIcon from './ui/AppIcon'
 import { playSound } from '../utils/soundManager'
+import { COMMUNITY_LINKS } from './windows/CommunityResourcesWindow'
 
 // Constants
 const MENU_SHOW_DELAY_MS = 100  // Reduced for more fluid hover experience
@@ -58,7 +59,21 @@ const MENU_STRUCTURE = {
         label: 'Links',
         icon: { type: 'img', src: '/icon/directory_closed-0.png' },
         type: 'submenu',
-        items: Object.values(APPS).filter(app => app.group === 'LINKS')
+        items: [
+          ...Object.values(APPS).filter(app => app.group === 'LINKS'),
+          {
+            id: 'community-resources',
+            label: 'Community Resources',
+            icon: { type: 'img', src: '/icon/directory_closed-0.png' },
+            type: 'submenu',
+            items: COMMUNITY_LINKS.map(link => ({
+              id: `community-link-${link.name.toLowerCase().replace(/\s+/g, '-')}`,
+              label: link.name,
+              icon: { type: 'img', src: '/icon/notepad-0.png' },
+              open: { type: 'external', href: link.url }
+            }))
+          }
+        ]
       }
     ]
   }
@@ -628,10 +643,19 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakGen
     hoverCloseTimerRef.current = setTimeout(() => {
       // Only close if submenu is still open and pointer hasn't entered submenu
       if (activePath[depth] === index) {
-        setActivePath(prev => prev.slice(0, depth))
+        const newPath = activePath.slice(0, depth)
+        setActivePath(newPath)
         setSelectedIndexByDepth(prev => {
           const next = { ...prev }
           delete next[depth]
+          // Ensure parent menu item selection is preserved
+          if (depth > 0 && newPath.length > 0) {
+            const parentDepth = depth - 1
+            const parentIndex = newPath[parentDepth]
+            if (parentIndex !== undefined) {
+              next[parentDepth] = parentIndex
+            }
+          }
           return next
         })
       }
@@ -639,13 +663,142 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakGen
     }, MENU_CLOSE_DELAY_MS)
   }, [pointerType, activePath])
 
-  // Handle submenu panel pointer enter (cancel close delay)
-  const handleSubmenuPanelEnter = useCallback(() => {
+  // Handle submenu panel pointer enter (cancel close delay and preserve selection)
+  const handleSubmenuPanelEnter = useCallback((depth) => {
     if (hoverCloseTimerRef.current) {
       clearTimeout(hoverCloseTimerRef.current)
       hoverCloseTimerRef.current = null
     }
-  }, [])
+    // Preserve the selection for this depth's parent menu item
+    // When entering a submenu panel, ensure the parent item that opened it remains selected
+    if (depth > 0 && activePath.length >= depth) {
+      const parentDepth = depth - 1
+      const parentIndex = activePath[parentDepth]
+      if (parentIndex !== undefined) {
+        setSelectedIndexByDepth(prev => ({
+          ...prev,
+          [parentDepth]: parentIndex
+        }))
+      }
+    }
+  }, [activePath])
+
+  // Handle submenu panel pointer leave (schedule close delay)
+  const handleSubmenuPanelLeave = useCallback((depth) => {
+    // Only apply close delay for mouse, not touch
+    if (pointerType !== 'mouse') return
+    
+    // Only schedule close if there's a submenu open at this depth or deeper
+    if (activePath.length <= depth) return
+    
+    // Schedule close after delay
+    if (hoverCloseTimerRef.current) {
+      clearTimeout(hoverCloseTimerRef.current)
+    }
+    
+    hoverCloseTimerRef.current = setTimeout(() => {
+      // Only close if submenu is still open at this depth or deeper
+      if (activePath.length > depth) {
+        const newPath = activePath.slice(0, depth)
+        setActivePath(newPath)
+        setSelectedIndexByDepth(prev => {
+          const next = { ...prev }
+          // Remove selections for the closed depth and all deeper depths
+          Object.keys(next).forEach(key => {
+            const keyDepth = parseInt(key)
+            if (keyDepth >= depth) {
+              delete next[key]
+            }
+          })
+          // Ensure parent menu item selection is preserved
+          // If we're closing depth 2, preserve depth 1's selection (which should match activePath[1])
+          if (depth > 0 && newPath.length > 0) {
+            const parentDepth = depth - 1
+            const parentIndex = newPath[parentDepth]
+            if (parentIndex !== undefined) {
+              next[parentDepth] = parentIndex
+            }
+          }
+          return next
+        })
+      }
+      hoverCloseTimerRef.current = null
+    }, MENU_CLOSE_DELAY_MS)
+  }, [pointerType, activePath])
+
+  // Handle root menu panel pointer enter (check if hovering over submenu parent item)
+  const handleRootMenuPanelEnter = useCallback((e) => {
+    // Only apply for mouse, not touch
+    if (pointerType !== 'mouse') return
+    
+    // If there's a submenu open at depth 1 (Programs submenu), check if we're hovering over Programs item
+    if (activePath.length > 0 && activePath[0] !== undefined) {
+      const programsItemIndex = activePath[0]
+      // Check if the mouse is actually over the Programs item
+      const programsItemKey = `root-${programsItemIndex}`
+      const programsItemEl = itemRefs.current[programsItemKey]
+      
+      if (programsItemEl) {
+        const itemRect = programsItemEl.getBoundingClientRect()
+        const mouseX = e.clientX
+        const mouseY = e.clientY
+        
+        // Check if mouse is over the Programs item
+        const isOverProgramsItem = (
+          mouseX >= itemRect.left &&
+          mouseX <= itemRect.right &&
+          mouseY >= itemRect.top &&
+          mouseY <= itemRect.bottom
+        )
+        
+        if (!isOverProgramsItem) {
+          // Mouse is in root menu but NOT over Programs item - start close timer
+          if (hoverCloseTimerRef.current) {
+            clearTimeout(hoverCloseTimerRef.current)
+          }
+          
+          hoverCloseTimerRef.current = setTimeout(() => {
+            // Close Programs submenu if still open (this will also close all nested submenus)
+            if (activePath.length > 0 && activePath[0] === programsItemIndex) {
+              setActivePath([])
+              setSelectedIndexByDepth({}) // Clear all selections when closing root submenu
+            }
+            hoverCloseTimerRef.current = null
+          }, MENU_CLOSE_DELAY_MS)
+        } else {
+          // Mouse is over Programs item - cancel any close timer
+          if (hoverCloseTimerRef.current) {
+            clearTimeout(hoverCloseTimerRef.current)
+            hoverCloseTimerRef.current = null
+          }
+        }
+      }
+    }
+  }, [pointerType, activePath])
+
+  // Handle root menu pointer leave (schedule close for all submenus when mouse leaves Start Menu)
+  // Note: This will be cancelled if mouse enters a submenu panel
+  const handleRootMenuLeave = useCallback(() => {
+    // Only apply for mouse, not touch
+    if (pointerType !== 'mouse') return
+    
+    // Only schedule close if there are open submenus
+    if (activePath.length === 0) return
+    
+    // Schedule close after delay (will be cancelled if mouse enters submenu)
+    if (hoverCloseTimerRef.current) {
+      clearTimeout(hoverCloseTimerRef.current)
+    }
+    
+    hoverCloseTimerRef.current = setTimeout(() => {
+      // Only close if submenus are still open
+      if (activePath.length > 0) {
+        setActivePath([])
+        setSelectedIndexByDepth({})
+      }
+      hoverCloseTimerRef.current = null
+    }, MENU_CLOSE_DELAY_MS)
+  }, [pointerType, activePath])
 
   // Handle overflow scroll arrow hover
   const handleScrollArrowEnter = useCallback((panelKey, direction, depth) => {
@@ -997,7 +1150,8 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakGen
           top: `${defaultPosition.top}px`, 
           zIndex: 10000 + depth
         } : undefined}
-        onPointerEnter={depth > 0 ? handleSubmenuPanelEnter : undefined}
+        onPointerEnter={depth > 0 ? () => handleSubmenuPanelEnter(depth) : depth === 0 ? handleRootMenuPanelEnter : undefined}
+        onPointerLeave={depth > 0 ? () => handleSubmenuPanelLeave(depth) : undefined}
       >
         {depth > 0 && useDrillIn && (
           <div className="start-menu-drill-header">
@@ -1152,7 +1306,7 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakGen
         )}
       </div>
     )
-  }, [activePath, selectedIndexByDepth, useDrillIn, handleItemPointerEnter, handleItemClick, handleItemPointerLeave, handleSubmenuPanelEnter, handleScrollArrowEnter, handleScrollArrowLeave, isKeyboardMode, keyboardFocusDepth, keyboardFocusIndex, scrollStateByPanel, calculateScrollState])
+  }, [activePath, selectedIndexByDepth, useDrillIn, handleItemPointerEnter, handleItemClick, handleItemPointerLeave, handleSubmenuPanelEnter, handleSubmenuPanelLeave, handleRootMenuPanelEnter, handleScrollArrowEnter, handleScrollArrowLeave, isKeyboardMode, keyboardFocusDepth, keyboardFocusIndex, scrollStateByPanel, calculateScrollState])
 
   if (!isOpen) return null
 
@@ -1176,6 +1330,7 @@ export default function StartMenu({ isOpen, onClose, onOpenPaint, onOpenWojakGen
           e.stopPropagation()
         }
       }}
+      onPointerLeave={handleRootMenuLeave}
     >
       <div className="start-menu-header">
         <span className="start-menu-title">Wojak Farmers Plot</span>

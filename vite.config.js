@@ -24,6 +24,49 @@ export default defineConfig({
           })
         },
       },
+      // Proxy for Treasury APIs to avoid CORS issues
+      '/treasury-api': {
+        target: 'https://api.v2.tibetswap.io',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/treasury-api/, ''),
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.warn('Treasury API proxy error:', err.message)
+          })
+        },
+      },
+      // XCHScan API proxy (primary)
+      '/xchscan-api': {
+        target: 'https://api.xchscan.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/xchscan-api/, ''),
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.warn('XCHScan API proxy error:', err.message)
+          })
+        },
+      },
+      // Spacescan API proxy (fallback)
+      '/spacescan-api': {
+        target: 'https://api2.spacescan.io',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/spacescan-api/, ''),
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.warn('Spacescan API proxy error:', err.message)
+          })
+        },
+      },
+      '/coingecko-api': {
+        target: 'https://api.coingecko.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/coingecko-api/, ''),
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.warn('CoinGecko API proxy error:', err.message)
+          })
+        },
+      },
     },
   },
   // For production builds, ensure proper routing

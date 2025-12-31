@@ -343,16 +343,16 @@ export default function WojakGenerator({ onClose, onAddDesktopImage, desktopImag
     }
   }, [canvasRef, showToast])
   
-  // Download handler for mobile
+  // Export handler for mobile
   const handleDownload = useCallback(async () => {
-    // Check if download is allowed (Base, MouthBase, Clothes must be selected)
+    // Check if export is allowed (Base, MouthBase, Clothes must be selected)
     const hasBase = selectedLayers['Base'] && selectedLayers['Base'] !== 'None'
     const hasMouthBase = selectedLayers['MouthBase'] && selectedLayers['MouthBase'] !== 'None'
     const hasClothes = selectedLayers['Clothes'] && selectedLayers['Clothes'] !== 'None'
     const canDownload = hasBase && hasMouthBase && hasClothes
     
     if (!canvasRef.current || !canDownload) {
-      showToast('⚠️ Please select Base, Mouth (Base), and Clothing before downloading.', 'warning', 4000)
+      showToast('⚠️ Please select Base, Mouth (Base), and Clothing before exporting.', 'warning', 4000)
       return
     }
 
@@ -365,33 +365,28 @@ export default function WojakGenerator({ onClose, onAddDesktopImage, desktopImag
 
       // Generate filename using buildImageName for desktop storage
       const filename = buildImageName(selectedLayers, 'original')
-      // Use generateWojakFilename for actual download
-      const downloadFilename = generateWojakFilename({ selectedLayers })
       
-      // Capture canvas as data URL before download
+      // Capture canvas as data URL before saving to desktop
       const canvasDataUrl = canvasRef.current.toDataURL('image/png')
       
-      // Download the file
-      await downloadCanvasAsPNG(canvasRef.current, downloadFilename)
-      
       // Add to desktop icons - compress image before storing
+      // No browser download dialog - just save to desktop
       if (onAddDesktopImage) {
         try {
           const compressedDataUrl = await compressImage(canvasDataUrl)
           const pairId = generatePairId()
           onAddDesktopImage(compressedDataUrl, filename, 'original', selectedLayers, pairId)
-          showToast('✅ Wojak saved to desktop!', 'success', 3000)
+          showToast('✅ Wojak exported to desktop! Double-click the icon to download.', 'success', 4000)
         } catch (error) {
           console.error('Error compressing/saving to desktop:', error)
-          // Still show success for download
-          showToast('✅ Wojak downloaded!', 'success', 3000)
+          showToast('Failed to export to desktop', 'error', 3000)
         }
       } else {
-        showToast('✅ Wojak downloaded!', 'success', 3000)
+        showToast('⚠️ Export to desktop is not available', 'error', 3000)
       }
     } catch (error) {
-      console.error('Download error:', error)
-      showToast('Failed to download image', 'error', 3000)
+      console.error('Export error:', error)
+      showToast('Failed to export image', 'error', 3000)
     }
   }, [canvasRef, selectedLayers, desktopImages, onAddDesktopImage, showToast])
   
@@ -558,6 +553,7 @@ export default function WojakGenerator({ onClose, onAddDesktopImage, desktopImag
                 showTangified={showTangified}
                 onToggleView={handleToggleView}
                 isRendering={isRendering}
+                selectedLayers={selectedLayers}
               />
             </div>
           </div>
@@ -718,6 +714,7 @@ export default function WojakGenerator({ onClose, onAddDesktopImage, desktopImag
                 showTangified={showTangified}
                 onToggleView={handleToggleView}
                 isRendering={isRendering}
+                selectedLayers={selectedLayers}
               />
             </div>
             <div className="export-controls-wrapper export-controls-preview">

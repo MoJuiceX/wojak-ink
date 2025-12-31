@@ -1,6 +1,6 @@
 import Window from './Window'
-import { useState, useEffect } from 'react'
-import { loadFavoriteWojaks, removeFavoriteWojak } from '../../utils/desktopStorage'
+import { useState, useEffect, useRef } from 'react'
+import { loadFavoriteWojaks, removeFavoriteWojak, addFavoriteWojak } from '../../utils/desktopStorage'
 import { Button } from '../ui'
 import { playSound } from '../../utils/soundManager'
 import { downloadCanvasAsPNG, canvasToBlob } from '../../utils/imageUtils'
@@ -11,9 +11,12 @@ export default function MyFavoriteWojaksWindow({
   onClose,
   favoriteWojaks,
   onRemove,
-  onViewImage
+  onViewImage,
+  onAddFavorite
 }) {
   const [wojaks, setWojaks] = useState(favoriteWojaks || [])
+  const [isDragOver, setIsDragOver] = useState(false)
+  const windowBodyRef = useRef(null)
 
   // Reload when favoriteWojaks prop changes
   useEffect(() => {
@@ -23,6 +26,82 @@ export default function MyFavoriteWojaksWindow({
       setWojaks(loadFavoriteWojaks())
     }
   }, [favoriteWojaks])
+
+  // Handle drag and drop
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    e.dataTransfer.dropEffect = 'copy'
+    setIsDragOver(true)
+  }
+
+  const handleDragLeave = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    // Only set dragOver to false if we're leaving the window body
+    if (!windowBodyRef.current?.contains(e.relatedTarget)) {
+      setIsDragOver(false)
+    }
+  }
+
+  const handleDrop = async (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragOver(false)
+    playSound('click')
+
+    try {
+      // Get the image data from dataTransfer
+      const jsonData = e.dataTransfer.getData('application/json')
+      if (!jsonData) {
+        console.warn('No image data found in drop event')
+        return
+      }
+
+      const imageData = JSON.parse(jsonData)
+      
+      // Convert desktop image to favorite wojak format
+      let dataUrl = imageData.dataUrl || imageData.image
+      
+      // If it's a blob URL, convert to data URL
+      if (dataUrl && dataUrl.startsWith('blob:')) {
+        dataUrl = await blobUrlToDataUrl(dataUrl)
+      }
+
+      // Validate data URL
+      if (!dataUrl || !dataUrl.startsWith('data:image/')) {
+        alert('Invalid image data format')
+        return
+      }
+
+      const wojak = {
+        id: imageData.id || `wojak-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        name: imageData.name || 'Favorite Wojak',
+        dataUrl: dataUrl,
+        type: imageData.type || 'wojak',
+        layers: imageData.layers,
+        savedAt: new Date().toISOString()
+      }
+
+      // Save to favorites
+      const result = addFavoriteWojak(wojak)
+      if (result.success) {
+        // Update local state
+        const updatedWojaks = loadFavoriteWojaks()
+        setWojaks(updatedWojaks)
+        
+        // Notify parent if callback provided
+        if (onAddFavorite) {
+          onAddFavorite(wojak)
+        }
+      } else {
+        alert(result.error || 'Failed to add to favorites')
+      }
+    } catch (error) {
+      console.error('Error handling drop:', error)
+      alert('Failed to add wojak to favorites: ' + error.message)
+    }
+  }
 
   const handleRemove = (wojakId) => {
     if (window.confirm('Remove this wojak from favorites?')) {
@@ -166,7 +245,19 @@ export default function MyFavoriteWojaksWindow({
       }}
       onClose={onClose}
     >
-      <div className="window-body">
+      <div 
+        className="window-body"
+        ref={windowBodyRef}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        style={{
+          position: 'relative',
+          backgroundColor: isDragOver ? 'rgba(0, 120, 215, 0.1)' : 'transparent',
+          border: isDragOver ? '2px dashed var(--accent)' : 'none',
+          transition: 'background-color 0.2s, border 0.2s'
+        }}
+      >
         {/* Header */}
         <div style={{
           padding: '8px',
@@ -176,6 +267,11 @@ export default function MyFavoriteWojaksWindow({
         }}>
           <div className="status-text">
             {wojaks.length} favorite wojak{wojaks.length !== 1 ? 's' : ''}
+            {isDragOver && (
+              <span style={{ marginLeft: '8px', color: 'var(--accent)', fontSize: '11px' }}>
+                Drop wojak here to add to favorites
+              </span>
+            )}
           </div>
         </div>
 
@@ -188,7 +284,16 @@ export default function MyFavoriteWojaksWindow({
             fontFamily: 'MS Sans Serif, sans-serif'
           }}>
             No favorite wojaks yet.<br />
-            Create wojaks in the Wojak Generator and save them here!
+            {isDragOver ? (
+              <>
+                <strong>Drop a wojak here to add it!</strong>
+              </>
+            ) : (
+              <>
+                Create wojaks in the Wojak Generator and save them here,<br />
+                or drag and drop wojaks from your desktop!
+              </>
+            )}
           </div>
         ) : (
           <div 

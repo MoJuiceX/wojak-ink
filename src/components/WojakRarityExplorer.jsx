@@ -463,21 +463,23 @@ const tierEmojiPairs = {
 // Row 2: Head, Clothes, Background (3 tabs)
 const categories = ['Base', 'Face', 'Mouth', 'Face Wear', 'Head', 'Clothes', 'Background'];
 
-function WojakRarityExplorer({ onClose, onOpenBigPulp }) {
+function WojakRarityExplorer({ onClose, onOpenBigPulp, onOpenBigPulpQuestionTree, hasCommentary }) {
   const [activeTab, setActiveTab] = useState('Base');
   const [hoveredTrait, setHoveredTrait] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [nftId, setNftId] = useState('');
   const [selectedNft, setSelectedNft] = useState(null);
   const [showError, setShowError] = useState(false);
+  const [isValidButNotIndexed, setIsValidButNotIndexed] = useState(false);
   const [nftRarityData, setNftRarityData] = useState(null);
   
-  // Check if current NFT has data (for Big Pulp button visibility)
+  // Check if current NFT has data and commentary (for Big Pulp button visibility)
   const normalizedNftId = nftId ? String(parseInt(nftId) || 0) : null;
   const hasNftData = normalizedNftId && selectedNft;
+  const hasCommentaryForCurrentNft = hasNftData && hasCommentary && hasCommentary(normalizedNftId);
   
   const handleBigPulpClick = () => {
-    if (hasNftData && onOpenBigPulp) {
+    if (hasCommentaryForCurrentNft && onOpenBigPulp) {
       // Play orange click sound
       ensureOrangeAudioUnlocked().then(() => {
         playOrangeClickSound()
@@ -486,6 +488,16 @@ function WojakRarityExplorer({ onClose, onOpenBigPulp }) {
       // Pass full NFT data to parent
       // selectedNft structure: [rank, ?, tier, Base, Face, Mouth, Face Wear, Head, Clothes, Background]
       onOpenBigPulp(normalizedNftId, selectedNft);
+    }
+  };
+
+  const handleBigPulpQuestionTreeClick = () => {
+    if (onOpenBigPulpQuestionTree) {
+      // Play orange click sound
+      ensureOrangeAudioUnlocked().then(() => {
+        playOrangeClickSound()
+      })
+      onOpenBigPulpQuestionTree();
     }
   };
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -532,6 +544,7 @@ function WojakRarityExplorer({ onClose, onOpenBigPulp }) {
     };
     loadNftData();
   }, []);
+
 
 
   // Reset image loading state when nftId changes
@@ -672,29 +685,32 @@ function WojakRarityExplorer({ onClose, onOpenBigPulp }) {
     );
   };
 
-  // NFT lookup handlers
   const handleSearchWithId = (id) => {
-    if (!nftRarityData) {
-      setShowError(true);
+    if (!nftRarityData || !id) {
       setSelectedNft(null);
-      return;
-    }
-    
-    const numId = parseInt(id, 10);
-    
-    if (isNaN(numId) || numId < 1 || numId > 4200) {
-      setShowError(true);
-      setSelectedNft(null);
-      return;
-    }
-    
-    const nft = nftRarityData[String(numId)];
-    if (nft) {
-      setSelectedNft(nft);
       setShowError(false);
-    } else {
-      setShowError(true);
+      setIsValidButNotIndexed(false);
+      return;
+    }
+    
+    const numericId = parseInt(id, 10);
+    if (isNaN(numericId) || numericId < 1 || numericId > 4200) {
       setSelectedNft(null);
+      setShowError(true);
+      setIsValidButNotIndexed(false);
+      return;
+    }
+    
+    const rarityInfo = nftRarityData[String(numericId)];
+    if (rarityInfo && Array.isArray(rarityInfo) && rarityInfo.length >= 10) {
+      setSelectedNft(rarityInfo);
+      setShowError(false);
+      setIsValidButNotIndexed(false);
+    } else {
+      // Valid ID but not in the data (not in top 420)
+      setSelectedNft(null);
+      setShowError(false);
+      setIsValidButNotIndexed(true);
     }
   };
 
@@ -706,6 +722,7 @@ function WojakRarityExplorer({ onClose, onOpenBigPulp }) {
       // Clear the preview when input is empty
       setSelectedNft(null);
       setShowError(false);
+      setIsValidButNotIndexed(false);
     } else if (value.length === 4) {
       setTimeout(() => handleSearchWithId(value), 100);
     }
@@ -739,7 +756,54 @@ function WojakRarityExplorer({ onClose, onOpenBigPulp }) {
     setNftId('');
     setSelectedNft(null);
     setShowError(false);
+    setIsValidButNotIndexed(false);
   };
+
+  // Emit NFT selection for Big Pulp Intelligence
+  useEffect(() => {
+    if (!nftId || !selectedNft) return;
+    
+    window.dispatchEvent(new CustomEvent('nftSelected', {
+      detail: { nftId: String(nftId) }
+    }));
+  }, [nftId, selectedNft]);
+
+  // Listen for navigateToNft event from Big Pulp Intelligence
+  useEffect(() => {
+    if (!nftRarityData) return;
+    
+    const handleNavigateToNft = (event) => {
+      const { nftId } = event.detail;
+      if (nftId) {
+        setNftId(nftId);
+        setTimeout(() => {
+          if (!nftRarityData) return;
+          const numericId = parseInt(nftId, 10);
+          if (isNaN(numericId) || numericId < 1 || numericId > 4200) {
+            setSelectedNft(null);
+            setShowError(true);
+            setIsValidButNotIndexed(false);
+            return;
+          }
+          const rarityInfo = nftRarityData[String(numericId)];
+          if (rarityInfo && Array.isArray(rarityInfo) && rarityInfo.length >= 10) {
+            setSelectedNft(rarityInfo);
+            setShowError(false);
+            setIsValidButNotIndexed(false);
+          } else {
+            setSelectedNft(null);
+            setShowError(false);
+            setIsValidButNotIndexed(true);
+          }
+        }, 100);
+      }
+    };
+
+    window.addEventListener('navigateToNft', handleNavigateToNft);
+    return () => {
+      window.removeEventListener('navigateToNft', handleNavigateToNft);
+    };
+  }, [nftRarityData]);
 
   // Modern easing function for smooth scroll animation
   const easeOutCubic = (t) => {
@@ -936,6 +1000,42 @@ function WojakRarityExplorer({ onClose, onOpenBigPulp }) {
               }}
             />
             <span style={{ fontWeight: 'bold', fontSize: '12px', color: 'var(--text-1, #000000)' }}>Wojak Farmers Plot</span>
+            <button
+              onClick={handleBigPulpQuestionTreeClick}
+              onPointerDown={(e) => e.stopPropagation()}
+              title="Hang with Big Pulp"
+              style={{
+                background: 'linear-gradient(180deg, #ffaa44 0%, #ff8800 100%)',
+                border: '2px outset #ffcc88',
+                color: 'white',
+                fontWeight: 'bold',
+                fontSize: '10px',
+                padding: '3px 8px',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                textShadow: '1px 1px 0 #995500',
+                fontFamily: "'MS Sans Serif', sans-serif",
+                flexShrink: 0,
+                marginLeft: '6px'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(180deg, #ffbb55 0%, #ff9922 100%)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(180deg, #ffaa44 0%, #ff8800 100%)';
+              }}
+              onMouseDown={(e) => {
+                e.stopPropagation();
+                e.currentTarget.style.borderStyle = 'inset';
+                e.currentTarget.style.background = 'linear-gradient(180deg, #ff8800 0%, #ff6600 100%)';
+              }}
+              onMouseUp={(e) => {
+                e.currentTarget.style.borderStyle = 'outset';
+                e.currentTarget.style.background = 'linear-gradient(180deg, #ffaa44 0%, #ff8800 100%)';
+              }}
+            >
+              Hang with Big Pulp 🍊
+            </button>
           </div>
           <div style={{ 
             display: 'flex', 
@@ -945,35 +1045,47 @@ function WojakRarityExplorer({ onClose, onOpenBigPulp }) {
             {hasNftData && (
               <button
                 onClick={handleBigPulpClick}
+                disabled={!hasCommentaryForCurrentNft}
                 onPointerDown={(e) => e.stopPropagation()}
-                title="Get Big Pulp's take on this NFT"
+                title={hasCommentaryForCurrentNft ? "Get Big Pulp's take on this NFT" : "No commentary available for this NFT"}
                 style={{
-                  background: 'linear-gradient(180deg, #ffaa44 0%, #ff8800 100%)',
+                  background: hasCommentaryForCurrentNft 
+                    ? 'linear-gradient(180deg, #ffaa44 0%, #ff8800 100%)' 
+                    : 'linear-gradient(180deg, #808080 0%, #606060 100%)',
                   border: '2px outset #ffcc88',
                   color: 'white',
                   fontWeight: 'bold',
                   fontSize: '10px',
                   padding: '3px 8px',
-                  cursor: 'pointer',
+                  cursor: hasCommentaryForCurrentNft ? 'pointer' : 'not-allowed',
                   whiteSpace: 'nowrap',
                   textShadow: '1px 1px 0 #995500',
                   fontFamily: "'MS Sans Serif', sans-serif",
-                  flexShrink: 0
+                  flexShrink: 0,
+                  opacity: hasCommentaryForCurrentNft ? 1 : 0.6
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'linear-gradient(180deg, #ffbb55 0%, #ff9922 100%)';
+                  if (hasCommentaryForCurrentNft) {
+                    e.currentTarget.style.background = 'linear-gradient(180deg, #ffbb55 0%, #ff9922 100%)';
+                  }
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'linear-gradient(180deg, #ffaa44 0%, #ff8800 100%)';
+                  if (hasCommentaryForCurrentNft) {
+                    e.currentTarget.style.background = 'linear-gradient(180deg, #ffaa44 0%, #ff8800 100%)';
+                  }
                 }}
                 onMouseDown={(e) => {
-                  e.stopPropagation();
-                  e.currentTarget.style.borderStyle = 'inset';
-                  e.currentTarget.style.background = 'linear-gradient(180deg, #ff8800 0%, #ff6600 100%)';
+                  if (hasCommentaryForCurrentNft) {
+                    e.stopPropagation();
+                    e.currentTarget.style.borderStyle = 'inset';
+                    e.currentTarget.style.background = 'linear-gradient(180deg, #ff8800 0%, #ff6600 100%)';
+                  }
                 }}
                 onMouseUp={(e) => {
-                  e.currentTarget.style.borderStyle = 'outset';
-                  e.currentTarget.style.background = 'linear-gradient(180deg, #ffaa44 0%, #ff8800 100%)';
+                  if (hasCommentaryForCurrentNft) {
+                    e.currentTarget.style.borderStyle = 'outset';
+                    e.currentTarget.style.background = 'linear-gradient(180deg, #ffaa44 0%, #ff8800 100%)';
+                  }
                 }}
               >
                 Ask Big Pulp 🍊
@@ -1046,6 +1158,42 @@ function WojakRarityExplorer({ onClose, onOpenBigPulp }) {
             <div>
               <div style={{ fontWeight: 'bold', fontSize: '14px', color: 'var(--text-1, #000000)' }}>Wojak Farmers Plot</div>
             </div>
+            <button
+              onClick={handleBigPulpQuestionTreeClick}
+              onPointerDown={(e) => e.stopPropagation()}
+              title="Hang with Big Pulp"
+              style={{
+                background: 'linear-gradient(180deg, #ffaa44 0%, #ff8800 100%)',
+                border: '2px outset #ffcc88',
+                color: 'white',
+                fontWeight: 'bold',
+                fontSize: '11px',
+                padding: '4px 10px',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                textShadow: '1px 1px 0 #995500',
+                fontFamily: "'MS Sans Serif', sans-serif",
+                flexShrink: 0,
+                marginLeft: '12px'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(180deg, #ffbb55 0%, #ff9922 100%)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(180deg, #ffaa44 0%, #ff8800 100%)';
+              }}
+              onMouseDown={(e) => {
+                e.stopPropagation();
+                e.currentTarget.style.borderStyle = 'inset';
+                e.currentTarget.style.background = 'linear-gradient(180deg, #ff8800 0%, #ff6600 100%)';
+              }}
+              onMouseUp={(e) => {
+                e.currentTarget.style.borderStyle = 'outset';
+                e.currentTarget.style.background = 'linear-gradient(180deg, #ffaa44 0%, #ff8800 100%)';
+              }}
+            >
+              Hang with Big Pulp 🍊
+            </button>
           </div>
           <div style={{ 
             display: 'flex', 
@@ -1059,35 +1207,47 @@ function WojakRarityExplorer({ onClose, onOpenBigPulp }) {
             {hasNftData && (
               <button
                 onClick={handleBigPulpClick}
+                disabled={!hasCommentaryForCurrentNft}
                 onPointerDown={(e) => e.stopPropagation()}
-                title="Get Big Pulp's take on this NFT"
+                title={hasCommentaryForCurrentNft ? "Get Big Pulp's take on this NFT" : "No commentary available for this NFT"}
                 style={{
-                  background: 'linear-gradient(180deg, #ffaa44 0%, #ff8800 100%)',
+                  background: hasCommentaryForCurrentNft 
+                    ? 'linear-gradient(180deg, #ffaa44 0%, #ff8800 100%)' 
+                    : 'linear-gradient(180deg, #808080 0%, #606060 100%)',
                   border: '2px outset #ffcc88',
                   color: 'white',
                   fontWeight: 'bold',
                   fontSize: '11px',
                   padding: '4px 10px',
-                  cursor: 'pointer',
+                  cursor: hasCommentaryForCurrentNft ? 'pointer' : 'not-allowed',
                   whiteSpace: 'nowrap',
                   textShadow: '1px 1px 0 #995500',
                   fontFamily: "'MS Sans Serif', sans-serif",
-                  flexShrink: 0
+                  flexShrink: 0,
+                  opacity: hasCommentaryForCurrentNft ? 1 : 0.6
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'linear-gradient(180deg, #ffbb55 0%, #ff9922 100%)';
+                  if (hasCommentaryForCurrentNft) {
+                    e.currentTarget.style.background = 'linear-gradient(180deg, #ffbb55 0%, #ff9922 100%)';
+                  }
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'linear-gradient(180deg, #ffaa44 0%, #ff8800 100%)';
+                  if (hasCommentaryForCurrentNft) {
+                    e.currentTarget.style.background = 'linear-gradient(180deg, #ffaa44 0%, #ff8800 100%)';
+                  }
                 }}
                 onMouseDown={(e) => {
-                  e.stopPropagation();
-                  e.currentTarget.style.borderStyle = 'inset';
-                  e.currentTarget.style.background = 'linear-gradient(180deg, #ff8800 0%, #ff6600 100%)';
+                  if (hasCommentaryForCurrentNft) {
+                    e.stopPropagation();
+                    e.currentTarget.style.borderStyle = 'inset';
+                    e.currentTarget.style.background = 'linear-gradient(180deg, #ff8800 0%, #ff6600 100%)';
+                  }
                 }}
                 onMouseUp={(e) => {
-                  e.currentTarget.style.borderStyle = 'outset';
-                  e.currentTarget.style.background = 'linear-gradient(180deg, #ffaa44 0%, #ff8800 100%)';
+                  if (hasCommentaryForCurrentNft) {
+                    e.currentTarget.style.borderStyle = 'outset';
+                    e.currentTarget.style.background = 'linear-gradient(180deg, #ffaa44 0%, #ff8800 100%)';
+                  }
                 }}
               >
                 Ask Big Pulp 🍊
@@ -1123,6 +1283,73 @@ function WojakRarityExplorer({ onClose, onOpenBigPulp }) {
                 textAlign: 'center'
               }}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Not Indexed Message Panel - Fixed when visible */}
+      {isValidButNotIndexed && nftId && (
+        <div 
+          id="nft-not-indexed-panel"
+          style={{
+            margin: '8px',
+            border: '2px solid',
+            borderColor: 'var(--border-dark) var(--border-light) var(--border-light) var(--border-dark)',
+            background: 'var(--surface-1, #c0c0c0)',
+            flexShrink: 0,
+            width: isMobile ? 'calc(100% - 16px)' : 'auto',
+            maxWidth: isMobile ? 'calc(100% - 16px)' : 'none',
+            boxSizing: 'border-box',
+            opacity: 0.6
+          }}
+          onMouseDown={(e) => {
+            // Prevent window dragging when clicking inside panel
+            e.stopPropagation();
+          }}
+          onPointerDown={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          {/* Panel Title Bar */}
+          <div style={{
+            background: 'linear-gradient(90deg, #808080, #a0a0a0)',
+            padding: '4px 8px',
+            color: '#ffffff',
+            fontSize: '12px',
+            fontWeight: 'bold',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <span style={{ color: '#000000' }}>NFT #{String(parseInt(nftId) || 0).padStart(4, '0')}</span>
+          </div>
+          
+          {/* Panel Content */}
+          <div 
+            style={{
+              padding: isMobile ? '16px 12px' : '20px 16px',
+              background: 'var(--inset-face, #ffffff)',
+              border: '2px solid',
+              borderColor: 'var(--border-dark) var(--border-light) var(--border-light) var(--border-dark)',
+              margin: isMobile ? '3px' : '4px',
+              textAlign: 'center',
+              color: 'var(--text-2, #888)'
+            }}
+          >
+            <div style={{
+              fontSize: '14px',
+              fontWeight: 'bold',
+              marginBottom: '8px',
+              color: 'var(--text-2, #666)'
+            }}>
+              Currently, only the top 10% is indexed
+            </div>
+            <div style={{
+              fontSize: '11px',
+              color: 'var(--text-2, #888)'
+            }}>
+              This NFT is not in the top 420 pieces (top 10%)
+            </div>
           </div>
         </div>
       )}

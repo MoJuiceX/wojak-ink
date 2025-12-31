@@ -63,14 +63,18 @@ export function snapToGrid(x, y, useOffset = true) {
   const adjustedX = x - gridOffset.x
   const adjustedY = y - gridOffset.y
 
-  // Snap to nearest grid point
-  const snappedX = Math.round(adjustedX / gridSize.x) * gridSize.x
-  const snappedY = Math.round(adjustedY / gridSize.y) * gridSize.y
+  // Snap to nearest grid point with explicit integer rounding
+  const gridCellX = Math.round(adjustedX / gridSize.x)
+  const gridCellY = Math.round(adjustedY / gridSize.y)
 
-  // Add offset back
+  // Calculate snapped position and ensure integer values
+  const snappedX = gridCellX * gridSize.x
+  const snappedY = gridCellY * gridSize.y
+
+  // Add offset back and round to integers (prevent floating point drift)
   return {
-    x: snappedX + gridOffset.x,
-    y: snappedY + gridOffset.y
+    x: Math.round(snappedX + gridOffset.x),
+    y: Math.round(snappedY + gridOffset.y)
   }
 }
 

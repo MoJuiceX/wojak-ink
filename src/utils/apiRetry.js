@@ -51,9 +51,18 @@ export async function fetchWithRetry(url, options = {}, retryConfig = {}) {
         const retryAfter = response.headers.get('Retry-After')
         let delay = baseDelay * Math.pow(2, attempt) // Exponential backoff
 
+        // Special handling for rate limit errors (429)
+        if (response.status === 429) {
+          // Use longer base delay for rate limits: 5s, 10s, 20s
+          const rateLimitDelays = [5000, 10000, 20000]
+          delay = rateLimitDelays[Math.min(attempt, rateLimitDelays.length - 1)]
+          // Cap at 60 seconds
+          delay = Math.min(delay, 60000)
+        }
+
         if (retryAfter) {
-          // Use Retry-After header if provided (in seconds)
-          delay = parseInt(retryAfter, 10) * 1000
+          // Use Retry-After header if provided (in seconds), with max cap
+          delay = Math.min(parseInt(retryAfter, 10) * 1000, 60000)
         }
 
         if (attempt < maxRetries) {
@@ -104,6 +113,7 @@ export async function fetchWithRetry(url, options = {}, retryConfig = {}) {
 export function apiFetch(url, options = {}, retryConfig = {}) {
   return fetchWithRetry(url, options, retryConfig)
 }
+
 
 
 

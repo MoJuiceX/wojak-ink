@@ -47,7 +47,22 @@ export function loadIconPositions() {
     if (!stored) return {}
     
     const parsed = JSON.parse(stored)
-    return typeof parsed === 'object' && parsed !== null ? parsed : {}
+    if (typeof parsed !== 'object' || parsed === null) return {}
+    
+    // CRITICAL FIX: Normalize all loaded positions to grid
+    // This ensures positions are always exactly on grid points
+    const normalized = {}
+    for (const [appId, position] of Object.entries(parsed)) {
+      if (position && typeof position.x === 'number' && typeof position.y === 'number') {
+        const snapped = snapToGrid(position.x, position.y)
+        normalized[appId] = {
+          x: Math.round(snapped.x),
+          y: Math.round(snapped.y)
+        }
+      }
+    }
+    
+    return normalized
   } catch (error) {
     console.error('Error loading icon positions:', error)
     return {}
@@ -85,8 +100,13 @@ export function saveAllIconPositions(positions) {
  * @returns {{ success: boolean, error?: string }} Result object
  */
 export function saveIconPosition(appId, x, y) {
+  // CRITICAL: Always snap to grid before saving
+  const snapped = snapToGrid(x, y)
+  const normalizedX = Math.round(snapped.x)
+  const normalizedY = Math.round(snapped.y)
+  
   const positions = loadIconPositions()
-  positions[appId] = { x, y }
+  positions[appId] = { x: normalizedX, y: normalizedY }
   return saveAllIconPositions(positions)
 }
 

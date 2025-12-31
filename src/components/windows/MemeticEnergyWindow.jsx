@@ -1,16 +1,19 @@
 import Window from './Window'
-import { useState, useEffect } from 'react'
-import { getAllLayerImages } from '../../lib/memeImageManifest'
-import { UI_LAYER_ORDER } from '../../lib/memeLayers'
+import { useState, useEffect, useMemo } from 'react'
+import { getAllMemeticEnergyImages, getMemeticEnergyCategories } from '../../lib/memeticEnergyLoader'
 import { playSound } from '../../utils/soundManager'
+import ImagePreviewModal from '../ui/ImagePreviewModal'
 
 export default function MemeticEnergyWindow({
   isOpen,
   onClose
 }) {
-  const [selectedCategory, setSelectedCategory] = useState(UI_LAYER_ORDER[0]?.name || '')
+  const categories = useMemo(() => getMemeticEnergyCategories(), [])
+  const [selectedCategory, setSelectedCategory] = useState(categories[0] || '')
   const [images, setImages] = useState({})
   const [loading, setLoading] = useState(true)
+  const [previewImage, setPreviewImage] = useState(null)
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
 
   useEffect(() => {
     if (!isOpen) return
@@ -18,20 +21,32 @@ export default function MemeticEnergyWindow({
     setLoading(true)
     try {
       const loadedImages = {}
-      UI_LAYER_ORDER.forEach(layer => {
-        loadedImages[layer.name] = getAllLayerImages(layer.name)
+      categories.forEach(category => {
+        loadedImages[category] = getAllMemeticEnergyImages(category)
       })
       setImages(loadedImages)
       setLoading(false)
     } catch (err) {
-      console.error("Failed to load trait images:", err)
+      console.error("Failed to load memetic energy images:", err)
       setLoading(false)
     }
-  }, [isOpen])
+  }, [isOpen, categories])
 
   const handleCategoryChange = (e) => {
     playSound('click')
     setSelectedCategory(e.target.value)
+  }
+
+  const handleImageClick = (image) => {
+    playSound('click')
+    setPreviewImage(image)
+    setIsPreviewOpen(true)
+  }
+
+  const handleClosePreview = () => {
+    playSound('click')
+    setIsPreviewOpen(false)
+    setPreviewImage(null)
   }
 
   if (!isOpen) return null
@@ -39,18 +54,19 @@ export default function MemeticEnergyWindow({
   const currentCategoryImages = images[selectedCategory] || []
 
   return (
-    <Window
-      id="memetic-energy"
-      title="MEMETIC ENERGY"
-      style={{
-        width: 'clamp(400px, 90vw, 800px)',
-        maxWidth: 'min(calc(100% - 16px), 800px)',
-        left: '100px',
-        top: '100px',
-        height: '600px'
-      }}
-      onClose={onClose}
-    >
+    <>
+      <Window
+        id="memetic-energy"
+        title="MEMETIC ENERGY"
+        style={{
+          width: 'clamp(500px, 90vw, 900px)',
+          maxWidth: 'min(calc(100% - 16px), 900px)',
+          left: '100px',
+          top: '100px',
+          height: '700px'
+        }}
+        onClose={onClose}
+      >
       <div className="window-body" style={{ 
         display: 'flex', 
         flexDirection: 'column', 
@@ -75,12 +91,14 @@ export default function MemeticEnergyWindow({
               padding: '2px 4px',
               background: 'var(--input-bg)',
               border: '1px inset var(--border-dark)',
-              minWidth: '150px'
+              color: 'var(--text)',
+              minWidth: '150px',
+              fontSize: '11px'
             }}
           >
-            {UI_LAYER_ORDER.map(layer => (
-              <option key={layer.name} value={layer.name}>
-                {layer.name}
+            {categories.map(category => (
+              <option key={category} value={category} style={{ color: 'var(--text)', background: 'var(--input-bg)' }}>
+                {category}
               </option>
             ))}
           </select>
@@ -110,13 +128,18 @@ export default function MemeticEnergyWindow({
           </div>
         ) : (
           <div
+            className="memetic-energy-grid scroll-allowed"
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
               gap: '12px',
               padding: '8px',
-              overflowY: 'auto',
-              flex: 1
+              overflowY: 'scroll',
+              overflowX: 'hidden',
+              flex: 1,
+              minHeight: 0,
+              maxHeight: '100%',
+              height: 0
             }}
           >
             {currentCategoryImages.map((trait, index) => (
@@ -132,10 +155,7 @@ export default function MemeticEnergyWindow({
                   gap: '4px',
                   cursor: 'pointer'
                 }}
-                onClick={() => {
-                  playSound('click')
-                  // Could open image in viewer or copy to clipboard
-                }}
+                onClick={() => handleImageClick(trait)}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = 'var(--surface-2)'
                 }}
@@ -193,6 +213,14 @@ export default function MemeticEnergyWindow({
         )}
       </div>
     </Window>
+
+    {/* Image Preview Modal - rendered outside Window to overlay everything */}
+    <ImagePreviewModal
+      isOpen={isPreviewOpen}
+      onClose={handleClosePreview}
+      image={previewImage}
+    />
+    </>
   )
 }
 

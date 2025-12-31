@@ -76,7 +76,7 @@ export default function ExportControls({
   const [showDuplicateConfirm, setShowDuplicateConfirm] = useState(false)
   const lastTangifiedTraitsRef = useRef(null) // Track last tangified traits
   const saveButtonClickedRef = useRef(false) // Track if Save button was explicitly clicked
-  const downloadButtonClickedRef = useRef(false) // Track if Download button was explicitly clicked
+  const downloadButtonClickedRef = useRef(false) // Track if Export button was explicitly clicked
 
   // Update screensaver context when tangifying state changes
   // Always call the hook unconditionally to avoid React hooks rule violations
@@ -89,7 +89,7 @@ export default function ExportControls({
     }
   }, [isTangifying, setTangifying])
 
-  // Require a complete base Wojak before allowing download:
+  // Require a complete base Wojak before allowing export:
   // - Base
   // - Mouth (Base)
   // - Clothing
@@ -528,7 +528,7 @@ export default function ExportControls({
   }
   
   const handleDownload = useCallback(async () => {
-    // Guard: Only proceed if Download button was explicitly clicked
+    // Guard: Only proceed if Export button was explicitly clicked
     // This prevents accidental calls from initialization or other triggers
     if (!downloadButtonClickedRef.current) {
       // Silently return - don't log or show any messages
@@ -540,7 +540,7 @@ export default function ExportControls({
     
     // Guard: canDownload must be explicitly true (not undefined)
     if (!canvasRef.current || canDownload !== true) {
-      showToast('⚠️ Please select Base, Mouth (Base), and Clothing before downloading.', 'warning', 4000)
+      showToast('⚠️ Please select Base, Mouth (Base), and Clothing before exporting.', 'warning', 4000)
       return
     }
 
@@ -550,7 +550,7 @@ export default function ExportControls({
     }
 
     setIsExporting(true)
-    setExportStatus('Downloading...')
+    setExportStatus('Exporting...')
 
     try {
       // Check for duplicate before saving
@@ -564,34 +564,32 @@ export default function ExportControls({
 
       // Generate filename using buildImageName for desktop storage
       const filename = buildImageName(selectedLayers, 'original')
-      // Use generateWojakFilename for actual download
-      const downloadFilename = generateWojakFilename({ selectedLayers })
       
-      // Capture canvas as data URL before download
+      // Capture canvas as data URL before saving to desktop
       const canvasDataUrl = canvasRef.current.toDataURL('image/png')
       
-      // Download the file
-      await downloadCanvasAsPNG(canvasRef.current, downloadFilename)
-      
       // Add to desktop icons - compress image before storing
+      // No browser download dialog - just save to desktop
       if (onAddDesktopImage) {
         try {
           const compressedDataUrl = await compressImage(canvasDataUrl)
           const pairId = generatePairId()
           onAddDesktopImage(compressedDataUrl, filename, 'original', selectedLayers, pairId)
-          showToast('✅ Wojak saved to desktop!', 'success', 3000)
+          showToast('✅ Wojak exported to desktop! Double-click the icon to download.', 'success', 4000)
         } catch (error) {
           console.error('Error compressing/saving to desktop:', error)
-          // Still show success for download
-          showToast('✅ Wojak downloaded!', 'success', 3000)
+          showToast('Failed to export to desktop', 'error', 3000)
         }
+      } else {
+        showToast('⚠️ Export to desktop is not available', 'error', 3000)
       }
       
-      setExportStatus('Downloaded!')
+      setExportStatus('Exported!')
       setTimeout(() => setExportStatus(''), 2000)
     } catch (error) {
-      setExportStatus('Error downloading')
-      console.error('Download error:', error)
+      setExportStatus('Error exporting')
+      console.error('Export error:', error)
+      showToast('Failed to export image', 'error', 3000)
       setTimeout(() => setExportStatus(''), 2000)
     } finally {
       setIsExporting(false)
@@ -830,7 +828,7 @@ export default function ExportControls({
         } catch (downloadError) {
           setExportStatus('Error')
           console.error('Download error:', downloadError)
-          showToast('Failed to copy or download. Please try the Download button.', 'error', 3000)
+          showToast('Failed to copy or download. Please try the Export button.', 'error', 3000)
           setTimeout(() => setExportStatus(''), 2000)
         }
       } else {
@@ -990,36 +988,27 @@ export default function ExportControls({
         >
           📎
         </Button>
-        {/* Hide Download button on mobile - it's in the first row of MobileTraitBottomSheet */}
+        {/* Hide Export button on mobile - it's in the first row of MobileTraitBottomSheet */}
         {!isMobile() && (
           <Button 
             type="button"
             className={`win98-tooltip generator-download-btn ${!canDownload ? 'is-disabled' : ''}`}
             data-tooltip={
               !canDownload
-                ? 'Select Base, Mouth, and Clothing to download'
-                : 'Download as PNG.'
+                ? 'Select Base, Mouth, and Clothing to export'
+                : 'Export to desktop. Double-click the icon to download.'
             }
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
-              // Mark that Download button was explicitly clicked
+              // Mark that Export button was explicitly clicked
               downloadButtonClickedRef.current = true
               handleDownload()
             }} 
             disabled={isDownloadDisabled}
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            <img 
-              src="/assets/images/downloadicon.png" 
-              alt="Download" 
-              style={{ 
-                width: '18px', 
-                height: '18px', 
-                objectFit: 'contain',
-                imageRendering: 'auto'
-              }} 
-            />
+            Export
           </Button>
         )}
         <Button 
@@ -1135,7 +1124,7 @@ export default function ExportControls({
           color: '#666',
           fontStyle: 'italic'
         }}>
-          Select Base, Mouth (Base), and Clothing before downloading.
+          Select Base, Mouth (Base), and Clothing before exporting.
         </p>
       )}
       {exportStatus && (

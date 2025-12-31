@@ -1,5 +1,6 @@
 import { useEffect, useRef, memo, useMemo } from 'react'
 import { Button } from '../ui'
+import { canvasToBlob, blobUrlToDataUrl } from '../../utils/imageUtils'
 
 const MemeCanvas = memo(function MemeCanvas({ 
   canvasRef, 
@@ -8,7 +9,9 @@ const MemeCanvas = memo(function MemeCanvas({
   tangifiedImage = null,
   showTangified = false,
   onToggleView = null,
-  isRendering = false
+  isRendering = false,
+  selectedLayers = {},
+  onDragStart = null
 }) {
   const containerRef = useRef(null)
   const internalRef = useRef(null)
@@ -84,7 +87,92 @@ const MemeCanvas = memo(function MemeCanvas({
     // GPU acceleration
     willChange: 'contents',
     imageRendering: 'auto',
+    cursor: 'grab',
   }), [width, height])
+
+  // Handle drag start - make canvas draggable
+  const handleDragStart = async (e) => {
+    if (!actualRef.current || isRendering) {
+      e.preventDefault()
+      return
+    }
+
+    try {
+      // Get the canvas data
+      const canvas = actualRef.current
+      const blob = await canvasToBlob(canvas, 'image/png')
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onloadend = () => resolve(reader.result)
+        reader.onerror = () => reject(new Error('Failed to read canvas'))
+        reader.readAsDataURL(blob)
+      })
+
+      // Create image data for drag
+      const imageData = {
+        id: `wojak-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        name: 'Wojak Generator',
+        dataUrl: dataUrl,
+        image: dataUrl,
+        type: 'wojak',
+        layers: selectedLayers,
+        savedAt: new Date().toISOString()
+      }
+
+      // Set drag data
+      e.dataTransfer.setData('application/json', JSON.stringify(imageData))
+      e.dataTransfer.effectAllowed = 'copy'
+      e.dataTransfer.setData('text/plain', 'Wojak Generator')
+
+      // Call optional callback
+      if (onDragStart) {
+        onDragStart(imageData)
+      }
+    } catch (error) {
+      console.error('Error preparing drag data:', error)
+      e.preventDefault()
+    }
+  }
+
+  // Handle drag start for tangified image
+  const handleTangifiedDragStart = async (e) => {
+    if (!tangifiedImage || isRendering) {
+      e.preventDefault()
+      return
+    }
+
+    try {
+      // Convert blob URL to data URL if needed
+      let dataUrl = tangifiedImage
+      if (tangifiedImage.startsWith('blob:')) {
+        dataUrl = await blobUrlToDataUrl(tangifiedImage)
+      }
+
+      // Create image data for drag
+      const imageData = {
+        id: `cybertang-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        name: 'CyberTang',
+        dataUrl: dataUrl,
+        image: dataUrl,
+        type: 'cybertang',
+        layers: selectedLayers,
+        savedAt: new Date().toISOString()
+      }
+
+      // Set drag data
+      e.dataTransfer.setData('application/json', JSON.stringify(imageData))
+      e.dataTransfer.effectAllowed = 'copy'
+      e.dataTransfer.setData('text/plain', 'CyberTang')
+
+      // Call optional callback
+      if (onDragStart) {
+        onDragStart(imageData)
+      }
+    } catch (error) {
+      console.error('Error preparing tangified drag data:', error)
+      e.preventDefault()
+    }
+  }
 
   return (
     <div style={borderWrapperStyle}>
@@ -94,6 +182,8 @@ const MemeCanvas = memo(function MemeCanvas({
       >
         <canvas
           ref={actualRef}
+          draggable={!isRendering && !showTangified}
+          onDragStart={handleDragStart}
           style={{
             ...canvasStyle,
             display: showTangified ? 'none' : 'block',
@@ -103,12 +193,15 @@ const MemeCanvas = memo(function MemeCanvas({
           <img
             src={tangifiedImage}
             alt="Tangified Wojak"
+            draggable={!isRendering}
+            onDragStart={handleTangifiedDragStart}
             style={{
               display: 'block',
               width: `${width}px`,
               height: `${height}px`,
               objectFit: 'contain',
               aspectRatio: `${width} / ${height}`,
+              cursor: 'grab',
             }}
           />
         )}
@@ -116,13 +209,15 @@ const MemeCanvas = memo(function MemeCanvas({
     </div>
   )
 }, (prevProps, nextProps) => {
-  // Re-render if width, height, canvasRef, tangifiedImage, or showTangified changed
+  // Re-render if width, height, canvasRef, tangifiedImage, showTangified, selectedLayers, or isRendering changed
   return (
     prevProps.width === nextProps.width &&
     prevProps.height === nextProps.height &&
     prevProps.canvasRef === nextProps.canvasRef &&
     prevProps.tangifiedImage === nextProps.tangifiedImage &&
-    prevProps.showTangified === nextProps.showTangified
+    prevProps.showTangified === nextProps.showTangified &&
+    prevProps.selectedLayers === nextProps.selectedLayers &&
+    prevProps.isRendering === nextProps.isRendering
   )
 })
 

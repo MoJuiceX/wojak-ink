@@ -28,6 +28,9 @@ export function useDraggableIcon({
   const previousPositionRef = useRef(initialPosition)
   const iconElementRef = useRef(null)
   const hasSetInitialPositionRef = useRef(false)
+  const lastClickTimeRef = useRef(0) // Track last click time for double-click detection
+  const doubleClickTimeoutRef = useRef(null) // Timeout to clear double-click detection
+  const activeHandlersRef = useRef({ mouseMove: null, mouseUp: null }) // Store active event handlers for cleanup
 
   // Set initial position when element is mounted (only once)
   // After mount, hook manages position entirely via DOM - don't sync with React state
@@ -126,7 +129,66 @@ export function useDraggableIcon({
 
     // Don't start drag on double-click
     if (e.detail === 2) {
+      // Clear any pending drag setup
+      if (doubleClickTimeoutRef.current) {
+        clearTimeout(doubleClickTimeoutRef.current)
+        doubleClickTimeoutRef.current = null
+      }
+      // Cancel any active drag from first click
+      if (isDraggingRef.current) {
+        isDraggingRef.current = false
+        hasDraggedRef.current = false
+        const icon = iconElementRef.current
+        if (icon) {
+          icon.dataset.dragging = 'false'
+          icon.classList.remove('dragging')
+          icon.style.userSelect = ''
+          icon.style.cursor = 'pointer'
+          icon.style.opacity = '1'
+          icon.style.transition = ''
+          icon.style.willChange = ''
+          icon.style.backfaceVisibility = ''
+        }
+        // Remove any event listeners
+        if (activeHandlersRef.current.mouseMove) {
+          document.removeEventListener('mousemove', activeHandlersRef.current.mouseMove)
+          activeHandlersRef.current.mouseMove = null
+        }
+        if (activeHandlersRef.current.mouseUp) {
+          document.removeEventListener('mouseup', activeHandlersRef.current.mouseUp)
+          activeHandlersRef.current.mouseUp = null
+        }
+      }
       return
+    }
+
+    // Check if this might be the first click of a double-click
+    const now = Date.now()
+    const timeSinceLastClick = now - lastClickTimeRef.current
+    const DOUBLE_CLICK_WINDOW = 500 // ms (standard double-click detection window)
+    
+    // If we're within the double-click window, don't start drag at all
+    // This prevents glitches when double-clicking
+    if (timeSinceLastClick < DOUBLE_CLICK_WINDOW && timeSinceLastClick > 0) {
+      // Recent click detected - might be a double-click, don't start drag
+      // Clear any pending drag setup
+      if (doubleClickTimeoutRef.current) {
+        clearTimeout(doubleClickTimeoutRef.current)
+        doubleClickTimeoutRef.current = null
+      }
+      // Update last click time
+      lastClickTimeRef.current = now
+      // Don't prevent default or stop propagation - let double-click handler work
+      return
+    }
+
+    // Update last click time
+    lastClickTimeRef.current = now
+    
+    // Clear any existing timeout
+    if (doubleClickTimeoutRef.current) {
+      clearTimeout(doubleClickTimeoutRef.current)
+      doubleClickTimeoutRef.current = null
     }
 
     e.preventDefault()
@@ -157,7 +219,8 @@ export function useDraggableIcon({
       offsetX,
       offsetY,
       desktopRect,
-      updateScheduled: false
+      updateScheduled: false,
+      positionSet: false // Track if position has been set (only set when drag actually starts)
     }
     
     previousPositionRef.current = {
@@ -187,9 +250,9 @@ export function useDraggableIcon({
     // Add dragging class for CSS styling (without triggering React re-render)
     icon.classList.add('dragging')
     
-    // Set initial position using left/top with !important to prevent React from overwriting during drag
-    icon.style.setProperty('left', `${currentLeft}px`, 'important')
-    icon.style.setProperty('top', `${currentTop}px`, 'important')
+    // DON'T set position on mousedown - only set it when mouse actually moves (indicating drag)
+    // This prevents icons from jumping when clicked (not dragged)
+    // Position will be set in handleMouseMove when drag threshold is exceeded
 
     if (onDragStart) {
       onDragStart()
@@ -242,6 +305,16 @@ export function useDraggableIcon({
 
       if (moveDeltaX > threshold || moveDeltaY > threshold) {
         hasDraggedRef.current = true // Mark that actual drag occurred
+        
+        // Only set position when drag actually starts (mouse has moved beyond threshold)
+        // This prevents icons from jumping on simple clicks
+        const icon = iconElementRef.current
+        if (icon && !dragStartRef.current.positionSet) {
+          const { baseX, baseY } = dragStartRef.current
+          icon.style.setProperty('left', `${baseX}px`, 'important')
+          icon.style.setProperty('top', `${baseY}px`, 'important')
+          dragStartRef.current.positionSet = true
+        }
       }
 
       // Calculate new position (optimized - use cached desktopRect)
@@ -264,6 +337,12 @@ export function useDraggableIcon({
     }
 
     const handleMouseUp = (e) => {
+      // Clear double-click timeout if drag was cancelled
+      if (doubleClickTimeoutRef.current) {
+        clearTimeout(doubleClickTimeoutRef.current)
+        doubleClickTimeoutRef.current = null
+      }
+      
       if (!isDraggingRef.current) return
 
       isDraggingRef.current = false
@@ -284,10 +363,13 @@ export function useDraggableIcon({
 
       let finalX, finalY
 
-      // If no actual drag occurred (just a click), always revert to previous position
+      // If no actual drag occurred (just a click), ensure position wasn't changed
       if (!hasDraggedRef.current) {
         finalX = previousPositionRef.current.x
         finalY = previousPositionRef.current.y
+        // Reset any position changes that might have been applied
+        icon.style.setProperty('left', `${finalX}px`, 'important')
+        icon.style.setProperty('top', `${finalY}px`, 'important')
       } else {
         // Actual drag occurred - get the current position from transform or stored position
         const currentX = dragStartRef.current.currentX || previousPositionRef.current.x
@@ -306,14 +388,16 @@ export function useDraggableIcon({
       // Apply grid snapping if enabled (only if actual drag occurred)
       if (hasDraggedRef.current && isGridSnappingEnabled()) {
         const snapped = snapToGrid(finalX, finalY)
-        finalX = snapped.x
-        finalY = snapped.y
+        // Round to integers to ensure exact grid alignment
+        finalX = Math.round(snapped.x)
+        finalY = Math.round(snapped.y)
       }
 
       // Constrain final position to bounds (always, even for clicks)
       const constrained = constrainToBounds(finalX, finalY, desktopRect)
-      finalX = constrained.x
-      finalY = constrained.y
+      // Round constrained values to ensure integer positions
+      finalX = Math.round(constrained.x)
+      finalY = Math.round(constrained.y)
 
       // Set final position IMMEDIATELY with !important BEFORE any React re-renders
       // This prevents the visual snap-back glitch
@@ -369,8 +453,14 @@ export function useDraggableIcon({
       icon.style.backfaceVisibility = ''
 
         // Remove document listeners
-        document.removeEventListener('mousemove', handleMouseMove)
-        document.removeEventListener('mouseup', handleMouseUp)
+        if (activeHandlersRef.current.mouseMove) {
+          document.removeEventListener('mousemove', activeHandlersRef.current.mouseMove)
+          activeHandlersRef.current.mouseMove = null
+        }
+        if (activeHandlersRef.current.mouseUp) {
+          document.removeEventListener('mouseup', activeHandlersRef.current.mouseUp)
+          activeHandlersRef.current.mouseUp = null
+        }
 
       // Remove dragging class
       icon.classList.remove('dragging')
@@ -397,6 +487,10 @@ export function useDraggableIcon({
       }
     }
 
+    // Store handlers for cleanup
+    activeHandlersRef.current.mouseMove = handleMouseMove
+    activeHandlersRef.current.mouseUp = handleMouseUp
+    
     document.addEventListener('mousemove', handleMouseMove)
     document.addEventListener('mouseup', handleMouseUp)
   }, [
@@ -440,7 +534,8 @@ export function useDraggableIcon({
       y: touch.clientY,
       offsetX,
       offsetY,
-      desktopRect
+      desktopRect,
+      positionSet: false // Track if position has been set (only set when drag actually starts)
     }
     
     previousPositionRef.current = {
@@ -464,9 +559,9 @@ export function useDraggableIcon({
     // Add dragging class for CSS styling (without triggering React re-render)
     icon.classList.add('dragging')
     
-    // Set initial position using left/top with !important to prevent React from overwriting during drag
-    icon.style.setProperty('left', `${currentLeft}px`, 'important')
-    icon.style.setProperty('top', `${currentTop}px`, 'important')
+    // DON'T set position on touchstart - only set it when touch actually moves (indicating drag)
+    // This prevents icons from jumping when tapped (not dragged)
+    // Position will be set in handleTouchMove when drag threshold is exceeded
 
     if (onDragStart) {
       onDragStart()
@@ -487,6 +582,17 @@ export function useDraggableIcon({
 
       if (moveDeltaX > threshold || moveDeltaY > threshold) {
         hasDraggedRef.current = true
+        
+        // Only set position when drag actually starts (touch has moved beyond threshold)
+        // This prevents icons from jumping on simple taps
+        const icon = iconElementRef.current
+        if (icon && !dragStartRef.current.positionSet) {
+          const baseX = dragStartRef.current.baseX || previousPositionRef.current.x
+          const baseY = dragStartRef.current.baseY || previousPositionRef.current.y
+          icon.style.setProperty('left', `${baseX}px`, 'important')
+          icon.style.setProperty('top', `${baseY}px`, 'important')
+          dragStartRef.current.positionSet = true
+        }
       }
 
       const newX = touch.clientX - desktopRect.left - offsetX
@@ -535,10 +641,13 @@ export function useDraggableIcon({
 
       let finalX, finalY
 
-      // If no actual drag occurred (just a tap), always revert to previous position
+      // If no actual drag occurred (just a tap), ensure position wasn't changed
       if (!hasDraggedRef.current) {
         finalX = previousPositionRef.current.x
         finalY = previousPositionRef.current.y
+        // Reset any position changes that might have been applied
+        icon.style.setProperty('left', `${finalX}px`, 'important')
+        icon.style.setProperty('top', `${finalY}px`, 'important')
       } else {
         // Actual drag occurred - get the current position from transform or stored position
         const currentX = dragStartRef.current.currentX || previousPositionRef.current.x
@@ -557,14 +666,16 @@ export function useDraggableIcon({
       // Apply grid snapping if enabled (only if actual drag occurred)
       if (hasDraggedRef.current && isGridSnappingEnabled()) {
         const snapped = snapToGrid(finalX, finalY)
-        finalX = snapped.x
-        finalY = snapped.y
+        // Round to integers to ensure exact grid alignment
+        finalX = Math.round(snapped.x)
+        finalY = Math.round(snapped.y)
       }
 
       // Constrain final position to bounds (always, even for taps)
       const constrained = constrainToBounds(finalX, finalY, desktopRect)
-      finalX = constrained.x
-      finalY = constrained.y
+      // Round constrained values to ensure integer positions
+      finalX = Math.round(constrained.x)
+      finalY = Math.round(constrained.y)
 
       // Set final position using left/top with !important
       icon.style.setProperty('left', `${finalX}px`, 'important')

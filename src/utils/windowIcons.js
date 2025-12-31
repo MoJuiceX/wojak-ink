@@ -25,6 +25,7 @@ const windowIconMap = {
   'try-again-window': 'msg_question-0',
   'window-chia-network': 'msg_information-0', // Will be overridden by icon prop
   'roadmap-window': 'notepad-0',
+  'treasury-window': 'tresury_Icon', // Treasury window uses custom icon
 }
 
 // Map window titles to icon filenames (fallback)
@@ -48,6 +49,8 @@ const titleIconMap = {
   'CHIA_NETWORK.TXT': 'msg_information-0', // Will be overridden by icon prop
   '@chubzxmeta': 'msg_information-0', // Will be overridden by icon prop
   'Wojak_Farmers_Plot_Roadmap.TXT': 'notepad-0',
+  'TREASURY': 'tresury_Icon', // Treasury window uses custom icon
+  'TREASURY.EXE': 'tresury_Icon', // Treasury window uses custom icon
 }
 
 /**
@@ -80,6 +83,11 @@ export function getWindowIcon(windowId, title) {
   // Special case: Chia Network window uses chubz.jpg image
   if (windowId === 'window-chia-network' || title === 'CHIA_NETWORK.TXT' || title === '@chubzxmeta') {
     return '/assets/images/chubz.jpg'
+  }
+  
+  // Special case: Treasury window uses tresury_Icon.png
+  if (windowId === 'treasury-window' || title === 'TREASURY' || title === 'TREASURY.EXE') {
+    return '/icon/tresury_Icon.png'
   }
   
   // Try window ID first

@@ -14,6 +14,7 @@ import {
   importGallery as importGalleryUtil
 } from './utils/desktopStorage'
 import { enforceDesktopLimit, enforceRecycleBinLimit, isDuplicateImage } from './utils/desktopUtils'
+import { snapToGrid } from './utils/iconGrid'
 import { useToast } from './contexts/ToastContext'
 import { Routes, Route } from 'react-router-dom'
 import ReadmeWindow from './components/windows/ReadmeWindow'
@@ -83,6 +84,7 @@ import PropertiesWindow from './components/windows/PropertiesWindow'
 import DisplayPropertiesWindow from './components/windows/DisplayPropertiesWindow'
 import ThemeQAWindow from './components/windows/ThemeQAWindow'
 import RoadmapWindow from './components/windows/RoadmapWindow'
+import TreasuryWindow from './components/windows/TreasuryWindow'
 import { clearAllIconPositions } from './utils/iconPositionStorage'
 
 // Wallpaper definitions - exported for use in DisplayPropertiesWindow
@@ -121,27 +123,51 @@ function useGlobalScrollLock() {
       attributeFilter: ['style']
     })
     
-    // Prevent wheel scrolling on document (except in scroll-allowed elements)
+    // Prevent wheel scrolling on document (except in scrollable elements)
     const handleWheel = (e) => {
-      // Check if the event target or any parent has scroll-allowed class
+      // Check if the event target or any parent is scrollable
       let element = e.target
-      let isScrollAllowed = false
+      let isScrollable = false
       
       while (element && element !== document.body) {
+        // Check for scroll-allowed class (existing behavior)
         if (element.classList && element.classList.contains('scroll-allowed')) {
-          isScrollAllowed = true
+          isScrollable = true
           break
         }
+        
+        // Check if element is actually scrollable (has overflow: auto/scroll)
+        const style = window.getComputedStyle(element)
+        const overflowY = style.overflowY || style.overflow
+        const overflowX = style.overflowX || style.overflow
+        
+        // Element is scrollable if it has overflow: auto or scroll
+        if (overflowY === 'auto' || overflowY === 'scroll' || 
+            overflowX === 'auto' || overflowX === 'scroll') {
+          // Additional check: element must actually be scrollable (content exceeds bounds)
+          const isVerticallyScrollable = element.scrollHeight > element.clientHeight
+          const isHorizontallyScrollable = element.scrollWidth > element.clientWidth
+          
+          if ((overflowY === 'auto' || overflowY === 'scroll') && isVerticallyScrollable) {
+            isScrollable = true
+            break
+          }
+          if ((overflowX === 'auto' || overflowX === 'scroll') && isHorizontallyScrollable) {
+            isScrollable = true
+            break
+          }
+        }
+        
         element = element.parentElement
       }
       
-      // Only prevent default if not in a scroll-allowed element
-      if (!isScrollAllowed) {
+      // Only prevent default if not in a scrollable element
+      if (!isScrollable) {
         e.preventDefault()
       }
     }
     
-    // Prevent touch scrolling on document (except in scroll-allowed elements)
+    // Prevent touch scrolling on document (except in scrollable elements)
     // Check if we're dragging an icon - if so, don't prevent default (let icon handler do it)
     const handleTouchMove = (e) => {
       // Check if we're dragging an icon - if so, skip preventing default
@@ -153,18 +179,39 @@ function useGlobalScrollLock() {
         return // Let the icon's drag handler manage preventDefault
       }
       
+      // Use same scrollable detection as handleWheel
       let element = e.target
-      let isScrollAllowed = false
+      let isScrollable = false
       
       while (element && element !== document.body) {
         if (element.classList && element.classList.contains('scroll-allowed')) {
-          isScrollAllowed = true
+          isScrollable = true
           break
         }
+        
+        const style = window.getComputedStyle(element)
+        const overflowY = style.overflowY || style.overflow
+        const overflowX = style.overflowX || style.overflow
+        
+        if (overflowY === 'auto' || overflowY === 'scroll' || 
+            overflowX === 'auto' || overflowX === 'scroll') {
+          const isVerticallyScrollable = element.scrollHeight > element.clientHeight
+          const isHorizontallyScrollable = element.scrollWidth > element.clientWidth
+          
+          if ((overflowY === 'auto' || overflowY === 'scroll') && isVerticallyScrollable) {
+            isScrollable = true
+            break
+          }
+          if ((overflowX === 'auto' || overflowX === 'scroll') && isHorizontallyScrollable) {
+            isScrollable = true
+            break
+          }
+        }
+        
         element = element.parentElement
       }
       
-      if (!isScrollAllowed) {
+      if (!isScrollable) {
         // Only prevent default if listener is not passive
         // On iOS, we use passive: true, so we can't prevent default here
         // But we can still try (it will just be ignored on iOS)
@@ -188,22 +235,45 @@ function useGlobalScrollLock() {
       ]
       
       if (scrollKeys.includes(e.key)) {
-        // Check if focus is in a scroll-allowed element
+        // Check if focus is in a scrollable element
         const activeElement = document.activeElement
-        let isScrollAllowed = false
+        let isScrollable = false
         
         if (activeElement) {
           let element = activeElement
           while (element && element !== document.body) {
+            // Check for scroll-allowed class
             if (element.classList && element.classList.contains('scroll-allowed')) {
-              isScrollAllowed = true
+              isScrollable = true
               break
             }
+            
+            // Check if element is scrollable
+            const style = window.getComputedStyle(element)
+            const overflowY = style.overflowY || style.overflow
+            const overflowX = style.overflowX || style.overflow
+            
+            if (overflowY === 'auto' || overflowY === 'scroll' || 
+                overflowX === 'auto' || overflowX === 'scroll') {
+              const isVerticallyScrollable = element.scrollHeight > element.clientHeight
+              const isHorizontallyScrollable = element.scrollWidth > element.clientWidth
+              
+              if ((overflowY === 'auto' || overflowY === 'scroll') && isVerticallyScrollable) {
+                isScrollable = true
+                break
+              }
+              if ((overflowX === 'auto' || overflowX === 'scroll') && isHorizontallyScrollable) {
+                isScrollable = true
+                break
+              }
+            }
+            
             element = element.parentElement
           }
         }
         
-        if (!isScrollAllowed) {
+        // Only prevent default if not in a scrollable element
+        if (!isScrollable) {
           e.preventDefault()
         }
       }
@@ -235,6 +305,10 @@ const isLocalhost = () => {
   return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]'
 }
 
+// Module-level cache to persist desktopImages state across component remounts
+let cachedDesktopImagesState = null
+let cacheInitialized = false
+
 function AppContent() {
   const { isTangifying, isInputFocused } = useScreensaver()
   const { activeWindowId, getAllWindows } = useWindow()
@@ -244,7 +318,43 @@ function AppContent() {
   const [showClippy, setShowClippy] = useState(false)
   const [secretWallpaper, setSecretWallpaper] = useState(false)
   const [notifyOpen, setNotifyOpen] = useState(false)
-  const [desktopImages, setDesktopImages] = useState([])
+  const hasLoadedFromStorageRef = useRef(false) // Track if we've successfully loaded from localStorage
+  // Use lazy initialization to load from localStorage or cache immediately, preventing empty array on remount
+  const [desktopImages, setDesktopImages] = useState(() => {
+    // If we have a cached value from a previous mount, use it immediately to prevent empty array on remount
+    if (cacheInitialized && cachedDesktopImagesState !== null) {
+      hasLoadedFromStorageRef.current = true
+      return cachedDesktopImagesState
+    }
+    
+    try {
+      if (typeof window !== 'undefined' && isLocalStorageAvailable()) {
+        const loaded = loadDesktopImages()
+        // Cache the loaded value at module level to persist across component remounts
+        cachedDesktopImagesState = loaded
+        cacheInitialized = true
+        hasLoadedFromStorageRef.current = true // Mark that we've loaded from storage
+        return loaded
+      }
+    } catch (error) {
+      console.error('Error loading desktop images on mount:', error)
+    }
+    const emptyArray = []
+    // Only cache empty array if we don't have a cached value (first mount)
+    if (!cacheInitialized) {
+      cachedDesktopImagesState = emptyArray
+      cacheInitialized = true
+    }
+    return emptyArray
+  })
+  
+  // Sync state to cache whenever it changes, so remounts can use the latest value
+  useEffect(() => {
+    if (hasLoadedFromStorageRef.current && desktopImages.length > 0) {
+      cachedDesktopImagesState = desktopImages
+      cacheInitialized = true
+    }
+  }, [desktopImages])
   const [recycleBin, setRecycleBin] = useState([])
   const [favoriteWojaks, setFavoriteWojaks] = useState([])
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false)
@@ -373,6 +483,7 @@ function AppContent() {
     'community-resources': false,
     'window-chia-network': false,
     'dev-panel': false,
+    'treasury-window': false,
   })
 
   // Check if modal/dialog is open
@@ -387,6 +498,10 @@ function AppContent() {
   const { contextMenu, showContextMenu, hideContextMenu } = useContextMenu()
   const desktopRef = useRef(null)
   const [iconResetKey, setIconResetKey] = useState(1) // Start at 1 to avoid key={0} issues
+  
+  // Track iconResetKey changes
+  useEffect(() => {
+  }, [iconResetKey, desktopImages.length])
 
   // Reset all icon positions to defaults
   const resetIconPositions = useCallback(() => {
@@ -394,12 +509,12 @@ function AppContent() {
     clearAllIconPositions()
     
     // Reset desktop image icon positions (remove position property so they use defaults)
-    setDesktopImages(prev => 
-      prev.map(img => {
+    setDesktopImages(prev => {
+      return prev.map(img => {
         const { position, ...rest } = img
         return rest
       })
-    )
+    })
     
     // Force re-mount of both DesktopIcons and DesktopImageIcons
     // This will make them reload positions from localStorage (which is now empty)
@@ -587,7 +702,7 @@ function AppContent() {
     }
   }, [])
 
-  // Load desktop images and recycle bin from localStorage on mount
+  // Load recycle bin and favorites from localStorage on mount (desktopImages loaded via lazy init)
   useEffect(() => {
     // Check localStorage availability
     if (!isLocalStorageAvailable()) {
@@ -602,12 +717,14 @@ function AppContent() {
     // Use setTimeout to prevent blocking UI
     setTimeout(() => {
       try {
-        const loaded = loadDesktopImages()
+        // DesktopImages already loaded via lazy initialization in useState, so only load recycle bin and favorites
         const loadedBin = loadRecycleBin()
         const loadedFavorites = loadFavoriteWojaks()
-        setDesktopImages(loaded)
+        // Don't overwrite desktopImages - it's already loaded via lazy init
         setRecycleBin(loadedBin)
         setFavoriteWojaks(loadedFavorites)
+        // Mark that we've successfully loaded from storage (desktopImages already marked in lazy init)
+        hasLoadedFromStorageRef.current = true
       } catch (error) {
         console.error('Failed to load gallery:', error)
         showToast('⚠️ Failed to load gallery', 'error', 3000)
@@ -615,7 +732,7 @@ function AppContent() {
         setIsLoadingGallery(false)
       }
     }, 0)
-  }, [showToast])
+  }, [showToast]) // Removed desktopImages.length dependency - desktopImages loaded via lazy init
 
   // Ensure README.TXT window is open when the app loads
   // We intentionally avoid relying on localStorage here so that
@@ -629,14 +746,18 @@ function AppContent() {
   }, [])
 
   const openWindow = (windowId) => {
+    
     // Backward compatibility: map old wojak-creator to wojak-generator
     if (windowId === 'wojak-creator') {
       windowId = 'wojak-generator'
     }
-    setOpenWindows(prev => ({
-      ...prev,
-      [windowId]: true,
-    }))
+    setOpenWindows(prev => {
+      const newWindows = {
+        ...prev,
+        [windowId]: true,
+      }
+      return newWindows
+    })
   }
 
   const closeWindow = (windowId) => {
@@ -810,9 +931,14 @@ function AppContent() {
 
   // Update icon position after drag
   const updateIconPosition = useCallback((id, x, y) => {
+    // Normalize position to grid before updating
+    const snapped = snapToGrid(x, y)
+    const normalizedX = Math.round(snapped.x)
+    const normalizedY = Math.round(snapped.y)
+    
     setDesktopImages(prev => {
       const updated = prev.map(img => 
-        img.id === id ? { ...img, position: { x, y } } : img
+        img.id === id ? { ...img, position: { x: normalizedX, y: normalizedY } } : img
       )
       return updated
     })
@@ -821,10 +947,18 @@ function AppContent() {
   // Save desktopImages to localStorage whenever it changes (skip initial load)
   const isInitialLoadRef = useRef(true)
   useEffect(() => {
+    
     if (isInitialLoadRef.current) {
       isInitialLoadRef.current = false
       return // Skip saving on initial mount (data loaded from localStorage)
     }
+    
+    // CRITICAL: Don't save empty array if we haven't loaded from storage yet
+    // This prevents saving [] during component remount before localStorage load completes
+    if (!hasLoadedFromStorageRef.current && desktopImages.length === 0) {
+      return
+    }
+    
     if (storageAvailable) {
       saveDesktopImages(desktopImages)
     }
@@ -863,6 +997,17 @@ function AppContent() {
   const handleWallpaperChange = (newWallpaper) => {
     setWallpaper(newWallpaper)
   }
+
+  // Remove desktop image without moving to recycle bin (e.g., when moving to favorites)
+  const removeFromDesktop = useCallback((imageId) => {
+    setDesktopImages(prev => {
+      const updated = prev.filter(img => img.id !== imageId)
+      if (storageAvailable) {
+        saveDesktopImages(updated)
+      }
+      return updated
+    })
+  }, [storageAvailable])
 
   // Move desktop image to recycle bin
   const moveToRecycleBin = useCallback((imageId) => {
@@ -1287,6 +1432,7 @@ function AppContent() {
                 zIndex: isStartupComplete ? 1 : 0,
                 transition: 'opacity 1.5s ease-in-out',
                 visibility: isStartupComplete ? 'visible' : 'hidden'
+                /* Removed isolation: isolate - it was preventing desktop icons from being visible when windows open */
               }}>
                 {/* Audio prompt */}
                 <AudioPrompt />
@@ -1302,7 +1448,6 @@ function AppContent() {
                 style={getWallpaperStyle()}
                 onContextMenu={handleDesktopContextMenu}
                 onClick={(e) => {
-                  // #region agent log
                   const target = e.target
                   const isIconClick = target.closest('button[data-icon-id]') || 
                                      target.closest('.desktop-icon-button') ||
@@ -1315,8 +1460,6 @@ function AppContent() {
                     isMainContent: target.id === 'main-content',
                     timestamp: Date.now()
                   }
-                  fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.jsx:1295',message:'Desktop onClick fired',data:logData,timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'J'})}).catch(()=>{});
-                  // #endregion
                   
                   // Don't handle clicks on icons - let them handle their own clicks
                   if (isIconClick) {
@@ -1342,10 +1485,7 @@ function AppContent() {
                       !clickedElement.closest('.taskbar')
                     
                     if (isActuallyDesktop) {
-                      // #region agent log
-                      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.jsx:1336',message:'Desktop onClick - calling deselectAll',data:{currentSelection:selectedIconIds},timestamp:Date.now(),sessionId:'debug-session',runId:'run5',hypothesisId:'L'})}).catch(()=>{});
                       console.log('[App] Desktop onClick - calling deselectAll', { currentSelection: selectedIconIds })
-                      // #endregion
                       deselectAll()
                     }
                   }
@@ -1372,13 +1512,11 @@ function AppContent() {
                   key="selection-box"
                   containerRef={desktopRef}
                   icons={(() => {
-                    // #region agent log
                     const imageIds = desktopImages.map(img => img.id)
                     const allIds = [
                       ...imageIds,
                       'RECYCLE_BIN',
                       'MEMETIC_ENERGY',
-                      'COMMUNITY_RESOURCES',
                       'MY_FAVORITE_WOJAKS',
                     ]
                     const duplicateIds = allIds.filter((id, idx) => allIds.indexOf(id) !== idx)
@@ -1394,7 +1532,6 @@ function AppContent() {
                       imageIds: imageIds,
                       allIds: allIds
                     })
-                    // #endregion
                     // CRITICAL: Filter out any images with id: 0, undefined, or null before mapping
                     // This prevents React from seeing duplicate keys
                     const validImageIds = desktopImages
@@ -1404,14 +1541,13 @@ function AppContent() {
                     return [
                       ...validImageIds,
                       // Include folder icons so they can be selected with drag-to-select
+                      // COMMUNITY_RESOURCES is now handled by DesktopIcons (moved to left side under Roadmap)
                       { id: 'RECYCLE_BIN' },
                       { id: 'MEMETIC_ENERGY' },
-                      { id: 'COMMUNITY_RESOURCES' },
                       { id: 'MY_FAVORITE_WOJAKS' },
                     ]
                   })()}
                   onSelectionChange={(selectedIds) => {
-                    // #region agent log
                     const logData = {
                       selectedIds,
                       selectedCount: selectedIds.length,
@@ -1419,14 +1555,11 @@ function AppContent() {
                       willUpdate: JSON.stringify(selectedIds) !== JSON.stringify(selectedIconIds),
                       timestamp: Date.now()
                     }
-                    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.jsx:1404',message:'SelectionBox onSelectionChange called',data:logData,timestamp:Date.now(),sessionId:'debug-session',runId:'run5',hypothesisId:'L'})}).catch(()=>{});
                     console.log('[App] SelectionBox onSelectionChange called', logData)
-                    // #endregion
                     setSelectedIconIds(selectedIds)
                   }}
                   isEnabled={!isLoadingGallery}
                 />
-                {/* #region agent log */}
                 {(() => {
                   const logData = {
                     iconResetKey,
@@ -1435,28 +1568,24 @@ function AppContent() {
                     selectionBoxKey: 'selection-box',
                     timestamp: Date.now()
                   }
-                  fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.jsx:1392',message:'Rendering DesktopIcons and DesktopImageIcons with keys',data:logData,timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
                   console.log('[App] Rendering DesktopIcons and DesktopImageIcons with keys', logData)
                   return null
                 })()}
-                {/* #endregion */}
                 <DesktopIcons key={`desktop-icons-${iconResetKey}`} onOpenApp={openWindow} />
-                {/* #region agent log */}
                 {(() => {
                   const logData = {
                     desktopImagesLength: desktopImages.length,
                     desktopImagesIds: desktopImages.map(img => ({ id: img.id, idType: typeof img.id, name: img.name?.substring(0, 20) })),
                     timestamp: Date.now()
                   }
-                  fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.jsx:1407',message:'Passing desktopImages to DesktopImageIcons',data:logData,timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'I'})}).catch(()=>{});
                   console.log('[App] Passing desktopImages to DesktopImageIcons', logData)
                   return null
                 })()}
-                {/* #endregion */}
                 <DesktopImageIcons 
                   key={`desktop-image-icons-${iconResetKey}`}
                   desktopImages={desktopImages}
                   onRemoveImage={moveToRecycleBin}
+                  onRemoveFromDesktop={removeFromDesktop}
                   onUpdatePosition={updateIconPosition}
                   onOpenRecycleBin={() => setIsRecycleBinOpen(true)}
                   onOpenFavoriteWojaks={() => {
@@ -1475,6 +1604,12 @@ function AppContent() {
                   setSelectedIconIds={setSelectedIconIds}
                   onShowProperties={setPropertiesIcon}
                   recycleBin={recycleBin}
+                  onAddToFavorites={(wojak) => {
+                    const result = addFavoriteWojak(wojak)
+                    if (result.success) {
+                      setFavoriteWojaks(loadFavoriteWojaks())
+                    }
+                  }}
                 />
                 {openWindows['window-readme-txt'] && (
                   <ReadmeWindow onClose={() => closeWindow('window-readme-txt')} />
@@ -1594,6 +1729,9 @@ function AppContent() {
                     closeWindow('my-favorite-wojaks')
                   }}
                   favoriteWojaks={favoriteWojaks}
+                  onAddFavorite={(wojak) => {
+                    setFavoriteWojaks(loadFavoriteWojaks())
+                  }}
                   onRemove={(wojakId) => {
                     const result = removeFavoriteWojak(wojakId)
                     if (result.success) {
@@ -1634,6 +1772,12 @@ function AppContent() {
                 <RoadmapWindow
                   isOpen={openWindows['roadmap-window']}
                   onClose={() => closeWindow('roadmap-window')}
+                />
+              )}
+              {openWindows['treasury-window'] && (
+                <TreasuryWindow
+                  isOpen={openWindows['treasury-window']}
+                  onClose={() => closeWindow('treasury-window')}
                 />
               )}
             </main>

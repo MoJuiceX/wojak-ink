@@ -447,22 +447,6 @@ function OfferFileModal({ nft, offerFile, onClose, onCopy }) {
   
   // Final fallback: Use MintGarden thumbnail API URL (requires launcher ID, which we might not have here)
 
-  // #region agent log
-  useEffect(() => {
-    const checkZIndex = () => {
-      if (backdropRef.current) {
-        const taskbar = document.querySelector('.taskbar');
-        const backdropZIndex = window.getComputedStyle(backdropRef.current).zIndex;
-        const taskbarZIndex = taskbar ? window.getComputedStyle(taskbar).zIndex : 'not found';
-        const taskbarVisible = taskbar ? window.getComputedStyle(taskbar).visibility !== 'hidden' && window.getComputedStyle(taskbar).display !== 'none' : false;
-        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MarketplaceWindow.jsx:OfferFileModal',message:'Modal backdrop rendered - z-index check',data:{backdropZIndex:backdropZIndex,taskbarZIndex:taskbarZIndex,taskbarExists:!!taskbar,taskbarVisible:taskbarVisible},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-      }
-    };
-    // Use setTimeout to ensure ref is set after render
-    const timeoutId = setTimeout(checkZIndex, 0);
-    return () => clearTimeout(timeoutId);
-  }, []);
-  // #endregion
   return (
     <div
       ref={backdropRef}
@@ -733,25 +717,6 @@ export default function MarketplaceWindow({ onClose }) {
   const itemsPerPage = 1000 // Show all NFTs (no pagination limit)
   const windowRef = useRef(null)
   
-  // #region agent log
-  useEffect(() => {
-    if (selectedOffer) {
-      setTimeout(() => {
-        const allHighZ = Array.from(document.querySelectorAll('*')).filter(el => {
-          const z = window.getComputedStyle(el).zIndex;
-          return z && parseInt(z) >= 9999;
-        }).map(el => ({
-          tag: el.tagName,
-          className: el.className,
-          zIndex: window.getComputedStyle(el).zIndex,
-          id: el.id
-        }));
-        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MarketplaceWindow.jsx:useEffect',message:'All elements with z-index >= 9999 when modal open',data:{highZElements:allHighZ},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-      }, 300);
-    }
-  }, [selectedOffer]);
-  // #endregion
-  
   // Determine if we should show skeleton loading (initial load, no groups yet, or loading NFTs)
   const isLoadingInitial = nftEntries.length === 0 || (tokenGroups.length === 0 && nftEntries.length > 0)
   
@@ -809,9 +774,6 @@ export default function MarketplaceWindow({ onClose }) {
   }
 
   const handleViewOffer = (nft, offerFile) => {
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MarketplaceWindow.jsx:handleViewOffer',message:'handleViewOffer called',data:{nftId:nft?.id,hasOfferFile:!!offerFile},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
     // Ensure nft object has all required properties for the modal
     const nftForModal = {
       id: nft.id,
@@ -820,17 +782,6 @@ export default function MarketplaceWindow({ onClose }) {
       ...nft, // Include all other properties
     }
     setSelectedOffer({ nft: nftForModal, offerFile })
-    // #region agent log
-    setTimeout(() => {
-      const taskbar = document.querySelector('.taskbar');
-      const modalBackdrop = document.querySelector('[ref="backdropRef"], [data-modal-backdrop]');
-      const modalBackdropComputed = modalBackdrop ? window.getComputedStyle(modalBackdrop).zIndex : null;
-      const taskbarComputed = taskbar ? window.getComputedStyle(taskbar).zIndex : null;
-      const taskbarRect = taskbar ? taskbar.getBoundingClientRect() : null;
-      const modalRect = modalBackdrop ? modalBackdrop.getBoundingClientRect() : null;
-      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'MarketplaceWindow.jsx:handleViewOffer',message:'Z-index values after modal open',data:{taskbarExists:!!taskbar,taskbarZIndex:taskbarComputed,modalBackdropExists:!!modalBackdrop,modalBackdropZIndex:modalBackdropComputed,taskbarTop:taskbarRect?.top,modalTop:modalRect?.top},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-    }, 200);
-    // #endregion
   }
 
   const handleCloseModal = () => {

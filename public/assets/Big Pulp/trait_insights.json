@@ -1,0 +1,384 @@
+{
+  "Crown": {
+    "count": 140,
+    "percentile": 3.33,
+    "category": "Head",
+    "provenance_tier": "S",
+    "cultural_note": "Most wanted trait. Royal Club status.",
+    "community_meme": "Royal Club membership",
+    "pairs_well_with": [
+      "Neckbeard",
+      "MOG Glasses",
+      "Military Beret"
+    ],
+    "best_holder": {
+      "nft_id": "2867",
+      "rank": 88
+    },
+    "fun_fact": "Crown holders are called the Royal Club in Tang Gang."
+  },
+  "Military Beret": {
+    "count": 164,
+    "percentile": 3.9,
+    "category": "Head",
+    "provenance_tier": "S",
+    "cultural_note": "Second most wanted. The beret stays on.",
+    "community_meme": "The beret stays on",
+    "pairs_well_with": [
+      "Neckbeard",
+      "Crown",
+      "MOG Glasses"
+    ],
+    "best_holder": {
+      "nft_id": "3844",
+      "rank": 100
+    },
+    "fun_fact": "Community rule: The beret stays on during any activity."
+  },
+  "Wizard Hat": {
+    "count": 248,
+    "percentile": 5.9,
+    "category": "Head",
+    "provenance_tier": "S",
+    "cultural_note": "Arcane loadout. Full Wizard combo piece.",
+    "community_meme": "You shall not pass",
+    "pairs_well_with": [
+      "Wizard Drip",
+      "Wizard Glasses"
+    ],
+    "best_holder": {
+      "nft_id": "4158",
+      "rank": 83
+    },
+    "fun_fact": "Wizard Hat + Wizard Drip = Full Wizard transformation."
+  },
+  "Fedora": {
+    "count": 111,
+    "percentile": 2.64,
+    "category": "Head",
+    "provenance_tier": "S",
+    "cultural_note": "Classic. M'TangTard energy.",
+    "community_meme": "*tips fedora*",
+    "pairs_well_with": [
+      "Neckbeard"
+    ],
+    "best_holder": {
+      "nft_id": "3841",
+      "rank": 33
+    },
+    "fun_fact": "Fedora + Neckbeard = Classic Neckbeard combo (only 6 exist)."
+  },
+  "Clown": {
+    "count": 143,
+    "percentile": 3.4,
+    "category": "Head",
+    "provenance_tier": "S",
+    "cultural_note": "Full Clown combo piece. Chaos energy.",
+    "community_meme": "Honk honk",
+    "pairs_well_with": [
+      "Clown Nose"
+    ],
+    "best_holder": {
+      "nft_id": "3892",
+      "rank": 41
+    },
+    "fun_fact": "Clown + Clown Nose = Full Clown transformation."
+  },
+  "Devil Horns": {
+    "count": 91,
+    "percentile": 2.17,
+    "category": "Head",
+    "provenance_tier": "S",
+    "cultural_note": "Hell aesthetic. Natural habitat pairing.",
+    "community_meme": "Embrace the chaos",
+    "pairs_well_with": [
+      "Hell"
+    ],
+    "best_holder": {
+      "nft_id": "3900",
+      "rank": 45
+    },
+    "fun_fact": "Devil Horns + Hell background = Devil in Hell combo."
+  },
+  "Tin Foil Hat": {
+    "count": 117,
+    "percentile": 2.79,
+    "category": "Head",
+    "provenance_tier": "S",
+    "cultural_note": "Conspiracy theorist energy.",
+    "community_meme": "They don't want you to know",
+    "pairs_well_with": [],
+    "best_holder": {
+      "nft_id": "3991",
+      "rank": 209
+    },
+    "fun_fact": "The truth is out there. They just don't want you to see it."
+  },
+  "Ronin Helmet": {
+    "count": 129,
+    "percentile": 3.07,
+    "category": "Head",
+    "provenance_tier": "S",
+    "cultural_note": "Full Ronin combo piece. Samurai aesthetic.",
+    "community_meme": "The way of the blade",
+    "pairs_well_with": [
+      "Ronin",
+      "Ronin Dojo"
+    ],
+    "best_holder": {
+      "nft_id": "2866",
+      "rank": 139
+    },
+    "fun_fact": "Full Ronin = Ronin Helmet + Ronin clothes + Ronin Dojo."
+  },
+  "Piccolo Turban": {
+    "count": 9,
+    "percentile": 0.21,
+    "category": "Head",
+    "provenance_tier": "S+",
+    "cultural_note": "Namekian royalty. Rarest combo.",
+    "community_meme": "Over 9000",
+    "pairs_well_with": [
+      "Piccolo Uniform"
+    ],
+    "best_holder": {
+      "nft_id": "3729",
+      "rank": 1
+    },
+    "fun_fact": "Full Piccolo (7 exist) dominates top 5 rankings."
+  },
+  "Straitjacket": {
+    "count": 86,
+    "percentile": 2.05,
+    "category": "Clothes",
+    "provenance_tier": "S",
+    "cultural_note": "Asylum Patient combo piece. Chaos energy.",
+    "community_meme": "The asylum couldn't contain this",
+    "pairs_well_with": [
+      "Hannibal Mask",
+      "Crazy Room"
+    ],
+    "best_holder": {
+      "nft_id": "2157",
+      "rank": 11
+    },
+    "fun_fact": "Straitjacket + Hannibal Mask = Asylum Patient (30 exist)."
+  },
+  "Goose Suit": {
+    "count": 59,
+    "percentile": 1.4,
+    "category": "Clothes",
+    "provenance_tier": "S",
+    "cultural_note": "Honk Gang piece. Peace was never an option.",
+    "community_meme": "Peace was never an option",
+    "pairs_well_with": [
+      "$HONK"
+    ],
+    "best_holder": {
+      "nft_id": "3780",
+      "rank": 46
+    },
+    "fun_fact": "Goose Suit + $HONK background = Honk Gang (only 4 exist)."
+  },
+  "Wizard Drip": {
+    "count": 198,
+    "percentile": 4.71,
+    "category": "Clothes",
+    "provenance_tier": "S",
+    "cultural_note": "Full Wizard combo piece. Arcane loadout.",
+    "community_meme": "Magic is real",
+    "pairs_well_with": [
+      "Wizard Hat",
+      "Wizard Glasses"
+    ],
+    "best_holder": {
+      "nft_id": "3890",
+      "rank": 64
+    },
+    "fun_fact": "Part of the Full Wizard transformation."
+  },
+  "Piccolo Uniform": {
+    "count": 14,
+    "percentile": 0.33,
+    "category": "Clothes",
+    "provenance_tier": "S+",
+    "cultural_note": "Namekian royalty clothing.",
+    "community_meme": "DBZ legends only",
+    "pairs_well_with": [
+      "Piccolo Turban"
+    ],
+    "best_holder": {
+      "nft_id": "3729",
+      "rank": 1
+    },
+    "fun_fact": "Essential piece for Full Piccolo combo."
+  },
+  "El Presidente": {
+    "count": 49,
+    "percentile": 1.17,
+    "category": "Clothes",
+    "provenance_tier": "S",
+    "cultural_note": "Leadership energy. Presidential drip.",
+    "community_meme": "El Jefe",
+    "pairs_well_with": [],
+    "best_holder": {
+      "nft_id": "3733",
+      "rank": 10
+    },
+    "fun_fact": "Presidential swagger in pixel form."
+  },
+  "Ronin": {
+    "count": 168,
+    "percentile": 4.0,
+    "category": "Clothes",
+    "provenance_tier": "S",
+    "cultural_note": "Samurai aesthetic. Full Ronin piece.",
+    "community_meme": "Masterless warrior",
+    "pairs_well_with": [
+      "Ronin Helmet",
+      "Ronin Dojo"
+    ],
+    "best_holder": {
+      "nft_id": "3974",
+      "rank": 188
+    },
+    "fun_fact": "The way of the ronin."
+  },
+  "MOG Glasses": {
+    "count": 302,
+    "percentile": 7.19,
+    "category": "Face Wear",
+    "provenance_tier": "S",
+    "cultural_note": "Peak face wear. Dominance signifier.",
+    "community_meme": "Mogging",
+    "pairs_well_with": [
+      "Crown",
+      "Military Beret"
+    ],
+    "best_holder": {
+      "nft_id": "3879",
+      "rank": 23
+    },
+    "fun_fact": "MOG Glasses = asserting dominance."
+  },
+  "Wizard Glasses": {
+    "count": 145,
+    "percentile": 3.45,
+    "category": "Face Wear",
+    "provenance_tier": "S",
+    "cultural_note": "Full Wizard combo piece.",
+    "community_meme": "Arcane vision",
+    "pairs_well_with": [
+      "Wizard Hat",
+      "Wizard Drip"
+    ],
+    "best_holder": {
+      "nft_id": "41",
+      "rank": 59
+    },
+    "fun_fact": "See the magic with these."
+  },
+  "Cyber Shades": {
+    "count": 157,
+    "percentile": 3.74,
+    "category": "Face Wear",
+    "provenance_tier": "S",
+    "cultural_note": "Cyberpunk energy. Future vision.",
+    "community_meme": "Neon future",
+    "pairs_well_with": [],
+    "best_holder": {
+      "nft_id": "4186",
+      "rank": 9
+    },
+    "fun_fact": "Cyberpunk aesthetic activated."
+  },
+  "VR Headset": {
+    "count": 67,
+    "percentile": 1.6,
+    "category": "Face Wear",
+    "provenance_tier": "S",
+    "cultural_note": "Tech energy. Metaverse ready.",
+    "community_meme": "Already in the metaverse",
+    "pairs_well_with": [],
+    "best_holder": {
+      "nft_id": "3457",
+      "rank": 24
+    },
+    "fun_fact": "Living in the future."
+  },
+  "Fake It Mask": {
+    "count": 39,
+    "percentile": 0.93,
+    "category": "Face Wear",
+    "provenance_tier": "S",
+    "cultural_note": "Mystery energy. Hidden identity.",
+    "community_meme": "Fake it til you make it",
+    "pairs_well_with": [],
+    "best_holder": {
+      "nft_id": "3729",
+      "rank": 1
+    },
+    "fun_fact": "The mask stays on."
+  },
+  "Hannibal Mask": {
+    "count": 76,
+    "percentile": 1.81,
+    "category": "Face Wear",
+    "provenance_tier": "S",
+    "cultural_note": "Asylum Patient combo piece.",
+    "community_meme": "Hello Clarice",
+    "pairs_well_with": [
+      "Straitjacket",
+      "Crazy Room"
+    ],
+    "best_holder": {
+      "nft_id": "41",
+      "rank": 59
+    },
+    "fun_fact": "Essential for Asylum Patient aesthetic."
+  },
+  "Neckbeard": {
+    "count": 184,
+    "percentile": 4.38,
+    "category": "Mouth",
+    "provenance_tier": "S",
+    "cultural_note": "Cultural cornerstone. Winners Win.",
+    "community_meme": "Winners Win",
+    "pairs_well_with": [
+      "Fedora",
+      "Crown",
+      "Military Beret"
+    ],
+    "best_holder": {
+      "nft_id": "3796",
+      "rank": 60
+    },
+    "fun_fact": "Origin of \"Winners Win\" culture. WMC heritage."
+  },
+  "Monkey Zoo": {
+    "count": 200,
+    "percentile": 4.76,
+    "category": "Base",
+    "provenance_tier": "Heritage",
+    "cultural_note": "OG ape heritage from early grove.",
+    "pairs_well_with": [],
+    "best_holder": {
+      "nft_id": "3457",
+      "rank": 24
+    },
+    "fun_fact": "One of the original cultural bases."
+  },
+  "Papa Tang": {
+    "count": 250,
+    "percentile": 5.95,
+    "category": "Base",
+    "provenance_tier": "Heritage",
+    "cultural_note": "Founder energy. King of the grove.",
+    "pairs_well_with": [],
+    "best_holder": {
+      "nft_id": "3435",
+      "rank": 123
+    },
+    "fun_fact": "WMC creator. Tales of the Grove."
+  }
+}

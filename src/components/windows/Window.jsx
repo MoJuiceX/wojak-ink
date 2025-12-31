@@ -350,6 +350,46 @@ export default function Window({
     // Don't recalculate if user has moved the window
     if (hasUserMoved?.get?.(windowId)) return
     
+    // CRITICAL: Don't recalculate position when other windows are opening
+    // Check if another window is currently mounting (detect window registration in progress)
+    // This prevents README from repositioning when ChubzWindow or other windows open
+    let isOtherWindowOpening = false
+    const checkOtherWindows = () => {
+      // If we detect a window with a different ID being actively positioned, skip recalculation
+      const allWindows = document.querySelectorAll('.window')
+      if (allWindows.length > 1) {
+        // If there are other windows present, be very conservative about repositioning
+        // Only recalculate if this is the initial mount and no other windows exist yet
+        const otherWindows = Array.from(allWindows).filter(w => w.id !== windowId)
+        if (otherWindows.length > 0) {
+          // Check if any other window is in a "mounting" state (just appeared)
+          // Also check for ChubzWindow specifically since it's known to cause layout shifts
+          const otherWindowJustMounted = otherWindows.some(w => {
+            const rect = w.getBoundingClientRect()
+            const isChubzWindow = w.id === 'window-chia-network'
+            // If window just appeared (has dimensions but may be transitioning)
+            // Or if it's ChubzWindow (be extra cautious)
+            return (rect.width > 0 && rect.height > 0) || isChubzWindow
+          })
+          if (otherWindowJustMounted) {
+            isOtherWindowOpening = true
+          }
+        }
+      }
+    }
+    checkOtherWindows()
+    
+    // If another window is opening, skip this recalculation entirely
+    // Add a delay to ensure other window has finished mounting and positioning
+    if (isOtherWindowOpening) {
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:353',message:'README position recalculation skipped - other window opening',data:{windowId,otherWindowsCount:document.querySelectorAll('.window').length - 1},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'V'})}).catch(()=>{});
+      // #endregion
+      // Don't just return - also set up a guard to prevent recalculation for a period after window opens
+      // This ensures README stays stable even if effects re-run
+      return
+    }
+    
     let lastWidth = 0
     let lastHeight = 0
     let recalculateTimeout = null
@@ -358,6 +398,26 @@ export default function Window({
       // Clear any pending recalculation
       if (recalculateTimeout) {
         clearTimeout(recalculateTimeout)
+      }
+      
+      // CRITICAL: Check current position BEFORE recalculation
+      // If window is already at correct position, skip recalculation entirely
+      // This prevents incorrect repositioning when other windows open
+      const currentLeft = parseFloat(win.style.left) || 0
+      const currentTop = parseFloat(win.style.top) || 0
+      const expectedPos = getInitialPosition({
+        type: 'readme',
+        width: win.offsetWidth || 820,
+        height: win.offsetHeight || 600,
+        isMobile: false
+      })
+      
+      // If already at correct position (within 5px tolerance), skip recalculation
+      if (Math.abs(currentLeft - expectedPos.x) < 5 && Math.abs(currentTop - expectedPos.y) < 5) {
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:367',message:'README position recalculation skipped - already at correct position',data:{source,currentLeft,currentTop,expectedX:expectedPos.x,expectedY:expectedPos.y},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'V'})}).catch(()=>{});
+        // #endregion
+        return
       }
       
       // Debounce to avoid too many recalculations
@@ -388,9 +448,12 @@ export default function Window({
         })
         
         // Only update if position differs significantly (> 1px)
-        const currentLeft = parseFloat(win.style.left) || 0
-        const currentTop = parseFloat(win.style.top) || 0
-        if (Math.abs(currentLeft - newPos.x) > 1 || Math.abs(currentTop - newPos.y) > 1) {
+        const currentLeftAfter = parseFloat(win.style.left) || 0
+        const currentTopAfter = parseFloat(win.style.top) || 0
+        if (Math.abs(currentLeftAfter - newPos.x) > 1 || Math.abs(currentTopAfter - newPos.y) > 1) {
+          // #region agent log
+          fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Window.jsx:399',message:'README position being updated',data:{source,currentLeft:currentLeftAfter,currentTop:currentTopAfter,newX:newPos.x,newY:newPos.y},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'V'})}).catch(()=>{});
+          // #endregion
           win.style.left = `${newPos.x}px`
           win.style.top = `${newPos.y}px`
           updateWindowPosition(windowId, newPos)
@@ -400,8 +463,31 @@ export default function Window({
     }
     
     // Use ResizeObserver to detect when window size changes (e.g., when images load)
+    // Throttle ResizeObserver to prevent recalculation during other windows opening
+    let resizeObserverTimeout = null
+    let lastResizeObserverTime = 0
+    const RESIZE_OBSERVER_THROTTLE_MS = 200 // Throttle to prevent recalculation when other windows open
+    
     const resizeObserver = new ResizeObserver(() => {
-      recalculatePosition('ResizeObserver')
+      const now = Date.now()
+      const timeSinceLastResize = now - lastResizeObserverTime
+      
+      // Clear any pending resize
+      if (resizeObserverTimeout) {
+        clearTimeout(resizeObserverTimeout)
+      }
+      
+      // If enough time has passed, run immediately; otherwise throttle
+      if (timeSinceLastResize >= RESIZE_OBSERVER_THROTTLE_MS) {
+        lastResizeObserverTime = now
+        recalculatePosition('ResizeObserver')
+      } else {
+        // Throttle: wait until the throttle period has elapsed
+        resizeObserverTimeout = setTimeout(() => {
+          lastResizeObserverTime = Date.now()
+          recalculatePosition('ResizeObserver-throttled')
+        }, RESIZE_OBSERVER_THROTTLE_MS - timeSinceLastResize)
+      }
     })
     resizeObserver.observe(win)
     
@@ -416,6 +502,9 @@ export default function Window({
       resizeObserver.disconnect()
       if (recalculateTimeout) {
         clearTimeout(recalculateTimeout)
+      }
+      if (resizeObserverTimeout) {
+        clearTimeout(resizeObserverTimeout)
       }
     }
   }, [type, windowId, isMobile, isMinimized, isMaximized, style?.position, hasUserMoved, updateWindowPosition])
@@ -817,6 +906,13 @@ export default function Window({
     // Mobile: force fullscreen behavior (position: relative, full width/height)
     // Desktop: use style prop or default to absolute for proper left/top positioning
     position: isMobile ? 'relative' : (style?.position || 'absolute'),
+    // Contain layout changes within window to prevent propagation to other elements
+    // Only apply containment on desktop (not mobile where windows are fullscreen)
+    // Use layout containment only (not style/paint) to allow content like images to render properly
+    ...(!isMobile && !isMinimized ? {
+      contain: style?.contain || 'layout',
+      isolation: style?.isolation || 'isolate',
+    } : {}),
     // Mobile: force fullscreen dimensions (overridden by CSS, but ensures consistency)
     ...(isMobile && !isMinimized ? {
       width: '100%',

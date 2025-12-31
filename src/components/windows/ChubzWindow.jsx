@@ -2,10 +2,158 @@ import Window from './Window'
 import { useEffect, useRef, useState } from 'react'
 
 export default function ChubzWindow({ onClose }) {
+  // #region agent log
+  useEffect(() => {
+    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChubzWindow.jsx:4',message:'ChubzWindow mounted',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+    
+    // Track viewport/scroll position changes to identify layout shifts
+    const checkPositions = (label) => {
+      const desktopIconsContainer = document.querySelector('.desktop-image-icons-container');
+      const desktopContainer = document.querySelector('.desktop');
+      const desktopWrapper = document.querySelector('.desktop')?.parentElement;
+      const windowEl = document.querySelector('#window-chia-network');
+      const bodyEl = document.body;
+      const htmlEl = document.documentElement;
+      
+      const result = { 
+        label,
+        viewport: {
+          scrollX: window.scrollX,
+          scrollY: window.scrollY,
+          innerWidth: window.innerWidth,
+          innerHeight: window.innerHeight
+        }
+      };
+      
+      if (bodyEl) {
+        const bodyStyles = window.getComputedStyle(bodyEl);
+        const bodyRect = bodyEl.getBoundingClientRect();
+        result.body = {
+          overflow: bodyStyles.overflow,
+          position: bodyStyles.position,
+          top: bodyRect.top,
+          left: bodyRect.left,
+          scrollTop: bodyEl.scrollTop,
+          scrollLeft: bodyEl.scrollLeft
+        };
+      }
+      
+      if (htmlEl) {
+        const htmlStyles = window.getComputedStyle(htmlEl);
+        result.html = {
+          overflow: htmlStyles.overflow,
+          position: htmlStyles.position,
+          scrollTop: htmlEl.scrollTop,
+          scrollLeft: htmlEl.scrollLeft
+        };
+      }
+      
+      if (desktopIconsContainer) {
+        const rect = desktopIconsContainer.getBoundingClientRect();
+        const styles = window.getComputedStyle(desktopIconsContainer);
+        result.desktopIcons = {
+          display: styles.display,
+          visibility: styles.visibility,
+          opacity: styles.opacity,
+          zIndex: styles.zIndex,
+          position: styles.position,
+          width: rect.width,
+          height: rect.height,
+          top: rect.top,
+          left: rect.left
+        };
+      }
+      
+      if (desktopContainer) {
+        const rect = desktopContainer.getBoundingClientRect();
+        const styles = window.getComputedStyle(desktopContainer);
+        result.desktop = {
+          display: styles.display,
+          visibility: styles.visibility,
+          opacity: styles.opacity,
+          zIndex: styles.zIndex,
+          position: styles.position,
+          width: rect.width,
+          height: rect.height,
+          top: rect.top,
+          left: rect.left
+        };
+      }
+      
+      if (desktopWrapper) {
+        const rect = desktopWrapper.getBoundingClientRect();
+        const styles = window.getComputedStyle(desktopWrapper);
+        result.desktopWrapper = {
+          zIndex: styles.zIndex,
+          position: styles.position,
+          width: rect.width,
+          height: rect.height,
+          top: rect.top,
+          left: rect.left
+        };
+      }
+      
+      if (windowEl) {
+        const rect = windowEl.getBoundingClientRect();
+        const styles = window.getComputedStyle(windowEl);
+        result.window = {
+          display: styles.display,
+          position: styles.position,
+          zIndex: styles.zIndex,
+          width: rect.width,
+          height: rect.height,
+          top: rect.top,
+          left: rect.left
+        };
+      }
+      
+      const readmeWindow = document.querySelector('#window-readme-txt');
+      if (readmeWindow) {
+        const rect = readmeWindow.getBoundingClientRect();
+        const styles = window.getComputedStyle(readmeWindow);
+        result.readmeWindow = {
+          display: styles.display,
+          position: styles.position,
+          zIndex: styles.zIndex,
+          width: rect.width,
+          height: rect.height,
+          top: rect.top,
+          left: rect.left,
+          bottom: rect.bottom,
+          right: rect.right
+        };
+      }
+      
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChubzWindow.jsx:10',message:`Position check: ${label}`,data:result,timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'R'})}).catch(()=>{});
+    };
+    
+    // Monitor scroll events to detect viewport shifts
+    const handleScroll = () => {
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChubzWindow.jsx:scroll',message:'Page scroll detected',data:{scrollX:window.scrollX,scrollY:window.scrollY,bodyScrollTop:document.body.scrollTop,htmlScrollTop:document.documentElement.scrollTop},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'R'})}).catch(()=>{});
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    // Check before mount completes
+    checkPositions('before mount');
+    
+    // Check after mount
+    setTimeout(() => checkPositions('after 100ms'), 100);
+    setTimeout(() => checkPositions('after 500ms'), 500);
+    setTimeout(() => checkPositions('after 1000ms'), 1000);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+  // #endregion
+  
   const contentRef = useRef(null)
   const [winWidth, setWinWidth] = useState(null)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 640)
+  const isCalculatingWidthRef = useRef(false)
 
+  // Defer width calculation until after initial mount to prevent layout shifts
   useEffect(() => {
     const el = contentRef.current
     if (!el) return
@@ -17,27 +165,55 @@ export default function ChubzWindow({ onClose }) {
         return
       }
 
+      // Prevent multiple simultaneous calculations
+      if (isCalculatingWidthRef.current) return
+      isCalculatingWidthRef.current = true
+
       // On mobile, always use full width
       if (window.innerWidth <= 640) {
         setWinWidth(null) // Let CSS handle full width on mobile
+        isCalculatingWidthRef.current = false
         return
       }
 
-      const contentW = el.scrollWidth
-      const padding = 40 // window inner padding + borders buffer
-      const maxW = Math.min(900, window.innerWidth - 80) // clamp for desktop
-      const minW = 420
+      // Use requestAnimationFrame to batch the layout read and prevent causing reflow
+      requestAnimationFrame(() => {
+        // Only read layout after ensuring window is positioned
+        const contentW = el.scrollWidth
+        const padding = 40 // window inner padding + borders buffer
+        const maxW = Math.min(900, window.innerWidth - 80) // clamp for desktop
+        const minW = 420
 
-      const target = Math.max(minW, Math.min(maxW, contentW + padding))
-      setWinWidth(target)
+        const target = Math.max(minW, Math.min(maxW, contentW + padding))
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChubzWindow.jsx:161',message:'ChubzWindow compute width',data:{contentW,innerWidth:window.innerWidth,target,scrollY:window.scrollY},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'S'})}).catch(()=>{});
+        // #endregion
+        setWinWidth(target)
+        isCalculatingWidthRef.current = false
+      })
     }
 
-    compute()
+    // Defer initial calculation significantly to avoid interfering with other windows during mount
+    // Use longer delay to ensure window positioning is complete and stable
+    const scheduleCompute = () => {
+      // Wait for window to be positioned and all other windows to settle
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(compute, { timeout: 1000 })
+      } else {
+        // Use longer delay to ensure window positioning completes first
+        setTimeout(compute, 500)
+      }
+    }
+
+    scheduleCompute()
 
     // Recompute on resize (and after fonts/layout changes via resize)
     // Use debounce to prevent excessive recalculations
     let resizeTimeout
     const handleResize = () => {
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChubzWindow.jsx:169',message:'ChubzWindow resize handler fired',data:{innerWidth:window.innerWidth,innerHeight:window.innerHeight,scrollY:window.scrollY},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'S'})}).catch(()=>{});
+      // #endregion
       setIsMobile(window.innerWidth <= 640)
       clearTimeout(resizeTimeout)
       resizeTimeout = setTimeout(compute, 100)
@@ -47,10 +223,14 @@ export default function ChubzWindow({ onClose }) {
     return () => {
       window.removeEventListener('resize', handleResize)
       clearTimeout(resizeTimeout)
+      isCalculatingWidthRef.current = false
     }
   }, [])
 
   // Ensure scrollbar is always visible (Windows 98 behavior)
+  // Use ref to track scrollbar state across remounts to prevent multiple scroll manipulations
+  const scrollbarEnsuredRef = useRef(false)
+  
   useEffect(() => {
     const contentEl = contentRef.current
     if (!contentEl) return
@@ -74,10 +254,18 @@ export default function ChubzWindow({ onClose }) {
       windowBody.style.flex = '1 1 0%'
       windowBody.style.minHeight = '0'
       windowBody.style.maxHeight = '100%'
+      // Ensure window-body scroll doesn't affect page scroll or layout
+      windowBody.style.overscrollBehavior = 'contain'
+      // Use layout containment only to prevent layout shifts but allow content rendering
+      windowBody.style.contain = 'layout'
+      // Additional isolation to prevent layout propagation
+      windowBody.style.isolation = 'isolate'
+      // Prevent scroll chaining
+      windowBody.style.overscrollBehaviorY = 'contain'
     }
 
-    // Force immediately - don't wait
-    forceHeightConstraint()
+    // Don't force immediately - defer to avoid causing layout shifts during mount
+    // The window should be positioned first before we manipulate its internal layout
 
     // Add a tiny invisible spacer at the end of content to ensure there's always overflow
     let spacer = contentEl.querySelector('.scrollbar-spacer')
@@ -92,58 +280,193 @@ export default function ChubzWindow({ onClose }) {
     }
 
     // Force scrollbar to appear by doing a tiny scroll
+    // Only run scroll manipulation once across all remounts using ref
     const ensureScrollbar = () => {
-      windowBody.style.overflowY = 'scroll'
-      
-      // Force scrollbar by doing a tiny scroll manipulation
-      const currentScroll = windowBody.scrollTop
-      windowBody.scrollTop = 0.5
-      requestAnimationFrame(() => {
-        windowBody.scrollTop = 0
-      })
+      try {
+        if (scrollbarEnsuredRef.current) {
+          // Already ensured, just set overflow
+          windowBody.style.overflowY = 'scroll'
+          return
+        }
+        
+        // CRITICAL: Ensure windowBody is contained and isolated before any manipulation
+        if (!windowBody || !document.body.contains(windowBody)) return
+        
+        // Store page scroll position BEFORE any manipulation to prevent layout shifts
+        const pageScrollY = window.scrollY
+        const pageScrollX = window.scrollX
+        
+        // Ensure windowBody is completely isolated from page layout
+        windowBody.style.overflowY = 'scroll'
+        windowBody.style.overscrollBehavior = 'contain'
+        windowBody.style.isolation = 'isolate'
+        
+        // Mark as ensuring to prevent multiple simultaneous calls
+        scrollbarEnsuredRef.current = true
+        
+        // Use will-change to hint browser to isolate this element from page layout
+        windowBody.style.willChange = 'scroll-position'
+        
+        // Delay scroll manipulation to avoid interfering with initial layout
+        // Use longer delay to ensure other windows have finished mounting
+        setTimeout(() => {
+          requestAnimationFrame(() => {
+            // Only manipulate if still mounted and body still exists
+            if (!windowBody || !document.body.contains(windowBody)) {
+              scrollbarEnsuredRef.current = false
+              return
+            }
+            
+            try {
+              const beforeScroll = windowBody.scrollTop
+              // Use requestAnimationFrame to ensure this happens after layout
+              requestAnimationFrame(() => {
+                if (!windowBody || !document.body.contains(windowBody)) {
+                  scrollbarEnsuredRef.current = false
+                  return
+                }
+                
+                try {
+                  // Tiny scroll to trigger scrollbar
+                  windowBody.scrollTop = 0.5
+                  
+                  requestAnimationFrame(() => {
+                    if (!windowBody || !document.body.contains(windowBody)) {
+                      scrollbarEnsuredRef.current = false
+                      return
+                    }
+                    
+                    try {
+                      windowBody.scrollTop = 0
+                      windowBody.style.willChange = 'auto'
+                      
+                      // CRITICAL: Ensure page scroll position didn't change
+                      // Restore immediately if it changed, with no visual delay
+                      if (window.scrollY !== pageScrollY || window.scrollX !== pageScrollX) {
+                        // Use scrollTo with instant behavior to prevent any visual shift
+                        window.scrollTo({ left: pageScrollX, top: pageScrollY, behavior: 'instant' })
+                      }
+                      
+                      // #region agent log
+                      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChubzWindow.jsx:186',message:'ChubzWindow scroll reset',data:{afterScrollTop:windowBody.scrollTop,beforeScroll,pageScrollY:window.scrollY,pageScrollX:window.scrollX},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'Q'})}).catch(()=>{});
+                      // #endregion
+                    } catch (e) {
+                      console.error('[ChubzWindow] Error in scrollbar reset:', e)
+                      scrollbarEnsuredRef.current = false
+                    }
+                  })
+                } catch (e) {
+                  console.error('[ChubzWindow] Error setting scrollTop:', e)
+                  scrollbarEnsuredRef.current = false
+                }
+              })
+            } catch (e) {
+              console.error('[ChubzWindow] Error in scrollbar manipulation:', e)
+              scrollbarEnsuredRef.current = false
+            }
+          })
+        }, 100) // Increased delay to avoid interfering with other windows
+      } catch (e) {
+        console.error('[ChubzWindow] Error in ensureScrollbar:', e)
+        scrollbarEnsuredRef.current = false
+      }
     }
 
     // Use ResizeObserver to detect when window-body is ready
-    const resizeObserver = new ResizeObserver(() => {
-      forceHeightConstraint()
-      requestAnimationFrame(() => {
-        ensureScrollbar()
-      })
-    })
+    // Throttle ResizeObserver to prevent excessive layout thrashing
+    let resizeTimeout = null
+    let lastResizeTime = 0
+    const RESIZE_THROTTLE_MS = 300 // Increased throttle to prevent interfering with other windows
     
-    resizeObserver.observe(windowBody)
-    if (windowEl) {
-      resizeObserver.observe(windowEl)
-    }
-
-    // Force multiple times to catch all cases
-    requestAnimationFrame(() => {
-      forceHeightConstraint()
-      ensureScrollbar()
-      requestAnimationFrame(() => {
+    // Flag to prevent ResizeObserver from running during initial mount
+    let isInitialMount = true
+    setTimeout(() => {
+      isInitialMount = false
+    }, 500) // Wait 500ms after mount before allowing ResizeObserver to trigger
+    
+    const resizeObserver = new ResizeObserver((entries) => {
+      // Skip during initial mount to prevent layout shifts
+      if (isInitialMount) return
+      
+      const now = Date.now()
+      const timeSinceLastResize = now - lastResizeTime
+      
+      // Clear any pending resize
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout)
+      }
+      
+      // If enough time has passed, run immediately; otherwise throttle
+      if (timeSinceLastResize >= RESIZE_THROTTLE_MS) {
+        lastResizeTime = now
         forceHeightConstraint()
-        ensureScrollbar()
-      })
+        requestAnimationFrame(() => {
+          // Delay scrollbar manipulation to avoid layout shifts
+          setTimeout(() => {
+            ensureScrollbar()
+          }, 50)
+        })
+      } else {
+        // Throttle: wait until the throttle period has elapsed
+        resizeTimeout = setTimeout(() => {
+          lastResizeTime = Date.now()
+          forceHeightConstraint()
+          requestAnimationFrame(() => {
+            setTimeout(() => {
+              ensureScrollbar()
+            }, 50)
+          })
+        }, RESIZE_THROTTLE_MS - timeSinceLastResize)
+      }
     })
     
-    const timeout1 = setTimeout(() => {
-      forceHeightConstraint()
-      ensureScrollbar()
-    }, 10)
-    const timeout2 = setTimeout(() => {
-      forceHeightConstraint()
-      ensureScrollbar()
-    }, 50)
-    const timeout3 = setTimeout(() => {
-      forceHeightConstraint()
-      ensureScrollbar()
-    }, 150)
+
+    // Defer all operations to avoid interfering with initial mount and other windows
+    // Use longer delay to ensure other windows have finished their positioning
+    const deferredInit = () => {
+      // Wait for window to be fully positioned and stable
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          // Apply height constraint after positioning is stable
+          forceHeightConstraint()
+          // Defer scrollbar manipulation even further
+          setTimeout(() => {
+            requestAnimationFrame(() => {
+              ensureScrollbar()
+            })
+          }, 300)
+        })
+      })
+    }
+    
+    // Start deferred initialization after window is positioned and other windows are stable
+    // Longer delay ensures no interference with other window positioning
+    const deferredInitTimeout = setTimeout(deferredInit, 300)
+    
+    // Store the observer setup timeout for cleanup
+    let observerSetupTimeout = null
+    if (windowBody || windowEl) {
+      observerSetupTimeout = setTimeout(() => {
+        if (windowBody && document.body.contains(windowBody)) {
+          resizeObserver.observe(windowBody)
+        }
+        if (windowEl && document.body.contains(windowEl)) {
+          resizeObserver.observe(windowEl)
+        }
+      }, 500)
+    }
     
     return () => {
       resizeObserver.disconnect()
-      clearTimeout(timeout1)
-      clearTimeout(timeout2)
-      clearTimeout(timeout3)
+      clearTimeout(deferredInitTimeout)
+      if (observerSetupTimeout) {
+        clearTimeout(observerSetupTimeout)
+      }
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout)
+      }
+      // Reset scrollbar ensured flag so it can be re-ensured if window reopens
+      scrollbarEnsuredRef.current = false
     }
   }, [])
 
@@ -167,7 +490,12 @@ export default function ChubzWindow({ onClose }) {
           minWidth: '420px',
           minHeight: '500px', // Minimum height for ChubzWindow
         }),
-        position: 'relative',
+        // Use absolute positioning (default) instead of relative to ensure proper stacking
+        // position: 'relative' was causing desktop icons to disappear
+        position: 'absolute',
+        // Use layout containment to isolate from document layout (allows images to render)
+        contain: 'layout', // Isolate layout changes but allow images/paint to work
+        isolation: 'isolate', // Create new stacking context to prevent layout propagation
       }}
       onClose={onClose}
     >
@@ -178,7 +506,7 @@ export default function ChubzWindow({ onClose }) {
           display: 'block',
         }}
       >
-        <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '16px', contain: 'layout' }}>
           <img 
             src="/assets/images/chubz-banner.jpeg" 
             alt="The Bitcoin Killer - Proof of Space and Time" 
@@ -188,6 +516,7 @@ export default function ChubzWindow({ onClose }) {
               height: 'auto',
               display: 'block',
               border: '1px solid var(--border-dark)',
+              contain: 'layout', // Allow image to render while containing layout
             }} 
           />
         </div>

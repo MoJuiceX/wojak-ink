@@ -1,7 +1,7 @@
 import Window from './Window'
 import { playSound } from '../../utils/soundManager'
 
-const COMMUNITY_LINKS = [
+export const COMMUNITY_LINKS = [
   {
     name: 'Chia Network',
     url: 'https://www.chia.net/',

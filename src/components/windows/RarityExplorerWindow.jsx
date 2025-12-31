@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import Window from './Window'
 import WojakRarityExplorer from '../WojakRarityExplorer'
 import BigPulpWindow from './BigPulpWindow'
+import BigPulpIntelligenceWindow from './BigPulpIntelligenceWindow'
 
 export default function RarityExplorerWindow({ onClose }) {
   // Load all three Big Pulp JSON files
@@ -194,6 +195,21 @@ export default function RarityExplorerWindow({ onClose }) {
     }
   }, [])
 
+  // State for Big Pulp Question Tree window
+  const [bigPulpQuestionTreeOpen, setBigPulpQuestionTreeOpen] = useState(false)
+
+  // Check if commentary exists for a given NFT ID
+  const hasCommentary = (nftId) => {
+    if (!nftId || !bigPulpLoaded) return false
+    const nftIdStr = String(nftId)
+    // Check if any version (A, B, or C) has commentary for this NFT
+    return !!(
+      (bigPulpData.A && (bigPulpData.A[nftIdStr] || bigPulpData.A[String(parseInt(nftIdStr))])) ||
+      (bigPulpData.B && (bigPulpData.B[nftIdStr] || bigPulpData.B[String(parseInt(nftIdStr))])) ||
+      (bigPulpData.C && (bigPulpData.C[nftIdStr] || bigPulpData.C[String(parseInt(nftIdStr))]))
+    )
+  }
+
   return (
     <>
       <Window
@@ -208,7 +224,12 @@ export default function RarityExplorerWindow({ onClose }) {
         }}
         onClose={onClose}
       >
-        <WojakRarityExplorer onClose={onClose} onOpenBigPulp={handleOpenBigPulp} />
+        <WojakRarityExplorer 
+          onClose={onClose} 
+          onOpenBigPulp={handleOpenBigPulp}
+          onOpenBigPulpQuestionTree={() => setBigPulpQuestionTreeOpen(true)}
+          hasCommentary={hasCommentary}
+        />
       </Window>
       
       {openBigPulpWindows.map(({ nftId, nftData, currentVersion, currentImage, clickCount }) => {
@@ -259,6 +280,12 @@ export default function RarityExplorerWindow({ onClose }) {
           />
         )
       })}
+
+      {bigPulpQuestionTreeOpen && (
+        <BigPulpIntelligenceWindow
+          onClose={() => setBigPulpQuestionTreeOpen(false)}
+        />
+      )}
     </>
   )
 }

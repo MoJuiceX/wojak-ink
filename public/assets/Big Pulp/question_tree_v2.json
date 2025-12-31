@@ -1,0 +1,398 @@
+{
+  "version": "2.0",
+  "description": "Big Pulp Question Tree with dynamic NFT analysis support",
+  "categories": [
+    {
+      "id": "my_nft",
+      "name": "\ud83d\udd0d About My NFT",
+      "icon": "\ud83d\udd0d",
+      "description": "Questions about the NFT you're viewing",
+      "requires_context": true
+    },
+    {
+      "id": "top_nfts",
+      "name": "\ud83c\udfc6 Top NFTs",
+      "icon": "\ud83c\udfc6",
+      "description": "Best NFTs by base type and traits"
+    },
+    {
+      "id": "traits",
+      "name": "\u2b50 S-Tier Traits",
+      "icon": "\u2b50",
+      "description": "Learn about high-provenance traits"
+    },
+    {
+      "id": "combos",
+      "name": "\ud83d\udd25 Named Combos",
+      "icon": "\ud83d\udd25",
+      "description": "Legendary trait combinations"
+    },
+    {
+      "id": "learn",
+      "name": "\ud83d\udcda Learn",
+      "icon": "\ud83d\udcda",
+      "description": "Understand rarity vs provenance"
+    },
+    {
+      "id": "stats",
+      "name": "\ud83d\udcca Collection Stats",
+      "icon": "\ud83d\udcca",
+      "description": "Numbers and facts"
+    }
+  ],
+  "dynamic_questions": [
+    {
+      "id": "whats_special",
+      "category": "my_nft",
+      "question": "What's special about this NFT?",
+      "short": "What's special?",
+      "type": "dynamic",
+      "answer_logic": "full_analysis",
+      "description": "Complete analysis of rank, traits, combos, and provenance"
+    },
+    {
+      "id": "rarest_thing",
+      "category": "my_nft",
+      "question": "What's the rarest thing about this NFT?",
+      "short": "Rarest feature?",
+      "type": "dynamic",
+      "answer_logic": "rarest_feature",
+      "description": "Highlights unique pairings, rare combos, or scarcest traits"
+    },
+    {
+      "id": "how_compare",
+      "category": "my_nft",
+      "question": "How does this compare to similar NFTs?",
+      "short": "How does it compare?",
+      "type": "dynamic",
+      "answer_logic": "base_comparison",
+      "description": "Ranking within base type and comparison to peers"
+    },
+    {
+      "id": "provenance_story",
+      "category": "my_nft",
+      "question": "What's the provenance story here?",
+      "short": "Provenance?",
+      "type": "dynamic",
+      "answer_logic": "provenance_analysis",
+      "description": "Cultural significance, S-tier traits, community recognition"
+    },
+    {
+      "id": "flex_line",
+      "category": "my_nft",
+      "question": "Give me a flex line for this NFT",
+      "short": "Flex line?",
+      "type": "dynamic",
+      "answer_logic": "flex_line",
+      "description": "One compelling sentence to share about this NFT"
+    },
+    {
+      "id": "hidden_gem",
+      "category": "my_nft",
+      "question": "Is there a hidden gem aspect to this NFT?",
+      "short": "Hidden gem?",
+      "type": "dynamic",
+      "answer_logic": "hidden_gem",
+      "description": "Underappreciated features or undervalued aspects"
+    }
+  ],
+  "static_questions": [
+    {
+      "id": "best_wojaks",
+      "category": "top_nfts",
+      "question": "Show me the best Wojaks",
+      "short": "Best Wojaks",
+      "type": "static",
+      "answer": "Top Wojaks out of 1,996:\n\n#41 (Rank 59) - The best Wojak. Straitjacket + Wizard Glasses. Asylum Patient combo. 1-of-1 pairing.\n#46 (Rank 91) - Second best. Field Cap + Straitjacket.\n#47 (Rank 114) - Firefighter Helmet + Straitjacket.\n#1392 (Rank 168) - Leather Jacket + Fake It Mask.\n#49 (Rank 183) - Trump Wave + Straitjacket.\n\nStraitjacket dominates the top Wojaks. Asylum energy runs deep. \ud83c\udf4a",
+      "nft_ids": [
+        "41",
+        "46",
+        "47",
+        "1392",
+        "49"
+      ]
+    },
+    {
+      "id": "best_soyjaks",
+      "category": "top_nfts",
+      "question": "Show me the best Soyjaks",
+      "short": "Best Soyjaks",
+      "type": "static",
+      "answer": "Top Soyjaks out of 750:\n\n#2157 (Rank 11) - THE best Soyjak. Top 11 overall. Soy Hair + Straitjacket + Matrix Lenses.\n#2160 (Rank 17) - Comrade Hat + Straitjacket.\n#2742 (Rank 36) - Super Saiyan Uniform + Cyber Shades.\n#2090 (Rank 136) - Pirate Hat + Bathrobe.\n#2517 (Rank 144) - Sports Jacket + Night Vision.\n\nSoyjaks punch above their weight. #2157 at Rank 11 is elite. \ud83c\udf4a",
+      "nft_ids": [
+        "2157",
+        "2160",
+        "2742",
+        "2090",
+        "2517"
+      ]
+    },
+    {
+      "id": "best_waifus",
+      "category": "top_nfts",
+      "question": "Show me the best Waifus",
+      "short": "Best Waifus",
+      "type": "static",
+      "answer": "Top Waifus out of 250:\n\n#2883 (Rank 29) - Best Waifu. Mermaid Waves + Roman Drip + Fake It Mask.\n#2983 (Rank 32) - Tiara + Vintage Dress + 3D Glasses.\n#2796 (Rank 38) - Tiara + Denim Vest + Cyber Shades.\n#2914 (Rank 57) - Tiara + School Uniform.\n#2868 (Rank 85) - Devil Horns + Prom Dress + Laser Eyes.\n\nTiaras dominate the top Waifus. Royal energy. \ud83d\udc51",
+      "nft_ids": [
+        "2883",
+        "2983",
+        "2796",
+        "2914",
+        "2868"
+      ]
+    },
+    {
+      "id": "best_baddies",
+      "category": "top_nfts",
+      "question": "Show me the best Baddies",
+      "short": "Best Baddies",
+      "type": "static",
+      "answer": "Top Baddies out of 200:\n\n#3137 (Rank 7) - THE best Baddie. Top 10 overall! Beanie + School Uniform + Clown Nose.\n#3081 (Rank 39) - Twin Braids + Pickle Suit.\n#3083 (Rank 52) - Mermaid Waves + Pickle Suit + Laser Eyes.\n#3076 (Rank 58) - Pepe Suit + 3D Glasses.\n#3038 (Rank 61) - Beanie + Denim Vest + Night Vision.\n\nPickle Suits and Pepe Suits rank high. Costume game strong. \ud83c\udf4a",
+      "nft_ids": [
+        "3137",
+        "3081",
+        "3083",
+        "3076",
+        "3038"
+      ]
+    },
+    {
+      "id": "best_monkey_zoo",
+      "category": "top_nfts",
+      "question": "Show me the best Monkey Zoos",
+      "short": "Best Monkey Zoos",
+      "type": "static",
+      "answer": "Top Monkey Zoos out of 200. OG heritage:\n\n#3457 (Rank 24) - Best Monkey Zoo. 2Pac Bandana + Bathrobe + VR Headset.\n#3503 (Rank 63) - Headphones + Chia Farmer + Aviators.\n#3458 (Rank 96) - Cowboy Hat + Bathrobe + Laser Eyes.\n#3535 (Rank 111) - Centurion + Roman Drip.\n#3570 (Rank 112) - Headphones + Sports Jacket + MOG Glasses.\n\nMonkey Zoo carries OG ape heritage. Cultural weight from the early grove. \ud83c\udf4a",
+      "nft_ids": [
+        "3457",
+        "3503",
+        "3458",
+        "3535",
+        "3570"
+      ]
+    },
+    {
+      "id": "best_papa_tang",
+      "category": "top_nfts",
+      "question": "Show me the best Papa Tangs",
+      "short": "Best Papa Tangs",
+      "type": "static",
+      "answer": "Top Papa Tangs out of 250. Founder energy:\n\n#3435 (Rank 123) - Best Papa Tang. Clown + Topless + VR Headset.\n#3363 (Rank 160) - Firefighter Helmet + Super Saiyan Uniform.\n#3242 (Rank 162) - Beer Hat + Born to Ride + VR Headset.\n#3298 (Rank 251) - SWAT Helmet + Ronin.\n#3213 (Rank 253) - Super Saiyan + Bepe Army.\n\nPapa Tang = King of the Grove. WMC founder energy. \ud83c\udf4a",
+      "nft_ids": [
+        "3435",
+        "3363",
+        "3242",
+        "3298",
+        "3213"
+      ]
+    },
+    {
+      "id": "best_alien_wojaks",
+      "category": "top_nfts",
+      "question": "Show me the best Alien Wojaks",
+      "short": "Best Alien Wojaks",
+      "type": "static",
+      "answer": "Alien Wojaks DOMINATE the rankings. 100 total:\n\n#3729 (Rank 1) - THE #1 NFT. Full Piccolo + Fake It Mask.\n#3707 (Rank 2) - Full Piccolo + Eye Patch.\n#3728 (Rank 3) - Full Piccolo + Matrix Lenses.\n#3705 (Rank 4) - Full Piccolo + Aviators.\n#3703 (Rank 5) - Full Piccolo + Matrix Lenses.\n\nTop 5 NFTs in the ENTIRE collection are Full Piccolo Alien Wojaks. Namekian royalty. \ud83d\udc51",
+      "nft_ids": [
+        "3729",
+        "3707",
+        "3728",
+        "3705",
+        "3703"
+      ]
+    },
+    {
+      "id": "best_bepe_waifus",
+      "category": "top_nfts",
+      "question": "Show me the best Bepe Waifus",
+      "short": "Best Bepe Waifus",
+      "type": "static",
+      "answer": "Bepe Waifus\u2014only 42 exist:\n\n#4121 (Rank 8) - Top 10 overall! Ponytail + Sports Bra + Aviators.\n#4148 (Rank 12) - Mermaid Waves + Prom Dress.\n#4145 (Rank 13) - Vixen Waves + School Uniform + Matrix Lenses.\n#4154 (Rank 15) - Twin Braids + Denim Vest.\n#4122 (Rank 16) - Mermaid Waves + Bepe Suit.\n\nBepe Waifus STACK in the top 20. Low supply + frog energy. \ud83c\udf4a",
+      "nft_ids": [
+        "4121",
+        "4148",
+        "4145",
+        "4154",
+        "4122"
+      ]
+    },
+    {
+      "id": "best_bepe_baddies",
+      "category": "top_nfts",
+      "question": "Show me the best Bepe Baddies",
+      "short": "Best Bepe Baddies",
+      "type": "static",
+      "answer": "Bepe Baddies\u201442 total, and they dominate:\n\n#4186 (Rank 9) - Top 10! Power Bob + School Uniform + Cyber Shades.\n#4189 (Rank 26) - Vixen Waves + Prom Dress + Alpha Shades.\n#4164 (Rank 28) - Ponytail + Born to Ride.\n#4162 (Rank 30) - Twin Braids + Sports Bra + MOG Glasses.\n#4163 (Rank 31) - Mermaid Waves + Bepe Suit + MOG Glasses.\n\nBepe Baddies cluster in the top 50. MOG Glasses combo is killer. \ud83c\udf4a",
+      "nft_ids": [
+        "4186",
+        "4189",
+        "4164",
+        "4162",
+        "4163"
+      ]
+    },
+    {
+      "id": "crown_trait",
+      "category": "traits",
+      "question": "Tell me about Crown",
+      "short": "Crown",
+      "type": "static",
+      "answer": "Crown - 140 exist (3.3%)\n\nProvenance: S-Tier (Most Wanted)\n\nCrown is THE most wanted trait. Not because it's rare\u2014140 isn't that scarce. It's because the community decided Crown = royalty.\n\nBest Crown holder: #2867 (Rank 88, Waifu)\n\nCrown holders are the Royal Club. Community-recognized status. When Tang Gang started, Crown became a symbol organically\u2014through memes, Discord, collective agreement.\n\nPairs well with: Neckbeard, MOG Glasses, Military Beret\n\nThat's provenance you can't manufacture. \ud83d\udc51",
+      "nft_ids": [
+        "2867"
+      ]
+    },
+    {
+      "id": "neckbeard_trait",
+      "category": "traits",
+      "question": "Tell me about Neckbeard",
+      "short": "Neckbeard",
+      "type": "static",
+      "answer": "Neckbeard - 184 exist (4.4%)\n\nProvenance: S-Tier (Cultural Cornerstone)\n\nNeckbeard is where 'Winners Win' comes from. This is WMC heritage\u2014World Meme Championship culture encoded in a trait.\n\nBest Neckbeard holder: #3796 (Rank 60, Alien Soyjak)\n\nThe blade has been studied. Neckbeard + Fedora = Classic Neckbeard combo (only 6 exist).\n\nPairs well with: Fedora, Crown, Military Beret, $NECKCOIN\n\nWinners win. \ud83c\udf4a",
+      "nft_ids": [
+        "3796"
+      ]
+    },
+    {
+      "id": "military_beret_trait",
+      "category": "traits",
+      "question": "Tell me about Military Beret",
+      "short": "Military Beret",
+      "type": "static",
+      "answer": "Military Beret - 164 exist (3.9%)\n\nProvenance: S-Tier (Second Most Wanted)\n\nThe beret stays on. That's not a suggestion\u2014it's identity.\n\nBest Beret holder: #3844 (Rank 100, Alien Waifu)\n\nCommunity meme: 'The beret stays on' during any activity. This trait signals commitment.\n\nPairs well with: Neckbeard, Crown, MOG Glasses\n\nThe beret. Stays. On. \ud83c\udf4a",
+      "nft_ids": [
+        "3844"
+      ]
+    },
+    {
+      "id": "straitjacket_trait",
+      "category": "traits",
+      "question": "Tell me about Straitjacket",
+      "short": "Straitjacket",
+      "type": "static",
+      "answer": "Straitjacket - 86 exist (2.0%)\n\nProvenance: S-Tier (Chaos Energy)\n\nStraitjacket is the Asylum Patient combo piece. Pure chaos energy.\n\nBest Straitjacket holder: #2157 (Rank 11, Soyjak)\n\nStraitjacket + Hannibal Mask = Asylum Patient (30 exist). The asylum couldn't contain these rankings.\n\nPairs well with: Hannibal Mask, Crazy Room, Matrix Lenses\n\nThey tried to contain this. Didn't work. \ud83c\udf4a",
+      "nft_ids": [
+        "2157"
+      ]
+    },
+    {
+      "id": "mog_glasses_trait",
+      "category": "traits",
+      "question": "Tell me about MOG Glasses",
+      "short": "MOG Glasses",
+      "type": "static",
+      "answer": "MOG Glasses - 302 exist (7.2%)\n\nProvenance: S-Tier (Peak Face Wear)\n\nMOG Glasses = dominance signifier. Peak face wear in Tang Gang.\n\nBest MOG Glasses holder: #3879 (Rank 23, Alien Baddie)\n\nFun fact: 4 of the top 5 MOG Glasses holders are Bepe Baddies. That combo hits different.\n\nPairs well with: Crown, Military Beret, Bepe bases\n\nMogging since mint. \ud83c\udf4a",
+      "nft_ids": [
+        "3879"
+      ]
+    },
+    {
+      "id": "full_piccolo",
+      "category": "combos",
+      "question": "What is the Full Piccolo combo?",
+      "short": "Full Piccolo",
+      "type": "static",
+      "answer": "Full Piccolo - 7 exist\n\nRequires: Piccolo Turban + Piccolo Uniform\n\nThis is the rarest named combo. Namekian royalty.\n\nThe top 5 NFTs in the ENTIRE collection are all Full Piccolo Alien Wojaks:\n\u2022 #3729 (Rank 1)\n\u2022 #3707 (Rank 2)\n\u2022 #3728 (Rank 3)\n\u2022 #3705 (Rank 4)\n\u2022 #3703 (Rank 5)\n\nThat's not coincidence. That's dominance. \ud83d\udc51",
+      "nft_ids": [
+        "3729",
+        "3707",
+        "3728",
+        "3705",
+        "3703"
+      ]
+    },
+    {
+      "id": "honk_gang",
+      "category": "combos",
+      "question": "What is the Honk Gang combo?",
+      "short": "Honk Gang",
+      "type": "static",
+      "answer": "Honk Gang - Only 4 exist\n\nRequires: Goose Suit + $HONK background\n\nPeace was never an option.\n\nThe complete Honk Gang:\n\u2022 #2814 (Rank 337) - Waifu\n\u2022 #2068 (Rank 364) - Soyjak\n\u2022 #210 (Rank 938) - Wojak\n\u2022 #2813 (Rank 1296) - Waifu\n\nThat's it. 4 out of 4,200. If you have one, you have something special. HONK. \ud83c\udf4a",
+      "nft_ids": [
+        "2814",
+        "2068",
+        "210",
+        "2813"
+      ]
+    },
+    {
+      "id": "asylum_patient",
+      "category": "combos",
+      "question": "What is the Asylum Patient combo?",
+      "short": "Asylum Patient",
+      "type": "static",
+      "answer": "Asylum Patient - 30 exist\n\nRequires: Straitjacket + Hannibal Mask\n\nThe containment aesthetic. Chaos energy.\n\nTop Asylum Patients:\n\u2022 #41 (Rank 59) - Best Wojak overall\n\u2022 #46 (Rank 91) - Field Cap variant\n\u2022 #47 (Rank 114) - Firefighter Helmet variant\n\u2022 #49 (Rank 183) - Trump Wave variant\n\u2022 #45 (Rank 201) - Full containment\n\nThey tried to contain these. Top 5 Asylum Patients are all in top 210. \ud83c\udf4a",
+      "nft_ids": [
+        "41",
+        "46",
+        "47",
+        "49",
+        "45"
+      ]
+    },
+    {
+      "id": "classic_neckbeard",
+      "category": "combos",
+      "question": "What is the Classic Neckbeard combo?",
+      "short": "Classic Neckbeard",
+      "type": "static",
+      "answer": "Classic Neckbeard - Only 6 exist\n\nRequires: Neckbeard + Fedora\n\nThe blade has been studied.\n\nThe complete list:\n\u2022 #3807 (Rank 641) - Alien Wojak\n\u2022 #3922 (Rank 671) - Bepe Wojak\n\u2022 #2165 (Rank 751) - Soyjak\n\u2022 #8 (Rank 1122) - OG Wojak\n\u2022 #349 (Rank 2317) - Wojak\n\u2022 Plus one more\n\n*tips fedora* M'provenance. \ud83c\udf4a",
+      "nft_ids": [
+        "3807",
+        "3922",
+        "2165",
+        "8",
+        "349"
+      ]
+    },
+    {
+      "id": "what_is_provenance",
+      "category": "learn",
+      "question": "What is provenance?",
+      "short": "Provenance explained",
+      "type": "static",
+      "answer": "Here's the deal:\n\n\ud83d\udcc8 RARITY = Math\nHow many exist? Statistical scarcity. Objective.\n\n\ud83d\udc51 PROVENANCE = Culture\nWhat does the community value? Cultural significance. Subjective but powerful.\n\nExample: Crown has 140 copies. Not super rare statistically. But Crown is the #1 most WANTED trait because the community decided it means royalty.\n\nAnother example: Neckbeard has 184 copies. But it's S-tier provenance because the Neckbeard community built 'Winners Win' culture.\n\nThe best NFTs have BOTH low rarity AND high provenance. That's the sweet spot. \ud83c\udf4a"
+    },
+    {
+      "id": "what_are_tiers",
+      "category": "learn",
+      "question": "How do ranking tiers work?",
+      "short": "Ranking tiers",
+      "type": "static",
+      "answer": "Ranking tiers in Wojak Farmers Plot:\n\n\ud83d\udc51 LEGENDARY (Rank 1-42)\nTop 1%. The elite. 42 NFTs.\n\n\ud83d\udd25 ELITE (Rank 43-420)\nTop 10%. Strong performers. 378 NFTs.\n\n\ud83d\udc9c RARE (Rank 421-840)\nTop 20%. Above average. 420 NFTs.\n\n\ud83d\udc99 UNCOMMON (Rank 841-2100)\nTop 50%. Upper half. 1,260 NFTs.\n\n\u26aa COMMON (Rank 2101-4200)\nLower 50%. But every piece has something.\n\nTier matters, but don't sleep on lower ranks\u2014many have 1-of-1 combos hiding. \ud83c\udf4a"
+    },
+    {
+      "id": "s_tier_traits_list",
+      "category": "learn",
+      "question": "What are all the S-tier traits?",
+      "short": "S-tier list",
+      "type": "static",
+      "answer": "S-tier traits (highest provenance):\n\n\ud83d\udc51 HEAD\nCrown, Military Beret, Wizard Hat, Fedora, Piccolo Turban, Devil Horns, Clown, Ronin Helmet, Tin Foil Hat\n\n\ud83d\udc54 CLOTHES\nStraitjacket, Goose Suit, Wizard Drip, Piccolo Uniform, El Presidente, Ronin, Pepe Suit, Pickle Suit, Drac\n\n\ud83d\udc53 FACE WEAR\nMOG Glasses, Wizard Glasses, Cyber Shades, VR Headset, Fake It Mask, Hannibal Mask, Matrix Lenses, Laser Eyes\n\n\ud83e\uddd4 MOUTH\nNeckbeard, Tyson Tattoo\n\n\ud83c\udf0d BACKGROUND\n$BEPE, $HONK, $NECKCOIN, Moon, Hell, Heaven, Matrix\n\nThese aren't always the rarest\u2014but they're the most WANTED. \ud83c\udf4a"
+    },
+    {
+      "id": "total_supply",
+      "category": "stats",
+      "question": "What's the total supply?",
+      "short": "Total supply",
+      "type": "static",
+      "answer": "Collection stats:\n\n\ud83d\udcca Total supply: 4,200 NFTs\n\ud83d\udd17 Blockchain: Chia\n\ud83d\udc65 Community: Tang Gang\n\ud83c\udfa8 Creator: MoJuice\n\nBase type breakdown:\n\u2022 Wojak: 1,996 (47.5%)\n\u2022 Soyjak: 750 (17.9%)\n\u2022 Waifu: 250 (6.0%)\n\u2022 Papa Tang: 250 (6.0%)\n\u2022 Baddie: 200 (4.8%)\n\u2022 Monkey Zoo: 200 (4.8%)\n\u2022 Alien Wojak: 100 (2.4%)\n\u2022 Bepe Wojak: 124 (3.0%)\n\u2022 Others: 330 (7.9%)\n\nThe top 420 (10%) are elite tier. Top 42 (1%) are legendary. \ud83c\udf4a"
+    },
+    {
+      "id": "rarest_base",
+      "category": "stats",
+      "question": "What's the rarest base type?",
+      "short": "Rarest base",
+      "type": "static",
+      "answer": "Base type rarity:\n\n\ud83e\udd47 Alien Waifu - 35 (0.83%)\n\ud83e\udd48 Alien Baddie - 35 (0.83%)\n\ud83e\udd49 Bepe Waifu - 42 (1.0%)\n4. Bepe Baddie - 42 (1.0%)\n5. Alien Soyjak - 80 (1.9%)\n6. Bepe Soyjak - 96 (2.3%)\n7. Alien Wojak - 100 (2.4%)\n8. Bepe Wojak - 124 (3.0%)\n\nAlien Waifu and Alien Baddie are the rarest at 35 each.\n\nBut remember: Monkey Zoo (200) and Papa Tang (250) carry HERITAGE provenance that transcends count. \ud83c\udf4a"
+    },
+    {
+      "id": "unique_combos_count",
+      "category": "stats",
+      "question": "How many 1-of-1 combos exist?",
+      "short": "1-of-1 combos",
+      "type": "static",
+      "answer": "1-of-1 combo stats:\n\n\ud83d\udc8e Total unique 2-trait combos: 1,937\n\nThat means 1,937 NFTs have at least one trait pairing that exists NOWHERE else in the collection.\n\nEven an NFT ranked #3500 might have a 1-of-1 combo. That's the hidden gem factor.\n\nThe rarest pairings often involve:\n\u2022 S-tier traits + unusual backgrounds\n\u2022 Heritage bases + rare face wear\n\u2022 Named combo pieces + unexpected additions\n\nEvery NFT has a fingerprint. \ud83c\udf4a"
+    }
+  ]
+}

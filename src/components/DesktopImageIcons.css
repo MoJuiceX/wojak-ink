@@ -6,8 +6,10 @@
   top: 0;
   right: 0;
   bottom: 46px; /* Above taskbar */
-  z-index: 10;
+  z-index: 10; /* Below windows (which have z-index 1000+), but above desktop background */
   pointer-events: none; /* Let clicks pass through, children will have pointer-events */
+  /* Ensure icons are always visible - create stacking context */
+  isolation: isolate;
 }
 
 .desktop-image-icon {

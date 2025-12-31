@@ -25,21 +25,12 @@ export default function SelectionBox({
 
   // Use provided checkIconInSelection function or default implementation
   const defaultCheckIconInSelection = useCallback((iconId, selectionRect, containerRect) => {
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'SelectionBox.jsx:27',message:'checkIconInSelection called',data:{iconId,selectionRect,containerRect:{left:containerRect.left,top:containerRect.top,width:containerRect.width,height:containerRect.height}},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-    // #endregion
     // Find the icon element by its data attribute - search in entire document
     // This ensures we find icons regardless of which container they're in
     const iconElement = document.querySelector(`[data-icon-id="${iconId}"]`)
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'SelectionBox.jsx:31',message:'Icon element lookup result',data:{iconId,found:!!iconElement,elementTag:iconElement?.tagName,elementClass:iconElement?.className},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-    // #endregion
     if (!iconElement) {
       // Try alternative selectors for folder icons
       const folderIcon = document.querySelector(`button[data-icon-id="${iconId}"]`)
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'SelectionBox.jsx:35',message:'Fallback folderIcon lookup',data:{iconId,found:!!folderIcon},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-      // #endregion
       if (!folderIcon) return false
       // Use folderIcon if found
       const iconRect = folderIcon.getBoundingClientRect()
@@ -55,9 +46,6 @@ export default function SelectionBox({
         iconRectRelative.bottom < selectionRect.top ||
         iconRectRelative.top > selectionRect.bottom
       )
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'SelectionBox.jsx:48',message:'Folder icon intersection check',data:{iconId,intersects,iconRectRelative,selectionRect},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-      // #endregion
       return intersects
     }
 
@@ -77,9 +65,6 @@ export default function SelectionBox({
       iconRectRelative.bottom < selectionRect.top ||
       iconRectRelative.top > selectionRect.bottom
     )
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'SelectionBox.jsx:66',message:'Image icon intersection check',data:{iconId,intersects,iconRectRelative,selectionRect},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-    // #endregion
     return intersects
   }, [containerRef])
 

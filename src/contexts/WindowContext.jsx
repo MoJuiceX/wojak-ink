@@ -51,6 +51,10 @@ export function WindowProvider({ children }) {
     const vw = window.innerWidth || 1024
     const vh = window.innerHeight || 768
 
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:52',message:'clampToViewport called',data:{vw,vh,scrollY:window.scrollY,scrollX:window.scrollX,posX:pos?.x,posY:pos?.y,sizeWidth:size?.width,sizeHeight:size?.height},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'T'})}).catch(()=>{});
+    // #endregion
+
     const parseSize = (value, fallback) => {
       if (typeof value === 'number') return value
       if (typeof value === 'string') {
@@ -69,10 +73,16 @@ export function WindowProvider({ children }) {
     const baseX = typeof pos?.x === 'number' ? pos.x : padding
     const baseY = typeof pos?.y === 'number' ? pos.y : padding
 
-    return {
+    const clamped = {
       x: Math.min(Math.max(baseX, padding), maxX),
       y: Math.min(Math.max(baseY, padding), maxY),
     }
+    
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:75',message:'clampToViewport result',data:{clampedX:clamped.x,clampedY:clamped.y,baseX,baseY,maxX,maxY},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'T'})}).catch(()=>{});
+    // #endregion
+
+    return clamped
   }, [])
 
   // Helper to get stable cascade index for a window
@@ -282,36 +292,8 @@ export function WindowProvider({ children }) {
                 isMobile: false,
                 windowId
               })
-            } else if (windowId === 'window-chia-network') {
-              // ChubzWindow: position to the left of recycle bin window
-              // Find recycle bin window position
-              const recycleBinWindow = prev.get('recycle-bin-window')
-              if (recycleBinWindow?.position) {
-                // Position to the left of recycle bin with a gap
-                const GAP = 20
-                position = {
-                  x: recycleBinWindow.position.x - windowWidth - GAP,
-                  y: recycleBinWindow.position.y
-                }
-                // Clamp to viewport
-                position = clampToViewport(position, { width: windowWidth, height: windowHeight })
-              } else {
-                // Recycle bin not open yet - position at bottom right area, then ChubzWindow will be to its left
-                const taskbarHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--taskbar-height')) || 40
-                const safeAreaBottom = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--safe-area-bottom')) || 0
-                const GAP = 20
-                const RIGHT_MARGIN = 20
-                // Calculate where recycle bin would be (bottom right)
-                const recycleBinX = window.innerWidth - RIGHT_MARGIN - 400 // Approximate recycle bin width
-                const recycleBinY = window.innerHeight - taskbarHeight - safeAreaBottom - 500 // Approximate recycle bin height
-                // Position ChubzWindow to the left
-                position = {
-                  x: Math.max(20, recycleBinX - windowWidth - GAP),
-                  y: Math.max(20, recycleBinY)
-                }
-              }
             } else {
-              // Other windows: cascade from README
+              // All windows (including ChubzWindow): cascade from README
               // Pass prev (current windows state) to getReadmeAnchor to get accurate README position
               const base = getReadmeAnchor(prev)
               const idx = getCascadeIndex(windowId) // First non-readme becomes index 1
@@ -363,6 +345,9 @@ export function WindowProvider({ children }) {
       const positionBeforeClamp = position
       const clampedPosition = clampToViewport(position, windowData?.size || existingWindow?.size)
       
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WindowContext.jsx:374',message:'registerWindow - position calculated',data:{windowId,positionBeforeClampX:positionBeforeClamp?.x,positionBeforeClampY:positionBeforeClamp?.y,clampedX:clampedPosition?.x,clampedY:clampedPosition?.y,existingWindow:!!existingWindow,viewportWidth:window.innerWidth,viewportHeight:window.innerHeight,scrollY:window.scrollY},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'T'})}).catch(()=>{});
+      // #endregion
       
       const windowEntry = {
         id: windowId,

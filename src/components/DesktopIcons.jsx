@@ -209,6 +209,33 @@ const DraggableIcon = memo(function DraggableIcon({ app, index, section, isLink,
           <span style={{ display: 'block', height: '14px' }}>RARITY</span>
           <span style={{ display: 'block', height: '14px' }}>EXPLORER</span>
         </div>
+      ) : app.id === 'COMMUNITY_RESOURCES' ? (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            lineHeight: '14px',
+            textAlign: 'center',
+            width: '96px',
+          }}
+        >
+          <span style={{ display: 'block', height: '14px' }}>COMMUNITY</span>
+          <span style={{ display: 'block', height: '14px' }}>RESOURCES</span>
+        </div>
+      ) : app.id === 'TREASURY' ? (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            lineHeight: '14px',
+            textAlign: 'center',
+            width: '96px',
+          }}
+        >
+          <span style={{ display: 'block', height: '14px' }}>TREASURY</span>
+        </div>
       ) : app.id === '@chubzxmeta' ? (
         <span
           style={{
@@ -731,35 +758,26 @@ export default function DesktopIcons({ onOpenApp }) {
         const savedPos = iconPositions[app.id]
         let defaultPos = getDefaultPosition(app.id, index, 'main', isMobile)
         
-        // Special positioning for CHIA_NETWORK: place to the left of recycle bin
+        // Special positioning for CHIA_NETWORK (@chubzxmeta): place to the right of README
         if (app.id === '@chubzxmeta' && !savedPos) {
           const ICON_WIDTH = 96
-          const ICON_HEIGHT = 80
-          const TASKBAR_HEIGHT = 46
-          const RIGHT_MARGIN = 20
-          const BOTTOM_MARGIN = 20
-          const ICON_GAP = 20 // Gap between CHIA_NETWORK and recycle bin
+          const ICON_GAP = 20 // Gap between README and CHIA_NETWORK
           
-          // Calculate recycle bin position (bottom right)
-          const recycleBinX = window.innerWidth - RIGHT_MARGIN - ICON_WIDTH
-          const recycleBinY = window.innerHeight - TASKBAR_HEIGHT - BOTTOM_MARGIN - ICON_HEIGHT
-          
-          // Position CHIA_NETWORK to the left of recycle bin (same Y, X = recycleBinX - ICON_WIDTH - gap)
-          defaultPos = {
-            x: recycleBinX - ICON_WIDTH - ICON_GAP,
-            y: recycleBinY
+          // Get README position (first icon in main order)
+          const readmeIndex = mainIcons.findIndex(a => a.id === 'README')
+          if (readmeIndex >= 0) {
+            const readmeDefaultPos = getDefaultPosition('README', readmeIndex, 'main', isMobile)
+            // Position CHIA_NETWORK to the right of README (same Y, X = README X + ICON_WIDTH + gap)
+            defaultPos = {
+              x: readmeDefaultPos.x + ICON_WIDTH + ICON_GAP,
+              y: readmeDefaultPos.y
+            }
           }
         }
         
         const position = savedPos || defaultPos
         // CRITICAL: Ensure key is always a string to prevent React from inferring key={0}
         const uniqueKey = `main-${String(app.id)}`
-        // #region agent log
-        if (index < 3 || app.id === '@chubzxmeta' || app.id === 0 || app.id === '0') {
-          fetch('http://127.0.0.1:7243/ingest/caaf9dd8-e863-4d9c-b151-a370d047a715',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DesktopIcons.jsx:757',message:'Main icon key generation',data:{appId:app.id,appIdType:typeof app.id,uniqueKey,uniqueKeyType:typeof uniqueKey,index},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-          console.log('[DesktopIcons] Main icon key', { appId: app.id, appIdType: typeof app.id, uniqueKey, uniqueKeyType: typeof uniqueKey, index })
-        }
-        // #endregion
         return (
           <DraggableIcon
             key={uniqueKey}

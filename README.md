@@ -62,6 +62,7 @@ Perfect for showcasing your collection, managing sales, and creating memes - all
 
 - **🪟 Windows 98 UI**: Authentic retro interface using [98.css](https://github.com/jdan/98.css)
 - **🎨 Wojak Creator**: Layer-based wojak creator with real-time preview and smart rules
+- **🍊 Big Pulp Intelligence**: Explore the collection through Big Pulp’s Q&A. Static answers include **up to 10 clickable NFT previews** you can jump to in the Rarity Explorer.
 - **✨ Tangify Feature**: Transform your wojak into a realistic AI-generated version using OpenAI's DALL-E 3
 - **🛒 Marketplace Integration**: P2P offer file management with MintGarden/Dexie APIs
 - **🖼️ Gallery**: Browse your NFT collection with hover effects

@@ -139,6 +139,13 @@ export const APPS = {
     group: 'MAIN',
     open: { type: 'window', windowId: 'roadmap-window' },
   },
+  TREASURY: {
+    id: 'TREASURY',
+    label: 'TREASURY.EXE',
+    icon: { type: 'img', src: '/icon/tresury_Icon.png' },
+    group: 'MAIN',
+    open: { type: 'window', windowId: 'treasury-window' },
+  },
 }
 
 // Desktop icon order (single source of truth)
@@ -153,6 +160,8 @@ export const DESKTOP_MAIN_ORDER = [
   'TANGGANG',
   'CRATE',
   'ROADMAP',
+  'COMMUNITY_RESOURCES',
+  'TREASURY',
   '@chubzxmeta',
 ]
 

@@ -36,7 +36,8 @@ export function loadDesktopImages() {
     if (!stored) return []
     
     const parsed = JSON.parse(stored)
-    return Array.isArray(parsed) ? parsed : []
+    const result = Array.isArray(parsed) ? parsed : []
+    return result
   } catch (error) {
     console.error('Error loading desktop images:', error)
     return []

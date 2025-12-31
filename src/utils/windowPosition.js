@@ -146,6 +146,7 @@ export function getDefaultWindowSize(windowId) {
     'window-gallery': { width: 1200, height: 600 }, // Updated to match actual width
     'window-faq': { width: 600, height: 400 }, // Updated to match actual width
     'window-marketplace': { width: 900, height: 700 },
+    'window-chia-network': { width: 700, height: 600 }, // Default size for ChubzWindow
     'tanggang': { width: 400, height: 300 },
     'wojak-generator': { width: 900, height: 800 },
     'paint-window': { width: 800, height: 600 },

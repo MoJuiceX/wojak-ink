@@ -233,62 +233,138 @@ const BigPulpWindow = ({
       ctx.drawImage(img, 0, 0, 800, 1200)
       
       // Draw text in speech bubble area
+      // Match CSS positioning exactly:
+      // CSS: top: 9.5%, left: 9%, right: 9% (width = 82%), height: 36%, padding: 8px
+      // Canvas: 800x1200 dimensions
       ctx.fillStyle = '#000000'
-      ctx.font = '24px "MS Sans Serif", sans-serif'
+      
+      // Use dynamic font size from state (matches what's displayed on screen)
+      const canvasFontSize = fontSize
+      const canvasLineHeight = canvasFontSize * 1.5 // CSS line-height: 1.5
+      
+      // Set font with Comic Sans MS to match CSS
+      ctx.font = `${canvasFontSize}px "Comic Sans MS", "Comic Sans", cursive, sans-serif`
       ctx.textAlign = 'left'
       ctx.textBaseline = 'top'
       
-      // Text area bounds (speech bubble) - matching CSS positioning
-      const textX = 64  // 8% of 800
-      const textY = 96  // 8% of 1200 (adjusted for better positioning)
-      const textWidth = 672  // 84% of 800
-      const textHeight = 432 // 36% of 1200
-      const lineHeight = 32
-      const maxLines = Math.floor(textHeight / lineHeight)
+      // Calculate exact positions from CSS percentages + padding
+      // textX = (9% × 800) + padding = 72 + 8 = 80px
+      const textX = (0.09 * 800) + 8
+      // textY = (9.5% × 1200) + padding = 114 + 8 = 122px
+      const textY = (0.095 * 1200) + 8
+      // textWidth = (82% × 800) - (2 × padding) = 656 - 16 = 640px
+      const textWidth = (0.82 * 800) - (2 * 8)
+      // textHeight = 36% of 1200 = 432px
+      const textHeight = 0.36 * 1200
+      const maxLines = Math.floor((textHeight - 8) / canvasLineHeight) // Account for bottom padding
       
-      // Word wrap and draw text (replace paragraph breaks with single space for canvas)
-      const textForCanvas = commentary.replace(/\n\n/g, ' ').replace(/\n/g, ' ')
-      const words = textForCanvas.split(/\s+/).filter(Boolean)
-      let line = ''
+      // Preserve paragraph breaks (\n\n) but handle single newlines
+      // Split by double newlines first to preserve paragraphs
+      const paragraphs = commentary.split(/\n\n+/).filter(p => p.trim())
+      
+      // Process each paragraph separately to preserve paragraph breaks
       let y = textY
       let linesDrawn = 0
       
-      for (let i = 0; i < words.length; i++) {
-        const word = words[i]
-        const testLine = line + (line ? ' ' : '') + word
-        const metrics = ctx.measureText(testLine)
+      let shouldStop = false
+      
+      for (let paraIndex = 0; paraIndex < paragraphs.length && !shouldStop; paraIndex++) {
+        const paragraph = paragraphs[paraIndex].trim()
         
-        if (metrics.width > textWidth && line !== '') {
-          ctx.fillText(line, textX, y)
-          line = word
-          y += lineHeight
+        // Replace single newlines with spaces within paragraphs
+        const textForCanvas = paragraph.replace(/\n/g, ' ')
+        const words = textForCanvas.split(/\s+/).filter(Boolean)
+        
+        // Helper function to draw justified text (matching CSS text-align: justify)
+        const drawJustifiedLine = (lineWords, x, yPos, width, isLastLine = false) => {
+          if (lineWords.length === 0) return
+          
+          // For last line of paragraph, use left-align (standard justify behavior)
+          if (isLastLine || lineWords.length === 1) {
+            ctx.fillText(lineWords.join(' '), x, yPos)
+            return
+          }
+          
+          // Calculate total text width
+          const text = lineWords.join(' ')
+          const textWidthMeasured = ctx.measureText(text).width
+          
+          // If text is already close to width, just draw it (avoid excessive spacing)
+          if (textWidthMeasured >= width * 0.9) {
+            ctx.fillText(text, x, yPos)
+            return
+          }
+          
+          // Calculate spacing needed between words
+          const spaceWidth = ctx.measureText(' ').width
+          const totalSpaceNeeded = width - textWidthMeasured
+          const spaceCount = lineWords.length - 1
+          const spaceBetweenWords = spaceWidth + (totalSpaceNeeded / spaceCount)
+          
+          // Draw words with justified spacing
+          let currentX = x
+          for (let i = 0; i < lineWords.length; i++) {
+            ctx.fillText(lineWords[i], currentX, yPos)
+            const wordWidth = ctx.measureText(lineWords[i]).width
+            currentX += wordWidth
+            
+            // Add spacing between words (except after last word)
+            if (i < lineWords.length - 1) {
+              currentX += spaceBetweenWords
+            }
+          }
+        }
+        
+        // Build lines array with word wrapping
+        const lines = []
+        let currentLine = ''
+        
+        for (let i = 0; i < words.length && !shouldStop; i++) {
+          const word = words[i]
+          const testLine = currentLine + (currentLine ? ' ' : '') + word
+          const metrics = ctx.measureText(testLine)
+          
+          if (metrics.width > textWidth && currentLine !== '') {
+            // Save this line
+            lines.push(currentLine.split(/\s+/).filter(Boolean))
+            currentLine = word
+            
+            // Check if we've exceeded max lines
+            if (lines.length >= maxLines) {
+              shouldStop = true
+              break
+            }
+          } else {
+            currentLine = testLine
+          }
+        }
+        
+        // Draw all lines except the last one
+        for (let lineIndex = 0; lineIndex < lines.length && !shouldStop; lineIndex++) {
+          const isLastLineOfParagraph = (lineIndex === lines.length - 1 && !currentLine.trim())
+          drawJustifiedLine(lines[lineIndex], textX, y, textWidth, isLastLineOfParagraph)
+          y += canvasLineHeight
+          linesDrawn++
+        }
+        
+        // Draw remaining line from this paragraph if we haven't exceeded max lines
+        if (!shouldStop && linesDrawn < maxLines && currentLine.trim()) {
+          const remainingWords = currentLine.split(/\s+/).filter(Boolean)
+          const isLastLineOfParagraph = true
+          drawJustifiedLine(remainingWords, textX, y, textWidth, isLastLineOfParagraph)
+          y += canvasLineHeight
           linesDrawn++
           
-          if (linesDrawn >= maxLines - 1) {
-            // Last line - check if remaining text fits
-            const remainingWords = words.slice(i + 1)
-            const remainingText = remainingWords.join(' ')
-            const lastLine = line + (remainingText ? ' ' + remainingText : '')
-            if (ctx.measureText(lastLine).width > textWidth) {
-              // Text doesn't fit, add ellipsis
-              let ellipsisLine = line
-              while (ctx.measureText(ellipsisLine + '...').width > textWidth && ellipsisLine.length > 0) {
-                ellipsisLine = ellipsisLine.slice(0, -1)
-              }
-              ctx.fillText(ellipsisLine + '...', textX, y)
-            } else {
-              ctx.fillText(lastLine, textX, y)
-            }
-            break
+          if (linesDrawn >= maxLines) {
+            shouldStop = true
           }
-        } else {
-          line = testLine
         }
-      }
-      
-      // Draw remaining text if we haven't exceeded max lines
-      if (linesDrawn < maxLines && line.trim()) {
-        ctx.fillText(line.trim(), textX, y)
+        
+        // Add spacing between paragraphs (skip after last paragraph)
+        if (!shouldStop && paraIndex < paragraphs.length - 1 && linesDrawn < maxLines - 1) {
+          y += canvasLineHeight * 0.5 // Half line height spacing between paragraphs
+          // Don't count spacing as a line, but account for the space visually
+        }
       }
       
       // Add NFT ID badge
