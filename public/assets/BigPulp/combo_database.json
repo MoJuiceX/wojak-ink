@@ -1,0 +1,2777 @@
+{
+  "named_combos": {
+    "Full Piccolo": {
+      "requires": [
+        "Piccolo Turban",
+        "Piccolo Uniform"
+      ],
+      "count": 7,
+      "best_nft": "3729",
+      "best_rank": 1,
+      "all_nfts": [
+        "3729",
+        "3707",
+        "3728",
+        "3705",
+        "3703",
+        "3704",
+        "3706"
+      ],
+      "lore": "Namekian royalty. The top 5 NFTs overall are all Full Piccolo Alien Wojaks.",
+      "cultural_significance": "Legendary",
+      "rarity_note": "Rarest named combo. Dominates top rankings."
+    },
+    "Honk Gang": {
+      "requires": [
+        "Goose Suit",
+        "$HONK"
+      ],
+      "count": 4,
+      "best_nft": "2814",
+      "best_rank": 337,
+      "all_nfts": [
+        "2814",
+        "2068",
+        "210",
+        "2813"
+      ],
+      "lore": "Peace was never an option. The most exclusive club.",
+      "cultural_significance": "Legendary",
+      "rarity_note": "Only 4 exist. Extremely rare."
+    },
+    "Classic Neckbeard": {
+      "requires": [
+        "Neckbeard",
+        "Fedora"
+      ],
+      "count": 6,
+      "best_nft": "3807",
+      "best_rank": 641,
+      "all_nfts": [
+        "3807",
+        "3922",
+        "2165",
+        "8",
+        "349",
+        "2"
+      ],
+      "lore": "The blade has been studied. M'TangTard supreme.",
+      "cultural_significance": "Legendary",
+      "rarity_note": "Only 6 exist. Cultural cornerstone."
+    },
+    "Asylum Patient": {
+      "requires": [
+        "Straitjacket",
+        "Hannibal Mask"
+      ],
+      "count": 17,
+      "best_nft": "41",
+      "best_rank": 59,
+      "all_nfts": [
+        "41",
+        "46",
+        "47",
+        "49",
+        "45",
+        "48",
+        "42",
+        "43",
+        "4094",
+        "2151"
+      ],
+      "lore": "The asylum couldn't contain what these represent. Chaos energy.",
+      "cultural_significance": "Iconic",
+      "rarity_note": "30 exist. Dominates top Wojak rankings."
+    },
+    "Full Wizard": {
+      "requires": [
+        "Wizard Hat",
+        "Wizard Drip"
+      ],
+      "count": 94,
+      "best_nft": "4115",
+      "best_rank": 142,
+      "all_nfts": [
+        "4115",
+        "4019",
+        "3739",
+        "4116",
+        "2991",
+        "3740",
+        "3768",
+        "3194",
+        "3679",
+        "3192"
+      ],
+      "lore": "Arcane loadout activated. Magic is real.",
+      "cultural_significance": "Iconic",
+      "rarity_note": "Add Wizard Glasses for full transformation."
+    },
+    "Full Ronin": {
+      "requires": [
+        "Ronin Helmet",
+        "Ronin"
+      ],
+      "count": 56,
+      "best_nft": "3852",
+      "best_rank": 226,
+      "all_nfts": [
+        "3852",
+        "3976",
+        "4080",
+        "3669",
+        "3305",
+        "3870",
+        "860",
+        "3551",
+        "3310",
+        "876"
+      ],
+      "lore": "The way of the masterless warrior.",
+      "cultural_significance": "Iconic",
+      "rarity_note": "Add Ronin Dojo background for complete set."
+    },
+    "Full Clown": {
+      "requires": [
+        "Clown",
+        "Clown Nose"
+      ],
+      "count": 96,
+      "best_nft": "3892",
+      "best_rank": 41,
+      "all_nfts": [
+        "3892",
+        "3778",
+        "3716",
+        "3722",
+        "3835",
+        "3135",
+        "3777",
+        "3776",
+        "4043",
+        "3042"
+      ],
+      "lore": "Honk honk. The circus has arrived.",
+      "cultural_significance": "Iconic",
+      "rarity_note": "Complete clown transformation."
+    },
+    "Devil in Hell": {
+      "requires": [
+        "Devil Horns",
+        "Hell"
+      ],
+      "count": 30,
+      "best_nft": "3900",
+      "best_rank": 45,
+      "all_nfts": [
+        "3900",
+        "3668",
+        "3662",
+        "3751",
+        "3899",
+        "2671",
+        "3925",
+        "2317",
+        "866",
+        "421"
+      ],
+      "lore": "Found their natural habitat.",
+      "cultural_significance": "Thematic",
+      "rarity_note": "Perfect theme alignment."
+    },
+    "Angel in Heaven": {
+      "requires": [
+        "Halo",
+        "Heaven"
+      ],
+      "count": 33,
+      "best_nft": "3785",
+      "best_rank": 73,
+      "all_nfts": [
+        "3785",
+        "4051",
+        "3748",
+        "2918",
+        "3141",
+        "4052",
+        "3845",
+        "2805",
+        "4130",
+        "62"
+      ],
+      "lore": "Achieved the ascended aesthetic.",
+      "cultural_significance": "Thematic",
+      "rarity_note": "Heavenly alignment."
+    },
+    "Matrix Mode": {
+      "requires": [
+        "Matrix Lenses",
+        "Matrix"
+      ],
+      "count": 24,
+      "best_nft": "3703",
+      "best_rank": 5,
+      "all_nfts": [
+        "3703",
+        "3767",
+        "4188",
+        "3659",
+        "2917",
+        "3907",
+        "3194",
+        "3333",
+        "3121",
+        "2508"
+      ],
+      "lore": "The red pill was accepted. They see the code.",
+      "cultural_significance": "Thematic",
+      "rarity_note": "Neo energy activated."
+    },
+    "Moon Mission": {
+      "requires": [
+        "Astronaut",
+        "Moon"
+      ],
+      "count": 26,
+      "best_nft": "3770",
+      "best_rank": 347,
+      "all_nfts": [
+        "3770",
+        "3904",
+        "3651",
+        "2014",
+        "4023",
+        "4022",
+        "152",
+        "3901",
+        "2007",
+        "4021"
+      ],
+      "lore": "The mission has been accomplished.",
+      "cultural_significance": "Thematic",
+      "rarity_note": "To the moon and back."
+    },
+    "Neckbeard Culture": {
+      "requires": [
+        "Neckbeard",
+        "$NECKCOIN"
+      ],
+      "count": 17,
+      "best_nft": "3658",
+      "best_rank": 184,
+      "all_nfts": [
+        "3658",
+        "27",
+        "2469",
+        "2681",
+        "8",
+        "2749",
+        "626",
+        "1041",
+        "34",
+        "2336"
+      ],
+      "lore": "Winners Win. Official currency of victory.",
+      "cultural_significance": "Thematic",
+      "rarity_note": "Cultural alignment."
+    },
+    "Full SWAT": {
+      "requires": [
+        "SWAT Helmet",
+        "SWAT Gear"
+      ],
+      "count": 26,
+      "best_nft": "3980",
+      "best_rank": 130,
+      "all_nfts": [
+        "3980",
+        "3979",
+        "4083",
+        "3126",
+        "3675",
+        "2900",
+        "3125",
+        "2902",
+        "77",
+        "2903"
+      ],
+      "lore": "Tactical response activated.",
+      "cultural_significance": "Thematic",
+      "rarity_note": "Complete tactical loadout."
+    },
+    "Full Viking": {
+      "requires": [
+        "Viking Helmet",
+        "Viking Armor"
+      ],
+      "count": 44,
+      "best_nft": "3439",
+      "best_rank": 263,
+      "all_nfts": [
+        "3439",
+        "3798",
+        "3813",
+        "4113",
+        "4014",
+        "3438",
+        "4112",
+        "418",
+        "395",
+        "3449"
+      ],
+      "lore": "Valhalla awaits.",
+      "cultural_significance": "Thematic",
+      "rarity_note": "Norse energy."
+    },
+    "Full Ninja Turtle": {
+      "requires": [
+        "Ninja Turtle Mask",
+        "Ninja Turtle Fit"
+      ],
+      "count": 40,
+      "best_nft": "3840",
+      "best_rank": 14,
+      "all_nfts": [
+        "3840",
+        "4064",
+        "3954",
+        "3955",
+        "3808",
+        "4065",
+        "2840",
+        "3663",
+        "2841",
+        "3069"
+      ],
+      "lore": "Cowabunga! Pizza time.",
+      "cultural_significance": "Thematic",
+      "rarity_note": "Heroes in a half shell."
+    },
+    "Full Super Saiyan": {
+      "requires": [
+        "Super Saiyan",
+        "Super Saiyan Uniform"
+      ],
+      "count": 81,
+      "best_nft": "4100",
+      "best_rank": 491,
+      "all_nfts": [
+        "4100",
+        "940",
+        "3601",
+        "3763",
+        "2684",
+        "2724",
+        "3997",
+        "3999",
+        "3794",
+        "2687"
+      ],
+      "lore": "Power level over 9000.",
+      "cultural_significance": "Thematic",
+      "rarity_note": "Ultimate transformation."
+    }
+  },
+  "rare_pairings": [
+    {
+      "traits": [
+        "Alien Wojak",
+        "Signal Lost"
+      ],
+      "count": 1,
+      "best_nft": "3729",
+      "best_rank": 1,
+      "nft_ids": [
+        "3729"
+      ]
+    },
+    {
+      "traits": [
+        "Piccolo Turban",
+        "Screaming"
+      ],
+      "count": 1,
+      "best_nft": "3729",
+      "best_rank": 1,
+      "nft_ids": [
+        "3729"
+      ]
+    },
+    {
+      "traits": [
+        "Fake It Mask",
+        "Piccolo Turban"
+      ],
+      "count": 1,
+      "best_nft": "3729",
+      "best_rank": 1,
+      "nft_ids": [
+        "3729"
+      ]
+    },
+    {
+      "traits": [
+        "Fake It Mask",
+        "Piccolo Uniform"
+      ],
+      "count": 1,
+      "best_nft": "3729",
+      "best_rank": 1,
+      "nft_ids": [
+        "3729"
+      ]
+    },
+    {
+      "traits": [
+        "Piccolo Turban",
+        "Signal Lost"
+      ],
+      "count": 1,
+      "best_nft": "3729",
+      "best_rank": 1,
+      "nft_ids": [
+        "3729"
+      ]
+    },
+    {
+      "traits": [
+        "Piccolo Uniform",
+        "Signal Lost"
+      ],
+      "count": 1,
+      "best_nft": "3729",
+      "best_rank": 1,
+      "nft_ids": [
+        "3729"
+      ]
+    },
+    {
+      "traits": [
+        "Joint",
+        "Piccolo Turban"
+      ],
+      "count": 1,
+      "best_nft": "3707",
+      "best_rank": 2,
+      "nft_ids": [
+        "3707"
+      ]
+    },
+    {
+      "traits": [
+        "Joint",
+        "Piccolo Uniform"
+      ],
+      "count": 1,
+      "best_nft": "3707",
+      "best_rank": 2,
+      "nft_ids": [
+        "3707"
+      ]
+    },
+    {
+      "traits": [
+        "Eye Patch",
+        "Piccolo Turban"
+      ],
+      "count": 1,
+      "best_nft": "3707",
+      "best_rank": 2,
+      "nft_ids": [
+        "3707"
+      ]
+    },
+    {
+      "traits": [
+        "Eye Patch",
+        "Piccolo Uniform"
+      ],
+      "count": 1,
+      "best_nft": "3707",
+      "best_rank": 2,
+      "nft_ids": [
+        "3707"
+      ]
+    },
+    {
+      "traits": [
+        "One Market",
+        "Piccolo Turban"
+      ],
+      "count": 1,
+      "best_nft": "3707",
+      "best_rank": 2,
+      "nft_ids": [
+        "3707"
+      ]
+    },
+    {
+      "traits": [
+        "Piccolo Turban",
+        "Pizza"
+      ],
+      "count": 1,
+      "best_nft": "3728",
+      "best_rank": 3,
+      "nft_ids": [
+        "3728"
+      ]
+    },
+    {
+      "traits": [
+        "Piccolo Uniform",
+        "Pizza"
+      ],
+      "count": 1,
+      "best_nft": "3728",
+      "best_rank": 3,
+      "nft_ids": [
+        "3728"
+      ]
+    },
+    {
+      "traits": [
+        "Piccolo Turban",
+        "Ronin Dojo"
+      ],
+      "count": 1,
+      "best_nft": "3728",
+      "best_rank": 3,
+      "nft_ids": [
+        "3728"
+      ]
+    },
+    {
+      "traits": [
+        "Piccolo Uniform",
+        "Ronin Dojo"
+      ],
+      "count": 1,
+      "best_nft": "3728",
+      "best_rank": 3,
+      "nft_ids": [
+        "3728"
+      ]
+    },
+    {
+      "traits": [
+        "Cohiba",
+        "Piccolo Turban"
+      ],
+      "count": 1,
+      "best_nft": "3705",
+      "best_rank": 4,
+      "nft_ids": [
+        "3705"
+      ]
+    },
+    {
+      "traits": [
+        "Cohiba",
+        "Piccolo Uniform"
+      ],
+      "count": 1,
+      "best_nft": "3705",
+      "best_rank": 4,
+      "nft_ids": [
+        "3705"
+      ]
+    },
+    {
+      "traits": [
+        "Aviators",
+        "Piccolo Turban"
+      ],
+      "count": 1,
+      "best_nft": "3705",
+      "best_rank": 4,
+      "nft_ids": [
+        "3705"
+      ]
+    },
+    {
+      "traits": [
+        "Matrix",
+        "Piccolo Turban"
+      ],
+      "count": 1,
+      "best_nft": "3703",
+      "best_rank": 5,
+      "nft_ids": [
+        "3703"
+      ]
+    },
+    {
+      "traits": [
+        "Cig",
+        "Piccolo Turban"
+      ],
+      "count": 1,
+      "best_nft": "3704",
+      "best_rank": 6,
+      "nft_ids": [
+        "3704"
+      ]
+    },
+    {
+      "traits": [
+        "Cig",
+        "Piccolo Uniform"
+      ],
+      "count": 1,
+      "best_nft": "3704",
+      "best_rank": 6,
+      "nft_ids": [
+        "3704"
+      ]
+    },
+    {
+      "traits": [
+        "Alpha Shades",
+        "Piccolo Turban"
+      ],
+      "count": 1,
+      "best_nft": "3704",
+      "best_rank": 6,
+      "nft_ids": [
+        "3704"
+      ]
+    },
+    {
+      "traits": [
+        "Alpha Shades",
+        "Piccolo Uniform"
+      ],
+      "count": 1,
+      "best_nft": "3704",
+      "best_rank": 6,
+      "nft_ids": [
+        "3704"
+      ]
+    },
+    {
+      "traits": [
+        "Hell",
+        "Piccolo Turban"
+      ],
+      "count": 1,
+      "best_nft": "3704",
+      "best_rank": 6,
+      "nft_ids": [
+        "3704"
+      ]
+    },
+    {
+      "traits": [
+        "Clown Nose",
+        "Sexy Lip Bite"
+      ],
+      "count": 1,
+      "best_nft": "3137",
+      "best_rank": 7,
+      "nft_ids": [
+        "3137"
+      ]
+    },
+    {
+      "traits": [
+        "School Uniform",
+        "Silicon Data Center"
+      ],
+      "count": 1,
+      "best_nft": "3137",
+      "best_rank": 7,
+      "nft_ids": [
+        "3137"
+      ]
+    },
+    {
+      "traits": [
+        "Alien Soyjak",
+        "Soy Hair"
+      ],
+      "count": 1,
+      "best_nft": "3733",
+      "best_rank": 10,
+      "nft_ids": [
+        "3733"
+      ]
+    },
+    {
+      "traits": [
+        "El Presidente",
+        "Soy Hair"
+      ],
+      "count": 1,
+      "best_nft": "3733",
+      "best_rank": 10,
+      "nft_ids": [
+        "3733"
+      ]
+    },
+    {
+      "traits": [
+        "Moms Basement",
+        "Soy Hair"
+      ],
+      "count": 1,
+      "best_nft": "3733",
+      "best_rank": 10,
+      "nft_ids": [
+        "3733"
+      ]
+    },
+    {
+      "traits": [
+        "El Presidente",
+        "Moms Basement"
+      ],
+      "count": 1,
+      "best_nft": "3733",
+      "best_rank": 10,
+      "nft_ids": [
+        "3733"
+      ]
+    },
+    {
+      "traits": [
+        "Pizza",
+        "Soy Hair"
+      ],
+      "count": 1,
+      "best_nft": "2157",
+      "best_rank": 11,
+      "nft_ids": [
+        "2157"
+      ]
+    },
+    {
+      "traits": [
+        "Pizza",
+        "Signal Lost"
+      ],
+      "count": 1,
+      "best_nft": "2157",
+      "best_rank": 11,
+      "nft_ids": [
+        "2157"
+      ]
+    },
+    {
+      "traits": [
+        "Matrix Lenses",
+        "Signal Lost"
+      ],
+      "count": 1,
+      "best_nft": "2157",
+      "best_rank": 11,
+      "nft_ids": [
+        "2157"
+      ]
+    },
+    {
+      "traits": [
+        "Signal Lost",
+        "Soy Hair"
+      ],
+      "count": 1,
+      "best_nft": "2157",
+      "best_rank": 11,
+      "nft_ids": [
+        "2157"
+      ]
+    },
+    {
+      "traits": [
+        "Signal Lost",
+        "Straitjacket"
+      ],
+      "count": 1,
+      "best_nft": "2157",
+      "best_rank": 11,
+      "nft_ids": [
+        "2157"
+      ]
+    },
+    {
+      "traits": [
+        "Bepe Waifu",
+        "Prom Dress"
+      ],
+      "count": 1,
+      "best_nft": "4148",
+      "best_rank": 12,
+      "nft_ids": [
+        "4148"
+      ]
+    },
+    {
+      "traits": [
+        "Rekt",
+        "Sexy Lip Bite"
+      ],
+      "count": 1,
+      "best_nft": "4148",
+      "best_rank": 12,
+      "nft_ids": [
+        "4148"
+      ]
+    },
+    {
+      "traits": [
+        "Moms Basement",
+        "Sexy Lip Bite"
+      ],
+      "count": 1,
+      "best_nft": "4148",
+      "best_rank": 12,
+      "nft_ids": [
+        "4148"
+      ]
+    },
+    {
+      "traits": [
+        "$BEPE",
+        "Bepe Waifu"
+      ],
+      "count": 1,
+      "best_nft": "4145",
+      "best_rank": 13,
+      "nft_ids": [
+        "4145"
+      ]
+    },
+    {
+      "traits": [
+        "$BEPE",
+        "Vixen Waves"
+      ],
+      "count": 1,
+      "best_nft": "4145",
+      "best_rank": 13,
+      "nft_ids": [
+        "4145"
+      ]
+    },
+    {
+      "traits": [
+        "Alien Waifu",
+        "Ninja Turtle Mask"
+      ],
+      "count": 1,
+      "best_nft": "3840",
+      "best_rank": 14,
+      "nft_ids": [
+        "3840"
+      ]
+    },
+    {
+      "traits": [
+        "Alien Waifu",
+        "Tiara"
+      ],
+      "count": 1,
+      "best_nft": "3840",
+      "best_rank": 14,
+      "nft_ids": [
+        "3840"
+      ]
+    },
+    {
+      "traits": [
+        "Alien Waifu",
+        "Ninja Turtle Fit"
+      ],
+      "count": 1,
+      "best_nft": "3840",
+      "best_rank": 14,
+      "nft_ids": [
+        "3840"
+      ]
+    },
+    {
+      "traits": [
+        "Ninja Turtle Mask",
+        "Tiara"
+      ],
+      "count": 1,
+      "best_nft": "3840",
+      "best_rank": 14,
+      "nft_ids": [
+        "3840"
+      ]
+    },
+    {
+      "traits": [
+        "Matrix",
+        "Tiara"
+      ],
+      "count": 1,
+      "best_nft": "3840",
+      "best_rank": 14,
+      "nft_ids": [
+        "3840"
+      ]
+    },
+    {
+      "traits": [
+        "Aviators",
+        "Twin Braids"
+      ],
+      "count": 1,
+      "best_nft": "4154",
+      "best_rank": 15,
+      "nft_ids": [
+        "4154"
+      ]
+    },
+    {
+      "traits": [
+        "Aviators",
+        "Denim Vest"
+      ],
+      "count": 1,
+      "best_nft": "4154",
+      "best_rank": 15,
+      "nft_ids": [
+        "4154"
+      ]
+    },
+    {
+      "traits": [
+        "Denim Vest",
+        "Heaven"
+      ],
+      "count": 1,
+      "best_nft": "4154",
+      "best_rank": 15,
+      "nft_ids": [
+        "4154"
+      ]
+    },
+    {
+      "traits": [
+        "Bepe Suit",
+        "Bepe Waifu"
+      ],
+      "count": 1,
+      "best_nft": "4122",
+      "best_rank": 16,
+      "nft_ids": [
+        "4122"
+      ]
+    },
+    {
+      "traits": [
+        "Comrade Hat",
+        "Crazy Room"
+      ],
+      "count": 1,
+      "best_nft": "2160",
+      "best_rank": 17,
+      "nft_ids": [
+        "2160"
+      ]
+    },
+    {
+      "traits": [
+        "Alien Soyjak",
+        "NYSE Dump"
+      ],
+      "count": 1,
+      "best_nft": "3779",
+      "best_rank": 18,
+      "nft_ids": [
+        "3779"
+      ]
+    },
+    {
+      "traits": [
+        "Drac",
+        "Stunned"
+      ],
+      "count": 1,
+      "best_nft": "3779",
+      "best_rank": 18,
+      "nft_ids": [
+        "3779"
+      ]
+    },
+    {
+      "traits": [
+        "NYSE Dump",
+        "Stunned"
+      ],
+      "count": 1,
+      "best_nft": "3779",
+      "best_rank": 18,
+      "nft_ids": [
+        "3779"
+      ]
+    },
+    {
+      "traits": [
+        "Cowboy Hat",
+        "NYSE Dump"
+      ],
+      "count": 1,
+      "best_nft": "3779",
+      "best_rank": 18,
+      "nft_ids": [
+        "3779"
+      ]
+    },
+    {
+      "traits": [
+        "Hell",
+        "Standard Cut"
+      ],
+      "count": 1,
+      "best_nft": "3936",
+      "best_rank": 19,
+      "nft_ids": [
+        "3936"
+      ]
+    },
+    {
+      "traits": [
+        "3D Glasses",
+        "Bepe Waifu"
+      ],
+      "count": 1,
+      "best_nft": "4137",
+      "best_rank": 20,
+      "nft_ids": [
+        "4137"
+      ]
+    },
+    {
+      "traits": [
+        "Bepe Waifu",
+        "Pepe Suit"
+      ],
+      "count": 1,
+      "best_nft": "4137",
+      "best_rank": 20,
+      "nft_ids": [
+        "4137"
+      ]
+    },
+    {
+      "traits": [
+        "3D Glasses",
+        "Nesting Grounds"
+      ],
+      "count": 1,
+      "best_nft": "4137",
+      "best_rank": 20,
+      "nft_ids": [
+        "4137"
+      ]
+    },
+    {
+      "traits": [
+        "Bepe Waifu",
+        "Ninja Turtle Mask"
+      ],
+      "count": 1,
+      "best_nft": "4146",
+      "best_rank": 22,
+      "nft_ids": [
+        "4146"
+      ]
+    },
+    {
+      "traits": [
+        "$HOA",
+        "Bepe Waifu"
+      ],
+      "count": 1,
+      "best_nft": "4146",
+      "best_rank": 22,
+      "nft_ids": [
+        "4146"
+      ]
+    },
+    {
+      "traits": [
+        "Mermaid Waves",
+        "Ninja Turtle Mask"
+      ],
+      "count": 1,
+      "best_nft": "4146",
+      "best_rank": 22,
+      "nft_ids": [
+        "4146"
+      ]
+    },
+    {
+      "traits": [
+        "Mermaid Waves",
+        "School Uniform"
+      ],
+      "count": 1,
+      "best_nft": "4146",
+      "best_rank": 22,
+      "nft_ids": [
+        "4146"
+      ]
+    },
+    {
+      "traits": [
+        "Alien Baddie",
+        "Pipe"
+      ],
+      "count": 1,
+      "best_nft": "3879",
+      "best_rank": 23,
+      "nft_ids": [
+        "3879"
+      ]
+    },
+    {
+      "traits": [
+        "Pipe",
+        "Vixen Waves"
+      ],
+      "count": 1,
+      "best_nft": "3879",
+      "best_rank": 23,
+      "nft_ids": [
+        "3879"
+      ]
+    },
+    {
+      "traits": [
+        "MOG Glasses",
+        "School Uniform"
+      ],
+      "count": 1,
+      "best_nft": "3879",
+      "best_rank": 23,
+      "nft_ids": [
+        "3879"
+      ]
+    },
+    {
+      "traits": [
+        "One Market",
+        "Vixen Waves"
+      ],
+      "count": 1,
+      "best_nft": "3879",
+      "best_rank": 23,
+      "nft_ids": [
+        "3879"
+      ]
+    },
+    {
+      "traits": [
+        "2Pac Bandana",
+        "VR Headset"
+      ],
+      "count": 1,
+      "best_nft": "3457",
+      "best_rank": 24,
+      "nft_ids": [
+        "3457"
+      ]
+    },
+    {
+      "traits": [
+        "Aviators",
+        "Mermaid Waves"
+      ],
+      "count": 1,
+      "best_nft": "3843",
+      "best_rank": 25,
+      "nft_ids": [
+        "3843"
+      ]
+    },
+    {
+      "traits": [
+        "Aviators",
+        "Prom Dress"
+      ],
+      "count": 1,
+      "best_nft": "3843",
+      "best_rank": 25,
+      "nft_ids": [
+        "3843"
+      ]
+    },
+    {
+      "traits": [
+        "Bepe Baddie",
+        "Prom Dress"
+      ],
+      "count": 1,
+      "best_nft": "4189",
+      "best_rank": 26,
+      "nft_ids": [
+        "4189"
+      ]
+    },
+    {
+      "traits": [
+        "Alpha Shades",
+        "Vixen Waves"
+      ],
+      "count": 1,
+      "best_nft": "4189",
+      "best_rank": 26,
+      "nft_ids": [
+        "4189"
+      ]
+    },
+    {
+      "traits": [
+        "Alpha Shades",
+        "Prom Dress"
+      ],
+      "count": 1,
+      "best_nft": "4189",
+      "best_rank": 26,
+      "nft_ids": [
+        "4189"
+      ]
+    },
+    {
+      "traits": [
+        "Cyber Shades",
+        "Standard Cut"
+      ],
+      "count": 1,
+      "best_nft": "3769",
+      "best_rank": 27,
+      "nft_ids": [
+        "3769"
+      ]
+    },
+    {
+      "traits": [
+        "El Presidente",
+        "Standard Cut"
+      ],
+      "count": 1,
+      "best_nft": "3769",
+      "best_rank": 27,
+      "nft_ids": [
+        "3769"
+      ]
+    },
+    {
+      "traits": [
+        "Aviators",
+        "Bepe Baddie"
+      ],
+      "count": 1,
+      "best_nft": "4164",
+      "best_rank": 28,
+      "nft_ids": [
+        "4164"
+      ]
+    },
+    {
+      "traits": [
+        "Bepe Baddie",
+        "Born to Ride"
+      ],
+      "count": 1,
+      "best_nft": "4164",
+      "best_rank": 28,
+      "nft_ids": [
+        "4164"
+      ]
+    },
+    {
+      "traits": [
+        "Bepe Baddie",
+        "Route 66"
+      ],
+      "count": 1,
+      "best_nft": "4164",
+      "best_rank": 28,
+      "nft_ids": [
+        "4164"
+      ]
+    },
+    {
+      "traits": [
+        "Route 66",
+        "Sexy Lip Bite"
+      ],
+      "count": 1,
+      "best_nft": "4164",
+      "best_rank": 28,
+      "nft_ids": [
+        "4164"
+      ]
+    },
+    {
+      "traits": [
+        "Fake It Mask",
+        "Waifu"
+      ],
+      "count": 1,
+      "best_nft": "2883",
+      "best_rank": 29,
+      "nft_ids": [
+        "2883"
+      ]
+    },
+    {
+      "traits": [
+        "Fake It Mask",
+        "Mermaid Waves"
+      ],
+      "count": 1,
+      "best_nft": "2883",
+      "best_rank": 29,
+      "nft_ids": [
+        "2883"
+      ]
+    },
+    {
+      "traits": [
+        "Mermaid Waves",
+        "Roman Drip"
+      ],
+      "count": 1,
+      "best_nft": "2883",
+      "best_rank": 29,
+      "nft_ids": [
+        "2883"
+      ]
+    },
+    {
+      "traits": [
+        "NYSE Pump",
+        "Twin Braids"
+      ],
+      "count": 1,
+      "best_nft": "4162",
+      "best_rank": 30,
+      "nft_ids": [
+        "4162"
+      ]
+    },
+    {
+      "traits": [
+        "Bepe Baddie",
+        "Bepe Suit"
+      ],
+      "count": 1,
+      "best_nft": "4163",
+      "best_rank": 31,
+      "nft_ids": [
+        "4163"
+      ]
+    },
+    {
+      "traits": [
+        "NPC",
+        "Tiara"
+      ],
+      "count": 1,
+      "best_nft": "2983",
+      "best_rank": 32,
+      "nft_ids": [
+        "2983"
+      ]
+    },
+    {
+      "traits": [
+        "3D Glasses",
+        "Tiara"
+      ],
+      "count": 1,
+      "best_nft": "2983",
+      "best_rank": 32,
+      "nft_ids": [
+        "2983"
+      ]
+    },
+    {
+      "traits": [
+        "3D Glasses",
+        "Vintage Dress"
+      ],
+      "count": 1,
+      "best_nft": "2983",
+      "best_rank": 32,
+      "nft_ids": [
+        "2983"
+      ]
+    },
+    {
+      "traits": [
+        "Mellow Yellow",
+        "Tiara"
+      ],
+      "count": 1,
+      "best_nft": "2983",
+      "best_rank": 32,
+      "nft_ids": [
+        "2983"
+      ]
+    },
+    {
+      "traits": [
+        "Alien Waifu",
+        "Fedora"
+      ],
+      "count": 1,
+      "best_nft": "3841",
+      "best_rank": 33,
+      "nft_ids": [
+        "3841"
+      ]
+    },
+    {
+      "traits": [
+        "Fedora",
+        "Sexy Lip Bite"
+      ],
+      "count": 1,
+      "best_nft": "3841",
+      "best_rank": 33,
+      "nft_ids": [
+        "3841"
+      ]
+    },
+    {
+      "traits": [
+        "No Face Wear",
+        "Piccolo Turban"
+      ],
+      "count": 1,
+      "best_nft": "3706",
+      "best_rank": 34,
+      "nft_ids": [
+        "3706"
+      ]
+    },
+    {
+      "traits": [
+        "Rugged",
+        "Soy Hair"
+      ],
+      "count": 1,
+      "best_nft": "2742",
+      "best_rank": 36,
+      "nft_ids": [
+        "2742"
+      ]
+    },
+    {
+      "traits": [
+        "Cyber Shades",
+        "Soy Hair"
+      ],
+      "count": 1,
+      "best_nft": "2742",
+      "best_rank": 36,
+      "nft_ids": [
+        "2742"
+      ]
+    },
+    {
+      "traits": [
+        "$HONK",
+        "Cyber Shades"
+      ],
+      "count": 1,
+      "best_nft": "2742",
+      "best_rank": 36,
+      "nft_ids": [
+        "2742"
+      ]
+    },
+    {
+      "traits": [
+        "$HONK",
+        "Soy Hair"
+      ],
+      "count": 1,
+      "best_nft": "2742",
+      "best_rank": 36,
+      "nft_ids": [
+        "2742"
+      ]
+    },
+    {
+      "traits": [
+        "Piccolo Turban",
+        "Rugged"
+      ],
+      "count": 1,
+      "best_nft": "3723",
+      "best_rank": 37,
+      "nft_ids": [
+        "3723"
+      ]
+    },
+    {
+      "traits": [
+        "Gold Teeth",
+        "Piccolo Turban"
+      ],
+      "count": 1,
+      "best_nft": "3723",
+      "best_rank": 37,
+      "nft_ids": [
+        "3723"
+      ]
+    },
+    {
+      "traits": [
+        "3D Glasses",
+        "Piccolo Turban"
+      ],
+      "count": 1,
+      "best_nft": "3723",
+      "best_rank": 37,
+      "nft_ids": [
+        "3723"
+      ]
+    },
+    {
+      "traits": [
+        "Piccolo Turban",
+        "Topless"
+      ],
+      "count": 1,
+      "best_nft": "3723",
+      "best_rank": 37,
+      "nft_ids": [
+        "3723"
+      ]
+    },
+    {
+      "traits": [
+        "Sexy Lip Bite",
+        "Tangerine Pop"
+      ],
+      "count": 1,
+      "best_nft": "2796",
+      "best_rank": 38,
+      "nft_ids": [
+        "2796"
+      ]
+    },
+    {
+      "traits": [
+        "Cyber Shades",
+        "Denim Vest"
+      ],
+      "count": 1,
+      "best_nft": "2796",
+      "best_rank": 38,
+      "nft_ids": [
+        "2796"
+      ]
+    },
+    {
+      "traits": [
+        "Alpha Shades",
+        "Twin Braids"
+      ],
+      "count": 1,
+      "best_nft": "3081",
+      "best_rank": 39,
+      "nft_ids": [
+        "3081"
+      ]
+    },
+    {
+      "traits": [
+        "Pickle Suit",
+        "Twin Braids"
+      ],
+      "count": 1,
+      "best_nft": "3081",
+      "best_rank": 39,
+      "nft_ids": [
+        "3081"
+      ]
+    },
+    {
+      "traits": [
+        "Alien Soyjak",
+        "Rainforest"
+      ],
+      "count": 1,
+      "best_nft": "3787",
+      "best_rank": 40,
+      "nft_ids": [
+        "3787"
+      ]
+    },
+    {
+      "traits": [
+        "Piccolo Uniform",
+        "Teeth"
+      ],
+      "count": 1,
+      "best_nft": "3787",
+      "best_rank": 40,
+      "nft_ids": [
+        "3787"
+      ]
+    },
+    {
+      "traits": [
+        "Piccolo Uniform",
+        "Propeller Hat"
+      ],
+      "count": 1,
+      "best_nft": "3787",
+      "best_rank": 40,
+      "nft_ids": [
+        "3787"
+      ]
+    },
+    {
+      "traits": [
+        "Propeller Hat",
+        "Rainforest"
+      ],
+      "count": 1,
+      "best_nft": "3787",
+      "best_rank": 40,
+      "nft_ids": [
+        "3787"
+      ]
+    },
+    {
+      "traits": [
+        "Piccolo Uniform",
+        "Rainforest"
+      ],
+      "count": 1,
+      "best_nft": "3787",
+      "best_rank": 40,
+      "nft_ids": [
+        "3787"
+      ]
+    },
+    {
+      "traits": [
+        "One Market",
+        "Sports Bra"
+      ],
+      "count": 1,
+      "best_nft": "3892",
+      "best_rank": 41,
+      "nft_ids": [
+        "3892"
+      ]
+    },
+    {
+      "traits": [
+        "Moms Basement",
+        "Vixen Waves"
+      ],
+      "count": 1,
+      "best_nft": "3856",
+      "best_rank": 42,
+      "nft_ids": [
+        "3856"
+      ]
+    },
+    {
+      "traits": [
+        "Moms Basement",
+        "Vintage Dress"
+      ],
+      "count": 1,
+      "best_nft": "3856",
+      "best_rank": 42,
+      "nft_ids": [
+        "3856"
+      ]
+    },
+    {
+      "traits": [
+        "Bepe Baddie",
+        "Silicon Data Center"
+      ],
+      "count": 1,
+      "best_nft": "4181",
+      "best_rank": 43,
+      "nft_ids": [
+        "4181"
+      ]
+    },
+    {
+      "traits": [
+        "Bubble Gum",
+        "Silicon Data Center"
+      ],
+      "count": 1,
+      "best_nft": "4181",
+      "best_rank": 43,
+      "nft_ids": [
+        "4181"
+      ]
+    },
+    {
+      "traits": [
+        "Mermaid Waves",
+        "Silicon Data Center"
+      ],
+      "count": 1,
+      "best_nft": "4181",
+      "best_rank": 43,
+      "nft_ids": [
+        "4181"
+      ]
+    },
+    {
+      "traits": [
+        "Piccolo Turban",
+        "Smile"
+      ],
+      "count": 1,
+      "best_nft": "3730",
+      "best_rank": 44,
+      "nft_ids": [
+        "3730"
+      ]
+    },
+    {
+      "traits": [
+        "Laser Eyes",
+        "Piccolo Turban"
+      ],
+      "count": 1,
+      "best_nft": "3730",
+      "best_rank": 44,
+      "nft_ids": [
+        "3730"
+      ]
+    },
+    {
+      "traits": [
+        "Piccolo Turban",
+        "Sports Jacket"
+      ],
+      "count": 1,
+      "best_nft": "3730",
+      "best_rank": 44,
+      "nft_ids": [
+        "3730"
+      ]
+    },
+    {
+      "traits": [
+        "Piccolo Turban",
+        "Silicon Data Center"
+      ],
+      "count": 1,
+      "best_nft": "3730",
+      "best_rank": 44,
+      "nft_ids": [
+        "3730"
+      ]
+    },
+    {
+      "traits": [
+        "Devil Horns",
+        "Sexy Lip Bite"
+      ],
+      "count": 1,
+      "best_nft": "3900",
+      "best_rank": 45,
+      "nft_ids": [
+        "3900"
+      ]
+    },
+    {
+      "traits": [
+        "Alien Soyjak",
+        "NYSE Rug"
+      ],
+      "count": 1,
+      "best_nft": "3780",
+      "best_rank": 46,
+      "nft_ids": [
+        "3780"
+      ]
+    },
+    {
+      "traits": [
+        "NYSE Rug",
+        "Stunned"
+      ],
+      "count": 1,
+      "best_nft": "3780",
+      "best_rank": 46,
+      "nft_ids": [
+        "3780"
+      ]
+    },
+    {
+      "traits": [
+        "Cool Glasses",
+        "NYSE Rug"
+      ],
+      "count": 1,
+      "best_nft": "3780",
+      "best_rank": 46,
+      "nft_ids": [
+        "3780"
+      ]
+    },
+    {
+      "traits": [
+        "Goose Suit",
+        "NYSE Rug"
+      ],
+      "count": 1,
+      "best_nft": "3780",
+      "best_rank": 46,
+      "nft_ids": [
+        "3780"
+      ]
+    },
+    {
+      "traits": [
+        "Beanie",
+        "Sports Bra"
+      ],
+      "count": 1,
+      "best_nft": "3861",
+      "best_rank": 47,
+      "nft_ids": [
+        "3861"
+      ]
+    },
+    {
+      "traits": [
+        "Piccolo Uniform",
+        "Spikes"
+      ],
+      "count": 1,
+      "best_nft": "3702",
+      "best_rank": 49,
+      "nft_ids": [
+        "3702"
+      ]
+    },
+    {
+      "traits": [
+        "Mermaid Waves",
+        "Smile"
+      ],
+      "count": 1,
+      "best_nft": "3842",
+      "best_rank": 50,
+      "nft_ids": [
+        "3842"
+      ]
+    },
+    {
+      "traits": [
+        "Prom Dress",
+        "Smile"
+      ],
+      "count": 1,
+      "best_nft": "3842",
+      "best_rank": 50,
+      "nft_ids": [
+        "3842"
+      ]
+    },
+    {
+      "traits": [
+        "Cap",
+        "Sports Bra"
+      ],
+      "count": 1,
+      "best_nft": "3860",
+      "best_rank": 51,
+      "nft_ids": [
+        "3860"
+      ]
+    },
+    {
+      "traits": [
+        "Laser Eyes",
+        "Mermaid Waves"
+      ],
+      "count": 1,
+      "best_nft": "3083",
+      "best_rank": 52,
+      "nft_ids": [
+        "3083"
+      ]
+    },
+    {
+      "traits": [
+        "Mermaid Waves",
+        "Pickle Suit"
+      ],
+      "count": 1,
+      "best_nft": "3083",
+      "best_rank": 52,
+      "nft_ids": [
+        "3083"
+      ]
+    },
+    {
+      "traits": [
+        "Alien Soyjak",
+        "Price Down"
+      ],
+      "count": 1,
+      "best_nft": "3778",
+      "best_rank": 54,
+      "nft_ids": [
+        "3778"
+      ]
+    },
+    {
+      "traits": [
+        "Morning Routine",
+        "Power Bob"
+      ],
+      "count": 1,
+      "best_nft": "3881",
+      "best_rank": 56,
+      "nft_ids": [
+        "3881"
+      ]
+    },
+    {
+      "traits": [
+        "Morning Routine",
+        "Sports Bra"
+      ],
+      "count": 1,
+      "best_nft": "3881",
+      "best_rank": 56,
+      "nft_ids": [
+        "3881"
+      ]
+    },
+    {
+      "traits": [
+        "Pipe",
+        "Tiara"
+      ],
+      "count": 1,
+      "best_nft": "2914",
+      "best_rank": 57,
+      "nft_ids": [
+        "2914"
+      ]
+    },
+    {
+      "traits": [
+        "Pepe Suit",
+        "Sexy Lip Bite"
+      ],
+      "count": 1,
+      "best_nft": "3076",
+      "best_rank": 58,
+      "nft_ids": [
+        "3076"
+      ]
+    },
+    {
+      "traits": [
+        "Chia Farm",
+        "Sexy Lip Bite"
+      ],
+      "count": 1,
+      "best_nft": "3076",
+      "best_rank": 58,
+      "nft_ids": [
+        "3076"
+      ]
+    },
+    {
+      "traits": [
+        "Crazy Room",
+        "Wizard Glasses"
+      ],
+      "count": 1,
+      "best_nft": "41",
+      "best_rank": 59,
+      "nft_ids": [
+        "41"
+      ]
+    },
+    {
+      "traits": [
+        "Chia Farm",
+        "Trump Wave"
+      ],
+      "count": 1,
+      "best_nft": "3796",
+      "best_rank": 60,
+      "nft_ids": [
+        "3796"
+      ]
+    },
+    {
+      "traits": [
+        "Mellow Yellow",
+        "Sexy Lip Bite"
+      ],
+      "count": 1,
+      "best_nft": "3038",
+      "best_rank": 61,
+      "nft_ids": [
+        "3038"
+      ]
+    },
+    {
+      "traits": [
+        "Beanie",
+        "Denim Vest"
+      ],
+      "count": 1,
+      "best_nft": "3038",
+      "best_rank": 61,
+      "nft_ids": [
+        "3038"
+      ]
+    },
+    {
+      "traits": [
+        "Denim Vest",
+        "Mellow Yellow"
+      ],
+      "count": 1,
+      "best_nft": "3038",
+      "best_rank": 61,
+      "nft_ids": [
+        "3038"
+      ]
+    },
+    {
+      "traits": [
+        "Matrix Lenses",
+        "Standard Cut"
+      ],
+      "count": 1,
+      "best_nft": "3927",
+      "best_rank": 62,
+      "nft_ids": [
+        "3927"
+      ]
+    },
+    {
+      "traits": [
+        "Aviators",
+        "Headphones"
+      ],
+      "count": 1,
+      "best_nft": "3503",
+      "best_rank": 63,
+      "nft_ids": [
+        "3503"
+      ]
+    },
+    {
+      "traits": [
+        "Chia Farmer",
+        "Headphones"
+      ],
+      "count": 1,
+      "best_nft": "3503",
+      "best_rank": 63,
+      "nft_ids": [
+        "3503"
+      ]
+    },
+    {
+      "traits": [
+        "Alien Baddie",
+        "Wizard Glasses"
+      ],
+      "count": 1,
+      "best_nft": "3890",
+      "best_rank": 64,
+      "nft_ids": [
+        "3890"
+      ]
+    },
+    {
+      "traits": [
+        "Construction Helmet",
+        "Copium Mask"
+      ],
+      "count": 1,
+      "best_nft": "3718",
+      "best_rank": 67,
+      "nft_ids": [
+        "3718"
+      ]
+    },
+    {
+      "traits": [
+        "Bepe Soyjak",
+        "Fedora"
+      ],
+      "count": 1,
+      "best_nft": "4046",
+      "best_rank": 68,
+      "nft_ids": [
+        "4046"
+      ]
+    },
+    {
+      "traits": [
+        "El Presidente",
+        "Fedora"
+      ],
+      "count": 1,
+      "best_nft": "4046",
+      "best_rank": 68,
+      "nft_ids": [
+        "4046"
+      ]
+    },
+    {
+      "traits": [
+        "Alien Baddie",
+        "Laser Eyes"
+      ],
+      "count": 1,
+      "best_nft": "3891",
+      "best_rank": 71,
+      "nft_ids": [
+        "3891"
+      ]
+    },
+    {
+      "traits": [
+        "Alien Baddie",
+        "Cap"
+      ],
+      "count": 1,
+      "best_nft": "3891",
+      "best_rank": 71,
+      "nft_ids": [
+        "3891"
+      ]
+    },
+    {
+      "traits": [
+        "Halo",
+        "Wizard Drip"
+      ],
+      "count": 1,
+      "best_nft": "3785",
+      "best_rank": 73,
+      "nft_ids": [
+        "3785"
+      ]
+    },
+    {
+      "traits": [
+        "Alien Waifu",
+        "Clown Nose"
+      ],
+      "count": 1,
+      "best_nft": "3835",
+      "best_rank": 74,
+      "nft_ids": [
+        "3835"
+      ]
+    },
+    {
+      "traits": [
+        "Alien Waifu",
+        "Clown"
+      ],
+      "count": 1,
+      "best_nft": "3835",
+      "best_rank": 74,
+      "nft_ids": [
+        "3835"
+      ]
+    },
+    {
+      "traits": [
+        "Denim Vest",
+        "Moms Basement"
+      ],
+      "count": 1,
+      "best_nft": "3835",
+      "best_rank": 74,
+      "nft_ids": [
+        "3835"
+      ]
+    },
+    {
+      "traits": [
+        "Cohiba",
+        "Vintage Dress"
+      ],
+      "count": 1,
+      "best_nft": "4152",
+      "best_rank": 77,
+      "nft_ids": [
+        "4152"
+      ]
+    },
+    {
+      "traits": [
+        "$PIZZA",
+        "Alien Wojak"
+      ],
+      "count": 1,
+      "best_nft": "3692",
+      "best_rank": 78,
+      "nft_ids": [
+        "3692"
+      ]
+    },
+    {
+      "traits": [
+        "$PIZZA",
+        "Eye Patch"
+      ],
+      "count": 1,
+      "best_nft": "3692",
+      "best_rank": 78,
+      "nft_ids": [
+        "3692"
+      ]
+    },
+    {
+      "traits": [
+        "Alien Waifu",
+        "Twin Braids"
+      ],
+      "count": 1,
+      "best_nft": "3854",
+      "best_rank": 79,
+      "nft_ids": [
+        "3854"
+      ]
+    },
+    {
+      "traits": [
+        "Bleeding Bags",
+        "Twin Braids"
+      ],
+      "count": 1,
+      "best_nft": "3854",
+      "best_rank": 79,
+      "nft_ids": [
+        "3854"
+      ]
+    },
+    {
+      "traits": [
+        "Cowboy Hat",
+        "Piccolo Uniform"
+      ],
+      "count": 1,
+      "best_nft": "3824",
+      "best_rank": 81,
+      "nft_ids": [
+        "3824"
+      ]
+    },
+    {
+      "traits": [
+        "Matrix",
+        "Trump Wave"
+      ],
+      "count": 1,
+      "best_nft": "3767",
+      "best_rank": 82,
+      "nft_ids": [
+        "3767"
+      ]
+    },
+    {
+      "traits": [
+        "Alpha Shades",
+        "Bepe Waifu"
+      ],
+      "count": 1,
+      "best_nft": "4158",
+      "best_rank": 83,
+      "nft_ids": [
+        "4158"
+      ]
+    },
+    {
+      "traits": [
+        "Alien Waifu",
+        "School Uniform"
+      ],
+      "count": 1,
+      "best_nft": "3849",
+      "best_rank": 84,
+      "nft_ids": [
+        "3849"
+      ]
+    },
+    {
+      "traits": [
+        "Matrix",
+        "Power Bob"
+      ],
+      "count": 1,
+      "best_nft": "3849",
+      "best_rank": 84,
+      "nft_ids": [
+        "3849"
+      ]
+    },
+    {
+      "traits": [
+        "Pizza",
+        "Prom Dress"
+      ],
+      "count": 1,
+      "best_nft": "2868",
+      "best_rank": 85,
+      "nft_ids": [
+        "2868"
+      ]
+    },
+    {
+      "traits": [
+        "Laser Eyes",
+        "Prom Dress"
+      ],
+      "count": 1,
+      "best_nft": "2868",
+      "best_rank": 85,
+      "nft_ids": [
+        "2868"
+      ]
+    },
+    {
+      "traits": [
+        "Devil Horns",
+        "Prom Dress"
+      ],
+      "count": 1,
+      "best_nft": "2868",
+      "best_rank": 85,
+      "nft_ids": [
+        "2868"
+      ]
+    },
+    {
+      "traits": [
+        "Alien Baddie",
+        "Silicon Data Center"
+      ],
+      "count": 1,
+      "best_nft": "3888",
+      "best_rank": 86,
+      "nft_ids": [
+        "3888"
+      ]
+    },
+    {
+      "traits": [
+        "Beanie",
+        "Vintage Dress"
+      ],
+      "count": 1,
+      "best_nft": "3888",
+      "best_rank": 86,
+      "nft_ids": [
+        "3888"
+      ]
+    },
+    {
+      "traits": [
+        "Alien Wojak",
+        "Everythings Fine"
+      ],
+      "count": 1,
+      "best_nft": "3688",
+      "best_rank": 87,
+      "nft_ids": [
+        "3688"
+      ]
+    },
+    {
+      "traits": [
+        "$HONK",
+        "Terminator"
+      ],
+      "count": 1,
+      "best_nft": "2867",
+      "best_rank": 88,
+      "nft_ids": [
+        "2867"
+      ]
+    },
+    {
+      "traits": [
+        "Halo",
+        "Stunned"
+      ],
+      "count": 1,
+      "best_nft": "4051",
+      "best_rank": 89,
+      "nft_ids": [
+        "4051"
+      ]
+    },
+    {
+      "traits": [
+        "Heaven",
+        "Stunned"
+      ],
+      "count": 1,
+      "best_nft": "4051",
+      "best_rank": 89,
+      "nft_ids": [
+        "4051"
+      ]
+    },
+    {
+      "traits": [
+        "Crazy Room",
+        "Field Cap"
+      ],
+      "count": 1,
+      "best_nft": "46",
+      "best_rank": 91,
+      "nft_ids": [
+        "46"
+      ]
+    },
+    {
+      "traits": [
+        "Rainforest",
+        "Waifu"
+      ],
+      "count": 1,
+      "best_nft": "2916",
+      "best_rank": 92,
+      "nft_ids": [
+        "2916"
+      ]
+    },
+    {
+      "traits": [
+        "Night Vision",
+        "School Uniform"
+      ],
+      "count": 1,
+      "best_nft": "2916",
+      "best_rank": 92,
+      "nft_ids": [
+        "2916"
+      ]
+    },
+    {
+      "traits": [
+        "Beanie",
+        "Rainforest"
+      ],
+      "count": 1,
+      "best_nft": "2916",
+      "best_rank": 92,
+      "nft_ids": [
+        "2916"
+      ]
+    },
+    {
+      "traits": [
+        "Rainforest",
+        "School Uniform"
+      ],
+      "count": 1,
+      "best_nft": "2916",
+      "best_rank": 92,
+      "nft_ids": [
+        "2916"
+      ]
+    },
+    {
+      "traits": [
+        "Alien Wojak",
+        "Cool Glasses"
+      ],
+      "count": 1,
+      "best_nft": "3672",
+      "best_rank": 93,
+      "nft_ids": [
+        "3672"
+      ]
+    },
+    {
+      "traits": [
+        "Crazy Room",
+        "Gold Teeth"
+      ],
+      "count": 1,
+      "best_nft": "3672",
+      "best_rank": 93,
+      "nft_ids": [
+        "3672"
+      ]
+    },
+    {
+      "traits": [
+        "Bandana Mask",
+        "Fake It Mask"
+      ],
+      "count": 1,
+      "best_nft": "3668",
+      "best_rank": 94,
+      "nft_ids": [
+        "3668"
+      ]
+    },
+    {
+      "traits": [
+        "Bandana Mask",
+        "Hell"
+      ],
+      "count": 1,
+      "best_nft": "3668",
+      "best_rank": 94,
+      "nft_ids": [
+        "3668"
+      ]
+    },
+    {
+      "traits": [
+        "Fake It Mask",
+        "Hell"
+      ],
+      "count": 1,
+      "best_nft": "3668",
+      "best_rank": 94,
+      "nft_ids": [
+        "3668"
+      ]
+    },
+    {
+      "traits": [
+        "Rugged",
+        "Sexy Lip Bite"
+      ],
+      "count": 1,
+      "best_nft": "3862",
+      "best_rank": 97,
+      "nft_ids": [
+        "3862"
+      ]
+    },
+    {
+      "traits": [
+        "Cowboy Hat",
+        "Sexy Lip Bite"
+      ],
+      "count": 1,
+      "best_nft": "3862",
+      "best_rank": 97,
+      "nft_ids": [
+        "3862"
+      ]
+    },
+    {
+      "traits": [
+        "Bleeding Bags",
+        "Power Bob"
+      ],
+      "count": 1,
+      "best_nft": "2789",
+      "best_rank": 98,
+      "nft_ids": [
+        "2789"
+      ]
+    },
+    {
+      "traits": [
+        "Bleeding Bags",
+        "Denim Vest"
+      ],
+      "count": 1,
+      "best_nft": "2789",
+      "best_rank": 98,
+      "nft_ids": [
+        "2789"
+      ]
+    },
+    {
+      "traits": [
+        "Power Bob",
+        "Smile"
+      ],
+      "count": 1,
+      "best_nft": "2789",
+      "best_rank": 98,
+      "nft_ids": [
+        "2789"
+      ]
+    },
+    {
+      "traits": [
+        "NYSE Dump",
+        "Smile"
+      ],
+      "count": 1,
+      "best_nft": "2789",
+      "best_rank": 98,
+      "nft_ids": [
+        "2789"
+      ]
+    },
+    {
+      "traits": [
+        "Bepe Baddie",
+        "Chia Farmer"
+      ],
+      "count": 1,
+      "best_nft": "4165",
+      "best_rank": 99,
+      "nft_ids": [
+        "4165"
+      ]
+    },
+    {
+      "traits": [
+        "Bepe Baddie",
+        "Chia Farm"
+      ],
+      "count": 1,
+      "best_nft": "4165",
+      "best_rank": 99,
+      "nft_ids": [
+        "4165"
+      ]
+    },
+    {
+      "traits": [
+        "Alien Waifu",
+        "Copium Mask"
+      ],
+      "count": 1,
+      "best_nft": "3844",
+      "best_rank": 100,
+      "nft_ids": [
+        "3844"
+      ]
+    },
+    {
+      "traits": [
+        "3D Glasses",
+        "Alien Waifu"
+      ],
+      "count": 1,
+      "best_nft": "3844",
+      "best_rank": 100,
+      "nft_ids": [
+        "3844"
+      ]
+    },
+    {
+      "traits": [
+        "Copium Mask",
+        "Sports Bra"
+      ],
+      "count": 1,
+      "best_nft": "3844",
+      "best_rank": 100,
+      "nft_ids": [
+        "3844"
+      ]
+    },
+    {
+      "traits": [
+        "Bepe Soyjak",
+        "Propeller Hat"
+      ],
+      "count": 1,
+      "best_nft": "4064",
+      "best_rank": 101,
+      "nft_ids": [
+        "4064"
+      ]
+    },
+    {
+      "traits": [
+        "Morning Routine",
+        "Stunned"
+      ],
+      "count": 1,
+      "best_nft": "4064",
+      "best_rank": 101,
+      "nft_ids": [
+        "4064"
+      ]
+    },
+    {
+      "traits": [
+        "Morning Routine",
+        "Ninja Turtle Mask"
+      ],
+      "count": 1,
+      "best_nft": "4064",
+      "best_rank": 101,
+      "nft_ids": [
+        "4064"
+      ]
+    },
+    {
+      "traits": [
+        "Morning Routine",
+        "Propeller Hat"
+      ],
+      "count": 1,
+      "best_nft": "4064",
+      "best_rank": 101,
+      "nft_ids": [
+        "4064"
+      ]
+    },
+    {
+      "traits": [
+        "Clown",
+        "School Uniform"
+      ],
+      "count": 1,
+      "best_nft": "3135",
+      "best_rank": 102,
+      "nft_ids": [
+        "3135"
+      ]
+    },
+    {
+      "traits": [
+        "Bepe Waifu",
+        "One Market"
+      ],
+      "count": 1,
+      "best_nft": "4142",
+      "best_rank": 103,
+      "nft_ids": [
+        "4142"
+      ]
+    },
+    {
+      "traits": [
+        "One Market",
+        "Tiara"
+      ],
+      "count": 1,
+      "best_nft": "4142",
+      "best_rank": 103,
+      "nft_ids": [
+        "4142"
+      ]
+    }
+  ]
+}
