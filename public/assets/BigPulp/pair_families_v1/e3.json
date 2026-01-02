@@ -1,0 +1,237 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "face:Bleeding Bags||head:Viking Helmet": [
+      "418",
+      "3449",
+      "736",
+      "2167",
+      "72",
+      "74",
+      "3646",
+      "1209",
+      "3407",
+      "773",
+      "419",
+      "2166",
+      "73"
+    ],
+    "face:Bleeding Bags||mouth:Cohiba": [
+      "3545",
+      "3614",
+      "1016",
+      "550",
+      "3449",
+      "3594",
+      "105",
+      "3612",
+      "1844",
+      "3642",
+      "3236",
+      "252",
+      "183",
+      "1103",
+      "3308",
+      "589",
+      "3274",
+      "1619",
+      "1963",
+      "1738"
+    ],
+    "clothes:Bepe Suit||mouth:Joint": [
+      "179",
+      "2097",
+      "2105",
+      "173",
+      "165"
+    ],
+    "clothes:Bepe Suit||mouth:Smile": [
+      "2108",
+      "3713",
+      "167",
+      "2102",
+      "2760"
+    ],
+    "clothes:Bepe Suit||mouth:Pizza": [
+      "2759",
+      "175"
+    ],
+    "face:Rugged||facewear:Alpha Shades": [
+      "3298",
+      "3515",
+      "3364",
+      "3231",
+      "3271",
+      "789",
+      "495",
+      "613",
+      "936",
+      "1011",
+      "805",
+      "1190",
+      "1952",
+      "2104",
+      "1098",
+      "269",
+      "197",
+      "1288"
+    ],
+    "facewear:Alpha Shades||head:Comrade Hat": [
+      "1754",
+      "445",
+      "316"
+    ],
+    "facewear:Matrix Lenses||head:Firefighter Helmet": [
+      "319",
+      "569",
+      "1403"
+    ],
+    "clothes:Straitjacket||mouth:Cig": [
+      "390",
+      "2159",
+      "375",
+      "379",
+      "368",
+      "352"
+    ],
+    "clothes:Drac||head:Beanie": [
+      "583",
+      "2186"
+    ],
+    "clothes:Bathrobe||head:Fedora": [
+      "3209",
+      "3771",
+      "3006",
+      "3452",
+      "3202",
+      "653",
+      "634"
+    ],
+    "clothes:Ninja Turtle Fit||facewear:Night Vision": [
+      "1020",
+      "1002",
+      "984",
+      "966"
+    ],
+    "clothes:Bepe Army||head:No Headgear": [
+      "4031",
+      "4057",
+      "1141",
+      "3225",
+      "4073",
+      "4069",
+      "3909",
+      "2551",
+      "1170"
+    ],
+    "facewear:Fake It Mask||head:Hard Hat": [
+      "1230"
+    ],
+    "clothes:Leather Jacket||facewear:Ninja Turtle Mask": [
+      "3807",
+      "3951",
+      "1322",
+      "1359",
+      "1355"
+    ],
+    "facewear:Tyson Tattoo||head:Wizard Hat": [
+      "1497",
+      "1515",
+      "1479",
+      "1363"
+    ],
+    "clothes:Topless||mouth:Bubble Gum": [
+      "3639",
+      "3404",
+      "2416",
+      "3621",
+      "2428",
+      "2414",
+      "3382",
+      "1588",
+      "1603",
+      "1539",
+      "1540",
+      "1614",
+      "1538"
+    ],
+    "facewear:Wizard Glasses||head:Tin Foil Hat": [
+      "3963",
+      "1773",
+      "1715",
+      "2507"
+    ],
+    "clothes:Sports Jacket||head:Halo": [
+      "1733",
+      "3574"
+    ],
+    "clothes:Suit||head:Wizard Hat": [
+      "3333",
+      "3993",
+      "3995",
+      "1949",
+      "1950",
+      "3580",
+      "1968",
+      "3169",
+      "1978",
+      "1998",
+      "1957",
+      "1895",
+      "1997",
+      "1969",
+      "1979",
+      "1990",
+      "1939"
+    ],
+    "clothes:Bepe Suit||mouth:Teeth": [
+      "2099",
+      "2096"
+    ],
+    "facewear:Cyber Shades||mouth:Bandana Mask": [
+      "2713"
+    ],
+    "clothes:School Uniform||head:SWAT Helmet": [
+      "2920"
+    ],
+    "base:Baddie||clothes:Goose Suit": [
+      "3052",
+      "3051",
+      "3050",
+      "3049",
+      "3053"
+    ],
+    "base:Baddie||clothes:Roman Drip": [
+      "3104",
+      "3110",
+      "3103",
+      "3109",
+      "3111",
+      "3107",
+      "3108",
+      "3105",
+      "3106",
+      "3102"
+    ],
+    "clothes:School Uniform||mouth:Bandana Mask": [
+      "3131"
+    ],
+    "base:Alien Soyjak||head:Beanie": [
+      "3772",
+      "3742"
+    ],
+    "base:Alien Baddie||mouth:Joint": [
+      "3869"
+    ],
+    "base:Alien Baddie||mouth:Smile": [
+      "3873"
+    ],
+    "base:Alien Baddie||mouth:Teeth": [
+      "3893"
+    ],
+    "clothes:Vintage Dress||mouth:Cohiba": [
+      "4152"
+    ]
+  }
+}

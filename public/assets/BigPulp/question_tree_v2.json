@@ -193,6 +193,15 @@
       "requires_context": true,
       "answer_logic": "brag_card",
       "description": "Outputs 3 deterministic copy formats: Tweet, Discord, Collector note"
+    },
+    {
+      "id": "combo_explorer",
+      "category": "discovery",
+      "question": "Combo Explorer",
+      "short": "Combo Explorer",
+      "type": "dynamic",
+      "answer_logic": "combo_explorer",
+      "requires_context": false
     }
   ],
   "static_questions": [

@@ -76,7 +76,7 @@ export default function BootSequence({
 
     // Play PC boot sound at the start (20% slower - was 10%, now 20%)
     const bootAudio = new Audio('/assets/audio/PC-boot.mp3')
-    bootAudio.volume = 0.75 // 75% volume
+    bootAudio.volume = 0.5 // 50% volume
     bootAudio.playbackRate = 0.8 // 20% slower (0.8 = 80% speed)
     
     // Pass bootAudio reference to parent so it can control fade out timing

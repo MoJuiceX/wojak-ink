@@ -1,0 +1,199 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "clothes:Tee||facewear:MOG Glasses": [
+      "2453",
+      "4105",
+      "771",
+      "798",
+      "2431",
+      "76",
+      "2461",
+      "5",
+      "763"
+    ],
+    "base:Bepe Wojak||head:Cap": [
+      "27"
+    ],
+    "base:Wojak||head:Halo": [
+      "64",
+      "63",
+      "62",
+      "572",
+      "334",
+      "1733",
+      "723",
+      "605",
+      "1583",
+      "789",
+      "495",
+      "993",
+      "936",
+      "694",
+      "760",
+      "328",
+      "409",
+      "514",
+      "1483",
+      "1022",
+      "317",
+      "821",
+      "60",
+      "362",
+      "320",
+      "904",
+      "1297",
+      "645",
+      "315",
+      "1326",
+      "1983",
+      "2000",
+      "964"
+    ],
+    "clothes:Suit||facewear:Night Vision": [
+      "3166",
+      "3341",
+      "1961",
+      "100",
+      "1922"
+    ],
+    "clothes:Pickle Suit||mouth:Stache": [
+      "126"
+    ],
+    "face:Bleeding Bags||facewear:Tyson Tattoo": [
+      "151",
+      "169"
+    ],
+    "clothes:Proof of Prayer||mouth:Vampire Teeth": [
+      "2116",
+      "290"
+    ],
+    "clothes:Firefighter Uniform||facewear:No Face Wear": [
+      "4047",
+      "3717",
+      "3935",
+      "3933",
+      "537",
+      "544",
+      "535",
+      "543",
+      "2271",
+      "555",
+      "2272",
+      "528",
+      "2263",
+      "536",
+      "553",
+      "525",
+      "545",
+      "505",
+      "2265",
+      "549",
+      "2250",
+      "510",
+      "529",
+      "556",
+      "504",
+      "509",
+      "551"
+    ],
+    "clothes:Bathrobe||head:Centurion": [
+      "2757",
+      "652",
+      "633"
+    ],
+    "clothes:Bathrobe||mouth:Cohiba": [
+      "3458",
+      "2086",
+      "661",
+      "651",
+      "652",
+      "642",
+      "3460",
+      "673",
+      "2082",
+      "634"
+    ],
+    "clothes:Bathrobe||facewear:MOG Glasses": [
+      "3209",
+      "2086",
+      "3206",
+      "679",
+      "673",
+      "640",
+      "2081"
+    ],
+    "head:2Pac Bandana||mouth:Numb": [
+      "709",
+      "680",
+      "3386",
+      "746"
+    ],
+    "clothes:Ninja Turtle Fit||mouth:Hannibal Mask": [
+      "3808",
+      "2476",
+      "1009",
+      "961",
+      "978"
+    ],
+    "facewear:Laser Eyes||head:Propeller Hat": [
+      "2758",
+      "3401",
+      "1302",
+      "1338"
+    ],
+    "clothes:Chia Farmer||head:Hip Hop Hat": [
+      "2778",
+      "2659",
+      "2669",
+      "1427",
+      "1456"
+    ],
+    "head:Clown||mouth:Stunned": [
+      "3776",
+      "3758",
+      "2608",
+      "2441",
+      "2332",
+      "2559"
+    ],
+    "base:Waifu||head:Mermaid Waves": [
+      "2883",
+      "2898",
+      "2946",
+      "2801",
+      "2933",
+      "2956",
+      "2949",
+      "2788",
+      "2839",
+      "2974"
+    ],
+    "facewear:Alpha Shades||head:Mermaid Waves": [
+      "4190",
+      "2956",
+      "3153"
+    ],
+    "clothes:Born to Ride||head:Mermaid Waves": [
+      "3016"
+    ],
+    "facewear:Eye Patch||head:Piccolo Turban": [
+      "3707"
+    ],
+    "base:Alien Soyjak||mouth:Gold Teeth": [
+      "3757",
+      "3774",
+      "3791"
+    ],
+    "base:Bepe Baddie||head:Vixen Waves": [
+      "4189",
+      "4194",
+      "4188",
+      "4195",
+      "4183",
+      "4160",
+      "4172"
+    ]
+  }
+}

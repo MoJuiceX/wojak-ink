@@ -1,0 +1,1309 @@
+{
+  "schema_version": "1.0",
+  "range": [
+    2901,
+    3000
+  ],
+  "nfts": {
+    "2901": {
+      "rank": 1804,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2901.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Aviators",
+        "head": "SWAT Helmet",
+        "clothes": "SWAT Gear",
+        "background": "$HOA"
+      }
+    },
+    "2902": {
+      "rank": 1211,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2902.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "Shades",
+        "head": "SWAT Helmet",
+        "clothes": "SWAT Gear",
+        "background": "Price Up"
+      }
+    },
+    "2903": {
+      "rank": 1351,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2903.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "Alpha Shades",
+        "head": "SWAT Helmet",
+        "clothes": "SWAT Gear",
+        "background": "Bepe Barracks"
+      }
+    },
+    "2904": {
+      "rank": 2318,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2904.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "Ronin Helmet",
+        "clothes": "SWAT Gear",
+        "background": "Orange Grove"
+      }
+    },
+    "2905": {
+      "rank": 1319,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2905.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Cool Glasses",
+        "head": "Military Beret",
+        "clothes": "SWAT Gear",
+        "background": "$CHIA"
+      }
+    },
+    "2906": {
+      "rank": 2321,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2906.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "NPC",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Military Beret",
+        "clothes": "SWAT Gear",
+        "background": "Chia Green"
+      }
+    },
+    "2907": {
+      "rank": 2444,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2907.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Cap",
+        "clothes": "SWAT Gear",
+        "background": "Radioactive Forest"
+      }
+    },
+    "2908": {
+      "rank": 2712,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2908.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "SWAT Gear",
+        "background": "Neo Mint"
+      }
+    },
+    "2909": {
+      "rank": 1904,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2909.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Terminator",
+        "mouth": "Pizza",
+        "facewear": "No Face Wear",
+        "head": "Propeller Hat",
+        "clothes": "SWAT Gear",
+        "background": "Green Candle"
+      }
+    },
+    "2910": {
+      "rank": 1170,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2910.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "Propeller Hat",
+        "clothes": "School Uniform",
+        "background": "NYSE Pump"
+      }
+    },
+    "2911": {
+      "rank": 121,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2911.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "Shades",
+        "head": "Hip Hop Hat",
+        "clothes": "School Uniform",
+        "background": "Morning Routine"
+      }
+    },
+    "2912": {
+      "rank": 120,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2912.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Eye Patch",
+        "head": "Pirate Hat",
+        "clothes": "School Uniform",
+        "background": "Pirate Ship"
+      }
+    },
+    "2913": {
+      "rank": 791,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2913.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "No Face Wear",
+        "head": "Beer Hat",
+        "clothes": "School Uniform",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "2914": {
+      "rank": 57,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2914.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Pipe",
+        "facewear": "Cyber Shades",
+        "head": "Tiara",
+        "clothes": "School Uniform",
+        "background": "$LOVE"
+      }
+    },
+    "2915": {
+      "rank": 233,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2915.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "Cool Glasses",
+        "head": "Crown",
+        "clothes": "School Uniform",
+        "background": "$CHIA"
+      }
+    },
+    "2916": {
+      "rank": 92,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2916.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Night Vision",
+        "head": "Beanie",
+        "clothes": "School Uniform",
+        "background": "Rainforest"
+      }
+    },
+    "2917": {
+      "rank": 317,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2917.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "Matrix Lenses",
+        "head": "Spikes",
+        "clothes": "School Uniform",
+        "background": "Matrix"
+      }
+    },
+    "2918": {
+      "rank": 176,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2918.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Alpha Shades",
+        "head": "Halo",
+        "clothes": "School Uniform",
+        "background": "Heaven"
+      }
+    },
+    "2919": {
+      "rank": 346,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2919.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "3D Glasses",
+        "head": "Ronin Helmet",
+        "clothes": "School Uniform",
+        "background": "Ronin Dojo"
+      }
+    },
+    "2920": {
+      "rank": 1225,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2920.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Rekt",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "SWAT Helmet",
+        "clothes": "School Uniform",
+        "background": "Neo Mint"
+      }
+    },
+    "2921": {
+      "rank": 633,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2921.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "School Uniform",
+        "background": "$CASTER"
+      }
+    },
+    "2922": {
+      "rank": 3106,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2922.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Sports Bra",
+        "background": "Chia Green"
+      }
+    },
+    "2923": {
+      "rank": 515,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2923.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Sports Bra",
+        "background": "$LOVE"
+      }
+    },
+    "2924": {
+      "rank": 2505,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2924.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Sports Bra",
+        "background": "NYSE Pump"
+      }
+    },
+    "2925": {
+      "rank": 1909,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2925.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Sports Bra",
+        "background": "Spell Room"
+      }
+    },
+    "2926": {
+      "rank": 3120,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2926.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Sports Bra",
+        "background": "Orange Grove"
+      }
+    },
+    "2927": {
+      "rank": 1841,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2927.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "MOG Glasses",
+        "head": "Wizard Hat",
+        "clothes": "Sports Bra",
+        "background": "$CHIA"
+      }
+    },
+    "2928": {
+      "rank": 439,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2928.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "3D Glasses",
+        "head": "Pirate Hat",
+        "clothes": "Sports Bra",
+        "background": "Pirate Ship"
+      }
+    },
+    "2929": {
+      "rank": 567,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2929.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "Night Vision",
+        "head": "Fedora",
+        "clothes": "Sports Bra",
+        "background": "Bepe Barracks"
+      }
+    },
+    "2930": {
+      "rank": 353,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2930.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "Shades",
+        "head": "Tiara",
+        "clothes": "Sports Bra",
+        "background": "$CHIA"
+      }
+    },
+    "2931": {
+      "rank": 2888,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2931.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Crown",
+        "clothes": "Sports Bra",
+        "background": "$HOA"
+      }
+    },
+    "2932": {
+      "rank": 330,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2932.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "No Face Wear",
+        "head": "Twin Braids",
+        "clothes": "Sports Bra",
+        "background": "$LOVE"
+      }
+    },
+    "2933": {
+      "rank": 333,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2933.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Cyber Shades",
+        "head": "Mermaid Waves",
+        "clothes": "Sports Bra",
+        "background": "$CHIA"
+      }
+    },
+    "2934": {
+      "rank": 110,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2934.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Terminator",
+        "mouth": "Glossed Lips",
+        "facewear": "Shades",
+        "head": "Vixen Waves",
+        "clothes": "Sports Bra",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "2935": {
+      "rank": 823,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2935.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Rugged",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Ronin Helmet",
+        "clothes": "Sports Bra",
+        "background": "Ronin Dojo"
+      }
+    },
+    "2936": {
+      "rank": 1335,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2936.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Terminator",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "Propeller Hat",
+        "clothes": "Sports Bra",
+        "background": "Neo Mint"
+      }
+    },
+    "2937": {
+      "rank": 2499,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2937.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "Ponytail",
+        "clothes": "Sports Jacket",
+        "background": "Orange Grove"
+      }
+    },
+    "2938": {
+      "rank": 643,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2938.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "Alpha Shades",
+        "head": "SWAT Helmet",
+        "clothes": "Sports Jacket",
+        "background": "$LOVE"
+      }
+    },
+    "2939": {
+      "rank": 419,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2939.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Power Bob",
+        "clothes": "Sports Jacket",
+        "background": "$HOA"
+      }
+    },
+    "2940": {
+      "rank": 298,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2940.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Copium Mask",
+        "facewear": "Aviators",
+        "head": "Ponytail",
+        "clothes": "Sports Jacket",
+        "background": "NYSE Pump"
+      }
+    },
+    "2941": {
+      "rank": 553,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2941.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "Matrix Lenses",
+        "head": "Viking Helmet",
+        "clothes": "Sports Jacket",
+        "background": "$BEPE"
+      }
+    },
+    "2942": {
+      "rank": 1267,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2942.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Wizard Hat",
+        "clothes": "Sports Jacket",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "2943": {
+      "rank": 1100,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2943.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "Night Vision",
+        "head": "Wizard Hat",
+        "clothes": "Sports Jacket",
+        "background": "Green Candle"
+      }
+    },
+    "2944": {
+      "rank": 2825,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2944.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "No Face Wear",
+        "head": "Construction Helmet",
+        "clothes": "Sports Jacket",
+        "background": "$CHIA"
+      }
+    },
+    "2945": {
+      "rank": 1069,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2945.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Rekt",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Twin Braids",
+        "clothes": "Sports Jacket",
+        "background": "Price Down"
+      }
+    },
+    "2946": {
+      "rank": 283,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2946.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Rekt",
+        "mouth": "Cohiba",
+        "facewear": "Wizard Glasses",
+        "head": "Mermaid Waves",
+        "clothes": "Sports Jacket",
+        "background": "Price Up"
+      }
+    },
+    "2947": {
+      "rank": 937,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2947.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Terminator",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Vixen Waves",
+        "clothes": "Sports Jacket",
+        "background": "Tangerine Pop"
+      }
+    },
+    "2948": {
+      "rank": 1596,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2948.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Terminator",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "Pirate Hat",
+        "clothes": "Sports Jacket",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "2949": {
+      "rank": 1120,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2949.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Terminator",
+        "mouth": "Pipe",
+        "facewear": "No Face Wear",
+        "head": "Mermaid Waves",
+        "clothes": "Sports Jacket",
+        "background": "$HOA"
+      }
+    },
+    "2950": {
+      "rank": 3887,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2950.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Military Beret",
+        "clothes": "Sports Jacket",
+        "background": "Bepe Barracks"
+      }
+    },
+    "2951": {
+      "rank": 3878,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2951.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Military Beret",
+        "clothes": "Suit",
+        "background": "Green Candle"
+      }
+    },
+    "2952": {
+      "rank": 3337,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2952.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "MOG Glasses",
+        "head": "Military Beret",
+        "clothes": "Suit",
+        "background": "$CHIA"
+      }
+    },
+    "2953": {
+      "rank": 821,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2953.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "Matrix Lenses",
+        "head": "Spikes",
+        "clothes": "Suit",
+        "background": "Chia Green"
+      }
+    },
+    "2954": {
+      "rank": 1643,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2954.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "Laser Eyes",
+        "head": "Centurion",
+        "clothes": "Suit",
+        "background": "Green Candle"
+      }
+    },
+    "2955": {
+      "rank": 245,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2955.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "VR Headset",
+        "head": "Vixen Waves",
+        "clothes": "Suit",
+        "background": "Matrix"
+      }
+    },
+    "2956": {
+      "rank": 1048,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2956.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Alpha Shades",
+        "head": "Mermaid Waves",
+        "clothes": "Suit",
+        "background": "NYSE Pump"
+      }
+    },
+    "2957": {
+      "rank": 903,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2957.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Suit",
+        "background": "Moms Basement"
+      }
+    },
+    "2958": {
+      "rank": 476,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2958.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "Wizard Glasses",
+        "head": "Cap",
+        "clothes": "Suit",
+        "background": "NYSE Pump"
+      }
+    },
+    "2959": {
+      "rank": 624,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2959.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Terminator",
+        "mouth": "Gold Teeth",
+        "facewear": "Wizard Glasses",
+        "head": "Cowboy Hat",
+        "clothes": "Suit",
+        "background": "Green Candle"
+      }
+    },
+    "2960": {
+      "rank": 318,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2960.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Terminator",
+        "mouth": "Glossed Lips",
+        "facewear": "Laser Eyes",
+        "head": "Cowboy Hat",
+        "clothes": "Suit",
+        "background": "$HOA"
+      }
+    },
+    "2961": {
+      "rank": 1356,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2961.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Terminator",
+        "mouth": "Pipe",
+        "facewear": "No Face Wear",
+        "head": "Comrade Hat",
+        "clothes": "Suit",
+        "background": "Radioactive Forest"
+      }
+    },
+    "2962": {
+      "rank": 1434,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2962.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Crown",
+        "clothes": "Viking Armor",
+        "background": "Pirate Ship"
+      }
+    },
+    "2963": {
+      "rank": 1728,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2963.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Beer Hat",
+        "clothes": "Viking Armor",
+        "background": "Pirate Ship"
+      }
+    },
+    "2964": {
+      "rank": 2442,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2964.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "No Face Wear",
+        "head": "Viking Helmet",
+        "clothes": "Viking Armor",
+        "background": "$LOVE"
+      }
+    },
+    "2965": {
+      "rank": 3505,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2965.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "No Face Wear",
+        "head": "Viking Helmet",
+        "clothes": "Viking Armor",
+        "background": "Sky Dive"
+      }
+    },
+    "2966": {
+      "rank": 2163,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2966.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "MOG Glasses",
+        "head": "Viking Helmet",
+        "clothes": "Viking Armor",
+        "background": "Orange Grove"
+      }
+    },
+    "2967": {
+      "rank": 1453,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2967.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "Eye Patch",
+        "head": "Viking Helmet",
+        "clothes": "Viking Armor",
+        "background": "$CHIA"
+      }
+    },
+    "2968": {
+      "rank": 1191,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2968.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Pipe",
+        "facewear": "Aviators",
+        "head": "Viking Helmet",
+        "clothes": "Viking Armor",
+        "background": "Tangerine Pop"
+      }
+    },
+    "2969": {
+      "rank": 1157,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2969.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "Twin Braids",
+        "clothes": "Viking Armor",
+        "background": "NYSE Dump"
+      }
+    },
+    "2970": {
+      "rank": 1152,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2970.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "NPC",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Pirate Hat",
+        "clothes": "Viking Armor",
+        "background": "Pirate Ship"
+      }
+    },
+    "2971": {
+      "rank": 1717,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2971.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Terminator",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Construction Helmet",
+        "clothes": "Viking Armor",
+        "background": "$CHIA"
+      }
+    },
+    "2972": {
+      "rank": 205,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2972.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Vixen Waves",
+        "clothes": "Vintage Dress",
+        "background": "NYSE Rug"
+      }
+    },
+    "2973": {
+      "rank": 1577,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2973.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "No Face Wear",
+        "head": "Devil Horns",
+        "clothes": "Vintage Dress",
+        "background": "Mellow Yellow"
+      }
+    },
+    "2974": {
+      "rank": 1338,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2974.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Mermaid Waves",
+        "clothes": "Vintage Dress",
+        "background": "$CHIA"
+      }
+    },
+    "2975": {
+      "rank": 555,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2975.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "No Face Wear",
+        "head": "Ponytail",
+        "clothes": "Vintage Dress",
+        "background": "Green Candle"
+      }
+    },
+    "2976": {
+      "rank": 289,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2976.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "No Face Wear",
+        "head": "Power Bob",
+        "clothes": "Vintage Dress",
+        "background": "$LOVE"
+      }
+    },
+    "2977": {
+      "rank": 578,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2977.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Twin Braids",
+        "clothes": "Vintage Dress",
+        "background": "Hot Coral"
+      }
+    },
+    "2978": {
+      "rank": 618,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2978.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Aviators",
+        "head": "Military Beret",
+        "clothes": "Vintage Dress",
+        "background": "Orange Grove"
+      }
+    },
+    "2979": {
+      "rank": 604,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2979.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Cool Glasses",
+        "head": "Fedora",
+        "clothes": "Vintage Dress",
+        "background": "Chia Farm"
+      }
+    },
+    "2980": {
+      "rank": 2182,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2980.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Hip Hop Hat",
+        "clothes": "Vintage Dress",
+        "background": "$HOA"
+      }
+    },
+    "2981": {
+      "rank": 1887,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2981.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Vintage Dress",
+        "background": "Price Down"
+      }
+    },
+    "2982": {
+      "rank": 243,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2982.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Power Bob",
+        "clothes": "Vintage Dress",
+        "background": "NYSE Dump"
+      }
+    },
+    "2983": {
+      "rank": 32,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2983.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "NPC",
+        "mouth": "Screaming",
+        "facewear": "3D Glasses",
+        "head": "Tiara",
+        "clothes": "Vintage Dress",
+        "background": "Mellow Yellow"
+      }
+    },
+    "2984": {
+      "rank": 128,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2984.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Terminator",
+        "mouth": "Teeth",
+        "facewear": "Laser Eyes",
+        "head": "Crown",
+        "clothes": "Vintage Dress",
+        "background": "$BEPE"
+      }
+    },
+    "2985": {
+      "rank": 316,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2985.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Terminator",
+        "mouth": "Bubble Gum",
+        "facewear": "Aviators",
+        "head": "Clown",
+        "clothes": "Vintage Dress",
+        "background": "Chia Green"
+      }
+    },
+    "2986": {
+      "rank": 873,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2986.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Terminator",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Military Beret",
+        "clothes": "Vintage Dress",
+        "background": "Bepe Barracks"
+      }
+    },
+    "2987": {
+      "rank": 2016,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2987.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Wizard Drip",
+        "background": "Spell Room"
+      }
+    },
+    "2988": {
+      "rank": 2822,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2988.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Wizard Drip",
+        "background": "Spell Room"
+      }
+    },
+    "2989": {
+      "rank": 2823,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2989.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Wizard Drip",
+        "background": "Spell Room"
+      }
+    },
+    "2990": {
+      "rank": 3253,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2990.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Wizard Drip",
+        "background": "Silicon Data Center"
+      }
+    },
+    "2991": {
+      "rank": 540,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2991.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "Cyber Shades",
+        "head": "Wizard Hat",
+        "clothes": "Wizard Drip",
+        "background": "Spell Room"
+      }
+    },
+    "2992": {
+      "rank": 1178,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2992.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "Alpha Shades",
+        "head": "Wizard Hat",
+        "clothes": "Wizard Drip",
+        "background": "Orange Grove"
+      }
+    },
+    "2993": {
+      "rank": 2531,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2993.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Wizard Hat",
+        "clothes": "Wizard Drip",
+        "background": "$CHIA"
+      }
+    },
+    "2994": {
+      "rank": 3562,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2994.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Pipe",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Wizard Drip",
+        "background": "$HOA"
+      }
+    },
+    "2995": {
+      "rank": 3148,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2995.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Wizard Drip",
+        "background": "Heaven"
+      }
+    },
+    "2996": {
+      "rank": 2101,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2996.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "3D Glasses",
+        "head": "Fedora",
+        "clothes": "Wizard Drip",
+        "background": "Green Candle"
+      }
+    },
+    "2997": {
+      "rank": 1906,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2997.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Cool Glasses",
+        "head": "Military Beret",
+        "clothes": "Wizard Drip",
+        "background": "Bepe Barracks"
+      }
+    },
+    "2998": {
+      "rank": 285,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2998.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "MOG Glasses",
+        "head": "Twin Braids",
+        "clothes": "Wizard Drip",
+        "background": "Hot Coral"
+      }
+    },
+    "2999": {
+      "rank": 2599,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2999.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Terminator",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Wizard Drip",
+        "background": "One Market"
+      }
+    },
+    "3000": {
+      "rank": 904,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3000.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Terminator",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Tin Foil Hat",
+        "clothes": "Wizard Drip",
+        "background": "Nesting Grounds"
+      }
+    }
+  }
+}

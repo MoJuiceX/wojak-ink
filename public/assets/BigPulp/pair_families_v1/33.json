@@ -1,0 +1,151 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "clothes:El Presidente||mouth:Neckbeard": [
+      "3680",
+      "4044",
+      "2019",
+      "2088",
+      "3929",
+      "35",
+      "776",
+      "1729"
+    ],
+    "clothes:Proof of Prayer||face:Classic": [
+      "3098",
+      "3099",
+      "3667",
+      "2875",
+      "3285",
+      "3526",
+      "3097",
+      "2876",
+      "3276",
+      "2870",
+      "2117",
+      "3096",
+      "2114",
+      "3277",
+      "2874",
+      "2113",
+      "3527",
+      "291",
+      "2110",
+      "2116",
+      "2871",
+      "289",
+      "2873",
+      "2872",
+      "280",
+      "283",
+      "3966",
+      "288",
+      "281",
+      "282",
+      "286",
+      "284",
+      "2112",
+      "277",
+      "279",
+      "285",
+      "2115",
+      "276",
+      "2111",
+      "290",
+      "278",
+      "56",
+      "287"
+    ],
+    "facewear:Matrix Lenses||head:Tin Foil Hat": [
+      "3907",
+      "1279",
+      "485",
+      "81",
+      "463"
+    ],
+    "clothes:Astronaut||face:Rugged": [
+      "2013",
+      "158",
+      "159",
+      "2012"
+    ],
+    "clothes:Goose Suit||facewear:3D Glasses": [
+      "2814",
+      "2072",
+      "205"
+    ],
+    "clothes:God's Robe||mouth:Gold Teeth": [
+      "3047",
+      "323"
+    ],
+    "clothes:Bathrobe||head:No Headgear": [
+      "4025",
+      "3460",
+      "3203",
+      "621",
+      "662",
+      "3905",
+      "2091",
+      "2075",
+      "622",
+      "667",
+      "644",
+      "675",
+      "620"
+    ],
+    "clothes:Tee||head:Firefighter Helmet": [
+      "788",
+      "806",
+      "759"
+    ],
+    "clothes:Ninja Turtle Fit||head:Spikes": [
+      "971",
+      "1000"
+    ],
+    "clothes:Born to Ride||head:Hard Hat": [
+      "3245",
+      "1230",
+      "2579",
+      "1240",
+      "1233",
+      "1257",
+      "1241",
+      "1298",
+      "1312",
+      "1269",
+      "1268"
+    ],
+    "clothes:Leather Jacket||head:Beer Hat": [
+      "3514",
+      "3267",
+      "1320"
+    ],
+    "head:Standard Cut||mouth:Bubble Gum": [
+      "2482"
+    ],
+    "base:Waifu||clothes:Sports Jacket": [
+      "2946",
+      "2940",
+      "2939",
+      "2941",
+      "2938",
+      "2947",
+      "2945",
+      "2943",
+      "2949",
+      "2942",
+      "2948",
+      "2937",
+      "2944",
+      "2950"
+    ],
+    "clothes:Vintage Dress||head:Fedora": [
+      "3841",
+      "2979"
+    ],
+    "head:Cowboy Hat||mouth:Bandana Mask": [
+      "3557"
+    ]
+  }
+}

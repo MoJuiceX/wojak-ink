@@ -32,7 +32,7 @@ const HARDCODED_MANIFEST = {
       'BACKGROUND_Chia Farm.png',
       'BACKGROUND_Hell.png',
       'BACKGROUND_Matrix.png',
-      'BACKGROUND_MomΓÇÖs Basement.png',
+      'BACKGROUND_MomΓÇÖs Basement.png',
       'BACKGROUND_Moon.png',
       'BACKGROUND_NYSE Dump.png',
       'BACKGROUND_NYSE Pump.png',

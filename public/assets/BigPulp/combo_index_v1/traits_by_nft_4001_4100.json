@@ -1,0 +1,1309 @@
+{
+  "schema_version": "1.0",
+  "range": [
+    4001,
+    4100
+  ],
+  "nfts": {
+    "4001": {
+      "rank": 1215,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4001.png",
+      "traits": {
+        "base": "Bepe Wojak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Cool Glasses",
+        "head": "Military Beret",
+        "clothes": "Topless",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4002": {
+      "rank": 1133,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4002.png",
+      "traits": {
+        "base": "Bepe Wojak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Aviators",
+        "head": "Military Beret",
+        "clothes": "Topless",
+        "background": "Matrix"
+      }
+    },
+    "4003": {
+      "rank": 750,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4003.png",
+      "traits": {
+        "base": "Bepe Wojak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Cyber Shades",
+        "head": "Propeller Hat",
+        "clothes": "Topless",
+        "background": "$BEPE"
+      }
+    },
+    "4004": {
+      "rank": 1958,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4004.png",
+      "traits": {
+        "base": "Bepe Wojak",
+        "face": "Rekt",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Super Wojak Hat",
+        "clothes": "Topless",
+        "background": "Orange Grove"
+      }
+    },
+    "4005": {
+      "rank": 1693,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4005.png",
+      "traits": {
+        "base": "Bepe Wojak",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "No Face Wear",
+        "head": "Pirate Hat",
+        "clothes": "Tee",
+        "background": "Silicon Data Center"
+      }
+    },
+    "4006": {
+      "rank": 455,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4006.png",
+      "traits": {
+        "base": "Bepe Wojak",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "Cool Glasses",
+        "head": "Viking Helmet",
+        "clothes": "Tee",
+        "background": "Pirate Ship"
+      }
+    },
+    "4007": {
+      "rank": 220,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4007.png",
+      "traits": {
+        "base": "Bepe Wojak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Night Vision",
+        "head": "Beer Hat",
+        "clothes": "Tee",
+        "background": "One Market"
+      }
+    },
+    "4008": {
+      "rank": 430,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4008.png",
+      "traits": {
+        "base": "Bepe Wojak",
+        "face": "Terminator",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Standard Cut",
+        "clothes": "Tee",
+        "background": "$BEPE"
+      }
+    },
+    "4009": {
+      "rank": 401,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4009.png",
+      "traits": {
+        "base": "Bepe Wojak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "MOG Glasses",
+        "head": "Standard Cut",
+        "clothes": "Tank Top",
+        "background": "Orange Grove"
+      }
+    },
+    "4010": {
+      "rank": 302,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4010.png",
+      "traits": {
+        "base": "Bepe Wojak",
+        "face": "Classic",
+        "mouth": "Pipe",
+        "facewear": "3D Glasses",
+        "head": "Super Wojak Hat",
+        "clothes": "Tank Top",
+        "background": "$BEPE"
+      }
+    },
+    "4011": {
+      "rank": 440,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4011.png",
+      "traits": {
+        "base": "Bepe Wojak",
+        "face": "Rekt",
+        "mouth": "Cig",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Tank Top",
+        "background": "Hell"
+      }
+    },
+    "4012": {
+      "rank": 954,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4012.png",
+      "traits": {
+        "base": "Bepe Wojak",
+        "face": "Terminator",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Tin Foil Hat",
+        "clothes": "Tank Top",
+        "background": "Matrix"
+      }
+    },
+    "4013": {
+      "rank": 1149,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4013.png",
+      "traits": {
+        "base": "Bepe Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Viking Armor",
+        "background": "Pirate Ship"
+      }
+    },
+    "4014": {
+      "rank": 505,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4014.png",
+      "traits": {
+        "base": "Bepe Wojak",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "3D Glasses",
+        "head": "Viking Helmet",
+        "clothes": "Viking Armor",
+        "background": "Hell"
+      }
+    },
+    "4015": {
+      "rank": 672,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4015.png",
+      "traits": {
+        "base": "Bepe Wojak",
+        "face": "Rekt",
+        "mouth": "Cig",
+        "facewear": "Night Vision",
+        "head": "Wizard Hat",
+        "clothes": "Viking Armor",
+        "background": "Moon"
+      }
+    },
+    "4016": {
+      "rank": 1298,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4016.png",
+      "traits": {
+        "base": "Bepe Wojak",
+        "face": "Terminator",
+        "mouth": "Cohiba",
+        "facewear": "No Face Wear",
+        "head": "Military Beret",
+        "clothes": "Viking Armor",
+        "background": "Matrix"
+      }
+    },
+    "4017": {
+      "rank": 3243,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4017.png",
+      "traits": {
+        "base": "Bepe Wojak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Wizard Drip",
+        "background": "Moms Basement"
+      }
+    },
+    "4018": {
+      "rank": 1060,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4018.png",
+      "traits": {
+        "base": "Bepe Wojak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "VR Headset",
+        "head": "Wizard Hat",
+        "clothes": "Wizard Drip",
+        "background": "Hell"
+      }
+    },
+    "4019": {
+      "rank": 387,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4019.png",
+      "traits": {
+        "base": "Bepe Wojak",
+        "face": "Rekt",
+        "mouth": "Teeth",
+        "facewear": "Cyber Shades",
+        "head": "Wizard Hat",
+        "clothes": "Wizard Drip",
+        "background": "Spell Room"
+      }
+    },
+    "4020": {
+      "rank": 1730,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4020.png",
+      "traits": {
+        "base": "Bepe Wojak",
+        "face": "Terminator",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Tin Foil Hat",
+        "clothes": "Wizard Drip",
+        "background": "Moon"
+      }
+    },
+    "4021": {
+      "rank": 1847,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4021.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Astronaut",
+        "background": "Moon"
+      }
+    },
+    "4022": {
+      "rank": 1425,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4022.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Cyber Shades",
+        "head": "No Headgear",
+        "clothes": "Astronaut",
+        "background": "Moon"
+      }
+    },
+    "4023": {
+      "rank": 1406,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4023.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "MOG Glasses",
+        "head": "No Headgear",
+        "clothes": "Astronaut",
+        "background": "Moon"
+      }
+    },
+    "4024": {
+      "rank": 320,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4024.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Terminator",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Astronaut",
+        "background": "Signal Lost"
+      }
+    },
+    "4025": {
+      "rank": 1092,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4025.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Bleeding Bags",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Bathrobe",
+        "background": "Morning Routine"
+      }
+    },
+    "4026": {
+      "rank": 474,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4026.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Bathrobe",
+        "background": "$BEPE"
+      }
+    },
+    "4027": {
+      "rank": 434,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4027.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "No Face Wear",
+        "head": "Soy Hair",
+        "clothes": "Bathrobe",
+        "background": "Moon"
+      }
+    },
+    "4028": {
+      "rank": 2880,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4028.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Hard Hat",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4029": {
+      "rank": 1123,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4029.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "Wizard Glasses",
+        "head": "Military Beret",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4030": {
+      "rank": 1331,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4030.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Cyber Shades",
+        "head": "Super Saiyan",
+        "clothes": "Bepe Army",
+        "background": "Moon"
+      }
+    },
+    "4031": {
+      "rank": 702,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4031.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "VR Headset",
+        "head": "No Headgear",
+        "clothes": "Bepe Army",
+        "background": "Mellow Yellow"
+      }
+    },
+    "4032": {
+      "rank": 864,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4032.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "MOG Glasses",
+        "head": "Firefighter Helmet",
+        "clothes": "Bepe Army",
+        "background": "Hell"
+      }
+    },
+    "4033": {
+      "rank": 729,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4033.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Terminator",
+        "mouth": "Stunned",
+        "facewear": "No Face Wear",
+        "head": "Centurion",
+        "clothes": "Bepe Army",
+        "background": "Orange Grove"
+      }
+    },
+    "4034": {
+      "rank": 2251,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4034.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "4035": {
+      "rank": 325,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4035.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Night Vision",
+        "head": "Hip Hop Hat",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "4036": {
+      "rank": 1301,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4036.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Rekt",
+        "mouth": "Smile",
+        "facewear": "No Face Wear",
+        "head": "Trump Wave",
+        "clothes": "Born to Ride",
+        "background": "Sky Dive"
+      }
+    },
+    "4037": {
+      "rank": 1240,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4037.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Bleeding Bags",
+        "mouth": "Stunned",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Chia Farmer",
+        "background": "Price Down"
+      }
+    },
+    "4038": {
+      "rank": 569,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4038.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "Matrix Lenses",
+        "head": "Wizard Hat",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "4039": {
+      "rank": 1073,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4039.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Copium Mask",
+        "facewear": "No Face Wear",
+        "head": "Cowboy Hat",
+        "clothes": "Chia Farmer",
+        "background": "Silicon Data Center"
+      }
+    },
+    "4040": {
+      "rank": 655,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4040.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Terminator",
+        "mouth": "Cohiba",
+        "facewear": "Eye Patch",
+        "head": "No Headgear",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "4041": {
+      "rank": 2978,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4041.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Vampire Teeth",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Drac",
+        "background": "Moon"
+      }
+    },
+    "4042": {
+      "rank": 175,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4042.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Rekt",
+        "mouth": "Vampire Teeth",
+        "facewear": "Cyber Shades",
+        "head": "Military Beret",
+        "clothes": "Drac",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4043": {
+      "rank": 228,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4043.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Terminator",
+        "mouth": "Cig",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Drac",
+        "background": "Matrix"
+      }
+    },
+    "4044": {
+      "rank": 370,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4044.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Aviators",
+        "head": "Military Beret",
+        "clothes": "El Presidente",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4045": {
+      "rank": 932,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4045.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "No Face Wear",
+        "head": "Military Beret",
+        "clothes": "El Presidente",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4046": {
+      "rank": 68,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4046.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Terminator",
+        "mouth": "Teeth",
+        "facewear": "Laser Eyes",
+        "head": "Fedora",
+        "clothes": "El Presidente",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4047": {
+      "rank": 464,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4047.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "No Face Wear",
+        "head": "Firefighter Helmet",
+        "clothes": "Firefighter Uniform",
+        "background": "Everythings Fine"
+      }
+    },
+    "4048": {
+      "rank": 174,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4048.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "Alpha Shades",
+        "head": "Firefighter Helmet",
+        "clothes": "Firefighter Uniform",
+        "background": "Nesting Grounds"
+      }
+    },
+    "4049": {
+      "rank": 211,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4049.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "Aviators",
+        "head": "Tin Foil Hat",
+        "clothes": "Firefighter Uniform",
+        "background": "Hell"
+      }
+    },
+    "4050": {
+      "rank": 841,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4050.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "No Face Wear",
+        "head": "Halo",
+        "clothes": "God's Robe",
+        "background": "Heaven"
+      }
+    },
+    "4051": {
+      "rank": 89,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4051.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "Matrix Lenses",
+        "head": "Halo",
+        "clothes": "God's Robe",
+        "background": "Heaven"
+      }
+    },
+    "4052": {
+      "rank": 276,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4052.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "MOG Glasses",
+        "head": "Halo",
+        "clothes": "God's Robe",
+        "background": "Heaven"
+      }
+    },
+    "4053": {
+      "rank": 2997,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4053.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Hard Hat",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4054": {
+      "rank": 1232,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4054.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Cool Glasses",
+        "head": "Field Cap",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4055": {
+      "rank": 564,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4055.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "Wizard Glasses",
+        "head": "No Headgear",
+        "clothes": "Goose Suit",
+        "background": "Nesting Grounds"
+      }
+    },
+    "4056": {
+      "rank": 1747,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4056.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Hannibal Mask",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Goose Suit",
+        "background": "Hell"
+      }
+    },
+    "4057": {
+      "rank": 2604,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4057.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Copium Mask",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Bepe Army",
+        "background": "NYSE Dump"
+      }
+    },
+    "4058": {
+      "rank": 1990,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4058.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "Chia Farm"
+      }
+    },
+    "4059": {
+      "rank": 647,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4059.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "Aviators",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "Nesting Grounds"
+      }
+    },
+    "4060": {
+      "rank": 3504,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4060.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Leather Jacket",
+        "background": "Route 66"
+      }
+    },
+    "4061": {
+      "rank": 1088,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4061.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Alpha Shades",
+        "head": "Pirate Hat",
+        "clothes": "Leather Jacket",
+        "background": "Hell"
+      }
+    },
+    "4062": {
+      "rank": 805,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4062.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Wizard Glasses",
+        "head": "Military Beret",
+        "clothes": "Leather Jacket",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4063": {
+      "rank": 2170,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4063.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Ninja Turtle Mask",
+        "head": "No Headgear",
+        "clothes": "Ninja Turtle Fit",
+        "background": "Moon"
+      }
+    },
+    "4064": {
+      "rank": 101,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4064.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Propeller Hat",
+        "clothes": "Ninja Turtle Fit",
+        "background": "Morning Routine"
+      }
+    },
+    "4065": {
+      "rank": 390,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4065.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Rekt",
+        "mouth": "Joint",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Military Beret",
+        "clothes": "Ninja Turtle Fit",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4066": {
+      "rank": 2335,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4066.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Pepe Suit",
+        "background": "Heaven"
+      }
+    },
+    "4067": {
+      "rank": 306,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4067.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "Cool Glasses",
+        "head": "No Headgear",
+        "clothes": "Pepe Suit",
+        "background": "Nesting Grounds"
+      }
+    },
+    "4068": {
+      "rank": 681,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4068.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Rekt",
+        "mouth": "Cig",
+        "facewear": "3D Glasses",
+        "head": "No Headgear",
+        "clothes": "Pepe Suit",
+        "background": "Hell"
+      }
+    },
+    "4069": {
+      "rank": 3742,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4069.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Bepe Army",
+        "background": "Moon"
+      }
+    },
+    "4070": {
+      "rank": 1187,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4070.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Bepe Army",
+        "background": "Matrix"
+      }
+    },
+    "4071": {
+      "rank": 293,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4071.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Rekt",
+        "mouth": "Joint",
+        "facewear": "Cool Glasses",
+        "head": "No Headgear",
+        "clothes": "Pickle Suit",
+        "background": "Moms Basement"
+      }
+    },
+    "4072": {
+      "rank": 366,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4072.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Terminator",
+        "mouth": "Gold Teeth",
+        "facewear": "Laser Eyes",
+        "head": "No Headgear",
+        "clothes": "Pickle Suit",
+        "background": "Moon"
+      }
+    },
+    "4073": {
+      "rank": 3651,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4073.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4074": {
+      "rank": 593,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4074.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Eye Patch",
+        "head": "Military Beret",
+        "clothes": "Bepe Army",
+        "background": "Matrix"
+      }
+    },
+    "4075": {
+      "rank": 1081,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4075.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "MOG Glasses",
+        "head": "Viking Helmet",
+        "clothes": "Bepe Army",
+        "background": "One Market"
+      }
+    },
+    "4076": {
+      "rank": 2154,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4076.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Centurion",
+        "clothes": "Roman Drip",
+        "background": "Silicon Data Center"
+      }
+    },
+    "4077": {
+      "rank": 145,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4077.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Night Vision",
+        "head": "Comrade Hat",
+        "clothes": "Roman Drip",
+        "background": "Rome"
+      }
+    },
+    "4078": {
+      "rank": 1830,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4078.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Terminator",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Centurion",
+        "clothes": "Roman Drip",
+        "background": "Orange Grove"
+      }
+    },
+    "4079": {
+      "rank": 2510,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4079.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "Ronin Helmet",
+        "clothes": "Ronin",
+        "background": "$HOA"
+      }
+    },
+    "4080": {
+      "rank": 277,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4080.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Cyber Shades",
+        "head": "Ronin Helmet",
+        "clothes": "Ronin",
+        "background": "Ronin Dojo"
+      }
+    },
+    "4081": {
+      "rank": 2611,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4081.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "No Face Wear",
+        "head": "Super Saiyan",
+        "clothes": "Ronin",
+        "background": "Moon"
+      }
+    },
+    "4082": {
+      "rank": 723,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4082.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Cool Glasses",
+        "head": "Super Saiyan",
+        "clothes": "SWAT Gear",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4083": {
+      "rank": 667,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4083.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "MOG Glasses",
+        "head": "SWAT Helmet",
+        "clothes": "SWAT Gear",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4084": {
+      "rank": 1365,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4084.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Terminator",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "SWAT Helmet",
+        "clothes": "SWAT Gear",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4085": {
+      "rank": 1272,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4085.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Cyber Shades",
+        "head": "No Headgear",
+        "clothes": "Sonic Suit",
+        "background": "Moon"
+      }
+    },
+    "4086": {
+      "rank": 945,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4086.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Clown Nose",
+        "head": "No Headgear",
+        "clothes": "Sonic Suit",
+        "background": "Matrix"
+      }
+    },
+    "4087": {
+      "rank": 483,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4087.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Rekt",
+        "mouth": "Joint",
+        "facewear": "MOG Glasses",
+        "head": "No Headgear",
+        "clothes": "Sonic Suit",
+        "background": "NYSE Pump"
+      }
+    },
+    "4088": {
+      "rank": 125,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4088.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Terminator",
+        "mouth": "Stunned",
+        "facewear": "Laser Eyes",
+        "head": "No Headgear",
+        "clothes": "Sonic Suit",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4089": {
+      "rank": 2890,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4089.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Sports Jacket",
+        "background": "Chia Farm"
+      }
+    },
+    "4090": {
+      "rank": 1401,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4090.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "MOG Glasses",
+        "head": "Military Beret",
+        "clothes": "Sports Jacket",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4091": {
+      "rank": 327,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4091.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Terminator",
+        "mouth": "Cig",
+        "facewear": "Laser Eyes",
+        "head": "Trump Wave",
+        "clothes": "Sports Jacket",
+        "background": "Moon"
+      }
+    },
+    "4092": {
+      "rank": 223,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4092.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Tin Foil Hat",
+        "clothes": "Straitjacket",
+        "background": "Crazy Room"
+      }
+    },
+    "4093": {
+      "rank": 358,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4093.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Vampire Teeth",
+        "facewear": "Cyber Shades",
+        "head": "Viking Helmet",
+        "clothes": "Straitjacket",
+        "background": "Moon"
+      }
+    },
+    "4094": {
+      "rank": 488,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4094.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Hannibal Mask",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Straitjacket",
+        "background": "Crazy Room"
+      }
+    },
+    "4095": {
+      "rank": 3880,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4095.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Suit",
+        "background": "One Market"
+      }
+    },
+    "4096": {
+      "rank": 1823,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4096.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "No Face Wear",
+        "head": "Cap",
+        "clothes": "Suit",
+        "background": "Silicon Data Center"
+      }
+    },
+    "4097": {
+      "rank": 591,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4097.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Rekt",
+        "mouth": "Joint",
+        "facewear": "Shades",
+        "head": "Super Wojak Hat",
+        "clothes": "Suit",
+        "background": "Moon"
+      }
+    },
+    "4098": {
+      "rank": 2758,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4098.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "Super Saiyan",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Hell"
+      }
+    },
+    "4099": {
+      "rank": 2259,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4099.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "No Face Wear",
+        "head": "Super Saiyan",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Heaven"
+      }
+    },
+    "4100": {
+      "rank": 491,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4100.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "MOG Glasses",
+        "head": "Super Saiyan",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Moms Basement"
+      }
+    }
+  }
+}

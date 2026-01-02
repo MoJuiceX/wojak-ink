@@ -1,0 +1,183 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "clothes:Suit||mouth:Screaming": [
+      "1975",
+      "2958",
+      "3587",
+      "2223",
+      "3830",
+      "2220",
+      "2207",
+      "1961",
+      "3338",
+      "3580",
+      "3829",
+      "1955",
+      "23",
+      "1880",
+      "1962",
+      "1883",
+      "1995",
+      "1927",
+      "1903"
+    ],
+    "facewear:Matrix Lenses||mouth:Bandana Mask": [
+      "2532",
+      "1325",
+      "81"
+    ],
+    "facewear:Tyson Tattoo||mouth:Screaming": [
+      "169",
+      "2426",
+      "374",
+      "1677",
+      "1461",
+      "2113",
+      "1805",
+      "1363"
+    ],
+    "head:Hard Hat||mouth:Copium Mask": [
+      "935",
+      "321",
+      "1484",
+      "1121",
+      "1734",
+      "1984"
+    ],
+    "facewear:Shades||head:Beanie": [
+      "3772",
+      "2834",
+      "2252",
+      "332",
+      "1941"
+    ],
+    "clothes:Straitjacket||head:Pirate Hat": [
+      "2155",
+      "365"
+    ],
+    "clothes:Firefighter Uniform||head:Super Saiyan": [
+      "521"
+    ],
+    "head:Beanie||mouth:Vampire Teeth": [
+      "583"
+    ],
+    "clothes:Chia Farmer||head:Ronin Helmet": [
+      "3022",
+      "2675",
+      "2782",
+      "1460",
+      "1518",
+      "1431",
+      "1489",
+      "2652"
+    ],
+    "clothes:Chia Farmer||mouth:Vampire Teeth": [
+      "2678",
+      "2679",
+      "2663",
+      "1500",
+      "1482",
+      "1448",
+      "1523",
+      "1431",
+      "1501"
+    ],
+    "facewear:Eye Patch||mouth:Stache": [
+      "3782",
+      "2155",
+      "1506",
+      "2007",
+      "2275",
+      "1764",
+      "1998"
+    ],
+    "base:Waifu||facewear:Matrix Lenses": [
+      "2917",
+      "2772",
+      "2941",
+      "2953",
+      "2899",
+      "2860",
+      "2885",
+      "2826",
+      "2768",
+      "2874"
+    ],
+    "clothes:Sports Bra||mouth:Gold Teeth": [
+      "3892",
+      "2928",
+      "3147",
+      "2924"
+    ],
+    "clothes:Sports Bra||facewear:Shades": [
+      "2934",
+      "2930",
+      "3142"
+    ],
+    "facewear:Matrix Lenses||mouth:Sexy Lip Bite": [
+      "2941",
+      "3194",
+      "2953"
+    ],
+    "clothes:Vintage Dress||face:Terminator": [
+      "2984",
+      "2985",
+      "3189",
+      "2986"
+    ],
+    "base:Baddie||head:Fedora": [
+      "3006",
+      "3164",
+      "3071",
+      "3129",
+      "3063"
+    ],
+    "clothes:Vintage Dress||facewear:Wizard Glasses": [
+      "3179"
+    ],
+    "base:Alien Soyjak||face:Terminator": [
+      "3787",
+      "3796",
+      "3797",
+      "3786",
+      "3795",
+      "3798",
+      "3792",
+      "3800",
+      "3790",
+      "3793",
+      "3794",
+      "3799",
+      "3788",
+      "3791",
+      "3789"
+    ],
+    "base:Bepe Wojak||facewear:Eye Patch": [
+      "3908",
+      "3961",
+      "3960",
+      "3979"
+    ],
+    "base:Bepe Wojak||clothes:Ronin": [
+      "3974",
+      "3976",
+      "3975",
+      "3973"
+    ],
+    "base:Bepe Soyjak||face:Terminator": [
+      "4046",
+      "4088",
+      "4043",
+      "4024",
+      "4091",
+      "4072",
+      "4040",
+      "4033",
+      "4084",
+      "4078",
+      "4110"
+    ]
+  }
+}

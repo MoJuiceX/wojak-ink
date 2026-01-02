@@ -1,0 +1,240 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-01-01T16:55:13.589Z",
+  "counts": {
+    "n_sales": 201,
+    "n_listed": 97,
+    "n_traits_with_support": 298,
+    "n_pairs_stored": 328
+  },
+  "distribution_stats": {
+    "median_xch": 0.902,
+    "mad_xch": 2.9652,
+    "floor_xch": 0.8,
+    "p10_xch": 0.902,
+    "p90_xch": 1.65
+  },
+  "top_20_trait_deltas": {
+    "ask": [
+      {
+        "trait": "face::Classic",
+        "delta": 0.11388379103642773
+      },
+      {
+        "trait": "clothes::Topless",
+        "delta": 0.08620059470452546
+      },
+      {
+        "trait": "facewear::No Face Wear",
+        "delta": 0.08495107677615894
+      },
+      {
+        "trait": "base::Papa Tang",
+        "delta": 0.07359512169629956
+      },
+      {
+        "trait": "base::Baddie",
+        "delta": 0.06689838402572144
+      },
+      {
+        "trait": "background::Hell",
+        "delta": 0.06062434627527289
+      },
+      {
+        "trait": "background::NYSE Pump",
+        "delta": 0.06053387039114436
+      },
+      {
+        "trait": "base::Wojak",
+        "delta": 0.0596347333970843
+      },
+      {
+        "trait": "background::Chia Green",
+        "delta": 0.05841060137433872
+      },
+      {
+        "trait": "mouth::Pizza",
+        "delta": 0.057113735282772804
+      },
+      {
+        "trait": "head::No Headgear",
+        "delta": 0.05497701228142414
+      },
+      {
+        "trait": "head::Military Beret",
+        "delta": 0.05440832536991017
+      },
+      {
+        "trait": "base::Monkey Zoo",
+        "delta": 0.053003946436983446
+      },
+      {
+        "trait": "background::$PIZZA",
+        "delta": 0.04776569110159436
+      },
+      {
+        "trait": "face::Rugged",
+        "delta": 0.04572154660429605
+      },
+      {
+        "trait": "background::One Market",
+        "delta": 0.044897089438767294
+      },
+      {
+        "trait": "background::Sky Shock Blue",
+        "delta": 0.043937117406471424
+      },
+      {
+        "trait": "head::Spikes",
+        "delta": 0.042815071737202434
+      },
+      {
+        "trait": "background::Everythings Fine",
+        "delta": 0.04140572438449666
+      },
+      {
+        "trait": "background::Hot Coral",
+        "delta": 0.04130386613530334
+      }
+    ],
+    "clear": [
+      {
+        "trait": "background::Moon",
+        "delta": 0.314685910539735
+      },
+      {
+        "trait": "base::Wojak",
+        "delta": 0.24571300538227034
+      },
+      {
+        "trait": "base::Alien Wojak",
+        "delta": 0.18695930934051774
+      },
+      {
+        "trait": "background::Hell",
+        "delta": 0.18662710245813247
+      },
+      {
+        "trait": "head::Centurion",
+        "delta": 0.17565405913441012
+      },
+      {
+        "trait": "background::Chia Green",
+        "delta": 0.16903159635957793
+      },
+      {
+        "trait": "background::$BEPE",
+        "delta": 0.1594764089485851
+      },
+      {
+        "trait": "head::Fedora",
+        "delta": 0.15219752641649056
+      },
+      {
+        "trait": "clothes::Topless",
+        "delta": 0.1493274691755923
+      },
+      {
+        "trait": "background::Heaven",
+        "delta": 0.14435889410418284
+      },
+      {
+        "trait": "face::Classic",
+        "delta": 0.1432889204424319
+      },
+      {
+        "trait": "facewear::Ninja Turtle Mask",
+        "delta": 0.14199982281700912
+      },
+      {
+        "trait": "clothes::Bepe Army",
+        "delta": 0.13670523420323324
+      },
+      {
+        "trait": "mouth::Teeth",
+        "delta": 0.13517977993563074
+      },
+      {
+        "trait": "mouth::Copium Mask",
+        "delta": 0.11459051396517943
+      },
+      {
+        "trait": "facewear::Shades",
+        "delta": 0.11293654370423488
+      },
+      {
+        "trait": "base::Alien Soyjak",
+        "delta": 0.11073846233387483
+      },
+      {
+        "trait": "facewear::Laser Eyes",
+        "delta": 0.10676047664557087
+      },
+      {
+        "trait": "head::No Headgear",
+        "delta": 0.10359246590647674
+      },
+      {
+        "trait": "mouth::Cohiba",
+        "delta": 0.10352818348932596
+      }
+    ]
+  },
+  "warnings": [
+    "mad_zero_fallback_used",
+    "low_coverage_traits"
+  ],
+  "low_coverage_traits": [
+    "head::Wizard Hat",
+    "background::Mellow Yellow",
+    "background::Rome",
+    "head::Comrade Hat",
+    "facewear::Eye Patch",
+    "background::$LOVE",
+    "facewear::Aviators",
+    "background::$HONK",
+    "background::Spell Room",
+    "head::Crown",
+    "background::Radioactive Forest",
+    "head::Devil Horns",
+    "background::Hell",
+    "facewear::Tyson Tattoo",
+    "head::Fedora",
+    "background::NYSE Pump",
+    "mouth::Pipe",
+    "facewear::Cool Glasses",
+    "head::Super Wojak Hat",
+    "head::Beer Hat",
+    "head::Pirate Hat",
+    "mouth::Neckbeard",
+    "clothes::Wizard Drip",
+    "background::Silicon Data Center",
+    "clothes::Suit",
+    "clothes::Astronaut",
+    "background::$BEPE",
+    "background::Moon",
+    "clothes::Pickle Suit",
+    "clothes::Bathrobe",
+    "background::Pirate Ship",
+    "clothes::Bepe Suit",
+    "background::One Market",
+    "clothes::Proof of Prayer",
+    "background::Heaven",
+    "clothes::Pepe Suit",
+    "background::Price Up",
+    "mouth::Hannibal Mask",
+    "clothes::El Presidente",
+    "clothes::Drac",
+    "clothes::Gopher Suit",
+    "facewear::Night Vision",
+    "head::Soy Hair",
+    "clothes::SWAT Gear",
+    "head::Clown",
+    "mouth::Stunned",
+    "head::Ronin Helmet",
+    "clothes::Tee",
+    "clothes::Ninja Turtle Fit",
+    "background::$PIZZA"
+  ],
+  "is_healthy": true
+}

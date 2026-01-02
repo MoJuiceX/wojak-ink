@@ -39,3 +39,9 @@ dist-ssr
 
 # ignore installer files
 *.pkg
+
+# Sales index build artifacts (checkpoints, logs, errors)
+public/assets/BigPulp/.sales_index_checkpoint.json
+public/assets/BigPulp/.sales_index_errors.json
+public/assets/BigPulp/.sales_index_build.log
+public/assets/BigPulp/rare_pairings_index_v1.json

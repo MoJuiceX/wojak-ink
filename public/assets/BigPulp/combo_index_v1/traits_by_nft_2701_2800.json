@@ -1,0 +1,1309 @@
+{
+  "schema_version": "1.0",
+  "range": [
+    2701,
+    2800
+  ],
+  "nfts": {
+    "2701": {
+      "rank": 3740,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2701.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "No Face Wear",
+        "head": "Construction Helmet",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Chia Green"
+      }
+    },
+    "2702": {
+      "rank": 380,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2702.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "Aviators",
+        "head": "Soy Hair",
+        "clothes": "Super Saiyan Uniform",
+        "background": "$BEPE"
+      }
+    },
+    "2703": {
+      "rank": 3193,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2703.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "Cowboy Hat",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Route 66"
+      }
+    },
+    "2704": {
+      "rank": 1312,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2704.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "MOG Glasses",
+        "head": "Firefighter Helmet",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Everythings Fine"
+      }
+    },
+    "2705": {
+      "rank": 2657,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2705.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Super Saiyan Uniform",
+        "background": "NYSE Pump"
+      }
+    },
+    "2706": {
+      "rank": 3119,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2706.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "Viking Helmet",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Pirate Ship"
+      }
+    },
+    "2707": {
+      "rank": 4020,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2707.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "No Face Wear",
+        "head": "Propeller Hat",
+        "clothes": "Super Saiyan Uniform",
+        "background": "$CHIA"
+      }
+    },
+    "2708": {
+      "rank": 3809,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2708.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "No Face Wear",
+        "head": "Super Saiyan",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Hot Coral"
+      }
+    },
+    "2709": {
+      "rank": 2379,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2709.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Vampire Teeth",
+        "facewear": "Clown Nose",
+        "head": "Super Saiyan",
+        "clothes": "Super Saiyan Uniform",
+        "background": "$HOA"
+      }
+    },
+    "2710": {
+      "rank": 3563,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2710.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "MOG Glasses",
+        "head": "Super Saiyan",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Neo Mint"
+      }
+    },
+    "2711": {
+      "rank": 2462,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2711.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Screaming",
+        "facewear": "Laser Eyes",
+        "head": "Super Saiyan",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Price Up"
+      }
+    },
+    "2712": {
+      "rank": 4151,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2712.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "2713": {
+      "rank": 1689,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2713.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Bandana Mask",
+        "facewear": "Cyber Shades",
+        "head": "Super Saiyan",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Hot Coral"
+      }
+    },
+    "2714": {
+      "rank": 1723,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2714.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Screaming",
+        "facewear": "Eye Patch",
+        "head": "Pirate Hat",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Pirate Ship"
+      }
+    },
+    "2715": {
+      "rank": 2778,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2715.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Fake It Mask",
+        "head": "No Headgear",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Chia Farm"
+      }
+    },
+    "2716": {
+      "rank": 2244,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2716.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "VR Headset",
+        "head": "SWAT Helmet",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Chia Green"
+      }
+    },
+    "2717": {
+      "rank": 486,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2717.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "Wizard Glasses",
+        "head": "Soy Hair",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Tangerine Pop"
+      }
+    },
+    "2718": {
+      "rank": 3146,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2718.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "No Face Wear",
+        "head": "Hard Hat",
+        "clothes": "Super Saiyan Uniform",
+        "background": "$HOA"
+      }
+    },
+    "2719": {
+      "rank": 1975,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2719.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "Eye Patch",
+        "head": "Beer Hat",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Green Candle"
+      }
+    },
+    "2720": {
+      "rank": 1485,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2720.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Screaming",
+        "facewear": "Shades",
+        "head": "Standard Cut",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Hot Coral"
+      }
+    },
+    "2721": {
+      "rank": 3134,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2721.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Screaming",
+        "facewear": "3D Glasses",
+        "head": "Super Saiyan",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Moon"
+      }
+    },
+    "2722": {
+      "rank": 3401,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2722.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "Clown Nose",
+        "head": "No Headgear",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Chia Green"
+      }
+    },
+    "2723": {
+      "rank": 3445,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2723.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "NPC",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Super Saiyan",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Tangerine Pop"
+      }
+    },
+    "2724": {
+      "rank": 837,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2724.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "NPC",
+        "mouth": "Cig",
+        "facewear": "Laser Eyes",
+        "head": "Super Saiyan",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Moms Basement"
+      }
+    },
+    "2725": {
+      "rank": 992,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2725.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "NPC",
+        "mouth": "Teeth",
+        "facewear": "Alpha Shades",
+        "head": "Field Cap",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Orange Grove"
+      }
+    },
+    "2726": {
+      "rank": 811,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2726.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "NPC",
+        "mouth": "Neckbeard",
+        "facewear": "Cool Glasses",
+        "head": "Firefighter Helmet",
+        "clothes": "Super Saiyan Uniform",
+        "background": "$CHIA"
+      }
+    },
+    "2727": {
+      "rank": 338,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2727.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "NPC",
+        "mouth": "Vampire Teeth",
+        "facewear": "Clown Nose",
+        "head": "Cowboy Hat",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Golden Hour"
+      }
+    },
+    "2728": {
+      "rank": 2091,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2728.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "NPC",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Standard Cut",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Sky Dive"
+      }
+    },
+    "2729": {
+      "rank": 3925,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2729.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Super Saiyan",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Tangerine Pop"
+      }
+    },
+    "2730": {
+      "rank": 2790,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2730.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Cig",
+        "facewear": "Alpha Shades",
+        "head": "Super Saiyan",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Green Candle"
+      }
+    },
+    "2731": {
+      "rank": 3854,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2731.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "Super Saiyan",
+        "clothes": "Super Saiyan Uniform",
+        "background": "$CHIA"
+      }
+    },
+    "2732": {
+      "rank": 3422,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2732.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Copium Mask",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Price Down"
+      }
+    },
+    "2733": {
+      "rank": 1711,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2733.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Screaming",
+        "facewear": "Matrix Lenses",
+        "head": "Trump Wave",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "2734": {
+      "rank": 2309,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2734.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Cyber Shades",
+        "head": "Military Beret",
+        "clothes": "Super Saiyan Uniform",
+        "background": "$HOA"
+      }
+    },
+    "2735": {
+      "rank": 2242,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2735.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Pizza",
+        "facewear": "No Face Wear",
+        "head": "Fedora",
+        "clothes": "Super Saiyan Uniform",
+        "background": "$PIZZA"
+      }
+    },
+    "2736": {
+      "rank": 2156,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2736.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Smile",
+        "facewear": "No Face Wear",
+        "head": "Halo",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Heaven"
+      }
+    },
+    "2737": {
+      "rank": 1982,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2737.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Stunned",
+        "facewear": "No Face Wear",
+        "head": "Crown",
+        "clothes": "Super Saiyan Uniform",
+        "background": "NYSE Pump"
+      }
+    },
+    "2738": {
+      "rank": 1244,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2738.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Teeth",
+        "facewear": "MOG Glasses",
+        "head": "Tin Foil Hat",
+        "clothes": "Super Saiyan Uniform",
+        "background": "NYSE Dump"
+      }
+    },
+    "2739": {
+      "rank": 1051,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2739.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Screaming",
+        "facewear": "Matrix Lenses",
+        "head": "Beer Hat",
+        "clothes": "Super Saiyan Uniform",
+        "background": "One Market"
+      }
+    },
+    "2740": {
+      "rank": 3023,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2740.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "Beer Hat",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Green Candle"
+      }
+    },
+    "2741": {
+      "rank": 3299,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2741.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Propeller Hat",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Tangerine Pop"
+      }
+    },
+    "2742": {
+      "rank": 36,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2742.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rugged",
+        "mouth": "Stunned",
+        "facewear": "Cyber Shades",
+        "head": "Soy Hair",
+        "clothes": "Super Saiyan Uniform",
+        "background": "$HONK"
+      }
+    },
+    "2743": {
+      "rank": 3347,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2743.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rugged",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Super Saiyan",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Price Down"
+      }
+    },
+    "2744": {
+      "rank": 2177,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2744.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rugged",
+        "mouth": "Cig",
+        "facewear": "Shades",
+        "head": "Super Saiyan",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Mellow Yellow"
+      }
+    },
+    "2745": {
+      "rank": 1127,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2745.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Vampire Teeth",
+        "facewear": "Alpha Shades",
+        "head": "Super Saiyan",
+        "clothes": "El Presidente",
+        "background": "$LOVE"
+      }
+    },
+    "2746": {
+      "rank": 3498,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2746.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Terminator",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Super Saiyan",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Hot Coral"
+      }
+    },
+    "2747": {
+      "rank": 2914,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2747.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Terminator",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "Super Saiyan",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Green Candle"
+      }
+    },
+    "2748": {
+      "rank": 2539,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2748.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Terminator",
+        "mouth": "Neckbeard",
+        "facewear": "No Face Wear",
+        "head": "Super Saiyan",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Price Up"
+      }
+    },
+    "2749": {
+      "rank": 1482,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2749.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Terminator",
+        "mouth": "Neckbeard",
+        "facewear": "Aviators",
+        "head": "No Headgear",
+        "clothes": "Super Saiyan Uniform",
+        "background": "$NECKCOIN"
+      }
+    },
+    "2750": {
+      "rank": 1237,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2750.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Terminator",
+        "mouth": "Vampire Teeth",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Super Saiyan Uniform",
+        "background": "$CHIA"
+      }
+    },
+    "2751": {
+      "rank": 523,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2751.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "Shades",
+        "head": "Cowboy Hat",
+        "clothes": "Bathrobe",
+        "background": "Morning Routine"
+      }
+    },
+    "2752": {
+      "rank": 908,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2752.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Laser Eyes",
+        "head": "Viking Helmet",
+        "clothes": "Bathrobe",
+        "background": "Pirate Ship"
+      }
+    },
+    "2753": {
+      "rank": 1269,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2753.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "Alpha Shades",
+        "head": "Tin Foil Hat",
+        "clothes": "Bathrobe",
+        "background": "Neo Mint"
+      }
+    },
+    "2754": {
+      "rank": 244,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2754.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "No Face Wear",
+        "head": "Tiara",
+        "clothes": "Bathrobe",
+        "background": "Morning Routine"
+      }
+    },
+    "2755": {
+      "rank": 1985,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2755.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "SWAT Helmet",
+        "clothes": "Bathrobe",
+        "background": "NYSE Pump"
+      }
+    },
+    "2756": {
+      "rank": 2273,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2756.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "NPC",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Bathrobe",
+        "background": "Tangerine Pop"
+      }
+    },
+    "2757": {
+      "rank": 1128,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2757.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Rekt",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Centurion",
+        "clothes": "Bathrobe",
+        "background": "Morning Routine"
+      }
+    },
+    "2758": {
+      "rank": 402,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2758.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Terminator",
+        "mouth": "Teeth",
+        "facewear": "Laser Eyes",
+        "head": "Propeller Hat",
+        "clothes": "Bathrobe",
+        "background": "Orange Grove"
+      }
+    },
+    "2759": {
+      "rank": 3127,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2759.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "One Market"
+      }
+    },
+    "2760": {
+      "rank": 2063,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2760.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "Aviators",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "$CHIA"
+      }
+    },
+    "2761": {
+      "rank": 421,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2761.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "Night Vision",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "NYSE Pump"
+      }
+    },
+    "2762": {
+      "rank": 1395,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2762.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Copium Mask",
+        "facewear": "3D Glasses",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "Green Candle"
+      }
+    },
+    "2763": {
+      "rank": 1642,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2763.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Terminator",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "Nesting Grounds"
+      }
+    },
+    "2764": {
+      "rank": 1030,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2764.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "2765": {
+      "rank": 2220,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2765.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Ponytail",
+        "clothes": "Born to Ride",
+        "background": "$CHIA"
+      }
+    },
+    "2766": {
+      "rank": 262,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2766.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Power Bob",
+        "clothes": "Born to Ride",
+        "background": "Sky Dive"
+      }
+    },
+    "2767": {
+      "rank": 1112,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2767.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "Wizard Glasses",
+        "head": "SWAT Helmet",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "2768": {
+      "rank": 2202,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2768.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Matrix Lenses",
+        "head": "Military Beret",
+        "clothes": "Born to Ride",
+        "background": "Mellow Yellow"
+      }
+    },
+    "2769": {
+      "rank": 548,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2769.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Pipe",
+        "facewear": "MOG Glasses",
+        "head": "Ponytail",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "2770": {
+      "rank": 1459,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2770.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "Eye Patch",
+        "head": "Ronin Helmet",
+        "clothes": "Born to Ride",
+        "background": "$HOA"
+      }
+    },
+    "2771": {
+      "rank": 3650,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2771.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "Construction Helmet",
+        "clothes": "Born to Ride",
+        "background": "Neo Mint"
+      }
+    },
+    "2772": {
+      "rank": 336,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2772.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "Matrix Lenses",
+        "head": "Beanie",
+        "clothes": "Born to Ride",
+        "background": "Price Down"
+      }
+    },
+    "2773": {
+      "rank": 2562,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2773.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Viking Helmet",
+        "clothes": "Born to Ride",
+        "background": "Pirate Ship"
+      }
+    },
+    "2774": {
+      "rank": 2779,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2774.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Terminator",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Military Beret",
+        "clothes": "Born to Ride",
+        "background": "Green Candle"
+      }
+    },
+    "2775": {
+      "rank": 1222,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2775.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "Alpha Shades",
+        "head": "Devil Horns",
+        "clothes": "Chia Farmer",
+        "background": "Heaven"
+      }
+    },
+    "2776": {
+      "rank": 1551,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2776.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Cool Glasses",
+        "head": "Centurion",
+        "clothes": "Chia Farmer",
+        "background": "$CHIA"
+      }
+    },
+    "2777": {
+      "rank": 352,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2777.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "MOG Glasses",
+        "head": "Power Bob",
+        "clothes": "Chia Farmer",
+        "background": "$HOA"
+      }
+    },
+    "2778": {
+      "rank": 1524,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2778.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "Shades",
+        "head": "Hip Hop Hat",
+        "clothes": "Chia Farmer",
+        "background": "Sky Dive"
+      }
+    },
+    "2779": {
+      "rank": 3082,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2779.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Vixen Waves",
+        "clothes": "Chia Farmer",
+        "background": "Tangerine Pop"
+      }
+    },
+    "2780": {
+      "rank": 3384,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2780.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Crown",
+        "clothes": "Chia Farmer",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "2781": {
+      "rank": 941,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2781.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "Wizard Glasses",
+        "head": "Cap",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "2782": {
+      "rank": 2471,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2782.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Alpha Shades",
+        "head": "Ronin Helmet",
+        "clothes": "Chia Farmer",
+        "background": "Chia Green"
+      }
+    },
+    "2783": {
+      "rank": 2915,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2783.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "No Face Wear",
+        "head": "Military Beret",
+        "clothes": "Chia Farmer",
+        "background": "NYSE Pump"
+      }
+    },
+    "2784": {
+      "rank": 3489,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2784.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "NPC",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Chia Farmer",
+        "background": "Mellow Yellow"
+      }
+    },
+    "2785": {
+      "rank": 1400,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2785.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Rekt",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Ponytail",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "2786": {
+      "rank": 1748,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2786.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Chia Farmer",
+        "background": "$CHIA"
+      }
+    },
+    "2787": {
+      "rank": 2333,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2787.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Terminator",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "SWAT Helmet",
+        "clothes": "Chia Farmer",
+        "background": "Matrix"
+      }
+    },
+    "2788": {
+      "rank": 1250,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2788.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Terminator",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Mermaid Waves",
+        "clothes": "Chia Farmer",
+        "background": "$CHIA"
+      }
+    },
+    "2789": {
+      "rank": 98,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2789.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Bleeding Bags",
+        "mouth": "Smile",
+        "facewear": "No Face Wear",
+        "head": "Power Bob",
+        "clothes": "Denim Vest",
+        "background": "NYSE Dump"
+      }
+    },
+    "2790": {
+      "rank": 768,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2790.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "Construction Helmet",
+        "clothes": "Denim Vest",
+        "background": "$PIZZA"
+      }
+    },
+    "2791": {
+      "rank": 397,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2791.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "Shades",
+        "head": "Comrade Hat",
+        "clothes": "Denim Vest",
+        "background": "Hot Coral"
+      }
+    },
+    "2792": {
+      "rank": 808,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2792.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Night Vision",
+        "head": "Fedora",
+        "clothes": "Denim Vest",
+        "background": "$CHIA"
+      }
+    },
+    "2793": {
+      "rank": 1490,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2793.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "No Face Wear",
+        "head": "Pirate Hat",
+        "clothes": "Denim Vest",
+        "background": "Pirate Ship"
+      }
+    },
+    "2794": {
+      "rank": 1174,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2794.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "Halo",
+        "clothes": "Denim Vest",
+        "background": "Hell"
+      }
+    },
+    "2795": {
+      "rank": 645,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2795.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "MOG Glasses",
+        "head": "Crown",
+        "clothes": "Denim Vest",
+        "background": "Silicon Data Center"
+      }
+    },
+    "2796": {
+      "rank": 38,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2796.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "Cyber Shades",
+        "head": "Tiara",
+        "clothes": "Denim Vest",
+        "background": "Tangerine Pop"
+      }
+    },
+    "2797": {
+      "rank": 367,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2797.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "NPC",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Tin Foil Hat",
+        "clothes": "Denim Vest",
+        "background": "NYSE Rug"
+      }
+    },
+    "2798": {
+      "rank": 1454,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2798.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Rekt",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "Cap",
+        "clothes": "Denim Vest",
+        "background": "$CHIA"
+      }
+    },
+    "2799": {
+      "rank": 980,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2799.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Cowboy Hat",
+        "clothes": "Denim Vest",
+        "background": "$BEPE"
+      }
+    },
+    "2800": {
+      "rank": 385,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2800.png",
+      "traits": {
+        "base": "Waifu",
+        "face": "Rekt",
+        "mouth": "Pipe",
+        "facewear": "No Face Wear",
+        "head": "Power Bob",
+        "clothes": "Denim Vest",
+        "background": "Neo Mint"
+      }
+    }
+  }
+}

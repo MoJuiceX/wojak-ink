@@ -1,0 +1,212 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "base:Wojak||clothes:Proof of Prayer": [
+      "309",
+      "310",
+      "295",
+      "305",
+      "308",
+      "296",
+      "304",
+      "300",
+      "297",
+      "294",
+      "303",
+      "313",
+      "302",
+      "301",
+      "291",
+      "289",
+      "306",
+      "314",
+      "298",
+      "299",
+      "280",
+      "283",
+      "292",
+      "288",
+      "312",
+      "281",
+      "282",
+      "286",
+      "284",
+      "311",
+      "277",
+      "279",
+      "285",
+      "307",
+      "276",
+      "290",
+      "278",
+      "293",
+      "56",
+      "287"
+    ],
+    "face:Terminator||facewear:VR Headset": [
+      "112"
+    ],
+    "facewear:Alpha Shades||head:Trump Wave": [
+      "3796",
+      "113",
+      "3406",
+      "1635"
+    ],
+    "facewear:VR Headset||mouth:Gold Teeth": [
+      "3457",
+      "3435",
+      "3931",
+      "3757",
+      "2257",
+      "214",
+      "2325",
+      "2168"
+    ],
+    "clothes:Sonic Suit||facewear:Clown Nose": [
+      "4086",
+      "223",
+      "229"
+    ],
+    "face:Terminator||head:Fedora": [
+      "4046",
+      "1029",
+      "3996",
+      "3258",
+      "3345",
+      "349",
+      "1404",
+      "3314",
+      "2320",
+      "1980"
+    ],
+    "clothes:Straitjacket||facewear:Ninja Turtle Mask": [
+      "2161",
+      "365"
+    ],
+    "face:Bleeding Bags||mouth:Copium Mask": [
+      "1392",
+      "1208",
+      "419",
+      "1734"
+    ],
+    "clothes:Firefighter Uniform||facewear:Eye Patch": [
+      "527",
+      "520"
+    ],
+    "head:Clown||mouth:Cohiba": [
+      "3835",
+      "3493",
+      "3475",
+      "780",
+      "2308",
+      "2378",
+      "926",
+      "1345",
+      "812"
+    ],
+    "clothes:Ronin||head:Military Beret": [
+      "3552",
+      "870",
+      "3308",
+      "871",
+      "2382"
+    ],
+    "clothes:Chia Farmer||head:Trump Wave": [
+      "3499",
+      "1437",
+      "1524",
+      "2653"
+    ],
+    "clothes:Sports Jacket||head:Hard Hat": [
+      "3332",
+      "2278",
+      "2489",
+      "1734",
+      "1652",
+      "1705"
+    ],
+    "clothes:Suit||head:Hip Hop Hat": [
+      "1956",
+      "2212",
+      "1927"
+    ],
+    "head:Hard Hat||mouth:Stunned": [
+      "2278",
+      "2439",
+      "2718"
+    ],
+    "base:Soyjak||clothes:Topless": [
+      "2420",
+      "2422",
+      "2424",
+      "2415",
+      "2426",
+      "2416",
+      "2403",
+      "2418",
+      "2412",
+      "2402",
+      "2408",
+      "2428",
+      "2414",
+      "2427",
+      "2423",
+      "2404",
+      "2417",
+      "2419",
+      "2429",
+      "2411",
+      "2410",
+      "2409",
+      "2425",
+      "2421",
+      "2401",
+      "2405",
+      "2413",
+      "2406",
+      "2407"
+    ],
+    "base:Waifu||clothes:Proof of Prayer": [
+      "2875",
+      "2876",
+      "2870",
+      "2874",
+      "2869",
+      "2871",
+      "2873",
+      "2872"
+    ],
+    "base:Waifu||clothes:SWAT Gear": [
+      "2898",
+      "2899",
+      "2900",
+      "2902",
+      "2905",
+      "2903",
+      "2901",
+      "2909",
+      "2897",
+      "2904",
+      "2906",
+      "2907",
+      "2908"
+    ],
+    "clothes:SWAT Gear||head:Mermaid Waves": [
+      "2898",
+      "3847"
+    ],
+    "clothes:School Uniform||face:Rugged": [
+      "3135",
+      "2921"
+    ],
+    "base:Papa Tang||facewear:Wizard Glasses": [
+      "3221",
+      "3428"
+    ],
+    "base:Alien Baddie||head:Beanie": [
+      "3888",
+      "3871"
+    ]
+  }
+}

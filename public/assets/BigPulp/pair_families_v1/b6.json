@@ -1,0 +1,215 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "clothes:Drac||face:Classic": [
+      "3927",
+      "3926",
+      "3682",
+      "3928",
+      "572",
+      "3746",
+      "3802",
+      "583",
+      "3925",
+      "3657",
+      "2195",
+      "608",
+      "2194",
+      "584",
+      "565",
+      "2190",
+      "591",
+      "15",
+      "568",
+      "563",
+      "573",
+      "569",
+      "571",
+      "562",
+      "578",
+      "2189",
+      "576",
+      "2191",
+      "2197",
+      "579",
+      "566",
+      "580",
+      "2196",
+      "582",
+      "574",
+      "564",
+      "2192",
+      "4041",
+      "575",
+      "2193",
+      "567",
+      "590",
+      "577",
+      "561",
+      "2188",
+      "570"
+    ],
+    "clothes:Proof of Prayer||mouth:Teeth": [
+      "2120",
+      "300",
+      "3282",
+      "282",
+      "56"
+    ],
+    "head:Ronin Helmet||mouth:Cohiba": [
+      "3547",
+      "2770",
+      "829",
+      "3471",
+      "898",
+      "85",
+      "766",
+      "1144"
+    ],
+    "clothes:Ninja Turtle Fit||face:Bleeding Bags": [
+      "1016",
+      "1017",
+      "2833",
+      "111",
+      "1019",
+      "1018"
+    ],
+    "face:NPC||mouth:Screaming": [
+      "2983",
+      "1745",
+      "1202",
+      "1023",
+      "135",
+      "1630"
+    ],
+    "clothes:Proof of Prayer||mouth:Smile": [
+      "3696",
+      "2123",
+      "2873",
+      "288"
+    ],
+    "clothes:God's Robe||facewear:Alpha Shades": [
+      "2805",
+      "336",
+      "316"
+    ],
+    "facewear:3D Glasses||head:SWAT Helmet": [
+      "390",
+      "2599",
+      "669",
+      "1603",
+      "3620",
+      "1097",
+      "479"
+    ],
+    "facewear:Shades||head:Halo": [
+      "514",
+      "2300",
+      "904"
+    ],
+    "clothes:Firefighter Uniform||mouth:Screaming": [
+      "3747",
+      "2251",
+      "555",
+      "553",
+      "549",
+      "2250",
+      "521",
+      "551"
+    ],
+    "clothes:Drac||head:Hip Hop Hat": [
+      "599",
+      "571"
+    ],
+    "facewear:3D Glasses||head:Cap": [
+      "624",
+      "1036"
+    ],
+    "clothes:Ninja Turtle Fit||head:Cowboy Hat": [
+      "1016",
+      "2471",
+      "987",
+      "1026",
+      "958"
+    ],
+    "facewear:Ninja Turtle Mask||head:Wizard Hat": [
+      "2942",
+      "3070",
+      "1007",
+      "2993",
+      "978"
+    ],
+    "clothes:Bepe Army||mouth:Hannibal Mask": [
+      "1180",
+      "1129",
+      "2554"
+    ],
+    "facewear:VR Headset||mouth:Hannibal Mask": [
+      "1660"
+    ],
+    "clothes:Wizard Drip||facewear:MOG Glasses": [
+      "2998",
+      "3768",
+      "4114",
+      "1817",
+      "1834",
+      "1847",
+      "3190",
+      "1853",
+      "2523",
+      "1777",
+      "1797"
+    ],
+    "head:Devil Horns||mouth:Stunned": [
+      "2671"
+    ],
+    "head:Power Bob||mouth:Smile": [
+      "2789"
+    ],
+    "facewear:Aviators||mouth:Glossed Lips": [
+      "4154",
+      "3843",
+      "2978",
+      "3167"
+    ],
+    "head:Power Bob||mouth:Teeth": [
+      "3004"
+    ],
+    "clothes:Bathrobe||head:Twin Braids": [
+      "3005"
+    ],
+    "head:Power Bob||mouth:Pizza": [
+      "3026"
+    ],
+    "base:Papa Tang||head:2Pac Bandana": [
+      "3386"
+    ],
+    "base:Alien Wojak||face:Bleeding Bags": [
+      "3819",
+      "3818",
+      "3820",
+      "3817"
+    ],
+    "base:Alien Waifu||mouth:Smile": [
+      "3842",
+      "3836"
+    ],
+    "base:Alien Waifu||head:Power Bob": [
+      "3849",
+      "3848"
+    ],
+    "base:Alien Waifu||mouth:Teeth": [
+      "3860",
+      "3859",
+      "3858"
+    ],
+    "base:Bepe Soyjak||head:SWAT Helmet": [
+      "4083",
+      "4084"
+    ],
+    "base:Bepe Waifu||clothes:God's Robe": [
+      "4130"
+    ]
+  }
+}

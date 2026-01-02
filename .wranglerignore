@@ -1,0 +1,3 @@
+# Exclude large files that exceed Cloudflare Pages 25MB limit
+assets/BigPulp/rare_pairings_index_v1.json
+

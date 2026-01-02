@@ -1,0 +1,1309 @@
+{
+  "schema_version": "1.0",
+  "range": [
+    2201,
+    2300
+  ],
+  "nfts": {
+    "2201": {
+      "rank": 355,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2201.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Vampire Teeth",
+        "facewear": "Matrix Lenses",
+        "head": "Military Beret",
+        "clothes": "El Presidente",
+        "background": "NYSE Pump"
+      }
+    },
+    "2202": {
+      "rank": 544,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2202.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Vampire Teeth",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Drac",
+        "background": "Price Down"
+      }
+    },
+    "2203": {
+      "rank": 2230,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2203.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rugged",
+        "mouth": "Vampire Teeth",
+        "facewear": "No Face Wear",
+        "head": "Cap",
+        "clothes": "Drac",
+        "background": "Sky Dive"
+      }
+    },
+    "2204": {
+      "rank": 1833,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2204.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rugged",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Devil Horns",
+        "clothes": "Drac",
+        "background": "Heaven"
+      }
+    },
+    "2205": {
+      "rank": 1386,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2205.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Terminator",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Soy Hair",
+        "clothes": "Drac",
+        "background": "Neo Mint"
+      }
+    },
+    "2206": {
+      "rank": 1257,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2206.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "MOG Glasses",
+        "head": "Soy Hair",
+        "clothes": "Suit",
+        "background": "$LOVE"
+      }
+    },
+    "2207": {
+      "rank": 1763,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2207.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Screaming",
+        "facewear": "Aviators",
+        "head": "Standard Cut",
+        "clothes": "Suit",
+        "background": "Tangerine Pop"
+      }
+    },
+    "2208": {
+      "rank": 2757,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2208.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "Matrix Lenses",
+        "head": "Comrade Hat",
+        "clothes": "Suit",
+        "background": "Chia Green"
+      }
+    },
+    "2209": {
+      "rank": 3128,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2209.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Firefighter Helmet",
+        "clothes": "Suit",
+        "background": "Sky Dive"
+      }
+    },
+    "2210": {
+      "rank": 2555,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2210.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "3D Glasses",
+        "head": "Halo",
+        "clothes": "Suit",
+        "background": "Green Candle"
+      }
+    },
+    "2211": {
+      "rank": 1802,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2211.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "Wizard Glasses",
+        "head": "Comrade Hat",
+        "clothes": "Suit",
+        "background": "Tangerine Pop"
+      }
+    },
+    "2212": {
+      "rank": 3824,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2212.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "Hip Hop Hat",
+        "clothes": "Suit",
+        "background": "Neo Mint"
+      }
+    },
+    "2213": {
+      "rank": 3375,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2213.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Cyber Shades",
+        "head": "Construction Helmet",
+        "clothes": "Suit",
+        "background": "Neo Mint"
+      }
+    },
+    "2214": {
+      "rank": 2173,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2214.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Eye Patch",
+        "head": "Pirate Hat",
+        "clothes": "Suit",
+        "background": "Golden Hour"
+      }
+    },
+    "2215": {
+      "rank": 2453,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2215.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "3D Glasses",
+        "head": "Beanie",
+        "clothes": "Suit",
+        "background": "Green Candle"
+      }
+    },
+    "2216": {
+      "rank": 1165,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2216.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "VR Headset",
+        "head": "Construction Helmet",
+        "clothes": "Suit",
+        "background": "Tangerine Pop"
+      }
+    },
+    "2217": {
+      "rank": 517,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2217.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "VR Headset",
+        "head": "Military Beret",
+        "clothes": "El Presidente",
+        "background": "Neo Mint"
+      }
+    },
+    "2218": {
+      "rank": 849,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2218.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Bleeding Bags",
+        "mouth": "Gold Teeth",
+        "facewear": "Alpha Shades",
+        "head": "Cowboy Hat",
+        "clothes": "Suit",
+        "background": "One Market"
+      }
+    },
+    "2219": {
+      "rank": 1522,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2219.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "NPC",
+        "mouth": "Cig",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Field Cap",
+        "clothes": "Suit",
+        "background": "$CHIA"
+      }
+    },
+    "2220": {
+      "rank": 1281,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2220.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Screaming",
+        "facewear": "Aviators",
+        "head": "Devil Horns",
+        "clothes": "Suit",
+        "background": "NYSE Pump"
+      }
+    },
+    "2221": {
+      "rank": 2799,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2221.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "Firefighter Helmet",
+        "clothes": "Suit",
+        "background": "NYSE Dump"
+      }
+    },
+    "2222": {
+      "rank": 1848,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2222.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Smile",
+        "facewear": "Shades",
+        "head": "Propeller Hat",
+        "clothes": "Suit",
+        "background": "Tangerine Pop"
+      }
+    },
+    "2223": {
+      "rank": 689,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2223.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "Fake It Mask",
+        "head": "Viking Helmet",
+        "clothes": "Suit",
+        "background": "Tangerine Pop"
+      }
+    },
+    "2224": {
+      "rank": 1636,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2224.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Terminator",
+        "mouth": "Neckbeard",
+        "facewear": "Clown Nose",
+        "head": "Military Beret",
+        "clothes": "Suit",
+        "background": "Sky Dive"
+      }
+    },
+    "2225": {
+      "rank": 1700,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2225.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Terminator",
+        "mouth": "Stache",
+        "facewear": "No Face Wear",
+        "head": "Ronin Helmet",
+        "clothes": "Suit",
+        "background": "Ronin Dojo"
+      }
+    },
+    "2226": {
+      "rank": 2131,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2226.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Terminator",
+        "mouth": "Cig",
+        "facewear": "Shades",
+        "head": "Trump Wave",
+        "clothes": "Suit",
+        "background": "Chia Green"
+      }
+    },
+    "2227": {
+      "rank": 3521,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2227.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Bleeding Bags",
+        "mouth": "Pipe",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "2228": {
+      "rank": 2225,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2228.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "3D Glasses",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "Green Candle"
+      }
+    },
+    "2229": {
+      "rank": 1101,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2229.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Bleeding Bags",
+        "mouth": "Bandana Mask",
+        "facewear": "Wizard Glasses",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "Neo Mint"
+      }
+    },
+    "2230": {
+      "rank": 3303,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2230.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Tyson Tattoo",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "Tangerine Pop"
+      }
+    },
+    "2231": {
+      "rank": 3156,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2231.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Screaming",
+        "facewear": "Ninja Turtle Mask",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "Radioactive Forest"
+      }
+    },
+    "2232": {
+      "rank": 3881,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2232.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "MOG Glasses",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "$CHIA"
+      }
+    },
+    "2233": {
+      "rank": 3165,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2233.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Vampire Teeth",
+        "facewear": "Shades",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "Tangerine Pop"
+      }
+    },
+    "2234": {
+      "rank": 1786,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2234.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "Laser Eyes",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "$CASTER"
+      }
+    },
+    "2235": {
+      "rank": 1622,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2235.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "Cyber Shades",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "Silicon Data Center"
+      }
+    },
+    "2236": {
+      "rank": 3406,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2236.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "Moms Basement"
+      }
+    },
+    "2237": {
+      "rank": 3590,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2237.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "Clown Nose",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "$CHIA"
+      }
+    },
+    "2238": {
+      "rank": 3730,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2238.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Matrix Lenses",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "Green Candle"
+      }
+    },
+    "2239": {
+      "rank": 4152,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2239.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "Sky Dive"
+      }
+    },
+    "2240": {
+      "rank": 3309,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2240.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "Shades",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "Matrix"
+      }
+    },
+    "2241": {
+      "rank": 1817,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2241.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Gold Teeth",
+        "facewear": "Laser Eyes",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "Hot Coral"
+      }
+    },
+    "2242": {
+      "rank": 3763,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2242.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "Neo Mint"
+      }
+    },
+    "2243": {
+      "rank": 2235,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2243.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Copium Mask",
+        "facewear": "Shades",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "$CHIA"
+      }
+    },
+    "2244": {
+      "rank": 917,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2244.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Pizza",
+        "facewear": "Tyson Tattoo",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "$PIZZA"
+      }
+    },
+    "2245": {
+      "rank": 1782,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2245.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rugged",
+        "mouth": "Joint",
+        "facewear": "Ninja Turtle Mask",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "$HOA"
+      }
+    },
+    "2246": {
+      "rank": 3956,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2246.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rugged",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "Sky Dive"
+      }
+    },
+    "2247": {
+      "rank": 3538,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2247.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Terminator",
+        "mouth": "Pipe",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "Neo Mint"
+      }
+    },
+    "2248": {
+      "rank": 2767,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2248.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Terminator",
+        "mouth": "Numb",
+        "facewear": "Matrix Lenses",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "Green Candle"
+      }
+    },
+    "2249": {
+      "rank": 1595,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2249.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Terminator",
+        "mouth": "Bubble Gum",
+        "facewear": "Cool Glasses",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "Tangerine Pop"
+      }
+    },
+    "2250": {
+      "rank": 3109,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2250.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Military Beret",
+        "clothes": "Firefighter Uniform",
+        "background": "$CHIA"
+      }
+    },
+    "2251": {
+      "rank": 847,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2251.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "Laser Eyes",
+        "head": "Crown",
+        "clothes": "Firefighter Uniform",
+        "background": "Tangerine Pop"
+      }
+    },
+    "2252": {
+      "rank": 1216,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2252.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Copium Mask",
+        "facewear": "Shades",
+        "head": "Beanie",
+        "clothes": "Firefighter Uniform",
+        "background": "Neo Mint"
+      }
+    },
+    "2253": {
+      "rank": 2544,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2253.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "MOG Glasses",
+        "head": "Construction Helmet",
+        "clothes": "Firefighter Uniform",
+        "background": "$BEPE"
+      }
+    },
+    "2254": {
+      "rank": 1849,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2254.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "3D Glasses",
+        "head": "Tin Foil Hat",
+        "clothes": "Firefighter Uniform",
+        "background": "$HOA"
+      }
+    },
+    "2255": {
+      "rank": 2506,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2255.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "Alpha Shades",
+        "head": "Ronin Helmet",
+        "clothes": "Firefighter Uniform",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "2256": {
+      "rank": 1834,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2256.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Laser Eyes",
+        "head": "Devil Horns",
+        "clothes": "Firefighter Uniform",
+        "background": "Radioactive Forest"
+      }
+    },
+    "2257": {
+      "rank": 605,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2257.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "VR Headset",
+        "head": "Standard Cut",
+        "clothes": "Firefighter Uniform",
+        "background": "Chia Green"
+      }
+    },
+    "2258": {
+      "rank": 1951,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2258.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "Wizard Glasses",
+        "head": "Viking Helmet",
+        "clothes": "Firefighter Uniform",
+        "background": "Tangerine Pop"
+      }
+    },
+    "2259": {
+      "rank": 1103,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2259.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Matrix Lenses",
+        "head": "Field Cap",
+        "clothes": "Firefighter Uniform",
+        "background": "Everythings Fine"
+      }
+    },
+    "2260": {
+      "rank": 2033,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2260.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Aviators",
+        "head": "Propeller Hat",
+        "clothes": "Firefighter Uniform",
+        "background": "Golden Hour"
+      }
+    },
+    "2261": {
+      "rank": 836,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2261.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "NPC",
+        "mouth": "Joint",
+        "facewear": "Alpha Shades",
+        "head": "Firefighter Helmet",
+        "clothes": "Firefighter Uniform",
+        "background": "Sky Dive"
+      }
+    },
+    "2262": {
+      "rank": 467,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2262.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "NPC",
+        "mouth": "Vampire Teeth",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Construction Helmet",
+        "clothes": "Firefighter Uniform",
+        "background": "$CHIA"
+      }
+    },
+    "2263": {
+      "rank": 2522,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2263.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Devil Horns",
+        "clothes": "Firefighter Uniform",
+        "background": "One Market"
+      }
+    },
+    "2264": {
+      "rank": 696,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2264.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Cohiba",
+        "facewear": "Night Vision",
+        "head": "Military Beret",
+        "clothes": "El Presidente",
+        "background": "Orange Grove"
+      }
+    },
+    "2265": {
+      "rank": 3030,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2265.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Firefighter Helmet",
+        "clothes": "Firefighter Uniform",
+        "background": "Green Candle"
+      }
+    },
+    "2266": {
+      "rank": 1341,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2266.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Pizza",
+        "facewear": "MOG Glasses",
+        "head": "Firefighter Helmet",
+        "clothes": "Firefighter Uniform",
+        "background": "Neo Mint"
+      }
+    },
+    "2267": {
+      "rank": 600,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2267.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Bubble Gum",
+        "facewear": "Cyber Shades",
+        "head": "Firefighter Helmet",
+        "clothes": "Firefighter Uniform",
+        "background": "Radioactive Forest"
+      }
+    },
+    "2268": {
+      "rank": 766,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2268.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Pizza",
+        "facewear": "Wizard Glasses",
+        "head": "Beanie",
+        "clothes": "Firefighter Uniform",
+        "background": "Chia Green"
+      }
+    },
+    "2269": {
+      "rank": 545,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2269.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Gold Teeth",
+        "facewear": "Aviators",
+        "head": "Ronin Helmet",
+        "clothes": "Firefighter Uniform",
+        "background": "Ronin Dojo"
+      }
+    },
+    "2270": {
+      "rank": 384,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2270.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rekt",
+        "mouth": "Joint",
+        "facewear": "Shades",
+        "head": "Standard Cut",
+        "clothes": "Firefighter Uniform",
+        "background": "$LOVE"
+      }
+    },
+    "2271": {
+      "rank": 2265,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2271.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Rugged",
+        "mouth": "Neckbeard",
+        "facewear": "No Face Wear",
+        "head": "Tin Foil Hat",
+        "clothes": "Firefighter Uniform",
+        "background": "Green Candle"
+      }
+    },
+    "2272": {
+      "rank": 2434,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2272.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Terminator",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Trump Wave",
+        "clothes": "Firefighter Uniform",
+        "background": "Tangerine Pop"
+      }
+    },
+    "2273": {
+      "rank": 3827,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2273.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "No Face Wear",
+        "head": "Cowboy Hat",
+        "clothes": "Sports Jacket",
+        "background": "Chia Green"
+      }
+    },
+    "2274": {
+      "rank": 2648,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2274.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Vampire Teeth",
+        "facewear": "Matrix Lenses",
+        "head": "Crown",
+        "clothes": "Sports Jacket",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "2275": {
+      "rank": 1859,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2275.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "Eye Patch",
+        "head": "Field Cap",
+        "clothes": "Sports Jacket",
+        "background": "Bepe Barracks"
+      }
+    },
+    "2276": {
+      "rank": 3270,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2276.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Alpha Shades",
+        "head": "Ronin Helmet",
+        "clothes": "Sports Jacket",
+        "background": "Radioactive Forest"
+      }
+    },
+    "2277": {
+      "rank": 1948,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2277.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "Wizard Glasses",
+        "head": "Construction Helmet",
+        "clothes": "Sports Jacket",
+        "background": "Silicon Data Center"
+      }
+    },
+    "2278": {
+      "rank": 1264,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2278.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "Aviators",
+        "head": "Hard Hat",
+        "clothes": "Sports Jacket",
+        "background": "Chia Farm"
+      }
+    },
+    "2279": {
+      "rank": 3044,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2279.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Screaming",
+        "facewear": "Clown Nose",
+        "head": "Ronin Helmet",
+        "clothes": "Ronin",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "2280": {
+      "rank": 3305,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2280.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "Ronin Helmet",
+        "clothes": "Ronin",
+        "background": "Ronin Dojo"
+      }
+    },
+    "2281": {
+      "rank": 2724,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2281.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Cool Glasses",
+        "head": "Ronin Helmet",
+        "clothes": "Ronin",
+        "background": "$HOA"
+      }
+    },
+    "2282": {
+      "rank": 1769,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2282.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "Wizard Glasses",
+        "head": "Ronin Helmet",
+        "clothes": "Ronin",
+        "background": "$BEPE"
+      }
+    },
+    "2283": {
+      "rank": 2369,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2283.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "Eye Patch",
+        "head": "Ronin Helmet",
+        "clothes": "Ronin",
+        "background": "$CHIA"
+      }
+    },
+    "2284": {
+      "rank": 1631,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2284.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "Cool Glasses",
+        "head": "Beer Hat",
+        "clothes": "Ninja Turtle Fit",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "2285": {
+      "rank": 631,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2285.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "Tyson Tattoo",
+        "head": "Comrade Hat",
+        "clothes": "Ninja Turtle Fit",
+        "background": "$PIZZA"
+      }
+    },
+    "2286": {
+      "rank": 2383,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2286.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Hip Hop Hat",
+        "clothes": "Ninja Turtle Fit",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "2287": {
+      "rank": 814,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2287.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "Tyson Tattoo",
+        "head": "Military Beret",
+        "clothes": "El Presidente",
+        "background": "Chia Green"
+      }
+    },
+    "2288": {
+      "rank": 3936,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2288.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "No Face Wear",
+        "head": "Crown",
+        "clothes": "Ninja Turtle Fit",
+        "background": "Sky Dive"
+      }
+    },
+    "2289": {
+      "rank": 3977,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2289.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Pipe",
+        "facewear": "No Face Wear",
+        "head": "Cap",
+        "clothes": "Roman Drip",
+        "background": "Chia Green"
+      }
+    },
+    "2290": {
+      "rank": 2417,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2290.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "MOG Glasses",
+        "head": "Clown",
+        "clothes": "Roman Drip",
+        "background": "Golden Hour"
+      }
+    },
+    "2291": {
+      "rank": 2455,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2291.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Pipe",
+        "facewear": "Cyber Shades",
+        "head": "Centurion",
+        "clothes": "Roman Drip",
+        "background": "Green Candle"
+      }
+    },
+    "2292": {
+      "rank": 3453,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2292.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Matrix Lenses",
+        "head": "Centurion",
+        "clothes": "Roman Drip",
+        "background": "$CHIA"
+      }
+    },
+    "2293": {
+      "rank": 2183,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2293.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Centurion",
+        "clothes": "Roman Drip",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "2294": {
+      "rank": 3719,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2294.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "No Face Wear",
+        "head": "Construction Helmet",
+        "clothes": "Leather Jacket",
+        "background": "Golden Hour"
+      }
+    },
+    "2295": {
+      "rank": 3840,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2295.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "No Face Wear",
+        "head": "Construction Helmet",
+        "clothes": "Leather Jacket",
+        "background": "$HOA"
+      }
+    },
+    "2296": {
+      "rank": 2792,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2296.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "Cyber Shades",
+        "head": "Ronin Helmet",
+        "clothes": "Leather Jacket",
+        "background": "Chia Green"
+      }
+    },
+    "2297": {
+      "rank": 3604,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2297.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Hannibal Mask",
+        "facewear": "No Face Wear",
+        "head": "Propeller Hat",
+        "clothes": "Leather Jacket",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "2298": {
+      "rank": 1075,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2298.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "Night Vision",
+        "head": "Soy Hair",
+        "clothes": "Leather Jacket",
+        "background": "Sky Dive"
+      }
+    },
+    "2299": {
+      "rank": 2943,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2299.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Screaming",
+        "facewear": "Aviators",
+        "head": "SWAT Helmet",
+        "clothes": "Leather Jacket",
+        "background": "Tangerine Pop"
+      }
+    },
+    "2300": {
+      "rank": 2637,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/2300.png",
+      "traits": {
+        "base": "Soyjak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Shades",
+        "head": "Halo",
+        "clothes": "Leather Jacket",
+        "background": "Hot Coral"
+      }
+    }
+  }
+}

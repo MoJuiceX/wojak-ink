@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "clothes:Suit||mouth:Stache": [
+      "2225",
+      "16",
+      "1912",
+      "1929",
+      "1922",
+      "1998",
+      "1907",
+      "1906",
+      "1914"
+    ],
+    "head:Trump Wave||mouth:Gold Teeth": [
+      "3520",
+      "3579",
+      "2376",
+      "67",
+      "1886"
+    ],
+    "clothes:Goose Suit||face:NPC": [
+      "2068",
+      "2067",
+      "209",
+      "2065",
+      "210",
+      "2066",
+      "208"
+    ],
+    "facewear:MOG Glasses||head:Fedora": [
+      "3209",
+      "3996",
+      "3509",
+      "598",
+      "1404",
+      "436",
+      "1019",
+      "1135",
+      "1672",
+      "1236",
+      "1654",
+      "1451"
+    ],
+    "head:SWAT Helmet||mouth:Vampire Teeth": [
+      "1270",
+      "2313",
+      "1206",
+      "566"
+    ],
+    "clothes:Bathrobe||head:Field Cap": [
+      "3212",
+      "2086",
+      "661",
+      "651",
+      "672",
+      "678",
+      "631"
+    ],
+    "clothes:Bepe Army||head:Construction Helmet": [
+      "3216",
+      "1218",
+      "3476",
+      "1211",
+      "1167",
+      "1160",
+      "1131",
+      "1189",
+      "1198"
+    ],
+    "clothes:Born to Ride||facewear:Cyber Shades": [
+      "3490",
+      "3655",
+      "1261"
+    ],
+    "clothes:Leather Jacket||facewear:Alpha Shades": [
+      "3515",
+      "2322",
+      "3271",
+      "4061",
+      "1369",
+      "2315",
+      "1372",
+      "3267",
+      "1335",
+      "1329"
+    ],
+    "clothes:Bepe Suit||mouth:Hannibal Mask": [
+      "2094"
+    ],
+    "head:Mermaid Waves||mouth:Screaming": [
+      "2883",
+      "2801",
+      "3118",
+      "3028"
+    ],
+    "clothes:Viking Armor||head:Twin Braids": [
+      "2969"
+    ],
+    "base:Baddie||face:NPC": [
+      "3040",
+      "3092",
+      "3187",
+      "3134",
+      "3027"
+    ],
+    "base:Papa Tang||facewear:Alpha Shades": [
+      "3298",
+      "3364",
+      "3231",
+      "3271",
+      "3362",
+      "3342",
+      "3406",
+      "3285",
+      "3255",
+      "3223",
+      "3267"
+    ],
+    "head:Devil Horns||mouth:Sexy Lip Bite": [
+      "3900"
+    ],
+    "base:Bepe Wojak||facewear:Clown Nose": [
+      "3911",
+      "4011"
+    ],
+    "base:Bepe Soyjak||facewear:Cool Glasses": [
+      "4071",
+      "4067",
+      "4082",
+      "4054"
+    ]
+  }
+}

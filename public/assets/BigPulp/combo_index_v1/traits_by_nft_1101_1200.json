@@ -1,0 +1,1309 @@
+{
+  "schema_version": "1.0",
+  "range": [
+    1101,
+    1200
+  ],
+  "nfts": {
+    "1101": {
+      "rank": 1658,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1101.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "MOG Glasses",
+        "head": "Centurion",
+        "clothes": "Roman Drip",
+        "background": "NYSE Rug"
+      }
+    },
+    "1102": {
+      "rank": 1927,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1102.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "Alpha Shades",
+        "head": "Clown",
+        "clothes": "Roman Drip",
+        "background": "Price Down"
+      }
+    },
+    "1103": {
+      "rank": 2211,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1103.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Cohiba",
+        "facewear": "Aviators",
+        "head": "Pirate Hat",
+        "clothes": "Roman Drip",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1104": {
+      "rank": 1002,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1104.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Gold Teeth",
+        "facewear": "Eye Patch",
+        "head": "Pirate Hat",
+        "clothes": "Roman Drip",
+        "background": "Pirate Ship"
+      }
+    },
+    "1105": {
+      "rank": 3586,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1105.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "Super Saiyan",
+        "clothes": "Roman Drip",
+        "background": "Hot Coral"
+      }
+    },
+    "1106": {
+      "rank": 4017,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1106.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Super Saiyan",
+        "clothes": "Roman Drip",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1107": {
+      "rank": 3715,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1107.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Viking Helmet",
+        "clothes": "Roman Drip",
+        "background": "Sky Dive"
+      }
+    },
+    "1108": {
+      "rank": 3652,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1108.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Centurion",
+        "clothes": "Roman Drip",
+        "background": "Radioactive Forest"
+      }
+    },
+    "1109": {
+      "rank": 1066,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1109.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Numb",
+        "facewear": "Laser Eyes",
+        "head": "Centurion",
+        "clothes": "Roman Drip",
+        "background": "Rome"
+      }
+    },
+    "1110": {
+      "rank": 843,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1110.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Cohiba",
+        "facewear": "3D Glasses",
+        "head": "Centurion",
+        "clothes": "Roman Drip",
+        "background": "Rome"
+      }
+    },
+    "1111": {
+      "rank": 3307,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1111.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Devil Horns",
+        "clothes": "Roman Drip",
+        "background": "Hell"
+      }
+    },
+    "1112": {
+      "rank": 1669,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1112.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Cohiba",
+        "facewear": "Cool Glasses",
+        "head": "Construction Helmet",
+        "clothes": "Roman Drip",
+        "background": "$HOA"
+      }
+    },
+    "1113": {
+      "rank": 1600,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1113.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Gold Teeth",
+        "facewear": "Matrix Lenses",
+        "head": "Comrade Hat",
+        "clothes": "Roman Drip",
+        "background": "Chia Green"
+      }
+    },
+    "1114": {
+      "rank": 844,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1114.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Teeth",
+        "facewear": "Night Vision",
+        "head": "SWAT Helmet",
+        "clothes": "Roman Drip",
+        "background": "Price Up"
+      }
+    },
+    "1115": {
+      "rank": 4069,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1115.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Centurion",
+        "clothes": "Roman Drip",
+        "background": "Chia Green"
+      }
+    },
+    "1116": {
+      "rank": 4016,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1116.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Centurion",
+        "clothes": "Roman Drip",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1117": {
+      "rank": 2581,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1117.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Neckbeard",
+        "facewear": "No Face Wear",
+        "head": "Centurion",
+        "clothes": "Roman Drip",
+        "background": "Rome"
+      }
+    },
+    "1118": {
+      "rank": 3363,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1118.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Stache",
+        "facewear": "No Face Wear",
+        "head": "Centurion",
+        "clothes": "Roman Drip",
+        "background": "Tangerine Pop"
+      }
+    },
+    "1119": {
+      "rank": 979,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1119.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Smile",
+        "facewear": "Aviators",
+        "head": "Crown",
+        "clothes": "Roman Drip",
+        "background": "Rome"
+      }
+    },
+    "1120": {
+      "rank": 1953,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1120.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Gold Teeth",
+        "facewear": "Shades",
+        "head": "Devil Horns",
+        "clothes": "Roman Drip",
+        "background": "Hell"
+      }
+    },
+    "1121": {
+      "rank": 2305,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1121.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Copium Mask",
+        "facewear": "No Face Wear",
+        "head": "Hard Hat",
+        "clothes": "Roman Drip",
+        "background": "NYSE Pump"
+      }
+    },
+    "1122": {
+      "rank": 2918,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1122.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Pipe",
+        "facewear": "No Face Wear",
+        "head": "Super Wojak Hat",
+        "clothes": "Roman Drip",
+        "background": "Chia Farm"
+      }
+    },
+    "1123": {
+      "rank": 3022,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1123.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Vampire Teeth",
+        "facewear": "No Face Wear",
+        "head": "Trump Wave",
+        "clothes": "Roman Drip",
+        "background": "Tangerine Pop"
+      }
+    },
+    "1124": {
+      "rank": 3988,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1124.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "Field Cap",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "1125": {
+      "rank": 4094,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1125.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "Field Cap",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "1126": {
+      "rank": 4165,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1126.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Field Cap",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "1127": {
+      "rank": 3637,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1127.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "Alpha Shades",
+        "head": "Field Cap",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "1128": {
+      "rank": 3648,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1128.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "Aviators",
+        "head": "Centurion",
+        "clothes": "Bepe Army",
+        "background": "Neo Mint"
+      }
+    },
+    "1129": {
+      "rank": 2650,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1129.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Hannibal Mask",
+        "facewear": "3D Glasses",
+        "head": "Field Cap",
+        "clothes": "Bepe Army",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1130": {
+      "rank": 3153,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1130.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Cool Glasses",
+        "head": "Field Cap",
+        "clothes": "Bepe Army",
+        "background": "Hot Coral"
+      }
+    },
+    "1131": {
+      "rank": 3232,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1131.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Eye Patch",
+        "head": "Construction Helmet",
+        "clothes": "Bepe Army",
+        "background": "Sky Dive"
+      }
+    },
+    "1132": {
+      "rank": 2403,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1132.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Screaming",
+        "facewear": "Fake It Mask",
+        "head": "Crown",
+        "clothes": "Bepe Army",
+        "background": "Mellow Yellow"
+      }
+    },
+    "1133": {
+      "rank": 2762,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1133.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "Laser Eyes",
+        "head": "Field Cap",
+        "clothes": "Bepe Army",
+        "background": "Golden Hour"
+      }
+    },
+    "1134": {
+      "rank": 3574,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1134.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Screaming",
+        "facewear": "Matrix Lenses",
+        "head": "Devil Horns",
+        "clothes": "Bepe Army",
+        "background": "Green Candle"
+      }
+    },
+    "1135": {
+      "rank": 2941,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1135.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "MOG Glasses",
+        "head": "Fedora",
+        "clothes": "Bepe Army",
+        "background": "Price Up"
+      }
+    },
+    "1136": {
+      "rank": 2630,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1136.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "Night Vision",
+        "head": "Field Cap",
+        "clothes": "Bepe Army",
+        "background": "Tangerine Pop"
+      }
+    },
+    "1137": {
+      "rank": 3365,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1137.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Firefighter Helmet",
+        "clothes": "Bepe Army",
+        "background": "Sky Dive"
+      }
+    },
+    "1138": {
+      "rank": 2754,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1138.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Vampire Teeth",
+        "facewear": "MOG Glasses",
+        "head": "Devil Horns",
+        "clothes": "Bepe Army",
+        "background": "Heaven"
+      }
+    },
+    "1139": {
+      "rank": 3377,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1139.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Pipe",
+        "facewear": "Shades",
+        "head": "Hard Hat",
+        "clothes": "Bepe Army",
+        "background": "Neo Mint"
+      }
+    },
+    "1140": {
+      "rank": 1929,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1140.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Copium Mask",
+        "facewear": "Tyson Tattoo",
+        "head": "Hip Hop Hat",
+        "clothes": "Bepe Army",
+        "background": "$CHIA"
+      }
+    },
+    "1141": {
+      "rank": 2800,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1141.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Bandana Mask",
+        "facewear": "VR Headset",
+        "head": "No Headgear",
+        "clothes": "Bepe Army",
+        "background": "$BEPE"
+      }
+    },
+    "1142": {
+      "rank": 3207,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1142.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "Wizard Glasses",
+        "head": "Pirate Hat",
+        "clothes": "Bepe Army",
+        "background": "Chia Green"
+      }
+    },
+    "1143": {
+      "rank": 3890,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1143.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Clown Nose",
+        "head": "Propeller Hat",
+        "clothes": "Bepe Army",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1144": {
+      "rank": 4163,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1144.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "No Face Wear",
+        "head": "Ronin Helmet",
+        "clothes": "Bepe Army",
+        "background": "Green Candle"
+      }
+    },
+    "1145": {
+      "rank": 4133,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1145.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "Spikes",
+        "clothes": "Bepe Army",
+        "background": "$CHIA"
+      }
+    },
+    "1146": {
+      "rank": 3749,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1146.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Aviators",
+        "head": "Super Saiyan",
+        "clothes": "Bepe Army",
+        "background": "$BEPE"
+      }
+    },
+    "1147": {
+      "rank": 3720,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1147.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Alpha Shades",
+        "head": "Super Wojak Hat",
+        "clothes": "Bepe Army",
+        "background": "Chia Green"
+      }
+    },
+    "1148": {
+      "rank": 3468,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1148.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Aviators",
+        "head": "SWAT Helmet",
+        "clothes": "Bepe Army",
+        "background": "Sky Dive"
+      }
+    },
+    "1149": {
+      "rank": 3552,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1149.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Cool Glasses",
+        "head": "Tin Foil Hat",
+        "clothes": "Bepe Army",
+        "background": "Radioactive Forest"
+      }
+    },
+    "1150": {
+      "rank": 3564,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1150.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "Alpha Shades",
+        "head": "Field Cap",
+        "clothes": "Bepe Army",
+        "background": "Neo Mint"
+      }
+    },
+    "1151": {
+      "rank": 3620,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1151.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Screaming",
+        "facewear": "Eye Patch",
+        "head": "Viking Helmet",
+        "clothes": "Bepe Army",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1152": {
+      "rank": 3170,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1152.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Screaming",
+        "facewear": "Fake It Mask",
+        "head": "Wizard Hat",
+        "clothes": "Bepe Army",
+        "background": "Neo Mint"
+      }
+    },
+    "1153": {
+      "rank": 3039,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1153.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "Laser Eyes",
+        "head": "Field Cap",
+        "clothes": "Bepe Army",
+        "background": "Green Candle"
+      }
+    },
+    "1154": {
+      "rank": 1878,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1154.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Bandana Mask",
+        "facewear": "Laser Eyes",
+        "head": "Military Beret",
+        "clothes": "El Presidente",
+        "background": "$CHIA"
+      }
+    },
+    "1155": {
+      "rank": 3432,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1155.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Vampire Teeth",
+        "facewear": "MOG Glasses",
+        "head": "Beer Hat",
+        "clothes": "Bepe Army",
+        "background": "Chia Green"
+      }
+    },
+    "1156": {
+      "rank": 2882,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1156.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Pipe",
+        "facewear": "Night Vision",
+        "head": "Cap",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "1157": {
+      "rank": 2974,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1157.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Copium Mask",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Centurion",
+        "clothes": "Bepe Army",
+        "background": "Chia Green"
+      }
+    },
+    "1158": {
+      "rank": 3588,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1158.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "Clown",
+        "clothes": "Bepe Army",
+        "background": "$NECKCOIN"
+      }
+    },
+    "1159": {
+      "rank": 3335,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1159.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "Shades",
+        "head": "Comrade Hat",
+        "clothes": "Bepe Army",
+        "background": "Sky Dive"
+      }
+    },
+    "1160": {
+      "rank": 3224,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1160.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Tyson Tattoo",
+        "head": "Construction Helmet",
+        "clothes": "Bepe Army",
+        "background": "Radioactive Forest"
+      }
+    },
+    "1161": {
+      "rank": 2635,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1161.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "VR Headset",
+        "head": "Cowboy Hat",
+        "clothes": "Bepe Army",
+        "background": "Neo Mint"
+      }
+    },
+    "1162": {
+      "rank": 3331,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1162.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "Wizard Glasses",
+        "head": "Field Cap",
+        "clothes": "Bepe Army",
+        "background": "Tangerine Pop"
+      }
+    },
+    "1163": {
+      "rank": 3351,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1163.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Cyber Shades",
+        "head": "Field Cap",
+        "clothes": "Bepe Army",
+        "background": "Hot Coral"
+      }
+    },
+    "1164": {
+      "rank": 3571,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1164.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Laser Eyes",
+        "head": "Field Cap",
+        "clothes": "Bepe Army",
+        "background": "Green Candle"
+      }
+    },
+    "1165": {
+      "rank": 3080,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1165.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Matrix Lenses",
+        "head": "Field Cap",
+        "clothes": "Bepe Army",
+        "background": "Mellow Yellow"
+      }
+    },
+    "1166": {
+      "rank": 3876,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1166.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "MOG Glasses",
+        "head": "Firefighter Helmet",
+        "clothes": "Bepe Army",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1167": {
+      "rank": 3100,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1167.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "Night Vision",
+        "head": "Construction Helmet",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "1168": {
+      "rank": 3536,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1168.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Screaming",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Hard Hat",
+        "clothes": "Bepe Army",
+        "background": "$CHIA"
+      }
+    },
+    "1169": {
+      "rank": 3222,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1169.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "Aviators",
+        "head": "SWAT Helmet",
+        "clothes": "Bepe Army",
+        "background": "Tangerine Pop"
+      }
+    },
+    "1170": {
+      "rank": 4194,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1170.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Bepe Army",
+        "background": "Sky Dive"
+      }
+    },
+    "1171": {
+      "rank": 3675,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1171.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "Pirate Hat",
+        "clothes": "Bepe Army",
+        "background": "Radioactive Forest"
+      }
+    },
+    "1172": {
+      "rank": 3787,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1172.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Vampire Teeth",
+        "facewear": "No Face Wear",
+        "head": "Propeller Hat",
+        "clothes": "Bepe Army",
+        "background": "Neo Mint"
+      }
+    },
+    "1173": {
+      "rank": 2411,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1173.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Pipe",
+        "facewear": "3D Glasses",
+        "head": "Field Cap",
+        "clothes": "Bepe Army",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1174": {
+      "rank": 1204,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1174.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Copium Mask",
+        "facewear": "Alpha Shades",
+        "head": "Spikes",
+        "clothes": "Bepe Army",
+        "background": "$LOVE"
+      }
+    },
+    "1175": {
+      "rank": 2995,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1175.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "Aviators",
+        "head": "Super Saiyan",
+        "clothes": "Bepe Army",
+        "background": "$BEPE"
+      }
+    },
+    "1176": {
+      "rank": 2160,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1176.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Bubble Gum",
+        "facewear": "Shades",
+        "head": "Super Wojak Hat",
+        "clothes": "Bepe Army",
+        "background": "Mellow Yellow"
+      }
+    },
+    "1177": {
+      "rank": 2803,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1177.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Cig",
+        "facewear": "Shades",
+        "head": "SWAT Helmet",
+        "clothes": "Bepe Army",
+        "background": "Golden Hour"
+      }
+    },
+    "1178": {
+      "rank": 2231,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1178.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Cohiba",
+        "facewear": "Eye Patch",
+        "head": "Tin Foil Hat",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "1179": {
+      "rank": 1366,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1179.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Screaming",
+        "facewear": "Fake It Mask",
+        "head": "Trump Wave",
+        "clothes": "Bepe Army",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1180": {
+      "rank": 1392,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1180.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Hannibal Mask",
+        "facewear": "Laser Eyes",
+        "head": "Viking Helmet",
+        "clothes": "Bepe Army",
+        "background": "Tangerine Pop"
+      }
+    },
+    "1181": {
+      "rank": 3440,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1181.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Joint",
+        "facewear": "Matrix Lenses",
+        "head": "Wizard Hat",
+        "clothes": "Bepe Army",
+        "background": "Sky Dive"
+      }
+    },
+    "1182": {
+      "rank": 3592,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1182.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Cig",
+        "facewear": "MOG Glasses",
+        "head": "Wizard Hat",
+        "clothes": "Bepe Army",
+        "background": "Radioactive Forest"
+      }
+    },
+    "1183": {
+      "rank": 2355,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1183.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "Night Vision",
+        "head": "Beanie",
+        "clothes": "Bepe Army",
+        "background": "Neo Mint"
+      }
+    },
+    "1184": {
+      "rank": 2210,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1184.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Pizza",
+        "facewear": "Cool Glasses",
+        "head": "Beer Hat",
+        "clothes": "Bepe Army",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1185": {
+      "rank": 2720,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1185.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Screaming",
+        "facewear": "Shades",
+        "head": "Cap",
+        "clothes": "Bepe Army",
+        "background": "Hot Coral"
+      }
+    },
+    "1186": {
+      "rank": 3065,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1186.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Smile",
+        "facewear": "MOG Glasses",
+        "head": "Centurion",
+        "clothes": "Bepe Army",
+        "background": "Chia Green"
+      }
+    },
+    "1187": {
+      "rank": 3062,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1187.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Gold Teeth",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Bepe Army",
+        "background": "Chia Green"
+      }
+    },
+    "1188": {
+      "rank": 3945,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1188.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Bepe Army",
+        "background": "Golden Hour"
+      }
+    },
+    "1189": {
+      "rank": 3441,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1189.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Vampire Teeth",
+        "facewear": "No Face Wear",
+        "head": "Construction Helmet",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "1190": {
+      "rank": 2061,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1190.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Pipe",
+        "facewear": "Alpha Shades",
+        "head": "Cowboy Hat",
+        "clothes": "Bepe Army",
+        "background": "Chia Green"
+      }
+    },
+    "1191": {
+      "rank": 1360,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1191.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Copium Mask",
+        "facewear": "Aviators",
+        "head": "Field Cap",
+        "clothes": "Bepe Army",
+        "background": "$HOA"
+      }
+    },
+    "1192": {
+      "rank": 1843,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1192.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "Devil Horns",
+        "clothes": "Bepe Army",
+        "background": "NYSE Rug"
+      }
+    },
+    "1193": {
+      "rank": 1382,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1193.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Bubble Gum",
+        "facewear": "Laser Eyes",
+        "head": "Fedora",
+        "clothes": "Bepe Army",
+        "background": "Radioactive Forest"
+      }
+    },
+    "1194": {
+      "rank": 2667,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1194.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Cig",
+        "facewear": "Matrix Lenses",
+        "head": "Field Cap",
+        "clothes": "Bepe Army",
+        "background": "Neo Mint"
+      }
+    },
+    "1195": {
+      "rank": 2872,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1195.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Cohiba",
+        "facewear": "MOG Glasses",
+        "head": "Firefighter Helmet",
+        "clothes": "Bepe Army",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1196": {
+      "rank": 1461,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1196.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Gold Teeth",
+        "facewear": "Night Vision",
+        "head": "Field Cap",
+        "clothes": "Bepe Army",
+        "background": "Hot Coral"
+      }
+    },
+    "1197": {
+      "rank": 2903,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1197.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Gold Teeth",
+        "facewear": "Shades",
+        "head": "SWAT Helmet",
+        "clothes": "Bepe Army",
+        "background": "Chia Green"
+      }
+    },
+    "1198": {
+      "rank": 3768,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1198.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Construction Helmet",
+        "clothes": "Bepe Army",
+        "background": "Mellow Yellow"
+      }
+    },
+    "1199": {
+      "rank": 3619,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1199.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Neckbeard",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Bepe Army",
+        "background": "Golden Hour"
+      }
+    },
+    "1200": {
+      "rank": 3003,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1200.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Neckbeard",
+        "facewear": "No Face Wear",
+        "head": "Pirate Hat",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    }
+  }
+}

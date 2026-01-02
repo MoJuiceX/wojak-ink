@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "facewear:MOG Glasses||mouth:Gold Teeth": [
+      "3647",
+      "3477",
+      "3904",
+      "136",
+      "1973",
+      "2582",
+      "531",
+      "1739",
+      "304",
+      "2431",
+      "2693",
+      "689",
+      "1381",
+      "1954",
+      "1877",
+      "1438"
+    ],
+    "clothes:Astronaut||facewear:Matrix Lenses": [
+      "149",
+      "2003"
+    ],
+    "clothes:Pepe Suit||mouth:Gold Teeth": [
+      "3960",
+      "2140",
+      "2842",
+      "187"
+    ],
+    "clothes:Drac||facewear:Laser Eyes": [
+      "607",
+      "584",
+      "2190",
+      "571"
+    ],
+    "clothes:Bathrobe||head:SWAT Helmet": [
+      "3204",
+      "2076",
+      "2079",
+      "2755",
+      "669",
+      "627",
+      "648",
+      "628"
+    ],
+    "clothes:Ninja Turtle Fit||facewear:Alpha Shades": [
+      "1029",
+      "993",
+      "1011",
+      "957",
+      "975"
+    ],
+    "clothes:Leather Jacket||face:NPC": [
+      "2310",
+      "2311",
+      "2309",
+      "1400",
+      "1399",
+      "1396",
+      "1398",
+      "1397",
+      "1401"
+    ],
+    "facewear:Aviators||head:Tin Foil Hat": [
+      "4049",
+      "2512",
+      "2677",
+      "1647"
+    ],
+    "facewear:Shades||head:Standard Cut": [
+      "2270",
+      "2720"
+    ],
+    "facewear:Cyber Shades||head:Tiara": [
+      "2796",
+      "2914"
+    ],
+    "clothes:Prom Dress||facewear:Matrix Lenses": [
+      "2860"
+    ],
+    "clothes:Vintage Dress||mouth:Smile": [
+      "2973"
+    ],
+    "clothes:Vintage Dress||mouth:Teeth": [
+      "2984"
+    ],
+    "base:Baddie||head:Tiara": [
+      "3140",
+      "3064",
+      "3034",
+      "3139",
+      "3182",
+      "3165",
+      "3018"
+    ],
+    "clothes:Vintage Dress||mouth:Joint": [
+      "4194",
+      "4151",
+      "3186"
+    ],
+    "base:Papa Tang||head:Military Beret": [
+      "3316",
+      "3409",
+      "3391",
+      "3397",
+      "3244",
+      "3297",
+      "3446",
+      "3385",
+      "3207",
+      "3428",
+      "3214",
+      "3256",
+      "3261",
+      "3308",
+      "3357",
+      "3337"
+    ],
+    "base:Alien Baddie||head:Fedora": [
+      "3897"
+    ]
+  }
+}

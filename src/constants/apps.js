@@ -44,7 +44,7 @@ export const APPS = {
   RARITY_EXPLORER: {
     id: 'RARITY_EXPLORER',
     label: 'RARITY EXPLORER.EXE',
-    icon: { type: 'img', src: '/icon/chart1-0.png' },
+    icon: { type: 'img', src: '/icon/icons1/orange-3d-icon.png' },
     group: 'MAIN',
     open: { type: 'window', windowId: 'rarity-explorer' },
   },
@@ -135,14 +135,14 @@ export const APPS = {
   ROADMAP: {
     id: 'ROADMAP',
     label: 'ROADMAP.TXT',
-    icon: { type: 'img', src: '/icon/Roadmap.png' },
+    icon: { type: 'img', src: '/icon/icons1/Roadmap.png' },
     group: 'MAIN',
     open: { type: 'window', windowId: 'roadmap-window' },
   },
   TREASURY: {
     id: 'TREASURY',
     label: 'TREASURY.EXE',
-    icon: { type: 'img', src: '/icon/tresury_Icon.png' },
+    icon: { type: 'img', src: '/icon/icons1/tresury_Icon.png' },
     group: 'MAIN',
     open: { type: 'window', windowId: 'treasury-window' },
   },

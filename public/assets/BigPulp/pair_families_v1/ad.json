@@ -1,0 +1,263 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "base:Wojak||clothes:God's Robe": [
+      "64",
+      "63",
+      "62",
+      "334",
+      "347",
+      "336",
+      "346",
+      "321",
+      "339",
+      "332",
+      "331",
+      "330",
+      "319",
+      "335",
+      "341",
+      "328",
+      "326",
+      "342",
+      "340",
+      "120",
+      "317",
+      "349",
+      "316",
+      "329",
+      "320",
+      "345",
+      "322",
+      "323",
+      "333",
+      "337",
+      "95",
+      "348",
+      "343",
+      "344",
+      "325",
+      "338",
+      "324",
+      "327",
+      "315",
+      "318"
+    ],
+    "facewear:Matrix Lenses||head:Centurion": [
+      "3538",
+      "1092",
+      "1078",
+      "93",
+      "2292"
+    ],
+    "face:NPC||mouth:Teeth": [
+      "2363",
+      "134",
+      "793",
+      "1114",
+      "2309",
+      "2725",
+      "1626",
+      "1303",
+      "731",
+      "868",
+      "257",
+      "1964",
+      "2631"
+    ],
+    "facewear:Shades||mouth:Vampire Teeth": [
+      "599",
+      "2663",
+      "565",
+      "168",
+      "987",
+      "523",
+      "1448",
+      "1698",
+      "2233",
+      "1573",
+      "1681",
+      "1658"
+    ],
+    "clothes:Proof of Prayer||facewear:VR Headset": [
+      "305",
+      "2114"
+    ],
+    "facewear:No Face Wear||head:Halo": [
+      "3876",
+      "3845",
+      "4130",
+      "3937",
+      "3046",
+      "3689",
+      "4050",
+      "3804",
+      "4173",
+      "3938",
+      "3045",
+      "2794",
+      "3044",
+      "2015",
+      "3574",
+      "3431",
+      "2148",
+      "1022",
+      "2736",
+      "2806",
+      "2429",
+      "3597",
+      "2358",
+      "1297",
+      "645",
+      "315",
+      "1983",
+      "2000",
+      "964"
+    ],
+    "clothes:God's Robe||mouth:Screaming": [
+      "3937",
+      "331",
+      "330",
+      "2015",
+      "2022"
+    ],
+    "clothes:Viking Armor||facewear:Ninja Turtle Mask": [
+      "437",
+      "414"
+    ],
+    "facewear:Ninja Turtle Mask||head:Hip Hop Hat": [
+      "3954",
+      "3132",
+      "3157",
+      "2659",
+      "2286",
+      "464"
+    ],
+    "head:Super Wojak Hat||mouth:Gold Teeth": [
+      "732",
+      "3507",
+      "2083",
+      "3340",
+      "470",
+      "1640"
+    ],
+    "clothes:Drac||mouth:Copium Mask": [
+      "605",
+      "3802",
+      "613"
+    ],
+    "head:Devil Horns||mouth:Neckbeard": [
+      "817"
+    ],
+    "clothes:Ninja Turtle Fit||face:Terminator": [
+      "1029",
+      "3956",
+      "1027",
+      "3073",
+      "1025",
+      "1026",
+      "1024",
+      "2488",
+      "2487",
+      "1028"
+    ],
+    "face:NPC||mouth:Smile": [
+      "1203",
+      "1746"
+    ],
+    "clothes:Born to Ride||mouth:Copium Mask": [
+      "1272",
+      "1238",
+      "1289",
+      "1255",
+      "1306",
+      "2594"
+    ],
+    "clothes:Chia Farmer||facewear:Cool Glasses": [
+      "4165",
+      "2672",
+      "2776",
+      "2658",
+      "1450",
+      "1414",
+      "1434"
+    ],
+    "clothes:Wizard Drip||head:Centurion": [
+      "1837",
+      "2544",
+      "1806",
+      "1868"
+    ],
+    "clothes:Suit||facewear:3D Glasses": [
+      "1933",
+      "1951",
+      "2215",
+      "2210",
+      "1996",
+      "1897",
+      "1874"
+    ],
+    "clothes:Drac||head:Soy Hair": [
+      "2195",
+      "2205"
+    ],
+    "clothes:Sports Jacket||mouth:Glossed Lips": [
+      "4188",
+      "2939",
+      "3156",
+      "2947",
+      "3160"
+    ],
+    "facewear:MOG Glasses||head:Mermaid Waves": [
+      "4163",
+      "4181",
+      "3842",
+      "4138",
+      "4178",
+      "3056"
+    ],
+    "clothes:Sports Bra||head:Power Bob": [
+      "3881",
+      "3143"
+    ],
+    "base:Monkey Zoo||mouth:Cohiba": [
+      "3458",
+      "3513",
+      "3493",
+      "3475",
+      "3545",
+      "3614",
+      "3592",
+      "3623",
+      "3563",
+      "3538",
+      "3547",
+      "3594",
+      "3612",
+      "3630",
+      "3642",
+      "3576",
+      "3464",
+      "3584",
+      "3460",
+      "3519",
+      "3485",
+      "3471",
+      "3619"
+    ],
+    "clothes:Bepe Army||head:Headphones": [
+      "3479"
+    ],
+    "base:Alien Wojak||facewear:3D Glasses": [
+      "3723",
+      "3669"
+    ],
+    "facewear:MOG Glasses||head:Standard Cut": [
+      "4009"
+    ],
+    "base:Bepe Waifu||clothes:Prom Dress": [
+      "4148"
+    ]
+  }
+}

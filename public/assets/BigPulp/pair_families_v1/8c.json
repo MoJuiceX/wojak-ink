@@ -1,0 +1,185 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "facewear:Tyson Tattoo||mouth:Hannibal Mask": [
+      "46",
+      "2504",
+      "465"
+    ],
+    "clothes:Wizard Drip||face:Bleeding Bags": [
+      "3890",
+      "3891",
+      "106",
+      "2520",
+      "1843",
+      "1849",
+      "1848",
+      "1844",
+      "1845",
+      "1847",
+      "1846",
+      "2519",
+      "2987",
+      "75"
+    ],
+    "facewear:Night Vision||head:Construction Helmet": [
+      "3312",
+      "100",
+      "1254",
+      "1167",
+      "457"
+    ],
+    "clothes:Chia Farmer||mouth:Joint": [
+      "3499",
+      "2668",
+      "3248",
+      "1515",
+      "1440",
+      "2782",
+      "2649",
+      "1474",
+      "2653",
+      "122",
+      "1457",
+      "1423"
+    ],
+    "face:NPC||facewear:3D Glasses": [
+      "2983",
+      "2087",
+      "1110",
+      "734",
+      "227",
+      "660",
+      "792"
+    ],
+    "clothes:Gopher Suit||facewear:Laser Eyes": [
+      "3948",
+      "4133",
+      "271",
+      "2234",
+      "2241",
+      "258",
+      "244"
+    ],
+    "clothes:Straitjacket||facewear:Aviators": [
+      "357",
+      "367"
+    ],
+    "clothes:Firefighter Uniform||mouth:Hannibal Mask": [
+      "537"
+    ],
+    "face:Terminator||head:Devil Horns": [
+      "3900",
+      "2868",
+      "3899",
+      "3924",
+      "1120",
+      "1865",
+      "615",
+      "2577",
+      "1028",
+      "1527"
+    ],
+    "head:Crown||mouth:Screaming": [
+      "3825",
+      "3228",
+      "741",
+      "2251",
+      "2962",
+      "2342",
+      "686",
+      "1961",
+      "1132",
+      "2487"
+    ],
+    "facewear:Clown Nose||head:Devil Horns": [
+      "866",
+      "1553"
+    ],
+    "clothes:Chia Farmer||mouth:Smile": [
+      "2781",
+      "1497",
+      "1503",
+      "1496",
+      "2783",
+      "1445",
+      "2662",
+      "1462",
+      "1411"
+    ],
+    "clothes:Chia Farmer||mouth:Teeth": [
+      "2775",
+      "1475",
+      "1413",
+      "1481",
+      "1505",
+      "1499",
+      "1464",
+      "3024",
+      "2654"
+    ],
+    "clothes:Chia Farmer||mouth:Pizza": [
+      "3026",
+      "3497",
+      "3745",
+      "3249",
+      "2659",
+      "1426",
+      "1443",
+      "1460",
+      "1518",
+      "1494",
+      "1477"
+    ],
+    "facewear:3D Glasses||head:Halo": [
+      "2194",
+      "1483",
+      "2210"
+    ],
+    "clothes:Wizard Drip||mouth:Cohiba": [
+      "3899",
+      "2545",
+      "1844",
+      "3200",
+      "3191",
+      "2522",
+      "2993",
+      "1840",
+      "1780",
+      "2548",
+      "1855",
+      "1869",
+      "1796",
+      "1762",
+      "1818",
+      "1797",
+      "1772",
+      "1798",
+      "1799"
+    ],
+    "clothes:Pickle Suit||facewear:Cyber Shades": [
+      "3755",
+      "2037"
+    ],
+    "clothes:Sports Bra||facewear:MOG Glasses": [
+      "4162",
+      "3860",
+      "4119",
+      "3140",
+      "4127",
+      "4170",
+      "3886",
+      "2927"
+    ],
+    "clothes:Ninja Turtle Fit||head:Ponytail": [
+      "3072"
+    ],
+    "base:Alien Soyjak||facewear:Clown Nose": [
+      "3778",
+      "3777",
+      "3776",
+      "3758"
+    ]
+  }
+}

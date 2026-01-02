@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "clothes:Chia Farmer||mouth:Cohiba": [
+      "4040",
+      "2677",
+      "1512",
+      "1488",
+      "1437",
+      "1469",
+      "3921",
+      "1479",
+      "1434",
+      "2657",
+      "6",
+      "1522",
+      "1456",
+      "1463",
+      "1430",
+      "1420",
+      "1471"
+    ],
+    "clothes:Goose Suit||facewear:No Face Wear": [
+      "4131",
+      "3051",
+      "3050",
+      "4172",
+      "3049",
+      "4056",
+      "3941",
+      "3053",
+      "208",
+      "3942",
+      "2074",
+      "216",
+      "2815",
+      "2811",
+      "200",
+      "212",
+      "215",
+      "217",
+      "53",
+      "2062"
+    ],
+    "head:Clown||mouth:Pizza": [
+      "3599",
+      "3246",
+      "4026",
+      "3644",
+      "2185",
+      "3317",
+      "342",
+      "743"
+    ],
+    "head:Trump Wave||mouth:Teeth": [
+      "442",
+      "2453",
+      "1891"
+    ],
+    "head:Firefighter Helmet||mouth:Cig": [
+      "3565",
+      "3549",
+      "526",
+      "2370",
+      "2500",
+      "3434",
+      "544",
+      "512",
+      "2209",
+      "2615",
+      "2016",
+      "992"
+    ],
+    "head:Clown||mouth:Joint": [
+      "2511",
+      "1974",
+      "534",
+      "1474",
+      "1724",
+      "1878"
+    ],
+    "facewear:Clown Nose||head:Field Cap": [
+      "651",
+      "991"
+    ],
+    "clothes:Bepe Army||facewear:Laser Eyes": [
+      "3712",
+      "2575",
+      "3912",
+      "3216",
+      "1204",
+      "1193",
+      "1180",
+      "1218",
+      "1133",
+      "1153",
+      "1164"
+    ],
+    "facewear:Ninja Turtle Mask||head:Beer Hat": [
+      "1588"
+    ],
+    "head:Hip Hop Hat||mouth:Bubble Gum": [
+      "3157",
+      "2778"
+    ],
+    "facewear:Shades||mouth:Sexy Lip Bite": [
+      "2819"
+    ],
+    "facewear:Night Vision||mouth:Glossed Lips": [
+      "3846",
+      "2884"
+    ],
+    "base:Alien Wojak||clothes:Chia Farmer": [
+      "3656",
+      "3686",
+      "3715",
+      "3801"
+    ],
+    "base:Alien Baddie||clothes:Suit": [
+      "3873",
+      "3895"
+    ]
+  }
+}

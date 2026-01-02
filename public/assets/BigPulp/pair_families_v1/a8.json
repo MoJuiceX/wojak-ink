@@ -1,0 +1,246 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "facewear:Alpha Shades||mouth:Cig": [
+      "3704",
+      "3143",
+      "3364",
+      "3811",
+      "2667",
+      "2956",
+      "4061",
+      "3489",
+      "3406",
+      "1850",
+      "718",
+      "2676",
+      "445",
+      "2104",
+      "1098",
+      "269",
+      "2730",
+      "2436",
+      "140",
+      "405",
+      "848",
+      "206",
+      "1898",
+      "765",
+      "975",
+      "22",
+      "2112",
+      "1541",
+      "1794",
+      "278"
+    ],
+    "clothes:SWAT Gear||head:Cap": [
+      "3827",
+      "2897",
+      "34",
+      "2907",
+      "455"
+    ],
+    "clothes:Tee||head:Propeller Hat": [
+      "2455",
+      "78",
+      "794",
+      "76",
+      "765"
+    ],
+    "clothes:Pepe Suit||face:NPC": [
+      "2142",
+      "2144",
+      "193",
+      "2845",
+      "2143",
+      "2141",
+      "191"
+    ],
+    "clothes:God's Robe||head:Trump Wave": [
+      "324"
+    ],
+    "clothes:Straitjacket||mouth:Gold Teeth": [
+      "3672",
+      "385",
+      "2154",
+      "377",
+      "376",
+      "354"
+    ],
+    "head:Military Beret||mouth:Pizza": [
+      "3470",
+      "3912",
+      "3950",
+      "378",
+      "2474",
+      "3385",
+      "3428",
+      "3214",
+      "3158",
+      "493"
+    ],
+    "clothes:SWAT Gear||mouth:Gold Teeth": [
+      "2368",
+      "489",
+      "2364",
+      "486",
+      "470",
+      "503",
+      "458"
+    ],
+    "facewear:Alpha Shades||head:Tin Foil Hat": [
+      "3811",
+      "2753",
+      "546",
+      "471",
+      "1299",
+      "2341",
+      "1335",
+      "832",
+      "975"
+    ],
+    "clothes:Firefighter Uniform||mouth:Smile": [
+      "560",
+      "506",
+      "538",
+      "514",
+      "513",
+      "524"
+    ],
+    "clothes:Firefighter Uniform||mouth:Pizza": [
+      "2268",
+      "552",
+      "2266",
+      "508"
+    ],
+    "clothes:Firefighter Uniform||mouth:Teeth": [
+      "542",
+      "530"
+    ],
+    "head:Military Beret||mouth:Joint": [
+      "4065",
+      "3906",
+      "3173",
+      "3571",
+      "654",
+      "3598",
+      "3397",
+      "3636",
+      "1858",
+      "2997",
+      "557",
+      "2574",
+      "2774",
+      "581",
+      "1300",
+      "2951"
+    ],
+    "clothes:Drac||head:Ronin Helmet": [
+      "600"
+    ],
+    "clothes:Tank Top||head:Cowboy Hat": [
+      "2345",
+      "718",
+      "2330",
+      "688"
+    ],
+    "clothes:Super Saiyan Uniform||facewear:VR Headset": [
+      "921",
+      "2716"
+    ],
+    "clothes:Ninja Turtle Fit||facewear:3D Glasses": [
+      "2468",
+      "1010",
+      "956",
+      "992"
+    ],
+    "head:Military Beret||mouth:Teeth": [
+      "3800",
+      "3121",
+      "3893",
+      "2423",
+      "3638",
+      "3159",
+      "1205"
+    ],
+    "clothes:Born to Ride||head:Ronin Helmet": [
+      "2600",
+      "3237",
+      "3480",
+      "2602",
+      "2770",
+      "2585",
+      "1245"
+    ],
+    "head:Military Beret||mouth:Smile": [
+      "2837",
+      "4000",
+      "2783",
+      "1307"
+    ],
+    "clothes:Leather Jacket||facewear:Wizard Glasses": [
+      "3517",
+      "2830",
+      "4062",
+      "1389",
+      "1364"
+    ],
+    "head:Super Saiyan||mouth:Stunned": [
+      "4100",
+      "3793",
+      "2459"
+    ],
+    "base:Waifu||head:Tin Foil Hat": [
+      "2797",
+      "3000",
+      "2753",
+      "2882",
+      "2859"
+    ],
+    "base:Monkey Zoo||head:Crown": [
+      "3589",
+      "3554",
+      "3451",
+      "3466",
+      "3648",
+      "3564",
+      "3616"
+    ],
+    "base:Monkey Zoo||head:Clown": [
+      "3599",
+      "3493",
+      "3568",
+      "3475",
+      "3644",
+      "3540",
+      "3627",
+      "3512"
+    ],
+    "base:Monkey Zoo||head:Halo": [
+      "3574",
+      "3597"
+    ],
+    "base:Alien Wojak||head:Super Saiyan": [
+      "3673",
+      "3674",
+      "3820"
+    ],
+    "base:Bepe Soyjak||mouth:Cohiba": [
+      "4040",
+      "4112",
+      "4029",
+      "4060"
+    ],
+    "base:Bepe Baddie||clothes:Vintage Dress": [
+      "4181",
+      "4193",
+      "4194",
+      "4184",
+      "4195",
+      "4192",
+      "4182",
+      "4183"
+    ]
+  }
+}

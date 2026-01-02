@@ -1,0 +1,194 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "facewear:Tyson Tattoo||head:Fedora": [
+      "609",
+      "8",
+      "1533"
+    ],
+    "clothes:Astronaut||face:Classic": [
+      "3756",
+      "2006",
+      "3651",
+      "4023",
+      "4022",
+      "2007",
+      "4021",
+      "2003",
+      "148",
+      "146",
+      "3902",
+      "147",
+      "2005",
+      "2002",
+      "144",
+      "145",
+      "2004",
+      "2001"
+    ],
+    "facewear:VR Headset||mouth:Bubble Gum": [
+      "3666",
+      "305",
+      "2114"
+    ],
+    "facewear:Cool Glasses||head:Devil Horns": [
+      "2317",
+      "358"
+    ],
+    "facewear:Shades||head:Construction Helmet": [
+      "3718",
+      "670",
+      "1514",
+      "1211",
+      "1447",
+      "1697",
+      "629",
+      "1676"
+    ],
+    "head:Construction Helmet||mouth:Screaming": [
+      "713",
+      "2404"
+    ],
+    "clothes:Tee||facewear:Eye Patch": [
+      "783"
+    ],
+    "facewear:Matrix Lenses||head:Ronin Helmet": [
+      "3180",
+      "860",
+      "795",
+      "2675",
+      "850"
+    ],
+    "head:Ronin Helmet||mouth:Neckbeard": [
+      "4080",
+      "814",
+      "999"
+    ],
+    "head:Construction Helmet||mouth:Vampire Teeth": [
+      "2262",
+      "1720",
+      "911",
+      "1189"
+    ],
+    "head:Clown||mouth:Smile": [
+      "3042",
+      "3873",
+      "2568",
+      "1503",
+      "1753",
+      "984",
+      "1445",
+      "1695",
+      "1945"
+    ],
+    "face:Rugged||head:Cowboy Hat": [
+      "3779",
+      "3458",
+      "3862",
+      "2345",
+      "3239",
+      "2573",
+      "3271",
+      "2427",
+      "1727",
+      "1190",
+      "3399",
+      "1291"
+    ],
+    "clothes:Born to Ride||head:Centurion": [
+      "3655",
+      "1316",
+      "2597",
+      "1287",
+      "2583",
+      "1226",
+      "2609",
+      "2590",
+      "1258"
+    ],
+    "clothes:Born to Ride||facewear:Fake It Mask": [
+      "1277",
+      "2605",
+      "1250",
+      "1230"
+    ],
+    "head:Clown||mouth:Teeth": [
+      "2162",
+      "2344",
+      "1407",
+      "1657",
+      "1811",
+      "1561"
+    ],
+    "clothes:Topless||facewear:Aviators": [
+      "3433",
+      "3412",
+      "2424",
+      "4002",
+      "1604",
+      "1548",
+      "1623",
+      "1586",
+      "1567",
+      "1641",
+      "1529"
+    ],
+    "clothes:Prom Dress||mouth:Screaming": [
+      "3896",
+      "3085"
+    ],
+    "base:Papa Tang||mouth:Screaming": [
+      "3242",
+      "3298",
+      "3209",
+      "3393",
+      "3416",
+      "3438",
+      "3410",
+      "3228",
+      "3319",
+      "3417",
+      "3420",
+      "3229",
+      "3244",
+      "3323",
+      "3254",
+      "3338",
+      "3398",
+      "3210",
+      "3261",
+      "3279",
+      "3318",
+      "3426",
+      "3394",
+      "3360",
+      "3373",
+      "3370"
+    ],
+    "clothes:Sports Jacket||head:2Pac Bandana": [
+      "3567"
+    ],
+    "clothes:Wizard Drip||head:Halo": [
+      "3785"
+    ],
+    "base:Alien Waifu||face:Bleeding Bags": [
+      "3856",
+      "3854",
+      "3855",
+      "3853"
+    ],
+    "base:Alien Baddie||clothes:Ninja Turtle Fit": [
+      "3874"
+    ],
+    "base:Alien Baddie||face:Rekt": [
+      "3892",
+      "3894",
+      "3893"
+    ],
+    "base:Bepe Wojak||mouth:Hannibal Mask": [
+      "3925",
+      "3971"
+    ]
+  }
+}

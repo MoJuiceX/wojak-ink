@@ -10,9 +10,9 @@ export const WALLET_ADDRESS = 'xch18tcyy0knvfcgg5dld7gt2zev3qvu0dz5vplhq9gnhwvz9
  * Maps token symbol to logo path
  */
 export const TOKEN_LOGOS = {
-  '$CHAD': '/icon/icon_chad.png',  // Chat/Chad token logo
-  '$PIZZA': '/icon/icon_pizza.png', // Pizza token logo
-  '$PP': '/icon/icon_pp.png',       // PP token logo
+  '$CHAD': '/icon/icons1/icon_chad.png',  // Chat/Chad token logo
+  '$PIZZA': '/icon/icons1/icon_pizza.png', // Pizza token logo
+  '$PP': '/icon/icons1/icon_pp.png',       // PP token logo
 }
 
 /**
@@ -20,9 +20,9 @@ export const TOKEN_LOGOS = {
  * Maps asset ID (lowercase) to logo path
  */
 export const TOKEN_LOGOS_BY_ASSET_ID = {
-  '0941dc178e75d3699fab42a002034cae455ba5dfc91a9a9f58b62c48c9cea754': '/icon/icon_chad.png',  // $CHAD
-  'dd37f678dda586fad9b1daeae1f7c5c137ffa6d947e1ed5c7b4f3c430da80638': '/icon/icon_pizza.png', // $PIZZA
-  '84d31c80c619070ba45ce4dc5cc0bed2ae4341a0da1d69504e28243e6ccbef37': '/icon/icon_pp.png',    // $PP
+  '0941dc178e75d3699fab42a002034cae455ba5dfc91a9a9f58b62c48c9cea754': '/icon/icons1/icon_chad.png',  // $CHAD
+  'dd37f678dda586fad9b1daeae1f7c5c137ffa6d947e1ed5c7b4f3c430da80638': '/icon/icons1/icon_pizza.png', // $PIZZA
+  '84d31c80c619070ba45ce4dc5cc0bed2ae4341a0da1d69504e28243e6ccbef37': '/icon/icons1/icon_pp.png',    // $PP
 }
 
 /**

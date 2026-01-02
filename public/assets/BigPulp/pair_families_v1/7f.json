@@ -1,0 +1,270 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "clothes:Wizard Drip||facewear:Laser Eyes": [
+      "3891",
+      "2538",
+      "2527",
+      "1809",
+      "10",
+      "2529",
+      "1771"
+    ],
+    "clothes:Leather Jacket||mouth:Neckbeard": [
+      "27",
+      "3807",
+      "4062",
+      "3952",
+      "1400",
+      "1384",
+      "1332",
+      "1349",
+      "1383",
+      "2295",
+      "2303",
+      "1350"
+    ],
+    "clothes:Bepe Suit||facewear:No Face Wear": [
+      "3713",
+      "3916",
+      "3913",
+      "3010",
+      "3009",
+      "2763",
+      "2107",
+      "3914",
+      "2105",
+      "2106",
+      "2759",
+      "175",
+      "172",
+      "173",
+      "3008",
+      "2094",
+      "2101",
+      "2092",
+      "2098",
+      "176",
+      "51"
+    ],
+    "clothes:SWAT Gear||facewear:Night Vision": [
+      "2350",
+      "77",
+      "2351",
+      "483",
+      "457"
+    ],
+    "clothes:Wizard Drip||head:Devil Horns": [
+      "3899",
+      "106",
+      "1865",
+      "1803",
+      "1777",
+      "1758"
+    ],
+    "clothes:Pickle Suit||facewear:Wizard Glasses": [
+      "2849",
+      "129"
+    ],
+    "clothes:Pickle Suit||face:NPC": [
+      "134",
+      "2036",
+      "135",
+      "136"
+    ],
+    "clothes:Proof of Prayer||facewear:MOG Glasses": [
+      "3098",
+      "3696",
+      "3967",
+      "3275",
+      "304",
+      "286"
+    ],
+    "face:Bleeding Bags||mouth:Bubble Gum": [
+      "3639",
+      "3479",
+      "3454",
+      "3265",
+      "3222",
+      "1210",
+      "305",
+      "1394",
+      "3382",
+      "3355",
+      "1736"
+    ],
+    "clothes:God's Robe||facewear:MOG Glasses": [
+      "4052",
+      "3939",
+      "4171",
+      "331",
+      "2024",
+      "341",
+      "320"
+    ],
+    "clothes:God's Robe||head:Cap": [
+      "333",
+      "344"
+    ],
+    "head:Beer Hat||mouth:Smile": [
+      "347",
+      "2440"
+    ],
+    "head:Halo||mouth:Stache": [
+      "3748",
+      "495"
+    ],
+    "head:Hip Hop Hat||mouth:Gold Teeth": [
+      "3132",
+      "852"
+    ],
+    "head:Beer Hat||mouth:Pizza": [
+      "2719",
+      "3227",
+      "1184",
+      "857"
+    ],
+    "clothes:Super Saiyan Uniform||facewear:3D Glasses": [
+      "937",
+      "2694",
+      "3356",
+      "918",
+      "2721",
+      "899"
+    ],
+    "clothes:Roman Drip||facewear:Ninja Turtle Mask": [
+      "2878",
+      "2293",
+      "1087",
+      "1047",
+      "1065"
+    ],
+    "clothes:Bepe Army||facewear:Shades": [
+      "3772",
+      "3474",
+      "1176",
+      "3219",
+      "1185",
+      "1177",
+      "1211",
+      "1197",
+      "1159",
+      "1139"
+    ],
+    "head:Beer Hat||mouth:Teeth": [
+      "3653",
+      "2592",
+      "1413",
+      "2836",
+      "1663"
+    ],
+    "clothes:Chia Farmer||head:Wizard Hat": [
+      "4038",
+      "2681",
+      "1507",
+      "1516",
+      "1498",
+      "1497",
+      "1515",
+      "1450",
+      "2674",
+      "3834",
+      "1479",
+      "1478",
+      "3252",
+      "1490",
+      "1449",
+      "1439",
+      "1457",
+      "1468",
+      "2673"
+    ],
+    "face:NPC||facewear:Fake It Mask": [
+      "1745"
+    ],
+    "clothes:El Presidente||mouth:Stunned": [
+      "3741",
+      "2217",
+      "2287",
+      "4045"
+    ],
+    "base:Waifu||mouth:Bubble Gum": [
+      "2866",
+      "2985",
+      "2923",
+      "2841",
+      "2857",
+      "2831",
+      "2881",
+      "2764",
+      "2910",
+      "2794",
+      "2778",
+      "2954",
+      "2820",
+      "2872"
+    ],
+    "face:Classic||head:Power Bob": [
+      "4186",
+      "4143",
+      "3881",
+      "3849",
+      "3026",
+      "4120",
+      "2877",
+      "3099",
+      "4192",
+      "3869",
+      "2766",
+      "3143",
+      "2976",
+      "3186",
+      "2777",
+      "3051",
+      "4149",
+      "2939",
+      "3185",
+      "3155",
+      "3848",
+      "2881",
+      "3004"
+    ],
+    "face:Rugged||head:Mermaid Waves": [
+      "2801",
+      "3028"
+    ],
+    "base:Monkey Zoo||head:Construction Helmet": [
+      "3569",
+      "3583",
+      "3508",
+      "3539",
+      "3611",
+      "3605",
+      "3476"
+    ],
+    "base:Alien Waifu||head:Ronin Helmet": [
+      "3852"
+    ],
+    "base:Alien Baddie||head:Pirate Hat": [
+      "3874"
+    ],
+    "base:Alien Baddie||facewear:Aviators": [
+      "3877"
+    ],
+    "base:Bepe Wojak||clothes:Wizard Drip": [
+      "4019",
+      "4018",
+      "4020",
+      "4017"
+    ],
+    "base:Bepe Soyjak||facewear:Night Vision": [
+      "4115",
+      "4077",
+      "4035"
+    ],
+    "base:Bepe Baddie||head:Pirate Hat": [
+      "4179"
+    ]
+  }
+}

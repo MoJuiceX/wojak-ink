@@ -1,0 +1,1309 @@
+{
+  "schema_version": "1.0",
+  "range": [
+    101,
+    200
+  ],
+  "nfts": {
+    "101": {
+      "rank": 786,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0101.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "3D Glasses",
+        "head": "Hip Hop Hat",
+        "clothes": "Tee",
+        "background": "Price Down"
+      }
+    },
+    "102": {
+      "rank": 1632,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0102.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "Alpha Shades",
+        "head": "Hip Hop Hat",
+        "clothes": "Tee",
+        "background": "Sky Dive"
+      }
+    },
+    "103": {
+      "rank": 2281,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0103.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "Aviators",
+        "head": "No Headgear",
+        "clothes": "Pickle Suit",
+        "background": "Radioactive Forest"
+      }
+    },
+    "104": {
+      "rank": 1766,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0104.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "Cool Glasses",
+        "head": "Cowboy Hat",
+        "clothes": "SWAT Gear",
+        "background": "$CHIA"
+      }
+    },
+    "105": {
+      "rank": 1236,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0105.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Cohiba",
+        "facewear": "Cyber Shades",
+        "head": "Crown",
+        "clothes": "Viking Armor",
+        "background": "$BEPE"
+      }
+    },
+    "106": {
+      "rank": 998,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0106.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Cig",
+        "facewear": "Wizard Glasses",
+        "head": "Devil Horns",
+        "clothes": "Wizard Drip",
+        "background": "White House"
+      }
+    },
+    "107": {
+      "rank": 824,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0107.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Pizza",
+        "facewear": "Shades",
+        "head": "Fedora",
+        "clothes": "Tank Top",
+        "background": "$PIZZA"
+      }
+    },
+    "108": {
+      "rank": 1568,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0108.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Teeth",
+        "facewear": "Night Vision",
+        "head": "Field Cap",
+        "clothes": "Born to Ride",
+        "background": "Orange Grove"
+      }
+    },
+    "109": {
+      "rank": 203,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0109.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Gold Teeth",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Firefighter Helmet",
+        "clothes": "Firefighter Uniform",
+        "background": "Signal Lost"
+      }
+    },
+    "110": {
+      "rank": 2503,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0110.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Vampire Teeth",
+        "facewear": "No Face Wear",
+        "head": "Hard Hat",
+        "clothes": "Leather Jacket",
+        "background": "One Market"
+      }
+    },
+    "111": {
+      "rank": 1550,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0111.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Neckbeard",
+        "facewear": "MOG Glasses",
+        "head": "Super Wojak Hat",
+        "clothes": "Ninja Turtle Fit",
+        "background": "Bepe Barracks"
+      }
+    },
+    "112": {
+      "rank": 720,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0112.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Neckbeard",
+        "facewear": "VR Headset",
+        "head": "Tin Foil Hat",
+        "clothes": "Roman Drip",
+        "background": "Chia Farm"
+      }
+    },
+    "113": {
+      "rank": 1056,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0113.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Stache",
+        "facewear": "Alpha Shades",
+        "head": "Trump Wave",
+        "clothes": "Ronin",
+        "background": "Hell"
+      }
+    },
+    "114": {
+      "rank": 1547,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0114.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Numb",
+        "facewear": "Aviators",
+        "head": "Hip Hop Hat",
+        "clothes": "Sports Jacket",
+        "background": "Moms Basement"
+      }
+    },
+    "115": {
+      "rank": 3820,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0115.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Aviators",
+        "head": "Beer Hat",
+        "clothes": "Sports Jacket",
+        "background": "Green Candle"
+      }
+    },
+    "116": {
+      "rank": 3138,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0116.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Cool Glasses",
+        "head": "Beer Hat",
+        "clothes": "Straitjacket",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "117": {
+      "rank": 3642,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0117.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Cyber Shades",
+        "head": "Beer Hat",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Sky Dive"
+      }
+    },
+    "118": {
+      "rank": 2984,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0118.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Wizard Glasses",
+        "head": "Beer Hat",
+        "clothes": "Ronin",
+        "background": "Radioactive Forest"
+      }
+    },
+    "119": {
+      "rank": 3400,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0119.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "Laser Eyes",
+        "head": "Beer Hat",
+        "clothes": "Roman Drip",
+        "background": "Chia Green"
+      }
+    },
+    "120": {
+      "rank": 2021,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0120.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Matrix Lenses",
+        "head": "Beer Hat",
+        "clothes": "God's Robe",
+        "background": "Heaven"
+      }
+    },
+    "121": {
+      "rank": 1729,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0121.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "MOG Glasses",
+        "head": "2Pac Bandana",
+        "clothes": "Firefighter Uniform",
+        "background": "Hell"
+      }
+    },
+    "122": {
+      "rank": 3670,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0122.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Alpha Shades",
+        "head": "Spikes",
+        "clothes": "Chia Farmer",
+        "background": "$CHIA"
+      }
+    },
+    "123": {
+      "rank": 3435,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0123.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Shades",
+        "head": "Spikes",
+        "clothes": "Leather Jacket",
+        "background": "$BEPE"
+      }
+    },
+    "124": {
+      "rank": 1168,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0124.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "Tyson Tattoo",
+        "head": "Spikes",
+        "clothes": "Leather Jacket",
+        "background": "$NECKCOIN"
+      }
+    },
+    "125": {
+      "rank": 3782,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0125.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "3D Glasses",
+        "head": "No Headgear",
+        "clothes": "Born to Ride",
+        "background": "Radioactive Forest"
+      }
+    },
+    "126": {
+      "rank": 3096,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0126.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "Alpha Shades",
+        "head": "No Headgear",
+        "clothes": "Pickle Suit",
+        "background": "Radioactive Forest"
+      }
+    },
+    "127": {
+      "rank": 3846,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0127.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "Aviators",
+        "head": "No Headgear",
+        "clothes": "Pickle Suit",
+        "background": "Sky Dive"
+      }
+    },
+    "128": {
+      "rank": 3932,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0128.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Cool Glasses",
+        "head": "No Headgear",
+        "clothes": "Pickle Suit",
+        "background": "Green Candle"
+      }
+    },
+    "129": {
+      "rank": 2614,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0129.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Vampire Teeth",
+        "facewear": "Wizard Glasses",
+        "head": "No Headgear",
+        "clothes": "Pickle Suit",
+        "background": "Hot Coral"
+      }
+    },
+    "130": {
+      "rank": 2960,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0130.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "Matrix Lenses",
+        "head": "No Headgear",
+        "clothes": "Pickle Suit",
+        "background": "Golden Hour"
+      }
+    },
+    "131": {
+      "rank": 4050,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0131.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "MOG Glasses",
+        "head": "No Headgear",
+        "clothes": "Pickle Suit",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "132": {
+      "rank": 2623,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0132.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "Night Vision",
+        "head": "No Headgear",
+        "clothes": "Pickle Suit",
+        "background": "NYSE Pump"
+      }
+    },
+    "133": {
+      "rank": 967,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0133.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Copium Mask",
+        "facewear": "Night Vision",
+        "head": "Military Beret",
+        "clothes": "El Presidente",
+        "background": "Price Down"
+      }
+    },
+    "134": {
+      "rank": 571,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0134.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Teeth",
+        "facewear": "Laser Eyes",
+        "head": "No Headgear",
+        "clothes": "Pickle Suit",
+        "background": "Crazy Room"
+      }
+    },
+    "135": {
+      "rank": 1523,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0135.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Screaming",
+        "facewear": "Laser Eyes",
+        "head": "No Headgear",
+        "clothes": "Pickle Suit",
+        "background": "Chia Farm"
+      }
+    },
+    "136": {
+      "rank": 1775,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0136.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Gold Teeth",
+        "facewear": "MOG Glasses",
+        "head": "No Headgear",
+        "clothes": "Pickle Suit",
+        "background": "Price Up"
+      }
+    },
+    "137": {
+      "rank": 2563,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0137.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Joint",
+        "facewear": "Shades",
+        "head": "No Headgear",
+        "clothes": "Pickle Suit",
+        "background": "Price Up"
+      }
+    },
+    "138": {
+      "rank": 2279,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0138.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "Tyson Tattoo",
+        "head": "No Headgear",
+        "clothes": "Pickle Suit",
+        "background": "$LOVE"
+      }
+    },
+    "139": {
+      "rank": 1500,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0139.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Numb",
+        "facewear": "3D Glasses",
+        "head": "No Headgear",
+        "clothes": "Pickle Suit",
+        "background": "$HONK"
+      }
+    },
+    "140": {
+      "rank": 3060,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0140.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Cig",
+        "facewear": "Alpha Shades",
+        "head": "No Headgear",
+        "clothes": "Pickle Suit",
+        "background": "Sky Dive"
+      }
+    },
+    "141": {
+      "rank": 2263,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0141.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Cohiba",
+        "facewear": "Aviators",
+        "head": "No Headgear",
+        "clothes": "Pickle Suit",
+        "background": "Radioactive Forest"
+      }
+    },
+    "142": {
+      "rank": 2332,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0142.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Joint",
+        "facewear": "Cool Glasses",
+        "head": "No Headgear",
+        "clothes": "Pickle Suit",
+        "background": "Tangerine Pop"
+      }
+    },
+    "143": {
+      "rank": 3101,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0143.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Pizza",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Pickle Suit",
+        "background": "$PIZZA"
+      }
+    },
+    "144": {
+      "rank": 3462,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0144.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "3D Glasses",
+        "head": "No Headgear",
+        "clothes": "Astronaut",
+        "background": "Moon"
+      }
+    },
+    "145": {
+      "rank": 3591,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0145.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "Alpha Shades",
+        "head": "No Headgear",
+        "clothes": "Astronaut",
+        "background": "Moon"
+      }
+    },
+    "146": {
+      "rank": 2569,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0146.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "Cool Glasses",
+        "head": "No Headgear",
+        "clothes": "Astronaut",
+        "background": "NYSE Pump"
+      }
+    },
+    "147": {
+      "rank": 2928,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0147.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "Cyber Shades",
+        "head": "No Headgear",
+        "clothes": "Astronaut",
+        "background": "Moon"
+      }
+    },
+    "148": {
+      "rank": 2566,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0148.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "Wizard Glasses",
+        "head": "No Headgear",
+        "clothes": "Astronaut",
+        "background": "Matrix"
+      }
+    },
+    "149": {
+      "rank": 2329,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0149.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "Matrix Lenses",
+        "head": "No Headgear",
+        "clothes": "Astronaut",
+        "background": "Moon"
+      }
+    },
+    "150": {
+      "rank": 2785,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0150.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "MOG Glasses",
+        "head": "No Headgear",
+        "clothes": "Astronaut",
+        "background": "Moon"
+      }
+    },
+    "151": {
+      "rank": 929,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0151.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Teeth",
+        "facewear": "Tyson Tattoo",
+        "head": "No Headgear",
+        "clothes": "Astronaut",
+        "background": "NYSE Dump"
+      }
+    },
+    "152": {
+      "rank": 1481,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0152.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Numb",
+        "facewear": "VR Headset",
+        "head": "No Headgear",
+        "clothes": "Astronaut",
+        "background": "Moon"
+      }
+    },
+    "153": {
+      "rank": 2649,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0153.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Numb",
+        "facewear": "Shades",
+        "head": "No Headgear",
+        "clothes": "Astronaut",
+        "background": "Moon"
+      }
+    },
+    "154": {
+      "rank": 734,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0154.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Stache",
+        "facewear": "Laser Eyes",
+        "head": "No Headgear",
+        "clothes": "Astronaut",
+        "background": "Price Up"
+      }
+    },
+    "155": {
+      "rank": 3013,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0155.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "Cyber Shades",
+        "head": "No Headgear",
+        "clothes": "Astronaut",
+        "background": "Moon"
+      }
+    },
+    "156": {
+      "rank": 2040,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0156.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Smile",
+        "facewear": "Ninja Turtle Mask",
+        "head": "No Headgear",
+        "clothes": "Astronaut",
+        "background": "Moon"
+      }
+    },
+    "157": {
+      "rank": 1667,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0157.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Gold Teeth",
+        "facewear": "Aviators",
+        "head": "No Headgear",
+        "clothes": "Astronaut",
+        "background": "White House"
+      }
+    },
+    "158": {
+      "rank": 2226,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0158.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Astronaut",
+        "background": "Signal Lost"
+      }
+    },
+    "159": {
+      "rank": 2598,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0159.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Smile",
+        "facewear": "MOG Glasses",
+        "head": "No Headgear",
+        "clothes": "Astronaut",
+        "background": "Sky Dive"
+      }
+    },
+    "160": {
+      "rank": 2612,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0160.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Numb",
+        "facewear": "Laser Eyes",
+        "head": "No Headgear",
+        "clothes": "Astronaut",
+        "background": "Moon"
+      }
+    },
+    "161": {
+      "rank": 3908,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0161.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Astronaut",
+        "background": "Moon"
+      }
+    },
+    "162": {
+      "rank": 2848,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0162.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "Alpha Shades",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "Price Up"
+      }
+    },
+    "163": {
+      "rank": 2726,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0163.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "Aviators",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "NYSE Pump"
+      }
+    },
+    "164": {
+      "rank": 3560,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0164.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "Cool Glasses",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "Mellow Yellow"
+      }
+    },
+    "165": {
+      "rank": 3726,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0165.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Cyber Shades",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "Neo Mint"
+      }
+    },
+    "166": {
+      "rank": 3192,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0166.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Matrix Lenses",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "Matrix"
+      }
+    },
+    "167": {
+      "rank": 1447,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0167.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Smile",
+        "facewear": "Laser Eyes",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "Price Down"
+      }
+    },
+    "168": {
+      "rank": 1736,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0168.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Vampire Teeth",
+        "facewear": "Shades",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "One Market"
+      }
+    },
+    "169": {
+      "rank": 1062,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0169.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "Tyson Tattoo",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "NYSE Rug"
+      }
+    },
+    "170": {
+      "rank": 2752,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0170.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Cig",
+        "facewear": "MOG Glasses",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "Hot Coral"
+      }
+    },
+    "171": {
+      "rank": 2537,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0171.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Gold Teeth",
+        "facewear": "3D Glasses",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "Sky Dive"
+      }
+    },
+    "172": {
+      "rank": 3513,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0172.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "NYSE Dump"
+      }
+    },
+    "173": {
+      "rank": 3699,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0173.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "Bepe Barracks"
+      }
+    },
+    "174": {
+      "rank": 3059,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0174.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Cig",
+        "facewear": "Shades",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "$CHIA"
+      }
+    },
+    "175": {
+      "rank": 3137,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0175.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Pizza",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "$BEPE"
+      }
+    },
+    "176": {
+      "rank": 4112,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0176.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "Neo Mint"
+      }
+    },
+    "177": {
+      "rank": 1765,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0177.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Cohiba",
+        "facewear": "Ninja Turtle Mask",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "$NECKCOIN"
+      }
+    },
+    "178": {
+      "rank": 2967,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0178.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Gold Teeth",
+        "facewear": "Shades",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "Radioactive Forest"
+      }
+    },
+    "179": {
+      "rank": 1617,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0179.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Joint",
+        "facewear": "VR Headset",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "Orange Grove"
+      }
+    },
+    "180": {
+      "rank": 1029,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0180.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Stache",
+        "facewear": "Wizard Glasses",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "NYSE Dump"
+      }
+    },
+    "181": {
+      "rank": 2377,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0181.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Neckbeard",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Pepe Suit",
+        "background": "Crazy Room"
+      }
+    },
+    "182": {
+      "rank": 1492,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0182.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "3D Glasses",
+        "head": "No Headgear",
+        "clothes": "Pepe Suit",
+        "background": "Everythings Fine"
+      }
+    },
+    "183": {
+      "rank": 1825,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0183.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Cohiba",
+        "facewear": "Aviators",
+        "head": "No Headgear",
+        "clothes": "Pepe Suit",
+        "background": "NYSE Dump"
+      }
+    },
+    "184": {
+      "rank": 4086,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0184.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Pepe Suit",
+        "background": "Nesting Grounds"
+      }
+    },
+    "185": {
+      "rank": 4159,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0185.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Pepe Suit",
+        "background": "Chia Farm"
+      }
+    },
+    "186": {
+      "rank": 3112,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0186.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Hannibal Mask",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Pepe Suit",
+        "background": "Crazy Room"
+      }
+    },
+    "187": {
+      "rank": 3497,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0187.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "Cyber Shades",
+        "head": "No Headgear",
+        "clothes": "Pepe Suit",
+        "background": "Radioactive Forest"
+      }
+    },
+    "188": {
+      "rank": 3669,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0188.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "Shades",
+        "head": "No Headgear",
+        "clothes": "Pepe Suit",
+        "background": "$HOA"
+      }
+    },
+    "189": {
+      "rank": 3691,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0189.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Bandana Mask",
+        "facewear": "MOG Glasses",
+        "head": "No Headgear",
+        "clothes": "Pepe Suit",
+        "background": "$CHIA"
+      }
+    },
+    "190": {
+      "rank": 3233,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0190.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "Laser Eyes",
+        "head": "No Headgear",
+        "clothes": "Pepe Suit",
+        "background": "$LOVE"
+      }
+    },
+    "191": {
+      "rank": 3911,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0191.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Pepe Suit",
+        "background": "Mellow Yellow"
+      }
+    },
+    "192": {
+      "rank": 3974,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0192.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "Military Beret",
+        "clothes": "SWAT Gear",
+        "background": "Neo Mint"
+      }
+    },
+    "193": {
+      "rank": 948,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0193.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Bubble Gum",
+        "facewear": "Alpha Shades",
+        "head": "No Headgear",
+        "clothes": "Pepe Suit",
+        "background": "$HONK"
+      }
+    },
+    "194": {
+      "rank": 3857,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0194.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Pepe Suit",
+        "background": "$PIZZA"
+      }
+    },
+    "195": {
+      "rank": 2975,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0195.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Joint",
+        "facewear": "Night Vision",
+        "head": "No Headgear",
+        "clothes": "Pepe Suit",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "196": {
+      "rank": 3917,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0196.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Pizza",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Pepe Suit",
+        "background": "Neo Mint"
+      }
+    },
+    "197": {
+      "rank": 3195,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0197.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "Alpha Shades",
+        "head": "No Headgear",
+        "clothes": "Pepe Suit",
+        "background": "Sky Dive"
+      }
+    },
+    "198": {
+      "rank": 3326,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0198.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Smile",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Pepe Suit",
+        "background": "Silicon Data Center"
+      }
+    },
+    "199": {
+      "rank": 2214,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0199.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Stache",
+        "facewear": "Laser Eyes",
+        "head": "No Headgear",
+        "clothes": "Pepe Suit",
+        "background": "Chia Green"
+      }
+    },
+    "200": {
+      "rank": 3528,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/0200.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Goose Suit",
+        "background": "Moms Basement"
+      }
+    }
+  }
+}

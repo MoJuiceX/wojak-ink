@@ -1,0 +1,181 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "base:Bepe Wojak||clothes:Tank Top": [
+      "4010",
+      "4009",
+      "4011",
+      "31",
+      "4012"
+    ],
+    "face:NPC||mouth:Vampire Teeth": [
+      "2727",
+      "2262",
+      "592",
+      "476",
+      "1304",
+      "228",
+      "1206",
+      "2198"
+    ],
+    "face:Rugged||facewear:Clown Nose": [
+      "3778",
+      "3722",
+      "3135",
+      "3568",
+      "3475",
+      "2608",
+      "2165",
+      "3627",
+      "1500",
+      "1285",
+      "2511",
+      "786",
+      "266",
+      "1950",
+      "1292",
+      "1609",
+      "1724",
+      "1610"
+    ],
+    "facewear:Night Vision||head:Halo": [
+      "328"
+    ],
+    "clothes:Viking Armor||facewear:Matrix Lenses": [
+      "3767",
+      "3445",
+      "427",
+      "2182",
+      "2170",
+      "411"
+    ],
+    "face:Rekt||head:Comrade Hat": [
+      "4107",
+      "655",
+      "715",
+      "3380",
+      "433",
+      "1475",
+      "486",
+      "1368",
+      "781",
+      "925"
+    ],
+    "facewear:VR Headset||head:Fedora": [
+      "1388",
+      "459"
+    ],
+    "clothes:Tank Top||head:Ronin Helmet": [
+      "2339",
+      "2346",
+      "700",
+      "729"
+    ],
+    "head:Devil Horns||mouth:Cohiba": [
+      "3899",
+      "866",
+      "2367",
+      "1293",
+      "1264",
+      "2577",
+      "2413"
+    ],
+    "clothes:Ninja Turtle Fit||head:Propeller Hat": [
+      "4064",
+      "998",
+      "2486",
+      "969"
+    ],
+    "clothes:Bepe Army||mouth:Bubble Gum": [
+      "3472",
+      "3479",
+      "3465",
+      "3982",
+      "1193",
+      "4166",
+      "3222",
+      "1210",
+      "1176",
+      "3965",
+      "1142",
+      "1159",
+      "4073",
+      "1125"
+    ],
+    "clothes:Sports Jacket||facewear:VR Headset": [
+      "1733",
+      "1660",
+      "1692"
+    ],
+    "base:Soyjak||head:Standard Cut": [
+      "2457",
+      "2572",
+      "2087",
+      "2446",
+      "2310",
+      "2270",
+      "2314",
+      "2257",
+      "2542",
+      "2154",
+      "2424",
+      "2720",
+      "2348",
+      "2323",
+      "2207",
+      "2482",
+      "2189",
+      "2728",
+      "2173"
+    ],
+    "head:Halo||mouth:Sexy Lip Bite": [
+      "3876",
+      "3046"
+    ],
+    "face:NPC||head:Twin Braids": [
+      "3187"
+    ],
+    "base:Papa Tang||head:Tin Foil Hat": [
+      "3404",
+      "3205",
+      "3270",
+      "3405",
+      "3346"
+    ],
+    "base:Monkey Zoo||clothes:Bepe Army": [
+      "3470",
+      "3472",
+      "3473",
+      "3479",
+      "3475",
+      "3465",
+      "3477",
+      "3468",
+      "3466",
+      "3469",
+      "3474",
+      "3462",
+      "3467",
+      "3478",
+      "3464",
+      "3463",
+      "3476",
+      "3471"
+    ],
+    "base:Alien Wojak||clothes:Tank Top": [
+      "3676",
+      "3811"
+    ],
+    "base:Alien Wojak||head:Propeller Hat": [
+      "3700"
+    ],
+    "base:Alien Soyjak||facewear:Fake It Mask": [
+      "3783",
+      "3747"
+    ],
+    "head:Fedora||mouth:Sexy Lip Bite": [
+      "3841"
+    ]
+  }
+}

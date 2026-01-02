@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "clothes:Ninja Turtle Fit||head:Hard Hat": [
+      "1023",
+      "20",
+      "994",
+      "59",
+      "965",
+      "2485"
+    ],
+    "clothes:Bepe Suit||face:NPC": [
+      "174",
+      "175",
+      "173"
+    ],
+    "clothes:SWAT Gear||head:Tin Foil Hat": [
+      "471",
+      "485",
+      "463",
+      "500"
+    ],
+    "head:Trump Wave||mouth:Vampire Teeth": [
+      "3767",
+      "564",
+      "1123"
+    ],
+    "facewear:Tyson Tattoo||head:Beanie": [
+      "2149",
+      "583",
+      "1749",
+      "2700",
+      "1659",
+      "2410"
+    ],
+    "facewear:Matrix Lenses||head:Military Beret": [
+      "2201",
+      "4125",
+      "3571",
+      "3606",
+      "658",
+      "3121",
+      "2768",
+      "2082",
+      "1205"
+    ],
+    "facewear:Matrix Lenses||head:Construction Helmet": [
+      "2182",
+      "2860",
+      "782",
+      "2404",
+      "2661",
+      "911"
+    ],
+    "head:Wizard Hat||mouth:Stache": [
+      "3799",
+      "2496",
+      "1498",
+      "2495",
+      "835",
+      "1748",
+      "1771",
+      "1998",
+      "1756"
+    ],
+    "facewear:Aviators||head:Super Wojak Hat": [
+      "1755",
+      "1521",
+      "2080",
+      "1336"
+    ],
+    "base:Soyjak||head:Viking Helmet": [
+      "2540",
+      "2223",
+      "2200",
+      "2167",
+      "2359",
+      "2017",
+      "2326",
+      "2174",
+      "2168",
+      "2258",
+      "2396",
+      "2484",
+      "2089",
+      "2362",
+      "2170",
+      "2166",
+      "2411",
+      "2624",
+      "2586",
+      "2647",
+      "2706",
+      "2635",
+      "2470",
+      "2660"
+    ],
+    "clothes:Viking Armor||head:Standard Cut": [
+      "2173"
+    ],
+    "base:Waifu||clothes:God's Robe": [
+      "2810",
+      "2805",
+      "2809",
+      "2808",
+      "2804",
+      "2806",
+      "2807"
+    ],
+    "clothes:Prom Dress||head:Cap": [
+      "3085",
+      "2858"
+    ],
+    "base:Alien Wojak||clothes:Gopher Suit": [
+      "3690",
+      "3661",
+      "3806"
+    ],
+    "base:Alien Waifu||head:Tiara": [
+      "3840"
+    ],
+    "clothes:El Presidente||head:Cowboy Hat": [
+      "3931"
+    ],
+    "base:Bepe Soyjak||mouth:Vampire Teeth": [
+      "4042",
+      "4093",
+      "4041"
+    ],
+    "facewear:Ninja Turtle Mask||head:Mermaid Waves": [
+      "4146"
+    ],
+    "facewear:Alpha Shades||head:Vixen Waves": [
+      "4189"
+    ]
+  }
+}

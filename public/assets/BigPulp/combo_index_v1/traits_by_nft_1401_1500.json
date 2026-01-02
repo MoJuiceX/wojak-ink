@@ -1,0 +1,1309 @@
+{
+  "schema_version": "1.0",
+  "range": [
+    1401,
+    1500
+  ],
+  "nfts": {
+    "1401": {
+      "rank": 3935,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1401.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Propeller Hat",
+        "clothes": "Leather Jacket",
+        "background": "Sky Dive"
+      }
+    },
+    "1402": {
+      "rank": 2952,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1402.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Pizza",
+        "facewear": "No Face Wear",
+        "head": "Hard Hat",
+        "clothes": "Leather Jacket",
+        "background": "Route 66"
+      }
+    },
+    "1403": {
+      "rank": 1993,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1403.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Screaming",
+        "facewear": "Matrix Lenses",
+        "head": "Firefighter Helmet",
+        "clothes": "Leather Jacket",
+        "background": "Hell"
+      }
+    },
+    "1404": {
+      "rank": 2416,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1404.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Smile",
+        "facewear": "MOG Glasses",
+        "head": "Fedora",
+        "clothes": "Leather Jacket",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1405": {
+      "rank": 1826,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1405.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Smile",
+        "facewear": "Shades",
+        "head": "Crown",
+        "clothes": "Leather Jacket",
+        "background": "Hot Coral"
+      }
+    },
+    "1406": {
+      "rank": 3587,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1406.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Stache",
+        "facewear": "No Face Wear",
+        "head": "Construction Helmet",
+        "clothes": "Leather Jacket",
+        "background": "Green Candle"
+      }
+    },
+    "1407": {
+      "rank": 1905,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1407.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Teeth",
+        "facewear": "Shades",
+        "head": "Clown",
+        "clothes": "Leather Jacket",
+        "background": "Route 66"
+      }
+    },
+    "1408": {
+      "rank": 3884,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1408.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Vampire Teeth",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Leather Jacket",
+        "background": "Green Candle"
+      }
+    },
+    "1409": {
+      "rank": 1695,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1409.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Pipe",
+        "facewear": "Clown Nose",
+        "head": "Beanie",
+        "clothes": "Leather Jacket",
+        "background": "Chia Green"
+      }
+    },
+    "1410": {
+      "rank": 2907,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1410.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Hannibal Mask",
+        "facewear": "No Face Wear",
+        "head": "Spikes",
+        "clothes": "Leather Jacket",
+        "background": "$CHIA"
+      }
+    },
+    "1411": {
+      "rank": 4002,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1411.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "No Face Wear",
+        "head": "Cap",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "1412": {
+      "rank": 3052,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1412.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "Alpha Shades",
+        "head": "Beanie",
+        "clothes": "Chia Farmer",
+        "background": "Chia Green"
+      }
+    },
+    "1413": {
+      "rank": 2153,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1413.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "Aviators",
+        "head": "Beer Hat",
+        "clothes": "Chia Farmer",
+        "background": "$CASTER"
+      }
+    },
+    "1414": {
+      "rank": 3175,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1414.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "Cool Glasses",
+        "head": "Cap",
+        "clothes": "Chia Farmer",
+        "background": "Sky Dive"
+      }
+    },
+    "1415": {
+      "rank": 3423,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1415.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Pipe",
+        "facewear": "MOG Glasses",
+        "head": "Centurion",
+        "clothes": "Chia Farmer",
+        "background": "Radioactive Forest"
+      }
+    },
+    "1416": {
+      "rank": 4056,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1416.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Copium Mask",
+        "facewear": "No Face Wear",
+        "head": "Clown",
+        "clothes": "Chia Farmer",
+        "background": "Neo Mint"
+      }
+    },
+    "1417": {
+      "rank": 3744,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1417.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "Comrade Hat",
+        "clothes": "Chia Farmer",
+        "background": "Mellow Yellow"
+      }
+    },
+    "1418": {
+      "rank": 3471,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1418.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Laser Eyes",
+        "head": "Construction Helmet",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "1419": {
+      "rank": 3439,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1419.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Shades",
+        "head": "Cowboy Hat",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "1420": {
+      "rank": 3951,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1420.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "MOG Glasses",
+        "head": "Crown",
+        "clothes": "Chia Farmer",
+        "background": "Green Candle"
+      }
+    },
+    "1421": {
+      "rank": 3313,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1421.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "Night Vision",
+        "head": "Devil Horns",
+        "clothes": "Chia Farmer",
+        "background": "Chia Green"
+      }
+    },
+    "1422": {
+      "rank": 2233,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1422.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Fedora",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "1423": {
+      "rank": 4095,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1423.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Field Cap",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "1424": {
+      "rank": 3602,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1424.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Shades",
+        "head": "Cap",
+        "clothes": "Chia Farmer",
+        "background": "Neo Mint"
+      }
+    },
+    "1425": {
+      "rank": 3532,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1425.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Tyson Tattoo",
+        "head": "Construction Helmet",
+        "clothes": "Chia Farmer",
+        "background": "Tangerine Pop"
+      }
+    },
+    "1426": {
+      "rank": 2174,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1426.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "VR Headset",
+        "head": "Construction Helmet",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "1427": {
+      "rank": 2636,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1427.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Screaming",
+        "facewear": "Wizard Glasses",
+        "head": "Hip Hop Hat",
+        "clothes": "Chia Farmer",
+        "background": "Hot Coral"
+      }
+    },
+    "1428": {
+      "rank": 3895,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1428.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Chia Farmer",
+        "background": "Green Candle"
+      }
+    },
+    "1429": {
+      "rank": 2571,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1429.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "3D Glasses",
+        "head": "Pirate Hat",
+        "clothes": "Chia Farmer",
+        "background": "Mellow Yellow"
+      }
+    },
+    "1430": {
+      "rank": 3862,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1430.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "Alpha Shades",
+        "head": "Propeller Hat",
+        "clothes": "Chia Farmer",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1431": {
+      "rank": 3058,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1431.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Vampire Teeth",
+        "facewear": "MOG Glasses",
+        "head": "Ronin Helmet",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "1432": {
+      "rank": 2834,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1432.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Pipe",
+        "facewear": "Shades",
+        "head": "Spikes",
+        "clothes": "Chia Farmer",
+        "background": "$LOVE"
+      }
+    },
+    "1433": {
+      "rank": 2047,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1433.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Copium Mask",
+        "facewear": "Cyber Shades",
+        "head": "Super Saiyan",
+        "clothes": "Chia Farmer",
+        "background": "$NECKCOIN"
+      }
+    },
+    "1434": {
+      "rank": 3231,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1434.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "Cool Glasses",
+        "head": "Super Wojak Hat",
+        "clothes": "Chia Farmer",
+        "background": "Orange Grove"
+      }
+    },
+    "1435": {
+      "rank": 4126,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1435.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "Cap",
+        "clothes": "Chia Farmer",
+        "background": "Green Candle"
+      }
+    },
+    "1436": {
+      "rank": 4170,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1436.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Tin Foil Hat",
+        "clothes": "Chia Farmer",
+        "background": "Neo Mint"
+      }
+    },
+    "1437": {
+      "rank": 2234,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1437.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "Matrix Lenses",
+        "head": "Trump Wave",
+        "clothes": "Chia Farmer",
+        "background": "White House"
+      }
+    },
+    "1438": {
+      "rank": 3679,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1438.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "MOG Glasses",
+        "head": "Viking Helmet",
+        "clothes": "Chia Farmer",
+        "background": "Radioactive Forest"
+      }
+    },
+    "1439": {
+      "rank": 3923,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1439.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Night Vision",
+        "head": "Wizard Hat",
+        "clothes": "Chia Farmer",
+        "background": "Neo Mint"
+      }
+    },
+    "1440": {
+      "rank": 2328,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1440.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Ninja Turtle Mask",
+        "head": "2Pac Bandana",
+        "clothes": "Chia Farmer",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1441": {
+      "rank": 4054,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1441.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "No Face Wear",
+        "head": "Beanie",
+        "clothes": "Chia Farmer",
+        "background": "Sky Dive"
+      }
+    },
+    "1442": {
+      "rank": 3912,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1442.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Shades",
+        "head": "Beer Hat",
+        "clothes": "Chia Farmer",
+        "background": "Green Candle"
+      }
+    },
+    "1443": {
+      "rank": 2745,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1443.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "Tyson Tattoo",
+        "head": "Cap",
+        "clothes": "Chia Farmer",
+        "background": "Mellow Yellow"
+      }
+    },
+    "1444": {
+      "rank": 3548,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1444.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Clown Nose",
+        "head": "Centurion",
+        "clothes": "Chia Farmer",
+        "background": "Golden Hour"
+      }
+    },
+    "1445": {
+      "rank": 2922,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1445.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Chia Farmer",
+        "background": "$LOVE"
+      }
+    },
+    "1446": {
+      "rank": 2293,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1446.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Clown Nose",
+        "head": "Cap",
+        "clothes": "Chia Farmer",
+        "background": "$NECKCOIN"
+      }
+    },
+    "1447": {
+      "rank": 3387,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1447.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Shades",
+        "head": "Construction Helmet",
+        "clothes": "Chia Farmer",
+        "background": "$PIZZA"
+      }
+    },
+    "1448": {
+      "rank": 2621,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1448.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Vampire Teeth",
+        "facewear": "Shades",
+        "head": "Cowboy Hat",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "1449": {
+      "rank": 3894,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1449.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Pipe",
+        "facewear": "Aviators",
+        "head": "Wizard Hat",
+        "clothes": "Chia Farmer",
+        "background": "Chia Green"
+      }
+    },
+    "1450": {
+      "rank": 2060,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1450.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Copium Mask",
+        "facewear": "Cool Glasses",
+        "head": "Wizard Hat",
+        "clothes": "Chia Farmer",
+        "background": "$HONK"
+      }
+    },
+    "1451": {
+      "rank": 3905,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1451.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "MOG Glasses",
+        "head": "Fedora",
+        "clothes": "Chia Farmer",
+        "background": "Mellow Yellow"
+      }
+    },
+    "1452": {
+      "rank": 3186,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1452.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "Eye Patch",
+        "head": "Field Cap",
+        "clothes": "Chia Farmer",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1453": {
+      "rank": 4052,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1453.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "Firefighter Helmet",
+        "clothes": "Chia Farmer",
+        "background": "Golden Hour"
+      }
+    },
+    "1454": {
+      "rank": 3635,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1454.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "Laser Eyes",
+        "head": "Construction Helmet",
+        "clothes": "Chia Farmer",
+        "background": "Sky Dive"
+      }
+    },
+    "1455": {
+      "rank": 3282,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1455.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Screaming",
+        "facewear": "Matrix Lenses",
+        "head": "Hard Hat",
+        "clothes": "Chia Farmer",
+        "background": "Radioactive Forest"
+      }
+    },
+    "1456": {
+      "rank": 3557,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1456.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "MOG Glasses",
+        "head": "Hip Hop Hat",
+        "clothes": "Chia Farmer",
+        "background": "Neo Mint"
+      }
+    },
+    "1457": {
+      "rank": 3929,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1457.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Wizard Glasses",
+        "head": "Wizard Hat",
+        "clothes": "Chia Farmer",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1458": {
+      "rank": 3424,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1458.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "VR Headset",
+        "head": "Propeller Hat",
+        "clothes": "Chia Farmer",
+        "background": "$CHIA"
+      }
+    },
+    "1459": {
+      "rank": 4184,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1459.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Propeller Hat",
+        "clothes": "Chia Farmer",
+        "background": "Green Candle"
+      }
+    },
+    "1460": {
+      "rank": 2869,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1460.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "Shades",
+        "head": "Ronin Helmet",
+        "clothes": "Chia Farmer",
+        "background": "$PIZZA"
+      }
+    },
+    "1461": {
+      "rank": 2529,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1461.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Screaming",
+        "facewear": "Tyson Tattoo",
+        "head": "Spikes",
+        "clothes": "Chia Farmer",
+        "background": "Hot Coral"
+      }
+    },
+    "1462": {
+      "rank": 3725,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1462.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "MOG Glasses",
+        "head": "Super Saiyan",
+        "clothes": "Chia Farmer",
+        "background": "$HOA"
+      }
+    },
+    "1463": {
+      "rank": 3585,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1463.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "Shades",
+        "head": "Super Saiyan",
+        "clothes": "Chia Farmer",
+        "background": "Silicon Data Center"
+      }
+    },
+    "1464": {
+      "rank": 2981,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1464.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "Shades",
+        "head": "Super Wojak Hat",
+        "clothes": "Chia Farmer",
+        "background": "Price Up"
+      }
+    },
+    "1465": {
+      "rank": 3411,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1465.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "3D Glasses",
+        "head": "Tin Foil Hat",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "1466": {
+      "rank": 3609,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1466.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Pipe",
+        "facewear": "Alpha Shades",
+        "head": "Cap",
+        "clothes": "Chia Farmer",
+        "background": "$CHIA"
+      }
+    },
+    "1467": {
+      "rank": 1456,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1467.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Copium Mask",
+        "facewear": "Aviators",
+        "head": "Viking Helmet",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "1468": {
+      "rank": 3938,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1468.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Chia Farmer",
+        "background": "Green Candle"
+      }
+    },
+    "1469": {
+      "rank": 2337,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1469.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Cohiba",
+        "facewear": "Cyber Shades",
+        "head": "Super Saiyan",
+        "clothes": "Chia Farmer",
+        "background": "Price Up"
+      }
+    },
+    "1470": {
+      "rank": 2151,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1470.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Cig",
+        "facewear": "Eye Patch",
+        "head": "Construction Helmet",
+        "clothes": "Chia Farmer",
+        "background": "Price Down"
+      }
+    },
+    "1471": {
+      "rank": 4036,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1471.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Cohiba",
+        "facewear": "No Face Wear",
+        "head": "Construction Helmet",
+        "clothes": "Chia Farmer",
+        "background": "Neo Mint"
+      }
+    },
+    "1472": {
+      "rank": 4024,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1472.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "Cap",
+        "clothes": "Chia Farmer",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1473": {
+      "rank": 2902,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1473.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Gold Teeth",
+        "facewear": "Shades",
+        "head": "Beer Hat",
+        "clothes": "Chia Farmer",
+        "background": "Sky Dive"
+      }
+    },
+    "1474": {
+      "rank": 2665,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1474.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Joint",
+        "facewear": "Shades",
+        "head": "Clown",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "1475": {
+      "rank": 2065,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1475.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Teeth",
+        "facewear": "Night Vision",
+        "head": "Comrade Hat",
+        "clothes": "Chia Farmer",
+        "background": "Chia Green"
+      }
+    },
+    "1476": {
+      "rank": 2488,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1476.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Bubble Gum",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Construction Helmet",
+        "clothes": "Chia Farmer",
+        "background": "$CHIA"
+      }
+    },
+    "1477": {
+      "rank": 3386,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1477.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Pizza",
+        "facewear": "No Face Wear",
+        "head": "Cowboy Hat",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "1478": {
+      "rank": 3677,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1478.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Screaming",
+        "facewear": "Shades",
+        "head": "Wizard Hat",
+        "clothes": "Chia Farmer",
+        "background": "Neo Mint"
+      }
+    },
+    "1479": {
+      "rank": 3009,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1479.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Cohiba",
+        "facewear": "Tyson Tattoo",
+        "head": "Wizard Hat",
+        "clothes": "Chia Farmer",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1480": {
+      "rank": 3407,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1480.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Hannibal Mask",
+        "facewear": "No Face Wear",
+        "head": "Fedora",
+        "clothes": "Chia Farmer",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1481": {
+      "rank": 2651,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1481.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Teeth",
+        "facewear": "Wizard Glasses",
+        "head": "Field Cap",
+        "clothes": "Chia Farmer",
+        "background": "$CHIA"
+      }
+    },
+    "1482": {
+      "rank": 1411,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1482.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Vampire Teeth",
+        "facewear": "Clown Nose",
+        "head": "Firefighter Helmet",
+        "clothes": "Chia Farmer",
+        "background": "Price Down"
+      }
+    },
+    "1483": {
+      "rank": 2031,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1483.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Pipe",
+        "facewear": "3D Glasses",
+        "head": "Halo",
+        "clothes": "Chia Farmer",
+        "background": "Chia Green"
+      }
+    },
+    "1484": {
+      "rank": 2009,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1484.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Copium Mask",
+        "facewear": "Alpha Shades",
+        "head": "Hard Hat",
+        "clothes": "Chia Farmer",
+        "background": "$CHIA"
+      }
+    },
+    "1485": {
+      "rank": 3539,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1485.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "Shades",
+        "head": "Cap",
+        "clothes": "Chia Farmer",
+        "background": "Green Candle"
+      }
+    },
+    "1486": {
+      "rank": 3814,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1486.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Bubble Gum",
+        "facewear": "MOG Glasses",
+        "head": "No Headgear",
+        "clothes": "Chia Farmer",
+        "background": "Tangerine Pop"
+      }
+    },
+    "1487": {
+      "rank": 2924,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1487.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Cig",
+        "facewear": "Cyber Shades",
+        "head": "Pirate Hat",
+        "clothes": "Chia Farmer",
+        "background": "Sky Dive"
+      }
+    },
+    "1488": {
+      "rank": 1559,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1488.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Cohiba",
+        "facewear": "Eye Patch",
+        "head": "Pirate Hat",
+        "clothes": "Chia Farmer",
+        "background": "Pirate Ship"
+      }
+    },
+    "1489": {
+      "rank": 3114,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1489.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "Ronin Helmet",
+        "clothes": "Chia Farmer",
+        "background": "$PIZZA"
+      }
+    },
+    "1490": {
+      "rank": 3845,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1490.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Chia Farmer",
+        "background": "Spell Room"
+      }
+    },
+    "1491": {
+      "rank": 2678,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1491.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "Matrix Lenses",
+        "head": "Super Saiyan",
+        "clothes": "El Presidente",
+        "background": "$HOA"
+      }
+    },
+    "1492": {
+      "rank": 2307,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1492.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Neckbeard",
+        "facewear": "MOG Glasses",
+        "head": "Super Wojak Hat",
+        "clothes": "Chia Farmer",
+        "background": "Sky Dive"
+      }
+    },
+    "1493": {
+      "rank": 2628,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1493.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Numb",
+        "facewear": "Night Vision",
+        "head": "SWAT Helmet",
+        "clothes": "Chia Farmer",
+        "background": "Sky Dive"
+      }
+    },
+    "1494": {
+      "rank": 3273,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1494.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Pizza",
+        "facewear": "No Face Wear",
+        "head": "Tin Foil Hat",
+        "clothes": "Chia Farmer",
+        "background": "Golden Hour"
+      }
+    },
+    "1495": {
+      "rank": 3848,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1495.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Super Saiyan",
+        "clothes": "Chia Farmer",
+        "background": "$LOVE"
+      }
+    },
+    "1496": {
+      "rank": 2610,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1496.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Smile",
+        "facewear": "Shades",
+        "head": "Viking Helmet",
+        "clothes": "Chia Farmer",
+        "background": "Chia Green"
+      }
+    },
+    "1497": {
+      "rank": 1746,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1497.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Smile",
+        "facewear": "Tyson Tattoo",
+        "head": "Wizard Hat",
+        "clothes": "Chia Farmer",
+        "background": "Mellow Yellow"
+      }
+    },
+    "1498": {
+      "rank": 1719,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1498.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Stache",
+        "facewear": "VR Headset",
+        "head": "Wizard Hat",
+        "clothes": "Chia Farmer",
+        "background": "Chia Green"
+      }
+    },
+    "1499": {
+      "rank": 2966,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1499.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "Beanie",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "1500": {
+      "rank": 1350,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1500.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Vampire Teeth",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    }
+  }
+}

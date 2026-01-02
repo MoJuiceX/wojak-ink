@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "clothes:Bepe Army||head:Cowboy Hat": [
+      "2573",
+      "11",
+      "1190",
+      "3219",
+      "1161"
+    ],
+    "head:Trump Wave||mouth:Hannibal Mask": [
+      "49"
+    ],
+    "facewear:Shades||mouth:Bubble Gum": [
+      "1005",
+      "3310",
+      "3017",
+      "2778",
+      "2301",
+      "2414",
+      "1274",
+      "3331",
+      "1176",
+      "2305",
+      "1257",
+      "1539",
+      "1159",
+      "768",
+      "188",
+      "1540",
+      "1614"
+    ],
+    "clothes:Viking Armor||facewear:Shades": [
+      "441",
+      "3448",
+      "415"
+    ],
+    "face:NPC||head:Devil Horns": [
+      "866",
+      "1111"
+    ],
+    "clothes:Super Saiyan Uniform||head:Super Wojak Hat": [
+      "896",
+      "3365"
+    ],
+    "clothes:Prom Dress||facewear:Cyber Shades": [
+      "3086"
+    ],
+    "clothes:Sports Bra||face:Rekt": [
+      "3892",
+      "3148"
+    ],
+    "base:Papa Tang||facewear:Clown Nose": [
+      "3246",
+      "3419",
+      "3417",
+      "3420",
+      "3317",
+      "3418"
+    ],
+    "base:Bepe Wojak||mouth:Joint": [
+      "4009",
+      "3935",
+      "3906",
+      "3984",
+      "3920",
+      "4012",
+      "3951",
+      "3986",
+      "3967",
+      "3943",
+      "4004",
+      "3985"
+    ],
+    "base:Bepe Soyjak||mouth:Hannibal Mask": [
+      "4094",
+      "4056"
+    ],
+    "base:Bepe Waifu||facewear:Alpha Shades": [
+      "4158"
+    ]
+  }
+}

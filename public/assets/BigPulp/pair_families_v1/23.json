@@ -1,0 +1,164 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "facewear:Cyber Shades||mouth:Smile": [
+      "3781",
+      "3983",
+      "3062",
+      "1845",
+      "1094",
+      "19",
+      "451",
+      "1611",
+      "1536"
+    ],
+    "clothes:Topless||facewear:Laser Eyes": [
+      "2420",
+      "3401",
+      "3784",
+      "3397",
+      "2412",
+      "3367",
+      "36",
+      "3385",
+      "1612",
+      "1537",
+      "1575",
+      "1556"
+    ],
+    "clothes:Ronin||mouth:Gold Teeth": [
+      "3117",
+      "3299",
+      "869",
+      "2376",
+      "2384",
+      "3304",
+      "4079",
+      "2280",
+      "67",
+      "832",
+      "852",
+      "815"
+    ],
+    "facewear:Cyber Shades||mouth:Teeth": [
+      "3518",
+      "738",
+      "4019",
+      "2686",
+      "97",
+      "1054",
+      "2037",
+      "91"
+    ],
+    "clothes:Gopher Suit||facewear:Alpha Shades": [
+      "253",
+      "269",
+      "238"
+    ],
+    "face:Terminator||facewear:Clown Nose": [
+      "3137",
+      "3716",
+      "4043",
+      "2611",
+      "3493",
+      "559",
+      "2373",
+      "3540",
+      "619",
+      "1027",
+      "3420",
+      "2750",
+      "2185",
+      "2028",
+      "2224",
+      "1409",
+      "1862",
+      "1317",
+      "1753",
+      "2125",
+      "275",
+      "444"
+    ],
+    "clothes:God's Robe||facewear:Ninja Turtle Mask": [
+      "2021",
+      "326"
+    ],
+    "facewear:Aviators||head:Cowboy Hat": [
+      "3779",
+      "2452",
+      "576",
+      "357",
+      "1069",
+      "1586",
+      "1920"
+    ],
+    "clothes:Straitjacket||head:Super Saiyan": [
+      "370"
+    ],
+    "clothes:Super Saiyan Uniform||facewear:Eye Patch": [
+      "3358",
+      "913",
+      "932",
+      "2714",
+      "2719",
+      "951",
+      "2696",
+      "894"
+    ],
+    "head:Construction Helmet||mouth:Neckbeard": [
+      "3658",
+      "1229",
+      "2661",
+      "1131",
+      "2295"
+    ],
+    "clothes:Born to Ride||mouth:Bubble Gum": [
+      "3492",
+      "3017",
+      "2764",
+      "4123",
+      "3833",
+      "1308",
+      "1274",
+      "1240",
+      "1257",
+      "1291",
+      "1223"
+    ],
+    "clothes:Chia Farmer||head:Halo": [
+      "2651",
+      "1483"
+    ],
+    "clothes:Prom Dress||head:Fedora": [
+      "2861"
+    ],
+    "base:Alien Wojak||facewear:Ninja Turtle Mask": [
+      "3698",
+      "3808",
+      "3663",
+      "3807",
+      "3673"
+    ],
+    "base:Alien Soyjak||clothes:El Presidente": [
+      "3733",
+      "3769",
+      "3741",
+      "3800",
+      "3774",
+      "3731"
+    ],
+    "base:Alien Soyjak||head:Centurion": [
+      "3757"
+    ],
+    "clothes:Bathrobe||head:Soy Hair": [
+      "4027"
+    ],
+    "base:Bepe Waifu||clothes:Denim Vest": [
+      "4154",
+      "4138",
+      "4156",
+      "4155"
+    ]
+  }
+}

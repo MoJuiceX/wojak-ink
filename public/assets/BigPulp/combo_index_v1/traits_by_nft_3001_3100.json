@@ -1,0 +1,1309 @@
+{
+  "schema_version": "1.0",
+  "range": [
+    3001,
+    3100
+  ],
+  "nfts": {
+    "3001": {
+      "rank": 1379,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3001.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Vixen Waves",
+        "clothes": "Bathrobe",
+        "background": "Orange Grove"
+      }
+    },
+    "3002": {
+      "rank": 599,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3002.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "No Face Wear",
+        "head": "Mermaid Waves",
+        "clothes": "Bathrobe",
+        "background": "One Market"
+      }
+    },
+    "3003": {
+      "rank": 621,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3003.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Matrix Lenses",
+        "head": "Ponytail",
+        "clothes": "Bathrobe",
+        "background": "Radioactive Forest"
+      }
+    },
+    "3004": {
+      "rank": 1221,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3004.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "Power Bob",
+        "clothes": "Bathrobe",
+        "background": "$LOVE"
+      }
+    },
+    "3005": {
+      "rank": 1653,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3005.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "No Face Wear",
+        "head": "Twin Braids",
+        "clothes": "Bathrobe",
+        "background": "$CHIA"
+      }
+    },
+    "3006": {
+      "rank": 465,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3006.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "3D Glasses",
+        "head": "Fedora",
+        "clothes": "Bathrobe",
+        "background": "$BEPE"
+      }
+    },
+    "3007": {
+      "rank": 779,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3007.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Wizard Glasses",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "NYSE Pump"
+      }
+    },
+    "3008": {
+      "rank": 3714,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3008.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "$HOA"
+      }
+    },
+    "3009": {
+      "rank": 1497,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3009.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "Nesting Grounds"
+      }
+    },
+    "3010": {
+      "rank": 1354,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3010.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Terminator",
+        "mouth": "Pipe",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "Silicon Data Center"
+      }
+    },
+    "3011": {
+      "rank": 1486,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3011.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "SWAT Helmet",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "3012": {
+      "rank": 701,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3012.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Matrix Lenses",
+        "head": "SWAT Helmet",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "3013": {
+      "rank": 2783,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3013.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Cool Glasses",
+        "head": "No Headgear",
+        "clothes": "Born to Ride",
+        "background": "Chia Farm"
+      }
+    },
+    "3014": {
+      "rank": 1445,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3014.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "Wizard Glasses",
+        "head": "Military Beret",
+        "clothes": "Born to Ride",
+        "background": "Matrix"
+      }
+    },
+    "3015": {
+      "rank": 2518,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3015.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Aviators",
+        "head": "Wizard Hat",
+        "clothes": "Born to Ride",
+        "background": "Green Candle"
+      }
+    },
+    "3016": {
+      "rank": 611,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3016.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "No Face Wear",
+        "head": "Mermaid Waves",
+        "clothes": "Born to Ride",
+        "background": "$NECKCOIN"
+      }
+    },
+    "3017": {
+      "rank": 953,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3017.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "Shades",
+        "head": "Ponytail",
+        "clothes": "Born to Ride",
+        "background": "Chia Green"
+      }
+    },
+    "3018": {
+      "rank": 1235,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3018.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Rekt",
+        "mouth": "Cohiba",
+        "facewear": "No Face Wear",
+        "head": "Tiara",
+        "clothes": "Born to Ride",
+        "background": "Neo Mint"
+      }
+    },
+    "3019": {
+      "rank": 784,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3019.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Terminator",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Spikes",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "3020": {
+      "rank": 2083,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3020.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Beer Hat",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "3021": {
+      "rank": 469,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3021.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "MOG Glasses",
+        "head": "Ponytail",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "3022": {
+      "rank": 1239,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3022.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Cyber Shades",
+        "head": "Ronin Helmet",
+        "clothes": "Chia Farmer",
+        "background": "Green Candle"
+      }
+    },
+    "3023": {
+      "rank": 830,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3023.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Chia Farmer",
+        "background": "Moms Basement"
+      }
+    },
+    "3024": {
+      "rank": 3027,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3024.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "Comrade Hat",
+        "clothes": "Chia Farmer",
+        "background": "Neo Mint"
+      }
+    },
+    "3025": {
+      "rank": 3747,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3025.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Military Beret",
+        "clothes": "Chia Farmer",
+        "background": "Bepe Barracks"
+      }
+    },
+    "3026": {
+      "rank": 109,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3026.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "VR Headset",
+        "head": "Power Bob",
+        "clothes": "Chia Farmer",
+        "background": "$PIZZA"
+      }
+    },
+    "3027": {
+      "rank": 740,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3027.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "NPC",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Vixen Waves",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "3028": {
+      "rank": 669,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3028.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Mermaid Waves",
+        "clothes": "Chia Farmer",
+        "background": "NYSE Rug"
+      }
+    },
+    "3029": {
+      "rank": 340,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3029.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Rekt",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Ponytail",
+        "clothes": "Chia Farmer",
+        "background": "Morning Routine"
+      }
+    },
+    "3030": {
+      "rank": 2066,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3030.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Terminator",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "Construction Helmet",
+        "clothes": "Chia Farmer",
+        "background": "$HOA"
+      }
+    },
+    "3031": {
+      "rank": 1503,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3031.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Construction Helmet",
+        "clothes": "Denim Vest",
+        "background": "Orange Grove"
+      }
+    },
+    "3032": {
+      "rank": 986,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3032.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "Pirate Hat",
+        "clothes": "Denim Vest",
+        "background": "Pirate Ship"
+      }
+    },
+    "3033": {
+      "rank": 983,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3033.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Shades",
+        "head": "Cap",
+        "clothes": "Denim Vest",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "3034": {
+      "rank": 207,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3034.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "MOG Glasses",
+        "head": "Tiara",
+        "clothes": "Denim Vest",
+        "background": "Radioactive Forest"
+      }
+    },
+    "3035": {
+      "rank": 2766,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3035.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Tin Foil Hat",
+        "clothes": "Denim Vest",
+        "background": "$CHIA"
+      }
+    },
+    "3036": {
+      "rank": 1375,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3036.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Spikes",
+        "clothes": "Denim Vest",
+        "background": "Green Candle"
+      }
+    },
+    "3037": {
+      "rank": 445,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3037.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Eye Patch",
+        "head": "Spikes",
+        "clothes": "Denim Vest",
+        "background": "Tangerine Pop"
+      }
+    },
+    "3038": {
+      "rank": 61,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3038.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "Night Vision",
+        "head": "Beanie",
+        "clothes": "Denim Vest",
+        "background": "Mellow Yellow"
+      }
+    },
+    "3039": {
+      "rank": 193,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3039.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "No Face Wear",
+        "head": "Twin Braids",
+        "clothes": "Denim Vest",
+        "background": "$LOVE"
+      }
+    },
+    "3040": {
+      "rank": 196,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3040.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "NPC",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Ponytail",
+        "clothes": "Denim Vest",
+        "background": "One Market"
+      }
+    },
+    "3041": {
+      "rank": 225,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3041.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Rekt",
+        "mouth": "Cig",
+        "facewear": "Wizard Glasses",
+        "head": "Wizard Hat",
+        "clothes": "Denim Vest",
+        "background": "Spell Room"
+      }
+    },
+    "3042": {
+      "rank": 229,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3042.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Rekt",
+        "mouth": "Smile",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Denim Vest",
+        "background": "Green Candle"
+      }
+    },
+    "3043": {
+      "rank": 466,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3043.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Terminator",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "Vixen Waves",
+        "clothes": "Denim Vest",
+        "background": "Chia Green"
+      }
+    },
+    "3044": {
+      "rank": 1316,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3044.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "No Face Wear",
+        "head": "Halo",
+        "clothes": "God's Robe",
+        "background": "Heaven"
+      }
+    },
+    "3045": {
+      "rank": 1167,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3045.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Halo",
+        "clothes": "God's Robe",
+        "background": "Heaven"
+      }
+    },
+    "3046": {
+      "rank": 654,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3046.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "No Face Wear",
+        "head": "Halo",
+        "clothes": "God's Robe",
+        "background": "Heaven"
+      }
+    },
+    "3047": {
+      "rank": 2044,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3047.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "Devil Horns",
+        "clothes": "God's Robe",
+        "background": "Hell"
+      }
+    },
+    "3048": {
+      "rank": 661,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3048.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Terminator",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "Vixen Waves",
+        "clothes": "God's Robe",
+        "background": "Green Candle"
+      }
+    },
+    "3049": {
+      "rank": 519,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3049.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Mermaid Waves",
+        "clothes": "Goose Suit",
+        "background": "Nesting Grounds"
+      }
+    },
+    "3050": {
+      "rank": 403,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3050.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Ponytail",
+        "clothes": "Goose Suit",
+        "background": "Nesting Grounds"
+      }
+    },
+    "3051": {
+      "rank": 377,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3051.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "No Face Wear",
+        "head": "Power Bob",
+        "clothes": "Goose Suit",
+        "background": "Orange Grove"
+      }
+    },
+    "3052": {
+      "rank": 179,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3052.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Cool Glasses",
+        "head": "Vixen Waves",
+        "clothes": "Goose Suit",
+        "background": "Nesting Grounds"
+      }
+    },
+    "3053": {
+      "rank": 2287,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3053.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Mermaid Waves",
+        "clothes": "Goose Suit",
+        "background": "$CHIA"
+      }
+    },
+    "3054": {
+      "rank": 1477,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3054.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Vixen Waves",
+        "clothes": "Gopher Suit",
+        "background": "Silicon Data Center"
+      }
+    },
+    "3055": {
+      "rank": 744,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3055.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Mermaid Waves",
+        "clothes": "Gopher Suit",
+        "background": "Moms Basement"
+      }
+    },
+    "3056": {
+      "rank": 538,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3056.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "MOG Glasses",
+        "head": "Mermaid Waves",
+        "clothes": "Gopher Suit",
+        "background": "$LOVE"
+      }
+    },
+    "3057": {
+      "rank": 108,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3057.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Ponytail",
+        "clothes": "Gopher Suit",
+        "background": "$PIZZA"
+      }
+    },
+    "3058": {
+      "rank": 1952,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3058.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Terminator",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "NYSE Dump"
+      }
+    },
+    "3059": {
+      "rank": 1773,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3059.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "Vixen Waves",
+        "clothes": "Leather Jacket",
+        "background": "Radioactive Forest"
+      }
+    },
+    "3060": {
+      "rank": 1540,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3060.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Mermaid Waves",
+        "clothes": "Leather Jacket",
+        "background": "$LOVE"
+      }
+    },
+    "3061": {
+      "rank": 1714,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3061.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Shades",
+        "head": "Viking Helmet",
+        "clothes": "Leather Jacket",
+        "background": "Pirate Ship"
+      }
+    },
+    "3062": {
+      "rank": 972,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3062.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "Cyber Shades",
+        "head": "Wizard Hat",
+        "clothes": "Leather Jacket",
+        "background": "Spell Room"
+      }
+    },
+    "3063": {
+      "rank": 2096,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3063.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "Shades",
+        "head": "Fedora",
+        "clothes": "Leather Jacket",
+        "background": "$CHIA"
+      }
+    },
+    "3064": {
+      "rank": 154,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3064.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Rekt",
+        "mouth": "Joint",
+        "facewear": "Aviators",
+        "head": "Tiara",
+        "clothes": "Leather Jacket",
+        "background": "Price Down"
+      }
+    },
+    "3065": {
+      "rank": 683,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3065.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Twin Braids",
+        "clothes": "Leather Jacket",
+        "background": "Price Down"
+      }
+    },
+    "3066": {
+      "rank": 1158,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3066.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Terminator",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "Cowboy Hat",
+        "clothes": "Leather Jacket",
+        "background": "Matrix"
+      }
+    },
+    "3067": {
+      "rank": 1526,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3067.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "MOG Glasses",
+        "head": "Viking Helmet",
+        "clothes": "Ninja Turtle Fit",
+        "background": "Orange Grove"
+      }
+    },
+    "3068": {
+      "rank": 1025,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3068.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Viking Helmet",
+        "clothes": "Ninja Turtle Fit",
+        "background": "Matrix"
+      }
+    },
+    "3069": {
+      "rank": 969,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3069.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Ninja Turtle Mask",
+        "head": "SWAT Helmet",
+        "clothes": "Ninja Turtle Fit",
+        "background": "$CHIA"
+      }
+    },
+    "3070": {
+      "rank": 1772,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3070.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Wizard Hat",
+        "clothes": "Ninja Turtle Fit",
+        "background": "Green Candle"
+      }
+    },
+    "3071": {
+      "rank": 976,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3071.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Fedora",
+        "clothes": "Ninja Turtle Fit",
+        "background": "$HOA"
+      }
+    },
+    "3072": {
+      "rank": 695,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3072.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Ponytail",
+        "clothes": "Ninja Turtle Fit",
+        "background": "NYSE Rug"
+      }
+    },
+    "3073": {
+      "rank": 1504,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3073.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Terminator",
+        "mouth": "Smile",
+        "facewear": "No Face Wear",
+        "head": "Pirate Hat",
+        "clothes": "Ninja Turtle Fit",
+        "background": "$CHIA"
+      }
+    },
+    "3074": {
+      "rank": 247,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3074.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Pipe",
+        "facewear": "Alpha Shades",
+        "head": "Ponytail",
+        "clothes": "Pepe Suit",
+        "background": "Orange Grove"
+      }
+    },
+    "3075": {
+      "rank": 481,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3075.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Vixen Waves",
+        "clothes": "Pepe Suit",
+        "background": "Nesting Grounds"
+      }
+    },
+    "3076": {
+      "rank": 58,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3076.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "3D Glasses",
+        "head": "Mermaid Waves",
+        "clothes": "Pepe Suit",
+        "background": "Chia Farm"
+      }
+    },
+    "3077": {
+      "rank": 462,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3077.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Cool Glasses",
+        "head": "Twin Braids",
+        "clothes": "Pepe Suit",
+        "background": "$CHIA"
+      }
+    },
+    "3078": {
+      "rank": 312,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3078.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Vixen Waves",
+        "clothes": "Pepe Suit",
+        "background": "NYSE Dump"
+      }
+    },
+    "3079": {
+      "rank": 865,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3079.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "Vixen Waves",
+        "clothes": "Pickle Suit",
+        "background": "Chia Farm"
+      }
+    },
+    "3080": {
+      "rank": 75,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3080.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "Matrix Lenses",
+        "head": "Ponytail",
+        "clothes": "Pickle Suit",
+        "background": "$PIZZA"
+      }
+    },
+    "3081": {
+      "rank": 39,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3081.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "Alpha Shades",
+        "head": "Twin Braids",
+        "clothes": "Pickle Suit",
+        "background": "$LOVE"
+      }
+    },
+    "3082": {
+      "rank": 116,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3082.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "Aviators",
+        "head": "Ponytail",
+        "clothes": "Pickle Suit",
+        "background": "Heaven"
+      }
+    },
+    "3083": {
+      "rank": 52,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3083.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Terminator",
+        "mouth": "Cig",
+        "facewear": "Laser Eyes",
+        "head": "Mermaid Waves",
+        "clothes": "Pickle Suit",
+        "background": "NYSE Pump"
+      }
+    },
+    "3084": {
+      "rank": 329,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3084.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Ponytail",
+        "clothes": "Pickle Suit",
+        "background": "Hell"
+      }
+    },
+    "3085": {
+      "rank": 322,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3085.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Cap",
+        "clothes": "Prom Dress",
+        "background": "NYSE Rug"
+      }
+    },
+    "3086": {
+      "rank": 148,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3086.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "Cyber Shades",
+        "head": "Wizard Hat",
+        "clothes": "Prom Dress",
+        "background": "$LOVE"
+      }
+    },
+    "3087": {
+      "rank": 623,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3087.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Shades",
+        "head": "Wizard Hat",
+        "clothes": "Prom Dress",
+        "background": "$HOA"
+      }
+    },
+    "3088": {
+      "rank": 187,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3088.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Ponytail",
+        "clothes": "Prom Dress",
+        "background": "$HONK"
+      }
+    },
+    "3089": {
+      "rank": 1430,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3089.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "No Face Wear",
+        "head": "Spikes",
+        "clothes": "Prom Dress",
+        "background": "Mellow Yellow"
+      }
+    },
+    "3090": {
+      "rank": 1346,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3090.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "Clown",
+        "clothes": "Prom Dress",
+        "background": "Green Candle"
+      }
+    },
+    "3091": {
+      "rank": 812,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3091.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Copium Mask",
+        "facewear": "No Face Wear",
+        "head": "Crown",
+        "clothes": "Prom Dress",
+        "background": "Chia Farm"
+      }
+    },
+    "3092": {
+      "rank": 332,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3092.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "NPC",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Power Bob",
+        "clothes": "Prom Dress",
+        "background": "Sky Dive"
+      }
+    },
+    "3093": {
+      "rank": 357,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3093.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Rekt",
+        "mouth": "Cig",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Prom Dress",
+        "background": "Neo Mint"
+      }
+    },
+    "3094": {
+      "rank": 1464,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3094.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Rekt",
+        "mouth": "Cohiba",
+        "facewear": "No Face Wear",
+        "head": "Military Beret",
+        "clothes": "Prom Dress",
+        "background": "$CHIA"
+      }
+    },
+    "3095": {
+      "rank": 826,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3095.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Terminator",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "Military Beret",
+        "clothes": "Prom Dress",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "3096": {
+      "rank": 2159,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3096.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Vixen Waves",
+        "clothes": "Proof of Prayer",
+        "background": "$CHIA"
+      }
+    },
+    "3097": {
+      "rank": 1585,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3097.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Mermaid Waves",
+        "clothes": "Proof of Prayer",
+        "background": "Green Candle"
+      }
+    },
+    "3098": {
+      "rank": 149,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3098.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "MOG Glasses",
+        "head": "Ponytail",
+        "clothes": "Proof of Prayer",
+        "background": "Hell"
+      }
+    },
+    "3099": {
+      "rank": 173,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3099.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "Cool Glasses",
+        "head": "Power Bob",
+        "clothes": "Proof of Prayer",
+        "background": "$LOVE"
+      }
+    },
+    "3100": {
+      "rank": 250,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3100.png",
+      "traits": {
+        "base": "Baddie",
+        "face": "Terminator",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Twin Braids",
+        "clothes": "Proof of Prayer",
+        "background": "Heaven"
+      }
+    }
+  }
+}

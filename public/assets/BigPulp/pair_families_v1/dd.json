@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "face:NPC||mouth:Bubble Gum": [
+      "733",
+      "193",
+      "595",
+      "1853",
+      "545",
+      "946",
+      "424"
+    ],
+    "clothes:Firefighter Uniform||mouth:Bubble Gum": [
+      "2267",
+      "545",
+      "529"
+    ],
+    "clothes:Tank Top||head:Spikes": [
+      "730",
+      "701"
+    ],
+    "clothes:Super Saiyan Uniform||head:Cap": [
+      "3364",
+      "3594",
+      "947",
+      "928",
+      "915"
+    ],
+    "head:Field Cap||mouth:Bandana Mask": [
+      "3437",
+      "3273",
+      "3753",
+      "2304",
+      "3962",
+      "1325",
+      "1124"
+    ],
+    "head:Power Bob||mouth:Bubble Gum": [
+      "3099",
+      "2881"
+    ],
+    "clothes:Sports Bra||head:Pirate Hat": [
+      "2928"
+    ],
+    "clothes:School Uniform||head:Cowboy Hat": [
+      "3128"
+    ],
+    "base:Monkey Zoo||head:Beer Hat": [
+      "3587",
+      "3562",
+      "3534",
+      "3514",
+      "3609",
+      "3481"
+    ],
+    "base:Alien Wojak||facewear:MOG Glasses": [
+      "3714",
+      "3675",
+      "3660",
+      "3696",
+      "3694",
+      "3805",
+      "3678"
+    ]
+  }
+}

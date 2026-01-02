@@ -530,7 +530,7 @@ export default function TreasuryWindow({ isOpen, onClose }) {
     <Window
       id="treasury-window"
       title="TREASURY"
-      icon="/icon/tresury_Icon.png"
+      icon="/icon/icons1/tresury_Icon.png"
       style={{
         width: '900px',
         height: '700px', // WINDOW HEIGHT - Change this number to make window taller/shorter

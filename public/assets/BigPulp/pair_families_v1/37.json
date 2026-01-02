@@ -1,0 +1,179 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "head:Cap||mouth:Neckbeard": [
+      "27",
+      "1011",
+      "34",
+      "2417",
+      "1446",
+      "2664",
+      "1674",
+      "1424",
+      "1696"
+    ],
+    "face:Bleeding Bags||facewear:Aviators": [
+      "735",
+      "469",
+      "874",
+      "1393",
+      "806",
+      "201",
+      "2030",
+      "183",
+      "1103",
+      "254",
+      "103",
+      "73"
+    ],
+    "clothes:Gopher Suit||mouth:Gold Teeth": [
+      "2241",
+      "3058",
+      "2237",
+      "249",
+      "274"
+    ],
+    "head:Field Cap||mouth:Numb": [
+      "2351",
+      "3301",
+      "2563",
+      "2447",
+      "2552",
+      "2535",
+      "2324",
+      "556",
+      "819"
+    ],
+    "facewear:Aviators||head:Wizard Hat": [
+      "2496",
+      "1838",
+      "650",
+      "3015",
+      "1820",
+      "1775",
+      "1346",
+      "1997",
+      "1449",
+      "1689"
+    ],
+    "head:Field Cap||mouth:Pipe": [
+      "720",
+      "1173",
+      "3910",
+      "1237"
+    ],
+    "clothes:Super Saiyan Uniform||mouth:Cig": [
+      "3364",
+      "2724",
+      "3600",
+      "3350",
+      "3602",
+      "2694",
+      "947",
+      "2744",
+      "3352",
+      "931",
+      "2730",
+      "908",
+      "882",
+      "897",
+      "3365",
+      "925"
+    ],
+    "clothes:Super Saiyan Uniform||head:Hard Hat": [
+      "935",
+      "3600",
+      "903",
+      "2718"
+    ],
+    "clothes:Ninja Turtle Fit||facewear:Aviators": [
+      "2481",
+      "994"
+    ],
+    "clothes:Sports Jacket||mouth:Bandana Mask": [
+      "2494",
+      "3557",
+      "2948",
+      "3315",
+      "1718",
+      "1667"
+    ],
+    "face:Rugged||head:Twin Braids": [
+      "2998",
+      "3065"
+    ],
+    "clothes:Leather Jacket||head:Vixen Waves": [
+      "3059"
+    ],
+    "base:Papa Tang||mouth:Teeth": [
+      "3213",
+      "3374",
+      "3395",
+      "3333",
+      "3237",
+      "3414",
+      "3341",
+      "3270",
+      "3295",
+      "3348",
+      "3423",
+      "3324",
+      "3240",
+      "3282",
+      "3264"
+    ],
+    "base:Papa Tang||facewear:Night Vision": [
+      "3363",
+      "3384",
+      "3440",
+      "3312",
+      "3235",
+      "3341",
+      "3425",
+      "3263"
+    ],
+    "base:Alien Wojak||head:Hip Hop Hat": [
+      "3697"
+    ],
+    "base:Alien Soyjak||clothes:God's Robe": [
+      "3748"
+    ],
+    "base:Alien Waifu||face:Classic": [
+      "3840",
+      "3843",
+      "3841",
+      "3842",
+      "3835",
+      "3849",
+      "3844",
+      "3846",
+      "3832",
+      "3852",
+      "3851",
+      "3845",
+      "3831",
+      "3850",
+      "3836",
+      "3847",
+      "3848",
+      "3837",
+      "3838",
+      "3839",
+      "3833",
+      "3834"
+    ],
+    "base:Alien Waifu||clothes:Denim Vest": [
+      "3835",
+      "3832",
+      "3837",
+      "3838"
+    ],
+    "facewear:Ninja Turtle Mask||head:Tiara": [
+      "3840"
+    ],
+    "base:Bepe Wojak||head:Hip Hop Hat": [
+      "3954"
+    ]
+  }
+}

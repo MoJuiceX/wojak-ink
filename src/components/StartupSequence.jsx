@@ -26,7 +26,7 @@ export default function StartupSequence({ onComplete }) {
       // Start PS1 audio when sequence 1 (logo stage) begins
       if (!ps1AudioRef.current) {
         ps1AudioRef.current = new Audio('/assets/audio/Ps1-startup.mp3')
-        ps1AudioRef.current.volume = 0.75 // 75% volume
+        ps1AudioRef.current.volume = 0.5 // 50% volume
         ps1AudioRef.current.play().then(() => {
           // Skip the first 0.5 seconds of the audio
           ps1AudioRef.current.currentTime = 0.5

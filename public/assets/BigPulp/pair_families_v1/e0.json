@@ -1,0 +1,184 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "clothes:Topless||facewear:MOG Glasses": [
+      "3410",
+      "3379",
+      "1583",
+      "3625",
+      "1613",
+      "2423",
+      "1619",
+      "3424",
+      "1600",
+      "1",
+      "1638",
+      "1563",
+      "2407",
+      "1544"
+    ],
+    "clothes:Tank Top||mouth:Neckbeard": [
+      "3796",
+      "3676",
+      "8",
+      "2340",
+      "2336"
+    ],
+    "base:Wojak||head:Standard Cut": [
+      "16"
+    ],
+    "facewear:Alpha Shades||head:Cap": [
+      "3364",
+      "3489",
+      "663",
+      "3255",
+      "1011",
+      "34",
+      "778",
+      "1560",
+      "1664",
+      "1591",
+      "2657",
+      "1466",
+      "1225",
+      "22"
+    ],
+    "head:Construction Helmet||mouth:Hannibal Mask": [
+      "38"
+    ],
+    "clothes:Goose Suit||mouth:Copium Mask": [
+      "209"
+    ],
+    "face:Bleeding Bags||facewear:Clown Nose": [
+      "2684",
+      "2613",
+      "3417",
+      "872",
+      "1844",
+      "2402",
+      "223",
+      "251",
+      "1391",
+      "1503",
+      "939",
+      "1737"
+    ],
+    "head:Construction Helmet||mouth:Joint": [
+      "3837",
+      "3145",
+      "3257",
+      "1843",
+      "659",
+      "2584",
+      "356",
+      "1040",
+      "1198",
+      "1296",
+      "1593"
+    ],
+    "facewear:Tyson Tattoo||head:Super Saiyan": [
+      "2384",
+      "1713",
+      "884",
+      "416",
+      "1571",
+      "1790",
+      "1805"
+    ],
+    "head:Military Beret||mouth:Bubble Gum": [
+      "3815",
+      "3095",
+      "658",
+      "595",
+      "1614"
+    ],
+    "facewear:Night Vision||head:Crown": [
+      "3940",
+      "2884",
+      "617",
+      "3263",
+      "1961",
+      "909",
+      "1594",
+      "1655"
+    ],
+    "clothes:Tee||head:Beer Hat": [
+      "4007",
+      "2440",
+      "777",
+      "748",
+      "2438"
+    ],
+    "facewear:Night Vision||head:Clown": [
+      "984"
+    ],
+    "face:Rekt||mouth:Neckbeard": [
+      "1082",
+      "999",
+      "1816"
+    ],
+    "clothes:Leather Jacket||head:Centurion": [
+      "3515",
+      "1321"
+    ],
+    "clothes:Leather Jacket||facewear:Matrix Lenses": [
+      "2826",
+      "1403",
+      "1325",
+      "1339",
+      "1352"
+    ],
+    "clothes:Topless||facewear:Tyson Tattoo": [
+      "2426",
+      "1627",
+      "1589",
+      "2411",
+      "2410",
+      "1571",
+      "1533",
+      "1552"
+    ],
+    "clothes:Sports Jacket||face:NPC": [
+      "1745",
+      "2501",
+      "1746",
+      "1740",
+      "2500",
+      "1744",
+      "1739",
+      "1748",
+      "1742",
+      "2499",
+      "1747",
+      "1743",
+      "1741"
+    ],
+    "facewear:Shades||head:Pirate Hat": [
+      "2387"
+    ],
+    "facewear:Laser Eyes||mouth:Stunned": [
+      "4088",
+      "2575"
+    ],
+    "head:Cowboy Hat||mouth:Stunned": [
+      "3779",
+      "2632"
+    ],
+    "clothes:Vintage Dress||head:Twin Braids": [
+      "4193",
+      "3854",
+      "4184",
+      "4141",
+      "3187",
+      "2977"
+    ],
+    "base:Alien Waifu||head:Cap": [
+      "3860",
+      "3833"
+    ],
+    "clothes:Bepe Army||head:Vixen Waves": [
+      "4117"
+    ]
+  }
+}

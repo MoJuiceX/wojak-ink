@@ -1,0 +1,181 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "clothes:Ronin||head:Trump Wave": [
+      "113",
+      "2376",
+      "67"
+    ],
+    "clothes:Sports Jacket||head:Hip Hop Hat": [
+      "3157",
+      "3330",
+      "3575",
+      "114",
+      "1677",
+      "1706"
+    ],
+    "facewear:Cool Glasses||head:Ronin Helmet": [
+      "2866",
+      "3442",
+      "2311",
+      "953",
+      "876",
+      "2389",
+      "833",
+      "2281",
+      "827",
+      "368",
+      "1882"
+    ],
+    "facewear:Eye Patch||head:Viking Helmet": [
+      "395",
+      "2359",
+      "2967",
+      "1605",
+      "1938",
+      "397",
+      "1151"
+    ],
+    "face:Rekt||head:Pirate Hat": [
+      "2504",
+      "3116",
+      "2422",
+      "3230",
+      "1272",
+      "997",
+      "3585",
+      "1488",
+      "489",
+      "1374",
+      "3195",
+      "3218",
+      "1487",
+      "2566",
+      "1171",
+      "1819"
+    ],
+    "head:Super Wojak Hat||mouth:Vampire Teeth": [
+      "2678",
+      "568"
+    ],
+    "clothes:Drac||mouth:Gold Teeth": [
+      "618",
+      "2197",
+      "602",
+      "577"
+    ],
+    "face:Rekt||mouth:Vampire Teeth": [
+      "3767",
+      "3777",
+      "4042",
+      "2201",
+      "2202",
+      "1823",
+      "2025",
+      "597",
+      "599",
+      "929",
+      "2569",
+      "1270",
+      "2602",
+      "1482",
+      "2103",
+      "598",
+      "2313",
+      "596",
+      "1931",
+      "2637",
+      "1083",
+      "1172"
+    ],
+    "clothes:Tank Top||head:Pirate Hat": [
+      "727",
+      "3735",
+      "698"
+    ],
+    "clothes:Tee||face:Terminator": [
+      "3797",
+      "4008",
+      "801",
+      "798",
+      "802",
+      "797",
+      "800",
+      "799"
+    ],
+    "clothes:Ninja Turtle Fit||facewear:Cool Glasses": [
+      "4177",
+      "1013",
+      "2480",
+      "2284",
+      "977"
+    ],
+    "clothes:Bepe Army||face:NPC": [
+      "2562",
+      "1202",
+      "1204",
+      "1203",
+      "1206",
+      "1201",
+      "1200",
+      "2561"
+    ],
+    "clothes:Born to Ride||mouth:Neckbeard": [
+      "2603",
+      "1229",
+      "1314",
+      "1298",
+      "1246",
+      "1263",
+      "1297"
+    ],
+    "clothes:Born to Ride||facewear:Tyson Tattoo": [
+      "1238",
+      "2592",
+      "1239",
+      "1258"
+    ],
+    "facewear:Clown Nose||head:Beer Hat": [
+      "2408"
+    ],
+    "facewear:Wizard Glasses||head:Mermaid Waves": [
+      "2946"
+    ],
+    "base:Baddie||mouth:Joint": [
+      "3064",
+      "3186",
+      "3056",
+      "3173",
+      "3145",
+      "3033",
+      "3068",
+      "3153",
+      "3115",
+      "3175",
+      "3096",
+      "3015"
+    ],
+    "head:Ponytail||mouth:Pizza": [
+      "3080",
+      "3057"
+    ],
+    "head:Ponytail||mouth:Smile": [
+      "3082"
+    ],
+    "clothes:Prom Dress||head:Spikes": [
+      "3089"
+    ],
+    "facewear:3D Glasses||head:Piccolo Turban": [
+      "3723"
+    ],
+    "face:Classic||head:Piccolo Turban": [
+      "3729",
+      "3728",
+      "3730"
+    ],
+    "face:Rugged||mouth:Sexy Lip Bite": [
+      "3862"
+    ]
+  }
+}

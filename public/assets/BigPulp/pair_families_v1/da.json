@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "clothes:Straitjacket||facewear:Wizard Glasses": [
+      "41",
+      "48"
+    ],
+    "facewear:Shades||mouth:Stache": [
+      "1514",
+      "1748",
+      "2138",
+      "415",
+      "89"
+    ],
+    "facewear:Cyber Shades||mouth:Numb": [
+      "3490",
+      "3763",
+      "3562",
+      "3306",
+      "2171",
+      "4022",
+      "2625",
+      "3277",
+      "359",
+      "2355",
+      "256",
+      "684",
+      "155",
+      "628",
+      "2213",
+      "1892",
+      "117",
+      "1901"
+    ],
+    "clothes:Gopher Suit||facewear:Cool Glasses": [
+      "2249",
+      "255",
+      "2817",
+      "240"
+    ],
+    "clothes:Proof of Prayer||facewear:Matrix Lenses": [
+      "2119",
+      "2874",
+      "303",
+      "2116",
+      "285"
+    ],
+    "clothes:Viking Armor||facewear:Cool Glasses": [
+      "3442",
+      "2174",
+      "426",
+      "434",
+      "407"
+    ],
+    "clothes:Firefighter Uniform||facewear:Laser Eyes": [
+      "3936",
+      "3658",
+      "3803",
+      "2251",
+      "530",
+      "2256",
+      "511"
+    ],
+    "facewear:Cyber Shades||mouth:Pipe": [
+      "2914",
+      "3601",
+      "3661",
+      "720",
+      "2291"
+    ],
+    "facewear:Ninja Turtle Mask||mouth:Neckbeard": [
+      "3807",
+      "3953",
+      "2664",
+      "1674",
+      "1908",
+      "889"
+    ],
+    "facewear:Cool Glasses||mouth:Bandana Mask": [
+      "1013",
+      "896"
+    ],
+    "base:Soyjak||head:Military Beret": [
+      "2201",
+      "2217",
+      "2264",
+      "2287",
+      "2025",
+      "2181",
+      "2432",
+      "2019",
+      "2088",
+      "2224",
+      "2474",
+      "2423",
+      "2150",
+      "2603",
+      "2191",
+      "2361",
+      "2082",
+      "2734",
+      "2574",
+      "2328",
+      "2627",
+      "2176",
+      "2250",
+      "2164",
+      "2518",
+      "2537",
+      "2382",
+      "2303"
+    ],
+    "face:Rugged||head:Headphones": [
+      "3503",
+      "3570",
+      "3395"
+    ]
+  }
+}

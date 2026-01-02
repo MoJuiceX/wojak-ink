@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "facewear:No Face Wear||mouth:Vampire Teeth": [
+      "3682",
+      "2187",
+      "585",
+      "2189",
+      "2203",
+      "877",
+      "596",
+      "110",
+      "2012",
+      "1948",
+      "1982",
+      "1287",
+      "564",
+      "615",
+      "2198",
+      "4041",
+      "232",
+      "1523",
+      "1123",
+      "1732",
+      "1750",
+      "2637",
+      "1083",
+      "567",
+      "590",
+      "1501",
+      "1189",
+      "561",
+      "2130",
+      "2188",
+      "1172",
+      "1408",
+      "247",
+      "2000",
+      "290",
+      "570"
+    ],
+    "head:2Pac Bandana||mouth:Joint": [
+      "979",
+      "643",
+      "121",
+      "1440",
+      "1940"
+    ],
+    "facewear:Matrix Lenses||head:Halo": [
+      "3785",
+      "4051",
+      "362"
+    ],
+    "facewear:Shades||head:Field Cap": [
+      "3319",
+      "678",
+      "1295",
+      "2475",
+      "1237",
+      "1802"
+    ],
+    "facewear:3D Glasses||head:Field Cap": [
+      "787",
+      "2304",
+      "3560",
+      "1173",
+      "2553",
+      "1129"
+    ],
+    "facewear:Clown Nose||head:Ronin Helmet": [
+      "2602",
+      "829",
+      "2279"
+    ],
+    "clothes:Born to Ride||head:Beer Hat": [
+      "3242",
+      "2592",
+      "1314",
+      "3481",
+      "1256",
+      "1224"
+    ],
+    "clothes:Sports Jacket||facewear:Night Vision": [
+      "2517",
+      "3572",
+      "3312",
+      "2943",
+      "2498",
+      "1709",
+      "1655",
+      "1673"
+    ],
+    "facewear:VR Headset||head:Spikes": [
+      "1660"
+    ],
+    "facewear:Night Vision||head:Propeller Hat": [
+      "3572",
+      "2623",
+      "1839",
+      "2587",
+      "1709"
+    ],
+    "facewear:Fake It Mask||mouth:Numb": [
+      "2715"
+    ],
+    "clothes:Denim Vest||facewear:No Face Wear": [
+      "4196",
+      "2789",
+      "3832",
+      "4197",
+      "4156",
+      "3039",
+      "3040",
+      "3869",
+      "4155",
+      "2801",
+      "2797",
+      "2800",
+      "3043",
+      "2803",
+      "3837",
+      "3838",
+      "2790",
+      "2799",
+      "3032",
+      "2802",
+      "2794",
+      "3036",
+      "2798",
+      "2793",
+      "3031",
+      "3035"
+    ],
+    "clothes:Pepe Suit||mouth:Sexy Lip Bite": [
+      "3076"
+    ],
+    "base:Papa Tang||head:Headphones": [
+      "3383",
+      "3395",
+      "3381"
+    ],
+    "base:Monkey Zoo||head:SWAT Helmet": [
+      "3495",
+      "3510",
+      "3561",
+      "3620",
+      "3504"
+    ],
+    "facewear:Fake It Mask||mouth:Pipe": [
+      "3508"
+    ],
+    "head:2Pac Bandana||mouth:Pizza": [
+      "3521",
+      "3711"
+    ],
+    "base:Alien Soyjak||clothes:Pepe Suit": [
+      "3754"
+    ]
+  }
+}

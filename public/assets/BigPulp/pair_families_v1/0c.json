@@ -1,0 +1,200 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "head:Field Cap||mouth:Stache": [
+      "3663",
+      "2275",
+      "1136",
+      "1922",
+      "25",
+      "505",
+      "1153"
+    ],
+    "face:Bleeding Bags||facewear:Wizard Glasses": [
+      "3890",
+      "48",
+      "2375",
+      "106",
+      "2520",
+      "2229",
+      "421",
+      "1843",
+      "1849",
+      "252",
+      "1615",
+      "1389",
+      "2109"
+    ],
+    "face:Terminator||mouth:Gold Teeth": [
+      "3960",
+      "4024",
+      "4072",
+      "2959",
+      "3117",
+      "3136",
+      "3606",
+      "3964",
+      "2888",
+      "3258",
+      "3715",
+      "3541",
+      "3478",
+      "2763",
+      "2040",
+      "952",
+      "3058",
+      "1120",
+      "3207",
+      "3030",
+      "3293",
+      "503",
+      "3402",
+      "618",
+      "2125",
+      "951",
+      "1640",
+      "3791",
+      "50",
+      "2680",
+      "313",
+      "2643",
+      "1213",
+      "742",
+      "677",
+      "1636",
+      "274",
+      "2321",
+      "1311"
+    ],
+    "facewear:3D Glasses||head:Hip Hop Hat": [
+      "3171",
+      "101"
+    ],
+    "face:Bleeding Bags||mouth:Cig": [
+      "775",
+      "3506",
+      "3534",
+      "3330",
+      "106",
+      "3300",
+      "3286",
+      "3205",
+      "3977",
+      "3269",
+      "3297",
+      "3434",
+      "251",
+      "3522",
+      "3259",
+      "1737",
+      "3524",
+      "3641",
+      "3432",
+      "2044",
+      "170",
+      "3337",
+      "3283",
+      "1211",
+      "3613",
+      "140",
+      "3378",
+      "379",
+      "1018",
+      "1618",
+      "2615",
+      "1395",
+      "1958",
+      "2645"
+    ],
+    "clothes:Gopher Suit||facewear:Wizard Glasses": [
+      "2229",
+      "252",
+      "2818",
+      "267"
+    ],
+    "clothes:Proof of Prayer||facewear:Eye Patch": [
+      "2126",
+      "302",
+      "282"
+    ],
+    "facewear:Night Vision||head:Cap": [
+      "947",
+      "928",
+      "522",
+      "1088",
+      "767",
+      "1156"
+    ],
+    "facewear:Cool Glasses||head:Propeller Hat": [
+      "2543",
+      "574"
+    ],
+    "facewear:Clown Nose||mouth:Gold Teeth": [
+      "3892",
+      "2402",
+      "1285",
+      "2197",
+      "2125",
+      "1187",
+      "1806",
+      "2237"
+    ],
+    "clothes:Leather Jacket||mouth:Copium Mask": [
+      "1392",
+      "1358",
+      "3684",
+      "1375",
+      "1324",
+      "1341"
+    ],
+    "facewear:Eye Patch||head:Wizard Hat": [
+      "1637",
+      "3465",
+      "1740",
+      "1998"
+    ],
+    "head:SWAT Helmet||mouth:Glossed Lips": [
+      "3126",
+      "3012",
+      "3069",
+      "2755"
+    ],
+    "clothes:Prom Dress||facewear:Laser Eyes": [
+      "2868"
+    ],
+    "clothes:Roman Drip||head:Power Bob": [
+      "2877",
+      "2881",
+      "3111",
+      "2888"
+    ],
+    "clothes:Proof of Prayer||head:Ponytail": [
+      "3098"
+    ],
+    "facewear:VR Headset||head:Clown": [
+      "3435"
+    ],
+    "base:Monkey Zoo||facewear:Eye Patch": [
+      "3521",
+      "3472",
+      "3465",
+      "3549"
+    ],
+    "head:Standard Cut||mouth:Neckbeard": [
+      "3762"
+    ],
+    "base:Alien Waifu||head:Construction Helmet": [
+      "3837"
+    ],
+    "base:Bepe Soyjak||head:Hip Hop Hat": [
+      "4035"
+    ],
+    "head:Propeller Hat||mouth:Glossed Lips": [
+      "4144",
+      "4132",
+      "4175",
+      "4187"
+    ]
+  }
+}

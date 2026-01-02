@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "facewear:No Face Wear||head:Cowboy Hat": [
+      "3824",
+      "3862",
+      "3865",
+      "3838",
+      "2799",
+      "4039",
+      "3066",
+      "3557",
+      "3612",
+      "2632",
+      "3128",
+      "44",
+      "3421",
+      "2427",
+      "3399",
+      "1026",
+      "2703",
+      "1477",
+      "1977",
+      "1291",
+      "1669",
+      "2273"
+    ],
+    "facewear:3D Glasses||head:Fedora": [
+      "2861",
+      "3006",
+      "804",
+      "847",
+      "2665",
+      "2996",
+      "1951",
+      "88"
+    ],
+    "clothes:Firefighter Uniform||facewear:Clown Nose": [
+      "559",
+      "534"
+    ],
+    "facewear:3D Glasses||head:Construction Helmet": [
+      "3253",
+      "2327",
+      "649",
+      "1874"
+    ],
+    "facewear:Laser Eyes||mouth:Bandana Mask": [
+      "3803",
+      "2379",
+      "2412",
+      "1154"
+    ],
+    "clothes:Goose Suit||facewear:Wizard Glasses": [
+      "4055",
+      "2067",
+      "2070"
+    ],
+    "head:Soy Hair||mouth:Numb": [
+      "2350",
+      "2195"
+    ],
+    "base:Baddie||facewear:MOG Glasses": [
+      "3140",
+      "3098",
+      "3034",
+      "3185",
+      "3021",
+      "3056",
+      "3103",
+      "3162",
+      "3067",
+      "3190"
+    ],
+    "face:Rekt||head:Piccolo Turban": [
+      "3705",
+      "3703",
+      "3704"
+    ]
+  }
+}

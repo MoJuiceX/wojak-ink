@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "clothes:God's Robe||mouth:Vampire Teeth": [
+      "2025",
+      "326"
+    ],
+    "face:Rekt||head:Cowboy Hat": [
+      "2161",
+      "2452",
+      "2368",
+      "2799",
+      "783",
+      "339",
+      "718",
+      "376",
+      "1369",
+      "923",
+      "533",
+      "1586",
+      "1477"
+    ],
+    "head:Cowboy Hat||mouth:Cig": [
+      "2825",
+      "339",
+      "3163",
+      "718",
+      "3219",
+      "958",
+      "1419",
+      "1919",
+      "1042"
+    ],
+    "clothes:Viking Armor||head:Beer Hat": [
+      "427",
+      "2963"
+    ],
+    "head:Comrade Hat||mouth:Cig": [
+      "3516",
+      "445",
+      "752",
+      "925"
+    ],
+    "facewear:MOG Glasses||head:SWAT Helmet": [
+      "3495",
+      "4083",
+      "3675",
+      "3260",
+      "2313",
+      "491",
+      "498",
+      "1206",
+      "2472",
+      "1377",
+      "2560",
+      "1062"
+    ],
+    "clothes:Tank Top||facewear:Eye Patch": [
+      "739",
+      "703"
+    ],
+    "clothes:Super Saiyan Uniform||mouth:Gold Teeth": [
+      "3363",
+      "3606",
+      "3354",
+      "952",
+      "949",
+      "884",
+      "2693",
+      "951",
+      "899",
+      "2731",
+      "2698",
+      "919"
+    ],
+    "facewear:Fake It Mask||head:Propeller Hat": [
+      "998"
+    ],
+    "clothes:Chia Farmer||mouth:Bubble Gum": [
+      "3686",
+      "3023",
+      "2778",
+      "1476",
+      "2674",
+      "1452",
+      "2652",
+      "1486",
+      "3252",
+      "1435"
+    ],
+    "clothes:Suit||head:Propeller Hat": [
+      "2222",
+      "3338",
+      "3586",
+      "1923",
+      "1958",
+      "1901",
+      "1930",
+      "1870"
+    ],
+    "clothes:Suit||facewear:Fake It Mask": [
+      "1975",
+      "2223"
+    ],
+    "face:Bleeding Bags||head:Soy Hair": [
+      "2375"
+    ],
+    "head:No Headgear||mouth:Sexy Lip Bite": [
+      "2814",
+      "2761",
+      "2848",
+      "2819",
+      "2875",
+      "3009"
+    ],
+    "head:Cowboy Hat||mouth:Glossed Lips": [
+      "2960"
+    ],
+    "clothes:School Uniform||head:Fedora": [
+      "3129"
+    ],
+    "base:Bepe Wojak||clothes:Drac": [
+      "3927",
+      "3926",
+      "3928",
+      "3925"
+    ]
+  }
+}

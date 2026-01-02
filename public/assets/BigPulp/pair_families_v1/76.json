@@ -1,0 +1,194 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "facewear:Cyber Shades||head:Cap": [
+      "27",
+      "2417"
+    ],
+    "face:NPC||head:SWAT Helmet": [
+      "733",
+      "1114",
+      "77",
+      "1303",
+      "1206",
+      "472",
+      "1743"
+    ],
+    "clothes:Sonic Suit||facewear:Cool Glasses": [
+      "230"
+    ],
+    "face:NPC||head:Cap": [
+      "3134",
+      "1966",
+      "656",
+      "947",
+      "333",
+      "1622"
+    ],
+    "head:Crown||mouth:Smile": [
+      "3940",
+      "560",
+      "1119",
+      "1094",
+      "1405",
+      "1220",
+      "451",
+      "348",
+      "1655"
+    ],
+    "facewear:Aviators||head:Comrade Hat": [
+      "655",
+      "2539",
+      "674",
+      "433"
+    ],
+    "head:Crown||mouth:Teeth": [
+      "2984",
+      "3451",
+      "3414",
+      "3295",
+      "437",
+      "1813",
+      "1389",
+      "3423",
+      "3681",
+      "755",
+      "784",
+      "1563"
+    ],
+    "clothes:Firefighter Uniform||head:SWAT Helmet": [
+      "529"
+    ],
+    "head:Firefighter Helmet||mouth:Screaming": [
+      "3517",
+      "722",
+      "1403",
+      "555",
+      "549",
+      "693",
+      "1653"
+    ],
+    "facewear:Night Vision||head:Comrade Hat": [
+      "4077",
+      "3516",
+      "744",
+      "690",
+      "1475"
+    ],
+    "face:Terminator||facewear:Ninja Turtle Mask": [
+      "3635",
+      "3553",
+      "745"
+    ],
+    "clothes:Tee||mouth:Bandana Mask": [
+      "750"
+    ],
+    "head:Centurion||mouth:Neckbeard": [
+      "1117",
+      "1090"
+    ],
+    "clothes:Born to Ride||facewear:Matrix Lenses": [
+      "2772",
+      "3919",
+      "3239",
+      "3012",
+      "1303",
+      "2768",
+      "2591",
+      "1279",
+      "1263",
+      "1232",
+      "1252"
+    ],
+    "head:Tin Foil Hat||mouth:Pizza": [
+      "3542",
+      "3405",
+      "1299",
+      "1744",
+      "2882",
+      "1494",
+      "1351",
+      "1994"
+    ],
+    "head:Military Beret||mouth:Stunned": [
+      "3741",
+      "2217",
+      "2287",
+      "4045",
+      "2382"
+    ],
+    "clothes:Sports Jacket||mouth:Stunned": [
+      "2278",
+      "2493",
+      "4089"
+    ],
+    "head:Tin Foil Hat||mouth:Teeth": [
+      "3991",
+      "3150",
+      "3766",
+      "3736",
+      "2738",
+      "3270"
+    ],
+    "head:Tin Foil Hat||mouth:Smile": [
+      "3983",
+      "2753"
+    ],
+    "clothes:Pickle Suit||mouth:Glossed Lips": [
+      "2851"
+    ],
+    "clothes:School Uniform||facewear:Ninja Turtle Mask": [
+      "4146",
+      "3132"
+    ],
+    "head:Devil Horns||mouth:Glossed Lips": [
+      "3138"
+    ],
+    "facewear:Aviators||head:Construction Helmet": [
+      "3412",
+      "3145"
+    ],
+    "base:Monkey Zoo||clothes:Suit": [
+      "3589",
+      "3583",
+      "3591",
+      "3587",
+      "3592",
+      "3593",
+      "3579",
+      "3582",
+      "3585",
+      "3577",
+      "3590",
+      "3588",
+      "3584",
+      "3578",
+      "3586",
+      "3580",
+      "3581"
+    ],
+    "clothes:Piccolo Uniform||head:No Headgear": [
+      "3719",
+      "3720",
+      "3727"
+    ],
+    "base:Alien Soyjak||clothes:Tank Top": [
+      "3796",
+      "3765",
+      "3735",
+      "3821"
+    ],
+    "base:Alien Waifu||clothes:Leather Jacket": [
+      "3862",
+      "3863",
+      "3839"
+    ],
+    "base:Bepe Soyjak||clothes:Tank Top": [
+      "4101",
+      "4103",
+      "4102",
+      "4104"
+    ]
+  }
+}

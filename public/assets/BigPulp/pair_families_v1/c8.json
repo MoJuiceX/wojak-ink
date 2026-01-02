@@ -1,0 +1,194 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "clothes:Wizard Drip||facewear:Wizard Glasses": [
+      "3890",
+      "2540",
+      "3739",
+      "4116",
+      "2545",
+      "106",
+      "2520",
+      "1843",
+      "1849",
+      "9",
+      "1831",
+      "1804",
+      "1824",
+      "1858",
+      "1864",
+      "1773",
+      "1815",
+      "1830",
+      "1854",
+      "1812",
+      "1780",
+      "1766",
+      "1869",
+      "1796",
+      "1761",
+      "2521",
+      "1763",
+      "1868",
+      "1793"
+    ],
+    "clothes:Straitjacket||facewear:Cyber Shades": [
+      "4093",
+      "385",
+      "17",
+      "359"
+    ],
+    "clothes:Tee||mouth:Numb": [
+      "4008",
+      "2448",
+      "2449",
+      "786",
+      "777",
+      "802",
+      "778",
+      "748",
+      "76",
+      "2447",
+      "2437",
+      "792",
+      "2454",
+      "785",
+      "791",
+      "2435",
+      "808",
+      "749",
+      "803",
+      "746",
+      "747"
+    ],
+    "clothes:Gopher Suit||facewear:Tyson Tattoo": [
+      "2244",
+      "250",
+      "2230"
+    ],
+    "clothes:Straitjacket||facewear:VR Headset": [
+      "391"
+    ],
+    "face:Rekt||head:Fedora": [
+      "3692",
+      "3955",
+      "3771",
+      "2366",
+      "653",
+      "847",
+      "598",
+      "2312",
+      "2315",
+      "2735",
+      "436",
+      "1814",
+      "1701",
+      "1480",
+      "1595"
+    ],
+    "facewear:Shades||head:Hip Hop Hat": [
+      "2911",
+      "2451",
+      "599",
+      "2778",
+      "1049",
+      "1568"
+    ],
+    "clothes:Bathrobe||facewear:Cool Glasses": [
+      "633"
+    ],
+    "facewear:Ninja Turtle Mask||head:2Pac Bandana": [
+      "709",
+      "1440"
+    ],
+    "head:Clown||mouth:Bubble Gum": [
+      "2985",
+      "3686",
+      "2923",
+      "3023",
+      "3123",
+      "2764",
+      "2433",
+      "714",
+      "2290",
+      "751"
+    ],
+    "clothes:Tee||mouth:Pipe": [
+      "3812",
+      "2461",
+      "763"
+    ],
+    "facewear:Laser Eyes||head:2Pac Bandana": [
+      "775"
+    ],
+    "facewear:Fake It Mask||mouth:Neckbeard": [
+      "980"
+    ],
+    "clothes:Bepe Army||head:Fedora": [
+      "1193",
+      "4166",
+      "1135"
+    ],
+    "clothes:Chia Farmer||head:Super Wojak Hat": [
+      "2678",
+      "3923",
+      "1521",
+      "1492",
+      "2655",
+      "1464",
+      "1434",
+      "1522"
+    ],
+    "clothes:Wizard Drip||head:Cowboy Hat": [
+      "1804",
+      "1807"
+    ],
+    "clothes:Suit||mouth:Stunned": [
+      "3793",
+      "2216",
+      "3732"
+    ],
+    "clothes:Ronin||head:Centurion": [
+      "2392"
+    ],
+    "face:Rugged||head:Tiara": [
+      "2895"
+    ],
+    "clothes:School Uniform||head:Spikes": [
+      "2917"
+    ],
+    "head:Construction Helmet||mouth:Glossed Lips": [
+      "3866",
+      "3160",
+      "3031",
+      "2971",
+      "3181",
+      "3161"
+    ],
+    "base:Alien Wojak||face:Rugged": [
+      "3723",
+      "3722",
+      "3721",
+      "3724",
+      "3726",
+      "3725"
+    ],
+    "clothes:Piccolo Uniform||mouth:Screaming": [
+      "3729",
+      "3824",
+      "3825"
+    ],
+    "base:Bepe Wojak||head:Halo": [
+      "3937",
+      "3938"
+    ],
+    "base:Bepe Waifu||head:Crown": [
+      "4135",
+      "4126"
+    ],
+    "clothes:Denim Vest||facewear:Aviators": [
+      "4154"
+    ]
+  }
+}

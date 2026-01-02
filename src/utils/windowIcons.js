@@ -15,7 +15,7 @@ const windowIconMap = {
   'tanggang': 'application_hourglass-0', // TangGang window uses explicit ID
   'window-wojak-generator': 'paint_file-0',
   'wojak-generator': 'paint_file-0',
-  'rarity-explorer': 'chart1-0',
+  'rarity-explorer': 'icons1/orange-3d-icon',
   'window-notify-me': 'msg_information-0',
   'window-admin-panel': 'settings_gear-0',
   'pinball-window': 'pinball_ball-0',
@@ -37,7 +37,7 @@ const titleIconMap = {
   'MARKETPLACE': 'briefcase-0',
   'TangGang': 'application_hourglass-0',
   'WOJAK_GENERATOR.EXE': 'paint_file-0',
-  'RARITY EXPLORER.EXE': 'chart1-0',
+  'RARITY EXPLORER.EXE': 'icons1/orange-3d-icon',
   'NOTIFY_ME': 'msg_information-0',
   'ADMIN PANEL': 'settings_gear-0',
   'Paint': 'paint_file-0',
@@ -87,7 +87,12 @@ export function getWindowIcon(windowId, title) {
   
   // Special case: Treasury window uses tresury_Icon.png
   if (windowId === 'treasury-window' || title === 'TREASURY' || title === 'TREASURY.EXE') {
-    return '/icon/tresury_Icon.png'
+    return '/icon/icons1/tresury_Icon.png'
+  }
+  
+  // Special case: Rarity Explorer uses orange-3d-icon.png
+  if (windowId === 'rarity-explorer' || title === 'RARITY EXPLORER.EXE') {
+    return '/icon/icons1/orange-3d-icon.png'
   }
   
   // Try window ID first

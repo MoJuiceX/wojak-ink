@@ -5,18 +5,25 @@ import BigPulpWindow from './BigPulpWindow'
 import BigPulpIntelligenceWindow from './BigPulpIntelligenceWindow'
 
 export default function RarityExplorerWindow({ onClose }) {
-  // Load all three Big Pulp JSON files
+  // Load all_nft_sentences.json and map variants to A/B/C structure
   const [bigPulpData, setBigPulpData] = useState({ A: {}, B: {}, C: {} })
   const [bigPulpLoaded, setBigPulpLoaded] = useState(false)
 
   useEffect(() => {
-    Promise.all([
-      fetch('/data/bigPulpA.json').then(r => r.json()),
-      fetch('/data/bigPulpB.json').then(r => r.json()),
-      fetch('/data/bigPulpC.json').then(r => r.json()),
-    ])
-      .then(([a, b, c]) => {
-        setBigPulpData({ A: a, B: b, C: c })
+    fetch('/assets/BigPulp/all_nft_sentences.json')
+      .then(r => r.json())
+      .then(sentencesData => {
+        // Transform from { "1234": { variants: [...] } } to { A: { "1234": "..." }, B: { "1234": "..." }, C: { "1234": "..." } }
+        const transformed = { A: {}, B: {}, C: {} }
+        for (const [nftId, data] of Object.entries(sentencesData)) {
+          if (data?.variants && Array.isArray(data.variants)) {
+            // Map variants[0] to A, variants[1] to B, variants[2] to C
+            if (data.variants[0]) transformed.A[nftId] = data.variants[0]
+            if (data.variants[1]) transformed.B[nftId] = data.variants[1]
+            if (data.variants[2]) transformed.C[nftId] = data.variants[2]
+          }
+        }
+        setBigPulpData(transformed)
         setBigPulpLoaded(true)
       })
       .catch(err => {
@@ -200,14 +207,10 @@ export default function RarityExplorerWindow({ onClose }) {
 
   // Check if commentary exists for a given NFT ID
   const hasCommentary = (nftId) => {
-    if (!nftId || !bigPulpLoaded) return false
-    const nftIdStr = String(nftId)
-    // Check if any version (A, B, or C) has commentary for this NFT
-    return !!(
-      (bigPulpData.A && (bigPulpData.A[nftIdStr] || bigPulpData.A[String(parseInt(nftIdStr))])) ||
-      (bigPulpData.B && (bigPulpData.B[nftIdStr] || bigPulpData.B[String(parseInt(nftIdStr))])) ||
-      (bigPulpData.C && (bigPulpData.C[nftIdStr] || bigPulpData.C[String(parseInt(nftIdStr))]))
-    )
+    if (!nftId) return false
+    const numericId = parseInt(String(nftId), 10)
+    // All NFTs 1-4200 now have sentences in all_nft_sentences.json
+    return !isNaN(numericId) && numericId >= 1 && numericId <= 4200
   }
 
   return (

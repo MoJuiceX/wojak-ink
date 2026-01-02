@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "face:NPC||facewear:Aviators": [
+      "2310",
+      "2539",
+      "1202",
+      "474",
+      "794",
+      "79",
+      "1396",
+      "1623"
+    ],
+    "facewear:Ninja Turtle Mask||head:Pirate Hat": [
+      "727",
+      "365",
+      "3322",
+      "997",
+      "968"
+    ],
+    "facewear:Matrix Lenses||head:SWAT Helmet": [
+      "3012",
+      "1303",
+      "1263",
+      "1232",
+      "411"
+    ],
+    "clothes:Bathrobe||mouth:Teeth": [
+      "2758",
+      "2751",
+      "3451",
+      "3004",
+      "670",
+      "647",
+      "665",
+      "2080",
+      "636",
+      "646"
+    ],
+    "clothes:Bathrobe||mouth:Smile": [
+      "2753",
+      "3005",
+      "638",
+      "678",
+      "637",
+      "645"
+    ],
+    "head:Crown||mouth:Stache": [
+      "909"
+    ],
+    "clothes:Chia Farmer||head:Super Saiyan": [
+      "1433",
+      "1469",
+      "1510",
+      "1463",
+      "1462",
+      "1495",
+      "1511"
+    ],
+    "clothes:Bepe Suit||facewear:Night Vision": [
+      "2761"
+    ],
+    "clothes:Denim Vest||head:Tin Foil Hat": [
+      "2797",
+      "3035"
+    ],
+    "head:Hip Hop Hat||mouth:Sexy Lip Bite": [
+      "3179"
+    ],
+    "base:Alien Baddie||mouth:Cohiba": [
+      "3899"
+    ],
+    "base:Bepe Wojak||facewear:VR Headset": [
+      "3931",
+      "3958",
+      "4018"
+    ],
+    "clothes:Firefighter Uniform||mouth:Stunned": [
+      "4049",
+      "4047"
+    ],
+    "base:Bepe Baddie||head:Propeller Hat": [
+      "4175",
+      "4187"
+    ]
+  }
+}

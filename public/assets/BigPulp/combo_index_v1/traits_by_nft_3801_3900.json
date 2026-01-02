@@ -1,0 +1,1309 @@
+{
+  "schema_version": "1.0",
+  "range": [
+    3801,
+    3900
+  ],
+  "nfts": {
+    "3801": {
+      "rank": 2099,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3801.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Classic",
+        "mouth": "Pipe",
+        "facewear": "No Face Wear",
+        "head": "Crown",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "3802": {
+      "rank": 842,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3802.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Classic",
+        "mouth": "Copium Mask",
+        "facewear": "No Face Wear",
+        "head": "Crown",
+        "clothes": "Drac",
+        "background": "Moms Basement"
+      }
+    },
+    "3803": {
+      "rank": 241,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3803.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Classic",
+        "mouth": "Bandana Mask",
+        "facewear": "Laser Eyes",
+        "head": "Firefighter Helmet",
+        "clothes": "Firefighter Uniform",
+        "background": "Moon"
+      }
+    },
+    "3804": {
+      "rank": 892,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3804.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "Halo",
+        "clothes": "God's Robe",
+        "background": "Heaven"
+      }
+    },
+    "3805": {
+      "rank": 1280,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3805.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "MOG Glasses",
+        "head": "No Headgear",
+        "clothes": "Goose Suit",
+        "background": "Nesting Grounds"
+      }
+    },
+    "3806": {
+      "rank": 3281,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3806.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "Hell"
+      }
+    },
+    "3807": {
+      "rank": 641,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3807.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Fedora",
+        "clothes": "Leather Jacket",
+        "background": "Moon"
+      }
+    },
+    "3808": {
+      "rank": 290,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3808.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Classic",
+        "mouth": "Hannibal Mask",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Field Cap",
+        "clothes": "Ninja Turtle Fit",
+        "background": "Moon"
+      }
+    },
+    "3809": {
+      "rank": 838,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3809.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Shades",
+        "head": "Firefighter Helmet",
+        "clothes": "Topless",
+        "background": "Nesting Grounds"
+      }
+    },
+    "3810": {
+      "rank": 742,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3810.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Shades",
+        "head": "No Headgear",
+        "clothes": "Pepe Suit",
+        "background": "Nesting Grounds"
+      }
+    },
+    "3811": {
+      "rank": 560,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3811.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Alpha Shades",
+        "head": "Tin Foil Hat",
+        "clothes": "Tank Top",
+        "background": "Moms Basement"
+      }
+    },
+    "3812": {
+      "rank": 417,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3812.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Classic",
+        "mouth": "Pipe",
+        "facewear": "Aviators",
+        "head": "Trump Wave",
+        "clothes": "Tee",
+        "background": "Moon"
+      }
+    },
+    "3813": {
+      "rank": 379,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3813.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Classic",
+        "mouth": "Copium Mask",
+        "facewear": "Cyber Shades",
+        "head": "Viking Helmet",
+        "clothes": "Viking Armor",
+        "background": "Moon"
+      }
+    },
+    "3814": {
+      "rank": 1126,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3814.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Classic",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "Viking Helmet",
+        "clothes": "Viking Armor",
+        "background": "Pirate Ship"
+      }
+    },
+    "3815": {
+      "rank": 278,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3815.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "Eye Patch",
+        "head": "Military Beret",
+        "clothes": "El Presidente",
+        "background": "Moon"
+      }
+    },
+    "3816": {
+      "rank": 1212,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3816.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Eye Patch",
+        "head": "No Headgear",
+        "clothes": "El Presidente",
+        "background": "Moon"
+      }
+    },
+    "3817": {
+      "rank": 1659,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3817.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "El Presidente",
+        "background": "Moon"
+      }
+    },
+    "3818": {
+      "rank": 1518,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3818.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Field Cap",
+        "clothes": "Bepe Army",
+        "background": "Moon"
+      }
+    },
+    "3819": {
+      "rank": 1229,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3819.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Military Beret",
+        "clothes": "Born to Ride",
+        "background": "One Market"
+      }
+    },
+    "3820": {
+      "rank": 1535,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3820.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Super Saiyan",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Matrix"
+      }
+    },
+    "3821": {
+      "rank": 3717,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3821.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Tank Top",
+        "background": "Moon"
+      }
+    },
+    "3822": {
+      "rank": 3183,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3822.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Tee",
+        "background": "Silicon Data Center"
+      }
+    },
+    "3823": {
+      "rank": 1798,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3823.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "No Face Wear",
+        "head": "Construction Helmet",
+        "clothes": "Wizard Drip",
+        "background": "Silicon Data Center"
+      }
+    },
+    "3824": {
+      "rank": 81,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3824.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Cowboy Hat",
+        "clothes": "Piccolo Uniform",
+        "background": "One Market"
+      }
+    },
+    "3825": {
+      "rank": 178,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3825.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Crown",
+        "clothes": "Piccolo Uniform",
+        "background": "Hell"
+      }
+    },
+    "3826": {
+      "rank": 2059,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3826.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Ronin",
+        "background": "Chia Farm"
+      }
+    },
+    "3827": {
+      "rank": 989,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3827.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Cap",
+        "clothes": "SWAT Gear",
+        "background": "Bepe Barracks"
+      }
+    },
+    "3828": {
+      "rank": 2212,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3828.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Roman Drip",
+        "background": "Heaven"
+      }
+    },
+    "3829": {
+      "rank": 2591,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3829.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Suit",
+        "background": "Hell"
+      }
+    },
+    "3830": {
+      "rank": 934,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3830.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Trump Wave",
+        "clothes": "Suit",
+        "background": "Hell"
+      }
+    },
+    "3831": {
+      "rank": 341,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3831.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Beanie",
+        "clothes": "Bathrobe",
+        "background": "Nesting Grounds"
+      }
+    },
+    "3832": {
+      "rank": 166,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3832.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Classic",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "Beer Hat",
+        "clothes": "Denim Vest",
+        "background": "One Market"
+      }
+    },
+    "3833": {
+      "rank": 1558,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3833.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "Cap",
+        "clothes": "Born to Ride",
+        "background": "Moon"
+      }
+    },
+    "3834": {
+      "rank": 2891,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3834.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Chia Farmer",
+        "background": "Moon"
+      }
+    },
+    "3835": {
+      "rank": 74,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3835.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Denim Vest",
+        "background": "Moms Basement"
+      }
+    },
+    "3836": {
+      "rank": 425,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3836.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "No Face Wear",
+        "head": "Comrade Hat",
+        "clothes": "God's Robe",
+        "background": "Heaven"
+      }
+    },
+    "3837": {
+      "rank": 711,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3837.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Construction Helmet",
+        "clothes": "Denim Vest",
+        "background": "Hell"
+      }
+    },
+    "3838": {
+      "rank": 721,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3838.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Cowboy Hat",
+        "clothes": "Denim Vest",
+        "background": "Hell"
+      }
+    },
+    "3839": {
+      "rank": 1498,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3839.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "No Face Wear",
+        "head": "Crown",
+        "clothes": "Leather Jacket",
+        "background": "Matrix"
+      }
+    },
+    "3840": {
+      "rank": 14,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3840.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Tiara",
+        "clothes": "Ninja Turtle Fit",
+        "background": "Matrix"
+      }
+    },
+    "3841": {
+      "rank": 33,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3841.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "Cyber Shades",
+        "head": "Fedora",
+        "clothes": "Vintage Dress",
+        "background": "Moon"
+      }
+    },
+    "3842": {
+      "rank": 50,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3842.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "MOG Glasses",
+        "head": "Mermaid Waves",
+        "clothes": "Prom Dress",
+        "background": "Moon"
+      }
+    },
+    "3843": {
+      "rank": 25,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3843.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Aviators",
+        "head": "Mermaid Waves",
+        "clothes": "Prom Dress",
+        "background": "Moon"
+      }
+    },
+    "3844": {
+      "rank": 100,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3844.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Classic",
+        "mouth": "Copium Mask",
+        "facewear": "3D Glasses",
+        "head": "Military Beret",
+        "clothes": "Sports Bra",
+        "background": "Moon"
+      }
+    },
+    "3845": {
+      "rank": 287,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3845.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Halo",
+        "clothes": "Sports Bra",
+        "background": "Heaven"
+      }
+    },
+    "3846": {
+      "rank": 161,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3846.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Night Vision",
+        "head": "No Headgear",
+        "clothes": "Sports Bra",
+        "background": "Moms Basement"
+      }
+    },
+    "3847": {
+      "rank": 443,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3847.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Mermaid Waves",
+        "clothes": "SWAT Gear",
+        "background": "Hell"
+      }
+    },
+    "3848": {
+      "rank": 659,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3848.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Power Bob",
+        "clothes": "SWAT Gear",
+        "background": "Hell"
+      }
+    },
+    "3849": {
+      "rank": 84,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3849.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Power Bob",
+        "clothes": "School Uniform",
+        "background": "Matrix"
+      }
+    },
+    "3850": {
+      "rank": 343,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3850.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "Cyber Shades",
+        "head": "Spikes",
+        "clothes": "Sports Jacket",
+        "background": "Matrix"
+      }
+    },
+    "3851": {
+      "rank": 270,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3851.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Cyber Shades",
+        "head": "Spikes",
+        "clothes": "Suit",
+        "background": "One Market"
+      }
+    },
+    "3852": {
+      "rank": 226,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3852.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Eye Patch",
+        "head": "Ronin Helmet",
+        "clothes": "Ronin",
+        "background": "One Market"
+      }
+    },
+    "3853": {
+      "rank": 520,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3853.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Vintage Dress",
+        "background": "NYSE Dump"
+      }
+    },
+    "3854": {
+      "rank": 79,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3854.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Twin Braids",
+        "clothes": "Vintage Dress",
+        "background": "Moon"
+      }
+    },
+    "3855": {
+      "rank": 80,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3855.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Vixen Waves",
+        "clothes": "Vintage Dress",
+        "background": "Hell"
+      }
+    },
+    "3856": {
+      "rank": 42,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3856.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Vixen Waves",
+        "clothes": "Vintage Dress",
+        "background": "Moms Basement"
+      }
+    },
+    "3857": {
+      "rank": 1203,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3857.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Wizard Drip",
+        "background": "Spell Room"
+      }
+    },
+    "3858": {
+      "rank": 957,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3858.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Rekt",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Wizard Drip",
+        "background": "One Market"
+      }
+    },
+    "3859": {
+      "rank": 304,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3859.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Rugged",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "Viking Helmet",
+        "clothes": "Sports Bra",
+        "background": "Moon"
+      }
+    },
+    "3860": {
+      "rank": 51,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3860.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Rugged",
+        "mouth": "Teeth",
+        "facewear": "MOG Glasses",
+        "head": "Cap",
+        "clothes": "Sports Bra",
+        "background": "Hell"
+      }
+    },
+    "3861": {
+      "rank": 47,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3861.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Rugged",
+        "mouth": "Numb",
+        "facewear": "Aviators",
+        "head": "Beanie",
+        "clothes": "Sports Bra",
+        "background": "Moon"
+      }
+    },
+    "3862": {
+      "rank": 97,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3862.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Rugged",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "No Face Wear",
+        "head": "Cowboy Hat",
+        "clothes": "Leather Jacket",
+        "background": "One Market"
+      }
+    },
+    "3863": {
+      "rank": 459,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3863.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Military Beret",
+        "clothes": "Leather Jacket",
+        "background": "NYSE Rug"
+      }
+    },
+    "3864": {
+      "rank": 874,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3864.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Terminator",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Military Beret",
+        "clothes": "SWAT Gear",
+        "background": "Bepe Barracks"
+      }
+    },
+    "3865": {
+      "rank": 449,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3865.png",
+      "traits": {
+        "base": "Alien Waifu",
+        "face": "Terminator",
+        "mouth": "Cohiba",
+        "facewear": "No Face Wear",
+        "head": "Cowboy Hat",
+        "clothes": "SWAT Gear",
+        "background": "Orange Grove"
+      }
+    },
+    "3866": {
+      "rank": 735,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3866.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Construction Helmet",
+        "clothes": "Bathrobe",
+        "background": "One Market"
+      }
+    },
+    "3867": {
+      "rank": 584,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3867.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Viking Helmet",
+        "clothes": "Born to Ride",
+        "background": "Morning Routine"
+      }
+    },
+    "3868": {
+      "rank": 1871,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3868.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Propeller Hat",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "3869": {
+      "rank": 213,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3869.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Power Bob",
+        "clothes": "Denim Vest",
+        "background": "Hell"
+      }
+    },
+    "3870": {
+      "rank": 579,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3870.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Ronin Helmet",
+        "clothes": "Ronin",
+        "background": "Ronin Dojo"
+      }
+    },
+    "3871": {
+      "rank": 606,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3871.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "Beanie",
+        "clothes": "Roman Drip",
+        "background": "Rome"
+      }
+    },
+    "3872": {
+      "rank": 924,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3872.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "Spikes",
+        "clothes": "Leather Jacket",
+        "background": "Moms Basement"
+      }
+    },
+    "3873": {
+      "rank": 478,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3873.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Suit",
+        "background": "Moon"
+      }
+    },
+    "3874": {
+      "rank": 1575,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3874.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Pirate Hat",
+        "clothes": "Ninja Turtle Fit",
+        "background": "Matrix"
+      }
+    },
+    "3875": {
+      "rank": 1488,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3875.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Classic",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Viking Helmet",
+        "clothes": "Viking Armor",
+        "background": "Matrix"
+      }
+    },
+    "3876": {
+      "rank": 169,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3876.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "No Face Wear",
+        "head": "Halo",
+        "clothes": "Vintage Dress",
+        "background": "Orange Grove"
+      }
+    },
+    "3877": {
+      "rank": 135,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3877.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "Aviators",
+        "head": "Military Beret",
+        "clothes": "SWAT Gear",
+        "background": "Orange Grove"
+      }
+    },
+    "3878": {
+      "rank": 72,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3878.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "No Face Wear",
+        "head": "Mermaid Waves",
+        "clothes": "Prom Dress",
+        "background": "Orange Grove"
+      }
+    },
+    "3879": {
+      "rank": 23,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3879.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Classic",
+        "mouth": "Pipe",
+        "facewear": "MOG Glasses",
+        "head": "Vixen Waves",
+        "clothes": "School Uniform",
+        "background": "One Market"
+      }
+    },
+    "3880": {
+      "rank": 105,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3880.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "No Face Wear",
+        "head": "Ponytail",
+        "clothes": "Sports Bra",
+        "background": "Moon"
+      }
+    },
+    "3881": {
+      "rank": 56,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3881.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Power Bob",
+        "clothes": "Sports Bra",
+        "background": "Morning Routine"
+      }
+    },
+    "3882": {
+      "rank": 164,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3882.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Twin Braids",
+        "clothes": "Sports Bra",
+        "background": "Hell"
+      }
+    },
+    "3883": {
+      "rank": 259,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3883.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Vixen Waves",
+        "clothes": "Sports Bra",
+        "background": "Moon"
+      }
+    },
+    "3884": {
+      "rank": 295,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3884.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Mermaid Waves",
+        "clothes": "Sports Bra",
+        "background": "Orange Grove"
+      }
+    },
+    "3885": {
+      "rank": 1676,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3885.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Sports Bra",
+        "background": "Moon"
+      }
+    },
+    "3886": {
+      "rank": 1383,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3886.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "MOG Glasses",
+        "head": "No Headgear",
+        "clothes": "Sports Bra",
+        "background": "Moon"
+      }
+    },
+    "3887": {
+      "rank": 935,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3887.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Vintage Dress",
+        "background": "Moon"
+      }
+    },
+    "3888": {
+      "rank": 86,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3888.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Beanie",
+        "clothes": "Vintage Dress",
+        "background": "Silicon Data Center"
+      }
+    },
+    "3889": {
+      "rank": 426,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3889.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Spikes",
+        "clothes": "Ronin",
+        "background": "Matrix"
+      }
+    },
+    "3890": {
+      "rank": 64,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3890.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "Wizard Glasses",
+        "head": "Spikes",
+        "clothes": "Wizard Drip",
+        "background": "Matrix"
+      }
+    },
+    "3891": {
+      "rank": 71,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3891.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "Laser Eyes",
+        "head": "Cap",
+        "clothes": "Wizard Drip",
+        "background": "One Market"
+      }
+    },
+    "3892": {
+      "rank": 41,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3892.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Rekt",
+        "mouth": "Gold Teeth",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Sports Bra",
+        "background": "One Market"
+      }
+    },
+    "3893": {
+      "rank": 1190,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3893.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Rekt",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "Military Beret",
+        "clothes": "Sports Jacket",
+        "background": "Bepe Barracks"
+      }
+    },
+    "3894": {
+      "rank": 104,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3894.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Tiara",
+        "clothes": "School Uniform",
+        "background": "Moon"
+      }
+    },
+    "3895": {
+      "rank": 510,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3895.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Rugged",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Tin Foil Hat",
+        "clothes": "Suit",
+        "background": "NYSE Rug"
+      }
+    },
+    "3896": {
+      "rank": 240,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3896.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Propeller Hat",
+        "clothes": "Prom Dress",
+        "background": "Moon"
+      }
+    },
+    "3897": {
+      "rank": 806,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3897.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Fedora",
+        "clothes": "Born to Ride",
+        "background": "Moon"
+      }
+    },
+    "3898": {
+      "rank": 1040,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3898.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Terminator",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Crown",
+        "clothes": "Wizard Drip",
+        "background": "Moon"
+      }
+    },
+    "3899": {
+      "rank": 539,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3899.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Terminator",
+        "mouth": "Cohiba",
+        "facewear": "No Face Wear",
+        "head": "Devil Horns",
+        "clothes": "Wizard Drip",
+        "background": "Hell"
+      }
+    },
+    "3900": {
+      "rank": 45,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3900.png",
+      "traits": {
+        "base": "Alien Baddie",
+        "face": "Terminator",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "No Face Wear",
+        "head": "Devil Horns",
+        "clothes": "Sports Bra",
+        "background": "Hell"
+      }
+    }
+  }
+}

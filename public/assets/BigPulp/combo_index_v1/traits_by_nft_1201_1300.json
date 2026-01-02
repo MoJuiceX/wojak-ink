@@ -1,0 +1,1309 @@
+{
+  "schema_version": "1.0",
+  "range": [
+    1201,
+    1300
+  ],
+  "nfts": {
+    "1201": {
+      "rank": 2081,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1201.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Pizza",
+        "facewear": "Alpha Shades",
+        "head": "Propeller Hat",
+        "clothes": "Bepe Army",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1202": {
+      "rank": 1042,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1202.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Screaming",
+        "facewear": "Aviators",
+        "head": "Field Cap",
+        "clothes": "Bepe Army",
+        "background": "$CASTER"
+      }
+    },
+    "1203": {
+      "rank": 1277,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1203.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Smile",
+        "facewear": "Cool Glasses",
+        "head": "Spikes",
+        "clothes": "Bepe Army",
+        "background": "Sky Dive"
+      }
+    },
+    "1204": {
+      "rank": 1200,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1204.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Stache",
+        "facewear": "Laser Eyes",
+        "head": "Super Saiyan",
+        "clothes": "Bepe Army",
+        "background": "Radioactive Forest"
+      }
+    },
+    "1205": {
+      "rank": 3773,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1205.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "Matrix Lenses",
+        "head": "Military Beret",
+        "clothes": "Bepe Army",
+        "background": "$CHIA"
+      }
+    },
+    "1206": {
+      "rank": 1899,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1206.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "NPC",
+        "mouth": "Vampire Teeth",
+        "facewear": "MOG Glasses",
+        "head": "SWAT Helmet",
+        "clothes": "Bepe Army",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1207": {
+      "rank": 3671,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1207.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Pipe",
+        "facewear": "No Face Wear",
+        "head": "Tin Foil Hat",
+        "clothes": "Bepe Army",
+        "background": "Chia Green"
+      }
+    },
+    "1208": {
+      "rank": 1605,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1208.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Copium Mask",
+        "facewear": "No Face Wear",
+        "head": "Trump Wave",
+        "clothes": "Bepe Army",
+        "background": "White House"
+      }
+    },
+    "1209": {
+      "rank": 1391,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1209.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Bandana Mask",
+        "facewear": "Alpha Shades",
+        "head": "Viking Helmet",
+        "clothes": "Bepe Army",
+        "background": "Mellow Yellow"
+      }
+    },
+    "1210": {
+      "rank": 1824,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1210.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Bubble Gum",
+        "facewear": "3D Glasses",
+        "head": "Wizard Hat",
+        "clothes": "Bepe Army",
+        "background": "Hot Coral"
+      }
+    },
+    "1211": {
+      "rank": 2849,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1211.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Cig",
+        "facewear": "Shades",
+        "head": "Construction Helmet",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "1212": {
+      "rank": 3713,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1212.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Cohiba",
+        "facewear": "No Face Wear",
+        "head": "Beanie",
+        "clothes": "Bepe Army",
+        "background": "$CHIA"
+      }
+    },
+    "1213": {
+      "rank": 3176,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1213.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "Beer Hat",
+        "clothes": "Bepe Army",
+        "background": "$BEPE"
+      }
+    },
+    "1214": {
+      "rank": 4018,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1214.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Field Cap",
+        "clothes": "Bepe Army",
+        "background": "Sky Dive"
+      }
+    },
+    "1215": {
+      "rank": 2253,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1215.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Joint",
+        "facewear": "Alpha Shades",
+        "head": "Field Cap",
+        "clothes": "Bepe Army",
+        "background": "Radioactive Forest"
+      }
+    },
+    "1216": {
+      "rank": 2186,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1216.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Neckbeard",
+        "facewear": "Aviators",
+        "head": "Clown",
+        "clothes": "Bepe Army",
+        "background": "Neo Mint"
+      }
+    },
+    "1217": {
+      "rank": 2420,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1217.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Numb",
+        "facewear": "Cool Glasses",
+        "head": "Comrade Hat",
+        "clothes": "Bepe Army",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1218": {
+      "rank": 1562,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1218.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Pizza",
+        "facewear": "Laser Eyes",
+        "head": "Construction Helmet",
+        "clothes": "Bepe Army",
+        "background": "Hot Coral"
+      }
+    },
+    "1219": {
+      "rank": 3210,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1219.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Screaming",
+        "facewear": "Matrix Lenses",
+        "head": "Wizard Hat",
+        "clothes": "Bepe Army",
+        "background": "Green Candle"
+      }
+    },
+    "1220": {
+      "rank": 2250,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1220.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Smile",
+        "facewear": "MOG Glasses",
+        "head": "Crown",
+        "clothes": "Bepe Army",
+        "background": "Mellow Yellow"
+      }
+    },
+    "1221": {
+      "rank": 3959,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1221.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Terminator",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Cap",
+        "clothes": "Bepe Army",
+        "background": "$CHIA"
+      }
+    },
+    "1222": {
+      "rank": 4132,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1222.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "1223": {
+      "rank": 4048,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1223.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "Beanie",
+        "clothes": "Born to Ride",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1224": {
+      "rank": 4044,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1224.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Beer Hat",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "1225": {
+      "rank": 3807,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1225.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "Alpha Shades",
+        "head": "Cap",
+        "clothes": "Born to Ride",
+        "background": "Sky Dive"
+      }
+    },
+    "1226": {
+      "rank": 3050,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1226.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "Aviators",
+        "head": "Centurion",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "1227": {
+      "rank": 1842,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1227.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Hannibal Mask",
+        "facewear": "3D Glasses",
+        "head": "Clown",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "1228": {
+      "rank": 3264,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1228.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Cool Glasses",
+        "head": "Comrade Hat",
+        "clothes": "Born to Ride",
+        "background": "Green Candle"
+      }
+    },
+    "1229": {
+      "rank": 2364,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1229.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Eye Patch",
+        "head": "Construction Helmet",
+        "clothes": "Born to Ride",
+        "background": "Price Up"
+      }
+    },
+    "1230": {
+      "rank": 2078,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1230.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Screaming",
+        "facewear": "Fake It Mask",
+        "head": "Hard Hat",
+        "clothes": "Born to Ride",
+        "background": "$HOA"
+      }
+    },
+    "1231": {
+      "rank": 3746,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1231.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "Laser Eyes",
+        "head": "No Headgear",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "1232": {
+      "rank": 3269,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1232.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Screaming",
+        "facewear": "Matrix Lenses",
+        "head": "SWAT Helmet",
+        "clothes": "Born to Ride",
+        "background": "Heaven"
+      }
+    },
+    "1233": {
+      "rank": 2772,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1233.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "MOG Glasses",
+        "head": "Hard Hat",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "1234": {
+      "rank": 2840,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1234.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "Night Vision",
+        "head": "Firefighter Helmet",
+        "clothes": "Born to Ride",
+        "background": "$CHIA"
+      }
+    },
+    "1235": {
+      "rank": 2749,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1235.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "Ninja Turtle Mask",
+        "head": "SWAT Helmet",
+        "clothes": "Born to Ride",
+        "background": "$BEPE"
+      }
+    },
+    "1236": {
+      "rank": 3481,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1236.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Vampire Teeth",
+        "facewear": "MOG Glasses",
+        "head": "Fedora",
+        "clothes": "Born to Ride",
+        "background": "Green Candle"
+      }
+    },
+    "1237": {
+      "rank": 3649,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1237.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Pipe",
+        "facewear": "Shades",
+        "head": "Field Cap",
+        "clothes": "Born to Ride",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1238": {
+      "rank": 1590,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1238.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Copium Mask",
+        "facewear": "Tyson Tattoo",
+        "head": "Firefighter Helmet",
+        "clothes": "Born to Ride",
+        "background": "Golden Hour"
+      }
+    },
+    "1239": {
+      "rank": 2469,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1239.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Bandana Mask",
+        "facewear": "Tyson Tattoo",
+        "head": "Tin Foil Hat",
+        "clothes": "Born to Ride",
+        "background": "$CHIA"
+      }
+    },
+    "1240": {
+      "rank": 2269,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1240.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "Wizard Glasses",
+        "head": "Hard Hat",
+        "clothes": "Born to Ride",
+        "background": "$BEPE"
+      }
+    },
+    "1241": {
+      "rank": 3046,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1241.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Clown Nose",
+        "head": "Hard Hat",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "1242": {
+      "rank": 4059,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1242.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "No Face Wear",
+        "head": "SWAT Helmet",
+        "clothes": "Born to Ride",
+        "background": "NYSE Pump"
+      }
+    },
+    "1243": {
+      "rank": 4139,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1243.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "Pirate Hat",
+        "clothes": "Born to Ride",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1244": {
+      "rank": 3922,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1244.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Aviators",
+        "head": "Propeller Hat",
+        "clothes": "Born to Ride",
+        "background": "Neo Mint"
+      }
+    },
+    "1245": {
+      "rank": 3817,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1245.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Alpha Shades",
+        "head": "Ronin Helmet",
+        "clothes": "Born to Ride",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1246": {
+      "rank": 3075,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1246.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Aviators",
+        "head": "Spikes",
+        "clothes": "Born to Ride",
+        "background": "Neo Mint"
+      }
+    },
+    "1247": {
+      "rank": 3992,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1247.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Cool Glasses",
+        "head": "Super Saiyan",
+        "clothes": "Born to Ride",
+        "background": "Green Candle"
+      }
+    },
+    "1248": {
+      "rank": 2831,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1248.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "Alpha Shades",
+        "head": "Super Wojak Hat",
+        "clothes": "Born to Ride",
+        "background": "Golden Hour"
+      }
+    },
+    "1249": {
+      "rank": 2812,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1249.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Screaming",
+        "facewear": "Eye Patch",
+        "head": "SWAT Helmet",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "1250": {
+      "rank": 1626,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1250.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Screaming",
+        "facewear": "Fake It Mask",
+        "head": "Tin Foil Hat",
+        "clothes": "Born to Ride",
+        "background": "NYSE Dump"
+      }
+    },
+    "1251": {
+      "rank": 2655,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1251.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "Laser Eyes",
+        "head": "Trump Wave",
+        "clothes": "Born to Ride",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1252": {
+      "rank": 3698,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1252.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "Matrix Lenses",
+        "head": "Viking Helmet",
+        "clothes": "Born to Ride",
+        "background": "Chia Green"
+      }
+    },
+    "1253": {
+      "rank": 3221,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1253.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Vampire Teeth",
+        "facewear": "MOG Glasses",
+        "head": "Wizard Hat",
+        "clothes": "Born to Ride",
+        "background": "Spell Room"
+      }
+    },
+    "1254": {
+      "rank": 2885,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1254.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Pipe",
+        "facewear": "Night Vision",
+        "head": "Construction Helmet",
+        "clothes": "Born to Ride",
+        "background": "$HOA"
+      }
+    },
+    "1255": {
+      "rank": 2137,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1255.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Copium Mask",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Beanie",
+        "clothes": "Born to Ride",
+        "background": "Neo Mint"
+      }
+    },
+    "1256": {
+      "rank": 4006,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1256.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "Beer Hat",
+        "clothes": "Born to Ride",
+        "background": "Chia Green"
+      }
+    },
+    "1257": {
+      "rank": 2900,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1257.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "Shades",
+        "head": "Hard Hat",
+        "clothes": "Born to Ride",
+        "background": "$LOVE"
+      }
+    },
+    "1258": {
+      "rank": 3524,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1258.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Tyson Tattoo",
+        "head": "Centurion",
+        "clothes": "Born to Ride",
+        "background": "Green Candle"
+      }
+    },
+    "1259": {
+      "rank": 2304,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1259.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "VR Headset",
+        "head": "SWAT Helmet",
+        "clothes": "Born to Ride",
+        "background": "Golden Hour"
+      }
+    },
+    "1260": {
+      "rank": 3164,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1260.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "Wizard Glasses",
+        "head": "Comrade Hat",
+        "clothes": "Born to Ride",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1261": {
+      "rank": 3245,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1261.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Cyber Shades",
+        "head": "Construction Helmet",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "1262": {
+      "rank": 3421,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1262.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Laser Eyes",
+        "head": "Cowboy Hat",
+        "clothes": "Born to Ride",
+        "background": "$CHIA"
+      }
+    },
+    "1263": {
+      "rank": 3093,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1263.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Matrix Lenses",
+        "head": "SWAT Helmet",
+        "clothes": "Born to Ride",
+        "background": "$HOA"
+      }
+    },
+    "1264": {
+      "rank": 2826,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1264.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "Aviators",
+        "head": "Devil Horns",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "1265": {
+      "rank": 2676,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1265.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "Night Vision",
+        "head": "Fedora",
+        "clothes": "Born to Ride",
+        "background": "Radioactive Forest"
+      }
+    },
+    "1266": {
+      "rank": 3568,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1266.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Screaming",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Field Cap",
+        "clothes": "Born to Ride",
+        "background": "Neo Mint"
+      }
+    },
+    "1267": {
+      "rank": 2146,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1267.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "Aviators",
+        "head": "Firefighter Helmet",
+        "clothes": "Born to Ride",
+        "background": "$NECKCOIN"
+      }
+    },
+    "1268": {
+      "rank": 3806,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1268.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "No Face Wear",
+        "head": "Hard Hat",
+        "clothes": "Born to Ride",
+        "background": "$LOVE"
+      }
+    },
+    "1269": {
+      "rank": 3676,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1269.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Hard Hat",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "1270": {
+      "rank": 1371,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1270.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Vampire Teeth",
+        "facewear": "Clown Nose",
+        "head": "SWAT Helmet",
+        "clothes": "Born to Ride",
+        "background": "Silicon Data Center"
+      }
+    },
+    "1271": {
+      "rank": 3866,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1271.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Pipe",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Born to Ride",
+        "background": "Morning Routine"
+      }
+    },
+    "1272": {
+      "rank": 1179,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1272.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Copium Mask",
+        "facewear": "Alpha Shades",
+        "head": "Pirate Hat",
+        "clothes": "Born to Ride",
+        "background": "Pirate Ship"
+      }
+    },
+    "1273": {
+      "rank": 3399,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1273.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "Aviators",
+        "head": "Propeller Hat",
+        "clothes": "Born to Ride",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1274": {
+      "rank": 2112,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1274.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Bubble Gum",
+        "facewear": "Shades",
+        "head": "Propeller Hat",
+        "clothes": "Born to Ride",
+        "background": "$BEPE"
+      }
+    },
+    "1275": {
+      "rank": 2865,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1275.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Gold Teeth",
+        "facewear": "Shades",
+        "head": "Spikes",
+        "clothes": "Born to Ride",
+        "background": "Sky Dive"
+      }
+    },
+    "1276": {
+      "rank": 2088,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1276.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Gold Teeth",
+        "facewear": "Eye Patch",
+        "head": "Spikes",
+        "clothes": "Born to Ride",
+        "background": "Green Candle"
+      }
+    },
+    "1277": {
+      "rank": 793,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1277.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Screaming",
+        "facewear": "Fake It Mask",
+        "head": "Super Wojak Hat",
+        "clothes": "Born to Ride",
+        "background": "Price Up"
+      }
+    },
+    "1278": {
+      "rank": 2519,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1278.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Hannibal Mask",
+        "facewear": "No Face Wear",
+        "head": "Firefighter Helmet",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "1279": {
+      "rank": 2521,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1279.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Joint",
+        "facewear": "Matrix Lenses",
+        "head": "Tin Foil Hat",
+        "clothes": "Born to Ride",
+        "background": "Orange Grove"
+      }
+    },
+    "1280": {
+      "rank": 3596,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1280.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Cig",
+        "facewear": "MOG Glasses",
+        "head": "Super Saiyan",
+        "clothes": "Born to Ride",
+        "background": "Tangerine Pop"
+      }
+    },
+    "1281": {
+      "rank": 3147,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1281.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "Night Vision",
+        "head": "Viking Helmet",
+        "clothes": "Born to Ride",
+        "background": "Chia Green"
+      }
+    },
+    "1282": {
+      "rank": 2386,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1282.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Pizza",
+        "facewear": "Cool Glasses",
+        "head": "Wizard Hat",
+        "clothes": "Born to Ride",
+        "background": "Golden Hour"
+      }
+    },
+    "1283": {
+      "rank": 3064,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1283.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rekt",
+        "mouth": "Screaming",
+        "facewear": "Shades",
+        "head": "SWAT Helmet",
+        "clothes": "Born to Ride",
+        "background": "Bepe Barracks"
+      }
+    },
+    "1284": {
+      "rank": 2030,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1284.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Smile",
+        "facewear": "MOG Glasses",
+        "head": "Beanie",
+        "clothes": "Born to Ride",
+        "background": "$CHIA"
+      }
+    },
+    "1285": {
+      "rank": 1545,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1285.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Gold Teeth",
+        "facewear": "Clown Nose",
+        "head": "SWAT Helmet",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "1286": {
+      "rank": 2879,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1286.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "SWAT Helmet",
+        "clothes": "Born to Ride",
+        "background": "NYSE Rug"
+      }
+    },
+    "1287": {
+      "rank": 2708,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1287.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Vampire Teeth",
+        "facewear": "No Face Wear",
+        "head": "Centurion",
+        "clothes": "Born to Ride",
+        "background": "Moms Basement"
+      }
+    },
+    "1288": {
+      "rank": 3457,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1288.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Pipe",
+        "facewear": "Alpha Shades",
+        "head": "No Headgear",
+        "clothes": "Born to Ride",
+        "background": "Neo Mint"
+      }
+    },
+    "1289": {
+      "rank": 1654,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1289.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Copium Mask",
+        "facewear": "Aviators",
+        "head": "SWAT Helmet",
+        "clothes": "Born to Ride",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1290": {
+      "rank": 2886,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1290.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "Construction Helmet",
+        "clothes": "Born to Ride",
+        "background": "Hot Coral"
+      }
+    },
+    "1291": {
+      "rank": 3549,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1291.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "Cowboy Hat",
+        "clothes": "Born to Ride",
+        "background": "$CHIA"
+      }
+    },
+    "1292": {
+      "rank": 2482,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1292.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Cig",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Born to Ride",
+        "background": "Mellow Yellow"
+      }
+    },
+    "1293": {
+      "rank": 1941,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1293.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Cohiba",
+        "facewear": "MOG Glasses",
+        "head": "Devil Horns",
+        "clothes": "Born to Ride",
+        "background": "Heaven"
+      }
+    },
+    "1294": {
+      "rank": 1038,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1294.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Rugged",
+        "mouth": "Gold Teeth",
+        "facewear": "Night Vision",
+        "head": "Fedora",
+        "clothes": "Born to Ride",
+        "background": "Moms Basement"
+      }
+    },
+    "1295": {
+      "rank": 2664,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1295.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Gold Teeth",
+        "facewear": "Shades",
+        "head": "Field Cap",
+        "clothes": "Born to Ride",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "1296": {
+      "rank": 3891,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1296.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Construction Helmet",
+        "clothes": "Born to Ride",
+        "background": "Green Candle"
+      }
+    },
+    "1297": {
+      "rank": 3278,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1297.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Neckbeard",
+        "facewear": "No Face Wear",
+        "head": "Halo",
+        "clothes": "Born to Ride",
+        "background": "Sky Dive"
+      }
+    },
+    "1298": {
+      "rank": 3051,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1298.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Neckbeard",
+        "facewear": "No Face Wear",
+        "head": "Hard Hat",
+        "clothes": "Born to Ride",
+        "background": "Radioactive Forest"
+      }
+    },
+    "1299": {
+      "rank": 2110,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1299.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Bleeding Bags",
+        "mouth": "Pizza",
+        "facewear": "Alpha Shades",
+        "head": "Tin Foil Hat",
+        "clothes": "Born to Ride",
+        "background": "Neo Mint"
+      }
+    },
+    "1300": {
+      "rank": 3867,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/1300.png",
+      "traits": {
+        "base": "Wojak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Aviators",
+        "head": "Military Beret",
+        "clothes": "Born to Ride",
+        "background": "Sky Dive"
+      }
+    }
+  }
+}

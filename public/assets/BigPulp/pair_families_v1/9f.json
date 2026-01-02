@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "clothes:Suit||facewear:Matrix Lenses": [
+      "2953",
+      "3333",
+      "3582",
+      "3994",
+      "1890",
+      "2208",
+      "1959",
+      "81",
+      "1905",
+      "1923"
+    ],
+    "facewear:Eye Patch||head:Halo": [
+      "334"
+    ],
+    "clothes:Straitjacket||facewear:3D Glasses": [
+      "390",
+      "355",
+      "2154"
+    ],
+    "facewear:Eye Patch||head:Field Cap": [
+      "3472",
+      "527",
+      "2403",
+      "2275",
+      "360",
+      "1452",
+      "1067"
+    ],
+    "face:Rugged||head:Pirate Hat": [
+      "2090",
+      "3647",
+      "3433",
+      "2319",
+      "727",
+      "3491",
+      "438",
+      "3450",
+      "1600"
+    ],
+    "head:Comrade Hat||mouth:Copium Mask": [
+      "2160",
+      "4107",
+      "2840",
+      "655",
+      "2539",
+      "842"
+    ],
+    "clothes:El Presidente||head:Clown": [
+      "3716",
+      "697"
+    ],
+    "clothes:Tank Top||face:Terminator": [
+      "3796",
+      "2347",
+      "741",
+      "744",
+      "4012",
+      "745",
+      "743",
+      "742",
+      "740"
+    ],
+    "clothes:Bepe Army||face:Rugged": [
+      "2572",
+      "3213",
+      "2575",
+      "3475",
+      "3477",
+      "2573",
+      "3228",
+      "1191",
+      "1193",
+      "1196",
+      "1192",
+      "2571",
+      "1190",
+      "3476",
+      "2570",
+      "1194",
+      "1195",
+      "1197",
+      "3225",
+      "1189",
+      "1199",
+      "1198"
+    ],
+    "clothes:Born to Ride||mouth:Gold Teeth": [
+      "3239",
+      "3655",
+      "1294",
+      "1285",
+      "3918",
+      "1276",
+      "2582",
+      "1295",
+      "1275",
+      "1226",
+      "1260",
+      "2580",
+      "2771",
+      "1311",
+      "2604",
+      "1243"
+    ],
+    "head:Military Beret||mouth:Cohiba": [
+      "3765",
+      "2264",
+      "3563",
+      "3978",
+      "3144",
+      "4029",
+      "4016",
+      "3970",
+      "3014",
+      "3094",
+      "3519",
+      "2082",
+      "3308",
+      "3357",
+      "1855",
+      "3120"
+    ],
+    "facewear:Cyber Shades||head:Trump Wave": [
+      "2343",
+      "3490",
+      "1937",
+      "1892"
+    ],
+    "clothes:Super Saiyan Uniform||head:Soy Hair": [
+      "2742",
+      "2702",
+      "2717"
+    ],
+    "clothes:Goose Suit||mouth:Sexy Lip Bite": [
+      "2814",
+      "3051"
+    ],
+    "base:Alien Wojak||mouth:Hannibal Mask": [
+      "3724",
+      "3656",
+      "3808",
+      "3690"
+    ],
+    "base:Bepe Wojak||head:Spikes": [
+      "3928"
+    ],
+    "base:Bepe Waifu||facewear:MOG Glasses": [
+      "4119",
+      "4138",
+      "4151",
+      "4127",
+      "4150",
+      "4128"
+    ],
+    "base:Bepe Baddie||facewear:Alpha Shades": [
+      "4189",
+      "4190"
+    ]
+  }
+}

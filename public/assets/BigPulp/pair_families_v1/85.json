@@ -1,0 +1,182 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "clothes:Straitjacket||facewear:Matrix Lenses": [
+      "2157",
+      "43",
+      "362",
+      "369"
+    ],
+    "clothes:Born to Ride||mouth:Stache": [
+      "3714",
+      "2611",
+      "1301",
+      "1302",
+      "1251",
+      "1234",
+      "2585",
+      "125",
+      "1268"
+    ],
+    "facewear:MOG Glasses||head:Halo": [
+      "3786",
+      "4052",
+      "1583",
+      "320",
+      "1326"
+    ],
+    "clothes:God's Robe||facewear:Aviators": [
+      "325"
+    ],
+    "facewear:No Face Wear||head:Beer Hat": [
+      "3832",
+      "2913",
+      "3534",
+      "2340",
+      "3609",
+      "2963",
+      "3227",
+      "3020",
+      "2836",
+      "1314",
+      "3347",
+      "3481",
+      "2740",
+      "2643",
+      "2438",
+      "1213",
+      "858",
+      "1723",
+      "740",
+      "2394",
+      "3366",
+      "1942",
+      "1256",
+      "352",
+      "1224",
+      "453",
+      "1913",
+      "981"
+    ],
+    "facewear:Cool Glasses||mouth:Gold Teeth": [
+      "3672",
+      "3442",
+      "2345",
+      "2543",
+      "2564",
+      "2672",
+      "376",
+      "633",
+      "1371",
+      "407",
+      "977"
+    ],
+    "clothes:Tank Top||facewear:Clown Nose": [
+      "4011",
+      "733",
+      "715",
+      "2332",
+      "2331",
+      "685"
+    ],
+    "clothes:Tee||mouth:Hannibal Mask": [
+      "757"
+    ],
+    "clothes:Bepe Army||facewear:Aviators": [
+      "3653",
+      "1202",
+      "1191",
+      "3463",
+      "1216",
+      "1175",
+      "1169",
+      "1148",
+      "1128",
+      "1146"
+    ],
+    "clothes:Born to Ride||head:Firefighter Helmet": [
+      "2607",
+      "1238",
+      "1267",
+      "1278",
+      "1234",
+      "2595"
+    ],
+    "facewear:3D Glasses||head:Spikes": [
+      "1547"
+    ],
+    "clothes:Denim Vest||facewear:Shades": [
+      "2791",
+      "3033"
+    ],
+    "clothes:Sports Bra||mouth:Glossed Lips": [
+      "4162",
+      "4119",
+      "3881",
+      "2934",
+      "3140",
+      "4157",
+      "4199",
+      "4198",
+      "3846",
+      "3882",
+      "3883",
+      "3845",
+      "3884",
+      "4160",
+      "2933",
+      "3139",
+      "4167",
+      "4126",
+      "4168",
+      "3148",
+      "3138",
+      "3885"
+    ],
+    "head:Twin Braids||mouth:Screaming": [
+      "3854",
+      "2998",
+      "3065"
+    ],
+    "clothes:Denim Vest||mouth:Glossed Lips": [
+      "4154",
+      "4196",
+      "4197",
+      "4156",
+      "4155",
+      "3036",
+      "3031"
+    ],
+    "base:Baddie||facewear:Eye Patch": [
+      "3104",
+      "3116",
+      "3037",
+      "3110",
+      "3174",
+      "3122"
+    ],
+    "clothes:Vintage Dress||head:Ronin Helmet": [
+      "3180"
+    ],
+    "clothes:Vintage Dress||facewear:Matrix Lenses": [
+      "3180"
+    ],
+    "base:Papa Tang||head:Pirate Hat": [
+      "3433",
+      "3230",
+      "3362",
+      "3450",
+      "3336",
+      "3322",
+      "3290",
+      "3303",
+      "3218",
+      "3396"
+    ],
+    "base:Alien Wojak||head:Tin Foil Hat": [
+      "3676",
+      "3811"
+    ]
+  }
+}

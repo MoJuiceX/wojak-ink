@@ -1,0 +1,827 @@
+{
+  "report_schema_version": "1.0",
+  "generated_at": "2026-01-01T09:20:11.198Z",
+  "collection_id": "col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah",
+  "source_metadata_file": "public/Wojak_Farmers_Plot_metadata_FIXED DRAC.json",
+  "metadata_source_hash": "3cfd9f268eb6e62b8d3e2593869cd7b41ed13a4b22eff86618d88a27e3f9cb96",
+  "summary": {
+    "fetched_count": 3934,
+    "mapped_count": 3916,
+    "missing_count": 284,
+    "conflicts_count": 18,
+    "unresolved_count": 0
+  },
+  "missing_ids_all": [
+    "36",
+    "43",
+    "45",
+    "115",
+    "124",
+    "126",
+    "135",
+    "142",
+    "143",
+    "148",
+    "154",
+    "157",
+    "168",
+    "175",
+    "179",
+    "192",
+    "193",
+    "198",
+    "205",
+    "210",
+    "226",
+    "259",
+    "265",
+    "287",
+    "331",
+    "353",
+    "382",
+    "412",
+    "441",
+    "449",
+    "452",
+    "454",
+    "467",
+    "478",
+    "490",
+    "500",
+    "516",
+    "520",
+    "524",
+    "536",
+    "543",
+    "594",
+    "609",
+    "632",
+    "648",
+    "650",
+    "656",
+    "672",
+    "675",
+    "685",
+    "710",
+    "731",
+    "764",
+    "774",
+    "781",
+    "811",
+    "846",
+    "854",
+    "858",
+    "860",
+    "876",
+    "895",
+    "896",
+    "899",
+    "904",
+    "912",
+    "932",
+    "933",
+    "936",
+    "952",
+    "972",
+    "993",
+    "996",
+    "999",
+    "1002",
+    "1005",
+    "1018",
+    "1020",
+    "1048",
+    "1077",
+    "1084",
+    "1095",
+    "1141",
+    "1179",
+    "1185",
+    "1188",
+    "1189",
+    "1201",
+    "1206",
+    "1240",
+    "1271",
+    "1274",
+    "1280",
+    "1297",
+    "1326",
+    "1337",
+    "1356",
+    "1367",
+    "1370",
+    "1376",
+    "1393",
+    "1409",
+    "1421",
+    "1452",
+    "1462",
+    "1463",
+    "1469",
+    "1492",
+    "1496",
+    "1516",
+    "1540",
+    "1560",
+    "1572",
+    "1579",
+    "1585",
+    "1599",
+    "1637",
+    "1638",
+    "1648",
+    "1668",
+    "1677",
+    "1678",
+    "1701",
+    "1721",
+    "1723",
+    "1735",
+    "1753",
+    "1754",
+    "1771",
+    "1844",
+    "1862",
+    "1865",
+    "1890",
+    "1899",
+    "1937",
+    "1979",
+    "1992",
+    "1996",
+    "1998",
+    "2006",
+    "2014",
+    "2017",
+    "2054",
+    "2061",
+    "2069",
+    "2095",
+    "2107",
+    "2119",
+    "2121",
+    "2126",
+    "2135",
+    "2157",
+    "2162",
+    "2167",
+    "2174",
+    "2178",
+    "2184",
+    "2194",
+    "2214",
+    "2217",
+    "2229",
+    "2254",
+    "2255",
+    "2261",
+    "2300",
+    "2313",
+    "2322",
+    "2331",
+    "2333",
+    "2349",
+    "2393",
+    "2397",
+    "2399",
+    "2401",
+    "2429",
+    "2467",
+    "2469",
+    "2482",
+    "2489",
+    "2494",
+    "2514",
+    "2531",
+    "2539",
+    "2559",
+    "2567",
+    "2588",
+    "2596",
+    "2626",
+    "2645",
+    "2694",
+    "2700",
+    "2729",
+    "2740",
+    "2742",
+    "2747",
+    "2772",
+    "2781",
+    "2791",
+    "2805",
+    "2826",
+    "2852",
+    "2901",
+    "2936",
+    "2951",
+    "2991",
+    "2997",
+    "3001",
+    "3004",
+    "3011",
+    "3016",
+    "3049",
+    "3052",
+    "3082",
+    "3095",
+    "3121",
+    "3126",
+    "3148",
+    "3156",
+    "3168",
+    "3176",
+    "3190",
+    "3195",
+    "3204",
+    "3214",
+    "3219",
+    "3229",
+    "3255",
+    "3269",
+    "3271",
+    "3279",
+    "3284",
+    "3317",
+    "3328",
+    "3364",
+    "3373",
+    "3407",
+    "3409",
+    "3423",
+    "3427",
+    "3429",
+    "3430",
+    "3450",
+    "3500",
+    "3538",
+    "3553",
+    "3555",
+    "3601",
+    "3610",
+    "3628",
+    "3629",
+    "3672",
+    "3678",
+    "3684",
+    "3759",
+    "3761",
+    "3767",
+    "3799",
+    "3819",
+    "3826",
+    "3845",
+    "3849",
+    "3861",
+    "3889",
+    "3891",
+    "3904",
+    "3907",
+    "3954",
+    "3970",
+    "3993",
+    "4008",
+    "4010",
+    "4019",
+    "4021",
+    "4037",
+    "4038",
+    "4074",
+    "4077",
+    "4084",
+    "4088",
+    "4093",
+    "4097",
+    "4118",
+    "4176",
+    "4198"
+  ],
+  "unresolved": [],
+  "conflicts": [
+    {
+      "id": "1149",
+      "primary_launcher": "nft1cf35qf9g7x9tvqa074ysnzzcsgmdjxh6c2sfugzjfa7pp0nd2q9quxdeq4",
+      "alternatives": [
+        "nft1xy8aas07g3appxv8nmx5zzz34s6cr47vmjrpdf03lqzf96cq697qev7rv9"
+      ],
+      "resolution_method": "edition_match",
+      "evidence": {
+        "primary": {
+          "launcher": "nft1cf35qf9g7x9tvqa074ysnzzcsgmdjxh6c2sfugzjfa7pp0nd2q9quxdeq4",
+          "edition": 1149,
+          "name": "Wojak #1149",
+          "score": 100,
+          "method": "edition_match"
+        },
+        "alternatives": [
+          {
+            "launcher": "nft1xy8aas07g3appxv8nmx5zzz34s6cr47vmjrpdf03lqzf96cq697qev7rv9",
+            "edition": 1149,
+            "name": "Wojak #1149",
+            "score": 100,
+            "method": "edition_match"
+          }
+        ]
+      }
+    },
+    {
+      "id": "1293",
+      "primary_launcher": "nft1d0gpplymuny5zxfs8u8ejdwgxshspsahmd029r98pu94azlsnl0s8qtxrh",
+      "alternatives": [
+        "nft1ml0qrc0kcusnwhmt05zcahau9h3vfvu7sfv4ar5mg2tpm2rkrrtqe6zjgs"
+      ],
+      "resolution_method": "edition_match",
+      "evidence": {
+        "primary": {
+          "launcher": "nft1d0gpplymuny5zxfs8u8ejdwgxshspsahmd029r98pu94azlsnl0s8qtxrh",
+          "edition": 1293,
+          "name": "Wojak #1293",
+          "score": 100,
+          "method": "edition_match"
+        },
+        "alternatives": [
+          {
+            "launcher": "nft1ml0qrc0kcusnwhmt05zcahau9h3vfvu7sfv4ar5mg2tpm2rkrrtqe6zjgs",
+            "edition": 1293,
+            "name": "Wojak #1293",
+            "score": 100,
+            "method": "edition_match"
+          }
+        ]
+      }
+    },
+    {
+      "id": "1812",
+      "primary_launcher": "nft17gvnjssj7jfnreeh4gx7can896qt622vcwn3hcd8n4e4ckyznu6qg560j8",
+      "alternatives": [
+        "nft1snf6cycp7ac8j7vw30havcnskyg44kxex0478esthwezm7ynztns3ww9e2"
+      ],
+      "resolution_method": "edition_match",
+      "evidence": {
+        "primary": {
+          "launcher": "nft17gvnjssj7jfnreeh4gx7can896qt622vcwn3hcd8n4e4ckyznu6qg560j8",
+          "edition": 1812,
+          "name": "Wojak #1812",
+          "score": 100,
+          "method": "edition_match"
+        },
+        "alternatives": [
+          {
+            "launcher": "nft1snf6cycp7ac8j7vw30havcnskyg44kxex0478esthwezm7ynztns3ww9e2",
+            "edition": 1812,
+            "name": "Wojak #1812",
+            "score": 100,
+            "method": "edition_match"
+          }
+        ]
+      }
+    },
+    {
+      "id": "1962",
+      "primary_launcher": "nft126wayhejhw3uluh3kacdyqlx47n88r8l2k67eqljp6syekgpz0ns6te7l4",
+      "alternatives": [
+        "nft1rwxzzt2th5xaqyzlrnspy9umry3d8ntlawmjnjxvn5j08h2vxr0smwkgq2"
+      ],
+      "resolution_method": "edition_match",
+      "evidence": {
+        "primary": {
+          "launcher": "nft126wayhejhw3uluh3kacdyqlx47n88r8l2k67eqljp6syekgpz0ns6te7l4",
+          "edition": 1962,
+          "name": "Wojak #1962",
+          "score": 100,
+          "method": "edition_match"
+        },
+        "alternatives": [
+          {
+            "launcher": "nft1rwxzzt2th5xaqyzlrnspy9umry3d8ntlawmjnjxvn5j08h2vxr0smwkgq2",
+            "edition": 1962,
+            "name": "Wojak #1962",
+            "score": 100,
+            "method": "edition_match"
+          }
+        ]
+      }
+    },
+    {
+      "id": "2153",
+      "primary_launcher": "nft17qpt4fzwweh86a7jqwemszq2tzzmkvmty9a0xyfwzk4kjz2q4agqqrue9s",
+      "alternatives": [
+        "nft1ykx4xp5mesv5lcn86e829vsclwtne52j7hgvce5y967erv7wh56s6j6qth"
+      ],
+      "resolution_method": "edition_match",
+      "evidence": {
+        "primary": {
+          "launcher": "nft17qpt4fzwweh86a7jqwemszq2tzzmkvmty9a0xyfwzk4kjz2q4agqqrue9s",
+          "edition": 2153,
+          "name": "Soyjak #2153",
+          "score": 100,
+          "method": "edition_match"
+        },
+        "alternatives": [
+          {
+            "launcher": "nft1ykx4xp5mesv5lcn86e829vsclwtne52j7hgvce5y967erv7wh56s6j6qth",
+            "edition": 2153,
+            "name": "Soyjak #2153",
+            "score": 100,
+            "method": "edition_match"
+          }
+        ]
+      }
+    },
+    {
+      "id": "2280",
+      "primary_launcher": "nft1al5gf6tt3m44e23rmp4cpd2fhta3dr0gamztuzl9gjrackxu8m0qhu4zdl",
+      "alternatives": [
+        "nft1fcw2yg8x76ft80fcy2360ujv77mkfqyuymay5lkw5nk8mxe4c0tstpt98e"
+      ],
+      "resolution_method": "edition_match",
+      "evidence": {
+        "primary": {
+          "launcher": "nft1al5gf6tt3m44e23rmp4cpd2fhta3dr0gamztuzl9gjrackxu8m0qhu4zdl",
+          "edition": 2280,
+          "name": "Soyjak #2280",
+          "score": 100,
+          "method": "edition_match"
+        },
+        "alternatives": [
+          {
+            "launcher": "nft1fcw2yg8x76ft80fcy2360ujv77mkfqyuymay5lkw5nk8mxe4c0tstpt98e",
+            "edition": 2280,
+            "name": "Soyjak #2280",
+            "score": 100,
+            "method": "edition_match"
+          }
+        ]
+      }
+    },
+    {
+      "id": "2327",
+      "primary_launcher": "nft13kk9d44wqek6u2dj8gqle8vrc8xjjq5rvx3esz4ggy9y9qte492sppd3ha",
+      "alternatives": [
+        "nft19a4575k8yxs3jw5h3wxkpu77slg336jnfd5ufwuejcweu5mdvnus795ay0"
+      ],
+      "resolution_method": "edition_match",
+      "evidence": {
+        "primary": {
+          "launcher": "nft13kk9d44wqek6u2dj8gqle8vrc8xjjq5rvx3esz4ggy9y9qte492sppd3ha",
+          "edition": 2327,
+          "name": "Soyjak #2327",
+          "score": 100,
+          "method": "edition_match"
+        },
+        "alternatives": [
+          {
+            "launcher": "nft19a4575k8yxs3jw5h3wxkpu77slg336jnfd5ufwuejcweu5mdvnus795ay0",
+            "edition": 2327,
+            "name": "Soyjak #2327",
+            "score": 100,
+            "method": "edition_match"
+          }
+        ]
+      }
+    },
+    {
+      "id": "2370",
+      "primary_launcher": "nft105ljzj2gwl98lun463r8p5jxrtlgc43wlk50khx4xr357vhslp5s5l59am",
+      "alternatives": [
+        "nft1mmydn40jwzkyq36ys0l2tgvw3mczazelyj85vg807vu9ksq5lqfsehhp4p"
+      ],
+      "resolution_method": "edition_match",
+      "evidence": {
+        "primary": {
+          "launcher": "nft105ljzj2gwl98lun463r8p5jxrtlgc43wlk50khx4xr357vhslp5s5l59am",
+          "edition": 2370,
+          "name": "Soyjak #2370",
+          "score": 100,
+          "method": "edition_match"
+        },
+        "alternatives": [
+          {
+            "launcher": "nft1mmydn40jwzkyq36ys0l2tgvw3mczazelyj85vg807vu9ksq5lqfsehhp4p",
+            "edition": 2370,
+            "name": "Soyjak #2370",
+            "score": 100,
+            "method": "edition_match"
+          }
+        ]
+      }
+    },
+    {
+      "id": "2948",
+      "primary_launcher": "nft1dvfpz953jt602q5y92205z7ea9a86t8ld7u5eg0cagf5wm4gxxmq3nnqn8",
+      "alternatives": [
+        "nft1tq5l25hmqwnfzxrrytmm4vn7zrstxmp0sc7fpymj0pl6gr6rsk9s2g5u7l"
+      ],
+      "resolution_method": "edition_match",
+      "evidence": {
+        "primary": {
+          "launcher": "nft1dvfpz953jt602q5y92205z7ea9a86t8ld7u5eg0cagf5wm4gxxmq3nnqn8",
+          "edition": 2948,
+          "name": "Waifu #2948",
+          "score": 100,
+          "method": "edition_match"
+        },
+        "alternatives": [
+          {
+            "launcher": "nft1tq5l25hmqwnfzxrrytmm4vn7zrstxmp0sc7fpymj0pl6gr6rsk9s2g5u7l",
+            "edition": 2948,
+            "name": "Waifu #2948",
+            "score": 100,
+            "method": "edition_match"
+          }
+        ]
+      }
+    },
+    {
+      "id": "3028",
+      "primary_launcher": "nft1reeslet5nd7cqurjceyxnfwx9fgcy4qhas8zeejfg7mhf609rt4spp0yfv",
+      "alternatives": [
+        "nft1vydly49g0c09nupghf0n9jvg07nxrj7q4f5nu2ecfh4wqwh2hqxszk8wc2"
+      ],
+      "resolution_method": "edition_match",
+      "evidence": {
+        "primary": {
+          "launcher": "nft1reeslet5nd7cqurjceyxnfwx9fgcy4qhas8zeejfg7mhf609rt4spp0yfv",
+          "edition": 3028,
+          "name": "Baddie #3028",
+          "score": 100,
+          "method": "edition_match"
+        },
+        "alternatives": [
+          {
+            "launcher": "nft1vydly49g0c09nupghf0n9jvg07nxrj7q4f5nu2ecfh4wqwh2hqxszk8wc2",
+            "edition": 3028,
+            "name": "Baddie #3028",
+            "score": 100,
+            "method": "edition_match"
+          }
+        ]
+      }
+    },
+    {
+      "id": "3258",
+      "primary_launcher": "nft17d82lmrzd9xg4c2rtrp4fwkuqnzcuq2pkjqdejnnsamxnrcadj9qm6399n",
+      "alternatives": [
+        "nft1l9p67gfqqkqjf820xu2wtkucf8u32y29kn0nrw43w6yer9et4v7qwertqt"
+      ],
+      "resolution_method": "edition_match",
+      "evidence": {
+        "primary": {
+          "launcher": "nft17d82lmrzd9xg4c2rtrp4fwkuqnzcuq2pkjqdejnnsamxnrcadj9qm6399n",
+          "edition": 3258,
+          "name": "Papa Tang #3258",
+          "score": 100,
+          "method": "edition_match"
+        },
+        "alternatives": [
+          {
+            "launcher": "nft1l9p67gfqqkqjf820xu2wtkucf8u32y29kn0nrw43w6yer9et4v7qwertqt",
+            "edition": 3258,
+            "name": "Papa Tang #3258",
+            "score": 100,
+            "method": "edition_match"
+          }
+        ]
+      }
+    },
+    {
+      "id": "3403",
+      "primary_launcher": "nft133ptgq9vvc073p3xl7wak9lhhskz8yp02d4x8d8a6wgd946xagmq6y4gvp",
+      "alternatives": [
+        "nft1atv0j2nl2s2pm6zczkmfkt4lup5tnnmua7netyffcfx352y9tqgqlatnkj"
+      ],
+      "resolution_method": "edition_match",
+      "evidence": {
+        "primary": {
+          "launcher": "nft133ptgq9vvc073p3xl7wak9lhhskz8yp02d4x8d8a6wgd946xagmq6y4gvp",
+          "edition": 3403,
+          "name": "Papa Tang #3403",
+          "score": 100,
+          "method": "edition_match"
+        },
+        "alternatives": [
+          {
+            "launcher": "nft1atv0j2nl2s2pm6zczkmfkt4lup5tnnmua7netyffcfx352y9tqgqlatnkj",
+            "edition": 3403,
+            "name": "Papa Tang #3403",
+            "score": 100,
+            "method": "edition_match"
+          }
+        ]
+      }
+    },
+    {
+      "id": "359",
+      "primary_launcher": "nft10jxj40rqd2az6lvhg98t38g72e7klxehxyjperrqc82eukyps6qshgvvlp",
+      "alternatives": [
+        "nft1lq4q53tyy2jgyafmt0aw0tx0xuj77mk8l4672et2hashvqn2c5xqyvz7hz"
+      ],
+      "resolution_method": "edition_match",
+      "evidence": {
+        "primary": {
+          "launcher": "nft10jxj40rqd2az6lvhg98t38g72e7klxehxyjperrqc82eukyps6qshgvvlp",
+          "edition": 359,
+          "name": "Wojak #0359",
+          "score": 100,
+          "method": "edition_match"
+        },
+        "alternatives": [
+          {
+            "launcher": "nft1lq4q53tyy2jgyafmt0aw0tx0xuj77mk8l4672et2hashvqn2c5xqyvz7hz",
+            "edition": 359,
+            "name": "Wojak #0359",
+            "score": 100,
+            "method": "edition_match"
+          }
+        ]
+      }
+    },
+    {
+      "id": "3676",
+      "primary_launcher": "nft1eyrh52ektayxcp0y0k09td0nrpc0dfmfq8hx9xk5md52anrk5cas4e85fc",
+      "alternatives": [
+        "nft1tp7nfs53jhk7yyq50v4e3vcv5f6jz4jdzrdjeexhear7d3qv23usevrskv"
+      ],
+      "resolution_method": "edition_match",
+      "evidence": {
+        "primary": {
+          "launcher": "nft1eyrh52ektayxcp0y0k09td0nrpc0dfmfq8hx9xk5md52anrk5cas4e85fc",
+          "edition": 3676,
+          "name": "Alien Wojak #3676",
+          "score": 100,
+          "method": "edition_match"
+        },
+        "alternatives": [
+          {
+            "launcher": "nft1tp7nfs53jhk7yyq50v4e3vcv5f6jz4jdzrdjeexhear7d3qv23usevrskv",
+            "edition": 3676,
+            "name": "Alien Wojak #3676",
+            "score": 100,
+            "method": "edition_match"
+          }
+        ]
+      }
+    },
+    {
+      "id": "3692",
+      "primary_launcher": "nft14lelyr9gkwnk2gau98l7tufw2qp2zx9sjf2zc8v5ylgds0pvyhuqy0uzls",
+      "alternatives": [
+        "nft15p8sqcujpqz050shgg3czsggav82geut2trgw43c0xk4evgazwlse96rkq"
+      ],
+      "resolution_method": "edition_match",
+      "evidence": {
+        "primary": {
+          "launcher": "nft14lelyr9gkwnk2gau98l7tufw2qp2zx9sjf2zc8v5ylgds0pvyhuqy0uzls",
+          "edition": 3692,
+          "name": "Alien Wojak #3692",
+          "score": 100,
+          "method": "edition_match"
+        },
+        "alternatives": [
+          {
+            "launcher": "nft15p8sqcujpqz050shgg3czsggav82geut2trgw43c0xk4evgazwlse96rkq",
+            "edition": 3692,
+            "name": "Alien Wojak #3692",
+            "score": 100,
+            "method": "edition_match"
+          }
+        ]
+      }
+    },
+    {
+      "id": "3933",
+      "primary_launcher": "nft13gjgjm6nd8vpuvzqr7cz6epnh59566pklzv8n906yltfqfddmf2sjrhq9k",
+      "alternatives": [
+        "nft1mdx2z5a8pcc0zwh8wpy2kkay20pf2agguuarwcdwt2ntvjv8rulq2fjc6e"
+      ],
+      "resolution_method": "edition_match",
+      "evidence": {
+        "primary": {
+          "launcher": "nft13gjgjm6nd8vpuvzqr7cz6epnh59566pklzv8n906yltfqfddmf2sjrhq9k",
+          "edition": 3933,
+          "name": "Bepe Wojak #3933",
+          "score": 100,
+          "method": "edition_match"
+        },
+        "alternatives": [
+          {
+            "launcher": "nft1mdx2z5a8pcc0zwh8wpy2kkay20pf2agguuarwcdwt2ntvjv8rulq2fjc6e",
+            "edition": 3933,
+            "name": "Bepe Wojak #3933",
+            "score": 100,
+            "method": "edition_match"
+          }
+        ]
+      }
+    },
+    {
+      "id": "429",
+      "primary_launcher": "nft14zpk04zhr6r0etj6nh7zrg5e4m3dlqltk028xdvvg97sqwc07m6ssakqfa",
+      "alternatives": [
+        "nft1aax5esc96vstynd9v09g8yqalzw6pftaqxl4jt5krwrzr7kx057sspky8w"
+      ],
+      "resolution_method": "edition_match",
+      "evidence": {
+        "primary": {
+          "launcher": "nft14zpk04zhr6r0etj6nh7zrg5e4m3dlqltk028xdvvg97sqwc07m6ssakqfa",
+          "edition": 429,
+          "name": "Wojak #0429",
+          "score": 100,
+          "method": "edition_match"
+        },
+        "alternatives": [
+          {
+            "launcher": "nft1aax5esc96vstynd9v09g8yqalzw6pftaqxl4jt5krwrzr7kx057sspky8w",
+            "edition": 429,
+            "name": "Wojak #0429",
+            "score": 100,
+            "method": "edition_match"
+          }
+        ]
+      }
+    },
+    {
+      "id": "796",
+      "primary_launcher": "nft19jak3qdsf44ydnl7xq92ghx8v8kn6ydyq9h4yqza9hj6srjxjqrs58jddh",
+      "alternatives": [
+        "nft1smqxnm6zk23r4psxqs8w66qzhwjn4zs9h8havkpx554amuhadh3qfr93k7"
+      ],
+      "resolution_method": "edition_match",
+      "evidence": {
+        "primary": {
+          "launcher": "nft19jak3qdsf44ydnl7xq92ghx8v8kn6ydyq9h4yqza9hj6srjxjqrs58jddh",
+          "edition": 796,
+          "name": "Wojak #0796",
+          "score": 100,
+          "method": "edition_match"
+        },
+        "alternatives": [
+          {
+            "launcher": "nft1smqxnm6zk23r4psxqs8w66qzhwjn4zs9h8havkpx554amuhadh3qfr93k7",
+            "edition": 796,
+            "name": "Wojak #0796",
+            "score": 100,
+            "method": "edition_match"
+          }
+        ]
+      }
+    }
+  ],
+  "alternatives_by_id": {
+    "359": [
+      "nft1lq4q53tyy2jgyafmt0aw0tx0xuj77mk8l4672et2hashvqn2c5xqyvz7hz"
+    ],
+    "429": [
+      "nft1aax5esc96vstynd9v09g8yqalzw6pftaqxl4jt5krwrzr7kx057sspky8w"
+    ],
+    "796": [
+      "nft1smqxnm6zk23r4psxqs8w66qzhwjn4zs9h8havkpx554amuhadh3qfr93k7"
+    ],
+    "1149": [
+      "nft1xy8aas07g3appxv8nmx5zzz34s6cr47vmjrpdf03lqzf96cq697qev7rv9"
+    ],
+    "1293": [
+      "nft1ml0qrc0kcusnwhmt05zcahau9h3vfvu7sfv4ar5mg2tpm2rkrrtqe6zjgs"
+    ],
+    "1812": [
+      "nft1snf6cycp7ac8j7vw30havcnskyg44kxex0478esthwezm7ynztns3ww9e2"
+    ],
+    "1962": [
+      "nft1rwxzzt2th5xaqyzlrnspy9umry3d8ntlawmjnjxvn5j08h2vxr0smwkgq2"
+    ],
+    "2153": [
+      "nft1ykx4xp5mesv5lcn86e829vsclwtne52j7hgvce5y967erv7wh56s6j6qth"
+    ],
+    "2280": [
+      "nft1fcw2yg8x76ft80fcy2360ujv77mkfqyuymay5lkw5nk8mxe4c0tstpt98e"
+    ],
+    "2327": [
+      "nft19a4575k8yxs3jw5h3wxkpu77slg336jnfd5ufwuejcweu5mdvnus795ay0"
+    ],
+    "2370": [
+      "nft1mmydn40jwzkyq36ys0l2tgvw3mczazelyj85vg807vu9ksq5lqfsehhp4p"
+    ],
+    "2948": [
+      "nft1tq5l25hmqwnfzxrrytmm4vn7zrstxmp0sc7fpymj0pl6gr6rsk9s2g5u7l"
+    ],
+    "3028": [
+      "nft1vydly49g0c09nupghf0n9jvg07nxrj7q4f5nu2ecfh4wqwh2hqxszk8wc2"
+    ],
+    "3258": [
+      "nft1l9p67gfqqkqjf820xu2wtkucf8u32y29kn0nrw43w6yer9et4v7qwertqt"
+    ],
+    "3403": [
+      "nft1atv0j2nl2s2pm6zczkmfkt4lup5tnnmua7netyffcfx352y9tqgqlatnkj"
+    ],
+    "3676": [
+      "nft1tp7nfs53jhk7yyq50v4e3vcv5f6jz4jdzrdjeexhear7d3qv23usevrskv"
+    ],
+    "3692": [
+      "nft15p8sqcujpqz050shgg3czsggav82geut2trgw43c0xk4evgazwlse96rkq"
+    ],
+    "3933": [
+      "nft1mdx2z5a8pcc0zwh8wpy2kkay20pf2agguuarwcdwt2ntvjv8rulq2fjc6e"
+    ]
+  }
+}

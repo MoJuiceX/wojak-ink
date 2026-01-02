@@ -1,0 +1,166 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "facewear:MOG Glasses||head:Ronin Helmet": [
+      "2567",
+      "864",
+      "1739",
+      "814",
+      "1931",
+      "1960",
+      "21",
+      "2381",
+      "1431",
+      "519"
+    ],
+    "face:Rekt||mouth:Hannibal Mask": [
+      "2504",
+      "42",
+      "3690",
+      "3775",
+      "1180",
+      "853",
+      "1815",
+      "1080",
+      "1278",
+      "2145",
+      "1592",
+      "1480",
+      "2503"
+    ],
+    "face:Bleeding Bags||head:Super Wojak Hat": [
+      "48",
+      "382",
+      "3558",
+      "3265",
+      "3507",
+      "3320",
+      "3236",
+      "111",
+      "3340",
+      "470",
+      "1963"
+    ],
+    "clothes:SWAT Gear||face:Bleeding Bags": [
+      "3119",
+      "3827",
+      "469",
+      "3977",
+      "2348",
+      "104",
+      "471",
+      "2897",
+      "470",
+      "468"
+    ],
+    "clothes:SWAT Gear||mouth:Screaming": [
+      "3119",
+      "3827",
+      "469",
+      "2348",
+      "3122",
+      "104",
+      "2908",
+      "468",
+      "461"
+    ],
+    "clothes:Sonic Suit||face:Rugged": [
+      "234",
+      "2055",
+      "233",
+      "232"
+    ],
+    "facewear:3D Glasses||mouth:Bubble Gum": [
+      "3669",
+      "3404",
+      "3947",
+      "847",
+      "1210",
+      "1308",
+      "1603",
+      "844",
+      "2528",
+      "277"
+    ],
+    "clothes:Firefighter Uniform||head:Halo": [
+      "514"
+    ],
+    "head:Firefighter Helmet||mouth:Copium Mask": [
+      "1238",
+      "528",
+      "1341"
+    ],
+    "clothes:Super Saiyan Uniform||head:Hip Hop Hat": [
+      "902"
+    ],
+    "facewear:VR Headset||head:Wizard Hat": [
+      "4018",
+      "1516",
+      "1498",
+      "2522"
+    ],
+    "clothes:Wizard Drip||head:SWAT Helmet": [
+      "3197",
+      "1791",
+      "1826"
+    ],
+    "clothes:Wizard Drip||facewear:Night Vision": [
+      "4115",
+      "3679",
+      "1791",
+      "1828",
+      "2531",
+      "1810"
+    ],
+    "facewear:MOG Glasses||mouth:Sexy Lip Bite": [
+      "3098",
+      "2777",
+      "3162"
+    ],
+    "facewear:Cyber Shades||mouth:Sexy Lip Bite": [
+      "3841",
+      "2796",
+      "3086",
+      "2991"
+    ],
+    "clothes:Ronin||head:Spikes": [
+      "3889",
+      "2894"
+    ],
+    "clothes:Suit||head:Tiara": [
+      "3165"
+    ],
+    "base:Monkey Zoo||facewear:MOG Glasses": [
+      "3570",
+      "3647",
+      "3554",
+      "3587",
+      "3495",
+      "3477",
+      "3509",
+      "3625",
+      "3650"
+    ],
+    "base:Alien Soyjak||mouth:Bubble Gum": [
+      "3771",
+      "3754"
+    ],
+    "base:Alien Baddie||clothes:Denim Vest": [
+      "3869"
+    ],
+    "base:Bepe Soyjak||head:Super Saiyan": [
+      "4100",
+      "4082",
+      "4101",
+      "4030",
+      "4102",
+      "4099",
+      "4081",
+      "4098"
+    ],
+    "base:Bepe Soyjak||mouth:Bubble Gum": [
+      "4073"
+    ]
+  }
+}

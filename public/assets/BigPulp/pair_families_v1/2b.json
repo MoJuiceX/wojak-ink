@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "clothes:Suit||head:Military Beret": [
+      "3162",
+      "3590",
+      "2224",
+      "3337",
+      "1946",
+      "2952",
+      "26",
+      "24",
+      "2951"
+    ],
+    "clothes:Straitjacket||facewear:Tyson Tattoo": [
+      "2160",
+      "46",
+      "2149",
+      "2156",
+      "374"
+    ],
+    "face:NPC||mouth:Cohiba": [
+      "1110",
+      "336",
+      "548",
+      "2086",
+      "474",
+      "661",
+      "387",
+      "866",
+      "1512",
+      "1112",
+      "948",
+      "79",
+      "1396",
+      "259",
+      "1971",
+      "1625",
+      "2595",
+      "2561",
+      "1855",
+      "1969"
+    ],
+    "facewear:MOG Glasses||head:Super Wojak Hat": [
+      "3923",
+      "3410",
+      "111",
+      "568",
+      "798",
+      "1492",
+      "640",
+      "2177",
+      "412",
+      "1690"
+    ],
+    "facewear:Tyson Tattoo||mouth:Stache": [
+      "1387",
+      "124",
+      "515",
+      "1929",
+      "1571",
+      "289"
+    ],
+    "facewear:Cyber Shades||head:SWAT Helmet": [
+      "2450",
+      "895",
+      "628"
+    ],
+    "clothes:Ronin||facewear:Matrix Lenses": [
+      "860",
+      "3115",
+      "825",
+      "868",
+      "3301",
+      "817",
+      "850",
+      "838"
+    ],
+    "clothes:Suit||head:SWAT Helmet": [
+      "1993",
+      "1884"
+    ],
+    "clothes:Ronin||facewear:VR Headset": [
+      "2385"
+    ],
+    "base:Waifu||facewear:3D Glasses": [
+      "2983",
+      "2861",
+      "2814",
+      "2919",
+      "2928",
+      "2762",
+      "2850",
+      "2996",
+      "2871"
+    ],
+    "base:Alien Soyjak||mouth:Neckbeard": [
+      "3796",
+      "3795",
+      "3739",
+      "3740",
+      "3760",
+      "3794",
+      "3762",
+      "3761"
+    ],
+    "base:Bepe Wojak||head:Cowboy Hat": [
+      "3931"
+    ],
+    "base:Bepe Soyjak||mouth:Neckbeard": [
+      "4077",
+      "4052",
+      "4080",
+      "4044",
+      "4109",
+      "4074",
+      "4082",
+      "4062",
+      "4032",
+      "4090",
+      "4108",
+      "4081"
+    ]
+  }
+}

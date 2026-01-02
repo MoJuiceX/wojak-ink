@@ -1,0 +1,146 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "face:Bleeding Bags||mouth:Hannibal Mask": [
+      "47",
+      "49",
+      "48",
+      "38",
+      "1502"
+    ],
+    "clothes:Leather Jacket||head:Fedora": [
+      "3807",
+      "1388",
+      "3509",
+      "3258",
+      "1358",
+      "2826",
+      "2312",
+      "2315",
+      "3063",
+      "1404",
+      "2320",
+      "88",
+      "1342"
+    ],
+    "face:Bleeding Bags||head:Field Cap": [
+      "3212",
+      "3437",
+      "2403",
+      "3818",
+      "108",
+      "3222",
+      "3248",
+      "1295"
+    ],
+    "facewear:Tyson Tattoo||mouth:Cohiba": [
+      "3513",
+      "661",
+      "2033",
+      "922",
+      "250",
+      "1479"
+    ],
+    "clothes:Viking Armor||head:Centurion": [
+      "2184",
+      "401"
+    ],
+    "facewear:Alpha Shades||head:Pirate Hat": [
+      "793",
+      "3362",
+      "4061",
+      "1272",
+      "1850",
+      "1788",
+      "1988"
+    ],
+    "facewear:Wizard Glasses||head:Super Saiyan": [
+      "972",
+      "1763"
+    ],
+    "clothes:Roman Drip||head:Military Beret": [
+      "3970",
+      "3108",
+      "3297",
+      "2627",
+      "1034"
+    ],
+    "facewear:Cool Glasses||head:Construction Helmet": [
+      "3539",
+      "1112",
+      "2405",
+      "1562",
+      "1668",
+      "1918"
+    ],
+    "clothes:El Presidente||facewear:Laser Eyes": [
+      "4046",
+      "1154"
+    ],
+    "clothes:Born to Ride||head:Beanie": [
+      "2772",
+      "3488",
+      "1284",
+      "1255",
+      "1223"
+    ],
+    "head:Super Wojak Hat||mouth:Screaming": [
+      "3410",
+      "1277"
+    ],
+    "face:Rugged||head:Super Wojak Hat": [
+      "2678",
+      "3410",
+      "2571",
+      "1382",
+      "1829",
+      "1492",
+      "1608"
+    ],
+    "facewear:Aviators||head:Beanie": [
+      "3861",
+      "2481",
+      "1393"
+    ],
+    "clothes:Chia Farmer||head:Pirate Hat": [
+      "1488",
+      "1429",
+      "1487",
+      "2654"
+    ],
+    "clothes:Suit||facewear:Eye Patch": [
+      "1956",
+      "1974",
+      "2214",
+      "1938",
+      "1871",
+      "1998"
+    ],
+    "base:Soyjak||head:Hip Hop Hat": [
+      "2611",
+      "2451",
+      "2322",
+      "2596",
+      "2353",
+      "2024",
+      "2336",
+      "2659",
+      "2669",
+      "2286",
+      "2365",
+      "2435",
+      "2629",
+      "2212"
+    ],
+    "head:Twin Braids||mouth:Sexy Lip Bite": [
+      "3081",
+      "3039",
+      "2932"
+    ],
+    "clothes:Vintage Dress||head:Wizard Hat": [
+      "3178",
+      "2981"
+    ]
+  }
+}

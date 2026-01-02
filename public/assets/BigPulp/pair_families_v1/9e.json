@@ -1,0 +1,171 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "base:Wojak||clothes:El Presidente": [
+      "476",
+      "658",
+      "378",
+      "133",
+      "1839",
+      "35",
+      "1054",
+      "1154",
+      "1725",
+      "1851",
+      "557",
+      "776",
+      "721",
+      "1729",
+      "1859",
+      "1856",
+      "697",
+      "1491",
+      "71",
+      "425"
+    ],
+    "head:Viking Helmet||mouth:Screaming": [
+      "3438",
+      "2223",
+      "736",
+      "2167",
+      "72",
+      "74",
+      "3646",
+      "3678",
+      "3875",
+      "374",
+      "773",
+      "2886",
+      "2396",
+      "2166",
+      "73",
+      "1151",
+      "429"
+    ],
+    "facewear:3D Glasses||mouth:Stache": [
+      "578",
+      "835",
+      "1429",
+      "1330",
+      "125"
+    ],
+    "clothes:Sonic Suit||mouth:Teeth": [
+      "2047",
+      "220"
+    ],
+    "head:Tin Foil Hat||mouth:Numb": [
+      "3895",
+      "2448",
+      "546",
+      "426",
+      "2341",
+      "1715",
+      "2507",
+      "1965",
+      "2859",
+      "3035",
+      "2630",
+      "485",
+      "1465",
+      "1149",
+      "894"
+    ],
+    "clothes:SWAT Gear||facewear:Ninja Turtle Mask": [
+      "487",
+      "464"
+    ],
+    "facewear:VR Headset||head:SWAT Helmet": [
+      "627",
+      "2716",
+      "1259"
+    ],
+    "head:Tin Foil Hat||mouth:Pipe": [
+      "695",
+      "3346",
+      "1207"
+    ],
+    "facewear:Matrix Lenses||head:Devil Horns": [
+      "817",
+      "1671",
+      "1134"
+    ],
+    "facewear:Matrix Lenses||head:Super Wojak Hat": [
+      "2333",
+      "1352"
+    ],
+    "clothes:Suit||mouth:Hannibal Mask": [
+      "1910",
+      "1980"
+    ],
+    "clothes:Sonic Suit||mouth:Pizza": [
+      "2055",
+      "2052"
+    ],
+    "base:Waifu||facewear:Cool Glasses": [
+      "2866",
+      "2877",
+      "2856",
+      "2915",
+      "2979",
+      "2905",
+      "2776",
+      "2876",
+      "2997",
+      "2852",
+      "2817"
+    ],
+    "head:Vixen Waves||mouth:Sexy Lip Bite": [
+      "2854"
+    ],
+    "head:Twin Braids||mouth:Glossed Lips": [
+      "4154",
+      "4162",
+      "4193",
+      "4119",
+      "4184",
+      "4198",
+      "3882",
+      "4197",
+      "4141",
+      "3100",
+      "2977",
+      "3156"
+    ],
+    "clothes:Denim Vest||facewear:Eye Patch": [
+      "3037"
+    ],
+    "head:Crown||mouth:Copium Mask": [
+      "3752",
+      "3091",
+      "3802",
+      "3990"
+    ],
+    "base:Papa Tang||head:Beer Hat": [
+      "3242",
+      "3416",
+      "3384",
+      "3358",
+      "3296",
+      "3329",
+      "3227",
+      "3267",
+      "3347",
+      "3366"
+    ],
+    "clothes:Sonic Suit||mouth:Smile": [
+      "3759"
+    ],
+    "base:Alien Soyjak||clothes:Super Saiyan Uniform": [
+      "3763",
+      "3794"
+    ],
+    "base:Alien Waifu||clothes:Born to Ride": [
+      "3833"
+    ],
+    "base:Alien Baddie||clothes:Ronin": [
+      "3889",
+      "3870"
+    ]
+  }
+}

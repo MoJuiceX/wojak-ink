@@ -1,13 +1,69 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.4.0",
   "generated_at": "2024-12-30T00:00:00Z",
+  "build_timestamp": "2024-12-30T00:00:00Z",
   "collection_size": 4200,
   "required_files": [
     "all_nft_analysis.json",
     "all_nft_sentences.json",
     "question_tree_v2.json",
     "trait_insights.json",
-    "combo_database.json"
+    "combo_database.json",
+    {
+      "path": "rare_pairings_index_v1.json",
+      "type": "json",
+      "description": "Rare pairings index for Discovery explorer"
+    },
+    {
+      "path": "combo_index_v1/inverted_index.json",
+      "type": "json",
+      "description": "Combo explorer inverted index"
+    },
+    {
+      "path": "combo_index_v1/pair_counts.json",
+      "type": "json",
+      "description": "Combo explorer pair counts for Hunter Mode"
+    },
+    {
+      "path": "combo_index_v1/partner_index.json",
+      "type": "json",
+      "description": "Combo explorer partner index for instant suggestions"
+    },
+    {
+      "path": "combo_index_v1/trait_catalog.json",
+      "type": "json",
+      "description": "Combo explorer trait catalog for pickers"
+    },
+    {
+      "path": "combo_index_v1/traits_by_nft_",
+      "type": "sharded_json",
+      "description": "Sharded traits-by-NFT files (ranges: 0001-0100, 0101-0200, ...)"
+    },
+    {
+      "path": "mintgarden_launcher_map_runtime_v1.json",
+      "type": "json",
+      "description": "Map of internal NFT number -> MintGarden launcher ID (runtime map only)"
+    },
+    {
+      "path": "mintgarden_offers_index_v1.json",
+      "type": "json",
+      "description": "MintGarden offers index (nftId -> active listing price with floor context)"
+    },
+    {
+      "path": "mintgarden_sales_index_v1.json",
+      "type": "json",
+      "description": "MintGarden sales index (executed trades)"
+    },
+    {
+      "path": "value_model_v1.json",
+      "type": "json",
+      "description": "BigPulp value model (trait-based pricing)"
+    },
+    {
+      "path": "value_model_diagnostics_v1.json",
+      "type": "json",
+      "description": "Value model diagnostics and health metrics"
+    }
   ]
 }
 

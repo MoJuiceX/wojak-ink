@@ -1,0 +1,187 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "clothes:Super Saiyan Uniform||mouth:Screaming": [
+      "940",
+      "2739",
+      "2720",
+      "3820",
+      "3998",
+      "2733",
+      "2714",
+      "2685",
+      "2711",
+      "2699",
+      "904",
+      "943",
+      "2721",
+      "3360",
+      "2741",
+      "2683",
+      "2688",
+      "942",
+      "58"
+    ],
+    "clothes:God's Robe||mouth:Smile": [
+      "3940",
+      "2810",
+      "64",
+      "63",
+      "3836",
+      "347",
+      "4050",
+      "3938",
+      "3044",
+      "2024",
+      "2806",
+      "348",
+      "324"
+    ],
+    "head:Devil Horns||mouth:Cig": [
+      "106",
+      "717",
+      "908",
+      "1018",
+      "1111",
+      "2506"
+    ],
+    "clothes:Pepe Suit||facewear:Cyber Shades": [
+      "187"
+    ],
+    "facewear:Eye Patch||mouth:Teeth": [
+      "2363",
+      "438",
+      "2172",
+      "257",
+      "2696",
+      "1871",
+      "1067",
+      "282"
+    ],
+    "clothes:God's Robe||mouth:Teeth": [
+      "3048",
+      "2808",
+      "332",
+      "322",
+      "337"
+    ],
+    "clothes:God's Robe||mouth:Pizza": [
+      "342"
+    ],
+    "facewear:Eye Patch||mouth:Pizza": [
+      "3692",
+      "3521",
+      "2314",
+      "3405",
+      "1740",
+      "2719",
+      "454",
+      "2283"
+    ],
+    "clothes:SWAT Gear||facewear:Wizard Glasses": [
+      "460"
+    ],
+    "face:NPC||head:Trump Wave": [
+      "477",
+      "548"
+    ],
+    "clothes:Firefighter Uniform||head:Trump Wave": [
+      "548",
+      "2272"
+    ],
+    "facewear:Tyson Tattoo||mouth:Vampire Teeth": [
+      "609",
+      "2678",
+      "1823",
+      "583",
+      "2334",
+      "970",
+      "563"
+    ],
+    "head:Wizard Hat||mouth:Hannibal Mask": [
+      "4094",
+      "1637",
+      "1815",
+      "978"
+    ],
+    "facewear:Eye Patch||mouth:Joint": [
+      "3707",
+      "3852",
+      "2562",
+      "3358",
+      "979",
+      "2178",
+      "1974",
+      "2584"
+    ],
+    "clothes:Sports Jacket||face:Rugged": [
+      "3570",
+      "2512",
+      "3572",
+      "3569",
+      "3567",
+      "3568",
+      "3571",
+      "3332",
+      "3319",
+      "1730",
+      "2515",
+      "3323",
+      "2511",
+      "2514",
+      "2513",
+      "1717",
+      "1731",
+      "1727",
+      "1721",
+      "1722",
+      "1726",
+      "1720",
+      "1719",
+      "1724",
+      "3315",
+      "2516",
+      "1723",
+      "1728",
+      "1718"
+    ],
+    "clothes:Wizard Drip||mouth:Stache": [
+      "3799",
+      "1764",
+      "1771",
+      "1756"
+    ],
+    "face:Rugged||mouth:Stunned": [
+      "3779",
+      "2742",
+      "3780",
+      "2013",
+      "2641",
+      "2397",
+      "2575",
+      "2182",
+      "2608",
+      "2124",
+      "2071",
+      "2346",
+      "2318"
+    ],
+    "face:Rugged||head:Vixen Waves": [
+      "3078",
+      "3176",
+      "2896"
+    ],
+    "base:Alien Soyjak||head:Construction Helmet": [
+      "3823"
+    ],
+    "clothes:Sports Bra||head:No Headgear": [
+      "3846",
+      "3886",
+      "3885"
+    ],
+    "clothes:Bathrobe||mouth:Stunned": [
+      "4027"
+    ]
+  }
+}

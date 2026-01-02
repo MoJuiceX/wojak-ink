@@ -1,0 +1,1309 @@
+{
+  "schema_version": "1.0",
+  "range": [
+    3701,
+    3800
+  ],
+  "nfts": {
+    "3701": {
+      "rank": 152,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3701.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Rekt",
+        "mouth": "Copium Mask",
+        "facewear": "No Face Wear",
+        "head": "Ronin Helmet",
+        "clothes": "Straitjacket",
+        "background": "Crazy Room"
+      }
+    },
+    "3702": {
+      "rank": 49,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3702.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "Aviators",
+        "head": "Spikes",
+        "clothes": "Piccolo Uniform",
+        "background": "Hell"
+      }
+    },
+    "3703": {
+      "rank": 5,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3703.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "Matrix Lenses",
+        "head": "Piccolo Turban",
+        "clothes": "Piccolo Uniform",
+        "background": "Matrix"
+      }
+    },
+    "3704": {
+      "rank": 6,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3704.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Rekt",
+        "mouth": "Cig",
+        "facewear": "Alpha Shades",
+        "head": "Piccolo Turban",
+        "clothes": "Piccolo Uniform",
+        "background": "Hell"
+      }
+    },
+    "3705": {
+      "rank": 4,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3705.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Rekt",
+        "mouth": "Cohiba",
+        "facewear": "Aviators",
+        "head": "Piccolo Turban",
+        "clothes": "Piccolo Uniform",
+        "background": "Moon"
+      }
+    },
+    "3706": {
+      "rank": 34,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3706.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Terminator",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Piccolo Turban",
+        "clothes": "Piccolo Uniform",
+        "background": "Moon"
+      }
+    },
+    "3707": {
+      "rank": 2,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3707.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Terminator",
+        "mouth": "Joint",
+        "facewear": "Eye Patch",
+        "head": "Piccolo Turban",
+        "clothes": "Piccolo Uniform",
+        "background": "One Market"
+      }
+    },
+    "3708": {
+      "rank": 1185,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3708.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Terminator",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Viking Helmet",
+        "clothes": "Wizard Drip",
+        "background": "$LOVE"
+      }
+    },
+    "3709": {
+      "rank": 1645,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3709.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Terminator",
+        "mouth": "Neckbeard",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Wizard Drip",
+        "background": "Moon"
+      }
+    },
+    "3710": {
+      "rank": 391,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3710.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Terminator",
+        "mouth": "Neckbeard",
+        "facewear": "No Face Wear",
+        "head": "Military Beret",
+        "clothes": "Astronaut",
+        "background": "Matrix"
+      }
+    },
+    "3711": {
+      "rank": 303,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3711.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Terminator",
+        "mouth": "Pizza",
+        "facewear": "No Face Wear",
+        "head": "2Pac Bandana",
+        "clothes": "Bathrobe",
+        "background": "Moon"
+      }
+    },
+    "3712": {
+      "rank": 232,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3712.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Terminator",
+        "mouth": "Screaming",
+        "facewear": "Laser Eyes",
+        "head": "Beanie",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "3713": {
+      "rank": 1011,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3713.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Terminator",
+        "mouth": "Smile",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "Chia Farm"
+      }
+    },
+    "3714": {
+      "rank": 324,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3714.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Terminator",
+        "mouth": "Stache",
+        "facewear": "MOG Glasses",
+        "head": "Cap",
+        "clothes": "Born to Ride",
+        "background": "Moon"
+      }
+    },
+    "3715": {
+      "rank": 1139,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3715.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Terminator",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "Centurion",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "3716": {
+      "rank": 65,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3716.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Terminator",
+        "mouth": "Vampire Teeth",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "El Presidente",
+        "background": "Moon"
+      }
+    },
+    "3717": {
+      "rank": 521,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3717.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Terminator",
+        "mouth": "Pipe",
+        "facewear": "No Face Wear",
+        "head": "Firefighter Helmet",
+        "clothes": "Firefighter Uniform",
+        "background": "Hell"
+      }
+    },
+    "3718": {
+      "rank": 67,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3718.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Terminator",
+        "mouth": "Copium Mask",
+        "facewear": "Shades",
+        "head": "Construction Helmet",
+        "clothes": "God's Robe",
+        "background": "Heaven"
+      }
+    },
+    "3719": {
+      "rank": 191,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3719.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Terminator",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Piccolo Uniform",
+        "background": "Moms Basement"
+      }
+    },
+    "3720": {
+      "rank": 589,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3720.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Terminator",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Piccolo Uniform",
+        "background": "Moon"
+      }
+    },
+    "3721": {
+      "rank": 90,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3721.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "Wizard Glasses",
+        "head": "Devil Horns",
+        "clothes": "Drac",
+        "background": "Heaven"
+      }
+    },
+    "3722": {
+      "rank": 66,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3722.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Rugged",
+        "mouth": "Vampire Teeth",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Drac",
+        "background": "One Market"
+      }
+    },
+    "3723": {
+      "rank": 37,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3723.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Rugged",
+        "mouth": "Gold Teeth",
+        "facewear": "3D Glasses",
+        "head": "Piccolo Turban",
+        "clothes": "Topless",
+        "background": "Moon"
+      }
+    },
+    "3724": {
+      "rank": 234,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3724.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Rugged",
+        "mouth": "Hannibal Mask",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Pepe Suit",
+        "background": "Crazy Room"
+      }
+    },
+    "3725": {
+      "rank": 2908,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3725.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Rugged",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "SWAT Gear",
+        "background": "Moon"
+      }
+    },
+    "3726": {
+      "rank": 725,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3726.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "Night Vision",
+        "head": "No Headgear",
+        "clothes": "Viking Armor",
+        "background": "Moon"
+      }
+    },
+    "3727": {
+      "rank": 1282,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3727.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Piccolo Uniform",
+        "background": "Matrix"
+      }
+    },
+    "3728": {
+      "rank": 3,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3728.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "Matrix Lenses",
+        "head": "Piccolo Turban",
+        "clothes": "Piccolo Uniform",
+        "background": "Ronin Dojo"
+      }
+    },
+    "3729": {
+      "rank": 1,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3729.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Classic",
+        "mouth": "Screaming",
+        "facewear": "Fake It Mask",
+        "head": "Piccolo Turban",
+        "clothes": "Piccolo Uniform",
+        "background": "Signal Lost"
+      }
+    },
+    "3730": {
+      "rank": 44,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3730.png",
+      "traits": {
+        "base": "Alien Wojak",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "Laser Eyes",
+        "head": "Piccolo Turban",
+        "clothes": "Sports Jacket",
+        "background": "Silicon Data Center"
+      }
+    },
+    "3731": {
+      "rank": 2166,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3731.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "El Presidente",
+        "background": "Moon"
+      }
+    },
+    "3732": {
+      "rank": 1177,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3732.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "MOG Glasses",
+        "head": "No Headgear",
+        "clothes": "Suit",
+        "background": "Silicon Data Center"
+      }
+    },
+    "3733": {
+      "rank": 10,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3733.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Vampire Teeth",
+        "facewear": "Night Vision",
+        "head": "Soy Hair",
+        "clothes": "El Presidente",
+        "background": "Moms Basement"
+      }
+    },
+    "3734": {
+      "rank": 1554,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3734.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Pipe",
+        "facewear": "No Face Wear",
+        "head": "Super Wojak Hat",
+        "clothes": "SWAT Gear",
+        "background": "Bepe Barracks"
+      }
+    },
+    "3735": {
+      "rank": 987,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3735.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "No Face Wear",
+        "head": "Pirate Hat",
+        "clothes": "Tank Top",
+        "background": "Moon"
+      }
+    },
+    "3736": {
+      "rank": 738,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3736.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "Shades",
+        "head": "Tin Foil Hat",
+        "clothes": "Tee",
+        "background": "Moon"
+      }
+    },
+    "3737": {
+      "rank": 963,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3737.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "No Face Wear",
+        "head": "Trump Wave",
+        "clothes": "Viking Armor",
+        "background": "Moon"
+      }
+    },
+    "3738": {
+      "rank": 1743,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3738.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Trump Wave",
+        "clothes": "Wizard Drip",
+        "background": "Moms Basement"
+      }
+    },
+    "3739": {
+      "rank": 507,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3739.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Wizard Glasses",
+        "head": "Wizard Hat",
+        "clothes": "Wizard Drip",
+        "background": "Spell Room"
+      }
+    },
+    "3740": {
+      "rank": 565,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3740.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Cool Glasses",
+        "head": "Wizard Hat",
+        "clothes": "Wizard Drip",
+        "background": "Moms Basement"
+      }
+    },
+    "3741": {
+      "rank": 156,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3741.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "3D Glasses",
+        "head": "Military Beret",
+        "clothes": "El Presidente",
+        "background": "Moon"
+      }
+    },
+    "3742": {
+      "rank": 778,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3742.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Alpha Shades",
+        "head": "Beanie",
+        "clothes": "Bepe Army",
+        "background": "Moon"
+      }
+    },
+    "3743": {
+      "rank": 577,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3743.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "Aviators",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "Moon"
+      }
+    },
+    "3744": {
+      "rank": 266,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3744.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "Cool Glasses",
+        "head": "Cap",
+        "clothes": "Born to Ride",
+        "background": "Chia Farm"
+      }
+    },
+    "3745": {
+      "rank": 1892,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3745.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "Cyber Shades",
+        "head": "No Headgear",
+        "clothes": "Chia Farmer",
+        "background": "Moon"
+      }
+    },
+    "3746": {
+      "rank": 840,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3746.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Vampire Teeth",
+        "facewear": "Cyber Shades",
+        "head": "No Headgear",
+        "clothes": "Drac",
+        "background": "Hell"
+      }
+    },
+    "3747": {
+      "rank": 692,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3747.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Screaming",
+        "facewear": "Fake It Mask",
+        "head": "No Headgear",
+        "clothes": "Firefighter Uniform",
+        "background": "Moon"
+      }
+    },
+    "3748": {
+      "rank": 106,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3748.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Stache",
+        "facewear": "Cool Glasses",
+        "head": "Halo",
+        "clothes": "God's Robe",
+        "background": "Heaven"
+      }
+    },
+    "3749": {
+      "rank": 942,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3749.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "Matrix Lenses",
+        "head": "No Headgear",
+        "clothes": "Goose Suit",
+        "background": "Hell"
+      }
+    },
+    "3750": {
+      "rank": 1034,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3750.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "MOG Glasses",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "Moon"
+      }
+    },
+    "3751": {
+      "rank": 348,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3751.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Pipe",
+        "facewear": "Eye Patch",
+        "head": "Devil Horns",
+        "clothes": "Leather Jacket",
+        "background": "Hell"
+      }
+    },
+    "3752": {
+      "rank": 212,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3752.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Copium Mask",
+        "facewear": "Cyber Shades",
+        "head": "Crown",
+        "clothes": "Ninja Turtle Fit",
+        "background": "One Market"
+      }
+    },
+    "3753": {
+      "rank": 1732,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3753.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "Field Cap",
+        "clothes": "Topless",
+        "background": "Matrix"
+      }
+    },
+    "3754": {
+      "rank": 1869,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3754.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Pepe Suit",
+        "background": "Moms Basement"
+      }
+    },
+    "3755": {
+      "rank": 1245,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3755.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Cyber Shades",
+        "head": "No Headgear",
+        "clothes": "Pickle Suit",
+        "background": "Moon"
+      }
+    },
+    "3756": {
+      "rank": 632,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3756.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Night Vision",
+        "head": "No Headgear",
+        "clothes": "Astronaut",
+        "background": "NYSE Pump"
+      }
+    },
+    "3757": {
+      "rank": 237,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3757.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Gold Teeth",
+        "facewear": "VR Headset",
+        "head": "Centurion",
+        "clothes": "Roman Drip",
+        "background": "Moms Basement"
+      }
+    },
+    "3758": {
+      "rank": 404,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3758.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Ronin",
+        "background": "Moon"
+      }
+    },
+    "3759": {
+      "rank": 554,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3759.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "3D Glasses",
+        "head": "No Headgear",
+        "clothes": "Sonic Suit",
+        "background": "Matrix"
+      }
+    },
+    "3760": {
+      "rank": 732,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3760.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Aviators",
+        "head": "Propeller Hat",
+        "clothes": "Sports Jacket",
+        "background": "Hell"
+      }
+    },
+    "3761": {
+      "rank": 1143,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3761.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "MOG Glasses",
+        "head": "No Headgear",
+        "clothes": "Straitjacket",
+        "background": "Chia Farm"
+      }
+    },
+    "3762": {
+      "rank": 1121,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3762.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "No Face Wear",
+        "head": "Standard Cut",
+        "clothes": "Suit",
+        "background": "Moon"
+      }
+    },
+    "3763": {
+      "rank": 737,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3763.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "Cyber Shades",
+        "head": "Super Saiyan",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Moon"
+      }
+    },
+    "3764": {
+      "rank": 361,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3764.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Rekt",
+        "mouth": "Cig",
+        "facewear": "Eye Patch",
+        "head": "Military Beret",
+        "clothes": "SWAT Gear",
+        "background": "Bepe Barracks"
+      }
+    },
+    "3765": {
+      "rank": 398,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3765.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Rekt",
+        "mouth": "Cohiba",
+        "facewear": "MOG Glasses",
+        "head": "Military Beret",
+        "clothes": "Tank Top",
+        "background": "Hell"
+      }
+    },
+    "3766": {
+      "rank": 282,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3766.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Rekt",
+        "mouth": "Teeth",
+        "facewear": "Laser Eyes",
+        "head": "Tin Foil Hat",
+        "clothes": "Tee",
+        "background": "$CHIA"
+      }
+    },
+    "3767": {
+      "rank": 82,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3767.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Rekt",
+        "mouth": "Vampire Teeth",
+        "facewear": "Matrix Lenses",
+        "head": "Trump Wave",
+        "clothes": "Viking Armor",
+        "background": "Matrix"
+      }
+    },
+    "3768": {
+      "rank": 588,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3768.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Rekt",
+        "mouth": "Pipe",
+        "facewear": "MOG Glasses",
+        "head": "Wizard Hat",
+        "clothes": "Wizard Drip",
+        "background": "Hell"
+      }
+    },
+    "3769": {
+      "rank": 27,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3769.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Rekt",
+        "mouth": "Cohiba",
+        "facewear": "Cyber Shades",
+        "head": "Standard Cut",
+        "clothes": "El Presidente",
+        "background": "Moon"
+      }
+    },
+    "3770": {
+      "rank": 347,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3770.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Rekt",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "Crown",
+        "clothes": "Astronaut",
+        "background": "Moon"
+      }
+    },
+    "3771": {
+      "rank": 335,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3771.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Rekt",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "Fedora",
+        "clothes": "Bathrobe",
+        "background": "Morning Routine"
+      }
+    },
+    "3772": {
+      "rank": 493,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3772.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Rekt",
+        "mouth": "Cig",
+        "facewear": "Shades",
+        "head": "Beanie",
+        "clothes": "Bepe Army",
+        "background": "Moon"
+      }
+    },
+    "3773": {
+      "rank": 185,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3773.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Rekt",
+        "mouth": "Stunned",
+        "facewear": "Wizard Glasses",
+        "head": "No Headgear",
+        "clothes": "Bepe Suit",
+        "background": "Moon"
+      }
+    },
+    "3774": {
+      "rank": 1164,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3774.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Rekt",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "El Presidente",
+        "background": "Silicon Data Center"
+      }
+    },
+    "3775": {
+      "rank": 1330,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3775.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Rekt",
+        "mouth": "Hannibal Mask",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "3776": {
+      "rank": 186,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3776.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Rekt",
+        "mouth": "Stunned",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Chia Farmer",
+        "background": "Orange Grove"
+      }
+    },
+    "3777": {
+      "rank": 150,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3777.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Rekt",
+        "mouth": "Vampire Teeth",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Drac",
+        "background": "Moon"
+      }
+    },
+    "3778": {
+      "rank": 54,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3778.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Rugged",
+        "mouth": "Vampire Teeth",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Drac",
+        "background": "Price Down"
+      }
+    },
+    "3779": {
+      "rank": 18,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3779.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Rugged",
+        "mouth": "Stunned",
+        "facewear": "Aviators",
+        "head": "Cowboy Hat",
+        "clothes": "Drac",
+        "background": "NYSE Dump"
+      }
+    },
+    "3780": {
+      "rank": 46,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3780.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Rugged",
+        "mouth": "Stunned",
+        "facewear": "Cool Glasses",
+        "head": "No Headgear",
+        "clothes": "Goose Suit",
+        "background": "NYSE Rug"
+      }
+    },
+    "3781": {
+      "rank": 200,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3781.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Rugged",
+        "mouth": "Smile",
+        "facewear": "Cyber Shades",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "NYSE Pump"
+      }
+    },
+    "3782": {
+      "rank": 134,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3782.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Rugged",
+        "mouth": "Stache",
+        "facewear": "Eye Patch",
+        "head": "Military Beret",
+        "clothes": "Leather Jacket",
+        "background": "$HOA"
+      }
+    },
+    "3783": {
+      "rank": 180,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3783.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "Fake It Mask",
+        "head": "No Headgear",
+        "clothes": "Ninja Turtle Fit",
+        "background": "$BEPE"
+      }
+    },
+    "3784": {
+      "rank": 774,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3784.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "Laser Eyes",
+        "head": "No Headgear",
+        "clothes": "Topless",
+        "background": "One Market"
+      }
+    },
+    "3785": {
+      "rank": 73,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3785.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Rugged",
+        "mouth": "Pipe",
+        "facewear": "Matrix Lenses",
+        "head": "Halo",
+        "clothes": "Wizard Drip",
+        "background": "Heaven"
+      }
+    },
+    "3786": {
+      "rank": 115,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3786.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Terminator",
+        "mouth": "Copium Mask",
+        "facewear": "MOG Glasses",
+        "head": "Halo",
+        "clothes": "Suit",
+        "background": "Hell"
+      }
+    },
+    "3787": {
+      "rank": 40,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3787.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Terminator",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "Propeller Hat",
+        "clothes": "Piccolo Uniform",
+        "background": "Rainforest"
+      }
+    },
+    "3788": {
+      "rank": 1637,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3788.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Terminator",
+        "mouth": "Stunned",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Roman Drip",
+        "background": "Moon"
+      }
+    },
+    "3789": {
+      "rank": 2863,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3789.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Terminator",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Ronin",
+        "background": "Moon"
+      }
+    },
+    "3790": {
+      "rank": 835,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3790.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Terminator",
+        "mouth": "Cohiba",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Sonic Suit",
+        "background": "Moms Basement"
+      }
+    },
+    "3791": {
+      "rank": 2787,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3791.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Terminator",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Sports Jacket",
+        "background": "Moon"
+      }
+    },
+    "3792": {
+      "rank": 310,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3792.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Terminator",
+        "mouth": "Stunned",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Straitjacket",
+        "background": "Crazy Room"
+      }
+    },
+    "3793": {
+      "rank": 940,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3793.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Terminator",
+        "mouth": "Stunned",
+        "facewear": "No Face Wear",
+        "head": "Super Saiyan",
+        "clothes": "Suit",
+        "background": "Moon"
+      }
+    },
+    "3794": {
+      "rank": 1070,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3794.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Terminator",
+        "mouth": "Neckbeard",
+        "facewear": "No Face Wear",
+        "head": "Super Saiyan",
+        "clothes": "Super Saiyan Uniform",
+        "background": "Hell"
+      }
+    },
+    "3795": {
+      "rank": 216,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3795.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Terminator",
+        "mouth": "Neckbeard",
+        "facewear": "Aviators",
+        "head": "Super Saiyan",
+        "clothes": "SWAT Gear",
+        "background": "Bepe Barracks"
+      }
+    },
+    "3796": {
+      "rank": 60,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3796.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Terminator",
+        "mouth": "Neckbeard",
+        "facewear": "Alpha Shades",
+        "head": "Trump Wave",
+        "clothes": "Tank Top",
+        "background": "Chia Farm"
+      }
+    },
+    "3797": {
+      "rank": 107,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3797.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Terminator",
+        "mouth": "Stunned",
+        "facewear": "No Face Wear",
+        "head": "Trump Wave",
+        "clothes": "Tee",
+        "background": "White House"
+      }
+    },
+    "3798": {
+      "rank": 272,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3798.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Terminator",
+        "mouth": "Stunned",
+        "facewear": "No Face Wear",
+        "head": "Viking Helmet",
+        "clothes": "Viking Armor",
+        "background": "Silicon Data Center"
+      }
+    },
+    "3799": {
+      "rank": 1214,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3799.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Terminator",
+        "mouth": "Stache",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Wizard Drip",
+        "background": "Orange Grove"
+      }
+    },
+    "3800": {
+      "rank": 461,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3800.png",
+      "traits": {
+        "base": "Alien Soyjak",
+        "face": "Terminator",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "Military Beret",
+        "clothes": "El Presidente",
+        "background": "Matrix"
+      }
+    }
+  }
+}

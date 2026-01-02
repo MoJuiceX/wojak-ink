@@ -1,0 +1,1309 @@
+{
+  "schema_version": "1.0",
+  "range": [
+    4101,
+    4200
+  ],
+  "nfts": {
+    "4101": {
+      "rank": 907,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4101.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Super Saiyan",
+        "clothes": "Tank Top",
+        "background": "Price Down"
+      }
+    },
+    "4102": {
+      "rank": 1846,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4102.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "No Face Wear",
+        "head": "Super Saiyan",
+        "clothes": "Tank Top",
+        "background": "$BEPE"
+      }
+    },
+    "4103": {
+      "rank": 1507,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4103.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "Shades",
+        "head": "No Headgear",
+        "clothes": "Tank Top",
+        "background": "One Market"
+      }
+    },
+    "4104": {
+      "rank": 1919,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4104.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Crown",
+        "clothes": "Tank Top",
+        "background": "$LOVE"
+      }
+    },
+    "4105": {
+      "rank": 1058,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4105.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "MOG Glasses",
+        "head": "Crown",
+        "clothes": "Tee",
+        "background": "$HOA"
+      }
+    },
+    "4106": {
+      "rank": 230,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4106.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Screaming",
+        "facewear": "Wizard Glasses",
+        "head": "Trump Wave",
+        "clothes": "Tee",
+        "background": "$PIZZA"
+      }
+    },
+    "4107": {
+      "rank": 279,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4107.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Rekt",
+        "mouth": "Copium Mask",
+        "facewear": "No Face Wear",
+        "head": "Comrade Hat",
+        "clothes": "Tee",
+        "background": "Silicon Data Center"
+      }
+    },
+    "4108": {
+      "rank": 2464,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4108.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "No Face Wear",
+        "head": "Crown",
+        "clothes": "Topless",
+        "background": "Matrix"
+      }
+    },
+    "4109": {
+      "rank": 436,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4109.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Neckbeard",
+        "facewear": "Eye Patch",
+        "head": "Crown",
+        "clothes": "Topless",
+        "background": "Moms Basement"
+      }
+    },
+    "4110": {
+      "rank": 3466,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4110.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Terminator",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Topless",
+        "background": "Moon"
+      }
+    },
+    "4111": {
+      "rank": 2457,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4111.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Viking Helmet",
+        "clothes": "Viking Armor",
+        "background": "Chia Farm"
+      }
+    },
+    "4112": {
+      "rank": 656,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4112.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "Cyber Shades",
+        "head": "Viking Helmet",
+        "clothes": "Viking Armor",
+        "background": "Hell"
+      }
+    },
+    "4113": {
+      "rank": 438,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4113.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Rekt",
+        "mouth": "Cig",
+        "facewear": "MOG Glasses",
+        "head": "Viking Helmet",
+        "clothes": "Viking Armor",
+        "background": "Pirate Ship"
+      }
+    },
+    "4114": {
+      "rank": 1332,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4114.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Rekt",
+        "mouth": "Cig",
+        "facewear": "MOG Glasses",
+        "head": "Wizard Hat",
+        "clothes": "Wizard Drip",
+        "background": "Moon"
+      }
+    },
+    "4115": {
+      "rank": 142,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4115.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Rekt",
+        "mouth": "Stunned",
+        "facewear": "Night Vision",
+        "head": "Wizard Hat",
+        "clothes": "Wizard Drip",
+        "background": "NYSE Pump"
+      }
+    },
+    "4116": {
+      "rank": 530,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4116.png",
+      "traits": {
+        "base": "Bepe Soyjak",
+        "face": "Classic",
+        "mouth": "Stunned",
+        "facewear": "Wizard Glasses",
+        "head": "Wizard Hat",
+        "clothes": "Wizard Drip",
+        "background": "Matrix"
+      }
+    },
+    "4117": {
+      "rank": 736,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4117.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Vixen Waves",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4118": {
+      "rank": 365,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4118.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Mermaid Waves",
+        "clothes": "Bathrobe",
+        "background": "Morning Routine"
+      }
+    },
+    "4119": {
+      "rank": 55,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4119.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "MOG Glasses",
+        "head": "Twin Braids",
+        "clothes": "Sports Bra",
+        "background": "Moon"
+      }
+    },
+    "4120": {
+      "rank": 126,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4120.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Pipe",
+        "facewear": "Cool Glasses",
+        "head": "Power Bob",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4121": {
+      "rank": 8,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4121.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "Aviators",
+        "head": "Ponytail",
+        "clothes": "Sports Bra",
+        "background": "NYSE Pump"
+      }
+    },
+    "4122": {
+      "rank": 16,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4122.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Cool Glasses",
+        "head": "Mermaid Waves",
+        "clothes": "Bepe Suit",
+        "background": "Nesting Grounds"
+      }
+    },
+    "4123": {
+      "rank": 1077,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4123.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "Fedora",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "4124": {
+      "rank": 1061,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4124.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Fedora",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "4125": {
+      "rank": 471,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4125.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Matrix Lenses",
+        "head": "Military Beret",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4126": {
+      "rank": 639,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4126.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Crown",
+        "clothes": "Sports Bra",
+        "background": "Hell"
+      }
+    },
+    "4127": {
+      "rank": 208,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4127.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Smile",
+        "facewear": "MOG Glasses",
+        "head": "Construction Helmet",
+        "clothes": "Sports Bra",
+        "background": "Matrix"
+      }
+    },
+    "4128": {
+      "rank": 1742,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4128.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "MOG Glasses",
+        "head": "Wizard Hat",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4129": {
+      "rank": 607,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4129.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "No Face Wear",
+        "head": "Hip Hop Hat",
+        "clothes": "Sports Bra",
+        "background": "Hell"
+      }
+    },
+    "4130": {
+      "rank": 409,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4130.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Halo",
+        "clothes": "God's Robe",
+        "background": "Heaven"
+      }
+    },
+    "4131": {
+      "rank": 129,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4131.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Vixen Waves",
+        "clothes": "Goose Suit",
+        "background": "Nesting Grounds"
+      }
+    },
+    "4132": {
+      "rank": 297,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4132.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Cyber Shades",
+        "head": "Propeller Hat",
+        "clothes": "Bepe Army",
+        "background": "Matrix"
+      }
+    },
+    "4133": {
+      "rank": 487,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4133.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Laser Eyes",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "Nesting Grounds"
+      }
+    },
+    "4134": {
+      "rank": 351,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4134.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Cool Glasses",
+        "head": "SWAT Helmet",
+        "clothes": "Leather Jacket",
+        "background": "Route 66"
+      }
+    },
+    "4135": {
+      "rank": 321,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4135.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "No Face Wear",
+        "head": "Crown",
+        "clothes": "Sports Bra",
+        "background": "Matrix"
+      }
+    },
+    "4136": {
+      "rank": 981,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4136.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "Pirate Hat",
+        "clothes": "Ninja Turtle Fit",
+        "background": "Pirate Ship"
+      }
+    },
+    "4137": {
+      "rank": 20,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4137.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "3D Glasses",
+        "head": "Mermaid Waves",
+        "clothes": "Pepe Suit",
+        "background": "Nesting Grounds"
+      }
+    },
+    "4138": {
+      "rank": 70,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4138.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "MOG Glasses",
+        "head": "Mermaid Waves",
+        "clothes": "Denim Vest",
+        "background": "Orange Grove"
+      }
+    },
+    "4139": {
+      "rank": 668,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4139.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Ponytail",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4140": {
+      "rank": 118,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4140.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Ponytail",
+        "clothes": "Vintage Dress",
+        "background": "Silicon Data Center"
+      }
+    },
+    "4141": {
+      "rank": 197,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4141.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Twin Braids",
+        "clothes": "Vintage Dress",
+        "background": "Orange Grove"
+      }
+    },
+    "4142": {
+      "rank": 103,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4142.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Tiara",
+        "clothes": "Vintage Dress",
+        "background": "One Market"
+      }
+    },
+    "4143": {
+      "rank": 21,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4143.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Cyber Shades",
+        "head": "Power Bob",
+        "clothes": "Vintage Dress",
+        "background": "Hell"
+      }
+    },
+    "4144": {
+      "rank": 249,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4144.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Propeller Hat",
+        "clothes": "School Uniform",
+        "background": "Moms Basement"
+      }
+    },
+    "4145": {
+      "rank": 13,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4145.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Matrix Lenses",
+        "head": "Vixen Waves",
+        "clothes": "School Uniform",
+        "background": "$BEPE"
+      }
+    },
+    "4146": {
+      "rank": 22,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4146.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Ninja Turtle Mask",
+        "head": "Mermaid Waves",
+        "clothes": "School Uniform",
+        "background": "$HOA"
+      }
+    },
+    "4147": {
+      "rank": 381,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4147.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "No Face Wear",
+        "head": "Mermaid Waves",
+        "clothes": "Sports Jacket",
+        "background": "Matrix"
+      }
+    },
+    "4148": {
+      "rank": 12,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4148.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Rekt",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "No Face Wear",
+        "head": "Mermaid Waves",
+        "clothes": "Prom Dress",
+        "background": "Moms Basement"
+      }
+    },
+    "4149": {
+      "rank": 414,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4149.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Power Bob",
+        "clothes": "Suit",
+        "background": "NYSE Pump"
+      }
+    },
+    "4150": {
+      "rank": 399,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4150.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "MOG Glasses",
+        "head": "Twin Braids",
+        "clothes": "Suit",
+        "background": "Mellow Yellow"
+      }
+    },
+    "4151": {
+      "rank": 117,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4151.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "MOG Glasses",
+        "head": "Vixen Waves",
+        "clothes": "Vintage Dress",
+        "background": "Orange Grove"
+      }
+    },
+    "4152": {
+      "rank": 77,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4152.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "Cyber Shades",
+        "head": "Mermaid Waves",
+        "clothes": "Vintage Dress",
+        "background": "Moon"
+      }
+    },
+    "4153": {
+      "rank": 76,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4153.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Rekt",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Ponytail",
+        "clothes": "Vintage Dress",
+        "background": "Orange Grove"
+      }
+    },
+    "4154": {
+      "rank": 15,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4154.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Aviators",
+        "head": "Twin Braids",
+        "clothes": "Denim Vest",
+        "background": "Heaven"
+      }
+    },
+    "4155": {
+      "rank": 291,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4155.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Vixen Waves",
+        "clothes": "Denim Vest",
+        "background": "Sky Dive"
+      }
+    },
+    "4156": {
+      "rank": 190,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4156.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Tiara",
+        "clothes": "Denim Vest",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "4157": {
+      "rank": 137,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4157.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Tiara",
+        "clothes": "Sports Bra",
+        "background": "$LOVE"
+      }
+    },
+    "4158": {
+      "rank": 83,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4158.png",
+      "traits": {
+        "base": "Bepe Waifu",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "Alpha Shades",
+        "head": "Wizard Hat",
+        "clothes": "Sports Bra",
+        "background": "$LOVE"
+      }
+    },
+    "4159": {
+      "rank": 677,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4159.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Bathrobe",
+        "background": "$BEPE"
+      }
+    },
+    "4160": {
+      "rank": 307,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4160.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Vixen Waves",
+        "clothes": "Sports Bra",
+        "background": "Moon"
+      }
+    },
+    "4161": {
+      "rank": 1295,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4161.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Mermaid Waves",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4162": {
+      "rank": 30,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4162.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "MOG Glasses",
+        "head": "Twin Braids",
+        "clothes": "Sports Bra",
+        "background": "NYSE Pump"
+      }
+    },
+    "4163": {
+      "rank": 31,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4163.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "MOG Glasses",
+        "head": "Mermaid Waves",
+        "clothes": "Bepe Suit",
+        "background": "Nesting Grounds"
+      }
+    },
+    "4164": {
+      "rank": 28,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4164.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "Aviators",
+        "head": "Ponytail",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "4165": {
+      "rank": 99,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4165.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Cool Glasses",
+        "head": "Mermaid Waves",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "4166": {
+      "rank": 1591,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4166.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "Fedora",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4167": {
+      "rank": 547,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4167.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Fedora",
+        "clothes": "Sports Bra",
+        "background": "Hell"
+      }
+    },
+    "4168": {
+      "rank": 687,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4168.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Military Beret",
+        "clothes": "Sports Bra",
+        "background": "Matrix"
+      }
+    },
+    "4169": {
+      "rank": 1582,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4169.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Crown",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4170": {
+      "rank": 432,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4170.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "MOG Glasses",
+        "head": "Construction Helmet",
+        "clothes": "Sports Bra",
+        "background": "Hell"
+      }
+    },
+    "4171": {
+      "rank": 542,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4171.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "MOG Glasses",
+        "head": "Wizard Hat",
+        "clothes": "God's Robe",
+        "background": "Heaven"
+      }
+    },
+    "4172": {
+      "rank": 495,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4172.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "No Face Wear",
+        "head": "Vixen Waves",
+        "clothes": "Goose Suit",
+        "background": "Orange Grove"
+      }
+    },
+    "4173": {
+      "rank": 918,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4173.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Halo",
+        "clothes": "Bepe Army",
+        "background": "Matrix"
+      }
+    },
+    "4174": {
+      "rank": 1358,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4174.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Gopher Suit",
+        "background": "Nesting Grounds"
+      }
+    },
+    "4175": {
+      "rank": 359,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4175.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Cyber Shades",
+        "head": "Propeller Hat",
+        "clothes": "Leather Jacket",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4176": {
+      "rank": 165,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4176.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Laser Eyes",
+        "head": "SWAT Helmet",
+        "clothes": "Sports Bra",
+        "background": "Matrix"
+      }
+    },
+    "4177": {
+      "rank": 224,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4177.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Cool Glasses",
+        "head": "SWAT Helmet",
+        "clothes": "Ninja Turtle Fit",
+        "background": "Moms Basement"
+      }
+    },
+    "4178": {
+      "rank": 181,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4178.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "MOG Glasses",
+        "head": "Mermaid Waves",
+        "clothes": "Pepe Suit",
+        "background": "Moon"
+      }
+    },
+    "4179": {
+      "rank": 113,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4179.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Teeth",
+        "facewear": "MOG Glasses",
+        "head": "Pirate Hat",
+        "clothes": "Denim Vest",
+        "background": "One Market"
+      }
+    },
+    "4180": {
+      "rank": 157,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4180.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "3D Glasses",
+        "head": "Mermaid Waves",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "4181": {
+      "rank": 43,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4181.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "MOG Glasses",
+        "head": "Mermaid Waves",
+        "clothes": "Vintage Dress",
+        "background": "Silicon Data Center"
+      }
+    },
+    "4182": {
+      "rank": 215,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4182.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Ponytail",
+        "clothes": "Vintage Dress",
+        "background": "Orange Grove"
+      }
+    },
+    "4183": {
+      "rank": 256,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4183.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Vixen Waves",
+        "clothes": "Vintage Dress",
+        "background": "Orange Grove"
+      }
+    },
+    "4184": {
+      "rank": 122,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4184.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Twin Braids",
+        "clothes": "Vintage Dress",
+        "background": "One Market"
+      }
+    },
+    "4185": {
+      "rank": 69,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4185.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Tiara",
+        "clothes": "School Uniform",
+        "background": "Heaven"
+      }
+    },
+    "4186": {
+      "rank": 9,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4186.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Cyber Shades",
+        "head": "Power Bob",
+        "clothes": "School Uniform",
+        "background": "$BEPE"
+      }
+    },
+    "4187": {
+      "rank": 453,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4187.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Propeller Hat",
+        "clothes": "School Uniform",
+        "background": "$HOA"
+      }
+    },
+    "4188": {
+      "rank": 124,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4188.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Matrix Lenses",
+        "head": "Vixen Waves",
+        "clothes": "Sports Jacket",
+        "background": "Matrix"
+      }
+    },
+    "4189": {
+      "rank": 26,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4189.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "Alpha Shades",
+        "head": "Vixen Waves",
+        "clothes": "Prom Dress",
+        "background": "Orange Grove"
+      }
+    },
+    "4190": {
+      "rank": 53,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4190.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Sexy Lip Bite",
+        "facewear": "Alpha Shades",
+        "head": "Mermaid Waves",
+        "clothes": "Suit",
+        "background": "NYSE Pump"
+      }
+    },
+    "4191": {
+      "rank": 427,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4191.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Rekt",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Mermaid Waves",
+        "clothes": "Suit",
+        "background": "NYSE Pump"
+      }
+    },
+    "4192": {
+      "rank": 198,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4192.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Power Bob",
+        "clothes": "Vintage Dress",
+        "background": "Orange Grove"
+      }
+    },
+    "4193": {
+      "rank": 48,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4193.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "MOG Glasses",
+        "head": "Twin Braids",
+        "clothes": "Vintage Dress",
+        "background": "Moon"
+      }
+    },
+    "4194": {
+      "rank": 95,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4194.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "MOG Glasses",
+        "head": "Vixen Waves",
+        "clothes": "Vintage Dress",
+        "background": "Hell"
+      }
+    },
+    "4195": {
+      "rank": 172,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4195.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Vixen Waves",
+        "clothes": "Vintage Dress",
+        "background": "Heaven"
+      }
+    },
+    "4196": {
+      "rank": 35,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4196.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Rekt",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Ponytail",
+        "clothes": "Denim Vest",
+        "background": "One Market"
+      }
+    },
+    "4197": {
+      "rank": 167,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4197.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Twin Braids",
+        "clothes": "Denim Vest",
+        "background": "Orange Grove"
+      }
+    },
+    "4198": {
+      "rank": 158,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4198.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Twin Braids",
+        "clothes": "Sports Bra",
+        "background": "$LOVE"
+      }
+    },
+    "4199": {
+      "rank": 138,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4199.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Tiara",
+        "clothes": "Sports Bra",
+        "background": "$LOVE"
+      }
+    },
+    "4200": {
+      "rank": 1308,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/4200.png",
+      "traits": {
+        "base": "Bepe Baddie",
+        "face": "Classic",
+        "mouth": "Glossed Lips",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Wizard Drip",
+        "background": "Spell Room"
+      }
+    }
+  }
+}

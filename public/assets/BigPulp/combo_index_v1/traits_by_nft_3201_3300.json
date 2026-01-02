@@ -1,0 +1,1309 @@
+{
+  "schema_version": "1.0",
+  "range": [
+    3201,
+    3300
+  ],
+  "nfts": {
+    "3201": {
+      "rank": 3615,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3201.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "No Face Wear",
+        "head": "Crown",
+        "clothes": "Bepe Army",
+        "background": "Tangerine Pop"
+      }
+    },
+    "3202": {
+      "rank": 831,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3202.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Bleeding Bags",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "Fedora",
+        "clothes": "Bathrobe",
+        "background": "$HOA"
+      }
+    },
+    "3203": {
+      "rank": 2898,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3203.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "3D Glasses",
+        "head": "No Headgear",
+        "clothes": "Bathrobe",
+        "background": "Matrix"
+      }
+    },
+    "3204": {
+      "rank": 686,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3204.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Terminator",
+        "mouth": "Pizza",
+        "facewear": "No Face Wear",
+        "head": "SWAT Helmet",
+        "clothes": "Bathrobe",
+        "background": "Morning Routine"
+      }
+    },
+    "3205": {
+      "rank": 1427,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3205.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Bleeding Bags",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Tin Foil Hat",
+        "clothes": "Bathrobe",
+        "background": "Price Down"
+      }
+    },
+    "3206": {
+      "rank": 1219,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3206.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rekt",
+        "mouth": "Cig",
+        "facewear": "MOG Glasses",
+        "head": "Crown",
+        "clothes": "Bathrobe",
+        "background": "Orange Grove"
+      }
+    },
+    "3207": {
+      "rank": 1986,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3207.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Terminator",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "Military Beret",
+        "clothes": "Bathrobe",
+        "background": "Bepe Barracks"
+      }
+    },
+    "3208": {
+      "rank": 2080,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3208.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Shades",
+        "head": "Propeller Hat",
+        "clothes": "Bathrobe",
+        "background": "Moon"
+      }
+    },
+    "3209": {
+      "rank": 264,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3209.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "MOG Glasses",
+        "head": "Fedora",
+        "clothes": "Bathrobe",
+        "background": "Morning Routine"
+      }
+    },
+    "3210": {
+      "rank": 2448,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3210.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Bathrobe",
+        "background": "$HOA"
+      }
+    },
+    "3211": {
+      "rank": 817,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3211.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rekt",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "Cap",
+        "clothes": "Bathrobe",
+        "background": "Morning Routine"
+      }
+    },
+    "3212": {
+      "rank": 413,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3212.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Bleeding Bags",
+        "mouth": "Joint",
+        "facewear": "Cyber Shades",
+        "head": "Field Cap",
+        "clothes": "Bathrobe",
+        "background": "Bepe Barracks"
+      }
+    },
+    "3213": {
+      "rank": 253,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3213.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rugged",
+        "mouth": "Teeth",
+        "facewear": "Cool Glasses",
+        "head": "Super Saiyan",
+        "clothes": "Bepe Army",
+        "background": "Rainforest"
+      }
+    },
+    "3214": {
+      "rank": 2238,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3214.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "MOG Glasses",
+        "head": "Military Beret",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "3215": {
+      "rank": 2937,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3215.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Super Saiyan",
+        "clothes": "Bepe Army",
+        "background": "One Market"
+      }
+    },
+    "3216": {
+      "rank": 670,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3216.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Bleeding Bags",
+        "mouth": "Gold Teeth",
+        "facewear": "Laser Eyes",
+        "head": "Construction Helmet",
+        "clothes": "Bepe Army",
+        "background": "Neo Mint"
+      }
+    },
+    "3217": {
+      "rank": 1268,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3217.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Bleeding Bags",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Propeller Hat",
+        "clothes": "Bepe Army",
+        "background": "White House"
+      }
+    },
+    "3218": {
+      "rank": 2897,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3218.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Pirate Hat",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "3219": {
+      "rank": 2491,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3219.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Shades",
+        "head": "Cowboy Hat",
+        "clothes": "Bepe Army",
+        "background": "$CHIA"
+      }
+    },
+    "3220": {
+      "rank": 2658,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3220.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Terminator",
+        "mouth": "Cohiba",
+        "facewear": "No Face Wear",
+        "head": "Cap",
+        "clothes": "Bepe Army",
+        "background": "$CHIA"
+      }
+    },
+    "3221": {
+      "rank": 996,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3221.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "Wizard Glasses",
+        "head": "Wizard Hat",
+        "clothes": "Bepe Army",
+        "background": "Spell Room"
+      }
+    },
+    "3222": {
+      "rank": 1737,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3222.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Bleeding Bags",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "Field Cap",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "3223": {
+      "rank": 2340,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3223.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Alpha Shades",
+        "head": "Ronin Helmet",
+        "clothes": "Bepe Army",
+        "background": "Mellow Yellow"
+      }
+    },
+    "3224": {
+      "rank": 2446,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3224.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "MOG Glasses",
+        "head": "Hard Hat",
+        "clothes": "Bepe Army",
+        "background": "Bepe Barracks"
+      }
+    },
+    "3225": {
+      "rank": 3261,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3225.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rugged",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Bepe Army",
+        "background": "Silicon Data Center"
+      }
+    },
+    "3226": {
+      "rank": 372,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3226.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Bleeding Bags",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "Hard Hat",
+        "clothes": "Bepe Army",
+        "background": "Rainforest"
+      }
+    },
+    "3227": {
+      "rank": 1976,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3227.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Terminator",
+        "mouth": "Pizza",
+        "facewear": "No Face Wear",
+        "head": "Beer Hat",
+        "clothes": "Bepe Army",
+        "background": "Sky Dive"
+      }
+    },
+    "3228": {
+      "rank": 756,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3228.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "Cyber Shades",
+        "head": "Crown",
+        "clothes": "Bepe Army",
+        "background": "Orange Grove"
+      }
+    },
+    "3229": {
+      "rank": 1367,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3229.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "Shades",
+        "head": "Propeller Hat",
+        "clothes": "Born to Ride",
+        "background": "$CHIA"
+      }
+    },
+    "3230": {
+      "rank": 919,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3230.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rekt",
+        "mouth": "Cig",
+        "facewear": "MOG Glasses",
+        "head": "Pirate Hat",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "3231": {
+      "rank": 508,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3231.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rugged",
+        "mouth": "Cohiba",
+        "facewear": "Alpha Shades",
+        "head": "Field Cap",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "3232": {
+      "rank": 3703,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3232.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Fedora",
+        "clothes": "Born to Ride",
+        "background": "Orange Grove"
+      }
+    },
+    "3233": {
+      "rank": 2316,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3233.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Cap",
+        "clothes": "Born to Ride",
+        "background": "Moms Basement"
+      }
+    },
+    "3234": {
+      "rank": 1628,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3234.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Laser Eyes",
+        "head": "Crown",
+        "clothes": "Born to Ride",
+        "background": "Mellow Yellow"
+      }
+    },
+    "3235": {
+      "rank": 1005,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3235.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "Night Vision",
+        "head": "Wizard Hat",
+        "clothes": "Born to Ride",
+        "background": "$PIZZA"
+      }
+    },
+    "3236": {
+      "rank": 1480,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3236.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Bleeding Bags",
+        "mouth": "Cohiba",
+        "facewear": "No Face Wear",
+        "head": "Super Wojak Hat",
+        "clothes": "Born to Ride",
+        "background": "$LOVE"
+      }
+    },
+    "3237": {
+      "rank": 1197,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3237.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Terminator",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "Ronin Helmet",
+        "clothes": "Born to Ride",
+        "background": "White House"
+      }
+    },
+    "3238": {
+      "rank": 1928,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3238.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Terminator",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Construction Helmet",
+        "clothes": "Born to Ride",
+        "background": "Nesting Grounds"
+      }
+    },
+    "3239": {
+      "rank": 634,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3239.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rugged",
+        "mouth": "Gold Teeth",
+        "facewear": "Matrix Lenses",
+        "head": "Cowboy Hat",
+        "clothes": "Born to Ride",
+        "background": "Green Candle"
+      }
+    },
+    "3240": {
+      "rank": 2802,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3240.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Bleeding Bags",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "3241": {
+      "rank": 1205,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3241.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Bleeding Bags",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Hip Hop Hat",
+        "clothes": "Born to Ride",
+        "background": "$LOVE"
+      }
+    },
+    "3242": {
+      "rank": 162,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3242.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "VR Headset",
+        "head": "Beer Hat",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "3243": {
+      "rank": 1672,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3243.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Ninja Turtle Mask",
+        "head": "SWAT Helmet",
+        "clothes": "Born to Ride",
+        "background": "Radioactive Forest"
+      }
+    },
+    "3244": {
+      "rank": 1502,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3244.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Military Beret",
+        "clothes": "Born to Ride",
+        "background": "Ronin Dojo"
+      }
+    },
+    "3245": {
+      "rank": 782,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3245.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Terminator",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "Hard Hat",
+        "clothes": "Born to Ride",
+        "background": "Route 66"
+      }
+    },
+    "3246": {
+      "rank": 394,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3246.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rekt",
+        "mouth": "Pizza",
+        "facewear": "Clown Nose",
+        "head": "Clown",
+        "clothes": "Born to Ride",
+        "background": "$NECKCOIN"
+      }
+    },
+    "3247": {
+      "rank": 2132,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3247.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Cool Glasses",
+        "head": "Super Saiyan",
+        "clothes": "Born to Ride",
+        "background": "Hot Coral"
+      }
+    },
+    "3248": {
+      "rank": 1744,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3248.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Bleeding Bags",
+        "mouth": "Joint",
+        "facewear": "No Face Wear",
+        "head": "Field Cap",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "3249": {
+      "rank": 2049,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3249.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Classic",
+        "mouth": "Pizza",
+        "facewear": "Matrix Lenses",
+        "head": "Propeller Hat",
+        "clothes": "Chia Farmer",
+        "background": "Chia Green"
+      }
+    },
+    "3250": {
+      "rank": 2297,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3250.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Terminator",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "SWAT Helmet",
+        "clothes": "Chia Farmer",
+        "background": "Chia Farm"
+      }
+    },
+    "3251": {
+      "rank": 1614,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3251.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Bleeding Bags",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "Crown",
+        "clothes": "Chia Farmer",
+        "background": "NYSE Pump"
+      }
+    },
+    "3252": {
+      "rank": 3843,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3252.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Chia Farmer",
+        "background": "Sky Dive"
+      }
+    },
+    "3253": {
+      "rank": 580,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3253.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rugged",
+        "mouth": "Cig",
+        "facewear": "3D Glasses",
+        "head": "Construction Helmet",
+        "clothes": "Chia Farmer",
+        "background": "Price Up"
+      }
+    },
+    "3254": {
+      "rank": 2175,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3254.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "MOG Glasses",
+        "head": "No Headgear",
+        "clothes": "Chia Farmer",
+        "background": "Matrix"
+      }
+    },
+    "3255": {
+      "rank": 1424,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3255.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "Alpha Shades",
+        "head": "Cap",
+        "clothes": "Chia Farmer",
+        "background": "$HOA"
+      }
+    },
+    "3256": {
+      "rank": 2310,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3256.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "MOG Glasses",
+        "head": "Military Beret",
+        "clothes": "Chia Farmer",
+        "background": "$CHIA"
+      }
+    },
+    "3257": {
+      "rank": 875,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3257.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rugged",
+        "mouth": "Joint",
+        "facewear": "Laser Eyes",
+        "head": "Construction Helmet",
+        "clothes": "Leather Jacket",
+        "background": "$CHIA"
+      }
+    },
+    "3258": {
+      "rank": 1095,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3258.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Terminator",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "Fedora",
+        "clothes": "Leather Jacket",
+        "background": "Rome"
+      }
+    },
+    "3259": {
+      "rank": 2421,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3259.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Bleeding Bags",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Ronin Helmet",
+        "clothes": "Leather Jacket",
+        "background": "Tangerine Pop"
+      }
+    },
+    "3260": {
+      "rank": 1129,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3260.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "MOG Glasses",
+        "head": "SWAT Helmet",
+        "clothes": "Leather Jacket",
+        "background": "Route 66"
+      }
+    },
+    "3261": {
+      "rank": 2467,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3261.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Bleeding Bags",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "Military Beret",
+        "clothes": "Leather Jacket",
+        "background": "Bepe Barracks"
+      }
+    },
+    "3262": {
+      "rank": 1195,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3262.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Cool Glasses",
+        "head": "Cap",
+        "clothes": "Leather Jacket",
+        "background": "NYSE Pump"
+      }
+    },
+    "3263": {
+      "rank": 1821,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3263.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Classic",
+        "mouth": "Cig",
+        "facewear": "Night Vision",
+        "head": "Crown",
+        "clothes": "Leather Jacket",
+        "background": "Tangerine Pop"
+      }
+    },
+    "3264": {
+      "rank": 3634,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3264.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Terminator",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Leather Jacket",
+        "background": "Sky Shock Blue"
+      }
+    },
+    "3265": {
+      "rank": 1037,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3265.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Bleeding Bags",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "Super Wojak Hat",
+        "clothes": "Leather Jacket",
+        "background": "$BEPE"
+      }
+    },
+    "3266": {
+      "rank": 770,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3266.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rugged",
+        "mouth": "Joint",
+        "facewear": "MOG Glasses",
+        "head": "Hard Hat",
+        "clothes": "Leather Jacket",
+        "background": "$HOA"
+      }
+    },
+    "3267": {
+      "rank": 2463,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3267.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Alpha Shades",
+        "head": "Beer Hat",
+        "clothes": "Leather Jacket",
+        "background": "Chia Green"
+      }
+    },
+    "3268": {
+      "rank": 1209,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3268.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "3D Glasses",
+        "head": "Super Saiyan",
+        "clothes": "Leather Jacket",
+        "background": "Rainforest"
+      }
+    },
+    "3269": {
+      "rank": 1537,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3269.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Bleeding Bags",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Propeller Hat",
+        "clothes": "Leather Jacket",
+        "background": "$NECKCOIN"
+      }
+    },
+    "3270": {
+      "rank": 1470,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3270.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Terminator",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "Tin Foil Hat",
+        "clothes": "Leather Jacket",
+        "background": "Route 66"
+      }
+    },
+    "3271": {
+      "rank": 764,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3271.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rugged",
+        "mouth": "Cohiba",
+        "facewear": "Alpha Shades",
+        "head": "Cowboy Hat",
+        "clothes": "Leather Jacket",
+        "background": "Green Candle"
+      }
+    },
+    "3272": {
+      "rank": 2832,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3272.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rekt",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "Wizard Hat",
+        "clothes": "Leather Jacket",
+        "background": "Tangerine Pop"
+      }
+    },
+    "3273": {
+      "rank": 1713,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3273.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rekt",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "Field Cap",
+        "clothes": "Leather Jacket",
+        "background": "Bepe Barracks"
+      }
+    },
+    "3274": {
+      "rank": 2727,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3274.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Bleeding Bags",
+        "mouth": "Cohiba",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Proof of Prayer",
+        "background": "Hell"
+      }
+    },
+    "3275": {
+      "rank": 1396,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3275.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rugged",
+        "mouth": "Cig",
+        "facewear": "MOG Glasses",
+        "head": "No Headgear",
+        "clothes": "Proof of Prayer",
+        "background": "Price Up"
+      }
+    },
+    "3276": {
+      "rank": 1891,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3276.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "Shades",
+        "head": "No Headgear",
+        "clothes": "Proof of Prayer",
+        "background": "$CASTER"
+      }
+    },
+    "3277": {
+      "rank": 2350,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3277.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Classic",
+        "mouth": "Numb",
+        "facewear": "Cyber Shades",
+        "head": "No Headgear",
+        "clothes": "Proof of Prayer",
+        "background": "NYSE Pump"
+      }
+    },
+    "3278": {
+      "rank": 3296,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3278.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Proof of Prayer",
+        "background": "One Market"
+      }
+    },
+    "3279": {
+      "rank": 2683,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3279.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Terminator",
+        "mouth": "Screaming",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Proof of Prayer",
+        "background": "Price Down"
+      }
+    },
+    "3280": {
+      "rank": 2641,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3280.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rekt",
+        "mouth": "Pizza",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Proof of Prayer",
+        "background": "One Market"
+      }
+    },
+    "3281": {
+      "rank": 2593,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3281.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Bleeding Bags",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Proof of Prayer",
+        "background": "Matrix"
+      }
+    },
+    "3282": {
+      "rank": 2911,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3282.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Terminator",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Proof of Prayer",
+        "background": "Orange Grove"
+      }
+    },
+    "3283": {
+      "rank": 2781,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3283.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Bleeding Bags",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Proof of Prayer",
+        "background": "Chia Farm"
+      }
+    },
+    "3284": {
+      "rank": 2497,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3284.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rugged",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "No Headgear",
+        "clothes": "Proof of Prayer",
+        "background": "$CHIA"
+      }
+    },
+    "3285": {
+      "rank": 1414,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3285.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Classic",
+        "mouth": "Bubble Gum",
+        "facewear": "Alpha Shades",
+        "head": "No Headgear",
+        "clothes": "Proof of Prayer",
+        "background": "White House"
+      }
+    },
+    "3286": {
+      "rank": 1380,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3286.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Bleeding Bags",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Centurion",
+        "clothes": "Roman Drip",
+        "background": "Rome"
+      }
+    },
+    "3287": {
+      "rank": 3085,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3287.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Classic",
+        "mouth": "Bandana Mask",
+        "facewear": "No Face Wear",
+        "head": "Centurion",
+        "clothes": "Roman Drip",
+        "background": "$CHIA"
+      }
+    },
+    "3288": {
+      "rank": 1511,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3288.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Terminator",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Centurion",
+        "clothes": "Roman Drip",
+        "background": "Rome"
+      }
+    },
+    "3289": {
+      "rank": 896,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3289.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rekt",
+        "mouth": "Cohiba",
+        "facewear": "Cyber Shades",
+        "head": "Centurion",
+        "clothes": "Roman Drip",
+        "background": "Moon"
+      }
+    },
+    "3290": {
+      "rank": 1479,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3290.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Classic",
+        "mouth": "Joint",
+        "facewear": "MOG Glasses",
+        "head": "Pirate Hat",
+        "clothes": "Roman Drip",
+        "background": "Pirate Ship"
+      }
+    },
+    "3291": {
+      "rank": 2109,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3291.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rekt",
+        "mouth": "Numb",
+        "facewear": "No Face Wear",
+        "head": "Centurion",
+        "clothes": "Roman Drip",
+        "background": "$NECKCOIN"
+      }
+    },
+    "3292": {
+      "rank": 1064,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3292.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rugged",
+        "mouth": "Bubble Gum",
+        "facewear": "No Face Wear",
+        "head": "Centurion",
+        "clothes": "Roman Drip",
+        "background": "Nesting Grounds"
+      }
+    },
+    "3293": {
+      "rank": 2277,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3293.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Terminator",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "Construction Helmet",
+        "clothes": "Roman Drip",
+        "background": "Tangerine Pop"
+      }
+    },
+    "3294": {
+      "rank": 546,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3294.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rugged",
+        "mouth": "Joint",
+        "facewear": "Aviators",
+        "head": "Viking Helmet",
+        "clothes": "Roman Drip",
+        "background": "Heaven"
+      }
+    },
+    "3295": {
+      "rank": 1801,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3295.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Bleeding Bags",
+        "mouth": "Teeth",
+        "facewear": "No Face Wear",
+        "head": "Crown",
+        "clothes": "Roman Drip",
+        "background": "Hell"
+      }
+    },
+    "3296": {
+      "rank": 887,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3296.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Classic",
+        "mouth": "Cohiba",
+        "facewear": "Shades",
+        "head": "Beer Hat",
+        "clothes": "Roman Drip",
+        "background": "Everythings Fine"
+      }
+    },
+    "3297": {
+      "rank": 1538,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3297.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Bleeding Bags",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Military Beret",
+        "clothes": "Roman Drip",
+        "background": "Rome"
+      }
+    },
+    "3298": {
+      "rank": 251,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3298.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Rugged",
+        "mouth": "Screaming",
+        "facewear": "Alpha Shades",
+        "head": "SWAT Helmet",
+        "clothes": "Ronin",
+        "background": "Rainforest"
+      }
+    },
+    "3299": {
+      "rank": 1012,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3299.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Bleeding Bags",
+        "mouth": "Gold Teeth",
+        "facewear": "No Face Wear",
+        "head": "Ronin Helmet",
+        "clothes": "Ronin",
+        "background": "Ronin Dojo"
+      }
+    },
+    "3300": {
+      "rank": 1015,
+      "image": "https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/3300.png",
+      "traits": {
+        "base": "Papa Tang",
+        "face": "Bleeding Bags",
+        "mouth": "Cig",
+        "facewear": "No Face Wear",
+        "head": "Ronin Helmet",
+        "clothes": "Ronin",
+        "background": "Rainforest"
+      }
+    }
+  }
+}

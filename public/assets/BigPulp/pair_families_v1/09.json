@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "facewear:Alpha Shades||head:Standard Cut": [
+      "16"
+    ],
+    "clothes:Viking Armor||head:Hip Hop Hat": [
+      "3171",
+      "402"
+    ],
+    "face:NPC||head:Field Cap": [
+      "1020",
+      "2725",
+      "1202",
+      "2086",
+      "661",
+      "2219",
+      "868",
+      "2447",
+      "2561",
+      "1972"
+    ],
+    "clothes:Tank Top||head:Field Cap": [
+      "2334",
+      "720",
+      "691",
+      "2324"
+    ],
+    "facewear:Ninja Turtle Mask||head:Field Cap": [
+      "3808",
+      "3663",
+      "2219",
+      "2467",
+      "691",
+      "1266"
+    ],
+    "facewear:Matrix Lenses||mouth:Copium Mask": [
+      "706",
+      "825"
+    ],
+    "face:Bleeding Bags||mouth:Stache": [
+      "1506",
+      "872",
+      "771",
+      "1504"
+    ],
+    "facewear:Cool Glasses||mouth:Bubble Gum": [
+      "2866",
+      "3099",
+      "3621",
+      "2395",
+      "2249",
+      "827"
+    ],
+    "head:Centurion||mouth:Vampire Teeth": [
+      "1287",
+      "914"
+    ],
+    "face:NPC||mouth:Bandana Mask": [
+      "945",
+      "1509",
+      "1968",
+      "1852"
+    ],
+    "facewear:Night Vision||head:Centurion": [
+      "3536",
+      "3105",
+      "1046",
+      "1321"
+    ],
+    "clothes:Topless||head:Comrade Hat": [
+      "3610",
+      "1617",
+      "3369",
+      "3380",
+      "2419"
+    ],
+    "clothes:Ronin||facewear:Tyson Tattoo": [
+      "2386",
+      "2384"
+    ],
+    "face:Terminator||mouth:Glossed Lips": [
+      "2934",
+      "3100",
+      "2960",
+      "3019",
+      "2986",
+      "3000",
+      "2947",
+      "2788",
+      "3160",
+      "2846",
+      "2971",
+      "2822"
+    ],
+    "clothes:Vintage Dress||head:Crown": [
+      "2984"
+    ],
+    "clothes:Vintage Dress||head:Clown": [
+      "2985"
+    ],
+    "base:Baddie||head:Spikes": [
+      "3037",
+      "3147",
+      "3019",
+      "3127",
+      "3036",
+      "3089"
+    ],
+    "base:Bepe Soyjak||clothes:Firefighter Uniform": [
+      "4048",
+      "4049",
+      "4047"
+    ]
+  }
+}

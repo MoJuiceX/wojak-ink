@@ -1,0 +1,166 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "clothes:Born to Ride||head:Field Cap": [
+      "3231",
+      "3494",
+      "108",
+      "1313",
+      "2606",
+      "1295",
+      "2588",
+      "1266",
+      "1237"
+    ],
+    "clothes:Pickle Suit||facewear:Alpha Shades": [
+      "3081",
+      "2848",
+      "2036",
+      "2041",
+      "2035",
+      "140",
+      "126"
+    ],
+    "face:NPC||head:Beanie": [
+      "387",
+      "2085"
+    ],
+    "head:Military Beret||mouth:Numb": [
+      "3256",
+      "1859",
+      "3622",
+      "1856",
+      "2176",
+      "425",
+      "2164",
+      "1946",
+      "2952",
+      "2537"
+    ],
+    "facewear:Night Vision||head:Hard Hat": [
+      "3425",
+      "532"
+    ],
+    "head:Fedora||mouth:Vampire Teeth": [
+      "609",
+      "598",
+      "573",
+      "1236"
+    ],
+    "clothes:Bathrobe||head:Propeller Hat": [
+      "2758",
+      "664",
+      "647",
+      "657",
+      "676",
+      "626",
+      "625",
+      "3208"
+    ],
+    "clothes:Bathrobe||mouth:Screaming": [
+      "3209",
+      "3453",
+      "3461",
+      "664",
+      "663",
+      "3210",
+      "662"
+    ],
+    "head:Pirate Hat||mouth:Numb": [
+      "2970",
+      "2018",
+      "3322",
+      "3874",
+      "3303",
+      "3546",
+      "2697",
+      "3195",
+      "2628",
+      "721",
+      "2387",
+      "3218",
+      "1600",
+      "2566",
+      "1893"
+    ],
+    "face:Rugged||facewear:Fake It Mask": [
+      "2457",
+      "3783",
+      "722",
+      "2223",
+      "2605"
+    ],
+    "facewear:Cyber Shades||head:Halo": [
+      "760"
+    ],
+    "clothes:Born to Ride||head:Comrade Hat": [
+      "3920",
+      "1318",
+      "1260",
+      "1228"
+    ],
+    "head:Pirate Hat||mouth:Pipe": [
+      "2090",
+      "3110",
+      "2422",
+      "3585",
+      "1374",
+      "1881",
+      "1631"
+    ],
+    "clothes:Topless||head:Hard Hat": [
+      "3635",
+      "3425",
+      "1629",
+      "1612",
+      "1536",
+      "1567",
+      "1550",
+      "1598",
+      "1582"
+    ],
+    "head:Military Beret||mouth:Pipe": [
+      "3552",
+      "3316",
+      "3956",
+      "3498",
+      "3391",
+      "3446",
+      "3486",
+      "3683",
+      "1662"
+    ],
+    "clothes:Sports Jacket||head:Cowboy Hat": [
+      "3557",
+      "1727",
+      "1698",
+      "1669",
+      "2273"
+    ],
+    "facewear:VR Headset||head:Standard Cut": [
+      "2257"
+    ],
+    "base:Waifu||clothes:Bathrobe": [
+      "2754",
+      "2758",
+      "2751",
+      "2752",
+      "2757",
+      "2753",
+      "2755",
+      "2756"
+    ],
+    "clothes:School Uniform||mouth:Bubble Gum": [
+      "2910"
+    ],
+    "clothes:Ronin||head:Mermaid Waves": [
+      "3118"
+    ],
+    "base:Bepe Wojak||clothes:Proof of Prayer": [
+      "3967",
+      "3968",
+      "3966"
+    ]
+  }
+}

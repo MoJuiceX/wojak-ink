@@ -99,6 +99,7 @@ export default function BigPulpQuestionTreeWindow({ onClose }) {
     if (!questionTreeData?.questions) return []
     
     let questions = questionTreeData.questions
+      .filter(q => q.id !== 'traits_that_almost_never_pair') // Exclude this question (replaced by combo explorer)
 
     if (selectedCategory && !searchQuery.trim()) {
       questions = questions.filter(q => q.category === selectedCategory)

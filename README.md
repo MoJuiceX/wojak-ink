@@ -62,7 +62,7 @@ Perfect for showcasing your collection, managing sales, and creating memes - all
 
 - **🪟 Windows 98 UI**: Authentic retro interface using [98.css](https://github.com/jdan/98.css)
 - **🎨 Wojak Creator**: Layer-based wojak creator with real-time preview and smart rules
-- **🍊 Big Pulp Intelligence**: Explore the collection through Big Pulp’s Q&A. Static answers include **up to 10 clickable NFT previews** you can jump to in the Rarity Explorer.
+- **🍊 Big Pulp Intelligence**: Explore the collection through Big Pulp's Q&A. Static answers include **up to 10 clickable NFT previews** you can jump to in the Rarity Explorer. Includes **Combo Explorer** with instant MintGarden links (MG button) for quick NFT lookup.
 - **✨ Tangify Feature**: Transform your wojak into a realistic AI-generated version using OpenAI's DALL-E 3
 - **🛒 Marketplace Integration**: P2P offer file management with MintGarden/Dexie APIs
 - **🖼️ Gallery**: Browse your NFT collection with hover effects
@@ -1124,6 +1124,24 @@ The app includes authentic Windows 98-style sound effects:
    - The original canvas is preserved - you can always switch back
    - Note: Requires OpenAI API key configured in Cloudflare Pages (see Deployment section)
 
+### Big Pulp Intelligence - MintGarden Integration
+
+The Combo Explorer in Big Pulp Intelligence includes instant MintGarden links:
+
+1. **Open Big Pulp Intelligence** from the Start menu
+2. Navigate to **Combo Explorer** (or explore traits)
+3. Select any NFT in the explorer
+4. Click the **"MG"** button in the Inspector panel to instantly open that NFT's page on MintGarden
+5. The button shows a ✓ checkmark when a MintGarden link is available
+6. Stats display shows map coverage (e.g., "3,916 / 4,200 mapped (93%)")
+
+**Note:** The MintGarden map is generated at build time. To update it, run:
+```bash
+npm run build:mintgarden-map
+```
+
+See the [Development](#development) section for more details on building the map.
+
 ### Marketplace
 
 The marketplace UI is gated behind an admin-controlled flag:
@@ -1857,7 +1875,12 @@ wojak-ink/
 - **`src/components/windows/MarketplaceWindow.jsx`** - Marketplace functionality
 - **`src/components/windows/WojakCreator.jsx`** - Wojak creator/meme generator
 - **`src/components/windows/TangGangWindow.jsx`** - Tang Gang community window
+- **`src/components/windows/BigPulpIntelligenceWindow.jsx`** - Big Pulp Intelligence with Combo Explorer and MintGarden integration
 - **`src/services/mintgardenApi.js`** - MintGarden API integration
+- **`scripts/build_mintgarden_launcher_map.mjs`** - Generates static MintGarden launcher map for instant NFT links
+- **`scripts/investigate_mintgarden_conflicts.mjs`** - Investigates mapping conflicts
+- **`scripts/investigate_mintgarden_missing.mjs`** - Investigates missing NFT mappings
+- **`public/assets/BigPulp/mintgarden_launcher_map_v1.json`** - Generated map file (internal NFT ID → MintGarden launcher)
 - **`src/data/offerFiles.csv`** - Offer file data (one offer per line; legacy multi-column format also supported)
 - **`scripts/generate-meme-manifest.js`** - Generates wojak creator layer manifest (runs before build)
 - **`src/utils/wojakRules.js`** - Rules system for layer compatibility (prevents incompatible combinations)
@@ -1970,6 +1993,15 @@ npm run build
 - Check that layer rules are working (e.g., Astronaut clothes should disable Head layer)
 - Verify rules in `src/utils/wojakRules.js` if layer combinations aren't working as expected
 
+#### MintGarden MG button not working
+
+- Verify `public/assets/BigPulp/mintgarden_launcher_map_v1.json` exists
+- Run `npm run build:mintgarden-map` to generate the map file
+- If conflicts are detected, use `npm run build:mintgarden-map -- --allow-partial` for development
+- Check browser console for errors loading the map
+- The button will be disabled if the map isn't loaded yet (check tooltip)
+- Some NFTs may not have MintGarden links (check stats display for coverage)
+
 #### Docker container health check fails
 
 ```bash
@@ -2068,6 +2100,11 @@ Abit, you've got everything you need to:
 npm run dev                    # Start dev server
 npm run build                  # Build for production
 npm run preview                # Preview production build
+
+# Build Scripts
+npm run build:mintgarden-map   # Generate MintGarden launcher map (for MG button links)
+npm run investigate:mintgarden-conflicts  # Investigate mapping conflicts
+npm run investigate:mintgarden-missing    # Investigate missing NFT mappings
 
 # Docker (if using)
 ./deploy.sh                    # Deploy with Docker

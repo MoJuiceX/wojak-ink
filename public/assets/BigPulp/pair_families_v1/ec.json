@@ -1,0 +1,233 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "head:Crown||mouth:Pipe": [
+      "3589",
+      "3146",
+      "2634",
+      "3311",
+      "3801",
+      "3564",
+      "988",
+      "3335",
+      "3616",
+      "1915",
+      "30"
+    ],
+    "clothes:Straitjacket||head:Super Wojak Hat": [
+      "48",
+      "382",
+      "2163"
+    ],
+    "head:Military Beret||mouth:Copium Mask": [
+      "3844",
+      "133",
+      "1306"
+    ],
+    "clothes:Astronaut||facewear:MOG Glasses": [
+      "3904",
+      "4023",
+      "159",
+      "150"
+    ],
+    "face:Rugged||mouth:Vampire Teeth": [
+      "3778",
+      "3722",
+      "609",
+      "2678",
+      "860",
+      "937",
+      "1500",
+      "2203",
+      "1720",
+      "2012",
+      "1948",
+      "1287",
+      "232",
+      "1189"
+    ],
+    "face:Terminator||head:Hard Hat": [
+      "3635",
+      "3245",
+      "3964",
+      "1862",
+      "1121",
+      "2027",
+      "1402",
+      "392",
+      "1312"
+    ],
+    "clothes:Viking Armor||head:Beanie": [
+      "430"
+    ],
+    "head:Crown||mouth:Numb": [
+      "3466",
+      "3975",
+      "494",
+      "3415",
+      "3359",
+      "2625",
+      "2425",
+      "2466",
+      "1359",
+      "1532"
+    ],
+    "clothes:Drac||head:Fedora": [
+      "609",
+      "598",
+      "573"
+    ],
+    "clothes:Bathrobe||head:Military Beret": [
+      "3906",
+      "654",
+      "3207",
+      "2082"
+    ],
+    "clothes:Tank Top||mouth:Gold Teeth": [
+      "739",
+      "732",
+      "2345",
+      "724",
+      "2325",
+      "690",
+      "711",
+      "2338",
+      "689",
+      "742"
+    ],
+    "clothes:Tank Top||facewear:Ninja Turtle Mask": [
+      "727",
+      "709",
+      "745",
+      "691"
+    ],
+    "head:Clown||mouth:Copium Mask": [
+      "913",
+      "1416"
+    ],
+    "clothes:Bepe Army||facewear:MOG Glasses": [
+      "3477",
+      "3982",
+      "4032",
+      "4075",
+      "2567",
+      "4128",
+      "1206",
+      "3214",
+      "1220",
+      "3224",
+      "1138",
+      "1195",
+      "1135",
+      "2560",
+      "1186",
+      "2557",
+      "1155",
+      "1182",
+      "1166"
+    ],
+    "clothes:Bepe Army||head:Wizard Hat": [
+      "3465",
+      "3221",
+      "4128",
+      "1210",
+      "1152",
+      "1219",
+      "1181",
+      "1182",
+      "1199",
+      "1188"
+    ],
+    "facewear:Tyson Tattoo||head:Centurion": [
+      "1258"
+    ],
+    "clothes:Chia Farmer||mouth:Pipe": [
+      "3503",
+      "2670",
+      "3924",
+      "3498",
+      "1483",
+      "3801",
+      "1432",
+      "1524",
+      "1415",
+      "1466",
+      "1449"
+    ],
+    "clothes:Chia Farmer||mouth:Numb": [
+      "3255",
+      "2665",
+      "2786",
+      "2675",
+      "2669",
+      "3250",
+      "3256",
+      "1493",
+      "3504",
+      "2779",
+      "1510",
+      "3501",
+      "1465",
+      "1418",
+      "2784",
+      "1425",
+      "1485",
+      "1444",
+      "1451",
+      "1442",
+      "2666",
+      "1527",
+      "2673",
+      "1459"
+    ],
+    "clothes:Sports Jacket||head:SWAT Helmet": [
+      "2938",
+      "3561",
+      "3331",
+      "1743"
+    ],
+    "base:Soyjak||clothes:El Presidente": [
+      "2201",
+      "2217",
+      "2264",
+      "2287",
+      "2181",
+      "2745",
+      "2019",
+      "2088",
+      "2150",
+      "2598",
+      "2680"
+    ],
+    "clothes:Chia Farmer||head:Power Bob": [
+      "3026",
+      "2777"
+    ],
+    "clothes:School Uniform||facewear:Alpha Shades": [
+      "2918"
+    ],
+    "clothes:Suit||facewear:Laser Eyes": [
+      "2960",
+      "3592",
+      "2954"
+    ],
+    "base:Papa Tang||head:Field Cap": [
+      "3212",
+      "3231",
+      "3437",
+      "3319",
+      "3273",
+      "3222",
+      "3248",
+      "3422",
+      "3301"
+    ],
+    "clothes:Born to Ride||head:2Pac Bandana": [
+      "3492"
+    ],
+    "clothes:Piccolo Uniform||facewear:Alpha Shades": [
+      "3704"
+    ]
+  }
+}

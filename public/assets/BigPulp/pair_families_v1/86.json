@@ -1,0 +1,186 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "face:Terminator||head:Wizard Hat": [
+      "1637",
+      "2681",
+      "2802",
+      "3799",
+      "9",
+      "3709",
+      "12",
+      "3177",
+      "1864",
+      "2682",
+      "618",
+      "2999",
+      "3169",
+      "1978",
+      "2548",
+      "1219",
+      "2550",
+      "677",
+      "2549",
+      "1866",
+      "1408",
+      "1861",
+      "1863",
+      "1311",
+      "1979"
+    ],
+    "facewear:Alpha Shades||mouth:Screaming": [
+      "3298",
+      "736",
+      "2167",
+      "72",
+      "663",
+      "102",
+      "1616",
+      "1102",
+      "2396",
+      "1369",
+      "821",
+      "1520",
+      "875",
+      "2127",
+      "1880",
+      "1580",
+      "197",
+      "1335"
+    ],
+    "head:Hard Hat||mouth:Vampire Teeth": [
+      "110",
+      "1048"
+    ],
+    "clothes:Astronaut||facewear:Aviators": [
+      "157",
+      "2011"
+    ],
+    "clothes:Proof of Prayer||face:Rekt": [
+      "3101",
+      "3696",
+      "2123",
+      "3967",
+      "3530",
+      "295",
+      "2120",
+      "296",
+      "3529",
+      "2122",
+      "297",
+      "3280",
+      "294",
+      "3528",
+      "3278",
+      "298",
+      "292",
+      "2121",
+      "293"
+    ],
+    "clothes:Straitjacket||facewear:Alpha Shades": [
+      "2153",
+      "387",
+      "377",
+      "356"
+    ],
+    "head:Pirate Hat||mouth:Cig": [
+      "422",
+      "3230",
+      "4061",
+      "1850",
+      "2581",
+      "2214",
+      "1737",
+      "1487",
+      "1819",
+      "1987"
+    ],
+    "facewear:MOG Glasses||head:Cowboy Hat": [
+      "3344",
+      "2582",
+      "456",
+      "1323",
+      "910",
+      "1919"
+    ],
+    "face:NPC||head:Hard Hat": [
+      "474",
+      "1023",
+      "1629",
+      "473"
+    ],
+    "clothes:Bathrobe||head:Super Saiyan": [
+      "3461",
+      "636",
+      "635"
+    ],
+    "clothes:Tank Top||head:Firefighter Helmet": [
+      "722",
+      "693"
+    ],
+    "clothes:Tank Top||head:Hard Hat": [
+      "724"
+    ],
+    "facewear:Tyson Tattoo||head:Hip Hop Hat": [
+      "3513",
+      "1140",
+      "1677"
+    ],
+    "clothes:Chia Farmer||mouth:Screaming": [
+      "3028",
+      "1507",
+      "2646",
+      "3254",
+      "1461",
+      "1520",
+      "1427",
+      "1455",
+      "1508",
+      "1478",
+      "1495",
+      "1519"
+    ],
+    "base:Papa Tang||mouth:Gold Teeth": [
+      "3435",
+      "3363",
+      "3442",
+      "3239",
+      "3216",
+      "3299",
+      "3450",
+      "3258",
+      "3354",
+      "3251",
+      "3326",
+      "3207",
+      "3340",
+      "3304",
+      "3293",
+      "3402",
+      "3349",
+      "3281",
+      "3372"
+    ],
+    "facewear:Cool Glasses||head:2Pac Bandana": [
+      "3386"
+    ],
+    "base:Alien Soyjak||clothes:Sports Jacket": [
+      "3760",
+      "3791"
+    ],
+    "base:Alien Waifu||head:Wizard Hat": [
+      "3858",
+      "3857",
+      "3834"
+    ],
+    "base:Bepe Soyjak||facewear:Aviators": [
+      "4049",
+      "4044",
+      "4059"
+    ],
+    "base:Bepe Waifu||head:Hip Hop Hat": [
+      "4129"
+    ]
+  }
+}

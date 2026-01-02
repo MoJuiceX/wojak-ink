@@ -1,0 +1,184 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "head:Beanie||mouth:Screaming": [
+      "3888",
+      "3712",
+      "2772",
+      "2186",
+      "23"
+    ],
+    "clothes:Suit||face:Rekt": [
+      "4191",
+      "3583",
+      "4097",
+      "2957",
+      "3342",
+      "2220",
+      "3585",
+      "3584",
+      "1933",
+      "3168",
+      "2222",
+      "3586",
+      "100",
+      "3346",
+      "1935",
+      "1931",
+      "1937",
+      "1938",
+      "1941",
+      "1932",
+      "2221",
+      "3347",
+      "1934",
+      "1946",
+      "1940",
+      "99",
+      "1936",
+      "32",
+      "1939"
+    ],
+    "face:Terminator||facewear:Shades": [
+      "3718",
+      "2934",
+      "2347",
+      "3461",
+      "2108",
+      "1309",
+      "168",
+      "1405",
+      "1407",
+      "1120",
+      "678",
+      "2226",
+      "503",
+      "50"
+    ],
+    "facewear:Shades||head:No Headgear": [
+      "3810",
+      "2006",
+      "2819",
+      "2108",
+      "4103",
+      "2812",
+      "2073",
+      "233",
+      "168",
+      "2102",
+      "3276",
+      "2099",
+      "2243",
+      "2128",
+      "2032",
+      "137",
+      "153",
+      "2138",
+      "2842",
+      "222",
+      "2135",
+      "178",
+      "174",
+      "2233",
+      "2516",
+      "2002",
+      "2240",
+      "213",
+      "2047",
+      "306",
+      "188",
+      "264",
+      "2049",
+      "249",
+      "288",
+      "942",
+      "1666",
+      "1642"
+    ],
+    "clothes:God's Robe||head:Construction Helmet": [
+      "3718",
+      "338"
+    ],
+    "head:Spikes||mouth:Cig": [
+      "3037",
+      "346",
+      "796",
+      "1831",
+      "1366",
+      "701",
+      "897"
+    ],
+    "head:Halo||mouth:Screaming": [
+      "3937",
+      "2015",
+      "409",
+      "821",
+      "362",
+      "904"
+    ],
+    "clothes:Viking Armor||mouth:Bubble Gum": [
+      "424"
+    ],
+    "face:Rugged||head:Trump Wave": [
+      "3632",
+      "3520",
+      "2641",
+      "442",
+      "1005",
+      "1604",
+      "3429"
+    ],
+    "clothes:Firefighter Uniform||head:Military Beret": [
+      "540",
+      "2250"
+    ],
+    "clothes:Drac||head:Halo": [
+      "572",
+      "605",
+      "2194"
+    ],
+    "clothes:Ninja Turtle Fit||head:Cap": [
+      "1011",
+      "982"
+    ],
+    "clothes:Bepe Army||facewear:Fake It Mask": [
+      "1179",
+      "1132",
+      "1152"
+    ],
+    "facewear:Tyson Tattoo||head:Military Beret": [
+      "2287"
+    ],
+    "clothes:Tank Top||mouth:Bandana Mask": [
+      "2339"
+    ],
+    "clothes:Denim Vest||head:Twin Braids": [
+      "4154",
+      "4197",
+      "3039",
+      "2803"
+    ],
+    "clothes:Prom Dress||head:Beanie": [
+      "2857"
+    ],
+    "clothes:Straitjacket||mouth:Stunned": [
+      "3792"
+    ],
+    "base:Alien Baddie||mouth:Glossed Lips": [
+      "3881",
+      "3882",
+      "3883",
+      "3884",
+      "3870",
+      "3867",
+      "3866",
+      "3885"
+    ],
+    "base:Bepe Waifu||facewear:Cyber Shades": [
+      "4143",
+      "4152",
+      "4132"
+    ]
+  }
+}

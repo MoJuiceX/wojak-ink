@@ -1,0 +1,152 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "facewear:Alpha Shades||head:Viking Helmet": [
+      "3593",
+      "736",
+      "2167",
+      "72",
+      "1209",
+      "2396",
+      "1646"
+    ],
+    "face:NPC||facewear:Night Vision": [
+      "1114",
+      "1020",
+      "77",
+      "947"
+    ],
+    "facewear:Aviators||mouth:Stache": [
+      "1521",
+      "2496",
+      "1095",
+      "1354",
+      "449",
+      "163",
+      "2063",
+      "1907"
+    ],
+    "clothes:Goose Suit||mouth:Screaming": [
+      "200",
+      "215"
+    ],
+    "clothes:Viking Armor||mouth:Copium Mask": [
+      "3813",
+      "419",
+      "400"
+    ],
+    "head:Wizard Hat||mouth:Copium Mask": [
+      "1450",
+      "1775",
+      "1700",
+      "630"
+    ],
+    "head:Devil Horns||mouth:Gold Teeth": [
+      "1120",
+      "3047",
+      "756",
+      "960",
+      "689",
+      "1921",
+      "1671",
+      "1421",
+      "666",
+      "2580"
+    ],
+    "facewear:Fake It Mask||head:Crown": [
+      "741",
+      "686",
+      "1132"
+    ],
+    "clothes:Tee||head:Devil Horns": [
+      "756",
+      "785"
+    ],
+    "clothes:Super Saiyan Uniform||head:No Headgear": [
+      "2749",
+      "2715",
+      "3604",
+      "3360",
+      "2722",
+      "2732",
+      "942",
+      "2712"
+    ],
+    "facewear:Fake It Mask||head:Clown": [
+      "1975",
+      "2335"
+    ],
+    "base:Soyjak||clothes:Tank Top": [
+      "2343",
+      "2347",
+      "2345",
+      "2339",
+      "2327",
+      "2344",
+      "2335",
+      "2325",
+      "2340",
+      "2334",
+      "2326",
+      "2323",
+      "2332",
+      "2346",
+      "2342",
+      "2330",
+      "2336",
+      "2341",
+      "2333",
+      "2329",
+      "2331",
+      "2328",
+      "2338",
+      "2324",
+      "2337"
+    ],
+    "clothes:Denim Vest||mouth:Cig": [
+      "3041",
+      "2797",
+      "3037",
+      "2792"
+    ],
+    "head:Power Bob||mouth:Screaming": [
+      "2982"
+    ],
+    "clothes:Vintage Dress||head:Construction Helmet": [
+      "3181"
+    ],
+    "base:Monkey Zoo||facewear:Night Vision": [
+      "3516",
+      "3572",
+      "3536",
+      "3551",
+      "3498",
+      "3510"
+    ],
+    "base:Alien Soyjak||clothes:Firefighter Uniform": [
+      "3747"
+    ],
+    "base:Alien Soyjak||head:Standard Cut": [
+      "3769",
+      "3762"
+    ],
+    "base:Alien Baddie||head:Clown": [
+      "3892",
+      "3873"
+    ],
+    "base:Alien Baddie||head:Crown": [
+      "3898"
+    ],
+    "base:Bepe Soyjak||clothes:Drac": [
+      "4042",
+      "4043",
+      "4041"
+    ],
+    "base:Bepe Soyjak||clothes:Suit": [
+      "4097",
+      "4096",
+      "4095"
+    ]
+  }
+}

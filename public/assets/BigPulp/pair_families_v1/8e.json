@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "facewear:Ninja Turtle Mask||mouth:Stache": [
+      "3954",
+      "3663",
+      "61",
+      "20",
+      "2650",
+      "1322",
+      "985",
+      "968",
+      "2293",
+      "1422",
+      "90",
+      "1570",
+      "1656"
+    ],
+    "face:Bleeding Bags||head:Beanie": [
+      "3888",
+      "739",
+      "3505",
+      "1393",
+      "332",
+      "3577",
+      "2186",
+      "1621"
+    ],
+    "head:Devil Horns||mouth:Copium Mask": [
+      "989",
+      "2514",
+      "340",
+      "1324"
+    ],
+    "head:Super Wojak Hat||mouth:Teeth": [
+      "382",
+      "1755",
+      "2309",
+      "2571",
+      "2333",
+      "1964",
+      "2080",
+      "1464",
+      "769",
+      "1714"
+    ],
+    "facewear:Night Vision||head:Super Wojak Hat": [
+      "382"
+    ],
+    "head:Super Wojak Hat||mouth:Pizza": [
+      "1248",
+      "3456",
+      "1577",
+      "412",
+      "1827"
+    ],
+    "facewear:Cyber Shades||head:Devil Horns": [
+      "3926",
+      "3691",
+      "1390",
+      "591",
+      "960",
+      "1921"
+    ],
+    "head:Halo||mouth:Joint": [
+      "3698",
+      "789",
+      "2210"
+    ],
+    "clothes:Super Saiyan Uniform||face:Terminator": [
+      "3608",
+      "953",
+      "3606",
+      "3794",
+      "2750",
+      "3607",
+      "954",
+      "2749",
+      "952",
+      "955",
+      "2682",
+      "3352",
+      "3605",
+      "3361",
+      "951",
+      "2748",
+      "2747",
+      "3604",
+      "2746",
+      "950"
+    ],
+    "head:Super Wojak Hat||mouth:Smile": [
+      "1003"
+    ],
+    "clothes:Suit||head:Centurion": [
+      "2954",
+      "1973",
+      "1944"
+    ],
+    "facewear:Aviators||mouth:Stunned": [
+      "3779",
+      "4049",
+      "2702",
+      "3743",
+      "2671",
+      "2278"
+    ],
+    "head:Soy Hair||mouth:Gold Teeth": [
+      "2420"
+    ],
+    "clothes:Bathrobe||mouth:Glossed Lips": [
+      "3831",
+      "3006",
+      "3866",
+      "3001",
+      "2755"
+    ],
+    "facewear:Cyber Shades||head:Mermaid Waves": [
+      "4152",
+      "2898",
+      "2933"
+    ],
+    "head:Power Bob||mouth:Cig": [
+      "3143",
+      "3185",
+      "3848"
+    ],
+    "base:Alien Wojak||head:Firefighter Helmet": [
+      "3688",
+      "3803",
+      "3717",
+      "3809",
+      "3664"
+    ],
+    "base:Alien Soyjak||mouth:Cig": [
+      "3764",
+      "3772",
+      "3756",
+      "3755",
+      "3738",
+      "3789",
+      "3822"
+    ],
+    "base:Bepe Waifu||clothes:Gopher Suit": [
+      "4133"
+    ]
+  }
+}

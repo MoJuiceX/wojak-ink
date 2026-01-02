@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "face:NPC||head:Spikes": [
+      "41",
+      "730",
+      "1203",
+      "1304",
+      "796",
+      "1399"
+    ],
+    "face:Terminator||head:Cowboy Hat": [
+      "2960",
+      "3865",
+      "2959",
+      "3066",
+      "44",
+      "3421",
+      "1026",
+      "1977"
+    ],
+    "facewear:Aviators||head:Propeller Hat": [
+      "3760",
+      "954",
+      "794",
+      "79",
+      "1354",
+      "626",
+      "2260",
+      "367",
+      "1860",
+      "1548",
+      "1273",
+      "1641",
+      "1244"
+    ],
+    "clothes:Leather Jacket||mouth:Gold Teeth": [
+      "3520",
+      "3515",
+      "3505",
+      "3872",
+      "3507",
+      "3258",
+      "3063",
+      "1371",
+      "1362",
+      "1381",
+      "1361",
+      "1397",
+      "1380",
+      "88",
+      "1346",
+      "1329",
+      "2321"
+    ],
+    "clothes:Sonic Suit||face:Rekt": [
+      "3699",
+      "4087",
+      "2053",
+      "2054",
+      "231",
+      "230",
+      "2052",
+      "229"
+    ],
+    "clothes:Firefighter Uniform||head:Viking Helmet": [
+      "516",
+      "2258",
+      "545"
+    ],
+    "clothes:Ninja Turtle Fit||facewear:Clown Nose": [
+      "1027",
+      "991"
+    ],
+    "clothes:Wizard Drip||head:Hip Hop Hat": [
+      "1818"
+    ],
+    "clothes:El Presidente||head:Propeller Hat": [
+      "1839"
+    ],
+    "head:Propeller Hat||mouth:Stunned": [
+      "4064",
+      "2455"
+    ],
+    "clothes:El Presidente||facewear:Alpha Shades": [
+      "2745"
+    ],
+    "clothes:Sports Bra||facewear:Wizard Glasses": [
+      "3141"
+    ],
+    "base:Alien Wojak||clothes:Super Saiyan Uniform": [
+      "3674",
+      "3820"
+    ],
+    "base:Alien Waifu||head:Cowboy Hat": [
+      "3862",
+      "3865",
+      "3838"
+    ],
+    "clothes:Sports Bra||head:Cap": [
+      "3860"
+    ],
+    "head:Halo||mouth:Stunned": [
+      "4051"
+    ],
+    "base:Bepe Waifu||facewear:No Face Wear": [
+      "4148",
+      "4153",
+      "4142",
+      "4140",
+      "4131",
+      "4157",
+      "4156",
+      "4141",
+      "4144",
+      "4155",
+      "4135",
+      "4118",
+      "4147",
+      "4130",
+      "4149",
+      "4129",
+      "4126",
+      "4139",
+      "4117",
+      "4136",
+      "4124",
+      "4123"
+    ]
+  }
+}

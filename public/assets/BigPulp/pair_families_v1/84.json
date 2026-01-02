@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "facewear:Ninja Turtle Mask||head:Ronin Helmet": [
+      "859",
+      "2891",
+      "84",
+      "1710",
+      "1570"
+    ],
+    "facewear:Wizard Glasses||mouth:Stache": [
+      "180",
+      "148"
+    ],
+    "clothes:Bepe Suit||face:Rekt": [
+      "3773",
+      "2103",
+      "177",
+      "2102",
+      "178",
+      "2101",
+      "176"
+    ],
+    "clothes:Proof of Prayer||facewear:3D Glasses": [
+      "2117",
+      "297",
+      "2871",
+      "277"
+    ],
+    "facewear:Matrix Lenses||head:Spikes": [
+      "2917",
+      "2953",
+      "638",
+      "369",
+      "1000",
+      "1339"
+    ],
+    "clothes:SWAT Gear||head:Beer Hat": [
+      "453"
+    ],
+    "clothes:Wizard Drip||mouth:Bubble Gum": [
+      "3199",
+      "1838",
+      "3196",
+      "1788",
+      "1853",
+      "1789",
+      "2528",
+      "1790"
+    ],
+    "base:Soyjak||facewear:VR Headset": [
+      "2478",
+      "2217",
+      "2319",
+      "2257",
+      "2144",
+      "2216",
+      "2626",
+      "2325",
+      "2053",
+      "2168",
+      "2716",
+      "2114",
+      "2522",
+      "2385"
+    ],
+    "facewear:Laser Eyes||head:Ronin Helmet": [
+      "2390"
+    ],
+    "clothes:School Uniform||facewear:Shades": [
+      "2911",
+      "3133"
+    ],
+    "facewear:Fake It Mask||head:Construction Helmet": [
+      "3508"
+    ],
+    "clothes:Pickle Suit||facewear:VR Headset": [
+      "3666"
+    ],
+    "clothes:Piccolo Uniform||head:Crown": [
+      "3825"
+    ],
+    "base:Alien Waifu||mouth:Copium Mask": [
+      "3844"
+    ],
+    "base:Bepe Wojak||head:Tin Foil Hat": [
+      "3991",
+      "3907",
+      "3963",
+      "3983",
+      "4012",
+      "4020"
+    ],
+    "base:Bepe Soyjak||facewear:Wizard Glasses": [
+      "4106",
+      "4116",
+      "4055",
+      "4062",
+      "4029"
+    ],
+    "facewear:Cool Glasses||head:Mermaid Waves": [
+      "4122",
+      "4165"
+    ]
+  }
+}

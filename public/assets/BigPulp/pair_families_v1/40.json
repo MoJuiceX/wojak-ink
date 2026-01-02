@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "face:Bleeding Bags||head:Hard Hat": [
+      "3226",
+      "469",
+      "1848",
+      "2489",
+      "2579",
+      "1734",
+      "110",
+      "1298",
+      "420"
+    ],
+    "head:Comrade Hat||mouth:Hannibal Mask": [
+      "355",
+      "1039"
+    ],
+    "head:Centurion||mouth:Numb": [
+      "1109",
+      "4078",
+      "1091",
+      "3291",
+      "1012",
+      "3463",
+      "3969",
+      "388",
+      "3102",
+      "684",
+      "1944",
+      "1031",
+      "2618",
+      "2479",
+      "1032",
+      "1694",
+      "2292",
+      "2620",
+      "1444",
+      "2184",
+      "1108",
+      "2617",
+      "1030",
+      "1074",
+      "1115"
+    ],
+    "clothes:Viking Armor||head:Comrade Hat": [
+      "2171",
+      "433",
+      "445",
+      "414"
+    ],
+    "clothes:SWAT Gear||head:Beanie": [
+      "452"
+    ],
+    "head:Centurion||mouth:Pipe": [
+      "487",
+      "2291",
+      "2590",
+      "1415"
+    ],
+    "clothes:Firefighter Uniform||facewear:Cyber Shades": [
+      "2267",
+      "539",
+      "508"
+    ],
+    "clothes:Tank Top||facewear:Matrix Lenses": [
+      "724",
+      "706",
+      "2333",
+      "688"
+    ],
+    "facewear:Tyson Tattoo||mouth:Cig": [
+      "3665",
+      "1947",
+      "1589",
+      "752",
+      "1160",
+      "1258",
+      "1767"
+    ],
+    "facewear:Aviators||mouth:Bandana Mask": [
+      "2339",
+      "1393",
+      "2651",
+      "880"
+    ],
+    "clothes:Wizard Drip||facewear:3D Glasses": [
+      "2542",
+      "1837",
+      "2996",
+      "1781",
+      "2528",
+      "1762"
+    ],
+    "clothes:Chia Farmer||mouth:Sexy Lip Bite": [
+      "2777"
+    ],
+    "clothes:Denim Vest||head:Crown": [
+      "2795"
+    ],
+    "face:Rekt||head:Twin Braids": [
+      "3101",
+      "2809",
+      "2945"
+    ],
+    "clothes:Vintage Dress||mouth:Sexy Lip Bite": [
+      "3841",
+      "3179",
+      "3876",
+      "2976",
+      "2975"
+    ],
+    "head:Beanie||mouth:Sexy Lip Bite": [
+      "3137",
+      "3038"
+    ],
+    "clothes:Denim Vest||head:Clown": [
+      "3835",
+      "3042"
+    ],
+    "facewear:Night Vision||mouth:Stunned": [
+      "4115"
+    ]
+  }
+}

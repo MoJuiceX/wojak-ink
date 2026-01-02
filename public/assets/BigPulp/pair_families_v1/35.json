@@ -1,0 +1,147 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-31T16:33:37.933Z",
+  "pairs": {
+    "facewear:MOG Glasses||head:Propeller Hat": [
+      "3982",
+      "76",
+      "1384",
+      "467",
+      "1930"
+    ],
+    "clothes:Super Saiyan Uniform||mouth:Numb": [
+      "3763",
+      "3596",
+      "3359",
+      "921",
+      "930",
+      "2697",
+      "2728",
+      "939",
+      "3361",
+      "98",
+      "2705",
+      "2715",
+      "3597",
+      "917",
+      "920",
+      "2690",
+      "902",
+      "2743",
+      "2723",
+      "893",
+      "2746",
+      "944",
+      "117",
+      "894",
+      "2729",
+      "950",
+      "891",
+      "881"
+    ],
+    "clothes:Born to Ride||face:Bleeding Bags": [
+      "3241",
+      "3819",
+      "3480",
+      "3236",
+      "3011",
+      "3244",
+      "108",
+      "1299",
+      "2579",
+      "4034",
+      "1295",
+      "3240",
+      "1298",
+      "1297",
+      "1296"
+    ],
+    "clothes:Gopher Suit||face:Terminator": [
+      "3948",
+      "271",
+      "2249",
+      "3058",
+      "2822",
+      "275",
+      "2248",
+      "2247",
+      "272",
+      "274",
+      "273"
+    ],
+    "head:Propeller Hat||mouth:Copium Mask": [
+      "613",
+      "367",
+      "1070"
+    ],
+    "facewear:Tyson Tattoo||head:Viking Helmet": [
+      "2200",
+      "2017",
+      "374",
+      "563",
+      "2411",
+      "2624"
+    ],
+    "clothes:Super Saiyan Uniform||mouth:Pipe": [
+      "3601",
+      "936",
+      "3607",
+      "3353",
+      "3595",
+      "912",
+      "915",
+      "886"
+    ],
+    "clothes:Ninja Turtle Fit||head:Devil Horns": [
+      "989",
+      "960",
+      "1018",
+      "1028"
+    ],
+    "clothes:Born to Ride||head:Cap": [
+      "3744",
+      "3714",
+      "3489",
+      "3833",
+      "3233",
+      "1225"
+    ],
+    "clothes:Sports Jacket||head:Firefighter Helmet": [
+      "3565",
+      "2500",
+      "1703",
+      "1732",
+      "1653"
+    ],
+    "head:SWAT Helmet||mouth:Sexy Lip Bite": [
+      "2938"
+    ],
+    "facewear:Matrix Lenses||head:Ponytail": [
+      "3080",
+      "3003"
+    ],
+    "clothes:Pickle Suit||head:Vixen Waves": [
+      "3079"
+    ],
+    "clothes:Bathrobe||head:Ronin Helmet": [
+      "3455"
+    ],
+    "base:Bepe Soyjak||facewear:MOG Glasses": [
+      "4052",
+      "4113",
+      "4087",
+      "4100",
+      "4083",
+      "4032",
+      "4105",
+      "4075",
+      "4114",
+      "4090",
+      "4023"
+    ],
+    "base:Bepe Soyjak||clothes:Gopher Suit": [
+      "4059",
+      "4058"
+    ]
+  }
+}
