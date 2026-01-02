@@ -659,8 +659,8 @@ function main() {
   console.log(`  Total family members: ${totalFamilyMembers}`)
   console.log(`  Shard sizes: avg ${(avgSize / 1024).toFixed(1)}KB, min ${(minSize / 1024).toFixed(1)}KB, max ${(maxSize / 1024).toFixed(1)}KB, total ${(totalSize / 1024 / 1024).toFixed(2)}MB`)
 
-  // Step 6: Build and write main index
-  console.log('\n[Step 6] Writing main index...')
+  // Step 6: Build and write main index as 4 chunks (to stay under GitHub's 100MB limit)
+  console.log('\n[Step 6] Writing main index as 4 chunks...')
   
   const inputCounts = {
     total_nfts_processed: nftTraits.size,
@@ -672,19 +672,96 @@ function main() {
     inputCounts.unique_traits_per_category[cat] = uniqueTraitsPerCategory[cat].size
   }
 
-  const indexData = {
+  // Split drilldown keys into 4 chunks using size-based balancing
+  const drilldownKeys = Object.keys(views.drilldown)
+  
+  // Calculate size of each drilldown entry (approximate)
+  const keySizes = new Map()
+  for (const key of drilldownKeys) {
+    // Approximate size by stringifying just this entry
+    keySizes.set(key, JSON.stringify(views.drilldown[key]).length)
+  }
+  
+  // Sort by size (largest first)
+  const sortedKeys = Array.from(keySizes.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([key]) => key)
+  
+  // Distribute into 4 chunks to balance sizes
+  const chunks = [[], [], [], []]
+  const chunkSizeEstimates = [0, 0, 0, 0]
+  
+  for (const key of sortedKeys) {
+    const size = keySizes.get(key)
+    // Add to smallest chunk
+    const smallestIdx = chunkSizeEstimates.indexOf(Math.min(...chunkSizeEstimates))
+    chunks[smallestIdx].push(key)
+    chunkSizeEstimates[smallestIdx] += size
+  }
+
+  console.log(`  Splitting ${drilldownKeys.length} drilldown keys into ${chunks.length} balanced chunks:`)
+  chunks.forEach((chunk, idx) => {
+    const sizeMB = (chunkSizeEstimates[idx] / 1024 / 1024).toFixed(2)
+    console.log(`    Chunk ${idx + 1}: ${chunk.length} keys, ~${sizeMB}MB`)
+  })
+
+  // Write chunk files
+  const chunkSizes = []
+  const baseMetadata = {
     schema_version: "1.3",
     generated_at: timestamp,
     source_files: ["nftRarityData.json", "all_nft_analysis.json"],
     input_counts: inputCounts,
     normalization_report: normalizationReport,
     categories: CATEGORIES,
-    views
+    chunk_info: {
+      total_chunks: chunks.length,
+      chunk_index: 0
+    }
   }
 
-  writeJson(FILES.outputIndex, indexData)
-  const indexSize = fs.statSync(FILES.outputIndex).size
-  console.log(`  Main index size: ${(indexSize / 1024).toFixed(1)}KB`)
+  // Chunk 1: Metadata + Primary + First drilldown chunk
+  const chunk1Data = {
+    ...baseMetadata,
+    chunk_info: { ...baseMetadata.chunk_info, chunk_index: 0 },
+    views: {
+      primary: views.primary,
+      drilldown: {}
+    }
+  }
+  for (const key of chunks[0]) {
+    chunk1Data.views.drilldown[key] = views.drilldown[key]
+  }
+  
+  const chunk1Path = FILES.outputIndex.replace('.json', '_part1.json')
+  writeJson(chunk1Path, chunk1Data)
+  const chunk1Size = fs.statSync(chunk1Path).size
+  chunkSizes.push(chunk1Size)
+  console.log(`  Chunk 1 size: ${(chunk1Size / 1024 / 1024).toFixed(2)}MB (metadata + primary + ${chunks[0].length} drilldown keys)`)
+
+  // Chunks 2-4: Remaining drilldown chunks
+  for (let i = 1; i < chunks.length; i++) {
+    const chunkData = {
+      ...baseMetadata,
+      chunk_info: { ...baseMetadata.chunk_info, chunk_index: i },
+      views: {
+        primary: {}, // Empty for chunks 2-4
+        drilldown: {}
+      }
+    }
+    for (const key of chunks[i]) {
+      chunkData.views.drilldown[key] = views.drilldown[key]
+    }
+    
+    const chunkPath = FILES.outputIndex.replace('.json', `_part${i + 1}.json`)
+    writeJson(chunkPath, chunkData)
+    const chunkSize = fs.statSync(chunkPath).size
+    chunkSizes.push(chunkSize)
+    console.log(`  Chunk ${i + 1} size: ${(chunkSize / 1024 / 1024).toFixed(2)}MB (${chunks[i].length} drilldown keys)`)
+  }
+
+  const totalChunkSize = chunkSizes.reduce((a, b) => a + b, 0)
+  console.log(`  Total size: ${(totalChunkSize / 1024 / 1024).toFixed(2)}MB across ${chunks.length} chunks`)
 
   // Verification output
   console.log('\n[Verification]')
@@ -727,7 +804,7 @@ function main() {
   }
 
   console.log('\n✓ Build complete!')
-  console.log(`  Main index: ${FILES.outputIndex}`)
+  console.log(`  Main index chunks: ${FILES.outputIndex.replace('.json', '_part1.json')} through ${FILES.outputIndex.replace('.json', `_part${chunks.length}.json`)}`)
   console.log(`  Family shards: ${FILES.familiesDir}/XX.json (256 files)`)
 }
 

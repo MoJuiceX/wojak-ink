@@ -265,12 +265,70 @@ const loadTraitInsights = async () => {
 }
 
 // Lazy loading: Load rare pairings index only when Rare Pairings Explorer opened
+// Now loads from 4 chunk files and merges them
 const loadRarePairingsIndex = async () => {
   if (DataCache.loaded.rarePairingsIndex) return DataCache.rarePairingsIndex
   if (DataCache.loadingPromises.rarePairingsIndex) return DataCache.loadingPromises.rarePairingsIndex
   
   DataCache.loadingPromises.rarePairingsIndex = (async () => {
     try {
+      // Try loading from 4 chunks first (new format)
+      const chunkPromises = []
+      let chunkCount = 4
+      
+      // Try to fetch all 4 chunks in parallel
+      for (let i = 1; i <= 4; i++) {
+        chunkPromises.push(
+          fetch(`/assets/BigPulp/rare_pairings_index_v1_part${i}.json`)
+            .then(res => res.ok ? res.json() : null)
+            .catch(() => null)
+        )
+      }
+      
+      const chunks = await Promise.all(chunkPromises)
+      const validChunks = chunks.filter(c => c !== null)
+      
+      if (validChunks.length > 0) {
+        // Merge chunks
+        const merged = {
+          schema_version: validChunks[0].schema_version,
+          generated_at: validChunks[0].generated_at,
+          source_files: validChunks[0].source_files,
+          input_counts: validChunks[0].input_counts,
+          normalization_report: validChunks[0].normalization_report,
+          categories: validChunks[0].categories,
+          views: {
+            primary: validChunks[0].views.primary || {},
+            drilldown: {}
+          }
+        }
+        
+        // Merge drilldown from all chunks
+        for (const chunk of validChunks) {
+          if (chunk.views && chunk.views.drilldown) {
+            Object.assign(merged.views.drilldown, chunk.views.drilldown)
+          }
+        }
+        
+        // Validate schema version
+        if (!merged.schema_version || !merged.schema_version.startsWith('1.')) {
+          if (import.meta.env.DEV) {
+            console.warn('[Big Pulp] Invalid rare pairings index schema_version:', merged.schema_version)
+          }
+          throw new Error('Invalid rare pairings index schema version')
+        }
+        
+        if (import.meta.env.DEV) {
+          console.log(`[Big Pulp] Loaded rare pairings index from ${validChunks.length} chunks`)
+        }
+        
+        DataCache.rarePairingsIndex = merged
+        DataCache.loaded.rarePairingsIndex = true
+        DataCache.loadingPromises.rarePairingsIndex = null
+        return merged
+      }
+      
+      // Fallback: Try loading old single file format (backward compatibility)
       const response = await fetch('/assets/BigPulp/rare_pairings_index_v1.json')
       if (!response.ok) throw new Error(`Rare pairings index fetch failed: ${response.status}`)
       const data = await response.json()
