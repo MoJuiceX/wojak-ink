@@ -74,7 +74,6 @@ export function useBigPulpHeatMap() {
         // On failure, try to use cached data
         const cached = loadHeatmapFromCache();
         if (cached) {
-          console.log('[useBigPulpHeatMap] API failed, using cached data');
           return cached.data;
         }
         // No cache available, rethrow

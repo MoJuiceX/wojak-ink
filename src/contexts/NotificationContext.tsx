@@ -170,7 +170,6 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
 
       if (!registration) {
         registration = await navigator.serviceWorker.register('/sw.js');
-        console.log('Service Worker registered');
       }
 
       // Wait for service worker to be ready
@@ -186,7 +185,6 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
             userVisibleOnly: true,
             applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource,
           });
-          console.log('Push subscription created');
         } catch (subError) {
           console.error('Error creating push subscription:', subError);
           // Still mark as subscribed for demo mode (local notifications)

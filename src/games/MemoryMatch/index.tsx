@@ -3,7 +3,6 @@
  *
  * Uses shared effects system and game UI components.
  */
-// @ts-nocheck
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useGameSounds } from '@/hooks/useGameSounds';
 import { useLeaderboard } from '@/hooks/data/useLeaderboard';
@@ -12,7 +11,6 @@ import { GameShell } from '@/systems/game-ui';
 import { useEffects, EffectsLayer } from '@/systems/effects';
 import {
   MEMORY_MATCH_CONFIG,
-  ROUND_CONFIG,
   SAD_IMAGES,
   GRID_MAP,
   getRoundConfig,
@@ -58,7 +56,7 @@ const MemoryMatchGame: React.FC = () => {
   const [gameState, setGameState] = useState<'idle' | 'loading' | 'playing' | 'roundComplete' | 'gameover'>('idle');
   const [cards, setCards] = useState<Card[]>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
-  const [moves, setMoves] = useState(0);
+  const [_moves, setMoves] = useState(0);
   const [matches, setMatches] = useState(0);
   const [timeLeft, setTimeLeft] = useState(40);
   const [isChecking, setIsChecking] = useState(false);
@@ -249,7 +247,6 @@ const MemoryMatchGame: React.FC = () => {
   };
 
   const calculateRoundScore = () => {
-    const config = getRoundConfig(round);
     const matchPoints = matches * 10;
     const timeBonus = timeLeft * 5;
     const roundBonus = round * 100;

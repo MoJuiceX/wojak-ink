@@ -94,9 +94,8 @@ export function useSalesHistory(): UseSalesHistoryResult {
 
     try {
       await ensureInitialized();
-      const result = await syncDexieSales();
+      await syncDexieSales();
       markSyncComplete(); // Track when we last synced
-      console.log('[useSalesHistory] Sync complete:', result);
       setRefreshKey(k => k + 1); // Trigger re-render
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Sync failed';

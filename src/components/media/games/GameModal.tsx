@@ -53,7 +53,6 @@ function ArcadeLightsBridge({
 
     // Sync if pattern is set OR if sequence is a game-set value
     if (pattern !== null || isGameSequence) {
-      console.log('[ArcadeLightsBridge] Syncing:', { sequence, pattern, options });
       onStateChange(sequence as LightSequence, options as LightOptions, pattern);
     }
   }, [sequence, options, pattern, onStateChange]);

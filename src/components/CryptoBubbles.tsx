@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useEffect, useRef, useState, useCallback } from 'react';
 import './CryptoBubbles.css';
 
@@ -655,9 +654,6 @@ const CryptoBubbles: React.FC<CryptoBubblesProps> = ({
     }
     return '$' + Math.round(value);
   };
-
-  // Small bubbles (radius <= 28) only show value, not symbol
-  const isSmallBubble = (radius: number) => radius <= 28;
 
   return (
     <>

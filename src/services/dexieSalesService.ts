@@ -176,7 +176,6 @@ export async function fetchDexieTrades(page: number = 1): Promise<DexieTradesRes
   }
 
   // Fallback to Parse.bot (PAID) only if Dexie fails
-  console.log('[DexieSales] Falling back to Parse.bot API...');
   return fetchParseBotFallback(page);
 }
 
@@ -213,12 +212,10 @@ async function fetchAllDexieTrades(): Promise<DexieOffer[]> {
 
       // If we have fresh cache, skip Parse.bot entirely
       if (cachedSales > 0 && hoursSinceSync < CACHE_FRESHNESS_THRESHOLD_HOURS) {
-        console.log(`[DexieSales] Dexie unavailable but cache is fresh (${Math.round(hoursSinceSync)}h old, ${cachedSales} sales) - skipping Parse.bot`);
         return []; // Return empty - caller will use existing cache
       }
 
       // Cache is stale or empty, use Parse.bot
-      console.log(`[DexieSales] Dexie unavailable and cache is stale (${Math.round(hoursSinceSync)}h old) - using Parse.bot`);
       usingFallback = true;
       response = await fetchParseBotFallback(page);
     } else if (!response?.offers && usingFallback) {
@@ -232,8 +229,6 @@ async function fetchAllDexieTrades(): Promise<DexieOffer[]> {
     // Calculate total pages from count and page_size
     if (page === 1) {
       totalPages = Math.ceil(response.count / response.page_size);
-      const source = usingFallback ? 'Parse.bot (paid)' : 'Dexie (free)';
-      console.log(`[DexieSales] Using ${source}: ${response.count} trades across ${totalPages} pages`);
     }
 
     // Stop if we've fetched all expected records
@@ -322,7 +317,6 @@ export async function syncDexieSales(): Promise<{
   catSales: number;
   usedCache: boolean;
 }> {
-  console.log('[DexieSales] Starting sync...');
 
   // Fetch all pages of trades
   const allOffers = await fetchAllDexieTrades();
@@ -331,18 +325,15 @@ export async function syncDexieSales(): Promise<{
   if (allOffers.length === 0) {
     const cachedSales = getSalesCount();
     if (cachedSales > 0) {
-      console.log('[DexieSales] Using cached data -', cachedSales, 'sales (no API calls made)');
       return { fetched: 0, imported: 0, xchSales: 0, catSales: 0, usedCache: true };
     }
     console.error('[DexieSales] No trades data received and no cache available');
     return { fetched: 0, imported: 0, xchSales: 0, catSales: 0, usedCache: false };
   }
 
-  console.log('[DexieSales] Fetched', allOffers.length, 'total trades');
 
   // Parse trades
   const parsedSales = parseTrades(allOffers);
-  console.log('[DexieSales] Parsed', parsedSales.length, 'valid NFT sales');
 
   // Count by currency
   const xchSales = parsedSales.filter((s) => s.currency === 'XCH').length;
@@ -351,14 +342,6 @@ export async function syncDexieSales(): Promise<{
   // Convert and import
   const rawRecords = toRawSaleRecords(parsedSales);
   const imported = await importSales(rawRecords);
-
-  console.log('[DexieSales] Sync complete:', {
-    fetched: allOffers.length,
-    parsed: parsedSales.length,
-    imported,
-    xchSales,
-    catSales,
-  });
 
   return {
     fetched: allOffers.length,

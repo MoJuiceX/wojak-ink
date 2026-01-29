@@ -355,7 +355,6 @@ export function AchievementsProvider({ children }: { children: React.ReactNode }
     saveProgress(newProgress);
 
     if (newlyUnlocked.length > 0) {
-      console.log('[Achievements] Newly unlocked:', newlyUnlocked);
     }
   }, [checkRequirement, saveProgress]);
 

@@ -184,7 +184,6 @@ async function fetchMintGardenListings(): Promise<NFTListing[]> {
       pageCount++;
     }
 
-    console.log(`[MarketService] MintGarden: ${listings.length} listings`);
   } catch (error) {
     console.error('[MarketService] MintGarden error:', error);
   }
@@ -250,7 +249,6 @@ async function fetchDexieListings(): Promise<NFTListing[]> {
       page++;
     }
 
-    console.log(`[MarketService] Dexie: ${listings.length} listings`);
   } catch (error) {
     console.error('[MarketService] Dexie error:', error);
   }
@@ -347,7 +345,6 @@ class MarketService implements IMarketService {
 
     // Start loading
     listingsCache.loading = (async () => {
-      console.log('[MarketService] Fetching listings from all sources...');
 
       const [mintgarden, dexie] = await Promise.all([
         fetchMintGardenListings(),
@@ -362,7 +359,6 @@ class MarketService implements IMarketService {
 
       saveListingsToCache(result.listings);
 
-      console.log(`[MarketService] Total unique listings: ${result.listings.length}`);
 
       return result.listings;
     })();
@@ -421,7 +417,6 @@ class MarketService implements IMarketService {
 
     if (listingsCache.loading) return;
 
-    console.log('[MarketService] Starting background prefetch...');
     this.fetchAllListings(true).catch(err => {
       console.warn('[MarketService] Prefetch failed:', err);
     });
@@ -481,7 +476,6 @@ async function fetchNftOwners(): Promise<Map<string, string>> {
       pageCount++;
     }
 
-    console.log(`[MarketService] Fetched owners for ${owners.size} NFTs`);
   } catch (error) {
     console.error('[MarketService] Owner fetch error:', error);
   }
@@ -561,7 +555,6 @@ export async function prefetchNftOwners(): Promise<void> {
 
   if (ownerCache.loading) return;
 
-  console.log('[MarketService] Prefetching NFT owners...');
   ownerCache.loading = fetchNftOwners();
   const owners = await ownerCache.loading;
   ownerCache.data = owners;

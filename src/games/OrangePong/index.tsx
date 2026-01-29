@@ -3,7 +3,6 @@
  *
  * Wrapper that provides effects context to the game.
  */
-// @ts-nocheck
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useGameSounds } from '@/hooks/useGameSounds';
 import { useLeaderboard } from '@/hooks/data/useLeaderboard';
@@ -40,7 +39,7 @@ const OrangePongGame: React.FC = () => {
     isSubmitting,
   } = useLeaderboard(ORANGE_PONG_CONFIG.leaderboardId || 'orange-pong');
 
-  const { isBackgroundMusicPlaying, playBackgroundMusic, pauseBackgroundMusic } = useAudio();
+  const { isBackgroundMusicPlaying: _isBackgroundMusicPlaying, playBackgroundMusic: _playBackgroundMusic, pauseBackgroundMusic: _pauseBackgroundMusic } = useAudio();
 
   const [gameState, setGameState] = useState<'idle' | 'playing' | 'gameover'>('idle');
   const [playerScore, setPlayerScore] = useState(0);
@@ -65,7 +64,7 @@ const OrangePongGame: React.FC = () => {
   });
   const [isNewPersonalBest, setIsNewPersonalBest] = useState(false);
   const [showLeaderboardPanel, setShowLeaderboardPanel] = useState(false);
-  const [showScreenShake, setShowScreenShake] = useState(false);
+  const [showScreenShake, _setShowScreenShake] = useState(false);
 
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);

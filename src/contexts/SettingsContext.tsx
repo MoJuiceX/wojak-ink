@@ -22,9 +22,43 @@ import type {
   MotionPreference,
   AppSettings,
 } from '@/types/settings';
-import { DEFAULT_SETTINGS } from '@/config/settingsThemes';
-import { getTheme, isValidThemeId } from '@/config/themes';
-import { THEME_TRANSITION_DURATION } from '@/config/settingsAnimations';
+
+// Inline defaults (previously from settingsThemes.ts)
+const DEFAULT_SETTINGS: SettingsState = {
+  theme: {
+    selected: 'tang-orange',
+    resolved: 'tang-orange',
+    systemPreference: 'dark',
+  },
+  audio: {
+    masterEnabled: true,
+    masterVolume: 0.7,
+    backgroundMusicEnabled: true,
+    backgroundMusicVolume: 0.5,
+    soundEffectsEnabled: true,
+    soundEffectsVolume: 0.8,
+    muteOnFocusLoss: false,
+    fadeOnPause: true,
+  },
+  motion: {
+    preference: 'system',
+    reducedMotion: false,
+  },
+  app: {
+    compactMode: false,
+    showTooltips: true,
+    confirmBeforeClose: false,
+    autoSave: true,
+    developerMode: false,
+    analyticsEnabled: true,
+  },
+};
+
+// Hardcoded theme (dark/orange only)
+const THEME_CONFIG = { isDark: true, id: 'tang-orange' };
+const getTheme = (_themeId?: string) => THEME_CONFIG;
+const isValidThemeId = (_themeId?: string) => true;
+const THEME_TRANSITION_DURATION = 300;
 
 const STORAGE_KEY = 'wojak-settings';
 
@@ -149,13 +183,11 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ============ Resolve Theme ============
+  // Always tang-orange (dark mode only)
 
   const resolvedTheme = useMemo<ResolvedTheme>(() => {
-    if (settings.theme.selected === 'system') {
-      return settings.theme.systemPreference;
-    }
-    return settings.theme.selected as ResolvedTheme;
-  }, [settings.theme.selected, settings.theme.systemPreference]);
+    return 'tang-orange';
+  }, []);
 
   // ============ Resolve Motion ============
 

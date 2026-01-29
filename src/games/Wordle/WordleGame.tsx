@@ -201,7 +201,6 @@ const WordleGame: React.FC = () => {
   useEffect(() => {
     const word = getRandomSolution();
     setTargetWord(word);
-    console.log('[Wordle] Target word:', word); // Debug only - remove in production
   }, []);
 
   /**
@@ -508,7 +507,6 @@ const WordleGame: React.FC = () => {
     setLastGuessCount(undefined);
     isRevealingRef.current = false;
     resetAllEffects();
-    console.log('[Wordle] New target word:', word); // Debug only
   }, [resetAllEffects]);
 
   /**

@@ -1,9 +1,7 @@
 /**
  * Knife Game - Coming Soon (Migrated to Shared Systems)
  */
-// @ts-nocheck
 import { useState, useRef, useEffect } from 'react';
-import { IonContent, IonPage } from '@ionic/react';
 import { Play, Pause } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { GameShell } from '@/systems/game-ui';
@@ -74,8 +72,8 @@ const KnifeGameContent: React.FC = () => {
   };
 
   return (
-    <IonPage>
-      <IonContent fullscreen className="knife-content" scrollY={false}>
+    <div className="knife-page">
+      <div className="knife-content">
         <div className="knife-area">
           <div className="game-menu-split">
             <div className="menu-left">
@@ -132,8 +130,8 @@ const KnifeGameContent: React.FC = () => {
             onEnded={handleEnded}
           />
         </div>
-      </IonContent>
-    </IonPage>
+      </div>
+    </div>
   );
 };
 

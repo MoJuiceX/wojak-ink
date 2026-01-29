@@ -14,7 +14,6 @@ import { PRIMARY_NAV_ITEMS, SECONDARY_NAV_ITEMS, isPathActive } from '@/config/r
 import { usePrefersReducedMotion } from '@/hooks/useMediaQuery';
 import { NavItem } from './NavItem';
 import { Logo } from './Logo';
-import { ThemeSwitcher } from '@/components/theme/ThemeSwitcher';
 import { GallerySidebarControls } from './GallerySidebarControls';
 import { UserAccountButton } from '@/components/auth/UserAccountButton';
 import type { SidebarPinnedState } from '@/contexts/LayoutContext';
@@ -289,19 +288,6 @@ export function Sidebar({
         <UserAccountButton showLabel={showExpanded} />
       </div>
 
-      {/* Footer with theme switcher - hovering here expands the sidebar */}
-      <div
-        className="flex-shrink-0"
-        style={{
-          paddingTop: 8,
-          paddingBottom: LAYOUT.sidebar.paddingY,
-          paddingLeft: LAYOUT.sidebar.paddingX,
-          paddingRight: LAYOUT.sidebar.paddingX,
-        }}
-        onMouseEnter={handleExpandableZoneEnter}
-      >
-        <ThemeSwitcher variant={showExpanded ? 'segmented' : 'icon-only'} />
-      </div>
     </motion.aside>
   );
 }

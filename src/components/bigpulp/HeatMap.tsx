@@ -15,7 +15,6 @@ import {
   getNextCellPosition,
   VIEW_MODES,
 } from '@/config/heatMapConfig';
-import { useTheme } from '@/hooks/useTheme';
 import type { CacheMetadata } from '@/services/heatmapCache';
 import { formatCacheAge } from '@/services/heatmapCache';
 
@@ -891,9 +890,8 @@ export function HeatMap({
   const [hoveredMode, setHoveredMode] = useState<HeatMapViewMode | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
 
-  // Get current theme for color palette
-  const { theme } = useTheme();
-  const themeId = theme.id;
+  // Theme is always dark
+  const themeId = 'dark';
 
   // Get view mode filter - use hovered mode for preview, otherwise use selected mode
   const effectiveMode = hoveredMode || viewMode;

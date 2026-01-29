@@ -1,22 +1,25 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 
-// Effect types
+// Effect types (support both kebab-case and camelCase for backwards compatibility)
 export type EffectType =
   | 'shockwave'
   | 'sparks'
   | 'confetti'
-  | 'combo-text'
-  | 'floating-emoji'
-  | 'screen-shake'
+  | 'combo-text' | 'comboText'
+  | 'floating-emoji' | 'floatingEmoji'
+  | 'screen-shake' | 'screenShake'
   | 'lightning'
-  | 'speed-lines'
-  | 'score-popup'
-  | 'vignette-pulse';
+  | 'speed-lines' | 'speedLines'
+  | 'score-popup' | 'scorePopup'
+  | 'vignette-pulse' | 'vignettePulse';
+
+export type EffectIntensity = 'low' | 'normal' | 'medium' | 'high' | 'strong';
 
 export interface Effect {
   id: string;
   type: EffectType;
+  intensity?: EffectIntensity;
   position?: { x: number; y: number };
   data?: Record<string, any>;
   duration: number;
@@ -30,6 +33,8 @@ export interface EffectPreset {
 interface EffectsContextType {
   activeEffects: Effect[];
   triggerEffect: (type: EffectType, options?: Partial<Effect>) => void;
+  /** Alias for triggerEffect that accepts object form: trigger({ type, intensity?, ...options }) */
+  trigger: (options: { type: EffectType; intensity?: EffectIntensity } & Partial<Omit<Effect, 'type' | 'intensity'>>) => void;
   triggerPreset: (preset: EffectPreset) => void;
   clearEffects: () => void;
   setIntensity: (level: 'low' | 'medium' | 'high') => void;
@@ -39,19 +44,19 @@ const EffectsContext = createContext<EffectsContextType | undefined>(undefined);
 
 let effectIdCounter = 0;
 
-// Default durations for each effect type
+// Default durations for each effect type (supports both naming conventions)
 function getDefaultDuration(type: EffectType): number {
-  const durations: Record<EffectType, number> = {
+  const durations: Partial<Record<EffectType, number>> = {
     'shockwave': 600,
     'sparks': 800,
     'confetti': 3000,
-    'combo-text': 1000,
-    'floating-emoji': 2000,
-    'screen-shake': 500,
+    'combo-text': 1000, 'comboText': 1000,
+    'floating-emoji': 2000, 'floatingEmoji': 2000,
+    'screen-shake': 500, 'screenShake': 500,
     'lightning': 300,
-    'speed-lines': 500,
-    'score-popup': 1500,
-    'vignette-pulse': 400
+    'speed-lines': 500, 'speedLines': 500,
+    'score-popup': 1500, 'scorePopup': 1500,
+    'vignette-pulse': 400, 'vignettePulse': 400
   };
   return durations[type] || 1000;
 }
@@ -109,11 +114,18 @@ export const EffectsProvider: React.FC<{ children: ReactNode }> = ({ children })
     setIntensityState(level);
   }, []);
 
+  // Alias for triggerEffect that accepts object form
+  const trigger = useCallback((options: { type: EffectType; intensity?: EffectIntensity } & Partial<Omit<Effect, 'type' | 'intensity'>>) => {
+    const { type, ...rest } = options;
+    triggerEffect(type, rest as Partial<Effect>);
+  }, [triggerEffect]);
+
   return (
     <EffectsContext.Provider
       value={{
         activeEffects,
         triggerEffect,
+        trigger,
         triggerPreset,
         clearEffects,
         setIntensity

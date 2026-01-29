@@ -1,9 +1,7 @@
 /**
  * Orange 2048 - Migrated to Shared Systems
  */
-// @ts-nocheck
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { IonContent, IonPage, IonButton } from '@ionic/react';
 import { GameShell } from '@/systems/game-ui';
 import { useEffects, EffectsLayer } from '@/systems/effects';
 import { ORANGE_2048_CONFIG, GRID_SIZE, TILE_EMOJI } from './config';
@@ -19,7 +17,7 @@ const Orange2048Game: React.FC = () => {
   const [highScore, setHighScore] = useState(() => {
     return parseInt(localStorage.getItem('orange2048HighScore') || '0', 10);
   });
-  const [showInfo, setShowInfo] = useState(false);
+  const [_showInfo, _setShowInfo] = useState(false);
 
   const touchStartRef = useRef({ x: 0, y: 0 });
   const lastMergeValueRef = useRef(0);
@@ -247,8 +245,8 @@ const Orange2048Game: React.FC = () => {
   }, [gameState, move]);
 
   return (
-    <IonPage>
-      <IonContent fullscreen className="game-2048-content" scrollY={false}>
+    <div className="game-2048-page">
+      <div className="game-2048-content">
         <div className="game-2048-container">
           <EffectsLayer />
 
@@ -296,7 +294,7 @@ const Orange2048Game: React.FC = () => {
               <div className="game-over-message">
                 <h2>{gameState === 'won' ? 'You Win!' : 'Game Over!'}</h2>
                 <p>Score: {score}</p>
-                <IonButton onClick={startGame}>Play Again</IonButton>
+                <button className="btn btn-primary" onClick={startGame}>Play Again</button>
               </div>
             </div>
           )}
@@ -305,8 +303,8 @@ const Orange2048Game: React.FC = () => {
             Swipe or use arrow keys to merge tiles!
           </div>
         </div>
-      </IonContent>
-    </IonPage>
+      </div>
+    </div>
   );
 };
 

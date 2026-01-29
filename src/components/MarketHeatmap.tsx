@@ -1,21 +1,7 @@
-// @ts-nocheck
 // UPDATED: amber colors + dynamic columns v2
 import { useState, useEffect, useMemo } from 'react';
-import {
-  IonButton,
-  IonSpinner,
-  IonModal,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-  IonList,
-  IonItem,
-  IonLabel,
-  IonThumbnail,
-  IonImg
-} from '@ionic/react';
-import { NFTListing, fetchAllListings, calculateFloorPrice, getCachedListings, getNftImageUrl } from '../services/marketApi';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { fetchAllListings, calculateFloorPrice, getCachedListings, getNftImageUrl, type NFTListing } from '../services/marketApi';
 import { getCachedXchPrice, getXchPrice } from '../services/treasuryApi';
 import './MarketHeatmap.css';
 
@@ -37,13 +23,6 @@ interface HeatmapCell {
 
 type HeatmapMode = 'all' | 'sleepy' | 'delusion' | 'floor' | 'rare' | 'whale';
 type ViewType = 'heatmap' | 'distribution';
-
-interface ComboBadge {
-  id: string;
-  name: string;
-  emoji: string;
-  category: string;
-}
 
 const HEATMAP_MODES: { key: HeatmapMode; label: string; description: string }[] = [
   { key: 'all', label: 'All', description: 'Show all listed NFTs' },
@@ -120,7 +99,6 @@ const MarketHeatmap: React.FC<MarketHeatmapProps> = ({ rankData, onNftClick }) =
           }
         }
         setComboLegend(legendItems);
-        console.log('Loaded combo legend:', legendItems.length, 'items');
 
         // Build NFT id -> emojis array map
         const badgeMap = new Map<number, string[]>();
@@ -383,7 +361,7 @@ const MarketHeatmap: React.FC<MarketHeatmapProps> = ({ rankData, onNftClick }) =
   if (loading && listings.length === 0) {
     return (
       <div className="heatmap-loading">
-        <IonSpinner name="crescent" />
+        <LoadingSpinner />
         <p>Fetching live listings...</p>
         <p className="loading-hint">This may take a moment</p>
       </div>
@@ -394,7 +372,7 @@ const MarketHeatmap: React.FC<MarketHeatmapProps> = ({ rankData, onNftClick }) =
     return (
       <div className="heatmap-error">
         <p>{error}</p>
-        <IonButton onClick={() => window.location.reload()}>Retry</IonButton>
+        <button className="btn btn-primary" onClick={() => window.location.reload()}>Retry</button>
       </div>
     );
   }
@@ -572,108 +550,112 @@ const MarketHeatmap: React.FC<MarketHeatmapProps> = ({ rankData, onNftClick }) =
       </div>
 
       {/* Cell Detail Modal */}
-      <IonModal isOpen={!!selectedCell} onDidDismiss={() => setSelectedCell(null)}>
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>
-              {selectedCell?.count} NFT{selectedCell?.count !== 1 ? 's' : ''}
-            </IonTitle>
-            <IonButton slot="end" fill="clear" onClick={() => setSelectedCell(null)}>
-              Close
-            </IonButton>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent>
-          <div className="cell-detail-header">
-            <span>Rarity: {selectedCell?.rarityRange}</span>
-            <span>Price: {selectedCell?.priceRange}</span>
+      {selectedCell && (
+        <div className="modal-overlay" onClick={() => setSelectedCell(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <header className="modal-header">
+              <h2 className="modal-title">
+                {selectedCell?.count} NFT{selectedCell?.count !== 1 ? 's' : ''}
+              </h2>
+              <button className="btn btn-ghost" onClick={() => setSelectedCell(null)}>
+                Close
+              </button>
+            </header>
+            <div className="modal-body">
+              <div className="cell-detail-header">
+                <span>Rarity: {selectedCell?.rarityRange}</span>
+                <span>Price: {selectedCell?.priceRange}</span>
+              </div>
+              <div className="nft-list">
+                {selectedCell?.listings
+                  .sort((a, b) => a.priceXch - b.priceXch)
+                  .map(listing => (
+                    <div
+                      key={listing.nftId}
+                      className="nft-item"
+                      onClick={() => {
+                        onNftClick?.(listing.nftId);
+                        setSelectedCell(null);
+                      }}
+                    >
+                      <div className="nft-thumbnail">
+                        <img src={getNftImageUrl(listing.nftId)} alt={`Wojak #${listing.nftId}`} />
+                      </div>
+                      <div className="nft-info">
+                        <h3>Wojak #{listing.nftId}</h3>
+                        <p className="nft-rank">
+                          Rank {ranks[listing.nftId] || '?'}
+                          {nftBadges.get(parseInt(listing.nftId))?.length ? (
+                            <span className="nft-badges"> {nftBadges.get(parseInt(listing.nftId))?.join('')}</span>
+                          ) : null}
+                        </p>
+                      </div>
+                      <div className="price-label">
+                        <span className="price-xch">{listing.priceXch.toFixed(2)} XCH</span>
+                        <span className="price-usd">${(listing.priceXch * xchPriceUsd).toFixed(2)}</span>
+                        <span className="price-multiple">
+                          {(listing.priceXch / floorPrice).toFixed(1)}x floor
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
           </div>
-          <IonList>
-            {selectedCell?.listings
-              .sort((a, b) => a.priceXch - b.priceXch)
-              .map(listing => (
-                <IonItem
-                  key={listing.nftId}
-                  button
-                  onClick={() => {
-                    onNftClick?.(listing.nftId);
-                    setSelectedCell(null);
-                  }}
-                >
-                  <IonThumbnail slot="start">
-                    <IonImg src={getNftImageUrl(listing.nftId)} />
-                  </IonThumbnail>
-                  <IonLabel>
-                    <h2>Wojak #{listing.nftId}</h2>
-                    <p className="nft-rank">
-                      👑{ranks[listing.nftId] || '?'}
-                      {nftBadges.get(parseInt(listing.nftId))?.length ? (
-                        <span className="nft-badges"> {nftBadges.get(parseInt(listing.nftId))?.join('')}</span>
-                      ) : null}
-                    </p>
-                  </IonLabel>
-                  <IonLabel slot="end" className="price-label">
-                    <span className="price-xch">{listing.priceXch.toFixed(2)} XCH</span>
-                    <span className="price-usd">${(listing.priceXch * xchPriceUsd).toFixed(2)}</span>
-                    <span className="price-multiple">
-                      {(listing.priceXch / floorPrice).toFixed(1)}x floor
-                    </span>
-                  </IonLabel>
-                </IonItem>
-              ))}
-          </IonList>
-        </IonContent>
-      </IonModal>
+        </div>
+      )}
 
       {/* Bar Detail Modal (for Price Distribution) */}
-      <IonModal isOpen={!!selectedBar} onDidDismiss={() => setSelectedBar(null)}>
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>
-              {selectedBar?.listings.length} NFT{selectedBar?.listings.length !== 1 ? 's' : ''} at {selectedBar?.priceRange}
-            </IonTitle>
-            <IonButton slot="end" fill="clear" onClick={() => setSelectedBar(null)}>
-              Close
-            </IonButton>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent>
-          <IonList>
-            {selectedBar?.listings
-              .sort((a, b) => a.priceXch - b.priceXch)
-              .map(listing => (
-                <IonItem
-                  key={listing.nftId}
-                  button
-                  onClick={() => {
-                    onNftClick?.(listing.nftId);
-                    setSelectedBar(null);
-                  }}
-                >
-                  <IonThumbnail slot="start">
-                    <IonImg src={getNftImageUrl(listing.nftId)} />
-                  </IonThumbnail>
-                  <IonLabel>
-                    <h2>Wojak #{listing.nftId}</h2>
-                    <p className="nft-rank">
-                      👑{ranks[listing.nftId] || '?'}
-                      {nftBadges.get(parseInt(listing.nftId))?.length ? (
-                        <span className="nft-badges"> {nftBadges.get(parseInt(listing.nftId))?.join('')}</span>
-                      ) : null}
-                    </p>
-                  </IonLabel>
-                  <IonLabel slot="end" className="price-label">
-                    <span className="price-xch">{listing.priceXch.toFixed(2)} XCH</span>
-                    <span className="price-usd">${(listing.priceXch * xchPriceUsd).toFixed(2)}</span>
-                    <span className="price-multiple">
-                      {(listing.priceXch / floorPrice).toFixed(1)}x floor
-                    </span>
-                  </IonLabel>
-                </IonItem>
-              ))}
-          </IonList>
-        </IonContent>
-      </IonModal>
+      {selectedBar && (
+        <div className="modal-overlay" onClick={() => setSelectedBar(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <header className="modal-header">
+              <h2 className="modal-title">
+                {selectedBar?.listings.length} NFT{selectedBar?.listings.length !== 1 ? 's' : ''} at {selectedBar?.priceRange}
+              </h2>
+              <button className="btn btn-ghost" onClick={() => setSelectedBar(null)}>
+                Close
+              </button>
+            </header>
+            <div className="modal-body">
+              <div className="nft-list">
+                {selectedBar?.listings
+                  .sort((a, b) => a.priceXch - b.priceXch)
+                  .map(listing => (
+                    <div
+                      key={listing.nftId}
+                      className="nft-item"
+                      onClick={() => {
+                        onNftClick?.(listing.nftId);
+                        setSelectedBar(null);
+                      }}
+                    >
+                      <div className="nft-thumbnail">
+                        <img src={getNftImageUrl(listing.nftId)} alt={`Wojak #${listing.nftId}`} />
+                      </div>
+                      <div className="nft-info">
+                        <h3>Wojak #{listing.nftId}</h3>
+                        <p className="nft-rank">
+                          Rank {ranks[listing.nftId] || '?'}
+                          {nftBadges.get(parseInt(listing.nftId))?.length ? (
+                            <span className="nft-badges"> {nftBadges.get(parseInt(listing.nftId))?.join('')}</span>
+                          ) : null}
+                        </p>
+                      </div>
+                      <div className="price-label">
+                        <span className="price-xch">{listing.priceXch.toFixed(2)} XCH</span>
+                        <span className="price-usd">${(listing.priceXch * xchPriceUsd).toFixed(2)}</span>
+                        <span className="price-multiple">
+                          {(listing.priceXch / floorPrice).toFixed(1)}x floor
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

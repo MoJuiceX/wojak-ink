@@ -64,7 +64,6 @@ export const useShare = (): UseShareReturn => {
           }
         } catch (e) {
           // Fall through to text-only share
-          console.log('Image share failed, falling back to text:', e);
         }
 
         // Try text-only share
@@ -173,10 +172,7 @@ export const useShare = (): UseShareReturn => {
 };
 
 // Analytics tracking
-function trackShare(method: string, gameId: string): void {
-  // Log for debugging
-  console.log(`Share tracked: ${method} for ${gameId}`);
-
+function trackShare(_method: string, _gameId: string): void {
   // Could send to analytics service here
   // analytics.track('share', { method, gameId });
 }

@@ -239,7 +239,6 @@ const OrangePong: React.FC = () => {
     });
 
     if (result.success) {
-      console.log('[OrangePong] Score submitted:', result);
       if (result.isNewHighScore) {
         setIsNewPersonalBest(true);
       }

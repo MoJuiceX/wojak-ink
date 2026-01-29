@@ -70,32 +70,11 @@ const AMBER_INTENSITY = [
   'rgba(255, 149, 0, 0.95)', // 10+ NFTs
 ];
 
-// Green palette (for chia-green theme)
-const GREEN_INTENSITY = [
-  'transparent',           // 0 (empty cell)
-  'rgba(34, 197, 94, 0.20)', // 1 NFT
-  'rgba(34, 197, 94, 0.35)', // 2-3 NFTs
-  'rgba(34, 197, 94, 0.50)', // 4-5 NFTs
-  'rgba(34, 197, 94, 0.65)', // 6-7 NFTs
-  'rgba(34, 197, 94, 0.80)', // 8-9 NFTs
-  'rgba(34, 197, 94, 0.95)', // 10+ NFTs
-];
-
-// Themes that use the green palette
-const GREEN_THEMES = ['chia-green'];
-
 /**
- * Check if a theme should use green colors
+ * Get the intensity color palette (always amber/orange)
  */
-export function isGreenTheme(themeId: string): boolean {
-  return GREEN_THEMES.includes(themeId);
-}
-
-/**
- * Get the intensity color palette for a theme
- */
-export function getIntensityPalette(themeId: string): readonly string[] {
-  return isGreenTheme(themeId) ? GREEN_INTENSITY : AMBER_INTENSITY;
+export function getIntensityPalette(_themeId?: string): readonly string[] {
+  return AMBER_INTENSITY;
 }
 
 export const HEATMAP_COLORS = {

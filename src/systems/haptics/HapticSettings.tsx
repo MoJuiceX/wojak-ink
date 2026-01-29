@@ -1,6 +1,6 @@
 import React from 'react';
-import { IonToggle, IonRange, IonIcon } from '@ionic/react';
-import { phonePortrait, phoneLandscape } from 'ionicons/icons';
+import { Smartphone, SlidersHorizontal } from 'lucide-react';
+import { Toggle } from '../../components/ui/Toggle';
 import { useHaptics } from './HapticContext';
 import './haptics.css';
 
@@ -15,7 +15,8 @@ export const HapticSettings: React.FC = () => {
   } = useHaptics();
 
   // Test vibration on intensity change
-  const handleIntensityChange = (value: number) => {
+  const handleIntensityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) / 100;
     setIntensity(value);
     trigger('medium'); // Test vibration
   };
@@ -32,26 +33,29 @@ export const HapticSettings: React.FC = () => {
     <div className="haptic-settings">
       <div className="setting-row">
         <div className="setting-label">
-          <IonIcon icon={phonePortrait} />
+          <Smartphone size={20} />
           <span>Vibration</span>
         </div>
-        <IonToggle
+        <Toggle
+          id="haptic-toggle"
           checked={isEnabled}
-          onIonChange={(e) => setEnabled(e.detail.checked)}
+          onChange={(checked) => setEnabled(checked)}
         />
       </div>
 
       {isEnabled && (
         <div className="setting-row">
           <div className="setting-label">
-            <IonIcon icon={phoneLandscape} />
+            <SlidersHorizontal size={20} />
             <span>Intensity</span>
           </div>
-          <IonRange
+          <input
+            type="range"
             min={0}
             max={100}
             value={intensity * 100}
-            onIonChange={(e) => handleIntensityChange((e.detail.value as number) / 100)}
+            onChange={handleIntensityChange}
+            className="intensity-slider"
           />
         </div>
       )}

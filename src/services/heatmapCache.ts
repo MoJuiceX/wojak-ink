@@ -69,7 +69,6 @@ export function saveHeatmapToCache(
       priceBinConfig: priceBinConfig || extractPriceBinConfig(data),
     };
     localStorage.setItem(CACHE_KEY, JSON.stringify(cached));
-    console.log('[HeatmapCache] Data saved to cache');
   } catch (error) {
     console.warn('[HeatmapCache] Failed to save to cache:', error);
   }
@@ -115,7 +114,6 @@ export function loadHeatmapFromCache(): CachedHeatmapData | null {
 
     // Check schema version
     if (cached.version !== CACHE_VERSION) {
-      console.log('[HeatmapCache] Cache version mismatch, clearing');
       clearHeatmapCache();
       return null;
     }
@@ -123,7 +121,6 @@ export function loadHeatmapFromCache(): CachedHeatmapData | null {
     // Check if completely expired (24 hours)
     const age = Date.now() - cached.timestamp;
     if (age > EXPIRY_THRESHOLD_MS) {
-      console.log('[HeatmapCache] Cache expired (>24h), clearing');
       clearHeatmapCache();
       return null;
     }
@@ -167,7 +164,6 @@ export function getCacheMetadata(cached: CachedHeatmapData | null): CacheMetadat
 export function clearHeatmapCache(): void {
   try {
     localStorage.removeItem(CACHE_KEY);
-    console.log('[HeatmapCache] Cache cleared');
   } catch (error) {
     console.warn('[HeatmapCache] Failed to clear cache:', error);
   }
@@ -230,9 +226,6 @@ export function createCachedHeatmapFetcher(
       // Fetch failed - use cache if available
       if (cached) {
         const metadata = getCacheMetadata(cached);
-        console.log(
-          `[HeatmapCache] Returning cached data from ${formatCacheAge(metadata.ageMinutes)}`
-        );
         return {
           data: cached.data,
           metadata: { ...metadata, source: 'cache' as const },
@@ -252,10 +245,6 @@ export function createCachedHeatmapFetcher(
 export function getInitialHeatmapData(): HeatMapCell[][] | undefined {
   const cached = loadHeatmapFromCache();
   if (cached) {
-    const metadata = getCacheMetadata(cached);
-    console.log(
-      `[HeatmapCache] Using cached initial data from ${formatCacheAge(metadata.ageMinutes)}`
-    );
     return cached.data;
   }
   return undefined;

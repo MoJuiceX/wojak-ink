@@ -5,9 +5,9 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { IonModal, IonButton, IonSpinner } from '@ionic/react';
 import { useCurrency } from '../../contexts/CurrencyContext';
 import { DAILY_REWARDS } from '../../types/currency';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
 import './Currency.css';
 
 interface DailyRewardModalProps {
@@ -65,89 +65,92 @@ export const DailyRewardModal: React.FC<DailyRewardModalProps> = ({ isOpen, onCl
     return `${hours}h ${minutes}m`;
   };
 
+  if (!isOpen) return null;
+
   return (
-    <IonModal isOpen={isOpen} onDidDismiss={onClose} className="daily-reward-modal">
-      <div className="daily-reward-content">
-        <div className="daily-header">
-          <h2>Daily Rewards</h2>
-          <button className="close-button" onClick={onClose}>
-            ✕
-          </button>
-        </div>
-
-        {/* Streak Display */}
-        <div className="streak-display">
-          <span className="streak-label">Current Streak</span>
-          <span className="streak-value">{status.currentStreak} days</span>
-        </div>
-
-        {/* Weekly Rewards Grid */}
-        <div className="weekly-rewards-grid">
-          {DAILY_REWARDS.map((reward, index) => {
-            const dayNumber = index + 1;
-            const streakPosition = status.currentStreak % 7 || 7;
-            const isPast = dayNumber < streakPosition;
-            const isToday = dayNumber === streakPosition;
-            const isClaimed = isPast || (isToday && !status.canClaim);
-
-            return (
-              <div
-                key={dayNumber}
-                className={`daily-reward-card ${isToday ? 'today' : ''} ${isClaimed ? 'claimed' : ''}`}
-              >
-                <span className="day-label">Day {dayNumber}</span>
-                <div className="reward-content">
-                  <span className="reward-icon">🍊</span>
-                  <span className="reward-amount">{reward.oranges}</span>
-                  {reward.gems > 0 && (
-                    <>
-                      <span className="reward-icon">💎</span>
-                      <span className="reward-amount">{reward.gems}</span>
-                    </>
-                  )}
-                  {reward.bonusItem && <span className="bonus-badge">🎁</span>}
-                </div>
-                {isClaimed && <div className="claimed-overlay">✓</div>}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Error Message */}
-        {error && <p className="error-message">{error}</p>}
-
-        {/* Claimed Reward Display */}
-        {claimedReward && (
-          <div className="claimed-reward-display">
-            <span className="claimed-title">Claimed!</span>
-            <div className="claimed-amounts">
-              <span>🍊 +{claimedReward.oranges}</span>
-              {claimedReward.gems > 0 && <span>💎 +{claimedReward.gems}</span>}
-              {claimedReward.bonusItem && <span>🎁 Mystery Box!</span>}
-            </div>
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="daily-reward-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="daily-reward-content">
+          <div className="daily-header">
+            <h2>Daily Rewards</h2>
+            <button className="close-button" onClick={onClose}>
+              ✕
+            </button>
           </div>
-        )}
 
-        {/* Claim Button */}
-        <div className="daily-actions">
-          {status.canClaim && !claimedReward ? (
-            <IonButton
-              onClick={handleClaim}
-              disabled={isClaiming}
-              expand="block"
-              className="claim-button"
-            >
-              {isClaiming ? <IonSpinner name="crescent" /> : "Claim Today's Reward"}
-            </IonButton>
-          ) : (
-            <div className="next-reward-timer">
-              <span>Next reward in</span>
-              <span className="timer">{formatTime(status.timeUntilReset)}</span>
+          {/* Streak Display */}
+          <div className="streak-display">
+            <span className="streak-label">Current Streak</span>
+            <span className="streak-value">{status.currentStreak} days</span>
+          </div>
+
+          {/* Weekly Rewards Grid */}
+          <div className="weekly-rewards-grid">
+            {DAILY_REWARDS.map((reward, index) => {
+              const dayNumber = index + 1;
+              const streakPosition = status.currentStreak % 7 || 7;
+              const isPast = dayNumber < streakPosition;
+              const isToday = dayNumber === streakPosition;
+              const isClaimed = isPast || (isToday && !status.canClaim);
+
+              return (
+                <div
+                  key={dayNumber}
+                  className={`daily-reward-card ${isToday ? 'today' : ''} ${isClaimed ? 'claimed' : ''}`}
+                >
+                  <span className="day-label">Day {dayNumber}</span>
+                  <div className="reward-content">
+                    <span className="reward-icon">🍊</span>
+                    <span className="reward-amount">{reward.oranges}</span>
+                    {reward.gems > 0 && (
+                      <>
+                        <span className="reward-icon">💎</span>
+                        <span className="reward-amount">{reward.gems}</span>
+                      </>
+                    )}
+                    {reward.bonusItem && <span className="bonus-badge">🎁</span>}
+                  </div>
+                  {isClaimed && <div className="claimed-overlay">✓</div>}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Error Message */}
+          {error && <p className="error-message">{error}</p>}
+
+          {/* Claimed Reward Display */}
+          {claimedReward && (
+            <div className="claimed-reward-display">
+              <span className="claimed-title">Claimed!</span>
+              <div className="claimed-amounts">
+                <span>🍊 +{claimedReward.oranges}</span>
+                {claimedReward.gems > 0 && <span>💎 +{claimedReward.gems}</span>}
+                {claimedReward.bonusItem && <span>🎁 Mystery Box!</span>}
+              </div>
             </div>
           )}
+
+          {/* Claim Button */}
+          <div className="daily-actions">
+            {status.canClaim && !claimedReward ? (
+              <button
+                onClick={handleClaim}
+                disabled={isClaiming}
+                className="btn btn-primary claim-button"
+              >
+                {isClaiming ? <LoadingSpinner size={18} /> : "Claim Today's Reward"}
+              </button>
+            ) : (
+              <div className="next-reward-timer">
+                <span>Next reward in</span>
+                <span className="timer">{formatTime(status.timeUntilReset)}</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </IonModal>
+    </div>
   );
 };
 

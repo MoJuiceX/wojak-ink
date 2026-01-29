@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * useSalesHistory Hook
  *
@@ -10,7 +9,6 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   initializeSalesDatabank,
   getSalesForNft,
-  nftHasSales,
   getTraitStats,
   getAllTraitStats,
   getOverallStats,
@@ -32,7 +30,6 @@ async function initialize(): Promise<void> {
     await initializePriceService();
     initializeSalesDatabank();
     isInitialized = true;
-    console.log('[useSalesHistory] Initialized');
   })();
 
   return initPromise;

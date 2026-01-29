@@ -84,7 +84,6 @@ export function useSageWalletStandalone(
     if (initializingRef.current || signClientRef.current) return;
     
     initializingRef.current = true;
-    console.log('[SageWallet] Initializing...');
     
     try {
       signClientRef.current = await SignClient.init({
@@ -105,7 +104,6 @@ export function useSageWalletStandalone(
       
       // Event listeners
       signClientRef.current.on('session_delete', () => {
-        console.log('[SageWallet] Session deleted');
         handleDisconnect();
       });
       
@@ -119,16 +117,13 @@ export function useSageWalletStandalone(
           try {
             await updateAddressFromWallet();
             setStatus('connected');
-            console.log('[SageWallet] Session restored');
           } catch {
             currentSessionRef.current = null;
-            console.log('[SageWallet] Session stale');
           }
         }
       }
       
       setIsInitialized(true);
-      console.log('[SageWallet] Initialized');
     } catch (err) {
       console.error('[SageWallet] Init failed:', err);
       setError(err instanceof Error ? err.message : 'Init failed');

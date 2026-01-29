@@ -52,7 +52,6 @@ function loadHistoryCache(): void {
       }
     }
 
-    console.log(`[HistoryCache] Loaded ${historyCache.size} cached entries`);
   } catch (error) {
     console.warn('[HistoryCache] Failed to load cache:', error);
   }
@@ -326,7 +325,6 @@ async function fetchMintGardenListings(): Promise<NFTListing[]> {
       pageCount++;
     }
 
-    console.log(`[MarketAPI] MintGarden: ${listings.length} listings`);
   } catch (error) {
     console.error('[MarketAPI] MintGarden error:', error);
   }
@@ -400,7 +398,6 @@ async function fetchDexieListings(): Promise<NFTListing[]> {
       page++;
     }
 
-    console.log(`[MarketAPI] Dexie: ${listings.length} listings`);
   } catch (error) {
     console.error('[MarketAPI] Dexie error:', error);
   }
@@ -497,7 +494,6 @@ export async function fetchAllListings(forceRefresh = false): Promise<ListingsRe
 
   // Start loading
   listingsCache.loading = (async () => {
-    console.log('[MarketAPI] Fetching listings from all sources...');
 
     // Fetch from all sources in parallel
     const [mintgarden, dexie] = await Promise.all([
@@ -514,7 +510,6 @@ export async function fetchAllListings(forceRefresh = false): Promise<ListingsRe
     // Save to localStorage for next time
     saveListingsToCache(result.listings);
 
-    console.log(`[MarketAPI] Total unique listings: ${result.listings.length}`);
 
     return result.listings;
   })();
@@ -540,7 +535,6 @@ export function prefetchListings(): void {
   // Don't start if already loading
   if (listingsCache.loading) return;
 
-  console.log('[MarketAPI] Starting background prefetch...');
   fetchAllListings(true).catch(err => {
     console.warn('[MarketAPI] Prefetch failed:', err);
   });
@@ -689,14 +683,12 @@ export async function fetchNftHistory(nftId: number, knownLauncherId?: string): 
   // 1. Check memory cache first
   const cached = getCachedHistory(nftId);
   if (cached) {
-    console.log(`[MarketAPI] History cache HIT for NFT #${nftId}`);
     return cached;
   }
 
   // 2. Check if request already in-flight (deduplication)
   const inFlight = inFlightHistoryRequests.get(nftId);
   if (inFlight) {
-    console.log(`[MarketAPI] Waiting for in-flight request for NFT #${nftId}`);
     return inFlight;
   }
 
@@ -758,7 +750,6 @@ export async function fetchNftHistory(nftId: number, knownLauncherId?: string): 
 
       // Cache the result
       setCachedHistory(nftId, events, launcherId);
-      console.log(`[MarketAPI] History fetched and cached for NFT #${nftId} (${events.length} events)`);
 
       return events;
     } catch (error) {
@@ -784,7 +775,6 @@ export function preloadListingImages(): void {
   const listings = getCachedListings();
   if (!listings || listings.length === 0) return;
 
-  console.log(`[MarketAPI] Preloading ${listings.length} listing images...`);
 
   // Use requestIdleCallback to not block the main thread
   const preload = () => {

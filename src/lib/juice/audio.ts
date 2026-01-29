@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Audio & Haptics Library
  * Web Audio API helpers, procedural sounds, and haptic feedback
@@ -367,7 +366,7 @@ export const playFireModeSound = (manager: AudioManager): void => {
 // HAPTIC FEEDBACK
 // ============================================
 
-export type HapticPattern = 'tap' | 'double' | 'success' | 'error' | 'heavy' | 'light' | number | number[];
+export type HapticPattern = 'tap' | 'double' | 'success' | 'error' | 'heavy' | 'light' | 'flutter' | 'impact' | number | number[];
 
 /**
  * Haptic pattern presets (in milliseconds)
@@ -426,7 +425,7 @@ export const stopHaptic = (): void => {
  * Play sound and haptic together
  */
 export const feedback = (
-  manager: AudioManager,
+  _manager: AudioManager,
   sound: () => void,
   haptic: HapticPattern
 ): void => {

@@ -5,14 +5,14 @@
  * Handles the auth flow including Google sign-in and username picker.
  */
 
-import React, { useState } from 'react';
-import { IonButton, IonSpinner, IonPopover, IonList, IonItem, IonIcon } from '@ionic/react';
-import { personCircleOutline, logOutOutline, createOutline, walletOutline } from 'ionicons/icons';
+import React, { useState, useRef, useEffect } from 'react';
+import { User, LogOut, Pencil, Wallet } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../../contexts/AuthContext';
 import { Avatar } from '../Avatar/Avatar';
 import { AvatarPickerModal } from '../AvatarPicker';
 import { UsernamePicker } from '../UsernamePicker';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
 import './SignInButton.css';
 
 interface SignInButtonProps {
@@ -37,17 +37,31 @@ export const SignInButton: React.FC<SignInButtonProps> = ({
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [_showUsernamePicker, _setShowUsernamePicker] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  // Close menu on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node) &&
+          triggerRef.current && !triggerRef.current.contains(e.target as Node)) {
+        setShowMenu(false);
+      }
+    }
+    if (showMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showMenu]);
 
   // Google login hook
   const googleLogin = useGoogleLogin({
     onSuccess: async (response) => {
       try {
-        // Exchange access token for ID token via Google's userinfo endpoint
         const userInfo = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
           headers: { Authorization: `Bearer ${response.access_token}` },
         });
         const userData = await userInfo.json();
-        // For demo purposes, create a mock credential from user data
         await signInWithGoogle(JSON.stringify(userData));
       } catch (error) {
         console.error('Sign in failed:', error);
@@ -93,7 +107,7 @@ export const SignInButton: React.FC<SignInButtonProps> = ({
   if (isLoading) {
     return (
       <div className="sign-in-button-loading">
-        <IonSpinner name="crescent" />
+        <LoadingSpinner size={20} />
       </div>
     );
   }
@@ -102,23 +116,21 @@ export const SignInButton: React.FC<SignInButtonProps> = ({
   if (!isAuthenticated) {
     return (
       <>
-        <IonButton
+        <button
           onClick={handleSignIn}
           disabled={isSigningIn}
-          className={`sign-in-button ${variant}`}
-          fill="solid"
+          className={`btn btn-primary sign-in-button ${variant}`}
         >
           {isSigningIn ? (
-            <IonSpinner name="crescent" />
+            <LoadingSpinner size={18} />
           ) : (
             <>
-              <IonIcon slot="start" icon={personCircleOutline} />
+              <User size={18} />
               {variant === 'full' ? 'Sign In with Google' : 'Sign In'}
             </>
           )}
-        </IonButton>
+        </button>
 
-        {/* Username picker for new users */}
         <UsernamePicker
           isOpen={isNewUser}
           onComplete={handleUsernameComplete}
@@ -131,10 +143,12 @@ export const SignInButton: React.FC<SignInButtonProps> = ({
   return (
     <>
       <button
+        ref={triggerRef}
         className="user-avatar-button"
-        onClick={() => setShowMenu(true)}
-        id="user-menu-trigger"
+        onClick={() => setShowMenu(!showMenu)}
         aria-label="User menu"
+        aria-expanded={showMenu}
+        aria-haspopup="true"
       >
         <Avatar
           type={user?.avatar.type || 'emoji'}
@@ -147,15 +161,9 @@ export const SignInButton: React.FC<SignInButtonProps> = ({
         )}
       </button>
 
-      <IonPopover
-        isOpen={showMenu}
-        onDidDismiss={() => setShowMenu(false)}
-        trigger="user-menu-trigger"
-        dismissOnSelect={true}
-        className="user-menu-popover"
-      >
-        <IonList>
-          <IonItem lines="none" className="user-menu-header">
+      {showMenu && (
+        <div ref={menuRef} className="user-menu-popover">
+          <div className="user-menu-header">
             <Avatar
               type={user?.avatar.type || 'emoji'}
               value={user?.avatar.value || '🍊'}
@@ -168,32 +176,32 @@ export const SignInButton: React.FC<SignInButtonProps> = ({
                 <span className="wallet-badge">Wallet Connected</span>
               )}
             </div>
-          </IonItem>
+          </div>
 
-          <IonItem button onClick={handleAvatarClick}>
-            <IonIcon slot="start" icon={createOutline} />
-            Change Avatar
-          </IonItem>
+          <div className="user-menu-items">
+            <button className="user-menu-item" onClick={handleAvatarClick}>
+              <Pencil size={18} />
+              Change Avatar
+            </button>
 
-          <IonItem button onClick={handleWalletAction}>
-            <IonIcon slot="start" icon={walletOutline} />
-            {user?.walletAddress ? 'Disconnect Wallet' : 'Connect Wallet'}
-          </IonItem>
+            <button className="user-menu-item" onClick={handleWalletAction}>
+              <Wallet size={18} />
+              {user?.walletAddress ? 'Disconnect Wallet' : 'Connect Wallet'}
+            </button>
 
-          <IonItem button onClick={handleSignOut} className="sign-out-item">
-            <IonIcon slot="start" icon={logOutOutline} />
-            Sign Out
-          </IonItem>
-        </IonList>
-      </IonPopover>
+            <button className="user-menu-item sign-out-item" onClick={handleSignOut}>
+              <LogOut size={18} />
+              Sign Out
+            </button>
+          </div>
+        </div>
+      )}
 
-      {/* Avatar Picker Modal */}
       <AvatarPickerModal
         isOpen={showAvatarPicker}
         onClose={() => setShowAvatarPicker(false)}
       />
 
-      {/* Username Picker for new users */}
       <UsernamePicker
         isOpen={isNewUser && !user?.username}
         onComplete={handleUsernameComplete}

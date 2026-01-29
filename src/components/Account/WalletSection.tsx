@@ -67,7 +67,6 @@ export function WalletSection() {
         walletAddress: address,
       });
 
-      console.log('[WalletSection] NFT count updated:', count);
     } catch (err) {
       console.error('[WalletSection] Error fetching NFTs:', err);
       setError('Failed to fetch NFTs');
@@ -90,7 +89,6 @@ export function WalletSection() {
       prevAddress !== address &&
       (profile?.walletAddress !== address || !hasVerified)
     ) {
-      console.log('[WalletSection] Wallet connected, auto-fetching NFTs');
       refreshNftCount();
     }
   }, [walletConnected, address, profile?.walletAddress, hasVerified, refreshNftCount]);

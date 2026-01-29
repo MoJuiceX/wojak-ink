@@ -41,11 +41,9 @@ export function GameScoresGrid({ userId, scores: initialScores }: GameScoresGrid
 
     async function fetchScores() {
       try {
-        console.log('[GameScoresGrid] Fetching scores for userId:', userId);
         const response = await fetch(`/api/scores/${userId}`);
         if (response.ok) {
           const data = await response.json();
-          console.log('[GameScoresGrid] Received scores:', data.scores);
           setScores(data.scores || []);
         } else {
           console.error('[GameScoresGrid] API error:', response.status, await response.text());

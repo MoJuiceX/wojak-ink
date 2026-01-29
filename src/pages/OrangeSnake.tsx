@@ -6,8 +6,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { IonIcon } from '@ionic/react';
-import { volumeHigh, volumeMute } from 'ionicons/icons';
+import { Volume2, VolumeX } from 'lucide-react';
 import { useGameSounds } from '@/hooks/useGameSounds';
 import { useGameHaptics } from '@/systems/haptics';
 import { useLeaderboard } from '@/hooks/data/useLeaderboard';
@@ -960,7 +959,7 @@ const OrangeSnake: React.FC = () => {
         onClick={toggleSound}
         aria-label={soundEnabled ? 'Mute sounds' : 'Unmute sounds'}
       >
-        <IonIcon icon={soundEnabled ? volumeHigh : volumeMute} />
+        {soundEnabled ? <Volume2 size={24} /> : <VolumeX size={24} />}
       </button>
 
       {/* Visual Effects */}

@@ -8,40 +8,27 @@
   padding: 8px 16px;
 }
 
-.sign-in-button-loading ion-spinner {
-  width: 24px;
-  height: 24px;
-  color: rgba(255, 255, 255, 0.6);
-}
-
 /* Sign In Button */
 .sign-in-button {
-  --background: linear-gradient(135deg, #ff8c32, #ff6b00);
-  --background-hover: linear-gradient(135deg, #ff9c42, #ff7b10);
-  --border-radius: 10px;
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .sign-in-button.compact {
-  --padding-start: 12px;
-  --padding-end: 12px;
+  padding: 8px 12px;
   height: 36px;
   font-size: 0.9rem;
 }
 
 .sign-in-button.full {
-  --padding-start: 20px;
-  --padding-end: 20px;
+  padding: 10px 20px;
   height: 44px;
-}
-
-.sign-in-button ion-spinner {
-  width: 20px;
-  height: 20px;
 }
 
 /* User Avatar Button */
 .user-avatar-button {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -70,51 +57,36 @@
 
 /* User Menu Popover */
 .user-menu-popover {
-  --background: rgba(26, 26, 46, 0.98);
-  --width: 260px;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  min-width: 220px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-dropdown);
+  overflow: hidden;
 }
 
-.user-menu-popover ion-list {
-  background: transparent;
-  padding: 8px 0;
-}
-
-.user-menu-popover ion-item {
-  --background: transparent;
-  --color: #fff;
-  --padding-start: 16px;
-  --padding-end: 16px;
-  --min-height: 48px;
-  font-size: 0.95rem;
-}
-
-.user-menu-popover ion-item:hover {
-  --background: rgba(255, 255, 255, 0.1);
-}
-
-.user-menu-popover ion-icon {
-  color: rgba(255, 255, 255, 0.7);
-  margin-right: 12px;
-}
-
-/* User Menu Header */
 .user-menu-header {
-  --min-height: auto;
-  padding: 16px !important;
-  margin-bottom: 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .user-menu-header .user-info {
   display: flex;
   flex-direction: column;
-  margin-left: 12px;
 }
 
 .user-menu-header .user-name {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--color-text);
 }
 
 .user-menu-header .wallet-badge {
@@ -123,14 +95,35 @@
   margin-top: 2px;
 }
 
-/* Sign Out Item */
-.sign-out-item {
-  margin-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+.user-menu-items {
+  padding: 8px;
 }
 
-.sign-out-item ion-icon {
-  color: #ff6666;
+.user-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.user-menu-item:hover {
+  background: var(--color-surface-hover);
+}
+
+.user-menu-item.sign-out-item {
+  color: var(--color-error);
+}
+
+.user-menu-item.sign-out-item:hover {
+  background: rgba(239, 68, 68, 0.1);
 }
 
 /* Responsive */

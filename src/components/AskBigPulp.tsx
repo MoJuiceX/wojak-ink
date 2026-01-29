@@ -1,16 +1,15 @@
-// @ts-nocheck
 import { useState, useEffect } from 'react';
-import { IonImg, IonIcon, IonSpinner } from '@ionic/react';
 import {
-  chevronForward,
-  chevronBack,
-  diamond,
-  statsChart,
-  school,
-  flame,
-  pricetag
-} from 'ionicons/icons';
-import { fetchTradeValues, fetchCollectionStats, TraitStats, CollectionStats, formatXCH, formatRelativeTime } from '../services/tradeValuesService';
+  ChevronRight,
+  ChevronLeft,
+  Diamond,
+  BarChart3,
+  GraduationCap,
+  Flame,
+  Tag
+} from 'lucide-react';
+import { LoadingSpinner, LoadingDots } from './ui/LoadingSpinner';
+import { fetchTradeValues, fetchCollectionStats, formatXCH, formatRelativeTime, type TraitStats, type CollectionStats } from '../services/tradeValuesService';
 import { getXchPrice, getCachedXchPrice } from '../services/treasuryApi';
 import './AskBigPulp.css';
 
@@ -121,7 +120,7 @@ const formatUsd = (xch: number, xchPrice: number): string => {
 
 const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
   const [comboData, setComboData] = useState<ComboDatabase | null>(null);
-  const [traitInsights, setTraitInsights] = useState<Record<string, TraitInsight> | null>(null);
+  const [_traitInsights, setTraitInsights] = useState<Record<string, TraitInsight> | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedSection, setExpandedSection] = useState<string | null>('stats');
 
@@ -242,7 +241,7 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
   if (loading) {
     return (
       <div className="ask-loading">
-        <IonSpinner />
+        <LoadingSpinner size={24} />
         <p>Loading BigPulp Intelligence...</p>
       </div>
     );
@@ -355,17 +354,21 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
           onClick={() => toggleSection('stats')}
         >
           <div className="section-header-left">
-            <IonIcon icon={statsChart} className="section-icon green" />
+            <BarChart3 size={20} className="section-icon green" />
             <span className="section-title">Collection Stats</span>
           </div>
-          <IonIcon icon={expandedSection === 'stats' ? chevronBack : chevronForward} className="section-chevron" />
+          {expandedSection === 'stats' ? (
+            <ChevronLeft size={18} className="section-chevron" />
+          ) : (
+            <ChevronRight size={18} className="section-chevron" />
+          )}
         </button>
 
         {expandedSection === 'stats' && (
           <div className="section-content">
             {statsLoading ? (
               <div className="section-loading">
-                <IonSpinner name="dots" />
+                <LoadingDots size={8} />
               </div>
             ) : (
               <div className="stats-grid">
@@ -411,10 +414,14 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
           onClick={() => toggleSection('provenance')}
         >
           <div className="section-header-left">
-            <IonIcon icon={school} className="section-icon blue" />
+            <GraduationCap size={20} className="section-icon blue" />
             <span className="section-title">Learn Provenance</span>
           </div>
-          <IonIcon icon={expandedSection === 'provenance' ? chevronBack : chevronForward} className="section-chevron" />
+          {expandedSection === 'provenance' ? (
+            <ChevronLeft size={18} className="section-chevron" />
+          ) : (
+            <ChevronRight size={18} className="section-chevron" />
+          )}
         </button>
 
         {expandedSection === 'provenance' && (
@@ -448,17 +455,21 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
           onClick={() => toggleSection('topTraits')}
         >
           <div className="section-header-left">
-            <IonIcon icon={flame} className="section-icon color-orange" />
+            <Flame size={20} className="section-icon color-orange" />
             <span className="section-title">Top 10 Valuable Attributes</span>
           </div>
-          <IonIcon icon={expandedSection === 'topTraits' ? chevronBack : chevronForward} className="section-chevron" />
+          {expandedSection === 'topTraits' ? (
+            <ChevronLeft size={18} className="section-chevron" />
+          ) : (
+            <ChevronRight size={18} className="section-chevron" />
+          )}
         </button>
 
         {expandedSection === 'topTraits' && (
           <div className="section-content">
             {tradeDataLoading ? (
               <div className="section-loading">
-                <IonSpinner name="dots" />
+                <LoadingDots size={8} />
               </div>
             ) : topTraits.length > 0 ? (
               <>
@@ -494,17 +505,21 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
           onClick={() => toggleSection('topSales')}
         >
           <div className="section-header-left">
-            <IonIcon icon={pricetag} className="section-icon gold" />
+            <Tag size={20} className="section-icon gold" />
             <span className="section-title">Top 10 Highest Sales</span>
           </div>
-          <IonIcon icon={expandedSection === 'topSales' ? chevronBack : chevronForward} className="section-chevron" />
+          {expandedSection === 'topSales' ? (
+            <ChevronLeft size={18} className="section-chevron" />
+          ) : (
+            <ChevronRight size={18} className="section-chevron" />
+          )}
         </button>
 
         {expandedSection === 'topSales' && (
           <div className="section-content">
             {tradeDataLoading ? (
               <div className="section-loading">
-                <IonSpinner name="dots" />
+                <LoadingDots size={8} />
               </div>
             ) : topSales.length > 0 ? (
               <>
@@ -517,10 +532,11 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
                       onClick={() => onNftClick(String(sale.edition))}
                     >
                       <div className="sale-rank-badge">#{idx + 1}</div>
-                      <IonImg
+                      <img
                         src={getNftImageUrl(sale.edition)}
                         alt={sale.nftName || `#${sale.edition}`}
                         className="sale-image"
+                        loading="lazy"
                       />
                       <div className="sale-info">
                         <span className="sale-name">{sale.nftName || `#${sale.edition}`}</span>
@@ -545,10 +561,14 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
           onClick={() => toggleSection('rarest')}
         >
           <div className="section-header-left">
-            <IonIcon icon={diamond} className="section-icon purple" />
+            <Diamond size={20} className="section-icon purple" />
             <span className="section-title">Rarest Finds</span>
           </div>
-          <IonIcon icon={expandedSection === 'rarest' ? chevronBack : chevronForward} className="section-chevron" />
+          {expandedSection === 'rarest' ? (
+            <ChevronLeft size={18} className="section-chevron" />
+          ) : (
+            <ChevronRight size={18} className="section-chevron" />
+          )}
         </button>
 
         {expandedSection === 'rarest' && (
@@ -561,10 +581,11 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
                   className="rarest-item"
                   onClick={() => onNftClick(pairing.best_nft)}
                 >
-                  <IonImg
+                  <img
                     src={getNftImageUrl(pairing.best_nft)}
                     alt={`#${pairing.best_nft}`}
                     className="rarest-image"
+                    loading="lazy"
                   />
                   <div className="rarest-info">
                     <span className="rarest-rank">Rank #{pairing.best_rank}</span>
@@ -587,7 +608,11 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
             <span className="section-title">High Provenance</span>
             <span className="hp-count-badge">43</span>
           </div>
-          <IonIcon icon={expandedSection === 'stier' ? chevronBack : chevronForward} className="section-chevron" />
+          {expandedSection === 'stier' ? (
+            <ChevronLeft size={18} className="section-chevron" />
+          ) : (
+            <ChevronRight size={18} className="section-chevron" />
+          )}
         </button>
 
         {expandedSection === 'stier' && (
@@ -608,10 +633,11 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
                         <span className="hp-category-title">
                           {hpCategoryLabels[category]} <span className="hp-category-count">({traitCount})</span>
                         </span>
-                        <IonIcon
-                          icon={expandedHpCategory === category ? chevronBack : chevronForward}
-                          className="hp-category-chevron"
-                        />
+                        {expandedHpCategory === category ? (
+                          <ChevronLeft size={16} className="hp-category-chevron" />
+                        ) : (
+                          <ChevronRight size={16} className="hp-category-chevron" />
+                        )}
                       </button>
 
                       {expandedHpCategory === category && (
@@ -635,7 +661,7 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
                                           navigateCarousel(name, 'prev', nfts.length);
                                         }}
                                       >
-                                        <IonIcon icon={chevronBack} />
+                                        <ChevronLeft size={16} />
                                       </button>
 
                                       <div className="hp-carousel-track">
@@ -644,9 +670,10 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
                                           className="hp-carousel-item hint prev"
                                           onClick={() => onNftClick(String(nfts[prevIndex]))}
                                         >
-                                          <IonImg
+                                          <img
                                             src={getNftImageUrl(nfts[prevIndex])}
                                             alt={`#${nfts[prevIndex]}`}
+                                            loading="lazy"
                                           />
                                         </div>
 
@@ -655,9 +682,10 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
                                           className="hp-carousel-item current"
                                           onClick={() => onNftClick(String(nfts[currentIndex]))}
                                         >
-                                          <IonImg
+                                          <img
                                             src={getNftImageUrl(nfts[currentIndex])}
                                             alt={`#${nfts[currentIndex]}`}
+                                            loading="lazy"
                                           />
                                         </div>
 
@@ -666,9 +694,10 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
                                           className="hp-carousel-item hint next"
                                           onClick={() => onNftClick(String(nfts[nextIndex]))}
                                         >
-                                          <IonImg
+                                          <img
                                             src={getNftImageUrl(nfts[nextIndex])}
                                             alt={`#${nfts[nextIndex]}`}
+                                            loading="lazy"
                                           />
                                         </div>
                                       </div>
@@ -680,7 +709,7 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
                                           navigateCarousel(name, 'next', nfts.length);
                                         }}
                                       >
-                                        <IonIcon icon={chevronForward} />
+                                        <ChevronRight size={16} />
                                       </button>
                                     </div>
                                   )}
@@ -719,7 +748,11 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
             <span className="section-title">Combo Badges</span>
             <span className="hp-count-badge">26</span>
           </div>
-          <IonIcon icon={expandedSection === 'comboBadges' ? chevronBack : chevronForward} className="section-chevron" />
+          {expandedSection === 'comboBadges' ? (
+            <ChevronLeft size={18} className="section-chevron" />
+          ) : (
+            <ChevronRight size={18} className="section-chevron" />
+          )}
         </button>
 
         {expandedSection === 'comboBadges' && (
@@ -740,10 +773,11 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
                           <span className="combo-category-emoji">{cat.emoji}</span>
                           {cat.name} <span className="combo-category-count">({combosInCategory.length})</span>
                         </span>
-                        <IonIcon
-                          icon={expandedComboCategory === cat.id ? chevronBack : chevronForward}
-                          className="combo-category-chevron"
-                        />
+                        {expandedComboCategory === cat.id ? (
+                          <ChevronLeft size={16} className="combo-category-chevron" />
+                        ) : (
+                          <ChevronRight size={16} className="combo-category-chevron" />
+                        )}
                       </button>
 
                       {expandedComboCategory === cat.id && (
@@ -767,7 +801,7 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
                                           navigateComboCarousel(combo.id, 'prev', nfts.length);
                                         }}
                                       >
-                                        <IonIcon icon={chevronBack} />
+                                        <ChevronLeft size={16} />
                                       </button>
 
                                       <div className="hp-carousel-track">
@@ -776,9 +810,10 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
                                           className="hp-carousel-item hint prev"
                                           onClick={() => onNftClick(String(nfts[prevIndex]))}
                                         >
-                                          <IonImg
+                                          <img
                                             src={getNftImageUrl(nfts[prevIndex])}
                                             alt={`NFT`}
+                                            loading="lazy"
                                           />
                                         </div>
 
@@ -787,9 +822,10 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
                                           className="hp-carousel-item current"
                                           onClick={() => onNftClick(String(nfts[currentIndex]))}
                                         >
-                                          <IonImg
+                                          <img
                                             src={getNftImageUrl(nfts[currentIndex])}
                                             alt={`NFT`}
+                                            loading="lazy"
                                           />
                                         </div>
 
@@ -798,9 +834,10 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
                                           className="hp-carousel-item hint next"
                                           onClick={() => onNftClick(String(nfts[nextIndex]))}
                                         >
-                                          <IonImg
+                                          <img
                                             src={getNftImageUrl(nfts[nextIndex])}
                                             alt={`NFT`}
+                                            loading="lazy"
                                           />
                                         </div>
                                       </div>
@@ -812,7 +849,7 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
                                           navigateComboCarousel(combo.id, 'next', nfts.length);
                                         }}
                                       >
-                                        <IonIcon icon={chevronForward} />
+                                        <ChevronRight size={16} />
                                       </button>
                                     </div>
                                   )}

@@ -5,16 +5,9 @@
  */
 
 import React, { useState } from 'react';
-import {
-  IonList,
-  IonItem,
-  IonLabel,
-  IonToggle,
-  IonButton,
-  IonNote,
-  IonSpinner,
-} from '@ionic/react';
 import { useNotifications } from '../../contexts/NotificationContext';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
+import { Toggle } from '../ui/Toggle';
 import './NotificationSettings.css';
 
 export const NotificationSettings: React.FC = () => {
@@ -62,13 +55,12 @@ export const NotificationSettings: React.FC = () => {
   if (isLoading) {
     return (
       <div className="notification-settings loading">
-        <IonSpinner name="crescent" />
+        <LoadingSpinner size={24} />
         <p>Loading notification settings...</p>
       </div>
     );
   }
 
-  // Push notifications not supported
   if (!isSupported) {
     return (
       <div className="notification-settings unsupported">
@@ -80,7 +72,6 @@ export const NotificationSettings: React.FC = () => {
     );
   }
 
-  // Permission denied by user
   if (permission === 'denied') {
     return (
       <div className="notification-settings blocked">
@@ -106,33 +97,28 @@ export const NotificationSettings: React.FC = () => {
         </div>
 
         {!isSubscribed ? (
-          <IonButton
+          <button
             onClick={handleEnableNotifications}
             disabled={isEnabling}
-            className="enable-button"
+            className="btn btn-primary enable-button"
           >
-            {isEnabling ? <IonSpinner name="crescent" /> : 'Enable Notifications'}
-          </IonButton>
+            {isEnabling ? <LoadingSpinner size={18} /> : 'Enable Notifications'}
+          </button>
         ) : (
           <div className="header-actions">
-            <IonButton
-              fill="outline"
-              size="small"
+            <button
               onClick={sendTestNotification}
-              className="test-button"
+              className="btn btn-ghost test-button"
             >
               Test
-            </IonButton>
-            <IonButton
-              fill="outline"
-              color="danger"
-              size="small"
+            </button>
+            <button
               onClick={handleDisableNotifications}
               disabled={isDisabling}
-              className="disable-button"
+              className="btn btn-ghost disable-button"
             >
-              {isDisabling ? <IonSpinner name="crescent" /> : 'Disable All'}
-            </IonButton>
+              {isDisabling ? <LoadingSpinner size={18} /> : 'Disable All'}
+            </button>
           </div>
         )}
       </div>
@@ -144,62 +130,72 @@ export const NotificationSettings: React.FC = () => {
             <p className="section-description">Choose which notifications you want to receive.</p>
           </div>
 
-          <IonList className="preferences-list">
-            <IonItem lines="full">
-              <IonLabel>
-                <h2>Daily Rewards</h2>
-                <IonNote>Remind me to claim daily rewards</IonNote>
-              </IonLabel>
-              <IonToggle
+          <div className="preferences-list">
+            <div className="preference-item">
+              <div className="preference-info">
+                <h5>Daily Rewards</h5>
+                <p className="preference-note">Remind me to claim daily rewards</p>
+              </div>
+              <Toggle
+                id="pref-daily-rewards"
                 checked={preferences.dailyRewards}
-                onIonChange={(e) => updatePreferences({ dailyRewards: e.detail.checked })}
+                onChange={(checked) => updatePreferences({ dailyRewards: checked })}
+                size="small"
               />
-            </IonItem>
+            </div>
 
-            <IonItem lines="full">
-              <IonLabel>
-                <h2>High Score Alerts</h2>
-                <IonNote>Notify when someone beats my score</IonNote>
-              </IonLabel>
-              <IonToggle
+            <div className="preference-item">
+              <div className="preference-info">
+                <h5>High Score Alerts</h5>
+                <p className="preference-note">Notify when someone beats my score</p>
+              </div>
+              <Toggle
+                id="pref-high-score"
                 checked={preferences.highScoreBeaten}
-                onIonChange={(e) => updatePreferences({ highScoreBeaten: e.detail.checked })}
+                onChange={(checked) => updatePreferences({ highScoreBeaten: checked })}
+                size="small"
               />
-            </IonItem>
+            </div>
 
-            <IonItem lines="full">
-              <IonLabel>
-                <h2>Guild Updates</h2>
-                <IonNote>Guild challenges, invites, and competitions</IonNote>
-              </IonLabel>
-              <IonToggle
+            <div className="preference-item">
+              <div className="preference-info">
+                <h5>Guild Updates</h5>
+                <p className="preference-note">Guild challenges, invites, and competitions</p>
+              </div>
+              <Toggle
+                id="pref-guild"
                 checked={preferences.guildUpdates}
-                onIonChange={(e) => updatePreferences({ guildUpdates: e.detail.checked })}
+                onChange={(checked) => updatePreferences({ guildUpdates: checked })}
+                size="small"
               />
-            </IonItem>
+            </div>
 
-            <IonItem lines="full">
-              <IonLabel>
-                <h2>Achievements</h2>
-                <IonNote>New achievements unlocked</IonNote>
-              </IonLabel>
-              <IonToggle
+            <div className="preference-item">
+              <div className="preference-info">
+                <h5>Achievements</h5>
+                <p className="preference-note">New achievements unlocked</p>
+              </div>
+              <Toggle
+                id="pref-achievements"
                 checked={preferences.achievements}
-                onIonChange={(e) => updatePreferences({ achievements: e.detail.checked })}
+                onChange={(checked) => updatePreferences({ achievements: checked })}
+                size="small"
               />
-            </IonItem>
+            </div>
 
-            <IonItem lines="none">
-              <IonLabel>
-                <h2>Social</h2>
-                <IonNote>Friends joining and activity</IonNote>
-              </IonLabel>
-              <IonToggle
+            <div className="preference-item">
+              <div className="preference-info">
+                <h5>Social</h5>
+                <p className="preference-note">Friends joining and activity</p>
+              </div>
+              <Toggle
+                id="pref-social"
                 checked={preferences.social}
-                onIonChange={(e) => updatePreferences({ social: e.detail.checked })}
+                onChange={(checked) => updatePreferences({ social: checked })}
+                size="small"
               />
-            </IonItem>
-          </IonList>
+            </div>
+          </div>
 
           <div className="notification-info">
             <p>

@@ -1,15 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  IonContent,
-  IonHeader,
-  IonPage,
-  IonTitle,
-  IonToolbar,
-  IonIcon,
-  IonButtons,
-  IonButton,
-} from '@ionic/react';
-import { informationCircleOutline, close } from 'ionicons/icons';
+import { Info, X } from 'lucide-react';
 import { useGameEffects, GameEffects } from '@/components/media';
 import { ArcadeGameOverScreen } from '@/components/media/games/ArcadeGameOverScreen';
 import { GameSEO } from '@/components/seo/GameSEO';
@@ -343,7 +333,7 @@ const Orange2048: React.FC = () => {
   }, [gameState, move]);
 
   return (
-    <IonPage>
+    <div className="game2048-page">
       <GameSEO
         gameName="Merge 2048"
         gameSlug="merge-2048"
@@ -351,17 +341,15 @@ const Orange2048: React.FC = () => {
         genre="Puzzle"
         difficulty="Medium"
       />
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot="start">
-            <IonButton onClick={() => setShowInfo(true)}>
-              <IonIcon icon={informationCircleOutline} />
-            </IonButton>
-          </IonButtons>
-          <IonTitle>2048 Oranges</IonTitle>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent fullscreen className="game2048-content" scrollY={false}>
+      <header className="game2048-header">
+        <div className="game2048-toolbar">
+          <button className="btn btn-ghost" onClick={() => setShowInfo(true)}>
+            <Info size={20} />
+          </button>
+          <h1 className="game2048-header-title">2048 Oranges</h1>
+        </div>
+      </header>
+      <div className="game2048-content">
         {gameState === 'playing' && (
           <div className="game2048-hud">
             <div className="hud-item">
@@ -438,7 +426,7 @@ const Orange2048: React.FC = () => {
           <div className="info-overlay" onClick={() => setShowInfo(false)}>
             <div className="info-modal" onClick={(e) => e.stopPropagation()}>
               <button className="info-close" onClick={() => setShowInfo(false)}>
-                <IonIcon icon={close} />
+                <X size={24} />
               </button>
               <h2>How to Play</h2>
               <div className="info-content">
@@ -456,8 +444,8 @@ const Orange2048: React.FC = () => {
             </div>
           </div>
         )}
-      </IonContent>
-    </IonPage>
+      </div>
+    </div>
   );
 };
 

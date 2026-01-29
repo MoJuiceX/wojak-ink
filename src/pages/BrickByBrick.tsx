@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { IonButton } from '@ionic/react';
 import { useGameSounds } from '@/hooks/useGameSounds';
 import { SoundManager } from '@/systems/audio/SoundManager';
 import { useGameHaptics } from '@/systems/haptics';
@@ -1613,15 +1612,15 @@ const BrickByBrick: React.FC = () => {
                   {level === 9 && 'Last level - you got this!'}
                 </p>
               </div>
-              <IonButton 
+              <button
                 onClick={(e) => {
                   e.stopPropagation();
                   startNextLevel();
-                }} 
-                className="play-btn"
+                }}
+                className="btn btn-primary play-btn"
               >
                 Next Level
-              </IonButton>
+              </button>
             </div>
           )}
 

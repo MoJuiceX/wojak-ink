@@ -5,13 +5,11 @@
  * audio controls, motion preferences, and app settings.
  */
 
-import type { ThemeId } from './theme';
+// ============ Theme Types (simplified - dark/orange only) ============
 
-// ============ Extended Theme Types ============
-
+export type ThemeId = 'tang-orange' | 'dark';
 export type SettingsThemeId = ThemeId | 'system';
-
-export type ResolvedTheme = Exclude<SettingsThemeId, 'system'>;
+export type ResolvedTheme = ThemeId;
 
 export interface ThemePreview {
   background: string;

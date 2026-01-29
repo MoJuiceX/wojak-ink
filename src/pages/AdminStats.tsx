@@ -1,18 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
-import {
-  IonContent,
-  IonHeader,
-  IonPage,
-  IonTitle,
-  IonToolbar,
-  IonButton,
-  IonIcon,
-  IonSpinner,
-  IonInput,
-  IonItem,
-} from '@ionic/react';
-import { arrowBack, lockClosed, refreshOutline, chevronUp, chevronDown } from 'ionicons/icons';
+import { ArrowLeft, Lock, RefreshCw, ChevronUp, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import './AdminStats.css';
 
 const WORKER_API_URL = 'https://wojak-mobile-trade-fetcher.abitsolvesthis.workers.dev';
@@ -164,64 +153,65 @@ const AdminStats: React.FC = () => {
   // Render login screen
   if (!isAuthenticated) {
     return (
-      <IonPage>
-        <IonHeader>
-          <IonToolbar>
-            <IonButton slot="start" fill="clear" onClick={() => navigate(-1)}>
-              <IonIcon icon={arrowBack} />
-            </IonButton>
-            <IonTitle>Admin Stats</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent className="admin-stats-content">
+      <div className="admin-stats-page">
+        <header className="admin-stats-header">
+          <div className="admin-stats-toolbar">
+            <button className="btn btn-ghost" onClick={() => navigate(-1)}>
+              <ArrowLeft size={20} />
+            </button>
+            <h1 className="admin-stats-title">Admin Stats</h1>
+          </div>
+        </header>
+        <div className="admin-stats-content">
           <div className="admin-login">
-            <IonIcon icon={lockClosed} className="login-icon" />
+            <Lock className="login-icon" size={48} />
             <h2>Admin Access Required</h2>
             <p>Enter the admin password to view statistics</p>
 
-            <IonItem className="password-input">
-              <IonInput
+            <div className="password-input">
+              <input
                 type="password"
+                className="input"
                 placeholder="Password"
                 value={password}
-                onIonInput={(e) => setPassword(e.detail.value || '')}
+                onChange={(e) => setPassword(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
               />
-            </IonItem>
+            </div>
 
             {error && <p className="error-message">{error}</p>}
 
-            <IonButton
-              expand="block"
+            <button
+              className="btn btn-primary w-full"
               onClick={handleLogin}
               disabled={isLoading || !password.trim()}
             >
-              {isLoading ? <IonSpinner name="crescent" /> : 'Login'}
-            </IonButton>
+              {isLoading ? <LoadingSpinner size={18} /> : 'Login'}
+            </button>
           </div>
-        </IonContent>
-      </IonPage>
+        </div>
+      </div>
     );
   }
 
   // Render stats dashboard
   return (
-    <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButton slot="start" fill="clear" onClick={() => navigate(-1)}>
-            <IonIcon icon={arrowBack} />
-          </IonButton>
-          <IonTitle>Favorite Stats</IonTitle>
-          <IonButton slot="end" fill="clear" onClick={handleRefresh}>
-            <IonIcon icon={refreshOutline} />
-          </IonButton>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent className="admin-stats-content">
+    <div className="admin-stats-page">
+      <header className="admin-stats-header">
+        <div className="admin-stats-toolbar">
+          <button className="btn btn-ghost" onClick={() => navigate(-1)}>
+            <ArrowLeft size={20} />
+          </button>
+          <h1 className="admin-stats-title">Favorite Stats</h1>
+          <button className="btn btn-ghost" onClick={handleRefresh}>
+            <RefreshCw size={20} />
+          </button>
+        </div>
+      </header>
+      <div className="admin-stats-content">
         {isLoading ? (
           <div className="loading-container">
-            <IonSpinner name="crescent" />
+            <LoadingSpinner />
             <p>Loading stats...</p>
           </div>
         ) : (
@@ -285,13 +275,13 @@ const AdminStats: React.FC = () => {
                       <th onClick={() => toggleSort('name')} className="sortable">
                         Attribute
                         {sortField === 'name' && (
-                          <IonIcon icon={sortDirection === 'asc' ? chevronUp : chevronDown} />
+                          sortDirection === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />
                         )}
                       </th>
                       <th onClick={() => toggleSort('count')} className="sortable">
                         Count
                         {sortField === 'count' && (
-                          <IonIcon icon={sortDirection === 'asc' ? chevronUp : chevronDown} />
+                          sortDirection === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />
                         )}
                       </th>
                     </tr>
@@ -341,14 +331,14 @@ const AdminStats: React.FC = () => {
             {/* Last Updated */}
             <div className="stats-footer">
               <p>Last updated: {stats?.lastUpdated ? new Date(stats.lastUpdated).toLocaleString() : 'Never'}</p>
-              <IonButton fill="clear" size="small" onClick={handleLogout}>
+              <button className="btn btn-ghost text-sm" onClick={handleLogout}>
                 Logout
-              </IonButton>
+              </button>
             </div>
           </>
         )}
-      </IonContent>
-    </IonPage>
+      </div>
+    </div>
   );
 };
 

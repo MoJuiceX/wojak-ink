@@ -1,25 +1,11 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { setupIonicReact } from '@ionic/react'
 import { ClerkProvider } from '@clerk/clerk-react'
 import { register as registerServiceWorker } from './serviceWorkerRegistration'
 import { ErrorBoundary } from './components/ErrorBoundary'
 
-/* Ionic CSS - only core.css to avoid overriding app scrolling */
-import '@ionic/react/css/core.css'
-
 import './index.css'
-import './styles/tokens.css'
-import './styles/animations.css'
-import './styles/utilities.css'
-import './styles/mobile.css'
-import './styles/shop-cosmetics.css'
 import App from './App.tsx'
-
-/* Initialize Ionic React */
-setupIonicReact({
-  mode: 'ios',
-})
 
 // Clerk publishable key from environment
 const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY

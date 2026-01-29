@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { EffectsProvider, EffectsLayer } from '../effects';
 import './game-ui.css';
 
-interface GameShellProps {
+export interface GameShellProps {
   children: ReactNode;
   gameId: string;
   className?: string;

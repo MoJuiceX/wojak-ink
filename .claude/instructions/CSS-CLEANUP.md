@@ -1,55 +1,63 @@
 # CSS CLEANUP INSTRUCTIONS
 
-## REQUIRED: Read These Files First
+## STATUS: Phase 1-3 ✅ | Phase 4 ⏳ Required
 
-Before executing ANY changes, you MUST read these files in the project root:
+## REQUIRED: Read This File
 
-1. `CSS-CLEANUP-AUDIT.md` - Complete audit of what exists
-2. `CSS-CLEANUP-EXECUTION.md` - Step-by-step execution plan
+**`CSS-CLEANUP-PHASE4.md`** - Fix broken code (DO THIS NOW)
 
-## Quick Summary
+---
 
-**Goal:** Consolidate 7+ CSS systems into ONE theme.css file
+## Phase 4 Summary
 
-**Delete these files:**
-- `src/theme/variables.css`
-- `src/theme/global.css`
-- `src/theme/ionic-overrides.css`
-- `src/styles/tokens.css`
-- `src/styles/premium-tokens.css`
-- `src/styles/premium-effects.css`
-- `src/styles/ambient-background.css`
-- `src/styles/utilities.css`
-- `src/systems/theme/` (entire folder)
-- `src/contexts/ThemeContext.tsx`
-- `src/components/theme/ThemeSwitcher.tsx`
-- `src/types/theme.ts`
+### 4A: RESTORE Ambient CSS (keep effects)
+Add ambient background and noise overlay CSS to `src/styles/theme.css`.
+The CSS is provided in CSS-CLEANUP-PHASE4.md - copy it to the end of theme.css.
 
-**Keep:**
-- `src/styles/theme.css` (new single source of truth)
-- `src/styles/animations.css`
-- `src/styles/game-container.css`
-- `src/styles/mobile.css`
-- `src/styles/shop-cosmetics.css`
+### 4B: Remove Unused npm Packages
+```bash
+npm uninstall @ionic/react @studio-freight/lenis crypto-js
+```
 
-**Replace:** `src/index.css` (1317 lines → ~50 lines)
+### 4C: Delete Empty Folders
+```bash
+rm -rf src/theme/
+```
 
-## Execution Order
+### 4D: Verify
+```bash
+npm run build
+npm run dev
+```
 
-1. Create backup branch
-2. Read full audit (CSS-CLEANUP-AUDIT.md)
-3. Read execution plan (CSS-CLEANUP-EXECUTION.md)
-4. Execute Phase 1: Delete duplicate variable files
-5. Execute Phase 2: Simplify index.css
-6. Execute Phase 3: Check Ionic usage, remove if unused
-7. Execute Phase 4: Remove theme switching code
-8. Execute Phase 5: Fix !important hacks
-9. Test with `npm run dev`
-10. Commit changes
+---
 
-## Important Rules
+## What Was Found
 
-- DO NOT create new CSS variable files
-- DO NOT add !important
-- ALL colors go in theme.css
-- Tailwind is ONLY for layout (flex, grid, padding, margin)
+| Issue | Fix |
+|-------|-----|
+| AmbientBackground CSS missing | ADD to theme.css |
+| noise-overlay CSS missing | ADD to theme.css |
+| @ionic/react (0 imports) | npm uninstall |
+| @studio-freight/lenis (0 imports) | npm uninstall |
+| crypto-js (0 imports) | npm uninstall |
+| src/theme/ empty folder | DELETE |
+
+---
+
+## Previous Phases (DONE)
+
+| Phase | Files Deleted | Result |
+|-------|---------------|--------|
+| 1 | 13 | CSS systems consolidated |
+| 2 | 9 | Theme switching removed |
+| 3 | 32 | Dead hooks/components removed |
+
+---
+
+## Rules
+
+- ALL visual styles in theme.css
+- NO unused npm packages
+- NO empty folders
+- Game files untouched

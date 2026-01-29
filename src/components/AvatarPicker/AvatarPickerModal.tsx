@@ -42,7 +42,6 @@ export function AvatarPickerModal({ isOpen, onClose }: AvatarPickerModalProps) {
 
   // Handle emoji selection - auto-save
   const handleEmojiSelect = async (emoji: string) => {
-    console.log('[AvatarPicker] Emoji selected:', emoji);
     setSelectedEmoji(emoji);
     setIsSaving(true);
     setError(null);
@@ -54,7 +53,6 @@ export function AvatarPickerModal({ isOpen, onClose }: AvatarPickerModalProps) {
       };
       const success = await updateAvatar(newAvatar);
       if (success) {
-        console.log('[AvatarPicker] Emoji avatar saved successfully');
         onClose();
       } else {
         setError('Failed to save avatar. Please try again.');
@@ -69,7 +67,6 @@ export function AvatarPickerModal({ isOpen, onClose }: AvatarPickerModalProps) {
 
   // Handle NFT selection - auto-save with wallet address
   const handleNftSelect = async (nft: NFT) => {
-    console.log('[AvatarPicker] NFT selected:', nft.id, 'wallet:', walletAddress, 'imageUrl:', nft.imageUrl);
     setSelectedNft(nft);
     setIsSaving(true);
     setError(null);
@@ -89,7 +86,6 @@ export function AvatarPickerModal({ isOpen, onClose }: AvatarPickerModalProps) {
         nftLauncherId: nft.launcherId,
       };
       
-      console.log('[AvatarPicker] Saving NFT avatar:', newAvatar);
       
       // Save both avatar AND wallet address together
       // This ensures the API validation passes (NFT avatars require wallet_address)
@@ -99,7 +95,6 @@ export function AvatarPickerModal({ isOpen, onClose }: AvatarPickerModalProps) {
       });
       
       if (success) {
-        console.log('[AvatarPicker] NFT avatar saved successfully');
         // NOTE: Don't call refreshProfile() here - it would fetch from API
         // and potentially overwrite local state if API save failed.
         // updateProfile already updates the state directly.
@@ -127,7 +122,6 @@ export function AvatarPickerModal({ isOpen, onClose }: AvatarPickerModalProps) {
 
   // Handle close
   const handleClose = () => {
-    console.log('[AvatarPicker] Close clicked');
     onClose();
   };
 

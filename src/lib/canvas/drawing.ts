@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Canvas Drawing Utilities
  * Common drawing functions for canvas games
@@ -131,7 +130,7 @@ export const arrow = (
   toX: number,
   toY: number,
   headLength: number = 10,
-  headWidth: number = 8
+  _headWidth: number = 8
 ): void => {
   const angle = Math.atan2(toY - fromY, toX - fromX);
 
@@ -202,7 +201,7 @@ export const createVerticalGradient = (
   ctx: CanvasRenderingContext2D,
   y1: number,
   y2: number,
-  width: number,
+  _width: number,
   colors: string[]
 ): CanvasGradient => {
   return createLinearGradient(ctx, 0, y1, 0, y2, colors);
@@ -215,7 +214,7 @@ export const createHorizontalGradient = (
   ctx: CanvasRenderingContext2D,
   x1: number,
   x2: number,
-  height: number,
+  _height: number,
   colors: string[]
 ): CanvasGradient => {
   return createLinearGradient(ctx, x1, 0, x2, 0, colors);

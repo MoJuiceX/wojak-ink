@@ -2,7 +2,6 @@ import { lazy, Suspense, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { QueryProvider } from '@/providers/QueryProvider';
-import { ThemeProvider } from '@/contexts/ThemeContext';
 import { DeviceOrientationProvider } from '@/contexts/DeviceOrientationContext';
 import { LayoutProvider } from '@/contexts/LayoutContext';
 import { SettingsProvider } from '@/contexts/SettingsContext';
@@ -463,7 +462,6 @@ function App() {
     <HelmetProvider>
     <QueryProvider>
       <SalesProvider>
-      <ThemeProvider defaultTheme="tang-orange">
         <DeviceOrientationProvider>
         <SettingsProvider>
           <ToastProvider>
@@ -510,7 +508,6 @@ function App() {
           </ToastProvider>
         </SettingsProvider>
         </DeviceOrientationProvider>
-      </ThemeProvider>
       </SalesProvider>
     </QueryProvider>
     </HelmetProvider>

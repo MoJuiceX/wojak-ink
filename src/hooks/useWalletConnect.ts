@@ -65,12 +65,11 @@ export function useWalletConnect() {
       clientRef.current = client;
 
       // Listen for session events
-      client.on('session_event', (args) => {
-        console.log('[WalletConnect] Session event:', args);
+      client.on('session_event', (_args) => {
+        // Session event received
       });
 
       client.on('session_delete', () => {
-        console.log('[WalletConnect] Session deleted');
         sessionRef.current = null;
         setState(s => ({
           ...s,
@@ -129,13 +128,11 @@ export function useWalletConnect() {
         setState(s => ({ ...s, qrCodeUri: qrCode, connectionUri: uri }));
 
         // Also log the URI for copy/paste
-        console.log('[WalletConnect] Connection URI:', uri);
       }
 
       // Wait for approval
       const session = await approval();
       sessionRef.current = session;
-      console.log('[WalletConnect] Session approved:', session);
 
       // Mark as connected and start loading NFTs
       setState(s => ({
@@ -149,7 +146,6 @@ export function useWalletConnect() {
 
       // Auto-fetch NFTs after connection
       try {
-        console.log('[WalletConnect] Auto-fetching NFTs...');
         const result = await client.request({
           topic: session.topic,
           chainId: CHAIN_ID,
@@ -159,32 +155,18 @@ export function useWalletConnect() {
           },
         });
 
-        console.log('[WalletConnect] Raw NFTs result:', result);
-        console.log('[WalletConnect] Result type:', typeof result);
-        console.log('[WalletConnect] Result keys:', result ? Object.keys(result as object) : 'null');
 
         // Filter for Wojak Farmers Plot NFTs
         const allNfts = (result as any)?.nfts || (result as any) || [];
-        console.log('[WalletConnect] All NFTs array:', allNfts);
-        console.log('[WalletConnect] NFT count:', Array.isArray(allNfts) ? allNfts.length : 'not array');
-
-        // Log all collection IDs for debugging
-        if (Array.isArray(allNfts) && allNfts.length > 0) {
-          console.log('[WalletConnect] First NFT structure:', JSON.stringify(allNfts[0], null, 2));
-          const collectionIds = allNfts.map((nft: any) => nft.collection_id || nft.collectionId || nft.collectionID || 'none');
-          console.log('[WalletConnect] All collection IDs:', collectionIds);
-        }
 
         const wojakNfts = Array.isArray(allNfts)
           ? allNfts.filter((nft: any) => {
               const collectionId = nft.collection_id || nft.collectionId || nft.collectionID || '';
               const matches = collectionId.includes(WOJAK_COLLECTION_ID);
-              console.log(`[WalletConnect] NFT collection: ${collectionId}, matches: ${matches}`);
               return matches;
             })
           : [];
 
-        console.log('[WalletConnect] Filtered Wojak Farmer NFTs:', wojakNfts.length);
 
         setState(s => ({
           ...s,
@@ -201,7 +183,6 @@ export function useWalletConnect() {
                               errorMsg.toLowerCase().includes('unknown method');
 
         if (isUnsupported) {
-          console.log('[WalletConnect] NFT detection not supported by this wallet');
           setState(s => ({
             ...s,
             isLoadingNfts: false,
@@ -229,14 +210,12 @@ export function useWalletConnect() {
   // Fetch NFTs from connected wallet
   const fetchNfts = useCallback(async () => {
     if (!clientRef.current || !sessionRef.current) {
-      console.log('[WalletConnect] Cannot fetch NFTs - not connected');
       return [];
     }
 
     setState(s => ({ ...s, isLoadingNfts: true, error: null }));
 
     try {
-      console.log('[WalletConnect] Fetching NFTs...');
       const result = await clientRef.current.request({
         topic: sessionRef.current.topic,
         chainId: CHAIN_ID,
@@ -246,16 +225,12 @@ export function useWalletConnect() {
         },
       });
 
-      console.log('[WalletConnect] Raw NFTs result:', result);
-      console.log('[WalletConnect] Result keys:', result ? Object.keys(result as object) : 'null');
 
       // Filter for Wojak Farmers Plot NFTs
       const allNfts = (result as any)?.nfts || (result as any) || [];
-      console.log('[WalletConnect] NFT count:', Array.isArray(allNfts) ? allNfts.length : 'not array');
 
       // Log first NFT structure for debugging
       if (Array.isArray(allNfts) && allNfts.length > 0) {
-        console.log('[WalletConnect] First NFT structure:', JSON.stringify(allNfts[0], null, 2));
       }
 
       const wojakNfts = Array.isArray(allNfts)
@@ -265,7 +240,6 @@ export function useWalletConnect() {
           })
         : [];
 
-      console.log('[WalletConnect] Wojak Farmer NFTs:', wojakNfts.length);
 
       setState(s => ({
         ...s,

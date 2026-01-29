@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * DesktopExplorerPanel Component
  *
@@ -313,77 +312,6 @@ function AttributesTab({
     <div className="grid grid-cols-2 gap-3">
       {nft.traits.map((trait, index) => (
         <AttributeCard key={index} trait={trait} getTooltipData={getTooltipData} />
-      ))}
-    </div>
-  );
-}
-
-// Activity Tab Content
-function ActivityTab({ nft }: { nft: NFT }) {
-  const formatDate = (date: Date) => {
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(hours / 24);
-
-    if (hours < 1) return 'Just now';
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
-  const getEventLabel = (type: string, price?: number) => {
-    switch (type) {
-      case 'mint':
-        return 'Minted';
-      case 'sale':
-        return `Sold for ${formatPriceXCH(price || 0)}`;
-      case 'transfer':
-        return 'Transferred';
-      case 'list':
-        return `Listed for ${formatPriceXCH(price || 0)}`;
-      case 'delist':
-        return 'Delisted';
-      default:
-        return type;
-    }
-  };
-
-  return (
-    <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
-      {nft.transactions.map((tx, index) => (
-        <div
-          key={index}
-          className="flex items-center justify-between p-3 rounded-lg"
-          style={{
-            background: 'var(--color-bg-tertiary)',
-            border: '1px solid var(--color-border)',
-          }}
-        >
-          <div>
-            <p
-              className="font-medium text-sm"
-              style={{ color: 'var(--color-text-primary)' }}
-            >
-              {getEventLabel(tx.type, tx.price)}
-            </p>
-            <p
-              className="text-xs mt-0.5"
-              style={{ color: 'var(--color-text-muted)' }}
-            >
-              {tx.from !== tx.to && `${truncateAddress(tx.from)} → ${truncateAddress(tx.to)}`}
-            </p>
-          </div>
-          <span
-            className="text-xs"
-            style={{ color: 'var(--color-text-muted)' }}
-          >
-            {formatDate(tx.timestamp)}
-          </span>
-        </div>
       ))}
     </div>
   );
@@ -1102,7 +1030,7 @@ export function DesktopExplorerPanel({
                         transition={{ duration: 0.15 }}
                       >
                         {activeTab === 'traits' && <AttributesTab nft={currentNft} getTooltipData={getTooltipData} />}
-                        {activeTab === 'history' && <HistoryTab nftId={currentNft.tokenId} />}
+                        {activeTab === 'history' && <HistoryTab nftId={Number(currentNft.tokenId)} />}
                       </motion.div>
                     </AnimatePresence>
                   </div>

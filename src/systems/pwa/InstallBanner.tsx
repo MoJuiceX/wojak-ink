@@ -1,5 +1,4 @@
 import React from 'react';
-import { IonButton } from '@ionic/react';
 import { usePWA } from './PWAContext';
 import './pwa.css';
 
@@ -36,13 +35,12 @@ export const InstallBanner: React.FC<InstallBannerProps> = ({
         >
           Later
         </button>
-        <IonButton
-          className="install-banner-install"
+        <button
+          className="btn btn-primary install-banner-install"
           onClick={handleInstall}
-          size="small"
         >
           Install
-        </IonButton>
+        </button>
       </div>
     </div>
   );

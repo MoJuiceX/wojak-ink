@@ -1,17 +1,7 @@
 import { useState } from 'react';
-import {
-  IonContent,
-  IonPage,
-  IonList,
-  IonItem,
-  IonLabel,
-  IonToggle,
-  IonIcon,
-  IonNote,
-  IonButton,
-} from '@ionic/react';
-import { musicalNotes, volumeHigh, sunny, moon, colorPalette, statsChart } from 'ionicons/icons';
+import { Music, Volume2, Sun, Moon, Palette, BarChart3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Toggle } from '../components/ui/Toggle';
 import { loadSettings, saveSettings, applyTheme, type AppSettings, type ThemeMode } from '../utils/settingsUtils';
 import './SettingsPage.css';
 
@@ -29,45 +19,45 @@ const SettingsPage: React.FC = () => {
     }
   };
 
-  const themes: { id: ThemeMode; label: string; icon: string; color: string }[] = [
-    { id: 'light', label: 'Light', icon: sunny, color: '#f5f5f5' },
-    { id: 'dark', label: 'Dark', icon: moon, color: '#1a1a2e' },
-    { id: 'orange', label: 'Orange', icon: colorPalette, color: '#ff8c00' },
-    { id: 'green', label: 'Green', icon: colorPalette, color: '#2ecc71' },
+  const themes: { id: ThemeMode; label: string; icon: React.ReactNode; color: string }[] = [
+    { id: 'light', label: 'Light', icon: <Sun size={20} />, color: '#f5f5f5' },
+    { id: 'dark', label: 'Dark', icon: <Moon size={20} />, color: '#1a1a2e' },
+    { id: 'orange', label: 'Orange', icon: <Palette size={20} />, color: '#ff8c00' },
+    { id: 'green', label: 'Green', icon: <Palette size={20} />, color: '#2ecc71' },
   ];
 
   return (
-    <IonPage>
-      <IonContent className="settings-page-content">
+    <div className="settings-page">
+      <div className="settings-page-content">
         {/* Audio Section */}
         <div className="settings-section">
           <h3 className="settings-section-title">Audio</h3>
-          <IonList>
-            <IonItem>
-              <IonIcon icon={musicalNotes} slot="start" className="settings-icon" />
-              <IonLabel>
-                <h2>Background Music</h2>
+          <div className="settings-list">
+            <div className="settings-item">
+              <Music size={20} className="settings-icon" />
+              <div className="settings-item-content">
+                <h4>Background Music</h4>
                 <p>Play music while browsing</p>
-              </IonLabel>
-              <IonToggle
-                slot="end"
+              </div>
+              <Toggle
+                id="background-music"
                 checked={settings.backgroundMusic}
-                onIonChange={(e: CustomEvent) => handleSettingChange('backgroundMusic', e.detail.checked)}
+                onChange={(checked) => handleSettingChange('backgroundMusic', checked)}
               />
-            </IonItem>
-            <IonItem>
-              <IonIcon icon={volumeHigh} slot="start" className="settings-icon" />
-              <IonLabel>
-                <h2>Sound Effects</h2>
+            </div>
+            <div className="settings-item">
+              <Volume2 size={20} className="settings-icon" />
+              <div className="settings-item-content">
+                <h4>Sound Effects</h4>
                 <p>UI sounds and game audio</p>
-              </IonLabel>
-              <IonToggle
-                slot="end"
+              </div>
+              <Toggle
+                id="sound-effects"
                 checked={settings.soundEffects}
-                onIonChange={(e: CustomEvent) => handleSettingChange('soundEffects', e.detail.checked)}
+                onChange={(checked) => handleSettingChange('soundEffects', checked)}
               />
-            </IonItem>
-          </IonList>
+            </div>
+          </div>
         </div>
 
         {/* Theme Section */}
@@ -85,7 +75,7 @@ const SettingsPage: React.FC = () => {
                   className="theme-preview"
                   style={{ backgroundColor: theme.color }}
                 >
-                  <IonIcon icon={theme.icon} />
+                  {theme.icon}
                 </div>
                 <span className="theme-label">{theme.label}</span>
               </div>
@@ -95,26 +85,22 @@ const SettingsPage: React.FC = () => {
 
         {/* Admin Section */}
         <div className="settings-section admin-section">
-          <IonButton
-            expand="block"
-            fill="outline"
-            className="admin-button"
+          <button
+            className="btn btn-secondary admin-button"
             onClick={() => navigate('/admin/stats')}
           >
-            <IonIcon icon={statsChart} slot="start" />
+            <BarChart3 size={18} />
             Generator Stats
-          </IonButton>
+          </button>
         </div>
 
         {/* App Info */}
         <div className="settings-footer">
-          <IonNote>
-            <p>Wojak.ink Mobile v1.0</p>
-            <p>4200 Wojak Farmers Plot NFTs on Chia</p>
-          </IonNote>
+          <p>Wojak.ink Mobile v1.0</p>
+          <p>4200 Wojak Farmers Plot NFTs on Chia</p>
         </div>
-      </IonContent>
-    </IonPage>
+      </div>
+    </div>
   );
 };
 

@@ -19,7 +19,6 @@ const initializeParse = (): void => {
   Parse.initialize(appId, jsKey);
   (Parse as any).serverURL = serverUrl;
 
-  console.log('Parse initialized successfully');
 };
 
 // Test the Parse connection
@@ -30,13 +29,11 @@ export const testParseConnection = async (): Promise<boolean> => {
     const query = new Parse.Query(TestObject);
     query.limit(1);
     await query.find();
-    console.log('Parse connection test: SUCCESS');
     return true;
   } catch (error) {
     // Error is expected if class doesn't exist, but connection works
     if ((error as any).code === 101) {
       // Class doesn't exist - but that means connection worked
-      console.log('Parse connection test: SUCCESS (no data yet)');
       return true;
     }
     console.error('Parse connection test: FAILED', error);

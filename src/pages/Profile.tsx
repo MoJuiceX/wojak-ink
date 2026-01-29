@@ -331,7 +331,6 @@ export default function Profile() {
   // Handle edit profile
   const handleEditProfile = () => {
     // TODO: Open edit profile modal
-    console.log('Edit profile clicked');
   };
 
   // Handle share profile

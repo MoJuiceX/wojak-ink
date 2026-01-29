@@ -5,7 +5,6 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
-import { IonContent, IonPage } from '@ionic/react';
 import { Play, Pause } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useGameNavigationGuard } from '@/hooks/useGameNavigationGuard';
@@ -132,7 +131,7 @@ const KnifeGame: React.FC = () => {
   };
 
   return (
-    <IonPage>
+    <div className="knife-page">
       <GameSEO
         gameName="Knife Game"
         gameSlug="knife"
@@ -140,7 +139,7 @@ const KnifeGame: React.FC = () => {
         genre="Arcade"
         difficulty="Hard"
       />
-      <IonContent fullscreen className="knife-content" scrollY={false}>
+      <div className="knife-content">
         <div className="knife-area">
           <div className="game-menu-split">
             {/* Left side - Game Info */}
@@ -222,8 +221,8 @@ const KnifeGame: React.FC = () => {
             icon="🎮"
           />
         </div>
-      </IonContent>
-    </IonPage>
+      </div>
+    </div>
   );
 };
 

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Merge 2048 Game - Citrus Edition
  *
@@ -129,7 +128,9 @@ const FEVER_CONFIG = {
 // PHASE 3: TILE PERSONALITY SYSTEM (Tasks 31-45)
 // ============================================================================
 
-// TASK 31: Tile face configuration
+// TASK 31 & 40: Tile faces and bios reserved for future character gallery feature
+// Commented out to avoid unused variable errors - uncomment when implementing gallery
+/*
 interface TileFace {
   eyes: string;
   mouth: string;
@@ -138,20 +139,19 @@ interface TileFace {
 }
 
 const TILE_FACES: Record<number, TileFace> = {
-  2:    { eyes: '• •', mouth: '‿', expression: 'sleepy' },       // Seed - drowsy
-  4:    { eyes: '◦ ◦', mouth: '‿', expression: 'happy' },        // Seedling - awake
-  8:    { eyes: '° °', mouth: '◡', expression: 'happy' },        // Slice - content
-  16:   { eyes: '◉ ◉', mouth: '◡', expression: 'happy' },        // Mandarin - alert
-  32:   { eyes: '◉ ◉', mouth: '▽', expression: 'excited' },      // Blood orange - excited
-  64:   { eyes: '★ ★', mouth: '▽', expression: 'excited' },      // Tangerine - starry
-  128:  { eyes: '✧ ✧', mouth: '◇', expression: 'excited', extras: '✨' }, // Lemon - sparkly
-  256:  { eyes: '◈ ◈', mouth: '○', expression: 'shocked', extras: '✨' }, // Grapefruit - wow
-  512:  { eyes: '❋ ❋', mouth: '◇', expression: 'excited', extras: '🔥' }, // Pomelo - fire
-  1024: { eyes: '☀ ☀', mouth: '◇', expression: 'excited', extras: '👑' }, // Golden - crowned
-  2048: { eyes: '🌟🌟', mouth: '◡◡', expression: 'happy', extras: '🍊👑' }, // THE ORANGE
+  2:    { eyes: '• •', mouth: '‿', expression: 'sleepy' },
+  4:    { eyes: '◦ ◦', mouth: '‿', expression: 'happy' },
+  8:    { eyes: '° °', mouth: '◡', expression: 'happy' },
+  16:   { eyes: '◉ ◉', mouth: '◡', expression: 'happy' },
+  32:   { eyes: '◉ ◉', mouth: '▽', expression: 'excited' },
+  64:   { eyes: '★ ★', mouth: '▽', expression: 'excited' },
+  128:  { eyes: '✧ ✧', mouth: '◇', expression: 'excited', extras: '✨' },
+  256:  { eyes: '◈ ◈', mouth: '○', expression: 'shocked', extras: '✨' },
+  512:  { eyes: '❋ ❋', mouth: '◇', expression: 'excited', extras: '🔥' },
+  1024: { eyes: '☀ ☀', mouth: '◇', expression: 'excited', extras: '👑' },
+  2048: { eyes: '🌟🌟', mouth: '◡◡', expression: 'happy', extras: '🍊👑' },
 };
 
-// TASK 40: Tile bios for character gallery
 const TILE_BIOS: Record<number, { name: string; bio: string }> = {
   2:    { name: 'Seed', bio: 'A tiny citrus seed, full of potential!' },
   4:    { name: 'Sprout', bio: 'Just waking up to the world.' },
@@ -165,6 +165,7 @@ const TILE_BIOS: Record<number, { name: string; bio: string }> = {
   1024: { name: 'Goldie', bio: 'Golden citrus royalty!' },
   2048: { name: 'THE ORANGE', bio: 'The legendary supreme citrus!' },
 };
+*/
 
 // Tile value to color mapping (citrus theme)
 const TILE_COLORS: Record<number, { background: string; text: string }> = {
@@ -545,7 +546,7 @@ const Merge2048Game: React.FC = () => {
   const [cameraZoom, setCameraZoom] = useState(1);
 
   // TASK 62: Impact flash state
-  const [impactFlash, setImpactFlash] = useState<{ x: number; y: number } | null>(null);
+  const [impactFlash, _setImpactFlash] = useState<{ x: number; y: number } | null>(null);
 
   // TASK 67: Danger level state
   const [dangerLevel, setDangerLevel] = useState<DangerLevel>('safe');
@@ -562,9 +563,9 @@ const Merge2048Game: React.FC = () => {
   const consecutiveMergesRef = useRef(0);
   const lastMergeTimeRef = useRef(0);
 
-  // TASK 126-138: Share system state
-  const [showShareModal, setShowShareModal] = useState(false);
-  const [shareImage, setShareImage] = useState<string | null>(null);
+  // TASK 126-138: Share system state - reserved for future share modal feature
+  // const [showShareModal, setShowShareModal] = useState(false);
+  // const [shareImage, setShareImage] = useState<string | null>(null);
   const [challengeTarget, setChallengeTarget] = useState<number | null>(null);
 
   // Game over screen state (FlappyOrange style)
@@ -591,7 +592,7 @@ const Merge2048Game: React.FC = () => {
   });
 
   // Audio hooks
-  const { playBlockLand, playPerfectBonus, playCombo, playWinSound, playGameOver, playClick, setMuted } = useHowlerSounds();
+  const { playBlockLand: _playBlockLand, playPerfectBonus: _playPerfectBonus, playCombo: _playCombo, playWinSound, playGameOver, playClick, setMuted } = useHowlerSounds();
 
   // Sync Howler mute state with arcade frame mute button
   useEffect(() => {
@@ -775,16 +776,6 @@ const Merge2048Game: React.FC = () => {
     return () => clearTimeout(timer);
   }, [tiles]);
 
-  /**
-   * Trigger haptic feedback (mobile devices) - LEGACY
-   */
-  const triggerHaptic = useCallback((pattern: 'light' | 'medium' | 'heavy' = 'light') => {
-    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-      const durations = { light: 10, medium: 25, heavy: 50 };
-      navigator.vibrate(durations[pattern]);
-    }
-  }, []);
-
   // ============================================================================
   // PHASE 2: PREMIUM HAPTIC FUNCTIONS
   // ============================================================================
@@ -832,13 +823,6 @@ const Merge2048Game: React.FC = () => {
     }
   }, []);
 
-  // TASK 26: Danger state pulse haptic
-  const triggerDangerPulse = useCallback(() => {
-    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-      navigator.vibrate(8);
-    }
-  }, []);
-
   // ============================================================================
   // PHASE 4: VISUAL JUICE EFFECTS FUNCTIONS
   // ============================================================================
@@ -856,134 +840,7 @@ const Merge2048Game: React.FC = () => {
     setTimeout(() => setCameraZoom(1), 150);
   }, []);
 
-  // TASK 62: Impact flash function
-  const triggerImpactFlash = useCallback((x: number, y: number) => {
-    setImpactFlash({ x, y });
-    setTimeout(() => setImpactFlash(null), 200);
-  }, []);
-
   // ============================================================================
-  // PHASE 10: VIRAL SHARE SYSTEM FUNCTIONS
-  // ============================================================================
-
-  // TASK 126: Generate share image
-  const generateShareImage = useCallback(async (finalScore: number, highestTile: number): Promise<string> => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 600;
-    canvas.height = 400;
-    const ctx = canvas.getContext('2d')!;
-
-    // Background gradient
-    const gradient = ctx.createLinearGradient(0, 0, 600, 400);
-    gradient.addColorStop(0, '#1a1a2e');
-    gradient.addColorStop(1, '#16213e');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, 600, 400);
-
-    // Title
-    ctx.fillStyle = '#ff6b00';
-    ctx.font = 'bold 42px -apple-system, BlinkMacSystemFont, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('2048 Citrus Edition', 300, 55);
-
-    // Score
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 72px -apple-system, BlinkMacSystemFont, sans-serif';
-    ctx.fillText(finalScore.toLocaleString(), 300, 150);
-    ctx.font = '20px -apple-system, BlinkMacSystemFont, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-    ctx.fillText('SCORE', 300, 180);
-
-    // Highest tile display
-    const tileColor = TILE_COLORS[highestTile]?.background || '#ff6b00';
-    ctx.fillStyle = tileColor;
-    ctx.beginPath();
-    ctx.roundRect(225, 210, 150, 90, 12);
-    ctx.fill();
-    ctx.fillStyle = TILE_COLORS[highestTile]?.text || '#f9f6f2';
-    ctx.font = 'bold 40px -apple-system, BlinkMacSystemFont, sans-serif';
-    ctx.fillText(highestTile.toString(), 300, 268);
-    ctx.font = '14px -apple-system, BlinkMacSystemFont, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-    ctx.fillText('HIGHEST TILE', 300, 320);
-
-    // Branding
-    ctx.fillStyle = '#ff6b00';
-    ctx.font = 'bold 18px -apple-system, BlinkMacSystemFont, sans-serif';
-    ctx.fillText('🍊 wojak.ink', 300, 375);
-
-    return canvas.toDataURL('image/png');
-  }, []);
-
-  // TASK 129: Encode/decode challenge
-  const encodeChallenge = useCallback((targetScore: number): string => {
-    return btoa(`${targetScore}-${Date.now()}`);
-  }, []);
-
-  const decodeChallenge = useCallback((encoded: string): { score: number; timestamp: number } | null => {
-    try {
-      const decoded = atob(encoded);
-      const [scoreStr, timestampStr] = decoded.split('-');
-      return { score: parseInt(scoreStr, 10), timestamp: parseInt(timestampStr, 10) };
-    } catch {
-      return null;
-    }
-  }, []);
-
-  // TASK 128: Native share handler
-  const handleNativeShare = useCallback(async () => {
-    const shareData = {
-      title: '2048 Citrus Edition',
-      text: `I scored ${score.toLocaleString()} in 2048 Citrus Edition! Can you beat it?`,
-      url: `${window.location.origin}${window.location.pathname}?challenge=${encodeChallenge(score)}`,
-    };
-
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-      } catch {
-        // User cancelled
-      }
-    } else {
-      // Fallback to copy
-      navigator.clipboard.writeText(shareData.url);
-    }
-  }, [score, encodeChallenge]);
-
-  // TASK 136: Copy to clipboard
-  const handleCopyLink = useCallback(() => {
-    const url = `${window.location.origin}${window.location.pathname}?challenge=${encodeChallenge(score)}`;
-    navigator.clipboard.writeText(url);
-  }, [score, encodeChallenge]);
-
-  // TASK 137: Download image
-  const handleDownloadImage = useCallback(() => {
-    if (!shareImage) return;
-    const link = document.createElement('a');
-    link.download = `2048-citrus-${score}.png`;
-    link.href = shareImage;
-    link.click();
-  }, [shareImage, score]);
-
-  // TASK 135: Generate text share (Wordle-style)
-  const generateTextShare = useCallback((): string => {
-    const tileEmoji = highestTileRef.current >= 2048 ? '🍊' :
-                      highestTileRef.current >= 1024 ? '🌟' :
-                      highestTileRef.current >= 512 ? '🔥' :
-                      highestTileRef.current >= 256 ? '✨' : '🟧';
-    return `2048 Citrus Edition ${tileEmoji}\n` +
-           `Score: ${score.toLocaleString()}\n` +
-           `Highest: ${highestTileRef.current}\n` +
-           `\n🍊 wojak.ink/games/2048-merge`;
-  }, [score]);
-
-  // TASK 127: Open share modal with generated image
-  const openShareModal = useCallback(async () => {
-    const image = await generateShareImage(score, highestTileRef.current);
-    setShareImage(image);
-    setShowShareModal(true);
-  }, [score, generateShareImage]);
-
   // ============================================================================
   // PHASE 7: NEXT TILE PREVIEW FUNCTIONS
   // ============================================================================
@@ -1015,12 +872,6 @@ const Merge2048Game: React.FC = () => {
       return { count: prev.count + 1, lastMergeTime: now, isActive: true };
     });
   }, [COMBO_TIMEOUT]);
-
-  // TASK 109: Get combo sound pitch multiplier
-  const getComboSoundPitch = useCallback((combo: number): number => {
-    const semitones = Math.min(combo - 1, 12);
-    return Math.pow(2, semitones / 12);
-  }, []);
 
   // TASK 110: Combo break sound
   const playComboBreak = useCallback(() => {
@@ -1241,25 +1092,6 @@ const Merge2048Game: React.FC = () => {
     osc.stop(ctx.currentTime + 0.4);
   }, [isMuted, getAudioContext]);
 
-  // TASK 89: Fever deactivation sound
-  const playFeverDeactivation = useCallback(() => {
-    if (isMuted) return;
-    const ctx = getAudioContext();
-    if (ctx.state === 'suspended') ctx.resume();
-
-    // Descending whoosh
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(600, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.3);
-    gain.gain.setValueAtTime(0.3, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
-    osc.connect(gain).connect(ctx.destination);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.35);
-  }, [isMuted, getAudioContext]);
-
   // TASK 82: Fever activation function
   const activateFeverMode = useCallback(() => {
     setFeverState({
@@ -1272,18 +1104,6 @@ const Merge2048Game: React.FC = () => {
     triggerConfetti();
     showEpicCallout('🔥 FEVER MODE! 🔥');
   }, [playFeverActivation, triggerConfetti, showEpicCallout]);
-
-  // TASK 82: Fever deactivation function
-  const deactivateFeverMode = useCallback(() => {
-    setFeverState({
-      active: false,
-      multiplier: 1,
-      intensity: 0,
-      startTime: 0,
-    });
-    playFeverDeactivation();
-  }, [playFeverDeactivation]);
-
 
   /**
    * Show score popup animation

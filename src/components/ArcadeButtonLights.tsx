@@ -119,16 +119,7 @@ export function ArcadeButtonLights({
   debug = false
 }: ArcadeButtonLightsProps) {
 
-  // Always log pattern to debug intro screen
-  console.log('[ArcadeButtonLights] pattern:', pattern, 'sequence:', sequence);
-  
-  if (debug) {
-    console.log('[ArcadeButtonLights DEBUG]', {
-      pattern,
-      sequence,
-      positions: BUTTON_POSITIONS
-    });
-  }
+  // Debug info removed
 
   // Handle completion callbacks for non-looping patterns/sequences
   useEffect(() => {

@@ -1,7 +1,6 @@
 /**
  * Wojak Runner - Migrated to Shared Systems
  */
-// @ts-nocheck
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useGameSounds } from '@/hooks/useGameSounds';
 import { useLeaderboard } from '@/hooks/data/useLeaderboard';
@@ -42,14 +41,14 @@ const WojakRunnerGame: React.FC = () => {
   const effects = useEffects();
 
   const {
-    leaderboard: globalLeaderboard,
+    leaderboard: _globalLeaderboard,
     submitScore,
     isSignedIn,
     userDisplayName,
     isSubmitting,
   } = useLeaderboard(WOJAK_RUNNER_CONFIG.leaderboardId || 'wojak-runner');
 
-  const { isBackgroundMusicPlaying, playBackgroundMusic, pauseBackgroundMusic } = useAudio();
+  const { isBackgroundMusicPlaying: _isBackgroundMusicPlaying, playBackgroundMusic: _playBackgroundMusic, pauseBackgroundMusic: _pauseBackgroundMusic } = useAudio();
 
   const [gameState, setGameState] = useState<'idle' | 'playing' | 'gameover'>('idle');
   const [playerLane, setPlayerLane] = useState(1);
@@ -69,8 +68,8 @@ const WojakRunnerGame: React.FC = () => {
   const [sadImage, setSadImage] = useState('');
   const [scoreSubmitted, setScoreSubmitted] = useState(false);
   const [isNewPersonalBest, setIsNewPersonalBest] = useState(false);
-  const [showLeaderboardPanel, setShowLeaderboardPanel] = useState(false);
-  const [showScreenShake, setShowScreenShake] = useState(false);
+  const [_showLeaderboardPanel, _setShowLeaderboardPanel] = useState(false);
+  const [showScreenShake, _setShowScreenShake] = useState(false);
 
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | undefined>(undefined);
@@ -168,14 +167,6 @@ const WojakRunnerGame: React.FC = () => {
       setIsNewPersonalBest(true);
     }
   }, [isSignedIn, scoreSubmitted, submitScore, highScore, distance]);
-
-  const displayLeaderboard = globalLeaderboard.length > 0
-    ? globalLeaderboard.map(entry => ({
-        name: entry.displayName,
-        score: entry.score,
-        date: entry.date,
-      }))
-    : localLeaderboard;
 
   // Game loop
   useEffect(() => {

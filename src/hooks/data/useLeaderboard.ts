@@ -10,7 +10,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
 import { useAuth } from '@clerk/clerk-react';
-import { leaderboardKeys, type GameId } from '@/config/query/queryKeys';
+import { leaderboardKeys } from '@/config/query/queryKeys';
 import { DATA_CACHE_MAP } from '@/config/query/cacheConfig';
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch';
 import { useUserProfile } from '@/contexts/UserProfileContext';
@@ -31,6 +31,8 @@ export interface LeaderboardEntry {
   score: number;
   level?: number;
   createdAt: string;
+  /** Alias for createdAt for backward compatibility */
+  date?: string;
   isCurrentUser?: boolean;
   equipped?: {
     nameEffect?: {
@@ -74,7 +76,7 @@ interface LeaderboardResponse {
  * Fetch leaderboard entries for a game
  */
 async function fetchLeaderboard(
-  gameId: GameId,
+  gameId: string,
   limit: number = 10,
   offset: number = 0
 ): Promise<LeaderboardResponse> {
@@ -92,7 +94,7 @@ async function fetchLeaderboard(
 /**
  * Hook for managing game leaderboard
  */
-export function useLeaderboard(gameId: GameId) {
+export function useLeaderboard(gameId: string) {
   const queryClient = useQueryClient();
   const { authenticatedFetch, isSignedIn, isLoaded: isAuthLoaded } = useAuthenticatedFetch();
   const { profile } = useUserProfile();

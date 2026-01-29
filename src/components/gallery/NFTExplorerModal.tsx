@@ -10,7 +10,6 @@ import { Minimize2 } from 'lucide-react';
 import { useGallery } from '@/hooks/useGallery';
 import { GALLERY_ANIMATIONS } from '@/config/galleryAnimations';
 import { usePrefersReducedMotion } from '@/hooks/useMediaQuery';
-import { useTheme } from '@/hooks/useTheme';
 import { ExplorerTopBar } from './ExplorerTopBar';
 import { FilterPills } from './FilterPills';
 import { SwipeableNFTImage } from './SwipeableNFTImage';
@@ -23,7 +22,6 @@ interface NFTExplorerModalProps {
 
 export function NFTExplorerModal({ isOpen, onClose }: NFTExplorerModalProps) {
   const prefersReducedMotion = usePrefersReducedMotion();
-  const { isDark } = useTheme();
   const [isImageExpanded, setIsImageExpanded] = useState(false);
 
   const {
@@ -110,7 +108,7 @@ export function NFTExplorerModal({ isOpen, onClose }: NFTExplorerModalProps) {
         <motion.div
           className="fixed inset-0 z-[100] flex flex-col"
           style={{
-            background: isDark ? 'rgba(0, 0, 0, 0.85)' : 'rgba(245, 245, 245, 0.95)',
+            background: 'rgba(0, 0, 0, 0.85)',
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
           }}
@@ -177,7 +175,7 @@ export function NFTExplorerModal({ isOpen, onClose }: NFTExplorerModalProps) {
         <motion.div
           className="fixed inset-0 flex items-center justify-center z-[200]"
           style={{
-            background: isDark ? 'rgba(0, 0, 0, 0.95)' : 'rgba(245, 245, 245, 0.98)',
+            background: 'rgba(0, 0, 0, 0.95)',
             cursor: 'zoom-out',
           }}
           onClick={() => setIsImageExpanded(false)}

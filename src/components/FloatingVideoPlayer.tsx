@@ -1,7 +1,5 @@
-// @ts-nocheck
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { IonIcon } from '@ionic/react';
-import { chevronForward, chevronBack } from 'ionicons/icons';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
 import './FloatingVideoPlayer.css';
 
 interface FloatingVideoPlayerProps {
@@ -458,7 +456,7 @@ const FloatingVideoPlayer: React.FC<FloatingVideoPlayerProps> = ({
             }
           }}
         >
-          <IonIcon icon={isOnRightSide ? chevronBack : chevronForward} className="expand-icon" />
+          {isOnRightSide ? <ChevronLeft className="expand-icon" size={20} /> : <ChevronRight className="expand-icon" size={20} />}
           <div className="mini-title">{isPlaying ? '▶' : '⏸'}</div>
         </div>
       )}

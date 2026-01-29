@@ -103,7 +103,6 @@ export function ProfileHeader({
         walletAddress: address,
       });
 
-      console.log('[ProfileHeader] NFT count updated:', count);
     } catch (err) {
       console.error('[ProfileHeader] Error fetching NFTs:', err);
       setWalletError('Failed to fetch NFTs');
@@ -126,7 +125,6 @@ export function ProfileHeader({
       prevAddress !== address &&
       (profile?.walletAddress !== address || !hasVerified)
     ) {
-      console.log('[ProfileHeader] Wallet connected, auto-fetching NFTs');
       refreshNftCount();
     }
   }, [walletConnected, address, profile?.walletAddress, hasVerified, refreshNftCount]);

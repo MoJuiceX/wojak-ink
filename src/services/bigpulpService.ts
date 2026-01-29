@@ -567,16 +567,6 @@ function calculateDynamicPriceBins(prices: number[]): { boundaries: number[]; la
     return `${minStr}-${maxStr}`;
   });
 
-  console.log('[HeatMap] Dynamic price bins calculated:', {
-    floor: floor.toFixed(2),
-    p90: p90.toFixed(2),
-    rawIncrement: rawIncrement.toFixed(2),
-    increment,
-    boundaries: boundaries.slice(0, -1),
-    labels,
-    totalListings: n,
-  });
-
   return { boundaries, labels };
 }
 

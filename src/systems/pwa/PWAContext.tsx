@@ -62,7 +62,6 @@ export const PWAProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setInstallPromptEvent(e as BeforeInstallPromptEvent);
-      console.log('PWA install prompt captured');
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -77,7 +76,6 @@ export const PWAProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const handleAppInstalled = () => {
       setIsInstalled(true);
       setInstallPromptEvent(null);
-      console.log('PWA was installed');
 
       // Track installation
       if (typeof localStorage !== 'undefined') {
@@ -116,7 +114,6 @@ export const PWAProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Trigger the install prompt
   const promptInstall = useCallback(async (): Promise<boolean> => {
     if (!installPromptEvent) {
-      console.log('No install prompt available');
       return false;
     }
 
@@ -124,7 +121,6 @@ export const PWAProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       await installPromptEvent.prompt();
       const { outcome } = await installPromptEvent.userChoice;
 
-      console.log(`User ${outcome} the install prompt`);
 
       if (outcome === 'accepted') {
         setIsInstalled(true);

@@ -79,7 +79,6 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     }
 
     initializingRef.current = true;
-    console.log('[SageWallet] Initializing...');
 
     try {
       // Initialize SignClient
@@ -109,7 +108,6 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
       }
 
       setState(prev => ({ ...prev, isInitialized: true }));
-      console.log('[SageWallet] Initialized successfully');
     } catch (error) {
       console.error('[SageWallet] Initialization failed:', error);
       setState(prev => ({
@@ -132,18 +130,15 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     if (!client) return;
 
     client.on('session_delete', () => {
-      console.log('[SageWallet] Session deleted');
       handleDisconnect();
     });
 
     client.on('session_update', async () => {
-      console.log('[SageWallet] Session updated');
       if (currentSessionRef.current) {
         await updateAddressFromWallet();
       }
     });
 
-    console.log('[SageWallet] Event listeners set up');
   }, []);
 
   // ============================================================================
@@ -156,7 +151,6 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
 
     try {
       const sessions = client.session.getAll();
-      console.log('[SageWallet] Found existing sessions:', sessions.length);
 
       if (sessions.length > 0) {
         const lastSession = sessions[sessions.length - 1];
@@ -170,9 +164,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
         try {
           await Promise.race([updateAddressFromWallet(), timeoutPromise]);
           setState(prev => ({ ...prev, status: 'connected' }));
-          console.log('[SageWallet] Session restored');
         } catch (error) {
-          console.log('[SageWallet] Session stale, clearing:', error);
           currentSessionRef.current = null;
           setState(prev => ({ ...prev, address: '' }));
         }
@@ -190,7 +182,6 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
       throw new Error('No active session');
     }
 
-    console.log('[SageWallet] Fetching address via chia_getAddress...');
 
     const result = await client.request({
       topic: session.topic,
@@ -234,11 +225,9 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     // Callback
     config.onConnect?.(address);
     
-    console.log('[SageWallet] Address set:', address);
   }, [config.storageKey, config.onConnect]);
 
   const handleDisconnect = useCallback(() => {
-    console.log('[SageWallet] Handling disconnect');
     currentSessionRef.current = null;
     localStorage.removeItem(config.storageKey);
     
@@ -267,13 +256,11 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
 
     // Already connected?
     if (state.address && state.status === 'connected') {
-      console.log('[SageWallet] Already connected:', state.address);
       return;
     }
 
     try {
       setState(prev => ({ ...prev, status: 'connecting', error: null }));
-      console.log('[SageWallet] Starting connection...');
 
       // Required Chia namespace
       const requiredNamespaces: Record<string, ProposalTypes.RequiredNamespace> = {
@@ -294,7 +281,6 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
       const { uri, approval } = await client.connect({ requiredNamespaces });
 
       if (uri && modal) {
-        console.log('[SageWallet] Opening modal...');
         await modal.openModal({ uri });
 
         // Wait for approval
@@ -304,7 +290,6 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
         modal.closeModal();
 
         currentSessionRef.current = session;
-        console.log('[SageWallet] Session established:', session.topic);
 
         // Get address
         await updateAddressFromWallet();
@@ -331,7 +316,6 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
   }, [state.address, state.status, updateAddressFromWallet, config.onError]);
 
   const disconnect = useCallback(async (): Promise<void> => {
-    console.log('[SageWallet] Disconnecting...');
 
     try {
       const client = signClientRef.current;
@@ -358,7 +342,6 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
       throw new Error('No active Sage wallet session');
     }
 
-    console.log('[SageWallet] Signing message...');
 
     const result = await client.request({
       topic: session.topic,
@@ -373,7 +356,6 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     });
 
     const typedResult = result as { signature: string; publicKey: string };
-    console.log('[SageWallet] Message signed');
 
     return {
       signature: typedResult.signature,
@@ -412,7 +394,6 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
       throw new Error('No active Sage wallet session');
     }
 
-    console.log('[SageWallet] Taking offer...');
 
     const result = await client.request({
       topic: session.topic,
@@ -423,7 +404,6 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
       },
     });
 
-    console.log('[SageWallet] Offer taken');
     return result;
   }, []);
 
@@ -438,7 +418,6 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
       return false;
     }
 
-    console.log('[SageWallet] Checking NFTs for collection:', collectionId);
 
     try {
       const response = await fetch(
@@ -452,7 +431,6 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
       const data: MintGardenResponse = await response.json();
       const hasNfts = data.items && data.items.length > 0;
 
-      console.log(`[SageWallet] NFT check: ${hasNfts ? 'PASSED' : 'FAILED'} (${data.items?.length || 0} found)`);
       return hasNfts;
     } catch (error) {
       console.error('[SageWallet] NFT check error:', error);

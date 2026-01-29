@@ -10,7 +10,6 @@ import { PageTransition } from '@/components/layout/PageTransition';
 import { useLayout } from '@/hooks/useLayout';
 import { useSettings } from '@/contexts/SettingsContext';
 import {
-  ThemeSelector,
   AudioSettings,
   AboutSection,
 } from '@/components/settings';
@@ -90,7 +89,6 @@ export default function Settings() {
   const prefersReducedMotion = useReducedMotion();
   const {
     settings,
-    setTheme,
     setBackgroundMusicVolume,
     toggleBackgroundMusic,
     setSoundEffectsVolume,
@@ -110,22 +108,10 @@ export default function Settings() {
           className="space-y-8 pb-24"
           style={{ maxWidth: isDesktop ? '1000px' : undefined, margin: '0 auto' }}
         >
-          {/* Desktop: Full-width themes, audio below */}
+          {/* Desktop layout */}
           {isDesktop ? (
             <div className="space-y-8">
-              {/* Theme Selection - Full width */}
-              <ThemeSelector
-                selectedTheme={settings.theme.selected}
-                onThemeChange={setTheme}
-              />
-
-              {/* Divider */}
-              <div
-                className="h-px"
-                style={{ background: 'var(--color-border)' }}
-              />
-
-              {/* Audio - Below themes */}
+              {/* Audio */}
               <AudioSettings
                 audio={settings.audio}
                 onMusicVolumeChange={setBackgroundMusicVolume}
@@ -146,18 +132,6 @@ export default function Settings() {
           ) : (
             /* Mobile: Single column layout */
             <>
-              {/* Theme Selection */}
-              <ThemeSelector
-                selectedTheme={settings.theme.selected}
-                onThemeChange={setTheme}
-              />
-
-              {/* Divider */}
-              <div
-                className="h-px"
-                style={{ background: 'var(--color-border)' }}
-              />
-
               {/* Audio */}
               <AudioSettings
                 audio={settings.audio}

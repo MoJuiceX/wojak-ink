@@ -4,7 +4,6 @@
  * For the initial migration, this file re-exports the original game
  * wrapped with GameShell for effects. Full migration can be done later.
  */
-// @ts-nocheck
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAudio } from '@/contexts/AudioContext';
 import { useLeaderboard } from '@/hooks/data/useLeaderboard';
@@ -16,15 +15,9 @@ import {
   PADDLE_COLLISION_RADIUS,
   ORANGE_SIZE,
   POWERUP_SIZE,
-  GRAVITY,
   HIT_VELOCITY,
-  BANANA_SPEEDS,
-  RUM_SPEEDS,
-  POWERUP_FALL_SPEED,
-  RUMS_FOR_REVERSE,
   COMBO_DECAY_TIME,
   LEVEL_CONFIG,
-  CAMEL_SIZE,
   CAMEL_SPAWN_INTERVAL,
 } from './config';
 import './OrangeJuggle.game.css';
@@ -41,7 +34,7 @@ const SAD_IMAGES = [
 // Sound effect for bouncing
 const createBounceSound = () => {
   try {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     return () => {
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
@@ -86,10 +79,10 @@ type GameState = 'menu' | 'playing' | 'levelComplete' | 'saveScore';
 
 const OrangeJuggleGame: React.FC = () => {
   const effects = useEffects();
-  const { isSoundEffectsEnabled, isBackgroundMusicPlaying, playBackgroundMusic, pauseBackgroundMusic } = useAudio();
+  const { isSoundEffectsEnabled, isBackgroundMusicPlaying: _isBackgroundMusicPlaying, playBackgroundMusic: _playBackgroundMusic, pauseBackgroundMusic: _pauseBackgroundMusic } = useAudio();
 
   const {
-    leaderboard: globalLeaderboard,
+    leaderboard: _globalLeaderboard,
     submitScore,
     isSignedIn,
     userDisplayName,
@@ -120,17 +113,17 @@ const OrangeJuggleGame: React.FC = () => {
   const [playerName, setPlayerName] = useState('');
   const [scoreSubmitted, setScoreSubmitted] = useState(false);
   const [isNewPersonalBest, setIsNewPersonalBest] = useState(false);
-  const [showLeaderboardPanel, setShowLeaderboardPanel] = useState(false);
+  const [_showLeaderboardPanel, _setShowLeaderboardPanel] = useState(false);
 
   const [objects, setObjects] = useState<GameObject[]>([]);
   const [paddleX, setPaddleX] = useState(0);
   const [paddleY, setPaddleY] = useState(0);
 
   const [speedModifier, setSpeedModifier] = useState(1);
-  const [activePowerup, setActivePowerup] = useState<'banana' | 'rum' | null>(null);
+  const [_activePowerup, setActivePowerup] = useState<'banana' | 'rum' | null>(null);
   const [isReversed, setIsReversed] = useState(false);
-  const [rumCount, setRumCount] = useState(0);
-  const [bananaCount, setBananaCount] = useState(0);
+  const [_rumCount, setRumCount] = useState(0);
+  const [_bananaCount, setBananaCount] = useState(0);
 
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | undefined>(undefined);
@@ -158,7 +151,7 @@ const OrangeJuggleGame: React.FC = () => {
     }
   }, []);
 
-  const startGame = (mode: string) => {
+  const startGame = (_mode: string) => {
     setLevel(1);
     setScore(0);
     scoreRef.current = 0;
@@ -449,10 +442,6 @@ const OrangeJuggleGame: React.FC = () => {
       gameArea.removeEventListener('touchmove', handleTouchMove);
     };
   }, [gameState]);
-
-  const displayLeaderboard = globalLeaderboard.length > 0
-    ? globalLeaderboard.map(e => ({ name: e.displayName, score: e.score, level: e.level || 1, date: e.date }))
-    : localLeaderboard;
 
   return (
     <div className="juggle-container">

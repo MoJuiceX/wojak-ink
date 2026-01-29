@@ -1191,7 +1191,6 @@ const OrangeJuggle: React.FC = () => {
         completed: finalLevel >= 5,
       });
       if (result.success) {
-        console.log('[OrangeJuggle] Score submitted:', result);
         if (result.isNewHighScore) {
           setIsNewPersonalBest(true);
         }

@@ -170,13 +170,6 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
 
         const needsOnboarding = !profile?.displayName;
 
-        console.log('[UserProfile] Profile loaded from API:', {
-          hasProfile: !!profile,
-          displayName: profile?.displayName,
-          needsOnboarding,
-          isAdmin: data.isAdmin,
-        });
-
         setState(s => ({
           ...s,
           profile,
@@ -191,7 +184,6 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
     } catch (error) {
       // Ignore AbortError - these are expected when component unmounts or request times out
       if (error instanceof Error && error.name === 'AbortError') {
-        console.log('[UserProfile] API timeout, falling back to localStorage');
       } else {
         console.error('[UserProfile] API error, falling back to localStorage:', error);
       }
@@ -203,7 +195,6 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
     // Auto-assign random emoji if no avatar exists
     if (!storedProfile?.avatar?.value) {
       const randomAvatar = createDefaultAvatar();
-      console.log('[UserProfile] Assigning random emoji:', randomAvatar.value);
 
       storedProfile = {
         displayName: storedProfile?.displayName || null,
@@ -225,12 +216,6 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
     }
 
     const needsOnboarding = !storedProfile?.displayName;
-
-    console.log('[UserProfile] Using localStorage profile:', {
-      hasProfile: !!storedProfile,
-      displayName: storedProfile?.displayName,
-      avatar: storedProfile?.avatar?.value,
-    });
 
     setState(s => ({
       ...s,
@@ -267,11 +252,9 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
   // Update profile (API with localStorage fallback)
   const updateProfile = useCallback(async (data: Partial<UserProfile>): Promise<boolean> => {
     if (!isSignedIn) {
-      console.log('[UserProfile] Not signed in, cannot update profile');
       return false;
     }
 
-    console.log('[UserProfile] Updating profile with data:', data);
 
     try {
       // Try API first with timeout (increased to 10s for reliability)
@@ -286,8 +269,6 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
 
       if (response.ok) {
         const result = await response.json();
-        console.log('[UserProfile] API update successful:', result);
-        console.log('[UserProfile] Avatar in response:', result.profile?.avatar);
         // Also save to localStorage
         if (result.profile) {
           saveProfileToStorage(result.profile);
@@ -311,7 +292,6 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
     }
 
     // Fallback: update localStorage directly (only for network/timeout errors)
-    console.log('[UserProfile] Using localStorage fallback');
     const currentProfile = state.profile || {
       displayName: null,
       xHandle: null,
@@ -341,7 +321,6 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
       needsOnboarding: !updatedProfile.displayName,
     }));
 
-    console.log('[UserProfile] Profile saved to localStorage:', updatedProfile);
     return true;
   }, [isSignedIn, authenticatedFetch, state.profile, saveProfileToStorage]);
 
@@ -353,7 +332,6 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
   // Refresh owned NFTs from wallet - stub for now, NFTPicker handles this directly
   const refreshOwnedNfts = useCallback(async () => {
     // NFT refresh is handled by the NFTPicker component which has access to useSageWallet
-    console.log('[UserProfile] refreshOwnedNfts called - handled by NFTPicker');
   }, []);
 
   // Computed effective display name (NEVER returns "Anonymous")

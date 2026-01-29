@@ -104,7 +104,6 @@ class SoundManagerClass {
       // Preload all sounds
       await this.preloadSounds();
       this.isInitialized = true;
-      console.log('🔊 Sound system initialized');
 
       // Play any sounds that were requested before initialization
       this.pendingSounds.forEach(({ name, volume }) => this.play(name, volume));

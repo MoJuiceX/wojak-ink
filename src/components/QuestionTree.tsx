@@ -1,10 +1,5 @@
-// @ts-nocheck
 import { useState, useEffect, useMemo } from 'react';
-import {
-  IonSearchbar,
-  IonSpinner,
-  IonImg
-} from '@ionic/react';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { getNftImageUrl } from '../services/marketApi';
 import './QuestionTree.css';
 
@@ -137,7 +132,7 @@ const QuestionTree: React.FC<QuestionTreeProps> = ({ onNftClick }) => {
   if (loading) {
     return (
       <div className="qt-loading">
-        <IonSpinner name="crescent" />
+        <LoadingSpinner />
         <p>Loading questions...</p>
       </div>
     );
@@ -182,7 +177,7 @@ const QuestionTree: React.FC<QuestionTreeProps> = ({ onNftClick }) => {
                   className="qt-nft-preview-card"
                   onClick={() => onNftClick?.(id)}
                 >
-                  <IonImg
+                  <img
                     src={getNftImageUrl(id)}
                     alt={`NFT #${id}`}
                     className="qt-nft-preview-img"
@@ -201,14 +196,15 @@ const QuestionTree: React.FC<QuestionTreeProps> = ({ onNftClick }) => {
   return (
     <div className="question-tree">
       {/* Search */}
-      <IonSearchbar
+      <input
+        type="text"
+        className="input qt-search"
         placeholder="Search questions..."
         value={searchQuery}
-        onIonInput={(e) => {
-          setSearchQuery(e.detail.value || '');
+        onChange={(e) => {
+          setSearchQuery(e.target.value);
           setSelectedCategory(null);
         }}
-        className="qt-search"
       />
 
       {/* Categories */}

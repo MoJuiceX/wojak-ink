@@ -80,7 +80,6 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
       try {
         const nfts = await getNFTs(WOJAK_COLLECTION_ID);
         setNftCount(nfts.length);
-        console.log('[OnboardingModal] Found', nfts.length, 'Wojak Farmer NFTs');
       } catch (error) {
         console.error('[OnboardingModal] NFT fetch error:', error);
         setNftCount(0);

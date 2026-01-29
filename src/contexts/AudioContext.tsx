@@ -1,5 +1,4 @@
-// @ts-nocheck
-import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, type ReactNode } from 'react';
 import { useSettings } from './SettingsContext';
 import { SoundManager } from '@/systems/audio/SoundManager';
 import type { SoundName } from '@/systems/audio/sounds';
@@ -91,8 +90,7 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
       bgMusicRef.current.src = currentTrack;
 
       if (wasPlaying && isBackgroundMusicEnabled) {
-        bgMusicRef.current.play().catch(err => {
-          console.log('Auto-play prevented:', err);
+        bgMusicRef.current.play().catch(_err => {
         });
       }
     }
@@ -117,8 +115,7 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
       .then(() => {
         setIsBackgroundMusicPlaying(true);
       })
-      .catch(err => {
-        console.log('Failed to play background music:', err);
+      .catch(_err => {
       });
   };
 
@@ -185,8 +182,7 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
     // Update volume and play
     audio.volume = sfxVolume;
     audio.currentTime = 0;
-    audio.play().catch(err => {
-      console.log(`Failed to play sound ${soundId}:`, err);
+    audio.play().catch(_err => {
     });
   };
 

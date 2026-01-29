@@ -1,8 +1,6 @@
-// @ts-nocheck
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IonIcon } from '@ionic/react';
-import { arrowBack } from 'ionicons/icons';
+import { ArrowLeft } from 'lucide-react';
 import { useGameSounds } from '@/hooks/useGameSounds';
 import { useGameHaptics } from '@/systems/haptics';
 import { useLeaderboard } from '@/hooks/data/useLeaderboard';
@@ -30,8 +28,6 @@ import {
   PHYSICS,
   JUICE_CONFIG,
   WEATHER_CONFIG,
-  ENVIRONMENT_COLORS,
-  WEATHER_SEQUENCES,
   CYCLE_DURATION_MS,
   BIRD_RADIUS,
   PIPE_WIDTH,
@@ -43,7 +39,6 @@ import {
   BARE_BONES_MODE,
   USE_MESSAGE_CHANNEL_LOOP,
   DEBUG_OVERLAY,
-  type WeatherType,
 } from './games/flappy-orange/config';
 import type {
   Bird,
@@ -74,10 +69,8 @@ import {
   addParticles,
 } from './games/flappy-orange/particles';
 import {
-  createRainDrops,
   updateRainDrops,
   updateRainSplashes,
-  addRainDropsWithCap,
   createSnowflakes,
   updateSnowflakes as updateSnowflakesPure,
   addSnowflakes,
@@ -87,10 +80,8 @@ import {
   updateBackgroundBirds as updateBackgroundBirdsPure,
   canSpawnBirdFlock,
   // Weather state machine functions
-  getTimeOfDayPhase as getTimeOfDayPhasePure,
   updateWeatherStateMachine,
   updateSnowAccumulation,
-  setWeatherTypeDirect,
   // Lightning functions
   generateLightningBolt as generateLightningBoltPure,
   updateLightningBolts as updateLightningBoltsPure,
@@ -170,8 +161,6 @@ import {
   processScore,
   calculateNextTarget,
   getStoredHighScore,
-  saveHighScore,
-  isNewPersonalBest,
   captureGameScreenshot,
   handleGameOverScore,
 } from './games/flappy-orange/scoring';
@@ -204,9 +193,9 @@ const FlappyOrange: React.FC = () => {
     triggerEvent,
     setGameId,
     // Legacy methods kept for backward compatibility
-    setSequence: setLightSequence,
-    triggerPipePass,
-    triggerCoinCollect,
+    setSequence: _setLightSequence,
+    triggerPipePass: _triggerPipePass,
+    triggerCoinCollect: _triggerCoinCollect,
     clearCombo: clearLightCombo,
   } = useArcadeLights();
 
@@ -897,24 +886,6 @@ const FlappyOrange: React.FC = () => {
     snowAccumulationRef.current = snowResult.snowAccumulation;
     snowGroundEdgeRef.current = snowResult.snowGroundEdge;
   }, [CANVAS_WIDTH]);
-
-  // Debug: Manually set weather type - wrapper for pure function
-  const setWeatherType = useCallback((type: WeatherType) => {
-    setWeatherTypeDirect(weatherRef.current, type);
-    lightningBoltsRef.current = [];
-  }, []);
-
-  // Debug: Toggle fog overlay
-  const toggleFog = useCallback(() => {
-    const weather = weatherRef.current;
-    if (weather.fogIntensity > 0 || fogTimerRef.current > 0) {
-      // Turn off fog
-      fogTimerRef.current = 0;
-    } else {
-      // Turn on fog for 15 seconds
-      fogTimerRef.current = 15000;
-    }
-  }, []);
 
   // Spawn snowflakes - uses pure function from weather module
   const spawnSnowflakes = useCallback((count: number, staggerY: boolean = false) => {
@@ -1935,7 +1906,7 @@ const FlappyOrange: React.FC = () => {
         onClick={(e) => { e.stopPropagation(); navigate('/games'); }}
         aria-label="Back to games"
       >
-        <IonIcon icon={arrowBack} />
+        <ArrowLeft size={24} />
       </button>
 
       {/* Debug: Music track switcher */}

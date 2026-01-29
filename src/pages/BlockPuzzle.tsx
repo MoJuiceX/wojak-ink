@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IonIcon } from '@ionic/react';
-import { pause, play } from 'ionicons/icons';
+import { Pause, Play } from 'lucide-react';
 import { useGameSounds } from '@/hooks/useGameSounds';
 import { useGameHaptics } from '@/systems/haptics';
 import { useLeaderboard } from '@/hooks/data/useLeaderboard';
@@ -1614,7 +1613,7 @@ const BlockPuzzle: React.FC = () => {
           onClick={togglePause}
           aria-label={isPaused ? 'Resume game' : 'Pause game'}
         >
-          <IonIcon icon={isPaused ? play : pause} />
+          {isPaused ? <Play size={24} /> : <Pause size={24} />}
         </button>
       )}
 

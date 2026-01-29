@@ -192,8 +192,7 @@ export function MarketTab({
   const [visualizationType, setVisualizationType] =
     useState<VisualizationType>('heatmap');
 
-  const handleCellClick = useCallback((cell: HeatMapCell) => {
-    console.log('Cell clicked:', cell);
+  const handleCellClick = useCallback((_cell: HeatMapCell) => {
     // TODO: Open cell detail modal
   }, []);
 

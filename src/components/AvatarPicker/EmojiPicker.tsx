@@ -23,7 +23,6 @@ export function EmojiPicker({ selectedEmoji, onSelect }: EmojiPickerProps) {
             type="button"
             className={`emoji-option ${selectedEmoji === emoji ? 'selected' : ''}`}
             onClick={() => {
-              console.log('[EmojiPicker] Clicked:', emoji);
               onSelect(emoji);
             }}
           >

@@ -22,7 +22,6 @@ const isLocalhost = Boolean(
 export function register(config?: Config): void {
   // Skip service worker in development mode to prevent stale cache issues
   if (import.meta.env.DEV) {
-    console.log('[SW] Skipping service worker in development mode');
     return;
   }
 
@@ -37,7 +36,6 @@ export function register(config?: Config): void {
       // Running on localhost - check if SW exists
       checkValidServiceWorker(swUrl, config);
       navigator.serviceWorker.ready.then(() => {
-        console.log('This app is being served cache-first by a service worker.');
       });
     } else {
       // Not localhost - register SW
@@ -47,12 +45,10 @@ export function register(config?: Config): void {
 
   // Listen for online/offline events
   window.addEventListener('online', () => {
-    console.log('Back online');
     config?.onOnline?.();
   });
 
   window.addEventListener('offline', () => {
-    console.log('Gone offline');
     config?.onOffline?.();
   });
 }
@@ -69,11 +65,9 @@ function registerValidSW(swUrl: string, config?: Config): void {
           if (installingWorker.state === 'installed') {
             if (navigator.serviceWorker.controller) {
               // New content available
-              console.log('New content is available; please refresh.');
               config?.onUpdate?.(registration);
             } else {
               // Content cached for offline use
-              console.log('Content is cached for offline use.');
               config?.onSuccess?.(registration);
             }
           }
@@ -104,7 +98,6 @@ function checkValidServiceWorker(swUrl: string, config?: Config): void {
       }
     })
     .catch(() => {
-      console.log('No internet connection found. App is running in offline mode.');
     });
 }
 

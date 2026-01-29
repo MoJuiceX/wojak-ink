@@ -1,15 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  IonContent,
-  IonHeader,
-  IonPage,
-  IonTitle,
-  IonToolbar,
-  IonButton,
-  IonIcon,
-  IonButtons,
-} from '@ionic/react';
-import { informationCircleOutline, close } from 'ionicons/icons';
+import { Info, X } from 'lucide-react';
 import { useLeaderboard } from '@/hooks/data/useLeaderboard';
 import { useAudio } from '@/contexts/AudioContext';
 import { ArcadeGameOverScreen } from '@/components/media/games/ArcadeGameOverScreen';
@@ -549,7 +539,6 @@ const Game: React.FC = () => {
         completed: finalLevel >= 3,
       });
       if (result.success) {
-        console.log('[OrangeSlice] Score submitted:', result);
         if (result.isNewHighScore) {
           setIsNewPersonalBest(true);
         }
@@ -577,18 +566,16 @@ const Game: React.FC = () => {
   }, [gameState, isSignedIn, score, level, scoreSubmitted, submitScoreGlobal]);
 
   return (
-    <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot="start">
-            <IonButton onClick={() => setShowInfo(true)}>
-              <IonIcon icon={informationCircleOutline} />
-            </IonButton>
-          </IonButtons>
-          <IonTitle>Orange Slice</IonTitle>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent fullscreen className="game-content" scrollY={false}>
+    <div className="game-page">
+      <header className="game-header">
+        <div className="game-toolbar">
+          <button className="btn btn-ghost" onClick={() => setShowInfo(true)}>
+            <Info size={20} />
+          </button>
+          <h1 className="game-header-title">Orange Slice</h1>
+        </div>
+      </header>
+      <div className="game-content">
         {/* Score HUD */}
         {gameState === 'playing' && (
           <div className="game-hud">
@@ -643,9 +630,9 @@ const Game: React.FC = () => {
                 {highScore > 0 && (
                   <p className="high-score">High Score: {highScore}</p>
                 )}
-                <IonButton onClick={startGame} className="play-btn">
+                <button onClick={startGame} className="btn btn-primary play-btn">
                   Play
-                </IonButton>
+                </button>
               </div>
               <div className="menu-right">
                 <div className="leaderboard">
@@ -685,9 +672,9 @@ const Game: React.FC = () => {
                   <p className="level-hint">Golden oranges! &#x1F31F; (3x points)</p>
                 )}
               </div>
-              <IonButton onClick={nextLevel} className="play-btn">
+              <button onClick={nextLevel} className="btn btn-primary play-btn">
                 Next Level
-              </IonButton>
+              </button>
             </div>
           )}
 
@@ -755,7 +742,7 @@ const Game: React.FC = () => {
           <div className="info-overlay" onClick={() => setShowInfo(false)}>
             <div className="info-modal" onClick={(e) => e.stopPropagation()}>
               <button className="info-close" onClick={() => setShowInfo(false)}>
-                <IonIcon icon={close} />
+                <X size={24} />
               </button>
               <h2>How to Play</h2>
               <div className="info-content">
@@ -772,8 +759,8 @@ const Game: React.FC = () => {
             </div>
           </div>
         )}
-      </IonContent>
-    </IonPage>
+      </div>
+    </div>
   );
 };
 

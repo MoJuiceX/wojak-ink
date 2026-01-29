@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Mobile Utilities
  * Touch handling, device detection, and mobile-specific helpers
@@ -310,8 +309,8 @@ export const lockOrientation = async (
   orientation: 'portrait' | 'landscape'
 ): Promise<boolean> => {
   try {
-    if (screen.orientation && screen.orientation.lock) {
-      await screen.orientation.lock(
+    if (screen.orientation && (screen.orientation as any).lock) {
+      await (screen.orientation as any).lock(
         orientation === 'portrait' ? 'portrait-primary' : 'landscape-primary'
       );
       return true;

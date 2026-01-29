@@ -162,7 +162,6 @@ async function fetchDexieTrades(maxPages = 50): Promise<NFTTrade[]> {
   const trades: NFTTrade[] = [];
   let page = 1;
 
-  console.log('[SalesAPI] Fetching trades from Dexie...');
 
   try {
     while (page <= maxPages) {
@@ -207,12 +206,10 @@ async function fetchDexieTrades(maxPages = 50): Promise<NFTTrade[]> {
         }
       }
 
-      console.log(`[SalesAPI] Page ${page}: Found ${offers.length} offers, ${trades.length} valid trades so far`);
 
       page++;
     }
 
-    console.log(`[SalesAPI] Total trades fetched: ${trades.length}`);
   } catch (error) {
     console.error('[SalesAPI] Dexie error:', error);
   }
@@ -372,7 +369,6 @@ export async function fetchSalesIndex(forceRefresh = false): Promise<SalesIndexR
 
   // Start loading
   salesCache.loading = (async () => {
-    console.log('[SalesAPI] Building sales index...');
 
     // Fetch trades and metadata in parallel
     const [trades, metadata] = await Promise.all([
@@ -406,7 +402,6 @@ export async function fetchSalesIndex(forceRefresh = false): Promise<SalesIndexR
     salesCache.loading = null;
     saveSalesToCache(result);
 
-    console.log(`[SalesAPI] Index built: ${trades.length} trades, ${byTrait.size} trait entries`);
 
     return result;
   })();

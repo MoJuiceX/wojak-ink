@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * TraitValues Component
  * Displays trait trade statistics in a sortable table
@@ -6,38 +5,30 @@
  */
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import {
-  IonSpinner,
-  IonSearchbar,
-  IonSelect,
-  IonSelectOption,
-  IonRefresher,
-  IonRefresherContent,
-  RefresherEventDetail,
-} from '@ionic/react';
+import { Search } from 'lucide-react';
 import {
   fetchTradeValues,
   fetchTraitSales,
   formatRelativeTime,
   formatXCH,
-  TraitStats,
-  Sale,
+  type TraitStats,
+  type Sale,
 } from '../services/tradeValuesService';
 import { getCachedXchPrice } from '../services/treasuryApi';
+import { LoadingSpinner, LoadingDots } from './ui/LoadingSpinner';
+import { Dropdown } from './ui/Dropdown';
 import './TraitValues.css';
 
 type SortField = 'trait_name' | 'trait_category' | 'total_sales' | 'average_xch' | 'min_xch' | 'max_xch' | 'last_trade';
 type SortDirection = 'asc' | 'desc';
 type SalesSortMode = 'price_asc' | 'price_desc' | 'rarity_asc' | 'rarity_desc' | 'time_asc' | 'time_desc';
 
-// IPFS gateway for NFT images
 const IPFS_CID = 'bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq';
 const getIpfsUrl = (edition: number) => {
   const paddedId = String(edition).padStart(4, '0');
   return `https://${IPFS_CID}.ipfs.w3s.link/${paddedId}.png`;
 };
 
-// Capitalize each word in a string
 const capitalizeCategory = (str: string): string => {
   return str
     .replace(/_/g, ' ')
@@ -57,32 +48,24 @@ const TraitValues: React.FC<TraitValuesProps> = ({ onTraitClick }) => {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [totalSalesCount, setTotalSalesCount] = useState(0);
 
-  // Sorting
   const [sortField, setSortField] = useState<SortField>('average_xch');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-
-  // Filtering
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Selected trait for detail
   const [selectedTrait, setSelectedTrait] = useState<TraitStats | null>(null);
   const [selectedTraitSales, setSelectedTraitSales] = useState<Sale[]>([]);
   const [loadingTraitSales, setLoadingTraitSales] = useState(false);
 
-  // Sales sorting and rarity data
   const [salesSortMode, setSalesSortMode] = useState<SalesSortMode>('price_asc');
   const [rarityData, setRarityData] = useState<Map<number, number>>(new Map());
   const xchPriceUsd = getCachedXchPrice();
 
-  // Fetch main data
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-
       const data = await fetchTradeValues();
-
       if (data.error && data.trait_stats.length === 0) {
         setError(data.error);
       } else {
@@ -102,7 +85,6 @@ const TraitValues: React.FC<TraitValuesProps> = ({ onTraitClick }) => {
     loadData();
   }, [loadData]);
 
-  // Load rarity data for sorting
   useEffect(() => {
     const loadRarityData = async () => {
       try {
@@ -120,7 +102,6 @@ const TraitValues: React.FC<TraitValuesProps> = ({ onTraitClick }) => {
     loadRarityData();
   }, []);
 
-  // Fetch sales for selected trait
   const loadTraitSales = useCallback(async (traitName: string) => {
     try {
       setLoadingTraitSales(true);
@@ -134,7 +115,6 @@ const TraitValues: React.FC<TraitValuesProps> = ({ onTraitClick }) => {
     }
   }, []);
 
-  // When trait is selected, load its sales
   useEffect(() => {
     if (selectedTrait) {
       loadTraitSales(selectedTrait.trait_name);
@@ -143,9 +123,7 @@ const TraitValues: React.FC<TraitValuesProps> = ({ onTraitClick }) => {
     }
   }, [selectedTrait, loadTraitSales]);
 
-  // Sorted sales based on current sort mode (with deduplication)
   const sortedSales = useMemo(() => {
-    // Deduplicate: remove entries with same edition + price + timestamp
     const seen = new Set<string>();
     const dedupedSales = selectedTraitSales.filter(sale => {
       const key = `${sale.edition}-${sale.price_xch}-${sale.timestamp}`;
@@ -164,41 +142,44 @@ const TraitValues: React.FC<TraitValuesProps> = ({ onTraitClick }) => {
         return sales.sort((a, b) => {
           const rankA = rarityData.get(a.edition) || 9999;
           const rankB = rarityData.get(b.edition) || 9999;
-          return rankA - rankB; // Lower rank = rarer
+          return rankA - rankB;
         });
       case 'rarity_desc':
         return sales.sort((a, b) => {
           const rankA = rarityData.get(a.edition) || 0;
           const rankB = rarityData.get(b.edition) || 0;
-          return rankB - rankA; // Higher rank = more common
+          return rankB - rankA;
         });
       case 'time_desc':
-        return sales.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()); // Newest first
+        return sales.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
       case 'time_asc':
-        return sales.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()); // Oldest first
+        return sales.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
       default:
         return sales;
     }
   }, [selectedTraitSales, salesSortMode, rarityData]);
 
-  // Get unique categories
   const categories = useMemo(() => {
     const cats = new Set(traitStats.map(t => t.trait_category));
     return ['all', ...Array.from(cats).sort()];
   }, [traitStats]);
 
-  // Filtered & sorted data
+  const categoryOptions = useMemo(() => {
+    return categories.map(cat => ({
+      value: cat,
+      label: cat === 'all' ? 'All Categories' : capitalizeCategory(cat),
+    }));
+  }, [categories]);
+
   const filteredStats = useMemo(() => {
     let result = [...traitStats];
 
-    // Category filter
     if (categoryFilter !== 'all') {
       result = result.filter(
         t => t.trait_category.toLowerCase() === categoryFilter.toLowerCase()
       );
     }
 
-    // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(t =>
@@ -206,12 +187,10 @@ const TraitValues: React.FC<TraitValuesProps> = ({ onTraitClick }) => {
       );
     }
 
-    // Sort
     result.sort((a, b) => {
       let aVal: string | number | null = a[sortField];
       let bVal: string | number | null = b[sortField];
 
-      // Handle nulls
       if (aVal === null) aVal = sortDirection === 'asc' ? Infinity : -Infinity;
       if (bVal === null) bVal = sortDirection === 'asc' ? Infinity : -Infinity;
 
@@ -227,7 +206,6 @@ const TraitValues: React.FC<TraitValuesProps> = ({ onTraitClick }) => {
     return result;
   }, [traitStats, categoryFilter, searchQuery, sortField, sortDirection]);
 
-  // Handle sort column click
   const handleSort = (field: SortField) => {
     if (field === sortField) {
       setSortDirection(d => d === 'asc' ? 'desc' : 'asc');
@@ -237,14 +215,9 @@ const TraitValues: React.FC<TraitValuesProps> = ({ onTraitClick }) => {
     }
   };
 
-  const handleRefresh = async (event: CustomEvent<RefresherEventDetail>) => {
-    await loadData();
-    event.detail.complete();
-  };
-
   const handleRowClick = (trait: TraitStats) => {
     if (selectedTrait?.trait_name === trait.trait_name) {
-      setSelectedTrait(null); // Toggle off
+      setSelectedTrait(null);
     } else {
       setSelectedTrait(trait);
       onTraitClick?.(trait.trait_name);
@@ -259,7 +232,7 @@ const TraitValues: React.FC<TraitValuesProps> = ({ onTraitClick }) => {
   if (loading) {
     return (
       <div className="trait-values-loading">
-        <IonSpinner name="crescent" />
+        <LoadingSpinner size={24} />
         <p>Loading trade data...</p>
       </div>
     );
@@ -269,39 +242,32 @@ const TraitValues: React.FC<TraitValuesProps> = ({ onTraitClick }) => {
     return (
       <div className="trait-values-error">
         <p>{error}</p>
-        <button onClick={loadData} className="retry-btn">Retry</button>
+        <button onClick={loadData} className="btn btn-primary retry-btn">Retry</button>
       </div>
     );
   }
 
   return (
     <div className="trait-values-container">
-      <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
-        <IonRefresherContent />
-      </IonRefresher>
-
       {/* Filters */}
       <div className="trait-filters">
-        <IonSelect
+        <Dropdown
+          id="category-filter"
           value={categoryFilter}
-          onIonChange={e => setCategoryFilter(e.detail.value)}
-          interface="popover"
+          options={categoryOptions}
+          onChange={setCategoryFilter}
           className="category-select"
-          placeholder="Category"
-        >
-          {categories.map(cat => (
-            <IonSelectOption key={cat} value={cat}>
-              {cat === 'all' ? 'All Categories' : capitalizeCategory(cat)}
-            </IonSelectOption>
-          ))}
-        </IonSelect>
-        <IonSearchbar
-          value={searchQuery}
-          onIonInput={e => setSearchQuery(e.detail.value || '')}
-          placeholder="Search attributes..."
-          className="trait-search"
-          debounce={300}
         />
+        <div className="search-input-wrapper">
+          <Search size={16} className="search-icon" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Search attributes..."
+            className="input trait-search"
+          />
+        </div>
       </div>
 
       {/* Stats Summary */}
@@ -366,7 +332,6 @@ const TraitValues: React.FC<TraitValuesProps> = ({ onTraitClick }) => {
                     <td className="price hide-mobile">{formatXCH(trait.max_xch)}</td>
                     <td className="last-trade">{formatRelativeTime(trait.last_trade)}</td>
                   </tr>
-                  {/* Expanded detail row */}
                   {selectedTrait?.trait_name === trait.trait_name && (
                     <tr className="detail-row">
                       <td colSpan={7}>
@@ -379,11 +344,7 @@ const TraitValues: React.FC<TraitValuesProps> = ({ onTraitClick }) => {
                                   className={`sort-toggle ${salesSortMode.startsWith('price') ? 'active' : ''}`}
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    if (salesSortMode === 'price_asc') {
-                                      setSalesSortMode('price_desc');
-                                    } else {
-                                      setSalesSortMode('price_asc');
-                                    }
+                                    setSalesSortMode(salesSortMode === 'price_asc' ? 'price_desc' : 'price_asc');
                                   }}
                                 >
                                   💰{salesSortMode === 'price_desc' ? '↓' : '↑'}
@@ -392,11 +353,7 @@ const TraitValues: React.FC<TraitValuesProps> = ({ onTraitClick }) => {
                                   className={`sort-toggle ${salesSortMode.startsWith('rarity') ? 'active' : ''}`}
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    if (salesSortMode === 'rarity_asc') {
-                                      setSalesSortMode('rarity_desc');
-                                    } else {
-                                      setSalesSortMode('rarity_asc');
-                                    }
+                                    setSalesSortMode(salesSortMode === 'rarity_asc' ? 'rarity_desc' : 'rarity_asc');
                                   }}
                                 >
                                   👑{salesSortMode === 'rarity_desc' ? '↓' : '↑'}
@@ -405,11 +362,7 @@ const TraitValues: React.FC<TraitValuesProps> = ({ onTraitClick }) => {
                                   className={`sort-toggle ${salesSortMode.startsWith('time') ? 'active' : ''}`}
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    if (salesSortMode === 'time_desc') {
-                                      setSalesSortMode('time_asc');
-                                    } else {
-                                      setSalesSortMode('time_desc');
-                                    }
+                                    setSalesSortMode(salesSortMode === 'time_desc' ? 'time_asc' : 'time_desc');
                                   }}
                                 >
                                   🕐{salesSortMode === 'time_asc' ? '↑' : '↓'}
@@ -417,13 +370,12 @@ const TraitValues: React.FC<TraitValuesProps> = ({ onTraitClick }) => {
                               </div>
                             </div>
                             {loadingTraitSales ? (
-                              <IonSpinner name="dots" />
+                              <LoadingDots size={8} />
                             ) : selectedTraitSales.length === 0 ? (
                               <p className="no-sales">No sales data available.</p>
                             ) : (
                               <div className="sales-carousel">
                                 {(() => {
-                                  // Calculate highlights
                                   const minPrice = Math.min(...sortedSales.map(s => s.price_xch));
                                   const maxPrice = Math.max(...sortedSales.map(s => s.price_xch));
                                   const timestamps = sortedSales.map(s => new Date(s.timestamp).getTime());
@@ -441,7 +393,6 @@ const TraitValues: React.FC<TraitValuesProps> = ({ onTraitClick }) => {
 
                                     return (
                                       <div key={`${sale.edition}-${idx}`} className="sale-card">
-                                        {/* Highlight badges above image */}
                                         <div className="sale-badges">
                                           {isMin && <span className="sale-badge min">MIN</span>}
                                           {isMax && <span className="sale-badge max">MAX</span>}
@@ -468,7 +419,6 @@ const TraitValues: React.FC<TraitValuesProps> = ({ onTraitClick }) => {
                                 })()}
                               </div>
                             )}
-                            {/* Average calculation below the carousel */}
                             {selectedTraitSales.length > 0 && !loadingTraitSales && (
                               <div className="avg-formula-row">
                                 {(() => {

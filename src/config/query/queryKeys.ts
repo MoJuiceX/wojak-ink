@@ -119,11 +119,11 @@ export const leaderboardKeys = {
   all: ['leaderboard'] as const,
 
   // Leaderboard for a specific game
-  game: (gameId: GameId) => [...leaderboardKeys.all, gameId] as const,
+  game: (gameId: string) => [...leaderboardKeys.all, gameId] as const,
 
   // Top 10 for game
-  top10: (gameId: GameId) => [...leaderboardKeys.game(gameId), 'top10'] as const,
+  top10: (gameId: string) => [...leaderboardKeys.game(gameId), 'top10'] as const,
 
   // Extended leaderboard (top 100)
-  extended: (gameId: GameId) => [...leaderboardKeys.game(gameId), 'extended'] as const,
+  extended: (gameId: string) => [...leaderboardKeys.game(gameId), 'extended'] as const,
 } as const;

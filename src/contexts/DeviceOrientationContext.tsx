@@ -80,7 +80,6 @@ export function DeviceOrientationProvider({ children }: DeviceOrientationProvide
 
     // Log first few orientation events for debugging
     if (Math.random() < 0.01) { // Log ~1% of events to not spam console
-      console.log('[DeviceOrientation] Event received - gamma:', gamma.toFixed(1), 'beta:', beta.toFixed(1));
     }
 
     // Normalize gamma (-90 to 90) to -1 to 1
@@ -107,9 +106,6 @@ export function DeviceOrientationProvider({ children }: DeviceOrientationProvide
 
   // Request permission (iOS 13+)
   const requestPermission = useCallback(async (): Promise<boolean> => {
-    console.log('[DeviceOrientation] requestPermission called');
-    console.log('[DeviceOrientation] DeviceOrientationEvent exists:', typeof DeviceOrientationEvent !== 'undefined');
-    console.log('[DeviceOrientation] has requestPermission:', 'requestPermission' in (DeviceOrientationEvent || {}));
 
     if (
       typeof DeviceOrientationEvent !== 'undefined' &&
@@ -117,9 +113,7 @@ export function DeviceOrientationProvider({ children }: DeviceOrientationProvide
       typeof (DeviceOrientationEvent as unknown as { requestPermission: () => Promise<string> }).requestPermission === 'function'
     ) {
       try {
-        console.log('[DeviceOrientation] Calling DeviceOrientationEvent.requestPermission()...');
         const permission = await (DeviceOrientationEvent as unknown as { requestPermission: () => Promise<string> }).requestPermission();
-        console.log('[DeviceOrientation] Permission result:', permission);
         const granted = permission === 'granted';
         setIsPermissionGranted(granted);
         if (granted) {
@@ -132,7 +126,6 @@ export function DeviceOrientationProvider({ children }: DeviceOrientationProvide
         return false;
       }
     } else {
-      console.log('[DeviceOrientation] No permission API found, assuming granted');
     }
 
     setIsPermissionGranted(true);

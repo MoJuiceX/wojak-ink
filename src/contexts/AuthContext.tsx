@@ -226,7 +226,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Will be implemented with Sage Wallet / WalletConnect SDK
     try {
       // TODO: Implement Sage Wallet connection
-      console.log('Wallet connection not yet implemented');
       return null;
     } catch (error) {
       console.error('Wallet connection failed:', error);

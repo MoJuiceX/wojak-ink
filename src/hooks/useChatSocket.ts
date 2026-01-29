@@ -92,7 +92,6 @@ export function useChatSocket(options: UseChatSocketOptions | null): UseChatSock
     setStatus('connecting');
     setError(null);
 
-    console.log('[Chat] Connecting to:', CHAT_SERVER_URL);
 
     const socket = io(CHAT_SERVER_URL, {
       auth: { token },
@@ -109,7 +108,6 @@ export function useChatSocket(options: UseChatSocketOptions | null): UseChatSock
     // ============ Connection Events ============
 
     socket.on('connect', () => {
-      console.log('[Chat] Connected to server');
       setStatus('connected');
       setError(null);
       reconnectAttempts.current = 0;
@@ -130,7 +128,6 @@ export function useChatSocket(options: UseChatSocketOptions | null): UseChatSock
     });
 
     socket.on('disconnect', (reason) => {
-      console.log('[Chat] Disconnected:', reason);
       setStatus('disconnected');
       if (reason === 'io server disconnect') {
         setError('Disconnected by server');
@@ -140,7 +137,6 @@ export function useChatSocket(options: UseChatSocketOptions | null): UseChatSock
     // ============ Chat Events ============
 
     socket.on('chat:connected', (data) => {
-      console.log('[Chat] Authenticated:', data);
       setIsAdmin(data.isAdmin);
       setUserId(data.userId);
       setRoomName(data.roomName || null);

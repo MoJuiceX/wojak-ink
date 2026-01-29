@@ -68,9 +68,7 @@ function loadDatabank(): void {
       if (parsed.version === DATABANK_VERSION) {
         databank = parsed;
         rebuildIndexes();
-        console.log('[SalesDatabank] Loaded', databank.sales.length, 'sales');
       } else {
-        console.log('[SalesDatabank] Version mismatch, starting fresh');
       }
     }
   } catch (error) {
@@ -157,7 +155,6 @@ export async function importSales(rawSales: RawSaleRecord[]): Promise<number> {
   if (addedCount > 0) {
     rebuildIndexes();
     saveDatabank();
-    console.log('[SalesDatabank] Added', addedCount, 'new sales');
   }
 
   return addedCount;
@@ -285,7 +282,6 @@ export function importDatabank(data: SalesDatabank): void {
   databank.version = DATABANK_VERSION;
   rebuildIndexes();
   saveDatabank();
-  console.log('[SalesDatabank] Imported', databank.sales.length, 'sales');
 }
 
 /**
@@ -353,7 +349,6 @@ export async function fixSuspiciousSales(): Promise<number> {
           if (newXchEquivalent < sale.xchEquivalent * 0.6) {
             const xchPrice = await getXchPrice(new Date(sale.timestamp));
 
-            console.log(`[SalesDatabank] Fixing NFT ${sale.nftId}: ${sale.xchEquivalent.toFixed(2)} XCH -> ${newXchEquivalent.toFixed(4)} XCH (${sale.amount} tokens @ ${estimatedRate} rate)`);
 
             sale.xchEquivalent = newXchEquivalent;
             sale.usdValue = newXchEquivalent * xchPrice;
@@ -368,7 +363,6 @@ export async function fixSuspiciousSales(): Promise<number> {
     if (fixedCount > 0) {
       rebuildIndexes();
       saveDatabank();
-      console.log(`[SalesDatabank] Fixed ${fixedCount} suspicious sales`);
     }
 
     return fixedCount;

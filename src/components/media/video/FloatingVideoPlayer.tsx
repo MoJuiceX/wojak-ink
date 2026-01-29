@@ -170,7 +170,6 @@ export function FloatingVideoPlayer() {
                 setHasStarted(false);
               }}
               onCanPlay={() => {
-                console.log('Video can play');
               }}
               onError={(e) => {
                 console.error('Video error:', e);

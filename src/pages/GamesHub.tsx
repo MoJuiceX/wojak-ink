@@ -271,10 +271,8 @@ export default function GamesHub() {
         targetId: v.targetId,
       }));
 
-    console.log('Showing heatmap for', type, 'with', votesForType.length, 'votes');
 
     if (votesForType.length === 0) {
-      console.log('No votes yet! Click on game cards to add votes first.');
       return;
     }
 

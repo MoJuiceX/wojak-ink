@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * GallerySidebarControls Component
  *
@@ -63,7 +62,7 @@ export function GallerySidebarControls({ showLabels }: GallerySidebarControlsPro
   }
 
   const {
-    selectedCharacter,
+    selectedCharacter: _selectedCharacter,
     sortMode,
     filterMode,
     setSortMode,

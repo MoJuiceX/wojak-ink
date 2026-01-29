@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * NFTInfoCard Component
  *
@@ -7,7 +6,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ExternalLink, X, Crown } from 'lucide-react';
+import { X, Crown } from 'lucide-react';
 import type { NFT } from '@/types/nft';
 import {
   formatPriceXCH,
@@ -618,7 +617,7 @@ export function NFTInfoCard({
               />
             )}
             {activeTab === 'metadata' && <MetadataTabContent nft={nft} />}
-            {activeTab === 'history' && <HistoryTabContent nftId={nft.tokenId} />}
+            {activeTab === 'history' && <HistoryTabContent nftId={Number(nft.tokenId)} />}
           </motion.div>
         </AnimatePresence>
       </div>

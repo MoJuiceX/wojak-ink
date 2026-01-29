@@ -130,7 +130,7 @@ export function LeaderboardPanel() {
           </div>
         ) : (
           <div className="space-y-2">
-            {topScores.map((entry, index) => (
+            {topScores.map((entry) => (
               <div
                 key={entry.gameId}
                 className="leaderboard-name-card flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer"

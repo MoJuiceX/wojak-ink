@@ -140,7 +140,6 @@ export async function initGalleryPreloader(): Promise<void> {
     });
 
     isInitialized = true;
-    console.log('[GalleryPreloader] Initialized with', allNfts.length, 'NFTs');
   } catch (error) {
     console.error('[GalleryPreloader] Failed to initialize:', error);
   }
@@ -153,7 +152,6 @@ export async function startPreloading(): Promise<void> {
   if (isPreloading || !isInitialized) return;
   isPreloading = true;
 
-  console.log('[GalleryPreloader] Starting preload...');
 
   // Collect first 10 images from each base's queue (140 images total)
   const priorityUrls: string[] = [];
@@ -168,7 +166,6 @@ export async function startPreloading(): Promise<void> {
   // Preload with 6 concurrent connections
   await preloadImages(priorityUrls, 6);
 
-  console.log('[GalleryPreloader] Preloaded', preloadedImages.size, 'images');
 }
 
 /**

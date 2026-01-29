@@ -125,7 +125,6 @@ export function NFTPicker({ selectedNftId, onSelect }: NFTPickerProps) {
             type="button"
             className={`nft-option ${selectedNftId === nft.id ? 'selected' : ''}`}
             onClick={() => {
-              console.log('[NFTPicker] Clicked:', nft.id);
               onSelect(nft);
             }}
           >

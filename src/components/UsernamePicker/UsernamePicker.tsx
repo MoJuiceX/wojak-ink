@@ -6,11 +6,11 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { IonModal, IonButton, IonInput, IonSpinner } from '@ionic/react';
 import { debounce } from 'lodash';
 import { useAuth } from '../../contexts/AuthContext';
 import { validateUsername, generateUsernameSuggestions } from '../../utils/validation';
 import { Avatar } from '../Avatar/Avatar';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
 import './UsernamePicker.css';
 
 interface UsernamePickerProps {
@@ -66,7 +66,8 @@ export const UsernamePicker: React.FC<UsernamePickerProps> = ({
   );
 
   // Handle username input change
-  const handleUsernameChange = (value: string) => {
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
     const trimmedValue = value.trim();
     setUsername(trimmedValue);
 
@@ -126,94 +127,94 @@ export const UsernamePicker: React.FC<UsernamePickerProps> = ({
     return '';
   };
 
+  if (!isOpen) return null;
+
   return (
-    <IonModal
-      isOpen={isOpen}
-      backdropDismiss={false}
-      className="username-picker-modal"
-    >
-      <div className="username-picker-content">
-        {/* Header with Avatar */}
-        <div className="username-picker-header">
-          <div className="welcome-avatar">
-            <Avatar
-              type={user?.avatar.type || 'emoji'}
-              value={user?.avatar.value || '🍊'}
-              size="xlarge"
+    <div className="modal-backdrop">
+      <div className="username-picker-modal">
+        <div className="username-picker-content">
+          {/* Header with Avatar */}
+          <div className="username-picker-header">
+            <div className="welcome-avatar">
+              <Avatar
+                type={user?.avatar.type || 'emoji'}
+                value={user?.avatar.value || '🍊'}
+                size="xlarge"
+              />
+            </div>
+            <h2>Welcome to Wojak.ink!</h2>
+            <p>Choose a username to get started</p>
+          </div>
+
+          {/* Username Input */}
+          <div className={`username-input-container ${getInputStatusClass()}`}>
+            <input
+              type="text"
+              value={username}
+              onChange={handleUsernameChange}
+              placeholder="Enter username"
+              maxLength={20}
+              className="input username-input"
             />
-          </div>
-          <h2>Welcome to Wojak.ink!</h2>
-          <p>Choose a username to get started</p>
-        </div>
-
-        {/* Username Input */}
-        <div className={`username-input-container ${getInputStatusClass()}`}>
-          <IonInput
-            value={username}
-            onIonInput={(e) => handleUsernameChange(e.detail.value || '')}
-            placeholder="Enter username"
-            maxlength={20}
-            className="username-input"
-          />
-          <div className="input-status-icon">
-            {isChecking && <IonSpinner name="crescent" />}
-            {!isChecking && isAvailable === true && <span className="check-icon">✓</span>}
-            {!isChecking && isAvailable === false && <span className="x-icon">✗</span>}
-          </div>
-        </div>
-
-        {/* Validation/Status Message */}
-        <div className="username-status">
-          {validationError && (
-            <span className="error-message">{validationError}</span>
-          )}
-          {!validationError && isAvailable === true && (
-            <span className="success-message">Username is available!</span>
-          )}
-          {!validationError && isAvailable === false && (
-            <span className="taken-message">Username is already taken</span>
-          )}
-        </div>
-
-        {/* Suggestions */}
-        {suggestions.length > 0 && (
-          <div className="username-suggestions">
-            <span className="suggestions-label">Try one of these:</span>
-            <div className="suggestions-list">
-              {suggestions.map((suggestion) => (
-                <button
-                  key={suggestion}
-                  className="suggestion-chip"
-                  onClick={() => handleSuggestionClick(suggestion)}
-                  type="button"
-                >
-                  {suggestion}
-                </button>
-              ))}
+            <div className="input-status-icon">
+              {isChecking && <LoadingSpinner size={16} />}
+              {!isChecking && isAvailable === true && <span className="check-icon">✓</span>}
+              {!isChecking && isAvailable === false && <span className="x-icon">✗</span>}
             </div>
           </div>
-        )}
 
-        {/* Rules */}
-        <div className="username-rules">
-          <ul>
-            <li>3-20 characters</li>
-            <li>Letters, numbers, and underscores only</li>
-            <li>No spaces or special characters</li>
-          </ul>
+          {/* Validation/Status Message */}
+          <div className="username-status">
+            {validationError && (
+              <span className="error-message">{validationError}</span>
+            )}
+            {!validationError && isAvailable === true && (
+              <span className="success-message">Username is available!</span>
+            )}
+            {!validationError && isAvailable === false && (
+              <span className="taken-message">Username is already taken</span>
+            )}
+          </div>
+
+          {/* Suggestions */}
+          {suggestions.length > 0 && (
+            <div className="username-suggestions">
+              <span className="suggestions-label">Try one of these:</span>
+              <div className="suggestions-list">
+                {suggestions.map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    className="suggestion-chip"
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    type="button"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Rules */}
+          <div className="username-rules">
+            <ul>
+              <li>3-20 characters</li>
+              <li>Letters, numbers, and underscores only</li>
+              <li>No spaces or special characters</li>
+            </ul>
+          </div>
+
+          {/* Action Button */}
+          <button
+            onClick={handleSave}
+            disabled={!username || !!validationError || isAvailable !== true || isSaving}
+            className="btn btn-primary continue-button"
+          >
+            {isSaving ? 'Setting up...' : 'Continue'}
+          </button>
         </div>
-
-        {/* Action Button */}
-        <IonButton
-          expand="block"
-          onClick={handleSave}
-          disabled={!username || !!validationError || isAvailable !== true || isSaving}
-          className="continue-button"
-        >
-          {isSaving ? 'Setting up...' : 'Continue'}
-        </IonButton>
       </div>
-    </IonModal>
+    </div>
   );
 };
 

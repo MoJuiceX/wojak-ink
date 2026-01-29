@@ -81,7 +81,6 @@ function loadCacheFromStorage(): void {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       priceCache = JSON.parse(stored);
-      console.log('[PriceService] Loaded cache with', Object.keys(priceCache.xchUsd).length, 'XCH prices');
     }
   } catch (error) {
     console.warn('[PriceService] Failed to load cache:', error);
@@ -211,7 +210,6 @@ async function fetchXchPriceRange(fromDate: Date, toDate: Date): Promise<Record<
       prices[date] = price;
     }
 
-    console.log('[PriceService] Fetched', Object.keys(prices).length, 'XCH prices from range');
     return prices;
   } catch (error) {
     // Don't log 429 errors
@@ -283,7 +281,6 @@ async function fetchCatTradeHistory(): Promise<Record<string, number>> {
       }
     }
 
-    console.log('[PriceService] Fetched', Object.keys(prices).length, 'CAT prices from trades');
     return prices;
   } catch (error) {
     console.error('[PriceService] Error fetching CAT trade history:', error);
@@ -317,7 +314,6 @@ export async function initializePriceService(): Promise<void> {
   }
 
   saveCacheToStorage();
-  console.log('[PriceService] Initialized with', Object.keys(priceCache.xchUsd).length, 'XCH prices and', Object.keys(priceCache.catXch).length, 'CAT prices');
 }
 
 /**
