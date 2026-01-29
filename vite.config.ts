@@ -53,6 +53,31 @@ export default defineConfig(({ mode }) => {
       ],
       force: false,
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            // React core - loaded on every page
+            'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+            // WalletConnect - heavy, only needed for wallet features
+            'vendor-wallet': [
+              '@walletconnect/modal',
+              '@walletconnect/sign-client',
+              '@walletconnect/types',
+              '@walletconnect/utils',
+            ],
+            // Auth - Clerk is heavy
+            'vendor-clerk': ['@clerk/clerk-react'],
+            // Animation & UI
+            'vendor-ui': ['framer-motion', 'lucide-react'],
+            // Data fetching & state
+            'vendor-data': ['@tanstack/react-query', 'zustand'],
+            // Utilities
+            'vendor-utils': ['lodash', 'date-fns'],
+          },
+        },
+      },
+    },
     server: {
       host: true, // Allow network access
       allowedHosts: ['localhost', '.trycloudflare.com', '.loca.lt', '.ngrok.io', '.ngrok-free.app'],

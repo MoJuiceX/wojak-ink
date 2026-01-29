@@ -16,11 +16,10 @@ export { NFTInfoCard } from './NFTInfoCard';
 // Responsive wrapper
 export { ResponsiveExplorer } from './ResponsiveExplorer';
 
-// Desktop components (lazy loaded)
+// Desktop components (DesktopExplorerPanel excluded - lazy loaded by ResponsiveExplorer)
 export {
   DesktopCharacterCard,
   DesktopCharacterGrid,
-  DesktopExplorerPanel,
   DesktopNFTImage,
   ThumbnailStrip,
   ExplorerOverlay,

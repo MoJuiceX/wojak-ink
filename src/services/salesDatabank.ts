@@ -8,7 +8,7 @@
  * from Parse.bot Dexie scraping.
  */
 
-import { convertSalePrice } from './historicalPriceService';
+import { convertSalePrice, getXchPrice } from './historicalPriceService';
 
 // ============ Types ============
 
@@ -317,7 +317,6 @@ export function getSalesCount(): number {
  */
 export async function fixSuspiciousSales(): Promise<number> {
   try {
-    const { getXchPrice } = await import('./historicalPriceService');
 
     let fixedCount = 0;
 

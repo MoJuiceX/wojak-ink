@@ -6,7 +6,7 @@
 
 export { DesktopCharacterCard } from './DesktopCharacterCard';
 export { DesktopCharacterGrid } from './DesktopCharacterGrid';
-export { DesktopExplorerPanel } from './DesktopExplorerPanel';
+// DesktopExplorerPanel intentionally excluded - lazy loaded by ResponsiveExplorer
 export { DesktopNFTImage } from './DesktopNFTImage';
 export { ThumbnailStrip } from './ThumbnailStrip';
 export { ExplorerOverlay } from './ExplorerOverlay';

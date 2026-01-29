@@ -684,7 +684,6 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
     }
 
     // Apply rules to check for conflicts and fix invalid combinations
-    const { getDisabledLayers } = await import('@/lib/wojakRules');
     const rulesResult = getDisabledLayers(randomSelections);
 
     // Apply forced selections from rules (e.g., force MouthBase to Numb)
