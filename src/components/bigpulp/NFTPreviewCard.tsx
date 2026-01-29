@@ -286,8 +286,8 @@ export function NFTPreviewCard({
       <div
         className="rounded-2xl overflow-hidden flex-1 flex items-center justify-center"
         style={{
-          background: 'var(--color-glass-bg)',
-          border: `2px solid ${rarity ? `${tierColor}40` : 'var(--color-border)'}`,
+          background: 'rgba(10, 10, 10, 0.98)',
+          border: `2px solid ${rarity ? `${tierColor}40` : 'rgba(255,255,255,0.1)'}`,
           aspectRatio: '1 / 1',
         }}
       >
@@ -363,7 +363,7 @@ export function NFTPreviewCard({
       <div
         className="rounded-2xl overflow-hidden flex flex-col flex-shrink-0"
         style={{
-          background: 'var(--color-glass-bg)',
+          background: 'rgba(10, 10, 10, 0.98)',
           border: '1px solid var(--color-border)',
           width: '160px',
         }}

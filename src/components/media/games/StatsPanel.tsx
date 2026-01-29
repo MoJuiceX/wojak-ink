@@ -81,7 +81,7 @@ export function StatsPanel() {
     <div
       className="h-full rounded-2xl overflow-hidden flex flex-col"
       style={{
-        background: 'var(--color-glass-bg)',
+        background: 'rgba(10, 10, 10, 0.98)',
         border: '1px solid var(--color-border)',
       }}
     >

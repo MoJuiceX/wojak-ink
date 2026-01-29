@@ -12,8 +12,8 @@
   --color-bg-primary: #0a0a0f;
   --color-bg-secondary: #101018;
   --color-bg-elevated: #16161f;
-  --color-bg-card: rgba(255, 255, 255, 0.03);
-  --color-bg-glass: rgba(255, 255, 255, 0.05);
+  --color-bg-card: rgba(10, 10, 10, 0.98);
+  --color-bg-glass: rgba(10, 10, 10, 0.98);
   --color-bg-input: rgba(255, 255, 255, 0.08);
 
   /* ---------- BRAND COLORS - ORANGE ---------- */
@@ -184,10 +184,10 @@
   --color-chrome-border-glow: rgba(249, 115, 22, 0.15);
 
   /* ---------- GLASSMORPHISM ---------- */
-  --glass-bg-light: rgba(255, 255, 255, 0.05);
-  --glass-bg-medium: rgba(255, 255, 255, 0.08);
-  --glass-bg-dark: rgba(0, 0, 0, 0.4);
-  --glass-bg-orange: rgba(249, 115, 22, 0.1);
+  --glass-bg-light: rgba(10, 10, 10, 0.98);
+  --glass-bg-medium: rgba(10, 10, 10, 0.98);
+  --glass-bg-dark: rgba(10, 10, 10, 0.98);
+  --glass-bg-orange: rgba(10, 10, 10, 0.98);
   --blur-sm: 8px;
   --blur-md: 12px;
   --blur-lg: 20px;
@@ -324,8 +324,8 @@
   --color-bg-primary: #1a0a00;
   --color-bg-secondary: #261000;
   --color-bg-elevated: #331500;
-  --color-bg-card: rgba(255, 107, 0, 0.08);
-  --color-bg-glass: rgba(255, 107, 0, 0.1);
+  --color-bg-card: rgba(10, 10, 10, 0.98);
+  --color-bg-glass: rgba(10, 10, 10, 0.98);
   --color-bg-input: rgba(255, 107, 0, 0.15);
 
   --color-orange-glow: rgba(255, 107, 0, 0.6);
@@ -373,8 +373,8 @@
   --color-bg-primary: #001a0a;
   --color-bg-secondary: #002610;
   --color-bg-elevated: #003315;
-  --color-bg-card: rgba(34, 197, 94, 0.08);
-  --color-bg-glass: rgba(34, 197, 94, 0.1);
+  --color-bg-card: rgba(10, 10, 10, 0.98);
+  --color-bg-glass: rgba(10, 10, 10, 0.98);
   --color-bg-input: rgba(34, 197, 94, 0.15);
 
   --color-orange-500: #22c55e;
@@ -417,34 +417,30 @@
 
 /* Glassmorphism presets */
 .glass {
-  background: var(--glass-bg-medium);
-  backdrop-filter: blur(var(--blur-md)) saturate(180%);
-  -webkit-backdrop-filter: blur(var(--blur-md)) saturate(180%);
+  background: #0a0a0a;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: 1px solid var(--color-border-subtle);
 }
 
 .glass-light {
-  background: var(--glass-bg-light);
-  backdrop-filter: blur(var(--blur-sm)) saturate(150%);
-  -webkit-backdrop-filter: blur(var(--blur-sm)) saturate(150%);
+  background: #0a0a0a;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: 1px solid var(--color-border-subtle);
 }
 
 .glass-dark {
-  background: var(--glass-bg-dark);
-  backdrop-filter: blur(var(--blur-lg)) saturate(180%);
-  -webkit-backdrop-filter: blur(var(--blur-lg)) saturate(180%);
+  background: #0a0a0a;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: 1px solid var(--color-border-default);
 }
 
 .glass-orange {
-  background: linear-gradient(
-    135deg,
-    var(--glass-bg-orange),
-    var(--glass-bg-dark)
-  );
-  backdrop-filter: blur(var(--blur-md));
-  -webkit-backdrop-filter: blur(var(--blur-md));
+  background: #0a0a0a;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: 1px solid var(--color-border-orange);
 }
 

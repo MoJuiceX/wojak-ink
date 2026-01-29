@@ -326,6 +326,7 @@ export default function GamesHub() {
         {gameSEO}
         <div
           ref={containerRef}
+          data-section="games"
           className={activeMode ? 'flick-mode-active' : ''}
           style={{
             padding: contentPadding,
@@ -420,6 +421,7 @@ export default function GamesHub() {
       {gameSEO}
       <div
         ref={containerRef}
+        data-section="games"
         className={activeMode ? 'flick-mode-active' : ''}
         style={{ padding: contentPadding, minHeight: '100%' }}
       >

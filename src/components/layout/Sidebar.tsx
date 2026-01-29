@@ -94,7 +94,7 @@ export function Sidebar({
 
   return (
     <motion.aside
-      className="fixed left-0 h-screen flex flex-col z-40"
+      className="fixed left-0 h-screen flex flex-col z-40 glass-strong"
       style={{
         top: 0,
         width,

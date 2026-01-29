@@ -87,21 +87,22 @@ function CompactRefreshButton({
       type="button"
       onClick={handleRefresh}
       disabled={isOnCooldown}
-      className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs"
+      className={`bigpulp-btn flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs ${refreshState === 'success' ? 'bigpulp-btn-active' : ''}`}
       style={{
-        background: refreshState === 'success' 
-          ? 'rgba(34,197,94,0.15)' 
-          : 'rgba(255,255,255,0.05)',
         border: refreshState === 'success'
-          ? '1px solid rgba(34,197,94,0.3)'
-          : '1px solid rgba(255,255,255,0.08)',
-        color: refreshState === 'success' 
-          ? 'rgb(34,197,94)' 
+          ? '1px solid rgba(34,197,94,0.5)'
+          : '1px solid var(--color-border)',
+        color: refreshState === 'success'
+          ? 'rgb(34,197,94)'
           : 'var(--color-text-muted)',
+        boxShadow: refreshState === 'success' ? '0 0 8px rgba(34,197,94,0.2)' : 'none',
         cursor: isOnCooldown ? 'not-allowed' : 'pointer',
         opacity: isOnCooldown ? 0.5 : 1,
       }}
-      whileHover={isOnCooldown ? {} : { scale: 1.05 }}
+      whileHover={isOnCooldown ? {} : {
+        scale: 1.05,
+        borderColor: 'rgba(255,255,255,0.2)',
+      }}
       whileTap={isOnCooldown ? {} : { scale: 0.95 }}
     >
       {refreshState === 'spinning' ? (
@@ -335,17 +336,19 @@ function ViewModeButtons({
         return (
           <motion.button
             key={chip.id}
-            className="px-2.5 py-1 rounded-full text-xs font-semibold transition-all"
+            className={`bigpulp-btn px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${isActive ? 'bigpulp-btn-active' : ''}`}
             style={{
-              background: isActive ? chip.bgColor : 'rgba(255,255,255,0.05)',
               color: isActive ? chip.color : 'var(--color-text-muted)',
-              border: isActive ? `1px solid ${chip.color}40` : '1px solid transparent',
-              boxShadow: isActive ? `0 0 8px ${chip.color}30` : 'none',
+              border: isActive ? `1px solid ${chip.color}` : '1px solid var(--color-border)',
+              boxShadow: isActive ? `0 0 8px ${chip.color}40` : 'none',
             }}
             onClick={() => handleClick(chip.id)}
             onMouseEnter={() => onHover(chip.id)}
             onMouseLeave={onHoverEnd}
-            whileHover={{ scale: 1.05 }}
+            whileHover={{
+              scale: 1.05,
+              borderColor: 'rgba(255,255,255,0.2)',
+            }}
             whileTap={{ scale: 0.95 }}
           >
             {chip.shortLabel}
@@ -405,28 +408,36 @@ function BadgeDropdown({
   return (
     <div ref={dropdownRef} className="relative flex items-center gap-1">
       {/* Info button */}
-      <button
-        className="p-1.5 rounded-lg transition-colors"
+      <motion.button
+        className={`bigpulp-btn p-1.5 rounded-lg transition-colors ${showInfo ? 'bigpulp-btn-active' : ''}`}
         style={{
-          background: showInfo ? 'var(--color-brand-primary)' : 'var(--color-glass-bg)',
-          color: showInfo ? 'white' : 'var(--color-text-muted)',
-          border: `1px solid ${showInfo ? 'var(--color-brand-primary)' : 'var(--color-border)'}`,
+          color: showInfo ? 'var(--color-brand-primary)' : 'var(--color-text-muted)',
+          border: `1px solid ${showInfo ? 'rgba(255,149,0,0.5)' : 'var(--color-border)'}`,
+          boxShadow: showInfo ? '0 0 8px rgba(255,149,0,0.2)' : 'none',
         }}
         onClick={() => setShowInfo(!showInfo)}
         title="What are badges?"
+        whileHover={{
+          borderColor: 'rgba(255,255,255,0.2)',
+        }}
+        whileTap={{ scale: 0.95 }}
       >
         <Info size={14} />
-      </button>
+      </motion.button>
 
       {/* Main dropdown button */}
-      <button
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+      <motion.button
+        className={`bigpulp-btn flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${isFilterActive ? 'bigpulp-btn-active' : ''}`}
         style={{
-          background: isFilterActive ? 'var(--color-brand-primary)' : 'var(--color-glass-bg)',
-          color: isFilterActive ? 'white' : 'var(--color-text-secondary)',
-          border: `1px solid ${isFilterActive ? 'var(--color-brand-primary)' : 'var(--color-border)'}`,
+          color: isFilterActive ? 'var(--color-brand-primary)' : 'var(--color-text-secondary)',
+          border: `1px solid ${isFilterActive ? 'rgba(255,149,0,0.5)' : 'var(--color-border)'}`,
+          boxShadow: isFilterActive ? '0 0 8px rgba(255,149,0,0.2)' : 'none',
         }}
         onClick={() => { setIsOpen(!isOpen); setShowInfo(false); }}
+        whileHover={{
+          borderColor: 'rgba(255,255,255,0.2)',
+        }}
+        whileTap={{ scale: 0.95 }}
       >
         <Award size={14} />
         <span>{displayName || 'Badges'}</span>
@@ -437,7 +448,7 @@ function BadgeDropdown({
             transition: 'transform 0.2s ease',
           }}
         />
-      </button>
+      </motion.button>
 
       {/* Info tooltip */}
       <AnimatePresence>
@@ -961,33 +972,35 @@ export function HeatMap({
 
   return (
     <div className="space-y-3">
-      {/* Compact header: Filters + Badge + Refresh in organized rows */}
-      <div className="space-y-2">
-        {/* Row 1: View mode filter chips */}
+      {/* Single row: Filters + Badge + Refresh all together */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {/* View mode filter chips */}
         <ViewModeButtons
           viewMode={viewMode}
           onViewModeChange={onViewModeChange}
           onHover={setHoveredMode}
           onHoverEnd={() => setHoveredMode(null)}
         />
-        
-        {/* Row 2: Badge filter + Cache refresh (compact) */}
-        <div className="flex items-center gap-2">
-          {badges && badges.length > 0 && onBadgeChange && (
-            <BadgeDropdown
-              badges={badges}
-              selectedBadge={selectedBadge ?? null}
-              onBadgeChange={onBadgeChange}
-            />
-          )}
-          <div className="flex-1" />
-          {onRefresh && (
-            <CompactRefreshButton
-              metadata={cacheMetadata}
-              onRefresh={onRefresh}
-            />
-          )}
-        </div>
+
+        {/* Badge filter dropdown */}
+        {badges && badges.length > 0 && onBadgeChange && (
+          <BadgeDropdown
+            badges={badges}
+            selectedBadge={selectedBadge ?? null}
+            onBadgeChange={onBadgeChange}
+          />
+        )}
+
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* Cache refresh */}
+        {onRefresh && (
+          <CompactRefreshButton
+            metadata={cacheMetadata}
+            onRefresh={onRefresh}
+          />
+        )}
       </div>
 
       {/* Heat map grid - compact, no horizontal scroll */}

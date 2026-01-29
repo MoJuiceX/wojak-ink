@@ -49,7 +49,7 @@ export const ChampionCard: React.FC<ChampionCardProps> = ({ entry, timeframe }) 
 
   return (
     <motion.div
-      className="champion-card"
+      className="champion-card glass hover-lift glow-section"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}

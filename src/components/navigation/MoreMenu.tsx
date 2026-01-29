@@ -138,7 +138,7 @@ export function MoreMenu({ isOpen, onClose }: MoreMenuProps) {
 
           {/* Sheet - positioned above the bottom nav (80px) */}
           <motion.div
-            className="fixed left-0 right-0 z-[9999]"
+            className="fixed left-0 right-0 z-[9999] glass-strong"
             style={{
               bottom: 80, // Above the mobile navigation bar
               background: '#1a1a24', // Solid dark background

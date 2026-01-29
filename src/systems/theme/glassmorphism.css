@@ -2,91 +2,63 @@
 
 /* Glass Panel - Primary (Light glass) */
 .glass-panel {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.1),
-    rgba(255, 255, 255, 0.05)
-  );
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: #0a0a0a;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
 }
 
 /* Glass Panel - Dark */
 .glass-panel-dark {
-  background: linear-gradient(
-    135deg,
-    rgba(20, 20, 35, 0.95),
-    rgba(30, 30, 50, 0.9)
-  );
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: #0a0a0a;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: 1px solid rgba(255, 140, 50, 0.2);
   border-radius: 16px;
 }
 
 /* Glass Panel - Accent (Orange tint) */
 .glass-panel-accent {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 140, 50, 0.15),
-    rgba(255, 100, 50, 0.1)
-  );
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: #0a0a0a;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: 1px solid rgba(255, 140, 50, 0.3);
   border-radius: 16px;
 }
 
 /* Glass Panel - Gold (for achievements/rewards) */
 .glass-panel-gold {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 215, 0, 0.15),
-    rgba(255, 140, 0, 0.1)
-  );
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: #0a0a0a;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: 1px solid rgba(255, 215, 0, 0.3);
   border-radius: 16px;
 }
 
 /* Glass Panel - Purple (for premium/gems) */
 .glass-panel-purple {
-  background: linear-gradient(
-    135deg,
-    rgba(155, 89, 182, 0.15),
-    rgba(108, 52, 131, 0.1)
-  );
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: #0a0a0a;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: 1px solid rgba(155, 89, 182, 0.3);
   border-radius: 16px;
 }
 
 /* Glass Panel - Success (for positive feedback) */
 .glass-panel-success {
-  background: linear-gradient(
-    135deg,
-    rgba(76, 175, 80, 0.15),
-    rgba(46, 125, 50, 0.1)
-  );
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: #0a0a0a;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: 1px solid rgba(76, 175, 80, 0.3);
   border-radius: 16px;
 }
 
 /* Glass Panel - Error (for warnings/errors) */
 .glass-panel-error {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 71, 87, 0.15),
-    rgba(200, 50, 60, 0.1)
-  );
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: #0a0a0a;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: 1px solid rgba(255, 71, 87, 0.3);
   border-radius: 16px;
 }
@@ -95,13 +67,9 @@
 
 /* Glass Button - Primary */
 .glass-button {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 140, 50, 0.3),
-    rgba(255, 100, 50, 0.2)
-  );
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: #0a0a0a;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: 1px solid rgba(255, 140, 50, 0.4);
   border-radius: 12px;
   color: #fff;
@@ -112,11 +80,7 @@
 }
 
 .glass-button:hover {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 140, 50, 0.4),
-    rgba(255, 100, 50, 0.3)
-  );
+  background: #151515;
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(255, 140, 50, 0.3);
 }
@@ -135,9 +99,9 @@
 
 /* Glass Button - Secondary */
 .glass-button-secondary {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: #0a0a0a;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 12px;
   color: rgba(255, 255, 255, 0.9);
@@ -148,7 +112,7 @@
 }
 
 .glass-button-secondary:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: #151515;
   border-color: rgba(255, 255, 255, 0.3);
 }
 
@@ -173,9 +137,9 @@
 
 /* Glass Input */
 .glass-input {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: #0a0a0a;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   color: #fff;
@@ -201,9 +165,9 @@
 
 /* Glass Select */
 .glass-select {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: #0a0a0a;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   color: #fff;
@@ -226,9 +190,9 @@
 /* ===== GLASS CARDS ===== */
 
 .glass-card {
-  background: var(--gradient-surface);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: #0a0a0a;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: 1px solid var(--border-subtle);
   border-radius: 16px;
   padding: 20px;

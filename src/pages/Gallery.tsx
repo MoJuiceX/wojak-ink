@@ -353,7 +353,7 @@ function GalleryContent() {
       {/* Animated gradient background */}
       <div className="gallery-page-background" />
 
-      <div className="min-h-full" style={{ padding: pagePadding }}>
+      <div className="min-h-full" data-section="gallery" style={{ padding: pagePadding }}>
         <div className={isDesktop ? 'space-y-8' : ''}>
           {/* Content */}
           <AnimatePresence mode="wait">

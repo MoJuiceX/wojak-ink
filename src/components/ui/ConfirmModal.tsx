@@ -67,7 +67,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
 
           {/* Modal */}
           <motion.div
-            className={`confirm-modal confirm-modal-${variant}`}
+            className={`confirm-modal confirm-modal-${variant} glass-strong`}
             initial={
               prefersReducedMotion
                 ? { opacity: 0 }

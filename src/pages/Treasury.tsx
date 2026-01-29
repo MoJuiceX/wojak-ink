@@ -48,7 +48,7 @@ function TreasuryContent() {
         description="Explore the Wojak Farmers community treasury. View XCH holdings, CAT tokens, and NFT collections in an interactive bubble visualization. Track portfolio value in real-time."
         path="/treasury"
       />
-      <div className="treasury-page" style={{ padding: Math.min(contentPadding, 16) }}>
+      <div className="treasury-page" data-section="treasury" style={{ padding: Math.min(contentPadding, 16) }}>
         {/*
           3-COLUMN RESPONSIVE LAYOUT
           Mobile: vertical stack (overview -> bubbles -> NFTs)

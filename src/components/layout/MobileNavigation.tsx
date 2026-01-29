@@ -61,7 +61,7 @@ export function MobileNavigation({ visible = true }: MobileNavigationProps) {
       {/* CRITICAL: 'mobile-navigation' class is required for game-fullscreen-mode to hide this nav.
           See index.css for the hiding rules. Do not remove this class! */}
       <motion.nav
-        className="mobile-navigation fixed bottom-0 left-0 right-0 z-50 flex flex-col"
+        className="mobile-navigation fixed bottom-0 left-0 right-0 z-50 flex flex-col glass-strong"
         style={{
           paddingBottom: LAYOUT.mobileNav.safeAreaBottom,
           background: 'rgba(10, 10, 10, 0.95)',

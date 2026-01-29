@@ -149,7 +149,7 @@ export function Lightbox({
           {/* Content */}
           <motion.div
             ref={lightboxRef}
-            className="lightbox-content"
+            className="lightbox-content glass-strong"
             style={{ '--lightbox-max-width': SIZE_MAP[size] } as React.CSSProperties}
             variants={contentVariants}
             initial="hidden"

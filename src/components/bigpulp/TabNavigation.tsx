@@ -102,19 +102,16 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
               aria-controls={`panel-${tab.id}`}
               id={`tab-${tab.id}`}
               tabIndex={isActive ? 0 : -1}
-              className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-semibold transition-all relative rounded-lg"
+              className={`bigpulp-btn flex-1 flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-semibold transition-all relative rounded-lg ${isActive ? 'bigpulp-btn-active' : ''}`}
               style={{
                 color: isActive
                   ? 'var(--color-brand-primary)'
                   : 'var(--color-text-muted)',
-                background: isActive
-                  ? 'linear-gradient(135deg, rgba(255,149,0,0.15) 0%, rgba(255,149,0,0.05) 100%)'
-                  : 'transparent',
                 border: isActive
-                  ? '1px solid rgba(255,149,0,0.3)'
-                  : '1px solid transparent',
+                  ? '1px solid rgba(255,149,0,0.5)'
+                  : '1px solid var(--color-border)',
                 boxShadow: isActive
-                  ? '0 2px 8px rgba(255,149,0,0.15), inset 0 1px 0 rgba(255,255,255,0.05)'
+                  ? '0 2px 8px rgba(255,149,0,0.2)'
                   : 'none',
               }}
               onClick={() => {
@@ -127,9 +124,7 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
                   ? undefined
                   : {
                       scale: 1.02,
-                      background: isActive
-                        ? 'linear-gradient(135deg, rgba(255,149,0,0.2) 0%, rgba(255,149,0,0.08) 100%)'
-                        : 'rgba(255,255,255,0.05)',
+                      borderColor: 'rgba(255,255,255,0.2)',
                     }
               }
               whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}

@@ -1,0 +1,125 @@
+/* AMBIENT BACKGROUND - Floating Gradient Orbs with Smooth Color Cycling */
+
+.ambient-background {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-ambient, 0);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ambient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.7;
+  will-change: transform, background-color;
+}
+
+/* Orb 1 - Top Left: Green → Cyan → Yellow-Green → Green */
+.ambient-orb--cyan {
+  width: 700px;
+  height: 700px;
+  left: -5%;
+  top: -5%;
+  background-color: #00FF9F;
+  animation: drift-1 15s ease-in-out infinite, color-cycle-1 30s ease-in-out infinite;
+}
+
+/* Orb 2 - Bottom Right: Orange → Coral → Magenta → Orange */
+.ambient-orb--orange {
+  width: 650px;
+  height: 650px;
+  right: -5%;
+  bottom: 0%;
+  background-color: #FF5A09;
+  animation: drift-2 18s ease-in-out infinite, color-cycle-2 30s ease-in-out infinite;
+}
+
+/* Orb 3 - Top Right: Purple → Magenta → Deep Teal → Purple */
+.ambient-orb--purple {
+  width: 550px;
+  height: 550px;
+  right: 5%;
+  top: 10%;
+  background-color: #B026FF;
+  animation: drift-3 20s ease-in-out infinite, color-cycle-3 30s ease-in-out infinite;
+}
+
+/* Orb 4 - Left Middle: Teal → Purple → Cyan → Teal */
+.ambient-orb--pink {
+  width: 500px;
+  height: 500px;
+  left: 0%;
+  top: 35%;
+  background-color: #0ABDC6;
+  animation: drift-4 16s ease-in-out infinite, color-cycle-4 30s ease-in-out infinite;
+}
+
+/* SMOOTH 3-COLOR CYCLES */
+
+/* Orb 1: Green → Cyan → Yellow-Green → Green */
+@keyframes color-cycle-1 {
+  0%, 100% { background-color: #00FF9F; }
+  33% { background-color: #00CCFF; }
+  66% { background-color: #CCFF00; }
+}
+
+/* Orb 2: Orange → Coral → Magenta → Orange */
+@keyframes color-cycle-2 {
+  0%, 100% { background-color: #FF5A09; }
+  33% { background-color: #FF3D94; }
+  66% { background-color: #FF0090; }
+}
+
+/* Orb 3: Purple → Magenta → Deep Teal → Purple */
+@keyframes color-cycle-3 {
+  0%, 100% { background-color: #B026FF; }
+  33% { background-color: #FF0090; }
+  66% { background-color: #0ABDC6; }
+}
+
+/* Orb 4: Teal → Purple → Cyan → Teal */
+@keyframes color-cycle-4 {
+  0%, 100% { background-color: #0ABDC6; }
+  33% { background-color: #B026FF; }
+  66% { background-color: #00CCFF; }
+}
+
+/* DRIFT ANIMATIONS - Movement */
+@keyframes drift-1 {
+  0% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(150px, 80px) scale(1.15); }
+  50% { transform: translate(200px, -50px) scale(1.05); }
+  75% { transform: translate(80px, -100px) scale(1.1); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes drift-2 {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-180px, 100px) scale(1.2); }
+  66% { transform: translate(-100px, -120px) scale(0.9); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes drift-3 {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-150px, 150px) scale(1.15); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes drift-4 {
+  0% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(100px, 120px) scale(1.15); }
+  50% { transform: translate(-60px, 100px) scale(1.25); }
+  75% { transform: translate(-120px, -60px) scale(1.1); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@media (max-width: 767px) {
+  .ambient-background { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-orb { animation: none !important; }
+}

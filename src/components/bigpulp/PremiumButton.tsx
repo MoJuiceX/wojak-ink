@@ -29,38 +29,34 @@ const SIZES: Record<PremiumButtonSize, { padding: string; fontSize: string; icon
   lg: { padding: '14px 20px', fontSize: '16px', iconSize: 18, gap: '10px' },
 };
 
-// Variant styles
+// Variant styles - backgrounds controlled by CSS .bigpulp-btn class
 const getVariantStyles = (variant: PremiumButtonVariant, isActive: boolean) => {
   if (isActive || variant === 'active') {
     return {
-      background: 'linear-gradient(135deg, rgba(255,149,0,0.25) 0%, rgba(255,149,0,0.15) 100%)',
       border: '1px solid rgba(255,149,0,0.5)',
       color: 'var(--color-brand-primary)',
-      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1), 0 0 20px rgba(255,149,0,0.15)',
+      boxShadow: '0 0 12px rgba(255,149,0,0.2)',
     };
   }
 
   switch (variant) {
     case 'accent':
       return {
-        background: 'linear-gradient(135deg, var(--color-brand-primary) 0%, rgba(255,149,0,0.8) 100%)',
         border: '1px solid rgba(255,149,0,0.6)',
-        color: 'white',
-        boxShadow: '0 4px 12px rgba(255,149,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2)',
+        color: 'var(--color-brand-primary)',
+        boxShadow: '0 4px 12px rgba(255,149,0,0.3)',
       };
     case 'ghost':
       return {
-        background: 'transparent',
         border: '1px solid var(--color-border)',
         color: 'var(--color-text-secondary)',
         boxShadow: 'none',
       };
     default:
       return {
-        background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
-        border: '1px solid rgba(255,255,255,0.12)',
+        border: '1px solid var(--color-border)',
         color: 'var(--color-text-secondary)',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 2px 8px rgba(0,0,0,0.2)',
+        boxShadow: 'none',
       };
   }
 };
@@ -89,6 +85,7 @@ export const PremiumButton = forwardRef<HTMLButtonElement, PremiumButtonProps>(
         ref={ref}
         type="button"
         disabled={disabled}
+        className={`bigpulp-btn ${isActive ? 'bigpulp-btn-active' : ''}`}
         style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -110,12 +107,7 @@ export const PremiumButton = forwardRef<HTMLButtonElement, PremiumButtonProps>(
             ? undefined
             : {
                 scale: 1.02,
-                boxShadow:
-                  isActive || variant === 'active'
-                    ? 'inset 0 1px 0 rgba(255,255,255,0.1), 0 0 30px rgba(255,149,0,0.25)'
-                    : variant === 'accent'
-                      ? '0 6px 20px rgba(255,149,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
-                      : 'inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 12px rgba(0,0,0,0.3)',
+                borderColor: 'rgba(255,255,255,0.2)',
               }
         }
         whileTap={disabled ? undefined : { scale: 0.98 }}
@@ -201,6 +193,7 @@ export function PremiumChip({
   return (
     <motion.button
       type="button"
+      className={`bigpulp-btn ${isActive ? 'bigpulp-btn-active' : ''}`}
       onClick={onClick}
       onMouseEnter={onHover}
       onMouseLeave={onHoverEnd}
@@ -215,23 +208,19 @@ export function PremiumChip({
         transition: 'all 0.2s ease',
         ...(isActive
           ? {
-              background: 'linear-gradient(135deg, rgba(255,149,0,0.3) 0%, rgba(255,149,0,0.15) 100%)',
               border: '1px solid rgba(255,149,0,0.5)',
               color: 'var(--color-brand-primary)',
-              boxShadow: '0 0 16px rgba(255,149,0,0.2)',
+              boxShadow: '0 0 12px rgba(255,149,0,0.2)',
             }
           : {
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.1)',
+              border: '1px solid var(--color-border)',
               color: 'var(--color-text-secondary)',
               boxShadow: 'none',
             }),
       }}
       whileHover={{
         scale: 1.05,
-        boxShadow: isActive
-          ? '0 0 24px rgba(255,149,0,0.3)'
-          : '0 4px 12px rgba(0,0,0,0.2)',
+        borderColor: 'rgba(255,255,255,0.2)',
       }}
       whileTap={{ scale: 0.95 }}
     >

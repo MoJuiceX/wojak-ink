@@ -40,20 +40,15 @@ export const GameCard = memo(function GameCard({
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   };
 
-  const backgroundTint = effects.backgroundTint > 0
-    ? hexToRgba(effects.color, effects.backgroundTint)
-    : 'transparent';
-
   const cardStyle = {
-    background: effects.backgroundTint > 0
-      ? `linear-gradient(135deg, ${backgroundTint}, var(--color-glass-bg))`
-      : 'var(--color-glass-bg)',
+    background: '#0a0a0a',
     border: '1px solid var(--color-border)',
     outline: isHovered ? `${effects.borderWidth}px solid ${effects.color}` : 'none',
     outlineOffset: '-1px',
     boxShadow: isHovered
       ? `0 0 ${effects.glowRadius}px ${hexToRgba(effects.color, effects.glowOpacity)}`
       : 'none',
+    backdropFilter: 'none',
   };
 
   // Handle click - either flick emoji or open game
@@ -81,7 +76,7 @@ export const GameCard = memo(function GameCard({
 
   return (
     <motion.button
-      className="relative flex flex-col items-center p-5 sm:p-4 rounded-xl text-center"
+      className="relative flex flex-col items-center p-5 sm:p-4 rounded-xl text-center hover-lift glow-section"
       style={{ ...cardStyle, ...disabledStyle, cursor: isDisabled ? 'not-allowed' : 'pointer' }}
       data-vote-target={game.id}
       initial={{ opacity: 0, y: 20 }}

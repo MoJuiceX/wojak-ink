@@ -71,7 +71,7 @@ export const NFTGridItem = memo(function NFTGridItem({
 
   return (
     <motion.button
-      className="nft-grid-item group relative aspect-square rounded-lg overflow-hidden transition-all duration-150 ease-out"
+      className="nft-grid-item glass hover-lift glow-section group relative aspect-square rounded-lg overflow-hidden transition-all duration-150 ease-out"
       style={{
         border: '1px solid rgba(249, 115, 22, 0.2)',
         transformStyle: 'preserve-3d',

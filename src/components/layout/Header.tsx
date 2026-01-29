@@ -184,7 +184,7 @@ export function Header({ transparent = false }: HeaderProps) {
       )}
 
       <header
-        className={`fixed top-0 right-0 z-50 flex items-center ${isMobile ? (headerBreadcrumb ? 'justify-start' : 'justify-center') : 'justify-between'}`}
+        className={`fixed top-0 right-0 z-50 flex items-center glass-strong ${isMobile ? (headerBreadcrumb ? 'justify-start' : 'justify-center') : 'justify-between'}`}
         style={{
           height,
           left: isMobile ? 0 : sidebarWidth,

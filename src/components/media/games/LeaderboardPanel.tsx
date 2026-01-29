@@ -8,7 +8,6 @@
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { Trophy } from 'lucide-react';
 import { Avatar } from '@/components/Avatar/Avatar';
 import { GAME_NAMES, type GameId } from '@/types/leaderboard';
@@ -79,7 +78,7 @@ export function LeaderboardPanel() {
     <div
       className="h-full rounded-2xl overflow-hidden flex flex-col"
       style={{
-        background: 'var(--color-glass-bg)',
+        background: 'rgba(10, 10, 10, 0.98)',
         border: '1px solid var(--color-border)',
       }}
     >
@@ -132,17 +131,12 @@ export function LeaderboardPanel() {
         ) : (
           <div className="space-y-2">
             {topScores.map((entry, index) => (
-              <motion.div
+              <div
                 key={entry.gameId}
-                className="flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer"
+                className="leaderboard-name-card flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer"
                 style={{
-                  background: 'var(--color-bg-primary)',
                   border: '1px solid var(--color-border)',
                 }}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.03 }}
-                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.1)' }}
                 onClick={() => handlePlayerClick(entry.userId)}
               >
                 {/* Player Avatar */}
@@ -181,7 +175,7 @@ export function LeaderboardPanel() {
                 >
                   {entry.score.toLocaleString()}
                 </span>
-              </motion.div>
+              </div>
             ))}
           </div>
         )}

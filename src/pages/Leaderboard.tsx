@@ -17,7 +17,7 @@ const Leaderboard = () => {
         description="Compete for the top spot on Wojak.ink global leaderboards. View high scores across 15 arcade games, track your personal bests, and see how you rank against players worldwide."
         path="/leaderboard"
       />
-      <div className="min-h-full px-3 md:px-4">
+      <div className="min-h-full px-3 md:px-4" data-section="leaderboard">
         <div className="pb-24 pt-2 md:pt-4">
           <LeaderboardComponent gameId="orange-stack" showGameSelector />
         </div>

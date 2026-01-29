@@ -35,7 +35,7 @@ export function ThemeCard({ theme, isSelected, onSelect }: ThemeCardProps) {
       whileHover={prefersReducedMotion ? undefined : 'hover'}
       whileTap={prefersReducedMotion ? undefined : 'tap'}
       className={`
-        relative p-4 rounded-xl text-left transition-all
+        relative p-4 rounded-xl text-left transition-all glass hover-lift glow-section
         focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
         focus-visible:ring-[var(--color-brand-primary)]
         ${isSelected ? 'ring-2 ring-[var(--color-brand-primary)]' : ''}

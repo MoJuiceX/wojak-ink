@@ -32,6 +32,7 @@ import StartupSequence from '@/components/StartupSequence';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { GameLoading } from '@/components/games/GameLoading';
 import { GameErrorBoundary } from '@/components/games/GameError';
+import { AmbientBackground } from './components/AmbientBackground';
 
 // Lazy load all pages for code splitting
 const Gallery = lazy(() => import('./pages/Gallery'));
@@ -142,7 +143,7 @@ function AppContent() {
           {showContent && <GlobalVideoPlayer />}
 
           {/* Ambient background with floating orbs */}
-          {showContent && <div className="app-background" />}
+          {showContent && <AmbientBackground />}
 
           {/* Subtle noise texture overlay */}
           {showContent && <div className="noise-overlay" />}

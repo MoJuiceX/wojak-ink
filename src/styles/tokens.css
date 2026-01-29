@@ -261,10 +261,10 @@
 
 :root {
   /* Glass backgrounds */
-  --glass-bg-light: rgba(255, 255, 255, 0.05);
-  --glass-bg-medium: rgba(255, 255, 255, 0.08);
-  --glass-bg-dark: rgba(0, 0, 0, 0.4);
-  --glass-bg-orange: rgba(249, 115, 22, 0.1);
+  --glass-bg-light: rgba(10, 10, 10, 0.98);
+  --glass-bg-medium: rgba(10, 10, 10, 0.98);
+  --glass-bg-dark: rgba(10, 10, 10, 0.98);
+  --glass-bg-orange: rgba(10, 10, 10, 0.98);
 
   /* Blur amounts */
   --blur-sm: 8px;
@@ -275,20 +275,16 @@
 
 /* Utility classes */
 .glass {
-  background: var(--glass-bg-medium);
-  backdrop-filter: blur(var(--blur-md)) saturate(180%);
-  -webkit-backdrop-filter: blur(var(--blur-md)) saturate(180%);
+  background: #0a0a0a;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: 1px solid var(--border-subtle);
 }
 
 .glass-orange {
-  background: linear-gradient(
-    135deg,
-    var(--glass-bg-orange),
-    var(--glass-bg-dark)
-  );
-  backdrop-filter: blur(var(--blur-md));
-  -webkit-backdrop-filter: blur(var(--blur-md));
+  background: #0a0a0a;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: 1px solid var(--border-accent);
 }
 

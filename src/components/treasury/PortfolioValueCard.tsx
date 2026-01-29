@@ -131,7 +131,7 @@ export function PortfolioValueCard({
 
   return (
     <motion.div
-      className="relative rounded-2xl overflow-hidden"
+      className="relative rounded-2xl overflow-hidden hover-lift glow-section"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}

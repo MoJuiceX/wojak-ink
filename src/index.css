@@ -252,8 +252,8 @@
   --color-brand-deep: #cc5500;
 
   /* Surface Effects */
-  --color-glass-bg: rgba(255, 255, 255, 0.03);
-  --color-glass-hover: rgba(255, 255, 255, 0.06);
+  --color-glass-bg: rgba(10, 10, 10, 0.98);
+  --color-glass-hover: rgba(20, 20, 20, 0.98);
   --color-border: rgba(255, 255, 255, 0.08);
   --color-border-glow: rgba(255, 107, 0, 0.3);
 
@@ -302,8 +302,8 @@
   --color-brand-deep: #cc5500;
 
   /* Surface Effects */
-  --color-glass-bg: rgba(255, 255, 255, 0.03);
-  --color-glass-hover: rgba(255, 255, 255, 0.06);
+  --color-glass-bg: rgba(10, 10, 10, 0.98);
+  --color-glass-hover: rgba(20, 20, 20, 0.98);
   --color-border: rgba(255, 255, 255, 0.1);
   --color-border-glow: rgba(255, 107, 0, 0.3);
 
@@ -402,8 +402,8 @@
   --color-brand-deep: #ff6600;
 
   /* Surface Effects */
-  --color-glass-bg: rgba(255, 140, 0, 0.08);
-  --color-glass-hover: rgba(255, 140, 0, 0.12);
+  --color-glass-bg: rgba(10, 10, 10, 0.98);
+  --color-glass-hover: rgba(20, 20, 20, 0.98);
   --color-border: rgba(255, 140, 0, 0.2);
   --color-border-glow: rgba(255, 140, 0, 0.5);
 
@@ -454,8 +454,8 @@
   --color-brand-deep: #16a34a;
 
   /* Surface Effects */
-  --color-glass-bg: rgba(34, 197, 94, 0.06);
-  --color-glass-hover: rgba(34, 197, 94, 0.1);
+  --color-glass-bg: rgba(10, 10, 10, 0.98);
+  --color-glass-hover: rgba(20, 20, 20, 0.98);
   --color-border: rgba(34, 197, 94, 0.15);
   --color-border-glow: rgba(34, 197, 94, 0.4);
 
@@ -1264,5 +1264,53 @@ body.game-fullscreen-mode .ion-page {
   --offset-top: 0px !important;
   padding-top: 0 !important;
   margin-top: 0 !important;
+}
+
+/* ============================================
+   PREMIUM REDESIGN IMPORTS
+   ============================================ */
+@import './styles/premium-tokens.css';
+@import './styles/premium-effects.css';
+@import './styles/ambient-background.css';
+
+/* ============================================
+   LEADERBOARD PANEL - NAME CARDS SOLID BLACK
+   Container stays glassmorphic, only name cards are solid
+   ============================================ */
+.leaderboard-name-card {
+  background-color: #0a0a0a !important;
+  background: #0a0a0a !important;
+  position: relative !important;
+  z-index: 1 !important;
+  isolation: isolate !important;
+}
+
+.leaderboard-name-card:hover {
+  background-color: #111111 !important;
+  background: #111111 !important;
+}
+
+/* ============================================
+   BIGPULP BUTTONS - SOLID BLACK
+   Override any glassmorphism or transparency
+   ============================================ */
+
+/* Base state - solid black */
+.bigpulp-btn {
+  background-color: #0a0a0a !important;
+  background: #0a0a0a !important;
+}
+
+/* Hover state - lighter */
+.bigpulp-btn:hover {
+  background-color: #1a1a1a !important;
+  background: #1a1a1a !important;
+}
+
+/* Active/Selected state - lighter with accent */
+.bigpulp-btn-active,
+.bigpulp-btn.active {
+  background-color: #1a1a1a !important;
+  background: #1a1a1a !important;
 }
 

@@ -1,0 +1,83 @@
+/* PREMIUM EFFECTS - Utility Classes */
+
+/* GLASSMORPHISM */
+.glass {
+  background: #0a0a0a;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid var(--glass-border);
+}
+
+.glass-strong {
+  background: #0a0a0a;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid var(--glass-border);
+}
+
+.glass-hover:hover {
+  background: #151515;
+  border-color: var(--glass-border-hover);
+}
+
+/* HOVER LIFT */
+.hover-lift {
+  transition: transform var(--duration-normal) var(--ease-out),
+              box-shadow var(--duration-normal) var(--ease-out);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+}
+
+/* GLOW EFFECTS */
+.glow-orange:hover { box-shadow: var(--glow-orange); }
+.glow-cyan:hover { box-shadow: var(--glow-cyan); }
+.glow-purple:hover { box-shadow: var(--glow-purple); }
+.glow-green:hover { box-shadow: var(--glow-green); }
+.glow-gold:hover { box-shadow: var(--glow-gold); }
+
+.glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 15px rgba(255, 107, 0, 0.3); }
+  50% { box-shadow: 0 0 25px rgba(255, 107, 0, 0.5); }
+}
+
+/* COMBINED: Premium Card */
+.premium-card {
+  background: #0a0a0a;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  transition: transform var(--duration-normal) var(--ease-out),
+              box-shadow var(--duration-normal) var(--ease-out);
+}
+
+.premium-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--glow-orange);
+}
+
+/* SECTION-SPECIFIC GLOWS */
+/* Default glow (gallery/shop/generator) */
+.glow-section:hover { box-shadow: var(--glow-orange); }
+
+/* Section overrides */
+[data-section="gallery"] .glow-section:hover { box-shadow: var(--glow-orange); }
+[data-section="bigpulp"] .glow-section:hover { box-shadow: var(--glow-cyan); }
+[data-section="games"] .glow-section:hover { box-shadow: var(--glow-purple); }
+[data-section="leaderboard"] .glow-section:hover { box-shadow: var(--glow-gold); }
+[data-section="treasury"] .glow-section:hover { box-shadow: var(--glow-green); }
+[data-section="shop"] .glow-section:hover { box-shadow: var(--glow-orange); }
+[data-section="generator"] .glow-section:hover { box-shadow: var(--glow-orange); }
+
+/* REDUCED MOTION */
+@media (prefers-reduced-motion: reduce) {
+  .hover-lift, .premium-card { transition: none; }
+  .hover-lift:hover, .premium-card:hover { transform: none; }
+  .glow-pulse { animation: none; }
+}

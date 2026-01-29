@@ -568,7 +568,7 @@ function BigPulpContent() {
         description="Get AI-powered insights on Wojak Farmers Plot NFTs. Analyze trait rarity, view sales history, explore market heatmaps, and discover valuable combos. Your NFT intelligence companion on Chia blockchain."
         path="/bigpulp"
       />
-      <div style={{ padding: contentPadding, paddingBottom: 'env(safe-area-inset-bottom, 16px)' }}>
+      <div data-section="bigpulp" style={{ padding: contentPadding, paddingBottom: 'env(safe-area-inset-bottom, 16px)' }}>
         {/* SEO H1 - visually hidden but accessible */}
         <h1 className="sr-only">BigPulp AI - Wojak Farmers NFT Intelligence & Analysis</h1>
 
