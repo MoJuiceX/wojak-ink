@@ -34,16 +34,14 @@ export function ProfileGuard({ children }: ProfileGuardProps) {
     const wasSkipped = localStorage.getItem(ONBOARDING_SKIPPED_KEY) === 'true';
 
     // Show onboarding modal if profile is incomplete and not skipped
-    if (userProfile.needsOnboarding && !wasSkipped) {
-      setShowOnboarding(true);
-    } else {
-      setShowOnboarding(false);
-    }
-  }, [
-    userProfile?.isSignedIn,
-    userProfile?.isLoaded,
-    userProfile?.needsOnboarding,
-  ]);
+    queueMicrotask(() => {
+      if (userProfile.needsOnboarding && !wasSkipped) {
+        setShowOnboarding(true);
+      } else {
+        setShowOnboarding(false);
+      }
+    });
+  }, [userProfile]);
 
   const handleSkip = () => {
     localStorage.setItem(ONBOARDING_SKIPPED_KEY, 'true');

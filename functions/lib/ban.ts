@@ -5,7 +5,9 @@
  * @see claude-specs/11-SERVER-STATE-SPEC.md
  */
 
-interface Env {
+// Env interface kept for documentation - DB binding used by functions
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface _Env {
   DB: D1Database;
 }
 
@@ -53,7 +55,7 @@ export async function banUser(
   // Clear any active sessions
   await db.prepare(`DELETE FROM active_sessions WHERE user_id = ?`).bind(userId).run();
 
-  console.log(`[BAN] User ${userId} banned for: ${reason}`);
+  console.warn(`[BAN] User ${userId} banned for: ${reason}`);
 }
 
 /**

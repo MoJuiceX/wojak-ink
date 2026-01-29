@@ -103,7 +103,7 @@ function GalleryContent() {
             if (secondBatch.length > 0) {
               imagePreloader.preloadBatch(secondBatch, 'medium');
             }
-          } catch (error) {
+          } catch {
             // Silently fail - this is a background optimization
           }
         }, 1000);
@@ -121,7 +121,7 @@ function GalleryContent() {
             if (thirdBatch.length > 0) {
               imagePreloader.preloadBatch(thirdBatch, 'low');
             }
-          } catch (error) {
+          } catch {
             // Silently fail
           }
         }, 3000);
@@ -261,27 +261,32 @@ function GalleryContent() {
   }, [filteredNfts, visibleCount, isLoading]);
 
   // Reset pagination when character changes
+   
   useEffect(() => {
-    setVisibleCount(ITEMS_PER_PAGE);
+    queueMicrotask(() => setVisibleCount(ITEMS_PER_PAGE));
   }, [selectedCharacter]);
 
   // Re-trigger animation when character changes
+   
   useEffect(() => {
     if (selectedCharacter) {
-      setAnimationKey((k) => k + 1);
+      queueMicrotask(() => setAnimationKey((k) => k + 1));
     }
   }, [selectedCharacter]);
 
   // Freeze/unfreeze grid when explorer opens/closes
   // This prevents background grid from re-sorting while in lightbox
+   
   useEffect(() => {
-    if (explorerOpen && !frozenGridNfts) {
-      // Capture current grid state when explorer opens
-      setFrozenGridNfts(filteredNfts.slice(0, visibleCount));
-    } else if (!explorerOpen && frozenGridNfts) {
-      // Clear frozen state when explorer closes
-      setFrozenGridNfts(null);
-    }
+    queueMicrotask(() => {
+      if (explorerOpen && !frozenGridNfts) {
+        // Capture current grid state when explorer opens
+        setFrozenGridNfts(filteredNfts.slice(0, visibleCount));
+      } else if (!explorerOpen && frozenGridNfts) {
+        // Clear frozen state when explorer closes
+        setFrozenGridNfts(null);
+      }
+    });
   }, [explorerOpen, filteredNfts, visibleCount, frozenGridNfts]);
 
   // Update header breadcrumb when character is selected
@@ -329,7 +334,7 @@ function GalleryContent() {
         const nfts = await galleryService.fetchNFTsByCharacter(character);
         const urls = nfts.slice(0, 50).map((nft) => nft.imageUrl);
         imagePreloader.preloadBatch(urls, 'high');
-      } catch (error) {
+      } catch {
         // Silently fail - preloading is a nice-to-have
       }
     },

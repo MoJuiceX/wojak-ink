@@ -247,7 +247,7 @@ async function loadTraitStats(): Promise<AttributeStats[]> {
 
     const stats: AttributeStats[] = [];
 
-    for (const [_key, attr] of Object.entries(jsonData.attributes)) {
+    for (const [, attr] of Object.entries(jsonData.attributes)) {
       // Get NFT count from trait rankings
       const traitData = traitRankings.lookup[attr.category]?.[attr.value];
       const count = traitData?.count || 0;

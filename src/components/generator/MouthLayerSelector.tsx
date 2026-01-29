@@ -126,7 +126,7 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
   useEffect(() => {
     if (!isInitialized) return;
 
-    setIsLoading(true);
+    queueMicrotask(() => setIsLoading(true));
     Promise.all([
       getLayerImages('MouthBase'),
       getLayerImages('MouthItem'),

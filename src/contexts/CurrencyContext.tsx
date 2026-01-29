@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * CurrencyContext - Server-Backed Implementation
  *
@@ -93,8 +94,9 @@ interface CurrencyContextType {
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
 
 export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Use Clerk auth if available
-  const authResult = CLERK_ENABLED ? useAuth() : { userId: null, isSignedIn: false, getToken: async () => null };
+  // Always call hooks unconditionally (rules of hooks)
+  const clerkAuth = useAuth();
+  const authResult = CLERK_ENABLED ? clerkAuth : { userId: null, isSignedIn: false, getToken: async () => null };
   const userId = authResult.userId;
   const isSignedIn = authResult.isSignedIn;
   const getToken = authResult.getToken;
@@ -715,7 +717,7 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }
       if (response.ok) {
         const data = await response.json();
         setRecentTransactions(
-          data.transactions.map((t: any) => ({
+          data.transactions.map((t: { id: string | number; amount: number; currencyType: string; source: string; sourceDetails?: unknown; createdAt: string }) => ({
             id: String(t.id),
             userId,
             type: t.amount > 0 ? 'earn' : 'spend',

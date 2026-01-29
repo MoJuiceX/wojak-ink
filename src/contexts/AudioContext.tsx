@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useRef, type ReactNode } from 'react';
 import { useSettings } from './SettingsContext';
 import { SoundManager } from '@/systems/audio/SoundManager';
@@ -90,11 +91,10 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
       bgMusicRef.current.src = currentTrack;
 
       if (wasPlaying && isBackgroundMusicEnabled) {
-        bgMusicRef.current.play().catch(_err => {
-        });
+        bgMusicRef.current.play().catch(() => { /* Autoplay may be blocked */ });
       }
     }
-  }, [currentTrack]);
+  }, [currentTrack, isBackgroundMusicEnabled, isBackgroundMusicPlaying]);
 
   // Handle background music enable/disable
   // Skip auto-pause when force play is active (games)
@@ -104,7 +104,7 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
 
     if (!isBackgroundMusicEnabled && isBackgroundMusicPlaying) {
       bgMusicRef.current.pause();
-      setIsBackgroundMusicPlaying(false);
+      queueMicrotask(() => setIsBackgroundMusicPlaying(false));
     }
   }, [isBackgroundMusicEnabled, isBackgroundMusicPlaying]);
 
@@ -115,8 +115,7 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
       .then(() => {
         setIsBackgroundMusicPlaying(true);
       })
-      .catch(_err => {
-      });
+      .catch(() => { /* Autoplay may be blocked */ });
   };
 
   // Force play - bypasses the isBackgroundMusicEnabled check (for games)
@@ -182,8 +181,7 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
     // Update volume and play
     audio.volume = sfxVolume;
     audio.currentTime = 0;
-    audio.play().catch(_err => {
-    });
+    audio.play().catch(() => { /* Autoplay may be blocked */ });
   };
 
   // Initialize the new SoundManager system

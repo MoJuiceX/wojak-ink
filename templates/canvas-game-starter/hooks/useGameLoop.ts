@@ -3,13 +3,14 @@
  * Manages the game loop with consistent timing and delta time
  */
 
-import { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useState } from 'react';
 
 interface GameLoopOptions {
+  update: (deltaTime: number) => void;
+  render: (ctx: CanvasRenderingContext2D, interpolation: number) => void;
+  canvasRef: React.RefObject<HTMLCanvasElement>;
   targetFPS?: number;
-  onUpdate: (deltaTime: number, frameCount: number) => void;
-  onRender: (ctx: CanvasRenderingContext2D, deltaTime: number) => void;
-  isPaused?: boolean;
+  fixedTimeStep?: boolean;
 }
 
 interface GameLoopState {
@@ -21,14 +22,21 @@ interface GameLoopState {
   fpsFrameCount: number;
 }
 
-export const useGameLoop = (
-  canvasRef: React.RefObject<HTMLCanvasElement>,
-  options: GameLoopOptions
-) => {
-  const { targetFPS = 60, onUpdate, onRender, isPaused = false } = options;
+export interface UseGameLoopReturn {
+  start: () => void;
+  stop: () => void;
+  isRunning: boolean;
+  getFrameCount: () => number;
+  getFps: () => number;
+  reset: () => void;
+}
+
+export const useGameLoop = (options: GameLoopOptions): UseGameLoopReturn => {
+  const { update, render, canvasRef, targetFPS = 60, fixedTimeStep = true } = options;
 
   const frameTime = 1000 / targetFPS;
   const rafIdRef = useRef<number>(0);
+  const [isRunning, setIsRunning] = useState(false);
   const stateRef = useRef<GameLoopState>({
     frameCount: 0,
     lastTime: 0,
@@ -38,15 +46,19 @@ export const useGameLoop = (
     fpsFrameCount: 0,
   });
 
-  const loop = useCallback(
-    (currentTime: number) => {
+  // Store loop function in a ref to avoid self-reference issues
+  const loopRef = useRef<((currentTime: number) => void) | null>(null);
+
+  // Update the loop function ref when dependencies change
+  useEffect(() => {
+    loopRef.current = (currentTime: number) => {
       const state = stateRef.current;
 
       // Initialize on first frame
       if (state.lastTime === 0) {
         state.lastTime = currentTime;
         state.fpsUpdateTime = currentTime;
-        rafIdRef.current = requestAnimationFrame(loop);
+        rafIdRef.current = requestAnimationFrame((t) => loopRef.current?.(t));
         return;
       }
 
@@ -62,47 +74,80 @@ export const useGameLoop = (
         state.fpsUpdateTime = currentTime;
       }
 
-      // Skip if paused
-      if (!isPaused) {
+      if (fixedTimeStep) {
         // Fixed timestep for physics
         state.accumulator += deltaTime;
         while (state.accumulator >= frameTime) {
-          onUpdate(frameTime, state.frameCount);
+          update(frameTime);
           state.accumulator -= frameTime;
           state.frameCount++;
         }
+
+        // Calculate interpolation for smooth rendering
+        const interpolation = state.accumulator / frameTime;
 
         // Render
         const canvas = canvasRef.current;
         if (canvas) {
           const ctx = canvas.getContext('2d');
           if (ctx) {
-            onRender(ctx, deltaTime);
+            render(ctx, interpolation);
+          }
+        }
+      } else {
+        // Variable timestep
+        update(deltaTime);
+        state.frameCount++;
+
+        const canvas = canvasRef.current;
+        if (canvas) {
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            render(ctx, 1);
           }
         }
       }
 
       // Continue loop
-      rafIdRef.current = requestAnimationFrame(loop);
-    },
-    [canvasRef, frameTime, isPaused, onUpdate, onRender]
-  );
+      rafIdRef.current = requestAnimationFrame((t) => loopRef.current?.(t));
+    };
+  }, [canvasRef, frameTime, fixedTimeStep, update, render]);
 
-  // Start/stop loop
+  const start = useCallback(() => {
+    if (!isRunning) {
+      setIsRunning(true);
+      // Reset state for fresh start
+      stateRef.current.lastTime = 0;
+      rafIdRef.current = requestAnimationFrame((t) => loopRef.current?.(t));
+    }
+  }, [isRunning]);
+
+  const stop = useCallback(() => {
+    if (isRunning) {
+      setIsRunning(false);
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = 0;
+      }
+    }
+  }, [isRunning]);
+
+  // Cleanup on unmount
   useEffect(() => {
-    rafIdRef.current = requestAnimationFrame(loop);
-
     return () => {
       if (rafIdRef.current) {
         cancelAnimationFrame(rafIdRef.current);
       }
     };
-  }, [loop]);
+  }, []);
 
-  // Return useful values
+  // Return useful values via getters to avoid ref access during render
   return {
-    frameCount: stateRef.current.frameCount,
-    fps: stateRef.current.fps,
+    start,
+    stop,
+    isRunning,
+    getFrameCount: () => stateRef.current.frameCount,
+    getFps: () => stateRef.current.fps,
     reset: () => {
       stateRef.current = {
         frameCount: 0,
@@ -154,11 +199,16 @@ export const useGameTimeout = (
   const savedCallback = useRef(callback);
   const timeoutRef = useRef<NodeJS.Timeout>();
   const remainingRef = useRef(delay);
-  const startTimeRef = useRef(Date.now());
+  const startTimeRef = useRef<number>(0);
 
   useEffect(() => {
     savedCallback.current = callback;
   }, [callback]);
+
+  // Initialize startTimeRef on mount
+  useEffect(() => {
+    startTimeRef.current = Date.now();
+  }, []);
 
   useEffect(() => {
     if (isPaused) {

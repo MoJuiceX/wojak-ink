@@ -15,7 +15,7 @@ let visibilityHandlerSetup = false;
 export const getAudioContext = () => {
   if (!audioContext) {
     try {
-      audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
       
       // Set up visibility change handler once to suspend/resume audio context
       // This ensures synthesized sounds stop when browser goes to background on mobile
@@ -33,7 +33,7 @@ export const getAudioContext = () => {
           }
         });
       }
-    } catch (e) {
+    } catch {
       console.warn('Web Audio API not supported');
       return null;
     }
@@ -83,7 +83,7 @@ export const createSoftPop = (ctx: AudioContext | null, freq: number = 800, dura
 
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + duration);
-  } catch (e) {
+  } catch {
     // Silently fail - don't break game flow
   }
 };
@@ -109,7 +109,7 @@ export const createChimeTail = (ctx: AudioContext | null, freq: number = 1200, d
 
     osc.start(startTime);
     osc.stop(startTime + 0.15);
-  } catch (e) {
+  } catch {
     // Silently fail - don't break game flow
   }
 };
@@ -139,7 +139,7 @@ export const createSparkleCascade = (ctx: AudioContext | null, count: number = 5
       osc.start(startTime);
       osc.stop(startTime + 0.12);
     }
-  } catch (e) {
+  } catch {
     // Silently fail - don't break game flow
   }
 };
@@ -175,7 +175,7 @@ export const createWinSparkle = () => {
 
     // Sparkle overlay
     createSparkleCascade(ctx, 6, 1800);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -206,7 +206,7 @@ export const createWinArpeggio = () => {
       osc.start(startTime);
       osc.stop(startTime + 0.25);
     });
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -223,7 +223,7 @@ export const createWinBubbles = () => {
         createSoftPop(ctx, freq, 0.1);
       }, i * 50);
     });
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -258,7 +258,7 @@ export const createWinBell = () => {
 
     // Add sparkle
     createSparkleCascade(ctx, 4, 2000);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -289,7 +289,7 @@ export const createWinShimmer = () => {
       osc.start(ctx.currentTime);
       osc.stop(ctx.currentTime + 0.8);
     }
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -321,7 +321,7 @@ export const createBlockLandSound = () => {
 
     // Subtle chime tail for satisfaction
     createChimeTail(ctx, 1200, 0.02);
-  } catch (e) {
+  } catch {
     // Silently fail - don't break game flow
   }
 };
@@ -356,7 +356,7 @@ export const createPerfectBonusSound = () => {
 
     // Add sparkle overlay
     createSparkleCascade(ctx, 4, 1600);
-  } catch (e) {
+  } catch {
     // Silently fail - don't break game flow
   }
 };
@@ -408,7 +408,7 @@ export const createComboSound = (comboLevel: number) => {
         osc.stop(startTime + 0.3);
       }
     }
-  } catch (e) {
+  } catch {
     // Silently fail - don't break game flow
   }
 };

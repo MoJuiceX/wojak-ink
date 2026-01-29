@@ -165,7 +165,7 @@ export async function getAPIStatus(): Promise<{
     const response = await fetch(`${WORKER_API_URL}/status`);
     if (!response.ok) throw new Error('Status check failed');
     return await response.json();
-  } catch (error) {
+  } catch {
     return {
       status: 'offline',
       last_updated: null,
@@ -316,7 +316,7 @@ export async function fetchCollectionStats(): Promise<CollectionStats> {
       if (items.length > 0) {
         // Get the lowest price from first few listings
         const prices = items
-          .map((item: any) => item.xch_price || item.price)
+          .map((item: Record<string, unknown>) => (item.xch_price || item.price) as number)
           .filter((p: number) => p > 0);
         if (prices.length > 0) {
           floorPrice = Math.min(...prices);

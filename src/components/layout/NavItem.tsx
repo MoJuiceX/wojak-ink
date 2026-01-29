@@ -31,7 +31,7 @@ interface NavItemProps {
 export function NavItem({
   icon: Icon,
   label,
-  shortLabel: _shortLabel,
+  shortLabel,
   isActive,
   onClick,
   showLabel = true,
@@ -43,6 +43,7 @@ export function NavItem({
   path,
   featured = false,
 }: NavItemProps) {
+  void shortLabel; // Reserved for collapsed sidebar mode
   const prefersReducedMotion = usePrefersReducedMotion();
   const haptic = useHaptic();
   const [showTooltip, setShowTooltip] = useState(false);

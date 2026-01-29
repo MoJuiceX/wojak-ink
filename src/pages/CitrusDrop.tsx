@@ -466,6 +466,15 @@ const CitrusDrop: React.FC = () => {
     }
   }, [handleGameOver]);
 
+  // Helper to lighten color
+  const lightenColor = (hex: string, percent: number): string => {
+    const num = parseInt(hex.replace('#', ''), 16);
+    const r = Math.min(255, (num >> 16) + percent);
+    const g = Math.min(255, ((num >> 8) & 0x00ff) + percent);
+    const b = Math.min(255, (num & 0x0000ff) + percent);
+    return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+  };
+
   // ============================================
   // RENDER
   // ============================================
@@ -612,15 +621,6 @@ const CitrusDrop: React.FC = () => {
       ctx.setLineDash([]);
     }
   }, [dimensions, nextFruitType, dropX]);
-
-  // Helper to lighten color
-  const lightenColor = (hex: string, percent: number): string => {
-    const num = parseInt(hex.replace('#', ''), 16);
-    const r = Math.min(255, (num >> 16) + percent);
-    const g = Math.min(255, ((num >> 8) & 0x00ff) + percent);
-    const b = Math.min(255, (num & 0x0000ff) + percent);
-    return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
-  };
 
   // ============================================
   // GAME LOOP
@@ -804,37 +804,6 @@ const CitrusDrop: React.FC = () => {
     preventScroll: true,
   });
 
-  // Keyboard support
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (gameState === 'ready' && (e.code === 'Space' || e.code === 'Enter')) {
-        e.preventDefault();
-        startGame();
-      } else if (gameState === 'playing') {
-        if (e.code === 'Space' || e.code === 'Enter') {
-          e.preventDefault();
-          dropFruit();
-        } else if (e.code === 'ArrowLeft') {
-          setDropX((prev) => {
-            const fruit = FRUITS[nextFruitType];
-            return Math.max(WALL_THICKNESS + fruit.radius, prev - 10);
-          });
-        } else if (e.code === 'ArrowRight') {
-          setDropX((prev) => {
-            const fruit = FRUITS[nextFruitType];
-            return Math.min(dimensions.width - WALL_THICKNESS - fruit.radius, prev + 10);
-          });
-        }
-      } else if (gameState === 'gameover' && (e.code === 'Space' || e.code === 'Enter')) {
-        e.preventDefault();
-        resetGame();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [gameState, dropFruit, nextFruitType, dimensions.width]);
-
   // ============================================
   // GAME CONTROLS
   // ============================================
@@ -868,6 +837,37 @@ const CitrusDrop: React.FC = () => {
   const handleBack = useCallback(() => {
     window.location.href = '/games';
   }, []);
+
+  // Keyboard support
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (gameState === 'ready' && (e.code === 'Space' || e.code === 'Enter')) {
+        e.preventDefault();
+        startGame();
+      } else if (gameState === 'playing') {
+        if (e.code === 'Space' || e.code === 'Enter') {
+          e.preventDefault();
+          dropFruit();
+        } else if (e.code === 'ArrowLeft') {
+          setDropX((prev) => {
+            const fruit = FRUITS[nextFruitType];
+            return Math.max(WALL_THICKNESS + fruit.radius, prev - 10);
+          });
+        } else if (e.code === 'ArrowRight') {
+          setDropX((prev) => {
+            const fruit = FRUITS[nextFruitType];
+            return Math.min(dimensions.width - WALL_THICKNESS - fruit.radius, prev + 10);
+          });
+        }
+      } else if (gameState === 'gameover' && (e.code === 'Space' || e.code === 'Enter')) {
+        e.preventDefault();
+        resetGame();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [gameState, dropFruit, nextFruitType, dimensions.width, startGame, resetGame]);
 
   // ============================================
   // RENDER UI

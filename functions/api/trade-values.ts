@@ -104,7 +104,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     }
 
     // Build response
-    let responseData: Partial<StoredData> & { trait_stats: TraitStats[] } = {
+    const responseData: Partial<StoredData> & { trait_stats: TraitStats[] } = {
       trait_stats: data.trait_stats,
       total_sales_count: data.total_sales_count,
       last_updated: data.last_updated,

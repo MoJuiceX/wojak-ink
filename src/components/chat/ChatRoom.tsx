@@ -318,7 +318,7 @@ function ChatInterface({ chatToken, userName, userAvatar, roomConfig }: ChatInte
 
   const {
     status,
-    error: _chatError,
+    error: chatError,
     isAdmin,
     userId,
     messages,
@@ -332,6 +332,8 @@ function ChatInterface({ chatToken, userName, userAvatar, roomConfig }: ChatInte
     deleteMessage,
     reconnect,
   } = useChatSocket({ token: chatToken, userName, userAvatar });
+
+  void chatError; // TODO: Display connection errors to user
 
   const filteredUsers = useMemo(() => {
     if (!mentionQuery) return [];

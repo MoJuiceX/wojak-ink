@@ -89,7 +89,7 @@ export interface SageSession {
   topic: string;
   accounts: SageAccount[];
   chains: string[];
-  metadata: any;
+  metadata: unknown;
 }
 
 export interface SignMessageResult {
@@ -157,7 +157,7 @@ export interface SageWalletActions {
   disconnect: () => Promise<void>;
   signMessage: (message: string) => Promise<SignMessageResult>;
   getAssetBalance: (assetId?: string | null) => Promise<AssetBalance>;
-  takeOffer: (offer: string, fee?: number) => Promise<any>;
+  takeOffer: (offer: string, fee?: number) => Promise<unknown>;
   hasRequiredNFTs: (collectionId: string) => Promise<boolean>;
   getNFTs: (collectionId?: string) => Promise<MintGardenNFT[]>;
 }

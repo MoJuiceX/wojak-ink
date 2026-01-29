@@ -31,12 +31,14 @@ export class MockGeneratorService {
     };
   }
 
-  async fetchTraitsForLayer(_layer: UILayerName): Promise<Trait[]> {
+  async fetchTraitsForLayer(layer: UILayerName): Promise<Trait[]> {
+    void layer;
     await delay(100);
     return [];
   }
 
-  async fetchTraitById(_id: string): Promise<Trait | null> {
+  async fetchTraitById(id: string): Promise<Trait | null> {
+    void id;
     await delay(50);
     return null;
   }
@@ -59,7 +61,8 @@ export class MockGeneratorService {
     };
   }
 
-  async getRandomTraitForLayer(_layer: UILayerName): Promise<Trait | null> {
+  async getRandomTraitForLayer(layer: UILayerName): Promise<Trait | null> {
+    void layer;
     await delay(50);
     return null;
   }

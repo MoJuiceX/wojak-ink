@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * Sage Wallet React Context & Provider
  * 
@@ -164,13 +165,13 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
         try {
           await Promise.race([updateAddressFromWallet(), timeoutPromise]);
           setState(prev => ({ ...prev, status: 'connected' }));
-        } catch (error) {
+        } catch {
           currentSessionRef.current = null;
           setState(prev => ({ ...prev, address: '' }));
         }
       }
-    } catch (error) {
-      console.error('[SageWallet] Error checking sessions:', error);
+    } catch (err) {
+      console.error('[SageWallet] Error checking sessions:', err);
     }
   }, []);
 
@@ -196,7 +197,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     if (typeof result === 'string') {
       address = result;
     } else if (result && typeof result === 'object' && 'address' in result) {
-      address = (result as any).address;
+      address = (result as { address: string }).address;
     }
 
     if (!address || !address.startsWith('xch1')) {
@@ -294,7 +295,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
         // Get address
         await updateAddressFromWallet();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[SageWallet] Connection failed:', error);
 
       // Close modal on error
@@ -303,14 +304,15 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
       setState(prev => ({
         ...prev,
         status: 'disconnected',
-        error: error?.message || 'Connection failed',
+        error: error instanceof Error ? error.message : 'Connection failed',
       }));
 
-      if (error?.message?.includes('User rejected') || error?.code === 5000) {
+      const errObj = error as Record<string, unknown>;
+      if (typeof errObj?.message === 'string' && errObj.message.includes('User rejected') || errObj?.code === 5000) {
         throw new Error('Connection cancelled by user');
       }
 
-      config.onError?.(error);
+      config.onError?.(error instanceof Error ? error : new Error(String(error)));
       throw error;
     }
   }, [state.address, state.status, updateAddressFromWallet, config.onError]);
@@ -386,7 +388,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     return result as AssetBalance;
   }, []);
 
-  const takeOffer = useCallback(async (offer: string, fee: number = 0): Promise<any> => {
+  const takeOffer = useCallback(async (offer: string, fee: number = 0): Promise<unknown> => {
     const client = signClientRef.current;
     const session = currentSessionRef.current;
 

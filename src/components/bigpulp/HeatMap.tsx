@@ -120,8 +120,7 @@ function CompactRefreshButton({
   );
 }
 
-// @ts-ignore - Legacy component kept for reference
-export function _LegacyCacheStatusIndicator({
+export function LegacyCacheStatusIndicator({
   metadata,
   onRefresh,
 }: {
@@ -879,12 +878,14 @@ export function HeatMap({
   onViewModeChange,
   onCellClick,
   cacheMetadata,
-  isRefetching: _isRefetching,
+  isRefetching,
   onRefresh,
   badges,
   selectedBadge,
   onBadgeChange,
 }: HeatMapProps) {
+  // Mark optional unused prop
+  void isRefetching;
   const [focusedCell, setFocusedCell] = useState({ row: 0, col: 0 });
   const [selectedCell, setSelectedCell] = useState<HeatMapCell | null>(null);
   const [hoveredMode, setHoveredMode] = useState<HeatMapViewMode | null>(null);

@@ -34,7 +34,7 @@ export const createOrangeJuggleHitSound = (hitPosition: number = 0.5) => {
 
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.15);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -63,7 +63,7 @@ export const createOrangeDropSound = () => {
 
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.4);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -122,7 +122,7 @@ export const createGoldenOrangeHitSound = () => {
     osc1.stop(ctx.currentTime + 0.3);
     osc2.stop(ctx.currentTime + 0.4);
     noise.stop(ctx.currentTime + 0.3);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -152,7 +152,7 @@ export const createBananaCollectSound = () => {
       osc.start(ctx.currentTime + i * 0.08);
       osc.stop(ctx.currentTime + i * 0.08 + 0.15);
     });
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -214,7 +214,7 @@ export const createRumCollectSound = () => {
     osc2.stop(ctx.currentTime + 0.28);
     lfo.stop(ctx.currentTime + 0.4);
     mainOsc.stop(ctx.currentTime + 0.4);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -255,7 +255,7 @@ export const createCamelWarningSound = () => {
     rumble.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.5);
     rumble.stop(ctx.currentTime + 0.6);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -303,7 +303,7 @@ export const createCamelImpactSound = () => {
     noise.start(ctx.currentTime);
     impact.stop(ctx.currentTime + 0.4);
     noise.stop(ctx.currentTime + 0.4);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -476,7 +476,7 @@ export const createOrangeJuggleComboSound = (streak: number) => {
         voice.stop(ctx.currentTime + 0.25);
       });
     }
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -506,7 +506,7 @@ export const createOrangeJuggleComboBreakSound = (lostCombo: number) => {
     osc.connect(gain).connect(ctx.destination);
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.35);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -536,7 +536,7 @@ export const createOrangeJuggleLevelCompleteSound = () => {
       osc.start(ctx.currentTime + i * 0.12);
       osc.stop(ctx.currentTime + i * 0.12 + 0.3);
     });
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };

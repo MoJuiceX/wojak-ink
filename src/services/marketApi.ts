@@ -237,6 +237,7 @@ function mojosToXch(mojos: number): number {
 /**
  * Extract NFT ID from various response formats
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response varies
 function extractNftId(obj: any): string | null {
   // Try various field names
   const fields = ['token_id', 'edition_number', 'edition', 'nft_id'];
@@ -267,6 +268,7 @@ function extractNftId(obj: any): string | null {
 /**
  * Extract price from various response formats
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response varies
 function extractPrice(obj: any): number | null {
   const fields = ['price', 'xch_price', 'price_xch', 'amount', 'amount_xch'];
   for (const field of fields) {
@@ -707,12 +709,12 @@ export async function fetchNftHistory(nftId: number, knownLauncherId?: string): 
 
           const response = await fetch(url);
           if (!response.ok) {
-            const error = new Error(`Launcher lookup failed: ${response.status}`) as any;
+            const error = new Error(`Launcher lookup failed: ${response.status}`) as Error & { status: number };
             error.status = response.status;
             throw error;
           }
 
-          const data = await response.json();
+          const data: { items?: Array<{ id?: string; launcher_id?: string; token_id?: number; edition_number?: number; name?: string }> } = await response.json();
           const items = data.items || [];
 
           for (const item of items) {
@@ -721,10 +723,10 @@ export async function fetchNftHistory(nftId: number, knownLauncherId?: string): 
             const nameId = nameMatch ? parseInt(nameMatch[1], 10) : null;
 
             if (itemId === nftId || nameId === nftId) {
-              return item.id || item.launcher_id || null;
+              return (item.id || item.launcher_id) ?? undefined;
             }
           }
-          return null;
+          return undefined;
         });
       }
 
@@ -739,12 +741,12 @@ export async function fetchNftHistory(nftId: number, knownLauncherId?: string): 
         const response = await fetch(url);
 
         if (!response.ok) {
-          const error = new Error(`NFT details fetch failed: ${response.status}`) as any;
+          const error = new Error(`NFT details fetch failed: ${response.status}`) as Error & { status: number };
           error.status = response.status;
           throw error;
         }
 
-        const data = await response.json();
+        const data: { events?: NftEvent[] } = await response.json();
         return data.events || [];
       });
 
@@ -785,7 +787,7 @@ export function preloadListingImages(): void {
   };
 
   if ('requestIdleCallback' in window) {
-    (window as any).requestIdleCallback(preload);
+    (window as unknown as { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(preload);
   } else {
     setTimeout(preload, 500);
   }

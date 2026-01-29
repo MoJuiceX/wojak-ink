@@ -37,13 +37,13 @@ export function useRateLimitState(): UseRateLimitStateReturn {
   const [rateLimitedUntil, setRateLimitedUntil] = useState<number | null>(null);
   const [secondsRemaining, setSecondsRemaining] = useState(0);
 
-  // Calculate if currently rate limited
-  const isRateLimited = rateLimitedUntil !== null && Date.now() < rateLimitedUntil;
+  // Calculate if currently rate limited (derived from countdown to avoid impure Date.now in render)
+  const isRateLimited = secondsRemaining > 0;
 
   // Update countdown timer
   useEffect(() => {
     if (!rateLimitedUntil) {
-      setSecondsRemaining(0);
+      setSecondsRemaining(0); // eslint-disable-line react-hooks/set-state-in-effect -- resetting derived state when dependency clears
       return;
     }
 

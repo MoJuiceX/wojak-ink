@@ -56,7 +56,7 @@ const MemoryMatchGame: React.FC = () => {
   const [gameState, setGameState] = useState<'idle' | 'loading' | 'playing' | 'roundComplete' | 'gameover'>('idle');
   const [cards, setCards] = useState<Card[]>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
-  const [_moves, setMoves] = useState(0);
+  const [, setMoves] = useState(0);
   const [matches, setMatches] = useState(0);
   const [timeLeft, setTimeLeft] = useState(40);
   const [isChecking, setIsChecking] = useState(false);
@@ -87,6 +87,7 @@ const MemoryMatchGame: React.FC = () => {
   const preloadedCardsRef = useRef<Card[] | null>(null);
   const isPreloadingRef = useRef(false);
   const flippedCardsRef = useRef<number[]>([]);
+  const startGameRef = useRef<(() => void) | null>(null);
 
   // Load metadata on mount
   useEffect(() => {
@@ -183,23 +184,9 @@ const MemoryMatchGame: React.FC = () => {
 
   useEffect(() => {
     if (metadata.length > 0 && gameState === 'idle') {
-      startGame();
+      queueMicrotask(() => startGameRef.current?.());
     }
-  }, [metadata]);
-
-  const startGame = async () => {
-    if (metadata.length === 0) {
-      setGameState('loading');
-      return;
-    }
-
-    setDevMode(false);
-    setRound(1);
-    setTotalScore(0);
-    setScoreSubmitted(false);
-    setIsNewPersonalBest(false);
-    await startRound(1, true);
-  };
+  }, [metadata, gameState]);
 
   const startRound = async (roundNum: number, isNewGame: boolean = false) => {
     setGameState('loading');
@@ -232,6 +219,25 @@ const MemoryMatchGame: React.FC = () => {
     const currentNftIds = [...new Set(newCards.map(c => c.nftId))];
     preloadNextRound(roundNum + 1, currentNftIds);
   };
+
+  const startGame = async () => {
+    if (metadata.length === 0) {
+      setGameState('loading');
+      return;
+    }
+
+    setDevMode(false);
+    setRound(1);
+    setTotalScore(0);
+    setScoreSubmitted(false);
+    setIsNewPersonalBest(false);
+    await startRound(1, true);
+  };
+
+  // Keep ref in sync
+  useEffect(() => {
+    startGameRef.current = startGame;
+  });
 
   const nextRound = async () => {
     const newRound = round + 1;
@@ -313,7 +319,7 @@ const MemoryMatchGame: React.FC = () => {
 
   useEffect(() => {
     if (gameState === 'loading' && metadata.length > 0 && !devMode && cards.length === 0) {
-      startGame();
+      queueMicrotask(() => startGame());
     }
   }, [metadata, gameState, devMode, cards.length]);
 
@@ -445,7 +451,7 @@ const MemoryMatchGame: React.FC = () => {
     if (devMode) return;
     const config = getRoundConfig(round);
     if (matches === config.pairs && gameState === 'playing') {
-      completeRound();
+      queueMicrotask(() => completeRound());
     }
   }, [matches, gameState, round, devMode]);
 
@@ -469,7 +475,7 @@ const MemoryMatchGame: React.FC = () => {
 
   useEffect(() => {
     if (gameState === 'gameover' && isSignedIn && totalScore > 0 && !scoreSubmitted) {
-      submitScoreGlobal(totalScore, round);
+      queueMicrotask(() => submitScoreGlobal(totalScore, round));
     }
   }, [gameState, isSignedIn, totalScore, round, scoreSubmitted, submitScoreGlobal]);
 

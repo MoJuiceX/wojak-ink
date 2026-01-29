@@ -567,7 +567,9 @@ export default function BrickBreaker() {
   }, [soundEnabled, playBrickBreakerPaddleHit, hapticBBPaddleHit, triggerScreenShake, triggerBallSquash, triggerPaddleSquash, createImpactFlash]);
 
   const checkBrickCollision = useCallback((ball: Ball): { hit: boolean; destroyed: boolean; brick: Brick | null } => {
-    for (const brick of bricksRef.current) {
+    const bricks = bricksRef.current;
+    for (let i = 0; i < bricks.length; i++) {
+      const brick = bricks[i];
       if (brick.hits <= 0) continue;
 
       // AABB collision
@@ -597,12 +599,12 @@ export default function BrickBreaker() {
 
         // Damage brick (unless unbreakable)
         if (brick.type !== 'unbreakable') {
-          brick.hits--;
+          bricks[i] = { ...brick, hits: brick.hits - 1 };
 
-          if (brick.hits <= 0) {
-            return { hit: true, destroyed: true, brick };
+          if (bricks[i].hits <= 0) {
+            return { hit: true, destroyed: true, brick: bricks[i] };
           }
-          return { hit: true, destroyed: false, brick };
+          return { hit: true, destroyed: false, brick: bricks[i] };
         }
 
         // Unbreakable brick - metallic clang
@@ -851,6 +853,9 @@ export default function BrickBreaker() {
   // GAME STATE HANDLERS
   // =============================================================================
 
+  // Ref for handleGameOver to allow forward reference
+  const handleGameOverRef = useRef<(() => void) | null>(null);
+
   const handleBallLost = useCallback(() => {
     livesRef.current--;
     setLives(livesRef.current);
@@ -858,7 +863,7 @@ export default function BrickBreaker() {
     triggerScreenShake(30);
 
     if (livesRef.current <= 0) {
-      handleGameOver();
+      handleGameOverRef.current?.();
     } else {
       // Play ball lost sound (not game over - just a setback)
       if (soundEnabled) playBrickBreakerBallLost();
@@ -970,6 +975,9 @@ export default function BrickBreaker() {
       }
     }
   }, [soundEnabled, playGameOver, hapticGameOver, triggerScreenShake, isSignedIn, submitScore, stopBrickBreakerAnticipationLoop, stopBrickBreakerFireballLoop]);
+
+  // Keep handleGameOverRef in sync
+  useEffect(() => { handleGameOverRef.current = handleGameOver; }, [handleGameOver]);
 
   // =============================================================================
   // RENDERING
@@ -1468,6 +1476,9 @@ export default function BrickBreaker() {
   // GAME LOOP
   // =============================================================================
 
+  // Ref for gameLoop to allow recursive calls
+  const gameLoopRef = useRef<(() => void) | null>(null);
+
   const gameLoop = useCallback(() => {
     if (statusRef.current !== 'playing' || showExitDialogRef.current) return;
 
@@ -1483,7 +1494,7 @@ export default function BrickBreaker() {
     if (now < freezeFrameUntilRef.current) {
       // Still frozen - just render, don't update
       render(ctx);
-      animationFrameRef.current = requestAnimationFrame(gameLoop);
+      animationFrameRef.current = requestAnimationFrame(() => gameLoopRef.current?.());
       return;
     }
 
@@ -1682,7 +1693,7 @@ export default function BrickBreaker() {
     // Render
     render(ctx);
 
-    animationFrameRef.current = requestAnimationFrame(gameLoop);
+    animationFrameRef.current = requestAnimationFrame(() => gameLoopRef.current?.());
   }, [
     gameHeight,
     checkWallCollision,
@@ -1699,6 +1710,9 @@ export default function BrickBreaker() {
     hapticBBNearMiss,
     triggerNearMissVisual,
   ]);
+
+  // Keep gameLoopRef in sync
+  useEffect(() => { gameLoopRef.current = gameLoop; }, [gameLoop]);
 
   // =============================================================================
   // INPUT HANDLERS
@@ -1718,7 +1732,7 @@ export default function BrickBreaker() {
 
   // Touch handling via useGameTouch hook - provides dx (delta) directly
   const touchHandlers = useGameTouch({
-    onDrag: (_x, _y, dx, _dy) => {
+    onDrag: (_x, _y, dx) => {
       if (statusRef.current === 'playing') {
         movePaddleByDelta(dx);
       }
@@ -1779,6 +1793,7 @@ export default function BrickBreaker() {
   // Force dimension sync when not playing (handles HMR constant changes)
   useEffect(() => {
     if (status === 'idle' && !isMobile) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: sync dimensions on status/screen change
       setGameWidth(DESKTOP_WIDTH);
       setGameHeight(DESKTOP_HEIGHT);
     }

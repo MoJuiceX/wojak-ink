@@ -34,7 +34,7 @@ export async function playComboNote(ctx: AudioContext | null, comboLevel: number
   if (ctx.state === 'suspended') {
     try {
       await ctx.resume();
-    } catch (e) {
+    } catch {
       console.warn('[BlockPuzzle] Failed to resume audio context for combo note');
       return;
     }
@@ -123,7 +123,7 @@ export function playLineClearSound(ctx: AudioContext | null, linesCleared: numbe
         }
       }, 50);
     }
-  } catch (e) {
+  } catch {
     // Ignore errors
   }
 }
@@ -146,7 +146,7 @@ export function playSpawnSound(ctx: AudioContext | null): void {
     osc.connect(gain).connect(ctx.destination);
     osc.start();
     osc.stop(ctx.currentTime + 0.08);
-  } catch (e) {
+  } catch {
     // Ignore errors
   }
 }
@@ -180,7 +180,7 @@ export function playSnapSound(ctx: AudioContext | null): void {
     clickOsc.connect(clickGain).connect(ctx.destination);
     clickOsc.start();
     clickOsc.stop(ctx.currentTime + 0.03);
-  } catch (e) {
+  } catch {
     // Ignore errors
   }
 }
@@ -203,7 +203,7 @@ export function playInvalidSound(ctx: AudioContext | null): void {
     osc.connect(gain).connect(ctx.destination);
     osc.start();
     osc.stop(ctx.currentTime + 0.08);
-  } catch (e) {
+  } catch {
     // Ignore errors
   }
 }

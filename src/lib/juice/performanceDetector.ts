@@ -119,7 +119,7 @@ export function detectInitialTier(): PerformanceTier {
     if (!gl) {
       tier = 'low';
     }
-  } catch (e) {
+  } catch {
     // If detection fails, default to high and let FPS monitor adjust
     console.warn('[PerformanceDetector] Detection failed, defaulting to high tier');
   }

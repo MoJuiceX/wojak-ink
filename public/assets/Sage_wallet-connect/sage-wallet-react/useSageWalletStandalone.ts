@@ -41,7 +41,7 @@ interface UseSageWalletStandaloneReturn {
   disconnect: () => Promise<void>;
   signMessage: (message: string) => Promise<SignMessageResult>;
   getAssetBalance: (assetId?: string | null) => Promise<AssetBalance>;
-  takeOffer: (offer: string, fee?: number) => Promise<any>;
+  takeOffer: (offer: string, fee?: number) => Promise<unknown>;
   hasRequiredNFTs: (collectionId: string) => Promise<boolean>;
   getNFTs: (collectionId?: string) => Promise<MintGardenNFT[]>;
   
@@ -146,7 +146,7 @@ export function useSageWalletStandalone(
       request: { method: ChiaMethod.GetAddress, params: {} },
     });
     
-    const addr = typeof result === 'string' ? result : (result as any)?.address || '';
+    const addr = typeof result === 'string' ? result : (result as Record<string, unknown>)?.address as string || '';
     
     if (!addr.startsWith('xch1')) throw new Error('Invalid address');
     
@@ -213,11 +213,12 @@ export function useSageWalletStandalone(
         await updateAddressFromWallet();
         setStatus('connected');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       modalRef.current?.closeModal();
       setStatus('disconnected');
-      setError(err?.message || 'Connection failed');
-      config.onError?.(err);
+      const error = err as Record<string, unknown>;
+      setError((error?.message as string) || 'Connection failed');
+      config.onError?.(err instanceof Error ? err : new Error('Connection failed'));
       throw err;
     }
   }, [isConnected, updateAddressFromWallet, config.onError]);
@@ -279,7 +280,7 @@ export function useSageWalletStandalone(
   }, []);
   
   // Take an offer
-  const takeOffer = useCallback(async (offer: string, fee: number = 0): Promise<any> => {
+  const takeOffer = useCallback(async (offer: string, fee: number = 0): Promise<unknown> => {
     const client = signClientRef.current;
     const sess = currentSessionRef.current;
     

@@ -5,7 +5,7 @@
  */
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { treasuryService } from '@/services/treasuryService';
 import { DATA_CACHE_MAP } from '@/config/query/cacheConfig';
 import { getTokenLogo } from '@/services/treasuryFallback';
@@ -59,8 +59,9 @@ export function useXchPrice() {
 
   // Check if cached price is fresh enough (max 1 hour old)
   const MAX_PRICE_AGE = 60 * 60 * 1000; // 1 hour
+  const [mountTime] = useState(() => Date.now());
   const cacheAge = cachedData?.lastUpdated
-    ? Date.now() - cachedData.lastUpdated.getTime()
+    ? mountTime - cachedData.lastUpdated.getTime()
     : Infinity;
   const isCacheFresh = cacheAge < MAX_PRICE_AGE;
 

@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import './BootSequence.css'
 
-export const TANGY_BOOT_LINES = [
+// Boot lines exported separately for component fast refresh
+const TANGY_BOOT_LINES = [
   "CitrusBIOS v1.369 (JuiceBuild)",
   "© 2023–2026 Orange Labs",
   "",
@@ -90,7 +91,7 @@ export default function BootSequence({
     }
 
     // Use Web Audio API for proper volume attenuation (can go below 0dB)
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+    const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
     const bootAudio = new Audio('/assets/BootUp/PC-boot.mp3')
     bootAudio.playbackRate = 0.8
 
@@ -102,7 +103,7 @@ export default function BootSequence({
     // Wait for audio to be ready, then connect Web Audio API and play
     bootAudio.addEventListener('canplaythrough', () => {
       // Only set up once
-      if ((bootAudio as any)._gainNode) return
+      if ((bootAudio as HTMLAudioElement & { _gainNode?: GainNode })._gainNode) return
 
       // Create audio source and gain node for precise volume control
       const source = audioContext.createMediaElementSource(bootAudio)
@@ -116,12 +117,12 @@ export default function BootSequence({
       gainNode.connect(audioContext.destination)
 
       // Store gainNode reference on the audio element for later access
-      ;(bootAudio as any)._gainNode = gainNode
-      ;(bootAudio as any)._audioContext = audioContext
+      ;(bootAudio as HTMLAudioElement & { _gainNode?: GainNode; _audioContext?: AudioContext })._gainNode = gainNode
+      ;(bootAudio as HTMLAudioElement & { _gainNode?: GainNode; _audioContext?: AudioContext })._audioContext = audioContext
 
       // Now play
-      bootAudio.play().catch(e => {
-        console.debug('[BootSequence] Audio play failed:', e)
+      bootAudio.play().catch(() => {
+        // Audio autoplay may be blocked
       })
     }, { once: true })
 
@@ -174,7 +175,7 @@ export default function BootSequence({
   const handleClickToStart = () => {
     // Pre-create PS1 audio with Web Audio API during user interaction
     if (onPs1AudioReady) {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
       const ps1Audio = new Audio('/assets/BootUp/Ps1-startup.mp3')
 
       // Pass reference immediately
@@ -183,7 +184,7 @@ export default function BootSequence({
       // Wait for audio to be ready, then connect Web Audio API
       ps1Audio.addEventListener('canplaythrough', () => {
         // Only set up once
-        if ((ps1Audio as any)._gainNode) return
+        if ((ps1Audio as HTMLAudioElement & { _gainNode?: GainNode })._gainNode) return
 
         // Create gain node for precise volume control
         const source = audioContext.createMediaElementSource(ps1Audio)
@@ -197,8 +198,8 @@ export default function BootSequence({
         gainNode.connect(audioContext.destination)
 
         // Store references for later access
-        ;(ps1Audio as any)._gainNode = gainNode
-        ;(ps1Audio as any)._audioContext = audioContext
+        ;(ps1Audio as HTMLAudioElement & { _gainNode?: GainNode; _audioContext?: AudioContext })._gainNode = gainNode
+        ;(ps1Audio as HTMLAudioElement & { _gainNode?: GainNode; _audioContext?: AudioContext })._audioContext = audioContext
       }, { once: true })
 
       // Start loading
@@ -259,3 +260,6 @@ export default function BootSequence({
 function delay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
+
+// Re-export for use in other components
+export { TANGY_BOOT_LINES }

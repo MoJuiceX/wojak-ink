@@ -18,7 +18,7 @@ export function useBreakpoint(breakpoint: BreakpointKey): boolean {
 
   useEffect(() => {
     const query = window.matchMedia(MEDIA_QUERIES[breakpoint]);
-    setMatches(query.matches);
+    queueMicrotask(() => setMatches(query.matches));
 
     const handler = (e: MediaQueryListEvent) => setMatches(e.matches);
     query.addEventListener('change', handler);

@@ -73,7 +73,8 @@ const AMBER_INTENSITY = [
 /**
  * Get the intensity color palette (always amber/orange)
  */
-export function getIntensityPalette(_themeId?: string): readonly string[] {
+export function getIntensityPalette(themeId?: string): readonly string[] {
+  void themeId; // Always uses amber palette
   return AMBER_INTENSITY;
 }
 

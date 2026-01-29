@@ -76,24 +76,6 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     'PushManager' in window &&
     'Notification' in window;
 
-  // Initialize on mount
-  useEffect(() => {
-    if (isSupported) {
-      setPermission(Notification.permission);
-      checkSubscription();
-    }
-    setIsLoading(false);
-  }, [isSupported]);
-
-  // Load preferences when user changes
-  useEffect(() => {
-    if (user) {
-      loadPreferences(user.id);
-    } else {
-      setPreferences(DEFAULT_NOTIFICATION_PREFERENCES);
-    }
-  }, [user]);
-
   // Check if already subscribed
   const checkSubscription = async () => {
     try {
@@ -105,8 +87,8 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
       if (subscription) {
         localStorage.setItem(PUSH_SUBSCRIPTION_KEY, JSON.stringify(subscription.toJSON()));
       }
-    } catch (error) {
-      console.error('Error checking push subscription:', error);
+    } catch (err) {
+      console.error('Error checking push subscription:', err);
       setIsSubscribed(false);
     }
   };
@@ -120,11 +102,32 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
       } else {
         setPreferences(DEFAULT_NOTIFICATION_PREFERENCES);
       }
-    } catch (error) {
-      console.error('Error loading notification preferences:', error);
+    } catch (err) {
+      console.error('Error loading notification preferences:', err);
       setPreferences(DEFAULT_NOTIFICATION_PREFERENCES);
     }
   };
+
+  // Initialize on mount
+  useEffect(() => {
+    queueMicrotask(() => {
+      if (isSupported) {
+        setPermission(Notification.permission);
+        checkSubscription();
+      }
+      setIsLoading(false);
+    });
+  }, [isSupported]);
+
+  // Load preferences when user changes
+  useEffect(() => {
+    if (user) {
+      queueMicrotask(() => loadPreferences(user.id));
+    } else {
+      queueMicrotask(() => setPreferences(DEFAULT_NOTIFICATION_PREFERENCES));
+    }
+
+  }, [user]);
 
   // Save preferences to localStorage
   const savePreferences = (userId: string, prefs: NotificationPreferences) => {
@@ -301,6 +304,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useNotifications = () => {
   const context = useContext(NotificationContext);
   if (!context) {
@@ -310,6 +314,7 @@ export const useNotifications = () => {
 };
 
 // Hook to check if user has enabled specific notification type
+// eslint-disable-next-line react-refresh/only-export-components
 export const useNotificationEnabled = (type: keyof NotificationPreferences): boolean => {
   const { isSubscribed, preferences } = useNotifications();
   return isSubscribed && preferences[type];

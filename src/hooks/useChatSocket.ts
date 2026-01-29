@@ -323,8 +323,11 @@ export function useChatSocket(options: UseChatSocketOptions | null): UseChatSock
   // Connect on mount
   useEffect(() => {
     if (token) {
-      const cleanup = connect();
-      return cleanup;
+      let cleanup: (() => void) | undefined;
+      queueMicrotask(() => {
+        cleanup = connect();
+      });
+      return () => cleanup?.();
     }
   }, [token, connect]);
 

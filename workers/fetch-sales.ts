@@ -142,7 +142,7 @@ async function fetchWithRetry(
       if (retryCount < DEFAULT_CONFIG.MAX_RETRIES) {
         // Exponential backoff: 1s, 2s, 4s
         const delay = DEFAULT_CONFIG.RETRY_BASE_DELAY_MS * Math.pow(2, retryCount);
-        console.log(`Rate limited (429), waiting ${delay}ms before retry ${retryCount + 1}...`);
+        console.warn(`Rate limited (429), waiting ${delay}ms before retry ${retryCount + 1}...`);
         await sleep(delay);
         return fetchWithRetry(url, retryCount + 1);
       }
@@ -152,7 +152,7 @@ async function fetchWithRetry(
     // Retry on server errors (5xx)
     if (response.status >= 500 && retryCount < DEFAULT_CONFIG.MAX_RETRIES) {
       const delay = DEFAULT_CONFIG.RETRY_BASE_DELAY_MS * Math.pow(2, retryCount);
-      console.log(`Server error (${response.status}), waiting ${delay}ms before retry...`);
+      console.warn(`Server error (${response.status}), waiting ${delay}ms before retry...`);
       await sleep(delay);
       return fetchWithRetry(url, retryCount + 1);
     }
@@ -162,7 +162,7 @@ async function fetchWithRetry(
     // Retry on network errors
     if (retryCount < DEFAULT_CONFIG.MAX_RETRIES) {
       const delay = DEFAULT_CONFIG.RETRY_BASE_DELAY_MS * Math.pow(2, retryCount);
-      console.log(`Network error, waiting ${delay}ms before retry...`);
+      console.warn(`Network error, waiting ${delay}ms before retry...`);
       await sleep(delay);
       return fetchWithRetry(url, retryCount + 1);
     }
@@ -213,12 +213,12 @@ async function fetchAllTrades(collectionId: string): Promise<Sale[]> {
   let consecutiveErrors = 0;
   const MAX_CONSECUTIVE_ERRORS = 3;
 
-  console.log('Fetching trades from Dexie API...');
+  console.warn('Fetching trades from Dexie API...');
 
   while (hasMore && page <= DEFAULT_CONFIG.MAX_PAGES) {
     const url = `${DEFAULT_CONFIG.DEXIE_API}/offers?status=4&offered=${collectionId}&requested=xch&page=${page}&page_size=${DEFAULT_CONFIG.PAGE_SIZE}&compact=true`;
 
-    console.log(`Fetching page ${page}...`);
+    console.warn(`Fetching page ${page}...`);
 
     try {
       const response = await fetchWithRetry(url);
@@ -266,7 +266,7 @@ async function fetchAllTrades(collectionId: string): Promise<Sale[]> {
         });
       }
 
-      console.log(`Page ${page}: ${data.offers.length} offers, ${allTrades.length} valid trades total`);
+      console.warn(`Page ${page}: ${data.offers.length} offers, ${allTrades.length} valid trades total`);
 
       // Check if more pages
       hasMore = data.offers.length === DEFAULT_CONFIG.PAGE_SIZE;
@@ -282,7 +282,7 @@ async function fetchAllTrades(collectionId: string): Promise<Sale[]> {
 
       // Circuit breaker: stop on too many consecutive errors
       if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
-        console.log(`Circuit breaker triggered after ${consecutiveErrors} consecutive errors`);
+        console.warn(`Circuit breaker triggered after ${consecutiveErrors} consecutive errors`);
         hasMore = false;
         break;
       }
@@ -301,7 +301,7 @@ async function fetchMetadata(env: Env): Promise<Map<number, NFTMetadata>> {
   // Try KV first
   const cached = await env.TRADE_VALUES_KV.get('metadata_cache', 'json') as NFTMetadata[] | null;
   if (cached) {
-    console.log('Using cached metadata from KV');
+    console.warn('Using cached metadata from KV');
     const map = new Map<number, NFTMetadata>();
     for (const nft of cached) {
       map.set(nft.edition, nft);
@@ -310,7 +310,7 @@ async function fetchMetadata(env: Env): Promise<Map<number, NFTMetadata>> {
   }
 
   // Fetch from GitHub (fallback)
-  console.log('Fetching metadata from GitHub...');
+  console.warn('Fetching metadata from GitHub...');
   try {
     const response = await fetch(DEFAULT_CONFIG.METADATA_URL);
     if (response.ok) {
@@ -403,18 +403,19 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<void> {
+    void ctx; // Required parameter, not currently used
     const startTime = Date.now();
-    console.log(`[${new Date().toISOString()}] Starting scheduled sales fetch from Dexie...`);
+    console.warn(`[${new Date().toISOString()}] Starting scheduled sales fetch from Dexie...`);
 
     const collectionId = env.COLLECTION_ID || DEFAULT_CONFIG.COLLECTION_ID;
 
     try {
       // Step 1: Fetch all trades from Dexie
       const trades = await fetchAllTrades(collectionId);
-      console.log(`Total trades from Dexie: ${trades.length}`);
+      console.warn(`Total trades from Dexie: ${trades.length}`);
 
       if (trades.length === 0) {
-        console.log('No trades found, storing empty data');
+        console.warn('No trades found, storing empty data');
         const emptyData: StoredData = {
           trait_stats: [],
           by_category: {},
@@ -429,11 +430,11 @@ export default {
 
       // Step 2: Fetch metadata for trait lookup
       const metadataMap = await fetchMetadata(env);
-      console.log(`Metadata loaded for ${metadataMap.size} NFTs`);
+      console.warn(`Metadata loaded for ${metadataMap.size} NFTs`);
 
       // Step 3: Calculate trait statistics
       const { traitStats, byCategory } = calculateTraitStats(trades, metadataMap);
-      console.log(`Calculated stats for ${traitStats.length} traits`);
+      console.warn(`Calculated stats for ${traitStats.length} traits`);
 
       // Step 4: Store in KV
       const storedData: StoredData = {
@@ -457,12 +458,12 @@ export default {
         }
       );
 
-      console.log(`Successfully stored data in KV (took ${storedData.fetch_duration_ms}ms)`);
+      console.warn(`Successfully stored data in KV (took ${storedData.fetch_duration_ms}ms)`);
 
       // Log top traits
-      console.log('Top 5 traits by average price:');
+      console.warn('Top 5 traits by average price:');
       for (const stat of traitStats.slice(0, 5)) {
-        console.log(`  ${stat.trait_category}/${stat.trait_name}: ${stat.average_xch} XCH`);
+        console.warn(`  ${stat.trait_category}/${stat.trait_name}: ${stat.average_xch} XCH`);
       }
 
     } catch (error) {
@@ -597,7 +598,7 @@ export default {
           const values = Array.isArray(value) ? value : [value];
           for (const v of values) {
             // Extract attribute name from path
-            const match = v.match(/\/([^\/]+)\.png$/i);
+            const match = v.match(/\/([^/]+)\.png$/i);
             const attrName = match ? match[1].replace(/^[A-Z]+_/, '') : v;
             stats.attributes[category][attrName] = (stats.attributes[category][attrName] || 0) + 1;
             attrNames.push(attrName);

@@ -44,7 +44,7 @@ export function NFTSearchInput({
   // Auto-search when 4 digits entered
   useEffect(() => {
     if (value.length === 4 && !hasAutoSearched && !isLoading) {
-      setHasAutoSearched(true);
+      queueMicrotask(() => setHasAutoSearched(true));
       onSearch(value);
       inputRef.current?.blur();
     }
@@ -53,7 +53,7 @@ export function NFTSearchInput({
   // Reset auto-search flag when value changes
   useEffect(() => {
     if (value.length < 4) {
-      setHasAutoSearched(false);
+      queueMicrotask(() => setHasAutoSearched(false));
     }
   }, [value]);
 

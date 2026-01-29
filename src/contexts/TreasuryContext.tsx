@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * TreasuryContext
  *
@@ -64,7 +65,7 @@ function treasuryReducer(state: TreasuryState, action: TreasuryAction): Treasury
       return { ...state, wallet: action.payload };
     case 'SET_ERROR':
       return { ...state, error: action.payload, isLoading: false };
-    case 'POP_BUBBLE':
+    case 'POP_BUBBLE': {
       const newPoppedCount = state.poppedCount + 1;
       const visibleCount = state.portfolio?.visibleTokenCount || 0;
       return {
@@ -72,6 +73,7 @@ function treasuryReducer(state: TreasuryState, action: TreasuryAction): Treasury
         poppedCount: newPoppedCount,
         allPopped: newPoppedCount >= visibleCount,
       };
+    }
     case 'RESET_BUBBLES':
       return { ...state, poppedCount: 0, allPopped: false };
     case 'SET_ALL_POPPED':

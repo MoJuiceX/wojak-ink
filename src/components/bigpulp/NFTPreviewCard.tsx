@@ -262,12 +262,15 @@ export function NFTPreviewCard({
   isLoading,
   traits,
   hpTraits,
-  namedCombos: _namedCombos, // Reserved for future use
-  cultures: _cultures, // Reserved for future use
+  namedCombos, // Reserved for future use
+  cultures, // Reserved for future use
   isFiveHp,
   isHomieEdition,
   homieName,
 }: NFTPreviewCardProps) {
+  // Silence unused prop warnings for reserved props
+  void namedCombos;
+  void cultures;
   const prefersReducedMotion = useReducedMotion();
   const { getTooltipData } = useTraitRankings();
 

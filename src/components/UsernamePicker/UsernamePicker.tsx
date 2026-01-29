@@ -45,7 +45,7 @@ export const UsernamePicker: React.FC<UsernamePickerProps> = ({
         // For now, we check localStorage for existing usernames
         const existingUsers = JSON.parse(localStorage.getItem('wojak_users') || '{}');
         const isTaken = Object.values(existingUsers).some(
-          (u: any) => u.username?.toLowerCase() === name.toLowerCase()
+          (u: unknown) => (u as { username?: string }).username?.toLowerCase() === name.toLowerCase()
         );
 
         setIsAvailable(!isTaken);

@@ -72,7 +72,7 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
       // Stagger content reveal
       setTimeout(() => setShowContent(true), 300);
     } else {
-      setShowContent(false);
+      queueMicrotask(() => setShowContent(false));
     }
   }, [isVisible, isNewHighScore, leaderboardRank, score, triggerPreset]);
 

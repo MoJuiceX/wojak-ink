@@ -41,7 +41,7 @@ function useSimulatedPrice(basePrice: number) {
   useEffect(() => {
     if (Math.abs(basePrice - basePriceRef.current) > basePriceRef.current * 0.01) {
       basePriceRef.current = basePrice;
-      setSimulatedPrice(basePrice);
+      queueMicrotask(() => setSimulatedPrice(basePrice));
     }
   }, [basePrice]);
 

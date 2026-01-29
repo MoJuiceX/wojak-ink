@@ -39,15 +39,18 @@ function ClerkRequireAuth({ children }: RequireAuthProps) {
   return <>{children}</>;
 }
 
-export function RequireAuth({ children }: RequireAuthProps) {
+function NoAuthRedirect() {
   const navigate = useNavigate();
+  useEffect(() => {
+    navigate('/gallery', { replace: true });
+  }, [navigate]);
+  return null;
+}
 
+export function RequireAuth({ children }: RequireAuthProps) {
   // If Clerk is not configured, redirect to gallery
   if (!CLERK_ENABLED) {
-    useEffect(() => {
-      navigate('/gallery', { replace: true });
-    }, [navigate]);
-    return null;
+    return <NoAuthRedirect />;
   }
 
   return <ClerkRequireAuth>{children}</ClerkRequireAuth>;

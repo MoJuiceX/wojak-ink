@@ -17,7 +17,8 @@ const corsHeaders = {
   'Content-Type': 'application/json',
 };
 
-// Valid game IDs
+// Valid game IDs - kept for reference/future validation
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const VALID_GAME_IDS = [
   'orange-stack',
   'memory-match',
@@ -97,7 +98,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     }
 
     // Fetch item details if there are equipped items
-    let itemDetails = new Map<string, { name: string; emoji: string | null; css_class: string | null }>();
+    const itemDetails = new Map<string, { name: string; emoji: string | null; css_class: string | null }>();
     if (equippedItemIds.size > 0) {
       const itemIds = Array.from(equippedItemIds);
       const placeholders = itemIds.map(() => '?').join(',');

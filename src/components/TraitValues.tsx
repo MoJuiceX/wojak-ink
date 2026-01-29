@@ -92,7 +92,7 @@ const TraitValues: React.FC<TraitValuesProps> = ({ onTraitClick }) => {
         const data = await response.json();
         const rarityMap = new Map<number, number>();
         for (const [id, analysis] of Object.entries(data)) {
-          rarityMap.set(parseInt(id), (analysis as any).rank);
+          rarityMap.set(parseInt(id), (analysis as { rank: number }).rank);
         }
         setRarityData(rarityMap);
       } catch (err) {

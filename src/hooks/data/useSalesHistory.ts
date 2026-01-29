@@ -145,7 +145,7 @@ export function useNftSales(nftId: number): {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setIsLoading(true);
+    queueMicrotask(() => setIsLoading(true));
     ensureInitialized().then(() => {
       setSales(getSalesForNft(nftId));
       setIsLoading(false);

@@ -112,5 +112,5 @@ export async function flagScore(
     .bind(userId, gameId, sessionId, score, reason, JSON.stringify(details))
     .run();
 
-  console.log(`[ANOMALY] Flagged score for user ${userId}: ${reason}`, details);
+  console.warn(`[ANOMALY] Flagged score for user ${userId}: ${reason}`, details);
 }

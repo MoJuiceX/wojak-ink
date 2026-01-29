@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * SplitFlapDisplay Component
  *
@@ -123,7 +124,7 @@ export function useSimulatedPrice(basePrice: number | null) {
 
       // If initial load OR base changed significantly (> 1%), reset to real price
       if (simulatedPrice === null || (previousBase !== null && Math.abs(basePrice - previousBase) > previousBase * 0.01)) {
-        setSimulatedPrice(basePrice);
+        queueMicrotask(() => setSimulatedPrice(basePrice));
       }
     }
   }, [basePrice, simulatedPrice]);

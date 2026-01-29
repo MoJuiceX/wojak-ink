@@ -208,7 +208,7 @@ async function fetchXchPrice(): Promise<number> {
     }
 
     return cachedPrice;
-  } catch (error) {
+  } catch {
     console.warn('[Treasury] XCH price fetch failed, using cached:', cachedPrice);
     return cachedPrice;
   }
@@ -242,7 +242,7 @@ async function fetchXchBalance(): Promise<{ xch: number; mojo: number }> {
     }
 
     return cachedBalance;
-  } catch (error) {
+  } catch {
     console.warn('[Treasury] XCH balance fetch failed, using cached:', cachedBalance.xch);
     return cachedBalance;
   }
@@ -307,7 +307,7 @@ async function fetchTokenBalances(): Promise<TokenBalance[]> {
 
     // No tokens returned - use cached
     return cachedTokens;
-  } catch (error) {
+  } catch {
     console.warn('[Treasury] Token fetch failed, using cached:', cachedTokens.length, 'tokens');
     return cachedTokens;
   }

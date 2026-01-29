@@ -138,5 +138,5 @@ export function playThunderSound(audioContext: AudioContext | null): void {
  * Handles WebKit prefix for Safari
  */
 export function createAudioContext(): AudioContext {
-  return new (window.AudioContext || (window as any).webkitAudioContext)();
+  return new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
 }

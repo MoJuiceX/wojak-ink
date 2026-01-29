@@ -14,7 +14,7 @@ import { generateGameScorecard } from '@/systems/sharing/GameScorecard';
 import { useGameMute } from '@/contexts/GameMuteContext';
 import { useArcadeLights } from '@/contexts/ArcadeLightsContext';
 import { useMobileGameFullscreen } from '@/hooks/useMobileGameFullscreen';
-import { getComboTier } from '@/config/arcade-light-mappings';
+import { getComboTier, type GameEvent } from '@/config/arcade-light-mappings';
 import { useGameSounds } from '@/hooks/useGameSounds';
 import { GAME_OVER_SEQUENCE } from '@/lib/juice/brandConstants';
 import {
@@ -121,10 +121,17 @@ const ColorReaction: React.FC = () => {
   const [matchProgress, setMatchProgress] = useState(0); // 0-100 for countdown ring
 
   // Background music refs
-  const playlistIndexRef = useRef(Math.floor(Math.random() * MUSIC_PLAYLIST.length));
+  const playlistIndexRef = useRef(0);
   const musicAudioRef = useRef<HTMLAudioElement | null>(null);
   const gameStatusRefForMusic = useRef(gameState.status);
   const isMutedRef = useRef(isMuted);
+  // Ref for the playMusicTrack function to allow recursive calls
+  const playMusicTrackRef = useRef<((index: number) => void) | null>(null);
+
+  // Initialize random playlist index on mount (avoids Math.random during render)
+  useEffect(() => {
+    playlistIndexRef.current = Math.floor(Math.random() * MUSIC_PLAYLIST.length);
+  }, []);
 
   // Keep refs in sync
   useEffect(() => { gameStatusRefForMusic.current = gameState.status; }, [gameState.status]);
@@ -146,7 +153,8 @@ const ColorReaction: React.FC = () => {
     music.addEventListener('ended', () => {
       playlistIndexRef.current = (playlistIndexRef.current + 1) % MUSIC_PLAYLIST.length;
       if (gameStatusRefForMusic.current === 'playing' && !isMutedRef.current) {
-        playMusicTrack(playlistIndexRef.current);
+        // Use ref to call playMusicTrack recursively (avoids stale closure)
+        playMusicTrackRef.current?.(playlistIndexRef.current);
       }
     }, { once: true });
     musicAudioRef.current = music;
@@ -154,6 +162,9 @@ const ColorReaction: React.FC = () => {
       music.play().catch(() => {});
     }
   }, []);
+
+  // Keep playMusicTrackRef in sync
+  useEffect(() => { playMusicTrackRef.current = playMusicTrack; }, [playMusicTrack]);
 
   // Play next song in playlist
   const playNextMusicTrack = useCallback(() => {
@@ -273,6 +284,7 @@ const ColorReaction: React.FC = () => {
   // Game over screen states
   const [gameScreenshot, setGameScreenshot] = useState<string | null>(null);
   const [isNewPersonalBest, setIsNewPersonalBest] = useState(false);
+  const [meetsMinimumActions, setMeetsMinimumActions] = useState(false);
   const [highScore, setHighScore] = useState(() => {
     return parseInt(localStorage.getItem('colorReactionHighScore') || '0', 10);
   });
@@ -323,6 +335,7 @@ const ColorReaction: React.FC = () => {
     // Only sync if NOT managed externally (meaning this game controls its own music)
     if (!musicManagedExternally) {
       // Arcade mute button changed - sync local state
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: sync external mute state to local state
       setIsMuted(arcadeMuted);
       setMuted(arcadeMuted);
       // Also directly pause/resume music for immediate feedback
@@ -496,6 +509,7 @@ const ColorReaction: React.FC = () => {
     } else if (score >= 500) {
       newLevel = 1; // Subtle intensity
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: derived state from score for visual intensity
     setPressureLevel(newLevel);
   }, [gameState.score]);
 
@@ -511,6 +525,7 @@ const ColorReaction: React.FC = () => {
       }, 15000);
     } else if (gameState.status === 'idle') {
       // Reset when game returns to idle
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: reset tutorial state when returning to idle
       setShowInstruction(true);
       showInstructionRef.current = true;
       if (instructionTimerRef.current) {
@@ -624,8 +639,12 @@ const ColorReaction: React.FC = () => {
       }
     }
 
+    // Check minimum actions and store in state (for render without ref access)
+    const hasMinimumActions = gameStatsRef.current.successes >= 3;
+    setMeetsMinimumActions(hasMinimumActions);
+
     // Submit score if signed in and met minimum actions
-    if (isSignedInRef.current && gameStatsRef.current.successes >= 3) {
+    if (isSignedInRef.current && hasMinimumActions) {
       submitScoreRef.current(finalScore, undefined, {
         bestReactionTime: bestReactionTime === Infinity ? null : Math.round(bestReactionTime),
         maxStreak: maxStreakRef.current,
@@ -641,6 +660,9 @@ const ColorReaction: React.FC = () => {
   const handleGameOverRef = useRef(handleGameOver);
   useEffect(() => { handleGameOverRef.current = handleGameOver; }, [handleGameOver]);
 
+  // Ref for scheduleNextCycle to allow recursive calls
+  const scheduleNextCycleRef = useRef<((currentScore: number, caller?: string) => void) | null>(null);
+
   const scheduleNextCycle = useCallback((currentScore: number, caller?: string) => {
     // Prevent concurrent calls
     if (processingCycleRef.current) {
@@ -649,7 +671,7 @@ const ColorReaction: React.FC = () => {
     // Pause game cycle when quit dialog is shown
     if (isContextPausedRef.current) {
       setTimeout(() => {
-        scheduleNextCycle(currentScore, caller || 'retry-after-pause');
+        scheduleNextCycleRef.current?.(currentScore, caller || 'retry-after-pause');
       }, 100);
       return;
     }
@@ -662,7 +684,7 @@ const ColorReaction: React.FC = () => {
       if (isMatchWindowRef.current) {
         processingCycleRef.current = false;
         setTimeout(() => {
-          scheduleNextCycle(currentScore, caller || 'retry-after-match-window');
+          scheduleNextCycleRef.current?.(currentScore, caller || 'retry-after-match-window');
         }, 100);
         return;
       }
@@ -951,7 +973,7 @@ const ColorReaction: React.FC = () => {
               nextCycleScheduled = true;
               // 500ms delay gives player breathing room
               setTimeout(() => {
-                scheduleNextCycle(currentScore, 'miss-handler');
+                scheduleNextCycleRef.current?.(currentScore, 'miss-handler');
               }, 500);
             }
             return { ...currentState, lives: newLives, streak: 0, isMatchWindow: false };
@@ -971,12 +993,15 @@ const ColorReaction: React.FC = () => {
       }
       
       roundTimeoutRef.current = setTimeout(() => {
-        scheduleNextCycle(currentScore, 'cycle-timeout');
+        scheduleNextCycleRef.current?.(currentScore, 'cycle-timeout');
       }, cycleMs);
     }
 
     processingCycleRef.current = false;
   }, [cleanupAllTimers, playCRMatchStart, hapticCRMiss, playCRMiss, playCRTimeDilation, triggerEvent]);
+
+  // Keep scheduleNextCycleRef in sync
+  useEffect(() => { scheduleNextCycleRef.current = scheduleNextCycle; }, [scheduleNextCycle]);
 
   // Handle correct tap with all effects (Arcade: points = basePoints + streakBonus, no multiplier)
   const handleCorrectTap = useCallback(
@@ -998,7 +1023,7 @@ const ColorReaction: React.FC = () => {
       // Arcade lights: Update combo tier
       if (newStreak >= 2) {
         const comboTier = getComboTier(newStreak);
-        triggerEvent(`combo:${comboTier}` as any);
+        triggerEvent(`combo:${comboTier}` as GameEvent);
       }
 
       if (rating !== 'PERFECT') {
@@ -1138,7 +1163,7 @@ const ColorReaction: React.FC = () => {
         showEpicCallout('LIGHTNING!');
       }
     },
-    [triggerScreenShake, triggerPlayerFlash, showFloatingScore, showEpicCallout, triggerShockwave, triggerSparks, addFloatingEmoji, updateCombo, triggerConfetti, hapticCRPerfect, hapticCRGreat, hapticCRGood, hapticCROk, hapticCRStreak5, hapticCRStreak10, hapticCRStreak15, hapticCRStreak20, playCRCorrectTap, playCRPerfect, playCRTimeDilation, playCRStreakMilestone]
+    [triggerScreenShake, triggerPlayerFlash, showFloatingScore, showEpicCallout, triggerShockwave, triggerSparks, addFloatingEmoji, updateCombo, triggerConfetti, hapticCRPerfect, hapticCRGreat, hapticCRGood, hapticCROk, hapticCRStreak5, hapticCRStreak10, hapticCRStreak15, hapticCRStreak20, playCRCorrectTap, playCRPerfect, playCRTimeDilation, playCRStreakMilestone, triggerEvent, feverMode]
   );
 
   // Handle wrong tap with effects
@@ -1175,6 +1200,7 @@ const ColorReaction: React.FC = () => {
   useEffect(() => {
     if (gameState.lives < prevLivesRef.current && gameState.status === 'playing') {
       // TASK 65: Pass whether there was a streak for streak break feedback
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: handleWrongTap triggers visual feedback
       handleWrongTap(gameState.streak > 0);
       showLivesWarning(gameState.lives);
       // TASK 10: Life loss haptic
@@ -1207,7 +1233,7 @@ const ColorReaction: React.FC = () => {
       triggerVignette(GAME_OVER_SEQUENCE.vignetteColor);
     }
     prevLivesRef.current = gameState.lives;
-  }, [gameState.lives, gameState.status, handleWrongTap, playCRGameOver, playCRLifeLoss, playCRLastLifeWarning, showLivesWarning, hapticCRLoseLife, hapticCRLastLife, hapticGameOver, triggerScreenShake, triggerVignette]);
+  }, [gameState.lives, gameState.status, gameState.streak, handleWrongTap, playCRGameOver, playCRLifeLoss, playCRLastLifeWarning, showLivesWarning, hapticCRLoseLife, hapticCRLastLife, hapticGameOver, triggerScreenShake, triggerVignette]);
 
   // Handle tap - uses refs for immediate state access (avoids stale closures on mobile)
   const handleTap = useCallback(() => {
@@ -1513,7 +1539,7 @@ const ColorReaction: React.FC = () => {
         scheduleNextCycle(gameState.score, 'handleTap-too-late-life-loss');
       }
     }
-  }, [scheduleNextCycle, handleCorrectTap, handleGameOver, gameState.streak, gameState.lives, gameState.score, gameState.bestReactionTime, hapticCRTap, musicManagedExternally, playNextMusicTrack]);
+  }, [scheduleNextCycle, handleCorrectTap, handleGameOver, gameState.streak, gameState.lives, gameState.score, gameState.bestReactionTime, gameState.targetFruit, gameState.targetColor, gameState.yourFruit, gameState.yourColor, hapticCRTap, musicManagedExternally, playNextMusicTrack, triggerEvent, playCRGameStart, highScore, feverMode, triggerScreenShake, triggerPlayerFlash, showFloatingScore]);
 
   // Handle game restart - TASK 82: Retry animation (smooth transition)
   const handleRestart = useCallback((e?: React.MouseEvent) => {
@@ -1530,6 +1556,7 @@ const ColorReaction: React.FC = () => {
     // Reset game over screen states to prevent stale data on replay
     setGameScreenshot(null);
     setIsNewPersonalBest(false);
+    setMeetsMinimumActions(false);
 
     // Reset timing refs to prevent edge case bugs on quick restart
     lastWrongTapTimeRef.current = 0;
@@ -1583,7 +1610,7 @@ const ColorReaction: React.FC = () => {
     }
     lastFullMatchTimeRef.current = 0;
     scheduleNextCycle(0, 'handleRestart');
-  }, [cleanupAllTimers, scheduleNextCycle, resetAllEffects, playNextMusicTrack, musicManagedExternally]);
+  }, [cleanupAllTimers, scheduleNextCycle, resetAllEffects, playNextMusicTrack, musicManagedExternally, triggerEvent]);
 
   // Share handler for game over scorecard
   const handleShare = useCallback(async () => {
@@ -1850,7 +1877,7 @@ const ColorReaction: React.FC = () => {
               onPlayAgain={handleRestart}
               onShare={handleShare}
               accentColor="#ff6b00"
-              meetsMinimumActions={gameStatsRef.current.successes >= 3}
+              meetsMinimumActions={meetsMinimumActions}
               minimumActionsMessage="Get at least 3 correct taps to be on the leaderboard"
             />
           )}

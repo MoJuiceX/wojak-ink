@@ -39,7 +39,8 @@ const OrangePongGame: React.FC = () => {
     isSubmitting,
   } = useLeaderboard(ORANGE_PONG_CONFIG.leaderboardId || 'orange-pong');
 
-  const { isBackgroundMusicPlaying: _isBackgroundMusicPlaying, playBackgroundMusic: _playBackgroundMusic, pauseBackgroundMusic: _pauseBackgroundMusic } = useAudio();
+  // Background music not used in this game
+  useAudio();
 
   const [gameState, setGameState] = useState<'idle' | 'playing' | 'gameover'>('idle');
   const [playerScore, setPlayerScore] = useState(0);
@@ -64,7 +65,7 @@ const OrangePongGame: React.FC = () => {
   });
   const [isNewPersonalBest, setIsNewPersonalBest] = useState(false);
   const [showLeaderboardPanel, setShowLeaderboardPanel] = useState(false);
-  const [showScreenShake, _setShowScreenShake] = useState(false);
+  const [showScreenShake] = useState(false);
 
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -186,7 +187,7 @@ const OrangePongGame: React.FC = () => {
     let currentBallY = ballY;
     let currentBallVX = ballVX;
     let currentBallVY = ballVY;
-    let currentPlayerY = playerYRef.current;
+    const currentPlayerY = playerYRef.current;
     let currentAiY = aiY;
     let currentRally = rallyRef.current;
 

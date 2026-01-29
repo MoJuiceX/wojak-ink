@@ -137,7 +137,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userPosition, setUserPosition] = useState<UserPosition | null>(null);
-  const [_resetTime, setResetTime] = useState<string | undefined>(undefined);
+  const [, setResetTime] = useState<string | undefined>(undefined);
 
   // Fetch leaderboard from server API
   const fetchLeaderboard = useCallback(async (gameId: GameId, tf: TimeframeType) => {

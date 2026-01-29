@@ -32,9 +32,13 @@ const SAD_IMAGES = [
 ];
 
 // Sound effect for bouncing
+interface WindowWithWebkit extends Window {
+  webkitAudioContext?: typeof AudioContext;
+}
+
 const createBounceSound = () => {
   try {
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const audioContext = new (window.AudioContext || (window as WindowWithWebkit).webkitAudioContext!)();
     return () => {
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
@@ -51,7 +55,7 @@ const createBounceSound = () => {
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 0.1);
     };
-  } catch (e) {
+  } catch {
     return () => {};
   }
 };
@@ -79,10 +83,9 @@ type GameState = 'menu' | 'playing' | 'levelComplete' | 'saveScore';
 
 const OrangeJuggleGame: React.FC = () => {
   const effects = useEffects();
-  const { isSoundEffectsEnabled, isBackgroundMusicPlaying: _isBackgroundMusicPlaying, playBackgroundMusic: _playBackgroundMusic, pauseBackgroundMusic: _pauseBackgroundMusic } = useAudio();
+  const { isSoundEffectsEnabled } = useAudio();
 
   const {
-    leaderboard: _globalLeaderboard,
     submitScore,
     isSignedIn,
     userDisplayName,
@@ -113,17 +116,16 @@ const OrangeJuggleGame: React.FC = () => {
   const [playerName, setPlayerName] = useState('');
   const [scoreSubmitted, setScoreSubmitted] = useState(false);
   const [isNewPersonalBest, setIsNewPersonalBest] = useState(false);
-  const [_showLeaderboardPanel, _setShowLeaderboardPanel] = useState(false);
 
   const [objects, setObjects] = useState<GameObject[]>([]);
   const [paddleX, setPaddleX] = useState(0);
   const [paddleY, setPaddleY] = useState(0);
 
   const [speedModifier, setSpeedModifier] = useState(1);
-  const [_activePowerup, setActivePowerup] = useState<'banana' | 'rum' | null>(null);
+  const [, setActivePowerup] = useState<'banana' | 'rum' | null>(null);
   const [isReversed, setIsReversed] = useState(false);
-  const [_rumCount, setRumCount] = useState(0);
-  const [_bananaCount, setBananaCount] = useState(0);
+  const [, setRumCount] = useState(0);
+  const [, setBananaCount] = useState(0);
 
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | undefined>(undefined);
@@ -140,6 +142,7 @@ const OrangeJuggleGame: React.FC = () => {
   const isReversedRef = useRef(false);
   const nextPowerupSpawnRef = useRef(0);
   const nextCamelSpawnRef = useRef(0);
+  const startGameRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     bounceSoundRef.current = createBounceSound();
@@ -147,21 +150,9 @@ const OrangeJuggleGame: React.FC = () => {
 
   useEffect(() => {
     if (gameState === 'menu') {
-      startGame('campaign');
+      queueMicrotask(() => startGameRef.current?.());
     }
-  }, []);
-
-  const startGame = (_mode: string) => {
-    setLevel(1);
-    setScore(0);
-    scoreRef.current = 0;
-    setCombo(0);
-    comboRef.current = 0;
-    setScoreSubmitted(false);
-    setIsNewPersonalBest(false);
-    setLostByCamel(false);
-    startLevel(1);
-  };
+  }, [gameState]);
 
   const startLevel = (lvl: number) => {
     const config = LEVEL_CONFIG[lvl as keyof typeof LEVEL_CONFIG] || LEVEL_CONFIG[5];
@@ -211,6 +202,23 @@ const OrangeJuggleGame: React.FC = () => {
 
     setGameState('playing');
   };
+
+  const startGame = () => {
+    setLevel(1);
+    setScore(0);
+    scoreRef.current = 0;
+    setCombo(0);
+    comboRef.current = 0;
+    setScoreSubmitted(false);
+    setIsNewPersonalBest(false);
+    setLostByCamel(false);
+    startLevel(1);
+  };
+
+  // Keep ref in sync
+  useEffect(() => {
+    startGameRef.current = startGame;
+  });
 
   const completeLevel = () => {
     setGameState('levelComplete');
@@ -277,7 +285,7 @@ const OrangeJuggleGame: React.FC = () => {
   // Auto-submit for signed-in users
   useEffect(() => {
     if (gameState === 'saveScore' && isSignedIn && score > 0 && !scoreSubmitted) {
-      submitScoreGlobal();
+      queueMicrotask(() => submitScoreGlobal());
     }
   }, [gameState, isSignedIn, score, scoreSubmitted, submitScoreGlobal]);
 
@@ -555,7 +563,7 @@ const OrangeJuggleGame: React.FC = () => {
                     {isSubmitting ? 'Saving...' : scoreSubmitted ? `Saved as ${userDisplayName}!` : null}
                   </div>
                   <div className="game-over-buttons">
-                    <button onClick={() => startGame('campaign')} className="play-btn">Play Again</button>
+                    <button onClick={() => startGame()} className="play-btn">Play Again</button>
                   </div>
                 </div>
               ) : (
@@ -570,13 +578,13 @@ const OrangeJuggleGame: React.FC = () => {
                   />
                   <div className="game-over-buttons">
                     <button onClick={saveScore} className="game-over-save" disabled={!playerName.trim()}>Save</button>
-                    <button onClick={() => startGame('campaign')} className="game-over-skip">Play Again</button>
+                    <button onClick={() => startGame()} className="game-over-skip">Play Again</button>
                   </div>
                 </div>
               )
             ) : (
               <div className="game-over-buttons-single">
-                <button onClick={() => startGame('campaign')} className="play-btn">Play Again</button>
+                <button onClick={() => startGame()} className="play-btn">Play Again</button>
               </div>
             )}
           </div>

@@ -42,7 +42,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       ).bind(userId).all();
 
       return new Response(JSON.stringify({
-        friendIds: (results.results || []).map((r: any) => r.friend_id),
+        friendIds: (results.results || []).map((r: { friend_id: string }) => r.friend_id),
       }), {
         headers: corsHeaders,
       });

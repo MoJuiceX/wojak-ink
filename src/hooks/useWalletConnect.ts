@@ -12,13 +12,22 @@ const PROJECT_ID = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID;
 const CHAIN_ID = 'chia:mainnet';
 const WOJAK_COLLECTION_ID = 'col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah';
 
+interface WalletNFT {
+  collection_id?: string;
+  collectionId?: string;
+  collectionID?: string;
+  name?: string;
+  id?: string;
+  [key: string]: unknown;
+}
+
 interface WalletConnectState {
   isConnecting: boolean;
   isConnected: boolean;
   qrCodeUri: string | null;
   connectionUri: string | null;
   walletAddress: string | null;
-  nfts: any[];
+  nfts: WalletNFT[];
   isLoadingNfts: boolean;
   nftDetectionUnavailable: boolean; // true if wallet doesn't support chia_getNFTs
   error: string | null;
@@ -38,7 +47,7 @@ export function useWalletConnect() {
   });
 
   const clientRef = useRef<SignClient | null>(null);
-  const sessionRef = useRef<any>(null);
+  const sessionRef = useRef<{ topic: string; peer?: { metadata?: unknown } } | null>(null);
 
   // Initialize client
   const initClient = useCallback(async () => {
@@ -157,10 +166,11 @@ export function useWalletConnect() {
 
 
         // Filter for Wojak Farmers Plot NFTs
-        const allNfts = (result as any)?.nfts || (result as any) || [];
+        const resultObj = result as Record<string, unknown> | unknown[];
+        const allNfts = (Array.isArray(resultObj) ? resultObj : (resultObj as Record<string, unknown>)?.nfts || resultObj || []) as WalletNFT[];
 
         const wojakNfts = Array.isArray(allNfts)
-          ? allNfts.filter((nft: any) => {
+          ? allNfts.filter((nft: WalletNFT) => {
               const collectionId = nft.collection_id || nft.collectionId || nft.collectionID || '';
               const matches = collectionId.includes(WOJAK_COLLECTION_ID);
               return matches;
@@ -173,9 +183,10 @@ export function useWalletConnect() {
           nfts: wojakNfts,
           isLoadingNfts: false,
         }));
-      } catch (nftError: any) {
+      } catch (nftError: unknown) {
+        const errorObj = nftError instanceof Error ? nftError : new Error('Failed to fetch NFTs');
         console.error('[WalletConnect] Auto-fetch NFTs error:', nftError);
-        const errorMsg = nftError.message || 'Failed to fetch NFTs';
+        const errorMsg = errorObj.message || 'Failed to fetch NFTs';
 
         // Check if the wallet doesn't support chia_getNFTs
         const isUnsupported = errorMsg.toLowerCase().includes('unsupported') ||
@@ -197,12 +208,12 @@ export function useWalletConnect() {
           }));
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[WalletConnect] Connect error:', error);
       setState(s => ({
         ...s,
         isConnecting: false,
-        error: error.message || 'Failed to connect wallet',
+        error: error instanceof Error ? error.message : 'Failed to connect wallet',
       }));
     }
   }, [initClient]);
@@ -227,14 +238,16 @@ export function useWalletConnect() {
 
 
       // Filter for Wojak Farmers Plot NFTs
-      const allNfts = (result as any)?.nfts || (result as any) || [];
+      const resultObj = result as Record<string, unknown> | unknown[];
+      const allNfts = (Array.isArray(resultObj) ? resultObj : (resultObj as Record<string, unknown>)?.nfts || resultObj || []) as WalletNFT[];
 
       // Log first NFT structure for debugging
       if (Array.isArray(allNfts) && allNfts.length > 0) {
+        // intentionally empty
       }
 
       const wojakNfts = Array.isArray(allNfts)
-        ? allNfts.filter((nft: any) => {
+        ? allNfts.filter((nft: WalletNFT) => {
             const collectionId = nft.collection_id || nft.collectionId || nft.collectionID || '';
             return collectionId.includes(WOJAK_COLLECTION_ID);
           })
@@ -248,12 +261,12 @@ export function useWalletConnect() {
       }));
 
       return wojakNfts;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[WalletConnect] Fetch NFTs error:', error);
       setState(s => ({
         ...s,
         isLoadingNfts: false,
-        error: error.message || 'Failed to fetch NFTs',
+        error: error instanceof Error ? error.message : 'Failed to fetch NFTs',
       }));
       return [];
     }

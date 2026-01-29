@@ -25,7 +25,7 @@ export default function StartupSequence({ onComplete }: StartupSequenceProps) {
 
     // Fade out boot audio smoothly over 500ms
     if (bootAudioRef.current) {
-      const gainNode = (bootAudioRef.current as any)?._gainNode
+      const gainNode = (bootAudioRef.current as unknown as { _gainNode?: GainNode })?._gainNode
       if (gainNode) {
         const currentTime = gainNode.context.currentTime
         const currentGain = gainNode.gain.value
@@ -41,7 +41,7 @@ export default function StartupSequence({ onComplete }: StartupSequenceProps) {
 
     // Fade out PS1 audio if it's playing
     if (ps1AudioRef.current) {
-      const gainNode = (ps1AudioRef.current as any)?._gainNode
+      const gainNode = (ps1AudioRef.current as unknown as { _gainNode?: GainNode })?._gainNode
       if (gainNode) {
         const currentTime = gainNode.context.currentTime
         const currentGain = gainNode.gain.value
@@ -82,7 +82,7 @@ export default function StartupSequence({ onComplete }: StartupSequenceProps) {
 
       // START BOOT AUDIO FADEOUT HERE - right when logo appears
       if (bootAudioRef.current) {
-        const gainNode = (bootAudioRef.current as any)._gainNode
+        const gainNode = (bootAudioRef.current as unknown as { _gainNode?: GainNode })._gainNode
         if (gainNode) {
           // Use Web Audio API's built-in smooth ramping
           // This is the professional way to fade audio - no clicks or pops
@@ -142,7 +142,7 @@ export default function StartupSequence({ onComplete }: StartupSequenceProps) {
             const prog = Math.min(elapsed / ps1FadeOutDuration, 1)
 
             // Get gainNode each frame (might not be ready at start)
-            const gainNode = (ps1AudioRef.current as any)._gainNode
+            const gainNode = (ps1AudioRef.current as unknown as { _gainNode?: GainNode })._gainNode
             if (gainNode) {
               // Fade from current max (0.11) to 0
               gainNode.gain.value = 0.11 * (1 - prog)

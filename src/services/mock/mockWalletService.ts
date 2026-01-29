@@ -9,12 +9,14 @@ import { mockWalletBalance, mockTokenPrices, mockNFTs } from '@/mocks/data';
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export class MockWalletService implements IWalletService {
-  async fetchWalletBalance(_address: string): Promise<WalletBalance> {
+  async fetchWalletBalance(address: string): Promise<WalletBalance> {
+    void address;
     await delay(200);
     return { ...mockWalletBalance };
   }
 
-  async fetchWalletNFTs(_address: string): Promise<NFT[]> {
+  async fetchWalletNFTs(address: string): Promise<NFT[]> {
+    void address;
     await delay(300);
     return mockNFTs.slice(0, 5);
   }

@@ -32,7 +32,7 @@ export function useMediaQuery(query: string): boolean {
     const mediaQuery = window.matchMedia(query);
 
     // Set initial value
-    setMatches(mediaQuery.matches);
+    queueMicrotask(() => setMatches(mediaQuery.matches));
 
     // Handler for changes
     function handleChange(event: MediaQueryListEvent) {

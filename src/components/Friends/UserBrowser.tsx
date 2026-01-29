@@ -104,7 +104,7 @@ export function UserBrowser() {
               return (
                 <div key={user.id} className="user-card">
                   <Link to={`/profile/${user.id}`} className="user-info">
-                    <Avatar avatar={user.avatar as any} size="medium" showBadge={false} />
+                    <Avatar avatar={user.avatar} size="medium" showBadge={false} />
                     <span className="user-name">{user.displayName}</span>
                   </Link>
 

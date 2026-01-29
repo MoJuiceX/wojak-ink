@@ -13,8 +13,8 @@ let volumeMultiplier = 1;
 export const getAudioContext = () => {
   if (!audioContext) {
     try {
-      audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    } catch (e) {
+      audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    } catch {
       console.warn('Web Audio API not supported');
       return null;
     }
@@ -53,7 +53,7 @@ const createSparkleCascade = (ctx: AudioContext | null, count: number = 5, baseF
       osc.start(startTime);
       osc.stop(startTime + 0.12);
     }
-  } catch (e) {
+  } catch {
     // Silently fail - don't break game flow
   }
 };
@@ -93,7 +93,7 @@ export const createCardHoverSound = () => {
 
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.035);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -168,7 +168,7 @@ export const createCardFlipSound = () => {
     noiseGain.connect(ctx.destination);
 
     noise.start(now);
-  } catch (e) {
+  } catch {
     // Silently fail - don't break game flow
   }
 };
@@ -233,7 +233,7 @@ export const createMatchFoundSound = (streak: number = 1) => {
       // Normal - light sparkle
       createSparkleCascade(ctx, 2, 1400);
     }
-  } catch (e) {
+  } catch {
     // Silently fail - don't break game flow
   }
 };
@@ -281,7 +281,7 @@ export const createFastMatchBonus = () => {
 
     osc2.start(ctx.currentTime + 0.02);
     osc2.stop(ctx.currentTime + 0.12);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -341,7 +341,7 @@ export const createAnticipationSound = (pairsRemaining: number) => {
       // Richer sparkle
       createSparkleCascade(ctx, 4, 1800);
     }
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -378,7 +378,7 @@ export const createMismatchSound = () => {
 
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.1);
-  } catch (e) {
+  } catch {
     // Silently fail - don't break game flow
   }
 };

@@ -7,6 +7,7 @@ import { useGameEffects, GameEffects } from '@/components/media';
 import { useGameMute } from '@/contexts/GameMuteContext';
 import { useArcadeLights } from '@/contexts/ArcadeLightsContext';
 import { GAME_COMBO_TIERS } from '@/config/arcade-light-mappings';
+import type { GameEvent } from '@/config/arcade-light-mappings';
 import { GAME_OVER_SEQUENCE } from '@/lib/juice/brandConstants';
 import { useTimeUrgency, getUrgencyClass } from '@/hooks/useTimeUrgency';
 import { useGameNavigationGuard } from '@/hooks/useGameNavigationGuard';
@@ -1067,11 +1068,11 @@ const MemoryMatch: React.FC = () => {
             // Arcade lights: Match found with streak tier
             const streakTier = GAME_COMBO_TIERS['memory-match'](newStreak);
             if (streakTier !== 'start') {
-              triggerEvent(`combo:${streakTier}` as any);
+              triggerEvent(`combo:${streakTier}` as GameEvent);
             } else {
               triggerEvent('score:medium'); // Base match
             }
-          } catch (e) {
+          } catch {
             // Sound/haptic errors shouldn't break the game
           }
 
@@ -1135,7 +1136,7 @@ const MemoryMatch: React.FC = () => {
                   setTimeout(() => showEpicCallout('⚡ SPEED BONUS!'), 400);
                 }
               }
-            } catch (e) {
+            } catch {
               // Visual effects errors shouldn't break the game
             }
 
@@ -1175,7 +1176,7 @@ const MemoryMatch: React.FC = () => {
                 if (remainingPairs === 1) {
                   setShowNearWinShimmer(true);
                 }
-              } catch (e) {
+              } catch {
                 // Callout errors shouldn't break match counting
               }
               return newMatches;
@@ -1216,7 +1217,7 @@ const MemoryMatch: React.FC = () => {
               emoji: '😬',
               score: '-1',
             });
-          } catch (e) {
+          } catch {
             // Visual effects errors shouldn't break the game
           }
         }

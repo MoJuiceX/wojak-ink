@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * Guild Context
  *
@@ -531,7 +532,7 @@ export const GuildProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     // Add member
     const members = getGuildMembers(myGuild.id);
     const allUsers = JSON.parse(localStorage.getItem('wojak_users') || '{}');
-    const requestUser = Object.values(allUsers).find((u: any) => u.id === request.userId) as any;
+    const requestUser = Object.values(allUsers).find((u: unknown) => (u as { id?: string }).id === request.userId) as { displayName?: string } | undefined;
 
     const newMember: GuildMember = {
       id: crypto.randomUUID(),

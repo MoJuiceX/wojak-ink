@@ -10,7 +10,7 @@
  * - Snow accumulation
  */
 
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useState } from 'react';
 import {
   WEATHER_CONFIG,
   type WeatherType,
@@ -91,11 +91,12 @@ export function useFlappyWeather({
     inClearBuffer: false,
   });
 
-  // Weather timing
-  const weatherTimerRef = useRef(
+  // Weather timing - use lazy initializer to avoid impure Math.random during render
+  const [initialWeatherDuration] = useState(() =>
     WEATHER_CONFIG.MIN_WEATHER_DURATION +
     Math.random() * (WEATHER_CONFIG.MAX_WEATHER_DURATION - WEATHER_CONFIG.MIN_WEATHER_DURATION)
   );
+  const weatherTimerRef = useRef(initialWeatherDuration);
   const fogTimerRef = useRef(0);
 
   // Snow state

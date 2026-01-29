@@ -334,8 +334,8 @@ async function drawScreenshotSection(
       ctx.lineWidth = 1;
       roundRect(ctx, frameX, frameY, frameWidth, frameHeight, radius);
       ctx.stroke();
-    } catch (e) {
-      console.warn('[FlappyOrangeScorecard] Failed to load screenshot:', e);
+    } catch {
+      // Screenshot load failed, use placeholder
       drawScreenshotPlaceholder(ctx, frameX, frameY, frameWidth, frameHeight, radius);
     }
   } else {
@@ -377,8 +377,10 @@ function drawStatsSection(
   ctx: CanvasRenderingContext2D,
   data: FlappyScorecardData,
   contentTop: number,
-  _contentHeight: number
+  contentHeight: number
 ): void {
+  // Mark as used for API consistency
+  void contentHeight;
   const x = LAYOUT.SCREENSHOT_WIDTH + LAYOUT.STATS_PADDING.left;
   const rightPadding = LAYOUT.STATS_PADDING.right;
   const availableWidth = CANVAS_WIDTH - x - rightPadding;

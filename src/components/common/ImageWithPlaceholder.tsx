@@ -40,8 +40,10 @@ export const ImageWithPlaceholder: React.FC<ImageWithPlaceholderProps> = ({
   // Check if image is already cached
   useEffect(() => {
     if (imgRef.current?.complete && imgRef.current?.naturalWidth > 0) {
-      setLoaded(true);
-      onLoad?.();
+      queueMicrotask(() => {
+        setLoaded(true);
+        onLoad?.();
+      });
     }
   }, [src, onLoad]);
 

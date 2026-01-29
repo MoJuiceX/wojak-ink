@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * Daily Challenges Context
  *
@@ -82,7 +83,9 @@ function formatPlayTime(seconds: number): string {
 }
 
 export const DailyChallengesProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const authResult = CLERK_ENABLED ? useAuth() : { userId: null, isSignedIn: false, getToken: async () => null };
+  // Always call hooks unconditionally (rules of hooks)
+  const clerkAuth = useAuth();
+  const authResult = CLERK_ENABLED ? clerkAuth : { userId: null, isSignedIn: false, getToken: async () => null };
   const userId = authResult.userId;
   const isSignedIn = authResult.isSignedIn;
   const getToken = authResult.getToken;
@@ -154,7 +157,7 @@ export const DailyChallengesProvider: React.FC<{ children: ReactNode }> = ({ chi
     if (userId && isSignedIn) {
       if (!hasFetchedRef.current) {
         hasFetchedRef.current = true;
-        setIsLoading(true);
+        setIsLoading(true); // eslint-disable-line react-hooks/set-state-in-effect -- loading state before async fetch
         fetchChallenges().finally(() => {
           setIsLoading(false);
         });

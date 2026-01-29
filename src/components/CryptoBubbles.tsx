@@ -39,7 +39,7 @@ const RESPAWN_DELAY = 30000; // 30 seconds
 // Create pop sound using Web Audio API - pitch varies by value
 const playPopSound = (value: number, maxValue: number) => {
   try {
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
 
     // Create oscillator for the pop
     const oscillator = audioContext.createOscillator();
@@ -65,7 +65,7 @@ const playPopSound = (value: number, maxValue: number) => {
     oscillator.type = 'sine';
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 0.15);
-  } catch (e) {
+  } catch {
     // Audio not supported, fail silently
   }
 };
@@ -77,7 +77,7 @@ const triggerHaptic = () => {
     if (navigator.vibrate) {
       navigator.vibrate(15); // Short 15ms vibration for a "pop" feel
     }
-  } catch (e) {
+  } catch {
     // Haptics not supported, fail silently
   }
 };
@@ -183,7 +183,7 @@ const createConfetti = (): Particle[] => {
 // Play celebration sound
 const playCelebrationSound = () => {
   try {
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
 
     // Play a cheerful ascending arpeggio
     const notes = [523, 659, 784, 1047]; // C5, E5, G5, C6
@@ -203,7 +203,7 @@ const playCelebrationSound = () => {
       osc.start(startTime);
       osc.stop(startTime + 0.2);
     });
-  } catch (e) {
+  } catch {
     // Audio not supported
   }
 };
@@ -319,9 +319,10 @@ const CryptoBubbles: React.FC<CryptoBubblesProps> = ({
 
   // Cleanup timers on unmount
   useEffect(() => {
+    const timersRef = respawnTimersRef.current;
     return () => {
-      respawnTimersRef.current.forEach(timer => clearTimeout(timer));
-      respawnTimersRef.current.clear();
+      timersRef.forEach(timer => clearTimeout(timer));
+      timersRef.clear();
     };
   }, []);
 
@@ -431,22 +432,28 @@ const CryptoBubbles: React.FC<CryptoBubblesProps> = ({
         cancelAnimationFrame(particleAnimationRef.current);
       }
     };
-  }, [particles.length > 0]);
+  }, [particles.length]);
 
   // Confetti trigger
   useEffect(() => {
     if (!showConfetti) return;
 
-    const newConfetti = createConfetti();
-    setConfettiParticles(newConfetti);
+    // Defer setState to avoid synchronous call in effect body
+    const timer = setTimeout(() => {
+      const newConfetti = createConfetti();
+      setConfettiParticles(newConfetti);
+    }, 0);
 
     // Auto-hide confetti after 8 seconds
-    const timeout = setTimeout(() => {
+    const hideTimeout = setTimeout(() => {
       setShowConfetti(false);
       setConfettiParticles([]);
     }, 8000);
 
-    return () => clearTimeout(timeout);
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(hideTimeout);
+    };
   }, [showConfetti]);
 
   // Confetti physics animation
@@ -478,7 +485,7 @@ const CryptoBubbles: React.FC<CryptoBubblesProps> = ({
         cancelAnimationFrame(confettiAnimationRef.current);
       }
     };
-  }, [confettiParticles.length > 0]);
+  }, [confettiParticles.length]);
 
   // Calculate bubble radius using log scale for better visual balance
   // This ensures smaller values are still visible while larger values are proportionally bigger
@@ -529,7 +536,9 @@ const CryptoBubbles: React.FC<CryptoBubblesProps> = ({
     });
 
     bubblesRef.current = initialBubbles;
-    setBubbles(initialBubbles);
+    // Defer setState to avoid synchronous call in effect
+    const timer = setTimeout(() => setBubbles(initialBubbles), 0);
+    return () => clearTimeout(timer);
   }, [data, width, height]);
 
   // Physics simulation

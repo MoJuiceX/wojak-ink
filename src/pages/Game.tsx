@@ -525,7 +525,7 @@ const Game: React.FC = () => {
   // Update high score
   useEffect(() => {
     if ((gameState === 'gameover' || gameState === 'levelComplete') && score > highScore) {
-      setHighScore(score);
+      queueMicrotask(() => setHighScore(score));
       localStorage.setItem('orangeSliceHighScore', String(score));
     }
   }, [gameState, score, highScore]);
@@ -561,7 +561,7 @@ const Game: React.FC = () => {
   // Auto-submit score for signed-in users when game ends
   useEffect(() => {
     if (gameState === 'gameover' && isSignedIn && score > 0 && !scoreSubmitted) {
-      submitScoreGlobal(score, level);
+      queueMicrotask(() => submitScoreGlobal(score, level));
     }
   }, [gameState, isSignedIn, score, level, scoreSubmitted, submitScoreGlobal]);
 

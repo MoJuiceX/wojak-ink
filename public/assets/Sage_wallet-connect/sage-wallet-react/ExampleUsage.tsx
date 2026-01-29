@@ -82,8 +82,8 @@ function MainContent() {
   const { 
     status, 
     address, 
-    isInitialized,
-    connect,
+    isInitialized: _isInitialized,
+    connect: _connect,
     disconnect,
     hasRequiredNFTs,
     getNFTs,
@@ -91,7 +91,7 @@ function MainContent() {
   } = useSageWallet();
   
   const [nfts, setNfts] = useState<MintGardenNFT[]>([]);
-  const [hasAccess, setHasAccess] = useState(false);
+  const [_hasAccess, setHasAccess] = useState(false);
   const [loading, setLoading] = useState(false);
   
   // Your Wojak Farmers Plot collection ID
@@ -394,7 +394,7 @@ export function MinimalWalletButton() {
     connect, 
     disconnect,
     shortenAddress,
-    error,
+    error: _error,
   } = useSageWalletStandalone({
     metadata: {
       name: 'Wojak.ink',

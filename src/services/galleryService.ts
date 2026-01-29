@@ -28,8 +28,8 @@ type RarityEntry = [number, number, string, ...string[]];
 
 let metadataCache: RawMetadata[] | null = null;
 let rarityCache: Record<string, RarityEntry> | null = null;
-let nftCache: Map<string, NFT> = new Map();
-let characterCache: Map<CharacterType, NFT[]> = new Map();
+const nftCache: Map<string, NFT> = new Map();
+const characterCache: Map<CharacterType, NFT[]> = new Map();
 
 // ============ Loaders ============
 

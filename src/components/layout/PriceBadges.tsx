@@ -159,7 +159,7 @@ export function PriceBadges({ size = 'md' }: PriceBadgesProps) {
 
       // If this is initial load OR the API price changed significantly (> 1%), reset to real price
       if (simulatedXchPrice === null || (previousBase !== null && Math.abs(xchPrice - previousBase) > previousBase * 0.01)) {
-        setSimulatedXchPrice(xchPrice);
+        queueMicrotask(() => setSimulatedXchPrice(xchPrice));
       }
     }
   }, [xchPrice, simulatedXchPrice]);
@@ -215,7 +215,7 @@ export function PriceBadges({ size = 'md' }: PriceBadgesProps) {
 
     // If this is the initial load, set immediately
     if (delayedFloorUsd === null) {
-      setDelayedFloorUsd(calculatedFloorUsd);
+      queueMicrotask(() => setDelayedFloorUsd(calculatedFloorUsd));
       return;
     }
 

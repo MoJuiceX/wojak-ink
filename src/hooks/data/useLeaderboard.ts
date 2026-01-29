@@ -101,8 +101,9 @@ export function useLeaderboard(gameId: string) {
   const { recordGamePlayed, recordLeaderboardRank, checkAchievements } = useAchievements();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Get current user ID from Clerk
-  const authResult = CLERK_ENABLED ? useAuth() : { userId: null };
+  // Always call hooks unconditionally (rules of hooks)
+  const clerkAuth = useAuth();
+  const authResult = CLERK_ENABLED ? clerkAuth : { userId: null };
   const currentUserId = authResult.userId;
 
   // Fetch top 10 leaderboard with current user marking

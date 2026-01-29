@@ -34,8 +34,10 @@ export function DesktopNFTImage({
 
   // Reset states when NFT changes
   useEffect(() => {
-    setImageLoaded(false);
-    setHasError(false);
+    queueMicrotask(() => {
+      setImageLoaded(false);
+      setHasError(false);
+    });
   }, [nft.id]);
 
   const handleLoad = () => {

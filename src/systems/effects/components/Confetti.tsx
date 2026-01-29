@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useState } from 'react';
 
 interface ConfettiProps {
   position?: { x: number; y: number };
@@ -8,6 +8,33 @@ interface ConfettiProps {
     spread?: number;
   };
   duration: number;
+}
+
+interface ConfettiParticle {
+  id: number;
+  color: string;
+  angle: number;
+  velocity: number;
+  rotation: number;
+  size: number;
+  delay: number;
+  endX: number;
+  endY: number;
+}
+
+function createParticles(count: number, colors: string[], spread: number): ConfettiParticle[] {
+  return Array.from({ length: count }, (_, i) => ({
+    id: i,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    angle: (Math.random() - 0.5) * spread,
+    velocity: 50 + Math.random() * 100,
+    rotation: Math.random() * 360,
+    size: 6 + Math.random() * 8,
+    delay: Math.random() * 100,
+    // Pre-calculate end positions for fallback animation
+    endX: (Math.random() - 0.5) * 200,
+    endY: Math.random() * 200 + 100
+  }));
 }
 
 export const Confetti: React.FC<ConfettiProps> = ({
@@ -21,20 +48,7 @@ export const Confetti: React.FC<ConfettiProps> = ({
     spread = 120
   } = data;
 
-  const particles = useMemo(() => {
-    return Array.from({ length: count }, (_, i) => ({
-      id: i,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      angle: (Math.random() - 0.5) * spread,
-      velocity: 50 + Math.random() * 100,
-      rotation: Math.random() * 360,
-      size: 6 + Math.random() * 8,
-      delay: Math.random() * 100,
-      // Pre-calculate end positions for fallback animation
-      endX: (Math.random() - 0.5) * 200,
-      endY: Math.random() * 200 + 100
-    }));
-  }, [count, colors, spread]);
+  const [particles] = useState<ConfettiParticle[]>(() => createParticles(count, colors, spread));
 
   return (
     <div

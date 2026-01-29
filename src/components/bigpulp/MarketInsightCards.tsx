@@ -94,7 +94,7 @@ function calculateInsightCounts(
 function InsightCard({
   config,
   count,
-  nfts: _nfts,
+  nfts,
   onExpand,
 }: {
   config: InsightConfig;
@@ -102,6 +102,7 @@ function InsightCard({
   nfts: HeatMapCell['nfts'];
   onExpand: () => void;
 }) {
+  void nfts; // Reserved for future use
   const prefersReducedMotion = useReducedMotion();
   const Icon = config.icon;
   const hasNfts = count > 0;

@@ -1,6 +1,7 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * Sage Wallet React Context & Provider
- * 
+ *
  * Provides WalletConnect integration for Sage wallet (Chia blockchain)
  * in React applications.
  */
@@ -200,7 +201,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     if (typeof result === 'string') {
       address = result;
     } else if (result && typeof result === 'object' && 'address' in result) {
-      address = (result as any).address;
+      address = (result as Record<string, unknown>).address as string;
     }
 
     if (!address || !address.startsWith('xch1')) {
@@ -304,19 +305,20 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
         // Get address
         await updateAddressFromWallet();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[SageWallet] Connection failed:', error);
 
       // Close modal on error
       modalRef.current?.closeModal();
 
+      const err = error as Record<string, unknown>;
       setState(prev => ({
         ...prev,
         status: 'disconnected',
-        error: error?.message || 'Connection failed',
+        error: (err?.message as string) || 'Connection failed',
       }));
 
-      if (error?.message?.includes('User rejected') || error?.code === 5000) {
+      if ((err?.message as string)?.includes('User rejected') || err?.code === 5000) {
         throw new Error('Connection cancelled by user');
       }
 
@@ -399,7 +401,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     return result as AssetBalance;
   }, []);
 
-  const takeOffer = useCallback(async (offer: string, fee: number = 0): Promise<any> => {
+  const takeOffer = useCallback(async (offer: string, fee: number = 0): Promise<unknown> => {
     const client = signClientRef.current;
     const session = currentSessionRef.current;
 

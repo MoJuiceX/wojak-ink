@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 
@@ -21,7 +22,7 @@ export interface Effect {
   type: EffectType;
   intensity?: EffectIntensity;
   position?: { x: number; y: number };
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   duration: number;
   createdAt: number;
 }

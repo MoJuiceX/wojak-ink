@@ -72,6 +72,8 @@ export const useGameRewards = ({ gameId }: UseGameRewardsOptions) => {
    * Use a continue to keep playing
    */
   const handleContinue = useCallback(async (): Promise<boolean> => {
+    // useContinue is a function from useCurrency(), not a hook - name is misleading
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- useContinue is a currency method, not a React hook
     return useContinue(gameId);
   }, [gameId, useContinue]);
 

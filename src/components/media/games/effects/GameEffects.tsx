@@ -5,9 +5,26 @@
  * Add this component inside your game container.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { GameEffectsState } from './useGameEffects';
 import './GameEffects.css';
+
+// Pre-generate confetti styles to avoid Math.random during render
+const CONFETTI_COLORS = ['#ff6b00', '#ffd700', '#00ff88', '#00bfff', '#a855f7', '#ff0080'];
+
+interface ConfettiPieceStyle {
+  x: string;
+  delay: string;
+  color: string;
+}
+
+function generateConfettiStyles(count: number): ConfettiPieceStyle[] {
+  return Array.from({ length: count }, () => ({
+    x: `${Math.random() * 100}%`,
+    delay: `${Math.random() * 0.5}s`,
+    color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+  }));
+}
 
 interface GameEffectsProps {
   /** Effects state from useGameEffects hook */
@@ -20,6 +37,9 @@ export const GameEffects: React.FC<GameEffectsProps> = ({
   effects,
   accentColor = '#ff6b00',
 }) => {
+  // Pre-generate confetti styles on first render to avoid Math.random during render
+  const [confettiStyles] = useState<ConfettiPieceStyle[]>(() => generateConfettiStyles(50));
+
   return (
     <div className="game-effects-container">
       {/* Shockwave - Expanding ring on impact */}
@@ -83,17 +103,15 @@ export const GameEffects: React.FC<GameEffectsProps> = ({
       {/* Confetti Explosion */}
       {effects.showConfetti && (
         <div className="effect-confetti-container">
-          {[...Array(50)].map((_, i) => (
+          {confettiStyles.map((style, i) => (
             <div
               key={i}
               className="confetti-piece"
               style={
                 {
-                  '--confetti-x': `${Math.random() * 100}%`,
-                  '--confetti-delay': `${Math.random() * 0.5}s`,
-                  '--confetti-color': ['#ff6b00', '#ffd700', '#00ff88', '#00bfff', '#a855f7', '#ff0080'][
-                    Math.floor(Math.random() * 6)
-                  ],
+                  '--confetti-x': style.x,
+                  '--confetti-delay': style.delay,
+                  '--confetti-color': style.color,
                 } as React.CSSProperties
               }
             />

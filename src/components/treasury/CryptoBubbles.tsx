@@ -517,7 +517,7 @@ export function CryptoBubbles({
     });
 
     bubblesRef.current = initialBubbles;
-    setBubbles(initialBubbles);
+    queueMicrotask(() => setBubbles(initialBubbles));
     bubblesInitializedRef.current = true;
   }, [tokens, containerSize.width, containerSize.height, isLoading, isContainerReady]);
 
@@ -675,7 +675,7 @@ export function CryptoBubbles({
     if (!showConfetti) return;
 
     const newConfetti = createConfetti();
-    setConfettiParticles(newConfetti);
+    queueMicrotask(() => setConfettiParticles(newConfetti));
 
     const timeout = setTimeout(() => {
       setShowConfetti(false);

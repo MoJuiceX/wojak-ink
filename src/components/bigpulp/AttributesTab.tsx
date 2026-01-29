@@ -397,11 +397,12 @@ export function AttributesTab({
         case 'maxPrice':
           comparison = a.maxPrice - b.maxPrice;
           break;
-        case 'lastSaleDate':
+        case 'lastSaleDate': {
           const aTime = a.lastSaleDate?.getTime() || 0;
           const bTime = b.lastSaleDate?.getTime() || 0;
           comparison = aTime - bTime;
           break;
+        }
         default:
           comparison = 0;
       }

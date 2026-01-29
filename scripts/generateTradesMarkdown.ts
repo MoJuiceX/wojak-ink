@@ -59,7 +59,7 @@ interface Trade {
  * Get XCH/USD rate for a date (simplified - uses default for now)
  * In production, you'd fetch from CoinGecko API
  */
-function getXchUsdRate(date: string): number {
+function getXchUsdRate(): number {
   // For now, use default rate
   // TODO: Fetch from CoinGecko API for historical accuracy
   return DEFAULT_XCH_USD_RATE;
@@ -116,7 +116,7 @@ async function main() {
       const xchEquivalent = convertToXCH(price, currency);
       
       // Calculate USD value
-      const xchUsdRate = getXchUsdRate(tradeDate);
+      const xchUsdRate = getXchUsdRate();
       const usdValue = xchEquivalent * xchUsdRate;
       const attributePriceXch = xchEquivalent / 7; // Divide by 7 attributes
       const attributePriceUsd = usdValue / 7;
@@ -337,14 +337,14 @@ async function main() {
   // Write markdown file
   const outputPath = path.join(__dirname, '../docs/WOJAK-FARMERS-PLOT-TRADES.md');
   fs.writeFileSync(outputPath, mdLines.join('\n'), 'utf-8');
-  
-  console.log(`✅ Generated markdown file: ${outputPath}`);
-  console.log(`   Total trades: ${trades.length}`);
-  console.log(`   Unique NFTs sold: ${uniqueNfts}`);
-  console.log(`   XCH trades: ${xchTrades}`);
-  console.log(`   CAT trades: ${catTrades}`);
-  console.log(`   Total volume: ${totalXchVolume.toFixed(4)} XCH ($${totalUsdVolume.toFixed(2)})`);
-  console.log(`   Average price: ${avgPriceXch.toFixed(4)} XCH ($${avgPriceUsd.toFixed(2)})`);
+
+  console.warn(`Generated markdown file: ${outputPath}`);
+  console.warn(`   Total trades: ${trades.length}`);
+  console.warn(`   Unique NFTs sold: ${uniqueNfts}`);
+  console.warn(`   XCH trades: ${xchTrades}`);
+  console.warn(`   CAT trades: ${catTrades}`);
+  console.warn(`   Total volume: ${totalXchVolume.toFixed(4)} XCH ($${totalUsdVolume.toFixed(2)})`);
+  console.warn(`   Average price: ${avgPriceXch.toFixed(4)} XCH ($${avgPriceUsd.toFixed(2)})`);
 }
 
 main().catch(console.error);

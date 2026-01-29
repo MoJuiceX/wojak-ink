@@ -43,7 +43,7 @@ export const isTouchDevice = (): boolean => {
 export const isStandalone = (): boolean => {
   return (
     window.matchMedia('(display-mode: standalone)').matches ||
-    (window.navigator as any).standalone === true
+    (window.navigator as unknown as { standalone?: boolean }).standalone === true
   );
 };
 
@@ -309,13 +309,13 @@ export const lockOrientation = async (
   orientation: 'portrait' | 'landscape'
 ): Promise<boolean> => {
   try {
-    if (screen.orientation && (screen.orientation as any).lock) {
-      await (screen.orientation as any).lock(
+    if (screen.orientation && (screen.orientation as unknown as { lock?: (o: string) => Promise<void> }).lock) {
+      await (screen.orientation as unknown as { lock: (o: string) => Promise<void> }).lock(
         orientation === 'portrait' ? 'portrait-primary' : 'landscape-primary'
       );
       return true;
     }
-  } catch (e) {
+  } catch {
     console.warn('Orientation lock not supported');
   }
   return false;
@@ -327,8 +327,8 @@ export const lockOrientation = async (
 export const preventDefaultTouch = (element: HTMLElement): void => {
   element.style.touchAction = 'none';
   element.style.userSelect = 'none';
-  (element.style as any).webkitUserSelect = 'none';
-  (element.style as any).webkitTouchCallout = 'none';
+  (element.style as unknown as Record<string, string>).webkitUserSelect = 'none';
+  (element.style as unknown as Record<string, string>).webkitTouchCallout = 'none';
 };
 
 /**
@@ -341,11 +341,11 @@ export const requestFullscreen = async (
     if (element.requestFullscreen) {
       await element.requestFullscreen();
       return true;
-    } else if ((element as any).webkitRequestFullscreen) {
-      await (element as any).webkitRequestFullscreen();
+    } else if ((element as unknown as { webkitRequestFullscreen?: () => Promise<void> }).webkitRequestFullscreen) {
+      await (element as unknown as { webkitRequestFullscreen: () => Promise<void> }).webkitRequestFullscreen();
       return true;
     }
-  } catch (e) {
+  } catch {
     console.warn('Fullscreen not supported');
   }
   return false;
@@ -357,8 +357,8 @@ export const requestFullscreen = async (
 export const exitFullscreen = async (): Promise<void> => {
   if (document.exitFullscreen) {
     await document.exitFullscreen();
-  } else if ((document as any).webkitExitFullscreen) {
-    await (document as any).webkitExitFullscreen();
+  } else if ((document as unknown as { webkitExitFullscreen?: () => Promise<void> }).webkitExitFullscreen) {
+    await (document as unknown as { webkitExitFullscreen: () => Promise<void> }).webkitExitFullscreen();
   }
 };
 
@@ -378,7 +378,7 @@ export const prefersReducedMotion = (): boolean => {
  */
 export const isLowPowerMode = (): boolean => {
   // No direct API, but we can infer from some signals
-  const connection = (navigator as any).connection;
+  const connection = (navigator as unknown as { connection?: { saveData?: boolean } }).connection;
   if (connection) {
     return connection.saveData === true;
   }

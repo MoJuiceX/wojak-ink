@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * FriendsContext
  *
@@ -52,8 +53,9 @@ const FriendsContext = createContext<FriendsContextType | null>(null);
 export function FriendsProvider({ children }: { children: React.ReactNode }) {
   const { isSignedIn } = useUserProfile();
   // Get user ID and getToken from Clerk
+  const clerkAuth = useAuth();
   const authResult = CLERK_ENABLED
-    ? useAuth()
+    ? clerkAuth
     : { userId: null, getToken: () => Promise.resolve(null) };
   const userId = authResult.userId;
   const getToken = authResult.getToken;
@@ -110,8 +112,10 @@ export function FriendsProvider({ children }: { children: React.ReactNode }) {
           setIsLoading(false);
           return;
         } else {
+          // intentionally empty
         }
-      } catch (e) {
+      } catch {
+        // intentionally empty
       }
 
       // Fallback to localStorage
@@ -198,6 +202,7 @@ export function FriendsProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ friendId }),
       });
       if (response.ok) {
+        // intentionally empty
       } else {
         console.warn('[Friends] Backend save failed:', response.status);
       }
@@ -220,6 +225,7 @@ export function FriendsProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await authFetch(`/api/friends/${friendId}`, { method: 'DELETE' });
       if (response.ok) {
+        // intentionally empty
       } else {
         console.warn('[Friends] Backend delete failed:', response.status);
       }
@@ -284,7 +290,7 @@ export function FriendsProvider({ children }: { children: React.ReactNode }) {
         setFriends(data.friendIds);
         saveFriendsToStorage(userId, data.friendIds);
       }
-    } catch (e) {
+    } catch {
       // Use localStorage as fallback
     } finally {
       setIsLoading(false);

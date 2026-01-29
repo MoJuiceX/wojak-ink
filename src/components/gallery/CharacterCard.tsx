@@ -26,8 +26,9 @@ export function CharacterCard({
   onSelect,
   priority = false,
   onHover,
-  index: _index = 0,
+  index = 0,
 }: CharacterCardProps) {
+  void index; // Reserved for staggered animation
   const prefersReducedMotion = usePrefersReducedMotion();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);

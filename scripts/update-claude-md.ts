@@ -52,8 +52,8 @@ async function analyzeAndUpdate(autoApply: boolean = false) {
   const recentChanges = await getRecentChanges();
   const modifiedFiles = await getModifiedFiles();
 
-  console.log('📊 Analyzing recent changes...');
-  console.log(`   Modified files: ${modifiedFiles.length}`);
+  console.warn('Analyzing recent changes...');
+  console.warn(`   Modified files: ${modifiedFiles.length}`);
 
   const prompt = `You are a documentation maintainer for the wojak.ink project. Your job is to keep CLAUDE.md up-to-date with lessons learned.
 
@@ -96,8 +96,8 @@ Analyze now:`;
 
   // Check if updates are needed
   if (responseText.includes('No updates needed')) {
-    console.log('✅ CLAUDE.md is up-to-date. No changes needed.');
-    console.log(responseText);
+    console.warn('CLAUDE.md is up-to-date. No changes needed.');
+    console.warn(responseText);
     return;
   }
 
@@ -105,8 +105,8 @@ Analyze now:`;
   const match = responseText.match(/<updated_claude_md>([\s\S]*?)<\/updated_claude_md>/);
 
   if (!match) {
-    console.log('⚠️  Could not extract updated content. Manual review needed.');
-    console.log(responseText);
+    console.warn('Could not extract updated content. Manual review needed.');
+    console.warn(responseText);
     return;
   }
 
@@ -115,15 +115,15 @@ Analyze now:`;
   if (autoApply) {
     // Auto-apply changes
     fs.writeFileSync(CLAUDE_MD_PATH, updatedContent);
-    console.log('✅ CLAUDE.md has been updated automatically.');
+    console.warn('CLAUDE.md has been updated automatically.');
   } else {
     // Show diff and ask for confirmation
-    console.log('\n📝 Suggested updates to CLAUDE.md:\n');
-    console.log('─'.repeat(60));
-    console.log(updatedContent);
-    console.log('─'.repeat(60));
-    console.log('\nTo apply these changes, run with --auto flag');
-    console.log('Or manually review and copy the content above.');
+    console.warn('\nSuggested updates to CLAUDE.md:\n');
+    console.warn('─'.repeat(60));
+    console.warn(updatedContent);
+    console.warn('─'.repeat(60));
+    console.warn('\nTo apply these changes, run with --auto flag');
+    console.warn('Or manually review and copy the content above.');
   }
 }
 

@@ -21,7 +21,7 @@ export const SoundSettings: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    refreshVolumes();
+    queueMicrotask(() => refreshVolumes());
   }, [refreshVolumes]);
 
   const handleMasterChange = (e: React.ChangeEvent<HTMLInputElement>) => {

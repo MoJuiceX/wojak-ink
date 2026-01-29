@@ -17,7 +17,7 @@ const initializeParse = (): void => {
   }
 
   Parse.initialize(appId, jsKey);
-  (Parse as any).serverURL = serverUrl;
+  (Parse as unknown as { serverURL: string }).serverURL = serverUrl;
 
 };
 
@@ -32,7 +32,7 @@ export const testParseConnection = async (): Promise<boolean> => {
     return true;
   } catch (error) {
     // Error is expected if class doesn't exist, but connection works
-    if ((error as any).code === 101) {
+    if ((error as { code?: number }).code === 101) {
       // Class doesn't exist - but that means connection worked
       return true;
     }

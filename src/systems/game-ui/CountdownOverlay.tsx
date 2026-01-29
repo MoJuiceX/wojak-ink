@@ -18,11 +18,11 @@ export const CountdownOverlay: React.FC<CountdownOverlayProps> = ({
 
   useEffect(() => {
     if (!isVisible) {
-      setCount(null);
+      queueMicrotask(() => setCount(null));
       return;
     }
 
-    setCount(startFrom);
+    queueMicrotask(() => setCount(startFrom));
 
     const interval = setInterval(() => {
       setCount(prev => {

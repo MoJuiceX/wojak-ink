@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * BigPulp Context
  *
@@ -429,8 +430,9 @@ interface BigPulpProviderProps {
 
 export function BigPulpProvider({
   children,
-  mockData: _mockData = true,
+  mockData = true,
 }: BigPulpProviderProps) {
+  void mockData; // Reserved for development mode
   const [state, dispatch] = useReducer(bigPulpReducer, initialState);
 
   // NFT data from big_pulp_v9_output.json
@@ -519,12 +521,14 @@ export function BigPulpProvider({
     }
 
     // Update badges with listed counts
-    setBadges(prevBadges => {
-      if (prevBadges.length === 0) return prevBadges;
-      return prevBadges.map(badge => ({
-        ...badge,
-        listedCount: badgeListedCounts[badge.name] || 0,
-      }));
+    queueMicrotask(() => {
+      setBadges(prevBadges => {
+        if (prevBadges.length === 0) return prevBadges;
+        return prevBadges.map(badge => ({
+          ...badge,
+          listedCount: badgeListedCounts[badge.name] || 0,
+        }));
+      });
     });
   }, [heatMapData, badgeMapping]);
 

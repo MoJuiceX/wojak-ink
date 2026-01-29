@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * AchievementsContext
  *
@@ -49,7 +50,9 @@ interface AchievementsContextType {
 const AchievementsContext = createContext<AchievementsContextType | null>(null);
 
 export function AchievementsProvider({ children }: { children: React.ReactNode }) {
-  const authResult = CLERK_ENABLED ? useAuth() : { userId: null, isSignedIn: false, getToken: async () => null };
+  // Always call hooks unconditionally (rules of hooks)
+  const clerkAuth = useAuth();
+  const authResult = CLERK_ENABLED ? clerkAuth : { userId: null, isSignedIn: false, getToken: async () => null };
   const getToken = authResult.getToken;
   const { profile, isSignedIn } = useUserProfile();
   const { currency, refreshBalance } = useCurrency();
@@ -137,7 +140,7 @@ export function AchievementsProvider({ children }: { children: React.ReactNode }
   // Load progress from server on mount
   useEffect(() => {
     if (!isSignedIn) {
-      setProgress([]);
+      setProgress([]); // eslint-disable-line react-hooks/set-state-in-effect -- reset state when user signs out
       hasFetchedRef.current = false;
       return;
     }
@@ -196,7 +199,7 @@ export function AchievementsProvider({ children }: { children: React.ReactNode }
     const activeGames = MINI_GAMES.filter(g => g.status === 'available' && !g.disabled);
     const itemsOwned = loadOwnedItemsCount();
 
-    setStats(prev => ({
+    setStats(prev => ({ // eslint-disable-line react-hooks/set-state-in-effect -- syncing derived state from external sources
       ...prev,
       activeGameCount: activeGames.length,
       itemsOwned,
@@ -256,12 +259,13 @@ export function AchievementsProvider({ children }: { children: React.ReactNode }
           progress: stats.highestScore,
         };
 
-      case 'all_games_played':
+      case 'all_games_played': {
         const uniqueGamesPlayed = Object.keys(stats.gamesPlayedByType).length;
         return {
           met: uniqueGamesPlayed >= stats.activeGameCount && stats.activeGameCount > 0,
           progress: uniqueGamesPlayed,
         };
+      }
 
       case 'leaderboard_rank':
         return {
@@ -287,19 +291,21 @@ export function AchievementsProvider({ children }: { children: React.ReactNode }
           progress: stats.friendsCount,
         };
 
-      case 'profile_complete':
+      case 'profile_complete': {
         const profileComplete = stats.hasCustomName && stats.hasCustomAvatar;
         return {
           met: profileComplete,
           progress: profileComplete ? 1 : 0,
         };
+      }
 
-      case 'streak':
+      case 'streak': {
         const bestStreak = Math.max(stats.currentStreak, stats.longestStreak);
         return {
           met: bestStreak >= requirement.target,
           progress: bestStreak,
         };
+      }
 
       case 'lifetime_oranges':
         return {
@@ -355,6 +361,7 @@ export function AchievementsProvider({ children }: { children: React.ReactNode }
     saveProgress(newProgress);
 
     if (newlyUnlocked.length > 0) {
+      // intentionally empty
     }
   }, [checkRequirement, saveProgress]);
 

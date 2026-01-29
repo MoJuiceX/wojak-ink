@@ -19,7 +19,7 @@ const LEARNINGS_PATH = path.join(__dirname, '..', 'LEARNINGS.md');
 async function mergeLearnings() {
   // Check if LEARNINGS.md exists
   if (!fs.existsSync(LEARNINGS_PATH)) {
-    console.log('No LEARNINGS.md file found. Nothing to merge.');
+    console.warn('No LEARNINGS.md file found. Nothing to merge.');
     return;
   }
 
@@ -28,11 +28,11 @@ async function mergeLearnings() {
 
   // Check if there are unchecked items
   if (!learnings.includes('- [ ]')) {
-    console.log('No unchecked learnings to merge.');
+    console.warn('No unchecked learnings to merge.');
     return;
   }
 
-  console.log('🔄 Merging learnings into CLAUDE.md...\n');
+  console.warn('Merging learnings into CLAUDE.md...\n');
 
   const anthropic = new Anthropic();
 
@@ -69,11 +69,11 @@ Then list which learnings were merged so we can mark them as done.`
 
   if (match) {
     fs.writeFileSync(CLAUDE_MD_PATH, match[1].trim());
-    console.log('✅ CLAUDE.md updated successfully!\n');
-    console.log('Remember to mark merged items as [x] in LEARNINGS.md');
+    console.warn('CLAUDE.md updated successfully!\n');
+    console.warn('Remember to mark merged items as [x] in LEARNINGS.md');
   } else {
-    console.log('Could not extract updated content.');
-    console.log(responseText);
+    console.warn('Could not extract updated content.');
+    console.warn(responseText);
   }
 }
 

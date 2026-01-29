@@ -36,7 +36,8 @@ export function AchievementsWidget({ onViewAll }: AchievementsWidgetProps) {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [stats, setStats] = useState<AchievementStats>({ completed: 0, total: 0, orangesEarned: 0 });
   const [loading, setLoading] = useState(true);
-  const authResult = CLERK_ENABLED ? useAuth() : { getToken: async () => null };
+  const clerkAuth = useAuth();
+  const authResult = CLERK_ENABLED ? clerkAuth : { getToken: async () => null };
   const { getToken } = authResult;
 
   useEffect(() => {

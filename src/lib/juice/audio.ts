@@ -56,7 +56,7 @@ export const initAudio = (manager: AudioManager): boolean => {
 
   try {
     const AudioContextClass =
-      window.AudioContext || (window as any).webkitAudioContext;
+      window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
 
     if (!AudioContextClass) {
       console.warn('Web Audio API not supported');
@@ -403,7 +403,7 @@ export const triggerHaptic = (pattern: HapticPattern): boolean => {
 
     navigator.vibrate(vibrationPattern);
     return true;
-  } catch (e) {
+  } catch {
     return false;
   }
 };

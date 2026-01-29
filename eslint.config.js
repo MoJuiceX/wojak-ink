@@ -22,6 +22,13 @@ export default defineConfig([
     rules: {
       // Prevent console.log in production code (allow warn/error for legitimate logging)
       'no-console': ['warn', { allow: ['warn', 'error'] }],
+      // Allow underscore-prefixed variables/args to signal intentionally unused
+      '@typescript-eslint/no-unused-vars': ['error', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        destructuredArrayIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
+      }],
     },
   },
 ])

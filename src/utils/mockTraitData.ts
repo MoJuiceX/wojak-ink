@@ -9,12 +9,14 @@ import type { Trait, MouthSelection } from '@/types/generator';
 import type { UILayerName } from '@/lib/wojakRules';
 
 // Empty trait getter - not used, data comes from generatorService
-export function getTraitById(_id: string): Trait | null {
+export function getTraitById(id: string): Trait | null {
+  void id;
   return null;
 }
 
 // Empty trait getter - not used
-export function getRandomTrait(_layer: UILayerName): Trait | null {
+export function getRandomTrait(layer: UILayerName): Trait | null {
+  void layer;
   return null;
 }
 

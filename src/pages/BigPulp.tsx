@@ -61,7 +61,7 @@ function TopLeftPanel() {
   // Fetch owned NFTs when wallet is connected
   useEffect(() => {
     if (isWalletConnected) {
-      setIsLoadingNFTs(true);
+      queueMicrotask(() => setIsLoadingNFTs(true));
       getNFTs(WOJAK_COLLECTION_ID)
         .then((nfts) => {
           const mapped = nfts.map((nft) => ({
@@ -80,7 +80,7 @@ function TopLeftPanel() {
           setIsLoadingNFTs(false);
         });
     } else {
-      setOwnedNFTs([]);
+      queueMicrotask(() => setOwnedNFTs([]));
     }
   }, [isWalletConnected, getNFTs]);
 
@@ -366,7 +366,7 @@ function MobileEmptyState() {
   // Fetch owned NFTs when wallet is connected
   useEffect(() => {
     if (isWalletConnected) {
-      setIsLoadingNFTs(true);
+      queueMicrotask(() => setIsLoadingNFTs(true));
       getNFTs(WOJAK_COLLECTION_ID)
         .then((nfts) => {
           const mapped = nfts.map((nft) => ({
@@ -385,7 +385,7 @@ function MobileEmptyState() {
           setIsLoadingNFTs(false);
         });
     } else {
-      setOwnedNFTs([]);
+      queueMicrotask(() => setOwnedNFTs([]));
     }
   }, [isWalletConnected, getNFTs]);
 

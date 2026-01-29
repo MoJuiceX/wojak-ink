@@ -109,6 +109,7 @@ function verifyChatToken(token: string, secret: string): ChatTokenPayload | null
     if (parts.length !== 3) return null;
 
     // Verify signature using timing-safe comparison to prevent timing attacks
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const crypto = require('crypto');
     const [header, payload, signature] = parts;
     const message = `${header}.${payload}`;
@@ -297,6 +298,7 @@ io.on('connection', async (socket: AuthenticatedSocket) => {
       .limit(MAX_MESSAGES)
       .lean();
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     socket.emit('chat:messages:history', messages.reverse().map((msg: any) => ({
       id: msg._id.toString(),
       text: msg.text,
@@ -384,6 +386,7 @@ io.on('connection', async (socket: AuthenticatedSocket) => {
     if (data.replyToId) {
       try {
         const MessageModel = getMessageModel(roomName);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const originalMsg = await MessageModel.findById(data.replyToId).lean() as any;
         if (originalMsg) {
           replyTo = {
@@ -627,11 +630,13 @@ async function migrateMessages() {
 
     // Get IDs of existing whale messages to avoid duplicates
     const existingIds = new Set(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (await WhaleMessage.find({}, { _id: 1 }).lean()).map((m: any) => m._id.toString())
     );
 
     // Get legacy messages that haven't been migrated
     const legacyMessages = await LegacyMessage.find({}).lean();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const newMessages = legacyMessages.filter((m: any) => !existingIds.has(m._id.toString()));
 
     if (newMessages.length === 0) {

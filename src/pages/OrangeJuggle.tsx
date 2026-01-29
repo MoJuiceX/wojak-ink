@@ -646,7 +646,8 @@ const OrangeJuggle: React.FC = () => {
 
       // Process objects directly using ref (avoids async state issues)
       const newObjects = objectsRef.current.map(obj => {
-        let { x, y, vx, vy, type, id, wasHit, bounceCount, pattern, squashX, squashY, trail } = obj;
+        const { type, id, pattern } = obj;
+        let { x, y, vx, vy, wasHit, bounceCount, squashX, squashY, trail } = obj;
         // Get size based on object type
         const size = type === 'camel' ? CAMEL_SIZE
           : (type === 'banana' || type === 'rum') ? POWERUP_SIZE

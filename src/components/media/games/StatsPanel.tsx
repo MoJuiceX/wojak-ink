@@ -36,8 +36,9 @@ export function StatsPanel() {
   const [isLoading, setIsLoading] = useState(true);
   const [hoveredGame, setHoveredGame] = useState<GameId | null>(null);
 
-  // Get user ID from Clerk
-  const authResult = CLERK_ENABLED ? useAuth() : { userId: null };
+  // Always call hooks unconditionally (rules of hooks)
+  const clerkAuth = useAuth();
+  const authResult = CLERK_ENABLED ? clerkAuth : { userId: null };
   const userId = authResult.userId;
 
   useEffect(() => {
@@ -54,7 +55,7 @@ export function StatsPanel() {
 
         const data = await response.json();
 
-        const scores: GameScore[] = (data.scores || []).map((s: any) => ({
+        const scores: GameScore[] = (data.scores || []).map((s: { gameId: string; highScore: number; rank: number; nextRank?: number | null }) => ({
           gameId: s.gameId as GameId,
           gameName: GAME_NAMES[s.gameId as GameId] || s.gameId,
           highScore: s.highScore,

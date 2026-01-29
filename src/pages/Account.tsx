@@ -101,9 +101,11 @@ export default function Account() {
 
   // Gift modal state
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response items passed to InventorySection
   const [selectedGiftItem, setSelectedGiftItem] = useState<any>(null);
 
   // Inventory items from shop
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response items passed to InventorySection
   const [inventoryItems, setInventoryItems] = useState<any[]>([]);
   const [, setEquippedItems] = useState<{
     frame_id: string | null;
@@ -142,6 +144,7 @@ export default function Account() {
             celebration_id: null,
           });
           // Flatten categories into items array
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response items
           const allItems: any[] = [];
           if (data.categories) {
             for (const category of Object.keys(data.categories)) {
@@ -261,11 +264,11 @@ export default function Account() {
       try {
         const nfts = await getNFTs(WOJAK_COLLECTION_ID);
         // Extract NFT IDs from the fetched NFTs
-        const ids = nfts.map((nft: any) => {
+        const ids = nfts.map((nft: { name?: string; id?: string }) => {
           // Extract the NFT number from the name or ID
           const match = nft.name?.match(/\d+/) || nft.id?.match(/\d+/);
           return match ? match[0] : nft.id;
-        }).filter(Boolean);
+        }).filter((id): id is string => Boolean(id));
         setOwnedNftIds(ids);
       } catch (error) {
         console.error('[Account] Failed to fetch NFTs:', error);
@@ -386,10 +389,6 @@ export default function Account() {
                 setFriendsLightboxTab('friends');
                 setShowFriendsLightbox(true);
               }}
-              onAddFriend={() => {
-                setFriendsLightboxTab('find');
-                setShowFriendsLightbox(true);
-              }}
             />
             <AchievementsWidget
               onViewAll={() => setShowAchievementsLightbox(true)}
@@ -454,7 +453,8 @@ export default function Account() {
               });
               if (res.ok) {
                 const data = await res.json();
-                const allItems: any[] = [];
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response items
+          const allItems: any[] = [];
                 if (data.categories) {
                   for (const category of Object.keys(data.categories)) {
                     allItems.push(...data.categories[category]);

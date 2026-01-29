@@ -72,6 +72,7 @@ function mojosToXch(mojos: number): number {
 /**
  * Extract NFT ID from trade object
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- External API response
 function extractNftIdFromTrade(trade: any): string | null {
   // Check offered array
   for (const item of (trade.offered || [])) {
@@ -113,6 +114,7 @@ function extractNftIdFromTrade(trade: any): string | null {
 /**
  * Extract price from trade object
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- External API response
 function extractPriceFromTrade(trade: any): number | null {
   // Direct price field
   if (trade.price && trade.price > 0) {
@@ -121,6 +123,7 @@ function extractPriceFromTrade(trade: any): number | null {
 
   // Check which side has the NFT, get XCH from the other side
   const offeredHasNft = (trade.offered || []).some(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- External API item
     (i: any) => i.type === 'nft' || i.asset_id === COLLECTION_ID
   );
 
@@ -140,6 +143,7 @@ function extractPriceFromTrade(trade: any): number | null {
 /**
  * Extract timestamp from trade object
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- External API response
 function extractTimestamp(trade: any): number | null {
   const dateStr = trade.date_completed || trade.date_created;
   if (!dateStr) return null;
@@ -176,7 +180,7 @@ async function fetchDexieTrades(maxPages = 50): Promise<NFTTrade[]> {
       const data = await dexieQueue.add(async () => {
         const response = await fetch(url.toString());
         if (!response.ok) {
-          const error = new Error(`Dexie fetch failed: ${response.status}`) as any;
+          const error = new Error(`Dexie fetch failed: ${response.status}`) as Error & { status: number };
           error.status = response.status;
           throw error;
         }
@@ -217,15 +221,22 @@ async function fetchDexieTrades(maxPages = 50): Promise<NFTTrade[]> {
   return trades;
 }
 
+// NFT metadata shape from metadata.json
+interface NFTMetadataItem {
+  name?: string;
+  edition?: number;
+  attributes?: Array<{ trait_type: string; value: string }>;
+}
+
 /**
  * Load NFT metadata for trait lookups
  */
-async function loadNftMetadata(): Promise<Map<string, any>> {
+async function loadNftMetadata(): Promise<Map<string, NFTMetadataItem>> {
   try {
     const response = await fetch('/assets/nft-data/metadata.json');
-    const data = await response.json();
+    const data: NFTMetadataItem[] = await response.json();
 
-    const metadataMap = new Map<string, any>();
+    const metadataMap = new Map<string, NFTMetadataItem>();
     for (const nft of data) {
       // Extract ID from name or edition
       const match = nft.name?.match(/#(\d+)/);
@@ -247,7 +258,7 @@ async function loadNftMetadata(): Promise<Map<string, any>> {
  */
 function buildTraitIndex(
   trades: NFTTrade[],
-  metadata: Map<string, any>
+  metadata: Map<string, NFTMetadataItem>
 ): Map<string, TraitSalesData> {
   const traitSales = new Map<string, { prices: number[]; trades: NFTTrade[] }>();
 

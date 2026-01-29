@@ -32,30 +32,47 @@ export const PWAProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Check if running as installed PWA
   const isStandalone = typeof window !== 'undefined' && (
     window.matchMedia('(display-mode: standalone)').matches ||
-    (window.navigator as any).standalone === true
+    (window.navigator as unknown as { standalone?: boolean }).standalone === true
   );
 
   // Check if installable (prompt event captured)
   const isInstallable = !!installPromptEvent && !isInstalled && !isStandalone;
 
-  // Determine if we should show install banner
-  const showInstallBanner = (() => {
-    if (!isInstallable) return false;
-    if (typeof localStorage === 'undefined') return false;
+  // Track whether to show install banner using state
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
 
-    // Check if user dismissed recently (24 hours)
-    const dismissedTime = localStorage.getItem('pwa-install-dismissed');
-    if (dismissedTime) {
-      const hoursSinceDismissed = (Date.now() - parseInt(dismissedTime)) / (1000 * 60 * 60);
-      if (hoursSinceDismissed < 24) return false;
-    }
+  // Determine if we should show install banner (run in effect to avoid impure function during render)
+  useEffect(() => {
+    queueMicrotask(() => {
+      if (!isInstallable) {
+        setShowInstallBanner(false);
+        return;
+      }
+      if (typeof localStorage === 'undefined') {
+        setShowInstallBanner(false);
+        return;
+      }
 
-    // Check if user has played enough games (engagement threshold)
-    const gamesPlayed = parseInt(localStorage.getItem('games-played') || '0');
-    if (gamesPlayed < 3) return false; // Wait until they've played 3 games
+      // Check if user dismissed recently (24 hours)
+      const dismissedTime = localStorage.getItem('pwa-install-dismissed');
+      if (dismissedTime) {
+        const hoursSinceDismissed = (Date.now() - parseInt(dismissedTime)) / (1000 * 60 * 60);
+        if (hoursSinceDismissed < 24) {
+          setShowInstallBanner(false);
+          return;
+        }
+      }
 
-    return true;
-  })();
+      // Check if user has played enough games (engagement threshold)
+      const gamesPlayed = parseInt(localStorage.getItem('games-played') || '0');
+      if (gamesPlayed < 3) {
+        setShowInstallBanner(false);
+        return;
+      }
+
+      setShowInstallBanner(true);
+    });
+  }, [isInstallable]);
 
   // Capture the install prompt event
   useEffect(() => {
@@ -88,7 +105,7 @@ export const PWAProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     // Check if already installed
     if (typeof localStorage !== 'undefined') {
       if (localStorage.getItem('pwa-installed') === 'true' || isStandalone) {
-        setIsInstalled(true);
+        queueMicrotask(() => setIsInstalled(true));
       }
     }
 
@@ -160,6 +177,7 @@ export const PWAProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const usePWA = () => {
   const context = useContext(PWAContext);
   if (!context) {

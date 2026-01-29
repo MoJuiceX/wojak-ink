@@ -412,7 +412,7 @@ export function DesktopExplorerPanel({
 }: DesktopExplorerPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const [_direction, setDirection] = useState<'forward' | 'backward' | null>(null);
+  const [, setDirection] = useState<'forward' | 'backward' | null>(null);
   const [activeTab, setActiveTab] = useState<DetailTab>('traits');
   const [isImageExpanded, setIsImageExpanded] = useState(false);
 
@@ -469,12 +469,12 @@ export function DesktopExplorerPanel({
   // Fetch real owner info via Parse.bot
   useEffect(() => {
     if (!currentNft || !isOpen) {
-      setOwnerInfo(null);
+      queueMicrotask(() => setOwnerInfo(null));
       return;
     }
 
     // Reset owner info when NFT changes
-    setOwnerInfo(null);
+    queueMicrotask(() => setOwnerInfo(null));
 
     const edition = currentNft.tokenId;
     fetchNFTOwnerByEdition(edition).then((info) => {
@@ -487,7 +487,7 @@ export function DesktopExplorerPanel({
   // Load badge data
   useEffect(() => {
     if (!currentNft || !isOpen) {
-      setBadges(null);
+      queueMicrotask(() => setBadges(null));
       return;
     }
 

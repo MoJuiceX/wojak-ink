@@ -535,7 +535,7 @@ export function NFTInfoCard({
   const [badgeSystem, setBadgeSystem] = useState<BadgeSystem | null>(null);
 
   useEffect(() => {
-    setOwnerInfo(null);
+    queueMicrotask(() => setOwnerInfo(null));
     const edition = nft.tokenId;
     fetchNFTOwnerByEdition(edition)
       .then((info) => setOwnerInfo(info))

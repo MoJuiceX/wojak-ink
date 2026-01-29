@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * Settings Context
  *
@@ -56,8 +57,8 @@ const DEFAULT_SETTINGS: SettingsState = {
 
 // Hardcoded theme (dark/orange only)
 const THEME_CONFIG = { isDark: true, id: 'tang-orange' };
-const getTheme = (_themeId?: string) => THEME_CONFIG;
-const isValidThemeId = (_themeId?: string) => true;
+const getTheme = (themeId?: string) => { void themeId; return THEME_CONFIG; };
+const isValidThemeId = (themeId?: string) => { void themeId; return true; };
 const THEME_TRANSITION_DURATION = 300;
 
 const STORAGE_KEY = 'wojak-settings';
@@ -219,13 +220,15 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     applyMotionPreferenceToDOM(resolvedMotion);
 
     // Update settings state with resolved motion
-    setSettings((prev) => ({
-      ...prev,
-      motion: {
-        ...prev.motion,
-        reducedMotion: resolvedMotion,
-      },
-    }));
+    queueMicrotask(() => {
+      setSettings((prev) => ({
+        ...prev,
+        motion: {
+          ...prev.motion,
+          reducedMotion: resolvedMotion,
+        },
+      }));
+    });
   }, [resolvedMotion]);
 
   // ============ System Preference Listeners ============

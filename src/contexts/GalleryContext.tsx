@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * Gallery Context
  *
@@ -369,13 +370,15 @@ export function GalleryProvider({ children }: GalleryProviderProps) {
     imagePreloader.preloadForExplorer(imageUrls, currentNftIndex, direction);
 
     // Update preloadedImages state for UI feedback
-    const preloadRange = 5;
-    for (let i = -preloadRange; i <= preloadRange; i++) {
-      const idx = currentNftIndex + i;
-      if (idx >= 0 && idx < filteredNfts.length) {
-        setPreloadedImages((prev) => new Set(prev).add(filteredNfts[idx].id));
+    queueMicrotask(() => {
+      const preloadRange = 5;
+      for (let i = -preloadRange; i <= preloadRange; i++) {
+        const idx = currentNftIndex + i;
+        if (idx >= 0 && idx < filteredNfts.length) {
+          setPreloadedImages((prev) => new Set(prev).add(filteredNfts[idx].id));
+        }
       }
-    }
+    });
   }, [currentNftIndex, explorerOpen, filteredNfts]);
 
   const value = useMemo<GalleryContextValue>(

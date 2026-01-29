@@ -66,7 +66,7 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
     if (xAccount?.username && !xHandle) {
       setXHandle(xAccount.username);
     }
-  }, [user]); // Only run when user changes, not on every displayName/xHandle change
+  }, [user, displayName, xHandle]); // Include all deps but only set if empty
 
   // Fetch NFTs when wallet connects
   useEffect(() => {

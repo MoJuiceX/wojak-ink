@@ -41,8 +41,8 @@ export function ProfileHeader({
   avatar,
   displayName,
   xHandle,
-  walletAddress: _walletAddress, // Renamed to indicate intentionally unused
-  createdAt: _createdAt, // Renamed to indicate intentionally unused
+  walletAddress: _walletAddress,
+  createdAt: _createdAt,
   isOwnProfile,
   onEditName,
   currentStreak = 0,
@@ -52,12 +52,16 @@ export function ProfileHeader({
   donuts = 0,
   poops = 0,
 }: ProfileHeaderProps) {
+  // Silence unused prop warnings - kept for API compatibility
+  void _walletAddress;
+  void _createdAt;
+
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
-  
+
   // Wallet integration
   const { profile, updateProfile, isSignedIn } = useUserProfile();
   const { status: walletStatus, address, connect, disconnect, getNFTs } = useSageWallet();
-  const [_isRefreshing, setIsRefreshing] = useState(false);
+  const [, setIsRefreshing] = useState(false);
   const [walletError, setWalletError] = useState<string | null>(null);
 
   const walletConnected = walletStatus === 'connected' && !!address;

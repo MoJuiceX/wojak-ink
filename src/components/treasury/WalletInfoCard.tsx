@@ -16,6 +16,27 @@ interface WalletInfoCardProps {
 }
 
 export function WalletInfoCard({ wallet, onConnect, isLoading = false }: WalletInfoCardProps) {
+  // Hooks must be called before any early returns (rules of hooks)
+  const [showFullAddress, setShowFullAddress] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(async () => {
+    if (!wallet) return;
+
+    try {
+      await navigator.clipboard.writeText(wallet.address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  }, [wallet]);
+
+  const handleExplorerClick = useCallback(() => {
+    if (!wallet) return;
+    window.open(wallet.explorerUrl, '_blank', 'noopener,noreferrer');
+  }, [wallet]);
+
   // Loading skeleton
   if (isLoading) {
     return (
@@ -58,26 +79,6 @@ export function WalletInfoCard({ wallet, onConnect, isLoading = false }: WalletI
       </div>
     );
   }
-
-  const [showFullAddress, setShowFullAddress] = useState(false);
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = useCallback(async () => {
-    if (!wallet) return;
-
-    try {
-      await navigator.clipboard.writeText(wallet.address);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  }, [wallet]);
-
-  const handleExplorerClick = useCallback(() => {
-    if (!wallet) return;
-    window.open(wallet.explorerUrl, '_blank', 'noopener,noreferrer');
-  }, [wallet]);
 
   // Not connected state
   if (!wallet || !wallet.isConnected) {

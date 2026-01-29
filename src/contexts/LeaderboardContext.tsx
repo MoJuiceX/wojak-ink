@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * Leaderboard Context
  *
@@ -18,6 +19,25 @@ import type {
   SubmitScoreResult,
   GameId,
 } from '../types/leaderboard';
+
+// Stored score record shape (from localStorage)
+interface StoredScore {
+  id?: string;
+  userId: string;
+  googleId: string;
+  gameId: string;
+  score: number;
+  level?: number;
+  achievedAt: string;
+}
+
+// User record shape (from localStorage)
+interface StoredUser {
+  id?: string;
+  username?: string;
+  displayName?: string;
+  avatar?: { type?: string; value?: string; source?: string };
+}
 
 // Storage keys
 const SCORES_KEY = 'wojak_scores';
@@ -72,7 +92,7 @@ export const LeaderboardProvider: React.FC<{ children: ReactNode }> = ({ childre
 
   // Filter scores by timeframe
   const filterByTimeframe = useCallback((
-    scores: any[],
+    scores: StoredScore[],
     timeframe: 'all-time' | 'weekly' | 'daily'
   ) => {
     const now = new Date();
@@ -104,14 +124,14 @@ export const LeaderboardProvider: React.FC<{ children: ReactNode }> = ({ childre
       const allUsers = getAllUsers();
 
       // Filter by game and timeframe
-      const gameScores = allScores.filter((s: any) => s.gameId === filter.gameId);
+      const gameScores = allScores.filter((s: StoredScore) => s.gameId === filter.gameId);
       const filteredScores = filterByTimeframe(gameScores, filter.timeframe);
 
       // Get best score per signed-in user
-      const userBestScores = new Map<string, any>();
+      const userBestScores = new Map<string, StoredScore & { username?: string; displayName?: string; avatar?: StoredUser['avatar'] }>();
 
-      filteredScores.forEach((score: any) => {
-        const userData = allUsers[score.googleId];
+      filteredScores.forEach((score: StoredScore) => {
+        const userData = allUsers[score.googleId] as StoredUser | undefined;
         if (!userData) return;
 
         // Include all signed-in users on leaderboard (NFT not required)
@@ -130,14 +150,14 @@ export const LeaderboardProvider: React.FC<{ children: ReactNode }> = ({ childre
       const sortedEntries = Array.from(userBestScores.values())
         .sort((a, b) => b.score - a.score)
         .slice(0, filter.limit || 100)
-        .map((entry, index) => ({
+        .map((entry, index): LeaderboardEntry => ({
           rank: index + 1,
           userId: entry.userId,
-          displayName: entry.displayName,
+          displayName: entry.displayName || '',
           avatar: {
-            type: entry.avatar?.type || 'emoji',
+            type: (entry.avatar?.type as 'emoji' | 'nft') || 'emoji',
             value: entry.avatar?.value || '🎮',
-            source: entry.avatar?.source || 'default',
+            source: (entry.avatar?.source as 'default' | 'user' | 'wallet') || 'default',
           },
           score: entry.score,
           level: entry.level,
@@ -181,32 +201,32 @@ export const LeaderboardProvider: React.FC<{ children: ReactNode }> = ({ childre
     try {
       const allScores = getAllScores();
       const userScores = allScores.filter(
-        (s: any) => s.userId === user.id && s.gameId === gameId
+        (s: StoredScore) => s.userId === user.id && s.gameId === gameId
       );
 
       if (userScores.length === 0) return null;
 
-      const scores = userScores.map((s: any) => s.score);
+      const scores = userScores.map((s: StoredScore) => s.score);
       const stats: PersonalStats = {
         gameId,
         highScore: Math.max(...scores),
         totalGamesPlayed: userScores.length,
         totalScore: scores.reduce((a: number, b: number) => a + b, 0),
         averageScore: Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length),
-        lastPlayedAt: new Date(Math.max(...userScores.map((s: any) => new Date(s.achievedAt).getTime()))),
+        lastPlayedAt: new Date(Math.max(...userScores.map((s: StoredScore) => new Date(s.achievedAt).getTime()))),
       };
 
       // Calculate best rank for signed-in users
       if (canUserCompete()) {
         const allUsers = getAllUsers();
-        const allGameScores = allScores.filter((s: any) => s.gameId === gameId);
+        const allGameScores = allScores.filter((s: StoredScore) => s.gameId === gameId);
 
         // Get best scores per signed-in user
         const bestScores: number[] = [];
         const userBest = new Map<string, number>();
 
-        allGameScores.forEach((score: any) => {
-          const userData = allUsers[score.googleId];
+        allGameScores.forEach((score: StoredScore) => {
+          const userData = allUsers[score.googleId] as StoredUser | undefined;
           if (!userData) return;
 
           const existing = userBest.get(score.userId);
@@ -256,10 +276,10 @@ export const LeaderboardProvider: React.FC<{ children: ReactNode }> = ({ childre
 
       // Check if this is a new high score
       const userGameScores = allScores.filter(
-        (s: any) => s.userId === user.id && s.gameId === gameId
+        (s: StoredScore) => s.userId === user.id && s.gameId === gameId
       );
       const previousHighScore = userGameScores.length > 0
-        ? Math.max(...userGameScores.map((s: any) => s.score))
+        ? Math.max(...userGameScores.map((s: StoredScore) => s.score))
         : 0;
       const isNewHighScore = score > previousHighScore;
 
@@ -284,12 +304,12 @@ export const LeaderboardProvider: React.FC<{ children: ReactNode }> = ({ childre
 
       if (addedToLeaderboard) {
         const allUsers = getAllUsers();
-        const allGameScores = allScores.filter((s: any) => s.gameId === gameId);
+        const allGameScores = allScores.filter((s: StoredScore) => s.gameId === gameId);
 
         // Get best scores per signed-in user
         const userBest = new Map<string, number>();
-        allGameScores.forEach((s: any) => {
-          const userData = allUsers[s.googleId];
+        allGameScores.forEach((s: StoredScore) => {
+          const userData = allUsers[s.googleId] as StoredUser | undefined;
           if (!userData) return;
 
           const existing = userBest.get(s.userId);

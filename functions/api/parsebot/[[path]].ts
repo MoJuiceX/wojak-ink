@@ -64,7 +64,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         'Cache-Control': 'public, max-age=60', // Cache for 1 minute
       },
     });
-  } catch (error) {
+  } catch {
     return new Response(JSON.stringify({ error: 'Failed to fetch from Parse.bot' }), {
       status: 500,
       headers: {

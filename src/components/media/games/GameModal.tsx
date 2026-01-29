@@ -172,7 +172,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
   const [showInstructions, setShowInstructions] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
-  const [_gameReady, setGameReady] = useState(false);
+  const [, setGameReady] = useState(false);
   // Initialize with idle/breathe so lights show immediately on intro screen
   const [lightSequence, setLightSequence] = useState<LightSequence>('idle');
   const [lightOptions, setLightOptions] = useState<LightOptions>({});
@@ -294,31 +294,35 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
   // Reset when modal closes or game changes
   useEffect(() => {
     if (!isOpen) {
-      setGameStarted(false);
-      setGameReady(false);
-      setShowInstructions(false);
-      setShowLeaderboard(false);
-      setLightSequence('off');
-      setIsMuted(false);
+      queueMicrotask(() => {
+        setGameStarted(false);
+        setGameReady(false);
+        setShowInstructions(false);
+        setShowLeaderboard(false);
+        setLightSequence('off');
+        setIsMuted(false);
+      });
       stopGameMusic();
 
       // Exit fullscreen when game closes
       if (document.fullscreenElement) {
         document.exitFullscreen().catch(() => {});
-      } else if ((document as any).webkitFullscreenElement) {
-        (document as any).webkitExitFullscreen?.();
+      } else if ((document as unknown as { webkitFullscreenElement?: Element }).webkitFullscreenElement) {
+        (document as unknown as { webkitExitFullscreen?: () => void }).webkitExitFullscreen?.();
       }
     } else {
       // Go directly to idle pattern for intro screen
       // Use the new pattern system (not legacy sequence) for consistent positioning
-      setLightSequence('idle');
+      queueMicrotask(() => setLightSequence('idle'));
       // Game-specific idle/attract patterns
-      if (game?.id === 'orange-stack') {
-        // Brick-by-Brick: Smooth perimeter flow wave
-        setLightPattern('perimeterFlow');
-      } else {
-        setLightPattern('breathe');
-      }
+      queueMicrotask(() => {
+        if (game?.id === 'orange-stack') {
+          // Brick-by-Brick: Smooth perimeter flow wave
+          setLightPattern('perimeterFlow');
+        } else {
+          setLightPattern('breathe');
+        }
+      });
       // Start game music immediately when modal opens
       if (game?.id && GAME_MUSIC[game.id]) {
         playGameMusic(game.id);
@@ -401,9 +405,9 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
       const elem = document.documentElement;
       if (elem.requestFullscreen) {
         elem.requestFullscreen().catch(() => {});
-      } else if ((elem as any).webkitRequestFullscreen) {
+      } else if ((elem as unknown as { webkitRequestFullscreen?: () => void }).webkitRequestFullscreen) {
         // Safari/iOS
-        (elem as any).webkitRequestFullscreen();
+        (elem as unknown as { webkitRequestFullscreen: () => void }).webkitRequestFullscreen();
       }
     }
   };

@@ -120,7 +120,7 @@ const formatUsd = (xch: number, xchPrice: number): string => {
 
 const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
   const [comboData, setComboData] = useState<ComboDatabase | null>(null);
-  const [_traitInsights, setTraitInsights] = useState<Record<string, TraitInsight> | null>(null);
+  const [, setTraitInsights] = useState<Record<string, TraitInsight> | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedSection, setExpandedSection] = useState<string | null>('stats');
 
@@ -278,12 +278,14 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
     switch (combo.logic) {
       case 'exact':
         return Object.values(combo.requirements || {}).join(' + ');
-      case 'any_two':
+      case 'any_two': {
         const traits = (combo.requirementPool || []).map(req => Object.values(req)[0]);
         return `Any 2 of: ${traits.join(', ')}`;
-      case 'trait_plus_base':
+      }
+      case 'trait_plus_base': {
         const trait = Object.values(combo.requirements || {})[0];
         return `${trait} + ${(combo.requiredBases || []).join('/')} base`;
+      }
       case 'single':
         return Object.values(combo.requirements || {})[0] + ' (single trait)';
       default:

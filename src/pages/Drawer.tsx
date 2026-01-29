@@ -126,7 +126,7 @@ export default function Drawer() {
         }
         const json = await res.json();
         setData(json);
-      } catch (err) {
+      } catch (_err) {
         setError('Network error');
       } finally {
         setIsLoading(false);
@@ -446,7 +446,9 @@ export default function Drawer() {
               layout
             >
               <AnimatePresence mode="popLayout">
-                {getFilteredItems().map((item: any, index: number) => (
+                {getFilteredItems().map(
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- heterogeneous item types from mixed collections
+                  (item: any, index: number) => (
                   <motion.div
                     key={item.id}
                     className={`collection-card collection-item ${cardStyleClass} ${RARITY_GRADIENTS[item.rarity] || ''}`}

@@ -405,7 +405,7 @@ export function getPatternForEvent(event: GameEvent, gameId?: string): PatternNa
  */
 export function getEventsForPattern(pattern: PatternName): GameEvent[] {
   return (Object.entries(DEFAULT_EVENT_MAPPINGS) as [GameEvent, PatternName][])
-    .filter(([_, p]) => p === pattern)
+    .filter(([, p]) => p === pattern)
     .map(([event]) => event);
 }
 

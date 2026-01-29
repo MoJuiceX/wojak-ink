@@ -34,7 +34,7 @@ export function PreviewCanvas({
   // Show brief glow when preview image changes
   useEffect(() => {
     if (previewImage && previewImage !== prevImageRef.current && !prefersReducedMotion) {
-      setShowUpdateGlow(true);
+      queueMicrotask(() => setShowUpdateGlow(true));
       const timer = setTimeout(() => setShowUpdateGlow(false), 400);
       prevImageRef.current = previewImage;
       return () => clearTimeout(timer);

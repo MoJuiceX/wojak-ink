@@ -34,8 +34,9 @@ export const AvatarUpgradeBanner: React.FC<AvatarUpgradeBannerProps> = ({
     // Check if user already dismissed this session
     const dismissed = sessionStorage.getItem('avatar_upgrade_dismissed');
     if (dismissed) {
-      setIsDismissed(true);
-      return;
+      // Defer state update to avoid synchronous setState in effect
+      const dismissTimer = setTimeout(() => setIsDismissed(true), 0);
+      return () => clearTimeout(dismissTimer);
     }
 
     const timer = setTimeout(() => {

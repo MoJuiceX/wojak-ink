@@ -17,19 +17,23 @@ export function usePreloadImage(url: string | null, priority: PreloadPriority = 
 
   useEffect(() => {
     if (!url) {
-      setIsLoaded(false);
-      setIsLoading(false);
+      queueMicrotask(() => {
+        setIsLoaded(false);
+        setIsLoading(false);
+      });
       return;
     }
 
     // Check if already loaded
     if (imagePreloader.isLoaded(url)) {
-      setIsLoaded(true);
-      setIsLoading(false);
+      queueMicrotask(() => {
+        setIsLoaded(true);
+        setIsLoading(false);
+      });
       return;
     }
 
-    setIsLoading(true);
+    queueMicrotask(() => setIsLoading(true));
 
     imagePreloader.preload(url, priority).then((result) => {
       setIsLoaded(result.success);

@@ -148,6 +148,7 @@ export default function WojakWhack() {
   const maxComboRef = useRef(0);
   const statusRef = useRef<GameStatus>('idle');
   const holesRef = useRef<Hole[]>(holes);
+  const scheduleNextSpawnRef = useRef<(() => void) | null>(null);
 
   // Ref for game loop to check dialog state
   const showExitDialogRef = useRef(false);
@@ -258,9 +259,14 @@ export default function WojakWhack() {
 
     spawnTimeoutRef.current = window.setTimeout(() => {
       spawnCharacter();
-      scheduleNextSpawn();
+      scheduleNextSpawnRef.current?.();
     }, delay);
   }, [difficulty, spawnCharacter]);
+
+  // Keep ref in sync for self-referencing callback
+  useEffect(() => {
+    scheduleNextSpawnRef.current = scheduleNextSpawn;
+  }, [scheduleNextSpawn]);
 
   const handleGameOver = useCallback(async () => {
     // Clear all timers
@@ -351,7 +357,7 @@ export default function WojakWhack() {
   // Handle game over when status changes
   useEffect(() => {
     if (status === 'gameover') {
-      handleGameOver();
+      queueMicrotask(() => handleGameOver());
     }
   }, [status, handleGameOver]);
 

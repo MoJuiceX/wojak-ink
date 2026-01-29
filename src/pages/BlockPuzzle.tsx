@@ -12,6 +12,7 @@ import { GameSEO } from '@/components/seo/GameSEO';
 import { useGameMute } from '@/contexts/GameMuteContext';
 import { useMobileGameFullscreen } from '@/hooks/useMobileGameFullscreen';
 import { useArcadeLights } from '@/contexts/ArcadeLightsContext';
+import type { GameEvent } from '@/config/arcade-light-mappings';
 import { getLineClearTier, GAME_COMBO_TIERS } from '@/config/arcade-light-mappings';
 import { GAME_OVER_SEQUENCE } from '@/lib/juice/brandConstants';
 import { captureGameArea } from '@/systems/sharing/captureDOM';
@@ -225,7 +226,7 @@ const BlockPuzzle: React.FC = () => {
   // Get or create audio context
   const getAudioContext = useCallback(() => {
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
     }
     return audioContextRef.current;
   }, []);
@@ -243,7 +244,7 @@ const BlockPuzzle: React.FC = () => {
       if (audioUnlockedRef.current && audioContextRef.current?.state === 'running') return;
 
       if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        audioContextRef.current = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
       }
       if (audioContextRef.current.state !== 'running') {
         audioContextRef.current.resume().then(() => {
@@ -903,7 +904,7 @@ const BlockPuzzle: React.FC = () => {
   const startGame = useCallback(() => {
     // CRITICAL: Unlock WebAudio on game start (user gesture required on iOS)
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
     }
     audioContextRef.current.resume().catch(() => {});
 
@@ -1127,13 +1128,13 @@ const BlockPuzzle: React.FC = () => {
 
       // Arcade lights: Line clear with tier based on count
       const lineClearTier = getLineClearTier(linesCleared);
-      triggerEvent(`score:${lineClearTier}` as any);
+      triggerEvent(`score:${lineClearTier}` as GameEvent);
 
       // Arcade lights: Combo milestone using native thresholds
       if (newCombo >= 2) {
         const comboTier = GAME_COMBO_TIERS['block-puzzle'](newCombo);
         if (comboTier !== 'start') {
-          triggerEvent(`combo:${comboTier}` as any);
+          triggerEvent(`combo:${comboTier}` as GameEvent);
         }
       }
 

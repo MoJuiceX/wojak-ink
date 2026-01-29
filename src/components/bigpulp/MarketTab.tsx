@@ -192,8 +192,8 @@ export function MarketTab({
   const [visualizationType, setVisualizationType] =
     useState<VisualizationType>('heatmap');
 
-  const handleCellClick = useCallback((_cell: HeatMapCell) => {
-    // TODO: Open cell detail modal
+  const handleCellClick = useCallback((cell: HeatMapCell) => {
+    void cell; // TODO: Open cell detail modal
   }, []);
 
   // Toggle options - same for mobile and desktop now

@@ -43,7 +43,7 @@ function EditableField({ label, value, icon, placeholder, onSave, validation }: 
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setEditValue(value || '');
+    queueMicrotask(() => setEditValue(value || ''));
   }, [value]);
 
   const handleSave = async () => {
@@ -185,7 +185,7 @@ export function AccountSettings() {
   // Close modal when connected
   useEffect(() => {
     if (walletConnect.isConnected && showWalletModal) {
-      setShowWalletModal(false);
+      queueMicrotask(() => setShowWalletModal(false));
     }
   }, [walletConnect.isConnected, showWalletModal]);
 

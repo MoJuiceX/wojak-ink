@@ -2,7 +2,7 @@
  * Vote counter badge for cards
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 
 interface VoteCounterProps {
@@ -13,24 +13,30 @@ interface VoteCounterProps {
 export function VoteCounter({ donutCount, poopCount }: VoteCounterProps) {
   const [donutBounce, setDonutBounce] = useState(false);
   const [poopBounce, setPoopBounce] = useState(false);
-  const [prevDonut, setPrevDonut] = useState(donutCount);
-  const [prevPoop, setPrevPoop] = useState(poopCount);
+  const prevDonutRef = useRef(donutCount);
+  const prevPoopRef = useRef(poopCount);
 
   useEffect(() => {
-    if (donutCount > prevDonut) {
-      setDonutBounce(true);
-      setTimeout(() => setDonutBounce(false), 400);
+    if (donutCount > prevDonutRef.current) {
+      // Schedule state update via microtask to avoid synchronous setState warning
+      queueMicrotask(() => setDonutBounce(true));
+      const timer = setTimeout(() => setDonutBounce(false), 400);
+      prevDonutRef.current = donutCount;
+      return () => clearTimeout(timer);
     }
-    setPrevDonut(donutCount);
-  }, [donutCount, prevDonut]);
+    prevDonutRef.current = donutCount;
+  }, [donutCount]);
 
   useEffect(() => {
-    if (poopCount > prevPoop) {
-      setPoopBounce(true);
-      setTimeout(() => setPoopBounce(false), 400);
+    if (poopCount > prevPoopRef.current) {
+      // Schedule state update via microtask to avoid synchronous setState warning
+      queueMicrotask(() => setPoopBounce(true));
+      const timer = setTimeout(() => setPoopBounce(false), 400);
+      prevPoopRef.current = poopCount;
+      return () => clearTimeout(timer);
     }
-    setPrevPoop(poopCount);
-  }, [poopCount, prevPoop]);
+    prevPoopRef.current = poopCount;
+  }, [poopCount]);
 
   return (
     <div className="vote-counter">

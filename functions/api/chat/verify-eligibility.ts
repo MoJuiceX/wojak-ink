@@ -41,11 +41,13 @@ interface MintGardenNFT {
   };
 }
 
-interface MintGardenResponse {
+// MintGardenResponse type - structure of API response (items array extracted directly)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type _MintGardenResponse = {
   items: MintGardenNFT[];
   count?: number;
   total?: number;
-}
+};
 
 // Wojak Farmers Plot collection ID
 const WOJAK_COLLECTION_ID = 'col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah';
@@ -147,7 +149,7 @@ async function fetchWojakNftCount(walletAddress: string, db: D1Database): Promis
       // Fall back to cache
       const cached = await getCachedNftCount(db, walletAddress);
       if (cached !== null) {
-        console.log(`[Chat Verify] Using cached count: ${cached}`);
+        console.warn(`[Chat Verify] Using cached count: ${cached}`);
         return { count: cached, fromCache: true };
       }
       return { count: 0, fromCache: false };
@@ -166,7 +168,7 @@ async function fetchWojakNftCount(walletAddress: string, db: D1Database): Promis
     // Fall back to cache on network error
     const cached = await getCachedNftCount(db, walletAddress);
     if (cached !== null) {
-      console.log(`[Chat Verify] Using cached count after error: ${cached}`);
+      console.warn(`[Chat Verify] Using cached count after error: ${cached}`);
       return { count: cached, fromCache: true };
     }
     return { count: 0, fromCache: false };

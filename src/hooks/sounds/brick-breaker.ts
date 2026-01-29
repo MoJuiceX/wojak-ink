@@ -13,8 +13,8 @@ let volumeMultiplier = 1;
 export const getAudioContext = () => {
   if (!audioContext) {
     try {
-      audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    } catch (e) {
+      audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    } catch {
       console.warn('Web Audio API not supported');
       return null;
     }
@@ -53,7 +53,7 @@ const createSparkleCascade = (ctx: AudioContext | null, count: number = 5, baseF
       osc.start(startTime);
       osc.stop(startTime + 0.12);
     }
-  } catch (e) {
+  } catch {
     // Silently fail - don't break game flow
   }
 };
@@ -238,7 +238,7 @@ export const createBrickBreakerBrickDestroySound = (brickType: 'normal' | 'stron
     // Randomly select a variation
     const variation = brickDestroyVariations[Math.floor(Math.random() * brickDestroyVariations.length)];
     variation(ctx, isStrong, basePitch, baseVolume);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -329,7 +329,7 @@ export const createBrickBreakerWallHitSound = () => {
     // Randomly select a variation
     const variation = wallHitVariations[Math.floor(Math.random() * wallHitVariations.length)];
     variation(ctx);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -447,7 +447,7 @@ export const createBrickBreakerPaddleHitSound = (hitPosition: number = 0.5) => {
     // Randomly select a variation
     const variation = paddleHitVariations[Math.floor(Math.random() * paddleHitVariations.length)];
     variation(ctx, pitchMultiplier);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -549,7 +549,7 @@ export const createBrickBreakerComboSound = (combo: number) => {
         shimmer.stop(startTime + 0.25);
       }
     }
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -587,7 +587,7 @@ export const createBrickBreakerComboBreakSound = (lostCombo: number) => {
 
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.25);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -639,7 +639,7 @@ export const createBrickBreakerBallLostSound = () => {
 
     undertone.start(ctx.currentTime + 0.05);
     undertone.stop(ctx.currentTime + 0.4);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -832,7 +832,7 @@ export const createBrickBreakerPowerupCollectSound = (type: string) => {
         osc.stop(ctx.currentTime + 0.2);
       }
     }
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -886,7 +886,7 @@ export const createBrickBreakerPowerupSpawnSound = () => {
       shimmer.start(startTime);
       shimmer.stop(startTime + 0.1);
     }
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -949,7 +949,7 @@ export const createBrickBreakerUnbreakableHitSound = () => {
 
     ring.start(ctx.currentTime + 0.02);
     ring.stop(ctx.currentTime + 0.15);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -1011,7 +1011,7 @@ export const createBrickBreakerBrickCrackSound = () => {
     crackGain.gain.exponentialRampToValueAtTime(0.001 * volumeMultiplier, ctx.currentTime + crackLength);
 
     crackSource.start(ctx.currentTime);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };

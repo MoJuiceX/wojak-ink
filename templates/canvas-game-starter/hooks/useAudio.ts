@@ -12,12 +12,11 @@
  * };
  */
 
-import { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   createAudioManager,
   initAudio as initAudioSystem,
   playTone,
-  playFlapSound,
   playImpactSound,
   playSuccessSound,
   triggerHaptic,
@@ -31,7 +30,7 @@ import { AUDIO } from '../config';
 // ============================================
 
 export interface UseAudioReturn {
-  audioManager: AudioManager;
+  audioManagerRef: React.RefObject<AudioManager>;
   isInitialized: boolean;
   isMuted: boolean;
   initAudio: () => boolean;
@@ -197,7 +196,7 @@ export const useAudio = (): UseAudioReturn => {
   }, [isMuted]);
 
   return {
-    audioManager: audioManagerRef.current,
+    audioManagerRef,
     isInitialized,
     isMuted,
     initAudio,

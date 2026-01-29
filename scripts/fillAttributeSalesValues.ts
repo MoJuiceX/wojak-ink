@@ -7,11 +7,6 @@
  */
 
 import * as fs from 'fs';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // TibetSwap exchange rates (XCH per token) - calculated from raw reserves
 // Formula: (xch_reserve / 1e12) / (token_reserve / 1000)
@@ -86,11 +81,11 @@ function main() {
   const inputPath = '/Users/abit_hex/Downloads/correct_attribute_sales.csv';
   const outputPath = '/Users/abit_hex/Downloads/correct_attribute_sales_filled.csv';
 
-  console.log('Reading CSV file...');
+  console.warn('Reading CSV file...');
   const content = fs.readFileSync(inputPath, 'utf-8');
   const rows = parseCSV(content);
 
-  console.log(`Processing ${rows.length} rows...`);
+  console.warn(`Processing ${rows.length} rows...`);
 
   // Calculate values
   for (const row of rows) {
@@ -109,20 +104,20 @@ function main() {
   }
 
   fs.writeFileSync(outputPath, outputLines.join('\n'), 'utf-8');
-  console.log(`Output written to: ${outputPath}`);
+  console.warn(`Output written to: ${outputPath}`);
 
   // Print summary
   const currencies = [...new Set(rows.map(r => r.currency))];
-  console.log('\nCurrency breakdown:');
+  console.warn('\nCurrency breakdown:');
   for (const currency of currencies) {
     const currencyRows = rows.filter(r => r.currency === currency);
     const totalXCH = currencyRows.reduce((sum, r) => sum + r.xchValue, 0);
-    console.log(`  ${currency}: ${currencyRows.length} rows, ${formatNumber(totalXCH, 2)} XCH total`);
+    console.warn(`  ${currency}: ${currencyRows.length} rows, ${formatNumber(totalXCH, 2)} XCH total`);
   }
 
   const totalXCH = rows.reduce((sum, r) => sum + r.xchValue, 0);
   const totalUSD = totalXCH * XCH_USD_RATE;
-  console.log(`\nTotal: ${formatNumber(totalXCH, 2)} XCH = $${formatNumber(totalUSD, 2)}`);
+  console.warn(`\nTotal: ${formatNumber(totalXCH, 2)} XCH = $${formatNumber(totalUSD, 2)}`);
 }
 
 main();

@@ -49,12 +49,16 @@ export function usePointerType(): PointerType {
  * Check if device supports touch
  */
 export function useIsTouchDevice(): boolean {
-  const [isTouch, setIsTouch] = useState(false);
+  const [isTouch, setIsTouch] = useState(() => {
+    // Initialize with actual value if available (SSR-safe)
+    if (typeof window !== 'undefined') {
+      return window.matchMedia(POINTER_QUERIES.touch).matches;
+    }
+    return false;
+  });
 
   useEffect(() => {
     const query = window.matchMedia(POINTER_QUERIES.touch);
-    setIsTouch(query.matches);
-
     const handler = (e: MediaQueryListEvent) => setIsTouch(e.matches);
     query.addEventListener('change', handler);
 
@@ -90,12 +94,16 @@ export function useOrientation(): Orientation {
  * Detect mobile landscape (phone turned sideways)
  */
 export function useIsMobileLandscape(): boolean {
-  const [isMobileLandscape, setIsMobileLandscape] = useState(false);
+  const [isMobileLandscape, setIsMobileLandscape] = useState(() => {
+    // Initialize with actual value if available (SSR-safe)
+    if (typeof window !== 'undefined') {
+      return window.matchMedia(ORIENTATION_QUERIES.mobileLandscape).matches;
+    }
+    return false;
+  });
 
   useEffect(() => {
     const query = window.matchMedia(ORIENTATION_QUERIES.mobileLandscape);
-    setIsMobileLandscape(query.matches);
-
     const handler = (e: MediaQueryListEvent) => setIsMobileLandscape(e.matches);
     query.addEventListener('change', handler);
 

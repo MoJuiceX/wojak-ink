@@ -44,12 +44,14 @@ export function useDeviceOrientation(): DeviceOrientation {
   // Check if DeviceOrientationEvent is supported
   useEffect(() => {
     const supported = 'DeviceOrientationEvent' in window;
-    setIsSupported(supported);
+    queueMicrotask(() => {
+      setIsSupported(supported);
 
-    // On non-iOS devices, permission is usually granted by default
-    if (supported && !('requestPermission' in DeviceOrientationEvent)) {
-      setIsPermissionGranted(true);
-    }
+      // On non-iOS devices, permission is usually granted by default
+      if (supported && !('requestPermission' in DeviceOrientationEvent)) {
+        setIsPermissionGranted(true);
+      }
+    });
   }, []);
 
   // Handle orientation changes

@@ -63,7 +63,9 @@ export default function GamesHub() {
   // Track user's vote balances (consumables from the shop)
   const [donutBalance, setDonutBalance] = useState(0);
   const [poopBalance, setPoopBalance] = useState(0);
-  const authResult = CLERK_ENABLED ? useAuth() : { getToken: async () => null };
+  // Always call hooks unconditionally (rules of hooks)
+  const clerkAuth = useAuth();
+  const authResult = CLERK_ENABLED ? clerkAuth : { getToken: async () => null };
   const { getToken } = authResult;
 
   // Fetch consumable balances from API when signed in

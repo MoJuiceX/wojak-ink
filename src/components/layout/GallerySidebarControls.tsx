@@ -62,7 +62,6 @@ export function GallerySidebarControls({ showLabels }: GallerySidebarControlsPro
   }
 
   const {
-    selectedCharacter: _selectedCharacter,
     sortMode,
     filterMode,
     setSortMode,

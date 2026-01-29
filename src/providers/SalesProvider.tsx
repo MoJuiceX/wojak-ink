@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * Sales Provider
  *
@@ -48,9 +49,8 @@ export function SalesProvider({ children }: SalesProviderProps) {
 
 
     // Fix any sales with incorrect token conversion rates (one-time migration)
-    fixSuspiciousSales().then(fixed => {
-      if (fixed > 0) {
-      }
+    fixSuspiciousSales().then(() => {
+      // Migration complete (silent)
     });
 
     // Check if auto-sync is needed (more than 6 hours since last sync)
@@ -64,9 +64,7 @@ export function SalesProvider({ children }: SalesProviderProps) {
 
           // Fix any newly imported sales with incorrect token rates
           if (result.imported > 0) {
-            const fixed = await fixSuspiciousSales();
-            if (fixed > 0) {
-            }
+            await fixSuspiciousSales();
           }
 
           // Invalidate BigPulp queries so they refetch with new sales data
@@ -78,6 +76,7 @@ export function SalesProvider({ children }: SalesProviderProps) {
 
       return () => clearTimeout(timer);
     } else {
+      // intentionally empty
     }
   }, [queryClient]);
 

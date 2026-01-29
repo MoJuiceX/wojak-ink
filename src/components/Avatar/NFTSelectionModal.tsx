@@ -5,7 +5,7 @@
  * Features staggered animations and hover effects.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2 } from 'lucide-react';
 import { useSageWallet } from '@/sage-wallet';
@@ -37,21 +37,15 @@ export const NFTSelectionModal: React.FC<NFTSelectionModalProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [selectedNft, setSelectedNft] = useState<NFT | null>(null);
 
-  useEffect(() => {
-    if (isOpen && status === 'connected') {
-      fetchNFTs();
-    }
-  }, [isOpen, status]);
-
-  const fetchNFTs = async () => {
+  const fetchNFTs = useCallback(async () => {
     setIsLoading(true);
     try {
       const walletNfts = await getNFTs(WOJAK_COLLECTION_ID);
-      const formattedNfts: NFT[] = walletNfts.map((nft: any) => ({
-        id: nft.launcher_id || nft.id,
-        name: nft.name || `Wojak #${nft.edition || nft.id}`,
-        imageUrl: nft.thumbnail_uri || nft.image || '',
-        collection: 'Wojak Farmers Plot',
+      const formattedNfts: NFT[] = walletNfts.map((nft) => ({
+        id: nft.encoded_id,
+        name: nft.name || `Wojak #${nft.encoded_id}`,
+        imageUrl: nft.thumbnail_uri || nft.data_uri || '',
+        collection: nft.collection_name || 'Wojak Farmers Plot',
       }));
       setNfts(formattedNfts);
     } catch (error) {
@@ -60,7 +54,13 @@ export const NFTSelectionModal: React.FC<NFTSelectionModalProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [getNFTs]);
+
+  useEffect(() => {
+    if (isOpen && status === 'connected') {
+      fetchNFTs();
+    }
+  }, [isOpen, status, fetchNFTs]);
 
   const handleSelect = (nft: NFT) => {
     setSelectedNft(nft);

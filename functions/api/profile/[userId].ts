@@ -124,7 +124,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     }
 
     // Fetch drawer customization settings
-    let customization: Record<string, any> | null = null;
+    let customization: Record<string, unknown> | null = null;
     try {
       customization = await env.DB.prepare(`
         SELECT
@@ -157,7 +157,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     }
 
     // Fetch emoji ring (equipped emojis)
-    let emojiRing: Record<string, string> = {};
+    const emojiRing: Record<string, string> = {};
     try {
       const emojis = await env.DB.prepare(`
         SELECT ui.item_id, sc.icon
@@ -266,7 +266,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         WHERE ui.user_id = ?
         ORDER BY sc.rarity DESC, sc.category, sc.name
       `).bind(userId).all();
-      collectionItems = (items.results || []).map((i: any) => ({
+      collectionItems = (items.results || []).map((i: { id: string; name: string; category: string; rarity: string | null; icon: string | null; css_class: string | null }) => ({
         id: i.id,
         name: i.name,
         category: i.category,
@@ -279,7 +279,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     }
 
     // Fetch game scores with ranks
-    let gameScores: Array<{
+    const gameScores: Array<{
       gameId: string;
       gameName: string;
       score: number;
@@ -301,7 +301,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         GROUP BY game_id
       `).bind(userId).all();
 
-      for (const s of (scores.results || []) as any[]) {
+      for (const s of (scores.results || []) as Array<{ game_id: string; high_score: number; play_count: number }>) {
         totalScore += s.high_score || 0;
         gamesPlayed += s.play_count || 0;
 
@@ -354,7 +354,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       reward: { oranges: number; gems: number };
       isSecret: boolean;
     }> = [];
-    let achievementProgress: Record<string, {
+    const achievementProgress: Record<string, {
       achievementId: string;
       progress: number;
       target: number;
@@ -373,7 +373,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         ORDER BY sort_order, rarity DESC
       `).all();
 
-      achievements = (achievementDefs.results || []).map((a: any) => ({
+      achievements = (achievementDefs.results || []).map((a: { id: string; name: string; description: string; icon: string | null; category: string | null; rarity: string | null; reward_oranges: number | null; reward_gems: number | null; target: number; is_secret: number }) => ({
         id: a.id,
         name: a.name,
         description: a.description,
@@ -392,12 +392,12 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         WHERE user_id = ?
       `).bind(userId).all();
 
-      for (const p of (progress.results || []) as any[]) {
-        const achDef = achievements.find(a => a.id === p.achievement_id);
+      for (const p of (progress.results || []) as Array<{ achievement_id: string; progress: number; completed: number; completed_at: string | null; claimed: number }>) {
+        const achDef = achievementDefs.results?.find((a: { id: string; target: number }) => a.id === p.achievement_id) as { id: string; target: number } | undefined;
         achievementProgress[p.achievement_id] = {
           achievementId: p.achievement_id,
           progress: p.progress || 0,
-          target: achDef ? (achievementDefs.results?.find((a: any) => a.id === p.achievement_id) as any)?.target || 1 : 1,
+          target: achDef?.target || 1,
           completed: p.completed === 1,
           completedAt: p.completed_at,
           claimed: p.claimed === 1,

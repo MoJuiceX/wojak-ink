@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * DeviceOrientationContext
  *
@@ -46,31 +47,31 @@ export function DeviceOrientationProvider({ children }: DeviceOrientationProvide
   // Detect mobile vs desktop
   useEffect(() => {
     const mobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    setIsMobile(mobile);
-
     const orientationSupported = 'DeviceOrientationEvent' in window;
-    setIsSupported(orientationSupported || !mobile); // Desktop always "supported" via mouse
-
-    // Check if this is iOS requiring permission
     const requiresPermission = orientationSupported &&
       'requestPermission' in DeviceOrientationEvent &&
       typeof (DeviceOrientationEvent as unknown as { requestPermission: () => Promise<string> }).requestPermission === 'function';
 
-    if (requiresPermission) {
-      // iOS 13+ - needs explicit permission
-      setNeedsPermission(true);
-      setIsPermissionGranted(false);
-    } else if (orientationSupported) {
-      // Android or older iOS - permission granted by default
-      setNeedsPermission(false);
-      setIsPermissionGranted(true);
-    }
+    queueMicrotask(() => {
+      setIsMobile(mobile);
+      setIsSupported(orientationSupported || !mobile); // Desktop always "supported" via mouse
 
-    // Desktop doesn't need permission
-    if (!mobile) {
-      setNeedsPermission(false);
-      setIsPermissionGranted(true);
-    }
+      if (requiresPermission) {
+        // iOS 13+ - needs explicit permission
+        setNeedsPermission(true);
+        setIsPermissionGranted(false);
+      } else if (orientationSupported) {
+        // Android or older iOS - permission granted by default
+        setNeedsPermission(false);
+        setIsPermissionGranted(true);
+      }
+
+      // Desktop doesn't need permission
+      if (!mobile) {
+        setNeedsPermission(false);
+        setIsPermissionGranted(true);
+      }
+    });
   }, []);
 
   // Handle device orientation (mobile)
@@ -126,6 +127,7 @@ export function DeviceOrientationProvider({ children }: DeviceOrientationProvide
         return false;
       }
     } else {
+      // intentionally empty
     }
 
     setIsPermissionGranted(true);

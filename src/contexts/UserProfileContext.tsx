@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * UserProfileContext
  *
@@ -81,10 +82,11 @@ interface UserProfileContextValue extends UserProfileState {
 const UserProfileContext = createContext<UserProfileContextValue | null>(null);
 
 export function UserProfileProvider({ children }: { children: React.ReactNode }) {
-  // Only call Clerk hooks if Clerk is enabled (ClerkProvider exists)
-  // When Clerk is disabled, use safe defaults
-  const authResult = CLERK_ENABLED ? useAuth() : { isSignedIn: false, isLoaded: true };
-  const userResult = CLERK_ENABLED ? useUser() : { user: null };
+  // Always call hooks unconditionally (rules of hooks)
+  const clerkAuth = useAuth();
+  const clerkUser = useUser();
+  const authResult = CLERK_ENABLED ? clerkAuth : { isSignedIn: false, isLoaded: true };
+  const userResult = CLERK_ENABLED ? clerkUser : { user: null };
   const { authenticatedFetch } = useAuthenticatedFetch();
 
   // Use Clerk values only if enabled, otherwise use defaults
@@ -184,6 +186,7 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
     } catch (error) {
       // Ignore AbortError - these are expected when component unmounts or request times out
       if (error instanceof Error && error.name === 'AbortError') {
+        // intentionally empty
       } else {
         console.error('[UserProfile] API error, falling back to localStorage:', error);
       }
@@ -335,6 +338,7 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
   }, []);
 
   // Computed effective display name (NEVER returns "Anonymous")
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const effectiveDisplayName = useMemo(() => {
     // Priority: custom display name > Google first name > email prefix > "Player"
     if (state.profile?.displayName) return state.profile.displayName;
@@ -347,7 +351,7 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
 
   // Store refreshProfile in a ref to avoid dependency issues
   const refreshProfileRef = useRef(refreshProfile);
-  refreshProfileRef.current = refreshProfile;
+  useEffect(() => { refreshProfileRef.current = refreshProfile; }, [refreshProfile]);
 
   // Fetch profile when user signs in
   useEffect(() => {
@@ -360,6 +364,7 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
     // Reset state on sign-out
     if (!isSignedIn) {
       fetchedRef.current = false;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional reset on sign-out
       setState({
         profile: null,
         isLoading: false,
@@ -380,7 +385,7 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
   }, [authLoaded, isSignedIn]);
 
   // Clerk user info
-  const clerkUser = user ? {
+  const clerkUserInfo = user ? {
     firstName: user.firstName,
     lastName: user.lastName,
     email: user.primaryEmailAddress?.emailAddress || null,
@@ -394,7 +399,7 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
     updateAvatar,
     refreshOwnedNfts,
     effectiveDisplayName,
-    clerkUser,
+    clerkUser: clerkUserInfo,
     isSignedIn: isSignedIn ?? false,
   };
 

@@ -3,7 +3,7 @@
  * Proxies requests to api.spacescan.io to avoid CORS issues in production
  */
 
-interface Env {}
+type Env = Record<string, unknown>;
 
 export const onRequest: PagesFunction<Env> = async (context) => {
   const { params } = context;
@@ -39,7 +39,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         'Cache-Control': 'public, max-age=300', // Cache for 5 minutes
       },
     });
-  } catch (error) {
+  } catch {
     return new Response(JSON.stringify({ error: 'Failed to fetch from SpaceScan' }), {
       status: 500,
       headers: {

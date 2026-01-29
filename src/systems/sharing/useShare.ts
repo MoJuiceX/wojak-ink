@@ -62,7 +62,7 @@ export const useShare = (): UseShareReturn => {
             trackShare('native-image', shareData.gameId);
             return true;
           }
-        } catch (e) {
+        } catch {
           // Fall through to text-only share
         }
 
@@ -90,7 +90,32 @@ export const useShare = (): UseShareReturn => {
     } finally {
       setIsSharing(false);
     }
-  }, [profile, isSignedIn]);
+  }, [profile?.displayName, profile?.xHandle, isSignedIn]);
+
+  // Copy to clipboard
+  const copyToClipboard = useCallback(async (text: string): Promise<boolean> => {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.opacity = '0';
+      document.body.appendChild(textArea);
+      textArea.select();
+
+      try {
+        document.execCommand('copy');
+        return true;
+      } catch {
+        return false;
+      } finally {
+        document.body.removeChild(textArea);
+      }
+    }
+  }, []);
 
   // Share to specific platform
   const shareToPlatform = useCallback(async (
@@ -135,32 +160,7 @@ export const useShare = (): UseShareReturn => {
     window.open(shareUrl, '_blank', 'width=600,height=400');
     trackShare(platform, 'manual');
     return true;
-  }, []);
-
-  // Copy to clipboard
-  const copyToClipboard = useCallback(async (text: string): Promise<boolean> => {
-    try {
-      await navigator.clipboard.writeText(text);
-      return true;
-    } catch {
-      // Fallback for older browsers
-      const textArea = document.createElement('textarea');
-      textArea.value = text;
-      textArea.style.position = 'fixed';
-      textArea.style.opacity = '0';
-      document.body.appendChild(textArea);
-      textArea.select();
-
-      try {
-        document.execCommand('copy');
-        return true;
-      } catch {
-        return false;
-      } finally {
-        document.body.removeChild(textArea);
-      }
-    }
-  }, []);
+  }, [copyToClipboard]);
 
   return {
     isSharing,
@@ -172,9 +172,10 @@ export const useShare = (): UseShareReturn => {
 };
 
 // Analytics tracking
-function trackShare(_method: string, _gameId: string): void {
+function trackShare(method: string, gameId: string): void {
   // Could send to analytics service here
-  // analytics.track('share', { method, gameId });
+  void method;
+  void gameId;
 }
 
 export default useShare;

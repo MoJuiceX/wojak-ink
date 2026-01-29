@@ -50,8 +50,8 @@ class HapticManagerClass {
 
     try {
       navigator.vibrate(scaledPattern);
-    } catch (error) {
-      console.debug('Vibration failed:', error);
+    } catch {
+      // Vibration failed, ignore
     }
   }
 
@@ -66,8 +66,8 @@ class HapticManagerClass {
 
     try {
       navigator.vibrate(scaledPattern);
-    } catch (error) {
-      console.debug('Vibration failed:', error);
+    } catch {
+      // Vibration failed, ignore
     }
   }
 
@@ -80,7 +80,7 @@ class HapticManagerClass {
 
     try {
       navigator.vibrate(0);
-    } catch (error) {
+    } catch {
       // Ignore
     }
   }
@@ -125,7 +125,7 @@ class HapticManagerClass {
         intensity: this.intensity
       };
       localStorage.setItem('wojak-haptic-prefs', JSON.stringify(prefs));
-    } catch (e) {
+    } catch {
       // Ignore storage errors
     }
   }
@@ -142,7 +142,7 @@ class HapticManagerClass {
         this.isEnabled = prefs.isEnabled ?? true;
         this.intensity = prefs.intensity ?? 1;
       }
-    } catch (e) {
+    } catch {
       // Use defaults
     }
   }

@@ -101,11 +101,11 @@ export const MobilePodium: React.FC<MobilePodiumProps> = ({ entries, timeframe }
   useEffect(() => {
     const resetTime = getResetTime(timeframe);
     if (!resetTime) {
-      setCountdown(null);
+      queueMicrotask(() => setCountdown(null));
       return;
     }
 
-    setCountdown(formatCountdown(resetTime));
+    queueMicrotask(() => setCountdown(formatCountdown(resetTime)));
     const interval = setInterval(() => {
       setCountdown(formatCountdown(resetTime));
     }, 60000); // Update every minute

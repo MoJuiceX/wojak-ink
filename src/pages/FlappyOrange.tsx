@@ -1883,7 +1883,7 @@ const FlappyOrange: React.FC = () => {
         return;
       }
 
-      handleTap(e as any);
+      handleTap(e as unknown as React.MouseEvent);
     };
 
     document.addEventListener('click', handleDocumentClick);

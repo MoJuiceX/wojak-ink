@@ -13,7 +13,7 @@ import { ShareButton } from '@/systems/sharing';
 import { captureGameArea } from '@/systems/sharing/captureDOM';
 import { useGameMute } from '@/contexts/GameMuteContext';
 import { useArcadeLights } from '@/contexts/ArcadeLightsContext';
-import { getMergeTier, GAME_COMBO_TIERS } from '@/config/arcade-light-mappings';
+import { getMergeTier, GAME_COMBO_TIERS, type GameEvent } from '@/config/arcade-light-mappings';
 import './Merge2048Game.css';
 
 // Direction type for moves
@@ -450,10 +450,17 @@ const Merge2048Game: React.FC = () => {
   const [isMuted, setIsMuted] = useState(false);
 
   // Background music refs (MP3 playlist)
-  const playlistIndexRef = useRef(Math.floor(Math.random() * MUSIC_PLAYLIST.length));
+  const playlistIndexRef = useRef(0);
   const bgMusicAudioRef = useRef<HTMLAudioElement | null>(null);
   const isMutedRef = useRef(isMuted);
   const isGameOverRef = useRef(isGameOver);
+  // Ref for playBgMusicTrack to allow recursive calls
+  const playBgMusicTrackRef = useRef<((index: number) => void) | null>(null);
+
+  // Initialize random playlist index on mount (avoids Math.random during render)
+  useEffect(() => {
+    playlistIndexRef.current = Math.floor(Math.random() * MUSIC_PLAYLIST.length);
+  }, []);
 
   // Keep refs in sync
   useEffect(() => { isMutedRef.current = isMuted; }, [isMuted]);
@@ -469,6 +476,7 @@ const Merge2048Game: React.FC = () => {
     // Only sync if NOT managed externally (meaning this game controls its own music)
     if (!musicManagedExternally) {
       // Arcade mute button changed - sync local state
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: sync external mute state to local state
       setIsMuted(arcadeMuted);
       // Also directly pause/resume music for immediate feedback
       if (arcadeMuted) {
@@ -495,7 +503,8 @@ const Merge2048Game: React.FC = () => {
     music.addEventListener('ended', () => {
       playlistIndexRef.current = (playlistIndexRef.current + 1) % MUSIC_PLAYLIST.length;
       if (!isGameOverRef.current && !isMutedRef.current) {
-        playBgMusicTrack(playlistIndexRef.current);
+        // Use ref to call playBgMusicTrack recursively (avoids stale closure)
+        playBgMusicTrackRef.current?.(playlistIndexRef.current);
       }
     }, { once: true });
     bgMusicAudioRef.current = music;
@@ -503,6 +512,9 @@ const Merge2048Game: React.FC = () => {
       music.play().catch(() => {});
     }
   }, []);
+
+  // Keep playBgMusicTrackRef in sync
+  useEffect(() => { playBgMusicTrackRef.current = playBgMusicTrack; }, [playBgMusicTrack]);
 
   // Play next song in playlist
   const playNextBgMusicTrack = useCallback(() => {
@@ -546,7 +558,7 @@ const Merge2048Game: React.FC = () => {
   const [cameraZoom, setCameraZoom] = useState(1);
 
   // TASK 62: Impact flash state
-  const [impactFlash, _setImpactFlash] = useState<{ x: number; y: number } | null>(null);
+  const [impactFlash] = useState<{ x: number; y: number } | null>(null);
 
   // TASK 67: Danger level state
   const [dangerLevel, setDangerLevel] = useState<DangerLevel>('safe');
@@ -574,6 +586,7 @@ const Merge2048Game: React.FC = () => {
   const [showLeaderboardPanel, setShowLeaderboardPanel] = useState(false);
   const [scoreSubmitted, setScoreSubmitted] = useState(false);
   const [isNewPersonalBest, setIsNewPersonalBest] = useState(false);
+  const [meetsMinimumMerges, setMeetsMinimumMerges] = useState(false);
 
   // Next tile queue for spawning (internal use)
   const [nextTileQueue, setNextTileQueue] = useState<number[]>([2, 2]);
@@ -592,7 +605,7 @@ const Merge2048Game: React.FC = () => {
   });
 
   // Audio hooks
-  const { playBlockLand: _playBlockLand, playPerfectBonus: _playPerfectBonus, playCombo: _playCombo, playWinSound, playGameOver, playClick, setMuted } = useHowlerSounds();
+  const { playWinSound, playGameOver, playClick, setMuted } = useHowlerSounds();
 
   // Sync Howler mute state with arcade frame mute button
   useEffect(() => {
@@ -645,14 +658,18 @@ const Merge2048Game: React.FC = () => {
   // Get or create audio context (must be defined early for all sound functions)
   const getAudioContext = useCallback(() => {
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      audioContextRef.current = new AudioContextClass();
     }
     return audioContextRef.current;
   }, []);
 
+  // Ref for handleNewGame to allow forward reference
+  const handleNewGameRef = useRef<(() => void) | null>(null);
+
   // Initialize game on mount
   useEffect(() => {
-    handleNewGame();
+    handleNewGameRef.current?.();
   }, []);
 
   // TASK 130: Check for challenge on page load
@@ -666,6 +683,7 @@ const Merge2048Game: React.FC = () => {
         const [scoreStr] = decoded.split('-');
         const score = parseInt(scoreStr, 10);
         if (!isNaN(score)) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: set challenge target from URL params on mount
           setChallengeTarget(score);
         }
       } catch {
@@ -687,6 +705,7 @@ const Merge2048Game: React.FC = () => {
   // Save best score to localStorage
   useEffect(() => {
     if (score > bestScore) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: update best score from score comparison
       setBestScore(score);
       localStorage.setItem('merge2048-best', score.toString());
     }
@@ -699,15 +718,16 @@ const Merge2048Game: React.FC = () => {
   // TASK 67: Update danger level based on empty cells
   useEffect(() => {
     const emptyCells = getEmptyCells(tiles).length;
+    let newLevel: DangerLevel = 'safe';
     if (emptyCells <= DANGER_THRESHOLDS.imminent) {
-      setDangerLevel('imminent');
+      newLevel = 'imminent';
     } else if (emptyCells <= DANGER_THRESHOLDS.critical) {
-      setDangerLevel('critical');
+      newLevel = 'critical';
     } else if (emptyCells <= DANGER_THRESHOLDS.warning) {
-      setDangerLevel('warning');
-    } else {
-      setDangerLevel('safe');
+      newLevel = 'warning';
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: derived danger level from tiles state
+    setDangerLevel(newLevel);
   }, [tiles]);
 
   // TASK 74: Periodic danger haptic pulses
@@ -1150,6 +1170,7 @@ const Merge2048Game: React.FC = () => {
     setHasWon(false);
     setDismissedWin(false);
     setScorePopup(null);
+    setMeetsMinimumMerges(false);
     resetAllEffects();
     // Start background music on user gesture (required for mobile browsers)
     // Skip if GameModal manages the music (check both ref AND context for timing safety)
@@ -1160,9 +1181,13 @@ const Merge2048Game: React.FC = () => {
     triggerEvent('play:active');
   }, [playClick, resetAllEffects, initNextTileQueue, playNextBgMusicTrack, musicManagedExternally, triggerEvent]);
 
+  // Keep handleNewGameRef in sync
+  useEffect(() => { handleNewGameRef.current = handleNewGame; }, [handleNewGame]);
+
   /**
    * Move tiles in the specified direction
    */
+  /* eslint-disable react-hooks/preserve-manual-memoization -- Complex game callback with intentional state updates during animation frames */
   const move = useCallback(
     (direction: Direction) => {
       if (isGameOver || isMovingRef.current) return;
@@ -1288,7 +1313,7 @@ const Merge2048Game: React.FC = () => {
               // Arcade lights: Building toward fever
               const comboTier = GAME_COMBO_TIERS['merge-2048'](consecutiveMergesRef.current);
               if (comboTier !== 'start') {
-                triggerEvent(`combo:${comboTier}` as any);
+                triggerEvent(`combo:${comboTier}` as GameEvent);
               }
             }
 
@@ -1317,7 +1342,7 @@ const Merge2048Game: React.FC = () => {
             checkMilestone(highestMerged);
             // Arcade lights: Merge with value-based tier (debounced)
             const mergeTier = getMergeTier(highestMerged);
-            triggerEvent(`score:${mergeTier}` as any);
+            triggerEvent(`score:${mergeTier}` as GameEvent);
           }
 
           // TASK 28: Use premium merge haptic based on value
@@ -1405,6 +1430,8 @@ const Merge2048Game: React.FC = () => {
                     bgMusicAudioRef.current.pause();
                     bgMusicAudioRef.current = null;
                   }
+                  // Set minimum merges state for render (avoids ref access during render)
+                  setMeetsMinimumMerges(totalMergesRef.current >= 3);
                   setIsGameOver(true);
                   playGameOver();
                   triggerGameOverHaptic();
@@ -1445,6 +1472,8 @@ const Merge2048Game: React.FC = () => {
                   bgMusicAudioRef.current.pause();
                   bgMusicAudioRef.current = null;
                 }
+                // Set minimum merges state for render (avoids ref access during render)
+                setMeetsMinimumMerges(totalMergesRef.current >= 3);
                 setIsGameOver(true);
                 playGameOver();
                 triggerGameOverHaptic();
@@ -1486,6 +1515,7 @@ const Merge2048Game: React.FC = () => {
     },
     [isGameOver, hasWon, showScorePopup, triggerScreenShake, playSlideSound, playMergeSound, playSpawnSound, playInvalidMoveSound, checkMilestone, playWinSound, playGameOver, isSignedIn, submitScore, score, triggerShockwave, triggerSparks, addFloatingEmoji, showEpicCallout, triggerConfetti, triggerSlideHaptic, triggerMergeHaptic, triggerWinHaptic, triggerGameOverHaptic, triggerErrorHaptic, incrementCombo, nextTileQueue, generateNextTile]
   );
+  /* eslint-enable react-hooks/preserve-manual-memoization */
 
   /**
    * Handle keyboard input
@@ -1749,18 +1779,18 @@ const Merge2048Game: React.FC = () => {
                     </div>
                   </div>
 
-                  {(isNewPersonalBest || score > bestScore) && score > 0 && totalMergesRef.current >= 3 && (
+                  {(isNewPersonalBest || score > bestScore) && score > 0 && meetsMinimumMerges && (
                     <div className="m2048-new-record">New Personal Best!</div>
                   )}
 
-                  {isSignedIn && totalMergesRef.current >= 3 && (
+                  {isSignedIn && meetsMinimumMerges && (
                     <div className="m2048-submitted">
                       {isSubmitting ? 'Saving...' : scoreSubmitted ? `Saved as ${userDisplayName}!` : ''}
                     </div>
                   )}
-                  
+
                   {/* Show minimum actions message when player doesn't meet threshold */}
-                  {totalMergesRef.current < 3 && (
+                  {!meetsMinimumMerges && (
                     <div className="m2048-minimum-actions">
                       Make at least 3 merges to be on the leaderboard
                     </div>

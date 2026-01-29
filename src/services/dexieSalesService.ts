@@ -285,8 +285,8 @@ function parseTrades(offers: DexieOffer[]): ParsedSale[] {
  * Get traits for an NFT by edition number
  * This should be connected to the gallery context in the future
  */
-function getTraitsForNft(_edition: number): Record<string, string> {
-  // TODO: Connect to NFT data to get actual traits
+function getTraitsForNft(edition: number): Record<string, string> {
+  void edition; // TODO: Connect to NFT data to get actual traits
   // For now, return empty traits - will be enhanced later
   return {};
 }

@@ -161,7 +161,7 @@ const createBallLaunchSound = () => {
 
     ping.start(ctx.currentTime + 0.08);
     ping.stop(ctx.currentTime + 0.2);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -230,7 +230,7 @@ const startBrickBreakerAnticipation = () => {
       brickBreakerAnticipationOsc = null;
       brickBreakerAnticipationGain = null;
     }, (fadeOutEnd - ctx.currentTime + 0.2) * 1000);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -250,7 +250,7 @@ const stopBrickBreakerAnticipation = () => {
         setTimeout(() => {
           try {
             brickBreakerAnticipationOsc?.stop();
-          } catch (e) {
+          } catch {
             // Already stopped
           }
           brickBreakerAnticipationOsc = null;
@@ -258,7 +258,7 @@ const stopBrickBreakerAnticipation = () => {
         }, 550);
       }
     }
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -349,7 +349,7 @@ const startBrickBreakerFireball = () => {
     brickBreakerFireballOsc.start(ctx.currentTime);
     brickBreakerFireballOsc2.start(ctx.currentTime);
     brickBreakerFireballNoiseSource.start(ctx.currentTime);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -366,7 +366,7 @@ const stopBrickBreakerFireball = () => {
             brickBreakerFireballOsc?.stop();
             brickBreakerFireballOsc2?.stop();
             brickBreakerFireballNoiseSource?.stop();
-          } catch (e) {
+          } catch {
             // Already stopped
           }
           brickBreakerFireballOsc = null;
@@ -376,7 +376,7 @@ const stopBrickBreakerFireball = () => {
         }, 350);
       }
     }
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -586,7 +586,7 @@ const createWojakChimeSound = () => {
     bass.connect(bassGain).connect(ctx.destination);
     bass.start(ctx.currentTime + 0.35);
     bass.stop(ctx.currentTime + 0.7);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -635,7 +635,7 @@ const createGameOverSound = () => {
 
     osc2.start(ctx.currentTime + 0.1);
     osc2.stop(ctx.currentTime + 0.5);
-  } catch (e) {
+  } catch {
     // Silently fail - don't break game flow
   }
 };
@@ -671,7 +671,7 @@ const createOrangeJuggleHitSound = (hitPosition: number = 0.5) => {
 
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.15);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -700,7 +700,7 @@ const createOrangeDropSound = () => {
 
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.4);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -758,7 +758,7 @@ const createGoldenOrangeHitSound = () => {
     osc1.stop(ctx.currentTime + 0.3);
     osc2.stop(ctx.currentTime + 0.4);
     noise.stop(ctx.currentTime + 0.3);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -788,7 +788,7 @@ const createBananaCollectSound = () => {
       osc.start(ctx.currentTime + i * 0.08);
       osc.stop(ctx.currentTime + i * 0.08 + 0.15);
     });
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -849,7 +849,7 @@ const createRumCollectSound = () => {
     osc2.stop(ctx.currentTime + 0.28);
     lfo.stop(ctx.currentTime + 0.4);
     mainOsc.stop(ctx.currentTime + 0.4);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -889,7 +889,7 @@ const createCamelWarningSound = () => {
     rumble.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.5);
     rumble.stop(ctx.currentTime + 0.6);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -936,7 +936,7 @@ const createCamelImpactSound = () => {
     noise.start(ctx.currentTime);
     impact.stop(ctx.currentTime + 0.4);
     noise.stop(ctx.currentTime + 0.4);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -1108,7 +1108,7 @@ const createOrangeJuggleComboSound = (streak: number) => {
         voice.stop(ctx.currentTime + 0.25);
       });
     }
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -1138,7 +1138,7 @@ const createOrangeJuggleComboBreakSound = (lostCombo: number) => {
     osc.connect(gain).connect(ctx.destination);
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.35);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -1179,7 +1179,7 @@ const startRumAmbientLoop = () => {
 
     rumAmbientOscillators = [lfo, main];
     rumAmbientGains = [lfoGain, mainGain];
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -1201,12 +1201,12 @@ const stopRumAmbientLoop = () => {
 
     setTimeout(() => {
       rumAmbientOscillators.forEach(o => {
-        try { o.stop(); } catch (e) { /* already stopped */ }
+        try { o.stop(); } catch { /* already stopped */ }
       });
       rumAmbientOscillators = [];
       rumAmbientGains = [];
     }, 500);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -1256,7 +1256,7 @@ const startBananaAmbientLoop = () => {
 
     bananaAmbientOscillators = [lfo, main, harm];
     bananaAmbientGains = [lfoGain, mainGain, harmGain];
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -1278,12 +1278,12 @@ const stopBananaAmbientLoop = () => {
 
     setTimeout(() => {
       bananaAmbientOscillators.forEach(o => {
-        try { o.stop(); } catch (e) { /* already stopped */ }
+        try { o.stop(); } catch { /* already stopped */ }
       });
       bananaAmbientOscillators = [];
       bananaAmbientGains = [];
     }, 300);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -1313,7 +1313,7 @@ const createOrangeJuggleLevelCompleteSound = () => {
       osc.start(ctx.currentTime + i * 0.12);
       osc.stop(ctx.currentTime + i * 0.12 + 0.3);
     });
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };
@@ -1346,7 +1346,7 @@ const createArmSwingSound = (isLeftArm: boolean = true) => {
     noise.connect(filter).connect(gain).connect(ctx.destination);
     noise.start(ctx.currentTime);
     noise.stop(ctx.currentTime + 0.08);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 };

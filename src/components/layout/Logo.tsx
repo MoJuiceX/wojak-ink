@@ -63,6 +63,7 @@ function FlapChar({ char, index }: FlapCharProps) {
   const [unfoldChar, setUnfoldChar] = useState(char);
   const targetCharRef = useRef(char);
   const iterationRef = useRef(0);
+  const doFlipRef = useRef<(newChar: string, isFinal: boolean) => void>(() => {});
 
   const doFlip = useCallback((newChar: string, isFinal: boolean) => {
     setFoldChar(displayChar);
@@ -79,17 +80,22 @@ function FlapChar({ char, index }: FlapCharProps) {
         iterationRef.current++;
         if (iterationRef.current < SCRAMBLE_ITERATIONS) {
           setTimeout(() => {
-            doFlip(getRandomChar(), false);
+            doFlipRef.current(getRandomChar(), false);
           }, 20);
         } else {
           // Final flip to target
           setTimeout(() => {
-            doFlip(targetCharRef.current, true);
+            doFlipRef.current(targetCharRef.current, true);
           }, 20);
         }
       }
     }, FLIP_DURATION);
   }, [displayChar]);
+
+  // Keep doFlipRef up to date
+  useEffect(() => {
+    doFlipRef.current = doFlip;
+  }, [doFlip]);
 
   useEffect(() => {
     if (char !== targetCharRef.current) {
@@ -100,12 +106,12 @@ function FlapChar({ char, index }: FlapCharProps) {
       // Start scramble sequence after stagger delay
       const staggerTimeout = setTimeout(() => {
         iterationRef.current = 0;
-        doFlip(getRandomChar(), false);
+        doFlipRef.current(getRandomChar(), false);
       }, index * STAGGER_DELAY);
 
       return () => clearTimeout(staggerTimeout);
     }
-  }, [char, index, displayChar, doFlip]);
+  }, [char, index, displayChar]);
 
   return (
     <div className={`flap-char ${isFlipping ? 'flipping' : ''}`} data-char={displayChar}>

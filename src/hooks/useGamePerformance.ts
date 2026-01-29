@@ -67,7 +67,7 @@ export function useGamePerformance(options: UseGamePerformanceOptions = {}) {
   }, [enabled, warnThreshold, onPerformanceWarning]);
 
   const getMetrics = useCallback((): PerformanceMetrics => {
-    const memory = (performance as any).memory;
+    const memory = (performance as unknown as { memory?: { usedJSHeapSize?: number } }).memory;
     return {
       fps: fpsRef.current,
       frameTime: 1000 / fpsRef.current,

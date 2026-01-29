@@ -44,7 +44,7 @@ export function LeaderboardPanel() {
 
         const data = await response.json();
 
-        const scores: TopScore[] = (data.topScores || []).map((entry: any) => ({
+        const scores: TopScore[] = (data.topScores || []).map((entry: { gameId: string; displayName?: string; userId: string; score: number; avatar?: { type?: string; value?: string; source?: string }; equipped?: unknown }) => ({
           gameId: entry.gameId as GameId,
           gameName: GAME_NAMES[entry.gameId as GameId] || entry.gameId,
           playerName: entry.displayName || 'Player',

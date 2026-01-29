@@ -28,6 +28,31 @@ const TILE_EMOJI: { [key: number]: string } = {
   2048: '👑',   // Crown
 };
 
+// Helper functions moved outside component to avoid hoisting issues
+function createEmptyGrid(): Grid {
+  return Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(null));
+}
+
+function checkIsGameOver(currentGrid: Grid): boolean {
+  // Check for empty cells
+  for (let row = 0; row < GRID_SIZE; row++) {
+    for (let col = 0; col < GRID_SIZE; col++) {
+      if (currentGrid[row][col] === null) return false;
+    }
+  }
+
+  // Check for possible merges
+  for (let row = 0; row < GRID_SIZE; row++) {
+    for (let col = 0; col < GRID_SIZE; col++) {
+      const current = currentGrid[row][col];
+      if (col < GRID_SIZE - 1 && current === currentGrid[row][col + 1]) return false;
+      if (row < GRID_SIZE - 1 && current === currentGrid[row + 1][col]) return false;
+    }
+  }
+
+  return true;
+}
+
 const Orange2048: React.FC = () => {
   const isMobile = useIsMobile();
   const [gameState, setGameState] = useState<'idle' | 'playing' | 'gameover' | 'won'>('idle');
@@ -65,10 +90,6 @@ const Orange2048: React.FC = () => {
       document.body.classList.remove('game-fullscreen-mode');
     };
   }, [isMobile, gameState]);
-
-  function createEmptyGrid(): Grid {
-    return Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(null));
-  }
 
   const addRandomTile = useCallback((currentGrid: Grid): Grid => {
     const emptyCells: { row: number; col: number }[] = [];
@@ -146,7 +167,7 @@ const Orange2048: React.FC = () => {
 
   const slide = (row: (number | null)[]): { row: (number | null)[]; score: number } => {
     // Remove nulls
-    let arr = row.filter((x): x is number => x !== null);
+    const arr = row.filter((x): x is number => x !== null);
     let scoreGained = 0;
 
     // Merge adjacent equal tiles
@@ -160,7 +181,7 @@ const Orange2048: React.FC = () => {
 
     // Pad with nulls
     while (arr.length < GRID_SIZE) {
-      arr.push(null as any);
+      arr.push(null as unknown as number);
     }
 
     return { row: arr, score: scoreGained };
@@ -266,32 +287,12 @@ const Orange2048: React.FC = () => {
       }
 
       // Check for game over
-      if (isGameOver(newGrid)) {
+      if (checkIsGameOver(newGrid)) {
         setGameState('gameover');
         triggerScreenShake(500);
       }
     }
   }, [gameState, grid, addRandomTile, highScore, addScorePopup, updateCombo, triggerShockwave, triggerSparks, addFloatingEmoji, triggerScreenShake, showEpicCallout, triggerConfetti]);
-
-  const isGameOver = (currentGrid: Grid): boolean => {
-    // Check for empty cells
-    for (let row = 0; row < GRID_SIZE; row++) {
-      for (let col = 0; col < GRID_SIZE; col++) {
-        if (currentGrid[row][col] === null) return false;
-      }
-    }
-
-    // Check for possible merges
-    for (let row = 0; row < GRID_SIZE; row++) {
-      for (let col = 0; col < GRID_SIZE; col++) {
-        const current = currentGrid[row][col];
-        if (col < GRID_SIZE - 1 && current === currentGrid[row][col + 1]) return false;
-        if (row < GRID_SIZE - 1 && current === currentGrid[row + 1][col]) return false;
-      }
-    }
-
-    return true;
-  };
 
   // Touch controls using shared hook
   const touchHandlers = useGameTouch({

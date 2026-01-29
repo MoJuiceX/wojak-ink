@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * Generator Context
  *
@@ -275,7 +276,7 @@ function getMissingRequiredLayers(selectedLayers: SelectedLayers): string[] {
 function generatorReducer(state: GeneratorState, action: GeneratorAction): GeneratorState {
   switch (action.type) {
     case 'SET_LAYER': {
-      let updatedLayers = { ...state.selectedLayers, [action.layer]: action.path };
+      const updatedLayers = { ...state.selectedLayers, [action.layer]: action.path };
 
       // When Base is selected, auto-set matching clothes if user hasn't manually selected clothes
       // or if clothes is still on a default/matching value
@@ -309,7 +310,7 @@ function generatorReducer(state: GeneratorState, action: GeneratorAction): Gener
     }
 
     case 'CLEAR_LAYER': {
-      let updatedLayers = { ...state.selectedLayers, [action.layer]: '' };
+      const updatedLayers = { ...state.selectedLayers, [action.layer]: '' };
 
       // Required layers reset to defaults instead of being cleared
       if (action.layer === 'MouthBase') {

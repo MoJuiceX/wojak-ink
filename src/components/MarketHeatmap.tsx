@@ -19,6 +19,7 @@ interface HeatmapCell {
   priceMax: number;
   listings: NFTListing[];
   count: number;
+  highlight?: boolean;
 }
 
 type HeatmapMode = 'all' | 'sleepy' | 'delusion' | 'floor' | 'rare' | 'whale';
@@ -145,7 +146,7 @@ const MarketHeatmap: React.FC<MarketHeatmapProps> = ({ rankData, onNftClick }) =
           const analysisData = await analysisRes.json();
           const ranks: Record<string, number> = {};
           for (const [id, data] of Object.entries(analysisData)) {
-            ranks[id] = (data as any).rank;
+            ranks[id] = (data as { rank: number }).rank;
           }
           setInternalRankData(ranks);
         }
@@ -348,7 +349,7 @@ const MarketHeatmap: React.FC<MarketHeatmapProps> = ({ rankData, onNftClick }) =
       };
 
       if ('requestIdleCallback' in window) {
-        (window as any).requestIdleCallback(preloadImages);
+        (window as unknown as { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(preloadImages);
       } else {
         setTimeout(preloadImages, 100);
       }
@@ -468,8 +469,8 @@ const MarketHeatmap: React.FC<MarketHeatmapProps> = ({ rankData, onNftClick }) =
                     return (
                       <div
                         key={colIdx}
-                        className={`heatmap-cell ${cell.count > 0 ? 'clickable' : ''} ${(cell as any).highlight ? 'highlighted' : ''} ${cellBadges.length > 0 ? 'has-badges' : ''}`}
-                        style={{ backgroundColor: getCellColor(cell.count, (cell as any).highlight) }}
+                        className={`heatmap-cell ${cell.count > 0 ? 'clickable' : ''} ${cell.highlight ? 'highlighted' : ''} ${cellBadges.length > 0 ? 'has-badges' : ''}`}
+                        style={{ backgroundColor: getCellColor(cell.count, cell.highlight) }}
                         onClick={() => cell.count > 0 && setSelectedCell(cell)}
                       >
                         {cell.count > 0 && (

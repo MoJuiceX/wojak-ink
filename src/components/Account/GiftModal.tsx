@@ -58,14 +58,17 @@ export function GiftModal({
 
   // Reset when modal opens
   useEffect(() => {
-    if (isOpen) {
+    if (!isOpen) return;
+    // Use callback refs to avoid setting state synchronously in effect
+    const timer = setTimeout(() => {
       setError(null);
       setSuccess(null);
       if (preselectedItem) {
         setGiftType('item');
         setSelectedItem(preselectedItem);
       }
-    }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [isOpen, preselectedItem]);
 
   // Fetch friends list on open
@@ -106,7 +109,7 @@ export function GiftModal({
           const data = await res.json();
           // Filter to only owned items (not equipped, not consumables)
           const giftable = (data.items || []).filter(
-            (item: any) =>
+            (item: { state: string; category: string }) =>
               item.state === 'owned' &&
               item.category !== 'consumable'
           );
@@ -151,7 +154,7 @@ export function GiftModal({
 
     try {
       const token = await getToken();
-      const body: any = {
+      const body: { recipientId: string; type: GiftType; message?: string; itemId?: string; amount?: number } = {
         recipientId: selectedFriend,
         type: giftType,
         message: message.trim() || undefined,
@@ -186,7 +189,7 @@ export function GiftModal({
       } else {
         setError(data.error || 'Failed to send gift');
       }
-    } catch (err) {
+    } catch {
       setError('Network error. Please try again.');
     }
 

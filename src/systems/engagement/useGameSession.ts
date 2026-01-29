@@ -17,7 +17,7 @@ export type GameId =
 interface GameSessionOptions {
   gameId: GameId;
   onHighScore?: (score: number) => void;
-  onAchievement?: (achievement: any) => void;
+  onAchievement?: (achievement: unknown) => void;
   comboTimeoutMs?: number; // Default 2000ms
 }
 
@@ -38,7 +38,7 @@ interface GameEndResult {
     gems: number;
     breakdown: Record<string, number>;
   };
-  newAchievements: any[];
+  newAchievements: unknown[];
 }
 
 // Local storage key for high scores
@@ -47,9 +47,9 @@ const getHighScoreKey = (gameId: string) => `wojak_highscore_${gameId}`;
 export const useGameSession = (options: GameSessionOptions) => {
   const { gameId, onHighScore, comboTimeoutMs = 2000 } = options;
 
-  // Try to use effects context, but don't fail if not available
   let effectsContext: ReturnType<typeof useEffects> | null = null;
   try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- useEffects may not have a provider; catching gracefully
     effectsContext = useEffects();
   } catch {
     // Effects context not available, effects will be disabled

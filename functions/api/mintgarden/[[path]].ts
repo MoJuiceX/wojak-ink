@@ -3,7 +3,7 @@
  * Proxies requests to api.mintgarden.io to avoid CORS issues in production
  */
 
-interface Env {}
+type Env = Record<string, unknown>;
 
 export const onRequest: PagesFunction<Env> = async (context) => {
   const { params, request } = context;
@@ -43,7 +43,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         'Cache-Control': 'public, max-age=60', // Cache for 1 minute
       },
     });
-  } catch (error) {
+  } catch {
     return new Response(JSON.stringify({ error: 'Failed to fetch from MintGarden' }), {
       status: 500,
       headers: {

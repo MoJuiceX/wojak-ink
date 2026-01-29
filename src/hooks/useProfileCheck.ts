@@ -29,7 +29,9 @@ interface UseProfileCheckResult {
 export function useProfileCheck(): UseProfileCheckResult {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isSignedIn, isLoaded } = CLERK_ENABLED ? useAuth() : { isSignedIn: false, isLoaded: true };
+  // Always call hooks unconditionally (rules of hooks)
+  const clerkAuth = useAuth();
+  const { isSignedIn, isLoaded } = CLERK_ENABLED ? clerkAuth : { isSignedIn: false, isLoaded: true };
   const { authenticatedFetch } = useAuthenticatedFetch();
 
   const [isLoading, setIsLoading] = useState(true);

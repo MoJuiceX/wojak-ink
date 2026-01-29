@@ -224,7 +224,7 @@ async function drawScreenshotSection(
       ctx.lineWidth = 1;
       roundRect(ctx, frameX, frameY, frameWidth, frameHeight, radius);
       ctx.stroke();
-    } catch (e) {
+    } catch {
       drawScreenshotPlaceholder(ctx, frameX, frameY, frameWidth, frameHeight, radius);
     }
   } else {

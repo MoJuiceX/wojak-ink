@@ -35,7 +35,7 @@ export const SignInButton: React.FC<SignInButtonProps> = ({
 
   const [showMenu, setShowMenu] = useState(false);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
-  const [_showUsernamePicker, _setShowUsernamePicker] = useState(false);
+  const [, setShowUsernamePicker] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -100,7 +100,7 @@ export const SignInButton: React.FC<SignInButtonProps> = ({
   };
 
   const handleUsernameComplete = () => {
-    _setShowUsernamePicker(false);
+    setShowUsernamePicker(false);
   };
 
   // Loading state

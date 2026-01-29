@@ -32,7 +32,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   }
 
   try {
-    let counts: Record<string, { donuts: number; poops: number }> = {};
+    const counts: Record<string, { donuts: number; poops: number }> = {};
 
     if (targetId) {
       // Get counts for a specific target

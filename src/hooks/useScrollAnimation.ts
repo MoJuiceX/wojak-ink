@@ -38,8 +38,10 @@ export function useScrollAnimation(options: UseScrollAnimationOptions = {}) {
 
     // If reduced motion, show immediately
     if (prefersReducedMotion) {
-      setIsVisible(true);
-      setHasAnimated(true);
+      queueMicrotask(() => {
+        setIsVisible(true);
+        setHasAnimated(true);
+      });
       return;
     }
 

@@ -42,7 +42,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
     // Calculate ranks and next rank info for each game
     const scoresWithRanks = await Promise.all(
-      (scores.results || []).map(async (s: any) => {
+      (scores.results || []).map(async (s: { game_id: string; high_score: number; last_played: string }) => {
         // Get current rank
         const rankResult = await env.DB.prepare(`
           SELECT COUNT(*) + 1 as rank

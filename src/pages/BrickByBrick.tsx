@@ -657,9 +657,9 @@ const BrickByBrick: React.FC = () => {
     const lastLeft = lastBlock.x;
     const lastRight = lastBlock.x + lastBlock.width;
 
-    let overlapLeft = Math.max(currentLeft, lastLeft);
-    let overlapRight = Math.min(currentRight, lastRight);
-    let overlapWidth = overlapRight - overlapLeft;
+    const overlapLeft = Math.max(currentLeft, lastLeft);
+    const overlapRight = Math.min(currentRight, lastRight);
+    const overlapWidth = overlapRight - overlapLeft;
 
     if (overlapWidth <= 0) {
       // No overlap - game over
@@ -802,7 +802,7 @@ const BrickByBrick: React.FC = () => {
 
       // Arcade lights: Combo milestone using native thresholds
       const comboTier = GAME_COMBO_TIERS['orange-stack'](newCombo);
-      triggerEvent(`combo:${comboTier}` as any);
+      triggerEvent(`combo:${comboTier}` as 'combo:start' | 'combo:low' | 'combo:mid' | 'combo:high' | 'combo:max');
     }
 
     const newScore = score + dropPoints;
@@ -1069,8 +1069,7 @@ const BrickByBrick: React.FC = () => {
   const comboEffectY = Math.max(2, (comboTopFromTop / CONTAINER_HEIGHT) * 100);
   
   // Bonus flash positioned relative to combo (slightly below)
-  // @ts-expect-error Reserved for future use
-  const _bonusFlashY = comboEffectY + 5;
+  // Reserved for future use: const bonusFlashY = comboEffectY + 5;
 
   // Show last 12 blocks for rendering (anything below camera offset will be off-screen)
   const visibleBlocks = blocks.slice(-12);

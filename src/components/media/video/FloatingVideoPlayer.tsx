@@ -47,10 +47,14 @@ export function FloatingVideoPlayer() {
 
   const playerSize = PLAYER_SIZES[size];
   const [hasStarted, setHasStarted] = useState(false);
+  const [isPaused, setIsPaused] = useState(true);
 
-  // Reset hasStarted when video changes
+  // Reset hasStarted and isPaused when video changes
   useEffect(() => {
-    setHasStarted(false);
+    queueMicrotask(() => {
+      setHasStarted(false);
+      setIsPaused(true);
+    });
   }, [currentVideo?.id]);
 
   // Auto-hide controls
@@ -91,12 +95,14 @@ export function FloatingVideoPlayer() {
       video.play()
         .then(() => {
           setHasStarted(true);
+          setIsPaused(false);
         })
         .catch((err) => {
           console.error('Play failed:', err);
         });
     } else {
       video.pause();
+      setIsPaused(true);
       pauseVideo();
     }
   };
@@ -168,6 +174,7 @@ export function FloatingVideoPlayer() {
               onEnded={() => {
                 pauseVideo();
                 setHasStarted(false);
+                setIsPaused(true);
               }}
               onCanPlay={() => {
               }}
@@ -196,7 +203,7 @@ export function FloatingVideoPlayer() {
                       className="w-16 h-16 rounded-full flex items-center justify-center"
                       style={{ background: 'var(--color-brand-primary)' }}
                     >
-                      {!hasStarted || localVideoRef.current?.paused ? (
+                      {!hasStarted || isPaused ? (
                         <Play size={32} fill="white" color="white" />
                       ) : (
                         <Pause size={32} fill="white" color="white" />

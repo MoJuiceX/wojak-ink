@@ -11,8 +11,8 @@ let audioContext: AudioContext | null = null;
 export const getAudioContext = () => {
   if (!audioContext) {
     try {
-      audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    } catch (e) {
+      audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    } catch {
       console.warn('Web Audio API not supported');
       return null;
     }
@@ -57,7 +57,7 @@ export const createSparkleCascade = (ctx: AudioContext | null, count: number = 5
       osc.start(startTime);
       osc.stop(startTime + 0.12);
     }
-  } catch (e) {
+  } catch {
     // Silently fail - don't break game flow
   }
 };

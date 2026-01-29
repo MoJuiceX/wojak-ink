@@ -93,12 +93,12 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
   useEffect(() => {
     const resetTime = getResetTime(timeframe);
     if (!resetTime) {
-      setTimeRemaining(null);
+      queueMicrotask(() => setTimeRemaining(null));
       return;
     }
 
     // Update immediately
-    setTimeRemaining(calculateTimeRemaining(resetTime));
+    queueMicrotask(() => setTimeRemaining(calculateTimeRemaining(resetTime)));
 
     // Update every second
     const interval = setInterval(() => {

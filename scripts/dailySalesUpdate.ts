@@ -23,10 +23,6 @@ const __dirname = path.dirname(__filename);
 // Collection ID for BigPulp Wojak.Ink (bech32m format)
 const COLLECTION_ID = 'col1m8m3tdxqt74u0ka5g3t9vtxjfx52muz7sstaqmqs6h2e9mncm5wsx57nrn';
 
-// Collection ID in hex format (for matching against API response)
-// Convert col1... to hex or check against the collection name
-const COLLECTION_NAME = 'BigPulp Wojak.Ink';
-
 // TibetSwap exchange rates (XCH per token)
 const CAT_TO_XCH_RATES: Record<string, number> = {
   '✨❤️‍🔥🧙‍♂️': 2.926,      // Caster
@@ -121,12 +117,12 @@ async function fetchNewSales(sinceDate: Date): Promise<DexieOffer[]> {
   const pageSize = 100;
   let hasMore = true;
 
-  console.log(`Fetching trades since: ${sinceDate.toISOString()}`);
+  console.warn(`Fetching trades since: ${sinceDate.toISOString()}`);
 
   while (hasMore) {
     const url = `https://api.dexie.space/v1/offers?offered_or_requested=${COLLECTION_ID}&status=4&page=${page}&page_size=${pageSize}&sort=date_completed&order=desc`;
 
-    console.log(`Fetching page ${page}...`);
+    console.warn(`Fetching page ${page}...`);
 
     const response = await fetch(url);
     if (!response.ok) {
@@ -161,7 +157,7 @@ async function fetchNewSales(sinceDate: Date): Promise<DexieOffer[]> {
     }
   }
 
-  console.log(`Found ${allTrades.length} new trades`);
+  console.warn(`Found ${allTrades.length} new trades`);
   return allTrades;
 }
 
@@ -252,11 +248,11 @@ async function main() {
   const metadataPath = path.join(__dirname, '../public/assets/nft-data/metadata.json');
 
   // Load existing stats
-  console.log('Loading existing attribute stats...');
+  console.warn('Loading existing attribute stats...');
   const existingStats: AttributeStatsOutput = JSON.parse(fs.readFileSync(statsPath, 'utf-8'));
 
   // Load metadata for attribute mapping
-  console.log('Loading NFT metadata...');
+  console.warn('Loading NFT metadata...');
   const metadata: NFTMetadata[] = JSON.parse(fs.readFileSync(metadataPath, 'utf-8'));
   const metadataByEdition = new Map<number, NFTMetadata>();
   for (const nft of metadata) {
@@ -279,7 +275,7 @@ async function main() {
   const newTrades = await fetchNewSales(lastDate);
 
   if (newTrades.length === 0) {
-    console.log('No new trades found. Exiting.');
+    console.warn('No new trades found. Exiting.');
     return;
   }
 
@@ -363,7 +359,7 @@ async function main() {
       tradeId: offer.id,
     };
 
-    console.log(`  #${edition}: ${priceInfo.amount} ${priceInfo.currency} = ${saleRecord.priceXCH} XCH (${nftInfo.name})`);
+    console.warn(`  #${edition}: ${priceInfo.amount} ${priceInfo.currency} = ${saleRecord.priceXCH} XCH (${nftInfo.name})`);
 
     // Add sale to each attribute
     for (const attr of nftMetadata.attributes) {
@@ -394,15 +390,15 @@ async function main() {
     }
   }
 
-  console.log(`\nProcessed ${newSalesCount} new sales (skipped ${skippedCount} non-matching)`);
+  console.warn(`\nProcessed ${newSalesCount} new sales (skipped ${skippedCount} non-matching)`);
 
   if (newSalesCount === 0) {
-    console.log('No new Wojak sales after filtering. Exiting.');
+    console.warn('No new Wojak sales after filtering. Exiting.');
     return;
   }
 
   // Recalculate statistics
-  console.log('Recalculating statistics...');
+  console.warn('Recalculating statistics...');
   let totalSalesRecords = 0;
 
   for (const attr of Object.values(existingStats.attributes)) {
@@ -426,14 +422,14 @@ async function main() {
   delete existingStats.lastProcessedTimestamp;
 
   // Write updated stats
-  console.log('Writing updated attribute stats...');
+  console.warn('Writing updated attribute stats...');
   fs.writeFileSync(statsPath, JSON.stringify(existingStats, null, 2), 'utf-8');
 
-  console.log('\n=== Update Summary ===');
-  console.log(`New sales processed: ${newSalesCount}`);
-  console.log(`Total attributes: ${existingStats.totalAttributes}`);
-  console.log(`Total sales records: ${existingStats.totalSalesRecords}`);
-  console.log(`Last processed: ${latestDate.toISOString()}`);
+  console.warn('\n=== Update Summary ===');
+  console.warn(`New sales processed: ${newSalesCount}`);
+  console.warn(`Total attributes: ${existingStats.totalAttributes}`);
+  console.warn(`Total sales records: ${existingStats.totalSalesRecords}`);
+  console.warn(`Last processed: ${latestDate.toISOString()}`);
 }
 
 main().catch(console.error);

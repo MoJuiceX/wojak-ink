@@ -39,7 +39,9 @@ export function useFlickVoting(pageType: VotePageType) {
   const [activeMode, setActiveMode] = useState<'donut' | 'poop' | null>(null);
   const [votes, setVotes] = useState<VoteStore>({});
   const [isLoading, setIsLoading] = useState(false);
-  const authResult = CLERK_ENABLED ? useAuth() : { getToken: async () => null };
+  // Always call hooks unconditionally (rules of hooks)
+  const clerkAuth = useAuth();
+  const authResult = CLERK_ENABLED ? clerkAuth : { getToken: async () => null };
   const { getToken } = authResult;
 
   // Load vote counts on mount

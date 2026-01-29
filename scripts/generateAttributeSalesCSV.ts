@@ -63,7 +63,7 @@ for (const nft of metadata) {
   nftTraitsMap.set(nft.edition, traits);
 }
 
-console.log(`Loaded ${metadata.length} NFTs from metadata`);
+console.warn(`Loaded ${metadata.length} NFTs from metadata`);
 
 // We need to get sales data from localStorage export or Dexie API
 // Since this is a Node script, we'll need to fetch from Dexie directly
@@ -116,7 +116,7 @@ async function fetchAllTrades(): Promise<DexieOffer[]> {
       page_size: '50',
     });
 
-    console.log(`Fetching page ${page}...`);
+    console.warn(`Fetching page ${page}...`);
 
     const response = await fetch(`${DEXIE_API}/offers?${params}`);
     if (!response.ok) {
@@ -132,7 +132,7 @@ async function fetchAllTrades(): Promise<DexieOffer[]> {
 
     if (page === 1) {
       totalPages = Math.ceil(data.count / data.page_size);
-      console.log(`Total trades: ${data.count}, pages: ${totalPages}`);
+      console.warn(`Total trades: ${data.count}, pages: ${totalPages}`);
     }
 
     if (allOffers.length >= data.count) break;
@@ -147,9 +147,9 @@ async function fetchAllTrades(): Promise<DexieOffer[]> {
 }
 
 async function main() {
-  console.log('Fetching all trades from Dexie...');
+  console.warn('Fetching all trades from Dexie...');
   const trades = await fetchAllTrades();
-  console.log(`Fetched ${trades.length} trades`);
+  console.warn(`Fetched ${trades.length} trades`);
 
   // Generate CSV rows
   const csvRows: string[] = [];
@@ -205,23 +205,23 @@ async function main() {
   }
 
   if (skippedUnknownCAT > 0) {
-    console.log(`Skipped ${skippedUnknownCAT} trades with unknown CAT tokens`);
+    console.warn(`Skipped ${skippedUnknownCAT} trades with unknown CAT tokens`);
   }
 
-  console.log(`Processed ${processedSales} sales`);
-  console.log(`Generated ${attributeRows} attribute rows (${processedSales} × 7 = ${processedSales * 7})`);
+  console.warn(`Processed ${processedSales} sales`);
+  console.warn(`Generated ${attributeRows} attribute rows (${processedSales} × 7 = ${processedSales * 7})`);
 
   // Write CSV file
   const outputPath = path.join(__dirname, '../attribute_sales.csv');
   fs.writeFileSync(outputPath, csvRows.join('\n'), 'utf-8');
-  console.log(`CSV written to: ${outputPath}`);
+  console.warn(`CSV written to: ${outputPath}`);
 
   // Also print some stats
   const xchSales = trades.filter(t => t.requested?.[0]?.id === 'xch').length;
   const catSales = trades.filter(t => t.requested?.[0]?.id !== 'xch').length;
-  console.log(`\nSales breakdown:`);
-  console.log(`  XCH sales: ${xchSales}`);
-  console.log(`  CAT sales: ${catSales}`);
+  console.warn(`\nSales breakdown:`);
+  console.warn(`  XCH sales: ${xchSales}`);
+  console.warn(`  CAT sales: ${catSales}`);
 }
 
 main().catch(console.error);

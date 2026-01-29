@@ -47,7 +47,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       ? await context.env.DB.prepare(dataQuery).bind(searchPattern, limit, offset).all()
       : await context.env.DB.prepare(dataQuery).bind(limit, offset).all();
 
-    const users = (results.results || []).map((row: any) => ({
+    const users = (results.results || []).map((row: { id: string; display_name: string; avatar_type: string | null; avatar_value: string | null; avatar_source: string | null }) => ({
       id: row.id,
       displayName: row.display_name,
       avatar: {

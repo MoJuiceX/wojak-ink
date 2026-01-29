@@ -31,6 +31,30 @@ interface PiledEmoji {
   zIndex: number;
 }
 
+interface VoteRandomData {
+  initialRotate: number;
+  animateRotate: number;
+  duration: number;
+}
+
+// Generate random data for all votes at once (called once per vote set)
+function generateAllVoteRandomData(votes: VotePosition[]): Map<string, VoteRandomData> {
+  const data = new Map<string, VoteRandomData>();
+  votes.forEach(vote => {
+    data.set(vote.id, {
+      initialRotate: Math.random() * 360,
+      animateRotate: Math.random() * 720 - 360,
+      duration: 1.2 + Math.random() * 0.3,
+    });
+  });
+  return data;
+}
+
+// Generate random rotation for piled emoji
+function generatePiledRotation(): number {
+  return (Math.random() - 0.5) * 20;
+}
+
 // Cluster nearby emojis for pile effect
 function clusterVotes(votes: VotePosition[], threshold: number = 5): Map<string, VotePosition[]> {
   const clusters = new Map<string, VotePosition[]>();
@@ -48,39 +72,60 @@ function clusterVotes(votes: VotePosition[], threshold: number = 5): Map<string,
   return clusters;
 }
 
+// Helper to calculate absolute position from percentages
+function calculateAbsolutePosition(
+  xPercent: number,
+  yPercent: number,
+  targetId: string,
+  container: HTMLElement | null
+): { x: number; y: number } {
+  if (!container) return { x: 0, y: 0 };
+
+  // Find the target element using data-vote-target attribute
+  const targetElement = container.querySelector(`[data-vote-target="${targetId}"]`);
+  if (!targetElement) {
+    // Fallback to container
+    const rect = container.getBoundingClientRect();
+    return {
+      x: rect.left + (xPercent / 100) * rect.width,
+      y: rect.top + (yPercent / 100) * rect.height,
+    };
+  }
+
+  const targetRect = targetElement.getBoundingClientRect();
+  // Return the exact position where the user clicked
+  return {
+    x: targetRect.left + (xPercent / 100) * targetRect.width,
+    y: targetRect.top + (yPercent / 100) * targetRect.height,
+  };
+}
+
 export function HeatmapRain({ votes, type, containerRef, onComplete }: HeatmapRainProps) {
   const emoji = type === 'donut' ? '🍩' : '💩';
   const [fallingEmojis, setFallingEmojis] = useState<string[]>([]);
   const [piledEmojis, setPiledEmojis] = useState<PiledEmoji[]>([]);
   const [isComplete, setIsComplete] = useState(false);
 
-  // Calculate absolute positions from percentages
-  // Returns the exact click position - offsets for centering emojis are applied at render time
-  const getAbsolutePosition = (xPercent: number, yPercent: number, targetId: string) => {
-    const container = containerRef.current;
-    if (!container) return { x: 0, y: 0 };
-
-    // Find the target element using data-vote-target attribute
-    const targetElement = container.querySelector(`[data-vote-target="${targetId}"]`);
-    if (!targetElement) {
-      // Fallback to container
-      const rect = container.getBoundingClientRect();
-      return {
-        x: rect.left + (xPercent / 100) * rect.width,
-        y: rect.top + (yPercent / 100) * rect.height,
-      };
-    }
-
-    const targetRect = targetElement.getBoundingClientRect();
-    // Return the exact position where the user clicked
-    return {
-      x: targetRect.left + (xPercent / 100) * targetRect.width,
-      y: targetRect.top + (yPercent / 100) * targetRect.height,
-    };
-  };
+  // Cache computed positions to avoid accessing ref during render
+  const [votePositions, setVotePositions] = useState<Map<string, { x: number; y: number }>>(new Map());
 
   // Cluster votes for pile stacking
   const clusters = useMemo(() => clusterVotes(votes), [votes]);
+
+  // Generate random data for all votes once using useState lazy initializer
+  // This runs outside the render cycle and only re-runs when votes identity changes
+  const [voteRandomData] = useState(() => generateAllVoteRandomData(votes));
+
+  // Compute positions in effect (not during render) to avoid ref access during render
+  useEffect(() => {
+    const container = containerRef.current;
+    const positions = new Map<string, { x: number; y: number }>();
+    votes.forEach(vote => {
+      positions.set(vote.id, calculateAbsolutePosition(vote.xPercent, vote.yPercent, vote.targetId, container));
+    });
+    // Use queueMicrotask to avoid synchronous setState warning
+    queueMicrotask(() => setVotePositions(positions));
+  }, [votes, containerRef]);
 
   // Start the rain animation
   useEffect(() => {
@@ -104,11 +149,12 @@ export function HeatmapRain({ votes, type, containerRef, onComplete }: HeatmapRa
   const handleLand = (vote: VotePosition, clusterKey: string) => {
     const cluster = clusters.get(clusterKey) || [];
     const indexInCluster = cluster.findIndex(v => v.id === vote.id);
-    const pos = getAbsolutePosition(vote.xPercent, vote.yPercent, vote.targetId);
+    const pos = votePositions.get(vote.id) || { x: 0, y: 0 };
 
     // Piled emoji size is 24px, so offset by 12px to center on click position
     const emojiHalfSize = 12;
-    
+
+    const rotation = generatePiledRotation();
     setPiledEmojis(prev => {
       const newEmoji: PiledEmoji = {
         id: vote.id,
@@ -116,7 +162,7 @@ export function HeatmapRain({ votes, type, containerRef, onComplete }: HeatmapRa
         x: pos.x - emojiHalfSize,
         y: pos.y - emojiHalfSize - indexInCluster * 8,
         scale: 0.55,
-        rotation: (Math.random() - 0.5) * 20, // Slight rotation for visual interest
+        rotation, // Slight rotation for visual interest
         zIndex: prev.length,
       };
       return [...prev, newEmoji];
@@ -152,10 +198,12 @@ export function HeatmapRain({ votes, type, containerRef, onComplete }: HeatmapRa
           const cellX = Math.floor(vote.xPercent / 5);
           const cellY = Math.floor(vote.yPercent / 5);
           const clusterKey = `${vote.targetId}-${cellX}-${cellY}`;
-          const endPos = getAbsolutePosition(vote.xPercent, vote.yPercent, vote.targetId);
+          const endPos = votePositions.get(vote.id) || { x: 0, y: 0 };
 
           // Falling emoji size is 36px, center it on the click position
           const emojiHalfSize = 18;
+
+          const randomData = voteRandomData.get(vote.id) || { initialRotate: 0, animateRotate: 0, duration: 1.2 };
 
           return (
             <motion.div
@@ -172,7 +220,7 @@ export function HeatmapRain({ votes, type, containerRef, onComplete }: HeatmapRa
                 x: endPos.x - emojiHalfSize,
                 y: -60,
                 scale: 1.2,
-                rotate: Math.random() * 360,
+                rotate: randomData.initialRotate,
                 opacity: 1,
               }}
               animate={{
@@ -180,11 +228,11 @@ export function HeatmapRain({ votes, type, containerRef, onComplete }: HeatmapRa
                 x: endPos.x - emojiHalfSize,
                 y: endPos.y - emojiHalfSize,
                 scale: [1.2, 1.1, 0.6],
-                rotate: Math.random() * 720 - 360,
+                rotate: randomData.animateRotate,
                 opacity: 1,
               }}
               transition={{
-                duration: 1.2 + Math.random() * 0.3,
+                duration: randomData.duration,
                 ease: [0.25, 0.1, 0.25, 1],
                 scale: {
                   times: [0, 0.9, 1],

@@ -70,7 +70,7 @@ export function FriendsList() {
         {friendProfiles.map((friend) => (
           <div key={friend.id} className="friend-card">
             <Link to={`/profile/${friend.id}`} className="friend-info">
-              <Avatar avatar={friend.avatar as any} size="medium" showBadge={false} />
+              <Avatar avatar={friend.avatar} size="medium" showBadge={false} />
               <span className="friend-name">{friend.displayName}</span>
             </Link>
 

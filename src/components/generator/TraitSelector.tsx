@@ -346,7 +346,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
   useEffect(() => {
     if (!isInitialized || isMouthLayer) return;
 
-    setIsLoading(true);
+    queueMicrotask(() => setIsLoading(true));
     getLayerImages(activeLayer)
       .then((imgs) => {
         setImages(imgs);

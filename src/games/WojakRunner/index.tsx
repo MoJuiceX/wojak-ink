@@ -41,14 +41,14 @@ const WojakRunnerGame: React.FC = () => {
   const effects = useEffects();
 
   const {
-    leaderboard: _globalLeaderboard,
     submitScore,
     isSignedIn,
     userDisplayName,
     isSubmitting,
   } = useLeaderboard(WOJAK_RUNNER_CONFIG.leaderboardId || 'wojak-runner');
 
-  const { isBackgroundMusicPlaying: _isBackgroundMusicPlaying, playBackgroundMusic: _playBackgroundMusic, pauseBackgroundMusic: _pauseBackgroundMusic } = useAudio();
+  // Background music not used in this game
+  useAudio();
 
   const [gameState, setGameState] = useState<'idle' | 'playing' | 'gameover'>('idle');
   const [playerLane, setPlayerLane] = useState(1);
@@ -68,8 +68,7 @@ const WojakRunnerGame: React.FC = () => {
   const [sadImage, setSadImage] = useState('');
   const [scoreSubmitted, setScoreSubmitted] = useState(false);
   const [isNewPersonalBest, setIsNewPersonalBest] = useState(false);
-  const [_showLeaderboardPanel, _setShowLeaderboardPanel] = useState(false);
-  const [showScreenShake, _setShowScreenShake] = useState(false);
+  const [showScreenShake] = useState(false);
 
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | undefined>(undefined);
@@ -86,6 +85,7 @@ const WojakRunnerGame: React.FC = () => {
   const playGameOverRef = useRef(playGameOver);
   const startRunningRef = useRef(startRunning);
   const stopRunningRef = useRef(stopRunning);
+  const startGameRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     playCollectRef.current = playCollect;
@@ -104,9 +104,9 @@ const WojakRunnerGame: React.FC = () => {
 
   useEffect(() => {
     if (gameState === 'idle') {
-      startGame();
+      queueMicrotask(() => startGameRef.current?.());
     }
-  }, []);
+  }, [gameState]);
 
   const startGame = () => {
     setPlayerLane(1);
@@ -126,6 +126,11 @@ const WojakRunnerGame: React.FC = () => {
     collectStreakRef.current = 0;
     setGameState('playing');
   };
+
+  // Keep ref in sync
+  useEffect(() => {
+    startGameRef.current = startGame;
+  });
 
   const goToMenu = () => {
     setGameState('idle');
@@ -327,7 +332,7 @@ const WojakRunnerGame: React.FC = () => {
   // Auto-submit score
   useEffect(() => {
     if (gameState === 'gameover' && isSignedIn && (score + Math.floor(distance / 10)) > 0 && !scoreSubmitted) {
-      submitScoreGlobal(score + Math.floor(distance / 10));
+      queueMicrotask(() => submitScoreGlobal(score + Math.floor(distance / 10)));
     }
   }, [gameState, isSignedIn, score, distance, scoreSubmitted, submitScoreGlobal]);
 

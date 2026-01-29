@@ -72,7 +72,7 @@ async function ensureUser(db: D1Database, userId: string): Promise<void> {
  */
 async function getProfile(db: D1Database, userId: string) {
   // Query profile with all columns - no fallback, columns should exist
-  console.log('[Profile] getProfile called for userId:', userId);
+  console.warn('[Profile] getProfile called for userId:', userId);
   
   const result = await db
     .prepare(`SELECT
@@ -115,7 +115,7 @@ async function getProfile(db: D1Database, userId: string) {
       updated_at: string;
     }>();
 
-  console.log('[Profile] getProfile result:', JSON.stringify({
+  console.warn('[Profile] getProfile result:', JSON.stringify({
     hasResult: !!result,
     avatar_type: result?.avatar_type,
     avatar_value: result?.avatar_value?.substring(0, 50),
@@ -194,7 +194,7 @@ async function upsertProfile(
   data: ProfileData
 ): Promise<void> {
   // Log what we're about to save
-  console.log('[Profile] upsertProfile called:', JSON.stringify({
+  console.warn('[Profile] upsertProfile called:', JSON.stringify({
     userId,
     hasAvatar: !!data.avatar,
     avatarType: data.avatar?.type,
@@ -212,7 +212,7 @@ async function upsertProfile(
 
   if (existing) {
     // UPDATE existing profile
-    console.log('[Profile] Profile exists, performing UPDATE');
+    console.warn('[Profile] Profile exists, performing UPDATE');
     
     // Build SET clauses dynamically based on what's provided
     const setClauses: string[] = [];
@@ -269,14 +269,14 @@ async function upsertProfile(
       const sql = `UPDATE profiles SET ${setClauses.join(', ')} WHERE user_id = ?`;
       values.push(userId);
 
-      console.log('[Profile] UPDATE SQL:', sql);
-      console.log('[Profile] UPDATE values:', JSON.stringify(values));
-      console.log('[Profile] Value types:', values.map(v => typeof v).join(', '));
+      console.warn('[Profile] UPDATE SQL:', sql);
+      console.warn('[Profile] UPDATE values:', JSON.stringify(values));
+      console.warn('[Profile] Value types:', values.map(v => typeof v).join(', '));
 
       try {
         const result = await db.prepare(sql).bind(...values).run();
         
-        console.log('[Profile] UPDATE result:', JSON.stringify({
+        console.warn('[Profile] UPDATE result:', JSON.stringify({
           success: result.success,
           changes: result.meta?.changes,
           duration: result.meta?.duration,
@@ -292,7 +292,7 @@ async function upsertProfile(
           .bind(userId)
           .first<{ avatar_type: string | null; avatar_value: string | null; avatar_source: string | null }>();
         
-        console.log('[Profile] VERIFY after UPDATE:', JSON.stringify({
+        console.warn('[Profile] VERIFY after UPDATE:', JSON.stringify({
           avatar_type: verify?.avatar_type,
           avatar_value: verify?.avatar_value?.substring(0, 50),
           avatar_source: verify?.avatar_source,
@@ -305,7 +305,7 @@ async function upsertProfile(
     }
   } else {
     // INSERT new profile
-    console.log('[Profile] Profile does not exist, performing INSERT');
+    console.warn('[Profile] Profile does not exist, performing INSERT');
     
     try {
       const result = await db
@@ -333,7 +333,7 @@ async function upsertProfile(
         )
         .run();
 
-      console.log('[Profile] INSERT result:', JSON.stringify({
+      console.warn('[Profile] INSERT result:', JSON.stringify({
         success: result.success,
         changes: result.meta?.changes,
         lastRowId: result.meta?.last_row_id,
@@ -397,7 +397,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       // Auto-assign random emoji for new users without an avatar
       if (!profile || !profile.avatar_value) {
         const randomEmoji = getRandomEmoji();
-        console.log(`[Profile] Assigning random emoji ${randomEmoji} to user ${userId}`);
+        console.warn(`[Profile] Assigning random emoji ${randomEmoji} to user ${userId}`);
 
         // Save the random emoji to the database
         await upsertProfile(env.DB, userId, {
@@ -469,13 +469,13 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       }
 
       // Save
-      console.log('[Profile] Saving profile data:', JSON.stringify(data));
+      console.warn('[Profile] Saving profile data:', JSON.stringify(data));
       await upsertProfile(env.DB, userId, data);
-      console.log('[Profile] Upsert complete');
+      console.warn('[Profile] Upsert complete');
 
       // Return updated profile
       const profile = await getProfile(env.DB, userId);
-      console.log('[Profile] Retrieved profile after save:', JSON.stringify({
+      console.warn('[Profile] Retrieved profile after save:', JSON.stringify({
         avatar_type: profile?.avatar_type,
         avatar_value: profile?.avatar_value?.substring(0, 50),
         avatar_source: profile?.avatar_source,

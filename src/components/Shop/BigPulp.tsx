@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * BigPulp Component
  *
@@ -96,7 +97,7 @@ export function BigPulp({
   // Trigger animation on dialogue change
   useEffect(() => {
     if (dialogue) {
-      setIsAnimating(true);
+      queueMicrotask(() => setIsAnimating(true));
       const timer = setTimeout(() => setIsAnimating(false), 500);
       return () => clearTimeout(timer);
     }
@@ -256,13 +257,14 @@ export function getBigPulpDialogue(
     case 'loss':
       pool = LOSS_DIALOGUES;
       break;
-    case 'drawer':
+    case 'drawer': {
       const size = options?.collectionSize || 0;
       if (size >= 50) pool = DRAWER_DIALOGUES.legendary;
       else if (size >= 20) pool = DRAWER_DIALOGUES.large;
       else if (size >= 10) pool = DRAWER_DIALOGUES.medium;
       else pool = DRAWER_DIALOGUES.small;
       break;
+    }
     default:
       pool = [{ text: "Let's do this! 🍊", mood: "hype" }];
   }

@@ -255,7 +255,7 @@ export function Shop({ onClose }: ShopProps) {
       } else {
         setMessage({ type: 'error', text: data.error || 'Purchase failed' });
       }
-    } catch (err) {
+    } catch {
       setMessage({ type: 'error', text: 'Network error' });
     }
 
@@ -296,7 +296,7 @@ export function Shop({ onClose }: ShopProps) {
         });
         await fetchInventory();
       }
-    } catch (err) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to equip item' });
     }
 
@@ -352,7 +352,7 @@ export function Shop({ onClose }: ShopProps) {
 
   // Reset carousel when category changes
   useEffect(() => {
-    setCarouselIndex(0);
+    queueMicrotask(() => setCarouselIndex(0));
     if (carouselRef.current) {
       carouselRef.current.scrollTo({ left: 0, behavior: 'smooth' });
     }

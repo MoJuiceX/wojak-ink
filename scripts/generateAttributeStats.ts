@@ -159,10 +159,10 @@ function main() {
   const inputPath = '/Users/abit_hex/Downloads/correct_attribute_sales_filled.csv';
   const outputPath = path.join(__dirname, '../public/assets/nft-data/attribute_stats.json');
 
-  console.log('Reading CSV file...');
+  console.warn('Reading CSV file...');
   const content = fs.readFileSync(inputPath, 'utf-8');
   const rows = parseCSV(content);
-  console.log(`Parsed ${rows.length} rows`);
+  console.warn(`Parsed ${rows.length} rows`);
 
   // Group sales by attribute (Category|Value)
   const attributeSalesMap = new Map<string, SaleRecord[]>();
@@ -184,7 +184,7 @@ function main() {
     });
   }
 
-  console.log(`Found ${attributeSalesMap.size} unique attributes`);
+  console.warn(`Found ${attributeSalesMap.size} unique attributes`);
 
   // Calculate statistics for each attribute
   const attributeStats: Record<string, AttributeStats> = {};
@@ -225,21 +225,21 @@ function main() {
 
   // Write JSON file
   fs.writeFileSync(outputPath, JSON.stringify(output, null, 2), 'utf-8');
-  console.log(`\nOutput written to: ${outputPath}`);
+  console.warn(`\nOutput written to: ${outputPath}`);
 
   // Print summary
-  console.log('\n=== Summary ===');
-  console.log(`Total unique attributes: ${output.totalAttributes}`);
-  console.log(`Total sales records: ${output.totalSalesRecords}`);
+  console.warn('\n=== Summary ===');
+  console.warn(`Total unique attributes: ${output.totalAttributes}`);
+  console.warn(`Total sales records: ${output.totalSalesRecords}`);
 
   // Top 10 most sold attributes
   const sortedByCount = Object.values(attributeStats).sort(
     (a, b) => b.totalSales - a.totalSales
   );
-  console.log('\nTop 10 most sold attributes:');
+  console.warn('\nTop 10 most sold attributes:');
   for (let i = 0; i < Math.min(10, sortedByCount.length); i++) {
     const attr = sortedByCount[i];
-    console.log(
+    console.warn(
       `  ${i + 1}. ${attr.category}: ${attr.value} - ${attr.totalSales} sales, avg ${attr.avgPrice.toFixed(4)} XCH`
     );
   }
@@ -248,10 +248,10 @@ function main() {
   const sortedByAvg = Object.values(attributeStats).sort(
     (a, b) => b.avgPrice - a.avgPrice
   );
-  console.log('\nTop 10 highest average price attributes:');
+  console.warn('\nTop 10 highest average price attributes:');
   for (let i = 0; i < Math.min(10, sortedByAvg.length); i++) {
     const attr = sortedByAvg[i];
-    console.log(
+    console.warn(
       `  ${i + 1}. ${attr.category}: ${attr.value} - avg ${attr.avgPrice.toFixed(4)} XCH (${attr.totalSales} sales)`
     );
   }

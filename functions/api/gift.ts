@@ -288,12 +288,6 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     // Execute all statements atomically
     await env.DB.batch(statements);
 
-    // Get sender name for response
-    const sender = await env.DB
-      .prepare('SELECT display_name FROM profiles WHERE user_id = ?')
-      .bind(auth.userId)
-      .first<{ display_name: string | null }>();
-
     return new Response(
       JSON.stringify({
         success: true,

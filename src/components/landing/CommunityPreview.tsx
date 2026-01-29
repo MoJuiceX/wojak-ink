@@ -62,7 +62,7 @@ export const CommunityPreview: React.FC = () => {
           xchPrice,
           isLoading: false,
         });
-      } catch (err) {
+      } catch {
         // Use fallback values
         setStats({
           ...FALLBACK_STATS,

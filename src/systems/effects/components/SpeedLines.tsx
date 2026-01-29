@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useState } from 'react';
 
 interface SpeedLinesProps {
   data?: {
@@ -8,20 +8,29 @@ interface SpeedLinesProps {
   duration: number;
 }
 
+interface SpeedLine {
+  id: number;
+  left: number;
+  delay: number;
+  height: number;
+}
+
+function createLines(count: number): SpeedLine[] {
+  return Array.from({ length: count }, (_, i) => ({
+    id: i,
+    left: Math.random() * 100,
+    delay: Math.random() * 200,
+    height: 50 + Math.random() * 100
+  }));
+}
+
 export const SpeedLines: React.FC<SpeedLinesProps> = ({
   data = {},
   duration
 }) => {
   const { count = 20, direction = 'down' } = data;
 
-  const lines = useMemo(() => {
-    return Array.from({ length: count }, (_, i) => ({
-      id: i,
-      left: Math.random() * 100,
-      delay: Math.random() * 200,
-      height: 50 + Math.random() * 100
-    }));
-  }, [count]);
+  const [lines] = useState<SpeedLine[]>(() => createLines(count));
 
   return (
     <div className={`effect-speed-lines direction-${direction}`}>

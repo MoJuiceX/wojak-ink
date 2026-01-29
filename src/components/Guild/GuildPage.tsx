@@ -30,9 +30,6 @@ export function GuildPage() {
     myGuildMembers,
     myRole,
     isLoading,
-    myInvites: _myInvites,
-    acceptInvite: _acceptInvite,
-    declineInvite: _declineInvite,
     leaveGuild,
   } = useGuild();
   const prefersReducedMotion = useReducedMotion();

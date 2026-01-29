@@ -3,6 +3,7 @@
  * Supports multiple simultaneous splatters via unique id
  */
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 
 interface SplatterEffectProps {
@@ -10,6 +11,21 @@ interface SplatterEffectProps {
   type: 'donut' | 'poop';
   position: { x: number; y: number };
   onComplete: (id: string) => void;
+}
+
+interface ParticleData {
+  x: number;
+  y: number;
+  delay: number;
+}
+
+// Generate particle data outside render cycle
+function generateParticleData(): ParticleData[] {
+  return Array.from({ length: 6 }, () => ({
+    x: (Math.random() - 0.5) * 120,
+    y: (Math.random() - 0.5) * 100 + 30,
+    delay: Math.random() * 0.08,
+  }));
 }
 
 const pieceDirections = [
@@ -21,6 +37,9 @@ const pieceDirections = [
 
 export function SplatterEffect({ id, type, position, onComplete }: SplatterEffectProps) {
   const emoji = type === 'donut' ? '🍩' : '💩';
+
+  // useState initializer runs once, outside the render cycle
+  const [particleData] = useState<ParticleData[]>(generateParticleData);
 
   return (
     <div
@@ -93,7 +112,7 @@ export function SplatterEffect({ id, type, position, onComplete }: SplatterEffec
       ))}
 
       {/* Particle debris - faster */}
-      {[...Array(6)].map((_, i) => (
+      {particleData.map((particle, i) => (
         <motion.div
           key={`particle-${i}`}
           style={{
@@ -107,12 +126,12 @@ export function SplatterEffect({ id, type, position, onComplete }: SplatterEffec
           }}
           initial={{ x: 0, y: 0, scale: 1, opacity: 1 }}
           animate={{
-            x: (Math.random() - 0.5) * 120,
-            y: (Math.random() - 0.5) * 100 + 30,
+            x: particle.x,
+            y: particle.y,
             scale: 0,
             opacity: 0,
           }}
-          transition={{ duration: 0.4, ease: 'easeOut', delay: Math.random() * 0.08 }}
+          transition={{ duration: 0.4, ease: 'easeOut', delay: particle.delay }}
         />
       ))}
     </div>

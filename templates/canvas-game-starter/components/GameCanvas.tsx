@@ -56,7 +56,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
   // Hooks
   const { initAudio, playSound, isInitialized: audioInitialized } = useAudio();
-  const { justPressed, getPointer, clearJustPressed, isTouchDevice } = useInput(canvasRef);
+  const { justPressed, clearJustPressed, isTouchDevice } = useInput(canvasRef);
 
   // ==========================================
   // GAME LOGIC
@@ -114,7 +114,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     onScoreChange?.(newScore);
   }, [gameState.status, gameState.score, gameState.multiplier, playSound, onScoreChange]);
 
-  // Game over
+  // Game over (example - call this when player loses)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const gameOver = useCallback(() => {
     playSound('fail', { haptic: 'heavy' });
 
@@ -162,7 +163,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   // ==========================================
 
   const render = useCallback(
-    (ctx: CanvasRenderingContext2D, _interpolation: number) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    (ctx: CanvasRenderingContext2D, interpolation: number) => {
       const { width, height } = ctx.canvas;
 
       // Clear
@@ -234,6 +236,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   // GAME LOOP
   // ==========================================
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { start, stop, isRunning } = useGameLoop({
     update,
     render,

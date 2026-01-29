@@ -9,6 +9,11 @@ import './Orange2048.game.css';
 
 type Grid = (number | null)[][];
 
+// Helper function moved outside component to avoid hoisting issues
+function createEmptyGrid(): Grid {
+  return Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(null));
+}
+
 const Orange2048Game: React.FC = () => {
   const effects = useEffects();
   const [gameState, setGameState] = useState<'idle' | 'playing' | 'gameover' | 'won'>('idle');
@@ -17,14 +22,10 @@ const Orange2048Game: React.FC = () => {
   const [highScore, setHighScore] = useState(() => {
     return parseInt(localStorage.getItem('orange2048HighScore') || '0', 10);
   });
-  const [_showInfo, _setShowInfo] = useState(false);
+  // Reserved for info modal: const [showInfo, setShowInfo] = useState(false);
 
   const touchStartRef = useRef({ x: 0, y: 0 });
   const lastMergeValueRef = useRef(0);
-
-  function createEmptyGrid(): Grid {
-    return Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(null));
-  }
 
   const addRandomTile = useCallback((currentGrid: Grid): Grid => {
     const emptyCells: { row: number; col: number }[] = [];
@@ -56,15 +57,16 @@ const Orange2048Game: React.FC = () => {
     lastMergeValueRef.current = 0;
   };
 
-  // Auto-start
+  // Auto-start - runs only once on mount
   useEffect(() => {
     if (gameState === 'idle') {
-      startGame();
+      queueMicrotask(() => startGame());
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Intentional: only run on mount, not on state changes
   }, []);
 
   const slide = (row: (number | null)[]): { row: (number | null)[]; score: number } => {
-    let arr = row.filter((x): x is number => x !== null);
+    const arr = row.filter((x): x is number => x !== null);
     let scoreGained = 0;
 
     for (let i = 0; i < arr.length - 1; i++) {
@@ -76,7 +78,7 @@ const Orange2048Game: React.FC = () => {
     }
 
     while (arr.length < GRID_SIZE) {
-      arr.push(null as any);
+      arr.push(null as unknown as number);
     }
 
     return { row: arr, score: scoreGained };

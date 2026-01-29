@@ -55,8 +55,8 @@ let databank: SalesDatabank = {
 };
 
 // Index for fast lookups
-let salesByNftId: Map<number, SaleRecord[]> = new Map();
-let salesByTrait: Map<string, SaleRecord[]> = new Map(); // "category:value" -> sales
+const salesByNftId: Map<number, SaleRecord[]> = new Map();
+const salesByTrait: Map<string, SaleRecord[]> = new Map(); // "category:value" -> sales
 
 // ============ Persistence ============
 
@@ -68,8 +68,8 @@ function loadDatabank(): void {
       if (parsed.version === DATABANK_VERSION) {
         databank = parsed;
         rebuildIndexes();
-      } else {
       }
+      // else: version mismatch, start fresh (silent)
     }
   } catch (error) {
     console.warn('[SalesDatabank] Failed to load:', error);

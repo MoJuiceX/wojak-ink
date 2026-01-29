@@ -70,7 +70,7 @@ const FloatingVideoPlayer: React.FC<FloatingVideoPlayerProps> = ({
       const currentVolume = startVolume * (1 - easeProgress);
       try {
         video.volume = Math.max(0, currentVolume);
-      } catch (e) {
+      } catch {
         // iOS volume control fallback
       }
 
@@ -78,7 +78,7 @@ const FloatingVideoPlayer: React.FC<FloatingVideoPlayerProps> = ({
       if (nextVideo) {
         try {
           nextVideo.volume = easeProgress;
-        } catch (e) {}
+        } catch { /* iOS fallback */ }
       }
 
       // Visual crossfade
@@ -131,7 +131,8 @@ const FloatingVideoPlayer: React.FC<FloatingVideoPlayerProps> = ({
   // Reset fade state when video source changes
   useEffect(() => {
     isFadingRef.current = false;
-    setCrossfadeOpacity(1);
+    // Defer state update to avoid synchronous setState in effect
+    const timer = setTimeout(() => setCrossfadeOpacity(1), 0);
     if (fadeAnimationRef.current) {
       cancelAnimationFrame(fadeAnimationRef.current);
       fadeAnimationRef.current = null;
@@ -140,8 +141,9 @@ const FloatingVideoPlayer: React.FC<FloatingVideoPlayerProps> = ({
     if (videoRef.current) {
       try {
         videoRef.current.volume = 1;
-      } catch (e) {}
+      } catch { /* iOS fallback */ }
     }
+    return () => clearTimeout(timer);
   }, [videoSrc]);
 
   // Cleanup on unmount
@@ -156,10 +158,12 @@ const FloatingVideoPlayer: React.FC<FloatingVideoPlayerProps> = ({
   // Reset state and autoplay when opening
   useEffect(() => {
     if (isOpen && videoSrc) {
-      setPosition({ x: 20, y: 100 });
-      setIsMinimized(false);
-      setIsPlaying(false);
-      setHasMoved(false);
+      queueMicrotask(() => {
+        setPosition({ x: 20, y: 100 });
+        setIsMinimized(false);
+        setIsPlaying(false);
+        setHasMoved(false);
+      });
 
       // Only autoplay if background music is enabled
       if (platform === 'local' && isBackgroundMusicEnabled) {
@@ -187,7 +191,7 @@ const FloatingVideoPlayer: React.FC<FloatingVideoPlayerProps> = ({
   useEffect(() => {
     if (!isBackgroundMusicEnabled && isPlaying && videoRef.current) {
       videoRef.current.pause();
-      setIsPlaying(false);
+      queueMicrotask(() => setIsPlaying(false));
     }
   }, [isBackgroundMusicEnabled, isPlaying]);
 

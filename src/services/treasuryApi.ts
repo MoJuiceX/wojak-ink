@@ -135,8 +135,7 @@ async function fetchXchPrice(): Promise<number> {
         `${COINGECKO_API}/api/v3/simple/price?ids=chia&vs_currencies=usd`
       );
       if (!response.ok) {
-        const error = new Error(`CoinGecko API error: ${response.status}`) as any;
-        error.status = response.status;
+        const error = Object.assign(new Error(`CoinGecko API error: ${response.status}`), { status: response.status });
         throw error;
       }
       return response.json();
@@ -174,8 +173,7 @@ async function fetchXchBalance(): Promise<{ xch: number; mojo: number }> {
       );
 
       if (!response.ok) {
-        const error = new Error(`Spacescan API error: ${response.status}`) as any;
-        error.status = response.status;
+        const error = Object.assign(new Error(`Spacescan API error: ${response.status}`), { status: response.status });
         throw error;
       }
 
@@ -216,8 +214,7 @@ async function fetchTokenBalances(): Promise<TokenBalance[]> {
       );
 
       if (!response.ok) {
-        const error = new Error(`SpaceScan token API error: ${response.status}`) as any;
-        error.status = response.status;
+        const error = Object.assign(new Error(`SpaceScan token API error: ${response.status}`), { status: response.status });
         throw error;
       }
 
@@ -228,15 +225,15 @@ async function fetchTokenBalances(): Promise<TokenBalance[]> {
     const tokens = data.data || data || [];
 
     const tokenBalances: TokenBalance[] = tokens
-      .filter((token: any) => token.name) // Skip unnamed/unknown tokens
-      .map((token: any) => ({
-        asset_id: token.asset_id,
-        name: token.name,
-        symbol: token.symbol || token.name,
-        balance: token.balance || 0,
-        value_usd: token.total_value || 0,
-        price_usd: token.price || 0,
-        logo_url: token.preview_url,
+      .filter((token: Record<string, unknown>) => token.name) // Skip unnamed/unknown tokens
+      .map((token: Record<string, unknown>) => ({
+        asset_id: token.asset_id as string,
+        name: token.name as string,
+        symbol: (token.symbol || token.name) as string,
+        balance: (token.balance as number) || 0,
+        value_usd: (token.total_value as number) || 0,
+        price_usd: (token.price as number) || 0,
+        logo_url: token.preview_url as string | undefined,
       }))
       .sort((a: TokenBalance, b: TokenBalance) => b.value_usd - a.value_usd);
 
@@ -246,7 +243,7 @@ async function fetchTokenBalances(): Promise<TokenBalance[]> {
     }
 
     return tokenBalances;
-  } catch (error) {
+  } catch {
     // Return cached tokens on error
     return cachedTokens;
   }
@@ -266,8 +263,7 @@ async function fetchWalletNfts(): Promise<NFTCollection[]> {
       );
 
       if (!response.ok) {
-        const error = new Error(`Spacescan NFT API error: ${response.status}`) as any;
-        error.status = response.status;
+        const error = Object.assign(new Error(`Spacescan NFT API error: ${response.status}`), { status: response.status });
         throw error;
       }
 
@@ -380,7 +376,7 @@ export async function fetchWalletData(forceRefresh = false, backgroundRefresh = 
     persistData(walletData);
 
     return walletData;
-  } catch (error) {
+  } catch {
     // On any error, return cached data if available
     if (cachedData) {
       return cachedData;

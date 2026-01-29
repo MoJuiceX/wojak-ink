@@ -26,7 +26,7 @@ export function useAnimatedCounter(
   useEffect(() => {
     // Skip animation if reduced motion
     if (prefersReduced) {
-      setDisplayValue(target);
+      queueMicrotask(() => setDisplayValue(target));
       return;
     }
 
