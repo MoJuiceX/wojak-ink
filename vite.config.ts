@@ -38,7 +38,6 @@ export default defineConfig(({ mode }) => {
         '@tanstack/react-query',
         '@tanstack/query-core',
         'framer-motion',
-        '@ionic/react',
       ],
     },
     // Pre-bundle dependencies to ensure single React instance
