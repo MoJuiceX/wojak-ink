@@ -333,9 +333,6 @@ const MarketHeatmap: React.FC<MarketHeatmapProps> = ({ rankData, onNftClick }) =
       ? `rgba(255, 200, 50, ${Math.min(alpha + 0.1, 1)})`  // Bright gold for highlights
       : `rgba(255, 149, 0, ${alpha})`;                     // Standard amber
 
-    // Debug log (remove after testing)
-    if (count > 0) console.log(`[Heatmap] count=${count}, color=${color}`);
-
     return color;
   };
 
