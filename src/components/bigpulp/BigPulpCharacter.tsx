@@ -20,36 +20,36 @@ interface BigPulpCharacterProps {
 
 // Head trait to BigPulp image mapping
 const HEAD_TO_BIGPULP: Record<string, string> = {
-  'Crown': 'BigP_crown.png',
-  'Clown': 'BigP_clown.png',
-  'Military Beret': 'BigP_beret.png',
-  'Viking Helmet': 'BigP_viking.png',
-  'Tin Foil Hat': 'BigP_tin.png',
-  'Super Wojak Hat': 'BigP_super_wojak.png',
-  'Propeller Hat': 'BigP_propeller.png',
-  'Fedora': 'BigP_Fedora.png',
+  'Crown': 'BigP_crown.webp',
+  'Clown': 'BigP_clown.webp',
+  'Military Beret': 'BigP_beret.webp',
+  'Viking Helmet': 'BigP_viking.webp',
+  'Tin Foil Hat': 'BigP_tin.webp',
+  'Super Wojak Hat': 'BigP_super_wojak.webp',
+  'Propeller Hat': 'BigP_propeller.webp',
+  'Fedora': 'BigP_Fedora.webp',
 };
 
 // Wizard hat colors (random selection)
 const WIZARD_COLORS = [
-  'BigP_wiz_orange.png',
-  'BigP_wiz_red.png',
-  'BigP_wiz_pink.png',
-  'BigP_wiz_blue.png',
-  'BigP_wiz_yellow.png',
-  'BigP_wiz_dark_blue.png',
+  'BigP_wiz_orange.webp',
+  'BigP_wiz_red.webp',
+  'BigP_wiz_pink.webp',
+  'BigP_wiz_blue.webp',
+  'BigP_wiz_yellow.webp',
+  'BigP_wiz_dark_blue.webp',
 ];
 
 // All images for random fallback
 const ALL_BIGPULP_IMAGES = [
-  'BigP_crown.png',
-  'BigP_clown.png',
-  'BigP_beret.png',
-  'BigP_viking.png',
-  'BigP_tin.png',
-  'BigP_super_wojak.png',
-  'BigP_propeller.png',
-  'BigP_Fedora.png',
+  'BigP_crown.webp',
+  'BigP_clown.webp',
+  'BigP_beret.webp',
+  'BigP_viking.webp',
+  'BigP_tin.webp',
+  'BigP_super_wojak.webp',
+  'BigP_propeller.webp',
+  'BigP_Fedora.webp',
   ...WIZARD_COLORS,
 ];
 
@@ -183,7 +183,7 @@ export function BigPulpCharacter({
         <div className="character-layers">
           {/* Layer 1: Static base (feet) */}
           <img
-            src="/assets/BigPulp/art/BigP_base.png"
+            src="/assets/BigPulp/art/BigP_base.webp"
             alt="BigPulp base"
             className="bigpulp-layer bigpulp-layer-static"
           />

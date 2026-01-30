@@ -60,7 +60,7 @@
   right: 0;
   bottom: -100px;
   height: calc(100% + 600px);
-  background-image: url('/assets/Games/backgrounds/BACKGROUND_Orange Grove_brick.png');
+  background-image: url('/assets/Games/backgrounds/BACKGROUND_Orange Grove_brick.webp');
   background-size: cover;
   background-position: center 100%; /* Start at very bottom showing ground */
   background-repeat: no-repeat;

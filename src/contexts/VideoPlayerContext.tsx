@@ -17,7 +17,7 @@ const MUSIC_VIDEOS: VideoItem[] = [
     title: 'HIT YAH! Neckbeard Punk Tactics',
     platform: 'local',
     videoFile: '/assets/videos/hit-yah-neckbeard-punk.mp4',
-    thumbnail: '/assets/videos/TN_hit-yah-neckbeard-punk.png',
+    thumbnail: '/assets/videos/TN_hit-yah-neckbeard-punk.webp',
     author: '@yamidotmp3'
   },
   {
@@ -25,7 +25,7 @@ const MUSIC_VIDEOS: VideoItem[] = [
     title: 'Pokemon Tang Gang - Gotta Trade em All!',
     platform: 'local',
     videoFile: '/assets/videos/pokemon-tang-gang.mp4',
-    thumbnail: '/assets/videos/TN_pokemon-tang-gang.png',
+    thumbnail: '/assets/videos/TN_pokemon-tang-gang.webp',
     author: '@yamidotmp3'
   },
   {
@@ -33,7 +33,7 @@ const MUSIC_VIDEOS: VideoItem[] = [
     title: 'Multi-Billion DAO Marketing Agency',
     platform: 'local',
     videoFile: '/assets/videos/multi-billion-dao.mp4',
-    thumbnail: '/assets/videos/TN_multi-billion-dao.png',
+    thumbnail: '/assets/videos/TN_multi-billion-dao.webp',
     author: '@OrangeGooey'
   },
   {
@@ -41,7 +41,7 @@ const MUSIC_VIDEOS: VideoItem[] = [
     title: 'WizNerd Music',
     platform: 'local',
     videoFile: '/assets/videos/wiznerd-music.mov',
-    thumbnail: '/assets/videos/TN_wiznerd-music.png',
+    thumbnail: '/assets/videos/TN_wiznerd-music.webp',
     author: '@WizNerd'
   },
 ];

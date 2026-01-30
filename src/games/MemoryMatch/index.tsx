@@ -709,7 +709,7 @@ const MemoryMatchGame: React.FC = () => {
                         <div className="card-inner">
                           <div className="card-front">
                             <img
-                              src="/assets/Games/games_media/Memory_card.png"
+                              src="/assets/Games/games_media/Memory_card.webp"
                               alt=""
                               className="card-back-image"
                             />

@@ -11,7 +11,7 @@ export const COLLECTIBLE_SIZE = 35;
 
 export const SAD_IMAGES = Array.from(
   { length: 19 },
-  (_, i) => `/assets/Games/games_media/sad_runner_${i + 1}.png`
+  (_, i) => `/assets/Games/games_media/sad_runner_${i + 1}.webp`
 );
 
 export const WOJAK_RUNNER_CONFIG: GameConfig = {

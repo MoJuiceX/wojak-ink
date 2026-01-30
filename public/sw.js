@@ -3,13 +3,16 @@
  *
  * Handles:
  * - Asset caching for offline support
+ * - IPFS NFT image caching (cross-origin, cache-first)
  * - Push notifications
  * - Background sync
  */
 
 const CACHE_NAME = 'wojak-games-v1';
 const STATIC_CACHE = 'wojak-static-v1';
-const DYNAMIC_CACHE = 'wojak-dynamic-v1';
+const DYNAMIC_CACHE = 'wojak-dynamic-v2';
+const NFT_IMAGE_CACHE = 'wojak-nft-images-v1';
+const NFT_CACHE_MAX = 500;
 
 // Assets to cache immediately on install
 const STATIC_ASSETS = [
@@ -42,12 +45,14 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   console.log('[SW] Activating...');
 
+  const KEEP_CACHES = [STATIC_CACHE, DYNAMIC_CACHE, NFT_IMAGE_CACHE];
+
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
         return Promise.all(
           cacheNames
-            .filter((name) => name !== STATIC_CACHE && name !== DYNAMIC_CACHE)
+            .filter((name) => !KEEP_CACHES.includes(name))
             .map((name) => {
               console.log('[SW] Deleting old cache:', name);
               return caches.delete(name);
@@ -61,6 +66,40 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// IPFS NFT image handler — cache-first with LRU eviction
+async function handleIPFSImage(request) {
+  const cache = await caches.open(NFT_IMAGE_CACHE);
+
+  // Check cache first (IPFS images are immutable)
+  const cached = await cache.match(request);
+  if (cached) {
+    return cached;
+  }
+
+  // Cache miss — fetch from network
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const clone = response.clone();
+      // Store in cache, then evict if over limit
+      cache.put(request, clone).then(async () => {
+        const keys = await cache.keys();
+        if (keys.length > NFT_CACHE_MAX) {
+          // Delete oldest entries (first in list) until under limit
+          const toDelete = keys.length - NFT_CACHE_MAX;
+          for (let i = 0; i < toDelete; i++) {
+            await cache.delete(keys[i]);
+          }
+        }
+      });
+    }
+    return response;
+  } catch (error) {
+    // Network failed, no cache — return error
+    return new Response('Image unavailable offline', { status: 503 });
+  }
+}
+
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
   const { request } = event;
@@ -69,7 +108,13 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (request.method !== 'GET') return;
 
-  // Skip cross-origin requests
+  // Handle IPFS NFT images (cross-origin) with dedicated cache
+  if (url.hostname.endsWith('.ipfs.w3s.link')) {
+    event.respondWith(handleIPFSImage(request));
+    return;
+  }
+
+  // Skip other cross-origin requests
   if (url.origin !== location.origin) return;
 
   // Skip API requests (don't cache API responses)

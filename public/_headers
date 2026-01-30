@@ -44,6 +44,10 @@
   Cache-Control: public, max-age=31536000, immutable
   Access-Control-Allow-Origin: *
 
+# Game sprites and overlays - long cache
+/img/*
+  Cache-Control: public, max-age=31536000, immutable
+
 # NFT images - long cache (they don't change)
 /assets/nft-images/*
   Cache-Control: public, max-age=31536000, immutable

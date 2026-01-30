@@ -59,6 +59,7 @@ export default function GamesHub() {
     activeMode,
     setActiveMode,
     addVote,
+    fetchVotesForHeatmap,
     isLoading: isVotingLoading,
   } = useFlickVoting('games');
 
@@ -182,8 +183,8 @@ export default function GamesHub() {
     if (balance <= 0) return;
 
     const startPos = getTogglePosition();
-    const xPercent = ((clickX - cardRect.left) / cardRect.width) * 100;
-    const yPercent = ((clickY - cardRect.top) / cardRect.height) * 100;
+    const xPercent = Math.max(0, Math.min(100, ((clickX - cardRect.left) / cardRect.width) * 100));
+    const yPercent = Math.max(0, Math.min(100, ((clickY - cardRect.top) / cardRect.height) * 100));
 
     // Generate unique ID for this throw
     const emojiId = `emoji-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -240,33 +241,57 @@ export default function GamesHub() {
     }]);
 
     // Send vote to server (balance already optimistically decremented)
-    // Server response will reconcile if needed
     const result = await addVote(targetId, type, xPercent, yPercent);
 
-    // Reconcile balance if server returns different value
     if (result.success && result.newBalance !== undefined) {
+      // Always reconcile with server's authoritative balance
       if (type === 'donut') {
         setDonutBalance(result.newBalance);
       } else {
         setPoopBalance(result.newBalance);
       }
+    } else if (!result.success) {
+      // Vote failed — re-fetch authoritative balance from server
+      try {
+        const token = await getToken();
+        if (token) {
+          const res = await fetch('/api/shop/consumables', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setDonutBalance(data.donuts || 0);
+            setPoopBalance(data.poops || 0);
+          }
+        }
+      } catch {
+        // Fallback: simple revert
+        if (type === 'donut') {
+          setDonutBalance(prev => prev + 1);
+        } else {
+          setPoopBalance(prev => prev + 1);
+        }
+      }
     }
-  }, [flyingEmojis, addVote]);
+  }, [flyingEmojis, addVote, getToken]);
 
   // Handle splatter completion - remove specific splatter by id
   const handleSplatterComplete = useCallback((splatterId: string) => {
     setSplatters(prev => prev.filter(s => s.id !== splatterId));
   }, []);
 
-  const handleShowHeatmap = useCallback((type: 'donut' | 'poop') => {
+  const handleShowHeatmap = useCallback(async (type: 'donut' | 'poop') => {
     // Toggle off if already showing
     if (heatmapState.isActive) {
       setHeatmapState({ isActive: false, type: 'donut', votes: [] });
       return;
     }
 
-    // Filter local votes by type
-    const votesForType = localVotes
+    // Fetch community votes from the API
+    const apiVotes = await fetchVotesForHeatmap(type);
+
+    // Merge with local votes from this session (in case API hasn't synced yet)
+    const localForType = localVotes
       .filter(v => v.type === type)
       .map(v => ({
         id: v.id,
@@ -275,14 +300,25 @@ export default function GamesHub() {
         targetId: v.targetId,
       }));
 
+    // Combine: API votes first, then local votes not yet in API
+    const apiIds = new Set(apiVotes.map(v => v.id));
+    const merged = [
+      ...apiVotes.map(v => ({
+        id: v.id,
+        xPercent: v.xPercent,
+        yPercent: v.yPercent,
+        targetId: v.targetId,
+      })),
+      ...localForType.filter(v => !apiIds.has(v.id)),
+    ];
 
-    if (votesForType.length === 0) {
+    if (merged.length === 0) {
       return;
     }
 
     SoundManager.play('vote-rain');
-    setHeatmapState({ isActive: true, type, votes: votesForType });
-  }, [localVotes, heatmapState.isActive]);
+    setHeatmapState({ isActive: true, type, votes: merged });
+  }, [localVotes, heatmapState.isActive, fetchVotesForHeatmap]);
 
   const handleCloseHeatmap = useCallback(() => {
     setHeatmapState(prev => ({ ...prev, isActive: false, votes: [] }));

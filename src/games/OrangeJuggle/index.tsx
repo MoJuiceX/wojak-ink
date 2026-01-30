@@ -22,13 +22,13 @@ import {
 } from './config';
 import './OrangeJuggle.game.css';
 
-const JUGGLE_SPRITE = '/assets/Games/games_media/juggle.png';
+const JUGGLE_SPRITE = '/assets/Games/games_media/juggle.webp';
 const SAD_IMAGES = [
-  '/assets/Games/games_media/sad_1.png',
-  '/assets/Games/games_media/sad_2.png',
-  '/assets/Games/games_media/sad_3.png',
-  '/assets/Games/games_media/sad_4.png',
-  '/assets/Games/games_media/sad_5.png',
+  '/assets/Games/games_media/sad_1.webp',
+  '/assets/Games/games_media/sad_2.webp',
+  '/assets/Games/games_media/sad_3.webp',
+  '/assets/Games/games_media/sad_4.webp',
+  '/assets/Games/games_media/sad_5.webp',
 ];
 
 // Sound effect for bouncing

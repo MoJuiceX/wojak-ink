@@ -19,15 +19,13 @@ const corsHeaders = {
   'Content-Type': 'application/json',
 };
 
-// Simple hash function for IP (privacy-preserving rate limiting)
-function hashIP(ip: string): string {
-  let hash = 0;
-  for (let i = 0; i < ip.length; i++) {
-    const char = ip.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
-  }
-  return hash.toString(16);
+// SHA-256 hash for IP (privacy-preserving rate limiting)
+async function hashIP(ip: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(ip);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
@@ -51,7 +49,15 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       yPercent?: number;
     };
 
-    const { targetId, pageType, emoji, xPercent, yPercent } = body;
+    const { targetId, pageType, emoji } = body;
+
+    // Clamp position values to 0-100
+    const xPercent = body.xPercent != null
+      ? Math.max(0, Math.min(100, body.xPercent))
+      : null;
+    const yPercent = body.yPercent != null
+      ? Math.max(0, Math.min(100, body.yPercent))
+      : null;
 
     // Validate required fields
     if (!targetId || !pageType || !emoji) {
@@ -78,27 +84,28 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       });
     }
 
-    // Check user has consumables
+    // Deduct consumable atomically — UPDATE returns 0 changes if quantity was already 0
     const consumableType = emoji; // 'donut' or 'poop'
-    const consumable = await env.DB.prepare(`
-      SELECT quantity FROM user_consumables
-      WHERE user_id = ? AND consumable_type = ?
-    `).bind(auth.userId, consumableType).first<{ quantity: number }>();
+    const deductResult = await env.DB.prepare(`
+      UPDATE user_consumables
+      SET quantity = quantity - 1, updated_at = datetime('now')
+      WHERE user_id = ? AND consumable_type = ? AND quantity > 0
+    `).bind(auth.userId, consumableType).run();
 
-    if (!consumable || consumable.quantity <= 0) {
+    if (!deductResult.meta.changes || deductResult.meta.changes === 0) {
       return new Response(JSON.stringify({
         error: 'No consumables available',
         type: consumableType,
-        balance: consumable?.quantity || 0,
+        balance: 0,
       }), {
         status: 400,
         headers: corsHeaders,
       });
     }
 
-    // Get IP for rate limiting (privacy-preserving hash)
+    // Get IP for rate limiting (privacy-preserving SHA-256 hash)
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
-    const ipHash = hashIP(ip);
+    const ipHash = await hashIP(ip);
 
     // Simple rate limiting: max 100 votes per IP per hour
     const oneHourAgo = new Date(Date.now() - 3600000).toISOString();
@@ -108,35 +115,47 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     `).bind(ipHash, oneHourAgo).first<{ count: number }>();
 
     if (recentVotes && recentVotes.count >= 100) {
+      // Refund the consumable since we already deducted it
+      await env.DB.prepare(`
+        UPDATE user_consumables
+        SET quantity = quantity + 1, updated_at = datetime('now')
+        WHERE user_id = ? AND consumable_type = ?
+      `).bind(auth.userId, consumableType).run();
+
       return new Response(JSON.stringify({ error: 'Rate limit exceeded' }), {
         status: 429,
         headers: corsHeaders,
       });
     }
 
-    // Atomic transaction: decrement consumable and insert vote
-    await env.DB.batch([
-      // Decrement consumable
-      env.DB.prepare(`
-        UPDATE user_consumables
-        SET quantity = quantity - 1, updated_at = datetime('now')
-        WHERE user_id = ? AND consumable_type = ? AND quantity > 0
-      `).bind(auth.userId, consumableType),
-
-      // Insert vote
-      env.DB.prepare(`
+    // Insert vote — consumable already deducted above
+    try {
+      await env.DB.prepare(`
         INSERT INTO votes (page_type, target_id, emoji, x_percent, y_percent, user_id, ip_hash, created_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
       `).bind(
         pageType,
         targetId,
         emoji,
-        xPercent ?? null,
-        yPercent ?? null,
+        xPercent,
+        yPercent,
         auth.userId,
         ipHash
-      ),
-    ]);
+      ).run();
+    } catch (insertError) {
+      // Vote insert failed — refund the consumable
+      console.error('[Votes API] Insert failed, refunding consumable:', insertError);
+      await env.DB.prepare(`
+        UPDATE user_consumables
+        SET quantity = quantity + 1, updated_at = datetime('now')
+        WHERE user_id = ? AND consumable_type = ?
+      `).bind(auth.userId, consumableType).run();
+
+      return new Response(JSON.stringify({ error: 'Failed to record vote' }), {
+        status: 500,
+        headers: corsHeaders,
+      });
+    }
 
     // Return new balance
     const newBalance = await env.DB.prepare(`

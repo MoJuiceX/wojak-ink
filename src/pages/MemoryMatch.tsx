@@ -1700,7 +1700,7 @@ const MemoryMatch: React.FC = () => {
                         <div className="mm-card-inner">
                           <div className="mm-card-front">
                             <img
-                              src="/assets/Games/games_media/Memory_card.png"
+                              src="/assets/Games/games_media/Memory_card.webp"
                               alt=""
                               className="mm-card-img"
                             />

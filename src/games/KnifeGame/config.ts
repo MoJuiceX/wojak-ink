@@ -5,7 +5,7 @@
 import type { GameConfig } from '@/systems/game-ui/types';
 
 export const AUDIO_URL = '/assets/Games/games_media/The New Knife Game Song - Rusty Cage.mp3';
-export const IMAGE_URL = '/assets/Games/games_media/Knife_Game.png';
+export const IMAGE_URL = '/assets/Games/games_media/Knife_Game.webp';
 
 export const KNIFE_GAME_CONFIG: GameConfig = {
   id: 'knife-game',

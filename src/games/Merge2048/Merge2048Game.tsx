@@ -50,7 +50,7 @@ const WINNING_VALUE = 2048;
 const BIG_MERGE_THRESHOLD = 256; // Trigger screen shake for big merges
 
 // Sad images for game over screen
-const SAD_IMAGES = Array.from({ length: 19 }, (_, i) => `/assets/Games/games_media/sad_runner_${i + 1}.png`);
+const SAD_IMAGES = Array.from({ length: 19 }, (_, i) => `/assets/Games/games_media/sad_runner_${i + 1}.webp`);
 
 // ============================================================================
 // PHASE 1: SOUND FOUNDATION (Tasks 1-18)

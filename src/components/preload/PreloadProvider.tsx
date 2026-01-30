@@ -49,6 +49,25 @@ export function PreloadProvider({ children }: PreloadProviderProps) {
     if (allStaticImages.length > 0) {
       imagePreloader.preloadBatch(allStaticImages, 'low');
     }
+
+    // Preload game assets during idle time so games open instantly
+    const idleTimeout = setTimeout(() => {
+      const gameAssets = [
+        // Memory Match card back
+        '/assets/Games/games_media/Memory_card.webp',
+        // Game backgrounds
+        '/assets/Games/backgrounds/BACKGROUND_Orange Grove_brick.webp',
+        // Game sprites
+        '/assets/Games/games_media/juggle.webp',
+        '/assets/Games/games_media/runner.webp',
+        '/assets/Games/games_media/Knife_Game.webp',
+        // BigPulp base (used across pages)
+        '/assets/BigPulp/art/BigP_base.webp',
+      ];
+      imagePreloader.preloadBatch(gameAssets, 'low');
+    }, 3000); // Wait 3s after boot to avoid competing with critical loads
+
+    return () => clearTimeout(idleTimeout);
   }, []);
 
   // Update current page when route changes

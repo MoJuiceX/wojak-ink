@@ -258,7 +258,7 @@ export const DEBUG_WEATHER = false;             // Weather testing panel
 // ============================================
 export const SAD_IMAGES = Array.from(
   { length: 19 },
-  (_, i) => `/assets/Games/games_media/sad_runner_${i + 1}.png`
+  (_, i) => `/assets/Games/games_media/sad_runner_${i + 1}.webp`
 );
 
 // ============================================

@@ -13,7 +13,7 @@ export const AI_REACTION_ZONE = 20;
 
 export const SAD_IMAGES = Array.from(
   { length: 19 },
-  (_, i) => `/assets/Games/games_media/sad_runner_${i + 1}.png`
+  (_, i) => `/assets/Games/games_media/sad_runner_${i + 1}.webp`
 );
 
 export const ORANGE_PONG_CONFIG: GameConfig = {

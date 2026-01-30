@@ -757,7 +757,7 @@
   transform: translate(-50%, -50%);
   width: 180px;
   height: 120px;
-  background: url('/assets/Games/games_media/juggle.png') 0 0 no-repeat;
+  background: url('/assets/Games/games_media/juggle.webp') 0 0 no-repeat;
   background-size: 360px 120px;
   animation: juggle-arms 0.5s step-end infinite, orangutan-glow 2s ease-in-out infinite alternate;
   pointer-events: none;

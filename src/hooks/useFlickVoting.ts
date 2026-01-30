@@ -35,6 +35,10 @@ interface VoteStore {
 
 const API_BASE = '/api/votes';
 
+function cacheKey(pageType: string) {
+  return `wojak_votes_${pageType}`;
+}
+
 export function useFlickVoting(pageType: VotePageType) {
   const [activeMode, setActiveMode] = useState<'donut' | 'poop' | null>(null);
   const [votes, setVotes] = useState<VoteStore>({});
@@ -54,13 +58,20 @@ export function useFlickVoting(pageType: VotePageType) {
       const response = await fetch(`${API_BASE}/counts?pageType=${pageType}`);
       if (response.ok) {
         const data = await response.json();
-        setVotes(data.counts || {});
+        const counts = data.counts || {};
+        setVotes(counts);
+        // Write-through to localStorage for offline fallback
+        try {
+          localStorage.setItem(cacheKey(pageType), JSON.stringify(counts));
+        } catch {
+          // Ignore quota errors
+        }
       }
     } catch (error) {
       console.error('Failed to fetch vote counts:', error);
-      // Fallback to localStorage
+      // Fallback to localStorage cache
       try {
-        const stored = localStorage.getItem(`wojak_votes_${pageType}`);
+        const stored = localStorage.getItem(cacheKey(pageType));
         if (stored) setVotes(JSON.parse(stored));
       } catch {
         // Ignore localStorage errors
@@ -92,11 +103,27 @@ export function useFlickVoting(pageType: VotePageType) {
       };
     });
 
+    // Revert helper for failed votes
+    const revertVote = () => {
+      setVotes(prev => {
+        const current = prev[targetId] || { donuts: 0, poops: 0 };
+        const key = type === 'donut' ? 'donuts' : 'poops';
+        return {
+          ...prev,
+          [targetId]: {
+            ...current,
+            [key]: Math.max(0, current[key] - 1),
+          },
+        };
+      });
+    };
+
     // Send to backend with auth
     try {
       const token = await getToken();
       if (!token) {
         console.error('No auth token for voting');
+        revertVote();
         return { success: false };
       }
 
@@ -121,10 +148,12 @@ export function useFlickVoting(pageType: VotePageType) {
       } else {
         const error = await response.json();
         console.error('Vote failed:', error);
+        revertVote();
         return { success: false };
       }
     } catch (error) {
       console.error('Failed to save vote:', error);
+      revertVote();
       return { success: false };
     }
   }, [pageType, getToken]);

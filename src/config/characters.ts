@@ -14,7 +14,7 @@ export const CHARACTER_TYPES: CharacterTypeConfig[] = [
     shortName: 'Wojak',
     description: 'The classic Wojak, farming the fields of Chia',
     count: 800,
-    previewImage: '/assets/gallery-previews/wojak.png',
+    previewImage: '/assets/gallery-previews/wojak.webp',
   },
   {
     id: 'soyjak',
@@ -22,7 +22,7 @@ export const CHARACTER_TYPES: CharacterTypeConfig[] = [
     shortName: 'Soyjak',
     description: 'The enthusiastic Soyjak, excited about everything',
     count: 700,
-    previewImage: '/assets/gallery-previews/soyjak.png',
+    previewImage: '/assets/gallery-previews/soyjak.webp',
   },
   {
     id: 'waifu',
@@ -30,7 +30,7 @@ export const CHARACTER_TYPES: CharacterTypeConfig[] = [
     shortName: 'Waifu',
     description: 'The elegant Waifu of the Tang Gang',
     count: 500,
-    previewImage: '/assets/gallery-previews/waifu.png',
+    previewImage: '/assets/gallery-previews/waifu.webp',
   },
   {
     id: 'baddie',
@@ -38,7 +38,7 @@ export const CHARACTER_TYPES: CharacterTypeConfig[] = [
     shortName: 'Baddie',
     description: 'The confident Baddie, running the show',
     count: 500,
-    previewImage: '/assets/gallery-previews/baddie.png',
+    previewImage: '/assets/gallery-previews/baddie.webp',
   },
   {
     id: 'papa-tang',
@@ -46,7 +46,7 @@ export const CHARACTER_TYPES: CharacterTypeConfig[] = [
     shortName: 'Papa',
     description: 'The legendary Papa Tang, founder of the farm',
     count: 100,
-    previewImage: '/assets/gallery-previews/papa-tang.png',
+    previewImage: '/assets/gallery-previews/papa-tang.webp',
     accentColor: '#ff8c00',
   },
   {
@@ -55,7 +55,7 @@ export const CHARACTER_TYPES: CharacterTypeConfig[] = [
     shortName: 'Monkey',
     description: 'The wild Monkey Zoo crew',
     count: 300,
-    previewImage: '/assets/gallery-previews/monkey-zoo.png',
+    previewImage: '/assets/gallery-previews/monkey-zoo.webp',
   },
   {
     id: 'bepe-wojak',
@@ -63,7 +63,7 @@ export const CHARACTER_TYPES: CharacterTypeConfig[] = [
     shortName: 'B-Wojak',
     description: 'Wojak channeling Bepe energy',
     count: 200,
-    previewImage: '/assets/gallery-previews/bepe-wojak.png',
+    previewImage: '/assets/gallery-previews/bepe-wojak.webp',
     accentColor: '#4ade80',
   },
   {
@@ -72,7 +72,7 @@ export const CHARACTER_TYPES: CharacterTypeConfig[] = [
     shortName: 'B-Soyjak',
     description: 'Soyjak with rare Bepe traits',
     count: 200,
-    previewImage: '/assets/gallery-previews/bepe-soyjak.png',
+    previewImage: '/assets/gallery-previews/bepe-soyjak.webp',
     accentColor: '#4ade80',
   },
   {
@@ -81,7 +81,7 @@ export const CHARACTER_TYPES: CharacterTypeConfig[] = [
     shortName: 'B-Waifu',
     description: 'Waifu with rare Bepe traits',
     count: 200,
-    previewImage: '/assets/gallery-previews/bepe-waifu.png',
+    previewImage: '/assets/gallery-previews/bepe-waifu.webp',
     accentColor: '#4ade80',
   },
   {
@@ -90,7 +90,7 @@ export const CHARACTER_TYPES: CharacterTypeConfig[] = [
     shortName: 'B-Baddie',
     description: 'Baddie with rare Bepe traits',
     count: 200,
-    previewImage: '/assets/gallery-previews/bepe-baddie.png',
+    previewImage: '/assets/gallery-previews/bepe-baddie.webp',
     accentColor: '#4ade80',
   },
   {
@@ -99,7 +99,7 @@ export const CHARACTER_TYPES: CharacterTypeConfig[] = [
     shortName: 'A-Wojak',
     description: 'Wojak from beyond the stars',
     count: 150,
-    previewImage: '/assets/gallery-previews/alien-wojak.png',
+    previewImage: '/assets/gallery-previews/alien-wojak.webp',
     accentColor: '#a855f7',
   },
   {
@@ -108,7 +108,7 @@ export const CHARACTER_TYPES: CharacterTypeConfig[] = [
     shortName: 'A-Soyjak',
     description: 'Soyjak abducted and enhanced',
     count: 150,
-    previewImage: '/assets/gallery-previews/alien-soyjak.png',
+    previewImage: '/assets/gallery-previews/alien-soyjak.webp',
     accentColor: '#a855f7',
   },
   {
@@ -117,7 +117,7 @@ export const CHARACTER_TYPES: CharacterTypeConfig[] = [
     shortName: 'A-Waifu',
     description: 'Waifu of extraterrestrial origin',
     count: 100,
-    previewImage: '/assets/gallery-previews/alien-waifu.png',
+    previewImage: '/assets/gallery-previews/alien-waifu.webp',
     accentColor: '#a855f7',
   },
   {
@@ -126,7 +126,7 @@ export const CHARACTER_TYPES: CharacterTypeConfig[] = [
     shortName: 'A-Baddie',
     description: 'Baddie from another dimension',
     count: 100,
-    previewImage: '/assets/gallery-previews/alien-baddie.png',
+    previewImage: '/assets/gallery-previews/alien-baddie.webp',
     accentColor: '#a855f7',
   },
 ];

@@ -91,7 +91,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           >
             {/* Layer 1: Base/Legs */}
             <img
-              src="/assets/BigPulp/art/BigP_base.png"
+              src="/assets/BigPulp/art/BigP_base.webp"
               alt="BigPulp mascot base layer"
               loading="eager"
               style={{
@@ -106,7 +106,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             />
             {/* Layer 2: Upper body with crown */}
             <img
-              src="/assets/BigPulp/art/BigP_crown.png"
+              src="/assets/BigPulp/art/BigP_crown.webp"
               alt="BigPulp"
               loading="eager"
               style={{

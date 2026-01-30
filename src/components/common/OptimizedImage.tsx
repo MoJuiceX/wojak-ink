@@ -35,7 +35,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   width,
   height,
   placeholderSrc,
-  rootMargin = '100px',
+  rootMargin = '400px',
   aspectRatio,
   objectFit = 'cover',
   onLoad,

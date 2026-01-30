@@ -34,7 +34,7 @@ export const TIME_INCREASE_PER_ROUND = 1.20;
 // Sad images for game over screen
 export const SAD_IMAGES = Array.from(
   { length: 19 },
-  (_, i) => `/assets/Games/games_media/sad_runner_${i + 1}.png`
+  (_, i) => `/assets/Games/games_media/sad_runner_${i + 1}.webp`
 );
 
 // Grid layout map for card counts

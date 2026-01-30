@@ -768,23 +768,24 @@ const BlockPuzzle: React.FC = () => {
 
   // TASK 85: Update streak on line clear or placement
   const updateStreak = useCallback((clearedLines: boolean) => {
-    setStreakState(prev => {
-      if (clearedLines) {
+    if (clearedLines) {
+      setStreakState(prev => {
         const newCount = prev.count + 1;
-        // Fire effects when crossing threshold
+        // Fire side effects on next tick to avoid setState-during-render
         if (newCount === STREAK_CONFIG.fireThreshold) {
-          playStreakFireSound();
-          triggerStreakFireHaptic();
-          triggerConfetti();
-          showEpicCallout('STREAK FIRE!');
-          // Arcade lights: Streak fire celebration
-          triggerEvent('critical:hit');
+          queueMicrotask(() => {
+            playStreakFireSound();
+            triggerStreakFireHaptic();
+            triggerConfetti();
+            showEpicCallout('STREAK FIRE!');
+            triggerEvent('critical:hit');
+          });
         }
         return { count: newCount };
-      } else {
-        return { count: 0 };
-      }
-    });
+      });
+    } else {
+      setStreakState({ count: 0 });
+    }
   }, [playStreakFireSound, triggerStreakFireHaptic, triggerConfetti, showEpicCallout, triggerEvent]);
 
   // TASK 87: Calculate streak bonus — multiplier lookup

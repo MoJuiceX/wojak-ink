@@ -70,7 +70,7 @@ export const CollectionPreview: React.FC = () => {
         transition={{ duration: 0.6 }}
       >
         <img
-          src="/assets/banners/gallery-banner.png"
+          src="/assets/banners/gallery-banner.webp"
           alt="Wojak Farmers Plot Collection"
           loading="lazy"
         />

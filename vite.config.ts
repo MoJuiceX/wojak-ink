@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import basicSsl from '@vitejs/plugin-basic-ssl'
+import { ViteImageOptimizer } from 'vite-plugin-image-optimizer'
 import path from 'path'
 
 export default defineConfig(({ mode }) => {
@@ -13,6 +14,13 @@ export default defineConfig(({ mode }) => {
       react(),
       tailwindcss(),
       useHttps && basicSsl(),
+      ViteImageOptimizer({
+        png: { quality: 80 },
+        jpeg: { quality: 80 },
+        webp: { quality: 85 },
+        includePublic: true,
+        logStats: true,
+      }),
     ].filter(Boolean),
     resolve: {
       alias: {
