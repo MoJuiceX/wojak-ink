@@ -1,1299 +1,635 @@
 /**
- * Merge 2048 Game Styles - Citrus Edition
+ * Wojak Merge 2048 — Styles
+ * Layout: Left snake sidebar | Center board | Right controls
+ * Mobile: stacked (header → legend → board)
  */
 
-/* Container */
-.merge2048-container {
+/* ── Outer wrapper: positions tutorial banner outside game canvas ── */
+
+.nft-merge-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Container: 3-column layout (desktop) / stacked (mobile) ── */
+
+.nft-merge-game {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  gap: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+/* ── Left Sidebar: 2-col snake grid ── */
+
+.nft-merge-sidebar {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  overflow: visible;
+}
+
+.snake-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: repeat(6, 1fr);
+  gap: 4px 8px;
   width: 100%;
   height: 100%;
-  min-height: 400px; /* Ensure minimum height for visibility */
-  padding: 16px;
-  background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+  overflow: visible;
+  padding: 0 22px;
   box-sizing: border-box;
-  overflow: hidden;
-  /* Ensure container fills parent */
-  position: absolute;
-  top: 0;
-  left: 0;
 }
 
-/* Hide the GameEffects combo - we use our own combo system */
-.merge2048-container .effect-combo {
-  display: none !important;
-}
-
-/* Header */
-.merge2048-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  width: 100%;
-  max-width: 400px;
-  margin-bottom: 16px;
-  gap: 16px;
-}
-
-.merge2048-title {
+.snake-cell {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  position: relative;
+  opacity: 0.35;
+  transition: opacity 0.3s;
+  padding: 2px 0;
+  overflow: visible;
 }
 
-.merge2048-title h1 {
-  font-size: 48px;
-  font-weight: bold;
-  color: #ff6b00;
-  margin: 0;
-  line-height: 1;
-  text-shadow: 0 2px 10px rgba(255, 107, 0, 0.3);
+.snake-reached {
+  opacity: 1;
 }
 
-.merge2048-subtitle {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.6);
+/* Grid placement via row/col classes */
+.snake-r0 { grid-row: 1; }
+.snake-r1 { grid-row: 2; }
+.snake-r2 { grid-row: 3; }
+.snake-r3 { grid-row: 4; }
+.snake-r4 { grid-row: 5; }
+.snake-r5 { grid-row: 6; }
+.snake-c0 { grid-column: 1; }
+.snake-c1 { grid-column: 2; }
+
+.snake-badge-img {
+  width: 100%;
+  aspect-ratio: 1;
+  max-width: 56px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  background: #1a1a2e;
+  flex-shrink: 1;
+  min-height: 0;
+}
+
+.snake-badge-name {
+  font-size: 9px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 0.3px;
+  text-align: center;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 84px;
 }
 
-/* Score boxes */
-.merge2048-scores {
+/* ── Snake arrows (positioned between cells) ── */
+
+.snake-arrow {
+  position: absolute;
   display: flex;
-  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Right arrow: sits at right edge of cell, at image vertical center */
+.snake-arrow-right {
+  right: -12px;
+  top: 38%;
+  transform: translateY(-50%);
+}
+
+/* Left arrow: sits at left edge of cell, at image vertical center */
+.snake-arrow-left {
+  left: -12px;
+  top: 38%;
+  transform: translateY(-50%);
+}
+
+/* U-turn right: exits right from image center, goes down, enters next row's image center */
+.snake-arrow-uturn-right {
+  right: -18px;
+  top: 38%;
+  width: 18px;
+  height: calc(62% + 4px + 38%);
+}
+
+/* U-turn left: exits left from image center, goes down, enters next row's image center */
+.snake-arrow-uturn-left {
+  left: -18px;
+  top: 38%;
+  width: 18px;
+  height: calc(62% + 4px + 38%);
+}
+
+/* ── Center column: board + tutorial banner ── */
+
+.nft-merge-center {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* ── Right column: controls ── */
+
+.nft-merge-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+}
+
+.nft-merge-title {
+  text-align: center;
+}
+
+.nft-merge-title h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.nft-merge-subtitle {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.nft-merge-controls .score-box {
+  width: 100%;
+  max-width: 120px;
 }
 
 .score-box {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #bbada0;
-  border-radius: 6px;
-  padding: 8px 16px;
-  min-width: 70px;
-  position: relative; /* For score popup positioning */
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  min-width: 60px;
 }
 
 .score-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: #eee4da;
+  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .score-value {
   font-size: 22px;
-  font-weight: bold;
-  color: white;
+  font-weight: 700;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Controls */
-.merge2048-controls {
-  display: flex;
-  gap: 8px;
-  width: 100%;
-  max-width: 400px;
-  margin-bottom: 16px;
-}
+/* ── Buttons (New Game / Tutorial) ── */
 
-.new-game-btn {
-  background: linear-gradient(135deg, #ff6b00 0%, #ff8533 100%);
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  font-size: 14px;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  border-radius: 6px;
+.nft-merge-new-game {
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: background 0.15s, border-color 0.15s;
+  outline: none;
+  width: 100%;
+  max-width: 120px;
 }
 
-.new-game-btn:hover {
-  transform: scale(1.02);
-  box-shadow: 0 4px 20px rgba(255, 107, 0, 0.4);
-}
-
-.new-game-btn:active {
-  transform: scale(0.98);
-}
-
-/* Mute button */
-.mute-btn {
+.nft-merge-new-game:hover {
   background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 10px 14px;
-  font-size: 18px;
-  border-radius: 6px;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.nft-merge-new-game:active {
+  transform: scale(0.97);
+}
+
+.nft-merge-tutorial-btn {
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.15s ease;
-  line-height: 1;
-}
-
-.mute-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.mute-btn:active {
-  transform: scale(0.95);
-}
-
-/* Skip hint animation */
-.merge-skip-hint {
-  position: absolute;
-  right: -8px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 12px;
-  animation: merge-skip-slide 1.5s ease-out forwards;
-}
-
-@keyframes merge-skip-slide {
-  0% {
-    opacity: 0;
-    transform: translateY(-50%) translateX(-10px);
-  }
-  20% {
-    opacity: 1;
-    transform: translateY(-50%) translateX(0);
-  }
-  80% {
-    opacity: 1;
-    transform: translateY(-50%) translateX(5px);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-50%) translateX(15px);
-  }
-}
-
-/* Grid Wrapper - for positioning overlays */
-.merge2048-grid-wrapper {
-  position: relative;
+  transition: background 0.15s, border-color 0.15s;
+  outline: none;
   width: 100%;
-  max-width: 400px;
-  aspect-ratio: 1;
-  touch-action: none; /* Prevent scroll interference on swipes */
-  user-select: none; /* Prevent text selection */
+  max-width: 120px;
 }
 
-/* Grid */
-.merge2048-grid {
+.nft-merge-tutorial-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.nft-merge-tutorial-btn:active {
+  transform: scale(0.97);
+}
+
+/* ── Board ── */
+
+.nft-merge-board {
   position: relative;
-  width: 100%;
-  height: 100%;
-  background: #bbada0;
   border-radius: 12px;
-  padding: 12px;
-  box-sizing: border-box;
-  /* CSS variable for gap - used by inline tile positioning */
-  --grid-gap: 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  touch-action: none;
+  overflow: hidden;
+  transition: box-shadow 0.4s ease, border-color 0.4s ease;
 }
 
-/* Grid background (empty cells) */
-.grid-background {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(4, 1fr);
-  gap: 12px;
-  width: 100%;
-  height: 100%;
+/* ── Danger states ── */
+
+.nft-merge-board.danger-warning {
+  box-shadow: inset 0 0 20px rgba(245, 158, 11, 0.25),
+              0 0 15px rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.35);
 }
 
-.grid-cell {
-  background: rgba(238, 228, 218, 0.35);
-  border-radius: 6px;
+.nft-merge-board.danger-critical {
+  box-shadow: inset 0 0 30px rgba(239, 68, 68, 0.3),
+              0 0 20px rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+  animation: dangerPulse 1s ease-in-out infinite;
 }
 
-/* Tiles container - CSS Grid matching background for guaranteed alignment */
-.tiles-container {
+@keyframes dangerPulse {
+  0%, 100% {
+    box-shadow: inset 0 0 30px rgba(239, 68, 68, 0.3),
+                0 0 20px rgba(239, 68, 68, 0.2);
+  }
+  50% {
+    box-shadow: inset 0 0 40px rgba(239, 68, 68, 0.45),
+                0 0 30px rgba(239, 68, 68, 0.3);
+  }
+}
+
+.danger-warning .nft-merge-cell {
+  background: rgba(245, 158, 11, 0.06);
+}
+
+.danger-critical .nft-merge-cell {
+  background: rgba(239, 68, 68, 0.06);
+}
+
+/* Background grid cells */
+.nft-merge-cell {
   position: absolute;
-  top: 12px;
-  left: 12px;
-  right: 12px;
-  bottom: 12px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(4, 1fr);
-  gap: 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
-/* Individual tile - uses grid-row/grid-column for positioning */
-.tile {
+/* ── Tiles ── */
+
+.nft-tile {
+  position: absolute;
+  border-radius: 8px;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
-  font-weight: bold;
-  z-index: 10;
-  /* Animation handled by tile-new and tile-merged classes */
+  transition: top 0.15s ease-in-out, left 0.15s ease-in-out;
+  z-index: 1;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  background: #1a1a2e;
 }
 
-.tile-value {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+.nft-tile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
-/* Tile font sizes */
-.tile-font-large {
-  font-size: 36px;
+/* ── Rarity glows ── */
+
+/* Common: Phunky, High Council, Bepe Army */
+.nft-tile-2,
+.nft-tile-4,
+.nft-tile-8 {
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
-.tile-font-medium {
-  font-size: 28px;
+/* Uncommon: Royal Club, Pirate */
+.nft-tile-16,
+.nft-tile-32 {
+  border-color: rgba(74, 222, 128, 0.6);
+  box-shadow: 0 0 10px rgba(74, 222, 128, 0.25);
 }
 
-.tile-font-small {
-  font-size: 20px;
+/* Rare: Super Saiyan, Hellspawn */
+.nft-tile-64,
+.nft-tile-128 {
+  border-color: rgba(245, 158, 11, 0.7);
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.3);
 }
 
-/* Tile spawn animation - scale only */
-@keyframes tile-spawn {
-  0% {
-    opacity: 0;
-    transform: scale(0);
+/* Epic: Ronin, Neckbeard */
+.nft-tile-256,
+.nft-tile-512 {
+  border-color: rgba(139, 92, 246, 0.7);
+  box-shadow: 0 0 18px rgba(139, 92, 246, 0.4);
+}
+
+/* Legendary: Honk Gang */
+.nft-tile-1024 {
+  border-color: rgba(236, 72, 153, 0.8);
+  box-shadow: 0 0 22px rgba(236, 72, 153, 0.5);
+}
+
+/* ULTRA LEGENDARY: Namekian */
+.nft-tile-2048 {
+  border-color: rgba(16, 185, 129, 0.9);
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.7),
+              0 0 60px rgba(16, 185, 129, 0.3);
+  animation: namekianGlow 2s ease-in-out infinite;
+}
+
+/* Beyond 2048 (keep playing) */
+.nft-tile-4096 {
+  border-color: rgba(255, 215, 0, 0.9);
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+}
+
+@keyframes namekianGlow {
+  0%, 100% {
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.7),
+                0 0 60px rgba(16, 185, 129, 0.3);
   }
   50% {
-    transform: scale(1.1);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
+    box-shadow: 0 0 40px rgba(16, 185, 129, 1),
+                0 0 80px rgba(16, 185, 129, 0.5);
   }
 }
 
-/* Tile merge animation - scale pulse */
-@keyframes tile-merge {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.2);
-  }
-  100% {
-    transform: scale(1);
-  }
+/* ── Tile animations ── */
+
+.nft-tile-new {
+  animation: tileAppear 0.15s ease-out;
 }
 
-.tile-new {
-  animation: tile-spawn 200ms ease-out forwards;
+.nft-tile-merged {
+  animation: tilePop 0.15s ease-out;
+  z-index: 2;
 }
 
-.tile-merged {
-  animation: tile-merge 200ms ease-out forwards;
-  z-index: 20;
+@keyframes tileAppear {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
-/* Score popup animation - moved to Phase 4 section (TASK 65) */
-
-/* Screen shake for big merges */
-@keyframes screen-shake {
-  0%, 100% { transform: translateX(0); }
-  10% { transform: translateX(-4px) rotate(-0.5deg); }
-  20% { transform: translateX(4px) rotate(0.5deg); }
-  30% { transform: translateX(-4px) rotate(-0.5deg); }
-  40% { transform: translateX(4px) rotate(0.5deg); }
-  50% { transform: translateX(-2px) rotate(-0.25deg); }
-  60% { transform: translateX(2px) rotate(0.25deg); }
-  70% { transform: translateX(-2px); }
-  80% { transform: translateX(2px); }
-  90% { transform: translateX(-1px); }
+@keyframes tilePop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
 }
 
-.shake {
-  animation: screen-shake 300ms ease-out;
-}
+/* ── Overlays ── */
 
-/* High-value tile glow effects */
-.tile-glow-128 {
-  box-shadow: 0 0 15px rgba(237, 194, 46, 0.6);
-}
-
-.tile-glow-256 {
-  box-shadow: 0 0 20px rgba(246, 94, 59, 0.7);
-}
-
-.tile-glow-512 {
-  box-shadow: 0 0 25px rgba(237, 77, 46, 0.8);
-}
-
-.tile-glow-1024 {
-  box-shadow: 0 0 30px rgba(237, 65, 64, 0.9);
-}
-
-.tile-glow-2048 {
-  box-shadow: 0 0 35px rgba(237, 197, 63, 1), 0 0 60px rgba(237, 197, 63, 0.5);
-}
-
-/* Game overlays */
-.game-overlay {
+.nft-merge-overlay {
   position: absolute;
   inset: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: rgba(238, 228, 218, 0.9);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  z-index: 10;
   border-radius: 12px;
-  z-index: 100;
-  animation: fadeIn 0.3s ease;
-  gap: 20px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.nft-merge-win {
+  background: rgba(16, 185, 129, 0.15);
+}
+
+.nft-merge-gameover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.nft-merge-overlay-content {
+  text-align: center;
   padding: 24px;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+.nft-merge-win-nft {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  object-fit: cover;
+  margin: 0 auto 12px;
+  display: block;
+  border: 2px solid rgba(16, 185, 129, 0.8);
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.6);
 }
 
-.game-overlay h2 {
-  font-size: 2.4rem;
-  font-weight: bold;
-  color: #776e65;
-  margin: 0;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+.nft-merge-overlay-content h3 {
+  margin: 0 0 8px;
+  font-size: 28px;
+  font-weight: 800;
+  color: #fff;
 }
 
-.game-overlay p {
+.nft-merge-win h3 {
+  color: #10b981;
+  text-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+}
+
+.nft-merge-overlay-content p {
+  margin: 0 0 16px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.nft-merge-final-score {
   font-size: 18px;
-  color: #776e65;
-  margin: 0;
 }
 
-/* Game over stats styling */
-.game-overlay .final-score {
-  font-size: 5rem;
-  font-weight: bold;
-  color: #ff6b00;
-  text-shadow: 0 0 30px rgba(255, 107, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.2);
-  line-height: 1;
-  margin: 8px 0;
+.nft-merge-final-score strong {
+  color: #fff;
+  font-size: 22px;
 }
 
-.game-overlay .score-label-text {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #776e65;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-}
-
-.game-overlay .stat-value {
-  font-size: 2rem;
-  font-weight: bold;
-  color: #776e65;
-}
-
-.game-overlay .stat-label {
-  font-size: 0.85rem;
-  color: #9a8b7c;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.game-won h2 {
-  color: #ff6b00;
-}
-
-.overlay-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #ff6b00 0%, #ff8533 100%);
-  color: white;
-  border: none;
-  padding: 14px 36px;
-  font-size: 16px;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  margin-top: 12px;
-  min-width: 140px;
-}
-
-.overlay-btn:hover {
-  transform: scale(1.02);
-  box-shadow: 0 4px 20px rgba(255, 107, 0, 0.4);
-}
-
-.overlay-btn.secondary {
-  background: #8f7a66;
-}
-
-.overlay-btn.secondary:hover {
-  box-shadow: 0 4px 20px rgba(143, 122, 102, 0.4);
-}
-
-/* Instructions */
-.merge2048-instructions {
-  margin-top: auto; /* Push to bottom */
-  padding-top: 16px;
-  padding-bottom: 8px;
-  text-align: center;
-  max-width: 400px;
-}
-
-.merge2048-instructions p {
+.nft-merge-highest {
   font-size: 13px;
   color: rgba(255, 255, 255, 0.5);
-  margin: 0;
 }
 
-/* Simplified - removed unused danger, fever, tile face, and gallery styles */
-
-/* ========== PHASE 4: VISUAL JUICE EFFECTS ========== */
-
-/* TASK 48: Freeze frame CSS */
-.merge2048-grid-wrapper.freeze-frame .tiles-container {
-  animation-play-state: paused;
-}
-
-.merge2048-grid-wrapper.freeze-frame .tile {
-  transition: none;
-}
-
-/* TASK 54: Squash/stretch animations for movement */
-.tile-moving-left,
-.tile-moving-right {
-  transform: scaleX(1.1) scaleY(0.92);
-}
-
-.tile-moving-up,
-.tile-moving-down {
-  transform: scaleY(1.1) scaleX(0.92);
-}
-
-/* TASK 54: Enhanced merge animation with squash */
-@keyframes squashMerge {
-  0% { transform: scale(0.8, 1.2); }
-  40% { transform: scale(1.25, 0.85); }
-  70% { transform: scale(0.95, 1.05); }
-  100% { transform: scale(1, 1); }
-}
-
-.tile-merged {
-  animation: squashMerge 200ms ease-out;
-  z-index: 20;
-}
-
-/* TASK 57: Tile slide trails */
-.tile::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: inherit;
-  opacity: 0;
-  transform: scale(1);
-  transition: opacity 100ms, transform 100ms;
-  border-radius: inherit;
-  z-index: -1;
-}
-
-.tile-moving-left::before {
-  opacity: 0.2;
-  transform: translateX(15%) scaleX(1.2);
-}
-
-.tile-moving-right::before {
-  opacity: 0.2;
-  transform: translateX(-15%) scaleX(1.2);
-}
-
-.tile-moving-up::before {
-  opacity: 0.2;
-  transform: translateY(15%) scaleY(1.2);
-}
-
-.tile-moving-down::before {
-  opacity: 0.2;
-  transform: translateY(-15%) scaleY(1.2);
-}
-
-/* TASK 60: Smooth camera zoom transition */
-.merge2048-grid-wrapper {
-  transition: transform 150ms cubic-bezier(0.25, 0.1, 0.25, 1);
-}
-
-/* TASK 64: Impact flash CSS */
-.impact-flash {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%);
-  transform: translate(-50%, -50%);
-  animation: flashExpand 200ms ease-out forwards;
-  pointer-events: none;
-  z-index: 60;
-}
-
-@keyframes flashExpand {
-  0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
-  100% { transform: translate(-50%, -50%) scale(4); opacity: 0; }
-}
-
-/* TASK 65: Enhanced score popup animation */
-.score-popup {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 32px;
-  font-weight: bold;
-  color: #ff6b00;
-  text-shadow: 0 2px 10px rgba(255, 107, 0, 0.5);
-  pointer-events: none;
-  z-index: 50;
-  animation: scoreFloat 800ms cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
-}
-
-@keyframes scoreFloat {
-  0% {
-    transform: translate(-50%, -50%) scale(0.5);
-    opacity: 0;
-  }
-  20% {
-    transform: translate(-50%, -70%) scale(1.3);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(-50%, -150%) scale(1);
-    opacity: 0;
-  }
-}
-
-/* ========== END VISUAL JUICE EFFECTS ========== */
-
-/* ========== PHASE 10: VIRAL SHARE SYSTEM ========== */
-
-/* TASK 131: Challenge target display */
-.challenge-box {
-  background: linear-gradient(135deg, #ff6b00, #ff8533);
-  animation: challengePulse 2s ease-in-out infinite;
-}
-
-.challenge-box.challenge-won {
-  background: linear-gradient(135deg, #4CAF50, #66BB6A);
-  animation: none;
-}
-
-@keyframes challengePulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 0, 0.4); }
-  50% { box-shadow: 0 0 0 8px rgba(255, 107, 0, 0); }
-}
-
-/* Challenge text in overlay */
-.challenge-won {
-  color: #4CAF50;
-  font-weight: bold;
-}
-
-.challenge-lost {
-  color: rgba(255, 255, 255, 0.6);
-}
-
-/* Overlay buttons container */
-.overlay-buttons {
+.nft-merge-overlay-buttons {
   display: flex;
-  gap: 16px;
-  margin-top: 16px;
-}
-
-.overlay-btn.share-btn {
-  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
-}
-
-.overlay-btn.share-btn:hover {
-  box-shadow: 0 4px 20px rgba(76, 175, 80, 0.4);
-}
-
-/* TASK 127: Share Modal */
-.share-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.85);
-  display: flex;
-  align-items: center;
+  gap: 10px;
   justify-content: center;
-  z-index: 1100;
-  animation: fadeIn 0.2s ease;
 }
 
-.share-modal {
-  background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
-  border-radius: 16px;
-  max-width: 90vw;
-  width: 360px;
-  padding: 20px;
-  display: flex;
+.nft-merge-overlay-content button {
+  padding: 10px 22px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  outline: none;
+}
+
+.nft-merge-overlay-content button:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.nft-merge-overlay-content button:active {
+  transform: scale(0.97);
+}
+
+/* ── Mobile: stacked column layout ── */
+
+.nft-merge-game-mobile {
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  flex-wrap: nowrap;
 }
 
-.share-header {
+.nft-merge-mobile-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-}
-
-.share-header h2 {
-  margin: 0;
-  color: #ff6b00;
-  font-size: 20px;
-}
-
-.share-close {
-  background: none;
-  border: none;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 24px;
-  cursor: pointer;
-  padding: 4px 8px;
-  transition: color 0.15s ease;
-}
-
-.share-close:hover {
-  color: white;
-}
-
-.share-preview-image {
-  width: 100%;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
-.share-buttons {
-  display: flex;
-  gap: 10px;
-  width: 100%;
-}
-
-.share-action-btn {
-  flex: 1;
-  padding: 12px 8px;
-  border: none;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #ff6b00 0%, #ff8533 100%);
-  color: white;
-  font-weight: bold;
-  font-size: 13px;
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.share-action-btn:hover {
-  transform: scale(1.02);
-  box-shadow: 0 4px 15px rgba(255, 107, 0, 0.4);
-}
-
-.share-action-btn:active {
-  transform: scale(0.98);
-}
-
-.share-text-section {
-  width: 100%;
-}
-
-.share-text-btn {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 13px;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.share-text-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-/* ========== END VIRAL SHARE SYSTEM ========== */
-
-/* Animated score */
-.animated-score {
-  transition: transform 50ms ease;
-}
-
-/* Responsive adjustments */
-@media (max-width: 420px) {
-  .merge2048-container {
-    padding: 12px;
-  }
-
-  .merge2048-title h1 {
-    font-size: 36px;
-  }
-
-  .score-box {
-    padding: 6px 12px;
-    min-width: 60px;
-  }
-
-  .score-value {
-    font-size: 18px;
-  }
-
-  .merge2048-grid {
-    padding: 8px;
-    --grid-gap: 8px;
-  }
-
-  .grid-background {
-    gap: 8px;
-  }
-
-  .tiles-container {
-    top: 8px;
-    left: 8px;
-    right: 8px;
-    bottom: 8px;
-    gap: 8px;
-  }
-
-  /* Tile font sizes for mobile - position/size via inline styles */
-  .tile-font-large {
-    font-size: 28px;
-  }
-
-  .tile-font-medium {
-    font-size: 22px;
-  }
-
-  .tile-font-small {
-    font-size: 16px;
-  }
-}
-
-/* Extra small screens */
-@media (max-height: 600px) {
-  .merge2048-header {
-    margin-bottom: 8px;
-  }
-
-  .merge2048-title h1 {
-    font-size: 32px;
-  }
-
-  .merge2048-controls {
-    margin-bottom: 8px;
-  }
-
-  .new-game-btn {
-    padding: 8px 16px;
-    font-size: 12px;
-  }
-
-  .merge2048-instructions {
-    margin-top: 8px;
-  }
-}
-
-/* Very narrow screens (< 320px) */
-@media (max-width: 320px) {
-  .merge2048-container {
-    padding: 8px;
-  }
-
-  .merge2048-header {
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .merge2048-title h1 {
-    font-size: 28px;
-  }
-
-  .score-box {
-    padding: 4px 8px;
-    min-width: 50px;
-  }
-
-  .score-value {
-    font-size: 16px;
-  }
-
-  .merge2048-grid {
-    padding: 6px;
-    --grid-gap: 6px;
-  }
-
-  .grid-background {
-    gap: 6px;
-  }
-
-  .tiles-container {
-    top: 6px;
-    left: 6px;
-    right: 6px;
-    bottom: 6px;
-    gap: 6px;
-  }
-
-  /* Tile font sizes for narrow screens - position/size via inline styles */
-  .tile-font-large {
-    font-size: 20px;
-  }
-
-  .tile-font-medium {
-    font-size: 16px;
-  }
-
-  .tile-font-small {
-    font-size: 12px;
-  }
-}
-
-/* ============================================
-   FLAPPYORANGE-STYLE GAME OVER SCREEN
-   ============================================ */
-
-.m2048-game-over-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 500;
-  pointer-events: auto;
-  padding: 24px;
-  animation: m2048-game-over-appear 0.4s ease-out;
-}
-
-@keyframes m2048-game-over-appear {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
-}
-
-.m2048-game-over-content {
-  display: flex;
-  align-items: center;
-  gap: 40px;
-  max-width: 680px;
-  width: 100%;
-  animation: m2048-game-over-content 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both;
-}
-
-@keyframes m2048-game-over-content {
-  0% { opacity: 0; transform: scale(0.9) translateY(20px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-.m2048-game-over-left {
+  gap: 8px;
   flex-shrink: 0;
 }
 
-.m2048-sad-image {
-  width: 180px;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 20px;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
-  border: 3px solid rgba(255, 255, 255, 0.1);
-}
-
-.m2048-game-over-emoji {
-  width: 180px;
-  height: 180px;
+.nft-merge-scores {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 80px;
-  background: linear-gradient(135deg, rgba(255, 107, 0, 0.2), rgba(255, 107, 0, 0.1));
-  border-radius: 20px;
-  border: 3px solid rgba(255, 107, 0, 0.3);
-}
-
-.m2048-game-over-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.m2048-game-over-title {
-  font-size: 2.4rem;
-  font-weight: 800;
-  color: #ff6b00;
-  margin: 0 0 8px 0;
-  text-shadow: 0 2px 20px rgba(255, 107, 0, 0.3);
-}
-
-.m2048-game-over-score {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 16px;
-}
-
-.m2048-game-over-score .m2048-score-value {
-  font-size: 5rem;
-  font-weight: 900;
-  color: #fff;
-  text-shadow: 0 0 40px rgba(255, 107, 0, 0.6);
-  line-height: 1;
-  animation: m2048-final-score-pulse 2s ease-in-out infinite;
-}
-
-@keyframes m2048-final-score-pulse {
-  0%, 100% { text-shadow: 0 0 30px rgba(255, 107, 0, 0.5); }
-  50% { text-shadow: 0 0 50px rgba(255, 107, 0, 0.8), 0 0 80px rgba(255, 107, 0, 0.4); }
-}
-
-.m2048-game-over-score .m2048-score-label {
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.5);
-  text-transform: uppercase;
-  letter-spacing: 2px;
-}
-
-.m2048-game-over-stats {
-  display: flex;
-  gap: 32px;
-  margin: 8px 0 16px 0;
-}
-
-.m2048-stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.m2048-stat-value {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #ff6b00;
-}
-
-.m2048-stat-label {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.5);
-  text-transform: uppercase;
-}
-
-.m2048-new-record {
-  font-size: 1rem;
-  color: #ffd700;
-  font-weight: 700;
-  animation: m2048-glow 1s ease-in-out infinite alternate;
-  margin-bottom: 8px;
-}
-
-@keyframes m2048-glow {
-  from { text-shadow: 0 0 10px #ffd700; }
-  to { text-shadow: 0 0 30px #ffd700, 0 0 60px #ffa500; }
-}
-
-.m2048-submitted {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.6);
-  min-height: 1.2em;
-  margin-bottom: 16px;
-}
-
-.m2048-game-over-buttons {
-  display: flex;
-  gap: 16px;
-  margin-top: 8px;
-}
-
-.m2048-play-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 14px 36px;
-  min-width: 140px;
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: #fff;
-  background: linear-gradient(135deg, #ff6b00, #ff8533);
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 20px rgba(255, 107, 0, 0.4);
-}
-
-.m2048-play-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 30px rgba(255, 107, 0, 0.5);
-}
-
-.m2048-share-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 14px 24px;
-  min-width: 100px;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #fff;
-  background: linear-gradient(135deg, #FF6B00, #FF8533);
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 20px rgba(255, 107, 0, 0.4);
-}
-
-.m2048-share-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(255, 107, 0, 0.5);
-}
-
-.m2048-leaderboard-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 14px 24px;
-  min-width: 140px;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.m2048-leaderboard-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.4);
-}
-
-.m2048-back-to-games-btn {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  padding: 10px 20px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.6);
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.m2048-back-to-games-btn:hover {
-  color: #fff;
-  background: rgba(0, 0, 0, 0.7);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-/* Leaderboard Panel */
-.m2048-leaderboard-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 600;
-  animation: fadeIn 0.2s ease;
-}
-
-.m2048-leaderboard-panel {
-  background: linear-gradient(145deg, rgba(30, 25, 20, 0.98), rgba(20, 15, 10, 0.98));
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 24px;
-  min-width: 320px;
-  max-width: 400px;
-  max-height: 70vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-}
-
-.m2048-leaderboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.m2048-leaderboard-header h3 {
-  margin: 0;
-  font-size: 1.3rem;
-  color: #ff6b00;
-}
-
-.m2048-leaderboard-close {
-  background: none;
-  border: none;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 4px 8px;
-  line-height: 1;
-  transition: color 0.2s;
-}
-
-.m2048-leaderboard-close:hover {
-  color: #fff;
-}
-
-.m2048-leaderboard-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.m2048-leaderboard-entry {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  transition: background 0.2s;
-}
-
-.m2048-leaderboard-entry:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.m2048-leaderboard-entry.current-user {
-  background: rgba(255, 107, 0, 0.2);
-  border: 1px solid rgba(255, 107, 0, 0.3);
-}
-
-.m2048-leaderboard-rank {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.5);
-  min-width: 32px;
-}
-
-.m2048-leaderboard-name {
-  flex: 1;
-  font-size: 0.95rem;
-  color: #fff;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.m2048-leaderboard-score {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #ff6b00;
-}
-
-/* Mobile responsive */
-@media (max-width: 600px) {
-  .m2048-game-over-content {
-    flex-direction: column;
-    text-align: center;
-    gap: 24px;
-  }
-
-  .m2048-game-over-right {
-    align-items: center;
-  }
-
-  .m2048-sad-image,
-  .m2048-game-over-emoji {
-    width: 140px;
-    height: 140px;
-  }
-
-  .m2048-game-over-emoji {
-    font-size: 60px;
-  }
-
-  .m2048-game-over-title {
-    font-size: 1.8rem;
-  }
-
-  .m2048-game-over-score .m2048-score-value {
-    font-size: 3.5rem;
-  }
-
-  .m2048-game-over-buttons {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-  }
-
-  .m2048-play-btn,
-  .m2048-share-btn,
-  .m2048-leaderboard-btn {
-    padding: 12px 20px;
-    min-width: auto;
-    font-size: 0.9rem;
-  }
-}
-
-/* ============================================
-   ARCADE FRAME - Desktop sizing
-   When game is inside arcade screen, fit to container
-   ============================================ */
-
-.arcade-screen .merge2048-container {
-  padding: 4px 8px;
-  min-height: unset;
-  justify-content: center;
-  height: 100%;
-  overflow: hidden;
-}
-
-.arcade-screen .merge2048-header {
-  margin-bottom: 4px;
   gap: 6px;
 }
 
-.arcade-screen .merge2048-title h1 {
-  font-size: 32px;
+.nft-merge-buttons {
+  display: flex;
+  gap: 6px;
 }
 
-.arcade-screen .merge2048-subtitle {
-  font-size: 10px;
+.nft-merge-legend-mobile {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 4px 0;
+  width: 100%;
+  flex-shrink: 0;
 }
 
-.arcade-screen .merge2048-scores {
-  gap: 4px;
+.legend-mobile-item {
+  display: flex;
+  align-items: center;
+  gap: 2px;
 }
 
-.arcade-screen .score-box {
-  padding: 4px 10px;
-  min-width: 55px;
+.legend-mobile-img {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.arcade-screen .merge2048-controls {
-  margin-bottom: 4px;
-  gap: 4px;
+.legend-mobile-arrow {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.2);
+  line-height: 1;
 }
 
-.arcade-screen .merge2048-controls button {
-  padding: 4px 8px;
-  font-size: 10px;
+/* ── Tutorial banner ── */
+
+.tutorial-banner {
+  position: absolute;
+  bottom: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 460px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: rgba(10, 10, 15, 0.92);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  text-align: center;
+  z-index: 10;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
 }
 
-.arcade-screen .merge2048-grid-wrapper {
-  margin-bottom: 0;
+.tutorial-banner-title {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #10b981;
+  margin-bottom: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tutorial-banner-message {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.4;
+}
+
+/* ── Tutorial complete overlay ── */
+
+.tutorial-complete-overlay {
+  background: rgba(16, 185, 129, 0.15);
+}
+
+.tutorial-complete-overlay h3 {
+  color: #10b981;
+  text-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
 }

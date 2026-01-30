@@ -1721,6 +1721,177 @@ export function useGameSounds() {
     createArmSwingSound(isLeftArm);
   }, [isSoundEffectsEnabled]);
 
+  // ── Wojak Merge (2048) sounds ──
+  // Design: Warm, round, woody — like a kalimba or marimba
+  // Technique: Pure sine fundamental + gentle octave, heavy lowpass, detuned pair for chorus
+  //            NO inharmonic partials (those sound metallic). Just clean, warm, round tones.
+
+  /**
+   * Helper: Create a warm, round tone — like plucking a kalimba or tapping a marimba.
+   * Two slightly detuned sines create chorus warmth. Heavy lowpass keeps it soft.
+   * A gentle octave partial adds just enough body without metallic character.
+   */
+  const warmTone = useCallback((
+    ctx: AudioContext, freq: number, startTime: number, vol: number, dur: number
+  ) => {
+    // Detuned pair for chorus warmth (±1.5Hz — very subtle, just enough to not sound digital)
+    [-1.5, 1.5].forEach((detune) => {
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq + detune, startTime);
+
+      const gain = ctx.createGain();
+      const peakVol = vol * 0.5 * volumeMultiplier;
+      // Soft attack (~10ms) then smooth decay
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(peakVol, startTime + 0.01);
+      gain.gain.setTargetAtTime(peakVol * 0.6, startTime + 0.01, dur * 0.15);
+      gain.gain.setTargetAtTime(0.001, startTime + dur * 0.35, dur * 0.25);
+
+      // Heavy lowpass — removes any harshness, keeps it round and soft
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(Math.min(freq * 2.5, 4000), startTime);
+      // Filter closes over time — sound gets warmer as it decays
+      filter.frequency.setTargetAtTime(Math.min(freq * 1.2, 2000), startTime + 0.05, dur * 0.3);
+      filter.Q.setValueAtTime(0.5, startTime);
+
+      osc.connect(filter).connect(gain).connect(ctx.destination);
+      osc.start(startTime);
+      osc.stop(startTime + dur + 0.1);
+    });
+
+    // Gentle octave above (very quiet) — adds a touch of brightness without metallic-ness
+    if (freq * 2 < 5000) {
+      const oct = ctx.createOscillator();
+      oct.type = 'sine';
+      oct.frequency.setValueAtTime(freq * 2, startTime);
+      const octGain = ctx.createGain();
+      const octVol = vol * 0.12 * volumeMultiplier;
+      octGain.gain.setValueAtTime(0, startTime);
+      octGain.gain.linearRampToValueAtTime(octVol, startTime + 0.008);
+      octGain.gain.exponentialRampToValueAtTime(0.001, startTime + dur * 0.5);
+
+      const octFilter = ctx.createBiquadFilter();
+      octFilter.type = 'lowpass';
+      octFilter.frequency.setValueAtTime(Math.min(freq * 3, 3500), startTime);
+      octFilter.Q.setValueAtTime(0.3, startTime);
+
+      oct.connect(octFilter).connect(octGain).connect(ctx.destination);
+      oct.start(startTime);
+      oct.stop(startTime + dur * 0.5 + 0.05);
+    }
+  }, []);
+
+  const playMergeTileSound = useCallback((tileValue: number) => {
+    if (!isSoundEffectsEnabled) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const t = ctx.currentTime;
+    const logVal = Math.log2(tileValue);
+
+    // Pentatonic scale starting at C4 — always sounds happy, gradually rises with excitement
+    const penta = [
+      262,  // C4  — tile 4
+      294,  // D4  — tile 8
+      330,  // E4  — tile 16
+      392,  // G4  — tile 32
+      440,  // A4  — tile 64
+      523,  // C5  — tile 128
+      587,  // D5  — tile 256
+      659,  // E5  — tile 512
+      784,  // G5  — tile 1024
+      880,  // A5  — tile 2048
+    ];
+    const idx = Math.min(Math.floor(logVal) - 2, penta.length - 1);
+    const f = penta[Math.max(0, idx)];
+
+    // Duration grows slightly with tile value
+    const dur = 0.4 + (logVal - 2) * 0.04;
+
+    // === Core warm tone ===
+    warmTone(ctx, f, t, 0.3, dur);
+
+    // === Second note: major third up, slightly delayed — the happy "answer" ===
+    warmTone(ctx, f * 1.25, t + 0.07, 0.2, dur * 0.8);
+
+    // === 64+: Add the fifth — fuller, richer ===
+    if (tileValue >= 64) {
+      warmTone(ctx, f * 1.5, t + 0.04, 0.1, dur * 0.7);
+    }
+
+    // === 256+: Sub-octave bloom — deep warmth underneath ===
+    if (tileValue >= 256) {
+      warmTone(ctx, f * 0.5, t, 0.14, dur * 1.2);
+    }
+
+    // === 512+: Staggered major chord — triumphant but still soft ===
+    if (tileValue >= 512) {
+      warmTone(ctx, f * 0.5, t + 0.02, 0.08, dur * 1.4);
+      warmTone(ctx, f * 0.625, t + 0.04, 0.07, dur * 1.2);
+      warmTone(ctx, f * 0.75, t + 0.06, 0.07, dur * 1.1);
+    }
+  }, [isSoundEffectsEnabled, warmTone]);
+
+  const playTileSpawnSound = useCallback(() => {
+    if (!isSoundEffectsEnabled) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const t = ctx.currentTime;
+
+    // Tiny soft pluck — like a quiet kalimba note
+    warmTone(ctx, 392, t, 0.04, 0.12); // G4, very quiet, short
+  }, [isSoundEffectsEnabled, warmTone]);
+
+  const playInvalidMoveSound = useCallback(() => {
+    if (!isSoundEffectsEnabled) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const t = ctx.currentTime;
+
+    // Two soft muted taps — gentle "nope"
+    [0, 0.06].forEach((delay) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(260, t + delay);
+      osc.frequency.exponentialRampToValueAtTime(190, t + delay + 0.035);
+      gain.gain.setValueAtTime(0.045 * volumeMultiplier, t + delay);
+      gain.gain.exponentialRampToValueAtTime(0.001 * volumeMultiplier, t + delay + 0.045);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(t + delay);
+      osc.stop(t + delay + 0.055);
+    });
+  }, [isSoundEffectsEnabled]);
+
+  // Game over — same cheerful ascending arpeggio as the treasury bubble celebration
+  // C5 → E5 → G5 → C6 — simple sine waves, always sounds positive
+  const playMergeGameOverSound = useCallback(() => {
+    if (!isSoundEffectsEnabled) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const t = ctx.currentTime;
+
+    const notes = [523, 659, 784, 1047]; // C5, E5, G5, C6
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+
+      const startTime = t + i * 0.1;
+      gain.gain.setValueAtTime(0.15 * volumeMultiplier, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.01 * volumeMultiplier, startTime + 0.2);
+
+      osc.start(startTime);
+      osc.stop(startTime + 0.2);
+    });
+  }, [isSoundEffectsEnabled]);
+
   // Cleanup Orange Juggle ambient loops on unmount
   useEffect(() => {
     return () => {
@@ -1806,6 +1977,12 @@ export function useGameSounds() {
     stopBananaAmbient,
     playOrangeJuggleLevelComplete,
     playArmSwing,
+
+    // Wojak Merge (2048)
+    playMergeTile: playMergeTileSound,
+    playTileSpawn: playTileSpawnSound,
+    playInvalidMove: playInvalidMoveSound,
+    playMergeGameOver: playMergeGameOverSound,
   };
 }
 

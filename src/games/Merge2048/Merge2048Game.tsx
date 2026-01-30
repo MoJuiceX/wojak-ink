@@ -1,441 +1,297 @@
 /**
- * Merge 2048 Game - Citrus Edition
+ * Wojak Merge 2048
  *
- * A 2048-style merge game with an orange citrus theme for wojak.ink
+ * 4x4 merge game where tiles display real Wojak NFT images.
+ * Merging two same-badge tiles produces the next rarer badge.
+ * Progression: Phunky → High Council → Bepe Army → Honk Gang →
+ *   Pirate → Super Saiyan → Ronin → Neckbeard → Royal Club →
+ *   Hellspawn → Namekian (WIN!)
+ *
+ * Layout: Left sidebar (badge progression) | Right (board + controls)
+ *
+ * Architecture based on Bram Cohen's tile-array design:
+ * tiles[] is source of truth, grid derived on demand, CSS transitions animate.
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Howler } from 'howler';
-import { useHowlerSounds } from '@/hooks/useHowlerSounds';
 import { useLeaderboard } from '@/hooks/data/useLeaderboard';
-import { useGameEffects, GameEffects } from '@/components/media';
-import { ShareButton } from '@/systems/sharing';
-import { captureGameArea } from '@/systems/sharing/captureDOM';
-import { useGameMute } from '@/contexts/GameMuteContext';
+import { GameShell } from '@/systems/game-ui';
+import { useEffects } from '@/systems/effects';
+import { useGameSounds } from '@/hooks/useGameSounds';
+import { useHaptic } from '@/hooks/useHaptic';
 import { useArcadeLights } from '@/contexts/ArcadeLightsContext';
-import { getMergeTier, GAME_COMBO_TIERS, type GameEvent } from '@/config/arcade-light-mappings';
+import type { GameEvent } from '@/config/arcade-light-mappings';
+import BADGE_NFTS from '../NFT2048/badgeNfts.json';
 import './Merge2048Game.css';
 
-// Direction type for moves
-type Direction = 'up' | 'down' | 'left' | 'right';
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
 
-// ============================================================================
-// INTERFACES
-// ============================================================================
+const ROWS = 4;
+const COLS = 4;
+const WIN_VALUE = 2048;
+const SLIDE_DURATION = 150; // ms — matches CSS transition
+
+const IPFS_BASE =
+  'https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link';
+
+const TILE_BADGES: Record<number, string> = {
+  2: 'Phunky',
+  4: 'High Council',
+  8: 'Bepe Army',
+  16: 'Honk Gang',
+  32: 'Pirate',
+  64: 'Super Saiyan',
+  128: 'Ronin',
+  256: 'Neckbeard',
+  512: 'Royal Club',
+  1024: 'Hellspawn',
+  2048: 'Namekian',
+};
+
+/** Ordered progression from lowest to highest value */
+const BADGE_ORDER = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048];
+
+/**
+ * Snake layout: 2 columns, 6 rows.
+ * Even rows go left→right, odd rows go right→left.
+ * Arrows connect badges showing the merge progression path.
+ *
+ * Row 0: Phunky    →  High Council
+ *                           ↓
+ * Row 1: Honk Gang ← Bepe Army
+ *   ↓
+ * Row 2: Pirate    →  Super Saiyan
+ *                           ↓
+ * Row 3: Neckbeard ← Ronin
+ *   ↓
+ * Row 4: Royal Club → Hellspawn
+ *                           ↓
+ * Row 5:              Namekian
+ */
+const SNAKE_GRID: { val: number; row: number; col: number }[] = [
+  { val: 2, row: 0, col: 0 },
+  { val: 4, row: 0, col: 1 },
+  { val: 8, row: 1, col: 1 },
+  { val: 16, row: 1, col: 0 },
+  { val: 32, row: 2, col: 0 },
+  { val: 64, row: 2, col: 1 },
+  { val: 128, row: 3, col: 1 },
+  { val: 256, row: 3, col: 0 },
+  { val: 512, row: 4, col: 0 },
+  { val: 1024, row: 4, col: 1 },
+  { val: 2048, row: 5, col: 1 },
+];
+
+/** Arrow direction between each consecutive pair */
+type ArrowDir = 'right' | 'left' | 'uturn-right' | 'uturn-left';
+const SNAKE_ARROWS: { afterIndex: number; dir: ArrowDir }[] = [
+  { afterIndex: 0, dir: 'right' },        // Phunky → High Council
+  { afterIndex: 1, dir: 'uturn-right' },   // High Council ↓ Bepe Army (col 1, goes right)
+  { afterIndex: 2, dir: 'left' },          // Bepe Army → Honk Gang
+  { afterIndex: 3, dir: 'uturn-left' },    // Honk Gang ↓ Pirate (col 0, goes left)
+  { afterIndex: 4, dir: 'right' },         // Pirate → Super Saiyan
+  { afterIndex: 5, dir: 'uturn-right' },   // Super Saiyan ↓ Ronin (col 1, goes right)
+  { afterIndex: 6, dir: 'left' },          // Ronin → Neckbeard
+  { afterIndex: 7, dir: 'uturn-left' },    // Neckbeard ↓ Royal Club (col 0, goes left)
+  { afterIndex: 8, dir: 'right' },         // Royal Club → Hellspawn
+  { afterIndex: 9, dir: 'uturn-right' },   // Hellspawn ↓ Namekian (col 1, goes right)
+];
+
+/** Rarity tier colors for sidebar badges */
+const BADGE_COLORS: Record<number, string> = {
+  2: 'rgba(255,255,255,0.5)',
+  4: 'rgba(255,255,255,0.5)',
+  8: 'rgba(255,255,255,0.5)',
+  16: '#4ade80',
+  32: '#4ade80',
+  64: '#f59e0b',
+  128: '#f59e0b',
+  256: '#8b5cf6',
+  512: '#8b5cf6',
+  1024: '#ec4899',
+  2048: '#10b981',
+};
+
+type Direction = 'up' | 'down' | 'left' | 'right';
+type GameState = 'playing' | 'won' | 'over';
+
+// ---------------------------------------------------------------------------
+// Tutorial steps
+// ---------------------------------------------------------------------------
+
+interface TutorialStepDef {
+  title: string;
+  message: string;
+  setupTiles?: { row: number; col: number; value: number }[];
+  spawnAfterPrev?: { row: number; col: number; value: number };
+  targetValue: number; // 0 = any move, -1 = final (overlay)
+}
+
+const TUTORIAL_STEPS: TutorialStepDef[] = [
+  {
+    title: 'WELCOME TO WOJAK MERGE',
+    message: 'Use the arrow keys or swipe to move the tiles.',
+    setupTiles: [
+      { row: 1, col: 1, value: 2 },
+      { row: 3, col: 3, value: 2 },
+    ],
+    targetValue: 0,
+  },
+  {
+    title: 'MAKE A MATCH',
+    message: 'The tiles all moved and a new one appeared. Try moving the Phunky tiles towards each other.',
+    spawnAfterPrev: { row: 0, col: 0, value: 2 },
+    targetValue: 4,
+  },
+  {
+    title: 'BOOM!',
+    message: 'NFTs with the same badge merge when they touch! Keep going — merge two High Council into a Bepe Army.',
+    spawnAfterPrev: { row: 0, col: 3, value: 4 },
+    targetValue: 8,
+  },
+  {
+    title: 'NICE!',
+    message: "You're getting the hang of it! Merge two Bepe Army tiles into a Honk Gang.",
+    spawnAfterPrev: { row: 3, col: 0, value: 8 },
+    targetValue: 16,
+  },
+  {
+    title: "YOU'RE READY",
+    message: 'Keep merging NFTs to reach the legendary Namekian! Each merge creates a rarer badge. Good luck!',
+    targetValue: -1,
+  },
+];
 
 interface Tile {
   id: number;
-  value: number; // 2, 4, 8, 16... (citrus sizes)
   row: number;
   col: number;
-  isNew?: boolean; // for spawn animation
-  isMerged?: boolean; // for merge animation
+  value: number;
+  nftId: number;
+  badge: string;
+  isNew: boolean;
+  isMerged: boolean;
 }
 
-// GameState interface - will be used when implementing move logic
-// interface GameState {
-//   tiles: Tile[];
-//   score: number;
-//   bestScore: number;
-//   isGameOver: boolean;
-//   hasWon: boolean; // reached 2048
-// }
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
-// ============================================================================
-// CONSTANTS
-// ============================================================================
-
-const GRID_SIZE = 4;
-const WINNING_VALUE = 2048;
-const BIG_MERGE_THRESHOLD = 256; // Trigger screen shake for big merges
-
-// Sad images for game over screen
-const SAD_IMAGES = Array.from({ length: 19 }, (_, i) => `/assets/Games/games_media/sad_runner_${i + 1}.webp`);
-
-// ============================================================================
-// PHASE 1: SOUND FOUNDATION (Tasks 1-18)
-// ============================================================================
-
-// TASK 1: Merge sound configuration - ascending pitch per tile value
-const MERGE_SOUND_CONFIG: Record<number, { pitch: number; volume: number; layers: number }> = {
-  4:    { pitch: 0.8,  volume: 0.4, layers: 1 },  // Low, simple
-  8:    { pitch: 0.85, volume: 0.45, layers: 1 },
-  16:   { pitch: 0.9,  volume: 0.5, layers: 1 },
-  32:   { pitch: 0.95, volume: 0.55, layers: 1 },
-  64:   { pitch: 1.0,  volume: 0.6, layers: 1 },
-  128:  { pitch: 1.05, volume: 0.65, layers: 2 }, // Add sparkle layer
-  256:  { pitch: 1.1,  volume: 0.7, layers: 2 },
-  512:  { pitch: 1.15, volume: 0.75, layers: 3 }, // Add bass hit
-  1024: { pitch: 1.2,  volume: 0.8, layers: 3 },
-  2048: { pitch: 1.3,  volume: 1.0, layers: 4 },  // Full celebration
-};
-
-// TASK 6: Milestone values for signature chime
-const MILESTONE_VALUES = [128, 256, 512, 1024, 2048];
-
-// ============================================================================
-// PHASE 2: PREMIUM HAPTICS (Tasks 19-30)
-// ============================================================================
-
-// TASK 19: Haptic configuration - intensity/duration/pattern per value
-const HAPTIC_CONFIG: Record<number, { intensity: number; duration: number; pattern: number[] }> = {
-  4:    { intensity: 0.3, duration: 12, pattern: [12] },
-  8:    { intensity: 0.4, duration: 15, pattern: [15] },
-  16:   { intensity: 0.45, duration: 18, pattern: [18] },
-  32:   { intensity: 0.5, duration: 20, pattern: [20] },
-  64:   { intensity: 0.55, duration: 22, pattern: [22] },
-  128:  { intensity: 0.6, duration: 25, pattern: [25] },
-  256:  { intensity: 0.7, duration: 28, pattern: [15, 20, 25] }, // Double tap
-  512:  { intensity: 0.8, duration: 32, pattern: [20, 15, 25, 15, 30] }, // Triple
-  1024: { intensity: 0.9, duration: 38, pattern: [25, 20, 30, 20, 35] },
-  2048: { intensity: 1.0, duration: 50, pattern: [30, 20, 35, 20, 40, 20, 50] }, // Celebration
-};
-
-// ============================================================================
-// PHASE 5: DANGER STATE SYSTEM (Tasks 66-78)
-// ============================================================================
-
-// TASK 66: Danger thresholds
-const DANGER_THRESHOLDS = {
-  warning: 4,   // 4 or fewer empty cells
-  critical: 2,  // 2 or fewer empty cells
-  imminent: 1,  // Only 1 empty cell
-};
-
-// Danger level type
-type DangerLevel = 'safe' | 'warning' | 'critical' | 'imminent';
-
-// ============================================================================
-// PHASE 6: FEVER MODE (Tasks 79-92)
-// ============================================================================
-
-// TASK 79 & 80: Fever state interface and config
-interface FeverState {
-  active: boolean;
-  multiplier: number;
-  intensity: number;
-  startTime: number;
+function getNftImageUrl(nftId: number): string {
+  return `${IPFS_BASE}/${String(nftId).padStart(4, '0')}.png`;
 }
 
-const FEVER_CONFIG = {
-  activationThreshold: 5,    // Merges needed to activate
-  scoreMultiplier: 2,        // 2x score during fever
-  minDuration: 3000,         // Minimum fever duration
-  cooldownAfterNoMerge: 2000, // Time before fever deactivates
-};
-
-// ============================================================================
-// PHASE 3: TILE PERSONALITY SYSTEM (Tasks 31-45)
-// ============================================================================
-
-// TASK 31 & 40: Tile faces and bios reserved for future character gallery feature
-// Commented out to avoid unused variable errors - uncomment when implementing gallery
-/*
-interface TileFace {
-  eyes: string;
-  mouth: string;
-  expression: 'happy' | 'excited' | 'worried' | 'sleepy' | 'shocked';
-  extras?: string;
-}
-
-const TILE_FACES: Record<number, TileFace> = {
-  2:    { eyes: '• •', mouth: '‿', expression: 'sleepy' },
-  4:    { eyes: '◦ ◦', mouth: '‿', expression: 'happy' },
-  8:    { eyes: '° °', mouth: '◡', expression: 'happy' },
-  16:   { eyes: '◉ ◉', mouth: '◡', expression: 'happy' },
-  32:   { eyes: '◉ ◉', mouth: '▽', expression: 'excited' },
-  64:   { eyes: '★ ★', mouth: '▽', expression: 'excited' },
-  128:  { eyes: '✧ ✧', mouth: '◇', expression: 'excited', extras: '✨' },
-  256:  { eyes: '◈ ◈', mouth: '○', expression: 'shocked', extras: '✨' },
-  512:  { eyes: '❋ ❋', mouth: '◇', expression: 'excited', extras: '🔥' },
-  1024: { eyes: '☀ ☀', mouth: '◇', expression: 'excited', extras: '👑' },
-  2048: { eyes: '🌟🌟', mouth: '◡◡', expression: 'happy', extras: '🍊👑' },
-};
-
-const TILE_BIOS: Record<number, { name: string; bio: string }> = {
-  2:    { name: 'Seed', bio: 'A tiny citrus seed, full of potential!' },
-  4:    { name: 'Sprout', bio: 'Just waking up to the world.' },
-  8:    { name: 'Slice', bio: 'A fresh orange slice, ready to merge!' },
-  16:   { name: 'Mandy', bio: 'Mandarin with big dreams.' },
-  32:   { name: 'Ruby', bio: 'Blood orange with a fiery personality.' },
-  64:   { name: 'Tang', bio: 'Tangerine who loves to party!' },
-  128:  { name: 'Lemmy', bio: 'Lemon who brings the zest!' },
-  256:  { name: 'Grape', bio: 'Grapefruit with serious goals.' },
-  512:  { name: 'Pom', bio: 'Pomelo, the wise elder.' },
-  1024: { name: 'Goldie', bio: 'Golden citrus royalty!' },
-  2048: { name: 'THE ORANGE', bio: 'The legendary supreme citrus!' },
-};
-*/
-
-// Tile value to color mapping (citrus theme)
-const TILE_COLORS: Record<number, { background: string; text: string }> = {
-  2: { background: '#eee4da', text: '#776e65' }, // seed
-  4: { background: '#ede0c8', text: '#776e65' }, // small citrus
-  8: { background: '#f2b179', text: '#f9f6f2' }, // orange slice
-  16: { background: '#f59563', text: '#f9f6f2' }, // mandarin
-  32: { background: '#f67c5f', text: '#f9f6f2' }, // blood orange
-  64: { background: '#f65e3b', text: '#f9f6f2' }, // tangerine
-  128: { background: '#edcf72', text: '#f9f6f2' }, // lemon
-  256: { background: '#edcc61', text: '#f9f6f2' }, // grapefruit
-  512: { background: '#edc850', text: '#f9f6f2' }, // pomelo
-  1024: { background: '#edc53f', text: '#f9f6f2' }, // golden citrus
-  2048: { background: '#ff6b00', text: '#f9f6f2' }, // THE ORANGE - victory!
-};
-
-// Emoji mapping for tiles (optional visual flair)
-const TILE_EMOJIS: Record<number, string> = {
-  2: '',
-  4: '',
-  8: '',
-  16: '',
-  32: '',
-  64: '',
-  128: '',
-  256: '',
-  512: '',
-  1024: '',
-  2048: '',
-};
-
-// ============================================================================
-// HELPER FUNCTIONS
-// ============================================================================
-
 /**
- * Get all empty cell positions on the grid
+ * Pick one random NFT per tile value.
+ * If a previous map is provided, only re-randomize badges the player
+ * actually reached (value <= highestReached). Unreached badges keep
+ * their images — avoids unnecessary loads and gives visual continuity.
  */
-const getEmptyCells = (tiles: Tile[]): { row: number; col: number }[] => {
-  const occupied = new Set(tiles.map((t) => `${t.row}-${t.col}`));
-  const empty: { row: number; col: number }[] = [];
-
-  for (let row = 0; row < GRID_SIZE; row++) {
-    for (let col = 0; col < GRID_SIZE; col++) {
-      if (!occupied.has(`${row}-${col}`)) {
-        empty.push({ row, col });
-      }
-    }
-  }
-
-  return empty;
-};
-
-/**
- * Spawn a new tile in a random empty cell
- * 90% chance of 2, 10% chance of 4
- */
-const spawnTile = (tiles: Tile[], nextId: number): Tile | null => {
-  const emptyCells = getEmptyCells(tiles);
-  if (emptyCells.length === 0) return null;
-
-  const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-  const value = Math.random() < 0.9 ? 2 : 4;
-
-  return {
-    id: nextId,
-    value,
-    row: randomCell.row,
-    col: randomCell.col,
-    isNew: true,
-  };
-};
-
-/**
- * Initialize a new game with 2 starting tiles
- */
-const initGame = (): { tiles: Tile[]; nextTileId: number } => {
-  const tiles: Tile[] = [];
-  let nextTileId = 1;
-
-  // Spawn first tile
-  const tile1 = spawnTile(tiles, nextTileId++);
-  if (tile1) tiles.push(tile1);
-
-  // Spawn second tile
-  const tile2 = spawnTile(tiles, nextTileId++);
-  if (tile2) tiles.push(tile2);
-
-  return { tiles, nextTileId };
-};
-
-/**
- * Get tile style based on value
- */
-const getTileStyle = (value: number): React.CSSProperties => {
-  const colors = TILE_COLORS[value] || { background: '#3c3a32', text: '#f9f6f2' };
-  return {
-    backgroundColor: colors.background,
-    color: colors.text,
-  };
-};
-
-/**
- * Get font size class based on tile value (for large numbers)
- */
-const getFontSizeClass = (value: number): string => {
-  if (value < 100) return 'tile-font-large';
-  if (value < 1000) return 'tile-font-medium';
-  return 'tile-font-small';
-};
-
-/**
- * Convert tiles array to 2D grid representation
- */
-const tilesToGrid = (tiles: Tile[]): (Tile | null)[][] => {
-  const grid: (Tile | null)[][] = Array(GRID_SIZE)
-    .fill(null)
-    .map(() => Array(GRID_SIZE).fill(null));
-  tiles.forEach((tile) => {
-    grid[tile.row][tile.col] = tile;
-  });
-  return grid;
-};
-
-/**
- * Slide and merge a single line (row or column)
- * Returns the merged tiles and score gained
- */
-const slideAndMerge = (
-  line: (Tile | null)[],
-  nextIdRef: { current: number }
-): { tiles: Tile[]; scoreGained: number } => {
-  // Filter out nulls
-  const filtered = line.filter((t): t is Tile => t !== null);
-  let scoreGained = 0;
-  const merged: Tile[] = [];
-
-  for (let i = 0; i < filtered.length; i++) {
-    if (i < filtered.length - 1 && filtered[i].value === filtered[i + 1].value) {
-      // Merge these two tiles
-      const newValue = filtered[i].value * 2;
-      merged.push({
-        id: nextIdRef.current++,
-        value: newValue,
-        row: 0, // Will be set later
-        col: 0, // Will be set later
-        isMerged: true,
-        isNew: false,
-      });
-      scoreGained += newValue;
-      i++; // Skip next tile (it was merged)
+function pickNftMap(
+  prev?: Record<number, number>,
+  highestReached?: number,
+): Record<number, number> {
+  const map: Record<number, number> = {};
+  for (const [val, badge] of Object.entries(TILE_BADGES)) {
+    const v = Number(val);
+    const ids = (BADGE_NFTS as Record<string, number[]>)[badge] || [1];
+    if (prev && highestReached && v > highestReached) {
+      // Player never reached this badge — keep the previous NFT
+      map[v] = prev[v] ?? ids[Math.floor(Math.random() * ids.length)];
     } else {
-      merged.push({
-        ...filtered[i],
-        isMerged: false,
-        isNew: false,
-      });
+      map[v] = ids[Math.floor(Math.random() * ids.length)];
     }
   }
+  return map;
+}
 
-  return { tiles: merged, scoreGained };
-};
-
-/**
- * Get a column from the grid
- */
-const getColumn = (grid: (Tile | null)[][], col: number): (Tile | null)[] => {
-  return grid.map((row) => row[col]);
-};
-
-/**
- * Set a column in the grid
- */
-const setColumn = (grid: (Tile | null)[][], col: number, column: (Tile | null)[]): void => {
-  for (let row = 0; row < GRID_SIZE; row++) {
-    grid[row][col] = column[row];
+/** Preload images for the NFT map so tiles render instantly */
+function preloadNftImages(nftMapObj: Record<number, number>) {
+  for (const nftId of Object.values(nftMapObj)) {
+    const img = new Image();
+    img.src = getNftImageUrl(nftId);
   }
-};
+}
+
+/** Derive 2D grid (value only) from tile array */
+function getGrid(tiles: Tile[]): number[][] {
+  const grid = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+  for (const t of tiles) grid[t.row][t.col] = t.value;
+  return grid;
+}
 
 /**
- * Check if the game is over (no moves possible)
+ * Safety guard: remove duplicate tiles at the same cell.
+ * Keeps the tile with the higher value (or higher id if equal).
+ * Prevents ghost-tile data corruption from the flat-array design.
  */
-const checkGameOver = (tiles: Tile[]): boolean => {
-  // Not game over if there are empty cells
-  if (tiles.length < GRID_SIZE * GRID_SIZE) return false;
-
-  const grid = tilesToGrid(tiles);
-
-  // Check for any possible merges
-  for (let row = 0; row < GRID_SIZE; row++) {
-    for (let col = 0; col < GRID_SIZE; col++) {
-      const current = grid[row][col];
-      if (!current) return false; // Empty cell exists
-
-      // Check right neighbor
-      if (col < GRID_SIZE - 1 && grid[row][col + 1]?.value === current.value) {
-        return false; // Can merge right
-      }
-      // Check bottom neighbor
-      if (row < GRID_SIZE - 1 && grid[row + 1][col]?.value === current.value) {
-        return false; // Can merge down
-      }
+function dedupeTiles(tiles: Tile[]): Tile[] {
+  const seen = new Map<string, Tile>();
+  for (const t of tiles) {
+    const key = `${t.row},${t.col}`;
+    const prev = seen.get(key);
+    if (!prev || t.value > prev.value || (t.value === prev.value && t.id > prev.id)) {
+      seen.set(key, t);
     }
   }
+  return seen.size === tiles.length ? tiles : Array.from(seen.values());
+}
 
-  return true; // No moves possible
-};
+function checkGameOver(tiles: Tile[]): boolean {
+  const grid = getGrid(tiles);
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (grid[r][c] === 0) return false;
+      if (c < COLS - 1 && grid[r][c] === grid[r][c + 1]) return false;
+      if (r < ROWS - 1 && grid[r][c] === grid[r + 1][c]) return false;
+    }
+  }
+  return true;
+}
 
-/**
- * Check if player has won (reached 2048)
- */
-const checkWin = (tiles: Tile[]): boolean => {
-  return tiles.some((tile) => tile.value >= WINNING_VALUE);
-};
+// ---------------------------------------------------------------------------
+// Board sizing
+// ---------------------------------------------------------------------------
 
-/**
- * Get the highest merged value from a move (for effects)
- */
-const getHighestMergedValue = (tiles: Tile[]): number => {
-  const mergedTiles = tiles.filter((t) => t.isMerged);
-  if (mergedTiles.length === 0) return 0;
-  return Math.max(...mergedTiles.map((t) => t.value));
-};
+function calculateSizes(containerW?: number, containerH?: number) {
+  const cw = containerW || window.innerWidth;
+  const ch = containerH || window.innerHeight;
+  const showSidebar = cw >= 560;
+  // Both sides flex:1 — reserve minimum content width for each
+  const sideReserve = showSidebar ? 240 : 32;
+  const maxW = cw - sideReserve;
+  const maxH = ch;
+  const maxBoard = Math.min(maxW, maxH);
+  const gap = Math.floor(maxBoard * 0.02);
+  const padding = gap;
+  const cellSize = Math.floor((maxBoard - padding * 2 - gap * (COLS - 1)) / COLS);
+  const boardW = cellSize * COLS + gap * (COLS - 1) + padding * 2;
+  const boardH = cellSize * ROWS + gap * (ROWS - 1) + padding * 2;
+  return { cellSize, gap, padding, boardW, boardH, showSidebar };
+}
 
-// ============================================================================
-// PHASE 9: ANIMATED SCORE COMPONENT
-// ============================================================================
+function getPosition(
+  row: number,
+  col: number,
+  cellSize: number,
+  gap: number,
+  padding: number,
+) {
+  return {
+    top: padding + row * (cellSize + gap),
+    left: padding + col * (cellSize + gap),
+  };
+}
 
-// TASK 117: Animated score counter component
-const AnimatedScore: React.FC<{ value: number }> = ({ value }) => {
-  const [displayValue, setDisplayValue] = useState(value);
-  const targetRef = useRef(value);
-
-  useEffect(() => {
-    targetRef.current = value;
-  }, [value]);
-
-  useEffect(() => {
-    const animate = () => {
-      setDisplayValue(prev => {
-        const diff = targetRef.current - prev;
-        if (Math.abs(diff) < 1) return targetRef.current;
-        return prev + diff * 0.15;
-      });
-    };
-
-    const interval = setInterval(animate, 16);
-    return () => clearInterval(interval);
-  }, []);
-
-  return <span className="score-value animated-score">{Math.floor(displayValue).toLocaleString()}</span>;
-};
-
-// ============================================================================
-// BACKGROUND MUSIC PLAYLIST
-// ============================================================================
-const MUSIC_PLAYLIST = [
-  { src: '/audio/music/2048-merge/sf2-chunli-final.mp3', name: 'Chun-Li Stage' },
-  { src: '/audio/music/2048-merge/sf2-blanka-final.mp3', name: 'Blanka Stage' },
-  { src: '/audio/music/2048-merge/sf2-sagat-final.mp3', name: 'Sagat Stage' },
-  { src: '/audio/music/2048-merge/sf2-ending-final.mp3', name: 'SF2 Ending' },
-];
-
-// ============================================================================
-// COMPONENT
-// ============================================================================
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
 const Merge2048Game: React.FC = () => {
-  // Arcade frame mute control (from GameModal)
-  const { isMuted: arcadeMuted, musicManagedExternally } = useGameMute();
+  // Layout
+  const [sizes, setSizes] = useState(calculateSizes);
 
   // Game state
   const [tiles, setTiles] = useState<Tile[]>([]);
@@ -444,1439 +300,971 @@ const Merge2048Game: React.FC = () => {
     const saved = localStorage.getItem('merge2048-best');
     return saved ? parseInt(saved, 10) : 0;
   });
-  const [isGameOver, setIsGameOver] = useState(false);
-  const [hasWon, setHasWon] = useState(false);
-  const [dismissedWin, setDismissedWin] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const [gameState, setGameState] = useState<GameState>('playing');
+  const [keepPlaying, setKeepPlaying] = useState(false);
 
-  // Background music refs (MP3 playlist)
-  const playlistIndexRef = useRef(0);
-  const bgMusicAudioRef = useRef<HTMLAudioElement | null>(null);
-  const isMutedRef = useRef(isMuted);
-  const isGameOverRef = useRef(isGameOver);
-  // Ref for playBgMusicTrack to allow recursive calls
-  const playBgMusicTrackRef = useRef<((index: number) => void) | null>(null);
+  // Tutorial
+  const [isTutorial, setIsTutorial] = useState(false);
+  const [tutorialStep, setTutorialStep] = useState(0);
+  const tutorialStepRef = useRef(0); // mirror for use inside move() closure
 
-  // Initialize random playlist index on mount (avoids Math.random during render)
-  useEffect(() => {
-    playlistIndexRef.current = Math.floor(Math.random() * MUSIC_PLAYLIST.length);
-  }, []);
+  // Fixed NFT per tile value (regenerated each new game)
+  const nftMap = useRef<Record<number, number>>(pickNftMap());
 
-  // Keep refs in sync
-  useEffect(() => { isMutedRef.current = isMuted; }, [isMuted]);
-  useEffect(() => { isGameOverRef.current = isGameOver; }, [isGameOver]);
+  // Refs
+  const nextId = useRef(0);
+  const isAnimating = useRef(false);
+  const totalMerges = useRef(0);
+  const highestTile = useRef(0);
+  const touchStart = useRef({ x: 0, y: 0 });
+  const boardRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Ref for musicManagedExternally (to check in startGame)
-  const musicManagedExternallyRef = useRef(musicManagedExternally);
-  useEffect(() => { musicManagedExternallyRef.current = musicManagedExternally; }, [musicManagedExternally]);
-
-  // Sync with arcade frame mute button (from GameMuteContext)
-  // Note: setMuted from Howler is used later, so we call setIsMuted and pause music directly
-  useEffect(() => {
-    // Only sync if NOT managed externally (meaning this game controls its own music)
-    if (!musicManagedExternally) {
-      // Arcade mute button changed - sync local state
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: sync external mute state to local state
-      setIsMuted(arcadeMuted);
-      // Also directly pause/resume music for immediate feedback
-      if (arcadeMuted) {
-        if (bgMusicAudioRef.current) {
-          bgMusicAudioRef.current.pause();
-        }
-      } else if (!isGameOverRef.current) {
-        if (bgMusicAudioRef.current) {
-          bgMusicAudioRef.current.play().catch(() => {});
-        }
-      }
-    }
-  }, [arcadeMuted, musicManagedExternally]);
-
-  // Play specific track
-  const playBgMusicTrack = useCallback((index: number) => {
-    if (bgMusicAudioRef.current) {
-      bgMusicAudioRef.current.pause();
-    }
-    playlistIndexRef.current = index;
-    const track = MUSIC_PLAYLIST[index];
-    const music = new Audio(track.src);
-    music.volume = 1.0;
-    music.addEventListener('ended', () => {
-      playlistIndexRef.current = (playlistIndexRef.current + 1) % MUSIC_PLAYLIST.length;
-      if (!isGameOverRef.current && !isMutedRef.current) {
-        // Use ref to call playBgMusicTrack recursively (avoids stale closure)
-        playBgMusicTrackRef.current?.(playlistIndexRef.current);
-      }
-    }, { once: true });
-    bgMusicAudioRef.current = music;
-    if (!isMutedRef.current) {
-      music.play().catch(() => {});
-    }
-  }, []);
-
-  // Keep playBgMusicTrackRef in sync
-  useEffect(() => { playBgMusicTrackRef.current = playBgMusicTrack; }, [playBgMusicTrack]);
-
-  // Play next song in playlist
-  const playNextBgMusicTrack = useCallback(() => {
-    playBgMusicTrack(playlistIndexRef.current);
-  }, [playBgMusicTrack]);
-
-  // Cleanup music on unmount
-  useEffect(() => {
-    return () => {
-      if (bgMusicAudioRef.current) {
-        bgMusicAudioRef.current.pause();
-        bgMusicAudioRef.current = null;
-      }
-    };
-  }, []);
-
-  // Control music based on game over state and mute
-  useEffect(() => {
-    if (!isGameOver && !isMuted) {
-      if (bgMusicAudioRef.current) {
-        bgMusicAudioRef.current.play().catch(() => {});
-      }
-    } else {
-      if (bgMusicAudioRef.current) {
-        bgMusicAudioRef.current.pause();
-      }
-    }
-  }, [isGameOver, isMuted]);
-
-  // Visual effects state (local)
-  const [scorePopup, setScorePopup] = useState<{ value: number; key: number } | null>(null);
-
-  // TASK 46: Freeze frame state
-  const [freezeFrame, setFreezeFrame] = useState(false);
-  const freezeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // TASK 55: Track last move direction for squash/stretch
-  const [lastMoveDirection, setLastMoveDirection] = useState<Direction | null>(null);
-
-  // TASK 58: Camera zoom state
-  const [cameraZoom, setCameraZoom] = useState(1);
-
-  // TASK 62: Impact flash state
-  const [impactFlash] = useState<{ x: number; y: number } | null>(null);
-
-  // TASK 67: Danger level state
-  const [dangerLevel, setDangerLevel] = useState<DangerLevel>('safe');
-
-  // TASK 79: Fever mode state
-  const [feverState, setFeverState] = useState<FeverState>({
-    active: false,
-    multiplier: 1,
-    intensity: 0,
-    startTime: 0,
-  });
-
-  // TASK 81: Track consecutive merges for fever
-  const consecutiveMergesRef = useRef(0);
-  const lastMergeTimeRef = useRef(0);
-
-  // TASK 126-138: Share system state - reserved for future share modal feature
-  // const [showShareModal, setShowShareModal] = useState(false);
-  // const [shareImage, setShareImage] = useState<string | null>(null);
-  const [challengeTarget, setChallengeTarget] = useState<number | null>(null);
-
-  // Game over screen state (FlappyOrange style)
-  const [sadImage, setSadImage] = useState<string | null>(null);
-  const [gameScreenshot, setGameScreenshot] = useState<string | null>(null);
-  const [showLeaderboardPanel, setShowLeaderboardPanel] = useState(false);
-  const [scoreSubmitted, setScoreSubmitted] = useState(false);
-  const [isNewPersonalBest, setIsNewPersonalBest] = useState(false);
-  const [meetsMinimumMerges, setMeetsMinimumMerges] = useState(false);
-
-  // Next tile queue for spawning (internal use)
-  const [nextTileQueue, setNextTileQueue] = useState<number[]>([2, 2]);
-
-  // Combo state for score multipliers (internal use)
-  const COMBO_TIMEOUT = 1500;
-  interface ComboState {
-    count: number;
-    lastMergeTime: number;
-    isActive: boolean;
-  }
-  const [comboState, setComboState] = useState<ComboState>({
-    count: 0,
-    lastMergeTime: 0,
-    isActive: false,
-  });
-
-  // Audio hooks
-  const { playWinSound, playGameOver, playClick, setMuted } = useHowlerSounds();
-
-  // Sync Howler mute state with arcade frame mute button
-  useEffect(() => {
-    if (!musicManagedExternally) {
-      setMuted(arcadeMuted);
-    }
-  }, [arcadeMuted, musicManagedExternally, setMuted]);
-
-  // Leaderboard hooks
-  const { submitScore, isSignedIn, leaderboard: globalLeaderboard, userDisplayName, isSubmitting } = useLeaderboard('2048-merge');
-
-  // Universal visual effects system
-  const {
-    effects,
-    triggerShockwave,
-    triggerSparks,
-    triggerScreenShake,
-    addFloatingEmoji,
-    showEpicCallout,
-    triggerConfetti,
-    resetAllEffects,
-  } = useGameEffects();
-
-  // Arcade lights control
+  // Juice systems
+  const effects = useEffects();
+  const { playMatchFound, playWinSound, playMergeTile, playTileSpawn, playInvalidMove, playMergeGameOver } = useGameSounds();
+  const haptic = useHaptic();
   const { triggerEvent, setGameId } = useArcadeLights();
 
-  // Register this game for per-game light overrides
+  // Register game for per-game light profile
   useEffect(() => {
     setGameId('merge-2048');
   }, [setGameId]);
 
-  // Refs
-  const nextTileIdRef = useRef(1);
-  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
-  const isMovingRef = useRef(false); // Prevent multiple moves during animation
-  const gridWrapperRef = useRef<HTMLDivElement>(null);
-  const scorePopupKeyRef = useRef(0);
-  const highestTileRef = useRef(2); // Track highest tile achieved
-  const totalMergesRef = useRef(0); // NEW: Track total merges for minimum actions
+  // Juice tracking refs
+  const pendingMerges = useRef<{ value: number; row: number; col: number }[]>([]);
+  const moveCombo = useRef(0);
+  const milestonesReached = useRef(new Set<number>());
+  const [dangerLevel, setDangerLevel] = useState<'safe' | 'warning' | 'critical'>('safe');
+  const [displayScore, setDisplayScore] = useState(0);
+  const animatingScoreRef = useRef<number | null>(null);
+  const undoSnapshot = useRef<{ tiles: Tile[]; score: number } | null>(null);
+  const [undoUsed, setUndoUsed] = useState(false);
 
-  // TASK 6: Track milestones reached for signature sound
-  const milestonesReachedRef = useRef<Set<number>>(new Set());
+  // Leaderboard
+  const { submitScore, isSignedIn } = useLeaderboard('2048-merge');
+  const scoreSubmitted = useRef(false);
 
-  // Audio context ref for procedural sounds
-  const audioContextRef = useRef<AudioContext | null>(null);
+  // ------------------------------------------------------------------
+  // Tile creation
+  // ------------------------------------------------------------------
 
-  // Danger pulse interval ref
-  const dangerPulseIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const makeTile = useCallback(
+    (row: number, col: number, value: number, isNew = false): Tile => {
+      const badge = TILE_BADGES[value] || 'Phunky';
+      return {
+        id: nextId.current++,
+        row,
+        col,
+        value,
+        nftId: nftMap.current[value] || 1,
+        badge,
+        isNew,
+        isMerged: false,
+      };
+    },
+    [],
+  );
 
-  // Get or create audio context (must be defined early for all sound functions)
-  const getAudioContext = useCallback(() => {
-    if (!audioContextRef.current) {
-      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      audioContextRef.current = new AudioContextClass();
+  // ------------------------------------------------------------------
+  // New game
+  // ------------------------------------------------------------------
+
+  const newGame = useCallback(() => {
+    nextId.current = 0;
+    isAnimating.current = false;
+    totalMerges.current = 0;
+    scoreSubmitted.current = false;
+    // Only re-randomize badges the player actually reached
+    nftMap.current = pickNftMap(nftMap.current, highestTile.current);
+    highestTile.current = 0;
+    preloadNftImages(nftMap.current);
+    setScore(0);
+    setDisplayScore(0);
+    setGameState('playing');
+    setKeepPlaying(false);
+
+    // Reset juice state
+    milestonesReached.current = new Set();
+    pendingMerges.current = [];
+    moveCombo.current = 0;
+    setDangerLevel('safe');
+    undoSnapshot.current = null;
+    setUndoUsed(false);
+
+    // Spawn two random tiles
+    const emptyCells: { r: number; c: number }[] = [];
+    for (let r = 0; r < ROWS; r++)
+      for (let c = 0; c < COLS; c++) emptyCells.push({ r, c });
+
+    const first = emptyCells.splice(
+      Math.floor(Math.random() * emptyCells.length),
+      1,
+    )[0];
+    const second = emptyCells.splice(
+      Math.floor(Math.random() * emptyCells.length),
+      1,
+    )[0];
+
+    setTiles([
+      makeTile(first.r, first.c, 2, true),
+      makeTile(second.r, second.c, 2, true),
+    ]);
+
+    // Arcade lights: game started
+    triggerEvent('play:active');
+  }, [makeTile, triggerEvent]);
+
+  // ------------------------------------------------------------------
+  // Tutorial
+  // ------------------------------------------------------------------
+
+  const startTutorial = useCallback(() => {
+    nextId.current = 0;
+    isAnimating.current = false;
+    totalMerges.current = 0;
+    scoreSubmitted.current = false;
+    nftMap.current = pickNftMap(nftMap.current, highestTile.current);
+    highestTile.current = 0;
+    preloadNftImages(nftMap.current);
+    setScore(0);
+    setDisplayScore(0);
+    setGameState('playing');
+    setKeepPlaying(false);
+    setDangerLevel('safe');
+    undoSnapshot.current = null;
+    setUndoUsed(false);
+    milestonesReached.current = new Set();
+    setIsTutorial(true);
+    setTutorialStep(0);
+    tutorialStepRef.current = 0;
+
+    // Place step-0 tiles
+    const step0 = TUTORIAL_STEPS[0];
+    if (step0.setupTiles) {
+      setTiles(step0.setupTiles.map((t) => makeTile(t.row, t.col, t.value, true)));
     }
-    return audioContextRef.current;
-  }, []);
+  }, [makeTile]);
 
-  // Ref for handleNewGame to allow forward reference
-  const handleNewGameRef = useRef<(() => void) | null>(null);
+  const endTutorial = useCallback(() => {
+    setIsTutorial(false);
+    setTutorialStep(0);
+    tutorialStepRef.current = 0;
+    newGame();
+  }, [newGame]);
 
-  // Initialize game on mount
+  const handleUndo = useCallback(() => {
+    if (undoUsed || !undoSnapshot.current || isAnimating.current) return;
+    const snap = undoSnapshot.current;
+    setTiles(snap.tiles);
+    setScore(snap.score);
+    setUndoUsed(true);
+    undoSnapshot.current = null;
+    setDangerLevel('safe');
+    setGameState('playing');
+  }, [undoUsed]);
+
+  // Init on mount
   useEffect(() => {
-    handleNewGameRef.current?.();
-  }, []);
+    newGame();
+  }, [newGame]);
 
-  // TASK 130: Check for challenge on page load
+  // Measure the arcade screen container to get real available space.
+  // Walk up past GameShell's .game-shell div (which has min-height: 100vh)
+  // to the actual constrained arcade frame area.
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const challenge = params.get('challenge');
-
-    if (challenge) {
-      try {
-        const decoded = atob(challenge);
-        const [scoreStr] = decoded.split('-');
-        const score = parseInt(scoreStr, 10);
-        if (!isNaN(score)) {
-          // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: set challenge target from URL params on mount
-          setChallengeTarget(score);
-        }
-      } catch {
-        // Invalid challenge, ignore
+    const el = containerRef.current;
+    // Walk up: .nft-merge-game → .nft-merge-wrapper → .game-shell → arcade container
+    let target = el?.parentElement || el; // .nft-merge-wrapper
+    if (target?.parentElement?.classList.contains('game-shell')) {
+      target = target.parentElement.parentElement || target;
+    }
+    if (!target) return;
+    const measure = () => {
+      const rect = target.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        setSizes(calculateSizes(rect.width, rect.height));
       }
-    }
-  }, []);
-
-  // iOS audio unlock
-  useEffect(() => {
-    const unlock = () => {
-      Howler.ctx?.resume();
-      document.removeEventListener('touchstart', unlock);
     };
-    document.addEventListener('touchstart', unlock);
-    return () => document.removeEventListener('touchstart', unlock);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(target);
+    return () => ro.disconnect();
   }, []);
 
-  // Save best score to localStorage
-  useEffect(() => {
-    if (score > bestScore) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: update best score from score comparison
-      setBestScore(score);
-      localStorage.setItem('merge2048-best', score.toString());
-    }
-  }, [score, bestScore]);
+  // ------------------------------------------------------------------
+  // Move logic (Bram Cohen's direction-agnostic line iterator)
+  // ------------------------------------------------------------------
 
-  // ============================================================================
-  // PHASE 5: DANGER STATE EFFECTS
-  // ============================================================================
+  const move = useCallback(
+    (direction: Direction) => {
+      if (isAnimating.current) return;
+      if (gameState === 'over') return;
+      if (gameState === 'won' && !keepPlaying) return;
 
-  // TASK 67: Update danger level based on empty cells
-  useEffect(() => {
-    const emptyCells = getEmptyCells(tiles).length;
-    let newLevel: DangerLevel = 'safe';
-    if (emptyCells <= DANGER_THRESHOLDS.imminent) {
-      newLevel = 'imminent';
-    } else if (emptyCells <= DANGER_THRESHOLDS.critical) {
-      newLevel = 'critical';
-    } else if (emptyCells <= DANGER_THRESHOLDS.warning) {
-      newLevel = 'warning';
-    }
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: derived danger level from tiles state
-    setDangerLevel(newLevel);
-  }, [tiles]);
-
-  // TASK 74: Periodic danger haptic pulses
-  useEffect(() => {
-    if (dangerLevel === 'safe') {
-      if (dangerPulseIntervalRef.current) {
-        clearInterval(dangerPulseIntervalRef.current);
-        dangerPulseIntervalRef.current = null;
-      }
-      return;
-    }
-
-    const interval = dangerLevel === 'imminent' ? 500 : dangerLevel === 'critical' ? 1000 : 2000;
-    dangerPulseIntervalRef.current = setInterval(() => {
-      // Inline danger pulse haptic to avoid initialization order issues
-      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-        navigator.vibrate(8);
-      }
-    }, interval);
-
-    return () => {
-      if (dangerPulseIntervalRef.current) {
-        clearInterval(dangerPulseIntervalRef.current);
-      }
-    };
-  }, [dangerLevel]);
-
-  // ============================================================================
-  // PHASE 6: FEVER MODE EFFECTS
-  // ============================================================================
-
-  // TASK 81: Reset fever if too much time between merges
-  useEffect(() => {
-    const checkCooldown = setInterval(() => {
-      if (Date.now() - lastMergeTimeRef.current > FEVER_CONFIG.cooldownAfterNoMerge) {
-        if (feverState.active) {
-          // Inline fever deactivation to avoid initialization order issues
-          setFeverState({
-            active: false,
-            multiplier: 1,
-            intensity: 0,
-            startTime: 0,
-          });
+      setTiles((prevTiles) => {
+        // Save undo snapshot (before any changes)
+        if (!undoUsed) {
+          undoSnapshot.current = { tiles: prevTiles.map(t => ({ ...t })), score };
         }
-        consecutiveMergesRef.current = 0;
-      }
-    }, 500);
 
-    return () => clearInterval(checkCooldown);
-  }, [feverState.active]);
+        // Reset per-move juice counters
+        pendingMerges.current = [];
+        moveCombo.current = 0;
 
-  // Clear isNew/isMerged flags after animation
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setTiles((prev) =>
-        prev.map((tile) => ({
-          ...tile,
+        // Direction mapping
+        const isHorizontal = direction === 'left' || direction === 'right';
+        const isReversed = direction === 'right' || direction === 'down';
+        const primarySize = isHorizontal ? ROWS : COLS;
+        const secondarySize = isHorizontal ? COLS : ROWS;
+
+        const getRC = (i: number, j: number) => {
+          const jj = isReversed ? secondarySize - 1 - j : j;
+          return isHorizontal ? { row: i, col: jj } : { row: jj, col: i };
+        };
+
+        const newTiles = prevTiles.map((t) => ({
+          ...t,
           isNew: false,
           isMerged: false,
-        }))
-      );
-      // TASK 56: Clear move direction after animation
-      setLastMoveDirection(null);
-    }, 200);
+        }));
+        let moved = false;
+        let scoreGain = 0;
+        const toRemove: number[] = [];
+        const toAdd: Tile[] = [];
 
+        for (let i = 0; i < primarySize; i++) {
+          // Collect tiles in this line, in order
+          const line: Tile[] = [];
+          for (let j = 0; j < secondarySize; j++) {
+            const { row, col } = getRC(i, j);
+            const tile = newTiles.find(
+              (t) => t.row === row && t.col === col && !toRemove.includes(t.id),
+            );
+            if (tile) line.push(tile);
+          }
+
+          let targetJ = 0;
+          let skip = false;
+
+          for (let idx = 0; idx < line.length; idx++) {
+            if (skip) {
+              skip = false;
+              continue;
+            }
+
+            const tile = line[idx];
+            const nextTile = line[idx + 1];
+            const { row: tR, col: tC } = getRC(i, targetJ);
+
+            if (nextTile && tile.value === nextTile.value) {
+              // Merge
+              const newValue = tile.value * 2;
+              scoreGain += newValue;
+              totalMerges.current++;
+              if (newValue > highestTile.current) highestTile.current = newValue;
+
+              toRemove.push(tile.id, nextTile.id);
+              // Move both toward target during slide
+              tile.row = tR;
+              tile.col = tC;
+              nextTile.row = tR;
+              nextTile.col = tC;
+
+              const merged = makeTile(tR, tC, newValue);
+              merged.isMerged = true;
+              toAdd.push(merged);
+
+              // Track for juice effects
+              pendingMerges.current.push({ value: newValue, row: tR, col: tC });
+              moveCombo.current++;
+
+              skip = true;
+              moved = true;
+            } else {
+              // Slide
+              if (tile.row !== tR || tile.col !== tC) {
+                tile.row = tR;
+                tile.col = tC;
+                moved = true;
+              }
+            }
+            targetJ++;
+          }
+        }
+
+        if (!moved) {
+          // Invalid move — sound + haptic
+          playInvalidMove();
+          haptic.tap();
+          triggerEvent('miss:light');
+          return prevTiles;
+        }
+
+        isAnimating.current = true;
+
+        // Freeze frame: add 50ms weight to big merges (256+)
+        const hasBigMerge = pendingMerges.current.some(m => m.value >= 256);
+        const freezeDelay = hasBigMerge ? 50 : 0;
+
+        // Phase 1: slide (CSS transition handles visual).
+        // Return tiles with updated positions (merged tiles not yet swapped).
+        // After SLIDE_DURATION, swap in merged tiles + spawn.
+        setTimeout(() => {
+          setTiles((current) => {
+            const removeSet = new Set(toRemove);
+            const afterMerge = current.filter((t) => !removeSet.has(t.id));
+            afterMerge.push(...toAdd);
+
+            const curStep = tutorialStepRef.current;
+            const inTutorial = curStep >= 0 && curStep < TUTORIAL_STEPS.length;
+
+            if (inTutorial && isTutorial) {
+              // ── Tutorial spawn logic ──
+              const step = TUTORIAL_STEPS[curStep];
+
+              // Check if step target is met
+              const targetMet =
+                step.targetValue === 0 || // any move
+                (step.targetValue > 0 &&
+                  afterMerge.some((t) => t.value >= step.targetValue));
+
+              if (targetMet) {
+                const nextStep = curStep + 1;
+                tutorialStepRef.current = nextStep;
+                setTutorialStep(nextStep);
+
+                // Spawn the next step's guided tile (if defined and cell is empty)
+                if (nextStep < TUTORIAL_STEPS.length) {
+                  const ns = TUTORIAL_STEPS[nextStep];
+                  if (ns.spawnAfterPrev) {
+                    const grid = getGrid(afterMerge);
+                    const { row: sr, col: sc, value: sv } = ns.spawnAfterPrev;
+                    if (grid[sr][sc] === 0) {
+                      afterMerge.push(makeTile(sr, sc, sv, true));
+                    } else {
+                      // Fallback: find an empty cell for the guided tile
+                      const empty: { r: number; c: number }[] = [];
+                      for (let r = 0; r < ROWS; r++)
+                        for (let c = 0; c < COLS; c++)
+                          if (grid[r][c] === 0) empty.push({ r, c });
+                      if (empty.length > 0) {
+                        const { r, c } = empty[Math.floor(Math.random() * empty.length)];
+                        afterMerge.push(makeTile(r, c, sv, true));
+                      }
+                    }
+                  }
+                }
+              } else {
+                // Step not met yet — spawn a random Phunky (value 2) to keep board playable
+                const grid = getGrid(afterMerge);
+                const empty: { r: number; c: number }[] = [];
+                for (let r = 0; r < ROWS; r++)
+                  for (let c = 0; c < COLS; c++)
+                    if (grid[r][c] === 0) empty.push({ r, c });
+                if (empty.length > 0) {
+                  const { r, c } = empty[Math.floor(Math.random() * empty.length)];
+                  afterMerge.push(makeTile(r, c, 2, true));
+                }
+              }
+            } else {
+              // ── Normal spawn logic ──
+              const grid = getGrid(afterMerge);
+              const empty: { r: number; c: number }[] = [];
+              for (let r = 0; r < ROWS; r++)
+                for (let c = 0; c < COLS; c++)
+                  if (grid[r][c] === 0) empty.push({ r, c });
+
+              if (empty.length > 0) {
+                const { r, c } =
+                  empty[Math.floor(Math.random() * empty.length)];
+                const spawnValue = Math.random() < 0.9 ? 2 : 4;
+                afterMerge.push(makeTile(r, c, spawnValue, true));
+              }
+
+              // Check win
+              const hasWinTile = afterMerge.some((t) => t.value >= WIN_VALUE);
+              if (hasWinTile && !keepPlaying) {
+                setGameState('won');
+              }
+
+              // Check game over
+              if (checkGameOver(afterMerge)) {
+                setGameState('over');
+              }
+            }
+
+            isAnimating.current = false;
+            return dedupeTiles(afterMerge);
+          });
+
+          // Update score (skip in tutorial)
+          if (scoreGain > 0 && !isTutorial) {
+            setScore((prev) => {
+              const newScore = prev + scoreGain;
+              setBestScore((best) => {
+                const updated = Math.max(best, newScore);
+                localStorage.setItem('merge2048-best', String(updated));
+                return updated;
+              });
+              return newScore;
+            });
+          }
+
+          // ── Juice: fire effects after tiles arrive ──
+          const boardEl = boardRef.current;
+          const boardRect = boardEl?.getBoundingClientRect();
+
+          for (const m of pendingMerges.current) {
+            // Sound — pitch scales with tile value
+            playMergeTile(m.value);
+
+            // Haptic — intensity scales with tile value
+            // Arcade lights — escalating merge events
+            if (m.value >= 512) {
+              haptic.celebration();
+              triggerEvent('score:large');
+            } else if (m.value >= 128) {
+              haptic.success();
+              triggerEvent('score:medium');
+            } else if (m.value >= 64) {
+              haptic.success();
+              triggerEvent('score:small');
+            } else {
+              haptic.tap();
+            }
+
+            // Visual effects at merge position
+            if (boardRect) {
+              const pos = getPosition(m.row, m.col, cellSize, gap, padding);
+              const screenX = boardRect.left + pos.left + cellSize / 2;
+              const screenY = boardRect.top + pos.top + cellSize / 2;
+
+              effects.trigger({
+                type: 'shockwave',
+                intensity: m.value >= 256 ? 'strong' : 'normal',
+                position: { x: screenX, y: screenY },
+              });
+              effects.trigger({
+                type: 'scorePopup',
+                data: { score: m.value },
+                position: { x: screenX, y: screenY },
+              });
+              if (m.value >= 256) {
+                effects.trigger({
+                  type: 'sparks',
+                  intensity: m.value >= 512 ? 'strong' : 'normal',
+                  position: { x: screenX, y: screenY },
+                });
+              }
+            }
+
+            // Milestone celebrations (512, 1024, 2048)
+            if (
+              (m.value === 512 || m.value === 1024 || m.value === 2048) &&
+              !milestonesReached.current.has(m.value)
+            ) {
+              milestonesReached.current.add(m.value);
+              effects.trigger({ type: 'confetti', intensity: 'strong' });
+              haptic.celebration();
+              if (m.value === 2048) {
+                playWinSound();
+                triggerEvent('game:win');
+              } else {
+                playMatchFound();
+                triggerEvent('progress:complete');
+              }
+            }
+          }
+
+          // Combo counter (visual, no score change)
+          if (moveCombo.current >= 2) {
+            effects.trigger({
+              type: 'comboText',
+              data: { combo: moveCombo.current },
+            });
+            // Arcade lights: combo chain
+            const comboTier = moveCombo.current >= 5 ? 'max' : moveCombo.current >= 4 ? 'high' : moveCombo.current >= 3 ? 'mid' : 'low';
+            triggerEvent(`combo:${comboTier}` as GameEvent);
+          }
+
+          // Spawn sound
+          playTileSpawn();
+
+          // Danger state — count empty cells after this move
+          setTiles((afterAll) => {
+            const grid = getGrid(afterAll);
+            let empties = 0;
+            for (let r = 0; r < ROWS; r++)
+              for (let c = 0; c < COLS; c++)
+                if (grid[r][c] === 0) empties++;
+            if (empties <= 2) {
+              setDangerLevel('critical');
+              triggerEvent('damage:light');
+            } else if (empties <= 4) {
+              setDangerLevel('warning');
+              triggerEvent('damage:light');
+            } else {
+              setDangerLevel('safe');
+            }
+            return afterAll; // no change
+          });
+        }, SLIDE_DURATION + freezeDelay);
+
+        return newTiles;
+      });
+    },
+    [gameState, keepPlaying, makeTile, isTutorial],
+  );
+
+  // ------------------------------------------------------------------
+  // Leaderboard submission on game over
+  // ------------------------------------------------------------------
+
+  useEffect(() => {
+    if (
+      gameState === 'over' &&
+      isSignedIn &&
+      !scoreSubmitted.current &&
+      totalMerges.current >= 3
+    ) {
+      scoreSubmitted.current = true;
+      submitScore(score, undefined, {
+        highestTile: highestTile.current,
+        totalMerges: totalMerges.current,
+      });
+    }
+  }, [gameState, isSignedIn, score, submitScore]);
+
+  // Game over / win juice — keep it positive, encourage replay
+  useEffect(() => {
+    if (gameState === 'over' && !isTutorial) {
+      playMergeGameOver();
+      haptic.tap();
+      triggerEvent('game:over');
+    }
+  }, [gameState, isTutorial, playMergeGameOver, haptic, triggerEvent]);
+
+  // Animated score counter
+  useEffect(() => {
+    if (score === displayScore) return;
+    const start = displayScore;
+    const startTime = performance.now();
+    const animate = (now: number) => {
+      const t = Math.min((now - startTime) / 300, 1);
+      const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
+      setDisplayScore(Math.floor(start + (score - start) * eased));
+      if (t < 1) {
+        animatingScoreRef.current = requestAnimationFrame(animate);
+      }
+    };
+    animatingScoreRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (animatingScoreRef.current) cancelAnimationFrame(animatingScoreRef.current);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [score]);
+
+  // ------------------------------------------------------------------
+  // Keyboard input
+  // ------------------------------------------------------------------
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const map: Record<string, Direction> = {
+        ArrowUp: 'up',
+        ArrowDown: 'down',
+        ArrowLeft: 'left',
+        ArrowRight: 'right',
+      };
+      const dir = map[e.key];
+      if (dir) {
+        e.preventDefault();
+        move(dir);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [move]);
+
+  // ------------------------------------------------------------------
+  // Touch / swipe input
+  // ------------------------------------------------------------------
+
+  useEffect(() => {
+    const board = boardRef.current;
+    if (!board) return;
+
+    const onTouchStart = (e: TouchEvent) => {
+      touchStart.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      };
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      const dx = e.changedTouches[0].clientX - touchStart.current.x;
+      const dy = e.changedTouches[0].clientY - touchStart.current.y;
+      const absDx = Math.abs(dx);
+      const absDy = Math.abs(dy);
+      if (Math.max(absDx, absDy) < 30) return; // too short
+
+      if (absDx > absDy) {
+        move(dx > 0 ? 'right' : 'left');
+      } else {
+        move(dy > 0 ? 'down' : 'up');
+      }
+    };
+
+    board.addEventListener('touchstart', onTouchStart, { passive: true });
+    board.addEventListener('touchend', onTouchEnd, { passive: true });
+    return () => {
+      board.removeEventListener('touchstart', onTouchStart);
+      board.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [move]);
+
+  // ------------------------------------------------------------------
+  // Clear isNew/isMerged flags after animation
+  // ------------------------------------------------------------------
+
+  useEffect(() => {
+    const hasAnim = tiles.some((t) => t.isNew || t.isMerged);
+    if (!hasAnim) return;
+    const timer = setTimeout(() => {
+      setTiles((prev) =>
+        prev.map((t) =>
+          t.isNew || t.isMerged ? { ...t, isNew: false, isMerged: false } : t,
+        ),
+      );
+    }, 200);
     return () => clearTimeout(timer);
   }, [tiles]);
 
-  // ============================================================================
-  // PHASE 2: PREMIUM HAPTIC FUNCTIONS
-  // ============================================================================
+  // ------------------------------------------------------------------
+  // Render
+  // ------------------------------------------------------------------
 
-  // TASK 20: Premium merge haptic based on tile value
-  const triggerMergeHaptic = useCallback((resultValue: number) => {
-    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-      const config = HAPTIC_CONFIG[resultValue] || { pattern: [20] };
-      navigator.vibrate(config.pattern);
+  const { cellSize, gap, padding, boardW, boardH, showSidebar } = sizes;
+
+  // Background grid cells
+  const gridCells = [];
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const pos = getPosition(r, c, cellSize, gap, padding);
+      gridCells.push(
+        <div
+          key={`cell-${r}-${c}`}
+          className="nft-merge-cell"
+          style={{
+            width: cellSize,
+            height: cellSize,
+            top: pos.top,
+            left: pos.left,
+          }}
+        />,
+      );
     }
-  }, []);
-
-  // TASK 21: Swipe start haptic (ultra-light)
-  const triggerSwipeHaptic = useCallback(() => {
-    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-      navigator.vibrate(5);
-    }
-  }, []);
-
-  // TASK 22: Slide haptic (light)
-  const triggerSlideHaptic = useCallback(() => {
-    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-      navigator.vibrate(8);
-    }
-  }, []);
-
-  // TASK 23: Error haptic for invalid move
-  const triggerErrorHaptic = useCallback(() => {
-    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-      navigator.vibrate([10, 50, 10]);
-    }
-  }, []);
-
-  // TASK 24: Win celebration haptic
-  const triggerWinHaptic = useCallback(() => {
-    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-      navigator.vibrate([20, 30, 25, 30, 30, 30, 40, 30, 50]);
-    }
-  }, []);
-
-  // TASK 25: Game over haptic
-  const triggerGameOverHaptic = useCallback(() => {
-    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-      navigator.vibrate([50, 100, 35, 150, 20]);
-    }
-  }, []);
-
-  // ============================================================================
-  // PHASE 4: VISUAL JUICE EFFECTS FUNCTIONS
-  // ============================================================================
-
-  // TASK 46: Freeze frame function
-  const triggerFreezeFrame = useCallback((duration: number = 50) => {
-    setFreezeFrame(true);
-    if (freezeTimeoutRef.current) clearTimeout(freezeTimeoutRef.current);
-    freezeTimeoutRef.current = setTimeout(() => setFreezeFrame(false), duration);
-  }, []);
-
-  // TASK 58: Camera zoom function
-  const triggerCameraZoom = useCallback((intensity: number = 1.03) => {
-    setCameraZoom(intensity);
-    setTimeout(() => setCameraZoom(1), 150);
-  }, []);
-
-  // ============================================================================
-  // ============================================================================
-  // PHASE 7: NEXT TILE PREVIEW FUNCTIONS
-  // ============================================================================
-
-  // TASK 93: Generate next tile value
-  const generateNextTile = useCallback((): number => {
-    return Math.random() < 0.9 ? 2 : 4;
-  }, []);
-
-  // TASK 94: Initialize next tile queue
-  const initNextTileQueue = useCallback(() => {
-    setNextTileQueue([generateNextTile(), generateNextTile()]);
-  }, [generateNextTile]);
-
-  // ============================================================================
-  // PHASE 8: COMBO SYSTEM FUNCTIONS
-  // ============================================================================
-
-  // TASK 103: Increment combo on merge
-  const incrementCombo = useCallback(() => {
-    const now = Date.now();
-    setComboState(prev => {
-      const timeSinceLastMerge = now - prev.lastMergeTime;
-
-      if (prev.lastMergeTime === 0 || timeSinceLastMerge > COMBO_TIMEOUT) {
-        return { count: 1, lastMergeTime: now, isActive: true };
-      }
-
-      return { count: prev.count + 1, lastMergeTime: now, isActive: true };
-    });
-  }, [COMBO_TIMEOUT]);
-
-  // TASK 110: Combo break sound
-  const playComboBreak = useCallback(() => {
-    if (isMuted) return;
-    const ctx = getAudioContext();
-    if (ctx.state === 'suspended') ctx.resume();
-
-    // Descending "whomp" sound
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(300, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.2);
-    gain.gain.setValueAtTime(0.2, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
-    osc.connect(gain).connect(ctx.destination);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.25);
-  }, [isMuted, getAudioContext]);
-
-  // TASK 104: Reset combo after timeout
-  useEffect(() => {
-    const checkTimeout = setInterval(() => {
-      if (comboState.isActive && Date.now() - comboState.lastMergeTime > COMBO_TIMEOUT) {
-        if (comboState.count >= 3) {
-          playComboBreak();
-        }
-        setComboState({ count: 0, lastMergeTime: 0, isActive: false });
-      }
-    }, 200);
-
-    return () => clearInterval(checkTimeout);
-  }, [comboState, COMBO_TIMEOUT, playComboBreak]);
-
-  // ============================================================================
-  // PHASE 1: SOUND FOUNDATION FUNCTIONS
-  // ============================================================================
-
-  // TASK 2: Pitch-based merge sound function
-  const playMergeSound = useCallback((resultValue: number) => {
-    if (isMuted) return;
-    const config = MERGE_SOUND_CONFIG[resultValue] || { pitch: 1.0, volume: 0.5, layers: 1 };
-    const ctx = getAudioContext();
-    if (ctx.state === 'suspended') ctx.resume();
-
-    // Base merge sound - sine wave pop
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    const baseFreq = 440 * config.pitch; // A4 scaled by pitch
-
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(baseFreq, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.5, ctx.currentTime + 0.15);
-    gain.gain.setValueAtTime(config.volume * 0.5, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
-
-    osc.connect(gain).connect(ctx.destination);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.2);
-
-    // TASK 2: Add sparkle layer for 128+
-    if (config.layers >= 2) {
-      setTimeout(() => {
-        const sparkleOsc = ctx.createOscillator();
-        const sparkleGain = ctx.createGain();
-        sparkleOsc.type = 'sine';
-        sparkleOsc.frequency.setValueAtTime(baseFreq * 2, ctx.currentTime);
-        sparkleOsc.frequency.exponentialRampToValueAtTime(baseFreq * 3, ctx.currentTime + 0.1);
-        sparkleGain.gain.setValueAtTime(0.15, ctx.currentTime);
-        sparkleGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
-        sparkleOsc.connect(sparkleGain).connect(ctx.destination);
-        sparkleOsc.start(ctx.currentTime);
-        sparkleOsc.stop(ctx.currentTime + 0.15);
-      }, 30);
-    }
-
-    // Add bass hit for 512+
-    if (config.layers >= 3) {
-      const bassOsc = ctx.createOscillator();
-      const bassGain = ctx.createGain();
-      bassOsc.type = 'sine';
-      bassOsc.frequency.setValueAtTime(baseFreq * 0.25, ctx.currentTime);
-      bassGain.gain.setValueAtTime(0.3, ctx.currentTime);
-      bassGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
-      bassOsc.connect(bassGain).connect(ctx.destination);
-      bassOsc.start(ctx.currentTime);
-      bassOsc.stop(ctx.currentTime + 0.25);
-    }
-
-    // Full celebration for 2048
-    if (config.layers >= 4) {
-      setTimeout(() => playWinSound(), 100);
-    }
-  }, [isMuted, getAudioContext, playWinSound]);
-
-  // TASK 3: Tile spawn sound
-  const playSpawnSound = useCallback(() => {
-    if (isMuted) return;
-    const ctx = getAudioContext();
-    if (ctx.state === 'suspended') ctx.resume();
-
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    const freq = 600 + Math.random() * 60; // Slight randomization
-
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(freq, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(freq * 0.8, ctx.currentTime + 0.08);
-    gain.gain.setValueAtTime(0.15, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
-
-    osc.connect(gain).connect(ctx.destination);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.1);
-  }, [isMuted, getAudioContext]);
-
-  // TASK 4: Tile slide sound
-  const playSlideSound = useCallback(() => {
-    if (isMuted) return;
-    const ctx = getAudioContext();
-    if (ctx.state === 'suspended') ctx.resume();
-
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(200, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.05);
-    gain.gain.setValueAtTime(0.08, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
-
-    osc.connect(gain).connect(ctx.destination);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.06);
-  }, [isMuted, getAudioContext]);
-
-  // TASK 5: Signature chime sound (A5 → E6)
-  const playSignatureChime = useCallback(() => {
-    if (isMuted) return;
-    const ctx = getAudioContext();
-    if (ctx.state === 'suspended') ctx.resume();
-
-    // Note 1: A5 (880 Hz)
-    const osc1 = ctx.createOscillator();
-    const gain1 = ctx.createGain();
-    osc1.frequency.value = 880;
-    osc1.type = 'sine';
-    gain1.gain.setValueAtTime(0.3, ctx.currentTime);
-    gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-    osc1.connect(gain1).connect(ctx.destination);
-    osc1.start(ctx.currentTime);
-    osc1.stop(ctx.currentTime + 0.3);
-
-    // Note 2: E6 (1318 Hz) - delayed
-    setTimeout(() => {
-      const osc2 = ctx.createOscillator();
-      const gain2 = ctx.createGain();
-      osc2.frequency.value = 1318;
-      osc2.type = 'sine';
-      gain2.gain.setValueAtTime(0.35, ctx.currentTime);
-      gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
-      osc2.connect(gain2).connect(ctx.destination);
-      osc2.start(ctx.currentTime);
-      osc2.stop(ctx.currentTime + 0.4);
-    }, 100);
-  }, [isMuted, getAudioContext]);
-
-  // TASK 13: Invalid move sound
-  const playInvalidMoveSound = useCallback(() => {
-    if (isMuted) return;
-    const ctx = getAudioContext();
-    if (ctx.state === 'suspended') ctx.resume();
-
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(150, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.1);
-    gain.gain.setValueAtTime(0.15, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
-
-    osc.connect(gain).connect(ctx.destination);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.12);
-  }, [isMuted, getAudioContext]);
-
-  // TASK 7: Check and trigger milestone signature sound
-  const checkMilestone = useCallback((highestMerged: number) => {
-    if (MILESTONE_VALUES.includes(highestMerged) && !milestonesReachedRef.current.has(highestMerged)) {
-      milestonesReachedRef.current.add(highestMerged);
-      playSignatureChime();
-      // Arcade lights: Milestone tile created
-      triggerEvent('progress:complete');
-    }
-  }, [playSignatureChime, triggerEvent]);
-
-  // ============================================================================
-  // PHASE 6: FEVER MODE FUNCTIONS
-  // ============================================================================
-
-  // TASK 89: Fever activation sound
-  const playFeverActivation = useCallback(() => {
-    if (isMuted) return;
-    const ctx = getAudioContext();
-    if (ctx.state === 'suspended') ctx.resume();
-
-    // Ascending whoosh + impact
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(200, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.3);
-    gain.gain.setValueAtTime(0.4, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-    osc.connect(gain).connect(ctx.destination);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.4);
-  }, [isMuted, getAudioContext]);
-
-  // TASK 82: Fever activation function
-  const activateFeverMode = useCallback(() => {
-    setFeverState({
-      active: true,
-      multiplier: FEVER_CONFIG.scoreMultiplier,
-      intensity: 1,
-      startTime: Date.now(),
-    });
-    playFeverActivation();
-    triggerConfetti();
-    showEpicCallout('🔥 FEVER MODE! 🔥');
-  }, [playFeverActivation, triggerConfetti, showEpicCallout]);
-
-  /**
-   * Show score popup animation
-   */
-  const showScorePopup = useCallback((value: number) => {
-    scorePopupKeyRef.current += 1;
-    setScorePopup({ value, key: scorePopupKeyRef.current });
-    setTimeout(() => setScorePopup(null), 800);
-  }, []);
-
-  /**
-   * Start a new game
-   */
-  const handleNewGame = useCallback(() => {
-    playClick();
-    const { tiles: newTiles, nextTileId: newNextId } = initGame();
-    setTiles(newTiles);
-    nextTileIdRef.current = newNextId;
-    highestTileRef.current = 2;
-    totalMergesRef.current = 0; // NEW: Reset total merges for minimum actions
-    // TASK 18: Reset milestone tracking on new game
-    milestonesReachedRef.current = new Set();
-    // TASK 78: Clean up danger state on new game
-    setDangerLevel('safe');
-    if (dangerPulseIntervalRef.current) {
-      clearInterval(dangerPulseIntervalRef.current);
-      dangerPulseIntervalRef.current = null;
-    }
-    // TASK 92: Reset fever state on new game
-    setFeverState({
-      active: false,
-      multiplier: 1,
-      intensity: 0,
-      startTime: 0,
-    });
-    consecutiveMergesRef.current = 0;
-    lastMergeTimeRef.current = 0;
-    // Initialize next tile queue on new game
-    initNextTileQueue();
-    // Reset combo on new game
-    setComboState({ count: 0, lastMergeTime: 0, isActive: false });
-    setScore(0);
-    setIsGameOver(false);
-    setHasWon(false);
-    setDismissedWin(false);
-    setScorePopup(null);
-    setMeetsMinimumMerges(false);
-    resetAllEffects();
-    // Start background music on user gesture (required for mobile browsers)
-    // Skip if GameModal manages the music (check both ref AND context for timing safety)
-    if (!bgMusicAudioRef.current && !musicManagedExternallyRef.current && !musicManagedExternally) {
-      playNextBgMusicTrack();
-    }
-    // Arcade lights: Game started
-    triggerEvent('play:active');
-  }, [playClick, resetAllEffects, initNextTileQueue, playNextBgMusicTrack, musicManagedExternally, triggerEvent]);
-
-  // Keep handleNewGameRef in sync
-  useEffect(() => { handleNewGameRef.current = handleNewGame; }, [handleNewGame]);
-
-  /**
-   * Move tiles in the specified direction
-   */
-  /* eslint-disable react-hooks/preserve-manual-memoization -- Complex game callback with intentional state updates during animation frames */
-  const move = useCallback(
-    (direction: Direction) => {
-      if (isGameOver || isMovingRef.current) return;
-
-      isMovingRef.current = true;
-      // TASK 55: Track movement direction for squash/stretch
-      setLastMoveDirection(direction);
-
-      setTiles((currentTiles) => {
-        const grid = tilesToGrid(currentTiles);
-        const newGrid: (Tile | null)[][] = Array(GRID_SIZE)
-          .fill(null)
-          .map(() => Array(GRID_SIZE).fill(null));
-        let totalScoreGained = 0;
-        let moved = false;
-
-        // Process based on direction
-        if (direction === 'left' || direction === 'right') {
-          // Process rows
-          for (let row = 0; row < GRID_SIZE; row++) {
-            let line = [...grid[row]];
-
-            // Reverse for right movement (so we always merge toward index 0)
-            if (direction === 'right') {
-              line = line.reverse();
-            }
-
-            const { tiles: mergedTiles, scoreGained } = slideAndMerge(line, nextTileIdRef);
-            totalScoreGained += scoreGained;
-
-            // Pad with nulls and assign positions
-            const newLine: (Tile | null)[] = [];
-            for (let col = 0; col < GRID_SIZE; col++) {
-              if (col < mergedTiles.length) {
-                const tile = mergedTiles[col];
-                const actualCol = direction === 'right' ? GRID_SIZE - 1 - col : col;
-                newLine.push({ ...tile, row, col: actualCol });
-              } else {
-                newLine.push(null);
-              }
-            }
-
-            // Reverse back for right movement
-            if (direction === 'right') {
-              newLine.reverse();
-            }
-
-            newGrid[row] = newLine;
-          }
-        } else {
-          // Process columns (up/down)
-          for (let col = 0; col < GRID_SIZE; col++) {
-            let line = getColumn(grid, col);
-
-            // Reverse for down movement
-            if (direction === 'down') {
-              line = line.reverse();
-            }
-
-            const { tiles: mergedTiles, scoreGained } = slideAndMerge(line, nextTileIdRef);
-            totalScoreGained += scoreGained;
-
-            // Pad with nulls and assign positions
-            const newColumn: (Tile | null)[] = [];
-            for (let row = 0; row < GRID_SIZE; row++) {
-              if (row < mergedTiles.length) {
-                const tile = mergedTiles[row];
-                const actualRow = direction === 'down' ? GRID_SIZE - 1 - row : row;
-                newColumn.push({ ...tile, row: actualRow, col });
-              } else {
-                newColumn.push(null);
-              }
-            }
-
-            // Reverse back for down movement
-            if (direction === 'down') {
-              newColumn.reverse();
-            }
-
-            setColumn(newGrid, col, newColumn);
-          }
-        }
-
-        // Convert grid back to tiles array
-        const newTiles: Tile[] = [];
-        for (let row = 0; row < GRID_SIZE; row++) {
-          for (let col = 0; col < GRID_SIZE; col++) {
-            const tile = newGrid[row][col];
-            if (tile) {
-              newTiles.push(tile);
-            }
-          }
-        }
-
-        // Check if anything moved
-        const oldPositions = new Set(currentTiles.map((t) => `${t.row}-${t.col}-${t.value}`));
-        const newPositions = new Set(newTiles.map((t) => `${t.row}-${t.col}-${t.value}`));
-        moved =
-          oldPositions.size !== newPositions.size ||
-          [...oldPositions].some((p) => !newPositions.has(p));
-
-        if (moved) {
-          // TASK 11: Play slide sound (using new procedural sound)
-          playSlideSound();
-          // TASK 22 & 27: Use premium slide haptic
-          triggerSlideHaptic();
-
-          // TASK 83 & 84: Track consecutive merges and apply fever multiplier
-          if (totalScoreGained > 0) {
-            consecutiveMergesRef.current++;
-            lastMergeTimeRef.current = Date.now();
-            totalMergesRef.current++; // NEW: Track total merges for minimum actions
-
-            // TASK 103: Increment combo counter
-            incrementCombo();
-
-            // TASK 83: Trigger fever on consecutive merge threshold
-            if (!feverState.active && consecutiveMergesRef.current >= FEVER_CONFIG.activationThreshold) {
-              activateFeverMode();
-              // Arcade lights: Fever mode activated
-              triggerEvent('combo:max');
-            } else if (consecutiveMergesRef.current >= 3 && consecutiveMergesRef.current < FEVER_CONFIG.activationThreshold) {
-              // Arcade lights: Building toward fever
-              const comboTier = GAME_COMBO_TIERS['merge-2048'](consecutiveMergesRef.current);
-              if (comboTier !== 'start') {
-                triggerEvent(`combo:${comboTier}` as GameEvent);
-              }
-            }
-
-            // TASK 84: Apply score multiplier in fever mode
-            // NEW: Add combo multiplier (conservative tiers: 1.1x at 5, 1.2x at 9, 1.3x at 13)
-            const comboMultiplier = 
-              comboState.count >= 13 ? 1.3 :
-              comboState.count >= 9 ? 1.2 :
-              comboState.count >= 5 ? 1.1 : 1.0;
-            
-            const finalScore = feverState.active
-              ? Math.floor(totalScoreGained * feverState.multiplier * comboMultiplier)
-              : Math.floor(totalScoreGained * comboMultiplier);
-
-            setScore((prev) => prev + finalScore);
-            showScorePopup(finalScore);
-          }
-
-          // Check for big merges (screen shake + combo sound + universal effects)
-          const highestMerged = getHighestMergedValue(newTiles);
-
-          // TASK 8 & 9: Use new pitch-based merge sound system
-          if (highestMerged > 0) {
-            playMergeSound(highestMerged);
-            // Check for milestone and play signature chime
-            checkMilestone(highestMerged);
-            // Arcade lights: Merge with value-based tier (debounced)
-            const mergeTier = getMergeTier(highestMerged);
-            triggerEvent(`score:${mergeTier}` as GameEvent);
-          }
-
-          // TASK 28: Use premium merge haptic based on value
-          if (highestMerged > 0) {
-            triggerMergeHaptic(highestMerged);
-          }
-
-          if (highestMerged >= BIG_MERGE_THRESHOLD) {
-            // TASK 47: Trigger freeze frame for big merges
-            triggerFreezeFrame(60);
-            triggerScreenShake(300);
-            triggerShockwave('#ff6b00', 0.7);
-            triggerSparks('#ff6b00');
-            // TASK 61: Trigger camera zoom on big merges
-            if (highestMerged >= 512) {
-              triggerCameraZoom(1.08);
-            } else if (highestMerged >= 256) {
-              triggerCameraZoom(1.05);
-            }
-            // Track highest tile for metadata
-            if (highestMerged > highestTileRef.current) {
-              highestTileRef.current = highestMerged;
-              addFloatingEmoji(TILE_EMOJIS[highestMerged] || '🔥');
-              showEpicCallout(`${highestMerged}!`);
-            }
-            // Extra celebration for very high tiles
-            if (highestMerged >= 512) {
-              triggerConfetti();
-            }
-          } else if (highestMerged > 0) {
-            // Regular merge - combo tracked by incrementCombo()
-          }
-
-          // Check for win (first time reaching 2048)
-          // TASK 29: Use triggerWinHaptic for win
-          if (!hasWon && checkWin(newTiles)) {
-            setHasWon(true);
-            playWinSound();
-            triggerWinHaptic();
-            triggerConfetti();
-            showEpicCallout('YOU WIN!');
-            triggerShockwave('#FFD700', 1.0);
-            // Arcade lights: 2048 reached - WIN!
-            triggerEvent('game:win');
-          }
-
-          // Spawn new tile after animation delay
-          // TASK 95: Use queue when spawning tiles
-          setTimeout(() => {
-            setTiles((prev) => {
-              const emptyCells = getEmptyCells(prev);
-              if (emptyCells.length === 0) return prev;
-
-              const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-              const value = nextTileQueue[0] || (Math.random() < 0.9 ? 2 : 4);
-
-              // Shift queue and add new tile
-              setNextTileQueue(prevQueue => [...prevQueue.slice(1), generateNextTile()]);
-
-              const newTile: Tile = {
-                id: nextTileIdRef.current++,
-                value,
-                row: randomCell.row,
-                col: randomCell.col,
-                isNew: true,
-              };
-
-              if (newTile) {
-                // TASK 10: Play spawn sound
-                playSpawnSound();
-                const tilesWithNew = [...prev, newTile];
-                // Check for game over after spawning new tile
-                // TASK 29: Use triggerGameOverHaptic for game over
-                if (checkGameOver(tilesWithNew)) {
-                  // Capture screenshot before game over overlay
-                  const gridEl = document.querySelector('.grid-container') as HTMLElement;
-                  if (gridEl) {
-                    captureGameArea(gridEl).then(screenshot => {
-                      if (screenshot) setGameScreenshot(screenshot);
-                    });
-                  }
-                  setSadImage(SAD_IMAGES[Math.floor(Math.random() * SAD_IMAGES.length)]);
-                  // Stop background music immediately on death
-                  if (bgMusicAudioRef.current) {
-                    bgMusicAudioRef.current.pause();
-                    bgMusicAudioRef.current = null;
-                  }
-                  // Set minimum merges state for render (avoids ref access during render)
-                  setMeetsMinimumMerges(totalMergesRef.current >= 3);
-                  setIsGameOver(true);
-                  playGameOver();
-                  triggerGameOverHaptic();
-                  triggerScreenShake(500);
-                  addFloatingEmoji('💀');
-                  // Arcade lights: Game over (check for high score)
-                  const finalScore = score + totalScoreGained;
-                  if (finalScore > bestScore) {
-                    triggerEvent('game:highScore');
-                  } else {
-                    triggerEvent('game:over');
-                  }
-                  // Submit score to leaderboard (only if minimum 3 merges)
-                  if (isSignedIn && totalMergesRef.current >= 3) {
-                    setScoreSubmitted(true);
-                    submitScore(finalScore, undefined, {
-                      highestTile: highestTileRef.current,
-                      totalMerges: totalMergesRef.current,
-                    }).then(result => {
-                      if (result?.isNewHighScore) setIsNewPersonalBest(true);
-                    });
-                  }
-                }
-                return tilesWithNew;
-              }
-              // Check game over even without new tile
-              if (checkGameOver(prev)) {
-                // Capture screenshot before game over overlay
-                const gridEl = document.querySelector('.grid-container') as HTMLElement;
-                if (gridEl) {
-                  captureGameArea(gridEl).then(screenshot => {
-                    if (screenshot) setGameScreenshot(screenshot);
-                  });
-                }
-                setSadImage(SAD_IMAGES[Math.floor(Math.random() * SAD_IMAGES.length)]);
-                // Stop background music immediately on death
-                if (bgMusicAudioRef.current) {
-                  bgMusicAudioRef.current.pause();
-                  bgMusicAudioRef.current = null;
-                }
-                // Set minimum merges state for render (avoids ref access during render)
-                setMeetsMinimumMerges(totalMergesRef.current >= 3);
-                setIsGameOver(true);
-                playGameOver();
-                triggerGameOverHaptic();
-                triggerScreenShake(500);
-                addFloatingEmoji('💀');
-                // Arcade lights: Game over (check for high score)
-                const finalScoreNoNewTile = score + totalScoreGained;
-                if (finalScoreNoNewTile > bestScore) {
-                  triggerEvent('game:highScore');
-                } else {
-                  triggerEvent('game:over');
-                }
-                // Submit score to leaderboard (only if minimum 3 merges)
-                if (isSignedIn && totalMergesRef.current >= 3) {
-                  setScoreSubmitted(true);
-                  submitScore(finalScoreNoNewTile, undefined, {
-                    highestTile: highestTileRef.current,
-                    totalMerges: totalMergesRef.current,
-                  }).then(result => {
-                    if (result?.isNewHighScore) setIsNewPersonalBest(true);
-                  });
-                }
-              }
-              return prev;
-            });
-            isMovingRef.current = false;
-          }, 150);
-
-          return newTiles;
-        } else {
-          // TASK 14: No move happened - play invalid move sound
-          playInvalidMoveSound();
-          // TASK 23: Error haptic for invalid move
-          triggerErrorHaptic();
-          isMovingRef.current = false;
-          return currentTiles;
-        }
-      });
-    },
-    [isGameOver, hasWon, showScorePopup, triggerScreenShake, playSlideSound, playMergeSound, playSpawnSound, playInvalidMoveSound, checkMilestone, playWinSound, playGameOver, isSignedIn, submitScore, score, triggerShockwave, triggerSparks, addFloatingEmoji, showEpicCallout, triggerConfetti, triggerSlideHaptic, triggerMergeHaptic, triggerWinHaptic, triggerGameOverHaptic, triggerErrorHaptic, incrementCombo, nextTileQueue, generateNextTile]
-  );
-  /* eslint-enable react-hooks/preserve-manual-memoization */
-
-  /**
-   * Handle keyboard input
-   */
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (isGameOver) return;
-
-      let direction: Direction | null = null;
-
-      switch (e.key) {
-        case 'ArrowUp':
-        case 'w':
-        case 'W':
-          direction = 'up';
-          break;
-        case 'ArrowDown':
-        case 's':
-        case 'S':
-          direction = 'down';
-          break;
-        case 'ArrowLeft':
-        case 'a':
-        case 'A':
-          direction = 'left';
-          break;
-        case 'ArrowRight':
-        case 'd':
-        case 'D':
-          direction = 'right';
-          break;
-      }
-
-      if (direction) {
-        e.preventDefault();
-        move(direction);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [move, isGameOver]);
-
-  /**
-   * Handle touch start
-   * TASK 30: Add haptic to touch start
-   */
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
-    // TASK 30: Trigger swipe haptic on touch start
-    triggerSwipeHaptic();
-  }, [triggerSwipeHaptic]);
-
-  /**
-   * Handle touch end - detect swipe direction
-   */
-  const handleTouchEnd = useCallback(
-    (e: React.TouchEvent) => {
-      if (!touchStartRef.current || isGameOver) return;
-
-      const touch = e.changedTouches[0];
-      const deltaX = touch.clientX - touchStartRef.current.x;
-      const deltaY = touch.clientY - touchStartRef.current.y;
-      const minSwipe = 50; // Minimum swipe distance
-
-      touchStartRef.current = null;
-
-      // Determine swipe direction
-      if (Math.abs(deltaX) > Math.abs(deltaY)) {
-        // Horizontal swipe
-        if (Math.abs(deltaX) > minSwipe) {
-          move(deltaX > 0 ? 'right' : 'left');
-        }
-      } else {
-        // Vertical swipe
-        if (Math.abs(deltaY) > minSwipe) {
-          move(deltaY > 0 ? 'down' : 'up');
-        }
-      }
-    },
-    [move, isGameOver]
-  );
-
-  /**
-   * Prevent default touch behavior (scrolling)
-   */
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    e.preventDefault();
-  }, []);
-
-  /**
-   * Render the grid background (empty cells)
-   * TASK 70: Highlight empty cells in danger state
-   */
-  const renderGridBackground = useCallback(() => {
-    const cells = [];
-    const emptyCells = getEmptyCells(tiles);
-    const emptySet = new Set(emptyCells.map(c => `${c.row}-${c.col}`));
-
-    for (let row = 0; row < GRID_SIZE; row++) {
-      for (let col = 0; col < GRID_SIZE; col++) {
-        const isEmpty = emptySet.has(`${row}-${col}`);
-        const isHighlighted = dangerLevel !== 'safe' && isEmpty;
-        cells.push(
-          <div
-            key={`${row}-${col}`}
-            className={`grid-cell ${isHighlighted ? 'cell-highlighted' : ''}`}
-          />
-        );
-      }
-    }
-    return cells;
-  }, [tiles, dangerLevel]);
-
-  /**
-   * Get glow class for high-value tiles
-   */
-  const getGlowClass = (value: number): string => {
-    if (value >= 2048) return 'tile-glow-2048';
-    if (value >= 1024) return 'tile-glow-1024';
-    if (value >= 512) return 'tile-glow-512';
-    if (value >= 256) return 'tile-glow-256';
-    if (value >= 128) return 'tile-glow-128';
-    return '';
-  };
-
-  /**
-   * Render a single tile
-   * Uses CSS Grid positioning (grid-row/grid-column) for reliable alignment
-   */
-  const renderTile = (tile: Tile) => {
-    // Use CSS Grid row/column - grid is 1-indexed
-    const style: React.CSSProperties = {
-      ...getTileStyle(tile.value),
-      gridRow: tile.row + 1,
-      gridColumn: tile.col + 1,
-    };
-
-    // TASK 56: Apply movement direction class to tiles
-    const moveClass = lastMoveDirection && !tile.isNew && !tile.isMerged
-      ? `tile-moving-${lastMoveDirection}`
-      : '';
-
-    const classes = [
-      'tile',
-      getFontSizeClass(tile.value),
-      getGlowClass(tile.value),
-      tile.isNew ? 'tile-new' : '',
-      tile.isMerged ? 'tile-merged' : '',
-      moveClass,
-    ]
-      .filter(Boolean)
-      .join(' ');
-
+  }
+
+  // Build snake arrow SVGs
+  const arrowSvg = (dir: ArrowDir) => {
+    const stroke = 'rgba(255,255,255,0.35)';
+    if (dir === 'right')
+      return (
+        <svg width="18" height="14" viewBox="0 0 12 10" fill="none">
+          <path d="M1 5H11M8 2L11 5L8 8" stroke={stroke} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      );
+    if (dir === 'left')
+      return (
+        <svg width="18" height="14" viewBox="0 0 12 10" fill="none">
+          <path d="M11 5H1M4 2L1 5L4 8" stroke={stroke} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      );
+    if (dir === 'uturn-right')
+      return (
+        <svg width="100%" height="100%" viewBox="0 0 18 100" fill="none" preserveAspectRatio="none">
+          <path d="M0 0 H13 V100 H0" stroke={stroke} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          <path d="M4 96 L0 100" stroke={stroke} strokeWidth="2" strokeLinecap="round" fill="none" />
+        </svg>
+      );
+    // uturn-left
     return (
-      <div key={tile.id} className={classes} style={style}>
-        <span className="tile-value">
-          {tile.value}
-        </span>
-      </div>
+      <svg width="100%" height="100%" viewBox="0 0 18 100" fill="none" preserveAspectRatio="none">
+        <path d="M18 0 H5 V100 H18" stroke={stroke} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        <path d="M14 96 L18 100" stroke={stroke} strokeWidth="2" strokeLinecap="round" fill="none" />
+      </svg>
     );
   };
 
-  return (
-    <div className="merge2048-container">
-      {/* Header */}
-      <div className="merge2048-header">
-        <div className="merge2048-title">
-          <h1>2048</h1>
-          <span className="merge2048-subtitle">Citrus Edition</span>
-        </div>
+  // Tutorial banner — rendered outside the game canvas, pinned to bottom
+  const tutorialBanner = isTutorial && tutorialStep < TUTORIAL_STEPS.length - 1 && (
+    <div className="tutorial-banner">
+      <strong className="tutorial-banner-title">
+        {TUTORIAL_STEPS[tutorialStep].title}
+      </strong>
+      <p className="tutorial-banner-message">
+        {TUTORIAL_STEPS[tutorialStep].message}
+      </p>
+    </div>
+  );
 
-        <div className="merge2048-scores">
-          {/* TASK 118: Replace score display with AnimatedScore */}
-          <div className="score-box">
-            <span className="score-label">SCORE</span>
-            <AnimatedScore value={score} />
-          </div>
-          <div className="score-box">
-            <span className="score-label">BEST</span>
-            <span className="score-value">{bestScore.toLocaleString()}</span>
-          </div>
-          {/* TASK 131: Challenge target display */}
-          {challengeTarget && (
-            <div className={`score-box challenge-box ${score >= challengeTarget ? 'challenge-won' : ''}`}>
-              <span className="score-label">TARGET</span>
-              <span className="score-value">{challengeTarget.toLocaleString()}</span>
-            </div>
-          )}
-        </div>
-      </div>
+  const boardElement = (
+    <div
+      ref={boardRef}
+      className={`nft-merge-board${dangerLevel !== 'safe' ? ` danger-${dangerLevel}` : ''}`}
+      style={{ width: boardW, height: boardH }}
+    >
+      {gridCells}
 
-      {/* Controls - simplified to just New Game */}
-      <div className="merge2048-controls">
-        <button className="new-game-btn" onClick={handleNewGame}>
-          New Game
-        </button>
-      </div>
-
-      {/* Universal Game Effects Layer */}
-      <GameEffects effects={effects} accentColor="#ff6b00" />
-
-      {/* Game Grid */}
-      {/* TASK 77: Add danger level to grid wrapper class */}
-      {/* TASK 85: Add fever-active class when fever mode is on */}
-      {/* TASK 48 & 59: Add freeze-frame and camera zoom */}
-      <div
-        ref={gridWrapperRef}
-        className={`merge2048-grid-wrapper ${effects.screenShake ? 'shake' : ''} ${freezeFrame ? 'freeze-frame' : ''}`}
-        style={{ transform: `scale(${cameraZoom})` }}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        onTouchMove={handleTouchMove}
-      >
-        <div className="merge2048-grid">
-          {/* Background cells */}
-          <div className="grid-background">{renderGridBackground()}</div>
-
-          {/* Tiles layer */}
-          <div className="tiles-container">{tiles.map(renderTile)}</div>
-
-          {/* TASK 63: Impact flash component */}
-          {impactFlash && (
-            <div
-              className="impact-flash"
-              style={{ left: impactFlash.x, top: impactFlash.y }}
+      {tiles.map((tile) => {
+        const pos = getPosition(tile.row, tile.col, cellSize, gap, padding);
+        return (
+          <div
+            key={tile.id}
+            className={[
+              'nft-tile',
+              `nft-tile-${tile.value}`,
+              tile.isNew ? 'nft-tile-new' : '',
+              tile.isMerged ? 'nft-tile-merged' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            style={{
+              width: cellSize,
+              height: cellSize,
+              top: pos.top,
+              left: pos.left,
+            }}
+          >
+            <img
+              src={getNftImageUrl(tile.nftId)}
+              alt={`${tile.badge} #${tile.nftId}`}
+              className="nft-tile-image"
+              draggable={false}
             />
-          )}
+          </div>
+        );
+      })}
 
-          {/* Score popup animation */}
-          {scorePopup && (
-            <span key={scorePopup.key} className="score-popup">
-              +{scorePopup.value}
-            </span>
-          )}
-
-          {/* Game Over overlay - FlappyOrange style */}
-          {isGameOver && (
-            <div className="m2048-game-over-overlay" onClick={(e) => e.stopPropagation()}>
-              <div className="m2048-game-over-content">
-                <div className="m2048-game-over-left">
-                  {sadImage ? (
-                    <img src={sadImage} alt="Game Over" className="m2048-sad-image" />
-                  ) : (
-                    <div className="m2048-game-over-emoji">🍊</div>
-                  )}
-                </div>
-                <div className="m2048-game-over-right">
-                  <h2 className="m2048-game-over-title">Game Over!</h2>
-
-                  <div className="m2048-game-over-score">
-                    <span className="m2048-score-value">{score.toLocaleString()}</span>
-                    <span className="m2048-score-label">points</span>
-                  </div>
-
-                  <div className="m2048-game-over-stats">
-                    <div className="m2048-stat">
-                      <span className="m2048-stat-value">{bestScore.toLocaleString()}</span>
-                      <span className="m2048-stat-label">best</span>
-                    </div>
-                  </div>
-
-                  {(isNewPersonalBest || score > bestScore) && score > 0 && meetsMinimumMerges && (
-                    <div className="m2048-new-record">New Personal Best!</div>
-                  )}
-
-                  {isSignedIn && meetsMinimumMerges && (
-                    <div className="m2048-submitted">
-                      {isSubmitting ? 'Saving...' : scoreSubmitted ? `Saved as ${userDisplayName}!` : ''}
-                    </div>
-                  )}
-
-                  {/* Show minimum actions message when player doesn't meet threshold */}
-                  {!meetsMinimumMerges && (
-                    <div className="m2048-minimum-actions">
-                      Make at least 3 merges to be on the leaderboard
-                    </div>
-                  )}
-
-                  <div className="m2048-game-over-buttons">
-                    <button onClick={handleNewGame} className="m2048-play-btn">
-                      Play Again
-                    </button>
-                    <ShareButton
-                      scoreData={{
-                        gameId: 'merge-2048',
-                        gameName: 'Merge 2048',
-                        score: score,
-                        highScore: bestScore,
-                        isNewHighScore: isNewPersonalBest || score > bestScore,
-                      }}
-                      screenshot={gameScreenshot}
-                      className="m2048-share-btn"
-                    />
-                    <button
-                      onClick={() => setShowLeaderboardPanel(!showLeaderboardPanel)}
-                      className="m2048-leaderboard-btn"
-                    >
-                      Leaderboard
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Leaderboard Panel */}
-              {showLeaderboardPanel && (
-                <div className="m2048-leaderboard-overlay" onClick={() => setShowLeaderboardPanel(false)}>
-                  <div className="m2048-leaderboard-panel" onClick={(e) => e.stopPropagation()}>
-                    <div className="m2048-leaderboard-header">
-                      <h3>Leaderboard</h3>
-                      <button className="m2048-leaderboard-close" onClick={() => setShowLeaderboardPanel(false)}>×</button>
-                    </div>
-                    <div className="m2048-leaderboard-list">
-                      {Array.from({ length: 10 }, (_, index) => {
-                        const entry = globalLeaderboard[index];
-                        const isCurrentUser = entry && score === entry.score;
-                        return (
-                          <div key={index} className={`m2048-leaderboard-entry ${isCurrentUser ? 'current-user' : ''}`}>
-                            <span className="m2048-leaderboard-rank">#{index + 1}</span>
-                            <span className="m2048-leaderboard-name">{entry?.displayName || '---'}</span>
-                            <span className="m2048-leaderboard-score">{entry?.score ?? '-'}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              )}
-
+      {/* Win overlay */}
+      {gameState === 'won' && !isTutorial && (
+        <div className="nft-merge-overlay nft-merge-win">
+          <div className="nft-merge-overlay-content">
+            <img
+              src={getNftImageUrl(nftMap.current[2048] || 3703)}
+              alt="Namekian"
+              className="nft-merge-win-nft"
+            />
+            <h3>NAMEKIAN!</h3>
+            <p>Only 7 exist. You reached the top.</p>
+            <div className="nft-merge-overlay-buttons">
               <button
-                onClick={() => { window.location.href = '/games'; }}
-                className="m2048-back-to-games-btn"
+                type="button"
+                onClick={() => {
+                  setKeepPlaying(true);
+                  setGameState('playing');
+                }}
               >
-                Back to Games
+                Keep Going
               </button>
-            </div>
-          )}
-
-          {/* Win overlay */}
-          {hasWon && !dismissedWin && !isGameOver && (
-            <div className="game-overlay game-won">
-              <h2>You Win!</h2>
-              <p>You reached 2048!</p>
-              <button className="overlay-btn" onClick={() => setDismissedWin(true)}>
-                Keep Playing
-              </button>
-              <button className="overlay-btn secondary" onClick={handleNewGame}>
+              <button type="button" onClick={newGame}>
                 New Game
               </button>
             </div>
-          )}
+          </div>
+        </div>
+      )}
+
+      {/* Tutorial complete overlay */}
+      {isTutorial && tutorialStep >= TUTORIAL_STEPS.length - 1 && (
+        <div className="nft-merge-overlay tutorial-complete-overlay">
+          <div className="nft-merge-overlay-content">
+            <h3>You're Ready</h3>
+            <p>
+              Keep merging NFTs to reach the legendary Namekian!
+              <br />
+              Each merge creates a rarer badge. Good luck!
+            </p>
+            <button type="button" onClick={endTutorial}>
+              Start Playing
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Game over overlay */}
+      {gameState === 'over' && !isTutorial && (
+        <div className="nft-merge-overlay nft-merge-gameover">
+          <div className="nft-merge-overlay-content">
+            <h3>Game Over</h3>
+            <p className="nft-merge-final-score">
+              Score: <strong>{score}</strong>
+            </p>
+            <p className="nft-merge-highest">
+              Highest: {TILE_BADGES[highestTile.current] || 'Phunky'}
+            </p>
+            <button type="button" onClick={newGame}>
+              Try Again
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  // ── Desktop: sidebar | board | controls (row) ──
+  if (showSidebar) {
+    return (
+      <div className="nft-merge-wrapper">
+        <div ref={containerRef} className="nft-merge-game">
+          <div className="nft-merge-sidebar" style={{ height: boardH }}>
+            <div className="snake-grid">
+              {SNAKE_GRID.map((item, idx) => (
+                <div
+                  key={item.val}
+                  className={`snake-cell snake-r${item.row} snake-c${item.col} ${
+                    highestTile.current >= item.val ? 'snake-reached' : ''
+                  }`}
+                >
+                  <img
+                    src={getNftImageUrl(nftMap.current[item.val] || 1)}
+                    alt={TILE_BADGES[item.val]}
+                    className="snake-badge-img"
+                    draggable={false}
+                  />
+                  <span
+                    className="snake-badge-name"
+                    style={{ color: BADGE_COLORS[item.val] }}
+                  >
+                    {TILE_BADGES[item.val]}
+                  </span>
+                  {idx < SNAKE_ARROWS.length && (
+                    <div className={`snake-arrow snake-arrow-${SNAKE_ARROWS[idx].dir}`}>
+                      {arrowSvg(SNAKE_ARROWS[idx].dir)}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="nft-merge-center">
+            {boardElement}
+            {tutorialBanner}
+          </div>
+
+          <div className="nft-merge-controls">
+            <div className="nft-merge-title">
+              <h2>Wojak Merge</h2>
+              <span className="nft-merge-subtitle">Phunky to Namekian</span>
+            </div>
+
+            <div className="score-box">
+              <span className="score-label">Score</span>
+              <span className="score-value">{displayScore}</span>
+            </div>
+            <div className="score-box">
+              <span className="score-label">Best</span>
+              <span className="score-value">{bestScore}</span>
+            </div>
+
+            <button
+              type="button"
+              className="nft-merge-new-game"
+              onClick={isTutorial ? endTutorial : newGame}
+            >
+              New Game
+            </button>
+            <button
+              type="button"
+              className="nft-merge-tutorial-btn"
+              onClick={startTutorial}
+              style={isTutorial ? { visibility: 'hidden' } : undefined}
+            >
+              Tutorial
+            </button>
+            <button
+              type="button"
+              className="nft-merge-tutorial-btn"
+              onClick={handleUndo}
+              disabled={undoUsed || !undoSnapshot.current || isTutorial}
+              style={{
+                opacity: undoUsed || !undoSnapshot.current || isTutorial ? 0.3 : 1,
+              }}
+            >
+              Undo
+            </button>
+          </div>
         </div>
       </div>
+    );
+  }
 
-      {/* Instructions */}
-      <div className="merge2048-instructions">
-        <p>Swipe to move tiles. Merge matching numbers to reach 2048!</p>
+  // ── Mobile: stacked column layout ──
+  return (
+    <div className="nft-merge-wrapper">
+      <div ref={containerRef} className="nft-merge-game nft-merge-game-mobile">
+        <div className="nft-merge-mobile-header">
+          <div className="nft-merge-scores">
+            <div className="score-box">
+              <span className="score-label">Score</span>
+              <span className="score-value">{displayScore}</span>
+            </div>
+            <div className="score-box">
+              <span className="score-label">Best</span>
+              <span className="score-value">{bestScore}</span>
+            </div>
+          </div>
+          <div className="nft-merge-buttons">
+            <button
+              type="button"
+              className="nft-merge-new-game"
+              onClick={isTutorial ? endTutorial : newGame}
+            >
+              New Game
+            </button>
+            <button
+              type="button"
+              className="nft-merge-tutorial-btn"
+              onClick={startTutorial}
+              style={isTutorial ? { visibility: 'hidden' } : undefined}
+            >
+              Tutorial
+            </button>
+          </div>
+        </div>
+
+        <div className="nft-merge-legend-mobile">
+          {BADGE_ORDER.map((val, idx) => (
+            <span key={val} className="legend-mobile-item">
+              <img
+                src={getNftImageUrl(nftMap.current[val] || 1)}
+                alt={TILE_BADGES[val]}
+                className="legend-mobile-img"
+                draggable={false}
+              />
+              {idx < BADGE_ORDER.length - 1 && (
+                <span className="legend-mobile-arrow">&rsaquo;</span>
+              )}
+            </span>
+          ))}
+        </div>
+
+        <div className="nft-merge-center">
+          {boardElement}
+          {tutorialBanner}
+        </div>
       </div>
     </div>
   );
 };
 
-export default Merge2048Game;
+const Merge2048Wrapped: React.FC = () => (
+  <GameShell gameId="2048-merge">
+    <Merge2048Game />
+  </GameShell>
+);
+
+export default Merge2048Wrapped;

@@ -2,225 +2,215 @@
 
 ## Overview
 
-This document provides comprehensive instructions for Claude CLI to create a new NFT-themed 2048 game based on **Bram Cohen's clean implementation** (https://github.com/bramcohen/2048).
+This document provides comprehensive instructions for Claude CLI to create an NFT-themed 2048 game where **actual Wojak NFTs** represent the tiles instead of numbers.
 
-**Why Bram Cohen's implementation?**
-- Clean, simple, self-contained single HTML file
-- Public domain license
-- Simple UI with minimal buttons
-- Working tile positioning using absolute positioning
-- Created by the founder of BitTorrent
-
----
-
-## PART 1: SOURCE IMPLEMENTATION ANALYSIS
-
-### Repository: bramcohen/2048
-
-**URL**: https://github.com/bramcohen/2048
-**License**: Public Domain
-**Description**: A trainer to help you play perfect 2048 on small boards
-
-### File Structure
-
-```
-bramcohen/2048/
-├── 2048-2x3.html          # Standalone 2x3 game (USE THIS AS BASE)
-├── 2048-3x3-client.html   # 3x3 game (needs server)
-├── src/main.rs            # Rust server (not needed)
-├── run-server.sh          # Server launcher (not needed)
-├── Cargo.toml             # Rust dependencies (not needed)
-└── README.md
-```
-
-### Key Implementation Details (from 2048-2x3.html)
-
-**Tech Stack:**
-- Single HTML file with embedded CSS and JavaScript
-- No frameworks, no dependencies
-- ~1010 lines total
-
-**Grid Configuration (Original):**
-```javascript
-const ROWS = 2;
-const COLS = 3;
-const NUM_CELLS = 6;
-const WIN_VALUE = 128;
-```
-
-**For 4x4 NFT Version, change to:**
-```javascript
-const ROWS = 4;
-const COLS = 4;
-const NUM_CELLS = 16;
-const WIN_VALUE = 2048;
-```
-
-### UI Structure (Simple & Clean)
-
-```html
-<body>
-  <h1>2048</h1>
-  <p class="subtitle">2x3 Edition</p>
-
-  <div class="header">
-    <div class="score-container">Accuracy</div>
-    <div class="score-container">Win Prob</div>
-    <button>Hints</button>
-    <button>Undo</button>
-    <button>New</button>
-  </div>
-
-  <div class="game-container">
-    <div class="grid"><!-- cells --></div>
-    <div id="tiles"><!-- tiles --></div>
-    <div class="game-over-overlay"><!-- game over --></div>
-  </div>
-
-  <p class="instructions">Use arrow keys to move tiles.</p>
-</body>
-```
-
-### Tile Positioning System (WORKING!)
-
-**Key difference from broken wojak-ink version:**
-- Uses **absolute positioning** with calculated `top`/`left`
-- NOT CSS Grid placement (which was buggy)
-
-```javascript
-function getPosition(row, col) {
-  return {
-    top: PADDING + row * (CELL_SIZE + GAP),
-    left: PADDING + col * (CELL_SIZE + GAP)
-  };
-}
-
-function createTile(row, col, value, isNew = false) {
-  const pos = getPosition(row, col);
-  tile.element.style.position = 'absolute';  // KEY!
-  tile.element.style.top = pos.top + 'px';
-  tile.element.style.left = pos.left + 'px';
-  // ...
-}
-```
-
-### CSS Tile Colors (Original)
-
-```css
-.tile-2 { background: #eee4da; color: #776e65; }
-.tile-4 { background: #ede0c8; color: #776e65; }
-.tile-8 { background: #f2b179; color: #f9f6f2; }
-.tile-16 { background: #f59563; color: #f9f6f2; }
-.tile-32 { background: #f67c5f; color: #f9f6f2; }
-.tile-64 { background: #f65e3b; color: #f9f6f2; }
-.tile-128 { background: #edcf72; color: #f9f6f2; }
-.tile-256 { background: #edcc61; color: #f9f6f2; }
-```
-
-### Game Logic Functions
-
-| Function | Purpose |
-|----------|---------|
-| `init()` | Initialize game state |
-| `createTile(row, col, value, isNew)` | Create and render a tile |
-| `move(direction)` | Handle tile movement and merging |
-| `addRandomTile()` | Spawn new tile (90% = 2, 10% = 4) |
-| `checkWin()` | Check if WIN_VALUE reached |
-| `checkGameOver()` | Check if no moves possible |
-| `newGame()` | Reset and start new game |
+**Core Concept:**
+- Each tile shows a **real NFT image** from the Wojak collection
+- NFTs are grouped by **badge categories** (rarity tiers)
+- Merging two tiles of the same badge → produces an NFT from the next rarer badge
+- Ultimate goal: Reach **Namekian** (only 7 NFTs exist!) 💚
 
 ---
 
-## PART 2: NFT TRANSFORMATION
+## PART 1: TILE MAPPING (Final)
 
-### Available NFT Headwear Assets
+| Tile Value | Badge | NFT Count | Emoji | Rarity |
+|------------|-------|-----------|-------|--------|
+| **2** | Phunky | 176 | 🤡 | Common |
+| **4** | High Council | 172 | 🧙 | Common |
+| **8** | Bepe Army | 171 | 🐸 | Common |
+| **16** | Royal Club | 164 | 👑 | Uncommon |
+| **32** | Pirate | 115 | 🏴‍☠️ | Uncommon |
+| **64** | Super Saiyan | 99 | ⚡ | Rare |
+| **128** | Hellspawn | 91 | 😈 | Rare |
+| **256** | Ronin | 80 | 🥷 | Epic |
+| **512** | Neckbeard | 57 | 🧔 | Epic |
+| **1024** | Honk Gang | 31 | 🪿 | Legendary |
+| **2048** | Namekian | 7 | 💚 | ULTRA LEGENDARY |
 
-**Location**: `/public/assets/wojak-layers/HEAD/`
+---
 
-| Value | Asset | Filename |
-|-------|-------|----------|
-| 2 | Cap | `HEAD_Cap_orange.png` |
-| 4 | Fedora | `HEAD_Fedora_brown.png` |
-| 8 | **[USER TO SPECIFY]** | |
-| 16 | Ronin Helmet | `HEAD_Ronin-Helmet.png` |
-| 32 | Crown | `HEAD_Crown_.png` |
-| 64 | **[USER TO SPECIFY]** | |
-| 128 | **[USER TO SPECIFY]** | |
-| 256 | **[USER TO SPECIFY]** | |
-| 512 | **[USER TO SPECIFY]** | |
-| 1024 | **[USER TO SPECIFY]** | |
-| 2048 | **[USER TO SPECIFY]** | |
+## PART 2: GAME MECHANICS
 
-### Full Asset List Available
+### How It Works
+
+1. **Start**: Two random tiles spawn (Phunky NFTs - value 2)
+2. **Swipe**: All tiles slide in that direction
+3. **Merge**: Two tiles of same badge combine → Next rarer badge appears
+4. **Goal**: Keep merging until you reach a **Namekian NFT** (2048)
+
+### Merge Progression
 
 ```
-HEAD_Cap_blue.png
-HEAD_Cap_green.png
-HEAD_Cap_orange.png
-HEAD_Cap_McD.png
-HEAD_Fedora_brown.png
-HEAD_Fedora_orange.png
-HEAD_Fedora_purple.png
-HEAD_Beanie_.png
-HEAD_Ronin-Helmet.png
-HEAD_Crown_.png
-HEAD_Cowboy-Hat_.png
-HEAD_Vikings-Hat_.png
-HEAD_Centurion_.png
-HEAD_Super-Saiyan.png
-HEAD_Wizard-Hat_man.png
-HEAD_Clown_.png
-HEAD_Construction-Helmet_.png
-HEAD_Devil-Horns.png
-HEAD_Pirate-Hat_.png
-HEAD_Military-Beret.png
-HEAD_SWAT-Helmet.png
-HEAD_Trump-Wave_.png
-HEAD_Tin-Foil_.png
-HEAD_Propeller-Hat_.png
-HEAD_Piccolo-Hat_.png
-HEAD_Hard-Hat_.png
-HEAD_Firefigther-Helmet_.png
-HEAD_Field-Cap_.png
-HEAD_Comrade-Cap_.png
-HEAD_Anarchy-Spikes_pink.png
-HEAD_2Pac-Bandana_red.png
+🤡 Phunky + 🤡 Phunky = 🧙 High Council
+🧙 High Council + 🧙 High Council = 🐸 Bepe Army
+🐸 Bepe Army + 🐸 Bepe Army = 👑 Royal Club
+👑 Royal Club + 👑 Royal Club = 🏴‍☠️ Pirate
+🏴‍☠️ Pirate + 🏴‍☠️ Pirate = ⚡ Super Saiyan
+⚡ Super Saiyan + ⚡ Super Saiyan = 😈 Hellspawn
+😈 Hellspawn + 😈 Hellspawn = 🥷 Ronin
+🥷 Ronin + 🥷 Ronin = 🧔 Neckbeard
+🧔 Neckbeard + 🧔 Neckbeard = 🪿 Honk Gang
+🪿 Honk Gang + 🪿 Honk Gang = 💚 NAMEKIAN (WIN!)
 ```
 
-### NFT Tile Configuration
+### Random NFT Selection
 
-**Replace number display with images:**
+When a tile is created or merged:
+1. Look up the badge category for that tile value
+2. Get the list of NFT IDs that have that badge
+3. Randomly select one NFT ID
+4. Display that NFT's image
+
+---
+
+## PART 3: DATA FILES
+
+### Badge System JSON
+
+**File**: `/public/assets/Badges/badge_system.json`
+
+Contains badge definitions with:
+- Badge name, emoji, count
+- Primary traits (required)
+- Secondary traits (optional)
+- Lore/description
+
+### NFT Badge Mapping JSON
+
+**File**: `/public/assets/Badges/nft_badge_mapping.json`
+
+Contains mapping of every NFT to its badges (large file, ~408KB).
+
+### Pre-Extracted Badge NFTs (READY TO USE!)
+
+**File**: `src/games/NFT2048/badgeNfts.json` ✅ **ALREADY GENERATED**
+
+Contains the exact NFT IDs for each of the 11 game badges:
+```json
+{
+  "Phunky": [24, 35, 71, 94, 133, ...],      // 176 NFTs
+  "High Council": [9, 10, 12, 13, 28, ...],  // 172 NFTs
+  "Bepe Army": [4, 11, 31, 173, 175, ...],   // 171 NFTs
+  "Royal Club": [1, 15, 30, 86, 105, ...],   // 164 NFTs
+  "Pirate": [7, 65, 68, 69, 70, ...],        // 115 NFTs
+  "Super Saiyan": [58, 96, 97, 370, ...],    // 99 NFTs
+  "Hellspawn": [15, 33, 36, 87, 106, ...],   // 91 NFTs
+  "Ronin": [21, 83, 84, 85, 393, ...],       // 80 NFTs
+  "Neckbeard": [1, 2, 8, 17, 27, ...],       // 57 NFTs
+  "Honk Gang": [14, 53, 200, 206, ...],      // 31 NFTs
+  "Namekian": [3703, 3704, 3705, 3706, 3707, 3728, 3729]  // 7 NFTs
+}
+```
+
+### NFT Images
+
+**Location**: NFT images should be accessible via URL pattern:
+- Format: `https://wojak.ink/nft/{id}.png` or similar
+- Or local: `/public/assets/nfts/{id}.png`
+
+---
+
+## PART 4: IMPLEMENTATION
+
+### Step 1: Import Badge-to-NFT Lookup
+
+Simply import the pre-generated JSON file:
 
 ```javascript
-const NFT_TILES = {
-  2:    { image: '/assets/wojak-layers/HEAD/HEAD_Cap_orange.png', name: 'Cap' },
-  4:    { image: '/assets/wojak-layers/HEAD/HEAD_Fedora_brown.png', name: 'Fedora' },
-  8:    { image: '[TBD]', name: '[TBD]' },
-  16:   { image: '/assets/wojak-layers/HEAD/HEAD_Ronin-Helmet.png', name: 'Ronin' },
-  32:   { image: '/assets/wojak-layers/HEAD/HEAD_Crown_.png', name: 'Crown' },
-  64:   { image: '[TBD]', name: '[TBD]' },
-  128:  { image: '[TBD]', name: '[TBD]' },
-  256:  { image: '[TBD]', name: '[TBD]' },
-  512:  { image: '[TBD]', name: '[TBD]' },
-  1024: { image: '[TBD]', name: '[TBD]' },
-  2048: { image: '[TBD]', name: '[TBD]' },
+// Import the pre-extracted badge NFT mapping
+import BADGE_NFTS from './badgeNfts.json';
+
+// BADGE_NFTS is ready to use:
+// {
+//   "Phunky": [24, 35, 71, ...],      // 176 NFTs
+//   "High Council": [9, 10, 12, ...], // 172 NFTs
+//   ... etc
+// }
+```
+
+### Step 2: Tile Value to Badge Mapping
+
+```javascript
+const TILE_BADGES = {
+  2: "Phunky",
+  4: "High Council",
+  8: "Bepe Army",
+  16: "Royal Club",
+  32: "Pirate",
+  64: "Super Saiyan",
+  128: "Hellspawn",
+  256: "Ronin",
+  512: "Neckbeard",
+  1024: "Honk Gang",
+  2048: "Namekian",
+};
+
+const BADGE_EMOJIS = {
+  "Phunky": "🤡",
+  "High Council": "🧙",
+  "Bepe Army": "🐸",
+  "Royal Club": "👑",
+  "Pirate": "🏴‍☠️",
+  "Super Saiyan": "⚡",
+  "Hellspawn": "😈",
+  "Ronin": "🥷",
+  "Neckbeard": "🧔",
+  "Honk Gang": "🪿",
+  "Namekian": "💚",
 };
 ```
 
-### Modified createTile Function
+### Step 3: Get Random NFT for Tile
+
+```javascript
+function getRandomNftForTile(tileValue) {
+  const badge = TILE_BADGES[tileValue];
+  const nftIds = BADGE_NFTS[badge];
+  const randomId = nftIds[Math.floor(Math.random() * nftIds.length)];
+  return {
+    id: randomId,
+    badge: badge,
+    emoji: BADGE_EMOJIS[badge],
+    imageUrl: `/assets/nfts/${randomId}.png`, // Adjust path as needed
+  };
+}
+```
+
+### Step 4: Modified Tile Structure
+
+```javascript
+// Each tile now stores:
+const tile = {
+  id: tileId++,
+  row: row,
+  col: col,
+  value: 2,           // The tile value (2, 4, 8, etc.)
+  nftId: 1234,        // The specific NFT ID being displayed
+  badge: "Phunky",    // The badge category
+  emoji: "🤡",        // Badge emoji
+  element: document.createElement('div'),
+};
+```
+
+### Step 5: Render Tile with NFT Image
 
 ```javascript
 function createTile(row, col, value, isNew = false) {
+  const nftData = getRandomNftForTile(value);
+
   const tile = {
     id: tileId++,
     row,
     col,
     value,
+    nftId: nftData.id,
+    badge: nftData.badge,
+    emoji: nftData.emoji,
     element: document.createElement('div')
   };
 
   const pos = getPosition(row, col);
-  const nftConfig = NFT_TILES[value] || { image: null, name: value };
 
   tile.element.className = `tile tile-${value}`;
   tile.element.style.width = `${CELL_SIZE}px`;
@@ -228,17 +218,19 @@ function createTile(row, col, value, isNew = false) {
   tile.element.style.top = pos.top + 'px';
   tile.element.style.left = pos.left + 'px';
 
-  // NFT Image instead of number
-  if (nftConfig.image) {
-    const img = document.createElement('img');
-    img.src = nftConfig.image;
-    img.alt = nftConfig.name;
-    img.className = 'tile-image';
-    img.draggable = false;
-    tile.element.appendChild(img);
-  } else {
-    tile.element.textContent = value;
-  }
+  // NFT Image
+  const img = document.createElement('img');
+  img.src = nftData.imageUrl;
+  img.alt = `${nftData.badge} #${nftData.id}`;
+  img.className = 'tile-nft-image';
+  img.draggable = false;
+  tile.element.appendChild(img);
+
+  // Badge emoji overlay (optional)
+  const badgeOverlay = document.createElement('span');
+  badgeOverlay.className = 'tile-badge';
+  badgeOverlay.textContent = nftData.emoji;
+  tile.element.appendChild(badgeOverlay);
 
   if (isNew) {
     tile.element.classList.add('tile-new');
@@ -250,137 +242,126 @@ function createTile(row, col, value, isNew = false) {
 }
 ```
 
-### CSS for NFT Tiles
+### Step 6: CSS for NFT Tiles
 
 ```css
 .tile {
-  border-radius: 6px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: absolute;
   transition: top 0.15s ease-in-out, left 0.15s ease-in-out;
-  background: rgba(238, 228, 218, 0.9);
+  overflow: hidden;
+  background: #1a1a2e;
+  border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
-.tile-image {
-  width: 85%;
-  height: 85%;
-  object-fit: contain;
+.tile-nft-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   pointer-events: none;
   user-select: none;
 }
 
-/* Optional: Different backgrounds per tier */
-.tile-2 { background: #eee4da; }
-.tile-4 { background: #ede0c8; }
-.tile-8 { background: #f2b179; }
-.tile-16 { background: #f59563; }
-.tile-32 { background: #f67c5f; }
-.tile-64 { background: #f65e3b; }
-.tile-128 { background: #edcf72; }
-.tile-256 { background: #edcc61; }
-.tile-512 { background: #edc850; }
-.tile-1024 { background: #edc53f; }
-.tile-2048 { background: #ff6b00; }
+.tile-badge {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  font-size: 16px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+
+/* Rarity glow effects */
+.tile-2, .tile-4, .tile-8 {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.tile-16, .tile-32 {
+  border-color: #4ade80;
+  box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+}
+
+.tile-64, .tile-128 {
+  border-color: #f59e0b;
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+}
+
+.tile-256, .tile-512 {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+}
+
+.tile-1024 {
+  border-color: #ec4899;
+  box-shadow: 0 0 25px rgba(236, 72, 153, 0.6);
+}
+
+.tile-2048 {
+  border-color: #10b981;
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.8),
+              0 0 60px rgba(16, 185, 129, 0.4);
+  animation: namekianGlow 2s ease-in-out infinite;
+}
+
+@keyframes namekianGlow {
+  0%, 100% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.8); }
+  50% { box-shadow: 0 0 50px rgba(16, 185, 129, 1), 0 0 80px rgba(16, 185, 129, 0.6); }
+}
 ```
 
 ---
 
-## PART 3: SIMPLIFIED UI FOR WOJAK-INK
+## PART 5: BASE CODE (Bram Cohen's 2048)
 
-### Remove Training Features (Keep it Simple)
+### Source Repository
 
-**REMOVE from Bram Cohen's code:**
-- Win probability calculation and display
-- Move hints panel
-- Accuracy tracking
-- Undo functionality (optional - can keep)
-- `computeWinProbabilities()` function (~100 lines)
-- All `WIN_PROBS` related code
+**URL**: https://github.com/bramcohen/2048
+**License**: Public Domain
+**File**: `2048-2x3.html` (standalone, ~1010 lines)
 
-**KEEP:**
-- Title
-- Score display
-- Best score display
-- New Game button
-- Grid with tiles
-- Simple game over overlay
-- Arrow key + touch controls
+### Key Modifications Needed
 
-### Target UI Structure
+1. **Grid Size**: Change from 2x3 to 4x4
+   ```javascript
+   const ROWS = 4;
+   const COLS = 4;
+   const WIN_VALUE = 2048;
+   ```
 
-```html
-<body>
-  <h1>2048</h1>
-  <p class="subtitle">NFT Merge</p>
+2. **Remove Training Features**: Delete win probability, hints, accuracy tracking
 
-  <div class="header">
-    <div class="score-container">
-      <div class="score-label">Score</div>
-      <div class="score-value" id="score">0</div>
-    </div>
-    <div class="score-container">
-      <div class="score-label">Best</div>
-      <div class="score-value" id="bestScore">0</div>
-    </div>
-    <button class="header-btn" onclick="newGame()">New Game</button>
-  </div>
+3. **Add NFT Tile System**: Implement the badge-to-NFT mapping
 
-  <div class="game-container">
-    <div class="grid">
-      <!-- 16 cells for 4x4 -->
-    </div>
-    <div id="tiles"></div>
-    <div class="game-over-overlay" id="gameOver">
-      <div class="game-over-text" id="gameOverText">Game Over!</div>
-      <div class="final-score">Score: <span id="finalScore">0</span></div>
-      <button class="header-btn" onclick="newGame()">Try Again</button>
-    </div>
-  </div>
+4. **Add Score System**: Track score based on merged values
 
-  <p class="instructions">Swipe or use arrow keys to merge NFTs!</p>
-</body>
-```
+5. **Tile Positioning**: Uses absolute positioning (this works correctly!)
+   ```javascript
+   function getPosition(row, col) {
+     return {
+       top: PADDING + row * (CELL_SIZE + GAP),
+       left: PADDING + col * (CELL_SIZE + GAP)
+     };
+   }
+   ```
 
 ---
 
-## PART 4: INTEGRATION WITH WOJAK-INK
+## PART 6: FILES TO CREATE
 
-### Option A: Standalone HTML (Simplest)
+| File | Purpose | Status |
+|------|---------|--------|
+| `src/games/NFT2048/NFT2048Game.tsx` | Main React game component | ❌ To create |
+| `src/games/NFT2048/NFT2048Game.css` | Styles with NFT/rarity theming | ❌ To create |
+| `src/games/NFT2048/badgeNfts.json` | Pre-extracted badge → NFT ID mapping | ✅ **DONE** |
+| `src/config/games.ts` | Add game entry (modify existing) | ❌ To modify |
 
-Create `/public/games/nft-2048.html` as a standalone game, similar to Bram Cohen's approach.
+---
 
-**Pros:**
-- Simple, self-contained
-- Easy to test and debug
-- No React complexity
-
-**Cons:**
-- Not integrated with existing game system
-- No leaderboard integration
-
-### Option B: React Component (Recommended)
-
-Convert to React component at `/src/games/NFT2048/NFT2048Game.tsx`
-
-**Changes needed:**
-1. Convert DOM manipulation to React state
-2. Use `useState` for `tiles`, `score`, `isGameOver`
-3. Use `useEffect` for keyboard/touch listeners
-4. Use `useCallback` for game functions
-5. Integrate with existing `useLeaderboard` hook
-
-### Files to Create/Modify
-
-| File | Action |
-|------|--------|
-| `src/games/NFT2048/NFT2048Game.tsx` | CREATE - Main game component |
-| `src/games/NFT2048/NFT2048Game.css` | CREATE - Styles |
-| `src/config/games.ts` | MODIFY - Add game entry |
-| `src/pages/GamesHub.tsx` | VERIFY - Auto-picks up from config |
-
-### Game Config Entry
+## PART 7: GAME CONFIG ENTRY
 
 ```typescript
 // In src/config/games.ts
@@ -388,125 +369,68 @@ Convert to React component at `/src/games/NFT2048/NFT2048Game.tsx`
 {
   id: 'nft-2048',
   name: 'NFT Merge',
-  emoji: '🎩',
-  description: 'Merge Wojak NFT headwear to reach the ultimate piece!',
-  shortDescription: 'Swipe to merge NFT headwear!',
+  emoji: '💚',
+  description: 'Merge Wojak NFTs to reach the legendary Namekian!',
+  shortDescription: 'Merge NFTs from Phunky to Namekian!',
   status: 'available',
   route: '/media/games/nft-2048',
-  accentColor: '#ff6b00',
+  accentColor: '#10b981',
   hasHighScores: true,
   difficulty: 'medium',
   estimatedPlayTime: '5-15 min',
-  // ...
+  accessibilityFeatures: {
+    keyboardPlayable: true,
+    screenReaderSupport: false,
+    colorBlindMode: true,
+    reducedMotionSupport: true,
+    audioDescriptions: false,
+    pauseAnytime: true,
+  },
+  instructions: [
+    { step: 1, text: 'Swipe to move all NFT tiles in one direction' },
+    { step: 2, text: 'Matching NFTs merge into rarer badges' },
+    { step: 3, text: 'Reach the legendary Namekian (💚) to win!' },
+    { step: 4, text: 'Game ends when no moves are left' },
+  ],
+  controls: [
+    { input: 'Swipe / Arrow Keys', action: 'Move tiles' },
+  ],
 }
 ```
 
 ---
 
-## PART 5: IMPLEMENTATION STEPS FOR CLAUDE CLI
+## PART 8: WIN CELEBRATION
 
-### Step 1: Get Bram Cohen's Code
+When player reaches **Namekian (2048)**:
 
-```bash
-# Clone the repo (or copy the HTML file)
-curl -o /tmp/2048-base.html https://raw.githubusercontent.com/bramcohen/2048/main/2048-2x3.html
-```
-
-### Step 2: Create New Game Component
-
-1. Create `src/games/NFT2048/` directory
-2. Create `NFT2048Game.tsx` based on Bram Cohen's logic
-3. Create `NFT2048Game.css` with styling
-
-### Step 3: Modify for 4x4 Grid
-
-```javascript
-// Change these constants:
-const ROWS = 4;
-const COLS = 4;
-const NUM_CELLS = 16;
-const WIN_VALUE = 2048;
-```
-
-### Step 4: Add NFT Tile Images
-
-1. Define `NFT_TILES` configuration
-2. Modify tile rendering to show images
-3. Add `.tile-image` CSS class
-
-### Step 5: Remove Training Features
-
-Delete all code related to:
-- `WIN_PROBS`
-- `computeWinProbabilities()`
-- `getMoveExpectedProb()`
-- `updateMoveHintsWithData()`
-- Accuracy tracking
-- Hints toggle
-
-### Step 6: Add Score Tracking
-
-```javascript
-let score = 0;
-let bestScore = localStorage.getItem('nft2048-best') || 0;
-
-// In merge logic:
-score += newValue;
-if (score > bestScore) {
-  bestScore = score;
-  localStorage.setItem('nft2048-best', bestScore);
-}
-```
-
-### Step 7: Register Game
-
-Add entry to `src/config/games.ts` with `status: 'available'`
-
-### Step 8: Test
-
-1. Run dev server
-2. Navigate to game
-3. Verify:
-   - Tiles position correctly
-   - Swipe/keyboard works
-   - Merging works
-   - NFT images display
-   - Game over triggers
-   - Score saves
+1. Show confetti animation
+2. Display the specific Namekian NFT they created
+3. Show message: "You reached NAMEKIAN! 💚 Only 7 exist!"
+4. Option to continue playing or share
 
 ---
 
-## PART 6: AWAITING USER INPUT
+## SUMMARY
 
-**Before implementation, please provide:**
+**What Claude CLI needs to do:**
 
-1. **Complete NFT tile mapping** for all 11 tiers (2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048)
+1. ✅ Use Bram Cohen's 2048 as base (clean, working code)
+2. ✅ Modify for 4x4 grid
+3. ✅ Load badge → NFT ID mapping from JSON
+4. ✅ Display actual NFT images on tiles
+5. ✅ Add rarity-based visual effects (glows, borders)
+6. ✅ Implement merge progression (Phunky → Namekian)
+7. ✅ Add win condition for Namekian
+8. ✅ Register game in config
 
-2. **Game name**: "NFT Merge", "Wojak Merge", "Hat Merge", or other?
-
-3. **Integration preference**:
-   - Standalone HTML file?
-   - React component integrated with existing system?
-
-4. **Features to include**:
-   - Undo button? (Yes/No)
-   - Sound effects? (Yes/No)
-   - Leaderboard integration? (Yes/No)
-
----
-
-## APPENDIX: Bram Cohen's Full 2048-2x3.html Code
-
-The complete source code is available at:
-https://raw.githubusercontent.com/bramcohen/2048/main/2048-2x3.html
-
-Key sections:
-- Lines 1-200: CSS styles
-- Lines 201-250: HTML structure
-- Lines 251-1010: JavaScript game logic
+**Data files:**
+- `/public/assets/Badges/badge_system.json` ✅ (exists)
+- `/public/assets/Badges/nft_badge_mapping.json` ✅ (exists)
+- `src/games/NFT2048/badgeNfts.json` ✅ **PRE-GENERATED & READY!**
 
 ---
 
 *Document created for Claude CLI implementation*
-*Based on bramcohen/2048 (Public Domain)*
+*NFT 2048: From Phunky 🤡 to Namekian 💚*
 *Last updated: January 2026*
