@@ -5,6 +5,7 @@
  */
 
 import { motion, useReducedMotion } from 'framer-motion';
+import { Monitor } from 'lucide-react';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { useLayout } from '@/hooks/useLayout';
 import { useSettings } from '@/contexts/SettingsContext';
@@ -12,18 +13,21 @@ import {
   AudioSettings,
   AboutSection,
 } from '@/components/settings';
-import { settingsPageVariants } from '@/config/settingsAnimations';
+import { settingsPageVariants, settingsSectionVariants } from '@/config/settingsAnimations';
 
 export default function Settings() {
   const { contentPadding, isDesktop } = useLayout();
   const prefersReducedMotion = useReducedMotion();
   const {
     settings,
+    updateAppSettings,
     setBackgroundMusicVolume,
     toggleBackgroundMusic,
     setSoundEffectsVolume,
     toggleSoundEffects,
   } = useSettings();
+
+  const skipBoot = settings.app.skipBootSequence;
 
   return (
     <PageTransition>
@@ -46,6 +50,102 @@ export default function Settings() {
             onSfxVolumeChange={setSoundEffectsVolume}
             onSfxToggle={toggleSoundEffects}
           />
+
+          {/* Divider */}
+          <div
+            className="h-px"
+            style={{ background: 'var(--color-border)' }}
+          />
+
+          {/* General */}
+          <motion.section
+            variants={prefersReducedMotion ? undefined : settingsSectionVariants}
+            initial="initial"
+            animate="animate"
+            className="space-y-4"
+            aria-labelledby="general-section-heading"
+          >
+            <div className="flex items-center gap-2">
+              <Monitor size={20} style={{ color: 'var(--color-brand-primary)' }} />
+              <h2
+                id="general-section-heading"
+                className="text-lg font-bold"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
+                General
+              </h2>
+            </div>
+
+            <div
+              className="p-4 rounded-xl"
+              style={{
+                background: 'var(--color-glass-bg)',
+                border: '1px solid var(--color-border)',
+              }}
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p
+                    className="text-sm font-medium"
+                    style={{ color: 'var(--color-text-primary)' }}
+                  >
+                    Skip Boot Sequence
+                  </p>
+                  <p
+                    className="text-xs mt-0.5"
+                    style={{ color: 'var(--color-text-muted)' }}
+                  >
+                    Skip the startup animation on future visits
+                  </p>
+                </div>
+
+                <div
+                  role="switch"
+                  aria-checked={skipBoot}
+                  aria-label="Toggle skip boot sequence"
+                  onClick={() => updateAppSettings({ skipBootSequence: !skipBoot })}
+                  className="cursor-pointer flex items-center"
+                  style={{
+                    position: 'relative',
+                    width: '52px',
+                    height: '24px',
+                    borderRadius: '9999px',
+                    background: skipBoot ? 'var(--color-brand-primary)' : 'rgba(255,255,255,0.1)',
+                    flexShrink: 0,
+                    transition: 'background 0.2s ease',
+                  }}
+                >
+                  <span
+                    style={{
+                      position: 'absolute',
+                      fontSize: '9px',
+                      fontWeight: 600,
+                      lineHeight: 1,
+                      color: skipBoot ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.4)',
+                      left: skipBoot ? '6px' : undefined,
+                      right: skipBoot ? undefined : '6px',
+                      transition: 'opacity 0.2s ease',
+                      userSelect: 'none',
+                    }}
+                  >
+                    {skipBoot ? 'ON' : 'OFF'}
+                  </span>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      width: '18px',
+                      height: '18px',
+                      top: '3px',
+                      borderRadius: '9999px',
+                      background: 'white',
+                      left: skipBoot ? '31px' : '3px',
+                      transition: 'left 0.2s ease',
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </motion.section>
 
           {/* Divider */}
           <div

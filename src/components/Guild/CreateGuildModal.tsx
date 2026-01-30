@@ -172,13 +172,53 @@ export function CreateGuildModal({
                   <span>Public Guild</span>
                   <span className="toggle-description">Anyone can request to join</span>
                 </label>
-                <button
-                  type="button"
-                  className={`toggle-button ${isPublic ? 'active' : ''}`}
+                <div
+                  role="switch"
+                  aria-checked={isPublic}
+                  aria-label="Toggle public guild"
                   onClick={() => setIsPublic(!isPublic)}
+                  style={{
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center',
+                    width: '52px',
+                    height: '24px',
+                    borderRadius: '9999px',
+                    background: isPublic ? 'var(--color-brand-primary)' : 'rgba(255,255,255,0.1)',
+                    flexShrink: 0,
+                    cursor: 'pointer',
+                    transition: 'background 0.2s ease',
+                  }}
                 >
-                  <span className="toggle-knob" />
-                </button>
+                  <span
+                    style={{
+                      position: 'absolute',
+                      fontSize: '9px',
+                      fontWeight: 600,
+                      lineHeight: 1,
+                      color: isPublic ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.4)',
+                      left: isPublic ? '6px' : undefined,
+                      right: isPublic ? undefined : '6px',
+                      userSelect: 'none',
+                      pointerEvents: 'none',
+                    }}
+                    aria-hidden="true"
+                  >
+                    {isPublic ? 'ON' : 'OFF'}
+                  </span>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      width: '18px',
+                      height: '18px',
+                      top: '3px',
+                      borderRadius: '9999px',
+                      background: 'white',
+                      left: isPublic ? '31px' : '3px',
+                      transition: 'left 0.2s ease',
+                    }}
+                  />
+                </div>
               </div>
 
               {error && <p className="error-message">{error}</p>}

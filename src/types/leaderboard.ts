@@ -118,12 +118,12 @@ export const ACTIVE_GAME_IDS: GameId[] = [
   'flappy-orange',
   'wojak-runner',
   'color-reaction',
-  '2048-merge',
   'block-puzzle',
 ];
 
 // Disabled games (coming soon) - greyed out
 export const DISABLED_GAME_IDS: GameId[] = [
+  '2048-merge',
   'orange-pong',
   'orange-juggle',
   'knife-game',

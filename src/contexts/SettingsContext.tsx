@@ -52,6 +52,7 @@ const DEFAULT_SETTINGS: SettingsState = {
     autoSave: true,
     developerMode: false,
     analyticsEnabled: true,
+    skipBootSequence: false,
   },
 };
 

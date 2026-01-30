@@ -19,7 +19,6 @@ import { useLayout } from '@/hooks/useLayout';
 import { ProfileHeader } from '@/components/Account/ProfileHeader';
 import { GameScoresGrid } from '@/components/Account/GameScoresGrid';
 import { NftGallery } from '@/components/Account/NftGallery';
-import { InventorySection } from '@/components/Account/InventorySection';
 import { FriendsWidget } from '@/components/Account/FriendsWidget';
 import { AchievementsWidget } from '@/components/Account/AchievementsWidget';
 import { FriendsLightbox } from '@/components/Account/FriendsLightbox';
@@ -27,7 +26,6 @@ import { AchievementsLightbox } from '@/components/Account/AchievementsLightbox'
 import { PageTransition } from '@/components/layout/PageTransition';
 import { DrawerEditor } from '@/components/Shop/DrawerEditor';
 import { GiftModal } from '@/components/Account/GiftModal';
-import { QuickActionsBar } from '@/components/Account/QuickActionsBar';
 import { InfoButton } from '@/components/common/InfoButton';
 
 import '@/components/Account/Account.css';
@@ -107,7 +105,7 @@ export default function Account() {
 
   // Inventory items from shop
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response items passed to InventorySection
-  const [inventoryItems, setInventoryItems] = useState<any[]>([]);
+  const [, setInventoryItems] = useState<any[]>([]);
   const [, setEquippedItems] = useState<{
     frame_id: string | null;
     title_id: string | null;
@@ -161,95 +159,6 @@ export default function Account() {
 
     fetchInventory();
   }, [isSignedIn, getToken]);
-
-  // Equip handler
-  const handleEquip = async (itemId: string, category: string) => {
-    if (!isSignedIn) return;
-
-    const slotMap: Record<string, string> = {
-      frame: 'frame',
-      title: 'title',
-      name_effect: 'name_effect',
-      background: 'background',
-      celebration: 'celebration',
-    };
-
-    const slot = slotMap[category];
-    if (!slot) return;
-
-    try {
-      const token = await getToken();
-      const res = await fetch('/api/shop/equip', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ slot, itemId }),
-      });
-
-      if (res.ok) {
-        // Update local state
-        setEquippedItems(prev => ({ ...prev, [`${slot}_id`]: itemId }));
-        setInventoryItems(prev =>
-          prev.map(item => ({
-            ...item,
-            equipped: item.category === category ? item.item_id === itemId : item.equipped,
-          }))
-        );
-      }
-    } catch (err) {
-      console.error('[Account] Failed to equip item:', err);
-    }
-  };
-
-  // Gift handler - opens gift modal with selected item
-  const handleGift = (itemId: string) => {
-    const item = inventoryItems.find(i => i.item_id === itemId);
-    setSelectedGiftItem(item || null);
-    setIsGiftModalOpen(true);
-  };
-
-  // Unequip handler
-  const handleUnequip = async (category: string) => {
-    if (!isSignedIn) return;
-
-    const slotMap: Record<string, string> = {
-      frame: 'frame',
-      title: 'title',
-      name_effect: 'name_effect',
-      background: 'background',
-      celebration: 'celebration',
-    };
-
-    const slot = slotMap[category];
-    if (!slot) return;
-
-    try {
-      const token = await getToken();
-      const res = await fetch('/api/shop/equip', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ slot, itemId: null }),
-      });
-
-      if (res.ok) {
-        // Update local state
-        setEquippedItems(prev => ({ ...prev, [`${slot}_id`]: null }));
-        setInventoryItems(prev =>
-          prev.map(item => ({
-            ...item,
-            equipped: item.category === category ? false : item.equipped,
-          }))
-        );
-      }
-    } catch (err) {
-      console.error('[Account] Failed to unequip item:', err);
-    }
-  };
 
   // Track owned NFT IDs
   const [ownedNftIds, setOwnedNftIds] = useState<string[]>([]);
@@ -318,14 +227,16 @@ export default function Account() {
   }
 
   return (
-    <PageTransition>
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+    >
       <div
-        style={{
-          padding: contentPadding,
-        }}
+        style={{ padding: contentPadding }}
         className="account-page"
       >
-        <motion.div 
+        <motion.div
           className="account-dashboard account-dashboard--premium"
           initial="hidden"
           animate="visible"
@@ -371,17 +282,8 @@ export default function Account() {
             <GameScoresGrid userId={userId || ''} />
           </motion.div>
 
-          {/* 5. Quick Actions Bar */}
-          <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } } }}>
-            <QuickActionsBar
-              onAchievements={() => setShowAchievementsLightbox(true)}
-              onCustomize={() => setIsDrawerEditorOpen(true)}
-              onViewProfileCard={() => setIsDrawerEditorOpen(true)}
-            />
-          </motion.div>
-
           {/* 6. Social Widgets Row - Expanded */}
-          <motion.div 
+          <motion.div
             className="account-widgets-row account-widgets-row--expanded"
             variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } } }}
           >
@@ -396,21 +298,8 @@ export default function Account() {
             />
           </motion.div>
 
-          {/* 7. Inventory - Only show if user has items */}
-          {inventoryItems.length > 0 && (
-            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } } }}>
-              <InventorySection
-                items={inventoryItems}
-                isOwnProfile={true}
-                onEquip={handleEquip}
-                onUnequip={handleUnequip}
-                onGift={handleGift}
-              />
-            </motion.div>
-          )}
-
           {/* 8. Account Actions */}
-          <motion.div 
+          <motion.div
             className="account-actions"
             variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } } }}
           >
@@ -483,6 +372,6 @@ export default function Account() {
 
         <InfoButton page="account" />
       </div>
-    </PageTransition>
+    </motion.div>
   );
 }

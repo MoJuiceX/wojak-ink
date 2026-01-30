@@ -9,7 +9,6 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { PanInfo } from 'framer-motion';
 import {
-  Trophy,
   ShoppingBag,
   Users,
   Landmark,
@@ -54,14 +53,6 @@ const menuItems: MenuItem[] = [
     route: '/chat',
     iconColor: '#10b981',
     iconBg: 'rgba(16, 185, 129, 0.15)',
-  },
-  {
-    icon: Trophy,
-    label: 'Leaderboard',
-    description: 'View rankings and compete',
-    route: '/leaderboard',
-    iconColor: '#fbbf24',
-    iconBg: 'rgba(251, 191, 36, 0.15)',
   },
   {
     icon: Users,

@@ -55,13 +55,53 @@ export const SoundSettings: React.FC = () => {
           {volumes.muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
           <span>Sound Effects</span>
         </div>
-        <button
-          className={`sound-toggle-btn ${!volumes.muted ? 'active' : ''}`}
-          onClick={handleToggleMute}
+        <div
+          role="switch"
+          aria-checked={!volumes.muted}
           aria-label={volumes.muted ? 'Enable sound' : 'Disable sound'}
+          onClick={handleToggleMute}
+          style={{
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            width: '52px',
+            height: '24px',
+            borderRadius: '9999px',
+            background: !volumes.muted ? 'var(--color-brand-primary)' : 'rgba(255,255,255,0.1)',
+            flexShrink: 0,
+            cursor: 'pointer',
+            transition: 'background 0.2s ease',
+          }}
         >
-          <span className="sound-toggle-slider" />
-        </button>
+          <span
+            style={{
+              position: 'absolute',
+              fontSize: '9px',
+              fontWeight: 600,
+              lineHeight: 1,
+              color: !volumes.muted ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.4)',
+              left: !volumes.muted ? '6px' : undefined,
+              right: !volumes.muted ? undefined : '6px',
+              userSelect: 'none',
+              pointerEvents: 'none',
+            }}
+            aria-hidden="true"
+          >
+            {!volumes.muted ? 'ON' : 'OFF'}
+          </span>
+          <div
+            style={{
+              position: 'absolute',
+              width: '18px',
+              height: '18px',
+              top: '3px',
+              borderRadius: '9999px',
+              background: 'white',
+              left: !volumes.muted ? '31px' : '3px',
+              transition: 'left 0.2s ease',
+            }}
+          />
+        </div>
       </div>
 
       {/* Volume sliders (only show when not muted) */}

@@ -59,6 +59,7 @@ export interface AppSettings {
   autoSave: boolean;
   developerMode: boolean;
   analyticsEnabled: boolean;
+  skipBootSequence: boolean;
 }
 
 // ============ Combined Settings State ============

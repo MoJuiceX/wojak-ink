@@ -88,6 +88,18 @@ const hasSeenBoot = () => {
   }
 };
 
+// Check if user has permanently disabled boot sequence in settings
+const hasSkipBootSetting = () => {
+  try {
+    const stored = localStorage.getItem('wojak-settings');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return parsed?.app?.skipBootSequence === true;
+    }
+  } catch {}
+  return false;
+};
+
 const markBootComplete = () => {
   try {
     sessionStorage.setItem('wojak_boot_complete', 'true');
@@ -109,9 +121,9 @@ function AppContent() {
     location.pathname === route || location.pathname.startsWith(route)
   );
 
-  // Skip boot if: dev mode, localhost, user already saw it, or public route
+  // Skip boot if: dev mode, localhost, user already saw it, public route, or user disabled it in settings
   const [isStartupComplete, setIsStartupComplete] = useState(
-    (import.meta.env.DEV && SKIP_BOOT_IN_DEV) || (SKIP_BOOT_IN_DEV && isLocalhost()) || hasSeenBoot() || isPublicRoute
+    (import.meta.env.DEV && SKIP_BOOT_IN_DEV) || (SKIP_BOOT_IN_DEV && isLocalhost()) || hasSeenBoot() || isPublicRoute || hasSkipBootSetting()
   );
 
   const handleStartupComplete = () => {

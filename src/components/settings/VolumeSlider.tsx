@@ -80,23 +80,41 @@ export function VolumeSlider({
           className="cursor-pointer"
           style={{
             position: 'relative',
-            width: '36px',
-            height: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            width: '52px',
+            height: '24px',
             borderRadius: '9999px',
             background: enabled ? 'var(--color-brand-primary)' : 'rgba(255,255,255,0.1)',
             flexShrink: 0,
             transition: 'background 0.2s ease',
           }}
         >
+          <span
+            style={{
+              position: 'absolute',
+              fontSize: '9px',
+              fontWeight: 600,
+              lineHeight: 1,
+              color: enabled ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.4)',
+              left: enabled ? '6px' : undefined,
+              right: enabled ? undefined : '6px',
+              userSelect: 'none',
+              pointerEvents: 'none',
+            }}
+            aria-hidden="true"
+          >
+            {enabled ? 'ON' : 'OFF'}
+          </span>
           <div
             style={{
               position: 'absolute',
-              width: '16px',
-              height: '16px',
-              top: '2px',
+              width: '18px',
+              height: '18px',
+              top: '3px',
               borderRadius: '9999px',
               background: 'white',
-              left: enabled ? '18px' : '2px',
+              left: enabled ? '31px' : '3px',
               transition: 'left 0.2s ease',
             }}
           />

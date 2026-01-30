@@ -23,6 +23,7 @@ const CONTENT_HEAVY_ROUTES = [
   '/guild',
   '/treasury',
   '/drawer',
+  '/bigpulp',
 ];
 
 const MAX_REPEL = 30;

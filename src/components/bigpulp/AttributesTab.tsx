@@ -7,7 +7,7 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { Search, ChevronDown, TrendingUp, Clock, Tag } from 'lucide-react';
+import { ChevronDown, ChevronUp, Clock, Tag } from 'lucide-react';
 import type {
   AttributeStats,
   AttributeSortField,
@@ -22,12 +22,12 @@ interface AttributesTabProps {
   isLoading?: boolean;
 }
 
-// Sort options for mobile
-const SORT_OPTIONS: { field: AttributeSortField; label: string }[] = [
-  { field: 'avgPrice', label: 'Avg Price' },
-  { field: 'totalSales', label: 'Most Sales' },
-  { field: 'lastSaleDate', label: 'Recent' },
-  { field: 'value', label: 'A-Z' },
+// Column definitions for the table header
+const TABLE_COLUMNS: { field: AttributeSortField; label: string; color: string }[] = [
+  { field: 'avgPrice', label: 'Avg', color: 'var(--color-brand-primary)' },
+  { field: 'minPrice', label: 'Min', color: 'rgba(34,197,94,0.9)' },
+  { field: 'maxPrice', label: 'Max', color: 'rgba(251,191,36,0.9)' },
+  { field: 'totalSales', label: 'Sales', color: 'var(--color-text-secondary)' },
 ];
 
 // Category color mapping for visual identification
@@ -88,9 +88,6 @@ function getCategoryColor(category: string) {
   return CATEGORY_COLORS[category] || DEFAULT_CATEGORY_COLOR;
 }
 
-// XCH to USD conversion rate
-const XCH_USD_RATE = 5.25;
-
 // Format relative time for last sale
 function formatRelativeTime(date: Date | undefined): string {
   if (!date) return '-';
@@ -114,8 +111,84 @@ function formatRelativeTime(date: Date | undefined): string {
   return `${years}y ago`;
 }
 
-// Premium Attribute Card for mobile
-function AttributeCard({
+// Sort indicator arrow — always reserves space to prevent layout shift
+function SortArrow({ field, sortState }: { field: AttributeSortField; sortState: AttributeSortState }) {
+  const isActive = sortState.field === field;
+  const Icon = isActive && sortState.direction === 'asc' ? ChevronUp : ChevronDown;
+  return (
+    <Icon
+      size={12}
+      className="inline ml-0.5"
+      style={{ visibility: isActive ? 'visible' : 'hidden' }}
+    />
+  );
+}
+
+// Table header with sortable columns
+function TableHeader({
+  sortState,
+  onSort,
+}: {
+  sortState: AttributeSortState;
+  onSort: (field: AttributeSortField) => void;
+}) {
+  return (
+    <div
+      className="flex items-center px-3 py-2.5"
+      style={{
+        background: 'rgba(255,255,255,0.03)',
+        borderBottom: '1px solid rgba(255,255,255,0.08)',
+      }}
+    >
+      {/* Category column header — fixed width, clickable to sort */}
+      <button
+        type="button"
+        className="w-[88px] flex-shrink-0 pr-2 text-left text-[13px] font-semibold uppercase tracking-wider outline-none"
+        style={{
+          color: sortState.field === 'category' ? 'var(--color-text-primary)' : 'var(--color-text-muted)',
+        }}
+        onClick={() => onSort('category')}
+      >
+        Type
+        <SortArrow field="category" sortState={sortState} />
+      </button>
+
+      {/* Attribute name column */}
+      <button
+        type="button"
+        className="flex-1 text-left text-[13px] font-semibold uppercase tracking-wider outline-none"
+        style={{
+          color: sortState.field === 'value' ? 'var(--color-text-primary)' : 'var(--color-text-muted)',
+        }}
+        onClick={() => onSort('value')}
+      >
+        Attribute
+        <SortArrow field="value" sortState={sortState} />
+      </button>
+
+      {/* Numeric columns — grouped right, compact */}
+      <div className="flex items-center gap-0">
+        {TABLE_COLUMNS.map((col) => (
+          <button
+            key={col.field}
+            type="button"
+            className="w-[72px] text-right text-[13px] font-semibold uppercase tracking-wider outline-none"
+            style={{
+              color: sortState.field === col.field ? col.color : 'var(--color-text-muted)',
+            }}
+            onClick={() => onSort(col.field)}
+          >
+            {col.label}
+            <SortArrow field={col.field} sortState={sortState} />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Single attribute row
+function AttributeRow({
   attribute,
   isExpanded,
   onToggle,
@@ -132,118 +205,80 @@ function AttributeCard({
 
   return (
     <motion.div
-      className="rounded-xl overflow-hidden"
+      className="rounded-lg overflow-hidden"
       style={{
-        background: isExpanded 
+        background: isExpanded
           ? `linear-gradient(135deg, ${categoryColor.cardBg} 0%, rgba(255,255,255,0.01) 100%)`
-          : `linear-gradient(135deg, ${categoryColor.cardBg} 0%, rgba(255,255,255,0.02) 100%)`,
-        border: isExpanded 
-          ? `1px solid ${categoryColor.border}` 
-          : `1px solid rgba(255,255,255,0.08)`,
-        boxShadow: isExpanded 
-          ? `0 4px 20px ${categoryColor.bg}` 
-          : '0 2px 8px rgba(0,0,0,0.2)',
+          : 'transparent',
+        border: isExpanded
+          ? `1px solid ${categoryColor.border}`
+          : '1px solid rgba(255,255,255,0.04)',
       }}
-      initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
+      initial={prefersReducedMotion ? {} : { opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.03 }}
-      whileTap={{ scale: 0.98 }}
+      transition={{ delay: index * 0.02 }}
     >
-      {/* Card Header - Always visible */}
+      {/* Row — category | attribute name | 4 numbers, all one line */}
       <button
         type="button"
-        className="w-full p-3 text-left"
+        className="w-full flex items-center px-3 py-3 text-left"
         onClick={onToggle}
         aria-expanded={isExpanded}
       >
-        {/* Top row: Category badge + Attribute name + Expand icon */}
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            <span
-              className="text-[10px] px-1.5 py-0.5 rounded font-medium flex-shrink-0"
-              style={{
-                background: categoryColor.bg,
-                color: categoryColor.text,
-                border: `1px solid ${categoryColor.border}`,
-              }}
-            >
-              {attribute.category}
-            </span>
-            <span
-              className="font-semibold text-sm truncate"
-              style={{ color: 'var(--color-text-primary)' }}
-            >
-              {attribute.value}
-            </span>
-          </div>
-          <motion.div
-            animate={{ rotate: isExpanded ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
-            className="flex-shrink-0"
+        {/* Category badge — fixed width column with right margin */}
+        <span
+          className="w-[88px] flex-shrink-0 pr-2"
+        >
+          <span
+            className="text-[11px] px-1.5 py-0.5 rounded font-medium inline-block"
+            style={{
+              background: categoryColor.bg,
+              color: categoryColor.text,
+              border: `1px solid ${categoryColor.border}`,
+            }}
           >
-            <ChevronDown size={16} style={{ color: 'var(--color-text-muted)' }} />
-          </motion.div>
-        </div>
+            {attribute.category}
+          </span>
+        </span>
 
-        {/* Stats row - compact grid */}
-        <div className="grid grid-cols-4 gap-2">
-          {/* Avg Price */}
-          <div className="text-center">
-            <p className="text-[10px] mb-0.5" style={{ color: 'var(--color-text-muted)' }}>Avg</p>
-            <p
-              className="text-sm font-bold font-mono"
-              style={{ color: hasSales ? 'var(--color-brand-primary)' : 'var(--color-text-muted)' }}
-            >
-              {hasSales ? attribute.avgPrice.toFixed(2) : '-'}
-            </p>
-            {hasSales && (
-              <p className="text-[9px]" style={{ color: 'var(--color-text-muted)' }}>
-                ${(attribute.avgPrice * XCH_USD_RATE).toFixed(0)}
-              </p>
-            )}
-          </div>
+        {/* Attribute name — flex column */}
+        <span
+          className="flex-1 text-[15px] font-medium truncate min-w-0"
+          style={{ color: 'var(--color-text-primary)' }}
+        >
+          {attribute.value}
+        </span>
 
-          {/* Min */}
-          <div className="text-center">
-            <p className="text-[10px] mb-0.5" style={{ color: 'var(--color-text-muted)' }}>Min</p>
-            <p
-              className="text-sm font-semibold font-mono"
-              style={{ color: hasSales ? 'rgba(34,197,94,0.9)' : 'var(--color-text-muted)' }}
-            >
-              {hasSales ? attribute.minPrice.toFixed(2) : '-'}
-            </p>
-          </div>
-
-          {/* Max */}
-          <div className="text-center">
-            <p className="text-[10px] mb-0.5" style={{ color: 'var(--color-text-muted)' }}>Max</p>
-            <p
-              className="text-sm font-semibold font-mono"
-              style={{ color: hasSales ? 'rgba(251,191,36,0.9)' : 'var(--color-text-muted)' }}
-            >
-              {hasSales ? attribute.maxPrice.toFixed(2) : '-'}
-            </p>
-          </div>
-
-          {/* Sales/Time */}
-          <div className="text-center">
-            <p className="text-[10px] mb-0.5" style={{ color: 'var(--color-text-muted)' }}>Sales</p>
-            <p
-              className="text-sm font-semibold"
-              style={{ color: hasSales ? 'var(--color-text-secondary)' : 'var(--color-text-muted)' }}
-            >
-              {hasSales ? attribute.totalSales : '-'}
-            </p>
-            {hasSales && attribute.lastSaleDate && (
-              <p className="text-[9px]" style={{ color: 'var(--color-text-muted)' }}>
-                {formatRelativeTime(attribute.lastSaleDate)}
-              </p>
-            )}
-          </div>
+        {/* Numeric values — right-aligned, matching header widths */}
+        <div className="flex items-center gap-0 flex-shrink-0">
+          <span
+            className="w-[72px] text-right text-sm font-mono font-bold"
+            style={{ color: hasSales ? 'var(--color-brand-primary)' : 'var(--color-text-muted)' }}
+          >
+            {hasSales ? attribute.avgPrice.toFixed(2) : '-'}
+          </span>
+          <span
+            className="w-[72px] text-right text-sm font-mono"
+            style={{ color: hasSales ? 'rgba(34,197,94,0.9)' : 'var(--color-text-muted)' }}
+          >
+            {hasSales ? attribute.minPrice.toFixed(2) : '-'}
+          </span>
+          <span
+            className="w-[72px] text-right text-sm font-mono"
+            style={{ color: hasSales ? 'rgba(251,191,36,0.9)' : 'var(--color-text-muted)' }}
+          >
+            {hasSales ? attribute.maxPrice.toFixed(2) : '-'}
+          </span>
+          <span
+            className="w-[72px] text-right text-sm font-mono"
+            style={{ color: hasSales ? 'var(--color-text-secondary)' : 'var(--color-text-muted)' }}
+          >
+            {hasSales ? attribute.totalSales : '-'}
+          </span>
         </div>
       </button>
 
-      {/* Expanded content */}
+      {/* Expanded detail (rarity + recent sales) */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -257,15 +292,16 @@ function AttributeCard({
               className="px-3 pb-3 pt-2"
               style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
             >
-              {/* Rarity info */}
               <div className="flex items-center gap-2 mb-3">
                 <Tag size={12} style={{ color: 'var(--color-text-muted)' }} />
                 <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
                   {attribute.count} NFTs have this trait ({attribute.rarity.toFixed(1)}% rarity)
+                  {hasSales && attribute.lastSaleDate && (
+                    <> &middot; Last sale {formatRelativeTime(attribute.lastSaleDate)}</>
+                  )}
                 </span>
               </div>
 
-              {/* Recent sales thumbnails */}
               {attribute.recentSales && attribute.recentSales.length > 0 ? (
                 <div>
                   <p className="text-xs mb-2 flex items-center gap-1" style={{ color: 'var(--color-text-muted)' }}>
@@ -309,25 +345,20 @@ function AttributeCard({
   );
 }
 
-// Loading skeleton for cards
-function CardSkeleton() {
+// Loading skeleton
+function RowSkeleton() {
   return (
-    <div
-      className="rounded-xl p-3 animate-pulse"
-      style={{
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.06)',
-      }}
-    >
-      <div className="flex items-center gap-2 mb-3">
-        <div className="h-4 w-16 rounded" style={{ background: 'var(--color-border)' }} />
-        <div className="h-4 w-24 rounded" style={{ background: 'var(--color-border)' }} />
+    <div className="flex items-center px-3 py-3 animate-pulse">
+      <div className="w-[88px] flex-shrink-0 pr-2">
+        <div className="h-5 w-16 rounded" style={{ background: 'var(--color-border)' }} />
       </div>
-      <div className="grid grid-cols-4 gap-2">
+      <div className="flex-1">
+        <div className="h-5 w-24 rounded" style={{ background: 'var(--color-border)' }} />
+      </div>
+      <div className="flex items-center gap-0">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="text-center">
-            <div className="h-3 w-8 rounded mx-auto mb-1" style={{ background: 'var(--color-border)' }} />
-            <div className="h-5 w-10 rounded mx-auto" style={{ background: 'var(--color-border)' }} />
+          <div key={i} className="w-[72px] flex justify-end">
+            <div className="h-5 w-12 rounded" style={{ background: 'var(--color-border)' }} />
           </div>
         ))}
       </div>
@@ -340,33 +371,36 @@ export function AttributesTab({
   isLoading = false,
 }: AttributesTabProps) {
   const prefersReducedMotion = useReducedMotion();
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedAttribute, setSelectedAttribute] = useState<string | null>(null);
   const [sortState, setSortState] = useState<AttributeSortState>({
     field: 'avgPrice',
     direction: 'desc',
   });
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
-  // Note: uniqueCategories removed - using CATEGORY_COLORS for legend instead
+  // Compute attribute values for the selected category (for the attribute dropdown)
+  const attributeValues = useMemo(() => {
+    if (!selectedCategory) return [];
+    const values = attributes
+      .filter((a) => a.category === selectedCategory)
+      .map((a) => a.value)
+      .sort((a, b) => a.localeCompare(b));
+    return [...new Set(values)];
+  }, [attributes, selectedCategory]);
 
   // Filter and sort attributes
   const filteredAttributes = useMemo(() => {
     let result = [...attributes];
 
-    // Filter by search
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (a) =>
-          a.value.toLowerCase().includes(query) ||
-          a.category.toLowerCase().includes(query)
-      );
-    }
-
     // Filter by category
     if (selectedCategory) {
       result = result.filter((a) => a.category === selectedCategory);
+    }
+
+    // Filter by specific attribute
+    if (selectedAttribute) {
+      result = result.filter((a) => a.value === selectedAttribute);
     }
 
     // Sort
@@ -410,7 +444,7 @@ export function AttributesTab({
     });
 
     return result;
-  }, [attributes, searchQuery, selectedCategory, sortState]);
+  }, [attributes, selectedCategory, selectedAttribute, sortState]);
 
   const handleSortChange = useCallback((field: AttributeSortField) => {
     setSortState((prev) => ({
@@ -426,13 +460,13 @@ export function AttributesTab({
   // Loading state
   if (isLoading) {
     return (
-      <div className="space-y-3 p-3">
-        <div className="flex gap-2">
-          <div className="flex-1 h-10 rounded-lg animate-pulse" style={{ background: 'var(--color-border)' }} />
-          <div className="w-24 h-10 rounded-lg animate-pulse" style={{ background: 'var(--color-border)' }} />
+      <div className="space-y-0 p-3">
+        <div className="flex gap-2 mb-3">
+          <div className="h-8 w-28 rounded-lg animate-pulse" style={{ background: 'var(--color-border)' }} />
+          <div className="h-8 w-28 rounded-lg animate-pulse" style={{ background: 'var(--color-border)' }} />
         </div>
-        <div className="space-y-2">
-          {[1, 2, 3, 4, 5].map((i) => <CardSkeleton key={i} />)}
+        <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
+          {[1, 2, 3, 4, 5, 6].map((i) => <RowSkeleton key={i} />)}
         </div>
       </div>
     );
@@ -440,131 +474,99 @@ export function AttributesTab({
 
   return (
     <motion.div
-      className="space-y-3 p-3"
+      className="p-3"
       variants={prefersReducedMotion ? undefined : tabContentVariants}
       initial="hidden"
       animate="visible"
       exit="exit"
     >
-      {/* Category Legend - scrollable chips */}
-      <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
-        {Object.entries(CATEGORY_COLORS).map(([category, colors]) => (
-          <button
-            key={category}
-            type="button"
-            onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
-            className="flex-shrink-0 px-2 py-1 rounded-lg text-[10px] font-medium transition-all"
-            style={{
-              background: selectedCategory === category ? colors.bg : 'transparent',
-              border: `1px solid ${selectedCategory === category ? colors.border : 'rgba(255,255,255,0.08)'}`,
-              color: selectedCategory === category ? colors.text : 'var(--color-text-muted)',
-              boxShadow: selectedCategory === category ? `0 2px 8px ${colors.bg}` : 'none',
-            }}
-          >
-            <span
-              className="inline-block w-2 h-2 rounded-full mr-1"
-              style={{ background: colors.text }}
-            />
-            {category}
-          </button>
-        ))}
+      {/* Filter dropdowns */}
+      <div className="flex items-center gap-2 mb-3">
+        {/* Category dropdown */}
+        <select
+          value={selectedCategory || ''}
+          onChange={(e) => {
+            const val = e.target.value || null;
+            setSelectedCategory(val);
+            setSelectedAttribute(null);
+          }}
+          className="px-2.5 py-1.5 rounded-lg text-xs appearance-none min-w-0"
+          style={{
+            background: selectedCategory
+              ? getCategoryColor(selectedCategory).bg
+              : 'rgba(255,255,255,0.05)',
+            border: `1px solid ${selectedCategory
+              ? getCategoryColor(selectedCategory).border
+              : 'rgba(255,255,255,0.08)'}`,
+            color: selectedCategory
+              ? getCategoryColor(selectedCategory).text
+              : 'var(--color-text-secondary)',
+          }}
+        >
+          <option value="">All Categories</option>
+          {Object.keys(CATEGORY_COLORS).map((cat) => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
+
+        {/* Attribute dropdown */}
+        <select
+          value={selectedAttribute || ''}
+          onChange={(e) => setSelectedAttribute(e.target.value || null)}
+          disabled={!selectedCategory}
+          className="px-2.5 py-1.5 rounded-lg text-xs appearance-none min-w-0"
+          style={{
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            color: !selectedCategory ? 'var(--color-text-muted)' : 'var(--color-text-secondary)',
+            opacity: !selectedCategory ? 0.5 : 1,
+          }}
+        >
+          <option value="">{selectedCategory ? 'All Attributes' : 'Select category first'}</option>
+          {attributeValues.map((val) => (
+            <option key={val} value={val}>{val}</option>
+          ))}
+        </select>
       </div>
 
-      {/* Search bar - full width, premium styled */}
+      {/* Table */}
       <div
-        className="flex items-center gap-2 px-3 py-2.5 rounded-xl"
+        className="rounded-xl overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
-          border: '1px solid rgba(255,255,255,0.08)',
+          background: 'rgba(255,255,255,0.02)',
+          border: '1px solid rgba(255,255,255,0.06)',
         }}
       >
-        <Search size={16} style={{ color: 'var(--color-text-muted)' }} />
-        <input
-          type="text"
-          placeholder="Search attributes..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="flex-1 bg-transparent outline-none text-sm"
-          style={{ color: 'var(--color-text-primary)' }}
-        />
-      </div>
+        {/* Sortable column headers */}
+        <TableHeader sortState={sortState} onSort={handleSortChange} />
 
-      {/* Sort dropdown + active filter indicator */}
-      <div className="flex items-center gap-2">
-        {/* Active filter indicator */}
-        {selectedCategory && (
-          <button
-            type="button"
-            onClick={() => setSelectedCategory(null)}
-            className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs"
-            style={{
-              background: getCategoryColor(selectedCategory).bg,
-              border: `1px solid ${getCategoryColor(selectedCategory).border}`,
-              color: getCategoryColor(selectedCategory).text,
-            }}
-          >
-            <span>{selectedCategory}</span>
-            <span className="ml-1">×</span>
-          </button>
-        )}
-
-        <div className="flex-1" />
-
-        {/* Sort dropdown */}
-        <div className="relative">
-          <select
-            value={sortState.field}
-            onChange={(e) => handleSortChange(e.target.value as AttributeSortField)}
-            className="px-3 py-1.5 rounded-lg text-xs appearance-none pr-7"
-            style={{
-              background: 'rgba(251,146,60,0.1)',
-              border: '1px solid rgba(251,146,60,0.2)',
-              color: 'var(--color-brand-primary)',
-            }}
-          >
-            {SORT_OPTIONS.map(({ field, label }) => (
-              <option key={field} value={field}>{label}</option>
-            ))}
-          </select>
-          <TrendingUp 
-            size={10} 
-            className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none"
-            style={{ color: 'var(--color-brand-primary)' }}
-          />
+        {/* Rows */}
+        <div>
+          {filteredAttributes.map((attr, index) => {
+            const key = `${attr.category}-${attr.value}`;
+            return (
+              <AttributeRow
+                key={key}
+                attribute={attr}
+                isExpanded={expandedCard === key}
+                onToggle={() => handleCardToggle(key)}
+                index={index}
+              />
+            );
+          })}
         </div>
-      </div>
-
-      {/* Results count */}
-      <p className="text-xs px-1" style={{ color: 'var(--color-text-muted)' }}>
-        {filteredAttributes.length} attributes found
-      </p>
-
-      {/* Card list */}
-      <div className="space-y-2">
-        {filteredAttributes.map((attr, index) => {
-          const key = `${attr.category}-${attr.value}`;
-          return (
-            <AttributeCard
-              key={key}
-              attribute={attr}
-              isExpanded={expandedCard === key}
-              onToggle={() => handleCardToggle(key)}
-              index={index}
-            />
-          );
-        })}
       </div>
 
       {filteredAttributes.length === 0 && (
         <div
-          className="p-8 text-center rounded-xl"
+          className="p-8 text-center rounded-xl mt-3"
           style={{
             background: 'rgba(255,255,255,0.02)',
             border: '1px solid rgba(255,255,255,0.06)',
             color: 'var(--color-text-muted)',
           }}
         >
-          No attributes found matching your search
+          No attributes found matching your filters
         </div>
       )}
     </motion.div>

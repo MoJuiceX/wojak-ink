@@ -19,22 +19,28 @@ interface ToggleProps {
 
 const sizeConfig = {
   small: {
-    trackWidth: 36,
-    trackHeight: 20,
+    trackWidth: 48,
+    trackHeight: 22,
     thumbSize: 16,
-    thumbOffset: 2,
+    thumbOffset: 3,
+    fontSize: '8px',
+    labelPadding: '5px',
   },
   medium: {
-    trackWidth: 36,
-    trackHeight: 20,
-    thumbSize: 16,
-    thumbOffset: 2,
+    trackWidth: 52,
+    trackHeight: 24,
+    thumbSize: 18,
+    thumbOffset: 3,
+    fontSize: '9px',
+    labelPadding: '6px',
   },
   large: {
-    trackWidth: 40,
-    trackHeight: 22,
-    thumbSize: 18,
-    thumbOffset: 2,
+    trackWidth: 56,
+    trackHeight: 26,
+    thumbSize: 20,
+    thumbOffset: 3,
+    fontSize: '9px',
+    labelPadding: '6px',
   },
 };
 
@@ -103,6 +109,8 @@ export function Toggle({
         className={disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
         style={{
           position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
           width: `${config.trackWidth}px`,
           height: `${config.trackHeight}px`,
           borderRadius: '9999px',
@@ -111,8 +119,25 @@ export function Toggle({
             : 'rgba(255,255,255,0.1)',
           flexShrink: 0,
           outline: 'none',
+          transition: 'background 0.2s ease',
         }}
       >
+        <span
+          style={{
+            position: 'absolute',
+            fontSize: config.fontSize,
+            fontWeight: 600,
+            lineHeight: 1,
+            color: checked ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.4)',
+            left: checked ? config.labelPadding : undefined,
+            right: checked ? undefined : config.labelPadding,
+            userSelect: 'none',
+            pointerEvents: 'none',
+          }}
+          aria-hidden="true"
+        >
+          {checked ? 'ON' : 'OFF'}
+        </span>
         <motion.div
           style={{
             position: 'absolute',

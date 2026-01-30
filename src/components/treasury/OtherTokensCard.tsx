@@ -64,7 +64,7 @@ export function OtherTokensCard({ tokens, isLoading = false }: OtherTokensCardPr
       transition={{ delay: 0.2, duration: 0.4 }}
     >
       {/* Token list - scrollable content area */}
-      <div className="p-3 flex-1 overflow-y-auto min-h-0">
+      <div className="p-3">
         <div className="flex flex-col gap-1.5">
           {sortedTokens.map((token, index) => (
             <motion.div

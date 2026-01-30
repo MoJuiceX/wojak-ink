@@ -573,6 +573,7 @@ body {
 .ambient-background {
   position: fixed;
   inset: 0;
+  bottom: -200px; /* Extra height to cover scroll parallax translate */
   pointer-events: none;
   z-index: 0;
   overflow: hidden;

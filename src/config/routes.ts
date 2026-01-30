@@ -91,6 +91,13 @@ export const PRIMARY_NAV_ITEMS: NavItem[] = [
     shortLabel: 'Games',
     icon: Gamepad2,
   },
+  {
+    id: 'leaderboard',
+    path: '/leaderboard',
+    label: 'Leaderboard',
+    shortLabel: 'Ranks',
+    icon: Trophy,
+  },
 ];
 
 /**
@@ -115,13 +122,6 @@ export const SECONDARY_NAV_ITEMS: NavItem[] = [
     label: 'Chat Rooms',
     shortLabel: 'Chat',
     icon: MessageCircle,
-  },
-  {
-    id: 'leaderboard',
-    path: '/leaderboard',
-    label: 'Leaderboard',
-    shortLabel: 'Ranks',
-    icon: Trophy,
   },
   // REMOVED: Friends (moved to Account page widget - SPEC 17)
   // REMOVED: Achievements (moved to Account page widget - SPEC 17)

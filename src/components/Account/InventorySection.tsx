@@ -5,7 +5,7 @@
  * Uses unified items table categories.
  */
 
-import { Check, Sparkles, Gift } from 'lucide-react';
+import { Check, Sparkles } from 'lucide-react';
 import './Account.css';
 
 // Database item categories from unified items table
@@ -136,7 +136,6 @@ export function InventorySection({
   isOwnProfile,
   onEquip,
   onUnequip,
-  onGift,
 }: InventorySectionProps) {
   // Group items by category
   const itemsByCategory = items.reduce((acc, item) => {
@@ -192,57 +191,39 @@ export function InventorySection({
         return (
           <div key={category} className="inventory-category">
             <h3 className="category-title">{CATEGORY_LABELS[category]}</h3>
-            <div className="inventory-items">
+            <div className="inventory-items-grid">
               {categoryItems.map((item) => (
                 <div
                   key={item.id}
-                  className={`inventory-item tier-${item.tier} ${item.equipped ? 'equipped' : ''}`}
+                  className={`inventory-card tier-${item.tier} ${item.equipped ? 'equipped' : ''}`}
+                  onClick={() => {
+                    if (!isOwnProfile || !isEquippable) return;
+                    if (item.equipped) {
+                      onUnequip?.(category);
+                    } else {
+                      onEquip?.(item.item_id, category);
+                    }
+                  }}
+                  role={isOwnProfile && isEquippable ? 'button' : undefined}
+                  tabIndex={isOwnProfile && isEquippable ? 0 : undefined}
                 >
-                  <div className="item-preview">
+                  <div className="card-preview">
                     {renderItemPreview(item)}
                   </div>
-                  <div className="item-info">
-                    <span className="item-name">{item.name}</span>
+                  <div className="card-details">
+                    <span className="card-name">{item.name}</span>
                     <span
-                      className="item-tier"
+                      className="card-tier"
                       style={{ color: TIER_COLORS[item.tier] }}
                     >
                       {item.tier}
                     </span>
                   </div>
-
-                  <div className="item-actions">
-                    {isOwnProfile && isEquippable && (
-                      <button
-                        className={`equip-button ${item.equipped ? 'equipped' : ''}`}
-                        onClick={() => {
-                          if (item.equipped) {
-                            onUnequip?.(category);
-                          } else {
-                            onEquip?.(item.item_id, category);
-                          }
-                        }}
-                      >
-                        {item.equipped ? (
-                          <>
-                            <Check size={14} /> Equipped
-                          </>
-                        ) : (
-                          'Equip'
-                        )}
-                      </button>
-                    )}
-
-                    {isOwnProfile && !item.equipped && onGift && (
-                      <button
-                        className="gift-button"
-                        onClick={() => onGift(item.item_id)}
-                        title="Gift this item"
-                      >
-                        <Gift size={14} />
-                      </button>
-                    )}
-                  </div>
+                  {item.equipped && (
+                    <div className="card-equipped-badge">
+                      <Check size={10} />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
