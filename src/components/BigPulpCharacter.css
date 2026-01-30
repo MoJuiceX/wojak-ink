@@ -8,7 +8,7 @@
   background-image: url('/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Orange Grove.png');
   background-size: cover;
   background-position: center;
-  border-radius: 16px;
+  border-radius: 24px;
   overflow: visible;
   /* Fill parent height on desktop, dynamic on mobile */
   height: 100%;

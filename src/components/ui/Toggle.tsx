@@ -1,11 +1,10 @@
 /**
  * Toggle Component
  *
- * Accessible toggle switch with proper ARIA attributes.
+ * Accessible pill-shaped toggle switch.
  */
 
 import { motion, useReducedMotion } from 'framer-motion';
-import { toggleThumbVariants } from '@/config/settingsAnimations';
 
 interface ToggleProps {
   id: string;
@@ -20,22 +19,22 @@ interface ToggleProps {
 
 const sizeConfig = {
   small: {
-    trackWidth: 44,          // px
-    trackHeight: 24,         // px - matches thumb + 4px padding
-    thumbSize: 20,           // px
-    thumbOffset: 2,          // (24 - 20) / 2 = 2px vertical centering
+    trackWidth: 36,
+    trackHeight: 20,
+    thumbSize: 16,
+    thumbOffset: 2,
   },
   medium: {
-    trackWidth: 50,          // px
-    trackHeight: 28,         // px - matches thumb + 4px padding
-    thumbSize: 24,           // px
-    thumbOffset: 2,          // (28 - 24) / 2 = 2px vertical centering
+    trackWidth: 36,
+    trackHeight: 20,
+    thumbSize: 16,
+    thumbOffset: 2,
   },
   large: {
-    trackWidth: 56,          // px
-    trackHeight: 32,         // px - matches thumb + 4px padding
-    thumbSize: 28,           // px
-    thumbOffset: 2,          // (32 - 28) / 2 = 2px vertical centering
+    trackWidth: 40,
+    trackHeight: 22,
+    thumbSize: 18,
+    thumbOffset: 2,
   },
 };
 
@@ -92,59 +91,50 @@ export function Toggle({
         </div>
       )}
 
-      <button
+      <div
         id={id}
-        type="button"
         role="switch"
+        tabIndex={disabled ? -1 : 0}
         aria-checked={checked}
         aria-label={label}
         aria-describedby={descriptionId}
-        disabled={disabled}
         onClick={handleToggle}
         onKeyDown={handleKeyDown}
-        className={`
-          rounded-full relative transition-colors
-          focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
-          focus-visible:ring-[var(--color-brand-primary)]
-          ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-        `}
+        className={disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
         style={{
-          width: config.trackWidth,
-          height: config.trackHeight,
+          position: 'relative',
+          width: `${config.trackWidth}px`,
+          height: `${config.trackHeight}px`,
+          borderRadius: '9999px',
           background: checked
             ? 'var(--color-brand-primary)'
-            : 'var(--color-bg-tertiary)',
-          border: checked ? 'none' : '1px solid var(--color-border)',
+            : 'rgba(255,255,255,0.1)',
+          flexShrink: 0,
+          outline: 'none',
         }}
       >
-        <motion.span
-          className="absolute bg-white rounded-full shadow-sm"
-          variants={prefersReducedMotion ? undefined : toggleThumbVariants}
-          animate={checked ? 'on' : 'off'}
-          custom={config.trackWidth - config.thumbSize - config.thumbOffset * 2}
+        <motion.div
+          style={{
+            position: 'absolute',
+            width: `${config.thumbSize}px`,
+            height: `${config.thumbSize}px`,
+            top: `${config.thumbOffset}px`,
+            borderRadius: '9999px',
+            background: 'white',
+          }}
+          animate={{
+            left: checked
+              ? `${config.trackWidth - config.thumbSize - config.thumbOffset}px`
+              : `${config.thumbOffset}px`,
+          }}
           transition={
             prefersReducedMotion
               ? { duration: 0.05 }
               : { type: 'spring', stiffness: 500, damping: 30 }
           }
-          style={{
-            width: config.thumbSize,
-            height: config.thumbSize,
-            top: config.thumbOffset,
-            left: config.thumbOffset,
-            x: checked ? config.trackWidth - config.thumbSize - config.thumbOffset * 2 : 0,
-          }}
           aria-hidden="true"
         />
-      </button>
-
-      <span
-        className="text-xs font-medium min-w-[24px]"
-        style={{ color: 'var(--color-text-muted)' }}
-        aria-hidden="true"
-      >
-        {checked ? 'ON' : 'OFF'}
-      </span>
+      </div>
     </div>
   );
 }

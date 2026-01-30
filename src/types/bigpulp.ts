@@ -273,3 +273,48 @@ export interface AttributeSortState {
   field: AttributeSortField;
   direction: SortDirection;
 }
+
+// ============ Streaming / AI Response Types ============
+
+export type StreamingStage = 'analyzing' | 'searching' | 'generating' | null;
+
+export interface StreamingState {
+  isStreaming: boolean;
+  currentText: string;
+  stage: StreamingStage;
+}
+
+export type AIResponseType = 'text' | 'nft-list' | 'stats' | 'chart' | 'suggestion' | 'error';
+
+export interface AIResponse {
+  id: string;
+  type: AIResponseType;
+  content: unknown;
+  timestamp: Date;
+}
+
+export interface NFTListResponse {
+  nfts: Array<{
+    id: string;
+    name: string;
+    image: string;
+    price?: number;
+    rarity: string;
+  }>;
+  title?: string;
+}
+
+export interface StatsResponse {
+  stats: Array<{
+    label: string;
+    value: string | number;
+    change?: number;
+    trend?: 'up' | 'down' | 'neutral';
+  }>;
+}
+
+export interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+  response?: AIResponse;
+}

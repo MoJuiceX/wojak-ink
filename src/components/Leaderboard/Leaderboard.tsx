@@ -32,7 +32,6 @@ import { PersonalStatsPanel } from './PersonalStatsPanel';
 import { useIsMobile } from '../../hooks/useMediaQuery';
 import type { GameId } from '../../types/leaderboard';
 import { GAME_NAMES, ACTIVE_GAME_IDS, DISABLED_GAME_IDS } from '../../types/leaderboard';
-import type { TierName } from '@/lib/leaderboard/tierCalculation';
 import './Leaderboard.css';
 import './MobilePodium.css';
 
@@ -49,7 +48,6 @@ interface LeaderboardEntryData {
   score: number;
   level?: number;
   createdAt: string;
-  tier?: TierName;
   isCurrentUser?: boolean;
   equipped?: {
     nameEffect?: {
@@ -71,7 +69,6 @@ interface LeaderboardEntryData {
 interface UserPosition {
   rank: number;
   score: number;
-  tier: TierName;
   totalPlayers: number;
   nextRival?: {
     userId: string;
@@ -108,10 +105,9 @@ interface LeaderboardProps {
   showGameSelector?: boolean;
 }
 
-type TimeframeType = 'all-time' | 'weekly' | 'daily';
+type TimeframeType = 'all-time' | 'weekly';
 
 const TIME_FILTERS: { value: TimeframeType; label: string }[] = [
-  { value: 'daily', label: 'Today' },
   { value: 'weekly', label: 'This Week' },
   { value: 'all-time', label: 'All Time' },
 ];
@@ -465,8 +461,6 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                     ? friends.length === 0
                       ? 'Add friends to see their scores here!'
                       : 'None of your friends have played this game yet.'
-                    : timeframe === 'daily'
-                    ? 'No scores yet today. Be the first!'
                     : timeframe === 'weekly'
                     ? 'No scores this week. Claim your glory!'
                     : 'Be the first to set a record!'}
@@ -641,8 +635,6 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                       ? friends.length === 0
                         ? 'Add friends to see their scores here!'
                         : 'None of your friends have played this game yet.'
-                      : timeframe === 'daily'
-                      ? 'No scores yet today. Be the first!'
                       : timeframe === 'weekly'
                       ? 'No scores this week. Claim your glory!'
                       : 'Be the first to set a record!'}

@@ -82,14 +82,14 @@ export function StatsPanel() {
     <div
       className="h-full rounded-2xl overflow-hidden flex flex-col"
       style={{
-        background: 'rgba(10, 10, 10, 0.98)',
+        background: 'transparent',
         border: '1px solid var(--color-border)',
       }}
     >
       {/* Header */}
       <div
         className="px-4 py-3 flex items-center gap-2"
-        style={{ borderBottom: '1px solid var(--color-border)' }}
+        style={{ background: '#000000', borderBottom: '1px solid var(--color-border)' }}
       >
         <BarChart3 size={18} style={{ color: 'var(--color-brand-primary)' }} />
         <h3
@@ -153,8 +153,8 @@ export function StatsPanel() {
                 key={game.gameId}
                 className="relative px-3 py-2 rounded-lg"
                 style={{
-                  background: 'var(--color-bg-primary)',
-                  border: '1px solid var(--color-border)',
+                  background: '#000000',
+                  border: '1px solid rgba(255,255,255,0.12)',
                 }}
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -199,7 +199,7 @@ export function StatsPanel() {
                   <motion.div
                     className="absolute left-0 right-0 top-full mt-1 z-10 px-3 py-2 rounded-lg"
                     style={{
-                      background: 'var(--color-bg-secondary)',
+                      background: 'var(--color-surface)',
                       border: '1px solid var(--color-border)',
                       boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
                     }}
@@ -240,7 +240,7 @@ export function StatsPanel() {
                   <motion.div
                     className="absolute left-0 right-0 top-full mt-1 z-10 px-3 py-2 rounded-lg text-center"
                     style={{
-                      background: 'var(--color-bg-secondary)',
+                      background: 'var(--color-surface)',
                       border: '1px solid #ffd700',
                       boxShadow: '0 4px 12px rgba(255,215,0,0.2)',
                     }}
@@ -260,8 +260,8 @@ export function StatsPanel() {
             <div
               className="mt-3 px-3 py-2 rounded-lg"
               style={{
-                background: 'var(--color-bg-primary)',
-                border: '1px solid var(--color-border)',
+                background: '#000000',
+                border: '1px solid rgba(255,255,255,0.12)',
               }}
             >
               <p

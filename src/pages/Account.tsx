@@ -28,6 +28,7 @@ import { PageTransition } from '@/components/layout/PageTransition';
 import { DrawerEditor } from '@/components/Shop/DrawerEditor';
 import { GiftModal } from '@/components/Account/GiftModal';
 import { QuickActionsBar } from '@/components/Account/QuickActionsBar';
+import { InfoButton } from '@/components/common/InfoButton';
 
 import '@/components/Account/Account.css';
 
@@ -479,6 +480,8 @@ export default function Account() {
           isOpen={showAchievementsLightbox}
           onClose={() => setShowAchievementsLightbox(false)}
         />
+
+        <InfoButton page="account" />
       </div>
     </PageTransition>
   );

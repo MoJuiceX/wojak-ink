@@ -78,14 +78,14 @@ export function LeaderboardPanel() {
     <div
       className="h-full rounded-2xl overflow-hidden flex flex-col"
       style={{
-        background: 'rgba(10, 10, 10, 0.98)',
+        background: 'transparent',
         border: '1px solid var(--color-border)',
       }}
     >
       {/* Header */}
       <div
         className="px-4 py-3 flex items-center gap-2"
-        style={{ borderBottom: '1px solid var(--color-border)' }}
+        style={{ background: '#000000', borderBottom: '1px solid var(--color-border)' }}
       >
         <Trophy size={18} style={{ color: 'var(--color-brand-primary)' }} />
         <h3
@@ -135,7 +135,8 @@ export function LeaderboardPanel() {
                 key={entry.gameId}
                 className="leaderboard-name-card flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer"
                 style={{
-                  border: '1px solid var(--color-border)',
+                  background: '#000000',
+                  border: '1px solid rgba(255,255,255,0.12)',
                 }}
                 onClick={() => handlePlayerClick(entry.userId)}
               >

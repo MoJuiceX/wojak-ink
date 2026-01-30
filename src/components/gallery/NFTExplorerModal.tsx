@@ -132,7 +132,7 @@ export function NFTExplorerModal({ isOpen, onClose }: NFTExplorerModalProps) {
             {/* Fixed top section: Image + Filter pills */}
             <div className="flex-shrink-0 flex flex-col gap-3">
               {/* Swipeable image */}
-              <div className="flex items-center justify-center px-4">
+              <div className={`flex items-center justify-center px-4 nft-explorer-image rarity-${currentNft.rarityTier}`}>
                 <SwipeableNFTImage
                   nfts={filteredNfts}
                   currentIndex={currentNftIndex}

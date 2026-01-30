@@ -5,7 +5,7 @@
  * Categories: Emojis, Frames, Name Effects, Titles, Backgrounds, Celebrations, BigPulp Items
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Loader2, Sparkles, Crown, Flame, Zap, Star, Package, Target, Palette, Gift, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
 import { useCurrency } from '../../contexts/CurrencyContext';
@@ -136,14 +136,152 @@ export function Shop({ onClose }: ShopProps) {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [equipped, setEquipped] = useState<EquippedState | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [purchasingId, setPurchasingId] = useState<string | null>(null);
+  const [purchasedId, setPurchasedId] = useState<string | null>(null);
   const [equipingId, setEquipingId] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [previewItem, setPreviewItem] = useState<ShopItem | null>(null);
-  
+  const [showConfetti, setShowConfetti] = useState(false);
+  const confettiCanvasRef = useRef<HTMLCanvasElement>(null);
+  const confettiRafRef = useRef(0);
+
   // Mobile carousel state
   const [carouselIndex, setCarouselIndex] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
+
+  // Confetti celebration system
+  const CONFETTI_EMOJIS = useMemo(() => ['🎉', '🎊', '✨', '💫', '⭐', '🌟', '🍊'], []);
+
+  const triggerConfetti = useCallback(() => {
+    setShowConfetti(true);
+    const canvas = confettiCanvasRef.current;
+    if (!canvas) {
+      // Canvas not mounted yet — try again next frame
+      requestAnimationFrame(() => {
+        const c = confettiCanvasRef.current;
+        if (c) startConfettiAnimation(c);
+      });
+      return;
+    }
+    startConfettiAnimation(canvas);
+  }, []);
+
+  // Pre-render emoji sprites once (expensive text shaping happens only here)
+  const emojiSprites = useRef<Map<string, HTMLCanvasElement>>(new Map());
+
+  const getEmojiSprite = useCallback((emoji: string, size: number): HTMLCanvasElement => {
+    const key = `${emoji}_${size}`;
+    const cached = emojiSprites.current.get(key);
+    if (cached) return cached;
+
+    const s = document.createElement('canvas');
+    const pad = Math.ceil(size * 0.3); // padding for glyph overflow
+    s.width = size + pad * 2;
+    s.height = size + pad * 2;
+    const sCtx = s.getContext('2d');
+    if (sCtx) {
+      sCtx.font = `${size}px serif`;
+      sCtx.textAlign = 'center';
+      sCtx.textBaseline = 'middle';
+      sCtx.fillText(emoji, s.width / 2, s.height / 2);
+    }
+    emojiSprites.current.set(key, s);
+    return s;
+  }, []);
+
+  const startConfettiAnimation = useCallback((canvas: HTMLCanvasElement) => {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    interface Particle {
+      x: number; y: number; vx: number; vy: number;
+      sprite: HTMLCanvasElement; size: number; opacity: number;
+      rotation: number; rotSpeed: number;
+    }
+
+    const emojis = CONFETTI_EMOJIS;
+    const particles: Particle[] = [];
+
+    const makeParticle = (x: number, y: number, vx: number, vy: number): Particle => {
+      const size = 16 + Math.random() * 16;
+      const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+      return {
+        x, y, vx, vy,
+        sprite: getEmojiSprite(emoji, Math.round(size)),
+        size,
+        opacity: 1,
+        rotation: Math.random() * 360,
+        rotSpeed: (Math.random() - 0.5) * 8,
+      };
+    };
+
+    // Spawn from top (40), left (25), right (25)
+    for (let i = 0; i < 40; i++) {
+      particles.push(makeParticle(
+        Math.random() * canvas.width,
+        -20 - Math.random() * 60,
+        (Math.random() - 0.5) * 4,
+        2 + Math.random() * 4,
+      ));
+    }
+    for (let i = 0; i < 25; i++) {
+      particles.push(makeParticle(
+        -20,
+        Math.random() * canvas.height * 0.6,
+        3 + Math.random() * 4,
+        -1 + Math.random() * 3,
+      ));
+    }
+    for (let i = 0; i < 25; i++) {
+      particles.push(makeParticle(
+        canvas.width + 20,
+        Math.random() * canvas.height * 0.6,
+        -(3 + Math.random() * 4),
+        -1 + Math.random() * 3,
+      ));
+    }
+
+    let alive = particles.length;
+    const startTime = performance.now();
+    const animate = (now: number) => {
+      if (now - startTime > 8000 || alive === 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        setShowConfetti(false);
+        return;
+      }
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      alive = 0;
+      for (const p of particles) {
+        if (p.opacity <= 0) continue;
+        alive++;
+        p.vy += 0.1;
+        p.vx *= 0.995;
+        p.vy *= 0.995;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.rotation += p.rotSpeed;
+        p.opacity -= 0.003;
+
+        ctx.save();
+        ctx.globalAlpha = p.opacity;
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rotation * Math.PI) / 180);
+        // drawImage is GPU-accelerated — no text shaping per frame
+        ctx.drawImage(p.sprite, -p.sprite.width / 2, -p.sprite.height / 2);
+        ctx.restore();
+      }
+      confettiRafRef.current = requestAnimationFrame(animate);
+    };
+    confettiRafRef.current = requestAnimationFrame(animate);
+  }, [CONFETTI_EMOJIS, getEmojiSprite]);
+
+  // Cleanup confetti on unmount
+  useEffect(() => {
+    return () => {
+      if (confettiRafRef.current) cancelAnimationFrame(confettiRafRef.current);
+    };
+  }, []);
 
   // Fetch shop items (with owned status if authenticated)
   const fetchItems = useCallback(async () => {
@@ -224,16 +362,23 @@ export function Shop({ onClose }: ShopProps) {
     return item.price_oranges <= currency.oranges;
   };
 
-  // Handle purchase
+  // Track buttons that are reverting from purchased → normal for CSS animation
+  const [revertingId, setRevertingId] = useState<string | null>(null);
+
+  // Handle purchase — optimistic: show "Purchased!" immediately, API call in background
   const handlePurchase = async (item: ShopItem) => {
-    setPurchasingId(item.id);
     setMessage(null);
+
+    // Optimistically show purchased state + confetti immediately
+    setPurchasedId(item.id);
+    triggerConfetti();
 
     try {
       const token = await getToken();
       if (!token) {
+        setPurchasedId(null);
         setMessage({ type: 'error', text: 'Please sign in to purchase' });
-        setPurchasingId(null);
+        setTimeout(() => setMessage(null), 3000);
         return;
       }
 
@@ -249,18 +394,29 @@ export function Shop({ onClose }: ShopProps) {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage({ type: 'success', text: `Purchased ${item.name}!` });
-        // Refresh both items (for owned status) and inventory
-        await Promise.all([fetchItems(), fetchInventory(), refreshBalance()]);
+        // Refresh data in background
+        Promise.all([fetchItems(), fetchInventory(), refreshBalance()]);
       } else {
+        // Revert optimistic state on failure
+        setPurchasedId(null);
         setMessage({ type: 'error', text: data.error || 'Purchase failed' });
+        setTimeout(() => setMessage(null), 3000);
+        return;
       }
     } catch {
+      setPurchasedId(null);
       setMessage({ type: 'error', text: 'Network error' });
+      setTimeout(() => setMessage(null), 3000);
+      return;
     }
 
-    setPurchasingId(null);
-    setTimeout(() => setMessage(null), 3000);
+    // Revert button after 3s with a smooth transition
+    setTimeout(() => {
+      setRevertingId(item.id);
+      setPurchasedId(null);
+      // Clear reverting class after animation completes
+      setTimeout(() => setRevertingId(null), 400);
+    }, 3000);
   };
 
   // Handle equip/unequip
@@ -493,8 +649,8 @@ export function Shop({ onClose }: ShopProps) {
         <CurrencyDisplay size="medium" />
       </div>
 
-      {/* Message */}
-      {message && (
+      {/* Error Message (success is now shown via button state + confetti) */}
+      {message && message.type === 'error' && (
         <div className={`purchase-message ${message.type}`}>
           {message.text}
         </div>
@@ -545,13 +701,12 @@ export function Shop({ onClose }: ShopProps) {
                 const owned = isOwned(item);
                 const equippedItem = isEquipped(item);
                 const affordable = canAfford(item);
-                const isPurchasing = purchasingId === item.id;
                 const isEquiping = equipingId === item.id;
                 const canEquip = ['frame', 'title', 'name_effect', 'background', 'celebration'].includes(item.category);
 
                 return (
-                  <div 
-                    key={item.id} 
+                  <div
+                    key={item.id}
                     className={`carousel-slide ${index === carouselIndex ? 'active' : ''}`}
                     onClick={() => setPreviewItem(item)}
                   >
@@ -590,12 +745,12 @@ export function Shop({ onClose }: ShopProps) {
                         )
                       ) : (
                         <button
-                          className={`carousel-btn buy ${!isSignedIn ? 'signin-required' : ''} ${!affordable && isSignedIn ? 'not-affordable' : ''}`}
-                          disabled={isPurchasing || (item.is_limited === 1 && item.stock_remaining === 0)}
+                          className={`carousel-btn buy ${purchasedId === item.id ? 'purchased' : ''} ${revertingId === item.id ? 'reverting' : ''} ${!isSignedIn ? 'signin-required' : ''} ${!affordable && isSignedIn ? 'not-affordable' : ''}`}
+                          disabled={purchasedId === item.id || (item.is_limited === 1 && item.stock_remaining === 0)}
                           onClick={() => handlePurchase(item)}
                         >
-                          {isPurchasing ? (
-                            <Loader2 className="animate-spin" size={14} />
+                          {purchasedId === item.id ? (
+                            '✓ Purchased!'
                           ) : item.is_limited === 1 && item.stock_remaining === 0 ? (
                             'Sold Out'
                           ) : (
@@ -651,7 +806,6 @@ export function Shop({ onClose }: ShopProps) {
             const owned = isOwned(item);
             const equippedItem = isEquipped(item);
             const affordable = canAfford(item);
-            const isPurchasing = purchasingId === item.id;
             const isEquiping = equipingId === item.id;
             const canEquip = ['frame', 'title', 'name_effect', 'background', 'celebration'].includes(item.category);
 
@@ -662,15 +816,19 @@ export function Shop({ onClose }: ShopProps) {
                 style={{ '--tier-color': TIER_COLORS[item.tier] } as React.CSSProperties}
                 onClick={() => setPreviewItem(item)}
               >
-                {/* Tier Badge */}
-                <span className={`tier-badge tier-${item.tier}`}>
-                  {item.tier}
-                </span>
+                {/* Tier Badge (hidden for consumables) */}
+                {item.category !== 'consumable' && (
+                  <span className={`tier-badge tier-${item.tier}`}>
+                    {item.tier}
+                  </span>
+                )}
 
-                {/* Info Button */}
-                <div className="item-info-position" onClick={e => e.stopPropagation()}>
-                  <ItemInfoButton item={item} />
-                </div>
+                {/* Info Button (hidden for consumables) */}
+                {item.category !== 'consumable' && (
+                  <div className="item-info-position" onClick={e => e.stopPropagation()}>
+                    <ItemInfoButton item={item} />
+                  </div>
+                )}
 
                 {/* Limited Edition Badge */}
                 {item.is_limited === 1 && item.stock_remaining !== null && (
@@ -691,7 +849,14 @@ export function Shop({ onClose }: ShopProps) {
                 <div className="item-info">
                   <span className="item-name">{item.name}</span>
                   {item.description && (
-                    <span className="item-description">{item.description}</span>
+                    <span className="item-description">
+                      {item.category === 'consumable'
+                        ? item.description
+                            .replace(/at NFTs/gi, 'at your favorite game')
+                            .replace(/to throw at/gi, 'to throw at')
+                            .replace(/to flick at/gi, 'to flick at')
+                        : item.description}
+                    </span>
                   )}
                 </div>
 
@@ -717,28 +882,13 @@ export function Shop({ onClose }: ShopProps) {
                     )
                   ) : (
                     <>
-                      <div className="item-price">
-                        {item.price_oranges > 0 && (
-                          <span className="price oranges">
-                            🍊 {item.price_oranges.toLocaleString()}
-                          </span>
-                        )}
-                        {item.price_gems > 0 && (
-                          <span className="price gems">
-                            💎 {item.price_gems}
-                          </span>
-                        )}
-                        {item.price_oranges === 0 && item.price_gems === 0 && (
-                          <span className="price free">Free</span>
-                        )}
-                      </div>
                       <button
-                        className={`buy-button ${!isSignedIn ? 'signin-required' : ''} ${!affordable && isSignedIn ? 'not-affordable' : ''}`}
-                        disabled={isPurchasing || (item.is_limited === 1 && item.stock_remaining === 0)}
+                        className={`buy-button ${purchasedId === item.id ? 'purchased' : ''} ${revertingId === item.id ? 'reverting' : ''} ${!isSignedIn ? 'signin-required' : ''} ${!affordable && isSignedIn ? 'not-affordable' : ''}`}
+                        disabled={purchasedId === item.id || (item.is_limited === 1 && item.stock_remaining === 0)}
                         onClick={() => handlePurchase(item)}
                       >
-                        {isPurchasing ? (
-                          <Loader2 className="animate-spin" size={14} />
+                        {purchasedId === item.id ? (
+                          '✓ Purchased!'
                         ) : item.is_limited === 1 && item.stock_remaining === 0 ? (
                           'Sold Out'
                         ) : (
@@ -759,6 +909,20 @@ export function Shop({ onClose }: ShopProps) {
             );
           })}
         </div>
+      )}
+
+      {/* Confetti Overlay */}
+      {showConfetti && (
+        <canvas
+          ref={confettiCanvasRef}
+          className="confetti-canvas"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9999,
+            pointerEvents: 'none',
+          }}
+        />
       )}
 
       {/* Preview Modal */}

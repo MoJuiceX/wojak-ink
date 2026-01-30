@@ -47,7 +47,7 @@ export function GamesGrid({
   const prefersReducedMotion = useReducedMotion();
 
   return (
-    <div className="py-2">
+    <div className="pb-2">
       {isLoading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6">
           {Array.from({ length: 6 }).map((_, i) => (

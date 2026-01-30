@@ -4,7 +4,7 @@
  * Large NFT preview with analysis overlay and rarity progress bar.
  */
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import type { NFTAnalysis, RarityTier } from '@/types/bigpulp';
@@ -47,9 +47,9 @@ const ATTRIBUTE_CATEGORIES = [
 function TraitRankingTooltip({ data }: { data: TooltipData }) {
   return (
     <div
-      className="p-3 rounded-lg min-w-[220px] max-w-[260px] font-mono text-sm max-h-[280px] overflow-y-auto"
+      className="p-3 rounded-lg min-w-[220px] max-w-[260px] font-mono text-sm"
       style={{
-        background: 'var(--color-bg-primary)',
+        background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
         boxShadow: '0 12px 40px rgba(0,0,0,0.5)',
       }}
@@ -162,56 +162,30 @@ function TraitRankingRow({
   );
 }
 
-// Attribute row with ranking tooltip
+// Attribute row (tooltip is managed by parent)
 function AttributeRow({
   category,
   value,
-  getTooltipData,
+  rankInfo,
   isLast,
   isHpTrait,
+  onMouseEnter,
+  onMouseLeave,
 }: {
   category: string;
   value: string | undefined;
-  getTooltipData: (category: string, traitValue: string) => TooltipData | null;
+  rankInfo: TooltipData | null;
   isLast: boolean;
   isHpTrait?: boolean;
+  onMouseEnter: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onMouseLeave: () => void;
 }) {
-  const rowRef = useRef<HTMLDivElement>(null);
-  const [showTooltip, setShowTooltip] = useState(false);
-  const [tooltipData, setTooltipData] = useState<TooltipData | null>(null);
-  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
-
-  const handleMouseEnter = () => {
-    if (!value) return;
-    const data = getTooltipData(category, value);
-    setTooltipData(data);
-
-    // Calculate position based on row's position
-    if (rowRef.current) {
-      const rect = rowRef.current.getBoundingClientRect();
-      // Position tooltip to the left of the metadata panel
-      setTooltipPosition({
-        top: rect.top,
-        left: rect.left - 230, // Position to the left with some margin
-      });
-    }
-    setShowTooltip(true);
-  };
-
-  const handleMouseLeave = () => {
-    setShowTooltip(false);
-  };
-
-  // Get rank info for display
-  const rankInfo = value ? getTooltipData(category, value) : null;
-
   return (
     <div
-      ref={rowRef}
       className="py-1.5"
       style={{ borderBottom: !isLast ? '1px solid var(--color-border)' : 'none' }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
       <span className="text-xs block" style={{ color: 'var(--color-text-muted)' }}>
         {category}
@@ -233,23 +207,85 @@ function AttributeRow({
           </span>
         )}
       </div>
+    </div>
+  );
+}
 
-      {/* Tooltip - fixed position */}
+// Attributes list with shared tooltip (no flicker between rows)
+function AttributesList({
+  traits,
+  getTooltipData,
+  isHpTrait,
+}: {
+  traits?: Record<string, string> | null;
+  getTooltipData: (category: string, traitValue: string) => TooltipData | null;
+  isHpTrait: (value: string | undefined) => boolean;
+}) {
+  const [activeTooltip, setActiveTooltip] = useState<{
+    data: TooltipData;
+    top: number;
+    left: number;
+  } | null>(null);
+
+  const handleRowEnter = (category: string, value: string | undefined) => (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!value) {
+      setActiveTooltip(null);
+      return;
+    }
+    const data = getTooltipData(category, value);
+    if (!data) {
+      setActiveTooltip(null);
+      return;
+    }
+    const rect = e.currentTarget.getBoundingClientRect();
+    setActiveTooltip({
+      data,
+      top: rect.top,
+      left: rect.left - 230,
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setActiveTooltip(null);
+  };
+
+  return (
+    <div className="flex-1 p-3 pt-2" onMouseLeave={handleMouseLeave}>
+      {ATTRIBUTE_CATEGORIES.map((category, index) => (
+        <AttributeRow
+          key={category}
+          category={category}
+          value={traits?.[category]}
+          rankInfo={traits?.[category] ? getTooltipData(category, traits[category]) : null}
+          isLast={index === ATTRIBUTE_CATEGORIES.length - 1}
+          isHpTrait={isHpTrait(traits?.[category])}
+          onMouseEnter={handleRowEnter(category, traits?.[category])}
+          onMouseLeave={() => {/* handled by parent onMouseLeave */}}
+        />
+      ))}
+
+      {/* Single shared tooltip - smoothly animates position */}
       <AnimatePresence>
-        {showTooltip && tooltipData && (
+        {activeTooltip && (
           <motion.div
+            key="shared-tooltip"
             initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
+            animate={{
+              opacity: 1,
+              x: 0,
+              top: activeTooltip.top,
+              left: activeTooltip.left,
+            }}
             exit={{ opacity: 0, x: 10 }}
             transition={{ duration: 0.15 }}
             style={{
               position: 'fixed',
-              top: tooltipPosition.top,
-              left: tooltipPosition.left,
+              top: activeTooltip.top,
+              left: activeTooltip.left,
               zIndex: 9999,
             }}
           >
-            <TraitRankingTooltip data={tooltipData} />
+            <TraitRankingTooltip data={activeTooltip.data} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -285,19 +321,20 @@ export function NFTPreviewCard({
 
   return (
     <div className="flex gap-3 h-full overflow-hidden">
-      {/* NFT Preview Container - 1:1 ratio, takes available space */}
+      {/* NFT Preview Container - 1:1 ratio, height-driven */}
       <div
-        className="rounded-2xl overflow-hidden flex-1 flex items-center justify-center"
+        className="rounded-3xl overflow-hidden flex items-center justify-center"
         style={{
           background: 'rgba(10, 10, 10, 0.98)',
           border: `2px solid ${rarity ? `${tierColor}40` : 'rgba(255,255,255,0.1)'}`,
           aspectRatio: '1 / 1',
+          height: '100%',
         }}
       >
         {/* Loading state */}
         {isLoading && (
           <div
-            className="w-full h-full animate-pulse"
+            className="w-full h-full animate-pulse rounded-3xl"
             style={{ background: 'var(--color-bg-tertiary)' }}
           />
         )}
@@ -342,7 +379,7 @@ export function NFTPreviewCard({
               {/* Legendary shimmer effect */}
               {rarity?.tier === 'legendary' && !prefersReducedMotion && (
                 <motion.div
-                  className="absolute inset-0 pointer-events-none"
+                  className="absolute inset-0 pointer-events-none rounded-2xl"
                   style={{
                     background:
                       'linear-gradient(45deg, transparent 30%, rgba(251, 191, 36, 0.1) 50%, transparent 70%)',
@@ -362,13 +399,14 @@ export function NFTPreviewCard({
         )}
       </div>
 
-      {/* Metadata Column - narrow */}
+      {/* Metadata Column - fills remaining width */}
       <div
-        className="rounded-2xl overflow-hidden flex flex-col flex-shrink-0"
+        className="rounded-3xl overflow-hidden flex flex-col"
         style={{
           background: 'rgba(10, 10, 10, 0.98)',
           border: '1px solid var(--color-border)',
-          width: '160px',
+          flex: 1,
+          minWidth: '140px',
         }}
       >
         {/* Header: Name/Rank/Badges */}
@@ -406,19 +444,12 @@ export function NFTPreviewCard({
           </div>
         </div>
 
-        {/* Attributes list - category on top, value below, with rankings */}
-        <div className="flex-1 p-3 pt-2">
-          {ATTRIBUTE_CATEGORIES.map((category, index) => (
-            <AttributeRow
-              key={category}
-              category={category}
-              value={traits?.[category]}
-              getTooltipData={getTooltipData}
-              isLast={index === ATTRIBUTE_CATEGORIES.length - 1}
-              isHpTrait={isHpTrait(traits?.[category])}
-            />
-          ))}
-        </div>
+        {/* Attributes list - category on top, value below, with shared tooltip */}
+        <AttributesList
+          traits={traits}
+          getTooltipData={getTooltipData}
+          isHpTrait={isHpTrait}
+        />
       </div>
     </div>
   );

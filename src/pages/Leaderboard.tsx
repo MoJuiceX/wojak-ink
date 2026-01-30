@@ -8,6 +8,7 @@
 import { PageTransition } from '@/components/layout/PageTransition';
 import { Leaderboard as LeaderboardComponent } from '@/components/Leaderboard';
 import { PageSEO } from '@/components/seo';
+import { InfoButton } from '@/components/common/InfoButton';
 
 const Leaderboard = () => {
   return (
@@ -22,6 +23,7 @@ const Leaderboard = () => {
           <LeaderboardComponent gameId="orange-stack" showGameSelector />
         </div>
       </div>
+      <InfoButton page="leaderboard" />
     </PageTransition>
   );
 };

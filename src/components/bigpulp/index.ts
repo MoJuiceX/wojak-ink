@@ -16,3 +16,6 @@ export { AttributesTab } from './AttributesTab';
 export { PremiumButton, PremiumToggleGroup, PremiumChip } from './PremiumButton';
 export { MarketInsightCards } from './MarketInsightCards';
 export { EmptyStateContent, QuickStats } from './EmptyStateContent';
+export { StreamingIndicator } from './StreamingIndicator';
+export { AIResponseCard } from './AIResponseCard';
+export { QuickPrompts } from './QuickPrompts';

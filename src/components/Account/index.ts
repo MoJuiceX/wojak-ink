@@ -12,3 +12,5 @@ export { InventorySection } from './InventorySection';
 export { QuickActionsBar } from './QuickActionsBar';
 export { FriendsWidget } from './FriendsWidget';
 export { AchievementsWidget } from './AchievementsWidget';
+export { ProfileHero } from './ProfileHero';
+export { QuickStats } from './QuickStats';

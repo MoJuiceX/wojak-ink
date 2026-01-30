@@ -36,6 +36,7 @@ import {
   formatPriceXCH,
   formatPriceUSD,
 } from '@/utils/mockData';
+import { getMintGardenNftUrl } from '@/services/marketApi';
 import { fetchNFTOwnerByEdition, type NFTOwnerInfo } from '@/services/parseBotService';
 import { useTraitRankings, type TooltipData } from '@/hooks/useTraitRankings';
 import { useSalesHistory } from '@/hooks/useSalesHistory';
@@ -70,6 +71,13 @@ function toggleSortMode(currentMode: SortMode, base: SortBase): SortMode {
   return `${base}-asc` as SortMode;
 }
 
+function getTraitRarityClass(rarityPct: number): string {
+  if (rarityPct < 5) return 'trait-gold';
+  if (rarityPct < 15) return 'trait-purple';
+  if (rarityPct < 30) return 'trait-blue';
+  return '';
+}
+
 interface DesktopExplorerPanelProps {
   isOpen: boolean;
   onClose: () => void;
@@ -92,9 +100,9 @@ function truncateAddress(address: string): string {
 function TraitRankingTooltip({ data }: { data: TooltipData }) {
   return (
     <div
-      className="p-3 rounded-lg min-w-[260px] max-w-[300px] font-mono text-sm max-h-[300px] overflow-y-auto"
+      className="p-3 rounded-lg min-w-[260px] max-w-[300px] font-mono text-sm"
       style={{
-        background: 'var(--color-bg-primary)',
+        background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
         boxShadow: '0 12px 40px rgba(0,0,0,0.5)',
       }}
@@ -245,11 +253,7 @@ function AttributeCard({
   return (
     <div
       ref={cardRef}
-      className="p-3 rounded-lg"
-      style={{
-        background: 'var(--color-bg-tertiary)',
-        border: '1px solid var(--color-border)',
-      }}
+      className={`trait-card p-3 ${getTraitRarityClass(trait.rarity)}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -635,7 +639,7 @@ export function DesktopExplorerPanel({
                 >
                   {/* NFT Image */}
                   <div
-                    className="relative w-full aspect-square rounded-xl overflow-hidden"
+                    className={`relative w-full aspect-square rounded-xl overflow-hidden nft-explorer-image rarity-${currentNft.rarityTier}`}
                     onMouseEnter={() => setIsImageHovered(true)}
                     onMouseLeave={() => setIsImageHovered(false)}
                   >
@@ -748,12 +752,16 @@ export function DesktopExplorerPanel({
                         </button>
                       </div>
                     ) : (
-                      <span
-                        className="text-sm font-medium"
-                        style={{ color: 'var(--color-text-muted)' }}
+                      <button
+                        className="explorer-action-btn flex-1"
+                        onClick={async () => {
+                          const url = await getMintGardenNftUrl(Number(currentNft.tokenId));
+                          window.open(url, '_blank', 'noopener,noreferrer');
+                        }}
                       >
-                        Not Listed
-                      </span>
+                        <ExternalLink size={14} />
+                        View on MintGarden
+                      </button>
                     )}
                   </div>
                 </div>

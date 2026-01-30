@@ -15,7 +15,7 @@ const APP_BUILD_DATE = '2026-01-29';
 const SOCIAL_LINKS = [
   { id: 'twitter', url: 'https://twitter.com/wojakink', icon: '𝕏', name: 'Twitter', handle: '@wojakink' },
   { id: 'discord', url: 'https://discord.gg/wojak', icon: '💬', name: 'Discord', handle: 'Join Server' },
-  { id: 'website', url: 'https://wojak.ink', icon: '🌐', name: 'Website', handle: 'wojak.ink' },
+  { id: 'website', url: 'https://tanggang.life/', icon: '🌐', name: 'Tang Gang Website', handle: 'tanggang.life' },
 ];
 
 // Admin password

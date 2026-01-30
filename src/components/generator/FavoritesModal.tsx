@@ -31,18 +31,12 @@ export function FavoritesModal({ className = '' }: FavoritesModalProps) {
   } = useGenerator();
   const prefersReducedMotion = useReducedMotion();
 
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
 
-  const handleDelete = (id: string) => {
-    if (deleteConfirm === id) {
-      removeFavorite(id);
-      setDeleteConfirm(null);
-    } else {
-      setDeleteConfirm(id);
-      setTimeout(() => setDeleteConfirm(null), 3000);
-    }
+  const handleDelete = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    removeFavorite(id);
   };
 
   const handleLoad = (favorite: FavoriteWojak) => {
@@ -69,7 +63,6 @@ export function FavoritesModal({ className = '' }: FavoritesModalProps) {
 
   const handleClose = () => {
     toggleFavorites(false);
-    setDeleteConfirm(null);
     setEditingId(null);
     setEditName('');
   };
@@ -93,7 +86,7 @@ export function FavoritesModal({ className = '' }: FavoritesModalProps) {
           <motion.div
             className="fixed inset-4 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 z-50 sm:w-full sm:max-w-2xl sm:max-h-[80vh] rounded-2xl overflow-hidden flex flex-col"
             style={{
-              background: 'var(--color-bg-secondary)',
+              background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
             }}
             variants={prefersReducedMotion ? undefined : modalContentVariants}
@@ -243,28 +236,22 @@ export function FavoritesModal({ className = '' }: FavoritesModalProps) {
                                 background: 'var(--color-glass-bg)',
                                 color: 'var(--color-text-secondary)',
                               }}
-                              onClick={() => handleStartEdit(favorite)}
+                              onClick={(e) => { e.stopPropagation(); handleStartEdit(favorite); }}
                               title="Edit name"
                             >
                               <Pencil size={12} />
                             </button>
                             <button
                               type="button"
-                              className="p-1 rounded transition-colors flex-shrink-0"
+                              className="flex items-center justify-center rounded transition-colors flex-shrink-0 hover:!bg-[var(--color-error)] hover:!text-white"
                               style={{
-                                background: deleteConfirm === favorite.id
-                                  ? 'var(--color-error)'
-                                  : 'var(--color-glass-bg)',
-                                color: deleteConfirm === favorite.id
-                                  ? 'white'
-                                  : 'var(--color-error)',
+                                width: '24px',
+                                height: '24px',
+                                background: 'var(--color-glass-bg)',
+                                color: 'var(--color-error)',
                               }}
-                              onClick={() => handleDelete(favorite.id)}
-                              title={
-                                deleteConfirm === favorite.id
-                                  ? 'Click again to confirm'
-                                  : 'Delete'
-                              }
+                              onClick={(e) => handleDelete(e, favorite.id)}
+                              title="Delete"
                             >
                               <Trash2 size={12} />
                             </button>

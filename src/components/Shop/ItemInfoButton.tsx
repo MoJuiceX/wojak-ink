@@ -2,10 +2,11 @@
  * Item Info Button Component
  *
  * Shows a tooltip with item description, effect, and category info
- * when clicked or hovered.
+ * when clicked or hovered. Uses fixed positioning to avoid clipping
+ * by overflow:hidden parent containers.
  */
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Info } from 'lucide-react';
 import './ItemInfoButton.css';
 
@@ -51,6 +52,37 @@ export function ItemInfoButton({ item }: ItemInfoButtonProps) {
   const [showTooltip, setShowTooltip] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const [tooltipStyle, setTooltipStyle] = useState<React.CSSProperties>({});
+
+  // Position tooltip using fixed coordinates from button rect
+  const updatePosition = useCallback(() => {
+    if (!buttonRef.current || !tooltipRef.current) return;
+    const btnRect = buttonRef.current.getBoundingClientRect();
+    const tipRect = tooltipRef.current.getBoundingClientRect();
+
+    // Position to the left of the button, vertically centered
+    let top = btnRect.top + btnRect.height / 2 - tipRect.height / 2;
+    let left = btnRect.left - tipRect.width - 8;
+
+    // If it would go off the left edge, flip to below the button
+    if (left < 8) {
+      left = btnRect.left + btnRect.width / 2 - tipRect.width / 2;
+      top = btnRect.bottom + 8;
+    }
+
+    // Clamp to viewport
+    top = Math.max(8, Math.min(top, window.innerHeight - tipRect.height - 8));
+    left = Math.max(8, Math.min(left, window.innerWidth - tipRect.width - 8));
+
+    setTooltipStyle({ top, left });
+  }, []);
+
+  useEffect(() => {
+    if (showTooltip) {
+      // Defer to next frame so tooltip is rendered and measurable
+      requestAnimationFrame(updatePosition);
+    }
+  }, [showTooltip, updatePosition]);
 
   // Close tooltip when clicking outside
   useEffect(() => {
@@ -94,7 +126,11 @@ export function ItemInfoButton({ item }: ItemInfoButtonProps) {
       </button>
 
       {showTooltip && (
-        <div ref={tooltipRef} className="item-info-tooltip">
+        <div
+          ref={tooltipRef}
+          className="item-info-tooltip"
+          style={tooltipStyle}
+        >
           <h4 className="item-info-name">{item.name}</h4>
 
           {hasContent ? (

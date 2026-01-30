@@ -9,16 +9,13 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { TierBadge } from './TierBadge';
 import { Avatar } from '@/components/Avatar/Avatar';
 import { getDeterministicRivalMessage, getPeekBarText } from '@/lib/leaderboard/rivalMessages';
-import type { TierName } from '@/lib/leaderboard/tierCalculation';
 import './YourPositionPeek.css';
 
 interface UserPosition {
   rank: number;
   score: number;
-  tier: TierName;
   totalPlayers: number;
   nextRival?: {
     userId: string;
@@ -41,7 +38,7 @@ export const YourPositionPeek: React.FC<YourPositionPeekProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const navigate = useNavigate();
-  const { rank, tier, score, nextRival } = userPosition;
+  const { rank, score, nextRival } = userPosition;
 
   // Get messages
   const peekText = useMemo(() => {
@@ -81,7 +78,6 @@ export const YourPositionPeek: React.FC<YourPositionPeekProps> = ({
       {/* Collapsed Bar (Always Visible) */}
       <div className="peek-collapsed" onClick={toggleExpand}>
         <div className="peek-left">
-          <TierBadge tier={tier} size="small" />
           <span className="peek-rank">#{rank}</span>
           <span className="peek-divider">·</span>
           <span className="peek-text">{isExpanded ? 'Tap to collapse' : peekText}</span>

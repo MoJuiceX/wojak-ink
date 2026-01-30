@@ -40,8 +40,8 @@ export const DESKTOP_LAYOUT = {
 
   // Overlay
   overlay: {
-    background: 'rgba(10, 10, 15, 0.8)',
-    blur: 12, // px backdrop blur
+    background: 'rgba(0, 0, 0, 0.85)',
+    blur: 20, // px backdrop blur - frosted glass
   },
 
   // Spacing

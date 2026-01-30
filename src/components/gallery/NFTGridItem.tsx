@@ -12,6 +12,7 @@
 import { memo, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useHoverPreload } from '@/hooks/useImagePreloader';
+import { imagePreloader } from '@/services/imagePreloader';
 import { nftGridItemVariants } from '@/config/galleryAnimations';
 import { usePrefersReducedMotion } from '@/hooks/useMediaQuery';
 import type { NFT } from '@/types/nft';
@@ -29,7 +30,7 @@ export const NFTGridItem = memo(function NFTGridItem({
   onClick,
   eagerLoad = false,
 }: NFTGridItemProps) {
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(() => imagePreloader.isLoaded(nft.thumbnailUrl));
   const [imageError, setImageError] = useState(false);
   const prefersReducedMotion = usePrefersReducedMotion();
 
@@ -49,14 +50,12 @@ export const NFTGridItem = memo(function NFTGridItem({
     setImageLoaded(true);
   }, []);
 
-  // Premium hover animation with 3D effect
+  // Snappy hover animation matching character cards
   const hoverAnimation = prefersReducedMotion
     ? {}
     : {
-        scale: 1.1,
-        rotateY: 5,
-        rotateX: -5,
-        z: 50,
+        y: -8,
+        scale: 1.02,
         zIndex: 10,
         transition: { type: 'spring' as const, stiffness: 300, damping: 20 },
       };
@@ -71,12 +70,7 @@ export const NFTGridItem = memo(function NFTGridItem({
 
   return (
     <motion.button
-      className="nft-grid-item glass hover-lift glow-section group relative aspect-square rounded-lg overflow-hidden transition-all duration-150 ease-out"
-      style={{
-        border: '1px solid rgba(249, 115, 22, 0.2)',
-        transformStyle: 'preserve-3d',
-        perspective: '1000px',
-      }}
+      className={`nft-grid-item nft-card rarity-${nft.rarityTier || 'common'} group relative aspect-square overflow-hidden`}
       variants={prefersReducedMotion ? undefined : nftGridItemVariants}
       whileHover={hoverAnimation}
       whileTap={tapAnimation}
@@ -89,7 +83,7 @@ export const NFTGridItem = memo(function NFTGridItem({
       {!imageLoaded && (
         <div
           className="absolute inset-0 animate-pulse"
-          style={{ background: 'var(--color-glass-bg)' }}
+          style={{ background: 'rgba(255, 255, 255, 0.03)' }}
         />
       )}
 
@@ -113,7 +107,7 @@ export const NFTGridItem = memo(function NFTGridItem({
         <img
           src={nft.thumbnailUrl}
           alt={nft.name}
-          className="w-full h-full object-cover rounded-lg"
+          className="w-full h-full object-cover"
           style={{ opacity: imageLoaded ? 1 : 0 }}
           loading={eagerLoad ? 'eager' : 'lazy'}
           onLoad={handleLoad}

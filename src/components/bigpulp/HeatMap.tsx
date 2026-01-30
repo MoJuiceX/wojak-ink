@@ -270,7 +270,7 @@ export function LegacyCacheStatusIndicator({
                   <div
                     className="absolute bottom-full right-0 mb-2 px-3 py-2 rounded-lg text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50"
                     style={{
-                      background: 'var(--color-bg-secondary)',
+                      background: 'var(--color-surface)',
                       border: '1px solid var(--color-border)',
                       color: 'var(--color-text-primary)',
                       boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
@@ -304,7 +304,7 @@ const FILTER_CHIPS: FilterChipConfig[] = [
   { id: 'sleepy-deals', label: 'Sleepy Deals', shortLabel: 'Sleepy', color: 'rgb(34,197,94)', bgColor: 'rgba(34,197,94,0.15)' },
   { id: 'floor-snipes', label: 'Floor', shortLabel: 'Floor', color: 'rgb(59,130,246)', bgColor: 'rgba(59,130,246,0.15)' },
   { id: 'whale-territory', label: 'Premium', shortLabel: 'Moon', color: 'rgb(251,191,36)', bgColor: 'rgba(251,191,36,0.15)' },
-  { id: 'delusion-zones', label: 'DYOR', shortLabel: 'DYOR', color: 'rgb(239,68,68)', bgColor: 'rgba(239,68,68,0.15)' },
+  { id: 'delusion-zones', label: 'This better be high provenance, or else...', shortLabel: 'HP or else...', color: 'rgb(239,68,68)', bgColor: 'rgba(239,68,68,0.15)' },
 ];
 
 function ViewModeButtons({
@@ -334,7 +334,7 @@ function ViewModeButtons({
         return (
           <motion.button
             key={chip.id}
-            className={`bigpulp-btn px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${isActive ? 'bigpulp-btn-active' : ''}`}
+            className={`bigpulp-btn px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${isActive ? 'bigpulp-btn-active' : ''}`}
             style={{
               color: isActive ? chip.color : 'var(--color-text-muted)',
               border: isActive ? `1px solid ${chip.color}` : '1px solid var(--color-border)',
@@ -349,7 +349,8 @@ function ViewModeButtons({
             }}
             whileTap={{ scale: 0.95 }}
           >
-            {chip.shortLabel}
+            <span className="hidden sm:inline">{chip.label}</span>
+            <span className="sm:hidden">{chip.shortLabel}</span>
           </motion.button>
         );
       })}
@@ -407,8 +408,10 @@ function BadgeDropdown({
     <div ref={dropdownRef} className="relative flex items-center gap-1">
       {/* Info button */}
       <motion.button
-        className={`bigpulp-btn p-1.5 rounded-lg transition-colors ${showInfo ? 'bigpulp-btn-active' : ''}`}
+        className={`bigpulp-btn flex items-center justify-center rounded-lg transition-colors ${showInfo ? 'bigpulp-btn-active' : ''}`}
         style={{
+          width: '28px',
+          height: '28px',
           color: showInfo ? 'var(--color-brand-primary)' : 'var(--color-text-muted)',
           border: `1px solid ${showInfo ? 'rgba(255,149,0,0.5)' : 'var(--color-border)'}`,
           boxShadow: showInfo ? '0 0 8px rgba(255,149,0,0.2)' : 'none',
@@ -454,7 +457,7 @@ function BadgeDropdown({
           <motion.div
             className="absolute top-full left-0 mt-1 z-50 p-3 rounded-lg text-xs"
             style={{
-              background: 'var(--color-bg-secondary)',
+              background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
               boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
               width: '280px',
@@ -482,11 +485,11 @@ function BadgeDropdown({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="absolute top-full left-0 mt-1 z-50 min-w-[280px] max-h-[350px] overflow-y-auto rounded-lg"
+            className="absolute top-full left-0 mt-1 z-50 min-w-[280px] max-h-[60vh] overflow-y-auto rounded-lg"
             style={{
-              background: 'var(--color-bg-secondary)',
+              background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
             }}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -604,7 +607,7 @@ function CellDetailModal({
       <motion.div
         className="w-[90vw] max-w-3xl max-h-[85vh] rounded-2xl overflow-hidden flex flex-col"
         style={{
-          background: 'var(--color-bg-secondary)',
+          background: 'var(--color-surface)',
           border: '1px solid var(--color-border)',
         }}
         initial={prefersReducedMotion ? {} : { opacity: 0, scale: 0.95 }}
@@ -970,7 +973,7 @@ export function HeatMap({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="relative space-y-3">
       {/* Single row: Filters + Badge + Refresh all together */}
       <div className="flex items-center gap-2 flex-wrap">
         {/* View mode filter chips */}

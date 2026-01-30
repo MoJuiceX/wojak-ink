@@ -8,3 +8,6 @@ export {
 } from './PageTransition';
 export { SkipLink } from './SkipLink';
 export { OptimizedImage } from './OptimizedImage';
+export { InfoButton } from './InfoButton';
+export type { PageId } from './InfoButton';
+export { PageInfoContent } from './PageInfoContent';

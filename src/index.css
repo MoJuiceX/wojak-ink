@@ -18,6 +18,89 @@
 @import './styles/profile.css';
 @import './styles/drawer-customization.css';
 
+/* Tailwind v4 theme tokens */
+@theme {
+  /* Tang Orange Palette */
+  --color-tang-50: #fff7ed;
+  --color-tang-100: #ffedd5;
+  --color-tang-200: #fed7aa;
+  --color-tang-300: #fdba74;
+  --color-tang-400: #fb923c;
+  --color-tang-500: #ff6b00;
+  --color-tang-600: #ea580c;
+  --color-tang-700: #c2410c;
+  --color-tang-800: #9a3412;
+  --color-tang-900: #7c2d12;
+  --color-tang-950: #431407;
+
+  /* Cyber Blue Palette */
+  --color-cyber-50: #ecfeff;
+  --color-cyber-100: #cffafe;
+  --color-cyber-200: #a5f3fc;
+  --color-cyber-300: #67e8f9;
+  --color-cyber-400: #22d3ee;
+  --color-cyber-500: #00d9ff;
+  --color-cyber-600: #0891b2;
+  --color-cyber-700: #0e7490;
+  --color-cyber-800: #155e75;
+  --color-cyber-900: #164e63;
+  --color-cyber-950: #083344;
+
+  /* Neon Pink Palette */
+  --color-neon-50: #fdf2f8;
+  --color-neon-100: #fce7f3;
+  --color-neon-200: #fbcfe8;
+  --color-neon-300: #f9a8d4;
+  --color-neon-400: #f472b6;
+  --color-neon-500: #ff2e97;
+  --color-neon-600: #db2777;
+  --color-neon-700: #be185d;
+  --color-neon-800: #9d174d;
+  --color-neon-900: #831843;
+  --color-neon-950: #500724;
+
+  /* Chia Green Palette */
+  --color-chia-50: #f0fdf4;
+  --color-chia-100: #dcfce7;
+  --color-chia-200: #bbf7d0;
+  --color-chia-300: #86efac;
+  --color-chia-400: #4ade80;
+  --color-chia-500: #22c55e;
+  --color-chia-600: #16a34a;
+  --color-chia-700: #15803d;
+  --color-chia-800: #166534;
+  --color-chia-900: #14532d;
+  --color-chia-950: #052e16;
+
+  /* Custom Animations */
+  --animate-glow-pulse: glow-pulse 2s ease-in-out infinite;
+  --animate-glow-pulse-fast: glow-pulse 1s ease-in-out infinite;
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-slide-in: slide-in 0.3s ease-out;
+  --animate-fade-in: fade-in 0.3s ease-out;
+  --animate-slide-up: slide-up 0.4s ease-out;
+  --animate-scale-in: scale-in 0.2s ease-out;
+  --animate-shimmer: shimmer 2s linear infinite;
+
+  /* Typography */
+  --font-display: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+
+  /* Spacing */
+  --spacing-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --spacing-safe-top: env(safe-area-inset-top, 0px);
+}
+
+/* Base layout styles */
+body {
+  margin: 0;
+  font-family: var(--font-display);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 /* Safe area insets for mobile */
 :root {
   --sat: env(safe-area-inset-top, 0px);

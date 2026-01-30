@@ -86,7 +86,7 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
       }}
     >
       {/* Tab buttons */}
-      <div className="flex p-1.5 gap-1">
+      <div className="flex p-2.5 gap-2.5">
         {TABS.map((tab, index) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -102,7 +102,7 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
               aria-controls={`panel-${tab.id}`}
               id={`tab-${tab.id}`}
               tabIndex={isActive ? 0 : -1}
-              className={`bigpulp-btn flex-1 flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-semibold transition-all relative rounded-lg ${isActive ? 'bigpulp-btn-active' : ''}`}
+              className={`bigpulp-btn flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold transition-all relative rounded-lg ${isActive ? 'bigpulp-btn-active' : ''}`}
               style={{
                 color: isActive
                   ? 'var(--color-brand-primary)'

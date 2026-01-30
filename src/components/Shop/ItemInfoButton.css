@@ -26,20 +26,15 @@
 }
 
 .item-info-tooltip {
-  position: absolute;
-  z-index: 100;
+  position: fixed;
+  z-index: 9999;
   width: 220px;
   padding: 12px;
   background: #1a1a1a;
   border: 1px solid #333;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-
-  /* Position tooltip to the left of the button */
-  right: 100%;
-  top: 50%;
-  transform: translateY(-50%);
-  margin-right: 8px;
+  pointer-events: none;
 
   /* Animation */
   animation: tooltipFadeIn 0.15s ease-out;
@@ -48,23 +43,10 @@
 @keyframes tooltipFadeIn {
   from {
     opacity: 0;
-    transform: translateY(-50%) translateX(4px);
   }
   to {
     opacity: 1;
-    transform: translateY(-50%) translateX(0);
   }
-}
-
-/* Arrow pointing to button */
-.item-info-tooltip::after {
-  content: '';
-  position: absolute;
-  right: -6px;
-  top: 50%;
-  transform: translateY(-50%);
-  border: 6px solid transparent;
-  border-left-color: #333;
 }
 
 .item-info-name {
@@ -107,33 +89,5 @@
   .item-info-tooltip {
     width: 180px;
     padding: 10px;
-
-    /* On mobile, position below the button */
-    right: auto;
-    left: 50%;
-    top: 100%;
-    transform: translateX(-50%);
-    margin-right: 0;
-    margin-top: 8px;
-  }
-
-  .item-info-tooltip::after {
-    right: auto;
-    left: 50%;
-    top: -6px;
-    transform: translateX(-50%);
-    border: 6px solid transparent;
-    border-bottom-color: #333;
-  }
-
-  @keyframes tooltipFadeIn {
-    from {
-      opacity: 0;
-      transform: translateX(-50%) translateY(-4px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
   }
 }

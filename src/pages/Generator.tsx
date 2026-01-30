@@ -19,6 +19,7 @@ import {
   StickyMiniPreview,
 } from '@/components/generator';
 import { PageSEO } from '@/components/seo';
+import { InfoButton } from '@/components/common/InfoButton';
 
 function GeneratorContent() {
   const { isDesktop } = useLayout();
@@ -107,6 +108,7 @@ function GeneratorContent() {
 
       {/* Mobile sticky preview */}
       {!isDesktop && <StickyMiniPreview />}
+      <InfoButton page="generator" />
     </PageTransition>
   );
 }

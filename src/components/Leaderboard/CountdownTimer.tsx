@@ -10,7 +10,7 @@ import { Clock } from 'lucide-react';
 import './CountdownTimer.css';
 
 interface CountdownTimerProps {
-  timeframe: 'daily' | 'weekly' | 'all-time';
+  timeframe: 'weekly' | 'all-time';
 }
 
 interface TimeRemaining {
@@ -56,32 +56,18 @@ function formatTimeRemaining(time: TimeRemaining): string {
 }
 
 // Calculate reset time based on timeframe (always calculate locally for consistency)
-function getResetTime(timeframe: 'daily' | 'weekly' | 'all-time'): string | null {
+function getResetTime(timeframe: 'weekly' | 'all-time'): string | null {
   if (timeframe === 'all-time') return null;
-  
+
+  // Weekly: Next Monday midnight UTC
   const now = new Date();
-  
-  if (timeframe === 'daily') {
-    // Next midnight UTC
-    const tomorrow = new Date(now);
-    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-    tomorrow.setUTCHours(0, 0, 0, 0);
-    return tomorrow.toISOString();
-  } else {
-    // Weekly: Next Monday midnight UTC
-    // Sunday = 0, Monday = 1, ..., Saturday = 6
-    const currentDay = now.getUTCDay();
-    
-    // If it's Sunday (0), next Monday is tomorrow (1 day away)
-    // If it's Monday (1), next Monday is 7 days away
-    // If it's Tuesday (2), next Monday is 6 days away, etc.
-    const daysUntilMonday = currentDay === 0 ? 1 : (8 - currentDay);
-    
-    const nextMonday = new Date(now);
-    nextMonday.setUTCDate(nextMonday.getUTCDate() + daysUntilMonday);
-    nextMonday.setUTCHours(0, 0, 0, 0);
-    return nextMonday.toISOString();
-  }
+  const currentDay = now.getUTCDay();
+  const daysUntilMonday = currentDay === 0 ? 1 : (8 - currentDay);
+
+  const nextMonday = new Date(now);
+  nextMonday.setUTCDate(nextMonday.getUTCDate() + daysUntilMonday);
+  nextMonday.setUTCHours(0, 0, 0, 0);
+  return nextMonday.toISOString();
 }
 
 export const CountdownTimer: React.FC<CountdownTimerProps> = ({

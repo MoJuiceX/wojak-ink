@@ -16,6 +16,7 @@ import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch';
 import { PageSEO } from '@/components/seo';
 import { CHAT_ROOMS, type ChatType, isEligibleForRoom } from '@/config/chatRooms';
 import './GatedChat.css';
+import { InfoButton } from '@/components/common/InfoButton';
 
 export default function ChatHub() {
   const navigate = useNavigate();
@@ -110,17 +111,14 @@ export default function ChatHub() {
 
                 {/* Room Cards - Terminal Style */}
                 <div className="gc-hub-rooms">
-                  {Object.entries(CHAT_ROOMS).map(([key, room], index) => {
+                  {Object.entries(CHAT_ROOMS).map(([key, room]) => {
                     const chatType = key as ChatType;
                     const isEligible = isAdmin || (hasVerified && isEligibleForRoom(nftCount!, chatType, false));
                     const neededMore = room.minNfts - (nftCount || 0);
 
                     return (
-                      <motion.div
+                      <div
                         key={chatType}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1 }}
                         className={`gc-hub-room ${isEligible ? 'gc-hub-room--eligible gc-hub-room--clickable' : 'gc-hub-room--locked'}`}
                         onClick={isEligible ? () => handleEnterRoom(chatType) : undefined}
                         style={isEligible ? { cursor: 'pointer' } : undefined}
@@ -158,7 +156,7 @@ export default function ChatHub() {
                             </span>
                           )}
                         </div>
-                      </motion.div>
+                      </div>
                     );
                   })}
                 </div>
@@ -182,6 +180,7 @@ export default function ChatHub() {
           </div>
         </div>
       </div>
+      <InfoButton page="chat" />
     </>
   );
 }

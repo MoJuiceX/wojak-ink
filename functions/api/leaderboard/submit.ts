@@ -184,7 +184,7 @@ async function submitScoreAtomic(
        ORDER BY created_at DESC LIMIT 1`
     ).bind(userId, data.gameId, data.score),
     db.prepare(
-      `SELECT COUNT(*) + 1 as rank FROM leaderboard_scores
+      `SELECT COUNT(DISTINCT user_id) + 1 as rank FROM leaderboard_scores
        WHERE game_id = ? AND score > ?`
     ).bind(data.gameId, data.score),
   ]);

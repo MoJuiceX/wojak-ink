@@ -41,7 +41,7 @@ export const GameCard = memo(function GameCard({
   };
 
   const cardStyle = {
-    background: '#0a0a0a',
+    background: '#000000',
     border: '1px solid var(--color-border)',
     outline: isHovered ? `${effects.borderWidth}px solid ${effects.color}` : 'none',
     outlineOffset: '-1px',

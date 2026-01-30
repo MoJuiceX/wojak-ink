@@ -230,7 +230,7 @@ export function Sidebar({
 
         {/* Secondary items */}
         <ul className="flex flex-col gap-1">
-          {SECONDARY_NAV_ITEMS.map((item) => (
+          {SECONDARY_NAV_ITEMS.filter(item => !item.hidden).map((item) => (
             <li key={item.id}>
               <NavItem
                 icon={item.icon}

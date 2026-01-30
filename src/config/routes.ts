@@ -45,6 +45,8 @@ export interface NavItem {
   requiredAuth?: boolean;
   /** Featured item with special styling (e.g., BigPulp) */
   featured?: boolean;
+  /** Hidden from navigation (route still works) */
+  hidden?: boolean;
   /** Nested child routes (not shown in main nav) */
   children?: Omit<NavItem, 'children'>[];
 }
@@ -136,6 +138,7 @@ export const SECONDARY_NAV_ITEMS: NavItem[] = [
     label: 'Guild',
     shortLabel: 'Guild',
     icon: Users,
+    hidden: true,
   },
   {
     id: 'treasury',

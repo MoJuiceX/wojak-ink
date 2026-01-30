@@ -1225,7 +1225,7 @@
 .gc-input-area {
   display: flex;
   flex-direction: column;
-  padding: 6px 16px 12px;
+  padding: 6px 16px 24px;
   background: transparent;
   border: none;
   flex-shrink: 0;

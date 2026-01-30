@@ -17,8 +17,7 @@ interface Env {
   CLERK_DOMAIN: string;
 }
 
-type Timeframe = 'daily' | 'weekly' | 'all-time';
-type TierName = 'diamond' | 'gold' | 'silver' | 'bronze' | 'rookie';
+type Timeframe = 'weekly' | 'all-time';
 
 interface LeaderboardEntry {
   rank: number;
@@ -32,7 +31,6 @@ interface LeaderboardEntry {
   score: number;
   level?: number;
   createdAt: string;
-  tier?: TierName;
   equipped?: {
     nameEffect?: {
       id: string;
@@ -52,7 +50,6 @@ interface LeaderboardEntry {
 interface UserPosition {
   rank: number;
   score: number;
-  tier: TierName;
   totalPlayers: number;
   nextRival?: {
     userId: string;
@@ -100,7 +97,7 @@ const VALID_GAME_IDS = [
 ];
 
 // Valid timeframes
-const VALID_TIMEFRAMES: Timeframe[] = ['daily', 'weekly', 'all-time'];
+const VALID_TIMEFRAMES: Timeframe[] = ['weekly', 'all-time'];
 
 // CORS headers
 const corsHeaders = {
@@ -111,29 +108,10 @@ const corsHeaders = {
 };
 
 /**
- * Calculate tier based on rank and total players
- * Diamond: Top 5%, Gold: Top 20%, Silver: Top 40%, Bronze: Top 70%, Rookie: Rest
- */
-function calculateTier(rank: number, totalPlayers: number): TierName {
-  if (totalPlayers === 0) return 'rookie';
-  
-  const percentile = (rank / totalPlayers) * 100;
-  
-  if (percentile <= 5) return 'diamond';
-  if (percentile <= 20) return 'gold';
-  if (percentile <= 40) return 'silver';
-  if (percentile <= 70) return 'bronze';
-  return 'rookie';
-}
-
-/**
  * Get SQL WHERE clause for timeframe filtering
  */
 function getTimeframeFilter(timeframe: Timeframe): string {
   switch (timeframe) {
-    case 'daily':
-      // Today (UTC)
-      return "AND ls.created_at >= datetime('now', 'start of day')";
     case 'weekly':
       // This week (Monday to now, UTC)
       // SQLite: weekday 0 = Sunday, so we calculate Monday
@@ -150,28 +128,16 @@ function getTimeframeFilter(timeframe: Timeframe): string {
 function getResetTime(timeframe: Timeframe): string | undefined {
   if (timeframe === 'all-time') return undefined;
 
+  // Next Monday midnight UTC
   const now = new Date();
-  let resetDate: Date;
-
-  if (timeframe === 'daily') {
-    // Next midnight UTC
-    resetDate = new Date(Date.UTC(
-      now.getUTCFullYear(),
-      now.getUTCMonth(),
-      now.getUTCDate() + 1,
-      0, 0, 0, 0
-    ));
-  } else {
-    // Next Monday midnight UTC
-    const dayOfWeek = now.getUTCDay();
-    const daysUntilMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek);
-    resetDate = new Date(Date.UTC(
-      now.getUTCFullYear(),
-      now.getUTCMonth(),
-      now.getUTCDate() + daysUntilMonday,
-      0, 0, 0, 0
-    ));
-  }
+  const dayOfWeek = now.getUTCDay();
+  const daysUntilMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek);
+  const resetDate = new Date(Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate() + daysUntilMonday,
+    0, 0, 0, 0
+  ));
 
   return resetDate.toISOString();
 }
@@ -189,12 +155,17 @@ async function getLeaderboard(
   const timeFilter = getTimeframeFilter(timeframe);
   
   const query = `
+    WITH best_scores AS (
+      SELECT user_id, MAX(score) as score, MIN(created_at) as created_at
+      FROM leaderboard_scores ls
+      WHERE ls.game_id = ? ${timeFilter}
+      GROUP BY user_id
+    )
     SELECT
-      ROW_NUMBER() OVER (ORDER BY ls.score DESC, ls.created_at ASC) as rank,
-      ls.user_id,
-      ls.score,
-      ls.level,
-      ls.created_at,
+      ROW_NUMBER() OVER (ORDER BY bs.score DESC, bs.created_at ASC) as rank,
+      bs.user_id,
+      bs.score,
+      bs.created_at,
       COALESCE(p.display_name, 'Player') as display_name,
       COALESCE(p.avatar_type, 'emoji') as avatar_type,
       COALESCE(p.avatar_value, '🎮') as avatar_value,
@@ -205,14 +176,13 @@ async function getLeaderboard(
       fr.css_class as frame_class,
       ue.title_id,
       ti.name as title_name
-    FROM leaderboard_scores ls
-    LEFT JOIN profiles p ON ls.user_id = p.user_id
-    LEFT JOIN user_equipped ue ON ls.user_id = ue.user_id
+    FROM best_scores bs
+    LEFT JOIN profiles p ON bs.user_id = p.user_id
+    LEFT JOIN user_equipped ue ON bs.user_id = ue.user_id
     LEFT JOIN shop_items ne ON ue.name_effect_id = ne.id
     LEFT JOIN shop_items fr ON ue.frame_id = fr.id
     LEFT JOIN shop_items ti ON ue.title_id = ti.id
-    WHERE ls.game_id = ? ${timeFilter}
-    ORDER BY ls.score DESC, ls.created_at ASC
+    ORDER BY bs.score DESC, bs.created_at ASC
     LIMIT ? OFFSET ?
   `;
 
@@ -223,7 +193,6 @@ async function getLeaderboard(
       rank: number;
       user_id: string;
       score: number;
-      level: number | null;
       created_at: string;
       display_name: string;
       avatar_type: string;
@@ -248,7 +217,6 @@ async function getLeaderboard(
         source: row.avatar_source as 'default' | 'user' | 'wallet',
       },
       score: row.score,
-      level: row.level || undefined,
       createdAt: row.created_at,
     };
 
@@ -346,23 +314,26 @@ async function getUserPosition(
     .first<{ rank: number }>();
 
   const rank = rankResult?.rank ?? 1;
-  const tier = calculateTier(rank, totalPlayers);
 
-  // Get the next rival (user immediately above)
+  // Get the next rival (user immediately above, deduplicated by best score)
   const rivalQuery = `
-    SELECT 
-      ls.user_id,
-      ls.score,
+    WITH best_scores AS (
+      SELECT user_id, MAX(score) as score
+      FROM leaderboard_scores
+      WHERE game_id = ? ${timeFilter}
+      GROUP BY user_id
+    )
+    SELECT
+      bs.user_id,
+      bs.score,
       COALESCE(p.display_name, 'Player') as display_name,
       COALESCE(p.avatar_type, 'emoji') as avatar_type,
       COALESCE(p.avatar_value, '🎮') as avatar_value
-    FROM leaderboard_scores ls
-    LEFT JOIN profiles p ON ls.user_id = p.user_id
-    WHERE ls.game_id = ? 
-      AND ls.score > ?
-      AND ls.user_id != ?
-      ${timeFilter}
-    ORDER BY ls.score ASC
+    FROM best_scores bs
+    LEFT JOIN profiles p ON bs.user_id = p.user_id
+    WHERE bs.score > ?
+      AND bs.user_id != ?
+    ORDER BY bs.score ASC
     LIMIT 1
   `;
 
@@ -380,7 +351,6 @@ async function getUserPosition(
   const userPosition: UserPosition = {
     rank,
     score: userScore,
-    tier,
     totalPlayers,
   };
 
@@ -398,16 +368,6 @@ async function getUserPosition(
   }
 
   return userPosition;
-}
-
-/**
- * Add tier to top entries
- */
-function addTiersToEntries(entries: LeaderboardEntry[], totalPlayers: number): LeaderboardEntry[] {
-  return entries.map(entry => ({
-    ...entry,
-    tier: calculateTier(entry.rank, totalPlayers),
-  }));
 }
 
 export const onRequest: PagesFunction<Env> = async (context) => {
@@ -473,10 +433,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
     // Get leaderboard entries
     const totalCount = await getLeaderboardCount(env.DB, gameId, timeframe);
-    let entries = await getLeaderboard(env.DB, gameId, timeframe, limit, offset);
-    
-    // Add tiers to entries
-    entries = addTiersToEntries(entries, totalCount);
+    const entries = await getLeaderboard(env.DB, gameId, timeframe, limit, offset);
 
     // Get user position if authenticated
     let userPosition: UserPosition | undefined;

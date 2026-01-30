@@ -71,26 +71,36 @@ export function VolumeSlider({
           </div>
         </div>
 
-        {/* Simple toggle matching Gyroscope Parallax style */}
-        <button
-          type="button"
+        {/* Pill toggle */}
+        <div
           role="switch"
           aria-checked={enabled}
           aria-label={`Toggle ${label}`}
           onClick={() => onToggle(!enabled)}
-          className="w-12 h-7 rounded-full relative cursor-pointer transition-colors"
+          className="cursor-pointer"
           style={{
-            background: enabled ? 'var(--color-brand-primary)' : 'var(--color-border)',
+            position: 'relative',
+            width: '36px',
+            height: '20px',
+            borderRadius: '9999px',
+            background: enabled ? 'var(--color-brand-primary)' : 'rgba(255,255,255,0.1)',
+            flexShrink: 0,
+            transition: 'background 0.2s ease',
           }}
         >
           <div
-            className="absolute top-1 w-5 h-5 rounded-full transition-all duration-200"
             style={{
-              background: enabled ? '#fff' : 'var(--color-text-muted)',
-              left: enabled ? 'calc(100% - 1.25rem - 0.25rem)' : '0.25rem',
+              position: 'absolute',
+              width: '16px',
+              height: '16px',
+              top: '2px',
+              borderRadius: '9999px',
+              background: 'white',
+              left: enabled ? '18px' : '2px',
+              transition: 'left 0.2s ease',
             }}
           />
-        </button>
+        </div>
       </div>
 
       {/* Volume slider */}

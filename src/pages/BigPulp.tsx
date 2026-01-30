@@ -24,6 +24,7 @@ import { MyWojaksModal } from '@/components/bigpulp/MyWojaksModal';
 import { ALL_BADGES_FILTER } from '@/components/bigpulp/HeatMap';
 import { useSageWallet } from '@/sage-wallet';
 import { PageSEO } from '@/components/seo';
+import { InfoButton } from '@/components/common/InfoButton';
 
 // Wojak Farmers Plot collection ID on MintGarden
 const WOJAK_COLLECTION_ID = 'col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah';
@@ -181,7 +182,6 @@ function BottomPanel() {
     setActiveTab,
     marketStats,
     heatMapData,
-    priceDistribution,
     heatMapViewMode,
     setHeatMapViewMode,
     attributes,
@@ -280,7 +280,6 @@ function BottomPanel() {
               <MarketTab
                 stats={marketStats}
                 heatMapData={filteredHeatMapData}
-                priceDistribution={priceDistribution}
                 viewMode={heatMapViewMode}
                 onViewModeChange={setHeatMapViewMode}
                 isLoading={isMarketLoading}
@@ -542,7 +541,7 @@ function DesktopLayout() {
         </div>
       </div>
 
-      {/* Bottom Row: Market/Ask/Attributes - Full width */}
+      {/* Bottom Row: Market/Ask/Attributes - Full width, fills remaining space */}
       <BottomPanel />
     </div>
   );
@@ -561,6 +560,7 @@ function BigPulpContent() {
     };
   }, []);
 
+
   return (
     <PageTransition>
       <PageSEO
@@ -568,13 +568,14 @@ function BigPulpContent() {
         description="Get AI-powered insights on Wojak Farmers Plot NFTs. Analyze trait rarity, view sales history, explore market heatmaps, and discover valuable combos. Your NFT intelligence companion on Chia blockchain."
         path="/bigpulp"
       />
-      <div data-section="bigpulp" style={{ padding: contentPadding, paddingBottom: 'env(safe-area-inset-bottom, 16px)' }}>
+      <div data-section="bigpulp" style={{ paddingTop: contentPadding, paddingLeft: contentPadding, paddingRight: contentPadding, paddingBottom: 'env(safe-area-inset-bottom, 16px)' }}>
         {/* SEO H1 - visually hidden but accessible */}
         <h1 className="sr-only">BigPulp AI - Wojak Farmers NFT Intelligence & Analysis</h1>
 
         {/* Responsive layout - no header needed, title is in browser tab */}
         {isDesktop ? <DesktopLayout /> : <MobileLayout />}
       </div>
+      <InfoButton page="bigpulp" />
     </PageTransition>
   );
 }

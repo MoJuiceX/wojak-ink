@@ -30,6 +30,7 @@ import { useFlickVoting } from '@/hooks/useFlickVoting';
 import { SoundManager } from '@/systems/audio';
 import '@/styles/voting.css';
 import { PageSEO } from '@/components/seo';
+import { InfoButton } from '@/components/common/InfoButton';
 
 const CLERK_ENABLED = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -48,6 +49,7 @@ export default function GamesHub() {
 
   const [selectedGame, setSelectedGame] = useState<MiniGame | null>(null);
   const [gameModalOpen, setGameModalOpen] = useState(false);
+  const [showComingSoon, setShowComingSoon] = useState(false);
 
   // Fetch games using TanStack Query
   const { games, isLoading } = useMediaContent('all');
@@ -286,15 +288,45 @@ export default function GamesHub() {
     setHeatmapState(prev => ({ ...prev, isActive: false, votes: [] }));
   }, []);
 
+  // Filter games into playable and coming soon
+  const playableGames = games.filter(game => game.status === 'available' && !game.disabled);
+  const comingSoonGames = games.filter(game => game.status === 'coming-soon' || game.disabled);
+
   // === RENDER ===
   const gamesGridWithVoting = (
-    <GamesGrid
-      games={games}
-      onGameSelect={handleGameSelect}
-      isLoading={isLoading}
-      flickModeActive={activeMode}
-      onFlick={handleCardFlick}
-    />
+    <>
+      <GamesGrid
+        games={playableGames}
+        onGameSelect={handleGameSelect}
+        isLoading={isLoading}
+        flickModeActive={activeMode}
+        onFlick={handleCardFlick}
+      />
+      {comingSoonGames.length > 0 && (
+        <div style={{ marginTop: '24px' }}>
+          <button
+            className="stats-trigger"
+            onClick={() => setShowComingSoon(prev => !prev)}
+            style={{ justifyContent: 'space-between' }}
+          >
+            <span>More Games Coming Soon ({comingSoonGames.length})</span>
+            <span style={{ transform: showComingSoon ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
+              ▼
+            </span>
+          </button>
+          {showComingSoon && (
+            <div style={{ marginTop: '12px', opacity: 0.6 }}>
+              <GamesGrid
+                games={comingSoonGames}
+                onGameSelect={handleGameSelect}
+                isLoading={false}
+                flickModeActive={null}
+              />
+            </div>
+          )}
+        </div>
+      )}
+    </>
   );
 
   const gameSEO = (
@@ -350,11 +382,14 @@ export default function GamesHub() {
               width: '100%',
               // Align content to start, not center, to prevent top clipping
               alignContent: 'start',
+              // Create stacking context above ambient orbs (z-index:0) and noise overlay (z-index:1)
+              position: 'relative',
+              zIndex: 1,
             }}
           >
             <LeaderboardPanel />
             {/* Remove justifyContent: 'center' - causes top row to be pushed up when viewport shrinks */}
-            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', minHeight: 0, paddingTop: '8px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', minHeight: 0 }}>
               {gamesGridWithVoting}
             </div>
             {/* Right column: Stats + Voting Panel */}
@@ -411,6 +446,8 @@ export default function GamesHub() {
             onComplete={handleCloseHeatmap}
           />
         )}
+
+        <InfoButton page="games" />
       </PageTransition>
     );
   }
@@ -480,6 +517,8 @@ export default function GamesHub() {
           onComplete={handleCloseHeatmap}
         />
       )}
+
+      <InfoButton page="games" />
     </PageTransition>
   );
 }

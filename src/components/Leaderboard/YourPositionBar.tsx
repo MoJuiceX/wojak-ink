@@ -8,16 +8,13 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { TierBadge } from './TierBadge';
 import { Avatar } from '@/components/Avatar/Avatar';
 import { getDeterministicRivalMessage } from '@/lib/leaderboard/rivalMessages';
-import type { TierName } from '@/lib/leaderboard/tierCalculation';
 import './YourPositionBar.css';
 
 interface UserPosition {
   rank: number;
   score: number;
-  tier: TierName;
   totalPlayers: number;
   nextRival?: {
     userId: string;
@@ -41,7 +38,7 @@ export const YourPositionBar: React.FC<YourPositionBarProps> = ({
   isInVisibleList,
 }) => {
   const navigate = useNavigate();
-  const { rank, tier, nextRival } = userPosition;
+  const { rank, nextRival } = userPosition;
 
   // Get aggressive rival message
   const rivalMessage = useMemo(() => {
@@ -73,9 +70,8 @@ export const YourPositionBar: React.FC<YourPositionBarProps> = ({
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
     >
       <div className="position-bar-content">
-        {/* Tier and Rank */}
+        {/* Rank */}
         <div className="position-rank-section">
-          <TierBadge tier={tier} size="medium" />
           <span className="position-rank">#{rank}</span>
         </div>
 

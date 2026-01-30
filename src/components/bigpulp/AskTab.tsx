@@ -30,6 +30,8 @@ import {
   accordionArrowVariants,
   tabContentVariants,
 } from '@/config/bigpulpAnimations';
+import { QuickPrompts } from './QuickPrompts';
+import { useContextualPrompts } from '@/hooks/useContextualPrompts';
 
 interface AskTabProps {
   stats: MarketStats | null;
@@ -791,6 +793,20 @@ export function AskTab({
   const [expandedSection, setExpandedSection] = useState<SectionId | null>(null);
   const [isStatsExpanded, setIsStatsExpanded] = useState(false);
   const { data: xchPrice } = useXchPrice();
+  const quickPrompts = useContextualPrompts([]);
+
+  const handleQuickPrompt = useCallback((prompt: string) => {
+    // Quick prompts hint at future AI chat functionality.
+    // For now, expand the most relevant section based on the prompt.
+    const lower = prompt.toLowerCase();
+    if (lower.includes('trait') || lower.includes('rarest') || lower.includes('attribute')) {
+      setExpandedSection('attributes');
+    } else if (lower.includes('sale') || lower.includes('deal') || lower.includes('undervalued')) {
+      setExpandedSection('sales');
+    } else {
+      setExpandedSection('provenance');
+    }
+  }, []);
 
   // Use real XCH price for USD calculations
   const realXchPrice = xchPrice ?? 5.32;
@@ -964,6 +980,12 @@ export function AskTab({
           <BadgeGalleryContent />
         </ExpandableSection>
       </div>
+
+      {/* Quick Prompts */}
+      <QuickPrompts
+        prompts={quickPrompts}
+        onSelect={handleQuickPrompt}
+      />
     </motion.div>
   );
 }

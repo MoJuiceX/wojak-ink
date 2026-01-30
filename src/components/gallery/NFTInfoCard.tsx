@@ -6,12 +6,13 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Crown } from 'lucide-react';
+import { X, Crown, ExternalLink } from 'lucide-react';
 import type { NFT } from '@/types/nft';
 import {
   formatPriceXCH,
   formatPriceUSD,
 } from '@/utils/mockData';
+import { getMintGardenNftUrl } from '@/services/marketApi';
 import { useTraitRankings, type TooltipData } from '@/hooks/useTraitRankings';
 import { fetchNFTOwnerByEdition, type NFTOwnerInfo } from '@/services/parseBotService';
 import { useSalesHistory } from '@/hooks/useSalesHistory';
@@ -43,6 +44,13 @@ const tabs: { id: InfoTab; label: string }[] = [
 function truncateAddress(address: string): string {
   if (address.length <= 10) return address;
   return `${address.slice(0, 5)}...${address.slice(-4)}`;
+}
+
+function getTraitRarityClass(rarityPct: number): string {
+  if (rarityPct < 5) return 'trait-gold';
+  if (rarityPct < 15) return 'trait-purple';
+  if (rarityPct < 30) return 'trait-blue';
+  return '';
 }
 
 function MainTabContent({
@@ -82,7 +90,7 @@ function MainTabContent({
             className="text-sm font-medium"
             style={{ color: 'var(--color-text-secondary)' }}
           >
-            {nft.rarityRank}
+            #{nft.rarityRank}
           </span>
         </div>
       </div>
@@ -141,44 +149,46 @@ function MainTabContent({
         )}
       </p>
 
-      {/* Price */}
+      {/* Price & Actions */}
       {nft.listing ? (
-        <div className="flex items-baseline gap-2">
-          <p
-            className="text-xl font-bold"
-            style={{ color: 'var(--color-text-primary)' }}
+        <>
+          <div className="flex items-baseline gap-2">
+            <p
+              className="text-xl font-bold"
+              style={{ color: 'var(--color-text-primary)' }}
+            >
+              {formatPriceXCH(nft.listing.priceXCH)}
+            </p>
+            <p
+              className="text-sm"
+              style={{ color: 'var(--color-text-muted)' }}
+            >
+              ≈ {formatPriceUSD(calculateUsd(nft.listing.priceXCH))}
+            </p>
+          </div>
+          <motion.button
+            className="w-full flex items-center justify-center gap-2 h-10 rounded-lg text-sm font-medium transition-colors"
+            style={{
+              background: '#22c55e',
+              color: 'white',
+            }}
+            onClick={onOpenExternal}
+            whileTap={{ scale: 0.98 }}
           >
-            {formatPriceXCH(nft.listing.priceXCH)}
-          </p>
-          <p
-            className="text-sm"
-            style={{ color: 'var(--color-text-muted)' }}
-          >
-            ≈ {formatPriceUSD(calculateUsd(nft.listing.priceXCH))}
-          </p>
-        </div>
+            Buy on {nft.listing.marketplace === 'mintgarden' ? 'MintGarden' : nft.listing.marketplace}
+          </motion.button>
+        </>
       ) : (
-        <p
-          className="text-sm font-medium"
-          style={{ color: 'var(--color-text-muted)' }}
-        >
-          Not Listed
-        </p>
-      )}
-
-      {/* Action button */}
-      {nft.listing && (
-        <motion.button
-          className="w-full flex items-center justify-center gap-2 h-10 rounded-lg text-sm font-medium transition-colors"
-          style={{
-            background: '#22c55e',
-            color: 'white',
+        <button
+          className="explorer-action-btn flex-1"
+          onClick={async () => {
+            const url = await getMintGardenNftUrl(Number(nft.tokenId));
+            window.open(url, '_blank', 'noopener,noreferrer');
           }}
-          onClick={onOpenExternal}
-          whileTap={{ scale: 0.98 }}
         >
-          Buy on {nft.listing.marketplace === 'mintgarden' ? 'MintGarden' : nft.listing.marketplace}
-        </motion.button>
+          <ExternalLink size={14} />
+          View on MintGarden
+        </button>
       )}
     </div>
   );
@@ -347,41 +357,34 @@ function MetadataTabContent({ nft }: { nft: NFT }) {
 
   return (
     <>
-      <div className="space-y-1">
+      <div className="grid grid-cols-2 gap-2">
         {nft.traits.map((trait, index) => {
           const rankData = getTooltipData(trait.category, trait.value);
 
           return (
             <div
               key={index}
-              className="py-2"
-              style={{
-                borderBottom:
-                  index < nft.traits.length - 1
-                    ? '1px solid var(--color-border)'
-                    : 'none',
-              }}
+              className={`trait-card p-3 ${getTraitRarityClass(trait.rarity)}`}
             >
               {/* Category label */}
               <p
-                className="text-sm mb-0.5"
+                className="text-xs uppercase tracking-wide mb-1"
                 style={{ color: 'var(--color-text-muted)' }}
               >
                 {trait.category}
               </p>
-              {/* Value + Rank on same row */}
-              <div className="flex items-center justify-between">
+              {/* Value + Rank */}
+              <div className="flex items-baseline justify-between gap-1">
                 <p
-                  className="text-sm font-medium truncate flex-1 min-w-0"
+                  className="text-sm font-medium truncate"
                   style={{ color: 'var(--color-text-primary)' }}
                 >
                   {trait.value}
                 </p>
-                {/* Rank display - tappable */}
                 {rankData && (
                   <button
                     onClick={() => handleTraitTap(trait.category, trait.value)}
-                    className="text-xs px-1.5 py-0.5 rounded active:opacity-70 whitespace-nowrap ml-2"
+                    className="text-xs px-1.5 py-0.5 rounded active:opacity-70 whitespace-nowrap"
                     style={{
                       background: 'rgba(247, 147, 26, 0.15)',
                       color: 'var(--color-accent)',

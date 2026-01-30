@@ -354,17 +354,6 @@ export function ActionBar({ className = '' }: ActionBarProps) {
             <span className="text-xl">🌱</span>
             <span className="text-xs font-medium">Soon</span>
           </motion.button>
-          {/* Tooltip on hover */}
-          <div
-            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
-            style={{
-              background: 'rgba(0, 0, 0, 0.9)',
-              color: 'var(--color-text-secondary)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-            }}
-          >
-            Coming Soon
-          </div>
         </div>
       )}
     </div>
