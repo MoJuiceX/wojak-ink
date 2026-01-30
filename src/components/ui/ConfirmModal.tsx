@@ -54,36 +54,34 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   return createPortal(
     <AnimatePresence>
       {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            className="confirm-modal-backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
-            onClick={onClose}
-          />
-
-          {/* Modal */}
+        <motion.div
+          className="confirm-modal-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
+          onClick={onClose}
+        >
+          {/* Modal — inside backdrop for flex centering */}
           <motion.div
             className={`confirm-modal confirm-modal-${variant} glass-strong`}
             initial={
               prefersReducedMotion
                 ? { opacity: 0 }
-                : { opacity: 0, scale: 0.9, y: 20 }
+                : { opacity: 0, scale: 0.9 }
             }
-            animate={{ opacity: 1, scale: 1, y: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
             exit={
               prefersReducedMotion
                 ? { opacity: 0 }
-                : { opacity: 0, scale: 0.9, y: 20 }
+                : { opacity: 0, scale: 0.9 }
             }
             transition={
               prefersReducedMotion
                 ? { duration: 0.15 }
                 : { type: 'spring', damping: 25, stiffness: 300 }
             }
+            onClick={(e) => e.stopPropagation()}
             role="alertdialog"
             aria-modal="true"
             aria-labelledby="confirm-modal-title"
@@ -126,7 +124,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
               </motion.button>
             </div>
           </motion.div>
-        </>
+        </motion.div>
       )}
     </AnimatePresence>,
     document.body

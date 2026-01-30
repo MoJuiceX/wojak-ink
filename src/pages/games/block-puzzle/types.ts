@@ -35,9 +35,7 @@ export interface DraggablePiece {
 // STREAK STATE
 // ============================================
 export interface StreakState {
-  count: number;
-  active: boolean;
-  lastClearTime: number;
+  count: number;  // Consecutive clears (0 = no streak)
 }
 
 // ============================================
@@ -56,6 +54,7 @@ export interface ClearParticle {
   alpha: number;
   rotation: number;
   rotationSpeed: number;
+  life: number; // Frames remaining — hard cutoff to guarantee cleanup
 }
 
 // Shockwave effect

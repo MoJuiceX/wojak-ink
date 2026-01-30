@@ -1240,6 +1240,105 @@
 
 
 /* ============================================
+   SURGE PATTERNS 1-5
+   Continuous bidirectional waves at escalating speeds.
+   Bottom row: L→R→L ping-pong
+   Right column: down→up→down ping-pong
+   Left button: pulses on the beat
+   Any game can use these for streak/momentum systems.
+   ============================================ */
+
+/* Shared keyframes — ping-pong wave pulse */
+@keyframes surge-wave {
+  0%, 100% { opacity: 0.15; }
+  45%, 55% { opacity: 1; filter: brightness(1.3); }
+}
+
+/* --- SURGE 1: Slow (2400ms cycle) --- */
+.pattern-surge1 .arcade-glow { animation: surge-wave 2400ms ease-in-out infinite; }
+/* Bottom row L→R→L: 7 buttons across full cycle */
+.pattern-surge1 .arcade-glow-bottom1 { animation-delay: 0ms; }
+.pattern-surge1 .arcade-glow-bottom2 { animation-delay: 200ms; }
+.pattern-surge1 .arcade-glow-bottom3 { animation-delay: 400ms; }
+.pattern-surge1 .arcade-glow-bottom4 { animation-delay: 600ms; }
+.pattern-surge1 .arcade-glow-bottom5 { animation-delay: 800ms; }
+.pattern-surge1 .arcade-glow-bottom6 { animation-delay: 1000ms; }
+.pattern-surge1 .arcade-glow-bottom7 { animation-delay: 1200ms; }
+/* Right column down→up→down: 5 buttons */
+.pattern-surge1 .arcade-glow-right5 { animation-delay: 0ms; }
+.pattern-surge1 .arcade-glow-right4 { animation-delay: 300ms; }
+.pattern-surge1 .arcade-glow-right3 { animation-delay: 600ms; }
+.pattern-surge1 .arcade-glow-right2 { animation-delay: 900ms; }
+.pattern-surge1 .arcade-glow-right1 { animation-delay: 1200ms; }
+/* Left button: pulse on beat */
+.pattern-surge1 .arcade-glow-left1 { animation-delay: 600ms; }
+
+/* --- SURGE 2: Medium-slow (1800ms cycle) --- */
+.pattern-surge2 .arcade-glow { animation: surge-wave 1800ms ease-in-out infinite; }
+.pattern-surge2 .arcade-glow-bottom1 { animation-delay: 0ms; }
+.pattern-surge2 .arcade-glow-bottom2 { animation-delay: 150ms; }
+.pattern-surge2 .arcade-glow-bottom3 { animation-delay: 300ms; }
+.pattern-surge2 .arcade-glow-bottom4 { animation-delay: 450ms; }
+.pattern-surge2 .arcade-glow-bottom5 { animation-delay: 600ms; }
+.pattern-surge2 .arcade-glow-bottom6 { animation-delay: 750ms; }
+.pattern-surge2 .arcade-glow-bottom7 { animation-delay: 900ms; }
+.pattern-surge2 .arcade-glow-right5 { animation-delay: 0ms; }
+.pattern-surge2 .arcade-glow-right4 { animation-delay: 225ms; }
+.pattern-surge2 .arcade-glow-right3 { animation-delay: 450ms; }
+.pattern-surge2 .arcade-glow-right2 { animation-delay: 675ms; }
+.pattern-surge2 .arcade-glow-right1 { animation-delay: 900ms; }
+.pattern-surge2 .arcade-glow-left1 { animation-delay: 450ms; }
+
+/* --- SURGE 3: Medium (1200ms cycle) --- */
+.pattern-surge3 .arcade-glow { animation: surge-wave 1200ms ease-in-out infinite; }
+.pattern-surge3 .arcade-glow-bottom1 { animation-delay: 0ms; }
+.pattern-surge3 .arcade-glow-bottom2 { animation-delay: 100ms; }
+.pattern-surge3 .arcade-glow-bottom3 { animation-delay: 200ms; }
+.pattern-surge3 .arcade-glow-bottom4 { animation-delay: 300ms; }
+.pattern-surge3 .arcade-glow-bottom5 { animation-delay: 400ms; }
+.pattern-surge3 .arcade-glow-bottom6 { animation-delay: 500ms; }
+.pattern-surge3 .arcade-glow-bottom7 { animation-delay: 600ms; }
+.pattern-surge3 .arcade-glow-right5 { animation-delay: 0ms; }
+.pattern-surge3 .arcade-glow-right4 { animation-delay: 150ms; }
+.pattern-surge3 .arcade-glow-right3 { animation-delay: 300ms; }
+.pattern-surge3 .arcade-glow-right2 { animation-delay: 450ms; }
+.pattern-surge3 .arcade-glow-right1 { animation-delay: 600ms; }
+.pattern-surge3 .arcade-glow-left1 { animation-delay: 300ms; }
+
+/* --- SURGE 4: Fast (800ms cycle) --- */
+.pattern-surge4 .arcade-glow { animation: surge-wave 800ms ease-in-out infinite; }
+.pattern-surge4 .arcade-glow-bottom1 { animation-delay: 0ms; }
+.pattern-surge4 .arcade-glow-bottom2 { animation-delay: 66ms; }
+.pattern-surge4 .arcade-glow-bottom3 { animation-delay: 133ms; }
+.pattern-surge4 .arcade-glow-bottom4 { animation-delay: 200ms; }
+.pattern-surge4 .arcade-glow-bottom5 { animation-delay: 266ms; }
+.pattern-surge4 .arcade-glow-bottom6 { animation-delay: 333ms; }
+.pattern-surge4 .arcade-glow-bottom7 { animation-delay: 400ms; }
+.pattern-surge4 .arcade-glow-right5 { animation-delay: 0ms; }
+.pattern-surge4 .arcade-glow-right4 { animation-delay: 100ms; }
+.pattern-surge4 .arcade-glow-right3 { animation-delay: 200ms; }
+.pattern-surge4 .arcade-glow-right2 { animation-delay: 300ms; }
+.pattern-surge4 .arcade-glow-right1 { animation-delay: 400ms; }
+.pattern-surge4 .arcade-glow-left1 { animation-delay: 200ms; }
+
+/* --- SURGE 5: Frenetic (500ms cycle) --- */
+.pattern-surge5 .arcade-glow { animation: surge-wave 500ms ease-in-out infinite; }
+.pattern-surge5 .arcade-glow-bottom1 { animation-delay: 0ms; }
+.pattern-surge5 .arcade-glow-bottom2 { animation-delay: 42ms; }
+.pattern-surge5 .arcade-glow-bottom3 { animation-delay: 83ms; }
+.pattern-surge5 .arcade-glow-bottom4 { animation-delay: 125ms; }
+.pattern-surge5 .arcade-glow-bottom5 { animation-delay: 166ms; }
+.pattern-surge5 .arcade-glow-bottom6 { animation-delay: 208ms; }
+.pattern-surge5 .arcade-glow-bottom7 { animation-delay: 250ms; }
+.pattern-surge5 .arcade-glow-right5 { animation-delay: 0ms; }
+.pattern-surge5 .arcade-glow-right4 { animation-delay: 62ms; }
+.pattern-surge5 .arcade-glow-right3 { animation-delay: 125ms; }
+.pattern-surge5 .arcade-glow-right2 { animation-delay: 187ms; }
+.pattern-surge5 .arcade-glow-right1 { animation-delay: 250ms; }
+.pattern-surge5 .arcade-glow-left1 { animation-delay: 125ms; }
+
+
+/* ============================================
    REDUCED MOTION
    ============================================ */
 

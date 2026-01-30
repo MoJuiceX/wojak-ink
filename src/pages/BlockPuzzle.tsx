@@ -12,8 +12,6 @@ import { GameSEO } from '@/components/seo/GameSEO';
 import { useGameMute } from '@/contexts/GameMuteContext';
 import { useMobileGameFullscreen } from '@/hooks/useMobileGameFullscreen';
 import { useArcadeLights } from '@/contexts/ArcadeLightsContext';
-import type { GameEvent } from '@/config/arcade-light-mappings';
-import { getLineClearTier, GAME_COMBO_TIERS } from '@/config/arcade-light-mappings';
 import { GAME_OVER_SEQUENCE } from '@/lib/juice/brandConstants';
 import { captureGameArea } from '@/systems/sharing/captureDOM';
 import { generateGameScorecard } from '@/systems/sharing/GameScorecard';
@@ -58,7 +56,6 @@ import {
   createPerfectClearParticles,
   createTrailParticle,
   createShockwave,
-  updateClearParticles,
   updateTrailParticles,
   updateShockwaves,
 } from './games/block-puzzle/effects';
@@ -168,15 +165,10 @@ const BlockPuzzle: React.FC = () => {
     multiplier?: string; // TASK 107: Optional multiplier text
   }>>([]);
   const [combo, setCombo] = useState(0);
-  const [showCombo, setShowCombo] = useState(false);
   const [newPieceId, setNewPieceId] = useState<string | null>(null);
   const comboTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   // TASK 103 & 110: Combo visualization state
-  const [comboTimeLeft, setComboTimeLeft] = useState(100); // Percentage
   const comboStartTimeRef = useRef<number>(0);
-  const [comboShake, setComboShake] = useState(false);
-  const [lostCombo, setLostCombo] = useState<number | null>(null);
-  const COMBO_TIMEOUT_MS = 3000;
 
   // PHASE 3: EXPLOSIVE LINE CLEARS state
   // TASK 27: Freeze frame state
@@ -184,7 +176,7 @@ const BlockPuzzle: React.FC = () => {
   const freezeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // TASK 32: Particle state for line clear bursts
-  const [clearParticles, setClearParticles] = useState<ClearParticle[]>([]);
+  // clearParticles state removed — particles now use direct DOM manipulation via spawnDOMParticles
 
   // TASK 30: Shockwave state
   const [shockwaves, setShockwaves] = useState<Shockwave[]>([]);
@@ -211,12 +203,7 @@ const BlockPuzzle: React.FC = () => {
 
   // PHASE 7: Streak fire mode state
   // TASK 83: Streak state
-  const [streakState, setStreakState] = useState<StreakState>({
-    count: 0,
-    active: false,
-    lastClearTime: 0,
-  });
-  const streakTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [streakState, setStreakState] = useState<StreakState>({ count: 0 });
 
   // PHASE 1: Audio context for procedural sounds
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -471,6 +458,44 @@ const BlockPuzzle: React.FC = () => {
     freezeTimeoutRef.current = setTimeout(() => setFreezeFrame(false), duration);
   }, []);
 
+  // TASK 33: Particle system — direct DOM for guaranteed fade-out
+  const particleLayerRef = useRef<HTMLDivElement>(null);
+  const spawnDOMParticles = useCallback((particles: ClearParticle[]) => {
+    const layer = particleLayerRef.current;
+    if (!layer) return;
+    particles.forEach(p => {
+      const el = document.createElement('div');
+      el.className = 'bp-clear-particle';
+      el.style.left = `${p.x}px`;
+      el.style.top = `${p.y}px`;
+      el.style.width = `${p.size}px`;
+      el.style.height = `${p.size}px`;
+      el.style.backgroundColor = p.color;
+      el.style.opacity = '1';
+      el.style.transform = 'translate(-50%, -50%) scale(1)';
+      el.style.transition = 'transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s ease-in';
+      layer.appendChild(el);
+      // Trigger reflow then animate to end state
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          el.style.opacity = '0';
+          el.style.transform = `translate(calc(-50% + ${p.vx * 20}px), calc(-50% + ${p.vy * 20}px)) rotate(${p.rotation + p.rotationSpeed * 20}deg) scale(0.3)`;
+        });
+      });
+      // Remove from DOM after transition completes
+      setTimeout(() => el.remove(), 550);
+    });
+  }, []);
+
+  // Shockwave animation — rAF-chaining pattern
+  useEffect(() => {
+    if (shockwaves.length === 0) return;
+    const raf = requestAnimationFrame(() => {
+      setShockwaves(updateShockwaves);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [shockwaves]);
+
   // TASK 30: Trigger shockwave effect
   const triggerShockwave = useCallback((x: number, y: number, maxSize: number = 300) => {
     const shockwave = createShockwave(x, y, maxSize);
@@ -480,36 +505,14 @@ const BlockPuzzle: React.FC = () => {
   // TASK 32: Create particle burst from cleared cells
   const createLineClearBurst = useCallback((cells: { row: number; col: number }[], color: string) => {
     const newParticles = createLineClearBurstParticles(cells, color, CELL_SIZE);
-    setClearParticles(prev => [...prev, ...newParticles]);
-  }, [CELL_SIZE]);
+    spawnDOMParticles(newParticles);
+  }, [CELL_SIZE, spawnDOMParticles]);
 
   // TASK 39: Trigger screen flash
   const triggerScreenFlash = useCallback((color: string) => {
     setScreenFlash(color);
     setTimeout(() => setScreenFlash(null), 150);
   }, []);
-
-  // TASK 33: Particle animation loop - uses pure update function
-  useEffect(() => {
-    if (clearParticles.length === 0) return;
-
-    const interval = setInterval(() => {
-      setClearParticles(updateClearParticles);
-    }, 16);
-
-    return () => clearInterval(interval);
-  }, [clearParticles.length > 0]);
-
-  // Shockwave animation loop - uses pure update function
-  useEffect(() => {
-    if (shockwaves.length === 0) return;
-
-    const interval = setInterval(() => {
-      setShockwaves(updateShockwaves);
-    }, 16);
-
-    return () => clearInterval(interval);
-  }, [shockwaves.length > 0]);
 
   // Sound wrapper callbacks
   const dangerSoundStateRef = useRef<DangerSoundState>({ oscillator: null, gain: null });
@@ -586,8 +589,8 @@ const BlockPuzzle: React.FC = () => {
   }, []);
   const createPlacementParticles = useCallback((placedCells: string[], color: string) => {
     const newParticles = createPlacementParticlesFn(placedCells, color, CELL_SIZE);
-    setClearParticles(prev => [...prev, ...newParticles]);
-  }, [CELL_SIZE]);
+    spawnDOMParticles(newParticles);
+  }, [CELL_SIZE, spawnDOMParticles]);
 
   // Perfect clear effects
   const triggerMassiveConfetti = useCallback(() => {
@@ -605,7 +608,7 @@ const BlockPuzzle: React.FC = () => {
     triggerMassiveConfetti();
     triggerScreenFlash('#ffffff');
     const perfectParticles = createPerfectClearParticles(GRID_SIZE);
-    setClearParticles(prev => [...prev, ...perfectParticles]);
+    spawnDOMParticles(perfectParticles);
 
     setTimeout(() => setShowPerfectClear(false), 2500);
   }, [playPerfectClearSound, triggerPerfectClearHaptic, showEpicCallout, triggerMassiveConfetti, triggerScreenFlash, GRID_SIZE]);
@@ -765,112 +768,33 @@ const BlockPuzzle: React.FC = () => {
 
   // TASK 85: Update streak on line clear or placement
   const updateStreak = useCallback((clearedLines: boolean) => {
-    const now = Date.now();
-
     setStreakState(prev => {
       if (clearedLines) {
         const newCount = prev.count + 1;
-        const isActive = newCount >= STREAK_CONFIG.activationThreshold;
-
-        // TASK 85: Fire mode activation effects
-        if (isActive && !prev.active) {
+        // Fire effects when crossing threshold
+        if (newCount === STREAK_CONFIG.fireThreshold) {
           playStreakFireSound();
           triggerStreakFireHaptic();
           triggerConfetti();
           showEpicCallout('STREAK FIRE!');
+          // Arcade lights: Streak fire celebration
+          triggerEvent('critical:hit');
         }
-
-        return {
-          count: newCount,
-          active: isActive,
-          lastClearTime: now,
-        };
+        return { count: newCount };
       } else {
-        // Placement without clear - reset streak
-        return { count: 0, active: false, lastClearTime: 0 };
+        return { count: 0 };
       }
     });
-  }, [playStreakFireSound, triggerStreakFireHaptic, triggerConfetti, showEpicCallout]);
+  }, [playStreakFireSound, triggerStreakFireHaptic, triggerConfetti, showEpicCallout, triggerEvent]);
 
-  // TASK 86: Streak timeout check
-  useEffect(() => {
-    if (streakState.count === 0 || gameState !== 'playing') {
-      if (streakTimeoutRef.current) {
-        clearTimeout(streakTimeoutRef.current);
-        streakTimeoutRef.current = null;
-      }
-      return;
-    }
-
-    // Set timeout to reset streak
-    if (streakTimeoutRef.current) {
-      clearTimeout(streakTimeoutRef.current);
-    }
-
-    streakTimeoutRef.current = setTimeout(() => {
-      setStreakState({ count: 0, active: false, lastClearTime: 0 });
-    }, STREAK_CONFIG.timeout);
-
-    return () => {
-      if (streakTimeoutRef.current) {
-        clearTimeout(streakTimeoutRef.current);
-      }
-    };
-  }, [streakState.count, streakState.lastClearTime, gameState]);
-
-  // TASK 87: Calculate streak bonus
+  // TASK 87: Calculate streak bonus — multiplier lookup
   const calculateStreakBonus = useCallback((baseScore: number): number => {
-    if (streakState.active) {
-      return Math.floor(baseScore * STREAK_CONFIG.bonusMultiplier);
-    }
-    return baseScore;
-  }, [streakState.active]);
+    if (streakState.count === 0) return baseScore;
+    const idx = Math.min(streakState.count, STREAK_CONFIG.multipliers.length - 1);
+    return Math.floor(baseScore * STREAK_CONFIG.multipliers[idx]);
+  }, [streakState.count]);
 
-  // TASK 92: Fire particles during streak
-  useEffect(() => {
-    if (!streakState.active || gameState !== 'playing') return;
 
-    const interval = setInterval(() => {
-      // Random fire particle from bottom edges of grid
-      const side = Math.random() > 0.5;
-      const x = side ? Math.random() * GRID_SIZE * 0.3 : GRID_SIZE - Math.random() * GRID_SIZE * 0.3;
-      const y = GRID_SIZE;
-
-      const fireParticle: ClearParticle = {
-        id: Date.now() * 10000 + Math.floor(Math.random() * 10000),
-        x,
-        y,
-        vx: (Math.random() - 0.5) * 2,
-        vy: -3 - Math.random() * 3,
-        size: 4 + Math.random() * 4,
-        color: Math.random() > 0.3 ? '#ff6b00' : '#ffcc00',
-        alpha: 0.8,
-        rotation: 0,
-        rotationSpeed: 0,
-      };
-
-      setClearParticles(prev => [...prev, fireParticle]);
-    }, 120);
-
-    return () => clearInterval(interval);
-  }, [streakState.active, gameState, GRID_SIZE]);
-
-  // TASK 103: Combo timeout bar animation
-  useEffect(() => {
-    if (!showCombo || combo < 2 || gameState !== 'playing') {
-      setComboTimeLeft(100);
-      return;
-    }
-
-    // Update time remaining every 30ms for smooth animation
-    const interval = setInterval(() => {
-      const elapsed = Date.now() - comboStartTimeRef.current;
-      const remaining = Math.max(0, 100 - (elapsed / COMBO_TIMEOUT_MS) * 100);
-      setComboTimeLeft(remaining);
-    }, 30);
-
-    return () => clearInterval(interval);
-  }, [showCombo, combo, gameState, COMBO_TIMEOUT_MS]);
 
   // TASK 117: Check for challenge on page load
   useEffect(() => {
@@ -939,7 +863,7 @@ const BlockPuzzle: React.FC = () => {
     setShakeLevel('none');
     setFloatingScores([]);
     setCombo(0);
-    setShowCombo(false);
+
     setNewPieceId(null);
     if (comboTimeoutRef.current) {
       clearTimeout(comboTimeoutRef.current);
@@ -947,7 +871,10 @@ const BlockPuzzle: React.FC = () => {
     }
     // Reset Phase 3 states
     setFreezeFrame(false);
-    setClearParticles([]);
+    // Clear any lingering DOM particles
+    if (particleLayerRef.current) {
+      particleLayerRef.current.innerHTML = '';
+    }
     setShockwaves([]);
     setScreenFlash(null);
     if (freezeTimeoutRef.current) {
@@ -968,19 +895,11 @@ const BlockPuzzle: React.FC = () => {
       clearInterval(dangerHapticIntervalRef.current);
       dangerHapticIntervalRef.current = null;
     }
-    // TASK 94: Reset Phase 7 streak states
-    setStreakState({ count: 0, active: false, lastClearTime: 0 });
-    if (streakTimeoutRef.current) {
-      clearTimeout(streakTimeoutRef.current);
-      streakTimeoutRef.current = null;
-    }
+    // TASK 94: Reset streak
+    setStreakState({ count: 0 });
     // Reset Phase 8 perfect clear states
     setShowPerfectClear(false);
-    // Reset Phase 9 combo visualization states
-    setComboTimeLeft(100);
     comboStartTimeRef.current = 0;
-    setComboShake(false);
-    setLostCombo(null);
     // TASK 126: Reset Phase 10 share states
     setBestCombo(0);
     setShowShareModal(false);
@@ -1124,27 +1043,25 @@ const BlockPuzzle: React.FC = () => {
       // Increment combo
       const newCombo = combo + 1;
       setCombo(newCombo);
-      setShowCombo(true);
 
-      // Arcade lights: Line clear with tier based on count
-      const lineClearTier = getLineClearTier(linesCleared);
-      triggerEvent(`score:${lineClearTier}` as GameEvent);
 
-      // Arcade lights: Combo milestone using native thresholds
-      if (newCombo >= 2) {
-        const comboTier = GAME_COMBO_TIERS['block-puzzle'](newCombo);
-        if (comboTier !== 'start') {
-          triggerEvent(`combo:${comboTier}` as GameEvent);
-        }
+      // Arcade lights: Streak-aware continuous surge — faster at higher streaks
+      // streakState.count is pre-increment, so new streak = count + 1
+      const newStreak = streakState.count + 1;
+      if (newStreak >= 9) {
+        triggerEvent('combo:max');
+      } else if (newStreak >= 7) {
+        triggerEvent('combo:high');
+      } else if (newStreak >= 5) {
+        triggerEvent('combo:mid');
+      } else if (newStreak >= 3) {
+        triggerEvent('combo:low');
+      } else {
+        // Streak 1-2: slowest surge
+        triggerEvent('combo:start');
       }
 
-      // TASK 103 & 110: Combo persists as long as lines are cleared (NO timeout)
       comboStartTimeRef.current = Date.now();
-      setComboTimeLeft(100);
-      if (newCombo >= 2) {
-        setComboShake(true);
-        setTimeout(() => setComboShake(false), 300);
-      }
 
       // NEW: No timeout - combo only breaks on piece placed without clearing
       // Clear any existing timeout (backward compat)
@@ -1232,11 +1149,18 @@ const BlockPuzzle: React.FC = () => {
           }
         }
 
-        // Show floating score for line clear bonus
-        // TASK 107: Include multiplier text if combo is active
+        // Show floating score with streak/same-color/combo multiplier info
         if (gridRect) {
-          const multiplierText = newCombo >= 2 ? `×${Math.min(newCombo, 5)}` : undefined;
-          showFloatingScore(totalPoints, gridRect.left + gridRect.width / 2, gridRect.top + gridRect.height / 3, true, multiplierText);
+          const multiplierParts: string[] = [];
+          // Streak multiplier — streakState.count is pre-increment (updateStreak already called but setState is async)
+          const newStreakCount = streakState.count + 1;
+          const streakIdx = Math.min(newStreakCount, STREAK_CONFIG.multipliers.length - 1);
+          const streakMult = STREAK_CONFIG.multipliers[streakIdx];
+          if (streakMult > 1) multiplierParts.push(`🔥×${streakMult}`);
+          if (sameColorMultiplier > 1) multiplierParts.push(`🌈×${sameColorMultiplier}`);
+          if (newCombo >= 2) multiplierParts.push(`×${Math.min(newCombo, 5)}`);
+          const multiplierLabel = multiplierParts.length > 0 ? multiplierParts.join(' ') : undefined;
+          showFloatingScore(totalPoints, gridRect.left + gridRect.width / 2, gridRect.top + gridRect.height / 3, true, multiplierLabel);
         }
 
         // TASK 42: Epic callout with clear messages
@@ -1308,16 +1232,14 @@ const BlockPuzzle: React.FC = () => {
       const currentCombo = combo;
       if (currentCombo > 0) {
         playComboBreakSound(currentCombo);
-        // TASK 111: Show lost combo notification
         if (currentCombo >= 2) {
-          setLostCombo(currentCombo);
-          setTimeout(() => setLostCombo(null), 1500);
-          // Arcade lights: Combo broken
+          // Arcade lights: Streak broken — flash warn then return to calm ambient
           triggerEvent('combo:break');
+          setTimeout(() => triggerEvent('play:active'), 500);
         }
       }
       setCombo(0);
-      setShowCombo(false);
+  
 
       // TASK 85: Reset streak on placement without clear
       updateStreak(false);
@@ -1677,9 +1599,18 @@ const BlockPuzzle: React.FC = () => {
         />
       )}
 
-      {/* Score Panel - Three separate boxes */}
+      {/* Score boxes */}
       {gameState === 'playing' && (
-        <div className={`bp-score-column ${streakState.active ? 'streak-active' : ''}`}>
+        <div
+          className={`bp-score-column ${streakState.count > 0 ? 'has-streak' : ''}`}
+          style={{ '--streak': Math.min(streakState.count, 10) } as React.CSSProperties}
+        >
+          {/* Streak badge — above score boxes */}
+          {streakState.count > 0 && (
+            <div className={`bp-streak-badge ${streakState.count >= 3 ? 'fire' : streakState.count >= 2 ? 'warm' : ''}`}>
+              🔥{streakState.count}
+            </div>
+          )}
           <div className="bp-stat-box bp-stat-score">
             <span className="bp-stat-value">{score}</span>
             <span className="bp-stat-label">Score</span>
@@ -1695,36 +1626,16 @@ const BlockPuzzle: React.FC = () => {
         </div>
       )}
 
-      {/* TASK 90: Streak Meter */}
-      {gameState === 'playing' && streakState.count > 0 && (
-        <div className={`bp-streak-meter ${streakState.active ? 'active' : ''}`}>
-          <div className="bp-streak-label">
-            {streakState.active ? '🔥 STREAK FIRE!' : `🔥 ${streakState.count}/${STREAK_CONFIG.activationThreshold}`}
-          </div>
-          <div className="bp-streak-bar">
-            <div
-              className="bp-streak-fill"
-              style={{
-                width: `${Math.min(100, (streakState.count / STREAK_CONFIG.activationThreshold) * 100)}%`,
-                height: `${Math.min(100, (streakState.count / STREAK_CONFIG.activationThreshold) * 100)}%`
-              }}
-            />
-          </div>
-          {streakState.active && (
-            <div className="bp-streak-bonus">×{STREAK_CONFIG.bonusMultiplier} BONUS!</div>
-          )}
-        </div>
-      )}
-
       {/* Game Grid */}
       {gameState === 'playing' && (
         <div
           ref={gridRef}
-          className={`bp-game-grid ${shakeLevel !== 'none' ? `screen-shake-${shakeLevel}` : ''} ${draggedPieceId ? 'active' : ''} ${freezeFrame ? 'freeze-frame' : ''} ${dangerLevel !== 'safe' ? `bp-danger-${dangerLevel}` : ''} ${streakState.active ? 'bp-streak-fire' : ''}`}
+          className={`bp-game-grid ${shakeLevel !== 'none' ? `screen-shake-${shakeLevel}` : ''} ${draggedPieceId ? 'active' : ''} ${freezeFrame ? 'freeze-frame' : ''} ${dangerLevel !== 'safe' ? `bp-danger-${dangerLevel}` : ''} ${streakState.count > 0 ? 'has-streak' : ''}`}
           style={{
             width: GRID_SIZE,
             height: GRID_SIZE,
-          }}
+            '--streak': Math.min(streakState.count, 10),
+          } as React.CSSProperties}
         >
           {grid.map((row, rowIdx) =>
             row.map((cell, colIdx) => {
@@ -1765,24 +1676,8 @@ const BlockPuzzle: React.FC = () => {
             />
           ))}
 
-          {/* TASK 34: Particle layer for line clear bursts */}
-          <div className="bp-particle-layer">
-            {clearParticles.map(p => (
-              <div
-                key={p.id}
-                className="bp-clear-particle"
-                style={{
-                  left: p.x,
-                  top: p.y,
-                  width: p.size,
-                  height: p.size,
-                  backgroundColor: p.color,
-                  opacity: p.alpha,
-                  transform: `translate(-50%, -50%) rotate(${p.rotation}deg)`,
-                }}
-              />
-            ))}
-          </div>
+          {/* TASK 34: Particle layer for line clear bursts (DOM-driven) */}
+          <div className="bp-particle-layer" ref={particleLayerRef} />
         </div>
       )}
 
@@ -1794,34 +1689,6 @@ const BlockPuzzle: React.FC = () => {
         />
       )}
 
-      {/* TASK 103 & 105: Enhanced Combo Display with Timeout Bar */}
-      {showCombo && combo >= 2 && gameState === 'playing' && (
-        <div className={`bp-combo-display combo-${Math.min(combo, 5)} ${comboShake ? 'shake' : ''}`}>
-          {/* Left side: multiplier */}
-          <div className="bp-combo-left">
-            <div className="bp-combo-multiplier">{combo}x</div>
-            <div className="bp-combo-text">COMBO</div>
-          </div>
-          {/* Right side: bonus + timeout bar */}
-          <div className="bp-combo-right">
-            <div className="bp-combo-bonus">×{Math.min(combo, 5)} pts</div>
-            <div className="bp-combo-timeout-bar">
-              <div
-                className="bp-combo-timeout-fill"
-                style={{ width: `${comboTimeLeft}%` }}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* TASK 111: Lost Combo Notification */}
-      {lostCombo !== null && (
-        <div className="bp-lost-combo">
-          <span className="bp-lost-combo-value">{lostCombo}x</span>
-          <span className="bp-lost-combo-text">combo lost!</span>
-        </div>
-      )}
 
       {/* TASK 79: Moves Left Warning */}
       {movesLeft !== null && movesLeft <= 8 && gameState === 'playing' && (
@@ -1863,7 +1730,8 @@ const BlockPuzzle: React.FC = () => {
             return (
               <div
                 key={piece.id}
-                className={`bp-piece-slot ${!canPlace ? 'disabled' : ''} ${isDragging ? 'dragging' : ''} ${isSpawning ? 'spawning' : ''} ${streakState.active ? 'bp-streak-fire' : ''}`}
+                className={`bp-piece-slot ${!canPlace ? 'disabled' : ''} ${isDragging ? 'dragging' : ''} ${isSpawning ? 'spawning' : ''} ${streakState.count >= 2 ? 'has-streak' : ''}`}
+                style={streakState.count >= 2 ? { '--streak': Math.min(streakState.count, 10) } as React.CSSProperties : undefined}
                 onMouseDown={(e) => handleMouseDown(e, piece.id)}
                 onTouchStart={(e) => handleTouchStart(e, piece.id)}
               >

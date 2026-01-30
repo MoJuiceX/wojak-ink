@@ -159,9 +159,9 @@ export const DANGER_HAPTIC_INTERVALS: Record<DangerLevel, number> = {
 // ============================================
 
 export const STREAK_CONFIG = {
-  activationThreshold: 3,  // 3 consecutive clears to activate fire mode
-  timeout: 6000,           // 6 seconds between clears before reset
-  bonusMultiplier: 1.5,    // 50% bonus during streak
+  fireThreshold: 3,  // Visual fire effects start at streak 3
+  // Index 0 = no streak (unused), 1 = streak 1, ..., 5+ = cap at 3x
+  multipliers: [1, 1.25, 1.5, 2, 2.5, 3] as readonly number[],
 } as const;
 
 // Perfect clear bonus

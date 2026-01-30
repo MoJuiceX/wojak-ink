@@ -304,6 +304,7 @@
 
 /* Score Column - horizontal row of stat boxes on mobile (PREMIUM) */
 .bp-score-column {
+  position: relative;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -380,23 +381,14 @@
   text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
 }
 
-/* Streak active glow - PREMIUM fire effect */
-.bp-score-column.streak-active .bp-stat-box {
-  border-color: rgba(255, 150, 0, 0.5);
-  box-shadow:
-    0 0 15px rgba(255, 100, 0, 0.3),
-    0 0 30px rgba(255, 80, 0, 0.15);
-  animation: bp-mobile-fire-glow 0.8s ease-in-out infinite alternate;
+/* --- SCORE BOX PROGRESSIVE STREAK GLOW --- driven by --streak variable */
+.bp-score-column.has-streak .bp-stat-box {
+  border-color: rgba(255, 140, 0, calc(0.2 + var(--streak) * 0.06)) !important;
+  box-shadow: 0 0 calc(4px + var(--streak) * 3px) rgba(255, 100, 0, calc(0.05 + var(--streak) * 0.04)) !important;
 }
-
-@keyframes bp-mobile-fire-glow {
-  0% { box-shadow: 0 0 15px rgba(255, 100, 0, 0.3), 0 0 30px rgba(255, 80, 0, 0.15); }
-  100% { box-shadow: 0 0 25px rgba(255, 150, 0, 0.4), 0 0 45px rgba(255, 100, 0, 0.2); }
-}
-
-.bp-score-column.streak-active .bp-stat-box .bp-stat-value {
-  color: #ffd700;
-  text-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+.bp-score-column.has-streak .bp-stat-box .bp-stat-value {
+  color: hsl(calc(40 - var(--streak) * 1.5), 100%, calc(60% + var(--streak) * 2%)) !important;
+  text-shadow: 0 0 calc(4px + var(--streak) * 2px) rgba(255, 200, 0, calc(0.1 + var(--streak) * 0.06)) !important;
 }
 
 /* Small mobile - slightly smaller boxes */
@@ -632,12 +624,7 @@
   100% { opacity: 0; transform: scale(1.3); }
 }
 
-/* Enhanced clearing animation with staggered wave */
-.bp-grid-cell.clearing {
-  animation: bp-cell-clear-enhanced 0.5s ease-out forwards;
-}
-
-/* Stagger delays for wave effect */
+/* Stagger delays for clearing wave effect */
 .bp-grid-cell.clearing:nth-child(8n+1) { animation-delay: 0ms; }
 .bp-grid-cell.clearing:nth-child(8n+2) { animation-delay: 20ms; }
 .bp-grid-cell.clearing:nth-child(8n+3) { animation-delay: 40ms; }
@@ -646,26 +633,6 @@
 .bp-grid-cell.clearing:nth-child(8n+6) { animation-delay: 100ms; }
 .bp-grid-cell.clearing:nth-child(8n+7) { animation-delay: 120ms; }
 .bp-grid-cell.clearing:nth-child(8n+8) { animation-delay: 140ms; }
-
-@keyframes bp-cell-clear-enhanced {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  20% {
-    transform: scale(1.2);
-    background: #fff !important;
-    box-shadow: 0 0 30px #ff6b00, 0 0 60px #ff6b00;
-    filter: brightness(2);
-  }
-  40% {
-    transform: scale(1.4) rotate(5deg);
-  }
-  100% {
-    transform: scale(0) rotate(180deg);
-    opacity: 0;
-  }
-}
 
 /* ============================================
    PIECE RACK
@@ -1483,8 +1450,9 @@
 
 .bp-clear-particle {
   position: absolute;
-  border-radius: 2px;
-  box-shadow: 0 0 4px currentColor;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform, opacity;
 }
 
 /* TASK 40: Screen flash on big clears */
@@ -1786,159 +1754,60 @@
    PHASE 7: STREAK FIRE MODE
    ============================================ */
 
-/* TASK 88: Fire visual on pieces during streak */
-.bp-piece-slot.bp-streak-fire {
-  animation: bp-piece-fire-glow 0.5s ease-in-out infinite alternate;
-}
+/* ============================================
+   PROGRESSIVE STREAK VISUALS
+   Uses --streak CSS variable (1-10) for smooth scaling.
+   Performance: static box-shadow, opacity-only animations.
+   ============================================ */
 
-.bp-piece-slot.bp-streak-fire::before {
-  content: '';
-  position: absolute;
-  inset: -8px;
-  background: radial-gradient(ellipse at center bottom, rgba(255, 100, 0, 0.4), transparent 70%);
-  border-radius: 8px;
-  animation: bp-fire-flicker 0.15s ease-in-out infinite;
-  pointer-events: none;
-  z-index: -1;
-}
-
-@keyframes bp-piece-fire-glow {
-  0% { filter: drop-shadow(0 0 8px rgba(255, 100, 0, 0.6)); }
-  100% { filter: drop-shadow(0 0 15px rgba(255, 200, 0, 0.8)); }
-}
-
-@keyframes bp-fire-flicker {
-  0%, 100% { opacity: 0.7; transform: scaleY(1); }
-  50% { opacity: 1; transform: scaleY(1.1); }
-}
-
-/* TASK 89: Fire border on grid during streak */
-.bp-game-grid.bp-streak-fire {
+/* --- GRID STREAK --- scales glow from subtle to intense */
+.bp-game-grid.has-streak {
   box-shadow:
-    inset 0 0 20px rgba(255, 100, 0, 0.3),
-    0 0 30px rgba(255, 80, 0, 0.5),
-    0 0 60px rgba(255, 50, 0, 0.3);
-  animation: bp-grid-fire-pulse 0.6s ease-in-out infinite alternate;
+    0 0 calc(8px + var(--streak) * 4px) rgba(255, 100, 0, calc(0.08 + var(--streak) * 0.04)),
+    inset 0 0 calc(var(--streak) * 3px) rgba(255, 100, 0, calc(var(--streak) * 0.025));
 }
 
-.bp-game-grid.bp-streak-fire::before {
+/* Streak 3+: add fire border via ::before */
+.bp-game-grid.has-streak::before {
   content: '';
   position: absolute;
-  inset: -4px;
-  border: 3px solid rgba(255, 100, 0, 0.6);
+  inset: -3px;
+  border: 2px solid rgba(255, 120, 0, calc(0.15 + var(--streak) * 0.06));
   border-radius: 10px;
-  animation: bp-fire-border 0.3s ease-in-out infinite;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.bp-game-grid.has-streak[style*="--streak:3"] ::before,
+.bp-game-grid.has-streak::before {
+  /* Show border at streak 3+ via opacity driven by calc — but calc can't do conditionals.
+     Use a threshold trick: large negative clamp becomes 0, positive becomes 1 */
 }
 
-@keyframes bp-grid-fire-pulse {
-  0% {
-    box-shadow:
-      inset 0 0 20px rgba(255, 100, 0, 0.3),
-      0 0 30px rgba(255, 80, 0, 0.5),
-      0 0 60px rgba(255, 50, 0, 0.3);
-  }
-  100% {
-    box-shadow:
-      inset 0 0 30px rgba(255, 120, 0, 0.4),
-      0 0 40px rgba(255, 100, 0, 0.6),
-      0 0 80px rgba(255, 70, 0, 0.4);
-  }
-}
-
-@keyframes bp-fire-border {
-  0%, 100% { border-color: rgba(255, 100, 0, 0.6); }
-  50% { border-color: rgba(255, 180, 0, 0.8); }
-}
-
-/* TASK 91: Streak meter UI */
-.bp-streak-meter {
+/* Streak 3+: pulsing outer glow via ::after (opacity-only animation = cheap) */
+.bp-game-grid.has-streak::after {
+  content: '';
   position: absolute;
-  top: 88px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(280px, 80vw);
-  background: rgba(30, 30, 30, 0.9);
+  inset: -6px;
   border-radius: 12px;
-  padding: 8px 16px;
-  z-index: 95;
-  border: 2px solid rgba(255, 100, 0, 0.5);
-  animation: bp-streak-meter-appear 0.3s ease-out;
+  pointer-events: none;
+  box-shadow:
+    0 0 calc(20px + var(--streak) * 6px) rgba(255, 80, 0, calc(0.1 + var(--streak) * 0.04)),
+    0 0 calc(40px + var(--streak) * 10px) rgba(255, 50, 0, calc(0.05 + var(--streak) * 0.025));
+  animation: bp-streak-pulse calc(2s - var(--streak) * 0.1s) ease-in-out infinite alternate;
 }
 
-.bp-streak-meter.active {
-  background: rgba(60, 20, 0, 0.95);
-  border-color: rgba(255, 150, 0, 0.8);
-  animation: bp-streak-meter-fire 0.5s ease-in-out infinite alternate;
+/* Lightweight pulse — opacity only, GPU-composited */
+@keyframes bp-streak-pulse {
+  0% { opacity: 0.5; }
+  100% { opacity: 1; }
 }
 
-@keyframes bp-streak-meter-appear {
-  0% { transform: translateX(-50%) translateY(-10px) scale(0.9); opacity: 0; }
-  100% { transform: translateX(-50%) translateY(0) scale(1); opacity: 1; }
+/* --- PIECE SLOT STREAK --- glow scales with streak */
+.bp-piece-slot.has-streak {
+  box-shadow: 0 0 calc(6px + var(--streak) * 2px) rgba(255, 100, 0, calc(0.1 + var(--streak) * 0.04));
 }
 
-@keyframes bp-streak-meter-fire {
-  0% { box-shadow: 0 0 15px rgba(255, 100, 0, 0.5); }
-  100% { box-shadow: 0 0 25px rgba(255, 150, 0, 0.7); }
-}
-
-.bp-streak-label {
-  font-size: 13px;
-  font-weight: bold;
-  color: #ff8c1a;
-  text-align: center;
-  margin-bottom: 6px;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-}
-
-.bp-streak-meter.active .bp-streak-label {
-  color: #ffcc00;
-  animation: bp-fire-text-pulse 0.3s ease-in-out infinite alternate;
-}
-
-@keyframes bp-fire-text-pulse {
-  0% { text-shadow: 0 0 8px rgba(255, 150, 0, 0.8); }
-  100% { text-shadow: 0 0 15px rgba(255, 200, 0, 1); }
-}
-
-.bp-streak-bar {
-  height: 8px;
-  background: rgba(80, 80, 80, 0.6);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.bp-streak-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #ff6b00, #ffcc00);
-  border-radius: 4px;
-  transition: width 0.3s ease-out;
-  box-shadow: 0 0 10px rgba(255, 150, 0, 0.6);
-}
-
-.bp-streak-meter.active .bp-streak-fill {
-  background: linear-gradient(90deg, #ff4400, #ff6b00, #ffcc00);
-  animation: bp-streak-fill-pulse 0.4s ease-in-out infinite alternate;
-}
-
-@keyframes bp-streak-fill-pulse {
-  0% { box-shadow: 0 0 10px rgba(255, 100, 0, 0.6); }
-  100% { box-shadow: 0 0 20px rgba(255, 180, 0, 0.9); }
-}
-
-.bp-streak-bonus {
-  font-size: 11px;
-  font-weight: bold;
-  color: #ffcc00;
-  text-align: center;
-  margin-top: 5px;
-  animation: bp-bonus-bounce 0.5s ease-in-out infinite alternate;
-}
-
-@keyframes bp-bonus-bounce {
-  0% { transform: scale(1); }
-  100% { transform: scale(1.1); }
-}
 
 /* ============================================
    PHASE 8: PERFECT CLEAR CELEBRATION
@@ -2135,14 +2004,55 @@
   box-shadow: 0 0 8px rgba(255, 150, 0, 0.6);
 }
 
-/* TASK 107: Floating score multiplier */
+/* Floating score multiplier */
 .bp-floating-multiplier {
   display: block;
-  font-size: 12px;
-  font-weight: bold;
+  font-size: 14px;
+  font-weight: 800;
   color: #ffcc00;
   margin-top: 2px;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 0 10px rgba(255, 200, 0, 0.8), 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Streak badge — floating above score boxes, scales with --streak */
+.bp-streak-badge {
+  position: absolute;
+  top: -48px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: calc(14px + var(--streak) * 0.5px);
+  font-weight: 800;
+  color: #ff8c00;
+  background: linear-gradient(135deg, rgba(20, 20, 30, 0.9) 0%, rgba(10, 10, 20, 0.95) 100%);
+  padding: 6px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 140, 0, calc(0.2 + var(--streak) * 0.05));
+  white-space: nowrap;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.3),
+    0 0 calc(var(--streak) * 3px) rgba(255, 100, 0, calc(var(--streak) * 0.04)),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  text-shadow: 0 0 calc(4px + var(--streak) * 1.5px) rgba(255, 140, 0, calc(0.3 + var(--streak) * 0.05));
+  animation: bp-badge-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Streak 2: warmer badge */
+.bp-streak-badge.warm {
+  color: #ffaa33;
+}
+
+/* Streak 3+: fire badge */
+.bp-streak-badge.fire {
+  color: #ffd700;
+  background: linear-gradient(135deg, rgba(80, 30, 0, 0.9) 0%, rgba(50, 15, 0, 0.95) 100%);
+}
+
+@keyframes bp-badge-pop {
+  0% { transform: translateX(-50%) scale(0); opacity: 0; }
+  60% { transform: translateX(-50%) scale(1.3); }
+  100% { transform: translateX(-50%) scale(1); opacity: 1; }
 }
 
 /* TASK 112: Lost combo notification */
@@ -2471,15 +2381,6 @@
   }
 }
 
-/* Streak meter polish - add glow when near activation */
-.bp-streak-meter:not(.active) .bp-streak-fill {
-  animation: bp-streak-building 1s ease-in-out infinite;
-}
-
-@keyframes bp-streak-building {
-  0%, 100% { filter: brightness(1); }
-  50% { filter: brightness(1.3); }
-}
 
 /* Danger state - make valid cells more visible */
 .bp-game-grid.bp-danger-critical .bp-grid-cell.valid-placement,
@@ -2525,16 +2426,6 @@
   filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
 }
 
-/* Score panel streak glow */
-.bp-score-panel.streak-active {
-  border-color: rgba(255, 100, 0, 0.6);
-  box-shadow: 0 0 20px rgba(255, 100, 0, 0.3);
-}
-
-.bp-score-panel.streak-active .bp-score-value {
-  color: #ffcc00;
-  text-shadow: 0 0 10px rgba(255, 200, 0, 0.5);
-}
 
 /* Score pulse on change - use CSS counter animation */
 .bp-score-main .bp-score-value {
@@ -2578,9 +2469,8 @@
 /* === ANIMATED BACKGROUND === */
 .arcade-screen .block-puzzle-container {
   padding: 20px 24px !important;
-  gap: 20px !important;
+  gap: 16px !important;
   flex-direction: row !important;
-  /* CENTER the grid+piece rack in the FULL canvas (score column is absolutely positioned) */
   justify-content: center !important;
   align-items: center !important;
   height: 100% !important;
@@ -2651,10 +2541,6 @@
 
 /* === SCORE COLUMN - Premium glassmorphism === */
 .arcade-screen .bp-score-column {
-  position: absolute !important;
-  left: 20px !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
@@ -2664,6 +2550,7 @@
   width: auto !important;
   max-width: none !important;
   height: auto !important;
+  flex-shrink: 0 !important;
 }
 
 /* === STAT BOXES - Premium design with auto-sizing text === */
@@ -2758,9 +2645,8 @@
   background: linear-gradient(135deg, rgba(30, 25, 35, 0.95) 0%, rgba(20, 15, 25, 0.98) 100%) !important;
   /* EQUAL padding on all sides for consistent border gap */
   padding: 8px !important;
-  box-sizing: border-box !important;
-  /* Center grid visually - offset to account for left score column */
-  margin-left: 50px !important;
+  box-sizing: content-box !important;
+  margin: 0 !important;
 }
 
 /* Grid cells - EMPTY cells only get dark background */
@@ -2787,9 +2673,10 @@
   flex-direction: column !important;
   width: auto !important;
   max-width: none !important;
-  margin: 0 0 0 20px !important;
+  margin: 0 !important;
   padding: 14px 12px !important;
   gap: 10px !important;
+  flex-shrink: 0 !important;
   /* Premium glassmorphism */
   background: linear-gradient(180deg, rgba(20, 20, 30, 0.85) 0%, rgba(15, 15, 25, 0.9) 100%) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -2861,106 +2748,6 @@
   color: rgba(255, 255, 255, 0.9) !important;
 }
 
-/* === STREAK METER - Vertical energy bar === */
-.arcade-screen .bp-streak-meter {
-  position: absolute !important;
-  top: 50% !important;
-  left: 130px !important; /* Right of score boxes */
-  right: auto !important;
-  bottom: auto !important;
-  transform: translateY(-50%) !important;
-  width: 16px !important;
-  height: 300px !important;
-  padding: 3px !important;
-  flex-direction: column !important;
-  justify-content: flex-end !important;
-  border-radius: 10px !important;
-  /* Premium dark container */
-  background: linear-gradient(180deg, rgba(20, 15, 25, 0.95) 0%, rgba(10, 10, 15, 0.98) 100%) !important;
-  border: 2px solid rgba(255, 100, 0, 0.3) !important;
-  box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.4),
-    inset 0 0 10px rgba(0, 0, 0, 0.5) !important;
-}
-
-.arcade-screen .bp-streak-meter.active {
-  border-color: rgba(255, 150, 0, 0.6) !important;
-  box-shadow:
-    0 4px 25px rgba(255, 100, 0, 0.3),
-    0 0 40px rgba(255, 100, 0, 0.2),
-    inset 0 0 10px rgba(0, 0, 0, 0.5) !important;
-}
-
-/* Label - horizontal below the bar */
-.arcade-screen .bp-streak-label {
-  position: absolute !important;
-  bottom: -24px !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  right: auto !important;
-  top: auto !important;
-  white-space: nowrap !important;
-  font-size: 10px !important;
-  letter-spacing: 0 !important;
-  margin-bottom: 0 !important;
-  writing-mode: horizontal-tb !important;
-  text-orientation: mixed !important;
-  color: rgba(255, 180, 0, 0.9) !important;
-  text-shadow: 0 0 10px rgba(255, 150, 0, 0.5) !important;
-}
-
-.arcade-screen .bp-streak-bar {
-  width: 100% !important;
-  height: 100% !important;
-  flex-direction: column !important;
-  display: flex !important;
-  justify-content: flex-end !important;
-}
-
-/* Streak fill - glowing energy effect */
-.arcade-screen .bp-streak-fill {
-  width: 100% !important;
-  min-height: 0 !important;
-  border-radius: 6px !important;
-  transition: height 0.3s ease-out !important;
-  /* Premium gradient fill */
-  background: linear-gradient(0deg, #ff4400 0%, #ff8800 50%, #ffcc00 100%) !important;
-  box-shadow:
-    0 0 10px rgba(255, 150, 0, 0.6),
-    0 0 20px rgba(255, 100, 0, 0.3) !important;
-}
-
-.arcade-screen .bp-streak-meter.active .bp-streak-fill {
-  animation: bp-streak-energy-pulse 0.5s ease-in-out infinite alternate !important;
-}
-
-@keyframes bp-streak-energy-pulse {
-  0% { box-shadow: 0 0 10px rgba(255, 150, 0, 0.6), 0 0 20px rgba(255, 100, 0, 0.3); }
-  100% { box-shadow: 0 0 15px rgba(255, 200, 0, 0.8), 0 0 30px rgba(255, 150, 0, 0.5); }
-}
-
-/* Bonus text - premium badge below the bar */
-.arcade-screen .bp-streak-bonus {
-  position: absolute !important;
-  bottom: -44px !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  right: auto !important;
-  font-size: 9px !important;
-  font-weight: 700 !important;
-  white-space: nowrap !important;
-  writing-mode: horizontal-tb !important;
-  text-orientation: mixed !important;
-  color: #ffcc00 !important;
-  text-shadow: 0 0 8px rgba(255, 200, 0, 0.6) !important;
-  animation: bp-bonus-pulse 0.6s ease-in-out infinite alternate !important;
-}
-
-@keyframes bp-bonus-pulse {
-  0% { transform: translateX(-50%) scale(1); }
-  100% { transform: translateX(-50%) scale(1.05); }
-}
-
 /* Moves warning - position on left side */
 .arcade-screen .bp-moves-warning {
   top: 70px !important;
@@ -2969,25 +2756,6 @@
   transform: none !important;
 }
 
-/* Streak active glow on stat boxes - premium fire effect */
-.arcade-screen .bp-score-column.streak-active .bp-stat-box {
-  border-color: rgba(255, 150, 0, 0.6) !important;
-  box-shadow:
-    0 0 20px rgba(255, 100, 0, 0.35),
-    0 0 40px rgba(255, 80, 0, 0.15),
-    inset 0 0 20px rgba(255, 100, 0, 0.1) !important;
-  animation: bp-stat-fire-glow 0.8s ease-in-out infinite alternate !important;
-}
-
-@keyframes bp-stat-fire-glow {
-  0% { box-shadow: 0 0 20px rgba(255, 100, 0, 0.35), 0 0 40px rgba(255, 80, 0, 0.15); }
-  100% { box-shadow: 0 0 30px rgba(255, 150, 0, 0.5), 0 0 60px rgba(255, 100, 0, 0.25); }
-}
-
-.arcade-screen .bp-score-column.streak-active .bp-stat-box .bp-stat-value {
-  color: #ffd700 !important;
-  text-shadow: 0 0 15px rgba(255, 215, 0, 0.7) !important;
-}
 
 /* ============================================
    MOBILE FULLSCREEN MODE
@@ -3037,11 +2805,6 @@
   .bp-piece-slot {
     width: 90px !important;
     height: 90px !important;
-  }
-
-  /* Hide streak meter on mobile - combo box already has timeout bar */
-  .bp-streak-meter {
-    display: none !important;
   }
 
   /* Position combo display just below piece rack with appropriate padding */

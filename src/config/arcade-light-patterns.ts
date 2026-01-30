@@ -250,6 +250,58 @@ export const PATTERNS = {
   },
 
   // ============================================
+  // SURGE PATTERNS (5)
+  // Continuous bidirectional waves at escalating speeds.
+  // Bottom row sweeps L→R→L, right column sweeps up→down→up.
+  // Designed for streak/momentum systems — any game can use them.
+  // ============================================
+
+  /** Slowest surge — gentle bidirectional wave (streak 1-2) */
+  surge1: {
+    duration: 2400,
+    loop: true,
+    category: 'chase',
+    description: 'Slow bidirectional wave: bottom L↔R, right up↔down',
+    buttons: 'perimeter',
+  },
+
+  /** Medium-slow surge (streak 3-4) */
+  surge2: {
+    duration: 1800,
+    loop: true,
+    category: 'chase',
+    description: 'Medium bidirectional wave: bottom L↔R, right up↔down',
+    buttons: 'perimeter',
+  },
+
+  /** Medium surge (streak 5-6) */
+  surge3: {
+    duration: 1200,
+    loop: true,
+    category: 'chase',
+    description: 'Fast bidirectional wave: bottom L↔R, right up↔down',
+    buttons: 'perimeter',
+  },
+
+  /** Fast surge (streak 7-8) */
+  surge4: {
+    duration: 800,
+    loop: true,
+    category: 'chase',
+    description: 'Very fast bidirectional wave: bottom L↔R, right up↔down',
+    buttons: 'perimeter',
+  },
+
+  /** Maximum surge — frenetic energy (streak 9-10) */
+  surge5: {
+    duration: 500,
+    loop: true,
+    category: 'chase',
+    description: 'Frenetic bidirectional wave: bottom L↔R, right up↔down',
+    buttons: 'perimeter',
+  },
+
+  // ============================================
   // CELEBRATION PATTERNS (1)
   // Maximum impact for wins/achievements
   // ============================================

@@ -306,13 +306,14 @@ export const GAME_EVENT_OVERRIDES: Record<string, Partial<Record<GameEvent, Patt
     'score:medium': 'waveRight',
     'score:large': 'waveRight',
     'score:huge': 'waveRight',
-    // Combo - same pattern, intensity increases (handled in game)
-    'combo:low': 'glow',
-    'combo:mid': 'orbit',
-    'combo:high': 'spin',
-    'combo:max': 'strobe',
-    // Combo break - subtle flick
-    'combo:break': 'flick',
+    // Streak escalation — continuous surge waves (speed increases with streak)
+    'combo:start': 'surge1',
+    'combo:low': 'surge2',
+    'combo:mid': 'surge3',
+    'combo:high': 'surge4',
+    'combo:max': 'surge5',
+    // Combo break - subtle warning
+    'combo:break': 'warn',
     // Danger state - faster pulse (handled in game code)
     'damage:light': 'throb',
     // Perfect clear - fireworks celebration

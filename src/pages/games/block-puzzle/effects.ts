@@ -64,6 +64,7 @@ export function createLineClearBurstParticles(
         alpha: 1,
         rotation: Math.random() * 360,
         rotationSpeed: (Math.random() - 0.5) * 20,
+        life: 30, // ~500ms at 60fps
       });
     }
   });
@@ -128,6 +129,7 @@ export function createPlacementParticles(
         alpha: 0.8,
         rotation: Math.random() * 360,
         rotationSpeed: (Math.random() - 0.5) * 15,
+        life: 25, // ~400ms at 60fps
       });
     }
   });
@@ -163,6 +165,7 @@ export function createPerfectClearParticles(gridSize: number): ClearParticle[] {
       alpha: 1,
       rotation: Math.random() * 360,
       rotationSpeed: (Math.random() - 0.5) * 20,
+      life: 40, // ~660ms at 60fps
     });
   }
 
@@ -252,11 +255,12 @@ export function updateClearParticles(particles: ClearParticle[]): ClearParticle[
       x: p.x + p.vx,
       y: p.y + p.vy,
       vy: p.vy + 0.3, // gravity
-      alpha: p.alpha - 0.025,
+      alpha: p.alpha - 0.035, // Faster fade
       rotation: p.rotation + p.rotationSpeed,
-      size: p.size * 0.98, // Shrink slightly
+      size: p.size * 0.97, // Shrink faster
+      life: p.life - 1,
     }))
-    .filter(p => p.alpha > 0);
+    .filter(p => p.alpha > 0 && p.life > 0);
 }
 
 /**
