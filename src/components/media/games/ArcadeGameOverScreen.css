@@ -354,7 +354,8 @@
   flex-direction: column;
   gap: 6px;
   flex: 1;
-  overflow: hidden;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .arcade-gameover-leaderboard-entry {
@@ -365,8 +366,8 @@
   border-radius: 8px;
   font-size: 0.95rem;
   transition: background 0.2s ease;
+  min-height: 42px;
   flex: 1;
-  min-height: 0;
 }
 
 .arcade-gameover-leaderboard-entry:hover {

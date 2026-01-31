@@ -102,7 +102,7 @@ export function useHaptic() {
     [vibrate]
   );
 
-  return {
+  return useMemo(() => ({
     isSupported,
     vibrate,
     cancel,
@@ -117,7 +117,10 @@ export function useHaptic() {
     confirm,
     celebration,
     pattern,
-  };
+  }), [
+    isSupported, vibrate, cancel, tap, success, error, warning,
+    selection, toggle, notification, click, confirm, celebration, pattern,
+  ]);
 }
 
 export default useHaptic;

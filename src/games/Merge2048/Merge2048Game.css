@@ -4,6 +4,11 @@
  * Mobile: stacked (header → legend → board)
  */
 
+/* ── Override game-shell min-height so overlay matches arcade screen ── */
+.game-shell-merge-2048 {
+  min-height: unset;
+}
+
 /* ── Outer wrapper: positions tutorial banner outside game canvas ── */
 
 .nft-merge-wrapper {
@@ -15,6 +20,7 @@
 /* ── Container: 3-column layout (desktop) / stacked (mobile) ── */
 
 .nft-merge-game {
+  position: relative;
   display: flex;
   flex-direction: row;
   align-items: center;

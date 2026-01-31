@@ -202,16 +202,19 @@ async function drawScreenshotSection(
       const frameAspect = frameWidth / frameHeight;
       let drawWidth: number, drawHeight: number, drawX: number, drawY: number;
 
+      // "Contain" mode — fit entire image within frame, no clipping
       if (imgAspect > frameAspect) {
-        drawHeight = frameHeight;
-        drawWidth = frameHeight * imgAspect;
-        drawX = frameX - (drawWidth - frameWidth) / 2;
-        drawY = frameY;
-      } else {
+        // Image is wider than frame — fit by width, center vertically
         drawWidth = frameWidth;
         drawHeight = frameWidth / imgAspect;
         drawX = frameX;
-        drawY = frameY - (drawHeight - frameHeight) / 2;
+        drawY = frameY + (frameHeight - drawHeight) / 2;
+      } else {
+        // Image is taller than frame — fit by height, center horizontally
+        drawHeight = frameHeight;
+        drawWidth = frameHeight * imgAspect;
+        drawX = frameX + (frameWidth - drawWidth) / 2;
+        drawY = frameY;
       }
 
       ctx.save();
@@ -478,7 +481,27 @@ function drawBrandingBar(ctx: CanvasRenderingContext2D, accentColor: string): vo
   ctx.font = '800 24px Sora, system-ui, sans-serif';
   ctx.textAlign = 'right';
   ctx.fillText('TWO GROVE GAMING', rightX, centerY);
+  const tggWidth = ctx.measureText('TWO GROVE GAMING').width;
   ctx.restore();
+
+  // Fill gap between WOJAK.INK and TWO GROVE GAMING with orange emojis
+  ctx.font = '800 32px Sora, system-ui, sans-serif';
+  const wojakInkWidth = ctx.measureText('WOJAK.INK').width;
+  const leftEnd = currentX + wojakInkWidth + 20; // after "WOJAK.INK" + gap
+  const rightStart = rightX - tggWidth - 20; // before "TWO GROVE GAMING" - gap
+  const gapWidth = rightStart - leftEnd;
+
+  if (gapWidth > emojiSize) {
+    ctx.font = `${emojiSize}px system-ui`;
+    ctx.textAlign = 'center';
+    const orangeSpacing = emojiSize + emojiGap;
+    const orangeCount = Math.floor(gapWidth / orangeSpacing);
+    const totalOrangesWidth = orangeCount * orangeSpacing - emojiGap;
+    const startX = leftEnd + (gapWidth - totalOrangesWidth) / 2;
+    for (let i = 0; i < orangeCount; i++) {
+      ctx.fillText('🍊', startX + i * orangeSpacing + emojiSize / 2, centerY);
+    }
+  }
 }
 
 // ============================================

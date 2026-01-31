@@ -21,6 +21,9 @@ import { useGameSounds } from '@/hooks/useGameSounds';
 import { useHaptic } from '@/hooks/useHaptic';
 import { useArcadeLights } from '@/contexts/ArcadeLightsContext';
 import type { GameEvent } from '@/config/arcade-light-mappings';
+import ArcadeGameOverScreen from '@/components/media/games/ArcadeGameOverScreen';
+import { generateGameScorecard } from '@/systems/sharing/GameScorecard';
+import { captureGameArea } from '@/systems/sharing/captureDOM';
 import BADGE_NFTS from '../NFT2048/badgeNfts.json';
 import './Merge2048Game.css';
 
@@ -342,8 +345,11 @@ const Merge2048Game: React.FC = () => {
   const [undoUsed, setUndoUsed] = useState(false);
 
   // Leaderboard
-  const { submitScore, isSignedIn } = useLeaderboard('merge-2048');
+  const { leaderboard: globalLeaderboard, submitScore, isSignedIn, userDisplayName, isSubmitting } = useLeaderboard('merge-2048');
   const scoreSubmitted = useRef(false);
+  const [scoreSubmittedState, setScoreSubmittedState] = useState(false);
+  const [isNewPersonalBest, setIsNewPersonalBest] = useState(false);
+  const [gameScreenshot, setGameScreenshot] = useState<string | null>(null);
 
   // ------------------------------------------------------------------
   // Tile creation
@@ -375,6 +381,9 @@ const Merge2048Game: React.FC = () => {
     isAnimating.current = false;
     totalMerges.current = 0;
     scoreSubmitted.current = false;
+    setScoreSubmittedState(false);
+    setIsNewPersonalBest(false);
+    setGameScreenshot(null);
     // Only re-randomize badges the player actually reached
     nftMap.current = pickNftMap(nftMap.current, highestTile.current);
     highestTile.current = 0;
@@ -611,6 +620,8 @@ const Merge2048Game: React.FC = () => {
         // Return tiles with updated positions (merged tiles not yet swapped).
         // After SLIDE_DURATION, swap in merged tiles + spawn.
         setTimeout(() => {
+          let gameEnded = false;
+
           setTiles((current) => {
             const removeSet = new Set(toRemove);
             const afterMerge = current.filter((t) => !removeSet.has(t.id));
@@ -690,6 +701,11 @@ const Merge2048Game: React.FC = () => {
 
               // Check game over
               if (checkGameOver(afterMerge)) {
+                gameEnded = true;
+                // Capture screenshot before visual changes
+                if (boardRef.current) {
+                  captureGameArea(boardRef.current).then(setGameScreenshot).catch(() => {});
+                }
                 setGameState('over');
               }
             }
@@ -710,6 +726,9 @@ const Merge2048Game: React.FC = () => {
               return newScore;
             });
           }
+
+          // Skip juice if game just ended — only the game-over effect should play
+          if (gameEnded) return;
 
           // ── Juice: fire effects after tiles arrive ──
           const boardEl = boardRef.current;
@@ -829,9 +848,14 @@ const Merge2048Game: React.FC = () => {
       totalMerges.current >= 3
     ) {
       scoreSubmitted.current = true;
+      setScoreSubmittedState(true);
       submitScore(score, undefined, {
         highestTile: highestTile.current,
         totalMerges: totalMerges.current,
+      }).then((result) => {
+        if (result?.success && result.isNewHighScore) {
+          setIsNewPersonalBest(true);
+        }
       });
     }
   }, [gameState, isSignedIn, score, submitScore]);
@@ -844,6 +868,47 @@ const Merge2048Game: React.FC = () => {
       triggerEvent('game:over');
     }
   }, [gameState, isTutorial, playMergeGameOver, haptic, triggerEvent]);
+
+  // Share handler — generates scorecard image, triggers download + native share
+  const handleShare = useCallback(async () => {
+    try {
+      const blob = await generateGameScorecard({
+        gameName: 'Wojak Merge',
+        gameNameParts: ['WOJAK', 'MERGE'],
+        score,
+        scoreLabel: 'points',
+        bestScore: bestScore,
+        isNewRecord: isNewPersonalBest,
+        screenshot: gameScreenshot,
+        accentColor: '#10b981',
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.download = `wojak-merge-${score}.png`;
+      link.href = url;
+      link.click();
+      URL.revokeObjectURL(url);
+
+      if (navigator.share && navigator.canShare) {
+        const file = new File([blob], 'wojak-merge-score.png', { type: 'image/png' });
+        const shareData = {
+          title: 'Wojak Merge Score',
+          text: `🔢 I scored ${score} points in Wojak Merge! Can you beat me?`,
+          files: [file],
+        };
+        if (navigator.canShare(shareData)) {
+          await navigator.share(shareData);
+        }
+      }
+    } catch {
+      const text = `🔢 Wojak Merge: ${score} points!\n\nCan you beat my score?\n\nhttps://wojak.ink/games`;
+      if (navigator.share) {
+        await navigator.share({ title: 'Wojak Merge', text });
+      } else {
+        await navigator.clipboard.writeText(text);
+      }
+    }
+  }, [score, bestScore, isNewPersonalBest, gameScreenshot]);
 
   // Animated score counter
   useEffect(() => {
@@ -1094,25 +1159,29 @@ const Merge2048Game: React.FC = () => {
         </div>
       )}
 
-      {/* Game over overlay */}
-      {gameState === 'over' && !isTutorial && (
-        <div className="nft-merge-overlay nft-merge-gameover">
-          <div className="nft-merge-overlay-content">
-            <h3>Game Over</h3>
-            <p className="nft-merge-final-score">
-              Score: <strong>{score}</strong>
-            </p>
-            <p className="nft-merge-highest">
-              Highest: {TILE_BADGES[highestTile.current] || 'Phunky'}
-            </p>
-            <button type="button" onClick={newGame}>
-              Try Again
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Game over — handled by ArcadeGameOverScreen at wrapper level */}
     </div>
   );
+
+  // Shared game over screen (used in both desktop and mobile layouts)
+  const gameOverScreen = gameState === 'over' && !isTutorial ? (
+    <ArcadeGameOverScreen
+      score={score}
+      highScore={bestScore}
+      scoreLabel="points"
+      isNewPersonalBest={isNewPersonalBest}
+      isSignedIn={isSignedIn}
+      isSubmitting={isSubmitting}
+      scoreSubmitted={scoreSubmittedState}
+      userDisplayName={userDisplayName ?? undefined}
+      leaderboard={globalLeaderboard}
+      onPlayAgain={newGame}
+      onShare={handleShare}
+      accentColor="#10b981"
+      meetsMinimumActions={totalMerges.current >= 3}
+      minimumActionsMessage="Make at least 3 merges to be on the leaderboard"
+    />
+  ) : null;
 
   // ── Desktop: sidebar | board | controls (row) ──
   if (showSidebar) {
@@ -1197,6 +1266,7 @@ const Merge2048Game: React.FC = () => {
               Undo
             </button>
           </div>
+          {gameOverScreen}
         </div>
       </div>
     );
@@ -1256,6 +1326,7 @@ const Merge2048Game: React.FC = () => {
           {boardElement}
           {tutorialBanner}
         </div>
+        {gameOverScreen}
       </div>
     </div>
   );

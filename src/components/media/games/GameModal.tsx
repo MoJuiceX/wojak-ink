@@ -250,6 +250,8 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
   const stopGameMusic = useCallback(() => {
     if (audioRef.current) {
       audioRef.current.pause();
+      audioRef.current.src = '';
+      audioRef.current.load();
       audioRef.current = null;
     }
   }, []);
@@ -328,6 +330,10 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
         playGameMusic(game.id);
       }
     }
+    // Cleanup on unmount — ensures music stops if component is destroyed while open
+    return () => {
+      stopGameMusic();
+    };
   }, [isOpen, game?.id, playGameMusic, stopGameMusic]);
 
   // Handle mute toggle - simple pause/resume
