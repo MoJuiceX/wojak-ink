@@ -91,7 +91,7 @@ const GAME_EMOJIS: Record<GameId, string> = {
   'orange-juggle': '🤹',
   'knife-game': '🔪',
   'color-reaction': '🎨',
-  '2048-merge': '🔢',
+  'merge-2048': '🔢',
   'block-puzzle': '🧩',
   'flappy-orange': '🍊',
   'citrus-drop': '🍋',

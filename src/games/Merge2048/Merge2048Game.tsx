@@ -342,7 +342,7 @@ const Merge2048Game: React.FC = () => {
   const [undoUsed, setUndoUsed] = useState(false);
 
   // Leaderboard
-  const { submitScore, isSignedIn } = useLeaderboard('2048-merge');
+  const { submitScore, isSignedIn } = useLeaderboard('merge-2048');
   const scoreSubmitted = useRef(false);
 
   // ------------------------------------------------------------------
@@ -1262,7 +1262,7 @@ const Merge2048Game: React.FC = () => {
 };
 
 const Merge2048Wrapped: React.FC = () => (
-  <GameShell gameId="2048-merge">
+  <GameShell gameId="merge-2048">
     <Merge2048Game />
   </GameShell>
 );

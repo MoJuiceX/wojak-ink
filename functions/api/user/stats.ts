@@ -72,7 +72,7 @@ const GAME_NAMES: Record<string, string> = {
   'orange-juggle': 'Orange Juggle',
   'knife-game': 'Knife Game',
   'color-reaction': 'Color Reaction',
-  'merge-2048': '2048 Merge',
+  'merge-2048': 'Wojak Merge',
   'orange-wordle': 'Orange Wordle',
   'block-puzzle': 'Block Puzzle',
   'flappy-orange': 'Flappy Orange',

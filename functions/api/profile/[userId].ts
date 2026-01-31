@@ -32,7 +32,7 @@ const GAME_NAMES: Record<string, string> = {
   'brick-breaker': 'Brick Breaker',
   'wojak-whack': 'Wojak Whack',
   'color-reaction': 'Color Reaction',
-  'merge-2048': 'Merge 2048',
+  'merge-2048': 'Wojak Merge',
   'orange-wordle': 'Orange Wordle',
 };
 

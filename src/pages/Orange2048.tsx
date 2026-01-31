@@ -336,7 +336,7 @@ const Orange2048: React.FC = () => {
   return (
     <div className="game2048-page">
       <GameSEO
-        gameName="Merge 2048"
+        gameName="Wojak Merge"
         gameSlug="merge-2048"
         description="Slide and merge tiles to reach 2048! Strategic puzzle gameplay with satisfying combinations and endless replayability."
         genre="Puzzle"

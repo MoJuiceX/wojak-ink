@@ -86,7 +86,7 @@ export type GameId =
   | 'orange-juggle'
   | 'knife-game'
   | 'color-reaction'
-  | '2048-merge'
+  | 'merge-2048'
   | 'block-puzzle'
   | 'flappy-orange'
   | 'citrus-drop'
@@ -102,7 +102,7 @@ export const GAME_NAMES: Record<GameId, string> = {
   'orange-juggle': 'Orange Juggle',
   'knife-game': 'The Knife Game',
   'color-reaction': 'Color Reaction',
-  '2048-merge': '2048 Merge',
+  'merge-2048': 'Wojak Merge',
   'block-puzzle': 'Block Puzzle',
   'flappy-orange': 'Flappy Orange',
   'citrus-drop': 'Citrus Drop',
@@ -119,11 +119,11 @@ export const ACTIVE_GAME_IDS: GameId[] = [
   'wojak-runner',
   'color-reaction',
   'block-puzzle',
+  'merge-2048',
 ];
 
 // Disabled games (coming soon) - greyed out
 export const DISABLED_GAME_IDS: GameId[] = [
-  '2048-merge',
   'orange-pong',
   'orange-juggle',
   'knife-game',

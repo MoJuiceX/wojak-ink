@@ -106,7 +106,7 @@ export type GameId =
   | 'orange-slice'
   | 'knife-game'
   | 'color-reaction'
-  | '2048-merge'
+  | 'merge-2048'
   | 'orange-wordle'
   | 'wojak-whack'
   | 'block-puzzle'
