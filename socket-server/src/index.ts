@@ -7,7 +7,7 @@
  * Features:
  * - JWT authentication (tokens from /api/chat/token)
  * - End-to-end encrypted messages (client-side AES)
- * - Auto-delete messages after 3 days (MongoDB TTL)
+ * - Auto-delete messages after 7 days (MongoDB TTL)
  * - Admin: pin messages, mute users, delete messages
  * - Typing indicators and online user list
  */

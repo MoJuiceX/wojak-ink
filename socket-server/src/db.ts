@@ -1,7 +1,7 @@
 /**
  * MongoDB Database Models
  *
- * - messages: Regular chat messages with 3-day TTL
+ * - messages: Regular chat messages with 7-day TTL
  * - pinnedMessages: Admin-pinned messages (persistent)
  * - mutedUsers: Temporarily muted users
  */
@@ -30,8 +30,8 @@ const messageSchema = new Schema<IMessage>({
   isDeleted: { type: Boolean, default: false },
 });
 
-// TTL Index: Auto-delete messages after 3 days (259200 seconds)
-messageSchema.index({ createdAt: 1 }, { expireAfterSeconds: 259200 });
+// TTL Index: Auto-delete messages after 7 days (604800 seconds)
+messageSchema.index({ createdAt: 1 }, { expireAfterSeconds: 604800 });
 
 export const Message = mongoose.model<IMessage>('Message', messageSchema);
 

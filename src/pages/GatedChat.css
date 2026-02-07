@@ -854,14 +854,16 @@
   display: inline;
 }
 
-/* ============ Inline Reactions (shown next to message text) ============ */
+/* ============ Inline Reactions (shown on right side of message row) ============ */
 
 .gc-inline-reactions {
-  display: inline-flex;
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
   gap: 3px;
-  margin-left: 8px;
   font-size: 14px;
-  vertical-align: middle;
 }
 
 .gc-inline-reaction {
@@ -1115,12 +1117,24 @@
   filter: brightness(1.2);
 }
 
+/* Selected/active emojis glow brighter on hover */
+.gc-action-btn.gc-reaction-btn.has-reactions:hover {
+  filter: brightness(2) drop-shadow(0 0 4px var(--gc-terminal-green));
+  transform: scale(1.3);
+}
+
 /* User has reacted - brighter glow */
 .gc-action-btn.gc-reaction-btn.user-reacted {
   opacity: 1;
   width: auto;
   min-width: 14px;
   filter: brightness(1.4) drop-shadow(0 0 3px var(--gc-terminal-green));
+}
+
+/* User-reacted emojis glow even brighter on hover */
+.gc-action-btn.gc-reaction-btn.user-reacted:hover {
+  filter: brightness(2.2) drop-shadow(0 0 6px var(--gc-terminal-green));
+  transform: scale(1.3);
 }
 
 /* Reaction count badge */
@@ -1309,7 +1323,7 @@
 
 .gc-input {
   flex: 1;
-  padding: 6px 0;
+  padding: 6px 0 6px 8px;
   min-height: 24px;
   max-height: 100px;
   background: transparent;

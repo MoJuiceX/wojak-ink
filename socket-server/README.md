@@ -6,7 +6,7 @@ Real-time Socket.io server for the gated chat room accessible only to holders of
 
 - **Gated Access**: Only users with verified 42+ NFTs can connect
 - **End-to-End Encryption**: Messages encrypted with AES (client-side)
-- **Ephemeral Messages**: Auto-delete after 3 days (MongoDB TTL)
+- **Ephemeral Messages**: Auto-delete after 7 days (MongoDB TTL)
 - **Admin Tools**: Pin messages, mute users, post announcements
 - **Typing Indicators**: Real-time typing status
 - **Online Users**: See who's in the chat
@@ -74,7 +74,7 @@ npm run dev
 4. Copy the connection string to `MONGODB_URI`
 
 The server will automatically create these collections with indexes:
-- `messages` - Regular messages (3-day TTL)
+- `messages` - Regular messages (7-day TTL)
 - `pinnedmessages` - Persistent admin-pinned messages
 - `mutedusers` - Muted user records (auto-expire)
 

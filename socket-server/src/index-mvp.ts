@@ -6,7 +6,7 @@
  * - wojak-holder: All holders (1+ NFT)
  *
  * Features:
- * - MongoDB persistence (last 50 messages per room, 3-day TTL)
+ * - MongoDB persistence (last 50 messages per room, 7-day TTL)
  * - Per-room online users and typing indicators
  * - Profile name + avatar support
  * - Admin delete capability
@@ -45,7 +45,7 @@ const MAX_MESSAGES = 200;
 const MAX_MESSAGE_LENGTH = 2000;
 const RATE_LIMIT_MESSAGES = 20;
 const RATE_LIMIT_WINDOW = 60000; // 1 minute
-const MESSAGE_TTL_DAYS = 3;
+const MESSAGE_TTL_DAYS = 7;
 
 // ============ MongoDB Schemas ============
 
