@@ -1,8 +1,8 @@
 # Phase 2: Your Wojak — Complete Plan
 
-> **Status:** Brainstorm complete, ready for implementation planning
-> **Last updated:** February 7, 2026
-> **Document purpose:** Captures all decisions, formulas, flows, and open questions from the Phase 2 brainstorming session.
+> **Status:** Phases A & B built, Phase C (frontend) next
+> **Last updated:** February 8, 2026
+> **Document purpose:** Single source of truth for Phase 2. Read this before any Phase 2 work.
 
 ---
 
@@ -444,59 +444,198 @@ Supply counter incremented
 | **Games leaderboard** | ✅ Built | D1 database, API endpoints, UI (separate from Credits leaderboard) |
 | **Layer assets** | ✅ Available | `public/assets/wojak-layers/` — 130+ PNG files across all categories |
 
-### Gaps to Fill
+### Implementation Status
 
-| Component | Status | What's Needed |
+| Component | Status | Location |
 |---|---|---|
-| **Buyer wallet tracking** | ✅ Built | `workers/credit-tracker/` fetches MintGarden Events API (XCH trades only) |
-| **Historical backfill** | ✅ Built | `scripts/backfill-credits.ts` — fetches all events, generates SQL |
-| **Credit calculation engine** | ✅ Built | Formula in worker + API endpoints in `functions/api/credits/` |
-| **Floor price tracking** | ✅ Built | Daily snapshot in credit-tracker worker, stored in D1 + KV |
-| **Dynamic pricing tracker** | ✅ Built | `trait_usage` table + `functions/api/mint/pricing.ts` endpoint |
-| **Credit leaderboard API** | ✅ Built | `functions/api/credits/leaderboard.ts` |
-| **IPFS upload pipeline** | ❌ Missing | Cloudflare Pages Function + Pinata (confirmed: MintGarden has no upload endpoint) |
-| **Image approach** | ✅ Decided | Client-upload (canvas render → WebP blob → backend → IPFS) |
-| **MintGarden mint integration** | ❌ Missing | API call to Dynamic Minting endpoint (UNBLOCKED: `reserve_for_seconds: 900`) |
-| **Mint button in Generator** | ❌ Missing | Wallet connection + paid/free flow + offer file copy |
-| **Color system** | ❌ Missing | Fill/outline rendering, color picker (BLOCKED: layers in progress) |
-| **Credit leaderboard UI** | ❌ Missing | Lightbox component in Generator |
+| **D1 schema (5 tables)** | ✅ Built | `functions/migrations/030_credit_system.sql` |
+| **Credit tracker worker** | ✅ Built | `workers/credit-tracker/worker.ts` — cron every 30min, MintGarden Events API, XCH-only |
+| **Historical backfill** | ✅ Built | `scripts/backfill-credits.ts` + `scripts/backfill-credits-data.sql` — 61 XCH trades, 30 wallets |
+| **Credit APIs** | ✅ Built | `functions/api/credits/balance.ts`, `history.ts`, `leaderboard.ts` |
+| **Mint pricing API** | ✅ Built | `functions/api/mint/pricing.ts` — surcharges, supply, floor price |
+| **Mint status API** | ✅ Built | `functions/api/mint/status.ts` — pending mint recovery, stale expiration |
+| **IPFS upload + mint prepare** | ✅ Built | `functions/api/mint/prepare.ts` — WebP upload to Pinata, CHIP-0007 metadata, MintGarden API |
+| **Mint confirm** | ✅ Built | `functions/api/mint/confirm.ts` — on-chain verification via MintGarden, trait usage update |
+| **Floor price tracking** | ✅ Built | Daily snapshot in credit-tracker worker, stored in D1 `floor_price_snapshots` + KV |
+| **Dynamic pricing tracker** | ✅ Built | `trait_usage` table + `functions/api/mint/pricing.ts` |
+| **Secrets (production)** | ✅ Set | `PINATA_JWT` and `MINTGARDEN_API_KEY` via `wrangler pages secret put` |
+| **wrangler.toml config** | ✅ Updated | Phase 2 env vars added (some placeholders remain) |
+| **Color system** | ❌ Not started | Color picker UI + canvas rendering (BLOCKED: layers in progress) |
+| **Sage wallet in Generator** | ❌ Not started | WalletConnect exists in `src/sage-wallet/`, needs wiring into Generator |
+| **Mint button UI** | ❌ Not started | Dual flow (free default + paid toggle), offer countdown, copy offer |
+| **Live price display** | ❌ Not started | Updates as traits selected, shows surcharges |
+| **Credit balance display** | ❌ Not started | Connect wallet → see credits + free mints remaining |
+| **Supply counter** | ❌ Not started | "X of 4,200 minted" |
+| **Congratulations page** | ❌ Not started | Success animation, MintGarden link |
+| **Credit leaderboard UI** | ❌ Not started | Lightbox component in Generator |
+| **New layer manifest** | ❌ Not started | Phase 2 layers need manifest integration (BLOCKED: layers in progress) |
+
+### Pending From User
+
+| Item | Status | Notes |
+|---|---|---|
+| **Phase 2 layers** | 🔄 In progress | User creating image layers in `public/assets/wojak-layers/YourWojak-layers/` |
+| **Collection UUID** | ⏳ Pending | User creating "Your Wojak" collection on MintGarden → UUID for `wrangler.toml` |
+| **Royalty XCH address** | ⏳ Pending | User's XCH address for `PHASE2_ROYALTY_ADDRESS` in `wrangler.toml` |
+| **Retroactive credit date** | ⏳ Pending | Exact cutoff ~January 5, 2026, will determine from backfill data |
+| **Royalty split decision** | 💭 Deferred | CHIP-0008 splitter puzzle for creator/buyer/community split — deciding later |
 
 ---
 
 ## Build Order
 
-### Phase A — Foundation (Do First)
+### Phase A — Data Foundation ✅ COMPLETE
 
-1. **Start capturing buyer wallet addresses** from Dexie trade data in the sales worker
-2. **Backfill historical buyer data** for all sales since ~January 5, 2026
-3. **Add floor price tracking** to the existing worker (every 6 hours, store in KV)
-4. **Build the credit calculation engine** (formula, D1 storage, balance endpoint)
-5. **Build the trait usage tracking system** (per-trait counters, surcharge calculation)
+1. ✅ **D1 migration** — 5 tables: `credit_events`, `credit_spends`, `floor_price_snapshots`, `phase2_mints`, `trait_usage`
+2. ✅ **Credit tracker worker** — `workers/credit-tracker/worker.ts`, cron every 30min, MintGarden Events API with cursor-based pagination
+3. ✅ **Historical backfill** — `scripts/backfill-credits.ts` generates SQL, 61 unique XCH trades from 30 wallets
+4. ✅ **Credit APIs** — balance, history, leaderboard endpoints in `functions/api/credits/`
+5. ✅ **Mint pricing + status APIs** — dynamic surcharges, pending mint recovery in `functions/api/mint/`
 
-### Phase B — Minting Pipeline
+### Phase B — Minting Infrastructure ✅ COMPLETE
 
-6. **IPFS upload pipeline** (Cloudflare Worker → Pinata API for image + metadata hosting)
-7. **Server-side image composition** (or client-upload approach)
-8. **Metadata generation** (CHIP-0007 compliant JSON)
-9. **MintGarden Dynamic Minting API integration** (secure backend endpoint)
-10. **Wire Sage wallet into the Generator** (WalletConnect already exists)
+6. ✅ **IPFS upload pipeline** — Pinata integration in `functions/api/mint/prepare.ts` (WebP image + CHIP-0007 JSON)
+7. ✅ **Client-upload approach** — Canvas renders WebP blob → POST to backend → Pinata → IPFS
+8. ✅ **CHIP-0007 metadata generation** — Sequential "Your Wojak #N" naming, all traits + colors as attributes
+9. ✅ **MintGarden Dynamic Minting API** — `reserve_for_seconds: 900` for paid, direct mint for free
+10. ✅ **Mint confirm endpoint** — On-chain verification via `GET /nfts/{launcher_id}`, atomic trait usage update
 
-### Phase C — User Experience
+### Phase C — User Experience ❌ NEXT
 
-11. **Mint button** with dual flow (paid with 15-min expiring offers / free with credits)
-12. **Live price display** in Generator (updates as traits are selected)
-13. **Credit balance display** (connect wallet → see credits)
-14. **Supply counter** ("X of 4,200 minted")
-15. **Congratulations page** after successful mint
-16. **Error handling and refund detection**
+> **BLOCKED BY:** Phase 2 layers (user creating), Collection UUID, Royalty address
 
-### Phase D — Polish & Launch
+11. ❌ **Integrate Phase 2 layers** — New manifest or manifest extension for YourWojak-layers
+12. ❌ **Color system** — 48 base colors × 4 variants (192 total), color picker UI, canvas color application
+13. ❌ **Wire Sage wallet into Generator** — Connect button, address retrieval (WalletConnect already in `src/sage-wallet/`)
+14. ❌ **Mint button** — Dual flow: free (default, credit deduction) + paid toggle (XCH offer via WalletConnect)
+15. ❌ **Live price display** — Updates as traits selected, shows per-trait surcharges
+16. ❌ **Credit balance display** — Connect wallet → see credits, free mints remaining
+17. ❌ **Supply counter** — "X of 4,200 minted"
+18. ❌ **Congratulations page** — Success animation, MintGarden link, share options
+19. ❌ **Error handling UX** — Offer expiry countdown (15min), retry flows, clear messages
 
-17. **Credit leaderboard** (personal + public opt-in)
-18. **Testing** with real mints (budget: ~10 credits = 0.05 XCH)
-19. **Soft launch** with core community members
-20. **Public announcement** (a few days before full launch)
-21. **Retroactive credit surprise** — existing collectors discover their credits
+### Phase D — Polish & Launch ❌ LATER
+
+20. ❌ **Credit leaderboard UI** — Lightbox in Generator, personal + public view
+21. ❌ **End-to-end testing** — Real test mints on MintGarden (~10 credits = 0.05 XCH budget)
+22. ❌ **Production deploy** — Migration to prod D1, credit-tracker worker, full Pages deploy
+23. ❌ **Soft launch** — Core community members first
+24. ❌ **Public announcement** — Retroactive credit surprise for existing collectors
+
+---
+
+## Architecture & Implementation Details
+
+### File Map (All Phase 2 Files)
+
+```
+functions/
+├── migrations/
+│   └── 030_credit_system.sql          # D1 schema: 5 tables
+├── api/
+│   ├── credits/
+│   │   ├── balance.ts                 # GET — wallet credit balance + free mints
+│   │   ├── history.ts                 # GET — paginated earn/spend history
+│   │   └── leaderboard.ts            # GET — top credit holders
+│   └── mint/
+│       ├── pricing.ts                 # GET — trait surcharges, supply, floor price
+│       ├── status.ts                  # GET — active pending mints for a wallet
+│       ├── prepare.ts                 # POST — IPFS upload + MintGarden mint (main endpoint)
+│       └── confirm.ts                 # POST — on-chain verification for paid mints
+
+workers/
+└── credit-tracker/
+    ├── worker.ts                      # Cron worker: fetches trades, calculates credits
+    └── wrangler.toml                  # Worker config with D1/KV bindings
+
+scripts/
+├── backfill-credits.ts               # One-time: fetch historical trades → generate SQL
+└── backfill-credits-data.sql          # Generated INSERT statements (61 trades)
+
+wrangler.toml                          # Phase 2 env vars added
+PHASE2-PLAN.md                         # This file
+```
+
+### D1 Tables
+
+| Table | Purpose |
+|---|---|
+| `credit_events` | Every XCH trade → credits earned. Key: `event_id` (nft_id + event_index + timestamp) |
+| `credit_spends` | Every free mint → 100 credits deducted. Key: `mint_id` |
+| `floor_price_snapshots` | Daily floor price from MintGarden collection API |
+| `phase2_mints` | Every mint attempt. Status: `pending` → `confirmed` or `expired`. Has `mint_number`, `launcher_id`, `offer_data` |
+| `trait_usage` | Per-trait usage count for dynamic pricing. Incremented only on confirmed mints |
+
+### API Endpoint Details
+
+**`POST /api/mint/prepare`** (main minting endpoint):
+1. Validates WebP image (magic bytes, <2MB) and metadata JSON
+2. Rate limits: 1 request per 60 seconds per wallet (via KV)
+3. Checks total supply < 4,200
+4. For free mints: checks credit balance ≥ 100
+5. Atomically reserves `mint_number` via `INSERT ... SELECT COALESCE(MAX(mint_number), 0) + 1`
+6. Uploads image to Pinata → gets IPFS CID
+7. Builds CHIP-0007 metadata with "Your Wojak #N" name
+8. Uploads metadata JSON to Pinata → gets IPFS CID
+9. SHA-256 hashes both image and metadata
+10. Calls MintGarden Dynamic Minting API:
+    - **Paid:** `reserve_for_seconds: 900`, `requested_mojos` = base + surcharge → returns offer file
+    - **Free:** No mojos, atomic credit deduction in D1 batch → NFT mints directly
+11. Returns offer data (paid) or confirmation (free) to frontend
+
+**`POST /api/mint/confirm`** (paid mint verification):
+1. Looks up pending mint by `mint_id`
+2. Checks 15-minute expiration
+3. Calls MintGarden `GET /nfts/{launcher_id}` to verify on-chain
+4. If confirmed: updates status to `confirmed`, atomically increments `trait_usage`
+5. If not yet confirmed: returns `{ status: "pending", retry: true }` for client polling
+
+### Key Technical Decisions
+
+| Decision | Choice | Rationale |
+|---|---|---|
+| **XCH-only credits** | Exclude CAT trades | Unreliable CAT→XCH conversion rates. Revisit in Phase 2.5 |
+| **Credit precision** | INTEGER × 100 | 50 credits stored as 5000 units. Eliminates float errors |
+| **Mint numbering** | Atomic at prepare time | `INSERT ... SELECT MAX+1` prevents race conditions, embeds # in immutable metadata |
+| **Image upload** | Client canvas → WebP blob → backend → Pinata | No server-side rendering needed, Pinata free tier sufficient |
+| **Offer expiration** | 15 minutes (`reserve_for_seconds: 900`) | Frees MintGarden credits from abandoned offers |
+| **Stale mint cleanup** | Auto-expire in `balance.ts`, `pricing.ts`, `status.ts` | Pending mints older than 20min set to `expired` |
+| **Free mint atomicity** | D1 `db.batch()` for credit check + deduction + mint status | Prevents double-spend on concurrent requests |
+| **Trait usage timing** | Increment on confirmation only | Avoids inflating counts from abandoned paid mints |
+| **Floor price** | Daily snapshot from MintGarden collection API | Low volume makes more frequent snapshots unnecessary |
+| **Backfill floor** | Fixed 1.0 XCH for all historical events | Simplest approach, fair enough for retroactive credits |
+| **MintGarden pagination** | Cursor-based with loop detection | API returns same cursor when no more data (infinite loop bug fixed) |
+
+### Environment Variables (wrangler.toml)
+
+| Variable | Value | Status |
+|---|---|---|
+| `PHASE2_COLLECTION_UUID` | `PLACEHOLDER_COLLECTION_UUID` | ⏳ User creating collection |
+| `PHASE2_PROFILE_ID` | `did:chia:15j5d0fm0x65nz7w6jr4c5any8mzrkru2x6l9uy2f0vcrc6jfedcqp20n4q` | ✅ Set |
+| `PHASE2_ROYALTY_ADDRESS` | `PLACEHOLDER_ROYALTY_XCH_ADDRESS` | ⏳ User needs to provide |
+| `PHASE2_ROYALTY_PCT` | `5` | ✅ Set (may change if royalty split is implemented) |
+| `PINATA_GATEWAY` | `gold-important-gibbon-467.mypinata.cloud` | ✅ Set |
+| `PINATA_JWT` | Secret | ✅ Set via `wrangler pages secret put` |
+| `MINTGARDEN_API_KEY` | Secret | ✅ Set via `wrangler pages secret put` |
+
+### Errors Encountered & Fixed During Build
+
+1. **MintGarden Events API 404** — Correct endpoint is `/events?collection={ID}` (query param, not path param)
+2. **Cursor pagination infinite loop** — API returns same `next` cursor when no more data; fixed with same-cursor detection
+3. **D1 batch statement limit** — Backfill SQL split into chunks of 50 INSERTs, executed sequentially
+4. **Worker D1 migration missing** — Local worker D1 needs separate migration from Pages D1
+5. **Worker KV state contamination** — Delete `.wrangler/` directory to reset local state after failed runs
+6. **Sandbox restrictions** — `wrangler dev` needs `required_permissions: ['all']` to avoid "spawn Unknown system error -88"
+7. **Pages dev proxy conflict** — Use `wrangler pages dev dist` (build first) not `wrangler pages dev --local dist -- npx vite`
+
+### Royalty Split Discussion (Deferred)
+
+User proposed a royalty splitting mechanism for Phase 2 NFTs:
+- **Option A:** 10% total: 5% to creator (user), 5% to the minter (buyer's wallet)
+- **Option B:** 15% total: 5% creator, 5% minter, 5% community wallet
+- **Implementation:** CHIP-0008 Splitter Puzzle — generates a puzzle hash used as `royalty_address` in MintGarden API
+- **Status:** Deferred to later. MintGarden API already accepts `royalty_address` and `royalty_percentage`. For splits, generate the splitter puzzle hash and pass it as the royalty address.
+- **Reference:** https://github.com/Chia-Network/chips/blob/main/CHIPs/chip-0026.md (also reviewed CHIP-0008)
 
 ---
 
@@ -513,7 +652,7 @@ Supply counter incremented
 - [x] **Floor price snapshots** — ✅ Once per day (simplest, sufficient for low volume).
 - [x] **Backfill floor price** — ✅ Fixed 1.0 XCH for all historical events.
 - [x] **Worker architecture** — ✅ New dedicated `workers/credit-tracker/` with KV + D1 bindings.
-- [x] **Mint numbering** — ✅ Assigned at confirmation only (no gaps). Sequential via D1 transaction.
+- [x] **Mint numbering** — ✅ Assigned atomically at prepare time via `INSERT ... SELECT MAX+1`. Embedded in immutable CHIP-0007 metadata. Sequential, no gaps.
 - [x] **Image format** — ✅ WebP for IPFS uploads.
 - [x] **Free mint default** — ✅ Default to free mint with "Pay with XCH instead" toggle.
 - [x] **Trait usage timing** — ✅ Increment at confirmation only (not at offer creation).
