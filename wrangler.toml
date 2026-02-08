@@ -23,6 +23,15 @@ id = "3d3382d37eeb4d4dac250fcf03b3f24d"
 COLLECTION_ID = "col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah"
 SECONDARY_SALES_CUTOFF = "2025-12-20T00:00:00Z"
 
+# Phase 2: Your Wojak — Minting config (fill in when ready)
+PHASE2_COLLECTION_UUID = "PLACEHOLDER_COLLECTION_UUID"
+PHASE2_PROFILE_ID = "did:chia:15j5d0fm0x65nz7w6jr4c5any8mzrkru2x6l9uy2f0vcrc6jfedcqp20n4q"
+PHASE2_ROYALTY_ADDRESS = "PLACEHOLDER_ROYALTY_XCH_ADDRESS"
+PHASE2_ROYALTY_PCT = "5"
+PINATA_GATEWAY = "gold-important-gibbon-467.mypinata.cloud"
+
 # Secrets (set via `wrangler pages secret put` or Cloudflare Dashboard):
 # - CLERK_DOMAIN: Your Clerk domain (e.g., your-app.clerk.accounts.dev)
 # - CHAT_JWT_SECRET: Secret for signing chat tokens (generate with: openssl rand -base64 32)
+# - PINATA_JWT: Pinata API JWT for IPFS uploads (already set)
+# - MINTGARDEN_API_KEY: MintGarden Dynamic Minting API key (run: wrangler pages secret put MINTGARDEN_API_KEY)
