@@ -505,6 +505,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     const metadataHash = await sha256Hex(metadataBytes.buffer);
 
     // ── Update D1 row with IPFS data ──
+    const primaryImageUri = imageUris[0];
+    const primaryMetadataUri = metadataUris[0];
     await env.DB
       .prepare(
         `UPDATE phase2_mints
@@ -512,8 +514,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
          WHERE id = ?`
       )
       .bind(
-        `ipfs://${imageCid}`,
-        `ipfs://${metadataCid}`,
+        primaryImageUri,
+        primaryMetadataUri,
         imageHash,
         metadataHash,
         mintId
@@ -549,16 +551,27 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         .run();
     }
 
+    // ── Build IPFS gateway URIs (multi-gateway for reliability) ──
+    const pinataGateway = env.PINATA_GATEWAY || 'gateway.pinata.cloud';
+    const imageUris = [
+      `https://${pinataGateway}/ipfs/${imageCid}`,
+      `https://ipfs.io/ipfs/${imageCid}`,
+    ];
+    const metadataUris = [
+      `https://${pinataGateway}/ipfs/${metadataCid}`,
+      `https://ipfs.io/ipfs/${metadataCid}`,
+    ];
+
     // ── Call MintGarden Dynamic Minting API ──
     const mintgardenBody: Record<string, unknown> = {
       profile_id: env.PHASE2_PROFILE_ID,
       metadata: {
         data_hash: imageHash,
-        data_uris: [`ipfs://${imageCid}`],
+        data_uris: imageUris,
         metadata_hash: metadataHash,
-        metadata_uris: [`ipfs://${metadataCid}`],
-        edition_number: 1,
-        edition_total: 1,
+        metadata_uris: metadataUris,
+        edition_number: mintNumber,
+        edition_total: MAX_SUPPLY,
       },
       royalty_address: env.PHASE2_ROYALTY_ADDRESS,
       royalty_percentage: parseInt(env.PHASE2_ROYALTY_PCT, 10) || 5,
@@ -587,8 +600,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       return new Response(
         JSON.stringify({
           error: 'MintGarden API unavailable. Please try again.',
-          ipfs_image_uri: `ipfs://${imageCid}`,
-          ipfs_metadata_uri: `ipfs://${metadataCid}`,
+          ipfs_image_uri: primaryImageUri,
+          ipfs_metadata_uri: primaryMetadataUri,
         }),
         { status: 502, headers: corsHeaders }
       );
@@ -654,8 +667,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           base_price_xch: BASE_PRICE_XCH,
           surcharge_xch: surchargeXch,
           highest_surcharge_trait: highestSurchargeTrait,
-          ipfs_image_uri: `ipfs://${imageCid}`,
-          ipfs_metadata_uri: `ipfs://${metadataCid}`,
+          ipfs_image_uri: primaryImageUri,
+          ipfs_metadata_uri: primaryMetadataUri,
         }),
         { status: 200, headers: corsHeaders }
       );
@@ -722,8 +735,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         nft_name: nftName,
         coin_id: coinId || null,
         status: 'minted',
-        ipfs_image_uri: `ipfs://${imageCid}`,
-        ipfs_metadata_uri: `ipfs://${metadataCid}`,
+        ipfs_image_uri: primaryImageUri,
+        ipfs_metadata_uri: primaryMetadataUri,
       }),
       { status: 200, headers: corsHeaders }
     );

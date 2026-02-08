@@ -1,10 +1,10 @@
 /**
  * Action Bar Component
  *
- * Control buttons for randomize, undo/redo, save, export.
+ * Control buttons for randomize, undo/redo, save, export, and MINT.
  */
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
   Undo2,
@@ -12,9 +12,18 @@ import {
   Heart,
   Download,
   Copy,
+  Sparkles,
+  Wallet,
+  Coins,
+  Trophy,
 } from 'lucide-react';
 import { useGenerator } from '@/contexts/GeneratorContext';
+import { useMint } from '@/contexts/MintContext';
+import { useSageWallet } from '@/sage-wallet';
 import { useLayout } from '@/hooks/useLayout';
+import { exportImage } from '@/services/canvasRenderer';
+import { MintFlowModal } from './MintFlowModal';
+import { CreditLeaderboard } from './CreditLeaderboard';
 
 interface ActionBarProps {
   className?: string;
@@ -33,7 +42,10 @@ export function ActionBar({ className = '' }: ActionBarProps) {
     favorites,
     saveFavorite,
     previewImage,
+    canExport,
   } = useGenerator();
+  const { credits, mintStep, startMint, resetMintFlow, totalMinted, maxSupply } = useMint();
+  const { address, status: walletStatus, connect } = useSageWallet();
   const prefersReducedMotion = useReducedMotion();
   const { isDesktop } = useLayout();
   const [isRandomizing, setIsRandomizing] = useState(false);
@@ -41,6 +53,54 @@ export function ActionBar({ className = '' }: ActionBarProps) {
   const [isCopying, setIsCopying] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
   const [showDownloadSuccess, setShowDownloadSuccess] = useState(false);
+  const [isMintModalOpen, setIsMintModalOpen] = useState(false);
+  const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
+  const [mintType, setMintType] = useState<'free' | 'paid'>('free');
+
+  // Determine mint readiness
+  const isWalletConnected = walletStatus === 'connected' && !!address;
+  const hasFreeMintsAvailable = (credits?.free_mints_available ?? 0) > 0;
+  const canMint = canExport && isWalletConnected;
+
+  // Handle mint button click
+  const handleMintClick = useCallback(async () => {
+    if (!isWalletConnected) {
+      connect();
+      return;
+    }
+    if (!canExport) return;
+
+    // Render the image as WebP blob
+    try {
+      const webpBlob = await exportImage(selectedLayers, {
+        format: 'webp',
+        quality: 0.92,
+        includeBackground: true,
+        size: { preset: '1024' },
+      });
+
+      // Extract layer names and colors from selectedLayers
+      const layerNames: Record<string, string> = {};
+      const layerColors: Record<string, string> = {};
+      for (const [key, value] of Object.entries(selectedLayers)) {
+        if (value && value !== '' && value !== 'None') {
+          // Extract trait name from path (e.g., "/assets/wojak-layers/Head/Crown.png" → "Crown")
+          const parts = value.split('/');
+          const fileName = parts[parts.length - 1];
+          const traitName = fileName.replace(/\.[^/.]+$/, ''); // Remove extension
+          layerNames[key] = traitName;
+        }
+      }
+
+      // Determine mint type based on toggle
+      const effectiveMintType = hasFreeMintsAvailable ? mintType : 'paid';
+
+      setIsMintModalOpen(true);
+      await startMint(webpBlob, layerNames, layerColors, effectiveMintType);
+    } catch (err) {
+      console.error('[ActionBar] Failed to prepare mint:', err);
+    }
+  }, [isWalletConnected, canExport, selectedLayers, hasFreeMintsAvailable, mintType, connect, startMint]);
 
   const basePath = selectedLayers.Base;
   const hasSelection = !!basePath && basePath !== '' && basePath !== 'None';
@@ -338,24 +398,95 @@ export function ActionBar({ className = '' }: ActionBarProps) {
         </div>
       )}
 
-      {/* Coming soon button - desktop only, grayed out */}
-      {isDesktop && (
-        <div className="relative group">
-          <motion.button
-            className="relative flex flex-col items-center gap-1 px-3 py-2 rounded-lg min-w-[60px] cursor-not-allowed"
-            style={{
-              background: 'transparent',
-              color: 'var(--color-text-muted)',
-              opacity: 0.4,
-              border: '1px solid transparent',
-            }}
-            aria-label="Coming soon"
-          >
-            <span className="text-xl">🌱</span>
-            <span className="text-xs font-medium">Soon</span>
-          </motion.button>
-        </div>
+      {/* Leaderboard button */}
+      {isDesktop && isWalletConnected && (
+        <ActionButton
+          onClick={() => setIsLeaderboardOpen(true)}
+          icon={<Trophy size={20} />}
+          label="Credits"
+          badge={credits?.free_mints_available}
+        />
       )}
+
+      {/* ── Mint Section ── */}
+      <div
+        className="flex items-center gap-2 pl-2 ml-1"
+        style={{ borderLeft: '1px solid var(--color-border)' }}
+      >
+        {/* Free/Paid toggle (only when wallet connected and has credits) */}
+        {isWalletConnected && hasFreeMintsAvailable && (
+          <div className="flex flex-col items-center gap-0.5">
+            <button
+              className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-colors"
+              style={{
+                background: mintType === 'free'
+                  ? 'rgba(34, 197, 94, 0.2)'
+                  : 'rgba(255, 107, 0, 0.2)',
+                color: mintType === 'free'
+                  ? 'var(--color-success)'
+                  : 'var(--color-primary)',
+                border: `1px solid ${mintType === 'free' ? 'rgba(34, 197, 94, 0.4)' : 'rgba(255, 107, 0, 0.4)'}`,
+              }}
+              onClick={() => setMintType(mintType === 'free' ? 'paid' : 'free')}
+              aria-label="Toggle mint type"
+            >
+              {mintType === 'free' ? (
+                <><Coins size={10} /> Free</>
+              ) : (
+                <><Wallet size={10} /> XCH</>
+              )}
+            </button>
+            {credits && (
+              <span className="text-[9px] text-secondary">
+                {credits.free_mints_available} free
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Mint button */}
+        <ActionButton
+          onClick={handleMintClick}
+          disabled={isWalletConnected ? !canExport : false}
+          isActive={canMint}
+          icon={
+            !isWalletConnected ? (
+              <Wallet size={20} />
+            ) : (
+              <Sparkles size={20} />
+            )
+          }
+          label={
+            !isWalletConnected
+              ? 'Connect'
+              : totalMinted >= maxSupply
+                ? 'Sold Out'
+                : 'Mint'
+          }
+        />
+
+        {/* Supply counter */}
+        {isDesktop && totalMinted > 0 && (
+          <span className="text-[10px] text-muted whitespace-nowrap">
+            {totalMinted.toLocaleString()}/{maxSupply.toLocaleString()}
+          </span>
+        )}
+      </div>
+
+      {/* Mint Flow Modal */}
+      <MintFlowModal
+        isOpen={isMintModalOpen}
+        onClose={() => {
+          setIsMintModalOpen(false);
+          resetMintFlow();
+        }}
+      />
+
+      {/* Credit Leaderboard Modal */}
+      <CreditLeaderboard
+        isOpen={isLeaderboardOpen}
+        onClose={() => setIsLeaderboardOpen(false)}
+      />
     </div>
   );
 }

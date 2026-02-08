@@ -460,14 +460,15 @@ Supply counter incremented
 | **Dynamic pricing tracker** | ✅ Built | `trait_usage` table + `functions/api/mint/pricing.ts` |
 | **Secrets (production)** | ✅ Set | `PINATA_JWT` and `MINTGARDEN_API_KEY` via `wrangler pages secret put` |
 | **wrangler.toml config** | ✅ Updated | Phase 2 env vars added (some placeholders remain) |
+| **MintContext** | ✅ Built | `src/contexts/MintContext.tsx` — credits, pricing, mint flow state machine |
+| **MintProvider in App** | ✅ Built | `src/App.tsx` — wraps app inside SageWalletProvider |
+| **Mint button** | ✅ Built | `src/components/generator/ActionBar.tsx` — replaced "Soon" placeholder |
+| **Free/Paid toggle** | ✅ Built | ActionBar — toggle between free (credits) and paid (XCH) |
+| **MintFlowModal** | ✅ Built | `src/components/generator/MintFlowModal.tsx` — full mint flow UI |
+| **Credit balance display** | ✅ Built | ActionBar shows free mints, Leaderboard shows full balance |
+| **Supply counter** | ✅ Built | ActionBar shows "X/4,200" on desktop |
+| **CreditLeaderboard** | ✅ Built | `src/components/generator/CreditLeaderboard.tsx` — lightbox modal |
 | **Color system** | ❌ Not started | Color picker UI + canvas rendering (BLOCKED: layers in progress) |
-| **Sage wallet in Generator** | ❌ Not started | WalletConnect exists in `src/sage-wallet/`, needs wiring into Generator |
-| **Mint button UI** | ❌ Not started | Dual flow (free default + paid toggle), offer countdown, copy offer |
-| **Live price display** | ❌ Not started | Updates as traits selected, shows surcharges |
-| **Credit balance display** | ❌ Not started | Connect wallet → see credits + free mints remaining |
-| **Supply counter** | ❌ Not started | "X of 4,200 minted" |
-| **Congratulations page** | ❌ Not started | Success animation, MintGarden link |
-| **Credit leaderboard UI** | ❌ Not started | Lightbox component in Generator |
 | **New layer manifest** | ❌ Not started | Phase 2 layers need manifest integration (BLOCKED: layers in progress) |
 
 ### Pending From User
@@ -500,23 +501,24 @@ Supply counter incremented
 9. ✅ **MintGarden Dynamic Minting API** — `reserve_for_seconds: 900` for paid, direct mint for free
 10. ✅ **Mint confirm endpoint** — On-chain verification via `GET /nfts/{launcher_id}`, atomic trait usage update
 
-### Phase C — User Experience ❌ NEXT
+### Phase C — User Experience 🔄 IN PROGRESS
 
-> **BLOCKED BY:** Phase 2 layers (user creating), Collection UUID, Royalty address
+> **BLOCKED:** Phase 2 layers (user creating), Collection UUID, Royalty address
+> **DONE:** All frontend components built, just need layers + config to wire up
 
-11. ❌ **Integrate Phase 2 layers** — New manifest or manifest extension for YourWojak-layers
-12. ❌ **Color system** — 48 base colors × 4 variants (192 total), color picker UI, canvas color application
-13. ❌ **Wire Sage wallet into Generator** — Connect button, address retrieval (WalletConnect already in `src/sage-wallet/`)
-14. ❌ **Mint button** — Dual flow: free (default, credit deduction) + paid toggle (XCH offer via WalletConnect)
-15. ❌ **Live price display** — Updates as traits selected, shows per-trait surcharges
-16. ❌ **Credit balance display** — Connect wallet → see credits, free mints remaining
-17. ❌ **Supply counter** — "X of 4,200 minted"
-18. ❌ **Congratulations page** — Success animation, MintGarden link, share options
-19. ❌ **Error handling UX** — Offer expiry countdown (15min), retry flows, clear messages
+11. ❌ **Integrate Phase 2 layers** — New manifest or manifest extension for YourWojak-layers (BLOCKED: layers in progress)
+12. ❌ **Color system** — 48 base colors × 4 variants (192 total), color picker UI, canvas color application (BLOCKED: layers)
+13. ✅ **Wire Sage wallet into Generator** — `MintProvider` wraps app, `useSageWallet()` + `useMint()` in ActionBar
+14. ✅ **Mint button** — Dual flow: free (default) + paid toggle, connect wallet if not connected
+15. ✅ **Live price display** — Pricing fetched from API, surcharge breakdown in MintFlowModal
+16. ✅ **Credit balance display** — Auto-fetches when wallet connects, shows in ActionBar + Leaderboard
+17. ✅ **Supply counter** — Shown next to mint button on desktop
+18. ✅ **Congratulations page** — MintFlowModal success step with NFT preview + MintGarden link
+19. ✅ **Error handling UX** — Offer expiry countdown, retry flows, expired/failed states in MintFlowModal
 
-### Phase D — Polish & Launch ❌ LATER
+### Phase D — Polish & Launch 🔄 IN PROGRESS
 
-20. ❌ **Credit leaderboard UI** — Lightbox in Generator, personal + public view
+20. ✅ **Credit leaderboard UI** — `CreditLeaderboard.tsx` lightbox, personal stats + ranked list
 21. ❌ **End-to-end testing** — Real test mints on MintGarden (~10 credits = 0.05 XCH budget)
 22. ❌ **Production deploy** — Migration to prod D1, credit-tracker worker, full Pages deploy
 23. ❌ **Soft launch** — Core community members first
@@ -627,6 +629,86 @@ PHASE2-PLAN.md                         # This file
 5. **Worker KV state contamination** — Delete `.wrangler/` directory to reset local state after failed runs
 6. **Sandbox restrictions** — `wrangler dev` needs `required_permissions: ['all']` to avoid "spawn Unknown system error -88"
 7. **Pages dev proxy conflict** — Use `wrangler pages dev dist` (build first) not `wrangler pages dev --local dist -- npx vite`
+
+### Crate Codebase Analysis (Koba42Corp/crate)
+
+Analyzed the full MojoFriends/Crate NFT platform codebase for reusable patterns. Key findings:
+
+**What we adopted / validated:**
+| Pattern | Source | Action |
+|---|---|---|
+| MintGarden API payload shape | `server/cloud/admin_functions/user_functions/queue_airdrop.js` | ✅ Validates our `prepare.ts` — same endpoint, same payload |
+| `edition_number` + `edition_total` in metadata | `queue_airdrop.js` | ✅ Added to our MintGarden API call |
+| Multi-gateway IPFS URIs | `ipfsService.js` | ✅ Added Pinata gateway + `ipfs.io` fallback to `data_uris` and `metadata_uris` |
+| `minting_tool` field in CHIP-0007 | `metadataService.js` | ✅ Added `"wojak-ink"` to our metadata |
+| WalletConnect `chia_takeOffer` shape | `wallet-connect.service.ts` | ✅ Our `src/sage-wallet/` already has this — `takeOffer(offer, fee?)` |
+| Observable connection state | `wallet-connect.service.ts` | ✅ Our SageWalletProvider uses `BehaviorSubject`-equivalent React state |
+| Session persistence / auto-reconnect | `wallet-connect.service.ts` | ✅ Already implemented in our `SageWalletProvider` |
+| `mintingInProgress` double-click prevention | `collection-detail.page.ts` | ✅ Will adopt in our mint button |
+| Dynamic button text reflecting wallet state | `collection-detail.page.ts` | ✅ Will adopt in our mint button |
+
+**What we consciously skipped:**
+| Pattern | Why Not |
+|---|---|
+| Memo-based payments (`chia_send` + blockchain scanner) | We use MintGarden offers directly — simpler, atomic, no scanner needed |
+| Spacescan API polling | We use MintGarden Events API |
+| Parse Server / MongoDB | We use Cloudflare D1 + Pages Functions |
+| Goby wallet support | Sage-only for simplicity |
+| Chia Event Subscriber (peer protocol) | Overkill for our volume; MintGarden Events API is sufficient |
+| Three-layer duplicate prevention | D1's `INSERT OR IGNORE` + atomic `db.batch()` handles our use cases |
+| Reservation-then-payment model | Our atomic offer model (MintGarden creates offer → user accepts → NFT minted in one transaction) is cleaner |
+| Collection-scoped credentials | We have one collection, not a multi-tenant platform |
+
+**Ideas worth considering for Phase 2.5:**
+- **NFT status state machine** (`preparing_mint → building_metadata → calling_mint_api → minted`) — could improve our `phase2_mints.status` tracking
+- **Express-style fallback URIs** — serve NFT images from our own CDN as backup to IPFS
+- **Refund flagging table** — for edge cases where IPFS upload succeeds but MintGarden fails
+- **Reservation health monitoring** — scheduled cleanup with metrics dashboard
+
+### Existing Sage Wallet Integration (Already Built)
+
+Our `src/sage-wallet/` provides a complete WalletConnect integration that's already app-wide:
+
+| Feature | Status | File |
+|---|---|---|
+| Connect/Disconnect | ✅ Ready | `SageWalletProvider.tsx` |
+| `chia_takeOffer(offer, fee)` | ✅ Ready | `SageWalletProvider.tsx` |
+| `chia_getAddress` | ✅ Ready | `SageWalletProvider.tsx` |
+| `chip0002_getAssetBalance` | ✅ Ready | `SageWalletProvider.tsx` |
+| Auto-reconnect on page load | ✅ Ready | `SageWalletProvider.tsx` |
+| NFT ownership check | ✅ Ready | `SageWalletProvider.tsx` |
+| `SageConnectButton` (3 variants) | ✅ Ready | `SageWalletComponents.tsx` |
+| `WalletFAB` (mobile) | ✅ Ready | `SageWalletComponents.tsx` |
+
+**`SageWalletProvider` wraps the entire app in `App.tsx`** — `useSageWallet()` is available in every component, including the Generator. No new wallet methods needed for minting.
+
+### Generator Integration Points
+
+The Generator page structure and integration plan for Phase 2:
+
+```
+Generator.tsx
+├── LayerTabs (category selection)
+├── PreviewCanvas (live preview)
+├── TraitSelector (trait grid with surcharge labels)  ← Phase 2: add surcharge per trait
+├── ActionBar                                         ← Phase 2: replace "Soon" with mint button
+│   ├── Random, Undo, Redo, Save, Export, Copy
+│   └── [MINT BUTTON] (line 342-358, currently placeholder)
+├── CreditBalanceDisplay (new)                        ← Phase 2: above preview or in ActionBar
+├── SupplyCounter (new)                               ← Phase 2: "127 / 4,200 minted"
+├── MintFlowModal (new)                               ← Phase 2: offer countdown, status, errors
+├── MintConfirmationModal (new)                       ← Phase 2: congratulations + MintGarden link
+└── CreditLeaderboardModal (new)                      ← Phase 2: lightbox leaderboard
+```
+
+**State architecture:** Keep `GeneratorContext` clean — create a separate `MintContext` (or `useMintState` hook) for:
+- Credit balance + free mints remaining
+- Current pricing (base + surcharge breakdown)
+- Mint flow state (idle → preparing → awaiting_offer → countdown → confirming → done)
+- Pending mint data (mint_id, offer_data, countdown timer)
+- Supply count
+
+The mint button reads from both `useGenerator()` (`selectedLayers`, `canExport`) and `useSageWallet()` (`address`, `takeOffer`).
 
 ### Royalty Split Discussion (Deferred)
 
