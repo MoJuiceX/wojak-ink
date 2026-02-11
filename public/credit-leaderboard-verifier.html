@@ -100,9 +100,39 @@
     .formula-box .formula { font-family: ui-monospace, monospace; font-size: 12px; color: var(--primary); }
     .formula-box .formula-desc { color: var(--text2); margin-top: 6px; }
     .formula-box .formula-desc code { font-family: ui-monospace, monospace; font-size: 11px; color: var(--text3); }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px 16px;
+      max-width: 900px;
+      margin: 0 auto;
+      gap: 16px;
+    }
+    .top-bar-title { font-size: 14px; font-weight: 600; color: var(--text2); }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--primary);
+      text-decoration: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 107, 0, 0.3);
+      background: rgba(255, 107, 0, 0.08);
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .back-link:hover { background: rgba(255, 107, 0, 0.15); border-color: rgba(255, 107, 0, 0.5); }
   </style>
 </head>
 <body>
+  <header class="top-bar">
+    <span class="top-bar-title">Credit Leaderboard</span>
+    <a href="/generator" class="back-link">← Back to Generator</a>
+  </header>
   <div class="container">
     <div class="leaderboard-header">
       <h1>Free Mint Credits Leaderboard</h1>

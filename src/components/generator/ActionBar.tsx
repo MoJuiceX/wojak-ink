@@ -25,7 +25,6 @@ import { useSageWallet } from '@/sage-wallet';
 import { useLayout } from '@/hooks/useLayout';
 import { exportImage } from '@/services/canvasRenderer';
 import { MintFlowModal } from './MintFlowModal';
-import { CreditLeaderboard } from './CreditLeaderboard';
 
 interface ActionBarProps {
   className?: string;
@@ -125,7 +124,6 @@ export function ActionBar({ className = '' }: ActionBarProps) {
   const [showCopied, setShowCopied] = useState(false);
   const [showDownloadSuccess, setShowDownloadSuccess] = useState(false);
   const [isMintModalOpen, setIsMintModalOpen] = useState(false);
-  const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
   const [mintType, setMintType] = useState<'free' | 'paid'>('free');
   const [showRandomMenu, setShowRandomMenu] = useState(false);
   const randomMenuRef = useRef<HTMLDivElement>(null);
@@ -559,10 +557,10 @@ export function ActionBar({ className = '' }: ActionBarProps) {
         </div>
       )}
 
-      {/* Leaderboard button — always visible */}
+      {/* Leaderboard — opens full verifier page with intro, formula, and wallet purchase details */}
       <ActionBarTooltip content="Leaderboard">
         <ActionButton
-          onClick={() => setIsLeaderboardOpen(true)}
+          onClick={() => { window.location.href = '/credit-leaderboard-verifier.html'; }}
           icon={<Trophy size={20} />}
           label="Leaderboard"
           badge={isWalletConnected && (credits?.free_mints_available ?? 0) > 0 ? credits!.free_mints_available : undefined}
@@ -652,11 +650,6 @@ export function ActionBar({ className = '' }: ActionBarProps) {
         }}
       />
 
-      {/* Credit Leaderboard Modal */}
-      <CreditLeaderboard
-        isOpen={isLeaderboardOpen}
-        onClose={() => setIsLeaderboardOpen(false)}
-      />
     </div>
   );
 }
