@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Credits — Formula & Ops — Wojak.ink</title>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --border: rgba(255,255,255,0.08);
+      --text: #fff;
+      --text2: #a0a0b0;
+      --text3: #606070;
+      --primary: #ff6b00;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px 24px 40px;
+      background-image: radial-gradient(ellipse 120% 80% at 50% -20%, rgba(255, 107, 0, 0.06), transparent 50%);
+    }
+    .container { max-width: 720px; margin: 0 auto; }
+    h1 { font-size: 22px; font-weight: 600; margin-bottom: 20px; letter-spacing: -0.03em; }
+    h2 { font-size: 16px; font-weight: 600; margin: 24px 0 10px; color: var(--text2); }
+    p, li { font-size: 14px; line-height: 1.65; color: var(--text2); margin-bottom: 10px; }
+    code { font-family: ui-monospace, monospace; font-size: 12px; color: var(--primary); background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px; }
+    .formula-block { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin: 16px 0; font-size: 13px; line-height: 1.7; }
+    .formula-block strong { color: var(--text); }
+    .back-link { display: inline-block; margin-bottom: 24px; font-size: 14px; color: var(--primary); text-decoration: none; }
+    .back-link:hover { text-decoration: underline; }
+    ul { margin-left: 20px; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/credit-leaderboard-verifier.html" class="back-link">← Back to Free Mint Credits Leaderboard</a>
+    <h1>Credits: Formula &amp; Ops</h1>
+    <p>How free-mint credits are calculated and how the system is monitored.</p>
+
+    <h2>Formula</h2>
+    <div class="formula-block">
+      <strong>credits</strong> = 50 × (price ÷ floor) × (1 + 0.2 × ln(price ÷ floor))<br>
+      <span style="color: var(--text3); font-size: 12px;">price = XCH you paid · floor = floor price at purchase · ln = natural log</span>
+    </div>
+    <p>Only <strong>XCH</strong> buys earn credits; CAT-only trades are excluded. Stored values use hundredths (divide by 100 for display). One free mint = 100 credits = 10,000 stored units.</p>
+
+    <h2>Operational guide</h2>
+    <p>Alerting, reconciliation, and health checks are documented in the repository:</p>
+    <ul>
+      <li><code>docs/CREDIT-LEADERBOARD-BULLETPROOF.md</code> — Alerting (daily worker + webhook), reconciliation (weekly audit), health endpoint (<code>GET /api/credits/status</code>).</li>
+      <li><code>docs/CREDITS-FORMULA.md</code> — Full formula and constants (single source of truth).</li>
+      <li><code>docs/CREDITS-AUDIT-GUIDE.md</code> — How to audit and reconcile with MintGarden.</li>
+    </ul>
+    <p>If you have access to the repo, open those files for setup (webhook URL, cron, GitHub Actions workflow).</p>
+  </div>
+</body>
+</html>

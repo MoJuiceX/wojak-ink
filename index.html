@@ -6,7 +6,7 @@
     <link rel="manifest" href="/manifest.json" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#FF8C32" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wojak.ink" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
@@ -44,10 +44,8 @@
     <link rel="dns-prefetch" href="https://api.spacescan.io" />
     <link rel="dns-prefetch" href="https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link" />
 
-    <!-- Preload critical above-the-fold assets -->
+    <!-- Preload critical above-the-fold assets (only preload what is used immediately) -->
     <link rel="preload" href="/assets/gallery-previews/wojak.webp" as="image" type="image/webp" />
-    <link rel="preload" href="/icons/icon-192.png" as="image" />
-    <link rel="preload" href="/assets/nft-data/metadata.json" as="fetch" crossorigin />
 
     <!-- Structured Data -->
     <script type="application/ld+json">

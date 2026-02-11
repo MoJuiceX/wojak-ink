@@ -11,7 +11,7 @@ import type { UILayerName } from '@/lib/layerRegistry';
 import { DEFAULT_BASE_PATH, DEFAULT_MOUTHBASE_PATH, DEFAULT_CLOTHES_PATH } from '@/lib/layerRegistry';
 import { UI_ORDER } from '@/lib/layerRegistry';
 import type { SelectionResolver } from '@/lib/selectionResolver';
-import { KNOWN_TRAIT_IDS, CLOTHES_NO_HEAD_SUITS } from '@/lib/generatorTraitIds';
+import { KNOWN_TRAIT_IDS, CLOTHES_NO_HEAD_SUITS, CLOTHES_NO_VR_HEADSET } from '@/lib/generatorTraitIds';
 
 export type SelectedLayers = Partial<Record<GeneratorLayerName, string>>;
 
@@ -496,6 +496,42 @@ function ruleBubbleGumDisablesMouthItem(resolver: SelectionResolver): RuleResult
 }
 
 /**
+ * Bepe suit and Pepe suit: VR Headset cannot be selected (mutually exclusive).
+ */
+function ruleBepePepeSuitDisablesVRHeadset(resolver: SelectionResolver): RuleResult {
+  const clothesTraitId = resolver.getTraitId('Clothes');
+  const hasBepeOrPepeSuit = clothesTraitId !== null && CLOTHES_NO_VR_HEADSET.includes(clothesTraitId);
+  const eyesTraitId = resolver.getTraitId('Eyes');
+  const hasVRHeadset = eyesTraitId === KNOWN_TRAIT_IDS.Eyes_VRHeadset;
+
+  if (hasBepeOrPepeSuit) {
+    const disabledEyesOptions = ['VR Headset', 'VR headset', 'VR-Headset'];
+    const disabledEyesReasons = {
+      'VR Headset': 'Not available with Bepe or Pepe suit',
+      'VR headset': 'Not available with Bepe or Pepe suit',
+      'VR-Headset': 'Not available with Bepe or Pepe suit',
+    };
+    if (hasVRHeadset) {
+      return {
+        disabledLayers: [],
+        reason: 'Deselect Bepe or Pepe suit',
+        forceSelections: { Eyes: '' },
+        clearSelections: ['Eyes'],
+        disabledOptions: { Eyes: disabledEyesOptions },
+        disabledOptionReasons: { Eyes: disabledEyesReasons },
+      };
+    }
+    return {
+      disabledLayers: [],
+      disabledOptions: { Eyes: disabledEyesOptions },
+      disabledOptionReasons: { Eyes: disabledEyesReasons },
+    };
+  }
+
+  return { disabledLayers: [] };
+}
+
+/**
  * Full-face masks (Skull masks, Fake It) disable Laser Eyes (Eyes layer; path check for mask names)
  */
 function ruleFullFaceMaskDisablesLaserEyes(resolver: SelectionResolver): RuleResult {
@@ -577,6 +613,7 @@ const RULES = [
   ruleAstronautDisablesMouthOptions,
   ruleAstronautCopiumMaskMutualExclusion,
   ruleAstronautDisablesNightVision,
+  ruleBepePepeSuitDisablesVRHeadset,
   ruleFullBodySuitNoHead,
   ruleFacialHairRequiresMouthBase,
   ruleMaskBlocksOtherLayers,

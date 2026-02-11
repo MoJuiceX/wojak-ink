@@ -18,6 +18,17 @@ export const FULL_FACE_MASKS = ['skull_mask', 'skull-mask', 'fake_it', 'fake-it'
 /** Heads that need EyesOverHead virtual layer (right half of eyes rendered above head) */
 export const HEADS_NEEDING_EYES_OVERLAY = ['clown', 'pirate', 'ronin', 'supa', 'saiyan'];
 
+/** Full-body suits where first 50% of eyes render under suit layer one (path substrings for layer builder). */
+export const SUITS_NEEDING_EYES_UNDER = [
+  'gopher-suit',
+  'sonic-suit',
+  'proof-of-prayer',
+  'pickle-suit',
+  'goose-suit',
+  'bepe-suit',
+  'pepe-suit',
+];
+
 /** Base z-index values for each layer (including virtual layers).
  * Composite clothes (suits, Proof-of-prayer, etc.) draw under MouthBase and MouthItem so Pizza/Pipe show on top.
  * Sonic suit is regular Clothes (z 2), not composite. */
@@ -28,6 +39,8 @@ export const LAYER_Z_INDEX: Record<string, number> = {
   Clothes: 2,
   ClothesComposite0: 2.1,  // composite layer0 (over base) — under MouthBase and MouthItem
   ClothesComposite1: 2.2,  // composite layer1 on top of layer0
+  EyesUnderSuit: 1.5,      // first 50% of eyes under suit layer one (Gopher, Sonic, Proof of Prayer, etc.)
+  EyesOverSuit: 2.25,      // remaining 50% of eyes on top of suit layer one
   ClothesAddon: 3,
   FacialHair: 4,
   MouthBase: 5,

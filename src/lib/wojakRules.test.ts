@@ -179,6 +179,35 @@ describe('wojakRules', () => {
       expect(result.disabledOptions?.Eyes).toContain('Night Vision');
     });
 
+    it('Bepe suit and Pepe suit disable VR Headset (Eyes); clear Eyes if VR Headset selected', () => {
+      const resolver = createMockResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          Clothes: '/g2/Clothes/Clothes_Bepe-suit_layer0.png',
+          MouthBase: DEFAULT_MOUTHBASE_PATH,
+          Eyes: '/g2/Face-wear/Face-wear_VR-headset.png',
+        },
+        { Clothes: 'Clothes_Bepe-suit', Eyes: KNOWN_TRAIT_IDS.Eyes_VRHeadset }
+      );
+      const result = getDisabledLayers(resolver);
+      expect(result.disabledOptions?.Eyes).toContain('VR Headset');
+      expect(result.forceSelections?.Eyes).toBe('');
+      expect(result.clearSelections).toContain('Eyes');
+    });
+
+    it('Bepe or Pepe suit: VR Headset option disabled when no Eyes selected', () => {
+      const resolver = createMockResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          Clothes: '/g2/Clothes/Clothes_Pepe-suit_layer0.png',
+          MouthBase: DEFAULT_MOUTHBASE_PATH,
+        },
+        { Clothes: 'Clothes_Pepe-suit' }
+      );
+      const result = getDisabledLayers(resolver);
+      expect(result.disabledOptions?.Eyes).toContain('VR Headset');
+    });
+
     it('disables MouthItem when Pipe (MouthBase) is selected', () => {
       const resolver = createMockResolver(
         {

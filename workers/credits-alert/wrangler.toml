@@ -1,0 +1,15 @@
+name = "wojak-credits-alert"
+main = "worker.ts"
+compatibility_date = "2024-01-01"
+
+# Run daily at 8:00 AM UTC (after credit-tracker has run several times)
+[triggers]
+crons = ["0 8 * * *"]
+
+# Set in dashboard or via wrangler secret:
+# - SITE_BASE_URL (var): e.g. https://wojak.ink
+# - CREDIT_TRACKER_RUN_URL (var, optional): e.g. https://wojak-credit-tracker.<account>.workers.dev/run
+# - ALERT_WEBHOOK_URL (secret): Slack/Discord webhook URL for alerts
+
+[vars]
+SITE_BASE_URL = "https://wojak.ink"

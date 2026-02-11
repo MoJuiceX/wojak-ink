@@ -2,6 +2,8 @@
 
 Step-by-step plan to make the credit leaderboard public with all data since **January 5th** and ongoing sales, using **floor price at time of purchase** for credit calculation. Follow this order; each step assumes the previous ones are done.
 
+**See also:** **[CREDIT-LEADERBOARD-SYSTEM.md](./CREDIT-LEADERBOARD-SYSTEM.md)** — full system documentation (purpose, architecture, workers, APIs, runbooks). [CREDIT-LEADERBOARD-BULLETPROOF.md](./CREDIT-LEADERBOARD-BULLETPROOF.md) for alerting, reconciliation, health endpoint, and ops. [CREDITS-FORMULA.md](./CREDITS-FORMULA.md) for the formula and constants.
+
 ---
 
 ## Run everything (one script)

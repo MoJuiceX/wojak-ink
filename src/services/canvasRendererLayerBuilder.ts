@@ -13,6 +13,7 @@ import {
   NINJA_COVERING_MASKS,
   FULL_FACE_MASKS,
   HEADS_NEEDING_EYES_OVERLAY,
+  SUITS_NEEDING_EYES_UNDER,
 } from '@/services/canvasRendererConstants';
 import type { RenderLayer } from '@/services/canvasRendererTypes';
 
@@ -131,6 +132,18 @@ function isFullFaceMask(path: string | undefined): boolean {
   return FULL_FACE_MASKS.some((mask) => pathContains(path, mask));
 }
 
+/** Full-body suits (Gopher, Sonic, Proof of Prayer, Pickle, Goose, Bepe, Pepe) where first 50% of eyes render under suit layer one. */
+function isSuitNeedingEyesUnder(selectedLayers: SelectedLayers): boolean {
+  const clothesPath = selectedLayers.Clothes;
+  if (!clothesPath) return false;
+  return SUITS_NEEDING_EYES_UNDER.some((id) => pathContains(clothesPath, id));
+}
+
+function isVRHeadset(path: string | undefined): boolean {
+  if (!path) return false;
+  return pathContains(path, 'vr-headset');
+}
+
 // ============ Layer Building ============
 
 /**
@@ -159,6 +172,7 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
   const hasCopium = isCopiumMask(selectedLayers);
   const hasLayersAboveHead = needsLayersAboveHead(selectedLayers);
   const hasFullFaceMask = isFullFaceMask(selectedLayers.Mask);
+  const hasSuitEyesUnder = !hasAstronaut && isSuitNeedingEyesUnder(selectedLayers);
 
   for (const layerName of RENDER_ORDER) {
     let path = selectedLayers[layerName];
@@ -204,6 +218,26 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
         if (hasNinja && maskCoversNinja) skipLayer = true;
         if (hasEyePatchSelected && hasHannibal) skipLayer = true;
         if (hasLayersAboveHead && !hasEyePatchSelected) skipLayer = true;
+        // Full-body suits: first 70% of eyes under suit layer one, rest on top (on top of base). VR headset: 65% + 10px boundary left.
+        if (!skipLayer && hasSuitEyesUnder && eyesPath) {
+          const fractionUnderSuit = isVRHeadset(eyesPath) ? 0.65 : 0.7;
+          const clipBoundaryOffsetPx = isVRHeadset(eyesPath) ? 10 : undefined; // VR headset: move boundary 10px left
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.EyesUnderSuit,
+            layerName: 'EyesUnderSuit',
+            clipRightPercent: 1 - fractionUnderSuit,
+            clipBoundaryOffsetPx,
+          });
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.EyesOverSuit,
+            layerName: 'EyesOverSuit',
+            clipLeftPercent: fractionUnderSuit,
+            clipBoundaryOffsetPx,
+          });
+          skipLayer = true;
+        }
         break;
 
       case 'FacialHair':

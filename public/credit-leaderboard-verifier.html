@@ -22,15 +22,39 @@
       --bronze: #cd7f32;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 20px; }
-    .container { max-width: 900px; margin: 0 auto; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 12px 20px 32px;
+      background-image: radial-gradient(ellipse 120% 80% at 50% -20%, rgba(255, 107, 0, 0.06), transparent 50%);
+    }
+    .container { max-width: 960px; margin: 0 auto; }
 
-    .leaderboard-header { margin-bottom: 24px; }
-    h1 { font-size: 22px; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.02em; }
-    .header-desc { color: var(--text2); font-size: 14px; line-height: 1.6; }
+    .leaderboard-header { margin-bottom: 28px; }
+    h1 {
+      font-size: 26px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      letter-spacing: -0.03em;
+      color: var(--text);
+    }
+    .header-sub { color: var(--text3); font-size: 14px; font-weight: 500; margin-bottom: 14px; }
+    .header-desc { color: var(--text2); font-size: 14px; line-height: 1.65; max-width: 56em; }
     .header-desc strong { color: var(--text); font-weight: 500; }
 
     .loading { text-align: center; padding: 48px; color: var(--text2); line-height: 1.5; }
+    .skeleton-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .skeleton-table th { text-align: left; padding: 14px 20px; color: var(--text3); font-weight: 500; font-size: 12px; border-bottom: 1px solid var(--border); }
+    .skeleton-table td { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+    .skeleton-row .skeleton-bar { height: 12px; border-radius: 6px; background: linear-gradient(90deg, var(--surface-hover) 0%, rgba(255,255,255,0.06) 50%, var(--surface-hover) 100%); background-size: 200% 100%; animation: skeleton-shine 1.2s ease-in-out infinite; }
+    .skeleton-row .skeleton-bar.w-8 { width: 32px; }
+    .skeleton-row .skeleton-bar.w-24 { width: 100px; }
+    .skeleton-row .skeleton-bar.w-16 { width: 64px; }
+    @keyframes skeleton-shine { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .skeleton-spinner { width: 32px; height: 32px; margin: 0 auto 12px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
     .error { background: rgba(239,68,68,0.15); color: #fca5a5; padding: 12px 16px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; }
     .sort-arrow { font-size: 10px; margin-left: 4px; color: var(--text3); opacity: 0.5; }
     th.sortable.active .sort-arrow { color: var(--primary); opacity: 1; }
@@ -38,14 +62,26 @@
     .btn-load-more { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); cursor: pointer; font-size: 13px; }
     .btn-load-more:hover { color: var(--text); border-color: var(--border-hover); }
 
-    .table-wrap { overflow-x: auto; border-radius: 14px; background: var(--surface); box-shadow: 0 4px 24px rgba(0,0,0,0.3); border: 1px solid var(--border); }
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 16px;
+      background: var(--surface);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+    }
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th { text-align: left; padding: 14px 18px; color: var(--text3); font-weight: 500; font-size: 12px; text-transform: none; letter-spacing: 0.02em; border-bottom: 1px solid var(--border); }
-    td { padding: 16px 18px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+    th { text-align: left; padding: 14px 20px; color: var(--text3); font-weight: 500; font-size: 12px; text-transform: none; letter-spacing: 0.02em; border-bottom: 1px solid var(--border); }
+    td { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+    @media (min-width: 900px) { th { padding: 16px 24px; } td { padding: 18px 24px; } }
     tr:last-child td { border-bottom: none; }
-    tr.wallet-row { cursor: pointer; transition: background 0.15s; }
+    tr.wallet-row {
+      cursor: pointer;
+      transition: box-shadow 0.2s;
+    }
     tr.wallet-row:nth-child(4n+1):not(.rank-1):not(.rank-2):not(.rank-3) { background: rgba(255,255,255,0.02); }
-    tr.wallet-row:hover { background: var(--surface-hover); }
+    /* Hover: same overlay on every row so light and dark stripes both change visibly */
+    tr.wallet-row:hover { box-shadow: inset 0 0 0 999px rgba(255,255,255,0.07), inset 0 0 0 1px rgba(255,255,255,0.06); }
+    tr.wallet-row.rank-1:hover, tr.wallet-row.rank-2:hover, tr.wallet-row.rank-3:hover { box-shadow: inset 0 0 0 999px rgba(255,255,255,0.06), inset 0 0 0 1px rgba(255,255,255,0.08); }
     tr.wallet-row.expanded { background: var(--primary-muted); }
     tr.wallet-row.rank-1 { background: linear-gradient(90deg, rgba(251,191,36,0.08) 0%, transparent 100%); border-left: 3px solid var(--gold); }
     tr.wallet-row.rank-2 { background: linear-gradient(90deg, rgba(148,163,184,0.06) 0%, transparent 100%); border-left: 3px solid var(--silver); }
@@ -54,7 +90,19 @@
     tr.wallet-row.rank-1 .rank { color: var(--gold); }
     tr.wallet-row.rank-2 .rank { color: var(--silver); }
     tr.wallet-row.rank-3 .rank { color: var(--bronze); }
-    .rank { width: 44px; font-variant-numeric: tabular-nums; color: var(--text3); }
+    .rank { width: 52px; font-variant-numeric: tabular-nums; color: var(--text3); }
+    .rank-cell { display: flex; align-items: center; gap: 8px; }
+    .rank-badge {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .rank-badge.rank-1st { background: rgba(251,191,36,0.2); color: var(--gold); }
+    .rank-badge.rank-2nd { background: rgba(148,163,184,0.15); color: var(--silver); }
+    .rank-badge.rank-3rd { background: rgba(205,127,50,0.2); color: var(--bronze); }
     th.sortable { cursor: pointer; user-select: none; }
     th.sortable:hover { color: var(--text2); }
     .wallet-cell { font-family: ui-monospace, monospace; font-size: 13px; color: var(--text); }
@@ -86,7 +134,19 @@
     .expand-loading { padding: 20px; text-align: center; color: var(--text3); font-size: 13px; }
     .expand-empty { padding: 16px; color: var(--text3); font-size: 13px; }
 
-    .formula-box { position: relative; margin-top: 20px; padding: 14px 44px 14px 18px; background: rgba(0,0,0,0.25); border-radius: 10px; border: 1px solid var(--border); font-size: 12px; line-height: 1.6; min-width: 520px; }
+    .formula-box {
+      position: relative;
+      margin-top: 20px;
+      padding: 14px 44px 14px 18px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      font-size: 12px;
+      line-height: 1.6;
+      max-width: 100%;
+      min-width: 0;
+    }
+    @media (min-width: 560px) { .formula-box { min-width: 520px; } }
     .formula-info-wrap { position: absolute; top: 12px; right: 12px; }
     .formula-info-btn { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text3); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; }
     .formula-info-btn:hover { color: var(--primary); border-color: var(--primary); }
@@ -101,43 +161,52 @@
     .formula-box .formula-desc { color: var(--text2); margin-top: 6px; }
     .formula-box .formula-desc code { font-family: ui-monospace, monospace; font-size: 11px; color: var(--text3); }
 
-    .top-bar {
+    /* Fixed X: independent of layout, top-right corner of viewport */
+    .top-bar-close {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text2);
+      text-decoration: none;
+      font-size: 20px;
+      line-height: 1;
+      font-weight: 300;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .top-bar-close:hover { color: var(--text); border-color: var(--border-hover); background: var(--surface-hover); }
+
+    .trust-line {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 20px 16px;
-      max-width: 900px;
-      margin: 0 auto;
-      gap: 16px;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: var(--text3);
     }
-    .top-bar-title { font-size: 14px; font-weight: 600; color: var(--text2); }
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--primary);
-      text-decoration: none;
-      padding: 8px 14px;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 107, 0, 0.3);
-      background: rgba(255, 107, 0, 0.08);
-      transition: background 0.15s, border-color 0.15s;
-    }
-    .back-link:hover { background: rgba(255, 107, 0, 0.15); border-color: rgba(255, 107, 0, 0.5); }
+    .trust-line a { color: var(--primary); text-decoration: none; }
+    .trust-line a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
-  <header class="top-bar">
-    <span class="top-bar-title">Credit Leaderboard</span>
-    <a href="/generator" class="back-link">← Back to Generator</a>
-  </header>
+  <a href="/generator" class="top-bar-close" aria-label="Close">×</a>
   <div class="container">
     <div class="leaderboard-header">
       <h1>Free Mint Credits Leaderboard</h1>
+      <p class="header-sub">Ranked by all-time credits earned</p>
       <p class="header-desc">
-        Ranked by all-time credits earned. Credits come from XCH spent on Wojak Farmers Plot NFTs — 100 credits gets you one free mint. Spend them in the <strong>Wojak Generator</strong> to create <strong>YourWojak</strong> NFTs. YourWojak NFT creators earn <strong>10% royalties forever</strong>. This is phase 1 of the Wojak Generator — after 4,200 mints, the royalty structure will change.
+        Credits come from XCH spent on Wojak Farmers Plot NFTs — 100 credits gets you one free mint. Spend them in the <strong>Wojak Generator</strong> to create <strong>YourWojak</strong> NFTs. YourWojak NFT creators earn <strong>10% royalties forever</strong>. This is phase 1 of the Wojak Generator — after 4,200 mints, the royalty structure will change.
       </p>
       <div class="formula-box">
         <div class="formula-info-wrap" id="formula-info-wrap">
@@ -154,11 +223,31 @@
         <div class="formula-desc">
           <code>price</code> = XCH you paid · <code>floor</code> = floor price at purchase · <code>ln</code> = natural log
         </div>
+        <div class="formula-desc" style="margin-top: 8px;">
+          <a href="/credits-docs.html" style="color: var(--primary); text-decoration: none;">Formula &amp; ops guide</a> — full formula, alerting, reconciliation.
+        </div>
       </div>
     </div>
 
     <div id="error" class="error" style="display:none"></div>
-    <div id="loading" class="loading" style="display:none">Loading leaderboard…</div>
+    <div id="loading" class="loading" style="display:none">
+      <div class="skeleton-spinner"></div>
+      <p>Loading leaderboard…</p>
+      <div id="skeleton-table-wrap" class="table-wrap" style="margin-top:24px">
+        <table class="skeleton-table">
+          <thead>
+            <tr><th class="rank">#</th><th>Wallet</th><th>Credits</th><th>Available</th><th>Paid mint</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr class="skeleton-row"><td><span class="skeleton-bar w-8"></span></td><td><span class="skeleton-bar w-24"></span></td><td><span class="skeleton-bar w-16"></span></td><td><span class="skeleton-bar w-8"></span></td><td><span class="skeleton-bar w-8"></span></td><td></td></tr>
+            <tr class="skeleton-row"><td><span class="skeleton-bar w-8"></span></td><td><span class="skeleton-bar w-24"></span></td><td><span class="skeleton-bar w-16"></span></td><td><span class="skeleton-bar w-8"></span></td><td><span class="skeleton-bar w-8"></span></td><td></td></tr>
+            <tr class="skeleton-row"><td><span class="skeleton-bar w-8"></span></td><td><span class="skeleton-bar w-24"></span></td><td><span class="skeleton-bar w-16"></span></td><td><span class="skeleton-bar w-8"></span></td><td><span class="skeleton-bar w-8"></span></td><td></td></tr>
+            <tr class="skeleton-row"><td><span class="skeleton-bar w-8"></span></td><td><span class="skeleton-bar w-24"></span></td><td><span class="skeleton-bar w-16"></span></td><td><span class="skeleton-bar w-8"></span></td><td><span class="skeleton-bar w-8"></span></td><td></td></tr>
+            <tr class="skeleton-row"><td><span class="skeleton-bar w-8"></span></td><td><span class="skeleton-bar w-24"></span></td><td><span class="skeleton-bar w-16"></span></td><td><span class="skeleton-bar w-8"></span></td><td><span class="skeleton-bar w-8"></span></td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
     <div id="table-wrap" class="table-wrap" style="display:none">
       <table>
@@ -174,6 +263,10 @@
         </thead>
         <tbody id="tbody"></tbody>
       </table>
+    </div>
+    <div id="trust-line" class="trust-line" style="display:none">
+      <span>Live from <a href="https://wojak.ink">Wojak.ink</a></span>
+      <span>Updates every 5 min</span>
     </div>
     <div id="load-more-wrap" class="load-more-wrap" style="display:none">
       <button type="button" id="btn-load-more" class="btn-load-more">Load more</button>
@@ -270,6 +363,13 @@
       }));
     }
 
+    function rankCell(rank, idx) {
+      if (idx === 0) return `<td class="rank"><div class="rank-cell">${rank}<span class="rank-badge rank-1st">1st</span></div></td>`;
+      if (idx === 1) return `<td class="rank"><div class="rank-cell">${rank}<span class="rank-badge rank-2nd">2nd</span></div></td>`;
+      if (idx === 2) return `<td class="rank"><div class="rank-cell">${rank}<span class="rank-badge rank-3rd">3rd</span></div></td>`;
+      return `<td class="rank">${rank}</td>`;
+    }
+
     function renderTable(data) {
       const tbody = document.getElementById('tbody');
       tbody.innerHTML = '';
@@ -279,7 +379,7 @@
         tr.className = 'wallet-row' + (idx < 3 ? ' rank-' + (idx + 1) : '');
         tr.dataset.wallet = row.wallet;
         tr.innerHTML = `
-          <td class="rank">${row.rank}</td>
+          ${rankCell(row.rank, idx)}
           <td class="wallet-cell">${truncateWallet(row.wallet)}</td>
           <td class="credits-cell">${row.earned}</td>
           <td class="mints-cell">${row.freeMints}</td>
@@ -386,6 +486,7 @@
         hasMore = hm;
         document.getElementById('loading').style.display = 'none';
         document.getElementById('table-wrap').style.display = 'block';
+        document.getElementById('trust-line').style.display = 'flex';
         document.getElementById('load-more-wrap').style.display = hasMore ? 'block' : 'none';
         renderTable();
       } catch (err) {
@@ -401,6 +502,7 @@
           hasMore = false;
           document.getElementById('loading').style.display = 'none';
           document.getElementById('table-wrap').style.display = 'block';
+          document.getElementById('trust-line').style.display = 'flex';
           document.getElementById('load-more-wrap').style.display = 'none';
           renderTable();
           return;

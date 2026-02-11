@@ -193,6 +193,8 @@ SpaceScan is EXTREMELY strict: 1 request per 20 seconds!
 - `src/contexts/GeneratorContext.tsx` - Selection state
 - `src/lib/wojakRules.ts` - Layer compatibility rules
 
+**Credits & free mints:** Users earn credits by buying Wojak Farmers Plot NFTs with XCH; 100 credits = 1 free Your Wojak mint. Balance from `/api/credits/balance`; leaderboard from `/api/credits/leaderboard`. Full system (workers, formula, APIs, runbooks): **docs/CREDIT-LEADERBOARD-SYSTEM.md**.
+
 ---
 
 ### 2.5 Media Hub Page

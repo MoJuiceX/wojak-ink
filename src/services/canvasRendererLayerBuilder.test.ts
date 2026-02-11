@@ -115,5 +115,52 @@ describe('canvasRendererLayerBuilder', () => {
       expect(layers[0].layerName).toBe('Base');
       expect(layers[0].zIndex).toBe(LAYER_Z_INDEX.Base);
     });
+
+    it('full-body suit (Gopher, Sonic, Proof of Prayer, etc.) + Eyes: first 70% under suit, rest on top', () => {
+      const eyesPath = '/g2/Face-wear/EYE_Shades_blue.png';
+      const selectedLayers: SelectedLayers = {
+        Base: DEFAULT_BASE_PATH,
+        Clothes: '/g2/Clothes/Clothes_gopher-suit_layer0.png',
+        MouthBase: DEFAULT_MOUTHBASE_PATH,
+        Eyes: eyesPath,
+      };
+      const layers = buildRenderLayers(selectedLayers);
+      const names = layers.map((l) => l.layerName);
+      expect(names).not.toContain('Eyes');
+      expect(names).toContain('EyesUnderSuit');
+      expect(names).toContain('EyesOverSuit');
+      const under = layers.find((l) => l.layerName === 'EyesUnderSuit');
+      const over = layers.find((l) => l.layerName === 'EyesOverSuit');
+      expect(under?.path).toBe(eyesPath);
+      expect(under?.zIndex).toBe(LAYER_Z_INDEX.EyesUnderSuit);
+      expect(under?.clipRightPercent).toBeCloseTo(0.3); // 1 - 0.7: show left 70%
+      expect(over?.path).toBe(eyesPath);
+      expect(over?.zIndex).toBe(LAYER_Z_INDEX.EyesOverSuit);
+      expect(over?.clipLeftPercent).toBeCloseTo(0.7); // show right 30%
+      const baseIdx = layers.findIndex((l) => l.layerName === 'Base');
+      const underIdx = layers.findIndex((l) => l.layerName === 'EyesUnderSuit');
+      const clothesIdx = layers.findIndex((l) => l.layerName === 'Clothes');
+      const overIdx = layers.findIndex((l) => l.layerName === 'EyesOverSuit');
+      expect(layers[underIdx].zIndex).toBeGreaterThan(layers[baseIdx].zIndex);
+      expect(layers[clothesIdx].zIndex).toBeGreaterThan(layers[underIdx].zIndex);
+      expect(layers[overIdx].zIndex).toBeGreaterThan(layers[clothesIdx].zIndex);
+    });
+
+    it('VR headset + full-body suit: 65% under suit + 10px boundary left', () => {
+      const eyesPath = '/g2/Face-wear/Face-wear_VR-headset.png';
+      const selectedLayers: SelectedLayers = {
+        Base: DEFAULT_BASE_PATH,
+        Clothes: '/g2/Clothes/Clothes_gopher-suit_layer0.png',
+        MouthBase: DEFAULT_MOUTHBASE_PATH,
+        Eyes: eyesPath,
+      };
+      const layers = buildRenderLayers(selectedLayers);
+      const under = layers.find((l) => l.layerName === 'EyesUnderSuit');
+      const over = layers.find((l) => l.layerName === 'EyesOverSuit');
+      expect(under?.clipRightPercent).toBeCloseTo(0.35); // 1 - 0.65: left 65%
+      expect(over?.clipLeftPercent).toBeCloseTo(0.65); // right 35%
+      expect(under?.clipBoundaryOffsetPx).toBe(10);
+      expect(over?.clipBoundaryOffsetPx).toBe(10);
+    });
   });
 });

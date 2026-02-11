@@ -45,56 +45,70 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const sort = url.searchParams.get('sort') || 'earned';
 
   try {
-    const earnedMap = new Map<string, number>();
-    const spentMap = new Map<string, number>();
-    const boughtMap = new Map<string, number>();
-
-    const earnedRows = await env.DB.prepare(
-      'SELECT wallet_address, SUM(credits_earned) AS total FROM credit_events GROUP BY wallet_address'
-    ).all<{ wallet_address: string; total: number }>();
-    for (const r of earnedRows.results || []) {
-      earnedMap.set(r.wallet_address, r.total);
-    }
-
-    const spentRows = await env.DB.prepare(
-      'SELECT wallet_address, SUM(credits_spent) AS total FROM credit_spends GROUP BY wallet_address'
-    ).all<{ wallet_address: string; total: number }>();
-    for (const r of spentRows.results || []) {
-      spentMap.set(r.wallet_address, r.total);
-    }
-
-    let boughtRows: { results?: { wallet_address: string; count: number }[] } = { results: [] };
+    const query = `
+      WITH wallets AS (
+        SELECT wallet_address FROM credit_events
+        UNION
+        SELECT wallet_address FROM credit_spends
+        UNION
+        SELECT wallet_address FROM phase2_mints WHERE mint_type = 'paid' AND status = 'minted'
+      ),
+      earned AS (
+        SELECT wallet_address, SUM(credits_earned) AS total FROM credit_events GROUP BY wallet_address
+      ),
+      spent AS (
+        SELECT wallet_address, SUM(credits_spent) AS total FROM credit_spends GROUP BY wallet_address
+      ),
+      bought AS (
+        SELECT wallet_address, COUNT(*) AS cnt FROM phase2_mints
+        WHERE mint_type = 'paid' AND status = 'minted'
+        GROUP BY wallet_address
+      )
+      SELECT
+        w.wallet_address AS wallet,
+        COALESCE(e.total, 0) AS earned,
+        COALESCE(s.total, 0) AS spent,
+        COALESCE(b.cnt, 0) AS yourWojakBought
+      FROM wallets w
+      LEFT JOIN earned e ON w.wallet_address = e.wallet_address
+      LEFT JOIN spent s ON w.wallet_address = s.wallet_address
+      LEFT JOIN bought b ON w.wallet_address = b.wallet_address
+    `;
+    let rows: { results?: { wallet: string; earned: number; spent: number; yourWojakBought: number }[] };
     try {
-      boughtRows = await env.DB.prepare(
-        `SELECT wallet_address, COUNT(*) AS count FROM phase2_mints
-         WHERE mint_type = 'paid' AND status = 'minted'
-         GROUP BY wallet_address`
-      ).all<{ wallet_address: string; count: number }>();
-    } catch {
-      // phase2_mints may not exist or be empty
-    }
-    for (const r of boughtRows.results || []) {
-      boughtMap.set(r.wallet_address, r.count);
+      rows = await env.DB.prepare(query).all<
+        { wallet: string; earned: number; spent: number; yourWojakBought: number }
+      >();
+    } catch (e) {
+      const err = String(e);
+      if (err.includes('phase2_mints') || err.includes('no such table')) {
+        rows = await env.DB.prepare(
+          `WITH wallets AS (
+            SELECT wallet_address FROM credit_events
+            UNION
+            SELECT wallet_address FROM credit_spends
+          ),
+          earned AS (SELECT wallet_address, SUM(credits_earned) AS total FROM credit_events GROUP BY wallet_address),
+          spent AS (SELECT wallet_address, SUM(credits_spent) AS total FROM credit_spends GROUP BY wallet_address)
+          SELECT w.wallet_address AS wallet, COALESCE(e.total, 0) AS earned, COALESCE(s.total, 0) AS spent, 0 AS yourWojakBought
+          FROM wallets w
+          LEFT JOIN earned e ON w.wallet_address = e.wallet_address
+          LEFT JOIN spent s ON w.wallet_address = s.wallet_address`
+        ).all<{ wallet: string; earned: number; spent: number; yourWojakBought: number }>();
+      } else {
+        throw e;
+      }
     }
 
-    const allWallets = new Set([
-      ...earnedMap.keys(),
-      ...spentMap.keys(),
-      ...boughtMap.keys(),
-    ]);
-    const entries = [...allWallets].map((wallet) => {
-      const earned = earnedMap.get(wallet) || 0;
-      const spent = spentMap.get(wallet) || 0;
-      const balance = earned - spent;
-      const mintsUsed = Math.floor(spent / 10000);
-      const yourWojakBought = boughtMap.get(wallet) || 0;
+    const entries = (rows.results || []).map((r) => {
+      const balance = r.earned - r.spent;
       return {
-        wallet,
-        earned,
-        spent,
+        wallet: r.wallet,
+        earned: r.earned,
+        spent: r.spent,
         balance,
-        mintsUsed,
-        yourWojakBought,
+        mintsUsed: Math.floor(r.spent / 10000),
+        yourWojakBought: r.yourWojakBought,
         freeMints: Math.floor(balance / 10000),
       };
     });

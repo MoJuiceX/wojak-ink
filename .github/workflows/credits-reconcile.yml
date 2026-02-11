@@ -1,0 +1,52 @@
+name: Credits Reconciliation
+
+on:
+  schedule:
+    # Run weekly on Sunday at 7:00 AM UTC
+    - cron: '0 7 * * 0'
+  workflow_dispatch:
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run credits reconciliation
+        id: reconcile
+        env:
+          SITE_BASE_URL: ${{ vars.SITE_BASE_URL }}
+        run: |
+          COMPARE_URL="${SITE_BASE_URL:-https://wojak.ink}"
+          npx tsx scripts/credits-reconcile.ts --since=2026-01-05 --compare="$COMPARE_URL"
+
+      - name: Upload report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        continue-on-error: true
+        with:
+          name: credits-reconcile-report
+          path: |
+            scripts/audit-credits-since-*.json
+            scripts/audit-mintgarden-since-*.json
+          retention-days: 30
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Credits Reconciliation" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "Status: OK — all events since cutoff are in the DB." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Status: FAILED — missing events detected. Check the report artifact." >> $GITHUB_STEP_SUMMARY
+          fi

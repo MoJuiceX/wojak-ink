@@ -20,6 +20,7 @@ export const KNOWN_TRAIT_IDS = {
   Eyes_NinjaTurtle: 'Face-wear_Ninja-Turtle-Mask',
   Eyes_EyePatch: 'Face-wear_Eye-patch',
   Eyes_NightVision: 'Face-wear_night-vision',
+  Eyes_VRHeadset: 'Face-wear_VR-headset',
   Eyes_LaserEyes: 'Face-laser_Laser-Eyes',
   Head_Ronin: 'Head_Ronin-helmet',
   Head_BeerHat: 'Head_Beer-Hat',
@@ -35,6 +36,9 @@ export const KNOWN_TRAIT_IDS = {
   Head_TrumpWave: 'Head_Trump-wave',
   FullFaceMasks: ['skull_mask', 'skull-mask', 'fake_it', 'fake-it', 'medievalbepe', 'tanginium'],
 } as const;
+
+/** Bepe suit and Pepe suit: VR Headset cannot be selected (mutually exclusive). */
+export const CLOTHES_NO_VR_HEADSET: readonly string[] = ['Clothes_Bepe-suit', 'Clothes_Pepe-suit'];
 
 /** Full-body suits that include a helmet/hood — Head layer disabled when any of these is selected. */
 export const CLOTHES_NO_HEAD_SUITS: readonly string[] = [

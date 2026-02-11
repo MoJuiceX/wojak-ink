@@ -37,6 +37,8 @@ export interface RenderLayer {
   clipLeftPercent?: number;
   /** Skip right X% (0-1); show left portion. e.g. 0.5 = left half only */
   clipRightPercent?: number;
+  /** Move under/over boundary this many pixels left (e.g. VR headset + suit). Applied with clipRightPercent/clipLeftPercent. */
+  clipBoundaryOffsetPx?: number;
   /** Restrict clip to top 50% of canvas only (for Beer Hat right-behind) */
   clipTopHalfOnly?: boolean;
   /** Top half: left portion; bottom half: full width (for Beer Hat on-top) */

@@ -1,5 +1,9 @@
 # Credit Leaderboard Audit Guide
 
+**See also:** [CREDITS-FORMULA.md](./CREDITS-FORMULA.md) (formula and constants) · [CREDIT-LEADERBOARD-BULLETPROOF.md](./CREDIT-LEADERBOARD-BULLETPROOF.md) (alerting, reconciliation, health endpoint).
+
+---
+
 ## Run the Audit
 
 ```bash

@@ -17,6 +17,11 @@ const FLOOR_FALLBACK_XCH = 100; // 1.0 XCH when no snapshot for date
 const MIN_EFFECTIVE_FLOOR = 0.5;
 const WHALE_COEFFICIENT = 0.2;
 
+const FETCH_RETRIES = 3;
+const FETCH_BACKOFF_MS = [1000, 2000, 4000];
+const BATCH_INSERT_SIZE = 10;
+const BATCH_EXISTING_CHUNK = 50;
+
 interface Env {
   DB: D1Database;
   TRADE_VALUES_KV: KVNamespace;
@@ -54,6 +59,34 @@ function calculateCredits(priceXch: number, floorXch: number): {
     credits: Math.round(rawCredits * 100),
     multiplier: Math.round(whaleMultiplier * 10000),
   };
+}
+
+async function fetchWithRetry(
+  url: string,
+  opts: RequestInit = {},
+  retries = FETCH_RETRIES
+): Promise<Response> {
+  let lastError: unknown;
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await fetch(url, opts);
+      if (res.ok || res.status === 404) return res;
+      if (res.status === 429 || res.status >= 500) {
+        lastError = new Error(`HTTP ${res.status}`);
+        if (i < retries - 1 && FETCH_BACKOFF_MS[i] != null) {
+          await new Promise((r) => setTimeout(r, FETCH_BACKOFF_MS[i]));
+        }
+        continue;
+      }
+      return res;
+    } catch (e) {
+      lastError = e;
+      if (i < retries - 1 && FETCH_BACKOFF_MS[i] != null) {
+        await new Promise((r) => setTimeout(r, FETCH_BACKOFF_MS[i]));
+      }
+    }
+  }
+  throw lastError;
 }
 
 async function getLastTimestamp(kv: KVNamespace): Promise<string | null> {
@@ -94,9 +127,13 @@ async function ensureFloorSnapshot(
   if (lastDate === today) return getLatestFloorStored(env.DB);
 
   const url = `${MINTGARDEN_API}/collections/${env.COLLECTION_ID}`;
-  const res = await fetch(url, {
-    headers: { Accept: 'application/json' },
-  });
+  let res: Response;
+  try {
+    res = await fetchWithRetry(url, { headers: { Accept: 'application/json' } });
+  } catch (e) {
+    console.error('[CreditTracker] Collection API error after retries:', e);
+    return getLatestFloorStored(env.DB);
+  }
   if (!res.ok) {
     console.error('[CreditTracker] Collection API error:', res.status);
     return getLatestFloorStored(env.DB);
@@ -123,7 +160,7 @@ async function processEvents(env: Env): Promise<{ processed: number; inserted: n
   let cursor: string | null = null;
   let processed = 0;
   let inserted = 0;
-  let latestTimestamp = lastTs;
+  const insertedTimestamps: string[] = [];
   const floorCache = new Map<string, number>();
 
   for (let page = 0; page < 20; page++) {
@@ -133,9 +170,15 @@ async function processEvents(env: Env): Promise<{ processed: number; inserted: n
     url.searchParams.set('size', '100');
     if (cursor) url.searchParams.set('cursor', cursor);
 
-    const res = await fetch(url.toString(), {
-      headers: { Accept: 'application/json' },
-    });
+    let res: Response;
+    try {
+      res = await fetchWithRetry(url.toString(), {
+        headers: { Accept: 'application/json' },
+      });
+    } catch (e) {
+      console.error('[CreditTracker] Events API error after retries:', e);
+      break;
+    }
     if (!res.ok) {
       console.error('[CreditTracker] Events API error:', res.status);
       break;
@@ -145,22 +188,42 @@ async function processEvents(env: Env): Promise<{ processed: number; inserted: n
     const items = data.items || [];
     if (items.length === 0) break;
 
-    for (const event of items) {
-      if (!event.xch_price || event.xch_price <= 0) continue;
-      if (!event.address?.encoded_id) continue;
-      if (lastTs && event.timestamp <= lastTs) continue;
+    const candidates = items.filter((event) => {
+      if (!event.xch_price || event.xch_price <= 0) return false;
+      if (!event.address?.encoded_id) return false;
+      if (lastTs && event.timestamp <= lastTs) return false;
+      return true;
+    });
+    processed += candidates.length;
 
-      processed++;
-      if (event.timestamp > (latestTimestamp || '')) latestTimestamp = event.timestamp;
-
-      const eventId = `${event.nft_id}_${event.event_index}_${event.timestamp}`;
-      const existing = await env.DB.prepare(
-        'SELECT 1 FROM credit_events WHERE event_id = ?'
+    const eventIds = candidates.map(
+      (e) => `${e.nft_id}_${e.event_index}_${e.timestamp}`
+    );
+    const existingSet = new Set<string>();
+    for (let i = 0; i < eventIds.length; i += BATCH_EXISTING_CHUNK) {
+      const chunk = eventIds.slice(i, i + BATCH_EXISTING_CHUNK);
+      const placeholders = chunk.map(() => '?').join(',');
+      const rows = await env.DB.prepare(
+        `SELECT event_id FROM credit_events WHERE event_id IN (${placeholders})`
       )
-        .bind(eventId)
-        .first();
-      if (existing) continue;
+        .bind(...chunk)
+        .all<{ event_id: string }>();
+      for (const r of rows.results || []) existingSet.add(r.event_id);
+    }
 
+    const toInsert: Array<{
+      wallet: string;
+      nft_id: string;
+      event_id: string;
+      price_xch: number;
+      floor_stored: number;
+      credits: number;
+      multiplier: number;
+      timestamp: string;
+    }> = [];
+    for (const event of candidates) {
+      const eventId = `${event.nft_id}_${event.event_index}_${event.timestamp}`;
+      if (existingSet.has(eventId)) continue;
       const eventDate = event.timestamp.slice(0, 10);
       let floorStored = floorCache.get(eventDate);
       if (floorStored === undefined) {
@@ -169,28 +232,51 @@ async function processEvents(env: Env): Promise<{ processed: number; inserted: n
       }
       const floorXch = floorStored / 100;
       const calc = calculateCredits(event.xch_price, floorXch);
+      toInsert.push({
+        wallet: event.address!.encoded_id,
+        nft_id: event.nft_id,
+        event_id: eventId,
+        price_xch: event.xch_price,
+        floor_stored: floorStored,
+        credits: calc.credits,
+        multiplier: calc.multiplier,
+        timestamp: event.timestamp,
+      });
+    }
 
-      try {
-        await env.DB.prepare(
-          `INSERT INTO credit_events
-           (wallet_address, nft_id, event_id, price_xch, floor_at_time, credits_earned, whale_multiplier, source, event_timestamp)
-           VALUES (?, ?, ?, ?, ?, ?, ?, 'mintgarden', ?)`
+    for (let i = 0; i < toInsert.length; i += BATCH_INSERT_SIZE) {
+      const batch = toInsert.slice(i, i + BATCH_INSERT_SIZE);
+      const values = batch
+        .map(
+          () =>
+            `(?, ?, ?, ?, ?, ?, ?, 'mintgarden', ?)`
         )
-          .bind(
-            event.address.encoded_id,
-            event.nft_id,
-            eventId,
-            event.xch_price,
-            floorStored,
-            calc.credits,
-            calc.multiplier,
-            event.timestamp
-          )
-          .run();
-        inserted++;
+        .join(',');
+      const stmt = env.DB.prepare(
+        `INSERT INTO credit_events
+         (wallet_address, nft_id, event_id, price_xch, floor_at_time, credits_earned, whale_multiplier, source, event_timestamp)
+         VALUES ${values}`
+      );
+      const bound = batch.flatMap((r) => [
+        r.wallet,
+        r.nft_id,
+        r.event_id,
+        r.price_xch,
+        r.floor_stored,
+        r.credits,
+        r.multiplier,
+        r.timestamp,
+      ]);
+      try {
+        await stmt.bind(...bound).run();
+        inserted += batch.length;
+        for (const r of batch) insertedTimestamps.push(r.timestamp);
       } catch (e) {
-        if (String(e).includes('UNIQUE')) continue;
-        console.error('[CreditTracker] Insert error:', e);
+        if (String(e).includes('UNIQUE')) {
+          for (const r of batch) insertedTimestamps.push(r.timestamp);
+          continue;
+        }
+        console.error('[CreditTracker] Batch insert error:', e);
       }
     }
 
@@ -201,7 +287,12 @@ async function processEvents(env: Env): Promise<{ processed: number; inserted: n
     }
   }
 
-  if (latestTimestamp) await setLastTimestamp(env.TRADE_VALUES_KV, latestTimestamp);
+  if (insertedTimestamps.length > 0) {
+    const latestInserted = insertedTimestamps.reduce((a, b) =>
+      a > b ? a : b
+    );
+    await setLastTimestamp(env.TRADE_VALUES_KV, latestInserted);
+  }
   return { processed, inserted };
 }
 

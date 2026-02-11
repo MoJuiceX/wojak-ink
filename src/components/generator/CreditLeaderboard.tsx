@@ -60,7 +60,6 @@ export function CreditLeaderboard({ isOpen, onClose }: CreditLeaderboardProps) {
     <Lightbox
       isOpen={isOpen}
       onClose={onClose}
-      title="Credit Leaderboard"
       size="gallery"
     >
       <div className="flex flex-col h-full min-h-0">

@@ -81,16 +81,17 @@ function createOffscreenCanvas(width: number, height: number): {
   canvas: HTMLCanvasElement | OffscreenCanvas;
   ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 } {
+  const contextOptions: CanvasRenderingContext2DSettings = { willReadFrequently: true };
   if (typeof OffscreenCanvas !== 'undefined') {
     const canvas = new OffscreenCanvas(width, height);
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', contextOptions);
     if (ctx) return { canvas, ctx };
   }
 
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', contextOptions);
   if (!ctx) throw new Error('Failed to get canvas context');
   return { canvas, ctx };
 }
@@ -201,12 +202,13 @@ function tintDraw(
   clipRightPercent?: number,
   flatTint?: boolean,
   clipTopHalfOnly?: boolean,
-  clipBottomHalfFull?: boolean
+  clipBottomHalfFull?: boolean,
+  clipBoundaryOffsetPx?: number
 ): void {
   const tc = document.createElement('canvas');
   tc.width = size;
   tc.height = size;
-  const tx = tc.getContext('2d')!;
+  const tx = tc.getContext('2d', { willReadFrequently: true })!;
 
   // 1. Draw gray fill
   tx.drawImage(fillImg, 0, 0, size, size);
@@ -268,7 +270,8 @@ function tintDraw(
     ctx.drawImage(tc, 0, 0, size, size);
     ctx.restore();
   } else if (clipLeftPercent && clipLeftPercent > 0) {
-    const clipX = size * clipLeftPercent;
+    let clipX = size * clipLeftPercent;
+    if (clipBoundaryOffsetPx != null) clipX = Math.max(0, clipX - clipBoundaryOffsetPx);
     ctx.save();
     ctx.beginPath();
     ctx.rect(clipX, 0, size - clipX, size);
@@ -276,7 +279,8 @@ function tintDraw(
     ctx.drawImage(tc, 0, 0, size, size);
     ctx.restore();
   } else if (clipRightPercent && clipRightPercent > 0) {
-    const clipW = size * (1 - clipRightPercent);
+    let clipW = size * (1 - clipRightPercent);
+    if (clipBoundaryOffsetPx != null) clipW = Math.max(0, clipW - clipBoundaryOffsetPx);
     ctx.save();
     ctx.beginPath();
     ctx.rect(0, 0, clipW, size);
@@ -848,18 +852,21 @@ async function drawG2Layer(
   clipLeftPercent?: number,
   clipRightPercent?: number,
   clipTopHalfOnly?: boolean,
-  clipBottomHalfFull?: boolean
+  clipBottomHalfFull?: boolean,
+  clipBoundaryOffsetPx?: number
 ): Promise<void> {
   const halfH = size / 2;
   const applyClip = () => {
     if (clipBottomHalfFull && clipRightPercent && clipRightPercent > 0) {
-      const clipW = size * (1 - clipRightPercent);
+      let clipW = size * (1 - clipRightPercent);
+      if (clipBoundaryOffsetPx != null) clipW = Math.max(0, clipW - clipBoundaryOffsetPx);
       ctx.beginPath();
       ctx.rect(0, 0, clipW, halfH);
       ctx.rect(0, halfH, size, halfH);
       ctx.clip();
     } else if (clipTopHalfOnly && clipLeftPercent && clipLeftPercent > 0) {
-      const clipX = size * clipLeftPercent;
+      let clipX = size * clipLeftPercent;
+      if (clipBoundaryOffsetPx != null) clipX = Math.max(0, clipX - clipBoundaryOffsetPx);
       ctx.beginPath();
       ctx.rect(clipX, 0, size - clipX, halfH);
       ctx.clip();
@@ -868,12 +875,14 @@ async function drawG2Layer(
       ctx.rect(size / 2, 0, size / 2, size);
       ctx.clip();
     } else if (clipLeftPercent && clipLeftPercent > 0) {
-      const clipX = size * clipLeftPercent;
+      let clipX = size * clipLeftPercent;
+      if (clipBoundaryOffsetPx != null) clipX = Math.max(0, clipX - clipBoundaryOffsetPx);
       ctx.beginPath();
       ctx.rect(clipX, 0, size - clipX, size);
       ctx.clip();
     } else if (clipRightPercent && clipRightPercent > 0) {
-      const clipW = size * (1 - clipRightPercent);
+      let clipW = size * (1 - clipRightPercent);
+      if (clipBoundaryOffsetPx != null) clipW = Math.max(0, clipW - clipBoundaryOffsetPx);
       ctx.beginPath();
       ctx.rect(0, 0, clipW, size);
       ctx.clip();
@@ -883,7 +892,7 @@ async function drawG2Layer(
   if (g2.supersample) {
     const ssSize = size * SUPERSAMPLE_FACTOR;
     const { canvas: ssCanvas, ctx: ssCtx } = createOffscreenCanvas(ssSize, ssSize);
-    await drawG2Layer(ssCtx, { ...g2, supersample: false }, ssSize, clipRightHalf, clipLeftPercent, clipRightPercent, clipTopHalfOnly, clipBottomHalfFull);
+    await drawG2Layer(ssCtx, { ...g2, supersample: false }, ssSize, clipRightHalf, clipLeftPercent, clipRightPercent, clipTopHalfOnly, clipBottomHalfFull, clipBoundaryOffsetPx);
     ctx.save();
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
@@ -901,10 +910,10 @@ async function drawG2Layer(
           if (item.opacity !== undefined && item.opacity < 1) {
             ctx.save();
             ctx.globalAlpha = item.opacity;
-            tintDraw(ctx, fillImg, item.color, size, clipRightHalf, clipLeftPercent, clipRightPercent, undefined, clipTopHalfOnly, clipBottomHalfFull);
+            tintDraw(ctx, fillImg, item.color, size, clipRightHalf, clipLeftPercent, clipRightPercent, undefined, clipTopHalfOnly, clipBottomHalfFull, clipBoundaryOffsetPx);
             ctx.restore();
           } else {
-            tintDraw(ctx, fillImg, item.color, size, clipRightHalf, clipLeftPercent, clipRightPercent, undefined, clipTopHalfOnly, clipBottomHalfFull);
+            tintDraw(ctx, fillImg, item.color, size, clipRightHalf, clipLeftPercent, clipRightPercent, undefined, clipTopHalfOnly, clipBottomHalfFull, clipBoundaryOffsetPx);
           }
         } catch (err) {
           console.warn(`[G2] Failed to load fill: ${item.file}`, err);
@@ -934,7 +943,7 @@ async function drawG2Layer(
         ctx.drawImage(fillImg, 0, 0, size, size);
         ctx.restore();
       } else {
-        tintDraw(ctx, fillImg, fill.color, size, clipRightHalf, clipLeftPercent, clipRightPercent, fill.flatTint, clipTopHalfOnly, clipBottomHalfFull);
+        tintDraw(ctx, fillImg, fill.color, size, clipRightHalf, clipLeftPercent, clipRightPercent, fill.flatTint, clipTopHalfOnly, clipBottomHalfFull, clipBoundaryOffsetPx);
       }
     } catch (err) {
       console.warn(`[G2] Failed to load fill: ${fill.file}`, err);
@@ -1505,11 +1514,13 @@ function drawLayer(
   clipLeftPercent?: number,
   clipRightPercent?: number,
   clipTopHalfOnly?: boolean,
-  clipBottomHalfFull?: boolean
+  clipBottomHalfFull?: boolean,
+  clipBoundaryOffsetPx?: number
 ): void {
   const halfH = size / 2;
   if (clipBottomHalfFull && clipRightPercent && clipRightPercent > 0) {
-    const clipW = size * (1 - clipRightPercent);
+    let clipW = size * (1 - clipRightPercent);
+    if (clipBoundaryOffsetPx != null) clipW = Math.max(0, clipW - clipBoundaryOffsetPx);
     ctx.save();
     ctx.beginPath();
     ctx.rect(0, 0, clipW, halfH);
@@ -1518,7 +1529,8 @@ function drawLayer(
     ctx.drawImage(image, 0, 0, size, size);
     ctx.restore();
   } else if (clipTopHalfOnly && clipLeftPercent && clipLeftPercent > 0) {
-    const clipX = size * clipLeftPercent;
+    let clipX = size * clipLeftPercent;
+    if (clipBoundaryOffsetPx != null) clipX = Math.max(0, clipX - clipBoundaryOffsetPx);
     ctx.save();
     ctx.beginPath();
     ctx.rect(clipX, 0, size - clipX, halfH);
@@ -1533,7 +1545,8 @@ function drawLayer(
     ctx.drawImage(image, 0, 0, size, size);
     ctx.restore();
   } else if (clipLeftPercent && clipLeftPercent > 0) {
-    const clipX = size * clipLeftPercent;
+    let clipX = size * clipLeftPercent;
+    if (clipBoundaryOffsetPx != null) clipX = Math.max(0, clipX - clipBoundaryOffsetPx);
     ctx.save();
     ctx.beginPath();
     ctx.rect(clipX, 0, size - clipX, size);
@@ -1541,7 +1554,8 @@ function drawLayer(
     ctx.drawImage(image, 0, 0, size, size);
     ctx.restore();
   } else if (clipRightPercent && clipRightPercent > 0) {
-    const clipW = size * (1 - clipRightPercent);
+    let clipW = size * (1 - clipRightPercent);
+    if (clipBoundaryOffsetPx != null) clipW = Math.max(0, clipW - clipBoundaryOffsetPx);
     ctx.save();
     ctx.beginPath();
     ctx.rect(0, 0, clipW, size);
@@ -1579,8 +1593,13 @@ export async function renderToCanvas(
     const expanded: RenderLayer[] = [];
     for (const layer of layers) {
       const layerNameStr = layer.layerName;
-      // Astronaut is a virtual layer for Clothes — G2 data is stored under 'Clothes'
-      const lookupLayer: UILayerName = layerNameStr === 'Astronaut' ? 'Clothes' : (layerNameStr as UILayerName);
+      // Virtual layers: Astronaut → Clothes; EyesUnderSuit/EyesOverSuit → Eyes
+      const lookupLayer: UILayerName =
+        layerNameStr === 'Astronaut'
+          ? 'Clothes'
+          : layerNameStr === 'EyesUnderSuit' || layerNameStr === 'EyesOverSuit'
+            ? 'Eyes'
+            : (layerNameStr as UILayerName);
       const g2Sel = options.g2Selections[lookupLayer];
       if (layerNameStr === 'Clothes' && g2Sel) {
         try {
@@ -1744,7 +1763,7 @@ export async function renderToCanvas(
       continue;
     }
     if (layer.g2) {
-      await drawG2Layer(ctx, layer.g2, size, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull);
+      await drawG2Layer(ctx, layer.g2, size, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull, layer.clipBoundaryOffsetPx);
     } else if (
       layer.fillPath &&
       layer.outlinePath &&
@@ -1766,7 +1785,7 @@ export async function renderToCanvas(
         layer.clipBottomHalfFull
       );
     } else if ('image' in layer && layer.image) {
-      drawLayer(ctx, layer.image, size, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull);
+      drawLayer(ctx, layer.image, size, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull, layer.clipBoundaryOffsetPx);
     }
   }
 
@@ -1848,7 +1867,12 @@ export async function exportImage(
     const expanded: RenderLayer[] = [];
     for (const layer of layers) {
       const layerNameStr = layer.layerName;
-      const lookupLayer: UILayerName = layerNameStr === 'Astronaut' ? 'Clothes' : (layerNameStr as UILayerName);
+      const lookupLayer: UILayerName =
+        layerNameStr === 'Astronaut'
+          ? 'Clothes'
+          : layerNameStr === 'EyesUnderSuit' || layerNameStr === 'EyesOverSuit'
+            ? 'Eyes'
+            : (layerNameStr as UILayerName);
       const g2Sel = g2Selections[lookupLayer];
       if (layerNameStr === 'Clothes' && g2Sel) {
         try {
@@ -1987,9 +2011,9 @@ export async function exportImage(
       continue;
     }
     if (layer.g2) {
-      await drawG2Layer(ctx, layer.g2, size, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull);
+      await drawG2Layer(ctx, layer.g2, size, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull, layer.clipBoundaryOffsetPx);
     } else if (layer.image) {
-      drawLayer(ctx, layer.image, size, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull);
+      drawLayer(ctx, layer.image, size, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull, layer.clipBoundaryOffsetPx);
     }
   }
 
@@ -2039,7 +2063,7 @@ export async function renderToTargetCanvas(
     includeBackground?: boolean;
   } = {}
 ): Promise<void> {
-  const ctx = targetCanvas.getContext('2d');
+  const ctx = targetCanvas.getContext('2d', { willReadFrequently: true });
   if (!ctx) throw new Error('Failed to get canvas context');
 
   const width = targetCanvas.width;
@@ -2069,9 +2093,9 @@ export async function renderToTargetCanvas(
       continue;
     }
     if (layer.g2) {
-      await drawG2Layer(ctx, layer.g2, width, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull);
+      await drawG2Layer(ctx, layer.g2, width, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull, layer.clipBoundaryOffsetPx);
     } else {
-      drawLayer(ctx, layer.image, width, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull);
+      drawLayer(ctx, layer.image, width, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull, layer.clipBoundaryOffsetPx);
     }
   }
 }
