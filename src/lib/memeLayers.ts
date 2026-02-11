@@ -47,28 +47,10 @@ export const LAYER_ORDER: LayerDefinition[] = [
   { name: 'BubbleGumOverEyes', folder: 'MOUTH', zIndex: 60, isVirtual: true, description: 'Bubble Gum on top of everything' },
 ];
 
-/**
- * UI-visible layers (excludes virtual/internal layers)
- */
-export const UI_LAYER_ORDER = LAYER_ORDER.filter(
-  (layer) =>
-    layer.name !== 'Extra' &&
-    layer.name !== 'ClothesAddon' &&
-    layer.name !== 'HannibalMask' &&
-    layer.name !== 'TysonTattoo' &&
-    layer.name !== 'NinjaTurtleUnderMask' &&
-    layer.name !== 'Astronaut' &&
-    layer.name !== 'BandanaMaskOverRonin' &&
-    layer.name !== 'EyesOverHead' &&
-    layer.name !== 'BubbleGumOverEyes' &&
-    layer.name !== 'BubbleGumRekt'
-);
-
 export const LAYER_NAMES = LAYER_ORDER.map((layer) => layer.name);
-export const UI_LAYER_NAMES = UI_LAYER_ORDER.map((layer) => layer.name);
 
 /**
- * Layer name type for type-safety
+ * Layer name type for type-safety (includes virtual layers)
  */
 export type GeneratorLayerName =
   | 'Background'
@@ -90,19 +72,14 @@ export type GeneratorLayerName =
   | 'EyesOverHead'
   | 'BubbleGumOverEyes';
 
-/**
- * UI layer name type (user-selectable layers)
- */
-export type UILayerName =
-  | 'Background'
-  | 'Base'
-  | 'Clothes'
-  | 'FacialHair'
-  | 'MouthBase'
-  | 'MouthItem'
-  | 'Mask'
-  | 'Eyes'
-  | 'Head';
+// Re-export from single source of truth (layerRegistry)
+import type { UILayerName } from '@/lib/layerRegistry';
+import { RENDER_ORDER } from '@/lib/layerRegistry';
+export type { UILayerName } from '@/lib/layerRegistry';
+export { RENDER_ORDER, UI_ORDER } from '@/lib/layerRegistry';
+
+/** UI layer names array (for generatorService and others) */
+export const UI_LAYER_NAMES: UILayerName[] = [...RENDER_ORDER];
 
 /**
  * Get layer definition by name

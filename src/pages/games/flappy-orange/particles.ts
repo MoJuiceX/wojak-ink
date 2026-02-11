@@ -6,17 +6,17 @@
  */
 
 import type { Particle } from './types';
-import { JUICE_CONFIG } from './config';
+import { JUICE_CONFIG, GAME_PALETTE } from './config';
 
 // ============================================
-// PARTICLE COLORS
+// PARTICLE COLORS (use shared GAME_PALETTE - red, orange, yellow, green, blue)
 // ============================================
 
-/** Death particle colors - orange + leaf colors for the exploding orange effect */
-const DEATH_COLORS = ['#FF6B00', '#FF8C33', '#FFD700', '#FFA500', '#FF4500', '#228B22'];
+/** Death burst: full colorful palette (no redundant oranges) */
+const DEATH_COLORS = GAME_PALETTE;
 
-/** Pass particle colors - celebratory gold/orange/white */
-const PASS_COLORS = ['#FFD700', '#FFA500', '#FF6B00', '#FFFFFF'];
+/** Pass celebration: yellows, greens, blues, white */
+const PASS_COLORS = ['#FFEB3B', '#FDD835', '#66BB6A', '#42A5F5', '#00ACC1', '#FFFFFF'];
 
 // ============================================
 // PARTICLE CREATION FUNCTIONS

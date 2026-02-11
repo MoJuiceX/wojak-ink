@@ -1,5 +1,14 @@
 # CLAUDE.md - Wojak.ink
 
+## Generator and layer work
+
+When making changes to the **wojak generator**, **layer rules**, **layer order**, **color picking**, **trait/layer config**, or when the user gives a **command or recommendation** about how to do something in the generator:
+
+1. **Read `docs/GENERATOR-CODE-HEALTH.md`** before editing and follow its guidance (what to do, what not to do, file roles).
+2. After changes, re-check that doc for any optional/next steps (e.g. tests, `isSelectionPathEmpty` usage).
+
+---
+
 ## ACTIVE TASK: CSS Cleanup
 
 **Read these files before any CSS work:**

@@ -86,6 +86,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     server: {
+      port: 5174, // Dedicated port for wojak-ink (5173 often used by other projects)
       host: true, // Allow network access
       allowedHosts: ['localhost', '.trycloudflare.com', '.loca.lt', '.ngrok.io', '.ngrok-free.app'],
       proxy: {

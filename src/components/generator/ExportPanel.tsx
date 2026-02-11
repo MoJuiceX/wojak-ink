@@ -20,7 +20,7 @@ interface ExportPanelProps {
 }
 
 export function ExportPanel({ className = '' }: ExportPanelProps) {
-  const { isExportOpen, toggleExport, exportWojak, previewImage, favorites, selectedLayers } = useGenerator();
+  const { isExportOpen, toggleExport, exportWojak, previewImage, favorites, selectedLayers, g2Selections, generatorError, clearGeneratorError } = useGenerator();
   const prefersReducedMotion = useReducedMotion();
 
   const getNextProjectName = () => {
@@ -63,6 +63,7 @@ export function ExportPanel({ className = '' }: ExportPanelProps) {
     renderToCanvas(selectedLayers, {
       size: 512,
       includeBackground: false,
+      g2Selections,
     })
       .then((result) => {
         if (!cancelled) {
@@ -74,7 +75,7 @@ export function ExportPanel({ className = '' }: ExportPanelProps) {
       });
 
     return () => { cancelled = true; };
-  }, [includeBackground, isExportOpen, selectedLayers]);
+  }, [includeBackground, isExportOpen, selectedLayers, g2Selections]);
 
   const displayPreview = localPreview || previewImage;
 
@@ -87,12 +88,15 @@ export function ExportPanel({ className = '' }: ExportPanelProps) {
         includeBackground,
       };
       await exportWojak(options, filename);
+    } catch {
+      // Error is stored in context (generatorError) and shown in banner + below
     } finally {
       setIsExporting(false);
     }
   };
 
   const handleClose = () => {
+    clearGeneratorError();
     toggleExport(false);
   };
 
@@ -257,6 +261,12 @@ export function ExportPanel({ className = '' }: ExportPanelProps) {
                 <Download size={16} />
                 {isExporting ? 'Exporting...' : 'Download'}
               </motion.button>
+
+              {generatorError && (
+                <p className="text-sm mt-2" style={{ color: 'var(--color-error)' }}>
+                  {generatorError}
+                </p>
+              )}
             </div>
           </motion.div>
         </>

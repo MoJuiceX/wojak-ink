@@ -2,24 +2,21 @@
  * Wojak Generator Rules Engine
  *
  * Enforces valid layer combinations and auto-corrects invalid states.
+ * Uses SelectionResolver (getTraitId / getPath) only — no pathContains for trait identity.
  * Ported from wojak-ink-mobile/src/utils/wojakRules.js
  */
 
 import type { GeneratorLayerName } from './memeLayers';
+import type { UILayerName } from '@/lib/layerRegistry';
+import { DEFAULT_BASE_PATH, DEFAULT_MOUTHBASE_PATH, DEFAULT_CLOTHES_PATH } from '@/lib/layerRegistry';
+import { UI_ORDER } from '@/lib/layerRegistry';
+import type { SelectionResolver } from '@/lib/selectionResolver';
+import { KNOWN_TRAIT_IDS, CLOTHES_NO_HEAD_SUITS } from '@/lib/generatorTraitIds';
 
 export type SelectedLayers = Partial<Record<GeneratorLayerName, string>>;
 
-// UI-visible layer names only
-export type UILayerName =
-  | 'Background'
-  | 'Base'
-  | 'Clothes'
-  | 'FacialHair'
-  | 'MouthBase'
-  | 'MouthItem'
-  | 'Mask'
-  | 'Eyes'
-  | 'Head';
+// Re-export for consumers
+export type { UILayerName } from '@/lib/layerRegistry';
 
 export interface RuleResult {
   disabledLayers: UILayerName[];
@@ -42,33 +39,37 @@ export interface DisabledLayersResult {
 }
 
 /**
- * Check if a path contains a specific identifier (case-insensitive)
+ * Helper: path contains identifier (case-insensitive). Used only for path-based checks
+ * where we don't have a trait ID (e.g. full-face mask names, Chia Addon path).
  */
 function pathContains(path: string | undefined, identifier: string): boolean {
   if (!path) return false;
   return path.toLowerCase().includes(identifier.toLowerCase());
 }
 
-// ============ Rules ============
+// ============ Rules (all use resolver only for trait identity) ============
 
 /**
  * Base must never be None - auto-default to Classic
  */
-function ruleBaseNeverNone(selectedLayers: SelectedLayers): RuleResult {
-  const basePath = selectedLayers['Base'];
+function ruleBaseNeverNone(resolver: SelectionResolver): RuleResult {
+  const basePath = resolver.getPath('Base');
   const isBaseEmpty = !basePath || basePath === '' || basePath === 'None';
 
-  const hasAnyOtherTrait = Object.keys(selectedLayers).some((layerName) => {
-    if (layerName === 'Base') return false;
-    const layerValue = selectedLayers[layerName as GeneratorLayerName];
-    return layerValue && layerValue !== '' && layerValue !== 'None';
-  });
+  let hasAnyOtherTrait = false;
+  for (const layer of UI_ORDER) {
+    if (layer === 'Base') continue;
+    if (resolver.getPath(layer)) {
+      hasAnyOtherTrait = true;
+      break;
+    }
+  }
 
   if (isBaseEmpty && hasAnyOtherTrait) {
     return {
       disabledLayers: [],
       forceSelections: {
-        Base: '/assets/wojak-layers/BASE/BASE_Base-Wojak_classic.png',
+        Base: DEFAULT_BASE_PATH,
       },
     };
   }
@@ -79,15 +80,15 @@ function ruleBaseNeverNone(selectedLayers: SelectedLayers): RuleResult {
 /**
  * MouthBase must never be None - auto-default to Numb
  */
-function ruleMouthBaseNeverNone(selectedLayers: SelectedLayers): RuleResult {
-  const mouthBasePath = selectedLayers['MouthBase'];
+function ruleMouthBaseNeverNone(resolver: SelectionResolver): RuleResult {
+  const mouthBasePath = resolver.getPath('MouthBase');
   const isMouthBaseEmpty = !mouthBasePath || mouthBasePath === '' || mouthBasePath === 'None';
 
   if (isMouthBaseEmpty) {
     return {
       disabledLayers: [],
       forceSelections: {
-        MouthBase: '/assets/wojak-layers/MOUTH/MOUTH_numb.png',
+        MouthBase: DEFAULT_MOUTHBASE_PATH,
       },
     };
   }
@@ -98,15 +99,15 @@ function ruleMouthBaseNeverNone(selectedLayers: SelectedLayers): RuleResult {
 /**
  * Clothes must never be None - auto-default to Tee blue
  */
-function ruleClothesNeverNone(selectedLayers: SelectedLayers): RuleResult {
-  const clothesPath = selectedLayers['Clothes'];
+function ruleClothesNeverNone(resolver: SelectionResolver): RuleResult {
+  const clothesPath = resolver.getPath('Clothes');
   const isClothesEmpty = !clothesPath || clothesPath === '' || clothesPath === 'None';
 
   if (isClothesEmpty) {
     return {
       disabledLayers: [],
       forceSelections: {
-        Clothes: '/assets/wojak-layers/CLOTHES/CLOTHES_Tee_blue.png',
+        Clothes: DEFAULT_CLOTHES_PATH,
       },
     };
   }
@@ -115,17 +116,19 @@ function ruleClothesNeverNone(selectedLayers: SelectedLayers): RuleResult {
 }
 
 /**
- * Astronaut disables Head layer and clears any existing head selection
+ * Full-body suits (Astronaut, Bepe suit, Pepe suit, Goose suit, Pickle suit,
+ * Proof of Prayer, Sonic suit, Gopher suit) include a helmet/hood — Head layer disabled.
  */
-function ruleAstronautNoHead(selectedLayers: SelectedLayers): RuleResult {
-  const clothesPath = selectedLayers['Clothes'];
-  const headPath = selectedLayers['Head'];
+function ruleFullBodySuitNoHead(resolver: SelectionResolver): RuleResult {
+  const clothesTraitId = resolver.getTraitId('Clothes');
+  const hasNoHeadSuit = clothesTraitId !== null && CLOTHES_NO_HEAD_SUITS.includes(clothesTraitId);
+  const headPath = resolver.getPath('Head');
+  const hasHead = !!(headPath && headPath !== '' && headPath !== 'None');
 
-  if (pathContains(clothesPath, 'Astronaut')) {
-    const hasHead = headPath && headPath !== '' && headPath !== 'None';
+  if (hasNoHeadSuit) {
     return {
       disabledLayers: ['Head'],
-      reason: 'Deselect Astronaut',
+      reason: 'Suit includes helmet',
       clearSelections: hasHead ? ['Head'] : [],
       forceSelections: hasHead ? { Head: '' } : {},
     };
@@ -139,56 +142,48 @@ function ruleAstronautNoHead(selectedLayers: SelectedLayers): RuleResult {
  * Allowed MouthBase: Gold teeth, teeth, Numb, screaming, smiling
  * Disabled MouthBase: Pipe, Pizza, Bubble-Gum
  */
-function ruleAstronautDisablesMouthOptions(selectedLayers: SelectedLayers): RuleResult {
-  const clothesPath = selectedLayers['Clothes'];
+function ruleAstronautDisablesMouthOptions(resolver: SelectionResolver): RuleResult {
+  const hasAstronaut = resolver.getTraitId('Clothes') === KNOWN_TRAIT_IDS.Clothes_Astronaut;
+  if (!hasAstronaut) return { disabledLayers: [] };
 
-  if (pathContains(clothesPath, 'Astronaut')) {
-    const mouthBasePath = selectedLayers['MouthBase'];
-    const disabledMouthOptions = ['Pipe', 'Pizza', 'Bubble-Gum', 'Bubble Gum'];
+  const mouthBaseTraitId = resolver.getTraitId('MouthBase');
+  const disabledMouthTraitIds = [
+    KNOWN_TRAIT_IDS.MouthBase_Pipe,
+    KNOWN_TRAIT_IDS.MouthBase_Pizza,
+    KNOWN_TRAIT_IDS.MouthBase_BubbleGum,
+  ];
+  const hasDisabledMouth = mouthBaseTraitId !== null && disabledMouthTraitIds.includes(mouthBaseTraitId as typeof disabledMouthTraitIds[number]);
+  const disabledMouthOptions = ['Pipe', 'Pizza', 'Bubble-Gum', 'Bubble Gum'];
 
-    // Check if current MouthBase is one of the disabled options
-    const hasDisabledMouth = disabledMouthOptions.some(opt =>
-      pathContains(mouthBasePath, opt.replace(' ', '-'))
-    );
+  const result: RuleResult = {
+    disabledLayers: ['MouthItem'],
+    reason: 'Deselect Astronaut',
+    forceSelections: { MouthItem: '' },
+    clearSelections: ['MouthItem'],
+    disabledOptions: {
+      MouthBase: disabledMouthOptions,
+    },
+  };
 
-    const result: RuleResult = {
-      disabledLayers: ['MouthItem'],
-      reason: 'Deselect Astronaut',
-      forceSelections: { MouthItem: '' },
-      clearSelections: ['MouthItem'],
-      disabledOptions: {
-        MouthBase: disabledMouthOptions,
-      },
+  if (hasDisabledMouth) {
+    result.forceSelections = {
+      ...result.forceSelections,
+      MouthBase: DEFAULT_MOUTHBASE_PATH,
     };
-
-    // If current mouth is disabled, force to Numb
-    if (hasDisabledMouth) {
-      result.forceSelections = {
-        ...result.forceSelections,
-        MouthBase: '/assets/wojak-layers/MOUTH/MOUTH_numb.png',
-      };
-    }
-
-    return result;
   }
 
-  return { disabledLayers: [] };
+  return result;
 }
 
 /**
  * Astronaut and Copium Mask are mutually exclusive
  * Other masks can be used with Astronaut (with different rendering orders)
  */
-function ruleAstronautCopiumMaskMutualExclusion(selectedLayers: SelectedLayers): RuleResult {
-  const clothesPath = selectedLayers['Clothes'];
-  const maskPath = selectedLayers['Mask'];
+function ruleAstronautCopiumMaskMutualExclusion(resolver: SelectionResolver): RuleResult {
+  const hasAstronaut = resolver.getTraitId('Clothes') === KNOWN_TRAIT_IDS.Clothes_Astronaut;
+  const hasCopiumMask = resolver.getTraitId('Mask') === KNOWN_TRAIT_IDS.Mask_Copium;
 
-  const hasAstronaut = pathContains(clothesPath, 'Astronaut');
-  const hasCopiumMask = pathContains(maskPath, 'Copium');
-
-  // If Astronaut is selected, only disable Copium Mask
   if (hasAstronaut) {
-    // If user currently has Copium Mask selected, clear it
     if (hasCopiumMask) {
       return {
         disabledLayers: [],
@@ -205,7 +200,6 @@ function ruleAstronautCopiumMaskMutualExclusion(selectedLayers: SelectedLayers):
         },
       };
     }
-    // Just disable Copium Mask option
     return {
       disabledLayers: [],
       disabledOptions: { Mask: ['Copium', 'Copium-Mask', 'Copium Mask'] },
@@ -219,7 +213,6 @@ function ruleAstronautCopiumMaskMutualExclusion(selectedLayers: SelectedLayers):
     };
   }
 
-  // If Copium Mask is selected, disable Astronaut
   if (hasCopiumMask) {
     return {
       disabledLayers: [],
@@ -235,11 +228,50 @@ function ruleAstronautCopiumMaskMutualExclusion(selectedLayers: SelectedLayers):
 }
 
 /**
- * FacialHair requires compatible MouthBase
+ * Astronaut and Night Vision are mutually exclusive.
+ * When Astronaut is selected: Night Vision cannot be selected; clear it if currently selected.
  */
-function ruleFacialHairRequiresMouthBase(selectedLayers: SelectedLayers): RuleResult {
-  const mouthBasePath = selectedLayers['MouthBase'];
-  const facialHairPath = selectedLayers['FacialHair'];
+function ruleAstronautDisablesNightVision(resolver: SelectionResolver): RuleResult {
+  const hasAstronaut = resolver.getTraitId('Clothes') === KNOWN_TRAIT_IDS.Clothes_Astronaut;
+  const hasNightVision = resolver.getTraitId('Eyes') === KNOWN_TRAIT_IDS.Eyes_NightVision;
+
+  if (hasAstronaut) {
+    if (hasNightVision) {
+      return {
+        disabledLayers: [],
+        reason: 'Deselect Astronaut',
+        forceSelections: { Eyes: '' },
+        clearSelections: ['Eyes'],
+        disabledOptions: { Eyes: ['Night Vision', 'night vision'] },
+        disabledOptionReasons: {
+          Eyes: {
+            'Night Vision': 'Remove Astronaut',
+            'night vision': 'Remove Astronaut',
+          },
+        },
+      };
+    }
+    return {
+      disabledLayers: [],
+      disabledOptions: { Eyes: ['Night Vision', 'night vision'] },
+      disabledOptionReasons: {
+        Eyes: {
+          'Night Vision': 'Remove Astronaut',
+          'night vision': 'Remove Astronaut',
+        },
+      },
+    };
+  }
+
+  return { disabledLayers: [] };
+}
+
+/**
+ * FacialHair requires compatible MouthBase (path check for allowed mouths; no trait IDs for all variants)
+ */
+function ruleFacialHairRequiresMouthBase(resolver: SelectionResolver): RuleResult {
+  const mouthBasePath = resolver.getPath('MouthBase');
+  const facialHairPath = resolver.getPath('FacialHair');
 
   const allowedMouthBases = ['numb', 'teeth', 'gold', 'smile', 'screeming', 'screaming', 'pizza', 'pipe'];
 
@@ -265,7 +297,7 @@ function ruleFacialHairRequiresMouthBase(selectedLayers: SelectedLayers): RuleRe
         disabledLayers: [],
         reason: 'Select mouth first',
         forceSelections: {
-          MouthBase: '/assets/wojak-layers/MOUTH/MOUTH_numb.png',
+          MouthBase: DEFAULT_MOUTHBASE_PATH,
         },
       };
     }
@@ -277,8 +309,8 @@ function ruleFacialHairRequiresMouthBase(selectedLayers: SelectedLayers): RuleRe
 /**
  * Mask blocks MouthItem and FacialHair
  */
-function ruleMaskBlocksOtherLayers(selectedLayers: SelectedLayers): RuleResult {
-  const maskPath = selectedLayers['Mask'];
+function ruleMaskBlocksOtherLayers(resolver: SelectionResolver): RuleResult {
+  const maskPath = resolver.getPath('Mask');
 
   if (maskPath && maskPath !== '' && maskPath !== 'None') {
     return {
@@ -291,13 +323,11 @@ function ruleMaskBlocksOtherLayers(selectedLayers: SelectedLayers): RuleResult {
 }
 
 /**
- * Hannibal Mask auto-removes Neckbeard
+ * Hannibal Mask auto-removes Neckbeard (path check for neckbeard; trait ID for Hannibal)
  */
-function ruleHannibalMaskRemovesNeckbeard(selectedLayers: SelectedLayers): RuleResult {
-  const maskPath = selectedLayers['Mask'];
-  const facialHairPath = selectedLayers['FacialHair'];
-
-  const hasHannibal = pathContains(maskPath, 'hannibal');
+function ruleHannibalMaskRemovesNeckbeard(resolver: SelectionResolver): RuleResult {
+  const hasHannibal = resolver.getTraitId('Mask') === KNOWN_TRAIT_IDS.Mask_Hannibal;
+  const facialHairPath = resolver.getPath('FacialHair');
   const hasNeckbeard = pathContains(facialHairPath, 'neckbeard');
 
   if (hasHannibal && hasNeckbeard) {
@@ -327,102 +357,72 @@ function ruleHannibalMaskRemovesNeckbeard(selectedLayers: SelectedLayers): RuleR
  * - Blocks: Pizza, Bubble Gum, Pipe (MouthBase)
  * - Blocks: All MouthItem (Cigarette, Cohiba, Joint)
  */
-function ruleCopiumMaskForcesValidMouthBase(selectedLayers: SelectedLayers): RuleResult {
-  const mask = selectedLayers?.Mask;
-  const mouthBase = selectedLayers?.MouthBase;
-  const mouthItem = selectedLayers?.MouthItem;
+function ruleCopiumMaskForcesValidMouthBase(resolver: SelectionResolver): RuleResult {
+  if (resolver.getTraitId('Mask') !== KNOWN_TRAIT_IDS.Mask_Copium) return { disabledLayers: [] };
 
-  const isCopium = typeof mask === 'string' && pathContains(mask, 'Copium-Mask');
+  const mouthBasePath = resolver.getPath('MouthBase');
+  const mouthItemPath = resolver.getPath('MouthItem');
 
-  if (!isCopium) return { disabledLayers: [] };
+  const mouthBaseTraitId = resolver.getTraitId('MouthBase');
+  const isPizza = mouthBaseTraitId === KNOWN_TRAIT_IDS.MouthBase_Pizza;
+  const isBubbleGum = mouthBaseTraitId === KNOWN_TRAIT_IDS.MouthBase_BubbleGum;
+  const isPipe = mouthBaseTraitId === KNOWN_TRAIT_IDS.MouthBase_Pipe;
+  const isEmpty = !mouthBasePath || mouthBasePath === '' || mouthBasePath === 'None';
+  const hasMouthItem = !!(mouthItemPath && mouthItemPath !== '' && mouthItemPath !== 'None');
 
-  const isPizza = typeof mouthBase === 'string' && pathContains(mouthBase, 'Pizza');
-  const isBubbleGum = typeof mouthBase === 'string' && pathContains(mouthBase, 'Bubble-Gum');
-  const isPipe = typeof mouthBase === 'string' && pathContains(mouthBase, 'Pipe');
-  const isEmpty = !mouthBase || mouthBase === '' || mouthBase === 'None';
-  const hasMouthItem = mouthItem && mouthItem !== '' && mouthItem !== 'None';
-
-  // Blocked MouthBase options for Copium Mask
   const blockedMouthBase = ['Pizza', 'Bubble-Gum', 'Bubble Gum', 'Pipe'];
+  const disabledOptionReasonsMouthBase = {
+    Pizza: 'Remove Copium Mask',
+    'Bubble-Gum': 'Remove Copium Mask',
+    'Bubble Gum': 'Remove Copium Mask',
+    Pipe: 'Remove Copium Mask',
+  };
 
-  // If current MouthBase is invalid, force to Numb
   if (isPizza || isBubbleGum || isPipe || isEmpty) {
     return {
       disabledLayers: ['MouthItem'],
       reason: 'Remove Copium Mask',
       forceSelections: {
-        MouthBase: '/assets/wojak-layers/MOUTH/MOUTH_numb.png',
+        MouthBase: DEFAULT_MOUTHBASE_PATH,
         MouthItem: '',
       },
       clearSelections: ['MouthItem'],
-      disabledOptions: {
-        MouthBase: blockedMouthBase,
-      },
-      disabledOptionReasons: {
-        MouthBase: {
-          Pizza: 'Remove Copium Mask',
-          'Bubble-Gum': 'Remove Copium Mask',
-          'Bubble Gum': 'Remove Copium Mask',
-          Pipe: 'Remove Copium Mask',
-        },
-      },
+      disabledOptions: { MouthBase: blockedMouthBase },
+      disabledOptionReasons: { MouthBase: disabledOptionReasonsMouthBase },
     };
   }
 
-  // Clear MouthItem if selected
   if (hasMouthItem) {
     return {
       disabledLayers: ['MouthItem'],
       reason: 'Remove Copium Mask',
       forceSelections: { MouthItem: '' },
       clearSelections: ['MouthItem'],
-      disabledOptions: {
-        MouthBase: blockedMouthBase,
-      },
-      disabledOptionReasons: {
-        MouthBase: {
-          Pizza: 'Remove Copium Mask',
-          'Bubble-Gum': 'Remove Copium Mask',
-          'Bubble Gum': 'Remove Copium Mask',
-          Pipe: 'Remove Copium Mask',
-        },
-      },
+      disabledOptions: { MouthBase: blockedMouthBase },
+      disabledOptionReasons: { MouthBase: disabledOptionReasonsMouthBase },
     };
   }
 
-  // Just disable the options
   return {
     disabledLayers: ['MouthItem'],
-    disabledOptions: {
-      MouthBase: blockedMouthBase,
-    },
-    disabledOptionReasons: {
-      MouthBase: {
-        Pizza: 'Remove Copium Mask',
-        'Bubble-Gum': 'Remove Copium Mask',
-        'Bubble Gum': 'Remove Copium Mask',
-        Pipe: 'Remove Copium Mask',
-      },
-    },
+    disabledOptions: { MouthBase: blockedMouthBase },
+    disabledOptionReasons: { MouthBase: disabledOptionReasonsMouthBase },
   };
 }
 
 /**
  * Mask forces MouthBase to Numb (except Copium)
  */
-function ruleMaskForcesNumbMouth(selectedLayers: SelectedLayers): RuleResult {
-  const mask = selectedLayers?.Mask;
-
-  const hasMask = mask && mask !== '' && mask !== 'None';
-  const isCopium = typeof mask === 'string' && pathContains(mask, 'Copium-Mask');
-
-  if (isCopium || !hasMask) return { disabledLayers: [] };
+function ruleMaskForcesNumbMouth(resolver: SelectionResolver): RuleResult {
+  const maskPath = resolver.getPath('Mask');
+  const hasMask = !!(maskPath && maskPath !== '' && maskPath !== 'None');
+  if (!hasMask || resolver.getTraitId('Mask') === KNOWN_TRAIT_IDS.Mask_Copium) return { disabledLayers: [] };
 
   return {
     disabledLayers: [],
     reason: 'Deselect Mask',
     forceSelections: {
-      MouthBase: '/assets/wojak-layers/MOUTH/MOUTH_numb.png',
+      MouthBase: DEFAULT_MOUTHBASE_PATH,
       MouthItem: '',
     },
   };
@@ -431,11 +431,8 @@ function ruleMaskForcesNumbMouth(selectedLayers: SelectedLayers): RuleResult {
 /**
  * Pipe disables MouthItem
  */
-function rulePipeDisablesMouthItem(selectedLayers: SelectedLayers): RuleResult {
-  const mouthBase = selectedLayers?.MouthBase;
-  const isPipe = typeof mouthBase === 'string' && pathContains(mouthBase, 'Pipe');
-
-  if (!isPipe) return { disabledLayers: [] };
+function rulePipeDisablesMouthItem(resolver: SelectionResolver): RuleResult {
+  if (resolver.getTraitId('MouthBase') !== KNOWN_TRAIT_IDS.MouthBase_Pipe) return { disabledLayers: [] };
 
   return {
     disabledLayers: ['MouthItem'],
@@ -447,24 +444,24 @@ function rulePipeDisablesMouthItem(selectedLayers: SelectedLayers): RuleResult {
 /**
  * Cig/Joint/Cohiba requires MouthBase
  */
-function ruleCigJointCohibaRequiresMouthBase(selectedLayers: SelectedLayers): RuleResult {
-  const mouthItem = selectedLayers?.MouthItem;
-  const mouthBase = selectedLayers?.MouthBase;
+function ruleCigJointCohibaRequiresMouthBase(resolver: SelectionResolver): RuleResult {
+  const mouthItemTraitId = resolver.getTraitId('MouthItem');
+  const needsMouthBase =
+    mouthItemTraitId === KNOWN_TRAIT_IDS.MouthItem_Cig ||
+    mouthItemTraitId === KNOWN_TRAIT_IDS.MouthItem_Joint ||
+    mouthItemTraitId === KNOWN_TRAIT_IDS.MouthItem_Cohiba;
 
-  const isCig = typeof mouthItem === 'string' && pathContains(mouthItem, 'Cig');
-  const isJoint = typeof mouthItem === 'string' && pathContains(mouthItem, 'Joint');
-  const isCohiba = typeof mouthItem === 'string' && pathContains(mouthItem, 'Cohiba');
+  if (!needsMouthBase) return { disabledLayers: [] };
 
-  if (!isCig && !isJoint && !isCohiba) return { disabledLayers: [] };
-
-  const isMouthBaseNone = !mouthBase || mouthBase === '' || mouthBase === 'None';
+  const mouthBasePath = resolver.getPath('MouthBase');
+  const isMouthBaseNone = !mouthBasePath || mouthBasePath === '' || mouthBasePath === 'None';
 
   if (isMouthBaseNone) {
     return {
       disabledLayers: [],
       reason: 'Select mouth first',
       forceSelections: {
-        MouthBase: '/assets/wojak-layers/MOUTH/MOUTH_numb.png',
+        MouthBase: DEFAULT_MOUTHBASE_PATH,
       },
     };
   }
@@ -475,11 +472,8 @@ function ruleCigJointCohibaRequiresMouthBase(selectedLayers: SelectedLayers): Ru
 /**
  * Pizza disables MouthItem
  */
-function rulePizzaDisablesMouthItem(selectedLayers: SelectedLayers): RuleResult {
-  const mouthBase = selectedLayers?.MouthBase;
-  const isPizza = typeof mouthBase === 'string' && mouthBase.toLowerCase().includes('pizza');
-
-  if (!isPizza) return { disabledLayers: [] };
+function rulePizzaDisablesMouthItem(resolver: SelectionResolver): RuleResult {
+  if (resolver.getTraitId('MouthBase') !== KNOWN_TRAIT_IDS.MouthBase_Pizza) return { disabledLayers: [] };
 
   return {
     disabledLayers: ['MouthItem'],
@@ -491,11 +485,8 @@ function rulePizzaDisablesMouthItem(selectedLayers: SelectedLayers): RuleResult 
 /**
  * Bubble Gum disables MouthItem
  */
-function ruleBubbleGumDisablesMouthItem(selectedLayers: SelectedLayers): RuleResult {
-  const mouthBase = selectedLayers?.MouthBase;
-  const isBubbleGum = typeof mouthBase === 'string' && pathContains(mouthBase, 'Bubble-Gum');
-
-  if (!isBubbleGum) return { disabledLayers: [] };
+function ruleBubbleGumDisablesMouthItem(resolver: SelectionResolver): RuleResult {
+  if (resolver.getTraitId('MouthBase') !== KNOWN_TRAIT_IDS.MouthBase_BubbleGum) return { disabledLayers: [] };
 
   return {
     disabledLayers: ['MouthItem'],
@@ -505,66 +496,50 @@ function ruleBubbleGumDisablesMouthItem(selectedLayers: SelectedLayers): RuleRes
 }
 
 /**
- * Full-face masks (Skull masks, Fake It) disable Laser Eyes
+ * Full-face masks (Skull masks, Fake It) disable Laser Eyes (Eyes layer; path check for mask names)
  */
-function ruleFullFaceMaskDisablesLaserEyes(selectedLayers: SelectedLayers): RuleResult {
-  const maskPath = selectedLayers['Mask'];
-  const eyesPath = selectedLayers['Eyes'];
+function ruleFullFaceMaskDisablesLaserEyes(resolver: SelectionResolver): RuleResult {
+  const maskPath = resolver.getPath('Mask');
+  const eyesPath = resolver.getPath('Eyes');
 
-  // Check for full-face masks
-  const isFullFaceMask =
-    pathContains(maskPath, 'skull_mask') ||
-    pathContains(maskPath, 'skull-mask') ||
-    pathContains(maskPath, 'fake_it') ||
-    pathContains(maskPath, 'fake-it');
+  const fullFaceSubstrings = ['skull_mask', 'skull-mask', 'fake_it', 'fake-it'];
+  const isFullFaceMask = fullFaceSubstrings.some((m) => pathContains(maskPath, m));
 
   if (!isFullFaceMask) return { disabledLayers: [] };
 
-  // Check if laser eyes are currently selected
   const hasLaserEyes = pathContains(eyesPath, 'laser');
+  const disabledEyesOptions = ['Laser', 'Laser-Eyes', 'Laser Eyes'];
+  const disabledEyesReasons = {
+    Laser: 'Remove Mask',
+    'Laser-Eyes': 'Remove Mask',
+    'Laser Eyes': 'Remove Mask',
+  };
 
-  // If laser eyes are selected, clear them
   if (hasLaserEyes) {
     return {
       disabledLayers: [],
       reason: 'Deselect full-face mask',
       clearSelections: ['Eyes'],
       forceSelections: { Eyes: '' },
-      disabledOptions: {
-        Eyes: ['Laser', 'Laser-Eyes', 'Laser Eyes'],
-      },
-      disabledOptionReasons: {
-        Eyes: {
-          Laser: 'Remove Mask',
-          'Laser-Eyes': 'Remove Mask',
-          'Laser Eyes': 'Remove Mask',
-        },
-      },
+      disabledOptions: { Eyes: disabledEyesOptions },
+      disabledOptionReasons: { Eyes: disabledEyesReasons },
     };
   }
 
-  // Just disable the laser eyes options
   return {
     disabledLayers: [],
-    disabledOptions: {
-      Eyes: ['Laser', 'Laser-Eyes', 'Laser Eyes'],
-    },
-    disabledOptionReasons: {
-      Eyes: {
-        Laser: 'Remove Mask',
-        'Laser-Eyes': 'Remove Mask',
-        'Laser Eyes': 'Remove Mask',
-      },
-    },
+    disabledOptions: { Eyes: disabledEyesOptions },
+    disabledOptionReasons: { Eyes: disabledEyesReasons },
   };
 }
 
 /**
- * ClothesAddon requires Tee or Tanktop
+ * Legacy ClothesAddon (G1) required Tee or Tanktop. G2 Chia Farmer is selectable as Clothes
+ * and chooses Tee or Tank top as under-layer in the panel — no force/disable.
  */
-function ruleClothesAddonRequiresTeeOrTanktop(selectedLayers: SelectedLayers): RuleResult {
-  const clothesPath = selectedLayers['Clothes'];
-  const clothesAddonPath = selectedLayers['ClothesAddon'];
+function ruleClothesAddonRequiresTeeOrTanktop(resolver: SelectionResolver): RuleResult {
+  const clothesPath = resolver.getPath('Clothes');
+  const clothesAddonPath = resolver.getPath('ClothesAddon');
 
   const hasChiaFarmerAddon =
     clothesAddonPath && (pathContains(clothesAddonPath, 'Chia-Farmer') || pathContains(clothesAddonPath, 'Chia Farmer'));
@@ -574,27 +549,12 @@ function ruleClothesAddonRequiresTeeOrTanktop(selectedLayers: SelectedLayers): R
     (pathContains(clothesPath, 'Tee') || pathContains(clothesPath, 'Tank-Top') || pathContains(clothesPath, 'tank-top')) &&
     !pathContains(clothesPath, 'Chia-Farmer');
 
-  const isSelectingChiaFarmer =
-    clothesPath && (pathContains(clothesPath, 'Chia-Farmer') || pathContains(clothesPath, 'Chia Farmer'));
-
-  if (!isTeeOrTanktop && !hasChiaFarmerAddon) {
-    return {
-      disabledLayers: [],
-      disabledOptions: { Clothes: ['Chia Farmer', 'Chia-Farmer'] },
-      disabledOptionReasons: {
-        Clothes: {
-          'Chia Farmer': 'Select Tee or Tank Top',
-          'Chia-Farmer': 'Select Tee or Tank Top',
-        },
-      },
-    };
-  }
-
-  if ((hasChiaFarmerAddon || isSelectingChiaFarmer) && !isTeeOrTanktop) {
+  // Only force when legacy addon exists and no tee/tank — never when user selected G2 Chia Farmer
+  if (hasChiaFarmerAddon && !isTeeOrTanktop) {
     return {
       disabledLayers: [],
       forceSelections: {
-        Clothes: '/assets/wojak-layers/CLOTHES/CLOTHES_Tee_blue.png',
+        Clothes: DEFAULT_CLOTHES_PATH,
       },
     };
   }
@@ -616,7 +576,8 @@ const RULES = [
   ruleBubbleGumDisablesMouthItem,
   ruleAstronautDisablesMouthOptions,
   ruleAstronautCopiumMaskMutualExclusion,
-  ruleAstronautNoHead,
+  ruleAstronautDisablesNightVision,
+  ruleFullBodySuitNoHead,
   ruleFacialHairRequiresMouthBase,
   ruleMaskBlocksOtherLayers,
   ruleHannibalMaskRemovesNeckbeard,
@@ -627,9 +588,10 @@ const RULES = [
 // ============ Public API ============
 
 /**
- * Get all disabled layers based on current selections
+ * Get all disabled layers based on current selections.
+ * Uses SelectionResolver so rules rely on trait IDs and paths from a single source.
  */
-export function getDisabledLayers(selectedLayers: SelectedLayers): DisabledLayersResult {
+export function getDisabledLayers(resolver: SelectionResolver): DisabledLayersResult {
   const disabledSet = new Set<UILayerName>();
   const reasons: Record<string, string> = {};
   const clearSet = new Set<UILayerName>();
@@ -638,7 +600,7 @@ export function getDisabledLayers(selectedLayers: SelectedLayers): DisabledLayer
   const disabledOptionReasons: Partial<Record<UILayerName, Record<string, string>>> = {};
 
   for (const rule of RULES) {
-    const result = rule(selectedLayers);
+    const result = rule(resolver);
 
     if (result.disabledLayers && result.disabledLayers.length > 0) {
       result.disabledLayers.forEach((layerName) => {
@@ -702,15 +664,15 @@ export function getDisabledLayers(selectedLayers: SelectedLayers): DisabledLayer
 /**
  * Check if a specific layer is disabled
  */
-export function isLayerDisabled(layerName: UILayerName, selectedLayers: SelectedLayers): boolean {
-  const { disabledLayers } = getDisabledLayers(selectedLayers);
+export function isLayerDisabled(layerName: UILayerName, resolver: SelectionResolver): boolean {
+  const { disabledLayers } = getDisabledLayers(resolver);
   return disabledLayers.includes(layerName);
 }
 
 /**
  * Get the reason why a layer is disabled
  */
-export function getDisabledReason(layerName: UILayerName, selectedLayers: SelectedLayers): string | null {
-  const { reasons } = getDisabledLayers(selectedLayers);
+export function getDisabledReason(layerName: UILayerName, resolver: SelectionResolver): string | null {
+  const { reasons } = getDisabledLayers(resolver);
   return reasons[layerName] || null;
 }

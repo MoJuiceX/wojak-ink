@@ -61,6 +61,29 @@ export const JUICE_CONFIG = {
 } as const;
 
 // ============================================
+// GAME PALETTE - Colorful, distinct (red, orange, yellow, green, blue)
+// ============================================
+/** Shared palette for leaves, death/pass particles. No near-duplicate oranges. */
+export const GAME_PALETTE: readonly string[] = [
+  // Reds (2)
+  '#E63939', '#C62828',
+  // Oranges (2 - was 4+ similar)
+  '#FF9800', '#F57C00',
+  // Yellows (2)
+  '#FFEB3B', '#FDD835',
+  // Greens (3)
+  '#66BB6A', '#43A047', '#2E7D32',
+  // Blues (3)
+  '#42A5F5', '#1E88E5', '#1565C0',
+  // Light blue / cyan (1)
+  '#00ACC1',
+  // Pinks (2) for variety
+  '#EC407A', '#F06292',
+  // Brown (1) for autumn leaves
+  '#8B6914',
+];
+
+// ============================================
 // WEATHER CONSTANTS - Dynamic weather system
 // ============================================
 export const WEATHER_CONFIG = {
@@ -109,8 +132,8 @@ export const WEATHER_CONFIG = {
   FLOCK_SIZE: { min: 3, max: 7 },
   BIRD_SPEED: { min: 1.5, max: 3 },
 
-  // Leaf settings - more frequent during golden/sunset
-  LEAF_COLORS: ['#FF6B00', '#FF8C33', '#FFD700', '#FF4500', '#8B4513'],
+  // Leaf settings - more frequent during golden/sunset (uses shared GAME_PALETTE)
+  LEAF_COLORS: GAME_PALETTE,
   LEAF_SPAWN_RATE: 0.04,  // Doubled leaf spawn rate
 } as const;
 

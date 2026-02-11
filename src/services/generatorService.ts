@@ -8,6 +8,8 @@
 import type { Trait } from '@/types/generator';
 import { UI_LAYER_NAMES, type UILayerName } from '@/lib/memeLayers';
 import { formatDisplayLabel, cleanDisplayName } from '@/lib/traitOptions';
+import { G1_TO_G2_MAP, normalizeTraitName } from '@/lib/traitMapping';
+import { G2_CATEGORY_TO_UI, G1_FOLDER_TO_UI } from '@/config/generatorLayerMapping';
 
 // ============ Types ============
 
@@ -41,12 +43,6 @@ const FACIAL_HAIR_PATTERNS = ['neckbeard', 'stach'];
 
 // Base layer sort order
 const BASE_SORT_ORDER = ['classic', 'rekt', 'rugged', 'bleeding', 'terminator'];
-
-// Background cashtag sort order (within $CASHTAG folder)
-const BACKGROUND_CASHTAG_ORDER = ['bepe', 'caster', 'hoa', 'pizza', 'honk', 'neck', 'chia', 'love'];
-
-// Background category order: $CASHTAG first, then Plain Backgrounds, then Scene
-const BACKGROUND_CATEGORY_ORDER = ['$cashtag', 'plain', 'scene'];
 
 // ============ Loaders ============
 
@@ -123,56 +119,38 @@ function buildLayerImages(manifest: ManifestData): void {
     layerImagesCache.set(layerName as UILayerName, []);
   }
 
-  // Process BACKGROUND
-  if (manifest['BACKGROUND']) {
-    const images: LayerImage[] = manifest['BACKGROUND'].map((filepath) => ({
-      path: `/assets/wojak-layers/BACKGROUND/${filepath}`,
-      name: filepath.split('/').pop()?.replace(/\.(png|jpg|jpeg|webp)$/i, '') || '',
-      displayName: parseDisplayName(filepath),
-      category: filepath.includes('/') ? filepath.split('/')[0] : undefined,
-    }));
-    // Sort backgrounds: $CASHTAG (in specific order), then Plain Backgrounds, then Scene
-    images.sort((a, b) => {
-      const aPath = a.path.toLowerCase();
-      const bPath = b.path.toLowerCase();
-
-      // Determine category index
-      const getCategoryIndex = (path: string): number => {
-        for (let i = 0; i < BACKGROUND_CATEGORY_ORDER.length; i++) {
-          if (path.includes(BACKGROUND_CATEGORY_ORDER[i])) return i;
-        }
-        return 999;
+  // Process BACKGROUND (Scene + Solid color only; $CASHTAG and Plain removed)
+  const bgLayer = G1_FOLDER_TO_UI['BACKGROUND'];
+  if (bgLayer && manifest['BACKGROUND']) {
+    const images: LayerImage[] = manifest['BACKGROUND'].map((filepath) => {
+      const isSolid = filepath === '__solid__';
+      return {
+        path: isSolid ? '__solid__' : `/assets/wojak-layers/BACKGROUND/${filepath}`,
+        name: filepath.split('/').pop()?.replace(/\.(png|jpg|jpeg|webp)$/i, '') || '',
+        displayName: isSolid ? 'Solid color' : parseDisplayName(filepath),
+        category: isSolid ? 'custom' : (filepath.includes('/') ? filepath.split('/')[0] : undefined),
       };
-
-      const aCatIndex = getCategoryIndex(aPath);
-      const bCatIndex = getCategoryIndex(bPath);
-
-      // If different categories, sort by category
-      if (aCatIndex !== bCatIndex) {
-        return aCatIndex - bCatIndex;
-      }
-
-      // If both are $CASHTAG, sort by specific order
-      if (aCatIndex === 0) {
-        const aTagIndex = BACKGROUND_CASHTAG_ORDER.findIndex((tag) => aPath.includes(tag));
-        const bTagIndex = BACKGROUND_CASHTAG_ORDER.findIndex((tag) => bPath.includes(tag));
-        return (aTagIndex === -1 ? 999 : aTagIndex) - (bTagIndex === -1 ? 999 : bTagIndex);
-      }
-
-      // Otherwise keep original order
-      return 0;
     });
-    layerImagesCache.set('Background', images);
+    images.sort((a, b) => {
+      // Solid color first, then Scene backgrounds alphabetically
+      const aSolid = a.path.includes('__solid__');
+      const bSolid = b.path.includes('__solid__');
+      if (aSolid && !bSolid) return -1;
+      if (!aSolid && bSolid) return 1;
+      if (aSolid && bSolid) return 0;
+      return (a.displayName || '').localeCompare(b.displayName || '');
+    });
+    layerImagesCache.set(bgLayer, images);
   }
 
   // Process BASE
-  if (manifest['BASE']) {
+  const baseLayer = G1_FOLDER_TO_UI['BASE'];
+  if (baseLayer && manifest['BASE']) {
     const images: LayerImage[] = manifest['BASE'].map((filepath) => ({
       path: `/assets/wojak-layers/BASE/${filepath}`,
       name: filepath.split('/').pop()?.replace(/\.(png|jpg|jpeg|webp)$/i, '') || '',
       displayName: parseDisplayName(filepath),
     }));
-    // Sort base images by predefined order
     images.sort((a, b) => {
       const aLower = a.path.toLowerCase();
       const bLower = b.path.toLowerCase();
@@ -180,38 +158,40 @@ function buildLayerImages(manifest: ManifestData): void {
       const bIndex = BASE_SORT_ORDER.findIndex((name) => bLower.includes(name));
       return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
     });
-    layerImagesCache.set('Base', images);
+    layerImagesCache.set(baseLayer, images);
   }
 
   // Process CLOTHES
-  if (manifest['CLOTHES']) {
+  const clothesLayer = G1_FOLDER_TO_UI['CLOTHES'];
+  if (clothesLayer && manifest['CLOTHES']) {
     const images: LayerImage[] = manifest['CLOTHES'].map((filepath) => ({
       path: `/assets/wojak-layers/CLOTHES/${filepath}`,
       name: filepath.split('/').pop()?.replace(/\.(png|jpg|jpeg|webp)$/i, '') || '',
       displayName: parseDisplayName(filepath),
     }));
-    layerImagesCache.set('Clothes', images);
+    layerImagesCache.set(clothesLayer, images);
   }
 
   // Process EYE -> Eyes
-  if (manifest['EYE']) {
-    const images: LayerImage[] = manifest['EYE']
-      .map((filepath) => ({
-        path: `/assets/wojak-layers/EYE/${filepath}`,
-        name: filepath.split('/').pop()?.replace(/\.(png|jpg|jpeg|webp)$/i, '') || '',
-        displayName: parseDisplayName(filepath),
-      }));
-    layerImagesCache.set('Eyes', images);
+  const eyesLayer = G1_FOLDER_TO_UI['EYE'];
+  if (eyesLayer && manifest['EYE']) {
+    const images: LayerImage[] = manifest['EYE'].map((filepath) => ({
+      path: `/assets/wojak-layers/EYE/${filepath}`,
+      name: filepath.split('/').pop()?.replace(/\.(png|jpg|jpeg|webp)$/i, '') || '',
+      displayName: parseDisplayName(filepath),
+    }));
+    layerImagesCache.set(eyesLayer, images);
   }
 
   // Process HEAD
-  if (manifest['HEAD']) {
+  const headLayer = G1_FOLDER_TO_UI['HEAD'];
+  if (headLayer && manifest['HEAD']) {
     const images: LayerImage[] = manifest['HEAD'].map((filepath) => ({
       path: `/assets/wojak-layers/HEAD/${filepath}`,
       name: filepath.split('/').pop()?.replace(/\.(png|jpg|jpeg|webp)$/i, '') || '',
       displayName: parseDisplayName(filepath),
     }));
-    layerImagesCache.set('Head', images);
+    layerImagesCache.set(headLayer, images);
   }
 
   // Process MOUTH -> categorize into MouthBase, MouthItem, Mask, FacialHair
@@ -252,14 +232,15 @@ function buildLayerImages(manifest: ManifestData): void {
   }
 
   // Process MASK folder (skull masks, etc.) - add to existing Mask images
-  if (manifest['MASK']) {
-    const existingMaskImages = layerImagesCache.get('Mask') || [];
+  const maskLayer = G1_FOLDER_TO_UI['MASK'];
+  if (maskLayer && manifest['MASK']) {
+    const existingMaskImages = layerImagesCache.get(maskLayer) || [];
     const newMaskImages: LayerImage[] = manifest['MASK'].map((filepath) => ({
       path: `/assets/wojak-layers/MASK/${filepath}`,
       name: filepath.split('/').pop()?.replace(/\.(png|jpg|jpeg|webp)$/i, '') || '',
       displayName: parseDisplayName(filepath),
     }));
-    layerImagesCache.set('Mask', [...existingMaskImages, ...newMaskImages]);
+    layerImagesCache.set(maskLayer, [...existingMaskImages, ...newMaskImages]);
   }
 }
 
@@ -342,3 +323,468 @@ class GeneratorService implements IGeneratorService {
 
 // Singleton instance
 export const generatorService = new GeneratorService();
+
+// ============ G2 (YourWojak) Manifest Types ============
+
+interface G2ManifestTrait {
+  id: string;
+  name: string;
+  category: string;
+  colorable: boolean;
+  // Single fill
+  fillFile?: string;
+  fill3File?: string;
+  fillNamePositionFile?: string;
+  /** When default color selected, use this instead of tinted fill (e.g. Astronaut) */
+  defaultFile?: string;
+  // Dual fill
+  fill1File?: string;
+  fill2File?: string;
+  // Multi fill
+  fillFiles?: string[];
+  // Outlines
+  outlineFile?: string;
+  outline2File?: string;
+  outlineFileForFill?: string;
+  detailOverlayFile?: string;
+  outlineFiles?: string[];
+  // Details
+  detailFile?: string;
+  detailOptions?: { file: string; name: string }[];
+  // Composite
+  composite?: boolean;
+  layer0File?: string;
+  layer1File?: string;
+  /** Composite layers (e.g. Bepe-suit) or layered colorable (e.g. Ninja-turtle-fit). type: other=composite, fill|outline=layered */
+  layers?: { pos: number; key: string; type: string; label: string; file: string; visible: boolean; underBase?: boolean; opacity?: number }[];
+  fills?: Record<string, { treatment: string; amount: number; source: string }>;
+  // Colors
+  defaultColor?: string;
+  defaultColor2?: string;
+  defaultColors?: string[];
+  // Variants
+  variants?: { file: string; color: string; name: string }[];
+  // Special
+  autoComplement?: boolean;
+  frameFiles?: { file: string; name: string; over: string }[];
+  textAreas?: unknown[];
+}
+
+interface G2Manifest {
+  version: number;
+  collection: string;
+  basePath: string;
+  categories: Record<string, {
+    layerName: string;
+    zIndex: number;
+    description: string;
+    traits: string[];
+  }>;
+  traits: G2ManifestTrait[];
+}
+
+// ============ Unified Trait Type ============
+
+export interface UnifiedTrait {
+  id: string;
+  name: string;
+  category: UILayerName;
+  source: 'g1' | 'g2' | 'both';
+  // G1 data
+  g1Path?: string;
+  g1Variants?: string[];
+  // G2 data
+  colorable?: boolean;
+  fillFile?: string;
+  fill3File?: string;
+  fillNamePositionFile?: string;
+  defaultFile?: string;
+  fill1File?: string;
+  fill2File?: string;
+  fillFiles?: string[];
+  outlineFile?: string;
+  outline2File?: string;
+  outlineFileForFill?: string;
+  detailOverlayFile?: string;
+  outlineFiles?: string[];
+  detailFile?: string;
+  detailOptions?: { file: string; name: string }[];
+  composite?: boolean;
+  layer0File?: string;
+  layer1File?: string;
+  layers?: { pos: number; key: string; type: string; label: string; file: string; visible: boolean; underBase?: boolean; opacity?: number }[];
+  fills?: Record<string, { treatment: string; amount: number; source: string }>;
+  defaultColor?: string;
+  defaultColor2?: string;
+  defaultColors?: string[];
+  variants?: { file: string; color: string; name: string }[];
+  autoComplement?: boolean;
+  frameFiles?: { file: string; name: string; over: string }[];
+  textAreas?: unknown[];
+}
+
+// ============ G2 Loader ============
+
+let g2ManifestCache: G2Manifest | null = null;
+const unifiedTraitsCache: Map<UILayerName, UnifiedTrait[]> = new Map();
+
+const G2_BASE_PATH = '/assets/wojak-layers/YourWojak-layers';
+
+async function loadG2Manifest(): Promise<G2Manifest | null> {
+  if (g2ManifestCache) return g2ManifestCache;
+
+  try {
+    const response = await fetch(`${G2_BASE_PATH}/manifest.json`);
+    if (!response.ok) throw new Error('Failed to load G2 manifest');
+    g2ManifestCache = await response.json();
+    return g2ManifestCache;
+  } catch (error) {
+    console.error('[GeneratorService] Failed to load G2 manifest:', error);
+    return null;
+  }
+}
+
+/**
+ * Extract the base trait name from a G1 filename.
+ * e.g. "CLOTHES_Bathrobe_blue.png" → "Bathrobe"
+ *      "HEAD_Wizard-Hat_man_blue.png" → "Wizard-Hat_man" (or "Wizard-Hat")
+ */
+function extractG1BaseName(filepath: string, prefix: string): string {
+  // Strip folder path and prefix
+  const filename = filepath.split('/').pop() || filepath;
+  const withoutPrefix = filename.replace(new RegExp(`^${prefix}_`, 'i'), '');
+  const withoutExt = withoutPrefix.replace(/\.(png|jpg|jpeg|webp)$/i, '');
+
+  // Remove trailing underscore (e.g. "Astronaut_" → "Astronaut")
+  const trimmed = withoutExt.replace(/_$/, '');
+
+  // Split remaining by underscore; first part is base name
+  // But some names have underscores (e.g. "Wizard-Hat_man"), so we need smarts:
+  // If the last part looks like a color/variant, strip it
+  const parts = trimmed.split('_');
+  if (parts.length <= 1) return trimmed;
+
+  // Known color suffixes
+  const colorSuffixes = new Set([
+    'black', 'blue', 'red', 'green', 'orange', 'pink', 'purple',
+    'brown', 'white', 'neon-green', 'yellow', 'blond',
+  ]);
+  // Check if last part is a color
+  const lastPart = parts[parts.length - 1].toLowerCase();
+  if (colorSuffixes.has(lastPart)) {
+    return parts.slice(0, -1).join('_');
+  }
+
+  // For suits: "Suit_black_red-bow" → "Suit"
+  if (parts[0].toLowerCase() === 'suit') return 'Suit';
+
+  return trimmed;
+}
+
+/**
+ * Try to find G2 match for a G1 base name.
+ * First checks hardcoded mapping, then tries normalized fuzzy match.
+ */
+function findG2Match(g1BaseName: string, g2Traits: G2ManifestTrait[]): G2ManifestTrait | null {
+  // 1. Check hardcoded mapping
+  const g2Id = G1_TO_G2_MAP[g1BaseName];
+  if (g2Id) {
+    const match = g2Traits.find(t => t.id === g2Id);
+    if (match) return match;
+  }
+
+  // 2. Normalized fuzzy match on name
+  const normalized = normalizeTraitName(g1BaseName);
+  for (const trait of g2Traits) {
+    if (normalizeTraitName(trait.name) === normalized) return trait;
+    // Also try matching against the part after the category prefix in the ID
+    const idName = trait.id.includes('_') ? trait.id.split('_').slice(1).join('_') : trait.id;
+    if (normalizeTraitName(idName) === normalized) return trait;
+  }
+
+  return null;
+}
+
+/**
+ * Derive detailOptions, outlineFile, fillFile, and fillFiles from layers when manifest uses layers-only format.
+ */
+function deriveFromLayers(g2: G2ManifestTrait): {
+  detailOptions?: { file: string; name: string }[];
+  outlineFile?: string;
+  fillFile?: string;
+  fillFiles?: string[];
+} {
+  const layers = g2.layers;
+  if (!layers?.length) return {};
+  const detailOptions = g2.detailOptions ?? layers.filter(l => l.type === 'detail').map(l => ({ file: l.file, name: l.label }));
+  const outlineLayer = layers.find(l => l.type === 'outline');
+  const outlineFile = g2.outlineFile ?? outlineLayer?.file;
+  const fillLayers = layers.filter(l => l.type === 'fill').sort((a, b) => a.pos - b.pos);
+  const fillLayer = fillLayers[0];
+  const fillFile = g2.fillFile ?? fillLayer?.file;
+  const fillFiles = g2.fillFiles ?? (fillLayers.length ? fillLayers.map(l => l.file) : undefined);
+  return { detailOptions: detailOptions.length ? detailOptions : undefined, outlineFile, fillFile, fillFiles };
+}
+
+/**
+ * Build unified trait from G2 manifest data.
+ */
+function g2TraitToUnified(g2: G2ManifestTrait, uiLayer: UILayerName): UnifiedTrait {
+  const { detailOptions, outlineFile, fillFile, fillFiles } = deriveFromLayers(g2);
+  return {
+    id: g2.id,
+    name: g2.name,
+    category: uiLayer,
+    source: 'g2',
+    colorable: g2.colorable,
+    fillFile: fillFile ?? g2.fillFile,
+    fill3File: g2.fill3File,
+    fillNamePositionFile: g2.fillNamePositionFile,
+    defaultFile: g2.defaultFile,
+    fill1File: g2.fill1File,
+    fill2File: g2.fill2File,
+    fillFiles: fillFiles ?? g2.fillFiles,
+    outlineFile: outlineFile ?? g2.outlineFile,
+    outline2File: g2.outline2File,
+    outlineFileForFill: g2.outlineFileForFill,
+    detailOverlayFile: g2.detailOverlayFile,
+    outlineFiles: g2.outlineFiles,
+    detailFile: g2.detailFile,
+    detailOptions: detailOptions ?? g2.detailOptions,
+    composite: g2.composite,
+    layer0File: g2.layer0File,
+    layer1File: g2.layer1File,
+    layers: g2.layers,
+    fills: g2.fills,
+    defaultColor: g2.defaultColor ?? g2.defaultColors?.[0],
+    defaultColor2: g2.defaultColor2,
+    defaultColors: g2.defaultColors,
+    variants: g2.variants,
+    autoComplement: g2.autoComplement,
+    frameFiles: g2.frameFiles,
+    textAreas: g2.textAreas,
+  };
+}
+
+/**
+ * Build unified traits for a given UI layer by merging G1 images and G2 traits.
+ */
+function buildUnifiedTraitsForLayer(
+  uiLayer: UILayerName,
+  g1Images: LayerImage[],
+  g2Traits: G2ManifestTrait[],
+): UnifiedTrait[] {
+  const result: UnifiedTrait[] = [];
+  const matchedG2Ids = new Set<string>();
+
+  // Group G1 images by base name to deduplicate color variants
+  const g1Groups = new Map<string, LayerImage[]>();
+  const g1Prefix = uiLayer === 'Clothes' ? 'CLOTHES'
+    : uiLayer === 'Head' ? 'HEAD'
+    : uiLayer === 'Eyes' ? 'EYE'
+    : uiLayer === 'MouthBase' || uiLayer === 'MouthItem' || uiLayer === 'FacialHair' || uiLayer === 'Mask' ? 'MOUTH'
+    : uiLayer === 'Base' ? 'BASE'
+    : uiLayer === 'Background' ? 'BACKGROUND'
+    : '';
+
+  for (const img of g1Images) {
+    const baseName = extractG1BaseName(img.name, g1Prefix);
+    if (!g1Groups.has(baseName)) {
+      g1Groups.set(baseName, []);
+    }
+    g1Groups.get(baseName)!.push(img);
+  }
+
+  // For each G1 group, try to find a G2 match
+  for (const [baseName, variants] of g1Groups) {
+    const g2Match = findG2Match(baseName, g2Traits);
+
+    if (g2Match) {
+      // G2 match: use G2 preview; set g1Path so pathToTraitIdMap and "selected" state work (e.g. Viking from randomize)
+      matchedG2Ids.add(g2Match.id);
+      const unified = g2TraitToUnified(g2Match, uiLayer);
+      unified.source = 'g2';
+      unified.g1Path = variants[0].path;
+      unified.g1Variants = variants.length > 1 ? variants.map(v => v.path) : undefined;
+      result.push(unified);
+    } else {
+      // G1 only
+      result.push({
+        id: `g1_${baseName}`,
+        name: variants[0].displayName,
+        category: uiLayer,
+        source: 'g1',
+        g1Path: variants[0].path,
+        g1Variants: variants.length > 1 ? variants.map(v => v.path) : undefined,
+      });
+    }
+  }
+
+  // Add G2-only traits (not matched to any G1)
+  for (const g2 of g2Traits) {
+    if (!matchedG2Ids.has(g2.id)) {
+      result.push(g2TraitToUnified(g2, uiLayer));
+    }
+  }
+
+  return result;
+}
+
+// ============ Unified Traits Public API ============
+
+/**
+ * Get unified traits for a UI layer (merged G1 + G2).
+ * Returns UnifiedTrait[] with source flag indicating origin.
+ */
+export async function getUnifiedTraits(layer: UILayerName): Promise<UnifiedTrait[]> {
+  // Check cache
+  const cached = unifiedTraitsCache.get(layer);
+  if (cached) return cached;
+
+  // Ensure both manifests are loaded
+  await generatorService.prefetchLayers();
+  const g2Manifest = await loadG2Manifest();
+
+  // Get G1 images for this layer
+  const g1Images = getAllLayerImages(layer);
+
+  // Get G2 traits for this layer
+  let g2Traits: G2ManifestTrait[] = [];
+  if (g2Manifest) {
+    // Find which G2 categories map to this UI layer
+    for (const [catName, catData] of Object.entries(g2Manifest.categories)) {
+      if (G2_CATEGORY_TO_UI[catName] === layer) {
+        // Get full trait data for each trait id in this category
+        for (const traitId of catData.traits) {
+          const traitData = g2Manifest.traits.find(t => t.id === traitId);
+          if (traitData) g2Traits.push(traitData);
+        }
+      }
+    }
+  }
+
+  // Merge
+  const unified = buildUnifiedTraitsForLayer(layer, g1Images, g2Traits);
+  unifiedTraitsCache.set(layer, unified);
+  return unified;
+}
+
+/**
+ * Get a specific unified trait by its id.
+ * Falls back to raw G2 manifest for traits not in categories (e.g. Clothes_Pepe-suit).
+ */
+export async function getUnifiedTraitById(id: string): Promise<UnifiedTrait | null> {
+  for (const layerName of UI_LAYER_NAMES) {
+    const traits = await getUnifiedTraits(layerName as UILayerName);
+    const found = traits.find(t => t.id === id);
+    if (found) return found;
+  }
+  // Fallback: trait may exist in manifest but not in any category (e.g. Clothes_Pepe-suit)
+  const g2Manifest = await loadG2Manifest();
+  if (g2Manifest) {
+    const g2Trait = g2Manifest.traits.find(t => t.id === id);
+    if (g2Trait) {
+      const catPart = id.includes('_') ? id.split('_')[0] : id;
+      const uiLayer = (G2_CATEGORY_TO_UI[catPart] ?? 'Clothes') as UILayerName;
+      return g2TraitToUnified(g2Trait, uiLayer);
+    }
+  }
+  return null;
+}
+
+/**
+ * Get the G2 base path for resolving fill/outline file URLs.
+ */
+export function getG2BasePath(): string {
+  return G2_BASE_PATH;
+}
+
+/**
+ * Get composite layer file paths in draw order.
+ * Uses layers array when present (e.g. Bepe-suit), else layer0File/layer1File.
+ */
+export function getCompositeLayerFiles(trait: UnifiedTrait, basePath: string): string[] {
+  return getCompositeLayerEntries(trait, basePath).map(e => e.path);
+}
+
+/** Composite layer with underBase flag (for z-order: underBase renders below Base) */
+export interface CompositeLayerEntry {
+  path: string;
+  underBase: boolean;
+}
+
+/**
+ * Get composite layer entries (path + underBase) in draw order.
+ */
+export function getCompositeLayerEntries(trait: UnifiedTrait, basePath: string): CompositeLayerEntry[] {
+  if (trait.layers && trait.layers.length > 0) {
+    return trait.layers
+      .filter(l => l.visible !== false)
+      .sort((a, b) => a.pos - b.pos)
+      .map(l => ({ path: `${basePath}/${l.file}`, underBase: !!l.underBase }));
+  }
+  const out: CompositeLayerEntry[] = [];
+  if (trait.layer0File) out.push({ path: `${basePath}/${trait.layer0File}`, underBase: false });
+  if (trait.layer1File) out.push({ path: `${basePath}/${trait.layer1File}`, underBase: false });
+  return out;
+}
+
+/**
+ * Clear the unified traits cache (e.g. when manifests change).
+ */
+export function clearUnifiedTraitsCache(): void {
+  unifiedTraitsCache.clear();
+  pathToTraitIdMapCache = null;
+  g2ManifestCache = null;
+}
+
+// ============ Path → TraitId Map (for selection resolver) ============
+
+let pathToTraitIdMapCache: Map<string, string> | null = null;
+
+function buildPathToTraitIdMap(): void {
+  const map = new Map<string, string>();
+  for (const layer of UI_LAYER_NAMES) {
+    const traits = unifiedTraitsCache.get(layer as UILayerName);
+    if (!traits) continue;
+    for (const trait of traits) {
+      if (trait.g1Path) map.set(trait.g1Path, trait.id);
+      if (trait.g1Variants) {
+        for (const p of trait.g1Variants) map.set(p, trait.id);
+      }
+      // Virtual path used when G2 is selected (e.g. /g2/Head/Viking-helmet) so path-only state can resolve to traitId
+      if (trait.source === 'g2' || trait.source === 'both') {
+        const virtualPath = `/g2/${trait.category}/${trait.name.replace(/\s+/g, '-')}`;
+        map.set(virtualPath, trait.id);
+      }
+    }
+  }
+  pathToTraitIdMapCache = map;
+}
+
+/**
+ * Ensure unified traits and pathToTraitId map are built (for resolver and rules).
+ * Call once before using the generator; generator UI can show loading until this resolves.
+ */
+export async function ensurePathToTraitIdMapReady(): Promise<void> {
+  if (pathToTraitIdMapCache) return;
+  for (const layer of UI_LAYER_NAMES) {
+    await getUnifiedTraits(layer as UILayerName);
+  }
+  buildPathToTraitIdMap();
+}
+
+/**
+ * Get the path → traitId map (for createSelectionResolver).
+ * Returns empty map if not yet built; call ensurePathToTraitIdMapReady() first.
+ */
+export function getPathToTraitIdMap(): Map<string, string> {
+  return pathToTraitIdMapCache ?? new Map();
+}
+
+/**
+ * True after ensurePathToTraitIdMapReady() has completed (pathToTraitIdMap is built).
+ */
+export function isGeneratorReady(): boolean {
+  return pathToTraitIdMapCache !== null;
+}

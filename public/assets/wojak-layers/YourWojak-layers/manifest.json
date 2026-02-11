@@ -1,0 +1,923 @@
+{
+  "version": 2,
+  "collection": "YourWojak",
+  "generated": "2026-02-08T17:47:49.389Z",
+  "basePath": "/assets/wojak-layers/YourWojak-layers",
+  "categories": {
+    "Clothes": {
+      "layerName": "Clothes",
+      "zIndex": 2,
+      "description": "Shirts, jackets, and outfits",
+      "traits": [
+        "Clothes_Astronaut",
+        "Clothes_Bathrobe",
+        "Clothes_Bepe-army",
+        "Clothes_Bepe-suit",
+        "Clothes_Born-to-ride",
+        "Clothes_Chia-farmer",
+        "Clothes_Drac-suit",
+        "Clothes_Goose-suit",
+        "Clothes_Leather-jacket",
+        "Clothes_Military-jacket",
+        "Clothes_Ninja-turtle-fit",
+        "Clothes_Pickle-suit",
+        "Clothes_Proof-of-prayer",
+        "Clothes_Roman-drip",
+        "Clothes_Ronin",
+        "Clothes_SWAT",
+        "Clothes_Sonic-suit",
+        "Clothes_Sports-jacket",
+        "Clothes_Straigth-jacket",
+        "Clothes_Suit",
+        "Clothes_Super-Saiyan",
+        "Clothes_Tank-top",
+        "Clothes_Tee",
+        "Clothes_Viking-Armor",
+        "Clothes_Wizard-drip",
+        "Clothes_fire-figther",
+        "Clothes_gods-robe",
+        "Clothes_gopher-suit"
+      ]
+    },
+    "Face-laser": {
+      "layerName": "Eyes",
+      "zIndex": 10.5,
+      "description": "Laser eye effects",
+      "traits": [
+        "Face-laser_Laser-Eyes"
+      ]
+    },
+    "Face-wear": {
+      "layerName": "Eyes",
+      "zIndex": 10,
+      "description": "Glasses, masks, and face accessories",
+      "traits": [
+        "Face-wear_3d-glases",
+        "Face-wear_MOG-Glasses",
+        "Face-wear_Matrix-Lenses",
+        "Face-wear_Ninja-Turtle-Mask",
+        "Face-wear_VR-headset",
+        "Face-wear_alpha-shades",
+        "Face-wear_aviators",
+        "Face-wear_cyber-shades",
+        "Face-wear_night-vision",
+        "Face-wear_shades"
+      ]
+    },
+    "Head": {
+      "layerName": "Head",
+      "zIndex": 12,
+      "description": "Hats, helmets, and head accessories",
+      "traits": [
+        "Head_2Pac-Bandana",
+        "Head_Beanie",
+        "Head_Beer-Hat",
+        "Head_Cap",
+        "Head_Centurion",
+        "Head_Clown",
+        "Head_Construction-Helmet",
+        "Head_Cowboy-Hat",
+        "Head_Crown",
+        "Head_Devil-horns",
+        "Head_Fedora",
+        "Head_Firefigther-Helmet",
+        "Head_Hard-hat",
+        "Head_Propeller-Hat",
+        "Head_military-beret",
+        "Head_Pirate-hat",
+        "Head_Ronin-helmet",
+        "Head_SWAT-helmet",
+        "Head_Spikes",
+        "Head_Standard-Cut",
+        "Head_Super-Saiyan",
+        "Head_Super-wojak",
+        "Head_Wiz-Hat",
+        "Head_viking-helmet"
+      ]
+    },
+    "Mouth": {
+      "layerName": "MouthBase",
+      "zIndex": 5,
+      "description": "Mouth expressions and items",
+      "traits": [
+        "Mouth_BubbleGum",
+        "Mouth_Pipe"
+      ]
+    }
+  },
+  "traits": [
+    {
+      "id": "Clothes_Astronaut",
+      "name": "Astronaut",
+      "category": "Clothes",
+      "colorable": true,
+      "fillFile": "Clothes_Astronaut_fill.png",
+      "defaultFile": "Clothes_Astronaut_default.png",
+      "defaultColor": "#FFFFFF",
+      "outlineFile": "Clothes_Astronaut_outline.png",
+      "detailOptions": [
+        {
+          "file": "Clothes_Astronaut_detail1.png",
+          "name": "Detail 1"
+        },
+        {
+          "file": "Clothes_Astronaut_detail2.png",
+          "name": "Detail 2"
+        }
+      ],
+      "frameFiles": [
+        {
+          "file": "Clothes_Astronaut_detail1.1.png",
+          "name": "Detail 1 Frame",
+          "over": "Detail 1"
+        },
+        {
+          "file": "Clothes_Astronaut_detail2.2.png",
+          "name": "Detail 2 Frame",
+          "over": "Detail 2"
+        }
+      ]
+    },
+    {
+      "id": "Clothes_Bathrobe",
+      "name": "Bathrobe",
+      "category": "Clothes",
+      "colorable": true,
+      "fill1File": "Clothes_Bathrobe_fill1.png",
+      "fill2File": "Clothes_Bathrobe_fill2.png",
+      "outlineFile": "Clothes_Bathrobe_outline.png",
+      "defaultColor": "#3b82f6",
+      "defaultColor2": "#3b82f6"
+    },
+    {
+      "id": "Clothes_Bepe-army",
+      "name": "Bepe army",
+      "category": "Clothes",
+      "colorable": true,
+      "fillFile": "Clothes_Bepe-army_fill.png",
+      "fill3File": "Clothes_Bepe-army_fill3.png",
+      "fillNamePositionFile": "Clothes_Bepe-army_name-position.png",
+      "defaultFile": "Clothes_Bepe-army_outline.png",
+      "defaultColor": "#4a5d23",
+      "outlineFile": "Clothes_Bepe-army_outline.png",
+      "outline2File": "Clothes_Bepe-army_outline2.png",
+      "outlineFileForFill": "Clothes_Bepe-army_outline_for_fill.png",
+      "detailOverlayFile": "Clothes_Bepe-army_detail.png"
+    },
+    {
+      "id": "Clothes_Bepe-suit",
+      "name": "Bepe suit",
+      "category": "Clothes",
+      "colorable": false,
+      "composite": true,
+      "layers": [
+        { "pos": 0, "key": "layer0", "type": "other", "label": "Layer 0 (body)", "file": "Clothes_Bepe-suit_layer0.png", "visible": true, "underBase": true },
+        { "pos": 1, "key": "layer1", "type": "other", "label": "Layer 1 (top)", "file": "Clothes_Bepe-suit_layer1.png", "visible": true }
+      ]
+    },
+    {
+      "id": "Clothes_Born-to-ride",
+      "name": "Born to ride",
+      "category": "Clothes",
+      "colorable": true,
+      "fillFile": "Clothes_Born-to-ride_fill.png",
+      "outlineFile": "Clothes_Born-to-ride_outline.png",
+      "defaultColor": "#171717",
+      "detailFile": "Clothes_Born-to-ride_detail.png"
+    },
+    {
+      "id": "Clothes_Chia-farmer",
+      "name": "Chia farmer",
+      "category": "Clothes",
+      "colorable": true,
+      "fillFile": "Clothes_Chia-farmer_fill.png",
+      "outlineFile": "Clothes_Chia-farmer_outline.png",
+      "defaultColor": "#FFFFFF"
+    },
+    {
+      "id": "Clothes_Drac-suit",
+      "name": "Drac suit",
+      "category": "Clothes",
+      "colorable": false,
+      "composite": true,
+      "layers": [
+        { "pos": 0, "key": "layer0", "type": "other", "label": "Layer 0 (body)", "file": "Clothes_Drac-suit_layer0.png", "visible": true, "underBase": true },
+        { "pos": 1, "key": "layer1", "type": "other", "label": "Layer 1 (top)", "file": "Clothes_Drac-suit_layer1.png", "visible": true }
+      ]
+    },
+    {
+      "id": "Clothes_Goose-suit",
+      "name": "Goose suit",
+      "category": "Clothes",
+      "colorable": false,
+      "composite": true,
+      "layers": [
+        { "pos": 0, "key": "layer0", "type": "other", "label": "Layer 0 (body)", "file": "Clothes_Goose-suit_layer0.png", "visible": true },
+        { "pos": 1, "key": "layer1", "type": "other", "label": "Layer 1 (top)", "file": "Clothes_Goose-suit_layer1.png", "visible": true }
+      ]
+    },
+    {
+      "id": "Clothes_Leather-jacket",
+      "name": "Leather jacket",
+      "category": "Clothes",
+      "colorable": true,
+      "fillFile": "Clothes_Leather-jacket_fill.png",
+      "outlineFile": "Clothes_Leather-jacket_outline.png",
+      "defaultColor": "#262626"
+    },
+    {
+      "id": "Clothes_Military-jacket",
+      "name": "Military jacket",
+      "category": "Clothes",
+      "colorable": true,
+      "defaultColor": "#2563EB",
+      "defaultColors": ["#2563EB", "#ebad25", "#FF0000", "#00d4ff", "#00ffab"],
+      "layers": [
+        { "pos": 0, "key": "mfill0", "type": "fill", "label": "Fill 1", "file": "Clothes_military-jacket_fill1.png", "visible": true },
+        { "pos": 1, "key": "mfill1", "type": "fill", "label": "Fill 2", "file": "Clothes_military-jacket_fill2.png", "visible": true },
+        { "pos": 2, "key": "mfill2", "type": "fill", "label": "Fill 3", "file": "Clothes_military-jacket_fill3.png", "visible": true },
+        { "pos": 3, "key": "mfill3", "type": "fill", "label": "Fill 4", "file": "Clothes_military-jacket_fill4.png", "visible": true },
+        { "pos": 4, "key": "mfill4", "type": "fill", "label": "Fill 5", "file": "Clothes_military-jacket_fill5.png", "visible": true },
+        { "pos": 5, "key": "outline", "type": "outline", "label": "Outline", "file": "Clothes_military-jacket_outline.png", "visible": true }
+      ],
+      "fills": {
+        "mfill1": { "treatment": "complementary", "source": "mfill0" },
+        "mfill2": { "treatment": "fixed", "amount": 13, "source": "", "fixedColor": "#FF0000" },
+        "mfill3": { "treatment": "complementary", "source": "mfill2" },
+        "mfill4": { "treatment": "split_complementary", "source": "mfill2", "fixedColor": "#FDE047" }
+      },
+      "outlineFile": "Clothes_military-jacket_outline.png"
+    },
+    {
+      "id": "Clothes_Ninja-turtle-fit",
+      "name": "Ninja turtle fit",
+      "category": "Clothes",
+      "colorable": true,
+      "defaultColors": ["#32CD32", "#45ba45", "#58a758"],
+      "layers": [
+        { "pos": 0, "key": "mfill2", "type": "fill", "label": "Fill 3", "file": "Clothes_Ninja-turtle-fit_fill3.png", "visible": true },
+        { "pos": 1, "key": "moutline1", "type": "outline", "label": "Outline 2", "file": "Clothes_Ninja-turtle-fit_outline2.png", "visible": true },
+        { "pos": 2, "key": "mfill0", "type": "fill", "label": "Fill 1", "file": "Clothes_Ninja-turtle-fit_fill1.png", "visible": true },
+        { "pos": 3, "key": "mfill1", "type": "fill", "label": "Fill 2", "file": "Clothes_Ninja-turtle-fit_fill2.png", "visible": true },
+        { "pos": 4, "key": "moutline0", "type": "outline", "label": "Outline 1", "file": "Clothes_Ninja-turtle-fit_outline1.png", "visible": true }
+      ],
+      "fills": {
+        "mfill1": { "treatment": "desaturated", "amount": 15, "source": "mfill0" },
+        "mfill2": { "treatment": "desaturated", "amount": 30, "source": "mfill0" }
+      }
+    },
+    {
+      "id": "Clothes_Pepe-suit",
+      "name": "Pepe suit",
+      "category": "Clothes",
+      "colorable": false,
+      "composite": true,
+      "layers": [
+        { "pos": 0, "key": "layer0", "type": "other", "label": "Layer 0 (body)", "file": "Clothes_Pepe-suit_layer0.png", "visible": true, "underBase": true },
+        { "pos": 1, "key": "layer1", "type": "other", "label": "Layer 1 (top)", "file": "Clothes_Pepe-suit_layer1.png", "visible": true }
+      ]
+    },
+    {
+      "id": "Clothes_Pickle-suit",
+      "name": "Pickle suit",
+      "category": "Clothes",
+      "colorable": false,
+      "composite": true,
+      "layer0File": "Clothes_Pickle-suit_layer0.png",
+      "layer1File": "Clothes_Pickle-suit_layer1.png"
+    },
+    {
+      "id": "Clothes_Proof-of-prayer",
+      "name": "Proof of prayer",
+      "category": "Clothes",
+      "colorable": false,
+      "composite": true,
+      "layers": [
+        { "pos": 0, "key": "layer0", "type": "other", "label": "Layer 0", "file": "Clothes_Proof-of-prayer_layer0.png", "visible": true, "underBase": true },
+        { "pos": 1, "key": "layer1", "type": "other", "label": "Layer 1", "file": "Clothes_Proof-of-prayer_layer1.png", "visible": true }
+      ]
+    },
+    {
+      "id": "Clothes_Roman-drip",
+      "name": "Roman drip",
+      "category": "Clothes",
+      "colorable": true,
+      "fillFile": "Clothes_Roman-drip_fill.png",
+      "outlineFile": "Clothes_Roman-drip_outline.png",
+      "defaultColor": "#8B0000",
+      "defaultColors": ["#8B0000"]
+    },
+    {
+      "id": "Clothes_Ronin",
+      "name": "Ronin",
+      "category": "Clothes",
+      "colorable": true,
+      "fillFiles": [
+        "Clothes_Ronin_fill1.png",
+        "Clothes_Ronin_fill2.png",
+        "Clothes_Ronin_fill3.png"
+      ],
+      "outlineFile": "Clothes_Ronin_outline.png",
+      "defaultColors": [
+        "#404040",
+        "#262626",
+        "#808080"
+      ]
+    },
+    {
+      "id": "Clothes_SWAT",
+      "name": "SWAT",
+      "category": "Clothes",
+      "colorable": true,
+      "fill1File": "Clothes_SWAT_fill.png",
+      "fill2File": "Clothes_SWAT_fill2.png",
+      "outlineFile": "Clothes_SWAT_outline.png",
+      "defaultColor": "#2563EB",
+      "defaultColors": ["#2563EB", "#00D4FF"],
+      "detailOptions": [
+        { "file": "Clothes_SWAT_detail1.png", "name": "Detail 1" },
+        { "file": "Clothes_SWAT_detail_cig.png", "name": "Detail 2" }
+      ],
+      "fills": {
+        "fill2": { "treatment": "darker_shade", "source": "fill1", "amount": 10 }
+      }
+    },
+    {
+      "id": "Clothes_Sonic-suit",
+      "name": "Sonic suit",
+      "category": "Clothes",
+      "colorable": true,
+      "fillFile": "Clothes_Sonic-suit_fill.png",
+      "outlineFile": "Clothes_Sonic-suit_outline.png",
+      "defaultColor": "#2563EB",
+      "defaultColors": ["#2563EB"]
+    },
+    {
+      "id": "Clothes_Sports-jacket",
+      "name": "Sports jacket",
+      "category": "Clothes",
+      "colorable": true,
+      "fillFile": "Clothes_Sports-jacket_fill.png",
+      "outlineFile": "Clothes_Sports-jacket_outline.png",
+      "defaultColor": "#228B22",
+      "detailOptions": [
+        {
+          "file": "Clothes_Sports-jacket_detail1.png",
+          "name": "Detail 1"
+        },
+        {
+          "file": "Clothes_Sports-jacket_detail2.png",
+          "name": "Detail 2"
+        }
+      ]
+    },
+    {
+      "id": "Clothes_Straigth-jacket",
+      "name": "Straigth jacket",
+      "category": "Clothes",
+      "colorable": true,
+      "fillFile": "Clothes_Straigth-jacket_fill.png",
+      "outlineFile": "Clothes_Straigth-jacket_outline.png",
+      "defaultColor": "#FFFFFF"
+    },
+    {
+      "id": "Clothes_Suit",
+      "name": "Suit",
+      "category": "Clothes",
+      "colorable": true,
+      "fillFiles": [
+        "Clothes_Suite-Tie_fill1.png",
+        "Clothes_Suite-Tie_fill2.png"
+      ],
+      "outlineFiles": [
+        "Clothes_Suite-Tie_outline.png"
+      ],
+      "defaultColors": ["#171717", "#2563EB"],
+      "detailOptions": [
+        {"file": "Clothes_Suite-Tie_outline.png", "name": "Tie"},
+        {"file": "Clothes_Suite-Bow_outline.png", "name": "Bow"}
+      ]
+    },
+    {
+      "id": "Clothes_Super-Saiyan",
+      "name": "Super Saiyan",
+      "category": "Clothes",
+      "colorable": true,
+      "fill1File": "Clothes_Super-Saiyan_fill1.png",
+      "fill2File": "Clothes_Super-Saiyan_fill2.png",
+      "outlineFile": "Clothes_Super-Saiyan_outline.png",
+      "defaultColor": "#FFA500",
+      "defaultColor2": "#0000CD"
+    },
+    {
+      "id": "Clothes_Tank-top",
+      "name": "Tank top",
+      "category": "Clothes",
+      "colorable": true,
+      "fillFile": "Clothes_Tank-top_fill.png",
+      "outlineFile": "Clothes_Tank-top_outline.png",
+      "defaultColor": "#FFFFFF"
+    },
+    {
+      "id": "Clothes_Tee",
+      "name": "Tee",
+      "category": "Clothes",
+      "colorable": true,
+      "fillFile": "Clothes_Tee_fill.png",
+      "outlineFile": "Clothes_Tee_outline.png",
+      "defaultColor": "#FFFFFF"
+    },
+    {
+      "id": "Clothes_Viking-Armor",
+      "name": "Viking Armor",
+      "category": "Clothes",
+      "colorable": true,
+      "fill1File": "Clothes_Viking-Armor_fill1.png",
+      "fill2File": "Clothes_Viking-Armor_fill2.png",
+      "outlineFile": "Clothes_Viking-Armor_outline.png",
+      "defaultColor": "#262626"
+    },
+    {
+      "id": "Clothes_Wizard-drip",
+      "name": "Wizard drip",
+      "category": "Clothes",
+      "colorable": true,
+      "fillFile": "Clothes_Wizard-drip_fill.png",
+      "outlineFile": "Clothes_Wizard-drip_outline.png",
+      "defaultColor": "#FFA500",
+      "detailOptions": [
+        {
+          "file": "Clothes_Wizard-drip_detail1.png",
+          "name": "Detail 1"
+        },
+        {
+          "file": "Clothes_Wizard-drip_detail2.png",
+          "name": "Detail 2"
+        },
+        {
+          "file": "Clothes_Wizard-drip_detail3.png",
+          "name": "Logo Patch"
+        }
+      ],
+      "frameFiles": [
+        {
+          "file": "Clothes_Wizard-drip_detail3.1.png",
+          "name": "Patch Frame",
+          "over": "Logo Patch"
+        }
+      ]
+    },
+    {
+      "id": "Clothes_fire-figther",
+      "name": "fire figther",
+      "category": "Clothes",
+      "colorable": true,
+      "fillFile": "Clothes_fire-figther_fill.png",
+      "outlineFile": "Clothes_fire-figther_outline.png",
+      "defaultColor": "#FF0000"
+    },
+    {
+      "id": "Clothes_gods-robe",
+      "name": "gods robe",
+      "category": "Clothes",
+      "colorable": true,
+      "fillFile": "Clothes_gods-robe_fill.png",
+      "outlineFile": "Clothes_gods-robe_outline.png",
+      "defaultColor": "#F5F5DC"
+    },
+    {
+      "id": "Clothes_gopher-suit",
+      "name": "gopher suit",
+      "category": "Clothes",
+      "colorable": false,
+      "composite": true,
+      "layer0File": "Clothes_gopher-suit_layer0.png",
+      "layer1File": "Clothes_gopher-suit_layer1.png"
+    },
+    {
+      "id": "Face-laser_Laser-Eyes",
+      "name": "Laser Eyes",
+      "category": "Face-laser",
+      "colorable": true,
+      "defaultColors": ["#32CD32"],
+      "layers": [
+        { "pos": 0, "key": "mfill0", "type": "fill", "label": "Fill 1", "file": "Face-laser_Laser-Eyes_fill1.png", "visible": true, "opacity": 0.6 },
+        { "pos": 1, "key": "mfill1", "type": "fill", "label": "Fill 2", "file": "Face-laser_Laser-Eyes_fill2.png", "visible": true, "opacity": 0.6 },
+        { "pos": 2, "key": "mfill2", "type": "fill", "label": "Fill 3", "file": "Face-laser_Laser-Eyes_fill3.png", "visible": true }
+      ],
+      "fills": {
+        "mfill1": { "treatment": "lighter_shade", "source": "mfill0", "amount": 10 },
+        "mfill2": { "treatment": "lighter_shade", "source": "mfill0", "amount": 40 }
+      }
+    },
+    {
+      "id": "Face-wear_3d-glases",
+      "name": "3d glases",
+      "category": "Face-wear",
+      "colorable": true,
+      "defaultColors": ["#2563EB", "#00D4FF"],
+      "layers": [
+        { "pos": 0, "key": "fill1", "type": "fill", "label": "Fill 1", "file": "Face-wear_3d-glases_fill1.png", "visible": true },
+        { "pos": 1, "key": "fill2", "type": "fill", "label": "Fill 2", "file": "Face-wear_3d-glases_fill2.png", "visible": true },
+        { "pos": 2, "key": "outline", "type": "outline", "label": "Outline", "file": "Face-wear_3d-glases_outline.png", "visible": true }
+      ],
+      "fills": {
+        "fill2": { "treatment": "split_complementary", "source": "fill1" }
+      }
+    },
+    {
+      "id": "Face-wear_MOG-Glasses",
+      "name": "MOG Glasses",
+      "category": "Face-wear",
+      "colorable": false,
+      "layers": [
+        { "pos": 0, "key": "dopt0", "type": "detail", "label": "Radioactive-forest", "file": "Face-wear_MOG-Glasses_detail_Radioactive-Forest.png", "visible": true },
+        { "pos": 1, "key": "dopt1", "type": "detail", "label": "Black", "file": "Face-wear_MOG-Glasses_detail_black.png", "visible": true },
+        { "pos": 2, "key": "dopt2", "type": "detail", "label": "Blue", "file": "Face-wear_MOG-Glasses_detail_blue.png", "visible": true },
+        { "pos": 3, "key": "dopt3", "type": "detail", "label": "Blue2", "file": "Face-wear_MOG-Glasses_detail_blue2.png", "visible": true },
+        { "pos": 4, "key": "dopt4", "type": "detail", "label": "Green", "file": "Face-wear_MOG-Glasses_detail_green.png", "visible": true },
+        { "pos": 5, "key": "dopt5", "type": "detail", "label": "Orange", "file": "Face-wear_MOG-Glasses_detail_orange.png", "visible": true },
+        { "pos": 6, "key": "dopt6", "type": "detail", "label": "Purple", "file": "Face-wear_MOG-Glasses_detail_purple.png", "visible": true },
+        { "pos": 7, "key": "dopt7", "type": "detail", "label": "Red", "file": "Face-wear_MOG-Glasses_detail_red.png", "visible": true },
+        { "pos": 8, "key": "dopt8", "type": "detail", "label": "Default (Rainbow)", "file": "Face-wear_MOG-Glasses_detail_default.png", "visible": true },
+        { "pos": 9, "key": "outline", "type": "outline", "label": "Outline", "file": "Face-wear_MOG-Glasses_outline.png", "visible": true }
+      ]
+    },
+    {
+      "id": "Face-wear_Matrix-Lenses",
+      "name": "Matrix Lenses",
+      "category": "Face-wear",
+      "colorable": true,
+      "defaultColors": ["#FF0000"],
+      "layers": [
+        { "pos": 0, "key": "fill", "type": "fill", "label": "Fill", "file": "Face-wear_Matrix-Lenses_fill.png", "visible": true },
+        { "pos": 1, "key": "outline", "type": "outline", "label": "Outline", "file": "Face-wear_Matrix-Lenses_outline.png", "visible": true }
+      ]
+    },
+    {
+      "id": "Face-wear_Ninja-Turtle-Mask",
+      "name": "Ninja Turtle Mask",
+      "category": "Face-wear",
+      "colorable": true,
+      "defaultColors": ["#FF0000"],
+      "layers": [
+        { "pos": 0, "key": "fill", "type": "fill", "label": "Fill", "file": "Face-wear_Ninja-Turtle-Mask_fill.png", "visible": true },
+        { "pos": 1, "key": "outline", "type": "outline", "label": "Outline", "file": "Face-wear_Ninja-Turtle-Mask_outline.png", "visible": true }
+      ]
+    },
+    {
+      "id": "Face-wear_VR-headset",
+      "name": "VR headset",
+      "category": "Face-wear",
+      "colorable": true,
+      "fillFiles": [
+        "Face-wear_VR-headset_fill1.png",
+        "Face-wear_VR-headset_fill2.png",
+        "Face-wear_VR-headset_fill3.png",
+        "Face-wear_VR-headset_fill4.png"
+      ],
+      "outlineFile": "Face-wear_VR-headset_outline.png",
+      "defaultColors": ["#FFFF00"],
+      "fills": {
+        "fill1": { "treatment": "darker_shade", "source": "fill0", "amount": 5 },
+        "fill2": { "treatment": "darker_shade", "source": "fill0", "amount": 5 },
+        "fill3": { "treatment": "darker_shade", "source": "fill0", "amount": 5 }
+      }
+    },
+    {
+      "id": "Face-wear_alpha-shades",
+      "name": "alpha shades",
+      "category": "Face-wear",
+      "colorable": true,
+      "fillFile": "Face-wear_alpha-shades_fill.png",
+      "outlineFile": "Face-wear_alpha-shades_outline.png",
+      "defaultColor": "#FF0000"
+    },
+    {
+      "id": "Face-wear_aviators",
+      "name": "aviators",
+      "category": "Face-wear",
+      "colorable": true,
+      "fillFile": "Face-wear_aviators_fill.png",
+      "outlineFile": "Face-wear_aviators_outline.png",
+      "defaultColor": "#171717"
+    },
+    {
+      "id": "Face-wear_cyber-shades",
+      "name": "cyber shades",
+      "category": "Face-wear",
+      "colorable": true,
+      "fillFile": "Face-wear_cyber-shades_fill.png",
+      "outlineFile": "Face-wear_cyber-shades_outline.png",
+      "defaultColor": "#FFA500"
+    },
+    {
+      "id": "Face-wear_night-vision",
+      "name": "night vision",
+      "category": "Face-wear",
+      "colorable": true,
+      "fillFile": "Face-wear_night-vision_fill.png",
+      "outlineFile": "Face-wear_night-vision_outline.png",
+      "defaultColor": "#262626"
+    },
+    {
+      "id": "Face-wear_shades",
+      "name": "shades",
+      "category": "Face-wear",
+      "colorable": true,
+      "fillFile": "Face-wear_shades_fill.png",
+      "outlineFile": "Face-wear_shades_outline.png",
+      "defaultColor": "#FF0000"
+    },
+    {
+      "id": "Head_2Pac-Bandana",
+      "name": "2Pac Bandana",
+      "category": "Head",
+      "colorable": true,
+      "fill1File": "Head_2Pac-Bandana_fill.png",
+      "fill2File": "Head_2Pac-Bandana_fill2.png",
+      "outlineFile": "Head_2Pac-Bandana_outline.png",
+      "defaultColor": "#FF6B00",
+      "defaultColor2": "#00D4FF"
+    },
+    {
+      "id": "Head_Beanie",
+      "name": "Beanie",
+      "category": "Head",
+      "colorable": true,
+      "fillFile": "Head_Beanie_fill.png",
+      "outlineFile": "Head_Beanie_outline.png",
+      "defaultColor": "#A0522D"
+    },
+    {
+      "id": "Head_Beer-Hat",
+      "name": "Beer Hat",
+      "category": "Head",
+      "colorable": false,
+      "outlineFile": "Head_Beer-Hat_outline.png",
+      "detailOptions": [
+        { "file": "Head_Beer-Hat_detail_AW.png", "name": "Aw" },
+        { "file": "Head_Beer-Hat_detail_Coffee.png", "name": "Coffee" },
+        { "file": "Head_Beer-Hat_detail_Coke.png", "name": "Coke" },
+        { "file": "Head_Beer-Hat_detail_DrPepper.png", "name": "Drpepper" },
+        { "file": "Head_Beer-Hat_detail_MtnDew.png", "name": "Mtndew" },
+        { "file": "Head_Beer-Hat_detail_red-bull.png", "name": "Red-bull" },
+        { "file": "Head_Beer-Hat_detail_monster.png", "name": "Monster" },
+        { "file": "Head_Beer-Hat_detail_monster-orange.png", "name": "Monster-orange" },
+        { "file": "Head_Beer-Hat_detail_citrus.png", "name": "Citrus" },
+        { "file": "Head_Beer-Hat_detail_Tang.png", "name": "Tang" }
+      ]
+    },
+    {
+      "id": "Head_Cap",
+      "name": "Cap",
+      "category": "Head",
+      "colorable": true,
+      "fillFile": "Head_Cap_fill.png",
+      "outlineFile": "Head_Cap_outline.png",
+      "defaultColor": "#228B22",
+      "detailOptions": [
+        {
+          "file": "Head_Cap_detail_McD.png",
+          "name": "Mcd"
+        },
+        {
+          "file": "Head_Cap_detail_chia.png",
+          "name": "Chia"
+        }
+      ],
+      "variants": [
+        {
+          "file": "Head_Cap_fill_armyl.png",
+          "color": "armyl",
+          "name": "Armyl"
+        }
+      ]
+    },
+    {
+      "id": "Head_Centurion",
+      "name": "Centurion",
+      "category": "Head",
+      "colorable": true,
+      "fillFile": "Head_Centurion_fill.png",
+      "outlineFile": "Head_Centurion_outline.png",
+      "defaultColor": "#8B0000"
+    },
+    {
+      "id": "Head_Clown",
+      "name": "Clown",
+      "category": "Head",
+      "colorable": true,
+      "fillFile": "Head_Clown_fill.png",
+      "outlineFile": "Head_Clown_outline.png",
+      "defaultColor": "#8B0000"
+    },
+    {
+      "id": "Head_Construction-Helmet",
+      "name": "Construction Helmet",
+      "category": "Head",
+      "colorable": true,
+      "fillFile": "Head_Construction-Helmet_fill.png",
+      "outlineFile": "Head_Construction-Helmet_outline.png",
+      "defaultColor": "#FFFF00",
+      "detailOptions": [
+        {
+          "file": "Head_Construction-Helmet_detail_chia-logo.png",
+          "name": "Chia-logo"
+        },
+        {
+          "file": "Head_Construction-Helmet_detail_cig-pack-2.png",
+          "name": "Cig-pack-2"
+        },
+        {
+          "file": "Head_Construction-Helmet_detail_cig-pack.png",
+          "name": "Cig-pack"
+        }
+      ]
+    },
+    {
+      "id": "Head_Cowboy-Hat",
+      "name": "Cowboy Hat",
+      "category": "Head",
+      "colorable": true,
+      "fillFile": "Head_Cowboy-Hat_fill.png",
+      "outlineFile": "Head_Cowboy-Hat_outline.png",
+      "defaultColor": "#A0522D"
+    },
+    {
+      "id": "Head_Crown",
+      "name": "Crown",
+      "category": "Head",
+      "colorable": true,
+      "fillFile": "Head_Crown_fill.png",
+      "outlineFile": "Head_Crown_outline.png",
+      "defaultColor": "#FFFF00"
+    },
+    {
+      "id": "Head_Devil-horns",
+      "name": "Devil horns",
+      "category": "Head",
+      "colorable": true,
+      "fillFile": "Head_Devil-horns_fill.png",
+      "outlineFile": "Head_Devil-horns_outline.png",
+      "defaultColor": "#FF0000"
+    },
+    {
+      "id": "Head_Fedora",
+      "name": "Fedora",
+      "category": "Head",
+      "colorable": true,
+      "fillFile": "Head_Fedora_fill.png",
+      "outlineFile": "Head_Fedora_outline.png",
+      "defaultColor": "#FF8C00"
+    },
+    {
+      "id": "Head_Firefigther-Helmet",
+      "name": "Firefigther Helmet",
+      "category": "Head",
+      "colorable": true,
+      "fillFile": "Head_Firefigther-Helmet_fill.png",
+      "outlineFile": "Head_Firefigther-Helmet_outline.png",
+      "defaultColor": "#FF0000"
+    },
+    {
+      "id": "Head_Hard-hat",
+      "name": "Hard Hat",
+      "category": "Head",
+      "colorable": true,
+      "fill1File": "Head_Hard-hat_fill1.png",
+      "fill2File": "Head_Hard-hat_fill2.png",
+      "outlineFile": "Head_Hard-hat_outline.png",
+      "defaultColor": "#262626",
+      "defaultColor2": "#00d4ff"
+    },
+    {
+      "id": "Head_Propeller-Hat",
+      "name": "Propeller Hat",
+      "category": "Head",
+      "colorable": true,
+      "fillFile": "Head_Propeller-Hat_fill.png",
+      "outlineFile": "Head_Propeller-Hat_outline.png",
+      "defaultColor": "#00d4ff"
+    },
+    {
+      "id": "Head_military-beret",
+      "name": "Military Beret",
+      "category": "Head",
+      "colorable": true,
+      "fillFile": "Head_military-beret_fill.png",
+      "outlineFile": "Head_military-beret_outline.png",
+      "defaultColor": "#1E90FF"
+    },
+    {
+      "id": "Head_Pirate-hat",
+      "name": "Pirate hat",
+      "category": "Head",
+      "colorable": true,
+      "fillFile": "Head_Pirate-hat_fill.png",
+      "outlineFile": "Head_Pirate-hat_outline.png",
+      "defaultColor": "#171717"
+    },
+    {
+      "id": "Head_Ronin-helmet",
+      "name": "Ronin helmet",
+      "category": "Head",
+      "colorable": true,
+      "fillFile": "Head_Ronin-helmet_fill.png",
+      "outlineFile": "Head_Ronin-helmet_outline.png",
+      "defaultColor": "#262626"
+    },
+    {
+      "id": "Head_SWAT-helmet",
+      "name": "SWAT helmet",
+      "category": "Head",
+      "colorable": true,
+      "fillFile": "Head_SWAT-helmet_fill.png",
+      "outlineFile": "Head_SWAT-helmet_outline.png",
+      "defaultColor": "#171717"
+    },
+    {
+      "id": "Head_Spikes",
+      "name": "Spikes",
+      "category": "Head",
+      "colorable": true,
+      "fillFile": "Head_Spikes_fill.png",
+      "outlineFile": "Head_Spikes_outline.png",
+      "defaultColor": "#FF0000"
+    },
+    {
+      "id": "Head_Standard-Cut",
+      "name": "Standard Cut",
+      "category": "Head",
+      "colorable": true,
+      "fillFile": "Head_Standard-Cut_fill.png",
+      "outlineFile": "Head_Standard-Cut_outline.png",
+      "defaultColor": "#8B4513"
+    },
+    {
+      "id": "Head_Super-Saiyan",
+      "name": "Super Saiyan",
+      "category": "Head",
+      "colorable": true,
+      "fill1File": "Head_Super-Saiyan_fill.png",
+      "fill2File": "Head_Super-Saiyan_fill2.png",
+      "outlineFile": "Head_Super-Saiyan_outline1.png",
+      "defaultColor": "#FFFF00",
+      "detailFile": "Head_Super-Saiyan_detail.png",
+      "fills": {
+        "fill2": { "treatment": "darker_shade", "source": "fill1", "amount": 12 }
+      }
+    },
+    {
+      "id": "Head_Super-wojak",
+      "name": "Super wojak",
+      "category": "Head",
+      "colorable": true,
+      "fillFile": "Head_Super-wojak_fill.png",
+      "outlineFile": "Head_Super-wojak_outline.png",
+      "defaultColor": "#FF0000"
+    },
+    {
+      "id": "Head_Wiz-Hat",
+      "name": "Wiz Hat",
+      "category": "Head",
+      "colorable": true,
+      "fillFile": "Head_Wiz-Hat_fill.png",
+      "outlineFile": "Head_Wiz-Hat_outline.png",
+      "defaultColor": "#FFA500"
+    },
+    {
+      "id": "Head_viking-helmet",
+      "name": "viking helmet",
+      "category": "Head",
+      "colorable": true,
+      "defaultColors": ["#404040"],
+      "layers": [
+        { "pos": 0, "key": "fill1", "type": "fill", "label": "Fill 1", "file": "Head_viking-helmet_fill1.png", "visible": true },
+        { "pos": 1, "key": "fill2", "type": "fill", "label": "Fill 2", "file": "Head_viking-helmet_fill2.png", "visible": true },
+        { "pos": 2, "key": "outline", "type": "outline", "label": "Outline", "file": "Head_viking-helmet_outline.png", "visible": true }
+      ],
+      "fills": {
+        "fill2": { "treatment": "darker_shade", "source": "fill1", "amount": 5 }
+      }
+    },
+    {
+      "id": "Mouth_BubbleGum",
+      "name": "BubbleGum",
+      "category": "Mouth",
+      "colorable": true,
+      "fillFile": "Mouth_BubbleGum_fill.png",
+      "outlineFile": "Mouth_BubbleGum_outline.png",
+      "defaultColor": "#FF1493"
+    },
+    {
+      "id": "Mouth_Pipe",
+      "name": "Pipe",
+      "category": "Mouth",
+      "colorable": true,
+      "fillFile": "Mouth_Pipe_fill.png",
+      "outlineFile": "Mouth_Pipe_outline.png",
+      "defaultColor": "#FF0000"
+    }
+  ]
+}

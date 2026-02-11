@@ -1,12 +1,15 @@
 /**
  * Historical Credit Backfill Script
  *
- * Fetches ALL trade events from MintGarden Events API for the
+ * Fetches trade events from MintGarden Events API for the
  * Wojak Farmers Plot collection and calculates retroactive credits.
  *
  * Usage:
  *   npx wrangler d1 execute wojak-users --local --file=functions/migrations/030_credit_system.sql
  *   npx tsx scripts/backfill-credits.ts
+ *
+ * Only include events on or after a date (e.g. leaderboard go-live):
+ *   npx tsx scripts/backfill-credits.ts --since=2026-01-05
  *
  * Or run against remote D1:
  *   npx tsx scripts/backfill-credits.ts --remote
@@ -15,9 +18,8 @@
  * Duplicate events are skipped via UNIQUE constraint on event_id.
  *
  * Configuration:
- *   - Uses fixed 1.0 XCH floor for all historical events
+ *   - Uses fixed 1.0 XCH floor for all historical events (no historical floor API)
  *   - Only XCH trades earn credits (CAT trades skipped)
- *   - Retroactive from a date determined by examining event data
  */
 
 // ============ Configuration ============
@@ -89,6 +91,8 @@ interface BackfillStats {
   totalCreditsUnits: number;
   earliestEvent: string;
   latestEvent: string;
+  /** When --since is used, number of events before that date (excluded) */
+  eventsBeforeSince?: number;
 }
 
 // ============ Credit Calculation ============
@@ -110,8 +114,13 @@ function calculateCredits(priceXch: number, floorXch: number): {
 
 // ============ MintGarden API ============
 
+function eventId(e: MintGardenEvent): string {
+  return `${e.nft_id}_${e.event_index}_${e.timestamp}`;
+}
+
 async function fetchAllTradeEvents(): Promise<MintGardenEvent[]> {
   const allEvents: MintGardenEvent[] = [];
+  const seenEventIds = new Set<string>();
   let cursor: string | null = null;
   let pageCount = 0;
   const pageSize = 100;
@@ -147,22 +156,38 @@ async function fetchAllTradeEvents(): Promise<MintGardenEvent[]> {
         break;
       }
 
-      allEvents.push(...events);
+      // Only add events we haven't seen (avoid pagination loop)
+      let newOnPage = 0;
+      for (const e of events) {
+        const id = eventId(e);
+        if (!seenEventIds.has(id)) {
+          seenEventIds.add(id);
+          allEvents.push(e);
+          newOnPage++;
+        }
+      }
+      if (newOnPage === 0) {
+        console.log(`Page ${pageCount}: all duplicates (pagination loop), stopping`);
+        break;
+      }
       console.log(
-        `Page ${pageCount}: ${events.length} events (total: ${allEvents.length})`
+        `Page ${pageCount}: ${events.length} events (${newOnPage} new, total unique: ${allEvents.length})`
       );
 
-      // Cursor-based pagination — detect infinite loop
-      // MintGarden returns the same cursor when there's no more data
-      if (data.next && data.next !== cursor) {
-        cursor = data.next;
+      // Cursor: prefer "next", then "previous" (stop if both would repeat)
+      const nextCursor = data.next && data.next !== cursor ? data.next : null;
+      const prevCursor = data.previous && data.previous !== cursor ? data.previous : null;
+      if (nextCursor) {
+        cursor = nextCursor;
+      } else if (prevCursor) {
+        cursor = prevCursor;
+        console.log(`Page ${pageCount}: using previous cursor for next page`);
       } else {
-        console.log(`Page ${pageCount}: reached end of data (cursor unchanged)`);
-        break; // No more pages or cursor didn't advance
+        console.log(`Page ${pageCount}: reached end of data (no next/previous cursor)`);
+        break;
       }
 
       pageCount++;
-      // Rate limit
       await new Promise((resolve) => setTimeout(resolve, DELAY_BETWEEN_PAGES_MS));
     } catch (error) {
       console.error(`Error fetching page ${pageCount}:`, error);
@@ -170,20 +195,22 @@ async function fetchAllTradeEvents(): Promise<MintGardenEvent[]> {
     }
   }
 
-  console.log(`\nTotal events fetched: ${allEvents.length}`);
+  console.log(`\nTotal unique events fetched: ${allEvents.length}`);
   return allEvents;
 }
 
 // ============ SQL Generation ============
 
 /**
- * Generate SQL INSERT statements for all credit events.
+ * Generate SQL INSERT statements for credit events.
  * Uses INSERT OR IGNORE for idempotency.
+ * @param events - Events to include (already filtered by --since if applicable)
+ * @param opts - Optional: sinceDate (YYYY-MM-DD), eventsBeforeSince count
  */
-function generateSQL(events: MintGardenEvent[]): {
-  sql: string;
-  stats: BackfillStats;
-} {
+function generateSQL(
+  events: MintGardenEvent[],
+  opts?: { sinceDate: string; eventsBeforeSince: number }
+): { sql: string; stats: BackfillStats } {
   const stats: BackfillStats = {
     totalEvents: events.length,
     xchTrades: 0,
@@ -195,6 +222,7 @@ function generateSQL(events: MintGardenEvent[]): {
     totalCreditsUnits: 0,
     earliestEvent: '',
     latestEvent: '',
+    eventsBeforeSince: opts?.eventsBeforeSince ?? undefined,
   };
 
   const insertStatements: string[] = [];
@@ -251,6 +279,14 @@ function generateSQL(events: MintGardenEvent[]): {
     `(floor_xch, source, snapshot_date) ` +
     `VALUES (${BACKFILL_FLOOR_STORED}, 'backfill', '${new Date().toISOString().split('T')[0]}');`;
 
+  const sinceLines: string[] = [];
+  if (opts?.sinceDate) {
+    sinceLines.push(`\n-- Since date: ${opts.sinceDate} (only events on or after)`);
+    if (opts.eventsBeforeSince > 0) {
+      sinceLines.push(`-- Events before cutoff excluded: ${opts.eventsBeforeSince}`);
+    }
+  }
+  const sinceBlock = sinceLines.length ? sinceLines.join('\n') : '';
   const sql = [
     '-- =====================================================',
     '-- Credit Backfill — Auto-generated',
@@ -261,6 +297,7 @@ function generateSQL(events: MintGardenEvent[]): {
     `-- XCH trades: ${stats.xchTrades}`,
     `-- CAT trades skipped: ${stats.catTradesSkipped}`,
     `-- Unique wallets: ${stats.uniqueWallets.size}`,
+    sinceBlock,
     '-- =====================================================',
     '',
     '-- Floor price snapshot',
@@ -273,9 +310,27 @@ function generateSQL(events: MintGardenEvent[]): {
   return { sql, stats };
 }
 
+// ============ CLI ============
+
+function parseSince(): string | undefined {
+  const arg = process.argv.find((a) => a.startsWith('--since='));
+  if (!arg) return undefined;
+  const value = arg.slice('--since='.length).trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    console.error('Invalid --since. Use YYYY-MM-DD (e.g. --since=2026-01-05)');
+    process.exit(1);
+  }
+  return value;
+}
+
 // ============ Main ============
 
 async function main() {
+  const since = parseSince();
+  if (since) {
+    console.log(`  Since date: ${since} (only events on or after this date)`);
+  }
+
   console.log('='.repeat(60));
   console.log('  Phase 2: Your Wojak — Credit Backfill');
   console.log('='.repeat(60));
@@ -288,19 +343,44 @@ async function main() {
     return;
   }
 
-  // Step 2: Generate SQL
-  const { sql, stats } = generateSQL(events);
+  // Step 2: Filter by --since if provided (e.g. --since=2026-01-05 for leaderboard go-live)
+  const sinceDate = since;
+  const eventsFiltered = sinceDate
+    ? events.filter((e) => e.timestamp.slice(0, 10) >= sinceDate)
+    : events;
+  const eventsBeforeSince = sinceDate ? events.length - eventsFiltered.length : 0;
+  if (sinceDate && eventsBeforeSince > 0) {
+    console.log(
+      `\nFilter: ${eventsFiltered.length} events on or after ${sinceDate} (${eventsBeforeSince} older events excluded)`
+    );
+  }
 
-  // Step 3: Write SQL file
+  if (eventsFiltered.length === 0) {
+    console.log(
+      sinceDate ? `\nNo events on or after ${sinceDate}. Exiting.` : '\nNo events found. Exiting.'
+    );
+    return;
+  }
+
+  // Step 3: Generate SQL
+  const { sql, stats } = generateSQL(
+    eventsFiltered,
+    sinceDate ? { sinceDate, eventsBeforeSince } : undefined
+  );
+
+  // Step 4: Write SQL file
   const outputPath = 'scripts/backfill-credits-data.sql';
   const fs = await import('fs');
   fs.writeFileSync(outputPath, sql, 'utf8');
 
-  // Step 4: Print summary
+  // Step 5: Print summary
   console.log('\n' + '='.repeat(60));
   console.log('  Backfill Summary');
   console.log('='.repeat(60));
-  console.log(`  Total events fetched:    ${stats.totalEvents}`);
+  if (stats.eventsBeforeSince !== undefined && stats.eventsBeforeSince > 0) {
+    console.log(`  Events before since:     ${stats.eventsBeforeSince} (excluded)`);
+  }
+  console.log(`  Total events (included): ${stats.totalEvents}`);
   console.log(`  XCH trades (credited):   ${stats.xchTrades}`);
   console.log(`  CAT trades (skipped):    ${stats.catTradesSkipped}`);
   console.log(`  No address (skipped):    ${stats.noAddressSkipped}`);
@@ -317,6 +397,9 @@ async function main() {
   console.log(`  Earliest event:          ${stats.earliestEvent}`);
   console.log(`  Latest event:            ${stats.latestEvent}`);
   console.log(`  Floor price used:        ${BACKFILL_FLOOR_XCH} XCH (fixed)`);
+  if (sinceDate) {
+    console.log(`  Since date:              ${sinceDate}`);
+  }
   console.log('='.repeat(60));
 
   console.log(`\nSQL written to: ${outputPath}`);
@@ -328,9 +411,9 @@ async function main() {
     `  (add --local for local testing, or --remote for production)`
   );
 
-  // Print top wallets preview
+  // Print top wallets preview (from included events only)
   const walletCredits = new Map<string, number>();
-  for (const event of events) {
+  for (const event of eventsFiltered) {
     if (!event.xch_price || event.xch_price <= 0) continue;
     if (!event.address?.encoded_id) continue;
     const calc = calculateCredits(event.xch_price, BACKFILL_FLOOR_XCH);
@@ -338,12 +421,16 @@ async function main() {
     walletCredits.set(event.address.encoded_id, prev + calc.credits);
   }
 
-  const topWallets = [...walletCredits.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 10);
+  const sortedWallets = [...walletCredits.entries()].sort((a, b) => b[1] - a[1]);
+  const showCount = sortedWallets.length <= 50 ? sortedWallets.length : 25;
+  const topWallets = sortedWallets.slice(0, showCount);
 
   if (topWallets.length > 0) {
-    console.log('\nTop 10 wallets by credits:');
+    const label =
+      showCount === sortedWallets.length
+        ? `All ${sortedWallets.length} wallets by credits:`
+        : `Top ${showCount} wallets by credits:`;
+    console.log(`\n${label}`);
     for (const [wallet, credits] of topWallets) {
       const displayCredits = (credits / 100).toFixed(2);
       const freeMints = Math.floor(credits / 10000);

@@ -10,12 +10,16 @@
   min-height: 100%;
 }
 
-/* Desktop: fit viewport */
+/* Desktop: constrain to viewport, allow scroll when content overflows so action bar is never cut off */
 @media (min-width: 1024px) {
   .generator-page {
-    height: calc(100vh - 64px);
-    height: calc(100dvh - 64px);
-    overflow: hidden;
+    /* Constrain height so overflow-y creates scrollbar when content exceeds viewport */
+    max-height: calc(100vh - 64px);
+    max-height: calc(100dvh - 64px);
+    min-height: calc(100vh - 64px);
+    min-height: calc(100dvh - 64px);
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 }
 
@@ -29,13 +33,13 @@
   padding: 16px;
 }
 
-/* Desktop: side by side, 45/55 split */
+/* Desktop: side by side, 50/50 split - canvas kept big */
 @media (min-width: 1024px) {
   .generator-content {
     flex-direction: row;
     gap: 24px;
     padding: 24px;
-    max-width: 1600px;
+    max-width: 1800px;
     margin: 0 auto;
     width: 100%;
   }
@@ -54,7 +58,8 @@
     flex-shrink: 0;
   }
 
-  .generator-preview-canvas {
+  .generator-preview-canvas,
+  .generator-preview-canvas-wrapper {
     aspect-ratio: 1;
     max-height: 45vh;
     width: 100%;
@@ -62,11 +67,12 @@
   }
 }
 
-/* Desktop: preview takes 45% width with strict 1:1 ratio */
+/* Desktop: preview takes 50% width, min 400px, max 560px - canvas stays prominent */
 @media (min-width: 1024px) {
   .generator-preview {
-    width: 45%;
-    max-width: 500px;
+    width: 50%;
+    min-width: 400px;
+    max-width: 560px;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
@@ -74,12 +80,17 @@
     justify-content: flex-start;
   }
 
-  /* Force 1:1 ratio by using width-based height */
+  /* Force 1:1 ratio for canvas element */
   .generator-preview-canvas {
     width: 100%;
     height: auto !important;
     aspect-ratio: 1 / 1 !important;
     flex: none !important;
+  }
+
+  .generator-preview-canvas-wrapper {
+    width: 100%;
+    flex: none;
   }
 }
 
@@ -90,6 +101,38 @@
   flex: 1;
   min-height: 0;
   gap: 16px;
+}
+
+/* Desktop: grid (3 cols) + details/colors panel as two columns */
+@media (min-width: 1024px) {
+  .generator-options {
+    flex-direction: row;
+    gap: 0;
+    min-width: 0;
+  }
+
+  .generator-options-grid-container {
+    flex: 1;
+    min-width: 0;
+    margin-right: 0;
+  }
+
+  /* Scrollbar on outer edge: details panel scrolls, bar appears to the right of content */
+  .generator-details-panel {
+    width: 22%;
+    min-width: 260px;
+    max-width: 360px;
+    flex-shrink: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 16px 8px 16px 16px;
+    border-left: 1px solid var(--color-border);
+    background: var(--color-surface);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    scrollbar-gutter: stable;
+  }
 }
 
 /* === CATEGORY TABS === */
@@ -117,10 +160,9 @@
   }
 }
 
-/* === OPTIONS GRID CONTAINER (Scrollable, fills height) === */
+/* === OPTIONS GRID CONTAINER === */
 .generator-options-grid-container {
   flex: 1;
-  overflow-y: auto;
   min-height: 0;
   padding: 4px;
   margin: -4px;
@@ -129,6 +171,7 @@
   border: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 /* === OPTIONS GRID === */
@@ -148,42 +191,23 @@
   }
 }
 
-/* Desktop: 4 columns (33% smaller than 3 columns) */
+/* Desktop: 3 columns, tighter spacing to free room for color panel */
 @media (min-width: 1024px) {
   .generator-options-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: clamp(14px, 1.5vw, 20px);
-    padding: clamp(14px, 1.5vw, 20px);
-  }
-}
-
-/* Large desktop: 5 columns */
-@media (min-width: 1600px) {
-  .generator-options-grid {
-    grid-template-columns: repeat(5, 1fr);
-    gap: clamp(16px, 1.5vw, 22px);
-    padding: clamp(16px, 1.5vw, 22px);
-  }
-}
-
-/* Extra large desktop: 6 columns */
-@media (min-width: 2000px) {
-  .generator-options-grid {
-    grid-template-columns: repeat(6, 1fr);
-    gap: 20px;
-    padding: 20px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(8px, 0.8vw, 12px);
+    padding: clamp(10px, 1vw, 14px);
   }
 }
 
 /* === TRAIT CARD IMAGE BACKGROUNDS (Theme-aware) === */
 /* Premium gradient with radial highlight and subtle vignette */
 
-/* Default/Dark/Void theme - orange */
+/* Default/Dark/Void theme - softer neutral so trait art stands out */
 .trait-card-image-bg {
   background:
-    radial-gradient(ellipse 80% 80% at 60% 40%, rgba(255, 180, 100, 0.2) 0%, transparent 50%),
-    radial-gradient(ellipse 100% 100% at 50% 50%, transparent 50%, rgba(0, 0, 0, 0.08) 100%),
-    linear-gradient(45deg, #e56500 0%, #ff7a1a 40%, #ff8c33 70%, #ff9d4d 100%) !important;
+    radial-gradient(ellipse 80% 80% at 50% 50%, rgba(255, 255, 255, 0.04) 0%, transparent 60%),
+    linear-gradient(180deg, #1f1f24 0%, #1a1a1f 50%, #16161a 100%) !important;
 }
 
 /* Light theme */
@@ -194,20 +218,18 @@
     linear-gradient(45deg, #e9ecef 0%, #f0f2f5 40%, #f5f7f9 70%, #fafbfc 100%) !important;
 }
 
-/* Tang Orange theme - richer orange */
+/* Tang Orange theme - subtle warm tint */
 .theme-tang-orange .trait-card-image-bg {
   background:
-    radial-gradient(ellipse 80% 80% at 60% 40%, rgba(255, 200, 120, 0.25) 0%, transparent 50%),
-    radial-gradient(ellipse 100% 100% at 50% 50%, transparent 50%, rgba(0, 0, 0, 0.08) 100%),
-    linear-gradient(45deg, #e56500 0%, #ff7a1a 40%, #ff9933 70%, #ffaa4d 100%) !important;
+    radial-gradient(ellipse 80% 80% at 50% 50%, rgba(255, 150, 80, 0.06) 0%, transparent 60%),
+    linear-gradient(180deg, #221f1c 0%, #1c1a18 50%, #181614 100%) !important;
 }
 
-/* Chia Green theme - rich vibrant green */
+/* Chia Green theme - subtle green tint */
 .theme-chia-green .trait-card-image-bg {
   background:
-    radial-gradient(ellipse 80% 80% at 60% 40%, rgba(100, 255, 150, 0.15) 0%, transparent 50%),
-    radial-gradient(ellipse 100% 100% at 50% 50%, transparent 50%, rgba(0, 0, 0, 0.08) 100%),
-    linear-gradient(45deg, #1f8a45 0%, #28a855 40%, #32c462 70%, #3dd66b 100%) !important;
+    radial-gradient(ellipse 80% 80% at 50% 50%, rgba(80, 200, 120, 0.06) 0%, transparent 60%),
+    linear-gradient(180deg, #1c221f 0%, #181c1a 50%, #141816 100%) !important;
 }
 
 /* === TRAIT CARD SELECTED BORDER & BADGE COLORS (Theme-aware) === */

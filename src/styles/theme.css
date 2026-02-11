@@ -566,119 +566,8 @@ body {
 
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   AMBIENT BACKGROUND EFFECTS
-   Floating orbs and noise texture for premium feel
+   NOISE TEXTURE OVERLAY
    ═══════════════════════════════════════════════════════════════════════════════ */
-
-.ambient-background {
-  position: fixed;
-  inset: 0;
-  bottom: -200px; /* Extra height to cover scroll parallax translate */
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
-}
-
-.ambient-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(120px);
-  top: 0;
-  left: 0;
-  will-change: transform;
-  --orb-opacity-min: 0.15;
-  --orb-opacity-max: 0.30;
-  transition: filter 0.6s ease, scale 0.6s ease;
-}
-
-/* Subdued mode for content-heavy pages */
-.ambient-subdued .ambient-orb {
-  --orb-opacity-min: 0.08;
-  --orb-opacity-max: 0.18;
-  filter: blur(100px);
-  scale: 0.85;
-}
-
-/* Orb 1: Cyan ↔ Magenta */
-.ambient-orb--1 {
-  width: 500px;
-  height: 500px;
-  animation:
-    orb-float-1 60s ease-in-out infinite,
-    orb-cyan-magenta 40s ease-in-out infinite,
-    orb-breathe 8s ease-in-out infinite;
-}
-
-/* Orb 2: Purple ↔ Lime */
-.ambient-orb--2 {
-  width: 600px;
-  height: 600px;
-  animation:
-    orb-float-2 55s ease-in-out infinite,
-    orb-purple-lime 40s ease-in-out infinite,
-    orb-breathe 11s ease-in-out infinite;
-}
-
-/* Orb 3: Yellow → Pink → Violet */
-.ambient-orb--3 {
-  width: 400px;
-  height: 400px;
-  animation:
-    orb-float-3 50s ease-in-out infinite,
-    orb-yellow-magenta-violet 40s ease-in-out infinite,
-    orb-breathe 14s ease-in-out infinite;
-}
-
-/* Float paths — each orb roams across the full viewport */
-@keyframes orb-float-1 {
-  0%   { transform: translate(5vw, 5vh) scale(1); }
-  20%  { transform: translate(60vw, 15vh) scale(1.05); }
-  40%  { transform: translate(70vw, 60vh) scale(0.95); }
-  60%  { transform: translate(25vw, 75vh) scale(1.02); }
-  80%  { transform: translate(10vw, 40vh) scale(0.98); }
-  100% { transform: translate(5vw, 5vh) scale(1); }
-}
-
-@keyframes orb-float-2 {
-  0%   { transform: translate(75vw, 30vh) scale(1); }
-  20%  { transform: translate(40vw, 65vh) scale(0.95); }
-  40%  { transform: translate(10vw, 50vh) scale(1.05); }
-  60%  { transform: translate(30vw, 10vh) scale(0.98); }
-  80%  { transform: translate(65vw, 5vh) scale(1.02); }
-  100% { transform: translate(75vw, 30vh) scale(1); }
-}
-
-@keyframes orb-float-3 {
-  0%   { transform: translate(60vw, 10vh) scale(1); }
-  20%  { transform: translate(15vw, 25vh) scale(1.05); }
-  40%  { transform: translate(5vw, 65vh) scale(0.98); }
-  60%  { transform: translate(45vw, 80vh) scale(0.95); }
-  80%  { transform: translate(80vw, 55vh) scale(1.02); }
-  100% { transform: translate(60vw, 10vh) scale(1); }
-}
-
-/* Color fade sequences */
-@keyframes orb-cyan-magenta {
-  0%, 100% { background-color: #00F0FF; }
-  50%      { background-color: #FF007F; }
-}
-
-@keyframes orb-purple-lime {
-  0%, 100% { background-color: #A100F2; }
-  50%      { background-color: #39FF14; }
-}
-
-@keyframes orb-yellow-magenta-violet {
-  0%, 100% { background-color: #FFEF00; }
-  33%      { background-color: #FF4F9A; }
-  66%      { background-color: #9D00FF; }
-}
-
-/* Opacity breathing — driven by CSS custom properties */
-@keyframes orb-breathe {
-  0%, 100% { opacity: var(--orb-opacity-min); }
-  50%      { opacity: var(--orb-opacity-max); }
-}
 
 /* Noise texture overlay for subtle grain effect */
 .noise-overlay {
@@ -690,20 +579,10 @@ body {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
 }
 
-/* Hide ambient effects on mobile for performance */
+/* Hide noise overlay on mobile for performance */
 @media (max-width: 768px) {
-  .ambient-background {
-    display: none;
-  }
   .noise-overlay {
     display: none;
-  }
-}
-
-/* Reduce motion for ambient orbs */
-@media (prefers-reduced-motion: reduce) {
-  .ambient-orb {
-    animation: none;
   }
 }
 

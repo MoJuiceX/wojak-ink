@@ -1,25 +1,20 @@
 /**
  * Mint Pricing API — /api/mint/pricing
  *
- * GET
+ * GET (no params)
  *
- * Returns current trait surcharges, supply count, and floor price.
- * Public endpoint, no auth.
- *
- * Surcharge formula: 0.2 * ln(1 + usage_count / 20)
- * Only the highest surcharge applies per mint.
+ * Returns trait surcharges (from trait_usage), supply count, and floor price.
+ * Used by Generator for dynamic pricing display.
  *
  * Response: {
- *   basePriceXch: number,
- *   traits: Record<string, { usage: number, surcharge: number }>,
- *   supply: { minted: number, total: number, remaining: number },
- *   floorPrice: number | null
+ *   traits: { [traitKey]: { usageCount, surchargeXch } },
+ *   supply: { minted: number, total: 4200 },
+ *   floorPrice: number
  * }
  */
 
 interface Env {
   DB: D1Database;
-  TRADE_VALUES_KV: KVNamespace;
 }
 
 const corsHeaders = {
@@ -29,45 +24,18 @@ const corsHeaders = {
   'Content-Type': 'application/json',
 };
 
-const BASE_PRICE_XCH = 0.2;
-const MAX_SUPPLY = 4200;
+const SUPPLY_TOTAL = 4200;
+const SURCHARGE_BASE = 0.2;
+const SURCHARGE_USES_DIVISOR = 20;
 
-// Dynamic pricing categories (Base and Background are exempt)
-const DYNAMIC_PRICING_CATEGORIES = ['Head', 'Eyes', 'Clothes', 'Mouth'];
+function surchargeXch(usageCount: number): number {
+  return SURCHARGE_BASE * Math.log(1 + usageCount / SURCHARGE_USES_DIVISOR);
+}
 
 interface TraitUsageRow {
   trait_category: string;
   trait_name: string;
   usage_count: number;
-}
-
-/**
- * Calculate surcharge using logarithmic formula.
- * Starts near-linear (~0.01/use), slows after ~20 uses, uncapped.
- */
-function calculateSurcharge(usageCount: number): number {
-  if (usageCount <= 0) return 0;
-  const surcharge = 0.2 * Math.log(1 + usageCount / 20);
-  return Math.round(surcharge * 100000) / 100000; // 5 decimal places
-}
-
-/**
- * Expire stale pending mints for accurate supply count.
- */
-async function expireStalePendingMints(db: D1Database): Promise<void> {
-  try {
-    await db
-      .prepare(
-        `UPDATE phase2_mints
-         SET status = 'expired'
-         WHERE status = 'pending'
-         AND expires_at IS NOT NULL
-         AND expires_at < datetime('now')`
-      )
-      .run();
-  } catch (error) {
-    console.error('[Mint Pricing] Error expiring stale mints:', error);
-  }
 }
 
 export const onRequest: PagesFunction<Env> = async (context) => {
@@ -92,60 +60,34 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   }
 
   try {
-    // Expire stale pending mints
-    await expireStalePendingMints(env.DB);
+    const traitRows = await env.DB.prepare(
+      'SELECT trait_category, trait_name, usage_count FROM trait_usage'
+    ).all<TraitUsageRow>();
 
-    // Fetch all trait usage counts
-    const traitResults = await env.DB
-      .prepare(
-        `SELECT trait_category, trait_name, usage_count
-         FROM trait_usage
-         WHERE trait_category IN ('Head', 'Eyes', 'Clothes', 'Mouth')
-         ORDER BY trait_category, trait_name`
-      )
-      .all<TraitUsageRow>();
-
-    // Build traits map with surcharges
-    const traits: Record<string, { usage: number; surcharge: number; category: string }> = {};
-    for (const row of traitResults.results || []) {
-      const key = `${row.trait_category}:${row.trait_name}`;
+    const traits: Record<string, { usageCount: number; surchargeXch: number }> = {};
+    for (const r of traitRows.results || []) {
+      const key = `${r.trait_category}_${r.trait_name}`;
       traits[key] = {
-        usage: row.usage_count,
-        surcharge: calculateSurcharge(row.usage_count),
-        category: row.trait_category,
+        usageCount: r.usage_count,
+        surchargeXch: Math.round(surchargeXch(r.usage_count) * 1000) / 1000,
       };
     }
 
-    // Get supply count (only confirmed mints)
-    const supplyResult = await env.DB
-      .prepare(
-        `SELECT COUNT(*) as minted FROM phase2_mints WHERE status = 'minted'`
-      )
-      .first<{ minted: number }>();
+    const supplyRow = await env.DB.prepare(
+      "SELECT COUNT(*) AS count FROM phase2_mints WHERE status = 'minted'"
+    ).first<{ count: number }>();
+    const minted = supplyRow?.count ?? 0;
 
-    const minted = supplyResult?.minted || 0;
-
-    // Get floor price from KV
-    let floorPrice: number | null = null;
-    try {
-      const kvFloor = await env.TRADE_VALUES_KV.get('current_floor_price');
-      if (kvFloor) {
-        floorPrice = parseFloat(kvFloor);
-      }
-    } catch {
-      // KV might not be available
-    }
+    const floorRow = await env.DB.prepare(
+      'SELECT floor_xch FROM floor_price_snapshots ORDER BY snapshot_date DESC LIMIT 1'
+    ).first<{ floor_xch: number }>();
+    const floorPrice = floorRow ? floorRow.floor_xch / 100 : 1.0;
 
     return new Response(
       JSON.stringify({
-        basePriceXch: BASE_PRICE_XCH,
         traits,
-        supply: {
-          minted,
-          total: MAX_SUPPLY,
-          remaining: MAX_SUPPLY - minted,
-        },
-        floorPrice,
+        supply: { minted, total: SUPPLY_TOTAL },
+        floorPrice: Math.round(floorPrice * 1000) / 1000,
       }),
       { status: 200, headers: corsHeaders }
     );

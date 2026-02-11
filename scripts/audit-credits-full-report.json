@@ -1,0 +1,183 @@
+{
+  "generatedAt": "2026-02-11T12:27:44.572Z",
+  "compareBase": "scripts/backfill-credits-data.sql",
+  "floorXch": 1,
+  "mintGardenCount": 158,
+  "dbCount": 79,
+  "missingCount": 0,
+  "creditMismatchCount": 0,
+  "extraCount": 0,
+  "missingEventIds": [],
+  "creditMismatches": [],
+  "status": "OK",
+  "expectedLeaderboard": [
+    {
+      "rank": 1,
+      "wallet": "xch1hk0zu5fddvs62uvcgwtqathfhcs6cjkp75dngjf8l63j8926wfgsxjqer8",
+      "creditsUnits": 482750,
+      "creditsDisplay": "4827.50",
+      "freeMints": 48
+    },
+    {
+      "rank": 2,
+      "wallet": "xch1wgq9ngz3w02pque435k74g74gvgtg8a2t95a4jzj9gg22des420s34rn6k",
+      "creditsUnits": 468800,
+      "creditsDisplay": "4688.00",
+      "freeMints": 46
+    },
+    {
+      "rank": 3,
+      "wallet": "xch1dxyvm8mecn8nkp92ehgsc4wzltnfpvjq8safpdc596hy3msaq95qnskfn9",
+      "creditsUnits": 381400,
+      "creditsDisplay": "3814.00",
+      "freeMints": 38
+    },
+    {
+      "rank": 4,
+      "wallet": "xch1fgl5vwmqjusc0nz2clmpc7utkzms7hkgfqq0d8ea3ludj7n2zstqc3e3wp",
+      "creditsUnits": 211852,
+      "creditsDisplay": "2118.52",
+      "freeMints": 21
+    },
+    {
+      "rank": 5,
+      "wallet": "xch1sngzz0zf7w9ju2p3yptu3yjqttlx68yacwrgvzsq20547rgrzk8qj2ya0s",
+      "creditsUnits": 171416,
+      "creditsDisplay": "1714.16",
+      "freeMints": 17
+    },
+    {
+      "rank": 6,
+      "wallet": "xch12rzp7c3a9yu72zyqngzv4xlz5cyrn79n58qpcrhkd7ms0vp67ztspe0ylt",
+      "creditsUnits": 162754,
+      "creditsDisplay": "1627.54",
+      "freeMints": 16
+    },
+    {
+      "rank": 7,
+      "wallet": "xch1lxee628lq4ttw4uhq8gugwl46snadcndrte23skmamgcxehn32xqhwp333",
+      "creditsUnits": 112778,
+      "creditsDisplay": "1127.78",
+      "freeMints": 11
+    },
+    {
+      "rank": 8,
+      "wallet": "xch1446hepskdwgn2nfunq0qhwweyjvwfn4kfcll6pznjkkfdptvrasqaxkxz5",
+      "creditsUnits": 79840,
+      "creditsDisplay": "798.40",
+      "freeMints": 7
+    },
+    {
+      "rank": 9,
+      "wallet": "xch18crwnum6qcj4wq9khuq7g6q06hcanjzry3mm4ycgth2qu6rc2cnsu5qv5a",
+      "creditsUnits": 76686,
+      "creditsDisplay": "766.86",
+      "freeMints": 7
+    },
+    {
+      "rank": 10,
+      "wallet": "xch1ac0y2dwcyfjkfmnug8tldqls4gjkkm36zps8ercwte4g85dmf4pqhc8rkv",
+      "creditsUnits": 68248,
+      "creditsDisplay": "682.48",
+      "freeMints": 6
+    },
+    {
+      "rank": 11,
+      "wallet": "xch1mhs4ewtrc42jang0lxr42v2a984r6xyvyvxqmtrqqzsp2ua44egs5acn4k",
+      "creditsUnits": 65170,
+      "creditsDisplay": "651.70",
+      "freeMints": 6
+    },
+    {
+      "rank": 12,
+      "wallet": "xch174yp5fuj5mdemp99lu9w0cqprwr9j0zfrdjt7tqeh9tqucjsfsgslaauws",
+      "creditsUnits": 40880,
+      "creditsDisplay": "408.80",
+      "freeMints": 4
+    },
+    {
+      "rank": 13,
+      "wallet": "xch1pp7zu75uaynulzhrn9d2mzw2agdjm3g0j5unflwuj78n5dvrrzsq73jsxm",
+      "creditsUnits": 36304,
+      "creditsDisplay": "363.04",
+      "freeMints": 3
+    },
+    {
+      "rank": 14,
+      "wallet": "xch174c2hqmk4lrpcrrrustkascf5ken4dyw9lje4fapeytcmxsxu7qsg27jtf",
+      "creditsUnits": 29996,
+      "creditsDisplay": "299.96",
+      "freeMints": 2
+    },
+    {
+      "rank": 15,
+      "wallet": "xch14wgj35mngcu2x35tlyqsvsh236wlwlh53q8e5m0xepgw5wkmsxdsc23xth",
+      "creditsUnits": 25470,
+      "creditsDisplay": "254.70",
+      "freeMints": 2
+    },
+    {
+      "rank": 16,
+      "wallet": "xch1hx3zjz9hzrxzrwjgtdg850358ylvaysmsx3yfpp33s9ex6l7qngqnwc90x",
+      "creditsUnits": 25470,
+      "creditsDisplay": "254.70",
+      "freeMints": 2
+    },
+    {
+      "rank": 17,
+      "wallet": "xch1p3l8uk4u2y5cn83f6teq97ccfxey8ln4vpqvxtz787c6qjn7t2pqzxnj9j",
+      "creditsUnits": 25470,
+      "creditsDisplay": "254.70",
+      "freeMints": 2
+    },
+    {
+      "rank": 18,
+      "wallet": "xch19pz3t9hxkfd2psqlqpmdwptr6t5xcmldu5zj2ujnpmfwzvajx08s4dcxtg",
+      "creditsUnits": 11210,
+      "creditsDisplay": "112.10",
+      "freeMints": 1
+    },
+    {
+      "rank": 19,
+      "wallet": "xch1hsarrryuj3acc7hmwj3d3w50sngdn6upl6nxta35n7g85pv7rc5qu0ap2m",
+      "creditsUnits": 11210,
+      "creditsDisplay": "112.10",
+      "freeMints": 1
+    },
+    {
+      "rank": 20,
+      "wallet": "xch164rups9jzp50xhjrcxh07p03ncmn7m3xxcz0eryhgqt7ppz0lucs2nj07c",
+      "creditsUnits": 11210,
+      "creditsDisplay": "112.10",
+      "freeMints": 1
+    },
+    {
+      "rank": 21,
+      "wallet": "xch1dpdu39xd6myval0gywdeuz0ft7wety2kzfscwtz289ddf8y7tphsmsl29m",
+      "creditsUnits": 11076,
+      "creditsDisplay": "110.76",
+      "freeMints": 1
+    },
+    {
+      "rank": 22,
+      "wallet": "xch1aw73nsjjylrmxgnx40lzletctfpcjtzmdzfsuyl2j9kyfmh5256qztxdaz",
+      "creditsUnits": 10542,
+      "creditsDisplay": "105.42",
+      "freeMints": 1
+    },
+    {
+      "rank": 23,
+      "wallet": "xch1egtrd68avxeqg8uca2vpps3dwxqsc6yk5t00ylwukjd5w8yz4h3qcmgdsf",
+      "creditsUnits": 10542,
+      "creditsDisplay": "105.42",
+      "freeMints": 1
+    },
+    {
+      "rank": 24,
+      "wallet": "xch1ylpezzrpa92nx0am8t3s90yy0s7tffulmnnl7scmnkp6pdl6n7wqap6y5v",
+      "creditsUnits": 10000,
+      "creditsDisplay": "100.00",
+      "freeMints": 1
+    }
+  ]
+}

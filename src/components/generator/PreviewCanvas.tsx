@@ -4,6 +4,11 @@
  * Displays the composited Wojak avatar with loading states.
  * Features ambient pulsing glow behind the avatar.
  * Shows brief glow flash when character updates (Phase 2).
+ *
+ * IMPORTANT: The main preview must always show the full avatar centered
+ * (object-contain). Do NOT add zoom, crop, or position changes for Beer Hat
+ * or any other trait — that causes the avatar to shift and leaves empty space
+ * below. Keep this behavior stable.
  */
 
 import { useState, useEffect, useRef } from 'react';
@@ -16,12 +21,15 @@ interface PreviewCanvasProps {
   size?: number;
   showPlaceholder?: boolean;
   className?: string;
+  /** When true, no background/checkerboard - parent provides it (for PreviewWithControls) */
+  embedded?: boolean;
 }
 
 export function PreviewCanvas({
   size,
   showPlaceholder = true,
   className = '',
+  embedded = false,
 }: PreviewCanvasProps) {
   const { previewImage, isRendering, selectedLayers } = useGenerator();
   const prefersReducedMotion = useReducedMotion();
@@ -49,12 +57,12 @@ export function PreviewCanvas({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl ${className} ${showUpdateGlow ? 'generator-preview-canvas updated' : 'generator-preview-canvas'}`}
+      className={`relative overflow-hidden ${embedded ? '' : 'rounded-2xl'} ${className} ${showUpdateGlow ? 'generator-preview-canvas updated' : 'generator-preview-canvas'}`}
       style={{
         ...sizeStyles,
         aspectRatio: '1 / 1',
-        background: 'var(--color-glass-bg)',
-        border: '1px solid var(--color-border)',
+        background: embedded ? 'transparent' : 'var(--color-glass-bg)',
+        border: embedded ? 'none' : '1px solid var(--color-border)',
       }}
     >
       {/* Pulsing ambient glow behind avatar */}
@@ -70,23 +78,25 @@ export function PreviewCanvas({
         />
       )}
 
-      {/* Checkerboard pattern for transparency */}
-      <div
-        className="absolute inset-0"
-        style={{
-          backgroundImage: `
-            linear-gradient(45deg, var(--color-border) 25%, transparent 25%),
-            linear-gradient(-45deg, var(--color-border) 25%, transparent 25%),
-            linear-gradient(45deg, transparent 75%, var(--color-border) 75%),
-            linear-gradient(-45deg, transparent 75%, var(--color-border) 75%)
-          `,
-          backgroundSize: '20px 20px',
-          backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px',
-          opacity: 0.3,
-        }}
-      />
+      {/* Checkerboard pattern for transparency (skip when embedded) */}
+      {!embedded && (
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `
+              linear-gradient(45deg, var(--color-border) 25%, transparent 25%),
+              linear-gradient(-45deg, var(--color-border) 25%, transparent 25%),
+              linear-gradient(45deg, transparent 75%, var(--color-border) 75%),
+              linear-gradient(-45deg, transparent 75%, var(--color-border) 75%)
+            `,
+            backgroundSize: '20px 20px',
+            backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px',
+            opacity: 0.3,
+          }}
+        />
+      )}
 
-      {/* Preview image - instant update */}
+      {/* Preview image — full avatar, centered. Do not zoom/crop by trait (e.g. Beer Hat). */}
       {previewImage && (
         <img
           src={previewImage}

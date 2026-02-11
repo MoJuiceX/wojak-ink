@@ -23,7 +23,7 @@ export interface LightboxProps {
   onClose: () => void;
   title?: string;
   children: React.ReactNode;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'gallery';
   /** Element to return focus to when lightbox closes */
   triggerRef?: React.RefObject<HTMLElement>;
 }
@@ -33,6 +33,8 @@ const SIZE_MAP = {
   md: '600px',
   lg: '800px',
   xl: '1000px',
+  /** Matches gallery NFT lightbox: 1100×680 */
+  gallery: '1100px',
 };
 
 export function Lightbox({
@@ -149,7 +151,7 @@ export function Lightbox({
           {/* Content */}
           <motion.div
             ref={lightboxRef}
-            className="lightbox-content glass-strong"
+            className={`lightbox-content ${size === 'gallery' ? 'lightbox-gallery' : ''}`}
             style={{ '--lightbox-max-width': SIZE_MAP[size] } as React.CSSProperties}
             variants={contentVariants}
             initial="hidden"

@@ -418,7 +418,7 @@ export default function GamesHub() {
               width: '100%',
               // Align content to start, not center, to prevent top clipping
               alignContent: 'start',
-              // Create stacking context above ambient orbs (z-index:0) and noise overlay (z-index:1)
+              // Create stacking context above noise overlay (z-index:1)
               position: 'relative',
               zIndex: 1,
             }}

@@ -10,6 +10,9 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { useGenerator } from '@/contexts/GeneratorContext';
 import { traitGridVariants, traitCardStaggerVariants } from '@/config/generatorAnimations';
 import type { LayerImage } from '@/services/generatorService';
+import type { UnifiedTrait } from '@/services/generatorService';
+
+const G2_BASE_PATH = '/assets/wojak-layers/YourWojak-layers';
 
 interface MouthLayerSelectorProps {
   className?: string;
@@ -100,11 +103,79 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, bad
   );
 }
 
+interface G2MouthCardProps {
+  trait: UnifiedTrait;
+  isSelected: boolean;
+  isDisabled: boolean;
+  disabledReason?: string;
+  onClick: () => void;
+}
+
+function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick }: G2MouthCardProps) {
+  const prefersReducedMotion = useReducedMotion();
+  const thumbnailSrc = trait.outlineFile
+    ? `${G2_BASE_PATH}/${trait.outlineFile}`
+    : trait.layer0File
+      ? `${G2_BASE_PATH}/${trait.layer0File}`
+      : '';
+
+  return (
+    <motion.button
+      className="w-full aspect-square relative rounded-xl overflow-hidden p-1"
+      style={{
+        background: 'var(--generator-trait-card-bg)',
+        border: isSelected
+          ? '2px solid var(--color-cyan, #00d4ff)'
+          : '1px solid var(--generator-trait-card-border)',
+        opacity: isDisabled ? 0.5 : 1,
+        cursor: isDisabled ? 'not-allowed' : 'pointer',
+        boxShadow: isSelected
+          ? '0 0 20px rgba(0, 212, 255, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3)'
+          : '0 2px 8px rgba(0, 0, 0, 0.2)',
+        transition: 'all 0.3s ease',
+      }}
+      whileHover={prefersReducedMotion || isDisabled ? undefined : { scale: 1.03 }}
+      whileTap={prefersReducedMotion || isDisabled ? undefined : { scale: 0.98 }}
+      transition={{ duration: 0.2 }}
+      onClick={onClick}
+      disabled={isDisabled}
+      title={disabledReason || trait.name}
+    >
+      <div className="relative w-full h-full rounded-lg overflow-hidden trait-card-image-bg">
+        {thumbnailSrc && (
+          <img
+            src={thumbnailSrc}
+            alt={trait.name}
+            className="absolute inset-0 w-full h-full object-cover"
+            loading="lazy"
+          />
+        )}
+      </div>
+      {isSelected && (
+        <motion.div
+          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center z-20"
+          style={{ background: 'var(--color-cyan, #00d4ff)' }}
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
+            <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
+          </svg>
+        </motion.div>
+      )}
+    </motion.button>
+  );
+}
+
 export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) {
   const {
     selectedLayers,
+    g2Selections,
     getLayerImages,
+    getUnifiedTraitsForLayer,
     selectLayer,
+    selectG2Layer,
     clearLayer,
     isLayerDisabled,
     isOptionDisabled,
@@ -112,7 +183,7 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
   } = useGenerator();
   const prefersReducedMotion = useReducedMotion();
 
-  const [mouthBaseImages, setMouthBaseImages] = useState<LayerImage[]>([]);
+  const [mouthBaseUnified, setMouthBaseUnified] = useState<UnifiedTrait[]>([]);
   const [mouthItemImages, setMouthItemImages] = useState<LayerImage[]>([]);
   const [facialHairImages, setFacialHairImages] = useState<LayerImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -122,30 +193,30 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
   const selectedFacialHair = selectedLayers.FacialHair;
   const isBlocked = isLayerDisabled('MouthBase') && isLayerDisabled('MouthItem') && isLayerDisabled('FacialHair');
 
-  // Load images for all mouth-related layers
+  // Load unified traits for MouthBase (G1 + G2 so BubbleGum, Pipe appear) and G1 images for MouthItem + FacialHair
   useEffect(() => {
     if (!isInitialized) return;
 
     queueMicrotask(() => setIsLoading(true));
     Promise.all([
-      getLayerImages('MouthBase'),
+      getUnifiedTraitsForLayer('MouthBase'),
       getLayerImages('MouthItem'),
       getLayerImages('FacialHair'),
     ])
-      .then(([baseImages, itemImages, facialImages]) => {
-        setMouthBaseImages(baseImages);
+      .then(([baseUnified, itemImages, facialImages]) => {
+        setMouthBaseUnified(baseUnified);
         setMouthItemImages(itemImages);
         setFacialHairImages(facialImages);
         setIsLoading(false);
       })
       .catch((err) => {
-        console.error('Failed to load mouth images:', err);
-        setMouthBaseImages([]);
+        console.error('Failed to load mouth options:', err);
+        setMouthBaseUnified([]);
         setMouthItemImages([]);
         setFacialHairImages([]);
         setIsLoading(false);
       });
-  }, [isInitialized, getLayerImages]);
+  }, [isInitialized, getUnifiedTraitsForLayer, getLayerImages]);
 
   // Loading skeleton
   if (isLoading || !isInitialized) {
@@ -159,17 +230,6 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
       </div>
     );
   }
-
-  const handleMouthBaseClick = (image: LayerImage) => {
-    if (isLayerDisabled('MouthBase') || isOptionDisabled('MouthBase', image.displayName)) return;
-
-    // MouthBase cannot be deselected - only switched to another option
-    // Clicking the same item does nothing
-    if (selectedMouthBase === image.path) {
-      return; // Do nothing - can't deselect MouthBase
-    }
-    selectLayer('MouthBase', image.path);
-  };
 
   const handleMouthItemClick = (image: LayerImage) => {
     if (isLayerDisabled('MouthItem') || isOptionDisabled('MouthItem', image.displayName)) return;
@@ -230,12 +290,8 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
     }
   };
 
-  // Combine images with category info
-  const allImages = [
-    ...mouthBaseImages.map((img) => ({ ...img, category: 'base' as const })),
-    ...mouthItemImages.map((img) => ({ ...img, category: 'item' as const })),
-    ...facialHairImages.map((img) => ({ ...img, category: 'facial' as const })),
-  ];
+  const hasAnyOptions =
+    mouthBaseUnified.length > 0 || mouthItemImages.length > 0 || facialHairImages.length > 0;
 
   return (
     <div className={`space-y-4 ${className}`}>
@@ -255,7 +311,7 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
       )}
 
       {/* Combined mouth trait grid */}
-      {!isBlocked && (mouthBaseImages.length > 0 || mouthItemImages.length > 0 || facialHairImages.length > 0) && (
+      {!isBlocked && hasAnyOptions && (
           <motion.div
             key="mouth-grid"
             className="generator-options-grid"
@@ -263,20 +319,51 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
             initial="initial"
             animate="animate"
           >
-            {/* MouthBase items */}
-            {mouthBaseImages.map((image) => {
-              const isDisabled = isLayerDisabled('MouthBase') || isOptionDisabled('MouthBase', image.displayName);
+            {/* MouthBase items (G1 + G2 unified: includes BubbleGum, Pipe from YourWojak) */}
+            {mouthBaseUnified.map((trait) => {
+              const isG2 = trait.source === 'g2' || trait.source === 'both';
+              const isSelected =
+                isG2
+                  ? g2Selections.MouthBase?.traitId === trait.id
+                  : selectedMouthBase === trait.g1Path;
+              const displayName = trait.name;
+              const isDisabled =
+                isLayerDisabled('MouthBase') || isOptionDisabled('MouthBase', displayName);
+
+              if (trait.source === 'g2') {
+                return (
+                  <motion.div
+                    key={trait.id}
+                    variants={prefersReducedMotion ? undefined : traitCardStaggerVariants}
+                  >
+                    <G2MouthCard
+                      trait={trait}
+                      isSelected={!!isSelected}
+                      isDisabled={isDisabled}
+                      disabledReason={isDisabled ? getDisabledReasonForOption('MouthBase', displayName) : undefined}
+                      onClick={() => selectG2Layer('MouthBase', trait)}
+                    />
+                  </motion.div>
+                );
+              }
+
+              const g1Path = trait.g1Path!;
+              const image: LayerImage = { path: g1Path, name: trait.name, displayName: trait.name };
               return (
                 <motion.div
-                  key={image.path}
+                  key={trait.id}
                   variants={prefersReducedMotion ? undefined : traitCardStaggerVariants}
                 >
                   <ImageCard
                     image={image}
-                    isSelected={selectedMouthBase === image.path}
+                    isSelected={!!isSelected}
                     isDisabled={isDisabled}
-                    disabledReason={isDisabled ? getDisabledReasonForOption('MouthBase', image.displayName) : undefined}
-                    onClick={() => handleMouthBaseClick(image)}
+                    disabledReason={isDisabled ? getDisabledReasonForOption('MouthBase', displayName) : undefined}
+                    onClick={() =>
+                      trait.source === 'g1'
+                        ? selectLayer('MouthBase', g1Path)
+                        : selectG2Layer('MouthBase', trait)
+                    }
                   />
                 </motion.div>
               );
@@ -323,7 +410,7 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
       )}
 
       {/* Empty state */}
-      {!isBlocked && allImages.length === 0 && (
+      {!isBlocked && !hasAnyOptions && (
         <div
           className="p-8 rounded-xl text-center"
           style={{

@@ -85,7 +85,6 @@ const frequencies: Record<string, Record<string, number>> = {
   },
   Head: {
     Beanie: 69,
-    "Cap McDonald's": 1,
     'Cap Blue': 1,
     'Cap Green': 1,
     'Cap Orange': 1,

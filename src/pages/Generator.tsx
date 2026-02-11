@@ -1,37 +1,83 @@
 /**
  * Wojak Generator Page
  *
- * 6-layer avatar composition system with trait selection.
+ * Layer-based avatar composition (Base, Clothes, Mouth, Mask, Eyes, Head, Background, etc.).
  * Phase 1: Redesigned layout - 45/55 split on desktop, 3-col mobile grid.
  */
 
 import './Generator.css';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { useLayout } from '@/hooks/useLayout';
-import { GeneratorProvider } from '@/contexts/GeneratorContext';
+import { GeneratorProvider, useGenerator } from '@/contexts/GeneratorContext';
 import {
-  PreviewCanvas,
+  PreviewWithControls,
   LayerTabs,
   TraitSelector,
   ActionBar,
   FavoritesModal,
   ExportPanel,
   StickyMiniPreview,
+  GeneratorRightPanel,
 } from '@/components/generator';
 import { PageSEO } from '@/components/seo';
-import { InfoButton } from '@/components/common/InfoButton';
+
+function GeneratorErrorBanner() {
+  const { generatorError, clearGeneratorError } = useGenerator();
+  if (!generatorError) return null;
+  return (
+    <div
+      className="card-static flex items-center justify-between gap-3 p-3 mb-4"
+      style={{
+        borderLeft: '4px solid var(--color-error)',
+        background: 'rgba(239, 68, 68, 0.1)',
+      }}
+      role="alert"
+    >
+      <span className="text-secondary flex-1 text-sm">{generatorError}</span>
+      <button
+        type="button"
+        onClick={clearGeneratorError}
+        className="btn btn-ghost text-sm shrink-0"
+        aria-label="Dismiss error"
+      >
+        Dismiss
+      </button>
+    </div>
+  );
+}
 
 function GeneratorContent() {
   const { isDesktop } = useLayout();
+  const { isInitialized, generatorError } = useGenerator();
 
   return (
     <PageTransition>
       <PageSEO
         title="Wojak Avatar Generator - Create Custom NFT Characters"
-        description="Design your own Wojak avatar with our 6-layer customization system. Choose from hundreds of traits including heads, eyes, mouths, clothing, and backgrounds. Save favorites and export high-quality images."
+        description="Design your own Wojak avatar with our layer-based customization system. Choose from hundreds of traits including heads, eyes, mouths, clothing, and backgrounds. Save favorites and export high-quality images."
         path="/generator"
       />
       <div className="generator-page">
+        {/* Error banner: init failure, export/save errors */}
+        <GeneratorErrorBanner />
+
+        {/* When init failed, show refresh prompt and hide main UI */}
+        {!isInitialized && generatorError ? (
+          <div
+            className="card-static p-6 text-center mb-4"
+            style={{ borderLeft: '4px solid var(--color-error)' }}
+          >
+            <p className="text-secondary mb-2">The generator could not load. You can try refreshing the page.</p>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="btn btn-primary"
+            >
+              Refresh page
+            </button>
+          </div>
+        ) : (
+        <>
         <div className="generator-content">
           {/* Left: Preview Section with Category Tabs */}
           <div className="generator-preview">
@@ -49,9 +95,9 @@ function GeneratorContent() {
               </div>
             )}
 
-            {/* Preview Canvas */}
-            <div className="generator-preview-canvas">
-              <PreviewCanvas className="w-full" />
+            {/* Preview Canvas with zoom and background controls */}
+            <div className="generator-preview-canvas-wrapper">
+              <PreviewWithControls className="w-full" />
             </div>
 
             {/* Desktop: Action Bar on bottom */}
@@ -72,12 +118,18 @@ function GeneratorContent() {
           {/* Divider (desktop only) */}
           {isDesktop && <div className="generator-divider" />}
 
-          {/* Right: Options Grid Section */}
+          {/* Right: Grid (3 cols) + Details/Colors panel (desktop) or just options (mobile) */}
           <div className="generator-options">
-            {/* Options Grid */}
+            {/* Options Grid — 3 columns on desktop */}
             <div className="generator-options-grid-container">
               <TraitSelector />
             </div>
+            {/* Desktop: 4th column = colors/details stripe */}
+            {isDesktop && (
+              <div className="generator-details-panel">
+                <GeneratorRightPanel />
+              </div>
+            )}
           </div>
         </div>
 
@@ -100,6 +152,8 @@ function GeneratorContent() {
             </p>
           </div>
         )}
+        </>
+        )}
       </div>
 
       {/* Modals */}
@@ -108,7 +162,6 @@ function GeneratorContent() {
 
       {/* Mobile sticky preview */}
       {!isDesktop && <StickyMiniPreview />}
-      <InfoButton page="generator" />
     </PageTransition>
   );
 }

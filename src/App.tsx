@@ -26,14 +26,13 @@ import { AchievementsProvider } from '@/contexts/AchievementsContext';
 import { PreloadProvider } from '@/components/preload/PreloadProvider';
 import { SageWalletProvider } from '@/sage-wallet';
 import { MintProvider } from '@/contexts/MintContext';
+import { GeneratorProvider } from '@/contexts/GeneratorContext';
 import { SalesProvider } from '@/providers/SalesProvider';
 import { GlobalVideoPlayer } from '@/components/media/video/GlobalVideoPlayer';
 import StartupSequence from '@/components/StartupSequence';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { GameLoading } from '@/components/games/GameLoading';
 import { GameErrorBoundary } from '@/components/games/GameError';
-import { AmbientBackground } from './components/AmbientBackground';
-
 // Lazy load all pages for code splitting
 const Gallery = lazy(() => import('./pages/Gallery'));
 const Treasury = lazy(() => import('./pages/Treasury'));
@@ -154,9 +153,6 @@ function AppContent() {
           {/* Global Video Player - rendered outside content wrapper for proper z-index */}
           {showContent && <GlobalVideoPlayer />}
 
-          {/* Ambient background with floating orbs */}
-          {showContent && <AmbientBackground />}
-
           {/* Subtle noise texture overlay */}
           {showContent && <div className="noise-overlay" />}
 
@@ -236,9 +232,11 @@ function AppContent() {
                   <Route
                     path="generator"
                     element={
-                      <Suspense fallback={<PageSkeleton type="generator" />}>
-                        <Generator />
-                      </Suspense>
+                      <GeneratorProvider>
+                        <Suspense fallback={<PageSkeleton type="generator" />}>
+                          <Generator />
+                        </Suspense>
+                      </GeneratorProvider>
                     }
                   />
                   <Route

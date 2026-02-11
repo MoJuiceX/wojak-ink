@@ -10,19 +10,17 @@
   justify-content: center;
 }
 
-/* Overlay/Backdrop */
+/* Overlay/Backdrop - solid to avoid see-through */
 .lightbox-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: #000;
 }
 
-/* Content Container */
+/* Content Container - solid background so content behind is not visible */
 .lightbox-content {
   position: relative;
-  background: rgba(20, 20, 28, 0.98);
+  background: #14141c;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
   max-height: 90vh;
@@ -38,6 +36,13 @@
 
 .lightbox-content:focus {
   outline: none;
+}
+
+/* Gallery-size lightbox: matches NFT explorer panel (1100×680) */
+.lightbox-content.lightbox-gallery {
+  height: 680px;
+  max-height: 90vh;
+  width: min(1100px, calc(100vw - 64px));
 }
 
 /* Header */

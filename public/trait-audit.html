@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trait Test Audit — Wojak Generator</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a28;
+    --border: rgba(255,255,255,0.08);
+    --text: #ffffff;
+    --text2: #a0a0b0;
+    --text3: #606070;
+    --primary: #ff6b00;
+    --primary-hover: #ff8533;
+    --success: #22c55e;
+    --cyan: #00d4ff;
+    --radius: 10px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    height: 100vh;
+    overflow: hidden;
+  }
+  .app { display: grid; grid-template-columns: 220px 1fr 340px; grid-template-rows: auto 1fr auto; height: 100vh; }
+  .header { grid-column: 1/-1; background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 16px; }
+  .header h1 { font-size: 16px; font-weight: 700; }
+  .header h1 span { color: var(--primary); }
+  .header p { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .sidebar { background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 8px; }
+  .main { display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; padding: 12px; }
+  .config { background: var(--surface); border-left: 1px solid var(--border); overflow-y: auto; padding: 12px; }
+  .footer { grid-column: 1/-1; background: var(--surface); border-top: 1px solid var(--border); padding: 10px 16px; }
+
+  .cat-header { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); padding: 6px 6px 3px; margin-top: 6px; }
+  .cat-header:first-child { margin-top: 0; }
+  .trait-btn {
+    display: flex; align-items: center; gap: 6px; width: 100%; padding: 6px 8px;
+    border: none; background: transparent; color: var(--text2); font-size: 12px;
+    border-radius: 5px; cursor: pointer; text-align: left; transition: all 0.15s;
+  }
+  .trait-btn:hover { background: var(--surface2); color: var(--text); }
+  .trait-btn.active { background: rgba(255,107,0,0.12); color: var(--primary); }
+
+  .preview-canvas {
+    width: min(560px, calc(100vh - 140px)); height: min(560px, calc(100vh - 140px));
+    border-radius: var(--radius); border: 1px solid var(--border); background: #1a1a28;
+    image-rendering: pixelated;
+  }
+
+  .layer-row {
+    display: flex; align-items: center; gap: 4px; padding: 4px 6px;
+    border-radius: 6px; border: 1px solid var(--border); background: var(--surface2);
+    margin-bottom: 3px; font-size: 11px;
+  }
+  .layer-row .pos { color: var(--text3); font-size: 9px; min-width: 14px; text-align: right; }
+  .layer-row .lbl { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .layer-row .lbl.fill-lbl { color: var(--primary); }
+  .lbtn {
+    width: 22px; height: 22px; border: 1px solid var(--border); border-radius: 4px;
+    background: var(--surface); color: var(--text3); font-size: 10px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .lbtn:hover { border-color: var(--text2); color: var(--text); }
+  .lbtn.vis-on { border-color: var(--primary); color: var(--primary); background: rgba(255,107,0,0.1); }
+  .lbtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .cfg-section { margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .cfg-title { font-size: 11px; font-weight: 600; color: var(--text2); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .cfg-row { margin-bottom: 6px; }
+  .cfg-label { font-size: 10px; color: var(--text3); margin-bottom: 2px; }
+  .cfg-select, .cfg-input { width: 100%; padding: 5px 7px; border-radius: 5px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: 11px; outline: none; }
+  .fill-card { background: var(--surface2); border-radius: 6px; padding: 8px; margin-bottom: 6px; border: 1px solid var(--border); }
+  .fill-card h3 { font-size: 11px; font-weight: 600; margin-bottom: 5px; color: var(--primary); }
+  .opacity-row { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--text2); }
+  .opacity-row input[type="range"],
+  .cfg-row input[type="range"] {
+    flex: 1;
+    min-width: 80px;
+    height: 20px;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+  }
+  .opacity-row input[type="range"]::-webkit-slider-runnable-track,
+  .cfg-row input[type="range"]::-webkit-slider-runnable-track {
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+  }
+  .opacity-row input[type="range"]::-webkit-slider-thumb,
+  .cfg-row input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: grab;
+    margin-top: -5px;
+  }
+  .opacity-row input[type="range"]::-moz-range-track,
+  .cfg-row input[type="range"]::-moz-range-track {
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+  }
+  .opacity-row input[type="range"]::-moz-range-thumb,
+  .cfg-row input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: grab;
+    border: none;
+  }
+
+  .btn { padding: 6px 12px; border-radius: 5px; border: none; cursor: pointer; font-size: 12px; font-weight: 500; }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: var(--primary-hover); }
+  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text2); }
+  .btn-ghost:hover { border-color: var(--text2); color: var(--text); }
+
+  .export-box { margin-top: 10px; }
+  .export-box .cfg-title { margin-bottom: 4px; }
+  .export-textarea { width: 100%; min-height: 120px; max-height: 200px; resize: vertical; font-family: monospace; font-size: 10px; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); outline: none; }
+  .export-actions { display: flex; gap: 8px; margin-top: 6px; }
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(10px);
+    background: var(--success); color: white; padding: 8px 20px; border-radius: 8px;
+    font-size: 13px; opacity: 0; pointer-events: none; transition: all 0.3s; z-index: 999;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .swatch-trigger { width: 28px; height: 22px; border-radius: 4px; border: 2px solid var(--border); cursor: pointer; }
+  .swatch-trigger:hover { border-color: var(--text2); }
+  .swatch-trigger.active { border-color: var(--primary); }
+  .swatch-dropdown { position: absolute; top: 100%; left: 0; z-index: 50; margin-top: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px; width: 260px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+  .swatch-group-label { font-size: 9px; color: var(--text3); margin: 4px 0 2px; }
+  .swatch-grid { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 4px; }
+  .sw { width: 22px; height: 22px; border-radius: 4px; border: 2px solid transparent; cursor: pointer; }
+  .sw:hover { transform: scale(1.1); border-color: white; }
+  .sw.selected { border-color: white; }
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <h1><span>Trait Test Audit</span> — Wojak Generator</h1>
+    <p>Test one trait at a time: reorder layers, change fill colors and treatments, set opacities. Export JSON for the current trait only, then paste it to update the generator.</p>
+  </div>
+  <div class="sidebar" id="sidebar"></div>
+  <div class="main" id="main-area">
+    <div class="empty-state" style="text-align:center;color:var(--text3);padding:40px">Select a trait from the sidebar</div>
+  </div>
+  <div class="config" id="config-panel">
+    <div class="empty-state" style="color:var(--text3)">Select a trait to configure</div>
+  </div>
+  <div class="footer">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <button class="btn btn-primary" id="btn-copy-json">Copy trait JSON</button>
+      <span style="font-size:11px;color:var(--text2)">Copy the JSON below and give it to update the Wojak generator for this trait only.</span>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+// ═══════════════════════════════════════ STATE ═══════════════════════════════════════
+let manifest = null;
+let basePath = '';
+let selectedTraitId = null;
+let configs = {};
+let layerOrder = [];
+let layerVis = {};
+let fillColors = {};
+let layerOpacity = {};  // traitId -> { layerKey -> 0..100 }
+const imageCache = {};
+const GLOBAL_KEYS = ['__BASE__','__FACIAL_HAIR__','__MOUTH__','__MOUTH_ITEM__','__MASK__'];
+let selectedBase = 'classic';
+let selectedMouth = 'numb';
+let selectedMouthItem = '';
+let selectedFacialHair = '';
+let selectedMask = '';
+let openSwatchPicker = null;
+
+const Z = { Base:1, Clothes:2, FacialHair:4, MouthBase:5, MouthItem:6, Mask:7, Eyes:10, Head:12 };
+
+// Same palette as Wojak generator (ColorPicker.tsx COLOR_FAMILIES)
+const PALETTE = [
+  { hex:'#FFC0CB', name:'Pink', g:'Reds' }, { hex:'#FF69B4', name:'Hot Pink', g:'Reds' }, { hex:'#FF6347', name:'Tomato', g:'Reds' }, { hex:'#FF0000', name:'Red', g:'Reds' }, { hex:'#FF1493', name:'Deep Pink', g:'Reds' }, { hex:'#8B0000', name:'Dark Red', g:'Reds' },
+  { hex:'#FFFF00', name:'Yellow', g:'Oranges' }, { hex:'#FFD700', name:'Gold', g:'Oranges' }, { hex:'#FACC15', name:'Amber', g:'Oranges' }, { hex:'#FFA500', name:'Orange', g:'Oranges' }, { hex:'#FF8C00', name:'Dark Orange', g:'Oranges' }, { hex:'#FF6B00', name:'Brand Orange', g:'Oranges' },
+  { hex:'#00FF00', name:'Lime', g:'Greens' }, { hex:'#7CFC00', name:'Lawn', g:'Greens' }, { hex:'#32CD32', name:'Lime Green', g:'Greens' }, { hex:'#16a34a', name:'Emerald', g:'Greens' }, { hex:'#2E8B57', name:'Sea Green', g:'Greens' }, { hex:'#228B22', name:'Forest', g:'Greens' },
+  { hex:'#00FFFF', name:'Cyan', g:'Teals & Cyan' }, { hex:'#00d4ff', name:'Brand Cyan', g:'Teals & Cyan' }, { hex:'#40E0D0', name:'Turquoise', g:'Teals & Cyan' }, { hex:'#00CED1', name:'Dark Turquoise', g:'Teals & Cyan' }, { hex:'#20B2AA', name:'Light Sea', g:'Teals & Cyan' }, { hex:'#0891b2', name:'Cyan 600', g:'Teals & Cyan' },
+  { hex:'#00BFFF', name:'Deep Sky', g:'Blues' }, { hex:'#1E90FF', name:'Dodger', g:'Blues' }, { hex:'#3b82f6', name:'Blue', g:'Blues' }, { hex:'#2563EB', name:'Royal Blue', g:'Blues' }, { hex:'#0000CD', name:'Medium Blue', g:'Blues' }, { hex:'#000080', name:'Navy', g:'Blues' },
+  { hex:'#BA55D3', name:'Medium Purple', g:'Purples' }, { hex:'#a855f7', name:'Violet', g:'Purples' }, { hex:'#A020F0', name:'Purple', g:'Purples' }, { hex:'#7c3aed', name:'Purple 600', g:'Purples' }, { hex:'#800080', name:'Magenta', g:'Purples' }, { hex:'#6d28d9', name:'Deep Purple', g:'Purples' },
+  { hex:'#FFC0CB', name:'Pink', g:'Pinks & Magenta' }, { hex:'#f9a8d4', name:'Pink 400', g:'Pinks & Magenta' }, { hex:'#FF69B4', name:'Hot Pink', g:'Pinks & Magenta' }, { hex:'#ec4899', name:'Pink 500', g:'Pinks & Magenta' }, { hex:'#FF1493', name:'Deep Pink', g:'Pinks & Magenta' }, { hex:'#FF00FF', name:'Magenta', g:'Pinks & Magenta' },
+  { hex:'#D2B48C', name:'Tan', g:'Browns' }, { hex:'#D4AF37', name:'Gold', g:'Browns' }, { hex:'#CD7F32', name:'Bronze', g:'Browns' }, { hex:'#A0522D', name:'Sienna', g:'Browns' }, { hex:'#8B4513', name:'Saddle Brown', g:'Browns' }, { hex:'#633800', name:'Dark Brown', g:'Browns' },
+  { hex:'#FFFFFF', name:'White', g:'Neutrals' }, { hex:'#F5F5DC', name:'Beige', g:'Neutrals' }, { hex:'#C0C0C0', name:'Silver', g:'Neutrals' }, { hex:'#808080', name:'Gray', g:'Neutrals' }, { hex:'#404040', name:'Dark Gray', g:'Neutrals' }, { hex:'#262626', name:'Charcoal', g:'Neutrals' }, { hex:'#171717', name:'Near Black', g:'Neutrals' },
+];
+const PALETTE_GROUPS = ['Reds','Oranges','Greens','Teals & Cyan','Blues','Purples','Pinks & Magenta','Browns','Neutrals'];
+
+function getGlobalPath(key) {
+  const gp = '/assets/wojak-layers/';
+  if (key === '__BASE__') return selectedBase ? `${gp}BASE/BASE_Base-Wojak_${selectedBase}.png` : null;
+  if (key === '__MOUTH__') return selectedMouth ? `${gp}MOUTH/MOUTH_${selectedMouth}.png` : null;
+  if (key === '__MOUTH_ITEM__') return selectedMouthItem ? `${gp}EXTRA/EXTRA_MOUTH_${selectedMouthItem}_.png` : null;
+  if (key === '__FACIAL_HAIR__') return selectedFacialHair ? `${gp}EXTRA/EXTRA_MOUTH_${selectedFacialHair}_.png` : null;
+  if (key === '__MASK__') return selectedMask ? `${gp}MASK/MASK_${selectedMask}.png` : null;
+  return null;
+}
+
+// ═══════════════════════════════════════ TRAIT LAYERS (same as generator source of truth) ═══════════════════════════════════════
+function getTraitLayers(t) {
+  const layers = [], b = basePath;
+  if (t.layers && t.layers.length) {
+    const fillLayers = t.layers.filter(l => l.type === 'fill');
+    t.layers.forEach(ly => {
+      const isFill = ly.type === 'fill';
+      const ci = isFill ? fillLayers.findIndex(l => l.key === ly.key) : 0;
+      layers.push({ key: ly.key, label: ly.label || ly.key, path: `${b}/${ly.file}`, color: isFill, ci, isDetail: ly.type === 'detail', isFrame: false, isVariant: false });
+    });
+    return layers;
+  }
+  if (t.fillFile) layers.push({ key:'fill', label:'Fill', path:`${b}/${t.fillFile}`, color:true, ci:0 });
+  if (t.fill1File) layers.push({ key:'fill1', label:'Fill 1', path:`${b}/${t.fill1File}`, color:true, ci:0 });
+  if (t.fill2File) layers.push({ key:'fill2', label:'Fill 2', path:`${b}/${t.fill2File}`, color:true, ci:1 });
+  if (t.fillFiles) t.fillFiles.forEach((f,i) => layers.push({ key:`mfill${i}`, label:`Fill ${i+1}`, path:`${b}/${f}`, color:true, ci:i }));
+  if (t.detailFile) layers.push({ key:'detail', label:'Detail', path:`${b}/${t.detailFile}`, color:false });
+  if (t.detailOptions) t.detailOptions.forEach((d,i) => layers.push({ key:`dopt${i}`, label:d.name, path:`${b}/${d.file}`, color:false, isDetail:true }));
+  if (t.outlineFile) layers.push({ key:'outline', label:'Outline', path:`${b}/${t.outlineFile}`, color:false });
+  if (t.outline2File) layers.push({ key:'outline2', label:'Outline 2', path:`${b}/${t.outline2File}`, color:false });
+  if (t.outlineFiles) t.outlineFiles.forEach((f,i) => layers.push({ key:`moutline${i}`, label:`Outline ${i+1}`, path:`${b}/${f}`, color:false }));
+  if (t.layer0File) layers.push({ key:'layer0', label:'Layer 0', path:`${b}/${t.layer0File}`, color:false });
+  if (t.layer1File) layers.push({ key:'layer1', label:'Layer 1', path:`${b}/${t.layer1File}`, color:false });
+  if (t.frameFiles) t.frameFiles.forEach((f,i) => layers.push({ key:`frame${i}`, label:f.name, path:`${b}/${f.file}`, color:false, isFrame:true }));
+  if (t.variants) t.variants.forEach((v,i) => layers.push({ key:`var${i}`, label:`Var: ${v.name}`, path:`${b}/${v.file}`, color:false, isVariant:true }));
+  return layers;
+}
+
+function getDefaultLayerOrder(t) {
+  const layers = getTraitLayers(t);
+  const entries = [];
+  entries.push({ key:'__BASE__', z: Z.Base });
+  entries.push({ key:'__FACIAL_HAIR__', z: Z.FacialHair });
+  entries.push({ key:'__MOUTH__', z: Z.MouthBase });
+  entries.push({ key:'__MOUTH_ITEM__', z: Z.MouthItem });
+  entries.push({ key:'__MASK__', z: Z.Mask });
+  const catDef = manifest.categories[t.category];
+  const traitZ = catDef ? catDef.zIndex : 10;
+  if (t.composite) {
+    layers.forEach(l => { entries.push({ key: l.key, z: l.key === 'layer0' ? 1.5 : 1.6 }); });
+  } else if (t.layers && t.layers.length) {
+    const sorted = [...t.layers].sort((a, b) => a.pos - b.pos);
+    sorted.forEach(ly => entries.push({ key: ly.key, z: traitZ + ly.pos * 0.001 }));
+  } else {
+    let sub = 0;
+    const fills = layers.filter(l => l.color);
+    const details = layers.filter(l => !l.color && (l.key === 'detail' || l.isDetail));
+    const outlines = layers.filter(l => !l.color && (l.key === 'outline' || l.key === 'outline2' || l.key.startsWith('moutline')));
+    const frames = layers.filter(l => l.isFrame);
+    const variants = layers.filter(l => l.isVariant);
+    fills.forEach(l => entries.push({ key: l.key, z: traitZ + (sub++ * 0.001) }));
+    details.forEach(l => entries.push({ key: l.key, z: traitZ + 0.1 + (sub++ * 0.001) }));
+    outlines.forEach(l => entries.push({ key: l.key, z: traitZ + 0.2 + (sub++ * 0.001) }));
+    frames.forEach(l => entries.push({ key: l.key, z: traitZ + 0.3 + (sub++ * 0.001) }));
+    variants.forEach(l => entries.push({ key: l.key, z: traitZ + 0.4 + (sub++ * 0.001) }));
+  }
+  entries.sort((a,b) => a.z - b.z);
+  return entries.map(e => e.key);
+}
+
+// ═══════════════════════════════════════ CONFIG & COLORS ═══════════════════════════════════════
+function getConfig(tid) {
+  if (!configs[tid]) {
+    configs[tid] = { fills: {}, group: '', notes: '' };
+    const t = manifest && manifest.traits ? manifest.traits.find(x => x.id === tid) : null;
+    if (t && t.fills && Object.keys(t.fills).length) configs[tid].fills = JSON.parse(JSON.stringify(t.fills));
+  }
+  return configs[tid];
+}
+
+function getLayerOpacity(tid, key) {
+  if (!layerOpacity[tid]) return 100;
+  return layerOpacity[tid][key] !== undefined ? layerOpacity[tid][key] : 100;
+}
+
+function setLayerOpacity(tid, key, val) {
+  if (!layerOpacity[tid]) layerOpacity[tid] = {};
+  layerOpacity[tid][key] = Math.max(0, Math.min(100, val));
+  saveCfg();
+  schedulePreviewRedraw();
+}
+
+function getRawColor(tid, ci) {
+  const key = `${tid}:${ci}`;
+  if (fillColors[key]) return fillColors[key];
+  const t = manifest && manifest.traits ? manifest.traits.find(x => x.id === tid) : null;
+  if (t) {
+    if (t.defaultColors && t.defaultColors[ci] !== undefined) return t.defaultColors[ci];
+    if (t.defaultColor && ci === 0) return t.defaultColor;
+  }
+  const defaults = ['#FF6B00','#00D4FF','#22C55E','#8B5CF6','#EF4444'];
+  return defaults[ci % defaults.length];
+}
+
+function hexToHsl(hex) {
+  let r = parseInt(hex.slice(1,3),16)/255, g = parseInt(hex.slice(3,5),16)/255, b = parseInt(hex.slice(5,7),16)/255;
+  const max = Math.max(r,g,b), min = Math.min(r,g,b), d = max-min;
+  let h=0, s=0, l=(max+min)/2;
+  if (d > 0) { s = l > 0.5 ? d/(2-max-min) : d/(max+min); if (max===r) h = ((g-b)/d + (g<b?6:0))/6; else if (max===g) h = ((b-r)/d + 2)/6; else h = ((r-g)/d + 4)/6; }
+  return [h*360, s*100, l*100];
+}
+function hslToHex(h,s,l) {
+  h = ((h%360)+360)%360; s = Math.max(0,Math.min(100,s))/100; l = Math.max(0,Math.min(100,l))/100;
+  const a = s * Math.min(l, 1-l);
+  const f = n => { const k = (n + h/30)%12; return l - a * Math.max(Math.min(k-3, 9-k, 1), -1); };
+  return '#' + [f(0),f(8),f(4)].map(x => Math.round(x*255).toString(16).padStart(2,'0')).join('');
+}
+function getDerivedColor(baseHex, treatment, amount) {
+  const [h,s,l] = hexToHsl(baseHex);
+  amount = amount || 30;
+  switch(treatment) {
+    case 'darker_shade': return hslToHex(h, s, Math.max(0, l - amount));
+    case 'lighter_shade': return hslToHex(h, s, Math.min(100, l + amount));
+    case 'complementary': return hslToHex(h + 180, s, l);
+    case 'split_complementary': return hslToHex(h + 150, s, l);
+    case 'warm_shift': return hslToHex(h - 30, s, l);
+    case 'cool_shift': return hslToHex(h + 30, s, l);
+    case 'desaturated': return hslToHex(h, Math.max(0, s - amount), l);
+    case 'same_as': return baseHex;
+    default: return baseHex;
+  }
+}
+
+function getColor(tid, ci) {
+  const t = manifest.traits.find(x => x.id === tid);
+  if (!t) return getRawColor(tid, ci);
+  const cfg = getConfig(tid);
+  const layers = getTraitLayers(t);
+  const layer = layers.find(l => l.color && l.ci === ci);
+  if (!layer) return getRawColor(tid, ci);
+  const fc = cfg.fills[layer.key];
+  // Derived/fixed: compute color (never use cached fillColors for this slot)
+  if (fc && fc.treatment === 'fixed') return fc.fixedColor || '#808080';
+  if (fc && fc.source && fc.treatment !== 'free_choice') {
+    const srcLayer = layers.find(l => l.key === fc.source);
+    if (srcLayer) {
+      const srcColor = getColor(tid, srcLayer.ci);
+      return getDerivedColor(srcColor, fc.treatment, fc.amount ?? 30);
+    }
+  }
+  // User-pickable: use stored color or raw/default
+  const key = `${tid}:${ci}`;
+  if (fillColors[key]) return fillColors[key];
+  return getRawColor(tid, ci);
+}
+
+function setColor(tid, ci, hex) {
+  fillColors[`${tid}:${ci}`] = hex;
+  localStorage.setItem('traitAuditColors', JSON.stringify(fillColors));
+  const t = manifest.traits.find(x => x.id === selectedTraitId);
+  if (t) renderConfigPanel(t);
+  schedulePreviewRedraw();
+}
+
+// ═══════════════════════════════════════ SWATCH UI ═══════════════════════════════════════
+function buildSwatchHtml(tid, ci) {
+  const currentColor = getColor(tid, ci);
+  const pickerId = `swatch-${tid}-${ci}`;
+  const isOpen = openSwatchPicker === pickerId;
+  let html = `<div style="position:relative;display:inline-block"><div class="swatch-trigger ${isOpen?'active':''}" style="background:${currentColor}" onclick="toggleSwatch('${pickerId}','${tid}',${ci})"></div>`;
+  if (isOpen) {
+    html += `<div class="swatch-dropdown" onclick="event.stopPropagation()">`;
+    PALETTE_GROUPS.forEach(g => {
+      html += `<div class="swatch-group-label">${g}</div><div class="swatch-grid">`;
+      PALETTE.filter(p => p.g === g).forEach(c => {
+        const sel = c.hex.toUpperCase() === currentColor.toUpperCase() ? ' selected' : '';
+        html += `<div class="sw${sel}" style="background:${c.hex}" title="${c.name}" onclick="pickSwatch('${tid}',${ci},'${c.hex}')"></div>`;
+      });
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+function toggleSwatch(pickerId, tid, ci) {
+  openSwatchPicker = openSwatchPicker === pickerId ? null : pickerId;
+  const t = manifest.traits.find(x => x.id === tid);
+  if (t) renderConfigPanel(t);
+}
+function pickSwatch(tid, ci, hex) {
+  openSwatchPicker = null;
+  setColor(tid, ci, hex);
+}
+document.addEventListener('click', (e) => {
+  if (openSwatchPicker && !e.target.closest('.swatch-trigger') && !e.target.closest('.swatch-dropdown')) {
+    openSwatchPicker = null;
+    const t = selectedTraitId && manifest ? manifest.traits.find(x => x.id === selectedTraitId) : null;
+    if (t) renderConfigPanel(t);
+  }
+});
+
+// ═══════════════════════════════════════ IMAGE LOADING ═══════════════════════════════════════
+function loadImg(src) {
+  if (imageCache[src]) return Promise.resolve(imageCache[src]);
+  return new Promise((r, e) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => { imageCache[src] = img; r(img); };
+    img.onerror = () => e(new Error('Failed: ' + src));
+    img.src = src;
+  });
+}
+
+// ═══════════════════════════════════════ CANVAS RENDER ═══════════════════════════════════════
+function tintDraw(ctx, img, color, sz, opacity) {
+  const op = opacity === undefined ? 1 : Math.max(0, Math.min(1, opacity / 100));
+  const tc = document.createElement('canvas');
+  tc.width = sz; tc.height = sz;
+  const tx = tc.getContext('2d');
+  tx.drawImage(img, 0, 0, sz, sz);
+  tx.globalCompositeOperation = 'source-atop';
+  tx.fillStyle = color;
+  tx.fillRect(0, 0, sz, sz);
+  tx.globalCompositeOperation = 'multiply';
+  tx.drawImage(img, 0, 0, sz, sz);
+  ctx.save();
+  if (op < 1) ctx.globalAlpha = op;
+  ctx.drawImage(tc, 0, 0, sz, sz);
+  ctx.restore();
+}
+
+async function renderCanvas() {
+  const canvas = document.getElementById('preview-canvas');
+  if (!canvas || !selectedTraitId) return;
+  const t = manifest.traits.find(x => x.id === selectedTraitId);
+  if (!t) return;
+  const ctx = canvas.getContext('2d');
+  const sz = 800;
+  canvas.width = sz; canvas.height = sz;
+  ctx.clearRect(0, 0, sz, sz);
+  const sq = 20;
+  for (let y = 0; y < sz; y += sq)
+    for (let x = 0; x < sz; x += sq) {
+      ctx.fillStyle = ((x+y)/sq)%2===0 ? '#1a1a28' : '#151520';
+      ctx.fillRect(x, y, sq, sq);
+    }
+  const tLayers = getTraitLayers(t);
+  for (const key of layerOrder) {
+    if (layerVis[key] === false) continue;
+    try {
+      if (GLOBAL_KEYS.includes(key)) {
+        const path = getGlobalPath(key);
+        if (path) { const img = await loadImg(path); ctx.drawImage(img,0,0,sz,sz); }
+        continue;
+      }
+      const l = tLayers.find(x => x.key === key);
+      if (!l) continue;
+      const img = await loadImg(l.path);
+      const opacity = getLayerOpacity(t.id, key);
+      if (l.color) {
+        tintDraw(ctx, img, getColor(t.id, l.ci), sz, opacity);
+      } else {
+        ctx.save();
+        if (opacity < 100) ctx.globalAlpha = opacity / 100;
+        ctx.drawImage(img, 0, 0, sz, sz);
+        ctx.restore();
+      }
+    } catch(err) {
+      if (typeof console !== 'undefined' && console.warn) console.warn('[trait-audit] layer draw failed:', key, err);
+    }
+  }
+}
+
+// ═══════════════════════════════════════ SELECT TRAIT ═══════════════════════════════════════
+function selectTrait(tid) {
+  selectedTraitId = tid;
+  document.querySelectorAll('.trait-btn').forEach(b => b.classList.toggle('active', b.dataset.traitId === tid));
+  const t = manifest.traits.find(x => x.id === tid);
+  if (!t) return;
+  const cfg = getConfig(tid);
+  if (cfg.layerOrder && cfg.layerOrder.length > 0) {
+    layerOrder = [...cfg.layerOrder];
+    getDefaultLayerOrder(t).forEach(k => { if (!layerOrder.includes(k)) layerOrder.push(k); });
+  } else {
+    layerOrder = getDefaultLayerOrder(t);
+  }
+  layerVis = {};
+  getTraitLayers(t).forEach(l => { layerVis[l.key] = true; });
+  GLOBAL_KEYS.forEach(k => layerVis[k] = true);
+  if (cfg.layerVis) { for (const [k,v] of Object.entries(cfg.layerVis)) layerVis[k] = v; }
+  renderPreview(t);
+  renderConfigPanel(t);
+  updateExportTextarea();
+}
+
+function renderPreview(t) {
+  const main = document.getElementById('main-area');
+  main.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center">
+        <span style="font-size:11px;color:var(--text2)">Preview — updates when you change colors or fill behavior</span>
+        <button type="button" class="btn btn-ghost" style="padding:4px 10px;font-size:11px" onclick="renderCanvas()">Refresh preview</button>
+      </div>
+      <canvas id="preview-canvas" class="preview-canvas" width="800" height="800"></canvas>
+    </div>`;
+  renderCanvas();
+}
+
+// ═══════════════════════════════════════ LAYER ORDER & VIS ═══════════════════════════════════════
+function moveLayer(idx, dir) {
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= layerOrder.length) return;
+  [layerOrder[idx], layerOrder[newIdx]] = [layerOrder[newIdx], layerOrder[idx]];
+  saveCfg();
+  schedulePreviewRedraw();
+  const t = manifest.traits.find(x => x.id === selectedTraitId);
+  if (t) { renderConfigPanel(t); updateExportTextarea(); }
+}
+
+function toggleVis(key) {
+  layerVis[key] = !layerVis[key];
+  saveCfg();
+  schedulePreviewRedraw();
+  const t = manifest.traits.find(x => x.id === selectedTraitId);
+  if (t) { renderConfigPanel(t); updateExportTextarea(); }
+}
+
+function resetLayerOrder() {
+  const t = manifest.traits.find(x => x.id === selectedTraitId);
+  if (!t) return;
+  layerOrder = getDefaultLayerOrder(t);
+  getTraitLayers(t).forEach(l => { layerVis[l.key] = true; });
+  GLOBAL_KEYS.forEach(k => layerVis[k] = true);
+  saveCfg();
+  schedulePreviewRedraw();
+  renderConfigPanel(t);
+  updateExportTextarea();
+}
+
+function saveCfg() {
+  if (selectedTraitId) {
+    const cfg = getConfig(selectedTraitId);
+    cfg.layerOrder = [...layerOrder];
+    cfg.layerVis = { ...layerVis };
+  }
+  localStorage.setItem('traitAuditConfig', JSON.stringify(configs));
+  localStorage.setItem('traitAuditLayerOpacity', JSON.stringify(layerOpacity));
+}
+
+// ═══════════════════════════════════════ FILL CONFIG ═══════════════════════════════════════
+function setFillCfg(tid, fk, prop, val) {
+  const cfg = getConfig(tid);
+  if (!cfg.fills[fk]) cfg.fills[fk] = { treatment: 'free_choice' };
+  cfg.fills[fk][prop] = val;
+  // Clear source when switching to user-picks so we use stored color, not derived
+  if (prop === 'treatment' && (val === 'free_choice' || val === 'fixed')) {
+    delete cfg.fills[fk].source;
+    delete cfg.fills[fk].amount;
+  }
+  if (prop === 'treatment' && val !== 'free_choice' && val !== 'fixed') {
+    const t = manifest.traits.find(x => x.id === tid);
+    if (t) {
+      const colorable = getTraitLayers(t).filter(l => l.color);
+      const others = colorable.filter(f => f.key !== fk);
+      if (others.length === 1) cfg.fills[fk].source = others[0].key;
+      const layer = colorable.find(l => l.key === fk);
+      if (layer) {
+        delete fillColors[`${tid}:${layer.ci}`];
+        localStorage.setItem('traitAuditColors', JSON.stringify(fillColors));
+      }
+    }
+  }
+  saveCfg();
+  const t = manifest.traits.find(x => x.id === tid);
+  if (t) { renderConfigPanel(t); updateExportTextarea(); }
+  schedulePreviewRedraw();
+}
+
+function slideFill(tid, fk, val) {
+  const cfg = getConfig(tid);
+  if (!cfg.fills[fk]) cfg.fills[fk] = { treatment: 'free_choice' };
+  cfg.fills[fk].amount = parseInt(val, 10);
+  saveCfg();
+  schedulePreviewRedraw();
+}
+
+// Redraw preview reliably: immediate + next frame + short delay fallback
+let _previewRedrawTimer = null;
+function schedulePreviewRedraw() {
+  renderCanvas(); // start draw now with current state
+  requestAnimationFrame(() => renderCanvas());
+  if (_previewRedrawTimer) clearTimeout(_previewRedrawTimer);
+  _previewRedrawTimer = setTimeout(() => { renderCanvas(); _previewRedrawTimer = null; }, 80);
+}
+
+// ═══════════════════════════════════════ CONFIG PANEL ═══════════════════════════════════════
+function getTraitType(t) {
+  if (t.composite) return 'Comp';
+  if (t.layers && t.layers.length) { const n = t.layers.filter(l => l.type === 'fill').length; return n ? n + '-Fill (layers)' : 'Layers'; }
+  if (t.fillFiles) return (t.fillFiles.length)+'-Fill';
+  if (t.fill1File) return '2-Fill';
+  if (t.fillFile) return 'Fill';
+  if (t.variants) return 'Var';
+  return 'Outline';
+}
+
+function renderConfigPanel(t) {
+  const panel = document.getElementById('config-panel');
+  const cfg = getConfig(t.id);
+  const layers = getTraitLayers(t);
+  const colorable = layers.filter(l => l.color);
+  const type = getTraitType(t);
+  let html = `<div style="margin-bottom:8px"><div style="font-size:15px;font-weight:700">${t.name}</div><div style="font-size:10px;color:var(--text3)">${t.category} · ${type} · ${layers.length} layers</div></div>`;
+
+  if (colorable.length > 0) {
+    html += '<div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">';
+    colorable.forEach(l => {
+      const c = getColor(t.id, l.ci);
+      html += `<div style="display:flex;align-items:center;gap:4px">${buildSwatchHtml(t.id, l.ci)}<span style="font-size:10px;color:var(--text2)">${l.label}</span></div>`;
+    });
+    html += '</div>';
+  }
+
+  html += `<div class="cfg-section"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><div class="cfg-title" style="margin-bottom:0">LAYER ORDER (TOP = FRONT)</div><button class="btn btn-ghost" style="padding:2px 8px;font-size:10px" onclick="resetLayerOrder()">Reset</button></div>`;
+  for (let i = layerOrder.length - 1; i >= 0; i--) {
+    const key = layerOrder[i];
+    if (GLOBAL_KEYS.includes(key)) { html += `<div class="layer-row"><span class="pos">${i}</span><span class="lbl">${key.replace('__','')}</span></div>`; continue; }
+    const l = layers.find(x => x.key === key);
+    if (!l) continue;
+    const vis = layerVis[key] !== false;
+    const opacity = getLayerOpacity(t.id, key);
+    html += `<div style="margin-bottom:4px">
+      <div class="layer-row">
+        <span class="pos">${i}</span>
+        <span class="lbl ${l.color?'fill-lbl':''}">${l.label}</span>
+        <button class="lbtn" onclick="moveLayer(${i},1)" ${i===layerOrder.length-1?'disabled':''}>▲</button>
+        <button class="lbtn" onclick="moveLayer(${i},-1)" ${i===0?'disabled':''}>▼</button>
+        <button class="lbtn ${vis?'vis-on':''}" onclick="toggleVis('${key}')">👁</button>
+      </div>
+      <div class="opacity-row" style="margin-top:2px;padding-left:18px"><span style="min-width:28px">${opacity}%</span><input type="range" min="0" max="100" value="${opacity}" oninput="setLayerOpacity('${t.id}','${key}',parseInt(this.value));this.previousElementSibling.textContent=this.value+'%'"></div>
+    </div>`;
+  }
+  html += '</div>';
+
+  if (colorable.length > 0) {
+    html += '<div class="cfg-section"><div class="cfg-title">FILL BEHAVIOR</div>';
+    colorable.forEach(l => {
+      const fk = l.key;
+      const fc = cfg.fills[fk] || { treatment: 'free_choice' };
+      const others = colorable.filter(f => f.key !== fk);
+      html += `<div class="fill-card"><h3>${l.label}</h3>
+        <div class="cfg-row"><select class="cfg-select" onchange="setFillCfg('${t.id}','${fk}','treatment',this.value)">
+          <option value="free_choice" ${fc.treatment==='free_choice'?'selected':''}>User picks</option>
+          <option value="darker_shade" ${fc.treatment==='darker_shade'?'selected':''}>Auto-darker</option>
+          <option value="lighter_shade" ${fc.treatment==='lighter_shade'?'selected':''}>Auto-lighter</option>
+          <option value="complementary" ${fc.treatment==='complementary'?'selected':''}>Complementary</option>
+          <option value="split_complementary" ${fc.treatment==='split_complementary'?'selected':''}>Split-comp</option>
+          <option value="desaturated" ${fc.treatment==='desaturated'?'selected':''}>Desaturated</option>
+          <option value="same_as" ${fc.treatment==='same_as'?'selected':''}>Same as</option>
+          <option value="fixed" ${fc.treatment==='fixed'?'selected':''}>Fixed color</option>
+        </select></div>`;
+      if (['darker_shade','lighter_shade','complementary','split_complementary','desaturated','same_as'].includes(fc.treatment)) {
+        html += `<div class="cfg-row"><div class="cfg-label">From</div><select class="cfg-select" onchange="setFillCfg('${t.id}','${fk}','source',this.value)">
+          ${others.map(f => `<option value="${f.key}" ${fc.source===f.key?'selected':''}>${f.label}</option>`).join('')}
+        </select></div>`;
+      }
+      if (['darker_shade','lighter_shade','desaturated'].includes(fc.treatment)) {
+        const amt = fc.amount || 30;
+        html += `<div class="cfg-row opacity-row"><span>${amt}%</span><input type="range" min="5" max="80" value="${amt}" oninput="slideFill('${t.id}','${fk}',this.value);this.previousElementSibling.textContent=this.value+'%'"></div>`;
+      }
+      if (fc.treatment === 'fixed') {
+        const fix = (fc.fixedColor || '#808080').toUpperCase();
+        html += `<div class="cfg-row"><div class="cfg-label">Fixed color</div><div class="swatch-grid">`;
+        PALETTE.slice(0,12).forEach(p => { const sel = p.hex.toUpperCase() === fix ? ' selected' : ''; html += `<div class="sw${sel}" style="background:${p.hex}" onclick="setFillCfg('${t.id}','${fk}','fixedColor','${p.hex}')"></div>`; });
+        html += '</div></div>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  html += '<div class="cfg-section export-box"><div class="cfg-title">EXPORT (current trait only)</div><textarea id="export-json-ta" class="export-textarea" readonly placeholder="Select a trait and click Copy trait JSON"></textarea><div class="export-actions"><button class="btn btn-primary" onclick="copyTraitJson()">Copy to clipboard</button></div></div>';
+  panel.innerHTML = html;
+  updateExportTextarea();
+}
+
+// ═══════════════════════════════════════ EXPORT (single trait JSON) ═══════════════════════════════════════
+function buildTraitSnapshot() {
+  if (!selectedTraitId || !manifest) return null;
+  const t = manifest.traits.find(x => x.id === selectedTraitId);
+  if (!t) return null;
+  const cfg = getConfig(t.id);
+  const tLayers = getTraitLayers(t);
+  const traitLayers = [];
+  let pos = 0;
+  for (const key of layerOrder) {
+    if (GLOBAL_KEYS.includes(key)) continue;
+    const l = tLayers.find(x => x.key === key);
+    if (!l) continue;
+    const vis = layerVis[key] !== false;
+    const type = l.color ? 'fill' : (l.key === 'outline' || l.key === 'outline2' || l.key.startsWith('moutline') ? 'outline' : (l.isDetail || l.key === 'detail' ? 'detail' : 'other'));
+    const entry = { pos: pos++, key, type, label: l.label, file: l.path.split('/').pop(), visible: vis };
+    if (l.color) {
+      entry.color = getRawColor(t.id, l.ci);
+      entry.computedColor = getColor(t.id, l.ci);
+    }
+    const op = getLayerOpacity(t.id, key);
+    if (op !== 100) entry.opacity = op / 100;
+    traitLayers.push(entry);
+  }
+  const fills = {};
+  if (cfg.fills) {
+    for (const [fk, fc] of Object.entries(cfg.fills)) {
+      if (fc.treatment && fc.treatment !== 'free_choice') fills[fk] = { ...fc };
+    }
+  }
+  const colorable = tLayers.filter(l => l.color).sort((a, b) => a.ci - b.ci);
+  const defaultColors = colorable.length ? colorable.map(l => getRawColor(t.id, l.ci)) : undefined;
+  const result = { trait: t.id, name: t.name, category: t.category, layers: traitLayers };
+  if (Object.keys(fills).length > 0) result.fills = fills;
+  if (defaultColors && defaultColors.length) result.defaultColors = defaultColors;
+  if (t.defaultColor && !result.defaultColors) result.defaultColor = getRawColor(t.id, 0);
+  return result;
+}
+
+function updateExportTextarea() {
+  const ta = document.getElementById('export-json-ta');
+  if (!ta) return;
+  const snap = buildTraitSnapshot();
+  ta.value = snap ? JSON.stringify(snap, null, 2) : '';
+}
+
+function copyTraitJson() {
+  const snap = buildTraitSnapshot();
+  if (!snap) { showToast('No trait selected'); return; }
+  const json = JSON.stringify(snap, null, 2);
+  navigator.clipboard.writeText(json).then(() => showToast('Copied! Paste this JSON to update the Wojak generator for this trait.')).catch(() => showToast('Copy failed'));
+}
+
+document.getElementById('btn-copy-json').onclick = copyTraitJson;
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ═══════════════════════════════════════ SIDEBAR & INIT ═══════════════════════════════════════
+function buildSidebar() {
+  const sb = document.getElementById('sidebar');
+  sb.innerHTML = '';
+  for (const [catName, cat] of Object.entries(manifest.categories)) {
+    const hdr = document.createElement('div');
+    hdr.className = 'cat-header';
+    hdr.textContent = `${catName} (${cat.traits.length})`;
+    sb.appendChild(hdr);
+    for (const tid of cat.traits) {
+      const t = manifest.traits.find(x => x.id === tid);
+      if (!t) continue;
+      const btn = document.createElement('button');
+      btn.className = 'trait-btn';
+      btn.dataset.traitId = tid;
+      btn.textContent = t.name;
+      btn.onclick = () => selectTrait(tid);
+      sb.appendChild(btn);
+    }
+  }
+}
+
+async function init() {
+  try {
+    const resp = await fetch('/assets/wojak-layers/YourWojak-layers/manifest.json');
+    manifest = await resp.json();
+    basePath = manifest.basePath || '/assets/wojak-layers/YourWojak-layers';
+    const saved = localStorage.getItem('traitAuditConfig');
+    if (saved) try { configs = JSON.parse(saved); } catch(e) {}
+    const savedColors = localStorage.getItem('traitAuditColors');
+    if (savedColors) try { fillColors = JSON.parse(savedColors); } catch(e) {}
+    const savedOpacity = localStorage.getItem('traitAuditLayerOpacity');
+    if (savedOpacity) try { layerOpacity = JSON.parse(savedOpacity); } catch(e) {}
+    buildSidebar();
+  } catch(e) {
+    document.getElementById('main-area').innerHTML = `<div class="empty-state" style="color:var(--error)">Failed to load manifest: ${e.message}</div>`;
+  }
+}
+
+init();
+</script>
+</body>
+</html>

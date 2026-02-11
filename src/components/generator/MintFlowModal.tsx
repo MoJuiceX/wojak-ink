@@ -1,392 +1,176 @@
 /**
  * Mint Flow Modal
  *
- * Full-screen modal that guides the user through the minting process:
- * - Preparing (uploading to IPFS)
- * - Awaiting offer (paid mints — show offer, send to Sage)
- * - Countdown (waiting for user to accept in Sage)
- * - Confirming (polling for on-chain confirmation)
- * - Success (congratulations!)
- * - Failed / Expired (error recovery)
+ * Shows the current mint step (confirm, signing, success, error).
+ * Countdown and Copy Offer for paid pending; success with mint number and MintGarden link.
  */
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Loader2,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  Copy,
-  ExternalLink,
-  Wallet,
-  Sparkles,
-  AlertTriangle,
-} from 'lucide-react';
-import { useMint, type MintFlowStep } from '@/contexts/MintContext';
+import { createPortal } from 'react-dom';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { X, Loader2, CheckCircle, AlertCircle, Copy, ExternalLink } from 'lucide-react';
+import { useMint } from '@/contexts/MintContext';
 
 interface MintFlowModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+const stepMessages: Record<string, { title: string; message: string }> = {
+  idle: { title: 'Mint', message: 'Preparing…' },
+  confirm: { title: 'Confirm mint', message: 'Review your Wojak and confirm in your wallet.' },
+  signing: { title: 'Accept in Sage', message: 'Accept the offer in your Sage wallet. You can copy the offer file if needed.' },
+  submitting: { title: 'Submitting', message: 'Submitting your mint…' },
+  success: { title: 'Minted!', message: 'Your Wojak has been minted successfully.' },
+  error: { title: 'Mint failed', message: 'Something went wrong. Try again or use a different wallet.' },
+};
+
+function formatTimeLeft(expiresAt: string | null): string {
+  if (!expiresAt) return '--:--';
+  const end = new Date(expiresAt).getTime();
+  const now = Date.now();
+  const left = Math.max(0, Math.floor((end - now) / 1000));
+  const m = Math.floor(left / 60);
+  const s = left % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
 export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
-  const {
-    mintStep,
-    pendingMint,
-    mintError,
-    countdownSeconds,
-    confirmPaidMint,
-    resetMintFlow,
-    copyOfferToClipboard,
-  } = useMint();
+  const { mintStep, pendingMint, successResult, resetMintFlow } = useMint();
+  const prefersReducedMotion = useReducedMotion();
+  const [timeLeft, setTimeLeft] = useState('');
+  const [copied, setCopied] = useState(false);
 
-  const [copiedOffer, setCopiedOffer] = useState(false);
-
-  const handleClose = () => {
-    if (mintStep === 'preparing' || mintStep === 'confirming') {
-      // Don't allow closing during critical operations
+  useEffect(() => {
+    if (!pendingMint?.expiresAt) {
+      setTimeLeft('');
       return;
     }
+    const tick = () => setTimeLeft(formatTimeLeft(pendingMint.expiresAt));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [pendingMint?.expiresAt]);
+
+  const handleClose = () => {
     resetMintFlow();
     onClose();
   };
 
   const handleCopyOffer = async () => {
-    const ok = await copyOfferToClipboard();
-    if (ok) {
-      setCopiedOffer(true);
-      setTimeout(() => setCopiedOffer(false), 2000);
+    if (!pendingMint?.offerFile) return;
+    try {
+      await navigator.clipboard.writeText(pendingMint.offerFile);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.warn('Copy failed:', err);
     }
   };
 
-  const formatCountdown = (seconds: number): string => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m}:${s.toString().padStart(2, '0')}`;
-  };
+  const { title, message } = stepMessages[mintStep] || stepMessages.idle;
+  const isPending = ['confirm', 'signing', 'submitting'].includes(mintStep);
+  const isSuccess = mintStep === 'success';
+  const isError = mintStep === 'error';
+  const showCountdown = mintStep === 'signing' && pendingMint;
 
-  if (!isOpen) return null;
-
-  return (
+  const content = (
     <AnimatePresence>
-      <motion.div
-        className="fixed inset-0 flex items-center justify-center p-4"
-        style={{ zIndex: 10000 }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-      >
-        {/* Backdrop */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: 'rgba(0, 0, 0, 0.85)',
-            backdropFilter: 'blur(20px)',
-          }}
-          onClick={handleClose}
-        />
-
-        {/* Modal */}
+      {isOpen && (
         <motion.div
-          className="card relative w-full max-w-md p-6 flex flex-col items-center gap-5"
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.9, opacity: 0 }}
-          transition={{ type: 'spring', damping: 25 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0, 0, 0, 0.7)' }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
+          onClick={handleClose}
         >
-          {/* Close button (when allowed) */}
-          {mintStep !== 'preparing' && mintStep !== 'confirming' && (
-            <button
-              className="absolute top-4 right-4 text-secondary hover:text-white transition-colors"
-              onClick={handleClose}
-              aria-label="Close"
-            >
-              <XCircle size={24} />
-            </button>
-          )}
-
-          {/* Step content */}
-          <StepContent
-            step={mintStep}
-            pendingMint={pendingMint}
-            mintError={mintError}
-            countdownSeconds={countdownSeconds}
-            formatCountdown={formatCountdown}
-            onSendToWallet={confirmPaidMint}
-            onCopyOffer={handleCopyOffer}
-            copiedOffer={copiedOffer}
-            onRetry={() => {
-              resetMintFlow();
-              onClose();
-            }}
-            onClose={handleClose}
-          />
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
-  );
-}
-
-// ============ Step content renderer ============
-
-function StepContent({
-  step,
-  pendingMint,
-  mintError,
-  countdownSeconds,
-  formatCountdown,
-  onSendToWallet,
-  onCopyOffer,
-  copiedOffer,
-  onRetry,
-  onClose,
-}: {
-  step: MintFlowStep;
-  pendingMint: ReturnType<typeof useMint>['pendingMint'];
-  mintError: string | null;
-  countdownSeconds: number;
-  formatCountdown: (s: number) => string;
-  onSendToWallet: () => void;
-  onCopyOffer: () => void;
-  copiedOffer: boolean;
-  onRetry: () => void;
-  onClose: () => void;
-}) {
-  switch (step) {
-    case 'preparing':
-      return (
-        <>
           <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}
+            className="card p-6 max-w-sm w-full"
+            initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+            transition={prefersReducedMotion ? { duration: 0.15 } : { type: 'spring', damping: 25, stiffness: 300 }}
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mint-flow-title"
           >
-            <Loader2 size={48} style={{ color: 'var(--color-primary)' }} />
-          </motion.div>
-          <h3 className="text-lg font-bold">Preparing Your Wojak</h3>
-          <p className="text-secondary text-center text-sm">
-            Uploading to IPFS and generating your NFT...
-          </p>
-          <div
-            className="w-full rounded-lg p-3 text-xs text-secondary"
-            style={{ background: 'rgba(255,255,255,0.05)' }}
-          >
-            <div className="flex items-center gap-2 mb-1">
-              <Loader2 size={12} className="animate-spin" />
-              Uploading image to IPFS
+            <div className="flex items-center justify-between gap-4 mb-4">
+              <h2 id="mint-flow-title" className="text-lg font-semibold">
+                {title}
+              </h2>
+              <button
+                type="button"
+                className="btn btn-ghost p-2"
+                onClick={handleClose}
+                aria-label="Close"
+              >
+                <X size={20} />
+              </button>
             </div>
-            <div className="flex items-center gap-2 mb-1 opacity-50">
-              <Clock size={12} />
-              Generating metadata
-            </div>
-            <div className="flex items-center gap-2 opacity-50">
-              <Clock size={12} />
-              Calling MintGarden
-            </div>
-          </div>
-        </>
-      );
 
-    case 'awaiting_offer':
-      return (
-        <>
-          <Wallet size={48} style={{ color: 'var(--color-primary)' }} />
-          <h3 className="text-lg font-bold">{pendingMint?.nft_name || 'Your Wojak'}</h3>
-          <p className="text-secondary text-center text-sm">
-            Your NFT is ready! Send the offer to your Sage wallet to complete the mint.
-          </p>
+            <div className="flex flex-col items-center gap-4 text-center">
+              {isPending && <Loader2 size={40} className="animate-spin text-accent" />}
+              {isSuccess && <CheckCircle size={40} className="text-success" />}
+              {isError && <AlertCircle size={40} className="text-error" />}
+              <p className="text-secondary text-sm">{message}</p>
 
-          {/* Price breakdown */}
-          {pendingMint?.total_price_xch !== undefined && (
-            <div
-              className="w-full rounded-lg p-3 text-sm"
-              style={{ background: 'rgba(255,255,255,0.05)' }}
-            >
-              <div className="flex justify-between mb-1">
-                <span className="text-secondary">Base price</span>
-                <span>{pendingMint.base_price_xch || 0.2} XCH</span>
-              </div>
-              {(pendingMint.surcharge_xch || 0) > 0 && (
-                <div className="flex justify-between mb-1">
-                  <span className="text-secondary">
-                    Trait premium ({pendingMint.highest_surcharge_trait?.split(':')[1]})
-                  </span>
-                  <span>+{pendingMint.surcharge_xch?.toFixed(3)} XCH</span>
+              {showCountdown && (
+                <div className="w-full rounded-lg p-3 text-center" style={{ background: 'var(--color-surface)' }}>
+                  <span className="text-2xl font-mono tabular-nums text-accent">{timeLeft}</span>
+                  <p className="text-muted text-xs mt-1">remaining</p>
                 </div>
               )}
-              <div
-                className="flex justify-between pt-2 mt-2 font-bold"
-                style={{ borderTop: '1px solid var(--color-border)' }}
-              >
-                <span>Total</span>
-                <span className="text-accent">{pendingMint.total_price_xch?.toFixed(3)} XCH</span>
-              </div>
+              {showCountdown && pendingMint?.offerFile && (
+                <button
+                  type="button"
+                  className="btn btn-secondary w-full flex items-center justify-center gap-2"
+                  onClick={handleCopyOffer}
+                >
+                  <Copy size={16} />
+                  {copied ? 'Copied!' : 'Copy Offer File'}
+                </button>
+              )}
+              {showCountdown && !pendingMint?.offerFile && pendingMint?.totalPriceXch != null && (
+                <p className="text-muted text-xs">
+                  Paid mint: MintGarden offer not yet configured. Your design is saved.
+                </p>
+              )}
+
+              {isSuccess && successResult && (
+                <div className="w-full flex flex-col gap-2 text-left">
+                  <p className="text-secondary text-sm">
+                    Your Wojak #{successResult.mintNumber}
+                  </p>
+                  {successResult.mintgardenUrl && (
+                    <a
+                      href={successResult.mintgardenUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-ghost flex items-center justify-center gap-2 text-accent"
+                    >
+                      <ExternalLink size={16} />
+                      View on MintGarden
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
-          )}
 
-          {/* Timer */}
-          {countdownSeconds > 0 && (
-            <div className="flex items-center gap-2 text-sm text-secondary">
-              <Clock size={14} />
-              <span>Expires in {formatCountdown(countdownSeconds)}</span>
+            <div className="mt-6 flex justify-end">
+              <button type="button" className="btn btn-primary" onClick={handleClose}>
+                {isSuccess ? 'Create Another' : 'Close'}
+              </button>
             </div>
-          )}
-
-          {/* Send to Sage */}
-          <button
-            className="btn btn-primary w-full flex items-center justify-center gap-2"
-            onClick={onSendToWallet}
-          >
-            <Wallet size={18} />
-            Accept in Sage Wallet
-          </button>
-
-          {/* Copy offer */}
-          <button
-            className="btn btn-ghost w-full flex items-center justify-center gap-2 text-sm"
-            onClick={onCopyOffer}
-          >
-            <Copy size={14} />
-            {copiedOffer ? 'Copied!' : 'Copy offer file (paste in Sage manually)'}
-          </button>
-        </>
-      );
-
-    case 'countdown':
-      return (
-        <>
-          <motion.div
-            animate={{ scale: [1, 1.05, 1] }}
-            transition={{ repeat: Infinity, duration: 2 }}
-          >
-            <Wallet size={48} style={{ color: 'var(--color-cyan)' }} />
           </motion.div>
-          <h3 className="text-lg font-bold">Check Your Sage Wallet</h3>
-          <p className="text-secondary text-center text-sm">
-            Accept the offer in your Sage wallet to complete the mint.
-          </p>
-          {countdownSeconds > 0 && (
-            <div
-              className="text-3xl font-mono font-bold"
-              style={{ color: countdownSeconds < 60 ? 'var(--color-error)' : 'var(--color-primary)' }}
-            >
-              {formatCountdown(countdownSeconds)}
-            </div>
-          )}
-          <div
-            className="w-full rounded-lg p-3 text-xs text-secondary text-center"
-            style={{ background: 'rgba(255,255,255,0.05)' }}
-          >
-            Waiting for wallet confirmation...
-          </div>
-        </>
-      );
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 
-    case 'confirming':
-      return (
-        <>
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}
-          >
-            <Loader2 size={48} style={{ color: 'var(--color-success)' }} />
-          </motion.div>
-          <h3 className="text-lg font-bold">Confirming On-Chain</h3>
-          <p className="text-secondary text-center text-sm">
-            Your transaction was accepted! Waiting for blockchain confirmation...
-          </p>
-        </>
-      );
-
-    case 'success':
-      return (
-        <>
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', damping: 10, stiffness: 100 }}
-          >
-            <Sparkles size={56} style={{ color: 'var(--color-primary)' }} />
-          </motion.div>
-          <h3 className="text-xl font-bold">
-            {pendingMint?.nft_name || 'Your Wojak'} Minted!
-          </h3>
-          <p className="text-secondary text-center text-sm">
-            Congratulations! Your custom Wojak NFT has been minted to your wallet.
-          </p>
-
-          {/* NFT Preview */}
-          {pendingMint?.ipfs_image_uri && (
-            <div className="w-32 h-32 rounded-xl overflow-hidden" style={{ border: '2px solid var(--color-primary)' }}>
-              <img
-                src={pendingMint.ipfs_image_uri}
-                alt={pendingMint.nft_name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
-
-          {/* MintGarden link */}
-          {pendingMint?.launcher_id && (
-            <a
-              href={`https://mintgarden.io/nfts/${pendingMint.launcher_id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-ghost flex items-center gap-2 text-sm"
-            >
-              <ExternalLink size={14} />
-              View on MintGarden
-            </a>
-          )}
-
-          <button
-            className="btn btn-primary w-full"
-            onClick={onClose}
-          >
-            <CheckCircle2 size={18} className="mr-2" />
-            Done
-          </button>
-        </>
-      );
-
-    case 'failed':
-      return (
-        <>
-          <XCircle size={48} style={{ color: 'var(--color-error)' }} />
-          <h3 className="text-lg font-bold">Minting Failed</h3>
-          <p className="text-secondary text-center text-sm">
-            {mintError || 'Something went wrong. Please try again.'}
-          </p>
-          <button
-            className="btn btn-primary w-full"
-            onClick={onRetry}
-          >
-            Try Again
-          </button>
-        </>
-      );
-
-    case 'expired':
-      return (
-        <>
-          <AlertTriangle size={48} style={{ color: 'var(--color-primary)' }} />
-          <h3 className="text-lg font-bold">Offer Expired</h3>
-          <p className="text-secondary text-center text-sm">
-            The 15-minute window has passed. No charge was made.
-            Your design is saved — you can mint again when ready.
-          </p>
-          <button
-            className="btn btn-primary w-full"
-            onClick={onRetry}
-          >
-            Try Again
-          </button>
-        </>
-      );
-
-    default:
-      return null;
-  }
+  return createPortal(content, document.body);
 }
 
 export default MintFlowModal;
