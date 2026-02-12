@@ -183,22 +183,18 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
     return { ...derived.g2Selections, Head: normalizedHead };
   }, [derived.g2Selections]);
 
-  // Pre-render Beer Hat card thumbnail so the grid card always shows full cans + underlayer (even when Beer Hat is not selected)
+  // Pre-render Beer Hat card thumbnail with fixed default layers (base + blue tee + mouth) so the grid card never changes with user selections
   const [beerHatCardThumbnailUrl, setBeerHatCardThumbnailUrl] = useState<string | null>(null);
   useEffect(() => {
-    const head = derived.g2Selections?.Head;
-    const isBeerHatSelected = head?.traitId === 'Head_Beer-Hat';
-    const basePath = derived.selectedLayers.Base;
-    const hasBaseAndClothes =
-      basePath && basePath !== '' && basePath !== 'None' && derived.selectedLayers.Clothes;
-    if (isBeerHatSelected || !hasBaseAndClothes) {
-      setBeerHatCardThumbnailUrl(null);
-      return;
-    }
     let cancelled = false;
-    const layersForBeerHat: SelectedLayers = { ...derived.selectedLayers, Head: '/g2/Head/Beer-Hat' };
-    const g2ForBeerHat: G2Selections = { ...derived.g2Selections, Head: BEER_HAT_CARD_G2 };
-    renderThumbnail(layersForBeerHat, g2ForBeerHat, state.selectedColors)
+    const layersForBeerHat: SelectedLayers = {
+      Base: '/assets/wojak-layers/BASE/BASE_Base-Wojak_classic.png',
+      Clothes: '/assets/wojak-layers/CLOTHES/CLOTHES_Tee_blue.png',
+      MouthBase: '/assets/wojak-layers/MOUTH/MOUTH_numb.png',
+      Head: '/g2/Head/Beer-Hat',
+    } as SelectedLayers;
+    const g2ForBeerHat: G2Selections = { Head: BEER_HAT_CARD_G2 };
+    renderThumbnail(layersForBeerHat, g2ForBeerHat, {})
       .then((dataUrl) => {
         if (!cancelled) setBeerHatCardThumbnailUrl(dataUrl);
       })
@@ -208,7 +204,7 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
     return () => {
       cancelled = true;
     };
-  }, [derived.selectedLayers, derived.g2Selections, state.selectedColors]);
+  }, []);
 
   // Render preview when selections change
   useEffect(() => {

@@ -32,7 +32,7 @@
     }
     .container { max-width: 960px; margin: 0 auto; }
 
-    .leaderboard-header { margin-bottom: 28px; }
+    .leaderboard-header { margin-bottom: 28px; text-align: center; }
     h1 {
       font-size: 26px;
       font-weight: 600;
@@ -41,7 +41,7 @@
       color: var(--text);
     }
     .header-sub { color: var(--text3); font-size: 14px; font-weight: 500; margin-bottom: 14px; }
-    .header-desc { color: var(--text2); font-size: 14px; line-height: 1.65; max-width: 56em; }
+    .header-desc { color: var(--text2); font-size: 14px; line-height: 1.65; max-width: 56em; margin-left: auto; margin-right: auto; }
     .header-desc strong { color: var(--text); font-weight: 500; }
 
     .loading { text-align: center; padding: 48px; color: var(--text2); line-height: 1.5; }
@@ -56,7 +56,7 @@
     .skeleton-spinner { width: 32px; height: 32px; margin: 0 auto 12px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .error { background: rgba(239,68,68,0.15); color: #fca5a5; padding: 12px 16px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; }
-    .sort-arrow { font-size: 10px; margin-left: 4px; color: var(--text3); opacity: 0.5; }
+    .sort-arrow { font-size: 10px; margin-left: 4px; color: var(--text3); opacity: 0; display: inline-block; width: 1em; }
     th.sortable.active .sort-arrow { color: var(--primary); opacity: 1; }
     .load-more-wrap { margin-top: 16px; text-align: center; }
     .btn-load-more { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); cursor: pointer; font-size: 13px; }
@@ -66,13 +66,15 @@
       overflow-x: auto;
       border-radius: 16px;
       background: var(--surface);
-      box-shadow: 0 4px 24px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.03);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.04);
       border: 1px solid var(--border);
     }
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th { text-align: left; padding: 14px 20px; color: var(--text3); font-weight: 500; font-size: 12px; text-transform: none; letter-spacing: 0.02em; border-bottom: 1px solid var(--border); }
-    td { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
-    @media (min-width: 900px) { th { padding: 16px 24px; } td { padding: 18px 24px; } }
+    th { text-align: left; padding: 14px 16px; color: var(--text3); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    td { padding: 16px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+    th:first-child, td:first-child { padding-left: 24px; }
+    td:last-child, th:last-child { padding-right: 24px; }
+    @media (min-width: 900px) { th { padding: 14px 18px; } td { padding: 18px 18px; } th:first-child, td:first-child { padding-left: 28px; } td:last-child, th:last-child { padding-right: 28px; } }
     tr:last-child td { border-bottom: none; }
     tr.wallet-row {
       cursor: pointer;
@@ -90,7 +92,10 @@
     tr.wallet-row.rank-1 .rank { color: var(--gold); }
     tr.wallet-row.rank-2 .rank { color: var(--silver); }
     tr.wallet-row.rank-3 .rank { color: var(--bronze); }
-    .rank { width: 52px; font-variant-numeric: tabular-nums; color: var(--text3); }
+    .rank { width: 44px; font-variant-numeric: tabular-nums; color: var(--text3); }
+    tr.wallet-row.rank-1 .credits-cell { color: var(--gold); }
+    tr.wallet-row.rank-2 .credits-cell { color: var(--silver); }
+    tr.wallet-row.rank-3 .credits-cell { color: var(--bronze); }
     .rank-cell { display: flex; align-items: center; gap: 8px; }
     .rank-badge {
       font-size: 10px;
@@ -105,10 +110,12 @@
     .rank-badge.rank-3rd { background: rgba(205,127,50,0.2); color: var(--bronze); }
     th.sortable { cursor: pointer; user-select: none; }
     th.sortable:hover { color: var(--text2); }
-    .wallet-cell { font-family: ui-monospace, monospace; font-size: 13px; color: var(--text); }
-    .credits-cell { font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
-    .mints-cell { color: var(--text2); font-size: 13px; font-variant-numeric: tabular-nums; }
-    .expand-icon { display: inline-block; width: 16px; height: 16px; line-height: 14px; text-align: center; border-radius: 4px; color: var(--text3); transition: transform 0.2s; vertical-align: middle; }
+    .wallet-cell { font-family: ui-monospace, monospace; font-size: 13px; color: var(--text2); letter-spacing: 0.01em; }
+    .credits-cell { font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; font-size: 16px; text-align: center; }
+    th[data-sort="earned"] { text-align: center; }
+    .mints-cell { color: var(--text3); font-size: 13px; font-variant-numeric: tabular-nums; text-align: center; padding-left: 16px; padding-right: 10px; }
+    th[data-sort="available"], th[data-sort="bought"] { text-align: center; padding-left: 16px; padding-right: 10px; }
+    .expand-icon { display: inline-block; width: 16px; height: 16px; line-height: 14px; text-align: center; border-radius: 4px; color: var(--text3); transition: transform 0.2s, color 0.2s; vertical-align: middle; font-size: 10px; }
     tr.expanded .expand-icon { transform: rotate(90deg); color: var(--primary); }
 
     .expand-content { display: none; background: rgba(0,0,0,0.2); }
@@ -137,7 +144,7 @@
     .formula-box {
       position: relative;
       margin-top: 20px;
-      padding: 14px 44px 14px 18px;
+      padding: 14px 44px;
       background: rgba(0,0,0,0.2);
       border-radius: 12px;
       border: 1px solid var(--border);
@@ -155,10 +162,10 @@
     .formula-info-popover .example { margin-bottom: 6px; white-space: nowrap; }
     .formula-info-popover .example:last-child { margin-bottom: 0; }
     .formula-info-popover .example strong { color: var(--primary); }
-    .formula-box .formula-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
+    .formula-box .formula-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; justify-content: center; }
     .formula-box strong { color: var(--text2); font-weight: 500; flex-shrink: 0; }
     .formula-box .formula { font-family: ui-monospace, monospace; font-size: 12px; color: var(--primary); }
-    .formula-box .formula-desc { color: var(--text2); margin-top: 6px; }
+    .formula-box .formula-desc { color: var(--text2); margin-top: 6px; text-align: center; }
     .formula-box .formula-desc code { font-family: ui-monospace, monospace; font-size: 11px; color: var(--text3); }
 
     /* Fixed X: independent of layout, top-right corner of viewport */
@@ -204,16 +211,19 @@
   <div class="container">
     <div class="leaderboard-header">
       <h1>Free Mint Credits Leaderboard</h1>
-      <p class="header-sub">Ranked by all-time credits earned</p>
       <p class="header-desc">
-        Credits come from XCH spent on Wojak Farmers Plot NFTs — 100 credits gets you one free mint. Spend them in the <strong>Wojak Generator</strong> to create <strong>YourWojak</strong> NFTs. YourWojak NFT creators earn <strong>10% royalties forever</strong>. This is phase 1 of the Wojak Generator — after 4,200 mints, the royalty structure will change.
+        Credits come from XCH spent on Wojak Farmers Plot NFTs.<br>
+        100 credits = one free mint in the <strong>Wojak Generator</strong> to create <strong>YourWojak</strong> NFTs.
+      </p>
+      <p class="header-desc" style="margin-top: 4px;">
+        YourWojak creators earn <strong>10% royalties forever</strong>. After 4,200 mints, the royalty structure will change.
       </p>
       <div class="formula-box">
         <div class="formula-info-wrap" id="formula-info-wrap">
-          <button type="button" class="formula-info-btn" id="formula-info-btn" title="Example calculations">ℹ</button>
+          <button type="button" class="formula-info-btn" id="formula-info-btn">ℹ</button>
           <div class="formula-info-popover" id="formula-info-popover">
             <div class="example">Buying an NFT at floor price earns <strong>50 credits</strong></div>
-            <div class="example">Buying an NFT at ten times the floor price earns <strong>730 credits</strong></div>
+            <div class="example">Buying an NFT at 10x floor price earns <strong>730 credits</strong></div>
           </div>
         </div>
         <div class="formula-row">
@@ -221,10 +231,7 @@
           <span class="formula">credits = 50 × (price ÷ floor) × (1 + 0.2 × ln(price ÷ floor))</span>
         </div>
         <div class="formula-desc">
-          <code>price</code> = XCH you paid · <code>floor</code> = floor price at purchase · <code>ln</code> = natural log
-        </div>
-        <div class="formula-desc" style="margin-top: 8px;">
-          <a href="/credits-docs.html" style="color: var(--primary); text-decoration: none;">Formula &amp; ops guide</a> — full formula, alerting, reconciliation.
+          <code>price</code> = XCH you paid · <code>floor</code> = 7-day average floor price · <code>ln</code> = natural log
         </div>
       </div>
     </div>
@@ -236,7 +243,7 @@
       <div id="skeleton-table-wrap" class="table-wrap" style="margin-top:24px">
         <table class="skeleton-table">
           <thead>
-            <tr><th class="rank">#</th><th>Wallet</th><th>Credits</th><th>Available</th><th>Paid mint</th><th></th></tr>
+            <tr><th class="rank">#</th><th>Wallet</th><th>Credits</th><th>Free Mints</th><th>Paid Mints</th><th></th></tr>
           </thead>
           <tbody>
             <tr class="skeleton-row"><td><span class="skeleton-bar w-8"></span></td><td><span class="skeleton-bar w-24"></span></td><td><span class="skeleton-bar w-16"></span></td><td><span class="skeleton-bar w-8"></span></td><td><span class="skeleton-bar w-8"></span></td><td></td></tr>
@@ -256,8 +263,8 @@
             <th class="rank">#</th>
             <th>Wallet</th>
             <th class="sortable" data-sort="earned">Credits<span class="sort-arrow"></span></th>
-            <th class="sortable" data-sort="available">Available<span class="sort-arrow"></span></th>
-            <th class="sortable" data-sort="bought">Paid mint<span class="sort-arrow"></span></th>
+            <th class="sortable" data-sort="available">Free Mints<span class="sort-arrow"></span></th>
+            <th class="sortable" data-sort="bought">Paid Mints<span class="sort-arrow"></span></th>
             <th></th>
           </tr>
         </thead>
@@ -414,11 +421,20 @@
         const isActive = sortKey === currentSort;
         th.classList.toggle('active', isActive);
         const arrow = th.querySelector('.sort-arrow');
-        if (arrow) arrow.textContent = isActive ? '▼' : '';
+        if (arrow) arrow.textContent = '▼';
         th.onclick = () => {
           if (sortKey === currentSort) return;
           currentSort = sortKey;
-          loadFromApi(sortKey);
+          if (leaderboard.length > 0) {
+            // Sort existing data client-side — no reload needed
+            if (sortKey === 'available') leaderboard.sort((a, b) => b.freeMints - a.freeMints || b.earned - a.earned);
+            else if (sortKey === 'bought') leaderboard.sort((a, b) => b.yourWojakBought - a.yourWojakBought || b.earned - a.earned);
+            else leaderboard.sort((a, b) => b.earned - a.earned);
+            leaderboard.forEach((r, i) => { r.rank = i + 1; });
+            renderTable();
+          } else {
+            loadFromApi(sortKey);
+          }
         };
       });
     }
@@ -444,7 +460,6 @@
           <span class="expand-summary">${mintsUsed} free mint${mintsUsed !== 1 ? 's' : ''} used · ${yourWojakBought} paid mint${yourWojakBought !== 1 ? 's' : ''}</span>
         </div>
         ${purchases.length > 0 ? `
-        <p class="expand-summary" style="margin-bottom:8px">Credit-earning purchases (Wojak Farmers Plot NFTs):</p>
         <table class="purchase-table">
           <thead>
             <tr><th>NFT</th><th>Price (XCH)</th><th>Credits</th></tr>

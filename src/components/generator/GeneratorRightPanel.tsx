@@ -80,6 +80,81 @@ function MilitaryBeretUpgradeSwatches({ onColorPick, disabled }: { onColorPick: 
   );
 }
 
+const MASK_VARIANTS = [
+  { file: 'MedievalBepe_cowboy.png', label: 'Cowboy Bepe' },
+  { file: 'MedievalBepe_emo.png', label: 'Emo Bepe' },
+  { file: 'MedievalBepe_wizard.png', label: 'Wizard Bepe' },
+  { file: 'Skull_mask_love.png', label: 'Skull Love' },
+  { file: 'Skull_mask_orange.png', label: 'Skull Orange' },
+  { file: 'Skull_mask_pink.png', label: 'Skull Pink' },
+  { file: 'Skull_mask_zebra.png', label: 'Skull Zebra' },
+  { file: 'Tanginium_king.png', label: 'Tanginium King' },
+  { file: 'Tanginium_sad.png', label: 'Tanginium Sad' },
+];
+const MASK_BASE_PATH = '/assets/wojak-layers/MASK';
+
+/** All full-face mask path substrings (hand mask + all style variants) */
+const FULL_FACE_MASK_SUBSTRINGS = [
+  'Wojak_hand_mask',
+  ...MASK_VARIANTS.map((v) => v.file.replace('.png', '')),
+];
+
+function isFullFaceMaskSelected(maskPath: string | undefined): boolean {
+  if (!maskPath) return false;
+  return FULL_FACE_MASK_SUBSTRINGS.some((s) => maskPath.includes(s));
+}
+
+function MaskVariantPicker({ selectedPath, onSelect }: { selectedPath: string | undefined; onSelect: (path: string) => void }) {
+  return (
+    <div>
+      <p className="text-xs font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+        Mask style
+      </p>
+      <div className="grid grid-cols-3 gap-2">
+        {MASK_VARIANTS.map(({ file, label }) => {
+          const path = `${MASK_BASE_PATH}/${file}`;
+          const isSelected = selectedPath === path;
+          return (
+            <button
+              key={file}
+              type="button"
+              className="aspect-square relative rounded-xl overflow-hidden"
+              style={{
+                background: 'var(--generator-trait-card-bg)',
+                border: isSelected
+                  ? '2px solid var(--generator-selected-color, #F97316)'
+                  : '1px solid var(--generator-trait-card-border)',
+                boxShadow: isSelected
+                  ? '0 0 20px rgba(0, 212, 255, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3)'
+                  : '0 2px 8px rgba(0, 0, 0, 0.2)',
+              }}
+              onClick={() => onSelect(path)}
+              title={label}
+            >
+              <img
+                src={path}
+                alt={label}
+                className="w-full h-full object-contain"
+                loading="lazy"
+              />
+              {isSelected && (
+                <div
+                  className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center"
+                  style={{ background: 'var(--generator-badge-color, #F97316)' }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+                    <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
+                  </svg>
+                </div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function BeerHatUnderlayerPicker({ selectedTraitId, onSelect }: { selectedTraitId: string; onSelect: (traitId: string) => void }) {
   const [traits, setTraits] = useState<Map<string, UnifiedTrait>>(new Map());
 
@@ -275,7 +350,7 @@ export function GeneratorRightPanel() {
       };
 
   return (
-    <div className="flex flex-col gap-4 min-h-0">
+    <div className="flex flex-col gap-4">
       {/* G1 Military Beret: "Pick a color to use new design" — swatches switch to G2 */}
       {isG1MilitaryBeret && (
         <div className="flex-shrink-0">
@@ -288,12 +363,25 @@ export function GeneratorRightPanel() {
           />
         </div>
       )}
-      {/* Single color palette — always one picker; multi-fill traits use buttons below to choose which part to color */}
-      {hasSelection && !isG1MilitaryBeret && (
+      {/* Single color palette — hidden for full-face masks and Hannibal mask (no colorable fills) */}
+      {hasSelection && !isG1MilitaryBeret && !(
+        activeLayer === 'Mask' && (
+          isFullFaceMaskSelected(selectedLayers.Mask) ||
+          selectedLayers.Mask?.includes('Hannibal')
+        )
+      ) && (
         <div className="flex-shrink-0">
           <ColorPicker {...colorPickerProps} />
         </div>
       )}
+      {/* Mask layer: show variant face masks when any full-face mask style is selected */}
+      {activeLayer === 'Mask' && isFullFaceMaskSelected(selectedLayers.Mask) && (
+        <MaskVariantPicker
+          selectedPath={selectedLayers.Mask}
+          onSelect={(path) => selectLayer('Mask', path)}
+        />
+      )}
+
       {/* Fill-target buttons: which part the color picker edits (for multi-fill traits except Suit/Chia Farmer) */}
       {hasSelection &&
         hasG2Selection &&
@@ -444,7 +532,7 @@ export function GeneratorRightPanel() {
       )}
 
       {/* G2 details: when Beer Hat + underlayer focus, show both can options and underlayer details; otherwise single panel */}
-      <div className="flex-1 min-h-0 flex flex-col gap-4 overflow-auto">
+      <div className="flex flex-col gap-4">
         {activeLayer === 'Head' && g2Selections.Head?.traitId === 'Head_Beer-Hat' && (
           <>
             {/* Can options — always visible when Beer Hat is selected */}

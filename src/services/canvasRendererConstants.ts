@@ -13,12 +13,12 @@ export const MOUTH_OVER_BEER_HAT = ['Cig', 'Joint', 'Cohiba'];
 export const NINJA_COVERING_MASKS = ['copium', 'hannibal', 'bandana'];
 
 /** Full-face masks that render on top of everything (skull masks, fake it mask) */
-export const FULL_FACE_MASKS = ['skull_mask', 'skull-mask', 'fake_it', 'fake-it', 'medievalbepe', 'tanginium'];
+export const FULL_FACE_MASKS = ['skull_mask', 'skull-mask', 'hand_mask', 'hand-mask', 'medievalbepe', 'tanginium'];
 
 /** Heads that need EyesOverHead virtual layer (right half of eyes rendered above head) */
 export const HEADS_NEEDING_EYES_OVERLAY = ['clown', 'pirate', 'ronin', 'supa', 'saiyan'];
 
-/** Full-body suits where first 50% of eyes render under suit layer one (path substrings for layer builder). */
+/** Full-body suits that render on top of eyewear (path substrings for layer builder). */
 export const SUITS_NEEDING_EYES_UNDER = [
   'gopher-suit',
   'sonic-suit',
@@ -39,8 +39,8 @@ export const LAYER_Z_INDEX: Record<string, number> = {
   Clothes: 2,
   ClothesComposite0: 2.1,  // composite layer0 (over base) — under MouthBase and MouthItem
   ClothesComposite1: 2.2,  // composite layer1 on top of layer0
-  EyesUnderSuit: 1.5,      // first 50% of eyes under suit layer one (Gopher, Sonic, Proof of Prayer, etc.)
-  EyesOverSuit: 2.25,      // remaining 50% of eyes on top of suit layer one
+  MaskUnderSuit: 1.4,      // bandana under EyesUnderSuit when suit is active
+  EyesUnderSuit: 1.5,      // left 63% of eyes under suit (Gopher, Sonic, Proof of Prayer, etc.)
   ClothesAddon: 3,
   FacialHair: 4,
   MouthBase: 5,

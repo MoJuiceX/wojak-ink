@@ -34,7 +34,7 @@ export const KNOWN_TRAIT_IDS = {
   Head_VikingHelmet: 'Head_viking-helmet',
   Head_StandardCut: 'Head_Standard-Cut',
   Head_TrumpWave: 'Head_Trump-wave',
-  FullFaceMasks: ['skull_mask', 'skull-mask', 'fake_it', 'fake-it', 'medievalbepe', 'tanginium'],
+  FullFaceMasks: ['skull_mask', 'skull-mask', 'hand_mask', 'hand-mask', 'medievalbepe', 'tanginium'],
 } as const;
 
 /** Bepe suit and Pepe suit: VR Headset cannot be selected (mutually exclusive). */

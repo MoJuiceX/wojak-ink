@@ -134,15 +134,6 @@
     "EXTRA_MOUTH_stach.png"
   ],
   "MASK": [
-    "Fake_it_mask.png",
-    "MedievalBepe_cowboy.png",
-    "MedievalBepe_emo.png",
-    "MedievalBepe_wizard.png",
-    "Skull_mask_love.png",
-    "Skull_mask_orange.png",
-    "Skull_mask_pink.png",
-    "Skull_mask_zebra.png",
-    "Tanginium_king.png",
-    "Tanginium_sad.png"
+    "Wojak_hand_mask.png"
   ]
 }

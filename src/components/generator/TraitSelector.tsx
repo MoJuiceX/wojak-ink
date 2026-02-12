@@ -13,7 +13,7 @@ import { useGenerator } from '@/contexts/GeneratorContext';
 import { traitGridVariants, traitCardStaggerVariants } from '@/config/generatorAnimations';
 import { getG2DefaultColor } from '@/config/g2DefaultColors';
 import { getPreviewColorForLayeredFill, isLayerFill } from '@/utils/layeredTraitPreviewColors';
-import { getDerivedColor } from '@/services/canvasRenderer';
+import { getDerivedColor, getFlagSvgDataUrl } from '@/services/canvasRenderer';
 import { MouthLayerSelector } from './MouthLayerSelector';
 import { G2TraitPanel } from './G2TraitPanel';
 import { ColorPicker } from './ColorPicker';
@@ -757,6 +757,41 @@ export function G2TraitCard({ trait, isSelected, onClick, needsClothesUnderlay, 
             </div>
             <img src={`${basePath}/${trait.outlineFile}`} alt={trait.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
           </>
+        ) : trait.id === 'Face-wear_VR-headset' && trait.fillFiles && trait.fillFiles.length >= 4 && trait.outlineFile ? (
+          <>
+            <img src={DEFAULT_BASE_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+            {needsClothesUnderlay && (
+              <img src={DEFAULT_CLOTHES_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+            )}
+            <img src={DEFAULT_MOUTH_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+            {/* VR headset: fill0 = user color, fill1-3 = darker shade of fill0 */}
+            {trait.fillFiles.map((file, i) => {
+              const baseColor = getG2DefaultColor(trait.id, 'fill0', trait, '#FFFF00');
+              const color = i === 0 ? baseColor : getDerivedColor(baseColor, 'darker_shade', 5);
+              return (
+                <div key={file} className="absolute inset-0 w-full h-full" style={{ isolation: 'isolate' }}>
+                  <img src={`${basePath}/${file}`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+                  <div
+                    className="absolute inset-0 w-full h-full"
+                    style={{
+                      background: color,
+                      mixBlendMode: 'multiply',
+                      pointerEvents: 'none',
+                      maskImage: `url(${basePath}/${file})`,
+                      WebkitMaskImage: `url(${basePath}/${file})`,
+                      maskSize: 'cover',
+                      WebkitMaskSize: 'cover',
+                      maskPosition: 'center',
+                      WebkitMaskPosition: 'center',
+                      maskRepeat: 'no-repeat',
+                      WebkitMaskRepeat: 'no-repeat',
+                    }}
+                  />
+                </div>
+              );
+            })}
+            <img src={`${basePath}/${trait.outlineFile}`} alt={trait.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+          </>
         ) : colorableDualFill ? (
           <>
             <img src={DEFAULT_BASE_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
@@ -849,6 +884,27 @@ export function G2TraitCard({ trait, isSelected, onClick, needsClothesUnderlay, 
                 </>
               );
             })()}
+          </>
+        ) : trait.id === 'Clothes_Astronaut' && colorableSingleFill ? (
+          <>
+            <img src={DEFAULT_BASE_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+            <img src={DEFAULT_MOUTH_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+            {/* White suit (default) */}
+            <img src={`${basePath}/Clothes_Astronaut_default.png`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+            {/* Coin logo (CAT) — circle at 35.5%,91.2% r=6.8% of 1000x1000 */}
+            <div className="absolute" style={{ left: '28.7%', top: '84.4%', width: '13.6%', height: '13.6%', borderRadius: '50%', overflow: 'hidden' }}>
+              <img src="/assets/wojak-layers/CHIA_coin_logos/CAT.webp" alt="" className="w-full h-full object-cover" loading="lazy" />
+            </div>
+            {/* Frame overlays (logo frame + flag frame) */}
+            <img src={`${basePath}/Clothes_Astronaut_detail1.1.png`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+            {/* US flag — rect at 62.6%,86.1% w=13.4% h=9.2% */}
+            <div className="absolute" style={{ left: '62.6%', top: '86.1%', width: '13.4%', height: '9.2%', overflow: 'hidden', borderRadius: '2px' }}>
+              <img src={getFlagSvgDataUrl('us', 134, 92)} alt=""
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <img src={`${basePath}/Clothes_Astronaut_detail2.2.png`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+            <img src={`${basePath}/Clothes_Astronaut_outline.png`} alt={trait.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
           </>
         ) : colorableSingleFill ? (
           <>
@@ -949,7 +1005,6 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
     setG2Detail,
     setBeerHatEditFocus,
     g2Selections,
-    previewImage,
     beerHatCardThumbnailUrl,
     getLayerImages,
     getUnifiedTraitsForLayer,
@@ -1163,11 +1218,10 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                 (!!trait.g1Path && (selectedPath === trait.g1Path || (selectedPath != null && trait.g1Variants?.includes(selectedPath))));
 
               if (trait.source === 'g2') {
-                const isBeerHatSelected = trait.id === 'Head_Beer-Hat' && !!isSelected;
-                // Beer Hat card always shows correct preview: live preview when selected, pre-rendered thumbnail when not (avoids empty cans in grid)
+                // Beer Hat card always uses the fixed thumbnail (base + blue tee + mouth) so it matches other grid previews
                 const beerHatCardPreviewUrl =
                   trait.id === 'Head_Beer-Hat'
-                    ? (isBeerHatSelected ? previewImage ?? undefined : beerHatCardThumbnailUrl ?? undefined)
+                    ? beerHatCardThumbnailUrl ?? undefined
                     : undefined;
                 return (
                   <motion.div

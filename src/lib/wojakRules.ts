@@ -228,25 +228,29 @@ function ruleAstronautCopiumMaskMutualExclusion(resolver: SelectionResolver): Ru
 }
 
 /**
- * Astronaut and Night Vision are mutually exclusive.
- * When Astronaut is selected: Night Vision cannot be selected; clear it if currently selected.
+ * Astronaut and Gopher suit disable Night Vision (mutually exclusive).
+ * When either is selected: Night Vision cannot be selected; clear it if currently selected.
  */
 function ruleAstronautDisablesNightVision(resolver: SelectionResolver): RuleResult {
-  const hasAstronaut = resolver.getTraitId('Clothes') === KNOWN_TRAIT_IDS.Clothes_Astronaut;
+  const clothesId = resolver.getTraitId('Clothes');
+  const hasAstronaut = clothesId === KNOWN_TRAIT_IDS.Clothes_Astronaut;
+  const hasGopherSuit = clothesId === 'Clothes_gopher-suit';
+  const blocksNightVision = hasAstronaut || hasGopherSuit;
   const hasNightVision = resolver.getTraitId('Eyes') === KNOWN_TRAIT_IDS.Eyes_NightVision;
+  const reason = hasAstronaut ? 'Remove Astronaut' : 'Remove Gopher Suit';
 
-  if (hasAstronaut) {
+  if (blocksNightVision) {
     if (hasNightVision) {
       return {
         disabledLayers: [],
-        reason: 'Deselect Astronaut',
+        reason,
         forceSelections: { Eyes: '' },
         clearSelections: ['Eyes'],
         disabledOptions: { Eyes: ['Night Vision', 'night vision'] },
         disabledOptionReasons: {
           Eyes: {
-            'Night Vision': 'Remove Astronaut',
-            'night vision': 'Remove Astronaut',
+            'Night Vision': reason,
+            'night vision': reason,
           },
         },
       };
@@ -256,8 +260,8 @@ function ruleAstronautDisablesNightVision(resolver: SelectionResolver): RuleResu
       disabledOptions: { Eyes: ['Night Vision', 'night vision'] },
       disabledOptionReasons: {
         Eyes: {
-          'Night Vision': 'Remove Astronaut',
-          'night vision': 'Remove Astronaut',
+          'Night Vision': reason,
+          'night vision': reason,
         },
       },
     };
@@ -532,13 +536,44 @@ function ruleBepePepeSuitDisablesVRHeadset(resolver: SelectionResolver): RuleRes
 }
 
 /**
+ * Sonic suit, Pickle suit, and Goose suit: Bandana mask cannot be selected.
+ */
+const CLOTHES_NO_BANDANA = ['Clothes_Sonic-suit', 'Clothes_Pickle-suit', 'Clothes_Goose-suit'];
+
+function ruleSuitDisablesBandana(resolver: SelectionResolver): RuleResult {
+  const clothesId = resolver.getTraitId('Clothes');
+  const hasSuit = clothesId !== null && CLOTHES_NO_BANDANA.includes(clothesId);
+  const hasBandana = resolver.getTraitId('Mask') === KNOWN_TRAIT_IDS.Mask_Bandana;
+
+  if (hasSuit && hasBandana) {
+    return {
+      disabledLayers: [],
+      forceSelections: { Mask: '' },
+      clearSelections: ['Mask'],
+    };
+  }
+  if (hasSuit) {
+    const disabledMaskOptions = ['Bandana-mask', 'Bandana mask', 'Bandana'];
+    const disabledMaskReasons: Record<string, string> = {};
+    for (const opt of disabledMaskOptions) disabledMaskReasons[opt] = 'Not available with this suit';
+    return {
+      disabledLayers: [],
+      disabledOptions: { Mask: disabledMaskOptions },
+      disabledOptionReasons: { Mask: disabledMaskReasons },
+    };
+  }
+
+  return { disabledLayers: [] };
+}
+
+/**
  * Full-face masks (Skull masks, Fake It) disable Laser Eyes (Eyes layer; path check for mask names)
  */
 function ruleFullFaceMaskDisablesLaserEyes(resolver: SelectionResolver): RuleResult {
   const maskPath = resolver.getPath('Mask');
   const eyesPath = resolver.getPath('Eyes');
 
-  const fullFaceSubstrings = ['skull_mask', 'skull-mask', 'fake_it', 'fake-it'];
+  const fullFaceSubstrings = ['skull_mask', 'skull-mask', 'hand_mask', 'hand-mask', 'medievalbepe', 'tanginium'];
   const isFullFaceMask = fullFaceSubstrings.some((m) => pathContains(maskPath, m));
 
   if (!isFullFaceMask) return { disabledLayers: [] };
@@ -614,6 +649,7 @@ const RULES = [
   ruleAstronautCopiumMaskMutualExclusion,
   ruleAstronautDisablesNightVision,
   ruleBepePepeSuitDisablesVRHeadset,
+  ruleSuitDisablesBandana,
   ruleFullBodySuitNoHead,
   ruleFacialHairRequiresMouthBase,
   ruleMaskBlocksOtherLayers,

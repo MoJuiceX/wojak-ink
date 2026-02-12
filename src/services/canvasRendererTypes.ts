@@ -39,10 +39,14 @@ export interface RenderLayer {
   clipRightPercent?: number;
   /** Move under/over boundary this many pixels left (e.g. VR headset + suit). Applied with clipRightPercent/clipLeftPercent. */
   clipBoundaryOffsetPx?: number;
+  /** Skip top X% (0-1); show bottom portion. e.g. 0.25 = skip top 25%, show bottom 75% */
+  clipTopPercent?: number;
   /** Restrict clip to top 50% of canvas only (for Beer Hat right-behind) */
   clipTopHalfOnly?: boolean;
   /** Top half: left portion; bottom half: full width (for Beer Hat on-top) */
   clipBottomHalfFull?: boolean;
+  /** Polygon clip path (array of [x, y] points normalized 0-1); only inside the polygon is visible */
+  clipPolygon?: [number, number][];
   g2?: G2LayerData;
   fillPath?: string;
   outlinePath?: string;

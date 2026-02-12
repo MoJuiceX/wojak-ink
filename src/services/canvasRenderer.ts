@@ -203,7 +203,9 @@ function tintDraw(
   flatTint?: boolean,
   clipTopHalfOnly?: boolean,
   clipBottomHalfFull?: boolean,
-  clipBoundaryOffsetPx?: number
+  clipBoundaryOffsetPx?: number,
+  clipTopPercent?: number,
+  clipPolygon?: [number, number][]
 ): void {
   const tc = document.createElement('canvas');
   tc.width = size;
@@ -245,7 +247,24 @@ function tintDraw(
 
   const halfH = size / 2;
   // 4. Draw result to main canvas (with optional clipping)
-  if (clipBottomHalfFull && clipRightPercent && clipRightPercent > 0) {
+  if (clipPolygon && clipPolygon.length >= 3) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(clipPolygon[0][0] * size, clipPolygon[0][1] * size);
+    for (let i = 1; i < clipPolygon.length; i++) ctx.lineTo(clipPolygon[i][0] * size, clipPolygon[i][1] * size);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(tc, 0, 0, size, size);
+    ctx.restore();
+  } else if (clipTopPercent && clipTopPercent > 0) {
+    const clipY = size * clipTopPercent;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, clipY, size, size - clipY);
+    ctx.clip();
+    ctx.drawImage(tc, 0, 0, size, size);
+    ctx.restore();
+  } else if (clipBottomHalfFull && clipRightPercent && clipRightPercent > 0) {
     const clipW = size * (1 - clipRightPercent);
     ctx.save();
     ctx.beginPath();
@@ -853,11 +872,24 @@ async function drawG2Layer(
   clipRightPercent?: number,
   clipTopHalfOnly?: boolean,
   clipBottomHalfFull?: boolean,
-  clipBoundaryOffsetPx?: number
+  clipBoundaryOffsetPx?: number,
+  clipTopPercent?: number,
+  clipPolygon?: [number, number][]
 ): Promise<void> {
   const halfH = size / 2;
   const applyClip = () => {
-    if (clipBottomHalfFull && clipRightPercent && clipRightPercent > 0) {
+    if (clipPolygon && clipPolygon.length >= 3) {
+      ctx.beginPath();
+      ctx.moveTo(clipPolygon[0][0] * size, clipPolygon[0][1] * size);
+      for (let i = 1; i < clipPolygon.length; i++) ctx.lineTo(clipPolygon[i][0] * size, clipPolygon[i][1] * size);
+      ctx.closePath();
+      ctx.clip();
+    } else if (clipTopPercent && clipTopPercent > 0) {
+      const clipY = size * clipTopPercent;
+      ctx.beginPath();
+      ctx.rect(0, clipY, size, size - clipY);
+      ctx.clip();
+    } else if (clipBottomHalfFull && clipRightPercent && clipRightPercent > 0) {
       let clipW = size * (1 - clipRightPercent);
       if (clipBoundaryOffsetPx != null) clipW = Math.max(0, clipW - clipBoundaryOffsetPx);
       ctx.beginPath();
@@ -892,7 +924,7 @@ async function drawG2Layer(
   if (g2.supersample) {
     const ssSize = size * SUPERSAMPLE_FACTOR;
     const { canvas: ssCanvas, ctx: ssCtx } = createOffscreenCanvas(ssSize, ssSize);
-    await drawG2Layer(ssCtx, { ...g2, supersample: false }, ssSize, clipRightHalf, clipLeftPercent, clipRightPercent, clipTopHalfOnly, clipBottomHalfFull, clipBoundaryOffsetPx);
+    await drawG2Layer(ssCtx, { ...g2, supersample: false }, ssSize, clipRightHalf, clipLeftPercent, clipRightPercent, clipTopHalfOnly, clipBottomHalfFull, clipBoundaryOffsetPx, clipTopPercent, clipPolygon);
     ctx.save();
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
@@ -910,10 +942,10 @@ async function drawG2Layer(
           if (item.opacity !== undefined && item.opacity < 1) {
             ctx.save();
             ctx.globalAlpha = item.opacity;
-            tintDraw(ctx, fillImg, item.color, size, clipRightHalf, clipLeftPercent, clipRightPercent, undefined, clipTopHalfOnly, clipBottomHalfFull, clipBoundaryOffsetPx);
+            tintDraw(ctx, fillImg, item.color, size, clipRightHalf, clipLeftPercent, clipRightPercent, undefined, clipTopHalfOnly, clipBottomHalfFull, clipBoundaryOffsetPx, clipTopPercent, clipPolygon);
             ctx.restore();
           } else {
-            tintDraw(ctx, fillImg, item.color, size, clipRightHalf, clipLeftPercent, clipRightPercent, undefined, clipTopHalfOnly, clipBottomHalfFull, clipBoundaryOffsetPx);
+            tintDraw(ctx, fillImg, item.color, size, clipRightHalf, clipLeftPercent, clipRightPercent, undefined, clipTopHalfOnly, clipBottomHalfFull, clipBoundaryOffsetPx, clipTopPercent, clipPolygon);
           }
         } catch (err) {
           console.warn(`[G2] Failed to load fill: ${item.file}`, err);
@@ -943,7 +975,7 @@ async function drawG2Layer(
         ctx.drawImage(fillImg, 0, 0, size, size);
         ctx.restore();
       } else {
-        tintDraw(ctx, fillImg, fill.color, size, clipRightHalf, clipLeftPercent, clipRightPercent, fill.flatTint, clipTopHalfOnly, clipBottomHalfFull, clipBoundaryOffsetPx);
+        tintDraw(ctx, fillImg, fill.color, size, clipRightHalf, clipLeftPercent, clipRightPercent, fill.flatTint, clipTopHalfOnly, clipBottomHalfFull, clipBoundaryOffsetPx, clipTopPercent, clipPolygon);
       }
     } catch (err) {
       console.warn(`[G2] Failed to load fill: ${fill.file}`, err);
@@ -1461,7 +1493,9 @@ function drawColoredLayer(
   clipLeftPercent?: number,
   clipRightPercent?: number,
   clipTopHalfOnly?: boolean,
-  clipBottomHalfFull?: boolean
+  clipBottomHalfFull?: boolean,
+  clipTopPercent?: number,
+  clipPolygon?: [number, number][]
 ): void {
   const halfH = size / 2;
   const { canvas: tempCanvas, ctx: tempCtx } = createOffscreenCanvas(size, size);
@@ -1472,7 +1506,18 @@ function drawColoredLayer(
   tempCtx.globalCompositeOperation = 'destination-in';
   tempCtx.drawImage(fillImage, 0, 0, size, size);
   mainCtx.save();
-  if (clipBottomHalfFull && clipRightPercent && clipRightPercent > 0) {
+  if (clipPolygon && clipPolygon.length >= 3) {
+    mainCtx.beginPath();
+    mainCtx.moveTo(clipPolygon[0][0] * size, clipPolygon[0][1] * size);
+    for (let i = 1; i < clipPolygon.length; i++) mainCtx.lineTo(clipPolygon[i][0] * size, clipPolygon[i][1] * size);
+    mainCtx.closePath();
+    mainCtx.clip();
+  } else if (clipTopPercent && clipTopPercent > 0) {
+    const clipY = size * clipTopPercent;
+    mainCtx.beginPath();
+    mainCtx.rect(0, clipY, size, size - clipY);
+    mainCtx.clip();
+  } else if (clipBottomHalfFull && clipRightPercent && clipRightPercent > 0) {
     const clipW = size * (1 - clipRightPercent);
     mainCtx.beginPath();
     mainCtx.rect(0, 0, clipW, halfH);
@@ -1515,10 +1560,29 @@ function drawLayer(
   clipRightPercent?: number,
   clipTopHalfOnly?: boolean,
   clipBottomHalfFull?: boolean,
-  clipBoundaryOffsetPx?: number
+  clipBoundaryOffsetPx?: number,
+  clipTopPercent?: number,
+  clipPolygon?: [number, number][]
 ): void {
   const halfH = size / 2;
-  if (clipBottomHalfFull && clipRightPercent && clipRightPercent > 0) {
+  if (clipPolygon && clipPolygon.length >= 3) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(clipPolygon[0][0] * size, clipPolygon[0][1] * size);
+    for (let i = 1; i < clipPolygon.length; i++) ctx.lineTo(clipPolygon[i][0] * size, clipPolygon[i][1] * size);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(image, 0, 0, size, size);
+    ctx.restore();
+  } else if (clipTopPercent && clipTopPercent > 0) {
+    const clipY = size * clipTopPercent;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, clipY, size, size - clipY);
+    ctx.clip();
+    ctx.drawImage(image, 0, 0, size, size);
+    ctx.restore();
+  } else if (clipBottomHalfFull && clipRightPercent && clipRightPercent > 0) {
     let clipW = size * (1 - clipRightPercent);
     if (clipBoundaryOffsetPx != null) clipW = Math.max(0, clipW - clipBoundaryOffsetPx);
     ctx.save();
@@ -1763,7 +1827,7 @@ export async function renderToCanvas(
       continue;
     }
     if (layer.g2) {
-      await drawG2Layer(ctx, layer.g2, size, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull, layer.clipBoundaryOffsetPx);
+      await drawG2Layer(ctx, layer.g2, size, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull, layer.clipBoundaryOffsetPx, layer.clipTopPercent, layer.clipPolygon);
     } else if (
       layer.fillPath &&
       layer.outlinePath &&
@@ -1782,10 +1846,12 @@ export async function renderToCanvas(
         layer.clipLeftPercent,
         layer.clipRightPercent,
         layer.clipTopHalfOnly,
-        layer.clipBottomHalfFull
+        layer.clipBottomHalfFull,
+        layer.clipTopPercent,
+        layer.clipPolygon
       );
     } else if ('image' in layer && layer.image) {
-      drawLayer(ctx, layer.image, size, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull, layer.clipBoundaryOffsetPx);
+      drawLayer(ctx, layer.image, size, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull, layer.clipBoundaryOffsetPx, layer.clipTopPercent, layer.clipPolygon);
     }
   }
 
@@ -2011,9 +2077,9 @@ export async function exportImage(
       continue;
     }
     if (layer.g2) {
-      await drawG2Layer(ctx, layer.g2, size, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull, layer.clipBoundaryOffsetPx);
+      await drawG2Layer(ctx, layer.g2, size, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull, layer.clipBoundaryOffsetPx, layer.clipTopPercent, layer.clipPolygon);
     } else if (layer.image) {
-      drawLayer(ctx, layer.image, size, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull, layer.clipBoundaryOffsetPx);
+      drawLayer(ctx, layer.image, size, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull, layer.clipBoundaryOffsetPx, layer.clipTopPercent, layer.clipPolygon);
     }
   }
 
@@ -2093,9 +2159,9 @@ export async function renderToTargetCanvas(
       continue;
     }
     if (layer.g2) {
-      await drawG2Layer(ctx, layer.g2, width, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull, layer.clipBoundaryOffsetPx);
+      await drawG2Layer(ctx, layer.g2, width, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull, layer.clipBoundaryOffsetPx, layer.clipTopPercent, layer.clipPolygon);
     } else {
-      drawLayer(ctx, layer.image, width, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull, layer.clipBoundaryOffsetPx);
+      drawLayer(ctx, layer.image, width, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull, layer.clipBoundaryOffsetPx, layer.clipTopPercent, layer.clipPolygon);
     }
   }
 }

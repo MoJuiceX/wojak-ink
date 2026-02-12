@@ -17,6 +17,17 @@ import {
 } from '@/services/canvasRendererConstants';
 import type { RenderLayer } from '@/services/canvasRendererTypes';
 
+/**
+ * Night Vision visor polygon (normalized 0-1 coords on 1000x1000 canvas).
+ * Only this area renders above the Goose suit; strap/band renders under.
+ */
+const NIGHT_VISION_VISOR_POLYGON: [number, number][] = [
+  [0.47, 0.33],   // top-left
+  [0.88, 0.33],   // top-right
+  [0.88, 0.53],   // bottom-right
+  [0.47, 0.53],   // bottom-left
+];
+
 // ============ Helpers ============
 
 function pathContains(path: string | undefined, identifier: string): boolean {
@@ -132,17 +143,29 @@ function isFullFaceMask(path: string | undefined): boolean {
   return FULL_FACE_MASKS.some((mask) => pathContains(path, mask));
 }
 
-/** Full-body suits (Gopher, Sonic, Proof of Prayer, Pickle, Goose, Bepe, Pepe) where first 50% of eyes render under suit layer one. */
+/** Full-body suits (Gopher, Sonic, Proof of Prayer, Pickle, Goose, Bepe, Pepe) that render on top of eyewear. */
 function isSuitNeedingEyesUnder(selectedLayers: SelectedLayers): boolean {
   const clothesPath = selectedLayers.Clothes;
   if (!clothesPath) return false;
   return SUITS_NEEDING_EYES_UNDER.some((id) => pathContains(clothesPath, id));
 }
 
-function isVRHeadset(path: string | undefined): boolean {
+function isNightVision(path: string | undefined): boolean {
   if (!path) return false;
-  return pathContains(path, 'vr-headset');
+  return pathContains(path, 'night-vision') || pathContains(path, 'nightvision');
 }
+
+function isGooseSuit(selectedLayers: SelectedLayers): boolean {
+  return pathContains(selectedLayers.Clothes, 'goose-suit');
+}
+
+/** Suits that are incompatible with bandana mask */
+function isSuitIncompatibleWithBandana(selectedLayers: SelectedLayers): boolean {
+  const c = selectedLayers.Clothes;
+  return pathContains(c, 'sonic-suit') || pathContains(c, 'pickle-suit') || pathContains(c, 'goose-suit');
+}
+
+
 
 // ============ Layer Building ============
 
@@ -158,7 +181,9 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
   const hasRekt = isRektBase(selectedLayers);
   const hasBubble = hasBubbleGum(selectedLayers);
   const hasRonin = hasRoninHelmet(selectedLayers);
-  const hasBandana = hasBandanaMask(selectedLayers);
+  const hasBandanaRaw = hasBandanaMask(selectedLayers);
+  // Bandana is effectively absent when an incompatible suit suppresses it
+  const hasBandana = hasBandanaRaw && !isSuitIncompatibleWithBandana(selectedLayers);
   const hasAstronaut = isAstronautSelected(selectedLayers);
   const eyesPath = selectedLayers.Eyes;
   const hasTyson = isTysonTattoo(eyesPath);
@@ -196,6 +221,24 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
         else if (hasAstronaut) skipLayer = true;
         else if (hasHannibal) skipLayer = true;
         else if (hasCopium && hasLayersAboveHead) skipLayer = true;
+        // Bandana + incompatible suit (Sonic, Pickle, Goose): skip entirely
+        else if (hasBandanaRaw && isSuitIncompatibleWithBandana(selectedLayers)) skipLayer = true;
+        // Bandana + other suit: left 37% under suit, right 63% at normal Mask z (above suit, below eyes)
+        else if (hasBandana && hasSuitEyesUnder) {
+          layers.push({
+            path,
+            zIndex: LAYER_Z_INDEX.MaskUnderSuit,
+            layerName: 'MaskUnderSuit',
+            clipRightPercent: 0.63,
+          });
+          layers.push({
+            path,
+            zIndex,
+            layerName: 'Mask',
+            clipLeftPercent: 0.37,
+          });
+          skipLayer = true;
+        }
         break;
 
       case 'Eyes':
@@ -218,23 +261,46 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
         if (hasNinja && maskCoversNinja) skipLayer = true;
         if (hasEyePatchSelected && hasHannibal) skipLayer = true;
         if (hasLayersAboveHead && !hasEyePatchSelected) skipLayer = true;
-        // Full-body suits: first 70% of eyes under suit layer one, rest on top (on top of base). VR headset: 65% + 10px boundary left.
-        if (!skipLayer && hasSuitEyesUnder && eyesPath) {
-          const fractionUnderSuit = isVRHeadset(eyesPath) ? 0.65 : 0.7;
-          const clipBoundaryOffsetPx = isVRHeadset(eyesPath) ? 10 : undefined; // VR headset: move boundary 10px left
+        // Ninja Turtle + any full-body suit: render under suit with left side cut out
+        if (!skipLayer && hasNinja && hasSuitEyesUnder && eyesPath) {
           layers.push({
             path: eyesPath,
             zIndex: LAYER_Z_INDEX.EyesUnderSuit,
             layerName: 'EyesUnderSuit',
-            clipRightPercent: 1 - fractionUnderSuit,
-            clipBoundaryOffsetPx,
+            clipLeftPercent: 0.25,
+          });
+          skipLayer = true;
+        }
+        // Night Vision + Goose suit: visor area above suit, strap/band under suit
+        if (!skipLayer && isNightVision(eyesPath) && isGooseSuit(selectedLayers) && eyesPath) {
+          // Full image under the suit
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.EyesUnderSuit,
+            layerName: 'EyesUnderSuit',
+          });
+          // Visor polygon above the suit (only the goggle lens area shows through)
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.Eyes,
+            layerName: 'EyesOverSuit',
+            clipPolygon: NIGHT_VISION_VISOR_POLYGON,
+          });
+          skipLayer = true;
+        }
+        // Full-body suits: left 63% of eyes under suit, right 37% at normal Eyes z (above masks and suit)
+        if (!skipLayer && hasSuitEyesUnder && eyesPath) {
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.EyesUnderSuit,
+            layerName: 'EyesUnderSuit',
+            clipRightPercent: 0.37,
           });
           layers.push({
             path: eyesPath,
-            zIndex: LAYER_Z_INDEX.EyesOverSuit,
+            zIndex: LAYER_Z_INDEX.Eyes,
             layerName: 'EyesOverSuit',
-            clipLeftPercent: fractionUnderSuit,
-            clipBoundaryOffsetPx,
+            clipLeftPercent: 0.63,
           });
           skipLayer = true;
         }
@@ -245,7 +311,8 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
         break;
 
       case 'MouthBase':
-        if (hasAstronaut) {
+        if (hasBandana) skipLayer = true;
+        else if (hasAstronaut) {
           const blockedMouthOptions = ['pipe', 'pizza', 'bubble-gum'];
           if (blockedMouthOptions.some((opt) => pathContains(path, opt))) skipLayer = true;
         }
@@ -253,7 +320,8 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
         break;
 
       case 'MouthItem':
-        if (hasAstronaut) skipLayer = true;
+        if (hasBandana) skipLayer = true;
+        else if (hasAstronaut) skipLayer = true;
         if (hasCenturion && isMouthOverCenturion(path)) zIndex = LAYER_Z_INDEX.Head + 1;
         break;
     }

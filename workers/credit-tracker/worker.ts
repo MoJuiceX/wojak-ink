@@ -107,16 +107,22 @@ async function getLatestFloorStored(db: D1Database): Promise<number> {
 }
 
 /**
- * Get floor price (x100) for the given date. Uses latest snapshot on or before that date.
+ * Get floor price (x100) for the given date.
+ * Uses a 7-day rolling average of snapshots ending on or before that date.
+ * This smooths out short-term manipulation (e.g. someone listing at 0.5 XCH
+ * to artificially lower the floor and inflate their credit multiplier).
  */
 async function getFloorForDate(db: D1Database, eventDate: string): Promise<number> {
-  const row = await db
+  const rows = await db
     .prepare(
-      'SELECT floor_xch FROM floor_price_snapshots WHERE snapshot_date <= ? ORDER BY snapshot_date DESC LIMIT 1'
+      'SELECT floor_xch FROM floor_price_snapshots WHERE snapshot_date <= ? ORDER BY snapshot_date DESC LIMIT 7'
     )
     .bind(eventDate)
-    .first<{ floor_xch: number }>();
-  return row?.floor_xch ?? FLOOR_FALLBACK_XCH;
+    .all<{ floor_xch: number }>();
+  const snapshots = rows.results || [];
+  if (snapshots.length === 0) return FLOOR_FALLBACK_XCH;
+  const sum = snapshots.reduce((acc, r) => acc + r.floor_xch, 0);
+  return Math.round(sum / snapshots.length);
 }
 
 async function ensureFloorSnapshot(
