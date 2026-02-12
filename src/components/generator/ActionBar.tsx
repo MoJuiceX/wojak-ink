@@ -577,14 +577,21 @@ export function ActionBar({ className = '' }: ActionBarProps) {
         style={{ borderLeft: '1px solid var(--color-border)' }}
       >
         <ActionBarTooltip content="Soon">
-          <ActionButton
-            variant="primary"
-            onClick={() => {}}
-            disabled
-            isActive={false}
-            icon={<Sparkles size={20} />}
-            label="Mint"
-          />
+          <div
+            className="flex items-center justify-center rounded-lg shrink-0 w-10 h-10"
+            style={{
+              background: 'transparent',
+              color: 'var(--color-text-muted)',
+              opacity: 0.35,
+              border: '1px solid var(--color-border)',
+              cursor: 'not-allowed',
+              pointerEvents: 'none',
+            }}
+            aria-label="Mint (coming soon)"
+            aria-disabled="true"
+          >
+            <Sparkles size={20} />
+          </div>
         </ActionBarTooltip>
       </div>
 
