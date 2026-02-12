@@ -10,10 +10,35 @@
   Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
 
 # HTML pages - no cache (so deployments take effect immediately)
+# Covers root, /index.html, and all SPA routes
 /
-  Cache-Control: no-cache
+  Cache-Control: no-cache, no-store, must-revalidate
 /index.html
-  Cache-Control: no-cache
+  Cache-Control: no-cache, no-store, must-revalidate
+/gallery
+  Cache-Control: no-cache, no-store, must-revalidate
+/generator
+  Cache-Control: no-cache, no-store, must-revalidate
+/games
+  Cache-Control: no-cache, no-store, must-revalidate
+/games/*
+  Cache-Control: no-cache, no-store, must-revalidate
+/leaderboard
+  Cache-Control: no-cache, no-store, must-revalidate
+/shop
+  Cache-Control: no-cache, no-store, must-revalidate
+/guild
+  Cache-Control: no-cache, no-store, must-revalidate
+/treasury
+  Cache-Control: no-cache, no-store, must-revalidate
+/settings
+  Cache-Control: no-cache, no-store, must-revalidate
+/account
+  Cache-Control: no-cache, no-store, must-revalidate
+/bigpulp
+  Cache-Control: no-cache, no-store, must-revalidate
+/profile/*
+  Cache-Control: no-cache, no-store, must-revalidate
 
 # Homepage - preload critical assets for LCP
 /
