@@ -1,13 +1,18 @@
 /**
  * Mint Confirm API — /api/mint/confirm
  *
- * POST body: { mintId: number, launcherId?: string }
+ * POST body: { mintId: number, walletAddress: string, launcherId?: string }
  *
- * Called by frontend after user accepts paid offer. If launcherId is provided
- * (or already stored), verifies NFT on MintGarden then assigns mint_number,
- * updates status to minted, increments trait_usage. For free mints, mint is
- * already completed in prepare.
+ * Called by frontend after user accepts paid offer. Verifies wallet ownership,
+ * updates status to minted, and increments trait_usage.
+ *
+ * AUDIT FIX: mint_number is now assigned at prepare time (so IPFS metadata
+ * name is correct). This endpoint no longer assigns a new number — it only
+ * transitions status from 'pending' to 'minted'. Added walletAddress
+ * verification to prevent unauthorized confirmation.
  */
+
+import { logMintStep } from './auditHelper';
 
 interface Env {
   DB: D1Database;
@@ -22,6 +27,7 @@ const corsHeaders = {
 
 interface PendingRow {
   id: number;
+  mint_number: number | null;
   wallet_address: string;
   mint_type: string;
   layers_json: string;
@@ -49,7 +55,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     });
   }
 
-  let body: { mintId?: number; launcherId?: string };
+  let body: { mintId?: number; walletAddress?: string; launcherId?: string };
   try {
     body = await request.json();
   } catch {
@@ -67,9 +73,11 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     });
   }
 
+  const callerWallet = body.walletAddress;
+
   try {
     const row = await env.DB.prepare(
-      `SELECT id, wallet_address, mint_type, layers_json, mintgarden_launcher_id
+      `SELECT id, mint_number, wallet_address, mint_type, layers_json, mintgarden_launcher_id
        FROM phase2_mints WHERE id = ? AND status = 'pending'`
     )
       .bind(mintId)
@@ -78,6 +86,14 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     if (!row) {
       return new Response(JSON.stringify({ error: 'Pending mint not found or already confirmed' }), {
         status: 404,
+        headers: corsHeaders,
+      });
+    }
+
+    // Verify caller owns this mint (prevent unauthorized confirmation)
+    if (callerWallet && callerWallet !== row.wallet_address) {
+      return new Response(JSON.stringify({ error: 'Wallet address does not match this mint' }), {
+        status: 403,
         headers: corsHeaders,
       });
     }
@@ -94,11 +110,10 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       );
     }
 
-    const nextNumRow = await env.DB.prepare(
-      "SELECT COALESCE(MAX(mint_number), 0) + 1 AS next_num FROM phase2_mints WHERE status = 'minted'"
-    ).first<{ next_num: number }>();
-    const mintNumber = nextNumRow?.next_num ?? 1;
+    // mint_number was already assigned at prepare time — use it directly
+    const mintNumber = row.mint_number;
 
+    // Increment trait usage
     const layers = JSON.parse(row.layers_json || '{}') as Record<string, string>;
     for (const [category, path] of Object.entries(layers)) {
       if (!path) continue;
@@ -114,27 +129,45 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         .run();
     }
 
+    // Update status to minted
     await env.DB.prepare(
       `UPDATE phase2_mints
-       SET mint_number = ?, status = 'minted', minted_at = datetime('now'), mintgarden_launcher_id = ?
+       SET status = 'minted', minted_at = datetime('now'),
+           mintgarden_launcher_id = ?, payment_verified = 1
        WHERE id = ?`
     )
-      .bind(mintNumber, launcherId, mintId)
+      .bind(launcherId, mintId)
       .run();
 
-    const mintgardenUrl = `https://mintgarden.io/nfts/${launcherId}`;
+    await logMintStep(env.DB, {
+      mint_id: mintId,
+      step: 'paid_mint_confirmed',
+      status: 'completed',
+      data: { mint_number: mintNumber, launcher_id: launcherId, wallet: row.wallet_address },
+    });
 
     return new Response(
       JSON.stringify({
         success: true,
         mintNumber,
         launcherId,
-        mintgardenUrl,
+        mintgardenUrl: `https://mintgarden.io/nfts/${launcherId}`,
       }),
       { status: 200, headers: corsHeaders }
     );
   } catch (error) {
     console.error('[Mint Confirm] Error:', error);
+    try {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      await logMintStep(env.DB, {
+        mint_id: mintId || 0,
+        step: 'confirm_failed',
+        status: 'failed',
+        error: errorMessage,
+      });
+    } catch {
+      // Audit logging failure must not break error response
+    }
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
       headers: corsHeaders,

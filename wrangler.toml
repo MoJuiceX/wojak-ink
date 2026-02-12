@@ -23,11 +23,11 @@ id = "3d3382d37eeb4d4dac250fcf03b3f24d"
 COLLECTION_ID = "col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah"
 SECONDARY_SALES_CUTOFF = "2025-12-20T00:00:00Z"
 
-# Phase 2: Your Wojak — Minting config (fill in when ready)
-PHASE2_COLLECTION_UUID = "PLACEHOLDER_COLLECTION_UUID"
+# Phase 2: Your Wojak — Minting config
+PHASE2_COLLECTION_UUID = "010a0dd7-56af-4016-953e-ef5e20c73d83"
 PHASE2_PROFILE_ID = "did:chia:15j5d0fm0x65nz7w6jr4c5any8mzrkru2x6l9uy2f0vcrc6jfedcqp20n4q"
-PHASE2_ROYALTY_ADDRESS = "PLACEHOLDER_ROYALTY_XCH_ADDRESS"
-PHASE2_ROYALTY_PCT = "5"
+PHASE2_ROYALTY_ADDRESS = "DYNAMIC_PER_MINTER"  # Each creator receives royalties for their own NFT
+PHASE2_ROYALTY_PCT = "10"
 PINATA_GATEWAY = "gold-important-gibbon-467.mypinata.cloud"
 
 # Secrets (set via `wrangler pages secret put` or Cloudflare Dashboard):

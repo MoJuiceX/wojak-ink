@@ -2,6 +2,8 @@
 
 Complete documentation of the **Free Mint Credits Leaderboard** for the Wojak Generator (Your Wojak). Purpose: so another developer or maintainer can fully understand the system and continue working on it.
 
+**Handoff:** For the full user journey (Generator → layers → mint → IPFS → MintGarden → Chia) and how credits plug in, see **docs/GENERATOR-MINT-HANDOFF.md**.
+
 ---
 
 ## 1. Purpose and context

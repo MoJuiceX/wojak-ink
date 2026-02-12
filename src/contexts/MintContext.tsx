@@ -4,6 +4,10 @@
  *
  * Credits (free mints), mint flow state, and collection supply for the Generator.
  * Fetches credits from /api/credits/balance and supply from trade values / MintGarden.
+ *
+ * AUDIT FIX: Added acceptOfferInWallet() to call takeOffer via WalletConnect,
+ * then confirm the mint via /api/mint/confirm. Added confirmMintManual() for
+ * users who already accepted the offer outside the flow.
  */
 
 import {
@@ -32,6 +36,7 @@ export type MintStep =
   | 'confirm'
   | 'signing'
   | 'submitting'
+  | 'accepting'
   | 'success'
   | 'error';
 
@@ -53,12 +58,15 @@ interface MintContextValue {
   mintStep: MintStep;
   pendingMint: PendingMintInfo | null;
   successResult: MintSuccessInfo | null;
+  errorMessage: string | null;
   startMint: (
     imageBlob: Blob,
     selectedLayers: Record<string, string>,
     selectedColors: Record<string, string>,
     mintType: 'free' | 'paid'
   ) => Promise<void>;
+  acceptOfferInWallet: () => Promise<void>;
+  confirmMintManual: () => Promise<void>;
   resetMintFlow: () => void;
   totalMinted: number;
   maxSupply: number;
@@ -85,11 +93,12 @@ function blobToBase64(blob: Blob): Promise<string> {
 }
 
 export function MintProvider({ children }: { children: ReactNode }) {
-  const { address, status: walletStatus } = useSageWallet();
+  const { address, status: walletStatus, takeOffer } = useSageWallet();
   const [credits, setCredits] = useState<MintCredits | null>(null);
   const [mintStep, setMintStep] = useState<MintStep>('idle');
   const [pendingMint, setPendingMint] = useState<PendingMintInfo | null>(null);
   const [successResult, setSuccessResult] = useState<MintSuccessInfo | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [totalMinted, setTotalMinted] = useState(0);
   const [maxSupply, setMaxSupply] = useState(DEFAULT_MAX_SUPPLY);
 
@@ -177,6 +186,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
     setMintStep('idle');
     setPendingMint(null);
     setSuccessResult(null);
+    setErrorMessage(null);
   }, []);
 
   const startMint = useCallback(
@@ -188,11 +198,13 @@ export function MintProvider({ children }: { children: ReactNode }) {
     ) => {
       if (!address || !address.startsWith('xch1')) {
         setMintStep('error');
+        setErrorMessage('Wallet not connected');
         return;
       }
       setMintStep('submitting');
       setPendingMint(null);
       setSuccessResult(null);
+      setErrorMessage(null);
       try {
         const imageBase64 = await blobToBase64(imageBlob);
         const res = await fetch('/api/mint/prepare', {
@@ -209,6 +221,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
           setMintStep('error');
+          setErrorMessage(data.error || 'Mint failed');
           return;
         }
         if (data.pending && data.mintId) {
@@ -233,13 +246,95 @@ export function MintProvider({ children }: { children: ReactNode }) {
           return;
         }
         setMintStep('error');
+        setErrorMessage('Unexpected response from server');
       } catch (err) {
         console.error('[MintContext] startMint error:', err);
         setMintStep('error');
+        setErrorMessage(err instanceof Error ? err.message : 'Mint failed');
       }
     },
     [address, refetchCredits]
   );
+
+  // Accept the offer in Sage wallet via WalletConnect, then confirm
+  const acceptOfferInWallet = useCallback(async () => {
+    if (!pendingMint?.offerFile || !address) return;
+
+    setMintStep('accepting');
+    setErrorMessage(null);
+    try {
+      // Send takeOffer to Sage wallet via WalletConnect
+      await takeOffer(pendingMint.offerFile, 0);
+
+      // Offer accepted — confirm the mint on the backend
+      const res = await fetch('/api/mint/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mintId: pendingMint.mintId,
+          walletAddress: address,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (data.success) {
+        setSuccessResult({
+          mintNumber: data.mintNumber ?? 0,
+          launcherId: data.launcherId ?? null,
+          mintgardenUrl: data.mintgardenUrl ?? null,
+        });
+        setMintStep('success');
+        refetchCredits();
+      } else if (data.pending) {
+        // NFT not yet on-chain — stay on signing step
+        setMintStep('signing');
+      } else {
+        setMintStep('error');
+        setErrorMessage(data.error || 'Confirmation failed');
+      }
+    } catch (err) {
+      console.error('[MintContext] acceptOfferInWallet error:', err);
+      // User may have rejected in wallet — go back to signing
+      setMintStep('signing');
+    }
+  }, [pendingMint, address, takeOffer, refetchCredits]);
+
+  // Manual confirm for users who already accepted the offer outside the flow
+  const confirmMintManual = useCallback(async () => {
+    if (!pendingMint?.mintId || !address) return;
+
+    setMintStep('submitting');
+    setErrorMessage(null);
+    try {
+      const res = await fetch('/api/mint/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mintId: pendingMint.mintId,
+          walletAddress: address,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (data.success) {
+        setSuccessResult({
+          mintNumber: data.mintNumber ?? 0,
+          launcherId: data.launcherId ?? null,
+          mintgardenUrl: data.mintgardenUrl ?? null,
+        });
+        setMintStep('success');
+        refetchCredits();
+      } else if (data.pending) {
+        setMintStep('signing');
+        setErrorMessage('NFT not confirmed yet. It may take a moment to appear on-chain.');
+      } else {
+        setMintStep('signing');
+        setErrorMessage(data.error || 'Not confirmed yet');
+      }
+    } catch (err) {
+      console.error('[MintContext] confirmMintManual error:', err);
+      setMintStep('signing');
+      setErrorMessage('Failed to confirm. Try again.');
+    }
+  }, [pendingMint, address, refetchCredits]);
 
   const value = useMemo<MintContextValue>(
     () => ({
@@ -247,13 +342,16 @@ export function MintProvider({ children }: { children: ReactNode }) {
       mintStep,
       pendingMint,
       successResult,
+      errorMessage,
       startMint,
+      acceptOfferInWallet,
+      confirmMintManual,
       resetMintFlow,
       totalMinted,
       maxSupply,
       refetchCredits,
     }),
-    [credits, mintStep, pendingMint, successResult, startMint, resetMintFlow, totalMinted, maxSupply, refetchCredits]
+    [credits, mintStep, pendingMint, successResult, errorMessage, startMint, acceptOfferInWallet, confirmMintManual, resetMintFlow, totalMinted, maxSupply, refetchCredits]
   );
 
   return <MintContext.Provider value={value}>{children}</MintContext.Provider>;

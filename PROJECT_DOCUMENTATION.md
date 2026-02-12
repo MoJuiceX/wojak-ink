@@ -195,6 +195,8 @@ SpaceScan is EXTREMELY strict: 1 request per 20 seconds!
 
 **Credits & free mints:** Users earn credits by buying Wojak Farmers Plot NFTs with XCH; 100 credits = 1 free Your Wojak mint. Balance from `/api/credits/balance`; leaderboard from `/api/credits/leaderboard`. Full system (workers, formula, APIs, runbooks): **docs/CREDIT-LEADERBOARD-SYSTEM.md**.
 
+**Full handoff (Generator + mint + IPFS + MintGarden + Chia):** **docs/GENERATOR-MINT-HANDOFF.md** — user journey, layer selection, mint flow, IPFS (Pinata), MintGarden dynamic minting, paid vs free, confirm API.
+
 ---
 
 ### 2.5 Media Hub Page

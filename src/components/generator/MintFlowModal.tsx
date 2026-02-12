@@ -2,13 +2,16 @@
  * Mint Flow Modal
  *
  * Shows the current mint step (confirm, signing, success, error).
- * Countdown and Copy Offer for paid pending; success with mint number and MintGarden link.
+ * Countdown and offer actions for paid pending; success with mint number and MintGarden link.
+ *
+ * AUDIT FIX: Added "Accept in Wallet" button that calls takeOffer via WalletConnect,
+ * "Copy Offer" as secondary, and "I've Already Accepted" for manual confirmation.
  */
 
 import { createPortal } from 'react-dom';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { X, Loader2, CheckCircle, AlertCircle, Copy, ExternalLink } from 'lucide-react';
+import { X, Loader2, CheckCircle, AlertCircle, Copy, ExternalLink, Wallet } from 'lucide-react';
 import { useMint } from '@/contexts/MintContext';
 
 interface MintFlowModalProps {
@@ -17,10 +20,11 @@ interface MintFlowModalProps {
 }
 
 const stepMessages: Record<string, { title: string; message: string }> = {
-  idle: { title: 'Mint', message: 'Preparing…' },
+  idle: { title: 'Mint', message: 'Preparing...' },
   confirm: { title: 'Confirm mint', message: 'Review your Wojak and confirm in your wallet.' },
-  signing: { title: 'Accept in Sage', message: 'Accept the offer in your Sage wallet. You can copy the offer file if needed.' },
-  submitting: { title: 'Submitting', message: 'Submitting your mint…' },
+  signing: { title: 'Accept Offer', message: 'Accept the offer in your Sage wallet to complete the mint.' },
+  submitting: { title: 'Submitting', message: 'Submitting your mint...' },
+  accepting: { title: 'Accepting', message: 'Waiting for wallet approval...' },
   success: { title: 'Minted!', message: 'Your Wojak has been minted successfully.' },
   error: { title: 'Mint failed', message: 'Something went wrong. Try again or use a different wallet.' },
 };
@@ -36,7 +40,15 @@ function formatTimeLeft(expiresAt: string | null): string {
 }
 
 export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
-  const { mintStep, pendingMint, successResult, resetMintFlow } = useMint();
+  const {
+    mintStep,
+    pendingMint,
+    successResult,
+    errorMessage,
+    resetMintFlow,
+    acceptOfferInWallet,
+    confirmMintManual,
+  } = useMint();
   const prefersReducedMotion = useReducedMotion();
   const [timeLeft, setTimeLeft] = useState('');
   const [copied, setCopied] = useState(false);
@@ -69,10 +81,11 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
   };
 
   const { title, message } = stepMessages[mintStep] || stepMessages.idle;
-  const isPending = ['confirm', 'signing', 'submitting'].includes(mintStep);
+  const isPending = ['confirm', 'signing', 'submitting', 'accepting'].includes(mintStep);
+  const isAccepting = mintStep === 'accepting';
   const isSuccess = mintStep === 'success';
   const isError = mintStep === 'error';
-  const showCountdown = mintStep === 'signing' && pendingMint;
+  const showOfferActions = mintStep === 'signing' && pendingMint;
 
   const content = (
     <AnimatePresence>
@@ -112,33 +125,68 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
             </div>
 
             <div className="flex flex-col items-center gap-4 text-center">
-              {isPending && <Loader2 size={40} className="animate-spin text-accent" />}
+              {(isPending && !isAccepting) && <Loader2 size={40} className="animate-spin text-accent" />}
+              {isAccepting && <Wallet size={40} className="animate-pulse text-accent" />}
               {isSuccess && <CheckCircle size={40} className="text-success" />}
               {isError && <AlertCircle size={40} className="text-error" />}
               <p className="text-secondary text-sm">{message}</p>
 
-              {showCountdown && (
+              {/* Error message */}
+              {isError && errorMessage && (
+                <p className="text-error text-xs">{errorMessage}</p>
+              )}
+
+              {/* Countdown timer */}
+              {showOfferActions && (
                 <div className="w-full rounded-lg p-3 text-center" style={{ background: 'var(--color-surface)' }}>
                   <span className="text-2xl font-mono tabular-nums text-accent">{timeLeft}</span>
                   <p className="text-muted text-xs mt-1">remaining</p>
                 </div>
               )}
-              {showCountdown && pendingMint?.offerFile && (
+
+              {/* Accept in Wallet — primary action */}
+              {showOfferActions && pendingMint?.offerFile && (
+                <button
+                  type="button"
+                  className="btn btn-primary w-full flex items-center justify-center gap-2"
+                  onClick={acceptOfferInWallet}
+                >
+                  <Wallet size={16} />
+                  Accept in Wallet
+                </button>
+              )}
+
+              {/* Copy Offer — secondary action */}
+              {showOfferActions && pendingMint?.offerFile && (
                 <button
                   type="button"
                   className="btn btn-secondary w-full flex items-center justify-center gap-2"
                   onClick={handleCopyOffer}
                 >
                   <Copy size={16} />
-                  {copied ? 'Copied!' : 'Copy Offer File'}
+                  {copied ? 'Copied!' : 'Copy Offer (Manual)'}
                 </button>
               )}
-              {showCountdown && !pendingMint?.offerFile && pendingMint?.totalPriceXch != null && (
+
+              {/* I've Already Accepted — for users who accepted outside this flow */}
+              {showOfferActions && pendingMint?.offerFile && (
+                <button
+                  type="button"
+                  className="text-xs text-secondary underline hover:text-accent transition-colors"
+                  onClick={confirmMintManual}
+                >
+                  I&apos;ve already accepted the offer
+                </button>
+              )}
+
+              {/* No offer file */}
+              {showOfferActions && !pendingMint?.offerFile && pendingMint?.totalPriceXch != null && (
                 <p className="text-muted text-xs">
                   Paid mint: MintGarden offer not yet configured. Your design is saved.
                 </p>
               )}
 
+              {/* Success info */}
               {isSuccess && successResult && (
                 <div className="w-full flex flex-col gap-2 text-left">
                   <p className="text-secondary text-sm">

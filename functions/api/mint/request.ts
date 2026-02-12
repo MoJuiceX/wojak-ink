@@ -1,12 +1,21 @@
 /**
  * MintGarden Dynamic Minting API — internal, called by prepare
  *
- * Uses the official API: POST https://api.mintgarden.io/mint/dynamic
+ * API: POST https://api.mintgarden.io/mint/dynamic
  * Docs: https://mintgarden.io/minting-api
- * Aligned with Crate (Koba42Corp) usage: response fields nft_coin_id, offer; retry with backoff.
  *
- * - Free: body has only target_address → NFT minted directly; response includes coin/launcher ID.
- * - Paid: body has target_address + requested_mojos → API returns an offer file for the user.
+ * Request body (relevant fields):
+ * - profile_id: MintGarden creator profile (DID).
+ * - metadata: data_hash, data_uris, metadata_hash, metadata_uris, edition_number, edition_total.
+ * - target_address: Chia (XCH) address that receives the NFT (or the offer is for).
+ * - royalty_address: Chia address that receives royalties on secondary sales. We set this to the
+ *   minter's wallet (Sage-connected) so the creator gets royalties.
+ * - royalty_percentage: e.g. 10 (percent). From env PHASE2_ROYALTY_PCT.
+ * - requested_mojos: (paid only) payment amount in mojos; API returns an offer file.
+ *
+ * Flow:
+ * - Free: target_address only → NFT minted directly to that address; response includes launcher/coin ID.
+ * - Paid: target_address + requested_mojos → API returns offer file; user accepts in wallet to complete mint.
  */
 
 const MINTGARDEN_DYNAMIC_URL = 'https://api.mintgarden.io/mint/dynamic';
@@ -18,12 +27,14 @@ const MOJOS_PER_XCH = 1_000_000_000_000;
 export interface MintRequestParams {
   walletAddress: string;
   mintType: 'paid' | 'free';
-  ipfsImageUri: string;
-  ipfsMetadataUri: string;
+  ipfsImageUris: string[];
+  ipfsMetadataUris: string[];
   imageHash: string;
   metadataHash: string;
-  priceXch?: number; // for paid
+  priceXch?: number;
   collectionUuid: string;
+  editionNumber: number;
+  editionTotal: number;
 }
 
 export interface MintRequestResult {
@@ -79,19 +90,18 @@ export async function callMintGardenMint(
   const royaltyPct = env.PHASE2_ROYALTY_PCT;
 
   if (!apiKey || !profileId) {
-    return { offerFile: null, launcherId: null };
+    throw new Error('MintGarden configuration missing: MINTGARDEN_API_KEY and PHASE2_PROFILE_ID are required');
   }
 
-  // Creator royalty: minter's wallet gets royalties (10% default). No project royalty.
   const body: Record<string, unknown> = {
     profile_id: profileId,
     metadata: {
       data_hash: params.imageHash,
-      data_uris: [params.ipfsImageUri].filter(Boolean),
+      data_uris: params.ipfsImageUris.filter(Boolean),
       metadata_hash: params.metadataHash,
-      metadata_uris: [params.ipfsMetadataUri].filter(Boolean),
-      edition_number: 1,
-      edition_total: 4200,
+      metadata_uris: params.ipfsMetadataUris.filter(Boolean),
+      edition_number: params.editionNumber,
+      edition_total: params.editionTotal,
     },
     target_address: params.walletAddress,
     royalty_address: params.walletAddress,

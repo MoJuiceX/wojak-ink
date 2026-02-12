@@ -122,7 +122,12 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         headers: corsHeaders,
       });
     }
-    const dataUris = [`ipfs://${ipfsHash}`];
+    // Multiple gateway URLs for redundancy
+    const dataUris = [
+      `ipfs://${ipfsHash}`,
+      `https://gateway.pinata.cloud/ipfs/${ipfsHash}`,
+      `https://ipfs.io/ipfs/${ipfsHash}`,
+    ];
 
     const metadataStr = JSON.stringify(metadata);
     const metadataBytes = new TextEncoder().encode(metadataStr);
@@ -152,7 +157,12 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         headers: corsHeaders,
       });
     }
-    const metadataUris = [`ipfs://${metaIpfsHash}`];
+    // Multiple gateway URLs for redundancy
+    const metadataUris = [
+      `ipfs://${metaIpfsHash}`,
+      `https://gateway.pinata.cloud/ipfs/${metaIpfsHash}`,
+      `https://ipfs.io/ipfs/${metaIpfsHash}`,
+    ];
 
     return new Response(
       JSON.stringify({

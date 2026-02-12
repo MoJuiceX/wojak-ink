@@ -9,11 +9,18 @@
  *   mintType: 'paid' | 'free'
  * }
  *
- * Validates layers/colors, uploads to IPFS, calls MintGarden via request.ts (paid/free),
- * creates pending (paid) or completes mint (free).
+ * Validates layers/colors, reserves atomic mint number, uploads to IPFS,
+ * calls MintGarden via request.ts (paid/free), creates pending (paid) or
+ * completes mint (free).
+ *
+ * AUDIT FIX: Mint number is now reserved BEFORE building metadata so the
+ * immutable IPFS name matches the actual assigned number. edition_number
+ * is passed through to MintGarden instead of being hardcoded.
  */
 
 import { callMintGardenMint } from './request';
+import { logMintStep } from './auditHelper';
+import { getNextMintNumber } from './mintNumberHelper';
 
 interface Env {
   DB: D1Database;
@@ -95,9 +102,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const selectedColors = body.selectedColors || {};
   const imageBase64 = body.imageBase64;
   const mintType = body.mintType === 'paid' ? 'paid' : 'free';
-  const collectionUuid = env.PHASE2_COLLECTION_UUID || 'USER_PROVIDES_UUID';
+  const collectionUuid = env.PHASE2_COLLECTION_UUID || '';
 
-  if (!wallet || !wallet.startsWith('xch1')) {
+  if (!wallet || !wallet.startsWith('xch1') || wallet.length < 60) {
     return new Response(JSON.stringify({ error: 'Missing or invalid walletAddress' }), {
       status: 400,
       headers: corsHeaders,
@@ -128,11 +135,13 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   }
 
   try {
+    // Expire stale pending mints
     await env.DB.prepare(
       `UPDATE phase2_mints SET status = 'expired'
        WHERE status = 'pending' AND expires_at IS NOT NULL AND expires_at < datetime('now')`
     ).run();
 
+    // Check for existing pending mint for this wallet
     const existingPending = await env.DB.prepare(
       `SELECT id, offer_file, expires_at, created_at FROM phase2_mints
        WHERE wallet_address = ? AND status = 'pending' AND (expires_at IS NULL OR expires_at > datetime('now'))`
@@ -153,6 +162,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       );
     }
 
+    // Supply check
     const supplyRow = await env.DB.prepare(
       "SELECT COUNT(*) AS count FROM phase2_mints WHERE status = 'minted'"
     ).first<{ count: number }>();
@@ -164,6 +174,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       });
     }
 
+    // Credit check for free mints
     if (mintType === 'free') {
       const balanceRow = await env.DB.prepare(
         `SELECT
@@ -184,9 +195,15 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     const layersJson = JSON.stringify(selectedLayers);
     const colorsJson = JSON.stringify(selectedColors);
 
+    // ── Reserve mint number FIRST (atomic, race-condition-free) ──
+    // This ensures the IPFS metadata name matches the actual mint number.
+    const mintNumber = await getNextMintNumber(env.DB);
+
+    // ── Build metadata with the REAL mint number ──
     const metadata = {
       format: 'CHIP-0007',
-      name: `Your Wojak #${mintedCount + 1}`,
+      minting_tool: 'Wojak.ink Generator',
+      name: `Your Wojak #${mintNumber}`,
       description: 'A custom Wojak created on wojak.ink',
       sensitive_content: false,
       collection: { name: 'Your Wojak', id: collectionUuid },
@@ -200,8 +217,11 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           value,
         })),
       ],
+      edition_number: mintNumber,
+      edition_total: SUPPLY_TOTAL,
     };
 
+    // ── IPFS Upload ──
     const uploadUrl = new URL('/api/mint/upload', request.url).toString();
     const uploadRes = await fetch(uploadUrl, {
       method: 'POST',
@@ -225,52 +245,72 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     const ipfsImageUri = uploadData.dataUris[0] ?? null;
     const ipfsMetadataUri = uploadData.metadataUris[0] ?? null;
 
+    // ═══════════════════════════════════════════════════════
+    // FREE MINT
+    // ═══════════════════════════════════════════════════════
     if (mintType === 'free') {
       const mintResult = await callMintGardenMint(
         {
           walletAddress: wallet,
           mintType: 'free',
-          ipfsImageUri: ipfsImageUri ?? '',
-          ipfsMetadataUri: ipfsMetadataUri ?? '',
+          ipfsImageUris: uploadData.dataUris,
+          ipfsMetadataUris: uploadData.metadataUris,
           imageHash: uploadData.dataHash,
           metadataHash: uploadData.metadataHash,
           collectionUuid: env.PHASE2_COLLECTION_UUID || '',
+          editionNumber: mintNumber,
+          editionTotal: SUPPLY_TOTAL,
         },
         env
       );
       const launcherId = mintResult.launcherId ?? null;
 
-      const nextNumRow = await env.DB.prepare(
-        "SELECT COALESCE(MAX(mint_number), 0) + 1 AS next_num FROM phase2_mints WHERE status = 'minted'"
-      ).first<{ next_num: number }>();
-      const mintNumber = nextNumRow?.next_num ?? 1;
+      if (!launcherId) {
+        return new Response(
+          JSON.stringify({
+            error: 'MintGarden API failed to create NFT. Please try again or contact support.',
+            errorCode: 'MINTGARDEN_FAILED',
+          }),
+          { status: 500, headers: corsHeaders }
+        );
+      }
 
-      await env.DB.prepare(
-        `INSERT INTO credit_spends (wallet_address, mint_id, credits_spent) VALUES (?, ?, ?)`
-      )
-        .bind(wallet, mintNumber, FREE_MINT_CREDITS)
-        .run();
-
-      await env.DB.prepare(
+      // Insert mint record
+      const insert = await env.DB.prepare(
         `INSERT INTO phase2_mints (
           mint_number, wallet_address, layers_json, colors_json,
           ipfs_image_uri, ipfs_metadata_uri, image_hash, metadata_hash,
-          mint_type, total_price_xch, status, minted_at, mintgarden_launcher_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'free', NULL, 'minted', datetime('now'), ?)`
+          mint_type, total_price_xch, status, minted_at, mintgarden_launcher_id,
+          ipfs_upload_started_at, ipfs_upload_completed_at,
+          mintgarden_called_at, mintgarden_completed_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'free', NULL, 'minted', datetime('now'), ?,
+                  datetime('now'), datetime('now'), datetime('now'), datetime('now'))`
       )
         .bind(
-          mintNumber,
-          wallet,
-          layersJson,
-          colorsJson,
-          ipfsImageUri,
-          ipfsMetadataUri,
-          uploadData.dataHash,
-          uploadData.metadataHash,
+          mintNumber, wallet, layersJson, colorsJson,
+          ipfsImageUri, ipfsMetadataUri, uploadData.dataHash, uploadData.metadataHash,
           launcherId
         )
         .run();
 
+      const mintId = insert.meta?.last_row_id ?? 0;
+
+      // Deduct credits using the DB row ID (not the sequential mint number)
+      await env.DB.prepare(
+        `INSERT INTO credit_spends (wallet_address, mint_id, credits_spent) VALUES (?, ?, ?)`
+      )
+        .bind(wallet, mintId, FREE_MINT_CREDITS)
+        .run();
+
+      // Audit logging
+      await logMintStep(env.DB, {
+        mint_id: mintId,
+        step: 'free_mint_completed',
+        status: 'completed',
+        data: { mint_number: mintNumber, launcher_id: launcherId },
+      });
+
+      // Increment trait usage
       for (const [category, path] of Object.entries(selectedLayers)) {
         if (!path) continue;
         const traitName = path.split('/').pop()?.replace(/\.(png|webp)$/i, '') || path;
@@ -285,19 +325,21 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           .run();
       }
 
-      const mintgardenUrl = launcherId ? `https://mintgarden.io/nfts/${launcherId}` : null;
       return new Response(
         JSON.stringify({
           success: true,
           mintType: 'free',
           mintNumber,
           launcherId,
-          mintgardenUrl,
+          mintgardenUrl: `https://mintgarden.io/nfts/${launcherId}`,
         }),
         { status: 200, headers: corsHeaders }
       );
     }
 
+    // ═══════════════════════════════════════════════════════
+    // PAID MINT
+    // ═══════════════════════════════════════════════════════
     const traitRows = await env.DB.prepare('SELECT trait_category, trait_name, usage_count FROM trait_usage').all<{
       trait_category: string;
       trait_name: string;
@@ -328,42 +370,46 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       {
         walletAddress: wallet,
         mintType: 'paid',
-        ipfsImageUri: ipfsImageUri ?? '',
-        ipfsMetadataUri: ipfsMetadataUri ?? '',
+        ipfsImageUris: uploadData.dataUris,
+        ipfsMetadataUris: uploadData.metadataUris,
         imageHash: uploadData.dataHash,
         metadataHash: uploadData.metadataHash,
         priceXch: totalPriceXch,
         collectionUuid,
+        editionNumber: mintNumber,
+        editionTotal: SUPPLY_TOTAL,
       },
       env
     );
     const offerFile = mintResult.offerFile ?? null;
 
+    // Paid mints get mint_number assigned NOW so it matches the IPFS metadata
     const insert = await env.DB.prepare(
       `INSERT INTO phase2_mints (
-        wallet_address, layers_json, colors_json,
+        mint_number, wallet_address, layers_json, colors_json,
         ipfs_image_uri, ipfs_metadata_uri, image_hash, metadata_hash,
         mint_type, total_price_xch, trait_surcharge_xch, highest_surcharge_trait,
-        offer_file, status, expires_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, 'paid', ?, ?, ?, ?, 'pending', ?)`
+        offer_file, status, expires_at,
+        ipfs_upload_started_at, ipfs_upload_completed_at,
+        mintgarden_called_at, mintgarden_completed_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'paid', ?, ?, ?, ?, 'pending', ?,
+                datetime('now'), datetime('now'), datetime('now'), datetime('now'))`
     )
       .bind(
-        wallet,
-        layersJson,
-        colorsJson,
-        ipfsImageUri,
-        ipfsMetadataUri,
-        uploadData.dataHash,
-        uploadData.metadataHash,
-        totalPriceStored,
-        surchargeStored,
-        highestTrait,
-        offerFile,
-        expiresAt
+        mintNumber, wallet, layersJson, colorsJson,
+        ipfsImageUri, ipfsMetadataUri, uploadData.dataHash, uploadData.metadataHash,
+        totalPriceStored, surchargeStored, highestTrait, offerFile, expiresAt
       )
       .run();
 
     const mintId = insert.meta?.last_row_id ?? 0;
+
+    await logMintStep(env.DB, {
+      mint_id: mintId,
+      step: 'paid_offer_created',
+      status: 'completed',
+      data: { mint_number: mintNumber, total_price_xch: totalPriceXch, offer_created: !!offerFile },
+    });
 
     const message = offerFile
       ? 'Accept the offer in your wallet before it expires.'
@@ -381,6 +427,17 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     );
   } catch (error) {
     console.error('[Mint Prepare] Error:', error);
+    try {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      await logMintStep(env.DB, {
+        mint_id: 0,
+        step: 'prepare_failed',
+        status: 'failed',
+        error: errorMessage,
+      });
+    } catch {
+      // Audit logging failure must not break error response
+    }
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
       headers: corsHeaders,
