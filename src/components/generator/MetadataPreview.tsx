@@ -220,10 +220,9 @@ export function useMetadataAttributes(): MetadataAttribute[] {
 
 interface MetadataPreviewProps {
   onSwitchToColors: () => void;
-  onOpenAudit?: () => void;
 }
 
-export function MetadataPreview({ onSwitchToColors, onOpenAudit }: MetadataPreviewProps) {
+export function MetadataPreview({ onSwitchToColors }: MetadataPreviewProps) {
   const attributes = useMetadataAttributes();
 
   const traitCount = attributes.length;
@@ -257,15 +256,6 @@ export function MetadataPreview({ onSwitchToColors, onOpenAudit }: MetadataPrevi
           )}
         </div>
         <div className="flex items-center gap-1">
-          {onOpenAudit && (
-            <button
-              className="text-xs px-2 py-0.5 rounded"
-              style={{ color: 'var(--color-text-muted)', background: 'rgba(255,255,255,0.05)' }}
-              onClick={onOpenAudit}
-            >
-              Audit
-            </button>
-          )}
           <button
             className="text-xs px-2 py-0.5 rounded"
             style={{ color: 'var(--color-text-muted)', background: 'rgba(255,255,255,0.05)' }}

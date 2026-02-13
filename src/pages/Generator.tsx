@@ -21,10 +21,9 @@ import {
   GeneratorRightPanel,
 } from '@/components/generator';
 import { MetadataPreview } from '@/components/generator/MetadataPreview';
-import { TraitNameAudit } from '@/components/generator/TraitNameAudit';
 import { PageSEO } from '@/components/seo';
 
-type RightPanelMode = 'colors' | 'metadata' | 'audit';
+type RightPanelMode = 'colors' | 'metadata';
 
 function GeneratorErrorBanner() {
   const { generatorError, clearGeneratorError } = useGenerator();
@@ -134,16 +133,13 @@ function GeneratorContent() {
             <div className="generator-options-grid-container">
               <TraitSelector />
             </div>
-            {/* Desktop: 4th column = colors/details, metadata preview, or audit */}
+            {/* Desktop: 4th column = colors/details or metadata preview */}
             {isDesktop && (
               <div className="generator-details-panel">
                 {rightPanelMode === 'metadata' ? (
                   <MetadataPreview
                     onSwitchToColors={() => setRightPanelMode('colors')}
-                    onOpenAudit={() => setRightPanelMode('audit')}
                   />
-                ) : rightPanelMode === 'audit' ? (
-                  <TraitNameAudit onBack={() => setRightPanelMode('metadata')} />
                 ) : (
                   <GeneratorRightPanel />
                 )}

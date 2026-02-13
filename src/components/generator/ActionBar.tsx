@@ -29,7 +29,7 @@ import { MintFlowModal } from './MintFlowModal';
 
 interface ActionBarProps {
   className?: string;
-  rightPanelMode?: 'colors' | 'metadata' | 'audit';
+  rightPanelMode?: 'colors' | 'metadata';
   onToggleRightPanel?: () => void;
 }
 
