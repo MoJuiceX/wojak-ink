@@ -45,6 +45,10 @@
   Link: </icons/icon-192.png>; rel=preload; as=image
   Link: </assets/banners/og-image.png>; rel=preload; as=image
 
+# G2 layer images (can be updated) - short cache, always revalidate
+/assets/wojak-layers/YourWojak-layers/*
+  Cache-Control: public, max-age=3600, must-revalidate
+
 # Static assets - immutable cache (1 year)
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
