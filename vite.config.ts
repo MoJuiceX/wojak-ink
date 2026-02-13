@@ -84,6 +84,9 @@ export default defineConfig(({ mode }) => {
           },
         },
       },
+      // 563KB raw = 167KB gzipped — acceptable for a feature-rich SPA.
+      // Vendors are already split; remaining index chunk is app code + contexts.
+      chunkSizeWarningLimit: 600,
     },
     server: {
       port: 5174, // Dedicated port for wojak-ink (5173 often used by other projects)

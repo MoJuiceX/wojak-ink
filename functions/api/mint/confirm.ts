@@ -18,6 +18,7 @@ import {
   errorResponse,
   optionsResponse,
 } from './_shared';
+import { checkRateLimit, getRateLimitKey, MINT_RATE_LIMITS } from '../../lib/rateLimit';
 
 interface Env {
   DB: D1Database;
@@ -47,6 +48,13 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     return errorResponse('Service not configured', 500);
   }
 
+  // Rate limit: 10 confirm attempts per minute per IP
+  const rlKey = getRateLimitKey(request);
+  const rlResult = await checkRateLimit(env.DB, rlKey, MINT_RATE_LIMITS.confirm);
+  if (!rlResult.allowed) {
+    return errorResponse('Too many requests. Please wait a moment.', 429);
+  }
+
   let body: { mintId?: number; walletAddress?: string; launcherId?: string };
   try {
     body = await request.json();
@@ -60,6 +68,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   }
 
   const callerWallet = body.walletAddress;
+  if (!callerWallet) {
+    return errorResponse('Missing walletAddress', 400);
+  }
 
   try {
     const row = await env.DB.prepare(
@@ -74,7 +85,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     }
 
     // Verify caller owns this mint (prevent unauthorized confirmation)
-    if (callerWallet && callerWallet !== row.wallet_address) {
+    if (callerWallet !== row.wallet_address) {
       return errorResponse('Wallet address does not match this mint', 403);
     }
 

@@ -29,6 +29,7 @@ import {
   surchargeXch as sharedSurchargeXch,
   INTERNAL_API_HEADER,
 } from './_shared';
+import { checkRateLimit, getRateLimitKey, MINT_RATE_LIMITS } from '../../lib/rateLimit';
 
 interface Env {
   DB: D1Database;
@@ -75,6 +76,13 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
   if (!env.DB) {
     return errorResponse('Service not configured', 500);
+  }
+
+  // Rate limit: 5 mint attempts per minute per IP/wallet
+  const rlKey = getRateLimitKey(request);
+  const rlResult = await checkRateLimit(env.DB, rlKey, MINT_RATE_LIMITS.prepare);
+  if (!rlResult.allowed) {
+    return errorResponse('Too many mint requests. Please wait a moment.', 429);
   }
 
   let body: PrepareBody;
@@ -150,7 +158,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       return jsonResponse({ error: 'Sold out', supply: { minted: mintedCount, total: SUPPLY_TOTAL } }, 400);
     }
 
-    // Credit check for free mints
+    // Credit pre-check for free mints (early exit with balance info)
+    // The actual atomic deduction happens after minting — see below
     if (mintType === 'free') {
       const balanceRow = await env.DB.prepare(
         `SELECT
@@ -267,12 +276,27 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
       const mintId = insert.meta?.last_row_id ?? 0;
 
-      // Deduct credits using the DB row ID (not the sequential mint number)
-      await env.DB.prepare(
-        `INSERT INTO credit_spends (wallet_address, mint_id, credits_spent) VALUES (?, ?, ?)`
+      // Atomic credit deduction: INSERT...SELECT checks balance in a single statement.
+      // If a concurrent request already spent the credits, the WHERE fails and 0 rows insert.
+      const deduct = await env.DB.prepare(
+        `INSERT INTO credit_spends (wallet_address, mint_id, credits_spent)
+         SELECT ?, ?, ?
+         WHERE (
+           (SELECT COALESCE(SUM(credits_earned), 0) FROM credit_events WHERE wallet_address = ?) -
+           (SELECT COALESCE(SUM(credits_spent), 0) FROM credit_spends WHERE wallet_address = ?)
+         ) >= ?`
       )
-        .bind(wallet, mintId, FREE_MINT_CREDITS)
+        .bind(wallet, mintId, FREE_MINT_CREDITS, wallet, wallet, FREE_MINT_CREDITS)
         .run();
+
+      if (!deduct.meta?.changes) {
+        // Race condition: credits were spent between pre-check and here.
+        // Mark the mint as failed so the mint_number isn't stuck.
+        await env.DB.prepare(
+          `UPDATE phase2_mints SET status = 'failed' WHERE id = ?`
+        ).bind(mintId).run();
+        return jsonResponse({ error: 'Insufficient credits (concurrent request)', balance: 0 }, 409);
+      }
 
       // Audit logging
       await logMintStep(env.DB, {
@@ -352,6 +376,13 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     );
     const offerFile = mintResult.offerFile ?? null;
 
+    if (!offerFile) {
+      return jsonResponse({
+        error: 'MintGarden did not return an offer file. Check API key configuration or try again.',
+        errorCode: 'OFFER_CREATION_FAILED',
+      }, 500);
+    }
+
     // Paid mints get mint_number assigned NOW so it matches the IPFS metadata
     const insert = await env.DB.prepare(
       `INSERT INTO phase2_mints (
@@ -380,9 +411,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       data: { mint_number: mintNumber, total_price_xch: totalPriceXch, offer_created: !!offerFile },
     });
 
-    const message = offerFile
-      ? 'Accept the offer in your wallet before it expires.'
-      : 'MintGarden offer not created (check API key and env). You can try free mint or try again later.';
+    const message = 'Accept the offer in your wallet before it expires.';
     return jsonResponse({
       pending: true,
       mintId: Number(mintId),

@@ -122,3 +122,17 @@ export const CHAT_RATE_LIMITS = {
     keyPrefix: 'chat-presence',
   },
 } as const;
+
+// Rate limits for mint endpoints
+export const MINT_RATE_LIMITS = {
+  prepare: {
+    windowMs: 60 * 1000,  // 1 minute
+    maxRequests: 5,        // 5 mint attempts per minute per wallet/IP
+    keyPrefix: 'mint-prepare',
+  },
+  confirm: {
+    windowMs: 60 * 1000,  // 1 minute
+    maxRequests: 10,       // 10 confirm attempts per minute per wallet/IP
+    keyPrefix: 'mint-confirm',
+  },
+} as const;
