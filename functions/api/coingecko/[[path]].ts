@@ -3,17 +3,22 @@
  * Proxies requests to api.coingecko.com to avoid CORS issues in production
  */
 
-type Env = Record<string, unknown>;
+interface Env {
+  COINGECKO_API_KEY?: string;
+}
 
 export const onRequest: PagesFunction<Env> = async (context) => {
-  const { params, request } = context;
+  const { params, request, env } = context;
 
   // Get the path from the catch-all parameter
   const pathSegments = params.path as string[];
   const path = pathSegments ? pathSegments.join('/') : '';
 
-  // Get query string from original request
+  // Get query string from original request, append demo API key if available
   const url = new URL(request.url);
+  if (env.COINGECKO_API_KEY) {
+    url.searchParams.set('x_cg_demo_api_key', env.COINGECKO_API_KEY);
+  }
   const queryString = url.search;
 
   // Build the CoinGecko URL
