@@ -79,9 +79,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     });
   }
 
-  // Admin authentication (optional but recommended)
+  // Admin authentication (required — blocks access if ADMIN_SECRET not configured)
   const authHeader = request.headers.get('Authorization');
-  if (env.ADMIN_SECRET && authHeader !== `Bearer ${env.ADMIN_SECRET}`) {
+  if (!env.ADMIN_SECRET || authHeader !== `Bearer ${env.ADMIN_SECRET}`) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
       headers: corsHeaders,
