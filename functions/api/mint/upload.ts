@@ -123,7 +123,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         Authorization: `Bearer ${jwt}`,
         'Content-Type': 'application/json',
       },
-      body: metadataStr,
+      body: JSON.stringify({ pinataContent: metadata }),
     });
     if (!pinJsonRes.ok) {
       const err = await pinJsonRes.text();
