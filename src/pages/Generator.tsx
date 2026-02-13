@@ -5,6 +5,7 @@
  * Phase 1: Redesigned layout - 45/55 split on desktop, 3-col mobile grid.
  */
 
+import { useState } from 'react';
 import './Generator.css';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { useLayout } from '@/hooks/useLayout';
@@ -19,7 +20,11 @@ import {
   StickyMiniPreview,
   GeneratorRightPanel,
 } from '@/components/generator';
+import { MetadataPreview } from '@/components/generator/MetadataPreview';
+import { TraitNameAudit } from '@/components/generator/TraitNameAudit';
 import { PageSEO } from '@/components/seo';
+
+type RightPanelMode = 'colors' | 'metadata' | 'audit';
 
 function GeneratorErrorBanner() {
   const { generatorError, clearGeneratorError } = useGenerator();
@@ -49,6 +54,7 @@ function GeneratorErrorBanner() {
 function GeneratorContent() {
   const { isDesktop } = useLayout();
   const { isInitialized, generatorError } = useGenerator();
+  const [rightPanelMode, setRightPanelMode] = useState<RightPanelMode>('metadata');
 
   return (
     <PageTransition>
@@ -103,7 +109,10 @@ function GeneratorContent() {
             {/* Desktop: Action Bar on bottom */}
             {isDesktop && (
               <div className="generator-actions">
-                <ActionBar />
+                <ActionBar
+                  rightPanelMode={rightPanelMode}
+                  onToggleRightPanel={() => setRightPanelMode((m) => m === 'colors' ? 'metadata' : 'colors')}
+                  />
               </div>
             )}
 
@@ -125,10 +134,19 @@ function GeneratorContent() {
             <div className="generator-options-grid-container">
               <TraitSelector />
             </div>
-            {/* Desktop: 4th column = colors/details stripe */}
+            {/* Desktop: 4th column = colors/details, metadata preview, or audit */}
             {isDesktop && (
               <div className="generator-details-panel">
-                <GeneratorRightPanel />
+                {rightPanelMode === 'metadata' ? (
+                  <MetadataPreview
+                    onSwitchToColors={() => setRightPanelMode('colors')}
+                    onOpenAudit={() => setRightPanelMode('audit')}
+                  />
+                ) : rightPanelMode === 'audit' ? (
+                  <TraitNameAudit onBack={() => setRightPanelMode('metadata')} />
+                ) : (
+                  <GeneratorRightPanel />
+                )}
               </div>
             )}
           </div>

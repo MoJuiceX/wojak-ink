@@ -29,6 +29,8 @@ import { MintFlowModal } from './MintFlowModal';
 
 interface ActionBarProps {
   className?: string;
+  rightPanelMode?: 'colors' | 'metadata' | 'audit';
+  onToggleRightPanel?: () => void;
 }
 
 /** Tooltip that renders in a portal above the trigger, so it's never clipped by overflow */
@@ -96,7 +98,7 @@ function ActionBarTooltip({
   );
 }
 
-export function ActionBar({ className = '' }: ActionBarProps) {
+export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }: ActionBarProps) {
   const {
     randomize,
     randomizeLayer,
@@ -144,14 +146,18 @@ export function ActionBar({ className = '' }: ActionBarProps) {
   const isWalletConnected = walletStatus === 'connected' && !!address;
 
   const hasFreeMintsAvailable = (credits?.free_mints_available ?? 0) > 0;
-  const canMint = canExport && isWalletConnected;
+
+  // Count selected traits for the 7-trait minimum
+  const traitCount = Object.values(selectedLayers).filter((v) => !isSelectionPathEmpty(v)).length;
+  const has7Traits = traitCount >= 7;
+  const canMint = canExport && isWalletConnected && has7Traits;
 
   const handleMintClick = useCallback(async () => {
     if (!isWalletConnected) {
       connect();
       return;
     }
-    if (!canExport) return;
+    if (!canExport || !has7Traits) return;
 
     try {
       const webpBlob = await exportImage(selectedLayers, {
@@ -175,7 +181,7 @@ export function ActionBar({ className = '' }: ActionBarProps) {
     } catch (err) {
       console.error('[ActionBar] Failed to prepare mint:', err);
     }
-  }, [isWalletConnected, canExport, selectedLayers, selectedColors, hasFreeMintsAvailable, mintType, connect, startMint, g2Selections]);
+  }, [isWalletConnected, canExport, has7Traits, selectedLayers, selectedColors, hasFreeMintsAvailable, mintType, connect, startMint, g2Selections]);
 
   const basePath = selectedLayers.Base;
   const hasSelection = !isSelectionPathEmpty(basePath);
@@ -567,6 +573,18 @@ export function ActionBar({ className = '' }: ActionBarProps) {
         />
       </ActionBarTooltip>
 
+      {/* Metadata Preview toggle — switches right panel */}
+      {onToggleRightPanel && (
+        <ActionBarTooltip content={rightPanelMode !== 'colors' ? 'Show Colors' : 'Show Metadata'}>
+          <ActionButton
+            onClick={onToggleRightPanel}
+            isActive={rightPanelMode !== 'colors'}
+            icon={<span style={{ fontFamily: 'monospace', fontSize: '14px', fontWeight: 700 }}>{'{ }'}</span>}
+            label="Metadata"
+          />
+        </ActionBarTooltip>
+      )}
+
       {/* ── Mint Section ── */}
       <div
         className="flex items-center gap-2 pl-2 ml-1"
@@ -585,7 +603,11 @@ export function ActionBar({ className = '' }: ActionBarProps) {
         )}
 
         {/* Mint button */}
-        <ActionBarTooltip content={!isWalletConnected ? 'Connect Wallet' : 'Mint NFT'}>
+        <ActionBarTooltip content={
+          !isWalletConnected ? 'Connect Wallet'
+            : !has7Traits ? `Need 7 traits (${traitCount}/7)`
+              : 'Mint NFT'
+        }>
           <ActionButton
             variant="primary"
             onClick={handleMintClick}
