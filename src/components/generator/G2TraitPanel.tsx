@@ -111,9 +111,13 @@ function LogoButton({ name, isSelected, onClick }: { name: string; isSelected: b
 interface G2TraitPanelProps {
   /** When set (e.g. Beer Hat underlayer focus), show this trait's details instead of activeLayer's main selection */
   overrideG2Selection?: G2Selection | null;
+  /** Override detail selection handler (e.g. for Beer Hat underlayer to route to underlayer G2) */
+  onDetailSelect?: (file: string | undefined, frameFile: string | undefined) => void;
+  /** Override construction helmet update handler for underlayer routing */
+  onConstructionHelmetUpdate?: (chiaLogo: boolean, cigPack: string) => void;
 }
 
-export function G2TraitPanel({ overrideG2Selection }: G2TraitPanelProps = {}) {
+export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructionHelmetUpdate }: G2TraitPanelProps = {}) {
   const { activeLayer, g2Selections, setG2Detail } = useGenerator();
 
   const [trait, setTrait] = useState<UnifiedTrait | null>(null);
@@ -135,12 +139,20 @@ export function G2TraitPanel({ overrideG2Selection }: G2TraitPanelProps = {}) {
   const isSuit = trait.id === 'Clothes_Suit';
   const isWizardDrip = trait.id === 'Clothes_Wizard-drip';
 
-  // BEPA Army: name tag inputs (8 chars, caps)
+  // BEPA Army: name tag inputs — limited by pixel width to fit the tag area
   if (isBepeArmy) {
     const name1 = g2Sel.name1 ?? '';
     const name2 = g2Sel.name2 ?? '';
     const handleNameChange = (which: 'name1' | 'name2', value: string) => {
       const capped = value.slice(0, 8).toUpperCase().replace(/[^A-Z0-9\s]/g, '');
+      // Measure pixel width with the same font used on canvas (38px bold Comic Sans).
+      // The visible tag area is ~210px wide (slightly wider than the 180px position rect).
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.font = 'bold 38px "Comic Sans MS", "Comic Sans", cursive';
+        if (ctx.measureText(capped).width > 210) return;
+      }
       setG2Detail(activeLayer, undefined, undefined, undefined, undefined, which === 'name1' ? capped : name1, which === 'name2' ? capped : name2);
     };
     return (
@@ -336,7 +348,11 @@ export function G2TraitPanel({ overrideG2Selection }: G2TraitPanelProps = {}) {
 
     // Helper: always pass both values for reliable updates (avoids param-order bugs)
     const setConstructionHelmet = (chia: boolean, cig: string) => {
-      setG2Detail(activeLayer, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, chia, cig);
+      if (onConstructionHelmetUpdate) {
+        onConstructionHelmetUpdate(chia, cig);
+      } else {
+        setG2Detail(activeLayer, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, chia, cig);
+      }
     };
 
     return (
@@ -436,6 +452,7 @@ export function G2TraitPanel({ overrideG2Selection }: G2TraitPanelProps = {}) {
               : g2Sel.detailOption
         }
         allowNone={trait.id !== 'Clothes_SWAT' && trait.id !== 'Head_Beer-Hat'}
+        zoom={trait.id === 'Head_Beer-Hat' ? 6 : undefined}
         onSelect={(file) => {
           let frameFile: string | undefined;
           if (file && trait.frameFiles) {
@@ -443,8 +460,12 @@ export function G2TraitPanel({ overrideG2Selection }: G2TraitPanelProps = {}) {
             const frame = trait.frameFiles.find(f => f.over === detailName);
             frameFile = frame?.file;
           }
-          // Use '' for None so reducer stores it (undefined is ignored)
-          setG2Detail(activeLayer, file ?? '', frameFile);
+          if (onDetailSelect) {
+            onDetailSelect(file, frameFile);
+          } else {
+            // Use '' for None so reducer stores it (undefined is ignored)
+            setG2Detail(activeLayer, file ?? '', frameFile);
+          }
         }}
         label=""
       />

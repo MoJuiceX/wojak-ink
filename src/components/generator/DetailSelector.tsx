@@ -27,6 +27,8 @@ interface DetailSelectorProps {
   label?: string;
   /** If false, hide the "None" option (e.g. SWAT always has a detail) */
   allowNone?: boolean;
+  /** Zoom factor for preview images (e.g. 6 = 6x zoom centered on image) */
+  zoom?: number;
 }
 
 export const DetailSelector = memo(function DetailSelector({
@@ -36,6 +38,7 @@ export const DetailSelector = memo(function DetailSelector({
   onSelect,
   label = 'Detail',
   allowNone = true,
+  zoom,
 }: DetailSelectorProps) {
   const prefersReducedMotion = useReducedMotion();
 
@@ -99,6 +102,7 @@ export const DetailSelector = memo(function DetailSelector({
                 src={`${basePath}/${opt.file}`}
                 alt={opt.name}
                 className="w-full h-full object-contain"
+                style={zoom ? { transform: `scale(${zoom}) translate(-16%, -14%)`, transformOrigin: 'top left' } : undefined}
                 loading="lazy"
               />
               {isSelected && (

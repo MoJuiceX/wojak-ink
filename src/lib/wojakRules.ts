@@ -11,7 +11,7 @@ import type { UILayerName } from '@/lib/layerRegistry';
 import { DEFAULT_BASE_PATH, DEFAULT_MOUTHBASE_PATH, DEFAULT_CLOTHES_PATH } from '@/lib/layerRegistry';
 import { UI_ORDER } from '@/lib/layerRegistry';
 import type { SelectionResolver } from '@/lib/selectionResolver';
-import { KNOWN_TRAIT_IDS, CLOTHES_NO_HEAD_SUITS, CLOTHES_NO_VR_HEADSET } from '@/lib/generatorTraitIds';
+import { KNOWN_TRAIT_IDS, CLOTHES_NO_HEAD_SUITS } from '@/lib/generatorTraitIds';
 
 export type SelectedLayers = Partial<Record<GeneratorLayerName, string>>;
 
@@ -228,29 +228,26 @@ function ruleAstronautCopiumMaskMutualExclusion(resolver: SelectionResolver): Ru
 }
 
 /**
- * Astronaut and Gopher suit disable Night Vision (mutually exclusive).
- * When either is selected: Night Vision cannot be selected; clear it if currently selected.
+ * Astronaut disables Night Vision (mutually exclusive).
+ * When selected: Night Vision cannot be selected; clear it if currently selected.
  */
 function ruleAstronautDisablesNightVision(resolver: SelectionResolver): RuleResult {
   const clothesId = resolver.getTraitId('Clothes');
   const hasAstronaut = clothesId === KNOWN_TRAIT_IDS.Clothes_Astronaut;
-  const hasGopherSuit = clothesId === 'Clothes_gopher-suit';
-  const blocksNightVision = hasAstronaut || hasGopherSuit;
   const hasNightVision = resolver.getTraitId('Eyes') === KNOWN_TRAIT_IDS.Eyes_NightVision;
-  const reason = hasAstronaut ? 'Remove Astronaut' : 'Remove Gopher Suit';
 
-  if (blocksNightVision) {
+  if (hasAstronaut) {
     if (hasNightVision) {
       return {
         disabledLayers: [],
-        reason,
+        reason: 'Remove Astronaut',
         forceSelections: { Eyes: '' },
         clearSelections: ['Eyes'],
         disabledOptions: { Eyes: ['Night Vision', 'night vision'] },
         disabledOptionReasons: {
           Eyes: {
-            'Night Vision': reason,
-            'night vision': reason,
+            'Night Vision': 'Remove Astronaut',
+            'night vision': 'Remove Astronaut',
           },
         },
       };
@@ -260,8 +257,8 @@ function ruleAstronautDisablesNightVision(resolver: SelectionResolver): RuleResu
       disabledOptions: { Eyes: ['Night Vision', 'night vision'] },
       disabledOptionReasons: {
         Eyes: {
-          'Night Vision': reason,
-          'night vision': reason,
+          'Night Vision': 'Remove Astronaut',
+          'night vision': 'Remove Astronaut',
         },
       },
     };
@@ -499,41 +496,6 @@ function ruleBubbleGumDisablesMouthItem(resolver: SelectionResolver): RuleResult
   };
 }
 
-/**
- * Bepe suit and Pepe suit: VR Headset cannot be selected (mutually exclusive).
- */
-function ruleBepePepeSuitDisablesVRHeadset(resolver: SelectionResolver): RuleResult {
-  const clothesTraitId = resolver.getTraitId('Clothes');
-  const hasBepeOrPepeSuit = clothesTraitId !== null && CLOTHES_NO_VR_HEADSET.includes(clothesTraitId);
-  const eyesTraitId = resolver.getTraitId('Eyes');
-  const hasVRHeadset = eyesTraitId === KNOWN_TRAIT_IDS.Eyes_VRHeadset;
-
-  if (hasBepeOrPepeSuit) {
-    const disabledEyesOptions = ['VR Headset', 'VR headset', 'VR-Headset'];
-    const disabledEyesReasons = {
-      'VR Headset': 'Not available with Bepe or Pepe suit',
-      'VR headset': 'Not available with Bepe or Pepe suit',
-      'VR-Headset': 'Not available with Bepe or Pepe suit',
-    };
-    if (hasVRHeadset) {
-      return {
-        disabledLayers: [],
-        reason: 'Deselect Bepe or Pepe suit',
-        forceSelections: { Eyes: '' },
-        clearSelections: ['Eyes'],
-        disabledOptions: { Eyes: disabledEyesOptions },
-        disabledOptionReasons: { Eyes: disabledEyesReasons },
-      };
-    }
-    return {
-      disabledLayers: [],
-      disabledOptions: { Eyes: disabledEyesOptions },
-      disabledOptionReasons: { Eyes: disabledEyesReasons },
-    };
-  }
-
-  return { disabledLayers: [] };
-}
 
 /**
  * Sonic suit, Pickle suit, and Goose suit: Bandana mask cannot be selected.
@@ -560,6 +522,48 @@ function ruleSuitDisablesBandana(resolver: SelectionResolver): RuleResult {
       disabledLayers: [],
       disabledOptions: { Mask: disabledMaskOptions },
       disabledOptionReasons: { Mask: disabledMaskReasons },
+    };
+  }
+
+  return { disabledLayers: [] };
+}
+
+/**
+ * Sonic suit, Pickle suit, and Goose suit are mutually exclusive with Hannibal mask.
+ */
+const CLOTHES_NO_HANNIBAL = ['Clothes_Sonic-suit', 'Clothes_Pickle-suit', 'Clothes_Goose-suit'];
+
+function ruleSuitDisablesHannibal(resolver: SelectionResolver): RuleResult {
+  const clothesId = resolver.getTraitId('Clothes');
+  const maskId = resolver.getTraitId('Mask');
+  const hasSuit = clothesId !== null && CLOTHES_NO_HANNIBAL.includes(clothesId);
+  const isHannibal = maskId === KNOWN_TRAIT_IDS.Mask_Hannibal;
+
+  if (hasSuit && isHannibal) {
+    return {
+      disabledLayers: [],
+      forceSelections: { Mask: '' },
+      clearSelections: ['Mask'],
+    };
+  }
+  if (hasSuit) {
+    const disabledMaskOptions = ['Hannibal-Mask', 'Hannibal mask', 'Hannibal'];
+    const disabledMaskReasons: Record<string, string> = {};
+    for (const opt of disabledMaskOptions) disabledMaskReasons[opt] = 'Not available with this suit';
+    return {
+      disabledLayers: [],
+      disabledOptions: { Mask: disabledMaskOptions },
+      disabledOptionReasons: { Mask: disabledMaskReasons },
+    };
+  }
+  if (isHannibal) {
+    const disabledClothesOptions = ['Sonic-suit', 'Sonic suit', 'Sonic', 'Pickle-suit', 'Pickle suit', 'Pickle', 'Goose-suit', 'Goose suit', 'Goose'];
+    const disabledClothesReasons: Record<string, string> = {};
+    for (const opt of disabledClothesOptions) disabledClothesReasons[opt] = 'Not available with Hannibal mask';
+    return {
+      disabledLayers: [],
+      disabledOptions: { Clothes: disabledClothesOptions },
+      disabledOptionReasons: { Clothes: disabledClothesReasons },
     };
   }
 
@@ -633,6 +637,46 @@ function ruleClothesAddonRequiresTeeOrTanktop(resolver: SelectionResolver): Rule
   return { disabledLayers: [] };
 }
 
+/**
+ * Sonic suit and Pickle suit cannot have Neckbeard (mutual exclusion).
+ */
+const CLOTHES_NO_NECKBEARD = ['Clothes_Sonic-suit', 'Clothes_Pickle-suit'];
+function ruleSuitDisablesNeckbeard(resolver: SelectionResolver): RuleResult {
+  const clothesId = resolver.getTraitId('Clothes');
+  const hasSuit = clothesId !== null && CLOTHES_NO_NECKBEARD.includes(clothesId);
+  const facialHairPath = resolver.getPath('FacialHair');
+  const hasNeckbeard = pathContains(facialHairPath, 'neckbeard');
+
+  if (hasSuit && hasNeckbeard) {
+    return {
+      disabledLayers: [],
+      forceSelections: { FacialHair: '' },
+      clearSelections: ['FacialHair'],
+      disabledOptions: { FacialHair: ['Neckbeard', 'neckbeard'] },
+      disabledOptionReasons: { FacialHair: { Neckbeard: 'Not available with this suit', neckbeard: 'Not available with this suit' } },
+    };
+  }
+  if (hasSuit) {
+    return {
+      disabledLayers: [],
+      disabledOptions: { FacialHair: ['Neckbeard', 'neckbeard'] },
+      disabledOptionReasons: { FacialHair: { Neckbeard: 'Not available with this suit', neckbeard: 'Not available with this suit' } },
+    };
+  }
+  if (hasNeckbeard) {
+    const disabledClothesOptions = ['Sonic-suit', 'Sonic suit', 'Sonic', 'Pickle-suit', 'Pickle suit', 'Pickle'];
+    const disabledClothesReasons: Record<string, string> = {};
+    for (const opt of disabledClothesOptions) disabledClothesReasons[opt] = 'Remove Neckbeard';
+    return {
+      disabledLayers: [],
+      disabledOptions: { Clothes: disabledClothesOptions },
+      disabledOptionReasons: { Clothes: disabledClothesReasons },
+    };
+  }
+
+  return { disabledLayers: [] };
+}
+
 // ============ Rules Array ============
 
 const RULES = [
@@ -648,14 +692,15 @@ const RULES = [
   ruleAstronautDisablesMouthOptions,
   ruleAstronautCopiumMaskMutualExclusion,
   ruleAstronautDisablesNightVision,
-  ruleBepePepeSuitDisablesVRHeadset,
   ruleSuitDisablesBandana,
+  ruleSuitDisablesHannibal,
   ruleFullBodySuitNoHead,
   ruleFacialHairRequiresMouthBase,
   ruleMaskBlocksOtherLayers,
   ruleHannibalMaskRemovesNeckbeard,
   ruleFullFaceMaskDisablesLaserEyes,
   ruleClothesAddonRequiresTeeOrTanktop,
+  ruleSuitDisablesNeckbeard,
 ];
 
 // ============ Public API ============

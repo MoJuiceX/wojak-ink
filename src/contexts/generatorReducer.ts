@@ -174,8 +174,11 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
       const existing = state.selections[action.layer]?.g2;
       if (!existing) return state;
 
+      // When the action explicitly provides beerHatEditFocus, use it for routing
+      // (allows callers to force-route to main selection or underlayer regardless of current focus)
+      const effectiveFocus = action.beerHatEditFocus ?? existing.beerHatEditFocus;
       const isBeerHatUnderlayer =
-        existing.traitId === 'Head_Beer-Hat' && existing.beerHatEditFocus === 'underlayer' && existing.beerHatUnderlayerG2;
+        existing.traitId === 'Head_Beer-Hat' && effectiveFocus === 'underlayer' && existing.beerHatUnderlayerG2;
       const targetG2 = isBeerHatUnderlayer && existing.beerHatUnderlayerG2 ? existing.beerHatUnderlayerG2 : existing;
       const g2: G2Selection = { ...existing };
 
@@ -183,7 +186,8 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
       if (action.beerHatUnderlayerG2 !== undefined) g2.beerHatUnderlayerG2 = action.beerHatUnderlayerG2;
       if (action.beerHatEditFocus !== undefined) g2.beerHatEditFocus = action.beerHatEditFocus;
 
-      if (isBeerHatUnderlayer && targetG2) {
+      if (isBeerHatUnderlayer && targetG2 && action.beerHatUnderlayerG2 === undefined) {
+        // Only merge into the existing underlayer when we're NOT replacing it wholesale
         const updatedUnder: G2Selection = { ...targetG2 };
         if (action.detailOption !== undefined) updatedUnder.detailOption = action.detailOption;
         if (action.frameOption !== undefined) updatedUnder.frameOption = action.frameOption;

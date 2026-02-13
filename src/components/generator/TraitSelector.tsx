@@ -755,6 +755,10 @@ export function G2TraitCard({ trait, isSelected, onClick, needsClothesUnderlay, 
                 }}
               />
             </div>
+            {/* SWAT: always show detail1 (cig pack) under outline */}
+            {trait.id === 'Clothes_SWAT' && trait.detailOptions?.[0]?.file && (
+              <img src={`${basePath}/${trait.detailOptions[0].file}`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+            )}
             <img src={`${basePath}/${trait.outlineFile}`} alt={trait.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
           </>
         ) : trait.id === 'Face-wear_VR-headset' && trait.fillFiles && trait.fillFiles.length >= 4 && trait.outlineFile ? (

@@ -41,6 +41,7 @@ export const LAYER_Z_INDEX: Record<string, number> = {
   ClothesComposite1: 2.2,  // composite layer1 on top of layer0
   MaskUnderSuit: 1.4,      // bandana under EyesUnderSuit when suit is active
   EyesUnderSuit: 1.5,      // left 63% of eyes under suit (Gopher, Sonic, Proof of Prayer, etc.)
+  FacialHairUnderSuit: 1.6, // left portion of neckbeard under suit (PoP, Gopher, Goose)
   ClothesAddon: 3,
   FacialHair: 4,
   MouthBase: 5,

@@ -91,6 +91,20 @@ describe('wojakRules', () => {
       expect(result.reasons?.Head).toBeDefined();
     });
 
+    it('Astronaut + Pizza: forces MouthBase to numb', () => {
+      const resolver = createMockResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          Clothes: '/astronaut.png',
+          MouthBase: '/assets/wojak-layers/MOUTH/MOUTH_Pizza.png',
+        },
+        { Clothes: KNOWN_TRAIT_IDS.Clothes_Astronaut, MouthBase: KNOWN_TRAIT_IDS.MouthBase_Pizza }
+      );
+      const result = getDisabledLayers(resolver);
+      expect(result.forceSelections?.MouthBase).toBe(DEFAULT_MOUTHBASE_PATH);
+      expect(result.disabledOptions?.MouthBase).toContain('Pizza');
+    });
+
     it('disables Head when Bepe suit, Pepe suit, Goose suit, Pickle suit, Proof of Prayer, Sonic suit, or Gopher suit is selected', () => {
       const suits = [
         'Clothes_Bepe-suit',
@@ -177,35 +191,6 @@ describe('wojakRules', () => {
       );
       const result = getDisabledLayers(resolver);
       expect(result.disabledOptions?.Eyes).toContain('Night Vision');
-    });
-
-    it('Bepe suit and Pepe suit disable VR Headset (Eyes); clear Eyes if VR Headset selected', () => {
-      const resolver = createMockResolver(
-        {
-          Base: DEFAULT_BASE_PATH,
-          Clothes: '/g2/Clothes/Clothes_Bepe-suit_layer0.png',
-          MouthBase: DEFAULT_MOUTHBASE_PATH,
-          Eyes: '/g2/Face-wear/Face-wear_VR-headset.png',
-        },
-        { Clothes: 'Clothes_Bepe-suit', Eyes: KNOWN_TRAIT_IDS.Eyes_VRHeadset }
-      );
-      const result = getDisabledLayers(resolver);
-      expect(result.disabledOptions?.Eyes).toContain('VR Headset');
-      expect(result.forceSelections?.Eyes).toBe('');
-      expect(result.clearSelections).toContain('Eyes');
-    });
-
-    it('Bepe or Pepe suit: VR Headset option disabled when no Eyes selected', () => {
-      const resolver = createMockResolver(
-        {
-          Base: DEFAULT_BASE_PATH,
-          Clothes: '/g2/Clothes/Clothes_Pepe-suit_layer0.png',
-          MouthBase: DEFAULT_MOUTHBASE_PATH,
-        },
-        { Clothes: 'Clothes_Pepe-suit' }
-      );
-      const result = getDisabledLayers(resolver);
-      expect(result.disabledOptions?.Eyes).toContain('VR Headset');
     });
 
     it('disables MouthItem when Pipe (MouthBase) is selected', () => {

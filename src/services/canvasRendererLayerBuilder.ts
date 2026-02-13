@@ -17,17 +17,6 @@ import {
 } from '@/services/canvasRendererConstants';
 import type { RenderLayer } from '@/services/canvasRendererTypes';
 
-/**
- * Night Vision visor polygon (normalized 0-1 coords on 1000x1000 canvas).
- * Only this area renders above the Goose suit; strap/band renders under.
- */
-const NIGHT_VISION_VISOR_POLYGON: [number, number][] = [
-  [0.47, 0.33],   // top-left
-  [0.88, 0.33],   // top-right
-  [0.88, 0.53],   // bottom-right
-  [0.47, 0.53],   // bottom-left
-];
-
 // ============ Helpers ============
 
 function pathContains(path: string | undefined, identifier: string): boolean {
@@ -150,14 +139,49 @@ function isSuitNeedingEyesUnder(selectedLayers: SelectedLayers): boolean {
   return SUITS_NEEDING_EYES_UNDER.some((id) => pathContains(clothesPath, id));
 }
 
+function isGooseSuit(selectedLayers: SelectedLayers): boolean {
+  return pathContains(selectedLayers.Clothes, 'goose-suit');
+}
+
+function isBepeSuit(selectedLayers: SelectedLayers): boolean {
+  return pathContains(selectedLayers.Clothes, 'bepe-suit');
+}
+
+function isPepeSuit(selectedLayers: SelectedLayers): boolean {
+  return pathContains(selectedLayers.Clothes, 'pepe-suit');
+}
+
+function isGopherSuit(selectedLayers: SelectedLayers): boolean {
+  return pathContains(selectedLayers.Clothes, 'gopher-suit');
+}
+
+function isSonicSuit(selectedLayers: SelectedLayers): boolean {
+  return pathContains(selectedLayers.Clothes, 'sonic-suit');
+}
+
+function isPickleSuit(selectedLayers: SelectedLayers): boolean {
+  return pathContains(selectedLayers.Clothes, 'pickle-suit');
+}
+
 function isNightVision(path: string | undefined): boolean {
   if (!path) return false;
   return pathContains(path, 'night-vision') || pathContains(path, 'nightvision');
 }
 
-function isGooseSuit(selectedLayers: SelectedLayers): boolean {
-  return pathContains(selectedLayers.Clothes, 'goose-suit');
+function isVRHeadset(path: string | undefined): boolean {
+  if (!path) return false;
+  return pathContains(path, 'vr') && pathContains(path, 'headset');
 }
+
+function isMogGlasses(path: string | undefined): boolean {
+  if (!path) return false;
+  return pathContains(path, 'mog');
+}
+
+function isProofOfPrayer(selectedLayers: SelectedLayers): boolean {
+  return pathContains(selectedLayers.Clothes, 'proof') && pathContains(selectedLayers.Clothes, 'prayer');
+}
+
 
 /** Suits that are incompatible with bandana mask */
 function isSuitIncompatibleWithBandana(selectedLayers: SelectedLayers): boolean {
@@ -221,8 +245,126 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
         else if (hasAstronaut) skipLayer = true;
         else if (hasHannibal) skipLayer = true;
         else if (hasCopium && hasLayersAboveHead) skipLayer = true;
+        // Copium + any full-body suit: left 43.1% under suit, right 56.9% on top
+        else if (hasCopium && hasSuitEyesUnder) {
+          layers.push({
+            path,
+            zIndex: LAYER_Z_INDEX.MaskUnderSuit,
+            layerName: 'MaskUnderSuit',
+            clipRightPercent: 1 - 0.431,
+          });
+          layers.push({
+            path,
+            zIndex,
+            layerName: 'Mask',
+            clipLeftPercent: 0.431,
+          });
+          skipLayer = true;
+        }
         // Bandana + incompatible suit (Sonic, Pickle, Goose): skip entirely
         else if (hasBandanaRaw && isSuitIncompatibleWithBandana(selectedLayers)) skipLayer = true;
+        // Bandana + Gopher suit + Ninja Turtle: crop left 30.1%, then 30.1%-41.5% under suit, 41.5%+ on top
+        else if (hasBandana && isGopherSuit(selectedLayers) && hasNinja) {
+          layers.push({
+            path,
+            zIndex: LAYER_Z_INDEX.MaskUnderSuit,
+            layerName: 'MaskUnderSuit',
+            clipLeftPercent: 0.301,
+            clipRightPercent: 1 - 0.415,
+          });
+          layers.push({
+            path,
+            zIndex,
+            layerName: 'Mask',
+            clipLeftPercent: 0.415,
+          });
+          skipLayer = true;
+        }
+        // Bandana + Gopher suit: crop left 30.1%, then 30.1%-45.2% under suit, 45.2%+ on top
+        else if (hasBandana && isGopherSuit(selectedLayers)) {
+          layers.push({
+            path,
+            zIndex: LAYER_Z_INDEX.MaskUnderSuit,
+            layerName: 'MaskUnderSuit',
+            clipLeftPercent: 0.301,
+            clipRightPercent: 1 - 0.452,
+          });
+          layers.push({
+            path,
+            zIndex,
+            layerName: 'Mask',
+            clipLeftPercent: 0.452,
+          });
+          skipLayer = true;
+        }
+        // Bandana + Proof of Prayer: crop left 35%, then 35%-45.2% under suit, 45.2%+ on top
+        else if (hasBandana && isProofOfPrayer(selectedLayers)) {
+          layers.push({
+            path,
+            zIndex: LAYER_Z_INDEX.MaskUnderSuit,
+            layerName: 'MaskUnderSuit',
+            clipLeftPercent: 0.35,
+            clipRightPercent: 1 - 0.452,
+          });
+          layers.push({
+            path,
+            zIndex,
+            layerName: 'Mask',
+            clipLeftPercent: 0.452,
+          });
+          skipLayer = true;
+        }
+        // Bandana + Bepe suit: crop left 30.1%, then 30.1%-41.5% under suit, 41.5%+ on top
+        else if (hasBandana && isBepeSuit(selectedLayers)) {
+          layers.push({
+            path,
+            zIndex: LAYER_Z_INDEX.MaskUnderSuit,
+            layerName: 'MaskUnderSuit',
+            clipLeftPercent: 0.301,
+            clipRightPercent: 1 - 0.415,
+          });
+          layers.push({
+            path,
+            zIndex,
+            layerName: 'Mask',
+            clipLeftPercent: 0.415,
+          });
+          skipLayer = true;
+        }
+        // Bandana + Pepe suit: crop left 35%, then 35%-38.9% under suit, 38.9%+ on top
+        else if (hasBandana && isPepeSuit(selectedLayers)) {
+          layers.push({
+            path,
+            zIndex: LAYER_Z_INDEX.MaskUnderSuit,
+            layerName: 'MaskUnderSuit',
+            clipLeftPercent: 0.35,
+            clipRightPercent: 1 - 0.389,
+          });
+          layers.push({
+            path,
+            zIndex,
+            layerName: 'Mask',
+            clipLeftPercent: 0.389,
+          });
+          skipLayer = true;
+        }
+        // Bandana + MOG Glasses + suit: crop left 27.7%, then 27.7%-36% under suit, 36%+ on top
+        else if (hasBandana && hasSuitEyesUnder && isMogGlasses(eyesPath)) {
+          layers.push({
+            path,
+            zIndex: LAYER_Z_INDEX.MaskUnderSuit,
+            layerName: 'MaskUnderSuit',
+            clipLeftPercent: 0.277,
+            clipRightPercent: 1 - 0.36,
+          });
+          layers.push({
+            path,
+            zIndex,
+            layerName: 'Mask',
+            clipLeftPercent: 0.36,
+          });
+          skipLayer = true;
+        }
         // Bandana + other suit: left 37% under suit, right 63% at normal Mask z (above suit, below eyes)
         else if (hasBandana && hasSuitEyesUnder) {
           layers.push({
@@ -261,6 +403,98 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
         if (hasNinja && maskCoversNinja) skipLayer = true;
         if (hasEyePatchSelected && hasHannibal) skipLayer = true;
         if (hasLayersAboveHead && !hasEyePatchSelected) skipLayer = true;
+        // Bandana + any suit: simple X-only split to keep eyes always above bandana mask
+        if (!skipLayer && hasBandana && hasSuitEyesUnder && eyesPath) {
+          // Match the bandana's underSuit X boundary per suit so eyes on-top aligns with bandana on-top
+          let splitX = 0.37;
+          let cropX = 0;
+          let cropY = 0;
+          if (isGopherSuit(selectedLayers) && hasNinja) {
+            splitX = 0.415;
+          } else if (isGopherSuit(selectedLayers)) {
+            splitX = 0.452;
+          } else if (isProofOfPrayer(selectedLayers)) {
+            splitX = 0.452; cropX = 0.319; cropY = 0.171;
+          } else if (isBepeSuit(selectedLayers)) {
+            splitX = 0.415; cropX = 0.319; cropY = 0.171;
+          } else if (isPepeSuit(selectedLayers)) {
+            splitX = 0.389; cropX = 0.319; cropY = 0.171;
+          } else if (isMogGlasses(eyesPath)) {
+            splitX = 0.36;
+          }
+          if (cropX > 0 || cropY > 0) {
+            layers.push({
+              path: eyesPath,
+              zIndex: LAYER_Z_INDEX.EyesUnderSuit,
+              layerName: 'EyesUnderSuit',
+              clipPolygon: [[cropX, cropY], [splitX, cropY], [splitX, 1], [cropX, 1]],
+            });
+            layers.push({
+              path: eyesPath,
+              zIndex: LAYER_Z_INDEX.Eyes,
+              layerName: 'EyesOverSuit',
+              clipPolygon: [[splitX, cropY], [1, cropY], [1, 1], [splitX, 1]],
+            });
+          } else {
+            layers.push({
+              path: eyesPath,
+              zIndex: LAYER_Z_INDEX.EyesUnderSuit,
+              layerName: 'EyesUnderSuit',
+              clipRightPercent: 1 - splitX,
+            });
+            layers.push({
+              path: eyesPath,
+              zIndex: LAYER_Z_INDEX.Eyes,
+              layerName: 'EyesOverSuit',
+              clipLeftPercent: splitX,
+            });
+          }
+          skipLayer = true;
+        }
+        // Ninja Turtle + Gopher suit: under-suit left 35% + top 50% (union)
+        if (!skipLayer && hasNinja && isGopherSuit(selectedLayers) && hasSuitEyesUnder && eyesPath) {
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.EyesUnderSuit,
+            layerName: 'EyesUnderSuit',
+            clipRightPercent: 1 - 0.35,
+          });
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.EyesUnderSuit,
+            layerName: 'EyesUnderSuit2',
+            clipPolygon: [[0.35, 0], [1, 0], [1, 0.5], [0.35, 0.5]],
+          });
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.Eyes,
+            layerName: 'EyesOverSuit',
+            clipPolygon: [[0.35, 0.5], [1, 0.5], [1, 1], [0.35, 1]],
+          });
+          skipLayer = true;
+        }
+        // Ninja Turtle + Sonic suit: crop left 30.1%, under-suit left 38.8% + top 36.7% (union)
+        if (!skipLayer && hasNinja && isSonicSuit(selectedLayers) && hasSuitEyesUnder && eyesPath) {
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.EyesUnderSuit,
+            layerName: 'EyesUnderSuit',
+            clipPolygon: [[0.301, 0], [0.388, 0], [0.388, 1], [0.301, 1]],
+          });
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.EyesUnderSuit,
+            layerName: 'EyesUnderSuit2',
+            clipPolygon: [[0.388, 0], [1, 0], [1, 0.367], [0.388, 0.367]],
+          });
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.Eyes,
+            layerName: 'EyesOverSuit',
+            clipPolygon: [[0.388, 0.367], [1, 0.367], [1, 1], [0.388, 1]],
+          });
+          skipLayer = true;
+        }
         // Ninja Turtle + any full-body suit: render under suit with left side cut out
         if (!skipLayer && hasNinja && hasSuitEyesUnder && eyesPath) {
           layers.push({
@@ -271,20 +505,189 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
           });
           skipLayer = true;
         }
-        // Night Vision + Goose suit: visor area above suit, strap/band under suit
-        if (!skipLayer && isNightVision(eyesPath) && isGooseSuit(selectedLayers) && eyesPath) {
-          // Full image under the suit
+        // Proof of Prayer / Goose suit + any eyes: crop left 31.9% + top 17.1%, under-suit left 50.4% + top 29.5% (union)
+        if (!skipLayer && (isProofOfPrayer(selectedLayers) || isGooseSuit(selectedLayers)) && hasSuitEyesUnder && eyesPath) {
+          // Under: left strip (full height within cropped area)
           layers.push({
             path: eyesPath,
             zIndex: LAYER_Z_INDEX.EyesUnderSuit,
             layerName: 'EyesUnderSuit',
+            clipPolygon: [[0.319, 0.171], [0.504, 0.171], [0.504, 1], [0.319, 1]],
           });
-          // Visor polygon above the suit (only the goggle lens area shows through)
+          // Under: top-right strip
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.EyesUnderSuit,
+            layerName: 'EyesUnderSuit2',
+            clipPolygon: [[0.504, 0.171], [1, 0.171], [1, 0.295], [0.504, 0.295]],
+          });
+          // Over: bottom-right corner
           layers.push({
             path: eyesPath,
             zIndex: LAYER_Z_INDEX.Eyes,
             layerName: 'EyesOverSuit',
-            clipPolygon: NIGHT_VISION_VISOR_POLYGON,
+            clipPolygon: [[0.504, 0.295], [1, 0.295], [1, 1], [0.504, 1]],
+          });
+          skipLayer = true;
+        }
+        // Bepe / Pepe suit + any eyes: same crop as PoP/Goose, but under-suit Y = 37.6%
+        if (!skipLayer && (isBepeSuit(selectedLayers) || isPepeSuit(selectedLayers)) && hasSuitEyesUnder && eyesPath) {
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.EyesUnderSuit,
+            layerName: 'EyesUnderSuit',
+            clipPolygon: [[0.319, 0.171], [0.504, 0.171], [0.504, 1], [0.319, 1]],
+          });
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.EyesUnderSuit,
+            layerName: 'EyesUnderSuit2',
+            clipPolygon: [[0.504, 0.171], [1, 0.171], [1, 0.376], [0.504, 0.376]],
+          });
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.Eyes,
+            layerName: 'EyesOverSuit',
+            clipPolygon: [[0.504, 0.376], [1, 0.376], [1, 1], [0.504, 1]],
+          });
+          skipLayer = true;
+        }
+        // Gopher suit + Night Vision: no crop, under-suit left 69.3% + top 34% (union)
+        if (!skipLayer && isGopherSuit(selectedLayers) && isNightVision(eyesPath) && hasSuitEyesUnder && eyesPath) {
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.EyesUnderSuit,
+            layerName: 'EyesUnderSuit',
+            clipRightPercent: 1 - 0.693,
+          });
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.EyesUnderSuit,
+            layerName: 'EyesUnderSuit2',
+            clipPolygon: [[0.693, 0], [1, 0], [1, 0.34], [0.693, 0.34]],
+          });
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.Eyes,
+            layerName: 'EyesOverSuit',
+            clipPolygon: [[0.693, 0.34], [1, 0.34], [1, 1], [0.693, 1]],
+          });
+          skipLayer = true;
+        }
+        // Gopher suit + VR headset: no crop, under-suit left 62.9% + top 28.4% (union)
+        if (!skipLayer && isGopherSuit(selectedLayers) && isVRHeadset(eyesPath) && hasSuitEyesUnder && eyesPath) {
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.EyesUnderSuit,
+            layerName: 'EyesUnderSuit',
+            clipRightPercent: 1 - 0.629,
+          });
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.EyesUnderSuit,
+            layerName: 'EyesUnderSuit2',
+            clipPolygon: [[0.629, 0], [1, 0], [1, 0.284], [0.629, 0.284]],
+          });
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.Eyes,
+            layerName: 'EyesOverSuit',
+            clipPolygon: [[0.629, 0.284], [1, 0.284], [1, 1], [0.629, 1]],
+          });
+          skipLayer = true;
+        }
+        // Gopher suit + Eye Patch: simple X-only split, under-suit left 57.9%
+        if (!skipLayer && isGopherSuit(selectedLayers) && hasEyePatchSelected && hasSuitEyesUnder && eyesPath) {
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.EyesUnderSuit,
+            layerName: 'EyesUnderSuit',
+            clipRightPercent: 1 - 0.579,
+          });
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.Eyes,
+            layerName: 'EyesOverSuit',
+            clipLeftPercent: 0.579,
+          });
+          skipLayer = true;
+        }
+        // Gopher suit + MOG Glasses: simple X-only split, under-suit left 58.2%
+        if (!skipLayer && isGopherSuit(selectedLayers) && isMogGlasses(eyesPath) && hasSuitEyesUnder && eyesPath) {
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.EyesUnderSuit,
+            layerName: 'EyesUnderSuit',
+            clipRightPercent: 1 - 0.582,
+          });
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.Eyes,
+            layerName: 'EyesOverSuit',
+            clipLeftPercent: 0.582,
+          });
+          skipLayer = true;
+        }
+        // Gopher suit + other eyes: no crop, under-suit left 37.3% + top 28.4% (union)
+        if (!skipLayer && isGopherSuit(selectedLayers) && hasSuitEyesUnder && eyesPath) {
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.EyesUnderSuit,
+            layerName: 'EyesUnderSuit',
+            clipRightPercent: 1 - 0.373,
+          });
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.EyesUnderSuit,
+            layerName: 'EyesUnderSuit2',
+            clipPolygon: [[0.373, 0], [1, 0], [1, 0.284], [0.373, 0.284]],
+          });
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.Eyes,
+            layerName: 'EyesOverSuit',
+            clipPolygon: [[0.373, 0.284], [1, 0.284], [1, 1], [0.373, 1]],
+          });
+          skipLayer = true;
+        }
+        // Pickle suit + MOG Glasses: simple X-only split, under-suit left 43.4%
+        if (!skipLayer && isPickleSuit(selectedLayers) && isMogGlasses(eyesPath) && hasSuitEyesUnder && eyesPath) {
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.EyesUnderSuit,
+            layerName: 'EyesUnderSuit',
+            clipRightPercent: 1 - 0.434,
+          });
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.Eyes,
+            layerName: 'EyesOverSuit',
+            clipLeftPercent: 0.434,
+          });
+          skipLayer = true;
+        }
+        // MOG Glasses + full-body suit (non-PoP): L-shaped under-suit (left 36% + top 36.3% under, bottom-right on top)
+        if (!skipLayer && isMogGlasses(eyesPath) && hasSuitEyesUnder && eyesPath) {
+          // Under: full-height left strip
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.EyesUnderSuit,
+            layerName: 'EyesUnderSuit',
+            clipRightPercent: 1 - 0.36,
+          });
+          // Under: top-right portion
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.EyesUnderSuit,
+            layerName: 'EyesUnderSuit2',
+            clipPolygon: [[0.36, 0], [1, 0], [1, 0.363], [0.36, 0.363]],
+          });
+          // Over: bottom-right corner
+          layers.push({
+            path: eyesPath,
+            zIndex: LAYER_Z_INDEX.Eyes,
+            layerName: 'EyesOverSuit',
+            clipPolygon: [[0.36, 0.363], [1, 0.363], [1, 1], [0.36, 1]],
           });
           skipLayer = true;
         }
@@ -308,6 +711,22 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
 
       case 'FacialHair':
         if (hasCenturion && pathContains(path, 'stach')) zIndex = LAYER_Z_INDEX.Head + 1;
+        // Neckbeard + suit: left 42.6% under suit, right on top
+        if (pathContains(path, 'neckbeard') && (isProofOfPrayer(selectedLayers) || isGopherSuit(selectedLayers) || isGooseSuit(selectedLayers))) {
+          layers.push({
+            path,
+            zIndex: LAYER_Z_INDEX.FacialHairUnderSuit,
+            layerName: 'FacialHairUnderSuit',
+            clipRightPercent: 1 - 0.426,
+          });
+          layers.push({
+            path,
+            zIndex: LAYER_Z_INDEX.FacialHair,
+            layerName: 'FacialHair',
+            clipLeftPercent: 0.426,
+          });
+          skipLayer = true;
+        }
         break;
 
       case 'MouthBase':
@@ -383,31 +802,66 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
 
   // NinjaTurtleUnderMask
   if (hasNinja && maskCoversNinja && eyesPath) {
+    // Gopher suit + Bandana: Ninja Turtle renders under both suit and bandana
+    const ninjaUnderSuit = hasBandana && isGopherSuit(selectedLayers);
     layers.push({
       path: eyesPath,
-      zIndex: LAYER_Z_INDEX.NinjaTurtleUnderMask,
+      zIndex: ninjaUnderSuit ? LAYER_Z_INDEX.EyesUnderSuit : LAYER_Z_INDEX.NinjaTurtleUnderMask,
       layerName: 'NinjaTurtleUnderMask',
     });
   }
 
   // EyePatchUnderHannibal
   if (hasEyePatchSelected && hasHannibal && eyesPath) {
-    layers.push({
-      path: eyesPath,
-      zIndex: LAYER_Z_INDEX.EyePatchUnderHannibal,
-      layerName: 'EyePatchUnderHannibal',
-    });
+    if (hasSuitEyesUnder) {
+      // Eye patch + Hannibal + suit: split under/over suit, both below Hannibal
+      const splitX = isGopherSuit(selectedLayers) ? 0.579 : 0.63;
+      layers.push({
+        path: eyesPath,
+        zIndex: LAYER_Z_INDEX.EyesUnderSuit,
+        layerName: 'EyesUnderSuit',
+        clipRightPercent: 1 - splitX,
+      });
+      layers.push({
+        path: eyesPath,
+        zIndex: LAYER_Z_INDEX.EyePatchUnderHannibal,
+        layerName: 'EyePatchUnderHannibal',
+        clipLeftPercent: splitX,
+      });
+    } else {
+      layers.push({
+        path: eyesPath,
+        zIndex: LAYER_Z_INDEX.EyePatchUnderHannibal,
+        layerName: 'EyePatchUnderHannibal',
+      });
+    }
   }
 
   // HannibalMask
   if (hasHannibal && !hasLayersAboveHead) {
     const maskPath = selectedLayers.Mask;
     if (maskPath) {
-      layers.push({
-        path: maskPath,
-        zIndex: LAYER_Z_INDEX.HannibalMask,
-        layerName: 'HannibalMask',
-      });
+      if (hasSuitEyesUnder) {
+        // Hannibal + suit: left 44.7% under suit, right 55.3% on top
+        layers.push({
+          path: maskPath,
+          zIndex: LAYER_Z_INDEX.MaskUnderSuit,
+          layerName: 'MaskUnderSuit',
+          clipRightPercent: 1 - 0.447,
+        });
+        layers.push({
+          path: maskPath,
+          zIndex: LAYER_Z_INDEX.HannibalMask,
+          layerName: 'HannibalMask',
+          clipLeftPercent: 0.447,
+        });
+      } else {
+        layers.push({
+          path: maskPath,
+          zIndex: LAYER_Z_INDEX.HannibalMask,
+          layerName: 'HannibalMask',
+        });
+      }
     }
   }
 

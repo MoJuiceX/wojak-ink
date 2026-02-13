@@ -56,6 +56,7 @@ const Guild = lazy(() => import('./pages/Guild'));
 const Shop = lazy(() => import('./pages/Shop'));
 const Leaderboard = lazy(() => import('./pages/Leaderboard'));
 const Drawer = lazy(() => import('./pages/Drawer'));
+const RuleBuilder = lazy(() => import('./pages/RuleBuilder'));
 
 // Games
 const BrickByBrick = lazy(() => import('./pages/BrickByBrick'));
@@ -237,6 +238,14 @@ function AppContent() {
                           <Generator />
                         </Suspense>
                       </GeneratorProvider>
+                    }
+                  />
+                  <Route
+                    path="rule-builder"
+                    element={
+                      <Suspense fallback={<PageSkeleton type="generator" />}>
+                        <RuleBuilder />
+                      </Suspense>
                     }
                   />
                   <Route

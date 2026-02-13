@@ -13,7 +13,7 @@ import { getUnifiedTraitById, getG2BasePath, getCompositeLayerEntries, type Unif
 import { getFillSlotBehavior } from '@/lib/g2FillTreatments';
 import { buildRenderLayers } from '@/services/canvasRendererLayerBuilder';
 import { LAYER_Z_INDEX, MOUTH_OVER_BEER_HAT } from '@/services/canvasRendererConstants';
-import type { RenderLayer, G2LayerData, G2DrawItem, RenderResult } from '@/services/canvasRendererTypes';
+import type { RenderLayer, G2LayerData, G2DrawItem, RenderResult, LayerRenderOverride } from '@/services/canvasRendererTypes';
 
 function isMouthOverBeerHat(path: string | undefined): boolean {
   if (!path) return false;
@@ -1074,16 +1074,20 @@ async function drawG2Layer(
     ctx.fillStyle = '#000000';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    if (g2.name1) {
-      const p = BEPA_ARMY_NAME1_POS;
-      ctx.font = `bold ${p.fontSize * scale}px "Comic Sans MS", "Comic Sans", cursive`;
-      ctx.fillText(g2.name1.slice(0, 8).toUpperCase(), (p.x + p.w / 2) * scale, (p.y + p.h / 2) * scale);
-    }
-    if (g2.name2) {
-      const p = BEPA_ARMY_NAME2_POS;
-      ctx.font = `bold ${p.fontSize * scale}px "Comic Sans MS", "Comic Sans", cursive`;
-      ctx.fillText(g2.name2.slice(0, 8).toUpperCase(), (p.x + p.w / 2) * scale, (p.y + p.h / 2) * scale);
-    }
+    const drawNameTag = (text: string, p: typeof BEPA_ARMY_NAME1_POS) => {
+      const txt = text.slice(0, 8).toUpperCase();
+      const maxW = 210 * scale; // visible tag area is wider than the position rect
+      let fs = p.fontSize * scale;
+      ctx.font = `bold ${fs}px "Comic Sans MS", "Comic Sans", cursive`;
+      // Shrink font if text is wider than the tag
+      while (ctx.measureText(txt).width > maxW && fs > 8) {
+        fs -= 1;
+        ctx.font = `bold ${fs}px "Comic Sans MS", "Comic Sans", cursive`;
+      }
+      ctx.fillText(txt, (p.x + p.w / 2) * scale, (p.y + p.h / 2) * scale);
+    };
+    if (g2.name1) drawNameTag(g2.name1, BEPA_ARMY_NAME1_POS);
+    if (g2.name2) drawNameTag(g2.name2, BEPA_ARMY_NAME2_POS);
     ctx.restore();
   }
 }
@@ -1634,6 +1638,219 @@ function drawLayer(
 /** Sentinel path for solid-color background (user picks color via color picker) */
 const BACKGROUND_SOLID_PATH = '__solid__';
 
+// ─── Layer override helpers (Rule Builder visual preview) ───
+
+/** Map virtual/composite layer names back to their parent UI layer name. */
+function getUIParentLayer(name: string): string {
+  if (name.startsWith('Eyes') || name === 'NinjaTurtleUnderMask') return 'Eyes';
+  if (name.startsWith('Mask') || name === 'HannibalMask' || name === 'FullFaceMask') return 'Mask';
+  if (name.startsWith('Clothes') || name === 'Astronaut' || name.startsWith('NinjaTurtle')) return 'Clothes';
+  if (name.startsWith('BeerHat')) return 'Head';
+  if (name === 'BubbleGumRekt' || name === 'BubbleGumOverEyes') return 'MouthBase';
+  return name;
+}
+
+/** Create a copy of a RenderLayer with all clip properties cleared. */
+function clearClips<T extends RenderLayer>(layer: T): T {
+  return {
+    ...layer,
+    clipLeftPercent: undefined,
+    clipRightPercent: undefined,
+    clipTopPercent: undefined,
+    clipRightHalf: undefined,
+    clipTopHalfOnly: undefined,
+    clipBottomHalfFull: undefined,
+    clipBoundaryOffsetPx: undefined,
+    clipPolygon: undefined,
+  };
+}
+
+/**
+ * Apply Rule Builder layer overrides to loaded layers.
+ * Supports crop-only, underSuit-only, or both simultaneously.
+ * Each can have independent X and Y axes. Also supports z-index overrides.
+ */
+function applyLayerClipOverrides<T extends RenderLayer>(
+  layers: T[],
+  overrides: Record<string, LayerRenderOverride>,
+): T[] {
+  let result = [...layers];
+
+  for (const [target, ov] of Object.entries(overrides)) {
+    const matchNames = new Set(
+      result.filter((l) => l.layerName === target || getUIParentLayer(l.layerName) === target).map((l) => l.layerName)
+    );
+    if (matchNames.size === 0) continue;
+
+    const template = result.find((l) => matchNames.has(l.layerName))!;
+    const originalZ = ov.zIndex ?? LAYER_Z_INDEX[target] ?? template.zIndex;
+    result = result.filter((l) => !matchNames.has(l.layerName));
+
+    // Hidden: skip entirely
+    if (ov.hidden) continue;
+
+    // Compute the visible X range [xMin, xMax] after crop
+    let xMin = 0, xMax = 1;
+    if (ov.crop?.x) {
+      if (ov.crop.x.side === 'left') xMin = ov.crop.x.clip;
+      else xMax = ov.crop.x.clip;
+    }
+
+    // Compute the visible Y range [yMin, yMax] after crop
+    let yMin = 0, yMax = 1;
+    if (ov.crop?.y) {
+      if (ov.crop.y.side === 'top') yMin = ov.crop.y.clip;
+      else yMax = ov.crop.y.clip;
+    }
+
+    // No underSuit — just crop (or z-index override only)
+    if (!ov.underSuit) {
+      const layer = clearClips(template);
+      layer.zIndex = originalZ;
+      layer.layerName = target;
+      applyRangeClip(layer, xMin, xMax, yMin, yMax);
+      result.push(layer);
+      continue;
+    }
+
+    // underSuit active — split visible region into under/over
+    const UNDER_Z = 1.4;
+    const hasUX = !!ov.underSuit.x;
+    const hasUY = !!ov.underSuit.y;
+
+    if (hasUX && hasUY) {
+      // Both axes — UNION: under if on the under-side of EITHER axis.
+      // Decomposition into 3 non-overlapping regions:
+      //   Under 1: full-height strip on the under-X side
+      //   Under 2: over-X strip on the under-Y side
+      //   Over:    over-X × over-Y corner (stays on top)
+      const splitX = Math.max(xMin, Math.min(xMax, ov.underSuit.x!.clip));
+      const splitY = Math.max(yMin, Math.min(yMax, ov.underSuit.y!.clip));
+      const isLeftUnder = ov.underSuit.x!.side === 'left';
+      const isTopUnder = ov.underSuit.y!.side === 'top';
+
+      const uXMin = isLeftUnder ? xMin : splitX;
+      const uXMax = isLeftUnder ? splitX : xMax;
+      const uYMin = isTopUnder ? yMin : splitY;
+      const uYMax = isTopUnder ? splitY : yMax;
+      const oXMin = isLeftUnder ? splitX : xMin;
+      const oXMax = isLeftUnder ? xMax : splitX;
+      const oYMin = isTopUnder ? splitY : yMin;
+      const oYMax = isTopUnder ? yMax : splitY;
+
+      // Under region 1: full-height strip on the under-X side
+      if (uXMax > uXMin) {
+        const underLayer1 = clearClips(template);
+        underLayer1.layerName = target + '_under1';
+        underLayer1.zIndex = UNDER_Z;
+        applyRangeClip(underLayer1, uXMin, uXMax, yMin, yMax);
+        result.push(underLayer1);
+      }
+
+      // Under region 2: remaining under-Y strip (only the over-X portion)
+      if (oXMax > oXMin && uYMax > uYMin) {
+        const underLayer2 = clearClips(template);
+        underLayer2.layerName = target + '_under2';
+        underLayer2.zIndex = UNDER_Z;
+        applyRangeClip(underLayer2, oXMin, oXMax, uYMin, uYMax);
+        result.push(underLayer2);
+      }
+
+      // Over region: the corner that's on the over-side of BOTH axes
+      if (oXMax > oXMin && oYMax > oYMin) {
+        const overLayer = clearClips(template);
+        overLayer.layerName = target + '_over';
+        overLayer.zIndex = originalZ;
+        applyRangeClip(overLayer, oXMin, oXMax, oYMin, oYMax);
+        result.push(overLayer);
+      }
+    } else if (hasUX) {
+      // X-axis only
+      const splitX = Math.max(xMin, Math.min(xMax, ov.underSuit.x!.clip));
+      const isLeftUnder = ov.underSuit.x!.side === 'left';
+
+      const uXMin = isLeftUnder ? xMin : splitX;
+      const uXMax = isLeftUnder ? splitX : xMax;
+      if (uXMax > uXMin) {
+        const underLayer = clearClips(template);
+        underLayer.layerName = target + '_under';
+        underLayer.zIndex = UNDER_Z;
+        applyRangeClip(underLayer, uXMin, uXMax, yMin, yMax);
+        result.push(underLayer);
+      }
+
+      const oXMin = isLeftUnder ? splitX : xMin;
+      const oXMax = isLeftUnder ? xMax : splitX;
+      if (oXMax > oXMin) {
+        const overLayer = clearClips(template);
+        overLayer.layerName = target + '_over';
+        overLayer.zIndex = originalZ;
+        applyRangeClip(overLayer, oXMin, oXMax, yMin, yMax);
+        result.push(overLayer);
+      }
+    } else if (hasUY) {
+      // Y-axis only
+      const splitY = Math.max(yMin, Math.min(yMax, ov.underSuit.y!.clip));
+      const isTopUnder = ov.underSuit.y!.side === 'top';
+
+      const uYMin = isTopUnder ? yMin : splitY;
+      const uYMax = isTopUnder ? splitY : yMax;
+      if (uYMax > uYMin) {
+        const underLayer = clearClips(template);
+        underLayer.layerName = target + '_under';
+        underLayer.zIndex = UNDER_Z;
+        applyRangeClip(underLayer, xMin, xMax, uYMin, uYMax);
+        result.push(underLayer);
+      }
+
+      const oYMin = isTopUnder ? splitY : yMin;
+      const oYMax = isTopUnder ? yMax : splitY;
+      if (oYMax > oYMin) {
+        const overLayer = clearClips(template);
+        overLayer.layerName = target + '_over';
+        overLayer.zIndex = originalZ;
+        applyRangeClip(overLayer, xMin, xMax, oYMin, oYMax);
+        result.push(overLayer);
+      }
+    } else {
+      // underSuit set but no axis enabled — treat as no underSuit
+      const layer = clearClips(template);
+      layer.zIndex = originalZ;
+      layer.layerName = target;
+      applyRangeClip(layer, xMin, xMax, yMin, yMax);
+      result.push(layer);
+    }
+  }
+
+  return result.sort((a, b) => a.zIndex - b.zIndex);
+}
+
+/** Apply a visible rectangle [xMin,xMax] × [yMin,yMax] as clip properties on a layer. */
+function applyRangeClip(layer: RenderLayer, xMin: number, xMax: number, yMin: number, yMax: number): void {
+  // Full range = no clip needed on that axis
+  if (xMin > 0) layer.clipLeftPercent = xMin;
+  if (xMax < 1) layer.clipRightPercent = 1 - xMax;
+  if (yMin > 0 || yMax < 1) {
+    // Use polygon for Y clipping since there's no clipBottomPercent
+    const x1 = xMin > 0 ? xMin : 0;
+    const x2 = xMax < 1 ? xMax : 1;
+    // If we also have X clips, use polygon for the entire rectangle
+    if (xMin > 0 || xMax < 1) {
+      layer.clipPolygon = [[x1, yMin], [x2, yMin], [x2, yMax], [x1, yMax]];
+      layer.clipLeftPercent = undefined;
+      layer.clipRightPercent = undefined;
+    } else {
+      if (yMin > 0 && yMax < 1) {
+        layer.clipPolygon = [[0, yMin], [1, yMin], [1, yMax], [0, yMax]];
+      } else if (yMin > 0) {
+        layer.clipTopPercent = yMin;
+      } else {
+        layer.clipPolygon = [[0, 0], [1, 0], [1, yMax], [0, yMax]];
+      }
+    }
+  }
+}
+
 export async function renderToCanvas(
   selectedLayers: SelectedLayers,
   options: {
@@ -1641,6 +1858,10 @@ export async function renderToCanvas(
     includeBackground?: boolean;
     g2Selections?: G2Selections;
     selectedColors?: Partial<Record<UILayerName, string>>;
+    /** Per-layer opacity overrides (0-1). Key is layerName. Visual-only for dev tools. */
+    layerOpacities?: Record<string, number>;
+    /** Per-layer clip overrides (crop/underSuit). Key is UI layerName. Visual-only for Rule Builder. */
+    layerClipOverrides?: Record<string, LayerRenderOverride>;
   } = {}
 ): Promise<RenderResult> {
   const size = options.size ?? CANVAS_CONFIG.renderSize;
@@ -1657,13 +1878,8 @@ export async function renderToCanvas(
     const expanded: RenderLayer[] = [];
     for (const layer of layers) {
       const layerNameStr = layer.layerName;
-      // Virtual layers: Astronaut → Clothes; EyesUnderSuit/EyesOverSuit → Eyes
-      const lookupLayer: UILayerName =
-        layerNameStr === 'Astronaut'
-          ? 'Clothes'
-          : layerNameStr === 'EyesUnderSuit' || layerNameStr === 'EyesOverSuit'
-            ? 'Eyes'
-            : (layerNameStr as UILayerName);
+      // Virtual layers: map back to their parent UI layer for G2 lookup
+      const lookupLayer = getUIParentLayer(layerNameStr) as UILayerName;
       const g2Sel = options.g2Selections[lookupLayer];
       if (layerNameStr === 'Clothes' && g2Sel) {
         try {
@@ -1809,9 +2025,14 @@ export async function renderToCanvas(
     }
   });
 
-  const loadedLayers = (await Promise.all(loadPromises)).filter(
+  let loadedLayers = (await Promise.all(loadPromises)).filter(
     (l): l is LoadedLayer => l !== null
   );
+
+  // Apply Rule Builder clip overrides (crop / underSuit) before drawing
+  if (options.layerClipOverrides && Object.keys(options.layerClipOverrides).length > 0) {
+    loadedLayers = applyLayerClipOverrides(loadedLayers, options.layerClipOverrides);
+  }
 
   loadedLayers.sort((a, b) => a.zIndex - b.zIndex);
 
@@ -1821,12 +2042,19 @@ export async function renderToCanvas(
     if (!options.includeBackground && layer.layerName === 'Background') {
       continue;
     }
+
+    // Apply per-layer opacity if provided (visual-only dev tool feature)
+    // Map virtual/composite layer names back to the UI layer for opacity lookup
+    const opacityLayerName = getUIParentLayer(layer.layerName);
+    const opacityOverride = options.layerOpacities?.[opacityLayerName] ?? options.layerOpacities?.[layer.layerName];
+    if (opacityOverride !== undefined && opacityOverride < 1) {
+      ctx.globalAlpha = opacityOverride;
+    }
+
     if ((layer as LoadedLayer & { isSolidBackground?: boolean }).isSolidBackground) {
       ctx.fillStyle = bgColor;
       ctx.fillRect(0, 0, size, size);
-      continue;
-    }
-    if (layer.g2) {
+    } else if (layer.g2) {
       await drawG2Layer(ctx, layer.g2, size, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull, layer.clipBoundaryOffsetPx, layer.clipTopPercent, layer.clipPolygon);
     } else if (
       layer.fillPath &&
@@ -1852,6 +2080,11 @@ export async function renderToCanvas(
       );
     } else if ('image' in layer && layer.image) {
       drawLayer(ctx, layer.image, size, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull, layer.clipBoundaryOffsetPx, layer.clipTopPercent, layer.clipPolygon);
+    }
+
+    // Reset alpha after each layer
+    if (opacityOverride !== undefined && opacityOverride < 1) {
+      ctx.globalAlpha = 1;
     }
   }
 
@@ -1933,12 +2166,8 @@ export async function exportImage(
     const expanded: RenderLayer[] = [];
     for (const layer of layers) {
       const layerNameStr = layer.layerName;
-      const lookupLayer: UILayerName =
-        layerNameStr === 'Astronaut'
-          ? 'Clothes'
-          : layerNameStr === 'EyesUnderSuit' || layerNameStr === 'EyesOverSuit'
-            ? 'Eyes'
-            : (layerNameStr as UILayerName);
+      // Virtual layers: map back to their parent UI layer for G2 lookup
+      const lookupLayer = getUIParentLayer(layerNameStr) as UILayerName;
       const g2Sel = g2Selections[lookupLayer];
       if (layerNameStr === 'Clothes' && g2Sel) {
         try {
@@ -2166,6 +2395,10 @@ export async function renderToTargetCanvas(
   }
 }
 
+/**
+ * Render pre-built layers to an offscreen canvas (used by Rule Builder for live override preview).
+ * Skips buildRenderLayers — caller provides the final layer array.
+ */
 export function hasRequiredSelections(selectedLayers: SelectedLayers): boolean {
   const basePath = selectedLayers.Base;
   return !!basePath && basePath !== '' && basePath !== 'None';

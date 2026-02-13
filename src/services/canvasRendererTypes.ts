@@ -58,3 +58,21 @@ export interface RenderResult {
   width: number;
   height: number;
 }
+
+/** Rule Builder override: visual-only crop and/or under-suit effect for a layer. Both can be active simultaneously, each with independent X and Y axes. */
+export interface LayerRenderOverride {
+  /** Crop: remove pixels on one or both axes */
+  crop?: {
+    x?: { clip: number; side: 'left' | 'right' };
+    y?: { clip: number; side: 'top' | 'bottom' };
+  };
+  /** Under suit: one side renders under the suit, other on top */
+  underSuit?: {
+    x?: { clip: number; side: 'left' | 'right' };
+    y?: { clip: number; side: 'top' | 'bottom' };
+  };
+  /** Hide layer entirely */
+  hidden?: boolean;
+  /** Override the layer's z-index (for reordering in Rule Builder) */
+  zIndex?: number;
+}

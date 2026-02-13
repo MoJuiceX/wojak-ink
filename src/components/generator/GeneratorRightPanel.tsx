@@ -536,10 +536,30 @@ export function GeneratorRightPanel() {
         {activeLayer === 'Head' && g2Selections.Head?.traitId === 'Head_Beer-Hat' && (
           <>
             {/* Can options — always visible when Beer Hat is selected */}
-            <G2TraitPanel />
-            {isBeerHatWithUnderlayerFocus && g2Selections.Head?.beerHatUnderlayerG2 && (
-              /* Under layer details (Cap / Construction Helmet) when user clicked on underlayer */
-              <G2TraitPanel overrideG2Selection={g2Selections.Head.beerHatUnderlayerG2} />
+            <G2TraitPanel
+              onDetailSelect={(file, frameFile) => {
+                // Always update the Beer Hat's own detailOption (can flavor), regardless of beerHatEditFocus.
+                // Pass beerHatEditFocus='beer' to force the reducer to route to the main selection.
+                setG2Detail('Head', file ?? '', frameFile ?? '', undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 'beer');
+              }}
+            />
+            {g2Selections.Head?.beerHatUnderlayerG2 && (
+              /* Under layer details (Cap / Construction Helmet) — always visible */
+              <G2TraitPanel
+                overrideG2Selection={g2Selections.Head.beerHatUnderlayerG2}
+                onDetailSelect={(file, frameFile) => {
+                  const underG2 = g2Selections.Head?.beerHatUnderlayerG2;
+                  if (!underG2) return;
+                  const updated = { ...underG2, detailOption: file ?? '', frameOption: frameFile ?? '' };
+                  setG2Detail('Head', undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, updated);
+                }}
+                onConstructionHelmetUpdate={(chiaLogo, cigPack) => {
+                  const underG2 = g2Selections.Head?.beerHatUnderlayerG2;
+                  if (!underG2) return;
+                  const updated = { ...underG2, constructionHelmetChiaLogo: chiaLogo, constructionHelmetCigPack: cigPack };
+                  setG2Detail('Head', undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, updated);
+                }}
+              />
             )}
           </>
         )}
