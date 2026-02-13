@@ -220,7 +220,7 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
   // Bandana is effectively absent when an incompatible suit suppresses it
   const hasBandana = hasBandanaRaw && !isSuitIncompatibleWithBandana(selectedLayers);
   const hasAstronaut = isAstronautSelected(selectedLayers);
-  const eyesPath = selectedLayers.Eyes;
+  const eyesPath = selectedLayers.Eyes ?? '';
   const hasTyson = isTysonTattoo(eyesPath);
   const hasNinja = isNinjaTurtle(eyesPath);
   const hasEyePatchSelected = isEyePatch(eyesPath);
@@ -235,8 +235,9 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
   const hasSuitEyesUnder = !hasAstronaut && isSuitNeedingEyesUnder(selectedLayers);
 
   for (const layerName of RENDER_ORDER) {
-    let path = selectedLayers[layerName];
-    if (isSelectionPathEmpty(path)) continue;
+    const rawPath = selectedLayers[layerName];
+    if (isSelectionPathEmpty(rawPath)) continue;
+    let path = rawPath as string;
 
     let zIndex = LAYER_Z_INDEX[layerName];
     let skipLayer = false;
@@ -802,8 +803,9 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
         layerName: 'Astronaut',
       });
     }
-    const maskPath = selectedLayers.Mask;
-    if (!isSelectionPathEmpty(maskPath) && !hasFullFaceMask) {
+    const maskPathRaw = selectedLayers.Mask;
+    if (!isSelectionPathEmpty(maskPathRaw) && !hasFullFaceMask) {
+      const maskPath = maskPathRaw as string;
       if (pathContains(maskPath, 'bandana')) {
         layers.push({
           path: maskPath,

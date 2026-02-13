@@ -487,7 +487,6 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
   };
   const detailOpts = trait.detailOptions;
   if (isConstructionHelmet && detailOpts && detailOpts.length >= 3) {
-    const chiaOpt = detailOpts.find(d => d.file.includes('chia-logo'));
     const cig1Opt = detailOpts.find(d => d.file.endsWith('cig-pack.png'));
     const cig2Opt = detailOpts.find(d => d.file.includes('cig-pack-2'));
     const chiaOn = g2Sel.constructionHelmetChiaLogo ?? false;

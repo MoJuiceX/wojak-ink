@@ -1381,7 +1381,6 @@ function buildG2LayerData(
     const fill3Color = resolveFillColor(trait.id, 'fill3', g2, trait) || getG2DefaultColor(trait.id, 'fill3', trait, '#FF0000');
     const detail1File = trait.detailOptions?.[0]?.file; // Star fill (colorable as fill3)
     const detail1Overlay = trait.detail1OverlayFile;     // Star outline (detail1.1)
-    const detail2File = trait.detailOptions?.[1]?.file;  // Logo patch circle (gray area)
 
     const items: G2DrawItem[] = [
       { type: 'fill', file: `${basePath}/${trait.fill1File}`, color: fill1Color },

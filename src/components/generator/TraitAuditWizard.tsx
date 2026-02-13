@@ -230,7 +230,7 @@ export function TraitAuditWizard({ onClose }: TraitAuditWizardProps) {
   const { isInitialized } = ctx;
   const prefersReducedMotion = useReducedMotion();
 
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [results, setResults] = useState<Map<string, Verdict>>(loadResults);
   const [isApplying, setIsApplying] = useState(false);
