@@ -21,6 +21,14 @@
 import { callMintGardenMint } from './request';
 import { logMintStep } from './auditHelper';
 import { getNextMintNumber } from './mintNumberHelper';
+import {
+  jsonResponse,
+  errorResponse,
+  optionsResponse,
+  isValidChiaAddress,
+  surchargeXch as sharedSurchargeXch,
+  INTERNAL_API_HEADER,
+} from './_shared';
 
 interface Env {
   DB: D1Database;
@@ -30,20 +38,12 @@ interface Env {
   PHASE2_ROYALTY_ADDRESS?: string;
   PHASE2_ROYALTY_PCT?: string;
   MINTGARDEN_API_KEY?: string;
+  INTERNAL_MINT_SECRET?: string;
 }
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Content-Type': 'application/json',
-};
 
 const SUPPLY_TOTAL = 4200;
 const FREE_MINT_CREDITS = 10000; // 100 credits in x100 units
 const BASE_PRICE_XCH = 0.2;
-const SURCHARGE_BASE = 0.2;
-const SURCHARGE_USES_DIVISOR = 20;
 const OFFER_EXPIRY_MINUTES = 15;
 
 const VALID_LAYER_NAMES = new Set([
@@ -52,10 +52,6 @@ const VALID_LAYER_NAMES = new Set([
 
 function isValidHex(color: string): boolean {
   return /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(color);
-}
-
-function surchargeXch(usageCount: number): number {
-  return SURCHARGE_BASE * Math.log(1 + usageCount / SURCHARGE_USES_DIVISOR);
 }
 
 interface PrepareBody {
@@ -70,31 +66,22 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
 
   if (request.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return optionsResponse();
   }
 
   if (request.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: corsHeaders,
-    });
+    return errorResponse('Method not allowed', 405);
   }
 
   if (!env.DB) {
-    return new Response(JSON.stringify({ error: 'Service not configured' }), {
-      status: 500,
-      headers: corsHeaders,
-    });
+    return errorResponse('Service not configured', 500);
   }
 
   let body: PrepareBody;
   try {
     body = await request.json();
   } catch {
-    return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
-      status: 400,
-      headers: corsHeaders,
-    });
+    return errorResponse('Invalid JSON', 400);
   }
 
   const wallet = body.walletAddress;
@@ -104,33 +91,28 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const mintType = body.mintType === 'paid' ? 'paid' : 'free';
   const collectionUuid = env.PHASE2_COLLECTION_UUID || '';
 
-  if (!wallet || !wallet.startsWith('xch1') || wallet.length < 60) {
-    return new Response(JSON.stringify({ error: 'Missing or invalid walletAddress' }), {
-      status: 400,
-      headers: corsHeaders,
-    });
+  if (!wallet || !isValidChiaAddress(wallet)) {
+    return errorResponse('Missing or invalid walletAddress', 400);
   }
   if (!imageBase64 || typeof imageBase64 !== 'string') {
-    return new Response(JSON.stringify({ error: 'Missing imageBase64' }), {
-      status: 400,
-      headers: corsHeaders,
-    });
+    return errorResponse('Missing imageBase64', 400);
   }
 
-  for (const layer of Object.keys(selectedLayers)) {
+  for (const [layer, path] of Object.entries(selectedLayers)) {
     if (!VALID_LAYER_NAMES.has(layer)) {
-      return new Response(JSON.stringify({ error: `Invalid layer: ${layer}` }), {
-        status: 400,
-        headers: corsHeaders,
-      });
+      return errorResponse(`Invalid layer: ${layer}`, 400);
+    }
+    // Validate path format: prevent directory traversal
+    if (path) {
+      const parts = path.split('/');
+      if (parts.length > 3 || parts.some(p => p === '..' || p === '.')) {
+        return errorResponse(`Invalid layer path for ${layer}`, 400);
+      }
     }
   }
   for (const [layer, color] of Object.entries(selectedColors)) {
     if (color && !isValidHex(color)) {
-      return new Response(JSON.stringify({ error: `Invalid color for ${layer}: ${color}` }), {
-        status: 400,
-        headers: corsHeaders,
-      });
+      return errorResponse(`Invalid color for ${layer}: ${color}`, 400);
     }
   }
 
@@ -150,16 +132,13 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       .first<{ id: number; offer_file: string | null; expires_at: string | null; created_at: string }>();
 
     if (existingPending) {
-      return new Response(
-        JSON.stringify({
-          pending: true,
-          mintId: existingPending.id,
-          offerFile: existingPending.offer_file,
-          expiresAt: existingPending.expires_at,
-          createdAt: existingPending.created_at,
-        }),
-        { status: 200, headers: corsHeaders }
-      );
+      return jsonResponse({
+        pending: true,
+        mintId: existingPending.id,
+        offerFile: existingPending.offer_file,
+        expiresAt: existingPending.expires_at,
+        createdAt: existingPending.created_at,
+      });
     }
 
     // Supply check
@@ -168,10 +147,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     ).first<{ count: number }>();
     const mintedCount = supplyRow?.count ?? 0;
     if (mintedCount >= SUPPLY_TOTAL) {
-      return new Response(JSON.stringify({ error: 'Sold out', supply: { minted: mintedCount, total: SUPPLY_TOTAL } }), {
-        status: 400,
-        headers: corsHeaders,
-      });
+      return jsonResponse({ error: 'Sold out', supply: { minted: mintedCount, total: SUPPLY_TOTAL } }, 400);
     }
 
     // Credit check for free mints
@@ -185,10 +161,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         .first<{ balance: number }>();
       const balance = balanceRow?.balance ?? 0;
       if (balance < FREE_MINT_CREDITS) {
-        return new Response(JSON.stringify({ error: 'Insufficient credits', balance: balance / 100 }), {
-          status: 400,
-          headers: corsHeaders,
-        });
+        return jsonResponse({ error: 'Insufficient credits', balance: balance / 100 }, 400);
       }
     }
 
@@ -222,18 +195,20 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     };
 
     // ── IPFS Upload ──
+    // TODO: Extract upload logic into shared function to eliminate self-fetch
     const uploadUrl = new URL('/api/mint/upload', request.url).toString();
+    const uploadHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (env.INTERNAL_MINT_SECRET) {
+      uploadHeaders[INTERNAL_API_HEADER] = env.INTERNAL_MINT_SECRET;
+    }
     const uploadRes = await fetch(uploadUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: uploadHeaders,
       body: JSON.stringify({ imageBase64, metadata }),
     });
     if (!uploadRes.ok) {
       const err = await uploadRes.json().catch(() => ({ error: 'Upload failed' }));
-      return new Response(JSON.stringify(err), {
-        status: uploadRes.status,
-        headers: corsHeaders,
-      });
+      return jsonResponse(err, uploadRes.status);
     }
     const uploadData = (await uploadRes.json()) as {
       dataHash: string;
@@ -266,13 +241,10 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       const launcherId = mintResult.launcherId ?? null;
 
       if (!launcherId) {
-        return new Response(
-          JSON.stringify({
-            error: 'MintGarden API failed to create NFT. Please try again or contact support.',
-            errorCode: 'MINTGARDEN_FAILED',
-          }),
-          { status: 500, headers: corsHeaders }
-        );
+        return jsonResponse({
+          error: 'MintGarden API failed to create NFT. Please try again or contact support.',
+          errorCode: 'MINTGARDEN_FAILED',
+        }, 500);
       }
 
       // Insert mint record
@@ -325,16 +297,13 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           .run();
       }
 
-      return new Response(
-        JSON.stringify({
-          success: true,
-          mintType: 'free',
-          mintNumber,
-          launcherId,
-          mintgardenUrl: `https://mintgarden.io/nfts/${launcherId}`,
-        }),
-        { status: 200, headers: corsHeaders }
-      );
+      return jsonResponse({
+        success: true,
+        mintType: 'free',
+        mintNumber,
+        launcherId,
+        mintgardenUrl: `https://mintgarden.io/nfts/${launcherId}`,
+      });
     }
 
     // ═══════════════════════════════════════════════════════
@@ -355,7 +324,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       if (!path) continue;
       const traitName = path.split('/').pop()?.replace(/\.(png|webp)$/i, '') || path;
       const usage = usageMap.get(`${layer}_${traitName}`) ?? 0;
-      const surcharge = surchargeXch(usage);
+      const surcharge = sharedSurchargeXch(usage);
       if (surcharge > maxSurcharge) {
         maxSurcharge = surcharge;
         highestTrait = `${layer}_${traitName}`;
@@ -414,17 +383,14 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     const message = offerFile
       ? 'Accept the offer in your wallet before it expires.'
       : 'MintGarden offer not created (check API key and env). You can try free mint or try again later.';
-    return new Response(
-      JSON.stringify({
-        pending: true,
-        mintId: Number(mintId),
-        offerFile,
-        expiresAt,
-        totalPriceXch: Math.round(totalPriceXch * 1000) / 1000,
-        message,
-      }),
-      { status: 200, headers: corsHeaders }
-    );
+    return jsonResponse({
+      pending: true,
+      mintId: Number(mintId),
+      offerFile,
+      expiresAt,
+      totalPriceXch: Math.round(totalPriceXch * 1000) / 1000,
+      message,
+    });
   } catch (error) {
     console.error('[Mint Prepare] Error:', error);
     try {
@@ -438,9 +404,6 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     } catch {
       // Audit logging failure must not break error response
     }
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
-      status: 500,
-      headers: corsHeaders,
-    });
+    return errorResponse('Internal server error', 500);
   }
 };

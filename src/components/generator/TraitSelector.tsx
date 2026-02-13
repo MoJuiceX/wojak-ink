@@ -12,15 +12,15 @@ import { useLayout } from '@/hooks/useLayout';
 import { useGenerator } from '@/contexts/GeneratorContext';
 import { traitGridVariants, traitCardStaggerVariants } from '@/config/generatorAnimations';
 import { getG2DefaultColor } from '@/config/g2DefaultColors';
-import { getPreviewColorForLayeredFill, isLayerFill } from '@/utils/layeredTraitPreviewColors';
-import { getDerivedColor, getFlagSvgDataUrl } from '@/services/canvasRenderer';
 import { MouthLayerSelector } from './MouthLayerSelector';
 import { G2TraitPanel } from './G2TraitPanel';
+import { G2TraitCardPreview } from './G2TraitCardPreview';
 import { ColorPicker } from './ColorPicker';
 import type { LayerImage } from '@/services/generatorService';
 import type { UnifiedTrait } from '@/services/generatorService';
 import { BASE_CLOTHES_MAP, DEFAULT_CLOTHES_PATH } from '@/config/layers';
 import { BEER_HAT_COMPATIBLE_HEADS } from '@/lib/generatorTraitIds';
+import { isSelectionPathEmpty } from '@/types/generator';
 
 interface TraitSelectorProps {
   className?: string;
@@ -136,8 +136,20 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick }: I
           loading="lazy"
         />
       </div>
+      {/* Disabled info badge */}
+      {isDisabled && disabledReason && (
+        <div
+          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
+          style={{ background: 'rgba(0, 0, 0, 0.7)', border: '1px solid var(--color-border)' }}
+          title={disabledReason}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+          </svg>
+        </div>
+      )}
       {/* Check mark with pop animation */}
-      {isSelected && (
+      {isSelected && !isDisabled && (
         <motion.div
           className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
           style={{ background: 'var(--generator-badge-color, #F97316)' }}
@@ -226,8 +238,20 @@ function BaseImageCard({ image, isSelected, isDisabled, disabledReason, onClick 
           loading="lazy"
         />
       </div>
+      {/* Disabled info badge */}
+      {isDisabled && disabledReason && (
+        <div
+          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
+          style={{ background: 'rgba(0, 0, 0, 0.7)', border: '1px solid var(--color-border)' }}
+          title={disabledReason}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+          </svg>
+        </div>
+      )}
       {/* Check mark with pop animation */}
-      {isSelected && (
+      {isSelected && !isDisabled && (
         <motion.div
           className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
           style={{ background: 'var(--generator-badge-color, #F97316)' }}
@@ -299,7 +323,19 @@ function SolidColorBackgroundCard({ color, isSelected, isDisabled, disabledReaso
       >
         Solid color
       </div>
-      {isSelected && (
+      {/* Disabled info badge */}
+      {isDisabled && disabledReason && (
+        <div
+          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
+          style={{ background: 'rgba(0, 0, 0, 0.7)', border: '1px solid var(--color-border)' }}
+          title={disabledReason}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+          </svg>
+        </div>
+      )}
+      {isSelected && !isDisabled && (
         <motion.div
           className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
           style={{ background: 'var(--generator-badge-color, #F97316)' }}
@@ -382,7 +418,19 @@ function LayerWithBaseMouthCard({ image, isSelected, isDisabled, disabledReason,
           loading="lazy"
         />
       </div>
-      {isSelected && (
+      {/* Disabled info badge */}
+      {isDisabled && disabledReason && (
+        <div
+          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
+          style={{ background: 'rgba(0, 0, 0, 0.7)', border: '1px solid var(--color-border)' }}
+          title={disabledReason}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+          </svg>
+        </div>
+      )}
+      {isSelected && !isDisabled && (
         <motion.div
           className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
           style={{ background: 'var(--generator-badge-color, #F97316)' }}
@@ -449,8 +497,20 @@ function ClothesImageCard({ image, isSelected, isDisabled, disabledReason, onCli
           loading="lazy"
         />
       </div>
+      {/* Disabled info badge */}
+      {isDisabled && disabledReason && (
+        <div
+          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
+          style={{ background: 'rgba(0, 0, 0, 0.7)', border: '1px solid var(--color-border)' }}
+          title={disabledReason}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+          </svg>
+        </div>
+      )}
       {/* Check mark with pop animation */}
-      {isSelected && (
+      {isSelected && !isDisabled && (
         <motion.div
           className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
           style={{ background: 'var(--generator-badge-color, #F97316)' }}
@@ -472,6 +532,8 @@ function ClothesImageCard({ image, isSelected, isDisabled, disabledReason, onCli
 interface G2TraitCardProps {
   trait: UnifiedTrait;
   isSelected: boolean;
+  isDisabled?: boolean;
+  disabledReason?: string | null;
   onClick: () => void;
   /** When true, render blue Tee between Base and Mouth (Head, Mask, Eyes) */
   needsClothesUnderlay?: boolean;
@@ -481,43 +543,8 @@ interface G2TraitCardProps {
   livePreviewUrl?: string | null;
 }
 
-export function G2TraitCard({ trait, isSelected, onClick, needsClothesUnderlay, isBeerHatUnderlayer, livePreviewUrl }: G2TraitCardProps) {
+export function G2TraitCard({ trait, isSelected, isDisabled, disabledReason, onClick, needsClothesUnderlay, isBeerHatUnderlayer, livePreviewUrl }: G2TraitCardProps) {
   const prefersReducedMotion = useReducedMotion();
-  const basePath = '/assets/wojak-layers/YourWojak-layers';
-  // Layered colorable (e.g. Ninja-turtle-fit, Military jacket): base + layers in draw order
-  const layeredColorableLayers = trait.colorable && trait.layers?.length && trait.layers.some((l: { type: string }) => l.type === 'fill')
-    ? [...trait.layers].filter((l: { visible?: boolean }) => l.visible !== false).sort((a: { pos: number }, b: { pos: number }) => a.pos - b.pos)
-    : null;
-  // Ninja-turtle-fit: fill3, outline2 under base; fill1, fill2, outline1 over base (matches canvas renderer)
-  const isNinjaTurtleFit = trait.id === 'Clothes_Ninja-turtle-fit';
-  const ninjaUnderBase = isNinjaTurtleFit && layeredColorableLayers ? layeredColorableLayers.filter((l: { pos: number }) => l.pos <= 1) : [];
-  const ninjaOverBase = isNinjaTurtleFit && layeredColorableLayers ? layeredColorableLayers.filter((l: { pos: number }) => l.pos >= 2) : [];
-  // Composite with layers: show base + all layers stacked (underBase, base, overBase)
-  const compositeLayers = trait.composite && trait.layers?.length
-    ? [...trait.layers].filter(l => l.visible !== false).sort((a, b) => a.pos - b.pos)
-    : null;
-  const underBase = compositeLayers?.filter(l => l.underBase) ?? [];
-  const overBase = compositeLayers?.filter(l => !l.underBase) ?? [];
-  const singleThumbnail = !compositeLayers && !layeredColorableLayers
-    ? (trait.outlineFile ? `${basePath}/${trait.outlineFile}` : trait.layer0File ? `${basePath}/${trait.layer0File}` : '')
-    : null;
-  // Colorable single-fill (e.g. Sonic suit): show fill with default color + outline so preview looks correct
-  const colorableSingleFill =
-    !compositeLayers &&
-    !layeredColorableLayers &&
-    trait.colorable &&
-    trait.fillFile &&
-    trait.outlineFile &&
-    (trait.defaultColor ?? trait.defaultColors?.[0]);
-  // Colorable dual-fill from fillFiles (e.g. Suit: fill0 suit, fill1 tie/bow)
-  const colorableDualFill =
-    !compositeLayers &&
-    !layeredColorableLayers &&
-    trait.colorable &&
-    (trait.fillFiles?.length ?? 0) >= 2 &&
-    (trait.outlineFile || trait.outlineFiles?.[0]) &&
-    ((trait.defaultColors?.length ?? 0) >= 2 || trait.defaultColor);
-
   return (
     <motion.button
       className="w-full aspect-square relative rounded-xl overflow-hidden p-1"
@@ -529,448 +556,19 @@ export function G2TraitCard({ trait, isSelected, onClick, needsClothesUnderlay, 
         boxShadow: isSelected
           ? '0 0 20px rgba(0, 212, 255, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3)'
           : '0 2px 8px rgba(0, 0, 0, 0.2)',
+        opacity: isDisabled ? 0.5 : 1,
+        cursor: isDisabled ? 'not-allowed' : 'pointer',
         transition: 'all 0.3s ease',
       }}
-      whileHover={prefersReducedMotion ? undefined : { scale: 1.03 }}
-      whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
+      whileHover={prefersReducedMotion || isDisabled ? undefined : { scale: 1.03 }}
+      whileTap={prefersReducedMotion || isDisabled ? undefined : { scale: 0.98 }}
       transition={{ duration: 0.2 }}
       onClick={onClick}
+      disabled={isDisabled}
+      title={isDisabled && disabledReason ? disabledReason : undefined}
     >
       <div className="relative w-full h-full rounded-lg overflow-hidden trait-card-image-bg">
-        {livePreviewUrl ? (
-          <img src={livePreviewUrl} alt={trait.name} className="absolute inset-0 w-full h-full object-contain" loading="lazy" />
-        ) : isNinjaTurtleFit && ninjaUnderBase.length > 0 ? (
-          <>
-            {ninjaUnderBase.map((l: { key: string; file: string; type?: string }) =>
-              isLayerFill(l) ? (
-                <div key={l.key} className="absolute inset-0 w-full h-full" style={{ isolation: 'isolate' }}>
-                  <img src={`${basePath}/${l.file}`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-                  <div
-                    className="absolute inset-0 w-full h-full"
-                    style={{
-                      background: getPreviewColorForLayeredFill(trait, l.key),
-                      mixBlendMode: 'multiply',
-                      pointerEvents: 'none',
-                      maskImage: `url(${basePath}/${l.file})`,
-                      WebkitMaskImage: `url(${basePath}/${l.file})`,
-                      maskSize: 'cover',
-                      WebkitMaskSize: 'cover',
-                      maskPosition: 'center',
-                      WebkitMaskPosition: 'center',
-                      maskRepeat: 'no-repeat',
-                      WebkitMaskRepeat: 'no-repeat',
-                    }}
-                  />
-                </div>
-              ) : (
-                <img key={l.key} src={`${basePath}/${l.file}`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-              )
-            )}
-            <img src={DEFAULT_BASE_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {needsClothesUnderlay && (
-              <img src={DEFAULT_CLOTHES_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            )}
-            <img src={DEFAULT_MOUTH_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {ninjaOverBase.map((l: { key: string; file: string; type?: string }) =>
-              isLayerFill(l) ? (
-                <div key={l.key} className="absolute inset-0 w-full h-full" style={{ isolation: 'isolate' }}>
-                  <img src={`${basePath}/${l.file}`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-                  <div
-                    className="absolute inset-0 w-full h-full"
-                    style={{
-                      background: getPreviewColorForLayeredFill(trait, l.key),
-                      mixBlendMode: 'multiply',
-                      pointerEvents: 'none',
-                      maskImage: `url(${basePath}/${l.file})`,
-                      WebkitMaskImage: `url(${basePath}/${l.file})`,
-                      maskSize: 'cover',
-                      WebkitMaskSize: 'cover',
-                      maskPosition: 'center',
-                      WebkitMaskPosition: 'center',
-                      maskRepeat: 'no-repeat',
-                      WebkitMaskRepeat: 'no-repeat',
-                    }}
-                  />
-                </div>
-              ) : (
-                <img key={l.key} src={`${basePath}/${l.file}`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-              )
-            )}
-          </>
-        ) : layeredColorableLayers ? (
-          <>
-            <img src={DEFAULT_BASE_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {needsClothesUnderlay && (
-              <img src={DEFAULT_CLOTHES_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            )}
-            <img src={DEFAULT_MOUTH_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {layeredColorableLayers.map((l: { key: string; file: string; type?: string }) =>
-              isLayerFill(l) ? (
-                <div key={l.key} className="absolute inset-0 w-full h-full" style={{ isolation: 'isolate' }}>
-                  <img src={`${basePath}/${l.file}`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-                  <div
-                    className="absolute inset-0 w-full h-full"
-                    style={{
-                      background: getPreviewColorForLayeredFill(trait, l.key),
-                      mixBlendMode: 'multiply',
-                      pointerEvents: 'none',
-                      maskImage: `url(${basePath}/${l.file})`,
-                      WebkitMaskImage: `url(${basePath}/${l.file})`,
-                      maskSize: 'cover',
-                      WebkitMaskSize: 'cover',
-                      maskPosition: 'center',
-                      WebkitMaskPosition: 'center',
-                      maskRepeat: 'no-repeat',
-                      WebkitMaskRepeat: 'no-repeat',
-                    }}
-                  />
-                </div>
-              ) : (
-                <img key={l.key} src={`${basePath}/${l.file}`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-              )
-            )}
-          </>
-        ) : compositeLayers ? (
-          <>
-            {underBase.map((l) => (
-              <img key={l.key} src={`${basePath}/${l.file}`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            ))}
-            <img src={DEFAULT_BASE_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {needsClothesUnderlay && (
-              <img src={DEFAULT_CLOTHES_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            )}
-            {overBase.map((l) => (
-              <img key={l.key} src={`${basePath}/${l.file}`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            ))}
-            <img src={DEFAULT_MOUTH_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-          </>
-        ) : trait.id === 'Face-wear_MOG-Glasses' && trait.outlineFile ? (
-          <>
-            <img src={DEFAULT_BASE_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {needsClothesUnderlay && (
-              <img src={DEFAULT_CLOTHES_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            )}
-            <img src={DEFAULT_MOUTH_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {/* MOG: default layer (rainbow) under outline */}
-            <img
-              src={`${basePath}/${trait.detailOptions?.find(d => d.name === 'Default (Rainbow)')?.file ?? 'Face-wear_MOG-Glasses_detail_default.png'}`}
-              alt=""
-              className="absolute inset-0 w-full h-full object-cover"
-              loading="lazy"
-            />
-            <img src={`${basePath}/${trait.outlineFile}`} alt={trait.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-          </>
-        ) : trait.id === 'Clothes_Chia-farmer' ? (
-          <>
-            <img src={DEFAULT_BASE_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            <img src={DEFAULT_MOUTH_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {/* Tee under layer */}
-            <div className="absolute inset-0 w-full h-full" style={{ isolation: 'isolate' }}>
-              <img src={`${basePath}/Clothes_Tee_fill.png`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-              <div
-                className="absolute inset-0 w-full h-full"
-                style={{
-                  background: getG2DefaultColor(trait.id, 'fill1', trait, '#2563EB'),
-                  mixBlendMode: 'multiply',
-                  pointerEvents: 'none',
-                  maskImage: `url(${basePath}/Clothes_Tee_fill.png)`,
-                  WebkitMaskImage: `url(${basePath}/Clothes_Tee_fill.png)`,
-                  maskSize: 'cover',
-                  WebkitMaskSize: 'cover',
-                  maskPosition: 'center',
-                  WebkitMaskPosition: 'center',
-                  maskRepeat: 'no-repeat',
-                  WebkitMaskRepeat: 'no-repeat',
-                }}
-              />
-            </div>
-            <img src={`${basePath}/Clothes_Tee_outline.png`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {/* Chia Farmer outfit */}
-            <div className="absolute inset-0 w-full h-full" style={{ isolation: 'isolate' }}>
-              <img src={`${basePath}/${trait.fillFile}`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-              <div
-                className="absolute inset-0 w-full h-full"
-                style={{
-                  background: getG2DefaultColor(trait.id, 'fill0', trait, '#22c55e'),
-                  mixBlendMode: 'multiply',
-                  pointerEvents: 'none',
-                  maskImage: `url(${basePath}/${trait.fillFile})`,
-                  WebkitMaskImage: `url(${basePath}/${trait.fillFile})`,
-                  maskSize: 'cover',
-                  WebkitMaskSize: 'cover',
-                  maskPosition: 'center',
-                  WebkitMaskPosition: 'center',
-                  maskRepeat: 'no-repeat',
-                  WebkitMaskRepeat: 'no-repeat',
-                }}
-              />
-            </div>
-            <img src={`${basePath}/${trait.outlineFile}`} alt={trait.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-          </>
-        ) : trait.colorable && trait.fill1File && trait.fill2File && trait.outlineFile ? (
-          <>
-            <img src={DEFAULT_BASE_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {needsClothesUnderlay && (
-              <img src={DEFAULT_CLOTHES_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            )}
-            <img src={DEFAULT_MOUTH_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {/* Super Saiyan: fill1 + fill2 */}
-            <div className="absolute inset-0 w-full h-full" style={{ isolation: 'isolate' }}>
-              <img src={`${basePath}/${trait.fill1File}`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-              <div
-                className="absolute inset-0 w-full h-full"
-                style={{
-                  background: getG2DefaultColor(trait.id, 'fill1', trait, '#2563EB'),
-                  mixBlendMode: 'multiply',
-                  pointerEvents: 'none',
-                  maskImage: `url(${basePath}/${trait.fill1File})`,
-                  WebkitMaskImage: `url(${basePath}/${trait.fill1File})`,
-                  maskSize: 'cover',
-                  WebkitMaskSize: 'cover',
-                  maskPosition: 'center',
-                  WebkitMaskPosition: 'center',
-                  maskRepeat: 'no-repeat',
-                  WebkitMaskRepeat: 'no-repeat',
-                }}
-              />
-            </div>
-            <div className="absolute inset-0 w-full h-full" style={{ isolation: 'isolate' }}>
-              <img src={`${basePath}/${trait.fill2File}`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-              <div
-                className="absolute inset-0 w-full h-full"
-                style={{
-                  background: trait.id === 'Clothes_SWAT'
-                    ? getDerivedColor(getG2DefaultColor(trait.id, 'fill1', trait, '#A020F0'), 'darker_shade', 10)
-                    : getG2DefaultColor(trait.id, 'fill2', trait, '#f97316'),
-                  mixBlendMode: 'multiply',
-                  pointerEvents: 'none',
-                  maskImage: `url(${basePath}/${trait.fill2File})`,
-                  WebkitMaskImage: `url(${basePath}/${trait.fill2File})`,
-                  maskSize: 'cover',
-                  WebkitMaskSize: 'cover',
-                  maskPosition: 'center',
-                  WebkitMaskPosition: 'center',
-                  maskRepeat: 'no-repeat',
-                  WebkitMaskRepeat: 'no-repeat',
-                }}
-              />
-            </div>
-            {/* SWAT: always show detail1 (cig pack) under outline */}
-            {trait.id === 'Clothes_SWAT' && trait.detailOptions?.[0]?.file && (
-              <img src={`${basePath}/${trait.detailOptions[0].file}`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            )}
-            <img src={`${basePath}/${trait.outlineFile}`} alt={trait.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-          </>
-        ) : trait.id === 'Face-wear_VR-headset' && trait.fillFiles && trait.fillFiles.length >= 4 && trait.outlineFile ? (
-          <>
-            <img src={DEFAULT_BASE_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {needsClothesUnderlay && (
-              <img src={DEFAULT_CLOTHES_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            )}
-            <img src={DEFAULT_MOUTH_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {/* VR headset: fill0 = user color, fill1-3 = darker shade of fill0 */}
-            {trait.fillFiles.map((file, i) => {
-              const baseColor = getG2DefaultColor(trait.id, 'fill0', trait, '#FFFF00');
-              const color = i === 0 ? baseColor : getDerivedColor(baseColor, 'darker_shade', 5);
-              return (
-                <div key={file} className="absolute inset-0 w-full h-full" style={{ isolation: 'isolate' }}>
-                  <img src={`${basePath}/${file}`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-                  <div
-                    className="absolute inset-0 w-full h-full"
-                    style={{
-                      background: color,
-                      mixBlendMode: 'multiply',
-                      pointerEvents: 'none',
-                      maskImage: `url(${basePath}/${file})`,
-                      WebkitMaskImage: `url(${basePath}/${file})`,
-                      maskSize: 'cover',
-                      WebkitMaskSize: 'cover',
-                      maskPosition: 'center',
-                      WebkitMaskPosition: 'center',
-                      maskRepeat: 'no-repeat',
-                      WebkitMaskRepeat: 'no-repeat',
-                    }}
-                  />
-                </div>
-              );
-            })}
-            <img src={`${basePath}/${trait.outlineFile}`} alt={trait.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-          </>
-        ) : colorableDualFill ? (
-          <>
-            <img src={DEFAULT_BASE_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {needsClothesUnderlay && (
-              <img src={DEFAULT_CLOTHES_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            )}
-            <img src={DEFAULT_MOUTH_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {/* Suit: fill0 (suit) + fill1 (tie/bow) from fillFiles */}
-            <div className="absolute inset-0 w-full h-full" style={{ isolation: 'isolate' }}>
-              <img src={`${basePath}/${trait.fillFiles![0]}`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-              <div
-                className="absolute inset-0 w-full h-full"
-                style={{
-                  background: getG2DefaultColor(trait.id, 'fill0', trait, trait.defaultColors?.[0] ?? '#171717'),
-                  mixBlendMode: 'multiply',
-                  pointerEvents: 'none',
-                  maskImage: `url(${basePath}/${trait.fillFiles![0]})`,
-                  WebkitMaskImage: `url(${basePath}/${trait.fillFiles![0]})`,
-                  maskSize: 'cover',
-                  WebkitMaskSize: 'cover',
-                  maskPosition: 'center',
-                  WebkitMaskPosition: 'center',
-                  maskRepeat: 'no-repeat',
-                  WebkitMaskRepeat: 'no-repeat',
-                }}
-              />
-            </div>
-            <div className="absolute inset-0 w-full h-full" style={{ isolation: 'isolate' }}>
-              <img src={`${basePath}/${trait.fillFiles![1]}`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-              <div
-                className="absolute inset-0 w-full h-full"
-                style={{
-                  background: getG2DefaultColor(trait.id, 'fill1', trait, trait.defaultColors?.[1] ?? '#2563EB'),
-                  mixBlendMode: 'multiply',
-                  pointerEvents: 'none',
-                  maskImage: `url(${basePath}/${trait.fillFiles![1]})`,
-                  WebkitMaskImage: `url(${basePath}/${trait.fillFiles![1]})`,
-                  maskSize: 'cover',
-                  WebkitMaskSize: 'cover',
-                  maskPosition: 'center',
-                  WebkitMaskPosition: 'center',
-                  maskRepeat: 'no-repeat',
-                  WebkitMaskRepeat: 'no-repeat',
-                }}
-              />
-            </div>
-            <img
-              src={`${basePath}/${trait.outlineFile ?? trait.outlineFiles![0]}`}
-              alt={trait.name}
-              className="absolute inset-0 w-full h-full object-cover"
-              loading="lazy"
-            />
-          </>
-        ) : trait.id === 'Head_Construction-Helmet' && trait.fillFile && trait.outlineFile ? (
-          <>
-            <img src={DEFAULT_BASE_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {needsClothesUnderlay && (
-              <img src={DEFAULT_CLOTHES_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            )}
-            <img src={DEFAULT_MOUTH_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {/* Fill with default color */}
-            <div className="absolute inset-0 w-full h-full" style={{ isolation: 'isolate' }}>
-              <img src={`${basePath}/${trait.fillFile}`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-              <div
-                className="absolute inset-0 w-full h-full"
-                style={{
-                  background: getG2DefaultColor(trait.id, 'fill', trait, trait.defaultColor ?? '#FFFF00'),
-                  mixBlendMode: 'multiply',
-                  pointerEvents: 'none',
-                  maskImage: `url(${basePath}/${trait.fillFile})`,
-                  WebkitMaskImage: `url(${basePath}/${trait.fillFile})`,
-                  maskSize: 'cover',
-                  WebkitMaskSize: 'cover',
-                  maskPosition: 'center',
-                  WebkitMaskPosition: 'center',
-                  maskRepeat: 'no-repeat',
-                  WebkitMaskRepeat: 'no-repeat',
-                }}
-              />
-            </div>
-            <img src={`${basePath}/${trait.outlineFile}`} alt={trait.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {/* Default details: Chia logo ON + cigarette pack (cig-pack.png) */}
-            {(() => {
-              const chiaFile = trait.detailOptions?.find(d => d.file.includes('chia-logo'))?.file;
-              const cigFile = trait.detailOptions?.find(d => d.file.endsWith('cig-pack.png'))?.file ?? 'Head_Construction-Helmet_detail_cig-pack.png';
-              return (
-                <>
-                  {chiaFile && <img src={`${basePath}/${chiaFile}`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />}
-                  <img src={`${basePath}/${cigFile}`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-                </>
-              );
-            })()}
-          </>
-        ) : trait.id === 'Clothes_Astronaut' && colorableSingleFill ? (
-          <>
-            <img src={DEFAULT_BASE_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            <img src={DEFAULT_MOUTH_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {/* White suit (default) */}
-            <img src={`${basePath}/Clothes_Astronaut_default.png`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {/* Coin logo (CAT) — circle at 35.5%,91.2% r=6.8% of 1000x1000 */}
-            <div className="absolute" style={{ left: '28.7%', top: '84.4%', width: '13.6%', height: '13.6%', borderRadius: '50%', overflow: 'hidden' }}>
-              <img src="/assets/wojak-layers/CHIA_coin_logos/CAT.webp" alt="" className="w-full h-full object-cover" loading="lazy" />
-            </div>
-            {/* Frame overlays (logo frame + flag frame) */}
-            <img src={`${basePath}/Clothes_Astronaut_detail1.1.png`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {/* US flag — rect at 62.6%,86.1% w=13.4% h=9.2% */}
-            <div className="absolute" style={{ left: '62.6%', top: '86.1%', width: '13.4%', height: '9.2%', overflow: 'hidden', borderRadius: '2px' }}>
-              <img src={getFlagSvgDataUrl('us', 134, 92)} alt=""
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <img src={`${basePath}/Clothes_Astronaut_detail2.2.png`} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            <img src={`${basePath}/Clothes_Astronaut_outline.png`} alt={trait.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-          </>
-        ) : colorableSingleFill ? (
-          <>
-            <img src={DEFAULT_BASE_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {needsClothesUnderlay && (
-              <img src={DEFAULT_CLOTHES_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            )}
-            <img src={DEFAULT_MOUTH_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {/* Fill with default color only; mask overlay to fill alpha so no background tint, base face shows through */}
-            <div className="absolute inset-0 w-full h-full" style={{ isolation: 'isolate' }}>
-              <img
-                src={`${basePath}/${trait.fillFile}`}
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover"
-                loading="lazy"
-              />
-              <div
-                className="absolute inset-0 w-full h-full"
-                style={{
-                  background: getG2DefaultColor(trait.id, 'fill', trait, trait.defaultColor ?? trait.defaultColors?.[0] ?? '#2563EB'),
-                  mixBlendMode: 'multiply',
-                  pointerEvents: 'none',
-                  maskImage: `url(${basePath}/${trait.fillFile})`,
-                  WebkitMaskImage: `url(${basePath}/${trait.fillFile})`,
-                  maskSize: 'cover',
-                  WebkitMaskSize: 'cover',
-                  maskPosition: 'center',
-                  WebkitMaskPosition: 'center',
-                  maskRepeat: 'no-repeat',
-                  WebkitMaskRepeat: 'no-repeat',
-                }}
-              />
-            </div>
-            <img src={`${basePath}/${trait.outlineFile}`} alt={trait.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-          </>
-        ) : singleThumbnail ? (
-          <>
-            <img src={DEFAULT_BASE_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {needsClothesUnderlay && (
-              <img src={DEFAULT_CLOTHES_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            )}
-            <img src={DEFAULT_MOUTH_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            <img src={singleThumbnail} alt={trait.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-          </>
-        ) : (
-          <>
-            {/* Fallback: always show base + mouth + any trait image we can find */}
-            <img src={DEFAULT_BASE_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {needsClothesUnderlay && (
-              <img src={DEFAULT_CLOTHES_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            )}
-            <img src={DEFAULT_MOUTH_PATH} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            {(() => {
-              const fallbackSrc =
-                trait.outlineFile ? `${basePath}/${trait.outlineFile}` :
-                trait.layer0File ? `${basePath}/${trait.layer0File}` :
-                trait.fillFile ? `${basePath}/${trait.fillFile}` :
-                trait.layers?.[0]?.file ? `${basePath}/${trait.layers[0].file}` : null;
-              return fallbackSrc ? <img src={fallbackSrc} alt={trait.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" /> : null;
-            })()}
-          </>
-        )}
+        <G2TraitCardPreview trait={trait} needsClothesUnderlay={needsClothesUnderlay} livePreviewUrl={livePreviewUrl} />
       </div>
       {/* Beer Hat under layer badge */}
       {isBeerHatUnderlayer && (
@@ -981,8 +579,20 @@ export function G2TraitCard({ trait, isSelected, onClick, needsClothesUnderlay, 
           Under
         </span>
       )}
+      {/* Disabled info badge */}
+      {isDisabled && disabledReason && (
+        <div
+          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
+          style={{ background: 'rgba(0, 0, 0, 0.7)', border: '1px solid var(--color-border)' }}
+          title={disabledReason}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+          </svg>
+        </div>
+      )}
       {/* Selected check */}
-      {isSelected && (
+      {isSelected && !isDisabled && (
         <motion.div
           className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
           style={{ background: 'var(--generator-badge-color, #F97316)' }}
@@ -1209,7 +819,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                 variants={prefersReducedMotion ? undefined : traitCardStaggerVariants}
               >
                 <NoneCard
-                  isSelected={!selectedPath || selectedPath === '' || selectedPath === 'None'}
+                  isSelected={isSelectionPathEmpty(selectedPath)}
                   onClick={handleClearSelection}
                 />
               </motion.div>
@@ -1235,6 +845,8 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                     <G2TraitCard
                       trait={trait}
                       isSelected={!!isSelected}
+                      isDisabled={!!disabled}
+                      disabledReason={reason}
                       onClick={() => handleTraitClick(trait)}
                       needsClothesUnderlay={['Head', 'Mask', 'Eyes'].includes(activeLayer)}
                       isBeerHatUnderlayer={activeLayer === 'Head' && g2Sel?.traitId === 'Head_Beer-Hat' && g2Sel.beerHatUnderlayer === trait.id}

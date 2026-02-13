@@ -334,7 +334,12 @@ export function GeneratorRightPanel() {
         defaultColor: isG2Colorable ? defaultColor : undefined,
         onReset: isMilitaryBeretG2 && g2Trait?.g1Path
           ? () => selectLayer('Head', g2Trait.g1Path!)
-          : undefined,
+          : g2Sel?.traitId === 'Head_Cap'
+            ? () => {
+                if (primarySlot) setG2Color(activeLayer, primarySlot, defaultColor ?? '#228B22');
+                setG2Detail(activeLayer, '');
+              }
+            : undefined,
       }
     : {
         selectedColor:
@@ -394,18 +399,7 @@ export function GeneratorRightPanel() {
             </p>
             <div className="flex flex-wrap gap-2">
               {allColorSlots.map((slot, index) => {
-                const label =
-                  slot === 'fill'
-                    ? 'Fill'
-                    : slot === 'fill0'
-                      ? 'Fill 1'
-                      : slot === 'fill1'
-                        ? 'Fill 2'
-                        : slot === 'fill2'
-                          ? 'Fill 3'
-                          : slot === 'fill3'
-                            ? 'Fill 4'
-                            : `Fill ${index + 1}`;
+                const label = allColorSlots.length === 1 ? 'Fill' : `Fill ${index + 1}`;
                 const isActive = primarySlot === slot;
                 return (
                   <button
@@ -414,7 +408,11 @@ export function GeneratorRightPanel() {
                     className={`flex-1 whitespace-nowrap px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                       isActive ? 'btn btn-primary' : 'btn btn-ghost'
                     }`}
-                    onClick={() => setG2Detail(activeLayer, undefined, undefined, undefined, undefined, undefined, undefined, slot)}
+                    onClick={() => {
+                      // Comrad Hat: clicking star fill (fill3) clears coin logo so the star reappears
+                      const clearLogo = g2Sel?.traitId === 'Head_Comrad-Hat' && slot === 'fill3' ? '' : undefined;
+                      setG2Detail(activeLayer, undefined, undefined, clearLogo, undefined, undefined, undefined, slot);
+                    }}
                   >
                     {label}
                   </button>
@@ -550,7 +548,21 @@ export function GeneratorRightPanel() {
                 onDetailSelect={(file, frameFile) => {
                   const underG2 = g2Selections.Head?.beerHatUnderlayerG2;
                   if (!underG2) return;
-                  const updated = { ...underG2, detailOption: file ?? '', frameOption: frameFile ?? '' };
+                  // Atomic: set detail AND clear logoOption in one dispatch
+                  const updated = { ...underG2, detailOption: file ?? '', frameOption: frameFile ?? '', logoOption: file ? '' : underG2.logoOption };
+                  setG2Detail('Head', undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, updated);
+                }}
+                onLogoSelect={(logoName) => {
+                  const underG2 = g2Selections.Head?.beerHatUnderlayerG2;
+                  if (!underG2) return;
+                  // Atomic: set logoOption AND clear detailOption in one dispatch
+                  const updated = { ...underG2, logoOption: logoName, detailOption: logoName ? '' : underG2.detailOption };
+                  setG2Detail('Head', undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, updated);
+                }}
+                onVariantSelect={(variantFile) => {
+                  const underG2 = g2Selections.Head?.beerHatUnderlayerG2;
+                  if (!underG2) return;
+                  const updated = { ...underG2, variant: variantFile };
                   setG2Detail('Head', undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, updated);
                 }}
                 onConstructionHelmetUpdate={(chiaLogo, cigPack) => {

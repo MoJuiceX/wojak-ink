@@ -13,17 +13,15 @@
  */
 
 import { logMintStep } from './auditHelper';
+import {
+  jsonResponse,
+  errorResponse,
+  optionsResponse,
+} from './_shared';
 
 interface Env {
   DB: D1Database;
 }
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Content-Type': 'application/json',
-};
 
 interface PendingRow {
   id: number;
@@ -38,39 +36,27 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
 
   if (request.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return optionsResponse();
   }
 
   if (request.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: corsHeaders,
-    });
+    return errorResponse('Method not allowed', 405);
   }
 
   if (!env.DB) {
-    return new Response(JSON.stringify({ error: 'Service not configured' }), {
-      status: 500,
-      headers: corsHeaders,
-    });
+    return errorResponse('Service not configured', 500);
   }
 
   let body: { mintId?: number; walletAddress?: string; launcherId?: string };
   try {
     body = await request.json();
   } catch {
-    return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
-      status: 400,
-      headers: corsHeaders,
-    });
+    return errorResponse('Invalid JSON', 400);
   }
 
   const mintId = body.mintId != null ? Number(body.mintId) : NaN;
   if (!Number.isInteger(mintId) || mintId < 1) {
-    return new Response(JSON.stringify({ error: 'Missing or invalid mintId' }), {
-      status: 400,
-      headers: corsHeaders,
-    });
+    return errorResponse('Missing or invalid mintId', 400);
   }
 
   const callerWallet = body.walletAddress;
@@ -84,30 +70,21 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       .first<PendingRow>();
 
     if (!row) {
-      return new Response(JSON.stringify({ error: 'Pending mint not found or already confirmed' }), {
-        status: 404,
-        headers: corsHeaders,
-      });
+      return errorResponse('Pending mint not found or already confirmed', 404);
     }
 
     // Verify caller owns this mint (prevent unauthorized confirmation)
     if (callerWallet && callerWallet !== row.wallet_address) {
-      return new Response(JSON.stringify({ error: 'Wallet address does not match this mint' }), {
-        status: 403,
-        headers: corsHeaders,
-      });
+      return errorResponse('Wallet address does not match this mint', 403);
     }
 
     const launcherId = body.launcherId ?? row.mintgarden_launcher_id;
     if (!launcherId) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          pending: true,
-          message: 'NFT not yet confirmed. Provide launcherId once the NFT appears in your wallet.',
-        }),
-        { status: 200, headers: corsHeaders }
-      );
+      return jsonResponse({
+        success: false,
+        pending: true,
+        message: 'NFT not yet confirmed. Provide launcherId once the NFT appears in your wallet.',
+      });
     }
 
     // mint_number was already assigned at prepare time — use it directly
@@ -146,31 +123,25 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       data: { mint_number: mintNumber, launcher_id: launcherId, wallet: row.wallet_address },
     });
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        mintNumber,
-        launcherId,
-        mintgardenUrl: `https://mintgarden.io/nfts/${launcherId}`,
-      }),
-      { status: 200, headers: corsHeaders }
-    );
+    return jsonResponse({
+      success: true,
+      mintNumber,
+      launcherId,
+      mintgardenUrl: `https://mintgarden.io/nfts/${launcherId}`,
+    });
   } catch (error) {
     console.error('[Mint Confirm] Error:', error);
     try {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errMsg = error instanceof Error ? error.message : String(error);
       await logMintStep(env.DB, {
         mint_id: mintId || 0,
         step: 'confirm_failed',
         status: 'failed',
-        error: errorMessage,
+        error: errMsg,
       });
     } catch {
       // Audit logging failure must not break error response
     }
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
-      status: 500,
-      headers: corsHeaders,
-    });
+    return errorResponse('Internal server error', 500);
   }
 };

@@ -26,6 +26,7 @@ export const CLOTHES_G1_TO_G2: Record<string, string> = {
 
 export const HEAD_G1_TO_G2: Record<string, string> = {
   'Anarchy-Spikes': 'Head_Spikes',
+  'Comrade-Cap': 'Head_Comrad-Hat',
   'Vikings-Hat': 'Head_viking-helmet',
   'Wizard-Hat': 'Head_Wiz-Hat',
   'Wizard-Hat_man': 'Head_Wiz-Hat', // G1 manifest uses Wizard-Hat_man.png; merge into colorable G2

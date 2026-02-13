@@ -46,11 +46,12 @@ export const G2_DEFAULT_COLORS: Record<string, Record<string, string>> = {
   'Face-wear_cyber-shades': { fill: '#FFA500' },
   'Face-wear_night-vision': { fill: '#262626' },
   'Face-wear_shades': { fill: '#FF0000' },
-  'Head_2Pac-Bandana': { fill1: '#FF6B00', fill2: '#00D4FF' },
+  'Head_2Pac-Bandana': { fill: '#00D4FF' },
   'Head_Beanie': { fill: '#A0522D' },
   'Head_Centurion': { fill: '#8B0000' },
   'Head_Cap': { fill: '#228B22' },
   'Head_Clown': { fill: '#8B0000' },
+  'Head_Comrad-Hat': { fill1: '#CD7F32', fill3: '#FF0000' },
   'Head_Construction-Helmet': { fill: '#FFFF00' },
   'Head_Cowboy-Hat': { fill: '#A0522D' },
   'Head_Crown': { fill: '#FFFF00' },
@@ -67,6 +68,8 @@ export const G2_DEFAULT_COLORS: Record<string, Record<string, string>> = {
   'Clothes_Straigth-jacket': { fill: '#FFFFFF' },
   'Mouth_Pipe': { fill: '#FF0000' },
   'Mouth_BubbleGum': { fill: '#FF1493' },
+  // Mask
+  'Mask_Bandana-mask': { fill: '#FF0000' },
   // Add more as defaults are defined:
   // 'Clothes_Sonic-suit': { fill: '#2563EB' },
   // 'Clothes_Bathrobe': { fill1: '#...', fill2: derived },

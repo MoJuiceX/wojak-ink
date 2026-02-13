@@ -7,6 +7,7 @@ import { describe, it, expect } from 'vitest';
 import type { UILayerName } from '@/lib/layerRegistry';
 import type { SelectionResolver } from '@/lib/selectionResolver';
 import { KNOWN_TRAIT_IDS } from '@/lib/generatorTraitIds';
+import { isSelectionPathEmpty } from '@/types/generator';
 import {
   getDisabledLayers,
   isLayerDisabled,
@@ -30,7 +31,7 @@ function createMockResolver(
     },
     getPath(layer: UILayerName | string): string | undefined {
       const p = paths[layer as UILayerName];
-      return p && p !== '' && p !== 'None' ? p : undefined;
+      return p && !isSelectionPathEmpty(p) ? p : undefined;
     },
   };
 }

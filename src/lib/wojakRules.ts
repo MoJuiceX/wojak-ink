@@ -12,6 +12,8 @@ import { DEFAULT_BASE_PATH, DEFAULT_MOUTHBASE_PATH, DEFAULT_CLOTHES_PATH } from 
 import { UI_ORDER } from '@/lib/layerRegistry';
 import type { SelectionResolver } from '@/lib/selectionResolver';
 import { KNOWN_TRAIT_IDS, CLOTHES_NO_HEAD_SUITS } from '@/lib/generatorTraitIds';
+import { pathContains } from '@/lib/pathHelpers';
+import { isSelectionPathEmpty } from '@/types/generator';
 
 export type SelectedLayers = Partial<Record<GeneratorLayerName, string>>;
 
@@ -38,13 +40,11 @@ export interface DisabledLayersResult {
   disabledOptionReasons: Partial<Record<UILayerName, Record<string, string>>>;
 }
 
-/**
- * Helper: path contains identifier (case-insensitive). Used only for path-based checks
- * where we don't have a trait ID (e.g. full-face mask names, Chia Addon path).
- */
-function pathContains(path: string | undefined, identifier: string): boolean {
-  if (!path) return false;
-  return path.toLowerCase().includes(identifier.toLowerCase());
+/** Build a disabled-reasons map from an array of option names and a single reason string. */
+function buildDisabledReasons(options: string[], reason: string): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const opt of options) result[opt] = reason;
+  return result;
 }
 
 // ============ Rules (all use resolver only for trait identity) ============
@@ -54,7 +54,7 @@ function pathContains(path: string | undefined, identifier: string): boolean {
  */
 function ruleBaseNeverNone(resolver: SelectionResolver): RuleResult {
   const basePath = resolver.getPath('Base');
-  const isBaseEmpty = !basePath || basePath === '' || basePath === 'None';
+  const isBaseEmpty = isSelectionPathEmpty(basePath);
 
   let hasAnyOtherTrait = false;
   for (const layer of UI_ORDER) {
@@ -82,7 +82,7 @@ function ruleBaseNeverNone(resolver: SelectionResolver): RuleResult {
  */
 function ruleMouthBaseNeverNone(resolver: SelectionResolver): RuleResult {
   const mouthBasePath = resolver.getPath('MouthBase');
-  const isMouthBaseEmpty = !mouthBasePath || mouthBasePath === '' || mouthBasePath === 'None';
+  const isMouthBaseEmpty = isSelectionPathEmpty(mouthBasePath);
 
   if (isMouthBaseEmpty) {
     return {
@@ -101,7 +101,7 @@ function ruleMouthBaseNeverNone(resolver: SelectionResolver): RuleResult {
  */
 function ruleClothesNeverNone(resolver: SelectionResolver): RuleResult {
   const clothesPath = resolver.getPath('Clothes');
-  const isClothesEmpty = !clothesPath || clothesPath === '' || clothesPath === 'None';
+  const isClothesEmpty = isSelectionPathEmpty(clothesPath);
 
   if (isClothesEmpty) {
     return {
@@ -123,7 +123,7 @@ function ruleFullBodySuitNoHead(resolver: SelectionResolver): RuleResult {
   const clothesTraitId = resolver.getTraitId('Clothes');
   const hasNoHeadSuit = clothesTraitId !== null && CLOTHES_NO_HEAD_SUITS.includes(clothesTraitId);
   const headPath = resolver.getPath('Head');
-  const hasHead = !!(headPath && headPath !== '' && headPath !== 'None');
+  const hasHead = !isSelectionPathEmpty(headPath);
 
   if (hasNoHeadSuit) {
     return {
@@ -181,7 +181,8 @@ function ruleAstronautDisablesMouthOptions(resolver: SelectionResolver): RuleRes
  */
 function ruleAstronautCopiumMaskMutualExclusion(resolver: SelectionResolver): RuleResult {
   const hasAstronaut = resolver.getTraitId('Clothes') === KNOWN_TRAIT_IDS.Clothes_Astronaut;
-  const hasCopiumMask = resolver.getTraitId('Mask') === KNOWN_TRAIT_IDS.Mask_Copium;
+  const maskPathAstro = resolver.getPath('Mask');
+  const hasCopiumMask = !!maskPathAstro && maskPathAstro.toLowerCase().includes('copium');
 
   if (hasAstronaut) {
     if (hasCopiumMask) {
@@ -313,7 +314,7 @@ function ruleFacialHairRequiresMouthBase(resolver: SelectionResolver): RuleResul
 function ruleMaskBlocksOtherLayers(resolver: SelectionResolver): RuleResult {
   const maskPath = resolver.getPath('Mask');
 
-  if (maskPath && maskPath !== '' && maskPath !== 'None') {
+  if (!isSelectionPathEmpty(maskPath)) {
     return {
       disabledLayers: ['MouthItem', 'FacialHair'],
       reason: 'Deselect Mask',
@@ -327,7 +328,8 @@ function ruleMaskBlocksOtherLayers(resolver: SelectionResolver): RuleResult {
  * Hannibal Mask auto-removes Neckbeard (path check for neckbeard; trait ID for Hannibal)
  */
 function ruleHannibalMaskRemovesNeckbeard(resolver: SelectionResolver): RuleResult {
-  const hasHannibal = resolver.getTraitId('Mask') === KNOWN_TRAIT_IDS.Mask_Hannibal;
+  const maskPath = resolver.getPath('Mask');
+  const hasHannibal = !!maskPath && maskPath.toLowerCase().includes('hannibal');
   const facialHairPath = resolver.getPath('FacialHair');
   const hasNeckbeard = pathContains(facialHairPath, 'neckbeard');
 
@@ -359,7 +361,8 @@ function ruleHannibalMaskRemovesNeckbeard(resolver: SelectionResolver): RuleResu
  * - Blocks: All MouthItem (Cigarette, Cohiba, Joint)
  */
 function ruleCopiumMaskForcesValidMouthBase(resolver: SelectionResolver): RuleResult {
-  if (resolver.getTraitId('Mask') !== KNOWN_TRAIT_IDS.Mask_Copium) return { disabledLayers: [] };
+  const copiumPath = resolver.getPath('Mask');
+  if (!copiumPath || !copiumPath.toLowerCase().includes('copium')) return { disabledLayers: [] };
 
   const mouthBasePath = resolver.getPath('MouthBase');
   const mouthItemPath = resolver.getPath('MouthItem');
@@ -368,8 +371,8 @@ function ruleCopiumMaskForcesValidMouthBase(resolver: SelectionResolver): RuleRe
   const isPizza = mouthBaseTraitId === KNOWN_TRAIT_IDS.MouthBase_Pizza;
   const isBubbleGum = mouthBaseTraitId === KNOWN_TRAIT_IDS.MouthBase_BubbleGum;
   const isPipe = mouthBaseTraitId === KNOWN_TRAIT_IDS.MouthBase_Pipe;
-  const isEmpty = !mouthBasePath || mouthBasePath === '' || mouthBasePath === 'None';
-  const hasMouthItem = !!(mouthItemPath && mouthItemPath !== '' && mouthItemPath !== 'None');
+  const isEmpty = isSelectionPathEmpty(mouthBasePath);
+  const hasMouthItem = !isSelectionPathEmpty(mouthItemPath);
 
   const blockedMouthBase = ['Pizza', 'Bubble-Gum', 'Bubble Gum', 'Pipe'];
   const disabledOptionReasonsMouthBase = {
@@ -412,20 +415,65 @@ function ruleCopiumMaskForcesValidMouthBase(resolver: SelectionResolver): RuleRe
 }
 
 /**
- * Mask forces MouthBase to Numb (except Copium)
+ * Mask forces MouthBase to Numb (except Copium which has its own rule).
+ * - Hannibal Mask: only Numb is allowed; all other mouths forced to Numb.
+ * - Bandana Mask: Numb, Gold Teeth, Teeth, Smile, Screaming are allowed.
  */
 function ruleMaskForcesNumbMouth(resolver: SelectionResolver): RuleResult {
   const maskPath = resolver.getPath('Mask');
-  const hasMask = !!(maskPath && maskPath !== '' && maskPath !== 'None');
-  if (!hasMask || resolver.getTraitId('Mask') === KNOWN_TRAIT_IDS.Mask_Copium) return { disabledLayers: [] };
+  const hasMask = !isSelectionPathEmpty(maskPath);
+  if (!hasMask || !maskPath || maskPath.toLowerCase().includes('copium')) return { disabledLayers: [] };
+
+  const maskLower = maskPath.toLowerCase();
+  const isHannibalMask = maskLower.includes('hannibal');
+
+  const mouthBasePath = resolver.getPath('MouthBase');
+  const isNumb = !!mouthBasePath && mouthBasePath.toLowerCase().includes('numb');
+
+  const blockedMouthBase = ['Pizza', 'Bubble-Gum', 'Bubble Gum', 'Pipe', 'BubbleGum'];
+  const blockedReasons = buildDisabledReasons(blockedMouthBase, 'Remove Mask');
+
+  // Hannibal: only Numb allowed — force to Numb and block everything else
+  if (isHannibalMask) {
+    const allBlockedMouth = [...blockedMouthBase, 'Gold Teeth', 'Gold-Teeth', 'Teeth', 'Smile', 'Screaming', 'Screeming'];
+    const allBlockedReasons = buildDisabledReasons(allBlockedMouth, 'Remove Hannibal Mask');
+
+    if (!isNumb) {
+      return {
+        disabledLayers: [],
+        reason: 'Deselect Hannibal Mask',
+        forceSelections: { MouthBase: DEFAULT_MOUTHBASE_PATH, MouthItem: '' },
+        disabledOptions: { MouthBase: allBlockedMouth },
+        disabledOptionReasons: { MouthBase: allBlockedReasons },
+      };
+    }
+    return {
+      disabledLayers: [],
+      forceSelections: { MouthItem: '' },
+      disabledOptions: { MouthBase: allBlockedMouth },
+      disabledOptionReasons: { MouthBase: allBlockedReasons },
+    };
+  }
+
+  // Bandana / other masks: allow Numb, Gold Teeth, Teeth, Smile, Screaming
+  const allowedWithMask = ['numb', 'gold-teeth', 'teeth', 'smile', 'screeming'];
+  const hasAllowedMouth = !!mouthBasePath && allowedWithMask.some((m) => mouthBasePath.toLowerCase().includes(m));
+
+  if (!hasAllowedMouth) {
+    return {
+      disabledLayers: [],
+      reason: 'Deselect Mask',
+      forceSelections: { MouthBase: DEFAULT_MOUTHBASE_PATH, MouthItem: '' },
+      disabledOptions: { MouthBase: blockedMouthBase },
+      disabledOptionReasons: { MouthBase: blockedReasons },
+    };
+  }
 
   return {
     disabledLayers: [],
-    reason: 'Deselect Mask',
-    forceSelections: {
-      MouthBase: DEFAULT_MOUTHBASE_PATH,
-      MouthItem: '',
-    },
+    forceSelections: { MouthItem: '' },
+    disabledOptions: { MouthBase: blockedMouthBase },
+    disabledOptionReasons: { MouthBase: blockedReasons },
   };
 }
 
@@ -455,7 +503,7 @@ function ruleCigJointCohibaRequiresMouthBase(resolver: SelectionResolver): RuleR
   if (!needsMouthBase) return { disabledLayers: [] };
 
   const mouthBasePath = resolver.getPath('MouthBase');
-  const isMouthBaseNone = !mouthBasePath || mouthBasePath === '' || mouthBasePath === 'None';
+  const isMouthBaseNone = isSelectionPathEmpty(mouthBasePath);
 
   if (isMouthBaseNone) {
     return {
@@ -505,7 +553,8 @@ const CLOTHES_NO_BANDANA = ['Clothes_Sonic-suit', 'Clothes_Pickle-suit', 'Clothe
 function ruleSuitDisablesBandana(resolver: SelectionResolver): RuleResult {
   const clothesId = resolver.getTraitId('Clothes');
   const hasSuit = clothesId !== null && CLOTHES_NO_BANDANA.includes(clothesId);
-  const hasBandana = resolver.getTraitId('Mask') === KNOWN_TRAIT_IDS.Mask_Bandana;
+  const bandanaPath = resolver.getPath('Mask');
+  const hasBandana = !!bandanaPath && bandanaPath.toLowerCase().includes('bandana');
 
   if (hasSuit && hasBandana) {
     return {
@@ -516,8 +565,7 @@ function ruleSuitDisablesBandana(resolver: SelectionResolver): RuleResult {
   }
   if (hasSuit) {
     const disabledMaskOptions = ['Bandana-mask', 'Bandana mask', 'Bandana'];
-    const disabledMaskReasons: Record<string, string> = {};
-    for (const opt of disabledMaskOptions) disabledMaskReasons[opt] = 'Not available with this suit';
+    const disabledMaskReasons = buildDisabledReasons(disabledMaskOptions, 'Not available with this suit');
     return {
       disabledLayers: [],
       disabledOptions: { Mask: disabledMaskOptions },
@@ -535,9 +583,9 @@ const CLOTHES_NO_HANNIBAL = ['Clothes_Sonic-suit', 'Clothes_Pickle-suit', 'Cloth
 
 function ruleSuitDisablesHannibal(resolver: SelectionResolver): RuleResult {
   const clothesId = resolver.getTraitId('Clothes');
-  const maskId = resolver.getTraitId('Mask');
+  const maskPath = resolver.getPath('Mask');
   const hasSuit = clothesId !== null && CLOTHES_NO_HANNIBAL.includes(clothesId);
-  const isHannibal = maskId === KNOWN_TRAIT_IDS.Mask_Hannibal;
+  const isHannibal = !!maskPath && maskPath.toLowerCase().includes('hannibal');
 
   if (hasSuit && isHannibal) {
     return {
@@ -548,8 +596,7 @@ function ruleSuitDisablesHannibal(resolver: SelectionResolver): RuleResult {
   }
   if (hasSuit) {
     const disabledMaskOptions = ['Hannibal-Mask', 'Hannibal mask', 'Hannibal'];
-    const disabledMaskReasons: Record<string, string> = {};
-    for (const opt of disabledMaskOptions) disabledMaskReasons[opt] = 'Not available with this suit';
+    const disabledMaskReasons = buildDisabledReasons(disabledMaskOptions, 'Not available with this suit');
     return {
       disabledLayers: [],
       disabledOptions: { Mask: disabledMaskOptions },
@@ -558,8 +605,7 @@ function ruleSuitDisablesHannibal(resolver: SelectionResolver): RuleResult {
   }
   if (isHannibal) {
     const disabledClothesOptions = ['Sonic-suit', 'Sonic suit', 'Sonic', 'Pickle-suit', 'Pickle suit', 'Pickle', 'Goose-suit', 'Goose suit', 'Goose'];
-    const disabledClothesReasons: Record<string, string> = {};
-    for (const opt of disabledClothesOptions) disabledClothesReasons[opt] = 'Not available with Hannibal mask';
+    const disabledClothesReasons = buildDisabledReasons(disabledClothesOptions, 'Not available with Hannibal mask');
     return {
       disabledLayers: [],
       disabledOptions: { Clothes: disabledClothesOptions },
@@ -665,12 +711,59 @@ function ruleSuitDisablesNeckbeard(resolver: SelectionResolver): RuleResult {
   }
   if (hasNeckbeard) {
     const disabledClothesOptions = ['Sonic-suit', 'Sonic suit', 'Sonic', 'Pickle-suit', 'Pickle suit', 'Pickle'];
-    const disabledClothesReasons: Record<string, string> = {};
-    for (const opt of disabledClothesOptions) disabledClothesReasons[opt] = 'Remove Neckbeard';
+    const disabledClothesReasons = buildDisabledReasons(disabledClothesOptions, 'Remove Neckbeard');
     return {
       disabledLayers: [],
       disabledOptions: { Clothes: disabledClothesOptions },
       disabledOptionReasons: { Clothes: disabledClothesReasons },
+    };
+  }
+
+  return { disabledLayers: [] };
+}
+
+/**
+ * Firefighter Helmet is mutually exclusive with VR Headset and Night Vision.
+ * Selecting one clears the other.
+ */
+function ruleFirefighterHelmetEyesExclusion(resolver: SelectionResolver): RuleResult {
+  const headId = resolver.getTraitId('Head');
+  const eyesId = resolver.getTraitId('Eyes');
+  const hasFirefighter = headId === KNOWN_TRAIT_IDS.Head_FirefighterHelmet;
+  const hasVR = eyesId === KNOWN_TRAIT_IDS.Eyes_VRHeadset;
+  const hasNightVision = eyesId === KNOWN_TRAIT_IDS.Eyes_NightVision;
+
+  const blockedEyesOptions = ['VR headset', 'VR Headset', 'VR-headset', 'Night Vision', 'night vision', 'night-vision'];
+  const blockedEyesReasons = buildDisabledReasons(blockedEyesOptions, 'Remove Firefighter Helmet');
+
+  if (hasFirefighter) {
+    if (hasVR || hasNightVision) {
+      return {
+        disabledLayers: [],
+        forceSelections: { Eyes: '' },
+        clearSelections: ['Eyes'],
+        disabledOptions: { Eyes: blockedEyesOptions },
+        disabledOptionReasons: { Eyes: blockedEyesReasons },
+      };
+    }
+    return {
+      disabledLayers: [],
+      disabledOptions: { Eyes: blockedEyesOptions },
+      disabledOptionReasons: { Eyes: blockedEyesReasons },
+    };
+  }
+
+  if (hasVR || hasNightVision) {
+    return {
+      disabledLayers: [],
+      disabledOptions: { Head: ['Firefigther Helmet', 'Firefighter Helmet', 'Firefigther-Helmet'] },
+      disabledOptionReasons: {
+        Head: {
+          'Firefigther Helmet': hasVR ? 'Remove VR Headset' : 'Remove Night Vision',
+          'Firefighter Helmet': hasVR ? 'Remove VR Headset' : 'Remove Night Vision',
+          'Firefigther-Helmet': hasVR ? 'Remove VR Headset' : 'Remove Night Vision',
+        },
+      },
     };
   }
 
@@ -701,6 +794,7 @@ const RULES = [
   ruleFullFaceMaskDisablesLaserEyes,
   ruleClothesAddonRequiresTeeOrTanktop,
   ruleSuitDisablesNeckbeard,
+  ruleFirefighterHelmetEyesExclusion,
 ];
 
 // ============ Public API ============

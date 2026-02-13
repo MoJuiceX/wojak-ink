@@ -12,6 +12,7 @@ export const G2_CATEGORY_TO_UI: Record<string, UILayerName> = {
   'Face-wear': 'Eyes',
   'Face-laser': 'Eyes',
   'Head': 'Head',
+  'Mask': 'Mask',
   'Mouth': 'MouthBase',
 };
 

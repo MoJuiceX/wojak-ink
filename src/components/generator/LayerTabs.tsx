@@ -20,6 +20,7 @@ import {
 import { useGenerator } from '@/contexts/GeneratorContext';
 import { LAYER_CONFIG, LAYER_ORDER } from '@/config/layers';
 import type { UILayerName } from '@/lib/wojakRules';
+import { isSelectionPathEmpty } from '@/types/generator';
 import { layerTabVariants } from '@/config/generatorAnimations';
 
 // Icon mapping
@@ -141,7 +142,7 @@ export function LayerTabs({ className = '' }: LayerTabsProps) {
 
   const hasLayerSelection = (layer: UILayerName): boolean => {
     const path = selectedLayers[layer];
-    return !!path && path !== '' && path !== 'None';
+    return !isSelectionPathEmpty(path);
   };
 
   // For MouthBase tab, also check if MouthItem or FacialHair has selection (since they're combined)

@@ -13,24 +13,18 @@
  * }
  */
 
+import {
+  jsonResponse,
+  errorResponse,
+  optionsResponse,
+  surchargeXch,
+} from './_shared';
+
 interface Env {
   DB: D1Database;
 }
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Content-Type': 'application/json',
-};
-
 const SUPPLY_TOTAL = 4200;
-const SURCHARGE_BASE = 0.2;
-const SURCHARGE_USES_DIVISOR = 20;
-
-function surchargeXch(usageCount: number): number {
-  return SURCHARGE_BASE * Math.log(1 + usageCount / SURCHARGE_USES_DIVISOR);
-}
 
 interface TraitUsageRow {
   trait_category: string;
@@ -42,21 +36,15 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
 
   if (request.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return optionsResponse();
   }
 
   if (request.method !== 'GET') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: corsHeaders,
-    });
+    return errorResponse('Method not allowed', 405);
   }
 
   if (!env.DB) {
-    return new Response(JSON.stringify({ error: 'Service not configured' }), {
-      status: 500,
-      headers: corsHeaders,
-    });
+    return errorResponse('Service not configured', 500);
   }
 
   try {
@@ -83,19 +71,13 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     ).first<{ floor_xch: number }>();
     const floorPrice = floorRow ? floorRow.floor_xch / 100 : 1.0;
 
-    return new Response(
-      JSON.stringify({
-        traits,
-        supply: { minted, total: SUPPLY_TOTAL },
-        floorPrice: Math.round(floorPrice * 1000) / 1000,
-      }),
-      { status: 200, headers: corsHeaders }
-    );
+    return jsonResponse({
+      traits,
+      supply: { minted, total: SUPPLY_TOTAL },
+      floorPrice: Math.round(floorPrice * 1000) / 1000,
+    });
   } catch (error) {
     console.error('[Mint Pricing] Error:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
-      status: 500,
-      headers: corsHeaders,
-    });
+    return errorResponse('Internal server error', 500);
   }
 };

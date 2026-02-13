@@ -44,7 +44,7 @@ export type GeneratorAction =
   | { type: 'SET_LAYER'; layer: UILayerName; path: string }
   | { type: 'SET_G2_LAYER'; layer: UILayerName; path: string; g2: G2Selection }
   | { type: 'SET_G2_COLOR'; layer: UILayerName; slot: string; color: string }
-  | { type: 'SET_G2_DETAIL'; layer: UILayerName; detailOption?: string; frameOption?: string; logoOption?: string; flagOption?: string; name1?: string; name2?: string; activeColorSlot?: string; suitVariant?: 'bepe' | 'pepe'; chiaFarmerUnderlayer?: 'tee' | 'tanktop'; constructionHelmetChiaLogo?: boolean; constructionHelmetCigPack?: string; beerHatUnderlayer?: string; beerHatUnderlayerG2?: G2Selection; beerHatEditFocus?: 'beer' | 'underlayer' }
+  | { type: 'SET_G2_DETAIL'; layer: UILayerName; detailOption?: string; frameOption?: string; logoOption?: string; flagOption?: string; name1?: string; name2?: string; activeColorSlot?: string; suitVariant?: 'bepe' | 'pepe'; chiaFarmerUnderlayer?: 'tee' | 'tanktop'; constructionHelmetChiaLogo?: boolean; constructionHelmetCigPack?: string; beerHatUnderlayer?: string; beerHatUnderlayerG2?: G2Selection; beerHatEditFocus?: 'beer' | 'underlayer'; variant?: string }
   | { type: 'CLEAR_LAYER'; layer: UILayerName }
   | { type: 'SET_ACTIVE_LAYER'; layer: UILayerName }
   | { type: 'RANDOMIZE'; selections: SelectionsSnapshot }
@@ -194,6 +194,7 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
         if (action.activeColorSlot !== undefined) updatedUnder.activeColorSlot = action.activeColorSlot;
         if (action.constructionHelmetChiaLogo !== undefined) updatedUnder.constructionHelmetChiaLogo = action.constructionHelmetChiaLogo;
         if (action.constructionHelmetCigPack !== undefined) updatedUnder.constructionHelmetCigPack = action.constructionHelmetCigPack;
+        if (action.variant !== undefined) updatedUnder.variant = action.variant;
         g2.beerHatUnderlayerG2 = updatedUnder;
       } else {
         if (action.detailOption !== undefined) g2.detailOption = action.detailOption;
@@ -207,6 +208,7 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
         if (action.chiaFarmerUnderlayer !== undefined) g2.chiaFarmerUnderlayer = action.chiaFarmerUnderlayer;
         if (action.constructionHelmetChiaLogo !== undefined) g2.constructionHelmetChiaLogo = action.constructionHelmetChiaLogo;
         if (action.constructionHelmetCigPack !== undefined) g2.constructionHelmetCigPack = action.constructionHelmetCigPack;
+        if (action.variant !== undefined) g2.variant = action.variant;
       }
 
       const updated: SelectionsSnapshot = { ...state.selections };

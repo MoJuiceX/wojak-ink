@@ -29,11 +29,15 @@ const stepMessages: Record<string, { title: string; message: string }> = {
   error: { title: 'Mint failed', message: 'Something went wrong. Try again or use a different wallet.' },
 };
 
-function formatTimeLeft(expiresAt: string | null): string {
-  if (!expiresAt) return '--:--';
+function getSecondsLeft(expiresAt: string | null): number {
+  if (!expiresAt) return -1;
   const end = new Date(expiresAt).getTime();
-  const now = Date.now();
-  const left = Math.max(0, Math.floor((end - now) / 1000));
+  return Math.max(0, Math.floor((end - Date.now()) / 1000));
+}
+
+function formatTimeLeft(expiresAt: string | null): string {
+  const left = getSecondsLeft(expiresAt);
+  if (left < 0) return '--:--';
   const m = Math.floor(left / 60);
   const s = left % 60;
   return `${m}:${s.toString().padStart(2, '0')}`;
@@ -51,14 +55,20 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
   } = useMint();
   const prefersReducedMotion = useReducedMotion();
   const [timeLeft, setTimeLeft] = useState('');
+  const [isExpired, setIsExpired] = useState(false);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!pendingMint?.expiresAt) {
       setTimeLeft('');
+      setIsExpired(false);
       return;
     }
-    const tick = () => setTimeLeft(formatTimeLeft(pendingMint.expiresAt));
+    const tick = () => {
+      const secs = getSecondsLeft(pendingMint.expiresAt);
+      setTimeLeft(formatTimeLeft(pendingMint.expiresAt));
+      setIsExpired(secs <= 0);
+    };
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
@@ -139,13 +149,20 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
               {/* Countdown timer */}
               {showOfferActions && (
                 <div className="w-full rounded-lg p-3 text-center" style={{ background: 'var(--color-surface)' }}>
-                  <span className="text-2xl font-mono tabular-nums text-accent">{timeLeft}</span>
-                  <p className="text-muted text-xs mt-1">remaining</p>
+                  <span className={`text-2xl font-mono tabular-nums ${isExpired ? 'text-error' : 'text-accent'}`}>{timeLeft}</span>
+                  <p className="text-muted text-xs mt-1">{isExpired ? 'Offer expired' : 'remaining'}</p>
                 </div>
               )}
 
+              {/* Expired message */}
+              {showOfferActions && isExpired && (
+                <p className="text-error text-xs">
+                  This offer has expired. Close and mint again.
+                </p>
+              )}
+
               {/* Accept in Wallet — primary action */}
-              {showOfferActions && pendingMint?.offerFile && (
+              {showOfferActions && pendingMint?.offerFile && !isExpired && (
                 <button
                   type="button"
                   className="btn btn-primary w-full flex items-center justify-center gap-2"
@@ -157,7 +174,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
               )}
 
               {/* Copy Offer — secondary action */}
-              {showOfferActions && pendingMint?.offerFile && (
+              {showOfferActions && pendingMint?.offerFile && !isExpired && (
                 <button
                   type="button"
                   className="btn btn-secondary w-full flex items-center justify-center gap-2"

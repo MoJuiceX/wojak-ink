@@ -22,6 +22,7 @@ export const KNOWN_TRAIT_IDS = {
   Eyes_NightVision: 'Face-wear_night-vision',
   Eyes_VRHeadset: 'Face-wear_VR-headset',
   Eyes_LaserEyes: 'Face-laser_Laser-Eyes',
+  Head_FirefighterHelmet: 'Head_Firefigther-Helmet',
   Head_Ronin: 'Head_Ronin-helmet',
   Head_BeerHat: 'Head_Beer-Hat',
   Head_Cap: 'Head_Cap',

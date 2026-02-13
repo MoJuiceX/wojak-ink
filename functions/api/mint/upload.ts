@@ -11,18 +11,20 @@
  * Returns: { dataHash, dataUris, metadataHash, metadataUris }
  *
  * Requires: PINATA_JWT secret
+ * Protected: Requires X-Internal-Mint-Request header (set by prepare.ts)
  */
+
+import {
+  jsonResponse,
+  errorResponse,
+  optionsResponse,
+  INTERNAL_API_HEADER,
+} from './_shared';
 
 interface Env {
   PINATA_JWT?: string;
+  INTERNAL_MINT_SECRET?: string;
 }
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Content-Type': 'application/json',
-};
 
 const PINATA_PIN_FILE = 'https://api.pinata.cloud/pinning/pinFileToIPFS';
 const PINATA_PIN_JSON = 'https://api.pinata.cloud/pinning/pinJSONToIPFS';
@@ -44,57 +46,45 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
 
   if (request.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return optionsResponse();
   }
 
   if (request.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: corsHeaders,
-    });
+    return errorResponse('Method not allowed', 405);
+  }
+
+  // Guard: only allow internal calls from prepare.ts
+  const internalSecret = env.INTERNAL_MINT_SECRET;
+  if (internalSecret && request.headers.get(INTERNAL_API_HEADER) !== internalSecret) {
+    return errorResponse('Unauthorized', 401);
   }
 
   const jwt = env.PINATA_JWT;
   if (!jwt) {
-    return new Response(JSON.stringify({ error: 'IPFS upload not configured' }), {
-      status: 503,
-      headers: corsHeaders,
-    });
+    return errorResponse('IPFS upload not configured', 503);
   }
 
   let body: { imageBase64?: string; metadata?: unknown };
   try {
     body = await request.json();
   } catch {
-    return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
-      status: 400,
-      headers: corsHeaders,
-    });
+    return errorResponse('Invalid JSON body', 400);
   }
 
   const imageBase64 = body.imageBase64;
   const metadata = body.metadata;
 
   if (!imageBase64 || typeof imageBase64 !== 'string') {
-    return new Response(JSON.stringify({ error: 'Missing imageBase64' }), {
-      status: 400,
-      headers: corsHeaders,
-    });
+    return errorResponse('Missing imageBase64', 400);
   }
   if (!metadata || typeof metadata !== 'object') {
-    return new Response(JSON.stringify({ error: 'Missing metadata object' }), {
-      status: 400,
-      headers: corsHeaders,
-    });
+    return errorResponse('Missing metadata object', 400);
   }
 
   try {
     const imageBytes = base64ToUint8Array(imageBase64);
     if (imageBytes.length > 2 * 1024 * 1024) {
-      return new Response(JSON.stringify({ error: 'Image too large (max 2MB)' }), {
-        status: 400,
-        headers: corsHeaders,
-      });
+      return errorResponse('Image too large (max 2MB)', 400);
     }
 
     const dataHash = await sha256Hex(imageBytes);
@@ -109,18 +99,12 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     if (!pinFileRes.ok) {
       const err = await pinFileRes.text();
       console.error('[Mint Upload] Pinata file error:', pinFileRes.status, err);
-      return new Response(JSON.stringify({ error: 'IPFS image upload failed' }), {
-        status: 502,
-        headers: corsHeaders,
-      });
+      return errorResponse('IPFS image upload failed', 502);
     }
     const pinFileData = (await pinFileRes.json()) as { IpfsHash?: string };
     const ipfsHash = pinFileData.IpfsHash;
     if (!ipfsHash) {
-      return new Response(JSON.stringify({ error: 'IPFS image upload: no hash returned' }), {
-        status: 502,
-        headers: corsHeaders,
-      });
+      return errorResponse('IPFS image upload: no hash returned', 502);
     }
     // Multiple gateway URLs for redundancy
     const dataUris = [
@@ -144,18 +128,12 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     if (!pinJsonRes.ok) {
       const err = await pinJsonRes.text();
       console.error('[Mint Upload] Pinata JSON error:', pinJsonRes.status, err);
-      return new Response(JSON.stringify({ error: 'IPFS metadata upload failed' }), {
-        status: 502,
-        headers: corsHeaders,
-      });
+      return errorResponse('IPFS metadata upload failed', 502);
     }
     const pinJsonData = (await pinJsonRes.json()) as { IpfsHash?: string };
     const metaIpfsHash = pinJsonData.IpfsHash;
     if (!metaIpfsHash) {
-      return new Response(JSON.stringify({ error: 'IPFS metadata upload: no hash returned' }), {
-        status: 502,
-        headers: corsHeaders,
-      });
+      return errorResponse('IPFS metadata upload: no hash returned', 502);
     }
     // Multiple gateway URLs for redundancy
     const metadataUris = [
@@ -164,20 +142,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       `https://ipfs.io/ipfs/${metaIpfsHash}`,
     ];
 
-    return new Response(
-      JSON.stringify({
-        dataHash,
-        dataUris,
-        metadataHash,
-        metadataUris,
-      }),
-      { status: 200, headers: corsHeaders }
-    );
+    return jsonResponse({ dataHash, dataUris, metadataHash, metadataUris });
   } catch (error) {
     console.error('[Mint Upload] Error:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
-      status: 500,
-      headers: corsHeaders,
-    });
+    return errorResponse('Internal server error', 500);
   }
 };

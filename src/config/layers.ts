@@ -56,7 +56,7 @@ export const BASE_TYPES = [
 // ============ Canvas Dimensions ============
 
 export const CANVAS_CONFIG = {
-  renderSize: 1024,
+  renderSize: 1000,
   displaySize: 512,
   thumbnailSize: 256,
   exportSizes: {

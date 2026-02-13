@@ -185,6 +185,11 @@ let fillColors = {};
 let layerOpacity = {};  // traitId -> { layerKey -> 0..100 }
 const imageCache = {};
 const GLOBAL_KEYS = ['__BASE__','__FACIAL_HAIR__','__MOUTH__','__MOUTH_ITEM__','__MASK__'];
+
+// Detail options that should be treated as colorable fills (traitId -> detailIndex -> ci + defaultColor)
+const COLORABLE_DETAILS = {
+  'Head_Comrad-Hat': { 0: { ci: 2, defaultColor: '#FF0000' } }, // Star detail is fill3
+};
 let selectedBase = 'classic';
 let selectedMouth = 'numb';
 let selectedMouthItem = '';
@@ -235,7 +240,18 @@ function getTraitLayers(t) {
   if (t.fill2File) layers.push({ key:'fill2', label:'Fill 2', path:`${b}/${t.fill2File}`, color:true, ci:1 });
   if (t.fillFiles) t.fillFiles.forEach((f,i) => layers.push({ key:`mfill${i}`, label:`Fill ${i+1}`, path:`${b}/${f}`, color:true, ci:i }));
   if (t.detailFile) layers.push({ key:'detail', label:'Detail', path:`${b}/${t.detailFile}`, color:false });
-  if (t.detailOptions) t.detailOptions.forEach((d,i) => layers.push({ key:`dopt${i}`, label:d.name, path:`${b}/${d.file}`, color:false, isDetail:true }));
+  if (t.detailOptions) t.detailOptions.forEach((d,i) => {
+    const cd = COLORABLE_DETAILS[t.id]?.[i];
+    if (cd) {
+      layers.push({ key:`dopt${i}`, label:d.name, path:`${b}/${d.file}`, color:true, ci:cd.ci, isDetail:true });
+      // detail1.1 overlay (e.g. Comrad Hat star outline) renders right after the colorable detail
+      if (i === 0 && t.detail1OverlayFile) {
+        layers.push({ key:'dopt0_overlay', label:d.name + ' Outline', path:`${b}/${t.detail1OverlayFile}`, color:false, isDetail:true });
+      }
+    } else {
+      layers.push({ key:`dopt${i}`, label:d.name, path:`${b}/${d.file}`, color:false, isDetail:true });
+    }
+  });
   if (t.outlineFile) layers.push({ key:'outline', label:'Outline', path:`${b}/${t.outlineFile}`, color:false });
   if (t.outline2File) layers.push({ key:'outline2', label:'Outline 2', path:`${b}/${t.outline2File}`, color:false });
   if (t.outlineFiles) t.outlineFiles.forEach((f,i) => layers.push({ key:`moutline${i}`, label:`Outline ${i+1}`, path:`${b}/${f}`, color:false }));
@@ -307,6 +323,14 @@ function getRawColor(tid, ci) {
   if (t) {
     if (t.defaultColors && t.defaultColors[ci] !== undefined) return t.defaultColors[ci];
     if (t.defaultColor && ci === 0) return t.defaultColor;
+    if (t.defaultColor2 && ci === 1) return t.defaultColor2;
+  }
+  // Check COLORABLE_DETAILS for defaults (e.g. Comrad Hat fill3 star)
+  const cdTrait = COLORABLE_DETAILS[tid];
+  if (cdTrait) {
+    for (const entry of Object.values(cdTrait)) {
+      if (entry.ci === ci && entry.defaultColor) return entry.defaultColor;
+    }
   }
   const defaults = ['#FF6B00','#00D4FF','#22C55E','#8B5CF6','#EF4444'];
   return defaults[ci % defaults.length];
@@ -573,7 +597,7 @@ function setFillCfg(tid, fk, prop, val) {
     if (t) {
       const colorable = getTraitLayers(t).filter(l => l.color);
       const others = colorable.filter(f => f.key !== fk);
-      if (others.length === 1) cfg.fills[fk].source = others[0].key;
+      if (others.length >= 1) cfg.fills[fk].source = others[0].key;
       const layer = colorable.find(l => l.key === fk);
       if (layer) {
         delete fillColors[`${tid}:${layer.ci}`];

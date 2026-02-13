@@ -351,6 +351,8 @@ interface G2ManifestTrait {
   // Details
   detailFile?: string;
   detailOptions?: { file: string; name: string }[];
+  /** Outline overlay for detail1 (e.g. Comrad Hat star outline) — renders on top of detail1 fill */
+  detail1OverlayFile?: string;
   // Composite
   composite?: boolean;
   layer0File?: string;
@@ -368,6 +370,8 @@ interface G2ManifestTrait {
   autoComplement?: boolean;
   frameFiles?: { file: string; name: string; over: string }[];
   textAreas?: unknown[];
+  /** G1 fallback path (for traits with both G1 and G2 versions) */
+  g1Path?: string;
 }
 
 interface G2Manifest {
@@ -409,6 +413,7 @@ export interface UnifiedTrait {
   outlineFiles?: string[];
   detailFile?: string;
   detailOptions?: { file: string; name: string }[];
+  detail1OverlayFile?: string;
   composite?: boolean;
   layer0File?: string;
   layer1File?: string;
@@ -551,6 +556,7 @@ function g2TraitToUnified(g2: G2ManifestTrait, uiLayer: UILayerName): UnifiedTra
     outlineFiles: g2.outlineFiles,
     detailFile: g2.detailFile,
     detailOptions: detailOptions ?? g2.detailOptions,
+    detail1OverlayFile: g2.detail1OverlayFile,
     composite: g2.composite,
     layer0File: g2.layer0File,
     layer1File: g2.layer1File,
@@ -563,6 +569,7 @@ function g2TraitToUnified(g2: G2ManifestTrait, uiLayer: UILayerName): UnifiedTra
     autoComplement: g2.autoComplement,
     frameFiles: g2.frameFiles,
     textAreas: g2.textAreas,
+    g1Path: g2.g1Path,
   };
 }
 

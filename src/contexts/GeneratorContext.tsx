@@ -37,7 +37,7 @@ const BEER_HAT_CARD_G2: G2Selection = {
   traitId: 'Head_Beer-Hat',
   g2Category: 'Head',
   colors: {},
-  detailOption: 'Head_Beer-Hat_detail_citrus.png',
+  detailOption: 'Head_Beer-Hat_detail_Tang.png',
   beerHatEditFocus: 'beer',
   beerHatUnderlayer: 'Head_Cap',
   beerHatUnderlayerG2: {
@@ -64,7 +64,7 @@ interface GeneratorContextValue extends GeneratorState {
   selectG2Layer: (layer: UILayerName, trait: UnifiedTrait, initialColors?: Record<string, string>) => void;
   setG2Color: (layer: UILayerName, slot: string, color: string) => void;
   setColor: (layer: UILayerName, color: string) => void;
-  setG2Detail: (layer: UILayerName, detailOption?: string, frameOption?: string, logoOption?: string, flagOption?: string, name1?: string, name2?: string, activeColorSlot?: string, suitVariant?: 'bepe' | 'pepe', chiaFarmerUnderlayer?: 'tee' | 'tanktop', constructionHelmetChiaLogo?: boolean, constructionHelmetCigPack?: string, beerHatUnderlayer?: string, beerHatUnderlayerG2?: G2Selection, beerHatEditFocus?: 'beer' | 'underlayer') => void;
+  setG2Detail: (layer: UILayerName, detailOption?: string, frameOption?: string, logoOption?: string, flagOption?: string, name1?: string, name2?: string, activeColorSlot?: string, suitVariant?: 'bepe' | 'pepe', chiaFarmerUnderlayer?: 'tee' | 'tanktop', constructionHelmetChiaLogo?: boolean, constructionHelmetCigPack?: string, beerHatUnderlayer?: string, beerHatUnderlayerG2?: G2Selection, beerHatEditFocus?: 'beer' | 'underlayer', variant?: string) => void;
   setBeerHatEditFocus: (focus: 'beer' | 'underlayer') => void;
   clearLayer: (layer: UILayerName) => void;
   setActiveLayer: (layer: UILayerName) => void;
@@ -211,7 +211,7 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
     if (!state.isPreviewStale) return;
 
     const basePath = derived.selectedLayers.Base;
-    const hasSelection = !!basePath && basePath !== '' && basePath !== 'None';
+    const hasSelection = !isSelectionPathEmpty(basePath);
 
     if (!hasSelection) {
       dispatch({ type: 'SET_PREVIEW', image: '' });
@@ -311,6 +311,9 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
       g2Category: trait.id.split('_')[0],
       colors: initialColors ? { ...colors, ...initialColors } : colors,
       detailOption: trait.detailOptions?.[0]?.file,
+      ...(trait.id === 'Head_Cap' && {
+        detailOption: undefined,
+      }),
       ...(trait.id === 'Head_Construction-Helmet' && {
         detailOption: undefined,
         constructionHelmetChiaLogo: true,
@@ -390,8 +393,8 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
     dispatch({ type: 'SET_COLOR', layer, color });
   }, []);
 
-  const setG2Detail = useCallback((layer: UILayerName, detailOption?: string, frameOption?: string, logoOption?: string, flagOption?: string, name1?: string, name2?: string, activeColorSlot?: string, suitVariant?: 'bepe' | 'pepe', chiaFarmerUnderlayer?: 'tee' | 'tanktop', constructionHelmetChiaLogo?: boolean, constructionHelmetCigPack?: string, beerHatUnderlayer?: string, beerHatUnderlayerG2?: G2Selection, beerHatEditFocus?: 'beer' | 'underlayer') => {
-    dispatch({ type: 'SET_G2_DETAIL', layer, detailOption, frameOption, logoOption, flagOption, name1, name2, activeColorSlot, suitVariant, chiaFarmerUnderlayer, constructionHelmetChiaLogo, constructionHelmetCigPack, beerHatUnderlayer, beerHatUnderlayerG2, beerHatEditFocus });
+  const setG2Detail = useCallback((layer: UILayerName, detailOption?: string, frameOption?: string, logoOption?: string, flagOption?: string, name1?: string, name2?: string, activeColorSlot?: string, suitVariant?: 'bepe' | 'pepe', chiaFarmerUnderlayer?: 'tee' | 'tanktop', constructionHelmetChiaLogo?: boolean, constructionHelmetCigPack?: string, beerHatUnderlayer?: string, beerHatUnderlayerG2?: G2Selection, beerHatEditFocus?: 'beer' | 'underlayer', variant?: string) => {
+    dispatch({ type: 'SET_G2_DETAIL', layer, detailOption, frameOption, logoOption, flagOption, name1, name2, activeColorSlot, suitVariant, chiaFarmerUnderlayer, constructionHelmetChiaLogo, constructionHelmetCigPack, beerHatUnderlayer, beerHatUnderlayerG2, beerHatEditFocus, variant });
   }, []);
 
   const setBeerHatEditFocus = useCallback((focus: 'beer' | 'underlayer') => {

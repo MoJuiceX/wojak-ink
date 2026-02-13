@@ -113,6 +113,7 @@ function GeneratorContent() {
                 <LayerTabs />
               </div>
             )}
+
           </div>
 
           {/* Divider (desktop only) */}

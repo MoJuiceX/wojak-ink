@@ -15,7 +15,7 @@ import type { G2Selection } from '@/types/generator';
 
 const COIN_LOGOS_BASE = '/assets/wojak-layers/CHIA_coin_logos';
 
-const ASTRONAUT_LOGOS = ['BEPE', 'CASTER', 'CAT', 'CHAD', 'CHIA', 'XCH', 'CNI', 'COOKIES', 'Dexi Bucks', 'DIG', 'DWB', 'G4M', 'GYATT', 'HOA', 'HONK', 'JOCK', 'LOVE', 'MAX', 'MIRROR', 'MMM', 'MOG', 'MonkeyZoo', 'MRMT', 'NeckCoin', 'NWO', 'PEPEcoin', 'PIZZA', 'PP', 'Spacebucks', 'SPELLPOWER', 'SPROUT', 'STONKS', 'TANG', 'TVL', 'WITCHER', 'WOJAK'];
+const ASTRONAUT_LOGOS = ['BEPE', 'CASTER', 'CAT', 'CHAD', 'XCH', 'CNI', 'COOKIES', 'Dexi Bucks', 'DIG', 'DWB', 'G4M', 'GYATT', 'HOA', 'HONK', 'JOCK', 'LOVE', 'MAX', 'MIRROR', 'MMM', 'MOG', 'MonkeyZoo', 'MRMT', 'NeckCoin', 'NWO', 'PEPEcoin', 'PIZZA', 'PP', 'Spacebucks', 'SPELLPOWER', 'SPROUT', 'STONKS', 'TANG', 'TVL', 'WITCHER', 'WOJAK'];
 
 const ASTRONAUT_FLAGS = [
   // Americas
@@ -115,9 +115,13 @@ interface G2TraitPanelProps {
   onDetailSelect?: (file: string | undefined, frameFile: string | undefined) => void;
   /** Override construction helmet update handler for underlayer routing */
   onConstructionHelmetUpdate?: (chiaLogo: boolean, cigPack: string) => void;
+  /** Override logo selection handler (e.g. for Beer Hat underlayer Cap coin logos) */
+  onLogoSelect?: (logoName: string) => void;
+  /** Override variant selection handler (e.g. for Beer Hat underlayer Cap army camo) */
+  onVariantSelect?: (variantFile: string) => void;
 }
 
-export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructionHelmetUpdate }: G2TraitPanelProps = {}) {
+export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructionHelmetUpdate, onLogoSelect, onVariantSelect }: G2TraitPanelProps = {}) {
   const { activeLayer, g2Selections, setG2Detail } = useGenerator();
 
   const [trait, setTrait] = useState<UnifiedTrait | null>(null);
@@ -336,8 +340,151 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
     );
   }
 
+  // Comrad Hat / Hard Hat: coin logo picker (no detail options)
+  if (trait.id === 'Head_Comrad-Hat' || trait.id === 'Head_Hard-hat') {
+    const currentLogo = g2Sel.logoOption || '';
+    const handleLogo = (name: string) => {
+      // Toggle: clicking same logo deselects
+      const newLogo = currentLogo === name ? '' : name;
+      setG2Detail(activeLayer, undefined, undefined, newLogo);
+    };
+    return (
+      <div
+        className="rounded-xl p-3 flex flex-col gap-3"
+        style={{
+          background: 'var(--color-surface)',
+          border: '1px solid var(--color-border)',
+        }}
+      >
+        <p className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+          Logo
+        </p>
+        <div className="flex flex-wrap" style={{ gap: 4 }}>
+          {ASTRONAUT_LOGOS.map((name) => (
+            <LogoButton
+              key={name}
+              name={name}
+              isSelected={currentLogo === name}
+              onClick={() => handleLogo(name)}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Cap: detail options (McD/Chia) + coin logos — mutually exclusive
+  // Preview overrides: show a nicer thumbnail in the picker while keeping the original detail for canvas rendering
+  const CAP_DETAIL_PREVIEW: Record<string, string> = {
+    'Head_Cap_detail_McD.png': `${basePath}/McDonalds-Logo.png`,
+    'Head_Cap_detail_chia.png': `${basePath}/chia-TN.png`,
+  };
+  if (trait.id === 'Head_Cap' && trait.detailOptions) {
+    const currentLogo = g2Sel.logoOption || '';
+    const currentDetail = g2Sel.detailOption || '';
+    const currentVariant = g2Sel.variant || '';
+    const handleDetail = (file: string) => {
+      const newDetail = currentDetail === file ? '' : file;
+      // Selecting a detail clears coin logo — single atomic callback to avoid stale-state race
+      if (onDetailSelect) {
+        onDetailSelect(newDetail || undefined, undefined);
+      } else {
+        setG2Detail(activeLayer, newDetail, undefined, newDetail ? '' : undefined);
+      }
+    };
+    const handleLogo = (name: string) => {
+      const newLogo = currentLogo === name ? '' : name;
+      // Selecting a coin logo clears detail option — single atomic callback to avoid stale-state race
+      if (onLogoSelect) {
+        onLogoSelect(newLogo);
+      } else {
+        setG2Detail(activeLayer, newLogo ? '' : undefined, undefined, newLogo);
+      }
+    };
+    const handleVariant = (file: string) => {
+      const newVariant = currentVariant === file ? '' : file;
+      if (onVariantSelect) {
+        onVariantSelect(newVariant);
+      } else {
+        setG2Detail(activeLayer, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, newVariant);
+      }
+    };
+    return (
+      <div
+        className="rounded-xl p-3 flex flex-col gap-3"
+        style={{
+          background: 'var(--color-surface)',
+          border: '1px solid var(--color-border)',
+        }}
+      >
+        {trait.variants && trait.variants.length > 0 && (
+          <>
+            <p className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+              Style
+            </p>
+            <div className="flex flex-wrap" style={{ gap: 4 }}>
+              {trait.variants.map((v) => {
+                const isSelected = currentVariant === v.file;
+                return (
+                  <button
+                    key={v.file}
+                    type="button"
+                    className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center"
+                    style={{
+                      border: isSelected ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
+                      background: 'var(--color-surface)',
+                    }}
+                    onClick={() => handleVariant(v.file)}
+                    title={v.name}
+                  >
+                    <img src={`${basePath}/${v.file}`} alt={v.name} className="w-full h-full object-contain" loading="lazy" />
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
+        <p className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+          Logo
+        </p>
+        <div className="flex flex-wrap" style={{ gap: 4 }}>
+          {trait.detailOptions.map((d) => {
+            const isSelected = !currentLogo && currentDetail === d.file;
+            return (
+              <button
+                key={d.file}
+                type="button"
+                className={`w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center ${isSelected ? '' : ''}`}
+                style={{
+                  border: isSelected ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
+                  background: 'var(--color-surface)',
+                }}
+                onClick={() => handleDetail(d.file)}
+                title={d.name}
+              >
+                <img src={CAP_DETAIL_PREVIEW[d.file] || `${basePath}/${d.file}`} alt={d.name} className="w-full h-full object-contain" loading="lazy" />
+              </button>
+            );
+          })}
+          {ASTRONAUT_LOGOS.filter(n => n !== 'XCH').map((name) => (
+            <LogoButton
+              key={name}
+              name={name}
+              isSelected={currentLogo === name}
+              onClick={() => handleLogo(name)}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   // Construction Helmet: multi-select (Chia logo toggle + cigarette pack — can combine both)
   const isConstructionHelmet = trait.id === 'Head_Construction-Helmet';
+  const CIG_PREVIEW: Record<string, string> = {
+    'Head_Construction-Helmet_detail_cig-pack.png': `${basePath}/Marlboro-red.png`,
+    'Head_Construction-Helmet_detail_cig-pack-2.png': `${basePath}/Marlboro-Menthol.png`,
+  };
   const detailOpts = trait.detailOptions;
   if (isConstructionHelmet && detailOpts && detailOpts.length >= 3) {
     const chiaOpt = detailOpts.find(d => d.file.includes('chia-logo'));
@@ -369,62 +516,65 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
           </span>
           <button
             type="button"
-            className={`w-14 h-14 rounded-lg overflow-hidden flex items-center justify-center ${chiaOn ? 'btn btn-primary' : 'btn btn-ghost'}`}
+            className="w-14 h-14 rounded-lg overflow-hidden p-0"
             style={{
               border: chiaOn ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
+              background: 'var(--color-surface)',
             }}
             onClick={() => setConstructionHelmet(!chiaOn, cigPack)}
             title={chiaOn ? 'Remove Chia logo' : 'Add Chia logo'}
           >
-            {chiaOpt && (
-              <img src={`${basePath}/${chiaOpt.file}`} alt="Chia" className="w-full h-full object-contain" loading="lazy" />
-            )}
+            <img src={`${basePath}/chia-TN.png`} alt="Chia" className="w-full h-full object-cover" loading="lazy" />
           </button>
         </div>
-        <div className="flex flex-col gap-2">
-          <span className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-            Cigarette pack
-          </span>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              className={`w-14 h-14 rounded-lg overflow-hidden flex items-center justify-center ${!cigPack ? 'btn btn-primary' : 'btn btn-ghost'}`}
-              style={{
-                border: !cigPack ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
-              }}
-              onClick={() => setConstructionHelmet(chiaOn, '')}
-              title="None"
-            >
-              <Ban size={20} style={{ color: !cigPack ? 'var(--color-primary)' : 'var(--color-text-muted)' }} />
-            </button>
-            {cig1Opt && (
+        {!overrideG2Selection && (
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+              Cigarette pack
+            </span>
+            <div className="flex flex-wrap gap-2">
               <button
                 type="button"
-                className={`w-14 h-14 rounded-lg overflow-hidden ${cigPack === cig1Opt.file ? 'btn btn-primary' : 'btn btn-ghost'}`}
+                className={`w-14 h-14 rounded-lg overflow-hidden flex items-center justify-center ${!cigPack ? 'btn btn-primary' : 'btn btn-ghost'}`}
                 style={{
-                  border: cigPack === cig1Opt.file ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
+                  border: !cigPack ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
                 }}
-                onClick={() => setConstructionHelmet(chiaOn, cig1Opt.file)}
-                title="Pack 1"
+                onClick={() => setConstructionHelmet(chiaOn, '')}
+                title="None"
               >
-                <img src={`${basePath}/${cig1Opt.file}`} alt="Pack 1" className="w-full h-full object-contain" loading="lazy" />
+                <Ban size={20} style={{ color: !cigPack ? 'var(--color-primary)' : 'var(--color-text-muted)' }} />
               </button>
-            )}
-            {cig2Opt && (
-              <button
-                type="button"
-                className={`w-14 h-14 rounded-lg overflow-hidden ${cigPack === cig2Opt.file ? 'btn btn-primary' : 'btn btn-ghost'}`}
-                style={{
-                  border: cigPack === cig2Opt.file ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
-                }}
-                onClick={() => setConstructionHelmet(chiaOn, cig2Opt.file)}
-                title="Pack 2"
-              >
-                <img src={`${basePath}/${cig2Opt.file}`} alt="Pack 2" className="w-full h-full object-contain" loading="lazy" />
-              </button>
-            )}
+              {cig1Opt && (
+                <button
+                  type="button"
+                  className="w-14 h-14 rounded-lg overflow-hidden p-0"
+                  style={{
+                    border: cigPack === cig1Opt.file ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
+                    background: 'var(--color-surface)',
+                  }}
+                  onClick={() => setConstructionHelmet(chiaOn, cig1Opt.file)}
+                  title="Pack 1"
+                >
+                  <img src={CIG_PREVIEW[cig1Opt.file] || `${basePath}/${cig1Opt.file}`} alt="Pack 1" className="w-full h-full object-cover" loading="lazy" />
+                </button>
+              )}
+              {cig2Opt && (
+                <button
+                  type="button"
+                  className="w-14 h-14 rounded-lg overflow-hidden p-0"
+                  style={{
+                    border: cigPack === cig2Opt.file ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
+                    background: 'var(--color-surface)',
+                  }}
+                  onClick={() => setConstructionHelmet(chiaOn, cig2Opt.file)}
+                  title="Pack 2"
+                >
+                  <img src={CIG_PREVIEW[cig2Opt.file] || `${basePath}/${cig2Opt.file}`} alt="Pack 2" className="w-full h-full object-cover" loading="lazy" />
+                </button>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     );
   }

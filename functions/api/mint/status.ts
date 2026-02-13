@@ -20,16 +20,16 @@
  * }
  */
 
+import {
+  jsonResponse,
+  errorResponse,
+  optionsResponse,
+  isValidChiaAddress,
+} from './_shared';
+
 interface Env {
   DB: D1Database;
 }
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Content-Type': 'application/json',
-};
 
 interface PendingMintRow {
   id: number;
@@ -46,31 +46,22 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
 
   if (request.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return optionsResponse();
   }
 
   if (request.method !== 'GET') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: corsHeaders,
-    });
+    return errorResponse('Method not allowed', 405);
   }
 
   if (!env.DB) {
-    return new Response(JSON.stringify({ error: 'Service not configured' }), {
-      status: 500,
-      headers: corsHeaders,
-    });
+    return errorResponse('Service not configured', 500);
   }
 
   const url = new URL(request.url);
   const wallet = url.searchParams.get('wallet');
 
-  if (!wallet || !wallet.startsWith('xch1')) {
-    return new Response(
-      JSON.stringify({ error: 'Missing or invalid wallet parameter.' }),
-      { status: 400, headers: corsHeaders }
-    );
+  if (!wallet || !isValidChiaAddress(wallet)) {
+    return errorResponse('Missing or invalid wallet parameter.', 400);
   }
 
   try {
@@ -100,10 +91,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       .first<PendingMintRow>();
 
     if (!pending) {
-      return new Response(
-        JSON.stringify({ pending: null }),
-        { status: 200, headers: corsHeaders }
-      );
+      return jsonResponse({ pending: null });
     }
 
     // Parse JSON fields safely
@@ -116,26 +104,20 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       // If JSON is malformed, return empty objects
     }
 
-    return new Response(
-      JSON.stringify({
-        pending: {
-          mintId: pending.id,
-          offerFile: pending.offer_file,
-          mintType: pending.mint_type,
-          totalPriceXch: pending.total_price_xch ? pending.total_price_xch / 100000 : null,
-          expiresAt: pending.expires_at,
-          createdAt: pending.created_at,
-          layers,
-          colors,
-        },
-      }),
-      { status: 200, headers: corsHeaders }
-    );
+    return jsonResponse({
+      pending: {
+        mintId: pending.id,
+        offerFile: pending.offer_file,
+        mintType: pending.mint_type,
+        totalPriceXch: pending.total_price_xch ? pending.total_price_xch / 100000 : null,
+        expiresAt: pending.expires_at,
+        createdAt: pending.created_at,
+        layers,
+        colors,
+      },
+    });
   } catch (error) {
     console.error('[Mint Status] Error:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
-      status: 500,
-      headers: corsHeaders,
-    });
+    return errorResponse('Internal server error', 500);
   }
 };

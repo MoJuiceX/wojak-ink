@@ -109,6 +109,12 @@ export const G2_FILL_TREATMENTS: Record<string, Record<string, FillSlotBehavior>
     fill2: { type: 'derived', source: 'fill0', treatment: 'darker_shade', amount: 5 },
     fill3: { type: 'derived', source: 'fill0', treatment: 'darker_shade', amount: 5 },
   },
+  // Comrad Hat: user picks fill1 (band) + fill3 (star); fill2 auto darker from fill1
+  'Head_Comrad-Hat': {
+    fill1: { type: 'user' },
+    fill2: { type: 'derived', source: 'fill1', treatment: 'darker_shade', amount: 16 },
+    fill3: { type: 'user' },
+  },
 };
 
 export function getFillSlotBehavior(traitId: string, fillKey: string): FillSlotBehavior {
@@ -168,6 +174,16 @@ export function getAllUserPickableFillSlots(
       if (l.type === 'fill' && l.key) {
         const canonical = LAYER_KEY_TO_FILL[l.key] ?? l.key;
         keys.push(canonical);
+      }
+    }
+  }
+  // Merge any additional user-pickable slots defined in treatments but not detected from files
+  // (e.g. Comrad Hat fill3 comes from a detail layer used as a colorable fill)
+  const treatments = G2_FILL_TREATMENTS[traitId];
+  if (treatments) {
+    for (const slot of Object.keys(treatments)) {
+      if (!keys.includes(slot) && treatments[slot].type === 'user') {
+        keys.push(slot);
       }
     }
   }

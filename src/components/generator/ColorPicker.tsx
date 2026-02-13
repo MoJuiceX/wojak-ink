@@ -22,10 +22,7 @@ export const COLOR_FAMILIES: { label: string; colors: string[] }[] = [
   { label: 'Purples', colors: ['#BA55D3', '#a855f7', '#A020F0', '#7c3aed', '#800080', '#6d28d9'] },
   { label: 'Pinks & Magenta', colors: ['#FFC0CB', '#f9a8d4', '#FF69B4', '#ec4899', '#FF1493', '#FF00FF'] },
   { label: 'Browns', colors: ['#D2B48C', '#D4AF37', '#CD7F32', '#A0522D', '#8B4513', '#633800'] },
-  {
-    label: 'Neutrals',
-    colors: ['#FFFFFF', '#F5F5DC', '#C0C0C0', '#808080', '#404040', '#262626', '#171717'],
-  },
+  { label: 'Neutrals', colors: ['#FFFFFF', '#F5F5DC', '#C0C0C0', '#808080', '#404040', '#262626'] },
 ];
 
 export const GENERATOR_PALETTE_HEX: string[] = COLOR_FAMILIES.flatMap((f) => f.colors);
@@ -52,7 +49,6 @@ interface ColorPickerProps {
 export const ColorPicker = memo(function ColorPicker({
   selectedColor,
   onColorChange,
-  label,
   disabled = false,
   defaultColor,
   onReset,
@@ -86,7 +82,7 @@ export const ColorPicker = memo(function ColorPicker({
       >
         <button
           type="button"
-          className="w-5 h-5 rounded flex-shrink-0 transition-opacity"
+          className="w-full aspect-square rounded transition-opacity"
           style={{
             background: hex,
             border: `2px solid ${borderColor}`,
@@ -122,115 +118,38 @@ export const ColorPicker = memo(function ColorPicker({
     );
   };
 
-  const DefaultButton = () => {
-    if (!defaultColor && !onReset) return null;
-    const defHexDisplay = defaultColor ? norm(defaultColor) : null;
-    const defBtnStyle: CSSProperties = {
-      border: `2px solid ${(defaultColor && isDefault) ? 'var(--color-primary, #ff6b00)' : 'var(--color-border)'}`,
-      boxSizing: 'border-box',
-      boxShadow: (defaultColor && isDefault) ? '0 0 6px var(--glow-primary, rgba(255,107,0,0.5))' : 'none',
-      background: 'var(--color-surface)',
-      cursor: disabled ? 'not-allowed' : 'pointer',
-      pointerEvents: disabled ? 'none' : 'auto',
-    };
-    return (
-      <div
-        className="relative"
-        onMouseEnter={() => setHoverHex('__default__')}
-        onMouseLeave={() => setHoverHex(null)}
-      >
-        <button
-          type="button"
-          className="w-5 h-5 rounded flex-shrink-0 flex items-center justify-center transition-opacity"
-          style={defBtnStyle}
-onClick={() => !disabled && (onReset ? onReset() : onColorChange(defaultColor!))}
-        disabled={disabled}
-        aria-label={onReset ? 'Use original design' : 'Reset to default color'}
-        >
-          <RotateCcw size={11} style={{ color: (defaultColor && isDefault) ? 'var(--color-primary)' : 'var(--color-text-muted)' }} />
-        </button>
-        {hoverHex === '__default__' && !disabled && (
-          <div
-            className="absolute z-50 px-2 py-1 rounded text-[10px] font-mono whitespace-nowrap pointer-events-none"
-            style={{
-              bottom: '100%',
-              left: '50%',
-              transform: 'translateX(-50%) translateY(-4px)',
-              background: 'var(--color-surface)',
-              border: '1px solid var(--color-border)',
-              color: 'var(--color-text)',
-              boxShadow: 'var(--shadow-card)',
-            }}
-          >
-            {onReset ? 'Use original' : defHexDisplay}
-          </div>
-        )}
-      </div>
-    );
-  };
-
   return (
-    <div className="flex flex-col gap-2" style={{ opacity: disabled ? 0.5 : 1 }}>
-      {label && (
-        <div className="flex items-center gap-2">
-          <span
-            className="text-xs font-medium"
-            style={{ color: disabled ? 'var(--color-text-muted)' : 'var(--color-text-secondary)' }}
-          >
-            {label}
-          </span>
-          <div
-            className="relative"
-            onMouseEnter={() => setHoverHex(selectedColor)}
-            onMouseLeave={() => setHoverHex(null)}
-          >
-            <div
-              className="w-5 h-5 rounded flex-shrink-0"
-              style={{
-                background: selectedColor,
-                border: '1px solid var(--color-border)',
-                boxShadow: '0 0 4px rgba(0,0,0,0.3)',
-              }}
-            />
-            {hoverHex === selectedColor && !disabled && (
-              <div
-                className="absolute z-50 px-2 py-1 rounded text-[10px] font-mono whitespace-nowrap pointer-events-none"
-                style={{
-                  bottom: '100%',
-                  left: '50%',
-                  transform: 'translateX(-50%) translateY(-4px)',
-                  background: 'var(--color-surface)',
-                  border: '1px solid var(--color-border)',
-                  color: 'var(--color-text)',
-                  boxShadow: 'var(--shadow-card)',
-                }}
-              >
-                {(selectedColor.startsWith('#') ? selectedColor : '#' + selectedColor).toUpperCase()}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Quick-access row - tooltip below so it isn't clipped at top */}
-      <div className="grid grid-cols-5 gap-1">
-        {QUICK_ACCESS_COLORS.map((hex) => (
-          <Swatch key={hex} hex={hex} tooltipBelow />
-        ))}
-      </div>
-
-      {/* Color swatches by family - no labels */}
-      <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-1" style={{ opacity: disabled ? 0.5 : 1 }}>
+      {/* Color swatches by family — 6 columns, fluid width */}
+      <div className="flex flex-col gap-1">
         {COLOR_FAMILIES.map((family) => (
           <div key={family.label} className="grid grid-cols-6 gap-1">
             {family.colors.map((hex, i) => (
               <Swatch key={`${family.label}-${i}`} hex={hex} />
             ))}
-            {/* Default button fills the empty spot in the last (Neutrals) row */}
-            {family.label === 'Neutrals' && <DefaultButton />}
           </div>
         ))}
       </div>
+
+      {/* Reset — compact row below swatches */}
+      {(defaultColor || onReset) && (
+        <button
+          type="button"
+          className="flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg text-xs font-medium transition-colors"
+          style={{
+            color: isDefault ? 'var(--color-text-muted)' : 'var(--color-primary)',
+            background: isDefault ? 'transparent' : 'rgba(255, 107, 0, 0.1)',
+            cursor: disabled || isDefault ? 'default' : 'pointer',
+            opacity: isDefault ? 0.4 : 1,
+          }}
+          onClick={() => !disabled && !isDefault && (onReset ? onReset() : onColorChange(defaultColor!))}
+          disabled={disabled || isDefault}
+          title={onReset ? 'Use original design' : 'Reset to default color'}
+        >
+          <RotateCcw size={12} />
+          <span>{onReset ? 'Use original' : 'Reset'}</span>
+        </button>
+      )}
     </div>
   );
 });

@@ -7,6 +7,7 @@
 import { useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useGenerator } from '@/contexts/GeneratorContext';
+import { isSelectionPathEmpty } from '@/types/generator';
 import { stickyPreviewVariants } from '@/config/generatorAnimations';
 
 interface StickyMiniPreviewProps {
@@ -27,7 +28,7 @@ export function StickyMiniPreview({
   } = useGenerator();
   const prefersReducedMotion = useReducedMotion();
   const basePath = selectedLayers.Base;
-  const hasSelection = !!basePath && basePath !== '' && basePath !== 'None';
+  const hasSelection = !isSelectionPathEmpty(basePath);
 
   // Track scroll position
   useEffect(() => {

@@ -85,8 +85,20 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, bad
           loading="lazy"
         />
       </div>
+      {/* Disabled info badge */}
+      {isDisabled && disabledReason && (
+        <div
+          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center z-20"
+          style={{ background: 'rgba(0, 0, 0, 0.7)', border: '1px solid var(--color-border)' }}
+          title={disabledReason}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+          </svg>
+        </div>
+      )}
       {/* Check mark with pop animation */}
-      {isSelected && (
+      {isSelected && !isDisabled && (
         <motion.div
           className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center z-20"
           style={{ background: 'var(--generator-badge-color, #F97316)' }}
@@ -151,7 +163,7 @@ function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick }:
           />
         )}
       </div>
-      {isSelected && (
+      {isSelected && !isDisabled && (
         <motion.div
           className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center z-20"
           style={{ background: 'var(--color-cyan, #00d4ff)' }}
@@ -163,6 +175,17 @@ function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick }:
             <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
           </svg>
         </motion.div>
+      )}
+      {isDisabled && disabledReason && (
+        <div
+          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center z-20"
+          style={{ background: 'rgba(0, 0, 0, 0.7)', border: '1px solid var(--color-border)' }}
+          title={disabledReason}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+          </svg>
+        </div>
       )}
     </motion.button>
   );

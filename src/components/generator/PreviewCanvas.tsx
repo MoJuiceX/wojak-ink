@@ -15,6 +15,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import { useGenerator } from '@/contexts/GeneratorContext';
+import { isSelectionPathEmpty } from '@/types/generator';
 import { skeletonPulseVariants } from '@/config/generatorAnimations';
 
 interface PreviewCanvasProps {
@@ -37,7 +38,7 @@ export function PreviewCanvas({
   const prevImageRef = useRef<string | null>(null);
 
   const basePath = selectedLayers.Base;
-  const hasSelection = !!basePath && basePath !== '' && basePath !== 'None';
+  const hasSelection = !isSelectionPathEmpty(basePath);
 
   // Show brief glow when preview image changes
   useEffect(() => {

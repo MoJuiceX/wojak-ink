@@ -6,6 +6,7 @@
  */
 
 import type { ExportOptions, G2Selections, G2Selection } from '@/types/generator';
+import { isSelectionPathEmpty } from '@/types/generator';
 import { getG2DefaultColor } from '@/config/g2DefaultColors';
 import type { SelectedLayers, UILayerName } from '@/lib/wojakRules';
 import { CANVAS_CONFIG } from '@/config/layers';
@@ -318,6 +319,9 @@ const ASTRONAUT_LOGO_POS = { cx: 355, cy: 912, r: 68 };   // Detail 1 — circle
 const ASTRONAUT_FLAG_POS = { x: 626, y: 861, w: 134, h: 92 };  // Detail 2 — rect (right arm)
 // Wizard drip logo patch position (right chest — patch frame cutout is right of center)
 const WIZARD_LOGO_POS = { cx: 520, cy: 922, r: 78 };  // 15% bigger (68→78), 10px down (912→922)
+const COMRAD_HAT_LOGO_POS = { cx: 560, cy: 250, r: 58 };  // Circle on front of hat (detail2 gray area)
+const HARD_HAT_LOGO_POS = { cx: 582, cy: 260, r: 55 };   // Front panel of hard hat
+const CAP_LOGO_POS = { cx: 565, cy: 211, r: 65 };         // Front panel of cap (matches McD/Chia detail position)
 
 // BEPA Army name tag positions (1000x1000 canvas space) — adjust from position file when available
 const BEPA_ARMY_NAME1_POS = { x: 216, y: 897, w: 180, h: 60, fontSize: 38 };  // left chest
@@ -962,7 +966,7 @@ async function drawG2Layer(
         }
       }
     }
-    return;
+    // Don't return early — fall through to draw detail, frame, and logo below
   }
 
   // Draw each fill (tinted or as-is)
@@ -1218,7 +1222,7 @@ function buildG2LayerData(
   // Beer Hat: outline must always render on top of detail (can logo). Default can = Citrus.
   if (trait.id === 'Head_Beer-Hat' && trait.outlineFile && trait.detailOptions?.length) {
     const items: G2DrawItem[] = [];
-    const defaultCan = trait.detailOptions.find(d => d.name === 'Citrus')?.file ?? trait.detailOptions[0]?.file;
+    const defaultCan = trait.detailOptions.find(d => d.name === 'Tang')?.file ?? trait.detailOptions[0]?.file;
     const detailFile = (g2.detailOption && g2.detailOption !== '') ? g2.detailOption : defaultCan;
     if (detailFile) {
       items.push({ type: 'outline', path: `${basePath}/${detailFile}` });
@@ -1370,6 +1374,65 @@ function buildG2LayerData(
     return { fills: [], outlines: [], orderedDrawItems: items };
   }
 
+  // Comrad Hat: fill1 (band) + fill2 (body) + detail1 as fill3 (star, colorable) + detail1.1 (star outline) + detail2 (coin logo patch)
+  if (trait.id === 'Head_Comrad-Hat' && trait.fill1File && trait.fill2File && trait.outlineFile) {
+    const fill1Color = resolveFillColor(trait.id, 'fill1', g2, trait) || getG2DefaultColor(trait.id, 'fill1', trait, trait.defaultColor || '#404040');
+    const fill2Color = resolveFillColor(trait.id, 'fill2', g2, trait) || getG2DefaultColor(trait.id, 'fill2', trait, trait.defaultColor2 || '#808080');
+    const fill3Color = resolveFillColor(trait.id, 'fill3', g2, trait) || getG2DefaultColor(trait.id, 'fill3', trait, '#FF0000');
+    const detail1File = trait.detailOptions?.[0]?.file; // Star fill (colorable as fill3)
+    const detail1Overlay = trait.detail1OverlayFile;     // Star outline (detail1.1)
+    const detail2File = trait.detailOptions?.[1]?.file;  // Logo patch circle (gray area)
+
+    const items: G2DrawItem[] = [
+      { type: 'fill', file: `${basePath}/${trait.fill1File}`, color: fill1Color },
+      { type: 'fill', file: `${basePath}/${trait.fill2File}`, color: fill2Color },
+    ];
+    if (g2.logoOption) {
+      // Coin logo selected: skip detail1 (star fill) + detail1.1 (star outline) + detail2 (gray patch)
+      // Only the coin logo renders at the patch position
+    } else {
+      if (detail1File) items.push({ type: 'fill', file: `${basePath}/${detail1File}`, color: fill3Color });
+      if (detail1Overlay) items.push({ type: 'outline', path: `${basePath}/${detail1Overlay}` });
+    }
+    items.push({ type: 'outline', path: `${basePath}/${trait.outlineFile}` });
+
+    const result: G2LayerData = { fills: [], outlines: [], orderedDrawItems: items };
+    if (g2.logoOption) {
+      result.logoOption = g2.logoOption;
+      result.logoPos = COMRAD_HAT_LOGO_POS;
+    }
+    return result;
+  }
+
+  // Hard Hat: fill1 + fill2 + outline, with optional coin logo on the front panel
+  if (trait.id === 'Head_Hard-hat' && trait.fill1File && trait.fill2File && trait.outlineFile) {
+    const fill1Color = resolveFillColor(trait.id, 'fill1', g2, trait) || getG2DefaultColor(trait.id, 'fill1', trait, trait.defaultColor || '#262626');
+    const fill2Color = resolveFillColor(trait.id, 'fill2', g2, trait) || getG2DefaultColor(trait.id, 'fill2', trait, trait.defaultColor2 || '#00d4ff');
+    const items: G2DrawItem[] = [
+      { type: 'fill', file: `${basePath}/${trait.fill1File}`, color: fill1Color },
+      { type: 'fill', file: `${basePath}/${trait.fill2File}`, color: fill2Color },
+      { type: 'outline', path: `${basePath}/${trait.outlineFile}` },
+    ];
+    const result: G2LayerData = { fills: [], outlines: [], orderedDrawItems: items };
+    if (g2.logoOption) {
+      result.logoOption = g2.logoOption;
+      result.logoPos = HARD_HAT_LOGO_POS;
+    }
+    return result;
+  }
+
+  // Cap: coin logo support — let generic path handle fill/outline/detail, just add logo when selected
+  if (trait.id === 'Head_Cap' && g2.logoOption) {
+    const variantFile = g2.variant && trait.variants?.find(v => v.file === g2.variant)?.file;
+    const color = resolveFillColor(trait.id, 'fill', g2, trait) || getG2DefaultColor(trait.id, 'fill', trait, trait.defaultColor || '#228B22');
+    const fills: G2LayerData['fills'] = [];
+    const outlines: string[] = [];
+    const fillSrc = variantFile ? `${basePath}/${variantFile}` : (trait.fillFile ? `${basePath}/${trait.fillFile}` : undefined);
+    if (fillSrc) fills.push({ file: fillSrc, color });
+    if (trait.outlineFile) outlines.push(`${basePath}/${trait.outlineFile}`);
+    return { fills, outlines, logoOption: g2.logoOption, logoPos: CAP_LOGO_POS };
+  }
+
   // Wizard drip: Detail 1, Detail 2, or coin logos (no None). Default to Detail 1 when neither set.
   if (trait.id === 'Clothes_Wizard-drip' && trait.fillFile && trait.outlineFile) {
     const defaultColor = getG2DefaultColor(trait.id, 'fill', trait, '#FFA500');
@@ -1427,15 +1490,21 @@ function buildG2LayerData(
       color: resolveFillColor(trait.id, 'fill2', g2, trait) || getG2DefaultColor(trait.id, 'fill2', trait, trait.defaultColor2 || '#FFFFFF'),
     });
   } else if (trait.fillFile) {
-    // Single fill
-    const fillColor = resolveFillColor(trait.id, 'fill', g2, trait) || getG2DefaultColor(trait.id, 'fill', trait, trait.defaultColor || '#FFFFFF');
-    const fillEntry: { file: string; color: string; flatTint?: boolean } = {
-      file: `${basePath}/${trait.fillFile}`,
-      color: fillColor,
-    };
-    // Centurion plume: flat tint + 4x supersample to reduce pixelation
-    if (trait.id === 'Head_Centurion') fillEntry.flatTint = true;
-    fills.push(fillEntry);
+    // Single fill — variant swaps the fill image but still tints with user color
+    const variantFile = g2.variant && trait.variants?.find(v => v.file === g2.variant)?.file;
+    if (variantFile) {
+      const fillColor = resolveFillColor(trait.id, 'fill', g2, trait) || getG2DefaultColor(trait.id, 'fill', trait, trait.defaultColor || '#FFFFFF');
+      fills.push({ file: `${basePath}/${variantFile}`, color: fillColor });
+    } else {
+      const fillColor = resolveFillColor(trait.id, 'fill', g2, trait) || getG2DefaultColor(trait.id, 'fill', trait, trait.defaultColor || '#FFFFFF');
+      const fillEntry: { file: string; color: string; flatTint?: boolean } = {
+        file: `${basePath}/${trait.fillFile}`,
+        color: fillColor,
+      };
+      // Centurion plume: flat tint + 4x supersample to reduce pixelation
+      if (trait.id === 'Head_Centurion') fillEntry.flatTint = true;
+      fills.push(fillEntry);
+    }
   }
 
   // Outlines
@@ -1868,6 +1937,8 @@ export async function renderToCanvas(
   const { canvas, ctx } = createOffscreenCanvas(size, size);
 
   ctx.clearRect(0, 0, size, size);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
 
   const layers = buildRenderLayers(selectedLayers);
 
@@ -1946,12 +2017,33 @@ export async function renderToCanvas(
             const underTrait = await getUnifiedTraitById(g2Sel.beerHatUnderlayer);
             if (underTrait && (underTrait.source === 'g2' || underTrait.source === 'both')) {
               const underG2 = buildG2LayerData(underTrait, g2Sel.beerHatUnderlayerG2, basePath);
-              expanded.push({
-                path: layer.path,
-                zIndex: LAYER_Z_INDEX.BeerHatUnder,
-                layerName: 'BeerHatUnder',
-                g2: underG2,
-              });
+              // Split: detail/logo renders ABOVE Beer Hat so it's not hidden by cans/outline
+              const hasDetailOrLogo = underG2.detail || underG2.logoOption;
+              if (hasDetailOrLogo) {
+                // Base layer (fill + outline only, no detail/logo)
+                const baseG2: G2LayerData = { ...underG2, detail: undefined, logoOption: undefined, logoPos: undefined };
+                expanded.push({
+                  path: layer.path,
+                  zIndex: LAYER_Z_INDEX.BeerHatUnder,
+                  layerName: 'BeerHatUnder',
+                  g2: baseG2,
+                });
+                // Detail/logo layer on top of Beer Hat
+                const detailG2: G2LayerData = { fills: [], outlines: [], detail: underG2.detail, logoOption: underG2.logoOption, logoPos: underG2.logoPos };
+                expanded.push({
+                  path: layer.path,
+                  zIndex: LAYER_Z_INDEX.BeerHatUnderDetailOver,
+                  layerName: 'BeerHatUnderDetailOver',
+                  g2: detailG2,
+                });
+              } else {
+                expanded.push({
+                  path: layer.path,
+                  zIndex: LAYER_Z_INDEX.BeerHatUnder,
+                  layerName: 'BeerHatUnder',
+                  g2: underG2,
+                });
+              }
             }
           }
         } catch (err) {
@@ -2156,6 +2248,8 @@ export async function exportImage(
   const { canvas, ctx } = createOffscreenCanvas(size, size);
 
   ctx.clearRect(0, 0, size, size);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
 
   const layers = buildRenderLayers(selectedLayers);
 
@@ -2234,12 +2328,31 @@ export async function exportImage(
             const underTrait = await getUnifiedTraitById(g2Sel.beerHatUnderlayer);
             if (underTrait && (underTrait.source === 'g2' || underTrait.source === 'both')) {
               const underG2 = buildG2LayerData(underTrait, g2Sel.beerHatUnderlayerG2, basePath);
-              expanded.push({
-                path: layer.path,
-                zIndex: LAYER_Z_INDEX.BeerHatUnder,
-                layerName: 'BeerHatUnder',
-                g2: underG2,
-              });
+              // Split: detail/logo renders ABOVE Beer Hat so it's not hidden by cans/outline
+              const hasDetailOrLogo = underG2.detail || underG2.logoOption;
+              if (hasDetailOrLogo) {
+                const baseG2: G2LayerData = { ...underG2, detail: undefined, logoOption: undefined, logoPos: undefined };
+                expanded.push({
+                  path: layer.path,
+                  zIndex: LAYER_Z_INDEX.BeerHatUnder,
+                  layerName: 'BeerHatUnder',
+                  g2: baseG2,
+                });
+                const detailG2: G2LayerData = { fills: [], outlines: [], detail: underG2.detail, logoOption: underG2.logoOption, logoPos: underG2.logoPos };
+                expanded.push({
+                  path: layer.path,
+                  zIndex: LAYER_Z_INDEX.BeerHatUnderDetailOver,
+                  layerName: 'BeerHatUnderDetailOver',
+                  g2: detailG2,
+                });
+              } else {
+                expanded.push({
+                  path: layer.path,
+                  zIndex: LAYER_Z_INDEX.BeerHatUnder,
+                  layerName: 'BeerHatUnder',
+                  g2: underG2,
+                });
+              }
             }
           }
         } catch {
@@ -2401,7 +2514,7 @@ export async function renderToTargetCanvas(
  */
 export function hasRequiredSelections(selectedLayers: SelectedLayers): boolean {
   const basePath = selectedLayers.Base;
-  return !!basePath && basePath !== '' && basePath !== 'None';
+  return !isSelectionPathEmpty(basePath);
 }
 
 export function getImageDimensions(src: string): Promise<{ width: number; height: number }> {

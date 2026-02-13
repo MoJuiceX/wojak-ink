@@ -14,8 +14,8 @@ import {
   Download,
   Copy,
   Sparkles,
-  // Wallet,   // TODO: re-enable at mint launch
-  // Coins,    // TODO: re-enable at mint launch
+  Wallet,
+  Coins,
   Trophy,
   ChevronDown,
 } from 'lucide-react';
@@ -23,8 +23,9 @@ import { useGenerator } from '@/contexts/GeneratorContext';
 import { useMint } from '@/contexts/MintContext';
 import { useSageWallet } from '@/sage-wallet';
 import { useLayout } from '@/hooks/useLayout';
-// import { exportImage } from '@/services/canvasRenderer'; // TODO: re-enable at mint launch
-// import { MintFlowModal } from './MintFlowModal'; // TODO: re-enable at mint launch
+import { isSelectionPathEmpty } from '@/types/generator';
+import { exportImage } from '@/services/canvasRenderer';
+import { MintFlowModal } from './MintFlowModal';
 
 interface ActionBarProps {
   className?: string;
@@ -107,17 +108,15 @@ export function ActionBar({ className = '' }: ActionBarProps) {
     toggleFavorites,
     toggleExport,
     selectedLayers,
-    // selectedColors,   // TODO: re-enable at mint launch
-    // g2Selections,     // TODO: re-enable at mint launch
+    selectedColors,
+    g2Selections,
     favorites,
     saveFavorite,
     previewImage,
-    // canExport,        // TODO: re-enable at mint launch
+    canExport,
   } = useGenerator();
-  // TODO: re-enable full destructuring at mint launch
-  // const { credits, startMint, resetMintFlow, totalMinted, maxSupply } = useMint();
-  const { credits } = useMint();
-  const { address, status: walletStatus } = useSageWallet();
+  const { credits, startMint, resetMintFlow, totalMinted, maxSupply } = useMint();
+  const { address, status: walletStatus, connect } = useSageWallet();
   const prefersReducedMotion = useReducedMotion();
   const { isDesktop } = useLayout();
   const [isRandomizing, setIsRandomizing] = useState(false);
@@ -125,9 +124,8 @@ export function ActionBar({ className = '' }: ActionBarProps) {
   const [isCopying, setIsCopying] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
   const [showDownloadSuccess, setShowDownloadSuccess] = useState(false);
-  // TODO: re-enable at mint launch
-  // const [isMintModalOpen, setIsMintModalOpen] = useState(false);
-  // const [mintType, setMintType] = useState<'free' | 'paid'>('free');
+  const [isMintModalOpen, setIsMintModalOpen] = useState(false);
+  const [mintType, setMintType] = useState<'free' | 'paid'>('free');
   const [showRandomMenu, setShowRandomMenu] = useState(false);
   const randomMenuRef = useRef<HTMLDivElement>(null);
 
@@ -145,7 +143,6 @@ export function ActionBar({ className = '' }: ActionBarProps) {
   // Determine mint readiness
   const isWalletConnected = walletStatus === 'connected' && !!address;
 
-  /* TODO: re-enable at mint launch ──────────────────────────────────
   const hasFreeMintsAvailable = (credits?.free_mints_available ?? 0) > 0;
   const canMint = canExport && isWalletConnected;
 
@@ -167,7 +164,7 @@ export function ActionBar({ className = '' }: ActionBarProps) {
       const effectiveMintType = hasFreeMintsAvailable ? mintType : 'paid';
       const layersForApi: Record<string, string> = {};
       for (const [key, value] of Object.entries(selectedLayers)) {
-        if (value && value !== '' && value !== 'None') {
+        if (!isSelectionPathEmpty(value)) {
           layersForApi[key] = value;
         }
       }
@@ -179,10 +176,9 @@ export function ActionBar({ className = '' }: ActionBarProps) {
       console.error('[ActionBar] Failed to prepare mint:', err);
     }
   }, [isWalletConnected, canExport, selectedLayers, selectedColors, hasFreeMintsAvailable, mintType, connect, startMint, g2Selections]);
-  ──────────────────────────────────────────────────────────────────── */
 
   const basePath = selectedLayers.Base;
-  const hasSelection = !!basePath && basePath !== '' && basePath !== 'None';
+  const hasSelection = !isSelectionPathEmpty(basePath);
 
   const handleRandomize = () => {
     setShowRandomMenu(false);
@@ -571,30 +567,51 @@ export function ActionBar({ className = '' }: ActionBarProps) {
         />
       </ActionBarTooltip>
 
-      {/* ── Mint Section — disabled until launch ── */}
+      {/* ── Mint Section ── */}
       <div
         className="flex items-center gap-2 pl-2 ml-1"
         style={{ borderLeft: '1px solid var(--color-border)' }}
       >
-        <ActionBarTooltip content="Soon">
-          <div
-            className="flex items-center justify-center rounded-lg shrink-0 w-10 h-10"
-            style={{
-              background: 'transparent',
-              color: 'var(--color-text-muted)',
-              opacity: 0.35,
-              border: '1px solid var(--color-border)',
-              cursor: 'not-allowed',
-              pointerEvents: 'none',
-            }}
-            aria-label="Mint (coming soon)"
-            aria-disabled="true"
-          >
-            <Sparkles size={20} />
-          </div>
+        {/* Free/Paid toggle — only when wallet connected and has free mints */}
+        {isWalletConnected && hasFreeMintsAvailable && (
+          <ActionBarTooltip content={mintType === 'free' ? 'Free Mint' : 'Paid Mint'}>
+            <ActionButton
+              onClick={() => setMintType((t) => (t === 'free' ? 'paid' : 'free'))}
+              isActive={mintType === 'free'}
+              icon={mintType === 'free' ? <Sparkles size={18} /> : <Coins size={18} />}
+              label={mintType === 'free' ? 'Free Mint' : 'Paid Mint'}
+            />
+          </ActionBarTooltip>
+        )}
+
+        {/* Mint button */}
+        <ActionBarTooltip content={!isWalletConnected ? 'Connect Wallet' : 'Mint NFT'}>
+          <ActionButton
+            variant="primary"
+            onClick={handleMintClick}
+            disabled={isWalletConnected && !canMint}
+            isActive={canMint}
+            icon={<Wallet size={22} />}
+            label={!isWalletConnected ? 'Connect Wallet' : 'Mint'}
+          />
         </ActionBarTooltip>
+
+        {/* Supply counter */}
+        {isWalletConnected && (
+          <span className="text-xs tabular-nums whitespace-nowrap" style={{ color: 'var(--color-text-muted)' }}>
+            {totalMinted}/{maxSupply}
+          </span>
+        )}
       </div>
 
+      {/* Mint Flow Modal */}
+      <MintFlowModal
+        isOpen={isMintModalOpen}
+        onClose={() => {
+          setIsMintModalOpen(false);
+          resetMintFlow();
+        }}
+      />
     </div>
   );
 }
