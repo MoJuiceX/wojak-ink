@@ -1,3 +1,52 @@
+# Wojak Ink — Project Intelligence
+
+## Before Starting Any Task
+
+1. **Read this file** (`CLAUDE.md`) — project conventions, CSS rules, routes
+2. **Read `.claude/instructions/PROMPT-PRINCIPLES.md`** — constraints, anti-patterns, self-review checklist
+3. **Identify the task type** and use the matching prompt template from `prompts/templates/`
+4. **Read the context files** listed in the routing table below for your domain
+
+## Context Routing Table
+
+| Domain | Read These First |
+|--------|-----------------|
+| **Minting** | `functions/api/mint/*.ts`, `docs/LAUNCH-READINESS.md`, `docs/AUDIT-REPORT.md` |
+| **Frontend** | This file (CSS rules below), `src/styles/theme.css`, similar components |
+| **Database** | `functions/migrations/` (all), `functions/api/mint/_shared.ts` |
+| **Wallet** | `src/sage-wallet/`, `src/contexts/MintContext.tsx` |
+| **Games** | `src/pages/` game pages, `src/components/games/` |
+| **Deployment** | `wrangler.toml`, `vite.config.ts`, `package.json` scripts |
+| **Security** | `docs/AUDIT-REPORT.md`, `docs/LAUNCH-READINESS.md` |
+| **Brand/Copy** | `docs/BRAND-VOICE.md` |
+| **Generator** | `docs/GENERATOR-CODE-HEALTH.md`, `src/contexts/GeneratorContext.tsx`, `src/lib/wojakRules.ts` |
+| **Credits** | `functions/api/credits/`, `workers/credit-tracker/`, `functions/migrations/030_credit_system.sql` |
+
+## Prompt Templates
+
+| Task Type | Template |
+|-----------|----------|
+| Security audit | `prompts/templates/AUDIT.template.md` |
+| New feature | `prompts/templates/FEATURE.template.md` |
+| Bug fix | `prompts/templates/BUGFIX.template.md` |
+| Refactoring | `prompts/templates/REFACTOR.template.md` |
+| DB migration | `prompts/templates/MIGRATION.template.md` |
+| Frontend work | `prompts/templates/FRONTEND.template.md` |
+| Research | `prompts/templates/RESEARCH.template.md` |
+
+## Critical Anti-Patterns (Never Do These)
+
+- **Never `SELECT MAX` for sequential IDs** — use `UPDATE...RETURNING` on `mint_counter`
+- **Never single IPFS URIs** — use `string[]` with gateway redundancy
+- **Never self-fetch own API endpoints** — the `prepare->upload` self-fetch is tech debt, don't add more
+- **Never `startsWith('xch1')` for wallet validation** — use `isValidChiaAddress()` (bech32m regex)
+- **Never hardcode XCH prices** — use constants or env vars
+- **Never change schema without a migration file** — `functions/migrations/NNN_description.sql`
+- **Never `!important` in CSS** — ever
+- **Never add deps without documenting why** — explain in commit message
+
+---
+
 # CLAUDE.md - Wojak.ink
 
 ## Generator and layer work
