@@ -59,7 +59,7 @@ export function AboutSection() {
         <h2
           id="about-section-heading"
           className="text-lg font-bold"
-          style={{ color: 'var(--color-text-primary)' }}
+          style={{ color: 'var(--color-text)' }}
         >
           About Wojak.ink
         </h2>
@@ -77,7 +77,7 @@ export function AboutSection() {
         <div className="flex items-center justify-center gap-2 mb-4">
           <span
             className="text-sm font-medium"
-            style={{ color: 'var(--color-text-primary)' }}
+            style={{ color: 'var(--color-text)' }}
           >
             Version {APP_VERSION}
           </span>
@@ -131,7 +131,7 @@ export function AboutSection() {
               whileTap={prefersReducedMotion ? undefined : 'tap'}
               className="p-3 rounded-xl flex flex-col items-center gap-1 transition-colors"
               style={{
-                background: 'var(--color-bg-tertiary)',
+                background: 'var(--color-border)',
                 border: '1px solid var(--color-border)',
               }}
             >
@@ -140,7 +140,7 @@ export function AboutSection() {
               </span>
               <span
                 className="text-xs font-medium"
-                style={{ color: 'var(--color-text-primary)' }}
+                style={{ color: 'var(--color-text)' }}
               >
                 {link.name}
               </span>
@@ -176,7 +176,7 @@ export function AboutSection() {
             onClick={() => setShowAdminModal(true)}
             className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-colors"
             style={{
-              background: 'var(--color-bg-tertiary)',
+              background: 'var(--color-border)',
               color: 'var(--color-text-secondary)',
               border: '1px solid var(--color-border)',
             }}
@@ -201,7 +201,7 @@ export function AboutSection() {
           <div
             className="fixed inset-4 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 z-50 sm:w-full sm:max-w-md rounded-2xl overflow-hidden flex flex-col"
             style={{
-              background: 'var(--color-bg-secondary)',
+              background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
               maxHeight: '80vh',
             }}
@@ -215,7 +215,7 @@ export function AboutSection() {
                 <Shield size={20} style={{ color: 'var(--color-primary)' }} />
                 <h2
                   className="text-lg font-semibold"
-                  style={{ color: 'var(--color-text-primary)' }}
+                  style={{ color: 'var(--color-text)' }}
                 >
                   Admin Panel
                 </h2>
@@ -252,7 +252,7 @@ export function AboutSection() {
                     className="w-full px-4 py-3 rounded-lg text-sm"
                     style={{
                       background: 'var(--color-surface)',
-                      color: 'var(--color-text-primary)',
+                      color: 'var(--color-text)',
                       border: passwordError
                         ? '2px solid #ef4444'
                         : '1px solid var(--color-border)',
@@ -293,7 +293,7 @@ export function AboutSection() {
                   <div
                     className="p-4 rounded-xl text-center"
                     style={{
-                      background: 'var(--color-bg-tertiary)',
+                      background: 'var(--color-border)',
                       border: '1px solid var(--color-border)',
                     }}
                   >

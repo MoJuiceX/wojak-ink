@@ -94,7 +94,7 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
             exit={{ scale: 0.9, opacity: 0 }}
             className="relative rounded-xl w-full max-w-md max-h-[85vh] overflow-hidden flex flex-col"
             style={{
-              background: 'var(--color-bg-secondary)',
+              background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
             }}
             onClick={(e) => e.stopPropagation()}
@@ -106,7 +106,7 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
             >
               <h2
                 className="text-lg font-bold"
-                style={{ color: 'var(--color-text-primary)' }}
+                style={{ color: 'var(--color-text)' }}
               >
                 Find a Guild
               </h2>
@@ -114,7 +114,7 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
                 type="button"
                 onClick={handleClose}
                 className="p-2 rounded-full transition-colors"
-                style={{ color: 'var(--color-text-tertiary)' }}
+                style={{ color: 'var(--color-text-muted)' }}
               >
                 <X size={20} />
               </button>
@@ -125,21 +125,21 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
               <div
                 className="flex items-center gap-3 px-4 py-3 rounded-lg"
                 style={{
-                  background: 'var(--color-bg-tertiary)',
+                  background: 'var(--color-border)',
                   border: '1px solid var(--color-border)',
                 }}
               >
-                <Search size={18} style={{ color: 'var(--color-text-tertiary)' }} />
+                <Search size={18} style={{ color: 'var(--color-text-muted)' }} />
                 <input
                   type="text"
                   value={query}
                   onChange={(e) => handleSearchChange(e.target.value)}
                   placeholder="Search by name or tag..."
                   className="flex-1 bg-transparent outline-none text-sm"
-                  style={{ color: 'var(--color-text-primary)' }}
+                  style={{ color: 'var(--color-text)' }}
                 />
                 {isSearching && (
-                  <Loader2 size={18} className="animate-spin" style={{ color: 'var(--color-brand-primary)' }} />
+                  <Loader2 size={18} className="animate-spin" style={{ color: 'var(--color-primary)' }} />
                 )}
               </div>
             </div>
@@ -161,7 +161,7 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
 
               {!isSearching && query.length < 2 && (
                 <div className="text-center py-8">
-                  <p style={{ color: 'var(--color-text-tertiary)' }}>
+                  <p style={{ color: 'var(--color-text-muted)' }}>
                     Enter at least 2 characters to search
                   </p>
                 </div>
@@ -177,7 +177,7 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
 
                   <div
                     className="flex justify-end px-4 py-3 rounded-b-lg -mt-4"
-                    style={{ background: 'var(--color-bg-tertiary)' }}
+                    style={{ background: 'var(--color-border)' }}
                   >
                     {requestSent.has(guild.id) ? (
                       <span className="text-sm" style={{ color: '#22c55e' }}>
@@ -192,7 +192,7 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
                         disabled={isRequesting}
                         className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                         style={{
-                          background: 'var(--color-brand-primary)',
+                          background: 'var(--color-primary)',
                           color: '#fff',
                           opacity: isRequesting ? 0.5 : 1,
                         }}
@@ -222,7 +222,7 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
                     exit={{ scale: 0.9 }}
                     className="rounded-xl w-full max-w-sm overflow-hidden"
                     style={{
-                      background: 'var(--color-bg-secondary)',
+                      background: 'var(--color-surface)',
                       border: '1px solid var(--color-border)',
                     }}
                     onClick={(e) => e.stopPropagation()}
@@ -233,32 +233,32 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
                       <div>
                         <h4
                           className="text-xs font-medium uppercase tracking-wide mb-2"
-                          style={{ color: 'var(--color-text-tertiary)' }}
+                          style={{ color: 'var(--color-text-muted)' }}
                         >
                           About
                         </h4>
                         <p
                           className="text-sm"
-                          style={{ color: 'var(--color-text-primary)' }}
+                          style={{ color: 'var(--color-text)' }}
                         >
                           {selectedGuild.description || 'No description provided.'}
                         </p>
                       </div>
 
                       <div
-                        className="grid grid-cols-3 gap-2 p-3 rounded-lg"
-                        style={{ background: 'var(--color-bg-tertiary)' }}
+                        className="grid grid-cols-3 gap-1.5 sm:gap-2 p-3 rounded-lg"
+                        style={{ background: 'var(--color-border)' }}
                       >
                         <div className="text-center">
                           <p
                             className="text-sm font-semibold"
-                            style={{ color: 'var(--color-text-primary)' }}
+                            style={{ color: 'var(--color-text)' }}
                           >
                             {selectedGuild.memberCount}/{selectedGuild.maxMembers}
                           </p>
                           <p
                             className="text-xs"
-                            style={{ color: 'var(--color-text-tertiary)' }}
+                            style={{ color: 'var(--color-text-muted)' }}
                           >
                             Members
                           </p>
@@ -266,13 +266,13 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
                         <div className="text-center">
                           <p
                             className="text-sm font-semibold"
-                            style={{ color: 'var(--color-text-primary)' }}
+                            style={{ color: 'var(--color-text)' }}
                           >
                             {selectedGuild.totalScore.toLocaleString()}
                           </p>
                           <p
                             className="text-xs"
-                            style={{ color: 'var(--color-text-tertiary)' }}
+                            style={{ color: 'var(--color-text-muted)' }}
                           >
                             Total Score
                           </p>
@@ -280,13 +280,13 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
                         <div className="text-center">
                           <p
                             className="text-sm font-semibold"
-                            style={{ color: 'var(--color-text-primary)' }}
+                            style={{ color: 'var(--color-text)' }}
                           >
                             {selectedGuild.weeklyScore.toLocaleString()}
                           </p>
                           <p
                             className="text-xs"
-                            style={{ color: 'var(--color-text-tertiary)' }}
+                            style={{ color: 'var(--color-text-muted)' }}
                           >
                             Weekly
                           </p>
@@ -307,7 +307,7 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
                             </span>
                             <p
                               className="text-sm mt-1"
-                              style={{ color: 'var(--color-text-tertiary)' }}
+                              style={{ color: 'var(--color-text-muted)' }}
                             >
                               Waiting for approval from guild officers
                             </p>
@@ -318,7 +318,7 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
                             disabled={isRequesting || selectedGuild.memberCount >= selectedGuild.maxMembers}
                             className="w-full py-3 rounded-lg font-medium transition-colors"
                             style={{
-                              background: 'var(--color-brand-primary)',
+                              background: 'var(--color-primary)',
                               color: '#fff',
                               opacity: (isRequesting || selectedGuild.memberCount >= selectedGuild.maxMembers) ? 0.5 : 1,
                             }}

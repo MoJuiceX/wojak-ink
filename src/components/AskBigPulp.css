@@ -968,6 +968,24 @@
   opacity: 0.9;
 }
 
+/* Mobile: reduce grid columns for 375px screens */
+@media (max-width: 480px) {
+  .combo-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .rarest-gallery {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .stier-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
+
 /* Desktop: Carousel on left side for combo badges */
 @media (min-width: 480px) {
   .combo-badge-content {

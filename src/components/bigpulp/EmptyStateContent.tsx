@@ -60,7 +60,7 @@ function QuickStats({
   if (isLoading || !stats) {
     return (
       <div
-        className="grid grid-cols-3 gap-3"
+        className="grid grid-cols-3 gap-2 sm:gap-3"
         style={{ marginBottom: '16px' }}
       >
         {[1, 2, 3].map((i) => (
@@ -88,7 +88,7 @@ function QuickStats({
 
   return (
     <div
-      className="grid grid-cols-3 gap-2"
+      className="grid grid-cols-3 gap-1.5 sm:gap-2"
       style={{ marginBottom: '12px' }}
     >
       {statsItems.map((item) => (

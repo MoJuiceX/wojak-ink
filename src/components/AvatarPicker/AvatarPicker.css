@@ -355,13 +355,13 @@
 }
 
 /* ===== Responsive ===== */
-@media (max-width: 400px) {
+@media (max-width: 480px) {
   .avatar-modal-container {
     max-height: 90vh;
   }
 
   .emoji-grid {
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 8px;
   }
 
@@ -370,7 +370,7 @@
   }
 
   .nft-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
   }
 }

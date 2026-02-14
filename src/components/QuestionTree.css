@@ -287,6 +287,14 @@
   color: white;
 }
 
+/* Mobile: reduce preview grid columns for 375px screens */
+@media (max-width: 480px) {
+  .qt-previews-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
 /* Dark mode adjustments */
 @media (prefers-color-scheme: dark) {
   .qt-answer-content {
