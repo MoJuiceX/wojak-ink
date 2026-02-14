@@ -68,6 +68,24 @@
 }
 
 /* ============================================
+   SMALL MOBILE (<480px): Compact layout for 375px screens
+   ============================================ */
+@media (max-width: 480px) {
+  .treasury-grid {
+    gap: 12px;
+  }
+
+  .treasury-bubbles {
+    min-height: 280px;
+  }
+
+  .treasury-nft {
+    height: 400px;
+    max-height: 400px;
+  }
+}
+
+/* ============================================
    TABLET LAYOUT (>=768px): Slightly larger bubbles
    ============================================ */
 @media (min-width: 768px) {

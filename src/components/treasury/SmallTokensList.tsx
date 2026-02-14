@@ -21,7 +21,7 @@ function TokenRow({ token, index }: { token: WalletToken; index: number }) {
       className="flex items-center gap-3 px-4 py-3 transition-colors hover:border-l-2"
       style={{
         borderBottom: '1px solid var(--color-border)',
-        borderLeftColor: 'var(--color-brand-primary)',
+        borderLeftColor: 'var(--color-primary)',
       }}
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
@@ -186,7 +186,7 @@ export function SmallTokensList({ tokens, maxDisplay = 5, isLoading = false }: S
       {hasMore && (
         <button
           className="w-full px-4 py-3 flex items-center justify-center gap-2 text-sm transition-colors"
-          style={{ color: 'var(--color-brand-primary)' }}
+          style={{ color: 'var(--color-primary)' }}
           onClick={() => setIsExpanded(!isExpanded)}
         >
           {isExpanded ? (

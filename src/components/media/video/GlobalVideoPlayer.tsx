@@ -528,7 +528,7 @@ export function GlobalVideoPlayer() {
             <motion.div
               className="h-full"
               style={{
-                background: 'var(--color-brand-primary)',
+                background: 'var(--color-primary)',
                 width: `${progress * 100}%`,
               }}
               transition={{ duration: 0.1 }}

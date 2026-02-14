@@ -127,7 +127,7 @@ export const VideoCard = memo(function VideoCard({ video, onClick }: VideoCardPr
         <h3
           className="text-sm font-semibold line-clamp-2 transition-colors duration-200 leading-tight"
           style={{
-            color: isHovered ? '#F97316' : 'var(--color-text-primary)',
+            color: isHovered ? '#F97316' : 'var(--color-text)',
             minHeight: '2.5em', // Ensures space for 2 lines
           }}
         >

@@ -91,10 +91,10 @@ export function StatsPanel() {
         className="px-4 py-3 flex items-center gap-2"
         style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)' }}
       >
-        <BarChart3 size={18} style={{ color: 'var(--color-brand-primary)' }} />
+        <BarChart3 size={18} style={{ color: 'var(--color-primary)' }} />
         <h3
           className="text-sm font-semibold"
-          style={{ color: 'var(--color-text-primary)' }}
+          style={{ color: 'var(--color-text)' }}
         >
           Your High Scores
         </h3>
@@ -167,7 +167,7 @@ export function StatsPanel() {
                   <div className="flex-1 min-w-0">
                     <p
                       className="text-xs font-medium truncate"
-                      style={{ color: 'var(--color-text-primary)' }}
+                      style={{ color: 'var(--color-text)' }}
                     >
                       {game.gameName}
                     </p>
@@ -187,7 +187,7 @@ export function StatsPanel() {
                   {/* Score */}
                   <span
                     className="text-sm font-bold cursor-help"
-                    style={{ color: 'var(--color-brand-primary)' }}
+                    style={{ color: 'var(--color-primary)' }}
                     title={game.nextRank ? `Beat ${game.nextRank.displayName} (${game.nextRank.score.toLocaleString()}) - need ${game.nextRank.pointsNeeded.toLocaleString()} more points` : 'You are #1!'}
                   >
                     {game.highScore.toLocaleString()}
@@ -211,7 +211,7 @@ export function StatsPanel() {
                       <TrendingUp size={12} style={{ color: '#22c55e' }} />
                       <span
                         className="text-[10px] font-medium"
-                        style={{ color: 'var(--color-text-primary)' }}
+                        style={{ color: 'var(--color-text)' }}
                       >
                         To reach #{game.nextRank.rank}:
                       </span>
@@ -222,7 +222,7 @@ export function StatsPanel() {
                     >
                       <span className="font-semibold">{game.nextRank.displayName}</span>
                       <span className="mx-1">has</span>
-                      <span className="font-semibold" style={{ color: 'var(--color-brand-primary)' }}>
+                      <span className="font-semibold" style={{ color: 'var(--color-primary)' }}>
                         {game.nextRank.score.toLocaleString()}
                       </span>
                     </div>
@@ -278,7 +278,7 @@ export function StatsPanel() {
                   className="h-full rounded-full transition-all duration-500"
                   style={{
                     width: `${(gameScores.length / 15) * 100}%`,
-                    background: 'var(--color-brand-primary)',
+                    background: 'var(--color-primary)',
                   }}
                 />
               </div>

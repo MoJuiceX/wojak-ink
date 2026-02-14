@@ -136,7 +136,7 @@ export function FloatingVideoPlayer() {
         style={{
           width: isMinimized ? 280 : playerSize.width,
           height: isMinimized ? 48 : playerSize.height + 80,
-          background: 'var(--color-bg-secondary)',
+          background: 'var(--color-surface)',
           border: '1px solid var(--color-border)',
           left: position.x,
           top: position.y,
@@ -201,7 +201,7 @@ export function FloatingVideoPlayer() {
                   >
                     <div
                       className="w-16 h-16 rounded-full flex items-center justify-center"
-                      style={{ background: 'var(--color-brand-primary)' }}
+                      style={{ background: 'var(--color-primary)' }}
                     >
                       {!hasStarted || isPaused ? (
                         <Play size={32} fill="white" color="white" />
@@ -222,21 +222,21 @@ export function FloatingVideoPlayer() {
         {/* Controls bar */}
         <div
           className="p-2 space-y-2"
-          style={{ background: 'var(--color-bg-secondary)' }}
+          style={{ background: 'var(--color-surface)' }}
         >
           {/* Title (minimized mode) */}
           {isMinimized && (
             <div className="flex items-center gap-2 px-2">
               <button
                 className="p-1.5 rounded-lg transition-colors"
-                style={{ color: 'var(--color-text-primary)' }}
+                style={{ color: 'var(--color-text)' }}
                 onClick={handlePlayPause}
               >
                 {isPlaying ? <Pause size={18} /> : <Play size={18} />}
               </button>
               <span
                 className="flex-1 text-sm truncate"
-                style={{ color: 'var(--color-text-primary)' }}
+                style={{ color: 'var(--color-text)' }}
               >
                 {currentVideo.title}
               </span>
@@ -259,7 +259,7 @@ export function FloatingVideoPlayer() {
               onChange={handleSeek}
               className="flex-1 h-1 rounded-full appearance-none cursor-pointer"
               style={{
-                background: `linear-gradient(to right, var(--color-brand-primary) ${(currentTime / (duration || 1)) * 100}%, var(--color-border) ${(currentTime / (duration || 1)) * 100}%)`,
+                background: `linear-gradient(to right, var(--color-primary) ${(currentTime / (duration || 1)) * 100}%, var(--color-border) ${(currentTime / (duration || 1)) * 100}%)`,
               }}
               aria-label="Video progress"
             />
@@ -285,7 +285,7 @@ export function FloatingVideoPlayer() {
                 <button
                   className="p-2 rounded-lg transition-colors"
                   style={{
-                    background: 'var(--color-brand-primary)',
+                    background: 'var(--color-primary)',
                     color: 'white',
                   }}
                   onClick={handlePlayPause}
@@ -326,7 +326,7 @@ export function FloatingVideoPlayer() {
                     onChange={handleVolumeChange}
                     className="w-16 h-1 rounded-full appearance-none cursor-pointer"
                     style={{
-                      background: `linear-gradient(to right, var(--color-brand-primary) ${(isMuted ? 0 : volume) * 100}%, var(--color-border) ${(isMuted ? 0 : volume) * 100}%)`,
+                      background: `linear-gradient(to right, var(--color-primary) ${(isMuted ? 0 : volume) * 100}%, var(--color-border) ${(isMuted ? 0 : volume) * 100}%)`,
                     }}
                     aria-label="Volume"
                   />

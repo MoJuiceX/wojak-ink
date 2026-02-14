@@ -73,7 +73,7 @@ export function NFTCollections({ collections, isLoading = false }: NFTCollection
         >
           <h3
             className="text-base font-semibold"
-            style={{ color: 'var(--color-text-primary)' }}
+            style={{ color: 'var(--color-text)' }}
           >
             NFT Collections
           </h3>
@@ -103,7 +103,7 @@ export function NFTCollections({ collections, isLoading = false }: NFTCollection
       >
         <h3
           className="text-base font-semibold truncate"
-          style={{ color: 'var(--color-text-primary)' }}
+          style={{ color: 'var(--color-text)' }}
         >
           {selectedCollection ? selectedCollection.collectionName : 'NFT Collections'}
         </h3>
@@ -112,9 +112,9 @@ export function NFTCollections({ collections, isLoading = false }: NFTCollection
           <motion.button
             className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg transition-colors flex-shrink-0"
             style={{
-              color: 'var(--color-brand-primary)',
+              color: 'var(--color-primary)',
               background: 'var(--color-surface)',
-              border: '1px solid var(--color-brand-primary)',
+              border: '1px solid var(--color-primary)',
             }}
             onClick={handleBack}
             whileHover={{ scale: 1.02 }}
@@ -147,7 +147,7 @@ export function NFTCollections({ collections, isLoading = false }: NFTCollection
                   key={nft.nftId}
                   className="aspect-square rounded-lg overflow-hidden"
                   style={{
-                    background: 'var(--color-bg-primary)',
+                    background: 'var(--color-bg)',
                     border: '1px solid var(--color-border)',
                   }}
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -191,13 +191,13 @@ export function NFTCollections({ collections, isLoading = false }: NFTCollection
                   key={collection.collectionId}
                   className="relative aspect-square rounded-lg overflow-hidden text-left"
                   style={{
-                    background: 'var(--color-bg-primary)',
+                    background: 'var(--color-bg)',
                     border: '2px solid transparent',
                   }}
                   onClick={() => handleSelectCollection(collection)}
                   whileHover={{
                     scale: 1.03,
-                    borderColor: 'var(--color-brand-primary)',
+                    borderColor: 'var(--color-primary)',
                   }}
                   whileTap={{ scale: 0.98 }}
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -230,7 +230,7 @@ export function NFTCollections({ collections, isLoading = false }: NFTCollection
                   >
                     <p
                       className="text-sm font-semibold truncate"
-                      style={{ color: 'var(--color-text-primary)' }}
+                      style={{ color: 'var(--color-text)' }}
                     >
                       {collection.collectionName}
                     </p>

@@ -71,7 +71,7 @@ export function OtherTokensCard({ tokens, isLoading = false }: OtherTokensCardPr
               key={token.id}
               className="flex items-center gap-3 px-3 py-2 rounded-lg"
               style={{
-                background: 'var(--color-bg-primary)',
+                background: 'var(--color-bg)',
                 border: '1px solid var(--color-border)',
               }}
               initial={{ opacity: 0, x: -10 }}

@@ -61,7 +61,7 @@ export function WalletAddressCard({ address, explorerUrl }: WalletAddressCardPro
           {/* Address */}
           <span
             className="text-sm font-mono flex-1 truncate"
-            style={{ color: 'var(--color-text-primary)' }}
+            style={{ color: 'var(--color-text)' }}
           >
             {truncatedAddress}
           </span>
@@ -70,7 +70,7 @@ export function WalletAddressCard({ address, explorerUrl }: WalletAddressCardPro
           <motion.button
             className="w-8 h-8 flex items-center justify-center rounded-lg flex-shrink-0"
             style={{
-              background: copied ? 'rgba(34, 197, 94, 0.2)' : 'var(--color-bg-primary)',
+              background: copied ? 'rgba(34, 197, 94, 0.2)' : 'var(--color-surface)',
               border: copied ? '1px solid var(--color-success)' : '1px solid var(--color-border)',
               color: copied ? 'var(--color-success)' : 'var(--color-text-secondary)',
             }}
@@ -86,7 +86,7 @@ export function WalletAddressCard({ address, explorerUrl }: WalletAddressCardPro
           <motion.button
             className="w-8 h-8 flex items-center justify-center rounded-lg flex-shrink-0"
             style={{
-              background: 'var(--color-bg-primary)',
+              background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
               color: 'var(--color-text-secondary)',
             }}

@@ -104,7 +104,7 @@ export const GameCard = memo(function GameCard({
       <div className="text-6xl sm:text-5xl mb-4 sm:mb-3 pointer-events-none">{game.emoji}</div>
 
       {/* Name */}
-      <h3 className="text-lg sm:text-base font-semibold pointer-events-none" style={{ color: 'var(--color-text-primary)' }}>
+      <h3 className="text-lg sm:text-base font-semibold pointer-events-none" style={{ color: 'var(--color-text)' }}>
         {game.name}
       </h3>
 
@@ -112,7 +112,7 @@ export const GameCard = memo(function GameCard({
       {game.status === 'coming-soon' && (
         <div
           className="absolute top-2 right-2 px-2 py-0.5 rounded text-[10px] font-medium pointer-events-none"
-          style={{ background: 'var(--color-brand-primary)', color: 'white' }}
+          style={{ background: 'var(--color-primary)', color: 'white' }}
         >
           Coming Soon
         </div>

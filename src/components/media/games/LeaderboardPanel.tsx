@@ -87,10 +87,10 @@ export function LeaderboardPanel() {
         className="px-4 py-3 flex items-center gap-2"
         style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)' }}
       >
-        <Trophy size={18} style={{ color: 'var(--color-brand-primary)' }} />
+        <Trophy size={18} style={{ color: 'var(--color-primary)' }} />
         <h3
           className="text-sm font-semibold"
-          style={{ color: 'var(--color-text-primary)' }}
+          style={{ color: 'var(--color-text)' }}
         >
           Top Scores
         </h3>
@@ -152,7 +152,7 @@ export function LeaderboardPanel() {
                   <div className="flex items-center gap-1">
                     <p
                       className={`text-xs font-semibold truncate ${entry.equipped.nameEffect?.css_class || ''}`}
-                      style={{ color: 'var(--color-text-primary)' }}
+                      style={{ color: 'var(--color-text)' }}
                     >
                       {entry.playerName}
                     </p>
@@ -172,7 +172,7 @@ export function LeaderboardPanel() {
                 {/* Score */}
                 <span
                   className="text-xs font-bold flex-shrink-0"
-                  style={{ color: 'var(--color-brand-primary)' }}
+                  style={{ color: 'var(--color-primary)' }}
                 >
                   {entry.score.toLocaleString()}
                 </span>

@@ -705,7 +705,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                                 <motion.div
                                   className="w-fit max-h-[80%] overflow-y-auto p-6 rounded-xl whitespace-nowrap"
                                   style={{
-                                    background: 'var(--color-bg-primary)',
+                                    background: 'var(--color-bg)',
                                     border: `1px solid ${game.accentColor}40`,
                                   }}
                                   initial={{ scale: 0.9, opacity: 0 }}
@@ -743,7 +743,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                                     <div className="mt-6">
                                       <h3
                                         className="text-sm font-semibold mb-3"
-                                        style={{ color: 'var(--color-text-primary)' }}
+                                        style={{ color: 'var(--color-text)' }}
                                       >
                                         Controls
                                       </h3>
@@ -904,7 +904,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                     >
                       <h4
                         className="text-sm font-medium mb-3"
-                        style={{ color: 'var(--color-text-primary)' }}
+                        style={{ color: 'var(--color-text)' }}
                       >
                         Accessibility Features
                       </h4>
@@ -985,7 +985,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                   <motion.div
                     className="w-fit max-h-[80%] overflow-y-auto p-6 rounded-xl whitespace-nowrap"
                     style={{
-                      background: 'var(--color-bg-primary)',
+                      background: 'var(--color-bg)',
                       border: `1px solid ${game.accentColor}40`,
                     }}
                     initial={{ scale: 0.9, opacity: 0 }}
@@ -1028,7 +1028,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                       <div className="mt-6">
                         <h3
                           className="text-sm font-semibold mb-3"
-                          style={{ color: 'var(--color-text-primary)' }}
+                          style={{ color: 'var(--color-text)' }}
                         >
                           Controls
                         </h3>

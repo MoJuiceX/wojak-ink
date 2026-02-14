@@ -63,7 +63,7 @@ export function WalletInfoCard({ wallet, onConnect, isLoading = false }: WalletI
         <div className="p-4 space-y-4">
           <div
             className="h-12 rounded-lg"
-            style={{ background: 'var(--color-bg-tertiary)' }}
+            style={{ background: 'var(--color-border)' }}
           />
           <div className="flex gap-3">
             <div
@@ -108,7 +108,7 @@ export function WalletInfoCard({ wallet, onConnect, isLoading = false }: WalletI
           <motion.button
             className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
             style={{
-              background: 'var(--color-brand-primary)',
+              background: 'var(--color-primary)',
               color: 'white',
             }}
             onClick={onConnect}
@@ -157,8 +157,8 @@ export function WalletInfoCard({ wallet, onConnect, isLoading = false }: WalletI
         <button
           className="w-full text-left font-mono text-sm break-all p-3 rounded-lg transition-colors"
           style={{
-            background: 'var(--color-bg-tertiary)',
-            color: 'var(--color-text-primary)',
+            background: 'var(--color-border)',
+            color: 'var(--color-text)',
           }}
           onClick={() => setShowFullAddress(!showFullAddress)}
           aria-label={showFullAddress ? 'Hide full address' : 'Show full address'}

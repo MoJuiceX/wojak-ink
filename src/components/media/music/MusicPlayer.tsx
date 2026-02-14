@@ -94,7 +94,7 @@ export function MusicPlayer({ tracks }: MusicPlayerProps) {
         />
         <h2
           className="text-xl font-bold relative"
-          style={{ color: 'var(--color-text-primary)' }}
+          style={{ color: 'var(--color-text)' }}
         >
           Background Music
           <span
@@ -113,8 +113,6 @@ export function MusicPlayer({ tracks }: MusicPlayerProps) {
         className={`relative flex items-center gap-5 p-5 overflow-hidden ${isPlaying ? 'playing' : ''}`}
         style={{
           background: 'var(--color-surface)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
           border: '1px solid rgba(249, 115, 22, 0.2)',
           borderRadius: '20px',
         }}
@@ -166,7 +164,7 @@ export function MusicPlayer({ tracks }: MusicPlayerProps) {
           <div>
             <span
               className="font-medium block"
-              style={{ color: 'var(--color-text-primary)' }}
+              style={{ color: 'var(--color-text)' }}
             >
               {currentTrack?.title || 'Wojak Vibes'}
             </span>
@@ -189,7 +187,7 @@ export function MusicPlayer({ tracks }: MusicPlayerProps) {
             width: 48,
             height: 48,
             borderRadius: '50%',
-            background: isPlaying ? 'var(--color-status-error)' : '#F97316',
+            background: isPlaying ? 'var(--color-error)' : '#F97316',
             color: 'white',
             border: 'none',
             cursor: 'pointer',

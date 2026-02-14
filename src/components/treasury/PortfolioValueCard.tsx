@@ -120,10 +120,10 @@ export function PortfolioValueCard({
         }}
       >
         <div className="p-6 space-y-4">
-          <div className="h-10 w-48 rounded-lg animate-pulse mx-auto" style={{ background: 'var(--color-glass-hover)' }} />
-          <div className="h-6 w-32 rounded-lg animate-pulse mx-auto" style={{ background: 'var(--color-glass-hover)' }} />
+          <div className="h-10 w-48 rounded-lg animate-pulse mx-auto" style={{ background: 'var(--color-border)' }} />
+          <div className="h-6 w-32 rounded-lg animate-pulse mx-auto" style={{ background: 'var(--color-border)' }} />
           <div className="h-px w-full" style={{ background: 'var(--color-border)' }} />
-          <div className="h-5 w-56 rounded-lg animate-pulse mx-auto" style={{ background: 'var(--color-glass-hover)' }} />
+          <div className="h-5 w-56 rounded-lg animate-pulse mx-auto" style={{ background: 'var(--color-border)' }} />
         </div>
       </div>
     );
@@ -139,7 +139,7 @@ export function PortfolioValueCard({
       aria-label="Portfolio summary"
       style={{
         // Gradient border using background-clip for consistent corner thickness
-        background: `linear-gradient(var(--color-bg-secondary), var(--color-bg-secondary)) padding-box, linear-gradient(135deg, #ff6b00, #ff8c00, #ffaa00) border-box`,
+        background: `linear-gradient(var(--color-surface), var(--color-surface)) padding-box, linear-gradient(135deg, #ff6b00, #ff8c00, #ffaa00) border-box`,
         border: '2px solid transparent',
       }}
     >
