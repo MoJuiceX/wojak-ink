@@ -43,7 +43,7 @@ export function WalletInfoCard({ wallet, onConnect, isLoading = false }: WalletI
       <div
         className="rounded-xl overflow-hidden animate-pulse"
         style={{
-          background: 'var(--color-glass-bg)',
+          background: 'var(--color-surface)',
           border: '1px solid var(--color-border)',
         }}
       >
@@ -86,7 +86,7 @@ export function WalletInfoCard({ wallet, onConnect, isLoading = false }: WalletI
       <motion.div
         className="rounded-xl p-6 text-center"
         style={{
-          background: 'var(--color-glass-bg)',
+          background: 'var(--color-surface)',
           border: '1px solid var(--color-border)',
         }}
         initial={{ opacity: 0, y: 20 }}
@@ -126,7 +126,7 @@ export function WalletInfoCard({ wallet, onConnect, isLoading = false }: WalletI
     <motion.div
       className="rounded-xl overflow-hidden"
       style={{
-        background: 'var(--color-glass-bg)',
+        background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
       }}
       initial={{ opacity: 0, y: 20 }}
@@ -140,7 +140,7 @@ export function WalletInfoCard({ wallet, onConnect, isLoading = false }: WalletI
       >
         <div
           className="w-2 h-2 rounded-full"
-          style={{ background: '#22c55e' }}
+          style={{ background: 'var(--color-success)' }}
           aria-label="Connected"
         />
         <h3
@@ -182,11 +182,11 @@ export function WalletInfoCard({ wallet, onConnect, isLoading = false }: WalletI
           <motion.button
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors"
             style={{
-              background: 'var(--color-glass-hover)',
-              color: copied ? '#22c55e' : 'var(--color-text-secondary)',
+              background: 'rgba(255, 255, 255, 0.06)',
+              color: copied ? 'var(--color-success)' : 'var(--color-text-secondary)',
             }}
             onClick={handleCopy}
-            whileHover={{ background: 'var(--color-glass-bg)' }}
+            whileHover={{ background: 'var(--color-surface)' }}
             whileTap={{ scale: 0.98 }}
             aria-label={copied ? 'Copied!' : 'Copy address'}
           >
@@ -221,11 +221,11 @@ export function WalletInfoCard({ wallet, onConnect, isLoading = false }: WalletI
           <motion.button
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors"
             style={{
-              background: 'var(--color-glass-hover)',
+              background: 'rgba(255, 255, 255, 0.06)',
               color: 'var(--color-text-secondary)',
             }}
             onClick={handleExplorerClick}
-            whileHover={{ background: 'var(--color-glass-bg)' }}
+            whileHover={{ background: 'var(--color-surface)' }}
             whileTap={{ scale: 0.98 }}
             aria-label="View on block explorer"
           >

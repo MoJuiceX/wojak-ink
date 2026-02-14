@@ -49,7 +49,7 @@ function VideoCardSkeleton() {
       className="overflow-hidden animate-pulse h-full flex flex-col"
       style={{
         borderRadius: '16px',
-        background: 'var(--color-glass-bg)',
+        background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
       }}
     >
@@ -147,7 +147,7 @@ export function VideosGrid({
         <motion.div
           className="p-12 rounded-2xl text-center"
           style={{
-            background: 'var(--color-glass-bg)',
+            background: 'var(--color-surface)',
             border: '1px solid var(--color-border)',
           }}
           initial={{ opacity: 0, y: 20 }}

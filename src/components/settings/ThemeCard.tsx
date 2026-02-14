@@ -37,13 +37,13 @@ export function ThemeCard({ theme, isSelected, onSelect }: ThemeCardProps) {
       className={`
         relative p-4 rounded-xl text-left transition-all glass hover-lift glow-section
         focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
-        focus-visible:ring-[var(--color-brand-primary)]
-        ${isSelected ? 'ring-2 ring-[var(--color-brand-primary)]' : ''}
+        focus-visible:ring-[var(--color-primary)]
+        ${isSelected ? 'ring-2 ring-[var(--color-primary)]' : ''}
       `}
       style={{
-        background: 'var(--color-glass-bg)',
+        background: 'var(--color-surface)',
         border: isSelected
-          ? '2px solid var(--color-brand-primary)'
+          ? '2px solid var(--color-primary)'
           : '1px solid var(--color-border)',
         boxShadow: isSelected
           ? '0 0 20px rgba(var(--color-brand-primary-rgb, 255, 107, 0), 0.2)'
@@ -118,7 +118,7 @@ export function ThemeCard({ theme, isSelected, onSelect }: ThemeCardProps) {
       >
         <div
           className="w-5 h-5 rounded-full flex items-center justify-center"
-          style={{ background: 'var(--color-brand-primary)' }}
+          style={{ background: 'var(--color-primary)' }}
         >
           <Check size={12} color="white" strokeWidth={3} />
         </div>

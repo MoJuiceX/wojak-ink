@@ -60,7 +60,7 @@ export function AccessibilitySettings({
     >
       {/* Section Header */}
       <div className="flex items-center gap-2">
-        <Accessibility size={20} style={{ color: 'var(--color-brand-primary)' }} />
+        <Accessibility size={20} style={{ color: 'var(--color-primary)' }} />
         <h2
           id="accessibility-section-heading"
           className="text-lg font-bold"
@@ -76,7 +76,7 @@ export function AccessibilitySettings({
         <div
           className="p-4 rounded-xl"
           style={{
-            background: 'var(--color-glass-bg)',
+            background: 'var(--color-surface)',
             border: '1px solid var(--color-border)',
           }}
         >
@@ -101,7 +101,7 @@ export function AccessibilitySettings({
         <div
           className="p-4 rounded-xl"
           style={{
-            background: 'var(--color-glass-bg)',
+            background: 'var(--color-surface)',
             border: '1px solid var(--color-border)',
           }}
         >

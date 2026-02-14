@@ -752,7 +752,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                                           <div
                                             key={index}
                                             className="flex items-center justify-between p-2 rounded-lg"
-                                            style={{ background: 'var(--color-glass-bg)' }}
+                                            style={{ background: 'var(--color-surface)' }}
                                           >
                                             <span
                                               className="text-xs font-mono px-2 py-1 rounded"
@@ -898,7 +898,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                     <div
                       className="p-4 rounded-xl mb-4"
                       style={{
-                        background: 'var(--color-glass-bg)',
+                        background: 'var(--color-surface)',
                         border: '1px solid var(--color-border)',
                       }}
                     >
@@ -938,7 +938,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                         fallback={
                           <div
                             className="w-full h-full flex items-center justify-center"
-                            style={{ background: 'var(--color-glass-bg)' }}
+                            style={{ background: 'var(--color-surface)' }}
                           >
                             <div className="text-center">
                               <div className="text-4xl mb-4">{game.emoji}</div>
@@ -955,7 +955,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                         ) : (
                           <div
                             className="w-full h-full flex items-center justify-center"
-                            style={{ background: 'var(--color-glass-bg)' }}
+                            style={{ background: 'var(--color-surface)' }}
                           >
                             <p style={{ color: 'var(--color-text-muted)' }}>
                               Game not available
@@ -1038,7 +1038,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                               key={index}
                               className="flex items-center justify-between p-2 rounded-lg"
                               style={{
-                                background: 'var(--color-glass-bg)',
+                                background: 'var(--color-surface)',
                               }}
                             >
                               <span

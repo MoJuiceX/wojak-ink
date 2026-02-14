@@ -115,7 +115,7 @@ export function PortfolioValueCard({
       <div
         className="relative rounded-2xl overflow-hidden"
         style={{
-          background: 'var(--color-glass-bg)',
+          background: 'var(--color-surface)',
           border: '2px solid var(--color-border)',
         }}
       >
@@ -171,15 +171,15 @@ export function PortfolioValueCard({
           className="text-3xl md:text-4xl font-bold flex items-center justify-center"
           aria-live="polite"
         >
-          <span style={{ color: 'rgba(74, 222, 128, 0.7)' }}>$</span>
+          <span style={{ color: 'var(--color-success)' }}>$</span>
           <SplitFlapDisplay text={formatPrice(simulatedTotalUSD)} muted size="lg" />
         </div>
 
         {/* XCH equivalent with split-flap animation */}
         <div className="text-lg flex items-center justify-center">
-          <span style={{ color: 'rgba(74, 222, 128, 0.7)' }}>≈ </span>
+          <span style={{ color: 'var(--color-success)' }}>≈ </span>
           <SplitFlapDisplay text={formatPrice(simulatedTotalXCH)} muted size="md" />
-          <span className="ml-1 font-bold" style={{ color: '#4ade80' }}>XCH</span>
+          <span className="ml-1 font-bold" style={{ color: 'var(--color-cyan)' }}>XCH</span>
         </div>
 
         {/* Divider */}
@@ -189,13 +189,13 @@ export function PortfolioValueCard({
         <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm">
           <div className="flex items-center">
             <span style={{ color: 'var(--color-text-secondary)' }}>XCH:&nbsp;</span>
-            <span style={{ color: 'rgba(74, 222, 128, 0.7)' }}>$</span>
+            <span style={{ color: 'var(--color-success)' }}>$</span>
             <SplitFlapDisplay text={formatPrice(simulatedXchUSD)} muted size="sm" />
           </div>
           <span style={{ color: 'var(--color-text-muted)' }}>+</span>
           <div className="flex items-center">
             <span style={{ color: 'var(--color-text-secondary)' }}>CATs:&nbsp;</span>
-            <span style={{ color: 'rgba(74, 222, 128, 0.7)' }}>$</span>
+            <span style={{ color: 'var(--color-success)' }}>$</span>
             <SplitFlapDisplay text={formatPrice(simulatedCatsUSD)} muted size="sm" />
           </div>
         </div>

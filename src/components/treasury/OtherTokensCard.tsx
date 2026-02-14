@@ -21,7 +21,7 @@ export function OtherTokensCard({ tokens, isLoading = false }: OtherTokensCardPr
       <div
         className="rounded-2xl overflow-hidden"
         style={{
-          background: 'var(--color-glass-bg)',
+          background: 'var(--color-surface)',
           border: '1px solid var(--color-border)',
         }}
       >
@@ -56,7 +56,7 @@ export function OtherTokensCard({ tokens, isLoading = false }: OtherTokensCardPr
     <motion.div
       className="rounded-2xl overflow-hidden flex-1 flex flex-col min-h-0"
       style={{
-        background: 'var(--color-glass-bg)',
+        background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
       }}
       initial={{ opacity: 0, y: 20 }}
@@ -92,7 +92,7 @@ export function OtherTokensCard({ tokens, isLoading = false }: OtherTokensCardPr
               {/* Token name - full width, no truncation */}
               <span
                 className="text-sm font-medium flex-1"
-                style={{ color: 'var(--color-text-primary)' }}
+                style={{ color: 'var(--color-text)' }}
               >
                 {token.symbol}
               </span>
@@ -100,7 +100,7 @@ export function OtherTokensCard({ tokens, isLoading = false }: OtherTokensCardPr
               {/* Token value */}
               <span
                 className="text-sm font-semibold flex-shrink-0"
-                style={{ color: 'var(--color-brand-primary)' }}
+                style={{ color: 'var(--color-text-secondary)' }}
               >
                 ${token.valueUSD.toFixed(2)}
               </span>

@@ -24,7 +24,7 @@ export const VideoCard = memo(function VideoCard({ video, onClick }: VideoCardPr
       className="group flex flex-col text-left overflow-hidden w-full h-full"
       style={{
         borderRadius: '16px',
-        background: 'var(--color-glass-bg)',
+        background: 'var(--color-surface)',
         border: '1px solid rgba(249, 115, 22, 0.1)',
         transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
       }}

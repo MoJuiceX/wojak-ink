@@ -40,7 +40,7 @@ export function WalletAddressCard({ address, explorerUrl }: WalletAddressCardPro
     <motion.div
       className="rounded-2xl overflow-hidden"
       style={{
-        background: 'var(--color-glass-bg)',
+        background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
       }}
       initial={{ opacity: 0, y: 20 }}
@@ -70,9 +70,9 @@ export function WalletAddressCard({ address, explorerUrl }: WalletAddressCardPro
           <motion.button
             className="w-8 h-8 flex items-center justify-center rounded-lg flex-shrink-0"
             style={{
-              background: copied ? 'rgba(74, 222, 128, 0.2)' : 'var(--color-bg-primary)',
-              border: copied ? '1px solid #4ade80' : '1px solid var(--color-border)',
-              color: copied ? '#4ade80' : 'var(--color-text-secondary)',
+              background: copied ? 'rgba(34, 197, 94, 0.2)' : 'var(--color-bg-primary)',
+              border: copied ? '1px solid var(--color-success)' : '1px solid var(--color-border)',
+              color: copied ? 'var(--color-success)' : 'var(--color-text-secondary)',
             }}
             onClick={handleCopy}
             whileHover={{ scale: 1.05 }}

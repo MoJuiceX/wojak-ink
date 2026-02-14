@@ -32,7 +32,7 @@ export function NFTCollections({ collections, isLoading = false }: NFTCollection
       <div
         className="rounded-2xl overflow-hidden flex flex-col absolute inset-0"
         style={{
-          background: 'var(--color-glass-bg)',
+          background: 'var(--color-surface)',
           border: '1px solid var(--color-border)',
         }}
       >
@@ -63,7 +63,7 @@ export function NFTCollections({ collections, isLoading = false }: NFTCollection
       <div
         className="rounded-2xl overflow-hidden flex flex-col absolute inset-0"
         style={{
-          background: 'var(--color-glass-bg)',
+          background: 'var(--color-surface)',
           border: '1px solid var(--color-border)',
         }}
       >
@@ -92,7 +92,7 @@ export function NFTCollections({ collections, isLoading = false }: NFTCollection
     <div
       className="rounded-2xl overflow-hidden flex flex-col absolute inset-0"
       style={{
-        background: 'var(--color-glass-bg)',
+        background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
       }}
     >
@@ -113,7 +113,7 @@ export function NFTCollections({ collections, isLoading = false }: NFTCollection
             className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg transition-colors flex-shrink-0"
             style={{
               color: 'var(--color-brand-primary)',
-              background: 'var(--color-glass-bg)',
+              background: 'var(--color-surface)',
               border: '1px solid var(--color-brand-primary)',
             }}
             onClick={handleBack}

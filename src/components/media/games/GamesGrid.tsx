@@ -24,7 +24,7 @@ function GameCardSkeleton() {
     <div
       className="rounded-xl overflow-hidden animate-pulse"
       style={{
-        background: 'var(--color-glass-bg)',
+        background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
       }}
     >
@@ -78,7 +78,7 @@ export function GamesGrid({
       {!isLoading && games.length === 0 && (
         <div
           className="p-8 rounded-xl text-center"
-          style={{ background: 'var(--color-glass-bg)', border: '1px solid var(--color-border)' }}
+          style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
         >
           <span className="text-5xl block mb-4 opacity-30">🎮</span>
           <p style={{ color: 'var(--color-text-muted)' }}>No games available yet</p>

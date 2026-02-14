@@ -112,7 +112,7 @@ export function MusicPlayer({ tracks }: MusicPlayerProps) {
       <motion.div
         className={`relative flex items-center gap-5 p-5 overflow-hidden ${isPlaying ? 'playing' : ''}`}
         style={{
-          background: 'var(--color-glass-bg)',
+          background: 'var(--color-surface)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
           border: '1px solid rgba(249, 115, 22, 0.2)',

@@ -66,7 +66,7 @@ export default function Settings() {
             aria-labelledby="general-section-heading"
           >
             <div className="flex items-center gap-2">
-              <Monitor size={20} style={{ color: 'var(--color-brand-primary)' }} />
+              <Monitor size={20} style={{ color: 'var(--color-primary)' }} />
               <h2
                 id="general-section-heading"
                 className="text-lg font-bold"
@@ -79,7 +79,7 @@ export default function Settings() {
             <div
               className="p-4 rounded-xl"
               style={{
-                background: 'var(--color-glass-bg)',
+                background: 'var(--color-surface)',
                 border: '1px solid var(--color-border)',
               }}
             >
@@ -110,7 +110,7 @@ export default function Settings() {
                     width: '52px',
                     height: '24px',
                     borderRadius: '9999px',
-                    background: skipBoot ? 'var(--color-brand-primary)' : 'rgba(255,255,255,0.1)',
+                    background: skipBoot ? 'var(--color-primary)' : 'var(--color-text-muted)',
                     flexShrink: 0,
                     transition: 'background 0.2s ease',
                   }}

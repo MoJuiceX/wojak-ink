@@ -37,7 +37,7 @@ export function AudioSettings({
     >
       {/* Section Header */}
       <div className="flex items-center gap-2">
-        <Volume2 size={20} style={{ color: 'var(--color-brand-primary)' }} />
+        <Volume2 size={20} style={{ color: 'var(--color-primary)' }} />
         <h2
           id="audio-section-heading"
           className="text-lg font-bold"

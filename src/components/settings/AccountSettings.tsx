@@ -111,7 +111,7 @@ function EditableField({ label, value, icon, placeholder, onSave, validation }: 
             disabled={isSaving}
             className="p-2 rounded-lg"
             style={{
-              background: 'var(--color-brand-primary)',
+              background: 'var(--color-primary)',
               color: '#fff',
             }}
           >
@@ -148,7 +148,7 @@ function EditableField({ label, value, icon, placeholder, onSave, validation }: 
         </button>
       )}
       {error && (
-        <p className="text-xs" style={{ color: '#ef4444' }}>{error}</p>
+        <p className="text-xs" style={{ color: 'var(--color-error)' }}>{error}</p>
       )}
     </div>
   );
@@ -199,7 +199,7 @@ export function AccountSettings() {
     >
       {/* Section Header */}
       <div className="flex items-center gap-2">
-        <User size={20} style={{ color: 'var(--color-brand-primary)' }} />
+        <User size={20} style={{ color: 'var(--color-primary)' }} />
         <h2
           id="account-section-heading"
           className="text-lg font-bold"
@@ -213,7 +213,7 @@ export function AccountSettings() {
       <div
         className="rounded-xl overflow-hidden"
         style={{
-          background: 'var(--color-glass-bg)',
+          background: 'var(--color-surface)',
           border: '1px solid var(--color-border)',
         }}
       >
@@ -235,7 +235,7 @@ export function AccountSettings() {
             <SignInButton mode="modal">
               <motion.button
                 className="px-6 py-3 rounded-lg font-medium text-white"
-                style={{ background: 'var(--color-brand-primary)' }}
+                style={{ background: 'var(--color-primary)' }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -248,7 +248,7 @@ export function AccountSettings() {
         <SignedIn>
           {isLoading ? (
             <div className="p-6 flex items-center justify-center">
-              <Loader2 size={24} className="animate-spin" style={{ color: 'var(--color-brand-primary)' }} />
+              <Loader2 size={24} className="animate-spin" style={{ color: 'var(--color-primary)' }} />
             </div>
           ) : (
             <div className="divide-y" style={{ borderColor: 'var(--color-border)' }}>
@@ -335,21 +335,21 @@ export function AccountSettings() {
                         border: '1px solid #22c55e',
                       }}
                     >
-                      <Wallet size={18} style={{ color: '#22c55e' }} />
+                      <Wallet size={18} style={{ color: 'var(--color-success)' }} />
                       <span
                         className="flex-1 text-sm"
                         style={{ color: 'var(--color-text-primary)' }}
                       >
                         Sage Wallet Connected
                       </span>
-                      <Check size={16} style={{ color: '#22c55e' }} />
+                      <Check size={16} style={{ color: 'var(--color-success)' }} />
                     </div>
                     <button
                       onClick={() => walletConnect.disconnect()}
                       className="w-full px-3 py-2 rounded-lg text-sm"
                       style={{
                         background: 'transparent',
-                        color: '#ef4444',
+                        color: 'var(--color-error)',
                         border: '1px solid rgba(239, 68, 68, 0.3)',
                       }}
                     >
@@ -382,7 +382,7 @@ export function AccountSettings() {
                   {unreadMessages > 0 && (
                     <span
                       className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-xs flex items-center justify-center font-medium"
-                      style={{ background: '#ef4444', color: '#fff' }}
+                      style={{ background: 'var(--color-error)', color: '#fff' }}
                     >
                       {unreadMessages > 9 ? '9+' : unreadMessages}
                     </span>
@@ -404,7 +404,7 @@ export function AccountSettings() {
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-colors"
                   style={{
                     background: 'transparent',
-                    color: '#ef4444',
+                    color: 'var(--color-error)',
                     border: '1px solid rgba(239, 68, 68, 0.3)',
                   }}
                 >

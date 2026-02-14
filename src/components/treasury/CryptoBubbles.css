@@ -14,7 +14,7 @@
   background-image: url('/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Orange Grove.png');
   background-size: cover;
   background-position: center;
-  background-color: var(--color-glass-bg);
+  background-color: var(--color-surface);
 }
 
 /* Loading state */

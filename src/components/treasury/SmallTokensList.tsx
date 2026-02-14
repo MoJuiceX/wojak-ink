@@ -40,13 +40,13 @@ function TokenRow({ token, index }: { token: WalletToken; index: number }) {
       <div className="flex-1 min-w-0">
         <p
           className="text-sm font-semibold truncate"
-          style={{ color: 'var(--color-text-primary)' }}
+          style={{ color: 'var(--color-text)' }}
         >
           {token.symbol}
         </p>
         <p
           className="text-xs truncate"
-          style={{ color: 'var(--color-text-muted)' }}
+          style={{ color: 'var(--color-text-secondary)' }}
         >
           {token.name}
         </p>
@@ -100,7 +100,7 @@ export function SmallTokensList({ tokens, maxDisplay = 5, isLoading = false }: S
       <div
         className="rounded-xl overflow-hidden"
         style={{
-          background: 'var(--color-glass-bg)',
+          background: 'var(--color-surface)',
           border: '1px solid var(--color-border)',
         }}
       >
@@ -134,7 +134,7 @@ export function SmallTokensList({ tokens, maxDisplay = 5, isLoading = false }: S
       <div
         className="rounded-xl p-6 text-center"
         style={{
-          background: 'var(--color-glass-bg)',
+          background: 'var(--color-surface)',
           border: '1px solid var(--color-border)',
         }}
       >
@@ -147,7 +147,7 @@ export function SmallTokensList({ tokens, maxDisplay = 5, isLoading = false }: S
     <motion.div
       className="rounded-xl overflow-hidden"
       style={{
-        background: 'var(--color-glass-bg)',
+        background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
       }}
       initial={{ opacity: 0, y: 20 }}

@@ -55,7 +55,7 @@ export function AboutSection() {
     >
       {/* Section Header */}
       <div className="flex items-center gap-2">
-        <Info size={20} style={{ color: 'var(--color-brand-primary)' }} />
+        <Info size={20} style={{ color: 'var(--color-primary)' }} />
         <h2
           id="about-section-heading"
           className="text-lg font-bold"
@@ -69,7 +69,7 @@ export function AboutSection() {
       <div
         className="p-6 rounded-xl text-center"
         style={{
-          background: 'var(--color-glass-bg)',
+          background: 'var(--color-surface)',
           border: '1px solid var(--color-border)',
         }}
       >
@@ -84,7 +84,7 @@ export function AboutSection() {
           <span
             className="px-2 py-0.5 text-xs font-semibold rounded"
             style={{
-              background: 'var(--color-brand-primary)',
+              background: 'var(--color-primary)',
               color: 'white',
             }}
           >
@@ -212,7 +212,7 @@ export function AboutSection() {
               style={{ borderBottom: '1px solid var(--color-border)' }}
             >
               <div className="flex items-center gap-2">
-                <Shield size={20} style={{ color: 'var(--color-brand-primary)' }} />
+                <Shield size={20} style={{ color: 'var(--color-primary)' }} />
                 <h2
                   className="text-lg font-semibold"
                   style={{ color: 'var(--color-text-primary)' }}
@@ -224,7 +224,7 @@ export function AboutSection() {
                 type="button"
                 className="p-2 rounded-lg transition-colors"
                 style={{
-                  background: 'var(--color-glass-bg)',
+                  background: 'var(--color-surface)',
                   color: 'var(--color-text-secondary)',
                 }}
                 onClick={handleCloseAdmin}
@@ -251,7 +251,7 @@ export function AboutSection() {
                     placeholder="Password"
                     className="w-full px-4 py-3 rounded-lg text-sm"
                     style={{
-                      background: 'var(--color-glass-bg)',
+                      background: 'var(--color-surface)',
                       color: 'var(--color-text-primary)',
                       border: passwordError
                         ? '2px solid #ef4444'
@@ -272,7 +272,7 @@ export function AboutSection() {
                     onClick={handleAdminLogin}
                     className="w-full py-3 rounded-lg font-medium transition-colors"
                     style={{
-                      background: 'var(--color-brand-primary)',
+                      background: 'var(--color-primary)',
                       color: 'white',
                     }}
                   >

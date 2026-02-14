@@ -42,14 +42,14 @@ export function VolumeSlider({
     <div
       className="p-4 rounded-xl"
       style={{
-        background: 'var(--color-glass-bg)',
+        background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
       }}
     >
       {/* Header with toggle */}
       <div className="flex items-start justify-between gap-4 mb-3">
         <div className="flex items-center gap-2">
-          <span style={{ color: enabled ? 'var(--color-brand-primary)' : 'var(--color-text-muted)' }}>
+          <span style={{ color: enabled ? 'var(--color-primary)' : 'var(--color-text-muted)' }}>
             {getVolumeIcon(volume, enabled)}
           </span>
           <div>
@@ -85,7 +85,7 @@ export function VolumeSlider({
             width: '52px',
             height: '24px',
             borderRadius: '9999px',
-            background: enabled ? 'var(--color-brand-primary)' : 'rgba(255,255,255,0.1)',
+            background: enabled ? 'var(--color-primary)' : 'var(--color-text-muted)',
             flexShrink: 0,
             transition: 'background 0.2s ease',
           }}

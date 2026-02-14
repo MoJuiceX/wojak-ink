@@ -195,7 +195,7 @@ export function Slider({
         className={`
           relative flex-1 h-2 rounded-full cursor-pointer select-none
           focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
-          focus-visible:ring-[var(--color-brand-primary)]
+          focus-visible:ring-[var(--color-primary)]
           ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
         `}
         style={{
@@ -208,8 +208,8 @@ export function Slider({
           className="absolute inset-y-0 left-0 rounded-full"
           style={{
             width: `${percentage}%`,
-            background: 'var(--color-brand-primary)',
-            boxShadow: isDragging ? '0 0 12px var(--color-brand-primary)' : 'none',
+            background: 'var(--color-primary)',
+            boxShadow: isDragging ? '0 0 12px var(--color-primary)' : 'none',
             transition: isDragging ? 'none' : 'box-shadow 0.2s ease',
           }}
         />
@@ -237,7 +237,7 @@ export function Slider({
       {showValue && (
         <span
           className="text-xs font-medium tabular-nums min-w-[40px] text-right"
-          style={{ color: isDragging ? 'var(--color-brand-primary)' : 'var(--color-text-muted)' }}
+          style={{ color: isDragging ? 'var(--color-primary)' : 'var(--color-text-muted)' }}
         >
           {valueFormatter(localValue)}
         </span>

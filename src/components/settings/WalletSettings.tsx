@@ -56,7 +56,7 @@ export function WalletSettings() {
     >
       {/* Section Header */}
       <div className="flex items-center gap-2">
-        <Wallet size={20} style={{ color: 'var(--color-brand-primary)' }} />
+        <Wallet size={20} style={{ color: 'var(--color-primary)' }} />
         <h2
           id="wallet-section-heading"
           className="text-lg font-bold"
@@ -70,7 +70,7 @@ export function WalletSettings() {
       <div
         className="p-4 rounded-xl"
         style={{
-          background: 'var(--color-glass-bg)',
+          background: 'var(--color-surface)',
           border: '1px solid var(--color-border)',
         }}
       >
@@ -92,7 +92,7 @@ export function WalletSettings() {
             <motion.button
               className="px-6 py-3 rounded-lg font-medium text-white"
               style={{
-                background: 'var(--color-brand-primary)',
+                background: 'var(--color-primary)',
               }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -137,7 +137,7 @@ export function WalletSettings() {
                 className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors"
                 style={{
                   background: 'var(--color-bg-tertiary)',
-                  color: copied ? '#22c55e' : 'var(--color-text-secondary)',
+                  color: copied ? 'var(--color-success)' : 'var(--color-text-secondary)',
                   border: '1px solid var(--color-border)',
                 }}
                 onClick={handleCopyAddress}
@@ -166,7 +166,7 @@ export function WalletSettings() {
               className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors"
               style={{
                 background: 'transparent',
-                color: '#ef4444',
+                color: 'var(--color-error)',
                 border: '1px solid rgba(239, 68, 68, 0.3)',
               }}
               onClick={handleDisconnect}
