@@ -244,21 +244,37 @@ body {
   border: 1px solid var(--color-border);
 }
 
+/* Animated rainbow border for selected color swatch.
+   The animation runs on the parent .generator-panel-section so --rainbow-angle
+   keeps rotating continuously even when the user changes swatch selection.
+   The selected swatch uses background-clip trick to show the conic-gradient as its border. */
+@keyframes rainbowRotate {
+  0% { --rainbow-angle: 0deg; }
+  100% { --rainbow-angle: 360deg; }
+}
+
+@property --rainbow-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: true;
+}
+
 /* Generator right-panel section — consistent container for color picker, details, etc. */
 .generator-panel-section {
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
+  background: var(--glass-bg);
+  border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
-  padding: 12px;
+  padding: 10px;
+  animation: rainbowRotate 3s linear infinite;
 }
 
 .generator-panel-section-label {
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
   font-weight: 600;
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .card-elevated {

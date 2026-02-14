@@ -5,7 +5,8 @@
  * then G2 details (coin logos, etc.) below when applicable.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { RotateCcw } from 'lucide-react';
 import { useGenerator } from '@/contexts/GeneratorContext';
 import { ColorPicker, COLOR_FAMILIES, QUICK_ACCESS_COLORS } from './ColorPicker';
 import { G2TraitPanel } from './G2TraitPanel';
@@ -350,8 +351,17 @@ export function GeneratorRightPanel() {
             : undefined,
       };
 
+  const hexDisplayRef = useRef('');
+  const [hexDisplay, setHexDisplay] = useState('');
+  const handleHexDisplay = useCallback((hex: string) => {
+    if (hex !== hexDisplayRef.current) {
+      hexDisplayRef.current = hex;
+      setHexDisplay(hex);
+    }
+  }, []);
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       {/* G1 Military Beret: "Pick a color to use new design" — swatches switch to G2 */}
       {isG1MilitaryBeret && (
         <div className="generator-panel-section flex-shrink-0">
@@ -370,8 +380,47 @@ export function GeneratorRightPanel() {
         )
       ) && (
         <div className="generator-panel-section flex-shrink-0">
-          <div className="generator-panel-section-label">Color</div>
-          <ColorPicker {...colorPickerProps} />
+          <div className="generator-panel-section-label flex items-center justify-between" style={{ height: '14px' }}>
+            <span>Color</span>
+            {/* Reset button — inline, no vertical padding so it doesn't change row height */}
+            {(colorPickerProps.defaultColor || colorPickerProps.onReset) && (() => {
+              const norm = (h: string) => (h.startsWith('#') ? h : '#' + h).toUpperCase();
+              const isAtDefault = colorPickerProps.defaultColor
+                ? norm(colorPickerProps.selectedColor) === norm(colorPickerProps.defaultColor)
+                : false;
+              return (
+                <button
+                  type="button"
+                  className="flex items-center gap-0.5 transition-colors"
+                  style={{
+                    color: isAtDefault ? 'var(--color-text-muted)' : 'var(--color-primary)',
+                    opacity: isAtDefault ? 0.4 : 1,
+                    cursor: isAtDefault || colorPickerProps.disabled ? 'default' : 'pointer',
+                    fontSize: '0.5625rem',
+                    fontWeight: 600,
+                    lineHeight: 1,
+                  }}
+                  onClick={() => {
+                    if (isAtDefault || colorPickerProps.disabled) return;
+                    if (colorPickerProps.onReset) colorPickerProps.onReset();
+                    else if (colorPickerProps.defaultColor) colorPickerProps.onColorChange(colorPickerProps.defaultColor);
+                  }}
+                  disabled={isAtDefault || colorPickerProps.disabled}
+                  title={colorPickerProps.onReset ? 'Use original design' : 'Reset to default color'}
+                >
+                  <RotateCcw size={8} />
+                  <span>{colorPickerProps.onReset ? 'Original' : 'Reset'}</span>
+                </button>
+              );
+            })()}
+            {hexDisplay && (
+              <span className="font-mono text-[10px]" style={{ color: 'var(--color-text-secondary)' }}>{hexDisplay}</span>
+            )}
+          </div>
+          <ColorPicker
+            {...colorPickerProps}
+            onHexDisplay={handleHexDisplay}
+          />
         </div>
       )}
       {/* Mask layer: show variant face masks when any full-face mask style is selected */}
@@ -519,7 +568,7 @@ export function GeneratorRightPanel() {
       )}
 
       {/* G2 details: when Beer Hat + underlayer focus, show both can options and underlayer details; otherwise single panel */}
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         {activeLayer === 'Head' && g2Selections.Head?.traitId === 'Head_Beer-Hat' && (
           <>
             {/* Can options — always visible when Beer Hat is selected */}

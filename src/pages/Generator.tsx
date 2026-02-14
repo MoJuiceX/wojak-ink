@@ -124,9 +124,6 @@ function GeneratorContent() {
 
           </div>
 
-          {/* Divider (desktop only) */}
-          {isDesktop && <div className="generator-divider" />}
-
           {/* Right: Grid (3 cols) + Details/Colors panel (desktop) or just options (mobile) */}
           <div className="generator-options">
             {/* Options Grid — 3 columns on desktop */}

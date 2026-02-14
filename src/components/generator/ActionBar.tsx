@@ -350,30 +350,21 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         variant === 'primary' ? 'w-10 h-10' : 'w-9 h-9'
       }`}
       style={{
-        background:
-          isActive
-            ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.25), rgba(249, 115, 22, 0.1))'
-            : variant === 'primary' && !disabled
-              ? 'rgba(249, 115, 22, 0.12)'
-              : 'transparent',
+        background: isActive
+          ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.25), rgba(249, 115, 22, 0.1))'
+          : 'transparent',
         color: disabled
           ? 'var(--color-text-muted)'
           : isActive
             ? 'white'
-            : variant === 'primary' && !disabled
-              ? 'var(--color-primary)'
-              : 'var(--color-text-secondary)',
+            : 'var(--color-text-secondary)',
         opacity: disabled ? 0.5 : 1,
-        border:
-          isActive
-            ? '1px solid rgba(249, 115, 22, 0.6)'
-            : variant === 'primary' && !disabled
-              ? '1px solid rgba(249, 115, 22, 0.25)'
-              : '1px solid transparent',
-        boxShadow:
-          isActive
-            ? '0 0 20px rgba(249, 115, 22, 0.3), inset 0 0 15px rgba(249, 115, 22, 0.1)'
-            : 'none',
+        border: isActive
+          ? '1px solid rgba(249, 115, 22, 0.6)'
+          : '1px solid transparent',
+        boxShadow: isActive
+          ? '0 0 20px rgba(249, 115, 22, 0.3), inset 0 0 15px rgba(249, 115, 22, 0.1)'
+          : 'none',
         transition: 'all 0.3s ease',
       }}
       whileHover={disabled || prefersReducedMotion ? undefined : { scale: 1.02 }}
@@ -403,7 +394,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
 
   return (
     <div
-      className={`flex items-center justify-center gap-1.5 p-2 rounded-2xl flex-nowrap ${className}`}
+      className={`flex items-center justify-between p-2 rounded-2xl flex-nowrap w-full ${className}`}
       style={{
         background: 'rgba(0, 0, 0, 0.3)',
         backdropFilter: 'blur(10px)',

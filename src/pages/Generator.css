@@ -33,12 +33,12 @@
   padding: 16px;
 }
 
-/* Desktop: side by side, 50/50 split - canvas kept big */
+/* Desktop: side by side layout */
 @media (min-width: 1024px) {
   .generator-content {
     flex-direction: row;
-    gap: 24px;
-    padding: 24px;
+    gap: 16px;
+    padding: 16px 24px;
     max-width: 1800px;
     margin: 0 auto;
     width: 100%;
@@ -49,7 +49,7 @@
 .generator-preview {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
 }
 
 /* Mobile: preview takes reasonable height */
@@ -67,16 +67,14 @@
   }
 }
 
-/* Desktop: preview takes 50% width, min 400px, max 560px - canvas stays prominent */
+/* Desktop: preview column — responsive width, items stretch to match canvas */
 @media (min-width: 1024px) {
   .generator-preview {
-    width: 50%;
-    min-width: 400px;
-    max-width: 560px;
+    width: clamp(420px, 42vw, 560px);
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     justify-content: flex-start;
   }
 
@@ -107,66 +105,41 @@
 @media (min-width: 1024px) {
   .generator-options {
     flex-direction: row;
-    gap: 0;
+    gap: 16px;
     min-width: 0;
   }
 
   .generator-options-grid-container {
     flex: 1;
     min-width: 0;
-    margin-right: 0;
   }
 
-  /* Scrollbar on outer edge: details panel scrolls, bar appears to the right of content */
+  /* Details/color panel — responsive width, scrolls independently.
+     scrollbar-gutter: stable reserves scrollbar space so swatches never shift when scrollbar appears. */
   .generator-details-panel {
-    width: 22%;
-    min-width: 260px;
-    max-width: 360px;
+    width: clamp(200px, 18vw, 280px);
     flex-shrink: 0;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 12px 8px 12px 12px;
+    padding: 0;
     display: flex;
     flex-direction: column;
     align-items: stretch;
+    gap: 12px;
     scrollbar-gutter: stable;
-    background: rgba(0, 0, 0, 0.15);
-    border-left: 1px solid var(--color-border);
-    border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
   }
 }
 
-/* === CATEGORY TABS === */
+/* === CATEGORY TABS — transparent wrapper, pill is rendered by LayerTabs component === */
 .generator-categories {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
   flex-shrink: 0;
-  padding: 4px;
-  margin: -4px;
-  justify-content: center;
-}
-
-/* Mobile: spread tabs evenly */
-@media (max-width: 1023px) {
-  .generator-categories {
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    gap: 4px;
-    padding: 6px;
-    margin: 0;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 12px;
-    border: 1px solid var(--color-border);
-  }
 }
 
 /* === OPTIONS GRID CONTAINER === */
 .generator-options-grid-container {
   flex: 1;
   min-height: 0;
-  padding: 4px;
-  margin: -4px;
   border-radius: 16px;
   background: var(--color-glass-bg);
   border: 1px solid var(--color-border);
@@ -192,10 +165,10 @@
   }
 }
 
-/* Desktop: 3 columns, tighter spacing to free room for color panel */
+/* Desktop: adaptive columns — 3 on most screens, 4 when space allows */
 @media (min-width: 1024px) {
   .generator-options-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: clamp(8px, 0.8vw, 12px);
     padding: clamp(10px, 1vw, 14px);
   }
@@ -313,19 +286,21 @@
 /* === CATEGORY TAB STATES === */
 .generator-category-tab {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border-radius: 9999px;
+  gap: 2px;
+  padding: 6px 8px;
+  border-radius: 12px;
   white-space: nowrap;
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 500;
   transition: all 0.2s ease;
-  border: 2px solid transparent;
-  background: var(--color-glass-bg);
+  background: transparent;
   color: var(--color-text-muted);
   cursor: pointer;
   position: relative;
+  flex: 1;
+  min-width: 0;
 }
 
 .generator-category-tab svg {
@@ -336,34 +311,17 @@
 
 /* Hover state */
 .generator-category-tab:hover {
-  background: var(--color-bg-secondary);
+  background: rgba(255, 255, 255, 0.06);
   color: var(--color-text-primary);
-  border-color: var(--color-border);
 }
 
-/* Active/selected state */
+/* Active/selected state — color only, no background (avoids inner box) */
 .generator-category-tab.active {
-  background: var(--color-brand-primary);
-  color: white;
-  border-color: var(--color-brand-primary);
-  box-shadow: 0 2px 12px rgba(255, 140, 0, 0.4);
+  color: var(--color-primary);
 }
 
 .generator-category-tab.active svg {
-  color: white;
-}
-
-/* Desktop: larger tabs */
-@media (min-width: 1024px) {
-  .generator-category-tab {
-    padding: 12px 20px;
-    font-size: 15px;
-  }
-
-  .generator-category-tab svg {
-    width: 20px;
-    height: 20px;
-  }
+  color: var(--color-primary);
 }
 
 /* === ACTION BUTTONS === */
@@ -444,28 +402,6 @@
   box-shadow: 0 0 30px rgba(255, 140, 0, 0.3);
 }
 
-/* === DIVIDER (Desktop only) === */
-.generator-divider {
-  display: none;
-}
-
-@media (min-width: 1024px) {
-  .generator-divider {
-    display: block;
-    width: 1px;
-    flex-shrink: 0;
-    position: relative;
-    background: var(--color-brand-primary);
-  }
-
-  .generator-divider::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: var(--color-brand-glow);
-    filter: blur(8px);
-  }
-}
 
 /* ============================================
    LEGACY STYLES (kept for compatibility)

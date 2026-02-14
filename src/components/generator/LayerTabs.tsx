@@ -60,10 +60,7 @@ function LayerTab({
     <motion.button
       className="generator-layer-tab relative flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg flex-1 sm:flex-none sm:px-3 sm:py-2 sm:gap-1 sm:min-w-[60px]"
       style={{
-        // Glowing active state with gradient background
-        background: isActive
-          ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.3), rgba(249, 115, 22, 0.1))'
-          : 'transparent',
+        background: 'transparent',
         color: isActive
           ? 'white'
           : isBlocked
@@ -71,13 +68,6 @@ function LayerTab({
             : 'var(--color-text-secondary)',
         opacity: isBlocked ? 0.5 : 1,
         filter: isBlocked ? 'grayscale(1)' : 'none',
-        // Enhanced border and glow for active state
-        border: isActive
-          ? '1px solid rgba(249, 115, 22, 0.6)'
-          : '1px solid transparent',
-        boxShadow: isActive
-          ? '0 0 20px rgba(249, 115, 22, 0.3), inset 0 0 15px rgba(249, 115, 22, 0.1)'
-          : 'none',
         transition: 'all 0.3s ease',
       }}
       variants={prefersReducedMotion ? undefined : layerTabVariants}
@@ -158,7 +148,7 @@ export function LayerTabs({ className = '' }: LayerTabsProps) {
 
   return (
     <div
-      className={`flex gap-2 p-2 rounded-2xl overflow-x-auto ${className}`}
+      className={`flex justify-between p-2 rounded-2xl overflow-x-auto w-full ${className}`}
       style={{
         background: 'rgba(0, 0, 0, 0.3)',
         backdropFilter: 'blur(10px)',
