@@ -68,16 +68,17 @@ export const LAYER_Z_INDEX: Record<string, number> = {
   Background: 0,
   ClothesCompositeUnderBase: 0.9,
   Base: 1,
+  RektMouthOverlay: 1.1,     // Rekt base mouth detail overlay (Pipe-when-rekt, Bubble-Gum_rekt)
   Clothes: 2,
   ClothesComposite0: 2.1,  // composite layer0 (over base) — under MouthBase and MouthItem
   ClothesComposite1: 2.2,  // composite layer1 on top of layer0
   MaskUnderSuit: 1.4,      // bandana under EyesUnderSuit when suit is active
   EyesUnderSuit: 1.5,      // left 63% of eyes under suit (Gopher, Sonic, Proof of Prayer, etc.)
   FacialHairUnderSuit: 1.6, // left portion of neckbeard under suit (PoP, Gopher, Goose)
+  CenturionUnder: 3.5,    // Centurion bottom-right quadrant under facial hair, mouth, mask, eyes
   ClothesAddon: 3,
   FacialHair: 4,
   MouthBase: 5,
-  BubbleGumRekt: 5.1,
   MouthItem: 6,
   TysonTattoo: 6.5,
   NinjaTurtleUnderMask: 6.6,
@@ -101,5 +102,6 @@ export const LAYER_Z_INDEX: Record<string, number> = {
   EyesOverStandardCut: 15,
   MaskOverStandardCut: 16,
   BubbleGumOverEyes: 60,
+  LaserEyesOverBubbleGum: 61, // Laser Eyes re-drawn on top of BubbleGum
   FullFaceMask: 100,
 };

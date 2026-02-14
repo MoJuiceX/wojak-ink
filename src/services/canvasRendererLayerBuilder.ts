@@ -53,7 +53,7 @@ function isRektBase(selectedLayers: SelectedLayers): boolean {
 }
 
 function hasBubbleGum(selectedLayers: SelectedLayers): boolean {
-  return pathContains(selectedLayers.MouthBase, 'Bubble-Gum');
+  return pathContains(selectedLayers.MouthBase, 'Bubble-Gum') || pathContains(selectedLayers.MouthBase, 'BubbleGum');
 }
 
 function hasRoninHelmet(selectedLayers: SelectedLayers): boolean {
@@ -250,6 +250,25 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
       case 'Head':
         if (hasAstronaut) skipLayer = true;
         if (hasCenturion && centurionMaskVariant) path = getCenturionPath(path, true);
+        // Centurion: split bottom-right quadrant to render under facial hair, mouth, mask, eyes.
+        // The chin guard/cheek flap area tucks under other face layers for natural overlap.
+        if (hasCenturion && !hasAstronaut) {
+          // Bottom-right quadrant: under everything at z 3.5
+          layers.push({
+            path,
+            zIndex: LAYER_Z_INDEX.CenturionUnder,
+            layerName: 'CenturionUnder',
+            clipPolygon: [[0.5, 0.5], [1, 0.5], [1, 1], [0.5, 1]],
+          });
+          // Remaining three quadrants (L-shape): at normal Head z-index
+          layers.push({
+            path,
+            zIndex,
+            layerName: 'Head',
+            clipPolygon: [[0, 0], [1, 0], [1, 0.5], [0.5, 0.5], [0.5, 1], [0, 1]],
+          });
+          skipLayer = true;
+        }
         break;
 
       case 'Mask':
@@ -913,12 +932,19 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
     }
   }
 
-  // BubbleGumRekt
+  // Rekt base + specific mouths: extra detail overlay on top of base
   if (hasBubble && hasRekt) {
     layers.push({
       path: '/assets/wojak-layers/MOUTH/MOUTH_Bubble-Gum_rekt.png',
-      zIndex: LAYER_Z_INDEX.BubbleGumRekt,
+      zIndex: LAYER_Z_INDEX.RektMouthOverlay,
       layerName: 'BubbleGumRekt',
+    });
+  }
+  if (hasRekt && pathContains(selectedLayers.MouthBase, 'Pipe')) {
+    layers.push({
+      path: '/assets/wojak-layers/MOUTH/MOUTH_Pipe-when-rekt.png',
+      zIndex: LAYER_Z_INDEX.RektMouthOverlay,
+      layerName: 'PipeWhenRekt',
     });
   }
 
@@ -944,6 +970,15 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
         layerName: 'BubbleGumOverEyes',
       });
     }
+  }
+
+  // Laser Eyes over BubbleGum: only eye trait that renders on top of bubble gum
+  if (hasBubble && hasLaserEyesSelected && eyesPath) {
+    layers.push({
+      path: eyesPath,
+      zIndex: LAYER_Z_INDEX.LaserEyesOverBubbleGum,
+      layerName: 'LaserEyesOverBubbleGum',
+    });
   }
 
   // BandanaMaskOverRonin
@@ -1007,6 +1042,16 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
 
   // Pirate Hat + Ninja Turtle: right 50% above the hat (left 22% already cropped in Eyes case)
   if (isPirateHead(selectedLayers) && hasNinja && eyesPath) {
+    layers.push({
+      path: eyesPath,
+      zIndex: LAYER_Z_INDEX.EyesOverHead,
+      layerName: 'EyesOverHead',
+      clipLeftPercent: CLIP.HALF,
+    });
+  }
+
+  // Clown Hair + Ninja Turtle: right 50% above the clown hair
+  if (pathContains(selectedLayers.Head, 'clown') && hasNinja && eyesPath) {
     layers.push({
       path: eyesPath,
       zIndex: LAYER_Z_INDEX.EyesOverHead,

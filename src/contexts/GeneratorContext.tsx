@@ -22,13 +22,167 @@ import { isFavoriteV2, isSelectionPathEmpty } from '@/types/generator';
 import { getDisabledLayers, type SelectedLayers, type UILayerName } from '@/lib/wojakRules';
 import { DEFAULT_SELECTIONS } from '@/config/layers';
 import { G2_DEFAULT_COLORS, getG2DefaultColor } from '@/config/g2DefaultColors';
-import { generatorService, type LayerImage, type UnifiedTrait, getUnifiedTraits, getUnifiedTraitById, getPathToTraitIdMap, ensurePathToTraitIdMapReady } from '@/services/generatorService';
+import { generatorService, type LayerImage, type UnifiedTrait, getUnifiedTraits, getPathToTraitIdMap, ensurePathToTraitIdMapReady } from '@/services/generatorService';
 import { createSelectionResolver } from '@/lib/selectionResolver';
 import { toExternal, fromExternal } from '@/lib/selectionAdapter';
 import { isUserPickableFill, getAllUserPickableFillSlots } from '@/lib/g2FillTreatments';
+import { GENERATOR_PALETTE_HEX } from '@/components/generator/ColorPicker';
 import { renderPreview, renderThumbnail, downloadImage } from '@/services/canvasRenderer';
 import { createInitialState, generatorReducer, type GeneratorState } from '@/contexts/generatorReducer';
 import { canExportOrSave, getMissingRequiredLayers, isUILayerName } from '@/contexts/generatorStateUtils';
+
+// ============ Randomizer Helpers ============
+
+/** Pick a random color from the generator palette */
+function pickRandomColor(): string {
+  return GENERATOR_PALETTE_HEX[Math.floor(Math.random() * GENERATOR_PALETTE_HEX.length)];
+}
+
+/** Build random colors for all user-pickable fill slots on a G2 trait */
+function buildRandomColors(trait: UnifiedTrait): Record<string, string> {
+  const slots = getAllUserPickableFillSlots(trait.id, trait);
+  const colors: Record<string, string> = {};
+  for (const slot of slots) {
+    colors[slot] = pickRandomColor();
+  }
+  return colors;
+}
+
+/**
+ * Pure function to build a G2Selection for a trait WITHOUT dispatching.
+ * Mirrors the logic in selectG2Layer so randomize() can build complete
+ * snapshots (including G2 data) before dispatching RANDOMIZE.
+ */
+function buildG2Selection(
+  trait: UnifiedTrait,
+  initialColors?: Record<string, string>
+): { virtualPath: string; g2: G2Selection } {
+  const virtualPath = `/g2/${trait.category}/${trait.name.replace(/\s+/g, '-')}`;
+
+  // Build default colors only for user-pickable fill slots
+  const colors: Record<string, string> = {};
+  if (trait.fillFile && trait.defaultColor && isUserPickableFill(trait.id, 'fill')) {
+    colors['fill'] = trait.defaultColor;
+  }
+  if (trait.fill1File && trait.defaultColor && isUserPickableFill(trait.id, 'fill1')) {
+    colors['fill1'] = trait.defaultColor;
+  }
+  if (trait.fill2File && isUserPickableFill(trait.id, 'fill2')) {
+    colors['fill2'] = trait.defaultColor2 || trait.defaultColor || '#FFFFFF';
+  }
+  if (trait.fillFiles && trait.defaultColors) {
+    trait.fillFiles.forEach((_, i) => {
+      const key = `fill${i}`;
+      if (isUserPickableFill(trait.id, key)) {
+        colors[key] = trait.defaultColors![i] || '#FFFFFF';
+      }
+    });
+  }
+  // Layered colorable
+  if (trait.layers && trait.colorable && trait.defaultColors) {
+    const layerKeyToFill: Record<string, string> = {
+      mfill0: 'fill0', mfill1: 'fill1', mfill2: 'fill2', mfill3: 'fill3', mfill4: 'fill4',
+      fill1: 'fill1', fill2: 'fill2',
+    };
+    for (const layer of trait.layers) {
+      if (layer.type === 'fill' && layerKeyToFill[layer.key]) {
+        const slot = layerKeyToFill[layer.key];
+        if (isUserPickableFill(trait.id, slot)) {
+          const twoFills = trait.defaultColors.length === 2 && (slot === 'fill1' || slot === 'fill2');
+          const idx = twoFills
+            ? (slot === 'fill1' ? 0 : 1)
+            : (slot === 'fill0' ? 0 : slot === 'fill1' ? 1 : slot === 'fill2' ? 2 : slot === 'fill3' ? 3 : 4);
+          colors[slot] = trait.defaultColors[idx] ?? trait.defaultColor ?? '#A0522D';
+        }
+      }
+    }
+  }
+  // Special cases
+  if (trait.id === 'Head_viking-helmet') {
+    colors.fill1 = colors.fill1 ?? trait.defaultColors?.[0] ?? '#FF6B00';
+  }
+  if (trait.id === 'Face-wear_3d-glases') {
+    colors.fill1 = colors.fill1 ?? trait.defaultColors?.[0] ?? getG2DefaultColor('Face-wear_3d-glases', 'fill1', trait, '#2563EB');
+  }
+
+  const g2: G2Selection = {
+    traitId: trait.id,
+    g2Category: trait.id.split('_')[0],
+    colors: initialColors ? { ...colors, ...initialColors } : colors,
+    detailOption: trait.detailOptions?.[0]?.file,
+    ...(trait.id === 'Head_Cap' && {
+      detailOption: undefined,
+    }),
+    ...(trait.id === 'Head_Construction-Helmet' && {
+      detailOption: undefined,
+      constructionHelmetChiaLogo: true,
+      constructionHelmetCigPack: trait.detailOptions?.find(d => d.file.endsWith('cig-pack.png'))?.file ?? 'Head_Construction-Helmet_detail_cig-pack.png',
+    }),
+    ...(trait.id === 'Clothes_Suit' && {
+      detailOption: trait.detailOptions?.[0]?.file,
+      activeColorSlot: 'fill0' as const,
+    }),
+    ...(trait.id === 'Clothes_Astronaut' && {
+      logoOption: 'CAT',
+      flagOption: 'us',
+    }),
+    ...(trait.id === 'Clothes_Bepe-army' && {
+      name1: '',
+      name2: '',
+    }),
+    ...(trait.id === 'Clothes_Bepe-suit' && {
+      suitVariant: 'bepe' as const,
+    }),
+    ...(trait.id === 'Clothes_Chia-farmer' && {
+      chiaFarmerUnderlayer: 'tee' as const,
+      activeColorSlot: 'fill0' as const,
+    }),
+    ...(trait.id === 'Clothes_Wizard-drip' && {
+      detailOption: trait.detailOptions?.[0]?.file,
+    }),
+    ...(trait.id === 'Head_Beer-Hat' && {
+      detailOption: trait.detailOptions?.find(d => d.name === 'Citrus')?.file ?? trait.detailOptions?.[0]?.file,
+      beerHatEditFocus: 'beer' as const,
+      beerHatUnderlayer: 'Head_Cap',
+      beerHatUnderlayerG2: {
+        traitId: 'Head_Cap',
+        g2Category: 'Head',
+        colors: { fill: G2_DEFAULT_COLORS['Head_Cap']?.fill ?? '#228B22' },
+      },
+    }),
+    ...(trait.id === 'Face-wear_MOG-Glasses' && {
+      detailOption: trait.detailOptions?.find(d => d.name === 'Default (Rainbow)')?.file ?? trait.detailOptions?.[0]?.file,
+    }),
+    ...(() => {
+      const slots = getAllUserPickableFillSlots(trait.id, trait);
+      return slots.length > 1 && trait.id !== 'Clothes_Suit' && trait.id !== 'Clothes_Chia-farmer'
+        ? { activeColorSlot: slots[0] }
+        : {};
+    })(),
+  };
+
+  // Apply centralized defaults from g2DefaultColors
+  const defaults = G2_DEFAULT_COLORS[trait.id];
+  if (defaults) {
+    for (const [slot, hex] of Object.entries(defaults)) {
+      if (initialColors?.[slot] !== undefined) continue;
+      g2.colors = { ...g2.colors, [slot]: hex };
+    }
+    if (trait.id === 'Clothes_Chia-farmer') delete g2.colors.fill;
+  }
+  // Fallback: use getG2DefaultColor for any user-pickable slot without initialColors
+  if (trait.fillFile && g2.colors.fill === undefined && initialColors?.fill === undefined) {
+    g2.colors.fill = getG2DefaultColor(trait.id, 'fill', trait, '#FFFFFF');
+  }
+  if (trait.fill1File && g2.colors.fill1 === undefined && initialColors?.fill1 === undefined) {
+    g2.colors.fill1 = getG2DefaultColor(trait.id, 'fill1', trait, '#FFFFFF');
+  }
+  if (trait.fill2File && g2.colors.fill2 === undefined && initialColors?.fill2 === undefined) {
+    g2.colors.fill2 = getG2DefaultColor(trait.id, 'fill2', trait, '#FFFFFF');
+  }
+
+  return { virtualPath, g2 };
+}
 
 // ============ Types ============
 
@@ -256,7 +410,7 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
    * Stores a virtual path in selectedLayers for rules engine compatibility,
    * and the full G2 data in g2Selections for the renderer.
    */
-  const selectG2Layer = useCallback((layer: UILayerName, trait: UnifiedTrait, initialColors?: Record<string, string>) => {
+  const selectG2Layer = useCallback((layer: UILayerName, trait: UnifiedTrait, initialColors?: Record<string, string>, skipHistory?: boolean) => {
     // Build a virtual path that includes the trait name (so rules pathContains works)
     const virtualPath = `/g2/${trait.category}/${trait.name.replace(/\s+/g, '-')}`;
 
@@ -382,7 +536,7 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
       g2.colors.fill2 = getG2DefaultColor(trait.id, 'fill2', trait, '#FFFFFF');
     }
 
-    dispatch({ type: 'SET_G2_LAYER', layer, path: virtualPath, g2 });
+    dispatch({ type: 'SET_G2_LAYER', layer, path: virtualPath, g2, skipHistory });
   }, []);
 
   const setG2Color = useCallback((layer: UILayerName, slot: string, color: string) => {
@@ -418,33 +572,30 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
       getWeightedRandomTrait,
       hasWeightedFrequencies,
       normalizeName,
+      addTrait: addWeightedTrait,
+      findMatchingTrait: findInFrequencies,
     } = await import('@/lib/weightedRandomizer');
 
     /**
-     * Find image by weighted trait name
-     * Matches display names to frequency keys using normalization
+     * Find a unified trait by weighted trait name
+     * Matches trait names to frequency keys using normalization
      */
-    const findImageByTrait = (
-      images: Array<{ path: string; displayName: string }>,
+    const findUnifiedTraitByName = (
+      traits: UnifiedTrait[],
       traitName: string
-    ): { path: string; displayName: string } | null => {
+    ): UnifiedTrait | null => {
       const normalizedTrait = normalizeName(traitName);
 
       // Try exact match first
-      for (const img of images) {
-        if (normalizeName(img.displayName) === normalizedTrait) {
-          return img;
-        }
+      for (const t of traits) {
+        if (normalizeName(t.name) === normalizedTrait) return t;
       }
 
       // Try partial match (trait contains or is contained)
-      for (const img of images) {
-        const normalizedDisplay = normalizeName(img.displayName);
-        if (
-          normalizedDisplay.includes(normalizedTrait) ||
-          normalizedTrait.includes(normalizedDisplay)
-        ) {
-          return img;
+      for (const t of traits) {
+        const normalizedName = normalizeName(t.name);
+        if (normalizedName.includes(normalizedTrait) || normalizedTrait.includes(normalizedName)) {
+          return t;
         }
       }
 
@@ -452,29 +603,40 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
     };
 
     /**
-     * Select a random image using weighted frequencies when available
-     * Falls back to uniform random if no weights defined or no match found
+     * Select a random unified trait using weighted frequencies when available.
+     * Returns both the path (for SelectedLayers) and the UnifiedTrait (for G2 hydration).
+     * Falls back to uniform random if no weights defined or no match found.
      */
-    const selectWeightedRandom = async (
+    const selectWeightedUnified = async (
       layerName: UILayerName
-    ): Promise<string | null> => {
-      const images = await generatorService.getLayerImages(layerName);
-      if (images.length === 0) return null;
+    ): Promise<{ path: string; trait: UnifiedTrait } | null> => {
+      const traits = await getUnifiedTraits(layerName);
+      if (traits.length === 0) return null;
+
+      // Register G2-only traits in weighted randomizer so they get a fair (rare) chance
+      for (const t of traits) {
+        if ((t.source === 'g2') && !t.g1Path && !findInFrequencies(layerName, t.name)) {
+          addWeightedTrait(layerName, t.name, 1);
+        }
+      }
 
       // Try weighted selection if frequencies exist for this layer
       if (hasWeightedFrequencies(layerName)) {
         const weightedTrait = getWeightedRandomTrait(layerName);
         if (weightedTrait) {
-          const matchedImage = findImageByTrait(images, weightedTrait);
-          if (matchedImage) {
-            return matchedImage.path;
+          const matchedTrait = findUnifiedTraitByName(traits, weightedTrait);
+          if (matchedTrait) {
+            const path = matchedTrait.g1Path || `/g2/${matchedTrait.category}/${matchedTrait.name.replace(/\s+/g, '-')}`;
+            return { path, trait: matchedTrait };
           }
         }
       }
 
-      // Fallback: uniform random selection
-      const randomIndex = Math.floor(Math.random() * images.length);
-      return images[randomIndex].path;
+      // Fallback: uniform random from all unified traits
+      const randomIndex = Math.floor(Math.random() * traits.length);
+      const selected = traits[randomIndex];
+      const path = selected.g1Path || `/g2/${selected.category}/${selected.name.replace(/\s+/g, '-')}`;
+      return { path, trait: selected };
     };
 
     // Required layers that MUST always be selected (including Background for randomization)
@@ -483,31 +645,37 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
     // Optional layers that have a chance to be selected
     const optionalLayers: UILayerName[] = ['FacialHair', 'MouthItem', 'Eyes', 'Head'];
 
+    // Track G2 traits for color hydration after selection
+    const g2Picks: { layer: UILayerName; trait: UnifiedTrait; colors: Record<string, string> }[] = [];
+
+    /** Helper to record a selection and track G2 traits for hydration */
+    const recordSelection = (layerName: UILayerName, result: { path: string; trait: UnifiedTrait }) => {
+      randomSelections[layerName] = result.path;
+      // ALL G2/both traits need selectG2Layer — without it the renderer can't resolve
+      // virtual paths for G2-only traits, and colorable traits won't get random colors.
+      if (result.trait.source === 'g2' || result.trait.source === 'both') {
+        g2Picks.push({ layer: layerName, trait: result.trait, colors: buildRandomColors(result.trait) });
+      }
+    };
+
     // Always select required layers with weighted randomization
     for (const layerName of requiredLayers) {
-      const path = await selectWeightedRandom(layerName);
-      if (path) {
-        randomSelections[layerName] = path;
-      }
+      const result = await selectWeightedUnified(layerName);
+      if (result) recordSelection(layerName, result);
     }
 
     // Randomly select optional layers (60% chance each) with weighted randomization
     for (const layerName of optionalLayers) {
-      const shouldSelect = Math.random() < 0.6;
-      if (shouldSelect) {
-        const path = await selectWeightedRandom(layerName);
-        if (path) {
-          randomSelections[layerName] = path;
-        }
+      if (Math.random() < 0.6) {
+        const result = await selectWeightedUnified(layerName);
+        if (result) recordSelection(layerName, result);
       }
     }
 
     // Mask has a much lower chance (15%) - most Wojaks should be unmasked
     if (Math.random() < 0.15) {
-      const maskPath = await selectWeightedRandom('Mask');
-      if (maskPath) {
-        randomSelections.Mask = maskPath;
-      }
+      const result = await selectWeightedUnified('Mask');
+      if (result) recordSelection('Mask', result);
     }
 
     // Apply rules to check for conflicts and fix invalid combinations (Phase 2: resolver)
@@ -532,75 +700,74 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
       }
     }
 
-    const pathMap = getPathToTraitIdMap();
-    const unified = fromExternal(randomSelections, {}, pathMap);
-    dispatch({ type: 'RANDOMIZE', selections: unified });
-
-    // Hydrate G2 for Head/Eyes when random path resolves to a G2 colorable trait (Viking helmet, 3D glasses, etc.)
-    // so the color picker works immediately without relying on the RightPanel hydrate effect.
-    for (const layer of ['Head', 'Eyes'] as const) {
-      const path = randomSelections[layer];
-      if (!path || isSelectionPathEmpty(path)) continue;
-      const resolvedTraitId = pathMap.get(path);
-      if (!resolvedTraitId) continue;
-      try {
-        const trait = await getUnifiedTraitById(resolvedTraitId);
-        if (!trait || !(trait.colorable || (trait.detailOptions && trait.detailOptions.length > 0))) continue;
-        if (trait.source !== 'g2' && trait.source !== 'both') continue;
-        selectG2Layer(layer, trait);
-      } catch {
-        // ignore
-      }
+    // Build G2 selections map BEFORE dispatching so the history snapshot includes complete G2 data.
+    // This ensures undo restores both paths AND G2 rendering data in a single atomic step.
+    const g2Map: G2Selections = {};
+    for (const { layer, trait, colors } of g2Picks) {
+      if (!randomSelections[layer]) continue; // cleared by rules engine
+      const { virtualPath, g2 } = buildG2Selection(trait, colors);
+      // Update path to match the virtual path (in case g1Path was used initially)
+      randomSelections[layer] = virtualPath;
+      g2Map[layer] = g2;
     }
-  }, [selectG2Layer]);
+
+    const pathMap = getPathToTraitIdMap();
+    const unified = fromExternal(randomSelections, g2Map, pathMap);
+    dispatch({ type: 'RANDOMIZE', selections: unified });
+  }, []);
 
   const randomizeLayer = useCallback(async (layer: UILayerName) => {
     const {
       getWeightedRandomTrait,
       hasWeightedFrequencies,
       normalizeName,
+      addTrait: addWeightedTrait,
+      findMatchingTrait: findInFrequencies,
     } = await import('@/lib/weightedRandomizer');
 
-    const findImageByTrait = (
-      images: Array<{ path: string; displayName: string }>,
+    const findUnifiedTraitByName = (
+      traits: UnifiedTrait[],
       traitName: string
-    ): { path: string; displayName: string } | null => {
+    ): UnifiedTrait | null => {
       const normalizedTrait = normalizeName(traitName);
-      for (const img of images) {
-        if (normalizeName(img.displayName) === normalizedTrait) return img;
+      for (const t of traits) {
+        if (normalizeName(t.name) === normalizedTrait) return t;
       }
-      for (const img of images) {
-        const normalizedDisplay = normalizeName(img.displayName);
-        if (
-          normalizedDisplay.includes(normalizedTrait) ||
-          normalizedTrait.includes(normalizedDisplay)
-        )
-          return img;
+      for (const t of traits) {
+        const normalizedName = normalizeName(t.name);
+        if (normalizedName.includes(normalizedTrait) || normalizedTrait.includes(normalizedName))
+          return t;
       }
       return null;
     };
 
-    const selectWeightedRandomForLayer = async (
-      layerName: UILayerName
-    ): Promise<string | null> => {
-      const images = await generatorService.getLayerImages(layerName);
-      if (images.length === 0) return null;
-      if (hasWeightedFrequencies(layerName)) {
-        const weightedTrait = getWeightedRandomTrait(layerName);
-        if (weightedTrait) {
-          const matched = findImageByTrait(images, weightedTrait);
-          if (matched) return matched.path;
-        }
-      }
-      const idx = Math.floor(Math.random() * images.length);
-      return images[idx].path;
-    };
+    const traits = await getUnifiedTraits(layer);
+    if (traits.length === 0) return;
 
-    const path = await selectWeightedRandomForLayer(layer);
-    if (!path) return;
+    // Register G2-only traits in weighted randomizer so they get a fair (rare) chance
+    for (const t of traits) {
+      if ((t.source === 'g2') && !t.g1Path && !findInFrequencies(layer, t.name)) {
+        addWeightedTrait(layer, t.name, 1);
+      }
+    }
+
+    // Select trait using weighted frequencies
+    let selectedTrait: UnifiedTrait | null = null;
+    if (hasWeightedFrequencies(layer)) {
+      const weightedName = getWeightedRandomTrait(layer);
+      if (weightedName) {
+        selectedTrait = findUnifiedTraitByName(traits, weightedName);
+      }
+    }
+    // Fallback: uniform random
+    if (!selectedTrait) {
+      selectedTrait = traits[Math.floor(Math.random() * traits.length)];
+    }
+
+    const path = selectedTrait.g1Path || `/g2/${selectedTrait.category}/${selectedTrait.name.replace(/\s+/g, '-')}`;
 
     const newSelectedLayers: SelectedLayers = { ...derived.selectedLayers, [layer]: path };
-    const newG2 = { ...derived.g2Selections };
+    const newG2: G2Selections = { ...derived.g2Selections };
     delete newG2[layer];
     const resolver = createSelectionResolver(newSelectedLayers, newG2, getPathToTraitIdMap());
     const rulesResult = getDisabledLayers(resolver);
@@ -616,28 +783,21 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
         delete finalSelectedLayers[l];
       }
     }
+
+    // Build G2 selection for the new trait BEFORE dispatching so the history
+    // snapshot includes complete G2 rendering data (atomic undo).
+    if (finalSelectedLayers[layer] && selectedTrait &&
+        (selectedTrait.source === 'g2' || selectedTrait.source === 'both')) {
+      const randomColors = buildRandomColors(selectedTrait);
+      const { virtualPath, g2 } = buildG2Selection(selectedTrait, randomColors);
+      finalSelectedLayers[layer] = virtualPath;
+      newG2[layer] = g2;
+    }
+
     const pathMap = getPathToTraitIdMap();
     const unified = fromExternal(finalSelectedLayers, newG2, pathMap);
     dispatch({ type: 'RANDOMIZE', selections: unified });
-
-    // Hydrate G2 for Head/Eyes when random path resolves to a G2 colorable trait (Viking helmet, 3D glasses, etc.)
-    if (layer === 'Head' || layer === 'Eyes') {
-      const path = finalSelectedLayers[layer];
-      if (path && !isSelectionPathEmpty(path)) {
-        const resolvedTraitId = pathMap.get(path);
-        if (resolvedTraitId) {
-          try {
-            const trait = await getUnifiedTraitById(resolvedTraitId);
-            if (trait && (trait.colorable || (trait.detailOptions && trait.detailOptions.length > 0)) && (trait.source === 'g2' || trait.source === 'both')) {
-              selectG2Layer(layer, trait);
-            }
-          } catch {
-            // ignore
-          }
-        }
-      }
-    }
-  }, [derived.selectedLayers, derived.g2Selections, selectG2Layer]);
+  }, [derived.selectedLayers, derived.g2Selections]);
 
   const clearAll = useCallback(() => {
     dispatch({ type: 'CLEAR_ALL' });

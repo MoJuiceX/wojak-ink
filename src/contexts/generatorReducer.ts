@@ -42,7 +42,7 @@ export interface GeneratorState {
 
 export type GeneratorAction =
   | { type: 'SET_LAYER'; layer: UILayerName; path: string }
-  | { type: 'SET_G2_LAYER'; layer: UILayerName; path: string; g2: G2Selection }
+  | { type: 'SET_G2_LAYER'; layer: UILayerName; path: string; g2: G2Selection; skipHistory?: boolean }
   | { type: 'SET_G2_COLOR'; layer: UILayerName; slot: string; color: string }
   | { type: 'SET_G2_DETAIL'; layer: UILayerName; detailOption?: string; frameOption?: string; logoOption?: string; flagOption?: string; name1?: string; name2?: string; activeColorSlot?: string; suitVariant?: 'bepe' | 'pepe'; chiaFarmerUnderlayer?: 'tee' | 'tanktop'; constructionHelmetChiaLogo?: boolean; constructionHelmetCigPack?: string; beerHatUnderlayer?: string; beerHatUnderlayerG2?: G2Selection; beerHatEditFocus?: 'beer' | 'underlayer'; variant?: string }
   | { type: 'CLEAR_LAYER'; layer: UILayerName }
@@ -138,7 +138,8 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
       updatedG2Sel[action.layer] = { path: action.path, traitId: action.g2.traitId, g2: action.g2 };
 
       const { newSelections, result } = applyRulesUnified(updatedG2Sel, pathMap);
-      const newState = pushHistoryUnified(state, newSelections);
+      // skipHistory: when called as part of RANDOMIZE, the history entry was already created
+      const newState = action.skipHistory ? state : pushHistoryUnified(state, newSelections);
 
       return {
         ...newState,

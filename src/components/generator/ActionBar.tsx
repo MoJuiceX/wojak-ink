@@ -435,10 +435,10 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         <AnimatePresence>
           {showRandomMenu && (
             <motion.div
-              initial={{ opacity: 0, y: -4 }}
+              initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              className="absolute top-full left-0 mt-1 z-50 rounded-lg overflow-hidden py-1 min-w-[140px]"
+              exit={{ opacity: 0, y: 4 }}
+              className="absolute bottom-full left-0 mb-1 z-50 rounded-lg overflow-hidden py-1 min-w-[140px]"
               style={{
                 background: 'var(--color-surface)',
                 border: '1px solid var(--color-border)',

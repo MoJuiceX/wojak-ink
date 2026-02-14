@@ -1710,11 +1710,11 @@ const BACKGROUND_SOLID_PATH = '__solid__';
 
 /** Map virtual/composite layer names back to their parent UI layer name. */
 function getUIParentLayer(name: string): string {
-  if (name.startsWith('Eyes') || name === 'NinjaTurtleUnderMask') return 'Eyes';
+  if (name.startsWith('Eyes') || name === 'NinjaTurtleUnderMask' || name === 'LaserEyesOverBubbleGum' || name === 'LaserEyesOverAstronaut') return 'Eyes';
   if (name.startsWith('Mask') || name === 'HannibalMask' || name === 'FullFaceMask') return 'Mask';
   if (name.startsWith('Clothes') || name === 'Astronaut' || name.startsWith('NinjaTurtle')) return 'Clothes';
-  if (name.startsWith('BeerHat')) return 'Head';
-  if (name === 'BubbleGumRekt' || name === 'BubbleGumOverEyes') return 'MouthBase';
+  if (name.startsWith('BeerHat') || name === 'CenturionUnder') return 'Head';
+  if (name === 'BubbleGumRekt' || name === 'BubbleGumOverEyes' || name === 'BubbleGumOverHead') return 'MouthBase';
   return name;
 }
 
