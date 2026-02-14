@@ -20,18 +20,25 @@ interface RateLimitResult {
 /**
  * Check and update rate limit for a given key
  * Uses user ID if authenticated, otherwise IP address
+ *
+ * failClosed: if true, deny requests when DB is unavailable (use for mint endpoints)
  */
 export async function checkRateLimit(
   db: D1Database | undefined,
   key: string,
-  config: RateLimitConfig
+  config: RateLimitConfig,
+  failClosed = false
 ): Promise<RateLimitResult> {
   const now = Date.now();
   const windowStart = now - config.windowMs;
   const resetAt = now + config.windowMs;
 
-  // If no database, allow the request (fail open)
+  // If no database, behavior depends on failClosed flag
   if (!db) {
+    if (failClosed) {
+      console.error('[RateLimit] DB unavailable — denying request (fail closed)');
+      return { allowed: false, remaining: 0, resetAt };
+    }
     return { allowed: true, remaining: config.maxRequests - 1, resetAt };
   }
 
@@ -68,8 +75,10 @@ export async function checkRateLimit(
       resetAt,
     };
   } catch (error) {
-    // If rate limiting fails, allow the request (fail open)
     console.error('[RateLimit] Error:', error);
+    if (failClosed) {
+      return { allowed: false, remaining: 0, resetAt };
+    }
     return { allowed: true, remaining: config.maxRequests - 1, resetAt };
   }
 }

@@ -37,25 +37,28 @@ The `/api/mint/pricing` endpoint returns:
 {
   traits: {
     "Head_Crown": {
-      usageCount: 87,        // raw times minted (integer)
-      effectiveUsage: 82.3,  // after decay (float)
-      surchargeXch: 0.784,   // surcharge in XCH (float)
-      fairShare: 105          // DO NOT show this to users
+      usageCount: 87,              // raw times minted (integer)
+      effectiveUsage: 82.3,        // after decay (float)
+      surchargeXch: 0.784,         // surcharge in XCH (float)
+      fairShare: 105,              // DO NOT show this to users
+      percentOfFairShare: 78.4     // DO NOT show this to users
     },
     "Clothes_Suit": { ... },
     "Face Wear_Aviators": { ... },
     "Mouth_Cig": {
       usageCount: 45,
       effectiveUsage: 42.1,
-      surchargeXch: 0,        // Mouth is excluded — always 0
-      fairShare: 0
+      surchargeXch: 0,              // Mouth is excluded — always 0
+      fairShare: 0,
+      percentOfFairShare: 0
     },
     ...
   },
   supply: {
     minted: 312,
     total: 4200
-  }
+  },
+  floorPrice: 1.0                   // current floor price in XCH (used internally)
 }
 ```
 
@@ -100,7 +103,8 @@ interface TraitPricingData {
   usageCount: number;
   effectiveUsage: number;
   surchargeXch: number;
-  fairShare: number; // stored but never shown to users
+  fairShare: number;          // stored but never shown to users
+  percentOfFairShare: number; // stored but never shown to users
 }
 
 interface PricingState {

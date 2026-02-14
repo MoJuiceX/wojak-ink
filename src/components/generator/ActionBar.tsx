@@ -153,7 +153,8 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   // Count selected traits for the 7-trait minimum
   const traitCount = Object.values(selectedLayers).filter((v) => !isSelectionPathEmpty(v)).length;
   const has7Traits = traitCount >= 7;
-  const canMint = canExport && isWalletConnected && has7Traits;
+  const isSoldOut = totalMinted >= maxSupply && maxSupply > 0;
+  const canMint = canExport && isWalletConnected && has7Traits && !isSoldOut;
 
   const handleMintClick = useCallback(async () => {
     if (!isWalletConnected) {
@@ -633,9 +634,10 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
 
         {/* Mint button */}
         <ActionBarTooltip content={
-          !isWalletConnected ? 'Connect Wallet'
-            : !has7Traits ? `Need 7 traits (${traitCount}/7)`
-              : 'Mint NFT'
+          isSoldOut ? 'Sold Out'
+            : !isWalletConnected ? 'Connect Wallet'
+              : !has7Traits ? `Need 7 traits (${traitCount}/7)`
+                : 'Mint NFT'
         }>
           <ActionButton
             variant="primary"

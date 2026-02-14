@@ -84,7 +84,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
   // Rate limit: 5 mint attempts per minute per IP/wallet
   const rlKey = getRateLimitKey(request);
-  const rlResult = await checkRateLimit(env.DB, rlKey, MINT_RATE_LIMITS.prepare);
+  const rlResult = await checkRateLimit(env.DB, rlKey, MINT_RATE_LIMITS.prepare, true);
   if (!rlResult.allowed) {
     return errorResponse('Too many mint requests. Please wait a moment.', 429);
   }

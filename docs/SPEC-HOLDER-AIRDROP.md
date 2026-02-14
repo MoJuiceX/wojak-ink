@@ -221,67 +221,58 @@ Where:
 
 ## Implementation
 
-### Option A: Database Migration (Recommended)
+### Option A: Database Migrations (Recommended)
 
-Create a one-time migration that inserts credit events for each airdrop wallet.
+Two migrations are needed:
 
-**Migration file:** `functions/migrations/035_holder_airdrop.sql`
+**Migration 1:** `functions/migrations/035_holder_airdrop_schema.sql`
 
-Each free mint = 100 credits (10000 stored units). The airdrop inserts pre-calculated credit amounts:
+Adds the `event_type` and `metadata` columns to `credit_events` if they don't exist:
+
+```sql
+-- Add event_type to distinguish trading credits from airdrop credits
+ALTER TABLE credit_events ADD COLUMN event_type TEXT DEFAULT 'trade';
+ALTER TABLE credit_events ADD COLUMN metadata TEXT;
+```
+
+**Migration 2:** `functions/migrations/036_holder_airdrop.sql`
+
+Inserts credit events for all 112 wallets. Each free mint = 100 credits (10000 stored units).
+
+**Important:** The `credit_events` table has NOT NULL columns (`nft_id`, `event_id`, `price_xch`, `floor_at_time`, `whale_multiplier`, `source`, `event_timestamp`) that must be provided. Use placeholder values for airdrop-specific rows:
 
 ```sql
 -- Holder Airdrop: 2026-02-14 snapshot
 -- Formula: floor(1 + ln(held / 5)) free mints per wallet
 -- 1 free mint = 10000 stored credit units (100 display credits)
 
--- Insert airdrop credit events
--- event_type = 'holder_airdrop' to distinguish from trading credits
--- Each row: wallet, credits (freeMints * 10000), source metadata
-
-INSERT INTO credit_events (wallet_address, credits_earned, event_type, metadata, created_at)
+INSERT INTO credit_events (
+  event_id, nft_id, wallet_address, price_xch, floor_at_time,
+  credits_earned, whale_multiplier, source, event_timestamp,
+  event_type, metadata
+)
 VALUES
-  ('xch1st3p4m2vluaa6we9anvqcjc0d23gn4v59cfuezh6td7wtxqeq60sp6uuz5', 40000, 'holder_airdrop', '{"held":179,"freeMints":4,"snapshot":"2026-02-14"}', datetime('now')),
+  ('airdrop_001', 'holder_airdrop', 'xch1st3p4m2vluaa6we9anvqcjc0d23gn4v59cfuezh6td7wtxqeq60sp6uuz5',
+   0, 0, 40000, 10000, 'holder_airdrop', datetime('now'),
+   'holder_airdrop', '{"held":179,"freeMints":4,"snapshot":"2026-02-14"}'),
   -- ... all 112 wallets ...
-  ('xch1cwrye8cgxtwgxut2g4yelu4ju5c7tvjtjt8zdkge4dx884sh6qaqr72mxa', 10000, 'holder_airdrop', '{"held":5,"freeMints":1,"snapshot":"2026-02-14"}', datetime('now'));
+  ('airdrop_112', 'holder_airdrop', 'xch1cwrye8cgxtwgxut2g4yelu4ju5c7tvjtjt8zdkge4dx884sh6qaqr72mxa',
+   0, 0, 10000, 10000, 'holder_airdrop', datetime('now'),
+   'holder_airdrop', '{"held":5,"freeMints":1,"snapshot":"2026-02-14"}');
 ```
 
-### Option B: Script-Based Insert
+### Schema Notes
 
-If the `credit_events` table schema doesn't support `event_type`, create a script:
-
-**File:** `scripts/apply-holder-airdrop.ts`
-
-```typescript
-const AIRDROP_WALLETS = [
-  { wallet: 'xch1st3p4m2...', held: 179, freeMints: 4 },
-  // ... all 112 ...
-];
-
-const CREDITS_PER_FREE_MINT = 10000; // 100 display credits
-
-for (const entry of AIRDROP_WALLETS) {
-  const credits = entry.freeMints * CREDITS_PER_FREE_MINT;
-  await db.prepare(`
-    INSERT INTO credit_events (wallet_address, credits_earned, event_type, metadata, created_at)
-    VALUES (?, ?, 'holder_airdrop', ?, datetime('now'))
-  `).bind(entry.wallet, credits, JSON.stringify({
-    held: entry.held,
-    freeMints: entry.freeMints,
-    snapshot: '2026-02-14',
-    formula: 'floor(1 + ln(held / 5))'
-  })).run();
-}
-```
-
-### Schema Consideration
-
-Check if `credit_events` has an `event_type` column. If not, add it:
-
-```sql
-ALTER TABLE credit_events ADD COLUMN event_type TEXT DEFAULT 'trade';
-```
-
-This distinguishes trading credits from airdrop credits in the leaderboard and balance queries.
+The `credit_events` table (from migration 030) has these required columns:
+- `event_id TEXT UNIQUE NOT NULL` — use `'airdrop_001'` through `'airdrop_112'`
+- `nft_id TEXT NOT NULL` — use `'holder_airdrop'` as placeholder
+- `price_xch INTEGER NOT NULL` — use `0` (no XCH spent)
+- `floor_at_time INTEGER NOT NULL` — use `0`
+- `whale_multiplier INTEGER NOT NULL` — use `10000` (1.0x)
+- `source TEXT NOT NULL` — use `'holder_airdrop'`
+- `event_timestamp TEXT NOT NULL` — use `datetime('now')`
+- `event_type TEXT` — use `'holder_airdrop'` (added by migration 035)
+- `metadata TEXT` — JSON with held count, freeMints, snapshot date (added by migration 035)
 
 ---
 

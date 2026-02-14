@@ -55,7 +55,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
   // Rate limit: 10 confirm attempts per minute per IP
   const rlKey = getRateLimitKey(request);
-  const rlResult = await checkRateLimit(env.DB, rlKey, MINT_RATE_LIMITS.confirm);
+  const rlResult = await checkRateLimit(env.DB, rlKey, MINT_RATE_LIMITS.confirm, true);
   if (!rlResult.allowed) {
     return errorResponse('Too many requests. Please wait a moment.', 429);
   }

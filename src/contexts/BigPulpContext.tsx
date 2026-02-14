@@ -138,7 +138,7 @@ type BigPulpAction =
   | { type: 'SET_BIGPULP_TYPING'; payload: boolean }
   | { type: 'ADVANCE_MESSAGE_QUEUE' }
   | { type: 'SET_BIGPULP_HEAD_VARIANT'; payload: string }
-  | { type: 'LOAD_MARKET_DATA'; payload: { stats: MarketStats; heatMap: HeatMapCell[][]; distribution: PriceDistribution } }
+  | { type: 'LOAD_MARKET_DATA'; payload: { stats?: MarketStats; heatMap?: HeatMapCell[][]; distribution?: PriceDistribution } }
   | { type: 'LOAD_ATTRIBUTES'; payload: AttributeStats[] }
   | { type: 'LOAD_ASK_DATA'; payload: { topSales: NFTSale[]; rarestFinds: NFTBasic[] } }
   | { type: 'UPDATE_NFT_TRAITS'; payload: V9NftPayload };
@@ -342,9 +342,9 @@ function bigPulpReducer(
     case 'LOAD_MARKET_DATA':
       return {
         ...state,
-        marketStats: action.payload.stats,
-        heatMapData: action.payload.heatMap,
-        priceDistribution: action.payload.distribution,
+        marketStats: action.payload.stats ?? state.marketStats,
+        heatMapData: action.payload.heatMap ?? state.heatMapData,
+        priceDistribution: action.payload.distribution ?? state.priceDistribution,
       };
 
     case 'LOAD_ATTRIBUTES':
@@ -539,9 +539,10 @@ export function BigPulpProvider({
   const searchMutation = useSearchNFTMutation();
   const randomMutation = useRandomAnalysisMutation();
 
-  // Sync market data to context state
+  // Sync market data to context state — dispatch each source independently
+  // so partial data is shown even if one source fails
   useEffect(() => {
-    if (marketStatsData && heatMapData && priceDistributionData) {
+    if (marketStatsData || heatMapData || priceDistributionData) {
       dispatch({
         type: 'LOAD_MARKET_DATA',
         payload: {

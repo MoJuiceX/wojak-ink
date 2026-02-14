@@ -36,7 +36,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
   // Guard: only allow internal calls
   const internalSecret = env.INTERNAL_MINT_SECRET;
-  if (internalSecret && request.headers.get(INTERNAL_API_HEADER) !== internalSecret) {
+  if (!internalSecret || request.headers.get(INTERNAL_API_HEADER) !== internalSecret) {
     return errorResponse('Unauthorized', 401);
   }
 

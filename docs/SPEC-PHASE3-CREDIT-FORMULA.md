@@ -146,7 +146,7 @@ calculateCredits(2.0, 2.0)  → credits ≈ 10000 (100 display = 1 free mint)
 calculateCredits(4.0, 2.0)  → credits ≈ 23000 (230 display)
 calculateCredits(20.0, 2.0) → credits ≈ 127000 (1270 display)
 calculateCredits(2.0, 2.0)  → multiplier = 10000 (1.0x — no bonus at floor)
-calculateCredits(100.0, 2.0) → multiplier ≈ 12970 (1.297x — near cap)
+calculateCredits(100.0, 2.0) → multiplier ≈ 12940 (1.294x — near cap)
 ```
 
 ---

@@ -794,9 +794,9 @@ class BigPulpService implements IBigPulpService {
       if (trades > 0) localStorage.setItem(FALLBACK_TRADES_KEY, String(trades));
     };
 
-    // Fetch real listings and collection stats in parallel
+    // Fetch real listings, collection stats, and current XCH price in parallel
     const fallbacks = getFallbacks();
-    const [listingsResult, collectionStats] = await Promise.all([
+    const [listingsResult, collectionStats, xchUsdPrice] = await Promise.all([
       marketService.fetchAllListings(),
       fetchCollectionStats().catch((error) => {
         console.warn('[BigPulp] Collection stats fetch failed, using fallbacks:', error.message);
@@ -810,6 +810,7 @@ class BigPulpService implements IBigPulpService {
           thumbnailUri: '',
         };
       }),
+      getCurrentXchPrice(),
     ]);
 
     // Save successful values as fallbacks for future use
@@ -836,9 +837,6 @@ class BigPulpService implements IBigPulpService {
     const medianPrice = listings.length > 0
       ? sortedPrices[Math.floor(sortedPrices.length / 2)]
       : 0;
-
-    // XCH to USD conversion (approximate, could fetch from CoinGecko)
-    const xchUsdPrice = 5.34; // TODO: Fetch real price
 
     return {
       listedCount: listings.length,

@@ -17,6 +17,7 @@
 | 6: Admin Dashboard | `docs/SPEC-PHASE6-ADMIN-DASHBOARD.md` |
 | 7: Holder Airdrop | `docs/SPEC-HOLDER-AIRDROP.md` |
 | 8: Pre-Launch Audit | `docs/SPEC-PRELAUNCH-AUDIT.md` |
+| 9: Security Hardening | `docs/SPEC-PHASE9-HARDENING.md` |
 
 ---
 
@@ -252,6 +253,44 @@ Run npm run typecheck && npm run build after changes. Both must pass.
 
 ---
 
+## Phase 9: Security Hardening & Cleanup
+
+**Goal:** Fix all 8 flagged items from the Phase 8 pre-launch audit — 2 HIGH security fixes, 3 MEDIUM improvements, 3 LOW cleanup tasks.
+
+**Spec:** `docs/SPEC-PHASE9-HARDENING.md`
+
+### Prompt for Claude CLI:
+
+```
+Read docs/SPEC-PHASE9-HARDENING.md in full. This is your implementation spec.
+It contains 8 fixes ordered by severity. Execute them in order 1-8.
+
+Fix 1 (HIGH): Add ADMIN_SECRET auth to /api/admin/credit-stats and /api/admin/recent-mints.
+  Copy the exact pattern from functions/api/mint/audit.ts. Update Admin.tsx to send the secret.
+
+Fix 2 (HIGH): Replace Access-Control-Allow-Origin: '*' with 'https://wojak.ink' everywhere.
+  Start with functions/api/mint/_shared.ts, then grep for any other files with wildcard CORS.
+
+Fix 3 (MEDIUM): Add WebP magic byte validation in the upload flow before IPFS upload.
+
+Fix 4 (MEDIUM): Move leaderboard sorting/pagination from JS into SQL (ORDER BY + LIMIT).
+
+Fix 5 (MEDIUM): Replace all startsWith('xch1') in frontend with isValidChiaAddress().
+  Create src/lib/validation.ts mirroring functions/lib/validation.ts.
+
+Fix 6 (LOW): Delete orphan pages (Landing.tsx, Onboarding.tsx, SettingsPage.tsx, Game.tsx).
+
+Fix 7 (LOW): Remove stale TODO in prepare.ts about self-fetch (already resolved).
+
+Fix 8 (LOW): Add accessibility comment above the !important rules in theme.css.
+
+Run npm run typecheck && npm run build after all changes.
+Run all verification greps listed at the bottom of the spec.
+Report results for each fix.
+```
+
+---
+
 ## Execution Order
 
 | Phase | When | Depends On | Spec File |
@@ -265,7 +304,9 @@ Run npm run typecheck && npm run build after changes. Both must pass.
 | **6: Admin Dashboard** | Post-launch or parallel | Nice to have | `SPEC-PHASE6-ADMIN-DASHBOARD.md` |
 | **7: Holder Airdrop** | After Phase 3 | Credit system working | `SPEC-HOLDER-AIRDROP.md` |
 | **8: Pre-Launch Audit** | After Phase 0-7 | Everything implemented | `SPEC-PRELAUNCH-AUDIT.md` |
+| **9: Security Hardening** | After Phase 8 | Audit flagged items | `SPEC-PHASE9-HARDENING.md` |
 
 Phases 1-2, Phase 3, and Phase 7 can run in parallel if you have multiple Claude CLI sessions.
 Phase 7 depends on Phase 3 (credit formula must be finalized before inserting airdrop credits).
 Phase 8 is the final gate before the real mint test.
+Phase 9 addresses everything Phase 8 flagged — the last step before launch.

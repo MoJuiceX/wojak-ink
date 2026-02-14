@@ -79,8 +79,9 @@ Each section has a heading and bullet points. Write the final copy following `BR
 
 **Facts to convey:**
 - Trade Wojak Farmers Plot NFTs on secondary markets and earn credits
+- OG holders of Wojak Farmers Plot (5+ NFTs) also received bonus credits
 - 100 credits = 1 free mint (no XCH needed)
-- Credits are tracked automatically from your marketplace activity
+- Trading credits are tracked automatically from your marketplace activity
 - Check your credit balance in the leaderboard
 
 **Tone:** Exciting — this is a bonus feature. Make it feel like a reward.

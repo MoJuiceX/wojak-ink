@@ -121,15 +121,24 @@ function loadCachedListings(): NFTListing[] | null {
       return null;
     }
 
-    listingsCache.data = data.listings;
-    listingsCache.timestamp = data.timestamp;
-    return data.listings;
+    const listings = data.listings as NFTListing[];
+
+    // Only populate memory cache with non-empty data to prevent cache poisoning
+    if (listings.length > 0) {
+      listingsCache.data = listings;
+      listingsCache.timestamp = data.timestamp;
+    }
+
+    return listings;
   } catch {
     return null;
   }
 }
 
 function saveListingsToCache(listings: NFTListing[]): void {
+  // Never cache empty results — they indicate API failure, not "no listings"
+  if (listings.length === 0) return;
+
   try {
     const data = {
       listings,
@@ -353,12 +362,14 @@ class MarketService implements IMarketService {
 
       const result = mergeListings(mintgarden, dexie);
 
-      listingsCache.data = result.listings;
-      listingsCache.timestamp = Date.now();
+      // Only update caches with non-empty results to prevent cache poisoning
+      // from temporary API failures
+      if (result.listings.length > 0) {
+        listingsCache.data = result.listings;
+        listingsCache.timestamp = Date.now();
+        saveListingsToCache(result.listings);
+      }
       listingsCache.loading = null;
-
-      saveListingsToCache(result.listings);
-
 
       return result.listings;
     })();

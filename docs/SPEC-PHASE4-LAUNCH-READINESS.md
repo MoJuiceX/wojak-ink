@@ -40,7 +40,7 @@ Add or update a "Security Audit" section documenting:
 - All 4 mint endpoints now use `isValidChiaAddress()` (bech32m regex validation)
 - Old `startsWith('xch1')` pattern fully removed
 - Shared validation module: `functions/lib/validation.ts`
-- Endpoints hardened: `prepare.ts`, `confirm.ts`, `status.ts`, `pricing.ts`
+- Endpoints hardened: `prepare.ts`, `confirm.ts`, `status.ts` (all endpoints that accept wallet input)
 
 ### Trait Name Consistency (FIX 1 + FIX 1a)
 - Server-side `functions/lib/traitNameMap.ts` mirrors client-side `src/lib/traitNameMap.ts`
