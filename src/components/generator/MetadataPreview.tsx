@@ -203,7 +203,7 @@ export function useMetadataAttributes(): MetadataAttribute[] {
       }
     }
 
-    // Always include "Base: Wojak" as a fixed entry
+    // Fixed entries: always present regardless of selection
     byTraitType.set('Base', {
       trait_type: 'Base',
       value: 'Wojak',
@@ -211,9 +211,27 @@ export function useMetadataAttributes(): MetadataAttribute[] {
       raw: '(fixed)',
       layerKey: '_base',
     });
+    if (!byTraitType.has('Head')) {
+      byTraitType.set('Head', {
+        trait_type: 'Head',
+        value: 'No Headgear',
+        source: 'map',
+        raw: '(default)',
+        layerKey: '_default',
+      });
+    }
+    if (!byTraitType.has('Face Wear')) {
+      byTraitType.set('Face Wear', {
+        trait_type: 'Face Wear',
+        value: 'No Face Wear',
+        source: 'map',
+        raw: '(default)',
+        layerKey: '_default',
+      });
+    }
 
     // Always return all 7 trait types in canonical order.
-    // Unselected traits get a placeholder so the panel is always complete.
+    // Background is the only trait that can be empty (grayed out until selected).
     const ORDER = ['Base', 'Face', 'Head', 'Face Wear', 'Mouth', 'Clothes', 'Background'];
     const result: MetadataAttribute[] = ORDER.map((traitType) => {
       const existing = byTraitType.get(traitType);
