@@ -678,7 +678,6 @@ export default function Drawer() {
           border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 16px;
           min-width: 120px;
-          backdrop-filter: blur(8px);
         }
 
         .stat-icon {

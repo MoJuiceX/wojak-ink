@@ -5,8 +5,6 @@
 /* Glass card container for the heatmap */
 .heatmap-card {
   background: var(--heatmap-card-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   border-radius: 20px;
   padding: 20px 16px;
   box-shadow: var(--heatmap-card-shadow);
