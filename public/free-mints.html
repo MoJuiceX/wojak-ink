@@ -204,6 +204,62 @@
     }
     .trust-line a { color: var(--primary); text-decoration: none; }
     .trust-line a:hover { text-decoration: underline; }
+
+    /* Connected wallet status bar */
+    .wallet-status-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 12px;
+    }
+    .wallet-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
+      flex-shrink: 0;
+    }
+    .wallet-status-addr {
+      font-family: ui-monospace, monospace;
+      color: var(--text2);
+    }
+    .wallet-status-rank {
+      color: var(--primary);
+      cursor: pointer;
+      background: none;
+      border: none;
+      font: inherit;
+      padding: 0;
+    }
+    .wallet-status-rank:hover { text-decoration: underline; }
+    .wallet-status-unranked { color: var(--text3); }
+
+    /* Highlighted user row */
+    tr.wallet-row.user-row {
+      background: rgba(255, 107, 0, 0.15);
+      border-left: 3px solid var(--primary);
+    }
+    tr.wallet-row.user-row:hover {
+      box-shadow: inset 0 0 0 999px rgba(255, 107, 0, 0.08), inset 0 0 0 1px rgba(255, 107, 0, 0.15);
+    }
+    tr.wallet-row.user-row .rank { color: var(--primary); }
+    tr.wallet-row.user-row .wallet-cell { color: var(--primary); }
+    tr.wallet-row.user-row .credits-cell { color: var(--primary); }
+    .you-tag {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-left: 4px;
+    }
+    .star-icon {
+      display: inline-block;
+      color: var(--primary);
+      margin-right: 2px;
+      font-size: 13px;
+      vertical-align: middle;
+    }
   </style>
 </head>
 <body>
@@ -256,6 +312,7 @@
       </div>
     </div>
 
+    <div id="wallet-status" class="wallet-status-bar" style="display:none"></div>
     <div id="table-wrap" class="table-wrap" style="display:none">
       <table>
         <thead>
@@ -291,6 +348,18 @@
     let nftCache = {};
     let hasMore = true;
     let loadingMore = false;
+
+    // Detect connected wallet from Sage wallet session in localStorage
+    function getConnectedWallet() {
+      try {
+        const raw = localStorage.getItem('sage-wallet-session');
+        if (!raw) return null;
+        const session = JSON.parse(raw);
+        return session?.address || null;
+      } catch (_) {
+        return null;
+      }
+    }
 
     function truncateWallet(s) {
       if (!s || s.length <= 10) return s;
@@ -389,19 +458,33 @@
       const tbody = document.getElementById('tbody');
       tbody.innerHTML = '';
       const displayData = Array.isArray(data) ? data : leaderboard;
+      const connectedWallet = getConnectedWallet();
+      let userRow = null;
+      let userRowEl = null;
+
       displayData.forEach((row, idx) => {
+        const isUser = connectedWallet && row.wallet === connectedWallet;
         const tr = document.createElement('tr');
-        tr.className = 'wallet-row' + (idx < 3 ? ' rank-' + (idx + 1) : '');
+        tr.className = 'wallet-row' + (idx < 3 ? ' rank-' + (idx + 1) : '') + (isUser ? ' user-row' : '');
         tr.dataset.wallet = row.wallet;
+
+        const starHtml = isUser ? '<span class="star-icon">★</span>' : '';
+        const youTag = isUser ? '<span class="you-tag">(you)</span>' : '';
+
         tr.innerHTML = `
-          ${rankCell(row.rank, idx)}
-          <td class="wallet-cell">${truncateWallet(row.wallet)}</td>
+          ${isUser ? `<td class="rank"><div class="rank-cell">${starHtml}${row.rank}</div></td>` : rankCell(row.rank, idx)}
+          <td class="wallet-cell">${truncateWallet(row.wallet)}${youTag}</td>
           <td class="credits-cell">${row.earned}</td>
           <td class="mints-cell">${row.freeMints}</td>
           <td class="mints-cell">${row.yourWojakBought}</td>
           <td><span class="expand-icon">▶</span></td>
         `;
         tbody.appendChild(tr);
+
+        if (isUser) {
+          userRow = row;
+          userRowEl = tr;
+        }
 
         const expandTr = document.createElement('tr');
         expandTr.className = 'expand-row';
@@ -423,6 +506,34 @@
           }
         });
       });
+
+      // Show wallet status bar
+      const statusBar = document.getElementById('wallet-status');
+      if (connectedWallet) {
+        statusBar.style.display = 'flex';
+        if (userRow) {
+          statusBar.innerHTML = `
+            <span class="wallet-status-dot"></span>
+            <span class="wallet-status-addr">${truncateWallet(connectedWallet)}</span>
+            <button type="button" class="wallet-status-rank" onclick="document.querySelector('.user-row')?.scrollIntoView({behavior:'smooth',block:'center'})">Rank #${userRow.rank}</button>
+          `;
+        } else {
+          statusBar.innerHTML = `
+            <span class="wallet-status-dot"></span>
+            <span class="wallet-status-addr">${truncateWallet(connectedWallet)}</span>
+            <span class="wallet-status-unranked">Not yet ranked</span>
+          `;
+        }
+      } else {
+        statusBar.style.display = 'none';
+      }
+
+      // Auto-scroll to user row after render
+      if (userRowEl) {
+        setTimeout(() => {
+          userRowEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
+      }
 
       document.querySelectorAll('th.sortable').forEach(th => {
         const sortKey = th.dataset.sort;
