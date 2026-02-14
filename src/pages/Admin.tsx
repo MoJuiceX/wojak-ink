@@ -10,6 +10,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { useLayout } from '@/hooks/useLayout';
 
+
 // ─── Types ───
 
 interface TraitPricing {
@@ -289,6 +290,8 @@ function CreditHealth({ stats }: { stats: CreditStats | null }) {
 export default function Admin() {
   const { contentPadding } = useLayout();
 
+  const adminSecret = (window as any).__ADMIN_SECRET__ || '';
+
   const [pricing, setPricing] = useState<PricingResponse | null>(null);
   const [recentMints, setRecentMints] = useState<RecentMint[]>([]);
   const [creditStats, setCreditStats] = useState<CreditStats | null>(null);
@@ -299,11 +302,19 @@ export default function Admin() {
     setLoading(true);
     setError(null);
     try {
+      const authHeaders = { 'Authorization': `Bearer ${adminSecret}` };
+
       const [pricingRes, mintsRes, creditsRes] = await Promise.all([
         fetch('/api/mint/pricing'),
-        fetch('/api/admin/recent-mints?limit=20'),
-        fetch('/api/admin/credit-stats'),
+        fetch('/api/admin/recent-mints?limit=20', { headers: authHeaders }),
+        fetch('/api/admin/credit-stats', { headers: authHeaders }),
       ]);
+
+      if (mintsRes.status === 401 || creditsRes.status === 401) {
+        setError('Invalid admin secret. Check your ?secret= parameter.');
+        setLoading(false);
+        return;
+      }
 
       if (pricingRes.ok) setPricing(await pricingRes.json());
       if (mintsRes.ok) setRecentMints((await mintsRes.json()).mints || []);
@@ -343,6 +354,23 @@ export default function Admin() {
         traitsByCategory[normalizedCategory].push({ name: traitName, data });
       }
     }
+  }
+
+  if (!adminSecret) {
+    return (
+      <PageTransition>
+        <div className="min-h-full flex items-center justify-center" style={{ padding: contentPadding }}>
+          <div className="card-static p-6 flex flex-col gap-3" style={{ maxWidth: 400, textAlign: 'center' }}>
+            <h2 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
+              Access Denied
+            </h2>
+            <p className="text-secondary text-sm">
+              You do not have permission to view this page.
+            </p>
+          </div>
+        </div>
+      </PageTransition>
+    );
   }
 
   return (

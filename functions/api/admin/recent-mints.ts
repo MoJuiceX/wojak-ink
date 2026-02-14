@@ -9,12 +9,13 @@
 
 interface Env {
   DB: D1Database;
+  ADMIN_SECRET?: string;  // Set via wrangler secret
 }
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   'Content-Type': 'application/json',
 };
 
@@ -40,6 +41,15 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   if (request.method !== 'GET') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
+      headers: corsHeaders,
+    });
+  }
+
+  // Admin authentication (required — blocks access if ADMIN_SECRET not configured)
+  const authHeader = request.headers.get('Authorization');
+  if (!env.ADMIN_SECRET || authHeader !== `Bearer ${env.ADMIN_SECRET}`) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
       headers: corsHeaders,
     });
   }
