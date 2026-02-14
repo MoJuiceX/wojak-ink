@@ -53,7 +53,7 @@ function GeneratorErrorBanner() {
 function GeneratorContent() {
   const { isDesktop } = useLayout();
   const { isInitialized, generatorError } = useGenerator();
-  const [rightPanelMode, setRightPanelMode] = useState<RightPanelMode>('metadata');
+  const [rightPanelMode, setRightPanelMode] = useState<RightPanelMode>('colors');
 
   return (
     <PageTransition>
