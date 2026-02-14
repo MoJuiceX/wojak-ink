@@ -39,6 +39,10 @@
   Cache-Control: no-cache, no-store, must-revalidate
 /profile/*
   Cache-Control: no-cache, no-store, must-revalidate
+/free-mints
+  Cache-Control: no-cache, no-store, must-revalidate
+/free-mints.html
+  Cache-Control: no-cache, no-store, must-revalidate
 
 # Homepage - preload critical assets for LCP
 /
@@ -48,6 +52,11 @@
 # Static assets - immutable cache (1 year)
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
+
+# Standalone wallet-connect bundle (no content hash, needs revalidation)
+/assets/wallet-connect-standalone.js
+  ! Cache-Control
+  Cache-Control: public, max-age=3600, must-revalidate
 
 # G2 layer images (can be updated) - override immutable with short cache
 /assets/wojak-layers/YourWojak-layers/*

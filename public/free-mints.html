@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Free Mints — Wojak.ink</title>
   <style>
     :root {
@@ -319,6 +322,10 @@
   </style>
 </head>
 <body>
+  <script>
+    // Force reload if restored from browser back/forward cache
+    window.addEventListener('pageshow', function(e) { if (e.persisted) window.location.reload(); });
+  </script>
   <div class="top-bar">
     <button type="button" class="top-bar-btn top-bar-wallet-btn" id="top-bar-wallet-btn" aria-label="Connect Wallet" title="Connect Wallet">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
