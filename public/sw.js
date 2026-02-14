@@ -8,9 +8,9 @@
  * - Background sync
  */
 
-const CACHE_NAME = 'wojak-games-v1';
-const STATIC_CACHE = 'wojak-static-v1';
-const DYNAMIC_CACHE = 'wojak-dynamic-v2';
+const CACHE_NAME = 'wojak-games-v2';
+const STATIC_CACHE = 'wojak-static-v2';
+const DYNAMIC_CACHE = 'wojak-dynamic-v3';
 const NFT_IMAGE_CACHE = 'wojak-nft-images-v1';
 const NFT_CACHE_MAX = 500;
 
@@ -123,6 +123,23 @@ self.addEventListener('fetch', (event) => {
       url.pathname.startsWith('/dexie-api/') ||
       url.pathname.startsWith('/spacescan-api/') ||
       url.pathname.startsWith('/coingecko-api/')) return;
+
+  // Hashed assets (e.g. /assets/index-AbCd1234.js) — network-first
+  // These filenames change per build, so stale cache hits cause version mismatches
+  if (url.pathname.startsWith('/assets/') && /\-[a-zA-Z0-9]{8,}\.(js|css)$/.test(url.pathname)) {
+    event.respondWith(
+      fetch(request)
+        .then((networkResponse) => {
+          if (networkResponse.ok) {
+            const clone = networkResponse.clone();
+            caches.open(DYNAMIC_CACHE).then((cache) => cache.put(request, clone));
+          }
+          return networkResponse;
+        })
+        .catch(() => caches.match(request).then((cached) => cached || new Response('Offline', { status: 503 })))
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(request)
