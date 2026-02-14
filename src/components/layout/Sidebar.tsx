@@ -98,8 +98,8 @@ export function Sidebar({
         top: 0,
         width,
         background: 'var(--color-chrome-bg)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
         borderRight: '1px solid var(--color-chrome-border)',
       }}
       onMouseLeave={handleMouseLeave}

@@ -195,8 +195,8 @@ export function Header({ transparent = false }: HeaderProps) {
             : isScrolled
               ? 'var(--color-chrome-bg-scrolled)'
               : 'var(--color-chrome-bg)',
-          backdropFilter: isTransparent ? 'none' : 'blur(20px) saturate(180%)',
-          WebkitBackdropFilter: isTransparent ? 'none' : 'blur(20px) saturate(180%)',
+          backdropFilter: isTransparent ? 'none' : 'blur(12px) saturate(180%)',
+          WebkitBackdropFilter: isTransparent ? 'none' : 'blur(12px) saturate(180%)',
           borderBottom: isTransparent
             ? 'none'
             : '1px solid var(--color-chrome-border-glow)',
@@ -212,7 +212,7 @@ export function Header({ transparent = false }: HeaderProps) {
               left: 0,
               right: 0,
               height: '1px',
-              background: 'linear-gradient(90deg, transparent 0%, rgba(249, 115, 22, 0.5) 50%, transparent 100%)',
+              background: 'linear-gradient(90deg, transparent 0%, rgba(249, 115, 22, 0.3) 50%, transparent 100%)',
               pointerEvents: 'none',
             }}
           />
