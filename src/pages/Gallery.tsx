@@ -28,7 +28,6 @@ import {
 } from '@/components/gallery';
 import { NFTGridItem } from '@/components/gallery/NFTGridItem';
 import type { CharacterType } from '@/types/nft';
-import { InfoButton } from '@/components/common/InfoButton';
 import { PageSEO } from '@/components/seo';
 
 const ITEMS_PER_PAGE = 100;
@@ -468,7 +467,6 @@ function GalleryContent() {
         {/* Responsive NFT Explorer (Modal on mobile, Panel on desktop) */}
         <ResponsiveExplorer isOpen={explorerOpen} onClose={closeExplorer} />
       </div>
-      <InfoButton page="gallery" />
     </PageTransition>
   );
 }

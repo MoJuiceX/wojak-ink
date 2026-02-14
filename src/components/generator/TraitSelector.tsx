@@ -1018,6 +1018,8 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
             ? (g2Sel?.activeColorSlot ?? 'fill0')
             : (g2Trait?.fillFile ? 'fill' : g2Trait?.fill1File ? 'fill1' : g2Trait?.fillFiles ? 'fill0' : (g2Trait?.layers && g2Trait?.colorable ? 'fill0' : null));
           const isColorable = g2Trait?.colorable && slot;
+          // Don't show color picker at all if trait is not colorable
+          if (!isColorable) return null;
           const defColor = g2Sel.traitId === 'Clothes_Suit' && g2Trait?.defaultColors
             ? (slot === 'fill0' ? g2Trait.defaultColors[0] : g2Trait.defaultColors[1])
             : (g2Trait?.defaultColor || (g2Sel.traitId === 'Clothes_Astronaut' ? '#FFFFFF' : undefined));
@@ -1027,20 +1029,23 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
               <ColorPicker
                 selectedColor={g2Sel.colors?.[slot ?? 'fill'] || '#FFFFFF'}
                 onColorChange={(color) => slot && setG2Color(activeLayer, slot, color)}
-                disabled={!isColorable}
-                defaultColor={isColorable ? defColor : undefined}
+                defaultColor={defColor}
               />
             </div>
           );
         }
-        // For G1 traits: use setColor (Background Solid color uses dark default)
+        // For G1 traits: only show for colorable layers (Clothes, Head, Eyes, Background solid)
         const isBgSolid = activeLayer === 'Background' && (selectedPath === '__solid__' || selectedPath?.includes('__solid__'));
+        const isG1Colorable =
+          (['Clothes', 'Head', 'Eyes'] as string[]).includes(activeLayer) || isBgSolid;
+        if (!isG1Colorable) return null;
         return (
           <div className="generator-panel-section mt-4">
             <div className="generator-panel-section-label">Color</div>
             <ColorPicker
               selectedColor={selectedColors?.[activeLayer] || (isBgSolid ? '#1a1a2e' : '#FFFFFF')}
               onColorChange={(color) => setColor(activeLayer, color)}
+              defaultColor={isBgSolid ? '#1a1a2e' : undefined}
             />
           </div>
         );

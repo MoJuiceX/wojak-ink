@@ -26,7 +26,6 @@ import { AchievementsLightbox } from '@/components/Account/AchievementsLightbox'
 import { PageTransition } from '@/components/layout/PageTransition';
 import { DrawerEditor } from '@/components/Shop/DrawerEditor';
 import { GiftModal } from '@/components/Account/GiftModal';
-import { InfoButton } from '@/components/common/InfoButton';
 
 import '@/components/Account/Account.css';
 
@@ -370,7 +369,6 @@ export default function Account() {
           onClose={() => setShowAchievementsLightbox(false)}
         />
 
-        <InfoButton page="account" />
       </div>
     </motion.div>
   );

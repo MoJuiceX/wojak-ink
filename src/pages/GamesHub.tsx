@@ -30,7 +30,6 @@ import { useFlickVoting } from '@/hooks/useFlickVoting';
 import { SoundManager } from '@/systems/audio';
 import '@/styles/voting.css';
 import { PageSEO } from '@/components/seo';
-import { InfoButton } from '@/components/common/InfoButton';
 
 const CLERK_ENABLED = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -483,7 +482,6 @@ export default function GamesHub() {
           />
         )}
 
-        <InfoButton page="games" />
       </PageTransition>
     );
   }
@@ -554,7 +552,6 @@ export default function GamesHub() {
         />
       )}
 
-      <InfoButton page="games" />
     </PageTransition>
   );
 }

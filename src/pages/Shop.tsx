@@ -6,7 +6,6 @@
 
 import { PageTransition } from '@/components/layout/PageTransition';
 import { Shop as ShopComponent } from '@/components/Shop';
-import { InfoButton } from '@/components/common/InfoButton';
 
 const Shop = () => {
   return (
@@ -20,7 +19,6 @@ const Shop = () => {
           More items arriving soon. Stay tuned.
         </p>
       </div>
-      <InfoButton page="shop" />
     </PageTransition>
   );
 };

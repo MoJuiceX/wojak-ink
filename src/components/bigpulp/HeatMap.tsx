@@ -328,13 +328,13 @@ function ViewModeButtons({
   };
 
   return (
-    <div className="flex gap-1.5 flex-wrap">
+    <div className="flex gap-1 sm:gap-1.5 flex-wrap">
       {FILTER_CHIPS.map((chip) => {
         const isActive = viewMode === chip.id;
         return (
           <motion.button
             key={chip.id}
-            className={`bigpulp-btn px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${isActive ? 'bigpulp-btn-active' : ''}`}
+            className={`bigpulp-btn px-2 sm:px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${isActive ? 'bigpulp-btn-active' : ''}`}
             style={{
               color: isActive ? chip.color : 'var(--color-text-muted)',
               border: isActive ? `1px solid ${chip.color}` : '1px solid var(--color-border)',
@@ -975,7 +975,7 @@ export function HeatMap({
   return (
     <div className="relative space-y-3">
       {/* Single row: Filters + Badge + Refresh all together */}
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
         {/* View mode filter chips */}
         <ViewModeButtons
           viewMode={viewMode}
@@ -1007,7 +1007,7 @@ export function HeatMap({
 
       {/* Heat map grid - compact, no horizontal scroll */}
       <div
-        className="p-2 rounded-xl"
+        className="p-1.5 sm:p-2 rounded-xl"
         style={{
           background: 'var(--color-surface)',
           border: '1px solid var(--color-border)',
@@ -1015,7 +1015,7 @@ export function HeatMap({
         }}
       >
         {/* Column headers (price bins) - compact */}
-        <div className="flex gap-0.5 mb-1 ml-7">
+        <div className="flex gap-0.5 mb-1 ml-6 sm:ml-7">
           {dynamicPriceBins.map((bin) => (
             <div
               key={bin.index}
@@ -1042,7 +1042,7 @@ export function HeatMap({
             <div key={rowIndex} role="row" className="flex gap-0.5 items-center">
               {/* Row header - compact */}
               <div
-                className="w-7 text-right pr-0.5 flex-shrink-0 font-semibold"
+                className="w-6 sm:w-7 text-right pr-0.5 flex-shrink-0 font-semibold"
                 style={{ 
                   fontSize: '8px',
                   color: rowIndex <= 2 
@@ -1075,7 +1075,7 @@ export function HeatMap({
         </div>
 
         {/* Axis labels - positioned correctly */}
-        <div className="flex justify-between mt-1.5 ml-7" style={{ fontSize: '8px' }}>
+        <div className="flex justify-between mt-1.5 ml-6 sm:ml-7" style={{ fontSize: '8px' }}>
           <div className="flex flex-col leading-tight">
             <span style={{ color: 'rgba(251,191,36,0.8)' }}>Rare</span>
             <span style={{ color: 'var(--color-text-muted)', fontSize: '6px' }}>↓</span>

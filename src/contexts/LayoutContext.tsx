@@ -126,20 +126,23 @@ export function LayoutProvider({ children }: LayoutProviderProps) {
     };
   }, []);
 
-  // Handle scroll tracking
+  // Handle scroll tracking with deadband to prevent direction flicker
   useEffect(() => {
+    const DIRECTION_DEADBAND = 5; // px of scroll before direction change registers
+
     function handleScroll() {
       const currentScrollY = window.scrollY;
 
       setScrollY(currentScrollY);
 
-      if (currentScrollY > lastScrollY.current) {
+      const delta = currentScrollY - lastScrollY.current;
+      if (delta > DIRECTION_DEADBAND) {
         setScrollDirection('down');
-      } else if (currentScrollY < lastScrollY.current) {
+        lastScrollY.current = currentScrollY;
+      } else if (delta < -DIRECTION_DEADBAND) {
         setScrollDirection('up');
+        lastScrollY.current = currentScrollY;
       }
-
-      lastScrollY.current = currentScrollY;
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true });

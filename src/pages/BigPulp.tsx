@@ -24,7 +24,6 @@ import { MyWojaksModal } from '@/components/bigpulp/MyWojaksModal';
 import { ALL_BADGES_FILTER } from '@/components/bigpulp/HeatMap';
 import { useSageWallet } from '@/sage-wallet';
 import { PageSEO } from '@/components/seo';
-import { InfoButton } from '@/components/common/InfoButton';
 
 // Wojak Farmers Plot collection ID on MintGarden
 const WOJAK_COLLECTION_ID = 'col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah';
@@ -265,7 +264,7 @@ function BottomPanel() {
       <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Tab content */}
-      <div className="p-4">
+      <div className="p-2 sm:p-4">
         <AnimatePresence mode="wait">
           {activeTab === 'market' && (
             <motion.div
@@ -414,7 +413,7 @@ function MobileEmptyState() {
   }, [topSales]);
 
   return (
-    <div className="flex flex-col gap-4" style={{ minHeight: 'calc(100dvh - 120px)' }}>
+    <div className="flex flex-col gap-4 pb-4">
       {/* Compact BigPulp Character */}
       <div className="relative flex-shrink-0">
         <BigPulpCharacter
@@ -472,7 +471,7 @@ function MobileEmptyState() {
 // Mobile NFT View - shows when an NFT is selected
 function MobileNFTView() {
   return (
-    <div className="flex flex-col gap-4" style={{ minHeight: 'calc(100dvh - 120px)' }}>
+    <div className="flex flex-col gap-4 pb-4">
       {/* Search + BigPulp Character */}
       <div className="flex-shrink-0">
         <TopLeftPanel />
@@ -575,7 +574,6 @@ function BigPulpContent() {
         {/* Responsive layout - no header needed, title is in browser tab */}
         {isDesktop ? <DesktopLayout /> : <MobileLayout />}
       </div>
-      <InfoButton page="bigpulp" />
     </PageTransition>
   );
 }

@@ -16,7 +16,6 @@ import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch';
 import { PageSEO } from '@/components/seo';
 import { CHAT_ROOMS, type ChatType, isEligibleForRoom } from '@/config/chatRooms';
 import './GatedChat.css';
-import { InfoButton } from '@/components/common/InfoButton';
 
 export default function ChatHub() {
   const navigate = useNavigate();
@@ -180,7 +179,6 @@ export default function ChatHub() {
           </div>
         </div>
       </div>
-      <InfoButton page="chat" />
     </>
   );
 }

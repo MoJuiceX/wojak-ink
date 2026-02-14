@@ -145,7 +145,7 @@
 /* Responsive - Mobile devices */
 @media (max-width: 768px) {
   .bigpulp-character-container {
-    height: clamp(180px, 30vh, 300px);
+    height: clamp(200px, 38vh, 320px);
     min-height: unset;
     padding: 70px 16px 10px 16px;
     overflow: hidden;
@@ -173,7 +173,7 @@
 /* Extra small devices */
 @media (max-width: 380px) {
   .bigpulp-character-container {
-    height: clamp(160px, 28vh, 220px);
+    height: clamp(180px, 34vh, 260px);
     padding: 60px 12px 8px 12px;
   }
 

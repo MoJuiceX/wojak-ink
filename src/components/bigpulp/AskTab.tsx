@@ -343,7 +343,7 @@ function TopSalesContent({ sales, isLoading }: { sales: NFTSale[]; isLoading?: b
     return date.toLocaleDateString();
   }, []);
 
-  if (isLoading || sales.length === 0) {
+  if (isLoading) {
     return (
       <div className="pt-4">
         <div className="space-y-2">
@@ -386,7 +386,17 @@ function TopSalesContent({ sales, isLoading }: { sales: NFTSale[]; isLoading?: b
           ))}
         </div>
         <p className="text-xs text-center mt-3" style={{ color: 'var(--color-text-muted)' }}>
-          {isLoading ? 'Loading sales data...' : 'Syncing sales data...'}
+          Loading sales data...
+        </p>
+      </div>
+    );
+  }
+
+  if (sales.length === 0) {
+    return (
+      <div className="py-6 text-center">
+        <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+          No sales data available yet.
         </p>
       </div>
     );

@@ -18,7 +18,6 @@ import {
 import { WALLET_ADDRESS, SPACESCAN_WALLET_URL } from '@/services/constants';
 import { PageSEO } from '@/components/seo';
 import './Treasury.css';
-import { InfoButton } from '@/components/common/InfoButton';
 
 function TreasuryContent() {
   const { contentPadding } = useLayout();
@@ -106,7 +105,6 @@ function TreasuryContent() {
           </div>
         </div>
       </div>
-      <InfoButton page="treasury" />
     </PageTransition>
   );
 }

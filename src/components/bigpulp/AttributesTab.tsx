@@ -8,6 +8,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { ChevronDown, ChevronUp, Clock, Tag } from 'lucide-react';
+import { useLayout } from '@/hooks/useLayout';
 import type {
   AttributeStats,
   AttributeSortField,
@@ -128,13 +129,24 @@ function SortArrow({ field, sortState }: { field: AttributeSortField; sortState:
 function TableHeader({
   sortState,
   onSort,
+  compact = false,
 }: {
   sortState: AttributeSortState;
   onSort: (field: AttributeSortField) => void;
+  compact?: boolean;
 }) {
+  // On mobile (compact): hide Sales column, use narrower widths
+  const visibleColumns = compact
+    ? TABLE_COLUMNS.filter((col) => col.field !== 'totalSales')
+    : TABLE_COLUMNS;
+  const numColWidth = compact ? 'w-[48px]' : 'w-[72px]';
+  const catWidth = compact ? 'w-[68px]' : 'w-[88px]';
+  const fontSize = compact ? 'text-[11px]' : 'text-[13px]';
+  const px = compact ? 'px-2' : 'px-3';
+
   return (
     <div
-      className="flex items-center px-3 py-2.5"
+      className={`flex items-center ${px} py-2.5`}
       style={{
         background: 'rgba(255,255,255,0.03)',
         borderBottom: '1px solid rgba(255,255,255,0.08)',
@@ -143,7 +155,7 @@ function TableHeader({
       {/* Category column header — fixed width, clickable to sort */}
       <button
         type="button"
-        className="w-[88px] flex-shrink-0 pr-2 text-left text-[13px] font-semibold uppercase tracking-wider outline-none"
+        className={`${catWidth} flex-shrink-0 pr-1 text-left ${fontSize} font-semibold uppercase tracking-wider outline-none`}
         style={{
           color: sortState.field === 'category' ? 'var(--color-text-primary)' : 'var(--color-text-muted)',
         }}
@@ -156,7 +168,7 @@ function TableHeader({
       {/* Attribute name column */}
       <button
         type="button"
-        className="flex-1 text-left text-[13px] font-semibold uppercase tracking-wider outline-none"
+        className={`flex-1 text-left ${fontSize} font-semibold uppercase tracking-wider outline-none min-w-0`}
         style={{
           color: sortState.field === 'value' ? 'var(--color-text-primary)' : 'var(--color-text-muted)',
         }}
@@ -167,12 +179,12 @@ function TableHeader({
       </button>
 
       {/* Numeric columns — grouped right, compact */}
-      <div className="flex items-center gap-0">
-        {TABLE_COLUMNS.map((col) => (
+      <div className="flex items-center gap-0 flex-shrink-0">
+        {visibleColumns.map((col) => (
           <button
             key={col.field}
             type="button"
-            className="w-[72px] text-right text-[13px] font-semibold uppercase tracking-wider outline-none"
+            className={`${numColWidth} text-right ${fontSize} font-semibold uppercase tracking-wider outline-none`}
             style={{
               color: sortState.field === col.field ? col.color : 'var(--color-text-muted)',
             }}
@@ -193,15 +205,20 @@ function AttributeRow({
   isExpanded,
   onToggle,
   index,
+  compact = false,
 }: {
   attribute: AttributeStats;
   isExpanded: boolean;
   onToggle: () => void;
   index: number;
+  compact?: boolean;
 }) {
   const prefersReducedMotion = useReducedMotion();
   const hasSales = attribute.totalSales > 0;
   const categoryColor = getCategoryColor(attribute.category);
+  const numColWidth = compact ? 'w-[48px]' : 'w-[72px]';
+  const catWidth = compact ? 'w-[68px]' : 'w-[88px]';
+  const px = compact ? 'px-2' : 'px-3';
 
   return (
     <motion.div
@@ -218,19 +235,19 @@ function AttributeRow({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.02 }}
     >
-      {/* Row — category | attribute name | 4 numbers, all one line */}
+      {/* Row — category | attribute name | numbers, all one line */}
       <button
         type="button"
-        className="w-full flex items-center px-3 py-3 text-left"
+        className={`w-full flex items-center ${px} py-3 text-left`}
         onClick={onToggle}
         aria-expanded={isExpanded}
       >
-        {/* Category badge — fixed width column with right margin */}
+        {/* Category badge — fixed width column */}
         <span
-          className="w-[88px] flex-shrink-0 pr-2"
+          className={`${catWidth} flex-shrink-0 pr-1`}
         >
           <span
-            className="text-[11px] px-1.5 py-0.5 rounded font-medium inline-block"
+            className={`${compact ? 'text-[10px] px-1 py-0.5' : 'text-[11px] px-1.5 py-0.5'} rounded font-medium inline-block`}
             style={{
               background: categoryColor.bg,
               color: categoryColor.text,
@@ -243,7 +260,7 @@ function AttributeRow({
 
         {/* Attribute name — flex column */}
         <span
-          className="flex-1 text-[15px] font-medium truncate min-w-0"
+          className={`flex-1 ${compact ? 'text-[13px]' : 'text-[15px]'} font-medium truncate min-w-0`}
           style={{ color: 'var(--color-text-primary)' }}
         >
           {attribute.value}
@@ -252,29 +269,31 @@ function AttributeRow({
         {/* Numeric values — right-aligned, matching header widths */}
         <div className="flex items-center gap-0 flex-shrink-0">
           <span
-            className="w-[72px] text-right text-sm font-mono font-bold"
+            className={`${numColWidth} text-right ${compact ? 'text-xs' : 'text-sm'} font-mono font-bold`}
             style={{ color: hasSales ? 'var(--color-brand-primary)' : 'var(--color-text-muted)' }}
           >
             {hasSales ? attribute.avgPrice.toFixed(2) : '-'}
           </span>
           <span
-            className="w-[72px] text-right text-sm font-mono"
+            className={`${numColWidth} text-right ${compact ? 'text-xs' : 'text-sm'} font-mono`}
             style={{ color: hasSales ? 'rgba(34,197,94,0.9)' : 'var(--color-text-muted)' }}
           >
             {hasSales ? attribute.minPrice.toFixed(2) : '-'}
           </span>
           <span
-            className="w-[72px] text-right text-sm font-mono"
+            className={`${numColWidth} text-right ${compact ? 'text-xs' : 'text-sm'} font-mono`}
             style={{ color: hasSales ? 'rgba(251,191,36,0.9)' : 'var(--color-text-muted)' }}
           >
             {hasSales ? attribute.maxPrice.toFixed(2) : '-'}
           </span>
-          <span
-            className="w-[72px] text-right text-sm font-mono"
-            style={{ color: hasSales ? 'var(--color-text-secondary)' : 'var(--color-text-muted)' }}
-          >
-            {hasSales ? attribute.totalSales : '-'}
-          </span>
+          {!compact && (
+            <span
+              className="w-[72px] text-right text-sm font-mono"
+              style={{ color: hasSales ? 'var(--color-text-secondary)' : 'var(--color-text-muted)' }}
+            >
+              {hasSales ? attribute.totalSales : '-'}
+            </span>
+          )}
         </div>
       </button>
 
@@ -370,6 +389,8 @@ export function AttributesTab({
   attributes,
   isLoading = false,
 }: AttributesTabProps) {
+  const { isDesktop } = useLayout();
+  const compact = !isDesktop;
   const prefersReducedMotion = useReducedMotion();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedAttribute, setSelectedAttribute] = useState<string | null>(null);
@@ -474,7 +495,7 @@ export function AttributesTab({
 
   return (
     <motion.div
-      className="p-3"
+      className={compact ? 'p-1' : 'p-3'}
       variants={prefersReducedMotion ? undefined : tabContentVariants}
       initial="hidden"
       animate="visible"
@@ -538,7 +559,7 @@ export function AttributesTab({
         }}
       >
         {/* Sortable column headers */}
-        <TableHeader sortState={sortState} onSort={handleSortChange} />
+        <TableHeader sortState={sortState} onSort={handleSortChange} compact={compact} />
 
         {/* Rows */}
         <div>
@@ -551,6 +572,7 @@ export function AttributesTab({
                 isExpanded={expandedCard === key}
                 onToggle={() => handleCardToggle(key)}
                 index={index}
+                compact={compact}
               />
             );
           })}

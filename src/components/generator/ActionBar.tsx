@@ -174,7 +174,11 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
 
   const handleMintClick = useCallback(async () => {
     if (!isWalletConnected) {
-      connect();
+      try {
+        await connect();
+      } catch (err) {
+        console.error('[ActionBar] Wallet connect failed:', err);
+      }
       return;
     }
     if (!canExport || !has7Traits) return;
@@ -402,7 +406,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         border: '1px solid var(--color-border)',
       }}
     >
-      {/* Randomize button with dropdown */}
+      {/* Randomize button — simple on mobile, dropdown on desktop */}
       <div className="relative" ref={randomMenuRef}>
         <ActionBarTooltip content="Random" disabled={showRandomMenu}>
         <div className="flex items-stretch rounded-lg overflow-hidden" style={{ border: '1px solid transparent' }}>
@@ -423,22 +427,25 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
             }
             label="Random"
           />
-          <button
-            type="button"
-            className="flex items-center justify-center px-1"
-            style={{
-              background: 'transparent',
-              color: 'var(--color-text-muted)',
-              borderLeft: '1px solid var(--color-border)',
-            }}
-            onClick={() => setShowRandomMenu((v) => !v)}
-            aria-label="Random options"
-          >
-            <ChevronDown size={14} style={{ transform: showRandomMenu ? 'none' : 'rotate(180deg)' }} />
-          </button>
+          {/* Dropdown chevron — desktop only */}
+          {isDesktop && (
+            <button
+              type="button"
+              className="flex items-center justify-center px-1"
+              style={{
+                background: 'transparent',
+                color: 'var(--color-text-muted)',
+                borderLeft: '1px solid var(--color-border)',
+              }}
+              onClick={() => setShowRandomMenu((v) => !v)}
+              aria-label="Random options"
+            >
+              <ChevronDown size={14} style={{ transform: showRandomMenu ? 'none' : 'rotate(180deg)' }} />
+            </button>
+          )}
         </div>
         <AnimatePresence>
-          {showRandomMenu && (
+          {showRandomMenu && isDesktop && (
             <motion.div
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
@@ -590,10 +597,10 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         <AnimatePresence>
           {showOverflowMenu && (
             <motion.div
-              initial={{ opacity: 0, y: 4 }}
+              initial={{ opacity: 0, y: isDesktop ? 4 : -4 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 4 }}
-              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 rounded-xl overflow-hidden py-1 whitespace-nowrap"
+              exit={{ opacity: 0, y: isDesktop ? 4 : -4 }}
+              className={`absolute ${isDesktop ? 'bottom-full mb-2' : 'top-full mt-2'} right-0 z-50 rounded-xl overflow-hidden py-1 whitespace-nowrap`}
               style={{
                 background: 'var(--color-surface)',
                 border: '1px solid var(--color-border)',

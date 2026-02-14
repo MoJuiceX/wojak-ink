@@ -17,6 +17,7 @@ import { MOBILE_NAV_ITEMS, isPathActive } from '@/config/routes';
 import { mobileNavTransition } from '@/config/animations';
 import { usePrefersReducedMotion } from '@/hooks/useMediaQuery';
 import { useHaptic } from '@/hooks/useHaptic';
+import { useLayout } from '@/hooks/useLayout';
 import { NavItem } from './NavItem';
 import { MoreMenu } from '@/components/navigation/MoreMenu';
 
@@ -24,12 +25,20 @@ interface MobileNavigationProps {
   visible?: boolean;
 }
 
+// Minimum scroll distance before hiding nav (prevents flicker)
+const SCROLL_HIDE_THRESHOLD = 60;
+
 export function MobileNavigation({ visible = true }: MobileNavigationProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const prefersReducedMotion = usePrefersReducedMotion();
   const haptic = useHaptic();
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const { scrollDirection, scrollY } = useLayout();
+
+  // Hide nav when scrolling down (past threshold), show when scrolling up
+  // Don't hide while MoreMenu is open (user may scroll while interacting)
+  const isHiddenByScroll = !isMoreMenuOpen && scrollDirection === 'down' && scrollY > SCROLL_HIDE_THRESHOLD;
 
   const activeIndex = useMemo(() => {
     return MOBILE_NAV_ITEMS.findIndex((item) =>
@@ -70,9 +79,9 @@ export function MobileNavigation({ visible = true }: MobileNavigationProps) {
           borderTop: '1px solid rgba(249, 115, 22, 0.15)',
         }}
         initial={{ y: 100 }}
-        animate={{ y: 0 }}
+        animate={{ y: isHiddenByScroll ? '100%' : 0 }}
         exit={{ y: 100 }}
-        transition={{ duration: 0.2 }}
+        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
         role="navigation"
         aria-label="Main navigation"
       >
