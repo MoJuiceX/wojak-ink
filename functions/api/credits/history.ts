@@ -75,9 +75,14 @@ export const onRequest: PagesFunction<Env> = async (context) => {
                 ELSE NULL
               END AS mg_nft_id
        FROM credit_events ce
-       LEFT JOIN sales_history sh
+       LEFT JOIN (
+         SELECT nft_edition, nft_name, mg_event_id,
+                ROW_NUMBER() OVER (PARTITION BY nft_edition ORDER BY id DESC) AS rn
+         FROM sales_history
+       ) sh
          ON ce.nft_id LIKE 'nft_edition_%'
          AND sh.nft_edition = CAST(SUBSTR(ce.nft_id, 13) AS INTEGER)
+         AND sh.rn = 1
        WHERE ce.wallet_address = ?
        ORDER BY ce.event_timestamp DESC
        LIMIT ?`
