@@ -11,7 +11,8 @@
   justify-content: center;
   width: 20px;
   height: 20px;
-  padding: 0;
+  padding: 12px;
+  box-sizing: content-box;
   border: none;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);

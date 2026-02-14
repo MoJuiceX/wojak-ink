@@ -29,6 +29,7 @@
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   position: relative;
   animation: scaleIn 0.2s ease;
 }
@@ -223,6 +224,7 @@
   gap: 8px;
   max-height: 200px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .gift-item-option {

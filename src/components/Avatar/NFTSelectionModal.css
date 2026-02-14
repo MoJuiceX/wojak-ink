@@ -69,6 +69,7 @@
 .nft-selection-modal .modal-body {
   flex: 1;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 20px 24px;
 }
 

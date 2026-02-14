@@ -547,6 +547,7 @@
   box-shadow: var(--shadow-card);
   max-height: 300px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .game-option {
