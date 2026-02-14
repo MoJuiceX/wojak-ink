@@ -89,7 +89,7 @@ export function StatsPanel() {
       {/* Header */}
       <div
         className="px-4 py-3 flex items-center gap-2"
-        style={{ background: '#000000', borderBottom: '1px solid var(--color-border)' }}
+        style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)' }}
       >
         <BarChart3 size={18} style={{ color: 'var(--color-brand-primary)' }} />
         <h3
@@ -153,8 +153,8 @@ export function StatsPanel() {
                 key={game.gameId}
                 className="relative px-3 py-2 rounded-lg"
                 style={{
-                  background: '#000000',
-                  border: '1px solid rgba(255,255,255,0.12)',
+                  background: 'var(--color-surface)',
+                  border: '1px solid var(--color-border)',
                 }}
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
