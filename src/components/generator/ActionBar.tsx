@@ -40,9 +40,11 @@ interface ActionBarProps {
 function ActionBarTooltip({
   content,
   children,
+  disabled,
 }: {
   content: string;
   children: React.ReactNode;
+  disabled?: boolean;
 }) {
   const [visible, setVisible] = useState(false);
   const [pos, setPos] = useState({ x: 0, y: 0 });
@@ -80,7 +82,7 @@ function ActionBarTooltip({
       >
         {children}
       </div>
-      {visible &&
+      {visible && !disabled &&
         createPortal(
           <div
             className="fixed px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap pointer-events-none z-[9999] -translate-x-1/2"
@@ -155,8 +157,8 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         setShowOverflowMenu(false);
       }
     };
-    document.addEventListener('click', handleClick);
-    return () => document.removeEventListener('click', handleClick);
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
   }, [showOverflowMenu]);
 
   // Determine mint readiness
@@ -349,31 +351,29 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
       }`}
       style={{
         background:
-          variant === 'primary' && (isActive || !disabled)
-            ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.4), rgba(249, 115, 22, 0.2))'
-            : isActive
-              ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.25), rgba(249, 115, 22, 0.1))'
+          isActive
+            ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.25), rgba(249, 115, 22, 0.1))'
+            : variant === 'primary' && !disabled
+              ? 'rgba(249, 115, 22, 0.12)'
               : 'transparent',
         color: disabled
           ? 'var(--color-text-muted)'
-          : variant === 'primary' && !disabled
+          : isActive
             ? 'white'
-            : isActive
-              ? 'white'
+            : variant === 'primary' && !disabled
+              ? 'var(--color-primary)'
               : 'var(--color-text-secondary)',
         opacity: disabled ? 0.5 : 1,
         border:
-          variant === 'primary' && !disabled
-            ? '1px solid rgba(249, 115, 22, 0.7)'
-            : isActive
-              ? '1px solid rgba(249, 115, 22, 0.6)'
+          isActive
+            ? '1px solid rgba(249, 115, 22, 0.6)'
+            : variant === 'primary' && !disabled
+              ? '1px solid rgba(249, 115, 22, 0.25)'
               : '1px solid transparent',
         boxShadow:
-          variant === 'primary' && !disabled
-            ? '0 0 24px rgba(249, 115, 22, 0.35), inset 0 0 15px rgba(249, 115, 22, 0.1)'
-            : isActive
-              ? '0 0 20px rgba(249, 115, 22, 0.3), inset 0 0 15px rgba(249, 115, 22, 0.1)'
-              : 'none',
+          isActive
+            ? '0 0 20px rgba(249, 115, 22, 0.3), inset 0 0 15px rgba(249, 115, 22, 0.1)'
+            : 'none',
         transition: 'all 0.3s ease',
       }}
       whileHover={disabled || prefersReducedMotion ? undefined : { scale: 1.02 }}
@@ -413,7 +413,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
     >
       {/* Randomize button with dropdown */}
       <div className="relative" ref={randomMenuRef}>
-        <ActionBarTooltip content="Random">
+        <ActionBarTooltip content="Random" disabled={showRandomMenu}>
         <div className="flex items-stretch rounded-lg overflow-hidden" style={{ border: '1px solid transparent' }}>
           <ActionButton
             onClick={handleRandomize}
@@ -443,7 +443,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
             onClick={() => setShowRandomMenu((v) => !v)}
             aria-label="Random options"
           >
-            <ChevronDown size={14} style={{ transform: showRandomMenu ? 'rotate(180deg)' : 'none' }} />
+            <ChevronDown size={14} style={{ transform: showRandomMenu ? 'none' : 'rotate(180deg)' }} />
           </button>
         </div>
         <AnimatePresence>
@@ -531,7 +531,6 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
               }
             }}
             disabled={!hasSelection}
-            isActive={hasSelection}
             icon={<Download size={22} />}
             label="Export"
           />
@@ -589,7 +588,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
 
       {/* Overflow menu — secondary actions */}
       <div className="relative" ref={overflowMenuRef}>
-        <ActionBarTooltip content="More">
+        <ActionBarTooltip content="More" disabled={showOverflowMenu}>
           <ActionButton
             onClick={() => setShowOverflowMenu((v) => !v)}
             isActive={showOverflowMenu}
@@ -603,7 +602,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 4 }}
-              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 rounded-xl overflow-hidden py-1 min-w-[160px]"
+              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 rounded-xl overflow-hidden py-1 whitespace-nowrap"
               style={{
                 background: 'var(--color-surface)',
                 border: '1px solid var(--color-border)',
@@ -648,7 +647,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
                   }}
                 >
                   <span style={{ fontFamily: 'monospace', fontSize: '14px', fontWeight: 700 }}>{'{ }'}</span>
-                  <span>{rightPanelMode !== 'colors' ? 'Show Colors' : 'Show Metadata'}</span>
+                  <span>{rightPanelMode !== 'colors' ? 'Colors' : 'Metadata'}</span>
                 </button>
               )}
 
@@ -717,7 +716,6 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
             variant="primary"
             onClick={handleMintClick}
             disabled={isWalletConnected && !canMint}
-            isActive={canMint}
             icon={<Wallet size={22} />}
             label={!isWalletConnected ? 'Connect Wallet' : 'Mint'}
           />
