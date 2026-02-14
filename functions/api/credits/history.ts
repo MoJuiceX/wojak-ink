@@ -26,6 +26,7 @@ interface CreditEventRow {
   price_xch: number;
   credits_earned: number;
   whale_multiplier: number;
+  event_type: string | null;
   event_timestamp: string;
 }
 
@@ -63,7 +64,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
   try {
     const rows = await env.DB.prepare(
-      `SELECT event_id, nft_id, price_xch, credits_earned, whale_multiplier, event_timestamp
+      `SELECT event_id, nft_id, price_xch, credits_earned, whale_multiplier, event_type, event_timestamp
        FROM credit_events
        WHERE wallet_address = ?
        ORDER BY event_timestamp DESC
@@ -78,6 +79,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       priceXch: r.price_xch,
       creditsEarned: r.credits_earned / 100,
       whaleMultiplier: r.whale_multiplier / 10000,
+      eventType: r.event_type || 'trade',
       eventTimestamp: r.event_timestamp,
     }));
 

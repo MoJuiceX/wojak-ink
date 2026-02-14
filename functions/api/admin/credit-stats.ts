@@ -40,7 +40,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   }
 
   try {
-    const [earnedRow, spentRow, freeMintsRow, walletsRow] = await Promise.all([
+    const [earnedRow, spentRow, freeMintsRow, walletsRow, airdropRow] = await Promise.all([
       env.DB.prepare(
         'SELECT COALESCE(SUM(credits_earned), 0) AS total FROM credit_events'
       ).first<{ total: number }>(),
@@ -56,6 +56,10 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       env.DB.prepare(
         'SELECT COUNT(DISTINCT wallet_address) AS count FROM credit_events'
       ).first<{ count: number }>(),
+
+      env.DB.prepare(
+        "SELECT COUNT(*) AS wallets, COALESCE(SUM(credits_earned), 0) AS total FROM credit_events WHERE event_type = 'holder_airdrop'"
+      ).first<{ wallets: number; total: number }>().catch(() => null),
     ]);
 
     const totalEarned = (earnedRow?.total ?? 0) / 100; // display units
@@ -71,6 +75,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         freeMints,
         walletCount,
         avgPerWallet,
+        airdropWallets: airdropRow?.wallets ?? 0,
+        airdropCredits: (airdropRow?.total ?? 0) / 100,
       }),
       { headers: corsHeaders }
     );

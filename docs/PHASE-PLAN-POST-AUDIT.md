@@ -15,6 +15,7 @@
 | 4: Launch Readiness | `docs/SPEC-PHASE4-LAUNCH-READINESS.md` |
 | 5: E2E Testing | `docs/SPEC-PHASE5-E2E-TESTING.md` |
 | 6: Admin Dashboard | `docs/SPEC-PHASE6-ADMIN-DASHBOARD.md` |
+| 7: Holder Airdrop | `docs/SPEC-HOLDER-AIRDROP.md` |
 
 ---
 
@@ -209,6 +210,47 @@ Run npm run typecheck && npm run build after changes. Both must pass.
 
 ---
 
+## Phase 7: Holder Airdrop
+
+**Goal:** Apply one-time free mint credit airdrop to 112 wallets holding 5+ Wojak Farmers Plot NFTs.
+
+**Spec:** `docs/SPEC-HOLDER-AIRDROP.md`
+
+### Prompt for Claude CLI:
+
+```
+Read docs/SPEC-HOLDER-AIRDROP.md in full. This is your implementation spec.
+Read functions/migrations/ to understand existing migration numbering.
+Read the credit_events table schema (check existing migrations for the CREATE TABLE).
+
+Implement the holder airdrop:
+
+1. Check if credit_events has an event_type column. If not, create a migration
+   to add it: ALTER TABLE credit_events ADD COLUMN event_type TEXT DEFAULT 'trade';
+
+2. Create migration 035_holder_airdrop.sql (or next available number) that
+   inserts credit events for all 112 wallets listed in the spec.
+   Each free mint = 10000 stored units (100 display credits).
+   Use event_type = 'holder_airdrop'.
+   Include metadata JSON with held count, freeMints, snapshot date, and formula.
+
+3. Update the balance and leaderboard endpoints to include airdrop credits
+   in the total. They should sum ALL credit_events regardless of event_type.
+
+4. Update the history endpoint so airdrop events display as "Holder Airdrop"
+   (not as an NFT purchase).
+
+5. Verify:
+   - SELECT COUNT(*) FROM credit_events WHERE event_type = 'holder_airdrop' = 112
+   - SELECT SUM(credits_earned) FROM credit_events WHERE event_type = 'holder_airdrop' = 2260000
+   - Top holder gets 40000 credits (4 free mints)
+   - Smallest holder gets 10000 credits (1 free mint)
+
+Run npm run typecheck && npm run build after changes. Both must pass.
+```
+
+---
+
 ## Execution Order
 
 | Phase | When | Depends On | Spec File |
@@ -220,5 +262,7 @@ Run npm run typecheck && npm run build after changes. Both must pass.
 | **4: Launch Readiness** | After Phase 0-3 | All fixes verified | `SPEC-PHASE4-LAUNCH-READINESS.md` |
 | **5: E2E Testing** | After Phase 4 | Everything implemented | `SPEC-PHASE5-E2E-TESTING.md` |
 | **6: Admin Dashboard** | Post-launch or parallel | Nice to have | `SPEC-PHASE6-ADMIN-DASHBOARD.md` |
+| **7: Holder Airdrop** | After Phase 3 | Credit system working | `SPEC-HOLDER-AIRDROP.md` |
 
-Phases 1-2 and Phase 3 can run in parallel if you have two Claude CLI sessions.
+Phases 1-2, Phase 3, and Phase 7 can run in parallel if you have multiple Claude CLI sessions.
+Phase 7 depends on Phase 3 (credit formula must be finalized before inserting airdrop credits).
