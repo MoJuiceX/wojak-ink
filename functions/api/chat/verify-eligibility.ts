@@ -20,6 +20,7 @@
 
 import { authenticateRequest } from '../../lib/auth';
 import { checkRateLimit, getRateLimitKey, getRateLimitHeaders, CHAT_RATE_LIMITS } from '../../lib/rateLimit';
+import { isValidChiaAddress } from '../../lib/validation';
 
 interface Env {
   CLERK_DOMAIN: string;
@@ -173,17 +174,6 @@ async function fetchWojakNftCount(walletAddress: string, db: D1Database): Promis
     }
     return { count: 0, fromCache: false };
   }
-}
-
-/**
- * Validate Chia wallet address format
- */
-function isValidChiaAddress(address: string): boolean {
-  // Chia addresses start with 'xch1' and are 62 characters total (bech32m)
-  return typeof address === 'string' &&
-    address.startsWith('xch1') &&
-    address.length === 62 &&
-    /^xch1[a-z0-9]+$/.test(address);
 }
 
 export const onRequest: PagesFunction<Env> = async (context) => {

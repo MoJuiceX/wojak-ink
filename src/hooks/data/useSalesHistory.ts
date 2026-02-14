@@ -2,7 +2,7 @@
  * Sales History Hook
  *
  * Provides access to NFT sales history data from the salesDatabank.
- * Handles syncing with Dexie.space via Parse.bot API.
+ * Data is synced from server-side D1 via SalesProvider.
  */
 
 import { useEffect, useState, useCallback } from 'react';
@@ -13,9 +13,9 @@ import {
   getRecentSales,
   getOverallStats,
   getSalesCount,
+  loadFromServer,
   type SaleRecord,
 } from '@/services/salesDatabank';
-import { syncDexieSales } from '@/services/dexieSalesService';
 import { markSyncComplete, getHoursSinceLastSync } from '@/providers/SalesProvider';
 
 interface UseSalesHistoryResult {
@@ -85,7 +85,7 @@ export function useSalesHistory(): UseSalesHistoryResult {
     return nftHasSales(nftId);
   }, [refreshKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Sync sales from Dexie (costs ~15 API calls for full sync)
+  // Sync sales from server-side D1 database
   const syncSales = useCallback(async () => {
     if (isSyncing) return;
 
@@ -94,9 +94,9 @@ export function useSalesHistory(): UseSalesHistoryResult {
 
     try {
       await ensureInitialized();
-      await syncDexieSales();
-      markSyncComplete(); // Track when we last synced
-      setRefreshKey(k => k + 1); // Trigger re-render
+      await loadFromServer();
+      markSyncComplete();
+      setRefreshKey(k => k + 1);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Sync failed';
       setLastSyncError(message);

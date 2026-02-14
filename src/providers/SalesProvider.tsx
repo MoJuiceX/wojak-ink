@@ -3,14 +3,12 @@
  * Sales Provider
  *
  * Initializes the sales databank from localStorage cache.
- * Auto-syncs every 4 hours using FREE Dexie direct API.
- * Falls back to Parse.bot (paid) only if Dexie is unavailable.
+ * Syncs from server-side D1 database (populated by fetch-sales worker).
  */
 
 import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { initializeSalesDatabank, fixSuspiciousSales } from '@/services/salesDatabank';
-import { syncDexieSales } from '@/services/dexieSalesService';
+import { initializeSalesDatabank, loadFromServer } from '@/services/salesDatabank';
 
 interface SalesProviderProps {
   children: React.ReactNode;
@@ -18,9 +16,6 @@ interface SalesProviderProps {
 
 // Storage key for last sync timestamp
 const LAST_SYNC_KEY = 'wojak_sales_last_sync';
-
-// Auto-sync interval in hours (6 hours - uses FREE Dexie API with Parse.bot fallback)
-const AUTO_SYNC_INTERVAL_HOURS = 6;
 
 // Get hours since last sync
 export function getHoursSinceLastSync(): number {
@@ -43,41 +38,25 @@ export function SalesProvider({ children }: SalesProviderProps) {
     if (hasInitialized.current) return;
     hasInitialized.current = true;
 
-    // Initialize databank from localStorage
+    // Initialize databank from localStorage (instant, offline-capable)
     initializeSalesDatabank();
-    const hoursSinceSync = getHoursSinceLastSync();
 
+    // Delay sync to not block initial render
+    const timer = setTimeout(async () => {
+      try {
+        // Load from server-side D1 database (populated by fetch-sales worker)
+        const serverAdded = await loadFromServer();
 
-    // Fix any sales with incorrect token conversion rates (one-time migration)
-    fixSuspiciousSales().then(() => {
-      // Migration complete (silent)
-    });
-
-    // Check if auto-sync is needed (more than 6 hours since last sync)
-    if (hoursSinceSync >= AUTO_SYNC_INTERVAL_HOURS) {
-
-      // Delay sync to not block initial render
-      const timer = setTimeout(async () => {
-        try {
-          const result = await syncDexieSales();
+        if (serverAdded > 0) {
           markSyncComplete();
-
-          // Fix any newly imported sales with incorrect token rates
-          if (result.imported > 0) {
-            await fixSuspiciousSales();
-          }
-
-          // Invalidate BigPulp queries so they refetch with new sales data
           queryClient.invalidateQueries({ queryKey: ['bigpulp'] });
-        } catch (error) {
-          console.error('[SalesProvider] Daily sync failed:', error);
         }
-      }, 3000);
+      } catch (error) {
+        console.error('[SalesProvider] Sync failed:', error);
+      }
+    }, 3000);
 
-      return () => clearTimeout(timer);
-    } else {
-      // intentionally empty
-    }
+    return () => clearTimeout(timer);
   }, [queryClient]);
 
   return <>{children}</>;

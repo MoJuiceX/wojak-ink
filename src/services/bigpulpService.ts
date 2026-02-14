@@ -17,7 +17,7 @@ import type {
 import { COLLECTION_SIZE, getNftImageUrl } from './constants';
 import { marketService } from './marketService';
 import { getRecentSales, type SaleRecord } from './salesDatabank';
-import { fetchCollectionStats } from './parseBotService';
+import { fetchCollectionStats } from './nftDataService';
 import { getCurrentXchPrice } from './historicalPriceService';
 
 // ============ Types for JSON Data ============

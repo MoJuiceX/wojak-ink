@@ -76,41 +76,42 @@ The credit-tracker worker is configured to use floor=1.0 during the audit period
 
 ---
 
-## XCH vs CAT: Only XCH Buys Earn Credits
+## XCH and CAT Token Credits
 
-**Answer: Only XCH purchases earn credits. CAT token purchases are not credited.**
+**Both XCH and whitelisted CAT token purchases earn credits.**
 
-The backfill and credit-tracker worker explicitly skip CAT trades:
+### XCH trades
+- Sourced from MintGarden Events API (`xch_price > 0`).
+- Credits calculated directly from XCH price paid.
 
-1. **MintGarden Events API** – Trade events have `xch_price` set for XCH trades; for CAT trades it is `0` or `null`.
-2. **Skip logic** – `scripts/backfill-credits.ts` and `workers/credit-tracker/worker.ts` both use:
-
-   ```ts
-   if (!event.xch_price || event.xch_price <= 0) {
-     stats.catTradesSkipped++;  // or continue
-     continue;
-   }
-   ```
-
-3. **Backfill stats** – Your last run: **158 XCH trades credited**, **42 CAT trades skipped**.
+### CAT trades (whitelisted tokens only)
+- Sourced from `sales_history` in D1 (populated by the `fetch-sales` worker via Dexie + MintGarden).
+- Credits calculated from `xch_equivalent` (the XCH-equivalent value at time of trade, using the token's conversion rate from `cat_token_rates`).
+- **Whitelisted tokens:** BEPE, Wand+Lightning, Sparkle+Mage, HOA, NeckCoin, $CHIA, PP.
+- Non-whitelisted CAT tokens are excluded to limit pricing risk (unreliable conversions, token volatility).
+- The whitelist is defined in `workers/credit-tracker/worker.ts` as `CAT_TOKEN_WHITELIST`.
 
 ---
 
 ## How Wallets Earn Free Mints
 
-1. **Buy Wojak Farmers Plot NFTs with XCH** on MintGarden/Dexie.
-2. **Each XCH trade** creates a row in `credit_events` with:
+1. **Buy Wojak Farmers Plot NFTs with XCH or whitelisted CAT tokens** on MintGarden/Dexie.
+2. **Each qualifying trade** creates a row in `credit_events` with:
    - `wallet_address` (buyer)
    - `nft_id` (NFT launcher)
-   - `price_xch`
+   - `price_xch` (or `xch_equivalent` for CAT trades)
    - `credits_earned` (stored ×100; divide by 100 for display)
-3. **Credit formula** (floor = 1.0 XCH for backfill):
+3. **Credit formula (V2):**
 
    ```
-   credits = 50 × (price/floor) × (1 + 0.2 × ln(price/floor))
+   effectiveFloor  = max(0.5, floorXch)
+   priceRatio      = max(1, priceXch / effectiveFloor)
+   whaleMultiplier = 1 + 0.30 × (1 − 1/priceRatio)
+   rawCredits      = 50 × priceXch × whaleMultiplier
+   credits_earned  = round(rawCredits × 100)
    ```
 
-   Above-floor buys get a whale bonus.
+   Above-floor buys get an asymptotic whale bonus capped at 1.30×.
 4. **1 free mint = 100 credits = 10,000 stored units.**
 
 ---
@@ -133,15 +134,15 @@ For each event:
 
 ```ts
 // From scripts/backfill-credits.ts
-const CREDITS_PER_FLOOR = 50;
+const CREDITS_PER_XCH = 50;
+const MAX_WHALE_BONUS = 0.30;
 const MIN_EFFECTIVE_FLOOR = 0.5;
-const WHALE_COEFFICIENT = 0.2;
 
 function calculateCredits(priceXch: number, floorXch: number) {
   const effectiveFloor = Math.max(MIN_EFFECTIVE_FLOOR, floorXch);
   const priceRatio = Math.max(1, priceXch / effectiveFloor);
-  const whaleMultiplier = 1 + WHALE_COEFFICIENT * Math.log(priceRatio);
-  const rawCredits = CREDITS_PER_FLOOR * priceRatio * whaleMultiplier;
+  const whaleMultiplier = 1 + (MAX_WHALE_BONUS * (1 - 1 / priceRatio));
+  const rawCredits = CREDITS_PER_XCH * priceXch * whaleMultiplier;
   return Math.round(rawCredits * 100);  // stored units
 }
 ```

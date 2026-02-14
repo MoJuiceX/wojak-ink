@@ -24,6 +24,7 @@ export const TRAIT_NAME_MAP: Record<string, string> = {
   'rugged': 'Rugged',
   'bleeding bags': 'Bleeding Bags',
   'terminator': 'Terminator',
+  'npc': 'NPC',
 
   // === Face Wear (EYE + Mask layers → "Face Wear" trait_type in Phase 1) ===
   '3d glasses': '3D Glasses',
@@ -272,6 +273,7 @@ export const TRAIT_NAME_MAP: Record<string, string> = {
   'nesting grounds': 'Nesting Grounds',
   'nyse dump': 'NYSE Dump',
   'nyse pump': 'NYSE Pump',
+  'nyse rug': 'NYSE Rug',
   'one market': 'One Market',
   'orange grove': 'Orange Grove',
   'ronin dojo': 'Ronin Dojo',

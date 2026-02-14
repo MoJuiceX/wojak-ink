@@ -22,9 +22,9 @@ const DELAY_MS = 500;
 const MAX_PAGES = 200;
 
 const FLOOR_XCH = 1.0;
-const CREDITS_PER_FLOOR = 50;
+const CREDITS_PER_XCH = 50;
+const MAX_WHALE_BONUS = 0.30;
 const MIN_EFFECTIVE_FLOOR = 0.5;
-const WHALE_COEFFICIENT = 0.2;
 
 interface MintGardenEvent {
   nft_id: string;
@@ -57,8 +57,8 @@ function eventId(e: MintGardenEvent): string {
 function calculateCredits(priceXch: number, floorXch: number): number {
   const effectiveFloor = Math.max(MIN_EFFECTIVE_FLOOR, floorXch);
   const priceRatio = Math.max(1, priceXch / effectiveFloor);
-  const whaleMultiplier = 1 + WHALE_COEFFICIENT * Math.log(priceRatio);
-  const rawCredits = CREDITS_PER_FLOOR * priceRatio * whaleMultiplier;
+  const whaleMultiplier = 1 + (MAX_WHALE_BONUS * (1 - 1 / priceRatio));
+  const rawCredits = CREDITS_PER_XCH * priceXch * whaleMultiplier;
   return Math.round(rawCredits * 100);
 }
 
@@ -387,8 +387,9 @@ async function main() {
       const nftId = exp.nftId.replace(/'/g, "''");
       const eventIdEsc = eid.replace(/'/g, "''");
       const ts = exp.timestamp.replace(/'/g, "''");
+      const prRatio = Math.max(1, exp.priceXch / FLOOR_XCH);
       const whaleMult = Math.round(
-        (1 + WHALE_COEFFICIENT * Math.log(Math.max(1, exp.priceXch / FLOOR_XCH))) * 10000
+        (1 + MAX_WHALE_BONUS * (1 - 1 / prRatio)) * 10000
       );
       inserts.push(
         `INSERT OR IGNORE INTO credit_events (wallet_address, nft_id, event_id, price_xch, floor_at_time, credits_earned, whale_multiplier, source, event_timestamp) ` +

@@ -37,7 +37,7 @@ import {
   formatPriceUSD,
 } from '@/utils/mockData';
 import { getMintGardenNftUrl } from '@/services/marketApi';
-import { fetchNFTOwnerByEdition, type NFTOwnerInfo } from '@/services/parseBotService';
+import { fetchNFTOwnerByEdition, type NFTOwnerInfo } from '@/services/nftDataService';
 import { useTraitRankings, type TooltipData } from '@/hooks/useTraitRankings';
 import { useSalesHistory } from '@/hooks/useSalesHistory';
 import { useXchPrice } from '@/hooks/data/useTreasuryData';
@@ -423,7 +423,7 @@ export function DesktopExplorerPanel({
   // Navigation arrows - show on hover
   const [isImageHovered, setIsImageHovered] = useState(false);
 
-  // Real owner info from Parse.bot
+  // Owner info from MintGarden
   const [ownerInfo, setOwnerInfo] = useState<NFTOwnerInfo | null>(null);
   // Badge data
   const [badges, setBadges] = useState<NFTBadgeEntry | null>(null);
@@ -470,7 +470,7 @@ export function DesktopExplorerPanel({
     }
   }, [isOpen]);
 
-  // Fetch real owner info via Parse.bot
+  // Fetch owner info via MintGarden
   useEffect(() => {
     if (!currentNft || !isOpen) {
       queueMicrotask(() => setOwnerInfo(null));
@@ -484,7 +484,7 @@ export function DesktopExplorerPanel({
     fetchNFTOwnerByEdition(edition).then((info) => {
       setOwnerInfo(info);
     }).catch((err) => {
-      console.error('[DesktopExplorerPanel] Error fetching owner via Parse.bot:', err);
+      console.error('[DesktopExplorerPanel] Error fetching owner:', err);
     });
   }, [currentNft, isOpen]);
 

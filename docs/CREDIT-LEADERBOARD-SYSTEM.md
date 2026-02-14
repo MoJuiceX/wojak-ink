@@ -110,14 +110,14 @@ Migration: `functions/migrations/030_credit_system.sql`.
 - **Per event:** For each new trade, we use **floor at time of purchase**: lookup `floor_price_snapshots` for the event’s date (`snapshot_date <= event_date` ORDER BY `snapshot_date` DESC LIMIT 1). If none exists, fallback 1.0 XCH (100).
 - **Backfill:** Historical floor data is not available; the backfill script uses a **fixed 1.0 XCH** for all backfilled events.
 
-### 4.3 Credit formula
+### 4.3 Credit formula (V2 — revenue-neutral with capped whale bonus)
 
-- Constants: `CREDITS_PER_FLOOR = 50`, `MIN_EFFECTIVE_FLOOR = 0.5`, `WHALE_COEFFICIENT = 0.2`.
+- Constants: `CREDITS_PER_XCH = 50`, `MAX_WHALE_BONUS = 0.30`, `MIN_EFFECTIVE_FLOOR = 0.5`.
 - Steps:
   - `effectiveFloor = max(0.5, floorXch)`
   - `priceRatio = max(1, priceXch / effectiveFloor)`
-  - `whaleMultiplier = 1 + 0.2 × ln(priceRatio)`
-  - `rawCredits = 50 × priceRatio × whaleMultiplier`
+  - `whaleMultiplier = 1 + 0.30 × (1 - 1 / priceRatio)` (asymptotic, caps at 1.30)
+  - `rawCredits = 50 × priceXch × whaleMultiplier` (proportional to XCH spent, not floor multiples)
   - Stored: `credits_earned = round(rawCredits × 100)` (hundredths).
 - Same formula in: **credit-tracker worker** and **backfill script**. See `docs/CREDITS-FORMULA.md` as single source of truth.
 
@@ -127,11 +127,12 @@ Migration: `functions/migrations/030_credit_system.sql`.
 
 ### 5.1 credit-tracker (`workers/credit-tracker/`)
 
-- **Role:** Ingest new XCH trades and daily floor; write to D1.
+- **Role:** Ingest new XCH trades, whitelisted CAT trades, and daily floor; write to D1.
 - **Schedule:** Cron `*/30 * * * *` (every 30 minutes).
 - **Steps each run:**
-  1. **Floor:** If today’s snapshot not yet written, fetch collection from MintGarden, insert into `floor_price_snapshots`, set KV `last_floor_snapshot_date`.
-  2. **Events:** Fetch events (paginated, cursor). For each event with `xch_price > 0` and `event_timestamp > last_credit_event_timestamp`: check if `event_id` already in DB; if not, get floor for event date, compute credits, batch INSERT into `credit_events`. Advance KV `last_credit_event_timestamp` only to the max timestamp of **inserted** events (so we never skip events on partial failure).
+  1. **Floor:** If today's snapshot not yet written, fetch collection from MintGarden, insert into `floor_price_snapshots`, set KV `last_floor_snapshot_date`.
+  2. **XCH Events:** Fetch MintGarden events (paginated, cursor). For each event with `xch_price > 0` and `event_timestamp > last_credit_event_timestamp`: check if `event_id` already in DB; if not, get floor for event date, compute credits, batch INSERT into `credit_events`. Advance KV `last_credit_event_timestamp` only to the max timestamp of **inserted** events (so we never skip events on partial failure).
+  3. **CAT Events:** Query `sales_history` for CAT trades with `xch_equivalent > 0.01` and a whitelisted `token_code` (BEPE, Wand+Lightning, Sparkle+Mage, HOA, NeckCoin, $CHIA, PP). For each trade with a wallet address and no existing credit_event: compute credits using `xch_equivalent` as the price, INSERT into `credit_events`. Advance KV `last_cat_credit_timestamp`.
 - **Bindings:** D1 `DB` (wojak-users), KV `TRADE_VALUES_KV`, var `COLLECTION_ID`. Optional secret: `MINTGARDEN_API_KEY`.
 - **Resilience:** Retries with backoff for MintGarden requests; batch “existing” check and batch INSERT; cursor advancement only for inserted events. See `docs/CREDIT-LEADERBOARD-BULLETPROOF.md`.
 

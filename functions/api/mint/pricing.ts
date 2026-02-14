@@ -3,11 +3,11 @@
  *
  * GET (no params)
  *
- * Returns trait surcharges (from trait_usage), supply count, and floor price.
- * Used by Generator for dynamic pricing display.
+ * Returns trait surcharges (fair-share pricing with decay), supply count,
+ * and floor price. Used by Generator for dynamic pricing display.
  *
  * Response: {
- *   traits: { [traitKey]: { usageCount, surchargeXch } },
+ *   traits: { [traitKey]: { usageCount, effectiveUsage, surchargeXch, fairShare, percentOfFairShare } },
  *   supply: { minted: number, total: 4200 },
  *   floorPrice: number
  * }
@@ -18,6 +18,8 @@ import {
   errorResponse,
   optionsResponse,
   surchargeXch,
+  applyDecay,
+  SURCHARGE_FAIR_SHARES,
 } from './_shared';
 
 interface Env {
@@ -30,6 +32,8 @@ interface TraitUsageRow {
   trait_category: string;
   trait_name: string;
   usage_count: number;
+  effective_usage: number;
+  last_decay_at: string;
 }
 
 export const onRequest: PagesFunction<Env> = async (context) => {
@@ -49,15 +53,30 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
   try {
     const traitRows = await env.DB.prepare(
-      'SELECT trait_category, trait_name, usage_count FROM trait_usage'
+      'SELECT trait_category, trait_name, usage_count, effective_usage, last_decay_at FROM trait_usage'
     ).all<TraitUsageRow>();
 
-    const traits: Record<string, { usageCount: number; surchargeXch: number }> = {};
+    interface TraitPricing {
+      usageCount: number;
+      effectiveUsage: number;
+      surchargeXch: number;
+      fairShare: number;
+      percentOfFairShare: number;
+    }
+
+    const traits: Record<string, TraitPricing> = {};
     for (const r of traitRows.results || []) {
+      const decayed = applyDecay(r.effective_usage, r.last_decay_at);
+      const fairShare = SURCHARGE_FAIR_SHARES[r.trait_category] || 0;
+      const sc = surchargeXch(decayed, r.trait_category, r.trait_name);
+
       const key = `${r.trait_category}_${r.trait_name}`;
       traits[key] = {
         usageCount: r.usage_count,
-        surchargeXch: Math.round(surchargeXch(r.usage_count) * 1000) / 1000,
+        effectiveUsage: Math.round(decayed * 100) / 100,
+        surchargeXch: Math.round(sc * 1000) / 1000,
+        fairShare,
+        percentOfFairShare: fairShare > 0 ? Math.round(decayed / fairShare * 100) : 0,
       };
     }
 

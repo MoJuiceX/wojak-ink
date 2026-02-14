@@ -83,8 +83,8 @@ How to make the Freemint Credits system **never lose data**, **always work**, an
 
 ### 4.3 Single source of truth for formula
 - Credit formula and constants live in **worker** and **backfill** (and possibly a shared module or doc). Document in this repo:
-  - `CREDITS_PER_FLOOR`, `MIN_EFFECTIVE_FLOOR`, `WHALE_COEFFICIENT`
-  - Rule: “Only XCH trades; floor at time of purchase from snapshots; backfill uses fixed 1.0 XCH.”
+  - `CREDITS_PER_XCH`, `MAX_WHALE_BONUS`, `MIN_EFFECTIVE_FLOOR`
+  - Rule: "XCH trades and whitelisted CAT trades (via xch_equivalent); floor at time of purchase from snapshots; backfill uses fixed 1.0 XCH."
 - Avoid changing formula without a migration/backfill plan and a note in CREDIT-LEADERBOARD-GO-LIVE-PLAN or this doc.
 
 ### 4.4 Audit endpoint

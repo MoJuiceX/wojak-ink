@@ -18,6 +18,7 @@ import {
   Coins,
   Trophy,
   ChevronDown,
+  Info,
 } from 'lucide-react';
 import { useGenerator } from '@/contexts/GeneratorContext';
 import { useMint } from '@/contexts/MintContext';
@@ -26,6 +27,7 @@ import { useLayout } from '@/hooks/useLayout';
 import { isSelectionPathEmpty } from '@/types/generator';
 import { exportImage } from '@/services/canvasRenderer';
 import { MintFlowModal } from './MintFlowModal';
+import { GeneratorInfo } from './GeneratorInfo';
 
 interface ActionBarProps {
   className?: string;
@@ -117,7 +119,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
     previewImage,
     canExport,
   } = useGenerator();
-  const { credits, startMint, resetMintFlow, totalMinted, maxSupply } = useMint();
+  const { credits, startMint, resetMintFlow, totalMinted, maxSupply, getTotalMintPrice } = useMint();
   const { address, status: walletStatus, connect } = useSageWallet();
   const prefersReducedMotion = useReducedMotion();
   const { isDesktop } = useLayout();
@@ -129,6 +131,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   const [isMintModalOpen, setIsMintModalOpen] = useState(false);
   const [mintType, setMintType] = useState<'free' | 'paid'>('free');
   const [showRandomMenu, setShowRandomMenu] = useState(false);
+  const [showGeneratorInfo, setShowGeneratorInfo] = useState(false);
   const randomMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -585,6 +588,15 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         </ActionBarTooltip>
       )}
 
+      {/* How It Works info */}
+      <ActionBarTooltip content="How It Works">
+        <ActionButton
+          onClick={() => setShowGeneratorInfo(true)}
+          icon={<Info size={20} />}
+          label="How It Works"
+        />
+      </ActionBarTooltip>
+
       {/* ── Mint Section ── */}
       <div
         className="flex items-center gap-2 pl-2 ml-1"
@@ -601,6 +613,23 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
             />
           </ActionBarTooltip>
         )}
+
+        {/* Price display — paid mints only */}
+        {isWalletConnected && !(hasFreeMintsAvailable && mintType === 'free') && (() => {
+          const price = getTotalMintPrice();
+          return (
+            <div className="flex flex-col items-end" style={{ minWidth: 0 }}>
+              <span className="text-xs font-semibold tabular-nums whitespace-nowrap" style={{ color: 'var(--color-primary)' }}>
+                {price.totalXch.toFixed(2)} XCH
+              </span>
+              {price.surchargeXch > 0 && (
+                <span className="text-[10px] tabular-nums whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>
+                  base {price.basePrice.toFixed(2)} + {price.surchargeXch.toFixed(2)} {price.surchargeTraitName} surcharge
+                </span>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Mint button */}
         <ActionBarTooltip content={
@@ -633,6 +662,12 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
           setIsMintModalOpen(false);
           resetMintFlow();
         }}
+      />
+
+      {/* Generator Info Modal */}
+      <GeneratorInfo
+        isOpen={showGeneratorInfo}
+        onClose={() => setShowGeneratorInfo(false)}
       />
     </div>
   );

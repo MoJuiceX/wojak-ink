@@ -93,6 +93,9 @@ const PHASE1_RARITY: Record<string, number> = {
   'Tyson Tattoo': 97,
   'VR Headset': 67,
   'Fake It Mask': 39,
+  // G2-only (rare, always win consolidation)
+  'Skull Mask': 0, 'MedievalBepe Cowboy': 0, 'MedievalBepe Emo': 0,
+  'MedievalBepe Wizard': 0, 'Tanginium King': 0, 'Tanginium Sad': 0,
 };
 
 /**
@@ -101,6 +104,7 @@ const PHASE1_RARITY: Record<string, number> = {
  */
 const LAYER_OVERRIDES: Record<string, string> = {
   'Clothes:super saiyan': 'Super Saiyan Uniform',
+  'Head:swat': 'SWAT Helmet',
 };
 
 /**

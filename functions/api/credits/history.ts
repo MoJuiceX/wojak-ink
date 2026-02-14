@@ -7,6 +7,8 @@
  * No auth required — wallet-based.
  */
 
+import { isValidChiaAddress } from '../../lib/validation';
+
 interface Env {
   DB: D1Database;
 }
@@ -52,7 +54,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const wallet = url.searchParams.get('wallet');
   const limit = Math.min(Number(url.searchParams.get('limit')) || 50, 100);
 
-  if (!wallet || !wallet.startsWith('xch1')) {
+  if (!wallet || !isValidChiaAddress(wallet)) {
     return new Response(
       JSON.stringify({ error: 'Missing or invalid wallet parameter. Expected xch1... address.' }),
       { status: 400, headers: corsHeaders }

@@ -126,16 +126,6 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/dexie-api/, ''),
         },
-        '/parsebot-api': {
-          target: 'https://api.parse.bot',
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/parsebot-api/, ''),
-          configure: (proxy) => {
-            proxy.on('proxyReq', (proxyReq) => {
-              proxyReq.setHeader('x-api-key', env.VITE_PARSEBOT_API_KEY || '');
-            });
-          },
-        },
       },
     },
   }

@@ -22,22 +22,70 @@ export function optionsResponse(): Response {
   return new Response(null, { headers: corsHeaders });
 }
 
+export { isValidChiaAddress } from '../../lib/validation';
+
+// ─── Surcharge: Fair-Share Pricing ───
+
+export const TOTAL_SUPPLY = 4200;
+export const SURCHARGE_RAMP_RATE = 1.0;
+export const SURCHARGE_PENALTY_SCALE = 8.0;
+export const SURCHARGE_PENALTY_EXPONENT = 2.0;
+export const DECAY_HALF_LIFE_DAYS = 30;
+
+/** Fair share = ideal usage per trait if all traits used equally */
+export const SURCHARGE_FAIR_SHARES: Record<string, number> = {
+  'Head': Math.round(TOTAL_SUPPLY / 40),       // 105
+  'Clothes': Math.round(TOTAL_SUPPLY / 36),     // 117
+  'Face Wear': Math.round(TOTAL_SUPPLY / 18),   // 233
+};
+
+/** Only these categories have surcharges */
+export const SURCHARGE_CATEGORIES = new Set(Object.keys(SURCHARGE_FAIR_SHARES));
+
+/** Trait values within surcharge categories that are exempt (none/default) */
+export const SURCHARGE_EXEMPT_TRAITS = new Set([
+  'No Headgear',
+  'No Face Wear',
+]);
+
 /**
- * Validate Chia bech32m wallet address format.
- * xch1 prefix + 58 bech32 characters = 62 total.
+ * Calculate surcharge for a trait based on its effective (decayed) usage
+ * and the fair share for its category.
+ *
+ * Formula: RAMP_RATE × r + PENALTY_SCALE × max(0, r - 1)²
+ * where r = effectiveUsage / fairShare
+ *
+ * Returns 0 if the category has no surcharge or the trait is exempt.
  */
-export function isValidChiaAddress(address: string): boolean {
-  return /^xch1[a-z0-9]{58}$/.test(address);
+export function surchargeXch(
+  effectiveUsage: number,
+  traitCategory: string,
+  traitDisplayName?: string
+): number {
+  const fairShare = SURCHARGE_FAIR_SHARES[traitCategory];
+  if (!fairShare) return 0; // Category not surcharge-eligible
+
+  if (traitDisplayName && SURCHARGE_EXEMPT_TRAITS.has(traitDisplayName)) return 0;
+
+  const ratio = effectiveUsage / fairShare;
+  const ramp = SURCHARGE_RAMP_RATE * ratio;
+  const overshoot = Math.max(0, ratio - 1);
+  const penalty = SURCHARGE_PENALTY_SCALE * Math.pow(overshoot, SURCHARGE_PENALTY_EXPONENT);
+  return ramp + penalty;
 }
 
 /**
- * Surcharge formula (used by prepare.ts and pricing.ts).
- * Centralised here as single source of truth.
+ * Apply time decay to an effective usage score.
+ * Returns the decayed score based on time elapsed since last decay.
  */
-export const SURCHARGE_BASE = 0.2;
-export const SURCHARGE_USES_DIVISOR = 20;
-export function surchargeXch(usageCount: number): number {
-  return SURCHARGE_BASE * Math.log(1 + usageCount / SURCHARGE_USES_DIVISOR);
+export function applyDecay(effectiveUsage: number, lastDecayAt: string): number {
+  const now = Date.now();
+  const lastDecay = new Date(lastDecayAt).getTime();
+  const daysSinceDecay = (now - lastDecay) / (1000 * 60 * 60 * 24);
+  if (daysSinceDecay <= 0) return effectiveUsage;
+
+  const decayFactor = Math.pow(0.5, daysSinceDecay / DECAY_HALF_LIFE_DAYS);
+  return effectiveUsage * decayFactor;
 }
 
 /**

@@ -1,6 +1,6 @@
 # Your Wojak Minting — Launch Readiness
 
-**Date:** 2026-02-13
+**Date:** 2026-02-14
 **Last Deploy:** `881c6fa` (Pinata pinJSONToIPFS fix)
 **Build:** `npm run build` (`tsc -b && vite build`) — PASS
 
@@ -39,6 +39,7 @@ Migrations are one-way. If one is missing, queries will reference columns that d
 | 030 | `functions/migrations/030_credit_system.sql` | `credit_events`, `credit_spends`, `floor_price_snapshots`, `phase2_mints`, `trait_usage` + indexes | Yes |
 | 031 | `functions/migrations/031_mint_counter.sql` | `mint_counter` table, seeded from existing mints | Yes (2026-02-13) |
 | 032 | `functions/migrations/032_mint_audit_trail.sql` | Audit columns on `phase2_mints` + `mint_audit_log` table + refund tracking columns | Yes (2026-02-13) |
+| 034 | `functions/migrations/034_trait_decay.sql` | Adds `effective_usage`, `last_decay_at` columns to `trait_usage` table. Enables time-based decay of trait popularity. | Apply before launch |
 
 ### Verification command
 
@@ -47,7 +48,16 @@ npx wrangler d1 execute wojak-users --remote --command \
   "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;"
 ```
 
-Expected tables: `credit_events`, `credit_spends`, `floor_price_snapshots`, `mint_audit_log`, `mint_counter`, `phase2_mints`, `trait_usage`
+Expected tables: `credit_events`, `credit_spends`, `floor_price_snapshots`, `mint_audit_log`, `mint_counter`, `phase2_mints`, `rate_limits`, `trait_usage`
+
+### Verify trait_usage decay columns
+
+```bash
+npx wrangler d1 execute wojak-users --remote --command \
+  "PRAGMA table_info(trait_usage);"
+```
+
+Should include: `effective_usage` (REAL), `last_decay_at` (TEXT).
 
 ### Verify counter is seeded
 
@@ -83,67 +93,61 @@ prepare.ts:
   7. Credit check: earned - spent >= 10000 units (100 credits)
   8. Reserve mint number (atomic UPDATE...RETURNING on mint_counter)
   9. Build CHIP-0007 metadata with real mint number
-  10. POST /api/mint/upload (with INTERNAL_MINT_SECRET header)
-
-upload.ts:
-  11. Verify X-Internal-Mint-Request header
-  12. Decode base64 -> WebP bytes, enforce 2MB limit
-  13. SHA256(image) -> dataHash
-  14. Pinata pinFileToIPFS (FormData) -> ipfsHash -> 3 gateway URIs
-  15. SHA256(metadata JSON) -> metadataHash
-  16. Pinata pinJSONToIPFS ({pinataContent: metadata}) -> metaIpfsHash -> 3 gateway URIs
-  17. Return {dataHash, dataUris, metadataHash, metadataUris}
-
-prepare.ts (continued):
-  18. callMintGardenMint(free, no mojos) -> MintGarden mints NFT to wallet
-  19. If no launcherId returned -> error 500
-  20. INSERT phase2_mints (status='minted', minted_at=now)
-  21. INSERT credit_spends (wallet, mintId, 10000)
-  22. Log audit step
-  23. INCREMENT trait_usage for each selected layer
-  24. Return {success: true, mintNumber, launcherId, mintgardenUrl}
+  10. uploadToIPFS() — direct function call (no HTTP self-fetch)
+      a. Decode base64 -> WebP bytes, enforce 2MB limit
+      b. SHA256(image) -> dataHash
+      c. Pinata pinFileToIPFS (FormData) -> ipfsHash -> 3 gateway URIs
+      d. SHA256(metadata JSON) -> metadataHash
+      e. Pinata pinJSONToIPFS ({pinataContent: metadata}) -> metaIpfsHash -> 3 gateway URIs
+  11. callMintGardenMint(free, no mojos) -> MintGarden mints NFT to wallet
+  12. If no launcherId returned -> error 500
+  13. INSERT phase2_mints (status='minted', minted_at=now)
+  14. INSERT credit_spends (wallet, mintId, 10000)
+  15. Log audit step
+  16. INCREMENT trait_usage (effective_usage with decay for Head/Clothes/Face Wear)
+  17. Return {success: true, mintNumber, launcherId, mintgardenUrl}
 
 MintContext:
-  25. Sets mintStep='success'
-  26. MintFlowModal shows success + MintGarden link
+  18. Sets mintStep='success'
+  19. MintFlowModal shows success + MintGarden link
 ```
 
 ### Paid Mint
 
 ```
-Steps 1-17: Same as free mint
+Steps 1-10: Same as free mint
 
 prepare.ts (continued):
-  18. Calculate surcharge from trait_usage (highest single trait)
-  19. totalPrice = 0.2 XCH + surcharge
-  20. callMintGardenMint(paid, requested_mojos) -> MintGarden returns offer_file
-  21. INSERT phase2_mints (status='pending', offer_file, expires_at=now+15min)
-  22. Log audit step
-  23. Return {pending: true, mintId, offerFile, expiresAt, totalPriceXch}
+  11. Calculate fair-share surcharge from trait_usage (highest single trait across Head/Clothes/Face Wear)
+  12. totalPrice = 0.2 XCH + highest surcharge
+  13. callMintGardenMint(paid, requested_mojos) -> MintGarden returns offer_file
+  14. INSERT phase2_mints (status='pending', offer_file, expires_at=now+15min)
+  15. Log audit step
+  16. Return {pending: true, mintId, offerFile, expiresAt, totalPriceXch}
 
 MintContext:
-  24. Sets mintStep='signing', stores pendingMint
-  25. MintFlowModal shows countdown + Accept/Copy buttons
+  17. Sets mintStep='signing', stores pendingMint
+  18. MintFlowModal shows countdown + Accept/Copy buttons
 
 User clicks "Accept in Wallet":
-  26. MintContext.acceptOfferInWallet()
-  27. takeOffer(offerFile, 0) via WalletConnect to Sage
-  28. Sage wallet processes the offer
-  29. POST /api/mint/confirm {mintId, walletAddress}
+  19. MintContext.acceptOfferInWallet()
+  20. takeOffer(offerFile, 0) via WalletConnect to Sage
+  21. Sage wallet processes the offer
+  22. POST /api/mint/confirm {mintId, walletAddress}
 
 confirm.ts:
-  30. Look up pending mint by ID
-  31. Verify wallet matches (if provided)
-  32. Get launcherId (from body or existing record)
-  33. If no launcherId -> return {pending: true} (try again later)
-  34. INCREMENT trait_usage for each layer
-  35. UPDATE phase2_mints SET status='minted', payment_verified=1
-  36. Log audit step
-  37. Return {success: true, mintNumber, launcherId, mintgardenUrl}
+  23. Look up pending mint by ID
+  24. Verify wallet matches (bech32m validation via isValidChiaAddress)
+  25. Get launcherId (from body or existing record)
+  26. If no launcherId -> return {pending: true} (try again later)
+  27. INCREMENT trait_usage (effective_usage with decay for Head/Clothes/Face Wear)
+  28. UPDATE phase2_mints SET status='minted', payment_verified=1
+  29. Log audit step
+  30. Return {success: true, mintNumber, launcherId, mintgardenUrl}
 
 MintContext:
-  38. Sets mintStep='success'
-  39. MintFlowModal shows success + MintGarden link
+  31. Sets mintStep='success'
+  32. MintFlowModal shows success + MintGarden link
 ```
 
 ### Failure Modes
@@ -167,40 +171,131 @@ MintContext:
 
 ---
 
-## 4. Security Audit Results
+## 4. Pricing — Fair-Share Surcharge System
 
-| Vector | Protection | File | Notes |
-|--------|-----------|------|-------|
-| Public upload abuse | `X-Internal-Mint-Request` header + `INTERNAL_MINT_SECRET` | upload.ts:57-59 | Only prepare.ts knows the secret |
-| Directory traversal | Path validation: max 3 segments, no `..` or `.` | prepare.ts:107-111 | Blocks `../../etc/passwd` style payloads |
-| Wallet spoofing | Full bech32m regex: `^xch1[a-z0-9]{58}$` | _shared.ts:30 | Used in prepare.ts, status.ts |
-| Mint number race condition | Atomic `UPDATE...RETURNING` on mint_counter | mintNumberHelper.ts:20-27 | Replaced `SELECT MAX() + 1` |
-| Double-spend credits | Balance check before number reservation; atomic credit deduction | prepare.ts:154-166 | Credits deducted after successful mint only |
-| Confirm another wallet's mint | Wallet ownership check | confirm.ts:77-79 | Soft check: only if walletAddress provided |
-| Supply bypass | `COUNT(*) WHERE status='minted'` checked before every mint | prepare.ts:145-151 | Pending mints don't count toward supply |
-| Expired offer clickable | `isExpired` state hides Accept/Copy buttons | MintFlowModal.tsx:165,177 | Timer turns red, expiry message shown |
-| Oversized image | 2MB limit on decoded base64 | upload.ts:86-88 | Checked before any Pinata call |
-| Invalid JSON body | try/catch on `request.json()` in all endpoints | All endpoints | Returns 400 "Invalid JSON" |
-| Missing env vars | Throws on missing API key/profile; 503 on missing JWT | request.ts:92-94, upload.ts:63-65 | Fail-fast, no silent null |
-| SQL injection | All queries use parameterized `.bind()` | All endpoints | No string interpolation in SQL |
-| XSS via layer names | Layer names validated against `VALID_LAYER_NAMES` whitelist | prepare.ts:49-51, 101-104 | Only 9 known layer names accepted |
+### Base Price
+
+`BASE_PRICE_XCH = 0.20` (defined in `prepare.ts`). All mints start at 0.20 XCH.
+
+### Surcharge Formula
+
+```
+surcharge = RAMP_RATE * r + PENALTY_SCALE * max(0, r - 1)^2
+
+where r = effectiveUsage / fairShare
+      fairShare = 4200 / numberOfOptionsInCategory
+```
+
+Constants (from `_shared.ts`): `RAMP_RATE=1.0`, `PENALTY_SCALE=8.0`, `PENALTY_EXPONENT=2.0`
+
+### Surcharge Categories
+
+| Category | Options | Fair Share | Surcharge? | Reason |
+|----------|:---:|:---:|:---:|--------|
+| Head | 40 | 105 | Yes | Large variety, high visual impact |
+| Clothes | 36 | 117 | Yes | Large variety, high visual impact |
+| Face Wear | 18 | 233 | Yes | Moderate variety, distinctive |
+| Mouth | 20 | — | No | Mandatory base system + rarity override |
+| Face | 6 | — | No | Core identity, only 6 options |
+| Background | 57 | — | No | Cosmetic backdrop only |
+| Base | 1 | — | No | Always "Wojak" |
+
+### Exempt Traits
+
+- "No Headgear" (Head category) — always surcharge 0
+- "No Face Wear" (Face Wear category) — always surcharge 0
+
+### Pricing Behavior
+
+- Only the **highest surcharge** among all 7 selected traits is charged
+- Total price = base (0.20 XCH) + highest surcharge
+- Free mints are free regardless of trait surcharges
+- Every surcharge category reaches 1.00 XCH surcharge at its fair share (total 1.20 XCH)
+- Past fair share, the quadratic wall makes overuse expensive (price wall effect)
+
+### Time Decay
+
+- 30-day half-life exponential decay on `effective_usage`
+- If a trait stops being popular, its surcharge drops over time
+- D1 SQL uses `exp(ln(0.5) * (julianday('now') - julianday(last_decay_at)) / 30)`
+- On each mint, effective_usage is decayed to "now" and incremented by 1
 
 ---
 
-## 5. Known Gaps and Accepted Risks
+## 5. Security Audit Results
+
+Comprehensive audit completed — 6 fixes applied (see `docs/SPEC-MINT-PIPELINE-AUDIT.md`).
+
+### Self-Fetch Eliminated (FIX 2)
+
+- The `prepare.ts -> /api/mint/upload` self-fetch anti-pattern was removed
+- `uploadToIPFS.ts` is now a direct function import, not an HTTP call
+- No more circular fetch dependencies
+
+### Wallet Validation Hardened (FIX 3 + FIX 4)
+
+- All 4 mint endpoints now use `isValidChiaAddress()` (bech32m regex validation)
+- Old `startsWith('xch1')` pattern fully removed from mint and credit endpoints
+- Shared validation module: `functions/lib/validation.ts`
+- Endpoints hardened: `prepare.ts`, `confirm.ts`, `status.ts`, `pricing.ts`, `balance.ts`, `history.ts`
+
+### Trait Name Consistency (FIX 1 + FIX 1a)
+
+- Server-side `functions/api/mint/traitResolver.ts` uses canonical `TRAIT_NAME_MAP`
+- `resolveTraitName()` function used in `prepare.ts` for metadata attribute names
+- All Phase 1 trait values verified against metadata.json
+- Layer-specific overrides (Super Saiyan Uniform, SWAT Gear/Helmet)
+
+### Mint Number Assignment (FIX 3)
+
+- Mint numbers now assigned atomically at prepare time using `UPDATE...RETURNING`
+- No more `SELECT MAX` pattern
+- Metadata name is correct from first IPFS upload
+
+### Threat Model
+
+| Vector | Protection | File | Notes |
+|--------|-----------|------|-------|
+| Public upload abuse | `X-Internal-Mint-Request` header + `INTERNAL_MINT_SECRET` | upload.ts | Only the HTTP path uses this; prepare.ts calls uploadToIPFS() directly |
+| Directory traversal | Path validation: max 3 segments, no `..` or `.` | prepare.ts | Blocks `../../etc/passwd` style payloads |
+| Wallet spoofing | Full bech32m regex: `^xch1[a-z0-9]{58}$` | functions/lib/validation.ts | Used in all endpoints via `isValidChiaAddress()` |
+| Mint number race condition | Atomic `UPDATE...RETURNING` on mint_counter | mintNumberHelper.ts | Replaced `SELECT MAX() + 1` |
+| Double-spend credits | Balance check + atomic INSERT...SELECT credit deduction | prepare.ts | Credits deducted after successful mint only |
+| Confirm another wallet's mint | Wallet ownership check with bech32m validation | confirm.ts | Rejects invalid or mismatched wallets |
+| Supply bypass | `COUNT(*) WHERE status='minted'` checked before every mint | prepare.ts | Pending mints don't count toward supply |
+| Expired offer clickable | `isExpired` state hides Accept/Copy buttons | MintFlowModal.tsx | Timer turns red, expiry message shown |
+| Oversized image | 2MB limit on decoded base64 | uploadToIPFS.ts | Checked before any Pinata call |
+| Invalid JSON body | try/catch on `request.json()` in all endpoints | All endpoints | Returns 400 "Invalid JSON" |
+| Missing env vars | Throws on missing API key/profile; 503 on missing JWT | request.ts, prepare.ts | Fail-fast, no silent null |
+| SQL injection | All queries use parameterized `.bind()` | All endpoints | No string interpolation in SQL |
+| XSS via layer names | Layer names validated against `VALID_LAYER_NAMES` whitelist | prepare.ts | Only 9 known layer names accepted |
+| Credit formula wash trading | Asymptotic whale multiplier capped at 1.30 | credit-tracker worker | Max ~1% profit at extreme prices — not viable |
+
+---
+
+## 6. Known Gaps and Accepted Risks
+
+### Resolved Items
+
+| Item | Status | Resolution |
+|------|--------|------------|
+| Self-fetch in prepare.ts | ✅ **RESOLVED** | FIX 2 — replaced with direct `uploadToIPFS()` import |
+| Metadata drift (trait names) | ✅ **RESOLVED** | FIX 1 — `resolveTraitName()` with `TRAIT_NAME_MAP` as single source of truth |
+| Weak wallet validation | ✅ **RESOLVED** | FIX 4 — `isValidChiaAddress()` everywhere (prepare, confirm, status, pricing, balance, history) |
+| Credit formula wash trade risk | ✅ **RESOLVED** | Credit Formula V2 — asymptotic whale multiplier caps at 1.30 |
+
+### Accepted Risks
 
 | Item | Severity | Description | Why Acceptable |
 |------|----------|-------------|----------------|
 | Mint number gaps | Low | If IPFS or MintGarden fails after `getNextMintNumber()`, the number is consumed, creating gaps (#1, #2, #5...) | Cosmetic only. NFT numbering doesn't need to be contiguous. Alternative (reserve after success) would reintroduce the metadata-name-mismatch bug. |
 | Confirm wallet check is soft | Low | `confirm.ts` only verifies wallet if `walletAddress` is provided in the POST body. Omitting it bypasses the check. | Frontend always sends it. An attacker would need the `mintId` (sequential integer) to target a specific mint. They can confirm it but can't steal the NFT (it's already in the wallet). |
-| `balance.ts` loose validation | Low | Uses `startsWith('xch1')` instead of full bech32m regex | Read-only endpoint. Worst case: someone queries balance for a malformed address and gets 0. |
-| Self-fetch to upload | Low | `prepare.ts` calls `/api/mint/upload` via HTTP instead of a direct function call. Adds ~50ms latency. | Works correctly on Cloudflare Pages. Refactor to shared function is optional post-launch. |
 | `audit.ts` / `refund.ts` inline CORS | Low | Admin-only endpoints still use inline `corsHeaders` instead of shared helpers | Not part of the critical mint pipeline. Low traffic. Can migrate later. |
 | Audit logging non-blocking | Info | `logMintStep()` catches errors silently — if audit insert fails, the mint still succeeds | Correct behavior. Audit logging failure should never block a user's mint. Errors are still logged to console. |
 
 ---
 
-## 6. Bugs Found and Fixed
+## 7. Bugs Found and Fixed
 
 | Bug | Severity | File | Fix | Commit |
 |-----|----------|------|-----|--------|
@@ -219,7 +314,7 @@ MintContext:
 
 ---
 
-## 7. Test Plan
+## 8. Test Plan
 
 Run these tests before announcing launch. Check each box as you go.
 
@@ -252,6 +347,43 @@ Run these tests before announcing launch. Check each box as you go.
 | 11 | Supply counter | Check generator UI | Shows correct minted/4200 count | |
 | 12 | Mint number correct | Check DB after both mints | Sequential numbers, no gaps, match NFT metadata | |
 
+### Surcharge Tests
+
+| # | Test | Expected Result | Pass? |
+|---|------|-----------------|-------|
+| 13 | `surchargeXch(0, 'Head', 'Crown')` | Returns 0 | |
+| 14 | `surchargeXch(105, 'Head', 'Crown')` | Returns ~1.000 (at fair share) | |
+| 15 | `surchargeXch(150, 'Head', 'Crown')` | Returns ~2.898 (price wall) | |
+| 16 | `surchargeXch(200, 'Head', 'Crown')` | Returns ~8.454 (effectively blocked) | |
+| 17 | `surchargeXch(100, 'Mouth', 'Cig')` | Returns 0 (excluded category) | |
+| 18 | `surchargeXch(100, 'Face', 'Classic')` | Returns 0 (excluded category) | |
+| 19 | `surchargeXch(100, 'Background', 'Moon')` | Returns 0 (excluded category) | |
+| 20 | `surchargeXch(100, 'Head', 'No Headgear')` | Returns 0 (exempt trait) | |
+| 21 | `surchargeXch(100, 'Face Wear', 'No Face Wear')` | Returns 0 (exempt trait) | |
+
+### Decay Tests
+
+| # | Test | Expected Result | Pass? |
+|---|------|-----------------|-------|
+| 22 | Trait with `effective_usage=100`, `last_decay_at=30 days ago` | effective_usage decays to ~50 | |
+| 23 | Trait with `last_decay_at=now` | effective_usage unchanged | |
+
+### Credit Formula V2 Tests
+
+| # | Test | Expected Result | Pass? |
+|---|------|-----------------|-------|
+| 24 | `calculateCredits(2.0, 2.0)` | 10000 stored units (100 display = 1 free mint) | |
+| 25 | `calculateCredits(4.0, 2.0)` | ~23000 stored units (multiplier ~1.15) | |
+| 26 | `calculateCredits(100.0, 2.0)` | multiplier ~1.294 (near 1.30 cap) | |
+| 27 | Old constants `CREDITS_PER_FLOOR`, `WHALE_COEFFICIENT` | Not in codebase (grep returns 0 results) | |
+
+### Wallet Validation Tests
+
+| # | Test | Expected Result | Pass? |
+|---|------|-----------------|-------|
+| 28 | `isValidChiaAddress('xch1short')` | Returns false | |
+| 29 | `isValidChiaAddress('xch1' + 58 valid bech32m chars)` | Returns true | |
+
 ### Post-Test Cleanup (Optional)
 
 ```bash
@@ -267,7 +399,7 @@ npx wrangler d1 execute wojak-users --remote --command \
 
 ---
 
-## 8. Rollback Plan
+## 9. Rollback Plan
 
 ### Disable minting immediately
 
@@ -304,7 +436,7 @@ npx wrangler pages deployments rollback --project-name=wojak-ink
 
 ---
 
-## 9. Post-Launch Monitoring Queries
+## 10. Post-Launch Monitoring Queries
 
 Run these in the first hours after launch.
 
@@ -369,7 +501,7 @@ SELECT
 
 ---
 
-## 10. Build Status
+## 11. Build Status
 
 ```
 npm run build (tsc -b && vite build):  PASS
@@ -381,21 +513,25 @@ Deploy URL:                            https://wojak.ink
 
 ---
 
-## 11. Files in the Minting Pipeline
+## 12. Files in the Minting Pipeline
 
 ### Backend (Cloudflare Pages Functions)
 
 | File | Role |
 |------|------|
-| `functions/api/mint/_shared.ts` | CORS helpers, wallet validation, surcharge formula, internal API header |
+| `functions/api/mint/_shared.ts` | CORS helpers, fair-share surcharge formula, decay, internal API header |
 | `functions/api/mint/mintNumberHelper.ts` | Atomic mint number allocation (UPDATE...RETURNING) |
 | `functions/api/mint/auditHelper.ts` | Audit trail logging, refund tracking |
 | `functions/api/mint/prepare.ts` | Main mint endpoint: validate, reserve number, upload, call MintGarden |
-| `functions/api/mint/upload.ts` | IPFS upload via Pinata (image + metadata), internal-only |
+| `functions/api/mint/uploadToIPFS.ts` | IPFS upload logic (direct function, not HTTP) |
+| `functions/api/mint/upload.ts` | HTTP wrapper for uploadToIPFS (internal-only, header guard) |
+| `functions/api/mint/traitResolver.ts` | Trait name resolution using canonical TRAIT_NAME_MAP |
 | `functions/api/mint/request.ts` | MintGarden Dynamic Minting API wrapper with retries |
 | `functions/api/mint/confirm.ts` | Confirm paid mint after user accepts offer |
 | `functions/api/mint/status.ts` | Check for pending mints (resume on reload) |
-| `functions/api/mint/pricing.ts` | Trait surcharges and supply count |
+| `functions/api/mint/pricing.ts` | Trait surcharges (fair-share) and supply count |
+| `functions/lib/validation.ts` | Shared `isValidChiaAddress()` bech32m validation |
+| `functions/lib/traitNameMap.ts` | Server-side canonical TRAIT_NAME_MAP (synced with src/) |
 | `functions/api/credits/balance.ts` | Credit balance for a wallet |
 
 ### Frontend (React)
@@ -413,14 +549,15 @@ Deploy URL:                            https://wojak.ink
 | `functions/migrations/030_credit_system.sql` | Core tables: credits, mints, traits, floor prices |
 | `functions/migrations/031_mint_counter.sql` | Atomic counter for mint numbering |
 | `functions/migrations/032_mint_audit_trail.sql` | Audit log + refund columns |
+| `functions/migrations/034_trait_decay.sql` | Trait decay columns (effective_usage, last_decay_at) |
 
 ---
 
-## 12. Post-Launch TODO
+## 13. Post-Launch TODO
 
-| Item | Priority |
-|------|----------|
-| Extract upload logic to shared function (eliminate self-fetch in prepare.ts) | Low |
-| Migrate `audit.ts`, `refund.ts` to shared CORS helpers | Low |
-| Harden `confirm.ts` wallet check (make walletAddress required) | Low |
-| Update `balance.ts` to use `isValidChiaAddress` | Low |
+| Item | Priority | Status |
+|------|----------|--------|
+| ~~Extract upload logic to shared function~~ | ~~Low~~ | ✅ Done (uploadToIPFS.ts) |
+| ~~Update balance.ts to use isValidChiaAddress~~ | ~~Low~~ | ✅ Done (FIX 4) |
+| ~~Harden confirm.ts wallet check~~ | ~~Low~~ | ✅ Done (FIX 3) |
+| Migrate `audit.ts`, `refund.ts` to shared CORS helpers | Low | Open |

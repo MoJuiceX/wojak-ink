@@ -23,6 +23,7 @@
 
 import { authenticateRequest } from '../../lib/auth';
 import { checkRateLimit, getRateLimitKey, getRateLimitHeaders, CHAT_RATE_LIMITS } from '../../lib/rateLimit';
+import { isValidChiaAddress } from '../../lib/validation';
 
 interface Env {
   CLERK_DOMAIN: string;
@@ -158,16 +159,6 @@ async function fetchWojakNftCount(walletAddress: string, db: D1Database): Promis
     const cached = await getCachedNftCount(db, walletAddress);
     return cached ?? 0;
   }
-}
-
-/**
- * Validate Chia wallet address format
- */
-function isValidChiaAddress(address: string): boolean {
-  return typeof address === 'string' &&
-    address.startsWith('xch1') &&
-    address.length === 62 &&
-    /^xch1[a-z0-9]+$/.test(address);
 }
 
 /**

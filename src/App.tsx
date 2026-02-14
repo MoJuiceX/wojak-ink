@@ -55,6 +55,7 @@ const Profile = lazy(() => import('./pages/Profile'));
 const Guild = lazy(() => import('./pages/Guild'));
 const Shop = lazy(() => import('./pages/Shop'));
 const Leaderboard = lazy(() => import('./pages/Leaderboard'));
+const Admin = lazy(() => import('./pages/Admin'));
 const Drawer = lazy(() => import('./pages/Drawer'));
 const RuleBuilder = lazy(() => import('./pages/RuleBuilder'));
 
@@ -323,6 +324,15 @@ function AppContent() {
                   <Route
                     path="achievements"
                     element={<Navigate to="/account" replace />}
+                  />
+                  {/* Admin dashboard — internal, not in navigation */}
+                  <Route
+                    path="admin"
+                    element={
+                      <Suspense fallback={<PageSkeleton type="settings" />}>
+                        <Admin />
+                      </Suspense>
+                    }
                   />
                   <Route
                     path="drawer/:userId"

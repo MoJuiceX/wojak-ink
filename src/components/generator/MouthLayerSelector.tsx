@@ -8,6 +8,8 @@
 import { useState, useEffect } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useGenerator } from '@/contexts/GeneratorContext';
+import { useMint, type TraitPricingEntry } from '@/contexts/MintContext';
+import { TraitUsageBadge } from '@/components/generator/TraitSelector';
 import { traitGridVariants, traitCardStaggerVariants } from '@/config/generatorAnimations';
 import type { LayerImage } from '@/services/generatorService';
 import type { UnifiedTrait } from '@/services/generatorService';
@@ -37,9 +39,10 @@ interface ImageCardProps {
   disabledReason?: string;
   onClick: () => void;
   badge?: string;
+  pricing?: TraitPricingEntry | null;
 }
 
-function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, badge }: ImageCardProps) {
+function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, badge, pricing }: ImageCardProps) {
   const prefersReducedMotion = useReducedMotion();
 
   return (
@@ -84,6 +87,7 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, bad
           className="absolute inset-0 w-full h-full object-cover"
           loading="lazy"
         />
+        <TraitUsageBadge pricing={pricing ?? null} />
       </div>
       {/* Disabled info badge */}
       {isDisabled && disabledReason && (
@@ -121,9 +125,10 @@ interface G2MouthCardProps {
   isDisabled: boolean;
   disabledReason?: string;
   onClick: () => void;
+  pricing?: TraitPricingEntry | null;
 }
 
-function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick }: G2MouthCardProps) {
+function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick, pricing }: G2MouthCardProps) {
   const prefersReducedMotion = useReducedMotion();
   const thumbnailSrc = trait.outlineFile
     ? `${G2_BASE_PATH}/${trait.outlineFile}`
@@ -162,6 +167,7 @@ function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick }:
             loading="lazy"
           />
         )}
+        <TraitUsageBadge pricing={pricing ?? null} />
       </div>
       {isSelected && !isDisabled && (
         <motion.div
@@ -204,7 +210,15 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
     isOptionDisabled,
     isInitialized,
   } = useGenerator();
+  const { getTraitPricing } = useMint();
   const prefersReducedMotion = useReducedMotion();
+
+  // All mouth layers map to "Mouth" trait_type — no surcharge category
+  const lookupPricing = (traitName: string): TraitPricingEntry | null => {
+    const p = getTraitPricing('Mouth', traitName);
+    if (p) return { usageCount: p.usageCount, surchargeXch: 0 };
+    return p;
+  };
 
   const [mouthBaseUnified, setMouthBaseUnified] = useState<UnifiedTrait[]>([]);
   const [mouthItemImages, setMouthItemImages] = useState<LayerImage[]>([]);
@@ -365,6 +379,7 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
                       isDisabled={isDisabled}
                       disabledReason={isDisabled ? getDisabledReasonForOption('MouthBase', displayName) : undefined}
                       onClick={() => selectG2Layer('MouthBase', trait)}
+                      pricing={lookupPricing(trait.name)}
                     />
                   </motion.div>
                 );
@@ -387,6 +402,7 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
                         ? selectLayer('MouthBase', g1Path)
                         : selectG2Layer('MouthBase', trait)
                     }
+                    pricing={lookupPricing(trait.name)}
                   />
                 </motion.div>
               );
@@ -406,6 +422,7 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
                     disabledReason={isDisabled ? getDisabledReasonForOption('MouthItem', image.displayName) : undefined}
                     onClick={() => handleMouthItemClick(image)}
                     badge="+"
+                    pricing={lookupPricing(image.displayName)}
                   />
                 </motion.div>
               );
@@ -425,6 +442,7 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
                     disabledReason={isDisabled ? getDisabledReasonForOption('FacialHair', image.displayName) : undefined}
                     onClick={() => handleFacialHairClick(image)}
                     badge="+"
+                    pricing={lookupPricing(image.displayName)}
                   />
                 </motion.div>
               );

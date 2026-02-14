@@ -26,10 +26,15 @@ import {
   errorResponse,
   optionsResponse,
   isValidChiaAddress,
-  surchargeXch as sharedSurchargeXch,
-  INTERNAL_API_HEADER,
+  surchargeXch,
+  applyDecay,
+  SURCHARGE_CATEGORIES,
+  SURCHARGE_EXEMPT_TRAITS,
+  DECAY_HALF_LIFE_DAYS,
 } from './_shared';
 import { checkRateLimit, getRateLimitKey, MINT_RATE_LIMITS } from '../../lib/rateLimit';
+import { uploadToIPFS, IPFSUploadResult } from './uploadToIPFS';
+import { resolveTraitName, LAYER_TO_TRAIT_TYPE, PHASE1_RARITY } from './traitResolver';
 
 interface Env {
   DB: D1Database;
@@ -39,7 +44,6 @@ interface Env {
   PHASE2_ROYALTY_ADDRESS?: string;
   PHASE2_ROYALTY_PCT?: string;
   MINTGARDEN_API_KEY?: string;
-  INTERNAL_MINT_SECRET?: string;
 }
 
 const SUPPLY_TOTAL = 4200;
@@ -182,49 +186,74 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     const mintNumber = await getNextMintNumber(env.DB);
 
     // ── Build metadata with the REAL mint number ──
+    // Build raw attributes, then consolidate duplicates (rarer trait wins)
+    const rawAttrs: { trait_type: string; value: string; layerKey: string }[] = [];
+    for (const [layer, value] of Object.entries(selectedLayers)) {
+      const traitType = LAYER_TO_TRAIT_TYPE[layer];
+      if (!traitType) continue;
+      rawAttrs.push({
+        trait_type: traitType,
+        value: resolveTraitName(value, layer),
+        layerKey: layer,
+      });
+    }
+
+    const consolidated = new Map<string, { trait_type: string; value: string; layerKey: string }>();
+    for (const attr of rawAttrs) {
+      const existing = consolidated.get(attr.trait_type);
+      if (!existing) {
+        consolidated.set(attr.trait_type, attr);
+      } else {
+        const existingRarity = PHASE1_RARITY[existing.value] ?? 0;
+        const newRarity = PHASE1_RARITY[attr.value] ?? 0;
+        if (newRarity < existingRarity) {
+          consolidated.set(attr.trait_type, attr);
+        }
+      }
+    }
+
+    // Always inject fixed "Base: Wojak"
+    consolidated.set('Base', { trait_type: 'Base', value: 'Wojak', layerKey: '_base' });
+
+    // Sort in Phase 1 canonical order
+    const TRAIT_ORDER = ['Background', 'Base', 'Clothes', 'Face', 'Face Wear', 'Head', 'Mouth'];
+    const attributes = [...consolidated.values()]
+      .map(({ trait_type, value }) => ({ trait_type, value }))
+      .sort((a, b) => {
+        const ai = TRAIT_ORDER.indexOf(a.trait_type);
+        const bi = TRAIT_ORDER.indexOf(b.trait_type);
+        return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+      });
+
     const metadata = {
       format: 'CHIP-0007',
-      minting_tool: 'Wojak.ink Generator',
       name: `Your Wojak #${mintNumber}`,
-      description: 'A custom Wojak created on wojak.ink',
+      description: 'Your Wojak puts collectors in control. Same handcrafted layers and lore from the Wojak Farmers Plot collection \u2014 but you choose every layer, every color, every detail using the Wojak Generator on Wojak.ink \uD83C\uDF4A',
       sensitive_content: false,
       collection: { name: 'Your Wojak', id: collectionUuid },
-      attributes: [
-        ...Object.entries(selectedLayers).map(([trait_type, value]) => ({
-          trait_type,
-          value: value.split('/').pop()?.replace(/\.png$/, '') || value,
-        })),
-        ...Object.entries(selectedColors).filter(([, v]) => v).map(([trait_type, value]) => ({
-          trait_type: `${trait_type} Color`,
-          value,
-        })),
-      ],
+      edition: mintNumber,
+      date: Date.now(),
+      compiler: 'Wojak.ink Generator',
+      attributes,
       edition_number: mintNumber,
       edition_total: SUPPLY_TOTAL,
     };
 
-    // ── IPFS Upload ──
-    // TODO: Extract upload logic into shared function to eliminate self-fetch
-    const uploadUrl = new URL('/api/mint/upload', request.url).toString();
-    const uploadHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (env.INTERNAL_MINT_SECRET) {
-      uploadHeaders[INTERNAL_API_HEADER] = env.INTERNAL_MINT_SECRET;
+    // ── IPFS Upload (direct call, no self-fetch) ──
+    const jwt = env.PINATA_JWT;
+    if (!jwt) {
+      return errorResponse('IPFS upload not configured', 503);
     }
-    const uploadRes = await fetch(uploadUrl, {
-      method: 'POST',
-      headers: uploadHeaders,
-      body: JSON.stringify({ imageBase64, metadata }),
-    });
-    if (!uploadRes.ok) {
-      const err = await uploadRes.json().catch(() => ({ error: 'Upload failed' }));
-      return jsonResponse(err, uploadRes.status);
+    let uploadData: IPFSUploadResult;
+    try {
+      uploadData = await uploadToIPFS(imageBase64, metadata as Record<string, unknown>, jwt);
+    } catch (error) {
+      console.error('[Mint Prepare] IPFS upload failed:', error);
+      return errorResponse(
+        error instanceof Error ? error.message : 'IPFS upload failed',
+        502
+      );
     }
-    const uploadData = (await uploadRes.json()) as {
-      dataHash: string;
-      dataUris: string[];
-      metadataHash: string;
-      metadataUris: string[];
-    };
 
     const ipfsImageUri = uploadData.dataUris[0] ?? null;
     const ipfsMetadataUri = uploadData.metadataUris[0] ?? null;
@@ -306,19 +335,40 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         data: { mint_number: mintNumber, launcher_id: launcherId },
       });
 
-      // Increment trait usage
-      for (const [category, path] of Object.entries(selectedLayers)) {
-        if (!path) continue;
-        const traitName = path.split('/').pop()?.replace(/\.(png|webp)$/i, '') || path;
-        await env.DB.prepare(
-          `INSERT INTO trait_usage (trait_category, trait_name, usage_count, updated_at)
-           VALUES (?, ?, 1, datetime('now'))
-           ON CONFLICT(trait_category, trait_name) DO UPDATE SET
-             usage_count = usage_count + 1,
-             updated_at = datetime('now')`
-        )
-          .bind(category, traitName)
-          .run();
+      // Batch all trait_usage upserts into a single D1 round trip
+      const traitStmts: D1PreparedStatement[] = [];
+      for (const { trait_type, value } of consolidated.values()) {
+        if (!value || trait_type === 'Base') continue;
+        const isExempt = SURCHARGE_EXEMPT_TRAITS.has(value);
+
+        if (SURCHARGE_CATEGORIES.has(trait_type) && !isExempt) {
+          traitStmts.push(
+            env.DB.prepare(
+              `INSERT INTO trait_usage (trait_category, trait_name, usage_count, effective_usage, last_decay_at, updated_at)
+               VALUES (?, ?, 1, 1, datetime('now'), datetime('now'))
+               ON CONFLICT(trait_category, trait_name) DO UPDATE SET
+                 usage_count = usage_count + 1,
+                 effective_usage = effective_usage * exp(
+                   ln(0.5) * (julianday('now') - julianday(last_decay_at)) / ?
+                 ) + 1,
+                 last_decay_at = datetime('now'),
+                 updated_at = datetime('now')`
+            ).bind(trait_type, value, DECAY_HALF_LIFE_DAYS)
+          );
+        } else {
+          traitStmts.push(
+            env.DB.prepare(
+              `INSERT INTO trait_usage (trait_category, trait_name, usage_count, updated_at)
+               VALUES (?, ?, 1, datetime('now'))
+               ON CONFLICT(trait_category, trait_name) DO UPDATE SET
+                 usage_count = usage_count + 1,
+                 updated_at = datetime('now')`
+            ).bind(trait_type, value)
+          );
+        }
+      }
+      if (traitStmts.length > 0) {
+        await env.DB.batch(traitStmts);
       }
 
       return jsonResponse({
@@ -333,25 +383,35 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     // ═══════════════════════════════════════════════════════
     // PAID MINT
     // ═══════════════════════════════════════════════════════
-    const traitRows = await env.DB.prepare('SELECT trait_category, trait_name, usage_count FROM trait_usage').all<{
+    const traitRows = await env.DB.prepare(
+      `SELECT trait_category, trait_name, usage_count, effective_usage, last_decay_at
+       FROM trait_usage WHERE trait_category IN ('Head', 'Clothes', 'Face Wear')`
+    ).all<{
       trait_category: string;
       trait_name: string;
       usage_count: number;
+      effective_usage: number;
+      last_decay_at: string;
     }>();
-    const usageMap = new Map<string, number>();
-    for (const r of traitRows.results || []) {
-      usageMap.set(`${r.trait_category}_${r.trait_name}`, r.usage_count);
-    }
+
+    // Calculate surcharge — only for Head, Clothes, Face Wear
+    // Take the single highest surcharge across all selected traits
     let maxSurcharge = 0;
     let highestTrait: string | null = null;
-    for (const [layer, path] of Object.entries(selectedLayers)) {
-      if (!path) continue;
-      const traitName = path.split('/').pop()?.replace(/\.(png|webp)$/i, '') || path;
-      const usage = usageMap.get(`${layer}_${traitName}`) ?? 0;
-      const surcharge = sharedSurchargeXch(usage);
-      if (surcharge > maxSurcharge) {
-        maxSurcharge = surcharge;
-        highestTrait = `${layer}_${traitName}`;
+
+    for (const { trait_type, value } of consolidated.values()) {
+      if (!SURCHARGE_CATEGORIES.has(trait_type)) continue;
+      if (SURCHARGE_EXEMPT_TRAITS.has(value)) continue;
+
+      const row = (traitRows.results || []).find(
+        r => r.trait_category === trait_type && r.trait_name === value
+      );
+      const decayedUsage = row ? applyDecay(row.effective_usage, row.last_decay_at) : 0;
+      const traitSurcharge = surchargeXch(decayedUsage, trait_type, value);
+
+      if (traitSurcharge > maxSurcharge) {
+        maxSurcharge = traitSurcharge;
+        highestTrait = `${trait_type}: ${value}`;
       }
     }
     const totalPriceXch = BASE_PRICE_XCH + maxSurcharge;

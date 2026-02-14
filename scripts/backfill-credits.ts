@@ -33,9 +33,9 @@ const BACKFILL_FLOOR_XCH = 1.0;
 const BACKFILL_FLOOR_STORED = 100; // x100
 
 // Credit formula constants
-const CREDITS_PER_FLOOR = 50;
+const CREDITS_PER_XCH = 50;
+const MAX_WHALE_BONUS = 0.30;
 const MIN_EFFECTIVE_FLOOR = 0.5;
-const WHALE_COEFFICIENT = 0.2;
 
 // Rate limiting
 const DELAY_BETWEEN_PAGES_MS = 500;
@@ -103,8 +103,12 @@ function calculateCredits(priceXch: number, floorXch: number): {
 } {
   const effectiveFloor = Math.max(MIN_EFFECTIVE_FLOOR, floorXch);
   const priceRatio = Math.max(1, priceXch / effectiveFloor);
-  const whaleMultiplier = 1 + WHALE_COEFFICIENT * Math.log(priceRatio);
-  const rawCredits = CREDITS_PER_FLOOR * priceRatio * whaleMultiplier;
+
+  // Asymptotic multiplier: approaches (1 + MAX_WHALE_BONUS) but never exceeds it
+  const whaleMultiplier = 1 + (MAX_WHALE_BONUS * (1 - 1 / priceRatio));
+
+  // Credits proportional to XCH spent (not floor multiples)
+  const rawCredits = CREDITS_PER_XCH * priceXch * whaleMultiplier;
 
   return {
     credits: Math.round(rawCredits * 100),

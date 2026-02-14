@@ -1,0 +1,25 @@
+name = "wojak-fetch-sales"
+main = "worker.ts"
+compatibility_date = "2024-01-01"
+
+# Cron trigger: every 30 minutes
+[triggers]
+crons = ["*/30 * * * *"]
+
+# D1 Database binding (same as Pages and credit-tracker)
+[[d1_databases]]
+binding = "DB"
+database_name = "wojak-users"
+database_id = "32e7fa5f-524e-4913-b541-f9a339c126c6"
+
+# KV Namespace binding for trade values cache
+[[kv_namespaces]]
+binding = "TRADE_VALUES_KV"
+id = "3d3382d37eeb4d4dac250fcf03b3f24d"
+
+# Environment variables
+[vars]
+COLLECTION_ID = "col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah"
+
+# Secrets (set via `wrangler secret put` in this worker's directory):
+# - ADMIN_PASSWORD: Password for admin endpoints

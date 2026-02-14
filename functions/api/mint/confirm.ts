@@ -17,8 +17,13 @@ import {
   jsonResponse,
   errorResponse,
   optionsResponse,
+  isValidChiaAddress,
+  SURCHARGE_CATEGORIES,
+  SURCHARGE_EXEMPT_TRAITS,
+  DECAY_HALF_LIFE_DAYS,
 } from './_shared';
 import { checkRateLimit, getRateLimitKey, MINT_RATE_LIMITS } from '../../lib/rateLimit';
+import { consolidateTraits } from './traitResolver';
 
 interface Env {
   DB: D1Database;
@@ -68,8 +73,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   }
 
   const callerWallet = body.walletAddress;
-  if (!callerWallet) {
-    return errorResponse('Missing walletAddress', 400);
+  if (!callerWallet || !isValidChiaAddress(callerWallet)) {
+    return errorResponse('Missing or invalid walletAddress', 400);
   }
 
   try {
@@ -85,7 +90,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     }
 
     // Verify caller owns this mint (prevent unauthorized confirmation)
-    if (callerWallet !== row.wallet_address) {
+    if (callerWallet.toLowerCase() !== row.wallet_address.toLowerCase()) {
       return errorResponse('Wallet address does not match this mint', 403);
     }
 
@@ -101,20 +106,44 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     // mint_number was already assigned at prepare time — use it directly
     const mintNumber = row.mint_number;
 
-    // Increment trait usage
+    // Increment trait usage (using resolved trait_type + display name)
     const layers = JSON.parse(row.layers_json || '{}') as Record<string, string>;
-    for (const [category, path] of Object.entries(layers)) {
-      if (!path) continue;
-      const traitName = path.split('/').pop()?.replace(/\.(png|webp)$/i, '') || path;
-      await env.DB.prepare(
-        `INSERT INTO trait_usage (trait_category, trait_name, usage_count, updated_at)
-         VALUES (?, ?, 1, datetime('now'))
-         ON CONFLICT(trait_category, trait_name) DO UPDATE SET
-           usage_count = usage_count + 1,
-           updated_at = datetime('now')`
-      )
-        .bind(category, traitName)
-        .run();
+    const consolidated = consolidateTraits(layers);
+
+    // Batch all trait_usage upserts into a single D1 round trip
+    const traitStmts: D1PreparedStatement[] = [];
+    for (const { traitType, displayName } of consolidated.values()) {
+      if (traitType === 'Base') continue;
+      const isExempt = SURCHARGE_EXEMPT_TRAITS.has(displayName);
+
+      if (SURCHARGE_CATEGORIES.has(traitType) && !isExempt) {
+        traitStmts.push(
+          env.DB.prepare(
+            `INSERT INTO trait_usage (trait_category, trait_name, usage_count, effective_usage, last_decay_at, updated_at)
+             VALUES (?, ?, 1, 1, datetime('now'), datetime('now'))
+             ON CONFLICT(trait_category, trait_name) DO UPDATE SET
+               usage_count = usage_count + 1,
+               effective_usage = effective_usage * exp(
+                 ln(0.5) * (julianday('now') - julianday(last_decay_at)) / ?
+               ) + 1,
+               last_decay_at = datetime('now'),
+               updated_at = datetime('now')`
+          ).bind(traitType, displayName, DECAY_HALF_LIFE_DAYS)
+        );
+      } else {
+        traitStmts.push(
+          env.DB.prepare(
+            `INSERT INTO trait_usage (trait_category, trait_name, usage_count, updated_at)
+             VALUES (?, ?, 1, datetime('now'))
+             ON CONFLICT(trait_category, trait_name) DO UPDATE SET
+               usage_count = usage_count + 1,
+               updated_at = datetime('now')`
+          ).bind(traitType, displayName)
+        );
+      }
+    }
+    if (traitStmts.length > 0) {
+      await env.DB.batch(traitStmts);
     }
 
     // Update status to minted

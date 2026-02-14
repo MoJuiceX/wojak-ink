@@ -4,25 +4,22 @@
  * Stores and queries NFT sales history.
  * Used for Gallery History tab and BigPulp trait analysis.
  *
- * Data is stored in localStorage and can be updated incrementally
- * from Parse.bot Dexie scraping.
+ * Server-side D1 database is the source of truth (populated by fetch-sales worker).
+ * This service caches data in localStorage for offline access and fast reads.
  */
-
-import { convertSalePrice, getXchPrice } from './historicalPriceService';
 
 // ============ Types ============
 
-export interface RawSaleRecord {
+export interface SaleRecord {
   nftId: number;           // Edition number (1-4200)
   amount: number;          // Original sale amount
   currency: 'XCH' | 'CAT'; // Payment currency
   timestamp: number;       // Unix timestamp (ms)
   traits: Record<string, string>; // NFT traits at time of sale
-}
-
-export interface SaleRecord extends RawSaleRecord {
   xchEquivalent: number;   // Normalized to XCH
   usdValue: number;        // USD value at time of sale
+  tokenCode: string | null;  // CAT token symbol (e.g. "BEPE", "🪄⚡️")
+  catXchRate: number | null; // XCH rate used for conversion
 }
 
 export interface SalesDatabank {
@@ -119,45 +116,6 @@ function rebuildIndexes(): void {
  */
 export function initializeSalesDatabank(): void {
   loadDatabank();
-}
-
-/**
- * Import raw sales from Parse.bot
- * Converts prices and adds to databank
- */
-export async function importSales(rawSales: RawSaleRecord[]): Promise<number> {
-  let addedCount = 0;
-
-  for (const raw of rawSales) {
-    // Check for duplicates (same NFT, same timestamp)
-    const existing = databank.sales.find(
-      s => s.nftId === raw.nftId && s.timestamp === raw.timestamp
-    );
-    if (existing) continue;
-
-    // Convert price to XCH equivalent and USD
-    const priceInfo = await convertSalePrice(
-      raw.amount,
-      raw.currency,
-      new Date(raw.timestamp)
-    );
-
-    const sale: SaleRecord = {
-      ...raw,
-      xchEquivalent: priceInfo.xchEquivalent,
-      usdValue: priceInfo.usdValue,
-    };
-
-    databank.sales.push(sale);
-    addedCount++;
-  }
-
-  if (addedCount > 0) {
-    rebuildIndexes();
-    saveDatabank();
-  }
-
-  return addedCount;
 }
 
 /**
@@ -268,6 +226,71 @@ export function getRecentSales(limit: number = 10): SaleRecord[] {
 }
 
 /**
+ * Load sales from the server-side D1 database.
+ * Hydrates the in-memory databank, deduplicates, and caches to localStorage.
+ * Returns the number of new sales added.
+ */
+export async function loadFromServer(): Promise<number> {
+  try {
+    const response = await fetch('/api/sales/history?limit=5000&sort=newest');
+    if (!response.ok) {
+      console.warn('[SalesDatabank] Server fetch failed:', response.status);
+      return 0;
+    }
+
+    const data = await response.json() as {
+      items: Array<{
+        nftId: number;
+        amount: number;
+        currency: 'XCH' | 'CAT';
+        timestamp: number;
+        traits: Record<string, string>;
+        xchEquivalent: number;
+        usdValue: number;
+        tokenCode: string | null;
+        catXchRate: number | null;
+      }>;
+      total: number;
+    };
+
+    if (!data.items || data.items.length === 0) return 0;
+
+    let addedCount = 0;
+
+    for (const item of data.items) {
+      // Deduplicate by nftId + timestamp
+      const existing = databank.sales.find(
+        s => s.nftId === item.nftId && s.timestamp === item.timestamp
+      );
+      if (existing) continue;
+
+      databank.sales.push({
+        nftId: item.nftId,
+        amount: item.amount,
+        currency: item.currency,
+        timestamp: item.timestamp,
+        traits: item.traits || {},
+        xchEquivalent: item.xchEquivalent,
+        usdValue: item.usdValue || 0,
+        tokenCode: item.tokenCode ?? null,
+        catXchRate: item.catXchRate ?? null,
+      });
+      addedCount++;
+    }
+
+    if (addedCount > 0) {
+      rebuildIndexes();
+      saveDatabank();
+    }
+
+    return addedCount;
+  } catch (error) {
+    console.warn('[SalesDatabank] Server load failed, using localStorage:', error);
+    return 0;
+  }
+}
+
+/**
  * Export databank for backup
  */
 export function exportDatabank(): SalesDatabank {
@@ -305,68 +328,3 @@ export function getSalesCount(): number {
   return databank.sales.length;
 }
 
-/**
- * Fix suspicious CAT token sales with wrong conversion rates
- * This targets sales where CAT amounts were converted with wrong rates
- *
- * Known patterns:
- * - PIZZA sales: 550,000 PIZZA should be ~1.57 XCH, not 25+ XCH
- * - G4M sales: 366,666 G4M should be ~0.64 XCH, not 16+ XCH
- * - SPROUT sales: 110,000 SPROUT should be ~1.02 XCH, not 5+ XCH
- * - Any CAT sale showing >3 XCH with huge original amounts is likely wrong
- */
-export async function fixSuspiciousSales(): Promise<number> {
-  try {
-
-    let fixedCount = 0;
-
-    // Token rate estimates based on amount ranges
-    // Different token types tend to have different value per token
-    const getEstimatedRate = (amount: number): number => {
-      // SPROUT-like (100k-200k range): ~0.00000932 XCH per token
-      if (amount >= 100000 && amount < 200000) return 0.00000932;
-      // G4M-like (300k-400k range): ~0.00000175 XCH per token
-      if (amount >= 300000 && amount < 500000) return 0.00000175;
-      // PIZZA-like (500k+ range): ~0.00000285 XCH per token
-      if (amount >= 500000) return 0.00000285;
-      // Default conservative rate for unknown ranges
-      return 0.000005;
-    };
-
-    for (const sale of databank.sales) {
-      try {
-        if (sale.currency !== 'CAT') continue;
-
-        // Check if this looks like a miscalculated token sale
-        // Pattern: huge original amount (>50k) + high XCH equivalent (>2)
-        if (sale.amount > 50000 && sale.xchEquivalent > 2) {
-          // Use estimated rate based on amount range
-          const estimatedRate = getEstimatedRate(sale.amount);
-          const newXchEquivalent = sale.amount * estimatedRate;
-
-          // Only fix if the new value is significantly lower (at least 40% reduction)
-          if (newXchEquivalent < sale.xchEquivalent * 0.6) {
-            const xchPrice = await getXchPrice(new Date(sale.timestamp));
-
-
-            sale.xchEquivalent = newXchEquivalent;
-            sale.usdValue = newXchEquivalent * xchPrice;
-            fixedCount++;
-          }
-        }
-      } catch (saleError) {
-        console.warn(`[SalesDatabank] Error fixing sale for NFT ${sale.nftId}:`, saleError);
-      }
-    }
-
-    if (fixedCount > 0) {
-      rebuildIndexes();
-      saveDatabank();
-    }
-
-    return fixedCount;
-  } catch (error) {
-    console.error('[SalesDatabank] Error in fixSuspiciousSales:', error);
-    return 0;
-  }
-}

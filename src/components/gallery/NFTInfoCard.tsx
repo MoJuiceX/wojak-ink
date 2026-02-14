@@ -14,7 +14,7 @@ import {
 } from '@/utils/mockData';
 import { getMintGardenNftUrl } from '@/services/marketApi';
 import { useTraitRankings, type TooltipData } from '@/hooks/useTraitRankings';
-import { fetchNFTOwnerByEdition, type NFTOwnerInfo } from '@/services/parseBotService';
+import { fetchNFTOwnerByEdition, type NFTOwnerInfo } from '@/services/nftDataService';
 import { useSalesHistory } from '@/hooks/useSalesHistory';
 import { useXchPrice } from '@/hooks/data/useTreasuryData';
 import {
@@ -531,7 +531,7 @@ export function NFTInfoCard({
   onTabChange,
   onOpenExternal,
 }: NFTInfoCardProps) {
-  // Fetch owner info via Parse.bot
+  // Fetch owner info via MintGarden
   const [ownerInfo, setOwnerInfo] = useState<NFTOwnerInfo | null>(null);
   // Badge data
   const [badges, setBadges] = useState<NFTBadgeEntry | null>(null);

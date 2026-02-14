@@ -18,6 +18,8 @@
  * }
  */
 
+import { isValidChiaAddress } from '../../lib/validation';
+
 interface Env {
   DB: D1Database;
 }
@@ -78,7 +80,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const url = new URL(request.url);
   const wallet = url.searchParams.get('wallet');
 
-  if (!wallet || !wallet.startsWith('xch1')) {
+  if (!wallet || !isValidChiaAddress(wallet)) {
     return new Response(
       JSON.stringify({ error: 'Missing or invalid wallet parameter. Expected xch1... address.' }),
       { status: 400, headers: corsHeaders }

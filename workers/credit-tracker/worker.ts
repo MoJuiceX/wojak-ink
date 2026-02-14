@@ -12,10 +12,30 @@
 const MINTGARDEN_API = 'https://api.mintgarden.io';
 const KV_KEY_LAST_TIMESTAMP = 'last_credit_event_timestamp';
 const KV_KEY_LAST_FLOOR_DATE = 'last_floor_snapshot_date';
-const CREDITS_PER_FLOOR = 50;
-const FLOOR_FALLBACK_XCH = 100; // 1.0 XCH when no snapshot for date
+// === Economic constants ===
+// Royalty: 10% on Farmers Plot sales. Your Wojak mint: 0.2 XCH.
+// CREDITS_PER_XCH = (0.10 / 0.20) * 100 = 50
+// At floor, 1 purchase = 1 free mint (revenue-neutral with royalty income).
+const CREDITS_PER_XCH = 50;
+
+// Asymptotic whale bonus cap: multiplier never exceeds 1.30.
+// Wash trading breaks even at ~3x floor, max ~1% profit at extreme prices.
+const MAX_WHALE_BONUS = 0.30;
+
 const MIN_EFFECTIVE_FLOOR = 0.5;
-const WHALE_COEFFICIENT = 0.2;
+const FLOOR_FALLBACK_XCH = 100; // 1.0 XCH (x100) when no snapshot
+
+// Only these CAT tokens earn credits. Others are excluded to limit
+// pricing risk (unreliable conversions, token dumps, etc.).
+const CAT_TOKEN_WHITELIST = new Set([
+  'BEPE',
+  '\u{1FA84}\u26A1\uFE0F',       // Wand+Lightning
+  '\u2728\u2764\uFE0F\u200D\u{1F525}\u{1F9D9}\u200D\u2642\uFE0F', // Sparkle+Mage
+  'HOA',
+  'NeckCoin',
+  '$CHIA',
+  'PP',
+]);
 
 const FETCH_RETRIES = 3;
 const FETCH_BACKOFF_MS = [1000, 2000, 4000];
@@ -53,8 +73,13 @@ function calculateCredits(priceXch: number, floorXch: number): {
 } {
   const effectiveFloor = Math.max(MIN_EFFECTIVE_FLOOR, floorXch);
   const priceRatio = Math.max(1, priceXch / effectiveFloor);
-  const whaleMultiplier = 1 + WHALE_COEFFICIENT * Math.log(priceRatio);
-  const rawCredits = CREDITS_PER_FLOOR * priceRatio * whaleMultiplier;
+
+  // Asymptotic multiplier: approaches (1 + MAX_WHALE_BONUS) but never exceeds it
+  const whaleMultiplier = 1 + (MAX_WHALE_BONUS * (1 - 1 / priceRatio));
+
+  // Credits proportional to XCH spent (not floor multiples)
+  const rawCredits = CREDITS_PER_XCH * priceXch * whaleMultiplier;
+
   return {
     credits: Math.round(rawCredits * 100),
     multiplier: Math.round(whaleMultiplier * 10000),
@@ -312,21 +337,255 @@ export default {
   },
 
   async fetch(request: Request, env: Env): Promise<Response> {
-    if (request.url.endsWith('/run') && request.method === 'POST') {
+    const url = new URL(request.url);
+
+    if (url.pathname.endsWith('/run') && request.method === 'POST') {
       await run(env);
       return new Response(JSON.stringify({ ok: true }), {
         headers: { 'Content-Type': 'application/json' },
       });
     }
+
+    if (url.pathname.endsWith('/reprocess-cat') && request.method === 'POST') {
+      // Find CAT trades that have wallets but NO credit_event, ignoring cursor
+      const result = await backfillMissingCatCredits(env);
+      return new Response(JSON.stringify({ ok: true, ...result }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     return new Response('Credit tracker worker. POST /run to trigger manually.', {
       status: 200,
     });
   },
 };
 
+/**
+ * Process CAT token sales from D1 sales_history.
+ * Awards credits using xch_equivalent (already converted by fetch-sales worker).
+ * Uses buyer_address from MintGarden enrichment as the wallet.
+ * Falls back to seller_address if buyer not available (seller earned the trade).
+ */
+async function processCatSales(env: Env): Promise<{ processed: number; inserted: number }> {
+  // Get the last CAT event timestamp we processed
+  const KV_KEY_LAST_CAT = 'last_cat_credit_timestamp';
+  const lastCatTs = await env.TRADE_VALUES_KV.get(KV_KEY_LAST_CAT);
+
+  // Query CAT trades from sales_history that have wallet addresses and valid XCH equivalent
+  let query = `SELECT
+    trade_id, nft_edition, nft_name, currency, token_code,
+    xch_equivalent, buyer_address, seller_address,
+    completed_at, completed_at_unix
+  FROM sales_history
+  WHERE currency = 'CAT'
+    AND xch_equivalent > 0.01`;
+
+  const params: (string | number)[] = [];
+  if (lastCatTs) {
+    query += ' AND completed_at > ?';
+    params.push(lastCatTs);
+  }
+  query += ' ORDER BY completed_at ASC LIMIT 200';
+
+  const result = await env.DB.prepare(query).bind(...params)
+    .all<{
+      trade_id: string;
+      nft_edition: number;
+      nft_name: string;
+      currency: string;
+      token_code: string;
+      xch_equivalent: number;
+      buyer_address: string | null;
+      seller_address: string | null;
+      completed_at: string;
+      completed_at_unix: number;
+    }>();
+
+  const rows = result.results || [];
+  if (rows.length === 0) return { processed: 0, inserted: 0 };
+
+  // Build event IDs and check which already exist
+  const eventIds = rows.map(r => `cat_${r.trade_id}`);
+  const existingSet = new Set<string>();
+  for (let i = 0; i < eventIds.length; i += BATCH_EXISTING_CHUNK) {
+    const chunk = eventIds.slice(i, i + BATCH_EXISTING_CHUNK);
+    const placeholders = chunk.map(() => '?').join(',');
+    const existing = await env.DB.prepare(
+      `SELECT event_id FROM credit_events WHERE event_id IN (${placeholders})`
+    ).bind(...chunk).all<{ event_id: string }>();
+    for (const r of existing.results || []) existingSet.add(r.event_id);
+  }
+
+  const floorCache = new Map<string, number>();
+  let inserted = 0;
+  let latestTimestamp = lastCatTs || '';
+
+  for (const row of rows) {
+    const eventId = `cat_${row.trade_id}`;
+    if (existingSet.has(eventId)) {
+      if (row.completed_at > latestTimestamp) latestTimestamp = row.completed_at;
+      continue;
+    }
+
+    // Only whitelisted CAT tokens earn credits
+    if (!CAT_TOKEN_WHITELIST.has(row.token_code)) {
+      if (row.completed_at > latestTimestamp) latestTimestamp = row.completed_at;
+      continue;
+    }
+
+    // Use buyer_address for credits (the person who bought the NFT)
+    const wallet = row.buyer_address || row.seller_address;
+    if (!wallet) {
+      if (row.completed_at > latestTimestamp) latestTimestamp = row.completed_at;
+      continue;
+    }
+
+    // Get floor price for the trade date
+    const eventDate = row.completed_at.slice(0, 10);
+    let floorStored = floorCache.get(eventDate);
+    if (floorStored === undefined) {
+      floorStored = await getFloorForDate(env.DB, eventDate);
+      floorCache.set(eventDate, floorStored);
+    }
+    const floorXch = floorStored / 100;
+    const calc = calculateCredits(row.xch_equivalent, floorXch);
+
+    try {
+      await env.DB.prepare(
+        `INSERT INTO credit_events
+         (wallet_address, nft_id, event_id, price_xch, floor_at_time, credits_earned, whale_multiplier, source, event_timestamp)
+         VALUES (?, ?, ?, ?, ?, ?, ?, 'sales_history', ?)`
+      ).bind(
+        wallet,
+        `nft_edition_${row.nft_edition}`,
+        eventId,
+        row.xch_equivalent,
+        floorStored,
+        calc.credits,
+        calc.multiplier,
+        row.completed_at
+      ).run();
+      inserted++;
+    } catch (e) {
+      if (!String(e).includes('UNIQUE')) {
+        console.error('[CreditTracker] CAT insert error:', e);
+      }
+    }
+
+    if (row.completed_at > latestTimestamp) latestTimestamp = row.completed_at;
+  }
+
+  if (latestTimestamp && latestTimestamp !== lastCatTs) {
+    await env.TRADE_VALUES_KV.put(KV_KEY_LAST_CAT, latestTimestamp);
+  }
+
+  return { processed: rows.length, inserted };
+}
+
+/**
+ * Backfill: find CAT trades with wallets that have no credit_event, regardless of cursor.
+ * Uses a LEFT JOIN to find gaps — safe to call repeatedly.
+ */
+async function backfillMissingCatCredits(env: Env): Promise<{ processed: number; inserted: number; remaining: number }> {
+  const tokens = [...CAT_TOKEN_WHITELIST];
+  const placeholders = tokens.map(() => '?').join(',');
+
+  const result = await env.DB.prepare(
+    `SELECT sh.trade_id, sh.nft_edition, sh.nft_name, sh.currency, sh.token_code,
+            sh.xch_equivalent, sh.buyer_address, sh.seller_address,
+            sh.completed_at, sh.completed_at_unix
+     FROM sales_history sh
+     LEFT JOIN credit_events ce ON ce.event_id = 'cat_' || sh.trade_id
+     WHERE sh.currency = 'CAT'
+       AND sh.xch_equivalent > 0.01
+       AND sh.token_code IN (${placeholders})
+       AND (sh.buyer_address IS NOT NULL OR sh.seller_address IS NOT NULL)
+       AND ce.event_id IS NULL
+     ORDER BY sh.completed_at ASC
+     LIMIT 200`
+  ).bind(...tokens).all<{
+    trade_id: string;
+    nft_edition: number;
+    nft_name: string;
+    currency: string;
+    token_code: string;
+    xch_equivalent: number;
+    buyer_address: string | null;
+    seller_address: string | null;
+    completed_at: string;
+    completed_at_unix: number;
+  }>();
+
+  const rows = result.results || [];
+  if (rows.length === 0) return { processed: 0, inserted: 0, remaining: 0 };
+
+  const floorCache = new Map<string, number>();
+  let inserted = 0;
+
+  for (const row of rows) {
+    const wallet = row.buyer_address || row.seller_address;
+    if (!wallet) continue;
+
+    const eventDate = row.completed_at.slice(0, 10);
+    let floorStored = floorCache.get(eventDate);
+    if (floorStored === undefined) {
+      floorStored = await getFloorForDate(env.DB, eventDate);
+      floorCache.set(eventDate, floorStored);
+    }
+    const floorXch = floorStored / 100;
+    const calc = calculateCredits(row.xch_equivalent, floorXch);
+
+    try {
+      await env.DB.prepare(
+        `INSERT INTO credit_events
+         (wallet_address, nft_id, event_id, price_xch, floor_at_time, credits_earned, whale_multiplier, source, event_timestamp)
+         VALUES (?, ?, ?, ?, ?, ?, ?, 'sales_history', ?)`
+      ).bind(
+        wallet,
+        `nft_edition_${row.nft_edition}`,
+        `cat_${row.trade_id}`,
+        row.xch_equivalent,
+        floorStored,
+        calc.credits,
+        calc.multiplier,
+        row.completed_at
+      ).run();
+      inserted++;
+    } catch (e) {
+      if (!String(e).includes('UNIQUE')) {
+        console.error('[CreditTracker] Backfill CAT insert error:', e);
+      }
+    }
+  }
+
+  // Count how many whitelisted trades are still missing
+  const remaining = await env.DB.prepare(
+    `SELECT COUNT(*) as cnt FROM sales_history sh
+     LEFT JOIN credit_events ce ON ce.event_id = 'cat_' || sh.trade_id
+     WHERE sh.currency = 'CAT'
+       AND sh.xch_equivalent > 0.01
+       AND sh.token_code IN (${placeholders})
+       AND (sh.buyer_address IS NOT NULL OR sh.seller_address IS NOT NULL)
+       AND ce.event_id IS NULL`
+  ).bind(...tokens).first<{ cnt: number }>();
+
+  return { processed: rows.length, inserted, remaining: remaining?.cnt ?? 0 };
+}
+
 async function run(env: Env): Promise<void> {
   const today = new Date().toISOString().slice(0, 10);
   await ensureFloorSnapshot(env, today);
+
+  // Process XCH trades from MintGarden events (existing)
   const { processed, inserted } = await processEvents(env);
-  console.log(`[CreditTracker] Processed ${processed} events, inserted ${inserted} credit_events`);
+  console.log(`[CreditTracker] XCH: ${processed} events, ${inserted} credit_events`);
+
+  // Process CAT trades from D1 sales_history (new)
+  try {
+    const catResult = await processCatSales(env);
+    console.log(`[CreditTracker] CAT: ${catResult.processed} trades, ${catResult.inserted} credit_events`);
+  } catch (e) {
+    // CAT processing is additive — don't fail the whole run
+    console.error('[CreditTracker] CAT processing error (non-fatal):', e);
+  }
 }
