@@ -25,7 +25,7 @@
  */
 
 import { useMemo } from 'react';
-import { useGenerator } from '@/contexts/GeneratorContext';
+import { useGeneratorOptional } from '@/contexts/GeneratorContext';
 import { isSelectionPathEmpty } from '@/types/generator';
 import { lookupTraitName, lookupBackgroundColorName } from '@/lib/traitNameMap';
 import { cleanDisplayName, formatDisplayLabel } from '@/lib/traitOptions';
@@ -146,9 +146,12 @@ export interface MetadataAttribute {
   layerKey: string;
 }
 
-/** Hook to compute the 7 Phase 1 metadata attributes from current selections */
+/** Hook to compute the 7 Phase 1 metadata attributes from current selections.
+ *  Safe to call outside GeneratorProvider — returns [] when no context available. */
 export function useMetadataAttributes(): MetadataAttribute[] {
-  const { selectedLayers, selectedColors } = useGenerator();
+  const ctx = useGeneratorOptional();
+  const selectedLayers = ctx?.selectedLayers ?? {};
+  const selectedColors = ctx?.selectedColors ?? {};
 
   return useMemo(() => {
     // Collect all raw attributes from selected layers

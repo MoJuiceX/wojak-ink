@@ -893,3 +893,9 @@ export function useGenerator(): GeneratorContextValue {
   }
   return context;
 }
+
+/** Non-throwing variant — returns null when called outside GeneratorProvider.
+ *  Use this in hooks/components that may run outside the generator route. */
+export function useGeneratorOptional(): GeneratorContextValue | null {
+  return useContext(GeneratorContext);
+}

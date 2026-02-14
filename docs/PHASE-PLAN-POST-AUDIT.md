@@ -16,6 +16,7 @@
 | 5: E2E Testing | `docs/SPEC-PHASE5-E2E-TESTING.md` |
 | 6: Admin Dashboard | `docs/SPEC-PHASE6-ADMIN-DASHBOARD.md` |
 | 7: Holder Airdrop | `docs/SPEC-HOLDER-AIRDROP.md` |
+| 8: Pre-Launch Audit | `docs/SPEC-PRELAUNCH-AUDIT.md` |
 
 ---
 
@@ -263,6 +264,8 @@ Run npm run typecheck && npm run build after changes. Both must pass.
 | **5: E2E Testing** | After Phase 4 | Everything implemented | `SPEC-PHASE5-E2E-TESTING.md` |
 | **6: Admin Dashboard** | Post-launch or parallel | Nice to have | `SPEC-PHASE6-ADMIN-DASHBOARD.md` |
 | **7: Holder Airdrop** | After Phase 3 | Credit system working | `SPEC-HOLDER-AIRDROP.md` |
+| **8: Pre-Launch Audit** | After Phase 0-7 | Everything implemented | `SPEC-PRELAUNCH-AUDIT.md` |
 
 Phases 1-2, Phase 3, and Phase 7 can run in parallel if you have multiple Claude CLI sessions.
 Phase 7 depends on Phase 3 (credit formula must be finalized before inserting airdrop credits).
+Phase 8 is the final gate before the real mint test.
