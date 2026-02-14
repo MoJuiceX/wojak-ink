@@ -28,6 +28,7 @@ export function PreviewWithControls({ className = '' }: { className?: string }) 
           aspectRatio: '1 / 1',
           ...BG_STYLE,
           border: '2px solid var(--color-border)',
+          boxShadow: '0 8px 40px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(0, 0, 0, 0.25)',
         }}
       >
         <PreviewCanvas className="w-full h-full" showPlaceholder embedded />

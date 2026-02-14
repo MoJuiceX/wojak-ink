@@ -22,6 +22,7 @@ import {
 import { useSageWallet } from '@/sage-wallet';
 import { fetchCollectionStats } from '@/services/tradeValuesService';
 import { useMetadataAttributes } from '@/components/generator/MetadataPreview';
+import { isValidChiaAddress } from '@/lib/validation';
 
 // ============ Types ============
 
@@ -123,7 +124,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
   const metadataAttributes = useMetadataAttributes();
 
   const refetchCredits = useCallback(async () => {
-    if (!address || !address.startsWith('xch1')) return;
+    if (!address || !isValidChiaAddress(address)) return;
     try {
       const res = await fetch(`/api/credits/balance?wallet=${encodeURIComponent(address)}`);
       if (!res.ok) return;
@@ -150,7 +151,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
 
   // Resume pending paid mint on load (e.g. after reload during countdown)
   useEffect(() => {
-    if (walletStatus !== 'connected' || !address || !address.startsWith('xch1')) return;
+    if (walletStatus !== 'connected' || !address || !isValidChiaAddress(address)) return;
     let cancelled = false;
     fetch(`/api/mint/status?wallet=${encodeURIComponent(address)}`)
       .then((res) => (res.ok ? res.json() : null))
@@ -258,7 +259,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
       selectedColors: Record<string, string>,
       mintType: 'free' | 'paid'
     ) => {
-      if (!address || !address.startsWith('xch1')) {
+      if (!address || !isValidChiaAddress(address)) {
         setMintStep('error');
         setErrorMessage('Wallet not connected');
         return;

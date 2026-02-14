@@ -18,6 +18,7 @@ import type { ReactNode } from 'react';
 import { SignClient } from '@walletconnect/sign-client';
 import { WalletConnectModal } from '@walletconnect/modal';
 import { getSdkError } from '@walletconnect/utils';
+import { isValidChiaAddress } from '@/lib/validation';
 import type { SessionTypes, ProposalTypes } from '@walletconnect/types';
 
 import {
@@ -200,7 +201,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
       address = (result as { address: string }).address;
     }
 
-    if (!address || !address.startsWith('xch1')) {
+    if (!address || !isValidChiaAddress(address)) {
       throw new Error(`Invalid address: ${address}`);
     }
 
@@ -410,7 +411,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
   }, []);
 
   const hasRequiredNFTs = useCallback(async (collectionId: string): Promise<boolean> => {
-    if (!state.address || !state.address.startsWith('xch1')) {
+    if (!state.address || !isValidChiaAddress(state.address)) {
       console.warn('[SageWallet] No valid address for NFT check');
       return false;
     }

@@ -1022,7 +1022,8 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
             ? (slot === 'fill0' ? g2Trait.defaultColors[0] : g2Trait.defaultColors[1])
             : (g2Trait?.defaultColor || (g2Sel.traitId === 'Clothes_Astronaut' ? '#FFFFFF' : undefined));
           return (
-            <div className="mt-4 pt-4 border-t border-[var(--color-border)]">
+            <div className="generator-panel-section mt-4">
+              <div className="generator-panel-section-label">Color</div>
               <ColorPicker
                 selectedColor={g2Sel.colors?.[slot ?? 'fill'] || '#FFFFFF'}
                 onColorChange={(color) => slot && setG2Color(activeLayer, slot, color)}
@@ -1035,7 +1036,8 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
         // For G1 traits: use setColor (Background Solid color uses dark default)
         const isBgSolid = activeLayer === 'Background' && (selectedPath === '__solid__' || selectedPath?.includes('__solid__'));
         return (
-          <div className="mt-4 pt-4 border-t border-[var(--color-border)]">
+          <div className="generator-panel-section mt-4">
+            <div className="generator-panel-section-label">Color</div>
             <ColorPicker
               selectedColor={selectedColors?.[activeLayer] || (isBgSolid ? '#1a1a2e' : '#FFFFFF')}
               onColorChange={(color) => setColor(activeLayer, color)}

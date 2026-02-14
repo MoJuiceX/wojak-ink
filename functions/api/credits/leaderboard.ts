@@ -12,7 +12,7 @@ interface Env {
 }
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://wojak.ink',
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
   'Content-Type': 'application/json',
@@ -43,6 +43,13 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const limit = Math.min(Number(url.searchParams.get('limit')) || 50, 100);
   const offset = Math.max(0, Number(url.searchParams.get('offset')) || 0);
   const sort = url.searchParams.get('sort') || 'earned';
+
+  const orderByMap: Record<string, string> = {
+    earned: 'COALESCE(e.total, 0) DESC',
+    available: '(COALESCE(e.total, 0) - COALESCE(s.total, 0)) DESC, COALESCE(e.total, 0) DESC',
+    bought: 'COALESCE(b.cnt, 0) DESC, COALESCE(e.total, 0) DESC',
+  };
+  const orderBy = orderByMap[sort] || orderByMap.earned;
 
   try {
     const query = `
@@ -76,7 +83,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     `;
     let rows: { results?: { wallet: string; earned: number; spent: number; yourWojakBought: number }[] };
     try {
-      rows = await env.DB.prepare(query).all<
+      rows = await env.DB.prepare(`${query} ORDER BY ${orderBy} LIMIT ? OFFSET ?`).bind(limit, offset).all<
         { wallet: string; earned: number; spent: number; yourWojakBought: number }
       >();
     } catch (e) {
@@ -93,8 +100,10 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           SELECT w.wallet_address AS wallet, COALESCE(e.total, 0) AS earned, COALESCE(s.total, 0) AS spent, 0 AS yourWojakBought
           FROM wallets w
           LEFT JOIN earned e ON w.wallet_address = e.wallet_address
-          LEFT JOIN spent s ON w.wallet_address = s.wallet_address`
-        ).all<{ wallet: string; earned: number; spent: number; yourWojakBought: number }>();
+          LEFT JOIN spent s ON w.wallet_address = s.wallet_address
+          ORDER BY ${orderBy}
+          LIMIT ? OFFSET ?`
+        ).bind(limit, offset).all<{ wallet: string; earned: number; spent: number; yourWojakBought: number }>();
       } else {
         throw e;
       }
@@ -113,15 +122,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       };
     });
 
-    if (sort === 'available') {
-      entries.sort((a, b) => b.freeMints - a.freeMints || b.earned - a.earned);
-    } else if (sort === 'bought') {
-      entries.sort((a, b) => b.yourWojakBought - a.yourWojakBought || b.earned - a.earned);
-    } else {
-      entries.sort((a, b) => b.earned - a.earned);
-    }
-
-    const top = entries.slice(offset, offset + limit).map((e, i) => ({
+    const top = entries.map((e, i) => ({
       rank: offset + i + 1,
       wallet: e.wallet,
       earned: Math.floor(e.earned / 100),

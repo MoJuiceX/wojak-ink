@@ -33,7 +33,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       status: response.status,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': 'https://wojak.ink',
         'Access-Control-Allow-Methods': 'GET, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type',
         'Cache-Control': 'public, max-age=300', // Cache for 5 minutes
@@ -44,7 +44,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       status: 500,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': 'https://wojak.ink',
       },
     });
   }
@@ -54,7 +54,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 export const onRequestOptions: PagesFunction<Env> = async () => {
   return new Response(null, {
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': 'https://wojak.ink',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     },

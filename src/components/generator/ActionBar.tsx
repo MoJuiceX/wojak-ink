@@ -19,6 +19,7 @@ import {
   Trophy,
   ChevronDown,
   Info,
+  MoreHorizontal,
 } from 'lucide-react';
 import { useGenerator } from '@/contexts/GeneratorContext';
 import { useMint } from '@/contexts/MintContext';
@@ -132,7 +133,9 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   const [mintType, setMintType] = useState<'free' | 'paid'>('free');
   const [showRandomMenu, setShowRandomMenu] = useState(false);
   const [showGeneratorInfo, setShowGeneratorInfo] = useState(false);
+  const [showOverflowMenu, setShowOverflowMenu] = useState(false);
   const randomMenuRef = useRef<HTMLDivElement>(null);
+  const overflowMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!showRandomMenu) return;
@@ -144,6 +147,17 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
     document.addEventListener('click', handleClick);
     return () => document.removeEventListener('click', handleClick);
   }, [showRandomMenu]);
+
+  useEffect(() => {
+    if (!showOverflowMenu) return;
+    const handleClick = (e: MouseEvent) => {
+      if (overflowMenuRef.current && !overflowMenuRef.current.contains(e.target as Node)) {
+        setShowOverflowMenu(false);
+      }
+    };
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, [showOverflowMenu]);
 
   // Determine mint readiness
   const isWalletConnected = walletStatus === 'connected' && !!address;
@@ -487,6 +501,12 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         />
       </ActionBarTooltip>
 
+      {/* Visual group separator */}
+      <div
+        className="h-6 w-px shrink-0 mx-0.5"
+        style={{ background: 'var(--color-border)' }}
+      />
+
       {/* Save to favorites */}
       <ActionBarTooltip content="Save">
         <ActionButton
@@ -567,36 +587,90 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         </div>
       )}
 
-      {/* Leaderboard — opens full verifier page with intro, formula, and wallet purchase details */}
-      <ActionBarTooltip content="Leaderboard">
-        <ActionButton
-          onClick={() => { window.location.href = '/free-mints.html'; }}
-          icon={<Trophy size={20} />}
-          label="Leaderboard"
-          badge={isWalletConnected && (credits?.free_mints_available ?? 0) > 0 ? credits!.free_mints_available : undefined}
-        />
-      </ActionBarTooltip>
-
-      {/* Metadata Preview toggle — switches right panel */}
-      {onToggleRightPanel && (
-        <ActionBarTooltip content={rightPanelMode !== 'colors' ? 'Show Colors' : 'Show Metadata'}>
+      {/* Overflow menu — secondary actions */}
+      <div className="relative" ref={overflowMenuRef}>
+        <ActionBarTooltip content="More">
           <ActionButton
-            onClick={onToggleRightPanel}
-            isActive={rightPanelMode !== 'colors'}
-            icon={<span style={{ fontFamily: 'monospace', fontSize: '14px', fontWeight: 700 }}>{'{ }'}</span>}
-            label="Metadata"
+            onClick={() => setShowOverflowMenu((v) => !v)}
+            isActive={showOverflowMenu}
+            icon={<MoreHorizontal size={20} />}
+            label="More options"
           />
         </ActionBarTooltip>
-      )}
+        <AnimatePresence>
+          {showOverflowMenu && (
+            <motion.div
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 4 }}
+              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 rounded-xl overflow-hidden py-1 min-w-[160px]"
+              style={{
+                background: 'var(--color-surface)',
+                border: '1px solid var(--color-border)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+              }}
+            >
+              {/* Free Mints / Leaderboard */}
+              <button
+                type="button"
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors"
+                style={{ color: 'var(--color-text)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                onClick={() => {
+                  setShowOverflowMenu(false);
+                  window.location.href = '/free-mints.html';
+                }}
+              >
+                <Trophy size={16} style={{ color: 'var(--color-primary)' }} />
+                <span>Free Mints</span>
+                {isWalletConnected && (credits?.free_mints_available ?? 0) > 0 && (
+                  <span
+                    className="ml-auto text-xs font-bold px-1.5 py-0.5 rounded-full"
+                    style={{ background: 'var(--color-primary)', color: 'white' }}
+                  >
+                    {credits!.free_mints_available}
+                  </span>
+                )}
+              </button>
 
-      {/* How It Works info */}
-      <ActionBarTooltip content="How It Works">
-        <ActionButton
-          onClick={() => setShowGeneratorInfo(true)}
-          icon={<Info size={20} />}
-          label="How It Works"
-        />
-      </ActionBarTooltip>
+              {/* Metadata toggle — desktop only */}
+              {onToggleRightPanel && (
+                <button
+                  type="button"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors"
+                  style={{ color: 'var(--color-text)' }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                  onClick={() => {
+                    setShowOverflowMenu(false);
+                    onToggleRightPanel();
+                  }}
+                >
+                  <span style={{ fontFamily: 'monospace', fontSize: '14px', fontWeight: 700 }}>{'{ }'}</span>
+                  <span>{rightPanelMode !== 'colors' ? 'Show Colors' : 'Show Metadata'}</span>
+                </button>
+              )}
+
+              {/* How It Works */}
+              <button
+                type="button"
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors"
+                style={{ color: 'var(--color-text)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                onClick={() => {
+                  setShowOverflowMenu(false);
+                  setShowGeneratorInfo(true);
+                }}
+              >
+                <Info size={16} style={{ color: 'var(--color-text-secondary)' }} />
+                <span>How It Works</span>
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* ── Mint Section ── */}
       <div

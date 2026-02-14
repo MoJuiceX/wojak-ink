@@ -14,7 +14,7 @@ interface Env {
 const DEFAULT_ADMIN_PASSWORD = 'wojak-admin-2026';
 
 const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://wojak.ink',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
 };

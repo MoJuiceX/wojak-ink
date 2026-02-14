@@ -106,10 +106,8 @@ function isFullFaceMaskSelected(maskPath: string | undefined): boolean {
 
 function MaskVariantPicker({ selectedPath, onSelect }: { selectedPath: string | undefined; onSelect: (path: string) => void }) {
   return (
-    <div>
-      <p className="text-xs font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
-        Mask style
-      </p>
+    <div className="generator-panel-section">
+      <div className="generator-panel-section-label">Mask style</div>
       <div className="grid grid-cols-3 gap-2">
         {MASK_VARIANTS.map(({ file, label }) => {
           const path = `${MASK_BASE_PATH}/${file}`;
@@ -173,10 +171,8 @@ function BeerHatUnderlayerPicker({ selectedTraitId, onSelect }: { selectedTraitI
   }, []);
 
   return (
-    <div className="flex-shrink-0">
-      <p className="text-xs font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
-        Under layer
-      </p>
+    <div className="generator-panel-section flex-shrink-0">
+      <div className="generator-panel-section-label">Under layer</div>
       <div className="grid grid-cols-3 gap-2">
         {BEER_HAT_COMPATIBLE_HEADS.map((traitId) => {
           const trait = traits.get(traitId);
@@ -358,10 +354,8 @@ export function GeneratorRightPanel() {
     <div className="flex flex-col gap-4">
       {/* G1 Military Beret: "Pick a color to use new design" — swatches switch to G2 */}
       {isG1MilitaryBeret && (
-        <div className="flex-shrink-0">
-          <p className="text-xs font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
-            Pick a color to use new design
-          </p>
+        <div className="generator-panel-section flex-shrink-0">
+          <div className="generator-panel-section-label">Pick a color to use new design</div>
           <MilitaryBeretUpgradeSwatches
             onColorPick={(color) => militaryBeretTrait && selectG2Layer(activeLayer, militaryBeretTrait, { fill: color })}
             disabled={!militaryBeretTrait}
@@ -375,7 +369,8 @@ export function GeneratorRightPanel() {
           selectedLayers.Mask?.includes('Hannibal')
         )
       ) && (
-        <div className="flex-shrink-0">
+        <div className="generator-panel-section flex-shrink-0">
+          <div className="generator-panel-section-label">Color</div>
           <ColorPicker {...colorPickerProps} />
         </div>
       )}
@@ -393,10 +388,8 @@ export function GeneratorRightPanel() {
         allColorSlots.length > 1 &&
         g2Sel?.traitId !== 'Clothes_Suit' &&
         g2Sel?.traitId !== 'Clothes_Chia-farmer' && (
-          <div className="flex-shrink-0">
-            <p className="text-xs font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
-              Color part
-            </p>
+          <div className="generator-panel-section flex-shrink-0">
+            <div className="generator-panel-section-label">Color Part</div>
             <div className="flex flex-wrap gap-2">
               {allColorSlots.map((slot, index) => {
                 const label = allColorSlots.length === 1 ? 'Fill' : `Fill ${index + 1}`;
@@ -456,10 +449,8 @@ export function GeneratorRightPanel() {
 
       {/* Bepe suit: toggle Bepe / Pepe variant (under color picker) */}
       {hasSelection && hasG2Selection && g2Sel?.traitId === 'Clothes_Bepe-suit' && (
-        <div className="flex-shrink-0">
-          <p className="text-xs font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
-            Suit style
-          </p>
+        <div className="generator-panel-section flex-shrink-0">
+          <div className="generator-panel-section-label">Suit style</div>
           <div className="flex gap-2">
             <button
               type="button"
@@ -489,10 +480,8 @@ export function GeneratorRightPanel() {
 
       {/* Chia Farmer: one row — pick which part to color (also switches visible under layer) */}
       {hasSelection && hasG2Selection && g2Sel?.traitId === 'Clothes_Chia-farmer' && (
-        <div className="flex-shrink-0">
-          <p className="text-xs font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
-            Color
-          </p>
+        <div className="generator-panel-section flex-shrink-0">
+          <div className="generator-panel-section-label">Color</div>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"

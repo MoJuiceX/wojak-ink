@@ -244,6 +244,23 @@ body {
   border: 1px solid var(--color-border);
 }
 
+/* Generator right-panel section — consistent container for color picker, details, etc. */
+.generator-panel-section {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  padding: 12px;
+}
+
+.generator-panel-section-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
 .card-elevated {
   background: var(--color-elevated);
   border-radius: var(--radius-lg);
@@ -554,6 +571,9 @@ body {
    REDUCED MOTION
    ═══════════════════════════════════════════════════════════════════════════════ */
 
+/* Accessibility: !important is intentional here — must override all animations
+   for users who prefer reduced motion. This is the ONLY acceptable use of
+   !important per CLAUDE.md conventions. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

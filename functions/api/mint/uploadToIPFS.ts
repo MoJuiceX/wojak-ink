@@ -21,6 +21,15 @@ export async function sha256Hex(data: ArrayBuffer | Uint8Array): Promise<string>
   return [...new Uint8Array(hash)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
+/** Validate WebP magic bytes: RIFF at offset 0, WEBP at offset 8 */
+function isValidWebP(buffer: Uint8Array): boolean {
+  if (buffer.length < 12) return false;
+  return (
+    buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46 && // RIFF
+    buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50   // WEBP
+  );
+}
+
 export interface IPFSUploadResult {
   dataHash: string;
   dataUris: string[];
@@ -39,6 +48,9 @@ export async function uploadToIPFS(
   pinataJwt: string
 ): Promise<IPFSUploadResult> {
   const imageBytes = base64ToUint8Array(imageBase64);
+  if (!isValidWebP(imageBytes)) {
+    throw new Error('Invalid image format: expected WebP');
+  }
   if (imageBytes.length > 2 * 1024 * 1024) {
     throw new Error('Image too large (max 2MB)');
   }

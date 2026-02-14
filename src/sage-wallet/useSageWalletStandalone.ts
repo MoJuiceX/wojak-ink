@@ -14,6 +14,7 @@ import { WalletConnectModal } from '@walletconnect/modal';
 import { getSdkError } from '@walletconnect/utils';
 import type { SessionTypes, ProposalTypes } from '@walletconnect/types';
 
+import { isValidChiaAddress } from '@/lib/validation';
 import {
   ChiaMethod,
   CHIA_CHAIN,
@@ -148,7 +149,7 @@ export function useSageWalletStandalone(
     
     const addr = typeof result === 'string' ? result : (result as { address?: string })?.address || '';
     
-    if (!addr.startsWith('xch1')) throw new Error('Invalid address');
+    if (!isValidChiaAddress(addr)) throw new Error('Invalid address');
     
     setAddress(addr);
     setSession({
@@ -297,7 +298,7 @@ export function useSageWalletStandalone(
   
   // Check if user has NFTs from collection (via MintGarden API)
   const hasRequiredNFTs = useCallback(async (collectionId: string): Promise<boolean> => {
-    if (!address?.startsWith('xch1') || !collectionId?.trim()) return false;
+    if (!address || !isValidChiaAddress(address) || !collectionId?.trim()) return false;
     
     try {
       const res = await fetch(
