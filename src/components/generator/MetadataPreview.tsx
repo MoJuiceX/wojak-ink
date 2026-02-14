@@ -212,13 +212,19 @@ export function useMetadataAttributes(): MetadataAttribute[] {
       layerKey: '_base',
     });
 
-    // Sort in Phase 1 canonical order
-    const ORDER = ['Background', 'Base', 'Clothes', 'Face', 'Face Wear', 'Head', 'Mouth'];
-    const result = [...byTraitType.values()];
-    result.sort((a, b) => {
-      const ai = ORDER.indexOf(a.trait_type);
-      const bi = ORDER.indexOf(b.trait_type);
-      return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+    // Always return all 7 trait types in canonical order.
+    // Unselected traits get a placeholder so the panel is always complete.
+    const ORDER = ['Base', 'Face', 'Head', 'Face Wear', 'Mouth', 'Clothes', 'Background'];
+    const result: MetadataAttribute[] = ORDER.map((traitType) => {
+      const existing = byTraitType.get(traitType);
+      if (existing) return existing;
+      return {
+        trait_type: traitType,
+        value: '',
+        source: 'map' as const,
+        raw: '(empty)',
+        layerKey: '_placeholder',
+      };
     });
 
     return result;
@@ -232,8 +238,8 @@ interface MetadataPreviewProps {
 export function MetadataPreview({ onSwitchToColors }: MetadataPreviewProps) {
   const attributes = useMetadataAttributes();
 
-  const traitCount = attributes.length;
-  const hasUnmapped = attributes.some((a) => a.source === 'fallback');
+  const selectedCount = attributes.filter((a) => a.value !== '').length;
+  const hasUnmapped = attributes.some((a) => a.source === 'fallback' && a.value !== '');
 
   return (
     <div className="flex flex-col gap-2 h-full overflow-hidden">
@@ -246,12 +252,12 @@ export function MetadataPreview({ onSwitchToColors }: MetadataPreviewProps) {
           <span
             className="text-xs px-1.5 py-0.5 rounded"
             style={{
-              background: traitCount >= 7 ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
-              color: traitCount >= 7 ? 'var(--color-success)' : 'var(--color-error)',
+              background: selectedCount >= 7 ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
+              color: selectedCount >= 7 ? 'var(--color-success)' : 'var(--color-error)',
               fontSize: '10px',
             }}
           >
-            {traitCount}/7
+            {selectedCount}/7
           </span>
           {hasUnmapped && (
             <span
@@ -273,37 +279,35 @@ export function MetadataPreview({ onSwitchToColors }: MetadataPreviewProps) {
         </div>
       </div>
 
-      {/* Attributes list */}
+      {/* Attributes list — always shows all 7 trait types */}
       <div className="flex-1 overflow-y-auto" style={{ minHeight: 0 }}>
-        {attributes.length === 0 ? (
-          <div className="text-xs p-2" style={{ color: 'var(--color-text-muted)' }}>
-            Select traits to see metadata
-          </div>
-        ) : (
-          <div className="flex flex-col gap-1">
-            {attributes.map((attr, i) => (
+        <div className="flex flex-col gap-1">
+          {attributes.map((attr, i) => {
+            const isEmpty = attr.value === '';
+            return (
               <div
                 key={i}
                 className="flex flex-col px-2 py-1.5 rounded"
                 style={{
                   background: 'rgba(255,255,255,0.02)',
-                  border: attr.source === 'fallback'
+                  opacity: isEmpty ? 0.4 : 1,
+                  border: attr.source === 'fallback' && !isEmpty
                     ? '1px solid rgba(251,191,36,0.3)'
                     : '1px solid transparent',
                 }}
               >
                 <div className="flex items-center justify-between">
-                  <span style={{ color: 'var(--color-cyan)', fontSize: '10px', fontWeight: 600 }}>
+                  <span style={{ color: isEmpty ? 'var(--color-text-muted)' : 'var(--color-cyan)', fontSize: '10px', fontWeight: 600 }}>
                     {attr.trait_type}
                   </span>
-                  {attr.source === 'fallback' && (
+                  {attr.source === 'fallback' && !isEmpty && (
                     <span style={{ color: '#fbbf24', fontSize: '9px' }}>not in map</span>
                   )}
                 </div>
-                <span style={{ color: 'var(--color-text)', fontSize: '12px' }}>
-                  {attr.value}
+                <span style={{ color: isEmpty ? 'var(--color-text-muted)' : 'var(--color-text)', fontSize: '12px' }}>
+                  {isEmpty ? '—' : attr.value}
                 </span>
-                {attr.raw !== '(fixed)' && (
+                {!isEmpty && attr.raw !== '(fixed)' && (
                   <span
                     className="truncate"
                     style={{ color: 'var(--color-text-muted)', fontSize: '9px', fontFamily: 'monospace' }}
@@ -313,9 +317,9 @@ export function MetadataPreview({ onSwitchToColors }: MetadataPreviewProps) {
                   </span>
                 )}
               </div>
-            ))}
-          </div>
-        )}
+            );
+          })}
+        </div>
       </div>
 
       {/* JSON toggle */}
