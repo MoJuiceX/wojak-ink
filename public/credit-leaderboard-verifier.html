@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Credit Leaderboard — Wojak.ink</title>
+  <title>Free Mints — Wojak.ink</title>
   <style>
     :root {
       --bg: #0a0a0f;
@@ -461,11 +461,9 @@
         }
       }
       inner.innerHTML = '<div class="expand-loading">Loading NFT details…</div>';
-      // Only fetch MintGarden info for hex coin IDs (not edition-based or airdrop)
+      // Fetch MintGarden info for all trade entries (API now returns hex coin IDs for all)
       const nftInfos = await Promise.all(purchases.map((p) => {
         if (p.eventType === 'holder_airdrop') return Promise.resolve(null);
-        if (p.nftName) return Promise.resolve({ name: p.nftName, img: null });
-        if (p.nftId.startsWith('nft_edition_')) return Promise.resolve(null);
         return fetchNftInfo(p.nftId);
       }));
       inner.innerHTML = `
@@ -499,8 +497,8 @@
               const info = nftInfos[i];
               const name = info?.name || p.nftName || truncateId(p.nftId, 12, 8);
               const img = info?.img ? `<img src="${info.img}" alt="" class="nft-thumb" loading="lazy">` : '<div class="nft-thumb-placeholder"></div>';
-              const link = p.nftId.startsWith('nft_edition_') ? '#' : MINTGARDEN_NFT + p.nftId;
-              const linkTarget = p.nftId.startsWith('nft_edition_') ? '' : ' target="_blank" rel="noopener"';
+              const link = MINTGARDEN_NFT + p.nftId;
+              const linkTarget = ' target="_blank" rel="noopener"';
               return `
               <tr>
                 <td>
