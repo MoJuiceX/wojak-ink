@@ -17,7 +17,12 @@
 | 6: Admin Dashboard | `docs/SPEC-PHASE6-ADMIN-DASHBOARD.md` |
 | 7: Holder Airdrop | `docs/SPEC-HOLDER-AIRDROP.md` |
 | 8: Pre-Launch Audit | `docs/SPEC-PRELAUNCH-AUDIT.md` |
-| 9: Security Hardening | `docs/SPEC-PHASE9-HARDENING.md` |
+| 9A: Admin Auth | `docs/SPEC-PHASE9A-ADMIN-AUTH.md` |
+| 9B: CORS Lockdown | `docs/SPEC-PHASE9B-CORS-LOCKDOWN.md` |
+| 9C: Code Quality | `docs/SPEC-PHASE9C-CODE-QUALITY.md` |
+| 10A: Action Bar Declutter | `docs/SPEC-PHASE10A-ACTIONBAR-DECLUTTER.md` |
+| 10B: Right Panel Polish | `docs/SPEC-PHASE10B-RIGHT-PANEL-POLISH.md` |
+| 10C: Premium Polish | `docs/SPEC-PHASE10C-PREMIUM-POLISH.md` |
 
 ---
 
@@ -253,40 +258,182 @@ Run npm run typecheck && npm run build after changes. Both must pass.
 
 ---
 
-## Phase 9: Security Hardening & Cleanup
+## Phase 9A: Admin Endpoint Authentication (HIGH)
 
-**Goal:** Fix all 8 flagged items from the Phase 8 pre-launch audit — 2 HIGH security fixes, 3 MEDIUM improvements, 3 LOW cleanup tasks.
+**Goal:** Add ADMIN_SECRET auth to both admin API endpoints + update the Admin.tsx frontend.
 
-**Spec:** `docs/SPEC-PHASE9-HARDENING.md`
+**Spec:** `docs/SPEC-PHASE9A-ADMIN-AUTH.md`
 
 ### Prompt for Claude CLI:
 
 ```
-Read docs/SPEC-PHASE9-HARDENING.md in full. This is your implementation spec.
-It contains 8 fixes ordered by severity. Execute them in order 1-8.
+Read docs/SPEC-PHASE9A-ADMIN-AUTH.md in full. This is your implementation spec.
 
-Fix 1 (HIGH): Add ADMIN_SECRET auth to /api/admin/credit-stats and /api/admin/recent-mints.
-  Copy the exact pattern from functions/api/mint/audit.ts. Update Admin.tsx to send the secret.
-
-Fix 2 (HIGH): Replace Access-Control-Allow-Origin: '*' with 'https://wojak.ink' everywhere.
-  Start with functions/api/mint/_shared.ts, then grep for any other files with wildcard CORS.
-
-Fix 3 (MEDIUM): Add WebP magic byte validation in the upload flow before IPFS upload.
-
-Fix 4 (MEDIUM): Move leaderboard sorting/pagination from JS into SQL (ORDER BY + LIMIT).
-
-Fix 5 (MEDIUM): Replace all startsWith('xch1') in frontend with isValidChiaAddress().
-  Create src/lib/validation.ts mirroring functions/lib/validation.ts.
-
-Fix 6 (LOW): Delete orphan pages (Landing.tsx, Onboarding.tsx, SettingsPage.tsx, Game.tsx).
-
-Fix 7 (LOW): Remove stale TODO in prepare.ts about self-fetch (already resolved).
-
-Fix 8 (LOW): Add accessibility comment above the !important rules in theme.css.
+Add ADMIN_SECRET authentication to both admin endpoints:
+1. functions/api/admin/credit-stats.ts — add ADMIN_SECRET to Env, add Authorization to
+   CORS headers, add auth check block (copy pattern from functions/api/mint/audit.ts)
+2. functions/api/admin/recent-mints.ts — same 3 changes
+3. src/pages/Admin.tsx — read secret from ?secret= URL param, send as Bearer token,
+   show "access required" message if no secret provided, handle 401 responses
 
 Run npm run typecheck && npm run build after all changes.
-Run all verification greps listed at the bottom of the spec.
+Run verification greps from the spec.
+```
+
+---
+
+## Phase 9B: CORS Origin Lockdown (HIGH)
+
+**Goal:** Replace `Access-Control-Allow-Origin: '*'` with `'https://wojak.ink'` across ALL 50+ API files.
+
+**Spec:** `docs/SPEC-PHASE9B-CORS-LOCKDOWN.md`
+
+### Prompt for Claude CLI:
+
+```
+Read docs/SPEC-PHASE9B-CORS-LOCKDOWN.md in full. This is your implementation spec.
+
+This is a large but simple change: replace '*' with 'https://wojak.ink' in every
+CORS header across 50+ files in functions/api/.
+
+1. Start by running: grep -rl "Access-Control-Allow-Origin.*'\*'" functions/ --include="*.ts"
+   to get the definitive file list
+2. Change functions/api/mint/_shared.ts first (covers 5 mint endpoints)
+3. Change every other file in the grep results
+4. DO NOT touch functions/api/chat/token.ts, presence.ts, or verify-eligibility.ts
+   (they already use dynamic origin validation)
+5. Proxy endpoints (coingecko, spacescan, mintgarden, dexie) have 3 CORS declarations
+   each — change all 3 in each file
+
+Run verification: grep -rn "Allow-Origin.*'\*'" functions/ --include="*.ts" must return ZERO.
+Run npm run typecheck && npm run build after all changes.
+```
+
+---
+
+## Phase 9C: Code Quality & Cleanup (MEDIUM + LOW)
+
+**Goal:** 6 remaining fixes — image validation, leaderboard SQL, frontend wallet validation, orphan cleanup, TODO cleanup, CSS comment.
+
+**Spec:** `docs/SPEC-PHASE9C-CODE-QUALITY.md`
+
+### Prompt for Claude CLI:
+
+```
+Read docs/SPEC-PHASE9C-CODE-QUALITY.md in full. This is your implementation spec.
+Execute fixes in order 1-6:
+
+Fix 1 (MEDIUM): Add WebP magic byte validation in functions/api/mint/uploadToIPFS.ts.
+  Add isValidWebP() function, check right after base64ToUint8Array(), before size check.
+
+Fix 2 (MEDIUM): Move leaderboard sorting/pagination into SQL.
+  Add ORDER BY map from sort param, append LIMIT/OFFSET to both main and fallback queries,
+  remove JS .sort() and .slice() calls.
+
+Fix 3 (MEDIUM): Replace all startsWith('xch1') with isValidChiaAddress().
+  Create src/lib/validation.ts, update MintContext.tsx (3 instances),
+  SageWalletProvider.tsx (2 instances), useSageWalletStandalone.ts (2 instances).
+
+Fix 4 (LOW): Delete 4 orphan pages after verifying no imports exist.
+  Landing.tsx, Onboarding.tsx, SettingsPage.tsx, Game.tsx.
+
+Fix 5 (LOW): Check if stale TODO in prepare.ts still exists. Remove if so.
+
+Fix 6 (LOW): Add accessibility comment above !important rules in theme.css.
+
+Run npm run typecheck && npm run build after all changes.
+Run all verification greps from the spec.
 Report results for each fix.
+```
+
+---
+
+## Phase 10A: Action Bar Declutter
+
+**Goal:** Reduce the 11-button action bar to 3 visual groups: Create (Random, Undo, Redo), Output (Save, Export, Copy, overflow ⋯), and Mint. Move Leaderboard, Metadata, and Info into an overflow menu.
+
+**Spec:** `docs/SPEC-PHASE10A-ACTIONBAR-DECLUTTER.md`
+
+### Prompt for Claude CLI:
+
+```
+Read docs/SPEC-PHASE10A-ACTIONBAR-DECLUTTER.md in full. This is your implementation spec.
+Read src/components/generator/ActionBar.tsx — the full component you'll modify.
+
+Reorganize the action bar into 3 visual groups:
+1. Add a MoreHorizontal overflow menu button (import from lucide-react)
+2. Move Leaderboard, Metadata toggle, and How It Works into the overflow dropdown
+3. Add a visual separator (1px divider) between Create group and Output group
+4. Keep the existing mint section divider as-is
+5. Use the same dropdown pattern as the existing Random menu (click-outside, AnimatePresence)
+
+Delete the 3 standalone button blocks (Leaderboard, Metadata, Info).
+Button order: Random, Undo, Redo | Save, Export, Copy, ⋯ | Mint section.
+
+Run npm run typecheck && npm run build after all changes.
+Test visually at localhost:5173/generator.
+```
+
+---
+
+## Phase 10B: Right Panel & Color Picker Polish
+
+**Goal:** Give the color picker and all right-panel sections consistent containers with labels, matching the trait grid's visual treatment. Add subtle background depth to the right panel.
+
+**Spec:** `docs/SPEC-PHASE10B-RIGHT-PANEL-POLISH.md`
+
+### Prompt for Claude CLI:
+
+```
+Read docs/SPEC-PHASE10B-RIGHT-PANEL-POLISH.md in full. This is your implementation spec.
+Read src/components/generator/GeneratorRightPanel.tsx — the right panel component.
+Read src/components/generator/ColorPicker.tsx — the color palette.
+Read src/pages/Generator.css — the panel layout styles.
+Read src/styles/theme.css — existing .card-static pattern.
+
+1. Add .generator-panel-section and .generator-panel-section-label classes to theme.css
+   (surface bg, border-radius, border, 12px padding; label is uppercase, muted, 11px)
+2. Wrap the ColorPicker in GeneratorRightPanel.tsx with .generator-panel-section + "Color" label
+3. Wrap the fill target buttons section with .generator-panel-section + "Color Part" label
+4. Wrap all other labeled sections (Mask style, Under layer, Suit style, Chia Farmer)
+5. Add a subtle darker background + left border to .generator-details-panel in Generator.css
+6. Check TraitSelector.tsx for mobile color picker — apply same container if found
+
+Run npm run typecheck && npm run build after all changes.
+Test visually at localhost:5173/generator — right panel should have labeled containers.
+```
+
+---
+
+## Phase 10C: Premium Visual Polish
+
+**Goal:** Subtle refinements to preview canvas depth, trait card hover, layer tab hover, and selection animation.
+
+**Spec:** `docs/SPEC-PHASE10C-PREMIUM-POLISH.md`
+
+### Prompt for Claude CLI:
+
+```
+Read docs/SPEC-PHASE10C-PREMIUM-POLISH.md in full. This is your implementation spec.
+Read src/components/generator/PreviewWithControls.tsx — canvas frame.
+Read src/pages/Generator.css — all generator visual styles.
+
+4 changes (skip item 5 per spec):
+
+1. Preview canvas: Add a two-layer dark box-shadow to PreviewWithControls.tsx
+   for depth (40px + 8px black shadows). No colored glows.
+
+2. Trait card hover: In Generator.css, change .generator-option-item:hover from
+   scale(1.05) to scale(1.02), add a subtle warm glow (rgba orange 0.12).
+
+3. Layer tab hover: Add .generator-layer-tab:not([aria-selected="true"]):not([aria-disabled="true"]):hover
+   rule in Generator.css with rgba(255,255,255,0.04) background.
+
+4. Selection pulse: Add @keyframes selectPulse in Generator.css (0.4s one-shot glow
+   intensification), apply to .generator-option-item.selected.
+
+Run npm run typecheck && npm run build after all changes.
+Test visually at localhost:5173/generator.
 ```
 
 ---
@@ -304,9 +451,15 @@ Report results for each fix.
 | **6: Admin Dashboard** | Post-launch or parallel | Nice to have | `SPEC-PHASE6-ADMIN-DASHBOARD.md` |
 | **7: Holder Airdrop** | After Phase 3 | Credit system working | `SPEC-HOLDER-AIRDROP.md` |
 | **8: Pre-Launch Audit** | After Phase 0-7 | Everything implemented | `SPEC-PRELAUNCH-AUDIT.md` |
-| **9: Security Hardening** | After Phase 8 | Audit flagged items | `SPEC-PHASE9-HARDENING.md` |
+| **9A: Admin Auth** | After Phase 8 | HIGH — security | `SPEC-PHASE9A-ADMIN-AUTH.md` |
+| **9B: CORS Lockdown** | After Phase 9A | HIGH — security | `SPEC-PHASE9B-CORS-LOCKDOWN.md` |
+| **9C: Code Quality** | After Phase 9B | MEDIUM + LOW — cleanup | `SPEC-PHASE9C-CODE-QUALITY.md` |
+| **10A: Action Bar** | After Phase 9C | UX — declutter | `SPEC-PHASE10A-ACTIONBAR-DECLUTTER.md` |
+| **10B: Right Panel** | After Phase 10A | UX — visual consistency | `SPEC-PHASE10B-RIGHT-PANEL-POLISH.md` |
+| **10C: Premium Polish** | After Phase 10B | UX — refinement | `SPEC-PHASE10C-PREMIUM-POLISH.md` |
 
 Phases 1-2, Phase 3, and Phase 7 can run in parallel if you have multiple Claude CLI sessions.
 Phase 7 depends on Phase 3 (credit formula must be finalized before inserting airdrop credits).
 Phase 8 is the final gate before the real mint test.
-Phase 9 addresses everything Phase 8 flagged — the last step before launch.
+Phases 9A → 9B → 9C address everything Phase 8 flagged.
+Phases 10A → 10B → 10C are generator UX improvements — run in order after security is done.
