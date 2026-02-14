@@ -460,12 +460,8 @@
           return;
         }
       }
-      inner.innerHTML = '<div class="expand-loading">Loading NFT details…</div>';
-      // Fetch MintGarden info for all trade entries (API now returns hex coin IDs for all)
-      const nftInfos = await Promise.all(purchases.map((p) => {
-        if (p.eventType === 'holder_airdrop') return Promise.resolve(null);
-        return fetchNftInfo(p.nftId);
-      }));
+
+      // Render immediately with names and placeholder thumbs
       inner.innerHTML = `
         <div class="expand-header">
           <a href="${SPACESCAN_ADDR + row.wallet}" target="_blank" rel="noopener">View wallet on Spacescan</a>
@@ -494,18 +490,14 @@
                   <td class="credits">${Math.floor(p.creditsEarned || 0)}</td>
                 </tr>`;
               }
-              const info = nftInfos[i];
-              const name = info?.name || p.nftName || truncateId(p.nftId, 12, 8);
-              const img = info?.img ? `<img src="${info.img}" alt="" class="nft-thumb" loading="lazy">` : '<div class="nft-thumb-placeholder"></div>';
-              const link = MINTGARDEN_NFT + p.nftId;
-              const linkTarget = ' target="_blank" rel="noopener"';
+              const name = p.nftName || truncateId(p.nftId, 12, 8);
               return `
               <tr>
                 <td>
                   <div class="nft-cell">
-                    ${img}
+                    <div class="nft-thumb-placeholder" data-nft-idx="${i}"></div>
                     <div class="nft-info">
-                      <a href="${link}"${linkTarget} class="nft-link">${name}</a>
+                      <a href="${MINTGARDEN_NFT + p.nftId}" target="_blank" rel="noopener" class="nft-link" data-nft-name="${i}">${name}</a>
                     </div>
                   </div>
                 </td>
@@ -517,6 +509,27 @@
         </table>
         ` : '<p class="expand-summary">No credit-earning purchases.</p>'}
       `;
+
+      // Lazy-load thumbnails in the background (non-blocking)
+      purchases.forEach((p, i) => {
+        if (p.eventType === 'holder_airdrop') return;
+        fetchNftInfo(p.nftId).then((info) => {
+          if (!info) return;
+          const thumbEl = inner.querySelector(`[data-nft-idx="${i}"]`);
+          if (thumbEl && info.img) {
+            const img = document.createElement('img');
+            img.src = info.img;
+            img.alt = '';
+            img.className = 'nft-thumb';
+            img.loading = 'lazy';
+            thumbEl.replaceWith(img);
+          }
+          if (info.name) {
+            const nameEl = inner.querySelector(`[data-nft-name="${i}"]`);
+            if (nameEl) nameEl.textContent = info.name;
+          }
+        });
+      });
     }
 
     async function loadFromApi(sort) {
