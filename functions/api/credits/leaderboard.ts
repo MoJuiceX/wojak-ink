@@ -40,7 +40,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   }
 
   const url = new URL(request.url);
-  const limit = Math.min(Number(url.searchParams.get('limit')) || 50, 100);
+  const limit = Math.min(Number(url.searchParams.get('limit')) || 50, 500);
   const offset = Math.max(0, Number(url.searchParams.get('offset')) || 0);
   const sort = url.searchParams.get('sort') || 'earned';
 

@@ -168,12 +168,17 @@
     .formula-box .formula-desc { color: var(--text2); margin-top: 6px; text-align: center; }
     .formula-box .formula-desc code { font-family: ui-monospace, monospace; font-size: 11px; color: var(--text3); }
 
-    /* Fixed X: independent of layout, top-right corner of viewport */
-    .top-bar-close {
+    /* Top bar buttons: fixed top-right */
+    .top-bar {
       position: fixed;
       top: 12px;
       right: 12px;
       z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .top-bar-btn {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -184,12 +189,15 @@
       background: var(--surface);
       color: var(--text2);
       text-decoration: none;
-      font-size: 20px;
-      line-height: 1;
-      font-weight: 300;
+      cursor: pointer;
       transition: color 0.15s, border-color 0.15s, background 0.15s;
+      padding: 0;
+      font: inherit;
     }
-    .top-bar-close:hover { color: var(--text); border-color: var(--border-hover); background: var(--surface-hover); }
+    .top-bar-btn:hover { color: var(--text); border-color: var(--border-hover); background: var(--surface-hover); }
+    .top-bar-btn svg { display: block; }
+    .top-bar-wallet-btn.connected { border-color: rgba(34, 197, 94, 0.4); }
+    .top-bar-wallet-btn.connected svg { color: var(--success); }
 
     .trust-line {
       display: flex;
@@ -205,15 +213,25 @@
     .trust-line a { color: var(--primary); text-decoration: none; }
     .trust-line a:hover { text-decoration: underline; }
 
-    /* Connected wallet status bar */
-    .wallet-status-bar {
+    /* Connected wallet card */
+    .wallet-card {
+      margin-bottom: 16px;
+      border-radius: 14px;
+      background: var(--surface);
+      border: 1px solid rgba(255, 107, 0, 0.25);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.03);
+      overflow: hidden;
+    }
+    .wallet-card-header {
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
-      font-size: 12px;
+      gap: 10px;
+      padding: 14px 18px;
+      cursor: pointer;
+      transition: background 0.15s;
     }
-    .wallet-status-dot {
+    .wallet-card-header:hover { background: var(--surface-hover); }
+    .wallet-card-dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
@@ -221,20 +239,58 @@
       box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
       flex-shrink: 0;
     }
-    .wallet-status-addr {
+    .wallet-card-addr {
       font-family: ui-monospace, monospace;
+      font-size: 13px;
       color: var(--text2);
     }
-    .wallet-status-rank {
+    .wallet-card-stats {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-left: auto;
+      font-size: 13px;
+    }
+    .wallet-card-stat { display: flex; align-items: center; gap: 4px; }
+    .wallet-card-stat-value { font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+    .wallet-card-stat-label { color: var(--text3); font-size: 11px; }
+    .wallet-card-rank {
+      background: var(--primary-muted);
       color: var(--primary);
-      cursor: pointer;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .wallet-card-chevron {
+      color: var(--text3);
+      font-size: 10px;
+      transition: transform 0.2s, color 0.2s;
+      margin-left: 4px;
+    }
+    .wallet-card.expanded .wallet-card-chevron { transform: rotate(90deg); color: var(--primary); }
+    .wallet-card-body {
+      display: none;
+      border-top: 1px solid var(--border);
+      padding: 16px 18px 20px;
+    }
+    .wallet-card.expanded .wallet-card-body { display: block; }
+    .wallet-card-scroll-btn {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--primary);
       background: none;
       border: none;
-      font: inherit;
+      cursor: pointer;
       padding: 0;
+      font: inherit;
     }
-    .wallet-status-rank:hover { text-decoration: underline; }
-    .wallet-status-unranked { color: var(--text3); }
+    .wallet-card-scroll-btn:hover { text-decoration: underline; }
+    @media (max-width: 600px) {
+      .wallet-card-stats { gap: 8px; }
+      .wallet-card-stat-label { display: none; }
+    }
 
     /* Highlighted user row */
     tr.wallet-row.user-row {
@@ -263,7 +319,14 @@
   </style>
 </head>
 <body>
-  <a href="/generator" class="top-bar-close" aria-label="Close">×</a>
+  <div class="top-bar">
+    <button type="button" class="top-bar-btn top-bar-wallet-btn" id="top-bar-wallet-btn" aria-label="Connect Wallet" title="Connect Wallet">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+    </button>
+    <a href="/generator" class="top-bar-btn" aria-label="Close">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </a>
+  </div>
   <div class="container">
     <div class="leaderboard-header">
       <h1>Free Mint Credits Leaderboard</h1>
@@ -312,7 +375,15 @@
       </div>
     </div>
 
-    <div id="wallet-status" class="wallet-status-bar" style="display:none"></div>
+    <div id="wallet-card" class="wallet-card" style="display:none">
+      <div class="wallet-card-header" id="wallet-card-header">
+        <span class="wallet-card-dot"></span>
+        <span class="wallet-card-addr" id="wallet-card-addr"></span>
+        <div class="wallet-card-stats" id="wallet-card-stats"></div>
+        <span class="wallet-card-chevron">▶</span>
+      </div>
+      <div class="wallet-card-body" id="wallet-card-body"></div>
+    </div>
     <div id="table-wrap" class="table-wrap" style="display:none">
       <table>
         <thead>
@@ -342,6 +413,7 @@
     const MINTGARDEN_NFT = 'https://mintgarden.io/nfts/';
     const MINTGARDEN_API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? '/mintgarden-api' : 'https://api.mintgarden.io';
     const PAGE_SIZE = 50;
+    const FULL_LOAD_SIZE = 500;
 
     let leaderboard = [];
     let historyCache = {};
@@ -412,10 +484,11 @@
     }
 
     let currentSort = 'earned';
-    async function fetchLeaderboard(sort, offset) {
+    async function fetchLeaderboard(sort, offset, limit) {
       sort = sort || currentSort;
       offset = offset ?? 0;
-      const res = await fetch('/api/credits/leaderboard?limit=' + PAGE_SIZE + '&offset=' + offset + '&sort=' + sort);
+      limit = limit || PAGE_SIZE;
+      const res = await fetch('/api/credits/leaderboard?limit=' + limit + '&offset=' + offset + '&sort=' + sort);
       if (!res.ok) throw new Error('Leaderboard API failed: ' + res.status);
       const data = await res.json();
       const items = (data.items || []).map((e) => ({
@@ -507,25 +580,29 @@
         });
       });
 
-      // Show wallet status bar
-      const statusBar = document.getElementById('wallet-status');
+      // Populate wallet card
+      const walletCard = document.getElementById('wallet-card');
       if (connectedWallet) {
-        statusBar.style.display = 'flex';
+        walletCard.style.display = 'block';
+        document.getElementById('wallet-card-addr').textContent = truncateWallet(connectedWallet);
+        const statsEl = document.getElementById('wallet-card-stats');
         if (userRow) {
-          statusBar.innerHTML = `
-            <span class="wallet-status-dot"></span>
-            <span class="wallet-status-addr">${truncateWallet(connectedWallet)}</span>
-            <button type="button" class="wallet-status-rank" onclick="document.querySelector('.user-row')?.scrollIntoView({behavior:'smooth',block:'center'})">Rank #${userRow.rank}</button>
+          statsEl.innerHTML = `
+            <span class="wallet-card-rank">Rank #${userRow.rank}</span>
+            <span class="wallet-card-stat"><span class="wallet-card-stat-value">${userRow.earned}</span><span class="wallet-card-stat-label">credits</span></span>
+            <span class="wallet-card-stat"><span class="wallet-card-stat-value">${userRow.freeMints}</span><span class="wallet-card-stat-label">free mints</span></span>
+            <span class="wallet-card-stat"><span class="wallet-card-stat-value">${userRow.yourWojakBought}</span><span class="wallet-card-stat-label">paid</span></span>
           `;
         } else {
-          statusBar.innerHTML = `
-            <span class="wallet-status-dot"></span>
-            <span class="wallet-status-addr">${truncateWallet(connectedWallet)}</span>
-            <span class="wallet-status-unranked">Not yet ranked</span>
-          `;
+          statsEl.innerHTML = '<span style="color:var(--text3);font-size:12px">No credits yet</span>';
+        }
+        // Populate body on first expand
+        const body = document.getElementById('wallet-card-body');
+        if (!body.dataset.loaded) {
+          body.innerHTML = '<div class="expand-loading">Click to see your purchase history</div>';
         }
       } else {
-        statusBar.style.display = 'none';
+        walletCard.style.display = 'none';
       }
 
       // Auto-scroll to user row after render
@@ -650,7 +727,9 @@
       document.getElementById('load-more-wrap').style.display = 'none';
       try {
         currentSort = sort || currentSort;
-        const { items, hasMore: hm } = await fetchLeaderboard(currentSort, 0);
+        // When wallet is connected, load all entries so we always find the user's rank
+        const initialLimit = getConnectedWallet() ? FULL_LOAD_SIZE : PAGE_SIZE;
+        const { items, hasMore: hm } = await fetchLeaderboard(currentSort, 0, initialLimit);
         leaderboard = items;
         hasMore = hm;
         document.getElementById('loading').style.display = 'none';
@@ -728,6 +807,115 @@
         }
       });
     })();
+
+    // Wallet connect button: if not connected, go to generator to connect; if connected, scroll to card
+    (function() {
+      const walletBtn = document.getElementById('top-bar-wallet-btn');
+      function updateWalletBtn() {
+        const addr = getConnectedWallet();
+        if (addr) {
+          walletBtn.classList.add('connected');
+          walletBtn.title = 'Wallet connected: ' + addr.slice(0, 8) + '…';
+        } else {
+          walletBtn.classList.remove('connected');
+          walletBtn.title = 'Connect Wallet';
+        }
+      }
+      updateWalletBtn();
+      // Re-check periodically in case user connects on another tab
+      setInterval(updateWalletBtn, 2000);
+      walletBtn.addEventListener('click', () => {
+        const addr = getConnectedWallet();
+        if (addr) {
+          const card = document.getElementById('wallet-card');
+          if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+          window.location.href = '/generator';
+        }
+      });
+    })();
+
+    // Wallet card expand/collapse + lazy-load purchase history
+    document.getElementById('wallet-card-header').addEventListener('click', async () => {
+      const card = document.getElementById('wallet-card');
+      const body = document.getElementById('wallet-card-body');
+      const isExpanding = !card.classList.contains('expanded');
+      card.classList.toggle('expanded');
+
+      if (isExpanding && !body.dataset.loaded) {
+        const wallet = getConnectedWallet();
+        if (!wallet) return;
+        body.innerHTML = '<div class="expand-loading">Loading your purchase history…</div>';
+        body.dataset.loaded = '1';
+
+        // Find user entry in leaderboard
+        const entry = leaderboard.find(r => r.wallet === wallet);
+
+        try {
+          const purchases = await fetchHistory(wallet);
+          const mintsUsed = entry?.mintsUsed ?? 0;
+          const yourWojakBought = entry?.yourWojakBought ?? 0;
+
+          body.innerHTML = `
+            <div class="expand-header">
+              <a href="${SPACESCAN_ADDR + wallet}" target="_blank" rel="noopener">View wallet on Spacescan</a>
+              <span class="expand-summary">${mintsUsed} free mint${mintsUsed !== 1 ? 's' : ''} used · ${yourWojakBought} paid mint${yourWojakBought !== 1 ? 's' : ''}</span>
+            </div>
+            ${purchases.length > 0 ? `
+            <table class="purchase-table">
+              <thead><tr><th>NFT</th><th>Price (XCH)</th><th>Credits</th></tr></thead>
+              <tbody>
+                ${purchases.map((p, i) => {
+                  if (p.eventType === 'holder_airdrop') {
+                    return `<tr>
+                      <td><div class="nft-cell">
+                        <div class="nft-thumb-placeholder" style="display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(255,107,0,0.12);border:1px solid rgba(255,107,0,0.25)">🪂</div>
+                        <div class="nft-info"><span class="nft-link" style="cursor:default;color:var(--primary)">Holder Airdrop</span></div>
+                      </div></td>
+                      <td class="price" style="color:var(--text3)">—</td>
+                      <td class="credits">${Math.floor(p.creditsEarned || 0)}</td>
+                    </tr>`;
+                  }
+                  const name = p.nftName || truncateId(p.nftId, 12, 8);
+                  return `<tr>
+                    <td><div class="nft-cell">
+                      <div class="nft-thumb-placeholder" data-wc-nft-idx="${i}"></div>
+                      <div class="nft-info"><a href="${MINTGARDEN_NFT + p.nftId}" target="_blank" rel="noopener" class="nft-link" data-wc-nft-name="${i}">${name}</a></div>
+                    </div></td>
+                    <td class="price">${p.priceXch.toFixed(2)}</td>
+                    <td class="credits">${Math.floor(p.creditsEarned || 0)}</td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>` : '<p class="expand-summary" style="margin-top:8px">No credit-earning purchases yet.</p>'}
+            <button type="button" class="wallet-card-scroll-btn" onclick="document.querySelector('.user-row')?.scrollIntoView({behavior:'smooth',block:'center'})">↓ Jump to my rank in leaderboard</button>
+          `;
+
+          // Lazy-load thumbnails
+          purchases.forEach((p, i) => {
+            if (p.eventType === 'holder_airdrop') return;
+            fetchNftInfo(p.nftId).then((info) => {
+              if (!info) return;
+              const thumbEl = body.querySelector(`[data-wc-nft-idx="${i}"]`);
+              if (thumbEl && info.img) {
+                const img = document.createElement('img');
+                img.src = info.img;
+                img.alt = '';
+                img.className = 'nft-thumb';
+                img.loading = 'lazy';
+                thumbEl.replaceWith(img);
+              }
+              if (info.name) {
+                const nameEl = body.querySelector(`[data-wc-nft-name="${i}"]`);
+                if (nameEl) nameEl.textContent = info.name;
+              }
+            });
+          });
+        } catch (err) {
+          body.innerHTML = '<div class="expand-empty">Could not load purchase history: ' + err.message + '</div>';
+        }
+      }
+    });
 
     loadFromApi();
   </script>
