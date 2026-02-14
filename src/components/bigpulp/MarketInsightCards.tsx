@@ -285,7 +285,7 @@ function NFTListModal({
                   key={nft.id}
                   className="rounded-xl overflow-hidden"
                   style={{
-                    background: 'var(--color-glass-bg)',
+                    background: 'var(--color-surface)',
                     border: '1px solid var(--color-border)',
                   }}
                   whileHover={{ scale: 1.02 }}

@@ -1,87 +1,38 @@
-# Premium Redesign Documentation
+# Premium Visual Upgrade — Handoff Plan
 
-## Files Created
+## Overview
 
-### CSS (in src/styles/)
-- `premium-tokens.css` - CSS variables for glassmorphism, glows, etc.
-- `premium-effects.css` - Utility classes (.glass, .hover-lift, .glow-*)
-- `ambient-background.css` - Floating gradient orbs styles
+Transform Wojak.ink from amateur-looking to premium/high-end dark UI through **coherence and restraint**. The core problem is that each page was styled independently — BigPulp uses inline styles, Leaderboard has custom glass morphism, Shop has custom gradients. The fix is theme-first: establish the design system in `theme.css`, then align every page.
 
-### Components (in src/components/)
-- `AmbientBackground.tsx` - Gradient orbs component
+## Phase Files
 
-### Hooks (in src/hooks/)
-- `useUISound.ts` - Sound hook (adjust to your settings)
+Execute in order. Each phase is independent and can be committed separately.
 
----
+| Phase | File | Scope | Impact |
+|-------|------|-------|--------|
+| **A** | `PART-A-THEME-FOUNDATION.md` | `theme.css` global variables | HIGHEST — cascades to all pages |
+| **B** | `PART-B-NAVIGATION.md` | Header, Sidebar, MobileNav | HIGH — affects every page's chrome |
+| **C** | `PART-C-PAGE-ALIGNMENT.md` | All pages individually | MEDIUM — page-by-page coherence |
+| **D** | `PART-D-COHERENCE-CHECK.md` | Cross-page verification | FINAL — ensure everything matches |
 
-## Implementation Steps
+## Supporting Files
 
-### Step 1: Import CSS
-In your main CSS file (src/index.css), add at the END:
-```css
-@import './styles/premium-tokens.css';
-@import './styles/premium-effects.css';
-@import './styles/ambient-background.css';
+| File | Purpose |
+|------|---------|
+| `DESIGN-REFERENCE.md` | Premium dark UI design principles, research-backed CSS values |
+
+## How to Hand Off to Claude CLI
+
+For each phase, give Claude CLI:
+```
+Read docs/premium-redesign/PART-A-THEME-FOUNDATION.md and implement all changes described. After each section, run the dev server and verify visually. Commit after each part.
 ```
 
-### Step 2: Add Ambient Background
-In App.tsx, add before your main content:
-```tsx
-import { AmbientBackground } from './components/AmbientBackground';
-
-function App() {
-  return (
-    <>
-      <AmbientBackground />
-      {/* rest of your app */}
-    </>
-  );
-}
-```
-
-### Step 3: Apply Glass Classes
-Add classes to your existing cards:
-```tsx
-// Before
-<div className="nft-card">
-
-// After
-<div className="nft-card glass hover-lift glow-orange">
-```
-
-### Step 4: Add Section Attributes
-On each page root element:
-```tsx
-<div data-section="bigpulp">  // Uses cyan glow
-<div data-section="games">     // Uses purple glow
-<div data-section="treasury">  // Uses green glow
-```
-
----
-
-## Class Reference
-
-| Class | Effect |
-|-------|--------|
-| `glass` | Frosted glass background |
-| `glass-strong` | More opaque glass |
-| `hover-lift` | Lifts 4px on hover |
-| `glow-orange` | Orange glow on hover |
-| `glow-cyan` | Cyan glow on hover |
-| `glow-purple` | Purple glow on hover |
-| `glow-green` | Green glow on hover |
-| `glow-section` | Auto-glow based on data-section |
-| `premium-card` | Combined glass + lift + glow |
-
----
-
-## Verification Checklist
-
-- [ ] CSS imports added to main CSS file
-- [ ] AmbientBackground added to App.tsx
-- [ ] Gradient orbs visible behind content
-- [ ] Glass classes applied to cards
-- [ ] Hover effects working
-- [ ] All routes still work
-- [ ] Theme switching still works
+## Key Rules for Implementation
+- ALL visual styles go in `src/styles/theme.css` (not new CSS files)
+- Tailwind is for layout ONLY (flex, grid, gap, padding, margin, width)
+- NEVER use `!important`
+- NEVER add new CSS files for styling — edit theme.css or replace inline styles with CSS variables
+- Keep the BigPulp character/speech bubble white (user preference)
+- Keep NFT art and orange grove scenes bright (character identity)
+- Generator is the visual benchmark — other pages should match its polish level

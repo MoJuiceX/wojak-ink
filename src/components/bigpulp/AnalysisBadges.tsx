@@ -87,7 +87,7 @@ function ProvenanceCard({
     <motion.div
       className="p-3 rounded-xl transition-colors"
       style={{
-        background: 'var(--color-glass-bg)',
+        background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
       }}
       variants={prefersReducedMotion ? undefined : badgeVariants}

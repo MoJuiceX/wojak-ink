@@ -104,7 +104,7 @@ export function NFTSearchInput({
           <div
             className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 transition-colors"
             style={{
-              background: 'var(--color-glass-bg)',
+              background: 'var(--color-surface)',
               border: `1px solid ${error ? 'var(--color-error, #ef4444)' : isFocused ? 'var(--color-brand-primary)' : 'var(--color-border)'}`,
             }}
           >

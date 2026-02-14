@@ -89,18 +89,18 @@ function CompactRefreshButton({
       className={`bigpulp-btn flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs ${refreshState === 'success' ? 'bigpulp-btn-active' : ''}`}
       style={{
         border: refreshState === 'success'
-          ? '1px solid rgba(34,197,94,0.5)'
+          ? '1px solid var(--color-success)'
           : '1px solid var(--color-border)',
         color: refreshState === 'success'
-          ? 'rgb(34,197,94)'
+          ? 'var(--color-success)'
           : 'var(--color-text-muted)',
-        boxShadow: refreshState === 'success' ? '0 0 8px rgba(34,197,94,0.2)' : 'none',
+        boxShadow: refreshState === 'success' ? 'var(--glow-green)' : 'none',
         cursor: isOnCooldown ? 'not-allowed' : 'pointer',
         opacity: isOnCooldown ? 0.5 : 1,
       }}
       whileHover={isOnCooldown ? {} : {
         scale: 1.05,
-        borderColor: 'rgba(255,255,255,0.2)',
+        borderColor: 'var(--color-border-hover)',
       }}
       whileTap={isOnCooldown ? {} : { scale: 0.95 }}
     >
@@ -178,8 +178,8 @@ export function LegacyCacheStatusIndicator({
       style={{
         background: refreshState === 'success'
           ? 'rgba(34, 197, 94, 0.15)'
-          : 'var(--color-glass-bg)',
-        border: `1px solid ${refreshState === 'success' ? 'rgba(34, 197, 94, 0.3)' : 'var(--color-border)'}`,
+          : 'var(--color-surface)',
+        border: `1px solid ${refreshState === 'success' ? 'var(--color-success)' : 'var(--color-border)'}`,
         minWidth: '140px',
         height: '28px',
       }}
@@ -218,9 +218,9 @@ export function LegacyCacheStatusIndicator({
               animate={{ scale: [0, 1.2, 1] }}
               transition={{ duration: 0.3 }}
             >
-              <Check size={12} style={{ color: 'rgb(34, 197, 94)' }} strokeWidth={3} />
+              <Check size={12} style={{ color: 'var(--color-success)' }} strokeWidth={3} />
             </motion.div>
-            <span style={{ color: 'rgb(34, 197, 94)' }}>Updated!</span>
+            <span style={{ color: 'var(--color-success)' }}>Updated!</span>
           </motion.div>
         ) : (
           <motion.div
@@ -246,7 +246,7 @@ export function LegacyCacheStatusIndicator({
                 className="flex items-center justify-center rounded transition-colors relative group"
                 style={{
                   marginLeft: metadata ? '4px' : '0',
-                  background: isOnCooldown ? 'transparent' : 'var(--color-glass-bg)',
+                  background: isOnCooldown ? 'transparent' : 'var(--color-surface)',
                   opacity: isOnCooldown ? 0.5 : 1,
                   cursor: isOnCooldown ? 'not-allowed' : 'pointer',
                   padding: isOnCooldown ? '0 6px' : '0',
@@ -255,7 +255,7 @@ export function LegacyCacheStatusIndicator({
                 }}
                 title={isOnCooldown ? undefined : 'Refresh data'}
                 aria-label={isOnCooldown ? `Cooldown: ${cooldownSeconds}s remaining` : 'Refresh heatmap data'}
-                whileHover={isOnCooldown ? {} : { scale: 1.1, backgroundColor: 'rgba(255,255,255,0.1)' }}
+                whileHover={isOnCooldown ? {} : { scale: 1.1, backgroundColor: 'var(--color-surface-hover)' }}
                 whileTap={isOnCooldown ? {} : { scale: 0.95 }}
               >
                 {isOnCooldown ? (
@@ -345,7 +345,7 @@ function ViewModeButtons({
             onMouseLeave={onHoverEnd}
             whileHover={{
               scale: 1.05,
-              borderColor: 'rgba(255,255,255,0.2)',
+              borderColor: 'var(--color-border-hover)',
             }}
             whileTap={{ scale: 0.95 }}
           >
@@ -413,13 +413,13 @@ function BadgeDropdown({
           width: '28px',
           height: '28px',
           color: showInfo ? 'var(--color-brand-primary)' : 'var(--color-text-muted)',
-          border: `1px solid ${showInfo ? 'rgba(255,149,0,0.5)' : 'var(--color-border)'}`,
-          boxShadow: showInfo ? '0 0 8px rgba(255,149,0,0.2)' : 'none',
+          border: `1px solid ${showInfo ? 'var(--color-border-active)' : 'var(--color-border)'}`,
+          boxShadow: showInfo ? 'var(--glow-primary)' : 'none',
         }}
         onClick={() => setShowInfo(!showInfo)}
         title="What are badges?"
         whileHover={{
-          borderColor: 'rgba(255,255,255,0.2)',
+          borderColor: 'var(--color-border-hover)',
         }}
         whileTap={{ scale: 0.95 }}
       >
@@ -431,12 +431,12 @@ function BadgeDropdown({
         className={`bigpulp-btn flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${isFilterActive ? 'bigpulp-btn-active' : ''}`}
         style={{
           color: isFilterActive ? 'var(--color-brand-primary)' : 'var(--color-text-secondary)',
-          border: `1px solid ${isFilterActive ? 'rgba(255,149,0,0.5)' : 'var(--color-border)'}`,
-          boxShadow: isFilterActive ? '0 0 8px rgba(255,149,0,0.2)' : 'none',
+          border: `1px solid ${isFilterActive ? 'var(--color-border-active)' : 'var(--color-border)'}`,
+          boxShadow: isFilterActive ? 'var(--glow-primary)' : 'none',
         }}
         onClick={() => { setIsOpen(!isOpen); setShowInfo(false); }}
         whileHover={{
-          borderColor: 'rgba(255,255,255,0.2)',
+          borderColor: 'var(--color-border-hover)',
         }}
         whileTap={{ scale: 0.95 }}
       >
@@ -500,7 +500,7 @@ function BadgeDropdown({
             <div
               className="px-3 py-1.5 text-xs flex items-center justify-between"
               style={{
-                background: 'var(--color-glass-bg)',
+                background: 'var(--color-surface)',
                 borderBottom: '1px solid var(--color-border)',
                 color: 'var(--color-text-muted)',
               }}
@@ -516,7 +516,7 @@ function BadgeDropdown({
             <button
               className="w-full px-3 py-2 text-left text-sm transition-colors flex items-center justify-between hover:bg-white/5"
               style={{
-                background: selectedBadge === null ? 'var(--color-glass-bg)' : 'transparent',
+                background: selectedBadge === null ? 'var(--color-surface)' : 'transparent',
                 color: 'var(--color-text-muted)',
                 borderBottom: '1px solid var(--color-border)',
               }}
@@ -530,7 +530,7 @@ function BadgeDropdown({
             <button
               className="w-full px-3 py-2 text-left text-sm transition-colors flex items-center justify-between hover:bg-white/5"
               style={{
-                background: selectedBadge === ALL_BADGES_FILTER ? 'var(--color-glass-bg)' : 'transparent',
+                background: selectedBadge === ALL_BADGES_FILTER ? 'var(--color-surface)' : 'transparent',
                 color: 'var(--color-text-primary)',
                 borderBottom: '1px solid var(--color-border)',
               }}
@@ -556,7 +556,7 @@ function BadgeDropdown({
                 key={badge.name}
                 className="w-full px-3 py-2 text-left text-sm transition-colors flex items-center justify-between hover:bg-white/5"
                 style={{
-                  background: selectedBadge === badge.name ? 'var(--color-glass-bg)' : 'transparent',
+                  background: selectedBadge === badge.name ? 'var(--color-surface)' : 'transparent',
                   color: 'var(--color-text-primary)',
                 }}
                 onClick={() => handleSelect(badge.name)}
@@ -634,7 +634,7 @@ function CellDetailModal({
           <button
             className="p-2 rounded-lg transition-colors"
             style={{
-              background: 'var(--color-glass-bg)',
+              background: 'var(--color-surface)',
               color: 'var(--color-text-secondary)',
             }}
             onClick={onClose}
@@ -660,7 +660,7 @@ function CellDetailModal({
                   key={nft.id}
                   className="rounded-xl overflow-hidden"
                   style={{
-                    background: 'var(--color-glass-bg)',
+                    background: 'var(--color-surface)',
                     border: '1px solid var(--color-border)',
                   }}
                 >
@@ -955,7 +955,7 @@ export function HeatMap({
       <div
         className="p-8 text-center rounded-xl"
         style={{
-          background: 'var(--color-glass-bg)',
+          background: 'var(--color-surface)',
           border: '1px solid var(--color-border)',
         }}
       >
@@ -1009,9 +1009,9 @@ export function HeatMap({
       <div
         className="p-2 rounded-xl"
         style={{
-          background: 'linear-gradient(135deg, rgba(25,25,25,0.95) 0%, rgba(15,15,15,0.98) 100%)',
-          border: '1px solid rgba(255,255,255,0.06)',
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03), 0 4px 20px rgba(0,0,0,0.4)',
+          background: 'var(--color-surface)',
+          border: '1px solid var(--color-border)',
+          boxShadow: 'var(--shadow-card)',
         }}
       >
         {/* Column headers (price bins) - compact */}

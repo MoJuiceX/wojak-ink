@@ -72,7 +72,7 @@ function StatCard({
     <motion.div
       className="p-3 rounded-xl text-center flex flex-col items-center justify-center"
       style={{
-        background: 'var(--color-glass-bg)',
+        background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
       }}
       variants={prefersReducedMotion ? undefined : statsCardVariants}
@@ -125,7 +125,7 @@ function ExpandableSection({
     <div
       className="rounded-xl overflow-hidden"
       style={{
-        background: 'var(--color-glass-bg)',
+        background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
       }}
     >
@@ -136,7 +136,7 @@ function ExpandableSection({
         aria-expanded={isExpanded}
         aria-controls={`section-${section.id}`}
         style={{
-          background: isExpanded ? 'var(--color-glass-hover)' : 'transparent',
+          background: isExpanded ? 'var(--color-surface-hover)' : 'transparent',
         }}
       >
         <div className="flex items-center gap-3">
@@ -356,30 +356,30 @@ function TopSalesContent({ sales, isLoading }: { sales: NFTSale[]; isLoading?: b
             >
               <div
                 className="w-6 h-6 rounded-full flex-shrink-0"
-                style={{ background: 'var(--color-glass-hover)' }}
+                style={{ background: 'var(--color-surface-hover)' }}
               />
               <div
                 className="w-10 h-10 rounded-lg flex-shrink-0"
-                style={{ background: 'var(--color-glass-hover)' }}
+                style={{ background: 'var(--color-surface-hover)' }}
               />
               <div className="flex-1 space-y-2">
                 <div
                   className="h-4 w-24 rounded"
-                  style={{ background: 'var(--color-glass-hover)' }}
+                  style={{ background: 'var(--color-surface-hover)' }}
                 />
                 <div
                   className="h-3 w-16 rounded"
-                  style={{ background: 'var(--color-glass-hover)' }}
+                  style={{ background: 'var(--color-surface-hover)' }}
                 />
               </div>
               <div className="text-right space-y-2">
                 <div
                   className="h-4 w-16 rounded ml-auto"
-                  style={{ background: 'var(--color-glass-hover)' }}
+                  style={{ background: 'var(--color-surface-hover)' }}
                 />
                 <div
                   className="h-3 w-12 rounded ml-auto"
-                  style={{ background: 'var(--color-glass-hover)' }}
+                  style={{ background: 'var(--color-surface-hover)' }}
                 />
               </div>
             </div>
@@ -404,7 +404,7 @@ function TopSalesContent({ sales, isLoading }: { sales: NFTSale[]; isLoading?: b
             <span
               className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
               style={{
-                background: index < 3 ? '#fbbf24' : 'var(--color-glass-hover)',
+                background: index < 3 ? '#fbbf24' : 'var(--color-surface-hover)',
                 color: index < 3 ? '#1a1a1a' : 'var(--color-text-secondary)',
               }}
             >
@@ -412,7 +412,7 @@ function TopSalesContent({ sales, isLoading }: { sales: NFTSale[]; isLoading?: b
             </span>
             <div
               className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden"
-              style={{ background: 'var(--color-glass-hover)' }}
+              style={{ background: 'var(--color-surface-hover)' }}
             >
               <img
                 src={sale.nft.imageUrl}
@@ -685,7 +685,7 @@ function BadgeGalleryContent() {
                         <div
                           key={nft.id}
                           className="relative aspect-square rounded-lg overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-105 hover:z-10"
-                          style={{ background: 'var(--color-glass-bg)' }}
+                          style={{ background: 'var(--color-surface)' }}
                           title={`${names[nft.id] || `Wojak #${nft.id.padStart(4, '0')}`}`}
                           onClick={() => handleNftClick(nft.id)}
                         >
@@ -738,7 +738,7 @@ function StatCardSkeleton() {
     <div
       className="p-3 rounded-xl animate-pulse"
       style={{
-        background: 'var(--color-glass-bg)',
+        background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
       }}
     >
@@ -759,7 +759,7 @@ function SectionSkeleton() {
     <div
       className="rounded-xl overflow-hidden animate-pulse"
       style={{
-        background: 'var(--color-glass-bg)',
+        background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
       }}
     >
@@ -858,7 +858,7 @@ export function AskTab({
       <div
         className="rounded-xl overflow-hidden"
         style={{
-          background: 'var(--color-glass-bg)',
+          background: 'var(--color-surface)',
           border: '1px solid var(--color-border)',
         }}
       >
@@ -867,7 +867,7 @@ export function AskTab({
           onClick={() => setIsStatsExpanded(!isStatsExpanded)}
           aria-expanded={isStatsExpanded}
           style={{
-            background: isStatsExpanded ? 'var(--color-glass-hover)' : 'transparent',
+            background: isStatsExpanded ? 'var(--color-surface-hover)' : 'transparent',
           }}
         >
           <div className="flex items-center gap-3">

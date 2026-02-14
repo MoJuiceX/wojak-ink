@@ -2,7 +2,7 @@
    GALLERY PAGE - Premium Cyberpunk Design
    ============================================ */
 
-/* Animated gradient background for gallery page */
+/* Subtle gradient background for gallery page */
 .gallery-page-background {
   position: fixed;
   inset: 0;
@@ -10,22 +10,15 @@
   background:
     radial-gradient(
       ellipse at 20% 80%,
-      rgba(249, 115, 22, 0.15) 0%,
+      rgba(249, 115, 22, 0.08) 0%,
       transparent 50%
     ),
     radial-gradient(
       ellipse at 80% 20%,
-      rgba(124, 58, 237, 0.1) 0%,
+      rgba(124, 58, 237, 0.05) 0%,
       transparent 50%
     ),
     linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
-  background-size: 200% 200%;
-  animation: gradientShift 15s ease infinite;
-}
-
-@keyframes gradientShift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
 }
 
 /* Character Card Hover Glow Effect */

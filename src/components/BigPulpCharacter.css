@@ -18,7 +18,7 @@
 /* Speech Bubble */
 .speech-bubble {
   background: white;
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
   padding: 14px 16px;
   width: 280px;
   min-height: 100px;
@@ -27,7 +27,7 @@
   left: 35px;
   transform-origin: top left;
   transform: scale(0.8);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
   opacity: 0;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: 5;

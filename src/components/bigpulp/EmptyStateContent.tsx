@@ -68,7 +68,7 @@ function QuickStats({
             key={i}
             className="p-3 rounded-xl animate-pulse"
             style={{
-              background: 'var(--color-glass-bg)',
+              background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
             }}
           >
@@ -153,7 +153,7 @@ function TrendingNFTs({
               key={i}
               className="flex-shrink-0 w-28 rounded-xl animate-pulse"
               style={{
-                background: 'var(--color-glass-bg)',
+                background: 'var(--color-surface)',
                 border: '1px solid var(--color-border)',
               }}
             >
@@ -275,7 +275,7 @@ function TrendingNFTs({
         <div
           className="flex-shrink-0 w-16 flex items-center justify-center rounded-xl"
           style={{
-            background: 'var(--color-glass-bg)',
+            background: 'var(--color-surface)',
             border: '1px solid var(--color-border)',
             scrollSnapAlign: 'start',
           }}

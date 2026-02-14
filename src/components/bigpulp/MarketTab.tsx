@@ -38,7 +38,7 @@ function HeatMapSkeleton() {
     <div
       className="p-4 rounded-xl animate-pulse"
       style={{
-        background: 'var(--color-glass-bg)',
+        background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
       }}
     >

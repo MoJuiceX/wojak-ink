@@ -163,7 +163,7 @@ export function MyWojaksModal({
                           key={nft.id}
                           className="relative aspect-square rounded-xl overflow-hidden group"
                           style={{
-                            background: 'var(--color-glass-bg)',
+                            background: 'var(--color-surface)',
                             border: isSelected
                               ? '3px solid #f97316'
                               : '2px solid var(--color-border, rgba(255, 255, 255, 0.1))',

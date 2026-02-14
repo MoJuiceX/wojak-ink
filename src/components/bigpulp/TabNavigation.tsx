@@ -108,10 +108,10 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
                   ? 'var(--color-brand-primary)'
                   : 'var(--color-text-muted)',
                 border: isActive
-                  ? '1px solid rgba(255,149,0,0.5)'
+                  ? '1px solid var(--color-border-active)'
                   : '1px solid var(--color-border)',
                 boxShadow: isActive
-                  ? '0 2px 8px rgba(255,149,0,0.2)'
+                  ? 'var(--glow-primary)'
                   : 'none',
               }}
               onClick={() => {
@@ -124,7 +124,7 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
                   ? undefined
                   : {
                       scale: 1.02,
-                      borderColor: 'rgba(255,255,255,0.2)',
+                      borderColor: 'var(--color-border-hover)',
                     }
               }
               whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
@@ -146,7 +146,7 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   style={{
-                    boxShadow: 'inset 0 0 12px rgba(255,149,0,0.1)',
+                    boxShadow: 'inset 0 0 12px var(--color-primary-muted)',
                   }}
                 />
               )}
