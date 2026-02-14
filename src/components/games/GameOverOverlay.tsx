@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import confetti from 'canvas-confetti';
+const loadConfetti = () => import('canvas-confetti').then(m => m.default);
 import { Share2, RotateCcw, LogOut } from 'lucide-react';
 import './GameOverOverlay.css';
 
@@ -42,12 +42,13 @@ export const GameOverOverlay: React.FC<GameOverOverlayProps> = ({
 
   useEffect(() => {
     if (isNewHighScore && !prefersReducedMotion) {
-      // Fire confetti
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#F97316', '#FFD700', '#FF6B00', '#EA580C'],
+      loadConfetti().then(confetti => {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#F97316', '#FFD700', '#FF6B00', '#EA580C'],
+        });
       });
     }
   }, [isNewHighScore, prefersReducedMotion]);

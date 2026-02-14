@@ -70,7 +70,7 @@ function StatCard({
 
   return (
     <motion.div
-      className="p-3 rounded-xl text-center flex flex-col items-center justify-center"
+      className="p-1.5 sm:p-3 rounded-lg sm:rounded-xl text-center flex flex-col items-center justify-center"
       style={{
         background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
@@ -79,13 +79,13 @@ function StatCard({
       whileHover="hover"
     >
       <p
-        className="text-base font-bold whitespace-nowrap"
+        className="text-xs sm:text-base font-bold whitespace-nowrap"
         style={{ color: 'var(--color-brand-primary)' }}
       >
         {value}
         {subValue && (
           <span
-            className="text-xs font-medium ml-0.5"
+            className="text-[10px] sm:text-xs font-medium ml-0.5"
             style={{ color: 'var(--color-text-secondary)' }}
           >
             {subValue}
@@ -93,14 +93,14 @@ function StatCard({
         )}
         {usdValue && (
           <span
-            className="text-xs font-medium ml-1"
+            className="text-[10px] sm:text-xs font-medium ml-0.5 sm:ml-1 hidden sm:inline"
             style={{ color: 'var(--color-text-muted)' }}
           >
             ({usdValue})
           </span>
         )}
       </p>
-      <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+      <p className="text-[10px] sm:text-xs" style={{ color: 'var(--color-text-muted)' }}>
         {label}
       </p>
     </motion.div>
@@ -131,7 +131,7 @@ function ExpandableSection({
     >
       {/* Header */}
       <button
-        className="w-full flex items-center justify-between p-4 text-left transition-colors"
+        className="w-full flex items-center justify-between p-3 sm:p-4 text-left transition-colors"
         onClick={onToggle}
         aria-expanded={isExpanded}
         aria-controls={`section-${section.id}`}
@@ -139,9 +139,10 @@ function ExpandableSection({
           background: isExpanded ? 'var(--color-surface-hover)' : 'transparent',
         }}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Icon
-            size={18}
+            size={16}
+            className="sm:w-[18px] sm:h-[18px]"
             style={{ color: 'var(--color-brand-primary)' }}
           />
           <span
@@ -178,7 +179,7 @@ function ExpandableSection({
             style={{ overflow: 'hidden' }}
           >
             <div
-              className="p-4 pt-0"
+              className="p-3 sm:p-4 pt-0"
               style={{ borderTop: '1px solid var(--color-border)' }}
             >
               {children}
@@ -858,7 +859,7 @@ export function AskTab({
 
   return (
     <motion.div
-      className="space-y-6 p-4"
+      className="space-y-3 sm:space-y-6 p-2 sm:p-4"
       variants={prefersReducedMotion ? undefined : tabContentVariants}
       initial="hidden"
       animate="visible"
@@ -873,16 +874,17 @@ export function AskTab({
         }}
       >
         <button
-          className="w-full flex items-center justify-between p-4 text-left transition-colors"
+          className="w-full flex items-center justify-between p-3 sm:p-4 text-left transition-colors"
           onClick={() => setIsStatsExpanded(!isStatsExpanded)}
           aria-expanded={isStatsExpanded}
           style={{
             background: isStatsExpanded ? 'var(--color-surface-hover)' : 'transparent',
           }}
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <BarChart3
-              size={18}
+              size={16}
+              className="sm:w-[18px] sm:h-[18px]"
               style={{ color: 'var(--color-brand-primary)' }}
             />
             <span
@@ -914,11 +916,11 @@ export function AskTab({
               style={{ overflow: 'hidden' }}
             >
               <div
-                className="p-4 pt-0"
+                className="p-2 sm:p-4 pt-0"
                 style={{ borderTop: '1px solid var(--color-border)' }}
               >
                 <motion.div
-                  className="grid grid-cols-5 gap-2 pt-4"
+                  className="grid grid-cols-5 gap-1.5 sm:gap-2 pt-3 sm:pt-4"
                   variants={prefersReducedMotion ? undefined : statsContainerVariants}
                   initial="initial"
                   animate="animate"
@@ -957,7 +959,7 @@ export function AskTab({
       </div>
 
       {/* Expandable Sections */}
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         <ExpandableSection
           section={SECTIONS[0]}
           isExpanded={expandedSection === 'provenance'}

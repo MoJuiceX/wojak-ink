@@ -341,9 +341,13 @@ interface DexieTicker {
   last_price: string;
 }
 
+// Cached tickers from Dexie for auto-discovery of new tokens
+let cachedDexieTickers: DexieTicker[] = [];
+
 /**
  * Refresh CAT token rates from Dexie's public tickers API.
  * Updates rates in cat_token_rates for tokens we already track.
+ * Also caches tickers for auto-discovery of unknown tokens during trade processing.
  * Matches by asset_id (base_id from Dexie) — most reliable since
  * token symbols can be emoji or have $ prefixes.
  */
@@ -358,6 +362,9 @@ async function refreshTokenRatesFromDexie(db: D1Database): Promise<number> {
     const data = await response.json() as { success?: boolean; tickers?: DexieTicker[] };
     const tickers = data.tickers;
     if (!Array.isArray(tickers) || tickers.length === 0) return 0;
+
+    // Cache tickers for auto-discovery during trade processing
+    cachedDexieTickers = tickers;
 
     // Load all tokens with their asset_ids
     const existing = await db.prepare(
@@ -408,12 +415,59 @@ async function refreshTokenRatesFromDexie(db: D1Database): Promise<number> {
   }
 }
 
+/**
+ * Auto-discover and persist a new CAT token rate from cached Dexie tickers.
+ * Called when an unknown token is encountered during trade processing.
+ * Returns the discovered rate, or null if not found.
+ */
+async function autoDiscoverTokenRate(
+  db: D1Database,
+  tokenCode: string,
+  tokenId: string,
+  ratesByCode: Map<string, number>,
+  ratesByAssetId: Map<string, { tokenCode: string; xchRate: number }>
+): Promise<number | null> {
+  // Look up in cached tickers by asset_id
+  const ticker = cachedDexieTickers.find(
+    t => t.target_currency === 'XCH' && t.base_id === tokenId
+  );
+  if (!ticker) return null;
+
+  const rate = parseFloat(ticker.last_price);
+  if (!rate || rate <= 0) return null;
+
+  // Insert into cat_token_rates
+  try {
+    await db.prepare(`
+      INSERT INTO cat_token_rates (token_code, token_id, xch_rate, asset_id, source, updated_at)
+      VALUES (?, ?, ?, ?, 'dexie', datetime('now'))
+      ON CONFLICT(token_code) DO UPDATE SET
+        xch_rate = excluded.xch_rate,
+        token_id = COALESCE(excluded.token_id, cat_token_rates.token_id),
+        asset_id = COALESCE(excluded.asset_id, cat_token_rates.asset_id),
+        source = 'dexie',
+        updated_at = datetime('now')
+    `).bind(tokenCode, tokenId, rate, tokenId).run();
+
+    // Update in-memory rate maps
+    ratesByCode.set(tokenCode, rate);
+    ratesByAssetId.set(tokenId, { tokenCode, xchRate: rate });
+
+    console.warn(`Auto-discovered token: ${tokenCode} (${tokenId}) rate=${rate} XCH`);
+    return rate;
+  } catch (error) {
+    console.warn(`Failed to auto-discover token ${tokenCode}:`, error);
+    return null;
+  }
+}
+
 // Fetch all trades from Dexie API (XCH + CAT) with retry logic and circuit breaker
 async function fetchAllTrades(
   collectionId: string,
   ratesByCode: Map<string, number>,
   metadataMap: Map<number, NFTMetadata>,
-  ratesByAssetId?: Map<string, { tokenCode: string; xchRate: number }>
+  ratesByAssetId?: Map<string, { tokenCode: string; xchRate: number }>,
+  db?: D1Database
 ): Promise<Sale[]> {
   const allTrades: Sale[] = [];
   let page = 1;
@@ -477,11 +531,22 @@ async function fetchAllTrades(
         } else {
           // CAT sale — look up conversion rate
           catXchRate = getTokenXchRate(payment.code || '', ratesByCode, payment.id, ratesByAssetId);
-          priceXch = originalAmount * catXchRate;
 
-          if (catXchRate === 0.000001) {
+          // Auto-discover unknown tokens from cached Dexie tickers
+          if (catXchRate === 0.000001 && db && payment.id) {
+            const discovered = await autoDiscoverTokenRate(
+              db, payment.code || payment.id, payment.id, ratesByCode, ratesByAssetId || new Map()
+            );
+            if (discovered) {
+              catXchRate = discovered;
+            } else {
+              console.warn(`Unknown CAT token: ${payment.code} (id: ${payment.id}), using fallback rate`);
+            }
+          } else if (catXchRate === 0.000001) {
             console.warn(`Unknown CAT token: ${payment.code} (id: ${payment.id}), using fallback rate`);
           }
+
+          priceXch = originalAmount * catXchRate;
         }
 
         // Build traits JSON from metadata
@@ -1159,7 +1224,7 @@ export default {
       console.warn(`${tokenRates.byCode.size} token rates loaded, ${tokenRates.byAssetId.size} asset mappings`);
 
       // Step 2: Fetch all trades from Dexie (XCH + CAT)
-      const trades = await fetchAllTrades(collectionId, tokenRates.byCode, metadataMap, tokenRates.byAssetId);
+      const trades = await fetchAllTrades(collectionId, tokenRates.byCode, metadataMap, tokenRates.byAssetId, env.DB);
       console.warn(`Total trades from Dexie: ${trades.length}`);
 
       if (trades.length === 0) {

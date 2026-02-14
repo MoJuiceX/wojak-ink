@@ -287,11 +287,8 @@ async function loadTraitStats(): Promise<AttributeStats[]> {
           return true;
         });
 
-      // Recalculate stats including new sales
-      const allPrices = [
-        ...attrNewSales.map(s => s.price),
-        ...attr.sales.map(s => s.priceXCH),
-      ];
+      // Recalculate stats from deduplicated merged sales
+      const allPrices = mergedSales.map(s => s.price);
 
       const totalSales = allPrices.length;
       const avgPrice = totalSales > 0

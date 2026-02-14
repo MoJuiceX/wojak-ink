@@ -146,7 +146,7 @@ function TableHeader({
 
   return (
     <div
-      className={`flex items-center ${px} py-2.5`}
+      className={`flex items-center ${px} ${compact ? 'py-1.5' : 'py-2.5'}`}
       style={{
         background: 'rgba(255,255,255,0.03)',
         borderBottom: '1px solid rgba(255,255,255,0.08)',
@@ -238,7 +238,7 @@ function AttributeRow({
       {/* Row — category | attribute name | numbers, all one line */}
       <button
         type="button"
-        className={`w-full flex items-center ${px} py-3 text-left`}
+        className={`w-full flex items-center ${px} ${compact ? 'py-2' : 'py-3'} text-left`}
         onClick={onToggle}
         aria-expanded={isExpanded}
       >
@@ -502,7 +502,7 @@ export function AttributesTab({
       exit="exit"
     >
       {/* Filter dropdowns */}
-      <div className="flex items-center gap-2 mb-3">
+      <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
         {/* Category dropdown */}
         <select
           value={selectedCategory || ''}

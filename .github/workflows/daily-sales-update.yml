@@ -25,7 +25,7 @@ jobs:
         run: npm ci
 
       - name: Run daily sales update
-        run: npx tsx scripts/dailySalesUpdate.ts
+        run: npx tsx scripts/regenerateAttributeStats.ts
         env:
           NODE_ENV: production
 
@@ -42,16 +42,6 @@ jobs:
           git add public/assets/nft-data/attribute_stats.json
           git commit -m "chore: update attribute sales data [automated]"
           git push
-
-      - name: Trigger Vercel rebuild
-        if: steps.git-check.outputs.changed == 'true'
-        run: |
-          if [ -n "${{ secrets.VERCEL_DEPLOY_HOOK }}" ]; then
-            curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK }}"
-            echo "Vercel rebuild triggered"
-          else
-            echo "VERCEL_DEPLOY_HOOK secret not set, skipping rebuild trigger"
-          fi
 
       - name: Summary
         run: |

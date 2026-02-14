@@ -264,7 +264,7 @@ function BottomPanel() {
       <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Tab content */}
-      <div className="p-2 sm:p-4">
+      <div className="p-1 sm:p-4">
         <AnimatePresence mode="wait">
           {activeTab === 'market' && (
             <motion.div

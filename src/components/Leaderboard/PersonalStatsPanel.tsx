@@ -13,7 +13,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, ChevronUp, Flame, Trophy, Gamepad2, TrendingUp, Award, Heart } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch';
-import confetti from 'canvas-confetti';
+const loadConfetti = () => import('canvas-confetti').then(m => m.default);
 import './PersonalStatsPanel.css';
 
 interface PerGameStats {
@@ -115,7 +115,8 @@ export const PersonalStatsPanel: React.FC<PersonalStatsPanelProps> = ({ classNam
   }, [isSignedIn, authenticatedFetch]);
 
   // Confetti effect for new personal best
-  const triggerConfetti = () => {
+  const triggerConfetti = async () => {
+    const confetti = await loadConfetti();
     confetti({
       particleCount: 100,
       spread: 70,

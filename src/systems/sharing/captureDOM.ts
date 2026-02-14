@@ -5,8 +5,6 @@
  * Primarily used for DOM-based games that don't use canvas.
  */
 
-import html2canvas from 'html2canvas';
-
 export interface CaptureOptions {
   /** Background color (default: game dark background) */
   backgroundColor?: string;
@@ -49,6 +47,7 @@ export async function captureGameArea(
   const mergedOptions = { ...DEFAULT_OPTIONS, ...options };
 
   try {
+    const { default: html2canvas } = await import('html2canvas');
     const canvas = await html2canvas(element, {
       backgroundColor: mergedOptions.backgroundColor,
       scale: mergedOptions.scale,
@@ -85,6 +84,7 @@ export async function isCaptureSupported(): Promise<boolean> {
     testEl.style.left = '-9999px';
     document.body.appendChild(testEl);
 
+    const { default: html2canvas } = await import('html2canvas');
     const canvas = await html2canvas(testEl, {
       scale: 1,
       logging: false,

@@ -6,7 +6,11 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { debounce } from 'lodash';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function debounce<T extends (...args: any[]) => any>(fn: T, ms: number): T {
+  let timer: ReturnType<typeof setTimeout>;
+  return ((...args: Parameters<T>) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), ms); }) as unknown as T;
+}
 import { useAuth } from '../../contexts/AuthContext';
 import { validateUsername, generateUsernameSuggestions } from '../../utils/validation';
 import { Avatar } from '../Avatar/Avatar';

@@ -41,22 +41,20 @@ export function SalesProvider({ children }: SalesProviderProps) {
     // Initialize databank from localStorage (instant, offline-capable)
     initializeSalesDatabank();
 
-    // Delay sync to not block initial render
-    const timer = setTimeout(async () => {
+    // Sync from server immediately (don't delay — BigPulp queries need this data)
+    (async () => {
       try {
-        // Load from server-side D1 database (populated by fetch-sales worker)
         const serverAdded = await loadFromServer();
 
         if (serverAdded > 0) {
           markSyncComplete();
+          // Force refetch all bigpulp queries with fresh data
           queryClient.invalidateQueries({ queryKey: ['bigpulp'] });
         }
       } catch (error) {
         console.error('[SalesProvider] Sync failed:', error);
       }
-    }, 3000);
-
-    return () => clearTimeout(timer);
+    })();
   }, [queryClient]);
 
   return <>{children}</>;

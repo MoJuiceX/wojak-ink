@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import confetti from 'canvas-confetti';
+const loadConfetti = () => import('canvas-confetti').then(m => m.default);
 import './AvatarSetSuccess.css';
 
 interface NFT {
@@ -35,41 +35,42 @@ export const AvatarSetSuccess: React.FC<AvatarSetSuccessProps> = ({
 }) => {
   useEffect(() => {
     if (isOpen && nft) {
-      // Trigger confetti burst
-      const duration = 2000;
-      const animationEnd = Date.now() + duration;
-      const colors = ['#F97316', '#FFD700', '#FF6B00', '#FFA500'];
+      loadConfetti().then(confetti => {
+        const duration = 2000;
+        const animationEnd = Date.now() + duration;
+        const colors = ['#F97316', '#FFD700', '#FF6B00', '#FFA500'];
 
-      const frame = () => {
+        const frame = () => {
+          confetti({
+            particleCount: 3,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0 },
+            colors,
+          });
+          confetti({
+            particleCount: 3,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1 },
+            colors,
+          });
+
+          if (Date.now() < animationEnd) {
+            requestAnimationFrame(frame);
+          }
+        };
+
+        // Initial burst
         confetti({
-          particleCount: 3,
-          angle: 60,
-          spread: 55,
-          origin: { x: 0 },
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
           colors,
         });
-        confetti({
-          particleCount: 3,
-          angle: 120,
-          spread: 55,
-          origin: { x: 1 },
-          colors,
-        });
 
-        if (Date.now() < animationEnd) {
-          requestAnimationFrame(frame);
-        }
-      };
-
-      // Initial burst
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors,
+        frame();
       });
-
-      frame();
     }
   }, [isOpen, nft]);
 
