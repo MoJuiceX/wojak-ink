@@ -927,98 +927,15 @@
     loadFromApi();
   </script>
 
-  <!-- WalletConnect integration (ESM module, loaded async) -->
-  <script type="module">
-    import SignClient from 'https://cdn.jsdelivr.net/npm/@walletconnect/sign-client@2.17.3/+esm';
-    import { WalletConnectModal } from 'https://cdn.jsdelivr.net/npm/@walletconnect/modal@2.7.0/+esm';
-
-    const PROJECT_ID = '500876ce87398e4721f71b6aa681a193';
-    const CHIA_CHAIN = 'chia:mainnet';
-    const STORAGE_KEY = 'sage-wallet-session';
-
-    let client = null;
-    let modal = null;
-    let connecting = false;
-
-    async function initWC() {
-      try {
-        client = await SignClient.init({
-          projectId: PROJECT_ID,
-          metadata: {
-            name: 'Wojak.ink',
-            description: 'Tang Gang NFT Collection',
-            url: window.location.origin,
-            icons: ['https://wojak.ink/favicon.ico'],
-          },
-          relayUrl: 'wss://relay.walletconnect.com',
-          logger: 'error',
-        });
-
-        modal = new WalletConnectModal({
-          projectId: PROJECT_ID,
-          themeMode: 'dark',
-          enableExplorer: false,
-          themeVariables: { '--wcm-z-index': '100000' },
-        });
-      } catch (err) {
-        console.warn('[WC] Init failed:', err.message);
+  <!-- WalletConnect SDK (bundled from npm packages) -->
+  <script src="/assets/wallet-connect-standalone.js" defer></script>
+  <script>
+    // Re-render leaderboard when wallet connects via the standalone script
+    window.addEventListener('sage-wallet-connected', function() {
+      if (typeof renderTable === 'function' && leaderboard.length > 0) {
+        renderTable();
       }
-    }
-
-    async function connect() {
-      if (connecting || !client || !modal) return;
-      connecting = true;
-      try {
-        const { uri, approval } = await client.connect({
-          requiredNamespaces: {
-            chia: {
-              methods: [
-                'chip0002_getPublicKeys',
-                'chia_signMessageByAddress',
-                'chia_getAddress',
-                'chia_takeOffer',
-                'chia_send',
-                'chip0002_getAssetBalance',
-              ],
-              chains: [CHIA_CHAIN],
-              events: [],
-            },
-          },
-        });
-
-        if (uri) {
-          await modal.openModal({ uri });
-          const session = await approval();
-          modal.closeModal();
-
-          // Get address from wallet
-          const result = await client.request({
-            topic: session.topic,
-            chainId: CHIA_CHAIN,
-            request: { method: 'chia_getAddress', params: {} },
-          });
-          const address = typeof result === 'string' ? result : (result && result.address) || '';
-
-          if (address) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify({ topic: session.topic, address }));
-            // Re-render leaderboard with highlighting
-            if (typeof renderTable === 'function') renderTable();
-          }
-        }
-      } catch (err) {
-        if (modal) modal.closeModal();
-        if (err && err.message && !err.message.includes('dismissed')) {
-          console.warn('[WC] Connect error:', err.message);
-        }
-      } finally {
-        connecting = false;
-      }
-    }
-
-    // Expose connect function for the inline script's click handler
-    window._sageConnect = connect;
-
-    initWC();
+    });
   </script>
 </body>
 </html>

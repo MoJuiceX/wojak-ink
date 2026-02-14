@@ -9,13 +9,14 @@
 import { useEffect, useRef } from 'react';
 import { motion, useSpring, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
-import { ArrowLeft, Grid3X3, Tag, Hash, Crown, DollarSign, ChevronUp, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Grid3X3, Tag, Hash, Crown, DollarSign, ChevronUp, ChevronDown, Wallet } from 'lucide-react';
 import { useLayout } from '@/hooks/useLayout';
 import { useGallery } from '@/hooks/useGallery';
 import { LAYOUT } from '@/config/layout';
 import { Logo } from './Logo';
 import { PriceBadges } from './PriceBadges';
 import { CurrencyDisplay } from '@/components/Currency';
+import { useSageWallet } from '@/sage-wallet';
 import { getNavItemByPath } from '@/config/routes';
 import type { SortMode, FilterMode } from '@/types/nft';
 
@@ -134,6 +135,8 @@ function MobileGalleryControls() {
 
 export function Header({ transparent = false }: HeaderProps) {
   const { isMobile, sidebarWidth, isScrolled, headerTransparent, headerBreadcrumb } = useLayout();
+  const { address, status, connect } = useSageWallet();
+  const isWalletConnected = status === 'connected' && !!address;
   const location = useLocation();
   const prevSidebarWidth = useRef(sidebarWidth);
 
@@ -317,10 +320,30 @@ export function Header({ transparent = false }: HeaderProps) {
               </AnimatePresence>
             </motion.div>
 
-            {/* Right: Currency + Price badges */}
-            <div className="flex-shrink-0 flex items-center gap-6">
+            {/* Right: Currency + Price badges + Wallet */}
+            <div className="flex-shrink-0 flex items-center gap-4">
               <CurrencyDisplay size="small" />
               <PriceBadges size="md" />
+              <button
+                type="button"
+                onClick={() => { if (!isWalletConnected) connect(); }}
+                title={isWalletConnected ? `Connected: ${address.slice(0, 8)}…${address.slice(-4)}` : 'Connect Wallet'}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all"
+                style={{
+                  background: isWalletConnected ? 'rgba(74, 222, 128, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                  border: `1px solid ${isWalletConnected ? 'rgba(74, 222, 128, 0.3)' : 'rgba(255, 255, 255, 0.08)'}`,
+                  cursor: isWalletConnected ? 'default' : 'pointer',
+                }}
+              >
+                <Wallet size={14} style={{ color: isWalletConnected ? '#4ade80' : 'var(--color-text-muted)' }} />
+                <span style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  color: isWalletConnected ? '#4ade80' : 'var(--color-text-muted)',
+                }}>
+                  {isWalletConnected ? `${address.slice(0, 6)}…${address.slice(-3)}` : 'Connect'}
+                </span>
+              </button>
             </div>
           </>
         )}

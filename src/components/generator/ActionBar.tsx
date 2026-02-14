@@ -169,9 +169,12 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   // Count selected traits for the 7-trait minimum
   const traitCount = Object.values(selectedLayers).filter((v) => !isSelectionPathEmpty(v)).length;
   const has7Traits = traitCount >= 7;
-  const isSoldOut = totalMinted >= maxSupply && maxSupply > 0;
-  const canMint = canExport && isWalletConnected && has7Traits && !isSoldOut;
+  // MINTING DISABLED — uncomment these and restore JSX references to re-enable
+  // const isSoldOut = totalMinted >= maxSupply && maxSupply > 0;
+  // const canMint = canExport && isWalletConnected && has7Traits && !isSoldOut;
 
+  // @ts-expect-error Minting disabled — keeping handler for when we re-enable
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleMintClick = useCallback(async () => {
     if (!isWalletConnected) {
       try {
@@ -674,8 +677,8 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         className="flex items-center gap-2 pl-2 ml-1"
         style={{ borderLeft: '1px solid var(--color-border)' }}
       >
-        {/* Free/Paid toggle — only when wallet connected and has free mints */}
-        {isWalletConnected && hasFreeMintsAvailable && (
+        {/* Free/Paid toggle — hidden until minting is live */}
+        {false && isWalletConnected && hasFreeMintsAvailable && (
           <ActionBarTooltip content={mintType === 'free' ? 'Free Mint' : 'Paid Mint'}>
             <ActionButton
               onClick={() => setMintType((t) => (t === 'free' ? 'paid' : 'free'))}
@@ -703,19 +706,14 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
           );
         })()}
 
-        {/* Mint button */}
-        <ActionBarTooltip content={
-          isSoldOut ? 'Sold Out'
-            : !isWalletConnected ? 'Connect Wallet'
-              : !has7Traits ? `Need 7 traits (${traitCount}/7)`
-                : 'Mint NFT'
-        }>
+        {/* Mint button — disabled until launch */}
+        <ActionBarTooltip content="Minting coming soon">
           <ActionButton
             variant="primary"
-            onClick={handleMintClick}
-            disabled={isWalletConnected && !canMint}
+            onClick={() => {}}
+            disabled={true}
             icon={<Wallet size={22} />}
-            label={!isWalletConnected ? 'Connect Wallet' : 'Mint'}
+            label="Coming Soon"
           />
         </ActionBarTooltip>
 
