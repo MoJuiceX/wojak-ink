@@ -28,6 +28,7 @@ interface CreditEventRow {
   whale_multiplier: number;
   event_type: string | null;
   event_timestamp: string;
+  nft_name: string | null;
 }
 
 export const onRequest: PagesFunction<Env> = async (context) => {
@@ -64,10 +65,15 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
   try {
     const rows = await env.DB.prepare(
-      `SELECT event_id, nft_id, price_xch, credits_earned, whale_multiplier, event_type, event_timestamp
-       FROM credit_events
-       WHERE wallet_address = ?
-       ORDER BY event_timestamp DESC
+      `SELECT ce.event_id, ce.nft_id, ce.price_xch, ce.credits_earned,
+              ce.whale_multiplier, ce.event_type, ce.event_timestamp,
+              sh.nft_name
+       FROM credit_events ce
+       LEFT JOIN sales_history sh
+         ON ce.nft_id LIKE 'nft_edition_%'
+         AND sh.nft_edition = CAST(SUBSTR(ce.nft_id, 13) AS INTEGER)
+       WHERE ce.wallet_address = ?
+       ORDER BY ce.event_timestamp DESC
        LIMIT ?`
     )
       .bind(wallet, limit)
@@ -81,6 +87,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       whaleMultiplier: r.whale_multiplier / 10000,
       eventType: r.event_type || 'trade',
       eventTimestamp: r.event_timestamp,
+      nftName: r.nft_name || null,
     }));
 
     return new Response(JSON.stringify({ wallet, items }), {

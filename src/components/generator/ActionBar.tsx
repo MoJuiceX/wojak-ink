@@ -569,7 +569,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
       {/* Leaderboard — opens full verifier page with intro, formula, and wallet purchase details */}
       <ActionBarTooltip content="Leaderboard">
         <ActionButton
-          onClick={() => { window.location.href = '/credit-leaderboard-verifier.html'; }}
+          onClick={() => { window.location.href = '/free-mints.html'; }}
           icon={<Trophy size={20} />}
           label="Leaderboard"
           badge={isWalletConnected && (credits?.free_mints_available ?? 0) > 0 ? credits!.free_mints_available : undefined}
