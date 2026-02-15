@@ -8,9 +8,9 @@
  * - Background sync
  */
 
-const CACHE_NAME = 'wojak-games-v2';
-const STATIC_CACHE = 'wojak-static-v2';
-const DYNAMIC_CACHE = 'wojak-dynamic-v3';
+const CACHE_NAME = 'wojak-games-v3';
+const STATIC_CACHE = 'wojak-static-v3';
+const DYNAMIC_CACHE = 'wojak-dynamic-v4';
 const NFT_IMAGE_CACHE = 'wojak-nft-images-v1';
 const NFT_CACHE_MAX = 500;
 
@@ -141,18 +141,32 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Navigation requests (HTML pages) — network-first so deploys take effect immediately
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((networkResponse) => {
+          if (networkResponse.ok) {
+            const clone = networkResponse.clone();
+            caches.open(STATIC_CACHE).then((cache) => cache.put(request, clone));
+          }
+          return networkResponse;
+        })
+        .catch(() => caches.match('/index.html').then((cached) => cached || new Response('Offline', { status: 503 })))
+    );
+    return;
+  }
+
+  // Other same-origin assets — cache-first with network fallback
   event.respondWith(
     caches.match(request)
       .then((cachedResponse) => {
         if (cachedResponse) {
-          // Return cached version
           return cachedResponse;
         }
 
-        // Fetch from network
         return fetch(request)
           .then((networkResponse) => {
-            // Cache successful responses (skip partial 206 responses - they can't be cached)
             if (networkResponse.ok && networkResponse.status !== 206) {
               const responseClone = networkResponse.clone();
               caches.open(DYNAMIC_CACHE)
@@ -163,10 +177,6 @@ self.addEventListener('fetch', (event) => {
             return networkResponse;
           })
           .catch(() => {
-            // Offline fallback for navigation requests
-            if (request.mode === 'navigate') {
-              return caches.match('/index.html');
-            }
             return new Response('Offline', { status: 503 });
           });
       })
