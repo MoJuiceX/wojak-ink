@@ -21,12 +21,12 @@ export async function sha256Hex(data: ArrayBuffer | Uint8Array): Promise<string>
   return [...new Uint8Array(hash)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-/** Validate WebP magic bytes: RIFF at offset 0, WEBP at offset 8 */
-function isValidWebP(buffer: Uint8Array): boolean {
-  if (buffer.length < 12) return false;
+/** Validate PNG magic bytes: 0x89 P N G at offset 0 */
+function isValidPNG(buffer: Uint8Array): boolean {
+  if (buffer.length < 8) return false;
   return (
-    buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46 && // RIFF
-    buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50   // WEBP
+    buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47 && // .PNG
+    buffer[4] === 0x0D && buffer[5] === 0x0A && buffer[6] === 0x1A && buffer[7] === 0x0A   // \r\n\x1a\n
   );
 }
 
@@ -97,16 +97,16 @@ export async function uploadToIPFS(
   pinataGateway?: string
 ): Promise<IPFSUploadResult> {
   const imageBytes = base64ToUint8Array(imageBase64);
-  if (!isValidWebP(imageBytes)) {
-    throw new Error('Invalid image format: expected WebP');
+  if (!isValidPNG(imageBytes)) {
+    throw new Error('Invalid image format: expected PNG');
   }
-  if (imageBytes.length > 2 * 1024 * 1024) {
-    throw new Error('Image too large (max 2MB)');
+  if (imageBytes.length > 5 * 1024 * 1024) {
+    throw new Error('Image too large (max 5MB)');
   }
 
   const dataHash = await sha256Hex(imageBytes);
   const form = new FormData();
-  form.append('file', new Blob([imageBytes], { type: 'image/webp' }), 'image.webp');
+  form.append('file', new Blob([imageBytes], { type: 'image/png' }), 'image.png');
 
   const pinFileRes = await fetch(PINATA_PIN_FILE, {
     method: 'POST',

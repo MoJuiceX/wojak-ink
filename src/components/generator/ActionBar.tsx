@@ -192,8 +192,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
 
     try {
       const webpBlob = await exportImage(selectedLayers, {
-        format: 'webp',
-        quality: 0.92,
+        format: 'png',
         includeBackground: true,
         size: { preset: '1024' },
       }, g2Selections);
