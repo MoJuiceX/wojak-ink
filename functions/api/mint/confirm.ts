@@ -110,14 +110,17 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     const layers = JSON.parse(row.layers_json || '{}') as Record<string, string>;
     const consolidated = consolidateTraits(layers);
 
-    // Batch all trait_usage upserts into a single D1 round trip
-    const traitStmts: D1PreparedStatement[] = [];
+    // Batch trait_usage upserts + status update in a single atomic transaction.
+    // D1 batch is transactional — either all succeed or all roll back,
+    // preventing orphaned mints where traits aren't counted.
+    const batchStmts: D1PreparedStatement[] = [];
+
     for (const { traitType, displayName } of consolidated.values()) {
       if (traitType === 'Base') continue;
       const isExempt = SURCHARGE_EXEMPT_TRAITS.has(displayName);
 
       if (SURCHARGE_CATEGORIES.has(traitType) && !isExempt) {
-        traitStmts.push(
+        batchStmts.push(
           env.DB.prepare(
             `INSERT INTO trait_usage (trait_category, trait_name, usage_count, effective_usage, last_decay_at, updated_at)
              VALUES (?, ?, 1, 1, datetime('now'), datetime('now'))
@@ -131,7 +134,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           ).bind(traitType, displayName, DECAY_HALF_LIFE_DAYS)
         );
       } else {
-        traitStmts.push(
+        batchStmts.push(
           env.DB.prepare(
             `INSERT INTO trait_usage (trait_category, trait_name, usage_count, updated_at)
              VALUES (?, ?, 1, datetime('now'))
@@ -142,19 +145,19 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         );
       }
     }
-    if (traitStmts.length > 0) {
-      await env.DB.batch(traitStmts);
-    }
 
-    // Update status to minted
-    await env.DB.prepare(
-      `UPDATE phase2_mints
-       SET status = 'minted', minted_at = datetime('now'),
-           mintgarden_launcher_id = ?, payment_verified = 1
-       WHERE id = ?`
-    )
-      .bind(launcherId, mintId)
-      .run();
+    // Status update is the LAST statement — if any trait upsert fails,
+    // the entire batch rolls back and the mint stays 'pending' (retryable).
+    batchStmts.push(
+      env.DB.prepare(
+        `UPDATE phase2_mints
+         SET status = 'minted', minted_at = datetime('now'),
+             mintgarden_launcher_id = ?, payment_verified = 1
+         WHERE id = ?`
+      ).bind(launcherId, mintId)
+    );
+
+    await env.DB.batch(batchStmts);
 
     await logMintStep(env.DB, {
       mint_id: mintId,

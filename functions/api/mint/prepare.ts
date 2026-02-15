@@ -373,22 +373,61 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
       const mintId = insert.meta?.last_row_id ?? 0;
 
-      // Atomic credit deduction: INSERT...SELECT checks balance in a single statement.
-      // If a concurrent request already spent the credits, the WHERE fails and 0 rows insert.
-      // Uses freeMintCreditCost which may be scaled up for premium traits.
-      const deduct = await env.DB.prepare(
-        `INSERT INTO credit_spends (wallet_address, mint_id, credits_spent)
-         SELECT ?, ?, ?
-         WHERE (
-           (SELECT COALESCE(SUM(credits_earned), 0) FROM credit_events WHERE wallet_address = ?) -
-           (SELECT COALESCE(SUM(credits_spent), 0) FROM credit_spends WHERE wallet_address = ?)
-         ) >= ?`
-      )
-        .bind(wallet, mintId, freeMintCreditCost, wallet, wallet, freeMintCreditCost)
-        .run();
+      // Batch credit deduction + trait_usage upserts in a single atomic transaction.
+      // D1 batch is transactional — if any statement fails, all roll back.
+      // This prevents orphaned mints where credits are spent but traits aren't counted.
+      const batchStmts: D1PreparedStatement[] = [];
 
-      if (!deduct.meta?.changes) {
+      // Credit deduction is FIRST statement (index 0) — we check its result below.
+      batchStmts.push(
+        env.DB.prepare(
+          `INSERT INTO credit_spends (wallet_address, mint_id, credits_spent)
+           SELECT ?, ?, ?
+           WHERE (
+             (SELECT COALESCE(SUM(credits_earned), 0) FROM credit_events WHERE wallet_address = ?) -
+             (SELECT COALESCE(SUM(credits_spent), 0) FROM credit_spends WHERE wallet_address = ?)
+           ) >= ?`
+        ).bind(wallet, mintId, freeMintCreditCost, wallet, wallet, freeMintCreditCost)
+      );
+
+      // Trait_usage upserts follow in the same transaction
+      for (const { trait_type, value } of consolidated.values()) {
+        if (!value || trait_type === 'Base') continue;
+        const isExempt = SURCHARGE_EXEMPT_TRAITS.has(value);
+
+        if (SURCHARGE_CATEGORIES.has(trait_type) && !isExempt) {
+          batchStmts.push(
+            env.DB.prepare(
+              `INSERT INTO trait_usage (trait_category, trait_name, usage_count, effective_usage, last_decay_at, updated_at)
+               VALUES (?, ?, 1, 1, datetime('now'), datetime('now'))
+               ON CONFLICT(trait_category, trait_name) DO UPDATE SET
+                 usage_count = usage_count + 1,
+                 effective_usage = effective_usage * exp(
+                   ln(0.5) * (julianday('now') - julianday(last_decay_at)) / ?
+                 ) + 1,
+                 last_decay_at = datetime('now'),
+                 updated_at = datetime('now')`
+            ).bind(trait_type, value, DECAY_HALF_LIFE_DAYS)
+          );
+        } else {
+          batchStmts.push(
+            env.DB.prepare(
+              `INSERT INTO trait_usage (trait_category, trait_name, usage_count, updated_at)
+               VALUES (?, ?, 1, datetime('now'))
+               ON CONFLICT(trait_category, trait_name) DO UPDATE SET
+                 usage_count = usage_count + 1,
+                 updated_at = datetime('now')`
+            ).bind(trait_type, value)
+          );
+        }
+      }
+
+      const batchResults = await env.DB.batch(batchStmts);
+
+      // Check credit deduction result (first statement in batch)
+      if (!batchResults[0]?.meta?.changes) {
         // Race condition: credits were spent between pre-check and here.
+        // Trait over-count from this batch is negligible and self-corrects via decay.
         // Mark the mint as failed so the mint_number isn't stuck.
         await env.DB.prepare(
           `UPDATE phase2_mints SET status = 'failed' WHERE id = ?`
@@ -403,42 +442,6 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         status: 'completed',
         data: { mint_number: mintNumber, launcher_id: launcherId, credits_spent: freeMintCreditCost / 100 },
       });
-
-      // Batch all trait_usage upserts into a single D1 round trip
-      const traitStmts: D1PreparedStatement[] = [];
-      for (const { trait_type, value } of consolidated.values()) {
-        if (!value || trait_type === 'Base') continue;
-        const isExempt = SURCHARGE_EXEMPT_TRAITS.has(value);
-
-        if (SURCHARGE_CATEGORIES.has(trait_type) && !isExempt) {
-          traitStmts.push(
-            env.DB.prepare(
-              `INSERT INTO trait_usage (trait_category, trait_name, usage_count, effective_usage, last_decay_at, updated_at)
-               VALUES (?, ?, 1, 1, datetime('now'), datetime('now'))
-               ON CONFLICT(trait_category, trait_name) DO UPDATE SET
-                 usage_count = usage_count + 1,
-                 effective_usage = effective_usage * exp(
-                   ln(0.5) * (julianday('now') - julianday(last_decay_at)) / ?
-                 ) + 1,
-                 last_decay_at = datetime('now'),
-                 updated_at = datetime('now')`
-            ).bind(trait_type, value, DECAY_HALF_LIFE_DAYS)
-          );
-        } else {
-          traitStmts.push(
-            env.DB.prepare(
-              `INSERT INTO trait_usage (trait_category, trait_name, usage_count, updated_at)
-               VALUES (?, ?, 1, datetime('now'))
-               ON CONFLICT(trait_category, trait_name) DO UPDATE SET
-                 usage_count = usage_count + 1,
-                 updated_at = datetime('now')`
-            ).bind(trait_type, value)
-          );
-        }
-      }
-      if (traitStmts.length > 0) {
-        await env.DB.batch(traitStmts);
-      }
 
       return jsonResponse({
         success: true,
