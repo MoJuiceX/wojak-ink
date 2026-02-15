@@ -31,6 +31,7 @@ import {
   SURCHARGE_CATEGORIES,
   SURCHARGE_EXEMPT_TRAITS,
   DECAY_HALF_LIFE_DAYS,
+  PREMIUM_TOP_N,
 } from './_shared';
 import { checkRateLimit, getRateLimitKey, MINT_RATE_LIMITS } from '../../lib/rateLimit';
 import { uploadToIPFS, IPFSUploadResult } from './uploadToIPFS';
@@ -162,31 +163,11 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       return jsonResponse({ error: 'Sold out', supply: { minted: mintedCount, total: SUPPLY_TOTAL } }, 400);
     }
 
-    // Credit pre-check for free mints (early exit with balance info)
-    // The actual atomic deduction happens after minting — see below
-    if (mintType === 'free') {
-      const balanceRow = await env.DB.prepare(
-        `SELECT
-          (SELECT COALESCE(SUM(credits_earned), 0) FROM credit_events WHERE wallet_address = ?) -
-          (SELECT COALESCE(SUM(credits_spent), 0) FROM credit_spends WHERE wallet_address = ?) AS balance`
-      )
-        .bind(wallet, wallet)
-        .first<{ balance: number }>();
-      const balance = balanceRow?.balance ?? 0;
-      if (balance < FREE_MINT_CREDITS) {
-        return jsonResponse({ error: 'Insufficient credits', balance: balance / 100 }, 400);
-      }
-    }
-
     const layersJson = JSON.stringify(selectedLayers);
     const colorsJson = JSON.stringify(selectedColors);
 
-    // ── Reserve mint number FIRST (atomic, race-condition-free) ──
-    // This ensures the IPFS metadata name matches the actual mint number.
-    const mintNumber = await getNextMintNumber(env.DB);
-
-    // ── Build metadata with the REAL mint number ──
-    // Build raw attributes, then consolidate duplicates (rarer trait wins)
+    // ── Build consolidated trait map early (needed for credit cost calculation) ──
+    // Consolidate duplicates: when multiple layers map to the same trait_type, rarer wins
     const rawAttrs: { trait_type: string; value: string; layerKey: string }[] = [];
     for (const [layer, value] of Object.entries(selectedLayers)) {
       const traitType = LAYER_TO_TRAIT_TYPE[layer];
@@ -214,6 +195,93 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
     // Always inject fixed "Base: Wojak"
     consolidated.set('Base', { trait_type: 'Base', value: 'Wojak', layerKey: '_base' });
+
+    // ── Free mint: calculate actual credit cost (premium tier logic) ──
+    // Standard: 100 credits. Premium (top 3 most popular per category): scales with surcharge.
+    let freeMintCreditCost = FREE_MINT_CREDITS; // default 100 credits (x100 units)
+
+    if (mintType === 'free') {
+      // Query all trait usage for surcharge categories
+      const allTraitRows = await env.DB.prepare(
+        `SELECT trait_category, trait_name, effective_usage, last_decay_at
+         FROM trait_usage WHERE trait_category IN ('Head', 'Clothes', 'Face Wear')`
+      ).all<{
+        trait_category: string;
+        trait_name: string;
+        effective_usage: number;
+        last_decay_at: string;
+      }>();
+
+      // Calculate surcharges for all traits, grouped by category
+      const surchargesByCategory: Record<string, { name: string; surcharge: number }[]> = {};
+      for (const cat of SURCHARGE_CATEGORIES) {
+        surchargesByCategory[cat] = [];
+      }
+      for (const row of (allTraitRows.results || [])) {
+        if (!SURCHARGE_CATEGORIES.has(row.trait_category)) continue;
+        if (SURCHARGE_EXEMPT_TRAITS.has(row.trait_name)) continue;
+        const decayed = applyDecay(row.effective_usage, row.last_decay_at);
+        const sc = surchargeXch(decayed, row.trait_category, row.trait_name);
+        surchargesByCategory[row.trait_category]?.push({ name: row.trait_name, surcharge: sc });
+      }
+
+      // Identify top N premium traits per category (by surcharge, descending)
+      const premiumTraits = new Set<string>();
+      for (const category of Object.keys(surchargesByCategory)) {
+        const sorted = surchargesByCategory[category].sort((a, b) => b.surcharge - a.surcharge);
+        for (let i = 0; i < Math.min(PREMIUM_TOP_N, sorted.length); i++) {
+          if (sorted[i].surcharge > 0) {
+            premiumTraits.add(`${category}:${sorted[i].name}`);
+          }
+        }
+      }
+
+      // Check if any selected trait is premium; if so, scale credit cost
+      let maxPremiumSurcharge = 0;
+      for (const { trait_type, value } of consolidated.values()) {
+        if (!SURCHARGE_CATEGORIES.has(trait_type)) continue;
+        if (SURCHARGE_EXEMPT_TRAITS.has(value)) continue;
+
+        const key = `${trait_type}:${value}`;
+        if (premiumTraits.has(key)) {
+          const row = (allTraitRows.results || []).find(
+            r => r.trait_category === trait_type && r.trait_name === value
+          );
+          const decayed = row ? applyDecay(row.effective_usage, row.last_decay_at) : 0;
+          const sc = surchargeXch(decayed, trait_type, value);
+          if (sc > maxPremiumSurcharge) maxPremiumSurcharge = sc;
+        }
+      }
+
+      // Scale credit cost: credits = 100 × (base + surcharge) / base
+      if (maxPremiumSurcharge > 0) {
+        freeMintCreditCost = Math.round(
+          FREE_MINT_CREDITS * (BASE_PRICE_XCH + maxPremiumSurcharge) / BASE_PRICE_XCH
+        );
+      }
+
+      // Credit pre-check (early exit before expensive IPFS/MintGarden calls)
+      const balanceRow = await env.DB.prepare(
+        `SELECT
+          (SELECT COALESCE(SUM(credits_earned), 0) FROM credit_events WHERE wallet_address = ?) -
+          (SELECT COALESCE(SUM(credits_spent), 0) FROM credit_spends WHERE wallet_address = ?) AS balance`
+      )
+        .bind(wallet, wallet)
+        .first<{ balance: number }>();
+      const balance = balanceRow?.balance ?? 0;
+      if (balance < freeMintCreditCost) {
+        return jsonResponse({
+          error: 'Insufficient credits',
+          balance: balance / 100,
+          requiredCredits: freeMintCreditCost / 100,
+          isPremiumTrait: maxPremiumSurcharge > 0,
+        }, 400);
+      }
+    }
+
+    // ── Reserve mint number FIRST (atomic, race-condition-free) ──
+    // This ensures the IPFS metadata name matches the actual mint number.
+    const mintNumber = await getNextMintNumber(env.DB);
 
     // Sort in Phase 1 canonical order
     const TRAIT_ORDER = ['Background', 'Base', 'Clothes', 'Face', 'Face Wear', 'Head', 'Mouth'];
@@ -307,6 +375,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
       // Atomic credit deduction: INSERT...SELECT checks balance in a single statement.
       // If a concurrent request already spent the credits, the WHERE fails and 0 rows insert.
+      // Uses freeMintCreditCost which may be scaled up for premium traits.
       const deduct = await env.DB.prepare(
         `INSERT INTO credit_spends (wallet_address, mint_id, credits_spent)
          SELECT ?, ?, ?
@@ -315,7 +384,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
            (SELECT COALESCE(SUM(credits_spent), 0) FROM credit_spends WHERE wallet_address = ?)
          ) >= ?`
       )
-        .bind(wallet, mintId, FREE_MINT_CREDITS, wallet, wallet, FREE_MINT_CREDITS)
+        .bind(wallet, mintId, freeMintCreditCost, wallet, wallet, freeMintCreditCost)
         .run();
 
       if (!deduct.meta?.changes) {
@@ -332,7 +401,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         mint_id: mintId,
         step: 'free_mint_completed',
         status: 'completed',
-        data: { mint_number: mintNumber, launcher_id: launcherId },
+        data: { mint_number: mintNumber, launcher_id: launcherId, credits_spent: freeMintCreditCost / 100 },
       });
 
       // Batch all trait_usage upserts into a single D1 round trip
@@ -376,6 +445,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         mintType: 'free',
         mintNumber,
         launcherId,
+        creditsSpent: freeMintCreditCost / 100,
         mintgardenUrl: `https://mintgarden.io/nfts/${launcherId}`,
       });
     }

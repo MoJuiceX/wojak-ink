@@ -42,6 +42,9 @@ export const SURCHARGE_FAIR_SHARES: Record<string, number> = {
 /** Only these categories have surcharges */
 export const SURCHARGE_CATEGORIES = new Set(Object.keys(SURCHARGE_FAIR_SHARES));
 
+/** Free mint premium tier: top N most popular traits per category cost extra credits */
+export const PREMIUM_TOP_N = 3;
+
 /** Trait values within surcharge categories that are exempt (none/default) */
 export const SURCHARGE_EXEMPT_TRAITS = new Set([
   'No Headgear',
