@@ -17,6 +17,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   type ReactNode,
 } from 'react';
 import { useSageWallet } from '@/sage-wallet';
@@ -53,6 +54,9 @@ export interface MintSuccessInfo {
   mintNumber: number;
   launcherId: string | null;
   mintgardenUrl: string | null;
+  mintType?: 'free' | 'paid';
+  creditsSpent?: number;
+  creditsRemaining?: number;
 }
 
 export interface TraitPricingEntry {
@@ -70,6 +74,7 @@ export interface TotalMintPrice {
 interface MintContextValue {
   credits: MintCredits | null;
   mintStep: MintStep;
+  submittingPhase: string;
   pendingMint: PendingMintInfo | null;
   successResult: MintSuccessInfo | null;
   errorMessage: string | null;
@@ -79,14 +84,23 @@ interface MintContextValue {
     selectedColors: Record<string, string>,
     mintType: 'free' | 'paid'
   ) => Promise<void>;
+  prepareMint: (
+    imageBlob: Blob,
+    selectedLayers: Record<string, string>,
+    selectedColors: Record<string, string>,
+    mintType: 'free' | 'paid'
+  ) => void;
   acceptOfferInWallet: () => Promise<void>;
   confirmMintManual: () => Promise<void>;
+  confirmPreparedMint: () => Promise<void>;
   resetMintFlow: () => void;
   totalMinted: number;
   maxSupply: number;
   refetchCredits: () => Promise<void>;
   getTraitPricing: (category: string, traitDisplayName: string) => TraitPricingEntry | null;
   getTotalMintPrice: () => TotalMintPrice;
+  isPremiumTrait: (category: string, traitName: string) => boolean;
+  getPremiumCreditCost: (category: string, traitName: string) => number | null;
 }
 
 const DEFAULT_MAX_SUPPLY = 4200;
@@ -121,6 +135,15 @@ export function MintProvider({ children }: { children: ReactNode }) {
   const [totalMinted, setTotalMinted] = useState(0);
   const [maxSupply, setMaxSupply] = useState(DEFAULT_MAX_SUPPLY);
   const [traitPricing, setTraitPricing] = useState<Record<string, { usageCount: number; effectiveUsage: number; surchargeXch: number; fairShare: number }>>({});
+  const [submittingPhase, setSubmittingPhase] = useState('');
+  const submittingTimerRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const [pendingMintParams, setPendingMintParams] = useState<{
+    imageBlob: Blob;
+    selectedLayers: Record<string, string>;
+    selectedColors: Record<string, string>;
+    mintType: 'free' | 'paid';
+  } | null>(null);
+  const lastVisibilityPollRef = useRef(0);
   const metadataAttributes = useMetadataAttributes();
 
   const refetchCredits = useCallback(async () => {
@@ -245,12 +268,71 @@ export function MintProvider({ children }: { children: ReactNode }) {
     };
   }, [metadataAttributes, traitPricing]);
 
+  // Premium trait identification: top 3 by surcharge per category
+  const PREMIUM_TOP_N = 3;
+  const premiumTraitKeys = useMemo(() => {
+    const byCategory: Record<string, { key: string; surcharge: number }[]> = {};
+    for (const [key, entry] of Object.entries(traitPricing)) {
+      const sep = key.indexOf('_');
+      if (sep < 0) continue;
+      const cat = key.slice(0, sep);
+      if (!byCategory[cat]) byCategory[cat] = [];
+      byCategory[cat].push({ key, surcharge: entry.surchargeXch });
+    }
+    const premium = new Set<string>();
+    for (const items of Object.values(byCategory)) {
+      items.sort((a, b) => b.surcharge - a.surcharge);
+      for (let i = 0; i < Math.min(PREMIUM_TOP_N, items.length); i++) {
+        if (items[i].surcharge > 0) premium.add(items[i].key);
+      }
+    }
+    return premium;
+  }, [traitPricing]);
+
+  const isPremiumTrait = useCallback(
+    (category: string, traitName: string) => premiumTraitKeys.has(`${category}_${traitName}`),
+    [premiumTraitKeys]
+  );
+
+  const getPremiumCreditCost = useCallback(
+    (category: string, traitName: string): number | null => {
+      const key = `${category}_${traitName}`;
+      if (!premiumTraitKeys.has(key)) return null;
+      const entry = traitPricing[key];
+      if (!entry) return null;
+      return Math.round(100 * (BASE_PRICE_XCH + entry.surchargeXch) / BASE_PRICE_XCH);
+    },
+    [premiumTraitKeys, traitPricing]
+  );
+
+  // Submitting phase timer helpers
+  const clearSubmittingTimers = useCallback(() => {
+    for (const t of submittingTimerRef.current) clearTimeout(t);
+    submittingTimerRef.current = [];
+    setSubmittingPhase('');
+  }, []);
+
+  const startSubmittingPhases = useCallback(() => {
+    clearSubmittingTimers();
+    setSubmittingPhase('Preparing your Wojak...');
+    const phases: [number, string][] = [
+      [3000, 'Uploading artwork...'],
+      [7000, 'Creating offer...'],
+      [14000, 'Still working — this can take a moment...'],
+    ];
+    for (const [delay, msg] of phases) {
+      submittingTimerRef.current.push(setTimeout(() => setSubmittingPhase(msg), delay));
+    }
+  }, [clearSubmittingTimers]);
+
   const resetMintFlow = useCallback(() => {
     setMintStep('idle');
     setPendingMint(null);
     setSuccessResult(null);
     setErrorMessage(null);
-  }, []);
+    setPendingMintParams(null);
+    clearSubmittingTimers();
+  }, [clearSubmittingTimers]);
 
   const startMint = useCallback(
     async (
@@ -265,6 +347,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
         return;
       }
       setMintStep('submitting');
+      startSubmittingPhases();
       setPendingMint(null);
       setSuccessResult(null);
       setErrorMessage(null);
@@ -288,6 +371,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
           return;
         }
         if (data.pending && data.mintId) {
+          clearSubmittingTimers();
           setPendingMint({
             mintId: data.mintId,
             offerFile: data.offerFile ?? null,
@@ -299,10 +383,17 @@ export function MintProvider({ children }: { children: ReactNode }) {
           return;
         }
         if (data.success) {
+          clearSubmittingTimers();
+          const updatedCredits = credits;
           setSuccessResult({
             mintNumber: data.mintNumber ?? 0,
             launcherId: data.launcherId ?? null,
             mintgardenUrl: data.mintgardenUrl ?? null,
+            mintType,
+            creditsSpent: data.creditsSpent ?? undefined,
+            creditsRemaining: updatedCredits
+              ? Math.max(0, Math.round(((updatedCredits.balance ?? 0) - (data.creditsSpent ? data.creditsSpent * 100 : 0)) / 100))
+              : undefined,
           });
           setMintStep('success');
           refetchCredits();
@@ -312,12 +403,37 @@ export function MintProvider({ children }: { children: ReactNode }) {
         setErrorMessage('Unexpected response from server');
       } catch (err) {
         console.error('[MintContext] startMint error:', err);
+        clearSubmittingTimers();
         setMintStep('error');
         setErrorMessage(err instanceof Error ? err.message : 'Mint failed');
       }
     },
-    [address, refetchCredits]
+    [address, refetchCredits, startSubmittingPhases, clearSubmittingTimers, credits]
   );
+
+  // prepareMint: store params + open confirm step (Phase 5)
+  const prepareMint = useCallback(
+    (
+      imageBlob: Blob,
+      selectedLayers: Record<string, string>,
+      selectedColors: Record<string, string>,
+      mintType: 'free' | 'paid'
+    ) => {
+      setPendingMintParams({ imageBlob, selectedLayers, selectedColors, mintType });
+      setMintStep('confirm');
+      setErrorMessage(null);
+      setSuccessResult(null);
+    },
+    []
+  );
+
+  // confirmPreparedMint: called from modal's "Continue" button
+  const confirmPreparedMint = useCallback(async () => {
+    if (!pendingMintParams) return;
+    const { imageBlob, selectedLayers, selectedColors, mintType } = pendingMintParams;
+    setPendingMintParams(null);
+    await startMint(imageBlob, selectedLayers, selectedColors, mintType);
+  }, [pendingMintParams, startMint]);
 
   // Accept the offer in Sage wallet via WalletConnect, then confirm
   const acceptOfferInWallet = useCallback(async () => {
@@ -344,6 +460,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
           mintNumber: data.mintNumber ?? 0,
           launcherId: data.launcherId ?? null,
           mintgardenUrl: data.mintgardenUrl ?? null,
+          mintType: 'paid',
         });
         setMintStep('success');
         refetchCredits();
@@ -382,6 +499,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
           mintNumber: data.mintNumber ?? 0,
           launcherId: data.launcherId ?? null,
           mintgardenUrl: data.mintgardenUrl ?? null,
+          mintType: 'paid',
         });
         setMintStep('success');
         refetchCredits();
@@ -399,24 +517,43 @@ export function MintProvider({ children }: { children: ReactNode }) {
     }
   }, [pendingMint, address, refetchCredits]);
 
+  // Auto-poll mint status when tab becomes visible (F3: wallet switching)
+  useEffect(() => {
+    const handler = () => {
+      if (document.hidden) return;
+      if (mintStep !== 'signing') return;
+      const now = Date.now();
+      if (now - lastVisibilityPollRef.current < 5000) return;
+      lastVisibilityPollRef.current = now;
+      confirmMintManual();
+    };
+    document.addEventListener('visibilitychange', handler);
+    return () => document.removeEventListener('visibilitychange', handler);
+  }, [mintStep, confirmMintManual]);
+
   const value = useMemo<MintContextValue>(
     () => ({
       credits,
       mintStep,
+      submittingPhase,
       pendingMint,
       successResult,
       errorMessage,
       startMint,
+      prepareMint,
       acceptOfferInWallet,
       confirmMintManual,
+      confirmPreparedMint,
       resetMintFlow,
       totalMinted,
       maxSupply,
       refetchCredits,
       getTraitPricing,
       getTotalMintPrice,
+      isPremiumTrait,
+      getPremiumCreditCost,
     }),
-    [credits, mintStep, pendingMint, successResult, errorMessage, startMint, acceptOfferInWallet, confirmMintManual, resetMintFlow, totalMinted, maxSupply, refetchCredits, getTraitPricing, getTotalMintPrice]
+    [credits, mintStep, submittingPhase, pendingMint, successResult, errorMessage, startMint, prepareMint, acceptOfferInWallet, confirmMintManual, confirmPreparedMint, resetMintFlow, totalMinted, maxSupply, refetchCredits, getTraitPricing, getTotalMintPrice, isPremiumTrait, getPremiumCreditCost]
   );
 
   return <MintContext.Provider value={value}>{children}</MintContext.Provider>;

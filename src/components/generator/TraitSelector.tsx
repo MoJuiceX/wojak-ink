@@ -39,21 +39,36 @@ const LAYER_TO_TRAIT_TYPE: Record<string, string> = {
 /** Surcharge categories — only these show "+X.XX XCH" badges */
 const SURCHARGE_CATEGORIES = new Set(['Head', 'Clothes', 'Face Wear']);
 
-/** Overlay badge showing usage count and optional surcharge */
-export function TraitUsageBadge({ pricing }: { pricing: TraitPricingEntry | null }) {
-  if (!pricing) return null;
+/** Overlay badge showing usage count, optional surcharge, and premium indicator */
+export function TraitUsageBadge({
+  pricing,
+  isPremium,
+  premiumCreditCost,
+}: {
+  pricing: TraitPricingEntry | null;
+  isPremium?: boolean;
+  premiumCreditCost?: number | null;
+}) {
+  if (!pricing && !isPremium) return null;
   return (
     <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-1.5 py-0.5 z-10"
       style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.75))' }}
     >
       <span className="text-[9px] tabular-nums" style={{ color: 'var(--color-text-muted)' }}>
-        {pricing.usageCount} minted
+        {pricing ? `${pricing.usageCount} minted` : ''}
       </span>
-      {pricing.surchargeXch > 0 && (
-        <span className="text-[9px] font-semibold tabular-nums" style={{ color: 'var(--color-primary)' }}>
-          +{pricing.surchargeXch.toFixed(2)}
-        </span>
-      )}
+      <span className="flex items-center gap-0.5">
+        {isPremium && premiumCreditCost && (
+          <span className="text-[9px] font-semibold" style={{ color: 'var(--color-primary)' }} title="Popular — premium credit cost">
+            {premiumCreditCost} cr
+          </span>
+        )}
+        {pricing && pricing.surchargeXch > 0 && (
+          <span className="text-[9px] font-semibold tabular-nums" style={{ color: 'var(--color-primary)' }}>
+            +{pricing.surchargeXch.toFixed(2)}
+          </span>
+        )}
+      </span>
     </div>
   );
 }
@@ -136,9 +151,11 @@ interface ImageCardProps {
   disabledReason?: string | null;
   onClick: () => void;
   pricing?: TraitPricingEntry | null;
+  isPremium?: boolean;
+  premiumCreditCost?: number | null;
 }
 
-function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing }: ImageCardProps) {
+function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing, isPremium, premiumCreditCost }: ImageCardProps) {
   const prefersReducedMotion = useReducedMotion();
 
   return (
@@ -172,7 +189,7 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pri
           className="absolute inset-0 w-full h-full object-cover"
           loading="lazy"
         />
-        <TraitUsageBadge pricing={pricing ?? null} />
+        <TraitUsageBadge pricing={pricing ?? null} isPremium={isPremium} premiumCreditCost={premiumCreditCost} />
       </div>
       {/* Disabled info badge */}
       {isDisabled && disabledReason && (
@@ -225,9 +242,11 @@ interface BaseImageCardProps {
   disabledReason?: string | null;
   onClick: () => void;
   pricing?: TraitPricingEntry | null;
+  isPremium?: boolean;
+  premiumCreditCost?: number | null;
 }
 
-function BaseImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing }: BaseImageCardProps) {
+function BaseImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing, isPremium, premiumCreditCost }: BaseImageCardProps) {
   const prefersReducedMotion = useReducedMotion();
 
   return (
@@ -276,7 +295,7 @@ function BaseImageCard({ image, isSelected, isDisabled, disabledReason, onClick,
           className="absolute inset-0 w-full h-full object-cover"
           loading="lazy"
         />
-        <TraitUsageBadge pricing={pricing ?? null} />
+        <TraitUsageBadge pricing={pricing ?? null} isPremium={isPremium} premiumCreditCost={premiumCreditCost} />
       </div>
       {/* Disabled info badge */}
       {isDisabled && disabledReason && (
@@ -315,6 +334,8 @@ interface ClothesImageCardProps {
   disabledReason?: string | null;
   onClick: () => void;
   pricing?: TraitPricingEntry | null;
+  isPremium?: boolean;
+  premiumCreditCost?: number | null;
 }
 
 interface SolidColorBackgroundCardProps {
@@ -400,10 +421,12 @@ interface LayerWithBaseMouthCardProps {
   disabledReason?: string | null;
   onClick: () => void;
   pricing?: TraitPricingEntry | null;
+  isPremium?: boolean;
+  premiumCreditCost?: number | null;
 }
 
 /** Card for Head, Mask, Eyes, Background: base + mouth rendered under the trait. */
-function LayerWithBaseMouthCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing }: LayerWithBaseMouthCardProps) {
+function LayerWithBaseMouthCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing, isPremium, premiumCreditCost }: LayerWithBaseMouthCardProps) {
   const prefersReducedMotion = useReducedMotion();
 
   return (
@@ -459,7 +482,7 @@ function LayerWithBaseMouthCard({ image, isSelected, isDisabled, disabledReason,
           className="absolute inset-0 w-full h-full object-cover"
           loading="lazy"
         />
-        <TraitUsageBadge pricing={pricing ?? null} />
+        <TraitUsageBadge pricing={pricing ?? null} isPremium={isPremium} premiumCreditCost={premiumCreditCost} />
       </div>
       {/* Disabled info badge */}
       {isDisabled && disabledReason && (
@@ -490,7 +513,7 @@ function LayerWithBaseMouthCard({ image, isSelected, isDisabled, disabledReason,
   );
 }
 
-function ClothesImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing }: ClothesImageCardProps) {
+function ClothesImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing, isPremium, premiumCreditCost }: ClothesImageCardProps) {
   const prefersReducedMotion = useReducedMotion();
 
   return (
@@ -539,7 +562,7 @@ function ClothesImageCard({ image, isSelected, isDisabled, disabledReason, onCli
           className="absolute inset-0 w-full h-full object-cover"
           loading="lazy"
         />
-        <TraitUsageBadge pricing={pricing ?? null} />
+        <TraitUsageBadge pricing={pricing ?? null} isPremium={isPremium} premiumCreditCost={premiumCreditCost} />
       </div>
       {/* Disabled info badge */}
       {isDisabled && disabledReason && (
@@ -586,9 +609,11 @@ interface G2TraitCardProps {
   /** When set, show this image as the card preview (e.g. live preview so grid matches big preview) */
   livePreviewUrl?: string | null;
   pricing?: TraitPricingEntry | null;
+  isPremium?: boolean;
+  premiumCreditCost?: number | null;
 }
 
-export function G2TraitCard({ trait, isSelected, isDisabled, disabledReason, onClick, needsClothesUnderlay, isBeerHatUnderlayer, livePreviewUrl, pricing }: G2TraitCardProps) {
+export function G2TraitCard({ trait, isSelected, isDisabled, disabledReason, onClick, needsClothesUnderlay, isBeerHatUnderlayer, livePreviewUrl, pricing, isPremium, premiumCreditCost }: G2TraitCardProps) {
   const prefersReducedMotion = useReducedMotion();
   return (
     <motion.button
@@ -614,7 +639,7 @@ export function G2TraitCard({ trait, isSelected, isDisabled, disabledReason, onC
     >
       <div className="relative w-full h-full rounded-lg overflow-hidden trait-card-image-bg">
         <G2TraitCardPreview trait={trait} needsClothesUnderlay={needsClothesUnderlay} livePreviewUrl={livePreviewUrl} />
-        <TraitUsageBadge pricing={pricing ?? null} />
+        <TraitUsageBadge pricing={pricing ?? null} isPremium={isPremium} premiumCreditCost={premiumCreditCost} />
       </div>
       {/* Beer Hat under layer badge */}
       {isBeerHatUnderlayer && (
@@ -676,7 +701,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
     getOptionDisabledReason,
     isInitialized,
   } = useGenerator();
-  const { getTraitPricing } = useMint();
+  const { getTraitPricing, isPremiumTrait, getPremiumCreditCost } = useMint();
   const { isDesktop } = useLayout();
   const prefersReducedMotion = useReducedMotion();
 
@@ -888,6 +913,9 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                 g2Sel?.traitId === trait.id ||
                 (!!trait.g1Path && (selectedPath === trait.g1Path || (selectedPath != null && trait.g1Variants?.includes(selectedPath))));
 
+              const traitIsPremium = isPremiumTrait(traitType, trait.name);
+              const traitCreditCost = traitIsPremium ? getPremiumCreditCost(traitType, trait.name) : null;
+
               if (trait.source === 'g2') {
                 // Beer Hat card always uses the fixed thumbnail (base + blue tee + mouth) so it matches other grid previews
                 const beerHatCardPreviewUrl =
@@ -909,6 +937,8 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                       isBeerHatUnderlayer={activeLayer === 'Head' && g2Sel?.traitId === 'Head_Beer-Hat' && g2Sel.beerHatUnderlayer === trait.id}
                       livePreviewUrl={beerHatCardPreviewUrl}
                       pricing={lookupPricing(trait.name)}
+                      isPremium={traitIsPremium}
+                      premiumCreditCost={traitCreditCost}
                     />
                   </motion.div>
                 );
@@ -933,6 +963,8 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                       disabledReason={reason}
                       onClick={() => handleTraitClick(trait)}
                       pricing={lookupPricing(trait.name)}
+                      isPremium={traitIsPremium}
+                      premiumCreditCost={traitCreditCost}
                     />
                   </motion.div>
                 );
@@ -951,6 +983,8 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                       disabledReason={reason}
                       onClick={() => handleTraitClick(trait)}
                       pricing={lookupPricing(trait.name)}
+                      isPremium={traitIsPremium}
+                      premiumCreditCost={traitCreditCost}
                     />
                   </motion.div>
                 );
@@ -992,6 +1026,8 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                       disabledReason={reason}
                       onClick={() => handleTraitClick(trait)}
                       pricing={lookupPricing(trait.name)}
+                      isPremium={traitIsPremium}
+                      premiumCreditCost={traitCreditCost}
                     />
                   ) : (
                     <ImageCard
@@ -1001,6 +1037,8 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                       disabledReason={reason}
                       onClick={() => handleTraitClick(trait)}
                       pricing={lookupPricing(trait.name)}
+                      isPremium={traitIsPremium}
+                      premiumCreditCost={traitCreditCost}
                     />
                   )}
                 </motion.div>

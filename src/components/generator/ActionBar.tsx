@@ -122,7 +122,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
     previewImage,
     canExport,
   } = useGenerator();
-  const { credits, startMint, resetMintFlow, totalMinted, maxSupply, getTotalMintPrice } = useMint();
+  const { credits, prepareMint, resetMintFlow, totalMinted, maxSupply, getTotalMintPrice } = useMint();
   const { address, status: walletStatus, connect } = useSageWallet();
   const prefersReducedMotion = useReducedMotion();
   const { isDesktop } = useLayout();
@@ -169,12 +169,14 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   // Count selected traits for the 7-trait minimum
   const traitCount = Object.values(selectedLayers).filter((v) => !isSelectionPathEmpty(v)).length;
   const has7Traits = traitCount >= 7;
-  // MINTING DISABLED — uncomment these and restore JSX references to re-enable
-  // const isSoldOut = totalMinted >= maxSupply && maxSupply > 0;
-  // const canMint = canExport && isWalletConnected && has7Traits && !isSoldOut;
+  const isSoldOut = totalMinted >= maxSupply && maxSupply > 0;
+  const canMint = canExport && isWalletConnected && has7Traits && !isSoldOut;
 
-  // @ts-expect-error Minting disabled — keeping handler for when we re-enable
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // Auto-default to free mint when credits are available
+  useEffect(() => {
+    if (hasFreeMintsAvailable) setMintType('free');
+  }, [hasFreeMintsAvailable]);
+
   const handleMintClick = useCallback(async () => {
     if (!isWalletConnected) {
       try {
@@ -204,11 +206,11 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
       const colorsForApi: Record<string, string> = { ...(selectedColors || {}) };
 
       setIsMintModalOpen(true);
-      await startMint(webpBlob, layersForApi, colorsForApi, effectiveMintType);
+      prepareMint(webpBlob, layersForApi, colorsForApi, effectiveMintType);
     } catch (err) {
       console.error('[ActionBar] Failed to prepare mint:', err);
     }
-  }, [isWalletConnected, canExport, has7Traits, selectedLayers, selectedColors, hasFreeMintsAvailable, mintType, connect, startMint, g2Selections]);
+  }, [isWalletConnected, canExport, has7Traits, selectedLayers, selectedColors, hasFreeMintsAvailable, mintType, connect, prepareMint, g2Selections]);
 
   const basePath = selectedLayers.Base;
   const hasSelection = !isSelectionPathEmpty(basePath);
@@ -677,20 +679,34 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         className="flex items-center gap-2 pl-2 ml-1"
         style={{ borderLeft: '1px solid var(--color-border)' }}
       >
-        {/* Free/Paid toggle — hidden until minting is live */}
-        {false && isWalletConnected && hasFreeMintsAvailable && (
-          <ActionBarTooltip content={mintType === 'free' ? 'Free Mint' : 'Paid Mint'}>
+        {/* Free/Paid toggle */}
+        {isWalletConnected && hasFreeMintsAvailable && (
+          <ActionBarTooltip content={mintType === 'free' ? 'Switch to paid mint' : 'Switch to free mint'}>
             <ActionButton
               onClick={() => setMintType((t) => (t === 'free' ? 'paid' : 'free'))}
               isActive={mintType === 'free'}
               icon={mintType === 'free' ? <Sparkles size={18} /> : <Coins size={18} />}
-              label={mintType === 'free' ? 'Free Mint' : 'Paid Mint'}
+              label={mintType === 'free' ? 'Free' : 'Paid'}
             />
           </ActionBarTooltip>
         )}
 
-        {/* Price display — paid mints only */}
-        {isWalletConnected && !(hasFreeMintsAvailable && mintType === 'free') && (() => {
+        {/* Price / credit cost display */}
+        {isWalletConnected && (() => {
+          if (hasFreeMintsAvailable && mintType === 'free') {
+            // Free mint: show credit balance
+            return (
+              <div className="flex flex-col items-end" style={{ minWidth: 0 }}>
+                <span className="text-xs font-semibold tabular-nums whitespace-nowrap" style={{ color: 'var(--color-primary)' }}>
+                  {credits?.free_mints_available ?? 0} free {(credits?.free_mints_available ?? 0) === 1 ? 'mint' : 'mints'}
+                </span>
+                <span className="text-[10px] tabular-nums whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>
+                  {Math.round((credits?.balance ?? 0) / 100)} credits
+                </span>
+              </div>
+            );
+          }
+          // Paid mint: show XCH price
           const price = getTotalMintPrice();
           return (
             <div className="flex flex-col items-end" style={{ minWidth: 0 }}>
@@ -698,24 +714,42 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
                 {price.totalXch.toFixed(2)} XCH
               </span>
               {price.surchargeXch > 0 && (
-                <span className="text-[10px] tabular-nums whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>
-                  base {price.basePrice.toFixed(2)} + {price.surchargeXch.toFixed(2)} {price.surchargeTraitName} surcharge
-                </span>
+                <div className="flex items-center gap-1">
+                  <span className="text-[10px] tabular-nums whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>
+                    base {price.basePrice.toFixed(2)} + {price.surchargeXch.toFixed(2)} {price.surchargeTraitName} surcharge
+                  </span>
+                  <ActionBarTooltip content="Popular traits cost more. Prices drop as demand fades.">
+                    <Info size={12} style={{ color: 'var(--color-text-muted)', cursor: 'help', flexShrink: 0 }} />
+                  </ActionBarTooltip>
+                </div>
               )}
             </div>
           );
         })()}
 
-        {/* Mint button — disabled until launch */}
-        <ActionBarTooltip content="Minting coming soon">
-          <ActionButton
-            variant="primary"
-            onClick={() => {}}
-            disabled={true}
-            icon={<Wallet size={22} />}
-            label="Coming Soon"
-          />
-        </ActionBarTooltip>
+        {/* Mint / Connect button */}
+        {!isWalletConnected ? (
+          <div className="flex flex-col items-center gap-0.5">
+            <ActionButton
+              onClick={handleMintClick}
+              icon={<Wallet size={22} />}
+              label="Connect"
+            />
+            <span className="text-[9px] whitespace-nowrap" style={{ color: 'var(--color-text-muted)' }}>Connect to mint</span>
+          </div>
+        ) : (
+          <ActionBarTooltip
+            content={isSoldOut ? 'All 4,200 Wojaks minted!' : !has7Traits ? 'Select all 7 traits to mint' : 'Mint your Wojak'}
+          >
+            <ActionButton
+              variant="primary"
+              onClick={handleMintClick}
+              disabled={!canMint}
+              icon={<Wallet size={22} />}
+              label="Mint"
+            />
+          </ActionBarTooltip>
+        )}
 
         {/* Supply counter */}
         {isWalletConnected && (
