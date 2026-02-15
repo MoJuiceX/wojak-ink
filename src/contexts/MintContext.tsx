@@ -1,13 +1,17 @@
 /* eslint-disable react-refresh/only-export-components */
 /**
- * MintContext
+ * MintContext — Queue-Based Architecture
  *
- * Credits (free mints), mint flow state, and collection supply for the Generator.
- * Fetches credits from /api/credits/balance and supply from trade values / MintGarden.
+ * Credits, mint flow state, collection supply, and job polling for the Generator.
+ * Replaces synchronous prepare/confirm with async submit→poll→process model.
  *
- * AUDIT FIX: Added acceptOfferInWallet() to call takeOffer via WalletConnect,
- * then confirm the mint via /api/mint/confirm. Added confirmMintManual() for
- * users who already accepted the offer outside the flow.
+ * Flow:
+ *   1. User clicks Mint → prepareMint() stores params, sets step to 'confirming'
+ *   2. User confirms → confirmMint() calls /api/mint/submit, starts polling
+ *   3. Polling hits /api/mint/job every 3s, updates currentJob state
+ *   4. Paid mints pause at 'awaiting_payment' → user confirms → confirmPayment()
+ *   5. Polling detects 'completed'/'failed'/'refunded' → done
+ *   6. On page reload: /api/mint/active-job detects in-progress job → resume polling
  */
 
 import {
@@ -36,27 +40,29 @@ export interface MintCredits {
 
 export type MintStep =
   | 'idle'
-  | 'confirm'
-  | 'signing'
-  | 'submitting'
-  | 'accepting'
+  | 'confirming'
+  | 'submitted'
+  | 'awaiting_payment'
   | 'success'
   | 'error';
 
-export interface PendingMintInfo {
-  mintId: number;
-  offerFile: string | null;
-  expiresAt: string | null;
-  totalPriceXch: number | null;
-}
-
-export interface MintSuccessInfo {
-  mintNumber: number;
-  launcherId: string | null;
-  mintgardenUrl: string | null;
-  mintType?: 'free' | 'paid';
+export interface MintJob {
+  jobId: number;
+  step: string;
+  mintType: 'paid' | 'free';
+  stepLabel: string;
+  stepNumber: number;
+  totalSteps: number;
+  mintNumber?: number;
+  offerFile?: string;
+  launcherId?: string;
+  mintgardenUrl?: string;
   creditsSpent?: number;
   creditsRemaining?: number;
+  error?: string;
+  creditsRefunded?: boolean;
+  createdAt?: string;
+  expiresAt?: string;
 }
 
 export interface TraitPricingEntry {
@@ -74,29 +80,30 @@ export interface TotalMintPrice {
 interface MintContextValue {
   credits: MintCredits | null;
   mintStep: MintStep;
-  submittingPhase: string;
-  pendingMint: PendingMintInfo | null;
-  successResult: MintSuccessInfo | null;
+  currentJob: MintJob | null;
   errorMessage: string | null;
-  startMint: (
-    imageBlob: Blob,
-    selectedLayers: Record<string, string>,
-    selectedColors: Record<string, string>,
-    mintType: 'free' | 'paid'
-  ) => Promise<void>;
+
+  // Actions
   prepareMint: (
     imageBlob: Blob,
     selectedLayers: Record<string, string>,
     selectedColors: Record<string, string>,
     mintType: 'free' | 'paid'
   ) => void;
+  confirmMint: () => Promise<void>;
+  confirmPayment: (launcherId: string) => Promise<void>;
   acceptOfferInWallet: () => Promise<void>;
   confirmMintManual: () => Promise<void>;
-  confirmPreparedMint: () => Promise<void>;
   resetMintFlow: () => void;
+
+  // Supply
   totalMinted: number;
   maxSupply: number;
+
+  // Credits
   refetchCredits: () => Promise<void>;
+
+  // Pricing
   getTraitPricing: (category: string, traitDisplayName: string) => TraitPricingEntry | null;
   getTotalMintPrice: () => TotalMintPrice;
   isPremiumTrait: (category: string, traitName: string) => boolean;
@@ -104,10 +111,14 @@ interface MintContextValue {
 }
 
 const DEFAULT_MAX_SUPPLY = 4200;
+const BASE_PRICE_XCH = 0.2;
+const PRICING_REFRESH_MS = 60_000;
+const POLL_INTERVAL_ACTIVE = 3000;
+const POLL_MAX_DURATION = 10 * 60 * 1000; // 10 minutes
 
 const MintContext = createContext<MintContextValue | null>(null);
 
-// ============ Provider ============
+// ============ Helpers ============
 
 function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -122,29 +133,29 @@ function blobToBase64(blob: Blob): Promise<string> {
   });
 }
 
-const BASE_PRICE_XCH = 0.2;
-const PRICING_REFRESH_MS = 60_000;
+// ============ Provider ============
 
 export function MintProvider({ children }: { children: ReactNode }) {
   const { address, status: walletStatus, takeOffer } = useSageWallet();
   const [credits, setCredits] = useState<MintCredits | null>(null);
   const [mintStep, setMintStep] = useState<MintStep>('idle');
-  const [pendingMint, setPendingMint] = useState<PendingMintInfo | null>(null);
-  const [successResult, setSuccessResult] = useState<MintSuccessInfo | null>(null);
+  const [currentJob, setCurrentJob] = useState<MintJob | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [totalMinted, setTotalMinted] = useState(0);
   const [maxSupply, setMaxSupply] = useState(DEFAULT_MAX_SUPPLY);
   const [traitPricing, setTraitPricing] = useState<Record<string, { usageCount: number; effectiveUsage: number; surchargeXch: number; fairShare: number }>>({});
-  const [submittingPhase, setSubmittingPhase] = useState('');
-  const submittingTimerRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const [pendingMintParams, setPendingMintParams] = useState<{
     imageBlob: Blob;
     selectedLayers: Record<string, string>;
     selectedColors: Record<string, string>;
     mintType: 'free' | 'paid';
   } | null>(null);
-  const lastVisibilityPollRef = useRef(0);
+  const [idempotencyKey, setIdempotencyKey] = useState<string | null>(null);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const metadataAttributes = useMetadataAttributes();
+
+  // ── Credits ──
 
   const refetchCredits = useCallback(async () => {
     if (!address || !isValidChiaAddress(address)) return;
@@ -172,29 +183,8 @@ export function MintProvider({ children }: { children: ReactNode }) {
     refetchCredits();
   }, [walletStatus, address, refetchCredits]);
 
-  // Resume pending paid mint on load (e.g. after reload during countdown)
-  useEffect(() => {
-    if (walletStatus !== 'connected' || !address || !isValidChiaAddress(address)) return;
-    let cancelled = false;
-    fetch(`/api/mint/status?wallet=${encodeURIComponent(address)}`)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (cancelled || !data?.pending) return;
-        setPendingMint({
-          mintId: data.pending.mintId,
-          offerFile: data.pending.offerFile ?? null,
-          expiresAt: data.pending.expiresAt ?? null,
-          totalPriceXch: data.pending.totalPriceXch ?? null,
-        });
-        setMintStep('signing');
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [walletStatus, address]);
+  // ── Pricing + Supply ──
 
-  // Fetch full pricing data (traits + supply) with 60s auto-refresh
   useEffect(() => {
     let cancelled = false;
     const fetchPricing = () => {
@@ -235,6 +225,8 @@ export function MintProvider({ children }: { children: ReactNode }) {
       clearInterval(intervalId);
     };
   }, []);
+
+  // ── Trait Pricing Helpers ──
 
   const getTraitPricing = useCallback(
     (category: string, traitDisplayName: string): TraitPricingEntry | null => {
@@ -305,113 +297,116 @@ export function MintProvider({ children }: { children: ReactNode }) {
     [premiumTraitKeys, traitPricing]
   );
 
-  // Submitting phase timer helpers
-  const clearSubmittingTimers = useCallback(() => {
-    for (const t of submittingTimerRef.current) clearTimeout(t);
-    submittingTimerRef.current = [];
-    setSubmittingPhase('');
+  // ── Polling ──
+
+  const stopPolling = useCallback(() => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+    if (pollingTimeoutRef.current) {
+      clearTimeout(pollingTimeoutRef.current);
+      pollingTimeoutRef.current = null;
+    }
   }, []);
 
-  const startSubmittingPhases = useCallback(() => {
-    clearSubmittingTimers();
-    setSubmittingPhase('Preparing your Wojak...');
-    const phases: [number, string][] = [
-      [3000, 'Uploading artwork...'],
-      [7000, 'Creating offer...'],
-      [14000, 'Still working — this can take a moment...'],
-    ];
-    for (const [delay, msg] of phases) {
-      submittingTimerRef.current.push(setTimeout(() => setSubmittingPhase(msg), delay));
-    }
-  }, [clearSubmittingTimers]);
+  const startPolling = useCallback((jobId: number, walletAddr: string) => {
+    stopPolling();
+
+    const poll = async () => {
+      try {
+        const res = await fetch(`/api/mint/job?id=${jobId}&wallet=${encodeURIComponent(walletAddr)}`);
+        if (!res.ok) return;
+        const data = await res.json() as MintJob;
+
+        setCurrentJob(data);
+
+        if (data.step === 'awaiting_payment') {
+          setMintStep('awaiting_payment');
+        }
+
+        if (data.step === 'completed') {
+          setMintStep('success');
+          stopPolling();
+          refetchCredits();
+        }
+
+        if (data.step === 'failed' || data.step === 'refunded') {
+          setMintStep('error');
+          setErrorMessage(data.error || 'Mint failed');
+          stopPolling();
+          if (data.creditsRefunded) {
+            refetchCredits();
+          }
+        }
+      } catch (err) {
+        console.warn('[MintContext] Poll failed:', err);
+      }
+    };
+
+    // Initial poll
+    poll();
+
+    // Start interval — use shorter interval for active processing
+    pollingRef.current = setInterval(poll, POLL_INTERVAL_ACTIVE);
+
+    // Safety: stop polling after 10 minutes
+    pollingTimeoutRef.current = setTimeout(stopPolling, POLL_MAX_DURATION);
+  }, [stopPolling, refetchCredits]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => stopPolling();
+  }, [stopPolling]);
+
+  // ── Page Reload Recovery ──
+
+  useEffect(() => {
+    if (walletStatus !== 'connected' || !address || !isValidChiaAddress(address)) return;
+    if (mintStep !== 'idle') return; // Don't interfere with active flow
+
+    let cancelled = false;
+    fetch(`/api/mint/active-job?wallet=${encodeURIComponent(address)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (cancelled || !data?.job) return;
+        const job = data.job as MintJob;
+        setCurrentJob(job);
+
+        if (job.step === 'awaiting_payment') {
+          setMintStep('awaiting_payment');
+        } else if (job.step === 'completed') {
+          setMintStep('success');
+        } else if (job.step === 'failed' || job.step === 'refunded') {
+          setMintStep('error');
+          setErrorMessage(job.error || 'Mint failed');
+        } else {
+          setMintStep('submitted');
+        }
+
+        // Resume polling if job is still active
+        if (!['completed', 'failed', 'refunded'].includes(job.step)) {
+          startPolling(job.jobId, address);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [walletStatus, address, mintStep, startPolling]);
+
+  // ── Mint Flow Actions ──
 
   const resetMintFlow = useCallback(() => {
     setMintStep('idle');
-    setPendingMint(null);
-    setSuccessResult(null);
+    setCurrentJob(null);
     setErrorMessage(null);
     setPendingMintParams(null);
-    clearSubmittingTimers();
-  }, [clearSubmittingTimers]);
+    setIdempotencyKey(null);
+    stopPolling();
+  }, [stopPolling]);
 
-  const startMint = useCallback(
-    async (
-      imageBlob: Blob,
-      selectedLayers: Record<string, string>,
-      selectedColors: Record<string, string>,
-      mintType: 'free' | 'paid'
-    ) => {
-      if (!address || !isValidChiaAddress(address)) {
-        setMintStep('error');
-        setErrorMessage('Wallet not connected');
-        return;
-      }
-      setMintStep('submitting');
-      startSubmittingPhases();
-      setPendingMint(null);
-      setSuccessResult(null);
-      setErrorMessage(null);
-      try {
-        const imageBase64 = await blobToBase64(imageBlob);
-        const res = await fetch('/api/mint/prepare', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            walletAddress: address,
-            selectedLayers,
-            selectedColors,
-            imageBase64,
-            mintType,
-          }),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          setMintStep('error');
-          setErrorMessage(data.error || 'Mint failed');
-          return;
-        }
-        if (data.pending && data.mintId) {
-          clearSubmittingTimers();
-          setPendingMint({
-            mintId: data.mintId,
-            offerFile: data.offerFile ?? null,
-            expiresAt: data.expiresAt ?? null,
-            totalPriceXch: data.totalPriceXch ?? null,
-          });
-          setMintStep('signing');
-          refetchCredits();
-          return;
-        }
-        if (data.success) {
-          clearSubmittingTimers();
-          const updatedCredits = credits;
-          setSuccessResult({
-            mintNumber: data.mintNumber ?? 0,
-            launcherId: data.launcherId ?? null,
-            mintgardenUrl: data.mintgardenUrl ?? null,
-            mintType,
-            creditsSpent: data.creditsSpent ?? undefined,
-            creditsRemaining: updatedCredits
-              ? Math.max(0, Math.round(((updatedCredits.balance ?? 0) - (data.creditsSpent ? data.creditsSpent * 100 : 0)) / 100))
-              : undefined,
-          });
-          setMintStep('success');
-          refetchCredits();
-          return;
-        }
-        setMintStep('error');
-        setErrorMessage('Unexpected response from server');
-      } catch (err) {
-        console.error('[MintContext] startMint error:', err);
-        clearSubmittingTimers();
-        setMintStep('error');
-        setErrorMessage(err instanceof Error ? err.message : 'Mint failed');
-      }
-    },
-    [address, refetchCredits, startSubmittingPhases, clearSubmittingTimers, credits]
-  );
-
-  // prepareMint: store params + open confirm step (Phase 5)
+  // Step 1: Store params + show confirm modal
   const prepareMint = useCallback(
     (
       imageBlob: Blob,
@@ -420,130 +415,165 @@ export function MintProvider({ children }: { children: ReactNode }) {
       mintType: 'free' | 'paid'
     ) => {
       setPendingMintParams({ imageBlob, selectedLayers, selectedColors, mintType });
-      setMintStep('confirm');
+      setIdempotencyKey(crypto.randomUUID());
+      setMintStep('confirming');
       setErrorMessage(null);
-      setSuccessResult(null);
+      setCurrentJob(null);
     },
     []
   );
 
-  // confirmPreparedMint: called from modal's "Continue" button
-  const confirmPreparedMint = useCallback(async () => {
-    if (!pendingMintParams) return;
+  // Step 2: Submit to /api/mint/submit
+  const confirmMint = useCallback(async () => {
+    if (!pendingMintParams || !address || !isValidChiaAddress(address)) return;
     const { imageBlob, selectedLayers, selectedColors, mintType } = pendingMintParams;
-    setPendingMintParams(null);
-    await startMint(imageBlob, selectedLayers, selectedColors, mintType);
-  }, [pendingMintParams, startMint]);
+    const key = idempotencyKey || crypto.randomUUID();
 
-  // Accept the offer in Sage wallet via WalletConnect, then confirm
-  const acceptOfferInWallet = useCallback(async () => {
-    if (!pendingMint?.offerFile || !address) return;
-
-    setMintStep('accepting');
+    setMintStep('submitted');
     setErrorMessage(null);
-    try {
-      // Send takeOffer to Sage wallet via WalletConnect
-      await takeOffer(pendingMint.offerFile, 0);
+    setPendingMintParams(null);
 
-      // Offer accepted — confirm the mint on the backend
-      const res = await fetch('/api/mint/confirm', {
+    try {
+      const imageBase64 = await blobToBase64(imageBlob);
+
+      const res = await fetch('/api/mint/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          mintId: pendingMint.mintId,
+          walletAddress: address,
+          selectedLayers,
+          selectedColors,
+          imageBase64,
+          mintType,
+          idempotencyKey: key,
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || data.error) {
+        setMintStep('error');
+        setErrorMessage(data.error || 'Mint submission failed');
+        return;
+      }
+
+      // Job created — start polling
+      setCurrentJob({
+        jobId: data.jobId,
+        step: data.step || 'queued',
+        mintType: data.mintType || mintType,
+        stepLabel: 'Preparing your mint...',
+        stepNumber: 1,
+        totalSteps: mintType === 'paid' ? 6 : 5,
+        creditsSpent: data.creditCost,
+      });
+
+      startPolling(data.jobId, address);
+    } catch (err) {
+      console.error('[MintContext] confirmMint error:', err);
+      setMintStep('error');
+      setErrorMessage(err instanceof Error ? err.message : 'Mint failed');
+    }
+  }, [pendingMintParams, address, idempotencyKey, startPolling]);
+
+  // Step 3 (paid): Confirm payment with launcher ID
+  const confirmPayment = useCallback(async (launcherId: string) => {
+    if (!currentJob || !address) return;
+
+    try {
+      const res = await fetch('/api/mint/confirm-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobId: currentJob.jobId,
+          walletAddress: address,
+          launcherId,
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (data.success) {
+        // Polling will pick up the completed state
+      } else if (data.pending) {
+        // Not yet confirmed on-chain — keep waiting
+      } else {
+        setErrorMessage(data.error || 'Payment confirmation failed');
+      }
+    } catch (err) {
+      console.error('[MintContext] confirmPayment error:', err);
+    }
+  }, [currentJob, address]);
+
+  // Accept offer in Sage wallet via WalletConnect, then confirm
+  const acceptOfferInWallet = useCallback(async () => {
+    if (!currentJob?.offerFile || !address) return;
+
+    try {
+      // Send takeOffer to Sage wallet via WalletConnect
+      await takeOffer(currentJob.offerFile, 0);
+
+      // Offer accepted — call confirm-payment
+      // Don't set step here; polling will pick up the server-side state
+      const res = await fetch('/api/mint/confirm-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobId: currentJob.jobId,
           walletAddress: address,
         }),
       });
       const data = await res.json().catch(() => ({}));
       if (data.success) {
-        setSuccessResult({
-          mintNumber: data.mintNumber ?? 0,
-          launcherId: data.launcherId ?? null,
-          mintgardenUrl: data.mintgardenUrl ?? null,
-          mintType: 'paid',
-        });
-        setMintStep('success');
-        refetchCredits();
+        // Polling will catch the completion
       } else if (data.pending) {
-        // NFT not yet on-chain — stay on signing step
-        setMintStep('signing');
-      } else {
-        setMintStep('error');
-        setErrorMessage(data.error || 'Confirmation failed');
+        // Still pending — polling continues
       }
     } catch (err) {
       console.error('[MintContext] acceptOfferInWallet error:', err);
-      // User may have rejected in wallet — go back to signing
-      setMintStep('signing');
+      // User may have rejected in wallet — stay on awaiting_payment
     }
-  }, [pendingMint, address, takeOffer, refetchCredits]);
+  }, [currentJob, address, takeOffer]);
 
   // Manual confirm for users who already accepted the offer outside the flow
   const confirmMintManual = useCallback(async () => {
-    if (!pendingMint?.mintId || !address) return;
+    if (!currentJob || !address) return;
 
-    setMintStep('submitting');
-    setErrorMessage(null);
     try {
-      const res = await fetch('/api/mint/confirm', {
+      const res = await fetch('/api/mint/confirm-payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          mintId: pendingMint.mintId,
+          jobId: currentJob.jobId,
           walletAddress: address,
         }),
       });
       const data = await res.json().catch(() => ({}));
       if (data.success) {
-        setSuccessResult({
-          mintNumber: data.mintNumber ?? 0,
-          launcherId: data.launcherId ?? null,
-          mintgardenUrl: data.mintgardenUrl ?? null,
-          mintType: 'paid',
-        });
-        setMintStep('success');
-        refetchCredits();
+        // Polling picks up completed
       } else if (data.pending) {
-        setMintStep('signing');
         setErrorMessage('NFT not confirmed yet. It may take a moment to appear on-chain.');
       } else {
-        setMintStep('signing');
         setErrorMessage(data.error || 'Not confirmed yet');
       }
     } catch (err) {
       console.error('[MintContext] confirmMintManual error:', err);
-      setMintStep('signing');
       setErrorMessage('Failed to confirm. Try again.');
     }
-  }, [pendingMint, address, refetchCredits]);
+  }, [currentJob, address]);
 
-  // Auto-poll mint status when tab becomes visible (F3: wallet switching)
-  useEffect(() => {
-    const handler = () => {
-      if (document.hidden) return;
-      if (mintStep !== 'signing') return;
-      const now = Date.now();
-      if (now - lastVisibilityPollRef.current < 5000) return;
-      lastVisibilityPollRef.current = now;
-      confirmMintManual();
-    };
-    document.addEventListener('visibilitychange', handler);
-    return () => document.removeEventListener('visibilitychange', handler);
-  }, [mintStep, confirmMintManual]);
+  // ── Context Value ──
 
   const value = useMemo<MintContextValue>(
     () => ({
       credits,
       mintStep,
-      submittingPhase,
-      pendingMint,
-      successResult,
+      currentJob,
       errorMessage,
-      startMint,
       prepareMint,
+      confirmMint,
+      confirmPayment,
       acceptOfferInWallet,
       confirmMintManual,
-      confirmPreparedMint,
       resetMintFlow,
       totalMinted,
       maxSupply,
@@ -553,7 +583,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
       isPremiumTrait,
       getPremiumCreditCost,
     }),
-    [credits, mintStep, submittingPhase, pendingMint, successResult, errorMessage, startMint, prepareMint, acceptOfferInWallet, confirmMintManual, confirmPreparedMint, resetMintFlow, totalMinted, maxSupply, refetchCredits, getTraitPricing, getTotalMintPrice, isPremiumTrait, getPremiumCreditCost]
+    [credits, mintStep, currentJob, errorMessage, prepareMint, confirmMint, confirmPayment, acceptOfferInWallet, confirmMintManual, resetMintFlow, totalMinted, maxSupply, refetchCredits, getTraitPricing, getTotalMintPrice, isPremiumTrait, getPremiumCreditCost]
   );
 
   return <MintContext.Provider value={value}>{children}</MintContext.Provider>;

@@ -32,6 +32,10 @@ import {
   SURCHARGE_EXEMPT_TRAITS,
   DECAY_HALF_LIFE_DAYS,
   PREMIUM_TOP_N,
+  TOTAL_SUPPLY,
+  FREE_MINT_CREDITS,
+  BASE_PRICE_XCH,
+  OFFER_EXPIRY_MINUTES,
 } from './_shared';
 import { checkRateLimit, getRateLimitKey, MINT_RATE_LIMITS } from '../../lib/rateLimit';
 import { uploadToIPFS, IPFSUploadResult } from './uploadToIPFS';
@@ -47,10 +51,7 @@ interface Env {
   MINTGARDEN_API_KEY?: string;
 }
 
-const SUPPLY_TOTAL = 4200;
-const FREE_MINT_CREDITS = 10000; // 100 credits in x100 units
-const BASE_PRICE_XCH = 0.2;
-const OFFER_EXPIRY_MINUTES = 15;
+const SUPPLY_TOTAL = TOTAL_SUPPLY; // alias for backwards compat within this file
 
 const VALID_LAYER_NAMES = new Set([
   'Background', 'Base', 'Clothes', 'FacialHair', 'MouthBase', 'MouthItem', 'Mask', 'Eyes', 'Head',

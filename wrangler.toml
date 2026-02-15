@@ -18,6 +18,11 @@ database_id = "32e7fa5f-524e-4913-b541-f9a339c126c6"
 binding = "TRADE_VALUES_KV"
 id = "3d3382d37eeb4d4dac250fcf03b3f24d"
 
+# KV Namespace for mint job image storage (30 min TTL)
+[[kv_namespaces]]
+binding = "MINT_JOBS_KV"
+id = "ccfd834158b44a799fe567fe0e3c26cf"
+
 # Environment variables
 [vars]
 COLLECTION_ID = "col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah"

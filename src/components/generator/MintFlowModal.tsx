@@ -1,9 +1,8 @@
 /**
- * Mint Flow Modal
+ * Mint Flow Modal — Queue-Based Architecture
  *
- * Shows the current mint step: confirm → submitting → signing → accepting → success | error.
- * Includes pre-mint confirmation, progress phases, offer countdown, error mapping,
- * free/paid differentiation, and post-success share actions.
+ * Progress driven by server-side job state via polling.
+ * Steps: confirming → submitted (with real progress) → awaiting_payment → success | error
  */
 
 import { createPortal } from 'react-dom';
@@ -19,13 +18,13 @@ interface MintFlowModalProps {
 
 // ── Helpers ──
 
-function getSecondsLeft(expiresAt: string | null): number {
+function getSecondsLeft(expiresAt: string | null | undefined): number {
   if (!expiresAt) return -1;
   const end = new Date(expiresAt).getTime();
   return Math.max(0, Math.floor((end - Date.now()) / 1000));
 }
 
-function formatTimeLeft(expiresAt: string | null): string {
+function formatTimeLeft(expiresAt: string | null | undefined): string {
   const left = getSecondsLeft(expiresAt);
   if (left < 0) return '--:--';
   const m = Math.floor(left / 60);
@@ -56,23 +55,30 @@ function friendlyErrorMessage(raw: string): { message: string; retryable: boolea
   if (/Insufficient credits/i.test(raw)) {
     return { message: 'Not enough credits for this mint.', retryable: false };
   }
+  if (/WALLET_LOCKED|already have a mint/i.test(raw)) {
+    return { message: 'You already have a mint in progress. Please wait for it to complete.', retryable: false };
+  }
+  if (/expired/i.test(raw)) {
+    return { message: 'Offer expired. Your design is saved — try again.', retryable: true };
+  }
+  if (/timeout/i.test(raw)) {
+    return { message: 'Processing timed out. Please try again.', retryable: true };
+  }
   return { message: raw, retryable: true };
 }
 
 export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
   const {
     mintStep,
-    submittingPhase,
-    pendingMint,
-    successResult,
+    currentJob,
     errorMessage,
     credits,
     totalMinted,
     maxSupply,
     resetMintFlow,
+    confirmMint,
     acceptOfferInWallet,
     confirmMintManual,
-    confirmPreparedMint,
     getTotalMintPrice,
   } = useMint();
   const prefersReducedMotion = useReducedMotion();
@@ -81,21 +87,23 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
   const [copied, setCopied] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
 
+  // Countdown timer for paid mints
   useEffect(() => {
-    if (!pendingMint?.expiresAt) {
+    const expiresAt = currentJob?.expiresAt;
+    if (!expiresAt) {
       setTimeLeft('');
       setIsExpired(false);
       return;
     }
     const tick = () => {
-      const secs = getSecondsLeft(pendingMint.expiresAt);
-      setTimeLeft(formatTimeLeft(pendingMint.expiresAt));
+      const secs = getSecondsLeft(expiresAt);
+      setTimeLeft(formatTimeLeft(expiresAt));
       setIsExpired(secs <= 0);
     };
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [pendingMint?.expiresAt]);
+  }, [currentJob?.expiresAt]);
 
   const handleClose = () => {
     resetMintFlow();
@@ -103,9 +111,9 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
   };
 
   const handleCopyOffer = async () => {
-    if (!pendingMint?.offerFile) return;
+    if (!currentJob?.offerFile) return;
     try {
-      await navigator.clipboard.writeText(pendingMint.offerFile);
+      await navigator.clipboard.writeText(currentJob.offerFile);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
@@ -114,9 +122,9 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
   };
 
   const handleShare = () => {
-    if (!successResult) return;
-    const text = `Just minted Wojak #${successResult.mintNumber} on @WojakInk!`;
-    const url = successResult.mintgardenUrl || 'https://wojak.ink';
+    if (!currentJob) return;
+    const text = `Just minted Wojak #${currentJob.mintNumber} on @WojakInk!`;
+    const url = currentJob.mintgardenUrl || 'https://wojak.ink';
     window.open(
       `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
       '_blank',
@@ -125,44 +133,44 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
   };
 
   const handleCopyLink = async () => {
-    if (!successResult?.mintgardenUrl) return;
+    if (!currentJob?.mintgardenUrl) return;
     try {
-      await navigator.clipboard.writeText(successResult.mintgardenUrl);
+      await navigator.clipboard.writeText(currentJob.mintgardenUrl);
       setShareCopied(true);
       setTimeout(() => setShareCopied(false), 2000);
     } catch {
-      // Fallback: open the URL
-      window.open(successResult.mintgardenUrl, '_blank');
+      window.open(currentJob.mintgardenUrl, '_blank');
     }
   };
 
   // Derive display state
-  const isConfirm = mintStep === 'confirm';
-  const isSubmitting = mintStep === 'submitting';
-  const isSigning = mintStep === 'signing';
-  const isAccepting = mintStep === 'accepting';
+  const isConfirming = mintStep === 'confirming';
+  const isSubmitted = mintStep === 'submitted';
+  const isAwaitingPayment = mintStep === 'awaiting_payment';
   const isSuccess = mintStep === 'success';
   const isError = mintStep === 'error';
-  const showOfferActions = isSigning && pendingMint;
-  const isFreeMintSuccess = isSuccess && successResult?.mintType === 'free';
+  const isFreeMint = currentJob?.mintType === 'free';
+  const showOfferActions = isAwaitingPayment && currentJob;
 
-  // Get title and message based on step
+  // Progress bar
+  const progressPct = currentJob
+    ? Math.round((currentJob.stepNumber / currentJob.totalSteps) * 100)
+    : 0;
+
+  // Get title and icon
   const getStepDisplay = () => {
-    if (isConfirm) {
+    if (isConfirming) {
       return { title: 'Confirm Mint', icon: <Sparkles size={40} className="text-accent" /> };
     }
-    if (isSubmitting) {
+    if (isSubmitted) {
       return { title: 'Minting', icon: <Loader2 size={40} className="animate-spin text-accent" /> };
     }
-    if (isSigning) {
-      return { title: 'Accept Offer', icon: <Loader2 size={40} className="animate-spin text-accent" /> };
-    }
-    if (isAccepting) {
-      return { title: 'Accepting', icon: <Wallet size={40} className="animate-pulse text-accent" /> };
+    if (isAwaitingPayment) {
+      return { title: 'Accept Offer', icon: <Wallet size={40} className="animate-pulse text-accent" /> };
     }
     if (isSuccess) {
       return {
-        title: isFreeMintSuccess ? 'Free Mint Complete!' : 'Minted!',
+        title: isFreeMint ? 'Free Mint Complete!' : 'Minted!',
         icon: <CheckCircle size={40} className="text-success" />,
       };
     }
@@ -215,12 +223,29 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
             <div className="flex flex-col items-center gap-4 text-center">
               {icon}
 
-              {/* ── Confirm step (pre-mint) ── */}
-              {isConfirm && (() => {
+              {/* ── Progress bar (during submitted/awaiting_payment) ── */}
+              {(isSubmitted || isAwaitingPayment) && currentJob && (
+                <div className="w-full">
+                  <div className="w-full rounded-full h-1.5 overflow-hidden" style={{ background: 'var(--color-surface)' }}>
+                    <motion.div
+                      className="h-full rounded-full"
+                      style={{ background: 'var(--color-primary)' }}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${progressPct}%` }}
+                      transition={{ duration: 0.5, ease: 'easeOut' }}
+                    />
+                  </div>
+                  <p className="text-muted text-[10px] mt-1 tabular-nums">
+                    Step {currentJob.stepNumber} of {currentJob.totalSteps}
+                  </p>
+                </div>
+              )}
+
+              {/* ── Confirming step (pre-mint) ── */}
+              {isConfirming && (() => {
                 const price = getTotalMintPrice();
                 const freeMints = credits?.free_mints_available ?? 0;
                 const balance = Math.round((credits?.balance ?? 0) / 100);
-                // Detect if free or paid from pending params (context stores mintType in pendingMintParams)
                 const isFreeConfirm = freeMints > 0;
                 return (
                   <div className="w-full flex flex-col gap-3">
@@ -247,7 +272,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
                       <button type="button" className="btn btn-secondary flex-1" onClick={handleClose}>
                         Cancel
                       </button>
-                      <button type="button" className="btn btn-primary flex-1" onClick={confirmPreparedMint}>
+                      <button type="button" className="btn btn-primary flex-1" onClick={confirmMint}>
                         {isFreeConfirm ? 'Mint' : 'Continue'}
                       </button>
                     </div>
@@ -255,21 +280,16 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
                 );
               })()}
 
-              {/* ── Submitting progress ── */}
-              {isSubmitting && (
+              {/* ── Submitted: real server-driven progress ── */}
+              {isSubmitted && currentJob && (
                 <div className="flex flex-col items-center gap-2">
-                  <p className="text-secondary text-sm">{submittingPhase || 'Preparing your Wojak...'}</p>
+                  <p className="text-secondary text-sm">{currentJob.stepLabel}</p>
                   <p className="text-muted text-[10px]">Please don&apos;t close this window</p>
                 </div>
               )}
 
-              {/* ── Accepting ── */}
-              {isAccepting && (
-                <p className="text-secondary text-sm">Waiting for wallet approval...</p>
-              )}
-
-              {/* ── Signing: countdown + offer actions ── */}
-              {isSigning && (
+              {/* ── Awaiting Payment: offer + countdown ── */}
+              {isAwaitingPayment && currentJob && (
                 <p className="text-secondary text-sm">
                   Open your Sage Wallet app and accept the pending offer. Then return here.
                 </p>
@@ -296,7 +316,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
               )}
 
               {/* Accept in Wallet — primary action */}
-              {showOfferActions && pendingMint?.offerFile && !isExpired && (
+              {showOfferActions && currentJob?.offerFile && !isExpired && (
                 <button
                   type="button"
                   className="btn btn-primary w-full flex items-center justify-center gap-2"
@@ -308,7 +328,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
               )}
 
               {/* Copy Offer — secondary action */}
-              {showOfferActions && pendingMint?.offerFile && !isExpired && (
+              {showOfferActions && currentJob?.offerFile && !isExpired && (
                 <button
                   type="button"
                   className="btn btn-secondary w-full flex items-center justify-center gap-2"
@@ -320,7 +340,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
               )}
 
               {/* I've Already Accepted */}
-              {showOfferActions && pendingMint?.offerFile && !isExpired && (
+              {showOfferActions && currentJob?.offerFile && !isExpired && (
                 <button
                   type="button"
                   className="text-xs text-secondary underline hover:text-accent transition-colors"
@@ -330,17 +350,13 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
                 </button>
               )}
 
-              {/* No offer file */}
-              {showOfferActions && !pendingMint?.offerFile && pendingMint?.totalPriceXch != null && (
-                <p className="text-muted text-xs">
-                  Paid mint: MintGarden offer not yet configured. Your design is saved.
-                </p>
-              )}
-
               {/* ── Error ── */}
               {isError && parsedError && (
                 <div className="w-full flex flex-col gap-3">
                   <p className="text-error text-sm">{parsedError.message}</p>
+                  {currentJob?.creditsRefunded && (
+                    <p className="text-muted text-xs">Your credits have been refunded.</p>
+                  )}
                   <div className="flex gap-2">
                     <button type="button" className="btn btn-secondary flex-1" onClick={handleClose}>
                       Close
@@ -355,18 +371,18 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
               )}
 
               {/* ── Success ── */}
-              {isSuccess && successResult && (
+              {isSuccess && currentJob && (
                 <div className="w-full flex flex-col gap-3">
                   <p className="text-secondary text-sm">
-                    Your Wojak #{successResult.mintNumber}
+                    Your Wojak #{currentJob.mintNumber}
                   </p>
 
                   {/* Free mint credit info */}
-                  {isFreeMintSuccess && (
+                  {isFreeMint && (
                     <p className="text-muted text-xs">
-                      {successResult.creditsSpent ?? 1} {(successResult.creditsSpent ?? 1) === 1 ? 'credit' : 'credits'} used.
-                      {successResult.creditsRemaining != null && (
-                        <> {successResult.creditsRemaining} remaining.</>
+                      {currentJob.creditsSpent ?? 1} {(currentJob.creditsSpent ?? 1) === 1 ? 'credit' : 'credits'} used.
+                      {currentJob.creditsRemaining != null && (
+                        <> {currentJob.creditsRemaining} remaining.</>
                       )}
                     </p>
                   )}
@@ -377,9 +393,9 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
                   </p>
 
                   {/* Action buttons */}
-                  {successResult.mintgardenUrl && (
+                  {currentJob.mintgardenUrl && (
                     <a
-                      href={successResult.mintgardenUrl}
+                      href={currentJob.mintgardenUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn btn-ghost flex items-center justify-center gap-2 text-accent"
@@ -407,7 +423,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
                     </button>
                   </div>
 
-                  {successResult.mintgardenUrl && (
+                  {currentJob.mintgardenUrl && (
                     <button
                       type="button"
                       className="text-xs text-secondary underline hover:text-accent transition-colors"
@@ -420,8 +436,8 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
               )}
             </div>
 
-            {/* Bottom close button — only for non-success, non-error, non-confirm states */}
-            {!isSuccess && !isError && !isConfirm && !(showOfferActions && isExpired) && (
+            {/* Bottom close button — only for non-terminal, non-confirm states */}
+            {!isSuccess && !isError && !isConfirming && !(showOfferActions && isExpired) && (
               <div className="mt-6 flex justify-end">
                 <button type="button" className="btn btn-ghost" onClick={handleClose}>
                   Close

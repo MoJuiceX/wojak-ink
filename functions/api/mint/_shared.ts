@@ -24,9 +24,14 @@ export function optionsResponse(): Response {
 
 export { isValidChiaAddress } from '../../lib/validation';
 
-// ─── Surcharge: Fair-Share Pricing ───
+// ─── Core mint constants ───
 
 export const TOTAL_SUPPLY = 4200;
+export const FREE_MINT_CREDITS = 10000; // 100 credits in x100 units
+export const BASE_PRICE_XCH = 0.2;
+export const OFFER_EXPIRY_MINUTES = 15;
+
+// ─── Surcharge: Fair-Share Pricing ───
 export const SURCHARGE_RAMP_RATE = 1.0;
 export const SURCHARGE_PENALTY_SCALE = 8.0;
 export const SURCHARGE_PENALTY_EXPONENT = 2.0;
