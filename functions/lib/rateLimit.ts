@@ -95,10 +95,9 @@ export function getRateLimitKey(
     return `user:${userId}`;
   }
   
-  // Fall back to IP address
-  const ip = request.headers.get('CF-Connecting-IP') || 
-             request.headers.get('X-Forwarded-For')?.split(',')[0]?.trim() ||
-             'unknown';
+  // CF-Connecting-IP is set by Cloudflare and cannot be spoofed by clients.
+  // X-Forwarded-For is client-controllable — never use it for rate limiting.
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
   return `ip:${ip}`;
 }
 

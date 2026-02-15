@@ -115,11 +115,16 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     if (!VALID_LAYER_NAMES.has(layer)) {
       return errorResponse(`Invalid layer: ${layer}`, 400);
     }
-    // Validate path format: prevent directory traversal
+    // Validate path format: prevent directory traversal and restrict to known patterns
     if (path) {
       const parts = path.split('/');
-      if (parts.length > 3 || parts.some(p => p === '..' || p === '.')) {
+      if (parts.length > 4 || parts.some(p => p === '..' || p === '.')) {
         return errorResponse(`Invalid layer path for ${layer}`, 400);
+      }
+      // Paths must only contain alphanumeric, hyphens, underscores, spaces, dots, $, commas
+      // and start with optional / (e.g. "/g2/skull-mask-love" or "HEAD_Crown")
+      if (!/^[a-zA-Z0-9_\-.\s/$,]+$/.test(path)) {
+        return errorResponse(`Invalid characters in layer path for ${layer}`, 400);
       }
     }
   }
@@ -130,21 +135,65 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   }
 
   try {
-    // Expire stale pending mints
+    // Expire stale pending mints (paid offers past their expiry)
     await env.DB.prepare(
       `UPDATE phase2_mints SET status = 'expired'
        WHERE status = 'pending' AND expires_at IS NOT NULL AND expires_at < datetime('now')`
     ).run();
 
-    // Check for existing pending mint for this wallet
+    // SECURITY (CF-4): Clean up stale credit_hold records from crashed Workers.
+    // If a free mint flow started credit deduction but the Worker died before
+    // completing the MintGarden call, the credit_hold row blocks future mints
+    // and the credits are stuck. Refund credits and mark as failed.
+    const staleCreditHolds = await env.DB.prepare(
+      `SELECT id FROM phase2_mints
+       WHERE status = 'credit_hold' AND created_at < datetime('now', '-2 minutes')`
+    ).all<{ id: number }>();
+
+    if (staleCreditHolds.results?.length) {
+      const cleanupStmts: D1PreparedStatement[] = [];
+      for (const row of staleCreditHolds.results) {
+        // Refund held credits
+        cleanupStmts.push(
+          env.DB.prepare(
+            `DELETE FROM credit_spends WHERE mint_id = ?`
+          ).bind(row.id)
+        );
+        // Mark mint as failed
+        cleanupStmts.push(
+          env.DB.prepare(
+            `UPDATE phase2_mints SET status = 'failed',
+             error_message = 'Stale credit_hold — Worker timeout, credits refunded'
+             WHERE id = ? AND status = 'credit_hold'`
+          ).bind(row.id)
+        );
+      }
+      await env.DB.batch(cleanupStmts);
+    }
+
+    // SECURITY (CF-4): Check for ANY in-progress mint for this wallet.
+    // Includes 'pending' (paid offer awaiting acceptance) AND 'credit_hold'
+    // (free mint in progress). This prevents concurrent free mint requests
+    // from both proceeding past this guard.
     const existingPending = await env.DB.prepare(
-      `SELECT id, offer_file, expires_at, created_at FROM phase2_mints
-       WHERE wallet_address = ? AND status = 'pending' AND (expires_at IS NULL OR expires_at > datetime('now'))`
+      `SELECT id, offer_file, expires_at, created_at, status FROM phase2_mints
+       WHERE wallet_address = ? AND (
+         (status = 'pending' AND (expires_at IS NULL OR expires_at > datetime('now')))
+         OR
+         (status = 'credit_hold' AND created_at > datetime('now', '-2 minutes'))
+       )`
     )
       .bind(wallet)
-      .first<{ id: number; offer_file: string | null; expires_at: string | null; created_at: string }>();
+      .first<{ id: number; offer_file: string | null; expires_at: string | null; created_at: string; status: string }>();
 
     if (existingPending) {
+      if (existingPending.status === 'credit_hold') {
+        // Free mint already in progress — tell user to wait
+        return jsonResponse({
+          error: 'A free mint is already in progress. Please wait for it to complete.',
+          errorCode: 'MINT_IN_PROGRESS',
+        }, 409);
+      }
       return jsonResponse({
         pending: true,
         mintId: existingPending.id,
@@ -281,7 +330,17 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
     // ── Reserve mint number FIRST (atomic, race-condition-free) ──
     // This ensures the IPFS metadata name matches the actual mint number.
-    const mintNumber = await getNextMintNumber(env.DB);
+    // SECURITY: getNextMintNumber enforces SUPPLY_TOTAL atomically — even
+    // under concurrency, no number above 4200 can ever be issued.
+    let mintNumber: number;
+    try {
+      mintNumber = await getNextMintNumber(env.DB, SUPPLY_TOTAL);
+    } catch (err) {
+      if (err instanceof Error && err.message === 'SUPPLY_EXHAUSTED') {
+        return jsonResponse({ error: 'Sold out', supply: { total: SUPPLY_TOTAL } }, 400);
+      }
+      throw err;
+    }
 
     // Sort in Phase 1 canonical order
     const TRAIT_ORDER = ['Background', 'Base', 'Clothes', 'Face', 'Face Wear', 'Head', 'Mouth'];
@@ -329,74 +388,117 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     // ═══════════════════════════════════════════════════════
     // FREE MINT
     // ═══════════════════════════════════════════════════════
+    // SECURITY: Credits are deducted BEFORE MintGarden is called.
+    // This prevents concurrent requests from getting free NFTs by
+    // racing the balance check. If MintGarden fails after deduction,
+    // credits are refunded.
     if (mintType === 'free') {
-      const mintResult = await callMintGardenMint(
-        {
-          walletAddress: wallet,
-          mintType: 'free',
-          ipfsImageUris: uploadData.dataUris,
-          ipfsMetadataUris: uploadData.metadataUris,
-          imageHash: uploadData.dataHash,
-          metadataHash: uploadData.metadataHash,
-          collectionUuid: env.PHASE2_COLLECTION_UUID || '',
-          editionNumber: mintNumber,
-          editionTotal: SUPPLY_TOTAL,
-        },
-        env
-      );
-      const launcherId = mintResult.launcherId ?? null;
-
-      if (!launcherId) {
-        return jsonResponse({
-          error: 'MintGarden API failed to create NFT. Please try again or contact support.',
-          errorCode: 'MINTGARDEN_FAILED',
-        }, 500);
-      }
-
-      // Insert mint record
+      // Step 1: Insert provisional mint record (status='credit_hold')
+      // We need a mint_id for the credit_spends foreign key.
       const insert = await env.DB.prepare(
         `INSERT INTO phase2_mints (
           mint_number, wallet_address, layers_json, colors_json,
           ipfs_image_uri, ipfs_metadata_uri, image_hash, metadata_hash,
-          mint_type, total_price_xch, status, minted_at, mintgarden_launcher_id,
-          ipfs_upload_started_at, ipfs_upload_completed_at,
-          mintgarden_called_at, mintgarden_completed_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'free', NULL, 'minted', datetime('now'), ?,
-                  datetime('now'), datetime('now'), datetime('now'), datetime('now'))`
+          mint_type, total_price_xch, status,
+          ipfs_upload_started_at, ipfs_upload_completed_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'free', NULL, 'credit_hold',
+                  datetime('now'), datetime('now'))`
       )
         .bind(
           mintNumber, wallet, layersJson, colorsJson,
-          ipfsImageUri, ipfsMetadataUri, uploadData.dataHash, uploadData.metadataHash,
-          launcherId
+          ipfsImageUri, ipfsMetadataUri, uploadData.dataHash, uploadData.metadataHash
         )
         .run();
 
       const mintId = insert.meta?.last_row_id ?? 0;
 
-      // Batch credit deduction + trait_usage upserts in a single atomic transaction.
-      // D1 batch is transactional — if any statement fails, all roll back.
-      // This prevents orphaned mints where credits are spent but traits aren't counted.
-      const batchStmts: D1PreparedStatement[] = [];
+      // Step 2: Atomically deduct credits BEFORE calling MintGarden.
+      // This is the concurrency gate — only one request per balance succeeds.
+      const deduct = await env.DB.prepare(
+        `INSERT INTO credit_spends (wallet_address, mint_id, credits_spent)
+         SELECT ?, ?, ?
+         WHERE (
+           (SELECT COALESCE(SUM(credits_earned), 0) FROM credit_events WHERE wallet_address = ?) -
+           (SELECT COALESCE(SUM(credits_spent), 0) FROM credit_spends WHERE wallet_address = ?)
+         ) >= ?`
+      )
+        .bind(wallet, mintId, freeMintCreditCost, wallet, wallet, freeMintCreditCost)
+        .run();
 
-      // Credit deduction is FIRST statement (index 0) — we check its result below.
-      batchStmts.push(
+      if (!deduct.meta?.changes) {
+        // Credits insufficient (concurrent request already spent them).
+        // No NFT was minted — safe to fail.
+        await env.DB.prepare(
+          `UPDATE phase2_mints SET status = 'failed' WHERE id = ?`
+        ).bind(mintId).run();
+        return jsonResponse({ error: 'Insufficient credits (concurrent request)', balance: 0 }, 409);
+      }
+
+      // Step 3: Credits held — now call MintGarden to create the NFT.
+      let launcherId: string | null = null;
+      try {
+        const mintResult = await callMintGardenMint(
+          {
+            walletAddress: wallet,
+            mintType: 'free',
+            ipfsImageUris: uploadData.dataUris,
+            ipfsMetadataUris: uploadData.metadataUris,
+            imageHash: uploadData.dataHash,
+            metadataHash: uploadData.metadataHash,
+            collectionUuid: env.PHASE2_COLLECTION_UUID || '',
+            editionNumber: mintNumber,
+            editionTotal: SUPPLY_TOTAL,
+          },
+          env
+        );
+        launcherId = mintResult.launcherId ?? null;
+      } catch (err) {
+        console.error('[Free Mint] MintGarden call threw:', err);
+      }
+
+      if (!launcherId) {
+        // MintGarden failed — REFUND credits (delete the spend record).
+        await env.DB.prepare(
+          `DELETE FROM credit_spends WHERE mint_id = ? AND wallet_address = ?`
+        ).bind(mintId, wallet).run();
+        await env.DB.prepare(
+          `UPDATE phase2_mints SET status = 'failed', error_message = 'MintGarden failed after credit hold' WHERE id = ?`
+        ).bind(mintId).run();
+        await logMintStep(env.DB, {
+          mint_id: mintId,
+          step: 'free_mint_refunded',
+          status: 'failed',
+          error: 'MintGarden failed — credits refunded',
+        });
+        return jsonResponse({
+          error: 'MintGarden API failed to create NFT. Your credits have been refunded. Please try again.',
+          errorCode: 'MINTGARDEN_FAILED',
+          creditsRefunded: true,
+        }, 500);
+      }
+
+      // Step 4: MintGarden succeeded — finalize mint record + update trait usage.
+      const finalizeStmts: D1PreparedStatement[] = [];
+
+      // Update mint record to 'minted'
+      finalizeStmts.push(
         env.DB.prepare(
-          `INSERT INTO credit_spends (wallet_address, mint_id, credits_spent)
-           SELECT ?, ?, ?
-           WHERE (
-             (SELECT COALESCE(SUM(credits_earned), 0) FROM credit_events WHERE wallet_address = ?) -
-             (SELECT COALESCE(SUM(credits_spent), 0) FROM credit_spends WHERE wallet_address = ?)
-           ) >= ?`
-        ).bind(wallet, mintId, freeMintCreditCost, wallet, wallet, freeMintCreditCost)
+          `UPDATE phase2_mints
+           SET status = 'minted', minted_at = datetime('now'),
+               mintgarden_launcher_id = ?,
+               mintgarden_called_at = datetime('now'),
+               mintgarden_completed_at = datetime('now')
+           WHERE id = ?`
+        ).bind(launcherId, mintId)
       );
 
-      // Trait_usage upserts follow in the same transaction
+      // Trait_usage upserts
       for (const { trait_type, value } of consolidated.values()) {
         if (!value || trait_type === 'Base') continue;
         const isExempt = SURCHARGE_EXEMPT_TRAITS.has(value);
 
         if (SURCHARGE_CATEGORIES.has(trait_type) && !isExempt) {
-          batchStmts.push(
+          finalizeStmts.push(
             env.DB.prepare(
               `INSERT INTO trait_usage (trait_category, trait_name, usage_count, effective_usage, last_decay_at, updated_at)
                VALUES (?, ?, 1, 1, datetime('now'), datetime('now'))
@@ -410,7 +512,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
             ).bind(trait_type, value, DECAY_HALF_LIFE_DAYS)
           );
         } else {
-          batchStmts.push(
+          finalizeStmts.push(
             env.DB.prepare(
               `INSERT INTO trait_usage (trait_category, trait_name, usage_count, updated_at)
                VALUES (?, ?, 1, datetime('now'))
@@ -422,18 +524,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         }
       }
 
-      const batchResults = await env.DB.batch(batchStmts);
-
-      // Check credit deduction result (first statement in batch)
-      if (!batchResults[0]?.meta?.changes) {
-        // Race condition: credits were spent between pre-check and here.
-        // Trait over-count from this batch is negligible and self-corrects via decay.
-        // Mark the mint as failed so the mint_number isn't stuck.
-        await env.DB.prepare(
-          `UPDATE phase2_mints SET status = 'failed' WHERE id = ?`
-        ).bind(mintId).run();
-        return jsonResponse({ error: 'Insufficient credits (concurrent request)', balance: 0 }, 409);
-      }
+      await env.DB.batch(finalizeStmts);
 
       // Audit logging
       await logMintStep(env.DB, {

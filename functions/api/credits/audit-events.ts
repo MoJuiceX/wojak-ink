@@ -10,12 +10,13 @@
 
 interface Env {
   DB: D1Database;
+  ADMIN_API_KEY?: string;
 }
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://wojak.ink',
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   'Content-Type': 'application/json',
 };
 
@@ -29,6 +30,16 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   if (request.method !== 'GET') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
+      headers: corsHeaders,
+    });
+  }
+
+  // Admin-only endpoint: require ADMIN_API_KEY via Authorization header
+  const authHeader = request.headers.get('Authorization');
+  const expectedKey = env.ADMIN_API_KEY;
+  if (!expectedKey || authHeader !== `Bearer ${expectedKey}`) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
       headers: corsHeaders,
     });
   }

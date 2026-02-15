@@ -103,6 +103,30 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       });
     }
 
+    // SECURITY: Verify the launcher ID is a real NFT on MintGarden.
+    // Prevents attackers from calling confirm with a fake launcherId
+    // without actually accepting (and paying for) the offer.
+    try {
+      const mgRes = await fetch(`https://api.mintgarden.io/nfts/${launcherId}`);
+      if (!mgRes.ok) {
+        return errorResponse('NFT not found on-chain. The offer may not have been accepted yet.', 400);
+      }
+      const nftData = await mgRes.json() as { owner_address?: { encoded_id?: string } };
+      // Optionally verify the NFT is owned by the expected wallet
+      const onChainOwner = nftData?.owner_address?.encoded_id;
+      if (onChainOwner && onChainOwner.toLowerCase() !== row.wallet_address.toLowerCase()) {
+        return errorResponse('NFT owner does not match the minting wallet.', 403);
+      }
+    } catch (err) {
+      // MintGarden API may be temporarily unavailable — allow retry
+      console.warn('[Mint Confirm] MintGarden verification failed:', err);
+      return jsonResponse({
+        success: false,
+        pending: true,
+        message: 'Could not verify NFT on-chain. Please try again in a moment.',
+      });
+    }
+
     // mint_number was already assigned at prepare time — use it directly
     const mintNumber = row.mint_number;
 
@@ -152,8 +176,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       env.DB.prepare(
         `UPDATE phase2_mints
          SET status = 'minted', minted_at = datetime('now'),
-             mintgarden_launcher_id = ?, payment_verified = 1
-         WHERE id = ?`
+             mintgarden_launcher_id = ?, payment_verified = 1,
+             mintgarden_completed_at = datetime('now')
+         WHERE id = ? AND status = 'pending'`
       ).bind(launcherId, mintId)
     );
 
