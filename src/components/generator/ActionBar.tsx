@@ -27,6 +27,7 @@ import { useSageWallet } from '@/sage-wallet';
 import { useLayout } from '@/hooks/useLayout';
 import { isSelectionPathEmpty } from '@/types/generator';
 import { exportImage } from '@/services/canvasRenderer';
+import { useMetadataAttributes } from './MetadataPreview';
 import { MintFlowModal } from './MintFlowModal';
 import { GeneratorInfo } from './GeneratorInfo';
 
@@ -166,10 +167,9 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
 
   const hasFreeMintsAvailable = (credits?.free_mints_available ?? 0) > 0;
 
-  // Count the 7 required UI categories (Mouth tab covers MouthBase/MouthItem/FacialHair)
-  const REQUIRED_CATEGORIES: (keyof typeof selectedLayers)[] = ['Base', 'Clothes', 'Mask', 'Eyes', 'Head', 'Background'];
-  const hasMouth = !isSelectionPathEmpty(selectedLayers.MouthBase) || !isSelectionPathEmpty(selectedLayers.MouthItem);
-  const traitCount = REQUIRED_CATEGORIES.filter((k) => !isSelectionPathEmpty(selectedLayers[k])).length + (hasMouth ? 1 : 0);
+  // Use the same consolidated trait count as the metadata panel (7 trait types)
+  const metadataAttributes = useMetadataAttributes();
+  const traitCount = metadataAttributes.filter((a) => a.value !== '').length;
   const has7Traits = traitCount >= 7;
   const isSoldOut = totalMinted >= maxSupply && maxSupply > 0;
   const canMint = canExport && isWalletConnected && has7Traits && !isSoldOut;

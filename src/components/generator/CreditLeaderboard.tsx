@@ -211,7 +211,7 @@ export function CreditLeaderboard({ isOpen, onClose }: CreditLeaderboardProps) {
                             )}
                           </td>
                           <td className={`py-3 px-4 text-right font-variant-numeric tabular-nums font-semibold ${isCurrent ? '' : ''}`}>
-                            {entry.earned.toLocaleString()}
+                            {entry.balance.toLocaleString()}
                           </td>
                           <td className="py-3 px-4 text-right font-variant-numeric tabular-nums text-secondary">
                             {entry.freeMints}
@@ -237,7 +237,7 @@ export function CreditLeaderboard({ isOpen, onClose }: CreditLeaderboardProps) {
                 >
                   <Star size={16} fill="var(--color-primary)" stroke="var(--color-primary)" />
                   <span>
-                    You have <strong className="text-accent">{userBalance.earned.toLocaleString()}</strong> credits
+                    You have <strong className="text-accent">{userBalance.balance.toLocaleString()}</strong> credits
                     ({userBalance.freeMints} free mint{userBalance.freeMints !== 1 ? 's' : ''})
                     — keep buying to climb the ranks!
                   </span>
