@@ -113,7 +113,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     }
     if (path) {
       const parts = path.split('/');
-      if (parts.length > 4 || parts.some(p => p === '..' || p === '.')) {
+      if (parts.length > 6 || parts.some(p => p === '..' || p === '.')) {
         return errorResponse(`Invalid layer path for ${layer}`, 400);
       }
       if (!/^[a-zA-Z0-9_\-.\s/$,]+$/.test(path)) {
