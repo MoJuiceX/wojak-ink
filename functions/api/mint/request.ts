@@ -148,7 +148,11 @@ export async function callMintGardenMint(
         throw new Error(`MintGarden API failed after ${MAX_RETRIES} retries: ${lastError}`);
       }
 
-      return parseResponse(data);
+      const parsed = parseResponse(data);
+      if (!parsed.offerFile && !parsed.launcherId) {
+        console.error('[MintGarden] 200 OK but no offer/launcher in response:', JSON.stringify(data).slice(0, 500));
+      }
+      return parsed;
     } catch (err) {
       lastError = err instanceof Error ? err.message : String(err);
       console.error('[MintGarden] Request failed:', lastError);

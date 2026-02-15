@@ -73,6 +73,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
     currentJob,
     errorMessage,
     credits,
+    pendingMintType,
     totalMinted,
     maxSupply,
     resetMintFlow,
@@ -245,9 +246,8 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
               {/* ── Confirming step (pre-mint) ── */}
               {isConfirming && (() => {
                 const price = getTotalMintPrice();
-                const freeMints = credits?.free_mints_available ?? 0;
                 const balance = Math.round((credits?.balance ?? 0) / 100);
-                const isFreeConfirm = freeMints > 0;
+                const isFreeConfirm = pendingMintType === 'free';
                 return (
                   <div className="w-full flex flex-col gap-3">
                     {isFreeConfirm ? (

@@ -82,6 +82,7 @@ interface MintContextValue {
   mintStep: MintStep;
   currentJob: MintJob | null;
   errorMessage: string | null;
+  pendingMintType: 'free' | 'paid' | null;
 
   // Actions
   prepareMint: (
@@ -611,6 +612,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
       mintStep,
       currentJob,
       errorMessage,
+      pendingMintType: pendingMintParams?.mintType ?? null,
       prepareMint,
       confirmMint,
       confirmPayment,
@@ -626,7 +628,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
       isPremiumTrait,
       getPremiumCreditCost,
     }),
-    [credits, mintStep, currentJob, errorMessage, prepareMint, confirmMint, confirmPayment, acceptOfferInWallet, confirmMintManual, resetMintFlow, retryMint, totalMinted, maxSupply, refetchCredits, getTraitPricing, getTotalMintPrice, isPremiumTrait, getPremiumCreditCost]
+    [credits, mintStep, currentJob, errorMessage, pendingMintParams, prepareMint, confirmMint, confirmPayment, acceptOfferInWallet, confirmMintManual, resetMintFlow, retryMint, totalMinted, maxSupply, refetchCredits, getTraitPricing, getTotalMintPrice, isPremiumTrait, getPremiumCreditCost]
   );
 
   return <MintContext.Provider value={value}>{children}</MintContext.Provider>;

@@ -397,9 +397,14 @@ async function handleJobFailure(
 
   console.error(`[MintProcessor] Job ${jobId} failed at step ${job?.step}:`, errorMsg);
 
-  // Non-retryable error codes
-  const nonRetryable = ['SOLD_OUT', 'INSUFFICIENT_CREDITS', 'INVALID_TRAITS', 'SUPPLY_EXHAUSTED', 'CONFIG_ERROR'];
-  const retryable = !nonRetryable.includes(errorCode);
+  // Non-retryable error codes — these won't succeed on retry
+  const nonRetryable = [
+    'SOLD_OUT', 'INSUFFICIENT_CREDITS', 'INVALID_TRAITS', 'SUPPLY_EXHAUSTED', 'CONFIG_ERROR',
+    'OFFER_CREATION_FAILED', 'MINTGARDEN_FAILED',
+  ];
+  // Also non-retryable if we're past IPFS upload (image deleted from KV, can't restart from scratch)
+  const pastIpfs = job?.step && !['queued', 'validating', 'reserving_number', 'uploading_ipfs'].includes(job.step);
+  const retryable = !nonRetryable.includes(errorCode) && !pastIpfs;
 
   if (retryable && (job?.retry_count ?? 0) < (job?.max_retries ?? 3)) {
     // Increment retry count, reset to queued for retry.
