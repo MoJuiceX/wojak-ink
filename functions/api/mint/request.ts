@@ -38,8 +38,8 @@ export interface MintRequestParams {
 }
 
 export interface MintRequestResult {
-  offerFile?: string | null;
-  launcherId?: string | null;
+  offerFile: string | null;  // null for free mints (they get launcherId)
+  launcherId: string | null; // null for paid mints (they get offerFile)
 }
 
 export interface MintGardenEnv {
@@ -135,7 +135,7 @@ export async function callMintGardenMint(
           await new Promise((r) => setTimeout(r, Math.pow(2, attempt) * 1000));
           continue;
         }
-        return { offerFile: null, launcherId: null };
+        throw new Error(`MintGarden API returned non-JSON after ${MAX_RETRIES} retries: ${lastError}`);
       }
 
       if (!res.ok) {
@@ -145,7 +145,7 @@ export async function callMintGardenMint(
           await new Promise((r) => setTimeout(r, Math.pow(2, attempt) * 1000));
           continue;
         }
-        return { offerFile: null, launcherId: null };
+        throw new Error(`MintGarden API failed after ${MAX_RETRIES} retries: ${lastError}`);
       }
 
       return parseResponse(data);
@@ -159,5 +159,5 @@ export async function callMintGardenMint(
   }
 
   console.error('[MintGarden] All retries exhausted:', lastError);
-  return { offerFile: null, launcherId: null };
+  throw new Error(`MintGarden API failed after ${MAX_RETRIES} retries: ${lastError}`);
 }

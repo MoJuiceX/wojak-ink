@@ -1,15 +1,18 @@
 /**
- * Mint Job Cleanup — stale job expiry, credit refunds, retry.
+ * Mint Job Cleanup — stale job expiry, credit refunds, IPFS unpin, retry.
  *
  * Exports cleanupStaleJobs() for use by cron.ts.
  * NOT an HTTP endpoint itself.
  */
 
 import { processJob, type ProcessEnv } from './process';
+import { unpinFromIPFS, extractCidFromUri } from './uploadToIPFS';
+import { markRefundNeeded } from './auditHelper';
 
 interface CleanupEnv extends ProcessEnv {
   DB: D1Database;
   MINT_JOBS_KV: KVNamespace;
+  PINATA_JWT?: string;
 }
 
 export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
@@ -18,6 +21,8 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
   retriedQueued: number;
   refunded: number;
   expiredLegacy: number;
+  unpinnedIPFS: number;
+  paidRefundsFlagged: number;
 }> {
   const stats = {
     expiredPaid: 0,
@@ -25,6 +30,8 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
     retriedQueued: 0,
     refunded: 0,
     expiredLegacy: 0,
+    unpinnedIPFS: 0,
+    paidRefundsFlagged: 0,
   };
 
   // 1. Expire jobs stuck in 'awaiting_payment' past their expires_at
@@ -94,6 +101,84 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
      WHERE status = 'pending' AND expires_at IS NOT NULL AND expires_at < datetime('now')`
   ).run();
   stats.expiredLegacy = expiredLegacy.meta?.changes ?? 0;
+
+  // 6. Unpin orphaned IPFS data for failed jobs older than 1 hour
+  if (env.PINATA_JWT) {
+    const orphanedJobs = await env.DB.prepare(
+      `SELECT id, data_uris, metadata_uris FROM mint_jobs
+       WHERE step IN ('failed', 'refunded')
+       AND data_uris IS NOT NULL
+       AND updated_at < datetime('now', '-1 hour')
+       LIMIT 10`
+    ).all<{ id: number; data_uris: string | null; metadata_uris: string | null }>();
+
+    for (const row of (orphanedJobs.results || [])) {
+      let unpinned = false;
+
+      // Unpin data (image)
+      if (row.data_uris) {
+        try {
+          const uris: string[] = JSON.parse(row.data_uris);
+          for (const uri of uris) {
+            const cid = extractCidFromUri(uri);
+            if (cid) {
+              await unpinFromIPFS(cid, env.PINATA_JWT!);
+              unpinned = true;
+              break; // Only need to unpin once per CID
+            }
+          }
+        } catch { /* parse error */ }
+      }
+
+      // Unpin metadata
+      if (row.metadata_uris) {
+        try {
+          const uris: string[] = JSON.parse(row.metadata_uris);
+          for (const uri of uris) {
+            const cid = extractCidFromUri(uri);
+            if (cid) {
+              await unpinFromIPFS(cid, env.PINATA_JWT!);
+              break;
+            }
+          }
+        } catch { /* parse error */ }
+      }
+
+      // Clear URIs from the job so we don't try to unpin again
+      if (unpinned) {
+        await env.DB.prepare(
+          "UPDATE mint_jobs SET data_uris = NULL, metadata_uris = NULL, updated_at = datetime('now') WHERE id = ?"
+        ).bind(row.id).run();
+        stats.unpinnedIPFS++;
+      }
+    }
+  }
+
+  // 7. Auto-flag refund for paid mints that failed after payment (have launcherId)
+  const paidFailedWithPayment = await env.DB.prepare(
+    `SELECT mj.id AS job_id, mj.phase2_mint_id, mj.error_message
+     FROM mint_jobs mj
+     LEFT JOIN phase2_mints pm ON pm.id = mj.phase2_mint_id
+     WHERE mj.step = 'failed'
+     AND mj.mint_type = 'paid'
+     AND mj.mintgarden_launcher_id IS NOT NULL
+     AND mj.phase2_mint_id IS NOT NULL
+     AND (pm.refund_needed IS NULL OR pm.refund_needed = 0)
+     LIMIT 10`
+  ).all<{ job_id: number; phase2_mint_id: number; error_message: string | null }>();
+
+  for (const row of (paidFailedWithPayment.results || [])) {
+    try {
+      await markRefundNeeded(
+        env.DB,
+        row.phase2_mint_id,
+        `Cleanup: job ${row.job_id} failed after payment. Error: ${row.error_message || 'unknown'}`
+      );
+      stats.paidRefundsFlagged++;
+    } catch (err) {
+      console.error(`[Cleanup] Failed to flag refund for job ${row.job_id}:`, err);
+    }
+  }
 
   return stats;
 }

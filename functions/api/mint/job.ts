@@ -11,6 +11,7 @@ import {
   optionsResponse,
   isValidChiaAddress,
 } from './_shared';
+import { MINT_ERROR_MESSAGES, type MintErrorCode } from './errors';
 
 interface Env {
   DB: D1Database;
@@ -86,6 +87,11 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
     const info = stepInfo(job.step, job.mint_type);
 
+    // Map error_code to user-friendly message via MINT_ERROR_MESSAGES
+    const errorDisplay = (job.step === 'failed' || job.step === 'refunded') && job.error_code
+      ? (MINT_ERROR_MESSAGES[job.error_code as MintErrorCode] || job.error_message || info.label)
+      : (job.step === 'failed' && job.error_message ? job.error_message : info.label);
+
     // For free mints, calculate credits remaining
     let creditsRemaining: number | undefined;
     if (job.mint_type === 'free' && (job.step === 'completed' || job.step === 'refunded')) {
@@ -103,7 +109,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       jobId: job.id,
       step: job.step,
       mintType: job.mint_type,
-      stepLabel: job.step === 'failed' && job.error_message ? job.error_message : info.label,
+      stepLabel: errorDisplay,
       stepNumber: info.number,
       totalSteps: info.total,
       mintNumber: job.mint_number,
@@ -112,7 +118,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       mintgardenUrl: launcherId ? `https://mintgarden.io/nfts/${launcherId}` : undefined,
       creditsSpent: job.credit_cost ? job.credit_cost / 100 : undefined,
       creditsRemaining,
-      error: job.step === 'failed' || job.step === 'refunded' ? job.error_message : undefined,
+      error: job.step === 'failed' || job.step === 'refunded'
+        ? (job.error_code ? (MINT_ERROR_MESSAGES[job.error_code as MintErrorCode] || job.error_message) : job.error_message)
+        : undefined,
       creditsRefunded: job.step === 'refunded',
       createdAt: job.created_at,
       expiresAt: job.expires_at,

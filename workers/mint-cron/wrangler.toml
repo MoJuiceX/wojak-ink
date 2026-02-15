@@ -16,3 +16,6 @@ database_id = "32e7fa5f-524e-4913-b541-f9a339c126c6"
 [[kv_namespaces]]
 binding = "MINT_JOBS_KV"
 id = "ccfd834158b44a799fe567fe0e3c26cf"
+
+# PINATA_JWT — set via: wrangler secret put PINATA_JWT --config workers/mint-cron/wrangler.toml
+# Required for IPFS unpin of orphaned pins

@@ -33,6 +33,7 @@ interface Env extends ProcessEnv {
   DB: D1Database;
   MINT_JOBS_KV: KVNamespace;
   PINATA_JWT?: string;
+  PINATA_GATEWAY?: string;
   PHASE2_COLLECTION_UUID?: string;
   PHASE2_PROFILE_ID?: string;
   PHASE2_ROYALTY_ADDRESS?: string;
@@ -147,6 +148,14 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         creditCost: existing.credit_cost ? existing.credit_cost / 100 : undefined,
         estimatedXch: existing.xch_price_mojos ? existing.xch_price_mojos / 1_000_000_000_000 : undefined,
       });
+    }
+
+    // ── Sold-out fast check (cached flag from server_state) ──
+    const soldOutRow = await env.DB.prepare(
+      "SELECT value FROM server_state WHERE key = 'sold_out'"
+    ).first<{ value: string }>();
+    if (soldOutRow?.value === 'true') {
+      return jsonResponse({ error: 'Sold out', supply: { minted: TOTAL_SUPPLY, total: TOTAL_SUPPLY } }, 400);
     }
 
     // ── Supply check: minted + in-flight >= TOTAL_SUPPLY ──

@@ -76,6 +76,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
     totalMinted,
     maxSupply,
     resetMintFlow,
+    retryMint,
     confirmMint,
     acceptOfferInWallet,
     confirmMintManual,
@@ -362,7 +363,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
                       Close
                     </button>
                     {parsedError.retryable && (
-                      <button type="button" className="btn btn-primary flex-1" onClick={handleClose}>
+                      <button type="button" className="btn btn-primary flex-1" onClick={() => { retryMint(); onClose(); }}>
                         Try Again
                       </button>
                     )}

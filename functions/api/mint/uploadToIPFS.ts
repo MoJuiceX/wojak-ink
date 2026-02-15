@@ -2,7 +2,7 @@
  * IPFS Upload — shared logic for uploading image + metadata to Pinata.
  *
  * Extracted from upload.ts to eliminate self-fetch anti-pattern.
- * Can be called directly from prepare.ts without an HTTP round-trip.
+ * Can be called directly from process.ts without an HTTP round-trip.
  */
 
 const PINATA_PIN_FILE = 'https://api.pinata.cloud/pinning/pinFileToIPFS';
@@ -30,6 +30,50 @@ function isValidWebP(buffer: Uint8Array): boolean {
   );
 }
 
+/**
+ * Generate redundant IPFS URIs for an IPFS CID.
+ * Order: ipfs:// native, dedicated Pinata gateway (if provided), public gateways.
+ * The dedicated gateway is prioritized because it's faster and more reliable.
+ */
+export function generateIPFSUris(ipfsCid: string, pinataGateway?: string): string[] {
+  const uris: string[] = [`ipfs://${ipfsCid}`];
+  if (pinataGateway) {
+    const gw = pinataGateway.replace(/\/$/, '');
+    uris.push(`https://${gw}/ipfs/${ipfsCid}`);
+  }
+  uris.push(`https://gateway.pinata.cloud/ipfs/${ipfsCid}`);
+  uris.push(`https://ipfs.io/ipfs/${ipfsCid}`);
+  return uris;
+}
+
+/**
+ * Unpin a CID from Pinata. Used by cleanup to remove orphaned pins.
+ * Returns true if unpinned or already gone (404). Returns false on error.
+ */
+export async function unpinFromIPFS(ipfsCid: string, pinataJwt: string): Promise<boolean> {
+  if (!ipfsCid || !pinataJwt) return false;
+  try {
+    const response = await fetch(`https://api.pinata.cloud/pinning/unpin/${ipfsCid}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${pinataJwt}` },
+    });
+    return response.ok || response.status === 404;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Extract IPFS CID from a URI (ipfs:// or gateway URL).
+ * Returns null if the URI doesn't contain a recognizable CID.
+ */
+export function extractCidFromUri(uri: string): string | null {
+  if (!uri) return null;
+  if (uri.startsWith('ipfs://')) return uri.replace('ipfs://', '');
+  const match = uri.match(/\/ipfs\/([a-zA-Z0-9]+)/);
+  return match ? match[1] : null;
+}
+
 export interface IPFSUploadResult {
   dataHash: string;
   dataUris: string[];
@@ -41,11 +85,16 @@ export interface IPFSUploadResult {
  * Upload image + metadata JSON to Pinata IPFS.
  * Returns hashes and multiple gateway URIs for redundancy.
  * Throws on failure — caller must handle errors.
+ *
+ * @param pinataGateway - Dedicated Pinata gateway hostname (e.g. "gold-important-gibbon-467.mypinata.cloud").
+ *                        If provided, included as the second URI for faster resolution.
+ *                        NFT URIs are IMMUTABLE once minted — always pass this in production.
  */
 export async function uploadToIPFS(
   imageBase64: string,
   metadata: Record<string, unknown>,
-  pinataJwt: string
+  pinataJwt: string,
+  pinataGateway?: string
 ): Promise<IPFSUploadResult> {
   const imageBytes = base64ToUint8Array(imageBase64);
   if (!isValidWebP(imageBytes)) {
@@ -74,12 +123,7 @@ export async function uploadToIPFS(
   if (!ipfsHash) {
     throw new Error('IPFS image upload: no hash returned');
   }
-  // Multiple gateway URLs for redundancy
-  const dataUris = [
-    `ipfs://${ipfsHash}`,
-    `https://gateway.pinata.cloud/ipfs/${ipfsHash}`,
-    `https://ipfs.io/ipfs/${ipfsHash}`,
-  ];
+  const dataUris = generateIPFSUris(ipfsHash, pinataGateway);
 
   const metadataStr = JSON.stringify(metadata);
   const metadataBytes = new TextEncoder().encode(metadataStr);
@@ -103,12 +147,7 @@ export async function uploadToIPFS(
   if (!metaIpfsHash) {
     throw new Error('IPFS metadata upload: no hash returned');
   }
-  // Multiple gateway URLs for redundancy
-  const metadataUris = [
-    `ipfs://${metaIpfsHash}`,
-    `https://gateway.pinata.cloud/ipfs/${metaIpfsHash}`,
-    `https://ipfs.io/ipfs/${metaIpfsHash}`,
-  ];
+  const metadataUris = generateIPFSUris(metaIpfsHash, pinataGateway);
 
   return { dataHash, dataUris, metadataHash, metadataUris };
 }

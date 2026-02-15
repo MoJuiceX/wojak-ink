@@ -95,6 +95,7 @@ interface MintContextValue {
   acceptOfferInWallet: () => Promise<void>;
   confirmMintManual: () => Promise<void>;
   resetMintFlow: () => void;
+  retryMint: () => void;
 
   // Supply
   totalMinted: number;
@@ -359,6 +360,37 @@ export function MintProvider({ children }: { children: ReactNode }) {
     return () => stopPolling();
   }, [stopPolling]);
 
+  // Immediate re-poll when tab becomes visible (handles backgrounded tabs)
+  useEffect(() => {
+    if (!currentJob || !address) return;
+    const terminalSteps = ['completed', 'failed', 'refunded'];
+    if (terminalSteps.includes(currentJob.step)) return;
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && pollingRef.current) {
+        // Trigger an immediate poll instead of waiting for the next interval
+        fetch(`/api/mint/job?id=${currentJob.jobId}&wallet=${encodeURIComponent(address)}`)
+          .then((res) => (res.ok ? res.json() : null))
+          .then((data) => {
+            if (!data) return;
+            setCurrentJob(data as MintJob);
+            if (data.step === 'awaiting_payment') setMintStep('awaiting_payment');
+            if (data.step === 'completed') { setMintStep('success'); stopPolling(); refetchCredits(); }
+            if (data.step === 'failed' || data.step === 'refunded') {
+              setMintStep('error');
+              setErrorMessage(data.error || 'Mint failed');
+              stopPolling();
+              if (data.creditsRefunded) refetchCredits();
+            }
+          })
+          .catch(() => {});
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [currentJob, address, stopPolling, refetchCredits]);
+
   // ── Page Reload Recovery ──
 
   useEffect(() => {
@@ -403,6 +435,16 @@ export function MintProvider({ children }: { children: ReactNode }) {
     setErrorMessage(null);
     setPendingMintParams(null);
     setIdempotencyKey(null);
+    stopPolling();
+  }, [stopPolling]);
+
+  // Retry: reset flow back to idle but keep the same idempotency key for dedup
+  const retryMint = useCallback(() => {
+    setMintStep('idle');
+    setCurrentJob(null);
+    setErrorMessage(null);
+    setPendingMintParams(null);
+    // Keep idempotencyKey so the server deduplicates if the original submission succeeded
     stopPolling();
   }, [stopPolling]);
 
@@ -575,6 +617,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
       acceptOfferInWallet,
       confirmMintManual,
       resetMintFlow,
+      retryMint,
       totalMinted,
       maxSupply,
       refetchCredits,
@@ -583,7 +626,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
       isPremiumTrait,
       getPremiumCreditCost,
     }),
-    [credits, mintStep, currentJob, errorMessage, prepareMint, confirmMint, confirmPayment, acceptOfferInWallet, confirmMintManual, resetMintFlow, totalMinted, maxSupply, refetchCredits, getTraitPricing, getTotalMintPrice, isPremiumTrait, getPremiumCreditCost]
+    [credits, mintStep, currentJob, errorMessage, prepareMint, confirmMint, confirmPayment, acceptOfferInWallet, confirmMintManual, resetMintFlow, retryMint, totalMinted, maxSupply, refetchCredits, getTraitPricing, getTotalMintPrice, isPremiumTrait, getPremiumCreditCost]
   );
 
   return <MintContext.Provider value={value}>{children}</MintContext.Provider>;

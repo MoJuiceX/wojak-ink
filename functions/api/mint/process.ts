@@ -10,10 +10,11 @@
  */
 
 import { callMintGardenMint } from './request';
-import { logMintStep } from './auditHelper';
+import { logMintStep, markRefundNeeded } from './auditHelper';
 import { getNextMintNumber } from './mintNumberHelper';
 import { uploadToIPFS, type IPFSUploadResult } from './uploadToIPFS';
-import { consolidateTraits, LAYER_TO_TRAIT_TYPE, resolveTraitName, PHASE1_RARITY } from './traitResolver';
+import { consolidateTraits } from './traitResolver';
+import { MintError } from './errors';
 import {
   TOTAL_SUPPLY,
   SURCHARGE_CATEGORIES,
@@ -21,12 +22,16 @@ import {
   DECAY_HALF_LIFE_DAYS,
 } from './_shared';
 
+// Re-export MintError for backwards compatibility (callers may import from process.ts)
+export { MintError };
+
 // ─── Types ───
 
 export interface ProcessEnv {
   DB: D1Database;
   MINT_JOBS_KV: KVNamespace;
   PINATA_JWT?: string;
+  PINATA_GATEWAY?: string;
   PHASE2_COLLECTION_UUID?: string;
   PHASE2_PROFILE_ID?: string;
   PHASE2_ROYALTY_ADDRESS?: string;
@@ -66,15 +71,6 @@ interface MintJobRow {
   completed_at: string | null;
   expires_at: string | null;
   wallet_lock: string | null;
-}
-
-// ─── Custom Error ───
-
-export class MintError extends Error {
-  constructor(public code: string, message: string) {
-    super(message);
-    this.name = 'MintError';
-  }
 }
 
 // ─── Step Updater ───
@@ -146,7 +142,15 @@ export async function processJob(
       name: `Your Wojak #${mintNumber}`,
       description: 'Your Wojak puts collectors in control. Same handcrafted layers and lore from the Wojak Farmers Plot collection \u2014 but you choose every layer, every color, every detail using the Wojak Generator on Wojak.ink \uD83C\uDF4A',
       sensitive_content: false,
-      collection: { name: 'Your Wojak', id: collectionUuid },
+      collection: {
+        name: 'Your Wojak',
+        id: collectionUuid,
+        attributes: [
+          { type: 'description', value: 'Your Wojak puts collectors in control. Choose every layer, every color, every detail.' },
+          { type: 'website', value: 'https://wojak.ink' },
+          { type: 'twitter', value: 'https://x.com/WojakInk' },
+        ],
+      },
       edition: mintNumber,
       date: Date.now(),
       compiler: 'Wojak.ink Generator',
@@ -157,7 +161,7 @@ export async function processJob(
 
     let uploadResult: IPFSUploadResult;
     try {
-      uploadResult = await uploadToIPFS(imageBase64, metadata as Record<string, unknown>, jwt);
+      uploadResult = await uploadToIPFS(imageBase64, metadata as Record<string, unknown>, jwt, env.PINATA_GATEWAY);
     } catch (err) {
       throw new MintError('IPFS_UPLOAD_FAILED', err instanceof Error ? err.message : 'IPFS upload failed');
     }
@@ -343,6 +347,16 @@ export async function finalizeJob(env: ProcessEnv, jobId: number): Promise<void>
     ).bind(mintRow.id, job.credit_spend_id).run();
   }
 
+  // Post-mint supply check: auto-set sold_out flag
+  const mintedCount = await env.DB.prepare(
+    "SELECT COUNT(*) AS count FROM phase2_mints WHERE status = 'minted'"
+  ).first<{ count: number }>();
+  if ((mintedCount?.count ?? 0) >= TOTAL_SUPPLY) {
+    await env.DB.prepare(
+      "INSERT OR REPLACE INTO server_state (key, value, updated_at) VALUES ('sold_out', 'true', datetime('now'))"
+    ).run();
+  }
+
   // Mark job as completed and release wallet lock
   await env.DB.prepare(
     `UPDATE mint_jobs SET
@@ -396,6 +410,19 @@ async function handleJobFailure(
       'DELETE FROM credit_spends WHERE id = ?'
     ).bind(job.credit_spend_id).run();
     finalStep = 'refunded';
+  }
+
+  // If paid mint failed after user already paid (has launcherId), auto-flag refund
+  if (job?.mint_type === 'paid' && job?.mintgarden_launcher_id && job?.phase2_mint_id) {
+    try {
+      await markRefundNeeded(
+        env.DB,
+        job.phase2_mint_id,
+        `Automatic: job ${jobId} failed at ${job.step} after payment. Error: ${errorMsg}`
+      );
+    } catch (refundErr) {
+      console.error(`[MintProcessor] Failed to flag refund for job ${jobId}:`, refundErr);
+    }
   }
 
   // Release wallet lock and mark as failed/refunded

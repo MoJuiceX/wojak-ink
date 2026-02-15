@@ -1,4 +1,8 @@
 /**
+ * @deprecated — Use /api/mint/confirm-payment instead (queue-based architecture).
+ * This endpoint remains as a legacy fallback but should not be called by
+ * the current frontend. Will be removed after mint launch stabilizes.
+ *
  * Mint Confirm API — /api/mint/confirm
  *
  * POST body: { mintId: number, walletAddress: string, launcherId?: string }
