@@ -32,17 +32,19 @@ function isValidPNG(buffer: Uint8Array): boolean {
 
 /**
  * Generate redundant IPFS URIs for an IPFS CID.
- * Order: ipfs:// native, dedicated Pinata gateway (if provided), public gateways.
- * The dedicated gateway is prioritized because it's faster and more reliable.
+ * Order: HTTPS gateways first (for MintGarden/explorer compatibility), ipfs:// last.
+ * MintGarden's proxy uses the first URI to display images and rejects ipfs:// protocol URIs.
  */
 export function generateIPFSUris(ipfsCid: string, pinataGateway?: string): string[] {
-  const uris: string[] = [`ipfs://${ipfsCid}`];
+  const uris: string[] = [];
   if (pinataGateway) {
     const gw = pinataGateway.replace(/\/$/, '');
     uris.push(`https://${gw}/ipfs/${ipfsCid}`);
   }
   uris.push(`https://gateway.pinata.cloud/ipfs/${ipfsCid}`);
   uris.push(`https://ipfs.io/ipfs/${ipfsCid}`);
+  // ipfs:// native URI last — for IPFS-native clients (wallets, pinning services)
+  uris.push(`ipfs://${ipfsCid}`);
   return uris;
 }
 

@@ -49,10 +49,11 @@ export interface MintGardenEnv {
   PHASE2_ROYALTY_PCT?: string;
 }
 
-/** Response from MintGarden /mint/dynamic (Crate uses nft_coin_id, offer) */
+/** Response from MintGarden /mint/dynamic */
 interface MintGardenDynamicResponse {
   offer_file?: string | null;
-  offer?: string | null;
+  offer_string?: string | null;
+  offer?: Record<string, unknown> | string | null;  // object with offer metadata, or string
   coin_id?: string | null;
   nft_coin_id?: string | null;
   launcher_id?: string | null;
@@ -62,13 +63,30 @@ interface MintGardenDynamicResponse {
 }
 
 function parseResponse(data: MintGardenDynamicResponse): MintRequestResult {
-  const launcherId =
+  // For free mints, the launcher ID comes directly in the response
+  let launcherId: string | null =
     data.launcher_id ??
     data.nft_coin_id ??
     data.coin_id ??
     data.nft_id ??
     null;
-  const offerFile = data.offer_file ?? data.offer ?? null;
+
+  // For paid mints, extract the NFT ID from offer.offered (e.g. { "nft1abc...": 1 })
+  if (!launcherId && data.offer && typeof data.offer === 'object') {
+    const offered = (data.offer as Record<string, unknown>).offered;
+    if (offered && typeof offered === 'object') {
+      const nftKey = Object.keys(offered as Record<string, unknown>).find(k => k.startsWith('nft1'));
+      if (nftKey) launcherId = nftKey;
+    }
+  }
+
+  // MintGarden returns the offer content in offer_string (paid mints),
+  // or sometimes offer_file. The "offer" field is an object with metadata, not the offer content.
+  const offerFile =
+    data.offer_file ??
+    data.offer_string ??
+    (typeof data.offer === 'string' ? data.offer : null) ??
+    null;
   return {
     offerFile: typeof offerFile === 'string' ? offerFile : null,
     launcherId: typeof launcherId === 'string' ? launcherId : null,
@@ -112,6 +130,8 @@ export async function callMintGardenMint(
     body.requested_mojos = Math.round(params.priceXch * MOJOS_PER_XCH);
   }
 
+  const mintGardenApiUrl = MINTGARDEN_DYNAMIC_URL;
+
   // Log the request payload (redact API key) for debugging
   console.log('[MintGarden] Request payload:', JSON.stringify({
     ...body,
@@ -119,8 +139,6 @@ export async function callMintGardenMint(
     _mintType: params.mintType,
     _hasRequestedMojos: 'requested_mojos' in body,
   }));
-
-  const mintGardenApiUrl = MINTGARDEN_DYNAMIC_URL;
   let lastError: string | null = null;
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {

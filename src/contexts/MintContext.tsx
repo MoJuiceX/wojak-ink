@@ -116,6 +116,7 @@ const DEFAULT_MAX_SUPPLY = 4200;
 const BASE_PRICE_XCH = 0.2;
 const PRICING_REFRESH_MS = 60_000;
 const POLL_INTERVAL_ACTIVE = 3000;
+const POLL_INTERVAL_AWAITING = 10000; // Slower polling during awaiting_payment (hits external API)
 const POLL_MAX_DURATION = 10 * 60 * 1000; // 10 minutes
 
 const MintContext = createContext<MintContextValue | null>(null);
@@ -312,7 +313,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const startPolling = useCallback((jobId: number, walletAddr: string) => {
+  const startPolling = useCallback((jobId: number, walletAddr: string, initialStep?: string) => {
     stopPolling();
 
     const poll = async () => {
@@ -325,6 +326,25 @@ export function MintProvider({ children }: { children: ReactNode }) {
 
         if (data.step === 'awaiting_payment') {
           setMintStep('awaiting_payment');
+
+          // Auto-detect payment: call confirm-payment (no launcherId) to let
+          // the server check if the NFT has appeared on-chain yet.
+          // This handles users who accepted the offer directly in Sage.
+          try {
+            const confirmRes = await fetch('/api/mint/confirm-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ jobId, walletAddress: walletAddr }),
+            });
+            const confirmData = await confirmRes.json().catch(() => ({}));
+            if (confirmData.success) {
+              // Server finalized — next poll will pick up completed state
+              return;
+            }
+            // pending = not yet on-chain, keep polling
+          } catch {
+            // Ignore — next poll will try again
+          }
         }
 
         if (data.step === 'completed') {
@@ -349,8 +369,10 @@ export function MintProvider({ children }: { children: ReactNode }) {
     // Initial poll
     poll();
 
-    // Start interval — use shorter interval for active processing
-    pollingRef.current = setInterval(poll, POLL_INTERVAL_ACTIVE);
+    // Start interval — use shorter interval for active processing,
+    // slower during awaiting_payment (since each poll also hits MintGarden API)
+    const interval = initialStep === 'awaiting_payment' ? POLL_INTERVAL_AWAITING : POLL_INTERVAL_ACTIVE;
+    pollingRef.current = setInterval(poll, interval);
 
     // Safety: stop polling after 10 minutes
     pollingTimeoutRef.current = setTimeout(stopPolling, POLL_MAX_DURATION);
@@ -419,7 +441,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
 
         // Resume polling if job is still active
         if (!['completed', 'failed', 'refunded'].includes(job.step)) {
-          startPolling(job.jobId, address);
+          startPolling(job.jobId, address, job.step);
         }
       })
       .catch(() => {});

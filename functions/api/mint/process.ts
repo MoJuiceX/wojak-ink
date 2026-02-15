@@ -221,14 +221,18 @@ export async function processJob(
       ).bind(mintResult.launcherId, jobId).run();
 
     } else {
-      // Paid mint: MintGarden returns offer file
+      // Paid mint: MintGarden returns offer file (and NFT ID in offer.offered)
       if (!mintResult.offerFile) {
         throw new MintError('OFFER_CREATION_FAILED', 'MintGarden did not return an offer.');
       }
+      // Store offer file + launcher ID (if available from offer.offered).
+      // Having the launcher ID early means confirm-payment can verify directly
+      // instead of relying on slow auto-detection by edition_number.
       await env.DB.prepare(
-        `UPDATE mint_jobs SET offer_file = ?, expires_at = ?, updated_at = datetime('now') WHERE id = ?`
+        `UPDATE mint_jobs SET offer_file = ?, mintgarden_launcher_id = ?, expires_at = ?, updated_at = datetime('now') WHERE id = ?`
       ).bind(
         mintResult.offerFile,
+        mintResult.launcherId,  // may be null if not in response
         new Date(Date.now() + 15 * 60 * 1000).toISOString(),
         jobId
       ).run();

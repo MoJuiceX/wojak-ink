@@ -173,13 +173,18 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       return errorResponse('Job not found or not awaiting payment', 404);
     }
 
-    // Resolve launcher ID: use provided one, or auto-detect from MintGarden
+    // Resolve launcher ID: use provided, or stored from offer response, or auto-detect
     let verifiedLauncherId: string | null = null;
 
+    // Pick the best launcher ID candidate:
+    // 1. Caller-provided (e.g. from "I've already accepted" with manual ID)
+    // 2. Stored on job from MintGarden offer response (offer.offered contains the NFT ID)
+    const candidateLauncherId = providedLauncherId || job.mintgarden_launcher_id;
+
     try {
-      if (providedLauncherId) {
-        // Path A: caller provided a launcherId — verify it
-        verifiedLauncherId = await verifyLauncherOnChain(providedLauncherId, job.wallet_address);
+      if (candidateLauncherId) {
+        // Verify the known launcher ID on-chain (confirms offer was accepted)
+        verifiedLauncherId = await verifyLauncherOnChain(candidateLauncherId, job.wallet_address);
         if (!verifiedLauncherId) {
           return jsonResponse({
             success: false,
@@ -188,7 +193,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           });
         }
       } else {
-        // Path B: no launcherId — auto-detect by querying wallet's NFTs
+        // Fallback: no launcher ID known — auto-detect by querying wallet's NFTs
         if (job.mint_number != null) {
           verifiedLauncherId = await detectLauncherByWallet(
             job.wallet_address,
