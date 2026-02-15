@@ -1,0 +1,18 @@
+name = "wojak-mint-cron"
+main = "worker.ts"
+compatibility_date = "2024-01-01"
+
+# Cron trigger: every 10 minutes
+[triggers]
+crons = ["*/10 * * * *"]
+
+# D1 Database binding (same as Pages)
+[[d1_databases]]
+binding = "DB"
+database_name = "wojak-users"
+database_id = "32e7fa5f-524e-4913-b541-f9a339c126c6"
+
+# KV Namespace for mint job images
+[[kv_namespaces]]
+binding = "MINT_JOBS_KV"
+id = "ccfd834158b44a799fe567fe0e3c26cf"
