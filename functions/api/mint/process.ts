@@ -112,11 +112,16 @@ export async function processJob(
     // ──── STEP 2: Reserve Mint Number ────
     await updateJobStep(env.DB, jobId, 'reserving_number');
 
-    const mintNumber = await getNextMintNumber(env.DB, TOTAL_SUPPLY);
-
-    await env.DB.prepare(
-      'UPDATE mint_jobs SET mint_number = ?, updated_at = datetime(\'now\') WHERE id = ?'
-    ).bind(mintNumber, jobId).run();
+    // Reuse mint_number from a previous attempt (retry) to avoid wasting supply
+    let mintNumber: number;
+    if (job.mint_number != null) {
+      mintNumber = job.mint_number;
+    } else {
+      mintNumber = await getNextMintNumber(env.DB, TOTAL_SUPPLY);
+      await env.DB.prepare(
+        'UPDATE mint_jobs SET mint_number = ?, updated_at = datetime(\'now\') WHERE id = ?'
+      ).bind(mintNumber, jobId).run();
+    }
 
     // ──── STEP 3: Upload to IPFS ────
     await updateJobStep(env.DB, jobId, 'uploading_ipfs');
@@ -379,11 +384,16 @@ export async function finalizeJob(env: ProcessEnv, jobId: number): Promise<void>
 async function handleJobFailure(
   env: ProcessEnv,
   jobId: number,
-  job: MintJobRow | null,
+  _initialJob: MintJobRow | null,
   error: unknown
 ): Promise<void> {
   const errorMsg = error instanceof Error ? error.message : String(error);
   const errorCode = error instanceof MintError ? error.code : 'INTERNAL_ERROR';
+
+  // Re-read job from DB for current state (initial variable is stale —
+  // fields like mintgarden_launcher_id may have been set during processing)
+  const job = await env.DB.prepare('SELECT * FROM mint_jobs WHERE id = ?')
+    .bind(jobId).first<MintJobRow>() ?? _initialJob;
 
   console.error(`[MintProcessor] Job ${jobId} failed at step ${job?.step}:`, errorMsg);
 
@@ -392,10 +402,14 @@ async function handleJobFailure(
   const retryable = !nonRetryable.includes(errorCode);
 
   if (retryable && (job?.retry_count ?? 0) < (job?.max_retries ?? 3)) {
-    // Increment retry count, reset to queued for retry
+    // Increment retry count, reset to queued for retry.
+    // Clear IPFS URIs (may be partial) but keep mint_number (to avoid wasting supply).
     await env.DB.prepare(
       `UPDATE mint_jobs SET step = 'queued', retry_count = retry_count + 1,
-       error_message = ?, error_code = ?, updated_at = datetime('now')
+       error_message = ?, error_code = ?,
+       ipfs_image_uris = NULL, ipfs_metadata_uris = NULL,
+       image_hash = NULL, metadata_hash = NULL,
+       updated_at = datetime('now')
        WHERE id = ?`
     ).bind(errorMsg, errorCode, jobId).run();
     return;
@@ -412,14 +426,27 @@ async function handleJobFailure(
     finalStep = 'refunded';
   }
 
-  // If paid mint failed after user already paid (has launcherId), auto-flag refund
-  if (job?.mint_type === 'paid' && job?.mintgarden_launcher_id && job?.phase2_mint_id) {
+  // If paid mint failed after user already paid (has launcherId), auto-flag refund.
+  // Check mintgarden_launcher_id (proves payment was in play) — phase2_mint_id
+  // may be NULL if finalization crashed before creating the phase2_mints record.
+  if (job?.mint_type === 'paid' && job?.mintgarden_launcher_id) {
     try {
-      await markRefundNeeded(
-        env.DB,
-        job.phase2_mint_id,
-        `Automatic: job ${jobId} failed at ${job.step} after payment. Error: ${errorMsg}`
-      );
+      if (job.phase2_mint_id) {
+        await markRefundNeeded(
+          env.DB,
+          job.phase2_mint_id,
+          `Automatic: job ${jobId} failed at ${job.step} after payment. Error: ${errorMsg}`
+        );
+      } else {
+        // No phase2_mints row — log refund need via audit (admin manual review)
+        await logMintStep(env.DB, {
+          mint_id: 0,
+          step: 'refund_needed_no_mint_record',
+          status: 'failed',
+          error: `Job ${jobId} failed after payment but no phase2_mints record exists.`,
+          data: { job_id: jobId, launcher_id: job.mintgarden_launcher_id, wallet: job.wallet_address },
+        });
+      }
     } catch (refundErr) {
       console.error(`[MintProcessor] Failed to flag refund for job ${jobId}:`, refundErr);
     }

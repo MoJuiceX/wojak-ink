@@ -4,7 +4,11 @@
  * Called when a paid mint offer is accepted. Resumes the job from
  * 'awaiting_payment' to 'finalizing' → 'completed'.
  *
- * Verifies the launcher ID on MintGarden API (same pattern as confirm.ts).
+ * launcherId is OPTIONAL. Two modes:
+ *   1. With launcherId: verify it directly on MintGarden, then finalize.
+ *   2. Without launcherId: auto-detect the NFT by querying MintGarden for
+ *      recent mints to this wallet, matching by edition_number.
+ *      If not found yet, return { pending: true } — frontend keeps polling.
  */
 
 import { finalizeJob, type ProcessEnv } from './process';
@@ -20,6 +24,7 @@ import { checkRateLimit, getRateLimitKey, MINT_RATE_LIMITS } from '../../lib/rat
 interface Env extends ProcessEnv {
   DB: D1Database;
   MINT_JOBS_KV: KVNamespace;
+  PHASE2_COLLECTION_UUID?: string;
 }
 
 interface AwaitingJobRow {
@@ -30,6 +35,86 @@ interface AwaitingJobRow {
   mint_number: number | null;
   mintgarden_launcher_id: string | null;
   offer_file: string | null;
+}
+
+/** MintGarden NFT item shape (subset of fields we need) */
+interface MintGardenNftItem {
+  id?: string;
+  encoded_id?: string;
+  data?: {
+    edition_number?: number;
+    metadata_json?: {
+      edition?: number;
+      edition_number?: number;
+      name?: string;
+    };
+  };
+  owner_address?: { encoded_id?: string };
+}
+
+/**
+ * Verify a known launcherId on MintGarden.
+ * Returns the verified launcherId, or null if not found/mismatch.
+ * Throws on network errors (caller handles).
+ */
+async function verifyLauncherOnChain(
+  launcherId: string,
+  expectedWallet: string
+): Promise<string | null> {
+  const mgRes = await fetch(`https://api.mintgarden.io/nfts/${launcherId}`);
+  if (!mgRes.ok) return null;
+
+  const nftData = await mgRes.json() as { owner_address?: { encoded_id?: string } };
+  const onChainOwner = nftData?.owner_address?.encoded_id;
+  if (onChainOwner && onChainOwner.toLowerCase() !== expectedWallet.toLowerCase()) {
+    return null; // Owner mismatch
+  }
+  return launcherId;
+}
+
+/**
+ * Auto-detect the NFT for a paid mint by querying MintGarden for
+ * recently minted NFTs owned by this wallet, matching by edition_number.
+ * Returns the launcherId if found, or null if the NFT hasn't appeared yet.
+ */
+async function detectLauncherByWallet(
+  walletAddress: string,
+  mintNumber: number,
+  collectionUuid: string
+): Promise<string | null> {
+  // MintGarden /address/{addr}/nfts returns NFTs owned by wallet.
+  // We filter by collection_id if we have one, or scan recent items.
+  let url = `https://api.mintgarden.io/address/${walletAddress}/nfts?type=owned`;
+  if (collectionUuid) {
+    url += `&collection_id=${collectionUuid}`;
+  }
+
+  const res = await fetch(url, {
+    headers: { Accept: 'application/json', 'User-Agent': 'wojak.ink/1.0' },
+  });
+  if (!res.ok) return null;
+
+  const data = await res.json() as { items?: MintGardenNftItem[] };
+  const items = data.items || [];
+
+  for (const item of items) {
+    const editionNumber =
+      item.data?.edition_number ??
+      item.data?.metadata_json?.edition_number ??
+      item.data?.metadata_json?.edition;
+
+    if (editionNumber === mintNumber) {
+      return item.encoded_id || item.id || null;
+    }
+
+    // Fallback: match by name pattern "Your Wojak #N"
+    const name = item.data?.metadata_json?.name;
+    if (name && name === `Your Wojak #${mintNumber}`) {
+      return item.encoded_id || item.id || null;
+    }
+  }
+
+  return null;
 }
 
 export const onRequest: PagesFunction<Env> = async (context) => {
@@ -71,10 +156,10 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     return errorResponse('Missing or invalid walletAddress', 400);
   }
 
-  const launcherId = body.launcherId;
-  if (!launcherId || typeof launcherId !== 'string') {
-    return errorResponse('Missing launcherId', 400);
-  }
+  // launcherId is optional — auto-detection kicks in when absent
+  const providedLauncherId = body.launcherId && typeof body.launcherId === 'string'
+    ? body.launcherId
+    : null;
 
   try {
     // Load job in awaiting_payment state
@@ -88,20 +173,37 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       return errorResponse('Job not found or not awaiting payment', 404);
     }
 
-    // Verify launcher ID on MintGarden
+    // Resolve launcher ID: use provided one, or auto-detect from MintGarden
+    let verifiedLauncherId: string | null = null;
+
     try {
-      const mgRes = await fetch(`https://api.mintgarden.io/nfts/${launcherId}`);
-      if (!mgRes.ok) {
-        return jsonResponse({
-          success: false,
-          pending: true,
-          message: 'NFT not found on-chain yet. The offer may not have been accepted.',
-        });
-      }
-      const nftData = await mgRes.json() as { owner_address?: { encoded_id?: string } };
-      const onChainOwner = nftData?.owner_address?.encoded_id;
-      if (onChainOwner && onChainOwner.toLowerCase() !== job.wallet_address.toLowerCase()) {
-        return errorResponse('NFT owner does not match the minting wallet.', 403);
+      if (providedLauncherId) {
+        // Path A: caller provided a launcherId — verify it
+        verifiedLauncherId = await verifyLauncherOnChain(providedLauncherId, job.wallet_address);
+        if (!verifiedLauncherId) {
+          return jsonResponse({
+            success: false,
+            pending: true,
+            message: 'NFT not found on-chain yet. The offer may not have been accepted.',
+          });
+        }
+      } else {
+        // Path B: no launcherId — auto-detect by querying wallet's NFTs
+        if (job.mint_number != null) {
+          verifiedLauncherId = await detectLauncherByWallet(
+            job.wallet_address,
+            job.mint_number,
+            env.PHASE2_COLLECTION_UUID || ''
+          );
+        }
+
+        if (!verifiedLauncherId) {
+          return jsonResponse({
+            success: false,
+            pending: true,
+            message: 'NFT not confirmed on-chain yet. We will detect it automatically.',
+          });
+        }
       }
     } catch (err) {
       console.warn('[Confirm Payment] MintGarden verification failed:', err);
@@ -115,7 +217,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     // Update job with verified launcher ID
     await env.DB.prepare(
       "UPDATE mint_jobs SET mintgarden_launcher_id = ?, updated_at = datetime('now') WHERE id = ?"
-    ).bind(launcherId, jobId).run();
+    ).bind(verifiedLauncherId, jobId).run();
 
     // Finalize the mint
     await finalizeJob(env, jobId);

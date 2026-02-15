@@ -92,19 +92,19 @@ export default {
     let unpinnedIPFS = 0;
     if (env.PINATA_JWT) {
       const orphanedJobs = await env.DB.prepare(
-        `SELECT id, data_uris, metadata_uris FROM mint_jobs
+        `SELECT id, ipfs_image_uris, ipfs_metadata_uris FROM mint_jobs
          WHERE step IN ('failed', 'refunded')
-         AND data_uris IS NOT NULL
+         AND ipfs_image_uris IS NOT NULL
          AND updated_at < datetime('now', '-1 hour')
          LIMIT 10`
-      ).all<{ id: number; data_uris: string | null; metadata_uris: string | null }>();
+      ).all<{ id: number; ipfs_image_uris: string | null; ipfs_metadata_uris: string | null }>();
 
       for (const row of (orphanedJobs.results || [])) {
         let unpinned = false;
 
-        if (row.data_uris) {
+        if (row.ipfs_image_uris) {
           try {
-            const uris: string[] = JSON.parse(row.data_uris);
+            const uris: string[] = JSON.parse(row.ipfs_image_uris);
             for (const uri of uris) {
               const cid = extractCidFromUri(uri);
               if (cid) { await unpinFromIPFS(cid, env.PINATA_JWT!); unpinned = true; break; }
@@ -112,9 +112,9 @@ export default {
           } catch { /* parse error */ }
         }
 
-        if (row.metadata_uris) {
+        if (row.ipfs_metadata_uris) {
           try {
-            const uris: string[] = JSON.parse(row.metadata_uris);
+            const uris: string[] = JSON.parse(row.ipfs_metadata_uris);
             for (const uri of uris) {
               const cid = extractCidFromUri(uri);
               if (cid) { await unpinFromIPFS(cid, env.PINATA_JWT!); break; }
@@ -124,7 +124,7 @@ export default {
 
         if (unpinned) {
           await env.DB.prepare(
-            "UPDATE mint_jobs SET data_uris = NULL, metadata_uris = NULL, updated_at = datetime('now') WHERE id = ?"
+            "UPDATE mint_jobs SET ipfs_image_uris = NULL, ipfs_metadata_uris = NULL, updated_at = datetime('now') WHERE id = ?"
           ).bind(row.id).run();
           unpinnedIPFS++;
         }
@@ -132,27 +132,40 @@ export default {
     }
 
     // 7. Flag refunds for paid mints that failed after payment (have launcherId)
+    //    phase2_mint_id may be NULL if finalization crashed before creating the record.
     let paidRefundsFlagged = 0;
     const paidFailedWithPayment = await env.DB.prepare(
-      `SELECT mj.id AS job_id, mj.phase2_mint_id, mj.error_message
+      `SELECT mj.id AS job_id, mj.phase2_mint_id, mj.error_message,
+              mj.mintgarden_launcher_id, mj.wallet_address
        FROM mint_jobs mj
        LEFT JOIN phase2_mints pm ON pm.id = mj.phase2_mint_id
        WHERE mj.step = 'failed'
        AND mj.mint_type = 'paid'
        AND mj.mintgarden_launcher_id IS NOT NULL
-       AND mj.phase2_mint_id IS NOT NULL
-       AND (pm.refund_needed IS NULL OR pm.refund_needed = 0)
+       AND (mj.phase2_mint_id IS NULL OR pm.refund_needed IS NULL OR pm.refund_needed = 0)
        LIMIT 10`
-    ).all<{ job_id: number; phase2_mint_id: number; error_message: string | null }>();
+    ).all<{ job_id: number; phase2_mint_id: number | null; error_message: string | null; mintgarden_launcher_id: string; wallet_address: string }>();
 
     for (const row of (paidFailedWithPayment.results || [])) {
       try {
-        await env.DB.prepare(
-          `UPDATE phase2_mints SET refund_needed = 1, refund_reason = ? WHERE id = ?`
-        ).bind(
-          `Cron cleanup: job ${row.job_id} failed after payment. Error: ${row.error_message || 'unknown'}`,
-          row.phase2_mint_id
-        ).run();
+        if (row.phase2_mint_id) {
+          await env.DB.prepare(
+            `UPDATE phase2_mints SET refund_needed = 1, refund_reason = ? WHERE id = ?`
+          ).bind(
+            `Cron cleanup: job ${row.job_id} failed after payment. Error: ${row.error_message || 'unknown'}`,
+            row.phase2_mint_id
+          ).run();
+        } else {
+          // No phase2_mints record — log for manual review
+          console.warn(`[MintCron] Job ${row.job_id} failed after payment but has no phase2_mints record. Launcher: ${row.mintgarden_launcher_id}, Wallet: ${row.wallet_address}`);
+          await env.DB.prepare(
+            `INSERT INTO mint_audit_log (mint_id, step, status, error, data, created_at)
+             VALUES (0, 'refund_needed_no_mint_record', 'failed', ?, ?, datetime('now'))`
+          ).bind(
+            `Cron: job ${row.job_id} failed after payment but no phase2_mints record exists.`,
+            JSON.stringify({ job_id: row.job_id, launcher_id: row.mintgarden_launcher_id, wallet: row.wallet_address })
+          ).run();
+        }
         paidRefundsFlagged++;
       } catch (err) {
         console.error(`[MintCron] Failed to flag refund for job ${row.job_id}:`, err);
