@@ -166,8 +166,10 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
 
   const hasFreeMintsAvailable = (credits?.free_mints_available ?? 0) > 0;
 
-  // Count selected traits for the 7-trait minimum
-  const traitCount = Object.values(selectedLayers).filter((v) => !isSelectionPathEmpty(v)).length;
+  // Count the 7 required UI categories (Mouth tab covers MouthBase/MouthItem/FacialHair)
+  const REQUIRED_CATEGORIES: (keyof typeof selectedLayers)[] = ['Base', 'Clothes', 'Mask', 'Eyes', 'Head', 'Background'];
+  const hasMouth = !isSelectionPathEmpty(selectedLayers.MouthBase) || !isSelectionPathEmpty(selectedLayers.MouthItem);
+  const traitCount = REQUIRED_CATEGORIES.filter((k) => !isSelectionPathEmpty(selectedLayers[k])).length + (hasMouth ? 1 : 0);
   const has7Traits = traitCount >= 7;
   const isSoldOut = totalMinted >= maxSupply && maxSupply > 0;
   const canMint = canExport && isWalletConnected && has7Traits && !isSoldOut;
