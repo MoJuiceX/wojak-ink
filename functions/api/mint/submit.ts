@@ -150,6 +150,14 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       });
     }
 
+    // ── Minting paused check ──
+    const pausedRow = await env.DB.prepare(
+      "SELECT value FROM server_state WHERE key = 'minting_paused'"
+    ).first<{ value: string }>();
+    if (pausedRow?.value === 'true') {
+      return jsonResponse({ error: 'Minting is temporarily paused. Check back soon!' }, 403);
+    }
+
     // ── Sold-out fast check (cached flag from server_state) ──
     const soldOutRow = await env.DB.prepare(
       "SELECT value FROM server_state WHERE key = 'sold_out'"
