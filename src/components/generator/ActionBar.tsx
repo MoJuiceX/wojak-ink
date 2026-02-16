@@ -17,7 +17,6 @@ import {
   Wallet,
   Coins,
   Trophy,
-  ChevronDown,
   Info,
   MoreHorizontal,
   Tag,
@@ -109,8 +108,6 @@ function ActionBarTooltip({
 export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }: ActionBarProps) {
   const {
     randomize,
-    randomizeLayer,
-    activeLayer,
     undo,
     redo,
     canUndo,
@@ -125,7 +122,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
     previewImage,
     canExport,
   } = useGenerator();
-  const { credits, prepareMint, resetMintFlow, totalMinted, maxSupply, getTotalMintPrice, mintingPaused } = useMint();
+  const { credits, prepareMint, resetMintFlow, maxSupply, getTotalMintPrice, mintingPaused, totalMinted } = useMint();
   const { address, status: walletStatus, connect } = useSageWallet();
   const prefersReducedMotion = useReducedMotion();
   const { isDesktop } = useLayout();
@@ -136,23 +133,10 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   const [showDownloadSuccess, setShowDownloadSuccess] = useState(false);
   const [isMintModalOpen, setIsMintModalOpen] = useState(false);
   const [mintType, setMintType] = useState<'free' | 'paid'>('free');
-  const [showRandomMenu, setShowRandomMenu] = useState(false);
   const [showGeneratorInfo, setShowGeneratorInfo] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
   const [showOverflowMenu, setShowOverflowMenu] = useState(false);
-  const randomMenuRef = useRef<HTMLDivElement>(null);
   const overflowMenuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!showRandomMenu) return;
-    const handleClick = (e: MouseEvent) => {
-      if (randomMenuRef.current && !randomMenuRef.current.contains(e.target as Node)) {
-        setShowRandomMenu(false);
-      }
-    };
-    document.addEventListener('click', handleClick);
-    return () => document.removeEventListener('click', handleClick);
-  }, [showRandomMenu]);
 
   useEffect(() => {
     if (!showOverflowMenu) return;
@@ -220,17 +204,9 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   const hasSelection = !isSelectionPathEmpty(basePath);
 
   const handleRandomize = () => {
-    setShowRandomMenu(false);
     setIsRandomizing(true);
     randomize();
     setTimeout(() => setIsRandomizing(false), 500);
-  };
-
-  const handleRandomizeLayer = async () => {
-    setShowRandomMenu(false);
-    setIsRandomizing(true);
-    await randomizeLayer(activeLayer);
-    setTimeout(() => setIsRandomizing(false), 400);
   };
 
   // Generate the next project name
@@ -415,78 +391,32 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         border: '1px solid var(--color-border)',
       }}
     >
-      {/* Randomize button — simple on mobile, dropdown on desktop */}
-      <div className="relative" ref={randomMenuRef}>
-        <ActionBarTooltip content="Random" disabled={showRandomMenu}>
-        <div className="flex items-stretch rounded-lg overflow-hidden" style={{ border: '1px solid transparent' }}>
-          <ActionButton
-            onClick={handleRandomize}
-            isActive={isRandomizing}
-            icon={
-              <motion.span
-                className="text-xl block"
-                animate={isRandomizing ? {
-                  scale: [1, 1.15, 1],
-                  rotate: [0, -10, 10, 0],
-                } : { scale: 1, rotate: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                🎲
-              </motion.span>
-            }
-            label="Random"
-          />
-          {/* Dropdown chevron — desktop only */}
-          {isDesktop && (
-            <button
-              type="button"
-              className="flex items-center justify-center px-1"
-              style={{
-                background: 'transparent',
-                color: 'var(--color-text-muted)',
-                borderLeft: '1px solid var(--color-border)',
-              }}
-              onClick={() => setShowRandomMenu((v) => !v)}
-              aria-label="Random options"
-            >
-              <ChevronDown size={14} style={{ transform: showRandomMenu ? 'none' : 'rotate(180deg)' }} />
-            </button>
-          )}
-        </div>
-        <AnimatePresence>
-          {showRandomMenu && isDesktop && (
-            <motion.div
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 4 }}
-              className="absolute bottom-full left-0 mb-1 z-50 rounded-lg overflow-hidden py-1 min-w-[140px]"
-              style={{
-                background: 'var(--color-surface)',
-                border: '1px solid var(--color-border)',
-                boxShadow: 'var(--shadow-lg)',
-              }}
-            >
-              <button
-                type="button"
-                className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-[var(--color-surface-hover)]"
-                style={{ color: 'var(--color-text)' }}
-                onClick={handleRandomize}
-              >
-                All layers
-              </button>
-              <button
-                type="button"
-                className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-[var(--color-surface-hover)]"
-                style={{ color: 'var(--color-text)' }}
-                onClick={handleRandomizeLayer}
-              >
-                This layer only
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-        </ActionBarTooltip>
-      </div>
+      {/* Randomize button — always randomizes all layers + colors */}
+      <ActionBarTooltip content="Randomize">
+        <motion.button
+          className="relative flex items-center justify-center rounded-lg shrink-0 w-9 h-9"
+          style={{
+            background: 'transparent',
+            border: 'none',
+            transition: 'all 0.3s ease',
+          }}
+          whileHover={prefersReducedMotion ? undefined : { scale: 1.05 }}
+          whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
+          onClick={handleRandomize}
+          aria-label="Randomize"
+        >
+          <motion.span
+            className="text-xl block"
+            animate={isRandomizing ? {
+              scale: [1, 1.15, 1],
+              rotate: [0, -10, 10, 0],
+            } : { scale: 1, rotate: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            🎲
+          </motion.span>
+        </motion.button>
+      </ActionBarTooltip>
 
       {/* Undo button */}
       <ActionBarTooltip content="Undo">
@@ -712,23 +642,19 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         )}
 
         {/* Price / credit cost display */}
-        {isWalletConnected && mintingPaused && (
-          <div className="flex flex-col items-end" style={{ minWidth: 0 }}>
-            <span className="text-xs font-semibold whitespace-nowrap" style={{ color: 'var(--color-text-muted)' }}>
-              Minting opens Friday
-            </span>
-          </div>
-        )}
         {isWalletConnected && !mintingPaused && (() => {
           if (hasFreeMintsAvailable && mintType === 'free') {
-            // Free mint: show credit balance
+            // Free mint: show credit cost (scales with surcharge)
+            const price = getTotalMintPrice();
+            const creditCost = Math.ceil(100 * price.totalXch / price.basePrice);
+            const balanceCredits = Math.round((credits?.balance ?? 0) / 100);
             return (
               <div className="flex flex-col items-end" style={{ minWidth: 0 }}>
                 <span className="text-xs font-semibold tabular-nums whitespace-nowrap" style={{ color: 'var(--color-primary)' }}>
-                  {credits?.free_mints_available ?? 0} free {(credits?.free_mints_available ?? 0) === 1 ? 'mint' : 'mints'}
+                  {creditCost} credits
                 </span>
                 <span className="text-[10px] tabular-nums whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>
-                  {Math.round((credits?.balance ?? 0) / 100)} credits
+                  {balanceCredits} available
                 </span>
               </div>
             );
@@ -756,14 +682,13 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
 
         {/* Mint / Connect button */}
         {!isWalletConnected ? (
-          <div className="flex flex-col items-center gap-0.5">
+          <ActionBarTooltip content="Connect to mint">
             <ActionButton
               onClick={handleMintClick}
               icon={<Wallet size={22} />}
               label="Connect"
             />
-            <span className="text-[9px] whitespace-nowrap" style={{ color: 'var(--color-text-muted)' }}>Connect to mint</span>
-          </div>
+          </ActionBarTooltip>
         ) : (
           <ActionBarTooltip
             content={mintingPaused ? 'Minting opens Friday!' : isSoldOut ? 'All 4,200 Wojaks minted!' : !has7Traits ? 'Select all 7 traits to mint' : 'Mint your Wojak'}
@@ -772,18 +697,12 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
               variant="primary"
               onClick={handleMintClick}
               disabled={!canMint}
-              icon={<Wallet size={22} />}
+              icon={<Sparkles size={22} />}
               label="Mint"
             />
           </ActionBarTooltip>
         )}
 
-        {/* Supply counter */}
-        {isWalletConnected && (
-          <span className="text-xs tabular-nums whitespace-nowrap" style={{ color: 'var(--color-text-muted)' }}>
-            {totalMinted}/{maxSupply}
-          </span>
-        )}
       </div>
 
       {/* Mint Flow Modal */}

@@ -84,7 +84,7 @@ describe('canvasRendererLayerBuilder', () => {
       const names = layers.map((l) => l.layerName);
       expect(names).toContain('BubbleGumRekt');
       const bubbleRekt = layers.find((l) => l.layerName === 'BubbleGumRekt');
-      expect(bubbleRekt?.zIndex).toBe(LAYER_Z_INDEX.BubbleGumRekt);
+      expect(bubbleRekt?.zIndex).toBe(LAYER_Z_INDEX.RektMouthOverlay);
     });
 
     it('Chia Farmer adds ClothesAddon virtual layer', () => {

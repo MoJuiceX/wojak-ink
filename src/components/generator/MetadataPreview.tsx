@@ -257,72 +257,73 @@ export function MetadataPreview({ onSwitchToColors }: MetadataPreviewProps) {
   const attributes = useMetadataAttributes();
 
   const selectedCount = attributes.filter((a) => a.value !== '').length;
-  const hasUnmapped = attributes.some((a) => a.source === 'fallback' && a.value !== '');
 
   return (
-    <div className="flex flex-col gap-2 h-full overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between px-1">
+    <div className="generator-panel-section flex flex-col h-full overflow-hidden">
+      {/* Header — matches color picker section label */}
+      <div className="generator-panel-section-label flex items-center justify-between" style={{ height: '14px', marginBottom: 10 }}>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold" style={{ color: 'var(--color-text-secondary)' }}>
-            Metadata
-          </span>
+          <span>Traits</span>
           <span
-            className="text-xs px-1.5 py-0.5 rounded"
+            className="px-1.5 py-px rounded-sm"
             style={{
-              background: selectedCount >= 7 ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
-              color: selectedCount >= 7 ? 'var(--color-success)' : 'var(--color-error)',
-              fontSize: '10px',
+              background: selectedCount >= 7 ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.06)',
+              color: selectedCount >= 7 ? 'var(--color-success)' : 'var(--color-text-muted)',
+              fontSize: '9px',
+              fontWeight: 700,
+              letterSpacing: '0.03em',
             }}
           >
             {selectedCount}/7
           </span>
-          {hasUnmapped && (
-            <span
-              className="text-xs px-1.5 py-0.5 rounded"
-              style={{ background: 'rgba(251,191,36,0.15)', color: '#fbbf24', fontSize: '10px' }}
-            >
-              unmapped
-            </span>
-          )}
         </div>
-        <div className="flex items-center gap-1">
-          <button
-            className="text-xs px-2 py-0.5 rounded"
-            style={{ color: 'var(--color-text-muted)', background: 'rgba(255,255,255,0.05)' }}
-            onClick={onSwitchToColors}
-          >
-            Colors
-          </button>
-        </div>
+        <button
+          type="button"
+          className="flex items-center gap-0.5 transition-colors"
+          style={{
+            color: 'var(--color-primary)',
+            fontSize: '0.5625rem',
+            fontWeight: 600,
+            lineHeight: 1,
+            cursor: 'pointer',
+          }}
+          onClick={onSwitchToColors}
+        >
+          Colors
+        </button>
       </div>
 
       {/* Attributes list — always shows all 7 trait types */}
       <div className="flex-1 overflow-y-auto" style={{ minHeight: 0 }}>
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1.5">
           {attributes.map((attr, i) => {
             const isEmpty = attr.value === '';
             return (
               <div
                 key={i}
-                className="flex flex-col px-2 py-1.5 rounded"
+                className="flex flex-col rounded-md"
                 style={{
-                  background: 'rgba(255,255,255,0.02)',
-                  opacity: isEmpty ? 0.4 : 1,
-                  border: attr.source === 'fallback' && !isEmpty
-                    ? '1px solid rgba(251,191,36,0.3)'
-                    : '1px solid transparent',
+                  padding: '6px 8px',
+                  background: isEmpty ? 'transparent' : 'rgba(255, 255, 255, 0.025)',
+                  border: isEmpty ? '1px solid rgba(255, 255, 255, 0.03)' : '1px solid rgba(255, 255, 255, 0.05)',
+                  opacity: isEmpty ? 0.3 : 1,
                 }}
               >
-                <div className="flex items-center justify-between">
-                  <span style={{ color: isEmpty ? 'var(--color-text-muted)' : 'var(--color-cyan)', fontSize: '10px', fontWeight: 600 }}>
-                    {attr.trait_type}
-                  </span>
-                  {attr.source === 'fallback' && !isEmpty && (
-                    <span style={{ color: '#fbbf24', fontSize: '9px' }}>not in map</span>
-                  )}
-                </div>
-                <span style={{ color: isEmpty ? 'var(--color-text-muted)' : 'var(--color-text)', fontSize: '12px' }}>
+                <span style={{
+                  color: 'var(--color-text-muted)',
+                  fontSize: '9px',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                  marginBottom: 1,
+                }}>
+                  {attr.trait_type}
+                </span>
+                <span style={{
+                  color: isEmpty ? 'var(--color-text-muted)' : 'var(--color-primary)',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                }}>
                   {isEmpty ? '—' : attr.value}
                 </span>
               </div>
@@ -330,7 +331,6 @@ export function MetadataPreview({ onSwitchToColors }: MetadataPreviewProps) {
           })}
         </div>
       </div>
-
     </div>
   );
 }

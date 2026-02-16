@@ -6,6 +6,7 @@
  */
 
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import './Generator.css';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { useLayout } from '@/hooks/useLayout';
@@ -133,13 +134,33 @@ function GeneratorContent() {
             {/* Desktop: 4th column = colors/details or metadata preview */}
             {isDesktop && (
               <div className="generator-details-panel">
-                {rightPanelMode === 'metadata' ? (
-                  <MetadataPreview
-                    onSwitchToColors={() => setRightPanelMode('colors')}
-                  />
-                ) : (
-                  <GeneratorRightPanel />
-                )}
+                <AnimatePresence mode="wait" initial={false}>
+                  {rightPanelMode === 'metadata' ? (
+                    <motion.div
+                      key="metadata"
+                      initial={{ x: 40, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      exit={{ x: 40, opacity: 0 }}
+                      transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                      className="flex flex-col gap-3 h-full"
+                    >
+                      <MetadataPreview
+                        onSwitchToColors={() => setRightPanelMode('colors')}
+                      />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="colors"
+                      initial={{ x: -40, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      exit={{ x: -40, opacity: 0 }}
+                      transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                      className="flex flex-col gap-3 h-full"
+                    >
+                      <GeneratorRightPanel />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )}
           </div>

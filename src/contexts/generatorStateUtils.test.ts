@@ -155,7 +155,7 @@ describe('generatorStateUtils', () => {
   describe('getMissingRequiredLayers', () => {
     it('returns labels for missing required layers', () => {
       const missing = getMissingRequiredLayers({});
-      expect(missing).toContain('Base');
+      expect(missing).toContain('Face');
       expect(missing).toContain('Clothes');
       expect(missing).toContain('Mouth');
       expect(missing.length).toBe(3);

@@ -24,6 +24,8 @@ export interface LightboxProps {
   title?: string;
   children: React.ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'gallery';
+  /** Extra class name applied to the .lightbox-content container */
+  contentClassName?: string;
   /** Element to return focus to when lightbox closes */
   triggerRef?: React.RefObject<HTMLElement>;
 }
@@ -43,6 +45,7 @@ export function Lightbox({
   title,
   children,
   size = 'md',
+  contentClassName,
   triggerRef,
 }: LightboxProps) {
   const prefersReducedMotion = useReducedMotion();
@@ -148,10 +151,10 @@ export function Lightbox({
             aria-hidden="true"
           />
 
-          {/* Content */}
+          {/* Content wrapper — holds external close button + content box */}
           <motion.div
             ref={lightboxRef}
-            className={`lightbox-content ${size === 'gallery' ? 'lightbox-gallery' : ''}`}
+            className="lightbox-wrapper"
             style={{ '--lightbox-max-width': SIZE_MAP[size] } as React.CSSProperties}
             variants={contentVariants}
             initial="hidden"
@@ -164,37 +167,39 @@ export function Lightbox({
             tabIndex={-1}
             onKeyDown={handleKeyDown}
           >
-            {/* Header */}
-            {title && (
-              <div className="lightbox-header">
-                <h2 id="lightbox-title" className="lightbox-title">
-                  {title}
-                </h2>
-                <button
-                  type="button"
-                  className="lightbox-close"
-                  onClick={onClose}
-                  aria-label="Close"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-            )}
-
-            {/* Close button if no title */}
+            {/* External close button (no title) — sits outside the box */}
             {!title && (
               <button
                 type="button"
-                className="lightbox-close lightbox-close--floating"
+                className="lightbox-close lightbox-close--external"
                 onClick={onClose}
                 aria-label="Close"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             )}
 
-            {/* Body */}
-            <div className="lightbox-body">{children}</div>
+            <div className={`lightbox-content ${size === 'gallery' ? 'lightbox-gallery' : ''} ${contentClassName || ''}`}>
+              {/* Header with inline close */}
+              {title && (
+                <div className="lightbox-header">
+                  <h2 id="lightbox-title" className="lightbox-title">
+                    {title}
+                  </h2>
+                  <button
+                    type="button"
+                    className="lightbox-close"
+                    onClick={onClose}
+                    aria-label="Close"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              )}
+
+              {/* Body */}
+              <div className="lightbox-body">{children}</div>
+            </div>
           </motion.div>
         </div>
       )}

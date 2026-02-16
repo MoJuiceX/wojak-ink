@@ -56,6 +56,7 @@ export const TRAIT_NAME_MAP: Record<string, string> = {
   'gold teeth': 'Gold Teeth',
   'pizza': 'Pizza',
   'pipe': 'Pipe',
+  'pipe when rekt': 'Pipe',                  // G1 rekt-variant file
   'bubble gum': 'Bubble Gum',
   'bubble gum rekt': 'Bubble Gum',
   'bubblegum': 'Bubble Gum',               // G2 no-space variant
@@ -258,6 +259,7 @@ export const TRAIT_NAME_MAP: Record<string, string> = {
   'hell': 'Hell',
   'matrix': 'Matrix',
   "mom\u0192\u00c7\u00d6s basement": 'Moms Basement',
+  "mom'''s basement": 'Moms Basement',   // ΓÇÖ → three apostrophes after regex
   'moms basement': 'Moms Basement',
   "mom's basement": 'Moms Basement',
   'moon': 'Moon',

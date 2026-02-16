@@ -35,7 +35,6 @@ import {
   SURCHARGE_CATEGORIES,
   SURCHARGE_EXEMPT_TRAITS,
   DECAY_HALF_LIFE_DAYS,
-  PREMIUM_TOP_N,
   TOTAL_SUPPLY,
   FREE_MINT_CREDITS,
   BASE_PRICE_XCH,
@@ -250,8 +249,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     // Always inject fixed "Base: Wojak"
     consolidated.set('Base', { trait_type: 'Base', value: 'Wojak', layerKey: '_base' });
 
-    // ── Free mint: top-3 blocking + credit check ──
-    let freeMintCreditCost = FREE_MINT_CREDITS; // flat 100 credits (x100 units)
+    // ── Free mint: surcharge-scaled credit cost + credit check ──
+    let freeMintCreditCost = FREE_MINT_CREDITS; // base 100 credits (x100 units)
 
     if (mintType === 'free') {
       // Query all trait usage for surcharge categories
@@ -265,44 +264,26 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         last_decay_at: string;
       }>();
 
-      // Determine top-3 traits per surcharge category (by effective usage)
-      const byCat: Record<string, { name: string; decayed: number }[]> = {};
-      for (const cat of SURCHARGE_CATEGORIES) {
-        byCat[cat] = [];
-      }
-      for (const row of (allTraitRows.results || [])) {
-        if (!SURCHARGE_CATEGORIES.has(row.trait_category)) continue;
-        if (SURCHARGE_EXEMPT_TRAITS.has(row.trait_name)) continue;
-        const decayed = applyDecay(row.effective_usage, row.last_decay_at);
-        byCat[row.trait_category]?.push({ name: row.trait_name, decayed });
-      }
-
-      const top3Traits = new Set<string>();
-      for (const [cat, items] of Object.entries(byCat)) {
-        items.sort((a, b) => b.decayed - a.decayed);
-        for (let i = 0; i < Math.min(PREMIUM_TOP_N, items.length); i++) {
-          if (items[i].decayed > 0) {
-            top3Traits.add(`${cat}:${items[i].name}`);
-          }
-        }
-      }
-
-      // Block free mints if ANY selected trait is in the top 3
-      const blockedTraits: string[] = [];
+      // Calculate highest surcharge among selected traits (same logic as paid path)
+      let maxSurcharge = 0;
       for (const { trait_type, value } of consolidated.values()) {
         if (!SURCHARGE_CATEGORIES.has(trait_type)) continue;
         if (SURCHARGE_EXEMPT_TRAITS.has(value)) continue;
-        if (top3Traits.has(`${trait_type}:${value}`)) {
-          blockedTraits.push(`${trait_type}: ${value}`);
+        const row = (allTraitRows.results || []).find(
+          r => r.trait_category === trait_type && r.trait_name === value
+        );
+        const decayedUsage = row ? applyDecay(row.effective_usage, row.last_decay_at) : 0;
+        const traitSurcharge = surchargeXch(decayedUsage, trait_type, value);
+        if (traitSurcharge > maxSurcharge) {
+          maxSurcharge = traitSurcharge;
         }
       }
 
-      if (blockedTraits.length > 0) {
-        return jsonResponse({
-          error: 'Free mints cannot use the top 3 most popular traits in each category. Switch to a paid mint or choose different traits.',
-          errorCode: 'TOP3_BLOCKED',
-          blockedTraits,
-        }, 400);
+      // Scale credit cost proportionally: credits = base × (base + surcharge) / base
+      if (maxSurcharge > 0) {
+        freeMintCreditCost = Math.ceil(
+          FREE_MINT_CREDITS * (BASE_PRICE_XCH + maxSurcharge) / BASE_PRICE_XCH
+        );
       }
 
       // Credit pre-check (early exit before expensive IPFS/MintGarden calls)

@@ -6,10 +6,10 @@
  * Features glass morphism background with blur effect.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, useSpring, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
-import { ArrowLeft, Grid3X3, Tag, Hash, Crown, DollarSign, ChevronUp, ChevronDown, Wallet } from 'lucide-react';
+import { ArrowLeft, Grid3X3, Tag, Hash, Crown, DollarSign, ChevronUp, ChevronDown, Wallet, LogOut } from 'lucide-react';
 import { useLayout } from '@/hooks/useLayout';
 import { useGallery } from '@/hooks/useGallery';
 import { LAYOUT } from '@/config/layout';
@@ -17,6 +17,7 @@ import { Logo } from './Logo';
 import { PriceBadges } from './PriceBadges';
 import { CurrencyDisplay } from '@/components/Currency';
 import { useSageWallet } from '@/sage-wallet';
+import { useMint } from '@/contexts/MintContext';
 import { getNavItemByPath } from '@/config/routes';
 import type { SortMode, FilterMode } from '@/types/nft';
 
@@ -135,10 +136,25 @@ function MobileGalleryControls() {
 
 export function Header({ transparent = false }: HeaderProps) {
   const { isMobile, sidebarWidth, isScrolled, headerTransparent, headerBreadcrumb } = useLayout();
-  const { address, status, connect } = useSageWallet();
+  const { address, status, connect, disconnect } = useSageWallet();
+  const { totalMinted, maxSupply } = useMint();
   const isWalletConnected = status === 'connected' && !!address;
   const location = useLocation();
   const prevSidebarWidth = useRef(sidebarWidth);
+  const [showWalletMenu, setShowWalletMenu] = useState(false);
+  const walletMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close wallet menu on outside click
+  useEffect(() => {
+    if (!showWalletMenu) return;
+    const handleClick = (e: MouseEvent) => {
+      if (walletMenuRef.current && !walletMenuRef.current.contains(e.target as Node)) {
+        setShowWalletMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [showWalletMenu]);
 
   const isTransparent = transparent || headerTransparent;
   const height = isMobile ? LAYOUT.header.heightMobile : LAYOUT.header.height;
@@ -303,18 +319,34 @@ export function Header({ transparent = false }: HeaderProps) {
                       <span style={{ color: 'var(--color-text-primary)' }}> Intelligence</span>
                     </motion.h1>
                   ) : (
-                    /* Regular page title */
-                    <motion.h1
+                    /* Regular page title + optional supply counter */
+                    <motion.div
                       key="page-title"
-                      className="text-3xl font-bold"
-                      style={{ color: 'var(--color-text-primary)' }}
+                      className="flex items-center gap-3"
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                     >
-                      {pageTitle}
-                    </motion.h1>
+                      <h1
+                        className="text-3xl font-bold"
+                        style={{ color: 'var(--color-text-primary)' }}
+                      >
+                        {pageTitle}
+                      </h1>
+                      {navItem?.id === 'generator' && isWalletConnected && maxSupply > 0 && (
+                        <span
+                          className="text-[11px] tabular-nums whitespace-nowrap font-semibold px-2 py-0.5 rounded-md"
+                          style={{
+                            color: 'var(--color-text-muted)',
+                            background: 'rgba(255, 255, 255, 0.04)',
+                            border: '1px solid rgba(255, 255, 255, 0.06)',
+                          }}
+                        >
+                          {totalMinted}/{maxSupply}
+                        </span>
+                      )}
+                    </motion.div>
                   )
                 )}
               </AnimatePresence>
@@ -324,26 +356,71 @@ export function Header({ transparent = false }: HeaderProps) {
             <div className="flex-shrink-0 flex items-center gap-4">
               <CurrencyDisplay size="small" />
               <PriceBadges size="md" />
-              <button
-                type="button"
-                onClick={() => { if (!isWalletConnected) connect(); }}
-                title={isWalletConnected ? `Connected: ${address.slice(0, 8)}…${address.slice(-4)}` : 'Connect Wallet'}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all"
-                style={{
-                  background: isWalletConnected ? 'rgba(74, 222, 128, 0.1)' : 'rgba(255, 255, 255, 0.05)',
-                  border: `1px solid ${isWalletConnected ? 'rgba(74, 222, 128, 0.3)' : 'rgba(255, 255, 255, 0.08)'}`,
-                  cursor: isWalletConnected ? 'default' : 'pointer',
-                }}
-              >
-                <Wallet size={14} style={{ color: isWalletConnected ? '#4ade80' : 'var(--color-text-muted)' }} />
-                <span style={{
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  color: isWalletConnected ? '#4ade80' : 'var(--color-text-muted)',
-                }}>
-                  {isWalletConnected ? `${address.slice(0, 6)}…${address.slice(-3)}` : 'Connect'}
-                </span>
-              </button>
+              <div className="relative" ref={walletMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (isWalletConnected) {
+                      setShowWalletMenu((v) => !v);
+                    } else {
+                      connect();
+                    }
+                  }}
+                  title={isWalletConnected ? `Connected: ${address.slice(0, 8)}…${address.slice(-4)}` : 'Connect Wallet'}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all"
+                  style={{
+                    background: isWalletConnected ? 'rgba(74, 222, 128, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                    border: `1px solid ${isWalletConnected ? 'rgba(74, 222, 128, 0.3)' : 'rgba(255, 255, 255, 0.08)'}`,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Wallet size={14} style={{ color: isWalletConnected ? '#4ade80' : 'var(--color-text-muted)' }} />
+                  <span style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    color: isWalletConnected ? '#4ade80' : 'var(--color-text-muted)',
+                  }}>
+                    {isWalletConnected ? `${address.slice(0, 6)}…${address.slice(-3)}` : 'Connect'}
+                  </span>
+                </button>
+                <AnimatePresence>
+                  {showWalletMenu && isWalletConnected && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute top-full right-0 mt-1.5 z-50 rounded-lg overflow-hidden py-1 min-w-[160px]"
+                      style={{
+                        background: 'var(--color-surface)',
+                        border: '1px solid var(--color-border)',
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+                      }}
+                    >
+                      <div
+                        className="px-3 py-2 text-[11px] tabular-nums truncate"
+                        style={{ color: 'var(--color-text-muted)', borderBottom: '1px solid var(--color-border)' }}
+                      >
+                        {address.slice(0, 12)}…{address.slice(-6)}
+                      </div>
+                      <button
+                        type="button"
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium transition-colors"
+                        style={{ color: 'var(--color-error)' }}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)')}
+                        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                        onClick={async () => {
+                          setShowWalletMenu(false);
+                          await disconnect();
+                        }}
+                      >
+                        <LogOut size={14} />
+                        <span>Disconnect</span>
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           </>
         )}

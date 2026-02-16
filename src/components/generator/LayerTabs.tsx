@@ -20,7 +20,6 @@ import {
 import { useGenerator } from '@/contexts/GeneratorContext';
 import { LAYER_CONFIG, LAYER_ORDER } from '@/config/layers';
 import type { UILayerName } from '@/lib/wojakRules';
-import { isSelectionPathEmpty } from '@/types/generator';
 import { layerTabVariants } from '@/config/generatorAnimations';
 
 // Icon mapping
@@ -40,7 +39,6 @@ interface LayerTabProps {
   isActive: boolean;
   isBlocked: boolean;
   blockedReason?: string | null;
-  hasSelection: boolean;
   onClick: () => void;
 }
 
@@ -49,7 +47,6 @@ function LayerTab({
   isActive,
   isBlocked,
   blockedReason,
-  hasSelection,
   onClick,
 }: LayerTabProps) {
   const prefersReducedMotion = useReducedMotion();
@@ -91,23 +88,14 @@ function LayerTab({
       </div>
       <span className="text-[10px] sm:text-xs font-medium">{config.label}</span>
 
-      {/* Selection indicator dot with glow */}
-      {hasSelection && !isBlocked && (
+      {/* Active indicator — pulsing dot only on current tab */}
+      {isActive && (
         <div
-          className="absolute top-1 right-1 w-2 h-2 rounded-full"
+          className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full layer-tab-active-dot"
           style={{
-            background: isActive ? 'white' : '#F97316',
-            boxShadow: isActive ? 'none' : '0 0 8px #F97316',
+            background: 'var(--color-primary)',
+            boxShadow: '0 0 6px var(--color-primary)',
           }}
-        />
-      )}
-
-      {/* Required indicator */}
-      {config.required && !hasSelection && (
-        <div
-          className="absolute top-1 right-1 w-2 h-2 rounded-full"
-          style={{ background: 'var(--color-error)' }}
-          title="Required"
         />
       )}
     </motion.button>
@@ -125,23 +113,9 @@ export function LayerTabs({ className = '' }: LayerTabsProps) {
   const {
     activeLayer,
     setActiveLayer,
-    selectedLayers,
     isLayerDisabled,
     getDisabledReason,
   } = useGenerator();
-
-  const hasLayerSelection = (layer: UILayerName): boolean => {
-    const path = selectedLayers[layer];
-    return !isSelectionPathEmpty(path);
-  };
-
-  // For MouthBase tab, also check if MouthItem or FacialHair has selection (since they're combined)
-  const hasSelectionIncludingCombined = (layer: UILayerName): boolean => {
-    if (layer === 'MouthBase') {
-      return hasLayerSelection('MouthBase') || hasLayerSelection('MouthItem') || hasLayerSelection('FacialHair');
-    }
-    return hasLayerSelection(layer);
-  };
 
   // Filter out hidden tabs
   const visibleLayers = LAYER_ORDER.filter((layer) => !HIDDEN_TABS.includes(layer));
@@ -165,7 +139,6 @@ export function LayerTabs({ className = '' }: LayerTabsProps) {
           isActive={activeLayer === layer || (layer === 'MouthBase' && (activeLayer === 'MouthItem' || activeLayer === 'FacialHair'))}
           isBlocked={isLayerDisabled(layer)}
           blockedReason={getDisabledReason(layer)}
-          hasSelection={hasSelectionIncludingCombined(layer)}
           onClick={() => setActiveLayer(layer)}
         />
       ))}

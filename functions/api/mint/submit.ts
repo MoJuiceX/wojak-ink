@@ -22,7 +22,6 @@ import {
   OFFER_EXPIRY_MINUTES,
   SURCHARGE_CATEGORIES,
   SURCHARGE_EXEMPT_TRAITS,
-  PREMIUM_TOP_N,
 } from './_shared';
 import { checkRateLimit, getRateLimitKey, MINT_RATE_LIMITS } from '../../lib/rateLimit';
 import { consolidateTraits } from './traitResolver';
@@ -201,50 +200,29 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     }>();
 
     if (mintType === 'free') {
-      // Determine top-3 traits per surcharge category (by effective usage)
-      const byCat: Record<string, { name: string; decayed: number }[]> = {};
-      for (const cat of SURCHARGE_CATEGORIES) {
-        byCat[cat] = [];
-      }
-      for (const row of (allTraitRows.results || [])) {
-        if (!SURCHARGE_CATEGORIES.has(row.trait_category)) continue;
-        if (SURCHARGE_EXEMPT_TRAITS.has(row.trait_name)) continue;
-        const decayed = applyDecay(row.effective_usage, row.last_decay_at);
-        byCat[row.trait_category]?.push({ name: row.trait_name, decayed });
-      }
-
-      const top3Traits = new Set<string>();
-      for (const [cat, items] of Object.entries(byCat)) {
-        items.sort((a, b) => b.decayed - a.decayed);
-        for (let i = 0; i < Math.min(PREMIUM_TOP_N, items.length); i++) {
-          if (items[i].decayed > 0) {
-            top3Traits.add(`${cat}:${items[i].name}`);
-          }
-        }
-      }
-
-      // Block free mints if ANY selected trait is in the top 3
-      const blockedTraits: string[] = [];
+      // Calculate highest surcharge among selected traits (same logic as paid path)
+      let maxSurcharge = 0;
       for (const { traitType, displayName } of consolidated.values()) {
         if (!SURCHARGE_CATEGORIES.has(traitType)) continue;
         if (SURCHARGE_EXEMPT_TRAITS.has(displayName)) continue;
-        if (top3Traits.has(`${traitType}:${displayName}`)) {
-          blockedTraits.push(`${traitType}: ${displayName}`);
+        const row = (allTraitRows.results || []).find(
+          r => r.trait_category === traitType && r.trait_name === displayName
+        );
+        const decayedUsage = row ? applyDecay(row.effective_usage, row.last_decay_at) : 0;
+        const traitSurcharge = surchargeXch(decayedUsage, traitType, displayName);
+        if (traitSurcharge > maxSurcharge) {
+          maxSurcharge = traitSurcharge;
+          highestTrait = `${traitType}: ${displayName}`;
         }
       }
 
-      if (blockedTraits.length > 0) {
-        return jsonResponse({
-          error: 'Free mints cannot use the top 3 most popular traits in each category. Switch to a paid mint or choose different traits.',
-          errorCode: 'TOP3_BLOCKED',
-          blockedTraits,
-        }, 400);
+      // Scale credit cost proportionally: credits = base × (base + surcharge) / base
+      if (maxSurcharge > 0) {
+        freeMintCreditCost = Math.ceil(
+          FREE_MINT_CREDITS * (BASE_PRICE_XCH + maxSurcharge) / BASE_PRICE_XCH
+        );
       }
-
-      // Free mints: flat credit cost (no premium scaling)
-      freeMintCreditCost = FREE_MINT_CREDITS;
-      surchargeStored = null;
-      highestTrait = null;
+      surchargeStored = maxSurcharge > 0 ? Math.round(maxSurcharge * 100000) : null;
 
     } else {
       // Paid: calculate XCH price

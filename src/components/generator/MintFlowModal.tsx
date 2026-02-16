@@ -246,14 +246,20 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
               {isConfirming && (() => {
                 const price = getTotalMintPrice();
                 const balance = Math.round((credits?.balance ?? 0) / 100);
+                const creditCost = Math.ceil(100 * price.totalXch / price.basePrice);
                 const isFreeConfirm = pendingMintType === 'free';
                 return (
                   <div className="w-full flex flex-col gap-3">
                     {isFreeConfirm ? (
                       <>
                         <p className="text-secondary text-sm">
-                          This will use credits from your balance of {balance}.
+                          This will use <span className="font-semibold text-accent">{creditCost} credits</span> from your balance of {balance}.
                         </p>
+                        {creditCost > 100 && (
+                          <p className="text-muted text-xs">
+                            Popular traits cost more credits ({price.surchargeTraitName} surcharge).
+                          </p>
+                        )}
                         <p className="text-muted text-xs">
                           Your Wojak will be minted instantly — no wallet signing needed.
                         </p>

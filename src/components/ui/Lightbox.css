@@ -10,32 +10,49 @@
   justify-content: center;
 }
 
-/* Overlay/Backdrop - solid to avoid see-through */
+/* Overlay/Backdrop */
 .lightbox-overlay {
   position: absolute;
   inset: 0;
-  background: #000;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Wrapper — positions external close button beside the content box */
+.lightbox-wrapper {
+  position: relative;
+  max-width: calc(var(--lightbox-max-width, 600px) + 48px);
+  width: calc(100% - 48px);
+  max-height: 84vh;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.lightbox-wrapper:focus {
+  outline: none;
 }
 
 /* Content Container - solid background so content behind is not visible */
 .lightbox-content {
   position: relative;
-  background: #14141c;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(180deg, #111118 0%, #0e0e15 100%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-top-color: rgba(255, 255, 255, 0.10);
   border-radius: 20px;
-  max-height: 90vh;
-  width: calc(100% - 48px);
-  max-width: var(--lightbox-max-width, 600px);
+  width: 100%;
+  max-height: 84vh;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 
-    0 20px 60px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(255, 255, 255, 0.05);
-}
-
-.lightbox-content:focus {
-  outline: none;
+  box-shadow:
+    0 25px 80px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
 /* Gallery-size lightbox: matches NFT explorer panel (1100×680) */
@@ -43,6 +60,11 @@
   height: 680px;
   max-height: 90vh;
   width: min(1100px, calc(100vw - 64px));
+}
+
+/* Fixed-height lightbox: always fills available vertical space */
+.lightbox-content.lightbox-fixed-height {
+  height: 84vh;
 }
 
 /* Header */
@@ -88,12 +110,20 @@
   outline-offset: 2px;
 }
 
-/* Floating close button (when no title) */
-.lightbox-close--floating {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  z-index: 10;
+/* External close button — sits to the right of the content box */
+.lightbox-close--external {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  flex-shrink: 0;
+  margin-top: 2px;
+  order: 1;
+}
+
+.lightbox-close--external:hover {
+  background: rgba(255, 255, 255, 0.14);
 }
 
 /* Body */
@@ -129,11 +159,20 @@
     padding: 0;
   }
 
-  .lightbox-content {
+  .lightbox-wrapper {
     width: 100%;
     max-width: 100%;
     height: 100vh;
     max-height: 100vh;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .lightbox-content {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
     border-radius: 0;
     border: none;
   }
@@ -144,9 +183,14 @@
     padding-top: calc(0.875rem + env(safe-area-inset-top, 0));
   }
 
-  .lightbox-close--floating {
+  /* On mobile, external close goes back inside as absolute positioned */
+  .lightbox-close--external {
+    position: absolute;
     top: calc(0.75rem + env(safe-area-inset-top, 0));
     right: 0.75rem;
+    z-index: 10;
+    margin-top: 0;
+    order: 0;
   }
 
   .lightbox-body {
