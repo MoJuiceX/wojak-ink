@@ -375,6 +375,12 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
               {/* ── Success ── */}
               {isSuccess && currentJob && (
                 <div className="w-full flex flex-col gap-3">
+                  {/* Celebration rings */}
+                  <div className="relative flex items-center justify-center" style={{ height: 0 }}>
+                    <div className="mint-celebrate-ring mint-celebrate-ring-1" style={{ width: 60, height: 60, top: -30, left: 'calc(50% - 30px)' }} />
+                    <div className="mint-celebrate-ring mint-celebrate-ring-2" style={{ width: 60, height: 60, top: -30, left: 'calc(50% - 30px)' }} />
+                    <div className="mint-celebrate-ring mint-celebrate-ring-3" style={{ width: 60, height: 60, top: -30, left: 'calc(50% - 30px)' }} />
+                  </div>
                   <p className="text-secondary text-sm">
                     Your Wojak #{currentJob.mintNumber}
                   </p>

@@ -36,15 +36,23 @@ export function PreviewCanvas({
   const prefersReducedMotion = useReducedMotion();
   const [showUpdateGlow, setShowUpdateGlow] = useState(false);
   const prevImageRef = useRef<string | null>(null);
+  const [fadingOutImage, setFadingOutImage] = useState<string | null>(null);
 
   const basePath = selectedLayers.Base;
   const hasSelection = !isSelectionPathEmpty(basePath);
 
-  // Show brief glow when preview image changes
+  // Show brief glow + crossfade when preview image changes
   useEffect(() => {
     if (previewImage && previewImage !== prevImageRef.current && !prefersReducedMotion) {
+      // Set the old image to fade out behind the new one
+      if (prevImageRef.current) {
+        setFadingOutImage(prevImageRef.current);
+      }
       queueMicrotask(() => setShowUpdateGlow(true));
-      const timer = setTimeout(() => setShowUpdateGlow(false), 400);
+      const timer = setTimeout(() => {
+        setShowUpdateGlow(false);
+        setFadingOutImage(null);
+      }, 400);
       prevImageRef.current = previewImage;
       return () => clearTimeout(timer);
     }
@@ -63,7 +71,7 @@ export function PreviewCanvas({
         ...sizeStyles,
         aspectRatio: '1 / 1',
         background: embedded ? 'transparent' : 'var(--color-glass-bg)',
-        border: embedded ? 'none' : '1px solid var(--color-border)',
+        border: 'none',
       }}
     >
       {/* Pulsing ambient glow behind avatar */}
@@ -79,31 +87,23 @@ export function PreviewCanvas({
         />
       )}
 
-      {/* Checkerboard pattern for transparency (skip when embedded) */}
-      {!embedded && (
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `
-              linear-gradient(45deg, var(--color-border) 25%, transparent 25%),
-              linear-gradient(-45deg, var(--color-border) 25%, transparent 25%),
-              linear-gradient(45deg, transparent 75%, var(--color-border) 75%),
-              linear-gradient(-45deg, transparent 75%, var(--color-border) 75%)
-            `,
-            backgroundSize: '20px 20px',
-            backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px',
-            opacity: 0.3,
-          }}
+      {/* Preview image — full avatar, centered. Do not zoom/crop by trait (e.g. Beer Hat). */}
+      {/* Fading-out previous image for crossfade */}
+      {fadingOutImage && (
+        <img
+          src={fadingOutImage}
+          alt=""
+          className="absolute inset-0 w-full h-full object-contain"
+          style={{ zIndex: 1, opacity: 0, transition: 'opacity 150ms ease-out' }}
         />
       )}
-
-      {/* Preview image — full avatar, centered. Do not zoom/crop by trait (e.g. Beer Hat). */}
       {previewImage && (
         <img
+          key={previewImage}
           src={previewImage}
           alt="Wojak preview"
           className="absolute inset-0 w-full h-full object-contain"
-          style={{ zIndex: 1 }}
+          style={{ zIndex: 2, opacity: fadingOutImage ? 1 : 1, transition: 'opacity 150ms ease-in' }}
         />
       )}
 

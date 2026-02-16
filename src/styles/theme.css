@@ -80,6 +80,9 @@
   --radius-2xl: 28px;
   --radius-full: 9999px;
 
+  /* Header badge height (floor price, XCH price, wallet button) */
+  --header-badge-height: 36px;
+
   /* ═══════════════════════════════════════════════════════════════════════════
      TYPOGRAPHY
      ═══════════════════════════════════════════════════════════════════════════ */
@@ -1724,4 +1727,91 @@ body {
       transform: translateY(0);
     }
   }
+}
+
+/* ============================================
+   Trait Hover Label (Generator)
+   ============================================ */
+.trait-label-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 6px 4px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.75));
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  opacity: 0;
+  transition: opacity 150ms ease-out;
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .trait-card-hover:hover .trait-label-overlay {
+    opacity: 1;
+  }
+}
+
+.trait-label-text {
+  color: white;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+/* ============================================
+   Trait Selection Glow (Generator)
+   ============================================ */
+@keyframes trait-select-glow {
+  0% { box-shadow: 0 0 0 rgba(255, 107, 0, 0); }
+  40% { box-shadow: 0 0 16px rgba(255, 107, 0, 0.5); }
+  100% { box-shadow: 0 0 0 rgba(255, 107, 0, 0); }
+}
+
+.trait-select-glow {
+  animation: trait-select-glow 300ms ease-out;
+}
+
+/* ============================================
+   Mint Celebration
+   ============================================ */
+@keyframes mint-celebrate-ring {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+.mint-celebrate-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid var(--color-primary);
+  pointer-events: none;
+}
+
+.mint-celebrate-ring-1 { animation: mint-celebrate-ring 1s ease-out 0s forwards; }
+.mint-celebrate-ring-2 { animation: mint-celebrate-ring 1s ease-out 0.2s forwards; }
+.mint-celebrate-ring-3 { animation: mint-celebrate-ring 1s ease-out 0.4s forwards; }
+
+@keyframes mint-celebrate-sparkle {
+  0% { opacity: 0; transform: scale(0) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1) rotate(180deg); }
+  100% { opacity: 0; transform: scale(0) rotate(360deg); }
+}
+
+.mint-celebrate-sparkle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: mint-celebrate-sparkle 0.8s ease-out forwards;
 }

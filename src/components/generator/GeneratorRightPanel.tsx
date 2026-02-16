@@ -107,8 +107,8 @@ function isFullFaceMaskSelected(maskPath: string | undefined): boolean {
 
 function MaskVariantPicker({ selectedPath, onSelect }: { selectedPath: string | undefined; onSelect: (path: string) => void }) {
   return (
-    <div className="generator-panel-section">
-      <div className="generator-panel-section-label">Mask style</div>
+    <div className="flex-shrink-0">
+      <div className="text-[10px] font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--color-text-muted)' }}>Mask style</div>
       <div className="grid grid-cols-3 gap-2">
         {MASK_VARIANTS.map(({ file, label }) => {
           const path = `${MASK_BASE_PATH}/${file}`;
@@ -361,7 +361,15 @@ export function GeneratorRightPanel() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-3">
+    <div
+      className="flex flex-col gap-3"
+      style={{
+        padding: '12px',
+        borderRadius: 'var(--radius-lg)',
+        background: 'rgba(255, 255, 255, 0.015)',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+      }}
+    >
       {/* G1 Military Beret: "Pick a color to use new design" — swatches switch to G2 */}
       {isG1MilitaryBeret && (
         <div className="generator-panel-section flex-shrink-0">
@@ -372,16 +380,11 @@ export function GeneratorRightPanel() {
           />
         </div>
       )}
-      {/* Single color palette — hidden for full-face masks and Hannibal mask (no colorable fills) */}
-      {hasSelection && !isG1MilitaryBeret && !(
-        activeLayer === 'Mask' && (
-          isFullFaceMaskSelected(selectedLayers.Mask) ||
-          selectedLayers.Mask?.includes('Hannibal')
-        )
-      ) && (
-        <div className="generator-panel-section flex-shrink-0">
-          <div className="generator-panel-section-label flex items-center justify-between" style={{ height: '14px' }}>
-            <span>Color</span>
+      {/* Single color palette — always visible (disabled when not colorable) */}
+      {!isG1MilitaryBeret && (
+        <div className="flex-shrink-0">
+          <div className="flex items-center justify-between mb-1.5" style={{ height: '14px' }}>
+            <span className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'var(--color-text-muted)' }}>Color</span>
             {/* Reset button — inline, no vertical padding so it doesn't change row height */}
             {(colorPickerProps.defaultColor || colorPickerProps.onReset) && (() => {
               const norm = (h: string) => (h.startsWith('#') ? h : '#' + h).toUpperCase();

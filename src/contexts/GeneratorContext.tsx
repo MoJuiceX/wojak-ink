@@ -21,6 +21,7 @@ import type { FavoriteWojak, ExportOptions, G2Selection, G2Selections } from '@/
 import { isFavoriteV2, isSelectionPathEmpty } from '@/types/generator';
 import { getDisabledLayers, type SelectedLayers, type UILayerName } from '@/lib/wojakRules';
 import { DEFAULT_SELECTIONS } from '@/config/layers';
+import { SCENE_BACKGROUNDS } from '@/lib/layerRegistry';
 import { G2_DEFAULT_COLORS, getG2DefaultColor } from '@/config/g2DefaultColors';
 import { generatorService, type LayerImage, type UnifiedTrait, getUnifiedTraits, getPathToTraitIdMap, ensurePathToTraitIdMapReady } from '@/services/generatorService';
 import { createSelectionResolver } from '@/lib/selectionResolver';
@@ -280,7 +281,10 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
       .prefetchLayers()
       .then(() => ensurePathToTraitIdMapReady())
       .then(() => {
-        const defaultUnified = fromExternal(DEFAULT_SELECTIONS, {}, getPathToTraitIdMap());
+        // Add a random scene background to defaults on each page load
+        const randomScene = SCENE_BACKGROUNDS[Math.floor(Math.random() * SCENE_BACKGROUNDS.length)];
+        const defaultsWithBackground = { ...DEFAULT_SELECTIONS, Background: randomScene };
+        const defaultUnified = fromExternal(defaultsWithBackground, {}, getPathToTraitIdMap());
         dispatch({ type: 'RANDOMIZE', selections: defaultUnified });
         dispatch({ type: 'INITIALIZE' });
       })

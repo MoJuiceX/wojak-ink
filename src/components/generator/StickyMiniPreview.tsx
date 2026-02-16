@@ -57,7 +57,7 @@ export function StickyMiniPreview({
             width: 140,
             height: 200,
             background: 'var(--color-glass-bg)',
-            border: '2px solid #3B82F6',
+            border: '2px solid var(--color-primary)',
           }}
           variants={prefersReducedMotion ? undefined : stickyPreviewVariants}
           initial="hidden"
@@ -79,7 +79,7 @@ export function StickyMiniPreview({
           <div
             className="absolute inset-0 rounded-xl animate-ping pointer-events-none"
             style={{
-              border: '2px solid #3B82F6',
+              border: '2px solid var(--color-primary)',
               opacity: 0.3,
             }}
           />

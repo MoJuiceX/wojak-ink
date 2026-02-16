@@ -37,13 +37,13 @@ export const RENDER_ORDER: UILayerName[] = [
 
 export const UI_ORDER: UILayerName[] = [
   'Base',
-  'Clothes',
   'MouthBase',
   'MouthItem',
   'FacialHair',
-  'Mask',
-  'Eyes',
   'Head',
+  'Eyes',
+  'Mask',
+  'Clothes',
   'Background',
 ];
 
@@ -140,6 +140,27 @@ export const DEFAULT_BASE_PATH = '/assets/wojak-layers/BASE/BASE_Base-Wojak_clas
 
 /** Default path for MouthBase when rules force it */
 export const DEFAULT_MOUTHBASE_PATH = '/assets/wojak-layers/MOUTH/MOUTH_numb.png';
+
+// ============ Scene Backgrounds (for random default) ============
+
+export const SCENE_BACKGROUNDS: string[] = [
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Bepe Barracks.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Chia Farm.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Hell.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Matrix.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Moms Basement.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Moon.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Nesting Grounds.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_NYSE Dump.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_NYSE Pump.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_One Market.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Orange Grove.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Ronin Dojo.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Route 66.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Silicon.net Data Center.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Spell Room.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_White House.png',
+];
 
 // ============ Helpers ============
 

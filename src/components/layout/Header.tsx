@@ -367,11 +367,12 @@ export function Header({ transparent = false }: HeaderProps) {
                     }
                   }}
                   title={isWalletConnected ? `Connected: ${address.slice(0, 8)}…${address.slice(-4)}` : 'Connect Wallet'}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all"
+                  className="flex items-center gap-2 px-3 rounded-lg transition-all"
                   style={{
                     background: isWalletConnected ? 'rgba(74, 222, 128, 0.1)' : 'rgba(255, 255, 255, 0.05)',
                     border: `1px solid ${isWalletConnected ? 'rgba(74, 222, 128, 0.3)' : 'rgba(255, 255, 255, 0.08)'}`,
                     cursor: 'pointer',
+                    height: 'var(--header-badge-height)',
                   }}
                 >
                   <Wallet size={14} style={{ color: isWalletConnected ? '#4ade80' : 'var(--color-text-muted)' }} />

@@ -257,11 +257,12 @@ export function PriceBadges({ size = 'md' }: PriceBadgesProps) {
     <div className={`flex items-center ${gap}`}>
       {/* Floor Price Badge */}
       <div
-        className={`flex items-center px-3 py-1.5 rounded-lg`}
+        className={`flex items-center px-3 rounded-lg`}
         style={{
           fontSize: size === 'sm' ? '0.75rem' : '0.875rem',
           background: 'rgba(74, 222, 128, 0.1)',
           border: '1px solid rgba(74, 222, 128, 0.2)',
+          height: 'var(--header-badge-height)',
         }}
       >
         <span
@@ -295,11 +296,12 @@ export function PriceBadges({ size = 'md' }: PriceBadgesProps) {
 
       {/* XCH Price Badge with Live Indicator */}
       <div
-        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg`}
+        className={`flex items-center gap-2 px-3 rounded-lg`}
         style={{
           fontSize: size === 'sm' ? '0.75rem' : '0.875rem',
           background: 'rgba(74, 222, 128, 0.1)',
           border: '1px solid rgba(74, 222, 128, 0.2)',
+          height: 'var(--header-badge-height)',
         }}
       >
         {/* Live indicator dot */}

@@ -5,7 +5,7 @@
  * Renders MouthLayerSelector for mouth-related layers.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Ban } from 'lucide-react';
 import { useLayout } from '@/hooks/useLayout';
@@ -134,7 +134,7 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pri
 
   return (
     <motion.button
-      className="w-full aspect-square relative rounded-xl overflow-hidden p-1"
+      className="w-full aspect-square relative rounded-xl overflow-hidden p-1 trait-card-hover"
       style={{
         background: 'var(--generator-trait-card-bg)',
         border: isSelected
@@ -164,6 +164,9 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pri
           loading="lazy"
         />
         <TraitUsageBadge pricing={pricing ?? null} isTop3={isTop3} />
+        <div className="trait-label-overlay">
+          <span className="trait-label-text">{image.displayName}</span>
+        </div>
       </div>
       {/* Disabled info badge */}
       {isDisabled && disabledReason && (
@@ -224,7 +227,7 @@ function BaseImageCard({ image, isSelected, isDisabled, disabledReason, onClick,
 
   return (
     <motion.button
-      className="w-full aspect-square relative rounded-xl overflow-hidden p-1"
+      className="w-full aspect-square relative rounded-xl overflow-hidden p-1 trait-card-hover"
       style={{
         background: 'var(--generator-trait-card-bg)',
         border: isSelected
@@ -269,6 +272,9 @@ function BaseImageCard({ image, isSelected, isDisabled, disabledReason, onClick,
           loading="lazy"
         />
         <TraitUsageBadge pricing={pricing ?? null} isTop3={isTop3} />
+        <div className="trait-label-overlay">
+          <span className="trait-label-text">{image.displayName}</span>
+        </div>
       </div>
       {/* Disabled info badge */}
       {isDisabled && disabledReason && (
@@ -402,7 +408,7 @@ function LayerWithBaseMouthCard({ image, isSelected, isDisabled, disabledReason,
 
   return (
     <motion.button
-      className="w-full aspect-square relative rounded-xl overflow-hidden p-1"
+      className="w-full aspect-square relative rounded-xl overflow-hidden p-1 trait-card-hover"
       style={{
         background: 'var(--generator-trait-card-bg)',
         border: isSelected
@@ -454,6 +460,9 @@ function LayerWithBaseMouthCard({ image, isSelected, isDisabled, disabledReason,
           loading="lazy"
         />
         <TraitUsageBadge pricing={pricing ?? null} isTop3={isTop3} />
+        <div className="trait-label-overlay">
+          <span className="trait-label-text">{image.displayName}</span>
+        </div>
       </div>
       {/* Disabled info badge */}
       {isDisabled && disabledReason && (
@@ -489,7 +498,7 @@ function ClothesImageCard({ image, isSelected, isDisabled, disabledReason, onCli
 
   return (
     <motion.button
-      className="w-full aspect-square relative rounded-xl overflow-hidden p-1"
+      className="w-full aspect-square relative rounded-xl overflow-hidden p-1 trait-card-hover"
       style={{
         background: 'var(--generator-trait-card-bg)',
         border: isSelected
@@ -534,6 +543,9 @@ function ClothesImageCard({ image, isSelected, isDisabled, disabledReason, onCli
           loading="lazy"
         />
         <TraitUsageBadge pricing={pricing ?? null} isTop3={isTop3} />
+        <div className="trait-label-overlay">
+          <span className="trait-label-text">{image.displayName}</span>
+        </div>
       </div>
       {/* Disabled info badge */}
       {isDisabled && disabledReason && (
@@ -587,7 +599,7 @@ export function G2TraitCard({ trait, isSelected, isDisabled, disabledReason, onC
   const prefersReducedMotion = useReducedMotion();
   return (
     <motion.button
-      className="w-full aspect-square relative rounded-xl overflow-hidden p-1"
+      className="w-full aspect-square relative rounded-xl overflow-hidden p-1 trait-card-hover"
       style={{
         background: 'var(--generator-trait-card-bg)',
         border: isSelected
@@ -610,6 +622,9 @@ export function G2TraitCard({ trait, isSelected, isDisabled, disabledReason, onC
       <div className="relative w-full h-full rounded-lg overflow-hidden trait-card-image-bg">
         <G2TraitCardPreview trait={trait} needsClothesUnderlay={needsClothesUnderlay} livePreviewUrl={livePreviewUrl} />
         <TraitUsageBadge pricing={pricing ?? null} isTop3={isTop3} />
+        <div className="trait-label-overlay">
+          <span className="trait-label-text">{trait.name}</span>
+        </div>
       </div>
       {/* Beer Hat under layer badge */}
       {isBeerHatUnderlayer && (
@@ -680,6 +695,17 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
   const [imagesForLayer, setImagesForLayer] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Glow animation state for trait selection micro-interaction
+  const [glowingTraitId, setGlowingTraitId] = useState<string | null>(null);
+  const glowTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const triggerSelectionGlow = (traitId: string) => {
+    if (glowTimerRef.current) clearTimeout(glowTimerRef.current);
+    setGlowingTraitId(traitId);
+    navigator.vibrate?.(10);
+    glowTimerRef.current = setTimeout(() => setGlowingTraitId(null), 300);
+  };
+
   // Check if this is a mouth layer (must be before any conditional returns but after hooks)
   const isMouthLayer = activeLayer === 'MouthBase' || activeLayer === 'MouthItem' || activeLayer === 'FacialHair';
 
@@ -744,6 +770,11 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
 
     const isG2Selected = g2Sel?.traitId === trait.id;
     const isG1Selected = trait.g1Path && (selectedPath === trait.g1Path || (selectedPath != null && trait.g1Variants?.includes(selectedPath)));
+
+    // Trigger selection glow if this is a new selection (not already selected)
+    if (!isG2Selected && !isG1Selected) {
+      triggerSelectionGlow(trait.id);
+    }
 
     // Beer Hat special rules (Head layer)
     if (activeLayer === 'Head' && g2Sel?.traitId === 'Head_Beer-Hat') {
@@ -884,6 +915,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                 (!!trait.g1Path && (selectedPath === trait.g1Path || (selectedPath != null && trait.g1Variants?.includes(selectedPath))));
 
               const traitIsTop3 = isTop3Trait(traitType, trait.name);
+              const isGlowing = glowingTraitId === trait.id;
 
               if (trait.source === 'g2') {
                 // Beer Hat card always uses the fixed thumbnail (base + blue tee + mouth) so it matches other grid previews
@@ -895,6 +927,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                   <motion.div
                     key={trait.id}
                     variants={prefersReducedMotion ? undefined : traitCardStaggerVariants}
+                    className={isGlowing ? 'trait-select-glow rounded-xl' : undefined}
                   >
                     <G2TraitCard
                       trait={trait}
@@ -923,6 +956,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                   <motion.div
                     key={trait.id}
                     variants={prefersReducedMotion ? undefined : traitCardStaggerVariants}
+                    className={isGlowing ? 'trait-select-glow rounded-xl' : undefined}
                   >
                     <BaseImageCard
                       image={image}
@@ -941,7 +975,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                   <motion.div
                     key={trait.id}
                     variants={prefersReducedMotion ? undefined : traitCardStaggerVariants}
-                    className="relative"
+                    className={`relative${isGlowing ? ' trait-select-glow rounded-xl' : ''}`}
                   >
                     <ClothesImageCard
                       image={image}
@@ -963,6 +997,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                   <motion.div
                     key={trait.id}
                     variants={prefersReducedMotion ? undefined : traitCardStaggerVariants}
+                    className={isGlowing ? 'trait-select-glow rounded-xl' : undefined}
                   >
                     <SolidColorBackgroundCard
                       color={swatchColor}
@@ -982,7 +1017,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                 <motion.div
                   key={trait.id}
                   variants={prefersReducedMotion ? undefined : traitCardStaggerVariants}
-                  className="relative"
+                  className={`relative${isGlowing ? ' trait-select-glow rounded-xl' : ''}`}
                 >
                   {useBaseMouthCard ? (
                     <LayerWithBaseMouthCard

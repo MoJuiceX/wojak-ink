@@ -12,7 +12,6 @@ import {
   Redo2,
   Heart,
   Download,
-  Copy,
   Sparkles,
   Wallet,
   Coins,
@@ -119,7 +118,6 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
     g2Selections,
     favorites,
     saveFavorite,
-    previewImage,
     canExport,
   } = useGenerator();
   const { credits, prepareMint, resetMintFlow, maxSupply, getTotalMintPrice, mintingPaused, totalMinted } = useMint();
@@ -128,15 +126,26 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   const { isDesktop } = useLayout();
   const [isRandomizing, setIsRandomizing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [isCopying, setIsCopying] = useState(false);
-  const [showCopied, setShowCopied] = useState(false);
   const [showDownloadSuccess, setShowDownloadSuccess] = useState(false);
   const [isMintModalOpen, setIsMintModalOpen] = useState(false);
   const [mintType, setMintType] = useState<'free' | 'paid'>('free');
   const [showGeneratorInfo, setShowGeneratorInfo] = useState(false);
+  const [isFirstVisitInfo, setIsFirstVisitInfo] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
   const [showOverflowMenu, setShowOverflowMenu] = useState(false);
   const overflowMenuRef = useRef<HTMLDivElement>(null);
+
+  // First-visit: auto-open How It Works modal
+  useEffect(() => {
+    const seen = localStorage.getItem('wojak_generator_seen');
+    if (!seen) {
+      const timer = setTimeout(() => {
+        setIsFirstVisitInfo(true);
+        setShowGeneratorInfo(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   useEffect(() => {
     if (!showOverflowMenu) return;
@@ -238,82 +247,6 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
     toggleFavorites(true);
   };
 
-  const handleCopyToClipboard = async () => {
-    if (!previewImage || isCopying) return;
-
-    setIsCopying(true);
-    try {
-      // Create PNG blob from image using canvas for better compatibility
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.src = previewImage;
-
-      await new Promise<void>((resolve, reject) => {
-        img.onload = () => resolve();
-        img.onerror = reject;
-      });
-
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) throw new Error('Could not get canvas context');
-      ctx.drawImage(img, 0, 0);
-
-      // Get PNG blob
-      const pngBlob = await new Promise<Blob>((resolve, reject) => {
-        canvas.toBlob(
-          (blob) => (blob ? resolve(blob) : reject(new Error('Failed to create blob'))),
-          'image/png'
-        );
-      });
-
-      // Try clipboard API with PNG
-      if (navigator.clipboard && typeof ClipboardItem !== 'undefined') {
-        try {
-          const item = new ClipboardItem({ 'image/png': pngBlob });
-          await navigator.clipboard.write([item]);
-          setShowCopied(true);
-          setTimeout(() => setShowCopied(false), 2000);
-          return;
-        } catch (clipboardError) {
-          console.warn('Clipboard API failed:', clipboardError);
-          // Continue to fallbacks
-        }
-      }
-
-      // Fallback: Use Web Share API on mobile (for sharing)
-      if (navigator.share && navigator.canShare) {
-        const file = new File([pngBlob], 'wojak.png', { type: 'image/png' });
-        if (navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: 'Wojak',
-          });
-          setShowCopied(true);
-          setTimeout(() => setShowCopied(false), 2000);
-          return;
-        }
-      }
-
-      // Final fallback: Download the image
-      const url = URL.createObjectURL(pngBlob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'wojak.png';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      setShowCopied(true);
-      setTimeout(() => setShowCopied(false), 2000);
-    } catch (error) {
-      console.error('Failed to copy/share:', error);
-    } finally {
-      setIsCopying(false);
-    }
-  };
-
   // Styled action button - icon only, primary for Export/Mint, secondary for others
   const ActionButton = ({
     onClick,
@@ -336,7 +269,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   }) => (
     <motion.button
       className={`relative flex items-center justify-center rounded-lg shrink-0 ${
-        variant === 'primary' ? 'w-10 h-10' : 'w-9 h-9'
+        variant === 'primary' ? 'w-9 h-9' : 'w-8 h-8'
       }`}
       style={{
         background: isActive
@@ -383,7 +316,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
 
   return (
     <div
-      className={`flex items-center justify-between p-2 rounded-2xl flex-nowrap w-full ${className}`}
+      className={`flex items-center justify-between px-2 py-1.5 rounded-2xl flex-nowrap w-full ${className}`}
       style={{
         background: 'rgba(0, 0, 0, 0.3)',
         backdropFilter: 'blur(10px)',
@@ -394,7 +327,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
       {/* Randomize button — always randomizes all layers + colors */}
       <ActionBarTooltip content="Randomize">
         <motion.button
-          className="relative flex items-center justify-center rounded-lg shrink-0 w-9 h-9"
+          className="relative flex items-center justify-center rounded-lg shrink-0 w-8 h-8"
           style={{
             background: 'transparent',
             border: 'none',
@@ -406,7 +339,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
           aria-label="Randomize"
         >
           <motion.span
-            className="text-xl block"
+            className="text-lg block"
             animate={isRandomizing ? {
               scale: [1, 1.15, 1],
               rotate: [0, -10, 10, 0],
@@ -418,22 +351,20 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         </motion.button>
       </ActionBarTooltip>
 
-      {/* Undo button */}
+      {/* Undo/Redo side by side */}
       <ActionBarTooltip content="Undo">
         <ActionButton
           onClick={undo}
           disabled={!canUndo}
-          icon={<Undo2 size={20} />}
+          icon={<Undo2 size={16} />}
           label="Undo"
         />
       </ActionBarTooltip>
-
-      {/* Redo button */}
       <ActionBarTooltip content="Redo">
         <ActionButton
           onClick={redo}
           disabled={!canRedo}
-          icon={<Redo2 size={20} />}
+          icon={<Redo2 size={16} />}
           label="Redo"
         />
       </ActionBarTooltip>
@@ -494,34 +425,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         </AnimatePresence>
       </div>
 
-      {/* Copy to clipboard button - desktop only */}
-      {isDesktop && (
-        <div className="relative">
-          <ActionBarTooltip content="Copy">
-            <ActionButton
-              onClick={handleCopyToClipboard}
-              disabled={!hasSelection || isCopying}
-              icon={<Copy size={20} />}
-              label="Copy"
-            />
-          </ActionBarTooltip>
-          {showCopied && (
-            <motion.div
-              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap"
-              style={{
-                background: 'rgba(0, 0, 0, 0.9)',
-                color: '#F97316',
-                border: '1px solid rgba(249, 115, 22, 0.3)',
-              }}
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 5 }}
-            >
-              Copied!
-            </motion.div>
-          )}
-        </div>
-      )}
+      {/* Copy button removed — users can export/download instead */}
 
       {/* Overflow menu — secondary actions */}
       <div className="relative" ref={overflowMenuRef}>
@@ -641,42 +545,24 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
           </ActionBarTooltip>
         )}
 
-        {/* Price / credit cost display */}
-        {isWalletConnected && !mintingPaused && (() => {
-          if (hasFreeMintsAvailable && mintType === 'free') {
-            // Free mint: show credit cost (scales with surcharge)
+        {/* Price display — always visible */}
+        {!mintingPaused && (() => {
+          if (isWalletConnected && hasFreeMintsAvailable && mintType === 'free') {
+            // Free mint: show credit cost
             const price = getTotalMintPrice();
             const creditCost = Math.ceil(100 * price.totalXch / price.basePrice);
-            const balanceCredits = Math.round((credits?.balance ?? 0) / 100);
             return (
-              <div className="flex flex-col items-end" style={{ minWidth: 0 }}>
-                <span className="text-xs font-semibold tabular-nums whitespace-nowrap" style={{ color: 'var(--color-primary)' }}>
-                  {creditCost} credits
-                </span>
-                <span className="text-[10px] tabular-nums whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>
-                  {balanceCredits} available
-                </span>
-              </div>
+              <span className="text-xs font-semibold tabular-nums whitespace-nowrap" style={{ color: 'var(--color-primary)' }}>
+                {creditCost} credits
+              </span>
             );
           }
-          // Paid mint: show XCH price
+          // Paid mint (or not connected): show single total XCH
           const price = getTotalMintPrice();
           return (
-            <div className="flex flex-col items-end" style={{ minWidth: 0 }}>
-              <span className="text-xs font-semibold tabular-nums whitespace-nowrap" style={{ color: 'var(--color-primary)' }}>
-                {price.totalXch.toFixed(2)} XCH
-              </span>
-              {price.surchargeXch > 0 && (
-                <div className="flex items-center gap-1">
-                  <span className="text-[10px] tabular-nums whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>
-                    base {price.basePrice.toFixed(2)} + {price.surchargeXch.toFixed(2)} {price.surchargeTraitName} surcharge
-                  </span>
-                  <ActionBarTooltip content="Popular traits cost more. Prices drop as demand fades.">
-                    <Info size={12} style={{ color: 'var(--color-text-muted)', cursor: 'help', flexShrink: 0 }} />
-                  </ActionBarTooltip>
-                </div>
-              )}
-            </div>
+            <span className="text-xs font-semibold tabular-nums whitespace-nowrap" style={{ color: 'var(--color-primary)' }}>
+              {price.totalXch.toFixed(2)} XCH
+            </span>
           );
         })()}
 
@@ -703,6 +589,17 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
           </ActionBarTooltip>
         )}
 
+        {/* Supply counter with hover tooltip */}
+        {maxSupply > 0 && (
+          <ActionBarTooltip content={`${Math.round((totalMinted / maxSupply) * 100)}% minted \u2022 ${maxSupply - totalMinted} remaining`}>
+            <span
+              className="text-[11px] tabular-nums whitespace-nowrap cursor-default"
+              style={{ color: 'var(--color-text-muted)' }}
+            >
+              {totalMinted}/{maxSupply}
+            </span>
+          </ActionBarTooltip>
+        )}
       </div>
 
       {/* Mint Flow Modal */}
@@ -717,7 +614,13 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
       {/* Generator Info Modal */}
       <GeneratorInfo
         isOpen={showGeneratorInfo}
-        onClose={() => setShowGeneratorInfo(false)}
+        onClose={() => {
+          setShowGeneratorInfo(false);
+          if (isFirstVisitInfo) {
+            localStorage.setItem('wojak_generator_seen', 'true');
+            setIsFirstVisitInfo(false);
+          }
+        }}
       />
 
       {/* Pricing Lightbox */}

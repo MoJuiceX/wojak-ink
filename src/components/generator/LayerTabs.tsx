@@ -85,19 +85,17 @@ function LayerTab({
             style={{ color: 'var(--color-text-muted)' }}
           />
         )}
+        {isActive && !isBlocked && (
+          <div
+            className="absolute -top-0.5 -right-1 w-1.5 h-1.5 rounded-full layer-tab-active-dot"
+            style={{
+              background: 'var(--color-primary)',
+              boxShadow: '0 0 6px var(--color-primary)',
+            }}
+          />
+        )}
       </div>
       <span className="text-[10px] sm:text-xs font-medium">{config.label}</span>
-
-      {/* Active indicator — pulsing dot only on current tab */}
-      {isActive && (
-        <div
-          className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full layer-tab-active-dot"
-          style={{
-            background: 'var(--color-primary)',
-            boxShadow: '0 0 6px var(--color-primary)',
-          }}
-        />
-      )}
     </motion.button>
   );
 }

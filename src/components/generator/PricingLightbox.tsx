@@ -11,7 +11,7 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
-import { Loader2, ChevronDown, ArrowUpDown } from 'lucide-react';
+import { Loader2, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lightbox } from '@/components/ui/Lightbox';
 import { useGenerator } from '@/contexts/GeneratorContext';
@@ -40,7 +40,7 @@ const BASE_PRICE = 0.2;
 const SURCHARGE_CATEGORIES = ['Head', 'Clothes', 'Face Wear'];
 const ALL_CATEGORIES = ['Head', 'Clothes', 'Face Wear', 'Face', 'Mouth', 'Background'];
 
-type SortMode = 'price' | 'minted';
+type SortMode = 'popular' | 'price' | 'az';
 
 /**
  * Complete list of all YourWojak generator traits per pricing category.
@@ -134,7 +134,7 @@ function CategoryAccordion({
   isSurchargeCategory: boolean;
   maxMinted: number;
   sortMode: SortMode;
-  onToggleSort: () => void;
+  onToggleSort: (mode: SortMode) => void;
   selectedTraitNames: Set<string>;
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -205,37 +205,39 @@ function CategoryAccordion({
             style={{ overflow: 'hidden' }}
           >
             <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
-              {/* Column headers */}
+              {/* Sort controls + Column headers */}
               <div
-                className="flex items-center"
+                className="flex items-center gap-2"
                 style={{
                   background: 'rgba(0, 0, 0, 0.15)',
                   padding: '8px 18px',
                 }}
               >
-                <span style={{ flex: 1, fontSize: '11px', fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                  Trait
-                </span>
-                <button
-                  type="button"
-                  className="flex items-center gap-1 transition-colors"
-                  style={{
-                    width: 80,
-                    justifyContent: 'flex-end',
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    color: sortMode === 'minted' ? 'var(--color-primary)' : 'var(--color-text-muted)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.06em',
-                    background: 'transparent',
-                    cursor: 'pointer',
-                  }}
-                  onClick={(e) => { e.stopPropagation(); onToggleSort(); }}
-                  title={`Sort by ${sortMode === 'minted' ? 'price' : 'popularity'}`}
-                >
-                  <ArrowUpDown size={10} />
+                <div className="flex items-center gap-1" style={{ flex: 1 }}>
+                  {(['popular', 'price', 'az'] as const).map((mode) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); onToggleSort(mode); }}
+                      style={{
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        color: sortMode === mode ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                        background: sortMode === mode ? 'rgba(255, 107, 0, 0.1)' : 'transparent',
+                        padding: '2px 8px',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                        border: 'none',
+                      }}
+                    >
+                      {mode === 'popular' ? 'Popular' : mode === 'price' ? 'Price' : 'A\u2013Z'}
+                    </button>
+                  ))}
+                </div>
+                <span style={{ width: 80, textAlign: 'right', fontSize: '11px', fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                   Minted
-                </button>
+                </span>
                 {isSurchargeCategory && (
                   <>
                     <span style={{ width: 80, textAlign: 'right', fontSize: '11px', fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
@@ -351,7 +353,7 @@ export function PricingLightbox({ isOpen, onClose }: PricingLightboxProps) {
   const [data, setData] = useState<PricingData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sortMode, setSortMode] = useState<SortMode>('price');
+  const [sortMode, setSortMode] = useState<SortMode>('popular');
   const { selectedLayers } = useGenerator();
 
   useEffect(() => {
@@ -417,10 +419,12 @@ export function PricingLightbox({ isOpen, onClose }: PricingLightboxProps) {
     }
 
     for (const items of Object.values(result)) {
-      if (sortMode === 'minted') {
+      if (sortMode === 'popular') {
         items.sort((a, b) => b.pricing.usageCount - a.pricing.usageCount || a.name.localeCompare(b.name));
-      } else {
+      } else if (sortMode === 'price') {
         items.sort((a, b) => b.pricing.surchargeXch - a.pricing.surchargeXch || b.pricing.usageCount - a.pricing.usageCount || a.name.localeCompare(b.name));
+      } else {
+        items.sort((a, b) => a.name.localeCompare(b.name));
       }
     }
 
@@ -516,7 +520,7 @@ export function PricingLightbox({ isOpen, onClose }: PricingLightboxProps) {
                 isSurchargeCategory={isSurchargeCategory}
                 maxMinted={maxMinted}
                 sortMode={sortMode}
-                onToggleSort={() => setSortMode((m) => m === 'price' ? 'minted' : 'price')}
+                onToggleSort={(mode) => setSortMode(mode)}
                 selectedTraitNames={selectedTraitNames}
               />
             );
