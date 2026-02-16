@@ -253,9 +253,48 @@ async function processEvents(env: Env): Promise<{ processed: number; inserted: n
       multiplier: number;
       timestamp: string;
     }> = [];
+
+    // Cross-path dedup: look up which NFT coin IDs map to which editions
+    // so we can check if a CAT credit already exists for the same wallet+edition.
+    const coinIds = candidates.map(e => e.nft_id);
+    const editionLookup = new Map<string, number>();
+    if (coinIds.length > 0) {
+      for (let i = 0; i < coinIds.length; i += BATCH_EXISTING_CHUNK) {
+        const chunk = coinIds.slice(i, i + BATCH_EXISTING_CHUNK);
+        const placeholders = chunk.map(() => '?').join(',');
+        const rows = await env.DB.prepare(
+          `SELECT mg_event_id, nft_edition FROM sales_history
+           WHERE mg_event_id IS NOT NULL
+           AND (${chunk.map(() => 'mg_event_id LIKE ? || \'%\'').join(' OR ')})`
+        ).bind(...chunk).all<{ mg_event_id: string; nft_edition: number }>();
+        for (const r of rows.results || []) {
+          // mg_event_id starts with the coin ID
+          for (const cid of chunk) {
+            if (r.mg_event_id?.startsWith(cid)) {
+              editionLookup.set(cid, r.nft_edition);
+            }
+          }
+        }
+      }
+    }
+
     for (const event of candidates) {
       const eventId = `${event.nft_id}_${event.event_index}_${event.timestamp}`;
       if (existingSet.has(eventId)) continue;
+
+      // Cross-path dedup: skip if this wallet already has credit for this edition via CAT path
+      const edition = editionLookup.get(event.nft_id);
+      if (edition && event.address?.encoded_id) {
+        const existing = await env.DB.prepare(
+          `SELECT 1 FROM credit_events
+           WHERE wallet_address = ? AND nft_id = ? LIMIT 1`
+        ).bind(event.address.encoded_id, `nft_edition_${edition}`).first();
+        if (existing) {
+          console.log(`[CreditTracker] Skipping XCH event for edition ${edition} — already credited via CAT path`);
+          continue;
+        }
+      }
+
       const eventDate = event.timestamp.slice(0, 10);
       let floorStored = floorCache.get(eventDate);
       if (floorStored === undefined) {
@@ -441,6 +480,23 @@ async function processCatSales(env: Env): Promise<{ processed: number; inserted:
       continue;
     }
 
+    // Cross-path dedup: check if this wallet already has credit for this edition via XCH path
+    // XCH path stores nft_id as hex coin ID, so check via sales_history.mg_event_id linkage
+    const crossPathCheck = await env.DB.prepare(
+      `SELECT ce.id FROM credit_events ce
+       INNER JOIN sales_history sh
+         ON sh.mg_event_id LIKE ce.nft_id || '%'
+         AND sh.nft_edition = ?
+       WHERE ce.wallet_address = ?
+         AND ce.nft_id NOT LIKE 'nft_edition_%'
+       LIMIT 1`
+    ).bind(row.nft_edition, wallet).first();
+    if (crossPathCheck) {
+      console.log(`[CreditTracker] Skipping CAT event for edition ${row.nft_edition} — already credited via XCH path`);
+      if (row.completed_at > latestTimestamp) latestTimestamp = row.completed_at;
+      continue;
+    }
+
     // Get floor price for the trade date
     const eventDate = row.completed_at.slice(0, 10);
     let floorStored = floorCache.get(eventDate);
@@ -526,6 +582,18 @@ async function backfillMissingCatCredits(env: Env): Promise<{ processed: number;
   for (const row of rows) {
     const wallet = row.buyer_address || row.seller_address;
     if (!wallet) continue;
+
+    // Cross-path dedup: check if this wallet already has credit for this edition via XCH path
+    const crossPathCheck = await env.DB.prepare(
+      `SELECT ce.id FROM credit_events ce
+       INNER JOIN sales_history sh
+         ON sh.mg_event_id LIKE ce.nft_id || '%'
+         AND sh.nft_edition = ?
+       WHERE ce.wallet_address = ?
+         AND ce.nft_id NOT LIKE 'nft_edition_%'
+       LIMIT 1`
+    ).bind(row.nft_edition, wallet).first();
+    if (crossPathCheck) continue;
 
     const eventDate = row.completed_at.slice(0, 10);
     let floorStored = floorCache.get(eventDate);

@@ -68,10 +68,12 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     const rows = await env.DB.prepare(
       `SELECT ce.event_id, ce.nft_id, ce.price_xch, ce.credits_earned,
               ce.whale_multiplier, ce.event_type, ce.event_timestamp,
-              sh.nft_name,
+              COALESCE(sh_edition.nft_name, sh_coin.nft_name) AS nft_name,
               CASE
-                WHEN sh.mg_event_id IS NOT NULL
-                THEN SUBSTR(sh.mg_event_id, 1, INSTR(sh.mg_event_id, '_') - 1)
+                WHEN sh_edition.mg_event_id IS NOT NULL
+                THEN SUBSTR(sh_edition.mg_event_id, 1, INSTR(sh_edition.mg_event_id, '_') - 1)
+                WHEN sh_coin.mg_event_id IS NOT NULL
+                THEN SUBSTR(sh_coin.mg_event_id, 1, INSTR(sh_coin.mg_event_id, '_') - 1)
                 ELSE NULL
               END AS mg_nft_id
        FROM credit_events ce
@@ -79,10 +81,20 @@ export const onRequest: PagesFunction<Env> = async (context) => {
          SELECT nft_edition, nft_name, mg_event_id,
                 ROW_NUMBER() OVER (PARTITION BY nft_edition ORDER BY id DESC) AS rn
          FROM sales_history
-       ) sh
+       ) sh_edition
          ON ce.nft_id LIKE 'nft_edition_%'
-         AND sh.nft_edition = CAST(SUBSTR(ce.nft_id, 13) AS INTEGER)
-         AND sh.rn = 1
+         AND sh_edition.nft_edition = CAST(SUBSTR(ce.nft_id, 13) AS INTEGER)
+         AND sh_edition.rn = 1
+       LEFT JOIN (
+         SELECT nft_name, mg_event_id,
+                ROW_NUMBER() OVER (PARTITION BY mg_event_id ORDER BY id DESC) AS rn
+         FROM sales_history
+         WHERE mg_event_id IS NOT NULL
+       ) sh_coin
+         ON ce.nft_id NOT LIKE 'nft_edition_%'
+         AND ce.nft_id NOT LIKE 'holder_%'
+         AND sh_coin.mg_event_id LIKE ce.nft_id || '%'
+         AND sh_coin.rn = 1
        WHERE ce.wallet_address = ?
        ORDER BY ce.event_timestamp DESC
        LIMIT ?`
