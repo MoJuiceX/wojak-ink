@@ -480,6 +480,16 @@ async function processCatSales(env: Env): Promise<{ processed: number; inserted:
       continue;
     }
 
+    // Same-path dedup: Dexie can report the same trade with two different trade_ids
+    // (offer and acceptance coins). Check if this wallet+edition already has a CAT credit.
+    const samePathCheck = await env.DB.prepare(
+      `SELECT 1 FROM credit_events WHERE wallet_address = ? AND nft_id = ? LIMIT 1`
+    ).bind(wallet, `nft_edition_${row.nft_edition}`).first();
+    if (samePathCheck) {
+      if (row.completed_at > latestTimestamp) latestTimestamp = row.completed_at;
+      continue;
+    }
+
     // Cross-path dedup: check if this wallet already has credit for this edition via XCH path
     // XCH path stores nft_id as hex coin ID, so check via sales_history.mg_event_id linkage
     const crossPathCheck = await env.DB.prepare(
@@ -582,6 +592,12 @@ async function backfillMissingCatCredits(env: Env): Promise<{ processed: number;
   for (const row of rows) {
     const wallet = row.buyer_address || row.seller_address;
     if (!wallet) continue;
+
+    // Same-path dedup: Dexie can report same trade with two different trade_ids
+    const samePathCheck = await env.DB.prepare(
+      `SELECT 1 FROM credit_events WHERE wallet_address = ? AND nft_id = ? LIMIT 1`
+    ).bind(wallet, `nft_edition_${row.nft_edition}`).first();
+    if (samePathCheck) continue;
 
     // Cross-path dedup: check if this wallet already has credit for this edition via XCH path
     const crossPathCheck = await env.DB.prepare(
