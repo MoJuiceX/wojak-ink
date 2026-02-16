@@ -108,8 +108,8 @@ interface MintContextValue {
   // Pricing
   getTraitPricing: (category: string, traitDisplayName: string) => TraitPricingEntry | null;
   getTotalMintPrice: () => TotalMintPrice;
-  isPremiumTrait: (category: string, traitName: string) => boolean;
-  getPremiumCreditCost: (category: string, traitName: string) => number | null;
+  isTop3Trait: (category: string, traitName: string) => boolean;
+  top3Traits: Record<string, string[]>;
 }
 
 const DEFAULT_MAX_SUPPLY = 4200;
@@ -146,7 +146,8 @@ export function MintProvider({ children }: { children: ReactNode }) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [totalMinted, setTotalMinted] = useState(0);
   const [maxSupply, setMaxSupply] = useState(DEFAULT_MAX_SUPPLY);
-  const [traitPricing, setTraitPricing] = useState<Record<string, { usageCount: number; effectiveUsage: number; surchargeXch: number; fairShare: number }>>({});
+  const [traitPricing, setTraitPricing] = useState<Record<string, { usageCount: number; effectiveUsage: number; surchargeXch: number }>>({});
+  const [top3Traits, setTop3Traits] = useState<Record<string, string[]>>({});
   const [mintingPaused, setMintingPaused] = useState(false);
   const [pendingMintParams, setPendingMintParams] = useState<{
     imageBlob: Blob;
@@ -202,6 +203,9 @@ export function MintProvider({ children }: { children: ReactNode }) {
           }
           if (data?.traits) {
             setTraitPricing(data.traits);
+          }
+          if (data?.top3) {
+            setTop3Traits(data.top3);
           }
           setMintingPaused(!!data?.mintingPaused);
         })
@@ -265,41 +269,12 @@ export function MintProvider({ children }: { children: ReactNode }) {
     };
   }, [metadataAttributes, traitPricing]);
 
-  // Premium trait identification: top 3 by surcharge per category
-  const PREMIUM_TOP_N = 3;
-  const premiumTraitKeys = useMemo(() => {
-    const byCategory: Record<string, { key: string; surcharge: number }[]> = {};
-    for (const [key, entry] of Object.entries(traitPricing)) {
-      const sep = key.indexOf('_');
-      if (sep < 0) continue;
-      const cat = key.slice(0, sep);
-      if (!byCategory[cat]) byCategory[cat] = [];
-      byCategory[cat].push({ key, surcharge: entry.surchargeXch });
-    }
-    const premium = new Set<string>();
-    for (const items of Object.values(byCategory)) {
-      items.sort((a, b) => b.surcharge - a.surcharge);
-      for (let i = 0; i < Math.min(PREMIUM_TOP_N, items.length); i++) {
-        if (items[i].surcharge > 0) premium.add(items[i].key);
-      }
-    }
-    return premium;
-  }, [traitPricing]);
-
-  const isPremiumTrait = useCallback(
-    (category: string, traitName: string) => premiumTraitKeys.has(`${category}_${traitName}`),
-    [premiumTraitKeys]
-  );
-
-  const getPremiumCreditCost = useCallback(
-    (category: string, traitName: string): number | null => {
-      const key = `${category}_${traitName}`;
-      if (!premiumTraitKeys.has(key)) return null;
-      const entry = traitPricing[key];
-      if (!entry) return null;
-      return Math.round(100 * (BASE_PRICE_XCH + entry.surchargeXch) / BASE_PRICE_XCH);
+  // Top-3 trait check: uses server-provided top3 list from /api/mint/pricing
+  const isTop3Trait = useCallback(
+    (category: string, traitName: string): boolean => {
+      return (top3Traits[category] || []).includes(traitName);
     },
-    [premiumTraitKeys, traitPricing]
+    [top3Traits]
   );
 
   // ── Polling ──
@@ -620,10 +595,10 @@ export function MintProvider({ children }: { children: ReactNode }) {
       refetchCredits,
       getTraitPricing,
       getTotalMintPrice,
-      isPremiumTrait,
-      getPremiumCreditCost,
+      isTop3Trait,
+      top3Traits,
     }),
-    [credits, mintStep, currentJob, errorMessage, pendingMintParams, mintingPaused, prepareMint, confirmMint, confirmPayment, acceptOfferInWallet, resetMintFlow, retryMint, totalMinted, maxSupply, refetchCredits, getTraitPricing, getTotalMintPrice, isPremiumTrait, getPremiumCreditCost]
+    [credits, mintStep, currentJob, errorMessage, pendingMintParams, mintingPaused, prepareMint, confirmMint, confirmPayment, acceptOfferInWallet, resetMintFlow, retryMint, totalMinted, maxSupply, refetchCredits, getTraitPricing, getTotalMintPrice, isTop3Trait, top3Traits]
   );
 
   return <MintContext.Provider value={value}>{children}</MintContext.Provider>;

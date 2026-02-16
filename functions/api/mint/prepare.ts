@@ -250,9 +250,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     // Always inject fixed "Base: Wojak"
     consolidated.set('Base', { trait_type: 'Base', value: 'Wojak', layerKey: '_base' });
 
-    // ── Free mint: calculate actual credit cost (premium tier logic) ──
-    // Standard: 100 credits. Premium (top 3 most popular per category): scales with surcharge.
-    let freeMintCreditCost = FREE_MINT_CREDITS; // default 100 credits (x100 units)
+    // ── Free mint: top-3 blocking + credit check ──
+    let freeMintCreditCost = FREE_MINT_CREDITS; // flat 100 credits (x100 units)
 
     if (mintType === 'free') {
       // Query all trait usage for surcharge categories
@@ -266,52 +265,44 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         last_decay_at: string;
       }>();
 
-      // Calculate surcharges for all traits, grouped by category
-      const surchargesByCategory: Record<string, { name: string; surcharge: number }[]> = {};
+      // Determine top-3 traits per surcharge category (by effective usage)
+      const byCat: Record<string, { name: string; decayed: number }[]> = {};
       for (const cat of SURCHARGE_CATEGORIES) {
-        surchargesByCategory[cat] = [];
+        byCat[cat] = [];
       }
       for (const row of (allTraitRows.results || [])) {
         if (!SURCHARGE_CATEGORIES.has(row.trait_category)) continue;
         if (SURCHARGE_EXEMPT_TRAITS.has(row.trait_name)) continue;
         const decayed = applyDecay(row.effective_usage, row.last_decay_at);
-        const sc = surchargeXch(decayed, row.trait_category, row.trait_name);
-        surchargesByCategory[row.trait_category]?.push({ name: row.trait_name, surcharge: sc });
+        byCat[row.trait_category]?.push({ name: row.trait_name, decayed });
       }
 
-      // Identify top N premium traits per category (by surcharge, descending)
-      const premiumTraits = new Set<string>();
-      for (const category of Object.keys(surchargesByCategory)) {
-        const sorted = surchargesByCategory[category].sort((a, b) => b.surcharge - a.surcharge);
-        for (let i = 0; i < Math.min(PREMIUM_TOP_N, sorted.length); i++) {
-          if (sorted[i].surcharge > 0) {
-            premiumTraits.add(`${category}:${sorted[i].name}`);
+      const top3Traits = new Set<string>();
+      for (const [cat, items] of Object.entries(byCat)) {
+        items.sort((a, b) => b.decayed - a.decayed);
+        for (let i = 0; i < Math.min(PREMIUM_TOP_N, items.length); i++) {
+          if (items[i].decayed > 0) {
+            top3Traits.add(`${cat}:${items[i].name}`);
           }
         }
       }
 
-      // Check if any selected trait is premium; if so, scale credit cost
-      let maxPremiumSurcharge = 0;
+      // Block free mints if ANY selected trait is in the top 3
+      const blockedTraits: string[] = [];
       for (const { trait_type, value } of consolidated.values()) {
         if (!SURCHARGE_CATEGORIES.has(trait_type)) continue;
         if (SURCHARGE_EXEMPT_TRAITS.has(value)) continue;
-
-        const key = `${trait_type}:${value}`;
-        if (premiumTraits.has(key)) {
-          const row = (allTraitRows.results || []).find(
-            r => r.trait_category === trait_type && r.trait_name === value
-          );
-          const decayed = row ? applyDecay(row.effective_usage, row.last_decay_at) : 0;
-          const sc = surchargeXch(decayed, trait_type, value);
-          if (sc > maxPremiumSurcharge) maxPremiumSurcharge = sc;
+        if (top3Traits.has(`${trait_type}:${value}`)) {
+          blockedTraits.push(`${trait_type}: ${value}`);
         }
       }
 
-      // Scale credit cost: credits = 100 × (base + surcharge) / base
-      if (maxPremiumSurcharge > 0) {
-        freeMintCreditCost = Math.round(
-          FREE_MINT_CREDITS * (BASE_PRICE_XCH + maxPremiumSurcharge) / BASE_PRICE_XCH
-        );
+      if (blockedTraits.length > 0) {
+        return jsonResponse({
+          error: 'Free mints cannot use the top 3 most popular traits in each category. Switch to a paid mint or choose different traits.',
+          errorCode: 'TOP3_BLOCKED',
+          blockedTraits,
+        }, 400);
       }
 
       // Credit pre-check (early exit before expensive IPFS/MintGarden calls)
@@ -328,7 +319,6 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           error: 'Insufficient credits',
           balance: balance / 100,
           requiredCredits: freeMintCreditCost / 100,
-          isPremiumTrait: maxPremiumSurcharge > 0,
         }, 400);
       }
     }

@@ -26,17 +26,13 @@ const TINY_PNG_BASE64 =
 // ─── Surcharge constants (mirrored from _shared.ts) ───
 
 const TOTAL_SUPPLY = 4200;
-const SURCHARGE_RAMP_RATE = 1.0;
-const SURCHARGE_PENALTY_SCALE = 8.0;
-const SURCHARGE_PENALTY_EXPONENT = 2.0;
-const DECAY_HALF_LIFE_DAYS = 30;
+const SURCHARGE_TARGET_XCH = 1.275;
+const SURCHARGE_TARGET_USES = 200;
+const SURCHARGE_EXPONENT = 0.90;
+const SURCHARGE_SCALE = SURCHARGE_TARGET_XCH / Math.pow(SURCHARGE_TARGET_USES - 1, SURCHARGE_EXPONENT);
+const DECAY_HALF_LIFE_DAYS = 14;
 
-const SURCHARGE_FAIR_SHARES: Record<string, number> = {
-  Head: Math.round(TOTAL_SUPPLY / 40), // 105
-  Clothes: Math.round(TOTAL_SUPPLY / 36), // 117
-  'Face Wear': Math.round(TOTAL_SUPPLY / 18), // 233
-};
-
+const SURCHARGE_CATEGORIES = new Set(['Head', 'Clothes', 'Face Wear']);
 const SURCHARGE_EXEMPT_TRAITS = new Set(['No Headgear', 'No Face Wear']);
 
 function surchargeXch(
@@ -44,16 +40,11 @@ function surchargeXch(
   traitCategory: string,
   traitDisplayName?: string
 ): number {
-  const fairShare = SURCHARGE_FAIR_SHARES[traitCategory];
-  if (!fairShare) return 0;
+  if (!SURCHARGE_CATEGORIES.has(traitCategory)) return 0;
   if (traitDisplayName && SURCHARGE_EXEMPT_TRAITS.has(traitDisplayName)) return 0;
+  if (effectiveUsage <= 1) return 0;
 
-  const ratio = effectiveUsage / fairShare;
-  const ramp = SURCHARGE_RAMP_RATE * ratio;
-  const overshoot = Math.max(0, ratio - 1);
-  const penalty =
-    SURCHARGE_PENALTY_SCALE * Math.pow(overshoot, SURCHARGE_PENALTY_EXPONENT);
-  return ramp + penalty;
+  return SURCHARGE_SCALE * Math.pow(effectiveUsage - 1, SURCHARGE_EXPONENT);
 }
 
 function applyDecay(effectiveUsage: number, lastDecayAt: string): number {
@@ -420,8 +411,8 @@ async function test7_pricingEndpointShape(): Promise<void> {
         `${key}: surchargeXch should be a number`
       );
       assert(
-        typeof trait.fairShare === 'number',
-        `${key}: fairShare should be a number`
+        trait.surchargeXch >= 0,
+        `${key}: surchargeXch should be non-negative`
       );
       // Only check first entry to keep output clean
       break;

@@ -118,6 +118,29 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       .bind(wallet)
       .first<{ count: number; total_xch: number }>();
 
+    // Get mint counts (free and paid)
+    let freeMintsUsed = 0;
+    let paidMints = 0;
+    try {
+      const freeRow = await env.DB
+        .prepare(
+          "SELECT COUNT(*) as count FROM phase2_mints WHERE wallet_address = ? AND mint_type = 'free' AND status = 'minted'"
+        )
+        .bind(wallet)
+        .first<{ count: number }>();
+      freeMintsUsed = freeRow?.count || 0;
+
+      const paidRow = await env.DB
+        .prepare(
+          "SELECT COUNT(*) as count FROM phase2_mints WHERE wallet_address = ? AND mint_type = 'paid' AND status = 'minted'"
+        )
+        .bind(wallet)
+        .first<{ count: number }>();
+      paidMints = paidRow?.count || 0;
+    } catch {
+      // phase2_mints table may not exist yet — ignore
+    }
+
     const earnedUnits = earnedResult?.total || 0;
     const spentUnits = spentResult?.total || 0;
     const balanceUnits = earnedUnits - spentUnits;
@@ -135,6 +158,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         spent: Math.round(spent * 100) / 100,
         balance: Math.round(balance * 100) / 100,
         freeMints,
+        freeMintsUsed,
+        paidMints,
         totalPurchases: purchaseResult?.count || 0,
         totalXchSpent: Math.round((purchaseResult?.total_xch || 0) * 1000) / 1000,
       }),

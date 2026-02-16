@@ -20,6 +20,7 @@ import {
   ChevronDown,
   Info,
   MoreHorizontal,
+  Tag,
 } from 'lucide-react';
 import { useGenerator } from '@/contexts/GeneratorContext';
 import { useMint } from '@/contexts/MintContext';
@@ -30,6 +31,7 @@ import { exportImage } from '@/services/canvasRenderer';
 import { useMetadataAttributes } from './MetadataPreview';
 import { MintFlowModal } from './MintFlowModal';
 import { GeneratorInfo } from './GeneratorInfo';
+import { PricingLightbox } from './PricingLightbox';
 
 interface ActionBarProps {
   className?: string;
@@ -123,7 +125,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
     previewImage,
     canExport,
   } = useGenerator();
-  const { credits, prepareMint, resetMintFlow, totalMinted, maxSupply, getTotalMintPrice } = useMint();
+  const { credits, prepareMint, resetMintFlow, totalMinted, maxSupply, getTotalMintPrice, mintingPaused } = useMint();
   const { address, status: walletStatus, connect } = useSageWallet();
   const prefersReducedMotion = useReducedMotion();
   const { isDesktop } = useLayout();
@@ -136,6 +138,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   const [mintType, setMintType] = useState<'free' | 'paid'>('free');
   const [showRandomMenu, setShowRandomMenu] = useState(false);
   const [showGeneratorInfo, setShowGeneratorInfo] = useState(false);
+  const [showPricing, setShowPricing] = useState(false);
   const [showOverflowMenu, setShowOverflowMenu] = useState(false);
   const randomMenuRef = useRef<HTMLDivElement>(null);
   const overflowMenuRef = useRef<HTMLDivElement>(null);
@@ -172,7 +175,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   const traitCount = metadataAttributes.filter((a) => a.value !== '').length;
   const has7Traits = traitCount >= 7;
   const isSoldOut = totalMinted >= maxSupply && maxSupply > 0;
-  const canMint = canExport && isWalletConnected && has7Traits && !isSoldOut;
+  const canMint = canExport && isWalletConnected && has7Traits && !isSoldOut && !mintingPaused;
 
   // Auto-default to free mint when credits are available
   useEffect(() => {
@@ -637,6 +640,22 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
                 )}
               </button>
 
+              {/* Trait Prices */}
+              <button
+                type="button"
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors"
+                style={{ color: 'var(--color-text)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                onClick={() => {
+                  setShowOverflowMenu(false);
+                  setShowPricing(true);
+                }}
+              >
+                <Tag size={16} style={{ color: 'var(--color-primary)' }} />
+                <span>Prices</span>
+              </button>
+
               {/* Metadata toggle — desktop only */}
               {onToggleRightPanel && (
                 <button
@@ -681,7 +700,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         style={{ borderLeft: '1px solid var(--color-border)' }}
       >
         {/* Free/Paid toggle */}
-        {isWalletConnected && hasFreeMintsAvailable && (
+        {isWalletConnected && hasFreeMintsAvailable && !mintingPaused && (
           <ActionBarTooltip content={mintType === 'free' ? 'Switch to paid mint' : 'Switch to free mint'}>
             <ActionButton
               onClick={() => setMintType((t) => (t === 'free' ? 'paid' : 'free'))}
@@ -693,7 +712,14 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         )}
 
         {/* Price / credit cost display */}
-        {isWalletConnected && (() => {
+        {isWalletConnected && mintingPaused && (
+          <div className="flex flex-col items-end" style={{ minWidth: 0 }}>
+            <span className="text-xs font-semibold whitespace-nowrap" style={{ color: 'var(--color-text-muted)' }}>
+              Minting opens Friday
+            </span>
+          </div>
+        )}
+        {isWalletConnected && !mintingPaused && (() => {
           if (hasFreeMintsAvailable && mintType === 'free') {
             // Free mint: show credit balance
             return (
@@ -740,7 +766,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
           </div>
         ) : (
           <ActionBarTooltip
-            content={isSoldOut ? 'All 4,200 Wojaks minted!' : !has7Traits ? 'Select all 7 traits to mint' : 'Mint your Wojak'}
+            content={mintingPaused ? 'Minting opens Friday!' : isSoldOut ? 'All 4,200 Wojaks minted!' : !has7Traits ? 'Select all 7 traits to mint' : 'Mint your Wojak'}
           >
             <ActionButton
               variant="primary"
@@ -773,6 +799,12 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
       <GeneratorInfo
         isOpen={showGeneratorInfo}
         onClose={() => setShowGeneratorInfo(false)}
+      />
+
+      {/* Pricing Lightbox */}
+      <PricingLightbox
+        isOpen={showPricing}
+        onClose={() => setShowPricing(false)}
       />
     </div>
   );

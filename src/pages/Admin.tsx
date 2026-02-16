@@ -17,12 +17,11 @@ interface TraitPricing {
   usageCount: number;
   effectiveUsage: number;
   surchargeXch: number;
-  fairShare: number;
-  percentOfFairShare: number;
 }
 
 interface PricingResponse {
   traits: Record<string, TraitPricing>;
+  top3: Record<string, string[]>;
   supply: { minted: number; total: number };
   floorPrice: number;
 }
@@ -64,10 +63,10 @@ function timeAgo(dateStr: string): string {
   return `${days}d ago`;
 }
 
-function statusBadge(pct: number): { label: string; className: string } {
-  if (pct > 100) return { label: `${pct}%`, className: 'badge-error' };
-  if (pct >= 50) return { label: `${pct}%`, className: 'badge-warning' };
-  return { label: `${pct}%`, className: 'badge-success' };
+function surchargeColor(xch: number): string {
+  if (xch >= 0.5) return 'var(--color-error)';
+  if (xch >= 0.1) return 'var(--color-primary)';
+  return 'var(--color-text-secondary)';
 }
 
 // ─── Sections ───
@@ -110,19 +109,18 @@ function SupplyProgress({ minted, total }: { minted: number; total: number }) {
 function TraitTable({
   category,
   traits,
+  top3,
 }: {
   category: string;
   traits: { name: string; data: TraitPricing }[];
+  top3: string[];
 }) {
-  const sorted = [...traits].sort((a, b) => b.data.usageCount - a.data.usageCount);
+  const sorted = [...traits].sort((a, b) => b.data.surchargeXch - a.data.surchargeXch || a.name.localeCompare(b.name));
 
   return (
     <div className="card-static p-4 flex flex-col gap-3">
       <h3 className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
         {category}
-        <span className="text-muted text-xs ml-2">
-          (fair share: {sorted[0]?.data.fairShare ?? '—'})
-        </span>
       </h3>
       <div style={{ overflowX: 'auto' }}>
         <table className="table">
@@ -132,18 +130,34 @@ function TraitTable({
               <th>Used</th>
               <th>Effective</th>
               <th>Surcharge</th>
-              <th>Status</th>
             </tr>
           </thead>
           <tbody>
             {sorted.map((t) => {
               const isExempt =
                 t.name === 'No Headgear' || t.name === 'No Face Wear';
-              const badge = statusBadge(t.data.percentOfFairShare);
+              const isTop3 = top3.includes(t.name);
               return (
                 <tr key={t.name}>
                   <td style={{ color: 'var(--color-text)', fontSize: '0.8125rem' }}>
                     {t.name}
+                    {isTop3 && (
+                      <span
+                        className="ml-1.5"
+                        style={{
+                          fontSize: '0.625rem',
+                          padding: '1px 5px',
+                          borderRadius: '4px',
+                          background: 'rgba(255,107,0,0.15)',
+                          color: 'var(--color-primary)',
+                        }}
+                      >
+                        Top 3
+                      </span>
+                    )}
+                    {isExempt && (
+                      <span className="badge ml-1.5" style={{ fontSize: '0.625rem' }}>exempt</span>
+                    )}
                   </td>
                   <td>{t.data.usageCount}</td>
                   <td>{t.data.effectiveUsage.toFixed(1)}</td>
@@ -151,17 +165,8 @@ function TraitTable({
                     {isExempt ? (
                       <span className="text-muted">—</span>
                     ) : (
-                      <span style={{ color: 'var(--color-primary)' }}>
+                      <span style={{ color: surchargeColor(t.data.surchargeXch) }}>
                         {t.data.surchargeXch.toFixed(3)}
-                      </span>
-                    )}
-                  </td>
-                  <td>
-                    {isExempt ? (
-                      <span className="badge" style={{ fontSize: '0.6875rem' }}>exempt</span>
-                    ) : (
-                      <span className={`badge ${badge.className}`} style={{ fontSize: '0.6875rem' }}>
-                        {badge.label}
                       </span>
                     )}
                   </td>
@@ -170,7 +175,7 @@ function TraitTable({
             })}
             {sorted.length === 0 && (
               <tr>
-                <td colSpan={5} className="text-muted" style={{ textAlign: 'center' }}>
+                <td colSpan={4} className="text-muted" style={{ textAlign: 'center' }}>
                   No usage data yet
                 </td>
               </tr>
@@ -417,6 +422,7 @@ export default function Admin() {
               key={cat}
               category={cat}
               traits={traitsByCategory[cat] || []}
+              top3={pricing?.top3?.[cat] || []}
             />
           ))}
 

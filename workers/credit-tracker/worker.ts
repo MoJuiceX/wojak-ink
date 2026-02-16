@@ -29,12 +29,13 @@ const FLOOR_FALLBACK_XCH = 100; // 1.0 XCH (x100) when no snapshot
 // pricing risk (unreliable conversions, token dumps, etc.).
 const CAT_TOKEN_WHITELIST = new Set([
   'BEPE',
-  '\u{1FA84}\u26A1\uFE0F',       // Wand+Lightning
-  '\u2728\u2764\uFE0F\u200D\u{1F525}\u{1F9D9}\u200D\u2642\uFE0F', // Sparkle+Mage
+  '\u{1FA84}\u26A1\uFE0F',       // SpellPower (Wand+Lightning)
+  '\u2728\u2764\uFE0F\u200D\u{1F525}\u{1F9D9}\u200D\u2642\uFE0F', // Caster (Sparkle+Mage)
   'HOA',
   'NeckCoin',
   '$CHIA',
   'PP',
+  'WOJAK',                        // Wojak CAT (38a507...)
 ]);
 
 const FETCH_RETRIES = 3;

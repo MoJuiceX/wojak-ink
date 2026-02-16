@@ -64,10 +64,10 @@ export const LAYER_META: Record<UILayerName, LayerMeta> = {
     description: 'Choose a background scene',
   },
   Base: {
-    label: 'Base',
+    label: 'Face',
     required: true,
     icon: 'User',
-    description: 'Wojak body type (required)',
+    description: 'Wojak face type (required)',
   },
   Clothes: {
     label: 'Clothes',

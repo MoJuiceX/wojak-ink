@@ -1,13 +1,15 @@
 /**
  * Credit Leaderboard Component
  *
- * Shows top credit holders from /api/credits/leaderboard in a lightbox
- * matching the gallery NFT lightbox size. Close button top-right.
- * Wallet connect button + highlighted row for connected user.
+ * Two-section layout:
+ *   1. "Your Credits" card — personal balance, free mints, usage (wallet connected)
+ *   2. "Top Supporters" table — community ranking by credits earned
+ *
+ * Opens in a lightbox matching the gallery NFT lightbox size.
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Loader2, Star } from 'lucide-react';
+import { Loader2, Star, Sparkles, Coins, Wallet } from 'lucide-react';
 import { useSageWallet, SageConnectButton } from '@/sage-wallet';
 import { Lightbox } from '@/components/ui/Lightbox';
 
@@ -22,10 +24,13 @@ interface LeaderboardEntry {
   yourWojakBought: number;
 }
 
-interface UserBalance {
+interface UserCredits {
   earned: number;
   balance: number;
   freeMints: number;
+  freeMintsUsed: number;
+  paidMints: number;
+  totalPurchases: number;
 }
 
 interface CreditLeaderboardProps {
@@ -43,12 +48,13 @@ export function CreditLeaderboard({ isOpen, onClose }: CreditLeaderboardProps) {
   const [items, setItems] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [userBalance, setUserBalance] = useState<UserBalance | null>(null);
+  const [userCredits, setUserCredits] = useState<UserCredits | null>(null);
   const userRowRef = useRef<HTMLTableRowElement>(null);
 
   const isConnected = status === 'connected' && !!address;
   const userEntry = isConnected ? items.find((e) => e.wallet === address) : null;
 
+  // Fetch leaderboard
   useEffect(() => {
     if (!isOpen) return;
     setLoading(true);
@@ -68,29 +74,30 @@ export function CreditLeaderboard({ isOpen, onClose }: CreditLeaderboardProps) {
       .finally(() => setLoading(false));
   }, [isOpen]);
 
-  // Fetch individual balance when connected but not in top 100
+  // Fetch personal balance (always when connected, for the personal card)
   useEffect(() => {
-    if (!isOpen || !isConnected || loading) return;
-    const inList = items.some((e) => e.wallet === address);
-    if (inList) {
-      setUserBalance(null);
+    if (!isOpen || !isConnected) {
+      setUserCredits(null);
       return;
     }
     fetch(`/api/credits/balance?wallet=${address}`)
-      .then((res) => res.ok ? res.json() : null)
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data && (data.earned > 0 || data.balance > 0)) {
-          setUserBalance({
+        if (data) {
+          setUserCredits({
             earned: data.earned ?? 0,
             balance: data.balance ?? 0,
-            freeMints: data.freeMints ?? Math.floor((data.balance ?? 0) / 100),
+            freeMints: data.freeMints ?? 0,
+            freeMintsUsed: data.freeMintsUsed ?? 0,
+            paidMints: data.paidMints ?? 0,
+            totalPurchases: data.totalPurchases ?? 0,
           });
         } else {
-          setUserBalance(null);
+          setUserCredits(null);
         }
       })
-      .catch(() => setUserBalance(null));
-  }, [isOpen, isConnected, address, loading, items]);
+      .catch(() => setUserCredits(null));
+  }, [isOpen, isConnected, address]);
 
   // Auto-scroll to user's row after data loads
   useEffect(() => {
@@ -120,133 +127,172 @@ export function CreditLeaderboard({ isOpen, onClose }: CreditLeaderboardProps) {
         {error && (
           <p className="text-center text-secondary py-8">{error}</p>
         )}
-        {!loading && !error && items.length === 0 && (
-          <p className="text-center text-muted py-12">No data yet</p>
-        )}
-        {!loading && !error && items.length > 0 && (
-          <div className="flex-1 min-h-0 flex flex-col">
-            {/* Wallet status bar */}
-            <div className="flex items-center justify-between px-1 pb-3">
-              {!isConnected ? (
+        {!loading && !error && (
+          <div className="flex-1 min-h-0 flex flex-col gap-4">
+
+            {/* ── Your Credits Card ── */}
+            {!isConnected ? (
+              <div
+                className="rounded-xl p-4 flex items-center justify-between"
+                style={{
+                  background: 'var(--color-surface)',
+                  border: '1px solid var(--color-border)',
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <Wallet size={20} style={{ color: 'var(--color-text-muted)' }} />
+                  <span className="text-sm text-secondary">Connect wallet to see your credits</span>
+                </div>
                 <SageConnectButton
                   variant="glass"
                   size="sm"
-                  connectText="Connect wallet to find yourself"
+                  connectText="Connect"
                 />
-              ) : (
-                <div className="flex items-center gap-2 text-xs">
-                  <span
-                    style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
-                      background: '#22c55e',
-                      display: 'inline-block',
-                      boxShadow: '0 0 6px rgba(34,197,94,0.5)',
-                    }}
-                  />
-                  <span className="font-mono text-secondary">{truncateWallet(address)}</span>
+              </div>
+            ) : (
+              <div
+                className="rounded-xl p-4"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(255, 107, 0, 0.08), rgba(255, 107, 0, 0.02))',
+                  border: '1px solid rgba(255, 107, 0, 0.2)',
+                }}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-medium text-secondary uppercase tracking-wider">Your Credits</span>
                   {userEntry && (
                     <button
                       type="button"
                       onClick={scrollToUser}
-                      className="text-accent hover:underline"
+                      className="text-xs font-medium hover:underline"
+                      style={{ color: 'var(--color-primary)' }}
                     >
                       Rank #{userEntry.rank}
                     </button>
                   )}
-                  {!userEntry && userBalance && (
-                    <span className="text-muted">Not yet ranked</span>
-                  )}
                 </div>
-              )}
-            </div>
 
-            {/* Leaderboard table */}
-            <div className="flex-1 min-h-0 overflow-auto">
-              <div className="rounded-xl overflow-hidden border border-[var(--color-border)]" style={{ background: 'var(--color-surface)' }}>
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
-                      <th className="text-left py-3 px-4 text-muted font-medium w-12">#</th>
-                      <th className="text-left py-3 px-4 text-muted font-medium">Wallet</th>
-                      <th className="text-right py-3 px-4 text-muted font-medium">Credits</th>
-                      <th className="text-right py-3 px-4 text-muted font-medium">Available</th>
-                      <th className="text-right py-3 px-4 text-muted font-medium">Paid mint</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {items.map((entry) => {
-                      const isCurrent = isConnected && entry.wallet === address;
-                      const rankClass = entry.rank === 1 ? 'text-amber-400' : entry.rank === 2 ? 'text-slate-400' : entry.rank === 3 ? 'text-amber-700' : 'text-muted';
-                      return (
-                        <tr
-                          key={entry.wallet}
-                          ref={isCurrent ? userRowRef : undefined}
-                          className="hover:bg-[var(--color-surface-hover)] transition-colors"
-                          style={{
-                            background: isCurrent ? 'rgba(255, 107, 0, 0.15)' : entry.rank <= 3 ? undefined : 'rgba(255,255,255,0.02)',
-                            borderLeft: isCurrent
-                              ? '3px solid var(--color-primary)'
-                              : entry.rank === 1 ? '3px solid #fbbf24'
-                              : entry.rank === 2 ? '3px solid #94a3b8'
-                              : entry.rank === 3 ? '3px solid #cd7f32'
-                              : undefined,
-                          }}
-                        >
-                          <td className={`py-3 px-4 font-variant-numeric tabular-nums font-semibold ${isCurrent ? 'text-accent' : rankClass}`}>
-                            <span className="flex items-center gap-1">
-                              {isCurrent && <Star size={14} fill="var(--color-primary)" stroke="var(--color-primary)" />}
-                              {entry.rank}
-                            </span>
-                          </td>
-                          <td
-                            className="py-3 px-4 font-mono truncate max-w-[180px]"
-                            title={entry.wallet}
-                            style={isCurrent ? { color: 'var(--color-primary)' } : undefined}
-                          >
-                            {truncateWallet(entry.wallet)}
-                            {isCurrent && (
-                              <span className="ml-1 text-xs font-semibold" style={{ color: 'var(--color-primary)' }}>(you)</span>
-                            )}
-                          </td>
-                          <td className={`py-3 px-4 text-right font-variant-numeric tabular-nums font-semibold ${isCurrent ? '' : ''}`}>
-                            {entry.balance.toLocaleString()}
-                          </td>
-                          <td className="py-3 px-4 text-right font-variant-numeric tabular-nums text-secondary">
-                            {entry.freeMints}
-                          </td>
-                          <td className="py-3 px-4 text-right font-variant-numeric tabular-nums text-secondary">
-                            {entry.yourWojakBought}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                {userCredits ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {/* Credits Earned */}
+                    <div className="flex flex-col">
+                      <span className="text-[11px] text-muted mb-0.5">Credits Earned</span>
+                      <span className="text-lg font-bold tabular-nums" style={{ color: 'var(--color-text)' }}>
+                        {userCredits.earned.toLocaleString()}
+                      </span>
+                    </div>
+                    {/* Free Mints Available */}
+                    <div className="flex flex-col">
+                      <span className="text-[11px] text-muted mb-0.5">Free Mints</span>
+                      <span
+                        className="text-lg font-bold tabular-nums flex items-center gap-1.5"
+                        style={{ color: userCredits.freeMints > 0 ? 'var(--color-primary)' : 'var(--color-text-secondary)' }}
+                      >
+                        <Sparkles size={16} />
+                        {userCredits.freeMints}
+                      </span>
+                    </div>
+                    {/* Free Mints Used */}
+                    <div className="flex flex-col">
+                      <span className="text-[11px] text-muted mb-0.5">Free Mints Used</span>
+                      <span className="text-lg font-bold tabular-nums text-secondary">
+                        {userCredits.freeMintsUsed}
+                      </span>
+                    </div>
+                    {/* Paid Mints */}
+                    <div className="flex flex-col">
+                      <span className="text-[11px] text-muted mb-0.5">Paid Mints</span>
+                      <span className="text-lg font-bold tabular-nums text-secondary flex items-center gap-1.5">
+                        <Coins size={16} />
+                        {userCredits.paidMints}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 py-2">
+                    <Loader2 size={16} className="animate-spin text-muted" />
+                    <span className="text-sm text-muted">Loading...</span>
+                  </div>
+                )}
+
+                {userCredits && userCredits.earned === 0 && (
+                  <p className="text-xs text-muted mt-3">
+                    Buy Wojak Farmers Plot NFTs to earn credits. 100 credits = 1 free mint.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* ── Top Supporters ── */}
+            <div className="flex-1 min-h-0 flex flex-col">
+              <div className="flex items-center gap-2 px-1 mb-2">
+                <Star size={14} style={{ color: '#fbbf24' }} />
+                <span className="text-xs font-medium text-secondary uppercase tracking-wider">Top Supporters</span>
+                <span className="text-xs text-muted">
+                  — ranked by credits earned from Plot NFT purchases
+                </span>
               </div>
 
-              {/* User not in top 100 card */}
-              {isConnected && !userEntry && userBalance && (
-                <div
-                  className="mt-3 rounded-lg p-3 flex items-center gap-3 text-sm"
-                  style={{
-                    background: 'rgba(255, 107, 0, 0.1)',
-                    border: '1px solid rgba(255, 107, 0, 0.25)',
-                  }}
-                >
-                  <Star size={16} fill="var(--color-primary)" stroke="var(--color-primary)" />
-                  <span>
-                    You have <strong className="text-accent">{userBalance.balance.toLocaleString()}</strong> credits
-                    ({userBalance.freeMints} free mint{userBalance.freeMints !== 1 ? 's' : ''})
-                    — keep buying to climb the ranks!
-                  </span>
-                </div>
-              )}
-
-              <p className="text-muted text-xs mt-4 px-1">
-                Credits earned from XCH purchases of Wojak Farmers Plot NFTs. 100 credits = 1 free mint.
-              </p>
+              <div className="flex-1 min-h-0 overflow-auto">
+                {items.length === 0 ? (
+                  <p className="text-center text-muted py-8">No supporters yet</p>
+                ) : (
+                  <div className="rounded-xl overflow-hidden border border-[var(--color-border)]" style={{ background: 'var(--color-surface)' }}>
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
+                          <th className="text-left py-2.5 px-3 text-muted font-medium w-10">#</th>
+                          <th className="text-left py-2.5 px-3 text-muted font-medium">Wallet</th>
+                          <th className="text-right py-2.5 px-3 text-muted font-medium" title="Total credits earned from Plot NFT purchases">Credits</th>
+                          <th className="text-right py-2.5 px-3 text-muted font-medium" title="Total Your Wojak mints (free + paid)">Mints</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {items.map((entry) => {
+                          const isCurrent = isConnected && entry.wallet === address;
+                          const totalMints = entry.mintsUsed + entry.yourWojakBought;
+                          const rankClass = entry.rank === 1 ? 'text-amber-400' : entry.rank === 2 ? 'text-slate-400' : entry.rank === 3 ? 'text-amber-700' : 'text-muted';
+                          return (
+                            <tr
+                              key={entry.wallet}
+                              ref={isCurrent ? userRowRef : undefined}
+                              className="hover:bg-[var(--color-surface-hover)] transition-colors"
+                              style={{
+                                background: isCurrent ? 'rgba(255, 107, 0, 0.12)' : undefined,
+                                borderLeft: isCurrent
+                                  ? '3px solid var(--color-primary)'
+                                  : entry.rank === 1 ? '3px solid #fbbf24'
+                                  : entry.rank === 2 ? '3px solid #94a3b8'
+                                  : entry.rank === 3 ? '3px solid #cd7f32'
+                                  : undefined,
+                              }}
+                            >
+                              <td className={`py-2.5 px-3 font-variant-numeric tabular-nums font-semibold ${isCurrent ? 'text-accent' : rankClass}`}>
+                                {entry.rank}
+                              </td>
+                              <td
+                                className="py-2.5 px-3 font-mono truncate max-w-[200px]"
+                                title={entry.wallet}
+                                style={isCurrent ? { color: 'var(--color-primary)' } : undefined}
+                              >
+                                {truncateWallet(entry.wallet)}
+                                {isCurrent && (
+                                  <span className="ml-1 text-xs font-semibold" style={{ color: 'var(--color-primary)' }}>(you)</span>
+                                )}
+                              </td>
+                              <td className="py-2.5 px-3 text-right font-variant-numeric tabular-nums font-semibold">
+                                {entry.earned.toLocaleString()}
+                              </td>
+                              <td className="py-2.5 px-3 text-right font-variant-numeric tabular-nums text-secondary">
+                                {totalMints > 0 ? totalMints : '—'}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}

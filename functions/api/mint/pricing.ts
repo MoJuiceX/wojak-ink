@@ -3,11 +3,12 @@
  *
  * GET (no params)
  *
- * Returns trait surcharges (fair-share pricing with decay), supply count,
- * and floor price. Used by Generator for dynamic pricing display.
+ * Returns trait surcharges (universal power curve with decay), supply count,
+ * floor price, and top-3 most popular traits per surcharge category.
  *
  * Response: {
- *   traits: { [traitKey]: { usageCount, effectiveUsage, surchargeXch, fairShare, percentOfFairShare } },
+ *   traits: { [traitKey]: { usageCount, effectiveUsage, surchargeXch } },
+ *   top3: { [category]: string[] },
  *   supply: { minted: number, total: 4200 },
  *   floorPrice: number
  * }
@@ -19,7 +20,8 @@ import {
   optionsResponse,
   surchargeXch,
   applyDecay,
-  SURCHARGE_FAIR_SHARES,
+  SURCHARGE_CATEGORIES,
+  SURCHARGE_EXEMPT_TRAITS,
 } from './_shared';
 
 interface Env {
@@ -60,14 +62,18 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       usageCount: number;
       effectiveUsage: number;
       surchargeXch: number;
-      fairShare: number;
-      percentOfFairShare: number;
     }
 
     const traits: Record<string, TraitPricing> = {};
+
+    // Build per-category lists for top-3 calculation
+    const byCat: Record<string, { name: string; decayed: number }[]> = {};
+    for (const cat of SURCHARGE_CATEGORIES) {
+      byCat[cat] = [];
+    }
+
     for (const r of traitRows.results || []) {
       const decayed = applyDecay(r.effective_usage, r.last_decay_at);
-      const fairShare = SURCHARGE_FAIR_SHARES[r.trait_category] || 0;
       const sc = surchargeXch(decayed, r.trait_category, r.trait_name);
 
       const key = `${r.trait_category}_${r.trait_name}`;
@@ -75,9 +81,19 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         usageCount: r.usage_count,
         effectiveUsage: Math.round(decayed * 100) / 100,
         surchargeXch: Math.round(sc * 1000) / 1000,
-        fairShare,
-        percentOfFairShare: fairShare > 0 ? Math.round(decayed / fairShare * 100) : 0,
       };
+
+      // Track surchargeable traits for top-3
+      if (SURCHARGE_CATEGORIES.has(r.trait_category) && !SURCHARGE_EXEMPT_TRAITS.has(r.trait_name)) {
+        byCat[r.trait_category]?.push({ name: r.trait_name, decayed });
+      }
+    }
+
+    // Top 3 most popular (by effective usage) per category
+    const top3: Record<string, string[]> = {};
+    for (const [cat, items] of Object.entries(byCat)) {
+      items.sort((a, b) => b.decayed - a.decayed);
+      top3[cat] = items.slice(0, 3).filter(t => t.decayed > 0).map(t => t.name);
     }
 
     const supplyRow = await env.DB.prepare(
@@ -90,10 +106,17 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     ).first<{ floor_xch: number }>();
     const floorPrice = floorRow ? floorRow.floor_xch / 100 : 1.0;
 
+    const pausedRow = await env.DB.prepare(
+      "SELECT value FROM server_state WHERE key = 'minting_paused'"
+    ).first<{ value: string }>();
+    const mintingPaused = pausedRow?.value === 'true';
+
     return jsonResponse({
       traits,
+      top3,
       supply: { minted, total: SUPPLY_TOTAL },
       floorPrice: Math.round(floorPrice * 1000) / 1000,
+      mintingPaused,
     });
   } catch (error) {
     console.error('[Mint Pricing] Error:', error);

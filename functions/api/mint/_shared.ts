@@ -31,21 +31,17 @@ export const FREE_MINT_CREDITS = 10000; // 100 credits in x100 units
 export const BASE_PRICE_XCH = 0.2;
 export const OFFER_EXPIRY_MINUTES = 15;
 
-// ─── Surcharge: Fair-Share Pricing ───
-export const SURCHARGE_RAMP_RATE = 1.0;
-export const SURCHARGE_PENALTY_SCALE = 8.0;
-export const SURCHARGE_PENALTY_EXPONENT = 2.0;
-export const DECAY_HALF_LIFE_DAYS = 30;
-
-/** Fair share = ideal usage per trait if all traits used equally */
-export const SURCHARGE_FAIR_SHARES: Record<string, number> = {
-  'Head': Math.round(TOTAL_SUPPLY / 40),       // 105
-  'Clothes': Math.round(TOTAL_SUPPLY / 36),     // 117
-  'Face Wear': Math.round(TOTAL_SUPPLY / 18),   // 233
-};
+// ─── Surcharge: Universal Power Curve ───
+// Formula: surcharge = SURCHARGE_SCALE × (effectiveUsage - 1) ^ SURCHARGE_EXPONENT
+// Scale is auto-derived: targetSurcharge / (targetUses - 1) ^ exponent
+export const SURCHARGE_TARGET_XCH = 1.275;
+export const SURCHARGE_TARGET_USES = 200;
+export const SURCHARGE_EXPONENT = 0.90;
+export const SURCHARGE_SCALE = SURCHARGE_TARGET_XCH / Math.pow(SURCHARGE_TARGET_USES - 1, SURCHARGE_EXPONENT);
+export const DECAY_HALF_LIFE_DAYS = 14;
 
 /** Only these categories have surcharges */
-export const SURCHARGE_CATEGORIES = new Set(Object.keys(SURCHARGE_FAIR_SHARES));
+export const SURCHARGE_CATEGORIES = new Set(['Head', 'Clothes', 'Face Wear']);
 
 /** Free mint premium tier: top N most popular traits per category cost extra credits */
 export const PREMIUM_TOP_N = 3;
@@ -57,29 +53,20 @@ export const SURCHARGE_EXEMPT_TRAITS = new Set([
 ]);
 
 /**
- * Calculate surcharge for a trait based on its effective (decayed) usage
- * and the fair share for its category.
- *
- * Formula: RAMP_RATE × r + PENALTY_SCALE × max(0, r - 1)²
- * where r = effectiveUsage / fairShare
- *
- * Returns 0 if the category has no surcharge or the trait is exempt.
+ * Calculate surcharge for a trait based on its effective (decayed) usage.
+ * Formula: SCALE × (effectiveUsage - 1) ^ EXPONENT
+ * First use is free (surcharge = 0 when effectiveUsage <= 1).
  */
 export function surchargeXch(
   effectiveUsage: number,
   traitCategory: string,
   traitDisplayName?: string
 ): number {
-  const fairShare = SURCHARGE_FAIR_SHARES[traitCategory];
-  if (!fairShare) return 0; // Category not surcharge-eligible
-
+  if (!SURCHARGE_CATEGORIES.has(traitCategory)) return 0;
   if (traitDisplayName && SURCHARGE_EXEMPT_TRAITS.has(traitDisplayName)) return 0;
+  if (effectiveUsage <= 1) return 0;
 
-  const ratio = effectiveUsage / fairShare;
-  const ramp = SURCHARGE_RAMP_RATE * ratio;
-  const overshoot = Math.max(0, ratio - 1);
-  const penalty = SURCHARGE_PENALTY_SCALE * Math.pow(overshoot, SURCHARGE_PENALTY_EXPONENT);
-  return ramp + penalty;
+  return SURCHARGE_SCALE * Math.pow(effectiveUsage - 1, SURCHARGE_EXPONENT);
 }
 
 /**

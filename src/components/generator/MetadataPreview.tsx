@@ -325,52 +325,12 @@ export function MetadataPreview({ onSwitchToColors }: MetadataPreviewProps) {
                 <span style={{ color: isEmpty ? 'var(--color-text-muted)' : 'var(--color-text)', fontSize: '12px' }}>
                   {isEmpty ? '—' : attr.value}
                 </span>
-                {!isEmpty && attr.raw !== '(fixed)' && (
-                  <span
-                    className="truncate"
-                    style={{ color: 'var(--color-text-muted)', fontSize: '9px', fontFamily: 'monospace' }}
-                    title={attr.raw}
-                  >
-                    {attr.raw.split('/').pop()}
-                  </span>
-                )}
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* JSON toggle */}
-      <details className="px-1">
-        <summary className="text-xs cursor-pointer" style={{ color: 'var(--color-text-muted)' }}>
-          Full JSON
-        </summary>
-        <pre
-          className="text-xs mt-1 p-2 rounded overflow-auto"
-          style={{
-            color: 'var(--color-text-secondary)',
-            fontFamily: 'monospace',
-            fontSize: '9px',
-            whiteSpace: 'pre-wrap',
-            backgroundColor: 'rgba(0,0,0,0.3)',
-            border: '1px solid var(--color-border)',
-            maxHeight: '180px',
-          }}
-        >
-          {JSON.stringify(
-            {
-              format: 'CHIP-0007',
-              name: 'Your Wojak #[N]',
-              compiler: 'Wojak.ink Generator',
-              attributes: attributes.map(({ trait_type, value }) => ({ trait_type, value })),
-              edition_number: '[N]',
-              edition_total: 4200,
-            },
-            null,
-            2
-          )}
-        </pre>
-      </details>
     </div>
   );
 }
