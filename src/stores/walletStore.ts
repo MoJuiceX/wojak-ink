@@ -7,6 +7,7 @@
 
 import { create } from 'zustand';
 import { persist, devtools } from 'zustand/middleware';
+import { treasuryService } from '@/services/treasuryService';
 
 // ============ Types ============
 
@@ -88,7 +89,7 @@ export const useWalletStore = create<WalletState>()(
         // Computed values
         getTotalValue: () => {
           const { balance } = get();
-          const xchPrice = 5.35; // TODO: Get from price feed
+          const xchPrice = treasuryService.getCachedXchPrice();
           const xchValue = balance.xch * xchPrice;
           const catsValue = balance.cats.reduce((sum, cat) => sum + cat.value, 0);
           return xchValue + catsValue;
