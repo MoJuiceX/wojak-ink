@@ -122,7 +122,7 @@ export function ProfileHeader({
         </button>
       )}
       {isOwnProfile && onEdit && (
-        <button className="edit-profile-btn" onClick={onEdit}>
+        <button className="edit-profile-btn" onClick={onEdit} title="Coming soon" style={{ opacity: 0.5, cursor: 'default' }}>
           <Edit size={16} />
           Edit Profile
         </button>

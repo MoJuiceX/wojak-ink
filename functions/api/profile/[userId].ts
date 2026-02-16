@@ -437,11 +437,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       // User basics
       userId: profile.user_id,
       displayName: profile.display_name || 'Player',
-      bio: null as string | null, // TODO: Add bio field to profiles table
+      bio: null as string | null, // See GitHub issue #5
       title,
       xHandle: profile.x_handle,
-      discord: null as string | null, // TODO: Add discord field
-      location: null as string | null, // TODO: Add location field
+      discord: null as string | null, // See GitHub issue #5
+      location: null as string | null, // See GitHub issue #5
       createdAt: profile.created_at || profile.updated_at,
 
       // Avatar & customization
@@ -484,7 +484,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         memberSince: profile.created_at || profile.updated_at,
         currentStreak: profile.current_streak || 0,
         longestStreak: profile.longest_streak || 0,
-        profileViews: undefined, // TODO: Add visitor tracking
+        profileViews: undefined, // See GitHub issue #5
         level,
         lifetimeOranges,
         totalSpent,
@@ -497,16 +497,16 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         highestRank: bestRank || undefined,
         firstPlaceCount,
         friendsCount,
-        guildName: undefined, // TODO: Add guild support
-        giftsSent: 0, // TODO: Add gift tracking
+        guildName: undefined, // See GitHub issue #5
+        giftsSent: 0, // See GitHub issue #5
         giftsReceived: 0,
-        challengesWon: 0, // TODO: Add challenge tracking
+        challengesWon: 0, // See GitHub issue #5
       },
 
       // Featured items (user can pin items)
       featured: [] as Array<{ id: string; type: string; name: string; icon: string }>,
 
-      // Recent activity (TODO: Implement activity tracking)
+      // Recent activity (See GitHub issue #5)
       activities: [] as Array<{ id: string; type: string; text: string; icon: string; timestamp: string }>,
 
       // Game scores

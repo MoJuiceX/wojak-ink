@@ -79,7 +79,7 @@ export function MarketTab({
   const prefersReducedMotion = useReducedMotion();
 
   const handleCellClick = useCallback((cell: HeatMapCell) => {
-    void cell; // TODO: Open cell detail modal
+    void cell; // See GitHub issue #3
   }, []);
 
   // Loading skeleton

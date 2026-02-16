@@ -249,7 +249,7 @@ function BottomPanel() {
   }, [heatMapData, selectedBadge, badgeMapping]);
 
   const handleAttributeClick = useCallback(() => {
-    // TODO: Handle attribute click for drill-down
+    // No-op — drill-down not yet implemented
   }, []);
 
   return (

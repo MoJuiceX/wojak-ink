@@ -125,7 +125,7 @@ export function ArcadeFrame({
  */
 function ArcadeFrameWide({ children }: { children: React.ReactNode }) {
   // For now, fall back to standard wrapper until edge assets are created
-  // TODO: Implement Phase 2 with edge pieces
+  // See GitHub issue #2
   return (
     <div className="arcade-frame-wide">
       {/* Edge pieces - uncomment when assets are ready */}

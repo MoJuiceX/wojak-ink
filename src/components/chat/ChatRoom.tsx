@@ -333,8 +333,6 @@ function ChatInterface({ chatToken, userName, userAvatar, roomConfig }: ChatInte
     reconnect,
   } = useChatSocket({ token: chatToken, userName, userAvatar });
 
-  void chatError; // TODO: Display connection errors to user
-
   const filteredUsers = useMemo(() => {
     if (!mentionQuery) return [];
     const query = mentionQuery.toLowerCase();
@@ -482,9 +480,14 @@ function ChatInterface({ chatToken, userName, userAvatar, roomConfig }: ChatInte
           </span>
           <span className={`gc-status-dot ${status}`} />
           {(status === 'error' || status === 'disconnected') && (
-            <button className="gc-reconnect-btn" onClick={reconnect} aria-label="Reconnect">
-              Retry
-            </button>
+            <>
+              {chatError && (
+                <span className="text-secondary text-xs">{chatError}</span>
+              )}
+              <button className="gc-reconnect-btn" onClick={reconnect} aria-label="Reconnect">
+                Retry
+              </button>
+            </>
           )}
         </div>
       </div>

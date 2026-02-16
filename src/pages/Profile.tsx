@@ -328,9 +328,9 @@ export default function Profile() {
     fetchProfile();
   }, [userId]);
 
-  // Handle edit profile
+  // Edit profile — not yet implemented
   const handleEditProfile = () => {
-    // TODO: Open edit profile modal
+    // No-op until profile editing is built
   };
 
   // Handle share profile

@@ -61,7 +61,7 @@ interface Trade {
  */
 function getXchUsdRate(): number {
   // For now, use default rate
-  // TODO: Fetch from CoinGecko API for historical accuracy
+  // See GitHub issue #6
   return DEFAULT_XCH_USD_RATE;
 }
 
