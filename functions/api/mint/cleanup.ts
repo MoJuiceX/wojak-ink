@@ -122,6 +122,17 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
       }
     } catch (err) {
       console.error(`[Cleanup] Auto-finalize failed for job ${row.id}:`, err);
+      // Log MintGarden availability issues so admins can manually intervene
+      // if paid mints are hanging due to MintGarden being down.
+      try {
+        await logMintStep(env.DB, {
+          mint_id: 0,
+          step: 'auto_finalize_failed',
+          status: 'failed',
+          error: `Cleanup auto-finalize failed for job ${row.id}: ${err instanceof Error ? err.message : String(err)}`,
+          data: { job_id: row.id, wallet: row.wallet_address, mint_number: row.mint_number },
+        });
+      } catch { /* audit log failure must not break cleanup */ }
     }
   }
 
@@ -143,22 +154,40 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
   ).run();
   stats.stuckProcessing = stuckProcessing.meta?.changes ?? 0;
 
-  // 4. Retry queued jobs that haven't been picked up in 30 seconds
+  // 4. Retry queued jobs that haven't been picked up in 30 seconds.
+  //    Limited to 2 jobs to avoid exceeding Cloudflare Pages Functions timeout
+  //    (each processJob involves IPFS + MintGarden calls, 5-30s each).
   const staleQueued = await env.DB.prepare(
     `SELECT id FROM mint_jobs WHERE step = 'queued'
      AND created_at < datetime('now', '-30 seconds')
      AND retry_count < max_retries
-     LIMIT 5`
+     LIMIT 2`
   ).all<{ id: number }>();
 
   for (const row of (staleQueued.results || [])) {
     const imageBase64 = await env.MINT_JOBS_KV.get(`job-image:${row.id}`);
     if (imageBase64) {
       try {
-        await processJob(env, row.id, imageBase64);
+        // Timeout guard: cap each retry at 25s to prevent blocking the HTTP handler
+        const RETRY_TIMEOUT_MS = 25_000;
+        await Promise.race([
+          processJob(env, row.id, imageBase64),
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error('Cleanup retry timed out')), RETRY_TIMEOUT_MS)
+          ),
+        ]);
         stats.retriedQueued++;
       } catch (err) {
-        console.error(`[Cleanup] Retry failed for job ${row.id}:`, err);
+        const errMsg = err instanceof Error ? err.message : String(err);
+        console.error(`[Cleanup] Retry failed for job ${row.id}:`, errMsg);
+        // On timeout, mark the job as failed to prevent infinite retry loops
+        if (errMsg.includes('timed out')) {
+          await env.DB.prepare(
+            `UPDATE mint_jobs SET step = 'failed', error_message = 'Processing timed out during retry',
+             error_code = 'TIMEOUT', wallet_lock = NULL, updated_at = datetime('now')
+             WHERE id = ? AND step = 'queued'`
+          ).bind(row.id).run();
+        }
       }
     } else {
       // Image expired from KV — fail the job
@@ -245,8 +274,9 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
     }
   }
 
-  // 8. Auto-flag refund for paid mints that failed after payment (have launcherId)
-  //    phase2_mint_id may be NULL if finalization crashed before creating the record.
+  // 8. Auto-flag refund for paid mints that failed after payment.
+  //    IMPORTANT: Uses mintgarden_launcher_id IS NOT NULL (not phase2_mint_id) to detect
+  //    payment — phase2_mint_id is only set at finalization, which may not have completed.
   const paidFailedWithPayment = await env.DB.prepare(
     `SELECT mj.id AS job_id, mj.phase2_mint_id, mj.error_message,
             mj.mintgarden_launcher_id, mj.wallet_address

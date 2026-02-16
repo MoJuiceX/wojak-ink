@@ -143,4 +143,9 @@ export const MINT_RATE_LIMITS = {
     maxRequests: 10,       // 10 confirm attempts per minute per wallet/IP
     keyPrefix: 'mint-confirm',
   },
+  jobPoll: {
+    windowMs: 60 * 1000,  // 1 minute
+    maxRequests: 120,      // 120 req/min per IP (frontend polls every 3s = 20/min; headroom for multi-tab)
+    keyPrefix: 'mint-job',
+  },
 } as const;

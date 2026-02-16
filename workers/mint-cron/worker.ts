@@ -38,9 +38,102 @@ async function unpinFromIPFS(ipfsCid: string, pinataJwt: string): Promise<boolea
   }
 }
 
+/** MintGarden NFT item shape (subset) */
+interface MintGardenNftItem {
+  id?: string;
+  encoded_id?: string;
+  data?: {
+    edition_number?: number;
+    metadata_json?: {
+      edition?: number;
+      edition_number?: number;
+      name?: string;
+    };
+  };
+}
+
+/**
+ * Query MintGarden for NFTs owned by a wallet, find one matching the mint_number.
+ * Returns the launcher ID if found, or null.
+ * Mirrors the same logic in cleanup.ts — duplicated here because the cron worker
+ * is a separate bundle that cannot import from Pages Functions.
+ */
+async function detectLauncherByWallet(
+  walletAddress: string,
+  mintNumber: number,
+  collectionUuid: string
+): Promise<string | null> {
+  let url = `https://api.mintgarden.io/address/${walletAddress}/nfts?type=owned`;
+  if (collectionUuid) {
+    url += `&collection_id=${collectionUuid}`;
+  }
+
+  const res = await fetch(url, {
+    headers: { Accept: 'application/json', 'User-Agent': 'wojak.ink/1.0' },
+  });
+  if (!res.ok) return null;
+
+  const data = await res.json() as { items?: MintGardenNftItem[] };
+  const items = data.items || [];
+
+  for (const item of items) {
+    const editionNumber =
+      item.data?.edition_number ??
+      item.data?.metadata_json?.edition_number ??
+      item.data?.metadata_json?.edition;
+
+    if (editionNumber === mintNumber) {
+      return item.encoded_id || item.id || null;
+    }
+
+    const name = item.data?.metadata_json?.name;
+    if (name && name === `Your Wojak #${mintNumber}`) {
+      return item.encoded_id || item.id || null;
+    }
+  }
+
+  return null;
+}
+
 export default {
   async scheduled(_event: ScheduledEvent, env: Env, _ctx: ExecutionContext): Promise<void> {
     console.log('[MintCron] Running cleanup...');
+
+    // 0. Auto-detect paid mints where user accepted the offer but
+    //    mintgarden_launcher_id wasn't captured (browser closed, network error, etc.).
+    //    Sets the launcher ID so the next cleanup/cron cycle can finalize.
+    let autoDetected = 0;
+    try {
+      const awaitingJobs = await env.DB.prepare(
+        `SELECT id, wallet_address, mint_number FROM mint_jobs
+         WHERE step = 'awaiting_payment' AND mint_type = 'paid'
+         AND mintgarden_launcher_id IS NULL
+         AND mint_number IS NOT NULL
+         AND updated_at < datetime('now', '-30 seconds')
+         LIMIT 3`
+      ).all<{ id: number; wallet_address: string; mint_number: number }>();
+
+      for (const row of (awaitingJobs.results || [])) {
+        try {
+          const launcherId = await detectLauncherByWallet(
+            row.wallet_address,
+            row.mint_number,
+            '' // Collection UUID not available in cron env — detection still works via edition_number
+          );
+          if (launcherId) {
+            await env.DB.prepare(
+              "UPDATE mint_jobs SET mintgarden_launcher_id = ?, updated_at = datetime('now') WHERE id = ?"
+            ).bind(launcherId, row.id).run();
+            autoDetected++;
+            console.log(`[MintCron] Auto-detected launcher for job ${row.id}: ${launcherId}`);
+          }
+        } catch (err) {
+          console.error(`[MintCron] Auto-detect failed for job ${row.id}:`, err);
+        }
+      }
+    } catch (err) {
+      console.error('[MintCron] Auto-detect step failed:', err);
+    }
 
     // 1. Expire paid mints past their expires_at
     const expiredPaid = await env.DB.prepare(
@@ -131,8 +224,9 @@ export default {
       }
     }
 
-    // 7. Flag refunds for paid mints that failed after payment (have launcherId)
-    //    phase2_mint_id may be NULL if finalization crashed before creating the record.
+    // 7. Flag refunds for paid mints that failed after payment.
+    //    IMPORTANT: Uses mintgarden_launcher_id IS NOT NULL (not phase2_mint_id) to detect
+    //    payment — phase2_mint_id is only set at finalization, which may not have completed.
     let paidRefundsFlagged = 0;
     const paidFailedWithPayment = await env.DB.prepare(
       `SELECT mj.id AS job_id, mj.phase2_mint_id, mj.error_message,
@@ -173,6 +267,7 @@ export default {
     }
 
     console.log('[MintCron] Done:', {
+      autoDetected,
       expiredPaid: expiredPaid.meta?.changes ?? 0,
       stuckProcessing: stuckProcessing.meta?.changes ?? 0,
       refunded,

@@ -12,6 +12,7 @@ import {
   isValidChiaAddress,
 } from './_shared';
 import { MINT_ERROR_MESSAGES, type MintErrorCode } from './errors';
+import { checkRateLimit, getRateLimitKey, MINT_RATE_LIMITS } from '../../lib/rateLimit';
 
 interface Env {
   DB: D1Database;
@@ -73,6 +74,13 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     return errorResponse('Missing or invalid wallet', 400);
   }
 
+  // Rate limit: 120 req/min per IP (polling endpoint)
+  const rlKey = getRateLimitKey(request);
+  const rlResult = await checkRateLimit(env.DB, rlKey, MINT_RATE_LIMITS.jobPoll);
+  if (!rlResult.allowed) {
+    return errorResponse('Too many requests. Please wait a moment.', 429);
+  }
+
   try {
     const job = await env.DB.prepare(
       `SELECT id, wallet_address, mint_type, step, mint_number,
@@ -83,6 +91,23 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
     if (!job) {
       return errorResponse('Job not found', 404);
+    }
+
+    // Inline expiry: if awaiting_payment and past expires_at, mark as failed now.
+    // This makes polling authoritative about expiry — no client/server mismatch.
+    if (
+      job.step === 'awaiting_payment' &&
+      job.expires_at &&
+      new Date(job.expires_at).getTime() < Date.now()
+    ) {
+      await env.DB.prepare(
+        `UPDATE mint_jobs SET step = 'failed', error_message = 'Offer expired',
+         error_code = 'OFFER_EXPIRED', wallet_lock = NULL, updated_at = datetime('now')
+         WHERE id = ? AND step = 'awaiting_payment'`
+      ).bind(job.id).run();
+      job.step = 'failed';
+      job.error_message = 'Offer expired';
+      job.error_code = 'OFFER_EXPIRED';
     }
 
     const info = stepInfo(job.step, job.mint_type);

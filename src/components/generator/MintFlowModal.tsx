@@ -80,7 +80,6 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
     retryMint,
     confirmMint,
     acceptOfferInWallet,
-    confirmMintManual,
     getTotalMintPrice,
   } = useMint();
   const prefersReducedMotion = useReducedMotion();
@@ -340,15 +339,11 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
                 </button>
               )}
 
-              {/* I've Already Accepted */}
+              {/* Auto-detection notice — polling + cleanup handle confirmation automatically */}
               {showOfferActions && currentJob?.offerFile && !isExpired && (
-                <button
-                  type="button"
-                  className="text-xs text-secondary underline hover:text-accent transition-colors"
-                  onClick={confirmMintManual}
-                >
-                  I&apos;ve already accepted the offer
-                </button>
+                <p className="text-muted text-xs">
+                  Already accepted? We&apos;ll detect it automatically.
+                </p>
               )}
 
               {/* ── Error ── */}

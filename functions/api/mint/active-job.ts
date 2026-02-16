@@ -26,6 +26,7 @@ interface ActiveJobRow {
   mintgarden_launcher_id: string | null;
   error_message: string | null;
   credit_cost: number | null;
+  idempotency_key: string | null;
   created_at: string;
   expires_at: string | null;
 }
@@ -52,7 +53,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     const job = await env.DB.prepare(
       `SELECT id, step, mint_type, mint_number, offer_file,
               mintgarden_launcher_id, error_message, credit_cost,
-              created_at, expires_at
+              idempotency_key, created_at, expires_at
        FROM mint_jobs
        WHERE wallet_address = ? AND wallet_lock IS NOT NULL
        ORDER BY created_at DESC LIMIT 1`
@@ -72,6 +73,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         launcherId: job.mintgarden_launcher_id,
         error: job.error_message,
         creditCost: job.credit_cost ? job.credit_cost / 100 : undefined,
+        idempotencyKey: job.idempotency_key,
         createdAt: job.created_at,
         expiresAt: job.expires_at,
       },

@@ -83,6 +83,7 @@ interface MintContextValue {
   currentJob: MintJob | null;
   errorMessage: string | null;
   pendingMintType: 'free' | 'paid' | null;
+  mintingPaused: boolean;
 
   // Actions
   prepareMint: (
@@ -94,7 +95,6 @@ interface MintContextValue {
   confirmMint: () => Promise<void>;
   confirmPayment: (launcherId: string) => Promise<void>;
   acceptOfferInWallet: () => Promise<void>;
-  confirmMintManual: () => Promise<void>;
   resetMintFlow: () => void;
   retryMint: () => void;
 
@@ -147,6 +147,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
   const [totalMinted, setTotalMinted] = useState(0);
   const [maxSupply, setMaxSupply] = useState(DEFAULT_MAX_SUPPLY);
   const [traitPricing, setTraitPricing] = useState<Record<string, { usageCount: number; effectiveUsage: number; surchargeXch: number; fairShare: number }>>({});
+  const [mintingPaused, setMintingPaused] = useState(false);
   const [pendingMintParams, setPendingMintParams] = useState<{
     imageBlob: Blob;
     selectedLayers: Record<string, string>;
@@ -202,6 +203,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
           if (data?.traits) {
             setTraitPricing(data.traits);
           }
+          setMintingPaused(!!data?.mintingPaused);
         })
         .catch(() => {
           if (cancelled) return;
@@ -428,6 +430,11 @@ export function MintProvider({ children }: { children: ReactNode }) {
         const job = data.job as MintJob;
         setCurrentJob(job);
 
+        // Restore idempotencyKey for dedup protection on recovered sessions
+        if (data.job.idempotencyKey) {
+          setIdempotencyKey(data.job.idempotencyKey);
+        }
+
         if (job.step === 'awaiting_payment') {
           setMintStep('awaiting_payment');
         } else if (job.step === 'completed') {
@@ -461,13 +468,15 @@ export function MintProvider({ children }: { children: ReactNode }) {
     stopPolling();
   }, [stopPolling]);
 
-  // Retry: reset flow back to idle but keep the same idempotency key for dedup
+  // Retry: reset flow back to idle so the user can start a fresh mint attempt.
+  // Clear idempotencyKey — pendingMintParams is already null, so the stale key
+  // serves no dedup purpose and a fresh UUID will be generated in prepareMint().
   const retryMint = useCallback(() => {
     setMintStep('idle');
     setCurrentJob(null);
     setErrorMessage(null);
     setPendingMintParams(null);
-    // Keep idempotencyKey so the server deduplicates if the original submission succeeded
+    setIdempotencyKey(null);
     stopPolling();
   }, [stopPolling]);
 
@@ -569,62 +578,26 @@ export function MintProvider({ children }: { children: ReactNode }) {
     }
   }, [currentJob, address]);
 
-  // Accept offer in Sage wallet via WalletConnect, then confirm
+  // Accept offer in Sage wallet via WalletConnect.
+  // After takeOffer succeeds, polling + cleanup auto-finalize handle confirmation.
+  // No manual confirm-payment call needed — the polling loop (lines 337-350)
+  // already calls confirm-payment on each cycle during awaiting_payment.
   const acceptOfferInWallet = useCallback(async () => {
     if (!currentJob?.offerFile || !address) return;
 
     try {
       // Send takeOffer to Sage wallet via WalletConnect
       await takeOffer(currentJob.offerFile, 0);
-
-      // Offer accepted — call confirm-payment
-      // Don't set step here; polling will pick up the server-side state
-      const res = await fetch('/api/mint/confirm-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jobId: currentJob.jobId,
-          walletAddress: address,
-        }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (data.success) {
-        // Polling will catch the completion
-      } else if (data.pending) {
-        // Still pending — polling continues
-      }
+      // Offer accepted — polling will auto-detect the payment and finalize
     } catch (err) {
       console.error('[MintContext] acceptOfferInWallet error:', err);
       // User may have rejected in wallet — stay on awaiting_payment
     }
   }, [currentJob, address, takeOffer]);
 
-  // Manual confirm for users who already accepted the offer outside the flow
-  const confirmMintManual = useCallback(async () => {
-    if (!currentJob || !address) return;
-
-    try {
-      const res = await fetch('/api/mint/confirm-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jobId: currentJob.jobId,
-          walletAddress: address,
-        }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (data.success) {
-        // Polling picks up completed
-      } else if (data.pending) {
-        setErrorMessage('NFT not confirmed yet. It may take a moment to appear on-chain.');
-      } else {
-        setErrorMessage(data.error || 'Not confirmed yet');
-      }
-    } catch (err) {
-      console.error('[MintContext] confirmMintManual error:', err);
-      setErrorMessage('Failed to confirm. Try again.');
-    }
-  }, [currentJob, address]);
+  // confirmMintManual removed — auto-finalize via polling + cleanup is the
+  // official paid mint confirmation path. confirm-payment.ts is kept as an
+  // admin/fallback endpoint but is no longer called from UI buttons.
 
   // ── Context Value ──
 
@@ -635,11 +608,11 @@ export function MintProvider({ children }: { children: ReactNode }) {
       currentJob,
       errorMessage,
       pendingMintType: pendingMintParams?.mintType ?? null,
+      mintingPaused,
       prepareMint,
       confirmMint,
       confirmPayment,
       acceptOfferInWallet,
-      confirmMintManual,
       resetMintFlow,
       retryMint,
       totalMinted,
@@ -650,7 +623,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
       isPremiumTrait,
       getPremiumCreditCost,
     }),
-    [credits, mintStep, currentJob, errorMessage, pendingMintParams, prepareMint, confirmMint, confirmPayment, acceptOfferInWallet, confirmMintManual, resetMintFlow, retryMint, totalMinted, maxSupply, refetchCredits, getTraitPricing, getTotalMintPrice, isPremiumTrait, getPremiumCreditCost]
+    [credits, mintStep, currentJob, errorMessage, pendingMintParams, mintingPaused, prepareMint, confirmMint, confirmPayment, acceptOfferInWallet, resetMintFlow, retryMint, totalMinted, maxSupply, refetchCredits, getTraitPricing, getTotalMintPrice, isPremiumTrait, getPremiumCreditCost]
   );
 
   return <MintContext.Provider value={value}>{children}</MintContext.Provider>;

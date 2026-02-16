@@ -412,7 +412,9 @@ async function handleJobFailure(
 
   if (retryable && (job?.retry_count ?? 0) < (job?.max_retries ?? 3)) {
     // Increment retry count, reset to queued for retry.
-    // Clear IPFS URIs (may be partial) but keep mint_number (to avoid wasting supply).
+    // Clear IPFS URIs (may be partial) but keep mint_number intentionally —
+    // processJob reuses job.mint_number on retry (line ~117) to avoid
+    // reserving a second number for the same job, which would leak supply.
     await env.DB.prepare(
       `UPDATE mint_jobs SET step = 'queued', retry_count = retry_count + 1,
        error_message = ?, error_code = ?,
@@ -435,9 +437,11 @@ async function handleJobFailure(
     finalStep = 'refunded';
   }
 
-  // If paid mint failed after user already paid (has launcherId), auto-flag refund.
-  // Check mintgarden_launcher_id (proves payment was in play) — phase2_mint_id
-  // may be NULL if finalization crashed before creating the phase2_mints record.
+  // If paid mint failed after user already paid, auto-flag refund.
+  // IMPORTANT: Check mintgarden_launcher_id (NOT phase2_mint_id) to detect payment.
+  // phase2_mint_id is only set at finalization — if failure occurs before that
+  // (IPFS upload fail, MintGarden API error), phase2_mint_id is NULL even though
+  // the user may have paid. mintgarden_launcher_id proves payment was in play.
   if (job?.mint_type === 'paid' && job?.mintgarden_launcher_id) {
     try {
       if (job.phase2_mint_id) {
