@@ -27,6 +27,7 @@ import {
 import { checkRateLimit, getRateLimitKey, MINT_RATE_LIMITS } from '../../lib/rateLimit';
 import { consolidateTraits } from './traitResolver';
 import { sha256Hex, base64ToUint8Array } from './uploadToIPFS';
+import { logMintStep } from './auditHelper';
 
 interface Env extends ProcessEnv {
   DB: D1Database;
@@ -375,6 +376,19 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
   } catch (error) {
     console.error('[Mint Submit] Error:', error);
+    // Log to audit trail for admin visibility
+    try {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      await logMintStep(env.DB, {
+        mint_id: 0,
+        step: 'submit_failed',
+        status: 'failed',
+        error: errMsg,
+        data: { wallet: wallet, mint_type: mintType },
+      });
+    } catch {
+      // Audit failure must not break response
+    }
     return errorResponse('Internal server error', 500);
   }
 };

@@ -180,6 +180,16 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
       } catch (err) {
         const errMsg = err instanceof Error ? err.message : String(err);
         console.error(`[Cleanup] Retry failed for job ${row.id}:`, errMsg);
+        // Log to audit trail
+        try {
+          await logMintStep(env.DB, {
+            mint_id: row.id,
+            step: 'cleanup_retry_failed',
+            status: 'failed',
+            error: errMsg,
+            data: { error_code: errMsg.includes('timed out') ? 'TIMEOUT' : 'RETRY_FAILED' },
+          });
+        } catch { /* audit log failure must not break cleanup */ }
         // On timeout, mark the job as failed to prevent infinite retry loops
         if (errMsg.includes('timed out')) {
           await env.DB.prepare(
@@ -196,6 +206,16 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
          error_code = 'IMAGE_EXPIRED', wallet_lock = NULL, updated_at = datetime('now')
          WHERE id = ?`
       ).bind(row.id).run();
+      // Log to audit trail
+      try {
+        await logMintStep(env.DB, {
+          mint_id: row.id,
+          step: 'cleanup_image_expired',
+          status: 'failed',
+          error: 'Image data expired from KV before processing',
+          data: { error_code: 'IMAGE_EXPIRED' },
+        });
+      } catch { /* audit log failure must not break cleanup */ }
     }
   }
 

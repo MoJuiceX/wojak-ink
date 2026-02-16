@@ -37,7 +37,27 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
   try {
     const stats = await cleanupStaleJobs(env);
-    return jsonResponse({ success: true, stats });
+
+    // Query recent error counts from mint_audit_log
+    const [errors1h, errors24h] = await Promise.all([
+      env.DB.prepare(
+        `SELECT COUNT(*) AS count FROM mint_audit_log
+         WHERE (status = 'error' OR status = 'failed')
+         AND created_at > datetime('now', '-1 hour')`
+      ).first<{ count: number }>(),
+      env.DB.prepare(
+        `SELECT COUNT(*) AS count FROM mint_audit_log
+         WHERE (status = 'error' OR status = 'failed')
+         AND created_at > datetime('now', '-24 hours')`
+      ).first<{ count: number }>(),
+    ]);
+
+    return jsonResponse({
+      success: true,
+      stats,
+      recentErrors1h: errors1h?.count ?? 0,
+      recentErrors24h: errors24h?.count ?? 0,
+    });
   } catch (error) {
     console.error('[Mint Cron] Error:', error);
     return errorResponse('Cleanup failed', 500);
