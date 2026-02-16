@@ -11,5 +11,10 @@ crons = ["0 8 * * *"]
 # - CREDIT_TRACKER_RUN_URL (var, optional): e.g. https://wojak-credit-tracker.<account>.workers.dev/run
 # - ALERT_WEBHOOK_URL (secret): Slack/Discord webhook URL for alerts
 
+# KV Namespace binding (same as credit-tracker, to read health reports)
+[[kv_namespaces]]
+binding = "TRADE_VALUES_KV"
+id = "3d3382d37eeb4d4dac250fcf03b3f24d"
+
 [vars]
 SITE_BASE_URL = "https://wojak.ink"

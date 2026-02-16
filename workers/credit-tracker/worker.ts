@@ -27,7 +27,8 @@ const FLOOR_FALLBACK_XCH = 100; // 1.0 XCH (x100) when no snapshot
 
 // Only these CAT tokens earn credits. Others are excluded to limit
 // pricing risk (unreliable conversions, token dumps, etc.).
-const CAT_TOKEN_WHITELIST = new Set([
+// Kept as fallback if cat_credit_whitelist table doesn't exist yet.
+const HARDCODED_WHITELIST = [
   'BEPE',
   '\u{1FA84}\u26A1\uFE0F',       // SpellPower (Wand+Lightning)
   '\u2728\u2764\uFE0F\u200D\u{1F525}\u{1F9D9}\u200D\u2642\uFE0F', // Caster (Sparkle+Mage)
@@ -36,7 +37,26 @@ const CAT_TOKEN_WHITELIST = new Set([
   '$CHIA',
   'PP',
   'WOJAK',                        // Wojak CAT (38a507...)
-]);
+];
+
+const KV_KEY_CREDIT_HEALTH = 'credit_health';
+
+/**
+ * Load CAT token whitelist from D1 instead of hardcoded Set.
+ * Falls back to hardcoded list if table doesn't exist yet.
+ */
+async function loadWhitelist(db: D1Database): Promise<Set<string>> {
+  try {
+    const rows = await db.prepare(
+      'SELECT token_code FROM cat_credit_whitelist'
+    ).all<{ token_code: string }>();
+    const tokens = (rows.results || []).map(r => r.token_code);
+    if (tokens.length > 0) return new Set(tokens);
+  } catch {
+    // Table might not exist yet — fall back to hardcoded
+  }
+  return new Set(HARDCODED_WHITELIST);
+}
 
 const FETCH_RETRIES = 3;
 const FETCH_BACKOFF_MS = [1000, 2000, 4000];
@@ -388,7 +408,8 @@ export default {
 
     if (url.pathname.endsWith('/reprocess-cat') && request.method === 'POST') {
       // Find CAT trades that have wallets but NO credit_event, ignoring cursor
-      const result = await backfillMissingCatCredits(env);
+      const whitelist = await loadWhitelist(env.DB);
+      const result = await backfillMissingCatCredits(env, whitelist);
       return new Response(JSON.stringify({ ok: true, ...result }), {
         headers: { 'Content-Type': 'application/json' },
       });
@@ -406,7 +427,7 @@ export default {
  * Uses buyer_address from MintGarden enrichment as the wallet.
  * Falls back to seller_address if buyer not available (seller earned the trade).
  */
-async function processCatSales(env: Env): Promise<{ processed: number; inserted: number }> {
+async function processCatSales(env: Env, whitelist: Set<string>): Promise<{ processed: number; inserted: number }> {
   // Get the last CAT event timestamp we processed
   const KV_KEY_LAST_CAT = 'last_cat_credit_timestamp';
   const lastCatTs = await env.TRADE_VALUES_KV.get(KV_KEY_LAST_CAT);
@@ -468,7 +489,7 @@ async function processCatSales(env: Env): Promise<{ processed: number; inserted:
     }
 
     // Only whitelisted CAT tokens earn credits
-    if (!CAT_TOKEN_WHITELIST.has(row.token_code)) {
+    if (!whitelist.has(row.token_code)) {
       if (row.completed_at > latestTimestamp) latestTimestamp = row.completed_at;
       continue;
     }
@@ -553,8 +574,8 @@ async function processCatSales(env: Env): Promise<{ processed: number; inserted:
  * Backfill: find CAT trades with wallets that have no credit_event, regardless of cursor.
  * Uses a LEFT JOIN to find gaps — safe to call repeatedly.
  */
-async function backfillMissingCatCredits(env: Env): Promise<{ processed: number; inserted: number; remaining: number }> {
-  const tokens = [...CAT_TOKEN_WHITELIST];
+async function backfillMissingCatCredits(env: Env, whitelist: Set<string>): Promise<{ processed: number; inserted: number; remaining: number }> {
+  const tokens = [...whitelist];
   const placeholders = tokens.map(() => '?').join(',');
 
   const result = await env.DB.prepare(
@@ -657,20 +678,120 @@ async function backfillMissingCatCredits(env: Env): Promise<{ processed: number;
   return { processed: rows.length, inserted, remaining: remaining?.cnt ?? 0 };
 }
 
+interface HealthReport {
+  timestamp: string;
+  duplicatesFound: number;
+  duplicatesFixed: number;
+  floorSnapshotOk: boolean;
+  totalEvents: number;
+  xchProcessed: number;
+  xchInserted: number;
+  catProcessed: number;
+  catInserted: number;
+  whitelistSize: number;
+  issues: string[];
+}
+
+/**
+ * Post-processing integrity check. Runs after every cron execution.
+ * Detects and auto-fixes duplicates, validates data health.
+ */
+async function runIntegrityCheck(
+  env: Env,
+  xchResult: { processed: number; inserted: number },
+  catResult: { processed: number; inserted: number },
+  whitelistSize: number
+): Promise<HealthReport> {
+  const issues: string[] = [];
+  let duplicatesFound = 0;
+  let duplicatesFixed = 0;
+
+  // 1. Check for duplicate credit entries (same wallet + same nft_id)
+  const dupes = await env.DB.prepare(
+    `SELECT wallet_address, nft_id, COUNT(*) as cnt, GROUP_CONCAT(id) as ids
+     FROM credit_events
+     GROUP BY wallet_address, nft_id
+     HAVING COUNT(*) > 1`
+  ).all<{ wallet_address: string; nft_id: string; cnt: number; ids: string }>();
+
+  for (const dup of dupes.results || []) {
+    duplicatesFound += dup.cnt - 1;
+    const idList = dup.ids.split(',').map(Number).sort((a, b) => a - b);
+    // Keep the first (earliest) ID, delete the rest
+    const toDelete = idList.slice(1);
+    if (toDelete.length > 0) {
+      const placeholders = toDelete.map(() => '?').join(',');
+      await env.DB.prepare(
+        `DELETE FROM credit_events WHERE id IN (${placeholders})`
+      ).bind(...toDelete).run();
+      duplicatesFixed += toDelete.length;
+      issues.push(`Auto-fixed ${toDelete.length} duplicate(s) for ${dup.nft_id} on wallet ${dup.wallet_address.slice(0, 10)}...`);
+    }
+  }
+
+  // 2. Check floor price snapshot exists for today
+  const today = new Date().toISOString().slice(0, 10);
+  const floorRow = await env.DB.prepare(
+    'SELECT 1 FROM floor_price_snapshots WHERE snapshot_date = ?'
+  ).bind(today).first();
+  const floorSnapshotOk = !!floorRow;
+  if (!floorSnapshotOk) {
+    issues.push('No floor price snapshot for today');
+  }
+
+  // 3. Count total events
+  const totalRow = await env.DB.prepare(
+    'SELECT COUNT(*) as cnt FROM credit_events'
+  ).first<{ cnt: number }>();
+
+  const report: HealthReport = {
+    timestamp: new Date().toISOString(),
+    duplicatesFound,
+    duplicatesFixed,
+    floorSnapshotOk,
+    totalEvents: totalRow?.cnt ?? 0,
+    xchProcessed: xchResult.processed,
+    xchInserted: xchResult.inserted,
+    catProcessed: catResult.processed,
+    catInserted: catResult.inserted,
+    whitelistSize,
+    issues,
+  };
+
+  // Store health report in KV for alert worker to read
+  await env.TRADE_VALUES_KV.put(KV_KEY_CREDIT_HEALTH, JSON.stringify(report), {
+    expirationTtl: 86400, // 24h TTL
+  });
+
+  if (issues.length > 0) {
+    console.warn(`[CreditTracker] Health issues: ${issues.join('; ')}`);
+  }
+
+  return report;
+}
+
 async function run(env: Env): Promise<void> {
   const today = new Date().toISOString().slice(0, 10);
   await ensureFloorSnapshot(env, today);
 
-  // Process XCH trades from MintGarden events (existing)
-  const { processed, inserted } = await processEvents(env);
-  console.log(`[CreditTracker] XCH: ${processed} events, ${inserted} credit_events`);
+  // Load whitelist from DB (falls back to hardcoded if table missing)
+  const whitelist = await loadWhitelist(env.DB);
+  console.log(`[CreditTracker] Whitelist: ${whitelist.size} tokens`);
 
-  // Process CAT trades from D1 sales_history (new)
+  // Process XCH trades from MintGarden events
+  const xchResult = await processEvents(env);
+  console.log(`[CreditTracker] XCH: ${xchResult.processed} events, ${xchResult.inserted} credit_events`);
+
+  // Process CAT trades from D1 sales_history
+  let catResult = { processed: 0, inserted: 0 };
   try {
-    const catResult = await processCatSales(env);
+    catResult = await processCatSales(env, whitelist);
     console.log(`[CreditTracker] CAT: ${catResult.processed} trades, ${catResult.inserted} credit_events`);
   } catch (e) {
-    // CAT processing is additive — don't fail the whole run
     console.error('[CreditTracker] CAT processing error (non-fatal):', e);
   }
+
+  // Post-processing integrity check + auto-dedup
+  const health = await runIntegrityCheck(env, xchResult, catResult, whitelist.size);
+  console.log(`[CreditTracker] Health: ${health.totalEvents} total events, ${health.duplicatesFixed} dupes fixed, ${health.issues.length} issues`);
 }
