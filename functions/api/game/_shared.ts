@@ -1,7 +1,8 @@
 // Game constants
 export const VOTES_PER_DAY = 10;
 export const POWER_LEVEL_MAX = 9000;
-export const PHASE1_COLLECTION_ID = 'col1z0ef7w5n4vq9qkue67y8jns89re570npt0s4wwtcmpv3lxsmjq4yqs9ser0h'; // Wojak Farmers Plot
+export const PHASE1_COLLECTION_ID = 'col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah'; // Wojak Farmers Plot
+export const PHASE2_COLLECTION_ID = 'col1rhrjj6f28tge783rp0lrj8ct7vnq79xsnklx3up49lgpnge62ensr2tyfx'; // Your Wojak
 
 // Onboarding credit bonuses (in x100 units, matching credit system)
 export const ONBOARDING_CREDITS = {
