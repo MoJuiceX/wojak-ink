@@ -3,7 +3,7 @@
 // Checks MintGarden API for Phase 1 NFT ownership by DID.
 
 import { PHASE1_COLLECTION_ID, ONBOARDING_CREDITS } from './_shared';
-import { authenticateRequest } from '../../lib/auth';
+import { verifyGameAuth, isAuthError } from './_auth';
 
 interface Env {
   DB: D1Database;
@@ -11,14 +11,12 @@ interface Env {
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
-  const auth = await authenticateRequest(context.request, context.env.CLERK_DOMAIN);
-  if (!auth) {
-    return Response.json({ error: 'Authentication required' }, { status: 401 });
-  }
-
   try {
     const body = await context.request.json() as { did: string };
     const { did } = body;
+
+    const authResult = await verifyGameAuth(context.request, context.env, did);
+    if (isAuthError(authResult)) return authResult;
 
     if (!did) {
       return Response.json({ error: 'DID required' }, { status: 400 });

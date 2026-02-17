@@ -6,7 +6,7 @@
 // the system creates a battle and removes both from the queue.
 
 import { isValidDid } from './_shared';
-import { authenticateRequest } from '../../lib/auth';
+import { verifyGameAuth, isAuthError } from './_auth';
 
 interface Env {
   DB: D1Database;
@@ -14,11 +14,6 @@ interface Env {
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
-  const auth = await authenticateRequest(context.request, context.env.CLERK_DOMAIN);
-  if (!auth) {
-    return Response.json({ error: 'Authentication required' }, { status: 401 });
-  }
-
   try {
     const body = await context.request.json() as {
       did: string;
@@ -31,6 +26,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (!did || !isValidDid(did) || !nftId || !editionNumber) {
       return Response.json({ error: 'Invalid parameters' }, { status: 400 });
     }
+
+    const authResult = await verifyGameAuth(context.request, context.env, did);
+    if (isAuthError(authResult)) return authResult;
 
     // Check player exists and is verified
     const player = await context.env.DB.prepare(
@@ -153,11 +151,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 };
 
 export const onRequestDelete: PagesFunction<Env> = async (context) => {
-  const auth = await authenticateRequest(context.request, context.env.CLERK_DOMAIN);
-  if (!auth) {
-    return Response.json({ error: 'Authentication required' }, { status: 401 });
-  }
-
   try {
     const body = await context.request.json() as {
       did: string;
@@ -165,6 +158,9 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
     };
 
     const { did, nftId } = body;
+
+    const authResult = await verifyGameAuth(context.request, context.env, did);
+    if (isAuthError(authResult)) return authResult;
 
     if (!did || !nftId) {
       return Response.json({ error: 'Invalid parameters' }, { status: 400 });

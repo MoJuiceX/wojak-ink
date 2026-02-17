@@ -3,7 +3,7 @@
 // Lets players name their Phase 2 NFTs.
 
 import { isValidDid } from './_shared';
-import { authenticateRequest } from '../../lib/auth';
+import { verifyGameAuth, isAuthError } from './_auth';
 
 interface Env {
   DB: D1Database;
@@ -14,11 +14,6 @@ const NAME_REGEX = /^[a-zA-Z0-9 .,!?'\-]+$/;
 const MAX_NAME_LENGTH = 30;
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
-  const auth = await authenticateRequest(context.request, context.env.CLERK_DOMAIN);
-  if (!auth) {
-    return Response.json({ error: 'Authentication required' }, { status: 401 });
-  }
-
   try {
     const body = await context.request.json() as {
       did: string;
@@ -27,6 +22,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     };
 
     const { did, editionNumber, name } = body;
+
+    const authResult = await verifyGameAuth(context.request, context.env, did);
+    if (isAuthError(authResult)) return authResult;
 
     if (!did || !isValidDid(did)) {
       return Response.json({ error: 'Invalid DID' }, { status: 400 });
@@ -45,16 +43,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return Response.json({ error: 'Name can only contain letters, numbers, spaces, and basic punctuation' }, { status: 400 });
     }
 
-    // Verify player is registered
-    const player = await context.env.DB.prepare(
-      'SELECT did_id FROM game_players WHERE did_id = ?'
-    ).bind(did).first();
-
-    if (!player) {
-      return Response.json({ error: 'Player not registered' }, { status: 404 });
-    }
-
-    // Verify player owns this NFT
+    // Verify player owns this NFT (verifyGameAuth already checked player exists)
     const holding = await context.env.DB.prepare(
       "SELECT nft_id FROM did_holdings WHERE did_id = ? AND edition_number = ? AND collection = 'phase2'"
     ).bind(did, editionNumber).first();

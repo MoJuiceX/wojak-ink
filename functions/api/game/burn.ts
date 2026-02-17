@@ -3,7 +3,7 @@
 // The actual on-chain burn is handled by the wallet.
 // This endpoint just records it and awards credits.
 
-import { authenticateRequest } from '../../lib/auth';
+import { verifyGameAuth, isAuthError } from './_auth';
 
 interface Env {
   DB: D1Database;
@@ -30,11 +30,6 @@ function calculateBurnCredits(likes: number, dislikes: number): number {
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
-  const auth = await authenticateRequest(context.request, context.env.CLERK_DOMAIN);
-  if (!auth) {
-    return Response.json({ error: 'Authentication required' }, { status: 401 });
-  }
-
   try {
     const body = await context.request.json() as {
       nftId: string;
@@ -44,6 +39,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     };
 
     const { nftId, editionNumber, burnerDid, burnerWallet } = body;
+
+    const authResult = await verifyGameAuth(context.request, context.env, burnerDid);
+    if (isAuthError(authResult)) return authResult;
 
     if (!nftId || !editionNumber || !burnerWallet) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });

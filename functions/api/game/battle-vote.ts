@@ -3,7 +3,7 @@
 // 1 vote per user per battle, separate from daily vote cap.
 
 import { isValidDid } from './_shared';
-import { authenticateRequest } from '../../lib/auth';
+import { verifyGameAuth, isAuthError } from './_auth';
 
 interface Env {
   DB: D1Database;
@@ -11,11 +11,6 @@ interface Env {
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
-  const auth = await authenticateRequest(context.request, context.env.CLERK_DOMAIN);
-  if (!auth) {
-    return Response.json({ error: 'Authentication required' }, { status: 401 });
-  }
-
   try {
     const body = await context.request.json() as {
       voterDid: string;
@@ -24,6 +19,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     };
 
     const { voterDid, battleId, votedFor } = body;
+
+    const authResult = await verifyGameAuth(context.request, context.env, voterDid);
+    if (isAuthError(authResult)) return authResult;
 
     if (!voterDid || !isValidDid(voterDid) || !battleId || !['a', 'b'].includes(votedFor)) {
       return Response.json({ error: 'Invalid parameters' }, { status: 400 });
