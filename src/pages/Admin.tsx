@@ -6,7 +6,7 @@
  * Access by URL only.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { useLayout } from '@/hooks/useLayout';
 
@@ -43,6 +43,17 @@ interface CreditStats {
   freeMints: number;
   walletCount: number;
   avgPerWallet: number;
+}
+
+interface FlaggedMint {
+  id: number;
+  mint_number: number | null;
+  wallet_address: string;
+  status: string;
+  mint_type: string;
+  error_message: string | null;
+  mintgarden_launcher_id: string | null;
+  created_at: string;
 }
 
 // ─── Helpers ───
@@ -290,6 +301,214 @@ function CreditHealth({ stats }: { stats: CreditStats | null }) {
   );
 }
 
+// ─── Safety Rail ───
+
+function MintSafetyRail({
+  flaggedMints,
+  adminSecret,
+  onRefresh,
+}: {
+  flaggedMints: FlaggedMint[];
+  adminSecret: string;
+  onRefresh: () => void;
+}) {
+  const [autoRefresh, setAutoRefresh] = useState(false);
+  const [actionLoading, setActionLoading] = useState<Record<number, string>>({});
+  const [actionResults, setActionResults] = useState<Record<number, { ok: boolean; msg: string }>>({});
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Auto-refresh every 30s
+  useEffect(() => {
+    if (autoRefresh) {
+      intervalRef.current = setInterval(onRefresh, 30000);
+    }
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [autoRefresh, onRefresh]);
+
+  const handleRetry = async (jobId: number) => {
+    setActionLoading((prev) => ({ ...prev, [jobId]: 'retry' }));
+    setActionResults((prev) => { const next = { ...prev }; delete next[jobId]; return next; });
+    try {
+      const res = await fetch('/api/mint/admin/retry', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminSecret}`,
+        },
+        body: JSON.stringify({ jobId }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setActionResults((prev) => ({ ...prev, [jobId]: { ok: true, msg: `Retrying (${data.newStep})` } }));
+        setTimeout(onRefresh, 1500);
+      } else {
+        setActionResults((prev) => ({ ...prev, [jobId]: { ok: false, msg: data.error || 'Retry failed' } }));
+      }
+    } catch {
+      setActionResults((prev) => ({ ...prev, [jobId]: { ok: false, msg: 'Network error' } }));
+    } finally {
+      setActionLoading((prev) => { const next = { ...prev }; delete next[jobId]; return next; });
+    }
+  };
+
+  const handleMarkRefund = async (mintId: number) => {
+    setActionLoading((prev) => ({ ...prev, [mintId]: 'refund' }));
+    setActionResults((prev) => { const next = { ...prev }; delete next[mintId]; return next; });
+    try {
+      const res = await fetch('/api/mint/refund', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminSecret}`,
+        },
+        body: JSON.stringify({ action: 'mark', mintId, reason: 'Admin marked for refund via safety rail' }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setActionResults((prev) => ({ ...prev, [mintId]: { ok: true, msg: 'Marked for refund' } }));
+        setTimeout(onRefresh, 1500);
+      } else {
+        setActionResults((prev) => ({ ...prev, [mintId]: { ok: false, msg: data.error || 'Refund failed' } }));
+      }
+    } catch {
+      setActionResults((prev) => ({ ...prev, [mintId]: { ok: false, msg: 'Network error' } }));
+    } finally {
+      setActionLoading((prev) => { const next = { ...prev }; delete next[mintId]; return next; });
+    }
+  };
+
+  const stepBadgeClass = (status: string): string => {
+    if (status === 'failed') return 'badge-error';
+    if (status === 'refunded' || status === 'needs_refund') return 'badge-warning';
+    return 'badge';
+  };
+
+  return (
+    <div className="card-static p-4 flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
+          Mint Safety Rail
+          {flaggedMints.length > 0 && (
+            <span
+              className="badge badge-error ml-2"
+              style={{ fontSize: '0.625rem' }}
+            >
+              {flaggedMints.length}
+            </span>
+          )}
+        </h3>
+        <label className="flex items-center gap-2" style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={autoRefresh}
+            onChange={(e) => setAutoRefresh(e.target.checked)}
+            style={{ accentColor: 'var(--color-primary)' }}
+          />
+          Auto-refresh
+        </label>
+      </div>
+
+      <div style={{ overflowX: 'auto' }}>
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Job ID</th>
+              <th>Mint #</th>
+              <th>Wallet</th>
+              <th>Step</th>
+              <th>Error</th>
+              <th>Launcher ID</th>
+              <th>Time</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {flaggedMints.map((m) => (
+              <tr key={m.id}>
+                <td style={{ color: 'var(--color-primary)', fontWeight: 600 }}>
+                  {m.id}
+                </td>
+                <td>{m.mint_number ?? '—'}</td>
+                <td style={{ fontFamily: 'monospace', fontSize: '0.75rem' }}>
+                  {shortWallet(m.wallet_address)}
+                </td>
+                <td>
+                  <span
+                    className={`badge ${stepBadgeClass(m.status)}`}
+                    style={{ fontSize: '0.6875rem' }}
+                  >
+                    {m.status}
+                  </span>
+                </td>
+                <td
+                  className="text-muted"
+                  style={{ fontSize: '0.75rem', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                  title={m.error_message || ''}
+                >
+                  {m.error_message || '—'}
+                </td>
+                <td style={{ fontFamily: 'monospace', fontSize: '0.7rem' }}>
+                  {m.mintgarden_launcher_id
+                    ? shortWallet(m.mintgarden_launcher_id)
+                    : '—'}
+                </td>
+                <td className="text-muted" style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
+                  {timeAgo(m.created_at)}
+                </td>
+                <td>
+                  <div className="flex gap-1.5 items-center">
+                    <button
+                      className="btn btn-ghost"
+                      style={{ fontSize: '0.6875rem', padding: '2px 8px' }}
+                      disabled={!!actionLoading[m.id]}
+                      onClick={() => handleRetry(m.id)}
+                    >
+                      {actionLoading[m.id] === 'retry' ? '...' : 'Retry'}
+                    </button>
+                    {m.mint_type === 'paid' && m.mintgarden_launcher_id && (
+                      <button
+                        className="btn btn-ghost"
+                        style={{
+                          fontSize: '0.6875rem',
+                          padding: '2px 8px',
+                          color: 'var(--color-error)',
+                        }}
+                        disabled={!!actionLoading[m.id]}
+                        onClick={() => handleMarkRefund(m.id)}
+                      >
+                        {actionLoading[m.id] === 'refund' ? '...' : 'Refund'}
+                      </button>
+                    )}
+                    {actionResults[m.id] && (
+                      <span
+                        style={{
+                          fontSize: '0.625rem',
+                          color: actionResults[m.id].ok ? 'var(--color-success)' : 'var(--color-error)',
+                        }}
+                      >
+                        {actionResults[m.id].msg}
+                      </span>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+            {flaggedMints.length === 0 && (
+              <tr>
+                <td colSpan={8} className="text-muted" style={{ textAlign: 'center' }}>
+                  No flagged mints — all clear
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Page ───
 
 export default function Admin() {
@@ -300,6 +519,7 @@ export default function Admin() {
   const [pricing, setPricing] = useState<PricingResponse | null>(null);
   const [recentMints, setRecentMints] = useState<RecentMint[]>([]);
   const [creditStats, setCreditStats] = useState<CreditStats | null>(null);
+  const [flaggedMints, setFlaggedMints] = useState<FlaggedMint[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -309,10 +529,11 @@ export default function Admin() {
     try {
       const authHeaders = { 'Authorization': `Bearer ${adminSecret}` };
 
-      const [pricingRes, mintsRes, creditsRes] = await Promise.all([
+      const [pricingRes, mintsRes, creditsRes, auditRes] = await Promise.all([
         fetch('/api/mint/pricing'),
         fetch('/api/admin/recent-mints?limit=20', { headers: authHeaders }),
         fetch('/api/admin/credit-stats', { headers: authHeaders }),
+        fetch('/api/mint/audit?format=json&status=failed', { headers: authHeaders }),
       ]);
 
       if (mintsRes.status === 401 || creditsRes.status === 401) {
@@ -324,6 +545,21 @@ export default function Admin() {
       if (pricingRes.ok) setPricing(await pricingRes.json());
       if (mintsRes.ok) setRecentMints((await mintsRes.json()).mints || []);
       if (creditsRes.ok) setCreditStats(await creditsRes.json());
+      if (auditRes.ok) {
+        const auditData = await auditRes.json();
+        // Combine failed mints and needs_refund, deduplicate by id
+        const failed: FlaggedMint[] = auditData.categories?.failed_mints || [];
+        const needsRefund: FlaggedMint[] = auditData.categories?.needs_refund || [];
+        const seen = new Set<number>();
+        const combined: FlaggedMint[] = [];
+        for (const m of [...failed, ...needsRefund]) {
+          if (!seen.has(m.id)) {
+            seen.add(m.id);
+            combined.push(m);
+          }
+        }
+        setFlaggedMints(combined);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load data');
     } finally {
@@ -415,6 +651,13 @@ export default function Admin() {
 
           {/* Credit Health */}
           <CreditHealth stats={creditStats} />
+
+          {/* Safety Rail */}
+          <MintSafetyRail
+            flaggedMints={flaggedMints}
+            adminSecret={adminSecret}
+            onRefresh={fetchAll}
+          />
 
           {/* Trait Distribution */}
           {surchargeCategories.map((cat) => (
