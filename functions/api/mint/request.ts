@@ -40,6 +40,7 @@ async function fetchWithTimeout(url: string, init?: RequestInit, timeoutMs = MIN
 
 export interface MintRequestParams {
   walletAddress: string;
+  royaltyAddress?: string;
   mintType: 'paid' | 'free';
   ipfsImageUris: string[];
   ipfsMetadataUris: string[];
@@ -136,7 +137,7 @@ export async function callMintGardenMint(
       edition_total: params.editionTotal,
     },
     target_address: params.walletAddress,
-    royalty_address: params.walletAddress,
+    royalty_address: params.royaltyAddress || params.walletAddress,
     royalty_percentage: parseInt(royaltyPct ?? '10', 10) || 10,
   };
 

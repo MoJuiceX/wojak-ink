@@ -10,6 +10,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X, Loader2, CheckCircle, AlertCircle, Copy, ExternalLink, Wallet, Share2, Sparkles } from 'lucide-react';
 import { useMint } from '@/contexts/MintContext';
+import { generateRandomName, validateName, MAX_NAME_LENGTH } from '@/lib/nameGenerator';
 
 interface MintFlowModalProps {
   isOpen: boolean;
@@ -81,12 +82,29 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
     confirmMint,
     acceptOfferInWallet,
     getTotalMintPrice,
+    customName,
+    setCustomName,
   } = useMint();
   const prefersReducedMotion = useReducedMotion();
   const [timeLeft, setTimeLeft] = useState('');
   const [isExpired, setIsExpired] = useState(false);
   const [copied, setCopied] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
+  const [nameError, setNameError] = useState('');
+
+  const handleNameChange = (value: string) => {
+    const validation = validateName(value);
+    setNameError(validation.error || '');
+    if (value.length <= MAX_NAME_LENGTH) {
+      setCustomName(value);
+    }
+  };
+
+  const handleGenerateRandom = () => {
+    const name = generateRandomName();
+    setCustomName(name);
+    setNameError('');
+  };
 
   // Countdown timer for paid mints
   useEffect(() => {
@@ -274,11 +292,46 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
                         </p>
                       </>
                     )}
+                    {/* Name your Wojak */}
+                    <div className="flex flex-col gap-2 w-full">
+                      <label className="text-xs text-secondary uppercase tracking-wider">
+                        Name your Wojak (optional)
+                      </label>
+                      <div className="flex gap-2">
+                        <div className="flex-1 relative">
+                          <input
+                            className="input w-full pr-12"
+                            type="text"
+                            value={customName}
+                            onChange={(e) => handleNameChange(e.target.value)}
+                            placeholder="e.g. Moon Boy"
+                            maxLength={MAX_NAME_LENGTH}
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted">
+                            {customName.length}/{MAX_NAME_LENGTH}
+                          </span>
+                        </div>
+                        <button
+                          className="btn btn-ghost text-xs"
+                          onClick={handleGenerateRandom}
+                          type="button"
+                        >
+                          Random
+                        </button>
+                      </div>
+                      {nameError && <p className="text-xs" style={{ color: 'var(--color-error)' }}>{nameError}</p>}
+                      {customName && (
+                        <p className="text-xs text-secondary">
+                          Preview: Your Wojak #___: {customName}
+                        </p>
+                      )}
+                    </div>
+
                     <div className="flex gap-2 mt-2">
                       <button type="button" className="btn btn-secondary flex-1" onClick={handleClose}>
                         Cancel
                       </button>
-                      <button type="button" className="btn btn-primary flex-1" onClick={confirmMint}>
+                      <button type="button" className="btn btn-primary flex-1" onClick={confirmMint} disabled={!!nameError}>
                         {isFreeConfirm ? 'Mint' : 'Continue'}
                       </button>
                     </div>

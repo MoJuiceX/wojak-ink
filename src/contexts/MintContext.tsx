@@ -86,6 +86,8 @@ interface MintContextValue {
   errorMessage: string | null;
   pendingMintType: 'free' | 'paid' | null;
   mintingPaused: boolean;
+  customName: string;
+  setCustomName: (name: string) => void;
 
   // Actions
   prepareMint: (
@@ -164,6 +166,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
     selectedColors: Record<string, string>;
     mintType: 'free' | 'paid';
   } | null>(null);
+  const [customName, setCustomName] = useState('');
   const [idempotencyKey, setIdempotencyKey] = useState<string | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -539,6 +542,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
           imageBase64,
           mintType,
           idempotencyKey: key,
+          customName: customName.trim() || undefined,
         }),
       });
 
@@ -567,7 +571,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
       setMintStep('error');
       setErrorMessage(err instanceof Error ? err.message : 'Mint failed');
     }
-  }, [pendingMintParams, address, idempotencyKey, startPolling]);
+  }, [pendingMintParams, address, idempotencyKey, customName, startPolling]);
 
   // Step 3 (paid): Confirm payment with launcher ID
   const confirmPayment = useCallback(async (launcherId: string) => {
@@ -628,6 +632,8 @@ export function MintProvider({ children }: { children: ReactNode }) {
       errorMessage,
       pendingMintType: pendingMintParams?.mintType ?? null,
       mintingPaused,
+      customName,
+      setCustomName,
       prepareMint,
       confirmMint,
       confirmPayment,
@@ -642,7 +648,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
       isTop3Trait,
       top3Traits,
     }),
-    [credits, mintStep, currentJob, errorMessage, pendingMintParams, mintingPaused, prepareMint, confirmMint, confirmPayment, acceptOfferInWallet, resetMintFlow, retryMint, totalMinted, maxSupply, refetchCredits, getTraitPricing, getTotalMintPrice, isTop3Trait, top3Traits]
+    [credits, mintStep, currentJob, errorMessage, pendingMintParams, mintingPaused, customName, prepareMint, confirmMint, confirmPayment, acceptOfferInWallet, resetMintFlow, retryMint, totalMinted, maxSupply, refetchCredits, getTraitPricing, getTotalMintPrice, isTop3Trait, top3Traits]
   );
 
   return <MintContext.Provider value={value}>{children}</MintContext.Provider>;

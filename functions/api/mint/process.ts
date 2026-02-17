@@ -15,6 +15,7 @@ import { getNextMintNumber } from './mintNumberHelper';
 import { uploadToIPFS, type IPFSUploadResult } from './uploadToIPFS';
 import { consolidateTraits } from './traitResolver';
 import { MintError } from './errors';
+import { getOrCreateSplitterAddress } from './splitxch';
 import {
   TOTAL_SUPPLY,
   SURCHARGE_CATEGORIES,
@@ -40,6 +41,7 @@ export interface ProcessEnv {
   PHASE2_ROYALTY_ADDRESS?: string;
   PHASE2_ROYALTY_PCT?: string;
   MINTGARDEN_API_KEY?: string;
+  TREASURY_ADDRESS?: string;
 }
 
 interface MintJobRow {
@@ -63,6 +65,7 @@ interface MintJobRow {
   mintgarden_launcher_id: string | null;
   offer_file: string | null;
   error_message: string | null;
+  custom_name: string | null;
   error_code: string | null;
   retry_count: number;
   max_retries: number;
@@ -129,6 +132,42 @@ export async function processJob(
 
     // ──── STEP 3: Upload to IPFS (skip if already uploaded from previous attempt) ────
     const collectionUuid = env.PHASE2_COLLECTION_UUID || '';
+    const TRAIT_ORDER = ['Background', 'Base', 'Clothes', 'Face', 'Face Wear', 'Head', 'Mouth'];
+    const attributes = [...consolidated.values()]
+      .map(({ traitType, displayName }) => ({ trait_type: traitType, value: displayName }))
+      .sort((a, b) => {
+        const ai = TRAIT_ORDER.indexOf(a.trait_type);
+        const bi = TRAIT_ORDER.indexOf(b.trait_type);
+        return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+      });
+
+    const customName = job.custom_name;
+    const fullName = customName
+      ? `Your Wojak #${mintNumber}: ${customName}`
+      : `Your Wojak #${mintNumber}`;
+
+    const metadata = {
+      format: 'CHIP-0007',
+      name: fullName,
+      description: 'Your Wojak puts collectors in control. Same handcrafted layers and lore from the Wojak Farmers Plot collection \u2014 but you choose every layer, every color, every detail using the Wojak Generator on Wojak.ink \uD83C\uDF4A',
+      sensitive_content: false,
+      collection: {
+        name: 'Your Wojak',
+        id: collectionUuid,
+        attributes: [
+          { type: 'description', value: 'Your Wojak puts collectors in control. Choose every layer, every color, every detail.' },
+          { type: 'website', value: 'https://wojak.ink' },
+          { type: 'twitter', value: 'https://x.com/WojakInk' },
+        ],
+      },
+      edition: mintNumber,
+      date: Date.now(),
+      compiler: 'Wojak.ink Generator',
+      attributes,
+      edition_number: mintNumber,
+      edition_total: TOTAL_SUPPLY,
+    };
+
     let uploadResult: IPFSUploadResult;
 
     if (job.ipfs_image_uris && job.ipfs_metadata_uris && job.image_hash && job.metadata_hash) {
@@ -147,38 +186,6 @@ export async function processJob(
       if (!jwt) {
         throw new MintError('CONFIG_ERROR', 'IPFS upload not configured (missing PINATA_JWT)');
       }
-
-      // Build CHIP-0007 metadata
-      const TRAIT_ORDER = ['Background', 'Base', 'Clothes', 'Face', 'Face Wear', 'Head', 'Mouth'];
-      const attributes = [...consolidated.values()]
-        .map(({ traitType, displayName }) => ({ trait_type: traitType, value: displayName }))
-        .sort((a, b) => {
-          const ai = TRAIT_ORDER.indexOf(a.trait_type);
-          const bi = TRAIT_ORDER.indexOf(b.trait_type);
-          return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
-        });
-
-      const metadata = {
-        format: 'CHIP-0007',
-        name: `Your Wojak #${mintNumber}`,
-        description: 'Your Wojak puts collectors in control. Same handcrafted layers and lore from the Wojak Farmers Plot collection \u2014 but you choose every layer, every color, every detail using the Wojak Generator on Wojak.ink \uD83C\uDF4A',
-        sensitive_content: false,
-        collection: {
-          name: 'Your Wojak',
-          id: collectionUuid,
-          attributes: [
-            { type: 'description', value: 'Your Wojak puts collectors in control. Choose every layer, every color, every detail.' },
-            { type: 'website', value: 'https://wojak.ink' },
-            { type: 'twitter', value: 'https://x.com/WojakInk' },
-          ],
-        },
-        edition: mintNumber,
-        date: Date.now(),
-        compiler: 'Wojak.ink Generator',
-        attributes,
-        edition_number: mintNumber,
-        edition_total: TOTAL_SUPPLY,
-      };
 
       try {
         uploadResult = await uploadToIPFS(imageBase64, metadata as Record<string, unknown>, jwt, env.PINATA_GATEWAY);
@@ -221,8 +228,24 @@ export async function processJob(
       ? job.xch_price_mojos / 1_000_000_000_000
       : undefined;
 
+    // Resolve SplitXCH splitter address for royalty splitting
+    let royaltyAddress: string | undefined;
+    if (env.TREASURY_ADDRESS) {
+      try {
+        royaltyAddress = await getOrCreateSplitterAddress(
+          { DB: env.DB, TREASURY_ADDRESS: env.TREASURY_ADDRESS },
+          job.wallet_address,
+          1, // wave 1
+        );
+      } catch (err) {
+        // Non-fatal: fall back to creator's wallet if SplitXCH is unavailable
+        console.error('[SplitXCH] Failed to resolve splitter, using creator wallet:', err);
+      }
+    }
+
     const mintResult = await callMintGardenMint({
       walletAddress: job.wallet_address,
+      royaltyAddress,
       mintType: job.mint_type,
       ipfsImageUris: uploadResult.dataUris,
       ipfsMetadataUris: uploadResult.metadataUris,
@@ -400,6 +423,17 @@ export async function finalizeJob(env: ProcessEnv, jobId: number): Promise<void>
       );
     }
   }
+
+  // Insert NFT name into nft_names cache table
+  const customName = job.custom_name;
+  const fullName = customName
+    ? `Your Wojak #${job.mint_number}: ${customName}`
+    : `Your Wojak #${job.mint_number}`;
+  batchStmts.push(
+    env.DB.prepare(
+      'INSERT OR REPLACE INTO nft_names (edition_number, custom_name, full_name) VALUES (?, ?, ?)'
+    ).bind(job.mint_number, customName, fullName)
+  );
 
   await env.DB.batch(batchStmts);
 

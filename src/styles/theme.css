@@ -1815,3 +1815,497 @@ body {
   pointer-events: none;
   animation: mint-celebrate-sparkle 0.8s ease-out forwards;
 }
+
+
+/* ============================================================
+   YOUR WOJAK GAME
+   ============================================================ */
+
+/* ── Voting Page Layout ── */
+
+.voting-page {
+  display: grid;
+  grid-template-columns: 220px 1fr 220px;
+  gap: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 16px;
+}
+
+.voting-page-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  min-height: 500px;
+}
+
+.voting-page-side {
+  position: sticky;
+  top: 80px;
+  align-self: start;
+}
+
+/* ── Mobile Stats Bar ── */
+
+.voting-stats-bar {
+  display: flex;
+  height: 44px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+}
+
+.voting-stats-bar-segment {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+}
+
+.voting-stats-bar-segment + .voting-stats-bar-segment {
+  border-left: 1px solid var(--color-border);
+}
+
+.voting-stats-bar-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1;
+}
+
+.voting-stats-bar-label {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  line-height: 1;
+}
+
+/* ── Vote Card ── */
+
+.vote-card {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  box-shadow: var(--shadow-card);
+}
+
+.vote-card:active {
+  cursor: grabbing;
+}
+
+.vote-card-image {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+.vote-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 200ms ease;
+}
+
+.vote-card-info {
+  height: 48px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vote-card-info-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70%;
+}
+
+.vote-card-info-edition {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+/* Card drag feedback */
+
+.vote-card-glow-right {
+  position: absolute;
+  inset: 0;
+  box-shadow: inset -6px 0 20px rgba(34, 197, 94, var(--glow-opacity, 0));
+  pointer-events: none;
+  z-index: 3;
+  border-radius: var(--radius-lg);
+}
+
+.vote-card-glow-left {
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 6px 0 20px rgba(239, 68, 68, var(--glow-opacity, 0));
+  pointer-events: none;
+  z-index: 3;
+  border-radius: var(--radius-lg);
+}
+
+.vote-card-tint {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  transition: background 100ms ease;
+}
+
+.vote-card-icon-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 5;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
+}
+
+.vote-card-icon-overlay svg {
+  width: 48px;
+  height: 48px;
+  stroke: white;
+  stroke-width: 2;
+  fill: none;
+}
+
+/* ── Card Stack ── */
+
+.vote-card-stack {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+}
+
+/* ── Vote Buttons ── */
+
+.vote-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  cursor: pointer;
+  border: 2px solid;
+  transition: transform 150ms ease-out, box-shadow 150ms ease-out, background 150ms ease-out;
+  padding: 0;
+}
+
+.vote-btn:active {
+  transform: scale(0.85);
+}
+
+.vote-btn svg {
+  width: 24px;
+  height: 24px;
+  stroke-width: 2;
+  fill: none;
+}
+
+.vote-btn-like {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.vote-btn-like svg {
+  stroke: var(--color-success);
+}
+
+.vote-btn-dislike {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+.vote-btn-dislike svg {
+  stroke: var(--color-error);
+}
+
+.vote-btn-undo {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  opacity: 0.5;
+  transition: opacity 150ms ease, transform 150ms ease-out;
+}
+
+.vote-btn-undo svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--color-text-muted);
+}
+
+.vote-btn-undo.available {
+  opacity: 1;
+}
+
+.vote-btn-undo:disabled {
+  opacity: 0.2;
+  pointer-events: none;
+  cursor: default;
+}
+
+@media (hover: hover) {
+  .vote-btn-like:hover {
+    transform: scale(1.1);
+    background: rgba(34, 197, 94, 0.1);
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.2);
+  }
+
+  .vote-btn-dislike:hover {
+    transform: scale(1.1);
+    background: rgba(239, 68, 68, 0.1);
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
+  }
+}
+
+/* ── Vote Progress Bar ── */
+
+.vote-progress-bar {
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  width: 100%;
+}
+
+.vote-progress-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  transition: width 200ms ease;
+}
+
+/* ── Vote Card Skeleton ── */
+
+.vote-card-skeleton {
+  width: 100%;
+  max-width: 380px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.vote-card-skeleton-image {
+  width: 100%;
+  aspect-ratio: 1;
+  background: linear-gradient(110deg, #1a1a24 30%, #24242e 50%, #1a1a24 70%);
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.vote-card-skeleton-info {
+  height: 48px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vote-card-skeleton-bar {
+  height: 14px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+/* ── Gate Checklist ── */
+
+.gate-step {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.gate-step-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 16px;
+}
+
+.gate-step-icon-future {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-text-muted);
+  margin: 6px;
+}
+
+.gate-step-content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Counter Bounce ── */
+
+.counter-bounce {
+  animation: counter-bounce 150ms ease-out;
+  color: var(--color-primary);
+}
+
+/* ── Keyframes ── */
+
+@keyframes wiggle {
+  0% { transform: translateX(0); }
+  15% { transform: translateX(20px); }
+  30% { transform: translateX(-20px); }
+  45% { transform: translateX(10px); }
+  60% { transform: translateX(-10px); }
+  100% { transform: translateX(0); }
+}
+
+.vote-card-wiggle {
+  animation: wiggle 800ms ease-in-out;
+}
+
+@keyframes counter-bounce {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+/* ── Mobile overrides ── */
+
+@media (max-width: 767px) {
+  .voting-page {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .voting-page-side {
+    display: none;
+  }
+
+  .vote-card {
+    max-width: calc(100vw - 32px);
+  }
+
+  .vote-card-stack {
+    max-width: calc(100vw - 32px);
+  }
+
+  .vote-btn {
+    width: 64px;
+    height: 64px;
+  }
+
+  .vote-btn svg {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* ── Reduced Motion ── */
+
+@media (prefers-reduced-motion: reduce) {
+  .vote-card-wiggle {
+    animation: none;
+  }
+
+  .counter-bounce {
+    animation: none;
+  }
+
+  .vote-card-skeleton-image {
+    animation: none;
+    opacity: 0.4;
+  }
+}
+
+/* Power Level Badge */
+.power-level-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.power-level-badge.tier-legend {
+  background: linear-gradient(135deg, rgba(255, 107, 0, 0.2), rgba(255, 187, 36, 0.2));
+  color: var(--color-gold);
+  border: 1px solid rgba(255, 187, 36, 0.3);
+  box-shadow: var(--glow-gold);
+}
+
+.power-level-badge.tier-top {
+  background: rgba(168, 85, 247, 0.15);
+  color: var(--color-purple);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.power-level-badge.tier-serious {
+  background: rgba(0, 212, 255, 0.15);
+  color: var(--color-cyan);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+}
+
+.power-level-badge.tier-active {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--color-success);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.power-level-badge.tier-casual {
+  color: var(--color-text-secondary);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-border);
+}
+
+/* ── Battle System ── */
+
+.battle-nft-image {
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--color-border);
+  background: var(--color-bg);
+}
+
+.battle-vote-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.battle-vote-fill-a {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-cyan));
+  transition: width 0.4s ease;
+}

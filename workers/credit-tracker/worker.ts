@@ -305,6 +305,17 @@ async function processEvents(env: Env): Promise<{ processed: number; inserted: n
         }
       }
 
+      // Anti-wash-trading: skip if buyer is the original minter of this NFT
+      if (event.address?.encoded_id) {
+        const mint = await env.DB.prepare(
+          'SELECT wallet_address FROM phase2_mints WHERE mintgarden_launcher_id = ?'
+        ).bind(event.nft_id).first<{ wallet_address: string }>();
+        if (mint && mint.wallet_address === event.address.encoded_id) {
+          console.log(`[Anti-Wash] Self-buy detected: ${event.address.encoded_id.slice(0, 15)}... bought own edition`);
+          continue;
+        }
+      }
+
       const eventDate = event.timestamp.slice(0, 10);
       let floorStored = floorCache.get(eventDate);
       if (floorStored === undefined) {
@@ -518,6 +529,16 @@ async function processCatSales(env: Env, whitelist: Set<string>): Promise<{ proc
       continue;
     }
 
+    // Anti-wash-trading: skip if buyer is the original minter
+    const mintCheck = await env.DB.prepare(
+      'SELECT wallet_address FROM phase2_mints WHERE mint_number = ?'
+    ).bind(row.nft_edition).first<{ wallet_address: string }>();
+    if (mintCheck && mintCheck.wallet_address === wallet) {
+      console.log(`[Anti-Wash] Self-buy detected (CAT): ${wallet.slice(0, 15)}... bought own edition ${row.nft_edition}`);
+      if (row.completed_at > latestTimestamp) latestTimestamp = row.completed_at;
+      continue;
+    }
+
     // Get floor price for the trade date
     const eventDate = row.completed_at.slice(0, 10);
     let floorStored = floorCache.get(eventDate);
@@ -621,6 +642,12 @@ async function backfillMissingCatCredits(env: Env, whitelist: Set<string>): Prom
        LIMIT 1`
     ).bind(row.nft_edition, wallet).first();
     if (crossPathCheck) continue;
+
+    // Anti-wash-trading: skip if buyer is the original minter
+    const mintCheck = await env.DB.prepare(
+      'SELECT wallet_address FROM phase2_mints WHERE mint_number = ?'
+    ).bind(row.nft_edition).first<{ wallet_address: string }>();
+    if (mintCheck && mintCheck.wallet_address === wallet) continue;
 
     const eventDate = row.completed_at.slice(0, 10);
     let floorStored = floorCache.get(eventDate);
@@ -760,6 +787,132 @@ async function runIntegrityCheck(
   return report;
 }
 
+// ─── Burn Detection ───
+// MintGarden event type 3 = burn (NFT sent to burn address)
+// Credit formula: heavily disliked burns earn more credits
+
+const KV_KEY_LAST_BURN_TIMESTAMP = 'last_burn_event_timestamp';
+
+function calculateBurnCredits(likes: number, dislikes: number): number {
+  const total = likes + dislikes;
+  if (total === 0) return 500;
+  const dislikeRatio = dislikes / total;
+  if (dislikeRatio > 0.7) return 2000;
+  if (dislikeRatio > 0.5) return 1200;
+  if (dislikeRatio > 0.3) return 500;
+  return 200;
+}
+
+async function detectBurns(env: Env): Promise<{ detected: number; credited: number }> {
+  const collectionId = env.COLLECTION_ID;
+  const lastBurnTs = await env.TRADE_VALUES_KV.get(KV_KEY_LAST_BURN_TIMESTAMP);
+  let detected = 0;
+  let credited = 0;
+  let latestTimestamp = lastBurnTs || '';
+
+  // Fetch burn events (type=3) from MintGarden
+  for (let page = 0; page < 5; page++) {
+    const url = new URL(`${MINTGARDEN_API}/events`);
+    url.searchParams.set('collection', collectionId);
+    url.searchParams.set('type', '3'); // burn events
+    url.searchParams.set('size', '100');
+
+    let res: Response;
+    try {
+      res = await fetchWithRetry(url.toString(), {
+        headers: { Accept: 'application/json' },
+      });
+    } catch (e) {
+      console.error('[CreditTracker] Burn events API error:', e);
+      break;
+    }
+    if (!res.ok) break;
+
+    const data = (await res.json()) as MintGardenEventsResponse;
+    const items = data.items || [];
+    if (items.length === 0) break;
+
+    for (const event of items) {
+      // Skip events we've already processed
+      if (lastBurnTs && event.timestamp <= lastBurnTs) continue;
+
+      const nftId = event.nft_id;
+      if (!nftId) continue;
+
+      // Check if already recorded in wojak_burns
+      const existing = await env.DB.prepare(
+        'SELECT 1 FROM wojak_burns WHERE nft_id = ?'
+      ).bind(nftId).first();
+      if (existing) {
+        if (event.timestamp > latestTimestamp) latestTimestamp = event.timestamp;
+        continue;
+      }
+
+      detected++;
+
+      // Look up edition number from phase2_mints
+      const mint = await env.DB.prepare(
+        'SELECT mint_number, wallet_address FROM phase2_mints WHERE mintgarden_launcher_id = ?'
+      ).bind(nftId).first<{ mint_number: number; wallet_address: string }>();
+
+      if (!mint) {
+        // Not a Phase 2 NFT we know about
+        if (event.timestamp > latestTimestamp) latestTimestamp = event.timestamp;
+        continue;
+      }
+
+      // Get vote scores
+      const scores = await env.DB.prepare(
+        'SELECT likes, dislikes, net_score FROM wojak_scores WHERE nft_id = ?'
+      ).bind(nftId).first<{ likes: number; dislikes: number; net_score: number }>();
+
+      const likes = scores?.likes ?? 0;
+      const dislikes = scores?.dislikes ?? 0;
+      const netScore = scores?.net_score ?? 0;
+      const credits = calculateBurnCredits(likes, dislikes);
+
+      // Resolve burner wallet: previous_address is who sent the burn
+      const burnerWallet = event.previous_address?.encoded_id || mint.wallet_address;
+
+      // Resolve DID (if registered game player)
+      const player = await env.DB.prepare(
+        'SELECT did_id FROM game_players WHERE wallet_address = ?'
+      ).bind(burnerWallet).first<{ did_id: string }>();
+
+      try {
+        await env.DB.batch([
+          env.DB.prepare(`
+            INSERT INTO wojak_burns (nft_id, edition_number, burner_did, burner_wallet, net_score_at_burn, credits_awarded, detected_via)
+            VALUES (?, ?, ?, ?, ?, ?, 'indexer')
+          `).bind(nftId, mint.mint_number, player?.did_id || null, burnerWallet, netScore, credits),
+          env.DB.prepare(`
+            INSERT INTO credit_events (wallet_address, nft_id, event_id, credits_earned, source, event_timestamp)
+            VALUES (?, ?, ?, ?, 'burn', ?)
+          `).bind(burnerWallet, nftId, `burn_${nftId}`, credits, event.timestamp),
+          env.DB.prepare(
+            'DELETE FROM did_holdings WHERE nft_id = ?'
+          ).bind(nftId),
+        ]);
+        credited++;
+      } catch (e) {
+        if (!String(e).includes('UNIQUE')) {
+          console.error('[CreditTracker] Burn insert error:', e);
+        }
+      }
+
+      if (event.timestamp > latestTimestamp) latestTimestamp = event.timestamp;
+    }
+
+    if (!data.next) break;
+  }
+
+  if (latestTimestamp && latestTimestamp !== lastBurnTs) {
+    await env.TRADE_VALUES_KV.put(KV_KEY_LAST_BURN_TIMESTAMP, latestTimestamp);
+  }
+
+  return { detected, credited };
+}
+
 async function run(env: Env): Promise<void> {
   const today = new Date().toISOString().slice(0, 10);
   await ensureFloorSnapshot(env, today);
@@ -779,6 +932,15 @@ async function run(env: Env): Promise<void> {
     console.log(`[CreditTracker] CAT: ${catResult.processed} trades, ${catResult.inserted} credit_events`);
   } catch (e) {
     console.error('[CreditTracker] CAT processing error (non-fatal):', e);
+  }
+
+  // Detect burn events from MintGarden and award credits
+  let burnResult = { detected: 0, credited: 0 };
+  try {
+    burnResult = await detectBurns(env);
+    console.log(`[CreditTracker] Burns: ${burnResult.detected} detected, ${burnResult.credited} credited`);
+  } catch (e) {
+    console.error('[CreditTracker] Burn detection error (non-fatal):', e);
   }
 
   // Post-processing integrity check + auto-dedup

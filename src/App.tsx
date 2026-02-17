@@ -60,6 +60,10 @@ const Drawer = lazy(() => import('./pages/Drawer'));
 const RuleBuilder = lazy(() => import('./pages/RuleBuilder'));
 
 // Games
+const GameVoting = lazy(() => import('./pages/GameVoting'));
+const GameDashboard = lazy(() => import('./pages/GameDashboard'));
+const GameBattles = lazy(() => import('./pages/GameBattles'));
+
 const BrickByBrick = lazy(() => import('./pages/BrickByBrick'));
 const MemoryMatch = lazy(() => import('./pages/MemoryMatch'));
 const OrangePong = lazy(() => import('./pages/OrangePong'));
@@ -339,6 +343,31 @@ function AppContent() {
                     element={
                       <Suspense fallback={<PageSkeleton type="settings" />}>
                         <Drawer />
+                      </Suspense>
+                    }
+                  />
+                  {/* Your Wojak Game */}
+                  <Route
+                    path="games/your-wojak"
+                    element={
+                      <Suspense fallback={<PageSkeleton type="media" />}>
+                        <GameVoting />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="games/your-wojak/dashboard"
+                    element={
+                      <Suspense fallback={<PageSkeleton type="settings" />}>
+                        <GameDashboard />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="games/your-wojak/battles"
+                    element={
+                      <Suspense fallback={<PageSkeleton type="media" />}>
+                        <GameBattles />
                       </Suspense>
                     }
                   />

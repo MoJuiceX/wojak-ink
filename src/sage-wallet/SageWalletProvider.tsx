@@ -274,6 +274,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
             'chia_takeOffer',
             'chia_send',
             'chip0002_getAssetBalance',
+            'chia_transferNFT',
           ],
           chains: [CHIA_CHAIN],
           events: [],
@@ -410,6 +411,26 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     return result;
   }, []);
 
+  const transferNFT = useCallback(async (nftCoinId: string, targetAddress: string, fee: number = 0): Promise<unknown> => {
+    const client = signClientRef.current;
+    const session = currentSessionRef.current;
+
+    if (!client || !session) {
+      throw new Error('No active Sage wallet session');
+    }
+
+    const result = await client.request({
+      topic: session.topic,
+      chainId: CHIA_CHAIN,
+      request: {
+        method: ChiaMethod.TransferNft,
+        params: { nftCoinId, targetAddress, fee },
+      },
+    });
+
+    return result;
+  }, []);
+
   const hasRequiredNFTs = useCallback(async (collectionId: string): Promise<boolean> => {
     if (!state.address || !isValidChiaAddress(state.address)) {
       console.warn('[SageWallet] No valid address for NFT check');
@@ -479,6 +500,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     signMessage,
     getAssetBalance,
     takeOffer,
+    transferNFT,
     hasRequiredNFTs,
     getNFTs,
   };
