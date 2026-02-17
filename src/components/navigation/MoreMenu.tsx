@@ -15,6 +15,7 @@ import {
   Settings,
   User,
   MessageCircle,
+  Heart,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -30,6 +31,15 @@ interface MenuItem {
 
 // Reordered: Account first (personal), then actions, community, settings last
 const menuItems: MenuItem[] = [
+  {
+    icon: Heart,
+    label: 'Wojak Swipe',
+    description: 'Vote, battle, and climb the leaderboard',
+    route: '/swipe',
+    badge: 'New',
+    iconColor: '#ef4444',
+    iconBg: 'rgba(239, 68, 68, 0.15)',
+  },
   {
     icon: User,
     label: 'Account',
