@@ -1,7 +1,7 @@
 // Collection Scroll — horizontal scrollable row of player's Wojak NFTs with detail modal.
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { X } from 'lucide-react';
+import { X, Pencil, Check } from 'lucide-react';
 import { BurnButton } from './BurnButton';
 import { useSageWallet } from '@/sage-wallet';
 import { useGame } from '@/contexts/GameContext';
@@ -31,6 +31,14 @@ function NftDetailModal({ nft, onClose, onBurned }: { nft: CollectionNft; onClos
   const [loadingCoinId, setLoadingCoinId] = useState(false);
   const [coinIdError, setCoinIdError] = useState<string | null>(null);
 
+  // Name editing state
+  const [displayName, setDisplayName] = useState(nft.name);
+  const [editing, setEditing] = useState(false);
+  const [nameInput, setNameInput] = useState('');
+  const [nameSaving, setNameSaving] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const fetchCoinId = useCallback(async () => {
     setLoadingCoinId(true);
     setCoinIdError(null);
@@ -44,6 +52,46 @@ function NftDetailModal({ nft, onClose, onBurned }: { nft: CollectionNft; onClos
     }
   }, [nft.nftId, getNFTCoinId]);
 
+  const startEditing = () => {
+    setNameInput('');
+    setNameError(null);
+    setEditing(true);
+    setTimeout(() => inputRef.current?.focus(), 50);
+  };
+
+  const cancelEditing = () => {
+    setEditing(false);
+    setNameError(null);
+  };
+
+  const saveName = async () => {
+    const trimmed = nameInput.trim();
+    if (!trimmed) { cancelEditing(); return; }
+    if (trimmed.length > 30) { setNameError('Max 30 characters'); return; }
+    if (!/^[a-zA-Z0-9 .,!?'\-]+$/.test(trimmed)) { setNameError('Letters, numbers, spaces, basic punctuation only'); return; }
+
+    setNameSaving(true);
+    setNameError(null);
+    try {
+      const res = await fetch('/api/game/nft-name', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ did: player?.did, editionNumber: nft.editionNumber, name: trimmed }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setDisplayName(data.name);
+        setEditing(false);
+      } else {
+        setNameError(data.error || 'Failed to save name');
+      }
+    } catch {
+      setNameError('Failed to save name');
+    } finally {
+      setNameSaving(false);
+    }
+  };
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -55,11 +103,36 @@ function NftDetailModal({ nft, onClose, onBurned }: { nft: CollectionNft; onClos
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
-          <h3 className="font-bold" style={{ fontSize: 16 }}>{nft.name}</h3>
+          {editing ? (
+            <div className="flex items-center gap-2 flex-1 mr-2">
+              <input
+                ref={inputRef}
+                className="input flex-1"
+                style={{ fontSize: 14, padding: '4px 8px' }}
+                value={nameInput}
+                onChange={e => setNameInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') saveName(); if (e.key === 'Escape') cancelEditing(); }}
+                placeholder="Name your Wojak..."
+                maxLength={30}
+                disabled={nameSaving}
+              />
+              <button className="btn btn-ghost" style={{ padding: 4, minWidth: 'auto' }} onClick={saveName} disabled={nameSaving}>
+                <Check size={16} />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <h3 className="font-bold" style={{ fontSize: 16 }}>{displayName}</h3>
+              <button className="btn btn-ghost" style={{ padding: 2, minWidth: 'auto' }} onClick={startEditing} title="Rename">
+                <Pencil size={14} className="text-muted" />
+              </button>
+            </div>
+          )}
           <button className="btn btn-ghost" style={{ padding: 4, minWidth: 'auto' }} onClick={onClose}>
             <X size={18} />
           </button>
         </div>
+        {nameError && <span className="text-sm" style={{ color: 'var(--color-error)' }}>{nameError}</span>}
 
         <img
           src={`https://assets.mintgarden.io/thumbnails/medium/${nft.nftId}.png`}
