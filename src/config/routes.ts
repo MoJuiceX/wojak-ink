@@ -12,6 +12,7 @@
 import {
   Camera,
   Briefcase,
+  Heart,
   Lightbulb,
   Palette,
   Settings,
@@ -90,6 +91,19 @@ export const PRIMARY_NAV_ITEMS: NavItem[] = [
     label: 'Games',
     shortLabel: 'Games',
     icon: Gamepad2,
+  },
+  {
+    id: 'swipe',
+    path: '/swipe',
+    label: 'Wojak Swipe',
+    shortLabel: 'Swipe',
+    icon: Heart,
+    badge: 'dot',
+    children: [
+      { id: 'swipe-dashboard', path: '/swipe/dashboard', label: 'Dashboard', icon: Heart },
+      { id: 'swipe-battles', path: '/swipe/battles', label: 'Battles', icon: Heart },
+      { id: 'swipe-leaderboard', path: '/swipe/leaderboard', label: 'Leaderboard', icon: Heart },
+    ]
   },
   {
     id: 'leaderboard',
