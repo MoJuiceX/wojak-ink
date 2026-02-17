@@ -304,7 +304,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
             image_base64_hash, mint_type, credit_cost, xch_price_mojos,
             surcharge_xch, highest_surcharge_trait,
             step, wallet_lock, credit_spend_id, expires_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'queued', ?, 0, ?)`
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'queued', ?, NULL, ?)`
         ).bind(
           wallet, idempotencyKey,
           JSON.stringify(selectedLayers), JSON.stringify(selectedColors),
@@ -339,14 +339,32 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
       if (!jobId) throw new Error('No job ID returned from INSERT');
 
-      // Link credit_spend to the job (now that we have the jobId)
-      if (creditSpendId) {
-        await env.DB.prepare(
-          'UPDATE credit_spends SET mint_id = ? WHERE id = ?'
-        ).bind(jobId, creditSpendId).run();
-        await env.DB.prepare(
-          'UPDATE mint_jobs SET credit_spend_id = ? WHERE id = ?'
-        ).bind(creditSpendId, jobId).run();
+      // Link credit_spend to the job (now that we have the jobId).
+      // Uses batch for atomicity + fallback lookup if last_row_id unavailable.
+      if (mintType === 'free') {
+        let spendId = creditSpendId;
+
+        // Fallback: if last_row_id wasn't returned, find by wallet + mint_id=0
+        if (!spendId) {
+          const fallback = await env.DB.prepare(
+            'SELECT id FROM credit_spends WHERE wallet_address = ? AND mint_id = 0 ORDER BY id DESC LIMIT 1'
+          ).bind(wallet).first<{ id: number }>();
+          spendId = fallback?.id ?? null;
+        }
+
+        if (spendId) {
+          try {
+            await env.DB.batch([
+              env.DB.prepare('UPDATE credit_spends SET mint_id = ? WHERE id = ?').bind(jobId, spendId),
+              env.DB.prepare('UPDATE mint_jobs SET credit_spend_id = ? WHERE id = ?').bind(spendId, jobId),
+            ]);
+            creditSpendId = spendId;
+          } catch (linkErr) {
+            // Linking failed — credit_spends row exists with mint_id=0.
+            // handleJobFailure and cleanup op 5 both have fallbacks for this.
+            console.error('[Mint Submit] Credit-spend linking failed:', linkErr);
+          }
+        }
       }
 
     } catch (err: unknown) {

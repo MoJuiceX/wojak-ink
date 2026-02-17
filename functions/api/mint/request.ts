@@ -20,9 +20,21 @@
 
 const MINTGARDEN_DYNAMIC_URL = 'https://api.mintgarden.io/mint/dynamic';
 const MAX_RETRIES = 3;
+const MINT_TIMEOUT_MS = 15_000; // 15s per attempt — prevents hanging on MintGarden outage
 
 /** 1 XCH = 10^12 mojos */
 const MOJOS_PER_XCH = 1_000_000_000_000;
+
+/** Fetch with AbortController timeout to prevent indefinite hangs. */
+async function fetchWithTimeout(url: string, init?: RequestInit, timeoutMs = MINT_TIMEOUT_MS): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
 
 export interface MintRequestParams {
   walletAddress: string;
@@ -142,7 +154,7 @@ export async function callMintGardenMint(
   let lastError: string | null = null;
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
-      const res = await fetch(mintGardenApiUrl, {
+      const res = await fetchWithTimeout(mintGardenApiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

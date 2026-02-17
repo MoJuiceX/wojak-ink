@@ -474,6 +474,19 @@ async function handleJobFailure(
       'DELETE FROM credit_spends WHERE id = ?'
     ).bind(job.credit_spend_id).run();
     finalStep = 'refunded';
+  } else if (job?.mint_type === 'free' && !job?.credit_spend_id) {
+    // credit_spend_id linking may have failed — find orphaned spend by wallet + mint_id=0
+    try {
+      const orphan = await env.DB.prepare(
+        'SELECT id FROM credit_spends WHERE wallet_address = ? AND mint_id = 0 ORDER BY id DESC LIMIT 1'
+      ).bind(job.wallet_address).first<{ id: number }>();
+      if (orphan) {
+        await env.DB.prepare('DELETE FROM credit_spends WHERE id = ?').bind(orphan.id).run();
+        finalStep = 'refunded';
+      }
+    } catch {
+      // Cleanup operation 5 will catch this as a fallback
+    }
   }
 
   // If paid mint failed after user already paid, auto-flag refund.

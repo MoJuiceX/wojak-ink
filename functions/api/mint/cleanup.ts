@@ -119,7 +119,7 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
     `SELECT id FROM mint_jobs WHERE step = 'queued'
      AND created_at < datetime('now', '-30 seconds')
      AND retry_count < max_retries
-     LIMIT 2`
+     LIMIT 1`
   ).all<{ id: number }>();
 
   for (const row of (staleQueued.results || [])) {
@@ -179,6 +179,7 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
 
   // 5. Refund credits for failed free mint jobs that haven't been refunded yet
   try {
+    // 5a. Jobs with linked credit_spend_id
     const unrefunded = await env.DB.prepare(
       `SELECT id, credit_spend_id FROM mint_jobs
        WHERE step = 'failed' AND mint_type = 'free'
@@ -195,6 +196,30 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
         stats.refunded++;
       } catch (err) {
         console.error(`[Cleanup] Refund failed for job ${row.id}:`, err);
+      }
+    }
+
+    // 5b. Orphaned credit_spends: linking failed so credit_spend_id is NULL on job,
+    //     but credit_spends row exists with mint_id=0. Match by wallet_address.
+    const orphanedSpends = await env.DB.prepare(
+      `SELECT mj.id AS job_id, cs.id AS spend_id
+       FROM mint_jobs mj
+       JOIN credit_spends cs ON cs.wallet_address = mj.wallet_address AND cs.mint_id = 0
+       WHERE mj.step = 'failed' AND mj.mint_type = 'free'
+       AND mj.credit_spend_id IS NULL
+       LIMIT 10`
+    ).all<{ job_id: number; spend_id: number }>();
+
+    for (const row of (orphanedSpends.results || [])) {
+      try {
+        await env.DB.prepare('DELETE FROM credit_spends WHERE id = ?')
+          .bind(row.spend_id).run();
+        await env.DB.prepare(
+          "UPDATE mint_jobs SET step = 'refunded', updated_at = datetime('now') WHERE id = ?"
+        ).bind(row.job_id).run();
+        stats.refunded++;
+      } catch (err) {
+        console.error(`[Cleanup] Orphan credit refund failed for job ${row.job_id}:`, err);
       }
     }
   } catch (err) {
