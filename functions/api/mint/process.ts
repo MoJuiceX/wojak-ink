@@ -481,6 +481,32 @@ export async function finalizeJob(env: ProcessEnv, jobId: number): Promise<void>
     status: 'completed',
     data: { mint_number: job.mint_number, launcher_id: launcherId, job_id: jobId },
   });
+
+  // Award onboarding_minted milestone if player is registered and hasn't received it yet
+  try {
+    const player = await env.DB.prepare(
+      'SELECT did_id, onboarding_minted FROM game_players WHERE wallet_address = ?'
+    ).bind(job.wallet_address).first<{ did_id: string; onboarding_minted: number }>();
+
+    if (player && !player.onboarding_minted) {
+      await env.DB.batch([
+        env.DB.prepare(
+          "UPDATE game_players SET onboarding_minted = 1, updated_at = datetime('now') WHERE wallet_address = ? AND onboarding_minted = 0"
+        ).bind(job.wallet_address),
+        env.DB.prepare(`
+          INSERT INTO credit_events (wallet_address, nft_id, event_id, price_xch, floor_at_time, credits_earned, whale_multiplier, source, event_type, event_timestamp)
+          VALUES (?, 'onboarding_first_mint', ?, 0, 0, 500, 100, 'onboarding', 'onboarding', datetime('now'))
+        `).bind(job.wallet_address, `onboarding_mint_${job.wallet_address}`),
+        env.DB.prepare(`
+          INSERT INTO game_activity (did_id, event_type, event_data)
+          VALUES (?, 'mint_milestone', ?)
+        `).bind(player.did_id, JSON.stringify({ milestone: 'first_mint', credits: 500 })),
+      ]);
+    }
+  } catch (e) {
+    // Non-critical — don't fail the mint if onboarding milestone fails
+    console.error('[MintProcessor] Onboarding milestone error:', e);
+  }
 }
 
 // ─── Failure Handler ───
