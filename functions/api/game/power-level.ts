@@ -122,9 +122,23 @@ async function calculatePowerLevel(context: EventContext<Env, string, unknown>) 
       WHERE did_id = ?
     `).bind(powerLevel, did).run();
 
+    // Calculate rank (1-based: count of players with higher power level + 1)
+    const rankResult = await context.env.DB.prepare(
+      'SELECT COUNT(*) as above FROM game_players WHERE power_level > ?'
+    ).bind(powerLevel).first();
+    const rank = ((rankResult?.above as number) || 0) + 1;
+
+    // Get total credits earned from trades
+    const creditsResult = await context.env.DB.prepare(
+      'SELECT COALESCE(SUM(credits_earned), 0) as total FROM credit_events WHERE wallet_address = ?'
+    ).bind(player.wallet_address).first();
+    const credits = (creditsResult?.total as number) || 0;
+
     return Response.json({
       success: true,
       powerLevel,
+      rank,
+      credits,
       breakdown: {
         holdings: {
           score: Math.round(holdingsScore),
