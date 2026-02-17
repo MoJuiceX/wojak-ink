@@ -244,7 +244,7 @@ function LeaderboardContent() {
               <span className="text-muted" style={{ fontSize: 14 }}>
                 {tab === 'players' ? 'Be the first on the leaderboard' : 'No votes cast yet'}
               </span>
-              <Link to="/your-wojak" className="btn btn-primary" style={{ fontSize: 13, padding: '8px 16px' }}>
+              <Link to="/swipe" className="btn btn-primary" style={{ fontSize: 13, padding: '8px 16px' }}>
                 Start Playing
               </Link>
             </div>

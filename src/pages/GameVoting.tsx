@@ -1,4 +1,4 @@
-// Voting page — /your-wojak
+// Voting page — /swipe
 // Desktop: 3-column (leaderboard | card | stats). Mobile: stats bar + card.
 
 import { useEffect } from 'react';

@@ -8,7 +8,7 @@ export function MobileStatsBar() {
   const { player } = useGame();
   const navigate = useNavigate();
 
-  const handleTap = () => navigate('/your-wojak/dashboard');
+  const handleTap = () => navigate('/swipe/dashboard');
 
   if (!player) return null;
 

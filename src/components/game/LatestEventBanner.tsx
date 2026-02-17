@@ -23,10 +23,10 @@ const EVENT_ICONS: Record<string, typeof Swords> = {
 };
 
 const EVENT_LINKS: Record<string, string> = {
-  battle_result: '/your-wojak/battles',
-  leaderboard_change: '/your-wojak/leaderboard',
-  vote_milestone: '/your-wojak',
-  burn: '/your-wojak/dashboard',
+  battle_result: '/swipe/battles',
+  leaderboard_change: '/swipe/leaderboard',
+  vote_milestone: '/swipe',
+  burn: '/swipe/dashboard',
   mint: '/generator',
 };
 
@@ -76,7 +76,7 @@ export function LatestEventBanner({ did }: LatestEventBannerProps) {
   if (!current) return null;
 
   const Icon = EVENT_ICONS[current.eventType] || Sparkles;
-  const link = EVENT_LINKS[current.eventType] || '/your-wojak/dashboard';
+  const link = EVENT_LINKS[current.eventType] || '/swipe/dashboard';
 
   return (
     <div

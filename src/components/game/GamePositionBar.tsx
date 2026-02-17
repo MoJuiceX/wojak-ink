@@ -37,7 +37,7 @@ export function GamePositionBar({ mode, isRegistered, playerPosition, wojakPosit
         }}
       >
         <div className="flex items-center justify-center" style={{ maxWidth: 720, margin: '0 auto', padding: '12px 16px' }}>
-          <Link to="/your-wojak/dashboard" className="btn btn-primary" style={{ fontSize: 13 }}>
+          <Link to="/swipe/dashboard" className="btn btn-primary" style={{ fontSize: 13 }}>
             Join the game
           </Link>
         </div>

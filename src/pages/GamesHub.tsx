@@ -332,7 +332,7 @@ export default function GamesHub() {
   const gamesGridWithVoting = (
     <>
       <Link
-        to="/your-wojak"
+        to="/swipe"
         className="card p-4 flex items-center gap-4"
         style={{ borderLeft: '3px solid var(--color-primary)', marginBottom: 16, textDecoration: 'none' }}
       >

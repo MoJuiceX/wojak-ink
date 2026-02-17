@@ -347,9 +347,9 @@ function AppContent() {
                       </Suspense>
                     }
                   />
-                  {/* Your Wojak Game */}
+                  {/* Wojak Swipe */}
                   <Route
-                    path="your-wojak"
+                    path="swipe"
                     element={
                       <Suspense fallback={<PageSkeleton type="media" />}>
                         <GameVoting />
@@ -357,7 +357,7 @@ function AppContent() {
                     }
                   />
                   <Route
-                    path="your-wojak/dashboard"
+                    path="swipe/dashboard"
                     element={
                       <Suspense fallback={<PageSkeleton type="settings" />}>
                         <GameDashboard />
@@ -365,7 +365,7 @@ function AppContent() {
                     }
                   />
                   <Route
-                    path="your-wojak/battles"
+                    path="swipe/battles"
                     element={
                       <Suspense fallback={<PageSkeleton type="media" />}>
                         <GameBattles />
@@ -373,13 +373,18 @@ function AppContent() {
                     }
                   />
                   <Route
-                    path="your-wojak/leaderboard"
+                    path="swipe/leaderboard"
                     element={
                       <Suspense fallback={<PageSkeleton type="settings" />}>
                         <GameLeaderboard />
                       </Suspense>
                     }
                   />
+                  {/* Redirects from old routes */}
+                  <Route path="your-wojak" element={<Navigate to="/swipe" replace />} />
+                  <Route path="your-wojak/dashboard" element={<Navigate to="/swipe/dashboard" replace />} />
+                  <Route path="your-wojak/battles" element={<Navigate to="/swipe/battles" replace />} />
+                  <Route path="your-wojak/leaderboard" element={<Navigate to="/swipe/leaderboard" replace />} />
                   {/* Game Routes - all under /games/* for cleaner URLs */}
                   <Route
                     path="games/stack"

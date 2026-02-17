@@ -58,7 +58,7 @@ export function ActiveBattleCard({ did }: ActiveBattleCardProps) {
       <div className="card-static p-4 flex flex-col items-center gap-2">
         <Swords size={24} className="text-muted" />
         <span className="text-muted" style={{ fontSize: 13 }}>No active battles</span>
-        <Link to="/your-wojak/battles" className="btn btn-primary" style={{ fontSize: 13 }}>
+        <Link to="/swipe/battles" className="btn btn-primary" style={{ fontSize: 13 }}>
           Find a Battle
         </Link>
       </div>
@@ -118,12 +118,12 @@ export function ActiveBattleCard({ did }: ActiveBattleCardProps) {
         </div>
       </div>
 
-      <Link to="/your-wojak/battles" className="btn btn-secondary w-full text-center" style={{ fontSize: 13 }}>
+      <Link to="/swipe/battles" className="btn btn-secondary w-full text-center" style={{ fontSize: 13 }}>
         View Battle
       </Link>
 
       {remaining > 0 && (
-        <Link to="/your-wojak/battles" className="text-accent text-center" style={{ fontSize: 12 }}>
+        <Link to="/swipe/battles" className="text-accent text-center" style={{ fontSize: 12 }}>
           +{remaining} more active
         </Link>
       )}

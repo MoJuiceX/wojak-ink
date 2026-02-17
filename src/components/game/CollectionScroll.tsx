@@ -71,7 +71,7 @@ function NftDetailModal({ nft, onClose }: { nft: CollectionNft; onClose: () => v
         </div>
 
         <div className="flex gap-3">
-          <Link to="/your-wojak/battles" className="btn btn-primary flex-1 text-center" style={{ fontSize: 13 }}>
+          <Link to="/swipe/battles" className="btn btn-primary flex-1 text-center" style={{ fontSize: 13 }}>
             Enter Battle
           </Link>
           <button

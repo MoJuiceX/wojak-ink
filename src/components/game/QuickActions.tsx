@@ -12,7 +12,7 @@ export function QuickActions({ votesRemaining, isVerified, hasActiveBattle }: Qu
   return (
     <div className="flex gap-3">
       <Link
-        to="/your-wojak"
+        to="/swipe"
         className="btn btn-secondary flex-1 flex flex-col items-center gap-1"
         style={{ padding: '14px 0', height: 70, position: 'relative' }}
       >
@@ -26,7 +26,7 @@ export function QuickActions({ votesRemaining, isVerified, hasActiveBattle }: Qu
       </Link>
 
       <Link
-        to="/your-wojak/battles"
+        to="/swipe/battles"
         className="btn btn-secondary flex-1 flex flex-col items-center gap-1"
         style={{
           padding: '14px 0',
