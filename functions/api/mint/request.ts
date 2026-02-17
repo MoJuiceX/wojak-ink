@@ -18,6 +18,8 @@
  * - Paid: target_address + requested_mojos → API returns offer file; user accepts in wallet to complete mint.
  */
 
+import { MintError } from './errors';
+
 const MINTGARDEN_DYNAMIC_URL = 'https://api.mintgarden.io/mint/dynamic';
 const MAX_RETRIES = 3;
 const MINT_TIMEOUT_MS = 15_000; // 15s per attempt — prevents hanging on MintGarden outage
@@ -180,6 +182,16 @@ export async function callMintGardenMint(
       if (!res.ok) {
         console.error('[MintGarden] API error:', res.status, data.error ?? data.message ?? text);
         lastError = data.error ?? data.message ?? text ?? `HTTP ${res.status}`;
+
+        // 429 = rate limited. Don't retry — throw immediately so processJob can re-queue.
+        if (res.status === 429) {
+          const retryAfterSec = parseInt(res.headers.get('Retry-After') ?? '', 10);
+          const err = new MintError('RATE_LIMITED', `MintGarden rate limited: ${lastError}`);
+          // Attach retryAfterMs for processJob to use as not_before
+          (err as any).retryAfterMs = !isNaN(retryAfterSec) ? retryAfterSec * 1000 : 30_000;
+          throw err;
+        }
+
         if (attempt < MAX_RETRIES - 1) {
           await new Promise((r) => setTimeout(r, Math.pow(2, attempt) * 1000));
           continue;
@@ -194,6 +206,8 @@ export async function callMintGardenMint(
       }
       return parsed;
     } catch (err) {
+      // Re-throw MintErrors (e.g. RATE_LIMITED) — they should not be retried
+      if (err instanceof MintError) throw err;
       lastError = err instanceof Error ? err.message : String(err);
       console.error('[MintGarden] Request failed:', lastError);
       if (attempt < MAX_RETRIES - 1) {
