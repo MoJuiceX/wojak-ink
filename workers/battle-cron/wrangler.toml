@@ -2,5 +2,5 @@ name = "wojak-battle-cron"
 main = "worker.ts"
 compatibility_date = "2024-12-01"
 
-# Cron removed — battle resolution now runs inside did-indexer (every 30 min).
-# This worker is kept for manual /run trigger but no longer scheduled.
+[triggers]
+crons = ["0 * * * *"]
