@@ -30,6 +30,7 @@ import { useFlickVoting } from '@/hooks/useFlickVoting';
 import { SoundManager } from '@/systems/audio';
 import '@/styles/voting.css';
 import { PageSEO } from '@/components/seo';
+import { Link } from 'react-router-dom';
 
 const CLERK_ENABLED = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -330,6 +331,17 @@ export default function GamesHub() {
   // === RENDER ===
   const gamesGridWithVoting = (
     <>
+      <Link
+        to="/your-wojak"
+        className="card p-4 flex items-center gap-4"
+        style={{ borderLeft: '3px solid var(--color-primary)', marginBottom: 16, textDecoration: 'none' }}
+      >
+        <div className="flex flex-col gap-1" style={{ flex: 1 }}>
+          <span className="font-bold" style={{ fontSize: 15 }}>Your Wojak</span>
+          <span className="text-secondary" style={{ fontSize: 13 }}>Vote, battle, and burn — the Wojak metagame</span>
+        </div>
+        <span className="text-muted" style={{ fontSize: 18 }}>&rarr;</span>
+      </Link>
       <GamesGrid
         games={playableGames}
         onGameSelect={handleGameSelect}
