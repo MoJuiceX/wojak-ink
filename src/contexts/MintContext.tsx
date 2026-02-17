@@ -63,6 +63,8 @@ export interface MintJob {
   creditsRefunded?: boolean;
   createdAt?: string;
   expiresAt?: string;
+  queuePosition?: number;
+  queueTotal?: number;
 }
 
 export interface TraitPricingEntry {
