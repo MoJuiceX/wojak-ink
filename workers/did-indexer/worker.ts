@@ -56,6 +56,18 @@ async function run(env: Env) {
 
   console.log(`[DID Indexer] Done. ${updatedCount}/${players.results.length} players had changes.`);
 
+  // Resolve expired battles (replaces standalone battle-cron worker)
+  try {
+    const res = await fetch('https://wojak.ink/api/game/battle-resolve', { method: 'POST' });
+    if (res.ok) {
+      const data = await res.json() as { resolved?: number; draws?: number };
+      console.log(`[DID Indexer] Battles resolved: ${data.resolved ?? 0}, draws: ${data.draws ?? 0}`);
+    } else {
+      console.error(`[DID Indexer] Battle resolve returned ${res.status}`);
+    }
+  } catch (err) {
+    console.error('[DID Indexer] Battle resolve error:', err);
+  }
 }
 
 async function syncDIDHoldings(env: Env, did: string): Promise<boolean> {
