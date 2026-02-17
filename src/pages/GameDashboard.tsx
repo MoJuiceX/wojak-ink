@@ -1,6 +1,8 @@
 // Game Dashboard — player HQ with Power Level, quick actions, collection, battles.
 import { useEffect, useState } from 'react';
 import { useGame, GameProvider } from '@/contexts/GameContext';
+import { useSageWallet } from '@/sage-wallet';
+import { GateChecklist } from '@/components/game/GateChecklist';
 import { PowerLevelDisplay } from '@/components/game/PowerLevelDisplay';
 import { OnboardingChecklist } from '@/components/game/OnboardingChecklist';
 import { QuickActions } from '@/components/game/QuickActions';
@@ -20,6 +22,7 @@ interface PowerData {
 
 function DashboardContent() {
   const { player, isRegistered, isVerified } = useGame();
+  const { address, status: walletStatus } = useSageWallet();
   const [powerData, setPowerData] = useState<PowerData>({});
 
   useEffect(() => { document.title = 'Dashboard — Your Wojak'; }, []);
@@ -41,11 +44,16 @@ function DashboardContent() {
     }
   }, [isRegistered, player?.did]);
 
+  const walletConnected = walletStatus === 'connected' && !!address;
+
   if (!player) {
     return (
-      <div className="card-static p-8 flex flex-col items-center gap-4">
-        <h2 className="text-xl font-bold">Your Wojak Dashboard</h2>
-        <p className="text-secondary">Connect your wallet to see your game profile.</p>
+      <div className="flex flex-col items-center p-4 gap-4">
+        <GateChecklist
+          walletConnected={walletConnected}
+          hasDid={isRegistered}
+          hasPhase1={isVerified}
+        />
       </div>
     );
   }
