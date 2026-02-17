@@ -315,6 +315,17 @@ async function processEvents(env: Env): Promise<{ processed: number; inserted: n
         }
       }
 
+      // Anti-wash-trading: skip if buyer is the original minter of this NFT
+      if (event.address?.encoded_id) {
+        const mint = await env.DB.prepare(
+          'SELECT wallet_address FROM phase2_mints WHERE mintgarden_launcher_id = ?'
+        ).bind(event.nft_id).first<{ wallet_address: string }>();
+        if (mint && mint.wallet_address === event.address.encoded_id) {
+          console.log(`[Anti-Wash] Self-buy detected: ${event.address.encoded_id.slice(0, 15)}... bought own edition`);
+          continue;
+        }
+      }
+
       const eventDate = event.timestamp.slice(0, 10);
       let floorStored = floorCache.get(eventDate);
       if (floorStored === undefined) {
@@ -528,6 +539,16 @@ async function processCatSales(env: Env, whitelist: Set<string>): Promise<{ proc
       continue;
     }
 
+    // Anti-wash-trading: skip if buyer is the original minter
+    const mintCheck = await env.DB.prepare(
+      'SELECT wallet_address FROM phase2_mints WHERE mint_number = ?'
+    ).bind(row.nft_edition).first<{ wallet_address: string }>();
+    if (mintCheck && mintCheck.wallet_address === wallet) {
+      console.log(`[Anti-Wash] Self-buy detected (CAT): ${wallet.slice(0, 15)}... bought own edition ${row.nft_edition}`);
+      if (row.completed_at > latestTimestamp) latestTimestamp = row.completed_at;
+      continue;
+    }
+
     // Get floor price for the trade date
     const eventDate = row.completed_at.slice(0, 10);
     let floorStored = floorCache.get(eventDate);
@@ -631,6 +652,12 @@ async function backfillMissingCatCredits(env: Env, whitelist: Set<string>): Prom
        LIMIT 1`
     ).bind(row.nft_edition, wallet).first();
     if (crossPathCheck) continue;
+
+    // Anti-wash-trading: skip if buyer is the original minter
+    const mintCheck = await env.DB.prepare(
+      'SELECT wallet_address FROM phase2_mints WHERE mint_number = ?'
+    ).bind(row.nft_edition).first<{ wallet_address: string }>();
+    if (mintCheck && mintCheck.wallet_address === wallet) continue;
 
     const eventDate = row.completed_at.slice(0, 10);
     let floorStored = floorCache.get(eventDate);
