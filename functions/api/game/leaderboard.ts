@@ -13,14 +13,22 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
     const results = await context.env.DB.prepare(`
       SELECT
-        did_id,
-        wallet_address,
-        power_level,
-        total_votes_cast,
-        created_at
-      FROM game_players
-      WHERE phase1_verified = 1 AND power_level > 0
-      ORDER BY power_level DESC
+        gp.did_id,
+        gp.wallet_address,
+        gp.power_level,
+        gp.total_votes_cast,
+        gp.created_at,
+        topnft.nft_id AS top_nft_id,
+        topnft.edition_number AS top_edition
+      FROM game_players gp
+      LEFT JOIN (
+        SELECT dh.did_id, dh.nft_id, dh.edition_number,
+               ROW_NUMBER() OVER (PARTITION BY dh.did_id ORDER BY COALESCE(ws.net_score, 0) DESC) AS rn
+        FROM did_holdings dh
+        LEFT JOIN wojak_scores ws ON dh.nft_id = ws.nft_id
+      ) topnft ON topnft.did_id = gp.did_id AND topnft.rn = 1
+      WHERE gp.phase1_verified = 1 AND gp.power_level > 0
+      ORDER BY gp.power_level DESC
       LIMIT ? OFFSET ?
     `).bind(limit, offset).all();
 
@@ -36,6 +44,10 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         walletAddress: row.wallet_address,
         powerLevel: row.power_level,
         totalVotesCast: row.total_votes_cast,
+        topNft: row.top_nft_id ? {
+          nftId: row.top_nft_id,
+          editionNumber: row.top_edition,
+        } : null,
       })),
       pagination: {
         limit,
