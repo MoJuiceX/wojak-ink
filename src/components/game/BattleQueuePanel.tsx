@@ -1,6 +1,7 @@
 // Battle Queue Panel — select an NFT from your collection and queue for battle.
 
 import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { useGame } from '@/contexts/GameContext';
 
 interface OwnedNft {
@@ -81,7 +82,7 @@ export function BattleQueuePanel({ onQueued }: BattleQueuePanelProps) {
       <div className="card-static p-4 text-center">
         <p className="text-secondary text-sm">
           No Your Wojak NFTs found. Mint one in the{' '}
-          <a href="/generator" style={{ color: 'var(--color-primary)' }}>Generator</a>.
+          <Link to="/generator" style={{ color: 'var(--color-primary)' }}>Generator</Link>.
         </p>
       </div>
     );
