@@ -158,6 +158,7 @@ export interface SageWalletActions {
   signMessage: (message: string) => Promise<SignMessageResult>;
   getAssetBalance: (assetId?: string | null) => Promise<AssetBalance>;
   takeOffer: (offer: string, fee?: number) => Promise<unknown>;
+  transferNFT: (nftCoinId: string, targetAddress: string, fee?: number) => Promise<unknown>;
   hasRequiredNFTs: (collectionId: string) => Promise<boolean>;
   getNFTs: (collectionId?: string) => Promise<MintGardenNFT[]>;
 }

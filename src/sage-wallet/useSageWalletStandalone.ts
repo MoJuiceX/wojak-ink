@@ -45,6 +45,7 @@ interface UseSageWalletStandaloneReturn {
   signMessage: (message: string) => Promise<SignMessageResult>;
   getAssetBalance: (assetId?: string | null) => Promise<AssetBalance>;
   takeOffer: (offer: string, fee?: number) => Promise<unknown>;
+  transferNFT: (nftCoinId: string, targetAddress: string, fee?: number) => Promise<unknown>;
   hasRequiredNFTs: (collectionId: string) => Promise<boolean>;
   getNFTs: (collectionId?: string) => Promise<MintGardenNFT[]>;
   
@@ -197,6 +198,7 @@ export function useSageWalletStandalone(
             'chia_takeOffer',
             'chia_send',
             'chip0002_getAssetBalance',
+            'chia_transferNFT',
           ],
           chains: [CHIA_CHAIN],
           events: [],
@@ -283,9 +285,9 @@ export function useSageWalletStandalone(
   const takeOffer = useCallback(async (offer: string, fee: number = 0): Promise<unknown> => {
     const client = signClientRef.current;
     const sess = currentSessionRef.current;
-    
+
     if (!client || !sess) throw new Error('Not connected');
-    
+
     return client.request({
       topic: sess.topic,
       chainId: CHIA_CHAIN,
@@ -295,7 +297,24 @@ export function useSageWalletStandalone(
       },
     });
   }, []);
-  
+
+  // Transfer an NFT to another address
+  const transferNFT = useCallback(async (nftCoinId: string, targetAddress: string, fee: number = 0): Promise<unknown> => {
+    const client = signClientRef.current;
+    const sess = currentSessionRef.current;
+
+    if (!client || !sess) throw new Error('Not connected');
+
+    return client.request({
+      topic: sess.topic,
+      chainId: CHIA_CHAIN,
+      request: {
+        method: ChiaMethod.TransferNft,
+        params: { nftCoinId, targetAddress, fee },
+      },
+    });
+  }, []);
+
   // Check if user has NFTs from collection (via MintGarden API)
   const hasRequiredNFTs = useCallback(async (collectionId: string): Promise<boolean> => {
     if (!address || !isValidChiaAddress(address) || !collectionId?.trim()) return false;
@@ -347,6 +366,7 @@ export function useSageWalletStandalone(
     signMessage,
     getAssetBalance,
     takeOffer,
+    transferNFT,
     hasRequiredNFTs,
     getNFTs,
     
