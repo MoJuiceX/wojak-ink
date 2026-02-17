@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wojak — Price Curve Tuner</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow-y: auto; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: #0a0a0f;
+    color: #e0e0e8;
+    padding: 12px 16px;
+  }
+
+  .header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .header h1 { font-size: 16px; font-weight: 600; color: #fff; }
+  .header .sub { color: #606070; font-size: 11px; }
+  .header .formula { color: #808090; font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; margin-left: auto; }
+  .header .formula b { color: #ff6b00; }
+
+  /* ── Curve section ── */
+  .curve-section {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 10px;
+    height: calc(100vh - 280px);
+    min-height: 300px;
+    max-height: 500px;
+    margin-bottom: 16px;
+  }
+
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .panel {
+    background: #12121a;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 12px;
+    flex-shrink: 0;
+  }
+  .panel-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: #808090;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .panel-title .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+
+  .ctrl { margin-bottom: 8px; }
+  .ctrl:last-child { margin-bottom: 0; }
+  .ctrl-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 3px;
+  }
+  .ctrl-row span { font-size: 11px; color: #a0a0b0; }
+  .ctrl-row .val { font-size: 12px; font-weight: 600; color: #ff6b00; font-variant-numeric: tabular-nums; }
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background: #1e1e2a;
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #ff6b00;
+    cursor: pointer;
+    border: 2px solid #0a0a0f;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #ff6b00;
+    cursor: pointer;
+    border: 2px solid #0a0a0f;
+  }
+
+  .presets { display: flex; gap: 4px; flex-wrap: wrap; }
+  .preset-btn {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: #1a1a24;
+    color: #a0a0b0;
+    cursor: pointer;
+  }
+  .preset-btn:hover { border-color: #ff6b00; color: #ff6b00; }
+  .preset-btn.active { background: rgba(255,107,0,0.15); border-color: #ff6b00; color: #ff6b00; }
+  .preset-btn.target { border-color: rgba(34,197,94,0.4); color: #22c55e; }
+  .preset-btn.target:hover, .preset-btn.target.active { background: rgba(34,197,94,0.12); border-color: #22c55e; color: #22c55e; }
+
+  .computed-info {
+    font-size: 10px;
+    color: #606070;
+    margin-top: 8px;
+    padding: 8px;
+    background: #0e0e16;
+    border-radius: 4px;
+    line-height: 1.6;
+    font-variant-numeric: tabular-nums;
+  }
+  .computed-info b { color: #00d4ff; }
+
+  .right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 0;
+  }
+
+  .chart-panel {
+    background: #12121a;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 10px;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    flex-shrink: 0;
+  }
+  .chart-title { font-size: 12px; font-weight: 600; color: #fff; }
+  .chart-legend { display: flex; gap: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #808090; }
+  .legend-dot { width: 10px; height: 3px; border-radius: 2px; }
+  .chart-wrap {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+  }
+  .chart-wrap canvas { width: 100%; height: 100%; display: block; border-radius: 6px; }
+  .tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: #1e1e2a;
+    border: 1px solid rgba(255,107,0,0.3);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 11px;
+    color: #e0e0e8;
+    white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    z-index: 10;
+    display: none;
+    font-variant-numeric: tabular-nums;
+  }
+  .tooltip .tt-label { color: #808090; font-size: 9px; }
+  .tooltip .tt-val { color: #ff6b00; font-weight: 600; }
+
+  .bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .stat {
+    background: #12121a;
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
+  }
+  .stat .lbl { font-size: 9px; color: #606070; text-transform: uppercase; letter-spacing: 0.4px; }
+  .stat .v { font-size: 16px; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; margin: 2px 0; }
+  .stat .v.accent { color: #ff6b00; }
+  .stat .v.cyan { color: #00d4ff; }
+  .stat .s { font-size: 9px; color: #505060; }
+
+  .table-panel {
+    background: #12121a;
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 8px;
+    padding: 8px;
+    overflow-y: auto;
+    max-height: 200px;
+  }
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+  }
+  .data-table th {
+    text-align: left;
+    padding: 4px 6px;
+    color: #606070;
+    font-weight: 500;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    position: sticky;
+    top: 0;
+    background: #12121a;
+  }
+  .data-table td { padding: 3px 6px; color: #b0b0c0; border-bottom: 1px solid rgba(255,255,255,0.02); }
+  .data-table .hl td { color: #22c55e; font-weight: 600; }
+  .right { text-align: right; }
+
+  .reset-btn {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: transparent;
+    color: #606070;
+    cursor: pointer;
+    margin-left: auto;
+  }
+  .reset-btn:hover { border-color: #ff6b00; color: #ff6b00; }
+
+  /* ── Simulation section ── */
+  .sim-section {
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 16px;
+    margin-top: 8px;
+  }
+  .sim-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .sim-header h2 { font-size: 15px; font-weight: 600; color: #fff; }
+  .sim-header .sub { color: #606070; font-size: 11px; }
+
+  .sim-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 10px;
+  }
+
+  .sim-controls .ctrl { margin-bottom: 8px; }
+
+  /* Revenue stats */
+  .rev-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .rev-stat {
+    background: #12121a;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+  }
+  .rev-stat .lbl { font-size: 10px; color: #606070; text-transform: uppercase; letter-spacing: 0.4px; }
+  .rev-stat .v { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; margin: 4px 0; }
+  .rev-stat .v.green { color: #22c55e; }
+  .rev-stat .v.accent { color: #ff6b00; }
+  .rev-stat .v.cyan { color: #00d4ff; }
+  .rev-stat .s { font-size: 10px; color: #505060; }
+
+  /* Category breakdown */
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .cat-card {
+    background: #12121a;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 12px;
+  }
+  .cat-card h3 {
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+  .cat-card .cat-info { font-size: 10px; color: #808090; margin-bottom: 8px; line-height: 1.5; }
+  .cat-card .cat-info b { color: #ff6b00; }
+
+  /* Trait bars */
+  .trait-bars { max-height: 180px; overflow-y: auto; }
+  .trait-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 3px;
+    font-size: 9px;
+  }
+  .trait-bar .rank { width: 14px; color: #505060; text-align: right; }
+  .trait-bar .bar-wrap { flex: 1; height: 12px; background: #0e0e16; border-radius: 3px; overflow: hidden; position: relative; }
+  .trait-bar .bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+  .trait-bar .bar-label {
+    position: absolute;
+    left: 4px;
+    top: 0;
+    line-height: 12px;
+    font-size: 8px;
+    color: rgba(255,255,255,0.6);
+    white-space: nowrap;
+  }
+  .trait-bar .uses { width: 32px; text-align: right; color: #a0a0b0; font-variant-numeric: tabular-nums; }
+  .trait-bar .rev { width: 50px; text-align: right; color: #ff6b00; font-variant-numeric: tabular-nums; }
+  .trait-bar.exempt .bar-fill { opacity: 0.3; }
+  .trait-bar.exempt .rev { color: #505060; }
+
+  /* Sim chart */
+  .sim-chart-panel {
+    background: #12121a;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  .sim-chart-panel canvas { width: 100%; height: 200px; display: block; border-radius: 6px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Price Curve Tuner</h1>
+  <span class="sub">Simplified surcharge model</span>
+  <span class="formula">surcharge = <b>scale</b> * (uses - 1)^<b>exp</b></span>
+</div>
+
+<!-- ══ CURVE TUNER ══ -->
+<div class="curve-section">
+  <div class="sidebar">
+    <div class="panel">
+      <div class="panel-title">
+        <span class="dot" style="background:#ff6b00"></span>
+        Parameters
+        <button class="reset-btn" onclick="resetToDefaults()">Reset</button>
+      </div>
+
+      <div class="ctrl">
+        <div class="ctrl-row"><span>Target Surcharge (XCH)</span><span class="val" id="val-targetSurcharge">1.275</span></div>
+        <input type="range" id="sl-targetSurcharge" min="0.10" max="3.00" value="1.275" step="0.025" oninput="update()">
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-row"><span>Target Uses</span><span class="val" id="val-targetUses">200</span></div>
+        <input type="range" id="sl-targetUses" min="20" max="500" value="200" step="5" oninput="update()">
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-row"><span>Exponent</span><span class="val" id="val-exponent">0.90</span></div>
+        <input type="range" id="sl-exponent" min="0.3" max="2.0" value="0.90" step="0.01" oninput="update()">
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-row"><span>Base Price (XCH)</span><span class="val" id="val-basePrice">0.20</span></div>
+        <input type="range" id="sl-basePrice" min="0.05" max="1.0" value="0.20" step="0.01" oninput="update()">
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-row"><span>X-Axis Range</span><span class="val" id="val-maxUses">500</span></div>
+        <input type="range" id="sl-maxUses" min="100" max="1000" value="500" step="10" oninput="update()">
+      </div>
+
+      <div class="computed-info" id="computed-info"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title"><span class="dot" style="background:#00d4ff"></span> Presets</div>
+      <div class="presets">
+        <button class="preset-btn target active" onclick="applyPreset('proposed',this)">Proposed</button>
+        <button class="preset-btn" onclick="applyPreset('prev',this)">Previous</button>
+        <button class="preset-btn" onclick="applyPreset('sqrt',this)">Sqrt</button>
+        <button class="preset-btn" onclick="applyPreset('linear',this)">Linear</button>
+        <button class="preset-btn" onclick="applyPreset('steep',this)">Steep</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title"><span class="dot" style="background:#22c55e"></span> How it works</div>
+      <div style="font-size:10px; color:#808090; line-height:1.5;">
+        <div style="margin-bottom:4px; color:#a0a0b0;"><b style="color:#ff6b00;">Target Surcharge</b> = extra XCH at calibration point</div>
+        <div style="margin-bottom:4px; color:#a0a0b0;"><b style="color:#ff6b00;">Target Uses</b> = where surcharge hits target</div>
+        <div style="margin-bottom:4px; color:#a0a0b0;"><b style="color:#ff6b00;">Exponent</b> = curve shape</div>
+        <div style="margin-top:6px; padding-top:6px; border-top:1px solid rgba(255,255,255,0.05);">
+          <span style="color:#00d4ff;">< 1.0</span> = diminishing returns<br>
+          <span style="color:#808090;">= 1.0</span> = linear<br>
+          <span style="color:#ff6b00;">> 1.0</span> = accelerating
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="right-col">
+    <div class="chart-panel">
+      <div class="chart-header">
+        <span class="chart-title">Total Price per Mint (XCH)</span>
+        <div class="chart-legend">
+          <div class="legend-item"><span class="legend-dot" style="background:#ff6b00"></span> Price</div>
+          <div class="legend-item"><span class="legend-dot" style="background:rgba(255,255,255,0.12)"></span> Base</div>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chart-price"></canvas>
+        <div class="tooltip" id="tooltip-price"></div>
+      </div>
+    </div>
+
+    <div class="bottom-row">
+      <div class="stats" id="stats-grid"></div>
+      <div class="table-panel">
+        <table class="data-table" id="data-table">
+          <thead>
+            <tr>
+              <th>Use #</th>
+              <th class="right">Surcharge</th>
+              <th class="right">Total</th>
+              <th class="right">Marginal</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ REVENUE SIMULATION ══ -->
+<div class="sim-section">
+  <div class="sim-header">
+    <h2>Revenue Simulation</h2>
+    <span class="sub">Full mint-out projection (uses curve parameters above)</span>
+  </div>
+
+  <div class="sim-grid">
+    <div class="sidebar sim-controls">
+      <div class="panel">
+        <div class="panel-title"><span class="dot" style="background:#22c55e"></span> Simulation</div>
+        <div class="ctrl">
+          <div class="ctrl-row"><span>Free Mints</span><span class="val" id="val-freeMints">600</span></div>
+          <input type="range" id="sl-freeMints" min="0" max="1500" value="600" step="50" oninput="updateSim()">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-row"><span>Popularity Skew</span><span class="val" id="val-skew">0.60</span></div>
+          <input type="range" id="sl-skew" min="0.1" max="1.5" value="0.6" step="0.05" oninput="updateSim()">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-row"><span>% choosing "None" (Head)</span><span class="val" id="val-noneHead">15</span></div>
+          <input type="range" id="sl-noneHead" min="0" max="50" value="15" step="1" oninput="updateSim()">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-row"><span>% choosing "None" (Face)</span><span class="val" id="val-noneFace">40</span></div>
+          <input type="range" id="sl-noneFace" min="0" max="70" value="40" step="1" oninput="updateSim()">
+        </div>
+        <div style="font-size:10px; color:#606070; margin-top:8px; line-height:1.5; padding:8px; background:#0e0e16; border-radius:4px;">
+          <b style="color:#00d4ff;">Popularity Skew</b> controls how unevenly traits are used.
+          Low = everyone picks different traits.
+          High = everyone picks the same few.<br><br>
+          <b style="color:#00d4ff;">"None" %</b> = how many minters skip headgear/face wear.
+          These are exempt from surcharges.
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:1; min-width:0;">
+      <!-- Revenue headline stats -->
+      <div class="rev-stats" id="rev-stats"></div>
+
+      <!-- Revenue over time chart -->
+      <div class="sim-chart-panel">
+        <div style="font-size:11px; font-weight:600; color:#fff; margin-bottom:6px;">Cumulative Revenue (XCH) over mints</div>
+        <canvas id="chart-revenue"></canvas>
+      </div>
+
+      <!-- Category breakdown -->
+      <div class="cat-grid" id="cat-grid"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══ CURVE TUNER (same as before) ══
+const DEFAULTS = { targetSurcharge: 1.275, targetUses: 200, exponent: 0.90, basePrice: 0.20, maxUses: 500 };
+
+const presets = {
+  proposed: { targetSurcharge: 1.275, targetUses: 200, exponent: 0.90, basePrice: 0.20, maxUses: 500 },
+  prev:     { targetSurcharge: 1.275, targetUses: 200, exponent: 0.70, basePrice: 0.20, maxUses: 500 },
+  linear:   { targetSurcharge: 1.275, targetUses: 200, exponent: 1.00, basePrice: 0.20, maxUses: 500 },
+  sqrt:     { targetSurcharge: 1.275, targetUses: 200, exponent: 0.50, basePrice: 0.20, maxUses: 500 },
+  steep:    { targetSurcharge: 1.70, targetUses: 200, exponent: 0.90, basePrice: 0.20, maxUses: 500 },
+};
+
+function calcScale(targetSurcharge, targetUses, exponent) {
+  const base = Math.pow(targetUses - 1, exponent);
+  return base > 0 ? targetSurcharge / base : 0;
+}
+
+function calcSurcharge(usage, scale, exponent) {
+  if (usage <= 1) return 0;
+  return scale * Math.pow(usage - 1, exponent);
+}
+
+function getParams() {
+  return {
+    targetSurcharge: parseFloat(document.getElementById('sl-targetSurcharge').value),
+    targetUses:      parseInt(document.getElementById('sl-targetUses').value),
+    exponent:        parseFloat(document.getElementById('sl-exponent').value),
+    basePrice:       parseFloat(document.getElementById('sl-basePrice').value),
+    maxUses:         parseInt(document.getElementById('sl-maxUses').value),
+  };
+}
+
+function setSliders(p) {
+  document.getElementById('sl-targetSurcharge').value = p.targetSurcharge;
+  document.getElementById('sl-targetUses').value = p.targetUses;
+  document.getElementById('sl-exponent').value = p.exponent;
+  document.getElementById('sl-basePrice').value = p.basePrice;
+  if (p.maxUses) document.getElementById('sl-maxUses').value = p.maxUses;
+  update();
+}
+
+function applyPreset(name, btn) {
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  setSliders(presets[name]);
+}
+
+function resetToDefaults() {
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.preset-btn').classList.add('active');
+  setSliders(DEFAULTS);
+}
+
+function drawChart(data, basePrice, targetUses, targetTotal, maxX) {
+  const canvas = document.getElementById('chart-price');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const W = rect.width, H = rect.height;
+
+  const pad = { top: 14, right: 16, bottom: 28, left: 46 };
+  const cW = W - pad.left - pad.right;
+  const cH = H - pad.top - pad.bottom;
+
+  let maxY = Math.max(...data) * 1.08;
+  maxY = Math.max(maxY, basePrice * 3, targetTotal * 1.3);
+
+  ctx.fillStyle = '#0e0e16';
+  ctx.beginPath(); ctx.roundRect(0, 0, W, H, 6); ctx.fill();
+
+  const yTicks = 5;
+  ctx.fillStyle = '#505060';
+  ctx.font = '9px -apple-system, system-ui, sans-serif';
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= yTicks; i++) {
+    const yVal = (maxY / yTicks) * i;
+    const y = pad.top + cH - (i / yTicks) * cH;
+    ctx.strokeStyle = 'rgba(255,255,255,0.04)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+    ctx.fillText(yVal.toFixed(1), pad.left - 4, y + 3);
+  }
+
+  ctx.textAlign = 'center'; ctx.fillStyle = '#505060';
+  const xStep = Math.ceil(maxX / 8 / 10) * 10 || 10;
+  for (let x = 0; x <= maxX; x += xStep) {
+    const px = pad.left + (x / maxX) * cW;
+    ctx.fillText(x.toString(), px, H - pad.bottom + 14);
+  }
+
+  const baseY = pad.top + cH - (basePrice / maxY) * cH;
+  ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.setLineDash([3, 3]); ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(pad.left, baseY); ctx.lineTo(W - pad.right, baseY); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.font = '8px -apple-system, system-ui, sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText('base ' + basePrice.toFixed(2), pad.left + 4, baseY - 3);
+
+  const tgtY = pad.top + cH - (targetTotal / maxY) * cH;
+  if (tgtY > pad.top && tgtY < pad.top + cH) {
+    ctx.strokeStyle = 'rgba(34,197,94,0.3)'; ctx.setLineDash([3, 3]); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pad.left, tgtY); ctx.lineTo(W - pad.right, tgtY); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(34,197,94,0.5)'; ctx.font = '8px -apple-system, system-ui, sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText(targetTotal.toFixed(2) + ' target', W - pad.right - 4, tgtY - 3);
+  }
+
+  if (targetUses <= maxX) {
+    const tux = pad.left + (targetUses / maxX) * cW;
+    ctx.strokeStyle = 'rgba(34,197,94,0.2)'; ctx.setLineDash([2, 2]); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(tux, pad.top); ctx.lineTo(tux, pad.top + cH); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(34,197,94,0.4)'; ctx.font = '8px -apple-system, system-ui, sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(targetUses.toString(), tux, pad.top - 3);
+  }
+
+  ctx.beginPath();
+  for (let i = 0; i < data.length; i++) {
+    const x = pad.left + (i / maxX) * cW;
+    const y = pad.top + cH - (data[i] / maxY) * cH;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.lineTo(pad.left + ((data.length - 1) / maxX) * cW, pad.top + cH);
+  ctx.lineTo(pad.left, pad.top + cH);
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + cH);
+  grad.addColorStop(0, 'rgba(255,107,0,0.10)'); grad.addColorStop(1, 'rgba(255,107,0,0)');
+  ctx.fillStyle = grad; ctx.fill();
+
+  ctx.strokeStyle = '#ff6b00'; ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i < data.length; i++) {
+    const x = pad.left + (i / maxX) * cW;
+    const y = pad.top + cH - (data[i] / maxY) * cH;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  if (targetUses < data.length) {
+    const dx = pad.left + (targetUses / maxX) * cW;
+    const dy = pad.top + cH - (data[targetUses] / maxY) * cH;
+    ctx.beginPath(); ctx.arc(dx, dy, 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#22c55e'; ctx.fill();
+    ctx.strokeStyle = '#0a0a0f'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = '#22c55e'; ctx.font = 'bold 10px -apple-system, system-ui, sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText(data[targetUses].toFixed(2), dx + 8, dy - 5);
+  }
+
+  const milestones = [25, 100, 400];
+  for (const m of milestones) {
+    if (m < data.length && m !== targetUses) {
+      const mx = pad.left + (m / maxX) * cW;
+      const my = pad.top + cH - (data[m] / maxY) * cH;
+      ctx.beginPath(); ctx.arc(mx, my, 3, 0, Math.PI * 2);
+      ctx.fillStyle = '#ff6b00'; ctx.fill(); ctx.strokeStyle = '#0a0a0f'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.fillStyle = 'rgba(255,107,0,0.7)'; ctx.font = '9px -apple-system, system-ui, sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText(data[m].toFixed(2), mx + 6, my - 3);
+    }
+  }
+
+  const tooltip = document.getElementById('tooltip-price');
+  canvas.onmousemove = (e) => {
+    const mx = e.offsetX - pad.left;
+    if (mx < 0 || mx > cW) { tooltip.style.display = 'none'; return; }
+    const usage = Math.round((mx / cW) * maxX);
+    if (usage < 0 || usage >= data.length) { tooltip.style.display = 'none'; return; }
+    tooltip.innerHTML = `<div class="tt-label">Use #${usage}</div><div><span class="tt-val">${data[usage].toFixed(3)}</span> total</div><div style="color:#a0a0b0;font-size:10px">+${(data[usage]-basePrice).toFixed(3)} surcharge</div>`;
+    tooltip.style.display = 'block';
+    let tx = e.offsetX + 12, ty = e.offsetY - 40;
+    if (tx + 140 > W) tx = e.offsetX - 140; if (ty < 0) ty = e.offsetY + 12;
+    tooltip.style.left = tx + 'px'; tooltip.style.top = ty + 'px';
+  };
+  canvas.onmouseleave = () => { tooltip.style.display = 'none'; };
+}
+
+function renderStats(p, scale) {
+  const grid = document.getElementById('stats-grid');
+  const bp = p.basePrice;
+  const s25 = calcSurcharge(25, scale, p.exponent);
+  const s100 = calcSurcharge(100, scale, p.exponent);
+  const sTgt = calcSurcharge(p.targetUses, scale, p.exponent);
+  const s400 = calcSurcharge(400, scale, p.exponent);
+  let cum100 = 0;
+  for (let i = 1; i <= 100; i++) cum100 += bp + calcSurcharge(i, scale, p.exponent);
+  grid.innerHTML = `
+    <div class="stat"><div class="lbl">@ 25 uses</div><div class="v accent">${(bp+s25).toFixed(2)}</div><div class="s">+${s25.toFixed(3)}</div></div>
+    <div class="stat"><div class="lbl">@ 100 uses</div><div class="v accent">${(bp+s100).toFixed(2)}</div><div class="s">+${s100.toFixed(3)}</div></div>
+    <div class="stat"><div class="lbl">@ ${p.targetUses}</div><div class="v" style="color:#22c55e">${(bp+sTgt).toFixed(2)}</div><div class="s">target</div></div>
+    <div class="stat"><div class="lbl">@ 400 uses</div><div class="v accent">${(bp+s400).toFixed(2)}</div><div class="s">+${s400.toFixed(3)}</div></div>
+    <div class="stat"><div class="lbl">100-mint cost</div><div class="v cyan">${cum100.toFixed(1)}</div><div class="s">XCH cumul.</div></div>
+    <div class="stat"><div class="lbl">Scale</div><div class="v" style="color:#00d4ff;font-size:12px">${scale.toFixed(6)}</div><div class="s">auto</div></div>
+  `;
+}
+
+function renderTable(p, scale) {
+  const bp = p.basePrice;
+  const tbody = document.querySelector('#data-table tbody');
+  const milestones = [1, 5, 10, 25, 50, 75, 100, 150, p.targetUses, 300, 400, 500];
+  const uses = [...new Set(milestones.filter(u => u > 0 && u <= p.maxUses))].sort((a,b) => a-b);
+  let rows = '';
+  for (const u of uses) {
+    const s = calcSurcharge(u, scale, p.exponent);
+    const sPrev = calcSurcharge(Math.max(1, u-1), scale, p.exponent);
+    const isTarget = u === p.targetUses;
+    rows += `<tr class="${isTarget?'hl':''}"><td>${u}${isTarget?' *':''}</td><td class="right">${s.toFixed(3)}</td><td class="right">${(bp+s).toFixed(3)}</td><td class="right" style="color:${(s-sPrev)>0.01?'#ff6b00':'#505060'}">${u<=1?'-':'+' + (s-sPrev).toFixed(4)}</td></tr>`;
+  }
+  tbody.innerHTML = rows;
+}
+
+function update() {
+  const p = getParams();
+  document.getElementById('val-targetSurcharge').textContent = p.targetSurcharge.toFixed(2);
+  document.getElementById('val-targetUses').textContent = p.targetUses;
+  document.getElementById('val-exponent').textContent = p.exponent.toFixed(2);
+  document.getElementById('val-basePrice').textContent = p.basePrice.toFixed(2);
+  document.getElementById('val-maxUses').textContent = p.maxUses;
+
+  const scale = calcScale(p.targetSurcharge, p.targetUses, p.exponent);
+  const targetTotal = p.basePrice + p.targetSurcharge;
+
+  const s25 = calcSurcharge(25, scale, p.exponent);
+  const s400 = calcSurcharge(400, scale, p.exponent);
+  const info = document.getElementById('computed-info');
+  const expLabel = p.exponent < 1 ? 'diminishing returns' : p.exponent === 1 ? 'linear' : 'accelerating';
+  info.innerHTML = `scale = <b>${scale.toFixed(6)}</b> (auto)<br>curve: <b>${expLabel}</b> (exp ${p.exponent.toFixed(2)})<br>@ 25: <b>${(p.basePrice+s25).toFixed(2)}</b> | @ ${p.targetUses}: <b>${targetTotal.toFixed(2)}</b> | @ 400: <b>${(p.basePrice+s400).toFixed(2)}</b>`;
+
+  const maxX = p.maxUses;
+  const prices = [];
+  for (let i = 0; i <= maxX; i++) prices.push(p.basePrice + calcSurcharge(i, scale, p.exponent));
+
+  drawChart(prices, p.basePrice, p.targetUses, targetTotal, maxX);
+  renderStats(p, scale);
+  renderTable(p, scale);
+  updateSim();
+}
+
+// ══ REVENUE SIMULATION ══
+
+const TOTAL_SUPPLY = 4200;
+const CATEGORIES = [
+  { name: 'Head',      traitCount: 40, exemptCount: 1, exemptName: 'No Headgear' },
+  { name: 'Clothes',   traitCount: 36, exemptCount: 0, exemptName: null },
+  { name: 'Face Wear', traitCount: 18, exemptCount: 1, exemptName: 'No Face Wear' },
+];
+
+/**
+ * Generate a Zipf-like distribution for `count` items totaling `total`.
+ * `skew` controls unevenness (0 = uniform, 1+ = very skewed).
+ * Returns array of usage counts sorted descending.
+ */
+function zipfDistribution(count, total, skew) {
+  const weights = [];
+  for (let k = 1; k <= count; k++) weights.push(1 / Math.pow(k, skew));
+  const sumW = weights.reduce((a, b) => a + b, 0);
+  let usages = weights.map(w => Math.round((w / sumW) * total));
+  // Fix rounding to exactly hit total
+  let diff = total - usages.reduce((a, b) => a + b, 0);
+  for (let i = 0; diff !== 0; i = (i + 1) % count) {
+    if (diff > 0) { usages[i]++; diff--; }
+    else { if (usages[i] > 0) { usages[i]--; diff++; } }
+  }
+  return usages;
+}
+
+/**
+ * Calculate total surcharge revenue from a single trait used `n` times.
+ * Only `paidRatio` fraction of uses generate revenue (rest are free mints).
+ * Revenue = paidRatio * scale * sum_{k=0}^{n-1} k^exp
+ */
+function traitSurchargeRevenue(n, scale, exponent, paidRatio) {
+  let total = 0;
+  for (let k = 0; k < n; k++) {
+    total += scale * Math.pow(k, exponent);
+  }
+  return total * paidRatio;
+}
+
+function updateSim() {
+  const p = getParams();
+  const scale = calcScale(p.targetSurcharge, p.targetUses, p.exponent);
+  const freeMints = parseInt(document.getElementById('sl-freeMints').value);
+  const skew = parseFloat(document.getElementById('sl-skew').value);
+  const noneHeadPct = parseInt(document.getElementById('sl-noneHead').value) / 100;
+  const noneFacePct = parseInt(document.getElementById('sl-noneFace').value) / 100;
+
+  document.getElementById('val-freeMints').textContent = freeMints;
+  document.getElementById('val-skew').textContent = skew.toFixed(2);
+  document.getElementById('val-noneHead').textContent = Math.round(noneHeadPct * 100);
+  document.getElementById('val-noneFace').textContent = Math.round(noneFacePct * 100);
+
+  const paidMints = TOTAL_SUPPLY - freeMints;
+  const paidRatio = paidMints / TOTAL_SUPPLY;
+
+  let totalBaseRevenue = paidMints * p.basePrice;
+  let totalSurchargeRevenue = 0;
+  const catResults = [];
+
+  for (const cat of CATEGORIES) {
+    const noneUses = cat.exemptCount > 0
+      ? Math.round(TOTAL_SUPPLY * (cat.name === 'Head' ? noneHeadPct : noneFacePct))
+      : 0;
+    const surchargeableUses = TOTAL_SUPPLY - noneUses;
+    const surchargeableTraits = cat.traitCount - cat.exemptCount;
+
+    const usages = zipfDistribution(surchargeableTraits, surchargeableUses, skew);
+
+    let catRevenue = 0;
+    const traits = [];
+    for (let i = 0; i < usages.length; i++) {
+      const rev = traitSurchargeRevenue(usages[i], scale, p.exponent, paidRatio);
+      catRevenue += rev;
+      traits.push({
+        rank: i + 1,
+        name: `${cat.name} #${i + 1}`,
+        uses: usages[i],
+        revenue: rev,
+        exempt: false,
+      });
+    }
+
+    if (cat.exemptCount > 0) {
+      traits.push({
+        rank: surchargeableTraits + 1,
+        name: cat.exemptName,
+        uses: noneUses,
+        revenue: 0,
+        exempt: true,
+      });
+    }
+
+    totalSurchargeRevenue += catRevenue;
+
+    catResults.push({
+      ...cat,
+      traits,
+      totalUses: TOTAL_SUPPLY,
+      surchargeRevenue: catRevenue,
+      topTraitUses: usages[0] || 0,
+      bottomTraitUses: usages[usages.length - 1] || 0,
+    });
+  }
+
+  const totalRevenue = totalBaseRevenue + totalSurchargeRevenue;
+  const avgPrice = totalRevenue / paidMints;
+
+  // Render revenue stats
+  document.getElementById('rev-stats').innerHTML = `
+    <div class="rev-stat"><div class="lbl">Total Revenue</div><div class="v green">${totalRevenue.toFixed(0)}</div><div class="s">XCH from ${paidMints} paid mints</div></div>
+    <div class="rev-stat"><div class="lbl">Base Revenue</div><div class="v cyan">${totalBaseRevenue.toFixed(0)}</div><div class="s">${paidMints} x ${p.basePrice.toFixed(2)} XCH</div></div>
+    <div class="rev-stat"><div class="lbl">Surcharge Revenue</div><div class="v accent">${totalSurchargeRevenue.toFixed(0)}</div><div class="s">${(totalSurchargeRevenue/totalRevenue*100).toFixed(0)}% of total</div></div>
+    <div class="rev-stat"><div class="lbl">Avg Price / Mint</div><div class="v" style="color:#fff">${avgPrice.toFixed(2)}</div><div class="s">${(avgPrice/p.basePrice).toFixed(1)}x base</div></div>
+  `;
+
+  // Render category cards
+  const catGrid = document.getElementById('cat-grid');
+  let catHtml = '';
+  const colors = ['#ff6b00', '#00d4ff', '#22c55e'];
+  for (let ci = 0; ci < catResults.length; ci++) {
+    const c = catResults[ci];
+    const color = colors[ci];
+    let barsHtml = '';
+    const maxUses = Math.max(...c.traits.map(t => t.uses));
+    // Sort: highest uses first, exempt last
+    const sorted = [...c.traits].sort((a, b) => {
+      if (a.exempt && !b.exempt) return 1;
+      if (!a.exempt && b.exempt) return -1;
+      return b.uses - a.uses;
+    });
+    for (const t of sorted) {
+      const pct = maxUses > 0 ? (t.uses / maxUses * 100) : 0;
+      barsHtml += `<div class="trait-bar ${t.exempt ? 'exempt' : ''}">
+        <span class="rank">${t.exempt ? '-' : t.rank}</span>
+        <div class="bar-wrap">
+          <div class="bar-fill" style="width:${pct}%; background:${color}"></div>
+          <span class="bar-label">${t.name} (${t.uses})</span>
+        </div>
+        <span class="uses">${t.uses}</span>
+        <span class="rev">${t.revenue.toFixed(1)}</span>
+      </div>`;
+    }
+
+    catHtml += `<div class="cat-card">
+      <h3 style="color:${color}">${c.name}</h3>
+      <div class="cat-info">
+        <b>${c.surchargeRevenue.toFixed(0)}</b> XCH surcharges<br>
+        ${c.traitCount - c.exemptCount} traits surcharged${c.exemptCount ? `, 1 exempt` : ''}<br>
+        Top trait: <b>${c.topTraitUses}</b> uses, bottom: <b>${c.bottomTraitUses}</b>
+      </div>
+      <div class="trait-bars">${barsHtml}</div>
+    </div>`;
+  }
+  catGrid.innerHTML = catHtml;
+
+  // Draw cumulative revenue chart
+  drawRevenueChart(catResults, paidMints, p.basePrice, scale, p.exponent, paidRatio);
+}
+
+function drawRevenueChart(catResults, paidMints, basePrice, scale, exponent, paidRatio) {
+  const canvas = document.getElementById('chart-revenue');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const W = rect.width, H = rect.height;
+
+  const pad = { top: 10, right: 16, bottom: 28, left: 50 };
+  const cW = W - pad.left - pad.right;
+  const cH = H - pad.top - pad.bottom;
+
+  // Simulate minting order: each mint picks one trait per category randomly
+  // weighted by the usage distribution. Accumulate revenue.
+  const totalMints = TOTAL_SUPPLY;
+  const steps = 100; // sample 100 points
+  const stepSize = Math.ceil(totalMints / steps);
+
+  // Build trait usage arrays per category (how many uses at each step)
+  // Simplified: linearly interpolate usage counts
+  const cumRevenue = [0];
+  let runningRev = 0;
+
+  // For a simpler model: compute total revenue at each fraction of minting
+  for (let s = 1; s <= steps; s++) {
+    const mintsSoFar = Math.min(s * stepSize, totalMints);
+    const frac = mintsSoFar / totalMints;
+
+    let stepRev = mintsSoFar * paidRatio * basePrice;
+
+    for (const cat of catResults) {
+      for (const t of cat.traits) {
+        if (t.exempt) continue;
+        const usesAtStep = Math.round(t.uses * frac);
+        let traitRev = 0;
+        for (let k = 0; k < usesAtStep; k++) {
+          traitRev += scale * Math.pow(k, exponent);
+        }
+        stepRev += traitRev * paidRatio;
+      }
+    }
+    cumRevenue.push(stepRev);
+  }
+
+  const maxY = cumRevenue[cumRevenue.length - 1] * 1.08;
+
+  ctx.fillStyle = '#0e0e16';
+  ctx.beginPath(); ctx.roundRect(0, 0, W, H, 6); ctx.fill();
+
+  // Y grid
+  ctx.fillStyle = '#505060'; ctx.font = '9px -apple-system, system-ui, sans-serif'; ctx.textAlign = 'right';
+  for (let i = 0; i <= 4; i++) {
+    const yVal = (maxY / 4) * i;
+    const y = pad.top + cH - (i / 4) * cH;
+    ctx.strokeStyle = 'rgba(255,255,255,0.04)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+    ctx.fillText(yVal.toFixed(0), pad.left - 4, y + 3);
+  }
+
+  // X labels
+  ctx.textAlign = 'center'; ctx.fillStyle = '#505060';
+  for (let x = 0; x <= totalMints; x += Math.ceil(totalMints / 6 / 100) * 100) {
+    const px = pad.left + (x / totalMints) * cW;
+    ctx.fillText(x.toString(), px, H - pad.bottom + 14);
+  }
+
+  // Base revenue line (linear)
+  ctx.strokeStyle = 'rgba(0,212,255,0.3)'; ctx.setLineDash([3, 3]); ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let s = 0; s <= steps; s++) {
+    const mints = Math.min(s * stepSize, totalMints);
+    const baseRev = mints * paidRatio * basePrice;
+    const x = pad.left + (s / steps) * cW;
+    const y = pad.top + cH - (baseRev / maxY) * cH;
+    if (s === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke(); ctx.setLineDash([]);
+
+  // Fill under total
+  ctx.beginPath();
+  for (let s = 0; s <= steps; s++) {
+    const x = pad.left + (s / steps) * cW;
+    const y = pad.top + cH - (cumRevenue[s] / maxY) * cH;
+    if (s === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.lineTo(pad.left + cW, pad.top + cH);
+  ctx.lineTo(pad.left, pad.top + cH);
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + cH);
+  grad.addColorStop(0, 'rgba(34,197,94,0.12)'); grad.addColorStop(1, 'rgba(34,197,94,0)');
+  ctx.fillStyle = grad; ctx.fill();
+
+  // Total revenue line
+  ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let s = 0; s <= steps; s++) {
+    const x = pad.left + (s / steps) * cW;
+    const y = pad.top + cH - (cumRevenue[s] / maxY) * cH;
+    if (s === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // End label
+  const finalRev = cumRevenue[cumRevenue.length - 1];
+  ctx.fillStyle = '#22c55e'; ctx.font = 'bold 11px -apple-system, system-ui, sans-serif'; ctx.textAlign = 'right';
+  const endY = pad.top + cH - (finalRev / maxY) * cH;
+  ctx.fillText(finalRev.toFixed(0) + ' XCH', W - pad.right - 4, endY - 6);
+
+  // Base end label
+  const baseFinal = totalMints * paidRatio * basePrice;
+  const baseEndY = pad.top + cH - (baseFinal / maxY) * cH;
+  ctx.fillStyle = 'rgba(0,212,255,0.6)'; ctx.font = '10px -apple-system, system-ui, sans-serif';
+  ctx.fillText(baseFinal.toFixed(0) + ' base', W - pad.right - 4, baseEndY - 4);
+
+  // Legend
+  ctx.fillStyle = '#22c55e'; ctx.font = '9px -apple-system, system-ui, sans-serif'; ctx.textAlign = 'left';
+  ctx.fillRect(pad.left + 8, pad.top + 4, 10, 3);
+  ctx.fillText('Total revenue', pad.left + 22, pad.top + 8);
+  ctx.fillStyle = 'rgba(0,212,255,0.5)';
+  ctx.fillRect(pad.left + 8, pad.top + 16, 10, 3);
+  ctx.fillText('Base only (no surcharges)', pad.left + 22, pad.top + 20);
+}
+
+// Initialize sliders from DEFAULTS on page load
+setSliders(DEFAULTS);
+window.addEventListener('resize', () => { clearTimeout(window._rt); window._rt = setTimeout(update, 100); });
+</script>
+</body>
+</html>
