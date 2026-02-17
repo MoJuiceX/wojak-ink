@@ -2309,3 +2309,11 @@ body {
   background: linear-gradient(90deg, var(--color-primary), var(--color-cyan));
   transition: width 0.4s ease;
 }
+
+/* ======= Scrollbar Hide ======= */
+.hide-scrollbar {
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}

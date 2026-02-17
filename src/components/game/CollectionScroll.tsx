@@ -81,11 +81,10 @@ export function CollectionScroll({ did }: CollectionScrollProps) {
         <span className="badge">{nfts.length}</span>
       </div>
       <div
-        className="flex gap-3"
+        className="flex gap-3 hide-scrollbar"
         style={{
           overflowX: 'auto',
           scrollSnapType: 'x mandatory',
-          scrollbarWidth: 'none',
           WebkitOverflowScrolling: 'touch',
         }}
       >
