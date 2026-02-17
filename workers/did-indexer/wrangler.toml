@@ -1,0 +1,11 @@
+name = "wojak-did-indexer"
+main = "worker.ts"
+compatibility_date = "2024-12-01"
+
+[triggers]
+crons = ["*/30 * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "wojak-users"
+database_id = "32e7fa5f-524e-4913-b541-f9a339c126c6"
