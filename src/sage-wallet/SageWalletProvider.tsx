@@ -481,6 +481,36 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     return data.items || [];
   }, [state.address]);
 
+  const getDIDs = useCallback(async (): Promise<string[]> => {
+    if (!state.address || !isValidChiaAddress(state.address)) {
+      return [];
+    }
+
+    try {
+      const response = await fetch(
+        `https://api.mintgarden.io/address/${state.address}/nfts?type=owned&size=1`
+      );
+
+      if (!response.ok) return [];
+
+      const data = await response.json() as {
+        items: Array<{ owner_did?: string }>;
+      };
+
+      const dids = new Set<string>();
+      for (const item of data.items || []) {
+        if (item.owner_did && typeof item.owner_did === 'string' && item.owner_did.startsWith('did:chia:')) {
+          dids.add(item.owner_did);
+        }
+      }
+
+      return Array.from(dids);
+    } catch (error) {
+      console.error('[SageWallet] DID lookup error:', error);
+      return [];
+    }
+  }, [state.address]);
+
   // ============================================================================
   // EFFECTS
   // ============================================================================
@@ -503,6 +533,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     transferNFT,
     hasRequiredNFTs,
     getNFTs,
+    getDIDs,
   };
 
   return (
