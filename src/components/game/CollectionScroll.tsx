@@ -135,6 +135,7 @@ function NftDetailModal({ nft, onClose, onBurned }: { nft: CollectionNft; onClos
 export function CollectionScroll({ did }: CollectionScrollProps) {
   const [nfts, setNfts] = useState<CollectionNft[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [selectedNft, setSelectedNft] = useState<CollectionNft | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -145,7 +146,7 @@ export function CollectionScroll({ did }: CollectionScrollProps) {
       .then(data => {
         if (!cancelled && data.success) setNfts(data.nfts);
       })
-      .catch(() => { /* silent */ })
+      .catch(() => { if (!cancelled) setError(true); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [did, refreshKey]);
@@ -160,6 +161,24 @@ export function CollectionScroll({ did }: CollectionScrollProps) {
           {[0, 1, 2, 3].map(i => (
             <div key={i} className="skeleton" style={{ width: 80, height: 80, borderRadius: 'var(--radius-md)', flexShrink: 0 }} />
           ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div id="collection-section" className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <span className="text-secondary" style={{ fontSize: 14, fontWeight: 500 }}>Your Collection</span>
+        </div>
+        <div className="flex items-center justify-center" style={{ height: 96 }}>
+          <div className="flex flex-col items-center gap-2">
+            <span className="text-muted" style={{ fontSize: 13 }}>Couldn't load collection</span>
+            <button className="btn btn-secondary" style={{ fontSize: 12, padding: '6px 12px' }} onClick={() => { setError(false); setRefreshKey(k => k + 1); }}>
+              Retry
+            </button>
+          </div>
         </div>
       </div>
     );
