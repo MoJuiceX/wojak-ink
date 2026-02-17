@@ -1,5 +1,8 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useRef } from 'react';
 import type { ReactNode } from 'react';
+import { useAuth } from '@clerk/clerk-react';
+
+const CLERK_ENABLED = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 interface GamePlayer {
   did: string;
@@ -41,6 +44,7 @@ interface GameContextType {
   castVote: (nftId: string, editionNumber: number, voteType: 1 | -1) => Promise<boolean>;
   loadFeed: () => Promise<void>;
   refreshPowerLevel: () => Promise<void>;
+  getAuthHeaders: () => Promise<Record<string, string>>;
 }
 
 const GameContext = createContext<GameContextType | null>(null);
@@ -52,14 +56,27 @@ export function useGame() {
 }
 
 export function GameProvider({ children }: { children: ReactNode }) {
+  const clerkAuth = useAuth();
+  const authResult = CLERK_ENABLED ? clerkAuth : { getToken: async () => null };
+  const getTokenRef = useRef(authResult.getToken);
+  getTokenRef.current = authResult.getToken;
+
   const [player, setPlayer] = useState<GamePlayer | null>(null);
   const [feed, setFeed] = useState<FeedItem[]>([]);
   const [feedLoading, setFeedLoading] = useState(false);
 
+  const getAuthHeaders = useCallback(async (): Promise<Record<string, string>> => {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    const token = await getTokenRef.current?.();
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    return headers;
+  }, []);
+
   const register = useCallback(async (did: string, walletAddress: string) => {
+    const headers = await getAuthHeaders();
     const res = await fetch('/api/game/register', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ did, walletAddress }),
     });
     const data = await res.json();
@@ -78,9 +95,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const verifyPhase1 = useCallback(async (did: string) => {
+    const headers = await getAuthHeaders();
     const res = await fetch('/api/game/verify-phase1', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ did }),
     });
     const data = await res.json();
@@ -106,9 +124,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const castVote = useCallback(async (nftId: string, editionNumber: number, voteType: 1 | -1) => {
     if (!player) return false;
+    const headers = await getAuthHeaders();
     const res = await fetch('/api/game/vote', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ voterDid: player.did, nftId, editionNumber, voteType }),
     });
     const data = await res.json();
@@ -147,6 +166,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       castVote,
       loadFeed,
       refreshPowerLevel,
+      getAuthHeaders,
     }}>
       {children}
     </GameContext.Provider>

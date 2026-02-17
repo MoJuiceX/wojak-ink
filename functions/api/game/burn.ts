@@ -3,8 +3,11 @@
 // The actual on-chain burn is handled by the wallet.
 // This endpoint just records it and awards credits.
 
+import { authenticateRequest } from '../../lib/auth';
+
 interface Env {
   DB: D1Database;
+  CLERK_DOMAIN: string;
 }
 
 const BURN_ADDRESS = 'xch1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqm6ks6e8mvy';
@@ -27,6 +30,11 @@ function calculateBurnCredits(likes: number, dislikes: number): number {
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
+  const auth = await authenticateRequest(context.request, context.env.CLERK_DOMAIN);
+  if (!auth) {
+    return Response.json({ error: 'Authentication required' }, { status: 401 });
+  }
+
   try {
     const body = await context.request.json() as {
       nftId: string;

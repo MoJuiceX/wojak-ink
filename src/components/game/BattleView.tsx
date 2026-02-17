@@ -26,7 +26,7 @@ interface Battle {
 type Tab = 'active' | 'history';
 
 export function BattleView() {
-  const { player, isVerified } = useGame();
+  const { player, isVerified, getAuthHeaders } = useGame();
   const [tab, setTab] = useState<Tab>('active');
   const [battles, setBattles] = useState<Battle[]>([]);
   const [historyBattles, setHistoryBattles] = useState<Battle[]>([]);
@@ -80,9 +80,10 @@ export function BattleView() {
 
   const handleVote = async (battleId: number, votedFor: 'a' | 'b') => {
     if (!player) return;
+    const headers = await getAuthHeaders();
     const res = await fetch('/api/game/battle-vote', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ voterDid: player.did, battleId, votedFor }),
     });
     const data = await res.json();

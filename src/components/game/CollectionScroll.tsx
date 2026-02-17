@@ -24,7 +24,7 @@ interface CollectionScrollProps {
 }
 
 function NftDetailModal({ nft, onClose, onBurned }: { nft: CollectionNft; onClose: () => void; onBurned: () => void }) {
-  const { player, refreshPowerLevel } = useGame();
+  const { player, refreshPowerLevel, getAuthHeaders } = useGame();
   const { getNFTCoinId } = useSageWallet();
   const estimatedCredits = calculateBurnCredits(nft.likes, nft.dislikes);
   const [coinId, setCoinId] = useState<string | null>(null);
@@ -73,9 +73,10 @@ function NftDetailModal({ nft, onClose, onBurned }: { nft: CollectionNft; onClos
     setNameSaving(true);
     setNameError(null);
     try {
+      const headers = await getAuthHeaders();
       const res = await fetch('/api/game/nft-name', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ did: player?.did, editionNumber: nft.editionNumber, name: trimmed }),
       });
       const data = await res.json();

@@ -16,7 +16,7 @@ interface BattleQueuePanelProps {
 }
 
 export function BattleQueuePanel({ onQueued }: BattleQueuePanelProps) {
-  const { player } = useGame();
+  const { player, getAuthHeaders } = useGame();
   const [nfts, setNfts] = useState<OwnedNft[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedNft, setSelectedNft] = useState<string | null>(null);
@@ -48,9 +48,10 @@ export function BattleQueuePanel({ onQueued }: BattleQueuePanelProps) {
     setResult(null);
 
     try {
+      const headers = await getAuthHeaders();
       const res = await fetch('/api/game/battle-queue', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           did: player.did,
           nftId: nft.nftId,
@@ -71,7 +72,7 @@ export function BattleQueuePanel({ onQueued }: BattleQueuePanelProps) {
     } finally {
       setQueueing(false);
     }
-  }, [player, selectedNft, nfts, onQueued]);
+  }, [player, selectedNft, nfts, onQueued, getAuthHeaders]);
 
   if (loading) {
     return <div className="text-secondary text-sm p-4">Loading your NFTs...</div>;

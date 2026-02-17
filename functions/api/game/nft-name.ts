@@ -3,15 +3,22 @@
 // Lets players name their Phase 2 NFTs.
 
 import { isValidDid } from './_shared';
+import { authenticateRequest } from '../../lib/auth';
 
 interface Env {
   DB: D1Database;
+  CLERK_DOMAIN: string;
 }
 
 const NAME_REGEX = /^[a-zA-Z0-9 .,!?'\-]+$/;
 const MAX_NAME_LENGTH = 30;
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
+  const auth = await authenticateRequest(context.request, context.env.CLERK_DOMAIN);
+  if (!auth) {
+    return Response.json({ error: 'Authentication required' }, { status: 401 });
+  }
+
   try {
     const body = await context.request.json() as {
       did: string;

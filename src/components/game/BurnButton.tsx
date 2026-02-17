@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useSageWallet } from '@/sage-wallet';
+import { useGame } from '@/contexts/GameContext';
 import { BurnConfirmDialog } from './BurnConfirmDialog';
 
 const BURN_ADDRESS = 'xch1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqm6ks6e8mvy';
@@ -21,6 +22,7 @@ export function BurnButton({
   likes, dislikes, estimatedCredits, burnerDid, onBurned,
 }: BurnButtonProps) {
   const { address, transferNFT } = useSageWallet();
+  const { getAuthHeaders } = useGame();
   const [showConfirm, setShowConfirm] = useState(false);
   const [burning, setBurning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,9 +36,10 @@ export function BurnButton({
       await transferNFT(nftCoinId, BURN_ADDRESS);
 
       // Step 2: Record the burn in backend
+      const headers = await getAuthHeaders();
       const res = await fetch('/api/game/burn', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           nftId,
           editionNumber,

@@ -3,12 +3,19 @@
 // Cast a vote on a Your Wojak NFT. 1 = like, -1 = dislike.
 
 import { VOTES_PER_DAY, getTodayString, getYesterdayString, STREAK_MILESTONES } from './_shared';
+import { authenticateRequest } from '../../lib/auth';
 
 interface Env {
   DB: D1Database;
+  CLERK_DOMAIN: string;
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
+  const auth = await authenticateRequest(context.request, context.env.CLERK_DOMAIN);
+  if (!auth) {
+    return Response.json({ error: 'Authentication required' }, { status: 401 });
+  }
+
   try {
     const body = await context.request.json() as {
       voterDid: string;
