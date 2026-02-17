@@ -1725,3 +1725,148 @@ body {
     }
   }
 }
+
+/* ============================================================
+   YOUR WOJAK GAME
+   ============================================================ */
+
+/* Swipe Card */
+.swipe-card {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.swipe-card:active {
+  cursor: grabbing;
+}
+
+.swipe-card-image {
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+}
+
+.swipe-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.swipe-card-info {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.swipe-card-info h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.swipe-card-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  padding: 0 16px 16px;
+}
+
+.swipe-btn-like,
+.swipe-btn-dislike {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.swipe-btn-like {
+  border: 2px solid var(--color-success);
+}
+
+.swipe-btn-dislike {
+  border: 2px solid var(--color-error);
+}
+
+.swipe-indicator {
+  position: absolute;
+  top: 20px;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-size: 24px;
+  font-weight: 900;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.swipe-like {
+  right: 20px;
+  color: var(--color-success);
+  border: 3px solid var(--color-success);
+  transform: rotate(15deg);
+}
+
+.swipe-dislike {
+  left: 20px;
+  color: var(--color-error);
+  border: 3px solid var(--color-error);
+  transform: rotate(-15deg);
+}
+
+/* Voting Feed */
+.voting-feed {
+  min-height: 500px;
+}
+
+/* Power Level Badge */
+.power-level-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.power-level-badge.tier-legend {
+  background: linear-gradient(135deg, rgba(255, 107, 0, 0.2), rgba(255, 187, 36, 0.2));
+  color: var(--color-gold);
+  border: 1px solid rgba(255, 187, 36, 0.3);
+  box-shadow: var(--glow-gold);
+}
+
+.power-level-badge.tier-top {
+  background: rgba(168, 85, 247, 0.15);
+  color: var(--color-purple);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.power-level-badge.tier-serious {
+  background: rgba(0, 212, 255, 0.15);
+  color: var(--color-cyan);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+}
+
+.power-level-badge.tier-active {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--color-success);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.power-level-badge.tier-casual {
+  color: var(--color-text-secondary);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-border);
+}
