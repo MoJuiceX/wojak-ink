@@ -66,6 +66,9 @@ export function QuickActions({ votesRemaining, isVerified, hasActiveBattle }: Qu
           cursor: isVerified ? 'pointer' : 'not-allowed',
         }}
         disabled={!isVerified}
+        onClick={() => {
+          document.getElementById('collection-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }}
       >
         <Flame size={20} />
         <span style={{ fontSize: 13, fontWeight: 500 }}>Burn</span>
