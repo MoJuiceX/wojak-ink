@@ -1,6 +1,5 @@
 // Progressive onboarding checklist gate.
-// Replaces old separate gate screens with a single progressive checklist.
-// Stub — will be fleshed out in T6.
+// Shows wallet connection, DID detection, and Phase 1 verification steps.
 
 import { useSageWallet } from '@/sage-wallet';
 
@@ -15,16 +14,16 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1 }: GateCheckl
 
   const steps = [
     { label: 'Connect wallet', done: walletConnected },
-    { label: 'Create a DID', done: hasDid },
-    { label: 'Get a Wojak Farmers Plot', done: hasPhase1 },
-    { label: 'Start voting', done: walletConnected && hasDid && hasPhase1 },
+    { label: 'Link your DID', done: hasDid },
+    { label: 'Hold a Wojak Farmers Plot', done: hasPhase1 },
+    { label: 'Start swiping', done: walletConnected && hasDid && hasPhase1 },
   ];
 
   return (
     <div className="card-static p-8 flex flex-col items-center gap-4" style={{ maxWidth: 380, width: '100%' }}>
-      <h2 className="text-xl font-bold">Your Wojak</h2>
+      <h2 className="text-xl font-bold">Wojak Swipe</h2>
       <p className="text-secondary text-sm text-center">
-        Complete these steps to start voting.
+        Complete these steps to start swiping.
       </p>
       <ol className="flex flex-col gap-3 w-full" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
         {steps.map((step, i) => {
@@ -45,15 +44,17 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1 }: GateCheckl
                   </button>
                 )}
                 {isCurrent && i === 1 && (
-                  <a
-                    href="https://docs.sagewalletapp.com/getting-started/did"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-ghost mt-2 text-sm"
-                    style={{ padding: '6px 16px' }}
-                  >
-                    Learn How &rarr;
-                  </a>
+                  <div className="flex flex-col gap-2 mt-2">
+                    <span className="text-muted text-sm">Detecting your DID...</span>
+                    <a
+                      href="https://docs.sagewalletapp.com/getting-started/did"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-accent text-sm"
+                    >
+                      Don't have a DID? Learn how to create one &rarr;
+                    </a>
+                  </div>
                 )}
                 {isCurrent && i === 2 && (
                   <a

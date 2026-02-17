@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
+import { useSageWallet } from '@/sage-wallet';
 
 interface GamePlayer {
   did: string;
@@ -131,6 +132,33 @@ export function GameProvider({ children }: { children: ReactNode }) {
       setPlayer(prev => prev ? { ...prev, powerLevel: data.powerLevel } : null);
     }
   }, [player]);
+
+  // Auto-register: when wallet connects, look up DID from MintGarden and register
+  const { address, status: walletStatus } = useSageWallet();
+  const autoRegisterAttempted = useRef(false);
+
+  useEffect(() => {
+    if (walletStatus !== 'connected' || !address || player || autoRegisterAttempted.current) return;
+    autoRegisterAttempted.current = true;
+
+    (async () => {
+      try {
+        // Query MintGarden for any NFTs owned by this address — the response includes owner_did
+        const res = await fetch(
+          `https://api.mintgarden.io/address/${address}/nfts?type=owned&size=1`
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+        const firstNft = data?.items?.[0];
+        const did = firstNft?.owner_did;
+        if (did && typeof did === 'string' && did.startsWith('did:chia:')) {
+          await register(did, address);
+        }
+      } catch {
+        // Silent — user can still register manually
+      }
+    })();
+  }, [walletStatus, address, player, register]);
 
   return (
     <GameContext.Provider value={{
