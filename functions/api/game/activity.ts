@@ -6,7 +6,8 @@ interface Env {
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const url = new URL(request.url);
   const did = url.searchParams.get('did');
-  const limit = Math.min(parseInt(url.searchParams.get('limit') || '5'), 20);
+  const limit = Math.min(parseInt(url.searchParams.get('limit') || '5'), 50);
+  const offset = Math.max(0, parseInt(url.searchParams.get('offset') || '0'));
 
   if (!did) {
     return Response.json({ error: 'DID required' }, { status: 400 });
@@ -18,8 +19,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
        FROM game_activity
        WHERE did_id = ?
        ORDER BY created_at DESC
-       LIMIT ?`
-    ).bind(did, limit).all();
+       LIMIT ? OFFSET ?`
+    ).bind(did, limit, offset).all();
 
     const events = (results || []).map((row: Record<string, unknown>) => ({
       id: row.id,
