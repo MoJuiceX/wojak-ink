@@ -886,8 +886,8 @@ async function detectBurns(env: Env): Promise<{ detected: number; credited: numb
             VALUES (?, ?, ?, ?, ?, ?, 'indexer')
           `).bind(nftId, mint.mint_number, player?.did_id || null, burnerWallet, netScore, credits),
           env.DB.prepare(`
-            INSERT INTO credit_events (wallet_address, nft_id, event_id, credits_earned, source, event_timestamp)
-            VALUES (?, ?, ?, ?, 'burn', ?)
+            INSERT INTO credit_events (wallet_address, nft_id, event_id, price_xch, floor_at_time, credits_earned, whale_multiplier, source, event_type, event_timestamp)
+            VALUES (?, ?, ?, 0, 0, ?, 100, 'burn', 'burn', ?)
           `).bind(burnerWallet, nftId, `burn_${nftId}`, credits, event.timestamp),
           env.DB.prepare(
             'DELETE FROM did_holdings WHERE nft_id = ?'
