@@ -203,7 +203,25 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
         ]);
         stats.retriedQueued++;
       } catch (err) {
-        console.error(`[Cleanup] mint_queued retry failed for job ${row.id}:`, err);
+        const errMsg = err instanceof Error ? err.message : String(err);
+        console.error(`[Cleanup] mint_queued retry failed for job ${row.id}:`, errMsg);
+        try {
+          await logMintStep(env.DB, {
+            mint_id: row.id,
+            step: 'cleanup_mint_queued_retry_failed',
+            status: 'failed',
+            error: errMsg,
+            data: { error_code: errMsg.includes('timed out') ? 'TIMEOUT' : 'RETRY_FAILED' },
+          });
+        } catch { /* audit log failure must not break cleanup */ }
+        // On timeout, mark the job as failed to prevent infinite retry loops
+        if (errMsg.includes('timed out')) {
+          await env.DB.prepare(
+            `UPDATE mint_jobs SET step = 'failed', error_message = 'Processing timed out during retry',
+             error_code = 'TIMEOUT', wallet_lock = NULL, updated_at = datetime('now')
+             WHERE id = ? AND step IN ('queued', 'mint_queued')`
+          ).bind(row.id).run();
+        }
       }
     } else {
       await env.DB.prepare(
