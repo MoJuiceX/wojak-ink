@@ -151,6 +151,53 @@ describe('cleanup.ts', () => {
     expect(processJob).toHaveBeenCalledWith(env, 5, 'base64imagedata');
   });
 
+  it('retries mint_queued jobs as safety net', async () => {
+    const env = createMockEnv();
+    env.DB.prepare = vi.fn((query: string) => {
+      if (query.includes('awaiting_payment') && query.includes('mintgarden_launcher_id IS NULL')) {
+        return { ...mockStmt(), all: vi.fn().mockResolvedValue({ results: [] }), bind: vi.fn().mockReturnThis() };
+      }
+      // Operation 4b: mint_queued query
+      if (query.includes("step = 'mint_queued'") && query.includes('not_before')) {
+        return { ...mockStmt(), all: vi.fn().mockResolvedValue({ results: [{ id: 77 }] }), bind: vi.fn().mockReturnThis() };
+      }
+      // Reset step from mint_queued to queued
+      if (query.includes("step = 'queued'") && query.includes("step = 'mint_queued'")) {
+        return mockStmt(null, { meta: { changes: 1 } });
+      }
+      return mockStmt();
+    });
+    env.MINT_JOBS_KV.get = vi.fn().mockResolvedValue('base64imagedata');
+
+    const stats = await cleanupStaleJobs(env as any);
+    expect(stats.retriedQueued).toBe(1);
+    expect(processJob).toHaveBeenCalledWith(env, 77, 'base64imagedata');
+  });
+
+  it('fails mint_queued job if image expired from KV', async () => {
+    const env = createMockEnv();
+    let jobFailedDueToImageExpiry = false;
+    env.DB.prepare = vi.fn((query: string) => {
+      if (query.includes('awaiting_payment') && query.includes('mintgarden_launcher_id IS NULL')) {
+        return { ...mockStmt(), all: vi.fn().mockResolvedValue({ results: [] }), bind: vi.fn().mockReturnThis() };
+      }
+      // Operation 4b: mint_queued query
+      if (query.includes("step = 'mint_queued'") && query.includes('not_before')) {
+        return { ...mockStmt(), all: vi.fn().mockResolvedValue({ results: [{ id: 88 }] }), bind: vi.fn().mockReturnThis() };
+      }
+      if (query.includes('IMAGE_EXPIRED') && !query.includes('created_at')) {
+        jobFailedDueToImageExpiry = true;
+        return mockStmt(null, { meta: { changes: 1 } });
+      }
+      return mockStmt();
+    });
+    env.MINT_JOBS_KV.get = vi.fn().mockResolvedValue(null); // Image not in KV
+
+    await cleanupStaleJobs(env as any);
+    expect(jobFailedDueToImageExpiry).toBe(true);
+    expect(processJob).not.toHaveBeenCalled();
+  });
+
   it('fails queued job if image expired from KV', async () => {
     const env = createMockEnv();
     let jobFailedDueToImageExpiry = false;

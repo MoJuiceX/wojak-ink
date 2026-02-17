@@ -104,7 +104,7 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
     const stuckProcessing = await env.DB.prepare(
       `UPDATE mint_jobs SET step = 'failed', error_message = 'Processing timed out',
        error_code = 'TIMEOUT', wallet_lock = NULL, updated_at = datetime('now')
-       WHERE step NOT IN ('completed', 'failed', 'refunded', 'awaiting_payment', 'queued')
+       WHERE step NOT IN ('completed', 'failed', 'refunded', 'awaiting_payment', 'queued', 'mint_queued')
        AND updated_at < datetime('now', '-5 minutes')`
     ).run();
     stats.stuckProcessing = stuckProcessing.meta?.changes ?? 0;
@@ -174,6 +174,41 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
           data: { error_code: 'IMAGE_EXPIRED' },
         });
       } catch { /* audit log failure must not break cleanup */ }
+    }
+  }
+
+  // 4b. Pick up mint_queued jobs that haven't been chained (safety net for broken chains).
+  //     These jobs have completed IPFS upload and just need a MintGarden slot.
+  const staleMintQueued = await env.DB.prepare(
+    `SELECT id FROM mint_jobs WHERE step = 'mint_queued'
+     AND (not_before IS NULL OR not_before <= datetime('now'))
+     AND updated_at < datetime('now', '-30 seconds')
+     LIMIT 3`
+  ).all<{ id: number }>();
+
+  for (const row of (staleMintQueued.results || [])) {
+    const imageBase64 = await env.MINT_JOBS_KV.get(`job-image:${row.id}`);
+    if (imageBase64) {
+      try {
+        const RETRY_TIMEOUT_MS = 25_000;
+        // Reset to queued so processJob picks it up (will re-check concurrency gate)
+        await env.DB.prepare(
+          "UPDATE mint_jobs SET step = 'queued', updated_at = datetime('now') WHERE id = ? AND step = 'mint_queued'"
+        ).bind(row.id).run();
+        await Promise.race([
+          processJob(env, row.id, imageBase64),
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error('Cleanup retry timed out')), RETRY_TIMEOUT_MS)
+          ),
+        ]);
+        stats.retriedQueued++;
+      } catch (err) {
+        console.error(`[Cleanup] mint_queued retry failed for job ${row.id}:`, err);
+      }
+    } else {
+      await env.DB.prepare(
+        "UPDATE mint_jobs SET step = 'failed', error_message = 'Image data expired', error_code = 'IMAGE_EXPIRED', wallet_lock = NULL, updated_at = datetime('now') WHERE id = ?"
+      ).bind(row.id).run();
     }
   }
 
