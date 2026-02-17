@@ -10,6 +10,7 @@ import { LatestEventBanner } from '@/components/game/LatestEventBanner';
 import { CollectionScroll } from '@/components/game/CollectionScroll';
 import { ActiveBattleCard } from '@/components/game/ActiveBattleCard';
 import PageTransition from '@/components/layout/PageTransition';
+import { PageSEO } from '@/components/seo';
 
 interface PowerData {
   rank?: number;
@@ -24,8 +25,6 @@ function DashboardContent() {
   const { player, isRegistered, isVerified } = useGame();
   const { address, status: walletStatus } = useSageWallet();
   const [powerData, setPowerData] = useState<PowerData>({});
-
-  useEffect(() => { document.title = 'Dashboard — Your Wojak'; }, []);
 
   useEffect(() => {
     if (isRegistered && player?.did) {
@@ -86,6 +85,11 @@ function DashboardContent() {
 export default function GameDashboard() {
   return (
     <GameProvider>
+      <PageSEO
+        title="Wojak Swipe Dashboard"
+        description="Track your power level, collection, and swipe stats"
+        path="/swipe/dashboard"
+      />
       <PageTransition>
         <DashboardContent />
       </PageTransition>

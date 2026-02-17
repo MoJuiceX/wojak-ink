@@ -5,6 +5,7 @@ import { GamePodium } from '@/components/game/GamePodium';
 import { GameLeaderboardList } from '@/components/game/GameLeaderboardList';
 import { GamePositionBar } from '@/components/game/GamePositionBar';
 import PageTransition from '@/components/layout/PageTransition';
+import { PageSEO } from '@/components/seo';
 import { Link } from 'react-router-dom';
 import { AlertCircle } from 'lucide-react';
 
@@ -33,7 +34,6 @@ function LeaderboardContent() {
   const { player, isRegistered } = useGame();
   const [tab, setTab] = useState<TabMode>('players');
 
-  useEffect(() => { document.title = 'Leaderboard — Your Wojak'; }, []);
 
   // Players state
   const [players, setPlayers] = useState<PlayerEntry[]>([]);
@@ -266,6 +266,11 @@ function LeaderboardContent() {
 export default function GameLeaderboard() {
   return (
     <GameProvider>
+      <PageSEO
+        title="Wojak Swipe Leaderboard"
+        description="Top players and most popular Wojaks ranked by community votes"
+        path="/swipe/leaderboard"
+      />
       <PageTransition>
         <LeaderboardContent />
       </PageTransition>

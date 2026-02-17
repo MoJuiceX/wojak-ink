@@ -1,9 +1,9 @@
 // Voting page — /swipe
 // Desktop: 3-column (leaderboard | card | stats). Mobile: stats bar + card.
 
-import { useEffect } from 'react';
 import { GameProvider } from '@/contexts/GameContext';
 import { useLayout } from '@/hooks/useLayout';
+import { PageSEO } from '@/components/seo';
 import { VotingFeed } from '@/components/game/VotingFeed';
 import { MiniLeaderboard } from '@/components/game/MiniLeaderboard';
 import { VotingStatsPanel } from '@/components/game/VotingStatsPanel';
@@ -45,10 +45,15 @@ function VotingPageMobile() {
 
 export default function GameVoting() {
   const { isDesktop } = useLayout();
-  useEffect(() => { document.title = 'Vote — Your Wojak'; }, []);
 
   return (
     <GameProvider>
+      <PageSEO
+        title="Wojak Swipe - Vote on Community NFTs"
+        description="Swipe through Wojak NFTs. Like or pass. Climb the leaderboard."
+        path="/swipe"
+        type="game"
+      />
       {isDesktop ? <VotingPageDesktop /> : <VotingPageMobile />}
     </GameProvider>
   );
