@@ -2,6 +2,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { X } from 'lucide-react';
+import { BurnButton } from './BurnButton';
+import { useGame } from '@/contexts/GameContext';
+import { calculateBurnCredits } from '@/lib/burnCredits';
 
 interface CollectionNft {
   nftId: string;
@@ -18,6 +21,9 @@ interface CollectionScrollProps {
 }
 
 function NftDetailModal({ nft, onClose }: { nft: CollectionNft; onClose: () => void }) {
+  const { player } = useGame();
+  const estimatedCredits = calculateBurnCredits(nft.likes, nft.dislikes);
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -74,13 +80,17 @@ function NftDetailModal({ nft, onClose }: { nft: CollectionNft; onClose: () => v
           <Link to="/swipe/battles" className="btn btn-primary flex-1 text-center" style={{ fontSize: 13 }}>
             Enter Battle
           </Link>
-          <button
-            className="btn btn-ghost flex-1"
-            style={{ fontSize: 13, color: 'var(--color-error)' }}
-            onClick={onClose}
-          >
-            Burn
-          </button>
+          <BurnButton
+            nftId={nft.nftId}
+            nftCoinId={nft.nftId}
+            editionNumber={nft.editionNumber}
+            nftName={nft.name}
+            likes={nft.likes}
+            dislikes={nft.dislikes}
+            estimatedCredits={estimatedCredits}
+            burnerDid={player?.did}
+            onBurned={() => onClose()}
+          />
         </div>
       </div>
     </div>
