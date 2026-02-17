@@ -15,6 +15,7 @@ import { getNextMintNumber } from './mintNumberHelper';
 import { uploadToIPFS, type IPFSUploadResult } from './uploadToIPFS';
 import { consolidateTraits } from './traitResolver';
 import { MintError } from './errors';
+import { getOrCreateSplitterAddress } from './splitxch';
 import {
   TOTAL_SUPPLY,
   SURCHARGE_CATEGORIES,
@@ -37,6 +38,7 @@ export interface ProcessEnv {
   PHASE2_ROYALTY_ADDRESS?: string;
   PHASE2_ROYALTY_PCT?: string;
   MINTGARDEN_API_KEY?: string;
+  TREASURY_ADDRESS?: string;
 }
 
 interface MintJobRow {
@@ -204,8 +206,24 @@ export async function processJob(
       ? job.xch_price_mojos / 1_000_000_000_000
       : undefined;
 
+    // Resolve SplitXCH splitter address for royalty splitting
+    let royaltyAddress: string | undefined;
+    if (env.TREASURY_ADDRESS) {
+      try {
+        royaltyAddress = await getOrCreateSplitterAddress(
+          { DB: env.DB, TREASURY_ADDRESS: env.TREASURY_ADDRESS },
+          job.wallet_address,
+          1, // wave 1
+        );
+      } catch (err) {
+        // Non-fatal: fall back to creator's wallet if SplitXCH is unavailable
+        console.error('[SplitXCH] Failed to resolve splitter, using creator wallet:', err);
+      }
+    }
+
     const mintResult = await callMintGardenMint({
       walletAddress: job.wallet_address,
+      royaltyAddress,
       mintType: job.mint_type,
       ipfsImageUris: uploadResult.dataUris,
       ipfsMetadataUris: uploadResult.metadataUris,
