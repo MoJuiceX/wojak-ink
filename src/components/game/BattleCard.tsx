@@ -17,6 +17,7 @@ interface BattleCardProps {
   winner?: string | null;
   hasVoted: boolean;
   onVote?: (battleId: number, votedFor: 'a' | 'b') => void;
+  resolvedAt?: string | null;
 }
 
 function useCountdown(endsAt: string) {
@@ -43,20 +44,31 @@ function useCountdown(endsAt: string) {
 }
 
 export function BattleCard({
-  battleId, nftA, nftB, endsAt, status, winner, hasVoted, onVote,
+  battleId, nftA, nftB, endsAt, status, winner, hasVoted, onVote, resolvedAt,
 }: BattleCardProps) {
   const countdown = useCountdown(endsAt);
   const totalVotes = nftA.votes + nftB.votes;
   const pctA = totalVotes > 0 ? Math.round((nftA.votes / totalVotes) * 100) : 50;
   const pctB = 100 - pctA;
   const isActive = status === 'active';
+  const isHistory = status === 'completed' || status === 'draw';
 
   return (
     <div className="card-static p-4 flex flex-col gap-3">
-      {/* Timer */}
+      {/* Timer / Result */}
       <div className="flex items-center justify-between">
-        <span className="badge badge-cyan">{isActive ? countdown : status}</span>
-        <span className="text-xs text-muted">#{battleId}</span>
+        {isHistory ? (
+          <span className={`badge ${status === 'completed' ? 'badge-success' : 'badge-cyan'}`}>
+            {status === 'draw' ? 'Draw' : 'Completed'}
+          </span>
+        ) : (
+          <span className="badge badge-cyan">{isActive ? countdown : status}</span>
+        )}
+        <span className="text-xs text-muted">
+          {isHistory && resolvedAt
+            ? new Date(resolvedAt).toLocaleDateString()
+            : `#${battleId}`}
+        </span>
       </div>
 
       {/* Side-by-side NFTs */}

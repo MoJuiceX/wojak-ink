@@ -23,11 +23,18 @@ interface Battle {
   hasVoted: boolean;
 }
 
+type Tab = 'active' | 'history';
+
 export function BattleView() {
   const { player, isVerified } = useGame();
+  const [tab, setTab] = useState<Tab>('active');
   const [battles, setBattles] = useState<Battle[]>([]);
+  const [historyBattles, setHistoryBattles] = useState<Battle[]>([]);
   const [loading, setLoading] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const [queueSize, setQueueSize] = useState(0);
+  const [historyHasMore, setHistoryHasMore] = useState(true);
+  const [historyLoadingMore, setHistoryLoadingMore] = useState(false);
 
   const loadBattles = useCallback(async () => {
     setLoading(true);
@@ -45,11 +52,31 @@ export function BattleView() {
     }
   }, [player?.did]);
 
+  const loadHistory = useCallback(async (offset: number, append: boolean) => {
+    try {
+      const params = new URLSearchParams({ status: 'history', limit: '10', offset: String(offset) });
+      const res = await fetch(`/api/game/battle-list?${params}`);
+      const data = await res.json();
+      if (data.success) {
+        const newBattles = data.battles as Battle[];
+        setHistoryBattles(prev => append ? [...prev, ...newBattles] : newBattles);
+        setHistoryHasMore(newBattles.length === 10);
+      }
+    } catch { /* silent */ }
+  }, []);
+
   useEffect(() => {
     if (isVerified) {
       loadBattles();
     }
   }, [isVerified, loadBattles]);
+
+  useEffect(() => {
+    if (tab === 'history' && historyBattles.length === 0 && isVerified) {
+      setHistoryLoading(true);
+      loadHistory(0, false).finally(() => setHistoryLoading(false));
+    }
+  }, [tab, isVerified, historyBattles.length, loadHistory]);
 
   const handleVote = async (battleId: number, votedFor: 'a' | 'b') => {
     if (!player) return;
@@ -60,7 +87,6 @@ export function BattleView() {
     });
     const data = await res.json();
     if (data.success) {
-      // Update local state
       setBattles(prev => prev.map(b => {
         if (b.id !== battleId) return b;
         return {
@@ -71,6 +97,12 @@ export function BattleView() {
         };
       }));
     }
+  };
+
+  const handleLoadMoreHistory = async () => {
+    setHistoryLoadingMore(true);
+    await loadHistory(historyBattles.length, true);
+    setHistoryLoadingMore(false);
   };
 
   if (!player) {
@@ -93,51 +125,103 @@ export function BattleView() {
     );
   }
 
-  if (loading) {
-    return (
-      <div className="flex flex-col gap-4">
-        <BattleQueuePanel onQueued={loadBattles} />
-        <div className="flex items-center justify-center p-12">
-          <div className="text-secondary">Loading battles...</div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col gap-4">
-      {/* Queue your NFT */}
-      <BattleQueuePanel onQueued={loadBattles} />
+      {/* Tab toggle */}
+      <div className="flex gap-2">
+        <button
+          className={`btn ${tab === 'active' ? 'btn-primary' : 'btn-secondary'}`}
+          onClick={() => setTab('active')}
+        >
+          Active
+        </button>
+        <button
+          className={`btn ${tab === 'history' ? 'btn-primary' : 'btn-secondary'}`}
+          onClick={() => setTab('history')}
+        >
+          History
+        </button>
+      </div>
 
-      {/* Queue status */}
-      {queueSize > 0 && (
-        <div className="text-xs text-secondary px-1">
-          {queueSize} NFT{queueSize > 1 ? 's' : ''} waiting for a match
-        </div>
+      {tab === 'active' && (
+        <>
+          <BattleQueuePanel onQueued={loadBattles} />
+
+          {queueSize > 0 && (
+            <div className="text-xs text-secondary px-1">
+              {queueSize} NFT{queueSize > 1 ? 's' : ''} waiting for a match
+            </div>
+          )}
+
+          {loading ? (
+            <div className="flex items-center justify-center p-12">
+              <div className="text-secondary">Loading battles...</div>
+            </div>
+          ) : battles.length === 0 ? (
+            <div className="card-static p-8 flex flex-col items-center gap-4">
+              <h2 className="text-xl font-bold">No Active Battles</h2>
+              <p className="text-secondary text-center">
+                Queue one of your Wojaks to start a battle!
+              </p>
+            </div>
+          ) : (
+            battles.map(battle => (
+              <BattleCard
+                key={battle.id}
+                battleId={battle.id}
+                nftA={battle.nftA}
+                nftB={battle.nftB}
+                endsAt={battle.endsAt}
+                status={battle.status}
+                winner={battle.winner}
+                hasVoted={battle.hasVoted}
+                onVote={handleVote}
+              />
+            ))
+          )}
+        </>
       )}
 
-      {/* Active battles */}
-      {battles.length === 0 ? (
-        <div className="card-static p-8 flex flex-col items-center gap-4">
-          <h2 className="text-xl font-bold">No Active Battles</h2>
-          <p className="text-secondary text-center">
-            Queue one of your Wojaks to start a battle!
-          </p>
-        </div>
-      ) : (
-        battles.map(battle => (
-          <BattleCard
-            key={battle.id}
-            battleId={battle.id}
-            nftA={battle.nftA}
-            nftB={battle.nftB}
-            endsAt={battle.endsAt}
-            status={battle.status}
-            winner={battle.winner}
-            hasVoted={battle.hasVoted}
-            onVote={handleVote}
-          />
-        ))
+      {tab === 'history' && (
+        <>
+          {historyLoading ? (
+            <div className="flex items-center justify-center p-12">
+              <div className="text-secondary">Loading history...</div>
+            </div>
+          ) : historyBattles.length === 0 ? (
+            <div className="card-static p-8 flex flex-col items-center gap-4">
+              <h2 className="text-xl font-bold">No Battle History</h2>
+              <p className="text-secondary text-center">
+                Completed and drawn battles will appear here.
+              </p>
+            </div>
+          ) : (
+            <>
+              {historyBattles.map(battle => (
+                <BattleCard
+                  key={battle.id}
+                  battleId={battle.id}
+                  nftA={battle.nftA}
+                  nftB={battle.nftB}
+                  endsAt={battle.endsAt}
+                  status={battle.status}
+                  winner={battle.winner}
+                  hasVoted={true}
+                  resolvedAt={battle.resolvedAt}
+                />
+              ))}
+              {historyHasMore && (
+                <button
+                  className="btn btn-secondary"
+                  onClick={handleLoadMoreHistory}
+                  disabled={historyLoadingMore}
+                >
+                  {historyLoadingMore ? 'Loading...' : 'Load More'}
+                </button>
+              )}
+            </>
+          )}
+        </>
       )}
     </div>
   );

@@ -35,19 +35,27 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       return Response.json({ success: true, battles });
     }
 
-    // Active battles list
-    const results = await context.env.DB.prepare(`
-      SELECT
-        b.*,
-        na.full_name as name_a,
-        nb.full_name as name_b
-      FROM battles b
-      LEFT JOIN nft_names na ON na.edition_number = b.nft_a_edition
-      LEFT JOIN nft_names nb ON nb.edition_number = b.nft_b_edition
-      WHERE b.status = ?
-      ORDER BY b.ends_at ASC
-      LIMIT ? OFFSET ?
-    `).bind(status, limit, offset).all();
+    // Battle list — active or history
+    const isHistory = status === 'history';
+    const query = isHistory
+      ? `SELECT b.*, na.full_name as name_a, nb.full_name as name_b
+         FROM battles b
+         LEFT JOIN nft_names na ON na.edition_number = b.nft_a_edition
+         LEFT JOIN nft_names nb ON nb.edition_number = b.nft_b_edition
+         WHERE b.status IN ('completed', 'draw')
+         ORDER BY b.resolved_at DESC
+         LIMIT ? OFFSET ?`
+      : `SELECT b.*, na.full_name as name_a, nb.full_name as name_b
+         FROM battles b
+         LEFT JOIN nft_names na ON na.edition_number = b.nft_a_edition
+         LEFT JOIN nft_names nb ON nb.edition_number = b.nft_b_edition
+         WHERE b.status = ?
+         ORDER BY b.ends_at ASC
+         LIMIT ? OFFSET ?`;
+
+    const results = isHistory
+      ? await context.env.DB.prepare(query).bind(limit, offset).all()
+      : await context.env.DB.prepare(query).bind(status, limit, offset).all();
 
     // If voterDid provided, check which battles they've already voted in
     let votedBattleIds = new Set<number>();
