@@ -10,12 +10,14 @@ import { QuickActions } from '@/components/game/QuickActions';
 import { LatestEventBanner } from '@/components/game/LatestEventBanner';
 import { CollectionScroll } from '@/components/game/CollectionScroll';
 import { ActiveBattleCard } from '@/components/game/ActiveBattleCard';
+import { CreatorStatsCard } from '@/components/game/CreatorStatsCard';
 import PageTransition from '@/components/layout/PageTransition';
 import { PageSEO } from '@/components/seo';
 
 interface PowerData {
   rank?: number;
   credits?: number;
+  voteStreak?: number;
   breakdown?: {
     holdings: { score: number; nftCount: number; uniqueCreators: number };
     creations: { score: number; quality: number; spread: number; uniqueCollectors: number };
@@ -36,6 +38,7 @@ function DashboardContent() {
             setPowerData({
               rank: data.rank,
               credits: data.credits,
+              voteStreak: data.voteStreak,
               breakdown: data.breakdown,
             });
           }
@@ -66,6 +69,7 @@ function DashboardContent() {
         level={player.powerLevel}
         rank={powerData.rank}
         credits={powerData.credits}
+        voteStreak={powerData.voteStreak}
         breakdown={powerData.breakdown}
       />
 
@@ -75,6 +79,8 @@ function DashboardContent() {
       />
 
       <CollectionScroll did={player.did} />
+
+      <CreatorStatsCard walletAddress={player.walletAddress} />
 
       <ActiveBattleCard did={player.did} />
 
