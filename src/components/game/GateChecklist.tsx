@@ -45,7 +45,9 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1 }: GateCheckl
                 )}
                 {isCurrent && i === 1 && (
                   <div className="flex flex-col gap-2 mt-2">
-                    <span className="text-muted text-sm">Detecting your DID...</span>
+                    <span className="text-muted text-sm">
+                      We'll auto-detect your DID when your wallet connects.
+                    </span>
                     <a
                       href="https://docs.sagewalletapp.com/getting-started/did"
                       target="_blank"

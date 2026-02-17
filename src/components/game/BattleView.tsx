@@ -95,8 +95,11 @@ export function BattleView() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-12">
-        <div className="text-secondary">Loading battles...</div>
+      <div className="flex flex-col gap-4">
+        <BattleQueuePanel onQueued={loadBattles} />
+        <div className="flex items-center justify-center p-12">
+          <div className="text-secondary">Loading battles...</div>
+        </div>
       </div>
     );
   }
@@ -118,7 +121,7 @@ export function BattleView() {
         <div className="card-static p-8 flex flex-col items-center gap-4">
           <h2 className="text-xl font-bold">No Active Battles</h2>
           <p className="text-secondary text-center">
-            Queue one of your Wojaks from the dashboard to start a battle!
+            Queue one of your Wojaks to start a battle!
           </p>
         </div>
       ) : (
