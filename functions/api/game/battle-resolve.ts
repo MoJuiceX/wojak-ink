@@ -36,10 +36,16 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       const battleId = battle.id as number;
 
       if (totalVotes < MIN_VOTES_FOR_RESULT) {
-        // Not enough votes — draw
-        await context.env.DB.prepare(`
-          UPDATE battles SET status = 'draw', resolved_at = datetime('now') WHERE id = ?
+        // Not enough votes — draw (optimistic lock: only if still active)
+        const drawResult = await context.env.DB.prepare(`
+          UPDATE battles SET status = 'draw', resolved_at = datetime('now')
+          WHERE id = ? AND status = 'active'
         `).bind(battleId).run();
+
+        if (drawResult.meta.changes === 0) {
+          console.log(`[Battle Resolve] Battle ${battleId} already resolved, skipping`);
+          continue;
+        }
 
         // Log activity
         await context.env.DB.batch([
@@ -65,10 +71,17 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       const votesB = battle.votes_b as number;
 
       if (votesA === votesB) {
-        // Tie — draw
-        await context.env.DB.prepare(`
-          UPDATE battles SET status = 'draw', resolved_at = datetime('now') WHERE id = ?
+        // Tie — draw (optimistic lock)
+        const tieResult = await context.env.DB.prepare(`
+          UPDATE battles SET status = 'draw', resolved_at = datetime('now')
+          WHERE id = ? AND status = 'active'
         `).bind(battleId).run();
+
+        if (tieResult.meta.changes === 0) {
+          console.log(`[Battle Resolve] Battle ${battleId} already resolved, skipping`);
+          continue;
+        }
+
         draws++;
         continue;
       }
@@ -83,13 +96,19 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       const winnerVotes = Math.max(votesA, votesB);
       const loserVotes = Math.min(votesA, votesB);
 
-      const stmts: D1PreparedStatement[] = [
-        // Mark battle completed
-        context.env.DB.prepare(`
-          UPDATE battles SET status = 'completed', winner_nft_id = ?, resolved_at = datetime('now')
-          WHERE id = ?
-        `).bind(winnerNftId, battleId),
+      // Optimistic lock: only complete if still active
+      const updateResult = await context.env.DB.prepare(`
+        UPDATE battles SET status = 'completed', winner_nft_id = ?, resolved_at = datetime('now')
+        WHERE id = ? AND status = 'active'
+      `).bind(winnerNftId, battleId).run();
 
+      if (updateResult.meta.changes === 0) {
+        console.log(`[Battle Resolve] Battle ${battleId} already resolved, skipping`);
+        continue;
+      }
+
+      // Score updates + activity logs (only after status update confirmed)
+      await context.env.DB.batch([
         // Award organic likes to winner (proportional to margin)
         context.env.DB.prepare(`
           INSERT INTO wojak_scores (nft_id, edition_number, creator_wallet, likes, dislikes, net_score, total_votes, first_voted_at, last_voted_at)
@@ -133,9 +152,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         `).bind(loserDid as string, JSON.stringify({
           battleId, votes: loserVotes, opponentVotes: winnerVotes,
         })),
-      ];
+      ]);
 
-      await context.env.DB.batch(stmts);
       resolved++;
     }
 
