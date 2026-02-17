@@ -123,73 +123,81 @@ export async function processJob(
       ).bind(mintNumber, jobId).run();
     }
 
-    // ──── STEP 3: Upload to IPFS ────
-    await updateJobStep(env.DB, jobId, 'uploading_ipfs');
-
-    const jwt = env.PINATA_JWT;
-    if (!jwt) {
-      throw new MintError('CONFIG_ERROR', 'IPFS upload not configured (missing PINATA_JWT)');
-    }
-
-    // Build CHIP-0007 metadata
+    // ──── STEP 3: Upload to IPFS (skip if already uploaded from previous attempt) ────
     const collectionUuid = env.PHASE2_COLLECTION_UUID || '';
-    const TRAIT_ORDER = ['Background', 'Base', 'Clothes', 'Face', 'Face Wear', 'Head', 'Mouth'];
-    const attributes = [...consolidated.values()]
-      .map(({ traitType, displayName }) => ({ trait_type: traitType, value: displayName }))
-      .sort((a, b) => {
-        const ai = TRAIT_ORDER.indexOf(a.trait_type);
-        const bi = TRAIT_ORDER.indexOf(b.trait_type);
-        return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
-      });
-
-    const metadata = {
-      format: 'CHIP-0007',
-      name: `Your Wojak #${mintNumber}`,
-      description: 'Your Wojak puts collectors in control. Same handcrafted layers and lore from the Wojak Farmers Plot collection \u2014 but you choose every layer, every color, every detail using the Wojak Generator on Wojak.ink \uD83C\uDF4A',
-      sensitive_content: false,
-      collection: {
-        name: 'Your Wojak',
-        id: collectionUuid,
-        attributes: [
-          { type: 'description', value: 'Your Wojak puts collectors in control. Choose every layer, every color, every detail.' },
-          { type: 'website', value: 'https://wojak.ink' },
-          { type: 'twitter', value: 'https://x.com/WojakInk' },
-        ],
-      },
-      edition: mintNumber,
-      date: Date.now(),
-      compiler: 'Wojak.ink Generator',
-      attributes,
-      edition_number: mintNumber,
-      edition_total: TOTAL_SUPPLY,
-    };
-
     let uploadResult: IPFSUploadResult;
-    try {
-      uploadResult = await uploadToIPFS(imageBase64, metadata as Record<string, unknown>, jwt, env.PINATA_GATEWAY);
-    } catch (err) {
-      throw new MintError('IPFS_UPLOAD_FAILED', err instanceof Error ? err.message : 'IPFS upload failed');
+
+    if (job.ipfs_image_uris && job.ipfs_metadata_uris && job.image_hash && job.metadata_hash) {
+      // Retry path: IPFS data already exists from a previous attempt
+      uploadResult = {
+        dataUris: JSON.parse(job.ipfs_image_uris) as string[],
+        metadataUris: JSON.parse(job.ipfs_metadata_uris) as string[],
+        dataHash: job.image_hash,
+        metadataHash: job.metadata_hash,
+      };
+      console.log(`[MintProcessor] Job ${jobId} reusing existing IPFS data from previous attempt`);
+    } else {
+      await updateJobStep(env.DB, jobId, 'uploading_ipfs');
+
+      const jwt = env.PINATA_JWT;
+      if (!jwt) {
+        throw new MintError('CONFIG_ERROR', 'IPFS upload not configured (missing PINATA_JWT)');
+      }
+
+      // Build CHIP-0007 metadata
+      const TRAIT_ORDER = ['Background', 'Base', 'Clothes', 'Face', 'Face Wear', 'Head', 'Mouth'];
+      const attributes = [...consolidated.values()]
+        .map(({ traitType, displayName }) => ({ trait_type: traitType, value: displayName }))
+        .sort((a, b) => {
+          const ai = TRAIT_ORDER.indexOf(a.trait_type);
+          const bi = TRAIT_ORDER.indexOf(b.trait_type);
+          return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+        });
+
+      const metadata = {
+        format: 'CHIP-0007',
+        name: `Your Wojak #${mintNumber}`,
+        description: 'Your Wojak puts collectors in control. Same handcrafted layers and lore from the Wojak Farmers Plot collection \u2014 but you choose every layer, every color, every detail using the Wojak Generator on Wojak.ink \uD83C\uDF4A',
+        sensitive_content: false,
+        collection: {
+          name: 'Your Wojak',
+          id: collectionUuid,
+          attributes: [
+            { type: 'description', value: 'Your Wojak puts collectors in control. Choose every layer, every color, every detail.' },
+            { type: 'website', value: 'https://wojak.ink' },
+            { type: 'twitter', value: 'https://x.com/WojakInk' },
+          ],
+        },
+        edition: mintNumber,
+        date: Date.now(),
+        compiler: 'Wojak.ink Generator',
+        attributes,
+        edition_number: mintNumber,
+        edition_total: TOTAL_SUPPLY,
+      };
+
+      try {
+        uploadResult = await uploadToIPFS(imageBase64, metadata as Record<string, unknown>, jwt, env.PINATA_GATEWAY);
+      } catch (err) {
+        throw new MintError('IPFS_UPLOAD_FAILED', err instanceof Error ? err.message : 'IPFS upload failed');
+      }
+
+      await env.DB.prepare(
+        `UPDATE mint_jobs SET
+          ipfs_image_uris = ?, ipfs_metadata_uris = ?,
+          image_hash = ?, metadata_hash = ?, updated_at = datetime('now')
+         WHERE id = ?`
+      ).bind(
+        JSON.stringify(uploadResult.dataUris),
+        JSON.stringify(uploadResult.metadataUris),
+        uploadResult.dataHash,
+        uploadResult.metadataHash,
+        jobId
+      ).run();
     }
 
-    await env.DB.prepare(
-      `UPDATE mint_jobs SET
-        ipfs_image_uris = ?, ipfs_metadata_uris = ?,
-        image_hash = ?, metadata_hash = ?, updated_at = datetime('now')
-       WHERE id = ?`
-    ).bind(
-      JSON.stringify(uploadResult.dataUris),
-      JSON.stringify(uploadResult.metadataUris),
-      uploadResult.dataHash,
-      uploadResult.metadataHash,
-      jobId
-    ).run();
-
-    // Clean up image from KV (no longer needed)
-    try {
-      await env.MINT_JOBS_KV.delete(`job-image:${jobId}`);
-    } catch {
-      // Non-critical — KV cleanup failure is fine
-    }
+    // Keep image in KV until job completes — needed for retry if MintGarden fails.
+    // KV entry will be cleaned up after finalization (see finalizeJob below).
 
     // ──── STEP 4: Call MintGarden ────
     await updateJobStep(env.DB, jobId, 'calling_mintgarden');
@@ -274,13 +282,38 @@ export async function finalizeJob(env: ProcessEnv, jobId: number): Promise<void>
   const ipfsImageUris = job.ipfs_image_uris ? JSON.parse(job.ipfs_image_uris) as string[] : [];
   const ipfsMetadataUris = job.ipfs_metadata_uris ? JSON.parse(job.ipfs_metadata_uris) as string[] : [];
 
+  // Check if already finalized (idempotent — safe to retry)
+  const existingMint = await env.DB.prepare(
+    'SELECT id FROM phase2_mints WHERE mint_number = ?'
+  ).bind(job.mint_number).first<{ id: number }>();
+
+  if (existingMint) {
+    // Already finalized — just update job status and release lock
+    await env.DB.prepare(
+      `UPDATE mint_jobs SET
+        step = 'completed', completed_at = datetime('now'),
+        phase2_mint_id = ?, wallet_lock = NULL, updated_at = datetime('now')
+       WHERE id = ?`
+    ).bind(existingMint.id, jobId).run();
+
+    await logMintStep(env.DB, {
+      mint_id: existingMint.id,
+      step: 'finalize_idempotent_skip',
+      status: 'completed',
+      data: { mint_number: job.mint_number, job_id: jobId, message: 'Already finalized, skipped duplicate' },
+    });
+    return;
+  }
+
   // Atomic batch: insert phase2_mints + update trait_usage + update job status
   const batchStmts: D1PreparedStatement[] = [];
 
   // 1. Insert into phase2_mints (the canonical mint record)
+  // ON CONFLICT(mint_number) DO NOTHING for safety — the pre-check above handles
+  // the idempotent case, but this prevents crashes if a race condition occurs.
   batchStmts.push(
     env.DB.prepare(
-      `INSERT INTO phase2_mints (
+      `INSERT OR IGNORE INTO phase2_mints (
         mint_number, wallet_address, layers_json, colors_json,
         ipfs_image_uri, ipfs_metadata_uri, image_hash, metadata_hash,
         mint_type, total_price_xch, trait_surcharge_xch, highest_surcharge_trait,
@@ -374,6 +407,13 @@ export async function finalizeJob(env: ProcessEnv, jobId: number): Promise<void>
      WHERE id = ?`
   ).bind(mintRow?.id ?? null, jobId).run();
 
+  // Clean up image from KV (no longer needed after successful finalization)
+  try {
+    await env.MINT_JOBS_KV.delete(`job-image:${jobId}`);
+  } catch {
+    // Non-critical — KV cleanup failure is fine
+  }
+
   // Audit log
   await logMintStep(env.DB, {
     mint_id: mintRow?.id ?? 0,
@@ -406,20 +446,19 @@ async function handleJobFailure(
     'SOLD_OUT', 'INSUFFICIENT_CREDITS', 'INVALID_TRAITS', 'SUPPLY_EXHAUSTED', 'CONFIG_ERROR',
     'OFFER_CREATION_FAILED', 'MINTGARDEN_FAILED',
   ];
-  // Also non-retryable if we're past IPFS upload (image deleted from KV, can't restart from scratch)
-  const pastIpfs = job?.step && !['queued', 'validating', 'reserving_number', 'uploading_ipfs'].includes(job.step);
-  const retryable = !nonRetryable.includes(errorCode) && !pastIpfs;
+  // Past-IPFS retries are now safe: image stays in KV until finalization,
+  // and processJob skips IPFS upload if URIs already exist on the job.
+  const retryable = !nonRetryable.includes(errorCode);
 
   if (retryable && (job?.retry_count ?? 0) < (job?.max_retries ?? 3)) {
     // Increment retry count, reset to queued for retry.
-    // Clear IPFS URIs (may be partial) but keep mint_number intentionally —
-    // processJob reuses job.mint_number on retry (line ~117) to avoid
-    // reserving a second number for the same job, which would leak supply.
+    // Keep mint_number (avoid leaking supply) and keep IPFS URIs if they exist
+    // (processJob will skip re-upload on retry if URIs are already set).
+    const hasIpfs = job?.ipfs_image_uris && job?.ipfs_metadata_uris;
     await env.DB.prepare(
       `UPDATE mint_jobs SET step = 'queued', retry_count = retry_count + 1,
        error_message = ?, error_code = ?,
-       ipfs_image_uris = NULL, ipfs_metadata_uris = NULL,
-       image_hash = NULL, metadata_hash = NULL,
+       ${hasIpfs ? '' : 'ipfs_image_uris = NULL, ipfs_metadata_uris = NULL, image_hash = NULL, metadata_hash = NULL,'}
        updated_at = datetime('now')
        WHERE id = ?`
     ).bind(errorMsg, errorCode, jobId).run();

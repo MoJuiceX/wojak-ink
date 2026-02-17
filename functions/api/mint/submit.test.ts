@@ -54,7 +54,11 @@ function createEnvWithQueries(queryHandlers: Record<string, ReturnType<typeof mo
         }
         return defaultStmt;
       }),
-      batch: vi.fn().mockResolvedValue([]),
+      // Default batch mock: returns two results (credit deduction + job insert)
+      batch: vi.fn().mockResolvedValue([
+        { meta: { changes: 1, last_row_id: 10 } },  // credit_spends INSERT
+        { meta: { changes: 1, last_row_id: 42 } },  // mint_jobs INSERT
+      ]),
     },
     MINT_JOBS_KV: {
       put: vi.fn().mockResolvedValue(undefined),
@@ -314,10 +318,12 @@ describe('submit.ts', () => {
         stmt.all = vi.fn().mockResolvedValue({ results: [] });
         return stmt;
       }
-      // Match INSERT INTO mint_jobs
-      if (query.includes('INSERT INTO mint_jobs')) return mockStmt(null, { meta: { changes: 1, last_row_id: 55 } });
       return mockStmt();
     });
+    // Paid mint: batch has only 1 statement (job INSERT, no credit deduction)
+    env.DB.batch = vi.fn().mockResolvedValue([
+      { meta: { changes: 1, last_row_id: 55 } },  // mint_jobs INSERT
+    ]);
 
     const req = makeRequest({ ...VALID_SUBMIT_BODY, mintType: 'paid' });
     const ctx = createContext(env, req);
@@ -332,31 +338,8 @@ describe('submit.ts', () => {
 
   it('returns 409 WALLET_LOCKED when wallet already has active mint', async () => {
     const env = createEnvWithQueries({});
-    let insertCalled = false;
 
     env.DB.prepare = vi.fn((query: string) => {
-      // CRITICAL: Order matters! More specific patterns must come FIRST
-      // because INSERT queries contain column names that could match SELECT patterns
-
-      // This INSERT should throw UNIQUE constraint error - check FIRST
-      if (query.startsWith('INSERT INTO mint_jobs')) {
-        insertCalled = true;
-        const stmt = {
-          bind: vi.fn().mockReturnThis(),
-          first: vi.fn().mockResolvedValue(null),
-          run: vi.fn().mockRejectedValue(new Error('UNIQUE constraint failed: mint_jobs.wallet_lock')),
-          all: vi.fn().mockResolvedValue({ results: [] }),
-        };
-        return stmt;
-      }
-      // INSERT INTO credit_spends contains COALESCE in subquery - check before balance
-      if (query.startsWith('INSERT INTO credit_spends')) {
-        return mockStmt(null, { meta: { changes: 1, last_row_id: 10 } });
-      }
-      if (query.includes('DELETE FROM credit_spends')) return mockStmt();
-      if (query.includes('wallet_lock =')) return mockStmt({ id: 99 });
-
-      // SELECT queries - these are safe to check by content
       if (query.includes('idempotency_key')) return mockStmt(null);
       if (query.includes('minting_paused')) return mockStmt(null);
       if (query.includes('sold_out')) return mockStmt(null);
@@ -368,16 +351,19 @@ describe('submit.ts', () => {
         return stmt;
       }
       if (query.includes('COALESCE(SUM(credits_earned)')) return mockStmt({ balance: 50000 });
-
+      // Return active job for wallet_lock lookup
+      if (query.includes('wallet_lock =')) return mockStmt({ id: 99 });
       return mockStmt();
     });
+
+    // batch() throws UNIQUE constraint error (wallet_lock is already set)
+    env.DB.batch = vi.fn().mockRejectedValue(
+      new Error('UNIQUE constraint failed: mint_jobs.wallet_lock')
+    );
 
     const req = makeRequest({ ...VALID_SUBMIT_BODY, mintType: 'free' });
     const ctx = createContext(env, req);
     const res = await onRequest(ctx);
-
-    // Verify the INSERT was called
-    expect(insertCalled).toBe(true);
 
     expect(res.status).toBe(409);
     const data = await parseResponse(res);
@@ -396,7 +382,6 @@ describe('submit.ts', () => {
   });
 
   it('accepts valid hex colors', async () => {
-    const insertStmt = mockStmt(null, { meta: { changes: 1, last_row_id: 99 } });
     const env = createEnvWithQueries({});
     env.DB.prepare = vi.fn((query: string) => {
       if (query.includes('idempotency_key')) return mockStmt(null);
@@ -409,9 +394,12 @@ describe('submit.ts', () => {
         stmt.all = vi.fn().mockResolvedValue({ results: [] });
         return stmt;
       }
-      if (query.includes('INSERT INTO mint_jobs')) return insertStmt;
       return mockStmt();
     });
+    // Paid mint: batch has only 1 statement (job INSERT)
+    env.DB.batch = vi.fn().mockResolvedValue([
+      { meta: { changes: 1, last_row_id: 99 } },
+    ]);
 
     const body = { ...VALID_SUBMIT_BODY, mintType: 'paid', selectedColors: { Background: '#ff6600' } };
     const req = makeRequest(body);

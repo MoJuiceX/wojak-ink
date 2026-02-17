@@ -116,8 +116,15 @@ const DEFAULT_MAX_SUPPLY = 4200;
 const BASE_PRICE_XCH = 0.2;
 const PRICING_REFRESH_MS = 60_000;
 const POLL_INTERVAL_ACTIVE = 3000;
-const POLL_INTERVAL_AWAITING = 10000; // Slower polling during awaiting_payment (hits external API)
 const POLL_MAX_DURATION = 10 * 60 * 1000; // 10 minutes
+
+// Progressive backoff intervals for awaiting_payment polling (hits MintGarden API each cycle)
+const POLL_BACKOFF_SCHEDULE = [
+  { afterMs: 0, intervalMs: 5000 },       // First 30s: every 5s
+  { afterMs: 30_000, intervalMs: 10_000 }, // 30s-2min: every 10s
+  { afterMs: 120_000, intervalMs: 15_000 },// 2-5min: every 15s
+  { afterMs: 300_000, intervalMs: 20_000 },// 5min+: every 20s
+];
 
 const MintContext = createContext<MintContextValue | null>(null);
 
@@ -281,6 +288,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
 
   const stopPolling = useCallback(() => {
     if (pollingRef.current) {
+      clearTimeout(pollingRef.current);
       clearInterval(pollingRef.current);
       pollingRef.current = null;
     }
@@ -290,8 +298,11 @@ export function MintProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const pollingStartTimeRef = useRef<number>(0);
+
   const startPolling = useCallback((jobId: number, walletAddr: string, initialStep?: string) => {
     stopPolling();
+    pollingStartTimeRef.current = Date.now();
 
     const poll = async () => {
       try {
@@ -343,13 +354,33 @@ export function MintProvider({ children }: { children: ReactNode }) {
       }
     };
 
+    // Get the right interval based on step and elapsed time
+    const getInterval = (isAwaiting: boolean): number => {
+      if (!isAwaiting) return POLL_INTERVAL_ACTIVE;
+      const elapsed = Date.now() - pollingStartTimeRef.current;
+      // Find the highest matching backoff tier
+      let interval = POLL_BACKOFF_SCHEDULE[0].intervalMs;
+      for (const tier of POLL_BACKOFF_SCHEDULE) {
+        if (elapsed >= tier.afterMs) interval = tier.intervalMs;
+      }
+      return interval;
+    };
+
     // Initial poll
     poll();
 
-    // Start interval — use shorter interval for active processing,
-    // slower during awaiting_payment (since each poll also hits MintGarden API)
-    const interval = initialStep === 'awaiting_payment' ? POLL_INTERVAL_AWAITING : POLL_INTERVAL_ACTIVE;
-    pollingRef.current = setInterval(poll, interval);
+    // Start with adaptive interval — re-schedule after each poll to adjust backoff
+    const isAwaiting = initialStep === 'awaiting_payment';
+    const scheduleNext = () => {
+      pollingRef.current = setTimeout(() => {
+        poll().then(() => {
+          if (pollingRef.current !== null) {
+            scheduleNext(); // Schedule next poll with potentially updated interval
+          }
+        });
+      }, getInterval(isAwaiting)) as unknown as ReturnType<typeof setInterval>;
+    };
+    scheduleNext();
 
     // Safety: stop polling after 10 minutes
     pollingTimeoutRef.current = setTimeout(stopPolling, POLL_MAX_DURATION);

@@ -298,10 +298,15 @@ describe('process.ts', () => {
         mintgarden_launcher_id: 'nft1abc',
       };
 
+      let phase2LookupCount = 0;
       env.DB.prepare = vi.fn((query: string) => {
         if (query.includes('UPDATE mint_jobs SET step')) return mockStmt();
         if (query.includes('SELECT * FROM mint_jobs WHERE id')) return mockStmt(finalizedJob);
-        if (query.includes('SELECT id FROM phase2_mints')) return mockStmt({ id: 500 });
+        // First phase2_mints lookup (idempotency check) returns null, second (post-batch) returns { id: 500 }
+        if (query.includes('SELECT id FROM phase2_mints') && !query.includes('COUNT')) {
+          phase2LookupCount++;
+          return mockStmt(phase2LookupCount === 1 ? null : { id: 500 });
+        }
         if (query.includes('UPDATE credit_spends')) return mockStmt();
         if (query.includes("SELECT COUNT(*) AS count FROM phase2_mints")) return mockStmt({ count: 100 });
         if (query.includes('step = \'completed\'')) return mockStmt();
@@ -342,10 +347,14 @@ describe('process.ts', () => {
       };
 
       let creditSpendUpdated = false;
+      let phase2LookupCount = 0;
       env.DB.prepare = vi.fn((query: string) => {
         if (query.includes('UPDATE mint_jobs SET step')) return mockStmt();
         if (query.includes('SELECT * FROM mint_jobs WHERE id')) return mockStmt(freeFinalized);
-        if (query.includes('SELECT id FROM phase2_mints')) return mockStmt({ id: 500 });
+        if (query.includes('SELECT id FROM phase2_mints') && !query.includes('COUNT')) {
+          phase2LookupCount++;
+          return mockStmt(phase2LookupCount === 1 ? null : { id: 500 });
+        }
         if (query.includes('UPDATE credit_spends')) {
           creditSpendUpdated = true;
           return mockStmt();
@@ -372,10 +381,14 @@ describe('process.ts', () => {
       };
 
       let soldOutSet = false;
+      let phase2LookupCount = 0;
       env.DB.prepare = vi.fn((query: string) => {
         if (query.includes('UPDATE mint_jobs SET step')) return mockStmt();
         if (query.includes('SELECT * FROM mint_jobs WHERE id')) return mockStmt(finalizedJob);
-        if (query.includes('SELECT id FROM phase2_mints')) return mockStmt({ id: 500 });
+        if (query.includes('SELECT id FROM phase2_mints') && !query.includes('COUNT')) {
+          phase2LookupCount++;
+          return mockStmt(phase2LookupCount === 1 ? null : { id: 500 });
+        }
         if (query.includes("SELECT COUNT(*) AS count FROM phase2_mints")) return mockStmt({ count: 4200 });
         if (query.includes("INSERT OR REPLACE INTO server_state") && query.includes('sold_out')) {
           soldOutSet = true;

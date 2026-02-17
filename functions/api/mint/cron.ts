@@ -36,7 +36,39 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   }
 
   try {
-    const stats = await cleanupStaleJobs(env);
+    // Fix 7: Cleanup mutex — prevent concurrent runs.
+    // Check if another cleanup is already running (started <5 min ago).
+    const lockRow = await env.DB.prepare(
+      "SELECT value FROM server_state WHERE key = 'cleanup_running'"
+    ).first<{ value: string }>();
+
+    if (lockRow?.value) {
+      const lockTime = new Date(lockRow.value).getTime();
+      const elapsed = Date.now() - lockTime;
+      if (elapsed < 5 * 60 * 1000) {
+        return jsonResponse({
+          success: false,
+          skipped: true,
+          message: `Cleanup already running (started ${Math.round(elapsed / 1000)}s ago)`,
+        });
+      }
+      // Lock is stale (>5 min) — proceed and overwrite
+    }
+
+    // Acquire lock
+    await env.DB.prepare(
+      "INSERT OR REPLACE INTO server_state (key, value, updated_at) VALUES ('cleanup_running', ?, datetime('now'))"
+    ).bind(new Date().toISOString()).run();
+
+    let stats;
+    try {
+      stats = await cleanupStaleJobs(env);
+    } finally {
+      // Release lock
+      await env.DB.prepare(
+        "DELETE FROM server_state WHERE key = 'cleanup_running'"
+      ).run();
+    }
 
     // Query recent error counts from mint_audit_log
     const [errors1h, errors24h] = await Promise.all([
@@ -60,6 +92,12 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     });
   } catch (error) {
     console.error('[Mint Cron] Error:', error);
+    // Release lock on error
+    try {
+      await env.DB.prepare(
+        "DELETE FROM server_state WHERE key = 'cleanup_running'"
+      ).run();
+    } catch { /* best effort */ }
     return errorResponse('Cleanup failed', 500);
   }
 };

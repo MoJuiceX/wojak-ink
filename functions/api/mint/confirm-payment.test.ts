@@ -226,6 +226,7 @@ describe('confirm-payment.ts', () => {
     };
     const env = createEnv({ 'awaiting_payment': mockStmt(awaitingJob) });
 
+    // verifyLauncherOnChain catches errors internally and returns null
     mockFetch.mockRejectedValue(new Error('Network error'));
 
     const req = makeRequest({ jobId: 1, walletAddress: TEST_WALLET });
@@ -233,7 +234,8 @@ describe('confirm-payment.ts', () => {
     const res = await onRequest(ctx);
     const data = await res.json() as Record<string, unknown>;
     expect(data.pending).toBe(true);
-    expect(data.message).toContain('Could not verify');
+    // verifyLauncherOnChain returns null on error → "may not have been accepted" path
+    expect(data.message).toContain('may not have been accepted');
   });
 
   it('uses caller-provided launcherId over stored one', async () => {
@@ -259,8 +261,11 @@ describe('confirm-payment.ts', () => {
     const data = await res.json() as Record<string, unknown>;
     expect(data.success).toBe(true);
 
-    // Verify fetch was called with provided launcher ID
-    expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('nft1provided'));
+    // Verify fetch was called with provided launcher ID (fetchWithTimeout passes signal)
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('nft1provided'),
+      expect.objectContaining({ signal: expect.any(AbortSignal) })
+    );
   });
 
   it('rejects invalid JSON body', async () => {

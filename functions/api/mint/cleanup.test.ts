@@ -293,14 +293,12 @@ describe('cleanup.ts', () => {
       return mockStmt();
     });
 
+    // detectLauncherByWallet now catches errors internally and returns null
     mockFetch.mockRejectedValue(new Error('Network error'));
 
     const stats = await cleanupStaleJobs(env as any);
-    // Should not crash, just log the error
+    // Should not crash — detectLauncherByWallet returns null, so no finalization
     expect(stats.autoFinalized).toBe(0);
-    expect(logMintStep).toHaveBeenCalledWith(env.DB, expect.objectContaining({
-      step: 'auto_finalize_failed',
-    }));
   });
 
   it('does not retry jobs that have reached max retries', async () => {

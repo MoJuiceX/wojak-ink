@@ -1,6 +1,6 @@
 /**
  * Mint Job Cleanup — stale job expiry, credit refunds, IPFS unpin, retry,
- * and auto-finalize paid mints where offer was accepted.
+ * auto-finalize paid mints, phantom mint detection, and absolute lock timeout.
  *
  * Exports cleanupStaleJobs() for use by cron.ts.
  * NOT an HTTP endpoint itself.
@@ -9,67 +9,13 @@
 import { processJob, finalizeJob, type ProcessEnv } from './process';
 import { unpinFromIPFS, extractCidFromUri } from './uploadToIPFS';
 import { markRefundNeeded, logMintStep } from './auditHelper';
+import { detectLauncherByWallet } from './mintgardenVerify';
 
 interface CleanupEnv extends ProcessEnv {
   DB: D1Database;
   MINT_JOBS_KV: KVNamespace;
   PINATA_JWT?: string;
   PHASE2_COLLECTION_UUID?: string;
-}
-
-/** MintGarden NFT item shape (subset) */
-interface MintGardenNftItem {
-  id?: string;
-  encoded_id?: string;
-  data?: {
-    edition_number?: number;
-    metadata_json?: {
-      edition?: number;
-      edition_number?: number;
-      name?: string;
-    };
-  };
-}
-
-/**
- * Query MintGarden for NFTs owned by a wallet, find one matching the mint_number.
- * Returns the launcher ID if found, or null.
- */
-async function detectLauncherByWallet(
-  walletAddress: string,
-  mintNumber: number,
-  collectionUuid: string
-): Promise<string | null> {
-  let url = `https://api.mintgarden.io/address/${walletAddress}/nfts?type=owned`;
-  if (collectionUuid) {
-    url += `&collection_id=${collectionUuid}`;
-  }
-
-  const res = await fetch(url, {
-    headers: { Accept: 'application/json', 'User-Agent': 'wojak.ink/1.0' },
-  });
-  if (!res.ok) return null;
-
-  const data = await res.json() as { items?: MintGardenNftItem[] };
-  const items = data.items || [];
-
-  for (const item of items) {
-    const editionNumber =
-      item.data?.edition_number ??
-      item.data?.metadata_json?.edition_number ??
-      item.data?.metadata_json?.edition;
-
-    if (editionNumber === mintNumber) {
-      return item.encoded_id || item.id || null;
-    }
-
-    const name = item.data?.metadata_json?.name;
-    if (name && name === `Your Wojak #${mintNumber}`) {
-      return item.encoded_id || item.id || null;
-    }
-  }
-
-  return null;
 }
 
 export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
@@ -81,6 +27,8 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
   expiredLegacy: number;
   unpinnedIPFS: number;
   paidRefundsFlagged: number;
+  phantomFinalized: number;
+  locksForceReleased: number;
 }> {
   const stats = {
     autoFinalized: 0,
@@ -91,6 +39,8 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
     expiredLegacy: 0,
     unpinnedIPFS: 0,
     paidRefundsFlagged: 0,
+    phantomFinalized: 0,
+    locksForceReleased: 0,
   };
 
   // 1. Auto-finalize paid mints where user accepted the offer but
@@ -137,22 +87,30 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
   }
 
   // 2. Expire jobs stuck in 'awaiting_payment' past their expires_at
-  const expiredPaid = await env.DB.prepare(
-    `UPDATE mint_jobs SET step = 'failed', error_message = 'Offer expired',
-     error_code = 'OFFER_EXPIRED', wallet_lock = NULL, updated_at = datetime('now')
-     WHERE step = 'awaiting_payment'
-     AND expires_at IS NOT NULL AND expires_at < datetime('now')`
-  ).run();
-  stats.expiredPaid = expiredPaid.meta?.changes ?? 0;
+  try {
+    const expiredPaid = await env.DB.prepare(
+      `UPDATE mint_jobs SET step = 'failed', error_message = 'Offer expired',
+       error_code = 'OFFER_EXPIRED', wallet_lock = NULL, updated_at = datetime('now')
+       WHERE step = 'awaiting_payment'
+       AND expires_at IS NOT NULL AND expires_at < datetime('now')`
+    ).run();
+    stats.expiredPaid = expiredPaid.meta?.changes ?? 0;
+  } catch (err) {
+    console.error('[Cleanup] Operation 2 (expire paid) failed:', err);
+  }
 
   // 3. Fail jobs stuck in processing for more than 5 minutes (worker died)
-  const stuckProcessing = await env.DB.prepare(
-    `UPDATE mint_jobs SET step = 'failed', error_message = 'Processing timed out',
-     error_code = 'TIMEOUT', wallet_lock = NULL, updated_at = datetime('now')
-     WHERE step NOT IN ('completed', 'failed', 'refunded', 'awaiting_payment', 'queued')
-     AND updated_at < datetime('now', '-5 minutes')`
-  ).run();
-  stats.stuckProcessing = stuckProcessing.meta?.changes ?? 0;
+  try {
+    const stuckProcessing = await env.DB.prepare(
+      `UPDATE mint_jobs SET step = 'failed', error_message = 'Processing timed out',
+       error_code = 'TIMEOUT', wallet_lock = NULL, updated_at = datetime('now')
+       WHERE step NOT IN ('completed', 'failed', 'refunded', 'awaiting_payment', 'queued')
+       AND updated_at < datetime('now', '-5 minutes')`
+    ).run();
+    stats.stuckProcessing = stuckProcessing.meta?.changes ?? 0;
+  } catch (err) {
+    console.error('[Cleanup] Operation 3 (stuck processing) failed:', err);
+  }
 
   // 4. Retry queued jobs that haven't been picked up in 30 seconds.
   //    Limited to 2 jobs to avoid exceeding Cloudflare Pages Functions timeout
@@ -220,27 +178,39 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
   }
 
   // 5. Refund credits for failed free mint jobs that haven't been refunded yet
-  const unrefunded = await env.DB.prepare(
-    `SELECT id, credit_spend_id FROM mint_jobs
-     WHERE step = 'failed' AND mint_type = 'free'
-     AND credit_spend_id IS NOT NULL`
-  ).all<{ id: number; credit_spend_id: number }>();
+  try {
+    const unrefunded = await env.DB.prepare(
+      `SELECT id, credit_spend_id FROM mint_jobs
+       WHERE step = 'failed' AND mint_type = 'free'
+       AND credit_spend_id IS NOT NULL`
+    ).all<{ id: number; credit_spend_id: number }>();
 
-  for (const row of (unrefunded.results || [])) {
-    await env.DB.prepare('DELETE FROM credit_spends WHERE id = ?')
-      .bind(row.credit_spend_id).run();
-    await env.DB.prepare(
-      "UPDATE mint_jobs SET step = 'refunded', credit_spend_id = NULL, updated_at = datetime('now') WHERE id = ?"
-    ).bind(row.id).run();
-    stats.refunded++;
+    for (const row of (unrefunded.results || [])) {
+      try {
+        await env.DB.prepare('DELETE FROM credit_spends WHERE id = ?')
+          .bind(row.credit_spend_id).run();
+        await env.DB.prepare(
+          "UPDATE mint_jobs SET step = 'refunded', credit_spend_id = NULL, updated_at = datetime('now') WHERE id = ?"
+        ).bind(row.id).run();
+        stats.refunded++;
+      } catch (err) {
+        console.error(`[Cleanup] Refund failed for job ${row.id}:`, err);
+      }
+    }
+  } catch (err) {
+    console.error('[Cleanup] Operation 5 (refund credits) failed:', err);
   }
 
   // 6. Expire stale phase2_mints pending records (legacy backwards compat)
-  const expiredLegacy = await env.DB.prepare(
-    `UPDATE phase2_mints SET status = 'expired'
-     WHERE status = 'pending' AND expires_at IS NOT NULL AND expires_at < datetime('now')`
-  ).run();
-  stats.expiredLegacy = expiredLegacy.meta?.changes ?? 0;
+  try {
+    const expiredLegacy = await env.DB.prepare(
+      `UPDATE phase2_mints SET status = 'expired'
+       WHERE status = 'pending' AND expires_at IS NOT NULL AND expires_at < datetime('now')`
+    ).run();
+    stats.expiredLegacy = expiredLegacy.meta?.changes ?? 0;
+  } catch (err) {
+    console.error('[Cleanup] Operation 6 (expire legacy) failed:', err);
+  }
 
   // 7. Unpin orphaned IPFS data for failed jobs older than 1 hour
   if (env.PINATA_JWT) {
@@ -331,6 +301,63 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
     } catch (err) {
       console.error(`[Cleanup] Failed to flag refund for job ${row.job_id}:`, err);
     }
+  }
+
+  // 9. Fix 4: Absolute lock timeout — force-release wallet locks older than 30 minutes.
+  //    This prevents permanent wallet lockout if cleanup or processing fails.
+  try {
+    const staleLocks = await env.DB.prepare(
+      `UPDATE mint_jobs SET wallet_lock = NULL, updated_at = datetime('now'),
+       error_message = COALESCE(error_message, '') || ' [lock force-released after 30min]'
+       WHERE wallet_lock IS NOT NULL
+       AND created_at < datetime('now', '-30 minutes')
+       AND step NOT IN ('completed')`
+    ).run();
+    stats.locksForceReleased = staleLocks.meta?.changes ?? 0;
+    if (stats.locksForceReleased > 0) {
+      console.log(`[Cleanup] Force-released ${stats.locksForceReleased} stale wallet locks`);
+    }
+  } catch (err) {
+    console.error('[Cleanup] Operation 9 (force-release locks) failed:', err);
+  }
+
+  // 10. Fix 5: Phantom mint detection for free mints.
+  //     Free mints that failed AFTER MintGarden returned a launcherId have the NFT
+  //     already created on-chain. Detect and auto-finalize them.
+  try {
+    const phantomFree = await env.DB.prepare(
+      `SELECT id, wallet_address, mint_number, mintgarden_launcher_id FROM mint_jobs
+       WHERE step IN ('failed', 'refunded')
+       AND mint_type = 'free'
+       AND mintgarden_launcher_id IS NOT NULL
+       AND mint_number IS NOT NULL
+       LIMIT 5`
+    ).all<{ id: number; wallet_address: string; mint_number: number; mintgarden_launcher_id: string }>();
+
+    for (const row of (phantomFree.results || [])) {
+      try {
+        // The NFT exists on chain — finalize it
+        await env.DB.prepare(
+          "UPDATE mint_jobs SET step = 'queued', wallet_lock = ?, updated_at = datetime('now') WHERE id = ?"
+        ).bind(row.wallet_address, row.id).run();
+
+        // Re-add credit spend if it was refunded
+        // (The refund happened because we thought the mint failed, but it actually succeeded)
+        await finalizeJob(env, row.id);
+        stats.phantomFinalized++;
+        console.log(`[Cleanup] Phantom-finalized free mint job ${row.id} (launcher: ${row.mintgarden_launcher_id})`);
+      } catch (err) {
+        console.error(`[Cleanup] Phantom finalize failed for job ${row.id}:`, err);
+        // Reset wallet_lock on failure
+        try {
+          await env.DB.prepare(
+            "UPDATE mint_jobs SET wallet_lock = NULL, step = 'failed', updated_at = datetime('now') WHERE id = ?"
+          ).bind(row.id).run();
+        } catch { /* best effort */ }
+      }
+    }
+  } catch (err) {
+    console.error('[Cleanup] Operation 10 (phantom free mints) failed:', err);
   }
 
   return stats;

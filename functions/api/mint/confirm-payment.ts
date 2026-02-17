@@ -20,6 +20,7 @@ import {
   isValidChiaAddress,
 } from './_shared';
 import { checkRateLimit, getRateLimitKey, MINT_RATE_LIMITS } from '../../lib/rateLimit';
+import { verifyLauncherOnChain, detectLauncherByWallet } from './mintgardenVerify';
 
 interface Env extends ProcessEnv {
   DB: D1Database;
@@ -35,86 +36,6 @@ interface AwaitingJobRow {
   mint_number: number | null;
   mintgarden_launcher_id: string | null;
   offer_file: string | null;
-}
-
-/** MintGarden NFT item shape (subset of fields we need) */
-interface MintGardenNftItem {
-  id?: string;
-  encoded_id?: string;
-  data?: {
-    edition_number?: number;
-    metadata_json?: {
-      edition?: number;
-      edition_number?: number;
-      name?: string;
-    };
-  };
-  owner_address?: { encoded_id?: string };
-}
-
-/**
- * Verify a known launcherId on MintGarden.
- * Returns the verified launcherId, or null if not found/mismatch.
- * Throws on network errors (caller handles).
- */
-async function verifyLauncherOnChain(
-  launcherId: string,
-  expectedWallet: string
-): Promise<string | null> {
-  const mgRes = await fetch(`https://api.mintgarden.io/nfts/${launcherId}`);
-  if (!mgRes.ok) return null;
-
-  const nftData = await mgRes.json() as { owner_address?: { encoded_id?: string } };
-  const onChainOwner = nftData?.owner_address?.encoded_id;
-  if (onChainOwner && onChainOwner.toLowerCase() !== expectedWallet.toLowerCase()) {
-    return null; // Owner mismatch
-  }
-  return launcherId;
-}
-
-/**
- * Auto-detect the NFT for a paid mint by querying MintGarden for
- * recently minted NFTs owned by this wallet, matching by edition_number.
- * Returns the launcherId if found, or null if the NFT hasn't appeared yet.
- */
-async function detectLauncherByWallet(
-  walletAddress: string,
-  mintNumber: number,
-  collectionUuid: string
-): Promise<string | null> {
-  // MintGarden /address/{addr}/nfts returns NFTs owned by wallet.
-  // We filter by collection_id if we have one, or scan recent items.
-  let url = `https://api.mintgarden.io/address/${walletAddress}/nfts?type=owned`;
-  if (collectionUuid) {
-    url += `&collection_id=${collectionUuid}`;
-  }
-
-  const res = await fetch(url, {
-    headers: { Accept: 'application/json', 'User-Agent': 'wojak.ink/1.0' },
-  });
-  if (!res.ok) return null;
-
-  const data = await res.json() as { items?: MintGardenNftItem[] };
-  const items = data.items || [];
-
-  for (const item of items) {
-    const editionNumber =
-      item.data?.edition_number ??
-      item.data?.metadata_json?.edition_number ??
-      item.data?.metadata_json?.edition;
-
-    if (editionNumber === mintNumber) {
-      return item.encoded_id || item.id || null;
-    }
-
-    // Fallback: match by name pattern "Your Wojak #N"
-    const name = item.data?.metadata_json?.name;
-    if (name && name === `Your Wojak #${mintNumber}`) {
-      return item.encoded_id || item.id || null;
-    }
-  }
-
-  return null;
 }
 
 export const onRequest: PagesFunction<Env> = async (context) => {

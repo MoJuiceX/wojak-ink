@@ -245,11 +245,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       surchargeStored = Math.round(maxSurcharge * 100000);
     }
 
-    // ── For free mints: deduct credits NOW ──
-    let creditSpendId: number | null = null;
-
+    // ── For free mints: check credit balance ──
     if (mintType === 'free') {
-      // Credit balance check
       const balanceRow = await env.DB.prepare(
         `SELECT
           (SELECT COALESCE(SUM(credits_earned), 0) FROM credit_events WHERE wallet_address = ?) -
@@ -264,66 +261,100 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           requiredCredits: freeMintCreditCost / 100,
         }, 400);
       }
-
-      // Atomic credit deduction — mint_id=0 temporarily, updated at finalize
-      const deduct = await env.DB.prepare(
-        `INSERT INTO credit_spends (wallet_address, mint_id, credits_spent)
-         SELECT ?, 0, ?
-         WHERE (
-           (SELECT COALESCE(SUM(credits_earned), 0) FROM credit_events WHERE wallet_address = ?) -
-           (SELECT COALESCE(SUM(credits_spent), 0) FROM credit_spends WHERE wallet_address = ?)
-         ) >= ?`
-      ).bind(wallet, freeMintCreditCost, wallet, wallet, freeMintCreditCost).run();
-
-      if (!deduct.meta?.changes) {
-        return jsonResponse({ error: 'Insufficient credits (concurrent request)', balance: 0 }, 409);
-      }
-
-      creditSpendId = deduct.meta?.last_row_id ?? null;
     }
 
     // ── Compute image hash ──
     const imageBytes = base64ToUint8Array(imageBase64);
     const imageHash = await sha256Hex(imageBytes);
 
-    // ── INSERT the job (with wallet_lock for per-wallet mutex) ──
+    // ── Atomic: credit deduction + job creation in one batch ──
+    // D1 .batch() is atomic — either both succeed or neither does.
+    // This prevents orphaned credit deductions if job INSERT fails.
     const expiresAt = mintType === 'paid'
       ? new Date(Date.now() + 20 * 60 * 1000).toISOString()
-      : new Date(Date.now() + 5 * 60 * 1000).toISOString();
+      : new Date(Date.now() + 120 * 60 * 1000).toISOString(); // 2hr for free (matches KV TTL)
 
     let jobId: number;
-    try {
-      const insertResult = await env.DB.prepare(
-        `INSERT INTO mint_jobs (
-          wallet_address, idempotency_key, layers_json, colors_json,
-          image_base64_hash, mint_type, credit_cost, xch_price_mojos,
-          surcharge_xch, highest_surcharge_trait,
-          step, wallet_lock, credit_spend_id, expires_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'queued', ?, ?, ?)`
-      ).bind(
-        wallet, idempotencyKey,
-        JSON.stringify(selectedLayers), JSON.stringify(selectedColors),
-        imageHash, mintType,
-        mintType === 'free' ? freeMintCreditCost : null,
-        xchPriceMojos,
-        surchargeStored, highestTrait,
-        wallet, // wallet_lock = wallet_address (activates mutex)
-        creditSpendId,
-        expiresAt
-      ).run();
+    let creditSpendId: number | null = null;
 
-      jobId = insertResult.meta?.last_row_id as number;
+    try {
+      const batchStmts: D1PreparedStatement[] = [];
+
+      // Statement 0 (free mints only): Atomic credit deduction
+      // INSERT...SELECT with balance check ensures no over-spend.
+      // mint_id=0 temporarily — updated at finalize.
+      if (mintType === 'free') {
+        batchStmts.push(
+          env.DB.prepare(
+            `INSERT INTO credit_spends (wallet_address, mint_id, credits_spent)
+             SELECT ?, 0, ?
+             WHERE (
+               (SELECT COALESCE(SUM(credits_earned), 0) FROM credit_events WHERE wallet_address = ?) -
+               (SELECT COALESCE(SUM(credits_spent), 0) FROM credit_spends WHERE wallet_address = ?)
+             ) >= ?`
+          ).bind(wallet, freeMintCreditCost, wallet, wallet, freeMintCreditCost)
+        );
+      }
+
+      // Statement 1 (or 0 for paid): Create the job
+      batchStmts.push(
+        env.DB.prepare(
+          `INSERT INTO mint_jobs (
+            wallet_address, idempotency_key, layers_json, colors_json,
+            image_base64_hash, mint_type, credit_cost, xch_price_mojos,
+            surcharge_xch, highest_surcharge_trait,
+            step, wallet_lock, credit_spend_id, expires_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'queued', ?, 0, ?)`
+        ).bind(
+          wallet, idempotencyKey,
+          JSON.stringify(selectedLayers), JSON.stringify(selectedColors),
+          imageHash, mintType,
+          mintType === 'free' ? freeMintCreditCost : null,
+          xchPriceMojos,
+          surchargeStored, highestTrait,
+          wallet, // wallet_lock = wallet_address (activates mutex)
+          expiresAt
+        )
+      );
+
+      const batchResults = await env.DB.batch(batchStmts);
+
+      if (mintType === 'free') {
+        // Check credit deduction succeeded (statement 0)
+        const creditResult = batchResults[0];
+        if (!creditResult.meta?.changes) {
+          // Balance went negative between check and batch — race condition
+          return jsonResponse({ error: 'Insufficient credits (concurrent request)', balance: 0 }, 409);
+        }
+        creditSpendId = creditResult.meta?.last_row_id ?? null;
+
+        // Job INSERT is statement 1
+        const jobResult = batchResults[1];
+        jobId = jobResult.meta?.last_row_id as number;
+      } else {
+        // Paid: job INSERT is statement 0
+        const jobResult = batchResults[0];
+        jobId = jobResult.meta?.last_row_id as number;
+      }
+
       if (!jobId) throw new Error('No job ID returned from INSERT');
+
+      // Link credit_spend to the job (now that we have the jobId)
+      if (creditSpendId) {
+        await env.DB.prepare(
+          'UPDATE credit_spends SET mint_id = ? WHERE id = ?'
+        ).bind(jobId, creditSpendId).run();
+        await env.DB.prepare(
+          'UPDATE mint_jobs SET credit_spend_id = ? WHERE id = ?'
+        ).bind(creditSpendId, jobId).run();
+      }
 
     } catch (err: unknown) {
       // UNIQUE constraint on wallet_lock = per-wallet mutex rejection
       const errMsg = err instanceof Error ? err.message : String(err);
       if (errMsg.includes('UNIQUE') && errMsg.includes('wallet_lock')) {
-        // Refund credits if we just deducted them
-        if (creditSpendId) {
-          await env.DB.prepare('DELETE FROM credit_spends WHERE id = ?').bind(creditSpendId).run();
-        }
-        // Find the existing active job for helpful error
+        // Batch is atomic — if wallet_lock UNIQUE failed, credit deduction
+        // was also rolled back. No manual refund needed.
         const activeJob = await env.DB.prepare(
           "SELECT id FROM mint_jobs WHERE wallet_lock = ? AND wallet_lock IS NOT NULL"
         ).bind(wallet).first<{ id: number }>();
@@ -337,8 +368,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       throw err;
     }
 
-    // ── Store image in KV (30 min TTL) ──
-    await env.MINT_JOBS_KV.put(`job-image:${jobId}`, imageBase64, { expirationTtl: 1800 });
+    // ── Store image in KV (2 hour TTL — matches free mint expiry) ──
+    await env.MINT_JOBS_KV.put(`job-image:${jobId}`, imageBase64, { expirationTtl: 7200 });
 
     // ── Trigger background processing ──
     context.waitUntil(processJob(env, jobId, imageBase64));
