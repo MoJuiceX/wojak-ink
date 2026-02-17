@@ -276,26 +276,16 @@ async function processEvents(env: Env): Promise<{ processed: number; inserted: n
 
     // Cross-path dedup: look up which NFT coin IDs map to which editions
     // so we can check if a CAT credit already exists for the same wallet+edition.
+    // Query one at a time — batching LIKE patterns causes D1 "LIKE pattern too complex" errors.
     const coinIds = candidates.map(e => e.nft_id);
     const editionLookup = new Map<string, number>();
-    if (coinIds.length > 0) {
-      for (let i = 0; i < coinIds.length; i += BATCH_EXISTING_CHUNK) {
-        const chunk = coinIds.slice(i, i + BATCH_EXISTING_CHUNK);
-        const placeholders = chunk.map(() => '?').join(',');
-        const rows = await env.DB.prepare(
-          `SELECT mg_event_id, nft_edition FROM sales_history
-           WHERE mg_event_id IS NOT NULL
-           AND (${chunk.map(() => 'mg_event_id LIKE ? || \'%\'').join(' OR ')})`
-        ).bind(...chunk).all<{ mg_event_id: string; nft_edition: number }>();
-        for (const r of rows.results || []) {
-          // mg_event_id starts with the coin ID
-          for (const cid of chunk) {
-            if (r.mg_event_id?.startsWith(cid)) {
-              editionLookup.set(cid, r.nft_edition);
-            }
-          }
-        }
-      }
+    for (const coinId of coinIds) {
+      if (editionLookup.has(coinId)) continue;
+      const row = await env.DB.prepare(
+        `SELECT nft_edition FROM sales_history
+         WHERE substr(mg_event_id, 1, length(?)) = ? LIMIT 1`
+      ).bind(coinId, coinId).first<{ nft_edition: number }>();
+      if (row) editionLookup.set(coinId, row.nft_edition);
     }
 
     for (const event of candidates) {
@@ -516,7 +506,7 @@ async function processCatSales(env: Env, whitelist: Set<string>): Promise<{ proc
     const crossPathCheck = await env.DB.prepare(
       `SELECT ce.id FROM credit_events ce
        INNER JOIN sales_history sh
-         ON sh.mg_event_id LIKE ce.nft_id || '%'
+         ON substr(sh.mg_event_id, 1, length(ce.nft_id)) = ce.nft_id
          AND sh.nft_edition = ?
        WHERE ce.wallet_address = ?
          AND ce.nft_id NOT LIKE 'nft_edition_%'
@@ -624,7 +614,7 @@ async function backfillMissingCatCredits(env: Env, whitelist: Set<string>): Prom
     const crossPathCheck = await env.DB.prepare(
       `SELECT ce.id FROM credit_events ce
        INNER JOIN sales_history sh
-         ON sh.mg_event_id LIKE ce.nft_id || '%'
+         ON substr(sh.mg_event_id, 1, length(ce.nft_id)) = ce.nft_id
          AND sh.nft_edition = ?
        WHERE ce.wallet_address = ?
          AND ce.nft_id NOT LIKE 'nft_edition_%'
