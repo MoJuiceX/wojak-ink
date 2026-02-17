@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { Swords } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+const FALLBACK_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' fill='%2312121a'%3E%3Crect width='200' height='200' rx='14'/%3E%3Ctext x='100' y='108' text-anchor='middle' fill='%23606070' font-size='14' font-family='system-ui'%3EImage unavailable%3C/text%3E%3C/svg%3E";
+
 interface Battle {
   battleId: string;
   status: string;
@@ -85,6 +87,7 @@ export function ActiveBattleCard({ did }: ActiveBattleCardProps) {
           <img
             src={`https://assets.mintgarden.io/thumbnails/medium/${battle.yourNftId}.png`}
             alt={`Your Wojak #${battle.yourEdition}`}
+            onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMG; }}
             style={{
               width: 60,
               height: 60,
@@ -104,6 +107,7 @@ export function ActiveBattleCard({ did }: ActiveBattleCardProps) {
           <img
             src={`https://assets.mintgarden.io/thumbnails/medium/${battle.opponentNftId}.png`}
             alt={`Opponent Wojak #${battle.opponentEdition}`}
+            onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMG; }}
             style={{
               width: 60,
               height: 60,
