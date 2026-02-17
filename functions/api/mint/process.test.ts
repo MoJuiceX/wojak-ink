@@ -123,6 +123,10 @@ describe('process.ts', () => {
           stepCallCount++;
           return mockStmt(freeJobRow);
         }
+        // Concurrency gate: under limit, proceed
+        if (query.includes("COUNT(*) AS count FROM mint_jobs WHERE step = 'calling_mintgarden'")) {
+          return mockStmt({ count: 0 });
+        }
         // Step updates
         if (query.includes('UPDATE mint_jobs SET step')) return mockStmt();
         // Mint number update
@@ -146,6 +150,8 @@ describe('process.ts', () => {
         if (query.includes('SELECT id FROM phase2_mints')) return mockStmt({ id: 100 });
         // Count mints
         if (query.includes("SELECT COUNT(*) AS count FROM phase2_mints")) return mockStmt({ count: 10 });
+        // Chain: no queued jobs
+        if (query.includes('mint_queued') && query.includes('ORDER BY created_at')) return mockStmt(null);
         return mockStmt();
       });
 
@@ -167,10 +173,16 @@ describe('process.ts', () => {
 
       env.DB.prepare = vi.fn((query: string) => {
         if (query.includes('step = ?')) return mockStmt(paidJobRow);
+        // Concurrency gate: under limit, proceed
+        if (query.includes("COUNT(*) AS count FROM mint_jobs WHERE step = 'calling_mintgarden'")) {
+          return mockStmt({ count: 0 });
+        }
         if (query.includes('UPDATE mint_jobs SET step')) return mockStmt();
         if (query.includes('UPDATE mint_jobs SET mint_number')) return mockStmt();
         if (query.includes('ipfs_image_uris')) return mockStmt();
         if (query.includes('offer_file')) return mockStmt();
+        // Chain: no queued jobs
+        if (query.includes('mint_queued') && query.includes('ORDER BY created_at')) return mockStmt(null);
         return mockStmt();
       });
 
@@ -240,6 +252,10 @@ describe('process.ts', () => {
 
       env.DB.prepare = vi.fn((query: string) => {
         if (query.includes('step = ?')) return mockStmt(jobWithNumber);
+        // Concurrency gate: under limit, proceed
+        if (query.includes("COUNT(*) AS count FROM mint_jobs WHERE step = 'calling_mintgarden'")) {
+          return mockStmt({ count: 0 });
+        }
         if (query.includes('SELECT * FROM mint_jobs WHERE id')) {
           return mockStmt({
             ...jobWithNumber,
@@ -251,6 +267,8 @@ describe('process.ts', () => {
         }
         if (query.includes('SELECT id FROM phase2_mints')) return mockStmt({ id: 100 });
         if (query.includes("SELECT COUNT(*) AS count FROM phase2_mints")) return mockStmt({ count: 10 });
+        // Chain: no queued jobs
+        if (query.includes('mint_queued') && query.includes('ORDER BY created_at')) return mockStmt(null);
         return mockStmt();
       });
 
@@ -264,6 +282,111 @@ describe('process.ts', () => {
 
       // Should NOT call getNextMintNumber since job already has one
       expect(getNextMintNumber).not.toHaveBeenCalled();
+    });
+
+    it('sets step to mint_queued when concurrency limit reached', async () => {
+      const env = createMockEnv();
+
+      env.DB.prepare = vi.fn((query: string) => {
+        if (query.includes('step = ?')) return mockStmt(freeJobRow);
+        if (query.includes("COUNT(*) AS count FROM mint_jobs WHERE step = 'calling_mintgarden'")) {
+          return mockStmt({ count: 3 });
+        }
+        if (query.includes('UPDATE mint_jobs SET step')) return mockStmt();
+        if (query.includes('UPDATE mint_jobs SET mint_number')) return mockStmt();
+        if (query.includes('ipfs_image_uris')) return mockStmt();
+        return mockStmt();
+      });
+
+      vi.mocked(uploadToIPFS).mockResolvedValue({
+        dataHash: 'img-hash', dataUris: ['ipfs://img'],
+        metadataHash: 'meta-hash', metadataUris: ['ipfs://meta'],
+      });
+
+      await processJob(env, 1, 'base64imagedata');
+
+      // Should NOT have called MintGarden
+      expect(callMintGardenMint).not.toHaveBeenCalled();
+      // Should have set step to mint_queued
+      const stepCalls = (env.DB.prepare as ReturnType<typeof vi.fn>).mock.calls;
+      const allPrepCalls = stepCalls.map((c: string[]) => c[0]);
+      expect(allPrepCalls.some((q: string) => q.includes('UPDATE mint_jobs SET step'))).toBe(true);
+    });
+
+    it('proceeds to MintGarden when under concurrency limit', async () => {
+      const env = createMockEnv();
+
+      env.DB.prepare = vi.fn((query: string) => {
+        if (query.includes('step = ?')) return mockStmt(freeJobRow);
+        if (query.includes("COUNT(*) AS count FROM mint_jobs WHERE step = 'calling_mintgarden'")) {
+          return mockStmt({ count: 1 });
+        }
+        if (query.includes('UPDATE mint_jobs SET step')) return mockStmt();
+        if (query.includes('UPDATE mint_jobs SET mint_number')) return mockStmt();
+        if (query.includes('ipfs_image_uris')) return mockStmt();
+        if (query.includes('mintgarden_launcher_id')) return mockStmt();
+        if (query.includes('SELECT * FROM mint_jobs WHERE id')) {
+          return mockStmt({
+            ...freeJobRow, step: 'finalizing', mint_number: 42,
+            ipfs_image_uris: '["ipfs://abc"]', ipfs_metadata_uris: '["ipfs://def"]',
+            mintgarden_launcher_id: 'nft1launcher',
+          });
+        }
+        if (query.includes('SELECT id FROM phase2_mints')) return mockStmt({ id: 100 });
+        if (query.includes("SELECT COUNT(*) AS count FROM phase2_mints")) return mockStmt({ count: 10 });
+        // Chain: no queued jobs
+        if (query.includes('mint_queued') && query.includes('ORDER BY created_at')) return mockStmt(null);
+        return mockStmt();
+      });
+
+      vi.mocked(uploadToIPFS).mockResolvedValue({
+        dataHash: 'img-hash', dataUris: ['ipfs://img'],
+        metadataHash: 'meta-hash', metadataUris: ['ipfs://meta'],
+      });
+      vi.mocked(callMintGardenMint).mockResolvedValue({ offerFile: null, launcherId: 'nft1launcher' });
+
+      await processJob(env, 1, 'base64imagedata');
+
+      expect(callMintGardenMint).toHaveBeenCalled();
+    });
+
+    it('re-queues to mint_queued on RATE_LIMITED error with not_before', async () => {
+      const env = createMockEnv();
+
+      env.DB.prepare = vi.fn((query: string) => {
+        if (query.includes('step = ?')) return mockStmt(freeJobRow);
+        if (query.includes("COUNT(*) AS count FROM mint_jobs WHERE step = 'calling_mintgarden'")) {
+          return mockStmt({ count: 0 });
+        }
+        if (query.includes('UPDATE mint_jobs SET step')) return mockStmt();
+        if (query.includes('UPDATE mint_jobs SET mint_number')) return mockStmt();
+        if (query.includes('ipfs_image_uris') && !query.includes('mint_queued')) return mockStmt();
+        // RATE_LIMITED re-queue
+        if (query.includes('mint_queued') && query.includes('not_before')) return mockStmt();
+        // Chain: no queued jobs
+        if (query.includes('mint_queued') && query.includes('ORDER BY created_at')) return mockStmt(null);
+        return mockStmt();
+      });
+
+      vi.mocked(uploadToIPFS).mockResolvedValue({
+        dataHash: 'img-hash', dataUris: ['ipfs://img'],
+        metadataHash: 'meta-hash', metadataUris: ['ipfs://meta'],
+      });
+
+      const { MintError } = await import('./errors');
+      const rateLimitErr = new MintError('RATE_LIMITED', 'Rate limited');
+      rateLimitErr.retryAfterMs = 30000;
+      vi.mocked(callMintGardenMint).mockRejectedValueOnce(rateLimitErr);
+
+      await processJob(env, 1, 'base64imagedata');
+
+      // Should have set step to mint_queued with not_before
+      const prepCalls = (env.DB.prepare as ReturnType<typeof vi.fn>).mock.calls;
+      const reQueueCall = prepCalls.find(
+        (c: string[]) => c[0].includes('mint_queued') && c[0].includes('not_before')
+      );
+      expect(reQueueCall).toBeTruthy();
+      // Should NOT have called handleJobFailure (no final failure log for RATE_LIMITED)
     });
 
     it('throws CONFIG_ERROR when PINATA_JWT is missing', async () => {

@@ -25,6 +25,9 @@ import {
 // Re-export MintError for backwards compatibility (callers may import from process.ts)
 export { MintError };
 
+/** Max concurrent MintGarden API calls. Soft cap — brief overshoot is fine. */
+const MAX_MINTGARDEN_CONCURRENT = 3;
+
 // ─── Types ───
 
 export interface ProcessEnv {
@@ -199,6 +202,17 @@ export async function processJob(
     // Keep image in KV until job completes — needed for retry if MintGarden fails.
     // KV entry will be cleaned up after finalization (see finalizeJob below).
 
+    // ──── CONCURRENCY GATE ────
+    const concurrencyCount = await env.DB.prepare(
+      "SELECT COUNT(*) AS count FROM mint_jobs WHERE step = 'calling_mintgarden'"
+    ).first<{ count: number }>();
+
+    if ((concurrencyCount?.count ?? 0) >= MAX_MINTGARDEN_CONCURRENT) {
+      await updateJobStep(env.DB, jobId, 'mint_queued');
+      console.log(`[MintProcessor] Job ${jobId} queued — ${concurrencyCount!.count} MintGarden calls in flight`);
+      return;
+    }
+
     // ──── STEP 4: Call MintGarden ────
     await updateJobStep(env.DB, jobId, 'calling_mintgarden');
 
@@ -249,15 +263,26 @@ export async function processJob(
     // ──── STEP 5: Await Payment (paid only) ────
     if (job.mint_type === 'paid') {
       await updateJobStep(env.DB, jobId, 'awaiting_payment');
-      // Processing STOPS here for paid mints.
-      // Resumed by confirm-payment.ts or expired by cleanup.ts.
+      await chainNextQueuedJob(env);
       return;
     }
 
     // ──── STEP 6: Finalize (free mints) ────
     await finalizeJob(env, jobId);
+    await chainNextQueuedJob(env);
 
   } catch (error) {
+    // Rate-limited by MintGarden — re-queue instead of failing
+    if (error instanceof MintError && error.code === 'RATE_LIMITED') {
+      const retryAfterMs = error.retryAfterMs ?? 30_000;
+      const notBefore = new Date(Date.now() + retryAfterMs).toISOString();
+      await env.DB.prepare(
+        "UPDATE mint_jobs SET step = 'mint_queued', not_before = ?, error_message = ?, updated_at = datetime('now') WHERE id = ?"
+      ).bind(notBefore, error.message, jobId).run();
+      console.log(`[MintProcessor] Job ${jobId} rate-limited, re-queued with not_before=${notBefore}`);
+      await chainNextQueuedJob(env);
+      return;
+    }
     await handleJobFailure(env, jobId, job, error);
   }
 }
@@ -540,4 +565,40 @@ async function handleJobFailure(
     error: errorMsg,
     data: { job_id: jobId, error_code: errorCode, mint_number: job.mint_number },
   });
+}
+
+// ─── Chain Processing ───
+
+/**
+ * Chain processing: pick up the next mint_queued job and process it.
+ * Called after a MintGarden call completes (success or failure).
+ * Capped to 1 to stay within waitUntil execution limits.
+ */
+async function chainNextQueuedJob(env: ProcessEnv): Promise<void> {
+  try {
+    const next = await env.DB.prepare(
+      `SELECT id FROM mint_jobs WHERE step = 'mint_queued'
+       AND (not_before IS NULL OR not_before <= datetime('now'))
+       ORDER BY created_at ASC LIMIT 1`
+    ).first<{ id: number }>();
+
+    if (!next) return;
+
+    const imageBase64 = await env.MINT_JOBS_KV.get(`job-image:${next.id}`);
+    if (!imageBase64) {
+      await env.DB.prepare(
+        "UPDATE mint_jobs SET step = 'failed', error_message = 'Image data expired', error_code = 'IMAGE_EXPIRED', wallet_lock = NULL, updated_at = datetime('now') WHERE id = ?"
+      ).bind(next.id).run();
+      return;
+    }
+
+    // Set step to queued so processJob picks it up (will re-check concurrency gate)
+    await env.DB.prepare(
+      "UPDATE mint_jobs SET step = 'queued', updated_at = datetime('now') WHERE id = ? AND step = 'mint_queued'"
+    ).bind(next.id).run();
+
+    await processJob(env, next.id, imageBase64);
+  } catch (err) {
+    console.error('[MintProcessor] Chain processing failed:', err);
+  }
 }
