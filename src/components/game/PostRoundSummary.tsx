@@ -73,7 +73,7 @@ export function PostRoundSummary({
         <Link to="/leaderboard" className="btn btn-primary text-center">
           View Leaderboard
         </Link>
-        <Link to="/games/your-wojak/dashboard" className="btn btn-secondary text-center">
+        <Link to="/your-wojak/dashboard" className="btn btn-secondary text-center">
           Go to Dashboard
         </Link>
       </div>

@@ -349,7 +349,7 @@ function AppContent() {
                   />
                   {/* Your Wojak Game */}
                   <Route
-                    path="games/your-wojak"
+                    path="your-wojak"
                     element={
                       <Suspense fallback={<PageSkeleton type="media" />}>
                         <GameVoting />
@@ -357,7 +357,7 @@ function AppContent() {
                     }
                   />
                   <Route
-                    path="games/your-wojak/dashboard"
+                    path="your-wojak/dashboard"
                     element={
                       <Suspense fallback={<PageSkeleton type="settings" />}>
                         <GameDashboard />
@@ -365,7 +365,7 @@ function AppContent() {
                     }
                   />
                   <Route
-                    path="games/your-wojak/battles"
+                    path="your-wojak/battles"
                     element={
                       <Suspense fallback={<PageSkeleton type="media" />}>
                         <GameBattles />

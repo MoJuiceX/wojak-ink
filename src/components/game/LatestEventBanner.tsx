@@ -23,10 +23,10 @@ const EVENT_ICONS: Record<string, typeof Swords> = {
 };
 
 const EVENT_LINKS: Record<string, string> = {
-  battle_result: '/games/your-wojak/battles',
+  battle_result: '/your-wojak/battles',
   leaderboard_change: '/leaderboard',
-  vote_milestone: '/games/your-wojak',
-  burn: '/games/your-wojak/dashboard',
+  vote_milestone: '/your-wojak',
+  burn: '/your-wojak/dashboard',
   mint: '/generator',
 };
 
@@ -76,7 +76,7 @@ export function LatestEventBanner({ did }: LatestEventBannerProps) {
   if (!current) return null;
 
   const Icon = EVENT_ICONS[current.eventType] || Sparkles;
-  const link = EVENT_LINKS[current.eventType] || '/games/your-wojak/dashboard';
+  const link = EVENT_LINKS[current.eventType] || '/your-wojak/dashboard';
 
   return (
     <div className="flex flex-col gap-1">
@@ -109,7 +109,7 @@ export function LatestEventBanner({ did }: LatestEventBannerProps) {
         </button>
       </div>
       <div className="flex justify-end">
-        <Link to="/games/your-wojak/activity" className="text-accent" style={{ fontSize: 12 }}>
+        <Link to="/your-wojak/activity" className="text-accent" style={{ fontSize: 12 }}>
           View all activity &rarr;
         </Link>
       </div>

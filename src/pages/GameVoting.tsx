@@ -1,4 +1,4 @@
-// Voting page — /games/your-wojak
+// Voting page — /your-wojak
 // Desktop: 3-column (leaderboard | card | stats). Mobile: stats bar + card.
 
 import { GameProvider } from '@/contexts/GameContext';
