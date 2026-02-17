@@ -286,13 +286,27 @@ describe('process.ts', () => {
 
     it('sets step to mint_queued when concurrency limit reached', async () => {
       const env = createMockEnv();
+      const stepUpdateBindCalls: unknown[][] = [];
 
       env.DB.prepare = vi.fn((query: string) => {
-        if (query.includes('step = ?')) return mockStmt(freeJobRow);
+        // Initial SELECT load — must match SELECT specifically, not UPDATE
+        if (query.includes('SELECT') && query.includes('step = ?')) return mockStmt(freeJobRow);
         if (query.includes("COUNT(*) AS count FROM mint_jobs WHERE step = 'calling_mintgarden'")) {
           return mockStmt({ count: 3 });
         }
-        if (query.includes('UPDATE mint_jobs SET step')) return mockStmt();
+        if (query.includes('UPDATE mint_jobs SET step')) {
+          // Track bind args for step updates
+          const stmt = {
+            bind: vi.fn((...args: unknown[]) => {
+              stepUpdateBindCalls.push(args);
+              return stmt;
+            }),
+            first: vi.fn().mockResolvedValue(null),
+            run: vi.fn().mockResolvedValue({ meta: { changes: 1, last_row_id: 1 } }),
+            all: vi.fn().mockResolvedValue({ results: [] }),
+          };
+          return stmt;
+        }
         if (query.includes('UPDATE mint_jobs SET mint_number')) return mockStmt();
         if (query.includes('ipfs_image_uris')) return mockStmt();
         return mockStmt();
@@ -307,10 +321,9 @@ describe('process.ts', () => {
 
       // Should NOT have called MintGarden
       expect(callMintGardenMint).not.toHaveBeenCalled();
-      // Should have set step to mint_queued
-      const stepCalls = (env.DB.prepare as ReturnType<typeof vi.fn>).mock.calls;
-      const allPrepCalls = stepCalls.map((c: string[]) => c[0]);
-      expect(allPrepCalls.some((q: string) => q.includes('UPDATE mint_jobs SET step'))).toBe(true);
+      // Should have set step to mint_queued specifically
+      const mintQueuedCall = stepUpdateBindCalls.find((args) => args[0] === 'mint_queued');
+      expect(mintQueuedCall).toBeTruthy();
     });
 
     it('proceeds to MintGarden when under concurrency limit', async () => {

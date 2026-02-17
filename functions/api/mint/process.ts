@@ -74,6 +74,7 @@ interface MintJobRow {
   completed_at: string | null;
   expires_at: string | null;
   wallet_lock: string | null;
+  not_before: string | null;
 }
 
 // ─── Step Updater ───
