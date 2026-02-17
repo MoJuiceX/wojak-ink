@@ -4,6 +4,7 @@
 
 import { isValidDid, getTodayString } from './_shared';
 import { authenticateRequest } from '../../lib/auth';
+import { isValidChiaAddress } from '../../lib/validation';
 
 interface Env {
   DB: D1Database;
@@ -23,8 +24,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (!did || !isValidDid(did)) {
       return Response.json({ error: 'Invalid DID format' }, { status: 400 });
     }
-    if (!walletAddress) {
-      return Response.json({ error: 'walletAddress required' }, { status: 400 });
+    if (!walletAddress || !isValidChiaAddress(walletAddress)) {
+      return Response.json({ error: 'Invalid wallet address format' }, { status: 400 });
     }
 
     // Upsert player
