@@ -1,6 +1,11 @@
+// Power Level hero card — centered score, tier badge, collapsible breakdown, credits.
+import { useState } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+
 interface PowerLevelDisplayProps {
   level: number;
   rank?: number;
+  credits?: number;
   breakdown?: {
     holdings: { score: number; nftCount: number; uniqueCreators: number };
     creations: { score: number; quality: number; spread: number; uniqueCollectors: number };
@@ -11,44 +16,58 @@ function getTier(level: number) {
   if (level >= 9000) return { name: 'Legend', class: 'tier-legend', label: "IT'S OVER 9,000!" };
   if (level >= 5000) return { name: 'Top Tier', class: 'tier-top', label: 'Top Tier' };
   if (level >= 2000) return { name: 'Serious', class: 'tier-serious', label: 'Serious' };
-  if (level >= 500) return { name: 'Active', class: 'tier-active', label: 'Active' };
-  if (level >= 100) return { name: 'Casual', class: 'tier-casual', label: 'Casual' };
+  if (level >= 500)  return { name: 'Active', class: 'tier-active', label: 'Active' };
+  if (level >= 100)  return { name: 'Casual', class: 'tier-casual', label: 'Casual' };
   return { name: 'New', class: 'tier-casual', label: 'New Player' };
 }
 
-export function PowerLevelDisplay({ level, rank, breakdown }: PowerLevelDisplayProps) {
+export function PowerLevelDisplay({ level, rank, credits, breakdown }: PowerLevelDisplayProps) {
   const tier = getTier(level);
+  const [showBreakdown, setShowBreakdown] = useState(false);
 
   return (
-    <div className="card-static p-6 flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">{level.toLocaleString()}</h2>
-          <p className="text-secondary text-sm">Power Level</p>
-        </div>
-        <div className={`power-level-badge ${tier.class}`}>
-          {tier.label}
-        </div>
+    <div className="card-static p-6 flex flex-col items-center gap-2">
+      {rank != null && (
+        <p className="text-muted" style={{ fontSize: 13 }}>#{rank}</p>
+      )}
+
+      <h2 className="font-bold" style={{ fontSize: 36 }}>{level.toLocaleString()}</h2>
+
+      <div className={`power-level-badge ${tier.class}`}>
+        {tier.label}
       </div>
 
-      {rank && (
-        <p className="text-secondary">
-          Rank <span className="text-accent font-bold">#{rank}</span> on the leaderboard
-        </p>
+      {credits != null && credits > 0 && (
+        <p className="text-muted" style={{ fontSize: 13 }}>Credits: {credits}</p>
       )}
 
       {breakdown && (
-        <div className="flex flex-col gap-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-secondary">From holdings:</span>
-            <span>+{breakdown.holdings.score} ({breakdown.holdings.nftCount} NFTs, {breakdown.holdings.uniqueCreators} creators)</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-secondary">From creations:</span>
-            <span>+{breakdown.creations.score} ({breakdown.creations.uniqueCollectors} collectors)</span>
-          </div>
-        </div>
+        <>
+          <button
+            onClick={() => setShowBreakdown(!showBreakdown)}
+            className="btn btn-ghost flex items-center gap-1"
+            style={{ fontSize: 13 }}
+          >
+            {showBreakdown ? 'Hide' : 'View'} Breakdown
+            {showBreakdown ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          </button>
+
+          {showBreakdown && (
+            <div className="flex flex-col gap-1 w-full" style={{ fontSize: 13 }}>
+              <div className="flex justify-between text-secondary">
+                <span>From holdings:</span>
+                <span>+{breakdown.holdings.score} ({breakdown.holdings.nftCount} NFTs, {breakdown.holdings.uniqueCreators} creators)</span>
+              </div>
+              <div className="flex justify-between text-secondary">
+                <span>From creations:</span>
+                <span>+{breakdown.creations.score} ({breakdown.creations.uniqueCollectors} collectors)</span>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
 }
+
+export { getTier };
