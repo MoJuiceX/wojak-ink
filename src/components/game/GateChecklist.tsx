@@ -26,11 +26,11 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1 }: GateCheckl
       <p className="text-secondary text-sm text-center">
         Complete these steps to start voting.
       </p>
-      <div className="flex flex-col gap-3 w-full">
+      <ol className="flex flex-col gap-3 w-full" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
         {steps.map((step, i) => {
           const isCurrent = !step.done && steps.slice(0, i).every(s => s.done);
           return (
-            <div key={step.label} className="gate-step">
+            <li key={step.label} className="gate-step" aria-current={isCurrent ? 'step' : undefined}>
               <span className="gate-step-icon">
                 {step.done ? '\u2705' : isCurrent ? '\u2610' : ''}
                 {!step.done && !isCurrent && <div className="gate-step-icon-future" />}
@@ -67,10 +67,10 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1 }: GateCheckl
                   </a>
                 )}
               </div>
-            </div>
+            </li>
           );
         })}
-      </div>
+      </ol>
     </div>
   );
 }

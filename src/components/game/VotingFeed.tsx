@@ -85,6 +85,17 @@ export function VotingFeed() {
     }
   });
 
+  // Desktop keyboard hint (shown once per device)
+  const [showKeyboardHint, setShowKeyboardHint] = useState(() => {
+    try {
+      if (typeof window === 'undefined') return false;
+      const isDesktop = window.matchMedia('(hover: hover)').matches;
+      return isDesktop && !localStorage.getItem('wojak_vote_kb_hint_seen');
+    } catch {
+      return false;
+    }
+  });
+
   // Snapshot power level at session start for delta
   useEffect(() => {
     if (player && powerLevelBefore.current === 0) {
@@ -111,11 +122,16 @@ export function VotingFeed() {
   useEffect(() => {
     if (voteCount >= 3 && !instructionsSeen) {
       setInstructionsSeen(true);
+      setShowKeyboardHint(false);
       try {
         if (typeof requestIdleCallback !== 'undefined') {
-          requestIdleCallback(() => localStorage.setItem('wojak_vote_instructions_seen', '1'));
+          requestIdleCallback(() => {
+            localStorage.setItem('wojak_vote_instructions_seen', '1');
+            localStorage.setItem('wojak_vote_kb_hint_seen', '1');
+          });
         } else {
           localStorage.setItem('wojak_vote_instructions_seen', '1');
+          localStorage.setItem('wojak_vote_kb_hint_seen', '1');
         }
       } catch {
         // localStorage unavailable
@@ -280,7 +296,7 @@ export function VotingFeed() {
 
       {/* Instruction text */}
       {!instructionsSeen && (
-        <p
+        <div
           className="text-muted text-center"
           style={{
             fontSize: 13,
@@ -288,8 +304,11 @@ export function VotingFeed() {
             opacity: voteCount >= 3 ? 0 : 1,
           }}
         >
-          Swipe right to like &middot; Swipe left to dislike
-        </p>
+          <p>Swipe right to like &middot; Swipe left to dislike</p>
+          {showKeyboardHint && (
+            <p style={{ marginTop: 2 }}>or use &larr; &rarr; arrow keys</p>
+          )}
+        </div>
       )}
     </div>
   );

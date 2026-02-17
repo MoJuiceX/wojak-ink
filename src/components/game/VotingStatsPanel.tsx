@@ -57,7 +57,14 @@ export function VotingStatsPanel() {
       {/* Votes Today */}
       <div className="flex flex-col gap-2">
         <span className="text-xs text-muted">Votes Today</span>
-        <div className="vote-progress-bar">
+        <div
+          className="vote-progress-bar"
+          role="progressbar"
+          aria-valuenow={votesUsed}
+          aria-valuemin={0}
+          aria-valuemax={10}
+          aria-label="Votes used today"
+        >
           <div
             className="vote-progress-fill"
             style={{ width: `${progressPct}%` }}
