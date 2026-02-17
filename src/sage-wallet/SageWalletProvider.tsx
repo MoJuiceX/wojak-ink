@@ -481,6 +481,31 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     return data.items || [];
   }, [state.address]);
 
+  const getNFTCoinId = useCallback(async (launcherId: string): Promise<string> => {
+    const client = signClientRef.current;
+    const session = currentSessionRef.current;
+
+    if (!client || !session) {
+      throw new Error('No active Sage wallet session');
+    }
+
+    const result = await client.request({
+      topic: session.topic,
+      chainId: CHIA_CHAIN,
+      request: {
+        method: ChiaMethod.GetNftInfo,
+        params: { coinId: launcherId },
+      },
+    });
+
+    const nftInfo = result as { nftCoinId?: string; nft_coin_id?: string };
+    const coinId = nftInfo.nftCoinId || nftInfo.nft_coin_id;
+    if (!coinId) {
+      throw new Error('Could not resolve NFT coin ID');
+    }
+    return coinId;
+  }, []);
+
   const getDIDs = useCallback(async (): Promise<string[]> => {
     if (!state.address || !isValidChiaAddress(state.address)) {
       return [];
@@ -534,6 +559,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     hasRequiredNFTs,
     getNFTs,
     getDIDs,
+    getNFTCoinId,
   };
 
   return (

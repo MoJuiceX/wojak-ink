@@ -162,6 +162,7 @@ export interface SageWalletActions {
   hasRequiredNFTs: (collectionId: string) => Promise<boolean>;
   getNFTs: (collectionId?: string) => Promise<MintGardenNFT[]>;
   getDIDs: () => Promise<string[]>;
+  getNFTCoinId: (launcherId: string) => Promise<string>;
 }
 
 // Combined context type

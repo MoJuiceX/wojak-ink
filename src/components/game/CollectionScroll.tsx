@@ -1,8 +1,9 @@
 // Collection Scroll — horizontal scrollable row of player's Wojak NFTs with detail modal.
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { BurnButton } from './BurnButton';
+import { useSageWallet } from '@/sage-wallet';
 import { useGame } from '@/contexts/GameContext';
 import { calculateBurnCredits } from '@/lib/burnCredits';
 
@@ -22,7 +23,24 @@ interface CollectionScrollProps {
 
 function NftDetailModal({ nft, onClose }: { nft: CollectionNft; onClose: () => void }) {
   const { player } = useGame();
+  const { getNFTCoinId } = useSageWallet();
   const estimatedCredits = calculateBurnCredits(nft.likes, nft.dislikes);
+  const [coinId, setCoinId] = useState<string | null>(null);
+  const [loadingCoinId, setLoadingCoinId] = useState(false);
+  const [coinIdError, setCoinIdError] = useState<string | null>(null);
+
+  const fetchCoinId = useCallback(async () => {
+    setLoadingCoinId(true);
+    setCoinIdError(null);
+    try {
+      const resolved = await getNFTCoinId(nft.nftId);
+      setCoinId(resolved);
+    } catch {
+      setCoinIdError('Could not fetch NFT coin ID from wallet. Is your wallet open?');
+    } finally {
+      setLoadingCoinId(false);
+    }
+  }, [nft.nftId, getNFTCoinId]);
 
   return (
     <div
@@ -80,18 +98,32 @@ function NftDetailModal({ nft, onClose }: { nft: CollectionNft; onClose: () => v
           <Link to="/swipe/battles" className="btn btn-primary flex-1 text-center" style={{ fontSize: 13 }}>
             Enter Battle
           </Link>
-          <BurnButton
-            nftId={nft.nftId}
-            nftCoinId={nft.nftId}
-            editionNumber={nft.editionNumber}
-            nftName={nft.name}
-            likes={nft.likes}
-            dislikes={nft.dislikes}
-            estimatedCredits={estimatedCredits}
-            burnerDid={player?.did}
-            onBurned={() => onClose()}
-          />
+          {coinId ? (
+            <BurnButton
+              nftId={nft.nftId}
+              nftCoinId={coinId}
+              editionNumber={nft.editionNumber}
+              nftName={nft.name}
+              likes={nft.likes}
+              dislikes={nft.dislikes}
+              estimatedCredits={estimatedCredits}
+              burnerDid={player?.did}
+              onBurned={() => onClose()}
+            />
+          ) : (
+            <button
+              className="btn btn-ghost text-sm"
+              style={{ color: 'var(--color-error)' }}
+              disabled={loadingCoinId}
+              onClick={fetchCoinId}
+            >
+              {loadingCoinId ? 'Loading...' : 'Burn'}
+            </button>
+          )}
         </div>
+        {coinIdError && (
+          <span className="text-sm" style={{ color: 'var(--color-error)' }}>{coinIdError}</span>
+        )}
       </div>
     </div>
   );
