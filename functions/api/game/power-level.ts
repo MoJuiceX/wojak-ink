@@ -139,6 +139,8 @@ async function calculatePowerLevel(context: EventContext<Env, string, unknown>) 
       powerLevel,
       rank,
       credits,
+      voteStreak: (player.vote_streak as number) || 0,
+      voteStreakLongest: (player.vote_streak_longest as number) || 0,
       breakdown: {
         holdings: {
           score: Math.round(holdingsScore),

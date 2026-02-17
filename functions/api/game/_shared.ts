@@ -21,3 +21,19 @@ export function isValidDid(did: string): boolean {
 export function getTodayString(): string {
   return new Date().toISOString().split('T')[0];
 }
+
+// Get yesterday's date string for streak tracking
+export function getYesterdayString(): string {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().split('T')[0];
+}
+
+// Streak milestone credit awards (in x100 units)
+export const STREAK_MILESTONES: Record<number, number> = {
+  3: 300,    // 3 credits
+  7: 500,    // 5 credits
+  14: 1000,  // 10 credits
+  30: 2000,  // 20 credits
+  100: 5000, // 50 credits
+};

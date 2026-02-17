@@ -8,6 +8,7 @@ interface GamePlayer {
   phase1Verified: boolean;
   votesToday: number;
   votesRemaining: number;
+  voteStreak: number;
   onboarding: {
     did: boolean;
     phase1: boolean;
@@ -70,6 +71,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         phase1Verified: data.player.phase1Verified,
         votesToday: data.player.votesToday,
         votesRemaining: 10 - data.player.votesToday,
+        voteStreak: data.player.voteStreak ?? 0,
         onboarding: data.player.onboarding,
       });
     }
@@ -115,6 +117,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         ...prev,
         votesToday: prev.votesToday + 1,
         votesRemaining: data.votesRemaining,
+        voteStreak: data.voteStreak ?? prev.voteStreak,
       } : null);
       // Remove voted item from feed
       setFeed(prev => prev.filter(item => item.nftId !== nftId));
@@ -128,7 +131,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     const res = await fetch(`/api/game/power-level?did=${player.did}`);
     const data = await res.json();
     if (data.success) {
-      setPlayer(prev => prev ? { ...prev, powerLevel: data.powerLevel } : null);
+      setPlayer(prev => prev ? { ...prev, powerLevel: data.powerLevel, voteStreak: data.voteStreak ?? prev.voteStreak } : null);
     }
   }, [player]);
 

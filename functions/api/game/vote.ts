@@ -2,7 +2,7 @@
 // Body: { voterDid: string, nftId: string, editionNumber: number, voteType: 1 | -1 }
 // Cast a vote on a Your Wojak NFT. 1 = like, -1 = dislike.
 
-import { VOTES_PER_DAY, getTodayString } from './_shared';
+import { VOTES_PER_DAY, getTodayString, getYesterdayString, STREAK_MILESTONES } from './_shared';
 
 interface Env {
   DB: D1Database;
@@ -144,11 +144,58 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     await context.env.DB.batch(statements);
 
+    // Vote streak tracking: update when all daily votes used
+    const votesRemaining = VOTES_PER_DAY - votesToday - 1;
+    let voteStreak = (player.vote_streak as number) || 0;
+
+    if (votesRemaining === 0) {
+      const yesterday = getYesterdayString();
+      const lastStreakDate = player.vote_streak_last_date as string | null;
+
+      if (lastStreakDate === yesterday) {
+        // Consecutive day — extend streak
+        voteStreak = voteStreak + 1;
+      } else if (lastStreakDate === today) {
+        // Already counted today (shouldn't happen, but safe)
+        // keep current streak
+      } else {
+        // Streak broken — start fresh
+        voteStreak = 1;
+      }
+
+      const streakStatements: D1PreparedStatement[] = [
+        context.env.DB.prepare(`
+          UPDATE game_players
+          SET vote_streak = ?,
+              vote_streak_last_date = ?,
+              vote_streak_longest = MAX(COALESCE(vote_streak_longest, 0), ?)
+          WHERE did_id = ?
+        `).bind(voteStreak, today, voteStreak, voterDid),
+      ];
+
+      // Award milestone credits
+      const milestoneCredits = STREAK_MILESTONES[voteStreak];
+      if (milestoneCredits) {
+        streakStatements.push(
+          context.env.DB.prepare(`
+            INSERT INTO credit_events (wallet_address, nft_id, event_id, price_xch, floor_at_time, credits_earned, whale_multiplier, source, event_type, event_timestamp)
+            VALUES (?, ?, ?, 0, 0, ?, 100, 'streak', 'streak', datetime('now'))
+          `).bind(player.wallet_address, `streak_${voteStreak}`, `streak_${voteStreak}_${voterDid}`, milestoneCredits),
+          context.env.DB.prepare(`
+            INSERT INTO game_activity (did_id, event_type, event_data) VALUES (?, 'streak_milestone', ?)
+          `).bind(voterDid, JSON.stringify({ days: voteStreak, credits: milestoneCredits }))
+        );
+      }
+
+      await context.env.DB.batch(streakStatements);
+    }
+
     return Response.json({
       success: true,
-      votesRemaining: VOTES_PER_DAY - votesToday - 1,
+      votesRemaining,
       voteType,
       editionNumber,
+      voteStreak,
     });
   } catch (err) {
     console.error('Vote error:', err);

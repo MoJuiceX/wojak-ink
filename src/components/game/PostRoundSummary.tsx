@@ -10,6 +10,16 @@ interface PostRoundSummaryProps {
   dislikes: number;
   powerLevel: number;
   powerLevelDelta: number;
+  voteStreak?: number;
+}
+
+const STREAK_MILESTONES = [3, 7, 14, 30, 100];
+
+function getNextMilestone(streak: number): number | null {
+  for (const m of STREAK_MILESTONES) {
+    if (streak < m) return m;
+  }
+  return null;
 }
 
 export function PostRoundSummary({
@@ -17,6 +27,7 @@ export function PostRoundSummary({
   dislikes,
   powerLevel,
   powerLevelDelta,
+  voteStreak,
 }: PostRoundSummaryProps) {
   const totalVotes = likes + dislikes;
 
@@ -63,6 +74,22 @@ export function PostRoundSummary({
           </span>
         )}
       </div>
+
+      {voteStreak != null && voteStreak > 0 && (
+        <div className="flex flex-col items-center gap-1">
+          <span className="font-bold" style={{ fontSize: 14, color: 'var(--color-primary)' }}>
+            {voteStreak}-day vote streak!
+          </span>
+          {(() => {
+            const next = getNextMilestone(voteStreak);
+            return next ? (
+              <span className="text-muted" style={{ fontSize: 12 }}>
+                Next bonus at {next} days
+              </span>
+            ) : null;
+          })()}
+        </div>
+      )}
 
       <p className="text-secondary text-sm text-center">
         Come back tomorrow for 10 more votes.

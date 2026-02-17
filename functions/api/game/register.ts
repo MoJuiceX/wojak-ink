@@ -41,6 +41,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         powerLevel: player!.power_level,
         phase1Verified: !!player!.phase1_verified,
         votesToday: player!.votes_today,
+        voteStreak: player!.vote_streak ?? 0,
         onboarding: {
           did: true,
           phase1: !!player!.onboarding_phase1,

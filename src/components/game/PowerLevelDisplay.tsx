@@ -6,6 +6,7 @@ interface PowerLevelDisplayProps {
   level: number;
   rank?: number;
   credits?: number;
+  voteStreak?: number;
   breakdown?: {
     holdings: { score: number; nftCount: number; uniqueCreators: number };
     creations: { score: number; quality: number; spread: number; uniqueCollectors: number };
@@ -21,7 +22,7 @@ function getTier(level: number) {
   return { name: 'New', class: 'tier-casual', label: 'New Player' };
 }
 
-export function PowerLevelDisplay({ level, rank, credits, breakdown }: PowerLevelDisplayProps) {
+export function PowerLevelDisplay({ level, rank, credits, voteStreak, breakdown }: PowerLevelDisplayProps) {
   const tier = getTier(level);
   const [showBreakdown, setShowBreakdown] = useState(false);
 
@@ -37,9 +38,14 @@ export function PowerLevelDisplay({ level, rank, credits, breakdown }: PowerLeve
         {tier.label}
       </div>
 
-      {credits != null && credits > 0 && (
-        <p className="text-muted" style={{ fontSize: 13 }}>Credits: {credits}</p>
-      )}
+      <div className="flex items-center gap-3" style={{ fontSize: 13 }}>
+        {credits != null && credits > 0 && (
+          <span className="text-muted">Credits: {credits}</span>
+        )}
+        {voteStreak != null && voteStreak > 0 && (
+          <span style={{ color: 'var(--color-primary)' }}>{voteStreak}-day streak</span>
+        )}
+      </div>
 
       {breakdown && (
         <>
