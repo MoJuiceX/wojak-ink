@@ -60,9 +60,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         `).bind(nftId, editionNumber, burnerDid || null, burnerWallet, netScore, credits),
         // Award credits
         context.env.DB.prepare(`
-          INSERT INTO credit_events (wallet_address, nft_id, edition_number, credits_earned, source, created_at)
-          VALUES (?, ?, ?, ?, 'burn', datetime('now'))
-        `).bind(burnerWallet, nftId, editionNumber, credits),
+          INSERT INTO credit_events (wallet_address, nft_id, event_id, price_xch, floor_at_time, credits_earned, whale_multiplier, source, event_type, event_timestamp)
+          VALUES (?, ?, ?, 0, 0, ?, 100, 'burn', 'burn', datetime('now'))
+        `).bind(burnerWallet, nftId, `burn_${nftId}`, credits),
         // Remove from did_holdings
         context.env.DB.prepare(
           'DELETE FROM did_holdings WHERE nft_id = ?'

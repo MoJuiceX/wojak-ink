@@ -57,18 +57,17 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
               updated_at = datetime('now')
           WHERE did_id = ?
         `).bind(did),
-        // Award onboarding credits (insert into credit_events)
+        // Award onboarding credits
         context.env.DB.prepare(`
-          INSERT INTO credit_events (wallet_address, nft_id, edition_number, credits_earned, source, created_at)
+          INSERT INTO credit_events (wallet_address, nft_id, event_id, price_xch, floor_at_time, credits_earned, whale_multiplier, source, event_type, event_timestamp)
           VALUES (
             (SELECT wallet_address FROM game_players WHERE did_id = ?),
             'onboarding_phase1',
-            0,
-            ?,
-            'onboarding',
+            'onboarding_phase1_' || ?,
+            0, 0, ?, 100, 'onboarding', 'onboarding',
             datetime('now')
           )
-        `).bind(did, ONBOARDING_CREDITS.phase1),
+        `).bind(did, did, ONBOARDING_CREDITS.phase1),
       ]);
     }
 
