@@ -299,10 +299,13 @@ export function MintProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const pollingStartTimeRef = useRef<number>(0);
+  const lastConfirmCallRef = useRef<number>(0);
+  const CONFIRM_DEDUP_MS = 10_000; // Don't call confirm-payment more than once per 10s
 
   const startPolling = useCallback((jobId: number, walletAddr: string, initialStep?: string) => {
     stopPolling();
     pollingStartTimeRef.current = Date.now();
+    lastConfirmCallRef.current = 0;
 
     const poll = async () => {
       try {
@@ -317,21 +320,25 @@ export function MintProvider({ children }: { children: ReactNode }) {
 
           // Auto-detect payment: call confirm-payment (no launcherId) to let
           // the server check if the NFT has appeared on-chain yet.
-          // This handles users who accepted the offer directly in Sage.
-          try {
-            const confirmRes = await fetch('/api/mint/confirm-payment', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ jobId, walletAddress: walletAddr }),
-            });
-            const confirmData = await confirmRes.json().catch(() => ({}));
-            if (confirmData.success) {
-              // Server finalized — next poll will pick up completed state
-              return;
+          // Deduped: skip if called less than 10s ago to avoid burning rate limit.
+          const now = Date.now();
+          if (now - lastConfirmCallRef.current >= CONFIRM_DEDUP_MS) {
+            lastConfirmCallRef.current = now;
+            try {
+              const confirmRes = await fetch('/api/mint/confirm-payment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ jobId, walletAddress: walletAddr }),
+              });
+              const confirmData = await confirmRes.json().catch(() => ({}));
+              if (confirmData.success) {
+                // Server finalized — next poll will pick up completed state
+                return;
+              }
+              // pending = not yet on-chain, keep polling
+            } catch {
+              // Ignore — next poll will try again
             }
-            // pending = not yet on-chain, keep polling
-          } catch {
-            // Ignore — next poll will try again
           }
         }
 

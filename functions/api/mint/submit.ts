@@ -101,6 +101,10 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   if (!imageBase64 || typeof imageBase64 !== 'string') {
     return errorResponse('Missing imageBase64', 400);
   }
+  // 5MB PNG ≈ 6.67MB base64. Reject early to avoid KV/memory waste.
+  if (imageBase64.length > 7_000_000) {
+    return errorResponse('Image too large (max 5MB)', 400);
+  }
   if (!idempotencyKey || typeof idempotencyKey !== 'string') {
     return errorResponse('Missing idempotencyKey', 400);
   }

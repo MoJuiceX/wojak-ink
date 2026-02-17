@@ -77,8 +77,11 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     return errorResponse('Missing or invalid walletAddress', 400);
   }
 
-  // launcherId is optional — auto-detection kicks in when absent
+  // launcherId is optional — auto-detection kicks in when absent.
+  // Validate bech32 format (nft1 + 58-62 lowercase alphanumeric) to prevent
+  // path traversal or junk being passed to MintGarden API URLs.
   const providedLauncherId = body.launcherId && typeof body.launcherId === 'string'
+    && /^nft1[a-z0-9]{58,62}$/.test(body.launcherId)
     ? body.launcherId
     : null;
 

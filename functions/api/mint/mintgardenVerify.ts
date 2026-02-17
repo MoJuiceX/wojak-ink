@@ -89,12 +89,20 @@ export async function detectLauncherByWallet(
         item.data?.edition_number ??
         item.data?.metadata_json?.edition_number ??
         item.data?.metadata_json?.edition;
+      const name = item.data?.metadata_json?.name;
 
+      // Match by edition number, but verify name starts with "Your Wojak"
+      // to prevent cross-collection collisions when collection_id filter
+      // is missing or ignored by the API.
       if (editionNumber === mintNumber) {
-        return item.encoded_id || item.id || null;
+        if (!name || name.startsWith('Your Wojak')) {
+          return item.encoded_id || item.id || null;
+        }
+        // Edition matches but wrong collection — skip
+        continue;
       }
 
-      const name = item.data?.metadata_json?.name;
+      // Fallback: match by exact name
       if (name && name === `Your Wojak #${mintNumber}`) {
         return item.encoded_id || item.id || null;
       }

@@ -239,11 +239,13 @@ describe('confirm-payment.ts', () => {
   });
 
   it('uses caller-provided launcherId over stored one', async () => {
+    // Valid bech32-length launcher ID (nft1 + 62 lowercase alphanumeric chars)
+    const PROVIDED_LAUNCHER = 'nft1' + 'b'.repeat(62);
     const awaitingJob = {
       id: 1, wallet_address: TEST_WALLET, mint_type: 'paid', step: 'awaiting_payment',
       mint_number: 42, mintgarden_launcher_id: 'nft1stored', offer_file: 'offer-data',
     };
-    const finalJob = { mint_number: 42, mintgarden_launcher_id: 'nft1provided', phase2_mint_id: 100 };
+    const finalJob = { mint_number: 42, mintgarden_launcher_id: PROVIDED_LAUNCHER, phase2_mint_id: 100 };
     const env = createEnv({
       'awaiting_payment': mockStmt(awaitingJob),
       'SELECT mint_number': mockStmt(finalJob),
@@ -255,7 +257,7 @@ describe('confirm-payment.ts', () => {
       json: async () => ({ owner_address: { encoded_id: TEST_WALLET } }),
     });
 
-    const req = makeRequest({ jobId: 1, walletAddress: TEST_WALLET, launcherId: 'nft1provided' });
+    const req = makeRequest({ jobId: 1, walletAddress: TEST_WALLET, launcherId: PROVIDED_LAUNCHER });
     const ctx = createContext(env, req);
     const res = await onRequest(ctx);
     const data = await res.json() as Record<string, unknown>;
@@ -263,7 +265,7 @@ describe('confirm-payment.ts', () => {
 
     // Verify fetch was called with provided launcher ID (fetchWithTimeout passes signal)
     expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('nft1provided'),
+      expect.stringContaining(PROVIDED_LAUNCHER),
       expect.objectContaining({ signal: expect.any(AbortSignal) })
     );
   });

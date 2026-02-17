@@ -361,6 +361,16 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
 
     for (const row of (phantomFree.results || [])) {
       try {
+        // Check if wallet already has an active lock (user started a new mint).
+        // If so, skip — we can't acquire the lock without conflicting.
+        const existingLock = await env.DB.prepare(
+          "SELECT id FROM mint_jobs WHERE wallet_lock = ? AND wallet_lock IS NOT NULL AND id != ?"
+        ).bind(row.wallet_address, row.id).first<{ id: number }>();
+        if (existingLock) {
+          console.log(`[Cleanup] Skipping phantom finalize for job ${row.id} — wallet has active lock (job ${existingLock.id})`);
+          continue;
+        }
+
         // The NFT exists on chain — finalize it
         await env.DB.prepare(
           "UPDATE mint_jobs SET step = 'queued', wallet_lock = ?, updated_at = datetime('now') WHERE id = ?"
@@ -383,6 +393,15 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
     }
   } catch (err) {
     console.error('[Cleanup] Operation 10 (phantom free mints) failed:', err);
+  }
+
+  // 11. Purge stale rate_limits rows older than 24 hours.
+  //     Per-key cleanup only happens on access — keys from one-off IPs accumulate forever.
+  try {
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+    await env.DB.prepare('DELETE FROM rate_limits WHERE timestamp < ?').bind(cutoff).run();
+  } catch (err) {
+    console.error('[Cleanup] Operation 11 (rate_limits purge) failed:', err);
   }
 
   return stats;
