@@ -1,99 +1,261 @@
-import { useEffect } from 'react';
+// Core voting orchestrator: card stack, vote handling, state transitions.
+// Renders: gate checklist | skeleton | error | summary | empty | card stack + buttons.
+
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { useGame } from '@/contexts/GameContext';
-import { SwipeCard } from './SwipeCard';
+import { useSageWallet } from '@/sage-wallet';
+import usePrefersReducedMotion from '@/hooks/usePrefersReducedMotion';
+import { SwipeCard, getNftImageUrl } from './SwipeCard';
+import { VoteButtons } from './VoteButtons';
+import { VoteCardSkeleton } from './VoteCardSkeleton';
+import { GateChecklist } from './GateChecklist';
+import { PostRoundSummary } from './PostRoundSummary';
+
+interface LastVote {
+  nftId: string;
+  editionNumber: number;
+  name: string;
+  customName: string | null;
+  imageUri: string;
+  voteType: 1 | -1;
+}
 
 export function VotingFeed() {
-  const { player, isVerified, feed, feedLoading, loadFeed, castVote } = useGame();
+  const {
+    player, isRegistered, isVerified,
+    feed, feedLoading, loadFeed,
+    castVote, refreshPowerLevel,
+  } = useGame();
+  const { address, status: walletStatus } = useSageWallet();
+  const reducedMotion = usePrefersReducedMotion();
 
+  // Session state
+  const [sessionLikes, setSessionLikes] = useState(0);
+  const [sessionDislikes, setSessionDislikes] = useState(0);
+  const [lastVote, setLastVote] = useState<LastVote | null>(null);
+  const [undoUsed, setUndoUsed] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
+  const [voteCount, setVoteCount] = useState(0);
+  const [feedError, setFeedError] = useState(false);
+  const [cardExiting, setCardExiting] = useState(false);
+  const powerLevelBefore = useRef(0);
+
+  // Instruction text visibility
+  const [instructionsSeen, setInstructionsSeen] = useState(() => {
+    try {
+      return !!localStorage.getItem('wojak_vote_instructions_seen');
+    } catch {
+      return false;
+    }
+  });
+
+  // Snapshot power level at session start for delta
   useEffect(() => {
-    if (isVerified) {
-      loadFeed();
+    if (player && powerLevelBefore.current === 0) {
+      powerLevelBefore.current = player.powerLevel;
     }
-  }, [isVerified, loadFeed]);
+  }, [player]);
 
-  if (!player) {
-    return (
-      <div className="card-static p-8 flex flex-col items-center gap-4">
-        <h2 className="text-xl font-bold">Connect Your Wallet</h2>
-        <p className="text-secondary">Connect your Sage wallet with a DID to start voting.</p>
-      </div>
-    );
-  }
-
-  if (!isVerified) {
-    return (
-      <div className="card-static p-8 flex flex-col items-center gap-4">
-        <h2 className="text-xl font-bold">Phase 1 NFT Required</h2>
-        <p className="text-secondary">
-          You need at least 1 Wojak Farmers Plot NFT assigned to your DID to vote.
-        </p>
-      </div>
-    );
-  }
-
-  if (player.votesRemaining <= 0) {
-    return (
-      <div className="card-static p-8 flex flex-col items-center gap-4">
-        <h2 className="text-xl font-bold">Votes Used Up!</h2>
-        <p className="text-secondary">
-          You've used all 10 votes today. Come back tomorrow!
-        </p>
-        <div className="badge badge-cyan">{player.votesToday}/10 votes cast</div>
-      </div>
-    );
-  }
-
-  if (feedLoading) {
-    return (
-      <div className="flex items-center justify-center p-12">
-        <div className="text-secondary">Loading feed...</div>
-      </div>
-    );
-  }
-
-  const currentItem = feed[0];
-
-  if (!currentItem) {
-    return (
-      <div className="card-static p-8 flex flex-col items-center gap-4">
-        <h2 className="text-xl font-bold">All Caught Up!</h2>
-        <p className="text-secondary">
-          You've seen all available Wojaks. Check back later for new mints!
-        </p>
-      </div>
-    );
-  }
-
-  const handleVote = async (voteType: 1 | -1) => {
-    await castVote(currentItem.nftId, currentItem.editionNumber, voteType);
-    // Feed auto-updates (castVote removes voted item)
-    // Load more if running low
-    if (feed.length <= 3) {
-      loadFeed();
+  // Load feed when verified
+  useEffect(() => {
+    if (isVerified && feed.length === 0 && !feedLoading) {
+      loadFeed().catch(() => setFeedError(true));
     }
-  };
+  }, [isVerified, feed.length, feedLoading, loadFeed]);
+
+  // Prefetch images for next 3 cards
+  useEffect(() => {
+    feed.slice(0, 3).forEach(item => {
+      const img = new Image();
+      img.src = getNftImageUrl(item.nftId);
+    });
+  }, [feed]);
+
+  // Mark instructions seen after 3 votes
+  useEffect(() => {
+    if (voteCount >= 3 && !instructionsSeen) {
+      setInstructionsSeen(true);
+      try {
+        if (typeof requestIdleCallback !== 'undefined') {
+          requestIdleCallback(() => localStorage.setItem('wojak_vote_instructions_seen', '1'));
+        } else {
+          localStorage.setItem('wojak_vote_instructions_seen', '1');
+        }
+      } catch {
+        // localStorage unavailable
+      }
+    }
+  }, [voteCount, instructionsSeen]);
+
+  const handleVote = useCallback((voteType: 1 | -1) => {
+    const currentItem = feed[0];
+    if (!currentItem || cardExiting) return;
+
+    setCardExiting(true);
+
+    // Track session stats
+    setLastVote({
+      nftId: currentItem.nftId,
+      editionNumber: currentItem.editionNumber,
+      name: currentItem.name,
+      customName: currentItem.customName,
+      imageUri: currentItem.imageUri,
+      voteType,
+    });
+    setVoteCount(prev => prev + 1);
+    if (voteType === 1) setSessionLikes(prev => prev + 1);
+    else setSessionDislikes(prev => prev + 1);
+
+    // Optimistic fire-and-forget
+    castVote(currentItem.nftId, currentItem.editionNumber, voteType);
+
+    // Small delay for exit animation, then advance
+    setTimeout(() => {
+      setCardExiting(false);
+
+      // Refill when running low
+      if (feed.length <= 3) {
+        loadFeed().catch(() => setFeedError(true));
+      }
+
+      // Check for round complete (10th vote)
+      if (player && player.votesRemaining <= 1) {
+        setTimeout(() => {
+          refreshPowerLevel();
+          setShowSummary(true);
+        }, 200);
+      }
+    }, 250);
+  }, [feed, cardExiting, castVote, loadFeed, player, refreshPowerLevel]);
+
+  const handleUndo = useCallback(() => {
+    if (!lastVote || undoUsed) return;
+    setUndoUsed(true);
+    // UI-only undo: decrement session counter
+    if (lastVote.voteType === 1) setSessionLikes(prev => Math.max(0, prev - 1));
+    else setSessionDislikes(prev => Math.max(0, prev - 1));
+    setVoteCount(prev => Math.max(0, prev - 1));
+    setLastVote(null);
+  }, [lastVote, undoUsed]);
+
+  const handleRetry = useCallback(() => {
+    setFeedError(false);
+    loadFeed().catch(() => setFeedError(true));
+  }, [loadFeed]);
+
+  // Gate: wallet not connected or player not registered/verified
+  const walletConnected = walletStatus === 'connected' && !!address;
+  const hasDid = isRegistered;
+  const hasPhase1 = isVerified;
+
+  if (!walletConnected || !hasDid || !hasPhase1) {
+    return (
+      <GateChecklist
+        walletConnected={walletConnected}
+        hasDid={hasDid}
+        hasPhase1={hasPhase1}
+      />
+    );
+  }
+
+  // Loading
+  if (feedLoading && feed.length === 0) {
+    return <VoteCardSkeleton />;
+  }
+
+  // Error
+  if (feedError && feed.length === 0) {
+    return (
+      <div className="vote-card-skeleton flex flex-col items-center justify-center gap-4 p-8" style={{ aspectRatio: 'auto', minHeight: 300 }}>
+        <span className="text-2xl">&#9888;&#65039;</span>
+        <h2 className="text-lg font-semibold">Something went wrong</h2>
+        <p className="text-secondary text-sm text-center">
+          Couldn't load the next Wojak. Check your connection and try again.
+        </p>
+        <button className="btn btn-primary" onClick={handleRetry}>Try Again</button>
+      </div>
+    );
+  }
+
+  // Post-round summary
+  if (showSummary) {
+    return (
+      <PostRoundSummary
+        likes={sessionLikes}
+        dislikes={sessionDislikes}
+        powerLevel={player?.powerLevel ?? 0}
+        powerLevelDelta={(player?.powerLevel ?? 0) - powerLevelBefore.current}
+      />
+    );
+  }
+
+  // Feed empty
+  if (feed.length === 0) {
+    return (
+      <div className="vote-card-skeleton flex flex-col items-center justify-center gap-4 p-8" style={{ aspectRatio: 'auto', minHeight: 300 }}>
+        <span className="text-2xl">&#10024;</span>
+        <h2 className="text-lg font-semibold">All Caught Up!</h2>
+        <p className="text-secondary text-sm text-center">
+          You've seen every available Wojak. Check back after new mints drop!
+        </p>
+        <a href="/generator" className="text-sm" style={{ color: 'var(--color-primary)' }}>
+          Mint a Wojak &rarr;
+        </a>
+      </div>
+    );
+  }
+
+  // Active voting
+  const visibleCards = feed.slice(0, 3);
 
   return (
-    <div className="voting-feed flex flex-col items-center gap-4">
-      {/* Votes remaining badge */}
-      <div className="flex items-center gap-2">
-        <span className="badge">{player.votesRemaining} votes left today</span>
+    <div className="flex flex-col items-center gap-4">
+      {/* Card stack */}
+      <div
+        className="vote-card-stack"
+        role="application"
+        aria-label="Vote on Wojak NFTs. Swipe right to like, left to dislike."
+      >
+        <AnimatePresence mode="popLayout">
+          {visibleCards.map((item, i) => (
+            <SwipeCard
+              key={item.nftId}
+              nftId={item.nftId}
+              name={item.customName || item.name}
+              editionNumber={item.editionNumber}
+              imageUrl={getNftImageUrl(item.nftId)}
+              onVote={handleVote}
+              stackPosition={i as 0 | 1 | 2}
+              isFirst={voteCount === 0 && i === 0}
+              reducedMotion={reducedMotion}
+            />
+          ))}
+        </AnimatePresence>
       </div>
 
-      {/* Swipe card */}
-      <SwipeCard
-        key={currentItem.nftId}
-        nftId={currentItem.nftId}
-        name={currentItem.name}
-        imageUrl={`https://assets.mintgarden.io/thumbnails/medium/${currentItem.nftId}.png`}
-        editionNumber={currentItem.editionNumber}
-        onVote={handleVote}
+      {/* Vote buttons */}
+      <VoteButtons
+        onLike={() => handleVote(1)}
+        onDislike={() => handleVote(-1)}
+        onUndo={handleUndo}
+        undoAvailable={!!lastVote && !undoUsed}
+        disabled={cardExiting}
       />
 
-      {/* Instructions */}
-      <p className="text-muted text-sm">
-        Swipe right to like · Swipe left to dislike
-      </p>
+      {/* Instruction text */}
+      {!instructionsSeen && (
+        <p
+          className="text-muted text-center"
+          style={{
+            fontSize: 13,
+            transition: 'opacity 500ms ease',
+            opacity: voteCount >= 3 ? 0 : 1,
+          }}
+        >
+          Swipe right to like &middot; Swipe left to dislike
+        </p>
+      )}
     </div>
   );
 }
