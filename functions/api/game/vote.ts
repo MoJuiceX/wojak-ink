@@ -120,12 +120,25 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       `).bind(voterDid),
     ];
 
-    // First vote onboarding milestone
+    // First vote onboarding milestone + activity log
     if (isFirstVote) {
       statements.push(
         context.env.DB.prepare(
           'UPDATE game_players SET onboarding_voted = 1 WHERE did_id = ?'
-        ).bind(voterDid)
+        ).bind(voterDid),
+        context.env.DB.prepare(
+          `INSERT INTO game_activity (did_id, event_type, event_data) VALUES (?, 'vote_milestone', ?)`
+        ).bind(voterDid, JSON.stringify({ count: 1, milestone: 'first_vote' }))
+      );
+    }
+
+    // Log milestone every 10 votes
+    const newTotal = (player.total_votes_cast as number) + 1;
+    if (!isFirstVote && newTotal % 10 === 0) {
+      statements.push(
+        context.env.DB.prepare(
+          `INSERT INTO game_activity (did_id, event_type, event_data) VALUES (?, 'vote_milestone', ?)`
+        ).bind(voterDid, JSON.stringify({ count: newTotal }))
       );
     }
 
