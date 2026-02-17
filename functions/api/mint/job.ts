@@ -42,6 +42,7 @@ function stepInfo(step: string, mintType: string): { label: string; number: numb
     case 'validating':        return { label: 'Validating trait selections...', number: 1, total };
     case 'reserving_number':  return { label: 'Reserving your Wojak number...', number: 2, total };
     case 'uploading_ipfs':    return { label: 'Uploading artwork to IPFS...', number: 3, total };
+    case 'mint_queued':       return { label: 'Waiting for a mint slot...', number: 4, total };
     case 'calling_mintgarden': return { label: 'Creating your NFT...', number: 4, total };
     case 'awaiting_payment':  return { label: 'Accept the offer in your wallet', number: 5, total };
     case 'finalizing':        return { label: 'Finalizing your mint...', number: total, total };
@@ -110,12 +111,31 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       job.error_code = 'OFFER_EXPIRED';
     }
 
+    // Queue position for mint_queued jobs
+    let queuePosition: number | undefined;
+    let queueTotal: number | undefined;
+    if (job.step === 'mint_queued') {
+      const posRow = await env.DB.prepare(
+        "SELECT COUNT(*) AS position FROM mint_jobs WHERE step = 'mint_queued' AND created_at < ?"
+      ).bind(job.created_at).first<{ position: number }>();
+      const totalRow = await env.DB.prepare(
+        "SELECT COUNT(*) AS total FROM mint_jobs WHERE step = 'mint_queued'"
+      ).first<{ total: number }>();
+      queuePosition = (posRow?.position ?? 0) + 1; // 1-indexed
+      queueTotal = totalRow?.total ?? 0;
+    }
+
     const info = stepInfo(job.step, job.mint_type);
 
     // Map error_code to user-friendly message via MINT_ERROR_MESSAGES
     const errorDisplay = (job.step === 'failed' || job.step === 'refunded') && job.error_code
       ? (MINT_ERROR_MESSAGES[job.error_code as MintErrorCode] || job.error_message || info.label)
       : (job.step === 'failed' && job.error_message ? job.error_message : info.label);
+
+    // Dynamic step label for queue position
+    const stepLabel = job.step === 'mint_queued' && queuePosition
+      ? `You are #${queuePosition} in the mint queue`
+      : errorDisplay;
 
     // For free mints, calculate credits remaining
     let creditsRemaining: number | undefined;
@@ -134,9 +154,11 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       jobId: job.id,
       step: job.step,
       mintType: job.mint_type,
-      stepLabel: errorDisplay,
+      stepLabel: stepLabel,
       stepNumber: info.number,
       totalSteps: info.total,
+      queuePosition,
+      queueTotal,
       mintNumber: job.mint_number,
       offerFile: job.step === 'awaiting_payment' ? job.offer_file : undefined,
       launcherId,

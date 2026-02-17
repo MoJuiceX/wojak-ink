@@ -237,4 +237,29 @@ describe('job.ts', () => {
     const res = await onRequest(ctx);
     expect(res.status).toBe(400);
   });
+
+  it('returns queue position for mint_queued jobs', async () => {
+    const jobRow = {
+      id: 5, wallet_address: TEST_WALLET, mint_type: 'free', step: 'mint_queued',
+      mint_number: 42, mintgarden_launcher_id: null, offer_file: null,
+      error_message: null, error_code: null, credit_cost: 10000, credit_spend_id: 1,
+      created_at: '2026-02-17T10:00:05Z', expires_at: null,
+    };
+    const env = createEnv({});
+    env.DB.prepare = vi.fn((query: string) => {
+      if (query.includes('FROM mint_jobs') && query.includes('WHERE id')) return mockStmt(jobRow);
+      if (query.includes("step = 'mint_queued'") && query.includes('created_at <')) return mockStmt({ position: 2 });
+      if (query.includes("step = 'mint_queued'") && query.includes('COUNT(*)') && !query.includes('created_at')) return mockStmt({ total: 7 });
+      return mockStmt();
+    });
+    const req = makeGetRequest(5, TEST_WALLET);
+    const ctx = createContext(env, req);
+    const res = await onRequest(ctx);
+    expect(res.status).toBe(200);
+    const data = await res.json() as Record<string, unknown>;
+    expect(data.step).toBe('mint_queued');
+    expect(data.queuePosition).toBe(3); // 2 + 1 (1-indexed)
+    expect(data.queueTotal).toBe(7);
+    expect((data.stepLabel as string)).toContain('#3');
+  });
 });
