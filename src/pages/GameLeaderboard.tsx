@@ -5,6 +5,7 @@ import { GamePodium } from '@/components/game/GamePodium';
 import { GameLeaderboardList } from '@/components/game/GameLeaderboardList';
 import { GamePositionBar } from '@/components/game/GamePositionBar';
 import PageTransition from '@/components/layout/PageTransition';
+import { Link } from 'react-router-dom';
 import { AlertCircle } from 'lucide-react';
 
 type TabMode = 'players' | 'wojaks';
@@ -53,14 +54,15 @@ function LeaderboardContent() {
     setPlayersError(false);
     try {
       const res = await fetch(`/api/game/leaderboard?limit=50&offset=${offset}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       if (data.success) {
         setPlayers(prev => offset === 0 ? data.entries : [...prev, ...data.entries]);
-        setPlayersTotal(data.pagination.total);
-        setPlayersHasMore(data.pagination.hasMore);
+        setPlayersTotal(data.pagination?.total ?? 0);
+        setPlayersHasMore(data.pagination?.hasMore ?? false);
       }
     } catch {
-      setPlayersError(true);
+      if (offset === 0) setPlayersError(true);
     } finally {
       setPlayersLoading(false);
     }
@@ -71,14 +73,15 @@ function LeaderboardContent() {
     setWojaksError(false);
     try {
       const res = await fetch(`/api/game/top-wojaks?limit=50&offset=${offset}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       if (data.success) {
         setWojaks(prev => offset === 0 ? data.wojaks : [...prev, ...data.wojaks]);
-        setWojaksTotal(data.total);
-        setWojaksHasMore(offset + 50 < data.total);
+        setWojaksTotal(data.total ?? 0);
+        setWojaksHasMore(offset + 50 < (data.total ?? 0));
       }
     } catch {
-      setWojaksError(true);
+      if (offset === 0) setWojaksError(true);
     } finally {
       setWojaksLoading(false);
     }
@@ -241,6 +244,9 @@ function LeaderboardContent() {
               <span className="text-muted" style={{ fontSize: 14 }}>
                 {tab === 'players' ? 'Be the first on the leaderboard' : 'No votes cast yet'}
               </span>
+              <Link to="/your-wojak" className="btn btn-primary" style={{ fontSize: 13, padding: '8px 16px' }}>
+                Start Playing
+              </Link>
             </div>
           )}
         </>
