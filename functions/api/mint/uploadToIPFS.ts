@@ -16,7 +16,11 @@ export function base64ToUint8Array(base64: string): Uint8Array {
 }
 
 export async function sha256Hex(data: ArrayBuffer | Uint8Array): Promise<string> {
-  const buffer = data instanceof Uint8Array ? data.buffer : data;
+  // For Uint8Array, use the subarray-safe overload (byteOffset + byteLength)
+  // instead of .buffer which may reference a larger underlying ArrayBuffer.
+  const buffer = data instanceof Uint8Array
+    ? data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength)
+    : data;
   const hash = await crypto.subtle.digest('SHA-256', buffer);
   return [...new Uint8Array(hash)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }

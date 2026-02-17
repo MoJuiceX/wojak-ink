@@ -301,6 +301,11 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
      AND mj.mint_type = 'paid'
      AND mj.mintgarden_launcher_id IS NOT NULL
      AND (mj.phase2_mint_id IS NULL OR pm.refund_needed IS NULL OR pm.refund_needed = 0)
+     AND NOT EXISTS (
+       SELECT 1 FROM mint_audit_log mal
+       WHERE mal.step = 'refund_needed_no_mint_record'
+       AND json_extract(mal.data, '$.job_id') = mj.id
+     )
      LIMIT 10`
   ).all<{ job_id: number; phase2_mint_id: number | null; error_message: string | null; mintgarden_launcher_id: string; wallet_address: string }>();
 

@@ -300,12 +300,14 @@ export function MintProvider({ children }: { children: ReactNode }) {
 
   const pollingStartTimeRef = useRef<number>(0);
   const lastConfirmCallRef = useRef<number>(0);
+  const currentStepRef = useRef<string>('');
   const CONFIRM_DEDUP_MS = 10_000; // Don't call confirm-payment more than once per 10s
 
   const startPolling = useCallback((jobId: number, walletAddr: string, initialStep?: string) => {
     stopPolling();
     pollingStartTimeRef.current = Date.now();
     lastConfirmCallRef.current = 0;
+    currentStepRef.current = initialStep || '';
 
     const poll = async () => {
       try {
@@ -314,6 +316,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
         const data = await res.json() as MintJob;
 
         setCurrentJob(data);
+        currentStepRef.current = data.step;
 
         if (data.step === 'awaiting_payment') {
           setMintStep('awaiting_payment');
@@ -361,9 +364,11 @@ export function MintProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    // Get the right interval based on step and elapsed time
-    const getInterval = (isAwaiting: boolean): number => {
-      if (!isAwaiting) return POLL_INTERVAL_ACTIVE;
+    // Get the right interval based on current step and elapsed time.
+    // Reads currentStepRef so the interval adapts when the step changes
+    // (e.g. from processing to awaiting_payment).
+    const getInterval = (): number => {
+      if (currentStepRef.current !== 'awaiting_payment') return POLL_INTERVAL_ACTIVE;
       const elapsed = Date.now() - pollingStartTimeRef.current;
       // Find the highest matching backoff tier
       let interval = POLL_BACKOFF_SCHEDULE[0].intervalMs;
@@ -377,7 +382,6 @@ export function MintProvider({ children }: { children: ReactNode }) {
     poll();
 
     // Start with adaptive interval — re-schedule after each poll to adjust backoff
-    const isAwaiting = initialStep === 'awaiting_payment';
     const scheduleNext = () => {
       pollingRef.current = setTimeout(() => {
         poll().then(() => {
@@ -385,7 +389,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
             scheduleNext(); // Schedule next poll with potentially updated interval
           }
         });
-      }, getInterval(isAwaiting)) as unknown as ReturnType<typeof setInterval>;
+      }, getInterval()) as unknown as ReturnType<typeof setInterval>;
     };
     scheduleNext();
 

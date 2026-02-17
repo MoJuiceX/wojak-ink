@@ -138,7 +138,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       stepNumber: info.number,
       totalSteps: info.total,
       mintNumber: job.mint_number,
-      offerFile: job.offer_file,
+      offerFile: job.step === 'awaiting_payment' ? job.offer_file : undefined,
       launcherId,
       mintgardenUrl: launcherId ? `https://mintgarden.io/nfts/${launcherId}` : undefined,
       creditsSpent: job.credit_cost ? job.credit_cost / 100 : undefined,

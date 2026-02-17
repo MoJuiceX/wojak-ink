@@ -328,8 +328,8 @@ export async function finalizeJob(env: ProcessEnv, jobId: number): Promise<void>
       job.wallet_address,
       job.layers_json,
       job.colors_json,
-      ipfsImageUris[0] ?? null,
-      ipfsMetadataUris[0] ?? null,
+      ipfsImageUris.length > 0 ? JSON.stringify(ipfsImageUris) : null,
+      ipfsMetadataUris.length > 0 ? JSON.stringify(ipfsMetadataUris) : null,
       job.image_hash,
       job.metadata_hash,
       job.mint_type,
@@ -435,11 +435,18 @@ async function handleJobFailure(
   const errorCode = error instanceof MintError ? error.code : 'INTERNAL_ERROR';
 
   // Re-read job from DB for current state (initial variable is stale —
-  // fields like mintgarden_launcher_id may have been set during processing)
+  // fields like mintgarden_launcher_id may have been set during processing).
+  // Do NOT fall back to _initialJob — it has stale field values.
   const job = await env.DB.prepare('SELECT * FROM mint_jobs WHERE id = ?')
-    .bind(jobId).first<MintJobRow>() ?? _initialJob;
+    .bind(jobId).first<MintJobRow>();
 
-  console.error(`[MintProcessor] Job ${jobId} failed at step ${job?.step}:`, errorMsg);
+  if (!job) {
+    // Job row disappeared — just log and bail
+    console.error(`[MintProcessor] Job ${jobId} not found during failure handling`);
+    return;
+  }
+
+  console.error(`[MintProcessor] Job ${jobId} failed at step ${job.step}:`, errorMsg);
 
   // Non-retryable error codes — these won't succeed on retry
   const nonRetryable = [
@@ -450,11 +457,11 @@ async function handleJobFailure(
   // and processJob skips IPFS upload if URIs already exist on the job.
   const retryable = !nonRetryable.includes(errorCode);
 
-  if (retryable && (job?.retry_count ?? 0) < (job?.max_retries ?? 3)) {
+  if (retryable && job.retry_count < job.max_retries) {
     // Increment retry count, reset to queued for retry.
     // Keep mint_number (avoid leaking supply) and keep IPFS URIs if they exist
     // (processJob will skip re-upload on retry if URIs are already set).
-    const hasIpfs = job?.ipfs_image_uris && job?.ipfs_metadata_uris;
+    const hasIpfs = job.ipfs_image_uris && job.ipfs_metadata_uris;
     await env.DB.prepare(
       `UPDATE mint_jobs SET step = 'queued', retry_count = retry_count + 1,
        error_message = ?, error_code = ?,
@@ -469,12 +476,12 @@ async function handleJobFailure(
   let finalStep = 'failed';
 
   // If credits were deducted (free mint), refund them
-  if (job?.mint_type === 'free' && job?.credit_spend_id) {
+  if (job.mint_type === 'free' && job.credit_spend_id) {
     await env.DB.prepare(
       'DELETE FROM credit_spends WHERE id = ?'
     ).bind(job.credit_spend_id).run();
     finalStep = 'refunded';
-  } else if (job?.mint_type === 'free' && !job?.credit_spend_id) {
+  } else if (job.mint_type === 'free' && !job.credit_spend_id) {
     // credit_spend_id linking may have failed — find orphaned spend by wallet + mint_id=0
     try {
       const orphan = await env.DB.prepare(
@@ -494,7 +501,7 @@ async function handleJobFailure(
   // phase2_mint_id is only set at finalization — if failure occurs before that
   // (IPFS upload fail, MintGarden API error), phase2_mint_id is NULL even though
   // the user may have paid. mintgarden_launcher_id proves payment was in play.
-  if (job?.mint_type === 'paid' && job?.mintgarden_launcher_id) {
+  if (job.mint_type === 'paid' && job.mintgarden_launcher_id) {
     try {
       if (job.phase2_mint_id) {
         await markRefundNeeded(
@@ -531,6 +538,6 @@ async function handleJobFailure(
     step: `job_${finalStep}`,
     status: 'failed',
     error: errorMsg,
-    data: { job_id: jobId, error_code: errorCode, mint_number: job?.mint_number },
+    data: { job_id: jobId, error_code: errorCode, mint_number: job.mint_number },
   });
 }
