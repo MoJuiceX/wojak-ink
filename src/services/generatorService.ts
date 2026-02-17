@@ -656,7 +656,7 @@ export async function getUnifiedTraits(layer: UILayerName): Promise<UnifiedTrait
   const g1Images = getAllLayerImages(layer);
 
   // Get G2 traits for this layer
-  let g2Traits: G2ManifestTrait[] = [];
+  const g2Traits: G2ManifestTrait[] = [];
   if (g2Manifest) {
     // Find which G2 categories map to this UI layer
     for (const [catName, catData] of Object.entries(g2Manifest.categories)) {

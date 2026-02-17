@@ -43,7 +43,7 @@ interface MintGardenNFT {
 }
 
 // MintGardenResponse type - structure of API response (items array extracted directly)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 type _MintGardenResponse = {
   items: MintGardenNFT[];
   count?: number;

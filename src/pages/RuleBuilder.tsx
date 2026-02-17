@@ -631,6 +631,7 @@ export default function RuleBuilder() {
     let cancelled = false;
     const sel = selectedPaths as SelectedLayers;
     const baseLayers = buildRenderLayers(sel);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setComputedLayers(baseLayers);
 
     const activeOpacities: Record<string, number> = {};

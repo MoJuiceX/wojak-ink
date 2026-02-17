@@ -130,6 +130,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
 
   useEffect(() => {
     if (!g2Sel) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTrait(null);
       return;
     }

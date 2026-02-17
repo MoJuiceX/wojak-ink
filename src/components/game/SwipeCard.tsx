@@ -104,6 +104,7 @@ export function SwipeCard({
     if (isFirst && !reducedMotion && stackPosition === 0) {
       try {
         if (!localStorage.getItem('wojak_vote_first_visit')) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setShouldWiggle(true);
         }
       } catch {

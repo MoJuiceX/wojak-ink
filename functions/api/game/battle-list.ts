@@ -104,7 +104,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 function formatBattle(b: Record<string, unknown>, perspectiveNftId: string) {
   const isA = b.nft_a_id === perspectiveNftId;
   const won = b.winner_nft_id === perspectiveNftId;
-  const lost = b.winner_nft_id && b.winner_nft_id !== perspectiveNftId;
+  const _lost = b.winner_nft_id && b.winner_nft_id !== perspectiveNftId;
 
   return {
     id: b.id,

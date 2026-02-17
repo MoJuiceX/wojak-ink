@@ -6,7 +6,7 @@
  */
 
 // Env interface kept for documentation - DB binding used by functions
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 interface _Env {
   DB: D1Database;
 }

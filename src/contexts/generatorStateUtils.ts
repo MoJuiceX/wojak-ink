@@ -33,7 +33,7 @@ export function applyRulesUnified(
 ): { newSelections: SelectionsSnapshot; result: DisabledLayersResult } {
   const resolver = createSelectionResolverFromUnified(selections);
   const result = getDisabledLayers(resolver);
-  let newSelections: SelectionsSnapshot = { ...selections };
+  const newSelections: SelectionsSnapshot = { ...selections };
 
   if (result.forceSelections) {
     for (const [layer, path] of Object.entries(result.forceSelections)) {

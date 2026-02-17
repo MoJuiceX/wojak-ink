@@ -110,6 +110,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
   useEffect(() => {
     const expiresAt = currentJob?.expiresAt;
     if (!expiresAt) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTimeLeft('');
       setIsExpired(false);
       return;

@@ -31,7 +31,7 @@ vi.mock('./traitResolver', () => ({
 }));
 
 import { onRequest } from './submit';
-import { TEST_WALLET, VALID_SUBMIT_BODY } from './test-helpers';
+import { TEST_WALLET as _TEST_WALLET, VALID_SUBMIT_BODY } from './test-helpers';
 import { checkRateLimit } from '../../lib/rateLimit';
 
 // Helper to create chainable mock prepared statement

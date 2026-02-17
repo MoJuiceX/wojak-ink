@@ -102,7 +102,7 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
   switch (action.type) {
     case 'SET_LAYER': {
       const pathMap = pathMapForReducer();
-      let updated: SelectionsSnapshot = { ...state.selections };
+      const updated: SelectionsSnapshot = { ...state.selections };
       updated[action.layer] = { path: action.path, traitId: pathMap.get(action.path) ?? null };
 
       if (action.layer === 'Base' && action.path) {
@@ -134,7 +134,7 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
 
     case 'SET_G2_LAYER': {
       const pathMap = pathMapForReducer();
-      let updatedG2Sel: SelectionsSnapshot = { ...state.selections };
+      const updatedG2Sel: SelectionsSnapshot = { ...state.selections };
       updatedG2Sel[action.layer] = { path: action.path, traitId: action.g2.traitId, g2: action.g2 };
 
       const { newSelections, result } = applyRulesUnified(updatedG2Sel, pathMap);
@@ -224,7 +224,7 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
     }
 
     case 'CLEAR_LAYER': {
-      let updated: SelectionsSnapshot = { ...state.selections };
+      const updated: SelectionsSnapshot = { ...state.selections };
       delete updated[action.layer];
       const updatedColors = { ...state.selectedColors };
       delete updatedColors[action.layer];

@@ -5,7 +5,7 @@
 // Auto-matchmaking: when 2+ NFTs are queued from different owners,
 // the system creates a battle and removes both from the queue.
 
-import { isValidDid, ONBOARDING_CREDITS } from './_shared';
+import { isValidDid } from './_shared';
 
 interface Env {
   DB: D1Database;

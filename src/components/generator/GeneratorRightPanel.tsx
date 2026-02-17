@@ -228,6 +228,7 @@ export function GeneratorRightPanel() {
 
   useEffect(() => {
     if (!g2Sel?.traitId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setG2Trait(null);
       return;
     }
@@ -238,6 +239,7 @@ export function GeneratorRightPanel() {
     if (isG1MilitaryBeret) {
       getUnifiedTraitById('Head_military-beret').then(setMilitaryBeretTrait).catch(() => setMilitaryBeretTrait(null));
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setMilitaryBeretTrait(null);
     }
   }, [isG1MilitaryBeret]);

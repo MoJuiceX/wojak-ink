@@ -2,7 +2,7 @@
 // Body: { voterDid: string, nftId: string, editionNumber: number, voteType: 1 | -1 }
 // Cast a vote on a Your Wojak NFT. 1 = like, -1 = dislike.
 
-import { VOTES_PER_DAY, getTodayString, ONBOARDING_CREDITS } from './_shared';
+import { VOTES_PER_DAY, getTodayString } from './_shared';
 
 interface Env {
   DB: D1Database;

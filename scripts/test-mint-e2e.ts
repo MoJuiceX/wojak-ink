@@ -25,7 +25,7 @@ const TINY_PNG_BASE64 =
 
 // ─── Surcharge constants (mirrored from _shared.ts) ───
 
-const TOTAL_SUPPLY = 4200;
+const _TOTAL_SUPPLY = 4200;
 const SURCHARGE_TARGET_XCH = 1.275;
 const SURCHARGE_TARGET_USES = 200;
 const SURCHARGE_EXPONENT = 0.90;

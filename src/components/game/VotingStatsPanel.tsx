@@ -25,6 +25,7 @@ export function VotingStatsPanel() {
     if (!player) return;
     if (player.votesRemaining !== prevVotesRemaining.current) {
       prevVotesRemaining.current = player.votesRemaining;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setBouncing(true);
       const timer = setTimeout(() => setBouncing(false), 200);
       return () => clearTimeout(timer);

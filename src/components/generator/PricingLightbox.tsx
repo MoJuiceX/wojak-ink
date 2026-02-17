@@ -358,6 +358,7 @@ export function PricingLightbox({ isOpen, onClose }: PricingLightboxProps) {
 
   useEffect(() => {
     if (!isOpen) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     setError(null);
 

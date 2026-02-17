@@ -236,6 +236,7 @@ export function VotingFeed() {
         likes={sessionLikes}
         dislikes={sessionDislikes}
         powerLevel={player?.powerLevel ?? 0}
+        // eslint-disable-next-line react-hooks/refs
         powerLevelDelta={(player?.powerLevel ?? 0) - powerLevelBefore.current}
       />
     );

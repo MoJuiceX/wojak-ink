@@ -194,6 +194,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (walletStatus !== 'connected' || !address) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCredits(null);
       return;
     }

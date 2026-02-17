@@ -57,6 +57,7 @@ export function CreditLeaderboard({ isOpen, onClose }: CreditLeaderboardProps) {
   // Fetch leaderboard
   useEffect(() => {
     if (!isOpen) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     setError(null);
     fetch('/api/credits/leaderboard?limit=100&sort=earned')
@@ -77,6 +78,7 @@ export function CreditLeaderboard({ isOpen, onClose }: CreditLeaderboardProps) {
   // Fetch personal balance (always when connected, for the personal card)
   useEffect(() => {
     if (!isOpen || !isConnected) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUserCredits(null);
       return;
     }

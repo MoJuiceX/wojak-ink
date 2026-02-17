@@ -775,7 +775,7 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
     delete newG2[layer];
     const resolver = createSelectionResolver(newSelectedLayers, newG2, getPathToTraitIdMap());
     const rulesResult = getDisabledLayers(resolver);
-    let finalSelectedLayers = { ...newSelectedLayers };
+    const finalSelectedLayers = { ...newSelectedLayers };
     if (rulesResult.forceSelections) {
       for (const [l, p] of Object.entries(rulesResult.forceSelections)) {
         if (p === '') delete finalSelectedLayers[l as UILayerName];

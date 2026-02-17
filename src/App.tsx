@@ -102,7 +102,7 @@ const hasSkipBootSetting = () => {
       const parsed = JSON.parse(stored);
       return parsed?.app?.skipBootSequence === true;
     }
-  } catch {}
+  } catch { /* intentionally empty */ }
   return false;
 };
 

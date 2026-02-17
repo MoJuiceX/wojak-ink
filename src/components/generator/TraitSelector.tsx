@@ -40,8 +40,7 @@ const LAYER_TO_TRAIT_TYPE: Record<string, string> = {
 const SURCHARGE_CATEGORIES = new Set(['Head', 'Clothes', 'Face Wear']);
 
 /** Overlay badge — disabled; pricing info moved to dedicated Prices lightbox */
-export function TraitUsageBadge({
-}: {
+export function TraitUsageBadge(_props: {
   pricing: TraitPricingEntry | null;
   isTop3?: boolean;
 }) {

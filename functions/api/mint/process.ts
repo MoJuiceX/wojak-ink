@@ -113,7 +113,7 @@ export async function processJob(
     await updateJobStep(env.DB, jobId, 'validating');
 
     const layers = JSON.parse(job.layers_json) as Record<string, string>;
-    const colors = JSON.parse(job.colors_json) as Record<string, string>;
+    const _colors = JSON.parse(job.colors_json) as Record<string, string>;
     const consolidated = consolidateTraits(layers);
 
     // ──── STEP 2: Reserve Mint Number ────
