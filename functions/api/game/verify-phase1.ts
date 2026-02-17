@@ -1,0 +1,86 @@
+// POST /api/game/verify-phase1
+// Body: { did: string }
+// Checks MintGarden API for Phase 1 NFT ownership by DID.
+
+import { PHASE1_COLLECTION_ID, ONBOARDING_CREDITS } from './_shared';
+
+interface Env {
+  DB: D1Database;
+}
+
+export const onRequestPost: PagesFunction<Env> = async (context) => {
+  try {
+    const body = await context.request.json() as { did: string };
+    const { did } = body;
+
+    if (!did) {
+      return Response.json({ error: 'DID required' }, { status: 400 });
+    }
+
+    // Check if already verified
+    const player = await context.env.DB.prepare(
+      'SELECT phase1_verified FROM game_players WHERE did_id = ?'
+    ).bind(did).first();
+
+    if (!player) {
+      return Response.json({ error: 'Player not registered. Call /api/game/register first.' }, { status: 404 });
+    }
+
+    if (player.phase1_verified) {
+      return Response.json({ success: true, verified: true, alreadyVerified: true });
+    }
+
+    // Query MintGarden for Phase 1 NFTs owned by this DID
+    // MintGarden API: GET /nfts?collection_id=...&owner_did=...
+    const mgUrl = `https://api.mintgarden.io/nfts?collection_id=${PHASE1_COLLECTION_ID}&owner_did=${encodeURIComponent(did)}&size=1`;
+
+    const mgResponse = await fetch(mgUrl, {
+      headers: { 'Accept': 'application/json' },
+    });
+
+    if (!mgResponse.ok) {
+      console.error('MintGarden API error:', mgResponse.status);
+      return Response.json({ error: 'Failed to verify NFT ownership' }, { status: 502 });
+    }
+
+    const mgData = await mgResponse.json() as { items: unknown[] };
+    const hasPhase1 = mgData.items && mgData.items.length > 0;
+
+    if (hasPhase1) {
+      // Mark as verified + award onboarding credits
+      await context.env.DB.batch([
+        context.env.DB.prepare(`
+          UPDATE game_players
+          SET phase1_verified = 1,
+              phase1_verified_at = datetime('now'),
+              onboarding_phase1 = 1,
+              updated_at = datetime('now')
+          WHERE did_id = ?
+        `).bind(did),
+        // Award onboarding credits (insert into credit_events)
+        context.env.DB.prepare(`
+          INSERT INTO credit_events (wallet_address, nft_id, edition_number, credits_earned, source, created_at)
+          VALUES (
+            (SELECT wallet_address FROM game_players WHERE did_id = ?),
+            'onboarding_phase1',
+            0,
+            ?,
+            'onboarding',
+            datetime('now')
+          )
+        `).bind(did, ONBOARDING_CREDITS.phase1),
+      ]);
+    }
+
+    return Response.json({
+      success: true,
+      verified: hasPhase1,
+      message: hasPhase1
+        ? 'Phase 1 NFT verified! You can now participate in the game.'
+        : 'No Wojak Farmers Plot NFT found on this DID. You need at least 1 to play.',
+    });
+  } catch (err) {
+    console.error('Phase 1 verify error:', err);
+    return Response.json({ error: 'Internal error' }, { status: 500 });
+  }
+};
