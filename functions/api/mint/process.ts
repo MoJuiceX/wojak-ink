@@ -60,6 +60,7 @@ interface MintJobRow {
   mintgarden_launcher_id: string | null;
   offer_file: string | null;
   error_message: string | null;
+  custom_name: string | null;
   error_code: string | null;
   retry_count: number;
   max_retries: number;
@@ -142,9 +143,14 @@ export async function processJob(
         return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
       });
 
+    const customName = job.custom_name;
+    const fullName = customName
+      ? `Your Wojak #${mintNumber}: ${customName}`
+      : `Your Wojak #${mintNumber}`;
+
     const metadata = {
       format: 'CHIP-0007',
-      name: `Your Wojak #${mintNumber}`,
+      name: fullName,
       description: 'Your Wojak puts collectors in control. Same handcrafted layers and lore from the Wojak Farmers Plot collection \u2014 but you choose every layer, every color, every detail using the Wojak Generator on Wojak.ink \uD83C\uDF4A',
       sensitive_content: false,
       collection: {
@@ -341,6 +347,17 @@ export async function finalizeJob(env: ProcessEnv, jobId: number): Promise<void>
       );
     }
   }
+
+  // Insert NFT name into nft_names cache table
+  const customName = job.custom_name;
+  const fullName = customName
+    ? `Your Wojak #${job.mint_number}: ${customName}`
+    : `Your Wojak #${job.mint_number}`;
+  batchStmts.push(
+    env.DB.prepare(
+      'INSERT OR REPLACE INTO nft_names (edition_number, custom_name, full_name) VALUES (?, ?, ?)'
+    ).bind(job.mint_number, customName, fullName)
+  );
 
   await env.DB.batch(batchStmts);
 

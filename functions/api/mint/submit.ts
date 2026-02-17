@@ -56,6 +56,7 @@ interface SubmitBody {
   imageBase64?: string;
   mintType?: 'paid' | 'free';
   idempotencyKey?: string;
+  customName?: string;
 }
 
 export const onRequest: PagesFunction<Env> = async (context) => {
@@ -95,6 +96,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const imageBase64 = body.imageBase64;
   const mintType = body.mintType === 'paid' ? 'paid' : 'free';
   const idempotencyKey = body.idempotencyKey;
+  const customName = (body.customName || '').trim();
 
   if (!wallet || !isValidChiaAddress(wallet)) {
     return errorResponse('Missing or invalid walletAddress', 400);
@@ -104,6 +106,16 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   }
   if (!idempotencyKey || typeof idempotencyKey !== 'string') {
     return errorResponse('Missing idempotencyKey', 400);
+  }
+
+  // Validate custom name (optional, max 15 chars, alphanumeric + basic punctuation)
+  if (customName.length > 0) {
+    if (customName.length > 15) {
+      return errorResponse('Custom name must be 15 characters or less', 400);
+    }
+    if (!/^[a-zA-Z0-9 .,!?'-]+$/.test(customName)) {
+      return errorResponse('Name contains invalid characters', 400);
+    }
   }
 
   // Validate layer names and paths
@@ -320,8 +332,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           wallet_address, idempotency_key, layers_json, colors_json,
           image_base64_hash, mint_type, credit_cost, xch_price_mojos,
           surcharge_xch, highest_surcharge_trait,
-          step, wallet_lock, credit_spend_id, expires_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'queued', ?, ?, ?)`
+          step, wallet_lock, credit_spend_id, expires_at, custom_name
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'queued', ?, ?, ?, ?)`
       ).bind(
         wallet, idempotencyKey,
         JSON.stringify(selectedLayers), JSON.stringify(selectedColors),
@@ -331,7 +343,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         surchargeStored, highestTrait,
         wallet, // wallet_lock = wallet_address (activates mutex)
         creditSpendId,
-        expiresAt
+        expiresAt,
+        customName || null
       ).run();
 
       jobId = insertResult.meta?.last_row_id as number;
