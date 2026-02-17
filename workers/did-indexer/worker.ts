@@ -57,13 +57,32 @@ async function run(env: Env) {
 
     try {
       const result = await syncDIDHoldings(env, did);
-      if (result === 'changed') { updatedCount++; consecutiveApiFailures = 0; }
-      else if (result === 'skipped') { skippedCount++; consecutiveApiFailures++; }
-      else { consecutiveApiFailures = 0; } // 'unchanged' resets circuit breaker
+      if (result === 'changed') {
+        updatedCount++;
+        consecutiveApiFailures = 0;
+        await env.DB.prepare(
+          "UPDATE game_players SET last_indexed_at = datetime('now'), last_index_error = NULL, index_error_count = 0 WHERE did_id = ?"
+        ).bind(did).run();
+      } else if (result === 'skipped') {
+        skippedCount++;
+        consecutiveApiFailures++;
+        await env.DB.prepare(
+          "UPDATE game_players SET last_index_error = 'API fetch incomplete', index_error_count = index_error_count + 1 WHERE did_id = ?"
+        ).bind(did).run();
+      } else {
+        consecutiveApiFailures = 0; // 'unchanged' resets circuit breaker
+        await env.DB.prepare(
+          "UPDATE game_players SET last_indexed_at = datetime('now'), last_index_error = NULL, index_error_count = 0 WHERE did_id = ?"
+        ).bind(did).run();
+      }
     } catch (err) {
       console.error(`[DID Indexer] Error for DID ${did}:`, err);
       errorCount++;
       consecutiveApiFailures++;
+      const errMsg = err instanceof Error ? err.message.slice(0, 200) : 'Unknown error';
+      await env.DB.prepare(
+        "UPDATE game_players SET last_index_error = ?, index_error_count = index_error_count + 1 WHERE did_id = ?"
+      ).bind(errMsg, did).run().catch(() => {});
     }
 
     // Rate limit
