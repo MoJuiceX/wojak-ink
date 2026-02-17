@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useGame } from '@/contexts/GameContext';
 import { BattleCard } from './BattleCard';
+import { BattleQueuePanel } from './BattleQueuePanel';
 
 interface BattleNft {
   id: string;
@@ -102,17 +103,15 @@ export function BattleView() {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Queue info */}
-      <div className="card-static p-4 flex items-center justify-between">
-        <div>
-          <h3 className="font-semibold">Battle Queue</h3>
-          <p className="text-xs text-secondary">
-            {queueSize === 0
-              ? 'No NFTs waiting. Queue yours to start a battle!'
-              : `${queueSize} NFT${queueSize > 1 ? 's' : ''} waiting for a match`}
-          </p>
+      {/* Queue your NFT */}
+      <BattleQueuePanel onQueued={loadBattles} />
+
+      {/* Queue status */}
+      {queueSize > 0 && (
+        <div className="text-xs text-secondary px-1">
+          {queueSize} NFT{queueSize > 1 ? 's' : ''} waiting for a match
         </div>
-      </div>
+      )}
 
       {/* Active battles */}
       {battles.length === 0 ? (
