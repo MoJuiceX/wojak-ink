@@ -121,5 +121,8 @@ CREATE INDEX idx_mj_step ON mint_jobs(step) WHERE step = 'queued';
 -- For finding stale jobs to expire
 CREATE INDEX idx_mj_updated ON mint_jobs(updated_at);
 
+-- For finding mint_queued jobs (concurrency gate chain + cleanup 4b)
+CREATE INDEX idx_mj_step_mint_queued ON mint_jobs(step, not_before) WHERE step = 'mint_queued';
+
 -- For idempotency lookups
 CREATE INDEX idx_mj_idempotency ON mint_jobs(idempotency_key) WHERE idempotency_key IS NOT NULL;

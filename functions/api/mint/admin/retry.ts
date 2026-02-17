@@ -64,9 +64,12 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
     const newStep = hasIpfs ? 'mint_queued' : 'queued';
 
+    // Backdate updated_at by 1 minute so the cleanup cron's 30-second threshold
+    // is already satisfied — the job gets picked up on the very next cron tick
+    // instead of sitting idle for 30+ seconds.
     await env.DB.prepare(
       `UPDATE mint_jobs SET step = ?, error_message = NULL, error_code = NULL,
-       not_before = NULL, wallet_lock = wallet_address, updated_at = datetime('now')
+       not_before = NULL, wallet_lock = wallet_address, updated_at = datetime('now', '-1 minute')
        WHERE id = ?`
     ).bind(newStep, jobId).run();
 

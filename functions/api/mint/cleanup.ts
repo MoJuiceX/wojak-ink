@@ -192,9 +192,11 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
       try {
         const RETRY_TIMEOUT_MS = 25_000;
         // Reset to queued so processJob picks it up (will re-check concurrency gate)
-        await env.DB.prepare(
+        const casResult = await env.DB.prepare(
           "UPDATE mint_jobs SET step = 'queued', updated_at = datetime('now') WHERE id = ? AND step = 'mint_queued'"
         ).bind(row.id).run();
+        // CAS guard: if another cleanup/chain already picked this job up, skip it
+        if ((casResult.meta?.changes ?? 0) === 0) continue;
         await Promise.race([
           processJob(env, row.id, imageBase64),
           new Promise<never>((_, reject) =>
