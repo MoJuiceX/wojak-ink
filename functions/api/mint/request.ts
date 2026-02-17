@@ -187,8 +187,7 @@ export async function callMintGardenMint(
         if (res.status === 429) {
           const retryAfterSec = parseInt(res.headers.get('Retry-After') ?? '', 10);
           const err = new MintError('RATE_LIMITED', `MintGarden rate limited: ${lastError}`);
-          // Attach retryAfterMs for processJob to use as not_before
-          (err as any).retryAfterMs = !isNaN(retryAfterSec) ? retryAfterSec * 1000 : 30_000;
+          err.retryAfterMs = !isNaN(retryAfterSec) ? retryAfterSec * 1000 : 30_000;
           throw err;
         }
 

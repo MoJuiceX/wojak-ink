@@ -84,7 +84,7 @@ describe('callMintGardenMint – 429 rate-limit detection', () => {
 
     const err = await resultPromise;
     expect(err).toBeInstanceOf(MintError);
-    expect((err as any).retryAfterMs).toBe(60_000); // 60 seconds = 60000ms
+    expect((err as MintError).retryAfterMs).toBe(60_000); // 60 seconds = 60000ms
   });
 
   it('defaults retryAfterMs to 30000 when no Retry-After header is present', async () => {
@@ -95,6 +95,6 @@ describe('callMintGardenMint – 429 rate-limit detection', () => {
 
     const err = await resultPromise;
     expect(err).toBeInstanceOf(MintError);
-    expect((err as any).retryAfterMs).toBe(30_000);
+    expect((err as MintError).retryAfterMs).toBe(30_000);
   });
 });

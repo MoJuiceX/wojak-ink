@@ -6,6 +6,9 @@
  */
 
 export class MintError extends Error {
+  /** For RATE_LIMITED: how long to wait before retrying (ms). */
+  public retryAfterMs?: number;
+
   constructor(
     public readonly code: MintErrorCode,
     message: string
