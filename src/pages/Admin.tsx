@@ -49,10 +49,12 @@ interface FlaggedMint {
   id: number;
   mint_number: number | null;
   wallet_address: string;
-  status: string;
+  step: string;
   mint_type: string;
   error_message: string | null;
+  error_code: string | null;
   mintgarden_launcher_id: string | null;
+  phase2_mint_id: number | null;
   created_at: string;
 }
 
@@ -353,9 +355,9 @@ function MintSafetyRail({
     }
   };
 
-  const handleMarkRefund = async (mintId: number) => {
-    setActionLoading((prev) => ({ ...prev, [mintId]: 'refund' }));
-    setActionResults((prev) => { const next = { ...prev }; delete next[mintId]; return next; });
+  const handleMarkRefund = async (jobId: number, phase2MintId: number) => {
+    setActionLoading((prev) => ({ ...prev, [jobId]: 'refund' }));
+    setActionResults((prev) => { const next = { ...prev }; delete next[jobId]; return next; });
     try {
       const res = await fetch('/api/mint/refund', {
         method: 'POST',
@@ -363,25 +365,25 @@ function MintSafetyRail({
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${adminSecret}`,
         },
-        body: JSON.stringify({ action: 'mark', mintId, reason: 'Admin marked for refund via safety rail' }),
+        body: JSON.stringify({ action: 'mark', mintId: phase2MintId, reason: 'Admin marked for refund via safety rail' }),
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        setActionResults((prev) => ({ ...prev, [mintId]: { ok: true, msg: 'Marked for refund' } }));
+        setActionResults((prev) => ({ ...prev, [jobId]: { ok: true, msg: 'Marked for refund' } }));
         setTimeout(onRefresh, 1500);
       } else {
-        setActionResults((prev) => ({ ...prev, [mintId]: { ok: false, msg: data.error || 'Refund failed' } }));
+        setActionResults((prev) => ({ ...prev, [jobId]: { ok: false, msg: data.error || 'Refund failed' } }));
       }
     } catch {
-      setActionResults((prev) => ({ ...prev, [mintId]: { ok: false, msg: 'Network error' } }));
+      setActionResults((prev) => ({ ...prev, [jobId]: { ok: false, msg: 'Network error' } }));
     } finally {
-      setActionLoading((prev) => { const next = { ...prev }; delete next[mintId]; return next; });
+      setActionLoading((prev) => { const next = { ...prev }; delete next[jobId]; return next; });
     }
   };
 
-  const stepBadgeClass = (status: string): string => {
-    if (status === 'failed') return 'badge-error';
-    if (status === 'refunded' || status === 'needs_refund') return 'badge-warning';
+  const stepBadgeClass = (step: string): string => {
+    if (step === 'failed') return 'badge-error';
+    if (step === 'refunded') return 'badge-warning';
     return 'badge';
   };
 
@@ -436,10 +438,10 @@ function MintSafetyRail({
                 </td>
                 <td>
                   <span
-                    className={`badge ${stepBadgeClass(m.status)}`}
+                    className={`badge ${stepBadgeClass(m.step)}`}
                     style={{ fontSize: '0.6875rem' }}
                   >
-                    {m.status}
+                    {m.step}
                   </span>
                 </td>
                 <td
@@ -467,7 +469,7 @@ function MintSafetyRail({
                     >
                       {actionLoading[m.id] === 'retry' ? '...' : 'Retry'}
                     </button>
-                    {m.mint_type === 'paid' && m.mintgarden_launcher_id && (
+                    {m.mint_type === 'paid' && m.mintgarden_launcher_id && m.phase2_mint_id && (
                       <button
                         className="btn btn-ghost"
                         style={{
@@ -476,7 +478,7 @@ function MintSafetyRail({
                           color: 'var(--color-error)',
                         }}
                         disabled={!!actionLoading[m.id]}
-                        onClick={() => handleMarkRefund(m.id)}
+                        onClick={() => handleMarkRefund(m.id, m.phase2_mint_id!)}
                       >
                         {actionLoading[m.id] === 'refund' ? '...' : 'Refund'}
                       </button>
@@ -529,11 +531,11 @@ export default function Admin() {
     try {
       const authHeaders = { 'Authorization': `Bearer ${adminSecret}` };
 
-      const [pricingRes, mintsRes, creditsRes, auditRes] = await Promise.all([
+      const [pricingRes, mintsRes, creditsRes, flaggedRes] = await Promise.all([
         fetch('/api/mint/pricing'),
         fetch('/api/admin/recent-mints?limit=20', { headers: authHeaders }),
         fetch('/api/admin/credit-stats', { headers: authHeaders }),
-        fetch('/api/mint/audit?format=json&status=failed', { headers: authHeaders }),
+        fetch('/api/mint/admin/flagged', { headers: authHeaders }),
       ]);
 
       if (mintsRes.status === 401 || creditsRes.status === 401) {
@@ -545,20 +547,9 @@ export default function Admin() {
       if (pricingRes.ok) setPricing(await pricingRes.json());
       if (mintsRes.ok) setRecentMints((await mintsRes.json()).mints || []);
       if (creditsRes.ok) setCreditStats(await creditsRes.json());
-      if (auditRes.ok) {
-        const auditData = await auditRes.json();
-        // Combine failed mints and needs_refund, deduplicate by id
-        const failed: FlaggedMint[] = auditData.categories?.failed_mints || [];
-        const needsRefund: FlaggedMint[] = auditData.categories?.needs_refund || [];
-        const seen = new Set<number>();
-        const combined: FlaggedMint[] = [];
-        for (const m of [...failed, ...needsRefund]) {
-          if (!seen.has(m.id)) {
-            seen.add(m.id);
-            combined.push(m);
-          }
-        }
-        setFlaggedMints(combined);
+      if (flaggedRes.ok) {
+        const flaggedData = await flaggedRes.json();
+        setFlaggedMints(flaggedData.jobs || []);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load data');
