@@ -22,6 +22,8 @@ function DashboardContent() {
   const { player, isRegistered, isVerified } = useGame();
   const [powerData, setPowerData] = useState<PowerData>({});
 
+  useEffect(() => { document.title = 'Dashboard — Your Wojak'; }, []);
+
   useEffect(() => {
     if (isRegistered && player?.did) {
       fetch(`/api/game/power-level?did=${player.did}`)

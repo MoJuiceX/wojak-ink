@@ -1,6 +1,7 @@
 // Voting page — /your-wojak
 // Desktop: 3-column (leaderboard | card | stats). Mobile: stats bar + card.
 
+import { useEffect } from 'react';
 import { GameProvider } from '@/contexts/GameContext';
 import { useLayout } from '@/hooks/useLayout';
 import { VotingFeed } from '@/components/game/VotingFeed';
@@ -44,6 +45,7 @@ function VotingPageMobile() {
 
 export default function GameVoting() {
   const { isDesktop } = useLayout();
+  useEffect(() => { document.title = 'Vote — Your Wojak'; }, []);
 
   return (
     <GameProvider>

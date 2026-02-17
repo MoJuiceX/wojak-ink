@@ -32,6 +32,8 @@ function LeaderboardContent() {
   const { player, isRegistered } = useGame();
   const [tab, setTab] = useState<TabMode>('players');
 
+  useEffect(() => { document.title = 'Leaderboard — Your Wojak'; }, []);
+
   // Players state
   const [players, setPlayers] = useState<PlayerEntry[]>([]);
   const [playersTotal, setPlayersTotal] = useState(0);
