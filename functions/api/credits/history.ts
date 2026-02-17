@@ -65,51 +65,86 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   }
 
   try {
+    // Step 1: Fetch credit events (fast — indexed on wallet_address)
     const rows = await env.DB.prepare(
-      `SELECT ce.event_id, ce.nft_id, ce.price_xch, ce.credits_earned,
-              ce.whale_multiplier, ce.event_type, ce.event_timestamp,
-              COALESCE(sh_edition.nft_name, sh_coin.nft_name) AS nft_name,
-              CASE
-                WHEN sh_edition.mg_event_id IS NOT NULL
-                THEN SUBSTR(sh_edition.mg_event_id, 1, INSTR(sh_edition.mg_event_id, '_') - 1)
-                WHEN sh_coin.mg_event_id IS NOT NULL
-                THEN SUBSTR(sh_coin.mg_event_id, 1, INSTR(sh_coin.mg_event_id, '_') - 1)
-                ELSE NULL
-              END AS mg_nft_id
-       FROM credit_events ce
-       LEFT JOIN (
-         SELECT nft_edition, nft_name, mg_event_id,
-                ROW_NUMBER() OVER (PARTITION BY nft_edition ORDER BY id DESC) AS rn
-         FROM sales_history
-       ) sh_edition
-         ON ce.nft_id LIKE 'nft_edition_%'
-         AND sh_edition.nft_edition = CAST(SUBSTR(ce.nft_id, 13) AS INTEGER)
-         AND sh_edition.rn = 1
-       LEFT JOIN (
-         SELECT nft_name, mg_event_id,
-                ROW_NUMBER() OVER (PARTITION BY mg_event_id ORDER BY id DESC) AS rn
-         FROM sales_history
-         WHERE mg_event_id IS NOT NULL
-       ) sh_coin
-         ON ce.nft_id NOT LIKE 'nft_edition_%'
-         AND ce.nft_id NOT LIKE 'holder_%'
-         AND sh_coin.mg_event_id LIKE ce.nft_id || '%'
-         AND sh_coin.rn = 1
-       WHERE ce.wallet_address = ?
-       ORDER BY ce.event_timestamp DESC
+      `SELECT event_id, nft_id, price_xch, credits_earned,
+              whale_multiplier, event_type, event_timestamp
+       FROM credit_events
+       WHERE wallet_address = ?
+       ORDER BY event_timestamp DESC
        LIMIT ?`
     )
       .bind(wallet, limit)
-      .all<CreditEventRow>();
+      .all<Omit<CreditEventRow, 'nft_name' | 'mg_nft_id'>>();
 
-    const items = (rows.results || []).map((r) => {
-      // Resolve the best MintGarden-compatible NFT ID:
-      // 1. For hex coin IDs (from MintGarden XCH trades): use nft_id directly
-      // 2. For nft_edition_XXXX: extract coin ID from mg_event_id
-      // 3. For holder_airdrop: no NFT ID
+    const events = rows.results || [];
+
+    // Step 2: Resolve NFT names with targeted lookups (avoid full-table window scans)
+    // Collect edition IDs and coin IDs separately
+    const editionIds: number[] = [];
+    const coinIds: string[] = [];
+    for (const e of events) {
+      if (e.nft_id.startsWith('nft_edition_')) {
+        editionIds.push(parseInt(e.nft_id.substring(12), 10));
+      } else if (!e.nft_id.startsWith('holder_')) {
+        coinIds.push(e.nft_id);
+      }
+    }
+
+    // Lookup maps
+    const nameMap = new Map<string, { nftName: string | null; mgNftId: string | null }>();
+
+    // Resolve edition-based IDs
+    if (editionIds.length > 0) {
+      const placeholders = editionIds.map(() => '?').join(',');
+      const editionRows = await env.DB.prepare(
+        `SELECT nft_edition, nft_name, mg_event_id
+         FROM sales_history
+         WHERE nft_edition IN (${placeholders})
+         ORDER BY id DESC`
+      )
+        .bind(...editionIds)
+        .all<{ nft_edition: number; nft_name: string | null; mg_event_id: string | null }>();
+
+      for (const r of editionRows.results || []) {
+        const key = `nft_edition_${r.nft_edition}`;
+        if (!nameMap.has(key)) {
+          const mgNftId = r.mg_event_id
+            ? r.mg_event_id.substring(0, r.mg_event_id.indexOf('_'))
+            : null;
+          nameMap.set(key, { nftName: r.nft_name, mgNftId });
+        }
+      }
+    }
+
+    // Resolve coin-based IDs
+    if (coinIds.length > 0) {
+      // Batch lookup: find sales_history rows where mg_event_id starts with any coin ID
+      const placeholders = coinIds.map(() => '?').join(',');
+      const coinRows = await env.DB.prepare(
+        `SELECT nft_name, mg_event_id
+         FROM sales_history
+         WHERE mg_event_id IS NOT NULL
+           AND SUBSTR(mg_event_id, 1, INSTR(mg_event_id, '_') - 1) IN (${placeholders})
+         ORDER BY id DESC`
+      )
+        .bind(...coinIds)
+        .all<{ nft_name: string | null; mg_event_id: string | null }>();
+
+      for (const r of coinRows.results || []) {
+        if (!r.mg_event_id) continue;
+        const coinId = r.mg_event_id.substring(0, r.mg_event_id.indexOf('_'));
+        if (!nameMap.has(coinId)) {
+          nameMap.set(coinId, { nftName: r.nft_name, mgNftId: coinId });
+        }
+      }
+    }
+
+    const items = events.map((r) => {
+      const lookup = nameMap.get(r.nft_id);
       let resolvedNftId = r.nft_id;
-      if (r.mg_nft_id && r.nft_id.startsWith('nft_edition_')) {
-        resolvedNftId = r.mg_nft_id;
+      if (r.nft_id.startsWith('nft_edition_') && lookup?.mgNftId) {
+        resolvedNftId = lookup.mgNftId;
       }
 
       return {
@@ -120,7 +155,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         whaleMultiplier: r.whale_multiplier / 10000,
         eventType: r.event_type || 'trade',
         eventTimestamp: r.event_timestamp,
-        nftName: r.nft_name || null,
+        nftName: lookup?.nftName || null,
       };
     });
 
