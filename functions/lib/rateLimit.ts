@@ -149,3 +149,37 @@ export const MINT_RATE_LIMITS = {
     keyPrefix: 'mint-job',
   },
 } as const;
+
+// Rate limits for game endpoints
+export const GAME_RATE_LIMITS = {
+  vote: {
+    windowMs: 60_000,
+    maxRequests: 20,
+    keyPrefix: 'game-vote',
+  },
+  register: {
+    windowMs: 300_000,
+    maxRequests: 3,
+    keyPrefix: 'game-register',
+  },
+  burn: {
+    windowMs: 60_000,
+    maxRequests: 5,
+    keyPrefix: 'game-burn',
+  },
+  verifyPhase1: {
+    windowMs: 300_000,
+    maxRequests: 5,
+    keyPrefix: 'game-verify',
+  },
+  battleQueue: {
+    windowMs: 60_000,
+    maxRequests: 10,
+    keyPrefix: 'game-bq',
+  },
+  battleVote: {
+    windowMs: 60_000,
+    maxRequests: 20,
+    keyPrefix: 'game-bvote',
+  },
+} as const;
