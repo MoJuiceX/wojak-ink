@@ -21,8 +21,8 @@ interface CollectionScrollProps {
   did: string;
 }
 
-function NftDetailModal({ nft, onClose }: { nft: CollectionNft; onClose: () => void }) {
-  const { player } = useGame();
+function NftDetailModal({ nft, onClose, onBurned }: { nft: CollectionNft; onClose: () => void; onBurned: () => void }) {
+  const { player, refreshPowerLevel } = useGame();
   const { getNFTCoinId } = useSageWallet();
   const estimatedCredits = calculateBurnCredits(nft.likes, nft.dislikes);
   const [coinId, setCoinId] = useState<string | null>(null);
@@ -108,7 +108,7 @@ function NftDetailModal({ nft, onClose }: { nft: CollectionNft; onClose: () => v
               dislikes={nft.dislikes}
               estimatedCredits={estimatedCredits}
               burnerDid={player?.did}
-              onBurned={() => onClose()}
+              onBurned={() => { onClose(); refreshPowerLevel(); onBurned(); }}
             />
           ) : (
             <button
@@ -133,6 +133,7 @@ export function CollectionScroll({ did }: CollectionScrollProps) {
   const [nfts, setNfts] = useState<CollectionNft[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedNft, setSelectedNft] = useState<CollectionNft | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -144,7 +145,7 @@ export function CollectionScroll({ did }: CollectionScrollProps) {
       .catch(() => { /* silent */ })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [did]);
+  }, [did, refreshKey]);
 
   if (loading) {
     return (
@@ -231,7 +232,7 @@ export function CollectionScroll({ did }: CollectionScrollProps) {
       </div>
 
       {selectedNft && (
-        <NftDetailModal nft={selectedNft} onClose={() => setSelectedNft(null)} />
+        <NftDetailModal nft={selectedNft} onClose={() => setSelectedNft(null)} onBurned={() => setRefreshKey(k => k + 1)} />
       )}
     </div>
   );
