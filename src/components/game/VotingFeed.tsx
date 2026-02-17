@@ -60,6 +60,7 @@ export function VotingFeed() {
     castVote, refreshPowerLevel,
   } = useGame();
   const { address, status: walletStatus } = useSageWallet();
+  const toast = useToast();
   const reducedMotion = usePrefersReducedMotion();
 
   // Milestone toasts
@@ -158,8 +159,10 @@ export function VotingFeed() {
     if (voteType === 1) setSessionLikes(prev => prev + 1);
     else setSessionDislikes(prev => prev + 1);
 
-    // Optimistic fire-and-forget
-    castVote(currentItem.nftId, currentItem.editionNumber, voteType);
+    // Optimistic fire-and-forget with error feedback
+    castVote(currentItem.nftId, currentItem.editionNumber, voteType)
+      .then(ok => { if (!ok) toast.error('Vote failed to save'); })
+      .catch(() => toast.error('Vote failed to save'));
 
     // Small delay for exit animation, then advance
     setTimeout(() => {
