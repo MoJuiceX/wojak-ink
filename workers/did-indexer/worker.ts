@@ -6,6 +6,7 @@
 
 interface Env {
   DB: D1Database;
+  ADMIN_SECRET?: string;
 }
 
 const PHASE1_COLLECTION = 'col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah';
@@ -93,7 +94,14 @@ async function run(env: Env) {
 
   // Resolve expired battles (replaces standalone battle-cron worker)
   try {
-    const res = await fetch('https://wojak.ink/api/game/battle-resolve', { method: 'POST' });
+    const battleHeaders: Record<string, string> = {};
+    if (env.ADMIN_SECRET) {
+      battleHeaders['Authorization'] = `Bearer ${env.ADMIN_SECRET}`;
+    }
+    const res = await fetch('https://wojak.ink/api/game/battle-resolve', {
+      method: 'POST',
+      headers: battleHeaders,
+    });
     if (res.ok) {
       const data = await res.json() as { resolved?: number; draws?: number };
       console.log(`[DID Indexer] Battles resolved: ${data.resolved ?? 0}, draws: ${data.draws ?? 0}`);

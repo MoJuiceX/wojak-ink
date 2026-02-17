@@ -11,11 +11,18 @@
 
 interface Env {
   DB: D1Database;
+  ADMIN_SECRET?: string;
 }
 
 const MIN_VOTES_FOR_RESULT = 10;
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
+  // Admin auth — same pattern as /api/admin/* endpoints
+  const authHeader = context.request.headers.get('Authorization');
+  if (!context.env.ADMIN_SECRET || authHeader !== `Bearer ${context.env.ADMIN_SECRET}`) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     // Find all active battles that have ended
     const expired = await context.env.DB.prepare(`
