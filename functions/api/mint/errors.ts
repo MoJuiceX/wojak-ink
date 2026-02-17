@@ -29,6 +29,7 @@ export type MintErrorCode =
   | 'IMAGE_EXPIRED'
   | 'TIMEOUT'
   | 'QUEUE_TIMEOUT'
+  | 'RATE_LIMITED'
   | 'CONFIG_ERROR'
   | 'SUPPLY_EXHAUSTED'
   | 'JOB_NOT_FOUND'
@@ -48,6 +49,7 @@ export const MINT_ERROR_MESSAGES: Record<MintErrorCode, string> = {
   IMAGE_EXPIRED: 'Your session expired. Please try minting again.',
   TIMEOUT: 'Minting took too long. Please try again.',
   QUEUE_TIMEOUT: 'Job timed out in queue. Please try again.',
+  RATE_LIMITED: 'The minting service is busy. Your mint is queued and will process shortly.',
   CONFIG_ERROR: 'Minting service is not properly configured. Please contact support.',
   SUPPLY_EXHAUSTED: 'All 4,200 Wojaks have been minted!',
   JOB_NOT_FOUND: 'Mint job not found.',
