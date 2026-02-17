@@ -9,7 +9,8 @@
 import { useCallback, useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './Gallery.css';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Heart } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { useLayout } from '@/hooks/useLayout';
 import { useIsDesktop } from '@/hooks/useDesktopBreakpoint';
@@ -45,6 +46,11 @@ function GalleryContent() {
     filteredNfts,
     isLoading,
   } = useGallery();
+
+  // Swipe banner state
+  const [bannerDismissed, setBannerDismissed] = useState(
+    () => localStorage.getItem('wojak_swipe_banner_dismissed') === 'true'
+  );
 
   // Pagination state
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
@@ -359,6 +365,26 @@ function GalleryContent() {
       <div className="gallery-page-background" />
 
       <div className="min-h-full" data-section="gallery" style={{ padding: pagePadding }}>
+        {!bannerDismissed && (
+          <Link to="/swipe" className="card p-4 flex items-center gap-4 mb-4" style={{ textDecoration: 'none' }}>
+            <Heart size={24} style={{ color: 'var(--color-error)', flexShrink: 0 }} />
+            <div className="flex-1">
+              <span className="font-bold" style={{ color: 'var(--color-text)' }}>Wojak Swipe is live!</span>
+              <span className="text-secondary ml-2">Vote, battle, and burn</span>
+            </div>
+            <span className="badge badge-success">NEW</span>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                localStorage.setItem('wojak_swipe_banner_dismissed', 'true');
+                setBannerDismissed(true);
+              }}
+              className="btn btn-ghost"
+              style={{ padding: '4px 8px', fontSize: '14px', minWidth: 'auto' }}
+            >&times;</button>
+          </Link>
+        )}
         <div className={isDesktop ? 'space-y-8' : ''}>
           {/* Content */}
           <AnimatePresence mode="wait">
