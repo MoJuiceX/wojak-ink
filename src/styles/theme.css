@@ -1870,3 +1870,27 @@ body {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--color-border);
 }
+
+/* ── Battle System ── */
+
+.battle-nft-image {
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--color-border);
+  background: var(--color-bg);
+}
+
+.battle-vote-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.battle-vote-fill-a {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-cyan));
+  transition: width 0.4s ease;
+}
