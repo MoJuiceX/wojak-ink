@@ -83,8 +83,9 @@ export function VotingFeed() {
       {/* Swipe card */}
       <SwipeCard
         key={currentItem.nftId}
+        nftId={currentItem.nftId}
         name={currentItem.name}
-        imageUri={currentItem.imageUri}
+        imageUrl={`https://assets.mintgarden.io/thumbnails/medium/${currentItem.nftId}.png`}
         editionNumber={currentItem.editionNumber}
         onVote={handleVote}
       />
