@@ -362,12 +362,13 @@ export function GeneratorRightPanel() {
 
   return (
     <div
-      className="flex flex-col gap-3"
+      className="flex flex-col gap-3 overflow-y-auto"
       style={{
         padding: '12px',
         borderRadius: 'var(--radius-lg)',
         background: 'rgba(255, 255, 255, 0.015)',
         border: '1px solid rgba(255, 255, 255, 0.05)',
+        maxHeight: '100%',
       }}
     >
       {/* G1 Military Beret: "Pick a color to use new design" — swatches switch to G2 */}
