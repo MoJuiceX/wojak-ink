@@ -2,6 +2,7 @@
 // Desktop: 3-column (leaderboard | card | stats). Mobile: stats bar + card.
 
 import { GameProvider } from '@/contexts/GameContext';
+import { SwipeAutoRegister } from '@/components/game/SwipeAutoRegister';
 import { useLayout } from '@/hooks/useLayout';
 import { PageSEO } from '@/components/seo';
 import { VotingFeed } from '@/components/game/VotingFeed';
@@ -48,6 +49,7 @@ export default function GameVoting() {
 
   return (
     <GameProvider>
+      <SwipeAutoRegister />
       <PageSEO
         title="Wojak Swipe - Vote on Community NFTs"
         description="Swipe through Wojak NFTs. Like or pass. Climb the leaderboard."

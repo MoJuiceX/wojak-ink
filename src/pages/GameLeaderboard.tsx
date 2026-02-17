@@ -1,6 +1,7 @@
 // Game Leaderboard — Players and Top Wojaks tabs with podium + list.
 import { useState, useEffect, useCallback } from 'react';
 import { GameProvider, useGame } from '@/contexts/GameContext';
+import { SwipeAutoRegister } from '@/components/game/SwipeAutoRegister';
 import { GamePodium } from '@/components/game/GamePodium';
 import { GameLeaderboardList } from '@/components/game/GameLeaderboardList';
 import { GamePositionBar } from '@/components/game/GamePositionBar';
@@ -266,6 +267,7 @@ function LeaderboardContent() {
 export default function GameLeaderboard() {
   return (
     <GameProvider>
+      <SwipeAutoRegister />
       <PageSEO
         title="Wojak Swipe Leaderboard"
         description="Top players and most popular Wojaks ranked by community votes"
