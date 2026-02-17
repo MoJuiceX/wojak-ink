@@ -56,8 +56,6 @@ async function run(env: Env) {
 
   console.log(`[DID Indexer] Done. ${updatedCount}/${players.results.length} players had changes.`);
 
-  // Resolve expired battles
-  await resolveBattles(env);
 }
 
 async function syncDIDHoldings(env: Env, did: string): Promise<boolean> {
@@ -181,89 +179,6 @@ async function fetchDIDNfts(did: string, collectionId: string): Promise<NftInfo[
   }
 
   return nfts;
-}
-
-const MIN_BATTLE_VOTES = 10;
-
-async function resolveBattles(env: Env) {
-  const expired = await env.DB.prepare(`
-    SELECT * FROM battles
-    WHERE status = 'active' AND ends_at <= datetime('now')
-  `).all();
-
-  const battles = expired.results || [];
-  if (battles.length === 0) {
-    console.log('[Battle Resolve] No battles to resolve.');
-    return;
-  }
-
-  let resolved = 0;
-  let draws = 0;
-
-  for (const battle of battles) {
-    const totalVotes = (battle.votes_a as number) + (battle.votes_b as number);
-    const battleId = battle.id as number;
-
-    if (totalVotes < MIN_BATTLE_VOTES || battle.votes_a === battle.votes_b) {
-      // Draw: insufficient votes or tie
-      await env.DB.prepare(`
-        UPDATE battles SET status = 'draw', resolved_at = datetime('now') WHERE id = ?
-      `).bind(battleId).run();
-
-      await env.DB.batch([
-        env.DB.prepare(`
-          INSERT INTO game_activity (did_id, event_type, event_data) VALUES (?, 'battle_draw', ?)
-        `).bind(battle.nft_a_owner_did as string, JSON.stringify({ battleId, totalVotes })),
-        env.DB.prepare(`
-          INSERT INTO game_activity (did_id, event_type, event_data) VALUES (?, 'battle_draw', ?)
-        `).bind(battle.nft_b_owner_did as string, JSON.stringify({ battleId, totalVotes })),
-      ]);
-
-      draws++;
-      continue;
-    }
-
-    const votesA = battle.votes_a as number;
-    const votesB = battle.votes_b as number;
-    const aWins = votesA > votesB;
-
-    const winnerNftId = aWins ? battle.nft_a_id : battle.nft_b_id;
-    const winnerEdition = aWins ? battle.nft_a_edition : battle.nft_b_edition;
-    const loserNftId = aWins ? battle.nft_b_id : battle.nft_a_id;
-    const loserEdition = aWins ? battle.nft_b_edition : battle.nft_a_edition;
-    const winnerDid = aWins ? battle.nft_a_owner_did : battle.nft_b_owner_did;
-    const loserDid = aWins ? battle.nft_b_owner_did : battle.nft_a_owner_did;
-    const winnerVotes = Math.max(votesA, votesB);
-    const loserVotes = Math.min(votesA, votesB);
-
-    await env.DB.batch([
-      env.DB.prepare(`
-        UPDATE battles SET status = 'completed', winner_nft_id = ?, resolved_at = datetime('now') WHERE id = ?
-      `).bind(winnerNftId, battleId),
-      env.DB.prepare(`
-        INSERT INTO wojak_scores (nft_id, edition_number, creator_wallet, likes, dislikes, net_score, total_votes, first_voted_at, last_voted_at)
-        VALUES (?, ?, COALESCE((SELECT wallet_address FROM phase2_mints WHERE mint_number = ?), 'unknown'), ?, 0, ?, ?, datetime('now'), datetime('now'))
-        ON CONFLICT(nft_id) DO UPDATE SET
-          likes = likes + ?, net_score = net_score + ?, total_votes = total_votes + ?, last_voted_at = datetime('now')
-      `).bind(winnerNftId, winnerEdition, winnerEdition, winnerVotes, winnerVotes, winnerVotes, winnerVotes, winnerVotes, winnerVotes),
-      env.DB.prepare(`
-        INSERT INTO wojak_scores (nft_id, edition_number, creator_wallet, likes, dislikes, net_score, total_votes, first_voted_at, last_voted_at)
-        VALUES (?, ?, COALESCE((SELECT wallet_address FROM phase2_mints WHERE mint_number = ?), 'unknown'), 0, ?, ?, ?, datetime('now'), datetime('now'))
-        ON CONFLICT(nft_id) DO UPDATE SET
-          dislikes = dislikes + ?, net_score = net_score - ?, total_votes = total_votes + ?, last_voted_at = datetime('now')
-      `).bind(loserNftId, loserEdition, loserEdition, loserVotes, -loserVotes, loserVotes, loserVotes, loserVotes, loserVotes),
-      env.DB.prepare(`
-        INSERT INTO game_activity (did_id, event_type, event_data) VALUES (?, 'battle_won', ?)
-      `).bind(winnerDid as string, JSON.stringify({ battleId, votes: winnerVotes, opponentVotes: loserVotes })),
-      env.DB.prepare(`
-        INSERT INTO game_activity (did_id, event_type, event_data) VALUES (?, 'battle_lost', ?)
-      `).bind(loserDid as string, JSON.stringify({ battleId, votes: loserVotes, opponentVotes: winnerVotes })),
-    ]);
-
-    resolved++;
-  }
-
-  console.log(`[Battle Resolve] Resolved: ${resolved}, Draws: ${draws}, Total: ${battles.length}`);
 }
 
 function sleep(ms: number): Promise<void> {
