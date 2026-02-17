@@ -23,6 +23,7 @@ export function BurnButton({
   const { address, transferNFT } = useSageWallet();
   const [showConfirm, setShowConfirm] = useState(false);
   const [burning, setBurning] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleBurn = async () => {
     if (!address) return;
@@ -50,6 +51,7 @@ export function BurnButton({
       }
     } catch (err) {
       console.error('Burn failed:', err);
+      setError('Burn failed. Your NFT was not destroyed.');
     } finally {
       setBurning(false);
       setShowConfirm(false);
@@ -61,11 +63,14 @@ export function BurnButton({
       <button
         className="btn btn-ghost text-sm"
         style={{ color: 'var(--color-error)' }}
-        onClick={() => setShowConfirm(true)}
+        onClick={() => { setShowConfirm(true); setError(null); }}
       >
         Burn
       </button>
 
+      {error && (
+        <span className="text-sm" style={{ color: 'var(--color-error)', display: 'block', marginTop: 4 }}>{error}</span>
+      )}
       {showConfirm && (
         <BurnConfirmDialog
           nftName={nftName}
