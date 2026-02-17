@@ -12,6 +12,9 @@ const PHASE1_COLLECTION = 'col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kp
 const PHASE2_COLLECTION = 'col1rhrjj6f28tge783rp0lrj8ct7vnq79xsnklx3up49lgpnge62ensr2tyfx';
 
 const RATE_LIMIT_MS = 500; // 500ms between MintGarden API calls
+const MAX_PAGES = 50;      // Safety cap on pagination
+const D1_BATCH_SIZE = 25;  // Max statements per D1 batch call
+const CIRCUIT_BREAKER_THRESHOLD = 5; // Consecutive API failures before aborting
 
 export default {
   async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
@@ -39,22 +42,35 @@ async function run(env: Env) {
   console.log(`[DID Indexer] Processing ${players.results.length} players`);
 
   let updatedCount = 0;
+  let errorCount = 0;
+  let skippedCount = 0;
+  let consecutiveApiFailures = 0;
 
   for (const player of players.results) {
     const did = player.did_id as string;
 
+    // Circuit breaker: abort if too many consecutive API failures
+    if (consecutiveApiFailures >= CIRCUIT_BREAKER_THRESHOLD) {
+      console.error(`[DID Indexer] Circuit breaker tripped after ${CIRCUIT_BREAKER_THRESHOLD} consecutive API failures. Aborting run.`);
+      break;
+    }
+
     try {
-      const changed = await syncDIDHoldings(env, did);
-      if (changed) updatedCount++;
+      const result = await syncDIDHoldings(env, did);
+      if (result === 'changed') { updatedCount++; consecutiveApiFailures = 0; }
+      else if (result === 'skipped') { skippedCount++; consecutiveApiFailures++; }
+      else { consecutiveApiFailures = 0; } // 'unchanged' resets circuit breaker
     } catch (err) {
       console.error(`[DID Indexer] Error for DID ${did}:`, err);
+      errorCount++;
+      consecutiveApiFailures++;
     }
 
     // Rate limit
     await sleep(RATE_LIMIT_MS);
   }
 
-  console.log(`[DID Indexer] Done. ${updatedCount}/${players.results.length} players had changes.`);
+  console.log(`[DID Indexer] Done. Changed: ${updatedCount}, Skipped: ${skippedCount}, Errors: ${errorCount}, Total: ${players.results.length}`);
 
   // Resolve expired battles (replaces standalone battle-cron worker)
   try {
@@ -70,13 +86,21 @@ async function run(env: Env) {
   }
 }
 
-async function syncDIDHoldings(env: Env, did: string): Promise<boolean> {
+async function syncDIDHoldings(env: Env, did: string): Promise<'changed' | 'unchanged' | 'skipped'> {
   // Fetch Phase 2 NFTs from MintGarden
-  const phase2Nfts = await fetchDIDNfts(did, PHASE2_COLLECTION);
+  const phase2Result = await fetchDIDNfts(did, PHASE2_COLLECTION);
+  await sleep(RATE_LIMIT_MS);
   // Fetch Phase 1 NFTs from MintGarden
-  const phase1Nfts = await fetchDIDNfts(did, PHASE1_COLLECTION);
+  const phase1Result = await fetchDIDNfts(did, PHASE1_COLLECTION);
 
-  await sleep(RATE_LIMIT_MS); // Rate limit between the two calls
+  // Guard: if either fetch failed, skip the diff entirely to avoid data wipe
+  if (!phase2Result.success || !phase1Result.success) {
+    console.warn(`[DID Indexer] Skipping diff for DID ${did.slice(0, 20)}... — API fetch incomplete`);
+    return 'skipped';
+  }
+
+  const phase2Nfts = phase2Result.nfts;
+  const phase1Nfts = phase1Result.nfts;
 
   // Get current DB holdings
   const currentHoldings = await env.DB.prepare(
@@ -110,10 +134,10 @@ async function syncDIDHoldings(env: Env, did: string): Promise<boolean> {
   }
 
   if (toAdd.length === 0 && toRemove.length === 0) {
-    return false; // No changes
+    return 'unchanged';
   }
 
-  // Apply changes in a batch
+  // Apply changes in chunked batches
   const statements: D1PreparedStatement[] = [];
 
   for (const nft of toAdd) {
@@ -132,7 +156,7 @@ async function syncDIDHoldings(env: Env, did: string): Promise<boolean> {
   }
 
   if (statements.length > 0) {
-    await env.DB.batch(statements);
+    await batchChunked(env.DB, statements);
   }
 
   // Check Phase 1 verification status
@@ -142,7 +166,7 @@ async function syncDIDHoldings(env: Env, did: string): Promise<boolean> {
   ).bind(hasPhase1 ? 1 : 0, did).run();
 
   console.log(`[DID Indexer] DID ${did.slice(0, 20)}...: +${toAdd.length} -${toRemove.length} NFTs`);
-  return true;
+  return 'changed';
 }
 
 interface NftInfo {
@@ -151,21 +175,32 @@ interface NftInfo {
   creator?: string;
 }
 
-async function fetchDIDNfts(did: string, collectionId: string): Promise<NftInfo[]> {
+interface FetchResult {
+  success: boolean;
+  nfts: NftInfo[];
+}
+
+async function fetchDIDNfts(did: string, collectionId: string): Promise<FetchResult> {
   const nfts: NftInfo[] = [];
   let page = 1;
   const pageSize = 100;
 
-  while (true) {
+  while (page <= MAX_PAGES) {
     const url = `https://api.mintgarden.io/nfts?collection_id=${collectionId}&owner_did=${encodeURIComponent(did)}&size=${pageSize}&page=${page}`;
 
-    const response = await fetch(url, {
-      headers: { 'Accept': 'application/json' },
-    });
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        headers: { 'Accept': 'application/json' },
+      });
+    } catch (err) {
+      console.error(`[DID Indexer] Network error fetching ${url}:`, err);
+      return { success: false, nfts: [] };
+    }
 
     if (!response.ok) {
-      console.error(`MintGarden API error: ${response.status} for ${url}`);
-      break;
+      console.error(`[DID Indexer] MintGarden API error: ${response.status} for ${url}`);
+      return { success: false, nfts: [] };
     }
 
     const data = await response.json() as {
@@ -188,9 +223,19 @@ async function fetchDIDNfts(did: string, collectionId: string): Promise<NftInfo[
 
     if (data.items.length < pageSize) break;
     page++;
+
+    // Rate limit between pages
+    await sleep(RATE_LIMIT_MS);
   }
 
-  return nfts;
+  return { success: true, nfts };
+}
+
+async function batchChunked(db: D1Database, statements: D1PreparedStatement[]): Promise<void> {
+  for (let i = 0; i < statements.length; i += D1_BATCH_SIZE) {
+    const chunk = statements.slice(i, i + D1_BATCH_SIZE);
+    await db.batch(chunk);
+  }
 }
 
 function sleep(ms: number): Promise<void> {
