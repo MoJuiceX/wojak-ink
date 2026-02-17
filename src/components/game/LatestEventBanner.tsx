@@ -24,7 +24,7 @@ const EVENT_ICONS: Record<string, typeof Swords> = {
 
 const EVENT_LINKS: Record<string, string> = {
   battle_result: '/your-wojak/battles',
-  leaderboard_change: '/leaderboard',
+  leaderboard_change: '/your-wojak/leaderboard',
   vote_milestone: '/your-wojak',
   burn: '/your-wojak/dashboard',
   mint: '/generator',
@@ -79,40 +79,33 @@ export function LatestEventBanner({ did }: LatestEventBannerProps) {
   const link = EVENT_LINKS[current.eventType] || '/your-wojak/dashboard';
 
   return (
-    <div className="flex flex-col gap-1">
-      <div
-        className="flex items-center gap-3"
-        style={{
-          background: 'rgba(255,255,255,0.04)',
-          borderRadius: 'var(--radius-md)',
-          padding: '10px 14px',
-        }}
+    <div
+      className="flex items-center gap-3"
+      style={{
+        background: 'rgba(255,255,255,0.04)',
+        borderRadius: 'var(--radius-md)',
+        padding: '10px 14px',
+      }}
+    >
+      <Icon size={16} className="text-accent" style={{ flexShrink: 0 }} />
+      <Link
+        to={link}
+        className="text-secondary flex-1"
+        style={{ fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
       >
-        <Icon size={16} className="text-accent" style={{ flexShrink: 0 }} />
-        <Link
-          to={link}
-          className="text-secondary flex-1"
-          style={{ fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-        >
-          {formatEvent(current)}
-        </Link>
-        <span className="text-muted" style={{ fontSize: 12, flexShrink: 0 }}>
-          {timeAgo(current.createdAt)}
-        </span>
-        <button
-          onClick={handleDismiss}
-          className="btn btn-ghost"
-          style={{ padding: 2, minWidth: 'auto' }}
-          aria-label="Dismiss event"
-        >
-          <X size={16} className="text-muted" />
-        </button>
-      </div>
-      <div className="flex justify-end">
-        <Link to="/your-wojak/activity" className="text-accent" style={{ fontSize: 12 }}>
-          View all activity &rarr;
-        </Link>
-      </div>
+        {formatEvent(current)}
+      </Link>
+      <span className="text-muted" style={{ fontSize: 12, flexShrink: 0 }}>
+        {timeAgo(current.createdAt)}
+      </span>
+      <button
+        onClick={handleDismiss}
+        className="btn btn-ghost"
+        style={{ padding: 2, minWidth: 'auto' }}
+        aria-label="Dismiss event"
+      >
+        <X size={16} className="text-muted" />
+      </button>
     </div>
   );
 }
