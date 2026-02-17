@@ -5,12 +5,44 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useGame } from '@/contexts/GameContext';
 import { useSageWallet } from '@/sage-wallet';
+import { useToast } from '@/contexts/ToastContext';
 import usePrefersReducedMotion from '@/hooks/usePrefersReducedMotion';
 import { SwipeCard, getNftImageUrl } from './SwipeCard';
 import { VoteButtons } from './VoteButtons';
 import { VoteCardSkeleton } from './VoteCardSkeleton';
 import { GateChecklist } from './GateChecklist';
 import { PostRoundSummary } from './PostRoundSummary';
+
+// Milestone toast hook — fires when onboarding milestones complete during session
+const MILESTONE_INFO: Record<string, { label: string; credits: number }> = {
+  voted: { label: 'First Vote!', credits: 2 },
+  minted: { label: 'First Mint!', credits: 5 },
+  battled: { label: 'First Battle!', credits: 3 },
+};
+
+function useMilestoneToasts(onboarding: { voted: boolean; minted: boolean; battled: boolean } | undefined) {
+  const toast = useToast();
+  const prev = useRef(onboarding);
+
+  useEffect(() => {
+    if (!onboarding || !prev.current) {
+      prev.current = onboarding;
+      return;
+    }
+
+    for (const [key, info] of Object.entries(MILESTONE_INFO)) {
+      const k = key as keyof typeof MILESTONE_INFO;
+      if (onboarding[k as keyof typeof onboarding] && !prev.current[k as keyof typeof onboarding]) {
+        toast.success(`+${info.credits} credits`, {
+          title: `\uD83C\uDFAF ${info.label}`,
+          duration: 3000,
+        });
+      }
+    }
+
+    prev.current = onboarding;
+  }, [onboarding, toast]);
+}
 
 interface LastVote {
   nftId: string;
@@ -29,6 +61,9 @@ export function VotingFeed() {
   } = useGame();
   const { address, status: walletStatus } = useSageWallet();
   const reducedMotion = usePrefersReducedMotion();
+
+  // Milestone toasts
+  useMilestoneToasts(player?.onboarding);
 
   // Session state
   const [sessionLikes, setSessionLikes] = useState(0);
