@@ -1,68 +1,12 @@
 // Latest Event Banner — slim banner showing most recent activity event.
 import { useState, useEffect, useCallback } from 'react';
-import { Swords, TrendingUp, Heart, Flame, Sparkles, X } from 'lucide-react';
+import { Sparkles, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-interface ActivityEvent {
-  id: number;
-  eventType: string;
-  eventData: Record<string, unknown>;
-  createdAt: string;
-}
+import type { ActivityEvent } from '../../lib/gameEvents';
+import { EVENT_ICONS, EVENT_LINKS, formatEvent, timeAgo } from '../../lib/gameEvents';
 
 interface LatestEventBannerProps {
   did: string;
-}
-
-const EVENT_ICONS: Record<string, typeof Swords> = {
-  battle_won: Swords,
-  battle_lost: Swords,
-  battle_draw: Swords,
-  battle_started: Swords,
-  leaderboard_change: TrendingUp,
-  vote_milestone: Heart,
-  burn: Flame,
-  mint: Sparkles,
-};
-
-const EVENT_LINKS: Record<string, string> = {
-  battle_won: '/swipe/battles',
-  battle_lost: '/swipe/battles',
-  battle_draw: '/swipe/battles',
-  battle_started: '/swipe/battles',
-  leaderboard_change: '/swipe/leaderboard',
-  vote_milestone: '/swipe',
-  burn: '/swipe/dashboard',
-  mint: '/generator',
-};
-
-function formatEvent(event: ActivityEvent): string {
-  const data = event.eventData;
-  switch (event.eventType) {
-    case 'battle_won': return `Won battle! (${data.votes}-${data.opponentVotes} votes)`;
-    case 'battle_lost': return `Lost battle (${data.votes}-${data.opponentVotes} votes)`;
-    case 'battle_draw': return 'Battle ended in a draw';
-    case 'battle_started': return 'Battle started!';
-    case 'leaderboard_change': return `Moved to rank #${data.rank || '?'} on the leaderboard`;
-    case 'vote_milestone':
-      return data.milestone === 'first_vote'
-        ? 'Cast your first vote!'
-        : `Reached ${data.count || '?'} total votes`;
-    case 'burn': return `Burned Wojak #${data.editionNumber || '?'} (+${Math.floor((data.creditsEarned as number || 0) / 100)} credits)`;
-    case 'mint': return `Minted Wojak #${data.editionNumber || '?'}`;
-    default: return 'New activity';
-  }
-}
-
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  return `${days}d ago`;
 }
 
 export function LatestEventBanner({ did }: LatestEventBannerProps) {
@@ -110,6 +54,13 @@ export function LatestEventBanner({ did }: LatestEventBannerProps) {
       <span className="text-muted" style={{ fontSize: 12, flexShrink: 0 }}>
         {timeAgo(current.createdAt)}
       </span>
+      <Link
+        to="/swipe/activity"
+        className="text-accent"
+        style={{ fontSize: 12, flexShrink: 0, textDecoration: 'none' }}
+      >
+        View all
+      </Link>
       <button
         onClick={handleDismiss}
         className="btn btn-ghost"
