@@ -25,6 +25,10 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     if (url.pathname === '/run') {
+      const authHeader = request.headers.get('Authorization');
+      if (!env.ADMIN_SECRET || authHeader !== `Bearer ${env.ADMIN_SECRET}`) {
+        return new Response('Unauthorized', { status: 401 });
+      }
       await run(env);
       return new Response('DID indexer run complete');
     }
