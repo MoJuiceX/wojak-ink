@@ -15,7 +15,10 @@ interface LatestEventBannerProps {
 }
 
 const EVENT_ICONS: Record<string, typeof Swords> = {
-  battle_result: Swords,
+  battle_won: Swords,
+  battle_lost: Swords,
+  battle_draw: Swords,
+  battle_started: Swords,
   leaderboard_change: TrendingUp,
   vote_milestone: Heart,
   burn: Flame,
@@ -23,7 +26,10 @@ const EVENT_ICONS: Record<string, typeof Swords> = {
 };
 
 const EVENT_LINKS: Record<string, string> = {
-  battle_result: '/swipe/battles',
+  battle_won: '/swipe/battles',
+  battle_lost: '/swipe/battles',
+  battle_draw: '/swipe/battles',
+  battle_started: '/swipe/battles',
   leaderboard_change: '/swipe/leaderboard',
   vote_milestone: '/swipe',
   burn: '/swipe/dashboard',
@@ -33,10 +39,16 @@ const EVENT_LINKS: Record<string, string> = {
 function formatEvent(event: ActivityEvent): string {
   const data = event.eventData;
   switch (event.eventType) {
-    case 'battle_result': return `Battle ${data.won ? 'won' : 'lost'} against ${data.opponent || 'opponent'}`;
+    case 'battle_won': return `Won battle! (${data.votes}-${data.opponentVotes} votes)`;
+    case 'battle_lost': return `Lost battle (${data.votes}-${data.opponentVotes} votes)`;
+    case 'battle_draw': return 'Battle ended in a draw';
+    case 'battle_started': return 'Battle started!';
     case 'leaderboard_change': return `Moved to rank #${data.rank || '?'} on the leaderboard`;
-    case 'vote_milestone': return `Reached ${data.count || '?'} total votes`;
-    case 'burn': return `Burned Wojak #${data.editionNumber || '?'}`;
+    case 'vote_milestone':
+      return data.milestone === 'first_vote'
+        ? 'Cast your first vote!'
+        : `Reached ${data.count || '?'} total votes`;
+    case 'burn': return `Burned Wojak #${data.editionNumber || '?'} (+${Math.floor((data.creditsEarned as number || 0) / 100)} credits)`;
     case 'mint': return `Minted Wojak #${data.editionNumber || '?'}`;
     default: return 'New activity';
   }
