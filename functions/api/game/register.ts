@@ -5,6 +5,7 @@
 import { isValidDid, getTodayString } from './_shared';
 import { authenticateRequest } from '../../lib/auth';
 import { isValidChiaAddress } from '../../lib/validation';
+import { checkRateLimit, getRateLimitKey, GAME_RATE_LIMITS } from '../../lib/rateLimit';
 
 interface Env {
   DB: D1Database;
@@ -15,6 +16,12 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   const auth = await authenticateRequest(context.request, context.env.CLERK_DOMAIN);
   if (!auth) {
     return Response.json({ error: 'Authentication required' }, { status: 401 });
+  }
+
+  const rlKey = getRateLimitKey(context.request, auth.userId);
+  const rl = await checkRateLimit(context.env.DB, rlKey, GAME_RATE_LIMITS.register);
+  if (!rl.allowed) {
+    return Response.json({ error: 'Rate limited. Try again later.' }, { status: 429 });
   }
 
   try {

@@ -4,6 +4,7 @@
 
 import { PHASE1_COLLECTION_ID, ONBOARDING_CREDITS } from './_shared';
 import { verifyGameAuth, isAuthError } from './_auth';
+import { checkRateLimit, getRateLimitKey, GAME_RATE_LIMITS } from '../../lib/rateLimit';
 
 interface Env {
   DB: D1Database;
@@ -17,6 +18,12 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     const authResult = await verifyGameAuth(context.request, context.env, did);
     if (isAuthError(authResult)) return authResult;
+
+    const rlKey = getRateLimitKey(context.request, authResult.userId);
+    const rl = await checkRateLimit(context.env.DB, rlKey, GAME_RATE_LIMITS.verifyPhase1);
+    if (!rl.allowed) {
+      return Response.json({ error: 'Rate limited. Try again later.' }, { status: 429 });
+    }
 
     if (!did) {
       return Response.json({ error: 'DID required' }, { status: 400 });

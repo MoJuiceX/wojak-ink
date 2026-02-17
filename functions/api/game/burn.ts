@@ -4,6 +4,7 @@
 // This endpoint just records it and awards credits.
 
 import { verifyGameAuth, isAuthError } from './_auth';
+import { checkRateLimit, getRateLimitKey, GAME_RATE_LIMITS } from '../../lib/rateLimit';
 
 interface Env {
   DB: D1Database;
@@ -42,6 +43,12 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     const authResult = await verifyGameAuth(context.request, context.env, burnerDid);
     if (isAuthError(authResult)) return authResult;
+
+    const rlKey = getRateLimitKey(context.request, authResult.userId);
+    const rl = await checkRateLimit(context.env.DB, rlKey, GAME_RATE_LIMITS.burn);
+    if (!rl.allowed) {
+      return Response.json({ error: 'Rate limited. Try again later.' }, { status: 429 });
+    }
 
     if (!nftId || !editionNumber || !burnerWallet) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
