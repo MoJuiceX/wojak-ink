@@ -1,7 +1,7 @@
 // functions/api/combat/submit-move.ts
 // POST /api/combat/submit-move — submit a move for a manual battle turn
 
-import { jsonResponse, errorResponse } from './_shared';
+import { jsonResponse, errorResponse, isValidDid } from './_shared';
 import { resolveTurn } from '../../../src/lib/combat/turn-resolver';
 import { initFighterState, initBattleState } from '../../../src/lib/combat/battle-state';
 import { chooseMove } from '../../../src/lib/combat/ai-strategist';
@@ -17,12 +17,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     battleId: number;
     nftId: string;
     moveId: string;
+    ownerDid: string;
   }>();
 
-  const { battleId, nftId, moveId } = body;
-  if (!battleId || !nftId || !moveId) {
-    return errorResponse('Missing required fields: battleId, nftId, moveId');
+  const { battleId, nftId, moveId, ownerDid } = body;
+  if (!battleId || !nftId || !moveId || !ownerDid) {
+    return errorResponse('Missing required fields: battleId, nftId, moveId, ownerDid');
   }
+  if (!isValidDid(ownerDid)) return errorResponse('Invalid DID format');
 
   const db = context.env.DB;
 
@@ -43,6 +45,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   ).bind(nftId).first<any>();
 
   if (!fighter) return errorResponse('Fighter not found', 404);
+
+  // Verify the submitter owns this fighter
+  if (fighter.owner_did !== ownerDid) return errorResponse('Not the owner of this fighter', 403);
 
   const validMoves = [fighter.move_1, fighter.move_2, fighter.move_3, fighter.move_4];
   if (!validMoves.includes(moveId)) {
