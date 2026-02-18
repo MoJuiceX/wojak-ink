@@ -95,6 +95,7 @@ const BrickBreaker = lazy(() => import('./pages/BrickBreaker'));
 const WojakWhack = lazy(() => import('./pages/WojakWhack'));
 const CombatArena = lazy(() => import('./pages/CombatArena'));
 const CombatBattle = lazy(() => import('./pages/CombatBattle'));
+const ArenaLeaderboard = lazy(() => import('./pages/ArenaLeaderboard'));
 
 // Skip boot sequence in development for faster testing
 const SKIP_BOOT_IN_DEV = true;
@@ -549,6 +550,17 @@ function AppContent() {
                       <GameErrorBoundary gameName="Combat Arena">
                         <Suspense fallback={<GameLoading gameName="Combat Arena" />}>
                           <CombatArena />
+                        </Suspense>
+                      </GameErrorBoundary>
+                    }
+                  />
+                  {/* Arena Leaderboard — /arena/leaderboard */}
+                  <Route
+                    path="arena/leaderboard"
+                    element={
+                      <GameErrorBoundary gameName="Arena Leaderboard">
+                        <Suspense fallback={<GameLoading gameName="Arena Leaderboard" />}>
+                          <ArenaLeaderboard />
                         </Suspense>
                       </GameErrorBoundary>
                     }
