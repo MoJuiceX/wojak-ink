@@ -18,25 +18,34 @@ interface PickerNft {
 interface BattleNftPickerModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (nft: PickerNft) => void;
+  onQueue: (nft: PickerNft) => Promise<{ success: boolean; error?: string }>;
   nfts: PickerNft[];
   loading: boolean;
 }
 
-export function BattleNftPickerModal({ isOpen, onClose, onSelect, nfts, loading }: BattleNftPickerModalProps) {
+export function BattleNftPickerModal({ isOpen, onClose, onQueue, nfts, loading }: BattleNftPickerModalProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [queueing, setQueueing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     const nft = nfts.find(n => n.nftId === selectedId);
-    if (nft) {
-      onSelect(nft);
+    if (!nft) return;
+    setQueueing(true);
+    setError(null);
+    const result = await onQueue(nft);
+    setQueueing(false);
+    if (result.success) {
       setSelectedId(null);
       onClose();
+    } else {
+      setError(result.error || 'Failed to queue');
     }
   };
 
   const handleClose = () => {
     setSelectedId(null);
+    setError(null);
     onClose();
   };
 
@@ -183,17 +192,22 @@ export function BattleNftPickerModal({ isOpen, onClose, onSelect, nfts, loading 
 
             {/* Footer */}
             {nfts.length > 0 && (
-              <div className="flex gap-3 p-5" style={{ borderTop: '1px solid var(--color-border)' }}>
-                <button className="btn btn-secondary flex-1" onClick={handleClose}>
-                  Cancel
-                </button>
-                <button
-                  className="btn btn-primary flex-1"
-                  disabled={!selectedId}
-                  onClick={handleConfirm}
-                >
-                  Enter Battle Queue
-                </button>
+              <div className="flex flex-col gap-2 p-5" style={{ borderTop: '1px solid var(--color-border)' }}>
+                {error && (
+                  <div className="text-sm text-center" style={{ color: 'var(--color-error)' }}>{error}</div>
+                )}
+                <div className="flex gap-3">
+                  <button className="btn btn-secondary flex-1" onClick={handleClose} disabled={queueing}>
+                    Cancel
+                  </button>
+                  <button
+                    className="btn btn-primary flex-1"
+                    disabled={!selectedId || queueing}
+                    onClick={handleConfirm}
+                  >
+                    {queueing ? 'Queueing...' : 'Enter Battle Queue'}
+                  </button>
+                </div>
               </div>
             )}
           </motion.div>

@@ -27,10 +27,7 @@ export function BattleQueuePanel({ onQueued, queuedNftIds = [] }: BattleQueuePan
   const [nfts, setNfts] = useState<OwnedNft[]>([]);
   const [loading, setLoading] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [selectedNft, setSelectedNft] = useState<OwnedNft | null>(null);
-  const [queueing, setQueueing] = useState(false);
   const [result, setResult] = useState<{ matched: boolean; message: string } | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!player?.did) return;
@@ -46,12 +43,8 @@ export function BattleQueuePanel({ onQueued, queuedNftIds = [] }: BattleQueuePan
       .finally(() => setLoading(false));
   }, [player?.did]);
 
-  const handleQueue = useCallback(async () => {
-    if (!player || !selectedNft) return;
-
-    setQueueing(true);
-    setError(null);
-    setResult(null);
+  const handleQueue = useCallback(async (nft: OwnedNft): Promise<{ success: boolean; error?: string }> => {
+    if (!player) return { success: false, error: 'Not logged in' };
 
     try {
       const headers = await getAuthHeaders();
@@ -60,25 +53,22 @@ export function BattleQueuePanel({ onQueued, queuedNftIds = [] }: BattleQueuePan
         headers,
         body: JSON.stringify({
           did: player.did,
-          nftId: selectedNft.nftId,
-          editionNumber: selectedNft.editionNumber,
+          nftId: nft.nftId,
+          editionNumber: nft.editionNumber,
         }),
       });
       const data = await res.json();
 
       if (data.success) {
         setResult({ matched: data.matched, message: data.message });
-        setSelectedNft(null);
         onQueued?.();
-      } else {
-        setError(data.error || 'Failed to queue');
+        return { success: true };
       }
+      return { success: false, error: data.error || 'Failed to queue' };
     } catch {
-      setError('Network error');
-    } finally {
-      setQueueing(false);
+      return { success: false, error: 'Network error' };
     }
-  }, [player, selectedNft, onQueued, getAuthHeaders]);
+  }, [player, onQueued, getAuthHeaders]);
 
   if (loading) {
     return <div className="text-secondary text-sm p-4">Loading your NFTs...</div>;
@@ -101,48 +91,11 @@ export function BattleQueuePanel({ onQueued, queuedNftIds = [] }: BattleQueuePan
     <div className="card-static p-4 flex flex-col gap-3">
       <h3 className="font-semibold">Queue for Battle</h3>
 
-      {selectedNft ? (
-        <div className="flex items-center gap-3 p-2" style={{ background: 'var(--color-bg)', borderRadius: 'var(--radius-md)' }}>
-          {selectedNft.imageUri ? (
-            <img
-              src={selectedNft.imageUri}
-              alt={selectedNft.name}
-              style={{ width: '48px', height: '48px', borderRadius: 'var(--radius-md)', objectFit: 'cover' }}
-            />
-          ) : (
-            <div
-              className="flex items-center justify-center text-muted"
-              style={{ width: '48px', height: '48px', borderRadius: 'var(--radius-md)', background: 'var(--color-surface)' }}
-            >
-              ?
-            </div>
-          )}
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium truncate">{selectedNft.name}</div>
-            <div className="text-xs text-secondary">Score: {selectedNft.netScore}</div>
-          </div>
-          <button
-            className="btn btn-ghost text-xs"
-            onClick={() => setPickerOpen(true)}
-          >
-            Change
-          </button>
-        </div>
-      ) : (
-        <button
-          className="btn btn-secondary"
-          onClick={() => setPickerOpen(true)}
-        >
-          Select a Wojak...
-        </button>
-      )}
-
       <button
         className="btn btn-primary"
-        disabled={!selectedNft || queueing}
-        onClick={handleQueue}
+        onClick={() => { setResult(null); setPickerOpen(true); }}
       >
-        {queueing ? 'Queueing...' : 'Enter Battle Queue'}
+        Select a Wojak...
       </button>
 
       {result && (
@@ -150,18 +103,11 @@ export function BattleQueuePanel({ onQueued, queuedNftIds = [] }: BattleQueuePan
           {result.message}
         </div>
       )}
-      {error && (
-        <div className="text-sm" style={{ color: 'var(--color-error)' }}>{error}</div>
-      )}
 
       <BattleNftPickerModal
         isOpen={pickerOpen}
         onClose={() => setPickerOpen(false)}
-        onSelect={(nft) => {
-          setSelectedNft(nft);
-          setResult(null);
-          setError(null);
-        }}
+        onQueue={handleQueue}
         nfts={availableNfts}
         loading={loading}
       />
