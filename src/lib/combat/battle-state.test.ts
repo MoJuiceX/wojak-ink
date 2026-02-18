@@ -1,7 +1,6 @@
 // src/lib/combat/battle-state.test.ts
 import { describe, it, expect } from 'vitest';
 import { initFighterState, initBattleState } from './battle-state';
-import type { FighterState, BattleState } from './battle-state';
 
 const FIGHTER_A_DATA = {
   nftId: 'nft-001',

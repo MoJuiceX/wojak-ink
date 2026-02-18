@@ -1,7 +1,6 @@
 // src/lib/combat/battle-runner.test.ts
 import { describe, it, expect } from 'vitest';
 import { runAutoBattle } from './battle-runner';
-import type { BattleResult } from './battle-runner';
 
 describe('battle-runner', () => {
   it('runs a FIRE vs WATER auto-battle to completion', () => {

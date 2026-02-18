@@ -22,7 +22,9 @@ interface TurnLogProps {
   maxHeight?: string;
 }
 
-function getEntryClass(event: TurnEntry['events'] extends (infer T)[] ? T : never): string {
+type TurnEvent = NonNullable<TurnEntry['events']>[number];
+
+function getEntryClass(event: TurnEvent): string {
   if (!event) return 'turn-entry';
   if (event.isCrit) return 'turn-entry turn-crit';
   if (event.effectiveness === 'super_effective') return 'turn-entry turn-super-effective';

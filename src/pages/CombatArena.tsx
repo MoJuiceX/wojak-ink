@@ -21,7 +21,7 @@ interface FighterSummary {
 }
 
 export default function CombatArena() {
-  const [fighters, setFighters] = useState<FighterSummary[]>([]);
+  const [fighters] = useState<FighterSummary[]>([]);
   const [queueStatus, setQueueStatus] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeBattleId, setActiveBattleId] = useState<number | null>(null);

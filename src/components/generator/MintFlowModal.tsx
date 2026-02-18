@@ -89,7 +89,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
     customName,
     setCustomName,
   } = useMint();
-  const { selectedLayers, g2Selections, combatMoves, setCombatMoves } = useGenerator();
+  const { g2Selections, combatMoves, setCombatMoves } = useGenerator();
   const prefersReducedMotion = useReducedMotion();
   const [timeLeft, setTimeLeft] = useState('');
   const [isExpired, setIsExpired] = useState(false);

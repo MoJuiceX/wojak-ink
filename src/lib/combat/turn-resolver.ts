@@ -8,7 +8,6 @@ import { applyStatusDamage, checkStatusSkip, tickStatus } from './status-effects
 import { getAbilityEffect } from './ability-effects';
 import { getMoveById } from './data/moves';
 import { getEffectiveness } from './data/type-chart';
-import type { CombatType } from './types';
 
 type RNG = () => number;
 
@@ -357,7 +356,7 @@ function mapStatToStageKey(stat: string): keyof FighterState['statStages'] | nul
 /**
  * Apply end-of-turn effects: status damage, leech seed, curse, ability heals, status ticking.
  */
-function applyEndOfTurnEffects(battle: BattleState, fighter: FighterState, opponent: FighterState): string | null {
+function applyEndOfTurnEffects(_battle: BattleState, fighter: FighterState, opponent: FighterState): string | null {
   let abilityTriggered: string | null = null;
 
   // Status damage (burn/poison) — check Magic Guard immunity
@@ -508,9 +507,6 @@ export function resolveTurn(
 
   const aResult = firstSide === 'a' ? firstResult : secondResult;
   const bResult = firstSide === 'a' ? secondResult : firstResult;
-  const aHpBefore = firstSide === 'a' ? hpBBefore : hpABefore; // defender's HP before A attacked
-  const bHpBefore = firstSide === 'a' ? hpABefore : hpBBefore;
-
   const turnResult: TurnResult = {
     turn: battle.turnNumber,
     fighter_a: {

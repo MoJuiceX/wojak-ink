@@ -1,9 +1,8 @@
 // src/lib/combat/ability-effects.test.ts
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { getAbilityEffect } from './ability-effects';
-import type { AbilityContext, AbilityEffect } from './ability-effects';
+import type { AbilityContext } from './ability-effects';
 import { initFighterState } from './battle-state';
-import type { FighterState } from './battle-state';
 
 function makeContext(overrides?: Partial<AbilityContext>): AbilityContext {
   const attacker = initFighterState({
