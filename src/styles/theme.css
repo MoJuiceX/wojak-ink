@@ -3008,21 +3008,211 @@ body {
   z-index: 10;
 }
 
-/* ── 12. Reduced Motion ───────────────────────────────────────────────────── */
+/* ── 12. Polish Phase 1 — Additional Animation Classes ────────────────────── */
+
+/* HP shimmer on damage */
+.hp-bar-shimmer .hp-bar-fill {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: hpShimmer 0.8s ease-out;
+}
+
+/* HP critical pulse */
+.hp-critical .hp-bar-fill {
+  animation: hpCriticalPulse 0.8s ease-in-out infinite;
+}
+
+/* Screen shake classes (used by BattleView animation orchestration) */
+.battle-shake-light {
+  animation: battleShakeLight 0.3s ease-out;
+}
+
+.battle-shake {
+  animation: battleShake 0.4s ease-out;
+}
+
+.battle-shake-heavy {
+  animation: battleShakeHeavy 0.5s ease-out;
+}
+
+/* Screen flash overlay */
+.battle-flash-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+  pointer-events: none;
+  z-index: 40;
+  animation: battleFlash 0.4s ease-out forwards;
+}
+
+.battle-flash-crit {
+  background: rgba(255, 107, 0, 0.2);
+}
+
+.battle-flash-super-effective {
+  background: rgba(34, 197, 94, 0.15);
+}
+
+.battle-flash-not-effective {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Fighter hit recoil (used by DamageNumber orchestration) */
+.fighter-hit-recoil {
+  animation: hitRecoil 0.3s ease-out;
+}
+
+/* Status icon classes (standalone component) */
+.status-icon-burn {
+  color: #f08030;
+  border-color: rgba(240, 128, 48, 0.4);
+  animation: statusBurn 1.5s ease-in-out infinite;
+}
+
+.status-icon-poison {
+  color: #a040a0;
+  border-color: rgba(160, 64, 160, 0.4);
+  animation: statusPoison 2s ease-in-out infinite;
+}
+
+.status-icon-paralysis {
+  color: #f8d030;
+  border-color: rgba(248, 208, 48, 0.4);
+  animation: statusParalysis 1s ease-in-out infinite;
+}
+
+.status-icon-freeze {
+  color: #98d8d8;
+  border-color: rgba(152, 216, 216, 0.4);
+  animation: statusFreeze 2s ease-in-out infinite;
+}
+
+.status-icon-sleep {
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
+  animation: statusSleep 2s ease-in-out infinite;
+}
+
+.status-icon-confusion {
+  color: #f85888;
+  border-color: rgba(248, 88, 136, 0.4);
+  animation: statusConfusion 1s ease-in-out infinite;
+}
+
+/* Effectiveness callout (standalone component) */
+.effectiveness-callout {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 60;
+  padding: 6px 16px;
+  border-radius: var(--radius-md);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  pointer-events: none;
+  animation: effectivenessPopIn 0.3s ease-out, effectivenessFadeOut 1.5s ease-out 0.3s forwards;
+}
+
+.callout-super-effective {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--color-success);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.callout-not-very-effective {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-error);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.callout-immune {
+  background: rgba(96, 96, 112, 0.15);
+  color: var(--color-text-muted);
+  border: 1px solid rgba(96, 96, 112, 0.3);
+}
+
+/* Move button type glow (selected state) */
+.move-btn.selected.move-glow {
+  animation: moveGlow 1.5s ease-in-out infinite;
+}
+
+.move-btn.move-glow-fire.selected    { box-shadow: 0 0 12px rgba(240, 128, 48, 0.4); }
+.move-btn.move-glow-water.selected   { box-shadow: 0 0 12px rgba(104, 144, 240, 0.4); }
+.move-btn.move-glow-electric.selected{ box-shadow: 0 0 12px rgba(248, 208, 48, 0.4); }
+.move-btn.move-glow-grass.selected   { box-shadow: 0 0 12px rgba(120, 200, 80, 0.4); }
+.move-btn.move-glow-ice.selected     { box-shadow: 0 0 12px rgba(152, 216, 216, 0.4); }
+.move-btn.move-glow-martial.selected { box-shadow: 0 0 12px rgba(192, 48, 40, 0.4); }
+.move-btn.move-glow-venom.selected   { box-shadow: 0 0 12px rgba(160, 64, 160, 0.4); }
+.move-btn.move-glow-earth.selected   { box-shadow: 0 0 12px rgba(224, 192, 104, 0.4); }
+.move-btn.move-glow-air.selected     { box-shadow: 0 0 12px rgba(168, 144, 240, 0.4); }
+.move-btn.move-glow-psyche.selected  { box-shadow: 0 0 12px rgba(248, 88, 136, 0.4); }
+.move-btn.move-glow-insect.selected  { box-shadow: 0 0 12px rgba(168, 184, 32, 0.4); }
+.move-btn.move-glow-stone.selected   { box-shadow: 0 0 12px rgba(184, 160, 56, 0.4); }
+.move-btn.move-glow-ghost.selected   { box-shadow: 0 0 12px rgba(112, 88, 152, 0.4); }
+.move-btn.move-glow-dragon.selected  { box-shadow: 0 0 12px rgba(112, 56, 248, 0.4); }
+.move-btn.move-glow-shadow.selected  { box-shadow: 0 0 12px rgba(112, 88, 72, 0.4); }
+.move-btn.move-glow-metal.selected   { box-shadow: 0 0 12px rgba(184, 184, 208, 0.4); }
+.move-btn.move-glow-mystic.selected  { box-shadow: 0 0 12px rgba(238, 153, 172, 0.4); }
+.move-btn.move-glow-neutral.selected { box-shadow: 0 0 12px rgba(168, 168, 120, 0.4); }
+
+/* Battle intro */
+.battle-intro-left {
+  animation: battleSlideInLeft 0.6s ease-out;
+}
+
+.battle-intro-right {
+  animation: battleSlideInRight 0.6s ease-out;
+}
+
+/* Victory / Defeat */
+.fighter-victory {
+  animation: victoryGlow 1s ease-out forwards;
+}
+
+.fighter-defeat {
+  animation: defeatFade 0.8s ease-out forwards;
+}
+
+/* Turn log entry animation */
+.turn-entry-animated {
+  animation: turnEntrySlide 0.3s ease-out forwards;
+  opacity: 0;
+}
+
+.turn-entry-animated.stagger-1 { animation-delay: 0.05s; }
+.turn-entry-animated.stagger-2 { animation-delay: 0.10s; }
+.turn-entry-animated.stagger-3 { animation-delay: 0.15s; }
+.turn-entry-animated.stagger-4 { animation-delay: 0.20s; }
+
+/* ── 13. Reduced Motion ───────────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
   .screen-shake,
   .screen-shake-heavy,
+  .battle-shake-light,
+  .battle-shake,
+  .battle-shake-heavy,
   .battle-flash,
+  .battle-flash-overlay,
   .damage-number,
   .damage-normal,
   .damage-crit,
   .damage-heal,
   .damage-super,
+  .damage-super-effective,
   .damage-resist,
   .damage-immune,
   .crit-text,
   .crit-zoom,
+  .effectiveness-callout,
   .effectiveness-super,
   .effectiveness-resist,
   .effectiveness-immune,
@@ -3032,15 +3222,29 @@ body {
   .status-freeze,
   .status-sleep,
   .status-confusion,
+  .status-icon-burn,
+  .status-icon-poison,
+  .status-icon-paralysis,
+  .status-icon-freeze,
+  .status-icon-sleep,
+  .status-icon-confusion,
   .battle-slide-left,
   .battle-slide-right,
+  .battle-intro-left,
+  .battle-intro-right,
   .fighter-faint,
   .fighter-winner,
+  .fighter-victory,
+  .fighter-defeat,
   .fighter-charge-right,
   .fighter-charge-left,
   .fighter-strike-right,
   .fighter-strike-left,
-  .fighter-hit {
+  .fighter-hit,
+  .fighter-hit-recoil,
+  .turn-entry-animated,
+  .hp-bar-shimmer .hp-bar-fill,
+  .hp-critical .hp-bar-fill {
     animation: none;
   }
 
@@ -3052,11 +3256,17 @@ body {
     animation: none;
   }
 
-  .fighter-loser {
+  .fighter-loser,
+  .fighter-defeat {
     filter: grayscale(0.8) brightness(0.6);
   }
 
-  .battle-flash {
+  .battle-flash,
+  .battle-flash-overlay {
     display: none;
+  }
+
+  .turn-entry-animated {
+    opacity: 1;
   }
 }

@@ -18,6 +18,9 @@ import { HPBar } from './HPBar';
 import { TurnLog } from './TurnLog';
 import { MoveButtons } from './MoveButtons';
 import { BattleCanvas } from './BattleCanvas';
+import { DamageNumber } from './DamageNumber';
+import { StatusIcon } from './StatusIcon';
+import { EffectivenessCallout } from './EffectivenessCallout';
 import { useBattlePlayback } from '@/hooks/useBattlePlayback';
 import { getBattleAudio } from '@/lib/combat/audio';
 import type { CombatType } from '@/lib/combat/types';
@@ -64,31 +67,6 @@ function computeMaxHP(level: number): number {
   return Math.floor((2 * 80 + 31) * level / 100) + level + 10;
 }
 
-// ── Status Icon Map ─────────────────────────────────────────────────────────
-
-const STATUS_ICONS: Record<string, { icon: string; cls: string }> = {
-  burn:      { icon: '\u{1F525}', cls: 'status-burn' },
-  burned:    { icon: '\u{1F525}', cls: 'status-burn' },
-  poison:    { icon: '\u{2620}\u{FE0F}', cls: 'status-poison' },
-  paralysis: { icon: '\u{26A1}', cls: 'status-paralysis' },
-  freeze:    { icon: '\u{2744}\u{FE0F}', cls: 'status-freeze' },
-  frozen:    { icon: '\u{2744}\u{FE0F}', cls: 'status-freeze' },
-  sleep:     { icon: '\u{1F4A4}', cls: 'status-sleep' },
-  confusion: { icon: '\u{1F635}', cls: 'status-confusion' },
-  confused:  { icon: '\u{1F635}', cls: 'status-confusion' },
-};
-
-function StatusIcon({ status }: { status: string | null }) {
-  if (!status) return null;
-  const entry = STATUS_ICONS[status];
-  if (!entry) return null;
-  return (
-    <div className={`status-icon ${entry.cls}`} title={status}>
-      {entry.icon}
-    </div>
-  );
-}
-
 // ── Fighter Position Constants (for canvas particle targeting) ──────────────
 
 const POS_A = { x: 0.25, y: 0.55 };
@@ -110,8 +88,25 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
   const [statusA, setStatusA] = useState<string | null>(null);
   const [statusB, setStatusB] = useState<string | null>(null);
 
+  // ── Visual overlay state ────────────────────────────────────────────────
+  type DamageEntry = { id: string; value: number | string; type: 'normal' | 'crit' | 'heal' | 'super-effective' | 'immune'; side: 'a' | 'b' };
+  type CalloutEntry = { id: string; type: 'super_effective' | 'not_very_effective' | 'immune' };
+  const [damageNumbers, setDamageNumbers] = useState<DamageEntry[]>([]);
+  const [callouts, setCallouts] = useState<CalloutEntry[]>([]);
+  const [shakeClass, setShakeClass] = useState('');
+  const [flashClass, setFlashClass] = useState('');
+
   // ── Played turn tracking ────────────────────────────────────────────────
   const [playedTurns, setPlayedTurns] = useState(0);
+
+  // ── Overlay cleanup callbacks ─────────────────────────────────────────
+  const removeDamageNumber = useCallback((id: string) => {
+    setDamageNumbers(prev => prev.filter(d => d.id !== id));
+  }, []);
+
+  const removeCallout = useCallback((id: string) => {
+    setCallouts(prev => prev.filter(c => c.id !== id));
+  }, []);
 
   // ── Playback hook ───────────────────────────────────────────────────────
   const callbacks = useMemo(() => ({
@@ -125,6 +120,40 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
     onStatusChange: (side: 'a' | 'b', status: string | null) => {
       if (side === 'a') setStatusA(status);
       else setStatusB(status);
+    },
+    onDamage: (side: 'a' | 'b', amount: number, isCrit: boolean, effectiveness: string) => {
+      const dmgType = isCrit ? 'crit' as const
+        : effectiveness === 'super_effective' ? 'super-effective' as const
+        : effectiveness === 'immune' ? 'immune' as const
+        : 'normal' as const;
+      setDamageNumbers(prev => [...prev, {
+        id: `dmg-${Date.now()}-${Math.random()}`,
+        value: amount,
+        type: dmgType,
+        side,
+      }]);
+
+      // Screen shake
+      const intensity = isCrit ? 'battle-shake-heavy' : amount > 30 ? 'battle-shake' : 'battle-shake-light';
+      setShakeClass(intensity);
+      setTimeout(() => setShakeClass(''), 500);
+
+      // Screen flash for crits
+      if (isCrit) {
+        setFlashClass('battle-flash-overlay battle-flash-crit');
+        setTimeout(() => setFlashClass(''), 400);
+      } else if (effectiveness === 'super_effective') {
+        setFlashClass('battle-flash-overlay battle-flash-super-effective');
+        setTimeout(() => setFlashClass(''), 400);
+      }
+
+      // Effectiveness callout
+      if (effectiveness && effectiveness !== 'neutral') {
+        setCallouts(prev => [...prev, {
+          id: `eff-${Date.now()}-${Math.random()}`,
+          type: effectiveness as CalloutEntry['type'],
+        }]);
+      }
     },
     onComplete: () => {
       // Playback finished — nothing special needed, UI is already updated
@@ -295,15 +324,28 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
       {/* ── Battle Arena ─────────────────────────────────────────────── */}
       <div
         ref={arenaRef}
-        className="battle-arena battle-scanlines"
+        className={`battle-arena battle-scanlines ${shakeClass}`}
       >
         {/* Canvas particle overlay */}
         <BattleCanvas ref={canvasRef} />
 
+        {/* Flash overlay */}
+        {flashClass && <div className={flashClass} />}
+
+        {/* Effectiveness callouts */}
+        {callouts.map(c => (
+          <EffectivenessCallout
+            key={c.id}
+            id={c.id}
+            type={c.type}
+            onComplete={() => removeCallout(c.id)}
+          />
+        ))}
+
         {/* Fighter panels (grid inside arena) */}
         <div className="grid grid-cols-2 gap-4 p-4" style={{ position: 'relative', zIndex: 2 }}>
           {/* Player side (left) */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2" style={{ position: 'relative' }}>
             {playerFighter?.imageUrl && (
               <div className={`battle-nft-image battle-slide-left ${playerImgClass}`}>
                 <img
@@ -329,10 +371,22 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
               ghost={playerHp.ghost}
               label="HP"
             />
+            {/* Damage numbers — player side */}
+            {damageNumbers
+              .filter(d => (isPlayerA ? d.side === 'a' : d.side === 'b'))
+              .map(d => (
+                <DamageNumber
+                  key={d.id}
+                  id={d.id}
+                  value={d.value}
+                  type={d.type}
+                  onComplete={() => removeDamageNumber(d.id)}
+                />
+              ))}
           </div>
 
           {/* Opponent side (right) */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2" style={{ position: 'relative' }}>
             {opponentFighter?.imageUrl && (
               <div className={`battle-nft-image battle-slide-right ${opponentImgClass}`}>
                 <img
@@ -358,6 +412,18 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
               ghost={opponentHp.ghost}
               label="HP"
             />
+            {/* Damage numbers — opponent side */}
+            {damageNumbers
+              .filter(d => (isPlayerA ? d.side === 'b' : d.side === 'a'))
+              .map(d => (
+                <DamageNumber
+                  key={d.id}
+                  id={d.id}
+                  value={d.value}
+                  type={d.type}
+                  onComplete={() => removeDamageNumber(d.id)}
+                />
+              ))}
           </div>
         </div>
       </div>
