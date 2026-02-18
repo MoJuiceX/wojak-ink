@@ -7,7 +7,7 @@ import { useGame } from '@/contexts/GameContext';
 import { useSageWallet } from '@/sage-wallet';
 import { useToast } from '@/contexts/ToastContext';
 import usePrefersReducedMotion from '@/hooks/usePrefersReducedMotion';
-import { SwipeCard, getNftImageUrl } from './SwipeCard';
+import { SwipeCard } from './SwipeCard';
 import { VoteButtons } from './VoteButtons';
 import { VoteCardSkeleton } from './VoteCardSkeleton';
 import { GateChecklist } from './GateChecklist';
@@ -130,7 +130,7 @@ export function VotingFeed() {
   useEffect(() => {
     feed.slice(0, 3).forEach(item => {
       const img = new Image();
-      img.src = getNftImageUrl(item.nftId);
+      img.src = item.imageUri;
     });
   }, [feed]);
 
@@ -297,7 +297,7 @@ export function VotingFeed() {
               nftId={item.nftId}
               name={item.customName || item.name}
               editionNumber={item.editionNumber}
-              imageUrl={getNftImageUrl(item.nftId)}
+              imageUrl={item.imageUri}
               onVote={handleVote}
               stackPosition={i as 0 | 1 | 2}
               isFirst={voteCount === 0 && i === 0}

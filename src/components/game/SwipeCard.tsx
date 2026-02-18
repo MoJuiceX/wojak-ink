@@ -276,8 +276,3 @@ export function SwipeCard({
     </motion.div>
   );
 }
-
-// Re-export nftId-to-image-URL helper
-export function getNftImageUrl(nftId: string): string {
-  return `https://assets.mintgarden.io/thumbnails/medium/${nftId}.png`;
-}
