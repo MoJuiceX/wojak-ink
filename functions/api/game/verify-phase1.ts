@@ -63,12 +63,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       );
 
       if (nftResponse.ok) {
+        // Individual NFT endpoint uses nested objects, not flat fields
         const nftData = await nftResponse.json() as {
-          collection_id?: string;
-          owner_encoded_id?: string;
+          collection?: { id?: string };
+          owner?: { encoded_id?: string };
         };
-        hasPhase1 = nftData.collection_id === PHASE1_COLLECTION_ID
-          && nftData.owner_encoded_id === did;
+        hasPhase1 = nftData.collection?.id === PHASE1_COLLECTION_ID
+          && nftData.owner?.encoded_id === did;
       }
     }
 
