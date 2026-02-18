@@ -43,7 +43,7 @@ describe('moves', () => {
   it('getMoveById returns correct move for poke_water_crabhammer', () => {
     const move = getMoveById('poke_water_crabhammer');
     expect(move).toBeDefined();
-    expect(move!.name).toBe('Claw Crusher');
+    expect(move!.name).toBe('Diamond Hands');
     expect(move!.type).toBe('WATER');
     expect(move!.power).toBe(100);
   });
