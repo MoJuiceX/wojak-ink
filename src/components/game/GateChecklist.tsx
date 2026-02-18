@@ -30,6 +30,9 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, o
   const [didInput, setDidInput] = useState('');
   const [didError, setDidError] = useState('');
   const [linking, setLinking] = useState(false);
+  const [detecting, setDetecting] = useState(false);
+  const [detectFailed, setDetectFailed] = useState(false);
+  const [showManualDid, setShowManualDid] = useState(false);
 
   // Progressive step reveal — checkmarks appear one by one with short delays
   const [animStep, setAnimStep] = useState(0);
@@ -60,6 +63,26 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, o
   useEffect(() => {
     if (!walletConnected) setAnimStep(0);
   }, [walletConnected]);
+
+  // Step 2 auto-detect: show detecting state while SwipeAutoRegister works
+  useEffect(() => {
+    if (walletConnected && !hasDid) {
+      setDetecting(true);
+      setDetectFailed(false);
+      setShowManualDid(false);
+      // Give SwipeAutoRegister time to detect DID (3 retries x 3s = ~9s)
+      const timer = setTimeout(() => {
+        setDetecting(false);
+        setDetectFailed(true);
+      }, 12000);
+      return () => clearTimeout(timer);
+    }
+    if (hasDid) {
+      setDetecting(false);
+      setDetectFailed(false);
+      setShowManualDid(false);
+    }
+  }, [walletConnected, hasDid]);
 
   // Step 3 state
   // Flow: auto-check → (fail) → show retry button → (retry fails) → show manual input
@@ -160,7 +183,7 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, o
   // Steps 2+ require wallet — reset if disconnected
   const steps = [
     { label: 'Connect wallet', done: walletConnected },
-    { label: 'Link your DID', done: walletConnected && hasDid },
+    { label: 'Detect your identity', done: walletConnected && hasDid },
     { label: 'Hold a Wojak Farmers Plot', done: walletConnected && hasPhase1 },
     { label: 'Start swiping', done: walletConnected && hasDid && hasPhase1 },
   ];
@@ -196,35 +219,58 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, o
                 )}
                 {isCurrent && i === 1 && (
                   <div className="flex flex-col gap-2 mt-2">
-                    <span className="text-muted text-sm">
-                      Paste your DID from Sage wallet.
-                    </span>
-                    <input
-                      className="input text-sm"
-                      type="text"
-                      placeholder="did:chia:1..."
-                      value={didInput}
-                      onChange={e => { setDidInput(e.target.value); setDidError(''); }}
-                      onKeyDown={e => { if (e.key === 'Enter') handleLinkDid(); }}
-                      style={{ fontSize: 13 }}
-                    />
-                    {didError && <span className="text-sm" style={{ color: 'var(--color-error)' }}>{didError}</span>}
-                    <button
-                      className="btn btn-primary text-sm"
-                      style={{ padding: '6px 16px' }}
-                      onClick={handleLinkDid}
-                      disabled={linking || !didInput.trim()}
-                    >
-                      {linking ? 'Linking...' : 'Link DID'}
-                    </button>
-                    <a
-                      href="https://docs.sagewalletapp.com/getting-started/did"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-accent text-sm"
-                    >
-                      Don't have a DID? Learn how to create one &rarr;
-                    </a>
+                    {detecting && !detectFailed && (
+                      <span className="text-secondary text-sm">
+                        Detecting your identity...
+                      </span>
+                    )}
+                    {detectFailed && !showManualDid && (
+                      <>
+                        <span className="text-muted text-sm">
+                          Could not detect DID automatically.
+                        </span>
+                        <button
+                          className="btn btn-ghost text-sm"
+                          style={{ padding: '4px 12px', alignSelf: 'flex-start' }}
+                          onClick={() => setShowManualDid(true)}
+                        >
+                          Enter DID manually
+                        </button>
+                      </>
+                    )}
+                    {(showManualDid || (!detecting && !detectFailed)) && (
+                      <>
+                        <span className="text-muted text-sm">
+                          Paste your DID from Sage wallet.
+                        </span>
+                        <input
+                          className="input text-sm"
+                          type="text"
+                          placeholder="did:chia:1..."
+                          value={didInput}
+                          onChange={e => { setDidInput(e.target.value); setDidError(''); }}
+                          onKeyDown={e => { if (e.key === 'Enter') handleLinkDid(); }}
+                          style={{ fontSize: 13 }}
+                        />
+                        {didError && <span className="text-sm" style={{ color: 'var(--color-error)' }}>{didError}</span>}
+                        <button
+                          className="btn btn-primary text-sm"
+                          style={{ padding: '6px 16px' }}
+                          onClick={handleLinkDid}
+                          disabled={linking || !didInput.trim()}
+                        >
+                          {linking ? 'Linking...' : 'Link DID'}
+                        </button>
+                        <a
+                          href="https://docs.sagewalletapp.com/getting-started/did"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-accent text-sm"
+                        >
+                          Don't have a DID? Learn how to create one &rarr;
+                        </a>
+                      </>
+                    )}
                   </div>
                 )}
                 {isCurrent && i === 2 && (
