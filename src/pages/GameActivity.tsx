@@ -1,7 +1,7 @@
 // Activity Feed — /swipe/activity
 // Chronological feed of all game events for the current player.
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Sparkles, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { GameProvider } from '@/contexts/GameContext';
@@ -13,6 +13,19 @@ import { EVENT_ICONS, formatEvent, timeAgo } from '@/lib/gameEvents';
 
 const PAGE_SIZE = 20;
 
+async function fetchActivityEvents(did: string, offset: number): Promise<{ events: ActivityEvent[]; ok: boolean }> {
+  try {
+    const res = await fetch(`/api/game/activity?did=${did}&limit=${PAGE_SIZE}&offset=${offset}`);
+    const data = await res.json();
+    if (data.success) {
+      return { events: data.events as ActivityEvent[], ok: true };
+    }
+    return { events: [], ok: false };
+  } catch {
+    return { events: [], ok: false };
+  }
+}
+
 function ActivityFeed() {
   const { player, isRegistered } = useGame();
   const [events, setEvents] = useState<ActivityEvent[]>([]);
@@ -20,34 +33,39 @@ function ActivityFeed() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const didRef = useRef(player?.did);
 
-  const fetchEvents = useCallback(async (offset: number, append: boolean) => {
-    if (!player?.did) return;
-    try {
-      const res = await fetch(`/api/game/activity?did=${player.did}&limit=${PAGE_SIZE}&offset=${offset}`);
-      const data = await res.json();
-      if (data.success) {
-        const newEvents = data.events as ActivityEvent[];
-        setEvents(prev => append ? [...prev, ...newEvents] : newEvents);
-        setHasMore(newEvents.length === PAGE_SIZE);
-        setError(false);
-      } else {
-        if (!append) setError(true);
-      }
-    } catch {
-      if (!append) setError(true);
-    }
+  useEffect(() => {
+    didRef.current = player?.did;
   }, [player?.did]);
 
   useEffect(() => {
     if (!player?.did) return;
-    setLoading(true);
-    fetchEvents(0, false).finally(() => setLoading(false));
-  }, [player?.did, fetchEvents]);
+    const did = player.did;
+    let cancelled = false;
+    fetchActivityEvents(did, 0).then(result => {
+      if (cancelled) return;
+      if (result.ok) {
+        setEvents(result.events);
+        setHasMore(result.events.length === PAGE_SIZE);
+        setError(false);
+      } else {
+        setError(true);
+      }
+      setLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, [player?.did]);
 
   const handleLoadMore = async () => {
+    const did = didRef.current;
+    if (!did) return;
     setLoadingMore(true);
-    await fetchEvents(events.length, true);
+    const result = await fetchActivityEvents(did, events.length);
+    if (result.ok) {
+      setEvents(prev => [...prev, ...result.events]);
+      setHasMore(result.events.length === PAGE_SIZE);
+    }
     setLoadingMore(false);
   };
 
@@ -78,10 +96,19 @@ function ActivityFeed() {
         <p className="text-secondary">Couldn't load activity</p>
         <button
           className="btn btn-secondary"
-          onClick={() => {
+          onClick={async () => {
+            const did = didRef.current;
+            if (!did) return;
             setError(false);
             setLoading(true);
-            fetchEvents(0, false).finally(() => setLoading(false));
+            const result = await fetchActivityEvents(did, 0);
+            if (result.ok) {
+              setEvents(result.events);
+              setHasMore(result.events.length === PAGE_SIZE);
+            } else {
+              setError(true);
+            }
+            setLoading(false);
           }}
         >
           <RefreshCw size={16} /> Retry
