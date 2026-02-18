@@ -1,6 +1,6 @@
 // Power Level hero card — centered score, tier badge, collapsible breakdown, credits.
 import { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Info } from 'lucide-react';
 
 interface PowerLevelDisplayProps {
   level: number;
@@ -25,6 +25,7 @@ function getTier(level: number) {
 export function PowerLevelDisplay({ level, rank, credits, voteStreak, breakdown }: PowerLevelDisplayProps) {
   const tier = getTier(level);
   const [showBreakdown, setShowBreakdown] = useState(false);
+  const [showExplainer, setShowExplainer] = useState(false);
 
   return (
     <div className="card-static p-6 flex flex-col items-center gap-2">
@@ -32,7 +33,25 @@ export function PowerLevelDisplay({ level, rank, credits, voteStreak, breakdown 
         <p className="text-muted" style={{ fontSize: 13 }}>#{rank}</p>
       )}
 
-      <h2 className="font-bold" style={{ fontSize: 36 }}>{level.toLocaleString()}</h2>
+      <div className="flex items-center gap-2">
+        <h2 className="font-bold" style={{ fontSize: 36 }}>{level.toLocaleString()}</h2>
+        <button
+          onClick={() => setShowExplainer(!showExplainer)}
+          className="btn btn-ghost"
+          style={{ padding: 4, opacity: 0.6 }}
+          aria-label="What is Power Level?"
+        >
+          <Info size={16} />
+        </button>
+      </div>
+
+      {showExplainer && (
+        <div className="text-secondary w-full" style={{ fontSize: 13 }}>
+          <p>Your Power Level reflects your standing in the Wojak ecosystem.</p>
+          <p className="mt-1"><strong style={{ color: 'var(--color-text)' }}>Holdings:</strong> Quality and diversity of NFTs you collect</p>
+          <p><strong style={{ color: 'var(--color-text)' }}>Creations:</strong> How well your minted Wojaks perform in votes</p>
+        </div>
+      )}
 
       <div className={`power-level-badge ${tier.class}`}>
         {tier.label}
