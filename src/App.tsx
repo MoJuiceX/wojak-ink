@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { DeviceOrientationProvider } from '@/contexts/DeviceOrientationContext';
@@ -33,6 +33,18 @@ import StartupSequence from '@/components/StartupSequence';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { GameLoading } from '@/components/games/GameLoading';
 import { GameErrorBoundary } from '@/components/games/GameError';
+import { GameProvider } from '@/contexts/GameContext';
+import { SwipeAutoRegister } from '@/components/game/SwipeAutoRegister';
+
+/** Shared layout for all /swipe/* routes — provides GameProvider + SwipeAutoRegister */
+function GameLayout() {
+  return (
+    <GameProvider>
+      <SwipeAutoRegister />
+      <Outlet />
+    </GameProvider>
+  );
+}
 // Lazy load all pages for code splitting
 const Gallery = lazy(() => import('./pages/Gallery'));
 const Treasury = lazy(() => import('./pages/Treasury'));
@@ -348,47 +360,49 @@ function AppContent() {
                       </Suspense>
                     }
                   />
-                  {/* Wojak Swipe */}
-                  <Route
-                    path="swipe"
-                    element={
-                      <Suspense fallback={<PageSkeleton type="media" />}>
-                        <GameVoting />
-                      </Suspense>
-                    }
-                  />
-                  <Route
-                    path="swipe/dashboard"
-                    element={
-                      <Suspense fallback={<PageSkeleton type="settings" />}>
-                        <GameDashboard />
-                      </Suspense>
-                    }
-                  />
-                  <Route
-                    path="swipe/battles"
-                    element={
-                      <Suspense fallback={<PageSkeleton type="media" />}>
-                        <GameBattles />
-                      </Suspense>
-                    }
-                  />
-                  <Route
-                    path="swipe/leaderboard"
-                    element={
-                      <Suspense fallback={<PageSkeleton type="settings" />}>
-                        <GameLeaderboard />
-                      </Suspense>
-                    }
-                  />
-                  <Route
-                    path="swipe/activity"
-                    element={
-                      <Suspense fallback={<PageSkeleton type="settings" />}>
-                        <GameActivity />
-                      </Suspense>
-                    }
-                  />
+                  {/* Wojak Swipe — shared GameProvider for all /swipe/* routes */}
+                  <Route path="swipe" element={<GameLayout />}>
+                    <Route
+                      index
+                      element={
+                        <Suspense fallback={<PageSkeleton type="media" />}>
+                          <GameVoting />
+                        </Suspense>
+                      }
+                    />
+                    <Route
+                      path="dashboard"
+                      element={
+                        <Suspense fallback={<PageSkeleton type="settings" />}>
+                          <GameDashboard />
+                        </Suspense>
+                      }
+                    />
+                    <Route
+                      path="battles"
+                      element={
+                        <Suspense fallback={<PageSkeleton type="media" />}>
+                          <GameBattles />
+                        </Suspense>
+                      }
+                    />
+                    <Route
+                      path="leaderboard"
+                      element={
+                        <Suspense fallback={<PageSkeleton type="settings" />}>
+                          <GameLeaderboard />
+                        </Suspense>
+                      }
+                    />
+                    <Route
+                      path="activity"
+                      element={
+                        <Suspense fallback={<PageSkeleton type="settings" />}>
+                          <GameActivity />
+                        </Suspense>
+                      }
+                    />
+                  </Route>
                   {/* Redirects from old routes */}
                   <Route path="your-wojak" element={<Navigate to="/swipe" replace />} />
                   <Route path="your-wojak/dashboard" element={<Navigate to="/swipe/dashboard" replace />} />

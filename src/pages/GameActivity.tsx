@@ -4,8 +4,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Sparkles, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { GameProvider } from '@/contexts/GameContext';
-import { SwipeAutoRegister } from '@/components/game/SwipeAutoRegister';
 import { useGame } from '@/contexts/GameContext';
 import { PageSEO } from '@/components/seo';
 import type { ActivityEvent } from '@/lib/gameEvents';
@@ -166,8 +164,7 @@ function ActivityFeed() {
 
 export default function GameActivity() {
   return (
-    <GameProvider>
-      <SwipeAutoRegister />
+    <>
       <PageSEO
         title="Activity — Wojak Swipe"
         description="Your game activity feed"
@@ -175,6 +172,6 @@ export default function GameActivity() {
         type="game"
       />
       <ActivityFeed />
-    </GameProvider>
+    </>
   );
 }

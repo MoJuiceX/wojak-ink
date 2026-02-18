@@ -1,7 +1,6 @@
 // Game Dashboard — player HQ with Power Level, quick actions, collection, battles.
 import { useEffect, useState } from 'react';
-import { useGame, GameProvider } from '@/contexts/GameContext';
-import { SwipeAutoRegister } from '@/components/game/SwipeAutoRegister';
+import { useGame } from '@/contexts/GameContext';
 import { useSageWallet } from '@/sage-wallet';
 import { GateChecklist } from '@/components/game/GateChecklist';
 import { PowerLevelDisplay } from '@/components/game/PowerLevelDisplay';
@@ -94,8 +93,7 @@ function DashboardContent() {
 
 export default function GameDashboard() {
   return (
-    <GameProvider>
-      <SwipeAutoRegister />
+    <>
       <PageSEO
         title="Wojak Swipe Dashboard"
         description="Track your power level, collection, and swipe stats"
@@ -104,6 +102,6 @@ export default function GameDashboard() {
       <PageTransition>
         <DashboardContent />
       </PageTransition>
-    </GameProvider>
+    </>
   );
 }

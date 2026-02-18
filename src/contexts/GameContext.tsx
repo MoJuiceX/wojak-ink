@@ -1,8 +1,5 @@
-import { createContext, useContext, useState, useCallback, useRef } from 'react';
+import { createContext, useContext, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
-import { useAuth } from '@clerk/clerk-react';
-
-const CLERK_ENABLED = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 interface GamePlayer {
   did: string;
@@ -40,6 +37,7 @@ interface GameContextType {
   feed: FeedItem[];
   feedLoading: boolean;
   register: (did: string, walletAddress: string) => Promise<void>;
+  resetPlayer: () => void;
   verifyPhase1: (did: string, nftId?: string) => Promise<boolean>;
   castVote: (nftId: string, editionNumber: number, voteType: 1 | -1) => Promise<boolean>;
   loadFeed: () => Promise<void>;
@@ -56,20 +54,17 @@ export function useGame() {
 }
 
 export function GameProvider({ children }: { children: ReactNode }) {
-  const clerkAuth = useAuth();
-  const authResult = CLERK_ENABLED ? clerkAuth : { getToken: async () => null };
-  const getTokenRef = useRef(authResult.getToken);
-  getTokenRef.current = authResult.getToken;
-
   const [player, setPlayer] = useState<GamePlayer | null>(null);
   const [feed, setFeed] = useState<FeedItem[]>([]);
   const [feedLoading, setFeedLoading] = useState(false);
 
   const getAuthHeaders = useCallback(async (): Promise<Record<string, string>> => {
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    const token = await getTokenRef.current?.();
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    return headers;
+    return { 'Content-Type': 'application/json' };
+  }, []);
+
+  const resetPlayer = useCallback(() => {
+    setPlayer(null);
+    setFeed([]);
   }, []);
 
   const register = useCallback(async (did: string, walletAddress: string) => {
@@ -168,6 +163,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       feed,
       feedLoading,
       register,
+      resetPlayer,
       verifyPhase1,
       castVote,
       loadFeed,

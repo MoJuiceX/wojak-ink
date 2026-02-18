@@ -12,34 +12,44 @@ const RETRY_DELAY_MS = 3000;
 
 export function SwipeAutoRegister() {
   const { address, status, getDIDs } = useSageWallet();
-  const { isRegistered, player, register } = useGame();
+  const { isRegistered, player, register, resetPlayer } = useGame();
   const attemptedRef = useRef(false);
-  const registeredAddressRef = useRef<string | null>(null);
+  const lastAddressRef = useRef<string | null>(null);
 
-  // Reset registration when wallet address changes
+  // Reset when wallet address changes so re-registration can occur
   useEffect(() => {
-    if (address && registeredAddressRef.current && address !== registeredAddressRef.current) {
+    if (address && lastAddressRef.current && address !== lastAddressRef.current) {
       attemptedRef.current = false;
-      registeredAddressRef.current = null;
+      resetPlayer();
     }
-  }, [address]);
+    lastAddressRef.current = address || null;
+  }, [address, resetPlayer]);
+
+  // Also reset if player's wallet doesn't match connected wallet
+  useEffect(() => {
+    if (player && address && player.walletAddress !== address) {
+      attemptedRef.current = false;
+      resetPlayer();
+    }
+  }, [player, address, resetPlayer]);
 
   // Auto-register: detect DID and register player
-  const needsRegister = !isRegistered || (player && address && player.walletAddress !== address);
   useEffect(() => {
-    if (status !== 'connected' || !address || !needsRegister || attemptedRef.current) return;
+    if (status !== 'connected' || !address || isRegistered || attemptedRef.current) return;
     attemptedRef.current = true;
 
     let cancelled = false;
 
     (async () => {
+      console.log('[SwipeAutoRegister] Starting auto-registration for', address);
       for (let attempt = 0; attempt < MAX_DID_RETRIES; attempt++) {
         if (cancelled) return;
         try {
           const dids = await getDIDs();
+          console.log('[SwipeAutoRegister] getDIDs attempt', attempt + 1, ':', dids);
           if (dids.length > 0) {
             await register(dids[0], address);
-            registeredAddressRef.current = address;
+            console.log('[SwipeAutoRegister] Registration succeeded for DID:', dids[0]);
             return;
           }
           if (attempt < MAX_DID_RETRIES - 1) {
@@ -56,7 +66,7 @@ export function SwipeAutoRegister() {
     })();
 
     return () => { cancelled = true; };
-  }, [status, address, needsRegister, getDIDs, register]);
+  }, [status, address, isRegistered, getDIDs, register]);
 
   return null;
 }
