@@ -25,6 +25,8 @@ import { useBattlePlayback } from '@/hooks/useBattlePlayback';
 import { getBattleAudio } from '@/lib/combat/audio';
 import type { CombatType } from '@/lib/combat/types';
 import type { TurnResult } from '@/lib/combat/battle-state';
+import { getBaseStats } from '@/lib/combat/data/base-stats';
+import { calculateHP } from '@/lib/combat/stat-calculator';
 
 // ── Interfaces ──────────────────────────────────────────────────────────────
 
@@ -62,9 +64,10 @@ interface BattleViewProps {
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
-/** Compute max HP from level using the standard formula (base HP stat = 80, IV = 31). */
-function computeMaxHP(level: number): number {
-  return Math.floor((2 * 80 + 31) * level / 100) + level + 10;
+/** Compute max HP from type and level using the real base stats. */
+function computeMaxHP(type: CombatType, level: number): number {
+  const base = getBaseStats(type);
+  return calculateHP(base.hp, level);
 }
 
 // ── Fighter Position Constants (for canvas particle targeting) ──────────────
@@ -179,8 +182,8 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
   }, []);
 
   // ── Computed values ─────────────────────────────────────────────────────
-  const maxHpA = battle?.fighterA?.level ? computeMaxHP(battle.fighterA.level) : 100;
-  const maxHpB = battle?.fighterB?.level ? computeMaxHP(battle.fighterB.level) : 100;
+  const maxHpA = battle?.fighterA ? computeMaxHP(battle.fighterA.type, battle.fighterA.level) : 100;
+  const maxHpB = battle?.fighterB ? computeMaxHP(battle.fighterB.type, battle.fighterB.level) : 100;
 
   // ── Fetch battle state ──────────────────────────────────────────────────
   const fetchBattle = useCallback(async () => {

@@ -4,6 +4,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { HPBar } from './HPBar';
+import { getBaseStats } from '@/lib/combat/data/base-stats';
+import { calculateHP } from '@/lib/combat/stat-calculator';
+import type { CombatType } from '@/lib/combat/types';
 
 interface TurnData {
   turn: number;
@@ -69,8 +72,12 @@ export function BattleReplay({ battleId }: BattleReplayProps) {
 
   const turns: TurnData[] = battle.turns ?? [];
   const turn = turns[currentStep];
-  const maxHP_A = 100; // Placeholder — would come from fighter stats
-  const maxHP_B = 100;
+  const maxHP_A = battle.fighterA?.type && battle.fighterA?.level
+    ? calculateHP(getBaseStats(battle.fighterA.type as CombatType).hp, battle.fighterA.level)
+    : 100;
+  const maxHP_B = battle.fighterB?.type && battle.fighterB?.level
+    ? calculateHP(getBaseStats(battle.fighterB.type as CombatType).hp, battle.fighterB.level)
+    : 100;
 
   return (
     <div className="flex flex-col gap-4">
