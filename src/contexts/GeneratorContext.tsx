@@ -260,6 +260,10 @@ interface GeneratorContextValue extends GeneratorState {
 
   // Error
   clearGeneratorError: () => void;
+
+  // Combat
+  combatMoves: string[];
+  setCombatMoves: (moves: string[]) => void;
 }
 
 // ============ Context ============
@@ -963,6 +967,10 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
     dispatch({ type: 'SET_ERROR', error: null });
   }, []);
 
+  const setCombatMoves = useCallback((moves: string[]) => {
+    dispatch({ type: 'SET_COMBAT_MOVES', moves });
+  }, []);
+
   const canExport = canExportOrSave(derived.selectedLayers);
   const missingLayers = getMissingRequiredLayers(derived.selectedLayers);
 
@@ -1005,6 +1013,7 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
       setScrollPosition,
       setStickyPreview,
       clearGeneratorError,
+      setCombatMoves,
     }),
     [
       state,
@@ -1042,6 +1051,7 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
       setScrollPosition,
       setStickyPreview,
       clearGeneratorError,
+      setCombatMoves,
     ]
   );
 

@@ -10,7 +10,11 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X, Loader2, CheckCircle, AlertCircle, Copy, ExternalLink, Wallet, Share2, Sparkles } from 'lucide-react';
 import { useMint } from '@/contexts/MintContext';
+import { useGenerator } from '@/contexts/GeneratorContext';
 import { generateRandomName, validateName, MAX_NAME_LENGTH } from '@/lib/nameGenerator';
+import { MoveSelection } from '@/components/generator/MoveSelection';
+import { calculateCombatIdentity } from '@/lib/combat/identity-calculator';
+import type { CombatType } from '@/lib/combat/types';
 
 interface MintFlowModalProps {
   isOpen: boolean;
@@ -85,12 +89,38 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
     customName,
     setCustomName,
   } = useMint();
+  const { selectedLayers, g2Selections, combatMoves, setCombatMoves } = useGenerator();
   const prefersReducedMotion = useReducedMotion();
   const [timeLeft, setTimeLeft] = useState('');
   const [isExpired, setIsExpired] = useState(false);
   const [copied, setCopied] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
   const [nameError, setNameError] = useState('');
+
+  // Compute combat type from current selections for move selection
+  const combatType = (() => {
+    try {
+      const traits: { traitId: string; layer: string }[] = [];
+      const colors: Record<string, string> = {};
+      const details: Record<string, string> = {};
+      if (g2Selections) {
+        for (const [layer, sel] of Object.entries(g2Selections)) {
+          if (!sel?.traitId) continue;
+          traits.push({ traitId: sel.traitId, layer });
+          if (sel.colors) {
+            for (const hex of Object.values(sel.colors)) {
+              if (hex) colors[sel.traitId] = hex;
+            }
+          }
+          if (sel.detailOption) details[sel.traitId] = sel.detailOption;
+        }
+      }
+      if (traits.length === 0) return null;
+      return calculateCombatIdentity({ traits, colors, details }).type as CombatType;
+    } catch {
+      return null;
+    }
+  })();
 
   const handleNameChange = (value: string) => {
     const validation = validateName(value);
@@ -328,11 +358,22 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
                       )}
                     </div>
 
+                    {/* Combat Move Selection */}
+                    {combatType && (
+                      <div className="w-full max-h-48 overflow-y-auto hide-scrollbar">
+                        <MoveSelection
+                          type={combatType}
+                          selectedMoves={combatMoves}
+                          onSelectionChange={setCombatMoves}
+                        />
+                      </div>
+                    )}
+
                     <div className="flex gap-2 mt-2">
                       <button type="button" className="btn btn-secondary flex-1" onClick={handleClose}>
                         Cancel
                       </button>
-                      <button type="button" className="btn btn-primary flex-1" onClick={confirmMint} disabled={!!nameError}>
+                      <button type="button" className="btn btn-primary flex-1" onClick={confirmMint} disabled={!!nameError || (combatType != null && combatMoves.length !== 4)}>
                         {isFreeConfirm ? 'Mint' : 'Continue'}
                       </button>
                     </div>

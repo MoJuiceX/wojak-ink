@@ -22,6 +22,7 @@ import {
   GeneratorRightPanel,
 } from '@/components/generator';
 import { MetadataPreview } from '@/components/generator/MetadataPreview';
+import { CombatPreview } from '@/components/generator/CombatPreview';
 import { PageSEO } from '@/components/seo';
 
 type RightPanelMode = 'colors' | 'metadata';
@@ -147,6 +148,7 @@ function GeneratorContent() {
                       <MetadataPreview
                         onSwitchToColors={() => setRightPanelMode('colors')}
                       />
+                      <CombatPreview />
                     </motion.div>
                   ) : (
                     <motion.div
