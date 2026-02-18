@@ -1,49 +1,38 @@
-import { authenticateRequest } from '../../lib/auth';
+/**
+ * Game auth — verifies the player's DID exists in the database.
+ * No Clerk dependency. The DID trust chain is:
+ *   WalletConnect (proves wallet) → getDIDs() (proves DID ownership) → register (creates player).
+ * Rate limiting uses DID instead of Clerk userId.
+ */
 
 interface GameAuthEnv {
   DB: D1Database;
-  CLERK_DOMAIN?: string;
 }
 
 /**
- * Verify that the authenticated Clerk user owns the claimed DID.
- * On first authenticated call by a legacy player, binds the Clerk userId to the DID.
- * Returns the auth result or an error Response.
+ * Verify that the claimed DID is a registered game player.
+ * Returns the DID for rate limiting, or an error Response.
  */
-export async function verifyGameAuth(
-  request: Request,
+export async function verifyGamePlayer(
   env: GameAuthEnv,
   did: string
-): Promise<{ userId: string } | Response> {
-  const auth = await authenticateRequest(request, env.CLERK_DOMAIN);
-  if (!auth) {
-    return Response.json({ error: 'Authentication required' }, { status: 401 });
+): Promise<{ did: string } | Response> {
+  if (!did) {
+    return Response.json({ error: 'DID required' }, { status: 400 });
   }
 
   const player = await env.DB.prepare(
-    'SELECT clerk_user_id FROM game_players WHERE did_id = ?'
-  ).bind(did).first<{ clerk_user_id: string | null }>();
+    'SELECT did_id FROM game_players WHERE did_id = ?'
+  ).bind(did).first();
 
   if (!player) {
     return Response.json({ error: 'Player not registered' }, { status: 404 });
   }
 
-  // If DID is bound to a different Clerk user, reject
-  if (player.clerk_user_id && player.clerk_user_id !== auth.userId) {
-    return Response.json({ error: 'DID does not belong to your account' }, { status: 403 });
-  }
-
-  // First authenticated call by a legacy (pre-L3) player — bind now
-  if (!player.clerk_user_id) {
-    await env.DB.prepare(
-      'UPDATE game_players SET clerk_user_id = ? WHERE did_id = ? AND clerk_user_id IS NULL'
-    ).bind(auth.userId, did).run();
-  }
-
-  return { userId: auth.userId };
+  return { did };
 }
 
 /** Type guard: returns true if the result is an error Response */
-export function isAuthError(result: { userId: string } | Response): result is Response {
+export function isAuthError(result: { did: string } | Response): result is Response {
   return result instanceof Response;
 }

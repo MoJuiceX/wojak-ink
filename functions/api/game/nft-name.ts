@@ -3,11 +3,10 @@
 // Lets players name their Phase 2 NFTs.
 
 import { isValidDid } from './_shared';
-import { verifyGameAuth, isAuthError } from './_auth';
+import { verifyGamePlayer, isAuthError } from './_auth';
 
 interface Env {
   DB: D1Database;
-  CLERK_DOMAIN: string;
 }
 
 const NAME_REGEX = /^[a-zA-Z0-9 .,!?'-]+$/;
@@ -23,7 +22,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     const { did, editionNumber, name } = body;
 
-    const authResult = await verifyGameAuth(context.request, context.env, did);
+    const authResult = await verifyGamePlayer(context.env, did);
     if (isAuthError(authResult)) return authResult;
 
     if (!did || !isValidDid(did)) {

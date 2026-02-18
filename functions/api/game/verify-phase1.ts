@@ -5,12 +5,11 @@
 // Otherwise falls back to slower profile-based search.
 
 import { PHASE1_COLLECTION_ID, ONBOARDING_CREDITS } from './_shared';
-import { verifyGameAuth, isAuthError } from './_auth';
+import { verifyGamePlayer, isAuthError } from './_auth';
 import { checkRateLimit, getRateLimitKey, GAME_RATE_LIMITS } from '../../lib/rateLimit';
 
 interface Env {
   DB: D1Database;
-  CLERK_DOMAIN: string;
 }
 
 // Validate NFT launcher ID format: nft1... bech32m
@@ -23,10 +22,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const body = await context.request.json() as { did: string; nftId?: string };
     const { did, nftId } = body;
 
-    const authResult = await verifyGameAuth(context.request, context.env, did);
+    const authResult = await verifyGamePlayer(context.env, did);
     if (isAuthError(authResult)) return authResult;
 
-    const rlKey = getRateLimitKey(context.request, authResult.userId);
+    const rlKey = getRateLimitKey(context.request, authResult.did);
     const rl = await checkRateLimit(context.env.DB, rlKey, GAME_RATE_LIMITS.verifyPhase1);
     if (!rl.allowed) {
       return Response.json({ error: 'Rate limited. Try again later.' }, { status: 429 });

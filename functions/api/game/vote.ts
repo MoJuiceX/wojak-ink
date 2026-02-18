@@ -3,12 +3,11 @@
 // Cast a vote on a Your Wojak NFT. 1 = like, -1 = dislike.
 
 import { VOTES_PER_DAY, getTodayString, getYesterdayString, STREAK_MILESTONES, ONBOARDING_CREDITS } from './_shared';
-import { verifyGameAuth, isAuthError } from './_auth';
+import { verifyGamePlayer, isAuthError } from './_auth';
 import { checkRateLimit, getRateLimitKey, GAME_RATE_LIMITS } from '../../lib/rateLimit';
 
 interface Env {
   DB: D1Database;
-  CLERK_DOMAIN: string;
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
@@ -22,10 +21,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     const { voterDid, nftId, editionNumber, voteType } = body;
 
-    const authResult = await verifyGameAuth(context.request, context.env, voterDid);
+    const authResult = await verifyGamePlayer(context.env, voterDid);
     if (isAuthError(authResult)) return authResult;
 
-    const rlKey = getRateLimitKey(context.request, authResult.userId);
+    const rlKey = getRateLimitKey(context.request, authResult.did);
     const rl = await checkRateLimit(context.env.DB, rlKey, GAME_RATE_LIMITS.vote);
     if (!rl.allowed) {
       return Response.json({ error: 'Rate limited. Try again later.' }, { status: 429 });

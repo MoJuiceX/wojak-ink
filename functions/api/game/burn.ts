@@ -3,12 +3,11 @@
 // The actual on-chain burn is handled by the wallet.
 // This endpoint just records it and awards credits.
 
-import { verifyGameAuth, isAuthError } from './_auth';
+import { verifyGamePlayer, isAuthError } from './_auth';
 import { checkRateLimit, getRateLimitKey, GAME_RATE_LIMITS } from '../../lib/rateLimit';
 
 interface Env {
   DB: D1Database;
-  CLERK_DOMAIN: string;
 }
 
 const BURN_ADDRESS = 'xch1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqm6ks6e8mvy';
@@ -41,10 +40,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     const { nftId, editionNumber, burnerDid, burnerWallet } = body;
 
-    const authResult = await verifyGameAuth(context.request, context.env, burnerDid);
+    const authResult = await verifyGamePlayer(context.env, burnerDid);
     if (isAuthError(authResult)) return authResult;
 
-    const rlKey = getRateLimitKey(context.request, authResult.userId);
+    const rlKey = getRateLimitKey(context.request, authResult.did);
     const rl = await checkRateLimit(context.env.DB, rlKey, GAME_RATE_LIMITS.burn);
     if (!rl.allowed) {
       return Response.json({ error: 'Rate limited. Try again later.' }, { status: 429 });
