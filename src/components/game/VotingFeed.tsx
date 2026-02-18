@@ -104,12 +104,14 @@ export function VotingFeed() {
     }
   }, [player]);
 
-  // Load feed when verified
+  // Load feed once when verified
+  const feedAttempted = useRef(false);
   useEffect(() => {
-    if (isVerified && feed.length === 0 && !feedLoading) {
+    if (isVerified && !feedAttempted.current) {
+      feedAttempted.current = true;
       loadFeed().catch(() => setFeedError(true));
     }
-  }, [isVerified, feed.length, feedLoading, loadFeed]);
+  }, [isVerified, loadFeed]);
 
   // Prefetch images for next 3 cards
   useEffect(() => {
@@ -195,6 +197,7 @@ export function VotingFeed() {
 
   const handleRetry = useCallback(() => {
     setFeedError(false);
+    feedAttempted.current = false;
     loadFeed().catch(() => setFeedError(true));
   }, [loadFeed]);
 
@@ -224,7 +227,7 @@ export function VotingFeed() {
   // Error
   if (feedError && feed.length === 0) {
     return (
-      <div className="vote-card-skeleton flex flex-col items-center justify-center gap-4 p-8" style={{ aspectRatio: 'auto', minHeight: 300 }}>
+      <div className="card-static flex flex-col items-center justify-center gap-4 p-8" style={{ minHeight: 300 }}>
         <span className="text-2xl">&#9888;&#65039;</span>
         <h2 className="text-lg font-semibold">Something went wrong</h2>
         <p className="text-secondary text-sm text-center">
@@ -252,13 +255,15 @@ export function VotingFeed() {
   // Feed empty
   if (feed.length === 0) {
     return (
-      <div className="vote-card-skeleton flex flex-col items-center justify-center gap-4 p-8" style={{ aspectRatio: 'auto', minHeight: 300 }}>
+      <div className="card-static flex flex-col items-center justify-center gap-4 p-8" style={{ minHeight: 300 }}>
         <span className="text-2xl">&#10024;</span>
-        <h2 className="text-lg font-semibold">All Caught Up!</h2>
+        <h2 className="text-lg font-semibold">No Wojaks to Vote On</h2>
         <p className="text-secondary text-sm text-center">
-          You've seen every available Wojak. Check back after new mints drop!
+          You've seen them all, or only your own Wojaks exist so far.
+          <br />
+          Invite others to mint &mdash; or check back later!
         </p>
-        <a href="/generator" className="text-sm" style={{ color: 'var(--color-primary)' }}>
+        <a href="/generator" className="btn btn-primary text-sm" style={{ padding: '8px 20px', textDecoration: 'none' }}>
           Mint a Wojak &rarr;
         </a>
       </div>

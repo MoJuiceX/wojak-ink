@@ -118,6 +118,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       const data = await res.json();
       if (data.success) {
         setFeed(data.feed);
+      } else {
+        throw new Error(data.error || 'Feed request failed');
       }
     } finally {
       setFeedLoading(false);
