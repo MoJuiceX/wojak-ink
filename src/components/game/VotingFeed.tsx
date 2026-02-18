@@ -77,6 +77,19 @@ export function VotingFeed() {
   const [cardExiting, setCardExiting] = useState(false);
   const powerLevelBefore = useRef(0);
 
+  // Gate animation state — always show checklist, transition after progressive reveal
+  const walletConnected = walletStatus === 'connected' && !!address;
+  const hasDid = isRegistered;
+  const hasPhase1 = isVerified;
+  const [gateAnimDone, setGateAnimDone] = useState(false);
+
+  // Reset gate animation if any condition becomes false
+  useEffect(() => {
+    if (!walletConnected || !hasDid || !hasPhase1) {
+      setGateAnimDone(false);
+    }
+  }, [walletConnected, hasDid, hasPhase1]);
+
   // Instruction text visibility
   const [instructionsSeen, setInstructionsSeen] = useState(() => {
     try {
@@ -104,14 +117,14 @@ export function VotingFeed() {
     }
   }, [player]);
 
-  // Load feed once when verified
+  // Load feed once when gate animation completes
   const feedAttempted = useRef(false);
   useEffect(() => {
-    if (isVerified && !feedAttempted.current) {
+    if (gateAnimDone && !feedAttempted.current) {
       feedAttempted.current = true;
       loadFeed().catch(() => setFeedError(true));
     }
-  }, [isVerified, loadFeed]);
+  }, [gateAnimDone, loadFeed]);
 
   // Prefetch images for next 3 cards
   useEffect(() => {
@@ -201,12 +214,7 @@ export function VotingFeed() {
     loadFeed().catch(() => setFeedError(true));
   }, [loadFeed]);
 
-  // Gate: wallet not connected or player not registered/verified
-  const walletConnected = walletStatus === 'connected' && !!address;
-  const hasDid = isRegistered;
-  const hasPhase1 = isVerified;
-
-  if (!walletConnected || !hasDid || !hasPhase1) {
+  if (!gateAnimDone) {
     return (
       <GateChecklist
         walletConnected={walletConnected}
@@ -215,6 +223,7 @@ export function VotingFeed() {
         onLinkDid={async (did) => { if (address) await register(did, address); }}
         onAutoVerify={async () => { if (player?.did) return verifyPhase1(player.did); return false; }}
         onVerifyNft={async (nftId) => { if (player?.did) return verifyPhase1(player.did, nftId); return false; }}
+        onAllComplete={() => setGateAnimDone(true)}
       />
     );
   }

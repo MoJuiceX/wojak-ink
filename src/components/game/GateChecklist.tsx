@@ -12,6 +12,7 @@ interface GateChecklistProps {
   onLinkDid?: (did: string) => Promise<void>;
   onAutoVerify?: () => Promise<boolean>;
   onVerifyNft?: (nftId: string) => Promise<boolean>;
+  onAllComplete?: () => void;
 }
 
 function isValidDid(did: string): boolean {
@@ -24,11 +25,41 @@ function isValidNftId(id: string): boolean {
 
 type VerifyState = 'idle' | 'checking' | 'not_found' | 'error';
 
-export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, onAutoVerify, onVerifyNft }: GateChecklistProps) {
+export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, onAutoVerify, onVerifyNft, onAllComplete }: GateChecklistProps) {
   const { connect } = useSageWallet();
   const [didInput, setDidInput] = useState('');
   const [didError, setDidError] = useState('');
   const [linking, setLinking] = useState(false);
+
+  // Progressive step reveal — checkmarks appear one by one with short delays
+  const [animStep, setAnimStep] = useState(0);
+
+  useEffect(() => {
+    if (animStep >= 4) return;
+    const stepsDone = [
+      walletConnected,
+      walletConnected && hasDid,
+      walletConnected && hasPhase1,
+      walletConnected && hasDid && hasPhase1,
+    ];
+    if (stepsDone[animStep]) {
+      const timer = setTimeout(() => setAnimStep(prev => prev + 1), 400);
+      return () => clearTimeout(timer);
+    }
+  }, [animStep, walletConnected, hasDid, hasPhase1]);
+
+  // Notify parent when all 4 steps revealed
+  useEffect(() => {
+    if (animStep >= 4 && walletConnected && hasDid && hasPhase1) {
+      const timer = setTimeout(() => onAllComplete?.(), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [animStep, walletConnected, hasDid, hasPhase1, onAllComplete]);
+
+  // Reset animation if wallet disconnects
+  useEffect(() => {
+    if (!walletConnected) setAnimStep(0);
+  }, [walletConnected]);
 
   // Step 3 state
   // Flow: auto-check → (fail) → show retry button → (retry fails) → show manual input
@@ -142,15 +173,20 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, o
       </p>
       <ol className="flex flex-col gap-3 w-full" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
         {steps.map((step, i) => {
+          // isRevealed: animation has ticked past this step (show checkmark)
+          const isRevealed = step.done && i < animStep;
+          // isCurrent: genuinely needs user action (not just waiting for animation)
           const isCurrent = !step.done && steps.slice(0, i).every(s => s.done);
+          // isScanning: step is done but animation hasn't revealed it yet
+          const isScanning = step.done && !isRevealed;
           return (
             <li key={step.label} className="gate-step" aria-current={isCurrent ? 'step' : undefined}>
               <span className="gate-step-icon">
-                {step.done ? '\u2705' : isCurrent ? '\u2610' : ''}
+                {isRevealed ? '\u2705' : (isCurrent || isScanning) ? '\u2610' : ''}
                 {!step.done && !isCurrent && <div className="gate-step-icon-future" />}
               </span>
               <div className="gate-step-content">
-                <span className={step.done ? 'text-secondary text-sm' : isCurrent ? 'text-sm font-medium' : 'text-muted text-sm'}>
+                <span className={isRevealed ? 'text-secondary text-sm' : (isCurrent || isScanning) ? 'text-sm font-medium' : 'text-muted text-sm'}>
                   {step.label}
                 </span>
                 {isCurrent && i === 0 && (
