@@ -1,0 +1,64 @@
+/**
+ * Combat Battle Detail Page — /games/combat/battle/:id
+ *
+ * Renders the full BattleView for a specific battle ID.
+ */
+
+import { useParams } from 'react-router-dom';
+import { PageSEO } from '@/components/seo';
+import { PageTransition } from '@/components/layout/PageTransition';
+import { BattleView } from '@/components/combat/BattleView';
+import { useSageWallet } from '@/sage-wallet/SageWalletProvider';
+import { useState, useEffect } from 'react';
+
+export default function CombatBattle() {
+  const { id } = useParams<{ id: string }>();
+  const battleId = id ? parseInt(id, 10) : null;
+  const { getDIDs, isConnected } = useSageWallet();
+  const [playerNftId, setPlayerNftId] = useState<string | undefined>();
+
+  // Try to determine which fighter belongs to the current user
+  useEffect(() => {
+    if (!isConnected || !battleId) return;
+
+    getDIDs().then(async (dids) => {
+      if (dids.length === 0) return;
+      const ownerDid = dids[0];
+
+      try {
+        const res = await fetch(`/api/combat/fighters?ownerDid=${encodeURIComponent(ownerDid)}`);
+        const fighters = await res.json();
+        if (Array.isArray(fighters) && fighters.length > 0) {
+          setPlayerNftId(fighters[0].nft_id);
+        }
+      } catch (err) {
+        console.error('[CombatBattle] Failed to load fighters:', err);
+      }
+    });
+  }, [isConnected, getDIDs, battleId]);
+
+  if (!battleId || isNaN(battleId)) {
+    return (
+      <PageTransition>
+        <div className="flex flex-col items-center p-4 sm:p-6 gap-6 max-w-2xl mx-auto animate-fade-in">
+          <PageSEO title="Battle Not Found" description="Invalid battle ID" />
+          <div className="card-static p-6 text-center">
+            <p className="text-error text-sm">Invalid battle ID.</p>
+          </div>
+        </div>
+      </PageTransition>
+    );
+  }
+
+  return (
+    <PageTransition>
+      <div className="flex flex-col items-center p-4 sm:p-6 gap-6 max-w-2xl mx-auto animate-fade-in">
+        <PageSEO
+          title={`Battle #${battleId}`}
+          description={`Combat Battle #${battleId}`}
+        />
+        <BattleView battleId={battleId} playerNftId={playerNftId} />
+      </div>
+    </PageTransition>
+  );
+}
