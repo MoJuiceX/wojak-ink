@@ -1,6 +1,6 @@
 // GET /api/game/battle-list?status=active&limit=20&offset=0
 // GET /api/game/battle-list?nftId=xxx — battle history for a specific NFT
-// Returns active battles with vote counts, or battle history.
+// Returns active battles with score deltas, or battle history.
 
 interface Env {
   DB: D1Database;
@@ -57,40 +57,66 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       ? await context.env.DB.prepare(query).bind(limit, offset).all()
       : await context.env.DB.prepare(query).bind(status, limit, offset).all();
 
-    // If voterDid provided, check which battles they've already voted in
-    let votedBattleIds = new Set<number>();
-    if (voterDid && results.results.length > 0) {
-      const battleIds = results.results.map(b => b.id as number);
-      const placeholders = battleIds.map(() => '?').join(',');
-      const votes = await context.env.DB.prepare(
-        `SELECT battle_id FROM battle_votes WHERE voter_did = ? AND battle_id IN (${placeholders})`
-      ).bind(voterDid, ...battleIds).all<{ battle_id: number }>();
-      votedBattleIds = new Set((votes.results || []).map(v => v.battle_id));
+    // For resolved battles, compute score deltas from snapshots
+    const resolvedBattles = (results.results || []).filter(
+      b => b.status === 'completed' || b.status === 'draw'
+    );
+    const deltaMap = new Map<number, { deltaA: number; deltaB: number }>();
+
+    if (resolvedBattles.length > 0) {
+      const allNftIds = new Set<string>();
+      for (const b of resolvedBattles) {
+        allNftIds.add(b.nft_a_id as string);
+        allNftIds.add(b.nft_b_id as string);
+      }
+      const placeholders = [...allNftIds].map(() => '?').join(',');
+      const scores = await context.env.DB.prepare(
+        `SELECT nft_id, net_score FROM wojak_scores WHERE nft_id IN (${placeholders})`
+      ).bind(...allNftIds).all<{ nft_id: string; net_score: number }>();
+
+      const scoreMap = new Map<string, number>();
+      for (const s of scores.results || []) {
+        scoreMap.set(s.nft_id, s.net_score);
+      }
+
+      for (const b of resolvedBattles) {
+        const currentA = scoreMap.get(b.nft_a_id as string) ?? 0;
+        const currentB = scoreMap.get(b.nft_b_id as string) ?? 0;
+        const snapshotA = (b.nft_a_score_start as number) ?? 0;
+        const snapshotB = (b.nft_b_score_start as number) ?? 0;
+        deltaMap.set(b.id as number, {
+          deltaA: currentA - snapshotA,
+          deltaB: currentB - snapshotB,
+        });
+      }
     }
 
-    const battles = (results.results || []).map((b) => ({
-      id: b.id,
-      nftA: {
-        id: b.nft_a_id,
-        edition: b.nft_a_edition,
-        ownerDid: b.nft_a_owner_did,
-        name: b.name_a || `Your Wojak #${b.nft_a_edition}`,
-        votes: b.votes_a,
-      },
-      nftB: {
-        id: b.nft_b_id,
-        edition: b.nft_b_edition,
-        ownerDid: b.nft_b_owner_did,
-        name: b.name_b || `Your Wojak #${b.nft_b_edition}`,
-        votes: b.votes_b,
-      },
-      status: b.status,
-      winner: b.winner_nft_id,
-      startedAt: b.started_at,
-      endsAt: b.ends_at,
-      resolvedAt: b.resolved_at,
-      hasVoted: votedBattleIds.has(b.id as number),
-    }));
+    const battles = (results.results || []).map((b) => {
+      const isResolved = b.status === 'completed' || b.status === 'draw';
+      const deltas = deltaMap.get(b.id as number);
+      return {
+        id: b.id,
+        nftA: {
+          id: b.nft_a_id,
+          edition: b.nft_a_edition,
+          ownerDid: b.nft_a_owner_did,
+          name: b.name_a || `Your Wojak #${b.nft_a_edition}`,
+          ...(isResolved && deltas ? { scoreDelta: deltas.deltaA } : {}),
+        },
+        nftB: {
+          id: b.nft_b_id,
+          edition: b.nft_b_edition,
+          ownerDid: b.nft_b_owner_did,
+          name: b.name_b || `Your Wojak #${b.nft_b_edition}`,
+          ...(isResolved && deltas ? { scoreDelta: deltas.deltaB } : {}),
+        },
+        status: b.status,
+        winner: b.winner_nft_id,
+        startedAt: b.started_at,
+        endsAt: b.ends_at,
+        resolvedAt: b.resolved_at,
+      };
+    });
 
     // Also get queue count
     const queueCount = await context.env.DB.prepare(
@@ -132,17 +158,18 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 function formatBattle(b: Record<string, unknown>, perspectiveNftId: string) {
   const isA = b.nft_a_id === perspectiveNftId;
   const won = b.winner_nft_id === perspectiveNftId;
-  const _lost = b.winner_nft_id && b.winner_nft_id !== perspectiveNftId;
 
   return {
     id: b.id,
     status: b.status,
     result: b.status === 'completed' ? (won ? 'win' : 'loss') :
             b.status === 'draw' ? 'draw' : 'pending',
-    myNft: isA ? { id: b.nft_a_id, edition: b.nft_a_edition, votes: b.votes_a, name: b.name_a } :
-                  { id: b.nft_b_id, edition: b.nft_b_edition, votes: b.votes_b, name: b.name_b },
-    opponent: isA ? { id: b.nft_b_id, edition: b.nft_b_edition, votes: b.votes_b, name: b.name_b } :
-                     { id: b.nft_a_id, edition: b.nft_a_edition, votes: b.votes_a, name: b.name_a },
+    myNft: isA
+      ? { id: b.nft_a_id, edition: b.nft_a_edition, name: b.name_a }
+      : { id: b.nft_b_id, edition: b.nft_b_edition, name: b.name_b },
+    opponent: isA
+      ? { id: b.nft_b_id, edition: b.nft_b_edition, name: b.name_b }
+      : { id: b.nft_a_id, edition: b.nft_a_edition, name: b.name_a },
     startedAt: b.started_at,
     endsAt: b.ends_at,
     resolvedAt: b.resolved_at,
