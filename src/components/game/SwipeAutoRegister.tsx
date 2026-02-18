@@ -12,12 +12,22 @@ const RETRY_DELAY_MS = 3000;
 
 export function SwipeAutoRegister() {
   const { address, status, getDIDs } = useSageWallet();
-  const { isRegistered, register } = useGame();
+  const { isRegistered, player, register } = useGame();
   const attemptedRef = useRef(false);
+  const registeredAddressRef = useRef<string | null>(null);
+
+  // Reset registration when wallet address changes
+  useEffect(() => {
+    if (address && registeredAddressRef.current && address !== registeredAddressRef.current) {
+      attemptedRef.current = false;
+      registeredAddressRef.current = null;
+    }
+  }, [address]);
 
   // Auto-register: detect DID and register player
+  const needsRegister = !isRegistered || (player && address && player.walletAddress !== address);
   useEffect(() => {
-    if (status !== 'connected' || !address || isRegistered || attemptedRef.current) return;
+    if (status !== 'connected' || !address || !needsRegister || attemptedRef.current) return;
     attemptedRef.current = true;
 
     let cancelled = false;
@@ -29,6 +39,7 @@ export function SwipeAutoRegister() {
           const dids = await getDIDs();
           if (dids.length > 0) {
             await register(dids[0], address);
+            registeredAddressRef.current = address;
             return;
           }
           if (attempt < MAX_DID_RETRIES - 1) {
@@ -45,7 +56,7 @@ export function SwipeAutoRegister() {
     })();
 
     return () => { cancelled = true; };
-  }, [status, address, isRegistered, getDIDs, register]);
+  }, [status, address, needsRegister, getDIDs, register]);
 
   return null;
 }
