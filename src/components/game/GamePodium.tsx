@@ -4,6 +4,7 @@ import { getTier } from '@/components/game/PowerLevelDisplay';
 interface PodiumEntry {
   rank: number;
   did?: string;
+  walletAddress?: string;
   name?: string;
   nftId?: string;
   editionNumber?: number;
@@ -29,9 +30,9 @@ const RANK_GLOWS: Record<number, string> = {
   3: '0 0 12px rgba(205, 127, 50, 0.15)',
 };
 
-function truncateDid(did: string): string {
-  if (did.length <= 12) return did;
-  return `${did.slice(0, 6)}...${did.slice(-4)}`;
+function truncateWallet(addr: string): string {
+  if (addr.length <= 14) return addr;
+  return `${addr.slice(0, 7)}...${addr.slice(-3)}`;
 }
 
 function PodiumCard({ entry, mode, isFirst }: { entry: PodiumEntry; mode: 'players' | 'wojaks'; isFirst: boolean }) {
@@ -98,7 +99,7 @@ function PodiumCard({ entry, mode, isFirst }: { entry: PodiumEntry; mode: 'playe
       {mode === 'players' ? (
         <>
           <span className="text-secondary" style={{ fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>
-            {entry.did ? truncateDid(entry.did) : 'Unknown'}
+            {entry.walletAddress ? truncateWallet(entry.walletAddress) : 'Unknown'}
           </span>
           <span style={{ fontSize: scoreSize, fontWeight: 700 }}>
             {(entry.powerLevel || 0).toLocaleString()}
@@ -117,9 +118,9 @@ function PodiumCard({ entry, mode, isFirst }: { entry: PodiumEntry; mode: 'playe
           <span style={{ fontSize: scoreSize, fontWeight: 700 }}>
             +{entry.netScore || 0} votes
           </span>
-          {entry.did && (
+          {entry.walletAddress && (
             <span className="text-muted" style={{ fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>
-              by {truncateDid(entry.did)}
+              by {truncateWallet(entry.walletAddress)}
             </span>
           )}
         </>

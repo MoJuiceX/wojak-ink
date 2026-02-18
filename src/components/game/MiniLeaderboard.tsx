@@ -8,6 +8,7 @@ import { useGame } from '@/contexts/GameContext';
 interface LeaderboardEntry {
   rank: number;
   did: string;
+  walletAddress?: string;
   powerLevel: number;
   totalVotesCast: number;
 }
@@ -18,11 +19,9 @@ function getTierEmoji(level: number): string {
   return '';
 }
 
-function truncateDid(did: string): string {
-  // did:chia:1abc...xyz -> abc...xyz (last 8 chars)
-  const short = did.replace('did:chia:1', '');
-  if (short.length <= 10) return short;
-  return short.slice(0, 4) + '...' + short.slice(-4);
+function truncateWallet(addr: string): string {
+  if (addr.length <= 14) return addr;
+  return `${addr.slice(0, 7)}...${addr.slice(-3)}`;
 }
 
 export function MiniLeaderboard() {
@@ -90,7 +89,7 @@ export function MiniLeaderboard() {
                   color: isYou ? 'var(--color-primary)' : undefined,
                 }}
               >
-                {isYou ? 'You' : truncateDid(entry.did)}
+                {isYou ? 'You' : (entry.walletAddress ? truncateWallet(entry.walletAddress) : truncateWallet(entry.did))}
               </span>
             </div>
           );

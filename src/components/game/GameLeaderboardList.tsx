@@ -4,6 +4,7 @@ import { getTier } from '@/components/game/PowerLevelDisplay';
 interface PlayerEntry {
   rank: number;
   did: string;
+  walletAddress?: string;
   powerLevel: number;
   topNft?: { nftId: string; editionNumber: number; imageUri?: string } | null;
 }
@@ -17,6 +18,7 @@ interface WojakEntry {
   likes: number;
   totalVotes: number;
   ownerDid?: string | null;
+  ownerWallet?: string | null;
   imageUri?: string;
 }
 
@@ -31,9 +33,9 @@ interface GameLeaderboardListProps {
   onLoadMore: () => void;
 }
 
-function truncateDid(did: string): string {
-  if (did.length <= 12) return did;
-  return `${did.slice(0, 6)}...${did.slice(-4)}`;
+function truncateWallet(addr: string): string {
+  if (addr.length <= 14) return addr;
+  return `${addr.slice(0, 7)}...${addr.slice(-3)}`;
 }
 
 function PlayerRow({ entry, isCurrent }: { entry: PlayerEntry; isCurrent: boolean }) {
@@ -66,7 +68,7 @@ function PlayerRow({ entry, isCurrent }: { entry: PlayerEntry; isCurrent: boolea
       )}
       <div className="flex items-center gap-2 flex-1" style={{ minWidth: 0 }}>
         <span className="text-secondary" style={{ fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {truncateDid(entry.did)}
+          {entry.walletAddress ? truncateWallet(entry.walletAddress) : truncateWallet(entry.did)}
         </span>
         <span
           style={{

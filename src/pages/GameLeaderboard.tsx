@@ -14,6 +14,7 @@ type TabMode = 'players' | 'wojaks';
 interface PlayerEntry {
   rank: number;
   did: string;
+  walletAddress?: string;
   powerLevel: number;
   topNft?: { nftId: string; editionNumber: number; imageUri?: string } | null;
 }
@@ -28,6 +29,7 @@ interface WojakEntry {
   dislikes: number;
   totalVotes: number;
   ownerDid?: string | null;
+  ownerWallet?: string | null;
   imageUri?: string;
 }
 
@@ -148,6 +150,9 @@ function LeaderboardContent() {
     imageUri: tab === 'players'
       ? (e as PlayerEntry).topNft?.imageUri
       : (e as WojakEntry).imageUri,
+    walletAddress: tab === 'players'
+      ? (e as PlayerEntry).walletAddress
+      : (e as WojakEntry).ownerWallet || undefined,
   }));
 
   const listPlayerEntries = tab === 'players' ? players.filter(p => p.rank > 3) : undefined;
