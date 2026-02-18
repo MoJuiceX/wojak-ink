@@ -13,9 +13,10 @@ interface OwnedNft {
 
 interface BattleQueuePanelProps {
   onQueued?: () => void;
+  queuedNftIds?: string[];
 }
 
-export function BattleQueuePanel({ onQueued }: BattleQueuePanelProps) {
+export function BattleQueuePanel({ onQueued, queuedNftIds = [] }: BattleQueuePanelProps) {
   const { player, getAuthHeaders } = useGame();
   const [nfts, setNfts] = useState<OwnedNft[]>([]);
   const [loading, setLoading] = useState(false);
@@ -99,7 +100,7 @@ export function BattleQueuePanel({ onQueued }: BattleQueuePanelProps) {
         onChange={(e) => setSelectedNft(e.target.value || null)}
       >
         <option value="">Select a Wojak...</option>
-        {nfts.map(nft => (
+        {nfts.filter(nft => !queuedNftIds.includes(nft.nftId)).map(nft => (
           <option key={nft.nftId} value={nft.nftId}>
             {nft.name} #{nft.editionNumber} (score: {nft.netScore})
           </option>

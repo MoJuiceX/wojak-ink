@@ -97,10 +97,30 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       'SELECT COUNT(*) as count FROM battle_queue'
     ).first<{ count: number }>();
 
+    // If voterDid provided, fetch their queued NFTs
+    let queuedNfts: { nftId: string; editionNumber: number; name: string; queuedAt: string }[] = [];
+    if (voterDid) {
+      const queued = await context.env.DB.prepare(`
+        SELECT bq.nft_id, bq.edition_number, bq.queued_at, nn.custom_name, nn.full_name
+        FROM battle_queue bq
+        LEFT JOIN nft_names nn ON bq.edition_number = nn.edition_number
+        WHERE bq.owner_did = ?
+        ORDER BY bq.queued_at DESC
+      `).bind(voterDid).all();
+
+      queuedNfts = (queued.results || []).map((row: Record<string, unknown>) => ({
+        nftId: row.nft_id as string,
+        editionNumber: row.edition_number as number,
+        name: (row.full_name as string) || `Your Wojak #${row.edition_number}`,
+        queuedAt: row.queued_at as string,
+      }));
+    }
+
     return Response.json({
       success: true,
       battles,
       queueSize: queueCount?.count ?? 0,
+      queuedNfts,
       pagination: { limit, offset },
     });
   } catch (err) {

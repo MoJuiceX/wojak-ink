@@ -23,6 +23,13 @@ interface Battle {
   hasVoted: boolean;
 }
 
+interface QueuedNft {
+  nftId: string;
+  editionNumber: number;
+  name: string;
+  queuedAt: string;
+}
+
 type Tab = 'active' | 'history';
 
 export function BattleView() {
@@ -33,6 +40,8 @@ export function BattleView() {
   const [loading, setLoading] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [queueSize, setQueueSize] = useState(0);
+  const [queuedNfts, setQueuedNfts] = useState<QueuedNft[]>([]);
+  const [cancellingNft, setCancellingNft] = useState<string | null>(null);
   const [historyHasMore, setHistoryHasMore] = useState(true);
   const [historyLoadingMore, setHistoryLoadingMore] = useState(false);
 
@@ -46,6 +55,7 @@ export function BattleView() {
       if (data.success) {
         setBattles(data.battles);
         setQueueSize(data.queueSize ?? 0);
+        setQueuedNfts(data.queuedNfts ?? []);
       }
     } finally {
       setLoading(false);
@@ -100,6 +110,26 @@ export function BattleView() {
     }
   };
 
+  const handleCancelQueue = async (nftId: string) => {
+    if (!player) return;
+    setCancellingNft(nftId);
+    try {
+      const headers = await getAuthHeaders();
+      const res = await fetch('/api/game/battle-queue', {
+        method: 'DELETE',
+        headers,
+        body: JSON.stringify({ did: player.did, nftId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        loadBattles();
+      }
+    } catch { /* silent */ }
+    finally {
+      setCancellingNft(null);
+    }
+  };
+
   const handleLoadMoreHistory = async () => {
     setHistoryLoadingMore(true);
     await loadHistory(historyBattles.length, true);
@@ -146,11 +176,33 @@ export function BattleView() {
 
       {tab === 'active' && (
         <>
-          <BattleQueuePanel onQueued={loadBattles} />
+          <BattleQueuePanel onQueued={loadBattles} queuedNftIds={queuedNfts.map(q => q.nftId)} />
 
-          {queueSize > 0 && (
+          {queuedNfts.length > 0 && (
+            <div className="card-static p-3 flex flex-col gap-2">
+              <div className="text-xs text-secondary font-semibold uppercase tracking-wide">Your Queue</div>
+              {queuedNfts.map(nft => (
+                <div key={nft.nftId} className="flex items-center justify-between gap-2 text-sm">
+                  <span className="font-medium truncate">{nft.name}</span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-muted text-xs">Waiting for opponent...</span>
+                    <button
+                      className="btn btn-ghost text-xs px-2 py-1"
+                      style={{ color: 'var(--color-error)' }}
+                      onClick={() => handleCancelQueue(nft.nftId)}
+                      disabled={cancellingNft === nft.nftId}
+                    >
+                      {cancellingNft === nft.nftId ? '...' : 'Cancel'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {queueSize > queuedNfts.length && (
             <div className="text-xs text-secondary px-1">
-              {queueSize} NFT{queueSize > 1 ? 's' : ''} waiting for a match
+              {queueSize - queuedNfts.length} other NFT{queueSize - queuedNfts.length !== 1 ? 's' : ''} waiting for a match
             </div>
           )}
 
