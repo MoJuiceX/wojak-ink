@@ -25,10 +25,12 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
               ws.net_score, ws.total_votes,
               nn.custom_name, nn.full_name,
               dh.did_id AS owner_did, dh.creator_wallet,
+              gp.wallet_address AS owner_wallet,
               pm.ipfs_image_uri
        FROM wojak_scores ws
        LEFT JOIN nft_names nn ON ws.edition_number = nn.edition_number
        LEFT JOIN did_holdings dh ON ws.nft_id = dh.nft_id
+       LEFT JOIN game_players gp ON dh.did_id = gp.did_id
        LEFT JOIN phase2_mints pm ON ws.edition_number = pm.mint_number
        WHERE ws.total_votes > 0
        ORDER BY ws.net_score DESC
@@ -50,6 +52,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       totalVotes: (row.total_votes as number) || 0,
       creatorWallet: row.creator_wallet || null,
       ownerDid: row.owner_did || null,
+      ownerWallet: (row.owner_wallet as string) || null,
       imageUri: resolveImageUri(row.ipfs_image_uri as string | null),
     }));
 
