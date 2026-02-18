@@ -25,7 +25,7 @@ interface PowerData {
 }
 
 function DashboardContent() {
-  const { player, isRegistered, isVerified } = useGame();
+  const { player, isRegistered, isVerified, register } = useGame();
   const { address, status: walletStatus } = useSageWallet();
   const [powerData, setPowerData] = useState<PowerData>({});
 
@@ -56,6 +56,7 @@ function DashboardContent() {
           walletConnected={walletConnected}
           hasDid={isRegistered}
           hasPhase1={isVerified}
+          onLinkDid={async (did) => { if (address) await register(did, address); }}
         />
       </div>
     );

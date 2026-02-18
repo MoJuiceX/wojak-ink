@@ -275,7 +275,6 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
             'chia_send',
             'chip0002_getAssetBalance',
             'chia_transferNFT',
-            'chia_getNFTWalletsWithDIDs',
           ],
           chains: [CHIA_CHAIN],
           events: [],
@@ -508,37 +507,31 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
   }, []);
 
   const getDIDs = useCallback(async (): Promise<string[]> => {
-    const client = signClientRef.current;
     const session = currentSessionRef.current;
 
-    // Primary: ask the wallet directly for DID wallets
-    if (client && session) {
-      try {
-        const result = await client.request({
-          topic: session.topic,
-          chainId: CHIA_CHAIN,
-          request: {
-            method: ChiaMethod.GetNftWalletsWithDids,
-            params: {},
-          },
-        });
-
-        const wallets = result as Array<{ did_id?: string; myDid?: string; did?: string }> | { nftWallets?: Array<{ did_id?: string; myDid?: string; did?: string }> } | null;
-
-        const dids = new Set<string>();
-        const items = Array.isArray(wallets) ? wallets : (wallets as { nftWallets?: unknown[] })?.nftWallets ?? [];
-        for (const w of items as Array<Record<string, unknown>>) {
-          // Sage may return the DID in different fields depending on version
-          const did = (w.did_id ?? w.myDid ?? w.did ?? w.didId) as string | undefined;
-          if (did && typeof did === 'string' && did.startsWith('did:chia:')) {
+    // Extract DIDs from WalletConnect session accounts.
+    // Sage wallet includes DID accounts in session.namespaces.chia.accounts
+    // as strings like "chia:mainnet:did:chia:1abc..." alongside address accounts.
+    if (session) {
+      const accounts = session.namespaces?.chia?.accounts ?? [];
+      const dids = new Set<string>();
+      for (const account of accounts) {
+        // Format: "chia:mainnet:did:chia:1..." or "chia:mainnet:xch1..."
+        const parts = account.split(':');
+        // Check if this account is a DID (parts: chia, mainnet, did, chia, hash)
+        if (parts.length >= 4 && parts[2] === 'did' && parts[3] === 'chia') {
+          // Reconstruct: "did:chia:1..."
+          const did = parts.slice(2).join(':');
+          if (did.startsWith('did:chia:')) {
             dids.add(did);
           }
         }
-
-        if (dids.size > 0) return Array.from(dids);
-      } catch (err) {
-        console.warn('[SageWallet] Wallet DID RPC failed, falling back to MintGarden:', err);
       }
+      if (dids.size > 0) {
+        console.warn('[SageWallet] Found DIDs from session accounts:', Array.from(dids));
+        return Array.from(dids);
+      }
+      console.warn('[SageWallet] No DIDs in session accounts:', accounts);
     }
 
     // Fallback: query MintGarden by address

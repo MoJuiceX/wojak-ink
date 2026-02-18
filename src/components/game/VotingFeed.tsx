@@ -57,7 +57,7 @@ export function VotingFeed() {
   const {
     player, isRegistered, isVerified,
     feed, feedLoading, loadFeed,
-    castVote, refreshPowerLevel,
+    castVote, refreshPowerLevel, register,
   } = useGame();
   const { address, status: walletStatus } = useSageWallet();
   const toast = useToast();
@@ -209,6 +209,7 @@ export function VotingFeed() {
         walletConnected={walletConnected}
         hasDid={hasDid}
         hasPhase1={hasPhase1}
+        onLinkDid={async (did) => { if (address) await register(did, address); }}
       />
     );
   }

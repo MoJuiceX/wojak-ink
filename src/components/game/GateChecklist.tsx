@@ -1,16 +1,42 @@
 // Progressive onboarding checklist gate.
-// Shows wallet connection, DID detection, and Phase 1 verification steps.
+// Shows wallet connection, DID input, and Phase 1 verification steps.
 
+import { useState } from 'react';
 import { useSageWallet } from '@/sage-wallet';
 
 interface GateChecklistProps {
   walletConnected: boolean;
   hasDid: boolean;
   hasPhase1: boolean;
+  onLinkDid?: (did: string) => Promise<void>;
 }
 
-export function GateChecklist({ walletConnected, hasDid, hasPhase1 }: GateChecklistProps) {
+function isValidDid(did: string): boolean {
+  return /^did:chia:1[a-z0-9]{45,}$/.test(did.trim());
+}
+
+export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid }: GateChecklistProps) {
   const { connect } = useSageWallet();
+  const [didInput, setDidInput] = useState('');
+  const [didError, setDidError] = useState('');
+  const [linking, setLinking] = useState(false);
+
+  const handleLinkDid = async () => {
+    const did = didInput.trim();
+    if (!isValidDid(did)) {
+      setDidError('Invalid DID. It should start with did:chia:1...');
+      return;
+    }
+    setDidError('');
+    setLinking(true);
+    try {
+      await onLinkDid?.(did);
+    } catch {
+      setDidError('Registration failed. Try again.');
+    } finally {
+      setLinking(false);
+    }
+  };
 
   const steps = [
     { label: 'Connect wallet', done: walletConnected },
@@ -46,8 +72,26 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1 }: GateCheckl
                 {isCurrent && i === 1 && (
                   <div className="flex flex-col gap-2 mt-2">
                     <span className="text-muted text-sm">
-                      We'll auto-detect your DID when your wallet connects.
+                      Paste your DID from Sage wallet.
                     </span>
+                    <input
+                      className="input text-sm"
+                      type="text"
+                      placeholder="did:chia:1..."
+                      value={didInput}
+                      onChange={e => { setDidInput(e.target.value); setDidError(''); }}
+                      onKeyDown={e => { if (e.key === 'Enter') handleLinkDid(); }}
+                      style={{ fontSize: 13 }}
+                    />
+                    {didError && <span className="text-sm" style={{ color: 'var(--color-error)' }}>{didError}</span>}
+                    <button
+                      className="btn btn-primary text-sm"
+                      style={{ padding: '6px 16px' }}
+                      onClick={handleLinkDid}
+                      disabled={linking || !didInput.trim()}
+                    >
+                      {linking ? 'Linking...' : 'Link DID'}
+                    </button>
                     <a
                       href="https://docs.sagewalletapp.com/getting-started/did"
                       target="_blank"
