@@ -190,6 +190,14 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
       return Response.json({ error: 'Invalid parameters' }, { status: 400 });
     }
 
+    // Verify the caller actually owns this NFT
+    const owns = await context.env.DB.prepare(
+      'SELECT 1 FROM did_holdings WHERE did_id = ? AND nft_id = ?'
+    ).bind(did, nftId).first();
+    if (!owns) {
+      return Response.json({ error: 'You do not own this NFT' }, { status: 403 });
+    }
+
     // Only the owner can remove from queue
     const result = await context.env.DB.prepare(
       'DELETE FROM battle_queue WHERE nft_id = ? AND owner_did = ?'

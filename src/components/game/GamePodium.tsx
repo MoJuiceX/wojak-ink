@@ -169,7 +169,7 @@ function PodiumCard({ entry, mode, isFirst }: { entry: PodiumEntry; mode: 'playe
             </Link>
           ) : (
             <span style={{ fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>
-              {entry.name || `Your Wojak #${entry.editionNumber}`}
+              {entry.name || 'Unknown Wojak'}
             </span>
           )}
           <span style={{ fontSize: scoreSize, fontWeight: 700 }}>

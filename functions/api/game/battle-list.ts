@@ -2,19 +2,10 @@
 // GET /api/game/battle-list?nftId=xxx — battle history for a specific NFT
 // Returns active battles with score deltas, or battle history.
 
+import { resolveImageUri } from './_shared';
+
 interface Env {
   DB: D1Database;
-}
-
-function resolveImageUri(raw: string | null): string {
-  if (!raw) return '';
-  if (raw.startsWith('[')) {
-    try {
-      const urls = JSON.parse(raw) as string[];
-      return urls.find(u => u.startsWith('https://')) || urls[0] || '';
-    } catch { return raw; }
-  }
-  return raw;
 }
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {

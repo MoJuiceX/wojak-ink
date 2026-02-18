@@ -1,19 +1,10 @@
 // GET /api/game/leaderboard?limit=50&offset=0
 // Returns ranked players by Power Level.
 
+import { resolveImageUri } from './_shared';
+
 interface Env {
   DB: D1Database;
-}
-
-function resolveImageUri(raw: string | null): string {
-  if (!raw) return '';
-  if (raw.startsWith('[')) {
-    try {
-      const urls = JSON.parse(raw) as string[];
-      return urls.find(u => u.startsWith('https://')) || urls[0] || '';
-    } catch { return raw; }
-  }
-  return raw;
 }
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {

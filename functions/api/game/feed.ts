@@ -2,23 +2,10 @@
 // Returns Wojaks for voting, weighted by recency (newer = more likely).
 // Excludes: already voted, own creations, own holdings.
 
+import { resolveImageUri } from './_shared';
+
 interface Env {
   DB: D1Database;
-}
-
-// ipfs_image_uri can be a plain URL string or a JSON array of gateway URLs.
-// Extract the first usable HTTP URL.
-function resolveImageUri(raw: string | null): string {
-  if (!raw) return '';
-  if (raw.startsWith('[')) {
-    try {
-      const urls = JSON.parse(raw) as string[];
-      return urls.find(u => u.startsWith('https://')) || urls[0] || '';
-    } catch {
-      return raw;
-    }
-  }
-  return raw;
 }
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {

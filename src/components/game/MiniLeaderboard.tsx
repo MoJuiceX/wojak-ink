@@ -89,7 +89,7 @@ export function MiniLeaderboard() {
                   color: isYou ? 'var(--color-primary)' : undefined,
                 }}
               >
-                {isYou ? 'You' : (entry.walletAddress ? truncateWallet(entry.walletAddress) : truncateWallet(entry.did))}
+                {isYou ? 'You' : (entry.walletAddress ? truncateWallet(entry.walletAddress) : entry.did ? truncateWallet(entry.did) : 'Unknown')}
               </span>
             </div>
           );

@@ -29,6 +29,18 @@ export function getYesterdayString(): string {
   return d.toISOString().split('T')[0];
 }
 
+// Resolve IPFS image URI — handles JSON arrays of gateway URLs or plain strings.
+export function resolveImageUri(raw: string | null): string {
+  if (!raw) return '';
+  if (raw.startsWith('[')) {
+    try {
+      const urls = JSON.parse(raw) as string[];
+      return urls.find(u => u.startsWith('https://')) || urls[0] || '';
+    } catch { return raw; }
+  }
+  return raw;
+}
+
 // Streak milestone credit awards (in x100 units)
 export const STREAK_MILESTONES: Record<number, number> = {
   3: 300,    // 3 credits

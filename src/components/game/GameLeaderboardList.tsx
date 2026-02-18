@@ -62,6 +62,7 @@ function PlayerRow({ entry, isCurrent }: { entry: PlayerEntry; isCurrent: boolea
             src={imageUrl}
             alt=""
             style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', objectFit: 'cover' }}
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
           />
         </Link>
       ) : imageUrl ? (
@@ -69,6 +70,7 @@ function PlayerRow({ entry, isCurrent }: { entry: PlayerEntry; isCurrent: boolea
           src={imageUrl}
           alt=""
           style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', objectFit: 'cover', flexShrink: 0 }}
+          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
         />
       ) : (
         <div
@@ -77,14 +79,14 @@ function PlayerRow({ entry, isCurrent }: { entry: PlayerEntry; isCurrent: boolea
       )}
       <div className="flex items-center gap-2 flex-1" style={{ minWidth: 0 }}>
         <span className="text-secondary" style={{ fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {entry.walletAddress ? truncateWallet(entry.walletAddress) : truncateWallet(entry.did)}
+          {entry.walletAddress ? truncateWallet(entry.walletAddress) : entry.did ? truncateWallet(entry.did) : 'Unknown'}
         </span>
         <span
           style={{
             width: 8,
             height: 8,
             borderRadius: '50%',
-            background: `var(--color-${tier.name === 'Legend' ? 'primary' : tier.name === 'Top Tier' ? 'cyan' : 'text-muted'})`,
+            background: tier.class === 'tier-legend' ? 'var(--color-primary)' : tier.class === 'tier-top' ? 'var(--color-cyan)' : 'var(--color-text-muted)',
             flexShrink: 0,
           }}
         />

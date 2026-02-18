@@ -75,6 +75,9 @@ export function ActiveBattleCard({ did }: ActiveBattleCardProps) {
   const battle = sorted[0];
   const remaining = sorted.length - 1;
 
+  // Guard against missing NFT data
+  if (!battle.nftA || !battle.nftB) return null;
+
   // Determine which side is "yours" based on DID
   const isA = battle.nftA.ownerDid === did;
   const yourNft = isA ? battle.nftA : battle.nftB;
