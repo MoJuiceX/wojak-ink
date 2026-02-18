@@ -180,6 +180,29 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         })),
       ]);
 
+      // Award combat XP to winner's fighter (if they have one)
+      try {
+        const SWIPE_BATTLE_WIN_XP = 8;
+        const winnerFighter = await context.env.DB.prepare(
+          'SELECT nft_id, xp, level FROM combat_fighters WHERE nft_id = ?'
+        ).bind(winnerNftId).first<{ nft_id: string; xp: number; level: number }>();
+
+        if (winnerFighter) {
+          const newXp = winnerFighter.xp + SWIPE_BATTLE_WIN_XP;
+          const levelRow = await context.env.DB.prepare(
+            'SELECT MAX(level) as new_level FROM combat_level_thresholds WHERE xp_required <= ?'
+          ).bind(newXp).first<{ new_level: number }>();
+          const newLevel = levelRow?.new_level ?? winnerFighter.level;
+
+          await context.env.DB.prepare(
+            "UPDATE combat_fighters SET xp = ?, level = ?, updated_at = datetime('now') WHERE nft_id = ?"
+          ).bind(newXp, newLevel, winnerNftId).run();
+        }
+      } catch (err) {
+        // Non-fatal: log but don't fail the resolution
+        console.error(`[Battle Resolve] Failed to award combat XP for battle ${battleId}:`, err);
+      }
+
       resolved++;
     }
 
