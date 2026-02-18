@@ -60,9 +60,14 @@ interface AttrStats {
 
 async function main() {
   console.log('Fetching sales from D1 API...');
-  const response = await fetch(API_URL);
+  let response = await fetch(API_URL);
   if (!response.ok) {
-    throw new Error(`API fetch failed: ${response.status}`);
+    console.warn(`First attempt failed with HTTP ${response.status}, retrying in 5s...`);
+    await new Promise(r => setTimeout(r, 5000));
+    response = await fetch(API_URL);
+    if (!response.ok) {
+      throw new Error(`API fetch failed after retry: HTTP ${response.status}`);
+    }
   }
   const data = await response.json() as { items: SaleItem[]; total: number };
   console.log(`Got ${data.items.length} sales (total: ${data.total})`);
