@@ -42,9 +42,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return Response.json({ success: true, verified: true, alreadyVerified: true });
     }
 
-    // Query MintGarden for Phase 1 NFTs owned by this DID
-    // MintGarden API: GET /nfts?collection_id=...&owner_did=...
-    const mgUrl = `https://api.mintgarden.io/nfts?collection_id=${PHASE1_COLLECTION_ID}&owner_did=${encodeURIComponent(did)}&size=1`;
+    // Query MintGarden for Phase 1 NFTs owned by this DID.
+    // The /profile/{did}/nfts endpoint returns NFTs owned by the DID.
+    // We paginate through results and check if any belong to the Phase 1 collection.
+    const mgUrl = `https://api.mintgarden.io/profile/${encodeURIComponent(did)}/nfts?type=owned&size=100`;
 
     const mgResponse = await fetch(mgUrl, {
       headers: { 'Accept': 'application/json' },
@@ -55,8 +56,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return Response.json({ error: 'Failed to verify NFT ownership' }, { status: 502 });
     }
 
-    const mgData = await mgResponse.json() as { items: unknown[] };
-    const hasPhase1 = mgData.items && mgData.items.length > 0;
+    const mgData = await mgResponse.json() as { items: Array<{ collection_id?: string }> };
+    const hasPhase1 = (mgData.items || []).some(
+      item => item.collection_id === PHASE1_COLLECTION_ID
+    );
 
     if (hasPhase1) {
       // Mark as verified + award onboarding credits

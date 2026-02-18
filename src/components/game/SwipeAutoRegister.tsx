@@ -1,5 +1,6 @@
-// Auto-registration bridge between SageWallet and GameContext.
+// Auto-registration and verification bridge between SageWallet and GameContext.
 // Detects DID from connected wallet via getDIDs(), registers if not already registered.
+// Auto-verifies Phase 1 NFT ownership after registration.
 // Renders nothing — pure side-effect component.
 
 import { useEffect, useRef } from 'react';
@@ -11,9 +12,11 @@ const RETRY_DELAY_MS = 3000;
 
 export function SwipeAutoRegister() {
   const { address, status, getDIDs } = useSageWallet();
-  const { isRegistered, register } = useGame();
+  const { isRegistered, isVerified, register, verifyPhase1, player } = useGame();
   const attemptedRef = useRef(false);
+  const verifyAttemptedRef = useRef(false);
 
+  // Auto-register: detect DID and register player
   useEffect(() => {
     if (status !== 'connected' || !address || isRegistered || attemptedRef.current) return;
     attemptedRef.current = true;
@@ -29,24 +32,32 @@ export function SwipeAutoRegister() {
             await register(dids[0], address);
             return;
           }
-          // No DIDs found — MintGarden may not have indexed yet. Retry after delay.
           if (attempt < MAX_DID_RETRIES - 1) {
             await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
           }
         } catch (err) {
           console.error('[SwipeAutoRegister] Auto-registration failed:', err);
-          // Allow retry on next mount/reconnect
           attemptedRef.current = false;
           return;
         }
       }
-      // All retries exhausted — allow retry on next wallet reconnect
       console.warn('[SwipeAutoRegister] No DID found after', MAX_DID_RETRIES, 'attempts');
       attemptedRef.current = false;
     })();
 
     return () => { cancelled = true; };
   }, [status, address, isRegistered, getDIDs, register]);
+
+  // Auto-verify Phase 1: when registered but not yet verified, check MintGarden
+  useEffect(() => {
+    if (!isRegistered || isVerified || !player?.did || verifyAttemptedRef.current) return;
+    verifyAttemptedRef.current = true;
+
+    verifyPhase1(player.did).catch(err => {
+      console.warn('[SwipeAutoRegister] Phase 1 verify failed:', err);
+      verifyAttemptedRef.current = false;
+    });
+  }, [isRegistered, isVerified, player?.did, verifyPhase1]);
 
   return null;
 }
