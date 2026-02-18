@@ -80,9 +80,15 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       ORDER BY
         -- Weighted random: newer + fewer votes = higher chance
         -- ABS(RANDOM()) gives random ordering, divided by weight for bias
+        -- Active battle NFTs get 5x boost to appear more often during their window
         ABS(RANDOM()) / (
           (1.0 / (1.0 + COALESCE(ws.total_votes, 0))) *
-          (1.0 / (1.0 + JULIANDAY('now') - JULIANDAY(pm.created_at)))
+          (1.0 / (1.0 + JULIANDAY('now') - JULIANDAY(pm.created_at))) *
+          CASE WHEN EXISTS (
+            SELECT 1 FROM battles bl
+            WHERE bl.status = 'active'
+            AND (bl.nft_a_id = pm.mintgarden_launcher_id OR bl.nft_b_id = pm.mintgarden_launcher_id)
+          ) THEN 5.0 ELSE 1.0 END
         )
       LIMIT ?
     `).bind(did, player.wallet_address, did, limit).all();
