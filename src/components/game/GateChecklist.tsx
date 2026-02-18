@@ -31,15 +31,19 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, o
   const [linking, setLinking] = useState(false);
 
   // Step 3 state
+  // Flow: auto-check → (fail) → show retry button → (retry fails) → show manual input
   const [verifyState, setVerifyState] = useState<VerifyState>('idle');
-  const [showManual, setShowManual] = useState(false);
+  const [retryUsed, setRetryUsed] = useState(false);
   const [nftInput, setNftInput] = useState('');
   const [nftError, setNftError] = useState('');
   const [verifyingNft, setVerifyingNft] = useState(false);
+  const [showInfoTip, setShowInfoTip] = useState(false);
   const autoVerifyAttempted = useRef(false);
 
   // Step 3 is active when wallet connected + DID linked + not yet verified
   const step3Active = walletConnected && hasDid && !hasPhase1;
+  // Show manual input after retry has been used and failed
+  const showManual = retryUsed && (verifyState === 'not_found' || verifyState === 'error');
 
   // Auto-verify when step 3 becomes active
   useEffect(() => {
@@ -55,7 +59,6 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, o
         if (!verified) {
           setVerifyState('not_found');
         }
-        // If verified, hasPhase1 prop will update and step 3 will no longer be active
       })
       .catch(() => {
         if (!cancelled) setVerifyState('error');
@@ -64,22 +67,23 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, o
     return () => { cancelled = true; };
   }, [step3Active, onAutoVerify]);
 
-  // Reset auto-verify state if step 3 becomes inactive then active again
+  // Reset state if step 3 becomes inactive then active again
   useEffect(() => {
     if (!step3Active) {
       autoVerifyAttempted.current = false;
       setVerifyState('idle');
-      setShowManual(false);
+      setRetryUsed(false);
     }
   }, [step3Active]);
 
-  const handleRetryAutoVerify = async () => {
+  const handleRetry = async () => {
     if (!onAutoVerify) return;
+    setRetryUsed(true);
     setVerifyState('checking');
-    setNftError('');
     try {
       const verified = await onAutoVerify();
       if (!verified) setVerifyState('not_found');
+      // If verified, hasPhase1 prop updates and step 3 disappears
     } catch {
       setVerifyState('error');
     }
@@ -196,8 +200,8 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, o
                       </span>
                     )}
 
-                    {/* Not found — show explanation + retry + manual fallback */}
-                    {(verifyState === 'not_found' || verifyState === 'error') && !showManual && (
+                    {/* First failure — show retry (one chance) */}
+                    {(verifyState === 'not_found' || verifyState === 'error') && !retryUsed && (
                       <>
                         <span className="text-muted text-sm">
                           {verifyState === 'error'
@@ -207,16 +211,9 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, o
                         <button
                           className="btn btn-primary text-sm"
                           style={{ padding: '6px 16px' }}
-                          onClick={handleRetryAutoVerify}
+                          onClick={handleRetry}
                         >
                           Retry
-                        </button>
-                        <button
-                          className="btn btn-ghost text-sm"
-                          style={{ padding: '6px 16px' }}
-                          onClick={() => setShowManual(true)}
-                        >
-                          Paste Launcher ID instead
                         </button>
                         <a
                           href="https://mintgarden.io/collections/wojak-farmers-plot-col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah"
@@ -229,12 +226,52 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, o
                       </>
                     )}
 
-                    {/* Manual Launcher ID input (fallback) */}
+                    {/* Retry failed — show manual Launcher ID input */}
                     {showManual && (
                       <>
-                        <span className="text-muted text-sm">
-                          Paste the Launcher ID from Sage wallet for instant verification.
-                        </span>
+                        <div className="flex items-center gap-1">
+                          <span className="text-muted text-sm">
+                            Paste Launcher ID
+                          </span>
+                          <span
+                            className="text-muted"
+                            style={{
+                              cursor: 'pointer',
+                              fontSize: 14,
+                              lineHeight: 1,
+                              position: 'relative',
+                            }}
+                            onMouseEnter={() => setShowInfoTip(true)}
+                            onMouseLeave={() => setShowInfoTip(false)}
+                            onClick={() => setShowInfoTip(prev => !prev)}
+                            aria-label="Where to find your Launcher ID"
+                          >
+                            &#9432;
+                            {showInfoTip && (
+                              <span
+                                className="card-static"
+                                style={{
+                                  position: 'absolute',
+                                  bottom: '100%',
+                                  left: '50%',
+                                  transform: 'translateX(-50%)',
+                                  marginBottom: 6,
+                                  padding: '8px 12px',
+                                  fontSize: 12,
+                                  lineHeight: 1.4,
+                                  width: 240,
+                                  zIndex: 10,
+                                  whiteSpace: 'normal',
+                                  pointerEvents: 'none',
+                                }}
+                              >
+                                <strong>Sage Wallet:</strong> Open your NFT &rarr; copy the Launcher ID at the top.
+                                <br /><br />
+                                <strong>MintGarden:</strong> Open the NFT page &rarr; the nft1... ID is below the name.
+                              </span>
+                            )}
+                          </span>
+                        </div>
                         <input
                           className="input text-sm"
                           type="text"
@@ -253,13 +290,14 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, o
                         >
                           {verifyingNft ? 'Verifying...' : 'Verify NFT'}
                         </button>
-                        <button
-                          className="btn btn-ghost text-sm"
-                          style={{ padding: '4px 16px', fontSize: 12 }}
-                          onClick={() => { setShowManual(false); handleRetryAutoVerify(); }}
+                        <a
+                          href="https://mintgarden.io/collections/wojak-farmers-plot-col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-accent text-sm"
                         >
-                          &larr; Back to auto-check
-                        </button>
+                          Don't have one? View collection &rarr;
+                        </a>
                       </>
                     )}
                   </div>
