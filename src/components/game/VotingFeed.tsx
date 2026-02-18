@@ -210,6 +210,7 @@ export function VotingFeed() {
         hasDid={hasDid}
         hasPhase1={hasPhase1}
         onLinkDid={async (did) => { if (address) await register(did, address); }}
+        onAutoVerify={async () => { if (player?.did) return verifyPhase1(player.did); return false; }}
         onVerifyNft={async (nftId) => { if (player?.did) return verifyPhase1(player.did, nftId); return false; }}
       />
     );

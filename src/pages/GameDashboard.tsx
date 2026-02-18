@@ -57,6 +57,7 @@ function DashboardContent() {
           hasDid={isRegistered}
           hasPhase1={isVerified}
           onLinkDid={async (did) => { if (address) await register(did, address); }}
+          onAutoVerify={async () => false}
           onVerifyNft={async () => false}
         />
       </div>

@@ -1,7 +1,8 @@
 // Progressive onboarding checklist gate.
 // Shows wallet connection, DID input, and Phase 1 verification steps.
+// Step 3 auto-verifies first; manual Launcher ID input is a fallback.
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSageWallet } from '@/sage-wallet';
 
 interface GateChecklistProps {
@@ -9,6 +10,7 @@ interface GateChecklistProps {
   hasDid: boolean;
   hasPhase1: boolean;
   onLinkDid?: (did: string) => Promise<void>;
+  onAutoVerify?: () => Promise<boolean>;
   onVerifyNft?: (nftId: string) => Promise<boolean>;
 }
 
@@ -20,14 +22,68 @@ function isValidNftId(id: string): boolean {
   return /^nft1[a-z0-9]{58,62}$/.test(id.trim());
 }
 
-export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, onVerifyNft }: GateChecklistProps) {
+type VerifyState = 'idle' | 'checking' | 'not_found' | 'error';
+
+export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, onAutoVerify, onVerifyNft }: GateChecklistProps) {
   const { connect } = useSageWallet();
   const [didInput, setDidInput] = useState('');
   const [didError, setDidError] = useState('');
   const [linking, setLinking] = useState(false);
+
+  // Step 3 state
+  const [verifyState, setVerifyState] = useState<VerifyState>('idle');
+  const [showManual, setShowManual] = useState(false);
   const [nftInput, setNftInput] = useState('');
   const [nftError, setNftError] = useState('');
-  const [verifying, setVerifying] = useState(false);
+  const [verifyingNft, setVerifyingNft] = useState(false);
+  const autoVerifyAttempted = useRef(false);
+
+  // Step 3 is active when wallet connected + DID linked + not yet verified
+  const step3Active = walletConnected && hasDid && !hasPhase1;
+
+  // Auto-verify when step 3 becomes active
+  useEffect(() => {
+    if (!step3Active || autoVerifyAttempted.current || !onAutoVerify) return;
+    autoVerifyAttempted.current = true;
+
+    let cancelled = false;
+    setVerifyState('checking');
+
+    onAutoVerify()
+      .then(verified => {
+        if (cancelled) return;
+        if (!verified) {
+          setVerifyState('not_found');
+        }
+        // If verified, hasPhase1 prop will update and step 3 will no longer be active
+      })
+      .catch(() => {
+        if (!cancelled) setVerifyState('error');
+      });
+
+    return () => { cancelled = true; };
+  }, [step3Active, onAutoVerify]);
+
+  // Reset auto-verify state if step 3 becomes inactive then active again
+  useEffect(() => {
+    if (!step3Active) {
+      autoVerifyAttempted.current = false;
+      setVerifyState('idle');
+      setShowManual(false);
+    }
+  }, [step3Active]);
+
+  const handleRetryAutoVerify = async () => {
+    if (!onAutoVerify) return;
+    setVerifyState('checking');
+    setNftError('');
+    try {
+      const verified = await onAutoVerify();
+      if (!verified) setVerifyState('not_found');
+    } catch {
+      setVerifyState('error');
+    }
+  };
 
   const handleVerifyNft = async () => {
     const id = nftInput.trim();
@@ -36,7 +92,7 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, o
       return;
     }
     setNftError('');
-    setVerifying(true);
+    setVerifyingNft(true);
     try {
       const verified = await onVerifyNft?.(id);
       if (!verified) {
@@ -45,7 +101,7 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, o
     } catch {
       setNftError('Verification failed. Try again.');
     } finally {
-      setVerifying(false);
+      setVerifyingNft(false);
     }
   };
 
@@ -133,35 +189,79 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, o
                 )}
                 {isCurrent && i === 2 && (
                   <div className="flex flex-col gap-2 mt-2">
-                    <span className="text-muted text-sm">
-                      Paste the Launcher ID of your Wojak Farmers Plot NFT from Sage wallet.
-                    </span>
-                    <input
-                      className="input text-sm"
-                      type="text"
-                      placeholder="nft1..."
-                      value={nftInput}
-                      onChange={e => { setNftInput(e.target.value); setNftError(''); }}
-                      onKeyDown={e => { if (e.key === 'Enter') handleVerifyNft(); }}
-                      style={{ fontSize: 13 }}
-                    />
-                    {nftError && <span className="text-sm" style={{ color: 'var(--color-error)' }}>{nftError}</span>}
-                    <button
-                      className="btn btn-primary text-sm"
-                      style={{ padding: '6px 16px' }}
-                      onClick={handleVerifyNft}
-                      disabled={verifying || !nftInput.trim()}
-                    >
-                      {verifying ? 'Verifying...' : 'Verify NFT'}
-                    </button>
-                    <a
-                      href="https://mintgarden.io/collections/wojak-farmers-plot-col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-accent text-sm"
-                    >
-                      Don't have one? View collection &rarr;
-                    </a>
+                    {/* Auto-checking state */}
+                    {verifyState === 'checking' && (
+                      <span className="text-muted text-sm">
+                        Checking your DID for Wojak Farmers Plot NFTs...
+                      </span>
+                    )}
+
+                    {/* Not found — show explanation + retry + manual fallback */}
+                    {(verifyState === 'not_found' || verifyState === 'error') && !showManual && (
+                      <>
+                        <span className="text-muted text-sm">
+                          {verifyState === 'error'
+                            ? 'Could not check your DID right now.'
+                            : 'No Wojak Farmers Plot found in your DID yet.'}
+                        </span>
+                        <button
+                          className="btn btn-primary text-sm"
+                          style={{ padding: '6px 16px' }}
+                          onClick={handleRetryAutoVerify}
+                        >
+                          Retry
+                        </button>
+                        <button
+                          className="btn btn-ghost text-sm"
+                          style={{ padding: '6px 16px' }}
+                          onClick={() => setShowManual(true)}
+                        >
+                          Paste Launcher ID instead
+                        </button>
+                        <a
+                          href="https://mintgarden.io/collections/wojak-farmers-plot-col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-accent text-sm"
+                        >
+                          Don't have one? View collection &rarr;
+                        </a>
+                      </>
+                    )}
+
+                    {/* Manual Launcher ID input (fallback) */}
+                    {showManual && (
+                      <>
+                        <span className="text-muted text-sm">
+                          Paste the Launcher ID from Sage wallet for instant verification.
+                        </span>
+                        <input
+                          className="input text-sm"
+                          type="text"
+                          placeholder="nft1..."
+                          value={nftInput}
+                          onChange={e => { setNftInput(e.target.value); setNftError(''); }}
+                          onKeyDown={e => { if (e.key === 'Enter') handleVerifyNft(); }}
+                          style={{ fontSize: 13 }}
+                        />
+                        {nftError && <span className="text-sm" style={{ color: 'var(--color-error)' }}>{nftError}</span>}
+                        <button
+                          className="btn btn-primary text-sm"
+                          style={{ padding: '6px 16px' }}
+                          onClick={handleVerifyNft}
+                          disabled={verifyingNft || !nftInput.trim()}
+                        >
+                          {verifyingNft ? 'Verifying...' : 'Verify NFT'}
+                        </button>
+                        <button
+                          className="btn btn-ghost text-sm"
+                          style={{ padding: '4px 16px', fontSize: 12 }}
+                          onClick={() => { setShowManual(false); handleRetryAutoVerify(); }}
+                        >
+                          &larr; Back to auto-check
+                        </button>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
