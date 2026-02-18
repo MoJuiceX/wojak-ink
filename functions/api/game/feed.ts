@@ -6,6 +6,21 @@ interface Env {
   DB: D1Database;
 }
 
+// ipfs_image_uri can be a plain URL string or a JSON array of gateway URLs.
+// Extract the first usable HTTP URL.
+function resolveImageUri(raw: string | null): string {
+  if (!raw) return '';
+  if (raw.startsWith('[')) {
+    try {
+      const urls = JSON.parse(raw) as string[];
+      return urls.find(u => u.startsWith('https://')) || urls[0] || '';
+    } catch {
+      return raw;
+    }
+  }
+  return raw;
+}
+
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     const url = new URL(context.request.url);
@@ -80,7 +95,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         creatorWallet: row.creator_wallet,
         name: row.full_name || `Your Wojak #${row.edition_number}`,
         customName: row.custom_name,
-        imageUri: row.ipfs_image_uri,
+        imageUri: resolveImageUri(row.ipfs_image_uri as string),
         totalVotes: row.total_votes,
         likes: row.likes,
         dislikes: row.dislikes,

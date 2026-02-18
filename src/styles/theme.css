@@ -1888,7 +1888,7 @@ body {
 .vote-card {
   position: relative;
   width: 100%;
-  max-width: 380px;
+  max-width: 480px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
@@ -1993,7 +1993,7 @@ body {
 .vote-card-stack {
   position: relative;
   width: 100%;
-  max-width: 380px;
+  max-width: 480px;
   margin: 0 auto;
 }
 
