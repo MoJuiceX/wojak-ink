@@ -10,7 +10,7 @@ interface Env {
   CLERK_DOMAIN: string;
 }
 
-const NAME_REGEX = /^[a-zA-Z0-9 .,!?'\-]+$/;
+const NAME_REGEX = /^[a-zA-Z0-9 .,!?'-]+$/;
 const MAX_NAME_LENGTH = 30;
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {

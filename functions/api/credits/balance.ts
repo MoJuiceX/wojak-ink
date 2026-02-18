@@ -91,7 +91,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     // Expire stale pending mints for accurate supply
     const expired = await expireStalePendingMints(env.DB);
     if (expired > 0) {
-      console.log(`[Credits Balance] Expired ${expired} stale pending mints`);
+      console.warn(`[Credits Balance] Expired ${expired} stale pending mints`);
     }
 
     // Get total earned credits

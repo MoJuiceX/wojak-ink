@@ -27,9 +27,11 @@ const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
 
 import { cleanupStaleJobs } from './cleanup';
-import { finalizeJob, processJob } from './process';
+import { finalizeJob, processJob, type ProcessEnv } from './process';
 import { unpinFromIPFS } from './uploadToIPFS';
 import { markRefundNeeded, logMintStep } from './auditHelper';
+
+type CleanupEnv = ProcessEnv & { DB: D1Database; MINT_JOBS_KV: KVNamespace; PINATA_JWT?: string; PHASE2_COLLECTION_UUID?: string };
 
 const TEST_WALLET = 'xch1' + 'a'.repeat(58);
 
@@ -69,7 +71,7 @@ describe('cleanup.ts', () => {
 
   it('returns zero stats when nothing to clean up', async () => {
     const env = createMockEnv();
-    const stats = await cleanupStaleJobs(env as any);
+    const stats = await cleanupStaleJobs(env as unknown as CleanupEnv);
     expect(stats.autoFinalized).toBe(0);
     expect(stats.expiredPaid).toBe(0);
     expect(stats.stuckProcessing).toBe(0);
@@ -97,7 +99,7 @@ describe('cleanup.ts', () => {
       }),
     });
 
-    const stats = await cleanupStaleJobs(env as any);
+    const stats = await cleanupStaleJobs(env as unknown as CleanupEnv);
     expect(stats.autoFinalized).toBe(1);
     expect(finalizeJob).toHaveBeenCalled();
   });
@@ -114,7 +116,7 @@ describe('cleanup.ts', () => {
       return mockStmt();
     });
 
-    const stats = await cleanupStaleJobs(env as any);
+    const stats = await cleanupStaleJobs(env as unknown as CleanupEnv);
     expect(stats.expiredPaid).toBe(3);
   });
 
@@ -129,7 +131,7 @@ describe('cleanup.ts', () => {
       return mockStmt();
     });
 
-    const stats = await cleanupStaleJobs(env as any);
+    const stats = await cleanupStaleJobs(env as unknown as CleanupEnv);
     expect(stats.stuckProcessing).toBe(2);
   });
 
@@ -146,7 +148,7 @@ describe('cleanup.ts', () => {
     });
     env.MINT_JOBS_KV.get = vi.fn().mockResolvedValue('base64imagedata');
 
-    const stats = await cleanupStaleJobs(env as any);
+    const stats = await cleanupStaleJobs(env as unknown as CleanupEnv);
     expect(stats.retriedQueued).toBe(1);
     expect(processJob).toHaveBeenCalledWith(env, 5, 'base64imagedata');
   });
@@ -169,7 +171,7 @@ describe('cleanup.ts', () => {
     });
     env.MINT_JOBS_KV.get = vi.fn().mockResolvedValue('base64imagedata');
 
-    const stats = await cleanupStaleJobs(env as any);
+    const stats = await cleanupStaleJobs(env as unknown as CleanupEnv);
     expect(stats.retriedQueued).toBe(1);
     expect(processJob).toHaveBeenCalledWith(env, 77, 'base64imagedata');
   });
@@ -193,7 +195,7 @@ describe('cleanup.ts', () => {
     });
     env.MINT_JOBS_KV.get = vi.fn().mockResolvedValue(null); // Image not in KV
 
-    await cleanupStaleJobs(env as any);
+    await cleanupStaleJobs(env as unknown as CleanupEnv);
     expect(jobFailedDueToImageExpiry).toBe(true);
     expect(processJob).not.toHaveBeenCalled();
   });
@@ -216,7 +218,7 @@ describe('cleanup.ts', () => {
     });
     env.MINT_JOBS_KV.get = vi.fn().mockResolvedValue(null); // Image not in KV
 
-    await cleanupStaleJobs(env as any);
+    await cleanupStaleJobs(env as unknown as CleanupEnv);
     expect(jobFailedDueToImageExpiry).toBe(true);
   });
 
@@ -236,7 +238,7 @@ describe('cleanup.ts', () => {
       return mockStmt();
     });
 
-    const stats = await cleanupStaleJobs(env as any);
+    const stats = await cleanupStaleJobs(env as unknown as CleanupEnv);
     expect(stats.refunded).toBe(1);
   });
 
@@ -262,7 +264,7 @@ describe('cleanup.ts', () => {
       return mockStmt();
     });
 
-    const stats = await cleanupStaleJobs(env as any);
+    const stats = await cleanupStaleJobs(env as unknown as CleanupEnv);
     expect(stats.unpinnedIPFS).toBe(1);
     expect(unpinFromIPFS).toHaveBeenCalled();
   });
@@ -291,7 +293,7 @@ describe('cleanup.ts', () => {
       return mockStmt();
     });
 
-    const stats = await cleanupStaleJobs(env as any);
+    const stats = await cleanupStaleJobs(env as unknown as CleanupEnv);
     expect(stats.paidRefundsFlagged).toBe(1);
     expect(markRefundNeeded).toHaveBeenCalledWith(env.DB, 200, expect.stringContaining('job 15'));
   });
@@ -320,7 +322,7 @@ describe('cleanup.ts', () => {
       return mockStmt();
     });
 
-    const stats = await cleanupStaleJobs(env as any);
+    const stats = await cleanupStaleJobs(env as unknown as CleanupEnv);
     expect(stats.paidRefundsFlagged).toBe(1);
     expect(logMintStep).toHaveBeenCalledWith(env.DB, expect.objectContaining({
       step: 'refund_needed_no_mint_record',
@@ -343,7 +345,7 @@ describe('cleanup.ts', () => {
     // detectLauncherByWallet now catches errors internally and returns null
     mockFetch.mockRejectedValue(new Error('Network error'));
 
-    const stats = await cleanupStaleJobs(env as any);
+    const stats = await cleanupStaleJobs(env as unknown as CleanupEnv);
     // Should not crash — detectLauncherByWallet returns null, so no finalization
     expect(stats.autoFinalized).toBe(0);
   });
@@ -361,7 +363,7 @@ describe('cleanup.ts', () => {
       return mockStmt();
     });
 
-    const stats = await cleanupStaleJobs(env as any);
+    const stats = await cleanupStaleJobs(env as unknown as CleanupEnv);
     expect(stats.retriedQueued).toBe(0);
     expect(processJob).not.toHaveBeenCalled();
   });
@@ -378,7 +380,7 @@ describe('cleanup.ts', () => {
       return mockStmt();
     });
 
-    const stats = await cleanupStaleJobs(env as any);
+    const stats = await cleanupStaleJobs(env as unknown as CleanupEnv);
     expect(stats.expiredLegacy).toBe(5);
   });
 });

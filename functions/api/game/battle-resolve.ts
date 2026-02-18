@@ -50,7 +50,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         `).bind(battleId).run();
 
         if (drawResult.meta.changes === 0) {
-          console.log(`[Battle Resolve] Battle ${battleId} already resolved, skipping`);
+          console.warn(`[Battle Resolve] Battle ${battleId} already resolved, skipping`);
           continue;
         }
 
@@ -85,7 +85,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         `).bind(battleId).run();
 
         if (tieResult.meta.changes === 0) {
-          console.log(`[Battle Resolve] Battle ${battleId} already resolved, skipping`);
+          console.warn(`[Battle Resolve] Battle ${battleId} already resolved, skipping`);
           continue;
         }
 
@@ -110,7 +110,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       `).bind(winnerNftId, battleId).run();
 
       if (updateResult.meta.changes === 0) {
-        console.log(`[Battle Resolve] Battle ${battleId} already resolved, skipping`);
+        console.warn(`[Battle Resolve] Battle ${battleId} already resolved, skipping`);
         continue;
       }
 

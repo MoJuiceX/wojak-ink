@@ -68,7 +68,7 @@ function NftDetailModal({ nft, onClose, onBurned }: { nft: CollectionNft; onClos
     const trimmed = nameInput.trim();
     if (!trimmed) { cancelEditing(); return; }
     if (trimmed.length > 30) { setNameError('Max 30 characters'); return; }
-    if (!/^[a-zA-Z0-9 .,!?'\-]+$/.test(trimmed)) { setNameError('Letters, numbers, spaces, basic punctuation only'); return; }
+    if (!/^[a-zA-Z0-9 .,!?'-]+$/.test(trimmed)) { setNameError('Letters, numbers, spaces, basic punctuation only'); return; }
 
     setNameSaving(true);
     setNameError(null);
