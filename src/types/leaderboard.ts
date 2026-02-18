@@ -92,7 +92,8 @@ export type GameId =
   | 'citrus-drop'
   | 'orange-snake'
   | 'brick-breaker'
-  | 'wojak-whack';
+  | 'wojak-whack'
+  | 'combat';
 
 export const GAME_NAMES: Record<GameId, string> = {
   'orange-stack': 'Brick by Brick',
@@ -109,6 +110,7 @@ export const GAME_NAMES: Record<GameId, string> = {
   'orange-snake': 'Orange Snake',
   'brick-breaker': 'Brick Breaker',
   'wojak-whack': 'Wojak Whack',
+  'combat': 'Combat Arena',
 };
 
 // Active games (not disabled) - shown prominently
@@ -120,6 +122,7 @@ export const ACTIVE_GAME_IDS: GameId[] = [
   'color-reaction',
   'block-puzzle',
   'merge-2048',
+  'combat',
 ];
 
 // Disabled games (coming soon) - greyed out
