@@ -13,6 +13,7 @@ interface CollectionNft {
   nftId: string;
   editionNumber: number;
   name: string;
+  imageUri?: string;
   likes: number;
   dislikes: number;
   netScore: number;
@@ -136,7 +137,7 @@ function NftDetailModal({ nft, onClose, onBurned }: { nft: CollectionNft; onClos
         {nameError && <span className="text-sm" style={{ color: 'var(--color-error)' }}>{nameError}</span>}
 
         <img
-          src={`https://assets.mintgarden.io/thumbnails/medium/${nft.nftId}.png`}
+          src={nft.imageUri || `https://assets.mintgarden.io/thumbnails/medium/${nft.nftId}.png`}
           alt={nft.name}
           onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMG; }}
           style={{
@@ -310,7 +311,7 @@ export function CollectionScroll({ did }: CollectionScrollProps) {
             onClick={() => setSelectedNft(nft)}
           >
             <img
-              src={`https://assets.mintgarden.io/thumbnails/medium/${nft.nftId}.png`}
+              src={nft.imageUri || `https://assets.mintgarden.io/thumbnails/medium/${nft.nftId}.png`}
               alt={nft.name}
               onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMG; }}
               style={{

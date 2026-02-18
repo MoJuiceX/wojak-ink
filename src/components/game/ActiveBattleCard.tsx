@@ -10,6 +10,7 @@ interface BattleNft {
   edition: number;
   ownerDid: string;
   name: string;
+  imageUri?: string;
 }
 
 interface Battle {
@@ -90,7 +91,7 @@ export function ActiveBattleCard({ did }: ActiveBattleCardProps) {
         <div className="flex flex-col items-center gap-1">
           <Link to={`/swipe/wojak/${yourNft.edition}`}>
             <img
-              src={`https://assets.mintgarden.io/thumbnails/medium/${yourNft.id}.png`}
+              src={yourNft.imageUri || `https://assets.mintgarden.io/thumbnails/medium/${yourNft.id}.png`}
               alt={yourNft.name}
               onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMG; }}
               style={{
@@ -110,7 +111,7 @@ export function ActiveBattleCard({ did }: ActiveBattleCardProps) {
         <div className="flex flex-col items-center gap-1">
           <Link to={`/swipe/wojak/${opponentNft.edition}`}>
             <img
-              src={`https://assets.mintgarden.io/thumbnails/medium/${opponentNft.id}.png`}
+              src={opponentNft.imageUri || `https://assets.mintgarden.io/thumbnails/medium/${opponentNft.id}.png`}
               alt={opponentNft.name}
               onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMG; }}
               style={{

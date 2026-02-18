@@ -6,6 +6,17 @@ interface Env {
   DB: D1Database;
 }
 
+function resolveImageUri(raw: string | null): string {
+  if (!raw) return '';
+  if (raw.startsWith('[')) {
+    try {
+      const urls = JSON.parse(raw) as string[];
+      return urls.find(u => u.startsWith('https://')) || urls[0] || '';
+    } catch { return raw; }
+  }
+  return raw;
+}
+
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     const url = new URL(context.request.url);
@@ -21,10 +32,14 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         SELECT
           b.*,
           na.full_name as name_a,
-          nb.full_name as name_b
+          nb.full_name as name_b,
+          pma.ipfs_image_uri as image_a,
+          pmb.ipfs_image_uri as image_b
         FROM battles b
         LEFT JOIN nft_names na ON na.edition_number = b.nft_a_edition
         LEFT JOIN nft_names nb ON nb.edition_number = b.nft_b_edition
+        LEFT JOIN phase2_mints pma ON pma.mint_number = b.nft_a_edition
+        LEFT JOIN phase2_mints pmb ON pmb.mint_number = b.nft_b_edition
         WHERE b.nft_a_id = ? OR b.nft_b_id = ?
         ORDER BY b.started_at DESC
         LIMIT ? OFFSET ?
@@ -38,17 +53,23 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     // Battle list — active or history
     const isHistory = status === 'history';
     const query = isHistory
-      ? `SELECT b.*, na.full_name as name_a, nb.full_name as name_b
+      ? `SELECT b.*, na.full_name as name_a, nb.full_name as name_b,
+               pma.ipfs_image_uri as image_a, pmb.ipfs_image_uri as image_b
          FROM battles b
          LEFT JOIN nft_names na ON na.edition_number = b.nft_a_edition
          LEFT JOIN nft_names nb ON nb.edition_number = b.nft_b_edition
+         LEFT JOIN phase2_mints pma ON pma.mint_number = b.nft_a_edition
+         LEFT JOIN phase2_mints pmb ON pmb.mint_number = b.nft_b_edition
          WHERE b.status IN ('completed', 'draw')
          ORDER BY b.resolved_at DESC
          LIMIT ? OFFSET ?`
-      : `SELECT b.*, na.full_name as name_a, nb.full_name as name_b
+      : `SELECT b.*, na.full_name as name_a, nb.full_name as name_b,
+               pma.ipfs_image_uri as image_a, pmb.ipfs_image_uri as image_b
          FROM battles b
          LEFT JOIN nft_names na ON na.edition_number = b.nft_a_edition
          LEFT JOIN nft_names nb ON nb.edition_number = b.nft_b_edition
+         LEFT JOIN phase2_mints pma ON pma.mint_number = b.nft_a_edition
+         LEFT JOIN phase2_mints pmb ON pmb.mint_number = b.nft_b_edition
          WHERE b.status = ?
          ORDER BY b.ends_at ASC
          LIMIT ? OFFSET ?`;
@@ -82,6 +103,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           edition: b.nft_a_edition,
           ownerDid: b.nft_a_owner_did,
           name: b.name_a || `Your Wojak #${b.nft_a_edition}`,
+          imageUri: resolveImageUri(b.image_a as string | null),
           ...(isResolved && deltas ? { scoreDelta: deltas.deltaA } : {}),
         },
         nftB: {
@@ -89,6 +111,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           edition: b.nft_b_edition,
           ownerDid: b.nft_b_owner_did,
           name: b.name_b || `Your Wojak #${b.nft_b_edition}`,
+          imageUri: resolveImageUri(b.image_b as string | null),
           ...(isResolved && deltas ? { scoreDelta: deltas.deltaB } : {}),
         },
         status: b.status,
@@ -158,12 +181,14 @@ function formatBattle(b: Record<string, unknown>, perspectiveNftId: string) {
       id: isA ? b.nft_a_id : b.nft_b_id,
       edition: isA ? b.nft_a_edition : b.nft_b_edition,
       name: isA ? b.name_a : b.name_b,
+      imageUri: resolveImageUri((isA ? b.image_a : b.image_b) as string | null),
       ...(isResolved ? { scoreDelta: isA ? deltaA : deltaB } : {}),
     },
     opponent: {
       id: isA ? b.nft_b_id : b.nft_a_id,
       edition: isA ? b.nft_b_edition : b.nft_a_edition,
       name: isA ? b.name_b : b.name_a,
+      imageUri: resolveImageUri((isA ? b.image_b : b.image_a) as string | null),
       ...(isResolved ? { scoreDelta: isA ? deltaB : deltaA } : {}),
     },
     startedAt: b.started_at,
