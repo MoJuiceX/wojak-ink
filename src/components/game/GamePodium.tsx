@@ -1,4 +1,5 @@
 // Game Podium — top 3 display with classic podium arrangement.
+import { Link } from 'react-router-dom';
 import { getTier } from '@/components/game/PowerLevelDisplay';
 
 interface PodiumEntry {
@@ -48,53 +49,103 @@ function PodiumCard({ entry, mode, isFirst }: { entry: PodiumEntry; mode: 'playe
       className="card-static flex flex-col items-center gap-2"
       style={{ padding, boxShadow: glow, flex: 1, minWidth: 0 }}
     >
-      <div style={{ position: 'relative' }}>
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={entry.name || `#${entry.editionNumber || '?'}`}
+      {entry.editionNumber ? (
+        <Link to={`/swipe/wojak/${entry.editionNumber}`} style={{ position: 'relative', display: 'block', cursor: 'pointer' }}>
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={entry.name || `#${entry.editionNumber || '?'}`}
+              style={{
+                width: avatarSize,
+                height: avatarSize,
+                borderRadius: 'var(--radius-md)',
+                objectFit: 'cover',
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: avatarSize,
+                height: avatarSize,
+                borderRadius: 'var(--radius-md)',
+                background: 'var(--color-border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <span className="text-muted" style={{ fontSize: 16 }}>?</span>
+            </div>
+          )}
+          <span
             style={{
-              width: avatarSize,
-              height: avatarSize,
-              borderRadius: 'var(--radius-md)',
-              objectFit: 'cover',
-            }}
-          />
-        ) : (
-          <div
-            style={{
-              width: avatarSize,
-              height: avatarSize,
-              borderRadius: 'var(--radius-md)',
-              background: 'var(--color-border)',
+              position: 'absolute',
+              top: -6,
+              left: -6,
+              width: 22,
+              height: 22,
+              borderRadius: '50%',
+              background: RANK_COLORS[entry.rank] || 'var(--color-border)',
+              color: '#000',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              fontSize: 11,
+              fontWeight: 700,
             }}
           >
-            <span className="text-muted" style={{ fontSize: 16 }}>?</span>
-          </div>
-        )}
-        <span
-          style={{
-            position: 'absolute',
-            top: -6,
-            left: -6,
-            width: 22,
-            height: 22,
-            borderRadius: '50%',
-            background: RANK_COLORS[entry.rank] || 'var(--color-border)',
-            color: '#000',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 11,
-            fontWeight: 700,
-          }}
-        >
-          #{entry.rank}
-        </span>
-      </div>
+            #{entry.rank}
+          </span>
+        </Link>
+      ) : (
+        <div style={{ position: 'relative' }}>
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={entry.name || `#${entry.editionNumber || '?'}`}
+              style={{
+                width: avatarSize,
+                height: avatarSize,
+                borderRadius: 'var(--radius-md)',
+                objectFit: 'cover',
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: avatarSize,
+                height: avatarSize,
+                borderRadius: 'var(--radius-md)',
+                background: 'var(--color-border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <span className="text-muted" style={{ fontSize: 16 }}>?</span>
+            </div>
+          )}
+          <span
+            style={{
+              position: 'absolute',
+              top: -6,
+              left: -6,
+              width: 22,
+              height: 22,
+              borderRadius: '50%',
+              background: RANK_COLORS[entry.rank] || 'var(--color-border)',
+              color: '#000',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 11,
+              fontWeight: 700,
+            }}
+          >
+            #{entry.rank}
+          </span>
+        </div>
+      )}
 
       {mode === 'players' ? (
         <>
@@ -112,9 +163,15 @@ function PodiumCard({ entry, mode, isFirst }: { entry: PodiumEntry; mode: 'playe
         </>
       ) : (
         <>
-          <span style={{ fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>
-            {entry.name || `Your Wojak #${entry.editionNumber}`}
-          </span>
+          {entry.editionNumber ? (
+            <Link to={`/swipe/wojak/${entry.editionNumber}`} style={{ fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%', color: 'inherit', textDecoration: 'none' }}>
+              {entry.name || `Your Wojak #${entry.editionNumber}`}
+            </Link>
+          ) : (
+            <span style={{ fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>
+              {entry.name || `Your Wojak #${entry.editionNumber}`}
+            </span>
+          )}
           <span style={{ fontSize: scoreSize, fontWeight: 700 }}>
             +{entry.netScore || 0} votes
           </span>

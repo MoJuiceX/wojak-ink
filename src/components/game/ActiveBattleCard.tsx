@@ -88,36 +88,40 @@ export function ActiveBattleCard({ did }: ActiveBattleCardProps) {
 
       <div className="flex items-center justify-center gap-4">
         <div className="flex flex-col items-center gap-1">
-          <img
-            src={`https://assets.mintgarden.io/thumbnails/medium/${yourNft.id}.png`}
-            alt={yourNft.name}
-            onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMG; }}
-            style={{
-              width: 60,
-              height: 60,
-              borderRadius: 'var(--radius-md)',
-              objectFit: 'cover',
-              border: '2px solid var(--color-primary)',
-            }}
-          />
+          <Link to={`/swipe/wojak/${yourNft.edition}`}>
+            <img
+              src={`https://assets.mintgarden.io/thumbnails/medium/${yourNft.id}.png`}
+              alt={yourNft.name}
+              onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMG; }}
+              style={{
+                width: 60,
+                height: 60,
+                borderRadius: 'var(--radius-md)',
+                objectFit: 'cover',
+                border: '2px solid var(--color-primary)',
+              }}
+            />
+          </Link>
           <span className="text-xs text-secondary">You</span>
         </div>
 
         <span className="text-muted" style={{ fontSize: 12 }}>VS</span>
 
         <div className="flex flex-col items-center gap-1">
-          <img
-            src={`https://assets.mintgarden.io/thumbnails/medium/${opponentNft.id}.png`}
-            alt={opponentNft.name}
-            onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMG; }}
-            style={{
-              width: 60,
-              height: 60,
-              borderRadius: 'var(--radius-md)',
-              objectFit: 'cover',
-              border: '2px solid var(--color-border)',
-            }}
-          />
+          <Link to={`/swipe/wojak/${opponentNft.edition}`}>
+            <img
+              src={`https://assets.mintgarden.io/thumbnails/medium/${opponentNft.id}.png`}
+              alt={opponentNft.name}
+              onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMG; }}
+              style={{
+                width: 60,
+                height: 60,
+                borderRadius: 'var(--radius-md)',
+                objectFit: 'cover',
+                border: '2px solid var(--color-border)',
+              }}
+            />
+          </Link>
           <span className="text-xs text-muted">#{opponentNft.edition}</span>
         </div>
       </div>

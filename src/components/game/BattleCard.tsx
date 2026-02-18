@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 interface BattleNft {
   id: string;
@@ -85,14 +86,18 @@ export function BattleCard({
             className="battle-nft-image"
             style={aWon ? { borderColor: 'var(--color-success)', boxShadow: '0 0 12px rgba(34, 197, 94, 0.3)' } : undefined}
           >
-            <img
-              src={`https://assets.mintgarden.io/thumbnails/medium/${nftA.id}.png`}
-              alt={nftA.name}
-              className="w-full rounded-lg"
-              loading="lazy"
-            />
+            <Link to={`/swipe/wojak/${nftA.edition}`}>
+              <img
+                src={`https://assets.mintgarden.io/thumbnails/medium/${nftA.id}.png`}
+                alt={nftA.name}
+                className="w-full rounded-lg"
+                loading="lazy"
+              />
+            </Link>
           </div>
-          <p className="text-sm font-semibold text-center">{nftA.name}</p>
+          <Link to={`/swipe/wojak/${nftA.edition}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+            <p className="text-sm font-semibold text-center">{nftA.name}</p>
+          </Link>
           <span className="text-xs text-secondary">#{nftA.edition}</span>
           {isResolved && (
             <span
@@ -116,14 +121,18 @@ export function BattleCard({
             className="battle-nft-image"
             style={bWon ? { borderColor: 'var(--color-success)', boxShadow: '0 0 12px rgba(34, 197, 94, 0.3)' } : undefined}
           >
-            <img
-              src={`https://assets.mintgarden.io/thumbnails/medium/${nftB.id}.png`}
-              alt={nftB.name}
-              className="w-full rounded-lg"
-              loading="lazy"
-            />
+            <Link to={`/swipe/wojak/${nftB.edition}`}>
+              <img
+                src={`https://assets.mintgarden.io/thumbnails/medium/${nftB.id}.png`}
+                alt={nftB.name}
+                className="w-full rounded-lg"
+                loading="lazy"
+              />
+            </Link>
           </div>
-          <p className="text-sm font-semibold text-center">{nftB.name}</p>
+          <Link to={`/swipe/wojak/${nftB.edition}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+            <p className="text-sm font-semibold text-center">{nftB.name}</p>
+          </Link>
           <span className="text-xs text-secondary">#{nftB.edition}</span>
           {isResolved && (
             <span

@@ -1,4 +1,5 @@
 // Game Leaderboard List — rank #4+ rows with pagination.
+import { Link } from 'react-router-dom';
 import { getTier } from '@/components/game/PowerLevelDisplay';
 
 interface PlayerEntry {
@@ -55,7 +56,15 @@ function PlayerRow({ entry, isCurrent }: { entry: PlayerEntry; isCurrent: boolea
       <span className="text-muted" style={{ fontSize: 14, fontWeight: 500, width: 32, textAlign: 'right', flexShrink: 0 }}>
         {entry.rank}
       </span>
-      {imageUrl ? (
+      {imageUrl && entry.topNft?.editionNumber ? (
+        <Link to={`/swipe/wojak/${entry.topNft.editionNumber}`} style={{ flexShrink: 0 }}>
+          <img
+            src={imageUrl}
+            alt=""
+            style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', objectFit: 'cover' }}
+          />
+        </Link>
+      ) : imageUrl ? (
         <img
           src={imageUrl}
           alt=""
@@ -91,13 +100,17 @@ function WojakRow({ entry, isOwned }: { entry: WojakEntry; isOwned: boolean }) {
   const likeRatio = entry.totalVotes > 0 ? Math.round((entry.likes / entry.totalVotes) * 100) : 0;
 
   return (
-    <div
+    <Link
+      to={`/swipe/wojak/${entry.editionNumber}`}
       className="flex items-center gap-3"
       style={{
         padding: '10px 14px',
         borderBottom: '1px solid rgba(255,255,255,0.04)',
         borderLeft: isOwned ? '2px solid var(--color-primary)' : '2px solid transparent',
         background: isOwned ? 'rgba(255,107,0,0.05)' : 'transparent',
+        textDecoration: 'none',
+        color: 'inherit',
+        cursor: 'pointer',
       }}
     >
       <span className="text-muted" style={{ fontSize: 14, fontWeight: 500, width: 32, textAlign: 'right', flexShrink: 0 }}>
@@ -130,7 +143,7 @@ function WojakRow({ entry, isOwned }: { entry: WojakEntry; isOwned: boolean }) {
           {likeRatio}% liked
         </span>
       </div>
-    </div>
+    </Link>
   );
 }
 
