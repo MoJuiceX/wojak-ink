@@ -77,6 +77,7 @@ const GameDashboard = lazy(() => import('./pages/GameDashboard'));
 const GameBattles = lazy(() => import('./pages/GameBattles'));
 const GameLeaderboard = lazy(() => import('./pages/GameLeaderboard'));
 const GameActivity = lazy(() => import('./pages/GameActivity'));
+const WojakProfile = lazy(() => import('./pages/WojakProfile'));
 
 const BrickByBrick = lazy(() => import('./pages/BrickByBrick'));
 const MemoryMatch = lazy(() => import('./pages/MemoryMatch'));
@@ -399,6 +400,14 @@ function AppContent() {
                       element={
                         <Suspense fallback={<PageSkeleton type="settings" />}>
                           <GameActivity />
+                        </Suspense>
+                      }
+                    />
+                    <Route
+                      path="wojak/:edition"
+                      element={
+                        <Suspense fallback={<PageSkeleton type="settings" />}>
+                          <WojakProfile />
                         </Suspense>
                       }
                     />
