@@ -3,6 +3,17 @@ interface Env {
   DB: D1Database;
 }
 
+function resolveImageUri(raw: string | null): string {
+  if (!raw) return '';
+  if (raw.startsWith('[')) {
+    try {
+      const urls = JSON.parse(raw) as string[];
+      return urls.find(u => u.startsWith('https://')) || urls[0] || '';
+    } catch { return raw; }
+  }
+  return raw;
+}
+
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const url = new URL(request.url);
   const limit = Math.min(parseInt(url.searchParams.get('limit') || '50'), 100);
@@ -13,10 +24,12 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       `SELECT ws.nft_id, ws.edition_number, ws.likes, ws.dislikes,
               ws.net_score, ws.total_votes,
               nn.custom_name, nn.full_name,
-              dh.did_id AS owner_did, dh.creator_wallet
+              dh.did_id AS owner_did, dh.creator_wallet,
+              pm.ipfs_image_uri
        FROM wojak_scores ws
        LEFT JOIN nft_names nn ON ws.edition_number = nn.edition_number
        LEFT JOIN did_holdings dh ON ws.nft_id = dh.nft_id
+       LEFT JOIN phase2_mints pm ON ws.edition_number = pm.mint_number
        WHERE ws.total_votes > 0
        ORDER BY ws.net_score DESC
        LIMIT ? OFFSET ?`
@@ -37,6 +50,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       totalVotes: (row.total_votes as number) || 0,
       creatorWallet: row.creator_wallet || null,
       ownerDid: row.owner_did || null,
+      imageUri: resolveImageUri(row.ipfs_image_uri as string | null),
     }));
 
     return Response.json({

@@ -9,6 +9,7 @@ interface PodiumEntry {
   editionNumber?: number;
   powerLevel?: number;
   netScore?: number;
+  imageUri?: string;
 }
 
 interface GamePodiumProps {
@@ -39,9 +40,7 @@ function PodiumCard({ entry, mode, isFirst }: { entry: PodiumEntry; mode: 'playe
   const scoreSize = isFirst ? 18 : 15;
   const glow = RANK_GLOWS[entry.rank] || 'none';
 
-  const imageUrl = entry.nftId
-    ? `https://assets.mintgarden.io/thumbnails/medium/${entry.nftId}.png`
-    : undefined;
+  const imageUrl = entry.imageUri || undefined;
 
   return (
     <div

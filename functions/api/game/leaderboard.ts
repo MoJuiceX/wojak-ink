@@ -5,6 +5,17 @@ interface Env {
   DB: D1Database;
 }
 
+function resolveImageUri(raw: string | null): string {
+  if (!raw) return '';
+  if (raw.startsWith('[')) {
+    try {
+      const urls = JSON.parse(raw) as string[];
+      return urls.find(u => u.startsWith('https://')) || urls[0] || '';
+    } catch { return raw; }
+  }
+  return raw;
+}
+
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     const url = new URL(context.request.url);
@@ -19,13 +30,15 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         gp.total_votes_cast,
         gp.created_at,
         topnft.nft_id AS top_nft_id,
-        topnft.edition_number AS top_edition
+        topnft.edition_number AS top_edition,
+        topnft.ipfs_image_uri AS top_image_uri
       FROM game_players gp
       LEFT JOIN (
-        SELECT dh.did_id, dh.nft_id, dh.edition_number,
+        SELECT dh.did_id, dh.nft_id, dh.edition_number, pm.ipfs_image_uri,
                ROW_NUMBER() OVER (PARTITION BY dh.did_id ORDER BY COALESCE(ws.net_score, 0) DESC) AS rn
         FROM did_holdings dh
         LEFT JOIN wojak_scores ws ON dh.nft_id = ws.nft_id
+        LEFT JOIN phase2_mints pm ON dh.edition_number = pm.mint_number
       ) topnft ON topnft.did_id = gp.did_id AND topnft.rn = 1
       WHERE gp.phase1_verified = 1 AND gp.power_level > 0
       ORDER BY gp.power_level DESC
@@ -47,6 +60,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         topNft: row.top_nft_id ? {
           nftId: row.top_nft_id,
           editionNumber: row.top_edition,
+          imageUri: resolveImageUri(row.top_image_uri as string | null),
         } : null,
       })),
       pagination: {

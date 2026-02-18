@@ -5,7 +5,7 @@ interface PlayerEntry {
   rank: number;
   did: string;
   powerLevel: number;
-  topNft?: { nftId: string; editionNumber: number } | null;
+  topNft?: { nftId: string; editionNumber: number; imageUri?: string } | null;
 }
 
 interface WojakEntry {
@@ -17,6 +17,7 @@ interface WojakEntry {
   likes: number;
   totalVotes: number;
   ownerDid?: string | null;
+  imageUri?: string;
 }
 
 interface GameLeaderboardListProps {
@@ -37,9 +38,7 @@ function truncateDid(did: string): string {
 
 function PlayerRow({ entry, isCurrent }: { entry: PlayerEntry; isCurrent: boolean }) {
   const tier = getTier(entry.powerLevel);
-  const imageUrl = entry.topNft
-    ? `https://assets.mintgarden.io/thumbnails/medium/${entry.topNft.nftId}.png`
-    : undefined;
+  const imageUrl = entry.topNft?.imageUri || undefined;
 
   return (
     <div
@@ -102,11 +101,17 @@ function WojakRow({ entry, isOwned }: { entry: WojakEntry; isOwned: boolean }) {
       <span className="text-muted" style={{ fontSize: 14, fontWeight: 500, width: 32, textAlign: 'right', flexShrink: 0 }}>
         {entry.rank}
       </span>
-      <img
-        src={`https://assets.mintgarden.io/thumbnails/medium/${entry.nftId}.png`}
-        alt={entry.name}
-        style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', objectFit: 'cover', flexShrink: 0 }}
-      />
+      {entry.imageUri ? (
+        <img
+          src={entry.imageUri}
+          alt={entry.name}
+          style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', objectFit: 'cover', flexShrink: 0 }}
+        />
+      ) : (
+        <div
+          style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', background: 'var(--color-border)', flexShrink: 0 }}
+        />
+      )}
       <div className="flex flex-col flex-1" style={{ minWidth: 0 }}>
         <span style={{ fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {entry.name}
