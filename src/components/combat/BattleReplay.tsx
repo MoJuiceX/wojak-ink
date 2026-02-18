@@ -239,6 +239,26 @@ export function BattleReplay({ battleId }: BattleReplayProps) {
     }
   }, [stepIndex]);
 
+  // ── Keyboard shortcuts for step mode ────────────────────────────────
+  useEffect(() => {
+    if (mode !== 'step') return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      if (e.key === 'ArrowRight' || e.key === 'l') {
+        e.preventDefault();
+        goNext();
+      } else if (e.key === 'ArrowLeft' || e.key === 'h') {
+        e.preventDefault();
+        goPrev();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [mode, goNext, goPrev]);
+
   // ── Switch mode handler ───────────────────────────────────────────────
   const switchToStep = useCallback(() => {
     setMode('step');
@@ -478,6 +498,11 @@ export function BattleReplay({ battleId }: BattleReplayProps) {
               Next
             </button>
           </div>
+
+          {/* Keyboard hint (desktop only) */}
+          <p className="text-xs text-muted text-center hidden md:block">
+            Arrow keys or H/L to navigate turns
+          </p>
         </>
       )}
 
