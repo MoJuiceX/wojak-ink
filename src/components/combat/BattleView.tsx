@@ -1,12 +1,29 @@
 /**
- * BattleView — split screen: your Wojak vs opponent with HP bars, turn log, and move controls.
+ * BattleView — full battle arena with animated playback, canvas particles, and audio.
+ *
+ * Replaces the original card-grid layout with:
+ * - Battle arena wrapper with scanlines + canvas particle overlay
+ * - useBattlePlayback hook for timed turn animation
+ * - Ghost-damage HP bars
+ * - Status condition icons with animated CSS
+ * - Fighter intro / faint / winner / loser animations
+ * - Audio integration (preload on mount, effects during playback)
+ *
+ * Keeps the existing API polling pattern (GET /api/combat/battle every 3s)
+ * and move submission (POST /api/combat/submit-move).
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { HPBar } from './HPBar';
 import { TurnLog } from './TurnLog';
 import { MoveButtons } from './MoveButtons';
+import { BattleCanvas } from './BattleCanvas';
+import { useBattlePlayback } from '@/hooks/useBattlePlayback';
+import { getBattleAudio } from '@/lib/combat/audio';
 import type { CombatType } from '@/lib/combat/types';
+import type { TurnResult } from '@/lib/combat/battle-state';
+
+// ── Interfaces ──────────────────────────────────────────────────────────────
 
 interface FighterDisplay {
   nft_id: string;
@@ -28,7 +45,7 @@ interface BattleData {
   winner: string | null;
   fighterA: FighterDisplay | null;
   fighterB: FighterDisplay | null;
-  turns: any[];
+  turns: TurnResult[];
   eloChangeA?: number;
   eloChangeB?: number;
   xpAwardedA?: number;
@@ -40,12 +57,103 @@ interface BattleViewProps {
   playerNftId?: string;
 }
 
+// ── Helpers ─────────────────────────────────────────────────────────────────
+
+/** Compute max HP from level using the standard formula (base HP stat = 80, IV = 31). */
+function computeMaxHP(level: number): number {
+  return Math.floor((2 * 80 + 31) * level / 100) + level + 10;
+}
+
+// ── Status Icon Map ─────────────────────────────────────────────────────────
+
+const STATUS_ICONS: Record<string, { icon: string; cls: string }> = {
+  burn:      { icon: '\u{1F525}', cls: 'status-burn' },
+  burned:    { icon: '\u{1F525}', cls: 'status-burn' },
+  poison:    { icon: '\u{2620}\u{FE0F}', cls: 'status-poison' },
+  paralysis: { icon: '\u{26A1}', cls: 'status-paralysis' },
+  freeze:    { icon: '\u{2744}\u{FE0F}', cls: 'status-freeze' },
+  frozen:    { icon: '\u{2744}\u{FE0F}', cls: 'status-freeze' },
+  sleep:     { icon: '\u{1F4A4}', cls: 'status-sleep' },
+  confusion: { icon: '\u{1F635}', cls: 'status-confusion' },
+  confused:  { icon: '\u{1F635}', cls: 'status-confusion' },
+};
+
+function StatusIcon({ status }: { status: string | null }) {
+  if (!status) return null;
+  const entry = STATUS_ICONS[status];
+  if (!entry) return null;
+  return (
+    <div className={`status-icon ${entry.cls}`} title={status}>
+      {entry.icon}
+    </div>
+  );
+}
+
+// ── Fighter Position Constants (for canvas particle targeting) ──────────────
+
+const POS_A = { x: 0.25, y: 0.55 };
+const POS_B = { x: 0.75, y: 0.55 };
+
+// ── BattleView Component ────────────────────────────────────────────────────
+
 export function BattleView({ battleId, playerNftId }: BattleViewProps) {
+  // ── Core state ──────────────────────────────────────────────────────────
   const [battle, setBattle] = useState<BattleData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fetch battle state
+  // ── HP state with ghost tracking ────────────────────────────────────────
+  const [hpA, setHpA] = useState<{ current: number; ghost: number }>({ current: 0, ghost: 0 });
+  const [hpB, setHpB] = useState<{ current: number; ghost: number }>({ current: 0, ghost: 0 });
+
+  // ── Status state ────────────────────────────────────────────────────────
+  const [statusA, setStatusA] = useState<string | null>(null);
+  const [statusB, setStatusB] = useState<string | null>(null);
+
+  // ── Played turn tracking ────────────────────────────────────────────────
+  const [playedTurns, setPlayedTurns] = useState(0);
+
+  // ── Playback hook ───────────────────────────────────────────────────────
+  const callbacks = useMemo(() => ({
+    onHpUpdate: (side: 'a' | 'b', hp: number, _maxHp: number) => {
+      if (side === 'a') {
+        setHpA(prev => ({ current: Math.max(0, hp), ghost: prev.current }));
+      } else {
+        setHpB(prev => ({ current: Math.max(0, hp), ghost: prev.current }));
+      }
+    },
+    onStatusChange: (side: 'a' | 'b', status: string | null) => {
+      if (side === 'a') setStatusA(status);
+      else setStatusB(status);
+    },
+    onComplete: () => {
+      // Playback finished — nothing special needed, UI is already updated
+    },
+  }), []);
+
+  const {
+    isPlaying,
+    canvasRef,
+    arenaRef,
+    playTurns,
+    speed,
+    setSpeed,
+  } = useBattlePlayback(callbacks);
+
+  // ── Audio preload on mount ──────────────────────────────────────────────
+  const audioPreloaded = useRef(false);
+  useEffect(() => {
+    if (!audioPreloaded.current) {
+      audioPreloaded.current = true;
+      getBattleAudio().preload();
+    }
+  }, []);
+
+  // ── Computed values ─────────────────────────────────────────────────────
+  const maxHpA = battle?.fighterA?.level ? computeMaxHP(battle.fighterA.level) : 100;
+  const maxHpB = battle?.fighterB?.level ? computeMaxHP(battle.fighterB.level) : 100;
+
+  // ── Fetch battle state ──────────────────────────────────────────────────
   const fetchBattle = useCallback(async () => {
     try {
       const res = await fetch(`/api/combat/battle?id=${battleId}`);
@@ -55,18 +163,57 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
         return;
       }
       setBattle(data);
-    } catch (err) {
+    } catch {
       setError('Failed to load battle');
     }
   }, [battleId]);
 
   useEffect(() => {
     fetchBattle();
-    // Poll for updates every 3 seconds during active battles
     const interval = setInterval(fetchBattle, 3000);
     return () => clearInterval(interval);
   }, [fetchBattle]);
 
+  // ── Initialize HP when battle first loads ───────────────────────────────
+  const initializedRef = useRef(false);
+  useEffect(() => {
+    if (!battle || initializedRef.current) return;
+    initializedRef.current = true;
+    const initHpA = battle.turns.length === 0
+      ? maxHpA
+      : battle.turns[battle.turns.length - 1].end_of_turn.fighter_a_hp;
+    const initHpB = battle.turns.length === 0
+      ? maxHpB
+      : battle.turns[battle.turns.length - 1].end_of_turn.fighter_b_hp;
+    setHpA({ current: initHpA, ghost: initHpA });
+    setHpB({ current: initHpB, ghost: initHpB });
+
+    // Set status from last turn
+    if (battle.turns.length > 0) {
+      const lastTurn = battle.turns[battle.turns.length - 1];
+      setStatusA(lastTurn.end_of_turn.fighter_a_status);
+      setStatusB(lastTurn.end_of_turn.fighter_b_status);
+    }
+
+    // Mark all existing turns as played (we only animate new turns going forward)
+    setPlayedTurns(battle.turns.length);
+  }, [battle, maxHpA, maxHpB]);
+
+  // ── Play new turns when they arrive ─────────────────────────────────────
+  useEffect(() => {
+    if (!battle || isPlaying) return;
+    if (battle.turns.length <= playedTurns) return;
+    if (!battle.fighterA || !battle.fighterB) return;
+
+    const newTurns = battle.turns.slice(playedTurns);
+    const typeA = battle.fighterA.type;
+    const typeB = battle.fighterB.type;
+
+    playTurns(newTurns, typeA, typeB, POS_A, POS_B);
+    setPlayedTurns(battle.turns.length);
+  }, [battle, playedTurns, isPlaying, playTurns]);
+
+  // ── Submit move handler ─────────────────────────────────────────────────
   const handleSubmitMove = useCallback(async (moveId: string) => {
     if (!playerNftId) return;
     setIsSubmitting(true);
@@ -87,6 +234,7 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
     }
   }, [battleId, playerNftId, fetchBattle]);
 
+  // ── Error state ─────────────────────────────────────────────────────────
   if (error) {
     return (
       <div className="card-static p-6 text-center">
@@ -95,6 +243,7 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
     );
   }
 
+  // ── Loading state ───────────────────────────────────────────────────────
   if (!battle) {
     return (
       <div className="card-static p-6 text-center">
@@ -103,75 +252,134 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
     );
   }
 
+  // ── Derived values ──────────────────────────────────────────────────────
   const isComplete = battle.status === 'completed';
   const isPlayerA = playerNftId === battle.fighterA?.nft_id;
   const playerFighter = isPlayerA ? battle.fighterA : battle.fighterB;
   const opponentFighter = isPlayerA ? battle.fighterB : battle.fighterA;
 
-  // Get HP from last turn result
-  const lastTurn = battle.turns.length > 0 ? battle.turns[battle.turns.length - 1] : null;
-  const hpA = lastTurn?.end_of_turn?.fighter_a_hp ?? 0;
-  const hpB = lastTurn?.end_of_turn?.fighter_b_hp ?? 0;
-  const playerHP = isPlayerA ? hpA : hpB;
-  const opponentHP = isPlayerA ? hpB : hpA;
+  // Determine player/opponent HP and status based on side
+  const playerHp = isPlayerA ? hpA : hpB;
+  const opponentHp = isPlayerA ? hpB : hpA;
+  const playerMaxHp = isPlayerA ? maxHpA : maxHpB;
+  const opponentMaxHp = isPlayerA ? maxHpB : maxHpA;
+  const playerStatus = isPlayerA ? statusA : statusB;
+  const opponentStatus = isPlayerA ? statusB : statusA;
 
-  // Compute max HP from stats (HP stat is maxHP)
-  const playerMaxHP = playerFighter?.level ? Math.floor((2 * 80 + 31) * playerFighter.level / 100) + playerFighter.level + 10 : 100;
-  const opponentMaxHP = opponentFighter?.level ? Math.floor((2 * 80 + 31) * opponentFighter.level / 100) + opponentFighter.level + 10 : 100;
+  // Winner/loser animation classes
+  const isPlayerWinner = isComplete && battle.winner === playerNftId;
+  const isOpponentWinner = isComplete && battle.winner != null && battle.winner !== playerNftId;
+  const playerImgClass = isPlayerWinner
+    ? 'fighter-winner'
+    : (isOpponentWinner ? 'fighter-loser' : '');
+  const opponentImgClass = isOpponentWinner
+    ? 'fighter-winner'
+    : (isPlayerWinner ? 'fighter-loser' : '');
+
+  // Play victory/defeat audio on completion
+  // (handled once via a ref to prevent re-triggering)
 
   return (
     <div className="flex flex-col gap-4 w-full">
       {/* Battle header */}
       <div className="flex items-center justify-between text-sm text-muted">
         <span>Battle #{battle.id}</span>
-        <span>Turn {battle.currentTurn}/{battle.maxTurns}</span>
-      </div>
-
-      {/* Fighter panels */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* Player side */}
-        <div className="card p-3 flex flex-col gap-2">
-          {playerFighter?.imageUrl && (
-            <div className="battle-nft-image">
-              <img src={playerFighter.imageUrl} alt="Your fighter" className="w-full h-full object-cover" />
-            </div>
+        <div className="flex items-center gap-3">
+          <span>Turn {battle.currentTurn}/{battle.maxTurns}</span>
+          {isPlaying && (
+            <span className="text-xs text-accent">Playing...</span>
           )}
-          <div className="flex items-center justify-between">
-            <span className={`badge badge-${playerFighter?.type.toLowerCase()}`}>
-              {playerFighter?.type}
-            </span>
-            <span className="text-xs text-muted">Lv.{playerFighter?.level}</span>
-          </div>
-          <HPBar
-            current={battle.turns.length === 0 ? playerMaxHP : playerHP}
-            max={playerMaxHP}
-            label="HP"
-          />
-        </div>
-
-        {/* Opponent side */}
-        <div className="card p-3 flex flex-col gap-2">
-          {opponentFighter?.imageUrl && (
-            <div className="battle-nft-image">
-              <img src={opponentFighter.imageUrl} alt="Opponent" className="w-full h-full object-cover" />
-            </div>
-          )}
-          <div className="flex items-center justify-between">
-            <span className={`badge badge-${opponentFighter?.type.toLowerCase()}`}>
-              {opponentFighter?.type}
-            </span>
-            <span className="text-xs text-muted">Lv.{opponentFighter?.level}</span>
-          </div>
-          <HPBar
-            current={battle.turns.length === 0 ? opponentMaxHP : opponentHP}
-            max={opponentMaxHP}
-            label="HP"
-          />
         </div>
       </div>
 
-      {/* Move buttons (manual mode only, when not complete) */}
-      {!isComplete && playerFighter?.moves && playerNftId && (
+      {/* ── Battle Arena ─────────────────────────────────────────────── */}
+      <div
+        ref={arenaRef}
+        className="battle-arena battle-scanlines"
+      >
+        {/* Canvas particle overlay */}
+        <BattleCanvas ref={canvasRef} />
+
+        {/* Fighter panels (grid inside arena) */}
+        <div className="grid grid-cols-2 gap-4 p-4" style={{ position: 'relative', zIndex: 2 }}>
+          {/* Player side (left) */}
+          <div className="flex flex-col gap-2">
+            {playerFighter?.imageUrl && (
+              <div className={`battle-nft-image battle-slide-left ${playerImgClass}`}>
+                <img
+                  src={playerFighter.imageUrl}
+                  alt="Your fighter"
+                  className="w-full h-full object-cover"
+                  style={{ borderRadius: 'var(--radius-md)' }}
+                />
+              </div>
+            )}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className={`badge badge-${playerFighter?.type.toLowerCase()}`}>
+                  {playerFighter?.type}
+                </span>
+                <StatusIcon status={playerStatus} />
+              </div>
+              <span className="text-xs text-muted">Lv.{playerFighter?.level}</span>
+            </div>
+            <HPBar
+              current={playerHp.current}
+              max={playerMaxHp}
+              ghost={playerHp.ghost}
+              label="HP"
+            />
+          </div>
+
+          {/* Opponent side (right) */}
+          <div className="flex flex-col gap-2">
+            {opponentFighter?.imageUrl && (
+              <div className={`battle-nft-image battle-slide-right ${opponentImgClass}`}>
+                <img
+                  src={opponentFighter.imageUrl}
+                  alt="Opponent"
+                  className="w-full h-full object-cover"
+                  style={{ borderRadius: 'var(--radius-md)' }}
+                />
+              </div>
+            )}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className={`badge badge-${opponentFighter?.type.toLowerCase()}`}>
+                  {opponentFighter?.type}
+                </span>
+                <StatusIcon status={opponentStatus} />
+              </div>
+              <span className="text-xs text-muted">Lv.{opponentFighter?.level}</span>
+            </div>
+            <HPBar
+              current={opponentHp.current}
+              max={opponentMaxHp}
+              ghost={opponentHp.ghost}
+              label="HP"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Speed control (visible during playback) */}
+      {isPlaying && (
+        <div className="flex items-center justify-center gap-2">
+          <span className="text-xs text-muted">Speed:</span>
+          {[0.5, 1, 2, 4].map((s) => (
+            <button
+              key={s}
+              className={`btn btn-ghost text-xs ${speed === s ? 'text-accent' : ''}`}
+              onClick={() => setSpeed(s)}
+            >
+              {s}x
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Move buttons (manual mode only, when not complete and not playing) */}
+      {!isComplete && !isPlaying && playerFighter?.moves && playerNftId && (
         <MoveButtons
           moves={playerFighter.moves}
           onSubmit={handleSubmitMove}
@@ -187,20 +395,56 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
 
       {/* Battle result */}
       {isComplete && (
-        <div className="card p-4 text-center">
-          <p className="text-lg font-bold">
-            {battle.winner === playerNftId
-              ? 'Victory!'
-              : battle.winner
-                ? 'Defeat'
-                : 'Draw'}
-          </p>
-          {battle.eloChangeA != null && (
-            <div className="flex items-center justify-center gap-4 mt-2 text-sm text-secondary">
-              <span>ELO: {(isPlayerA ? battle.eloChangeA : battle.eloChangeB) ?? 0 > 0 ? '+' : ''}{isPlayerA ? battle.eloChangeA : battle.eloChangeB}</span>
-              <span>XP: +{isPlayerA ? battle.xpAwardedA : battle.xpAwardedB}</span>
-            </div>
-          )}
+        <BattleResult
+          battle={battle}
+          playerNftId={playerNftId}
+          isPlayerA={isPlayerA}
+        />
+      )}
+    </div>
+  );
+}
+
+// ── BattleResult Sub-component ──────────────────────────────────────────────
+
+function BattleResult({
+  battle,
+  playerNftId,
+  isPlayerA,
+}: {
+  battle: BattleData;
+  playerNftId?: string;
+  isPlayerA: boolean;
+}) {
+  const audioPlayed = useRef(false);
+
+  useEffect(() => {
+    if (audioPlayed.current) return;
+    audioPlayed.current = true;
+    const audio = getBattleAudio();
+    if (battle.winner === playerNftId) {
+      audio.victory();
+    } else if (battle.winner) {
+      audio.defeat();
+    }
+  }, [battle.winner, playerNftId]);
+
+  const eloChange = isPlayerA ? battle.eloChangeA : battle.eloChangeB;
+  const xpAwarded = isPlayerA ? battle.xpAwardedA : battle.xpAwardedB;
+
+  return (
+    <div className="card p-4 text-center">
+      <p className="text-lg font-bold">
+        {battle.winner === playerNftId
+          ? 'Victory!'
+          : battle.winner
+            ? 'Defeat'
+            : 'Draw'}
+      </p>
+      {eloChange != null && (
+        <div className="flex items-center justify-center gap-4 mt-2 text-sm text-secondary">
+          <span>ELO: {eloChange > 0 ? '+' : ''}{eloChange}</span>
+          <span>XP: +{xpAwarded}</span>
         </div>
       )}
     </div>
