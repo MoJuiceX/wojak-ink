@@ -809,6 +809,7 @@ async function detectBurns(env: Env): Promise<{ detected: number; credited: numb
   let detected = 0;
   let credited = 0;
   let latestTimestamp = lastBurnTs || '';
+  let cursor: string | null = null;
 
   // Fetch burn events (type=3) from MintGarden
   for (let page = 0; page < 5; page++) {
@@ -816,6 +817,7 @@ async function detectBurns(env: Env): Promise<{ detected: number; credited: numb
     url.searchParams.set('collection', collectionId);
     url.searchParams.set('type', '3'); // burn events
     url.searchParams.set('size', '100');
+    if (cursor) url.searchParams.set('cursor', cursor);
 
     let res: Response;
     try {
@@ -903,7 +905,8 @@ async function detectBurns(env: Env): Promise<{ detected: number; credited: numb
       if (event.timestamp > latestTimestamp) latestTimestamp = event.timestamp;
     }
 
-    if (!data.next) break;
+    if (!data.next || data.next === cursor) break;
+    cursor = data.next;
   }
 
   if (latestTimestamp && latestTimestamp !== lastBurnTs) {

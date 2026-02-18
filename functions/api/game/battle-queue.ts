@@ -5,7 +5,7 @@
 // Auto-matchmaking: when 2+ NFTs are queued from different owners,
 // the system creates a battle and removes both from the queue.
 
-import { isValidDid } from './_shared';
+import { isValidDid, ONBOARDING_CREDITS } from './_shared';
 import { verifyGameAuth, isAuthError } from './_auth';
 import { checkRateLimit, getRateLimitKey, GAME_RATE_LIMITS } from '../../lib/rateLimit';
 
@@ -114,10 +114,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         `).bind(opponent.owner_did as string, JSON.stringify({ opponentDid: did, editionNumber: opponent.edition_number })),
       ]);
 
-      // First battle onboarding milestone for both players
+      // First battle onboarding milestone + credits for both players
       const isFirstBattleA = !(player.onboarding_battled as number);
-      const isFirstBattleB = await context.env.DB.prepare(
-        'SELECT onboarding_battled FROM game_players WHERE did_id = ?'
+      const playerBData = await context.env.DB.prepare(
+        'SELECT onboarding_battled, wallet_address FROM game_players WHERE did_id = ?'
       ).bind(opponent.owner_did).first();
 
       const milestoneStmts: D1PreparedStatement[] = [];
@@ -125,14 +125,22 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         milestoneStmts.push(
           context.env.DB.prepare(
             'UPDATE game_players SET onboarding_battled = 1 WHERE did_id = ?'
-          ).bind(did)
+          ).bind(did),
+          context.env.DB.prepare(`
+            INSERT INTO credit_events (wallet_address, nft_id, event_id, price_xch, floor_at_time, credits_earned, whale_multiplier, source, event_type, event_timestamp)
+            VALUES (?, 'onboarding_first_battle', ?, 0, 0, ?, 100, 'onboarding', 'onboarding', datetime('now'))
+          `).bind(player.wallet_address, `onboarding_first_battle_${did}`, ONBOARDING_CREDITS.first_battle)
         );
       }
-      if (isFirstBattleB && !(isFirstBattleB.onboarding_battled as number)) {
+      if (playerBData && !(playerBData.onboarding_battled as number)) {
         milestoneStmts.push(
           context.env.DB.prepare(
             'UPDATE game_players SET onboarding_battled = 1 WHERE did_id = ?'
-          ).bind(opponent.owner_did as string)
+          ).bind(opponent.owner_did as string),
+          context.env.DB.prepare(`
+            INSERT INTO credit_events (wallet_address, nft_id, event_id, price_xch, floor_at_time, credits_earned, whale_multiplier, source, event_type, event_timestamp)
+            VALUES (?, 'onboarding_first_battle', ?, 0, 0, ?, 100, 'onboarding', 'onboarding', datetime('now'))
+          `).bind(playerBData.wallet_address, `onboarding_first_battle_${opponent.owner_did}`, ONBOARDING_CREDITS.first_battle)
         );
       }
       if (milestoneStmts.length > 0) {

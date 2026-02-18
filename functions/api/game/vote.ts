@@ -2,7 +2,7 @@
 // Body: { voterDid: string, nftId: string, editionNumber: number, voteType: 1 | -1 }
 // Cast a vote on a Your Wojak NFT. 1 = like, -1 = dislike.
 
-import { VOTES_PER_DAY, getTodayString, getYesterdayString, STREAK_MILESTONES } from './_shared';
+import { VOTES_PER_DAY, getTodayString, getYesterdayString, STREAK_MILESTONES, ONBOARDING_CREDITS } from './_shared';
 import { verifyGameAuth, isAuthError } from './_auth';
 import { checkRateLimit, getRateLimitKey, GAME_RATE_LIMITS } from '../../lib/rateLimit';
 
@@ -63,7 +63,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return Response.json({
         error: 'Daily vote limit reached',
         votesRemaining: 0,
-        resetsAt: today + 'T00:00:00Z',
+        resetsAt: new Date(new Date(today + 'T00:00:00Z').getTime() + 86400000).toISOString(),
       }, { status: 429 });
     }
 
@@ -76,16 +76,17 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return Response.json({ error: 'Cannot vote on NFTs you hold' }, { status: 403 });
     }
 
-    // Check not voting on own creation
-    const nftScore = await context.env.DB.prepare(
-      'SELECT creator_wallet FROM wojak_scores WHERE nft_id = ?'
-    ).bind(nftId).first();
+    // Check not voting on own creation (check wojak_scores first, fall back to phase2_mints for unvoted NFTs)
+    const playerWallet = player.wallet_address as string;
+    const creatorRow = await context.env.DB.prepare(
+      `SELECT creator_wallet FROM wojak_scores WHERE nft_id = ?
+       UNION ALL
+       SELECT wallet_address AS creator_wallet FROM phase2_mints WHERE mintgarden_launcher_id = ?
+       LIMIT 1`
+    ).bind(nftId, nftId).first();
 
-    if (nftScore) {
-      const playerWallet = player.wallet_address as string;
-      if (nftScore.creator_wallet === playerWallet) {
-        return Response.json({ error: 'Cannot vote on your own creations' }, { status: 403 });
-      }
+    if (creatorRow && creatorRow.creator_wallet === playerWallet) {
+      return Response.json({ error: 'Cannot vote on your own creations' }, { status: 403 });
     }
 
     // Insert vote (UNIQUE constraint prevents duplicates)
@@ -132,7 +133,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       `).bind(voterDid),
     ];
 
-    // First vote onboarding milestone + activity log
+    // First vote onboarding milestone + activity log + credits
     if (isFirstVote) {
       statements.push(
         context.env.DB.prepare(
@@ -140,7 +141,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         ).bind(voterDid),
         context.env.DB.prepare(
           `INSERT INTO game_activity (did_id, event_type, event_data) VALUES (?, 'vote_milestone', ?)`
-        ).bind(voterDid, JSON.stringify({ count: 1, milestone: 'first_vote' }))
+        ).bind(voterDid, JSON.stringify({ count: 1, milestone: 'first_vote' })),
+        context.env.DB.prepare(`
+          INSERT INTO credit_events (wallet_address, nft_id, event_id, price_xch, floor_at_time, credits_earned, whale_multiplier, source, event_type, event_timestamp)
+          VALUES (?, 'onboarding_first_vote', ?, 0, 0, ?, 100, 'onboarding', 'onboarding', datetime('now'))
+        `).bind(player.wallet_address, `onboarding_first_vote_${voterDid}`, ONBOARDING_CREDITS.first_vote)
       );
     }
 
