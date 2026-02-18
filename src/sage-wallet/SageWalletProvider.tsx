@@ -528,10 +528,8 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
         }
       }
       if (dids.size > 0) {
-        console.warn('[SageWallet] Found DIDs from session accounts:', Array.from(dids));
         return Array.from(dids);
       }
-      console.warn('[SageWallet] No DIDs in session accounts:', accounts);
     }
 
     // Fallback: query MintGarden by address
