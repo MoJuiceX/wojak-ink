@@ -35,12 +35,14 @@ import { GameLoading } from '@/components/games/GameLoading';
 import { GameErrorBoundary } from '@/components/games/GameError';
 import { GameProvider } from '@/contexts/GameContext';
 import { SwipeAutoRegister } from '@/components/game/SwipeAutoRegister';
+import { SwipeNav } from '@/components/game/SwipeNav';
 
 /** Shared layout for all /swipe/* routes — provides GameProvider + SwipeAutoRegister */
 function GameLayout() {
   return (
     <GameProvider>
       <SwipeAutoRegister />
+      <SwipeNav />
       <Outlet />
     </GameProvider>
   );
