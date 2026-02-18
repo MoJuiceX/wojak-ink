@@ -3,9 +3,9 @@
 // Called by DID indexer worker or admin. Requires ADMIN_SECRET.
 //
 // For each fighter with a matching wojak_scores entry:
-// 1. Calculate net votes received since last calculation
-// 2. Award XP_PER_NET_LIKE (2) XP per net positive vote
-// 3. Update tracking timestamp
+// 1. Calculate delta = current net_score - vote_xp_net_snapshot
+// 2. Award max(0, delta) * XP_PER_NET_LIKE XP (downvotes reduce delta, never subtract XP)
+// 3. Update snapshot and timestamp
 
 import { jsonResponse, errorResponse } from './_shared';
 
@@ -25,25 +25,23 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
   const db = context.env.DB;
 
-  // Find all fighters that have a matching wojak_scores entry (joined by nft_id).
-  // For fighters that have never had vote XP calculated (vote_xp_last_updated IS NULL),
-  // use all net_score. For others, use the delta since last calculation.
+  // Find fighters with new votes since last snapshot.
+  // Join combat_fighters with wojak_scores by nft_id.
+  // Only process fighters where net_score has changed from snapshot.
   const fighters = await db.prepare(`
     SELECT
       cf.nft_id,
       cf.xp,
       cf.level,
-      cf.vote_xp_last_updated,
-      ws.net_score,
-      ws.last_voted_at
+      cf.vote_xp_net_snapshot,
+      ws.net_score
     FROM combat_fighters cf
     INNER JOIN wojak_scores ws ON cf.nft_id = ws.nft_id
-    WHERE ws.net_score > 0
-      AND (cf.vote_xp_last_updated IS NULL OR ws.last_voted_at > cf.vote_xp_last_updated)
+    WHERE ws.net_score > cf.vote_xp_net_snapshot
   `).all();
 
   if (!fighters.results || fighters.results.length === 0) {
-    return jsonResponse({ success: true, updated: 0, message: 'No fighters with new votes' });
+    return jsonResponse({ success: true, updated: 0, totalXpAwarded: 0, message: 'No new votes to process' });
   }
 
   let updated = 0;
@@ -53,16 +51,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const nftId = row.nft_id as string;
     const currentXp = row.xp as number;
     const currentLevel = row.level as number;
+    const snapshot = row.vote_xp_net_snapshot as number;
     const netScore = row.net_score as number;
-    const lastUpdated = row.vote_xp_last_updated as string | null;
 
-    // For first-time calculation, award XP = max(0, netScore) * XP_PER_NET_LIKE.
-    // For subsequent runs, skip until we have delta tracking (Task 11).
-    if (lastUpdated !== null) {
-      continue;
-    }
-
-    const voteXp = Math.max(0, netScore) * XP_PER_NET_LIKE;
+    // Delta: how much net_score increased since last snapshot
+    const delta = netScore - snapshot;
+    // Only award for positive delta (downvotes shrink delta, never go negative)
+    const voteXp = Math.max(0, delta) * XP_PER_NET_LIKE;
     if (voteXp <= 0) continue;
 
     const newXp = currentXp + voteXp;
@@ -75,9 +70,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     await db.prepare(`
       UPDATE combat_fighters
-      SET xp = ?, level = ?, vote_xp_last_updated = datetime('now'), updated_at = datetime('now')
+      SET xp = ?,
+          level = ?,
+          vote_xp_last_updated = datetime('now'),
+          vote_xp_net_snapshot = ?,
+          updated_at = datetime('now')
       WHERE nft_id = ?
-    `).bind(newXp, newLevel, nftId).run();
+    `).bind(newXp, newLevel, netScore, nftId).run();
 
     updated++;
     totalXpAwarded += voteXp;
