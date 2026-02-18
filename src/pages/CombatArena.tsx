@@ -9,6 +9,9 @@ import { useState, useCallback, useEffect } from 'react';
 import { PageSEO } from '@/components/seo';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { QueuePanel } from '@/components/combat/QueuePanel';
+import { BattleView } from '@/components/combat/BattleView';
+import { BattleHistory } from '@/components/combat/BattleHistory';
+import { useSageWallet } from '@/sage-wallet/SageWalletProvider';
 
 interface FighterSummary {
   nft_id: string;
@@ -21,15 +24,46 @@ interface FighterSummary {
 }
 
 export default function CombatArena() {
-  const [fighters] = useState<FighterSummary[]>([]);
+  const [fighters, setFighters] = useState<FighterSummary[]>([]);
+  const [ownerDid, setOwnerDid] = useState<string | null>(null);
+  const [isLoadingFighters, setIsLoadingFighters] = useState(false);
   const [queueStatus, setQueueStatus] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeBattleId, setActiveBattleId] = useState<number | null>(null);
+  const { getDIDs, isConnected } = useSageWallet();
 
-  // Load fighters owned by current user (placeholder — needs DID from auth context)
+  // Fetch owner DID from wallet
   useEffect(() => {
-    // TODO: Fetch fighters via /api/combat/fighter once auth is wired
-  }, []);
+    if (!isConnected) return;
+
+    getDIDs().then((dids) => {
+      if (dids.length > 0) {
+        setOwnerDid(dids[0]);
+      }
+    }).catch((err) => {
+      console.error('[CombatArena] Failed to get DIDs:', err);
+    });
+  }, [isConnected, getDIDs]);
+
+  // Fetch combat fighters by owner DID
+  useEffect(() => {
+    if (!ownerDid) return;
+    setIsLoadingFighters(true);
+
+    fetch(`/api/combat/fighters?ownerDid=${encodeURIComponent(ownerDid)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setFighters(data);
+        }
+      })
+      .catch((err) => {
+        console.error('[CombatArena] Failed to load fighters:', err);
+      })
+      .finally(() => {
+        setIsLoadingFighters(false);
+      });
+  }, [ownerDid]);
 
   const handleQueue = useCallback(async (nftId: string, battleMode: 'manual' | 'auto') => {
     setIsLoading(true);
@@ -37,7 +71,7 @@ export default function CombatArena() {
       const res = await fetch('/api/combat/queue', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nftId, ownerDid: '', battleMode }),
+        body: JSON.stringify({ nftId, ownerDid: ownerDid ?? '', battleMode }),
       });
       const data = await res.json();
       setQueueStatus(data);
@@ -49,19 +83,19 @@ export default function CombatArena() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [ownerDid]);
 
   const handleLeaveQueue = useCallback(async (nftId: string) => {
     setIsLoading(true);
     try {
-      await fetch(`/api/combat/queue?nftId=${nftId}&ownerDid=`, { method: 'DELETE' });
+      await fetch(`/api/combat/queue?nftId=${encodeURIComponent(nftId)}&ownerDid=${encodeURIComponent(ownerDid ?? '')}`, { method: 'DELETE' });
       setQueueStatus(null);
     } catch (err) {
       console.error('[CombatArena] Leave queue error:', err);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [ownerDid]);
 
   return (
     <PageTransition>
@@ -77,19 +111,43 @@ export default function CombatArena() {
           Send your Wojak into battle. Earn XP, climb the ELO ladder, and prove your fighter is the strongest.
         </p>
 
-        {/* Queue Panel */}
-        <div className="w-full">
-          <QueuePanel
-            fighters={fighters as any}
-            onQueue={handleQueue}
-            onLeaveQueue={handleLeaveQueue}
-            queueStatus={queueStatus}
-            isLoading={isLoading}
-          />
-        </div>
+        {/* Wallet connect prompt */}
+        {!isConnected && (
+          <div className="card-static p-6 text-center flex flex-col gap-3 w-full">
+            <p className="text-secondary text-sm">Connect your Sage wallet to access your combat fighters.</p>
+          </div>
+        )}
 
-        {/* Active battle link */}
-        {activeBattleId && (
+        {/* Loading fighters */}
+        {isConnected && isLoadingFighters && (
+          <div className="text-muted text-sm text-center py-4">Loading fighters...</div>
+        )}
+
+        {/* Queue Panel */}
+        {isConnected && !isLoadingFighters && (
+          <div className="w-full">
+            <QueuePanel
+              fighters={fighters as any}
+              onQueue={handleQueue}
+              onLeaveQueue={handleLeaveQueue}
+              queueStatus={queueStatus}
+              isLoading={isLoading}
+            />
+          </div>
+        )}
+
+        {/* Active battle — inline BattleView */}
+        {activeBattleId && ownerDid && (
+          <div className="w-full">
+            <BattleView
+              battleId={activeBattleId}
+              playerNftId={fighters[0]?.nft_id}
+            />
+          </div>
+        )}
+
+        {/* Active battle link (when no inline view) */}
+        {activeBattleId && !ownerDid && (
           <div className="card p-4 w-full text-center">
             <p className="text-secondary text-sm mb-2">Active Battle</p>
             <a
@@ -101,13 +159,23 @@ export default function CombatArena() {
           </div>
         )}
 
-        {/* Placeholder for battle history */}
-        <div className="w-full">
-          <h2 className="text-lg font-semibold mb-3">Recent Battles</h2>
-          <div className="card-static p-4 text-center">
-            <p className="text-muted text-sm">No battle history yet.</p>
+        {/* Battle history */}
+        {ownerDid && fighters.length > 0 && (
+          <div className="w-full">
+            <h2 className="text-lg font-semibold mb-3">Recent Battles</h2>
+            <BattleHistory nftId={fighters[0]?.nft_id} />
           </div>
-        </div>
+        )}
+
+        {/* Empty state for no fighters when connected */}
+        {isConnected && !isLoadingFighters && fighters.length === 0 && ownerDid && (
+          <div className="w-full">
+            <h2 className="text-lg font-semibold mb-3">Recent Battles</h2>
+            <div className="card-static p-4 text-center">
+              <p className="text-muted text-sm">No battle history yet.</p>
+            </div>
+          </div>
+        )}
       </div>
     </PageTransition>
   );
