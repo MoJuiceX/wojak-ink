@@ -2296,6 +2296,144 @@ body {
   background: var(--color-bg);
 }
 
+/* ── Combat Arena ── */
+
+/* Type badge colors */
+.badge-neutral    { background: rgba(168, 168, 120, 0.2); color: #a8a878; border: 1px solid rgba(168, 168, 120, 0.35); }
+.badge-fire       { background: rgba(240, 128, 48, 0.2); color: #f08030; border: 1px solid rgba(240, 128, 48, 0.35); }
+.badge-water      { background: rgba(104, 144, 240, 0.2); color: #6890f0; border: 1px solid rgba(104, 144, 240, 0.35); }
+.badge-electric   { background: rgba(248, 208, 48, 0.2); color: #f8d030; border: 1px solid rgba(248, 208, 48, 0.35); }
+.badge-grass      { background: rgba(120, 200, 80, 0.2); color: #78c850; border: 1px solid rgba(120, 200, 80, 0.35); }
+.badge-ice        { background: rgba(152, 216, 216, 0.2); color: #98d8d8; border: 1px solid rgba(152, 216, 216, 0.35); }
+.badge-martial    { background: rgba(192, 48, 40, 0.2); color: #c03028; border: 1px solid rgba(192, 48, 40, 0.35); }
+.badge-venom      { background: rgba(160, 64, 160, 0.2); color: #a040a0; border: 1px solid rgba(160, 64, 160, 0.35); }
+.badge-earth      { background: rgba(224, 192, 104, 0.2); color: #e0c068; border: 1px solid rgba(224, 192, 104, 0.35); }
+.badge-air        { background: rgba(168, 144, 240, 0.2); color: #a890f0; border: 1px solid rgba(168, 144, 240, 0.35); }
+.badge-psyche     { background: rgba(248, 88, 136, 0.2); color: #f85888; border: 1px solid rgba(248, 88, 136, 0.35); }
+.badge-insect     { background: rgba(168, 184, 32, 0.2); color: #a8b820; border: 1px solid rgba(168, 184, 32, 0.35); }
+.badge-stone      { background: rgba(184, 160, 56, 0.2); color: #b8a038; border: 1px solid rgba(184, 160, 56, 0.35); }
+.badge-ghost      { background: rgba(112, 88, 152, 0.2); color: #705898; border: 1px solid rgba(112, 88, 152, 0.35); }
+.badge-dragon     { background: rgba(112, 56, 248, 0.2); color: #7038f8; border: 1px solid rgba(112, 56, 248, 0.35); }
+.badge-shadow     { background: rgba(112, 88, 72, 0.2); color: #705848; border: 1px solid rgba(112, 88, 72, 0.35); }
+.badge-metal      { background: rgba(184, 184, 208, 0.2); color: #b8b8d0; border: 1px solid rgba(184, 184, 208, 0.35); }
+.badge-mystic     { background: rgba(238, 153, 172, 0.2); color: #ee99ac; border: 1px solid rgba(238, 153, 172, 0.35); }
+
+/* HP Bar */
+.hp-bar {
+  height: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 5px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.hp-bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.4s ease;
+}
+
+.hp-high  .hp-bar-fill { background: var(--color-success); }
+.hp-mid   .hp-bar-fill { background: #eab308; }
+.hp-low   .hp-bar-fill { background: var(--color-error); }
+
+/* Move Button */
+.move-btn {
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  text-align: left;
+}
+
+.move-btn:hover {
+  border-color: var(--color-primary);
+  background: rgba(255, 107, 0, 0.06);
+}
+
+.move-btn.selected {
+  border-color: var(--color-primary);
+  background: rgba(255, 107, 0, 0.12);
+  box-shadow: var(--glow-primary);
+}
+
+.move-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Turn Log */
+.turn-entry {
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 3px solid var(--color-border);
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.turn-entry.turn-crit {
+  border-left-color: var(--color-primary);
+}
+
+.turn-entry.turn-super-effective {
+  border-left-color: var(--color-success);
+}
+
+.turn-entry.turn-not-effective {
+  border-left-color: var(--color-error);
+}
+
+/* Combat Preview Badge (generator) */
+.combat-preview-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-border);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Combat timer */
+.combat-timer {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.combat-timer.timer-warning {
+  color: #eab308;
+}
+
+.combat-timer.timer-critical {
+  color: var(--color-error);
+  animation: pulse-text 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-text {
+  from { opacity: 1; }
+  to { opacity: 0.5; }
+}
+
+/* Fighter stat bar */
+.stat-bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.stat-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--color-primary);
+}
 
 /* ======= Scrollbar Hide ======= */
 .hide-scrollbar {
