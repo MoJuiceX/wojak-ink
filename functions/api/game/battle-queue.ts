@@ -6,12 +6,11 @@
 // the system creates a battle and removes both from the queue.
 
 import { isValidDid, ONBOARDING_CREDITS } from './_shared';
-import { verifyGameAuth, isAuthError } from './_auth';
+import { verifyGamePlayer, isAuthError } from './_auth';
 import { checkRateLimit, getRateLimitKey, GAME_RATE_LIMITS } from '../../lib/rateLimit';
 
 interface Env {
   DB: D1Database;
-  CLERK_DOMAIN: string;
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
@@ -28,10 +27,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return Response.json({ error: 'Invalid parameters' }, { status: 400 });
     }
 
-    const authResult = await verifyGameAuth(context.request, context.env, did);
+    const authResult = await verifyGamePlayer(context.env, did);
     if (isAuthError(authResult)) return authResult;
 
-    const rlKey = getRateLimitKey(context.request, authResult.userId);
+    const rlKey = getRateLimitKey(context.request, authResult.did);
     const rl = await checkRateLimit(context.env.DB, rlKey, GAME_RATE_LIMITS.battleQueue);
     if (!rl.allowed) {
       return Response.json({ error: 'Rate limited. Try again later.' }, { status: 429 });
@@ -90,15 +89,25 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       // Create a battle
       const endsAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
+      // Snapshot current net_scores for blind battle resolution
+      const scoreA = await context.env.DB.prepare(
+        'SELECT net_score FROM wojak_scores WHERE nft_id = ?'
+      ).bind(nftId).first<{ net_score: number }>();
+      const scoreB = await context.env.DB.prepare(
+        'SELECT net_score FROM wojak_scores WHERE nft_id = ?'
+      ).bind(opponent.nft_id).first<{ net_score: number }>();
+      const snapshotA = scoreA?.net_score ?? 0;
+      const snapshotB = scoreB?.net_score ?? 0;
+
       await context.env.DB.batch([
         // Insert battle
         context.env.DB.prepare(`
-          INSERT INTO battles (nft_a_id, nft_a_edition, nft_a_owner_did, nft_b_id, nft_b_edition, nft_b_owner_did, ends_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?)
+          INSERT INTO battles (nft_a_id, nft_a_edition, nft_a_owner_did, nft_b_id, nft_b_edition, nft_b_owner_did, ends_at, nft_a_score_start, nft_b_score_start)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).bind(
           nftId, editionNumber, did,
           opponent.nft_id, opponent.edition_number, opponent.owner_did,
-          endsAt
+          endsAt, snapshotA, snapshotB
         ),
         // Remove both from queue
         context.env.DB.prepare('DELETE FROM battle_queue WHERE nft_id = ?').bind(nftId),
@@ -174,7 +183,7 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
 
     const { did, nftId } = body;
 
-    const authResult = await verifyGameAuth(context.request, context.env, did);
+    const authResult = await verifyGamePlayer(context.env, did);
     if (isAuthError(authResult)) return authResult;
 
     if (!did || !nftId) {
