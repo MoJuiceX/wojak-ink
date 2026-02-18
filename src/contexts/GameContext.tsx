@@ -1,5 +1,7 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
+
+const SESSION_KEY = 'wojak_game_session';
 
 interface GamePlayer {
   did: string;
@@ -65,7 +67,45 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const resetPlayer = useCallback(() => {
     setPlayer(null);
     setFeed([]);
+    try { sessionStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
   }, []);
+
+  // Restore session on mount — re-register with cached DID to get fresh player data
+  const restoredRef = useRef(false);
+  useEffect(() => {
+    if (restoredRef.current || player) return;
+    restoredRef.current = true;
+    try {
+      const raw = sessionStorage.getItem(SESSION_KEY);
+      if (!raw) return;
+      const { did, walletAddress } = JSON.parse(raw) as { did: string; walletAddress: string };
+      if (!did || !walletAddress) return;
+      // register is idempotent — just fetches current player state
+      fetch('/api/game/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ did, walletAddress }),
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.success) {
+            setPlayer({
+              did: data.player.did,
+              walletAddress,
+              powerLevel: data.player.powerLevel,
+              phase1Verified: data.player.phase1Verified,
+              votesToday: data.player.votesToday,
+              votesRemaining: 10 - data.player.votesToday,
+              voteStreak: data.player.voteStreak ?? 0,
+              onboarding: data.player.onboarding,
+            });
+          } else {
+            sessionStorage.removeItem(SESSION_KEY);
+          }
+        })
+        .catch(() => { /* network error — will show gate checklist */ });
+    } catch { /* corrupt storage — ignore */ }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const register = useCallback(async (did: string, walletAddress: string) => {
     const headers = await getAuthHeaders();
@@ -88,6 +128,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
       voteStreak: data.player.voteStreak ?? 0,
       onboarding: data.player.onboarding,
     });
+    try {
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify({ did: data.player.did, walletAddress }));
+    } catch { /* quota exceeded or private mode — non-critical */ }
   }, []);
 
   const verifyPhase1 = useCallback(async (did: string, nftId?: string) => {

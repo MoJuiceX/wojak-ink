@@ -34,8 +34,17 @@ export function SwipeAutoRegister() {
   }, [player, address, resetPlayer]);
 
   // Auto-register: detect DID and register player
+  // Skip if session restore is in progress (sessionStorage has cached DID)
   useEffect(() => {
     if (status !== 'connected' || !address || isRegistered || attemptedRef.current) return;
+    // If sessionStorage has a cached session for this address, let GameProvider restore it
+    try {
+      const raw = sessionStorage.getItem('wojak_game_session');
+      if (raw) {
+        const cached = JSON.parse(raw);
+        if (cached.walletAddress === address) return;
+      }
+    } catch { /* ignore */ }
     attemptedRef.current = true;
 
     let cancelled = false;
