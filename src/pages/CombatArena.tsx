@@ -25,7 +25,8 @@ interface FighterSummary {
 }
 
 export default function CombatArena() {
-  const { getDIDs, isConnected } = useSageWallet();
+  const { getDIDs, status } = useSageWallet();
+  const isConnected = status === 'connected';
   const [ownerDid, setOwnerDid] = useState<string | null>(null);
   const [fighters, setFighters] = useState<FighterSummary[]>([]);
   const [selectedFighter, setSelectedFighter] = useState<string | null>(null);
