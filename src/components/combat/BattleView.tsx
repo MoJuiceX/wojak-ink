@@ -516,6 +516,19 @@ function BattleResult({
           <span>XP: +{xpAwarded}</span>
         </div>
       )}
+      {xpAwarded != null && xpAwarded > 0 && (
+        <div className="mt-3 flex flex-col gap-1">
+          <div className="text-xs text-muted text-center">XP Gained</div>
+          <div className="w-full max-w-48 mx-auto h-2 rounded-full overflow-hidden"
+               style={{ background: 'rgba(255,255,255,0.08)' }}>
+            <div
+              className="xp-gained-bar"
+              style={{ width: `${Math.min(100, xpAwarded)}%` }}
+            />
+          </div>
+          <div className="text-xs text-center text-cyan">+{xpAwarded} XP</div>
+        </div>
+      )}
     </div>
   );
 }

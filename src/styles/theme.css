@@ -2470,6 +2470,15 @@ body {
   100% { transform: scale(1); opacity: 1; }
 }
 
+/* XP gained bar — animates width on mount */
+.xp-gained-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--color-cyan);
+  transition: width 1s ease-out;
+  box-shadow: 0 0 6px rgba(0, 212, 255, 0.3);
+}
+
 /* Fighter stat bar */
 .stat-bar {
   height: 6px;
