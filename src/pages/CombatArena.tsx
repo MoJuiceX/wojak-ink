@@ -1,5 +1,5 @@
 /**
- * Combat Arena Page — /games/combat
+ * Combat Arena Page — /arena
  *
  * Main entry point for the combat system.
  * Shows queue panel, active battle, and recent history.
@@ -11,6 +11,7 @@ import { PageTransition } from '@/components/layout/PageTransition';
 import { QueuePanel } from '@/components/combat/QueuePanel';
 import { BattleView } from '@/components/combat/BattleView';
 import { BattleHistory } from '@/components/combat/BattleHistory';
+import { ArenaNav } from '@/components/combat/ArenaNav';
 import { useSageWallet } from '@/sage-wallet/SageWalletProvider';
 
 interface FighterSummary {
@@ -102,9 +103,10 @@ export default function CombatArena() {
       <PageSEO
         title="Combat Arena - Wojak Battles"
         description="Battle your Wojak NFTs in turn-based combat. 18 types, abilities, moves, ELO ranking."
-        path="/games/combat"
+        path="/arena"
         type="game"
       />
+      <ArenaNav />
       <div className="flex flex-col items-center p-4 gap-6 max-w-2xl mx-auto">
         <h1 className="text-2xl font-bold">Combat Arena</h1>
         <p className="text-secondary text-center text-sm">
@@ -151,7 +153,7 @@ export default function CombatArena() {
           <div className="card p-4 w-full text-center">
             <p className="text-secondary text-sm mb-2">Active Battle</p>
             <a
-              href={`/games/combat/battle/${activeBattleId}`}
+              href={`/arena/battle/${activeBattleId}`}
               className="btn btn-primary"
             >
               Go to Battle #{activeBattleId}
