@@ -1,6 +1,6 @@
-// Auto-registration and verification bridge between SageWallet and GameContext.
+// Auto-registration bridge between SageWallet and GameContext.
 // Detects DID from connected wallet via getDIDs(), registers if not already registered.
-// Auto-verifies Phase 1 NFT ownership after registration.
+// Phase 1 verification is handled by GateChecklist (not here, to avoid duplicate calls).
 // Renders nothing — pure side-effect component.
 
 import { useEffect, useRef } from 'react';
@@ -12,9 +12,8 @@ const RETRY_DELAY_MS = 3000;
 
 export function SwipeAutoRegister() {
   const { address, status, getDIDs } = useSageWallet();
-  const { isRegistered, isVerified, register, verifyPhase1, player } = useGame();
+  const { isRegistered, register } = useGame();
   const attemptedRef = useRef(false);
-  const verifyAttemptedRef = useRef(false);
 
   // Auto-register: detect DID and register player
   useEffect(() => {
@@ -47,17 +46,6 @@ export function SwipeAutoRegister() {
 
     return () => { cancelled = true; };
   }, [status, address, isRegistered, getDIDs, register]);
-
-  // Auto-verify Phase 1: when registered but not yet verified, check MintGarden
-  useEffect(() => {
-    if (!isRegistered || isVerified || !player?.did || verifyAttemptedRef.current) return;
-    verifyAttemptedRef.current = true;
-
-    verifyPhase1(player.did).catch(err => {
-      console.warn('[SwipeAutoRegister] Phase 1 verify failed:', err);
-      verifyAttemptedRef.current = false;
-    });
-  }, [isRegistered, isVerified, player?.did, verifyPhase1]);
 
   return null;
 }

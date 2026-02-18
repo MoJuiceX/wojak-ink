@@ -39,7 +39,7 @@ The gate state check moves **up** from VotingFeed into GameVoting. When the gate
 |------|--------|------|
 | `src/components/game/OnboardingHero.tsx` | **CREATE** | New full-width onboarding component |
 | `src/pages/GameVoting.tsx` | **MODIFY** | Add gate check, render OnboardingHero when gate not passed |
-| `src/components/game/GateChecklist.tsx` | **MODIFY** | Visual upgrade: SVG icons, connecting line, glow states. Preserve new `onLinkDid` prop and DID input form. |
+| `src/components/game/GateChecklist.tsx` | **MODIFY** | Visual upgrade: SVG icons, connecting line, glow states. Preserve ALL 3 callback props (`onLinkDid`, `onAutoVerify`, `onVerifyNft`), DID input form, NFT auto-verify + manual fallback flow. |
 | `src/components/game/VotingFeed.tsx` | **MODIFY** | Remove gate checklist rendering (moved up to GameVoting) |
 | `src/styles/theme.css` | **MODIFY** | Add ~100 lines of onboarding hero CSS, replace old gate CSS |
 
@@ -62,10 +62,15 @@ interface OnboardingHeroProps {
   hasDid: boolean;
   hasPhase1: boolean;
   onLinkDid?: (did: string) => Promise<void>;
+  onAutoVerify?: () => Promise<boolean>;
+  onVerifyNft?: (nftId: string) => Promise<boolean>;
 }
 ```
 
-Note: `onLinkDid` is passed through to GateChecklist for the DID input form.
+All three callbacks are passed through to GateChecklist:
+- `onLinkDid` — registers the user's DID (step 1)
+- `onAutoVerify` — auto-checks the user's DID for Phase 1 NFTs (step 2, fires automatically)
+- `onVerifyNft` — manual fallback: verifies a specific NFT launcher ID (step 2 fallback)
 
 ### Desktop Layout (min-width: 768px)
 
@@ -168,12 +173,32 @@ Static text initially — no API call:
 
 ### CRITICAL: Preserve Existing Functionality
 
-The GateChecklist was recently updated with:
-- `onLinkDid` prop for DID input handling
+The GateChecklist has been extensively updated. It now has:
+
+**Props (3 callbacks):**
+- `onLinkDid?: (did: string) => Promise<void>` — registers DID
+- `onAutoVerify?: () => Promise<boolean>` — auto-checks DID for Phase 1 NFTs
+- `onVerifyNft?: (nftId: string) => Promise<boolean>` — manual NFT launcher ID verification
+
+**DID input (step 1):**
 - `isValidDid()` validation function
-- DID text input field with error states and loading state
-- `useState` hooks for `didInput`, `didError`, `linking`
+- `useState` hooks: `didInput`, `didError`, `linking`
 - `handleLinkDid` async handler
+- Input field, error display, "Link DID" button, "Learn how" link
+
+**NFT verification (step 2) — auto-verify + manual fallback:**
+- `VerifyState` type: `'idle' | 'checking' | 'not_found' | 'error'`
+- `isValidNftId()` validation function
+- `useState` hooks: `verifyState`, `showManual`, `nftInput`, `nftError`, `verifyingNft`
+- `autoVerifyAttempted` ref to prevent double-checking
+- `useEffect` that auto-triggers `onAutoVerify` when step 3 becomes active
+- `useEffect` that resets state when step 3 becomes inactive
+- `handleRetryAutoVerify` handler
+- `handleVerifyNft` handler for manual input
+- Three UI states for step 2:
+  - "Checking your DID..." (auto-verify in progress)
+  - "Not found" with Retry + "Paste Launcher ID instead" + MintGarden link
+  - Manual input form with NFT ID field, error, verify button, "Back to auto-check" button
 
 **ALL of this must be preserved.** The visual upgrade only changes:
 1. Container and icons (emoji → SVG)
@@ -270,7 +295,7 @@ import { useSageWallet } from '@/sage-wallet';
 // ... existing imports ...
 
 function VotingPageInner({ isDesktop }: { isDesktop: boolean }) {
-  const { isRegistered, isVerified, register } = useGame();
+  const { player, isRegistered, isVerified, register, verifyPhase1 } = useGame();
   const { address, status: walletStatus } = useSageWallet();
 
   const walletConnected = walletStatus === 'connected' && !!address;
@@ -284,6 +309,8 @@ function VotingPageInner({ isDesktop }: { isDesktop: boolean }) {
         hasDid={hasDid}
         hasPhase1={hasPhase1}
         onLinkDid={async (did) => { if (address) await register(did, address); }}
+        onAutoVerify={async () => { if (player?.did) return verifyPhase1(player.did); return false; }}
+        onVerifyNft={async (nftId) => { if (player?.did) return verifyPhase1(player.did, nftId); return false; }}
       />
     );
   }
@@ -308,7 +335,12 @@ export default function GameVoting() {
 }
 ```
 
-**Important:** `VotingPageInner` must be a child of `<GameProvider>` so it can use `useGame()`. The `onLinkDid` callback replicates the pattern from VotingFeed line 212: `async (did) => { if (address) await register(did, address); }`.
+**Important:** `VotingPageInner` must be a child of `<GameProvider>` so it can use `useGame()`. The three callbacks replicate the exact patterns from VotingFeed lines 212-214:
+- `onLinkDid`: `async (did) => { if (address) await register(did, address); }`
+- `onAutoVerify`: `async () => { if (player?.did) return verifyPhase1(player.did); return false; }`
+- `onVerifyNft`: `async (nftId) => { if (player?.did) return verifyPhase1(player.did, nftId); return false; }`
+
+Note: `verifyPhase1` must be destructured from `useGame()` alongside `player`, `isRegistered`, `isVerified`, `register`.
 
 ---
 
@@ -316,7 +348,7 @@ export default function GameVoting() {
 
 Remove the gate checklist logic (lines 201-214). The gate check has moved up to GameVoting. VotingFeed now assumes the gate has been passed and starts at the loading/error/voting states.
 
-**Remove these lines (201-214):**
+**Remove these lines (201-215):**
 ```tsx
 // Gate: wallet not connected or player not registered/verified
 const walletConnected = walletStatus === 'connected' && !!address;
@@ -330,6 +362,8 @@ if (!walletConnected || !hasDid || !hasPhase1) {
       hasDid={hasDid}
       hasPhase1={hasPhase1}
       onLinkDid={async (did) => { if (address) await register(did, address); }}
+      onAutoVerify={async () => { if (player?.did) return verifyPhase1(player.did); return false; }}
+      onVerifyNft={async (nftId) => { if (player?.did) return verifyPhase1(player.did, nftId); return false; }}
     />
   );
 }
@@ -343,7 +377,7 @@ import { GateChecklist } from './GateChecklist';
 
 **Also remove the `useSageWallet` destructuring** wherever it appears in VotingFeed. Check: `address` and `walletStatus` are used ONLY for the gate check. After removing the gate check, VotingFeed no longer needs wallet state.
 
-**Also check:** Does VotingFeed use `register` from `useGame()`? If so, it's only for the `onLinkDid` callback in the gate check, so that can be removed too from the destructuring.
+**Also check and remove from `useGame()` destructuring:** `register`, `verifyPhase1`, `isRegistered`, `isVerified` — these were only used for the gate check. Only keep what VotingFeed actually uses post-gate (like `player`, `feed`, `castVote`, `loadFeed`, etc.).
 
 ---
 
@@ -690,7 +724,25 @@ When step 1 is active, the existing DID input form renders:
 **Do NOT change this form. Just upgrade the icon next to it.**
 
 ### Gate Step 2 (Hold NFT) Content — PRESERVE AS-IS
-- `<a className="btn btn-ghost">View Collection →</a>` linking to MintGarden
+Step 2 now has an **auto-verify + manual fallback** flow:
+
+**Auto-verify state (checking):**
+- "Checking your DID for Wojak Farmers Plot NFTs..."
+
+**Auto-verify failed (not_found/error) — before manual toggle:**
+- Status text ("No Wojak Farmers Plot found" or "Could not check")
+- "Retry" button → re-runs auto-verify
+- "Paste Launcher ID instead" button → switches to manual input
+- "Don't have one? View collection →" MintGarden link
+
+**Manual input (showManual=true):**
+- "Paste the Launcher ID from Sage wallet for instant verification."
+- Input field: `<input className="input text-sm" placeholder="nft1..." />`
+- Error display
+- "Verify NFT" button (with loading state)
+- "← Back to auto-check" button → switches back to auto-verify
+
+**Do NOT change any of this flow. Just upgrade the icon next to it.**
 
 ---
 

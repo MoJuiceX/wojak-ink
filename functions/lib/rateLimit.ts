@@ -169,7 +169,7 @@ export const GAME_RATE_LIMITS = {
   },
   verifyPhase1: {
     windowMs: 300_000,
-    maxRequests: 5,
+    maxRequests: 20,
     keyPrefix: 'game-verify',
   },
   battleQueue: {
