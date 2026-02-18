@@ -142,6 +142,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         votesToday: prev.votesToday + 1,
         votesRemaining: data.votesRemaining,
         voteStreak: data.voteStreak ?? prev.voteStreak,
+        onboarding: data.onboarding ?? prev.onboarding,
       } : null);
       // Remove voted item from feed
       setFeed(prev => prev.filter(item => item.nftId !== nftId));

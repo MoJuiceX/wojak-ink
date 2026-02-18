@@ -207,12 +207,23 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       await context.env.DB.batch(streakStatements);
     }
 
+    // Fetch updated onboarding state
+    const updated = await context.env.DB.prepare(
+      'SELECT onboarding_phase1, onboarding_minted, onboarding_voted, onboarding_battled FROM game_players WHERE did_id = ?'
+    ).bind(voterDid).first();
+
     return Response.json({
       success: true,
       votesRemaining,
       voteType,
       editionNumber,
       voteStreak,
+      onboarding: updated ? {
+        phase1: !!updated.onboarding_phase1,
+        minted: !!updated.onboarding_minted,
+        voted: !!updated.onboarding_voted,
+        battled: !!updated.onboarding_battled,
+      } : undefined,
     });
   } catch (err) {
     console.error('Vote error:', err);
