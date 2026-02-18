@@ -2,9 +2,9 @@ name = "wojak-credits-alert"
 main = "worker.ts"
 compatibility_date = "2024-01-01"
 
-# Run daily at 8:00 AM UTC (after credit-tracker has run several times)
-[triggers]
-crons = ["0 8 * * *"]
+# Cron disabled — freed slot for battle-cron (free plan limit: 5 cron triggers)
+# [triggers]
+# crons = ["0 8 * * *"]
 
 # Set in dashboard or via wrangler secret:
 # - SITE_BASE_URL (var): e.g. https://wojak.ink
