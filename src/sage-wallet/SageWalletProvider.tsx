@@ -512,8 +512,10 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     }
 
     try {
+      // Fetch enough NFTs to reliably find one with owner_did set.
+      // size=1 often returns an NFT without a DID; size=25 covers more.
       const response = await fetch(
-        `https://api.mintgarden.io/address/${state.address}/nfts?type=owned&size=1`
+        `https://api.mintgarden.io/address/${state.address}/nfts?type=owned&size=25`
       );
 
       if (!response.ok) return [];
