@@ -542,9 +542,9 @@ function AppContent() {
                       </GameErrorBoundary>
                     }
                   />
-                  {/* Combat Arena */}
+                  {/* Combat Arena — now lives at /arena */}
                   <Route
-                    path="games/combat"
+                    path="arena"
                     element={
                       <GameErrorBoundary gameName="Combat Arena">
                         <Suspense fallback={<GameLoading gameName="Combat Arena" />}>
@@ -553,9 +553,9 @@ function AppContent() {
                       </GameErrorBoundary>
                     }
                   />
-                  {/* Combat Battle Detail */}
+                  {/* Combat Battle Detail — /arena/battle/:id */}
                   <Route
-                    path="games/combat/battle/:id"
+                    path="arena/battle/:id"
                     element={
                       <GameErrorBoundary gameName="Combat Battle">
                         <Suspense fallback={<GameLoading gameName="Combat Battle" />}>
@@ -564,6 +564,9 @@ function AppContent() {
                       </GameErrorBoundary>
                     }
                   />
+                  {/* Redirect old combat routes to /arena */}
+                  <Route path="games/combat" element={<Navigate to="/arena" replace />} />
+                  <Route path="games/combat/*" element={<Navigate to="/arena" replace />} />
                   {/* Legacy game routes - redirect to new paths */}
                   <Route path="media/games/stack" element={<Navigate to="/games/stack" replace />} />
                   <Route path="media/games/memory" element={<Navigate to="/games/memory" replace />} />
