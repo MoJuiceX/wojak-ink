@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { useGame } from '@/contexts/GameContext';
 import { useSageWallet } from '@/sage-wallet';
 import { BattleCard } from './BattleCard';
@@ -201,8 +202,11 @@ export function BattleView() {
             <div className="card-static p-8 flex flex-col items-center gap-4">
               <h2 className="text-xl font-bold">No Active Battles</h2>
               <p className="text-secondary text-center">
-                Queue one of your Wojaks to start a battle!
+                No active battles right now. Queue a Wojak above to start one!
               </p>
+              <Link to="/swipe/dashboard" className="btn btn-secondary text-sm" style={{ textDecoration: 'none' }}>
+                Back to Dashboard
+              </Link>
             </div>
           ) : (
             battles.map(battle => (
@@ -230,7 +234,7 @@ export function BattleView() {
             <div className="card-static p-8 flex flex-col items-center gap-4">
               <h2 className="text-xl font-bold">No Battle History</h2>
               <p className="text-secondary text-center">
-                Completed and drawn battles will appear here.
+                No battles resolved yet. Queue a Wojak to start one.
               </p>
             </div>
           ) : (

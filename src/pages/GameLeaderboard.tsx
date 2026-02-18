@@ -249,12 +249,12 @@ function LeaderboardContent() {
 
           {/* Empty state */}
           {!loading && currentEntries.length === 0 && !error && (
-            <div className="flex flex-col items-center gap-3 p-8">
+            <div className="card-static flex flex-col items-center gap-4 p-8">
               <span className="text-muted" style={{ fontSize: 14 }}>
-                {tab === 'players' ? 'Be the first on the leaderboard' : 'No votes cast yet'}
+                {tab === 'players' ? 'No players yet. Start swiping to climb the ranks.' : 'No votes cast yet. Be the first to vote!'}
               </span>
-              <Link to="/swipe" className="btn btn-primary" style={{ fontSize: 13, padding: '8px 16px' }}>
-                Start Playing
+              <Link to="/swipe" className="btn btn-primary" style={{ fontSize: 13, padding: '8px 16px', textDecoration: 'none' }}>
+                Start Swiping
               </Link>
             </div>
           )}

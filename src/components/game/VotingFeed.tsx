@@ -3,6 +3,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { useGame } from '@/contexts/GameContext';
 import { useSageWallet } from '@/sage-wallet';
 import { useToast } from '@/contexts/ToastContext';
@@ -266,15 +267,18 @@ export function VotingFeed() {
     return (
       <div className="card-static flex flex-col items-center justify-center gap-4 p-8" style={{ minHeight: 300 }}>
         <span className="text-2xl">&#10024;</span>
-        <h2 className="text-lg font-semibold">No Wojaks to Vote On</h2>
+        <h2 className="text-lg font-semibold">You've Seen Them All</h2>
         <p className="text-secondary text-sm text-center">
-          You've seen them all, or only your own Wojaks exist so far.
-          <br />
-          Invite others to mint &mdash; or check back later!
+          You've voted on every Wojak! Check back when more are minted.
         </p>
-        <a href="/generator" className="btn btn-primary text-sm" style={{ padding: '8px 20px', textDecoration: 'none' }}>
-          Mint a Wojak &rarr;
-        </a>
+        <div className="flex gap-3">
+          <Link to="/swipe/leaderboard" className="btn btn-primary text-sm" style={{ padding: '8px 20px', textDecoration: 'none' }}>
+            View Leaderboard
+          </Link>
+          <Link to="/generator" className="btn btn-secondary text-sm" style={{ padding: '8px 20px', textDecoration: 'none' }}>
+            Mint a Wojak
+          </Link>
+        </div>
       </div>
     );
   }
