@@ -26,6 +26,8 @@ import { checkRateLimit, getRateLimitKey, MINT_RATE_LIMITS } from '../../lib/rat
 import { consolidateTraits } from './traitResolver';
 import { sha256Hex, base64ToUint8Array } from './uploadToIPFS';
 import { logMintStep } from './auditHelper';
+import type { CombatType } from '../../../src/lib/combat/types';
+import { validateMoveSelection } from '../../../src/lib/combat/data/moves';
 
 interface Env extends ProcessEnv {
   DB: D1Database;
@@ -55,6 +57,16 @@ interface SubmitBody {
   mintType?: 'paid' | 'free';
   idempotencyKey?: string;
   customName?: string;
+  combatMoves?: string[];
+}
+
+/** Validate combat move selection for a given type. Exported for testing. */
+export function validateCombatMoves(
+  moves: string[],
+  combatType: CombatType,
+): { valid: boolean; error?: string } {
+  const result = validateMoveSelection(moves, combatType);
+  return result;
 }
 
 export const onRequest: PagesFunction<Env> = async (context) => {

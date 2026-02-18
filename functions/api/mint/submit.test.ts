@@ -1,4 +1,38 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { validateCombatMoves } from './submit';
+
+// ── validateCombatMoves (pure function, no mocks needed) ──
+
+describe('validateCombatMoves', () => {
+  it('accepts 4 valid move IDs', () => {
+    const result = validateCombatMoves(
+      ['poke_fire_flare-blitz', 'poke_fire_fire-punch', 'poke_fire_ember', 'poke_fire_will-o-wisp'],
+      'FIRE',
+    );
+    expect(result.valid).toBe(true);
+  });
+
+  it('rejects fewer than 4 moves', () => {
+    const result = validateCombatMoves(['poke_fire_flare-blitz', 'poke_fire_ember'], 'FIRE');
+    expect(result.valid).toBe(false);
+  });
+
+  it('rejects moves not in the type pool', () => {
+    const result = validateCombatMoves(
+      ['poke_water_surf', 'poke_water_hydro-pump', 'poke_water_rain-dance', 'poke_water_aqua-jet'],
+      'FIRE',
+    );
+    expect(result.valid).toBe(false);
+  });
+
+  it('rejects duplicate moves', () => {
+    const result = validateCombatMoves(
+      ['poke_fire_flare-blitz', 'poke_fire_flare-blitz', 'poke_fire_ember', 'poke_fire_fire-punch'],
+      'FIRE',
+    );
+    expect(result.valid).toBe(false);
+  });
+});
 
 // Mock processJob before importing submit
 vi.mock('./process', () => ({
