@@ -512,22 +512,20 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     }
 
     try {
-      // Fetch enough NFTs to reliably find one with owner_did set.
-      // size=1 often returns an NFT without a DID; size=25 covers more.
       const response = await fetch(
-        `https://api.mintgarden.io/address/${state.address}/nfts?type=owned&size=25`
+        `https://api.mintgarden.io/address/${state.address}/nfts?type=owned&size=5`
       );
 
       if (!response.ok) return [];
 
       const data = await response.json() as {
-        items: Array<{ owner_did?: string }>;
+        items: Array<{ owner_encoded_id?: string }>;
       };
 
       const dids = new Set<string>();
       for (const item of data.items || []) {
-        if (item.owner_did && typeof item.owner_did === 'string' && item.owner_did.startsWith('did:chia:')) {
-          dids.add(item.owner_did);
+        if (item.owner_encoded_id && typeof item.owner_encoded_id === 'string' && item.owner_encoded_id.startsWith('did:chia:')) {
+          dids.add(item.owner_encoded_id);
         }
       }
 
