@@ -68,7 +68,7 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
         ).bind(launcherId, row.id).run();
         await finalizeJob(env, row.id);
         stats.autoFinalized++;
-        console.log(`[Cleanup] Auto-finalized job ${row.id} with launcher ${launcherId}`);
+        console.warn(`[Cleanup] Auto-finalized job ${row.id} with launcher ${launcherId}`);
       }
     } catch (err) {
       console.error(`[Cleanup] Auto-finalize failed for job ${row.id}:`, err);
@@ -400,7 +400,7 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
     ).run();
     stats.locksForceReleased = staleLocks.meta?.changes ?? 0;
     if (stats.locksForceReleased > 0) {
-      console.log(`[Cleanup] Force-released ${stats.locksForceReleased} stale wallet locks`);
+      console.warn(`[Cleanup] Force-released ${stats.locksForceReleased} stale wallet locks`);
     }
   } catch (err) {
     console.error('[Cleanup] Operation 9 (force-release locks) failed:', err);
@@ -427,7 +427,7 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
           "SELECT id FROM mint_jobs WHERE wallet_lock = ? AND wallet_lock IS NOT NULL AND id != ?"
         ).bind(row.wallet_address, row.id).first<{ id: number }>();
         if (existingLock) {
-          console.log(`[Cleanup] Skipping phantom finalize for job ${row.id} — wallet has active lock (job ${existingLock.id})`);
+          console.warn(`[Cleanup] Skipping phantom finalize for job ${row.id} — wallet has active lock (job ${existingLock.id})`);
           continue;
         }
 
@@ -440,7 +440,7 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
         // (The refund happened because we thought the mint failed, but it actually succeeded)
         await finalizeJob(env, row.id);
         stats.phantomFinalized++;
-        console.log(`[Cleanup] Phantom-finalized free mint job ${row.id} (launcher: ${row.mintgarden_launcher_id})`);
+        console.warn(`[Cleanup] Phantom-finalized free mint job ${row.id} (launcher: ${row.mintgarden_launcher_id})`);
       } catch (err) {
         console.error(`[Cleanup] Phantom finalize failed for job ${row.id}:`, err);
         // Reset wallet_lock on failure

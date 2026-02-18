@@ -148,7 +148,7 @@ export async function callMintGardenMint(
   const mintGardenApiUrl = MINTGARDEN_DYNAMIC_URL;
 
   // Log the request payload (redact API key) for debugging
-  console.log('[MintGarden] Request payload:', JSON.stringify({
+  console.warn('[MintGarden] Request payload:', JSON.stringify({
     ...body,
     _url: mintGardenApiUrl,
     _mintType: params.mintType,
@@ -199,7 +199,7 @@ export async function callMintGardenMint(
         throw new Error(`MintGarden API failed after ${MAX_RETRIES} retries: ${lastError}`);
       }
 
-      console.log('[MintGarden] Response (attempt', attempt + 1, '):', res.status, JSON.stringify(data).slice(0, 500));
+      console.warn('[MintGarden] Response (attempt', attempt + 1, '):', res.status, JSON.stringify(data).slice(0, 500));
       const parsed = parseResponse(data);
       if (!parsed.offerFile && !parsed.launcherId) {
         console.error('[MintGarden] 200 OK but no offer/launcher in response. Keys:', Object.keys(data).join(','));

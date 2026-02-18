@@ -285,7 +285,7 @@ describe('confirm-payment.ts', () => {
   it('returns 500 when DB is not configured', async () => {
     const env = { ...createEnv(), DB: undefined };
     const req = makeRequest({ jobId: 1, walletAddress: TEST_WALLET });
-    const ctx = createContext(env as any, req);
+    const ctx = createContext(env as unknown as ReturnType<typeof createEnv>, req);
     const res = await onRequest(ctx);
     expect(res.status).toBe(500);
   });

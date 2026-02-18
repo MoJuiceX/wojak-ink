@@ -178,7 +178,7 @@ export async function processJob(
         dataHash: job.image_hash,
         metadataHash: job.metadata_hash,
       };
-      console.log(`[MintProcessor] Job ${jobId} reusing existing IPFS data from previous attempt`);
+      console.warn(`[MintProcessor] Job ${jobId} reusing existing IPFS data from previous attempt`);
     } else {
       await updateJobStep(env.DB, jobId, 'uploading_ipfs');
 
@@ -217,7 +217,7 @@ export async function processJob(
 
     if ((concurrencyCount?.count ?? 0) >= MAX_MINTGARDEN_CONCURRENT) {
       await updateJobStep(env.DB, jobId, 'mint_queued');
-      console.log(`[MintProcessor] Job ${jobId} queued — ${concurrencyCount!.count} MintGarden calls in flight`);
+      console.warn(`[MintProcessor] Job ${jobId} queued — ${concurrencyCount!.count} MintGarden calls in flight`);
       return;
     }
 
@@ -303,7 +303,7 @@ export async function processJob(
       await env.DB.prepare(
         "UPDATE mint_jobs SET step = 'mint_queued', not_before = ?, error_message = ?, updated_at = datetime('now') WHERE id = ?"
       ).bind(notBefore, error.message, jobId).run();
-      console.log(`[MintProcessor] Job ${jobId} rate-limited, re-queued with not_before=${notBefore}`);
+      console.warn(`[MintProcessor] Job ${jobId} rate-limited, re-queued with not_before=${notBefore}`);
       await chainNextQueuedJob(env);
       return;
     }
