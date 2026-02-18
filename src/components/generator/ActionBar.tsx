@@ -591,7 +591,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
 
         {/* Supply counter with hover tooltip */}
         {maxSupply > 0 && (
-          <ActionBarTooltip content={`${Math.round((totalMinted / maxSupply) * 100)}% minted \u2022 ${maxSupply - totalMinted} remaining`}>
+          <ActionBarTooltip content={`${totalMinted > 0 ? Math.max(1, Math.round((totalMinted / maxSupply) * 100)) : 0}% minted \u2022 ${maxSupply - totalMinted} remaining`}>
             <span
               className="text-[11px] tabular-nums whitespace-nowrap cursor-default"
               style={{ color: 'var(--color-text-muted)' }}
