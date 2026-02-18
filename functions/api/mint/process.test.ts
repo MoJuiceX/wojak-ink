@@ -28,7 +28,7 @@ vi.mock('./traitResolver', () => ({
   ])),
 }));
 
-import { processJob, finalizeJob, updateJobStep } from './process';
+import { processJob, finalizeJob, updateJobStep, buildCombatAttributes, buildFighterInsertSQL } from './process';
 import { callMintGardenMint } from './request';
 import { uploadToIPFS } from './uploadToIPFS';
 import { logMintStep } from './auditHelper';
@@ -80,6 +80,40 @@ const freeJobRow = {
 };
 
 const paidJobRow = { ...freeJobRow, id: 2, mint_type: 'paid' as const, credit_cost: null, xch_price_mojos: 200000000000, credit_spend_id: null };
+
+describe('buildCombatAttributes', () => {
+  it('returns 7 CHIP-0007 attribute entries', () => {
+    const attrs = buildCombatAttributes({
+      type: 'PSYCHE',
+      nature: 'Focused',
+      ability: 'Magic Guard',
+      moves: ['Mind Ray', 'Mesmerize', 'Dream Drain', 'Sixth Sense'],
+    });
+    expect(attrs).toHaveLength(7);
+    expect(attrs[0]).toEqual({ trait_type: 'Combat Type', value: 'PSYCHE' });
+    expect(attrs[1]).toEqual({ trait_type: 'Nature', value: 'Focused' });
+    expect(attrs[2]).toEqual({ trait_type: 'Ability', value: 'Magic Guard' });
+    expect(attrs[3]).toEqual({ trait_type: 'Move 1', value: 'Mind Ray' });
+    expect(attrs[6]).toEqual({ trait_type: 'Move 4', value: 'Sixth Sense' });
+  });
+});
+
+describe('buildFighterInsertSQL', () => {
+  it('builds correct INSERT statement', () => {
+    const sql = buildFighterInsertSQL({
+      nft_id: 'nft_abc123',
+      edition_number: 42,
+      owner_did: 'did:chia:xyz',
+      combat_type: 'PSYCHE',
+      nature: 'Focused',
+      ability: 'Magic Guard',
+      moves: ['Mind Ray', 'Mesmerize', 'Dream Drain', 'Sixth Sense'],
+    });
+    expect(sql.query).toContain('INSERT INTO combat_fighters');
+    expect(sql.bindings).toContain('nft_abc123');
+    expect(sql.bindings).toContain('PSYCHE');
+  });
+});
 
 describe('process.ts', () => {
   beforeEach(() => {

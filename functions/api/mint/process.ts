@@ -26,6 +26,37 @@ import {
 // Re-export MintError for backwards compatibility (callers may import from process.ts)
 export { MintError };
 
+/** Build CHIP-0007 combat attributes for NFT metadata. */
+export function buildCombatAttributes(combat: {
+  type: string; nature: string; ability: string; moves: string[];
+}): Array<{ trait_type: string; value: string }> {
+  return [
+    { trait_type: 'Combat Type', value: combat.type },
+    { trait_type: 'Nature', value: combat.nature },
+    { trait_type: 'Ability', value: combat.ability },
+    { trait_type: 'Move 1', value: combat.moves[0] },
+    { trait_type: 'Move 2', value: combat.moves[1] },
+    { trait_type: 'Move 3', value: combat.moves[2] },
+    { trait_type: 'Move 4', value: combat.moves[3] },
+  ];
+}
+
+/** Build parameterized INSERT for combat_fighters table. */
+export function buildFighterInsertSQL(fighter: {
+  nft_id: string; edition_number: number; owner_did: string;
+  combat_type: string; nature: string; ability: string; moves: string[];
+}): { query: string; bindings: unknown[] } {
+  return {
+    query: `INSERT INTO combat_fighters (nft_id, edition_number, owner_did, combat_type, nature, ability, move_1, move_2, move_3, move_4)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    bindings: [
+      fighter.nft_id, fighter.edition_number, fighter.owner_did,
+      fighter.combat_type, fighter.nature, fighter.ability,
+      fighter.moves[0], fighter.moves[1], fighter.moves[2], fighter.moves[3],
+    ],
+  };
+}
+
 /** Max concurrent MintGarden API calls. Soft cap — brief overshoot is fine. */
 const MAX_MINTGARDEN_CONCURRENT = 3;
 
