@@ -57,7 +57,7 @@ export function VotingFeed() {
   const {
     player, isRegistered, isVerified,
     feed, feedLoading, loadFeed,
-    castVote, refreshPowerLevel, register,
+    castVote, refreshPowerLevel, register, verifyPhase1,
   } = useGame();
   const { address, status: walletStatus } = useSageWallet();
   const toast = useToast();
@@ -210,6 +210,7 @@ export function VotingFeed() {
         hasDid={hasDid}
         hasPhase1={hasPhase1}
         onLinkDid={async (did) => { if (address) await register(did, address); }}
+        onVerifyNft={async (nftId) => { if (player?.did) return verifyPhase1(player.did, nftId); return false; }}
       />
     );
   }

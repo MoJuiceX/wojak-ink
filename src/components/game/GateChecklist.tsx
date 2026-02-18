@@ -9,17 +9,45 @@ interface GateChecklistProps {
   hasDid: boolean;
   hasPhase1: boolean;
   onLinkDid?: (did: string) => Promise<void>;
+  onVerifyNft?: (nftId: string) => Promise<boolean>;
 }
 
 function isValidDid(did: string): boolean {
   return /^did:chia:1[a-z0-9]{45,}$/.test(did.trim());
 }
 
-export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid }: GateChecklistProps) {
+function isValidNftId(id: string): boolean {
+  return /^nft1[a-z0-9]{58,62}$/.test(id.trim());
+}
+
+export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, onVerifyNft }: GateChecklistProps) {
   const { connect } = useSageWallet();
   const [didInput, setDidInput] = useState('');
   const [didError, setDidError] = useState('');
   const [linking, setLinking] = useState(false);
+  const [nftInput, setNftInput] = useState('');
+  const [nftError, setNftError] = useState('');
+  const [verifying, setVerifying] = useState(false);
+
+  const handleVerifyNft = async () => {
+    const id = nftInput.trim();
+    if (!isValidNftId(id)) {
+      setNftError('Invalid Launcher ID. It should start with nft1...');
+      return;
+    }
+    setNftError('');
+    setVerifying(true);
+    try {
+      const verified = await onVerifyNft?.(id);
+      if (!verified) {
+        setNftError('NFT not found in your DID or not a Wojak Farmers Plot. Make sure it\'s assigned to your DID.');
+      }
+    } catch {
+      setNftError('Verification failed. Try again.');
+    } finally {
+      setVerifying(false);
+    }
+  };
 
   const handleLinkDid = async () => {
     const did = didInput.trim();
@@ -104,15 +132,37 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid }:
                   </div>
                 )}
                 {isCurrent && i === 2 && (
-                  <a
-                    href="https://mintgarden.io/collections/wojak-farmers-plot-col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-ghost mt-2 text-sm"
-                    style={{ padding: '6px 16px' }}
-                  >
-                    View Collection &rarr;
-                  </a>
+                  <div className="flex flex-col gap-2 mt-2">
+                    <span className="text-muted text-sm">
+                      Paste the Launcher ID of your Wojak Farmers Plot NFT from Sage wallet.
+                    </span>
+                    <input
+                      className="input text-sm"
+                      type="text"
+                      placeholder="nft1..."
+                      value={nftInput}
+                      onChange={e => { setNftInput(e.target.value); setNftError(''); }}
+                      onKeyDown={e => { if (e.key === 'Enter') handleVerifyNft(); }}
+                      style={{ fontSize: 13 }}
+                    />
+                    {nftError && <span className="text-sm" style={{ color: 'var(--color-error)' }}>{nftError}</span>}
+                    <button
+                      className="btn btn-primary text-sm"
+                      style={{ padding: '6px 16px' }}
+                      onClick={handleVerifyNft}
+                      disabled={verifying || !nftInput.trim()}
+                    >
+                      {verifying ? 'Verifying...' : 'Verify NFT'}
+                    </button>
+                    <a
+                      href="https://mintgarden.io/collections/wojak-farmers-plot-col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-accent text-sm"
+                    >
+                      Don't have one? View collection &rarr;
+                    </a>
+                  </div>
                 )}
               </div>
             </li>

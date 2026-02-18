@@ -40,7 +40,7 @@ interface GameContextType {
   feed: FeedItem[];
   feedLoading: boolean;
   register: (did: string, walletAddress: string) => Promise<void>;
-  verifyPhase1: (did: string) => Promise<boolean>;
+  verifyPhase1: (did: string, nftId?: string) => Promise<boolean>;
   castVote: (nftId: string, editionNumber: number, voteType: 1 | -1) => Promise<boolean>;
   loadFeed: () => Promise<void>;
   refreshPowerLevel: () => Promise<void>;
@@ -94,12 +94,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const verifyPhase1 = useCallback(async (did: string) => {
+  const verifyPhase1 = useCallback(async (did: string, nftId?: string) => {
     const headers = await getAuthHeaders();
+    const payload: Record<string, string> = { did };
+    if (nftId) payload.nftId = nftId;
     const res = await fetch('/api/game/verify-phase1', {
       method: 'POST',
       headers,
-      body: JSON.stringify({ did }),
+      body: JSON.stringify(payload),
     });
     const data = await res.json();
     if (data.verified && player) {
