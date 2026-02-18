@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useGame } from '@/contexts/GameContext';
+import { useSageWallet } from '@/sage-wallet';
 import { BattleCard } from './BattleCard';
 import { BattleQueuePanel } from './BattleQueuePanel';
 
@@ -8,7 +9,7 @@ interface BattleNft {
   edition: number;
   ownerDid: string;
   name: string;
-  votes: number;
+  scoreDelta?: number;
 }
 
 interface Battle {
@@ -20,7 +21,6 @@ interface Battle {
   startedAt: string;
   endsAt: string;
   resolvedAt: string | null;
-  hasVoted: boolean;
 }
 
 interface QueuedNft {
@@ -34,6 +34,7 @@ type Tab = 'active' | 'history';
 
 export function BattleView() {
   const { player, isVerified, getAuthHeaders } = useGame();
+  const { status: walletStatus, address } = useSageWallet();
   const [tab, setTab] = useState<Tab>('active');
   const [battles, setBattles] = useState<Battle[]>([]);
   const [historyBattles, setHistoryBattles] = useState<Battle[]>([]);
@@ -88,28 +89,6 @@ export function BattleView() {
     }
   }, [tab, isVerified, historyBattles.length, loadHistory]);
 
-  const handleVote = async (battleId: number, votedFor: 'a' | 'b') => {
-    if (!player) return;
-    const headers = await getAuthHeaders();
-    const res = await fetch('/api/game/battle-vote', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ voterDid: player.did, battleId, votedFor }),
-    });
-    const data = await res.json();
-    if (data.success) {
-      setBattles(prev => prev.map(b => {
-        if (b.id !== battleId) return b;
-        return {
-          ...b,
-          hasVoted: true,
-          nftA: { ...b.nftA, votes: data.votesA },
-          nftB: { ...b.nftB, votes: data.votesB },
-        };
-      }));
-    }
-  };
-
   const handleCancelQueue = async (nftId: string) => {
     if (!player) return;
     setCancellingNft(nftId);
@@ -137,6 +116,14 @@ export function BattleView() {
   };
 
   if (!player) {
+    // Wallet connected — auto-registration is in progress
+    if (walletStatus === 'connected' && address) {
+      return (
+        <div className="flex items-center justify-center p-12">
+          <div className="text-secondary">Loading your profile...</div>
+        </div>
+      );
+    }
     return (
       <div className="card-static p-8 flex flex-col items-center gap-4">
         <h2 className="text-xl font-bold">Connect Your Wallet</h2>
@@ -227,8 +214,6 @@ export function BattleView() {
                 endsAt={battle.endsAt}
                 status={battle.status}
                 winner={battle.winner}
-                hasVoted={battle.hasVoted}
-                onVote={handleVote}
               />
             ))
           )}
@@ -259,7 +244,6 @@ export function BattleView() {
                   endsAt={battle.endsAt}
                   status={battle.status}
                   winner={battle.winner}
-                  hasVoted={true}
                   resolvedAt={battle.resolvedAt}
                 />
               ))}

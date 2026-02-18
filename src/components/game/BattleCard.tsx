@@ -5,7 +5,7 @@ interface BattleNft {
   edition: number;
   ownerDid: string;
   name: string;
-  votes: number;
+  scoreDelta?: number;
 }
 
 interface BattleCardProps {
@@ -15,8 +15,6 @@ interface BattleCardProps {
   endsAt: string;
   status: string;
   winner?: string | null;
-  hasVoted: boolean;
-  onVote?: (battleId: number, votedFor: 'a' | 'b') => void;
   resolvedAt?: string | null;
 }
 
@@ -43,29 +41,37 @@ function useCountdown(endsAt: string) {
   return remaining;
 }
 
+function formatDelta(delta: number | undefined): string {
+  if (delta == null) return '?';
+  if (delta > 0) return `+${delta}`;
+  return String(delta);
+}
+
 export function BattleCard({
-  battleId, nftA, nftB, endsAt, status, winner, hasVoted, onVote, resolvedAt,
+  battleId, nftA, nftB, endsAt, status, winner, resolvedAt,
 }: BattleCardProps) {
   const countdown = useCountdown(endsAt);
-  const totalVotes = nftA.votes + nftB.votes;
-  const pctA = totalVotes > 0 ? Math.round((nftA.votes / totalVotes) * 100) : 50;
-  const pctB = 100 - pctA;
   const isActive = status === 'active';
-  const isHistory = status === 'completed' || status === 'draw';
+  const isCompleted = status === 'completed';
+  const isDraw = status === 'draw';
+  const isResolved = isCompleted || isDraw;
+
+  const aWon = winner === nftA.id;
+  const bWon = winner === nftB.id;
 
   return (
     <div className="card-static p-4 flex flex-col gap-3">
       {/* Timer / Result */}
       <div className="flex items-center justify-between">
-        {isHistory ? (
-          <span className={`badge ${status === 'completed' ? 'badge-success' : 'badge-cyan'}`}>
-            {status === 'draw' ? 'Draw' : 'Completed'}
+        {isResolved ? (
+          <span className={`badge ${isCompleted ? 'badge-success' : 'badge-cyan'}`}>
+            {isDraw ? 'Draw' : 'Completed'}
           </span>
         ) : (
-          <span className="badge badge-cyan">{isActive ? countdown : status}</span>
+          <span className="badge badge-cyan">{countdown}</span>
         )}
         <span className="text-xs text-muted">
-          {isHistory && resolvedAt
+          {isResolved && resolvedAt
             ? new Date(resolvedAt).toLocaleDateString()
             : `#${battleId}`}
         </span>
@@ -74,8 +80,11 @@ export function BattleCard({
       {/* Side-by-side NFTs */}
       <div className="flex gap-4">
         {/* NFT A */}
-        <div className="flex-1 flex flex-col items-center gap-2">
-          <div className="battle-nft-image">
+        <div className={`flex-1 flex flex-col items-center gap-2 ${isCompleted && !aWon ? 'opacity-40' : ''}`}>
+          <div
+            className="battle-nft-image"
+            style={aWon ? { borderColor: 'var(--color-success)', boxShadow: '0 0 12px rgba(34, 197, 94, 0.3)' } : undefined}
+          >
             <img
               src={`https://assets.mintgarden.io/thumbnails/medium/${nftA.id}.png`}
               alt={nftA.name}
@@ -85,23 +94,15 @@ export function BattleCard({
           </div>
           <p className="text-sm font-semibold text-center">{nftA.name}</p>
           <span className="text-xs text-secondary">#{nftA.edition}</span>
-          {isActive && !hasVoted && onVote && (
-            <button
-              className="btn btn-primary w-full text-sm"
-              onClick={() => onVote(battleId, 'a')}
+          {isResolved && (
+            <span
+              className={`text-sm font-bold ${(nftA.scoreDelta ?? 0) > 0 ? 'text-accent' : 'text-muted'}`}
+              style={(nftA.scoreDelta ?? 0) < 0 ? { color: 'var(--color-error)' } : undefined}
             >
-              Vote A
-            </button>
+              {formatDelta(nftA.scoreDelta)}
+            </span>
           )}
-          {(hasVoted || !isActive) && (
-            <div className="text-center">
-              <span className="text-lg font-bold">{nftA.votes}</span>
-              <span className="text-xs text-secondary ml-1">({pctA}%)</span>
-            </div>
-          )}
-          {winner === nftA.id && (
-            <span className="badge badge-success">Winner</span>
-          )}
+          {aWon && <span className="badge badge-success">Winner</span>}
         </div>
 
         {/* VS divider */}
@@ -110,8 +111,11 @@ export function BattleCard({
         </div>
 
         {/* NFT B */}
-        <div className="flex-1 flex flex-col items-center gap-2">
-          <div className="battle-nft-image">
+        <div className={`flex-1 flex flex-col items-center gap-2 ${isCompleted && !bWon ? 'opacity-40' : ''}`}>
+          <div
+            className="battle-nft-image"
+            style={bWon ? { borderColor: 'var(--color-success)', boxShadow: '0 0 12px rgba(34, 197, 94, 0.3)' } : undefined}
+          >
             <img
               src={`https://assets.mintgarden.io/thumbnails/medium/${nftB.id}.png`}
               alt={nftB.name}
@@ -121,35 +125,23 @@ export function BattleCard({
           </div>
           <p className="text-sm font-semibold text-center">{nftB.name}</p>
           <span className="text-xs text-secondary">#{nftB.edition}</span>
-          {isActive && !hasVoted && onVote && (
-            <button
-              className="btn btn-primary w-full text-sm"
-              onClick={() => onVote(battleId, 'b')}
+          {isResolved && (
+            <span
+              className={`text-sm font-bold ${(nftB.scoreDelta ?? 0) > 0 ? 'text-accent' : 'text-muted'}`}
+              style={(nftB.scoreDelta ?? 0) < 0 ? { color: 'var(--color-error)' } : undefined}
             >
-              Vote B
-            </button>
+              {formatDelta(nftB.scoreDelta)}
+            </span>
           )}
-          {(hasVoted || !isActive) && (
-            <div className="text-center">
-              <span className="text-lg font-bold">{nftB.votes}</span>
-              <span className="text-xs text-secondary ml-1">({pctB}%)</span>
-            </div>
-          )}
-          {winner === nftB.id && (
-            <span className="badge badge-success">Winner</span>
-          )}
+          {bWon && <span className="badge badge-success">Winner</span>}
         </div>
       </div>
 
-      {/* Vote bar */}
-      {totalVotes > 0 && (
-        <div className="battle-vote-bar">
-          <div className="battle-vote-fill-a" style={{ width: `${pctA}%` }} />
-        </div>
-      )}
-
-      {hasVoted && isActive && (
-        <p className="text-xs text-secondary text-center">You voted in this battle</p>
+      {/* Active battle hint */}
+      {isActive && (
+        <p className="text-xs text-secondary text-center">
+          Scores are hidden until the battle ends. Vote in Swipe to influence the outcome!
+        </p>
       )}
     </div>
   );
