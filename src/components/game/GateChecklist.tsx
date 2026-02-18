@@ -38,10 +38,11 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid }:
     }
   };
 
+  // Steps 2+ require wallet — reset if disconnected
   const steps = [
     { label: 'Connect wallet', done: walletConnected },
-    { label: 'Link your DID', done: hasDid },
-    { label: 'Hold a Wojak Farmers Plot', done: hasPhase1 },
+    { label: 'Link your DID', done: walletConnected && hasDid },
+    { label: 'Hold a Wojak Farmers Plot', done: walletConnected && hasPhase1 },
     { label: 'Start swiping', done: walletConnected && hasDid && hasPhase1 },
   ];
 
