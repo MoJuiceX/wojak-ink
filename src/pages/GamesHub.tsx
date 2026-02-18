@@ -334,7 +334,7 @@ export default function GamesHub() {
     <>
       {/* Combat Arena featured link */}
       <Link
-        to="/games/combat"
+        to="/arena"
         className="card p-4 flex items-center gap-4 mb-4"
       >
         <div className="flex-1">

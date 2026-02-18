@@ -6,6 +6,7 @@
  */
 
 import { useState, useCallback, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { PageSEO } from '@/components/seo';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { QueuePanel } from '@/components/combat/QueuePanel';
@@ -25,6 +26,7 @@ interface FighterSummary {
 }
 
 export default function CombatArena() {
+  const navigate = useNavigate();
   const { getDIDs, status } = useSageWallet();
   const isConnected = status === 'connected';
   const [ownerDid, setOwnerDid] = useState<string | null>(null);
@@ -158,12 +160,12 @@ export default function CombatArena() {
         {activeBattleId && !selectedFighter && (
           <div className="card p-4 w-full text-center">
             <p className="text-secondary text-sm mb-2">Active Battle</p>
-            <a
-              href={`/arena/battle/${activeBattleId}`}
+            <Link
+              to={`/arena/battle/${activeBattleId}`}
               className="btn btn-primary"
             >
               Go to Battle #{activeBattleId}
-            </a>
+            </Link>
           </div>
         )}
 
@@ -174,7 +176,7 @@ export default function CombatArena() {
             <BattleHistory
               nftId={selectedFighter}
               limit={10}
-              onSelectBattle={(id) => window.location.href = `/arena/battle/${id}`}
+              onSelectBattle={(id) => navigate(`/arena/battle/${id}`)}
             />
           </div>
         )}

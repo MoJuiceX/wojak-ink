@@ -96,6 +96,10 @@ async function run(env: Env) {
 
   console.log(`[DID Indexer] Done. Changed: ${updatedCount}, Skipped: ${skippedCount}, Errors: ${errorCount}, Total: ${players.results.length}`);
 
+  if (!env.ADMIN_SECRET) {
+    console.warn('[DID Indexer] ADMIN_SECRET not set — battle-resolve and vote-xp calls will fail with 401');
+  }
+
   // Resolve expired battles (replaces standalone battle-cron worker)
   try {
     const battleHeaders: Record<string, string> = {};

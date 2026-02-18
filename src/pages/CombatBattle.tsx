@@ -8,6 +8,7 @@ import { useParams } from 'react-router-dom';
 import { PageSEO } from '@/components/seo';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { BattleView } from '@/components/combat/BattleView';
+import { ArenaNav } from '@/components/combat/ArenaNav';
 import { useSageWallet } from '@/sage-wallet/SageWalletProvider';
 import { useState, useEffect } from 'react';
 
@@ -27,9 +28,10 @@ export default function CombatBattle() {
       const ownerDid = dids[0];
 
       try {
-        const res = await fetch(`/api/combat/fighters?ownerDid=${encodeURIComponent(ownerDid)}`);
-        const fighters = await res.json();
-        if (Array.isArray(fighters) && fighters.length > 0) {
+        const res = await fetch(`/api/combat/fighter?ownerDid=${encodeURIComponent(ownerDid)}`);
+        const data = await res.json();
+        const fighters = data.fighters ?? [];
+        if (fighters.length > 0) {
           setPlayerNftId(fighters[0].nft_id);
         }
       } catch (err) {
@@ -41,6 +43,7 @@ export default function CombatBattle() {
   if (!battleId || isNaN(battleId)) {
     return (
       <PageTransition>
+        <ArenaNav />
         <div className="flex flex-col items-center p-4 sm:p-6 gap-6 max-w-2xl mx-auto animate-fade-in">
           <PageSEO title="Battle Not Found" description="Invalid battle ID" path="/arena" />
           <div className="card-static p-6 text-center">
@@ -53,6 +56,7 @@ export default function CombatBattle() {
 
   return (
     <PageTransition>
+      <ArenaNav />
       <div className="flex flex-col items-center p-4 sm:p-6 gap-6 max-w-2xl mx-auto animate-fade-in">
         <PageSEO
           title={`Battle #${battleId}`}
