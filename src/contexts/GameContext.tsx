@@ -80,18 +80,19 @@ export function GameProvider({ children }: { children: ReactNode }) {
       body: JSON.stringify({ did, walletAddress }),
     });
     const data = await res.json();
-    if (data.success) {
-      setPlayer({
-        did: data.player.did,
-        walletAddress: walletAddress,
-        powerLevel: data.player.powerLevel,
-        phase1Verified: data.player.phase1Verified,
-        votesToday: data.player.votesToday,
-        votesRemaining: 10 - data.player.votesToday,
-        voteStreak: data.player.voteStreak ?? 0,
-        onboarding: data.player.onboarding,
-      });
+    if (!data.success) {
+      throw new Error(data.error || 'Registration failed');
     }
+    setPlayer({
+      did: data.player.did,
+      walletAddress: walletAddress,
+      powerLevel: data.player.powerLevel,
+      phase1Verified: data.player.phase1Verified,
+      votesToday: data.player.votesToday,
+      votesRemaining: 10 - data.player.votesToday,
+      voteStreak: data.player.voteStreak ?? 0,
+      onboarding: data.player.onboarding,
+    });
   }, []);
 
   const verifyPhase1 = useCallback(async (did: string, nftId?: string) => {

@@ -35,16 +35,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return Response.json({ error: 'Invalid wallet address format' }, { status: 400 });
     }
 
-    // Check if this Clerk user already has a different DID
-    const existingBinding = await context.env.DB.prepare(
-      'SELECT did_id FROM game_players WHERE clerk_user_id = ?'
-    ).bind(auth.userId).first<{ did_id: string }>();
-
-    if (existingBinding && existingBinding.did_id !== did) {
-      return Response.json({
-        error: 'Your account is already linked to a different DID. Contact support to change.'
-      }, { status: 409 });
-    }
+    // If this Clerk user was previously bound to a different DID, clear that binding
+    // (allows wallet switching during testing / multi-wallet setups)
+    await context.env.DB.prepare(
+      'UPDATE game_players SET clerk_user_id = NULL WHERE clerk_user_id = ? AND did_id != ?'
+    ).bind(auth.userId, did).run();
 
     // Upsert player with Clerk binding
     await context.env.DB.prepare(`
