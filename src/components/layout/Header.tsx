@@ -15,7 +15,6 @@ import { useGallery } from '@/hooks/useGallery';
 import { LAYOUT } from '@/config/layout';
 import { Logo } from './Logo';
 import { PriceBadges } from './PriceBadges';
-import { CurrencyDisplay } from '@/components/Currency';
 import { useSageWallet } from '@/sage-wallet';
 import { useMint } from '@/contexts/MintContext';
 import { getNavItemByPath } from '@/config/routes';
@@ -352,9 +351,8 @@ export function Header({ transparent = false }: HeaderProps) {
               </AnimatePresence>
             </motion.div>
 
-            {/* Right: Currency + Price badges + Wallet */}
-            <div className="flex-shrink-0 flex items-center gap-4">
-              <CurrencyDisplay size="small" />
+            {/* Right: Price badges + Wallet */}
+            <div className="flex-shrink-0 flex items-center gap-3">
               <PriceBadges size="md" />
               <div className="relative" ref={walletMenuRef}>
                 <button
