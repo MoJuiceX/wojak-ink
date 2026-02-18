@@ -109,12 +109,15 @@ export function QueuePanel({ fighters, onQueue, onLeaveQueue, queueStatus, isLoa
         </button>
       )}
 
-      {/* Queue status */}
+      {/* Queue status — searching animation */}
       {isQueued && (
         <div className="flex flex-col gap-2">
-          <div className="combat-preview-badge justify-center">
-            <span className="text-secondary">
-              In queue — position {queueStatus?.position ?? '?'}
+          <div className="queue-searching">
+            <span className="queue-searching-dot" />
+            <span className="queue-searching-dot" />
+            <span className="queue-searching-dot" />
+            <span className="text-secondary text-sm ml-2">
+              Searching for opponent... position {queueStatus?.position ?? '?'}
             </span>
           </div>
           <button
@@ -127,9 +130,9 @@ export function QueuePanel({ fighters, onQueue, onLeaveQueue, queueStatus, isLoa
         </div>
       )}
 
-      {/* Matched */}
+      {/* Matched — glow animation */}
       {isMatched && queueStatus?.battleId && (
-        <div className="combat-preview-badge justify-center">
+        <div className="queue-match-found">
           <span className="text-accent font-semibold">
             Match found! Battle #{queueStatus.battleId}
           </span>

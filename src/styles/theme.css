@@ -2423,6 +2423,53 @@ body {
   to { opacity: 0.5; }
 }
 
+/* Queue searching animation */
+.queue-searching {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--color-border);
+}
+
+.queue-searching-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  animation: queue-dot-pulse 1.4s ease-in-out infinite;
+}
+
+.queue-searching-dot:nth-child(2) { animation-delay: 0.2s; }
+.queue-searching-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes queue-dot-pulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+.queue-match-found {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 107, 0, 0.08);
+  border: 1px solid var(--color-primary);
+  box-shadow: var(--glow-primary);
+  animation: match-found-pulse 0.6s ease-out;
+}
+
+@keyframes match-found-pulse {
+  0% { transform: scale(0.92); opacity: 0; }
+  60% { transform: scale(1.03); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
 /* Fighter stat bar */
 .stat-bar {
   height: 6px;
