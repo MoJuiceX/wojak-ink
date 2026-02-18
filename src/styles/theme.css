@@ -2296,19 +2296,6 @@ body {
   background: var(--color-bg);
 }
 
-.battle-vote-bar {
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.08);
-  overflow: hidden;
-}
-
-.battle-vote-fill-a {
-  height: 100%;
-  border-radius: 3px;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-cyan));
-  transition: width 0.4s ease;
-}
 
 /* ======= Scrollbar Hide ======= */
 .hide-scrollbar {

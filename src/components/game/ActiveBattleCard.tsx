@@ -1,20 +1,23 @@
-// Active Battle Card — shows current battle state, challenge, or empty state.
+// Active Battle Card — shows current battle on the dashboard (spectator, no scores).
 import { useState, useEffect } from 'react';
 import { Swords } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const FALLBACK_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' fill='%2312121a'%3E%3Crect width='200' height='200' rx='14'/%3E%3Ctext x='100' y='108' text-anchor='middle' fill='%23606070' font-size='14' font-family='system-ui'%3EImage unavailable%3C/text%3E%3C/svg%3E";
 
+interface BattleNft {
+  id: string;
+  edition: number;
+  ownerDid: string;
+  name: string;
+}
+
 interface Battle {
-  battleId: string;
+  id: number;
+  nftA: BattleNft;
+  nftB: BattleNft;
   status: string;
   endsAt: string;
-  yourNftId: string;
-  yourEdition: number;
-  opponentNftId: string;
-  opponentEdition: number;
-  yourVotes: number;
-  opponentVotes: number;
 }
 
 interface ActiveBattleCardProps {
@@ -36,7 +39,7 @@ export function ActiveBattleCard({ did }: ActiveBattleCardProps) {
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`/api/game/battle-list?did=${did}&status=active`)
+    fetch(`/api/game/battle-list?voterDid=${did}&status=active`)
       .then(r => r.json())
       .then(data => {
         if (!cancelled && data.success) setBattles(data.battles || []);
@@ -54,7 +57,6 @@ export function ActiveBattleCard({ did }: ActiveBattleCardProps) {
     );
   }
 
-  // No active battles
   if (battles.length === 0) {
     return (
       <div className="card-static p-4 flex flex-col items-center gap-2">
@@ -72,8 +74,10 @@ export function ActiveBattleCard({ did }: ActiveBattleCardProps) {
   const battle = sorted[0];
   const remaining = sorted.length - 1;
 
-  const yourWinning = battle.yourVotes > battle.opponentVotes;
-  const opponentWinning = battle.opponentVotes > battle.yourVotes;
+  // Determine which side is "yours" based on DID
+  const isA = battle.nftA.ownerDid === did;
+  const yourNft = isA ? battle.nftA : battle.nftB;
+  const opponentNft = isA ? battle.nftB : battle.nftA;
 
   return (
     <div className="card-static p-4 flex flex-col gap-3">
@@ -85,42 +89,40 @@ export function ActiveBattleCard({ did }: ActiveBattleCardProps) {
       <div className="flex items-center justify-center gap-4">
         <div className="flex flex-col items-center gap-1">
           <img
-            src={`https://assets.mintgarden.io/thumbnails/medium/${battle.yourNftId}.png`}
-            alt={`Your Wojak #${battle.yourEdition}`}
+            src={`https://assets.mintgarden.io/thumbnails/medium/${yourNft.id}.png`}
+            alt={yourNft.name}
             onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMG; }}
             style={{
               width: 60,
               height: 60,
               borderRadius: 'var(--radius-md)',
               objectFit: 'cover',
-              border: yourWinning ? '2px solid var(--color-success)' : opponentWinning ? '2px solid var(--color-error)' : '2px solid var(--color-border)',
+              border: '2px solid var(--color-primary)',
             }}
           />
-          <span style={{ fontSize: 13, color: yourWinning ? 'var(--color-success)' : opponentWinning ? 'var(--color-error)' : 'var(--color-text-secondary)' }}>
-            {battle.yourVotes}
-          </span>
+          <span className="text-xs text-secondary">You</span>
         </div>
 
         <span className="text-muted" style={{ fontSize: 12 }}>VS</span>
 
         <div className="flex flex-col items-center gap-1">
           <img
-            src={`https://assets.mintgarden.io/thumbnails/medium/${battle.opponentNftId}.png`}
-            alt={`Opponent Wojak #${battle.opponentEdition}`}
+            src={`https://assets.mintgarden.io/thumbnails/medium/${opponentNft.id}.png`}
+            alt={opponentNft.name}
             onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMG; }}
             style={{
               width: 60,
               height: 60,
               borderRadius: 'var(--radius-md)',
               objectFit: 'cover',
-              border: opponentWinning ? '2px solid var(--color-success)' : yourWinning ? '2px solid var(--color-error)' : '2px solid var(--color-border)',
+              border: '2px solid var(--color-border)',
             }}
           />
-          <span style={{ fontSize: 13, color: opponentWinning ? 'var(--color-success)' : yourWinning ? 'var(--color-error)' : 'var(--color-text-secondary)' }}>
-            {battle.opponentVotes}
-          </span>
+          <span className="text-xs text-muted">#{opponentNft.edition}</span>
         </div>
       </div>
+
+      <p className="text-xs text-secondary text-center">Scores hidden until battle ends</p>
 
       <Link to="/swipe/battles" className="btn btn-secondary w-full text-center" style={{ fontSize: 13 }}>
         View Battle

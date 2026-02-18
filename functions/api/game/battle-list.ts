@@ -57,38 +57,19 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       ? await context.env.DB.prepare(query).bind(limit, offset).all()
       : await context.env.DB.prepare(query).bind(status, limit, offset).all();
 
-    // For resolved battles, compute score deltas from snapshots
-    const resolvedBattles = (results.results || []).filter(
-      b => b.status === 'completed' || b.status === 'draw'
-    );
+    // For resolved battles, compute score deltas from frozen end scores
     const deltaMap = new Map<number, { deltaA: number; deltaB: number }>();
-
-    if (resolvedBattles.length > 0) {
-      const allNftIds = new Set<string>();
-      for (const b of resolvedBattles) {
-        allNftIds.add(b.nft_a_id as string);
-        allNftIds.add(b.nft_b_id as string);
-      }
-      const placeholders = [...allNftIds].map(() => '?').join(',');
-      const scores = await context.env.DB.prepare(
-        `SELECT nft_id, net_score FROM wojak_scores WHERE nft_id IN (${placeholders})`
-      ).bind(...allNftIds).all<{ nft_id: string; net_score: number }>();
-
-      const scoreMap = new Map<string, number>();
-      for (const s of scores.results || []) {
-        scoreMap.set(s.nft_id, s.net_score);
-      }
-
-      for (const b of resolvedBattles) {
-        const currentA = scoreMap.get(b.nft_a_id as string) ?? 0;
-        const currentB = scoreMap.get(b.nft_b_id as string) ?? 0;
-        const snapshotA = (b.nft_a_score_start as number) ?? 0;
-        const snapshotB = (b.nft_b_score_start as number) ?? 0;
-        deltaMap.set(b.id as number, {
-          deltaA: currentA - snapshotA,
-          deltaB: currentB - snapshotB,
-        });
-      }
+    for (const b of (results.results || [])) {
+      if (b.status !== 'completed' && b.status !== 'draw') continue;
+      const startA = (b.nft_a_score_start as number) ?? 0;
+      const startB = (b.nft_b_score_start as number) ?? 0;
+      const endA = b.nft_a_score_end as number | null;
+      const endB = b.nft_b_score_end as number | null;
+      // Use stored end scores when available; fall back to start (delta=0) for legacy rows
+      deltaMap.set(b.id as number, {
+        deltaA: endA != null ? endA - startA : 0,
+        deltaB: endB != null ? endB - startB : 0,
+      });
     }
 
     const battles = (results.results || []).map((b) => {
@@ -158,18 +139,33 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 function formatBattle(b: Record<string, unknown>, perspectiveNftId: string) {
   const isA = b.nft_a_id === perspectiveNftId;
   const won = b.winner_nft_id === perspectiveNftId;
+  const isResolved = b.status === 'completed' || b.status === 'draw';
+
+  // Compute deltas from frozen end scores
+  const startA = (b.nft_a_score_start as number) ?? 0;
+  const startB = (b.nft_b_score_start as number) ?? 0;
+  const endA = b.nft_a_score_end as number | null;
+  const endB = b.nft_b_score_end as number | null;
+  const deltaA = endA != null ? endA - startA : 0;
+  const deltaB = endB != null ? endB - startB : 0;
 
   return {
     id: b.id,
     status: b.status,
     result: b.status === 'completed' ? (won ? 'win' : 'loss') :
             b.status === 'draw' ? 'draw' : 'pending',
-    myNft: isA
-      ? { id: b.nft_a_id, edition: b.nft_a_edition, name: b.name_a }
-      : { id: b.nft_b_id, edition: b.nft_b_edition, name: b.name_b },
-    opponent: isA
-      ? { id: b.nft_b_id, edition: b.nft_b_edition, name: b.name_b }
-      : { id: b.nft_a_id, edition: b.nft_a_edition, name: b.name_a },
+    myNft: {
+      id: isA ? b.nft_a_id : b.nft_b_id,
+      edition: isA ? b.nft_a_edition : b.nft_b_edition,
+      name: isA ? b.name_a : b.name_b,
+      ...(isResolved ? { scoreDelta: isA ? deltaA : deltaB } : {}),
+    },
+    opponent: {
+      id: isA ? b.nft_b_id : b.nft_a_id,
+      edition: isA ? b.nft_b_edition : b.nft_a_edition,
+      name: isA ? b.name_b : b.name_a,
+      ...(isResolved ? { scoreDelta: isA ? deltaB : deltaA } : {}),
+    },
     startedAt: b.started_at,
     endsAt: b.ends_at,
     resolvedAt: b.resolved_at,

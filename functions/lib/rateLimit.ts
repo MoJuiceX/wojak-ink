@@ -177,9 +177,4 @@ export const GAME_RATE_LIMITS = {
     maxRequests: 10,
     keyPrefix: 'game-bq',
   },
-  battleVote: {
-    windowMs: 60_000,
-    maxRequests: 20,
-    keyPrefix: 'game-bvote',
-  },
 } as const;

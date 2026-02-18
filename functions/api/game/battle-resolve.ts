@@ -76,9 +76,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         const reason = totalWindowVotes < MIN_VOTES_DURING_BATTLE ? 'insufficient_votes' : 'tied_deltas';
 
         const drawResult = await context.env.DB.prepare(`
-          UPDATE battles SET status = 'draw', resolved_at = datetime('now')
+          UPDATE battles SET status = 'draw', resolved_at = datetime('now'),
+            nft_a_score_end = ?, nft_b_score_end = ?
           WHERE id = ? AND status = 'active'
-        `).bind(battleId).run();
+        `).bind(currentA?.net_score ?? 0, currentB?.net_score ?? 0, battleId).run();
 
         if (drawResult.meta.changes === 0) {
           console.warn(`[Battle Resolve] Battle ${battleId} already resolved, skipping`);
@@ -122,9 +123,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
       // Optimistic lock: only complete if still active
       const updateResult = await context.env.DB.prepare(`
-        UPDATE battles SET status = 'completed', winner_nft_id = ?, resolved_at = datetime('now')
+        UPDATE battles SET status = 'completed', winner_nft_id = ?, resolved_at = datetime('now'),
+          nft_a_score_end = ?, nft_b_score_end = ?
         WHERE id = ? AND status = 'active'
-      `).bind(winnerNftId, battleId).run();
+      `).bind(winnerNftId, currentA?.net_score ?? 0, currentB?.net_score ?? 0, battleId).run();
 
       if (updateResult.meta.changes === 0) {
         console.warn(`[Battle Resolve] Battle ${battleId} already resolved, skipping`);
