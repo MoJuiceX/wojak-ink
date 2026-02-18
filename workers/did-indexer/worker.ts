@@ -115,6 +115,26 @@ async function run(env: Env) {
   } catch (err) {
     console.error('[DID Indexer] Battle resolve error:', err);
   }
+
+  // Award vote XP to combat fighters (bridges swipe votes → combat XP)
+  try {
+    const voteXpHeaders: Record<string, string> = {};
+    if (env.ADMIN_SECRET) {
+      voteXpHeaders['Authorization'] = `Bearer ${env.ADMIN_SECRET}`;
+    }
+    const voteXpRes = await fetch('https://wojak.ink/api/combat/vote-xp', {
+      method: 'POST',
+      headers: voteXpHeaders,
+    });
+    if (voteXpRes.ok) {
+      const data = await voteXpRes.json() as { updated?: number; totalXpAwarded?: number };
+      console.log(`[DID Indexer] Vote XP: ${data.updated ?? 0} fighters updated, ${data.totalXpAwarded ?? 0} XP awarded`);
+    } else {
+      console.error(`[DID Indexer] Vote XP returned ${voteXpRes.status}`);
+    }
+  } catch (err) {
+    console.error('[DID Indexer] Vote XP error:', err);
+  }
 }
 
 async function syncDIDHoldings(env: Env, did: string): Promise<'changed' | 'unchanged' | 'skipped'> {
