@@ -139,6 +139,12 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
 
   // Fetch leaderboard from server API
   const fetchLeaderboard = useCallback(async (gameId: GameId, tf: TimeframeType) => {
+    // Combat leaderboard is rendered by CombatLeaderboard component — skip fetch
+    if (gameId === 'combat') {
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 

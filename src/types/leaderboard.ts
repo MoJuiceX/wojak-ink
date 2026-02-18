@@ -115,6 +115,7 @@ export const GAME_NAMES: Record<GameId, string> = {
 
 // Active games (not disabled) - shown prominently
 export const ACTIVE_GAME_IDS: GameId[] = [
+  'combat',
   'orange-stack',
   'memory-match',
   'flappy-orange',
@@ -122,7 +123,6 @@ export const ACTIVE_GAME_IDS: GameId[] = [
   'color-reaction',
   'block-puzzle',
   'merge-2048',
-  'combat',
 ];
 
 // Disabled games (coming soon) - greyed out
