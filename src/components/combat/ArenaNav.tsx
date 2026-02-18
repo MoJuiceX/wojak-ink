@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { Heart } from 'lucide-react';
 
 const NAV_ITEMS = [
   { to: '/arena', label: 'Battle', end: true },
@@ -42,6 +43,33 @@ export function ArenaNav() {
           {item.label}
         </NavLink>
       ))}
+      {/* Divider + Swipe cross-link */}
+      <div style={{
+        width: 1,
+        background: 'var(--color-border)',
+        margin: '8px 4px',
+        flexShrink: 0,
+      }} />
+      <NavLink
+        to="/swipe"
+        style={{
+          padding: '12px 16px',
+          fontSize: 13,
+          fontWeight: 500,
+          color: 'var(--color-text-muted)',
+          borderBottom: '2px solid transparent',
+          textDecoration: 'none',
+          whiteSpace: 'nowrap',
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 4,
+          transition: 'color 150ms',
+        }}
+      >
+        <Heart size={14} />
+        Swipe
+      </NavLink>
     </nav>
   );
 }
