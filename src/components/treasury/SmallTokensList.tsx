@@ -170,6 +170,7 @@ export function SmallTokensList({ tokens, maxDisplay = 5, isLoading = false }: S
       {/* Show more/less button */}
       {hasMore && (
         <button
+          type="button"
           className="w-full px-4 py-3 flex items-center justify-center gap-2 text-sm transition-colors text-accent"
           onClick={() => setIsExpanded(!isExpanded)}
         >

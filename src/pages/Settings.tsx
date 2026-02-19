@@ -106,7 +106,9 @@ export default function Settings() {
                   role="switch"
                   aria-checked={skipBoot}
                   aria-label="Toggle skip boot sequence"
+                  tabIndex={0}
                   onClick={() => updateAppSettings({ skipBootSequence: !skipBoot })}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); updateAppSettings({ skipBootSequence: !skipBoot }); } }}
                   className="cursor-pointer flex items-center"
                   style={{
                     position: 'relative',

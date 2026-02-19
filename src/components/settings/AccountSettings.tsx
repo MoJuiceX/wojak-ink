@@ -104,6 +104,8 @@ function EditableField({ label, value, icon, placeholder, onSave, validation }: 
             />
           </div>
           <button
+            type="button"
+            aria-label="Save"
             onClick={handleSave}
             disabled={isSaving}
             className="p-2 rounded-lg"
@@ -115,6 +117,8 @@ function EditableField({ label, value, icon, placeholder, onSave, validation }: 
             {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
           </button>
           <button
+            type="button"
+            aria-label="Cancel"
             onClick={handleCancel}
             className="p-2 rounded-lg text-secondary"
             style={{
@@ -126,6 +130,7 @@ function EditableField({ label, value, icon, placeholder, onSave, validation }: 
         </div>
       ) : (
         <button
+          type="button"
           onClick={() => setIsEditing(true)}
           className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors"
           style={{
@@ -241,8 +246,8 @@ export function AccountSettings() {
 
         <SignedIn>
           {isLoading ? (
-            <div className="p-6 flex items-center justify-center">
-              <Loader2 size={24} className="animate-spin text-accent" />
+            <div className="p-6 flex items-center justify-center" role="status" aria-label="Loading account">
+              <Loader2 size={24} className="animate-spin text-accent" aria-hidden="true" />
             </div>
           ) : (
             <div className="divide-y" style={{ borderColor: 'var(--color-border)' }}>
@@ -335,6 +340,7 @@ export function AccountSettings() {
                       <Check size={16} className="text-success" />
                     </div>
                     <button
+                      type="button"
                       onClick={() => walletConnect.disconnect()}
                       className="w-full px-3 py-2 rounded-lg text-sm text-error"
                       style={{
@@ -347,6 +353,7 @@ export function AccountSettings() {
                   </div>
                 ) : (
                   <button
+                    type="button"
                     onClick={handleConnectWallet}
                     className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm text-secondary"
                     style={{
@@ -362,6 +369,7 @@ export function AccountSettings() {
 
               {/* Messages */}
               <button
+                type="button"
                 onClick={() => setShowMessagesModal(true)}
                 className="w-full p-4 flex items-center gap-3 text-left transition-colors hover:bg-black/5"
               >
@@ -387,6 +395,7 @@ export function AccountSettings() {
               {/* Sign Out */}
               <div className="p-4">
                 <button
+                  type="button"
                   onClick={handleSignOut}
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-error"
                   style={{

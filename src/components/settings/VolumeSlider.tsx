@@ -74,7 +74,9 @@ export function VolumeSlider({
           role="switch"
           aria-checked={enabled}
           aria-label={`Toggle ${label}`}
+          tabIndex={0}
           onClick={() => onToggle(!enabled)}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggle(!enabled); } }}
           className="cursor-pointer"
           style={{
             position: 'relative',

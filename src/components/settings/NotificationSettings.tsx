@@ -98,6 +98,7 @@ export const NotificationSettings: React.FC = () => {
 
         {!isSubscribed ? (
           <button
+            type="button"
             onClick={handleEnableNotifications}
             disabled={isEnabling}
             className="btn btn-primary enable-button"
@@ -107,12 +108,14 @@ export const NotificationSettings: React.FC = () => {
         ) : (
           <div className="header-actions">
             <button
+              type="button"
               onClick={sendTestNotification}
               className="btn btn-ghost test-button"
             >
               Test
             </button>
             <button
+              type="button"
               onClick={handleDisableNotifications}
               disabled={isDisabling}
               className="btn btn-ghost disable-button"

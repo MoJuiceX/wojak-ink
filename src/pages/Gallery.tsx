@@ -374,6 +374,8 @@ function GalleryContent() {
             </div>
             <span className="badge badge-success">NEW</span>
             <button
+              type="button"
+              aria-label="Dismiss banner"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -470,6 +472,7 @@ function GalleryContent() {
                     {hasMore && (
                       <div className="flex justify-center py-2">
                         <button
+                          type="button"
                           onClick={handleLoadMore}
                           className="flex items-center gap-2 px-6 py-3 rounded-full transition-all hover:scale-105 text-primary"
                           style={{

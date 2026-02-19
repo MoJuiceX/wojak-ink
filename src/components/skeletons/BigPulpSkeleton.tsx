@@ -12,7 +12,7 @@ export const BigPulpSkeleton: React.FC = () => {
   const prefersReducedMotion = useReducedMotion();
 
   return (
-    <div className="bigpulp-skeleton">
+    <div className="bigpulp-skeleton" role="status" aria-label="Loading BigPulp analysis">
       {/* Header with avatar and title */}
       <div className="analysis-header">
         <div className="skeleton skeleton-shimmer skeleton-avatar" />

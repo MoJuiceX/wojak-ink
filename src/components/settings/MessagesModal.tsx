@@ -168,6 +168,7 @@ export function MessagesModal({ isOpen, onClose }: MessagesModalProps) {
                 )}
               </div>
               <button
+                type="button"
                 onClick={onClose}
                 className="p-1 rounded-full text-tertiary"
                 aria-label="Close messages"
@@ -179,8 +180,8 @@ export function MessagesModal({ isOpen, onClose }: MessagesModalProps) {
             {/* Content */}
             <div className="flex-1 overflow-y-auto">
               {isLoading ? (
-                <div className="p-8 flex items-center justify-center">
-                  <Loader2 size={24} className="animate-spin text-accent" />
+                <div className="p-8 flex items-center justify-center" role="status" aria-label="Loading messages">
+                  <Loader2 size={24} className="animate-spin text-accent" aria-hidden="true" />
                 </div>
               ) : messages.length === 0 ? (
                 <div className="p-8 text-center">
@@ -198,6 +199,7 @@ export function MessagesModal({ isOpen, onClose }: MessagesModalProps) {
                 /* Message Detail View */
                 <div className="p-4">
                   <button
+                    type="button"
                     onClick={() => setSelectedMessage(null)}
                     className="text-sm mb-4 text-accent"
                   >
@@ -235,6 +237,7 @@ export function MessagesModal({ isOpen, onClose }: MessagesModalProps) {
                   {messages.map((message) => (
                     <button
                       key={message.id}
+                      type="button"
                       onClick={() => handleMessageClick(message)}
                       className="w-full p-4 flex items-start gap-3 text-left transition-colors hover:bg-black/5"
                     >

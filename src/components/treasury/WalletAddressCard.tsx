@@ -76,6 +76,7 @@ export function WalletAddressCard({ address, explorerUrl }: WalletAddressCardPro
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             title="Copy address"
+            aria-label={copied ? 'Address copied' : 'Copy wallet address'}
           >
             {copied ? <Check size={14} /> : <Copy size={14} />}
           </motion.button>
@@ -91,6 +92,7 @@ export function WalletAddressCard({ address, explorerUrl }: WalletAddressCardPro
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             title="View on SpaceScan"
+            aria-label="View wallet on SpaceScan explorer"
           >
             <ExternalLink size={14} />
           </motion.button>

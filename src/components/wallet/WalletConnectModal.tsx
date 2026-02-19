@@ -52,6 +52,9 @@ export function WalletConnectModal({ isOpen, onClose, walletConnect }: WalletCon
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="wallet-connect-title"
             className="relative p-6 rounded-xl max-w-sm w-full mx-4"
             style={{
               background: 'var(--color-surface)',
@@ -61,6 +64,8 @@ export function WalletConnectModal({ isOpen, onClose, walletConnect }: WalletCon
           >
             {/* Close button */}
             <button
+              type="button"
+              aria-label="Close"
               onClick={onClose}
               className="absolute top-4 right-4 p-1 rounded-full transition-colors text-tertiary"
             >
@@ -69,6 +74,7 @@ export function WalletConnectModal({ isOpen, onClose, walletConnect }: WalletCon
 
             <div className="text-center">
               <h2
+                id="wallet-connect-title"
                 className="text-xl font-bold mb-2 text-primary"
               >
                 Connect Sage Wallet
@@ -81,7 +87,7 @@ export function WalletConnectModal({ isOpen, onClose, walletConnect }: WalletCon
 
               {walletConnect.isConnecting && !walletConnect.qrCodeUri && (
                 <div className="flex flex-col items-center py-8">
-                  <Loader2 className="animate-spin mb-4 text-accent" size={40} />
+                  <Loader2 className="animate-spin mb-4 text-accent" size={40} role="status" aria-label="Connecting to wallet" />
                   <p className="text-secondary">Initializing...</p>
                 </div>
               )}
@@ -99,6 +105,8 @@ export function WalletConnectModal({ isOpen, onClose, walletConnect }: WalletCon
                     />
                   </div>
                   <button
+                    type="button"
+                    aria-label={copied ? 'Link copied' : 'Copy connection link'}
                     onClick={handleCopyUri}
                     className="flex items-center gap-2 px-4 py-2 rounded-lg mb-3 transition-colors"
                     style={{

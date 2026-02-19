@@ -308,6 +308,7 @@ export default function Account() {
             variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } } }}
           >
             <button
+              type="button"
               className="action-button action-settings"
               onClick={() => navigate('/settings')}
             >
@@ -316,6 +317,7 @@ export default function Account() {
             </button>
 
             <button
+              type="button"
               className="action-button action-signout"
               onClick={handleSignOut}
             >
