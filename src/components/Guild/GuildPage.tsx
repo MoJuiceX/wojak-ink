@@ -80,7 +80,7 @@ export function GuildPage() {
               display: 'none',
             }}
           >
-            <span style={{ color: '#F97316', fontWeight: 600, fontSize: '0.9rem' }}>
+            <span style={{ color: 'var(--color-primary)', fontWeight: 600, fontSize: '0.9rem' }}>
               Coming Soon
             </span>
           </motion.div>

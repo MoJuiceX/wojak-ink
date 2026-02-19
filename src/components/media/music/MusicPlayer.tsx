@@ -155,7 +155,7 @@ export function MusicPlayer({ tracks }: MusicPlayerProps) {
             ease: 'easeInOut',
           }}
         >
-          <Music size={24} style={{ color: '#F97316' }} />
+          <Music size={24} style={{ color: 'var(--color-primary)' }} />
         </motion.div>
 
         {/* Track info and equalizer */}

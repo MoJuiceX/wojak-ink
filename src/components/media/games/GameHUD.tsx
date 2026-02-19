@@ -51,7 +51,7 @@ export const GameHUD: React.FC<GameHUDProps> = ({
       {/* Level */}
       {level !== undefined && (
         <div className="hud-stat hud-stat-level">
-          <span className="hud-stat-value" style={{ color: '#ffd700' }}>
+          <span className="hud-stat-value" style={{ color: 'var(--color-gold-bright)' }}>
             {level}
           </span>
           <span className="hud-stat-label">LVL</span>
@@ -70,7 +70,7 @@ export const GameHUD: React.FC<GameHUDProps> = ({
 
       {/* Score - Always shown */}
       <div className="hud-stat hud-stat-score">
-        <span className="hud-stat-value" style={{ color: '#00ff88' }}>
+        <span className="hud-stat-value" style={{ color: 'var(--color-green-bright)' }}>
           {score.toLocaleString()}
         </span>
         <span className="hud-stat-label">SCORE</span>
@@ -101,7 +101,7 @@ export const GameHUD: React.FC<GameHUDProps> = ({
       {/* Time */}
       {time !== undefined && (
         <div className="hud-stat hud-stat-time">
-          <span className="hud-stat-value" style={{ color: '#00bfff' }}>
+          <span className="hud-stat-value" style={{ color: 'var(--color-cyan-light)' }}>
             {formatTime(time)}
           </span>
           <span className="hud-stat-label">TIME</span>

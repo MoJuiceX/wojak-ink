@@ -46,7 +46,10 @@
   --color-purple: #a855f7;
   --color-pink: #ec4899;
   --color-gold: #fbbf24;
+  --color-gold-bright: #ffd700;
   --color-green: #22c55e;
+  --color-green-bright: #00ff88;
+  --color-cyan-light: #00bfff;
 
   /* Rarity colors */
   --color-legendary: #fbbf24;

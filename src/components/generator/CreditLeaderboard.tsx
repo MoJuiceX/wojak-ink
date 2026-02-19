@@ -226,7 +226,7 @@ export function CreditLeaderboard({ isOpen, onClose }: CreditLeaderboardProps) {
             {/* ── Top Supporters ── */}
             <div className="flex-1 min-h-0 flex flex-col">
               <div className="flex items-center gap-2 px-1 mb-2">
-                <Star size={14} style={{ color: '#fbbf24' }} />
+                <Star size={14} style={{ color: 'var(--color-gold)' }} />
                 <span className="text-xs font-medium text-secondary uppercase tracking-wider">Top Supporters</span>
                 <span className="text-xs text-muted">
                   — ranked by credits earned from Plot NFT purchases

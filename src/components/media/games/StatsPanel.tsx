@@ -166,7 +166,7 @@ export function StatsPanel() {
                     </p>
                     {game.rank && (
                       <div className="flex items-center gap-1 mt-0.5">
-                        <Trophy size={10} style={{ color: '#ffd700' }} />
+                        <Trophy size={10} style={{ color: 'var(--color-gold-bright)' }} />
                         <span
                           className="text-[10px] text-muted"
                         >
@@ -230,14 +230,14 @@ export function StatsPanel() {
                     className="absolute left-0 right-0 top-full mt-1 z-10 px-3 py-2 rounded-lg text-center"
                     style={{
                       background: 'var(--color-surface)',
-                      border: '1px solid #ffd700',
+                      border: '1px solid var(--color-gold-bright)',
                       boxShadow: '0 4px 12px rgba(255,215,0,0.2)',
                     }}
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.15 }}
                   >
-                    <span className="text-[10px] font-semibold" style={{ color: '#ffd700' }}>
+                    <span className="text-[10px] font-semibold" style={{ color: 'var(--color-gold-bright)' }}>
                       👑 You're #1!
                     </span>
                   </motion.div>
