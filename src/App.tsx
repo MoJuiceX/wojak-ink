@@ -315,7 +315,7 @@ function AppContent() {
                   />
                   <Route
                     path="leaderboard"
-                    element={<Navigate to="/fight-club/rankings" replace />}
+                    element={<Navigate to="/games" replace />}
                   />
                   {/* Fight Club - unified combat hub */}
                   <Route
