@@ -2,17 +2,22 @@
  * Combat Arena Page — /arena
  *
  * Main entry point for the combat system.
- * Shows queue panel, active battle, and recent history.
+ * Shows agent dashboard (if agent exists), queue panel, active battle, and recent history.
  */
 
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Bot, Plus, Swords } from 'lucide-react';
 import { PageSEO } from '@/components/seo';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { QueuePanel } from '@/components/combat/QueuePanel';
 import { BattleView } from '@/components/combat/BattleView';
 import { BattleHistory } from '@/components/combat/BattleHistory';
 import { ArenaNav } from '@/components/combat/ArenaNav';
+import { AgentDashboard } from '@/components/combat/AgentDashboard';
+import { AgentSetupModal } from '@/components/combat/AgentSetupModal';
+import { AgentProvider, useAgent } from '@/contexts/AgentContext';
 import { useSageWallet } from '@/sage-wallet/SageWalletProvider';
 
 interface FighterSummary {
@@ -25,7 +30,7 @@ interface FighterSummary {
   elo: number;
 }
 
-export default function CombatArena() {
+function CombatArenaInner() {
   const navigate = useNavigate();
   const { getDIDs, status } = useSageWallet();
   const isConnected = status === 'connected';
@@ -36,6 +41,8 @@ export default function CombatArena() {
   const [queueStatus, setQueueStatus] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeBattleId, setActiveBattleId] = useState<number | null>(null);
+  const [showAgentModal, setShowAgentModal] = useState(false);
+  const { hasAgent } = useAgent();
 
   // Resolve DID from wallet
   useEffect(() => {
@@ -50,7 +57,7 @@ export default function CombatArena() {
     });
   }, [isConnected, getDIDs]);
 
-  // Load fighters by DID (uses /api/combat/fighter?ownerDid=)
+  // Load fighters by DID
   useEffect(() => {
     if (!ownerDid) return;
     setIsLoadingFighters(true);
@@ -72,7 +79,7 @@ export default function CombatArena() {
       });
   }, [ownerDid]);
 
-  const handleQueue = useCallback(async (nftId: string, battleMode: 'manual' | 'auto') => {
+  const handleQueue = useCallback(async (nftId: string, battleMode: 'manual' | 'auto' | 'agent') => {
     if (!ownerDid) return;
     setIsLoading(true);
     try {
@@ -116,10 +123,41 @@ export default function CombatArena() {
       />
       <ArenaNav />
       <div className="flex flex-col items-center p-4 gap-6 max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold">Combat Arena</h1>
-        <p className="text-secondary text-center text-sm">
-          Send your Wojak into battle. Earn XP, climb the leaderboard, and prove your fighter is the strongest.
-        </p>
+        {/* Header */}
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex items-center gap-3">
+            <Swords size={28} style={{ color: 'var(--color-primary)' }} />
+            <h1 className="text-2xl font-bold">Combat Arena</h1>
+          </div>
+          <p className="text-secondary text-center text-sm">
+            Send your Wojak into battle. Earn XP, climb the ELO ladder, and prove your fighter is the strongest.
+          </p>
+        </div>
+
+        {/* Agent Dashboard (if agent exists) */}
+        {hasAgent && (
+          <AgentDashboard onSettings={() => setShowAgentModal(true)} />
+        )}
+
+        {/* Create Agent CTA (if no agent and connected) */}
+        {!hasAgent && isConnected && ownerDid && (
+          <motion.button
+            className="agent-action-row w-full"
+            onClick={() => setShowAgentModal(true)}
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+          >
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg"
+              style={{ background: 'rgba(255, 107, 0, 0.1)' }}>
+              <Bot size={16} style={{ color: 'var(--color-primary)' }} />
+            </div>
+            <div className="flex flex-col flex-1">
+              <span className="text-sm font-medium">Create AI Agent</span>
+              <span className="text-xs text-muted">Control your fighters with your own AI via API</span>
+            </div>
+            <Plus size={16} style={{ color: 'var(--color-text-muted)' }} />
+          </motion.button>
+        )}
 
         {/* Wallet connect prompt */}
         {!isConnected && (
@@ -142,6 +180,7 @@ export default function CombatArena() {
               onLeaveQueue={handleLeaveQueue}
               queueStatus={queueStatus}
               isLoading={isLoading}
+              onCreateAgent={() => setShowAgentModal(true)}
             />
           </div>
         )}
@@ -158,15 +197,20 @@ export default function CombatArena() {
 
         {/* Active battle link (when no inline view) */}
         {activeBattleId && !selectedFighter && (
-          <div className="card p-4 w-full text-center">
+          <motion.div
+            className="card p-4 w-full text-center"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+          >
             <p className="text-secondary text-sm mb-2">Active Battle</p>
             <Link
               to={`/arena/battle/${activeBattleId}`}
               className="btn btn-primary"
             >
+              <Swords size={16} />
               Go to Battle #{activeBattleId}
             </Link>
-          </div>
+          </motion.div>
         )}
 
         {/* Battle history */}
@@ -191,6 +235,32 @@ export default function CombatArena() {
           </div>
         )}
       </div>
+
+      {/* Agent Setup Modal */}
+      <AgentSetupModal
+        isOpen={showAgentModal}
+        onClose={() => setShowAgentModal(false)}
+      />
     </PageTransition>
+  );
+}
+
+// Wrap with AgentProvider — resolves ownerDid from wallet
+export default function CombatArena() {
+  const { getDIDs, status } = useSageWallet();
+  const isConnected = status === 'connected';
+  const [ownerDid, setOwnerDid] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isConnected) return;
+    getDIDs().then((dids) => {
+      if (dids.length > 0) setOwnerDid(dids[0]);
+    }).catch(() => {});
+  }, [isConnected, getDIDs]);
+
+  return (
+    <AgentProvider ownerDid={ownerDid}>
+      <CombatArenaInner />
+    </AgentProvider>
   );
 }
