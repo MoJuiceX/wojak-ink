@@ -44,8 +44,12 @@ export function resolveImageUri(raw: string | null): string {
 // Streak milestone credit awards (in x100 units)
 export const STREAK_MILESTONES: Record<number, number> = {
   3: 300,    // 3 credits
-  7: 500,    // 5 credits
-  14: 1000,  // 10 credits
-  30: 2000,  // 20 credits
+  7: 1000,   // 10 credits (updated for new economics)
+  14: 1500,  // 15 credits
+  30: 2500,  // 25 credits
   100: 5000, // 50 credits
 };
+
+// Participation credits: 1 credit per 20 votes
+export const VOTES_PER_CREDIT = 20;
+export const VOTE_CREDIT_AMOUNT = 100; // 1 display credit = 100 stored units

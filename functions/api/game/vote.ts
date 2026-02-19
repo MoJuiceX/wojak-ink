@@ -2,7 +2,7 @@
 // Body: { voterDid: string, nftId: string, editionNumber: number, voteType: 1 | -1 }
 // Cast a vote on a Your Wojak NFT. 1 = like, -1 = dislike.
 
-import { VOTES_PER_DAY, getTodayString, getYesterdayString, STREAK_MILESTONES, ONBOARDING_CREDITS } from './_shared';
+import { VOTES_PER_DAY, getTodayString, getYesterdayString, STREAK_MILESTONES, ONBOARDING_CREDITS, VOTES_PER_CREDIT, VOTE_CREDIT_AMOUNT } from './_shared';
 import { verifyGamePlayer, isAuthError } from './_auth';
 import { checkRateLimit, getRateLimitKey, GAME_RATE_LIMITS } from '../../lib/rateLimit';
 
@@ -142,6 +142,40 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         WHERE did_id = ?
       `).bind(voterDid),
     ];
+
+    // Track participation credits (1 credit per 20 votes)
+    const walletAddress = player.wallet_address as string;
+    const voteTracking = await context.env.DB.prepare(
+      'SELECT total_votes, credits_awarded_at FROM vote_credit_tracking WHERE wallet_address = ?'
+    ).bind(walletAddress).first<{ total_votes: number; credits_awarded_at: number }>();
+
+    const currentTotalVotes = (voteTracking?.total_votes ?? 0) + 1;
+    const lastAwardedAt = voteTracking?.credits_awarded_at ?? 0;
+    const votesSinceLastCredit = currentTotalVotes - lastAwardedAt;
+
+    // Upsert vote tracking
+    statements.push(
+      context.env.DB.prepare(`
+        INSERT INTO vote_credit_tracking (wallet_address, total_votes, last_vote_date)
+        VALUES (?, 1, ?)
+        ON CONFLICT(wallet_address) DO UPDATE SET
+          total_votes = total_votes + 1,
+          last_vote_date = ?
+      `).bind(walletAddress, today, today)
+    );
+
+    // Award participation credit if reached 20 votes since last award
+    if (votesSinceLastCredit >= VOTES_PER_CREDIT) {
+      statements.push(
+        context.env.DB.prepare(`
+          UPDATE vote_credit_tracking SET credits_awarded_at = ? WHERE wallet_address = ?
+        `).bind(currentTotalVotes, walletAddress),
+        context.env.DB.prepare(`
+          INSERT INTO credit_events (wallet_address, nft_id, event_id, price_xch, floor_at_time, credits_earned, whale_multiplier, source, event_type, event_timestamp)
+          VALUES (?, 'participation_vote', ?, 0, 0, ?, 100, 'participation', 'vote_reward', datetime('now'))
+        `).bind(walletAddress, `vote_credit_${walletAddress}_${currentTotalVotes}`, VOTE_CREDIT_AMOUNT)
+      );
+    }
 
     // First vote onboarding milestone + activity log + credits
     if (isFirstVote) {
