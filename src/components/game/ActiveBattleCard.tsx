@@ -63,7 +63,7 @@ export function ActiveBattleCard({ did }: ActiveBattleCardProps) {
       <div className="card-static p-4 flex flex-col items-center gap-2">
         <Swords size={24} className="text-muted" />
         <span className="text-muted" style={{ fontSize: 13 }}>No active battles</span>
-        <Link to="/swipe/battles" className="btn btn-primary" style={{ fontSize: 13 }}>
+        <Link to="/fight-club/battle" className="btn btn-primary" style={{ fontSize: 13 }}>
           Find a Battle
         </Link>
       </div>
@@ -92,7 +92,7 @@ export function ActiveBattleCard({ did }: ActiveBattleCardProps) {
 
       <div className="flex items-center justify-center gap-4">
         <div className="flex flex-col items-center gap-1">
-          <Link to={`/swipe/wojak/${yourNft.edition}`}>
+          <Link to={`/fight-club/rankings`}>
             <img
               src={yourNft.imageUri || `https://assets.mintgarden.io/thumbnails/medium/${yourNft.id}.png`}
               alt={yourNft.name}
@@ -112,7 +112,7 @@ export function ActiveBattleCard({ did }: ActiveBattleCardProps) {
         <span className="text-muted" style={{ fontSize: 12 }}>VS</span>
 
         <div className="flex flex-col items-center gap-1">
-          <Link to={`/swipe/wojak/${opponentNft.edition}`}>
+          <Link to={`/fight-club/rankings`}>
             <img
               src={opponentNft.imageUri || `https://assets.mintgarden.io/thumbnails/medium/${opponentNft.id}.png`}
               alt={opponentNft.name}
@@ -132,12 +132,12 @@ export function ActiveBattleCard({ did }: ActiveBattleCardProps) {
 
       <p className="text-xs text-secondary text-center">Scores hidden until battle ends</p>
 
-      <Link to="/swipe/battles" className="btn btn-secondary w-full text-center" style={{ fontSize: 13 }}>
+      <Link to="/fight-club/battle" className="btn btn-secondary w-full text-center" style={{ fontSize: 13 }}>
         View Battle
       </Link>
 
       {remaining > 0 && (
-        <Link to="/swipe/battles" className="text-accent text-center" style={{ fontSize: 12 }}>
+        <Link to="/fight-club/battle" className="text-accent text-center" style={{ fontSize: 12 }}>
           +{remaining} more active
         </Link>
       )}

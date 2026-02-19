@@ -32,7 +32,7 @@ export function LatestEventBanner({ did }: LatestEventBannerProps) {
   if (!current) return null;
 
   const Icon = EVENT_ICONS[current.eventType] || Sparkles;
-  const link = EVENT_LINKS[current.eventType] || '/swipe/dashboard';
+  const link = EVENT_LINKS[current.eventType] || '/fight-club/vote';
 
   return (
     <div
@@ -55,7 +55,7 @@ export function LatestEventBanner({ did }: LatestEventBannerProps) {
         {timeAgo(current.createdAt)}
       </span>
       <Link
-        to="/swipe/activity"
+        to="/fight-club/vote"
         className="text-accent"
         style={{ fontSize: 12, flexShrink: 0, textDecoration: 'none' }}
       >

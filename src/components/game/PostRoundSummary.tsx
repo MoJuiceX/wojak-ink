@@ -97,10 +97,10 @@ export function PostRoundSummary({
 
       {/* CTAs */}
       <div className="flex flex-col gap-2 w-full">
-        <Link to="/swipe/leaderboard" className="btn btn-primary text-center">
+        <Link to="/fight-club/rankings" className="btn btn-primary text-center">
           View Leaderboard
         </Link>
-        <Link to="/swipe/dashboard" className="btn btn-secondary text-center">
+        <Link to="/fight-club/vote" className="btn btn-secondary text-center">
           Go to Dashboard
         </Link>
       </div>

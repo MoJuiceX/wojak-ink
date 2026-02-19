@@ -57,7 +57,7 @@ function PlayerRow({ entry, isCurrent }: { entry: PlayerEntry; isCurrent: boolea
         {entry.rank}
       </span>
       {imageUrl && entry.topNft?.editionNumber ? (
-        <Link to={`/swipe/wojak/${entry.topNft.editionNumber}`} style={{ flexShrink: 0 }}>
+        <Link to={`/fight-club/rankings`} style={{ flexShrink: 0 }}>
           <img
             src={imageUrl}
             alt=""
@@ -103,7 +103,7 @@ function WojakRow({ entry, isOwned }: { entry: WojakEntry; isOwned: boolean }) {
 
   return (
     <Link
-      to={`/swipe/wojak/${entry.editionNumber}`}
+      to={`/fight-club/rankings`}
       className="flex items-center gap-3"
       style={{
         padding: '10px 14px',

@@ -63,24 +63,24 @@ describe('EVENT_ICONS', () => {
 // ============ EVENT_LINKS ============
 
 describe('EVENT_LINKS', () => {
-  it('battle_won links to /swipe/battles', () => {
-    expect(EVENT_LINKS.battle_won).toBe('/swipe/battles');
+  it('battle_won links to /fight-club/battle', () => {
+    expect(EVENT_LINKS.battle_won).toBe('/fight-club/battle');
   });
 
-  it('leaderboard_change links to /swipe/leaderboard', () => {
-    expect(EVENT_LINKS.leaderboard_change).toBe('/swipe/leaderboard');
+  it('leaderboard_change links to /fight-club/rankings', () => {
+    expect(EVENT_LINKS.leaderboard_change).toBe('/fight-club/rankings');
   });
 
   it('mint links to /generator', () => {
     expect(EVENT_LINKS.mint).toBe('/generator');
   });
 
-  it('burn links to /swipe/dashboard', () => {
-    expect(EVENT_LINKS.burn).toBe('/swipe/dashboard');
+  it('burn links to /fight-club/vote', () => {
+    expect(EVENT_LINKS.burn).toBe('/fight-club/vote');
   });
 
-  it('vote_milestone links to /swipe', () => {
-    expect(EVENT_LINKS.vote_milestone).toBe('/swipe');
+  it('vote_milestone links to /fight-club/vote', () => {
+    expect(EVENT_LINKS.vote_milestone).toBe('/fight-club/vote');
   });
 
   it('all link values are non-empty strings starting with /', () => {

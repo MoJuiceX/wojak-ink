@@ -50,7 +50,7 @@ function PodiumCard({ entry, mode, isFirst }: { entry: PodiumEntry; mode: 'playe
       style={{ padding, boxShadow: glow, flex: 1, minWidth: 0 }}
     >
       {entry.editionNumber ? (
-        <Link to={`/swipe/wojak/${entry.editionNumber}`} style={{ position: 'relative', display: 'block', cursor: 'pointer' }}>
+        <Link to={`/fight-club/rankings`} style={{ position: 'relative', display: 'block', cursor: 'pointer' }}>
           {imageUrl ? (
             <img
               src={imageUrl}
@@ -164,7 +164,7 @@ function PodiumCard({ entry, mode, isFirst }: { entry: PodiumEntry; mode: 'playe
       ) : (
         <>
           {entry.editionNumber ? (
-            <Link to={`/swipe/wojak/${entry.editionNumber}`} style={{ fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%', color: 'inherit', textDecoration: 'none' }}>
+            <Link to={`/fight-club/rankings`} style={{ fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%', color: 'inherit', textDecoration: 'none' }}>
               {entry.name || `Your Wojak #${entry.editionNumber}`}
             </Link>
           ) : (

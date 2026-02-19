@@ -173,7 +173,7 @@ function NftDetailModal({ nft, onClose, onBurned }: { nft: CollectionNft; onClos
         </div>
 
         <div className="flex gap-3">
-          <Link to="/swipe/battles" className="btn btn-primary flex-1 text-center" style={{ fontSize: 13 }}>
+          <Link to="/fight-club/battle" className="btn btn-primary flex-1 text-center" style={{ fontSize: 13 }}>
             Enter Battle
           </Link>
           {coinId ? (

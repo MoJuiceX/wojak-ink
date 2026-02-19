@@ -206,7 +206,7 @@ export function BattleView() {
               <p className="text-secondary text-center">
                 No active battles right now. Queue a Wojak above to start one!
               </p>
-              <Link to="/swipe/dashboard" className="btn btn-secondary text-sm" style={{ textDecoration: 'none' }}>
+              <Link to="/fight-club/vote" className="btn btn-secondary text-sm" style={{ textDecoration: 'none' }}>
                 Back to Dashboard
               </Link>
             </div>

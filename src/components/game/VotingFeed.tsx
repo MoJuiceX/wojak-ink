@@ -272,7 +272,7 @@ export function VotingFeed() {
           You've voted on every Wojak! Check back when more are minted.
         </p>
         <div className="flex gap-3">
-          <Link to="/swipe/leaderboard" className="btn btn-primary text-sm" style={{ padding: '8px 20px', textDecoration: 'none' }}>
+          <Link to="/fight-club/rankings" className="btn btn-primary text-sm" style={{ padding: '8px 20px', textDecoration: 'none' }}>
             View Leaderboard
           </Link>
           <Link to="/generator" className="btn btn-secondary text-sm" style={{ padding: '8px 20px', textDecoration: 'none' }}>

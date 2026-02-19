@@ -89,7 +89,7 @@ export function BattleCard({
             className="battle-nft-image"
             style={aWon ? { borderColor: 'var(--color-success)', boxShadow: '0 0 12px var(--color-success-30)' } : undefined}
           >
-            <Link to={`/swipe/wojak/${nftA.edition}`}>
+            <Link to={`/fight-club/rankings`}>
               <img
                 src={nftA.imageUri || `https://assets.mintgarden.io/thumbnails/medium/${nftA.id}.png`}
                 alt={nftA.name}
@@ -99,7 +99,7 @@ export function BattleCard({
               />
             </Link>
           </div>
-          <Link to={`/swipe/wojak/${nftA.edition}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+          <Link to={`/fight-club/rankings`} style={{ textDecoration: 'none', color: 'inherit' }}>
             <p className="text-sm font-semibold text-center">{nftA.name}</p>
           </Link>
           <span className="text-xs text-secondary">#{nftA.edition}</span>
@@ -125,7 +125,7 @@ export function BattleCard({
             className="battle-nft-image"
             style={bWon ? { borderColor: 'var(--color-success)', boxShadow: '0 0 12px var(--color-success-30)' } : undefined}
           >
-            <Link to={`/swipe/wojak/${nftB.edition}`}>
+            <Link to={`/fight-club/rankings`}>
               <img
                 src={nftB.imageUri || `https://assets.mintgarden.io/thumbnails/medium/${nftB.id}.png`}
                 alt={nftB.name}
@@ -135,7 +135,7 @@ export function BattleCard({
               />
             </Link>
           </div>
-          <Link to={`/swipe/wojak/${nftB.edition}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+          <Link to={`/fight-club/rankings`} style={{ textDecoration: 'none', color: 'inherit' }}>
             <p className="text-sm font-semibold text-center">{nftB.name}</p>
           </Link>
           <span className="text-xs text-secondary">#{nftB.edition}</span>

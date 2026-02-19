@@ -23,15 +23,15 @@ export const EVENT_ICONS: Record<string, typeof Swords> = {
 };
 
 export const EVENT_LINKS: Record<string, string> = {
-  battle_won: '/swipe/battles',
-  battle_lost: '/swipe/battles',
-  battle_draw: '/swipe/battles',
-  battle_started: '/swipe/battles',
-  leaderboard_change: '/swipe/leaderboard',
-  vote_milestone: '/swipe',
-  burn: '/swipe/dashboard',
+  battle_won: '/fight-club/battle',
+  battle_lost: '/fight-club/battle',
+  battle_draw: '/fight-club/battle',
+  battle_started: '/fight-club/battle',
+  leaderboard_change: '/fight-club/rankings',
+  vote_milestone: '/fight-club/vote',
+  burn: '/fight-club/vote',
   mint: '/generator',
-  streak_milestone: '/swipe/dashboard',
+  streak_milestone: '/fight-club/vote',
 };
 
 export function formatEvent(event: ActivityEvent): string {

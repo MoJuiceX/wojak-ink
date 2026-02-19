@@ -8,7 +8,7 @@ export function MobileStatsBar() {
   const { player } = useGame();
   const navigate = useNavigate();
 
-  const handleTap = () => navigate('/swipe/dashboard');
+  const handleTap = () => navigate('/fight-club/vote');
 
   if (!player) return null;
 

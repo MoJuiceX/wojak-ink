@@ -87,7 +87,7 @@ export function VotingStatsPanel() {
       {/* Dashboard link */}
       <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 8 }}>
         <Link
-          to="/swipe/dashboard"
+          to="/fight-club/vote"
           className="text-muted"
           style={{ fontSize: 12, transition: 'color 150ms' }}
           onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-primary)')}

@@ -207,7 +207,7 @@ function CombatArenaInner() {
           >
             <p className="text-secondary text-sm mb-2">Active Battle</p>
             <Link
-              to={`/arena/battle/${activeBattleId}`}
+              to={`/fight-club/battle/${activeBattleId}`}
               className="btn btn-primary"
             >
               <Swords size={16} />
@@ -223,7 +223,7 @@ function CombatArenaInner() {
             <BattleHistory
               nftId={selectedFighter}
               limit={10}
-              onSelectBattle={(id) => navigate(`/arena/battle/${id}`)}
+              onSelectBattle={(id) => navigate(`/fight-club/battle/${id}`)}
             />
           </div>
         )}
