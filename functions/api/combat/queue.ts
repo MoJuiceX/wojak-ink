@@ -4,6 +4,7 @@
 // GET /api/combat/queue — check status
 
 import { jsonResponse, errorResponse, isValidDid } from './_shared';
+import { getSubscriptionStatus } from '../subscription/status';
 
 interface Env {
   DB: D1Database;
@@ -36,6 +37,24 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     if (!fighter) return errorResponse('Fighter not found', 404);
     if (fighter.owner_did !== ownerDid) return errorResponse('Not the owner of this fighter', 403);
+
+    // Check daily battle limit
+    const subscription = await getSubscriptionStatus(db, ownerDid);
+    if (subscription.battlesRemaining <= 0) {
+      const upgradeMsg = subscription.tier === 'free'
+        ? ' Upgrade to Premium for 4 battles/day.'
+        : '';
+      return Response.json(
+        {
+          error: `Daily battle limit reached.${upgradeMsg}`,
+          code: 'BATTLE_LIMIT_REACHED',
+          tier: subscription.tier,
+          battlesPerDay: subscription.battlesPerDay,
+          battlesToday: subscription.battlesToday,
+        },
+        { status: 429 }
+      );
+    }
 
     // Check not already in queue
     const inQueue = await db.prepare(
