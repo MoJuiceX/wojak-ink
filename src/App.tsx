@@ -55,6 +55,7 @@ const Profile = lazy(() => import('./pages/Profile'));
 const Guild = lazy(() => import('./pages/Guild'));
 const Shop = lazy(() => import('./pages/Shop'));
 const FightClub = lazy(() => import('./pages/FightClub'));
+const HowItWorks = lazy(() => import('./pages/HowItWorks'));
 const Admin = lazy(() => import('./pages/Admin'));
 const Drawer = lazy(() => import('./pages/Drawer'));
 const RuleBuilder = lazy(() => import('./pages/RuleBuilder'));
@@ -355,6 +356,14 @@ function AppContent() {
                     element={
                       <Suspense fallback={<PageSkeleton type="media" />}>
                         <FightClub />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="fight-club/guide"
+                    element={
+                      <Suspense fallback={<PageSkeleton type="settings" />}>
+                        <HowItWorks />
                       </Suspense>
                     }
                   />

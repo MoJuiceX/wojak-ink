@@ -11,7 +11,7 @@ import { MINTGARDEN_COLLECTION_URL } from '@/services/constants';
 import { lazy, Suspense, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Swords, Trophy, Heart, ExternalLink, Wallet, Palette, RefreshCw } from 'lucide-react';
+import { Swords, Trophy, Heart, ExternalLink, Wallet, Palette, RefreshCw, Info } from 'lucide-react';
 import { useToast } from '@/contexts/ToastContext';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { PageSkeleton } from '@/components/layout/PageSkeleton';
@@ -410,6 +410,14 @@ export default function FightClub() {
               </button>
             ))}
           </div>
+          <Link
+            to="/fight-club/guide"
+            className="btn btn-ghost text-xs flex items-center gap-1"
+            style={{ padding: '6px 10px', minWidth: 'auto' }}
+          >
+            <Info size={14} />
+            Guide
+          </Link>
           {playerDid && <RefreshButton did={playerDid} />}
         </div>
 
