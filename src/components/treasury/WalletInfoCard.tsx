@@ -174,7 +174,7 @@ export function WalletInfoCard({ wallet, onConnect, isLoading = false }: WalletI
           <motion.button
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors"
             style={{
-              background: 'rgba(255, 255, 255, 0.06)',
+              background: 'var(--color-white-6)',
               color: copied ? 'var(--color-success)' : 'var(--color-text-secondary)',
             }}
             onClick={handleCopy}
@@ -213,7 +213,7 @@ export function WalletInfoCard({ wallet, onConnect, isLoading = false }: WalletI
           <motion.button
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors text-secondary"
             style={{
-              background: 'rgba(255, 255, 255, 0.06)',
+              background: 'var(--color-white-6)',
             }}
             onClick={handleExplorerClick}
             whileHover={{ background: 'var(--color-surface)' }}

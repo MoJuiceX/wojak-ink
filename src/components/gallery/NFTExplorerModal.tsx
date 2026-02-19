@@ -223,7 +223,7 @@ export function NFTExplorerModal({ isOpen, onClose }: NFTExplorerModalProps) {
             alt={currentNft.name}
             className="max-w-[90vw] max-h-[80vh] object-contain rounded-2xl"
             style={{
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+              boxShadow: '0 25px 50px -12px var(--color-black-50)',
             }}
             onClick={(e) => e.stopPropagation()}
             initial={{ scale: 0.9, opacity: 0 }}

@@ -99,7 +99,7 @@ export function MyWojaksModal({
               style={{
                 background: 'var(--color-surface, rgba(20, 15, 10, 0.95))',
                 border: '1px solid var(--color-border, rgba(255, 255, 255, 0.1))',
-                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+                boxShadow: '0 20px 60px var(--color-black-50)',
               }}
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
@@ -184,7 +184,7 @@ export function MyWojaksModal({
                           {/* Hover overlay */}
                           <div
                             className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                            style={{ background: 'rgba(0, 0, 0, 0.6)' }}
+                            style={{ background: 'var(--color-black-60)' }}
                           >
                             <span className="text-white font-bold text-sm">
                               #{nftId}
@@ -195,7 +195,7 @@ export function MyWojaksModal({
                           <div
                             className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded text-xs font-mono font-bold"
                             style={{
-                              background: 'rgba(0, 0, 0, 0.8)',
+                              background: 'var(--color-black-80)',
                               color: '#fff',
                             }}
                           >

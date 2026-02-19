@@ -192,7 +192,7 @@ export function StatsPanel() {
                     style={{
                       background: 'var(--color-surface)',
                       border: '1px solid var(--color-border)',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                      boxShadow: '0 4px 12px var(--color-black-30)',
                     }}
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}

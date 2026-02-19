@@ -121,7 +121,7 @@ export function ExportPanel({ className = '' }: ExportPanelProps) {
             style={{
               background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
-              boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
+              boxShadow: '0 24px 80px var(--color-black-60)',
             }}
             variants={prefersReducedMotion ? undefined : modalContentVariants}
             initial="hidden"
@@ -134,7 +134,7 @@ export function ExportPanel({ className = '' }: ExportPanelProps) {
               style={{
                 aspectRatio: '1 / 1',
                 background: !includeBackground
-                  ? 'repeating-conic-gradient(rgba(255,255,255,0.06) 0% 25%, rgba(255,255,255,0.02) 0% 50%) 50% / 16px 16px'
+                  ? 'repeating-conic-gradient(var(--color-white-6) 0% 25%, rgba(255,255,255,0.02) 0% 50%) 50% / 16px 16px'
                   : 'transparent',
               }}
             >
@@ -152,7 +152,7 @@ export function ExportPanel({ className = '' }: ExportPanelProps) {
                 style={{
                   width: '32px',
                   height: '32px',
-                  background: 'rgba(0,0,0,0.5)',
+                  background: 'var(--color-black-50)',
                   backdropFilter: 'blur(8px)',
                   WebkitBackdropFilter: 'blur(8px)',
                   color: 'rgba(255,255,255,0.8)',
@@ -174,7 +174,7 @@ export function ExportPanel({ className = '' }: ExportPanelProps) {
                 placeholder="Filename"
                 className="w-full px-4 py-2.5 rounded-xl text-sm font-medium text-primary"
                 style={{
-                  background: 'rgba(255,255,255,0.05)',
+                  background: 'var(--color-white-5)',
                   border: '1px solid var(--color-border)',
                   outline: 'none',
                 }}

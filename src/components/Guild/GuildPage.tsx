@@ -58,7 +58,7 @@ export function GuildPage() {
             style={{
               position: 'absolute',
               inset: 0,
-              background: 'radial-gradient(ellipse at center top, rgba(249, 115, 22, 0.15) 0%, transparent 60%)',
+              background: 'radial-gradient(ellipse at center top, var(--color-primary-15) 0%, transparent 60%)',
               pointerEvents: 'none',
             }}
           />
@@ -73,8 +73,8 @@ export function GuildPage() {
               position: 'absolute',
               top: 20,
               right: 20,
-              background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(249, 115, 22, 0.1))',
-              border: '1px solid rgba(249, 115, 22, 0.4)',
+              background: 'linear-gradient(135deg, var(--color-primary-20), var(--color-primary-10))',
+              border: '1px solid var(--color-primary-40)',
               borderRadius: 12,
               padding: '12px 20px',
               display: 'none',
@@ -149,8 +149,8 @@ export function GuildPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
             style={{
-              background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(249, 115, 22, 0.05))',
-              border: '1px solid rgba(249, 115, 22, 0.3)',
+              background: 'linear-gradient(135deg, var(--color-primary-15), rgba(249, 115, 22, 0.05))',
+              border: '1px solid var(--color-primary-30)',
               borderRadius: 16,
               padding: '24px 32px',
               textAlign: 'center',
