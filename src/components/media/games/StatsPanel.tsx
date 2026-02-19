@@ -199,7 +199,7 @@ export function StatsPanel() {
                     transition={{ duration: 0.15 }}
                   >
                     <div className="flex items-center gap-2 mb-1">
-                      <TrendingUp size={12} style={{ color: '#22c55e' }} />
+                      <TrendingUp size={12} style={{ color: 'var(--color-success)' }} />
                       <span
                         className="text-[10px] font-medium text-primary"
                       >
@@ -217,7 +217,7 @@ export function StatsPanel() {
                     </div>
                     <div
                       className="text-[10px] mt-1"
-                      style={{ color: '#22c55e' }}
+                      style={{ color: 'var(--color-success)' }}
                     >
                       Need <span className="font-bold">+{game.nextRank.pointsNeeded.toLocaleString()}</span> points to beat
                     </div>

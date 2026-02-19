@@ -77,7 +77,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 border: '1px solid var(--color-error-30)',
               }}
             >
-              <AlertTriangle size={40} style={{ color: '#ef4444' }} />
+              <AlertTriangle size={40} style={{ color: 'var(--color-error)' }} />
             </div>
 
             {/* Error Title */}
@@ -111,7 +111,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 </summary>
                 <pre
                   className="text-xs overflow-auto max-h-40"
-                  style={{ color: '#ef4444' }}
+                  style={{ color: 'var(--color-error)' }}
                 >
                   {this.state.error?.stack}
                 </pre>

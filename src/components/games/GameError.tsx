@@ -57,7 +57,7 @@ export function GameError({ error, gameName, onRetry }: GameErrorProps) {
           animate={{ rotate: [0, -5, 5, 0] }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <AlertCircle size={48} style={{ color: '#ef4444' }} />
+          <AlertCircle size={48} style={{ color: 'var(--color-error)' }} />
         </motion.div>
 
         {/* Error Title */}
@@ -125,7 +125,7 @@ export function GameError({ error, gameName, onRetry }: GameErrorProps) {
             </summary>
             <pre
               className="text-xs overflow-auto max-h-40"
-              style={{ color: '#ef4444' }}
+              style={{ color: 'var(--color-error)' }}
             >
               {error.stack}
             </pre>

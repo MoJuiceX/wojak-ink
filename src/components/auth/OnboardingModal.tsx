@@ -283,14 +283,14 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
                       className="px-3 py-2 rounded-lg flex items-center gap-2"
                       style={{
                         background: 'var(--color-bg)',
-                        border: '1px solid #22c55e',
+                        border: '1px solid var(--color-success)',
                       }}
                     >
-                      <Wallet size={18} style={{ color: '#22c55e' }} />
+                      <Wallet size={18} style={{ color: 'var(--color-success)' }} />
                       <span className="flex-1 text-sm text-primary">
                         {walletAddress.slice(0, 10)}...{walletAddress.slice(-6)}
                       </span>
-                      <span style={{ color: '#22c55e' }}>✓</span>
+                      <span style={{ color: 'var(--color-success)' }}>✓</span>
                     </div>
                     {isLoadingNfts ? (
                       <p className="text-sm flex items-center gap-2 text-secondary">
@@ -298,7 +298,7 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
                         Checking for Wojak Farmer NFTs...
                       </p>
                     ) : nftCount !== null && nftCount > 0 ? (
-                      <p className="text-sm" style={{ color: '#22c55e' }}>
+                      <p className="text-sm" style={{ color: 'var(--color-success)' }}>
                         Found {nftCount} Wojak Farmer NFT{nftCount !== 1 ? 's' : ''}
                       </p>
                     ) : (
