@@ -5,7 +5,7 @@
  * Shows icon, optional label, and badge indicator.
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { LucideIcon } from 'lucide-react';
 import { usePrefersReducedMotion } from '@/hooks/useMediaQuery';
@@ -28,7 +28,7 @@ interface NavItemProps {
   featured?: boolean; // Special styling for featured items (e.g., BigPulp)
 }
 
-export function NavItem({
+export const NavItem = memo(function NavItem({
   icon: Icon,
   label,
   shortLabel,
@@ -365,6 +365,6 @@ export function NavItem({
       </AnimatePresence>
     </motion.button>
   );
-}
+});
 
 export default NavItem;

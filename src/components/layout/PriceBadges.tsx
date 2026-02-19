@@ -5,7 +5,7 @@
  * Features simulated price ticker that randomly adjusts cents between API calls.
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { motion } from 'framer-motion';
 import { useFloorPrice } from '@/hooks/data/useMarket';
 import { useXchPrice } from '@/hooks/data/useTreasuryData';
@@ -38,7 +38,7 @@ interface PriceFlapCharProps {
   muted?: boolean;
 }
 
-function PriceFlapChar({ char, index, muted = false }: PriceFlapCharProps) {
+const PriceFlapChar = memo(function PriceFlapChar({ char, index, muted = false }: PriceFlapCharProps) {
   const [displayChar, setDisplayChar] = useState(char);
   const [isFlipping, setIsFlipping] = useState(false);
   const [foldChar, setFoldChar] = useState(char);
@@ -86,7 +86,7 @@ function PriceFlapChar({ char, index, muted = false }: PriceFlapCharProps) {
       <div className="price-flap-fold-top" data-char={foldChar} />
     </div>
   );
-}
+});
 
 // Split-Flap Price Display
 interface PriceFlapDisplayProps {

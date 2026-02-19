@@ -6,7 +6,7 @@
  * Features realistic flip animation with top/bottom separation.
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import '../layout/PriceSplitFlap.css';
 
 // Animation timing
@@ -20,7 +20,7 @@ interface FlapCharProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-function FlapChar({ char, index, muted = false, size = 'md' }: FlapCharProps) {
+const FlapChar = memo(function FlapChar({ char, index, muted = false, size = 'md' }: FlapCharProps) {
   const [displayChar, setDisplayChar] = useState(char);
   const [isFlipping, setIsFlipping] = useState(false);
   const [foldChar, setFoldChar] = useState(char);
@@ -70,7 +70,7 @@ function FlapChar({ char, index, muted = false, size = 'md' }: FlapCharProps) {
       <div className="price-flap-fold-top" data-char={foldChar} />
     </div>
   );
-}
+});
 
 // Split-Flap Display Component
 interface SplitFlapDisplayProps {
