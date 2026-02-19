@@ -13,6 +13,7 @@ import {
 } from './_shared';
 import { MINT_ERROR_MESSAGES, type MintErrorCode } from './errors';
 import { checkRateLimit, getRateLimitKey, MINT_RATE_LIMITS } from '../../lib/rateLimit';
+import { getMoveById } from '../../../src/lib/combat/data/moves';
 
 interface Env {
   DB: D1Database;
@@ -150,6 +151,49 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
     const launcherId = job.mintgarden_launcher_id;
 
+    // Fetch combat identity for completed mints
+    let combat: {
+      type: string;
+      nature: string;
+      ability: string;
+      moves: { id: string; name: string; power: number; accuracy: number; category: string; description: string }[];
+    } | undefined;
+
+    if (job.step === 'completed' && job.mint_number) {
+      const fighterRow = await env.DB.prepare(
+        `SELECT combat_type, nature, ability, move_1, move_2, move_3, move_4
+         FROM combat_fighters WHERE edition_number = ?`
+      ).bind(job.mint_number).first<{
+        combat_type: string;
+        nature: string;
+        ability: string;
+        move_1: string;
+        move_2: string;
+        move_3: string;
+        move_4: string;
+      }>();
+
+      if (fighterRow) {
+        const moveIds = [fighterRow.move_1, fighterRow.move_2, fighterRow.move_3, fighterRow.move_4];
+        combat = {
+          type: fighterRow.combat_type,
+          nature: fighterRow.nature,
+          ability: fighterRow.ability,
+          moves: moveIds.map(id => {
+            const move = getMoveById(id);
+            return {
+              id,
+              name: move?.name || id,
+              power: move?.power || 0,
+              accuracy: move?.accuracy || 0,
+              category: move?.category || 'physical',
+              description: move?.description || '',
+            };
+          }),
+        };
+      }
+    }
+
     return jsonResponse({
       jobId: job.id,
       step: job.step,
@@ -165,6 +209,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       mintgardenUrl: launcherId ? `https://mintgarden.io/nfts/${launcherId}` : undefined,
       creditsSpent: job.credit_cost ? job.credit_cost / 100 : undefined,
       creditsRemaining,
+      combat,
       error: job.step === 'failed' || job.step === 'refunded'
         ? (job.error_code ? (MINT_ERROR_MESSAGES[job.error_code as MintErrorCode] || job.error_message) : job.error_message)
         : undefined,
