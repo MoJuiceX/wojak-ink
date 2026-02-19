@@ -36,13 +36,13 @@
 }
 
 .game-btn-secondary {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-white-10);
   color: var(--color-text);
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--color-white-20);
 }
 .game-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: var(--color-white-15);
+  border-color: var(--color-white-30);
 }
 
 .game-btn-ghost {
@@ -51,12 +51,12 @@
   border-color: transparent;
 }
 .game-btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-white-5);
   color: var(--color-text);
 }
 
 .game-btn-danger {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background: linear-gradient(135deg, var(--color-error), #dc2626);
   color: white;
   border-color: #f87171;
 }

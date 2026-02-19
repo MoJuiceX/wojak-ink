@@ -20,7 +20,7 @@
 /* ===== EMOJI AVATAR - Standard styling ===== */
 .avatar-emoji {
   border: 2px solid var(--color-primary, #F97316);
-  background: var(--color-surface, rgba(255, 255, 255, 0.1));
+  background: var(--color-surface, var(--color-white-10));
   overflow: hidden;
 }
 
@@ -31,16 +31,16 @@
 
 /* Legacy bordered style */
 .avatar-bordered {
-  border: 2px solid rgba(255, 140, 50, 0.5);
-  box-shadow: 0 2px 8px rgba(255, 140, 50, 0.2);
+  border: 2px solid var(--color-primary-50);
+  box-shadow: 0 2px 8px var(--color-primary-20);
 }
 
 /* ===== NFT AVATAR - Premium gold styling ===== */
 .avatar-nft {
-  border: 2px solid #FFD700;
+  border: 2px solid var(--color-gold-bright);
   box-shadow:
-    0 0 12px rgba(255, 215, 0, 0.4),
-    0 0 24px rgba(255, 215, 0, 0.2);
+    0 0 12px var(--color-gold-40),
+    0 0 24px var(--color-gold-20);
   overflow: hidden;
 }
 
