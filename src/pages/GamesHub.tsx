@@ -9,7 +9,6 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useClerk, useAuth } from '@clerk/clerk-react';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { useLayout } from '@/hooks/useLayout';
@@ -31,8 +30,6 @@ import { useFlickVoting } from '@/hooks/useFlickVoting';
 import { SoundManager } from '@/systems/audio';
 import '@/styles/voting.css';
 import { PageSEO } from '@/components/seo';
-import { WojakSwipeCard } from '@/components/game/WojakSwipeCard';
-
 const CLERK_ENABLED = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 export default function GamesHub() {
@@ -332,20 +329,6 @@ export default function GamesHub() {
   // === RENDER ===
   const gamesGridWithVoting = (
     <>
-      {/* Combat Arena featured link */}
-      <Link
-        to="/arena"
-        className="card p-4 flex items-center gap-4 mb-4"
-      >
-        <div className="flex-1">
-          <h3 className="font-semibold">Combat Arena</h3>
-          <p className="text-xs text-secondary mt-1">
-            Turn-based NFT battles. 18 types, abilities, ELO ranking.
-          </p>
-        </div>
-        <span className="btn btn-primary text-sm">Enter</span>
-      </Link>
-      <WojakSwipeCard />
       <GamesGrid
         games={playableGames}
         onGameSelect={handleGameSelect}
