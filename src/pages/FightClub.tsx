@@ -7,9 +7,10 @@
  */
 
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { lazy, Suspense } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Swords, Trophy, Heart, ExternalLink, Wallet, Palette } from 'lucide-react';
+import { lazy, Suspense, useState, useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Swords, Trophy, Heart, ExternalLink, Wallet, Palette, RefreshCw } from 'lucide-react';
+import { useToast } from '@/contexts/ToastContext';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { PageSkeleton } from '@/components/layout/PageSkeleton';
 import { useLayout } from '@/hooks/useLayout';
@@ -63,6 +64,77 @@ function useFloorPrice() {
     },
     staleTime: 300000, // 5 minutes
   });
+}
+
+// Get player's DID from wallet address
+function usePlayerDid(walletAddress: string | null) {
+  return useQuery({
+    queryKey: ['player-did', walletAddress],
+    queryFn: async () => {
+      if (!walletAddress) return null;
+      const res = await fetch(`/api/game/player?wallet=${encodeURIComponent(walletAddress)}`);
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.player?.did as string | null;
+    },
+    enabled: !!walletAddress,
+    staleTime: 300000,
+  });
+}
+
+// Refresh DID holdings button
+function RefreshButton({ did }: { did: string }) {
+  const [refreshing, setRefreshing] = useState(false);
+  const toast = useToast();
+  const queryClient = useQueryClient();
+
+  const handleRefresh = useCallback(async () => {
+    if (refreshing) return;
+    setRefreshing(true);
+
+    try {
+      const res = await fetch('/api/profile/refresh-did', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ did }),
+      });
+
+      const data = await res.json();
+
+      if (res.status === 429) {
+        toast.error(data.error || 'Please wait between refreshes');
+      } else if (!res.ok) {
+        toast.error(data.error || 'Refresh failed');
+      } else {
+        toast.success(`Synced! Found ${data.nftsFound} NFTs`);
+        // Invalidate relevant queries
+        queryClient.invalidateQueries({ queryKey: ['fight-club-gate'] });
+        queryClient.invalidateQueries({ queryKey: ['fighters'] });
+        queryClient.invalidateQueries({ queryKey: ['burn-eligible'] });
+      }
+    } catch {
+      toast.error('Refresh failed');
+    } finally {
+      setRefreshing(false);
+    }
+  }, [did, refreshing, toast, queryClient]);
+
+  return (
+    <button
+      type="button"
+      className="btn btn-ghost"
+      onClick={handleRefresh}
+      disabled={refreshing}
+      title="Sync NFT holdings"
+      style={{ padding: '6px 10px', minWidth: 'auto' }}
+    >
+      <RefreshCw
+        size={16}
+        className={refreshing ? 'animate-spin' : ''}
+        style={{ opacity: refreshing ? 0.5 : 1 }}
+      />
+    </button>
+  );
 }
 
 // Prompt shown when user hasn't connected wallet
@@ -248,8 +320,9 @@ export default function FightClub() {
   const location = useLocation();
   const navigate = useNavigate();
   const activeTab = getActiveTab(location.pathname);
-  const { isSignedIn } = useUserProfile();
+  const { isSignedIn, profile } = useUserProfile();
   const { data: accessData, isLoading: accessLoading } = useFightClubAccess();
+  const { data: playerDid } = usePlayerDid(profile?.walletAddress ?? null);
 
   const handleTabClick = (tab: Tab) => {
     navigate(tab.path);
@@ -287,17 +360,20 @@ export default function FightClub() {
         }}
       >
         {/* Tab Bar */}
-        <div className="fight-club-tabs">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              className={`fight-club-tab ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => handleTabClick(tab)}
-            >
-              {tab.label}
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          <div className="fight-club-tabs flex-1">
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                className={`fight-club-tab ${activeTab === tab.id ? 'active' : ''}`}
+                onClick={() => handleTabClick(tab)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+          {playerDid && <RefreshButton did={playerDid} />}
         </div>
 
         {/* Tab Content */}
