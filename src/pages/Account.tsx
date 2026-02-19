@@ -344,6 +344,10 @@ export default function Account() {
                 setFriendsLightboxTab('friends');
                 setShowFriendsLightbox(true);
               }}
+              onFindFriends={() => {
+                setFriendsLightboxTab('find');
+                setShowFriendsLightbox(true);
+              }}
             />
             <AchievementsWidget
               onViewAll={() => setShowAchievementsLightbox(true)}
