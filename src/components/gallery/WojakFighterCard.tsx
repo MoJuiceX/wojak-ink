@@ -49,7 +49,6 @@ export function WojakFighterCard({ wojak, onClick }: WojakFighterCardProps) {
           alt={`Wojak #${wojak.edition}`}
           loading="lazy"
           onError={(e) => {
-            (e.target as HTMLImageElement).src = '';
             (e.target as HTMLImageElement).style.display = 'none';
           }}
         />
