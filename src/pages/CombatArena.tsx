@@ -150,10 +150,10 @@ function CombatArenaInner() {
         {/* Header */}
         <div className="flex flex-col items-center gap-2">
           <div className="flex items-center gap-3">
-            <Swords size={28} style={{ color: 'var(--color-primary)' }} />
+            <Swords size={28} className="text-primary" />
             <h1 className="text-2xl font-bold">Combat Arena</h1>
           </div>
-          <p className="text-secondary text-center text-sm" style={{ maxWidth: 480 }}>
+          <p className="text-secondary text-center text-sm max-w-lg">
             Pick a fighter, choose your moves, and battle other Wojaks. Winners earn XP and climb the ELO ladder.
             Each fighter has a type, ability, and unique moves based on their traits.
           </p>
@@ -173,14 +173,14 @@ function CombatArenaInner() {
             whileTap={{ scale: 0.99 }}
           >
             <div className="flex items-center justify-center w-8 h-8 rounded-lg"
-              style={{ background: 'rgba(255, 107, 0, 0.1)' }}>
+              style={{ background: 'var(--color-primary-10)' }}>
               <Bot size={16} style={{ color: 'var(--color-primary)' }} />
             </div>
             <div className="flex flex-col flex-1">
               <span className="text-sm font-medium">Create AI Agent</span>
               <span className="text-xs text-muted">Control your fighters with your own AI via API</span>
             </div>
-            <Plus size={16} style={{ color: 'var(--color-text-muted)' }} />
+            <Plus size={16} className="text-muted" />
           </motion.button>
         )}
 
