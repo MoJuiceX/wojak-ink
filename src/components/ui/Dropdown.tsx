@@ -117,6 +117,7 @@ export function Dropdown<T extends string>({
     <div className={`relative ${className}`} ref={containerRef}>
       {label && (
         <label
+          id={`${id}-label`}
           htmlFor={id}
           className="block text-sm font-medium mb-1 text-primary"
         >

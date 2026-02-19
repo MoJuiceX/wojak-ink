@@ -71,7 +71,7 @@ export function BattleQueuePanel({ onQueued, queuedNftIds = [] }: BattleQueuePan
   }, [player, onQueued, getAuthHeaders]);
 
   if (loading) {
-    return <div className="text-secondary text-sm p-4">Loading your NFTs...</div>;
+    return <div role="status" aria-label="Loading your NFTs" className="text-secondary text-sm p-4">Loading your NFTs...</div>;
   }
 
   if (nfts.length === 0) {
@@ -92,6 +92,7 @@ export function BattleQueuePanel({ onQueued, queuedNftIds = [] }: BattleQueuePan
       <h3 className="font-semibold">Queue for Battle</h3>
 
       <button
+        type="button"
         className="btn btn-primary"
         onClick={() => { setResult(null); setPickerOpen(true); }}
       >

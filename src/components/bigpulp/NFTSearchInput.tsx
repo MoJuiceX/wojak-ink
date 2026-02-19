@@ -152,6 +152,8 @@ export function NFTSearchInput({
                   <Loader2
                     size={14}
                     className="animate-spin text-accent"
+                    role="status"
+                    aria-label="Loading"
                   />
                 </motion.div>
               )}

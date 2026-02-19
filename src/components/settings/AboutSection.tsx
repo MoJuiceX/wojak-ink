@@ -190,6 +190,9 @@ export function AboutSection() {
 
           {/* Modal */}
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="admin-modal-title"
             className="fixed inset-4 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 z-50 sm:w-full sm:max-w-md rounded-2xl overflow-hidden flex flex-col"
             style={{
               background: 'var(--color-surface)',
@@ -205,6 +208,7 @@ export function AboutSection() {
               <div className="flex items-center gap-2">
                 <Shield size={20} className="text-accent" />
                 <h2
+                  id="admin-modal-title"
                   className="text-lg font-semibold text-primary"
                 >
                   Admin Panel
@@ -212,6 +216,7 @@ export function AboutSection() {
               </div>
               <button
                 type="button"
+                aria-label="Close admin panel"
                 className="p-2 rounded-lg transition-colors text-secondary"
                 style={{
                   background: 'var(--color-surface)',

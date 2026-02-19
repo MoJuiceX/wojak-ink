@@ -130,6 +130,8 @@ export function WalletSettings() {
             {/* Action Buttons */}
             <div className="grid grid-cols-2 gap-2">
               <button
+                type="button"
+                aria-label={copied ? 'Address copied' : 'Copy wallet address'}
                 className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors"
                 style={{
                   background: 'var(--color-elevated)',
@@ -158,6 +160,7 @@ export function WalletSettings() {
 
             {/* Disconnect */}
             <button
+              type="button"
               className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors text-error"
               style={{
                 background: 'transparent',

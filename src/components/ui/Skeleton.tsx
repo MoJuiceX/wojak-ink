@@ -75,7 +75,7 @@ export function SkeletonText({
   className?: string;
 }) {
   return (
-    <div className={`space-y-2 ${className}`}>
+    <div role="status" aria-label="Loading" className={`space-y-2 ${className}`}>
       {Array.from({ length: lines }).map((_, i) => (
         <Skeleton
           key={i}
@@ -96,18 +96,22 @@ export function SkeletonAvatar({
   className?: string;
 }) {
   return (
-    <Skeleton
-      variant="circular"
-      width={size}
-      height={size}
-      className={className}
-    />
+    <div role="status" aria-label="Loading">
+      <Skeleton
+        variant="circular"
+        width={size}
+        height={size}
+        className={className}
+      />
+    </div>
   );
 }
 
 export function SkeletonCard({ className = '' }: { className?: string }) {
   return (
     <div
+      role="status"
+      aria-label="Loading"
       className={`rounded-xl overflow-hidden ${className}`}
       style={{
         background: 'var(--color-surface)',

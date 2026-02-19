@@ -213,7 +213,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
       return { title: 'Confirm Mint', icon: <Sparkles size={40} className="text-accent" /> };
     }
     if (isSubmitted) {
-      return { title: 'Minting', icon: <Loader2 size={40} className="animate-spin text-accent" /> };
+      return { title: 'Minting', icon: <Loader2 size={40} className="animate-spin text-accent" role="status" aria-label="Minting in progress" /> };
     }
     if (isAwaitingPayment) {
       return { title: 'Accept Offer', icon: <Wallet size={40} className="animate-pulse text-accent" /> };
@@ -227,7 +227,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
     if (isError) {
       return { title: 'Mint Failed', icon: <AlertCircle size={40} className="text-error" /> };
     }
-    return { title: 'Mint', icon: <Loader2 size={40} className="animate-spin text-accent" /> };
+    return { title: 'Mint', icon: <Loader2 size={40} className="animate-spin text-accent" role="status" aria-label="Loading" /> };
   };
 
   const { title, icon } = getStepDisplay();
