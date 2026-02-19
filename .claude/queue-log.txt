@@ -1,0 +1,8 @@
+=========================================
+Thu Feb 19 14:09:37 WET 2026: WOJAK AUTONOMOUS BUILDER STARTED
+=========================================
+
+=== PHASE 1: SPEC QUEUE ===
+
+--- SPEC #8: HOW-IT-WORKS ---
+Thu Feb 19 14:09:37 WET 2026: Starting...
