@@ -1,8 +1,11 @@
 /**
  * QueuePanel — select an NFT fighter, choose battle mode, and enter the combat queue.
+ * Now supports 3 modes: manual, auto, agent.
  */
 
 import { useState, useCallback } from 'react';
+import { BattleModeSelector } from './BattleModeSelector';
+import { useAgent } from '@/contexts/AgentContext';
 import type { CombatType } from '@/lib/combat/types';
 
 interface FighterSummary {
@@ -18,15 +21,17 @@ interface FighterSummary {
 
 interface QueuePanelProps {
   fighters: FighterSummary[];
-  onQueue: (nftId: string, battleMode: 'manual' | 'auto') => Promise<void>;
+  onQueue: (nftId: string, battleMode: 'manual' | 'auto' | 'agent') => Promise<void>;
   onLeaveQueue: (nftId: string) => Promise<void>;
   queueStatus: { status: string; position?: number; battleId?: number; opponent?: { nftId: string; elo: number } } | null;
   isLoading: boolean;
+  onCreateAgent?: () => void;
 }
 
-export function QueuePanel({ fighters, onQueue, onLeaveQueue, queueStatus, isLoading }: QueuePanelProps) {
+export function QueuePanel({ fighters, onQueue, onLeaveQueue, queueStatus, isLoading, onCreateAgent }: QueuePanelProps) {
   const [selectedFighter, setSelectedFighter] = useState<string>(fighters[0]?.nft_id ?? '');
-  const [battleMode, setBattleMode] = useState<'manual' | 'auto'>('auto');
+  const [battleMode, setBattleMode] = useState<'manual' | 'auto' | 'agent'>('auto');
+  const { hasAgent } = useAgent();
 
   const handleQueue = useCallback(async () => {
     if (!selectedFighter) return;
@@ -72,38 +77,21 @@ export function QueuePanel({ fighters, onQueue, onLeaveQueue, queueStatus, isLoa
         </select>
       </div>
 
-      {/* Battle mode */}
-      <div className="flex flex-col gap-2">
-        <label className="text-xs text-secondary uppercase tracking-wider">Battle Mode</label>
-        <div className="flex gap-2">
-          <button
-            className={`btn flex-1 ${battleMode === 'auto' ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setBattleMode('auto')}
-            disabled={isQueued || isLoading}
-          >
-            Auto
-          </button>
-          <button
-            className={`btn flex-1 ${battleMode === 'manual' ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setBattleMode('manual')}
-            disabled={isQueued || isLoading}
-          >
-            Manual
-          </button>
-        </div>
-        <p className="text-xs text-muted">
-          {battleMode === 'auto'
-            ? 'AI picks moves for both fighters. Watch the battle unfold.'
-            : 'Pick your moves each turn. 30s timer per turn.'}
-        </p>
-      </div>
+      {/* Battle mode — 3-option pills */}
+      <BattleModeSelector
+        value={battleMode}
+        onChange={setBattleMode}
+        hasAgent={hasAgent}
+        disabled={isQueued || isLoading}
+        onCreateAgent={onCreateAgent}
+      />
 
       {/* Queue action */}
       {!isQueued && !isMatched && (
         <button
           className="btn btn-primary w-full"
           onClick={handleQueue}
-          disabled={isLoading || !selectedFighter}
+          disabled={isLoading || !selectedFighter || (battleMode === 'agent' && !hasAgent)}
         >
           {isLoading ? 'Joining...' : 'Join Queue'}
         </button>
