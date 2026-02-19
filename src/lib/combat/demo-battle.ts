@@ -11,6 +11,7 @@
 import type { CombatType } from './types';
 import type { TurnResult } from './battle-state';
 import type { BattleData, FighterDisplay } from '@/components/combat/BattleView';
+import { getNftImageUrl } from '@/services/constants';
 
 // Fighter A: FIRE type
 const DEMO_FIGHTER_A: FighterDisplay = {
@@ -27,8 +28,8 @@ const DEMO_FIGHTER_A: FighterDisplay = {
     { id: 'poke_fire_will-o-wisp', name: 'Spite Flame', power: 0, accuracy: 85, category: 'status' },
     { id: 'poke_fire_flame-charge', name: 'FOMO Rush', power: 50, accuracy: 100, category: 'physical' },
   ],
-  // Placeholder - Task 7 will add real image
-  imageUrl: '/api/nft/image?edition=42',
+  // Real IPFS-hosted Wojak image
+  imageUrl: getNftImageUrl(42),
 };
 
 // Fighter B: WATER type
@@ -46,8 +47,8 @@ const DEMO_FIGHTER_B: FighterDisplay = {
     { id: 'poke_water_bouncy-bubble', name: 'Liquidity Drain', power: 60, accuracy: 100, category: 'special' },
     { id: 'poke_water_withdraw', name: 'HODL', power: 0, accuracy: 100, category: 'status' },
   ],
-  // Placeholder - Task 7 will add real image
-  imageUrl: '/api/nft/image?edition=88',
+  // Real IPFS-hosted Wojak image
+  imageUrl: getNftImageUrl(88),
 };
 
 // Max HP values (approximated from stat calculator at these levels)
