@@ -5,7 +5,7 @@
  * Used when data fails to load.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 
 interface RetryCardProps {
@@ -15,7 +15,7 @@ interface RetryCardProps {
   buttonText?: string;
 }
 
-export const RetryCard: React.FC<RetryCardProps> = ({
+export const RetryCard = memo<RetryCardProps>(({
   message = 'Failed to load',
   onRetry,
   icon = '😕',
@@ -60,7 +60,7 @@ export const RetryCard: React.FC<RetryCardProps> = ({
       </motion.button>
     </motion.div>
   );
-};
+});
 
 /**
  * Network Error

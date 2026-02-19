@@ -6,7 +6,7 @@
  * Uses Portal to render at document.body level for correct positioning.
  */
 
-import React from 'react';
+import { memo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import './ConfirmModal.css';
@@ -23,7 +23,7 @@ interface ConfirmModalProps {
   icon?: string;
 }
 
-export const ConfirmModal: React.FC<ConfirmModalProps> = ({
+export const ConfirmModal = memo<ConfirmModalProps>(({
   isOpen,
   onClose,
   onConfirm,
@@ -129,6 +129,6 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
     </AnimatePresence>,
     document.body
   );
-};
+});
 
 export default ConfirmModal;

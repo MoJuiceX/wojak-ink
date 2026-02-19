@@ -31,7 +31,7 @@ function getTypeIcon(type: string) {
     case 'warning':
       return <AlertTriangle size={18} style={{ color: '#f59e0b' }} />;
     default:
-      return <Info size={18} style={{ color: 'var(--color-primary)' }} />;
+      return <Info size={18} className="text-accent" />;
   }
 }
 
@@ -148,10 +148,9 @@ export function MessagesModal({ isOpen, onClose }: MessagesModalProps) {
               style={{ borderColor: 'var(--color-border)' }}
             >
               <div className="flex items-center gap-2">
-                <Bell size={20} style={{ color: 'var(--color-primary)' }} />
+                <Bell size={20} className="text-accent" />
                 <h2
-                  className="text-lg font-bold"
-                  style={{ color: 'var(--color-text)' }}
+                  className="text-lg font-bold text-primary"
                 >
                   Messages
                 </h2>
@@ -166,8 +165,7 @@ export function MessagesModal({ isOpen, onClose }: MessagesModalProps) {
               </div>
               <button
                 onClick={onClose}
-                className="p-1 rounded-full"
-                style={{ color: 'var(--color-text-tertiary)' }}
+                className="p-1 rounded-full text-tertiary"
               >
                 <X size={20} />
               </button>
@@ -177,7 +175,7 @@ export function MessagesModal({ isOpen, onClose }: MessagesModalProps) {
             <div className="flex-1 overflow-y-auto">
               {isLoading ? (
                 <div className="p-8 flex items-center justify-center">
-                  <Loader2 size={24} className="animate-spin" style={{ color: 'var(--color-primary)' }} />
+                  <Loader2 size={24} className="animate-spin text-accent" />
                 </div>
               ) : messages.length === 0 ? (
                 <div className="p-8 text-center">
@@ -185,9 +183,9 @@ export function MessagesModal({ isOpen, onClose }: MessagesModalProps) {
                     className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
                     style={{ background: 'var(--color-elevated)' }}
                   >
-                    <Mail size={32} style={{ color: 'var(--color-text-muted)' }} />
+                    <Mail size={32} className="text-muted" />
                   </div>
-                  <p style={{ color: 'var(--color-text-secondary)' }}>
+                  <p className="text-secondary">
                     No messages yet
                   </p>
                 </div>
@@ -196,8 +194,7 @@ export function MessagesModal({ isOpen, onClose }: MessagesModalProps) {
                 <div className="p-4">
                   <button
                     onClick={() => setSelectedMessage(null)}
-                    className="text-sm mb-4"
-                    style={{ color: 'var(--color-primary)' }}
+                    className="text-sm mb-4 text-accent"
                   >
                     &larr; Back to messages
                   </button>
@@ -209,22 +206,19 @@ export function MessagesModal({ isOpen, onClose }: MessagesModalProps) {
                       {getTypeIcon(selectedMessage.type)}
                       <div>
                         <h3
-                          className="font-medium"
-                          style={{ color: 'var(--color-text)' }}
+                          className="font-medium text-primary"
                         >
                           {selectedMessage.title}
                         </h3>
                         <p
-                          className="text-xs"
-                          style={{ color: 'var(--color-text-tertiary)' }}
+                          className="text-xs text-tertiary"
                         >
                           {formatDate(selectedMessage.createdAt)}
                         </p>
                       </div>
                     </div>
                     <p
-                      className="text-sm whitespace-pre-wrap"
-                      style={{ color: 'var(--color-text-secondary)' }}
+                      className="text-sm whitespace-pre-wrap text-secondary"
                     >
                       {selectedMessage.content}
                     </p>
@@ -241,16 +235,15 @@ export function MessagesModal({ isOpen, onClose }: MessagesModalProps) {
                     >
                       <div className="mt-0.5">
                         {message.read ? (
-                          <MailOpen size={18} style={{ color: 'var(--color-text-muted)' }} />
+                          <MailOpen size={18} className="text-muted" />
                         ) : (
-                          <Mail size={18} style={{ color: 'var(--color-primary)' }} />
+                          <Mail size={18} className="text-accent" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <p
-                            className={`text-sm truncate ${!message.read ? 'font-medium' : ''}`}
-                            style={{ color: 'var(--color-text)' }}
+                            className={`text-sm truncate text-primary ${!message.read ? 'font-medium' : ''}`}
                           >
                             {message.title}
                           </p>
@@ -262,8 +255,7 @@ export function MessagesModal({ isOpen, onClose }: MessagesModalProps) {
                           )}
                         </div>
                         <p
-                          className="text-xs truncate"
-                          style={{ color: 'var(--color-text-tertiary)' }}
+                          className="text-xs truncate text-tertiary"
                         >
                           {formatDate(message.createdAt)}
                         </p>

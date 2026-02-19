@@ -4,6 +4,7 @@
  * Accessible pill-shaped toggle switch.
  */
 
+import { memo } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 
 interface ToggleProps {
@@ -44,7 +45,7 @@ const sizeConfig = {
   },
 };
 
-export function Toggle({
+export const Toggle = memo(function Toggle({
   id,
   label,
   description,
@@ -162,6 +163,6 @@ export function Toggle({
       </div>
     </div>
   );
-}
+});
 
 export default Toggle;

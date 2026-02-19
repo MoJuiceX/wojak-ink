@@ -5,6 +5,7 @@
  * action buttons, and title/message support.
  */
 
+import { memo } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useToast } from '@/contexts/ToastContext';
@@ -107,7 +108,7 @@ function ToastItem({ toast, onDismiss }: ToastItemProps) {
   );
 }
 
-export function ToastContainer() {
+export const ToastContainer = memo(function ToastContainer() {
   const { toasts, dismissToast } = useToast();
 
   return (
@@ -123,6 +124,6 @@ export function ToastContainer() {
       </AnimatePresence>
     </div>
   );
-}
+});
 
 export default ToastContainer;

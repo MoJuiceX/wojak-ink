@@ -4,6 +4,7 @@
  * Button that copies text to clipboard with feedback.
  */
 
+import { memo } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Copy, Check } from 'lucide-react';
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard';
@@ -25,7 +26,7 @@ const sizeConfig = {
   large: { icon: 18, padding: 'p-2.5', text: 'text-base' },
 };
 
-export function CopyButton({
+export const CopyButton = memo(function CopyButton({
   text,
   label = 'Copy',
   showLabel = false,
@@ -91,7 +92,7 @@ export function CopyButton({
       <Icon size={config.icon} />
     </motion.button>
   );
-}
+});
 
 // Copy with truncated text preview
 export function CopyText({

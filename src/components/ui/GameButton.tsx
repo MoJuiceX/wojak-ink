@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, memo } from 'react';
 import { motion } from 'framer-motion';
 import type { HTMLMotionProps } from 'framer-motion';
 import './GameButton.css';
@@ -9,7 +9,7 @@ export interface GameButtonProps extends Omit<HTMLMotionProps<'button'>, 'ref'> 
   children: React.ReactNode;
 }
 
-export const GameButton = forwardRef<HTMLButtonElement, GameButtonProps>(
+export const GameButton = memo(forwardRef<HTMLButtonElement, GameButtonProps>(
   ({ variant = 'primary', size = 'md', className = '', children, ...props }, ref) => {
     return (
       <motion.button
@@ -23,6 +23,6 @@ export const GameButton = forwardRef<HTMLButtonElement, GameButtonProps>(
       </motion.button>
     );
   }
-);
+));
 
 GameButton.displayName = 'GameButton';

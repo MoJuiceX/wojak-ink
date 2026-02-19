@@ -4,6 +4,7 @@
  * Displays helpful message when content is empty.
  */
 
+import { memo } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { fadeInUpVariants } from '@/config/hoverEffects';
@@ -26,7 +27,7 @@ interface EmptyStateProps {
   className?: string;
 }
 
-export function EmptyState({
+export const EmptyState = memo(function EmptyState({
   illustration,
   title,
   description,
@@ -129,7 +130,7 @@ export function EmptyState({
       )}
     </motion.div>
   );
-}
+});
 
 // Preset empty states
 export const EMPTY_STATES = {

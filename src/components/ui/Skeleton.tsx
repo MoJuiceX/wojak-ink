@@ -9,6 +9,7 @@
  * 3. Respect prefers-reduced-motion
  */
 
+import { memo } from 'react';
 import { useReducedMotion } from 'framer-motion';
 import type { SkeletonVariant } from '@/types/microInteractions';
 
@@ -20,7 +21,7 @@ interface SkeletonProps {
   animation?: 'shimmer' | 'pulse' | 'none';
 }
 
-export function Skeleton({
+export const Skeleton = memo(function Skeleton({
   variant = 'rectangular',
   width,
   height,
@@ -63,7 +64,7 @@ export function Skeleton({
       aria-hidden="true"
     />
   );
-}
+});
 
 // Preset skeleton patterns
 export function SkeletonText({
