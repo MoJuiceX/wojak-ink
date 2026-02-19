@@ -36,7 +36,6 @@ async function init() {
       themeVariables: { '--wcm-z-index': '100000' },
     });
 
-    console.log('[WC] Initialized');
   } catch (err) {
     console.warn('[WC] Init failed:', (err as Error).message);
   }

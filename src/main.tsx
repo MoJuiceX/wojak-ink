@@ -136,10 +136,7 @@ const clerkAppearance = {
 }
 
 // Register service worker for PWA support
-registerServiceWorker({
-  onSuccess: () => console.log('App ready for offline use'),
-  onUpdate: () => console.log('New version available - refresh to update'),
-})
+registerServiceWorker({})
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

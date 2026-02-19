@@ -50,15 +50,12 @@ export function SwipeAutoRegister() {
     let cancelled = false;
 
     (async () => {
-      console.log('[SwipeAutoRegister] Starting auto-registration for', address);
       for (let attempt = 0; attempt < MAX_DID_RETRIES; attempt++) {
         if (cancelled) return;
         try {
           const dids = await getDIDs();
-          console.log('[SwipeAutoRegister] getDIDs attempt', attempt + 1, ':', dids);
           if (dids.length > 0) {
             await register(dids[0], address);
-            console.log('[SwipeAutoRegister] Registration succeeded for DID:', dids[0]);
             return;
           }
           if (attempt < MAX_DID_RETRIES - 1) {
