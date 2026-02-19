@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { DeviceOrientationProvider } from '@/contexts/DeviceOrientationContext';
@@ -33,20 +33,6 @@ import StartupSequence from '@/components/StartupSequence';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { GameLoading } from '@/components/games/GameLoading';
 import { GameErrorBoundary } from '@/components/games/GameError';
-import { GameProvider } from '@/contexts/GameContext';
-import { SwipeAutoRegister } from '@/components/game/SwipeAutoRegister';
-import { SwipeNav } from '@/components/game/SwipeNav';
-
-/** Shared layout for all /swipe/* routes — provides GameProvider + SwipeAutoRegister */
-function GameLayout() {
-  return (
-    <GameProvider>
-      <SwipeAutoRegister />
-      <SwipeNav />
-      <Outlet />
-    </GameProvider>
-  );
-}
 // Lazy load all pages for code splitting
 const Gallery = lazy(() => import('./pages/Gallery'));
 const Treasury = lazy(() => import('./pages/Treasury'));
@@ -68,19 +54,12 @@ const Profile = lazy(() => import('./pages/Profile'));
 // Friends and Achievements pages removed - now use lightboxes in Account page
 const Guild = lazy(() => import('./pages/Guild'));
 const Shop = lazy(() => import('./pages/Shop'));
-const Leaderboard = lazy(() => import('./pages/Leaderboard'));
+const FightClub = lazy(() => import('./pages/FightClub'));
 const Admin = lazy(() => import('./pages/Admin'));
 const Drawer = lazy(() => import('./pages/Drawer'));
 const RuleBuilder = lazy(() => import('./pages/RuleBuilder'));
 
 // Games
-const GameVoting = lazy(() => import('./pages/GameVoting'));
-const GameDashboard = lazy(() => import('./pages/GameDashboard'));
-const GameBattles = lazy(() => import('./pages/GameBattles'));
-const GameLeaderboard = lazy(() => import('./pages/GameLeaderboard'));
-const GameActivity = lazy(() => import('./pages/GameActivity'));
-const WojakProfile = lazy(() => import('./pages/WojakProfile'));
-
 const BrickByBrick = lazy(() => import('./pages/BrickByBrick'));
 const MemoryMatch = lazy(() => import('./pages/MemoryMatch'));
 const OrangePong = lazy(() => import('./pages/OrangePong'));
@@ -93,9 +72,7 @@ const CitrusDrop = lazy(() => import('./pages/CitrusDrop'));
 const OrangeSnake = lazy(() => import('./pages/OrangeSnake'));
 const BrickBreaker = lazy(() => import('./pages/BrickBreaker'));
 const WojakWhack = lazy(() => import('./pages/WojakWhack'));
-const CombatArena = lazy(() => import('./pages/CombatArena'));
 const CombatBattle = lazy(() => import('./pages/CombatBattle'));
-const ArenaLeaderboard = lazy(() => import('./pages/ArenaLeaderboard'));
 
 // Skip boot sequence in development for faster testing
 const SKIP_BOOT_IN_DEV = true;
@@ -338,9 +315,38 @@ function AppContent() {
                   />
                   <Route
                     path="leaderboard"
+                    element={<Navigate to="/fight-club/rankings" replace />}
+                  />
+                  {/* Fight Club - unified combat hub */}
+                  <Route
+                    path="fight-club"
                     element={
-                      <Suspense fallback={<PageSkeleton type="settings" />}>
-                        <Leaderboard />
+                      <Suspense fallback={<PageSkeleton type="media" />}>
+                        <FightClub />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="fight-club/battle"
+                    element={
+                      <Suspense fallback={<PageSkeleton type="media" />}>
+                        <FightClub />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="fight-club/vote"
+                    element={
+                      <Suspense fallback={<PageSkeleton type="media" />}>
+                        <FightClub />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="fight-club/rankings"
+                    element={
+                      <Suspense fallback={<PageSkeleton type="media" />}>
+                        <FightClub />
                       </Suspense>
                     }
                   />
@@ -366,65 +372,15 @@ function AppContent() {
                       </Suspense>
                     }
                   />
-                  {/* Wojak Swipe — shared GameProvider for all /swipe/* routes */}
-                  <Route path="swipe" element={<GameLayout />}>
-                    <Route
-                      index
-                      element={
-                        <Suspense fallback={<PageSkeleton type="media" />}>
-                          <GameVoting />
-                        </Suspense>
-                      }
-                    />
-                    <Route
-                      path="dashboard"
-                      element={
-                        <Suspense fallback={<PageSkeleton type="settings" />}>
-                          <GameDashboard />
-                        </Suspense>
-                      }
-                    />
-                    <Route
-                      path="battles"
-                      element={
-                        <Suspense fallback={<PageSkeleton type="media" />}>
-                          <GameBattles />
-                        </Suspense>
-                      }
-                    />
-                    <Route
-                      path="leaderboard"
-                      element={
-                        <Suspense fallback={<PageSkeleton type="settings" />}>
-                          <GameLeaderboard />
-                        </Suspense>
-                      }
-                    />
-                    <Route
-                      path="activity"
-                      element={
-                        <Suspense fallback={<PageSkeleton type="settings" />}>
-                          <GameActivity />
-                        </Suspense>
-                      }
-                    />
-                    <Route
-                      path="wojak/:edition"
-                      element={
-                        <Suspense fallback={<PageSkeleton type="settings" />}>
-                          <WojakProfile />
-                        </Suspense>
-                      }
-                    />
-                  </Route>
-                  {/* Combat Arena — top-level /arena route */}
-                  <Route path="arena" element={<GameErrorBoundary gameName="Combat Arena"><Suspense fallback={<GameLoading gameName="Combat Arena" />}><CombatArena /></Suspense></GameErrorBoundary>} />
-                  <Route path="arena/leaderboard" element={<GameErrorBoundary gameName="Arena Leaderboard"><Suspense fallback={<GameLoading gameName="Arena Leaderboard" />}><ArenaLeaderboard /></Suspense></GameErrorBoundary>} />
+                  {/* Swipe redirects to Fight Club Vote */}
+                  <Route path="swipe" element={<Navigate to="/fight-club/vote" replace />} />
+                  <Route path="swipe/*" element={<Navigate to="/fight-club/vote" replace />} />
+                  {/* Arena redirects to Fight Club Battle */}
+                  <Route path="arena" element={<Navigate to="/fight-club/battle" replace />} />
+                  <Route path="arena/*" element={<Navigate to="/fight-club/battle" replace />} />
                   {/* Redirects from old routes */}
-                  <Route path="your-wojak" element={<Navigate to="/swipe" replace />} />
-                  <Route path="your-wojak/dashboard" element={<Navigate to="/swipe/dashboard" replace />} />
-                  <Route path="your-wojak/battles" element={<Navigate to="/swipe/battles" replace />} />
-                  <Route path="your-wojak/leaderboard" element={<Navigate to="/swipe/leaderboard" replace />} />
+                  <Route path="your-wojak" element={<Navigate to="/fight-club/vote" replace />} />
+                  <Route path="your-wojak/*" element={<Navigate to="/fight-club/vote" replace />} />
                   {/* Game Routes - all under /games/* for cleaner URLs */}
                   <Route
                     path="games/stack"
@@ -546,9 +502,9 @@ function AppContent() {
                       </GameErrorBoundary>
                     }
                   />
-                  {/* Combat Battle Detail — /arena/battle/:id */}
+                  {/* Combat Battle Detail — /fight-club/battle/:id */}
                   <Route
-                    path="arena/battle/:id"
+                    path="fight-club/battle/:id"
                     element={
                       <GameErrorBoundary gameName="Combat Battle">
                         <Suspense fallback={<GameLoading gameName="Combat Battle" />}>
@@ -557,9 +513,9 @@ function AppContent() {
                       </GameErrorBoundary>
                     }
                   />
-                  {/* Legacy Combat Arena routes — redirect to top-level /arena */}
-                  <Route path="games/combat" element={<Navigate to="/arena" replace />} />
-                  <Route path="games/combat/*" element={<Navigate to="/arena" replace />} />
+                  {/* Legacy Combat Arena routes — redirect to Fight Club */}
+                  <Route path="games/combat" element={<Navigate to="/fight-club/battle" replace />} />
+                  <Route path="games/combat/*" element={<Navigate to="/fight-club/battle" replace />} />
                   {/* Legacy game routes - redirect to new paths */}
                   <Route path="media/games/stack" element={<Navigate to="/games/stack" replace />} />
                   <Route path="media/games/memory" element={<Navigate to="/games/memory" replace />} />

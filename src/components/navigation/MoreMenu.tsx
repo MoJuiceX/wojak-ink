@@ -15,7 +15,6 @@ import {
   Settings,
   User,
   MessageCircle,
-  Heart,
   Swords,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -30,22 +29,13 @@ interface MenuItem {
   iconBg: string;
 }
 
-// Reordered: Account first (personal), then actions, community, settings last
+// Reordered: Fight Club first (main feature), Account, then actions, community, settings last
 const menuItems: MenuItem[] = [
   {
-    icon: Heart,
-    label: 'Wojak Swipe',
-    description: 'Vote, battle, and climb the leaderboard',
-    route: '/swipe',
-    badge: 'New',
-    iconColor: '#ef4444',
-    iconBg: 'var(--color-error-15)',
-  },
-  {
     icon: Swords,
-    label: 'Arena',
-    description: 'Turn-based battles. Level up, climb the ELO ladder.',
-    route: '/arena',
+    label: 'Fight Club',
+    description: 'Vote, battle, and climb the rankings',
+    route: '/fight-club',
     badge: 'New',
     iconColor: '#ef4444',
     iconBg: 'var(--color-error-15)',

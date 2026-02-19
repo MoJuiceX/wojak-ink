@@ -87,43 +87,24 @@ export const PRIMARY_NAV_ITEMS: NavItem[] = [
     icon: Palette,
   },
   {
+    id: 'fight-club',
+    path: '/fight-club',
+    label: 'Fight Club',
+    shortLabel: 'Fight',
+    icon: Swords,
+    badge: 'dot',
+    children: [
+      { id: 'fight-club-battle', path: '/fight-club/battle', label: 'Battle', icon: Swords },
+      { id: 'fight-club-vote', path: '/fight-club/vote', label: 'Vote', icon: Heart },
+      { id: 'fight-club-rankings', path: '/fight-club/rankings', label: 'Rankings', icon: Trophy },
+    ]
+  },
+  {
     id: 'games',
     path: '/games',
     label: 'Games',
     shortLabel: 'Games',
     icon: Gamepad2,
-  },
-  {
-    id: 'swipe',
-    path: '/swipe',
-    label: 'Wojak Swipe',
-    shortLabel: 'Swipe',
-    icon: Heart,
-    badge: 'dot',
-    children: [
-      { id: 'swipe-dashboard', path: '/swipe/dashboard', label: 'Dashboard', icon: Heart },
-      { id: 'swipe-battles', path: '/swipe/battles', label: 'Battles', icon: Heart },
-      { id: 'swipe-leaderboard', path: '/swipe/leaderboard', label: 'Leaderboard', icon: Heart },
-      { id: 'swipe-activity', path: '/swipe/activity', label: 'Activity', icon: Heart },
-    ]
-  },
-  {
-    id: 'arena',
-    path: '/arena',
-    label: 'Arena',
-    shortLabel: 'Arena',
-    icon: Swords,
-    badge: 'dot',
-    children: [
-      { id: 'arena-leaderboard', path: '/arena/leaderboard', label: 'Leaderboard', icon: Swords },
-    ]
-  },
-  {
-    id: 'leaderboard',
-    path: '/leaderboard',
-    label: 'Leaderboard',
-    shortLabel: 'Ranks',
-    icon: Trophy,
   },
 ];
 

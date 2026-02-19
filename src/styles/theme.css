@@ -556,6 +556,46 @@ body {
 
 
 /* ═══════════════════════════════════════════════════════════════════════════════
+   FIGHT CLUB TABS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.fight-club-tabs {
+  display: flex;
+  gap: var(--space-2);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-1);
+  border: 1px solid var(--color-border);
+}
+
+.fight-club-tab {
+  flex: 1;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.fight-club-tab:hover {
+  color: var(--color-text);
+  background: var(--color-white-5);
+}
+
+.fight-club-tab.active {
+  color: var(--color-text);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════════
    INPUTS
    ═══════════════════════════════════════════════════════════════════════════════ */
 
