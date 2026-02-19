@@ -16,6 +16,7 @@ import {
   User,
   MessageCircle,
   Heart,
+  Swords,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -36,6 +37,15 @@ const menuItems: MenuItem[] = [
     label: 'Wojak Swipe',
     description: 'Vote, battle, and climb the leaderboard',
     route: '/swipe',
+    badge: 'New',
+    iconColor: '#ef4444',
+    iconBg: 'rgba(239, 68, 68, 0.15)',
+  },
+  {
+    icon: Swords,
+    label: 'Arena',
+    description: 'Turn-based battles. Level up, climb the ELO ladder.',
+    route: '/arena',
     badge: 'New',
     iconColor: '#ef4444',
     iconBg: 'rgba(239, 68, 68, 0.15)',
