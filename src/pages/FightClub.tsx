@@ -29,6 +29,7 @@ import { useSageWallet } from '@/sage-wallet';
 const CombatArena = lazy(() => import('./CombatArena'));
 const GameVoting = lazy(() => import('./GameVoting'));
 const BurnTab = lazy(() => import('@/components/combat/BurnTab'));
+const DemoBattle = lazy(() => import('@/components/combat/DemoBattle').then(m => ({ default: m.DemoBattle })));
 
 // Gate API response type
 interface GateResponse {
@@ -419,7 +420,12 @@ export default function FightClub() {
               {accessData?.wojakCount === 0 && <MintFighterBanner />}
               <GameErrorBoundary gameName="Combat Arena">
                 <Suspense fallback={<GameLoading gameName="Combat Arena" />}>
-                  <CombatArena />
+                  {/* Show demo when user has no fighters, real arena when they do */}
+                  {accessData?.wojakCount === 0 ? (
+                    <DemoBattle />
+                  ) : (
+                    <CombatArena />
+                  )}
                 </Suspense>
               </GameErrorBoundary>
             </>
