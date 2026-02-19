@@ -219,11 +219,10 @@ function WojaksTab() {
           <div key={wojak.nftId} className="rankings-row wojak-row">
             <RankBadge rank={wojak.rank} />
             <div className="wojak-row-image">
-              {wojak.imageUrl ? (
-                <img src={wojak.imageUrl} alt={`Wojak #${wojak.edition}`} />
-              ) : (
-                <div className="wojak-placeholder" />
-              )}
+              <img
+                src={wojak.imageUrl || `https://assets.mintgarden.io/thumbnails/medium/${wojak.nftId}.png`}
+                alt={`Wojak #${wojak.edition}`}
+              />
             </div>
             <div className="wojak-row-info">
               <div className="wojak-row-header">

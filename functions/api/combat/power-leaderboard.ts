@@ -121,7 +121,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           COALESCE(cf.total_combat_losses, 0) as losses,
           COALESCE(cf.total_combat_draws, 0) as draws,
           dp.display_name as owner_name,
-          pm.image_url
+          pm.ipfs_image_uri
         FROM combat_fighters cf
         LEFT JOIN did_profiles dp ON cf.owner_did = dp.did_id
         LEFT JOIN phase2_mints pm ON cf.edition_number = pm.mint_number
@@ -136,7 +136,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         rank: offset + idx + 1,
         nftId: row.nft_id,
         edition: row.edition_number,
-        imageUrl: row.image_url || null,
+        imageUrl: row.ipfs_image_uri || null,
         combatType: row.combat_type,
         powerScore: row.power_score || 0,
         votePower: row.vote_power || 0,
