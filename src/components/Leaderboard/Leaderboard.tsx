@@ -105,6 +105,7 @@ const GAME_EMOJIS: Record<GameId, string> = {
 interface LeaderboardProps {
   gameId: GameId;
   showGameSelector?: boolean;
+  excludeGames?: string[];
 }
 
 type TimeframeType = 'all-time' | 'weekly';
@@ -117,12 +118,22 @@ const TIME_FILTERS: { value: TimeframeType; label: string }[] = [
 export const Leaderboard: React.FC<LeaderboardProps> = ({
   gameId: initialGameId,
   showGameSelector = false,
+  excludeGames = [],
 }) => {
   const prefersReducedMotion = useReducedMotion();
   const isMobile = useIsMobile();
   const { user } = useAuth();
   const { friends, isFriend } = useFriends();
-  const [selectedGame, setSelectedGame] = useState<GameId>(initialGameId);
+  // Filter out excluded games from the available game lists
+  const filteredActiveGames = ACTIVE_GAME_IDS.filter(id => !excludeGames.includes(id));
+  const filteredDisabledGames = DISABLED_GAME_IDS.filter(id => !excludeGames.includes(id));
+
+  // If initial game is excluded, default to the first available game
+  const safeInitialGame = excludeGames.includes(initialGameId) && filteredActiveGames.length > 0
+    ? filteredActiveGames[0]
+    : initialGameId;
+
+  const [selectedGame, setSelectedGame] = useState<GameId>(safeInitialGame);
   const [timeframe, setTimeframe] = useState<TimeframeType>('weekly');
   const [filter, setFilter] = useState<'all' | 'friends'>('all');
   const [isGameDropdownOpen, setIsGameDropdownOpen] = useState(false);
@@ -227,7 +238,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
             <span>Games</span>
           </div>
           <div className="game-sidebar-list">
-            {ACTIVE_GAME_IDS.map((id) => (
+            {filteredActiveGames.map((id) => (
               <button
                 key={id}
                 className={`game-sidebar-item ${selectedGame === id ? 'selected' : ''}`}
@@ -237,7 +248,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                 <span className="game-sidebar-name">{GAME_NAMES[id]}</span>
               </button>
             ))}
-            {DISABLED_GAME_IDS.map((id) => (
+            {filteredDisabledGames.map((id) => (
               <button
                 key={id}
                 className={`game-sidebar-item disabled ${selectedGame === id ? 'selected' : ''}`}
@@ -285,7 +296,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                   exit={{ opacity: 0, y: -10, scale: 0.95 }}
                   transition={{ duration: 0.2 }}
                 >
-                  {ACTIVE_GAME_IDS.map((id, index) => (
+                  {filteredActiveGames.map((id, index) => (
                     <motion.button
                       key={id}
                       className={`game-option ${selectedGame === id ? 'selected' : ''}`}
@@ -298,16 +309,18 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                       <span className="game-option-name">{GAME_NAMES[id]}</span>
                     </motion.button>
                   ))}
-                  <div className="game-dropdown-divider">
-                    <span>Coming Soon</span>
-                  </div>
-                  {DISABLED_GAME_IDS.map((id, index) => (
+                  {filteredDisabledGames.length > 0 && (
+                    <div className="game-dropdown-divider">
+                      <span>Coming Soon</span>
+                    </div>
+                  )}
+                  {filteredDisabledGames.map((id, index) => (
                     <motion.button
                       key={id}
                       className={`game-option disabled ${selectedGame === id ? 'selected' : ''}`}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: (ACTIVE_GAME_IDS.length + index) * 0.03 }}
+                      transition={{ delay: (filteredActiveGames.length + index) * 0.03 }}
                       onClick={() => handleGameSelect(id)}
                     >
                       <span className="game-emoji">{GAME_EMOJIS[id]}</span>

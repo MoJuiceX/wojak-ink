@@ -10,11 +10,13 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useClerk, useAuth } from '@clerk/clerk-react';
+import { Gamepad2, Trophy } from 'lucide-react';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { useLayout } from '@/hooks/useLayout';
 import { GamesGrid, GameModal } from '@/components/media';
 import { LeaderboardPanel } from '@/components/media/games/LeaderboardPanel';
 import { StatsPanel } from '@/components/media/games/StatsPanel';
+import { Leaderboard } from '@/components/Leaderboard/Leaderboard';
 import { useMediaContent } from '@/hooks/data/useMediaData';
 import type { MiniGame } from '@/types/media';
 import { useUserProfile } from '@/contexts/UserProfileContext';
@@ -49,6 +51,7 @@ export default function GamesHub() {
   const [selectedGame, setSelectedGame] = useState<MiniGame | null>(null);
   const [gameModalOpen, setGameModalOpen] = useState(false);
   const [showComingSoon, setShowComingSoon] = useState(false);
+  const [activeTab, setActiveTab] = useState<'play' | 'scores'>('play');
 
   // Fetch games using TanStack Query
   const { games, isLoading } = useMediaContent('all');
@@ -387,6 +390,65 @@ export default function GamesHub() {
     />
   );
 
+  // Tab bar for Play/Scores toggle
+  const tabBar = (
+    <div
+      style={{
+        display: 'flex',
+        gap: '8px',
+        marginBottom: '16px',
+        padding: '4px',
+        background: 'var(--color-surface)',
+        borderRadius: 'var(--radius-lg)',
+        border: '1px solid var(--color-border)',
+        width: 'fit-content',
+      }}
+    >
+      <button
+        type="button"
+        onClick={() => setActiveTab('play')}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          padding: '8px 16px',
+          borderRadius: 'var(--radius-md)',
+          border: 'none',
+          background: activeTab === 'play' ? 'var(--color-primary)' : 'transparent',
+          color: activeTab === 'play' ? 'white' : 'var(--color-text-secondary)',
+          fontWeight: 600,
+          fontSize: '14px',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+        }}
+      >
+        <Gamepad2 size={16} />
+        Play
+      </button>
+      <button
+        type="button"
+        onClick={() => setActiveTab('scores')}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          padding: '8px 16px',
+          borderRadius: 'var(--radius-md)',
+          border: 'none',
+          background: activeTab === 'scores' ? 'var(--color-primary)' : 'transparent',
+          color: activeTab === 'scores' ? 'white' : 'var(--color-text-secondary)',
+          fontWeight: 600,
+          fontSize: '14px',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+        }}
+      >
+        <Trophy size={16} />
+        Scores
+      </button>
+    </div>
+  );
+
   // Desktop: 3-column layout that fits viewport
   if (isDesktop) {
     return (
@@ -423,28 +485,33 @@ export default function GamesHub() {
               zIndex: 1,
             }}
           >
-            <LeaderboardPanel />
+            {activeTab === 'play' && <LeaderboardPanel />}
             {/* Remove justifyContent: 'center' - causes top row to be pushed up when viewport shrinks */}
-            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', minHeight: 0 }}>
-              {gamesGridWithVoting}
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', minHeight: 0, gridColumn: activeTab === 'scores' ? '1 / -1' : undefined }}>
+              {tabBar}
+              {activeTab === 'play' ? gamesGridWithVoting : (
+                <Leaderboard gameId="flappy-orange" showGameSelector excludeGames={['combat']} />
+              )}
             </div>
-            {/* Right column: Stats + Voting Panel */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', overflow: 'auto' }}>
-              <StatsPanel />
-              <FlickModeToggle
-                ref={toggleRef}
-                activeMode={activeMode}
-                onModeChange={setActiveMode}
-                donutBalance={donutBalance}
-                poopBalance={poopBalance}
-                onShowHeatmap={handleShowHeatmap}
-                isHeatmapActive={heatmapState.isActive}
-                isHeatmapLoading={isVotingLoading}
-                isDesktop={true}
-                isSignedIn={isSignedIn}
-                onSignInClick={handleSignInClick}
-              />
-            </div>
+            {/* Right column: Stats + Voting Panel (only in Play mode) */}
+            {activeTab === 'play' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', overflow: 'auto' }}>
+                <StatsPanel />
+                <FlickModeToggle
+                  ref={toggleRef}
+                  activeMode={activeMode}
+                  onModeChange={setActiveMode}
+                  donutBalance={donutBalance}
+                  poopBalance={poopBalance}
+                  onShowHeatmap={handleShowHeatmap}
+                  isHeatmapActive={heatmapState.isActive}
+                  isHeatmapLoading={isVotingLoading}
+                  isDesktop={true}
+                  isSignedIn={isSignedIn}
+                  onSignInClick={handleSignInClick}
+                />
+              </div>
+            )}
           </div>
         </div>
 
@@ -498,24 +565,32 @@ export default function GamesHub() {
         style={{ padding: contentPadding, minHeight: '100%' }}
       >
         <div style={{ paddingBottom: '96px', paddingTop: '16px' }}>
-          {gamesGridWithVoting}
+          {tabBar}
 
-          {/* Voting UI - Mobile: Inline below games */}
-          <div style={{ marginTop: '24px' }}>
-            <FlickModeToggle
-              ref={toggleRef}
-              activeMode={activeMode}
-              onModeChange={setActiveMode}
-              donutBalance={donutBalance}
-              poopBalance={poopBalance}
-              onShowHeatmap={handleShowHeatmap}
-              isHeatmapActive={heatmapState.isActive}
-              isHeatmapLoading={isVotingLoading}
-              isDesktop={false}
-              isSignedIn={isSignedIn}
-              onSignInClick={handleSignInClick}
-            />
-          </div>
+          {activeTab === 'play' ? (
+            <>
+              {gamesGridWithVoting}
+
+              {/* Voting UI - Mobile: Inline below games */}
+              <div style={{ marginTop: '24px' }}>
+                <FlickModeToggle
+                  ref={toggleRef}
+                  activeMode={activeMode}
+                  onModeChange={setActiveMode}
+                  donutBalance={donutBalance}
+                  poopBalance={poopBalance}
+                  onShowHeatmap={handleShowHeatmap}
+                  isHeatmapActive={heatmapState.isActive}
+                  isHeatmapLoading={isVotingLoading}
+                  isDesktop={false}
+                  isSignedIn={isSignedIn}
+                  onSignInClick={handleSignInClick}
+                />
+              </div>
+            </>
+          ) : (
+            <Leaderboard gameId="flappy-orange" showGameSelector excludeGames={['combat']} />
+          )}
         </div>
       </div>
 
