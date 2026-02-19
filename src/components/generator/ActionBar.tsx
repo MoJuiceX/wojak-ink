@@ -118,7 +118,6 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
     favorites,
     saveFavorite,
     canExport,
-    combatMoves,
   } = useGenerator();
   const { credits, prepareMint, resetMintFlow, maxSupply, getTotalMintPrice, mintingPaused, totalMinted } = useMint();
   const { address, status: walletStatus, connect } = useSageWallet();
@@ -203,11 +202,11 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
       const colorsForApi: Record<string, string> = { ...(selectedColors || {}) };
 
       setIsMintModalOpen(true);
-      prepareMint(webpBlob, layersForApi, colorsForApi, effectiveMintType, combatMoves.length === 4 ? combatMoves : undefined);
+      prepareMint(webpBlob, layersForApi, colorsForApi, effectiveMintType);
     } catch (err) {
       console.error('[ActionBar] Failed to prepare mint:', err);
     }
-  }, [isWalletConnected, canExport, has7Traits, selectedLayers, selectedColors, hasFreeMintsAvailable, mintType, connect, prepareMint, g2Selections, combatMoves]);
+  }, [isWalletConnected, canExport, has7Traits, selectedLayers, selectedColors, hasFreeMintsAvailable, mintType, connect, prepareMint, g2Selections]);
 
   const basePath = selectedLayers.Base;
   const hasSelection = !isSelectionPathEmpty(basePath);
