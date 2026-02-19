@@ -5,11 +5,13 @@
  * horizontal NFT scroll, compact stats, and expanded social widgets.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SignedOut, SignInButton, useClerk, useAuth } from '@clerk/clerk-react';
-import { LogOut, Settings } from 'lucide-react';
+import { LogOut, Settings, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
+import { useToast } from '@/contexts/ToastContext';
 
 import { useUserProfile } from '@/contexts/UserProfileContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
@@ -62,6 +64,52 @@ export default function Account() {
     address: walletAddress,
     getNFTs,
   } = useSageWallet();
+
+  const toast = useToast();
+
+  // Get player's DID from wallet address for refresh
+  const { data: playerDid } = useQuery({
+    queryKey: ['player-did', walletAddress],
+    queryFn: async () => {
+      if (!walletAddress) return null;
+      const res = await fetch(`/api/game/player?wallet=${encodeURIComponent(walletAddress)}`);
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.player?.did as string | null;
+    },
+    enabled: !!walletAddress,
+    staleTime: 300000,
+  });
+
+  // DID refresh state
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefreshDid = useCallback(async () => {
+    if (!playerDid || refreshing) return;
+    setRefreshing(true);
+
+    try {
+      const res = await fetch('/api/profile/refresh-did', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ did: playerDid }),
+      });
+
+      const data = await res.json();
+
+      if (res.status === 429) {
+        toast.error(data.error || 'Please wait between refreshes');
+      } else if (!res.ok) {
+        toast.error(data.error || 'Refresh failed');
+      } else {
+        toast.success(`Synced! Found ${data.nftsFound} NFTs`);
+      }
+    } catch {
+      toast.error('Refresh failed');
+    } finally {
+      setRefreshing(false);
+    }
+  }, [playerDid, refreshing, toast]);
 
   // Voting consumables - fetch from API
   const [votingCounts, setVotingCounts] = useState({ donuts: 0, poops: 0 });
@@ -307,6 +355,18 @@ export default function Account() {
             className="account-actions"
             variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } } }}
           >
+            {playerDid && (
+              <button
+                type="button"
+                className="action-button"
+                onClick={handleRefreshDid}
+                disabled={refreshing}
+              >
+                <RefreshCw size={18} className={refreshing ? 'animate-spin' : ''} />
+                {refreshing ? 'Syncing...' : 'Sync NFTs'}
+              </button>
+            )}
+
             <button
               type="button"
               className="action-button action-settings"
