@@ -13,10 +13,10 @@ const MINTGARDEN_API = 'https://api.mintgarden.io';
 const KV_KEY_LAST_TIMESTAMP = 'last_credit_event_timestamp';
 const KV_KEY_LAST_FLOOR_DATE = 'last_floor_snapshot_date';
 // === Economic constants ===
-// Royalty: 10% on Farmers Plot sales. Your Wojak mint: 0.2 XCH.
-// CREDITS_PER_XCH = (0.10 / 0.20) * 100 = 50
+// Royalty: 10% on Farmers Plot sales. Your Wojak mint: 0.1 XCH.
+// CREDITS_PER_XCH = (0.10 / 0.10) * 100 = 100
 // At floor, 1 purchase = 1 free mint (revenue-neutral with royalty income).
-const CREDITS_PER_XCH = 50;
+const CREDITS_PER_XCH = 100;
 
 // Asymptotic whale bonus cap: multiplier never exceeds 1.30.
 // Wash trading breaks even at ~3x floor, max ~1% profit at extreme prices.
@@ -794,13 +794,15 @@ async function runIntegrityCheck(
 const KV_KEY_LAST_BURN_TIMESTAMP = 'last_burn_event_timestamp';
 
 function calculateBurnCredits(likes: number, dislikes: number): number {
+  // Stored units = display credits × 100
+  // Higher dislike ratio = more credits for burning "bad" NFTs
   const total = likes + dislikes;
-  if (total === 0) return 500;
+  if (total === 0) return 1000; // 10 display credits for unvoted NFTs
   const dislikeRatio = dislikes / total;
-  if (dislikeRatio > 0.7) return 2000;
-  if (dislikeRatio > 0.5) return 1200;
-  if (dislikeRatio > 0.3) return 500;
-  return 200;
+  if (dislikeRatio > 0.7) return 8000;  // 80 display credits
+  if (dislikeRatio > 0.5) return 5000;  // 50 display credits
+  if (dislikeRatio > 0.3) return 2500;  // 25 display credits
+  return 1000;                           // 10 display credits
 }
 
 async function detectBurns(env: Env): Promise<{ detected: number; credited: number }> {
@@ -876,25 +878,41 @@ async function detectBurns(env: Env): Promise<{ detected: number; credited: numb
       // Resolve burner wallet: previous_address is who sent the burn
       const burnerWallet = event.previous_address?.encoded_id || mint.wallet_address;
 
+      // Check if burner is the original minter - if so, no credits awarded
+      const isSelfBurn = burnerWallet === mint.wallet_address;
+      const creditsToAward = isSelfBurn ? 0 : credits;
+      if (isSelfBurn) {
+        console.log(`[CreditTracker] Self-burn detected: ${burnerWallet.slice(0, 15)}... burned own edition ${mint.mint_number} - no credits`);
+      }
+
       // Resolve DID (if registered game player)
       const player = await env.DB.prepare(
         'SELECT did_id FROM game_players WHERE wallet_address = ?'
       ).bind(burnerWallet).first<{ did_id: string }>();
 
       try {
-        await env.DB.batch([
+        // Always record the burn, but only award credits if not self-burn
+        const statements = [
           env.DB.prepare(`
             INSERT INTO wojak_burns (nft_id, edition_number, burner_did, burner_wallet, net_score_at_burn, credits_awarded, detected_via)
             VALUES (?, ?, ?, ?, ?, ?, 'indexer')
-          `).bind(nftId, mint.mint_number, player?.did_id || null, burnerWallet, netScore, credits),
-          env.DB.prepare(`
-            INSERT INTO credit_events (wallet_address, nft_id, event_id, price_xch, floor_at_time, credits_earned, whale_multiplier, source, event_type, event_timestamp)
-            VALUES (?, ?, ?, 0, 0, ?, 100, 'burn', 'burn', ?)
-          `).bind(burnerWallet, nftId, `burn_${nftId}`, credits, event.timestamp),
+          `).bind(nftId, mint.mint_number, player?.did_id || null, burnerWallet, netScore, creditsToAward),
           env.DB.prepare(
             'DELETE FROM did_holdings WHERE nft_id = ?'
           ).bind(nftId),
-        ]);
+        ];
+
+        // Only create credit event if credits > 0
+        if (creditsToAward > 0) {
+          statements.push(
+            env.DB.prepare(`
+              INSERT INTO credit_events (wallet_address, nft_id, event_id, price_xch, floor_at_time, credits_earned, whale_multiplier, source, event_type, event_timestamp)
+              VALUES (?, ?, ?, 0, 0, ?, 100, 'burn', 'burn', ?)
+            `).bind(burnerWallet, nftId, `burn_${nftId}`, creditsToAward, event.timestamp)
+          );
+        }
+
+        await env.DB.batch(statements);
         credited++;
       } catch (e) {
         if (!String(e).includes('UNIQUE')) {

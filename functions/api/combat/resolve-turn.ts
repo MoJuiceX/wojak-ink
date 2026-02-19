@@ -184,6 +184,29 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         db.prepare(`UPDATE combat_fighters SET xp = xp + ?, elo_rating = elo_rating + ?, ${winColB} = ${winColB} + 1, level = ?, battle_power = battle_power + ?, power_score = vote_power + battle_power + ?, updated_at = datetime('now') WHERE nft_id = ?`)
           .bind(xpB, eloB, calculateLevelFromXP(fighterBRow.xp + xpB), powerDeltaB, powerDeltaB, battle.fighter_b_nft),
       );
+
+      // Award participation credits: win = 500 units (5 credits), loss = 100 units (1 credit)
+      const creditsA = resultA === 'win' ? 500 : resultA === 'loss' ? 100 : 200;
+      const creditsB = resultB === 'win' ? 500 : resultB === 'loss' ? 100 : 200;
+
+      // Look up wallet addresses for credit events
+      const playerA = await db.prepare('SELECT wallet_address FROM game_players WHERE did_id = ?').bind(battle.fighter_a_did).first<{ wallet_address: string }>();
+      const playerB = await db.prepare('SELECT wallet_address FROM game_players WHERE did_id = ?').bind(battle.fighter_b_did).first<{ wallet_address: string }>();
+
+      if (playerA?.wallet_address) {
+        statements.push(
+          db.prepare(`INSERT INTO credit_events (wallet_address, nft_id, event_id, price_xch, floor_at_time, credits_earned, whale_multiplier, source, event_type, event_timestamp)
+            VALUES (?, ?, ?, 0, 0, ?, 100, 'battle', 'battle', datetime('now'))`)
+            .bind(playerA.wallet_address, battle.fighter_a_nft, `battle_${battleId}_a`, creditsA)
+        );
+      }
+      if (playerB?.wallet_address) {
+        statements.push(
+          db.prepare(`INSERT INTO credit_events (wallet_address, nft_id, event_id, price_xch, floor_at_time, credits_earned, whale_multiplier, source, event_type, event_timestamp)
+            VALUES (?, ?, ?, 0, 0, ?, 100, 'battle', 'battle', datetime('now'))`)
+            .bind(playerB.wallet_address, battle.fighter_b_nft, `battle_${battleId}_b`, creditsB)
+        );
+      }
     }
 
     await db.batch(statements);
