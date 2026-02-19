@@ -323,7 +323,7 @@ export function NFTPreviewCard({
         className="rounded-3xl overflow-hidden flex items-center justify-center"
         style={{
           background: 'var(--color-bg)',
-          border: `2px solid ${rarity ? `${tierColor}40` : 'rgba(255,255,255,0.1)'}`,
+          border: `2px solid ${rarity ? `${tierColor}40` : 'var(--color-white-10)'}`,
           aspectRatio: '1 / 1',
           height: '100%',
         }}

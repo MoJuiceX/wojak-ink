@@ -84,8 +84,8 @@ export const HEATMAP_COLORS = {
 
   // View mode overlays
   viewModeOverlays: {
-    'sleepy-deals': 'rgba(34, 197, 94, 0.3)', // Green
-    'delusion-zones': 'rgba(239, 68, 68, 0.3)', // Red
+    'sleepy-deals': 'var(--color-success-30)', // Green
+    'delusion-zones': 'var(--color-error-30)', // Red
     'floor-snipes': 'rgba(59, 130, 246, 0.3)', // Blue
     'rare-reasonable': 'rgba(168, 85, 247, 0.3)', // Purple
     'whale-territory': 'rgba(251, 191, 36, 0.3)', // Gold

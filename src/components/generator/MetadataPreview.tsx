@@ -304,7 +304,7 @@ export function MetadataPreview({ onSwitchToColors }: MetadataPreviewProps) {
                 style={{
                   padding: '6px 8px',
                   background: isEmpty ? 'transparent' : 'rgba(255, 255, 255, 0.025)',
-                  border: isEmpty ? '1px solid rgba(255, 255, 255, 0.03)' : '1px solid rgba(255, 255, 255, 0.05)',
+                  border: isEmpty ? '1px solid rgba(255, 255, 255, 0.03)' : '1px solid var(--color-white-5)',
                   opacity: isEmpty ? 0.3 : 1,
                 }}
               >

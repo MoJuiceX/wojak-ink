@@ -35,7 +35,7 @@ export const DebugMusicButtons: React.FC<DebugMusicButtonsProps> = ({
             border: '3px solid white',
             borderRadius: '10px',
             cursor: 'pointer',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
+            boxShadow: '0 2px 8px var(--color-black-50)',
           }}
         >
           {i + 1}

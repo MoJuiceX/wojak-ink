@@ -457,7 +457,7 @@ export function TraitAuditWizard({ onClose }: TraitAuditWizardProps) {
             <div className="flex items-center gap-2">
               <button type="button" className="btn btn-ghost text-[11px] px-2 py-1" disabled={currentIndex === 0} onClick={() => setCurrentIndex((i) => i - 1)}>Prev</button>
               <button type="button" className="text-[11px] px-3 py-1 rounded font-medium text-error" style={{ background: 'var(--color-error-15)', border: '1px solid var(--color-error-30)' }} disabled={isApplying} onClick={() => recordVerdict('fail')}>Fail</button>
-              <button type="button" className="text-[11px] px-3 py-1 rounded font-medium text-success" style={{ background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)' }} disabled={isApplying} onClick={() => recordVerdict('works')}>Works</button>
+              <button type="button" className="text-[11px] px-3 py-1 rounded font-medium text-success" style={{ background: 'rgba(34,197,94,0.15)', border: '1px solid var(--color-success-30)' }} disabled={isApplying} onClick={() => recordVerdict('works')}>Works</button>
               <button type="button" className="btn btn-ghost text-[11px] px-2 py-1" disabled={currentIndex === total - 1} onClick={() => setCurrentIndex((i) => i + 1)}>Next</button>
               <div className="flex-1" />
               <div className="flex items-center gap-0.5">
@@ -465,7 +465,7 @@ export function TraitAuditWizard({ onClose }: TraitAuditWizardProps) {
                   const v = results.get(tc.id);
                   return (
                     <button key={tc.id} type="button" className="w-2 h-2 rounded-full" style={{
-                      background: v === 'works' ? 'var(--color-success)' : v === 'fail' ? 'var(--color-error)' : i === currentIndex ? 'var(--color-primary)' : 'rgba(255,255,255,0.15)',
+                      background: v === 'works' ? 'var(--color-success)' : v === 'fail' ? 'var(--color-error)' : i === currentIndex ? 'var(--color-primary)' : 'var(--color-white-15)',
                       border: i === currentIndex ? '1px solid var(--color-text)' : 'none',
                       cursor: 'pointer',
                     }} onClick={() => setCurrentIndex(i)} title={`${i + 1}. ${tc.title}`} />

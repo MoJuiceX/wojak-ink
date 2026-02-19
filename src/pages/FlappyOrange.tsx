@@ -1655,7 +1655,7 @@ const FlappyOrange: React.FC = () => {
 
         // Idle screen
         if (state.gameState === 'idle') {
-          ctx.fillStyle = 'rgba(0,0,0,0.5)';
+          ctx.fillStyle = 'var(--color-black-50)';
           ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
           ctx.fillStyle = '#FFF';
           ctx.font = 'bold 24px Arial';
@@ -1792,7 +1792,7 @@ const FlappyOrange: React.FC = () => {
 
         // Draw background pill
         const textWidth = ctx.measureText(text).width;
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+        ctx.fillStyle = 'var(--color-black-60)';
         ctx.beginPath();
         ctx.roundRect(textX - textWidth / 2 - 10, textY - 12, textWidth + 20, 18, 9);
         ctx.fill();

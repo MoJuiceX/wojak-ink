@@ -64,7 +64,7 @@ function ToastItem({ toast, onDismiss }: ToastItemProps) {
       className={`toast toast-${toast.type}`}
       style={{
         borderColor: colors.border,
-        boxShadow: `0 10px 40px rgba(0, 0, 0, 0.5), 0 0 20px ${colors.glow}`,
+        boxShadow: `0 10px 40px var(--color-black-50), 0 0 20px ${colors.glow}`,
       }}
       role="status"
       aria-live="polite"

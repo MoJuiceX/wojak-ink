@@ -72,7 +72,7 @@ export const TraitCard = memo(function TraitCard({
       <div
         className="absolute bottom-0 left-0 right-0 px-2 py-1 text-xs font-medium truncate"
         style={{
-          background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
+          background: 'linear-gradient(transparent, var(--color-black-70))',
           color: 'white',
         }}
       >

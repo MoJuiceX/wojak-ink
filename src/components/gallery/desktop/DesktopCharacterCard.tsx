@@ -69,16 +69,16 @@ export function DesktopCharacterCard({
       className="character-card glass hover-lift glow-section w-full text-left overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-4"
       style={{
         // Glassmorphism background
-        background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%)',
+        background: 'linear-gradient(135deg, var(--color-primary-10) 0%, rgba(0, 0, 0, 0.4) 100%)',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
         border: isHovered
           ? '1px solid rgba(249, 115, 22, 0.6)'
-          : '1px solid rgba(249, 115, 22, 0.2)',
+          : '1px solid var(--color-primary-20)',
         borderRadius: card.borderRadius,
         // Glow effect on hover
         boxShadow: isHovered
-          ? '0 20px 40px rgba(0, 0, 0, 0.4), 0 0 30px rgba(249, 115, 22, 0.3), inset 0 0 20px rgba(249, 115, 22, 0.1)'
+          ? '0 20px 40px rgba(0, 0, 0, 0.4), 0 0 30px var(--color-primary-30), inset 0 0 20px var(--color-primary-10)'
           : 'none',
         transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
         // Focus ring styles
@@ -119,7 +119,7 @@ export function DesktopCharacterCard({
             className="relative text-sm font-bold"
             style={{
               color: '#ffffff',
-              textShadow: '0 1px 3px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.8)',
+              textShadow: '0 1px 3px var(--color-black-90), 0 0 8px var(--color-black-80)',
               lineHeight: 1.2,
             }}
           >
@@ -131,7 +131,7 @@ export function DesktopCharacterCard({
         <div
           className="absolute inset-0 pointer-events-none transition-opacity duration-300"
           style={{
-            boxShadow: 'inset 0 0 30px rgba(249, 115, 22, 0.2)',
+            boxShadow: 'inset 0 0 30px var(--color-primary-20)',
             borderRadius: 'inherit',
             opacity: isHovered ? 1 : 0,
           }}

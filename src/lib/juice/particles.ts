@@ -144,7 +144,7 @@ export const PARTICLE_PRESETS: Record<string, ParticleConfig> = {
     speed: { min: 0, max: 0 },
     size: { min: 10, max: 10 },
     life: { min: 400, max: 400 },
-    colors: ['rgba(255, 255, 255, 0.3)'],
+    colors: ['var(--color-white-30)'],
     gravity: 0,
     friction: 1,
     shrink: false, // grows instead

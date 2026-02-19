@@ -325,9 +325,9 @@ export function Logo({ className = '', size = 'md', showText = true, showTagline
                     style={{ marginRight: '8px' }}
                     animate={{
                       filter: [
-                        'drop-shadow(0 0 5px rgba(249, 115, 22, 0.3))',
+                        'drop-shadow(0 0 5px var(--color-primary-30))',
                         'drop-shadow(0 0 15px rgba(249, 115, 22, 0.5))',
-                        'drop-shadow(0 0 5px rgba(249, 115, 22, 0.3))',
+                        'drop-shadow(0 0 5px var(--color-primary-30))',
                       ],
                     }}
                     transition={{

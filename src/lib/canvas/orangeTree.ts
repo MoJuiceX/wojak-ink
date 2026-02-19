@@ -350,7 +350,7 @@ export const drawOrangeTree = (
     ctx.fill();
 
     // Small highlight
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.fillStyle = 'var(--color-white-40)';
     ctx.beginPath();
     ctx.arc(
       ox - orange.size * 0.3,

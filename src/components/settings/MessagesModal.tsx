@@ -38,7 +38,7 @@ function getTypeIcon(type: string) {
 function getTypeBg(type: string) {
   switch (type) {
     case 'success':
-      return 'rgba(34, 197, 94, 0.1)';
+      return 'var(--color-success-10)';
     case 'warning':
       return 'rgba(245, 158, 11, 0.1)';
     default:

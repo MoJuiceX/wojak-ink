@@ -408,7 +408,7 @@ export function GlobalVideoPlayer() {
                 cy="32"
                 r="28"
                 fill="none"
-                stroke="rgba(255,255,255,0.2)"
+                stroke="var(--color-white-20)"
                 strokeWidth="4"
               />
               {/* Progress circle */}
@@ -453,7 +453,7 @@ export function GlobalVideoPlayer() {
                 className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-1 rounded text-xs pointer-events-none"
                 style={{
                   top: MINIMIZED_SIZE + 8,
-                  background: 'rgba(0,0,0,0.9)',
+                  background: 'var(--color-black-90)',
                   color: 'white',
                 }}
                 initial={{ opacity: 0, y: -5 }}
@@ -523,7 +523,7 @@ export function GlobalVideoPlayer() {
           {/* Progress bar at very bottom */}
           <div
             className="absolute bottom-0 left-0 right-0 h-1"
-            style={{ background: 'rgba(255,255,255,0.2)' }}
+            style={{ background: 'var(--color-white-20)' }}
           >
             <motion.div
               className="h-full"

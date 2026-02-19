@@ -79,7 +79,7 @@ export const CARD_GESTURES = {
   subtle: {
     whileHover: {
       y: -2,
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+      backgroundColor: 'var(--color-white-5)',
     },
     transition: SPRING.soft,
   },

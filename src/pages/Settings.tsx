@@ -126,7 +126,7 @@ export default function Settings() {
                       fontSize: '9px',
                       fontWeight: 600,
                       lineHeight: 1,
-                      color: skipBoot ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.4)',
+                      color: skipBoot ? 'rgba(255,255,255,0.9)' : 'var(--color-white-40)',
                       left: skipBoot ? '6px' : undefined,
                       right: skipBoot ? undefined : '6px',
                       transition: 'opacity 0.2s ease',

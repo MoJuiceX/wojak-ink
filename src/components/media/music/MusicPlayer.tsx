@@ -112,7 +112,7 @@ export function MusicPlayer({ tracks }: MusicPlayerProps) {
         className={`relative flex items-center gap-5 p-5 overflow-hidden ${isPlaying ? 'playing' : ''}`}
         style={{
           background: 'var(--color-surface)',
-          border: '1px solid rgba(249, 115, 22, 0.2)',
+          border: '1px solid var(--color-primary-20)',
           borderRadius: '20px',
         }}
       >
@@ -120,7 +120,7 @@ export function MusicPlayer({ tracks }: MusicPlayerProps) {
         <motion.div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: 'linear-gradient(45deg, transparent 30%, rgba(249, 115, 22, 0.1) 50%, transparent 70%)',
+            background: 'linear-gradient(45deg, transparent 30%, var(--color-primary-10) 50%, transparent 70%)',
             backgroundSize: '200% 200%',
           }}
           animate={isPlaying && !prefersReducedMotion ? {
@@ -142,7 +142,7 @@ export function MusicPlayer({ tracks }: MusicPlayerProps) {
             width: 48,
             height: 48,
             borderRadius: '12px',
-            background: 'rgba(249, 115, 22, 0.2)',
+            background: 'var(--color-primary-20)',
           }}
           animate={isPlaying && !prefersReducedMotion ? {
             scale: [1, 1.05, 1],

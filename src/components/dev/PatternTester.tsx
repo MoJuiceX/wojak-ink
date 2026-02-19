@@ -76,7 +76,7 @@ export function PatternTester() {
         maxWidth: '600px',
         maxHeight: '80%',
         overflow: 'auto',
-        background: 'rgba(0, 0, 0, 0.9)',
+        background: 'var(--color-black-90)',
         borderRadius: '12px',
         padding: '20px',
         color: 'white',

@@ -704,7 +704,7 @@ const OrangeSnake: React.FC = () => {
       ctx.font = 'bold 24px Arial';
       ctx.textAlign = 'left';
       ctx.fillStyle = '#fff';
-      ctx.shadowColor = 'rgba(0,0,0,0.5)';
+      ctx.shadowColor = 'var(--color-black-50)';
       ctx.shadowBlur = 4;
       ctx.fillText(`Length: ${state.playerSnake.segments.length}`, 15, 35);
       ctx.restore();

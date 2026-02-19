@@ -341,7 +341,7 @@ export function TraitNameAudit({ onBack }: TraitNameAuditProps) {
                 background: isActive ? 'rgba(0,212,255,0.15)' : 'var(--color-white-3)',
                 color: isActive ? 'var(--color-cyan)' : 'var(--color-text-muted)',
                 border: isActive
-                  ? '1px solid rgba(0,212,255,0.3)'
+                  ? '1px solid var(--color-cyan-30)'
                   : hasUnmapped
                     ? `1px solid ${STATUS_BORDER['unmapped']}`
                     : hasGenOnly
@@ -410,7 +410,7 @@ export function TraitNameAudit({ onBack }: TraitNameAuditProps) {
                   className="px-2 py-1.5 rounded"
                   style={{
                     background: 'rgba(0,212,255,0.08)',
-                    border: '1px solid rgba(0,212,255,0.2)',
+                    border: '1px solid var(--color-cyan-20)',
                   }}
                 >
                   <span className="text-cyan" style={{ fontSize: '10px', fontWeight: 600 }}>
@@ -435,7 +435,7 @@ export function TraitNameAudit({ onBack }: TraitNameAuditProps) {
                         height: '14px',
                         borderRadius: '3px',
                         backgroundColor: '#1a1a2e',
-                        border: '1px solid rgba(255,255,255,0.15)',
+                        border: '1px solid var(--color-white-15)',
                         flexShrink: 0,
                       }}
                     />
@@ -497,7 +497,7 @@ export function TraitNameAudit({ onBack }: TraitNameAuditProps) {
                     className="px-2 py-1.5 rounded"
                     style={{
                       background: 'rgba(0,212,255,0.08)',
-                      border: '1px solid rgba(0,212,255,0.2)',
+                      border: '1px solid var(--color-cyan-20)',
                       marginTop: '6px',
                     }}
                   >

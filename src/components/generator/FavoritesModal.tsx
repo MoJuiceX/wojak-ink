@@ -74,7 +74,7 @@ export function FavoritesModal({ className = '' }: FavoritesModalProps) {
           {/* Backdrop */}
           <motion.div
             className={`fixed inset-0 z-50 ${className}`}
-            style={{ background: 'rgba(0, 0, 0, 0.7)' }}
+            style={{ background: 'var(--color-black-70)' }}
             variants={prefersReducedMotion ? undefined : modalBackdropVariants}
             initial="hidden"
             animate="visible"

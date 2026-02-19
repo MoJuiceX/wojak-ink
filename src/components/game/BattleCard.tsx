@@ -87,7 +87,7 @@ export function BattleCard({
         <div className={`flex-1 flex flex-col items-center gap-2 ${isCompleted && !aWon ? 'opacity-40' : ''}`}>
           <div
             className="battle-nft-image"
-            style={aWon ? { borderColor: 'var(--color-success)', boxShadow: '0 0 12px rgba(34, 197, 94, 0.3)' } : undefined}
+            style={aWon ? { borderColor: 'var(--color-success)', boxShadow: '0 0 12px var(--color-success-30)' } : undefined}
           >
             <Link to={`/swipe/wojak/${nftA.edition}`}>
               <img
@@ -123,7 +123,7 @@ export function BattleCard({
         <div className={`flex-1 flex flex-col items-center gap-2 ${isCompleted && !bWon ? 'opacity-40' : ''}`}>
           <div
             className="battle-nft-image"
-            style={bWon ? { borderColor: 'var(--color-success)', boxShadow: '0 0 12px rgba(34, 197, 94, 0.3)' } : undefined}
+            style={bWon ? { borderColor: 'var(--color-success)', boxShadow: '0 0 12px var(--color-success-30)' } : undefined}
           >
             <Link to={`/swipe/wojak/${nftB.edition}`}>
               <img

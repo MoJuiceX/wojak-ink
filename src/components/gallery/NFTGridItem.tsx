@@ -138,7 +138,7 @@ export const NFTGridItem = memo(function NFTGridItem({
           style={{
             color: 'white',
             textShadow:
-              '0 1px 4px rgba(0, 0, 0, 0.7), 0 0 8px rgba(0, 0, 0, 0.5)',
+              '0 1px 4px var(--color-black-70), 0 0 8px var(--color-black-50)',
           }}
         >
           {nft.name}

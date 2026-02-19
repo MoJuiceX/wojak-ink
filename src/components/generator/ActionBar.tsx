@@ -90,7 +90,7 @@ function ActionBarTooltip({
             style={{
               left: pos.x,
               bottom: typeof window !== 'undefined' ? window.innerHeight - pos.y + 8 : 0,
-              background: 'rgba(0, 0, 0, 0.9)',
+              background: 'var(--color-black-90)',
               border: '1px solid var(--color-border)',
             }}
             role="tooltip"

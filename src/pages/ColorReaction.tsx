@@ -1762,7 +1762,7 @@ const ColorReaction: React.FC = () => {
                     cy="50"
                     r="46"
                     fill="none"
-                    stroke="rgba(255,255,255,0.2)"
+                    stroke="var(--color-white-20)"
                     strokeWidth="4"
                   />
                   <circle

@@ -85,9 +85,9 @@ export const GameIdleScreen: React.FC<GameIdleScreenProps> = ({
               ? {}
               : {
                   boxShadow: [
-                    '0 0 20px rgba(249, 115, 22, 0.4)',
+                    '0 0 20px var(--color-primary-40)',
                     '0 0 40px rgba(249, 115, 22, 0.6)',
-                    '0 0 20px rgba(249, 115, 22, 0.4)',
+                    '0 0 20px var(--color-primary-40)',
                   ],
                 }
           }

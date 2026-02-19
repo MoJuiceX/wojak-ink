@@ -164,7 +164,7 @@ export function WalletSettings() {
               className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors text-error"
               style={{
                 background: 'transparent',
-                border: '1px solid rgba(239, 68, 68, 0.3)',
+                border: '1px solid var(--color-error-30)',
               }}
               onClick={handleDisconnect}
             >

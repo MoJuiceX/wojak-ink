@@ -595,7 +595,7 @@ export default function Drawer() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: rgba(255, 255, 255, 0.08);
+          background: var(--color-white-8);
           border: 1px solid var(--color-white-10);
           border-radius: 12px;
           color: #fff;
@@ -607,8 +607,8 @@ export default function Drawer() {
 
         .back-button:hover,
         .share-button:hover {
-          background: rgba(255, 255, 255, 0.15);
-          border-color: rgba(255, 255, 255, 0.2);
+          background: var(--color-white-15);
+          border-color: var(--color-white-20);
         }
 
         /* Hero Section */
@@ -682,7 +682,7 @@ export default function Drawer() {
           gap: 12px;
           padding: 16px 20px;
           background: var(--color-white-5);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          border: 1px solid var(--color-white-8);
           border-radius: 16px;
           min-width: 120px;
         }
@@ -799,7 +799,7 @@ export default function Drawer() {
           gap: 6px;
           padding: 10px 16px;
           background: var(--color-white-5);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          border: 1px solid var(--color-white-8);
           border-radius: 12px;
           color: var(--color-white-60);
           font-size: 0.85rem;
@@ -845,7 +845,7 @@ export default function Drawer() {
           align-items: center;
           padding: 20px 12px 16px;
           background: linear-gradient(135deg, var(--color-white-5), rgba(255, 255, 255, 0.02));
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          border: 1px solid var(--color-white-8);
           border-radius: 16px;
           transition: all 0.2s;
           cursor: pointer;

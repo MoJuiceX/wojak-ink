@@ -775,13 +775,13 @@ function HeatMapCell({
       return 'linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.01) 100%)';
     }
     // Overlay gradient on top of intensity color for premium look
-    return `linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(0,0,0,0.1) 100%), ${backgroundColor}`;
+    return `linear-gradient(135deg, var(--color-white-10) 0%, transparent 50%, rgba(0,0,0,0.1) 100%), ${backgroundColor}`;
   };
 
   const getCellShadow = () => {
     if (isEmpty) return 'none';
     if (cell.intensity > 0.5) {
-      return `inset 0 1px 0 rgba(255,255,255,0.2), 0 2px 4px rgba(0,0,0,0.3), 0 0 ${8 + cell.intensity * 12}px rgba(255,149,0,${0.1 + cell.intensity * 0.2})`;
+      return `inset 0 1px 0 var(--color-white-20), 0 2px 4px rgba(0,0,0,0.3), 0 0 ${8 + cell.intensity * 12}px rgba(255,149,0,${0.1 + cell.intensity * 0.2})`;
     }
     return 'inset 0 1px 0 var(--color-white-10), 0 1px 2px var(--color-black-20)';
   };
@@ -827,7 +827,7 @@ function HeatMapCell({
       whileHover={isEmpty ? undefined : {
         scale: 1.1,
         zIndex: 10,
-        boxShadow: `inset 0 1px 0 rgba(255,255,255,0.3), 0 4px 12px rgba(0,0,0,0.4), 0 0 20px rgba(255,149,0,0.3)`,
+        boxShadow: `inset 0 1px 0 var(--color-white-30), 0 4px 12px rgba(0,0,0,0.4), 0 0 20px rgba(255,149,0,0.3)`,
       }}
       whileTap={isEmpty ? undefined : {
         scale: 0.95,

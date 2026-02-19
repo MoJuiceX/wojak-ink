@@ -314,7 +314,7 @@ function drawBrandingBar(ctx: CanvasRenderingContext2D): void {
   ctx.fillRect(0, y, CANVAS_WIDTH, BRANDING_HEIGHT);
 
   // Top border line
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+  ctx.fillStyle = 'var(--color-white-8)';
   ctx.fillRect(0, y, CANVAS_WIDTH, 1);
 
   // Brand left
@@ -486,11 +486,11 @@ async function drawScreenshotSection(
       ctx.restore();
 
       // Subtle border/shadow
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+      ctx.shadowColor = 'var(--color-black-50)';
       ctx.shadowBlur = 48;
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 16;
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.strokeStyle = 'var(--color-white-15)';
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.roundRect(x, y, maxWidth, maxHeight, radius);
@@ -622,7 +622,7 @@ function drawStatsSection(
 
   // PHASE 2: CTA message
   const cta = getCTA(data.score, bestScore, data.isNewHighScore);
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+  ctx.fillStyle = 'var(--color-white-40)';
   ctx.font = 'italic 500 18px system-ui, -apple-system, sans-serif';
   ctx.fillText(cta, x, currentY);
 }

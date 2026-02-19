@@ -120,7 +120,7 @@ export const drawFloatingText = (
   ctx.shadowBlur = 8;
 
   // Shadow
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+  ctx.fillStyle = 'var(--color-black-50)';
   ctx.fillText(text.text, text.x + 2, text.y + 2);
 
   // Main text

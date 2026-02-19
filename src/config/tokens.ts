@@ -55,13 +55,13 @@ export const backgrounds = {
   tertiary: '#262626',
   elevated: '#2D2D2D',
   overlay: {
-    light: 'rgba(255, 255, 255, 0.05)',
-    medium: 'rgba(255, 255, 255, 0.08)',
+    light: 'var(--color-white-5)',
+    medium: 'var(--color-white-8)',
     heavy: 'rgba(255, 255, 255, 0.12)',
   },
   orange: {
     subtle: 'rgba(249, 115, 22, 0.05)',
-    light: 'rgba(249, 115, 22, 0.1)',
+    light: 'var(--color-primary-10)',
     medium: 'rgba(249, 115, 22, 0.15)',
     strong: 'rgba(249, 115, 22, 0.25)',
   },
@@ -71,16 +71,16 @@ export const text = {
   primary: '#FFFFFF',
   secondary: 'rgba(255, 255, 255, 0.7)',
   tertiary: 'rgba(255, 255, 255, 0.5)',
-  disabled: 'rgba(255, 255, 255, 0.3)',
+  disabled: 'var(--color-white-30)',
   accent: colors.primary[500],
   gold: colors.gold[500],
 } as const;
 
 export const borders = {
-  subtle: 'rgba(255, 255, 255, 0.08)',
+  subtle: 'var(--color-white-8)',
   default: 'rgba(255, 255, 255, 0.12)',
-  strong: 'rgba(255, 255, 255, 0.2)',
-  accent: 'rgba(249, 115, 22, 0.3)',
+  strong: 'var(--color-white-20)',
+  accent: 'var(--color-primary-30)',
   accentStrong: 'rgba(249, 115, 22, 0.5)',
 } as const;
 
@@ -90,8 +90,8 @@ export const borders = {
 
 export const glows = {
   orange: {
-    sm: '0 0 10px rgba(249, 115, 22, 0.3)',
-    md: '0 0 20px rgba(249, 115, 22, 0.4)',
+    sm: '0 0 10px var(--color-primary-30)',
+    md: '0 0 20px var(--color-primary-40)',
     lg: '0 0 40px rgba(249, 115, 22, 0.5)',
     xl: '0 0 60px rgba(249, 115, 22, 0.6)',
   },
@@ -101,11 +101,11 @@ export const glows = {
     lg: '0 0 40px rgba(234, 179, 8, 0.5)',
   },
   success: {
-    sm: '0 0 10px rgba(34, 197, 94, 0.3)',
+    sm: '0 0 10px var(--color-success-30)',
     md: '0 0 15px rgba(34, 197, 94, 0.4)',
   },
   error: {
-    sm: '0 0 10px rgba(239, 68, 68, 0.3)',
+    sm: '0 0 10px var(--color-error-30)',
     md: '0 0 15px rgba(239, 68, 68, 0.4)',
   },
   warning: {
@@ -117,11 +117,11 @@ export const glows = {
 export const shadows = {
   sm: '0 2px 8px rgba(0, 0, 0, 0.3)',
   md: '0 4px 16px rgba(0, 0, 0, 0.4)',
-  lg: '0 8px 32px rgba(0, 0, 0, 0.5)',
-  xl: '0 16px 48px rgba(0, 0, 0, 0.6)',
-  card: '0 4px 20px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05)',
-  cardHover: `0 8px 30px rgba(0, 0, 0, 0.5), ${glows.orange.sm}`,
-  modal: `0 25px 50px rgba(0, 0, 0, 0.6), ${glows.orange.md}`,
+  lg: '0 8px 32px var(--color-black-50)',
+  xl: '0 16px 48px var(--color-black-60)',
+  card: '0 4px 20px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--color-white-5)',
+  cardHover: `0 8px 30px var(--color-black-50), ${glows.orange.sm}`,
+  modal: `0 25px 50px var(--color-black-60), ${glows.orange.md}`,
 } as const;
 
 // ============================================
@@ -259,10 +259,10 @@ export const blurs = {
 export const gradients = {
   page: `linear-gradient(180deg, ${backgrounds.primary} 0%, ${backgrounds.secondary} 100%)`,
   orange: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.primary[600]} 100%)`,
-  orangeSoft: 'linear-gradient(135deg, rgba(249, 115, 22, 0.2) 0%, rgba(234, 88, 12, 0.1) 100%)',
+  orangeSoft: 'linear-gradient(135deg, var(--color-primary-20) 0%, rgba(234, 88, 12, 0.1) 100%)',
   gold: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
   goldText: `linear-gradient(90deg, ${colors.primary[500]}, #FFD700, ${colors.primary[500]})`,
-  shimmer: 'linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 100%)',
+  shimmer: 'linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0%, var(--color-white-8) 50%, rgba(255, 255, 255, 0.03) 100%)',
   rarity: {
     common: 'linear-gradient(135deg, #6B7280, #4B5563)',
     rare: 'linear-gradient(135deg, #3B82F6, #1D4ED8)',

@@ -93,7 +93,7 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, bad
       {isDisabled && disabledReason && (
         <div
           className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center z-20"
-          style={{ background: 'rgba(0, 0, 0, 0.7)', border: '1px solid var(--color-border)' }}
+          style={{ background: 'var(--color-black-70)', border: '1px solid var(--color-border)' }}
           title={disabledReason}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">
@@ -185,7 +185,7 @@ function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick, p
       {isDisabled && disabledReason && (
         <div
           className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center z-20"
-          style={{ background: 'rgba(0, 0, 0, 0.7)', border: '1px solid var(--color-border)' }}
+          style={{ background: 'var(--color-black-70)', border: '1px solid var(--color-border)' }}
           title={disabledReason}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">

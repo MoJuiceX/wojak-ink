@@ -1036,7 +1036,7 @@ export default function BrickBreaker() {
       ctx.fill();
 
       // Highlight
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.fillStyle = 'var(--color-white-20)';
       ctx.fillRect(brick.x, brick.y, brick.width, brick.height / 3);
 
       // Crack effect for damaged strong bricks
@@ -1279,7 +1279,7 @@ export default function BrickBreaker() {
       ctx.arc(predictedX, paddle.y - 8, 5, 0, Math.PI * 2);
       ctx.fill();
       // Add vertical line
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.strokeStyle = 'var(--color-white-30)';
       ctx.lineWidth = 1;
       ctx.setLineDash([3, 3]);
       ctx.beginPath();
@@ -1318,7 +1318,7 @@ export default function BrickBreaker() {
       const height = 22;
 
       // Background
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      ctx.fillStyle = 'var(--color-black-60)';
       ctx.beginPath();
       ctx.roundRect(x, y, width, height, 4);
       ctx.fill();
@@ -1396,7 +1396,7 @@ export default function BrickBreaker() {
       const comboProgress = Math.max(0, 1 - comboElapsed / 500);
 
       // Meter background
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      ctx.fillStyle = 'var(--color-black-60)';
       ctx.beginPath();
       ctx.roundRect(comboX, comboY, comboWidth, comboHeight, 4);
       ctx.fill();

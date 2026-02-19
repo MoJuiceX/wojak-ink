@@ -107,7 +107,7 @@ export const PremiumButton = forwardRef<HTMLButtonElement, PremiumButtonProps>(
             ? undefined
             : {
                 scale: 1.02,
-                borderColor: 'rgba(255,255,255,0.2)',
+                borderColor: 'var(--color-white-20)',
               }
         }
         whileTap={disabled ? undefined : { scale: 0.98 }}
@@ -220,7 +220,7 @@ export function PremiumChip({
       }}
       whileHover={{
         scale: 1.05,
-        borderColor: 'rgba(255,255,255,0.2)',
+        borderColor: 'var(--color-white-20)',
       }}
       whileTap={{ scale: 0.95 }}
     >

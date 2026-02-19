@@ -64,17 +64,17 @@ export class ErrorBoundary extends Component<Props, State> {
           <div
             className="max-w-md w-full p-8 rounded-2xl text-center"
             style={{
-              background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%)',
+              background: 'linear-gradient(135deg, var(--color-error-10) 0%, rgba(0, 0, 0, 0.4) 100%)',
               backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
+              border: '1px solid var(--color-error-30)',
             }}
           >
             {/* Error Icon */}
             <div
               className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center"
               style={{
-                background: 'rgba(239, 68, 68, 0.1)',
-                border: '1px solid rgba(239, 68, 68, 0.3)',
+                background: 'var(--color-error-10)',
+                border: '1px solid var(--color-error-30)',
               }}
             >
               <AlertTriangle size={40} style={{ color: '#ef4444' }} />
@@ -135,8 +135,8 @@ export class ErrorBoundary extends Component<Props, State> {
                 onClick={this.handleGoHome}
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all text-primary"
                 style={{
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  background: 'var(--color-white-10)',
+                  border: '1px solid var(--color-white-20)',
                 }}
               >
                 <Home size={18} />

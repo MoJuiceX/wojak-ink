@@ -79,7 +79,7 @@ export function PreviewCanvas({
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: 'radial-gradient(circle, rgba(249, 115, 22, 0.4) 0%, rgba(249, 115, 22, 0.1) 40%, transparent 70%)',
+            background: 'radial-gradient(circle, var(--color-primary-40) 0%, var(--color-primary-10) 40%, transparent 70%)',
             filter: 'blur(40px)',
             animation: 'pulseGlow 3s ease-in-out infinite',
             zIndex: 0,

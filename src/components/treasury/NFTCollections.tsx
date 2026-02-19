@@ -218,7 +218,7 @@ export function NFTCollections({ collections, isLoading = false }: NFTCollection
                   <div
                     className="absolute inset-x-0 bottom-0 p-2"
                     style={{
-                      background: 'linear-gradient(transparent, rgba(0,0,0,0.9))',
+                      background: 'linear-gradient(transparent, var(--color-black-90))',
                     }}
                   >
                     <p className="text-sm font-semibold truncate text-primary">

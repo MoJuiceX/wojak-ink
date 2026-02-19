@@ -184,7 +184,7 @@ export function AboutSection() {
           {/* Backdrop */}
           <div
             className="fixed inset-0 z-50"
-            style={{ background: 'rgba(0, 0, 0, 0.7)' }}
+            style={{ background: 'var(--color-black-70)' }}
             onClick={handleCloseAdmin}
           />
 

@@ -622,7 +622,7 @@ const MemoryMatchGame: React.FC = () => {
                       </div>
                       <div className="game-over-buttons">
                         <button onClick={startGame} className="play-btn">Play Again</button>
-                        <button onClick={goToMenu} className="play-btn" style={{ background: 'rgba(255, 255, 255, 0.1)' }}>Menu</button>
+                        <button onClick={goToMenu} className="play-btn" style={{ background: 'var(--color-white-10)' }}>Menu</button>
                       </div>
                       <button className="leaderboard-toggle-btn" onClick={() => setShowLeaderboardPanel(!showLeaderboardPanel)}>
                         {showLeaderboardPanel ? 'Hide Leaderboard' : 'View Leaderboard'}

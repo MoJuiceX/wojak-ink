@@ -35,7 +35,7 @@ function GeneratorErrorBanner() {
       className="card-static flex items-center justify-between gap-3 p-3 mb-4"
       style={{
         borderLeft: '4px solid var(--color-error)',
-        background: 'rgba(239, 68, 68, 0.1)',
+        background: 'var(--color-error-10)',
       }}
       role="alert"
     >

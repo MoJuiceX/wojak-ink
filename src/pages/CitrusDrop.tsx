@@ -611,7 +611,7 @@ const CitrusDrop: React.FC = () => {
       ctx.globalAlpha = 1;
 
       // Drop line
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.strokeStyle = 'var(--color-white-30)';
       ctx.lineWidth = 1;
       ctx.setLineDash([4, 4]);
       ctx.beginPath();

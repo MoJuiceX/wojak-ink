@@ -660,7 +660,7 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
           align-items: center;
           justify-content: space-between;
           padding: 20px 20px 12px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+          border-bottom: 1px solid var(--color-white-8);
         }
 
         .editor-header h2 {
@@ -676,7 +676,7 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: rgba(255, 255, 255, 0.08);
+          background: var(--color-white-8);
           border: none;
           border-radius: 12px;
           color: var(--color-white-60);
@@ -685,7 +685,7 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
         }
 
         .close-btn:hover {
-          background: rgba(255, 255, 255, 0.15);
+          background: var(--color-white-15);
           color: #fff;
         }
 
@@ -777,7 +777,7 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
         }
 
         .nav-btn:hover {
-          background: rgba(255, 255, 255, 0.08);
+          background: var(--color-white-8);
           color: rgba(255, 255, 255, 0.8);
         }
 
@@ -827,15 +827,15 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
           gap: 8px;
           padding: 14px 10px;
           background: rgba(255, 255, 255, 0.04);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          border: 1px solid var(--color-white-8);
           border-radius: 14px;
           cursor: pointer;
           transition: all 0.2s;
         }
 
         .item-btn:hover:not(:disabled) {
-          background: rgba(255, 255, 255, 0.08);
-          border-color: rgba(255, 255, 255, 0.15);
+          background: var(--color-white-8);
+          border-color: var(--color-white-15);
         }
 
         .item-btn.owned {
@@ -1011,7 +1011,7 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
 
         .item-owned {
           font-size: 0.7rem;
-          color: rgba(255, 255, 255, 0.4);
+          color: var(--color-white-40);
         }
 
         .item-selected {

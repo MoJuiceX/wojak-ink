@@ -66,7 +66,7 @@ export function WalletButton({ className = '', size = 'md' }: WalletButtonProps)
           cursor: 'pointer',
         }}
         whileHover={{
-          boxShadow: '0 0 20px rgba(249, 115, 22, 0.5), 0 10px 30px rgba(249, 115, 22, 0.3)',
+          boxShadow: '0 0 20px rgba(249, 115, 22, 0.5), 0 10px 30px var(--color-primary-30)',
           y: -2,
         }}
         whileTap={{ scale: 0.98 }}
@@ -76,7 +76,7 @@ export function WalletButton({ className = '', size = 'md' }: WalletButtonProps)
         <motion.div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent)',
+            background: 'linear-gradient(90deg, transparent, var(--color-white-30), transparent)',
             transform: 'translateX(-100%)',
           }}
           animate={{

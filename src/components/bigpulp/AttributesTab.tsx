@@ -47,7 +47,7 @@ const CATEGORY_COLORS: Record<string, { bg: string; border: string; text: string
   },
   'Clothes': {
     bg: 'rgba(34, 197, 94, 0.15)',
-    border: 'rgba(34, 197, 94, 0.3)',
+    border: 'var(--color-success-30)',
     text: 'rgb(74, 222, 128)',
     cardBg: 'rgba(34, 197, 94, 0.04)',
   },
@@ -149,7 +149,7 @@ function TableHeader({
       className={`flex items-center ${px} ${compact ? 'py-1.5' : 'py-2.5'}`}
       style={{
         background: 'var(--color-white-3)',
-        borderBottom: '1px solid rgba(255,255,255,0.08)',
+        borderBottom: '1px solid var(--color-white-8)',
       }}
     >
       {/* Category column header — fixed width, clickable to sort */}
@@ -517,7 +517,7 @@ export function AttributesTab({
               : 'var(--color-white-5)',
             border: `1px solid ${selectedCategory
               ? getCategoryColor(selectedCategory).border
-              : 'rgba(255,255,255,0.08)'}`,
+              : 'var(--color-white-8)'}`,
             color: selectedCategory
               ? getCategoryColor(selectedCategory).text
               : 'var(--color-text-secondary)',
@@ -537,7 +537,7 @@ export function AttributesTab({
           className="px-2.5 py-1.5 rounded-lg text-xs appearance-none min-w-0"
           style={{
             background: 'var(--color-white-5)',
-            border: '1px solid rgba(255,255,255,0.08)',
+            border: '1px solid var(--color-white-8)',
             color: !selectedCategory ? 'var(--color-text-muted)' : 'var(--color-text-secondary)',
             opacity: !selectedCategory ? 0.5 : 1,
           }}

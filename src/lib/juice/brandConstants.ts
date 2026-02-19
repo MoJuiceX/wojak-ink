@@ -39,7 +39,7 @@ export const BRAND_COLORS = {
   /** Pure white for impact flashes */
   white: '#FFFFFF',
   /** Dark vignette for game over */
-  vignetteDark: 'rgba(0, 0, 0, 0.7)',
+  vignetteDark: 'var(--color-black-70)',
   /** Red vignette for damage/loss */
   vignetteRed: 'rgba(255, 0, 0, 0.4)',
 } as const;

@@ -520,7 +520,7 @@ export function drawCoin(
 
   // Shine highlight
   if (rotationScale > 0.3) {
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.fillStyle = 'var(--color-white-60)';
     ctx.beginPath();
     ctx.ellipse(-coinRadius * 0.3 * rotationScale, -coinRadius * 0.3, coinRadius * 0.2 * rotationScale, coinRadius * 0.2, 0, 0, Math.PI * 2);
     ctx.fill();
@@ -715,7 +715,7 @@ export function drawLeaderboardCountdown(
   const pillHeight = 24;
 
   // Draw pill background
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+  ctx.fillStyle = 'var(--color-black-60)';
   ctx.beginPath();
   ctx.roundRect(pillX - textWidth - pillPadding * 2, pillY - pillHeight / 2, textWidth + pillPadding * 2, pillHeight, 12);
   ctx.fill();

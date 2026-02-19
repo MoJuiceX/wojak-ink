@@ -125,9 +125,9 @@ export function GuildPage() {
                   : {
                       y: [0, -10, 0],
                       filter: [
-                        'drop-shadow(0 0 20px rgba(249, 115, 22, 0.3))',
+                        'drop-shadow(0 0 20px var(--color-primary-30))',
                         'drop-shadow(0 0 40px rgba(249, 115, 22, 0.5))',
-                        'drop-shadow(0 0 20px rgba(249, 115, 22, 0.3))',
+                        'drop-shadow(0 0 20px var(--color-primary-30))',
                       ],
                     }
               }

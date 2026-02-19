@@ -9,7 +9,7 @@ import { useCallback } from 'react';
 import { useReducedMotion } from 'framer-motion';
 
 interface RippleOptions {
-  /** Ripple color (default: rgba(249, 115, 22, 0.3)) */
+  /** Ripple color (default: var(--color-primary-30)) */
   color?: string;
   /** Duration in ms (default: 600) */
   duration?: number;
@@ -43,7 +43,7 @@ interface RippleOptions {
  */
 export function useRipple(options: RippleOptions = {}) {
   const {
-    color = 'rgba(249, 115, 22, 0.3)',
+    color = 'var(--color-primary-30)',
     duration = 600,
     disabled = false,
   } = options;

@@ -117,7 +117,7 @@ export function CharacterGrid({
             background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.08) 0%, rgba(0, 0, 0, 0.4) 100%)',
             backdropFilter: 'blur(10px)',
             WebkitBackdropFilter: 'blur(10px)',
-            border: '1px solid rgba(249, 115, 22, 0.2)',
+            border: '1px solid var(--color-primary-20)',
           }}
         >
           <h3

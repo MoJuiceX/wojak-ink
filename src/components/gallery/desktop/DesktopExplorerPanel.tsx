@@ -653,7 +653,7 @@ export function DesktopExplorerPanel({
                               animate={{ opacity: 1 }}
                               exit={{ opacity: 0 }}
                               transition={{ duration: 0.15 }}
-                              whileHover={{ scale: 1.1, background: 'rgba(0, 0, 0, 0.8)' }}
+                              whileHover={{ scale: 1.1, background: 'var(--color-black-80)' }}
                               whileTap={{ scale: 0.95 }}
                               aria-label="Previous NFT"
                             >
@@ -676,7 +676,7 @@ export function DesktopExplorerPanel({
                               animate={{ opacity: 1 }}
                               exit={{ opacity: 0 }}
                               transition={{ duration: 0.15 }}
-                              whileHover={{ scale: 1.1, background: 'rgba(0, 0, 0, 0.8)' }}
+                              whileHover={{ scale: 1.1, background: 'var(--color-black-80)' }}
                               whileTap={{ scale: 0.95 }}
                               aria-label="Next NFT"
                             >

@@ -1235,7 +1235,7 @@ const BrickByBrick: React.FC = () => {
                       top: 0,
                       bottom: 0,
                       width: '2px',
-                      borderLeft: '2px dashed rgba(255, 255, 255, 0.3)',
+                      borderLeft: '2px dashed var(--color-white-30)',
                       pointerEvents: 'none',
                       zIndex: 5,
                     }}
@@ -1249,7 +1249,7 @@ const BrickByBrick: React.FC = () => {
                       top: 0,
                       bottom: 0,
                       width: '2px',
-                      borderRight: '2px dashed rgba(255, 255, 255, 0.3)',
+                      borderRight: '2px dashed var(--color-white-30)',
                       pointerEvents: 'none',
                       zIndex: 5,
                     }}

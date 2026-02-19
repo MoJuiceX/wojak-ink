@@ -32,8 +32,8 @@ export const VideoCard = memo(function VideoCard({ video, onClick }: VideoCardPr
       animate={{ opacity: 1, y: 0 }}
       whileHover={prefersReducedMotion ? undefined : {
         y: -8,
-        borderColor: 'rgba(249, 115, 22, 0.4)',
-        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4), 0 0 30px rgba(249, 115, 22, 0.2)',
+        borderColor: 'var(--color-primary-40)',
+        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4), 0 0 30px var(--color-primary-20)',
       }}
       whileTap={{ scale: 0.98 }}
       transition={{ type: 'spring', stiffness: 200, damping: 20 }}

@@ -213,7 +213,7 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   className="absolute inset-0 flex items-center justify-center p-4"
-                  style={{ background: 'rgba(0, 0, 0, 0.9)' }}
+                  style={{ background: 'var(--color-black-90)' }}
                   onClick={() => setSelectedGuild(null)}
                 >
                   <motion.div
@@ -290,8 +290,8 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
                           <div
                             className="text-center p-4 rounded-lg"
                             style={{
-                              background: 'rgba(34, 197, 94, 0.1)',
-                              border: '1px solid rgba(34, 197, 94, 0.3)',
+                              background: 'var(--color-success-10)',
+                              border: '1px solid var(--color-success-30)',
                             }}
                           >
                             <span className="font-semibold text-success">

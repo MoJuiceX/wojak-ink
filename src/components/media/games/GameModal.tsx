@@ -509,7 +509,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
           {/* This allows games to receive clicks anywhere on screen */}
           <motion.div
             className="fixed inset-0 z-50"
-            style={{ background: 'rgba(0, 0, 0, 0.9)' }}
+            style={{ background: 'var(--color-black-90)' }}
             variants={prefersReducedMotion ? undefined : gameModalOverlayVariants}
             initial="initial"
             animate="animate"
@@ -669,7 +669,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                                 onClick={handlePlayClick}
                                 style={{
                                   background: 'linear-gradient(180deg, #60a5fa 0%, #1e40af 100%)',
-                                  boxShadow: '0 6px 24px rgba(30, 64, 175, 0.6), inset 0 1px 0 rgba(255,255,255,0.3)',
+                                  boxShadow: '0 6px 24px rgba(30, 64, 175, 0.6), inset 0 1px 0 var(--color-white-30)',
                                 }}
                               >
                                 <span className="play-icon">▶</span>

@@ -199,7 +199,7 @@ export function ExportPanel({ className = '' }: ExportPanelProps) {
                     borderRadius: '9999px',
                     background: includeBackground
                       ? 'var(--color-primary)'
-                      : 'rgba(255,255,255,0.1)',
+                      : 'var(--color-white-10)',
                     flexShrink: 0,
                     transition: 'background 0.2s ease',
                   }}
@@ -214,7 +214,7 @@ export function ExportPanel({ className = '' }: ExportPanelProps) {
                       fontSize: '9px',
                       fontWeight: 600,
                       lineHeight: 1,
-                      color: includeBackground ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.4)',
+                      color: includeBackground ? 'rgba(255,255,255,0.9)' : 'var(--color-white-40)',
                       left: includeBackground ? '6px' : undefined,
                       right: includeBackground ? undefined : '6px',
                       userSelect: 'none',

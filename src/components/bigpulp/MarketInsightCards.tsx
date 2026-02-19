@@ -35,7 +35,7 @@ const INSIGHT_CONFIGS: InsightConfig[] = [
     description: 'Good rarity, priced below market',
     icon: TrendingUp,
     gradient: 'linear-gradient(135deg, rgba(34,197,94,0.2) 0%, rgba(34,197,94,0.05) 100%)',
-    glowColor: 'rgba(34,197,94,0.3)',
+    glowColor: 'var(--color-success-30)',
     borderColor: 'rgba(34,197,94,0.4)',
   },
   {
@@ -63,7 +63,7 @@ const INSIGHT_CONFIGS: InsightConfig[] = [
     icon: AlertTriangle,
     gradient: 'linear-gradient(135deg, rgba(239,68,68,0.15) 0%, rgba(239,68,68,0.03) 100%)',
     glowColor: 'rgba(239,68,68,0.2)',
-    borderColor: 'rgba(239,68,68,0.3)',
+    borderColor: 'var(--color-error-30)',
   },
 ];
 

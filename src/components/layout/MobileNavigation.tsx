@@ -123,7 +123,7 @@ export function MobileNavigation({ visible = true }: MobileNavigationProps) {
                 width: 32,
                 transform: 'translateX(-50%)',
                 background: '#F97316',
-                boxShadow: '0 0 15px #F97316, 0 0 30px rgba(249, 115, 22, 0.3)',
+                boxShadow: '0 0 15px #F97316, 0 0 30px var(--color-primary-30)',
                 borderRadius: '0 0 2px 2px',
               }}
             />

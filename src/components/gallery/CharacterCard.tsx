@@ -66,14 +66,14 @@ export function CharacterCard({
       className="character-card glass hover-lift glow-section w-full block text-left rounded-xl overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 aspect-square"
       style={{
         // Glassmorphism background
-        background: `linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%)`,
+        background: `linear-gradient(135deg, var(--color-primary-10) 0%, rgba(0, 0, 0, 0.4) 100%)`,
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
         border: isSelected
           ? `2px solid ${accentColor}`
-          : '1px solid rgba(249, 115, 22, 0.2)',
+          : '1px solid var(--color-primary-20)',
         boxShadow: isSelected
-          ? `0 0 30px ${accentColor}60, inset 0 0 20px rgba(249, 115, 22, 0.1)`
+          ? `0 0 30px ${accentColor}60, inset 0 0 20px var(--color-primary-10)`
           : 'none',
         padding: 0,
         margin: 0,
@@ -131,7 +131,7 @@ export function CharacterCard({
             className="relative text-xs font-bold character-name block"
             style={{
               color: '#ffffff',
-              textShadow: '0 1px 3px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.8)',
+              textShadow: '0 1px 3px var(--color-black-90), 0 0 8px var(--color-black-80)',
               lineHeight: 1.2,
             }}
           >
@@ -143,7 +143,7 @@ export function CharacterCard({
         <div
           className="character-card-glow absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-300"
           style={{
-            boxShadow: 'inset 0 0 30px rgba(249, 115, 22, 0.2)',
+            boxShadow: 'inset 0 0 30px var(--color-primary-20)',
             borderRadius: 'inherit',
           }}
         />
