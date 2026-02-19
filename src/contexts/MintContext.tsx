@@ -94,8 +94,7 @@ interface MintContextValue {
     imageBlob: Blob,
     selectedLayers: Record<string, string>,
     selectedColors: Record<string, string>,
-    mintType: 'free' | 'paid',
-    combatMoves?: string[]
+    mintType: 'free' | 'paid'
   ) => void;
   confirmMint: () => Promise<void>;
   confirmPayment: (launcherId: string) => Promise<void>;
@@ -166,7 +165,6 @@ export function MintProvider({ children }: { children: ReactNode }) {
     selectedLayers: Record<string, string>;
     selectedColors: Record<string, string>;
     mintType: 'free' | 'paid';
-    combatMoves?: string[];
   } | null>(null);
   const [customName, setCustomName] = useState('');
   const [idempotencyKey, setIdempotencyKey] = useState<string | null>(null);
@@ -511,10 +509,9 @@ export function MintProvider({ children }: { children: ReactNode }) {
       imageBlob: Blob,
       selectedLayers: Record<string, string>,
       selectedColors: Record<string, string>,
-      mintType: 'free' | 'paid',
-      combatMoves?: string[]
+      mintType: 'free' | 'paid'
     ) => {
-      setPendingMintParams({ imageBlob, selectedLayers, selectedColors, mintType, combatMoves });
+      setPendingMintParams({ imageBlob, selectedLayers, selectedColors, mintType });
       setIdempotencyKey(crypto.randomUUID());
       setMintStep('confirming');
       setErrorMessage(null);
@@ -526,7 +523,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
   // Step 2: Submit to /api/mint/submit
   const confirmMint = useCallback(async () => {
     if (!pendingMintParams || !address || !isValidChiaAddress(address)) return;
-    const { imageBlob, selectedLayers, selectedColors, mintType, combatMoves } = pendingMintParams;
+    const { imageBlob, selectedLayers, selectedColors, mintType } = pendingMintParams;
     const key = idempotencyKey || crypto.randomUUID();
 
     setMintStep('submitted');
@@ -547,7 +544,6 @@ export function MintProvider({ children }: { children: ReactNode }) {
           mintType,
           idempotencyKey: key,
           customName: customName.trim() || undefined,
-          combatMoves: combatMoves?.length === 4 ? combatMoves : undefined,
         }),
       });
 
