@@ -344,8 +344,34 @@ export default function FightClub() {
   if (accessLoading) {
     return (
       <PageTransition>
-        <div className="flex items-center justify-center" style={{ minHeight: '60vh' }}>
-          <div className="spinner" />
+        <div
+          style={{
+            padding: contentPadding,
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: '100%',
+          }}
+        >
+          {/* Skeleton tab bar */}
+          <div className="fight-club-tabs" style={{ opacity: 0.3, pointerEvents: 'none' }}>
+            {['Battle', 'Vote', 'Rankings', 'Burn'].map((label) => (
+              <div key={label} className="fight-club-tab">{label}</div>
+            ))}
+          </div>
+          {/* Skeleton content */}
+          <div className="flex flex-col gap-3 mt-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="card-static p-4 animate-pulse">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-lg" style={{ background: 'var(--color-white-8)' }} />
+                  <div className="flex-1 flex flex-col gap-2">
+                    <div className="h-4 w-32 rounded" style={{ background: 'var(--color-white-8)' }} />
+                    <div className="h-3 w-48 rounded" style={{ background: 'var(--color-white-5)' }} />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </PageTransition>
     );
