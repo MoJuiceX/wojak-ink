@@ -93,7 +93,25 @@ export function UserBrowser() {
         </div>
       ) : users.length === 0 ? (
         <div className="users-empty">
-          <p>No users found</p>
+          <span className="empty-icon">🔍</span>
+          {searchQuery.trim() ? (
+            <>
+              <p>No users match "{searchQuery}"</p>
+              <p className="empty-hint">Try a different name or check your spelling</p>
+              <button
+                type="button"
+                className="btn btn-secondary mt-4"
+                onClick={() => setSearchQuery('')}
+              >
+                Clear Search
+              </button>
+            </>
+          ) : (
+            <>
+              <p>No users registered yet</p>
+              <p className="empty-hint">Be the first to invite your friends!</p>
+            </>
+          )}
         </div>
       ) : (
         <>
