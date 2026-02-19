@@ -6,7 +6,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Bot } from 'lucide-react';
+import { Bot, Swords } from 'lucide-react';
 import { BattleModeSelector } from './BattleModeSelector';
 import { useAgent } from '@/contexts/AgentContext';
 import type { CombatType } from '@/lib/combat/types';
@@ -135,13 +135,20 @@ export function QueuePanel({ fighters, onQueue, onLeaveQueue, onFightAi, queueSt
 
   if (fighters.length === 0) {
     return (
-      <div className="card-static p-6 flex flex-col items-center gap-3 text-center">
-        <span style={{ fontSize: 40 }}>⚔️</span>
-        <p className="font-semibold">No fighters ready</p>
-        <p className="text-secondary text-sm">
-          Mint a Wojak with combat moves in the Generator to start battling.
-        </p>
-        <Link to="/generator" className="btn btn-primary text-sm mt-1">
+      <div className="card-static p-8 flex flex-col items-center gap-4 text-center">
+        <div
+          className="p-4 rounded-full"
+          style={{ background: 'var(--color-primary-15)' }}
+        >
+          <Swords size={32} className="text-primary" />
+        </div>
+        <div>
+          <p className="font-bold text-lg">No fighters ready</p>
+          <p className="text-secondary text-sm mt-1">
+            Mint a Wojak in the Generator to start battling.
+          </p>
+        </div>
+        <Link to="/generator" className="btn btn-primary">
           Create a Fighter
         </Link>
       </div>
