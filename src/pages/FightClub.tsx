@@ -6,10 +6,10 @@
  * Requires holding at least 1 Farmers Plot NFT to access.
  */
 
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Swords, Trophy, Heart, ExternalLink, Wallet } from 'lucide-react';
+import { Swords, Trophy, Heart, ExternalLink, Wallet, Palette } from 'lucide-react';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { PageSkeleton } from '@/components/layout/PageSkeleton';
 import { useLayout } from '@/hooks/useLayout';
@@ -25,6 +25,13 @@ import { useSageWallet } from '@/sage-wallet';
 const CombatArena = lazy(() => import('./CombatArena'));
 const GameVoting = lazy(() => import('./GameVoting'));
 
+// Gate API response type
+interface GateResponse {
+  hasAccess: boolean;
+  farmersPlotCount: number;
+  wojakCount: number;
+}
+
 // Check if user has access to Fight Club (holds Farmers Plot NFT)
 function useFightClubAccess() {
   const { isSignedIn, profile } = useUserProfile();
@@ -33,10 +40,10 @@ function useFightClubAccess() {
   return useQuery({
     queryKey: ['fight-club-gate', walletAddress],
     queryFn: async () => {
-      if (!walletAddress) return { hasAccess: false, farmersPlotCount: 0 };
+      if (!walletAddress) return { hasAccess: false, farmersPlotCount: 0, wojakCount: 0 };
       const res = await fetch(`/api/combat/gate?wallet=${encodeURIComponent(walletAddress)}`);
       if (!res.ok) throw new Error('Failed to check access');
-      return res.json() as Promise<{ hasAccess: boolean; farmersPlotCount: number }>;
+      return res.json() as Promise<GateResponse>;
     },
     enabled: isSignedIn && !!walletAddress,
     staleTime: 60000, // 1 minute
@@ -175,6 +182,42 @@ function FightClubGate() {
   );
 }
 
+// Banner shown on Battle tab when user has no Wojaks
+function MintFighterBanner() {
+  return (
+    <div
+      className="card p-4 flex items-center gap-4 mb-4"
+      style={{
+        borderColor: 'var(--color-primary)',
+        borderWidth: 1,
+        borderStyle: 'solid',
+      }}
+    >
+      <div
+        className="flex items-center justify-center"
+        style={{
+          width: 48,
+          height: 48,
+          borderRadius: 'var(--radius-md)',
+          background: 'var(--color-primary-15)',
+          flexShrink: 0,
+        }}
+      >
+        <Palette size={24} className="text-primary" />
+      </div>
+      <div className="flex-1">
+        <p className="font-bold" style={{ fontSize: 15 }}>Mint your first fighter!</p>
+        <p className="text-secondary" style={{ fontSize: 13 }}>
+          Create a Wojak in the Generator to enter the arena.
+        </p>
+      </div>
+      <Link to="/generator" className="btn btn-primary" style={{ flexShrink: 0 }}>
+        Generator
+      </Link>
+    </div>
+  );
+}
+
 type TabId = 'battle' | 'vote' | 'rankings';
 
 interface Tab {
@@ -257,11 +300,14 @@ export default function FightClub() {
         {/* Tab Content */}
         <div style={{ flex: 1, marginTop: '16px' }}>
           {activeTab === 'battle' && (
-            <GameErrorBoundary gameName="Combat Arena">
-              <Suspense fallback={<GameLoading gameName="Combat Arena" />}>
-                <CombatArena />
-              </Suspense>
-            </GameErrorBoundary>
+            <>
+              {accessData?.wojakCount === 0 && <MintFighterBanner />}
+              <GameErrorBoundary gameName="Combat Arena">
+                <Suspense fallback={<GameLoading gameName="Combat Arena" />}>
+                  <CombatArena />
+                </Suspense>
+              </GameErrorBoundary>
+            </>
           )}
           {activeTab === 'vote' && (
             <GameProvider>
