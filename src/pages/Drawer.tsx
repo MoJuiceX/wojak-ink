@@ -529,7 +529,7 @@ export default function Drawer() {
           justify-content: center;
           min-height: 60vh;
           gap: 16px;
-          color: rgba(255, 255, 255, 0.6);
+          color: var(--color-white-60);
           text-align: center;
           padding: 20px;
         }
@@ -546,7 +546,7 @@ export default function Drawer() {
 
         .drawer-error p {
           margin: 0;
-          color: rgba(255, 255, 255, 0.5);
+          color: var(--color-white-50);
         }
 
         .back-link {
@@ -558,13 +558,13 @@ export default function Drawer() {
           font-size: 0.9rem;
           margin-top: 16px;
           padding: 10px 20px;
-          background: rgba(249, 115, 22, 0.1);
+          background: var(--color-primary-10);
           border-radius: 12px;
           transition: all 0.2s;
         }
 
         .back-link:hover {
-          background: rgba(249, 115, 22, 0.2);
+          background: var(--color-primary-20);
         }
 
         /* Header */
@@ -578,7 +578,7 @@ export default function Drawer() {
           z-index: 100;
           background: rgba(10, 10, 18, 0.8);
           backdrop-filter: blur(12px);
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          border-bottom: 1px solid var(--color-white-5);
         }
 
         .drawer-header h1 {
@@ -596,7 +596,7 @@ export default function Drawer() {
           align-items: center;
           justify-content: center;
           background: rgba(255, 255, 255, 0.08);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          border: 1px solid var(--color-white-10);
           border-radius: 12px;
           color: #fff;
           cursor: pointer;
@@ -628,7 +628,7 @@ export default function Drawer() {
           transform: translateX(-50%);
           width: 400px;
           height: 400px;
-          background: radial-gradient(circle, rgba(249, 115, 22, 0.15) 0%, transparent 70%);
+          background: radial-gradient(circle, var(--color-primary-15) 0%, transparent 70%);
           pointer-events: none;
         }
 
@@ -640,7 +640,7 @@ export default function Drawer() {
         .bigpulp-frame {
           padding: 12px;
           border-radius: 50%;
-          background: rgba(255, 255, 255, 0.03);
+          background: var(--color-white-3);
         }
 
         .hero-user-info {
@@ -663,7 +663,7 @@ export default function Drawer() {
           display: block;
           margin-top: 4px;
           font-size: 0.9rem;
-          color: rgba(255, 255, 255, 0.6);
+          color: var(--color-white-60);
           font-style: italic;
         }
 
@@ -681,7 +681,7 @@ export default function Drawer() {
           align-items: center;
           gap: 12px;
           padding: 16px 20px;
-          background: rgba(255, 255, 255, 0.05);
+          background: var(--color-white-5);
           border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 16px;
           min-width: 120px;
@@ -693,13 +693,13 @@ export default function Drawer() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(234, 88, 12, 0.1));
+          background: linear-gradient(135deg, var(--color-primary-20), rgba(234, 88, 12, 0.1));
           border-radius: 12px;
           color: #f97316;
         }
 
         .stat-icon.orange {
-          background: linear-gradient(135deg, rgba(249, 115, 22, 0.3), rgba(234, 88, 12, 0.15));
+          background: linear-gradient(135deg, var(--color-primary-30), rgba(234, 88, 12, 0.15));
         }
 
         .stat-emoji {
@@ -720,7 +720,7 @@ export default function Drawer() {
 
         .stat-label {
           font-size: 0.75rem;
-          color: rgba(255, 255, 255, 0.5);
+          color: var(--color-white-50);
           margin-top: 2px;
         }
 
@@ -738,7 +738,7 @@ export default function Drawer() {
           padding: 60px 20px;
           text-align: center;
           background: rgba(255, 255, 255, 0.02);
-          border: 1px dashed rgba(255, 255, 255, 0.1);
+          border: 1px dashed var(--color-white-10);
           border-radius: 24px;
           margin-top: 20px;
         }
@@ -756,7 +756,7 @@ export default function Drawer() {
 
         .empty-collection p {
           margin: 0 0 24px;
-          color: rgba(255, 255, 255, 0.5);
+          color: var(--color-white-50);
           max-width: 280px;
         }
 
@@ -771,12 +771,12 @@ export default function Drawer() {
           font-weight: 600;
           border-radius: 14px;
           transition: all 0.2s;
-          box-shadow: 0 4px 20px rgba(249, 115, 22, 0.3);
+          box-shadow: 0 4px 20px var(--color-primary-30);
         }
 
         .shop-cta:hover {
           transform: translateY(-2px);
-          box-shadow: 0 6px 30px rgba(249, 115, 22, 0.4);
+          box-shadow: 0 6px 30px var(--color-primary-40);
         }
 
         /* Collection Tabs */
@@ -798,10 +798,10 @@ export default function Drawer() {
           align-items: center;
           gap: 6px;
           padding: 10px 16px;
-          background: rgba(255, 255, 255, 0.05);
+          background: var(--color-white-5);
           border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 12px;
-          color: rgba(255, 255, 255, 0.6);
+          color: var(--color-white-60);
           font-size: 0.85rem;
           font-weight: 500;
           cursor: pointer;
@@ -810,25 +810,25 @@ export default function Drawer() {
         }
 
         .tab-button:hover {
-          background: rgba(255, 255, 255, 0.1);
+          background: var(--color-white-10);
           color: #fff;
         }
 
         .tab-button.active {
-          background: linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(234, 88, 12, 0.1));
-          border-color: rgba(249, 115, 22, 0.3);
+          background: linear-gradient(135deg, var(--color-primary-20), rgba(234, 88, 12, 0.1));
+          border-color: var(--color-primary-30);
           color: #fff;
         }
 
         .tab-count {
           padding: 2px 8px;
-          background: rgba(255, 255, 255, 0.1);
+          background: var(--color-white-10);
           border-radius: 10px;
           font-size: 0.75rem;
         }
 
         .tab-button.active .tab-count {
-          background: rgba(249, 115, 22, 0.3);
+          background: var(--color-primary-30);
         }
 
         /* Collection Grid */
@@ -844,7 +844,7 @@ export default function Drawer() {
           flex-direction: column;
           align-items: center;
           padding: 20px 12px 16px;
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+          background: linear-gradient(135deg, var(--color-white-5), rgba(255, 255, 255, 0.02));
           border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 16px;
           transition: all 0.2s;
@@ -853,7 +853,7 @@ export default function Drawer() {
 
         .collection-card:hover {
           border-color: var(--rarity-color, rgba(255, 255, 255, 0.2));
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px color-mix(in srgb, var(--rarity-color) 20%, transparent);
+          box-shadow: 0 8px 32px var(--color-black-30), 0 0 20px color-mix(in srgb, var(--rarity-color) 20%, transparent);
         }
 
         .card-rarity {
@@ -900,7 +900,7 @@ export default function Drawer() {
           width: 56px;
           height: 36px;
           border-radius: 8px;
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          border: 1px solid var(--color-white-10);
         }
 
         .card-name {

@@ -18,8 +18,8 @@ export function GallerySkeleton() {
               key={`char-${i}`}
               className="aspect-square rounded-xl"
               style={{
-                background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.05) 0%, rgba(0, 0, 0, 0.3) 100%)',
-                border: '1px solid rgba(249, 115, 22, 0.1)',
+                background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.05) 0%, var(--color-black-30) 100%)',
+                border: '1px solid var(--color-primary-10)',
               }}
               animate={{
                 opacity: [0.5, 0.8, 0.5],
@@ -42,7 +42,7 @@ export function GallerySkeleton() {
             className="aspect-square rounded-lg"
             style={{
               background: 'rgba(249, 115, 22, 0.05)',
-              border: '1px solid rgba(249, 115, 22, 0.1)',
+              border: '1px solid var(--color-primary-10)',
             }}
             animate={{
               opacity: [0.3, 0.6, 0.3],
@@ -68,7 +68,7 @@ export function LeaderboardSkeleton() {
       {/* Header skeleton */}
       <div
         className="h-12 w-48 rounded-lg mb-6"
-        style={{ background: 'rgba(249, 115, 22, 0.1)' }}
+        style={{ background: 'var(--color-primary-10)' }}
       />
 
       {/* Game tabs skeleton */}
@@ -77,7 +77,7 @@ export function LeaderboardSkeleton() {
           <div
             key={i}
             className="h-10 w-24 rounded-lg flex-shrink-0"
-            style={{ background: 'rgba(249, 115, 22, 0.1)' }}
+            style={{ background: 'var(--color-primary-10)' }}
           />
         ))}
       </div>
@@ -89,8 +89,8 @@ export function LeaderboardSkeleton() {
             key={i}
             className="h-16 rounded-xl"
             style={{
-              background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.05) 0%, rgba(0, 0, 0, 0.3) 100%)',
-              border: '1px solid rgba(249, 115, 22, 0.1)',
+              background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.05) 0%, var(--color-black-30) 100%)',
+              border: '1px solid var(--color-primary-10)',
             }}
             animate={{
               opacity: [0.5, 0.8, 0.5],
@@ -125,7 +125,7 @@ export function PageSkeleton() {
         <motion.div
           className="w-16 h-16 mx-auto mb-4 rounded-full"
           style={{
-            border: '3px solid rgba(249, 115, 22, 0.2)',
+            border: '3px solid var(--color-primary-20)',
             borderTopColor: '#F97316',
           }}
           animate={{ rotate: 360 }}

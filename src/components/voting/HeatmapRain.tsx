@@ -183,7 +183,7 @@ export function HeatmapRain({ votes, type, containerRef, onComplete }: HeatmapRa
         style={{
           position: 'fixed',
           inset: 0,
-          background: 'rgba(0, 0, 0, 0.5)',
+          background: 'var(--color-black-50)',
           zIndex: 9000,
           pointerEvents: isComplete ? 'none' : 'auto',
           cursor: 'pointer',
@@ -213,7 +213,7 @@ export function HeatmapRain({ votes, type, containerRef, onComplete }: HeatmapRa
                 fontSize: '36px',
                 pointerEvents: 'none',
                 zIndex: 9500,
-                filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))',
+                filter: 'drop-shadow(0 4px 8px var(--color-black-30))',
               }}
               initial={{
                 // Start from exact x position, just above viewport for clean drop
@@ -257,7 +257,7 @@ export function HeatmapRain({ votes, type, containerRef, onComplete }: HeatmapRa
             fontSize: '24px',
             pointerEvents: 'none',
             zIndex: 9100 + item.zIndex,
-            filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))',
+            filter: 'drop-shadow(0 2px 4px var(--color-black-20))',
           }}
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{
@@ -293,7 +293,7 @@ export function HeatmapRain({ votes, type, containerRef, onComplete }: HeatmapRa
             padding: '14px 32px',
             borderRadius: '50px',
             background: 'linear-gradient(135deg, rgba(255, 100, 100, 0.9), rgba(200, 50, 50, 0.9))',
-            border: '2px solid rgba(255, 255, 255, 0.3)',
+            border: '2px solid var(--color-white-30)',
             color: '#fff',
             fontSize: '16px',
             fontWeight: 700,
@@ -325,7 +325,7 @@ export function HeatmapRain({ votes, type, containerRef, onComplete }: HeatmapRa
             zIndex: 9600,
             padding: '10px 20px',
             borderRadius: '20px',
-            background: 'rgba(0, 0, 0, 0.7)',
+            background: 'var(--color-black-70)',
             color: 'rgba(255, 255, 255, 0.8)',
             fontSize: '14px',
             pointerEvents: 'none',

@@ -471,8 +471,8 @@ export function GlobalVideoPlayer() {
           className="w-full h-full rounded-xl overflow-hidden cursor-grab active:cursor-grabbing"
           style={{
             background: 'rgba(20, 20, 20, 0.95)',
-            border: '1px solid rgba(249, 115, 22, 0.3)',
-            boxShadow: '0 0 40px rgba(249, 115, 22, 0.2), 0 25px 50px rgba(0, 0, 0, 0.5)',
+            border: '1px solid var(--color-primary-30)',
+            boxShadow: '0 0 40px var(--color-primary-20), 0 25px 50px var(--color-black-50)',
           }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

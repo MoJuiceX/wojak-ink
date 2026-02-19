@@ -91,7 +91,7 @@ export const NavItem = memo(function NavItem({
               marginTop: -16,
               background: 'linear-gradient(135deg, #F97316, #EA580C)',
               borderRadius: '50%',
-              boxShadow: '0 4px 20px rgba(249, 115, 22, 0.4), 0 0 30px rgba(249, 115, 22, 0.2)',
+              boxShadow: '0 4px 20px var(--color-primary-40), 0 0 30px var(--color-primary-20)',
               border: '3px solid rgba(10, 10, 10, 0.95)',
             }}
           >
@@ -99,7 +99,7 @@ export const NavItem = memo(function NavItem({
             <motion.div
               className="absolute inset-0 rounded-full"
               style={{
-                background: 'radial-gradient(circle, rgba(249, 115, 22, 0.3) 0%, transparent 70%)',
+                background: 'radial-gradient(circle, var(--color-primary-30) 0%, transparent 70%)',
               }}
               animate={
                 !prefersReducedMotion
@@ -126,7 +126,7 @@ export const NavItem = memo(function NavItem({
                 ease: 'easeInOut',
               }}
               style={{
-                filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))',
+                filter: 'drop-shadow(0 2px 4px var(--color-black-30))',
               }}
             >
               <Icon size={26} color="white" aria-hidden="true" />
@@ -183,7 +183,7 @@ export const NavItem = memo(function NavItem({
                 fontSize: 10,
                 fontWeight: 600,
                 color: 'white',
-                boxShadow: '0 0 8px rgba(249, 115, 22, 0.5)',
+                boxShadow: '0 0 8px var(--color-primary-50)',
               }}
               aria-label={
                 badge === 'dot'
@@ -263,7 +263,7 @@ export const NavItem = memo(function NavItem({
           className="absolute left-0 top-1/2 w-[3px] rounded-r-full"
           style={{
             background: '#F97316',
-            boxShadow: '0 0 15px #F97316, 0 0 30px rgba(249, 115, 22, 0.3)',
+            boxShadow: '0 0 15px #F97316, 0 0 30px var(--color-primary-30)',
           }}
           initial={prefersReducedMotion ? { height: 24 } : { height: 0 }}
           animate={{ height: 32, y: '-50%' }}

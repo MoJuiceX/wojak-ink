@@ -80,8 +80,8 @@ function NoneCard({ isSelected, onClick }: NoneCardProps) {
           ? '2px solid var(--generator-selected-color, #F97316)'
           : '1px solid var(--generator-trait-card-border)',
         boxShadow: isSelected
-          ? '0 0 20px var(--generator-selected-glow, rgba(249, 115, 22, 0.5)), 0 4px 12px rgba(0, 0, 0, 0.3)'
-          : '0 2px 8px rgba(0, 0, 0, 0.2)',
+          ? '0 0 20px var(--generator-selected-glow, var(--color-primary-50)), 0 4px 12px var(--color-black-30)'
+          : '0 2px 8px var(--color-black-20)',
         transition: 'all 0.3s ease',
       }}
       whileHover={prefersReducedMotion ? undefined : { scale: 1.03 }}
@@ -142,8 +142,8 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pri
         opacity: isDisabled ? 0.5 : 1,
         cursor: isDisabled ? 'not-allowed' : 'pointer',
         boxShadow: isSelected
-          ? '0 0 20px var(--generator-selected-glow, rgba(249, 115, 22, 0.5)), 0 4px 12px rgba(0, 0, 0, 0.3)'
-          : '0 2px 8px rgba(0, 0, 0, 0.2)',
+          ? '0 0 20px var(--generator-selected-glow, var(--color-primary-50)), 0 4px 12px var(--color-black-30)'
+          : '0 2px 8px var(--color-black-20)',
         transition: 'all 0.3s ease',
       }}
       whileHover={prefersReducedMotion || isDisabled ? undefined : { scale: 1.03 }}
@@ -171,7 +171,7 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pri
       {isDisabled && disabledReason && (
         <div
           className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
-          style={{ background: 'rgba(0, 0, 0, 0.7)', border: '1px solid var(--color-border)' }}
+          style={{ background: 'var(--color-black-70)', border: '1px solid var(--color-border)' }}
           title={disabledReason}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">
@@ -235,8 +235,8 @@ function BaseImageCard({ image, isSelected, isDisabled, disabledReason, onClick,
         opacity: isDisabled ? 0.5 : 1,
         cursor: isDisabled ? 'not-allowed' : 'pointer',
         boxShadow: isSelected
-          ? '0 0 20px var(--generator-selected-glow, rgba(249, 115, 22, 0.5)), 0 4px 12px rgba(0, 0, 0, 0.3)'
-          : '0 2px 8px rgba(0, 0, 0, 0.2)',
+          ? '0 0 20px var(--generator-selected-glow, var(--color-primary-50)), 0 4px 12px var(--color-black-30)'
+          : '0 2px 8px var(--color-black-20)',
         transition: 'all 0.3s ease',
       }}
       whileHover={prefersReducedMotion || isDisabled ? undefined : { scale: 1.03 }}
@@ -279,7 +279,7 @@ function BaseImageCard({ image, isSelected, isDisabled, disabledReason, onClick,
       {isDisabled && disabledReason && (
         <div
           className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
-          style={{ background: 'rgba(0, 0, 0, 0.7)', border: '1px solid var(--color-border)' }}
+          style={{ background: 'var(--color-black-70)', border: '1px solid var(--color-border)' }}
           title={disabledReason}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">
@@ -338,8 +338,8 @@ function SolidColorBackgroundCard({ color, isSelected, isDisabled, disabledReaso
         opacity: isDisabled ? 0.5 : 1,
         cursor: isDisabled ? 'not-allowed' : 'pointer',
         boxShadow: isSelected
-          ? '0 0 20px var(--generator-selected-glow, rgba(249, 115, 22, 0.5)), 0 4px 12px rgba(0, 0, 0, 0.3)'
-          : '0 2px 8px rgba(0, 0, 0, 0.2)',
+          ? '0 0 20px var(--generator-selected-glow, var(--color-primary-50)), 0 4px 12px var(--color-black-30)'
+          : '0 2px 8px var(--color-black-20)',
         transition: 'all 0.3s ease',
       }}
       whileHover={prefersReducedMotion || isDisabled ? undefined : { scale: 1.03 }}
@@ -356,7 +356,7 @@ function SolidColorBackgroundCard({ color, isSelected, isDisabled, disabledReaso
       <div
         className="absolute bottom-0 left-0 right-0 px-2 py-1 text-xs font-medium truncate text-primary"
         style={{
-          background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
+          background: 'linear-gradient(transparent, var(--color-black-70))',
         }}
       >
         Solid color
@@ -365,7 +365,7 @@ function SolidColorBackgroundCard({ color, isSelected, isDisabled, disabledReaso
       {isDisabled && disabledReason && (
         <div
           className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
-          style={{ background: 'rgba(0, 0, 0, 0.7)', border: '1px solid var(--color-border)' }}
+          style={{ background: 'var(--color-black-70)', border: '1px solid var(--color-border)' }}
           title={disabledReason}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">
@@ -415,8 +415,8 @@ function LayerWithBaseMouthCard({ image, isSelected, isDisabled, disabledReason,
         opacity: isDisabled ? 0.5 : 1,
         cursor: isDisabled ? 'not-allowed' : 'pointer',
         boxShadow: isSelected
-          ? '0 0 20px var(--generator-selected-glow, rgba(249, 115, 22, 0.5)), 0 4px 12px rgba(0, 0, 0, 0.3)'
-          : '0 2px 8px rgba(0, 0, 0, 0.2)',
+          ? '0 0 20px var(--generator-selected-glow, var(--color-primary-50)), 0 4px 12px var(--color-black-30)'
+          : '0 2px 8px var(--color-black-20)',
         transition: 'all 0.3s ease',
       }}
       whileHover={prefersReducedMotion || isDisabled ? undefined : { scale: 1.03 }}
@@ -466,7 +466,7 @@ function LayerWithBaseMouthCard({ image, isSelected, isDisabled, disabledReason,
       {isDisabled && disabledReason && (
         <div
           className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
-          style={{ background: 'rgba(0, 0, 0, 0.7)', border: '1px solid var(--color-border)' }}
+          style={{ background: 'var(--color-black-70)', border: '1px solid var(--color-border)' }}
           title={disabledReason}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">
@@ -505,8 +505,8 @@ function ClothesImageCard({ image, isSelected, isDisabled, disabledReason, onCli
         opacity: isDisabled ? 0.5 : 1,
         cursor: isDisabled ? 'not-allowed' : 'pointer',
         boxShadow: isSelected
-          ? '0 0 20px var(--generator-selected-glow, rgba(249, 115, 22, 0.5)), 0 4px 12px rgba(0, 0, 0, 0.3)'
-          : '0 2px 8px rgba(0, 0, 0, 0.2)',
+          ? '0 0 20px var(--generator-selected-glow, var(--color-primary-50)), 0 4px 12px var(--color-black-30)'
+          : '0 2px 8px var(--color-black-20)',
         transition: 'all 0.3s ease',
       }}
       whileHover={prefersReducedMotion || isDisabled ? undefined : { scale: 1.03 }}
@@ -549,7 +549,7 @@ function ClothesImageCard({ image, isSelected, isDisabled, disabledReason, onCli
       {isDisabled && disabledReason && (
         <div
           className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
-          style={{ background: 'rgba(0, 0, 0, 0.7)', border: '1px solid var(--color-border)' }}
+          style={{ background: 'var(--color-black-70)', border: '1px solid var(--color-border)' }}
           title={disabledReason}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">
@@ -604,8 +604,8 @@ export function G2TraitCard({ trait, isSelected, isDisabled, disabledReason, onC
           ? '2px solid var(--generator-selected-color, #F97316)'
           : '1px solid var(--generator-trait-card-border)',
         boxShadow: isSelected
-          ? '0 0 20px rgba(0, 212, 255, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3)'
-          : '0 2px 8px rgba(0, 0, 0, 0.2)',
+          ? '0 0 20px rgba(0, 212, 255, 0.4), 0 4px 12px var(--color-black-30)'
+          : '0 2px 8px var(--color-black-20)',
         opacity: isDisabled ? 0.5 : 1,
         cursor: isDisabled ? 'not-allowed' : 'pointer',
         transition: 'all 0.3s ease',
@@ -637,7 +637,7 @@ export function G2TraitCard({ trait, isSelected, isDisabled, disabledReason, onC
       {isDisabled && disabledReason && (
         <div
           className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
-          style={{ background: 'rgba(0, 0, 0, 0.7)', border: '1px solid var(--color-border)' }}
+          style={{ background: 'var(--color-black-70)', border: '1px solid var(--color-border)' }}
           title={disabledReason}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">

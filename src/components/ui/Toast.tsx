@@ -31,8 +31,8 @@ const toastColors: Record<ToastType, { border: string; glow: string }> = {
     glow: 'rgba(239, 68, 68, 0.2)',
   },
   info: {
-    border: 'rgba(249, 115, 22, 0.4)',
-    glow: 'rgba(249, 115, 22, 0.2)',
+    border: 'var(--color-primary-40)',
+    glow: 'var(--color-primary-20)',
   },
   warning: {
     border: 'rgba(245, 158, 11, 0.4)',

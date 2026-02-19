@@ -273,7 +273,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
       }`}
       style={{
         background: isActive
-          ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.25), rgba(249, 115, 22, 0.1))'
+          ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.25), var(--color-primary-10))'
           : 'transparent',
         color: disabled
           ? 'var(--color-text-muted)'
@@ -285,7 +285,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
           ? '1px solid rgba(249, 115, 22, 0.6)'
           : '1px solid transparent',
         boxShadow: isActive
-          ? '0 0 20px rgba(249, 115, 22, 0.3), inset 0 0 15px rgba(249, 115, 22, 0.1)'
+          ? '0 0 20px var(--color-primary-30), inset 0 0 15px var(--color-primary-10)'
           : 'none',
         transition: 'all 0.3s ease',
       }}
@@ -303,7 +303,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
             style={{
               background: '#F97316',
               color: 'white',
-              boxShadow: '0 0 8px rgba(249, 115, 22, 0.5)',
+              boxShadow: '0 0 8px var(--color-primary-50)',
             }}
           >
             {badge}
@@ -318,7 +318,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
     <div
       className={`flex items-center justify-between px-2 py-1.5 rounded-2xl flex-nowrap w-full ${className}`}
       style={{
-        background: 'rgba(0, 0, 0, 0.3)',
+        background: 'var(--color-black-30)',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
         border: '1px solid var(--color-border)',
@@ -447,14 +447,14 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
               style={{
                 background: 'var(--color-surface)',
                 border: '1px solid var(--color-border)',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+                boxShadow: '0 8px 32px var(--color-black-40)',
               }}
             >
               {/* Free Mints / Leaderboard */}
               <button
                 type="button"
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-primary"
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)')}
+                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-white-5)')}
                 onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                 onClick={() => {
                   setShowOverflowMenu(false);
@@ -477,7 +477,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
               <button
                 type="button"
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-primary"
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)')}
+                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-white-5)')}
                 onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                 onClick={() => {
                   setShowOverflowMenu(false);
@@ -493,7 +493,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
                 <button
                   type="button"
                   className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-primary"
-                  onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)')}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-white-5)')}
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                   onClick={() => {
                     setShowOverflowMenu(false);
@@ -509,7 +509,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
               <button
                 type="button"
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-primary"
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)')}
+                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-white-5)')}
                 onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                 onClick={() => {
                   setShowOverflowMenu(false);

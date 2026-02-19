@@ -290,7 +290,7 @@ export function TraitNameAudit({ onBack }: TraitNameAuditProps) {
             <span
               className="text-xs px-1.5 py-0.5 rounded"
               style={{
-                background: globalStats.needsReview === 0 ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
+                background: globalStats.needsReview === 0 ? 'rgba(34,197,94,0.15)' : 'var(--color-error-15)',
                 color: globalStats.needsReview === 0 ? 'var(--color-success)' : 'var(--color-error)',
                 fontSize: '10px',
               }}
@@ -303,7 +303,7 @@ export function TraitNameAudit({ onBack }: TraitNameAuditProps) {
         </div>
         <button
           className="text-xs px-2 py-0.5 rounded text-muted"
-          style={{ background: 'rgba(255,255,255,0.05)' }}
+          style={{ background: 'var(--color-white-5)' }}
           onClick={onBack}
         >
           Back
@@ -338,7 +338,7 @@ export function TraitNameAudit({ onBack }: TraitNameAuditProps) {
               key={layer}
               className="text-xs px-2 py-1 rounded"
               style={{
-                background: isActive ? 'rgba(0,212,255,0.15)' : 'rgba(255,255,255,0.03)',
+                background: isActive ? 'rgba(0,212,255,0.15)' : 'var(--color-white-3)',
                 color: isActive ? 'var(--color-cyan)' : 'var(--color-text-muted)',
                 border: isActive
                   ? '1px solid rgba(0,212,255,0.3)'
@@ -381,7 +381,7 @@ export function TraitNameAudit({ onBack }: TraitNameAuditProps) {
         <button
           className="text-xs px-2 py-0.5 rounded"
           style={{
-            background: filterMode === 'needs-review' ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.05)',
+            background: filterMode === 'needs-review' ? 'var(--color-error-15)' : 'var(--color-white-5)',
             color: filterMode === 'needs-review' ? '#ef4444' : 'var(--color-text-muted)',
             fontSize: '10px',
           }}
@@ -474,7 +474,7 @@ export function TraitNameAudit({ onBack }: TraitNameAuditProps) {
                               height: '14px',
                               borderRadius: '3px',
                               backgroundColor: hex,
-                              border: normHex === '#FFFFFF' ? '1px solid rgba(255,255,255,0.3)' : '1px solid rgba(0,0,0,0.2)',
+                              border: normHex === '#FFFFFF' ? '1px solid var(--color-white-30)' : '1px solid var(--color-black-20)',
                               flexShrink: 0,
                             }}
                           />

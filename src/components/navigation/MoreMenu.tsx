@@ -39,7 +39,7 @@ const menuItems: MenuItem[] = [
     route: '/swipe',
     badge: 'New',
     iconColor: '#ef4444',
-    iconBg: 'rgba(239, 68, 68, 0.15)',
+    iconBg: 'var(--color-error-15)',
   },
   {
     icon: Swords,
@@ -48,7 +48,7 @@ const menuItems: MenuItem[] = [
     route: '/arena',
     badge: 'New',
     iconColor: '#ef4444',
-    iconBg: 'rgba(239, 68, 68, 0.15)',
+    iconBg: 'var(--color-error-15)',
   },
   {
     icon: User,
@@ -64,7 +64,7 @@ const menuItems: MenuItem[] = [
     description: 'Spend your oranges and gems',
     route: '/shop',
     iconColor: '#f97316',
-    iconBg: 'rgba(249, 115, 22, 0.15)',
+    iconBg: 'var(--color-primary-15)',
   },
   {
     icon: MessageCircle,
@@ -136,7 +136,7 @@ export function MoreMenu({ isOpen, onClose }: MoreMenuProps) {
           <motion.div
             className="fixed inset-0 z-[9998]"
             style={{
-              background: 'rgba(0, 0, 0, 0.7)',
+              background: 'var(--color-black-70)',
               backdropFilter: 'blur(4px)',
               WebkitBackdropFilter: 'blur(4px)',
             }}
@@ -156,7 +156,7 @@ export function MoreMenu({ isOpen, onClose }: MoreMenuProps) {
               borderTop: '1px solid rgba(255, 255, 255, 0.08)',
               borderRadius: '20px 20px 0 0',
               maxHeight: 'calc(100vh - 160px)',
-              boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.5)',
+              boxShadow: '0 -8px 32px var(--color-black-50)',
             }}
             initial={{ y: '100%', opacity: 0.5 }}
             animate={{ y: 0, opacity: 1 }}
@@ -212,7 +212,7 @@ export function MoreMenu({ isOpen, onClose }: MoreMenuProps) {
                     aria-label={`${item.label} - ${item.description}`}
                     className="flex items-center gap-3 p-3 rounded-xl w-full text-left active:scale-[0.98] transition-transform"
                     style={{
-                      background: 'rgba(255, 255, 255, 0.05)',
+                      background: 'var(--color-white-5)',
                       border: '1px solid rgba(255, 255, 255, 0.04)',
                       opacity: isDisabled ? 0.45 : 1,
                     }}

@@ -25,7 +25,7 @@ export const VideoCard = memo(function VideoCard({ video, onClick }: VideoCardPr
       style={{
         borderRadius: '16px',
         background: 'var(--color-surface)',
-        border: '1px solid rgba(249, 115, 22, 0.1)',
+        border: '1px solid var(--color-primary-10)',
         transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
       }}
       initial={{ opacity: 0, y: 20 }}
@@ -61,7 +61,7 @@ export const VideoCard = memo(function VideoCard({ video, onClick }: VideoCardPr
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: 'linear-gradient(180deg, transparent 0%, transparent 50%, rgba(0, 0, 0, 0.8) 100%)',
+            background: 'linear-gradient(180deg, transparent 0%, transparent 50%, var(--color-black-80) 100%)',
           }}
         />
 
@@ -99,7 +99,7 @@ export const VideoCard = memo(function VideoCard({ video, onClick }: VideoCardPr
             <div
               className="p-1 rounded"
               style={{
-                background: 'rgba(0, 0, 0, 0.8)',
+                background: 'var(--color-black-80)',
                 color: 'white',
               }}
               title="Captions available"
@@ -111,7 +111,7 @@ export const VideoCard = memo(function VideoCard({ video, onClick }: VideoCardPr
             <div
               className="p-1 rounded"
               style={{
-                background: 'rgba(0, 0, 0, 0.8)',
+                background: 'var(--color-black-80)',
                 color: 'white',
               }}
               title="Audio description available"
