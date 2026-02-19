@@ -56,9 +56,8 @@ function TraitRankingTooltip({ data }: { data: TooltipData }) {
     >
       {/* Header */}
       <div
-        className="font-bold text-xs uppercase tracking-wide mb-2 pb-2"
+        className="font-bold text-xs uppercase tracking-wide mb-2 pb-2 text-accent"
         style={{
-          color: 'var(--color-accent)',
           borderBottom: '1px solid var(--color-border)',
         }}
       >
@@ -70,8 +69,7 @@ function TraitRankingTooltip({ data }: { data: TooltipData }) {
         <>
           <TraitRankingRow entry={data.rarest} isCurrent={false} />
           <div
-            className="text-center py-1 text-xs"
-            style={{ color: 'var(--color-text-muted)' }}
+            className="text-center py-1 text-xs text-muted"
           >
             ...
           </div>
@@ -91,8 +89,7 @@ function TraitRankingTooltip({ data }: { data: TooltipData }) {
       {data.mostCommon && (
         <>
           <div
-            className="text-center py-1 text-xs"
-            style={{ color: 'var(--color-text-muted)' }}
+            className="text-center py-1 text-xs text-muted"
           >
             ...
           </div>
@@ -125,7 +122,7 @@ function TraitRankingRow({
       }}
     >
       {/* Arrow indicator column */}
-      <span className="text-xs" style={{ color: 'var(--color-accent)', textAlign: 'center' }}>
+      <span className="text-xs text-accent" style={{ textAlign: 'center' }}>
         {isCurrent ? '▶' : ''}
       </span>
       {/* Rank column */}
@@ -187,7 +184,7 @@ function AttributeRow({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <span className="text-xs block" style={{ color: 'var(--color-text-muted)' }}>
+      <span className="text-xs block text-muted">
         {category}
       </span>
       <div className="flex items-baseline justify-between gap-1">
@@ -200,8 +197,8 @@ function AttributeRow({
         </span>
         {rankInfo && (
           <span
-            className="text-xs cursor-help whitespace-nowrap flex-shrink-0"
-            style={{ color: 'var(--color-accent)', opacity: 0.8 }}
+            className="text-xs cursor-help whitespace-nowrap flex-shrink-0 text-accent"
+            style={{ opacity: 0.8 }}
           >
             {rankInfo.currentRank}/{rankInfo.total}
           </span>
@@ -348,11 +345,10 @@ export function NFTPreviewCard({
             >
               <Sparkles
                 size={28}
-                style={{ color: 'var(--color-text-muted)' }}
-                className={prefersReducedMotion ? '' : 'animate-pulse'}
+                className={`text-muted ${prefersReducedMotion ? '' : 'animate-pulse'}`}
               />
             </div>
-            <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+            <p className="text-xs text-muted">
               Search for an NFT
             </p>
           </div>

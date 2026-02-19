@@ -283,7 +283,7 @@ export function TraitNameAudit({ onBack }: TraitNameAuditProps) {
       {/* Header */}
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold" style={{ color: 'var(--color-text-secondary)' }}>
+          <span className="text-xs font-semibold text-secondary">
             Review Wizard
           </span>
           {globalStats.total > 0 && (
@@ -302,8 +302,8 @@ export function TraitNameAudit({ onBack }: TraitNameAuditProps) {
           )}
         </div>
         <button
-          className="text-xs px-2 py-0.5 rounded"
-          style={{ color: 'var(--color-text-muted)', background: 'rgba(255,255,255,0.05)' }}
+          className="text-xs px-2 py-0.5 rounded text-muted"
+          style={{ background: 'rgba(255,255,255,0.05)' }}
           onClick={onBack}
         >
           Back
@@ -369,7 +369,7 @@ export function TraitNameAudit({ onBack }: TraitNameAuditProps) {
 
       {/* Filter toggle + layer stats */}
       <div className="flex items-center justify-between px-1">
-        <span style={{ color: 'var(--color-text-muted)', fontSize: '10px' }}>
+        <span className="text-muted" style={{ fontSize: '10px' }}>
           {layerStats.total} traits
           {layerStats.unmapped > 0 && (
             <span style={{ color: STATUS_COLOR['unmapped'] }}> / {layerStats.unmapped} unmapped</span>
@@ -394,11 +394,11 @@ export function TraitNameAudit({ onBack }: TraitNameAuditProps) {
       {/* Trait list */}
       <div className="flex-1 overflow-y-auto" style={{ minHeight: 0 }}>
         {loading ? (
-          <div className="text-xs p-2" style={{ color: 'var(--color-text-muted)' }}>
+          <div className="text-xs p-2 text-muted">
             Loading...
           </div>
         ) : displayTraits.length === 0 && activeLayer !== 'Background' ? (
-          <div className="text-xs p-2" style={{ color: 'var(--color-text-muted)' }}>
+          <div className="text-xs p-2 text-muted">
             {filterMode === 'needs-review' ? 'All traits confirmed for this layer!' : 'No traits found'}
           </div>
         ) : (
@@ -413,15 +413,15 @@ export function TraitNameAudit({ onBack }: TraitNameAuditProps) {
                     border: '1px solid rgba(0,212,255,0.2)',
                   }}
                 >
-                  <span style={{ color: 'var(--color-cyan)', fontSize: '10px', fontWeight: 600 }}>
+                  <span className="text-cyan" style={{ fontSize: '10px', fontWeight: 600 }}>
                     Solid Color Names ({Object.keys(BACKGROUND_COLOR_NAMES).length} colors)
                   </span>
                 </div>
                 {/* Default background color */}
                 <div className="flex flex-col gap-0.5">
                   <span
-                    className="px-2"
-                    style={{ color: 'var(--color-text-muted)', fontSize: '9px', fontWeight: 600, marginTop: '4px' }}
+                    className="px-2 text-muted"
+                    style={{ fontSize: '9px', fontWeight: 600, marginTop: '4px' }}
                   >
                     Default
                   </span>
@@ -439,10 +439,10 @@ export function TraitNameAudit({ onBack }: TraitNameAuditProps) {
                         flexShrink: 0,
                       }}
                     />
-                    <span style={{ color: 'var(--color-text)', fontSize: '11px', fontWeight: 600, flex: 1 }}>
+                    <span className="text-primary" style={{ fontSize: '11px', fontWeight: 600, flex: 1 }}>
                       {BACKGROUND_COLOR_NAMES['#1A1A2E']}
                     </span>
-                    <span style={{ color: 'var(--color-text-muted)', fontSize: '9px', fontFamily: 'monospace' }}>
+                    <span className="text-muted" style={{ fontSize: '9px', fontFamily: 'monospace' }}>
                       #1A1A2E
                     </span>
                   </div>
@@ -450,8 +450,8 @@ export function TraitNameAudit({ onBack }: TraitNameAuditProps) {
                 {COLOR_FAMILIES.map((family) => (
                   <div key={family.label} className="flex flex-col gap-0.5">
                     <span
-                      className="px-2"
-                      style={{ color: 'var(--color-text-muted)', fontSize: '9px', fontWeight: 600, marginTop: '4px' }}
+                      className="px-2 text-muted"
+                      style={{ fontSize: '9px', fontWeight: 600, marginTop: '4px' }}
                     >
                       {family.label}
                     </span>
@@ -478,11 +478,11 @@ export function TraitNameAudit({ onBack }: TraitNameAuditProps) {
                               flexShrink: 0,
                             }}
                           />
-                          <span style={{ color: 'var(--color-text)', fontSize: '11px', fontWeight: 600, flex: 1 }}>
+                          <span className="text-primary" style={{ fontSize: '11px', fontWeight: 600, flex: 1 }}>
                             {name || '???'}
                           </span>
                           <span
-                            style={{ color: 'var(--color-text-muted)', fontSize: '9px', fontFamily: 'monospace' }}
+                            className="text-muted" style={{ fontSize: '9px', fontFamily: 'monospace' }}
                           >
                             {normHex}
                           </span>
@@ -501,7 +501,7 @@ export function TraitNameAudit({ onBack }: TraitNameAuditProps) {
                       marginTop: '6px',
                     }}
                   >
-                    <span style={{ color: 'var(--color-cyan)', fontSize: '10px', fontWeight: 600 }}>
+                    <span className="text-cyan" style={{ fontSize: '10px', fontWeight: 600 }}>
                       Scene Backgrounds ({displayTraits.length} images)
                     </span>
                   </div>
@@ -541,7 +541,7 @@ export function TraitNameAudit({ onBack }: TraitNameAuditProps) {
 
                 {/* Row 2: trait_type + source */}
                 <div className="flex items-center justify-between" style={{ marginTop: '2px' }}>
-                  <span style={{ color: 'var(--color-cyan)', fontSize: '10px' }}>
+                  <span className="text-cyan" style={{ fontSize: '10px' }}>
                     {trait.traitType}
                   </span>
                   <span
@@ -560,8 +560,8 @@ export function TraitNameAudit({ onBack }: TraitNameAuditProps) {
 
                 {/* Row 3: raw key for debugging */}
                 <span
-                  className="truncate"
-                  style={{ color: 'var(--color-text-muted)', fontSize: '9px', fontFamily: 'monospace' }}
+                  className="truncate text-muted"
+                  style={{ fontSize: '9px', fontFamily: 'monospace' }}
                   title={trait.rawId}
                 >
                   key: {trait.rawId.toLowerCase()}

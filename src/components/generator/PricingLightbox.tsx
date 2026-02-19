@@ -166,22 +166,21 @@ function CategoryAccordion({
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.2 }}
         >
-          <ChevronDown size={16} style={{ color: 'var(--color-text-muted)' }} />
+          <ChevronDown size={16} className="text-muted" />
         </motion.div>
-        <span style={{ color: 'var(--color-text)', fontSize: '15px', fontWeight: 600, flex: 1, textAlign: 'left' }}>
+        <span className="text-primary" style={{ fontSize: '15px', fontWeight: 600, flex: 1, textAlign: 'left' }}>
           {category}
         </span>
-        <span className="tabular-nums" style={{ color: 'var(--color-text-muted)', fontSize: '13px' }}>
+        <span className="tabular-nums text-muted" style={{ fontSize: '13px' }}>
           {items.length} traits
         </span>
-        <span className="tabular-nums" style={{ color: 'var(--color-text-secondary)', fontSize: '13px' }}>
+        <span className="tabular-nums text-secondary" style={{ fontSize: '13px' }}>
           {totalMinted} minted
         </span>
         {isSurchargeCategory && maxSurcharge > 0 && (
           <span
-            className="tabular-nums"
+            className="tabular-nums text-accent"
             style={{
-              color: 'var(--color-primary)',
               fontSize: '12px',
               fontWeight: 700,
               background: 'rgba(255, 107, 0, 0.1)',
@@ -235,15 +234,15 @@ function CategoryAccordion({
                     </button>
                   ))}
                 </div>
-                <span style={{ width: 80, textAlign: 'right', fontSize: '11px', fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                <span className="text-muted" style={{ width: 80, textAlign: 'right', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                   Minted
                 </span>
                 {isSurchargeCategory && (
                   <>
-                    <span style={{ width: 80, textAlign: 'right', fontSize: '11px', fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    <span className="text-muted" style={{ width: 80, textAlign: 'right', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                       Price
                     </span>
-                    <span style={{ width: 72, textAlign: 'right', fontSize: '11px', fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    <span className="text-muted" style={{ width: 72, textAlign: 'right', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                       Credits
                     </span>
                   </>
@@ -305,7 +304,7 @@ function CategoryAccordion({
                           }}
                         />
                       </div>
-                      <span className="tabular-nums" style={{ fontSize: '14px', color: 'var(--color-text-secondary)', minWidth: 32, textAlign: 'right' }}>
+                      <span className="tabular-nums text-secondary" style={{ fontSize: '14px', minWidth: 32, textAlign: 'right' }}>
                         {pricing.usageCount}
                       </span>
                     </div>
@@ -468,8 +467,8 @@ export function PricingLightbox({ isOpen, onClose }: PricingLightboxProps) {
                 }}
               />
             </div>
-            <span className="tabular-nums shrink-0" style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-text-secondary)' }}>
-              {data.supply.minted}<span style={{ color: 'var(--color-text-muted)' }}>/{data.supply.total}</span>
+            <span className="tabular-nums shrink-0 text-secondary" style={{ fontSize: '14px', fontWeight: 600 }}>
+              {data.supply.minted}<span className="text-muted">/{data.supply.total}</span>
             </span>
           </div>
         )}
@@ -477,11 +476,10 @@ export function PricingLightbox({ isOpen, onClose }: PricingLightboxProps) {
         {/* Info pills */}
         <div className="flex items-center gap-3 flex-wrap">
           <span
-            className="tabular-nums"
+            className="tabular-nums text-primary"
             style={{
               fontSize: '13px',
               fontWeight: 600,
-              color: 'var(--color-text)',
               background: 'rgba(255, 255, 255, 0.05)',
               padding: '5px 12px',
               borderRadius: '8px',
@@ -490,7 +488,7 @@ export function PricingLightbox({ isOpen, onClose }: PricingLightboxProps) {
           >
             Base: {BASE_PRICE} XCH
           </span>
-          <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', lineHeight: 1.5 }}>
+          <span className="text-muted" style={{ fontSize: '13px', lineHeight: 1.5 }}>
             Popular traits in Head, Clothes & Face Wear add a surcharge. Only the highest applies.
           </span>
         </div>
@@ -498,12 +496,12 @@ export function PricingLightbox({ isOpen, onClose }: PricingLightboxProps) {
 
       {loading && (
         <div className="flex items-center justify-center py-20">
-          <Loader2 size={32} className="animate-spin" style={{ color: 'var(--color-primary)' }} />
+          <Loader2 size={32} className="animate-spin text-accent" />
         </div>
       )}
 
       {error && (
-        <p className="text-center py-12" style={{ color: 'var(--color-text-secondary)', fontSize: '14px' }}>{error}</p>
+        <p className="text-center py-12 text-secondary" style={{ fontSize: '14px' }}>{error}</p>
       )}
 
       {!loading && !error && data && (

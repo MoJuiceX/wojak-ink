@@ -97,7 +97,7 @@ function LogoButton({ name, isSelected, onClick }: { name: string; isSelected: b
       aria-label={name}
     >
       {imgError && (
-        <span className="text-[7px] font-bold" style={{ color: 'var(--color-text-muted)' }}>
+        <span className="text-[7px] font-bold text-muted">
           {name.slice(0, 4)}
         </span>
       )}
@@ -169,7 +169,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
         }}
       >
         <div className="flex flex-col gap-2">
-          <label className="text-[10px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+          <label className="text-[10px] font-medium text-secondary">
             Name 1
           </label>
           <input
@@ -183,7 +183,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
           />
         </div>
         <div className="flex flex-col gap-2">
-          <label className="text-[10px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+          <label className="text-[10px] font-medium text-secondary">
             Name 2
           </label>
           <input
@@ -357,7 +357,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
           border: '1px solid var(--color-border)',
         }}
       >
-        <p className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+        <p className="text-xs font-medium text-secondary">
           Logo
         </p>
         <div className="flex flex-wrap" style={{ gap: 4 }}>
@@ -420,7 +420,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
       >
         {trait.variants && trait.variants.length > 0 && (
           <>
-            <p className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+            <p className="text-xs font-medium text-secondary">
               Style
             </p>
             <div className="flex flex-wrap" style={{ gap: 4 }}>
@@ -445,7 +445,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
             </div>
           </>
         )}
-        <p className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+        <p className="text-xs font-medium text-secondary">
           Logo
         </p>
         <div className="flex flex-wrap" style={{ gap: 4 }}>
@@ -511,7 +511,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
         }}
       >
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+          <span className="text-xs font-medium text-secondary">
             Chia logo
           </span>
           <button
@@ -529,7 +529,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
         </div>
         {!overrideG2Selection && (
           <div className="flex flex-col gap-2">
-            <span className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+            <span className="text-xs font-medium text-secondary">
               Cigarette pack
             </span>
             <div className="flex flex-wrap gap-2">
