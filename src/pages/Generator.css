@@ -178,42 +178,42 @@
 /* Default/Dark/Void theme - softer neutral so trait art stands out */
 .trait-card-image-bg {
   background:
-    radial-gradient(ellipse 80% 80% at 50% 50%, rgba(255, 255, 255, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 80% at 50% 50%, var(--color-white-4) 0%, transparent 60%),
     linear-gradient(180deg, #1f1f24 0%, #1a1a1f 50%, #16161a 100%) !important;
 }
 
 /* Light theme */
 .theme-light .trait-card-image-bg {
   background:
-    radial-gradient(ellipse 80% 80% at 60% 40%, rgba(255, 255, 255, 0.4) 0%, transparent 50%),
-    radial-gradient(ellipse 100% 100% at 50% 50%, transparent 50%, rgba(0, 0, 0, 0.03) 100%),
+    radial-gradient(ellipse 80% 80% at 60% 40%, var(--color-white-40) 0%, transparent 50%),
+    radial-gradient(ellipse 100% 100% at 50% 50%, transparent 50%, var(--color-black-3) 100%),
     linear-gradient(45deg, #e9ecef 0%, #f0f2f5 40%, #f5f7f9 70%, #fafbfc 100%) !important;
 }
 
 /* Tang Orange theme - subtle warm tint */
 .theme-tang-orange .trait-card-image-bg {
   background:
-    radial-gradient(ellipse 80% 80% at 50% 50%, rgba(255, 150, 80, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 80% at 50% 50%, var(--color-primary-6) 0%, transparent 60%),
     linear-gradient(180deg, #221f1c 0%, #1c1a18 50%, #181614 100%) !important;
 }
 
 /* Chia Green theme - subtle green tint */
 .theme-chia-green .trait-card-image-bg {
   background:
-    radial-gradient(ellipse 80% 80% at 50% 50%, rgba(80, 200, 120, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 80% at 50% 50%, var(--color-success-6) 0%, transparent 60%),
     linear-gradient(180deg, #1c221f 0%, #181c1a 50%, #141816 100%) !important;
 }
 
 /* === TRAIT CARD SELECTED BORDER & BADGE COLORS (Theme-aware) === */
 :root {
   --generator-selected-color: #F97316;
-  --generator-selected-glow: rgba(249, 115, 22, 0.5);
+  --generator-selected-glow: var(--color-primary-50);
   --generator-badge-color: #F97316;
 }
 
 .theme-chia-green {
   --generator-selected-color: #4ade80;
-  --generator-selected-glow: rgba(74, 222, 128, 0.5);
+  --generator-selected-glow: var(--color-success-50);
   --generator-badge-color: #166534;
 }
 
@@ -223,7 +223,7 @@
   border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
-  background: rgba(30, 30, 30, 0.8);
+  background: var(--color-surface-dark-80);
   border: 2px solid transparent;
   transition: all 0.2s ease;
   position: relative;
@@ -232,10 +232,10 @@
 /* Hover state — subtle lift with warm glow */
 .generator-option-item:hover {
   transform: scale(1.02);
-  border-color: rgba(249, 115, 22, 0.4);
+  border-color: var(--color-primary-40);
   box-shadow:
-    0 0 16px rgba(249, 115, 22, 0.12),
-    0 4px 16px rgba(0, 0, 0, 0.3);
+    0 0 16px var(--color-primary-12),
+    0 4px 16px var(--color-black-30);
   z-index: 10;
 }
 
@@ -243,8 +243,8 @@
 .generator-option-item.selected {
   border-color: #F97316;
   box-shadow:
-    0 0 20px rgba(249, 115, 22, 0.5),
-    inset 0 0 20px rgba(249, 115, 22, 0.1);
+    0 0 20px var(--color-primary-50),
+    inset 0 0 20px var(--color-primary-10);
   animation: selectPulse 0.4s ease-out;
 }
 
@@ -257,7 +257,7 @@
 
 /* Layer tab hover — subtle feedback for non-active tabs */
 .generator-layer-tab:not([aria-selected="true"]):not([aria-disabled="true"]):hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--color-white-4);
 }
 
 /* Focus state for accessibility */
@@ -278,7 +278,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px var(--color-black-30);
 }
 
 /* === CATEGORY TAB STATES === */
@@ -309,7 +309,7 @@
 
 /* Hover state */
 .generator-category-tab:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--color-white-6);
   color: var(--color-text);
 }
 
@@ -351,7 +351,7 @@
   background: var(--color-surface);
   color: var(--color-text);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px var(--color-black-20);
 }
 
 .generator-action-btn:active {
@@ -367,11 +367,11 @@
 
 .generator-action-btn.primary:hover {
   background: #ff9500;
-  box-shadow: 0 4px 16px rgba(255, 140, 0, 0.4);
+  box-shadow: 0 4px 16px var(--color-primary-40);
 }
 
 .generator-action-btn.toggled {
-  background: rgba(255, 140, 0, 0.15);
+  background: var(--color-primary-15);
   color: var(--color-primary);
   border-color: var(--color-primary);
 }
@@ -397,7 +397,7 @@
 }
 
 .generator-preview-canvas.updated {
-  box-shadow: 0 0 30px rgba(255, 140, 0, 0.3);
+  box-shadow: 0 0 30px var(--color-primary-30);
 }
 
 
@@ -431,19 +431,19 @@
 @keyframes selectPulse {
   0% {
     box-shadow:
-      0 0 20px rgba(249, 115, 22, 0.5),
-      inset 0 0 20px rgba(249, 115, 22, 0.1);
+      0 0 20px var(--color-primary-50),
+      inset 0 0 20px var(--color-primary-10);
   }
   50% {
     box-shadow:
-      0 0 30px rgba(249, 115, 22, 0.7),
-      0 0 60px rgba(249, 115, 22, 0.2),
-      inset 0 0 25px rgba(249, 115, 22, 0.15);
+      0 0 30px var(--color-primary-70),
+      0 0 60px var(--color-primary-20),
+      inset 0 0 25px var(--color-primary-15);
   }
   100% {
     box-shadow:
-      0 0 20px rgba(249, 115, 22, 0.5),
-      inset 0 0 20px rgba(249, 115, 22, 0.1);
+      0 0 20px var(--color-primary-50),
+      inset 0 0 20px var(--color-primary-10);
   }
 }
 
@@ -484,7 +484,7 @@
   height: 160px;
   border-radius: 16px;
   background: var(--color-bg);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 16px var(--color-black-25);
   overflow: hidden;
   z-index: 1000;
   opacity: 0;
@@ -554,7 +554,7 @@
   border: 3px solid var(--color-primary);
   border-radius: 14px;
   pointer-events: none;
-  box-shadow: 0 0 20px rgba(255, 140, 0, 0.4);
+  box-shadow: 0 0 20px var(--color-primary-40);
 }
 
 /* Checkmark badge styling */
@@ -569,7 +569,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px var(--color-black-30);
 }
 
 /* Download success sparkles */

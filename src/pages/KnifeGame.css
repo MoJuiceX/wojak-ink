@@ -24,7 +24,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--color-black-60);
   z-index: -1;
 }
 
@@ -63,8 +63,8 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: rgba(0, 0, 0, 0.2);
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--color-black-20);
+  border-left: 1px solid var(--color-white-10);
 }
 
 /* Game Title */
@@ -104,7 +104,7 @@
   color: white;
   font-weight: 600;
   font-size: 16px;
-  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 4px 20px var(--color-error-40);
 }
 
 /* Media Player */
@@ -116,9 +116,9 @@
   width: 100%;
   max-width: 280px;
   padding: 24px;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--color-black-40);
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--color-white-10);
   backdrop-filter: blur(10px);
 }
 
@@ -128,7 +128,7 @@
   height: 160px;
   border-radius: 12px;
   object-fit: cover;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 24px var(--color-black-40);
 }
 
 /* Player Info */
@@ -145,7 +145,7 @@
 
 .knife-content .player-track-artist {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-white-60);
 }
 
 /* Play Button */
@@ -161,12 +161,12 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 4px 20px var(--color-error-40);
 }
 
 .knife-content .player-play-btn:hover {
   transform: scale(1.05);
-  box-shadow: 0 6px 30px rgba(239, 68, 68, 0.5);
+  box-shadow: 0 6px 30px var(--color-error-50);
 }
 
 .knife-content .player-play-btn:active {
@@ -186,7 +186,7 @@
 .knife-content .player-progress-bar {
   width: 100%;
   height: 6px;
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--color-white-20);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -203,5 +203,5 @@
   justify-content: space-between;
   margin-top: 8px;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-white-50);
 }

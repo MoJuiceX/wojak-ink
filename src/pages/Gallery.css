@@ -10,12 +10,12 @@
   background:
     radial-gradient(
       ellipse at 20% 80%,
-      rgba(249, 115, 22, 0.08) 0%,
+      var(--color-primary-8) 0%,
       transparent 50%
     ),
     radial-gradient(
       ellipse at 80% 20%,
-      rgba(124, 58, 237, 0.05) 0%,
+      var(--color-purple-5) 0%,
       transparent 50%
     ),
     linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
@@ -83,9 +83,9 @@
 /* Inner glow on hover */
 .nft-grid-item:hover {
   box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.4),
-    0 0 20px rgba(249, 115, 22, 0.3),
-    inset 0 0 15px rgba(249, 115, 22, 0.1);
+    0 10px 30px var(--color-black-40),
+    0 0 20px var(--color-primary-30),
+    inset 0 0 15px var(--color-primary-10);
 }
 
 /* ============================================
@@ -105,7 +105,7 @@
   background: linear-gradient(
     90deg,
     var(--color-surface) 0%,
-    rgba(249, 115, 22, 0.1) 50%,
+    var(--color-primary-10) 50%,
     var(--color-surface) 100%
   );
   background-size: 200% 100%;
@@ -181,7 +181,7 @@
   left: 0;
   right: 0;
   padding: 8px;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  background: linear-gradient(transparent, var(--color-black-80));
 }
 
 .base-name {
@@ -210,7 +210,7 @@
   aspect-ratio: 1;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 24px var(--color-black-20);
   touch-action: pan-y;
 }
 
@@ -274,7 +274,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--color-black-50);
   border-radius: 50%;
   color: white;
   animation: swipe-hint-pulse 0.8s ease-in-out infinite;
@@ -722,7 +722,7 @@
   font-size: 24px;
   cursor: grab;
   z-index: 10;
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(0 2px 6px var(--color-black-50));
   animation: idlePulse 2.5s ease-in-out infinite;
   /* GPU acceleration */
   will-change: transform;
@@ -759,7 +759,7 @@
   left: 32px;
   top: 50%;
   transform: translateY(-50%) translateX(0) scale(0.95);
-  background: rgba(0, 0, 0, 0.85);
+  background: var(--color-black-85);
   color: var(--ion-color-success);
   padding: 4px 7px;
   border-radius: 6px;
@@ -767,7 +767,7 @@
   font-weight: 700;
   white-space: nowrap;
   z-index: 30;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 2px 8px var(--color-black-40);
   opacity: 0;
   pointer-events: none;
   /* Longer, elegant fade out */
@@ -793,7 +793,7 @@
   top: 50%;
   transform: translateY(-50%);
   border: 5px solid transparent;
-  border-right-color: rgba(0, 0, 0, 0.85);
+  border-right-color: var(--color-black-85);
   border-left: none;
 }
 

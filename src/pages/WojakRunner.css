@@ -11,7 +11,7 @@
     0 0 10px #ff6b00,
     0 0 20px #ff6b00,
     0 0 40px #ff6b00,
-    0 4px 8px rgba(0, 0, 0, 0.9);
+    0 4px 8px var(--color-black-90);
   z-index: 9999;
   pointer-events: none;
   animation: wr-score-fly 0.8s ease-out forwards;
@@ -48,9 +48,9 @@
   font-weight: 900;
   color: #fff;
   text-shadow:
-    0 0 20px rgba(168, 85, 247, 0.8),
-    0 0 40px rgba(168, 85, 247, 0.6),
-    0 4px 8px rgba(0, 0, 0, 0.5);
+    0 0 20px var(--color-purple-80),
+    0 0 40px var(--color-purple-60),
+    0 4px 8px var(--color-black-50);
   line-height: 1;
 }
 
@@ -58,7 +58,7 @@
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 3px;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--color-white-90);
   text-transform: uppercase;
   margin-top: -2px;
 }
@@ -104,7 +104,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
+  background: var(--color-black-65);
   pointer-events: none;
   z-index: 0;
   transition: background 0.3s ease;
@@ -117,7 +117,7 @@
 }
 
 .runner-container.playing-mode::before {
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--color-black-30);
 }
 
 /* ============================================
@@ -143,12 +143,12 @@
   justify-content: center;
   gap: 12px;
   padding: 24px 20px;
-  background: linear-gradient(135deg, rgba(20, 20, 35, 0.95) 0%, rgba(30, 30, 50, 0.9) 100%);
-  border: 2px solid rgba(255, 107, 0, 0.4);
+  background: linear-gradient(135deg, var(--color-surface-runner-95) 0%, var(--color-surface-runner-90) 100%);
+  border: 2px solid var(--color-primary-40);
   border-right: none;
   border-radius: 20px 0 0 20px;
   backdrop-filter: blur(20px);
-  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.4), inset 0 0 30px rgba(255, 107, 0, 0.05);
+  box-shadow: -8px 0 32px var(--color-black-40), inset 0 0 30px var(--color-primary-5);
   min-width: 140px;
   height: 650px;
   z-index: 10;
@@ -160,9 +160,9 @@
   flex-direction: column;
   align-items: center;
   padding: 14px 12px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+  background: linear-gradient(135deg, var(--color-white-8) 0%, var(--color-white-3) 100%);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--color-white-10);
   transition: all 0.3s ease;
 }
 
@@ -171,7 +171,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-white-60);
   margin-bottom: 4px;
 }
 
@@ -185,7 +185,7 @@
 /* Score stat - green accent */
 .runner-container .stat-item.score-stat {
   border-left: 3px solid #00ff88;
-  background: linear-gradient(135deg, rgba(0, 255, 136, 0.15) 0%, rgba(0, 255, 136, 0.05) 100%);
+  background: linear-gradient(135deg, var(--color-success-15) 0%, var(--color-success-5) 100%);
 }
 .runner-container .stat-item.score-stat .stat-value {
   color: #00ff88;
@@ -194,7 +194,7 @@
 /* Best stat - gold accent */
 .runner-container .stat-item.best-stat {
   border-left: 3px solid #ffd700;
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.05) 100%);
+  background: linear-gradient(135deg, var(--color-gold-15) 0%, var(--color-gold-5) 100%);
 }
 .runner-container .stat-item.best-stat .stat-value {
   color: #ffd700;
@@ -203,7 +203,7 @@
 /* Speed stat - orange accent */
 .runner-container .stat-item.speed-stat {
   border-left: 3px solid #ff6b00;
-  background: linear-gradient(135deg, rgba(255, 107, 0, 0.15) 0%, rgba(255, 107, 0, 0.05) 100%);
+  background: linear-gradient(135deg, var(--color-primary-15) 0%, var(--color-primary-5) 100%);
 }
 .runner-container .stat-item.speed-stat .stat-value {
   color: #ff6b00;
@@ -212,7 +212,7 @@
 /* Distance stat - purple accent */
 .runner-container .stat-item.distance-stat {
   border-left: 3px solid #a855f7;
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(168, 85, 247, 0.05) 100%);
+  background: linear-gradient(135deg, var(--color-purple-15) 0%, var(--color-purple-5) 100%);
 }
 .runner-container .stat-item.distance-stat .stat-value {
   color: #a855f7;
@@ -224,11 +224,11 @@
   position: relative;
   width: 550px;
   height: 650px;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.4) 100%);
-  border: 2px solid rgba(255, 107, 0, 0.5);
+  background: linear-gradient(135deg, var(--color-black-60) 0%, var(--color-black-40) 100%);
+  border: 2px solid var(--color-primary-50);
   border-left: none;
   border-radius: 0 20px 20px 0;
-  box-shadow: 8px 0 32px rgba(0, 0, 0, 0.3), inset 0 0 60px rgba(255, 107, 0, 0.08);
+  box-shadow: 8px 0 32px var(--color-black-30), inset 0 0 60px var(--color-primary-8);
   overflow: hidden;
 }
 
@@ -312,7 +312,7 @@
   animation: wojak-run 0.3s steps(2) infinite;
   transition: left 0.05s ease-out; /* Snappy response on swipe */
   z-index: 10;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(0 4px 8px var(--color-black-50));
   will-change: left;
 }
 
@@ -334,11 +334,11 @@
 }
 
 .runner-obstacle.camel {
-  filter: drop-shadow(0 0 8px rgba(255, 200, 100, 0.5));
+  filter: drop-shadow(0 0 8px var(--color-camel-glow-50));
 }
 
 .runner-obstacle.bear {
-  filter: drop-shadow(0 0 8px rgba(139, 69, 19, 0.5));
+  filter: drop-shadow(0 0 8px var(--color-bear-glow-50));
 }
 
 .runner-collectible {
@@ -355,8 +355,8 @@
 }
 
 @keyframes pulse-collectible {
-  from { transform: scale(1); filter: drop-shadow(0 0 5px rgba(255, 140, 0, 0.5)); }
-  to { transform: scale(1.1); filter: drop-shadow(0 0 15px rgba(255, 140, 0, 0.8)); }
+  from { transform: scale(1); filter: drop-shadow(0 0 5px var(--color-primary-50)); }
+  to { transform: scale(1.1); filter: drop-shadow(0 0 15px var(--color-primary-80)); }
 }
 
 .swipe-hint {
@@ -365,7 +365,7 @@
   left: 0;
   right: 0;
   text-align: center;
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--color-white-30);
   font-size: 14px;
   animation: fade-pulse 1.5s ease-in-out infinite;
 }
@@ -502,9 +502,9 @@
   display: flex;
   align-items: center;
   padding: 8px 12px;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--color-black-30);
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--color-white-10);
 }
 
 .runner-container .leaderboard-rank {
@@ -577,8 +577,8 @@
     gap: 8px;
     border-radius: 0;
     border: none;
-    border-bottom: 2px solid rgba(255, 107, 0, 0.4);
-    background: linear-gradient(180deg, rgba(20, 20, 35, 0.98) 0%, rgba(20, 20, 35, 0.9) 100%);
+    border-bottom: 2px solid var(--color-primary-40);
+    background: linear-gradient(180deg, var(--color-surface-dark-deep-98) 0%, var(--color-surface-dark-deep-90) 100%);
   }
 
   .runner-container .stat-item {
@@ -686,7 +686,7 @@
 .runner-container .effect-score-popup .score-popup-value {
   font-size: 28px;
   color: #ffd700 !important;
-  text-shadow: 0 0 20px #ff6b00, 0 0 40px #ff6b00, 0 2px 4px rgba(0,0,0,0.8) !important;
+  text-shadow: 0 0 20px #ff6b00, 0 0 40px #ff6b00, 0 2px 4px var(--color-black-80) !important;
 }
 
 /* Vignette - keep full screen but subtle */
@@ -780,7 +780,7 @@
   gap: 8px;
   border-radius: 0;
   border: none;
-  border-right: 2px solid rgba(255, 107, 0, 0.4);
+  border-right: 2px solid var(--color-primary-40);
   justify-content: center;
 }
 
