@@ -83,6 +83,7 @@ export function ExplorerTopBar({
       {/* Close button (optional for desktop panel which has its own) */}
       {showClose ? (
         <motion.button
+          type="button"
           className="w-10 h-10 flex items-center justify-center rounded-lg transition-colors text-secondary"
           onClick={onClose}
           whileHover={{ background: 'var(--color-surface-hover)' }}
@@ -145,6 +146,7 @@ export function ExplorerTopBar({
           return (
             <Tooltip key={mode.base} text={mode.tooltip}>
               <motion.button
+                type="button"
                 className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors"
                 style={{
                   color: isActive

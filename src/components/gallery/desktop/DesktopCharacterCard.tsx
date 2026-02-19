@@ -65,6 +65,7 @@ export function DesktopCharacterCard({
 
   return (
     <motion.button
+      type="button"
       className="character-card glass hover-lift glow-section w-full text-left overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-4"
       style={{
         // Glassmorphism background

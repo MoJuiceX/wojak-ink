@@ -621,6 +621,7 @@ export function DesktopExplorerPanel({
                     {/* External link button */}
                     {currentNft.listing && (
                       <button
+                        type="button"
                         className="absolute bottom-3 right-3 w-10 h-10 flex items-center justify-center rounded-lg transition-colors"
                         style={{
                           background: 'var(--color-black-50)',
@@ -640,6 +641,7 @@ export function DesktopExplorerPanel({
                           {/* Left arrow */}
                           {canGoPrev && (
                             <motion.button
+                              type="button"
                               className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full cursor-pointer"
                               style={{
                                 background: 'var(--color-black-60)',
@@ -662,6 +664,7 @@ export function DesktopExplorerPanel({
                           {/* Right arrow */}
                           {canGoNext && (
                             <motion.button
+                              type="button"
                               className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full cursor-pointer"
                               style={{
                                 background: 'var(--color-black-60)',
@@ -704,23 +707,27 @@ export function DesktopExplorerPanel({
                           </span>
                         </div>
                         <button
+                          type="button"
                           className="px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:opacity-90"
                           style={{
                             background: '#22c55e',
                             color: 'white',
                           }}
                           onClick={handleOpenExternal}
+                          aria-label="Buy on marketplace"
                         >
                           Buy
                         </button>
                       </div>
                     ) : (
                       <button
+                        type="button"
                         className="explorer-action-btn flex-1"
                         onClick={async () => {
                           const url = await getMintGardenNftUrl(Number(currentNft.tokenId));
                           window.open(url, '_blank', 'noopener,noreferrer');
                         }}
+                        aria-label="View on MintGarden"
                       >
                         <ExternalLink size={14} />
                         View on MintGarden
@@ -744,6 +751,7 @@ export function DesktopExplorerPanel({
                       {/* Expand button - with gap after filter pills */}
                       <Tooltip text="Expand">
                         <motion.button
+                          type="button"
                           className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors ml-4 text-secondary"
                           style={{
                             background: 'var(--color-surface)',
@@ -762,6 +770,7 @@ export function DesktopExplorerPanel({
                       <div className="flex items-center gap-2 ml-4">
                         <Tooltip text="Shuffle">
                           <motion.button
+                            type="button"
                             className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors text-secondary"
                             style={{
                               background: 'var(--color-surface)',
@@ -777,6 +786,7 @@ export function DesktopExplorerPanel({
                         </Tooltip>
                         <Tooltip text="Sort by ID">
                           <motion.button
+                            type="button"
                             className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors"
                             style={{
                               background: 'var(--color-surface)',
@@ -803,6 +813,7 @@ export function DesktopExplorerPanel({
                         </Tooltip>
                         <Tooltip text="Sort by rank">
                           <motion.button
+                            type="button"
                             className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors"
                             style={{
                               background: 'var(--color-surface)',
@@ -829,6 +840,7 @@ export function DesktopExplorerPanel({
                         </Tooltip>
                         <Tooltip text="Sort by value">
                           <motion.button
+                            type="button"
                             className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors"
                             style={{
                               background: 'var(--color-surface)',
@@ -954,6 +966,7 @@ export function DesktopExplorerPanel({
                       return (
                         <button
                           key={tab.id}
+                          type="button"
                           className="flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors"
                           style={{
                             background: isActive
@@ -995,6 +1008,7 @@ export function DesktopExplorerPanel({
               {/* Close button - outside lightbox to the right */}
               <motion.button
                 ref={closeButtonRef}
+                type="button"
                 className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-xl transition-colors focus:outline-none focus-visible:ring-2 self-start mt-4 text-secondary"
                 style={{
                   background: 'var(--color-surface)',
@@ -1034,6 +1048,7 @@ export function DesktopExplorerPanel({
           >
             {/* Close button */}
             <motion.button
+              type="button"
               className="absolute top-6 right-6 w-12 h-12 flex items-center justify-center rounded-xl transition-colors text-secondary"
               style={{
                 background: 'var(--color-surface)',

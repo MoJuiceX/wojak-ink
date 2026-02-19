@@ -41,6 +41,7 @@ export function FilterPills({
         return (
           <motion.button
             key={filter.id}
+            type="button"
             className="h-9 px-5 rounded-full text-sm font-medium transition-colors"
             style={{
               background: isActive

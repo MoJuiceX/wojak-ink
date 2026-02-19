@@ -62,7 +62,7 @@ function NFTListCard({ data }: { data: NFTListResponse }) {
         ))}
       </div>
       {data.nfts.length > 6 && (
-        <button className="btn btn-ghost btn-sm">
+        <button type="button" className="btn btn-ghost btn-sm">
           View all {data.nfts.length} results
         </button>
       )}
@@ -97,7 +97,7 @@ function SuggestionCard({ suggestions }: { suggestions: string[] }) {
       <span className="suggestions-label">You might also want to know:</span>
       <div className="suggestion-chips">
         {suggestions.map((suggestion, i) => (
-          <button key={i} className="suggestion-chip">
+          <button key={i} type="button" className="suggestion-chip">
             {suggestion}
           </button>
         ))}
@@ -111,7 +111,7 @@ function ErrorCard({ message }: { message: string }) {
     <div className="response-error">
       <span className="error-icon">&#9888;&#65039;</span>
       <p>{message}</p>
-      <button className="btn btn-ghost btn-sm">Try again</button>
+      <button type="button" className="btn btn-ghost btn-sm">Try again</button>
     </div>
   );
 }

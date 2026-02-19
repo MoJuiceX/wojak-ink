@@ -161,6 +161,7 @@ function MainTabContent({
             </p>
           </div>
           <motion.button
+            type="button"
             className="w-full flex items-center justify-center gap-2 h-10 rounded-lg text-sm font-medium transition-colors"
             style={{
               background: '#22c55e',
@@ -174,6 +175,7 @@ function MainTabContent({
         </>
       ) : (
         <button
+          type="button"
           className="explorer-action-btn flex-1"
           onClick={async () => {
             const url = await getMintGardenNftUrl(Number(nft.tokenId));
@@ -287,8 +289,10 @@ function TraitRankingPopup({
             {data.category} Rarity
           </span>
           <button
+            type="button"
             onClick={onClose}
             className="p-1 rounded-lg text-muted"
+            aria-label="Close trait ranking"
           >
             <X size={18} />
           </button>
@@ -371,6 +375,7 @@ function MetadataTabContent({ nft }: { nft: NFT }) {
                 </p>
                 {rankData && (
                   <button
+                    type="button"
                     onClick={() => handleTraitTap(trait.category, trait.value)}
                     className="text-xs px-1.5 py-0.5 rounded active:opacity-70 whitespace-nowrap"
                     style={{
@@ -378,6 +383,7 @@ function MetadataTabContent({ nft }: { nft: NFT }) {
                       color: 'var(--color-accent)',
                       opacity: 0.8,
                     }}
+                    aria-label={`View ${trait.category} trait rankings`}
                   >
                     {rankData.currentRank}/{rankData.total}
                   </button>
@@ -551,6 +557,7 @@ export function NFTInfoCard({
 
           return (
             <button
+              type="button"
               key={tab.id}
               className="flex-1 py-3 text-sm font-medium transition-colors relative"
               style={{

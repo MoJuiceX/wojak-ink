@@ -146,6 +146,7 @@ export function DesktopNFTImage({
               </p>
               {onRetry && (
                 <button
+                  type="button"
                   className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors text-secondary"
                   style={{
                     background: 'var(--color-surface)',

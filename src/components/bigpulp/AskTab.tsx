@@ -112,6 +112,7 @@ function ExpandableSection({
     <div className="card-static rounded-xl overflow-hidden">
       {/* Header */}
       <button
+        type="button"
         className="w-full flex items-center justify-between p-3 sm:p-4 text-left transition-colors"
         onClick={onToggle}
         aria-expanded={isExpanded}
@@ -559,6 +560,7 @@ function BadgeGalleryContent() {
           >
             {/* Badge header */}
             <button
+              type="button"
               className="w-full flex items-center justify-between p-3 text-left transition-colors hover:bg-white/5"
               onClick={() => setExpandedBadge(isExpanded ? null : badge.name)}
               aria-expanded={isExpanded}
@@ -602,9 +604,11 @@ function BadgeGalleryContent() {
                     {/* NFT Grid */}
                     <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
                       {sortedNfts.map((nft) => (
-                        <div
+                        <button
                           key={nft.id}
+                          type="button"
                           className="card-static relative aspect-square rounded-lg overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-105 hover:z-10"
+                          aria-label={`Analyze Wojak ${names[nft.id] || '#' + nft.id.padStart(4, '0')}`}
                           title={`${names[nft.id] || `Wojak #${nft.id.padStart(4, '0')}`}`}
                           onClick={() => handleNftClick(nft.id)}
                         >
@@ -636,7 +640,7 @@ function BadgeGalleryContent() {
                               💜
                             </div>
                           )}
-                        </div>
+                        </button>
                       ))}
                     </div>
                   </div>
@@ -762,6 +766,7 @@ export function AskTab({
       {/* Collection Statistics - Collapsible like other sections */}
       <div className="card-static rounded-xl overflow-hidden">
         <button
+          type="button"
           className="w-full flex items-center justify-between p-3 sm:p-4 text-left transition-colors"
           onClick={() => setIsStatsExpanded(!isStatsExpanded)}
           aria-expanded={isStatsExpanded}

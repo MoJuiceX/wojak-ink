@@ -186,6 +186,7 @@ export function NFTExplorerModal({ isOpen, onClose }: NFTExplorerModalProps) {
         >
           {/* Close button */}
           <motion.button
+            type="button"
             className="absolute top-6 right-6 w-12 h-12 flex items-center justify-center rounded-xl transition-colors text-secondary"
             style={{
               background: 'var(--color-surface)',

@@ -140,6 +140,7 @@ export function SwipeableNFTImage({
 
       {/* Edge tap zones */}
       <button
+        type="button"
         className="absolute left-0 top-0 bottom-0 w-[15%] z-10 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-start pl-2"
         onClick={() => handleEdgeTap('left')}
         disabled={!canGoPrev}
@@ -158,6 +159,7 @@ export function SwipeableNFTImage({
       </button>
 
       <button
+        type="button"
         className="absolute right-0 top-0 bottom-0 w-[15%] z-10 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-end pr-2"
         onClick={() => handleEdgeTap('right')}
         disabled={!canGoNext}
@@ -178,6 +180,7 @@ export function SwipeableNFTImage({
       {/* Center tap zone */}
       {onTapCenter && (
         <button
+          type="button"
           className="absolute left-[15%] right-[15%] top-0 bottom-0 z-10"
           onClick={onTapCenter}
           aria-label="Toggle info"

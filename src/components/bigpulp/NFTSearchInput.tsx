@@ -163,6 +163,7 @@ export function NFTSearchInput({
 
         {/* Random dice button - blue like Generator */}
         <button
+          type="button"
           className="flex items-center justify-center rounded-lg transition-colors flex-shrink-0"
           style={{
             background: '#3B82F6',
@@ -186,6 +187,7 @@ export function NFTSearchInput({
         {/* My Wojaks button - only show if wallet connected with NFTs */}
         {hasWallet && ownedCount > 0 && onMyWojaks && (
           <button
+            type="button"
             className="flex items-center justify-center gap-1 rounded-lg transition-colors flex-shrink-0 px-2"
             style={{
               background: 'linear-gradient(135deg, #f97316, #ea580c)',

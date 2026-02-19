@@ -261,6 +261,7 @@ function NFTListModal({
             </div>
           </div>
           <button
+            type="button"
             className="p-2 rounded-lg transition-colors text-secondary"
             style={{
               background: 'var(--color-white-10)',

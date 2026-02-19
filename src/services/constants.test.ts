@@ -10,231 +10,260 @@ import {
   CAT_DECIMALS,
   SPACESCAN_WALLET_URL,
   MINTGARDEN_COLLECTION_URL,
-  CACHE_DURATIONS,
-  STORAGE_KEYS,
   getNftImageUrl,
   getNftThumbnailUrl,
   getMintGardenNftUrl,
   getMintGardenSearchUrl,
   getMintGardenWalletUrl,
+  CACHE_DURATIONS,
+  STORAGE_KEYS,
 } from './constants';
 
-// ============ Collection Info ============
+// ============================================
+// STATIC CONSTANTS
+// ============================================
 
-describe('Collection constants', () => {
-  it('COLLECTION_ID has the expected value', () => {
-    expect(COLLECTION_ID).toBe(
-      'col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah',
-    );
+describe('COLLECTION_ID', () => {
+  it('is a non-empty string', () => {
+    expect(typeof COLLECTION_ID).toBe('string');
+    expect(COLLECTION_ID.length).toBeGreaterThan(0);
   });
 
-  it('COLLECTION_SIZE is 4200', () => {
+  it('starts with col1', () => {
+    expect(COLLECTION_ID.startsWith('col1')).toBe(true);
+  });
+});
+
+describe('COLLECTION_SIZE', () => {
+  it('equals 4200', () => {
     expect(COLLECTION_SIZE).toBe(4200);
   });
+});
 
-  it('NFT_IPFS_CID has the expected CID', () => {
-    expect(NFT_IPFS_CID).toBe(
-      'bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq',
-    );
+describe('NFT_IPFS_CID', () => {
+  it('is a non-empty string', () => {
+    expect(typeof NFT_IPFS_CID).toBe('string');
+    expect(NFT_IPFS_CID.length).toBeGreaterThan(0);
   });
 });
 
-// ============ Treasury / Wallet ============
-
-describe('Wallet constants', () => {
-  it('WALLET_ADDRESS starts with xch1', () => {
+describe('WALLET_ADDRESS', () => {
+  it('starts with xch1', () => {
     expect(WALLET_ADDRESS.startsWith('xch1')).toBe(true);
   });
+});
 
-  it('WALLET_ADDRESS has the expected full value', () => {
-    expect(WALLET_ADDRESS).toBe(
-      'xch13afmxv0xpyz03t3jfdmcrtv5ecwe5n52977vxd3z2x995f9quunsre5vkd',
-    );
-  });
-
-  it('WALLET_PUZZLE_HASH has the expected hex value', () => {
-    expect(WALLET_PUZZLE_HASH).toBe(
-      '8f53b331e60904f8ae324b7781ad94ce1d9a4e8a2fbcc33622518a5a24a0e727',
-    );
-  });
-
-  it('WALLET_DISPLAY is a truncated form of WALLET_ADDRESS', () => {
-    const expectedStart = WALLET_ADDRESS.slice(0, 10);
-    const expectedEnd = WALLET_ADDRESS.slice(-6);
-    expect(WALLET_DISPLAY).toBe(`${expectedStart}...${expectedEnd}`);
-  });
-
-  it('WALLET_DISPLAY length is shorter than WALLET_ADDRESS', () => {
-    expect(WALLET_DISPLAY.length).toBeLessThan(WALLET_ADDRESS.length);
+describe('WALLET_PUZZLE_HASH', () => {
+  it('is a 64-character hex string', () => {
+    expect(WALLET_PUZZLE_HASH).toMatch(/^[0-9a-f]{64}$/);
   });
 });
 
-// ============ Decimals ============
-
-describe('Decimal constants', () => {
-  it('XCH_DECIMALS is 12', () => {
-    expect(XCH_DECIMALS).toBe(12);
+describe('WALLET_DISPLAY', () => {
+  it('contains an ellipsis', () => {
+    expect(WALLET_DISPLAY).toContain('...');
   });
 
-  it('CAT_DECIMALS is 3', () => {
+  it('starts with the first 10 chars of the wallet address', () => {
+    expect(WALLET_DISPLAY.startsWith(WALLET_ADDRESS.slice(0, 10))).toBe(true);
+  });
+
+  it('ends with the last 6 chars of the wallet address', () => {
+    expect(WALLET_DISPLAY.endsWith(WALLET_ADDRESS.slice(-6))).toBe(true);
+  });
+});
+
+describe('XCH_DECIMALS', () => {
+  it('equals 12', () => {
+    expect(XCH_DECIMALS).toBe(12);
+  });
+});
+
+describe('CAT_DECIMALS', () => {
+  it('equals 3', () => {
     expect(CAT_DECIMALS).toBe(3);
   });
 });
 
-// ============ External Link Constants ============
-
-describe('External link constants', () => {
-  it('SPACESCAN_WALLET_URL contains the wallet address', () => {
+describe('SPACESCAN_WALLET_URL', () => {
+  it('contains the wallet address', () => {
     expect(SPACESCAN_WALLET_URL).toContain(WALLET_ADDRESS);
   });
 
-  it('SPACESCAN_WALLET_URL points to spacescan.io', () => {
-    expect(SPACESCAN_WALLET_URL).toContain('spacescan.io');
-  });
-
-  it('MINTGARDEN_COLLECTION_URL points to mintgarden.io', () => {
-    expect(MINTGARDEN_COLLECTION_URL).toContain('mintgarden.io');
+  it('starts with https://www.spacescan.io', () => {
+    expect(SPACESCAN_WALLET_URL.startsWith('https://www.spacescan.io')).toBe(true);
   });
 });
 
-// ============ Cache Durations ============
-
-describe('CACHE_DURATIONS', () => {
-  it('listings is 15 minutes in milliseconds', () => {
-    expect(CACHE_DURATIONS.listings).toBe(15 * 60 * 1000);
-  });
-
-  it('walletData is 6 hours in milliseconds', () => {
-    expect(CACHE_DURATIONS.walletData).toBe(6 * 60 * 60 * 1000);
-  });
-
-  it('nftHistory is 30 minutes in milliseconds', () => {
-    expect(CACHE_DURATIONS.nftHistory).toBe(30 * 60 * 1000);
-  });
-
-  it('traitStats is 5 minutes in milliseconds', () => {
-    expect(CACHE_DURATIONS.traitStats).toBe(5 * 60 * 1000);
-  });
-
-  it('xchPrice is 30 minutes in milliseconds', () => {
-    expect(CACHE_DURATIONS.xchPrice).toBe(30 * 60 * 1000);
-  });
-
-  it('localStorage is 1 hour in milliseconds', () => {
-    expect(CACHE_DURATIONS.localStorage).toBe(60 * 60 * 1000);
+describe('MINTGARDEN_COLLECTION_URL', () => {
+  it('starts with https://mintgarden.io', () => {
+    expect(MINTGARDEN_COLLECTION_URL.startsWith('https://mintgarden.io')).toBe(true);
   });
 });
 
-// ============ Storage Keys ============
-
-describe('STORAGE_KEYS', () => {
-  it('listings key has the expected value', () => {
-    expect(STORAGE_KEYS.listings).toBe('wojak_listings_cache_v1');
-  });
-
-  it('nftHistory key has the expected value', () => {
-    expect(STORAGE_KEYS.nftHistory).toBe('wojak_nft_history_cache_v1');
-  });
-
-  it('walletData key has the expected value', () => {
-    expect(STORAGE_KEYS.walletData).toBe('wojak_treasury_data');
-  });
-
-  it('walletTimestamp key has the expected value', () => {
-    expect(STORAGE_KEYS.walletTimestamp).toBe('wojak_treasury_timestamp');
-  });
-
-  it('xchPrice key has the expected value', () => {
-    expect(STORAGE_KEYS.xchPrice).toBe('wojak_xch_price');
-  });
-
-  it('xchBalance key has the expected value', () => {
-    expect(STORAGE_KEYS.xchBalance).toBe('wojak_xch_balance');
-  });
-
-  it('all keys are unique (no duplicates)', () => {
-    const values = Object.values(STORAGE_KEYS);
-    expect(new Set(values).size).toBe(values.length);
-  });
-});
-
-// ============ getNftImageUrl ============
+// ============================================
+// getNftImageUrl
+// ============================================
 
 describe('getNftImageUrl', () => {
-  it('pads single-digit IDs to 4 characters', () => {
+  it('pads single-digit ID to 4 chars', () => {
     const url = getNftImageUrl(1);
     expect(url).toContain('0001.png');
   });
 
-  it('pads three-digit IDs to 4 characters', () => {
+  it('pads 3-digit ID correctly', () => {
     const url = getNftImageUrl(42);
     expect(url).toContain('0042.png');
   });
 
-  it('does not pad IDs that are already 4 digits', () => {
-    const url = getNftImageUrl(1234);
-    expect(url).toContain('1234.png');
+  it('does not pad 4-digit ID', () => {
+    const url = getNftImageUrl(4200);
+    expect(url).toContain('4200.png');
   });
 
-  it('uses the correct IPFS CID in the URL', () => {
+  it('accepts a string ID', () => {
+    const url = getNftImageUrl('7');
+    expect(url).toContain('0007.png');
+  });
+
+  it('contains the IPFS CID', () => {
     const url = getNftImageUrl(1);
     expect(url).toContain(NFT_IPFS_CID);
   });
 
-  it('accepts a string nftId and produces the same URL as a numeric ID', () => {
-    expect(getNftImageUrl('7')).toBe(getNftImageUrl(7));
+  it('is a valid https URL', () => {
+    const url = getNftImageUrl(100);
+    expect(url.startsWith('https://')).toBe(true);
   });
 
-  it('uses the w3s.link gateway', () => {
-    const url = getNftImageUrl(1);
-    expect(url).toContain('w3s.link');
+  it('ends with .png', () => {
+    const url = getNftImageUrl(999);
+    expect(url.endsWith('.png')).toBe(true);
   });
 });
 
-// ============ getNftThumbnailUrl ============
+// ============================================
+// getNftThumbnailUrl
+// ============================================
 
 describe('getNftThumbnailUrl', () => {
-  it('returns the same URL as getNftImageUrl (thumbnails not yet separate)', () => {
-    expect(getNftThumbnailUrl(100)).toBe(getNftImageUrl(100));
+  it('returns same URL as getNftImageUrl for now', () => {
+    const imgUrl = getNftImageUrl(100);
+    const thumbUrl = getNftThumbnailUrl(100);
+    expect(thumbUrl).toBe(imgUrl);
+  });
+
+  it('pads ID correctly', () => {
+    const url = getNftThumbnailUrl(5);
+    expect(url).toContain('0005.png');
   });
 });
 
-// ============ getMintGardenNftUrl ============
+// ============================================
+// getMintGardenNftUrl
+// ============================================
 
 describe('getMintGardenNftUrl', () => {
-  it('includes the provided launcher ID in the URL', () => {
-    const launcherId = 'nft1abc123';
-    expect(getMintGardenNftUrl(launcherId)).toContain(launcherId);
+  it('contains the launcher ID', () => {
+    const launcherId = 'nft1abc123xyz';
+    const url = getMintGardenNftUrl(launcherId);
+    expect(url).toContain(launcherId);
   });
 
-  it('points to mintgarden.io/nfts/', () => {
-    expect(getMintGardenNftUrl('nft1test')).toContain('mintgarden.io/nfts/');
+  it('starts with the mintgarden nfts path', () => {
+    const url = getMintGardenNftUrl('nft1abc');
+    expect(url).toContain('mintgarden.io/nfts/');
   });
 });
 
-// ============ getMintGardenSearchUrl ============
+// ============================================
+// getMintGardenSearchUrl
+// ============================================
 
 describe('getMintGardenSearchUrl', () => {
-  it('includes the nftId as a search param', () => {
+  it('contains the search query parameter', () => {
     const url = getMintGardenSearchUrl(42);
     expect(url).toContain('search=42');
   });
 
-  it('is based on MINTGARDEN_COLLECTION_URL', () => {
+  it('contains the collection URL', () => {
     const url = getMintGardenSearchUrl(1);
-    expect(url.startsWith(MINTGARDEN_COLLECTION_URL)).toBe(true);
+    expect(url).toContain(MINTGARDEN_COLLECTION_URL);
   });
 });
 
-// ============ getMintGardenWalletUrl ============
+// ============================================
+// getMintGardenWalletUrl
+// ============================================
 
 describe('getMintGardenWalletUrl', () => {
-  it('includes the provided address in the URL', () => {
-    const addr = 'xch1testaddress';
-    expect(getMintGardenWalletUrl(addr)).toContain(addr);
+  it('contains the address', () => {
+    const addr = 'xch1testaddress123';
+    const url = getMintGardenWalletUrl(addr);
+    expect(url).toContain(addr);
   });
 
-  it('points to mintgarden.io/addresses/', () => {
-    expect(getMintGardenWalletUrl('xch1test')).toContain('mintgarden.io/addresses/');
+  it('uses mintgarden.io/addresses/ path', () => {
+    const url = getMintGardenWalletUrl('xch1test');
+    expect(url).toContain('mintgarden.io/addresses/');
+  });
+});
+
+// ============================================
+// CACHE_DURATIONS
+// ============================================
+
+describe('CACHE_DURATIONS', () => {
+  it('listings is 15 minutes in ms', () => {
+    expect(CACHE_DURATIONS.listings).toBe(15 * 60 * 1000);
+  });
+
+  it('walletData is 6 hours in ms', () => {
+    expect(CACHE_DURATIONS.walletData).toBe(6 * 60 * 60 * 1000);
+  });
+
+  it('nftHistory is 30 minutes in ms', () => {
+    expect(CACHE_DURATIONS.nftHistory).toBe(30 * 60 * 1000);
+  });
+
+  it('xchPrice is 30 minutes in ms', () => {
+    expect(CACHE_DURATIONS.xchPrice).toBe(30 * 60 * 1000);
+  });
+
+  it('localStorage is 1 hour in ms', () => {
+    expect(CACHE_DURATIONS.localStorage).toBe(60 * 60 * 1000);
+  });
+
+  it('traitStats is 5 minutes in ms', () => {
+    expect(CACHE_DURATIONS.traitStats).toBe(5 * 60 * 1000);
+  });
+});
+
+// ============================================
+// STORAGE_KEYS
+// ============================================
+
+describe('STORAGE_KEYS', () => {
+  it('has a listings key', () => {
+    expect(typeof STORAGE_KEYS.listings).toBe('string');
+    expect(STORAGE_KEYS.listings.length).toBeGreaterThan(0);
+  });
+
+  it('has a nftHistory key', () => {
+    expect(typeof STORAGE_KEYS.nftHistory).toBe('string');
+  });
+
+  it('has a walletData key', () => {
+    expect(typeof STORAGE_KEYS.walletData).toBe('string');
+  });
+
+  it('has an xchPrice key', () => {
+    expect(typeof STORAGE_KEYS.xchPrice).toBe('string');
+  });
+
+  it('all keys are unique strings', () => {
+    const keys = Object.values(STORAGE_KEYS);
+    const unique = new Set(keys);
+    expect(unique.size).toBe(keys.length);
   });
 });

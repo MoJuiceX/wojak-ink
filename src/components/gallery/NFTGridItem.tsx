@@ -70,6 +70,7 @@ export const NFTGridItem = memo(function NFTGridItem({
 
   return (
     <motion.button
+      type="button"
       className={`nft-grid-item nft-card rarity-${nft.rarityTier || 'common'} group relative aspect-square overflow-hidden`}
       variants={prefersReducedMotion ? undefined : nftGridItemVariants}
       whileHover={hoverAnimation}
@@ -78,6 +79,7 @@ export const NFTGridItem = memo(function NFTGridItem({
       onMouseEnter={preloadEnter}
       onMouseLeave={preloadLeave}
       data-preload-index={index}
+      aria-label={`View ${nft.name}`}
     >
       {/* Loading placeholder */}
       {!imageLoaded && (

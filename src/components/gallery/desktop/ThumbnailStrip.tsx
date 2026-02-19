@@ -127,6 +127,7 @@ export function ThumbnailStrip({
 
             return (
               <motion.button
+                type="button"
                 key={nft.id}
                 id={`thumbnail-${index}`}
                 className="absolute left-0 right-0 rounded-lg overflow-hidden focus:outline-none focus-visible:ring-2"

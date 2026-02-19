@@ -332,6 +332,7 @@ function ViewModeButtons({
         const isActive = viewMode === chip.id;
         return (
           <motion.button
+            type="button"
             key={chip.id}
             className={`bigpulp-btn px-2 sm:px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${isActive ? 'bigpulp-btn-active' : ''}`}
             style={{
@@ -407,6 +408,7 @@ function BadgeDropdown({
     <div ref={dropdownRef} className="relative flex items-center gap-1">
       {/* Info button */}
       <motion.button
+        type="button"
         className={`bigpulp-btn flex items-center justify-center rounded-lg transition-colors ${showInfo ? 'bigpulp-btn-active' : ''}`}
         style={{
           width: '28px',
@@ -427,6 +429,7 @@ function BadgeDropdown({
 
       {/* Main dropdown button */}
       <motion.button
+        type="button"
         className={`bigpulp-btn flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${isFilterActive ? 'bigpulp-btn-active' : ''}`}
         style={{
           color: isFilterActive ? 'var(--color-primary)' : 'var(--color-text-secondary)',
@@ -511,6 +514,7 @@ function BadgeDropdown({
 
             {/* No Filter option - clear badge filter */}
             <button
+              type="button"
               className="w-full px-3 py-2 text-left text-sm transition-colors flex items-center justify-between hover:bg-white/5 text-muted"
               style={{
                 background: selectedBadge === null ? 'var(--color-surface)' : 'transparent',
@@ -524,6 +528,7 @@ function BadgeDropdown({
 
             {/* All Badges option - show only NFTs with any badge */}
             <button
+              type="button"
               className="w-full px-3 py-2 text-left text-sm transition-colors flex items-center justify-between hover:bg-white/5 text-primary"
               style={{
                 background: selectedBadge === ALL_BADGES_FILTER ? 'var(--color-surface)' : 'transparent',
@@ -545,6 +550,7 @@ function BadgeDropdown({
             {/* Individual badges */}
             {badges.map((badge) => (
               <button
+                type="button"
                 key={badge.name}
                 className="w-full px-3 py-2 text-left text-sm transition-colors flex items-center justify-between hover:bg-white/5 text-primary"
                 style={{
@@ -620,6 +626,7 @@ function CellDetailModal({
             </p>
           </div>
           <button
+            type="button"
             className="p-2 rounded-lg transition-colors text-secondary"
             style={{
               background: 'var(--color-surface)',
@@ -781,6 +788,7 @@ function HeatMapCell({
 
   return (
     <motion.button
+      type="button"
       role="gridcell"
       aria-label={cell.label}
       tabIndex={isEmpty ? -1 : (isFocused ? 0 : -1)}

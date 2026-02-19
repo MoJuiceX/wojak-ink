@@ -133,6 +133,7 @@ export function MyWojaksModal({
                 </div>
 
                 <button
+                  type="button"
                   onClick={onClose}
                   className="p-2 rounded-lg transition-colors hover:bg-white/10"
                   aria-label="Close"
@@ -163,6 +164,7 @@ export function MyWojaksModal({
 
                       return (
                         <motion.button
+                          type="button"
                           key={nft.id}
                           className="relative aspect-square rounded-xl overflow-hidden group"
                           style={{

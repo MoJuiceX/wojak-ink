@@ -93,6 +93,7 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
 
           return (
             <motion.button
+              type="button"
               key={tab.id}
               ref={(el) => {
                 if (el) tabsRef.current.set(tab.id, el);

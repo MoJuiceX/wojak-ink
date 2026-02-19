@@ -21,6 +21,7 @@ export function QuickPrompts({ prompts, onSelect, disabled }: QuickPromptsProps)
         {prompts.map((prompt) => (
           <motion.button
             key={prompt}
+            type="button"
             className="prompt-chip"
             onClick={() => onSelect(prompt)}
             disabled={disabled}
