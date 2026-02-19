@@ -178,8 +178,7 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
           {/* Close button */}
           <button
             onClick={onSkip}
-            className="absolute top-4 right-4 p-1 rounded-full transition-colors hover:bg-white/10"
-            style={{ color: 'var(--color-text-tertiary)' }}
+            className="absolute top-4 right-4 p-1 rounded-full transition-colors hover:bg-white/10 text-tertiary"
           >
             <X size={20} />
           </button>
@@ -188,14 +187,12 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
             {/* Header */}
             <div className="text-center mb-6">
               <h1
-                className="text-2xl font-bold mb-2"
-                style={{ color: 'var(--color-text)' }}
+                className="text-2xl font-bold mb-2 text-primary"
               >
                 Welcome to the Grove
               </h1>
               <p
-                className="text-sm"
-                style={{ color: 'var(--color-text-secondary)' }}
+                className="text-sm text-secondary"
               >
                 Set up your profile to get started...
               </p>
@@ -206,8 +203,7 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
               <div>
                 <label
                   htmlFor="displayName"
-                  className="block text-sm font-medium mb-1"
-                  style={{ color: 'var(--color-text-secondary)' }}
+                  className="block text-sm font-medium mb-1 text-secondary"
                 >
                   Display Name *
                 </label>
@@ -237,15 +233,13 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
               <div>
                 <label
                   htmlFor="xHandle"
-                  className="block text-sm font-medium mb-1"
-                  style={{ color: 'var(--color-text-secondary)' }}
+                  className="block text-sm font-medium mb-1 text-secondary"
                 >
                   X Handle (optional)
                 </label>
                 <div className="relative">
                   <span
-                    className="absolute left-3 top-1/2 -translate-y-1/2"
-                    style={{ color: 'var(--color-text-tertiary)' }}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-tertiary"
                   >
                     @
                   </span>
@@ -275,8 +269,7 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
               {/* Wallet Connection */}
               <div>
                 <label
-                  className="block text-sm font-medium mb-1"
-                  style={{ color: 'var(--color-text-secondary)' }}
+                  className="block text-sm font-medium mb-1 text-secondary"
                 >
                   Sage Wallet (optional)
                 </label>
@@ -290,13 +283,13 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
                       }}
                     >
                       <Wallet size={18} style={{ color: '#22c55e' }} />
-                      <span style={{ color: 'var(--color-text)' }} className="flex-1 text-sm">
+                      <span className="flex-1 text-sm text-primary">
                         {walletAddress.slice(0, 10)}...{walletAddress.slice(-6)}
                       </span>
                       <span style={{ color: '#22c55e' }}>✓</span>
                     </div>
                     {isLoadingNfts ? (
-                      <p className="text-sm flex items-center gap-2" style={{ color: 'var(--color-text-secondary)' }}>
+                      <p className="text-sm flex items-center gap-2 text-secondary">
                         <Loader2 size={14} className="animate-spin" />
                         Checking for Wojak Farmer NFTs...
                       </p>
@@ -305,7 +298,7 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
                         Found {nftCount} Wojak Farmer NFT{nftCount !== 1 ? 's' : ''}
                       </p>
                     ) : (
-                      <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+                      <p className="text-sm text-tertiary">
                         No Wojak Farmer NFTs found in wallet
                       </p>
                     )}
@@ -335,8 +328,7 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
                   </button>
                 )}
                 <p
-                  className="text-xs mt-1"
-                  style={{ color: 'var(--color-text-tertiary)' }}
+                  className="text-xs mt-1 text-tertiary"
                 >
                   {isWalletConnected
                     ? 'Connected via WalletConnect'
@@ -376,8 +368,7 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
               <button
                 type="button"
                 onClick={onSkip}
-                className="w-full py-2 text-sm"
-                style={{ color: 'var(--color-text-tertiary)' }}
+                className="w-full py-2 text-sm text-tertiary"
               >
                 Skip for now
               </button>

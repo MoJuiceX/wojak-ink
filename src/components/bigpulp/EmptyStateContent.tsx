@@ -115,8 +115,7 @@ function QuickStats({
             {item.value}
           </p>
           <p
-            className="text-xs"
-            style={{ color: 'var(--color-text-muted)' }}
+            className="text-xs text-muted"
           >
             {item.label}
           </p>
@@ -187,21 +186,21 @@ function TrendingNFTs({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Sparkles size={16} style={{ color: 'var(--color-primary)' }} />
+          <Sparkles size={16} className="text-accent" />
           <span
+            className="text-primary"
             style={{
               fontSize: '14px',
               fontWeight: 600,
-              color: 'var(--color-text)',
             }}
           >
             Recent Top Sales
           </span>
         </div>
         <span
+          className="text-muted"
           style={{
             fontSize: '12px',
-            color: 'var(--color-text-muted)',
           }}
         >
           Tap to analyze
@@ -256,14 +255,12 @@ function TrendingNFTs({
             {/* Info */}
             <div className="p-2">
               <p
-                className="text-xs font-medium truncate"
-                style={{ color: 'var(--color-text)' }}
+                className="text-xs font-medium truncate text-primary"
               >
                 {nft.name}
               </p>
               <p
-                className="text-xs font-bold"
-                style={{ color: 'var(--color-primary)' }}
+                className="text-xs font-bold text-accent"
               >
                 {nft.priceXch.toFixed(2)} XCH
               </p>
@@ -280,7 +277,7 @@ function TrendingNFTs({
             scrollSnapAlign: 'start',
           }}
         >
-          <ArrowRight size={20} style={{ color: 'var(--color-text-muted)' }} />
+          <ArrowRight size={20} className="text-muted" />
         </div>
       </div>
     </div>

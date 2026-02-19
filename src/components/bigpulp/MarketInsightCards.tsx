@@ -155,19 +155,19 @@ function InsightCard({
       {/* Content */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
+          className="text-primary"
           style={{
             fontSize: '15px',
             fontWeight: 700,
-            color: 'var(--color-text)',
             marginBottom: '2px',
           }}
         >
           {config.title}
         </div>
         <div
+          className="text-muted"
           style={{
             fontSize: '13px',
-            color: 'var(--color-text-muted)',
           }}
         >
           {config.description}
@@ -195,7 +195,7 @@ function InsightCard({
           {count}
         </div>
         {hasNfts && (
-          <ChevronRight size={20} style={{ color: 'var(--color-text-muted)' }} />
+          <ChevronRight size={20} className="text-muted" />
         )}
       </div>
     </motion.button>
@@ -246,21 +246,20 @@ function NFTListModal({
             <config.icon size={24} style={{ color: config.borderColor.replace('0.4', '1').replace('0.3', '1') }} />
             <div>
               <h3
-                className="font-bold"
-                style={{ color: 'var(--color-text)', fontSize: '16px' }}
+                className="font-bold text-primary"
+                style={{ fontSize: '16px' }}
               >
                 {config.title}
               </h3>
-              <p style={{ color: 'var(--color-text-muted)', fontSize: '13px' }}>
+              <p className="text-muted" style={{ fontSize: '13px' }}>
                 {nfts.length} NFT{nfts.length !== 1 ? 's' : ''} found
               </p>
             </div>
           </div>
           <button
-            className="p-2 rounded-lg transition-colors"
+            className="p-2 rounded-lg transition-colors text-secondary"
             style={{
               background: 'rgba(255,255,255,0.1)',
-              color: 'var(--color-text-secondary)',
             }}
             onClick={onClose}
             aria-label="Close modal"
@@ -272,10 +271,7 @@ function NFTListModal({
         {/* NFT Grid */}
         <div className="flex-1 overflow-y-auto p-4">
           {nfts.length === 0 ? (
-            <p
-              className="text-center py-8"
-              style={{ color: 'var(--color-text-muted)' }}
-            >
+            <p className="text-center py-8 text-muted">
               No NFTs in this category
             </p>
           ) : (
@@ -298,25 +294,16 @@ function NFTListModal({
                     loading="lazy"
                   />
                   <div className="p-3">
-                    <p
-                      className="text-sm font-semibold truncate"
-                      style={{ color: 'var(--color-text)' }}
-                    >
+                    <p className="text-sm font-semibold truncate text-primary">
                       {nft.name}
                     </p>
                     {nft.priceXch !== undefined && (
                       <div className="flex items-baseline gap-1.5 mt-1">
-                        <span
-                          className="text-sm font-bold"
-                          style={{ color: 'var(--color-primary)' }}
-                        >
+                        <span className="text-sm font-bold text-accent">
                           {nft.priceXch.toFixed(2)} XCH
                         </span>
                         {nft.priceUsd !== undefined && (
-                          <span
-                            className="text-xs"
-                            style={{ color: 'var(--color-text-muted)' }}
-                          >
+                          <span className="text-xs text-muted">
                             ${nft.priceUsd.toFixed(0)}
                           </span>
                         )}
@@ -369,21 +356,21 @@ export function MarketInsightCards({ data, onViewModeChange }: MarketInsightCard
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Sparkles size={18} style={{ color: 'var(--color-primary)' }} />
+          <Sparkles size={18} className="text-accent" />
           <span
+            className="text-primary"
             style={{
               fontSize: '14px',
               fontWeight: 600,
-              color: 'var(--color-text)',
             }}
           >
             Market Opportunities
           </span>
         </div>
         <span
+          className="text-muted"
           style={{
             fontSize: '13px',
-            color: 'var(--color-text-muted)',
           }}
         >
           {totalListed} listed
