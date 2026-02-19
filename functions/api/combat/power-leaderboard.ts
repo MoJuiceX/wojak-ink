@@ -54,6 +54,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
     if (type === 'players') {
       // Aggregate power by owner DID
+      // Include all players with any votes (positive or negative) or any battles
       const playersQuery = `
         SELECT
           cf.owner_did,
@@ -63,8 +64,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           MAX(COALESCE(cf.power_score, 0)) as best_wojak_power
         FROM combat_fighters cf
         LEFT JOIN did_profiles dp ON cf.owner_did = dp.did_id
+        WHERE cf.owner_did != ''
         GROUP BY cf.owner_did
-        HAVING total_power > 0
+        HAVING SUM(ABS(COALESCE(cf.power_score, 0))) > 0 OR SUM(COALESCE(cf.total_combat_wins, 0) + COALESCE(cf.total_combat_losses, 0)) > 0
         ORDER BY total_power DESC
         LIMIT ? OFFSET ?
       `;
@@ -88,8 +90,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           FROM (
             SELECT owner_did, SUM(COALESCE(power_score, 0)) as total_power
             FROM combat_fighters
+            WHERE owner_did != ''
             GROUP BY owner_did
-            HAVING total_power > 0
+            HAVING SUM(ABS(COALESCE(power_score, 0))) > 0 OR SUM(COALESCE(total_combat_wins, 0) + COALESCE(total_combat_losses, 0)) > 0
           ) sub
           WHERE sub.total_power > (
             SELECT COALESCE(SUM(COALESCE(power_score, 0)), 0)
@@ -104,6 +107,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       return jsonResponse({ players, yourRank });
     } else if (type === 'wojaks') {
       // Individual Wojak rankings
+      // Include fighters with any votes (positive or negative) or any battles
       const wojaksQuery = `
         SELECT
           cf.nft_id,
@@ -121,7 +125,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         FROM combat_fighters cf
         LEFT JOIN did_profiles dp ON cf.owner_did = dp.did_id
         LEFT JOIN phase2_mints pm ON cf.edition_number = pm.mint_number
-        WHERE cf.power_score > 0 OR cf.total_combat_wins > 0 OR cf.total_combat_losses > 0
+        WHERE cf.power_score != 0 OR cf.vote_power != 0 OR COALESCE(cf.total_combat_wins, 0) + COALESCE(cf.total_combat_losses, 0) + COALESCE(cf.total_combat_draws, 0) > 0
         ORDER BY cf.power_score DESC
         LIMIT ? OFFSET ?
       `;
