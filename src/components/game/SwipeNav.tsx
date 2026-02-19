@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { Swords } from 'lucide-react';
 import { useGame } from '@/contexts/GameContext';
+import './SwipeNav.css';
 
 const NAV_ITEMS = [
   { to: '/swipe', label: 'Vote', end: true },
@@ -16,46 +17,19 @@ export function SwipeNav() {
   if (!isRegistered) return null;
 
   return (
-    <nav
-      className="hide-scrollbar"
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        gap: 0,
-        overflowX: 'auto',
-        WebkitOverflowScrolling: 'touch',
-        borderBottom: '1px solid var(--color-border)',
-        position: 'sticky',
-        top: 0,
-        zIndex: 40,
-        background: 'var(--color-bg)',
-      }}
-    >
+    <nav className="swipe-nav hide-scrollbar">
       {NAV_ITEMS.map(item => (
         <NavLink
           key={item.to}
           to={item.to}
           end={item.end}
-          style={({ isActive }) => ({
-            padding: '12px 16px',
-            fontSize: 13,
-            fontWeight: 500,
-            color: isActive ? 'var(--color-text)' : 'var(--color-text-muted)',
-            borderBottom: isActive ? '2px solid var(--color-primary)' : '2px solid transparent',
-            textDecoration: 'none',
-            whiteSpace: 'nowrap',
-            flexShrink: 0,
-            transition: 'color 150ms, border-color 150ms',
-          })}
+          className={({ isActive }) => `swipe-nav-link${isActive ? ' swipe-nav-link--active' : ''}`}
         >
           {item.label}
         </NavLink>
       ))}
-      <div style={{ width: 1, background: 'var(--color-border)', margin: '8px 4px', flexShrink: 0 }} />
-      <NavLink
-        to="/arena"
-        style={{ padding: '12px 16px', fontSize: 13, fontWeight: 500, color: 'var(--color-text-muted)', borderBottom: '2px solid transparent', textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4, transition: 'color 150ms' }}
-      >
+      <div className="swipe-nav-divider" />
+      <NavLink to="/arena" className="swipe-nav-link swipe-nav-link--cross">
         <Swords size={14} />
         Arena
       </NavLink>
