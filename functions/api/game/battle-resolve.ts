@@ -189,10 +189,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
         if (winnerFighter) {
           const newXp = winnerFighter.xp + SWIPE_BATTLE_WIN_XP;
-          const levelRow = await context.env.DB.prepare(
-            'SELECT MAX(level) as new_level FROM combat_level_thresholds WHERE xp_required <= ?'
-          ).bind(newXp).first<{ new_level: number }>();
-          const newLevel = levelRow?.new_level ?? winnerFighter.level;
+          // Use deterministic formula (same as resolve-turn.ts) — avoids DB threshold table gaps
+          const { calculateLevelFromXP } = await import('../../../src/lib/combat/xp-elo-calculator');
+          const newLevel = calculateLevelFromXP(newXp);
 
           await context.env.DB.prepare(
             "UPDATE combat_fighters SET xp = ?, level = ?, updated_at = datetime('now') WHERE nft_id = ?"

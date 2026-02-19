@@ -8,6 +8,7 @@
 // 3. Update snapshot and timestamp
 
 import { jsonResponse, errorResponse } from './_shared';
+import { calculateLevelFromXP } from '../../../src/lib/combat/xp-elo-calculator';
 
 interface Env {
   DB: D1Database;
@@ -15,6 +16,7 @@ interface Env {
 }
 
 const XP_PER_NET_LIKE = 2;
+const D1_BATCH_SIZE = 25;
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   // Admin auth
@@ -26,8 +28,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   const db = context.env.DB;
 
   // Find fighters with new votes since last snapshot.
-  // Join combat_fighters with wojak_scores by nft_id.
-  // Only process fighters where net_score has changed from snapshot.
   const fighters = await db.prepare(`
     SELECT
       cf.nft_id,
@@ -44,42 +44,43 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     return jsonResponse({ success: true, updated: 0, totalXpAwarded: 0, message: 'No new votes to process' });
   }
 
+  // Build all update statements, then batch them
+  const statements: D1PreparedStatement[] = [];
   let updated = 0;
   let totalXpAwarded = 0;
 
   for (const row of fighters.results) {
     const nftId = row.nft_id as string;
     const currentXp = row.xp as number;
-    const currentLevel = row.level as number;
     const snapshot = row.vote_xp_net_snapshot as number;
     const netScore = row.net_score as number;
 
-    // Delta: how much net_score increased since last snapshot
     const delta = netScore - snapshot;
-    // Only award for positive delta (downvotes shrink delta, never go negative)
     const voteXp = Math.max(0, delta) * XP_PER_NET_LIKE;
     if (voteXp <= 0) continue;
 
     const newXp = currentXp + voteXp;
+    const newLevel = calculateLevelFromXP(newXp);
 
-    // Calculate new level from XP thresholds
-    const levelRow = await db.prepare(
-      'SELECT MAX(level) as new_level FROM combat_level_thresholds WHERE xp_required <= ?'
-    ).bind(newXp).first<{ new_level: number }>();
-    const newLevel = levelRow?.new_level ?? currentLevel;
-
-    await db.prepare(`
-      UPDATE combat_fighters
-      SET xp = ?,
-          level = ?,
-          vote_xp_last_updated = datetime('now'),
-          vote_xp_net_snapshot = ?,
-          updated_at = datetime('now')
-      WHERE nft_id = ?
-    `).bind(newXp, newLevel, netScore, nftId).run();
+    statements.push(
+      db.prepare(`
+        UPDATE combat_fighters
+        SET xp = ?,
+            level = ?,
+            vote_xp_last_updated = datetime('now'),
+            vote_xp_net_snapshot = ?,
+            updated_at = datetime('now')
+        WHERE nft_id = ?
+      `).bind(newXp, newLevel, netScore, nftId)
+    );
 
     updated++;
     totalXpAwarded += voteXp;
+  }
+
+  // Execute in chunked batches (D1 max 25 per batch)
+  for (let i = 0; i < statements.length; i += D1_BATCH_SIZE) {
+    await db.batch(statements.slice(i, i + D1_BATCH_SIZE));
   }
 
   return jsonResponse({ success: true, updated, totalXpAwarded });

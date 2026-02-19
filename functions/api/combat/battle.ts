@@ -27,15 +27,19 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     db.prepare('SELECT * FROM combat_fighters WHERE nft_id = ?').bind(battle.fighter_b_nft).first(),
   ]);
 
-  // Load turn log
+  // Load turn log — only include resolved turns (hide pending moves to prevent cheating)
   const turns = await db.prepare(
-    'SELECT turn_number, turn_result FROM combat_turns WHERE battle_id = ? ORDER BY turn_number ASC'
+    'SELECT turn_number, turn_result FROM combat_turns WHERE battle_id = ? AND turn_result IS NOT NULL ORDER BY turn_number ASC'
   ).bind(id).all();
 
-  const turnLog = turns.results?.map((t: any) => ({
-    turn: t.turn_number,
-    ...(t.turn_result ? JSON.parse(t.turn_result) : {}),
-  })) ?? [];
+  const turnLog: any[] = [];
+  for (const t of turns.results ?? []) {
+    try {
+      turnLog.push({ turn: (t as any).turn_number, ...JSON.parse((t as any).turn_result as string) });
+    } catch {
+      // Skip corrupted turn data
+    }
+  }
 
   return jsonResponse({
     id: battle.id,

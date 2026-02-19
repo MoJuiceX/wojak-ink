@@ -29,6 +29,7 @@ export default function CombatBattle() {
 
       try {
         const res = await fetch(`/api/combat/fighter?ownerDid=${encodeURIComponent(ownerDid)}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         const fighters = data.fighters ?? [];
         if (fighters.length > 0) {

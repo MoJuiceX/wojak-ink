@@ -8,11 +8,12 @@ import { getMovePoolForType } from '../../../src/lib/combat/data/moves';
 import type { CombatType } from '../../../src/lib/combat/types';
 
 export const onRequestPost: PagesFunction = async (context) => {
-  const body = await context.request.json<{
-    traits: { traitId: string; layer: string }[];
-    colors: Record<string, string>;
-    details: Record<string, string>;
-  }>();
+  let body: { traits: { traitId: string; layer: string }[]; colors: Record<string, string>; details: Record<string, string> };
+  try {
+    body = await context.request.json();
+  } catch {
+    return errorResponse('Invalid JSON body', 400);
+  }
 
   const { traits, colors, details } = body;
 

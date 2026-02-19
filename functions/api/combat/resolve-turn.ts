@@ -11,10 +11,22 @@ import type { CombatType } from '../../../src/lib/combat/types';
 
 interface Env {
   DB: D1Database;
+  ADMIN_SECRET?: string;
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
-  const body = await context.request.json<{ battleId: number }>();
+  // Server-only endpoint: require ADMIN_SECRET
+  const authHeader = context.request.headers.get('Authorization');
+  if (!context.env.ADMIN_SECRET || authHeader !== `Bearer ${context.env.ADMIN_SECRET}`) {
+    return errorResponse('Unauthorized', 401);
+  }
+
+  let body: { battleId: number };
+  try {
+    body = await context.request.json<{ battleId: number }>();
+  } catch {
+    return errorResponse('Invalid JSON body', 400);
+  }
   const { battleId } = body;
 
   if (!battleId) return errorResponse('Missing battleId');
@@ -76,12 +88,16 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   if (prevTurns.results) {
     for (const prev of prevTurns.results) {
       if (prev.turn_result) {
-        const tr = JSON.parse(prev.turn_result as string);
-        battleState.fighterA.currentHP = tr.end_of_turn.fighter_a_hp;
-        battleState.fighterB.currentHP = tr.end_of_turn.fighter_b_hp;
-        battleState.fighterA.status = tr.end_of_turn.fighter_a_status;
-        battleState.fighterB.status = tr.end_of_turn.fighter_b_status;
-        battleState.turnNumber++;
+        try {
+          const tr = JSON.parse(prev.turn_result as string);
+          battleState.fighterA.currentHP = tr.end_of_turn.fighter_a_hp;
+          battleState.fighterB.currentHP = tr.end_of_turn.fighter_b_hp;
+          battleState.fighterA.status = tr.end_of_turn.fighter_a_status;
+          battleState.fighterB.status = tr.end_of_turn.fighter_b_status;
+          battleState.turnNumber++;
+        } catch {
+          return errorResponse('Corrupted turn data', 500);
+        }
       }
     }
   }

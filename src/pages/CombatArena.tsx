@@ -56,7 +56,7 @@ export default function CombatArena() {
     setIsLoadingFighters(true);
 
     fetch(`/api/combat/fighter?ownerDid=${encodeURIComponent(ownerDid)}`)
-      .then((res) => res.json())
+      .then((res) => { if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.json(); })
       .then((data) => {
         const list = data.fighters ?? [];
         setFighters(list);

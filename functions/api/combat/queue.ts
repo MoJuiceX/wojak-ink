@@ -10,11 +10,12 @@ interface Env {
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
-  const body = await context.request.json<{
-    nftId: string;
-    ownerDid: string;
-    battleMode: 'manual' | 'auto';
-  }>();
+  let body: { nftId: string; ownerDid: string; battleMode: 'manual' | 'auto' };
+  try {
+    body = await context.request.json();
+  } catch {
+    return errorResponse('Invalid JSON body', 400);
+  }
 
   const { nftId, ownerDid, battleMode } = body;
   if (!nftId || !ownerDid || !battleMode) {

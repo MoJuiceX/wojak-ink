@@ -198,36 +198,42 @@ function applyMove(
         }
       }
 
-      // Stat drop on opponent from damaging move
-      const statDropOpp = move.effects.find(e => e.type === 'stat_drop' && e.target === 'opponent');
-      if (statDropOpp?.stat) {
-        const chance = statDropOpp.chance ?? 100;
-        if (rng() * 100 < chance) {
-          const statKey = mapStatToStageKey(statDropOpp.stat);
-          if (statKey) {
-            defender.statStages[statKey] = Math.max(-6, defender.statStages[statKey] - (statDropOpp.stages ?? 1));
+      // Stat drops on opponent from damaging move — supports multiple per move
+      const statDropsOpp = move.effects.filter(e => e.type === 'stat_drop' && e.target === 'opponent');
+      for (const statDropOpp of statDropsOpp) {
+        if (statDropOpp?.stat) {
+          const chance = statDropOpp.chance ?? 100;
+          if (rng() * 100 < chance) {
+            const statKey = mapStatToStageKey(statDropOpp.stat);
+            if (statKey) {
+              defender.statStages[statKey] = Math.max(-6, defender.statStages[statKey] - (statDropOpp.stages ?? 1));
+            }
           }
         }
       }
 
-      // Stat boost on self from damaging move (e.g. Flame Charge, Metal Claw)
-      const statBoostSelf = move.effects.find(e => e.type === 'stat_boost' && e.target === 'self');
-      if (statBoostSelf?.stat) {
-        const chance = statBoostSelf.chance ?? 100;
-        if (rng() * 100 < chance) {
-          const statKey = mapStatToStageKey(statBoostSelf.stat);
-          if (statKey) {
-            attacker.statStages[statKey] = Math.min(6, attacker.statStages[statKey] + (statBoostSelf.stages ?? 1));
+      // Stat boosts on self from damaging move (e.g. Flame Charge, Metal Claw) — supports multiple
+      const statBoostsSelf = move.effects.filter(e => e.type === 'stat_boost' && e.target === 'self');
+      for (const statBoostSelf of statBoostsSelf) {
+        if (statBoostSelf?.stat) {
+          const chance = statBoostSelf.chance ?? 100;
+          if (rng() * 100 < chance) {
+            const statKey = mapStatToStageKey(statBoostSelf.stat);
+            if (statKey) {
+              attacker.statStages[statKey] = Math.min(6, attacker.statStages[statKey] + (statBoostSelf.stages ?? 1));
+            }
           }
         }
       }
 
-      // Stat drop on self from damaging move (e.g. Draco Meteor, Close Combat)
-      const statDropSelf = move.effects.find(e => e.type === 'stat_drop' && e.target === 'self');
-      if (statDropSelf?.stat) {
-        const statKey = mapStatToStageKey(statDropSelf.stat);
-        if (statKey) {
-          attacker.statStages[statKey] = Math.max(-6, attacker.statStages[statKey] - (statDropSelf.stages ?? 1));
+      // Stat drops on self from damaging move (e.g. Draco Meteor, Close Combat) — supports multiple
+      const statDropsSelf = move.effects.filter(e => e.type === 'stat_drop' && e.target === 'self');
+      for (const statDropSelf of statDropsSelf) {
+        if (statDropSelf?.stat) {
+          const statKey = mapStatToStageKey(statDropSelf.stat);
+          if (statKey) {
+            attacker.statStages[statKey] = Math.max(-6, attacker.statStages[statKey] - (statDropSelf.stages ?? 1));
+          }
         }
       }
     }
@@ -275,23 +281,27 @@ function applyMove(
   } else {
     // --- STATUS / UTILITY MOVES ---
     if (move.effects) {
-      // Stat boost (self, guaranteed)
-      const statBoost = move.effects.find(e => e.type === 'stat_boost' && e.target === 'self');
-      if (statBoost?.stat) {
-        const statKey = mapStatToStageKey(statBoost.stat);
-        if (statKey) {
-          attacker.statStages[statKey] = Math.min(6, attacker.statStages[statKey] + (statBoost.stages ?? 1));
+      // Stat boosts (self, guaranteed) — supports multiple per move (e.g. Dragon Dance: +ATK +SPD)
+      const statBoosts = move.effects.filter(e => e.type === 'stat_boost' && e.target === 'self');
+      for (const statBoost of statBoosts) {
+        if (statBoost?.stat) {
+          const statKey = mapStatToStageKey(statBoost.stat);
+          if (statKey) {
+            attacker.statStages[statKey] = Math.min(6, attacker.statStages[statKey] + (statBoost.stages ?? 1));
+          }
         }
       }
 
-      // Stat drop (opponent)
-      const statDrop = move.effects.find(e => e.type === 'stat_drop' && e.target === 'opponent');
-      if (statDrop?.stat) {
-        const chance = statDrop.chance ?? 100;
-        if (rng() * 100 < chance) {
-          const statKey = mapStatToStageKey(statDrop.stat);
-          if (statKey) {
-            defender.statStages[statKey] = Math.max(-6, defender.statStages[statKey] - (statDrop.stages ?? 1));
+      // Stat drops (opponent) — supports multiple per move
+      const statDrops = move.effects.filter(e => e.type === 'stat_drop' && e.target === 'opponent');
+      for (const statDrop of statDrops) {
+        if (statDrop?.stat) {
+          const chance = statDrop.chance ?? 100;
+          if (rng() * 100 < chance) {
+            const statKey = mapStatToStageKey(statDrop.stat);
+            if (statKey) {
+              defender.statStages[statKey] = Math.max(-6, defender.statStages[statKey] - (statDrop.stages ?? 1));
+            }
           }
         }
       }
@@ -349,6 +359,7 @@ function applyMove(
 function mapStatToStageKey(stat: string): keyof FighterState['statStages'] | null {
   const map: Record<string, keyof FighterState['statStages']> = {
     attack: 'atk', defense: 'def', sp_atk: 'spa', sp_def: 'spd', speed: 'spe',
+    // 'accuracy' not mapped — no accuracy stage in battle state; accuracy moves are no-ops for now
   };
   return map[stat] ?? null;
 }

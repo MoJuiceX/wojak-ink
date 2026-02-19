@@ -46,6 +46,7 @@ export function BattleHistory({ nftId, limit = 20, onSelectBattle }: BattleHisto
     (async () => {
       try {
         const res = await fetch(`/api/combat/history?nftId=${nftId}&limit=${limit}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         setBattles(data.battles ?? []);
       } catch (err) {

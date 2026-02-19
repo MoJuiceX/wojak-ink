@@ -36,6 +36,7 @@ export function CombatLeaderboard() {
       setIsLoading(true);
       try {
         const res = await fetch(`/api/combat/leaderboard?sortBy=${sortBy}&limit=50`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         setFighters(data.fighters ?? []);
       } catch (err) {

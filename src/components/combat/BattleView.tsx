@@ -189,6 +189,10 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
   const fetchBattle = useCallback(async () => {
     try {
       const res = await fetch(`/api/combat/battle?id=${battleId}`);
+      if (!res.ok) {
+        setError(`Battle fetch failed (${res.status})`);
+        return;
+      }
       const data = await res.json();
       if (data.error) {
         setError(data.error);
@@ -200,14 +204,18 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
     }
   }, [battleId]);
 
+  // Poll for updates — stop once battle is completed
   useEffect(() => {
     fetchBattle();
+    if (battle?.status === 'completed') return;
     const interval = setInterval(fetchBattle, 3000);
     return () => clearInterval(interval);
-  }, [fetchBattle]);
+  }, [fetchBattle, battle?.status]);
 
   // ── Initialize HP when battle first loads ───────────────────────────────
   const initializedRef = useRef(false);
+  // Reset initialization when battleId changes
+  useEffect(() => { initializedRef.current = false; }, [battleId]);
   useEffect(() => {
     if (!battle || initializedRef.current) return;
     initializedRef.current = true;
