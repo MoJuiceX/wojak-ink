@@ -17,6 +17,7 @@ import { BattleHistory } from '@/components/combat/BattleHistory';
 import { ArenaNav } from '@/components/combat/ArenaNav';
 import { AgentDashboard } from '@/components/combat/AgentDashboard';
 import { AgentSetupModal } from '@/components/combat/AgentSetupModal';
+import { BattleCounter } from '@/components/combat/BattleCounter';
 import { AgentProvider, useAgent } from '@/contexts/AgentContext';
 import { useSageWallet } from '@/sage-wallet';
 import type { CombatType } from '@/lib/combat/types';
@@ -172,6 +173,13 @@ function CombatArenaInner() {
         {/* Loading fighters */}
         {isConnected && isLoadingFighters && (
           <div className="text-muted text-sm text-center py-4">Loading fighters...</div>
+        )}
+
+        {/* Battle Counter */}
+        {isConnected && ownerDid && (
+          <div className="w-full">
+            <BattleCounter playerDid={ownerDid} />
+          </div>
         )}
 
         {/* Queue Panel */}
