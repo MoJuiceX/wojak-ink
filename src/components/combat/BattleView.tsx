@@ -14,6 +14,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { Bot } from 'lucide-react';
 import { HPBar } from './HPBar';
 import { TurnLog } from './TurnLog';
 import { MoveButtons } from './MoveButtons';
@@ -328,6 +329,9 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
     ? 'fighter-winner'
     : (isPlayerWinner ? 'fighter-loser' : '');
 
+  // AI Sparring detection
+  const isSparring = opponentFighter?.nft_id === 'ai_sparring_partner';
+
   // Play victory/defeat audio on completion
   // (handled once via a ref to prevent re-triggering)
 
@@ -343,6 +347,24 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
           )}
         </div>
       </div>
+
+      {/* AI Sparring banner */}
+      {isSparring && (
+        <div
+          className="flex items-center gap-2 p-2 rounded-lg text-sm"
+          style={{
+            background: 'var(--color-cyan-15)',
+            borderColor: 'var(--color-cyan)',
+            borderWidth: 1,
+            borderStyle: 'solid',
+          }}
+        >
+          <Bot size={16} style={{ color: 'var(--color-cyan)' }} />
+          <span style={{ color: 'var(--color-cyan)' }}>
+            AI Sparring Match — reduced Power rewards
+          </span>
+        </div>
+      )}
 
       {/* ── Battle Arena ─────────────────────────────────────────────── */}
       <div
@@ -410,7 +432,21 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
 
           {/* Opponent side (right) */}
           <div className="flex flex-col gap-2" style={{ position: 'relative' }}>
-            {opponentFighter?.imageUrl && (
+            {isSparring ? (
+              /* AI Sparring Partner avatar */
+              <div
+                className={`battle-nft-image battle-slide-right ${opponentImgClass}`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'var(--color-cyan-15)',
+                  borderRadius: 'var(--radius-md)',
+                }}
+              >
+                <Bot size={48} style={{ color: 'var(--color-cyan)' }} />
+              </div>
+            ) : opponentFighter?.imageUrl ? (
               <div className={`battle-nft-image battle-slide-right ${opponentImgClass}`}>
                 <img
                   src={opponentFighter.imageUrl}
@@ -419,15 +455,18 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
                   style={{ borderRadius: 'var(--radius-md)' }}
                 />
               </div>
-            )}
+            ) : null}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
+                {isSparring && <Bot size={14} style={{ color: 'var(--color-cyan)' }} />}
                 <span className={`badge badge-${opponentFighter?.type.toLowerCase()}`}>
                   {opponentFighter?.type}
                 </span>
                 <StatusIcon status={opponentStatus} />
               </div>
-              <span className="text-xs text-muted">Lv.{opponentFighter?.level}</span>
+              <span className="text-xs text-muted">
+                {isSparring ? 'AI' : ''} Lv.{opponentFighter?.level}
+              </span>
             </div>
             <HPBar
               current={opponentHp.current}
