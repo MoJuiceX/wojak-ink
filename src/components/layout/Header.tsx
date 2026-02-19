@@ -241,8 +241,8 @@ export function Header({ transparent = false }: HeaderProps) {
             {isBigPulpPage ? (
               /* BigPulp page: show BigPulp Intelligence (same size as Wojak.ink) */
               <h1 className="font-bold whitespace-nowrap text-xl">
-                <span style={{ color: 'var(--color-primary)' }}>BigPulp</span>
-                <span style={{ color: 'var(--color-text)' }}> Intelligence</span>
+                <span className="text-accent">BigPulp</span>
+                <span className="text-primary"> Intelligence</span>
               </h1>
             ) : (
               /* Default: Logo with breadcrumb support */
@@ -296,8 +296,7 @@ export function Header({ transparent = false }: HeaderProps) {
                       <ArrowLeft size={20} />
                     </motion.button>
                     <h1
-                      className="text-3xl font-bold"
-                      style={{ color: 'var(--color-text)' }}
+                      className="text-3xl font-bold text-primary"
                     >
                       {headerBreadcrumb.label}
                     </h1>
@@ -314,8 +313,8 @@ export function Header({ transparent = false }: HeaderProps) {
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                     >
-                      <span style={{ color: 'var(--color-primary)' }}>BigPulp</span>
-                      <span style={{ color: 'var(--color-text)' }}> Intelligence</span>
+                      <span className="text-accent">BigPulp</span>
+                      <span className="text-primary"> Intelligence</span>
                     </motion.h1>
                   ) : (
                     /* Regular page title + optional supply counter */
@@ -328,8 +327,7 @@ export function Header({ transparent = false }: HeaderProps) {
                       transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                     >
                       <h1
-                        className="text-3xl font-bold"
-                        style={{ color: 'var(--color-text)' }}
+                        className="text-3xl font-bold text-primary"
                       >
                         {pageTitle}
                       </h1>
@@ -404,8 +402,7 @@ export function Header({ transparent = false }: HeaderProps) {
                       </div>
                       <button
                         type="button"
-                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium transition-colors"
-                        style={{ color: 'var(--color-error)' }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium transition-colors text-error"
                         onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)')}
                         onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                         onClick={async () => {

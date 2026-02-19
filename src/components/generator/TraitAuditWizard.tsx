@@ -359,17 +359,16 @@ export function TraitAuditWizard({ onClose }: TraitAuditWizardProps) {
           }}
         >
           <h2
-            className="text-lg font-bold mb-2"
-            style={{ color: 'var(--color-primary)' }}
+            className="text-lg font-bold mb-2 text-accent"
           >
             TRAIT AUDIT WIZARD
           </h2>
-          <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+          <p className="text-sm mb-4 text-secondary">
             {total} test cases across 6 categories. Each test auto-selects traits on the
             preview. Mark each as Works or Doesn't Work.
           </p>
           {results.size > 0 && (
-            <p className="text-xs mb-4" style={{ color: 'var(--color-text-muted)' }}>
+            <p className="text-xs mb-4 text-muted">
               Previous session: {passCount} pass, {failCount} fail, {total - passCount - failCount} remaining
             </p>
           )}
@@ -412,15 +411,15 @@ export function TraitAuditWizard({ onClose }: TraitAuditWizardProps) {
           {/* Header — single compact row */}
           <div className="flex items-center justify-between px-4 py-1" style={{ borderBottom: '1px solid var(--color-border)' }}>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold tracking-wider" style={{ color: 'var(--color-primary)' }}>AUDIT</span>
-              <span className="text-[9px] px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--color-text-secondary)' }}>{currentCase?.category}</span>
+              <span className="text-[10px] font-bold tracking-wider text-accent">AUDIT</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full text-secondary" style={{ background: 'rgba(255,255,255,0.08)' }}>{currentCase?.category}</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px]" style={{ color: 'var(--color-success)' }}>{passCount}P</span>
-              <span className="text-[10px]" style={{ color: 'var(--color-error)' }}>{failCount}F</span>
-              <span className="text-[10px] font-mono" style={{ color: 'var(--color-text-secondary)' }}>{currentIndex + 1}/{total}</span>
-              <button type="button" className="text-[9px] px-1.5 rounded" style={{ color: 'var(--color-text-muted)', background: 'rgba(255,255,255,0.05)' }} onClick={clearResults} title="Clear all results">Reset</button>
-              <button type="button" onClick={() => handleClose()} className="w-5 h-5 flex items-center justify-center rounded" style={{ color: 'var(--color-text-secondary)' }} title="Close">
+              <span className="text-[10px] text-success">{passCount}P</span>
+              <span className="text-[10px] text-error">{failCount}F</span>
+              <span className="text-[10px] font-mono text-secondary">{currentIndex + 1}/{total}</span>
+              <button type="button" className="text-[9px] px-1.5 rounded text-muted" style={{ background: 'rgba(255,255,255,0.05)' }} onClick={clearResults} title="Clear all results">Reset</button>
+              <button type="button" onClick={() => handleClose()} className="w-5 h-5 flex items-center justify-center rounded text-secondary" title="Close">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" /></svg>
               </button>
             </div>
@@ -433,11 +432,11 @@ export function TraitAuditWizard({ onClose }: TraitAuditWizardProps) {
           >
             {/* Row 1: Title + description */}
             <div className="flex items-baseline gap-2">
-              <span className="text-xs font-semibold shrink-0" style={{ color: 'var(--color-text)' }}>
+              <span className="text-xs font-semibold shrink-0 text-primary">
                 {currentCase?.title}
               </span>
               {isApplying && (
-                <span className="text-[9px] px-1 rounded animate-pulse" style={{ background: 'rgba(255,107,0,0.2)', color: 'var(--color-primary)' }}>
+                <span className="text-[9px] px-1 rounded animate-pulse text-accent" style={{ background: 'rgba(255,107,0,0.2)' }}>
                   Loading...
                 </span>
               )}
@@ -449,7 +448,7 @@ export function TraitAuditWizard({ onClose }: TraitAuditWizardProps) {
                   {currentVerdict === 'works' ? 'PASS' : 'FAIL'}
                 </span>
               )}
-              <span className="text-[10px] truncate" style={{ color: 'var(--color-text-muted)' }}>
+              <span className="text-[10px] truncate text-muted">
                 {currentCase?.lookFor}
               </span>
             </div>
@@ -457,8 +456,8 @@ export function TraitAuditWizard({ onClose }: TraitAuditWizardProps) {
             {/* Row 2: Navigation + Verdict + dots */}
             <div className="flex items-center gap-2">
               <button type="button" className="btn btn-ghost text-[11px] px-2 py-1" disabled={currentIndex === 0} onClick={() => setCurrentIndex((i) => i - 1)}>Prev</button>
-              <button type="button" className="text-[11px] px-3 py-1 rounded font-medium" style={{ background: 'rgba(239,68,68,0.15)', color: 'var(--color-error)', border: '1px solid rgba(239,68,68,0.3)' }} disabled={isApplying} onClick={() => recordVerdict('fail')}>Fail</button>
-              <button type="button" className="text-[11px] px-3 py-1 rounded font-medium" style={{ background: 'rgba(34,197,94,0.15)', color: 'var(--color-success)', border: '1px solid rgba(34,197,94,0.3)' }} disabled={isApplying} onClick={() => recordVerdict('works')}>Works</button>
+              <button type="button" className="text-[11px] px-3 py-1 rounded font-medium text-error" style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)' }} disabled={isApplying} onClick={() => recordVerdict('fail')}>Fail</button>
+              <button type="button" className="text-[11px] px-3 py-1 rounded font-medium text-success" style={{ background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)' }} disabled={isApplying} onClick={() => recordVerdict('works')}>Works</button>
               <button type="button" className="btn btn-ghost text-[11px] px-2 py-1" disabled={currentIndex === total - 1} onClick={() => setCurrentIndex((i) => i + 1)}>Next</button>
               <div className="flex-1" />
               <div className="flex items-center gap-0.5">
