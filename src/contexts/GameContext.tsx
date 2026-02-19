@@ -2,6 +2,63 @@ import { createContext, useContext, useState, useCallback, useEffect, useRef } f
 import type { ReactNode } from 'react';
 
 const SESSION_KEY = 'wojak_game_session';
+const GUEST_ID_KEY = 'wojak_guest_id';
+const GUEST_VOTES_KEY = 'wojak_guest_votes';
+
+// Daily limits
+const DAILY_LIMIT_HOLDER = 20;
+const DAILY_LIMIT_FREE = 5;
+
+// Generate or retrieve stable guest ID
+function getGuestId(): string {
+  try {
+    let id = localStorage.getItem(GUEST_ID_KEY);
+    if (!id) {
+      id = 'guest_' + crypto.randomUUID().replace(/-/g, '').slice(0, 16);
+      localStorage.setItem(GUEST_ID_KEY, id);
+    }
+    return id;
+  } catch {
+    // Fallback if localStorage not available
+    return 'guest_' + Math.random().toString(36).slice(2, 18);
+  }
+}
+
+// Get today's date string for tracking
+function getTodayString(): string {
+  return new Date().toISOString().split('T')[0];
+}
+
+// Track guest votes in localStorage
+function getGuestVotesToday(): number {
+  try {
+    const data = localStorage.getItem(GUEST_VOTES_KEY);
+    if (!data) return 0;
+    const { date, count } = JSON.parse(data);
+    if (date !== getTodayString()) return 0;
+    return count;
+  } catch {
+    return 0;
+  }
+}
+
+function incrementGuestVotes(): number {
+  try {
+    const today = getTodayString();
+    const data = localStorage.getItem(GUEST_VOTES_KEY);
+    let count = 1;
+    if (data) {
+      const parsed = JSON.parse(data);
+      if (parsed.date === today) {
+        count = parsed.count + 1;
+      }
+    }
+    localStorage.setItem(GUEST_VOTES_KEY, JSON.stringify({ date: today, count }));
+    return count;
+  } catch {
+    return 1;
+  }
+}
 
 interface GamePlayer {
   did: string;
@@ -34,8 +91,12 @@ interface FeedItem {
 
 interface GameContextType {
   player: GamePlayer | null;
+  guestId: string;
   isRegistered: boolean;
   isVerified: boolean;
+  isHolder: boolean;
+  votesRemaining: number;
+  dailyLimit: number;
   feed: FeedItem[];
   feedLoading: boolean;
   register: (did: string, walletAddress: string) => Promise<void>;
@@ -59,6 +120,17 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [player, setPlayer] = useState<GamePlayer | null>(null);
   const [feed, setFeed] = useState<FeedItem[]>([]);
   const [feedLoading, setFeedLoading] = useState(false);
+  const [guestVotesToday, setGuestVotesToday] = useState(() => getGuestVotesToday());
+
+  // Stable guest ID for this browser
+  const [guestId] = useState(() => getGuestId());
+
+  // Computed values
+  const isHolder = !!player?.phase1Verified;
+  const dailyLimit = isHolder ? DAILY_LIMIT_HOLDER : DAILY_LIMIT_FREE;
+  const votesRemaining = player
+    ? player.votesRemaining
+    : Math.max(0, DAILY_LIMIT_FREE - guestVotesToday);
 
   const getAuthHeaders = useCallback(async (): Promise<Record<string, string>> => {
     return { 'Content-Type': 'application/json' };
@@ -89,13 +161,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
         .then(r => r.json())
         .then(data => {
           if (data.success) {
+            const isHolderNow = data.player.phase1Verified;
+            const limit = isHolderNow ? DAILY_LIMIT_HOLDER : DAILY_LIMIT_FREE;
             setPlayer({
               did: data.player.did,
               walletAddress,
               powerLevel: data.player.powerLevel,
-              phase1Verified: data.player.phase1Verified,
+              phase1Verified: isHolderNow,
               votesToday: data.player.votesToday,
-              votesRemaining: 10 - data.player.votesToday,
+              votesRemaining: Math.max(0, limit - data.player.votesToday),
               voteStreak: data.player.voteStreak ?? 0,
               onboarding: data.player.onboarding,
             });
@@ -118,13 +192,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (!data.success) {
       throw new Error(data.error || 'Registration failed');
     }
+    const isHolderNow = data.player.phase1Verified;
+    const limit = isHolderNow ? DAILY_LIMIT_HOLDER : DAILY_LIMIT_FREE;
     setPlayer({
       did: data.player.did,
       walletAddress: walletAddress,
       powerLevel: data.player.powerLevel,
-      phase1Verified: data.player.phase1Verified,
+      phase1Verified: isHolderNow,
       votesToday: data.player.votesToday,
-      votesRemaining: 10 - data.player.votesToday,
+      votesRemaining: Math.max(0, limit - data.player.votesToday),
       voteStreak: data.player.voteStreak ?? 0,
       onboarding: data.player.onboarding,
     });
@@ -144,16 +220,26 @@ export function GameProvider({ children }: { children: ReactNode }) {
     });
     const data = await res.json();
     if (data.verified && player) {
-      setPlayer({ ...player, phase1Verified: true, onboarding: { ...player.onboarding, phase1: true } });
+      // Upgrade to holder: increase daily limit
+      setPlayer({
+        ...player,
+        phase1Verified: true,
+        votesRemaining: Math.max(0, DAILY_LIMIT_HOLDER - player.votesToday),
+        onboarding: { ...player.onboarding, phase1: true },
+      });
     }
     return data.verified;
   }, [player]);
 
   const loadFeed = useCallback(async () => {
-    if (!player) return;
     setFeedLoading(true);
     try {
-      const res = await fetch(`/api/game/feed?did=${player.did}&limit=10`);
+      // Use player DID if available, otherwise use guestId
+      const feedUrl = player?.did
+        ? `/api/game/feed?did=${encodeURIComponent(player.did)}&limit=10`
+        : `/api/game/feed?guestId=${encodeURIComponent(guestId)}&limit=10`;
+
+      const res = await fetch(feedUrl);
       const data = await res.json();
       if (data.success) {
         setFeed(data.feed);
@@ -163,31 +249,44 @@ export function GameProvider({ children }: { children: ReactNode }) {
     } finally {
       setFeedLoading(false);
     }
-  }, [player]);
+  }, [player, guestId]);
 
   const castVote = useCallback(async (nftId: string, editionNumber: number, voteType: 1 | -1) => {
-    if (!player) return false;
     const headers = await getAuthHeaders();
+
+    // Build request body based on whether we have a player or not
+    const body = player?.did
+      ? { voterDid: player.did, guestId: null, nftId, editionNumber, voteType }
+      : { voterDid: null, guestId, nftId, editionNumber, voteType };
+
     const res = await fetch('/api/game/vote', {
       method: 'POST',
       headers,
-      body: JSON.stringify({ voterDid: player.did, nftId, editionNumber, voteType }),
+      body: JSON.stringify(body),
     });
     const data = await res.json();
+
     if (data.success) {
-      setPlayer(prev => prev ? {
-        ...prev,
-        votesToday: prev.votesToday + 1,
-        votesRemaining: data.votesRemaining,
-        voteStreak: data.voteStreak ?? prev.voteStreak,
-        onboarding: data.onboarding ?? prev.onboarding,
-      } : null);
+      if (player) {
+        // Update player state
+        setPlayer(prev => prev ? {
+          ...prev,
+          votesToday: prev.votesToday + 1,
+          votesRemaining: data.votesRemaining,
+          voteStreak: data.voteStreak ?? prev.voteStreak,
+          onboarding: data.onboarding ?? prev.onboarding,
+        } : null);
+      } else {
+        // Track guest votes locally
+        const newCount = incrementGuestVotes();
+        setGuestVotesToday(newCount);
+      }
       // Remove voted item from feed
       setFeed(prev => prev.filter(item => item.nftId !== nftId));
       return true;
     }
     return false;
-  }, [player]);
+  }, [player, guestId]);
 
   const refreshPowerLevel = useCallback(async () => {
     if (!player) return;
@@ -201,8 +300,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
   return (
     <GameContext.Provider value={{
       player,
+      guestId,
       isRegistered: !!player,
       isVerified: !!player?.phase1Verified,
+      isHolder,
+      votesRemaining,
+      dailyLimit,
       feed,
       feedLoading,
       register,

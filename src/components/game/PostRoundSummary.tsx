@@ -1,5 +1,5 @@
-// Post-round summary shown after 10th vote.
-// Shows session stats, power level delta, and navigation CTAs.
+// Post-round summary shown after all daily votes used.
+// Shows session stats, power level delta (holders only), and navigation CTAs.
 
 import { motion } from 'framer-motion';
 import { defaultSpring } from '@/config/springs';
@@ -11,6 +11,7 @@ interface PostRoundSummaryProps {
   powerLevel: number;
   powerLevelDelta: number;
   voteStreak?: number;
+  isHolder?: boolean;
 }
 
 const STREAK_MILESTONES = [3, 7, 14, 30, 100];
@@ -28,6 +29,7 @@ export function PostRoundSummary({
   powerLevel,
   powerLevelDelta,
   voteStreak,
+  isHolder = true,
 }: PostRoundSummaryProps) {
   const totalVotes = likes + dislikes;
 
@@ -65,34 +67,51 @@ export function PostRoundSummary({
       {/* Divider */}
       <div style={{ width: '100%', height: 1, background: 'var(--color-border)' }} />
 
-      {/* Power Level */}
-      <div className="flex items-center gap-2" style={{ fontSize: 16 }}>
-        <span className="font-bold">Power Level: {powerLevel.toLocaleString()}</span>
-        {powerLevelDelta !== 0 && (
-          <span style={{ color: powerLevelDelta > 0 ? 'var(--color-success)' : 'var(--color-error)', fontSize: 14 }}>
-            ({powerLevelDelta > 0 ? '+' : ''}{powerLevelDelta})
-          </span>
-        )}
-      </div>
-
-      {voteStreak != null && voteStreak > 0 && (
-        <div className="flex flex-col items-center gap-1">
-          <span className="font-bold text-accent" style={{ fontSize: 14 }}>
-            {voteStreak}-day vote streak!
-          </span>
-          {(() => {
-            const next = getNextMilestone(voteStreak);
-            return next ? (
-              <span className="text-muted" style={{ fontSize: 12 }}>
-                Next bonus at {next} days
+      {/* Power Level (holders only) */}
+      {isHolder && (
+        <>
+          <div className="flex items-center gap-2" style={{ fontSize: 16 }}>
+            <span className="font-bold">Power Level: {powerLevel.toLocaleString()}</span>
+            {powerLevelDelta !== 0 && (
+              <span style={{ color: powerLevelDelta > 0 ? 'var(--color-success)' : 'var(--color-error)', fontSize: 14 }}>
+                ({powerLevelDelta > 0 ? '+' : ''}{powerLevelDelta})
               </span>
-            ) : null;
-          })()}
+            )}
+          </div>
+
+          {voteStreak != null && voteStreak > 0 && (
+            <div className="flex flex-col items-center gap-1">
+              <span className="font-bold text-accent" style={{ fontSize: 14 }}>
+                {voteStreak}-day vote streak!
+              </span>
+              {(() => {
+                const next = getNextMilestone(voteStreak);
+                return next ? (
+                  <span className="text-muted" style={{ fontSize: 12 }}>
+                    Next bonus at {next} days
+                  </span>
+                ) : null;
+              })()}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Free tier upsell */}
+      {!isHolder && (
+        <div className="flex flex-col items-center gap-2 text-center">
+          <p className="text-secondary text-sm">
+            Your votes help shape the meta!
+          </p>
+          <p className="text-sm">
+            <Link to="/fight-club" className="text-primary underline">Get a Farmers Plot</Link>
+            {' '}for 20 votes/day + Power rewards.
+          </p>
         </div>
       )}
 
       <p className="text-secondary text-sm text-center">
-        Come back tomorrow for 10 more votes.
+        Come back tomorrow for {isHolder ? '20' : '5'} more votes.
       </p>
 
       {/* CTAs */}
@@ -100,8 +119,8 @@ export function PostRoundSummary({
         <Link to="/fight-club/rankings" className="btn btn-primary text-center">
           View Leaderboard
         </Link>
-        <Link to="/fight-club/vote" className="btn btn-secondary text-center">
-          Go to Dashboard
+        <Link to="/generator" className="btn btn-secondary text-center">
+          Mint a Wojak
         </Link>
       </div>
     </motion.div>

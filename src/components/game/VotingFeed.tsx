@@ -1,18 +1,20 @@
 // Core voting orchestrator: card stack, vote handling, state transitions.
-// Renders: gate checklist | skeleton | error | summary | empty | card stack + buttons.
+// Supports three tiers: Guest (5/day), Connected (5/day), Holder (20/day).
+// Renders: free tier banner | skeleton | error | summary | empty | card stack + buttons.
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useGame } from '@/contexts/GameContext';
-import { useSageWallet } from '@/sage-wallet';
 import { useToast } from '@/contexts/ToastContext';
 import usePrefersReducedMotion from '@/hooks/usePrefersReducedMotion';
 import { SwipeCard } from './SwipeCard';
 import { VoteButtons } from './VoteButtons';
 import { VoteCardSkeleton } from './VoteCardSkeleton';
-import { GateChecklist } from './GateChecklist';
 import { PostRoundSummary } from './PostRoundSummary';
+
+// Constants
+const DAILY_LIMIT_HOLDER = 20;
 
 // Milestone toast hook — fires when onboarding milestones complete during session
 const MILESTONE_INFO: Record<string, { label: string; credits: number }> = {
@@ -56,15 +58,15 @@ interface LastVote {
 
 export function VotingFeed() {
   const {
-    player, isRegistered, isVerified,
+    player,
     feed, feedLoading, loadFeed,
-    castVote, refreshPowerLevel, register, verifyPhase1,
+    castVote, refreshPowerLevel,
+    votesRemaining, dailyLimit, isHolder,
   } = useGame();
-  const { address, status: walletStatus } = useSageWallet();
   const toast = useToast();
   const reducedMotion = usePrefersReducedMotion();
 
-  // Milestone toasts
+  // Milestone toasts (only for holders)
   useMilestoneToasts(player?.onboarding);
 
   // Session state
@@ -77,19 +79,6 @@ export function VotingFeed() {
   const [feedError, setFeedError] = useState(false);
   const [cardExiting, setCardExiting] = useState(false);
   const powerLevelBefore = useRef(0);
-
-  // Gate animation state — always show checklist, transition after progressive reveal
-  const walletConnected = walletStatus === 'connected' && !!address;
-  const hasDid = isRegistered;
-  const hasPhase1 = isVerified;
-  const [gateAnimDone, setGateAnimDone] = useState(false);
-
-  // Reset gate animation if any condition becomes false
-  useEffect(() => {
-    if (!walletConnected || !hasDid || !hasPhase1) {
-      setGateAnimDone(false);
-    }
-  }, [walletConnected, hasDid, hasPhase1]);
 
   // Instruction text visibility
   const [instructionsSeen, setInstructionsSeen] = useState(() => {
@@ -111,21 +100,21 @@ export function VotingFeed() {
     }
   });
 
-  // Snapshot power level at session start for delta
+  // Snapshot power level at session start for delta (holders only)
   useEffect(() => {
     if (player && powerLevelBefore.current === 0) {
       powerLevelBefore.current = player.powerLevel;
     }
   }, [player]);
 
-  // Load feed once when gate animation completes
+  // Load feed immediately (no gate)
   const feedAttempted = useRef(false);
   useEffect(() => {
-    if (gateAnimDone && !feedAttempted.current) {
+    if (!feedAttempted.current) {
       feedAttempted.current = true;
       loadFeed().catch(() => setFeedError(true));
     }
-  }, [gateAnimDone, loadFeed]);
+  }, [loadFeed]);
 
   // Prefetch images for next 3 cards
   useEffect(() => {
@@ -160,6 +149,12 @@ export function VotingFeed() {
     const currentItem = feed[0];
     if (!currentItem || cardExiting) return;
 
+    // Check if out of votes
+    if (votesRemaining <= 0) {
+      toast.error(`Daily limit reached (${dailyLimit} votes)`);
+      return;
+    }
+
     setCardExiting(true);
 
     // Track session stats
@@ -189,15 +184,15 @@ export function VotingFeed() {
         loadFeed().catch(() => setFeedError(true));
       }
 
-      // Check for round complete (10th vote)
-      if (player && player.votesRemaining <= 1) {
+      // Check for round complete (all votes used)
+      if (votesRemaining <= 1) {
         setTimeout(() => {
-          refreshPowerLevel();
+          if (isHolder) refreshPowerLevel();
           setShowSummary(true);
         }, 200);
       }
     }, 250);
-  }, [feed, cardExiting, castVote, loadFeed, player, refreshPowerLevel]);
+  }, [feed, cardExiting, castVote, loadFeed, votesRemaining, dailyLimit, isHolder, refreshPowerLevel, toast]);
 
   const handleUndo = useCallback(() => {
     if (!lastVote || undoUsed) return;
@@ -214,20 +209,6 @@ export function VotingFeed() {
     feedAttempted.current = false;
     loadFeed().catch(() => setFeedError(true));
   }, [loadFeed]);
-
-  if (!gateAnimDone) {
-    return (
-      <GateChecklist
-        walletConnected={walletConnected}
-        hasDid={hasDid}
-        hasPhase1={hasPhase1}
-        onLinkDid={async (did) => { if (address) await register(did, address); }}
-        onAutoVerify={async () => { if (player?.did) return verifyPhase1(player.did); return false; }}
-        onVerifyNft={async (nftId) => { if (player?.did) return verifyPhase1(player.did, nftId); return false; }}
-        onAllComplete={() => setGateAnimDone(true)}
-      />
-    );
-  }
 
   // Loading
   if (feedLoading && feed.length === 0) {
@@ -255,24 +236,24 @@ export function VotingFeed() {
         likes={sessionLikes}
         dislikes={sessionDislikes}
         powerLevel={player?.powerLevel ?? 0}
-        // eslint-disable-next-line react-hooks/refs
-        powerLevelDelta={(player?.powerLevel ?? 0) - powerLevelBefore.current}
-        voteStreak={player?.voteStreak}
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        powerLevelDelta={isHolder ? (player?.powerLevel ?? 0) - powerLevelBefore.current : 0}
+        voteStreak={isHolder ? player?.voteStreak : undefined}
+        isHolder={isHolder}
       />
     );
   }
 
   // Feed empty — all Wojaks on 24h cooldown
   if (feed.length === 0) {
-    const votesToday = player?.votesToday ?? 0;
     return (
       <div className="card-static flex flex-col items-center justify-center gap-4 p-8" style={{ minHeight: 300 }}>
         <span className="text-2xl">&#9203;</span>
         <h2 className="text-lg font-semibold">All Caught Up!</h2>
         <p className="text-secondary text-sm text-center">
           New Wojaks will appear as cooldowns expire.
-          {votesToday > 0 && (
-            <><br /><span className="text-muted">You've voted on {votesToday} Wojak{votesToday !== 1 ? 's' : ''} today.</span></>
+          {voteCount > 0 && (
+            <><br /><span className="text-muted">You've voted on {voteCount} Wojak{voteCount !== 1 ? 's' : ''} today.</span></>
           )}
         </p>
         <div className="flex gap-3">
@@ -292,6 +273,23 @@ export function VotingFeed() {
 
   return (
     <div className="flex flex-col items-center gap-4">
+      {/* Free tier banner for non-holders */}
+      {!isHolder && (
+        <div
+          className="card-static p-3 flex items-center gap-3 w-full"
+          style={{ borderLeft: '3px solid var(--color-primary)' }}
+        >
+          <span className="text-sm text-secondary">
+            <strong className="text-primary">{votesRemaining}</strong> free vote{votesRemaining !== 1 ? 's' : ''} remaining today.
+            {' '}
+            <Link to="/fight-club" className="text-primary underline">
+              Get a Farmers Plot
+            </Link>
+            {' '}for {DAILY_LIMIT_HOLDER} votes/day + Power rewards.
+          </span>
+        </div>
+      )}
+
       {/* Card stack */}
       <div
         className="vote-card-stack"
@@ -321,7 +319,7 @@ export function VotingFeed() {
         onDislike={() => handleVote(-1)}
         onUndo={handleUndo}
         undoAvailable={!!lastVote && !undoUsed}
-        disabled={cardExiting}
+        disabled={cardExiting || votesRemaining <= 0}
       />
 
       {/* Instruction text */}
