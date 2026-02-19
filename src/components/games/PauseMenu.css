@@ -3,7 +3,7 @@
 .pause-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--color-black-80);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   display: flex;
@@ -16,8 +16,8 @@
 .pause-menu {
   width: 100%;
   max-width: 300px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.3));
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: linear-gradient(135deg, var(--color-white-8), var(--color-black-30));
+  border: 1px solid var(--color-white-15);
   border-radius: 24px;
   padding: 24px;
   text-align: center;
@@ -37,7 +37,7 @@
 }
 
 .pause-game-name {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-white-50);
   font-size: 14px;
 }
 
@@ -72,23 +72,23 @@
 }
 
 .pause-btn.restart {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--color-white-10);
+  border: 1px solid var(--color-white-20);
   color: white;
 }
 
 .pause-btn.restart:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--color-white-15);
 }
 
 .pause-btn.exit {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: var(--color-error-10);
+  border: 1px solid var(--color-error-30);
   color: #EF4444;
 }
 
 .pause-btn.exit:hover {
-  background: rgba(239, 68, 68, 0.2);
+  background: var(--color-error-20);
 }
 
 /* Mobile */
