@@ -65,6 +65,12 @@ export interface MintJob {
   expiresAt?: string;
   queuePosition?: number;
   queueTotal?: number;
+  combat?: {
+    type: string;
+    nature: string;
+    ability: string;
+    moves: { id: string; name: string; power: number; accuracy: number; category: string; description: string }[];
+  };
 }
 
 export interface TraitPricingEntry {
