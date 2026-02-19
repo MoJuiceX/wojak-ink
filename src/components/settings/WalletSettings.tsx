@@ -56,11 +56,10 @@ export function WalletSettings() {
     >
       {/* Section Header */}
       <div className="flex items-center gap-2">
-        <Wallet size={20} style={{ color: 'var(--color-primary)' }} />
+        <Wallet size={20} className="text-accent" />
         <h2
           id="wallet-section-heading"
-          className="text-lg font-bold"
-          style={{ color: 'var(--color-text)' }}
+          className="text-lg font-bold text-primary"
         >
           Wallet
         </h2>
@@ -81,11 +80,10 @@ export function WalletSettings() {
               className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
               style={{ background: 'var(--color-elevated)' }}
             >
-              <Wallet size={32} style={{ color: 'var(--color-text-muted)' }} />
+              <Wallet size={32} className="text-muted" />
             </div>
             <p
-              className="text-sm mb-4"
-              style={{ color: 'var(--color-text-secondary)' }}
+              className="text-sm mb-4 text-secondary"
             >
               Connect your wallet to access Treasury and exclusive features
             </p>
@@ -117,14 +115,12 @@ export function WalletSettings() {
               />
               <div className="flex-1 min-w-0">
                 <p
-                  className="text-sm font-medium"
-                  style={{ color: 'var(--color-text)' }}
+                  className="text-sm font-medium text-primary"
                 >
                   Connected
                 </p>
                 <p
-                  className="text-sm font-mono truncate"
-                  style={{ color: 'var(--color-text-secondary)' }}
+                  className="text-sm font-mono truncate text-secondary"
                 >
                   {wallet.address && truncateAddress(wallet.address)}
                 </p>
@@ -149,10 +145,9 @@ export function WalletSettings() {
                 href={`https://spacescan.io/address/${wallet.address}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors"
+                className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors text-secondary"
                 style={{
                   background: 'var(--color-elevated)',
-                  color: 'var(--color-text-secondary)',
                   border: '1px solid var(--color-border)',
                 }}
               >
@@ -163,10 +158,9 @@ export function WalletSettings() {
 
             {/* Disconnect */}
             <button
-              className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors text-error"
               style={{
                 background: 'transparent',
-                color: 'var(--color-error)',
                 border: '1px solid rgba(239, 68, 68, 0.3)',
               }}
               onClick={handleDisconnect}

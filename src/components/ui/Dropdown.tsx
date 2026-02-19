@@ -118,8 +118,7 @@ export function Dropdown<T extends string>({
       {label && (
         <label
           htmlFor={id}
-          className="block text-sm font-medium mb-1"
-          style={{ color: 'var(--color-text)' }}
+          className="block text-sm font-medium mb-1 text-primary"
         >
           {label}
         </label>
@@ -127,8 +126,7 @@ export function Dropdown<T extends string>({
       {description && (
         <p
           id={descriptionId}
-          className="text-xs mb-2"
-          style={{ color: 'var(--color-text-muted)' }}
+          className="text-xs mb-2 text-muted"
         >
           {description}
         </p>
@@ -147,7 +145,7 @@ export function Dropdown<T extends string>({
         onKeyDown={handleKeyDown}
         className={`
           w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg
-          text-sm text-left transition-colors
+          text-sm text-left transition-colors text-primary
           focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
           focus-visible:ring-[var(--color-primary)]
           ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
@@ -155,14 +153,12 @@ export function Dropdown<T extends string>({
         style={{
           background: 'var(--color-surface)',
           border: '1px solid var(--color-border)',
-          color: 'var(--color-text)',
         }}
       >
         <span className="truncate">{selectedOption?.label || 'Select...'}</span>
         <ChevronDown
           size={16}
-          className={`transition-transform ${isOpen ? 'rotate-180' : ''}`}
-          style={{ color: 'var(--color-text-muted)' }}
+          className={`transition-transform text-muted ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
 
@@ -210,15 +206,13 @@ export function Dropdown<T extends string>({
                 <div className="flex items-center justify-between gap-2">
                   <div className="min-w-0">
                     <p
-                      className="text-sm font-medium truncate"
-                      style={{ color: 'var(--color-text)' }}
+                      className="text-sm font-medium truncate text-primary"
                     >
                       {option.label}
                     </p>
                     {option.description && (
                       <p
-                        className="text-xs truncate mt-0.5"
-                        style={{ color: 'var(--color-text-muted)' }}
+                        className="text-xs truncate mt-0.5 text-muted"
                       >
                         {option.description}
                       </p>
@@ -227,7 +221,7 @@ export function Dropdown<T extends string>({
                   {option.value === value && (
                     <Check
                       size={16}
-                      style={{ color: 'var(--color-primary)' }}
+                      className="text-accent"
                     />
                   )}
                 </div>

@@ -52,16 +52,14 @@ export function WalletAddressCard({ address, explorerUrl }: WalletAddressCardPro
         <div className="flex items-center gap-2">
           {/* Label */}
           <span
-            className="text-xs font-medium uppercase tracking-wide flex-shrink-0"
-            style={{ color: 'var(--color-text-muted)' }}
+            className="text-xs font-medium uppercase tracking-wide flex-shrink-0 text-muted"
           >
             Wallet
           </span>
 
           {/* Address */}
           <span
-            className="text-sm font-mono flex-1 truncate"
-            style={{ color: 'var(--color-text)' }}
+            className="text-sm font-mono flex-1 truncate text-primary"
           >
             {truncatedAddress}
           </span>

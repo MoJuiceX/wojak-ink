@@ -83,8 +83,7 @@ export function ExplorerTopBar({
       {/* Close button (optional for desktop panel which has its own) */}
       {showClose ? (
         <motion.button
-          className="w-10 h-10 flex items-center justify-center rounded-lg transition-colors"
-          style={{ color: 'var(--color-text-secondary)' }}
+          className="w-10 h-10 flex items-center justify-center rounded-lg transition-colors text-secondary"
           onClick={onClose}
           whileHover={{ background: 'var(--color-surface-hover)' }}
           whileTap={{ scale: 0.95 }}
@@ -103,9 +102,8 @@ export function ExplorerTopBar({
         <Tooltip text="Expand">
           <motion.button
             type="button"
-            className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors"
+            className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors text-muted"
             style={{
-              color: 'var(--color-text-muted)',
               background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
             }}
@@ -122,9 +120,8 @@ export function ExplorerTopBar({
         <Tooltip text="Shuffle">
           <motion.button
             type="button"
-            className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors"
+            className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors text-muted"
             style={{
-              color: 'var(--color-text-muted)',
               background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
             }}
@@ -169,9 +166,8 @@ export function ExplorerTopBar({
                   {isActive && (
                     <DirectionIcon
                       size={10}
-                      className="absolute -bottom-1 -right-1"
+                      className="absolute -bottom-1 -right-1 text-accent"
                       style={{
-                        color: 'var(--color-primary)',
                         strokeWidth: 3,
                       }}
                     />
@@ -208,18 +204,16 @@ export function ExplorerTopBar({
                 sortMode === 'price-asc' ? (
                   <ChevronUp
                     size={10}
-                    className="absolute -bottom-1 -right-1"
+                    className="absolute -bottom-1 -right-1 text-accent"
                     style={{
-                      color: 'var(--color-primary)',
                       strokeWidth: 3,
                     }}
                   />
                 ) : (
                   <ChevronDown
                     size={10}
-                    className="absolute -bottom-1 -right-1"
+                    className="absolute -bottom-1 -right-1 text-accent"
                     style={{
-                      color: 'var(--color-primary)',
                       strokeWidth: 3,
                     }}
                   />

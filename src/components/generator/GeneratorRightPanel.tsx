@@ -108,7 +108,7 @@ function isFullFaceMaskSelected(maskPath: string | undefined): boolean {
 function MaskVariantPicker({ selectedPath, onSelect }: { selectedPath: string | undefined; onSelect: (path: string) => void }) {
   return (
     <div className="flex-shrink-0">
-      <div className="text-[10px] font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--color-text-muted)' }}>Mask style</div>
+      <div className="text-[10px] font-semibold uppercase tracking-wide mb-1.5 text-muted">Mask style</div>
       <div className="grid grid-cols-3 gap-2">
         {MASK_VARIANTS.map(({ file, label }) => {
           const path = `${MASK_BASE_PATH}/${file}`;
@@ -387,7 +387,7 @@ export function GeneratorRightPanel() {
       {!isG1MilitaryBeret && (
         <div className="flex-shrink-0">
           <div className="flex items-center justify-between mb-1.5" style={{ height: '14px' }}>
-            <span className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'var(--color-text-muted)' }}>Color</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-muted">Color</span>
             {/* Reset button — inline, no vertical padding so it doesn't change row height */}
             {(colorPickerProps.defaultColor || colorPickerProps.onReset) && (() => {
               const norm = (h: string) => (h.startsWith('#') ? h : '#' + h).toUpperCase();
@@ -420,7 +420,7 @@ export function GeneratorRightPanel() {
               );
             })()}
             {hexDisplay && (
-              <span className="font-mono text-[10px]" style={{ color: 'var(--color-text-secondary)' }}>{hexDisplay}</span>
+              <span className="font-mono text-[10px] text-secondary">{hexDisplay}</span>
             )}
           </div>
           <ColorPicker

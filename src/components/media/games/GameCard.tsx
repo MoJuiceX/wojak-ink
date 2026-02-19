@@ -104,7 +104,7 @@ export const GameCard = memo(function GameCard({
       <div className="text-6xl sm:text-5xl mb-4 sm:mb-3 pointer-events-none">{game.emoji}</div>
 
       {/* Name */}
-      <h3 className="text-lg sm:text-base font-semibold pointer-events-none" style={{ color: 'var(--color-text)' }}>
+      <h3 className="text-lg sm:text-base font-semibold pointer-events-none text-primary">
         {game.name}
       </h3>
 

@@ -186,10 +186,9 @@ export function NFTExplorerModal({ isOpen, onClose }: NFTExplorerModalProps) {
         >
           {/* Close button */}
           <motion.button
-            className="absolute top-6 right-6 w-12 h-12 flex items-center justify-center rounded-xl transition-colors"
+            className="absolute top-6 right-6 w-12 h-12 flex items-center justify-center rounded-xl transition-colors text-secondary"
             style={{
               background: 'var(--color-surface)',
-              color: 'var(--color-text-secondary)',
               border: '1px solid var(--color-border)',
             }}
             onClick={(e) => {
@@ -212,8 +211,7 @@ export function NFTExplorerModal({ isOpen, onClose }: NFTExplorerModalProps) {
             }}
           >
             <span
-              className="font-bold text-lg"
-              style={{ color: 'var(--color-text)' }}
+              className="font-bold text-lg text-primary"
             >
               {currentNft.name}
             </span>
@@ -236,9 +234,8 @@ export function NFTExplorerModal({ isOpen, onClose }: NFTExplorerModalProps) {
 
           {/* Hint text at bottom */}
           <motion.p
-            className="absolute bottom-8 left-0 right-0 text-center text-sm"
+            className="absolute bottom-8 left-0 right-0 text-center text-sm text-muted"
             style={{
-              color: 'var(--color-text-muted)',
               paddingBottom: 'env(safe-area-inset-bottom)',
             }}
             initial={{ opacity: 0, y: 10 }}

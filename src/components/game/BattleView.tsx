@@ -175,8 +175,7 @@ export function BattleView() {
                   <div className="flex items-center gap-2 shrink-0">
                     <span className="text-muted text-xs">Waiting for opponent...</span>
                     <button
-                      className="btn btn-ghost text-xs px-2 py-1"
-                      style={{ color: 'var(--color-error)' }}
+                      className="btn btn-ghost text-xs px-2 py-1 text-error"
                       onClick={() => handleCancelQueue(nft.nftId)}
                       disabled={cancellingNft === nft.nftId}
                     >

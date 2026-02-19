@@ -350,7 +350,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
                           Random
                         </button>
                       </div>
-                      {nameError && <p className="text-xs" style={{ color: 'var(--color-error)' }}>{nameError}</p>}
+                      {nameError && <p className="text-xs text-error">{nameError}</p>}
                       {customName && (
                         <p className="text-xs text-secondary">
                           Preview: Your Wojak #___: {customName}

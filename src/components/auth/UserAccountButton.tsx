@@ -32,8 +32,7 @@ function ClerkUserButton({ showLabel }: { showLabel: boolean }) {
   if (!isClerkLoaded) {
     return (
       <div
-        className="flex items-center gap-3 px-3 py-2 rounded-lg opacity-50"
-        style={{ color: 'var(--color-text-muted)' }}
+        className="flex items-center gap-3 px-3 py-2 rounded-lg opacity-50 text-muted"
       >
         <User size={20} />
         {showLabel && <span className="text-sm">Loading...</span>}
@@ -47,10 +46,7 @@ function ClerkUserButton({ showLabel }: { showLabel: boolean }) {
       <SignedOut>
         <SignInButton mode="modal">
           <motion.button
-            className="flex items-center gap-3 px-3 py-2 rounded-lg w-full transition-colors"
-            style={{
-              color: 'var(--color-text-secondary)',
-            }}
+            className="flex items-center gap-3 px-3 py-2 rounded-lg w-full transition-colors text-secondary"
             whileHover={{
               background: 'var(--color-surface-hover)',
               color: 'var(--color-text)',
@@ -116,8 +112,7 @@ export function UserAccountButton({ showLabel = false }: UserAccountButtonProps)
   if (!CLERK_ENABLED) {
     return (
       <div
-        className="flex items-center gap-3 px-3 py-2 rounded-lg opacity-50 cursor-not-allowed"
-        style={{ color: 'var(--color-text-muted)' }}
+        className="flex items-center gap-3 px-3 py-2 rounded-lg opacity-50 cursor-not-allowed text-muted"
         title="Auth not configured"
       >
         <User size={20} />

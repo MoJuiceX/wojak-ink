@@ -99,13 +99,12 @@ export function WalletButton({ className = '', size = 'md' }: WalletButtonProps)
       <motion.button
         className={`
           flex items-center justify-center rounded-lg font-medium
-          transition-colors duration-200
+          transition-colors duration-200 text-primary
           ${sizeStyles[size]}
         `}
         style={{
           background: 'var(--color-surface)',
           border: '1px solid var(--color-border)',
-          color: 'var(--color-text)',
         }}
         whileHover={{
           borderColor: 'var(--color-primary)',
@@ -171,8 +170,7 @@ export function WalletButton({ className = '', size = 'md' }: WalletButtonProps)
               href={`https://spacescan.io/address/${wallet.address}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors"
-              style={{ color: 'var(--color-text-secondary)' }}
+              className="w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors text-secondary"
               onClick={() => setIsDropdownOpen(false)}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = 'var(--color-surface-hover)';
@@ -191,8 +189,7 @@ export function WalletButton({ className = '', size = 'md' }: WalletButtonProps)
             />
 
             <button
-              className="w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors"
-              style={{ color: 'var(--color-error)' }}
+              className="w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors text-error"
               onClick={handleDisconnect}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = 'var(--color-surface-hover)';

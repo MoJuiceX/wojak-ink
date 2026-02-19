@@ -91,16 +91,14 @@ export function OtherTokensCard({ tokens, isLoading = false }: OtherTokensCardPr
 
               {/* Token name - full width, no truncation */}
               <span
-                className="text-sm font-medium flex-1"
-                style={{ color: 'var(--color-text)' }}
+                className="text-sm font-medium flex-1 text-primary"
               >
                 {token.symbol}
               </span>
 
               {/* Token value */}
               <span
-                className="text-sm font-semibold flex-shrink-0"
-                style={{ color: 'var(--color-text-secondary)' }}
+                className="text-sm font-semibold flex-shrink-0 text-secondary"
               >
                 ${token.valueUSD.toFixed(2)}
               </span>

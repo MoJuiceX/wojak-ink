@@ -47,7 +47,7 @@ export const DetailSelector = memo(function DetailSelector({
   return (
     <div className="flex flex-col gap-2">
       {label && (
-        <span className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+        <span className="text-xs font-medium text-secondary">
           {label}
         </span>
       )}

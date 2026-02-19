@@ -122,8 +122,7 @@ export function CopyText({
       }}
     >
       <span
-        className="font-mono text-sm flex-1 truncate"
-        style={{ color: 'var(--color-text-secondary)' }}
+        className="font-mono text-sm flex-1 truncate text-secondary"
         title={text}
       >
         {displayText}

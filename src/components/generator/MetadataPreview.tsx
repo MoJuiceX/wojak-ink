@@ -279,9 +279,8 @@ export function MetadataPreview({ onSwitchToColors }: MetadataPreviewProps) {
         </div>
         <button
           type="button"
-          className="flex items-center gap-0.5 transition-colors"
+          className="flex items-center gap-0.5 transition-colors text-accent"
           style={{
-            color: 'var(--color-primary)',
             fontSize: '0.5625rem',
             fontWeight: 600,
             lineHeight: 1,
@@ -309,14 +308,16 @@ export function MetadataPreview({ onSwitchToColors }: MetadataPreviewProps) {
                   opacity: isEmpty ? 0.3 : 1,
                 }}
               >
-                <span style={{
-                  color: 'var(--color-text-muted)',
-                  fontSize: '9px',
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                  marginBottom: 1,
-                }}>
+                <span
+                  className="text-muted"
+                  style={{
+                    fontSize: '9px',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    marginBottom: 1,
+                  }}
+                >
                   {attr.trait_type}
                 </span>
                 <span style={{

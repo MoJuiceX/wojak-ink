@@ -116,16 +116,10 @@ export function PreviewCanvas({
           >
             😐
           </div>
-          <p
-            className="text-sm font-medium"
-            style={{ color: 'var(--color-text-muted)' }}
-          >
+          <p className="text-sm font-medium text-muted">
             Select a base to start
           </p>
-          <p
-            className="text-xs mt-1"
-            style={{ color: 'var(--color-text-muted)' }}
-          >
+          <p className="text-xs mt-1 text-muted">
             or click Randomize for a surprise
           </p>
         </div>
@@ -141,9 +135,8 @@ export function PreviewCanvas({
           animate="animate"
         >
           <Loader2
-            className="animate-spin"
+            className="animate-spin text-accent"
             size={32}
-            style={{ color: 'var(--color-primary)' }}
           />
         </motion.div>
       )}

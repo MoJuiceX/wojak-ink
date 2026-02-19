@@ -137,21 +137,19 @@ export function DesktopNFTImage({
             >
               <ImageOff
                 size={48}
-                style={{ color: 'var(--color-text-muted)' }}
+                className="text-muted"
               />
               <p
-                className="text-sm"
-                style={{ color: 'var(--color-text-muted)' }}
+                className="text-sm text-muted"
               >
                 Failed to load image
               </p>
               {onRetry && (
                 <button
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors text-secondary"
                   style={{
                     background: 'var(--color-surface)',
                     border: '1px solid var(--color-border)',
-                    color: 'var(--color-text-secondary)',
                   }}
                   onClick={handleRetry}
                 >

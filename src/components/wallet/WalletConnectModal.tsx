@@ -62,30 +62,27 @@ export function WalletConnectModal({ isOpen, onClose, walletConnect }: WalletCon
             {/* Close button */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 p-1 rounded-full transition-colors"
-              style={{ color: 'var(--color-text-tertiary)' }}
+              className="absolute top-4 right-4 p-1 rounded-full transition-colors text-tertiary"
             >
               <X size={20} />
             </button>
 
             <div className="text-center">
               <h2
-                className="text-xl font-bold mb-2"
-                style={{ color: 'var(--color-text)' }}
+                className="text-xl font-bold mb-2 text-primary"
               >
                 Connect Sage Wallet
               </h2>
               <p
-                className="text-sm mb-4"
-                style={{ color: 'var(--color-text-secondary)' }}
+                className="text-sm mb-4 text-secondary"
               >
                 Scan the QR code with Sage Wallet to connect
               </p>
 
               {walletConnect.isConnecting && !walletConnect.qrCodeUri && (
                 <div className="flex flex-col items-center py-8">
-                  <Loader2 className="animate-spin mb-4" size={40} style={{ color: 'var(--color-primary)' }} />
-                  <p style={{ color: 'var(--color-text-secondary)' }}>Initializing...</p>
+                  <Loader2 className="animate-spin mb-4 text-accent" size={40} />
+                  <p className="text-secondary">Initializing...</p>
                 </div>
               )}
 
@@ -122,8 +119,7 @@ export function WalletConnectModal({ isOpen, onClose, walletConnect }: WalletCon
                     )}
                   </button>
                   <p
-                    className="text-xs"
-                    style={{ color: 'var(--color-text-tertiary)' }}
+                    className="text-xs text-tertiary"
                   >
                     Paste in Sage Wallet → Settings → WalletConnect
                   </p>
@@ -132,10 +128,9 @@ export function WalletConnectModal({ isOpen, onClose, walletConnect }: WalletCon
 
               {walletConnect.error && (
                 <div
-                  className="p-3 rounded-lg text-sm mt-4"
+                  className="p-3 rounded-lg text-sm mt-4 text-error"
                   style={{
                     background: 'var(--color-error-bg, #fef2f2)',
-                    color: 'var(--color-error, #ef4444)',
                   }}
                 >
                   {walletConnect.error}

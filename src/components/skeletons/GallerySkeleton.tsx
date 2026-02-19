@@ -131,7 +131,7 @@ export function PageSkeleton() {
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
         />
-        <p style={{ color: 'var(--color-text-muted, #6b7280)' }}>Loading...</p>
+        <p className="text-muted">Loading...</p>
       </motion.div>
     </div>
   );

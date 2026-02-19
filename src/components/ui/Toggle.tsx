@@ -80,8 +80,7 @@ export const Toggle = memo(function Toggle({
           {label && (
             <label
               htmlFor={id}
-              className="text-sm font-medium cursor-pointer"
-              style={{ color: 'var(--color-text)' }}
+              className="text-sm font-medium cursor-pointer text-primary"
             >
               {label}
             </label>
@@ -89,8 +88,7 @@ export const Toggle = memo(function Toggle({
           {description && (
             <p
               id={descriptionId}
-              className="text-xs mt-0.5"
-              style={{ color: 'var(--color-text-muted)' }}
+              className="text-xs mt-0.5 text-muted"
             >
               {description}
             </p>

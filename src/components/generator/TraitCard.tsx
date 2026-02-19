@@ -95,7 +95,7 @@ export const TraitCard = memo(function TraitCard({
           className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center"
           style={{ background: 'var(--color-surface)' }}
         >
-          <Lock size={12} style={{ color: 'var(--color-text-muted)' }} />
+          <Lock size={12} className="text-muted" />
         </div>
       )}
 

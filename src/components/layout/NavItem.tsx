@@ -241,11 +241,10 @@ export const NavItem = memo(function NavItem({
       <AnimatePresence>
         {showTooltip && tooltip && (
           <motion.div
-            className="absolute left-full ml-2 px-2 py-1 rounded-md whitespace-nowrap pointer-events-none"
+            className="absolute left-full ml-2 px-2 py-1 rounded-md whitespace-nowrap pointer-events-none text-secondary"
             style={{
               background: 'var(--color-elevated)',
               border: '1px solid var(--color-border)',
-              color: 'var(--color-text-secondary)',
               fontSize: '0.875rem',
               zIndex: 100,
             }}

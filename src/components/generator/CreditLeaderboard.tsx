@@ -142,7 +142,7 @@ export function CreditLeaderboard({ isOpen, onClose }: CreditLeaderboardProps) {
                 }}
               >
                 <div className="flex items-center gap-3">
-                  <Wallet size={20} style={{ color: 'var(--color-text-muted)' }} />
+                  <Wallet size={20} className="text-muted" />
                   <span className="text-sm text-secondary">Connect wallet to see your credits</span>
                 </div>
                 <SageConnectButton
@@ -165,8 +165,7 @@ export function CreditLeaderboard({ isOpen, onClose }: CreditLeaderboardProps) {
                     <button
                       type="button"
                       onClick={scrollToUser}
-                      className="text-xs font-medium hover:underline"
-                      style={{ color: 'var(--color-primary)' }}
+                      className="text-xs font-medium hover:underline text-accent"
                     >
                       Rank #{userEntry.rank}
                     </button>
@@ -178,7 +177,7 @@ export function CreditLeaderboard({ isOpen, onClose }: CreditLeaderboardProps) {
                     {/* Credits Earned */}
                     <div className="flex flex-col">
                       <span className="text-[11px] text-muted mb-0.5">Credits Earned</span>
-                      <span className="text-lg font-bold tabular-nums" style={{ color: 'var(--color-text)' }}>
+                      <span className="text-lg font-bold tabular-nums text-primary">
                         {userCredits.earned.toLocaleString()}
                       </span>
                     </div>
@@ -278,7 +277,7 @@ export function CreditLeaderboard({ isOpen, onClose }: CreditLeaderboardProps) {
                               >
                                 {truncateWallet(entry.wallet)}
                                 {isCurrent && (
-                                  <span className="ml-1 text-xs font-semibold" style={{ color: 'var(--color-primary)' }}>(you)</span>
+                                  <span className="ml-1 text-xs font-semibold text-accent">(you)</span>
                                 )}
                               </td>
                               <td className="py-2.5 px-3 text-right font-variant-numeric tabular-nums font-semibold">

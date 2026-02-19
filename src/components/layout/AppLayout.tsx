@@ -67,11 +67,10 @@ export function AppLayout({
 
   return (
     <div
-      className="flex flex-col"
+      className="flex flex-col text-primary"
       style={{
         minHeight: '100dvh',
         background: 'var(--color-bg)',
-        color: 'var(--color-text)',
       }}
     >
       {/* Accessibility skip link */}

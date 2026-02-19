@@ -67,8 +67,7 @@ export const EmptyState = memo(function EmptyState({
   const renderSecondaryButton = () => {
     if (!secondaryAction) return null;
 
-    const buttonStyle = { color: 'var(--color-text-secondary)' };
-    const buttonClass = 'px-4 py-2 text-sm font-medium transition-colors';
+    const buttonClass = 'px-4 py-2 text-sm font-medium transition-colors text-secondary';
 
     if (secondaryAction.href) {
       return (
@@ -76,7 +75,6 @@ export const EmptyState = memo(function EmptyState({
           to={secondaryAction.href}
           onClick={secondaryAction.onClick}
           className={buttonClass}
-          style={buttonStyle}
         >
           {secondaryAction.label}
         </Link>
@@ -88,7 +86,6 @@ export const EmptyState = memo(function EmptyState({
         type="button"
         onClick={secondaryAction.onClick}
         className={buttonClass}
-        style={buttonStyle}
       >
         {secondaryAction.label}
       </button>
@@ -109,15 +106,13 @@ export const EmptyState = memo(function EmptyState({
       )}
 
       <h3
-        className="text-lg font-semibold mb-2"
-        style={{ color: 'var(--color-text)' }}
+        className="text-lg font-semibold mb-2 text-primary"
       >
         {title}
       </h3>
 
       <p
-        className="text-sm max-w-sm mb-6"
-        style={{ color: 'var(--color-text-muted)' }}
+        className="text-sm max-w-sm mb-6 text-muted"
       >
         {description}
       </p>

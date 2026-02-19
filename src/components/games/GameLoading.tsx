@@ -84,8 +84,7 @@ export function GameLoading({ gameName }: GameLoadingProps) {
 
       {/* Tip text */}
       <motion.p
-        className="absolute bottom-8 text-sm text-center px-4"
-        style={{ color: 'var(--color-text-muted, #6b7280)' }}
+        className="absolute bottom-8 text-sm text-center px-4 text-muted"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1 }}

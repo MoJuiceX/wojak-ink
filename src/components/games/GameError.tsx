@@ -62,16 +62,14 @@ export function GameError({ error, gameName, onRetry }: GameErrorProps) {
 
         {/* Error Title */}
         <h2
-          className="text-2xl font-bold mb-3"
-          style={{ color: 'var(--color-text, #fff)' }}
+          className="text-2xl font-bold mb-3 text-primary"
         >
           {gameName ? `${gameName} Error` : 'Game Error'}
         </h2>
 
         {/* Error Message */}
         <p
-          className="text-sm mb-8"
-          style={{ color: 'var(--color-text-secondary, #9ca3af)' }}
+          className="text-sm mb-8 text-secondary"
         >
           {errorMessage}
         </p>
@@ -120,8 +118,7 @@ export function GameError({ error, gameName, onRetry }: GameErrorProps) {
             }}
           >
             <summary
-              className="cursor-pointer text-xs font-medium mb-2"
-              style={{ color: 'var(--color-text-tertiary, #6b7280)' }}
+              className="cursor-pointer text-xs font-medium mb-2 text-tertiary"
             >
               Technical Details
             </summary>

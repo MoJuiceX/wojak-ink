@@ -60,11 +60,10 @@ export function AccessibilitySettings({
     >
       {/* Section Header */}
       <div className="flex items-center gap-2">
-        <Accessibility size={20} style={{ color: 'var(--color-primary)' }} />
+        <Accessibility size={20} className="text-accent" />
         <h2
           id="accessibility-section-heading"
-          className="text-lg font-bold"
-          style={{ color: 'var(--color-text)' }}
+          className="text-lg font-bold text-primary"
         >
           Accessibility
         </h2>
@@ -89,8 +88,7 @@ export function AccessibilitySettings({
             onChange={onMotionChange}
           />
           <p
-            className="text-xs mt-3"
-            style={{ color: 'var(--color-text-muted)' }}
+            className="text-xs mt-3 text-muted"
             aria-live="polite"
           >
             Currently: {currentMotionStatus}

@@ -273,8 +273,7 @@ export function PriceBadges({ size = 'md' }: PriceBadgesProps) {
         </span>
         {isLoading ? (
           <span
-            className={`${textSize} font-bold`}
-            style={{ color: 'var(--color-text-muted)' }}
+            className={`${textSize} font-bold text-muted`}
           >
             ...
           </span>
@@ -315,8 +314,7 @@ export function PriceBadges({ size = 'md' }: PriceBadgesProps) {
         </span>
         {xchLoading && simulatedXchPrice === null ? (
           <span
-            className={`${textSize} font-bold`}
-            style={{ color: 'var(--color-text-muted)' }}
+            className={`${textSize} font-bold text-muted`}
           >
             ...
           </span>

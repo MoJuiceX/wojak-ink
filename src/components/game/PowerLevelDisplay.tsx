@@ -48,8 +48,8 @@ export function PowerLevelDisplay({ level, rank, credits, voteStreak, breakdown 
       {showExplainer && (
         <div className="text-secondary w-full" style={{ fontSize: 13 }}>
           <p>Your Power Level reflects your standing in the Wojak ecosystem.</p>
-          <p className="mt-1"><strong style={{ color: 'var(--color-text)' }}>Holdings:</strong> Quality and diversity of NFTs you collect</p>
-          <p><strong style={{ color: 'var(--color-text)' }}>Creations:</strong> How well your minted Wojaks perform in votes</p>
+          <p className="mt-1"><strong className="text-primary">Holdings:</strong> Quality and diversity of NFTs you collect</p>
+          <p><strong className="text-primary">Creations:</strong> How well your minted Wojaks perform in votes</p>
         </div>
       )}
 
@@ -62,7 +62,7 @@ export function PowerLevelDisplay({ level, rank, credits, voteStreak, breakdown 
           <span className="text-muted">Credits: {credits}</span>
         )}
         {voteStreak != null && voteStreak > 0 && (
-          <span style={{ color: 'var(--color-primary)' }}>{voteStreak}-day streak</span>
+          <span className="text-accent">{voteStreak}-day streak</span>
         )}
       </div>
 

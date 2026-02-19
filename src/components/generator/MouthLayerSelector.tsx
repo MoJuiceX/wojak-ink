@@ -341,7 +341,7 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
             border: '1px solid var(--color-border)',
           }}
         >
-          <p style={{ color: 'var(--color-text-muted)' }}>
+          <p className="text-muted">
             Mouth layers are blocked by another trait selection
           </p>
         </div>
@@ -459,7 +459,7 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
             border: '1px solid var(--color-border)',
           }}
         >
-          <p style={{ color: 'var(--color-text-muted)' }}>
+          <p className="text-muted">
             No mouth traits available
           </p>
         </div>

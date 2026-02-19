@@ -147,10 +147,9 @@ export function SwipeableNFTImage({
       >
         {canGoPrev && (
           <div
-            className="w-8 h-8 rounded-full flex items-center justify-center"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-secondary"
             style={{
               background: 'var(--color-surface)',
-              color: 'var(--color-text-secondary)',
             }}
           >
             <ChevronLeft size={20} />
@@ -166,10 +165,9 @@ export function SwipeableNFTImage({
       >
         {canGoNext && (
           <div
-            className="w-8 h-8 rounded-full flex items-center justify-center"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-secondary"
             style={{
               background: 'var(--color-surface)',
-              color: 'var(--color-text-secondary)',
             }}
           >
             <ChevronRight size={20} />
@@ -196,8 +194,7 @@ export function SwipeableNFTImage({
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className="flex items-center gap-2"
-              style={{ color: 'var(--color-text-secondary)' }}
+              className="flex items-center gap-2 text-secondary"
               animate={{
                 x: [0, -10, 0],
                 opacity: [0.5, 1, 0.5],
@@ -212,18 +209,16 @@ export function SwipeableNFTImage({
             </motion.div>
 
             <div
-              className="px-4 py-2 rounded-full text-sm"
+              className="px-4 py-2 rounded-full text-sm text-secondary"
               style={{
                 background: 'var(--color-surface)',
-                color: 'var(--color-text-secondary)',
               }}
             >
               Swipe to explore
             </div>
 
             <motion.div
-              className="flex items-center gap-2"
-              style={{ color: 'var(--color-text-secondary)' }}
+              className="flex items-center gap-2 text-secondary"
               animate={{
                 x: [0, 10, 0],
                 opacity: [0.5, 1, 0.5],

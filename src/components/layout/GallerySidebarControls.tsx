@@ -153,9 +153,8 @@ export function GallerySidebarControls({ showLabels }: GallerySidebarControlsPro
                   {isActive && (
                     <DirectionIcon
                       size={10}
-                      className="absolute -bottom-1 -right-1"
+                      className="absolute -bottom-1 -right-1 text-accent"
                       style={{
-                        color: 'var(--color-primary)',
                         strokeWidth: 3,
                       }}
                     />

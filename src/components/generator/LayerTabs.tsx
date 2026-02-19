@@ -87,8 +87,7 @@ function LayerTab({
         {isBlocked && (
           <Lock
             size={8}
-            className="absolute -top-1 -right-1 sm:w-2.5 sm:h-2.5"
-            style={{ color: 'var(--color-text-muted)' }}
+            className="absolute -top-1 -right-1 sm:w-2.5 sm:h-2.5 text-muted"
           />
         )}
         {isActive && !isBlocked && (

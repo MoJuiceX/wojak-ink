@@ -81,7 +81,7 @@ export function GamesGrid({
           style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
         >
           <span className="text-5xl block mb-4 opacity-30">🎮</span>
-          <p style={{ color: 'var(--color-text-muted)' }}>No games available yet</p>
+          <p className="text-muted">No games available yet</p>
         </div>
       )}
     </div>

@@ -184,10 +184,7 @@ export function ExportPanel({ className = '' }: ExportPanelProps) {
 
               {/* Background toggle - aligned with input edges */}
               <div className="flex items-center justify-between px-4">
-                <span
-                  className="text-sm"
-                  style={{ color: 'var(--color-text-secondary)' }}
-                >
+                <span className="text-sm text-secondary">
                   Background
                 </span>
                 <div
@@ -263,7 +260,7 @@ export function ExportPanel({ className = '' }: ExportPanelProps) {
               </motion.button>
 
               {generatorError && (
-                <p className="text-sm mt-2" style={{ color: 'var(--color-error)' }}>
+                <p className="text-sm mt-2 text-error">
                   {generatorError}
                 </p>
               )}

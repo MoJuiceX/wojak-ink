@@ -96,14 +96,12 @@ export function ThemeCard({ theme, isSelected, onSelect }: ThemeCardProps) {
       {/* Theme info */}
       <div className="mt-3 text-center">
         <h3
-          className="text-sm font-semibold whitespace-nowrap"
-          style={{ color: 'var(--color-text)' }}
+          className="text-sm font-semibold whitespace-nowrap text-primary"
         >
           {theme.name}
         </h3>
         <p
-          className="text-xs mt-0.5 whitespace-nowrap"
-          style={{ color: 'var(--color-text-muted)' }}
+          className="text-xs mt-0.5 whitespace-nowrap text-muted"
         >
           {theme.description}
         </p>

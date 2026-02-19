@@ -132,8 +132,7 @@ export function CharacterGrid({
             Explore the Collection
           </h3>
           <p
-            className="text-xs leading-relaxed"
-            style={{ color: 'var(--color-text-muted)' }}
+            className="text-xs leading-relaxed text-muted"
           >
             Pick a character to explore all their variations. Sort by ID, rank, or price to find what you were always dreaming of.
           </p>

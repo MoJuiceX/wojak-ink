@@ -82,16 +82,14 @@ export class ErrorBoundary extends Component<Props, State> {
 
             {/* Error Title */}
             <h1
-              className="text-2xl font-bold mb-3"
-              style={{ color: 'var(--color-text, #fff)' }}
+              className="text-2xl font-bold mb-3 text-primary"
             >
               Something went wrong
             </h1>
 
             {/* Error Message */}
             <p
-              className="text-sm mb-6"
-              style={{ color: 'var(--color-text-secondary, #9ca3af)' }}
+              className="text-sm mb-6 text-secondary"
             >
               {this.state.error?.message || 'An unexpected error occurred. Please try again.'}
             </p>
@@ -107,8 +105,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 }}
               >
                 <summary
-                  className="cursor-pointer text-xs font-medium mb-2"
-                  style={{ color: 'var(--color-text-tertiary, #6b7280)' }}
+                  className="cursor-pointer text-xs font-medium mb-2 text-tertiary"
                 >
                   Technical Details
                 </summary>

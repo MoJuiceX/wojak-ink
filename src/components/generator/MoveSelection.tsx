@@ -94,12 +94,12 @@ export function MoveSelection({ type, selectedMoves, onSelectionChange }: MoveSe
 
       {/* Validation feedback */}
       {validation && !validation.valid && (
-        <p className="text-xs" style={{ color: 'var(--color-error)' }}>
+        <p className="text-xs text-error">
           {validation.error}
         </p>
       )}
       {selectedMoves.length === 4 && validation?.valid && (
-        <p className="text-xs" style={{ color: 'var(--color-success)' }}>
+        <p className="text-xs text-success">
           Move selection complete
         </p>
       )}
