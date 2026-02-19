@@ -147,10 +147,13 @@ function ConnectWalletPrompt() {
   return (
     <PageTransition>
       <div
-        className="flex flex-col items-center justify-center text-center"
+        className="flex flex-col items-center gap-4"
         style={{ padding: contentPadding, minHeight: '60vh' }}
       >
-        <div className="card p-8 max-w-md">
+        {/* Hero at top even on connect prompt */}
+        <FightClubHero isHolder={false} hasWojaks={false} />
+
+        <div className="card p-8 max-w-md text-center">
           <div className="flex justify-center mb-4">
             <div className="p-4 rounded-full" style={{ background: 'var(--color-primary-15)' }}>
               <Wallet size={32} style={{ color: 'var(--color-primary)' }} />
@@ -181,10 +184,13 @@ function FightClubGate() {
   return (
     <PageTransition>
       <div
-        className="flex flex-col items-center justify-center text-center"
+        className="flex flex-col items-center gap-4"
         style={{ padding: contentPadding, minHeight: '60vh' }}
       >
-        <div className="card-static p-8 max-w-md">
+        {/* Hero at top even on gate */}
+        <FightClubHero isHolder={false} hasWojaks={false} />
+
+        <div className="card-static p-8 max-w-md text-center">
           <div className="flex justify-center mb-4">
             <div className="p-4 rounded-full" style={{ background: 'var(--color-primary-15)' }}>
               <Swords size={32} className="text-primary" />
