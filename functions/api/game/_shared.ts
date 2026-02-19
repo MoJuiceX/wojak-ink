@@ -1,5 +1,7 @@
 // Game constants
-export const VOTES_PER_DAY = 10;
+export const VOTES_PER_DAY = 20; // For holders (legacy constant)
+export const VOTES_PER_DAY_HOLDER = 20; // Holders with Farmers Plot NFT
+export const VOTES_PER_DAY_FREE = 5; // Guests and connected users without NFT
 export const POWER_LEVEL_MAX = 9000;
 export const PHASE1_COLLECTION_ID = 'col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah'; // Wojak Farmers Plot
 export const PHASE2_COLLECTION_ID = 'col1rhrjj6f28tge783rp0lrj8ct7vnq79xsnklx3up49lgpnge62ensr2tyfx'; // Your Wojak
@@ -15,6 +17,11 @@ export const ONBOARDING_CREDITS = {
 // Validate DID format (did:chia:...)
 export function isValidDid(did: string): boolean {
   return /^did:chia:1[a-z0-9]{58}$/.test(did);
+}
+
+// Validate guest ID format (guest_[a-z0-9]{16})
+export function isValidGuestId(guestId: string): boolean {
+  return /^guest_[a-z0-9]{16}$/.test(guestId);
 }
 
 // Get today's date string for vote reset tracking
