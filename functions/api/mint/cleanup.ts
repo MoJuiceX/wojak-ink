@@ -458,7 +458,7 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
   // 11. Purge stale rate_limits rows older than 24 hours.
   //     Per-key cleanup only happens on access — keys from one-off IPs accumulate forever.
   try {
-    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     await env.DB.prepare('DELETE FROM rate_limits WHERE timestamp < ?').bind(cutoff).run();
   } catch (err) {
     console.error('[Cleanup] Operation 11 (rate_limits purge) failed:', err);

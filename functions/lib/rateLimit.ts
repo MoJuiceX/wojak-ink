@@ -1,7 +1,8 @@
 /**
  * Rate Limiting for Cloudflare Workers
- * 
+ *
  * Simple rate limiting using D1 database for distributed tracking.
+ * Uses a single row per key with a count column (efficient for D1).
  * Falls back to allowing requests if D1 is unavailable.
  */
 
@@ -30,8 +31,9 @@ export async function checkRateLimit(
   failClosed = false
 ): Promise<RateLimitResult> {
   const now = Date.now();
-  const windowStart = now - config.windowMs;
   const resetAt = now + config.windowMs;
+  const windowStartDate = new Date(now - config.windowMs).toISOString();
+  const nowDate = new Date(now).toISOString();
 
   // If no database, behavior depends on failClosed flag
   if (!db) {
@@ -45,16 +47,14 @@ export async function checkRateLimit(
   const rateLimitKey = `${config.keyPrefix}:${key}`;
 
   try {
-    // Clean up old entries and count current window
-    await db.prepare(
-      `DELETE FROM rate_limits WHERE key = ? AND timestamp < ?`
-    ).bind(rateLimitKey, windowStart).run();
+    // Get current rate limit state
+    const existing = await db.prepare(
+      `SELECT count, timestamp FROM rate_limits WHERE key = ?`
+    ).bind(rateLimitKey).first<{ count: number; timestamp: string }>();
 
-    const countResult = await db.prepare(
-      `SELECT COUNT(*) as count FROM rate_limits WHERE key = ? AND timestamp >= ?`
-    ).bind(rateLimitKey, windowStart).first<{ count: number }>();
-
-    const currentCount = countResult?.count || 0;
+    // Check if window has expired (timestamp is stored as ISO datetime string)
+    const windowExpired = !existing || existing.timestamp < windowStartDate;
+    const currentCount = windowExpired ? 0 : existing.count;
 
     if (currentCount >= config.maxRequests) {
       return {
@@ -64,10 +64,14 @@ export async function checkRateLimit(
       };
     }
 
-    // Record this request
-    await db.prepare(
-      `INSERT INTO rate_limits (key, timestamp) VALUES (?, ?)`
-    ).bind(rateLimitKey, now).run();
+    // Upsert: reset count if window expired, otherwise increment
+    await db.prepare(`
+      INSERT INTO rate_limits (key, count, timestamp)
+      VALUES (?, 1, ?)
+      ON CONFLICT(key) DO UPDATE SET
+        count = CASE WHEN timestamp < ? THEN 1 ELSE count + 1 END,
+        timestamp = CASE WHEN timestamp < ? THEN ? ELSE timestamp END
+    `).bind(rateLimitKey, nowDate, windowStartDate, windowStartDate, nowDate).run();
 
     return {
       allowed: true,
