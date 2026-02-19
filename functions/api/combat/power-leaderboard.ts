@@ -5,10 +5,11 @@
 // - offset: number (default 0)
 
 import { jsonResponse, errorResponse } from './_shared';
-import { verifyJWT } from '../../lib/auth';
+import { authenticateRequest } from '../../lib/auth';
 
 interface Env {
   DB: D1Database;
+  CLERK_DOMAIN: string;
 }
 
 interface PlayerRanking {
@@ -44,15 +45,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
     // Get caller's DID if authenticated (for "your rank" indicator)
     let callerDid: string | null = null;
-    const authHeader = context.request.headers.get('Authorization');
-    if (authHeader?.startsWith('Bearer ')) {
-      try {
-        const token = authHeader.slice(7);
-        const payload = await verifyJWT(token);
-        callerDid = payload?.did || null;
-      } catch {
-        // Not authenticated, that's fine
-      }
+    if (context.env.CLERK_DOMAIN) {
+      const auth = await authenticateRequest(context.request, context.env.CLERK_DOMAIN);
+      callerDid = (auth?.payload?.did as string) || null;
     }
 
     const db = context.env.DB;

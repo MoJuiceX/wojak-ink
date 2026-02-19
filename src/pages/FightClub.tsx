@@ -7,6 +7,7 @@
  */
 
 import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { MINTGARDEN_COLLECTION_URL } from '@/services/constants';
 import { lazy, Suspense, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -37,10 +38,7 @@ interface GateResponse {
 }
 
 // Check if user has access to Fight Club (holds Farmers Plot NFT)
-function useFightClubAccess() {
-  const { isSignedIn, profile } = useUserProfile();
-  const walletAddress = profile?.walletAddress;
-
+function useFightClubAccess(walletAddress: string | null) {
   return useQuery({
     queryKey: ['fight-club-gate', walletAddress],
     queryFn: async () => {
@@ -49,7 +47,7 @@ function useFightClubAccess() {
       if (!res.ok) throw new Error('Failed to check access');
       return res.json() as Promise<GateResponse>;
     },
-    enabled: isSignedIn && !!walletAddress,
+    enabled: !!walletAddress,
     staleTime: 60000, // 1 minute
   });
 }
@@ -153,7 +151,7 @@ function ConnectWalletPrompt() {
         <div className="card p-8 max-w-md">
           <div className="flex justify-center mb-4">
             <div className="p-4 rounded-full" style={{ background: 'var(--color-primary-15)' }}>
-              <Wallet size={32} className="text-primary" />
+              <Wallet size={32} style={{ color: 'var(--color-primary)' }} />
             </div>
           </div>
           <h1 className="text-2xl font-bold mb-2">Connect Your Wallet</h1>
@@ -184,7 +182,7 @@ function FightClubGate() {
         className="flex flex-col items-center justify-center text-center"
         style={{ padding: contentPadding, minHeight: '60vh' }}
       >
-        <div className="card p-8 max-w-md">
+        <div className="card-static p-8 max-w-md">
           <div className="flex justify-center mb-4">
             <div className="p-4 rounded-full" style={{ background: 'var(--color-primary-15)' }}>
               <Swords size={32} className="text-primary" />
@@ -247,7 +245,7 @@ function FightClubGate() {
 
           {/* CTA */}
           <a
-            href="https://mintgarden.io/collections/wojak-farmers-plot-col1fgqe3rl99t6vdv5cykqq0ngrpx93wzw4ufvf3awsv67mkvxw8qsu9g53e"
+            href={MINTGARDEN_COLLECTION_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-primary w-full flex items-center justify-center gap-2"
@@ -327,16 +325,18 @@ export default function FightClub() {
   const location = useLocation();
   const navigate = useNavigate();
   const activeTab = getActiveTab(location.pathname);
-  const { isSignedIn, profile } = useUserProfile();
-  const { data: accessData, isLoading: accessLoading } = useFightClubAccess();
-  const { data: playerDid } = usePlayerDid(profile?.walletAddress ?? null);
+  const { profile } = useUserProfile();
+  const { address: walletAddress, status: walletStatus } = useSageWallet();
+  const isWalletConnected = walletStatus === 'connected' && !!walletAddress;
+  const { data: accessData, isLoading: accessLoading } = useFightClubAccess(walletAddress);
+  const { data: playerDid } = usePlayerDid(walletAddress ?? profile?.walletAddress ?? null);
 
   const handleTabClick = (tab: Tab) => {
     navigate(tab.path);
   };
 
-  // Show connect wallet prompt if not signed in
-  if (!isSignedIn) {
+  // Show connect wallet prompt if wallet not connected
+  if (!isWalletConnected) {
     return <ConnectWalletPrompt />;
   }
 

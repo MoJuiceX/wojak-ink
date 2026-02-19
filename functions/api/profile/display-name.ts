@@ -2,10 +2,11 @@
 // PUT /api/profile/display-name — Set display name
 // Body: { did: string, name: string, source: 'custom' | 'random' }
 
-import { verifyJWT } from '../../lib/auth';
+import { authenticateRequest } from '../../lib/auth';
 
 interface Env {
   DB: D1Database;
+  CLERK_DOMAIN: string;
 }
 
 // Random name generation components
@@ -81,20 +82,17 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 export const onRequestPut: PagesFunction<Env> = async (context) => {
   try {
     // Verify authentication
-    const authHeader = context.request.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
+    if (!context.env.CLERK_DOMAIN) {
+      return Response.json({ error: 'Auth not configured' }, { status: 500 });
+    }
+
+    const auth = await authenticateRequest(context.request, context.env.CLERK_DOMAIN);
+    if (!auth) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const token = authHeader.slice(7);
-    let payload: { did?: string } | null = null;
-    try {
-      payload = await verifyJWT(token);
-    } catch {
-      return Response.json({ error: 'Invalid token' }, { status: 401 });
-    }
-
-    if (!payload?.did) {
+    const callerDid = auth.payload?.did as string | undefined;
+    if (!callerDid) {
       return Response.json({ error: 'Invalid token - missing DID' }, { status: 401 });
     }
 
@@ -107,7 +105,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     const { did, name, source } = body;
 
     // Verify user is updating their own profile
-    if (did !== payload.did) {
+    if (did !== callerDid) {
       return Response.json({ error: 'Cannot update another user\'s profile' }, { status: 403 });
     }
 
