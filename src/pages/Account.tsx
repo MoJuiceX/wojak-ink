@@ -26,6 +26,7 @@ import { AchievementsLightbox } from '@/components/Account/AchievementsLightbox'
 import { PageTransition } from '@/components/layout/PageTransition';
 import { DrawerEditor } from '@/components/Shop/DrawerEditor';
 import { GiftModal } from '@/components/Account/GiftModal';
+import type { InventoryItem } from '@/components/Account/InventorySection';
 
 import '@/components/Account/Account.css';
 import { PageSEO } from '@/components/seo';
@@ -104,8 +105,7 @@ export default function Account() {
   const [selectedGiftItem, setSelectedGiftItem] = useState<any>(null);
 
   // Inventory items from shop
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response items passed to InventorySection
-  const [, setInventoryItems] = useState<any[]>([]);
+  const [, setInventoryItems] = useState<InventoryItem[]>([]);
   const [, setEquippedItems] = useState<{
     frame_id: string | null;
     title_id: string | null;
@@ -143,8 +143,7 @@ export default function Account() {
             celebration_id: null,
           });
           // Flatten categories into items array
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response items
-          const allItems: any[] = [];
+          const allItems: InventoryItem[] = [];
           if (data.categories) {
             for (const category of Object.keys(data.categories)) {
               allItems.push(...data.categories[category]);
@@ -348,8 +347,7 @@ export default function Account() {
               });
               if (res.ok) {
                 const data = await res.json();
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response items
-          const allItems: any[] = [];
+                const allItems: InventoryItem[] = [];
                 if (data.categories) {
                   for (const category of Object.keys(data.categories)) {
                     allItems.push(...data.categories[category]);

@@ -454,7 +454,7 @@ export default function Drawer() {
             >
               <AnimatePresence mode="popLayout">
                 {getFilteredItems().map(
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- heterogeneous item types from mixed collections
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   (item: any, index: number) => (
                   <motion.div
                     key={item.id}

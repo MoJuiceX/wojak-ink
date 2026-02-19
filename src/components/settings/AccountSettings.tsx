@@ -339,7 +339,7 @@ export function AccountSettings() {
                       className="w-full px-3 py-2 rounded-lg text-sm text-error"
                       style={{
                         background: 'transparent',
-                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                        border: '1px solid var(--color-error-30)',
                       }}
                     >
                       Disconnect Wallet
@@ -391,7 +391,7 @@ export function AccountSettings() {
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-error"
                   style={{
                     background: 'transparent',
-                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    border: '1px solid var(--color-error-30)',
                   }}
                 >
                   <LogOut size={16} />

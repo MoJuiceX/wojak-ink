@@ -21,7 +21,7 @@ export function BurnConfirmDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-         style={{ background: 'rgba(0,0,0,0.8)' }}>
+         style={{ background: 'var(--color-black-80)' }}>
       <div className="card-static p-6 max-w-md w-full flex flex-col gap-4">
         <h2 className="text-xl font-bold text-error">
           Burn {nftName}?

@@ -203,7 +203,7 @@ function CategoryAccordion({
             transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
             style={{ overflow: 'hidden' }}
           >
-            <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
+            <div style={{ borderTop: '1px solid var(--color-white-5)' }}>
               {/* Sort controls + Column headers */}
               <div
                 className="flex items-center gap-2"
@@ -263,7 +263,7 @@ function CategoryAccordion({
                     className="flex items-center relative"
                     style={{
                       padding: '10px 18px',
-                      borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
+                      borderBottom: '1px solid var(--color-white-3)',
                       background: isSelected ? 'rgba(255, 107, 0, 0.04)' : 'transparent',
                     }}
                   >
@@ -480,7 +480,7 @@ export function PricingLightbox({ isOpen, onClose }: PricingLightboxProps) {
             style={{
               fontSize: '13px',
               fontWeight: 600,
-              background: 'rgba(255, 255, 255, 0.05)',
+              background: 'var(--color-white-5)',
               padding: '5px 12px',
               borderRadius: '8px',
               border: '1px solid rgba(255, 255, 255, 0.06)',

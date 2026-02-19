@@ -128,7 +128,7 @@ export function MessagesModal({ isOpen, onClose }: MessagesModalProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 flex items-center justify-center"
-          style={{ background: 'rgba(0, 0, 0, 0.8)' }}
+          style={{ background: 'var(--color-black-80)' }}
           onClick={onClose}
         >
           <motion.div

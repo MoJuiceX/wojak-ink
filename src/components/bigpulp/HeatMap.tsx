@@ -272,7 +272,7 @@ export function LegacyCacheStatusIndicator({
                     style={{
                       background: 'var(--color-surface)',
                       border: '1px solid var(--color-border)',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                      boxShadow: '0 4px 12px var(--color-black-30)',
                       width: '220px',
                       lineHeight: '1.4',
                     }}
@@ -299,7 +299,7 @@ interface FilterChipConfig {
 }
 
 const FILTER_CHIPS: FilterChipConfig[] = [
-  { id: 'all', label: 'All', shortLabel: 'All', color: 'rgba(255,255,255,0.9)', bgColor: 'rgba(255,255,255,0.1)' },
+  { id: 'all', label: 'All', shortLabel: 'All', color: 'rgba(255,255,255,0.9)', bgColor: 'var(--color-white-10)' },
   { id: 'sleepy-deals', label: 'Sleepy Deals', shortLabel: 'Sleepy', color: 'rgb(34,197,94)', bgColor: 'rgba(34,197,94,0.15)' },
   { id: 'floor-snipes', label: 'Floor', shortLabel: 'Floor', color: 'rgb(59,130,246)', bgColor: 'rgba(59,130,246,0.15)' },
   { id: 'whale-territory', label: 'Premium', shortLabel: 'Moon', color: 'rgb(251,191,36)', bgColor: 'rgba(251,191,36,0.15)' },
@@ -458,7 +458,7 @@ function BadgeDropdown({
             style={{
               background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+              boxShadow: '0 4px 20px var(--color-black-30)',
               width: '280px',
               lineHeight: '1.5',
               whiteSpace: 'pre-line',
@@ -487,7 +487,7 @@ function BadgeDropdown({
             style={{
               background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+              boxShadow: '0 4px 20px var(--color-black-50)',
             }}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -588,7 +588,7 @@ function CellDetailModal({
   return (
     <motion.div
       className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: 'rgba(0, 0, 0, 0.7)' }}
+      style={{ background: 'var(--color-black-70)' }}
       initial={prefersReducedMotion ? {} : { opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={prefersReducedMotion ? {} : { opacity: 0 }}
@@ -716,10 +716,10 @@ function HeatMapCellCompact({
           : cell.intensity > 0.3
             ? 'white'
             : 'var(--color-text)',
-        textShadow: cell.intensity > 0.3 ? '0 1px 1px rgba(0,0,0,0.5)' : 'none',
+        textShadow: cell.intensity > 0.3 ? '0 1px 1px var(--color-black-50)' : 'none',
         border: showZoneBorder && !isEmpty
           ? '2px solid rgba(255,149,0,0.8)'
-          : '1px solid rgba(255,255,255,0.03)',
+          : '1px solid var(--color-white-3)',
         boxShadow: !isEmpty && cell.intensity > 0.3 
           ? `0 0 ${4 + cell.intensity * 8}px rgba(255,149,0,${cell.intensity * 0.3})`
           : 'none',
@@ -776,7 +776,7 @@ function HeatMapCell({
     if (cell.intensity > 0.5) {
       return `inset 0 1px 0 rgba(255,255,255,0.2), 0 2px 4px rgba(0,0,0,0.3), 0 0 ${8 + cell.intensity * 12}px rgba(255,149,0,${0.1 + cell.intensity * 0.2})`;
     }
-    return 'inset 0 1px 0 rgba(255,255,255,0.1), 0 1px 2px rgba(0,0,0,0.2)';
+    return 'inset 0 1px 0 var(--color-white-10), 0 1px 2px var(--color-black-20)';
   };
 
   return (
@@ -799,12 +799,12 @@ function HeatMapCell({
           : cell.intensity > 0.4
             ? 'white'
             : 'var(--color-text)',
-        textShadow: cell.intensity > 0.4 ? '0 1px 2px rgba(0,0,0,0.5)' : 'none',
+        textShadow: cell.intensity > 0.4 ? '0 1px 2px var(--color-black-50)' : 'none',
         boxShadow: getCellShadow(),
         // Zone border: premium glow effect
         border: showZoneBorder
           ? `2px solid ${isEmpty ? 'rgba(255, 149, 0, 0.2)' : 'rgba(255, 149, 0, 0.8)'}`
-          : '1px solid rgba(255,255,255,0.05)',
+          : '1px solid var(--color-white-5)',
       }}
       initial={false}
       animate={{

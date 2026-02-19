@@ -618,7 +618,7 @@ function BadgeGalleryContent() {
                           <div
                             className="absolute bottom-0.5 left-0.5 px-1 py-0.5 rounded text-[8px] font-bold text-primary"
                             style={{
-                              background: 'rgba(0,0,0,0.7)',
+                              background: 'var(--color-black-70)',
                             }}
                           >
                             #{nft.id.padStart(4, '0')}

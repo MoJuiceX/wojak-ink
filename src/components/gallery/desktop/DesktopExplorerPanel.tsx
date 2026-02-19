@@ -104,7 +104,7 @@ function TraitRankingTooltip({ data }: { data: TooltipData }) {
       style={{
         background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
-        boxShadow: '0 12px 40px rgba(0,0,0,0.5)',
+        boxShadow: '0 12px 40px var(--color-black-50)',
       }}
     >
       {/* Header */}
@@ -592,7 +592,7 @@ export function DesktopExplorerPanel({
                   maxHeight: '90vh',
                   background: 'var(--color-surface)',
                   border: '1px solid var(--color-border)',
-                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                  boxShadow: '0 25px 50px -12px var(--color-black-50)',
                 }}
                 onClick={(e) => e.stopPropagation()}
                 {...GALLERY_ANIMATIONS.lightbox.content}
@@ -623,7 +623,7 @@ export function DesktopExplorerPanel({
                       <button
                         className="absolute bottom-3 right-3 w-10 h-10 flex items-center justify-center rounded-lg transition-colors"
                         style={{
-                          background: 'rgba(0, 0, 0, 0.5)',
+                          background: 'var(--color-black-50)',
                           color: 'white',
                         }}
                         onClick={handleOpenExternal}
@@ -642,7 +642,7 @@ export function DesktopExplorerPanel({
                             <motion.button
                               className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full cursor-pointer"
                               style={{
-                                background: 'rgba(0, 0, 0, 0.6)',
+                                background: 'var(--color-black-60)',
                                 color: 'white',
                                 backdropFilter: 'blur(8px)',
                               }}
@@ -664,7 +664,7 @@ export function DesktopExplorerPanel({
                             <motion.button
                               className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full cursor-pointer"
                               style={{
-                                background: 'rgba(0, 0, 0, 0.6)',
+                                background: 'var(--color-black-60)',
                                 color: 'white',
                                 backdropFilter: 'blur(8px)',
                               }}
@@ -1069,7 +1069,7 @@ export function DesktopExplorerPanel({
               alt={currentNft.name}
               className="max-w-[90vw] max-h-[90vh] object-contain rounded-2xl"
               style={{
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                boxShadow: '0 25px 50px -12px var(--color-black-50)',
               }}
               onClick={(e) => e.stopPropagation()}
               initial={{ scale: 0.9, opacity: 0 }}

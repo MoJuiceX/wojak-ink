@@ -36,7 +36,7 @@ type ItemCategory =
   | 'tabs_style'
   | 'visitor_counter';
 
-interface InventoryItem {
+export interface InventoryItem {
   id: string;
   item_id: string;
   name: string;

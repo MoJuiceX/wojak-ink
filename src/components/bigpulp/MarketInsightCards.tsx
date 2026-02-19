@@ -186,7 +186,7 @@ function InsightCard({
           style={{
             padding: '6px 12px',
             borderRadius: '20px',
-            background: hasNfts ? config.borderColor : 'rgba(255,255,255,0.1)',
+            background: hasNfts ? config.borderColor : 'var(--color-white-10)',
             fontSize: '14px',
             fontWeight: 700,
             color: hasNfts ? 'white' : 'var(--color-text-muted)',
@@ -217,7 +217,7 @@ function NFTListModal({
   return (
     <motion.div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
-      style={{ background: 'rgba(0, 0, 0, 0.7)' }}
+      style={{ background: 'var(--color-black-70)' }}
       initial={prefersReducedMotion ? {} : { opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={prefersReducedMotion ? {} : { opacity: 0 }}
@@ -259,7 +259,7 @@ function NFTListModal({
           <button
             className="p-2 rounded-lg transition-colors text-secondary"
             style={{
-              background: 'rgba(255,255,255,0.1)',
+              background: 'var(--color-white-10)',
             }}
             onClick={onClose}
             aria-label="Close modal"

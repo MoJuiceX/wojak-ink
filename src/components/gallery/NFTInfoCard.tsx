@@ -258,7 +258,7 @@ function TraitRankingPopup({
   return (
     <motion.div
       className="fixed inset-0 z-[150] flex items-center justify-center px-4"
-      style={{ background: 'rgba(0, 0, 0, 0.7)' }}
+      style={{ background: 'var(--color-black-70)' }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -269,7 +269,7 @@ function TraitRankingPopup({
         style={{
           background: 'var(--color-bg)',
           border: '1px solid var(--color-border)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+          boxShadow: '0 8px 32px var(--color-black-40)',
         }}
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
