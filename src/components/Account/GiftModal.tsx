@@ -3,18 +3,20 @@
  *
  * Modal for sending gifts (items, oranges, or gems) to friends.
  * Friends-only restriction enforced by API.
+ * Uses FriendsContext for consistent friend data across the app.
  */
 
 import { useState, useEffect } from 'react';
 import { X, Gift, Loader2, Send, AlertCircle } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { useFriends } from '@/contexts/FriendsContext';
 import './GiftModal.css';
 
 interface Friend {
   id: string;
-  display_name: string | null;
-  avatar_url: string | null;
+  displayName: string;
+  avatar: { type: string; value: string } | null;
 }
 
 interface GiftItem {
@@ -42,6 +44,7 @@ export function GiftModal({
 }: GiftModalProps) {
   const { getToken } = useAuth();
   const { currency, refreshBalance } = useCurrency();
+  const { friendProfiles, isLoading: friendsLoading, profilesLoaded } = useFriends();
 
   const [giftType, setGiftType] = useState<GiftType>(preselectedItem ? 'item' : 'oranges');
   const [selectedFriend, setSelectedFriend] = useState<string>('');
@@ -49,12 +52,20 @@ export function GiftModal({
   const [amount, setAmount] = useState<number>(100);
   const [message, setMessage] = useState<string>('');
 
-  const [friends, setFriends] = useState<Friend[]>([]);
   const [giftableItems, setGiftableItems] = useState<GiftItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  // Map friendProfiles to the expected Friend format
+  const friends: Friend[] = friendProfiles.map(fp => ({
+    id: fp.id,
+    displayName: fp.displayName,
+    avatar: fp.avatar,
+  }));
+
+  // Loading state for friends
+  const isLoading = friendsLoading && !profilesLoaded;
 
   // Reset when modal opens
   useEffect(() => {
@@ -71,29 +82,7 @@ export function GiftModal({
     return () => clearTimeout(timer);
   }, [isOpen, preselectedItem]);
 
-  // Fetch friends list on open
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const fetchFriends = async () => {
-      setIsLoading(true);
-      try {
-        const token = await getToken();
-        const res = await fetch('/api/friends?status=accepted', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setFriends(data.friends || []);
-        }
-      } catch (err) {
-        console.error('[GiftModal] Failed to fetch friends:', err);
-      }
-      setIsLoading(false);
-    };
-
-    fetchFriends();
-  }, [isOpen, getToken]);
+  // Friends are now loaded via FriendsContext
 
   // Fetch giftable items (owned, non-equipped)
   useEffect(() => {
@@ -236,7 +225,7 @@ export function GiftModal({
                 <option value="">Select a friend...</option>
                 {friends.map(friend => (
                   <option key={friend.id} value={friend.id}>
-                    {friend.display_name || 'Anonymous'}
+                    {friend.displayName || 'Anonymous'}
                   </option>
                 ))}
               </select>
@@ -369,7 +358,7 @@ export function GiftModal({
                     ? selectedItem?.name || 'item'
                     : `${amount.toLocaleString()} ${giftType === 'oranges' ? '🍊' : '💎'}`
                   }
-                  {' '}to {selectedFriendData?.display_name || 'your friend'}
+                  {' '}to {selectedFriendData?.displayName || 'your friend'}
                 </p>
               </div>
             )}
