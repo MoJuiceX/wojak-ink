@@ -116,6 +116,27 @@ function CombatArenaInner() {
     }
   }, [ownerDid]);
 
+  const handleFightAi = useCallback(async (nftId: string) => {
+    if (!ownerDid) return;
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/combat/ai-battle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fighterNftId: nftId, ownerDid }),
+      });
+      const data = await res.json();
+      if (data.battleId) {
+        setActiveBattleId(data.battleId);
+        setQueueStatus({ status: 'matched', battleId: data.battleId });
+      }
+    } catch (err) {
+      console.error('[CombatArena] AI battle error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [ownerDid]);
+
   return (
     <PageTransition>
       <PageSEO
@@ -189,6 +210,7 @@ function CombatArenaInner() {
               fighters={fighters as any}
               onQueue={handleQueue}
               onLeaveQueue={handleLeaveQueue}
+              onFightAi={handleFightAi}
               queueStatus={queueStatus}
               isLoading={isLoading}
               onCreateAgent={() => setShowAgentModal(true)}
