@@ -250,7 +250,7 @@ export function StatsPanel() {
               className="mt-3 px-3 py-2 rounded-lg"
               style={{
                 background: '#000000',
-                border: '1px solid rgba(255,255,255,0.12)',
+                border: '1px solid var(--color-white-12)',
               }}
             >
               <p

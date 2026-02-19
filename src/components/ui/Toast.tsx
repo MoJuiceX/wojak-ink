@@ -23,20 +23,20 @@ const defaultIcons: Record<ToastType, string> = {
 // Color configurations for glow effects
 const toastColors: Record<ToastType, { border: string; glow: string }> = {
   success: {
-    border: 'rgba(34, 197, 94, 0.4)',
-    glow: 'rgba(34, 197, 94, 0.2)',
+    border: 'var(--color-success-40)',
+    glow: 'var(--color-success-20)',
   },
   error: {
-    border: 'rgba(239, 68, 68, 0.4)',
-    glow: 'rgba(239, 68, 68, 0.2)',
+    border: 'var(--color-error-40)',
+    glow: 'var(--color-error-20)',
   },
   info: {
     border: 'var(--color-primary-40)',
     glow: 'var(--color-primary-20)',
   },
   warning: {
-    border: 'rgba(245, 158, 11, 0.4)',
-    glow: 'rgba(245, 158, 11, 0.2)',
+    border: 'var(--color-warning-40)',
+    glow: 'var(--color-warning-20)',
   },
 };
 
