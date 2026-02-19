@@ -41,10 +41,10 @@
 
 .gift-modal-close {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 32px;
-  height: 32px;
+  top: 12px;
+  right: 12px;
+  width: 44px;
+  height: 44px;
   background: var(--color-white-10);
   border: none;
   border-radius: 50%;
