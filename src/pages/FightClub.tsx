@@ -265,32 +265,33 @@ function FightClubGate() {
 function MintFighterBanner() {
   return (
     <div
-      className="card p-4 flex items-center gap-4 mb-4"
+      className="card flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-4 mb-4"
       style={{
         borderColor: 'var(--color-primary)',
         borderWidth: 1,
         borderStyle: 'solid',
       }}
     >
-      <div
-        className="flex items-center justify-center"
-        style={{
-          width: 48,
-          height: 48,
-          borderRadius: 'var(--radius-md)',
-          background: 'var(--color-primary-15)',
-          flexShrink: 0,
-        }}
-      >
-        <Palette size={24} className="text-primary" />
+      <div className="flex items-center gap-3 w-full sm:w-auto">
+        <div
+          className="flex items-center justify-center shrink-0"
+          style={{
+            width: 48,
+            height: 48,
+            borderRadius: 'var(--radius-md)',
+            background: 'var(--color-primary-15)',
+          }}
+        >
+          <Palette size={24} className="text-primary" />
+        </div>
+        <div className="flex-1 sm:flex-initial">
+          <p className="font-bold" style={{ fontSize: 15 }}>Mint your first fighter!</p>
+          <p className="text-secondary" style={{ fontSize: 13 }}>
+            Create a Wojak in the Generator to enter the arena.
+          </p>
+        </div>
       </div>
-      <div className="flex-1">
-        <p className="font-bold" style={{ fontSize: 15 }}>Mint your first fighter!</p>
-        <p className="text-secondary" style={{ fontSize: 13 }}>
-          Create a Wojak in the Generator to enter the arena.
-        </p>
-      </div>
-      <Link to="/generator" className="btn btn-primary" style={{ flexShrink: 0 }}>
+      <Link to="/generator" className="btn btn-primary w-full sm:w-auto shrink-0">
         Generator
       </Link>
     </div>
