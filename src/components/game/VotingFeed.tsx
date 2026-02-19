@@ -262,14 +262,18 @@ export function VotingFeed() {
     );
   }
 
-  // Feed empty
+  // Feed empty — all Wojaks on 24h cooldown
   if (feed.length === 0) {
+    const votesToday = player?.votesToday ?? 0;
     return (
       <div className="card-static flex flex-col items-center justify-center gap-4 p-8" style={{ minHeight: 300 }}>
-        <span className="text-2xl">&#10024;</span>
-        <h2 className="text-lg font-semibold">You've Seen Them All</h2>
+        <span className="text-2xl">&#9203;</span>
+        <h2 className="text-lg font-semibold">All Caught Up!</h2>
         <p className="text-secondary text-sm text-center">
-          You've voted on every Wojak! Check back when more are minted.
+          New Wojaks will appear as cooldowns expire.
+          {votesToday > 0 && (
+            <><br /><span className="text-muted">You've voted on {votesToday} Wojak{votesToday !== 1 ? 's' : ''} today.</span></>
+          )}
         </p>
         <div className="flex gap-3">
           <Link to="/fight-club/rankings" className="btn btn-primary text-sm" style={{ padding: '8px 20px', textDecoration: 'none' }}>
