@@ -302,29 +302,37 @@ export default function FightClub() {
           minHeight: '100%',
         }}
       >
-        {/* Tab Bar */}
-        <div className="flex items-center gap-2">
-          <div className="fight-club-tabs flex-1">
-            {TABS.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                className={`fight-club-tab ${activeTab === tab.id ? 'active' : ''}`}
-                onClick={() => handleTabClick(tab)}
-              >
-                {tab.label}
-              </button>
-            ))}
+        {/* Minimal Title Bar */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Swords size={20} className="text-primary" />
+            <h1 className="text-lg font-bold">Fight Club</h1>
           </div>
-          <Link
-            to="/fight-club/guide"
-            className="btn btn-ghost text-xs flex items-center gap-1"
-            style={{ padding: '6px 10px', minWidth: 'auto' }}
-          >
-            <Info size={14} />
-            Guide
-          </Link>
-          {playerDid && <RefreshButton did={playerDid} />}
+          <div className="flex items-center gap-2">
+            <Link
+              to="/fight-club/guide"
+              className="btn btn-ghost text-xs flex items-center gap-1"
+              style={{ padding: '6px 10px', minWidth: 'auto' }}
+            >
+              <Info size={14} />
+              Guide
+            </Link>
+            {playerDid && <RefreshButton did={playerDid} />}
+          </div>
+        </div>
+
+        {/* Tab Bar */}
+        <div className="fight-club-tabs">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              className={`fight-club-tab ${activeTab === tab.id ? 'active' : ''}`}
+              onClick={() => handleTabClick(tab)}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
 
         {/* Subscription Banner */}
