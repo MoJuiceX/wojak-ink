@@ -412,7 +412,7 @@ export function TraitAuditWizard({ onClose }: TraitAuditWizardProps) {
           <div className="flex items-center justify-between px-4 py-1" style={{ borderBottom: '1px solid var(--color-border)' }}>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-bold tracking-wider text-accent">AUDIT</span>
-              <span className="text-[9px] px-1.5 py-0.5 rounded-full text-secondary" style={{ background: 'rgba(255,255,255,0.08)' }}>{currentCase?.category}</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full text-secondary" style={{ background: 'var(--color-white-8)' }}>{currentCase?.category}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] text-success">{passCount}P</span>

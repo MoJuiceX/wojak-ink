@@ -95,7 +95,7 @@ export const ImageWithPlaceholder: React.FC<ImageWithPlaceholderProps> = ({
             position: 'absolute',
             inset: 0,
             background:
-              'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)',
+              'linear-gradient(90deg, transparent 0%, var(--color-white-10) 50%, transparent 100%)',
             animation: 'shimmer 1.5s infinite',
           }}
         />
@@ -110,8 +110,8 @@ export const ImageWithPlaceholder: React.FC<ImageWithPlaceholderProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            color: 'rgba(255,255,255,0.5)',
+            backgroundColor: 'var(--color-black-50)',
+            color: 'var(--color-white-50)',
             fontSize: '2rem',
           }}
         >

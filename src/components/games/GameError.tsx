@@ -51,8 +51,8 @@ export function GameError({ error, gameName, onRetry }: GameErrorProps) {
         <motion.div
           className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center"
           style={{
-            background: 'rgba(239, 68, 68, 0.1)',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
+            background: 'var(--color-error-10)',
+            border: '1px solid var(--color-error-30)',
           }}
           animate={{ rotate: [0, -5, 5, 0] }}
           transition={{ duration: 0.5, delay: 0.2 }}
@@ -82,7 +82,7 @@ export function GameError({ error, gameName, onRetry }: GameErrorProps) {
             style={{
               background: 'linear-gradient(135deg, #F97316, #EA580C)',
               color: '#fff',
-              boxShadow: '0 4px 20px rgba(249, 115, 22, 0.3)',
+              boxShadow: '0 4px 20px var(--color-primary-30)',
             }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -95,8 +95,8 @@ export function GameError({ error, gameName, onRetry }: GameErrorProps) {
             onClick={handleBack}
             className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-medium text-primary"
             style={{
-              background: 'rgba(255, 255, 255, 0.1)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
+              background: 'var(--color-white-10)',
+              border: '1px solid var(--color-white-20)',
             }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -111,7 +111,7 @@ export function GameError({ error, gameName, onRetry }: GameErrorProps) {
           <details
             className="mt-6 text-left"
             style={{
-              background: 'rgba(0, 0, 0, 0.3)',
+              background: 'var(--color-black-30)',
               borderRadius: 8,
               padding: 12,
             }}

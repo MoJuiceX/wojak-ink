@@ -59,14 +59,14 @@ export function ProfileTabs({
       <style>{`
         .tab-badge {
           padding: 2px 8px;
-          background: rgba(255, 255, 255, 0.1);
+          background: var(--color-white-10);
           border-radius: 10px;
           font-size: 0.7rem;
           margin-left: 4px;
         }
 
         .profile-tab.active .tab-badge {
-          background: rgba(249, 115, 22, 0.3);
+          background: var(--color-primary-30);
         }
       `}</style>
     </nav>

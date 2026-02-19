@@ -115,7 +115,7 @@ export const Toggle = memo(function Toggle({
           borderRadius: '9999px',
           background: checked
             ? 'var(--color-primary)'
-            : 'rgba(255,255,255,0.1)',
+            : 'var(--color-white-10)',
           flexShrink: 0,
           outline: 'none',
           transition: 'background 0.2s ease',
@@ -127,7 +127,7 @@ export const Toggle = memo(function Toggle({
             fontSize: config.fontSize,
             fontWeight: 600,
             lineHeight: 1,
-            color: checked ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.4)',
+            color: checked ? 'rgba(255,255,255,0.9)' : 'var(--color-white-40)',
             left: checked ? config.labelPadding : undefined,
             right: checked ? undefined : config.labelPadding,
             userSelect: 'none',

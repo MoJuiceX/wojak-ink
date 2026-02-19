@@ -190,7 +190,7 @@ export function AchievementsTab({
               right: 0,
               marginTop: 4,
               background: '#1a1a1a',
-              border: '1px solid rgba(255,255,255,0.1)',
+              border: '1px solid var(--color-white-10)',
               borderRadius: 12,
               overflow: 'hidden',
               zIndex: 10,

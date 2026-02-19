@@ -51,7 +51,7 @@ function TraitRankingTooltip({ data }: { data: TooltipData }) {
       style={{
         background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
-        boxShadow: '0 12px 40px rgba(0,0,0,0.5)',
+        boxShadow: '0 12px 40px var(--color-black-50)',
       }}
     >
       {/* Header */}

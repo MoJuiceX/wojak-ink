@@ -34,13 +34,13 @@ export const RetryCard = memo<RetryCardProps>(({
         alignItems: 'center',
         gap: 16,
         padding: 40,
-        background: 'rgba(255, 255, 255, 0.03)',
+        background: 'var(--color-white-3)',
         borderRadius: 16,
         textAlign: 'center',
       }}
     >
       <span style={{ fontSize: 48 }}>{icon}</span>
-      <p style={{ color: 'rgba(255, 255, 255, 0.6)', margin: 0 }}>{message}</p>
+      <p style={{ color: 'var(--color-white-60)', margin: 0 }}>{message}</p>
       <motion.button
         onClick={onRetry}
         whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
@@ -53,7 +53,7 @@ export const RetryCard = memo<RetryCardProps>(({
           color: 'white',
           fontWeight: 600,
           cursor: 'pointer',
-          boxShadow: '0 4px 15px rgba(249, 115, 22, 0.3)',
+          boxShadow: '0 4px 15px var(--color-primary-30)',
         }}
       >
         {buttonText}
@@ -89,7 +89,7 @@ export const NetworkError: React.FC<{ onRetry?: () => void }> = ({ onRetry }) =>
         📡
       </motion.div>
       <h3 style={{ color: 'white', margin: 0 }}>Connection Lost</h3>
-      <p style={{ color: 'rgba(255, 255, 255, 0.6)', margin: 0 }}>
+      <p style={{ color: 'var(--color-white-60)', margin: 0 }}>
         Please check your internet connection
       </p>
       {onRetry && (
@@ -99,8 +99,8 @@ export const NetworkError: React.FC<{ onRetry?: () => void }> = ({ onRetry }) =>
           whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
           style={{
             padding: '12px 24px',
-            background: 'rgba(255, 255, 255, 0.1)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
+            background: 'var(--color-white-10)',
+            border: '1px solid var(--color-white-20)',
             borderRadius: 12,
             color: 'white',
             fontWeight: 600,

@@ -153,7 +153,7 @@ export function MoreMenu({ isOpen, onClose }: MoreMenuProps) {
             style={{
               bottom: 80, // Above the mobile navigation bar
               background: '#1a1a24', // Solid dark background
-              borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+              borderTop: '1px solid var(--color-white-8)',
               borderRadius: '20px 20px 0 0',
               maxHeight: 'calc(100vh - 160px)',
               boxShadow: '0 -8px 32px var(--color-black-50)',
@@ -178,7 +178,7 @@ export function MoreMenu({ isOpen, onClose }: MoreMenuProps) {
             >
               <div
                 className="w-10 h-1 rounded-full"
-                style={{ background: 'rgba(255, 255, 255, 0.25)' }}
+                style={{ background: 'var(--color-white-25)' }}
               />
             </div>
 
@@ -258,7 +258,7 @@ export function MoreMenu({ isOpen, onClose }: MoreMenuProps) {
                       </div>
                       <span
                         className="text-[13px]"
-                        style={{ color: 'rgba(255, 255, 255, 0.4)' }}
+                        style={{ color: 'var(--color-white-40)' }}
                       >
                         {item.description}
                       </span>

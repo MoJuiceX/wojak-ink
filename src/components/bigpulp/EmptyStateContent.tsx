@@ -97,7 +97,7 @@ function QuickStats({
           className="py-2 px-2 rounded-xl text-center"
           style={{
             background: 'linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)',
-            border: '1px solid rgba(255,255,255,0.06)',
+            border: '1px solid var(--color-white-6)',
           }}
           whileHover={{
             scale: 1.02,
@@ -229,8 +229,8 @@ function TrendingNFTs({
             className="flex-shrink-0 rounded-xl overflow-hidden text-left"
             style={{
               width: '112px',
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
-              border: '1px solid rgba(255,255,255,0.1)',
+              background: 'linear-gradient(135deg, var(--color-white-6) 0%, rgba(255,255,255,0.02) 100%)',
+              border: '1px solid var(--color-white-10)',
               scrollSnapAlign: 'start',
             }}
             initial={prefersReducedMotion ? {} : { opacity: 0, x: 20 }}

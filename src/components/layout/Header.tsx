@@ -234,7 +234,7 @@ export function Header({ transparent = false }: HeaderProps) {
               left: 0,
               right: 0,
               height: '1px',
-              background: 'linear-gradient(90deg, transparent 0%, rgba(249, 115, 22, 0.3) 50%, transparent 100%)',
+              background: 'linear-gradient(90deg, transparent 0%, var(--color-primary-30) 50%, transparent 100%)',
               pointerEvents: 'none',
             }}
           />
@@ -339,7 +339,7 @@ export function Header({ transparent = false }: HeaderProps) {
                           className="text-[11px] tabular-nums whitespace-nowrap font-semibold px-2 py-0.5 rounded-md text-muted"
                           style={{
                             background: 'rgba(255, 255, 255, 0.04)',
-                            border: '1px solid rgba(255, 255, 255, 0.06)',
+                            border: '1px solid var(--color-white-6)',
                           }}
                         >
                           {totalMinted}/{maxSupply}
@@ -394,7 +394,7 @@ export function Header({ transparent = false }: HeaderProps) {
                       style={{
                         background: 'var(--color-surface)',
                         border: '1px solid var(--color-border)',
-                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+                        boxShadow: '0 8px 32px var(--color-black-40)',
                       }}
                     >
                       <div
@@ -406,7 +406,7 @@ export function Header({ transparent = false }: HeaderProps) {
                       <button
                         type="button"
                         className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium transition-colors text-error"
-                        onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)')}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-error-10)')}
                         onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                         onClick={async () => {
                           setShowWalletMenu(false);

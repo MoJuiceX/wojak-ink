@@ -97,7 +97,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
               <div
                 style={{
                   padding: '0 20px 16px',
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderBottom: '1px solid var(--color-white-10)',
                 }}
               >
                 <h3

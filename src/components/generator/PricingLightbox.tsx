@@ -147,7 +147,7 @@ function CategoryAccordion({
       className="rounded-xl overflow-hidden"
       style={{
         background: 'transparent',
-        border: '1px solid rgba(255, 255, 255, 0.06)',
+        border: '1px solid var(--color-white-6)',
       }}
     >
       {/* Category header */}
@@ -209,7 +209,7 @@ function CategoryAccordion({
               <div
                 className="flex items-center gap-2"
                 style={{
-                  background: 'rgba(0, 0, 0, 0.15)',
+                  background: 'var(--color-black-15)',
                   padding: '8px 18px',
                 }}
               >
@@ -295,7 +295,7 @@ function CategoryAccordion({
                     <div className="flex items-center gap-2" style={{ width: 110, justifyContent: 'flex-end' }}>
                       <div
                         className="rounded-full overflow-hidden"
-                        style={{ width: 40, height: 3, background: 'rgba(255, 255, 255, 0.06)', flexShrink: 0 }}
+                        style={{ width: 40, height: 3, background: 'var(--color-white-6)', flexShrink: 0 }}
                       >
                         <div
                           className="h-full rounded-full"
@@ -455,11 +455,11 @@ export function PricingLightbox({ isOpen, onClose }: PricingLightboxProps) {
   return (
     <Lightbox isOpen={isOpen} onClose={onClose} size="lg" title="Trait Prices" contentClassName="lightbox-fixed-height">
       {/* Supply bar + info */}
-      <div style={{ paddingBottom: 20, borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>
+      <div style={{ paddingBottom: 20, borderBottom: '1px solid var(--color-white-6)' }}>
         {/* Supply progress */}
         {data?.supply && (
           <div className="flex items-center gap-3" style={{ marginBottom: 14 }}>
-            <div className="flex-1 rounded-full overflow-hidden" style={{ height: 6, background: 'rgba(255, 255, 255, 0.06)' }}>
+            <div className="flex-1 rounded-full overflow-hidden" style={{ height: 6, background: 'var(--color-white-6)' }}>
               <div
                 className="h-full rounded-full"
                 style={{
@@ -485,7 +485,7 @@ export function PricingLightbox({ isOpen, onClose }: PricingLightboxProps) {
               background: 'var(--color-white-5)',
               padding: '5px 12px',
               borderRadius: '8px',
-              border: '1px solid rgba(255, 255, 255, 0.06)',
+              border: '1px solid var(--color-white-6)',
             }}
           >
             Base: {BASE_PRICE} XCH
