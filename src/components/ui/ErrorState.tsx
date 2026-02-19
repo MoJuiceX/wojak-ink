@@ -90,17 +90,11 @@ export function ErrorState({
         {config.icon}
       </div>
 
-      <h3
-        className="text-lg font-semibold mb-2"
-        style={{ color: 'var(--color-text-primary)' }}
-      >
+      <h3 className="text-lg font-semibold mb-2 text-primary">
         {displayTitle}
       </h3>
 
-      <p
-        className="text-sm max-w-sm mb-6"
-        style={{ color: 'var(--color-text-muted)' }}
-      >
+      <p className="text-sm max-w-sm mb-6 text-muted">
         {displayMessage}
       </p>
 
@@ -109,8 +103,7 @@ export function ErrorState({
           <motion.button
             type="button"
             onClick={onRetry}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white"
-            style={{ background: 'var(--color-brand-primary)' }}
+            className="btn btn-primary flex items-center gap-2 text-sm"
             variants={prefersReducedMotion ? undefined : buttonVariants}
             whileHover="hover"
             whileTap="tap"
@@ -123,12 +116,7 @@ export function ErrorState({
         {showHomeLink && type === 'notFound' && (
           <Link
             to="/"
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-            style={{
-              background: 'var(--color-glass-bg)',
-              color: 'var(--color-text-primary)',
-              border: '1px solid var(--color-border)',
-            }}
+            className="btn btn-secondary flex items-center gap-2 text-sm"
           >
             <Home size={16} />
             Go home
@@ -149,8 +137,7 @@ export function ErrorInline({
 }) {
   return (
     <div
-      className={`flex items-center gap-2 text-sm ${className}`}
-      style={{ color: '#ef4444' }}
+      className={`flex items-center gap-2 text-sm text-error ${className}`}
       role="alert"
     >
       <AlertTriangle size={14} />

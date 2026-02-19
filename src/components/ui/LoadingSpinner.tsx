@@ -40,7 +40,7 @@ export function LoadingSpinner({
       >
         <Loader2
           size={size}
-          style={{ color: 'var(--color-brand-primary)' }}
+          className="text-accent"
         />
       </motion.div>
       <span className="sr-only">{label}</span>
@@ -62,7 +62,7 @@ export function LoadingInline({
       role="status"
     >
       <LoadingSpinner size={16} />
-      <span style={{ color: 'var(--color-text-muted)' }}>{text}</span>
+      <span className="text-muted">{text}</span>
     </div>
   );
 }
@@ -76,15 +76,12 @@ export function LoadingOverlay({
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col items-center justify-center"
-      style={{ background: 'var(--color-bg-primary)' }}
+      style={{ background: 'var(--color-bg)' }}
       role="status"
       aria-live="polite"
     >
       <LoadingSpinner size={48} />
-      <p
-        className="mt-4 text-sm"
-        style={{ color: 'var(--color-text-muted)' }}
-      >
+      <p className="mt-4 text-sm text-muted">
         {message}
       </p>
     </div>
@@ -105,7 +102,7 @@ export function LoadingDots({
     width: size,
     height: size,
     borderRadius: '50%',
-    background: 'var(--color-brand-primary)',
+    background: 'var(--color-primary)',
   };
 
   return (
