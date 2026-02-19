@@ -148,7 +148,7 @@ export function PortfolioValueCard({
       <motion.div
         className="absolute inset-0 rounded-2xl pointer-events-none"
         style={{
-          boxShadow: '0 0 30px rgba(255, 107, 0, 0.2), 0 0 60px rgba(255, 107, 0, 0.1)',
+          boxShadow: '0 0 30px var(--color-primary-20), 0 0 60px var(--color-primary-10)',
         }}
         animate={
           prefersReducedMotion

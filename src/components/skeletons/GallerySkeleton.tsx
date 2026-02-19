@@ -18,7 +18,7 @@ export function GallerySkeleton() {
               key={`char-${i}`}
               className="aspect-square rounded-xl"
               style={{
-                background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.05) 0%, var(--color-black-30) 100%)',
+                background: 'linear-gradient(135deg, var(--color-primary-10) 0%, var(--color-black-30) 100%)',
                 border: '1px solid var(--color-primary-10)',
               }}
               animate={{
@@ -41,7 +41,7 @@ export function GallerySkeleton() {
             key={`nft-${i}`}
             className="aspect-square rounded-lg"
             style={{
-              background: 'rgba(249, 115, 22, 0.05)',
+              background: 'var(--color-primary-10)',
               border: '1px solid var(--color-primary-10)',
             }}
             animate={{
@@ -89,7 +89,7 @@ export function LeaderboardSkeleton() {
             key={i}
             className="h-16 rounded-xl"
             style={{
-              background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.05) 0%, var(--color-black-30) 100%)',
+              background: 'linear-gradient(135deg, var(--color-primary-10) 0%, var(--color-black-30) 100%)',
               border: '1px solid var(--color-primary-10)',
             }}
             animate={{

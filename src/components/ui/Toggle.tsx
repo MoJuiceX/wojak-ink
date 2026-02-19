@@ -127,7 +127,7 @@ export const Toggle = memo(function Toggle({
             fontSize: config.fontSize,
             fontWeight: 600,
             lineHeight: 1,
-            color: checked ? 'rgba(255,255,255,0.9)' : 'var(--color-white-40)',
+            color: checked ? 'var(--color-text)' : 'var(--color-white-40)',
             left: checked ? config.labelPadding : undefined,
             right: checked ? undefined : config.labelPadding,
             userSelect: 'none',
