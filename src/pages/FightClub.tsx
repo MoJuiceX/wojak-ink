@@ -9,9 +9,8 @@
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { MINTGARDEN_COLLECTION_URL } from '@/services/constants';
 import { lazy, Suspense, useState, useCallback } from 'react';
-import { motion } from 'framer-motion';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Swords, Trophy, Heart, ExternalLink, Wallet, Palette, RefreshCw, Info } from 'lucide-react';
+import { Swords, ExternalLink, Wallet, Palette, RefreshCw, Info } from 'lucide-react';
 import { useToast } from '@/contexts/ToastContext';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { PageSkeleton } from '@/components/layout/PageSkeleton';
@@ -176,94 +175,36 @@ function ConnectWalletPrompt() {
   );
 }
 
-// Gated view shown when user doesn't have Farmers Plot
-function FightClubGate() {
-  const { contentPadding } = useLayout();
+// Inline gate shown inside tab content when user doesn't have access
+function FightClubGateInline() {
   const { data: floorPrice } = useFloorPrice();
 
   return (
-    <PageTransition>
-      <div
-        className="flex flex-col items-center gap-4"
-        style={{ padding: contentPadding, minHeight: '60vh' }}
-      >
-        {/* Hero at top even on gate */}
-        <FightClubHero isHolder={false} hasWojaks={false} />
-
-        <div className="card-static p-8 max-w-md text-center">
-          <div className="flex justify-center mb-4">
-            <div className="p-4 rounded-full" style={{ background: 'var(--color-primary-15)' }}>
-              <Swords size={32} className="text-primary" />
-            </div>
-          </div>
-          <h1 className="text-2xl font-bold mb-2">Welcome to Fight Club</h1>
-          <p className="text-secondary mb-6">
-            Hold a Wojak Farmers Plot NFT to vote, battle, and climb the rankings.
-          </p>
-
-          {/* Feature preview */}
-          <div className="flex flex-col gap-3 mb-6 text-left">
-            <motion.div
-              className="flex items-center gap-3 p-3 rounded-lg"
-              style={{ background: 'var(--color-white-5)' }}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0 }}
-            >
-              <Heart size={20} className="text-error" />
-              <div>
-                <p className="font-medium">Vote</p>
-                <p className="text-sm text-secondary">Rate Wojaks, shape the meta</p>
-              </div>
-            </motion.div>
-            <motion.div
-              className="flex items-center gap-3 p-3 rounded-lg"
-              style={{ background: 'var(--color-white-5)' }}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 }}
-            >
-              <Swords size={20} className="text-primary" />
-              <div>
-                <p className="font-medium">Battle</p>
-                <p className="text-sm text-secondary">Turn-based combat, earn Power</p>
-              </div>
-            </motion.div>
-            <motion.div
-              className="flex items-center gap-3 p-3 rounded-lg"
-              style={{ background: 'var(--color-white-5)' }}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <Trophy size={20} className="text-gold" />
-              <div>
-                <p className="font-medium">Rankings</p>
-                <p className="text-sm text-secondary">Climb the leaderboard</p>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Floor price */}
-          {floorPrice != null && (
-            <p className="text-sm text-secondary mb-4">
-              Current floor: <span className="text-primary font-medium">{floorPrice} XCH</span>
-            </p>
-          )}
-
-          {/* CTA */}
-          <a
-            href={MINTGARDEN_COLLECTION_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-primary w-full flex items-center justify-center gap-2"
-          >
-            Buy on MintGarden
-            <ExternalLink size={16} />
-          </a>
+    <div className="card-static p-6 text-center max-w-lg mx-auto">
+      <div className="flex justify-center mb-4">
+        <div className="p-3 rounded-full" style={{ background: 'var(--color-primary-15)' }}>
+          <Swords size={28} className="text-primary" />
         </div>
       </div>
-    </PageTransition>
+      <h2 className="text-xl font-bold mb-2">Hold a Farmers Plot NFT</h2>
+      <p className="text-secondary mb-4 text-sm">
+        This tab requires holding a Wojak Farmers Plot NFT.
+      </p>
+      {floorPrice != null && (
+        <p className="text-sm text-secondary mb-4">
+          Current floor: <span className="text-primary font-medium">{floorPrice} XCH</span>
+        </p>
+      )}
+      <a
+        href={MINTGARDEN_COLLECTION_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="btn btn-primary inline-flex items-center gap-2"
+      >
+        Buy on MintGarden
+        <ExternalLink size={16} />
+      </a>
+    </div>
   );
 }
 
@@ -313,19 +254,19 @@ interface Tab {
 }
 
 const TABS: Tab[] = [
-  { id: 'battle', label: 'Battle', path: '/fight-club/battle' },
   { id: 'vote', label: 'Vote', path: '/fight-club/vote' },
+  { id: 'battle', label: 'Battle', path: '/fight-club/battle' },
   { id: 'rankings', label: 'Rankings', path: '/fight-club/rankings' },
   { id: 'burn', label: 'Burn', path: '/fight-club/burn' },
 ];
 
 function getActiveTab(pathname: string): TabId {
-  if (pathname.includes('/battle')) return 'battle';
   if (pathname.includes('/vote')) return 'vote';
+  if (pathname.includes('/battle')) return 'battle';
   if (pathname.includes('/rankings')) return 'rankings';
   if (pathname.includes('/burn')) return 'burn';
-  // Default to battle for /fight-club
-  return 'battle';
+  // Default to vote for /fight-club
+  return 'vote';
 }
 
 export default function FightClub() {
@@ -351,47 +292,9 @@ export default function FightClub() {
     return <ConnectWalletPrompt />;
   }
 
-  // Show loading state while checking access (only matters for gated tabs)
-  if (accessLoading && isGatedTab) {
-    return (
-      <PageTransition>
-        <div
-          style={{
-            padding: contentPadding,
-            display: 'flex',
-            flexDirection: 'column',
-            minHeight: '100%',
-          }}
-        >
-          {/* Skeleton tab bar */}
-          <div className="fight-club-tabs" style={{ opacity: 0.3, pointerEvents: 'none' }}>
-            {['Battle', 'Vote', 'Rankings', 'Burn'].map((label) => (
-              <div key={label} className="fight-club-tab">{label}</div>
-            ))}
-          </div>
-          {/* Skeleton content */}
-          <div className="flex flex-col gap-3 mt-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="card-static p-4 animate-pulse">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg" style={{ background: 'var(--color-white-8)' }} />
-                  <div className="flex-1 flex flex-col gap-2">
-                    <div className="h-4 w-32 rounded" style={{ background: 'var(--color-white-8)' }} />
-                    <div className="h-3 w-48 rounded" style={{ background: 'var(--color-white-5)' }} />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </PageTransition>
-    );
-  }
-
-  // Show gate only for gated tabs when no Farmers Plot
-  if (!accessData?.hasAccess && isGatedTab) {
-    return <FightClubGate />;
-  }
+  // Check if we should show gated content loading or gate
+  const showGateLoading = accessLoading && isGatedTab;
+  const showGate = !accessLoading && !accessData?.hasAccess && isGatedTab;
 
   return (
     <PageTransition>
@@ -439,21 +342,53 @@ export default function FightClub() {
 
         {/* Tab Content */}
         <div style={{ flex: 1, marginTop: '16px' }}>
-          {activeTab === 'battle' && (
+          {/* Show loading skeleton for gated tabs while checking access */}
+          {showGateLoading && (
+            <div className="flex flex-col gap-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="card-static p-4 animate-pulse">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-lg" style={{ background: 'var(--color-white-8)' }} />
+                    <div className="flex-1 flex flex-col gap-2">
+                      <div className="h-4 w-32 rounded" style={{ background: 'var(--color-white-8)' }} />
+                      <div className="h-3 w-48 rounded" style={{ background: 'var(--color-white-5)' }} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Show gate when user doesn't have access to gated tabs */}
+          {showGate && <FightClubGateInline />}
+
+          {/* Regular tab content when not loading/gated */}
+          {!showGateLoading && !showGate && (
             <>
-              {accessData?.wojakCount === 0 && <MintFighterBanner />}
-              <GameErrorBoundary gameName="Combat Arena">
-                <Suspense fallback={<GameLoading gameName="Combat Arena" />}>
-                  {/* Show demo when user has no fighters, real arena when they do */}
-                  {accessData?.wojakCount === 0 ? (
-                    <DemoBattle />
-                  ) : (
-                    <CombatArena />
-                  )}
+              {activeTab === 'battle' && (
+                <>
+                  {accessData?.wojakCount === 0 && <MintFighterBanner />}
+                  <GameErrorBoundary gameName="Combat Arena">
+                    <Suspense fallback={<GameLoading gameName="Combat Arena" />}>
+                      {/* Show demo when user has no fighters, real arena when they do */}
+                      {accessData?.wojakCount === 0 ? (
+                        <DemoBattle />
+                      ) : (
+                        <CombatArena />
+                      )}
+                    </Suspense>
+                  </GameErrorBoundary>
+                </>
+              )}
+              {activeTab === 'burn' && (
+                <Suspense fallback={<PageSkeleton type="media" />}>
+                  <BurnTab />
                 </Suspense>
-              </GameErrorBoundary>
+              )}
             </>
           )}
+
+          {/* Non-gated tabs always render immediately */}
           {activeTab === 'vote' && (
             <GameProvider>
               <SwipeAutoRegister />
@@ -463,11 +398,6 @@ export default function FightClub() {
             </GameProvider>
           )}
           {activeTab === 'rankings' && <FightClubRankings currentUserDid={playerDid} />}
-          {activeTab === 'burn' && (
-            <Suspense fallback={<PageSkeleton type="media" />}>
-              <BurnTab />
-            </Suspense>
-          )}
         </div>
       </div>
     </PageTransition>
