@@ -89,8 +89,10 @@ function ClerkUserButton({ showLabel }: { showLabel: boolean }) {
             {/* Unread messages badge */}
             {unreadMessages > 0 && (
               <span
-                className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[10px] flex items-center justify-center font-bold"
-                style={{ background: '#ef4444', color: '#fff' }}
+                className="absolute -top-1 -right-1 min-w-4 h-4 px-0.5 rounded-full text-[10px] flex items-center justify-center font-bold"
+                style={{ background: 'var(--color-error)', color: 'white' }}
+                role="status"
+                aria-label={`${unreadMessages > 9 ? 'More than 9' : unreadMessages} unread message${unreadMessages === 1 ? '' : 's'}`}
               >
                 {unreadMessages > 9 ? '!' : unreadMessages}
               </span>
