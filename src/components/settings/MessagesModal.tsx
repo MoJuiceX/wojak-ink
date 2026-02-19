@@ -140,6 +140,9 @@ export function MessagesModal({ isOpen, onClose }: MessagesModalProps) {
               background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
             }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="messages-modal-title"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -150,6 +153,7 @@ export function MessagesModal({ isOpen, onClose }: MessagesModalProps) {
               <div className="flex items-center gap-2">
                 <Bell size={20} className="text-accent" />
                 <h2
+                  id="messages-modal-title"
                   className="text-lg font-bold text-primary"
                 >
                   Messages
@@ -166,6 +170,7 @@ export function MessagesModal({ isOpen, onClose }: MessagesModalProps) {
               <button
                 onClick={onClose}
                 className="p-1 rounded-full text-tertiary"
+                aria-label="Close messages"
               >
                 <X size={20} />
               </button>

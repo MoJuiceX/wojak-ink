@@ -229,6 +229,9 @@ function NFTListModal({
           background: 'var(--color-surface)',
           border: '1px solid var(--color-border)',
         }}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="nft-list-modal-title"
         initial={prefersReducedMotion ? {} : { opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         exit={prefersReducedMotion ? {} : { opacity: 0, y: 50 }}
@@ -246,6 +249,7 @@ function NFTListModal({
             <config.icon size={24} style={{ color: config.borderColor.replace('0.4', '1').replace('0.3', '1') }} />
             <div>
               <h3
+                id="nft-list-modal-title"
                 className="font-bold text-primary"
                 style={{ fontSize: '16px' }}
               >

@@ -170,6 +170,9 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
             background: 'var(--color-surface)',
             border: '1px solid var(--color-border)',
           }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="onboarding-modal-title"
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
@@ -179,6 +182,7 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
           <button
             onClick={onSkip}
             className="absolute top-4 right-4 p-1 rounded-full transition-colors hover:bg-white/10 text-tertiary"
+            aria-label="Skip onboarding"
           >
             <X size={20} />
           </button>
@@ -187,6 +191,7 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
             {/* Header */}
             <div className="text-center mb-6">
               <h1
+                id="onboarding-modal-title"
                 className="text-2xl font-bold mb-2 text-primary"
               >
                 Welcome to the Grove

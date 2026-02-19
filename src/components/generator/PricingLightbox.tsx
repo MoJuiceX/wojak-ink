@@ -159,6 +159,7 @@ function CategoryAccordion({
           padding: '14px 18px',
         }}
         onClick={() => setIsOpen((v) => !v)}
+        aria-expanded={isOpen}
         onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)')}
         onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
       >
@@ -218,6 +219,7 @@ function CategoryAccordion({
                       key={mode}
                       type="button"
                       onClick={(e) => { e.stopPropagation(); onToggleSort(mode); }}
+                      aria-pressed={sortMode === mode}
                       style={{
                         fontSize: '11px',
                         fontWeight: 600,

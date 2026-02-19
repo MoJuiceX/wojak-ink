@@ -86,6 +86,8 @@ function MobileGalleryControls() {
             }}
             onClick={() => setFilterMode(option.id)}
             whileTap={{ scale: 0.95 }}
+            aria-label={`Filter: ${option.id}`}
+            aria-pressed={isActive}
           >
             <Icon size={16} />
           </motion.button>
@@ -117,6 +119,8 @@ function MobileGalleryControls() {
             }}
             onClick={() => setSortMode(toggleSortMode(sortMode, option.base))}
             whileTap={{ scale: 0.95 }}
+            aria-label={`Sort by ${option.base}`}
+            aria-pressed={isActive}
           >
             <Icon size={16} />
             {isActive && (
@@ -361,6 +365,7 @@ export function Header({ transparent = false }: HeaderProps) {
                     }
                   }}
                   title={isWalletConnected ? `Connected: ${address.slice(0, 8)}…${address.slice(-4)}` : 'Connect Wallet'}
+                  aria-label={isWalletConnected ? `Wallet connected: ${address.slice(0, 8)}…${address.slice(-4)}` : 'Connect Wallet'}
                   className="flex items-center gap-2 px-3 rounded-lg transition-all"
                   style={{
                     background: isWalletConnected ? 'rgba(74, 222, 128, 0.1)' : 'rgba(255, 255, 255, 0.05)',

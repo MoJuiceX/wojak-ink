@@ -323,3 +323,330 @@ describe('wojakRules', () => {
     });
   });
 });
+
+// ── Additional rule coverage ──────────────────────────────────────────────────
+
+describe('wojakRules (extended)', () => {
+  /** Shared mock-resolver factory (duplicated here for test isolation) */
+  function mkResolver(
+    paths: Partial<Record<string, string>> = {},
+    traitIds: Partial<Record<string, string>> = {}
+  ) {
+    return {
+      getTraitId(layer: string): string | null {
+        return (traitIds as Record<string, string>)[layer] ?? null;
+      },
+      getPath(layer: string): string | undefined {
+        const p = (paths as Record<string, string>)[layer];
+        return p && p !== '' && p !== 'None' ? p : undefined;
+      },
+    };
+  }
+
+  // ── Sonic / Pickle / Goose suit disables Bandana ──────────────────────────
+  describe('ruleSuitDisablesBandana', () => {
+    it('disables Bandana option when Sonic suit is selected', () => {
+      const resolver = mkResolver(
+        { Base: DEFAULT_BASE_PATH, Clothes: '/sonic-suit.png', MouthBase: DEFAULT_MOUTHBASE_PATH },
+        { Clothes: 'Clothes_Sonic-suit' }
+      );
+      const result = getDisabledLayers(resolver as SelectionResolver);
+      expect(result.disabledOptions?.Mask).toContain('Bandana');
+    });
+
+    it('clears Bandana selection when Pickle suit is selected', () => {
+      const resolver = mkResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          Clothes: '/pickle-suit.png',
+          MouthBase: DEFAULT_MOUTHBASE_PATH,
+          Mask: '/bandana-mask.png',
+        },
+        { Clothes: 'Clothes_Pickle-suit' }
+      );
+      const result = getDisabledLayers(resolver as SelectionResolver);
+      expect(result.clearSelections).toContain('Mask');
+      expect(result.forceSelections?.Mask).toBe('');
+    });
+
+    it('disables Bandana option when Goose suit is selected', () => {
+      const resolver = mkResolver(
+        { Base: DEFAULT_BASE_PATH, Clothes: '/goose-suit.png', MouthBase: DEFAULT_MOUTHBASE_PATH },
+        { Clothes: 'Clothes_Goose-suit' }
+      );
+      const result = getDisabledLayers(resolver as SelectionResolver);
+      expect(result.disabledOptions?.Mask).toContain('Bandana');
+    });
+  });
+
+  // ── Sonic / Pickle / Goose suit disables Hannibal ─────────────────────────
+  describe('ruleSuitDisablesHannibal', () => {
+    it('disables Hannibal option when Sonic suit is selected', () => {
+      const resolver = mkResolver(
+        { Base: DEFAULT_BASE_PATH, Clothes: '/sonic-suit.png', MouthBase: DEFAULT_MOUTHBASE_PATH },
+        { Clothes: 'Clothes_Sonic-suit' }
+      );
+      const result = getDisabledLayers(resolver as SelectionResolver);
+      expect(result.disabledOptions?.Mask).toContain('Hannibal');
+    });
+
+    it('disables suit options when Hannibal mask is selected', () => {
+      const resolver = mkResolver(
+        { Base: DEFAULT_BASE_PATH, Clothes: DEFAULT_CLOTHES_PATH, MouthBase: DEFAULT_MOUTHBASE_PATH, Mask: '/hannibal.png' },
+        {}
+      );
+      const result = getDisabledLayers(resolver as SelectionResolver);
+      expect(result.disabledOptions?.Clothes).toContain('Sonic');
+    });
+
+    it('clears Hannibal selection when Goose suit is selected with Hannibal mask', () => {
+      const resolver = mkResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          Clothes: '/goose-suit.png',
+          MouthBase: DEFAULT_MOUTHBASE_PATH,
+          Mask: '/hannibal.png',
+        },
+        { Clothes: 'Clothes_Goose-suit' }
+      );
+      const result = getDisabledLayers(resolver as SelectionResolver);
+      expect(result.clearSelections).toContain('Mask');
+    });
+  });
+
+  // ── Hannibal Mask removes Neckbeard ───────────────────────────────────────
+  describe('ruleHannibalMaskRemovesNeckbeard', () => {
+    it('clears FacialHair when Hannibal mask and neckbeard are both selected', () => {
+      const resolver = mkResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          MouthBase: DEFAULT_MOUTHBASE_PATH,
+          Clothes: DEFAULT_CLOTHES_PATH,
+          Mask: '/mask/hannibal.png',
+          FacialHair: '/facialhair/neckbeard.png',
+        },
+        {}
+      );
+      const result = getDisabledLayers(resolver as SelectionResolver);
+      expect(result.clearSelections).toContain('FacialHair');
+      expect(result.forceSelections?.FacialHair).toBe('');
+    });
+
+    it('disables Neckbeard option when only Hannibal mask is selected', () => {
+      const resolver = mkResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          MouthBase: DEFAULT_MOUTHBASE_PATH,
+          Clothes: DEFAULT_CLOTHES_PATH,
+          Mask: '/mask/hannibal.png',
+        },
+        {}
+      );
+      const result = getDisabledLayers(resolver as SelectionResolver);
+      expect(result.disabledOptions?.FacialHair).toContain('Neckbeard');
+    });
+  });
+
+  // ── Suit disables Neckbeard ───────────────────────────────────────────────
+  describe('ruleSuitDisablesNeckbeard', () => {
+    it('clears Neckbeard when Sonic suit is active', () => {
+      const resolver = mkResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          Clothes: '/sonic-suit.png',
+          MouthBase: DEFAULT_MOUTHBASE_PATH,
+          FacialHair: '/facialhair/neckbeard.png',
+        },
+        { Clothes: 'Clothes_Sonic-suit' }
+      );
+      const result = getDisabledLayers(resolver as SelectionResolver);
+      expect(result.clearSelections).toContain('FacialHair');
+      expect(result.forceSelections?.FacialHair).toBe('');
+    });
+
+    it('disables Sonic and Pickle suit options when Neckbeard is selected', () => {
+      const resolver = mkResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          Clothes: DEFAULT_CLOTHES_PATH,
+          MouthBase: DEFAULT_MOUTHBASE_PATH,
+          FacialHair: '/facialhair/neckbeard.png',
+        },
+        {}
+      );
+      const result = getDisabledLayers(resolver as SelectionResolver);
+      expect(result.disabledOptions?.Clothes).toContain('Sonic');
+      expect(result.disabledOptions?.Clothes).toContain('Pickle');
+    });
+  });
+
+  // ── Firefighter Helmet mutual exclusion ───────────────────────────────────
+  describe('ruleFirefighterHelmetEyesExclusion', () => {
+    it('disables VR Headset and Night Vision options when Firefighter Helmet is selected', () => {
+      const resolver = mkResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          MouthBase: DEFAULT_MOUTHBASE_PATH,
+          Clothes: DEFAULT_CLOTHES_PATH,
+          Head: '/head/firefighter.png',
+        },
+        { Head: KNOWN_TRAIT_IDS.Head_FirefighterHelmet }
+      );
+      const result = getDisabledLayers(resolver as SelectionResolver);
+      expect(result.disabledOptions?.Eyes).toContain('VR headset');
+      expect(result.disabledOptions?.Eyes).toContain('Night Vision');
+    });
+
+    it('clears Eyes when Firefighter Helmet is selected alongside VR Headset', () => {
+      const resolver = mkResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          MouthBase: DEFAULT_MOUTHBASE_PATH,
+          Clothes: DEFAULT_CLOTHES_PATH,
+          Head: '/head/firefighter.png',
+          Eyes: '/eyes/vr.png',
+        },
+        {
+          Head: KNOWN_TRAIT_IDS.Head_FirefighterHelmet,
+          Eyes: KNOWN_TRAIT_IDS.Eyes_VRHeadset,
+        }
+      );
+      const result = getDisabledLayers(resolver as SelectionResolver);
+      expect(result.clearSelections).toContain('Eyes');
+      expect(result.forceSelections?.Eyes).toBe('');
+    });
+
+    it('disables Firefighter Helmet option when VR Headset is selected', () => {
+      const resolver = mkResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          MouthBase: DEFAULT_MOUTHBASE_PATH,
+          Clothes: DEFAULT_CLOTHES_PATH,
+          Eyes: '/eyes/vr.png',
+        },
+        { Eyes: KNOWN_TRAIT_IDS.Eyes_VRHeadset }
+      );
+      const result = getDisabledLayers(resolver as SelectionResolver);
+      expect(result.disabledOptions?.Head).toContain('Firefighter Helmet');
+    });
+  });
+
+  // ── Full-face mask disables Laser Eyes ────────────────────────────────────
+  describe('ruleFullFaceMaskDisablesLaserEyes', () => {
+    const fullFaceMasks = [
+      '/mask/skull_mask.png',
+      '/mask/skull-mask.png',
+      '/mask/hand_mask.png',
+      '/mask/medievalbepe.png',
+      '/mask/tanginium.png',
+    ];
+
+    for (const maskPath of fullFaceMasks) {
+      it(`disables Laser Eyes option for mask path: ${maskPath}`, () => {
+        const resolver = mkResolver(
+          {
+            Base: DEFAULT_BASE_PATH,
+            MouthBase: DEFAULT_MOUTHBASE_PATH,
+            Clothes: DEFAULT_CLOTHES_PATH,
+            Mask: maskPath,
+          },
+          {}
+        );
+        const result = getDisabledLayers(resolver as SelectionResolver);
+        expect(result.disabledOptions?.Eyes).toContain('Laser');
+      });
+    }
+
+    it('clears Eyes when full-face mask is selected alongside Laser Eyes', () => {
+      const resolver = mkResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          MouthBase: DEFAULT_MOUTHBASE_PATH,
+          Clothes: DEFAULT_CLOTHES_PATH,
+          Mask: '/mask/skull_mask.png',
+          Eyes: '/eyes/laser-eyes.png',
+        },
+        {}
+      );
+      const result = getDisabledLayers(resolver as SelectionResolver);
+      expect(result.clearSelections).toContain('Eyes');
+      expect(result.forceSelections?.Eyes).toBe('');
+    });
+  });
+
+  // ── Facial hair requires MouthBase ───────────────────────────────────────
+  describe('ruleFacialHairRequiresMouthBase', () => {
+    it('forces MouthBase to default when FacialHair is selected without MouthBase', () => {
+      const resolver = mkResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          Clothes: DEFAULT_CLOTHES_PATH,
+          FacialHair: '/facialhair/beard.png',
+        },
+        {}
+      );
+      const result = getDisabledLayers(resolver as SelectionResolver);
+      expect(result.forceSelections?.MouthBase).toBe(DEFAULT_MOUTHBASE_PATH);
+    });
+  });
+
+  // ── Cig/Joint/Cohiba requires MouthBase ──────────────────────────────────
+  describe('ruleCigJointCohibaRequiresMouthBase', () => {
+    it('forces MouthBase to default when Cig MouthItem is selected without MouthBase', () => {
+      const resolver = mkResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          Clothes: DEFAULT_CLOTHES_PATH,
+          MouthItem: '/mouth/cig.png',
+        },
+        { MouthItem: KNOWN_TRAIT_IDS.MouthItem_Cig }
+      );
+      const result = getDisabledLayers(resolver as SelectionResolver);
+      expect(result.forceSelections?.MouthBase).toBe(DEFAULT_MOUTHBASE_PATH);
+    });
+
+    it('forces MouthBase to default when Joint MouthItem is selected without MouthBase', () => {
+      const resolver = mkResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          Clothes: DEFAULT_CLOTHES_PATH,
+          MouthItem: '/mouth/joint.png',
+        },
+        { MouthItem: KNOWN_TRAIT_IDS.MouthItem_Joint }
+      );
+      const result = getDisabledLayers(resolver as SelectionResolver);
+      expect(result.forceSelections?.MouthBase).toBe(DEFAULT_MOUTHBASE_PATH);
+    });
+  });
+
+  // ── Mask forces Numb mouth ────────────────────────────────────────────────
+  describe('ruleMaskForcesNumbMouth', () => {
+    it('forces MouthBase to Numb when a non-Copium non-Hannibal mask is selected with Pizza mouth', () => {
+      const resolver = mkResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          MouthBase: '/mouth/pizza.png',
+          Clothes: DEFAULT_CLOTHES_PATH,
+          Mask: '/mask/bandana.png',
+        },
+        { MouthBase: KNOWN_TRAIT_IDS.MouthBase_Pizza }
+      );
+      const result = getDisabledLayers(resolver as SelectionResolver);
+      expect(result.forceSelections?.MouthBase).toBe(DEFAULT_MOUTHBASE_PATH);
+    });
+
+    it('forces MouthBase to Numb when Hannibal mask + non-numb mouth is selected', () => {
+      const resolver = mkResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          MouthBase: '/mouth/pizza.png',
+          Clothes: DEFAULT_CLOTHES_PATH,
+          Mask: '/mask/hannibal.png',
+        },
+        { MouthBase: KNOWN_TRAIT_IDS.MouthBase_Pizza }
+      );
+      const result = getDisabledLayers(resolver as SelectionResolver);
+      expect(result.forceSelections?.MouthBase).toBe(DEFAULT_MOUTHBASE_PATH);
+    });
+  });
+});
