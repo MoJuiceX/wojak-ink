@@ -50,7 +50,7 @@ function LayerTab({
   isActive,
   isBlocked,
   blockedReason,
-  hasSelection,
+  hasSelection: _hasSelection,
   onClick,
 }: LayerTabProps) {
   const prefersReducedMotion = useReducedMotion();
@@ -66,9 +66,7 @@ function LayerTab({
           ? 'white'
           : isBlocked
             ? 'var(--color-text-muted)'
-            : hasSelection
-              ? 'rgba(255, 255, 255, 0.9)'
-              : 'var(--color-text-secondary)',
+            : 'rgba(255, 255, 255, 0.85)',
         opacity: isBlocked ? 0.5 : 1,
         filter: isBlocked ? 'grayscale(1)' : 'none',
         transition: 'all 0.3s ease',
@@ -83,7 +81,7 @@ function LayerTab({
       title={isBlocked ? (blockedReason || `${config.label} is blocked`) : config.description}
     >
       <div className="relative">
-        <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+        <Icon className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={2} />
         {isBlocked && (
           <Lock
             size={8}

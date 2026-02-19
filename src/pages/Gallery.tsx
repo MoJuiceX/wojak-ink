@@ -9,7 +9,7 @@
 import { useCallback, useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './Gallery.css';
-import { ChevronDown, Heart, Palette } from 'lucide-react';
+import { ChevronDown, Swords, Palette } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { useLayout } from '@/hooks/useLayout';
@@ -52,6 +52,15 @@ function GalleryContent() {
   const [bannerDismissed, setBannerDismissed] = useState(
     () => localStorage.getItem('wojak_swipe_banner_dismissed') === 'true'
   );
+
+  // Fight Club banner appears after 3 seconds
+  const [showFightClubBanner, setShowFightClubBanner] = useState(false);
+
+  useEffect(() => {
+    if (bannerDismissed) return;
+    const timer = setTimeout(() => setShowFightClubBanner(true), 3000);
+    return () => clearTimeout(timer);
+  }, [bannerDismissed]);
 
   // Pagination state
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
@@ -362,41 +371,62 @@ function GalleryContent() {
       {/* SEO H1 - visually hidden but accessible */}
       <h1 className="sr-only">Wojak Farmers Plot NFT Gallery - Browse 4,200 Unique NFTs</h1>
 
-      {/* Collection Banner */}
-      <div className="gallery-banner">
+      {/* Collection Banner with Fight Club overlay */}
+      <div className="gallery-banner" style={{ position: 'relative' }}>
         <img
           src="/images/gallery-banner.webp"
           alt="Wojak Farmers Plot Collection"
           loading="eager"
         />
+        {/* Fight Club Banner - floating card on top right */}
+        <AnimatePresence>
+          {showFightClubBanner && !bannerDismissed && (
+            <motion.div
+              initial={{ y: -50, opacity: 0, scale: 0.9 }}
+              animate={{
+                y: 0,
+                opacity: 1,
+                scale: 1,
+              }}
+              exit={{ y: -50, opacity: 0, scale: 0.9 }}
+              transition={{
+                type: 'spring',
+                stiffness: 300,
+                damping: 20,
+                bounce: 0.5,
+              }}
+              className="fight-club-float"
+            >
+              <div className="fight-club-float-inner fight-club-hover-anim">
+                <button
+                  type="button"
+                  aria-label="Dismiss banner"
+                  onClick={() => {
+                    localStorage.setItem('wojak_swipe_banner_dismissed', 'true');
+                    setBannerDismissed(true);
+                  }}
+                  className="fight-club-close"
+                >
+                  &times;
+                </button>
+                <Swords size={18} className="text-primary fight-club-icon" />
+                <Link to="/fight-club" className="fight-club-float-link">
+                  <div className="flex items-center gap-2">
+                    <span className="fight-club-title">Fight Club is live!</span>
+                    <span className="fight-club-badge">NEW</span>
+                  </div>
+                  <span className="fight-club-subtitle">Vote, battle, and climb the rankings</span>
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Animated gradient background */}
       <div className="gallery-page-background" />
 
       <div className="min-h-full" data-section="gallery" style={{ padding: pagePadding }}>
-        {!bannerDismissed && (
-          <Link to="/fight-club" className="card p-4 flex items-center gap-4 mb-4" style={{ textDecoration: 'none' }}>
-            <Heart size={24} className="text-error" style={{ flexShrink: 0 }} />
-            <div className="flex-1">
-              <span className="font-bold text-primary">Fight Club is live!</span>
-              <span className="text-secondary ml-2">Vote, battle, and climb the rankings</span>
-            </div>
-            <span className="badge badge-success">NEW</span>
-            <button
-              type="button"
-              aria-label="Dismiss banner"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                localStorage.setItem('wojak_swipe_banner_dismissed', 'true');
-                setBannerDismissed(true);
-              }}
-              className="btn btn-ghost"
-              style={{ padding: '12px', fontSize: '14px', minWidth: '44px', minHeight: '44px' }}
-            >&times;</button>
-          </Link>
-        )}
         <div className={isDesktop ? 'space-y-8' : ''}>
           {/* Content */}
           <AnimatePresence mode="wait">

@@ -614,8 +614,20 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
     const selectWeightedUnified = async (
       layerName: UILayerName
     ): Promise<{ path: string; trait: UnifiedTrait } | null> => {
-      const traits = await getUnifiedTraits(layerName);
+      let traits = await getUnifiedTraits(layerName);
       if (traits.length === 0) return null;
+
+      // For Background: filter out special virtual backgrounds (Solid color, Price overlays)
+      // These should only be manually selected, not randomly chosen
+      if (layerName === 'Background') {
+        traits = traits.filter(t =>
+          // Exclude virtual backgrounds that have __solid__ or __price_ in their path
+          // G2-only backgrounds (no g1Path) are fine to include
+          !t.g1Path?.includes('__solid__') &&
+          !t.g1Path?.includes('__price_')
+        );
+        if (traits.length === 0) return null;
+      }
 
       // Register G2-only traits in weighted randomizer so they get a fair (rare) chance
       for (const t of traits) {
@@ -701,6 +713,26 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
     if (rulesResult.clearSelections) {
       for (const layer of rulesResult.clearSelections) {
         delete randomSelections[layer];
+      }
+    }
+
+    // SAFEGUARD: Background must ALWAYS be selected in randomization
+    // If somehow missing, force select a random background (excluding virtual ones)
+    if (!randomSelections.Background) {
+      const allBgTraits = await getUnifiedTraits('Background');
+      const validBgTraits = allBgTraits.filter(t =>
+        // Exclude virtual backgrounds that have __solid__ or __price_ in their path
+        // G2-only backgrounds (no g1Path) are fine to include
+        !t.g1Path?.includes('__solid__') &&
+        !t.g1Path?.includes('__price_')
+      );
+      if (validBgTraits.length > 0) {
+        const randomBg = validBgTraits[Math.floor(Math.random() * validBgTraits.length)];
+        const bgPath = randomBg.g1Path || `/g2/Background/${randomBg.name.replace(/\s+/g, '-')}`;
+        randomSelections.Background = bgPath;
+        if (randomBg.source === 'g2' || randomBg.source === 'both') {
+          g2Picks.push({ layer: 'Background', trait: randomBg, colors: buildRandomColors(randomBg) });
+        }
       }
     }
 

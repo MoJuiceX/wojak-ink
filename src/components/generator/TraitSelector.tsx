@@ -39,6 +39,85 @@ const LAYER_TO_TRAIT_TYPE: Record<string, string> = {
 /** Surcharge categories — only these show "+X.XX XCH" badges */
 const SURCHARGE_CATEGORIES = new Set(['Head', 'Clothes', 'Face Wear']);
 
+/** Default color for solid color backgrounds - sky blue */
+const SOLID_BG_DEFAULT_COLOR = '#38BDF8';
+
+/**
+ * Clothes layer sort order - items appear in this order at the top.
+ * Keywords are matched case-insensitively against trait name or ID.
+ */
+const CLOTHES_TOP_ORDER = [
+  'Tee',
+  'Chia-farmer',
+  'Tank-top',
+  'Bathrobe',
+  'Sports-jacket',
+  'Topless',
+  'Suit',          // matches Clothes_Suit
+  'gods-robe',     // God's Robe
+  'Super-Saiyan',
+  'Drac-suit',
+  'Bepe-army',
+  'Military-jacket', // El Presidente
+  'fire-figther',    // Firefighter
+];
+
+/**
+ * Character suits - these appear at the very end, alphabetically sorted among themselves.
+ * Keywords matched case-insensitively against trait ID.
+ */
+const CLOTHES_BOTTOM_IDS = [
+  'Clothes_Bepe-suit',
+  'Clothes_Goose-suit',
+  'Clothes_gopher-suit',
+  'Clothes_Pickle-suit',
+  'Clothes_Proof-of-prayer',
+  'Clothes_Sonic-suit',
+];
+
+/**
+ * Sort clothes traits: top order first, then alphabetical, then character suits last.
+ */
+function sortClothesTraits(traits: UnifiedTrait[]): UnifiedTrait[] {
+  return [...traits].sort((a, b) => {
+    const aId = a.id.toLowerCase();
+    const bId = b.id.toLowerCase();
+    const aName = a.name.toLowerCase();
+    const bName = b.name.toLowerCase();
+
+    // Check if either is in the bottom (character suits) group
+    const aIsBottom = CLOTHES_BOTTOM_IDS.some(id => aId === id.toLowerCase());
+    const bIsBottom = CLOTHES_BOTTOM_IDS.some(id => bId === id.toLowerCase());
+
+    // If both are bottom items, sort alphabetically by display name
+    if (aIsBottom && bIsBottom) {
+      return a.name.localeCompare(b.name);
+    }
+    // Bottom items go last
+    if (aIsBottom) return 1;
+    if (bIsBottom) return -1;
+
+    // Check top order
+    const aTopIndex = CLOTHES_TOP_ORDER.findIndex(keyword =>
+      aId.toLowerCase().includes(keyword.toLowerCase()) ||
+      aName.includes(keyword.toLowerCase())
+    );
+    const bTopIndex = CLOTHES_TOP_ORDER.findIndex(keyword =>
+      bId.toLowerCase().includes(keyword.toLowerCase()) ||
+      bName.includes(keyword.toLowerCase())
+    );
+
+    // If both in top order, use that order
+    if (aTopIndex !== -1 && bTopIndex !== -1) return aTopIndex - bTopIndex;
+    // Top items come first
+    if (aTopIndex !== -1) return -1;
+    if (bTopIndex !== -1) return 1;
+
+    // Everything else alphabetical by display name
+    return a.name.localeCompare(b.name);
+  });
+}
+
 /** Overlay badge — disabled; pricing info moved to dedicated Prices lightbox */
 export function TraitUsageBadge(_props: {
   pricing: TraitPricingEntry | null;
@@ -360,6 +439,93 @@ function SolidColorBackgroundCard({ color, isSelected, isDisabled, disabledReaso
         }}
       >
         Solid color
+      </div>
+      {/* Disabled info badge */}
+      {isDisabled && disabledReason && (
+        <div
+          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
+          style={{ background: 'var(--color-black-70)', border: '1px solid var(--color-border)' }}
+          title={disabledReason}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+          </svg>
+        </div>
+      )}
+      {isSelected && !isDisabled && (
+        <motion.div
+          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
+          style={{ background: 'var(--generator-badge-color, #F97316)' }}
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
+            <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
+          </svg>
+        </motion.div>
+      )}
+    </motion.button>
+  );
+}
+
+interface PriceOverlayCardProps {
+  overlayType: 'up' | 'down';
+  bgColor: string;
+  isSelected: boolean;
+  isDisabled: boolean;
+  disabledReason?: string | null;
+  onClick: () => void;
+}
+
+/** Card for Price up/down overlays that work on top of solid color backgrounds */
+function PriceOverlayCard({ overlayType, bgColor, isSelected, isDisabled, disabledReason, onClick }: PriceOverlayCardProps) {
+  const prefersReducedMotion = useReducedMotion();
+  const overlayPath = `/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Price-${overlayType}.png`;
+  const label = overlayType === 'up' ? 'Price up' : 'Price down';
+
+  return (
+    <motion.button
+      type="button"
+      className="w-full aspect-square relative rounded-xl overflow-hidden p-1"
+      style={{
+        background: 'var(--generator-trait-card-bg)',
+        border: isSelected
+          ? '2px solid var(--generator-selected-color, #F97316)'
+          : '1px solid var(--generator-trait-card-border)',
+        opacity: isDisabled ? 0.5 : 1,
+        cursor: isDisabled ? 'not-allowed' : 'pointer',
+        boxShadow: isSelected
+          ? '0 0 20px var(--generator-selected-glow, var(--color-primary-50)), 0 4px 12px var(--color-black-30)'
+          : '0 2px 8px var(--color-black-20)',
+        transition: 'all 0.3s ease',
+      }}
+      whileHover={prefersReducedMotion || isDisabled ? undefined : { scale: 1.03 }}
+      whileTap={prefersReducedMotion || isDisabled ? undefined : { scale: 0.98 }}
+      transition={{ duration: 0.2 }}
+      onClick={onClick}
+      disabled={isDisabled}
+      title={isDisabled && disabledReason ? disabledReason : label}
+    >
+      <div
+        className="relative w-full h-full rounded-lg overflow-hidden"
+        style={{ backgroundColor: bgColor }}
+      >
+        <img
+          src={overlayPath}
+          alt={label}
+          className="absolute inset-0 w-full h-full object-cover"
+          loading="lazy"
+        />
+      </div>
+      <div
+        className="absolute bottom-0 left-0 right-0 px-2 py-1 text-xs font-medium truncate"
+        style={{
+          background: 'linear-gradient(transparent, var(--color-black-70))',
+          color: overlayType === 'up' ? 'var(--color-success)' : 'var(--color-error)',
+        }}
+      >
+        {label}
       </div>
       {/* Disabled info badge */}
       {isDisabled && disabledReason && (
@@ -726,7 +892,9 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
     ])
       .then(([imgs, traits]) => {
         setImages(imgs);
-        setUnifiedTraits(traits);
+        // Apply custom sort order for Clothes layer
+        const sortedTraits = activeLayer === 'Clothes' ? sortClothesTraits(traits) : traits;
+        setUnifiedTraits(sortedTraits);
         setImagesForLayer(activeLayer);
         setIsLoading(false);
       })
@@ -990,7 +1158,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
               // Background Solid color: show color swatch, not image
               const isSolidBg = image.path === '__solid__' || image.path?.includes('__solid__');
               if (activeLayer === 'Background' && isSolidBg) {
-                const swatchColor = selectedColors?.Background ?? '#1a1a2e';
+                const swatchColor = selectedColors?.Background ?? SOLID_BG_DEFAULT_COLOR;
                 return (
                   <motion.div
                     key={trait.id}
@@ -1003,6 +1171,44 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                       isDisabled={!!disabled}
                       disabledReason={reason}
                       onClick={() => handleTraitClick(trait)}
+                    />
+                  </motion.div>
+                );
+              }
+              // Price overlays: only enabled when solid color is selected
+              const isPriceUp = image.path === '__price_up__';
+              const isPriceDown = image.path === '__price_down__';
+              if (activeLayer === 'Background' && (isPriceUp || isPriceDown)) {
+                const hasSolidColorSelected = selectedPath === '__solid__' || selectedPath?.includes('__solid__');
+                const overlayDisabled = !hasSolidColorSelected;
+                const overlayReason = overlayDisabled ? 'Select solid color first' : reason;
+                const swatchColor = selectedColors?.Background ?? SOLID_BG_DEFAULT_COLOR;
+                // Check if this overlay is currently selected (encoded in path like __solid__+__price_up__)
+                const overlayKey = isPriceUp ? '__price_up__' : '__price_down__';
+                const overlaySelected = selectedPath?.includes(overlayKey) ?? false;
+                return (
+                  <motion.div
+                    key={trait.id}
+                    variants={prefersReducedMotion ? undefined : traitCardStaggerVariants}
+                    className={isGlowing ? 'trait-select-glow rounded-xl' : undefined}
+                  >
+                    <PriceOverlayCard
+                      overlayType={isPriceUp ? 'up' : 'down'}
+                      bgColor={swatchColor}
+                      isSelected={overlaySelected}
+                      isDisabled={overlayDisabled || !!disabled}
+                      disabledReason={overlayReason}
+                      onClick={() => {
+                        if (overlayDisabled) return;
+                        // Toggle overlay on/off
+                        if (overlaySelected) {
+                          // Remove overlay, keep solid color
+                          selectLayer('Background', '__solid__');
+                        } else {
+                          // Add overlay to solid color
+                          selectLayer('Background', `__solid__+${overlayKey}`);
+                        }
+                      }}
                     />
                   </motion.div>
                 );
@@ -1078,9 +1284,9 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
           <div className="generator-panel-section mt-4">
             <div className="generator-panel-section-label">Color</div>
             <ColorPicker
-              selectedColor={selectedColors?.[activeLayer] || (isBgSolid ? '#1a1a2e' : '#FFFFFF')}
+              selectedColor={selectedColors?.[activeLayer] || (isBgSolid ? SOLID_BG_DEFAULT_COLOR : '#FFFFFF')}
               onColorChange={(color) => setColor(activeLayer, color)}
-              defaultColor={isBgSolid ? '#1a1a2e' : undefined}
+              defaultColor={isBgSolid ? SOLID_BG_DEFAULT_COLOR : undefined}
             />
           </div>
         );

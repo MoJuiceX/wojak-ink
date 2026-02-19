@@ -30,7 +30,7 @@ const layerImagesCache: Map<UILayerName, LayerImage[]> = new Map();
 // ============ Mouth Item Classification ============
 
 // Items from MOUTH folder that belong to MouthBase
-const MOUTH_BASE_PATTERNS = ['numb', 'smile', 'screeming', 'teeth', 'gold-teeth', 'pizza', 'pipe', 'bubble-gum'];
+const MOUTH_BASE_PATTERNS = ['numb', 'smile', 'screeming', 'teeth', 'gold-teeth', 'pizza', 'pipe', 'bubble-gum', 'drac'];
 
 // Items from MOUTH folder that belong to MouthItem (EXTRA_MOUTH prefix with these names)
 const MOUTH_ITEM_PATTERNS = ['cig', 'cohiba', 'joint'];
@@ -119,28 +119,51 @@ function buildLayerImages(manifest: ManifestData): void {
     layerImagesCache.set(layerName as UILayerName, []);
   }
 
-  // Process BACKGROUND (Scene + Solid color only; $CASHTAG and Plain removed)
+  // Process BACKGROUND (Scene + Solid color + Price overlays + $CASHTAG)
   const bgLayer = G1_FOLDER_TO_UI['BACKGROUND'];
   if (bgLayer && manifest['BACKGROUND']) {
-    const images: LayerImage[] = manifest['BACKGROUND'].map((filepath) => {
+    const images: (LayerImage & { manifestIndex: number })[] = manifest['BACKGROUND'].map((filepath, index) => {
       const isSolid = filepath === '__solid__';
+      const isPriceUp = filepath === '__price_up__';
+      const isPriceDown = filepath === '__price_down__';
+      const isOverlay = isPriceUp || isPriceDown;
       return {
-        path: isSolid ? '__solid__' : `/assets/wojak-layers/BACKGROUND/${filepath}`,
+        path: isSolid ? '__solid__' : isOverlay ? filepath : `/assets/wojak-layers/BACKGROUND/${filepath}`,
         name: filepath.split('/').pop()?.replace(/\.(png|jpg|jpeg|webp)$/i, '') || '',
-        displayName: isSolid ? 'Solid color' : parseDisplayName(filepath),
-        category: isSolid ? 'custom' : (filepath.includes('/') ? filepath.split('/')[0] : undefined),
+        displayName: isSolid ? 'Solid color' : isPriceUp ? 'Price up' : isPriceDown ? 'Price down' : parseDisplayName(filepath),
+        category: isSolid ? 'custom' : isOverlay ? 'overlay' : (filepath.includes('/') ? filepath.split('/')[0] : undefined),
+        manifestIndex: index,
       };
     });
     images.sort((a, b) => {
-      // Solid color first, then Scene backgrounds alphabetically
+      // Solid color first, then overlays, then Scene (alphabetically), then $CASHTAG (manifest order)
       const aSolid = a.path.includes('__solid__');
       const bSolid = b.path.includes('__solid__');
+      const aOverlay = a.category === 'overlay';
+      const bOverlay = b.category === 'overlay';
+      const aScene = a.category === 'Scene';
+      const bScene = b.category === 'Scene';
+      const aCashtag = a.category === '$CASHTAG';
+      const bCashtag = b.category === '$CASHTAG';
+      // Solid color first
       if (aSolid && !bSolid) return -1;
       if (!aSolid && bSolid) return 1;
+      // Overlays second
+      if (aOverlay && !bOverlay && !bSolid) return -1;
+      if (!aOverlay && bOverlay && !aSolid) return 1;
       if (aSolid && bSolid) return 0;
-      return (a.displayName || '').localeCompare(b.displayName || '');
+      if (aOverlay && bOverlay) return a.manifestIndex - b.manifestIndex;
+      // Scene third (alphabetically)
+      if (aScene && !bScene) return -1;
+      if (!aScene && bScene) return 1;
+      if (aScene && bScene) return (a.displayName || '').localeCompare(b.displayName || '');
+      // $CASHTAG fourth (manifest order)
+      if (aCashtag && bCashtag) return a.manifestIndex - b.manifestIndex;
+      // Everything else by manifest order
+      return a.manifestIndex - b.manifestIndex;
     });
-    layerImagesCache.set(bgLayer, images);
+    // Remove manifestIndex before caching
+    layerImagesCache.set(bgLayer, images.map(({ manifestIndex: _manifestIndex, ...rest }) => rest));
   }
 
   // Process BASE

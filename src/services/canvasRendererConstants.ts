@@ -45,7 +45,7 @@ export const MOUTH_OVER_BEER_HAT = ['Cig', 'Joint', 'Cohiba'];
 export const NINJA_COVERING_MASKS = ['copium', 'hannibal', 'bandana'];
 
 /** Full-face masks that render on top of everything (skull masks, fake it mask) */
-export const FULL_FACE_MASKS = ['skull_mask', 'skull-mask', 'hand_mask', 'hand-mask', 'medievalbepe', 'tanginium'];
+export const FULL_FACE_MASKS = ['skull_mask', 'skull-mask', 'mask-skull', 'hand_mask', 'hand-mask', 'medievalbepe', 'tanginium'];
 
 /** Heads that need EyesOverHead virtual layer (right half of eyes rendered above head) */
 export const HEADS_NEEDING_EYES_OVERLAY = ['clown', 'pirate', 'ronin', 'supa', 'saiyan'];
@@ -98,6 +98,7 @@ export const LAYER_Z_INDEX: Record<string, number> = {
   BubbleGumOverHead: 12.1, // Bubble Gum re-drawn on top of Head traits
   MouthOverBeerHat: 12.5,  // Cig, Joint, Cohiba drawn on top of Beer Hat
   BandanaMaskOverRonin: 13,
+  NeckbeardOverRonin: 13.5, // right 50% of neckbeard over Ronin Helmet
   EyesOverHead: 14,
   EyesOverStandardCut: 15,
   MaskOverStandardCut: 16,

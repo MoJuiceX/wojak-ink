@@ -154,6 +154,7 @@ const frequencies: Record<string, Record<string, number>> = {
     Stache: 138,
   },
   Background: {
+    // Cashtag backgrounds
     $BEPE: 82,
     $CASTER: 43,
     $CHIA: 219,
@@ -162,6 +163,7 @@ const frequencies: Record<string, Record<string, number>> = {
     $LOVE: 90,
     $NECKCOIN: 49,
     $PIZZA: 51,
+    // Plain backgrounds
     'Chia Green': 232,
     'Golden Hour': 87,
     'Green Candle': 192,
@@ -172,6 +174,7 @@ const frequencies: Record<string, Record<string, number>> = {
     'Sky Dive': 206,
     'Sky Shock Blue': 205,
     'Tangerine Pop': 148,
+    // Scene backgrounds (from NFT collection)
     'Bepe Barracks': 145,
     'Chia Farm': 87,
     Hell: 113,
@@ -188,6 +191,27 @@ const frequencies: Record<string, Record<string, number>> = {
     'Silicon.net Data Center': 1,
     'Spell Room': 59,
     'White House': 45,
+    // New scene backgrounds (rare weight = 1)
+    Colosseum: 1,
+    Crystal: 1,
+    'Dark Alley': 1,
+    'Deep Ocean': 1,
+    'Dragons Lair': 1,
+    'Everythings-Fine': 1,
+    'Frozen Tundra': 1,
+    Graveyard: 1,
+    Heaven: 1,
+    Jungle: 1,
+    'Morning-Routine': 1,
+    'Pirate-ship': 1,
+    'Price-down': 1,
+    'Price-up': 1,
+    Rainforest: 1,
+    Rome: 1,
+    'Sky Fortress': 1,
+    'Steel Forge': 1,
+    'Stone Temple': 1,
+    Thunderstorm: 1,
   },
 };
 

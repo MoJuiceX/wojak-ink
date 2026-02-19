@@ -8,6 +8,18 @@
   display: flex;
   flex-direction: column;
   min-height: 100%;
+  overflow: hidden;
+}
+
+/* Mobile: constrain to viewport height to prevent overflow */
+@media (max-width: 1023px) {
+  .generator-page {
+    height: calc(100vh - 56px);
+    height: calc(100dvh - 56px);
+    max-height: calc(100vh - 56px);
+    max-height: calc(100dvh - 56px);
+    overflow: hidden;
+  }
 }
 
 /* Desktop: constrain to viewport, allow scroll when content overflows so action bar is never cut off */
@@ -29,8 +41,18 @@
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  gap: 16px;
-  padding: 16px;
+  gap: 12px;
+  padding: 12px;
+  overflow: hidden;
+}
+
+/* Mobile: stack vertically with proper containment */
+@media (max-width: 1023px) {
+  .generator-content {
+    height: 100%;
+    max-height: calc(100vh - 56px);
+    max-height: calc(100dvh - 56px);
+  }
 }
 
 /* Desktop: side by side layout */
@@ -52,18 +74,28 @@
   gap: 10px;
 }
 
-/* Mobile: preview takes reasonable height */
+/* Mobile: preview takes reasonable height without overlapping options */
 @media (max-width: 1023px) {
   .generator-preview {
-    flex-shrink: 0;
+    flex: 0 0 auto;
+    position: relative;
+    z-index: 2;
+    background: var(--color-bg);
   }
 
-  .generator-preview-canvas,
   .generator-preview-canvas-wrapper {
     aspect-ratio: 1;
-    max-height: 45vh;
     width: 100%;
+    /* Limit preview to 50% of viewport height to leave room for options grid */
+    max-width: min(100%, calc(50vh - 56px));
+    max-height: calc(50vh - 56px);
     margin: 0 auto;
+  }
+
+  .generator-preview-canvas {
+    aspect-ratio: 1;
+    width: 100%;
+    height: auto;
   }
 }
 
@@ -99,6 +131,20 @@
   flex: 1;
   min-height: 0;
   gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Mobile: options section fills remaining space and scrolls */
+@media (max-width: 1023px) {
+  .generator-options {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    background: var(--color-bg);
+    position: relative;
+    z-index: 1;
+  }
 }
 
 /* Desktop: grid (3 cols) + details/colors panel as two columns */
@@ -132,6 +178,16 @@
 .generator-categories {
   display: flex;
   flex-shrink: 0;
+  position: relative;
+  z-index: 5;
+  background: var(--color-bg);
+}
+
+/* Mobile: category tabs stay fixed at bottom of preview section */
+@media (max-width: 1023px) {
+  .generator-categories {
+    width: 100%;
+  }
 }
 
 /* === OPTIONS GRID CONTAINER === */
@@ -144,6 +200,17 @@
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Mobile: ensure grid container fills available space and scrolls */
+@media (max-width: 1023px) {
+  .generator-options-grid-container {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
 }
 
 /* === OPTIONS GRID === */
@@ -331,6 +398,14 @@
   flex-shrink: 0;
   position: relative;
   z-index: 10;
+  background: var(--color-bg);
+}
+
+/* Mobile: action bar has proper padding and stays above other content */
+@media (max-width: 1023px) {
+  .generator-actions {
+    padding: 4px 0;
+  }
 }
 
 .generator-action-btn {

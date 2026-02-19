@@ -43,6 +43,7 @@ export const LAYER_ORDER: LayerDefinition[] = [
   { name: 'Astronaut', folder: 'ASTRONAUT', zIndex: 11, isVirtual: true, description: 'Astronaut extracted from Clothes' },
   { name: 'Head', folder: 'HEAD', zIndex: 12 },
   { name: 'BandanaMaskOverRonin', folder: 'MASK', zIndex: 13, isVirtual: true, description: 'Bandana right half over Ronin' },
+  { name: 'NeckbeardOverRonin', folder: 'FACIALHAIR', zIndex: 13.5, isVirtual: true, description: 'Neckbeard right half over Ronin' },
   { name: 'EyesOverHead', folder: 'EYES', zIndex: 14, isVirtual: true, description: 'Eyes right half over specific heads' },
   { name: 'BubbleGumOverEyes', folder: 'MOUTH', zIndex: 60, isVirtual: true, description: 'Bubble Gum on top of everything' },
 ];
@@ -69,6 +70,7 @@ export type GeneratorLayerName =
   | 'Astronaut'
   | 'Head'
   | 'BandanaMaskOverRonin'
+  | 'NeckbeardOverRonin'
   | 'EyesOverHead'
   | 'BubbleGumOverEyes';
 

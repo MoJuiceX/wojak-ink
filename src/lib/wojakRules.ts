@@ -544,6 +544,19 @@ function ruleBubbleGumDisablesMouthItem(resolver: SelectionResolver): RuleResult
   };
 }
 
+/**
+ * Bubble Gum disables FacialHair (Neckbeard, Stache)
+ */
+function ruleBubbleGumDisablesFacialHair(resolver: SelectionResolver): RuleResult {
+  if (resolver.getTraitId('MouthBase') !== KNOWN_TRAIT_IDS.MouthBase_BubbleGum) return { disabledLayers: [] };
+
+  return {
+    disabledLayers: ['FacialHair'],
+    reason: 'Deselect Bubble Gum',
+    clearSelections: ['FacialHair'],
+  };
+}
+
 
 /**
  * Sonic suit, Pickle suit, and Goose suit: Bandana mask cannot be selected.
@@ -617,41 +630,48 @@ function ruleSuitDisablesHannibal(resolver: SelectionResolver): RuleResult {
 }
 
 /**
- * Full-face masks (Skull masks, Fake It) disable Laser Eyes (Eyes layer; path check for mask names)
+ * Laser Eyes and any Mask are mutually exclusive.
+ * - When any mask is selected, laser eyes cannot be selected.
+ * - When laser eyes are selected, masks cannot be selected.
  */
-function ruleFullFaceMaskDisablesLaserEyes(resolver: SelectionResolver): RuleResult {
+function ruleLaserEyesMaskMutualExclusion(resolver: SelectionResolver): RuleResult {
   const maskPath = resolver.getPath('Mask');
   const eyesPath = resolver.getPath('Eyes');
 
-  const fullFaceSubstrings = ['skull_mask', 'skull-mask', 'hand_mask', 'hand-mask', 'medievalbepe', 'tanginium'];
-  const isFullFaceMask = fullFaceSubstrings.some((m) => pathContains(maskPath, m));
-
-  if (!isFullFaceMask) return { disabledLayers: [] };
-
+  const hasMask = !isSelectionPathEmpty(maskPath);
   const hasLaserEyes = pathContains(eyesPath, 'laser');
-  const disabledEyesOptions = ['Laser', 'Laser-Eyes', 'Laser Eyes'];
-  const disabledEyesReasons = {
-    Laser: 'Remove Mask',
-    'Laser-Eyes': 'Remove Mask',
-    'Laser Eyes': 'Remove Mask',
-  };
 
-  if (hasLaserEyes) {
+  const disabledEyesOptions = ['Laser', 'Laser-Eyes', 'Laser Eyes'];
+  const disabledEyesReasons = buildDisabledReasons(disabledEyesOptions, 'Remove Mask');
+
+  // When mask is selected, disable/clear laser eyes
+  if (hasMask) {
+    if (hasLaserEyes) {
+      return {
+        disabledLayers: [],
+        reason: 'Remove Mask',
+        clearSelections: ['Eyes'],
+        forceSelections: { Eyes: '' },
+        disabledOptions: { Eyes: disabledEyesOptions },
+        disabledOptionReasons: { Eyes: disabledEyesReasons },
+      };
+    }
     return {
       disabledLayers: [],
-      reason: 'Deselect full-face mask',
-      clearSelections: ['Eyes'],
-      forceSelections: { Eyes: '' },
       disabledOptions: { Eyes: disabledEyesOptions },
       disabledOptionReasons: { Eyes: disabledEyesReasons },
     };
   }
 
-  return {
-    disabledLayers: [],
-    disabledOptions: { Eyes: disabledEyesOptions },
-    disabledOptionReasons: { Eyes: disabledEyesReasons },
-  };
+  // When laser eyes are selected, disable the entire Mask layer
+  if (hasLaserEyes) {
+    return {
+      disabledLayers: ['Mask'],
+      reason: 'Remove Laser Eyes',
+    };
+  }
+
+  return { disabledLayers: [] };
 }
 
 /**
@@ -782,6 +802,7 @@ const RULES = [
   ruleCigJointCohibaRequiresMouthBase,
   rulePizzaDisablesMouthItem,
   ruleBubbleGumDisablesMouthItem,
+  ruleBubbleGumDisablesFacialHair,
   ruleAstronautDisablesMouthOptions,
   ruleAstronautCopiumMaskMutualExclusion,
   ruleAstronautDisablesNightVision,
@@ -791,7 +812,7 @@ const RULES = [
   ruleFacialHairRequiresMouthBase,
   ruleMaskBlocksOtherLayers,
   ruleHannibalMaskRemovesNeckbeard,
-  ruleFullFaceMaskDisablesLaserEyes,
+  ruleLaserEyesMaskMutualExclusion,
   ruleClothesAddonRequiresTeeOrTanktop,
   ruleSuitDisablesNeckbeard,
   ruleFirefighterHelmetEyesExclusion,

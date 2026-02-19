@@ -16,6 +16,9 @@ import { buildRenderLayers } from '@/services/canvasRendererLayerBuilder';
 import { LAYER_Z_INDEX, MOUTH_OVER_BEER_HAT } from '@/services/canvasRendererConstants';
 import type { RenderLayer, G2LayerData, G2DrawItem, RenderResult, LayerRenderOverride } from '@/services/canvasRendererTypes';
 
+/** Default color for solid color backgrounds - sky blue */
+const SOLID_BG_DEFAULT_COLOR = '#38BDF8';
+
 function isMouthOverBeerHat(path: string | undefined): boolean {
   if (!path) return false;
   const lower = path.toLowerCase();
@@ -1706,6 +1709,26 @@ function drawLayer(
 /** Sentinel path for solid-color background (user picks color via color picker) */
 const BACKGROUND_SOLID_PATH = '__solid__';
 
+/** Price overlay paths */
+const PRICE_UP_OVERLAY = '__price_up__';
+const PRICE_DOWN_OVERLAY = '__price_down__';
+const PRICE_UP_IMAGE_PATH = '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Price-up.png';
+const PRICE_DOWN_IMAGE_PATH = '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Price-down.png';
+
+/** Parse solid background path for optional overlay */
+function parseSolidBackgroundPath(path: string): { isSolid: boolean; overlay: 'up' | 'down' | null } {
+  if (!path.includes(BACKGROUND_SOLID_PATH)) {
+    return { isSolid: false, overlay: null };
+  }
+  if (path.includes(PRICE_UP_OVERLAY)) {
+    return { isSolid: true, overlay: 'up' };
+  }
+  if (path.includes(PRICE_DOWN_OVERLAY)) {
+    return { isSolid: true, overlay: 'down' };
+  }
+  return { isSolid: true, overlay: null };
+}
+
 // ─── Layer override helpers (Rule Builder visual preview) ───
 
 /** Map virtual/composite layer names back to their parent UI layer name. */
@@ -2080,15 +2103,26 @@ export async function renderToCanvas(
   type LoadedLayer =
     | (RenderLayer & { image: HTMLImageElement; isSolidBackground?: false })
     | (RenderLayer & { fillImage: HTMLImageElement; outlineImage: HTMLImageElement; image?: null; isSolidBackground?: false })
-    | (RenderLayer & { image?: null; isSolidBackground: true });
+    | (RenderLayer & { image?: null; isSolidBackground: true; overlayImage?: HTMLImageElement });
 
   const loadPromises = resolvedLayers.map(async (layer): Promise<LoadedLayer | null> => {
     if (layer.g2) {
       return { ...layer, image: null as unknown as HTMLImageElement } as LoadedLayer;
     }
-    // Solid color background: no image load
-    if (layer.layerName === 'Background' && (layer.path === BACKGROUND_SOLID_PATH || layer.path?.includes(BACKGROUND_SOLID_PATH))) {
-      return { ...layer, image: undefined, isSolidBackground: true } as unknown as LoadedLayer;
+    // Solid color background: no image load, but may have price overlay
+    if (layer.layerName === 'Background' && layer.path?.includes(BACKGROUND_SOLID_PATH)) {
+      const { overlay } = parseSolidBackgroundPath(layer.path);
+      let overlayImage: HTMLImageElement | undefined;
+      if (overlay === 'up') {
+        try {
+          overlayImage = await loadImage(PRICE_UP_IMAGE_PATH);
+        } catch { /* ignore overlay load failure */ }
+      } else if (overlay === 'down') {
+        try {
+          overlayImage = await loadImage(PRICE_DOWN_IMAGE_PATH);
+        } catch { /* ignore overlay load failure */ }
+      }
+      return { ...layer, image: undefined, isSolidBackground: true, overlayImage } as unknown as LoadedLayer;
     }
     if (layer.fillPath && layer.outlinePath && layer.color) {
       try {
@@ -2127,7 +2161,7 @@ export async function renderToCanvas(
 
   loadedLayers.sort((a, b) => a.zIndex - b.zIndex);
 
-  const bgColor = options.selectedColors?.Background ?? '#1a1a2e';
+  const bgColor = options.selectedColors?.Background ?? SOLID_BG_DEFAULT_COLOR;
 
   for (const layer of loadedLayers) {
     if (!options.includeBackground && layer.layerName === 'Background') {
@@ -2145,6 +2179,11 @@ export async function renderToCanvas(
     if ((layer as LoadedLayer & { isSolidBackground?: boolean }).isSolidBackground) {
       ctx.fillStyle = bgColor;
       ctx.fillRect(0, 0, size, size);
+      // Draw price overlay on top of solid color if present
+      const overlayImg = (layer as LoadedLayer & { overlayImage?: HTMLImageElement }).overlayImage;
+      if (overlayImg) {
+        ctx.drawImage(overlayImg, 0, 0, size, size);
+      }
     } else if (layer.g2) {
       await drawG2Layer(ctx, layer.g2, size, layer.clipRightHalf, layer.clipLeftPercent, layer.clipRightPercent, layer.clipTopHalfOnly, layer.clipBottomHalfFull, layer.clipBoundaryOffsetPx, layer.clipTopPercent, layer.clipPolygon);
     } else if (
@@ -2388,25 +2427,36 @@ export async function exportImage(
 
   const loadPromises = resolvedLayers.map(async (layer) => {
     if (layer.g2) {
-      return { ...layer, image: null as unknown as HTMLImageElement, isSolidBg: false };
+      return { ...layer, image: null as unknown as HTMLImageElement, isSolidBg: false, overlayImage: null as HTMLImageElement | null };
     }
-    if (layer.layerName === 'Background' && (layer.path === BACKGROUND_SOLID_PATH || layer.path?.includes(BACKGROUND_SOLID_PATH))) {
-      return { ...layer, image: null as unknown as HTMLImageElement, isSolidBg: true };
+    if (layer.layerName === 'Background' && layer.path?.includes(BACKGROUND_SOLID_PATH)) {
+      const { overlay } = parseSolidBackgroundPath(layer.path);
+      let overlayImage: HTMLImageElement | null = null;
+      if (overlay === 'up') {
+        try {
+          overlayImage = await loadImage(PRICE_UP_IMAGE_PATH);
+        } catch { /* ignore overlay load failure */ }
+      } else if (overlay === 'down') {
+        try {
+          overlayImage = await loadImage(PRICE_DOWN_IMAGE_PATH);
+        } catch { /* ignore overlay load failure */ }
+      }
+      return { ...layer, image: null as unknown as HTMLImageElement, isSolidBg: true, overlayImage };
     }
     try {
       const image = await loadImage(layer.path);
-      return { ...layer, image, isSolidBg: false };
+      return { ...layer, image, isSolidBg: false, overlayImage: null as HTMLImageElement | null };
     } catch {
       return null;
     }
   });
 
-  type ExportLoaded = RenderLayer & { image: HTMLImageElement | null; isSolidBg: boolean };
+  type ExportLoaded = RenderLayer & { image: HTMLImageElement | null; isSolidBg: boolean; overlayImage: HTMLImageElement | null };
   const loadedLayers = (await Promise.all(loadPromises)).filter((l) => l !== null) as ExportLoaded[];
 
   loadedLayers.sort((a, b) => a.zIndex - b.zIndex);
 
-  const bgColor = selectedColors?.Background ?? '#1a1a2e';
+  const bgColor = selectedColors?.Background ?? SOLID_BG_DEFAULT_COLOR;
 
   for (const layer of loadedLayers) {
     if (!options.includeBackground && layer.layerName === 'Background') {
@@ -2415,6 +2465,10 @@ export async function exportImage(
     if (layer.isSolidBg) {
       ctx.fillStyle = bgColor;
       ctx.fillRect(0, 0, size, size);
+      // Draw price overlay on top of solid color if present
+      if (layer.overlayImage) {
+        ctx.drawImage(layer.overlayImage, 0, 0, size, size);
+      }
       continue;
     }
     if (layer.g2) {

@@ -13,8 +13,14 @@ import { TraitUsageBadge } from '@/components/generator/TraitSelector';
 import { traitGridVariants, traitCardStaggerVariants } from '@/config/generatorAnimations';
 import type { LayerImage } from '@/services/generatorService';
 import type { UnifiedTrait } from '@/services/generatorService';
+import { getG1MouthTransform, getG2MouthTransform } from './mouthPreviewPositions';
 
 const G2_BASE_PATH = '/assets/wojak-layers/YourWojak-layers';
+
+// Default layer paths for preview composites (same as TraitSelector)
+const DEFAULT_BASE_PATH = '/assets/wojak-layers/BASE/BASE_Base-Wojak_classic.png';
+const DEFAULT_CLOTHES_PATH = '/assets/wojak-layers/CLOTHES/CLOTHES_Tee_blue.png';
+const DEFAULT_MOUTH_PATH = '/assets/wojak-layers/MOUTH/MOUTH_numb.png';
 
 interface MouthLayerSelectorProps {
   className?: string;
@@ -40,10 +46,16 @@ interface ImageCardProps {
   onClick: () => void;
   badge?: string;
   pricing?: TraitPricingEntry | null;
+  /** If true, show numb mouth under the trait (for add-on items like cig, joint, neckbeard) */
+  showMouthUnderlay?: boolean;
 }
 
-function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, badge, pricing }: ImageCardProps) {
+/** Mouth trait card with base face + clothes underlay */
+function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, badge, pricing, showMouthUnderlay }: ImageCardProps) {
   const prefersReducedMotion = useReducedMotion();
+
+  // Get zoom transform from centralized positions file
+  const zoomTransform = getG1MouthTransform(image.displayName);
 
   return (
     <motion.button
@@ -81,13 +93,49 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, bad
       <div
         className="relative w-full h-full rounded-lg overflow-hidden trait-card-image-bg"
       >
-        <img
-          src={image.path}
-          alt={image.displayName}
-          className="absolute inset-0 w-full h-full object-cover"
-          loading="lazy"
-        />
+        {/* Zoomed container to focus on mouth area */}
+        <div
+          className="absolute inset-0 w-full h-full"
+          style={{
+            transform: zoomTransform,
+            transformOrigin: 'center center',
+          }}
+        >
+          {/* Base face layer */}
+          <img
+            src={DEFAULT_BASE_PATH}
+            alt="Base layer"
+            className="absolute inset-0 w-full h-full object-cover"
+            loading="lazy"
+          />
+          {/* Clothes layer (blue tee) */}
+          <img
+            src={DEFAULT_CLOTHES_PATH}
+            alt="Clothes layer"
+            className="absolute inset-0 w-full h-full object-cover"
+            loading="lazy"
+          />
+          {/* Numb mouth layer (for add-on items) */}
+          {showMouthUnderlay && (
+            <img
+              src={DEFAULT_MOUTH_PATH}
+              alt="Mouth layer"
+              className="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+            />
+          )}
+          {/* Mouth trait on top */}
+          <img
+            src={image.path}
+            alt={image.displayName}
+            className="absolute inset-0 w-full h-full object-cover"
+            loading="lazy"
+          />
+        </div>
         <TraitUsageBadge pricing={pricing ?? null} />
+        <div className="trait-label-overlay">
+          <span className="trait-label-text">{image.displayName}</span>
+        </div>
       </div>
       {/* Disabled info badge */}
       {isDisabled && disabledReason && (
@@ -128,13 +176,26 @@ interface G2MouthCardProps {
   pricing?: TraitPricingEntry | null;
 }
 
+/** Default color for Bubble Gum fill */
+const BUBBLE_GUM_DEFAULT_COLOR = '#FF1493';
+
+/** G2 mouth trait card with base face + clothes underlay */
 function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick, pricing }: G2MouthCardProps) {
   const prefersReducedMotion = useReducedMotion();
-  const thumbnailSrc = trait.outlineFile
+
+  // Get fill and outline paths
+  const fillSrc = trait.fillFile ? `${G2_BASE_PATH}/${trait.fillFile}` : null;
+  const outlineSrc = trait.outlineFile
     ? `${G2_BASE_PATH}/${trait.outlineFile}`
     : trait.layer0File
       ? `${G2_BASE_PATH}/${trait.layer0File}`
       : '';
+
+  // Default color for colorable traits (like Bubble Gum)
+  const defaultColor = trait.defaultColor || BUBBLE_GUM_DEFAULT_COLOR;
+
+  // Get zoom transform from centralized positions file
+  const zoomTransform = getG2MouthTransform(trait.name);
 
   return (
     <motion.button
@@ -142,12 +203,12 @@ function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick, p
       style={{
         background: 'var(--generator-trait-card-bg)',
         border: isSelected
-          ? '2px solid var(--color-cyan, #00d4ff)'
+          ? '2px solid var(--generator-selected-color, #F97316)'
           : '1px solid var(--generator-trait-card-border)',
         opacity: isDisabled ? 0.5 : 1,
         cursor: isDisabled ? 'not-allowed' : 'pointer',
         boxShadow: isSelected
-          ? '0 0 20px var(--glow-cyan), 0 4px 12px var(--color-black-30)'
+          ? '0 0 20px var(--generator-selected-glow, var(--color-primary-50)), 0 4px 12px var(--color-black-30)'
           : '0 2px 8px var(--color-black-20)',
         transition: 'all 0.3s ease',
       }}
@@ -159,20 +220,62 @@ function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick, p
       title={disabledReason || trait.name}
     >
       <div className="relative w-full h-full rounded-lg overflow-hidden trait-card-image-bg">
-        {thumbnailSrc && (
+        {/* Zoomed container to focus on mouth area */}
+        <div
+          className="absolute inset-0 w-full h-full"
+          style={{
+            transform: zoomTransform,
+            transformOrigin: 'center center',
+          }}
+        >
+          {/* Base face layer */}
           <img
-            src={thumbnailSrc}
-            alt={trait.name}
+            src={DEFAULT_BASE_PATH}
+            alt="Base layer"
             className="absolute inset-0 w-full h-full object-cover"
             loading="lazy"
           />
-        )}
+          {/* Clothes layer (blue tee) */}
+          <img
+            src={DEFAULT_CLOTHES_PATH}
+            alt="Clothes layer"
+            className="absolute inset-0 w-full h-full object-cover"
+            loading="lazy"
+          />
+          {/* Fill layer with default color (for colorable traits like Bubble Gum) */}
+          {fillSrc && (
+            <div
+              className="absolute inset-0 w-full h-full"
+              style={{
+                backgroundColor: defaultColor,
+                maskImage: `url(${fillSrc})`,
+                WebkitMaskImage: `url(${fillSrc})`,
+                maskSize: 'cover',
+                WebkitMaskSize: 'cover',
+                maskPosition: 'center',
+                WebkitMaskPosition: 'center',
+              }}
+            />
+          )}
+          {/* Outline layer on top */}
+          {outlineSrc && (
+            <img
+              src={outlineSrc}
+              alt={trait.name}
+              className="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+            />
+          )}
+        </div>
         <TraitUsageBadge pricing={pricing ?? null} />
+        <div className="trait-label-overlay">
+          <span className="trait-label-text">{trait.name}</span>
+        </div>
       </div>
       {isSelected && !isDisabled && (
         <motion.div
           className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center z-20"
-          style={{ background: 'var(--color-cyan, #00d4ff)' }}
+          style={{ background: 'var(--generator-badge-color, #F97316)' }}
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: 'spring', stiffness: 500, damping: 25 }}
@@ -225,6 +328,53 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
   const [facialHairImages, setFacialHairImages] = useState<LayerImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Custom sort order for MouthBase traits (exact display names or path keywords)
+  const MOUTH_BASE_ORDER = [
+    'numb',
+    'smile',
+    'screem',    // Screaming (file is "screeming")
+    'teeth',     // Regular teeth (must come before gold-teeth)
+    'gold-teeth', // Gold Teeth
+    'drac',      // Vampire Teeth
+    'pipe',
+    'pizza',
+    'bubble',    // Bubble Gum
+    'hannibal',  // Hannibal Mask
+  ];
+
+  const sortMouthBaseTraits = (traits: UnifiedTrait[]): UnifiedTrait[] => {
+    return [...traits].sort((a, b) => {
+      // Use g1Path if available, otherwise use name
+      const aKey = (a.g1Path || a.name).toLowerCase();
+      const bKey = (b.g1Path || b.name).toLowerCase();
+
+      // Find order index - check for exact substring match
+      const getOrderIndex = (key: string): number => {
+        for (let i = 0; i < MOUTH_BASE_ORDER.length; i++) {
+          const keyword = MOUTH_BASE_ORDER[i];
+          // For "teeth", make sure it doesn't match "gold-teeth"
+          if (keyword === 'teeth') {
+            if (key.includes('teeth') && !key.includes('gold')) return i;
+          } else if (key.includes(keyword)) {
+            return i;
+          }
+        }
+        return -1;
+      };
+
+      const aIndex = getOrderIndex(aKey);
+      const bIndex = getOrderIndex(bKey);
+
+      // If both found in order list, sort by that order
+      if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+      // If only one found, prioritize the one in the list
+      if (aIndex !== -1) return -1;
+      if (bIndex !== -1) return 1;
+      // Otherwise alphabetical
+      return aKey.localeCompare(bKey);
+    });
+  };
+
   const selectedMouthBase = selectedLayers.MouthBase;
   const selectedMouthItem = selectedLayers.MouthItem;
   const selectedFacialHair = selectedLayers.FacialHair;
@@ -241,7 +391,7 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
       getLayerImages('FacialHair'),
     ])
       .then(([baseUnified, itemImages, facialImages]) => {
-        setMouthBaseUnified(baseUnified);
+        setMouthBaseUnified(sortMouthBaseTraits(baseUnified));
         setMouthItemImages(itemImages);
         setFacialHairImages(facialImages);
         setIsLoading(false);
@@ -289,7 +439,10 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
     const hasMask = maskPath && maskPath !== '';
     const hasPipe = mouthBasePath.toLowerCase().includes('pipe');
     const hasPizza = mouthBasePath.toLowerCase().includes('pizza');
-    const hasBubbleGum = mouthBasePath.toLowerCase().includes('bubble-gum');
+    // Check both G1 path and G2 selection for Bubble Gum
+    const hasBubbleGum = mouthBasePath.toLowerCase().includes('bubble-gum') ||
+      g2Selections.MouthBase?.traitId?.toLowerCase().includes('bubblegum') ||
+      g2Selections.MouthBase?.traitId?.toLowerCase().includes('bubble-gum');
 
     if (layer === 'MouthItem') {
       if (hasAstronaut) return 'Remove Astronaut';
@@ -311,6 +464,7 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
 
     if (layer === 'FacialHair') {
       if (hasMask) return 'Remove Mask';
+      if (hasBubbleGum) return 'Remove Bubble Gum';
     }
 
     return undefined;
@@ -407,7 +561,7 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
                 </motion.div>
               );
             })}
-            {/* MouthItem items (Cig, Cohiba, Joint) */}
+            {/* MouthItem items (Cig, Cohiba, Joint) — show numb mouth underneath */}
             {mouthItemImages.map((image) => {
               const isDisabled = isLayerDisabled('MouthItem') || isOptionDisabled('MouthItem', image.displayName);
               return (
@@ -423,11 +577,12 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
                     onClick={() => handleMouthItemClick(image)}
                     badge="+"
                     pricing={lookupPricing(image.displayName)}
+                    showMouthUnderlay
                   />
                 </motion.div>
               );
             })}
-            {/* FacialHair items (Neckbeard, Stache) */}
+            {/* FacialHair items (Neckbeard, Stache) — show numb mouth underneath */}
             {facialHairImages.map((image) => {
               const isDisabled = isLayerDisabled('FacialHair') || isOptionDisabled('FacialHair', image.displayName);
               return (
@@ -443,6 +598,7 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
                     onClick={() => handleFacialHairClick(image)}
                     badge="+"
                     pricing={lookupPricing(image.displayName)}
+                    showMouthUnderlay
                   />
                 </motion.div>
               );

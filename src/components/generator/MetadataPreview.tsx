@@ -47,6 +47,9 @@ const LAYER_TO_TRAIT_TYPE: Record<string, string> = {
   Background: 'Background',
 };
 
+/** Default color for solid color backgrounds - sky blue */
+const SOLID_BG_DEFAULT_COLOR = '#38BDF8';
+
 /**
  * Phase 1 rarity counts (out of 4200 NFTs).
  * Used for consolidation: when multiple layers map to the same trait_type,
@@ -165,7 +168,7 @@ export function useMetadataAttributes(): MetadataAttribute[] {
 
       // Solid-color backgrounds: resolve from the hex code, not the path
       if (key === 'Background' && (value === '__solid__' || value?.includes('__solid__'))) {
-        const hex = selectedColors?.Background || '#1a1a2e';
+        const hex = selectedColors?.Background || SOLID_BG_DEFAULT_COLOR;
         const colorName = lookupBackgroundColorName(hex);
         rawAttrs.push({
           trait_type: 'Background',

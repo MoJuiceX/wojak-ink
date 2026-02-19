@@ -10,6 +10,7 @@ import { getG2DefaultColor } from '@/config/g2DefaultColors';
 import { getPreviewColorForLayeredFill, isLayerFill } from '@/utils/layeredTraitPreviewColors';
 import { getDerivedColor, getFlagSvgDataUrl } from '@/services/canvasRenderer';
 import { DEFAULT_CLOTHES_PATH } from '@/config/layers';
+import { getFillSlotBehavior, type DerivedFillSlotConfig } from '@/lib/g2FillTreatments';
 
 const G2_BASE_PATH = '/assets/wojak-layers/YourWojak-layers';
 const DEFAULT_BASE_PATH = '/assets/wojak-layers/BASE/BASE_Base-Wojak_classic.png';
@@ -158,19 +159,24 @@ function renderChiaFarmer({ trait }: PreviewProps) {
 }
 
 function renderDualFill({ trait, needsClothesUnderlay }: PreviewProps) {
+  const fill1Color = getG2DefaultColor(trait.id, 'fill1', trait, '#2563EB');
+
+  // Check if fill2 should be derived from fill1 using fill treatment config
+  const fill2Behavior = getFillSlotBehavior(trait.id, 'fill2');
+  let fill2Color: string;
+  if (fill2Behavior.type === 'derived') {
+    const derived = fill2Behavior as DerivedFillSlotConfig;
+    fill2Color = getDerivedColor(fill1Color, derived.treatment, derived.amount ?? 30);
+  } else {
+    fill2Color = getG2DefaultColor(trait.id, 'fill2', trait, '#f97316');
+  }
+
   return (
     <>
       <BaseUnderlay needsClothesUnderlay={needsClothesUnderlay} />
-      {/* fill1 + fill2 (e.g. Super Saiyan, SWAT) */}
-      <ColorFill file={trait.fill1File!} color={getG2DefaultColor(trait.id, 'fill1', trait, '#2563EB')} />
-      <ColorFill
-        file={trait.fill2File!}
-        color={
-          trait.id === 'Clothes_SWAT'
-            ? getDerivedColor(getG2DefaultColor(trait.id, 'fill1', trait, '#A020F0'), 'darker_shade', 10)
-            : getG2DefaultColor(trait.id, 'fill2', trait, '#f97316')
-        }
-      />
+      {/* fill1 + fill2 (e.g. Super Saiyan, SWAT, Bathrobe) */}
+      <ColorFill file={trait.fill1File!} color={fill1Color} />
+      <ColorFill file={trait.fill2File!} color={fill2Color} />
       {trait.id === 'Clothes_SWAT' && trait.detailOptions?.[0]?.file && (
         <Img src={`${G2_BASE_PATH}/${trait.detailOptions[0].file}`} />
       )}

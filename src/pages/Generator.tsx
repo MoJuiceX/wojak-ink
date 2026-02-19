@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './Generator.css';
 import { PageTransition } from '@/components/layout/PageTransition';
-import { useLayout } from '@/hooks/useLayout';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { GeneratorProvider, useGenerator } from '@/contexts/GeneratorContext';
 import {
   PreviewWithControls,
@@ -52,7 +52,8 @@ function GeneratorErrorBanner() {
 }
 
 function GeneratorContent() {
-  const { isDesktop } = useLayout();
+  // Use 1024px breakpoint to match Generator.css media queries
+  const isDesktop = useMediaQuery('(min-width: 1024px)');
   const { isInitialized, generatorError } = useGenerator();
   const [rightPanelMode, setRightPanelMode] = useState<RightPanelMode>('colors');
 

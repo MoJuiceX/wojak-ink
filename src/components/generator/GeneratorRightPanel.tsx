@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, Copy, Check } from 'lucide-react';
 import { useGenerator } from '@/contexts/GeneratorContext';
 import { ColorPicker, COLOR_FAMILIES, QUICK_ACCESS_COLORS } from './ColorPicker';
 import { G2TraitPanel } from './G2TraitPanel';
@@ -25,6 +25,9 @@ const LAYERS_WITH_G1_COLOR: UILayerName[] = ['Clothes', 'Head', 'Eyes'];
 /** Background uses color picker only when "Solid color" is selected */
 const isBackgroundSolidColor = (path: string | undefined) =>
   path === '__solid__' || path?.includes('__solid__');
+
+/** Default color for solid color backgrounds - sky blue */
+const SOLID_BG_DEFAULT_COLOR = '#38BDF8';
 
 /** Get the primary color slot key for a G2 trait (first user-pickable fill).
  * For layered traits (Viking helmet, 3D glasses) only considers slots that exist on the trait's layers,
@@ -498,24 +501,33 @@ export function GeneratorRightPanel() {
     : {
         selectedColor:
           activeLayer === 'Background' && isBackgroundSolidColor(selectedLayers.Background)
-            ? (selectedColors?.[activeLayer] || '#1a1a2e')
+            ? (selectedColors?.[activeLayer] || SOLID_BG_DEFAULT_COLOR)
             : (selectedColors?.[activeLayer] || '#FFFFFF'),
         onColorChange: (color: string) => setColor(activeLayer, color),
         disabled: !isG1Colorable,
         defaultColor:
           activeLayer === 'Background' && isBackgroundSolidColor(selectedLayers.Background)
-            ? '#1a1a2e'
+            ? SOLID_BG_DEFAULT_COLOR
             : undefined,
       };
 
   const hexDisplayRef = useRef('');
   const [hexDisplay, setHexDisplay] = useState('');
+  const [showCopied, setShowCopied] = useState(false);
   const handleHexDisplay = useCallback((hex: string) => {
     if (hex !== hexDisplayRef.current) {
       hexDisplayRef.current = hex;
       setHexDisplay(hex);
     }
   }, []);
+
+  const copyHexToClipboard = useCallback(() => {
+    if (!hexDisplay) return;
+    navigator.clipboard.writeText(hexDisplay).then(() => {
+      setShowCopied(true);
+      setTimeout(() => setShowCopied(false), 1500);
+    });
+  }, [hexDisplay]);
 
   return (
     <div
@@ -540,8 +552,8 @@ export function GeneratorRightPanel() {
       )}
       {/* Single color palette — hidden for full-face masks (no colorable parts) */}
       {!isG1MilitaryBeret && !(activeLayer === 'Mask' && isFullFaceMaskSelected(selectedLayers.Mask)) && (
-        <div className="flex-shrink-0">
-          <div className="flex items-center justify-between mb-1.5" style={{ height: '14px' }}>
+        <div className="flex-shrink-0" style={{ overflow: 'visible' }}>
+          <div className="flex items-center justify-between mb-1.5" style={{ height: '14px', overflow: 'visible' }}>
             <span className="text-[10px] font-semibold uppercase tracking-wide text-muted">Color</span>
             {/* Reset button — inline, no vertical padding so it doesn't change row height */}
             {(colorPickerProps.defaultColor || colorPickerProps.onReset) && (() => {
@@ -575,7 +587,19 @@ export function GeneratorRightPanel() {
               );
             })()}
             {hexDisplay && (
-              <span className="font-mono text-[10px] text-secondary">{hexDisplay}</span>
+              <button
+                type="button"
+                onClick={copyHexToClipboard}
+                className="flex items-center gap-1 font-mono text-[10px] text-secondary hover:text-white transition-colors cursor-pointer"
+                title="Copy to clipboard"
+              >
+                {hexDisplay}
+                {showCopied ? (
+                  <Check size={10} className="text-success" />
+                ) : (
+                  <Copy size={10} />
+                )}
+              </button>
             )}
           </div>
           <ColorPicker

@@ -9,26 +9,74 @@
 import { memo, useCallback, useState, useEffect } from 'react';
 
 // ============ Generator color palette ============
-// Must-haves from palette images + generator defaults; 6 per family for balance.
-// Each family ordered light → dark (left to right). See docs/GENERATOR-COLOR-PALETTE.md.
+// V2 palette: 15 families × 6 colors = 90 unique colors. All 18 combat types reachable (3–8 primary colors each).
+// Each family ordered light → dark (left to right). See docs/COLOR-PALETTE-V2-SPEC.md.
 
 export const COLOR_FAMILIES: { label: string; colors: string[] }[] = [
-  { label: 'Reds', colors: ['#FFC0CB', '#FF69B4', '#FF6347', '#FF0000', '#FF1493', '#8B0000'] },
-  { label: 'Oranges', colors: ['#FFFF00', '#FFD700', '#FACC15', '#FFA500', '#FF8C00', '#FF6B00'] },
-  { label: 'Greens', colors: ['#00FF00', '#7CFC00', '#32CD32', '#16a34a', '#2E8B57', '#228B22'] },
-  { label: 'Teals & Cyan', colors: ['#00FFFF', '#00d4ff', '#40E0D0', '#00CED1', '#20B2AA', '#0891b2'] },
-  { label: 'Blues', colors: ['#00BFFF', '#1E90FF', '#3b82f6', '#2563EB', '#0000CD', '#000080'] },
-  { label: 'Purples', colors: ['#BA55D3', '#a855f7', '#A020F0', '#7c3aed', '#800080', '#6d28d9'] },
-  { label: 'Pinks & Magenta', colors: ['#FFC0CB', '#f9a8d4', '#FF69B4', '#ec4899', '#FF1493', '#FF00FF'] },
-  { label: 'Browns', colors: ['#D2B48C', '#D4AF37', '#CD7F32', '#A0522D', '#8B4513', '#633800'] },
-  { label: 'Neutrals', colors: ['#FFFFFF', '#F5F5DC', '#C0C0C0', '#808080', '#404040', '#262626'] },
+  // Row 1 — Reds → FIRE
+  { label: 'Reds',           colors: ['#FF6347','#FF0000','#DC143C','#C0392B','#B22222','#992222'] },
+
+  // Row 2 — Oranges → DRAGON
+  { label: 'Oranges',        colors: ['#FFA500','#FF8C00','#FF6B00','#E65C00','#CC5200','#B34400'] },
+
+  // Row 3 — Yellows → ELECTRIC
+  { label: 'Yellows',        colors: ['#FFFF00','#F5FF00','#EEFF00','#D4E500','#C8D600','#A8B800'] },
+
+  // Row 4 — Yellow-Greens → INSECT
+  { label: 'Yellow-Greens',  colors: ['#ADFF2F','#9ACD32','#8DB600','#7CB518','#6B8E23','#4A6520'] },
+
+  // Row 5 — Greens → GRASS
+  { label: 'Greens',         colors: ['#00FF00','#32CD32','#22C55E','#16A34A','#2E8B57','#1A5C38'] },
+
+  // Row 6 — Teals → WATER / ICE
+  { label: 'Teals',          colors: ['#00FFFF','#40E0D0','#00CED1','#20B2AA','#0891B2','#0E7490'] },
+
+  // Row 7 — Sky Blues → AIR
+  { label: 'Sky Blues',      colors: ['#E0F7FF','#BAE6FD','#7DD3FC','#60A5FA','#93C5FD','#38BDF8'] },
+
+  // Row 8 — Blues → WATER / PSYCHE
+  { label: 'Blues',          colors: ['#1E90FF','#3B82F6','#2563EB','#1D4ED8','#1E3A8A','#172554'] },
+
+  // Row 9 — Purples → PSYCHE
+  { label: 'Purples',        colors: ['#C084FC','#A855F7','#9333EA','#7C3AED','#6D28D9','#5B21B6'] },
+
+  // Row 10 — Indigos → GHOST
+  { label: 'Indigos',        colors: ['#4B0082','#3B006B','#2E0054','#210040','#170030','#0D001A'] },
+
+  // Row 11 — Magentas → VENOM
+  { label: 'Magentas',       colors: ['#FF00FF','#E879F9','#D946EF','#A21CAF','#86198F','#6B1278'] },
+
+  // Row 12 — Pinks → MYSTIC
+  { label: 'Pinks',          colors: ['#FFB3D9','#FF69B4','#EC4899','#DB2777','#BE185D','#9D174D'] },
+
+  // Row 13 — Earth & Olive → EARTH
+  { label: 'Earth & Olive',  colors: ['#C8A87A','#A67C52','#8B7355','#6B5C3E','#5C4A1E','#3D2B1F'] },
+
+  // Row 14 — Crimsons → MARTIAL
+  { label: 'Crimsons',       colors: ['#7B1111','#6B0000','#5C0000','#4A0000','#380000','#1A0000'] },
+
+  // Row 15 — Neutrals (achromatic ramp: ICE → AIR → METAL → NEUTRAL → STONE → SHADOW)
+  { label: 'Neutrals',       colors: ['#FFFFFF','#C8C8C8','#999999','#666666','#404040','#171717'] },
 ];
 
 export const GENERATOR_PALETTE_HEX: string[] = COLOR_FAMILIES.flatMap((f) => f.colors);
 
 export const QUICK_ACCESS_COLORS = [
-  '#FF0000', '#FF6B00', '#FFD700', '#22c55e', '#00d4ff',
-  '#3b82f6', '#a855f7', '#ec4899', '#FFFFFF', '#262626',
+  '#FF0000',  // FIRE
+  '#FF8C00',  // DRAGON
+  '#FFFF00',  // ELECTRIC
+  '#9ACD32',  // INSECT
+  '#22C55E',  // GRASS
+  '#00CED1',  // WATER
+  '#7DD3FC',  // AIR
+  '#3B82F6',  // WATER/PSYCHE
+  '#A855F7',  // PSYCHE
+  '#4B0082',  // GHOST
+  '#D946EF',  // VENOM
+  '#EC4899',  // MYSTIC
+  '#8B7355',  // EARTH
+  '#6B0000',  // MARTIAL
+  '#999999',  // NEUTRAL/METAL
 ];
 
 // ============ Component ============

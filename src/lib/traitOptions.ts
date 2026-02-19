@@ -144,6 +144,11 @@ export function formatDisplayLabel(rawLabel: string | undefined): string {
     return 'Chia Farmer';
   }
 
+  // Drac -> Vampire Teeth
+  if (/^drac$/i.test(rawLabel)) {
+    return 'Vampire Teeth';
+  }
+
   // Topless Blue (overalls) - format as "Topless Blue"
   if (/topless[_ ]?blue/i.test(rawLabel)) {
     return 'Topless Blue';

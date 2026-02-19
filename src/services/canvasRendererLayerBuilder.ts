@@ -60,6 +60,14 @@ function hasRoninHelmet(selectedLayers: SelectedLayers): boolean {
   return pathContains(selectedLayers.Head, 'ronin');
 }
 
+function has2PacBandana(selectedLayers: SelectedLayers): boolean {
+  return pathContains(selectedLayers.Head, '2pac') && pathContains(selectedLayers.Head, 'bandana');
+}
+
+function hasAnarchySpikes(selectedLayers: SelectedLayers): boolean {
+  return pathContains(selectedLayers.Head, 'anarchy') || pathContains(selectedLayers.Head, 'spikes');
+}
+
 function hasBandanaMask(selectedLayers: SelectedLayers): boolean {
   return pathContains(selectedLayers.Mask, 'bandana');
 }
@@ -445,6 +453,66 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
           skipLayer = true;
           break;
         }
+        // Ninja Turtle + 2Pac Bandana: crop left 26.7%
+        if (hasNinja && has2PacBandana(selectedLayers)) {
+          layers.push({ path, zIndex, layerName, clipLeftPercent: 0.267 });
+          skipLayer = true;
+          break;
+        }
+        // Ninja Turtle + Anarchy Spikes: crop left 25%
+        if (hasNinja && hasAnarchySpikes(selectedLayers)) {
+          layers.push({ path, zIndex, layerName, clipLeftPercent: 0.25 });
+          skipLayer = true;
+          break;
+        }
+        // Ninja Turtle + Beanie: crop left 27.6%
+        if (hasNinja && pathContains(selectedLayers.Head, 'beanie')) {
+          layers.push({ path, zIndex, layerName, clipLeftPercent: 0.276 });
+          skipLayer = true;
+          break;
+        }
+        // Ninja Turtle + Centurion: crop left 28.1%
+        if (hasNinja && isCenturionSelected(selectedLayers)) {
+          layers.push({ path, zIndex, layerName, clipLeftPercent: 0.281 });
+          skipLayer = true;
+          break;
+        }
+        // Ninja Turtle + Clown: crop left 27.7%
+        if (hasNinja && pathContains(selectedLayers.Head, 'clown')) {
+          layers.push({ path, zIndex, layerName, clipLeftPercent: 0.277 });
+          skipLayer = true;
+          break;
+        }
+        // Ninja Turtle + Comrade Hat: crop left 23.7%
+        if (hasNinja && pathContains(selectedLayers.Head, 'comrade')) {
+          layers.push({ path, zIndex, layerName, clipLeftPercent: 0.237 });
+          skipLayer = true;
+          break;
+        }
+        // Ninja Turtle + Construction Helmet: crop left 25.3%
+        if (hasNinja && pathContains(selectedLayers.Head, 'construction')) {
+          layers.push({ path, zIndex, layerName, clipLeftPercent: 0.253 });
+          skipLayer = true;
+          break;
+        }
+        // Ninja Turtle + SWAT Helmet: crop left 24.7%
+        if (hasNinja && pathContains(selectedLayers.Head, 'swat')) {
+          layers.push({ path, zIndex, layerName, clipLeftPercent: 0.247 });
+          skipLayer = true;
+          break;
+        }
+        // Ninja Turtle + Wizard Hat (G2 path is "Wiz-Hat"): crop left 24.2%
+        if (hasNinja && (pathContains(selectedLayers.Head, 'wiz-hat') || pathContains(selectedLayers.Head, 'wizard'))) {
+          layers.push({ path, zIndex, layerName, clipLeftPercent: 0.242 });
+          skipLayer = true;
+          break;
+        }
+        // Ninja Turtle + Hard Hat: crop left 25.2%
+        if (hasNinja && pathContains(selectedLayers.Head, 'hard-hat')) {
+          layers.push({ path, zIndex, layerName, clipLeftPercent: 0.252 });
+          skipLayer = true;
+          break;
+        }
         if (hasTyson && hasMaskSelected) skipLayer = true;
         if (hasNinja && maskCoversNinja) skipLayer = true;
         if (hasEyePatchSelected && hasHannibal) skipLayer = true;
@@ -789,6 +857,16 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
           });
           skipLayer = true;
         }
+        // Neckbeard + Ronin Helmet: left 50% under helmet, right 50% on top
+        else if (pathContains(path, 'neckbeard') && hasRonin) {
+          layers.push({
+            path,
+            zIndex: LAYER_Z_INDEX.FacialHair,
+            layerName: 'FacialHair',
+            clipRightPercent: 0.5, // left 50% renders normally (under head)
+          });
+          skipLayer = true; // NeckbeardOverRonin virtual layer handles the right 50%
+        }
         break;
 
       case 'MouthBase':
@@ -990,6 +1068,19 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
         zIndex: LAYER_Z_INDEX.BandanaMaskOverRonin,
         layerName: 'BandanaMaskOverRonin',
         clipRightHalf: true,
+      });
+    }
+  }
+
+  // NeckbeardOverRonin: right 50% of neckbeard on top of Ronin Helmet
+  if (hasRonin) {
+    const facialHairPath = selectedLayers.FacialHair;
+    if (facialHairPath && pathContains(facialHairPath, 'neckbeard')) {
+      layers.push({
+        path: facialHairPath,
+        zIndex: LAYER_Z_INDEX.NeckbeardOverRonin,
+        layerName: 'NeckbeardOverRonin',
+        clipLeftPercent: 0.5, // right 50% renders on top of helmet
       });
     }
   }
