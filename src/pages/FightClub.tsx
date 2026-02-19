@@ -14,6 +14,7 @@ import { GameProvider } from '@/contexts/GameContext';
 import { SwipeAutoRegister } from '@/components/game/SwipeAutoRegister';
 import { GameErrorBoundary } from '@/components/games/GameError';
 import { GameLoading } from '@/components/games/GameLoading';
+import { FightClubRankings } from '@/components/combat/FightClubRankings';
 
 // Lazy load tab content
 const CombatArena = lazy(() => import('./CombatArena'));
@@ -92,12 +93,7 @@ export default function FightClub() {
               </Suspense>
             </GameProvider>
           )}
-          {activeTab === 'rankings' && (
-            <div className="card p-6 text-center">
-              <h2 className="text-xl font-semibold mb-2">Rankings</h2>
-              <p className="text-secondary">Coming soon - Power rankings for players and Wojaks</p>
-            </div>
-          )}
+          {activeTab === 'rankings' && <FightClubRankings />}
         </div>
       </div>
     </PageTransition>
