@@ -109,9 +109,8 @@ function TraitRankingTooltip({ data }: { data: TooltipData }) {
     >
       {/* Header */}
       <div
-        className="font-bold text-xs uppercase tracking-wide mb-2 pb-2"
+        className="font-bold text-xs uppercase tracking-wide mb-2 pb-2 text-accent"
         style={{
-          color: 'var(--color-accent)',
           borderBottom: '1px solid var(--color-border)',
         }}
       >
@@ -122,10 +121,7 @@ function TraitRankingTooltip({ data }: { data: TooltipData }) {
       {data.rarest && (
         <>
           <TraitRankingRow entry={data.rarest} isCurrent={false} />
-          <div
-            className="text-center py-1 text-xs"
-            style={{ color: 'var(--color-text-muted)' }}
-          >
+          <div className="text-center py-1 text-xs text-muted">
             ...
           </div>
         </>
@@ -143,10 +139,7 @@ function TraitRankingTooltip({ data }: { data: TooltipData }) {
       {/* Most common bookend */}
       {data.mostCommon && (
         <>
-          <div
-            className="text-center py-1 text-xs"
-            style={{ color: 'var(--color-text-muted)' }}
-          >
+          <div className="text-center py-1 text-xs text-muted">
             ...
           </div>
           <TraitRankingRow entry={data.mostCommon} isCurrent={false} />
@@ -178,7 +171,7 @@ function TraitRankingRow({
       }}
     >
       {/* Arrow indicator column */}
-      <span style={{ color: 'var(--color-accent)', textAlign: 'center' }}>
+      <span className="text-accent" style={{ textAlign: 'center' }}>
         {isCurrent ? '▶' : ''}
       </span>
       {/* Rank column */}
@@ -257,24 +250,18 @@ function AttributeCard({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <p
-        className="text-xs uppercase tracking-wide mb-1"
-        style={{ color: 'var(--color-text-muted)' }}
-      >
+      <p className="text-xs uppercase tracking-wide mb-1 text-muted">
         {trait.category}
       </p>
       {/* Trait value (left) + rank (right) on same row */}
       <div className="flex items-baseline justify-between gap-2">
-        <p
-          className="font-medium truncate"
-          style={{ color: 'var(--color-text)' }}
-        >
+        <p className="font-medium truncate text-primary">
           {trait.value}
         </p>
         {rankInfo && (
           <span
-            className="text-xs cursor-help whitespace-nowrap"
-            style={{ color: 'var(--color-accent)', opacity: 0.8 }}
+            className="text-xs cursor-help whitespace-nowrap text-accent"
+            style={{ opacity: 0.8 }}
           >
             {rankInfo.currentRank}/{rankInfo.total}
           </span>
@@ -339,10 +326,7 @@ function HistoryTab({ nftId }: { nftId: number }) {
 
   if (isLoading) {
     return (
-      <div
-        className="py-12 text-center text-sm"
-        style={{ color: 'var(--color-text-muted)' }}
-      >
+      <div className="py-12 text-center text-sm text-muted">
         Loading...
       </div>
     );
@@ -361,25 +345,16 @@ function HistoryTab({ nftId }: { nftId: number }) {
           }}
         >
           <div>
-            <p
-              className="font-medium text-sm"
-              style={{ color: 'var(--color-text)' }}
-            >
+            <p className="font-medium text-sm text-primary">
               Sold for {formatPriceXCH(sale.xchEquivalent)}
             </p>
             {sale.currency === 'CAT' && (
-              <p
-                className="text-xs mt-0.5"
-                style={{ color: 'var(--color-text-muted)' }}
-              >
+              <p className="text-xs mt-0.5 text-muted">
                 (Paid in CAT: {sale.amount.toLocaleString()})
               </p>
             )}
           </div>
-          <span
-            className="text-xs"
-            style={{ color: 'var(--color-text-muted)' }}
-          >
+          <span className="text-xs text-muted">
             {formatDate(sale.timestamp)}
           </span>
         </div>
@@ -393,16 +368,10 @@ function HistoryTab({ nftId }: { nftId: number }) {
           border: '1px solid var(--color-border)',
         }}
       >
-        <p
-          className="font-medium text-sm"
-          style={{ color: 'var(--color-text)' }}
-        >
+        <p className="font-medium text-sm text-primary">
           Minted
         </p>
-        <span
-          className="text-xs"
-          style={{ color: 'var(--color-text-muted)' }}
-        >
+        <span className="text-xs text-muted">
           {formatDate(COLLECTION_MINT_DATE)}
         </span>
       </div>
@@ -727,16 +696,10 @@ export function DesktopExplorerPanel({
                     {currentNft.listing ? (
                       <div className="flex items-center justify-between gap-4">
                         <div className="flex items-baseline gap-2">
-                          <span
-                            className="text-xl font-bold"
-                            style={{ color: 'var(--color-text)' }}
-                          >
+                          <span className="text-xl font-bold text-primary">
                             {formatPriceXCH(currentNft.listing.priceXCH)}
                           </span>
-                          <span
-                            className="text-sm"
-                            style={{ color: 'var(--color-text-muted)' }}
-                          >
+                          <span className="text-sm text-muted">
                             ≈ {formatPriceUSD(calculateUsd(currentNft.listing.priceXCH))}
                           </span>
                         </div>
@@ -781,10 +744,9 @@ export function DesktopExplorerPanel({
                       {/* Expand button - with gap after filter pills */}
                       <Tooltip text="Expand">
                         <motion.button
-                          className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors ml-4"
+                          className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors ml-4 text-secondary"
                           style={{
                             background: 'var(--color-surface)',
-                            color: 'var(--color-text-secondary)',
                             border: '1px solid var(--color-border)',
                           }}
                           onClick={() => setIsImageExpanded(true)}
@@ -800,10 +762,9 @@ export function DesktopExplorerPanel({
                       <div className="flex items-center gap-2 ml-4">
                         <Tooltip text="Shuffle">
                           <motion.button
-                            className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors"
+                            className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors text-secondary"
                             style={{
                               background: 'var(--color-surface)',
-                              color: 'var(--color-text-secondary)',
                               border: '1px solid var(--color-border)',
                             }}
                             onClick={shuffleToRandom}
@@ -832,9 +793,9 @@ export function DesktopExplorerPanel({
                               <Hash size={18} />
                               {getSortBase(sortMode) === 'id' && (
                                 getSortDirection(sortMode) === 'asc' ? (
-                                  <ChevronUp size={10} className="absolute -bottom-1 -right-1" style={{ color: 'var(--color-primary)', strokeWidth: 3 }} />
+                                  <ChevronUp size={10} className="absolute -bottom-1 -right-1 text-accent" style={{ strokeWidth: 3 }} />
                                 ) : (
-                                  <ChevronDown size={10} className="absolute -bottom-1 -right-1" style={{ color: 'var(--color-primary)', strokeWidth: 3 }} />
+                                  <ChevronDown size={10} className="absolute -bottom-1 -right-1 text-accent" style={{ strokeWidth: 3 }} />
                                 )
                               )}
                             </div>
@@ -858,9 +819,9 @@ export function DesktopExplorerPanel({
                               <Crown size={18} />
                               {getSortBase(sortMode) === 'rarity' && (
                                 getSortDirection(sortMode) === 'asc' ? (
-                                  <ChevronUp size={10} className="absolute -bottom-1 -right-1" style={{ color: 'var(--color-primary)', strokeWidth: 3 }} />
+                                  <ChevronUp size={10} className="absolute -bottom-1 -right-1 text-accent" style={{ strokeWidth: 3 }} />
                                 ) : (
-                                  <ChevronDown size={10} className="absolute -bottom-1 -right-1" style={{ color: 'var(--color-primary)', strokeWidth: 3 }} />
+                                  <ChevronDown size={10} className="absolute -bottom-1 -right-1 text-accent" style={{ strokeWidth: 3 }} />
                                 )
                               )}
                             </div>
@@ -884,9 +845,9 @@ export function DesktopExplorerPanel({
                               <DollarSign size={18} />
                               {getSortBase(sortMode) === 'price' && (
                                 getSortDirection(sortMode) === 'asc' ? (
-                                  <ChevronUp size={10} className="absolute -bottom-1 -right-1" style={{ color: 'var(--color-primary)', strokeWidth: 3 }} />
+                                  <ChevronUp size={10} className="absolute -bottom-1 -right-1 text-accent" style={{ strokeWidth: 3 }} />
                                 ) : (
-                                  <ChevronDown size={10} className="absolute -bottom-1 -right-1" style={{ color: 'var(--color-primary)', strokeWidth: 3 }} />
+                                  <ChevronDown size={10} className="absolute -bottom-1 -right-1 text-accent" style={{ strokeWidth: 3 }} />
                                 )
                               )}
                             </div>
@@ -901,11 +862,8 @@ export function DesktopExplorerPanel({
                   <div className="flex items-center gap-3 mb-6" style={{ marginTop: '0px' }}>
                     {/* NFT Name - fixed width to prevent layout shift */}
                     <span
-                      className="text-2xl font-bold"
-                      style={{
-                        color: 'var(--color-text)',
-                        minWidth: '180px',
-                      }}
+                      className="text-2xl font-bold text-primary"
+                      style={{ minWidth: '180px' }}
                     >
                       {currentNft.name}
                     </span>
@@ -917,38 +875,28 @@ export function DesktopExplorerPanel({
                     >
                       <Crown
                         size={18}
-                        style={{ color: 'var(--color-primary)' }}
+                        className="text-accent"
                       />
-                      <span
-                        className="text-sm font-medium"
-                        style={{ color: 'var(--color-text-secondary)' }}
-                      >
+                      <span className="text-sm font-medium text-secondary">
                         #{currentNft.rarityRank}
                       </span>
                     </div>
 
                     {/* Divider */}
-                    <span
-                      className="text-sm"
-                      style={{ color: 'var(--color-text-muted)' }}
-                    >
+                    <span className="text-sm text-muted">
                       |
                     </span>
 
                     {/* Owner */}
-                    <span
-                      className="text-sm"
-                      style={{ color: 'var(--color-text-muted)' }}
-                    >
+                    <span className="text-sm text-muted">
                       Owned by:{' '}
                       {ownerInfo ? (
                         <a
                           href={ownerInfo.profileUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="cursor-pointer hover:underline transition-colors relative z-50"
+                          className="cursor-pointer hover:underline transition-colors relative z-50 text-accent"
                           style={{
-                            color: 'var(--color-primary)',
                             textDecoration: 'none',
                             pointerEvents: 'auto',
                           }}
@@ -956,7 +904,7 @@ export function DesktopExplorerPanel({
                           {ownerInfo.name || truncateAddress(ownerInfo.address)}
                         </a>
                       ) : (
-                        <span style={{ color: 'var(--color-text-muted)' }}>Loading...</span>
+                        <span className="text-muted">Loading...</span>
                       )}
                     </span>
                   </div>
@@ -969,11 +917,10 @@ export function DesktopExplorerPanel({
                         return (
                           <span
                             key={badge.badge}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-secondary"
                             style={{
                               background: 'var(--color-surface)',
                               border: '1px solid var(--color-border)',
-                              color: 'var(--color-text-secondary)',
                             }}
                           >
                             <span>{def?.emoji || '🏅'}</span>
@@ -1048,10 +995,9 @@ export function DesktopExplorerPanel({
               {/* Close button - outside lightbox to the right */}
               <motion.button
                 ref={closeButtonRef}
-                className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-xl transition-colors focus:outline-none focus-visible:ring-2 self-start mt-4"
+                className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-xl transition-colors focus:outline-none focus-visible:ring-2 self-start mt-4 text-secondary"
                 style={{
                   background: 'var(--color-surface)',
-                  color: 'var(--color-text-secondary)',
                   border: '1px solid var(--color-border)',
                 }}
                 onClick={onClose}
@@ -1088,10 +1034,9 @@ export function DesktopExplorerPanel({
           >
             {/* Close button */}
             <motion.button
-              className="absolute top-6 right-6 w-12 h-12 flex items-center justify-center rounded-xl transition-colors"
+              className="absolute top-6 right-6 w-12 h-12 flex items-center justify-center rounded-xl transition-colors text-secondary"
               style={{
                 background: 'var(--color-surface)',
-                color: 'var(--color-text-secondary)',
                 border: '1px solid var(--color-border)',
               }}
               onClick={(e) => {
@@ -1113,10 +1058,7 @@ export function DesktopExplorerPanel({
                 border: '1px solid var(--color-border)',
               }}
             >
-              <span
-                className="font-bold text-lg"
-                style={{ color: 'var(--color-text)' }}
-              >
+              <span className="font-bold text-lg text-primary">
                 {currentNft.name}
               </span>
             </div>

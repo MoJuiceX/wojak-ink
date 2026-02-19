@@ -584,7 +584,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                                 >
                                   <div className="text-center">
                                     <div className="text-4xl mb-4">{game.emoji}</div>
-                                    <p style={{ color: 'var(--color-text-muted)' }}>Loading...</p>
+                                    <p className="text-muted">Loading...</p>
                                   </div>
                                 </div>
                               }
@@ -723,8 +723,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                                     {game.instructions.map((instruction) => (
                                       <li
                                         key={instruction.step}
-                                        className="flex items-start gap-2 text-sm"
-                                        style={{ color: 'var(--color-text-secondary)' }}
+                                        className="flex items-start gap-2 text-sm text-secondary"
                                       >
                                         <span
                                           className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
@@ -742,8 +741,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                                   {game.controls.length > 0 && (
                                     <div className="mt-6">
                                       <h3
-                                        className="text-sm font-semibold mb-3"
-                                        style={{ color: 'var(--color-text)' }}
+                                        className="text-sm font-semibold mb-3 text-primary"
                                       >
                                         Controls
                                       </h3>
@@ -764,8 +762,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                                               {control.input}
                                             </span>
                                             <span
-                                              className="text-sm"
-                                              style={{ color: 'var(--color-text-secondary)' }}
+                                              className="text-sm text-secondary"
                                             >
                                               {control.action}
                                             </span>
@@ -888,8 +885,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                       Coming Soon!
                     </h3>
                     <p
-                      className="text-base mb-6"
-                      style={{ color: 'var(--color-text-secondary)' }}
+                      className="text-base mb-6 text-secondary"
                     >
                       {game.description}
                     </p>
@@ -903,8 +899,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                       }}
                     >
                       <h4
-                        className="text-sm font-medium mb-3"
-                        style={{ color: 'var(--color-text)' }}
+                        className="text-sm font-medium mb-3 text-primary"
                       >
                         Accessibility Features
                       </h4>
@@ -912,8 +907,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                         {accessibilityList.map(({ key, icon, label }) => (
                           <div
                             key={key}
-                            className="flex items-center gap-1 text-sm"
-                            style={{ color: 'var(--color-text-muted)' }}
+                            className="flex items-center gap-1 text-sm text-muted"
                           >
                             <span>{icon}</span>
                             <span>{label}</span>
@@ -942,7 +936,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                           >
                             <div className="text-center">
                               <div className="text-4xl mb-4">{game.emoji}</div>
-                              <p style={{ color: 'var(--color-text-muted)' }}>Loading game...</p>
+                              <p className="text-muted">Loading game...</p>
                             </div>
                           </div>
                         }
@@ -957,7 +951,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                             className="w-full h-full flex items-center justify-center"
                             style={{ background: 'var(--color-surface)' }}
                           >
-                            <p style={{ color: 'var(--color-text-muted)' }}>
+                            <p className="text-muted">
                               Game not available
                             </p>
                           </div>
@@ -1006,8 +1000,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                       {game.instructions.map((instruction) => (
                         <li
                           key={instruction.step}
-                          className="flex items-start gap-2 text-sm"
-                          style={{ color: 'var(--color-text-secondary)' }}
+                          className="flex items-start gap-2 text-sm text-secondary"
                         >
                           <span
                             className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
@@ -1027,8 +1020,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                     {game.controls.length > 0 && (
                       <div className="mt-6">
                         <h3
-                          className="text-sm font-semibold mb-3"
-                          style={{ color: 'var(--color-text)' }}
+                          className="text-sm font-semibold mb-3 text-primary"
                         >
                           Controls
                         </h3>
@@ -1051,8 +1043,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                                 {control.input}
                               </span>
                               <span
-                                className="text-sm"
-                                style={{ color: 'var(--color-text-secondary)' }}
+                                className="text-sm text-secondary"
                               >
                                 {control.action}
                               </span>
