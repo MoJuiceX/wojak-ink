@@ -64,7 +64,7 @@ export class ErrorBoundary extends Component<Props, State> {
           <div
             className="max-w-md w-full p-8 rounded-2xl text-center"
             style={{
-              background: 'linear-gradient(135deg, var(--color-error-10) 0%, rgba(0, 0, 0, 0.4) 100%)',
+              background: 'linear-gradient(135deg, var(--color-error-10) 0%, var(--color-black-40) 100%)',
               backdropFilter: 'blur(20px)',
               border: '1px solid var(--color-error-30)',
             }}
@@ -99,7 +99,7 @@ export class ErrorBoundary extends Component<Props, State> {
               <details
                 className="mb-6 text-left"
                 style={{
-                  background: 'rgba(0, 0, 0, 0.3)',
+                  background: 'var(--color-black-30)',
                   borderRadius: 8,
                   padding: 12,
                 }}

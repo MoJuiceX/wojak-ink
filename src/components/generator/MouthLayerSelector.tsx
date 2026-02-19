@@ -56,8 +56,8 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, bad
         opacity: isDisabled ? 0.5 : 1,
         cursor: isDisabled ? 'not-allowed' : 'pointer',
         boxShadow: isSelected
-          ? '0 0 20px var(--generator-selected-glow, rgba(249, 115, 22, 0.5)), 0 4px 12px rgba(0, 0, 0, 0.3)'
-          : '0 2px 8px rgba(0, 0, 0, 0.2)',
+          ? '0 0 20px var(--generator-selected-glow, var(--color-primary-50)), 0 4px 12px var(--color-black-30)'
+          : '0 2px 8px var(--color-black-20)',
         transition: 'all 0.3s ease',
       }}
       whileHover={prefersReducedMotion || isDisabled ? undefined : { scale: 1.03 }}
@@ -147,8 +147,8 @@ function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick, p
         opacity: isDisabled ? 0.5 : 1,
         cursor: isDisabled ? 'not-allowed' : 'pointer',
         boxShadow: isSelected
-          ? '0 0 20px rgba(0, 212, 255, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3)'
-          : '0 2px 8px rgba(0, 0, 0, 0.2)',
+          ? '0 0 20px var(--glow-cyan), 0 4px 12px var(--color-black-30)'
+          : '0 2px 8px var(--color-black-20)',
         transition: 'all 0.3s ease',
       }}
       whileHover={prefersReducedMotion || isDisabled ? undefined : { scale: 1.03 }}

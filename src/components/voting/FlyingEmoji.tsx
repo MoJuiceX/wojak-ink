@@ -105,7 +105,7 @@ export function FlyingEmoji({ id, type, startPosition, endPosition, onComplete }
           fontSize: '42px',
           pointerEvents: 'none',
           zIndex: 9998,
-          filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4))',
+          filter: 'drop-shadow(0 4px 8px var(--color-black-40))',
           willChange: 'transform',
         }}
         initial={{

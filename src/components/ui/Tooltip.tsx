@@ -74,7 +74,7 @@ export function Tooltip({ children, text, position = 'bottom' }: TooltipProps) {
               style={{
                 background: 'var(--color-bg)',
                 border: '1px solid var(--color-border)',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                boxShadow: '0 4px 12px var(--color-black-30)',
               }}
             >
               {text}

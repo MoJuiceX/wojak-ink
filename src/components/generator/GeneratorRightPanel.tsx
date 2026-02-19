@@ -124,8 +124,8 @@ function MaskVariantPicker({ selectedPath, onSelect }: { selectedPath: string | 
                   ? '2px solid var(--generator-selected-color, #F97316)'
                   : '1px solid var(--generator-trait-card-border)',
                 boxShadow: isSelected
-                  ? '0 0 20px rgba(0, 212, 255, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3)'
-                  : '0 2px 8px rgba(0, 0, 0, 0.2)',
+                  ? '0 0 20px var(--glow-cyan), 0 4px 12px var(--color-black-30)'
+                  : '0 2px 8px var(--color-black-20)',
               }}
               onClick={() => onSelect(path)}
               title={label}

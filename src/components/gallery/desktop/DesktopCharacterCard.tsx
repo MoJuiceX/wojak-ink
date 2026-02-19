@@ -69,7 +69,7 @@ export function DesktopCharacterCard({
       className="character-card glass hover-lift glow-section w-full text-left overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-4"
       style={{
         // Glassmorphism background
-        background: 'linear-gradient(135deg, var(--color-primary-10) 0%, rgba(0, 0, 0, 0.4) 100%)',
+        background: 'linear-gradient(135deg, var(--color-primary-10) 0%, var(--color-black-40) 100%)',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
         border: isHovered
@@ -78,7 +78,7 @@ export function DesktopCharacterCard({
         borderRadius: card.borderRadius,
         // Glow effect on hover
         boxShadow: isHovered
-          ? '0 20px 40px rgba(0, 0, 0, 0.4), 0 0 30px var(--color-primary-30), inset 0 0 20px var(--color-primary-10)'
+          ? '0 20px 40px var(--color-black-40), 0 0 30px var(--color-primary-30), inset 0 0 20px var(--color-primary-10)'
           : 'none',
         transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
         // Focus ring styles

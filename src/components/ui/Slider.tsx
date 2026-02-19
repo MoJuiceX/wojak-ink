@@ -225,8 +225,8 @@ export function Slider({
             borderRadius: '50%',
             background: 'white',
             boxShadow: isDragging
-              ? '0 0 0 4px rgba(255, 107, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3)'
-              : '0 2px 8px rgba(0, 0, 0, 0.3)',
+              ? '0 0 0 4px var(--color-primary-30), 0 4px 12px var(--color-black-30)'
+              : '0 2px 8px var(--color-black-30)',
             transition: isDragging ? 'none' : 'width 0.15s ease, height 0.15s ease, box-shadow 0.15s ease',
             willChange: 'left, width, height',
             pointerEvents: 'none',

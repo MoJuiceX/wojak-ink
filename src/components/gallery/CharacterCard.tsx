@@ -66,7 +66,7 @@ export function CharacterCard({
       className="character-card glass hover-lift glow-section w-full block text-left rounded-xl overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 aspect-square"
       style={{
         // Glassmorphism background
-        background: `linear-gradient(135deg, var(--color-primary-10) 0%, rgba(0, 0, 0, 0.4) 100%)`,
+        background: `linear-gradient(135deg, var(--color-primary-10) 0%, var(--color-black-40) 100%)`,
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
         border: isSelected

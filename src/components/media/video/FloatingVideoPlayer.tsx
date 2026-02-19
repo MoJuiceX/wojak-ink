@@ -188,7 +188,7 @@ export function FloatingVideoPlayer() {
               {(showControls || !hasStarted) && (
                 <motion.div
                   className="absolute inset-0 flex items-center justify-center cursor-pointer"
-                  style={{ background: !hasStarted ? 'var(--color-black-50)' : 'rgba(0, 0, 0, 0.3)' }}
+                  style={{ background: !hasStarted ? 'var(--color-black-50)' : 'var(--color-black-30)' }}
                   variants={prefersReducedMotion ? undefined : playerControlsVariants}
                   initial="hidden"
                   animate="visible"

@@ -128,7 +128,7 @@ export function LayerTabs({ className = '' }: LayerTabsProps) {
     <div
       className={`flex justify-between p-2 rounded-2xl overflow-x-auto w-full ${className}`}
       style={{
-        background: 'rgba(0, 0, 0, 0.3)',
+        background: 'var(--color-black-30)',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
         border: '1px solid var(--color-border)',
