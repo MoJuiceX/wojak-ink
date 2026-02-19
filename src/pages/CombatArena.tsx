@@ -226,12 +226,15 @@ function CombatArenaInner() {
           </div>
         )}
 
-        {/* Empty state for no fighters when connected */}
+        {/* Battle history — empty state until first fight */}
         {isConnected && !isLoadingFighters && fighters.length === 0 && ownerDid && (
           <div className="w-full">
             <h2 className="text-lg font-semibold mb-3">Recent Battles</h2>
-            <div className="card-static p-4 text-center">
-              <p className="text-muted text-sm">No battle history yet.</p>
+            <div className="card-static p-6 flex flex-col items-center gap-2 text-center">
+              <span className="text-muted text-sm">No battles yet.</span>
+              <span className="text-muted text-xs">
+                Select a fighter above and join the queue to start your first battle.
+              </span>
             </div>
           </div>
         )}
