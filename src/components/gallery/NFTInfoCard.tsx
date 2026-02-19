@@ -607,7 +607,7 @@ export function NFTInfoCard({
             )}
             {activeTab === 'metadata' && <MetadataTabContent nft={nft} />}
             {activeTab === 'combat' && (
-              <FighterStatsPanel nftId={nft.id} edition={Number(nft.tokenId)} />
+              <FighterStatsPanel edition={Number(nft.tokenId)} />
             )}
             {activeTab === 'history' && <HistoryTabContent nftId={Number(nft.tokenId)} />}
           </motion.div>

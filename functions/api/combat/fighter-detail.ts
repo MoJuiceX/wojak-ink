@@ -33,7 +33,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     let ownerName = '';
     if (fighter.owner_did) {
       const nameResult = await context.env.DB.prepare(
-        'SELECT display_name FROM did_display_names WHERE did = ?'
+        'SELECT display_name FROM did_profiles WHERE did_id = ?'
       ).bind(fighter.owner_did).first();
       ownerName = (nameResult?.display_name as string) || '';
     }
