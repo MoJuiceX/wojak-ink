@@ -69,7 +69,7 @@ export function FriendsWidget({ onViewAll }: Omit<FriendsWidgetProps, 'onAddFrie
             Friends
           </h3>
         </div>
-        <div className="widget-loading">Loading...</div>
+        <div className="widget-loading" role="status" aria-label="Loading friends">Loading...</div>
       </div>
     );
   }

@@ -94,7 +94,7 @@ function ProfileContent() {
       <div className="card-static p-8 flex flex-col items-center gap-4" style={{ maxWidth: 720, margin: '0 auto' }}>
         <h2 className="text-lg font-bold">NFT Not Found</h2>
         <p className="text-secondary text-sm">This Wojak doesn't exist or hasn't been minted yet.</p>
-        <button className="btn btn-primary" onClick={() => navigate(-1)}>Go Back</button>
+        <button type="button" className="btn btn-primary" onClick={() => navigate(-1)}>Go Back</button>
       </div>
     );
   }
@@ -105,6 +105,7 @@ function ProfileContent() {
     <div className="flex flex-col gap-6" style={{ maxWidth: 720, margin: '0 auto', padding: 16, paddingBottom: 40 }}>
       {/* Back button */}
       <button
+        type="button"
         onClick={() => navigate(-1)}
         className="flex items-center gap-1 text-secondary"
         style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, padding: 0, alignSelf: 'flex-start' }}

@@ -88,7 +88,7 @@ export function AchievementsWidget({ onViewAll }: AchievementsWidgetProps) {
             Achievements
           </h3>
         </div>
-        <div className="widget-loading">Loading...</div>
+        <div className="widget-loading" role="status" aria-label="Loading achievements">Loading...</div>
       </div>
     );
   }

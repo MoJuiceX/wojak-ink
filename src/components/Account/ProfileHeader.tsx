@@ -151,6 +151,7 @@ export function ProfileHeader({
             />
             {isOwnProfile && (
               <button
+                type="button"
                 className="avatar-edit-button"
                 onClick={() => setShowAvatarPicker(true)}
                 aria-label="Change avatar"
@@ -167,7 +168,7 @@ export function ProfileHeader({
             <div className="profile-header__name-group">
               <h1 className="profile-display-name">{displayName}</h1>
               {isOwnProfile && onEditName && (
-                <button className="edit-name-button" onClick={onEditName} aria-label="Edit name">
+                <button type="button" className="edit-name-button" onClick={onEditName} aria-label="Edit name">
                   <Edit3 size={14} />
                 </button>
               )}
@@ -233,7 +234,7 @@ export function ProfileHeader({
               <p className="wallet-cta__text">
                 Connect your Sage wallet to verify NFT holdings, choose your avatar, and enter chat rooms.
               </p>
-              <button className="wallet-cta__btn" onClick={handleConnect}>
+              <button type="button" className="wallet-cta__btn" onClick={handleConnect}>
                 <Wallet size={16} />
                 Connect Sage Wallet
               </button>
@@ -260,6 +261,7 @@ export function ProfileHeader({
                 </span>
               </div>
               <button
+                type="button"
                 className="wallet-disconnect-btn"
                 onClick={handleDisconnect}
               >

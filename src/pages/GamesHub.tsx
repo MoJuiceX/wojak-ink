@@ -340,6 +340,7 @@ export default function GamesHub() {
       {comingSoonGames.length > 0 && (
         <div style={{ marginTop: '24px' }}>
           <button
+            type="button"
             className="stats-trigger"
             onClick={() => setShowComingSoon(prev => !prev)}
             style={{ justifyContent: 'space-between' }}

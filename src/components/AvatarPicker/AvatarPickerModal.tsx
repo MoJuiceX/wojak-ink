@@ -281,7 +281,7 @@ export function AvatarPickerModal({ isOpen, onClose }: AvatarPickerModalProps) {
 
             {/* Loading indicator */}
             {isSaving && (
-              <div className="avatar-modal-saving">
+              <div className="avatar-modal-saving" role="status" aria-label="Saving avatar">
                 <span>Saving...</span>
               </div>
             )}

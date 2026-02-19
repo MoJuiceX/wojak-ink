@@ -69,6 +69,8 @@ export const Avatar: React.FC<AvatarProps> = ({
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
+      aria-label={onClick ? 'Select avatar' : undefined}
+      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } } : undefined}
     >
       {avatarType === 'emoji' ? (
         <span className="avatar-content" style={{ fontSize: pixelSize * 0.6 }}>

@@ -147,6 +147,7 @@ export const AvatarSetSuccess: React.FC<AvatarSetSuccessProps> = ({
 
             {/* CTA Button */}
             <motion.button
+              type="button"
               className="lets-go-btn"
               onClick={onClose}
               initial={{ opacity: 0, y: 20 }}

@@ -102,6 +102,7 @@ export const LeaderboardGate: React.FC<LeaderboardGateProps> = ({
         {/* CTA buttons */}
         <div className="cta-buttons">
           <motion.button
+            type="button"
             className="primary-btn"
             onClick={onConnectWallet}
             whileHover={{ scale: 1.05 }}
@@ -111,6 +112,7 @@ export const LeaderboardGate: React.FC<LeaderboardGateProps> = ({
             Connect Wallet
           </motion.button>
           <button
+            type="button"
             className="secondary-link"
             onClick={() => navigate('/gallery')}
           >

@@ -38,6 +38,7 @@ export function ProfileHero({ user, onEditAvatar }: ProfileHeroProps) {
             className="avatar-image"
           />
           <button
+            type="button"
             onClick={onEditAvatar}
             className="avatar-edit-btn"
             aria-label="Edit avatar"
@@ -49,7 +50,7 @@ export function ProfileHero({ user, onEditAvatar }: ProfileHeroProps) {
 
       <div className="user-info">
         <h1 className="username">{user.username}</h1>
-        <button onClick={copyAddress} className="wallet-address">
+        <button type="button" onClick={copyAddress} className="wallet-address" aria-label="Copy wallet address">
           <span className="font-mono">{truncateAddress(user.walletAddress)}</span>
           {copied ? <Check size={14} /> : <Copy size={14} />}
         </button>

@@ -112,6 +112,7 @@ export function WalletSection() {
           </p>
         </div>
         <button
+          type="button"
           className="wallet-compact__connect-btn"
           onClick={handleConnect}
         >

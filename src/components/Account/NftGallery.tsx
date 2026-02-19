@@ -71,10 +71,10 @@ export function NftGallery({
       <div className="nft-gallery__header">
         <h2>NFT Collection <span className="count">({ownedNftIds.length})</span></h2>
         <div className="nft-gallery__nav">
-          <button className="swiper-btn swiper-btn-prev" aria-label="Previous NFTs">
+          <button type="button" className="swiper-btn swiper-btn-prev" aria-label="Previous NFTs">
             <ChevronLeft size={16} />
           </button>
-          <button className="swiper-btn swiper-btn-next" aria-label="Next NFTs">
+          <button type="button" className="swiper-btn swiper-btn-next" aria-label="Next NFTs">
             <ChevronRight size={16} />
           </button>
         </div>
@@ -103,7 +103,8 @@ export function NftGallery({
                 onClick={() => isOwnProfile && onSelectNft?.(nftId)}
                 role={isOwnProfile ? 'button' : undefined}
                 tabIndex={isOwnProfile ? 0 : undefined}
-                onKeyDown={(e) => e.key === 'Enter' && isOwnProfile && onSelectNft?.(nftId)}
+                aria-label={isOwnProfile ? `Select Wojak #${nftId} as avatar` : undefined}
+                onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && isOwnProfile) { e.preventDefault(); onSelectNft?.(nftId); } }}
               >
                 <img
                   src={getNftImageUrl(nftId)}

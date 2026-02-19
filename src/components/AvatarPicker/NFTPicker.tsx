@@ -80,8 +80,8 @@ export function NFTPicker({ selectedNftId, onSelect }: NFTPickerProps) {
 
   if (isLoading) {
     return (
-      <div className="nft-picker-loading">
-        <Loader2 className="spin" size={32} />
+      <div className="nft-picker-loading" role="status" aria-label="Loading NFTs">
+        <Loader2 className="spin" size={32} aria-hidden="true" />
         <p>Loading your NFTs...</p>
       </div>
     );
@@ -91,7 +91,7 @@ export function NFTPicker({ selectedNftId, onSelect }: NFTPickerProps) {
     return (
       <div className="nft-picker-error">
         <p>{error}</p>
-        <button onClick={() => window.location.reload()}>Retry</button>
+        <button type="button" onClick={() => window.location.reload()}>Retry</button>
       </div>
     );
   }

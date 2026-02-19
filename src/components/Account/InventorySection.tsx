@@ -206,6 +206,13 @@ export function InventorySection({
                   }}
                   role={isOwnProfile && isEquippable ? 'button' : undefined}
                   tabIndex={isOwnProfile && isEquippable ? 0 : undefined}
+                  aria-label={isOwnProfile && isEquippable ? (item.equipped ? `Unequip ${item.name}` : `Equip ${item.name}`) : undefined}
+                  onKeyDown={isOwnProfile && isEquippable ? (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      if (item.equipped) { onUnequip?.(category); } else { onEquip?.(item.item_id, category); }
+                    }
+                  } : undefined}
                 >
                   <div className="card-preview">
                     {renderItemPreview(item)}

@@ -81,6 +81,7 @@ export const AvatarUpgradeBanner: React.FC<AvatarUpgradeBannerProps> = ({
             </div>
 
             <motion.button
+              type="button"
               className="upgrade-btn"
               onClick={onConnectWallet}
               whileHover={{ scale: 1.05 }}
