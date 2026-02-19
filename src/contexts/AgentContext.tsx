@@ -5,6 +5,22 @@
 
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import { useToast } from './ToastContext';
+import type { CombatType, BaseStats } from '@/lib/combat/types';
+
+/** Fighter data returned by /api/combat/agent-profile */
+interface AgentFighter {
+  nft_id: string;
+  edition: number;
+  type: CombatType;
+  nature: string;
+  ability: string;
+  moves: string[];
+  level: number;
+  xp: number;
+  elo: number;
+  stats: BaseStats;
+  record: { wins: number; losses: number; draws: number };
+}
 
 interface AgentInfo {
   agent_id: string;
@@ -13,7 +29,7 @@ interface AgentInfo {
   tier: 'trial' | 'free' | 'premium';
   webhook_url: string | null;
   created_at: string;
-  fighters: any[];
+  fighters: AgentFighter[];
   battle_stats: {
     total: number;
     wins: number;
