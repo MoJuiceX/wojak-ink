@@ -52,10 +52,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       LEFT JOIN nft_names nn ON nn.edition_number = pm.mint_number
       WHERE pm.status = 'minted'
         AND pm.mintgarden_launcher_id IS NOT NULL
-        -- Exclude already voted
+        -- Exclude voted in last 24 hours (cooldown period)
         AND NOT EXISTS (
           SELECT 1 FROM wojak_votes wv
           WHERE wv.voter_did = ? AND wv.nft_id = pm.mintgarden_launcher_id
+          AND wv.created_at > datetime('now', '-24 hours')
         )
         -- Exclude own creations
         AND pm.wallet_address != ?
