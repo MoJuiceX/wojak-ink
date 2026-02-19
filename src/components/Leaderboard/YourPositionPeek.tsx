@@ -76,7 +76,7 @@ export const YourPositionPeek: React.FC<YourPositionPeekProps> = ({
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
     >
       {/* Collapsed Bar (Always Visible) */}
-      <div className="peek-collapsed" onClick={toggleExpand}>
+      <div className="peek-collapsed" onClick={toggleExpand} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && toggleExpand()}>
         <div className="peek-left">
           <span className="peek-rank">#{rank}</span>
           <span className="peek-divider">·</span>
@@ -110,7 +110,7 @@ export const YourPositionPeek: React.FC<YourPositionPeekProps> = ({
               {/* Rival Section */}
               {nextRival ? (
                 <div className="peek-rival-section">
-                  <div className="peek-rival-header" onClick={handleRivalClick}>
+                  <div className="peek-rival-header" onClick={handleRivalClick} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter') handleRivalClick(e as unknown as React.MouseEvent); }}>
                     <Avatar avatar={{ ...nextRival.avatar, source: 'default' }} size="small" />
                     <div className="peek-rival-info">
                       <span className="peek-rival-name">{nextRival.displayName}</span>

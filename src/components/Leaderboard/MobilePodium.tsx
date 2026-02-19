@@ -132,7 +132,7 @@ export const MobilePodium: React.FC<MobilePodiumProps> = ({ entries, timeframe }
       transition={{ duration: 0.4, ease: 'easeOut' }}
     >
       {/* === CHAMPION SECTION === */}
-      <div className="podium-champion" onClick={() => handleEntryClick(champion.userId)}>
+      <div className="podium-champion" onClick={() => handleEntryClick(champion.userId)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter') handleEntryClick(champion.userId); }}>
         {/* Header with label and countdown */}
         <div className="champion-header">
           <span className="champion-label">{timeframeLabel} Champion</span>

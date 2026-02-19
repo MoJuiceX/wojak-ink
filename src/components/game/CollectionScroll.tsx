@@ -125,12 +125,12 @@ function NftDetailModal({ nft, onClose, onBurned }: { nft: CollectionNft; onClos
           ) : (
             <div className="flex items-center gap-2">
               <h3 className="font-bold" style={{ fontSize: 16 }}>{displayName}</h3>
-              <button className="btn btn-ghost" style={{ padding: 2, minWidth: 'auto' }} onClick={startEditing} title="Rename">
+              <button className="btn btn-ghost" style={{ padding: 2, minWidth: 'auto' }} onClick={startEditing} aria-label="Rename">
                 <Pencil size={14} className="text-muted" />
               </button>
             </div>
           )}
-          <button className="btn btn-ghost" style={{ padding: 4, minWidth: 'auto' }} onClick={onClose}>
+          <button className="btn btn-ghost" style={{ padding: 4, minWidth: 'auto' }} onClick={onClose} aria-label="Close">
             <X size={18} />
           </button>
         </div>

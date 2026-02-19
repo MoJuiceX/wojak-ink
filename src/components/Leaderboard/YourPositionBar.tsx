@@ -80,7 +80,7 @@ export const YourPositionBar: React.FC<YourPositionBarProps> = ({
 
         {/* Rival Challenge */}
         {nextRival ? (
-          <div className="position-rival-section" onClick={handleRivalClick}>
+          <div className="position-rival-section" onClick={handleRivalClick} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter') handleRivalClick(); }}>
             <span className="rival-message">{rivalMessage}</span>
             <div className="rival-avatar-wrapper">
               <Avatar

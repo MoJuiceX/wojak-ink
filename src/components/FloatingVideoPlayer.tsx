@@ -435,7 +435,7 @@ const FloatingVideoPlayer: React.FC<FloatingVideoPlayerProps> = ({
             />
           </>
         )}
-        <button className="close-x" onClick={handleClose}>×</button>
+        <button className="close-x" onClick={handleClose} aria-label="Close video">×</button>
         {!isPlaying && !isFading && (
           <div className="play-indicator">▶</div>
         )}

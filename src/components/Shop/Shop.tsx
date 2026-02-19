@@ -641,7 +641,7 @@ export function Shop({ onClose }: ShopProps) {
         <div className="shop-title-row">
           <h1>Two Grove Shop</h1>
           {onClose && (
-            <button className="close-button" onClick={onClose}>
+            <button className="close-button" onClick={onClose} aria-label="Close shop">
               ✕
             </button>
           )}
@@ -929,7 +929,7 @@ export function Shop({ onClose }: ShopProps) {
       {previewItem && (
         <div className="preview-modal" onClick={() => setPreviewItem(null)}>
           <div className="preview-content" onClick={e => e.stopPropagation()}>
-            <button className="preview-close" onClick={() => setPreviewItem(null)}>
+            <button className="preview-close" onClick={() => setPreviewItem(null)} aria-label="Close preview">
               ✕
             </button>
             <div className="preview-header">
