@@ -38,8 +38,6 @@ export interface GeneratorState {
   scrollPosition: number;
   /** User-facing error from init, export, or save (cleared on next action or clearError). */
   generatorError: string | null;
-  /** Selected combat moves (4 move IDs) for mint */
-  combatMoves: string[];
 }
 
 export type GeneratorAction =
@@ -66,8 +64,7 @@ export type GeneratorAction =
   | { type: 'LOAD_FAVORITES'; favorites: FavoriteWojak[] }
   | { type: 'INITIALIZE' }
   | { type: 'SET_COLOR'; layer: UILayerName; color: string }
-  | { type: 'SET_ERROR'; error: string | null }
-  | { type: 'SET_COMBAT_MOVES'; moves: string[] };
+  | { type: 'SET_ERROR'; error: string | null };
 
 // ============ Initial State ============
 
@@ -92,7 +89,6 @@ export function createInitialState(): GeneratorState {
     showStickyPreview: false,
     scrollPosition: 0,
     generatorError: null,
-    combatMoves: [],
   };
 }
 
@@ -405,9 +401,6 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
 
     case 'SET_ERROR':
       return { ...state, generatorError: action.error };
-
-    case 'SET_COMBAT_MOVES':
-      return { ...state, combatMoves: action.moves };
 
     default:
       return state;
