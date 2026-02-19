@@ -1,4 +1,4 @@
-import type { CombatType, CombatMove, MoveEffect } from '../types';
+import type { CombatType, CombatMove } from '../types';
 
 // 174 moves ported from ClawCombat pokeapi-moves.json
 // Organized by type, 8-12 moves per type

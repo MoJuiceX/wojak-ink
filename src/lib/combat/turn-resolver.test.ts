@@ -80,7 +80,7 @@ describe('turn-resolver', () => {
   it('sets battle to finished when a fighter faints', () => {
     // Lower FIRE HP drastically
     battle.fighterA.currentHP = 1;
-    const result = resolveTurn(battle, 'poke_fire_fire-punch', 'poke_water_wave-crash', rng(0.5));
+    resolveTurn(battle, 'poke_fire_fire-punch', 'poke_water_wave-crash', rng(0.5));
     expect(battle.status).toBe('finished');
     expect(battle.winnerId).toBe('nft-b');
   });
@@ -97,7 +97,6 @@ describe('turn-resolver', () => {
     const hpBefore = battle.fighterB.currentHP;
     resolveTurn(battle, 'poke_fire_fire-punch', 'poke_water_wave-crash', rng(0.5));
     // HP should be reduced by burn damage + attack damage
-    const burnDmg = Math.max(1, Math.floor(battle.fighterB.maxHP / 16));
     expect(battle.fighterB.currentHP).toBeLessThan(hpBefore);
   });
 
@@ -147,7 +146,6 @@ describe('turn-resolver', () => {
 
   it('applies leech seed drain at end of turn', () => {
     battle.fighterB.leechSeeded = true;
-    const hpA_before = battle.fighterA.currentHP;
     resolveTurn(battle, 'poke_fire_fire-punch', 'poke_water_wave-crash', rng(0.5));
     // Leech seed drains defender and heals attacker
     // Fighter A might have healed from leech seed on B

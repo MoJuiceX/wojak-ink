@@ -2,7 +2,7 @@
 // Battle state initialization — ported from ClawCombat battle-engine.js buildAgentBattleState()
 
 import type { CombatType } from './types';
-import { calculateHP, calculateAllStats } from './stat-calculator';
+import { calculateAllStats } from './stat-calculator';
 
 export interface FighterState {
   nftId: string;

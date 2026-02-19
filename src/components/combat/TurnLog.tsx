@@ -2,15 +2,17 @@
  * TurnLog — scrollable turn-by-turn battle results.
  */
 
+interface TurnEvent {
+  type: string;
+  message?: string;
+  damage?: number;
+  effectiveness?: string;
+  isCrit?: boolean;
+}
+
 interface TurnEntry {
   turn: number;
-  events?: Array<{
-    type: string;
-    message?: string;
-    damage?: number;
-    effectiveness?: string;
-    isCrit?: boolean;
-  }>;
+  events?: TurnEvent[];
   end_of_turn?: {
     fighter_a_hp: number;
     fighter_b_hp: number;
@@ -22,7 +24,7 @@ interface TurnLogProps {
   maxHeight?: string;
 }
 
-function getEntryClass(event: TurnEntry['events'] extends (infer T)[] ? T : never): string {
+function getEntryClass(event: TurnEvent): string {
   if (!event) return 'turn-entry';
   if (event.isCrit) return 'turn-entry turn-crit';
   if (event.effectiveness === 'super_effective') return 'turn-entry turn-super-effective';
