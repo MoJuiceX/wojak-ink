@@ -9,7 +9,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Swords, Trophy, Heart, ExternalLink, Lock } from 'lucide-react';
+import { Swords, Trophy, Heart, ExternalLink, Wallet } from 'lucide-react';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { PageSkeleton } from '@/components/layout/PageSkeleton';
 import { useLayout } from '@/hooks/useLayout';
@@ -19,6 +19,7 @@ import { GameErrorBoundary } from '@/components/games/GameError';
 import { GameLoading } from '@/components/games/GameLoading';
 import { FightClubRankings } from '@/components/combat/FightClubRankings';
 import { useUserProfile } from '@/contexts/UserProfileContext';
+import { useSageWallet } from '@/sage-wallet';
 
 // Lazy load tab content
 const CombatArena = lazy(() => import('./CombatArena'));
@@ -42,9 +43,24 @@ function useFightClubAccess() {
   });
 }
 
-// Gated view shown when user doesn't have access
-function FightClubGate() {
+// Fetch floor price for gate display
+function useFloorPrice() {
+  return useQuery({
+    queryKey: ['floor-price'],
+    queryFn: async () => {
+      const res = await fetch('/api/mint/pricing');
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.floorPrice as number | null;
+    },
+    staleTime: 300000, // 5 minutes
+  });
+}
+
+// Prompt shown when user hasn't connected wallet
+function ConnectWalletPrompt() {
   const { contentPadding } = useLayout();
+  const { connect } = useSageWallet();
 
   return (
     <PageTransition>
@@ -62,38 +78,86 @@ function FightClubGate() {
         <div className="card p-8 max-w-md">
           <div className="flex justify-center mb-4">
             <div className="p-4 rounded-full" style={{ background: 'var(--color-primary-15)' }}>
-              <Lock size={32} className="text-primary" />
+              <Wallet size={32} className="text-primary" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold mb-2">Fight Club Access</h1>
+          <h1 className="text-2xl font-bold mb-2">Connect Your Wallet</h1>
           <p className="text-secondary mb-6">
-            Hold a Wojak Farmers Plot NFT to unlock Fight Club features.
+            Connect your wallet to access Fight Club and join the battle.
+          </p>
+          <button
+            type="button"
+            className="btn btn-primary w-full"
+            onClick={() => connect()}
+          >
+            Connect Wallet
+          </button>
+        </div>
+      </div>
+    </PageTransition>
+  );
+}
+
+// Gated view shown when user doesn't have Farmers Plot
+function FightClubGate() {
+  const { contentPadding } = useLayout();
+  const { data: floorPrice } = useFloorPrice();
+
+  return (
+    <PageTransition>
+      <div
+        style={{
+          padding: contentPadding,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '60vh',
+          textAlign: 'center',
+        }}
+      >
+        <div className="card p-8 max-w-md">
+          <div className="flex justify-center mb-4">
+            <div className="p-4 rounded-full" style={{ background: 'var(--color-primary-15)' }}>
+              <Swords size={32} className="text-primary" />
+            </div>
+          </div>
+          <h1 className="text-2xl font-bold mb-2">Welcome to Fight Club</h1>
+          <p className="text-secondary mb-6">
+            Hold a Wojak Farmers Plot NFT to vote, battle, and climb the rankings.
           </p>
 
           {/* Feature preview */}
           <div className="flex flex-col gap-3 mb-6 text-left">
             <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: 'var(--color-white-5)' }}>
-              <Swords size={20} className="text-primary" />
-              <div>
-                <p className="font-medium">Battle</p>
-                <p className="text-sm text-secondary">Turn-based combat with your Wojaks</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: 'var(--color-white-5)' }}>
               <Heart size={20} className="text-error" />
               <div>
                 <p className="font-medium">Vote</p>
-                <p className="text-sm text-secondary">Rate NFTs and earn Power</p>
+                <p className="text-sm text-secondary">Rate Wojaks, shape the meta</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: 'var(--color-white-5)' }}>
+              <Swords size={20} className="text-primary" />
+              <div>
+                <p className="font-medium">Battle</p>
+                <p className="text-sm text-secondary">Turn-based combat, earn Power</p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: 'var(--color-white-5)' }}>
               <Trophy size={20} className="text-gold" />
               <div>
                 <p className="font-medium">Rankings</p>
-                <p className="text-sm text-secondary">Compete for top spots on the leaderboard</p>
+                <p className="text-sm text-secondary">Climb the leaderboard</p>
               </div>
             </div>
           </div>
+
+          {/* Floor price */}
+          {floorPrice != null && (
+            <p className="text-sm text-secondary mb-4">
+              Current floor: <span className="text-primary font-medium">{floorPrice} XCH</span>
+            </p>
+          )}
 
           {/* CTA */}
           <a
@@ -102,7 +166,7 @@ function FightClubGate() {
             rel="noopener noreferrer"
             className="btn btn-primary w-full flex items-center justify-center gap-2"
           >
-            Get a Farmers Plot
+            Buy on MintGarden
             <ExternalLink size={16} />
           </a>
         </div>
@@ -145,8 +209,13 @@ export default function FightClub() {
     navigate(tab.path);
   };
 
+  // Show connect wallet prompt if not signed in
+  if (!isSignedIn) {
+    return <ConnectWalletPrompt />;
+  }
+
   // Show loading state while checking access
-  if (isSignedIn && accessLoading) {
+  if (accessLoading) {
     return (
       <PageTransition>
         <div className="flex items-center justify-center" style={{ minHeight: '60vh' }}>
@@ -156,8 +225,8 @@ export default function FightClub() {
     );
   }
 
-  // Show gate if not signed in or no access
-  if (!isSignedIn || !accessData?.hasAccess) {
+  // Show gate if no Farmers Plot
+  if (!accessData?.hasAccess) {
     return <FightClubGate />;
   }
 
