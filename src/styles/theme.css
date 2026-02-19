@@ -1044,6 +1044,12 @@ body {
   color: var(--color-purple);
 }
 
+.badge-active {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  border-color: var(--color-primary);
+}
+
 /* Fighter Type Badge - dynamic colors via inline style */
 .fighter-type-badge {
   display: inline-flex;
