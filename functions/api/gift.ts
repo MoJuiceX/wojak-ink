@@ -129,7 +129,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     const friendship = await env.DB
       .prepare(
         `SELECT id FROM friends
-         WHERE (user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)
+         WHERE ((user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?))
          AND status = 'accepted'`
       )
       .bind(auth.userId, recipientId, recipientId, auth.userId)
