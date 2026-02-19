@@ -4481,3 +4481,117 @@ body {
     display: none;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Fight Club Hero
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.fight-club-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px 16px 20px;
+  margin-bottom: 12px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+.fight-club-hero-glow {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 100px;
+  background: radial-gradient(ellipse at center, var(--color-primary-15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.fight-club-hero-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+  position: relative;
+  z-index: 1;
+}
+
+.fight-club-hero-title h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.fight-club-hero-tagline {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.fight-club-hero-loop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-loop-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.hero-loop-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-loop-label {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-secondary);
+}
+
+.hero-loop-arrow {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  margin-top: -16px;
+}
+
+.fight-club-hero-cta {
+  position: relative;
+  z-index: 1;
+}
+
+/* Desktop: wider layout */
+@media (min-width: 768px) {
+  .fight-club-hero {
+    padding: 28px 32px 24px;
+  }
+  .fight-club-hero-title h1 {
+    font-size: 1.75rem;
+  }
+  .fight-club-hero-loop {
+    gap: 12px;
+  }
+  .hero-loop-icon {
+    width: 42px;
+    height: 42px;
+  }
+}
