@@ -9,6 +9,8 @@
     "icons": "node scripts/generate-icons.mjs",
     "build:prerender": "npm run build && node scripts/prerender.mjs",
     "lint": "eslint .",
+    "health": "./scripts/health-check.sh",
+    "precommit": "npm run lint -- --max-warnings=0",
     "preview": "vite preview",
     "test": "playwright test",
     "test:unit": "vitest run",
