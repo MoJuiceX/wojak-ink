@@ -715,6 +715,10 @@ body {
   order: 3;
 }
 
+.podium-entry-you {
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+
 .podium-avatar {
   width: 48px;
   height: 48px;
@@ -792,6 +796,11 @@ body {
   background: var(--color-surface);
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
+}
+
+.rankings-row-you {
+  border-color: var(--color-primary);
+  background: var(--color-primary-5);
 }
 
 .rankings-row-info {

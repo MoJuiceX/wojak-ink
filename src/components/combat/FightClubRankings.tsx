@@ -86,7 +86,7 @@ function RankBadge({ rank }: { rank: number }) {
   return <span className="rank-number">#{rank}</span>;
 }
 
-function PlayersTab() {
+function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
   const { data, isLoading, error } = usePowerLeaderboard('players');
 
   if (isLoading) {
@@ -129,7 +129,7 @@ function PlayersTab() {
         {topThree.map((player, idx) => (
           <div
             key={player.did}
-            className={`podium-entry podium-${idx + 1}`}
+            className={`podium-entry podium-${idx + 1}${player.did === currentUserDid ? ' podium-entry-you' : ''}`}
           >
             <RankBadge rank={player.rank} />
             <div className="podium-avatar">
@@ -158,7 +158,7 @@ function PlayersTab() {
       {rest.length > 0 && (
         <div className="rankings-list">
           {rest.map((player) => (
-            <div key={player.did} className="rankings-row">
+            <div key={player.did} className={`rankings-row${player.did === currentUserDid ? ' rankings-row-you' : ''}`}>
               <RankBadge rank={player.rank} />
               <div className="rankings-row-info">
                 <span className="rankings-row-name">{player.displayName || 'Anon'}</span>
@@ -255,7 +255,11 @@ function WojaksTab() {
   );
 }
 
-export function FightClubRankings() {
+interface FightClubRankingsProps {
+  currentUserDid?: string | null;
+}
+
+export function FightClubRankings({ currentUserDid }: FightClubRankingsProps = {}) {
   const [activeTab, setActiveTab] = useState<RankingTab>('players');
 
   return (
@@ -281,7 +285,7 @@ export function FightClubRankings() {
       </div>
 
       {/* Tab content */}
-      {activeTab === 'players' ? <PlayersTab /> : <WojaksTab />}
+      {activeTab === 'players' ? <PlayersTab currentUserDid={currentUserDid} /> : <WojaksTab />}
     </div>
   );
 }

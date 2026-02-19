@@ -441,7 +441,7 @@ export default function FightClub() {
               </Suspense>
             </GameProvider>
           )}
-          {activeTab === 'rankings' && <FightClubRankings />}
+          {activeTab === 'rankings' && <FightClubRankings currentUserDid={playerDid} />}
           {activeTab === 'burn' && (
             <Suspense fallback={<PageSkeleton type="media" />}>
               <BurnTab />
