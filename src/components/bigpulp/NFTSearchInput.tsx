@@ -91,7 +91,7 @@ export function NFTSearchInput({
   return (
     <div
       className="space-y-1 rounded-xl p-2"
-      style={{ background: 'rgba(0, 0, 0, 0.75)' }}
+      style={{ background: 'var(--color-black-75)' }}
     >
       <div className="flex gap-1.5 items-start">
         {/* Search input */}

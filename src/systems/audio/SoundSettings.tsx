@@ -79,7 +79,7 @@ export const SoundSettings: React.FC = () => {
               fontSize: '9px',
               fontWeight: 600,
               lineHeight: 1,
-              color: !volumes.muted ? 'rgba(255,255,255,0.9)' : 'var(--color-white-40)',
+              color: !volumes.muted ? 'var(--color-white-90)' : 'var(--color-white-40)',
               left: !volumes.muted ? '6px' : undefined,
               right: !volumes.muted ? undefined : '6px',
               userSelect: 'none',

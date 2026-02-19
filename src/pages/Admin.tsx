@@ -161,7 +161,7 @@ function TraitTable({
                           fontSize: '0.625rem',
                           padding: '1px 5px',
                           borderRadius: '4px',
-                          background: 'rgba(255,107,0,0.15)',
+                          background: 'var(--color-primary-15)',
                         }}
                       >
                         Top 3

@@ -208,14 +208,14 @@ function ProfileContent() {
                 className="flex items-center gap-3"
                 style={{
                   padding: '10px 14px',
-                  borderBottom: '1px solid rgba(255,255,255,0.04)',
+                  borderBottom: '1px solid var(--color-white-4)',
                   textDecoration: 'none',
                   color: 'inherit',
                 }}
               >
                 <span
                   className={`badge ${b.result === 'win' ? 'badge-success' : b.result === 'loss' ? '' : 'badge-cyan'}`}
-                  style={b.result === 'loss' ? { background: 'rgba(239,68,68,0.15)', color: 'var(--color-error)' } : undefined}
+                  style={b.result === 'loss' ? { background: 'var(--color-error-15)', color: 'var(--color-error)' } : undefined}
                 >
                   {b.result === 'win' ? 'Won' : b.result === 'loss' ? 'Lost' : 'Draw'}
                 </span>
@@ -259,7 +259,7 @@ function ProfileContent() {
                 className="flex items-center gap-3"
                 style={{
                   padding: '10px 14px',
-                  borderBottom: '1px solid rgba(255,255,255,0.04)',
+                  borderBottom: '1px solid var(--color-white-4)',
                 }}
               >
                 <span className="text-muted" style={{ fontSize: 12 }}>
