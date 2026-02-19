@@ -59,6 +59,26 @@ const CACHE_DURATION = 60 * 60 * 1000;
 // LocalStorage key for persistent cache
 const SALES_CACHE_KEY = 'wojak_sales_index_v1';
 
+// Shape of a single item in trade.offered / trade.requested from Dexie API
+interface DexieTradeItem {
+  type?: string;
+  asset_id?: string | null;
+  edition?: number | string | null;
+  name?: string;
+  amount?: number;
+}
+
+// Shape of a trade record from Dexie API
+interface DexieTrade {
+  offered?: DexieTradeItem[];
+  requested?: DexieTradeItem[];
+  price?: number;
+  date_completed?: string | number;
+  date_created?: string | number;
+  status?: number;
+  id?: string;
+}
+
 /**
  * Convert mojos to XCH
  */
@@ -72,8 +92,7 @@ function mojosToXch(mojos: number): number {
 /**
  * Extract NFT ID from trade object
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- External API response
-function extractNftIdFromTrade(trade: any): string | null {
+function extractNftIdFromTrade(trade: DexieTrade): string | null {
   // Check offered array
   for (const item of (trade.offered || [])) {
     if (item.type === 'nft' || item.asset_id === COLLECTION_ID) {
@@ -114,8 +133,7 @@ function extractNftIdFromTrade(trade: any): string | null {
 /**
  * Extract price from trade object
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- External API response
-function extractPriceFromTrade(trade: any): number | null {
+function extractPriceFromTrade(trade: DexieTrade): number | null {
   // Direct price field
   if (trade.price && trade.price > 0) {
     return mojosToXch(trade.price);
@@ -123,8 +141,7 @@ function extractPriceFromTrade(trade: any): number | null {
 
   // Check which side has the NFT, get XCH from the other side
   const offeredHasNft = (trade.offered || []).some(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- External API item
-    (i: any) => i.type === 'nft' || i.asset_id === COLLECTION_ID
+    (i: DexieTradeItem) => i.type === 'nft' || i.asset_id === COLLECTION_ID
   );
 
   const xchSide = offeredHasNft ? trade.requested : trade.offered;
@@ -143,8 +160,7 @@ function extractPriceFromTrade(trade: any): number | null {
 /**
  * Extract timestamp from trade object
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- External API response
-function extractTimestamp(trade: any): number | null {
+function extractTimestamp(trade: DexieTrade): number | null {
   const dateStr = trade.date_completed || trade.date_created;
   if (!dateStr) return null;
 
@@ -184,10 +200,10 @@ async function fetchDexieTrades(maxPages = 50): Promise<NFTTrade[]> {
           error.status = response.status;
           throw error;
         }
-        return response.json();
+        return response.json() as Promise<{ offers?: DexieTrade[] }>;
       });
 
-      const offers = data.offers || [];
+      const offers: DexieTrade[] = data.offers || [];
 
       if (offers.length === 0) break;
 

@@ -224,6 +224,21 @@ export interface ListingsResult {
   };
 }
 
+// Shape of an item returned from MintGarden / Dexie / SpaceScan listing APIs
+interface MarketApiItem {
+  token_id?: string | number | null;
+  edition_number?: string | number | null;
+  edition?: string | number | null;
+  nft_id?: string | number | null;
+  name?: string;
+  price?: number;
+  xch_price?: number;
+  price_xch?: number;
+  amount?: number;
+  amount_xch?: number;
+  [key: string]: unknown;
+}
+
 /**
  * Convert mojos to XCH
  */
@@ -237,8 +252,7 @@ function mojosToXch(mojos: number): number {
 /**
  * Extract NFT ID from various response formats
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response varies
-function extractNftId(obj: any): string | null {
+function extractNftId(obj: MarketApiItem): string | null {
   // Try various field names
   const fields = ['token_id', 'edition_number', 'edition', 'nft_id'];
   for (const field of fields) {
@@ -268,12 +282,12 @@ function extractNftId(obj: any): string | null {
 /**
  * Extract price from various response formats
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response varies
-function extractPrice(obj: any): number | null {
+function extractPrice(obj: MarketApiItem): number | null {
   const fields = ['price', 'xch_price', 'price_xch', 'amount', 'amount_xch'];
   for (const field of fields) {
-    if (obj[field] != null && obj[field] > 0) {
-      return mojosToXch(obj[field]);
+    const val = obj[field];
+    if (typeof val === 'number' && val > 0) {
+      return mojosToXch(val);
     }
   }
   return null;
