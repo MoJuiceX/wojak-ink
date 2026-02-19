@@ -383,8 +383,8 @@ export function GeneratorRightPanel() {
           />
         </div>
       )}
-      {/* Single color palette — always visible (disabled when not colorable) */}
-      {!isG1MilitaryBeret && (
+      {/* Single color palette — hidden for full-face masks (no colorable parts) */}
+      {!isG1MilitaryBeret && !(activeLayer === 'Mask' && isFullFaceMaskSelected(selectedLayers.Mask)) && (
         <div className="flex-shrink-0">
           <div className="flex items-center justify-between mb-1.5" style={{ height: '14px' }}>
             <span className="text-[10px] font-semibold uppercase tracking-wide text-muted">Color</span>
