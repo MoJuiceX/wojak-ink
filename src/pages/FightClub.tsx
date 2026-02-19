@@ -8,6 +8,7 @@
 
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { lazy, Suspense, useState, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Swords, Trophy, Heart, ExternalLink, Wallet, Palette, RefreshCw } from 'lucide-react';
 import { useToast } from '@/contexts/ToastContext';
@@ -146,15 +147,8 @@ function ConnectWalletPrompt() {
   return (
     <PageTransition>
       <div
-        style={{
-          padding: contentPadding,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '60vh',
-          textAlign: 'center',
-        }}
+        className="flex flex-col items-center justify-center text-center"
+        style={{ padding: contentPadding, minHeight: '60vh' }}
       >
         <div className="card p-8 max-w-md">
           <div className="flex justify-center mb-4">
@@ -187,15 +181,8 @@ function FightClubGate() {
   return (
     <PageTransition>
       <div
-        style={{
-          padding: contentPadding,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '60vh',
-          textAlign: 'center',
-        }}
+        className="flex flex-col items-center justify-center text-center"
+        style={{ padding: contentPadding, minHeight: '60vh' }}
       >
         <div className="card p-8 max-w-md">
           <div className="flex justify-center mb-4">
@@ -210,27 +197,45 @@ function FightClubGate() {
 
           {/* Feature preview */}
           <div className="flex flex-col gap-3 mb-6 text-left">
-            <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: 'var(--color-white-5)' }}>
+            <motion.div
+              className="flex items-center gap-3 p-3 rounded-lg"
+              style={{ background: 'var(--color-white-5)' }}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0 }}
+            >
               <Heart size={20} className="text-error" />
               <div>
                 <p className="font-medium">Vote</p>
                 <p className="text-sm text-secondary">Rate Wojaks, shape the meta</p>
               </div>
-            </div>
-            <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: 'var(--color-white-5)' }}>
+            </motion.div>
+            <motion.div
+              className="flex items-center gap-3 p-3 rounded-lg"
+              style={{ background: 'var(--color-white-5)' }}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+            >
               <Swords size={20} className="text-primary" />
               <div>
                 <p className="font-medium">Battle</p>
                 <p className="text-sm text-secondary">Turn-based combat, earn Power</p>
               </div>
-            </div>
-            <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: 'var(--color-white-5)' }}>
+            </motion.div>
+            <motion.div
+              className="flex items-center gap-3 p-3 rounded-lg"
+              style={{ background: 'var(--color-white-5)' }}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
               <Trophy size={20} className="text-gold" />
               <div>
                 <p className="font-medium">Rankings</p>
                 <p className="text-sm text-secondary">Climb the leaderboard</p>
               </div>
-            </div>
+            </motion.div>
           </div>
 
           {/* Floor price */}
