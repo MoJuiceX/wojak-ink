@@ -32,7 +32,7 @@ import { calculateHP } from '@/lib/combat/stat-calculator';
 
 // ── Interfaces ──────────────────────────────────────────────────────────────
 
-interface FighterDisplay {
+export interface FighterDisplay {
   nft_id: string;
   edition?: number;
   type: CombatType;
@@ -44,7 +44,7 @@ interface FighterDisplay {
   imageUrl?: string;
 }
 
-interface BattleData {
+export interface BattleData {
   id: number;
   status: string;
   currentTurn: number;
@@ -62,6 +62,12 @@ interface BattleData {
 interface BattleViewProps {
   battleId: number;
   playerNftId?: string;
+  /** Static data for demo mode — skips API polling */
+  staticBattleData?: BattleData;
+  /** Auto-play mode — no move buttons, plays both sides automatically */
+  autoPlay?: boolean;
+  /** Callback when demo battle finishes */
+  onDemoComplete?: () => void;
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -79,7 +85,7 @@ const POS_B = { x: 0.75, y: 0.55 };
 
 // ── BattleView Component ────────────────────────────────────────────────────
 
-export function BattleView({ battleId, playerNftId }: BattleViewProps) {
+export function BattleView({ battleId, playerNftId, staticBattleData, autoPlay, onDemoComplete }: BattleViewProps) {
   // ── Core state ──────────────────────────────────────────────────────────
   const [battle, setBattle] = useState<BattleData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -161,9 +167,12 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
       }
     },
     onComplete: () => {
-      // Playback finished — nothing special needed, UI is already updated
+      // Playback finished — call onDemoComplete if in autoPlay mode
+      if (autoPlay && onDemoComplete) {
+        onDemoComplete();
+      }
     },
-  }), []);
+  }), [autoPlay, onDemoComplete]);
 
   const {
     isPlaying,
@@ -206,13 +215,18 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
     }
   }, [battleId]);
 
-  // Poll for updates — stop once battle is completed
+  // If static data provided, use it directly instead of fetching
   useEffect(() => {
+    if (staticBattleData) {
+      setBattle(staticBattleData);
+      return;
+    }
+    // Poll for updates — stop once battle is completed
     fetchBattle();
     if (battle?.status === 'completed') return;
     const interval = setInterval(fetchBattle, 3000);
     return () => clearInterval(interval);
-  }, [fetchBattle, battle?.status]);
+  }, [fetchBattle, battle?.status, staticBattleData]);
 
   // ── Initialize HP when battle first loads ───────────────────────────────
   const initializedRef = useRef(false);
@@ -221,6 +235,18 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
   useEffect(() => {
     if (!battle || initializedRef.current) return;
     initializedRef.current = true;
+
+    // For autoPlay mode (demo), start from full HP and play all turns
+    if (autoPlay) {
+      setHpA({ current: maxHpA, ghost: maxHpA });
+      setHpB({ current: maxHpB, ghost: maxHpB });
+      setStatusA(null);
+      setStatusB(null);
+      setPlayedTurns(0); // Play all turns from the beginning
+      return;
+    }
+
+    // For normal mode, resume from current state
     const initHpA = battle.turns.length === 0
       ? maxHpA
       : battle.turns[battle.turns.length - 1].end_of_turn.fighter_a_hp;
@@ -239,7 +265,7 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
 
     // Mark all existing turns as played (we only animate new turns going forward)
     setPlayedTurns(battle.turns.length);
-  }, [battle, maxHpA, maxHpB]);
+  }, [battle, maxHpA, maxHpB, autoPlay]);
 
   // ── Play new turns when they arrive ─────────────────────────────────────
   useEffect(() => {
@@ -506,8 +532,8 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
         </div>
       )}
 
-      {/* Turn timer — 30s countdown when it's your turn */}
-      {!isComplete && !isPlaying && playerFighter?.moves && playerNftId && (
+      {/* Turn timer — 30s countdown when it's your turn (hide in autoPlay mode) */}
+      {!autoPlay && !isComplete && !isPlaying && playerFighter?.moves && playerNftId && (
         <div className="flex items-center justify-center mb-3">
           <TurnTimer
             totalSeconds={30}
@@ -517,8 +543,8 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
         </div>
       )}
 
-      {/* Move buttons (manual mode only, when not complete and not playing) */}
-      {!isComplete && !isPlaying && playerFighter?.moves && playerNftId && (
+      {/* Move buttons (manual mode only, when not complete and not playing, hide in autoPlay mode) */}
+      {!autoPlay && !isComplete && !isPlaying && playerFighter?.moves && playerNftId && (
         <MoveButtons
           moves={playerFighter.moves}
           onSubmit={handleSubmitMove}
