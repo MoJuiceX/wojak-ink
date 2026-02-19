@@ -35,12 +35,12 @@
 
 /* Danger variant icon glow */
 .confirm-modal-danger .confirm-modal-icon {
-  filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.5));
+  filter: drop-shadow(0 0 15px var(--color-error-50));
 }
 
 /* Warning variant icon glow */
 .confirm-modal-warning .confirm-modal-icon {
-  filter: drop-shadow(0 0 15px rgba(245, 158, 11, 0.5));
+  filter: drop-shadow(0 0 15px var(--color-warning-50));
 }
 
 /* Title */
@@ -92,20 +92,20 @@
 .confirm-modal-btn-primary {
   background: linear-gradient(135deg, #F97316, #EA580C);
   color: white;
-  box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);
+  box-shadow: 0 4px 15px var(--color-primary-30);
 }
 
 .confirm-modal-btn-primary:hover {
-  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+  box-shadow: 0 6px 20px var(--color-primary-40);
 }
 
 .confirm-modal-btn-danger {
   background: linear-gradient(135deg, #EF4444, #DC2626);
-  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 15px var(--color-error-30);
 }
 
 .confirm-modal-btn-danger:hover {
-  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 6px 20px var(--color-error-40);
 }
 
 /* Mobile */
