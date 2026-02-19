@@ -193,7 +193,13 @@ function CombatArenaInner() {
 
         {/* Loading fighters */}
         {isConnected && isLoadingFighters && (
-          <div className="text-muted text-sm text-center py-4">Loading fighters...</div>
+          <div className="w-full flex flex-col gap-3">
+            <div className="card-static p-4 flex flex-col gap-3 animate-pulse">
+              <div className="h-4 w-32 rounded" style={{ background: 'var(--color-white-8)' }} />
+              <div className="h-10 w-full rounded" style={{ background: 'var(--color-white-5)' }} />
+              <div className="h-10 w-full rounded" style={{ background: 'var(--color-white-5)' }} />
+            </div>
+          </div>
         )}
 
         {/* Battle Counter */}

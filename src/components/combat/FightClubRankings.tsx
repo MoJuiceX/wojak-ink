@@ -91,9 +91,19 @@ function PlayersTab() {
 
   if (isLoading) {
     return (
-      <div className="rankings-loading">
-        <div className="spinner" />
-        <span>Loading rankings...</span>
+      <div className="rankings-content">
+        <div className="flex flex-col gap-2">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="card-static p-3 flex items-center gap-3 animate-pulse">
+              <div className="w-8 h-8 rounded-full" style={{ background: 'var(--color-white-8)' }} />
+              <div className="flex-1 flex flex-col gap-1">
+                <div className="h-3 w-24 rounded" style={{ background: 'var(--color-white-8)' }} />
+                <div className="h-2 w-16 rounded" style={{ background: 'var(--color-white-5)' }} />
+              </div>
+              <div className="h-4 w-12 rounded" style={{ background: 'var(--color-white-8)' }} />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -173,9 +183,19 @@ function WojaksTab() {
 
   if (isLoading) {
     return (
-      <div className="rankings-loading">
-        <div className="spinner" />
-        <span>Loading rankings...</span>
+      <div className="rankings-content">
+        <div className="flex flex-col gap-2">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="card-static p-3 flex items-center gap-3 animate-pulse">
+              <div className="w-8 h-8 rounded-full" style={{ background: 'var(--color-white-8)' }} />
+              <div className="flex-1 flex flex-col gap-1">
+                <div className="h-3 w-24 rounded" style={{ background: 'var(--color-white-8)' }} />
+                <div className="h-2 w-16 rounded" style={{ background: 'var(--color-white-5)' }} />
+              </div>
+              <div className="h-4 w-12 rounded" style={{ background: 'var(--color-white-8)' }} />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
