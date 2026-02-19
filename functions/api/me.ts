@@ -23,46 +23,54 @@ const corsHeaders = {
 };
 
 export const onRequest: PagesFunction<Env> = async (context) => {
-  const { request, env } = context;
+  try {
+    const { request, env } = context;
 
-  // Handle CORS preflight
-  if (request.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+    // Handle CORS preflight
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { headers: corsHeaders });
+    }
 
-  // Only allow GET
-  if (request.method !== 'GET') {
+    // Only allow GET
+    if (request.method !== 'GET') {
+      return new Response(
+        JSON.stringify({ error: 'Method not allowed' }),
+        { status: 405, headers: corsHeaders }
+      );
+    }
+
+    // Check if Clerk is configured
+    if (!env.CLERK_DOMAIN) {
+      return new Response(
+        JSON.stringify({ error: 'Auth not configured' }),
+        { status: 500, headers: corsHeaders }
+      );
+    }
+
+    // Authenticate request
+    const auth = await authenticateRequest(request, env.CLERK_DOMAIN);
+
+    if (!auth) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: corsHeaders }
+      );
+    }
+
+    // Return user info
     return new Response(
-      JSON.stringify({ error: 'Method not allowed' }),
-      { status: 405, headers: corsHeaders }
+      JSON.stringify({
+        userId: auth.userId,
+        // Include additional claims if needed
+        // email: auth.payload.email,
+      }),
+      { status: 200, headers: corsHeaders }
+    );
+  } catch (error) {
+    console.error('[api/me] Unhandled error:', error);
+    return Response.json(
+      { error: 'Internal server error', code: 'INTERNAL_ERROR' },
+      { status: 500 }
     );
   }
-
-  // Check if Clerk is configured
-  if (!env.CLERK_DOMAIN) {
-    return new Response(
-      JSON.stringify({ error: 'Auth not configured' }),
-      { status: 500, headers: corsHeaders }
-    );
-  }
-
-  // Authenticate request
-  const auth = await authenticateRequest(request, env.CLERK_DOMAIN);
-
-  if (!auth) {
-    return new Response(
-      JSON.stringify({ error: 'Unauthorized' }),
-      { status: 401, headers: corsHeaders }
-    );
-  }
-
-  // Return user info
-  return new Response(
-    JSON.stringify({
-      userId: auth.userId,
-      // Include additional claims if needed
-      // email: auth.payload.email,
-    }),
-    { status: 200, headers: corsHeaders }
-  );
 };

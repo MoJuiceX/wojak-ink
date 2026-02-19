@@ -13,78 +13,86 @@ interface Env {
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
-  const body = await context.request.json<{
-    battleId: number;
-    nftId: string;
-    moveId: string;
-  }>();
+  try {
+    const body = await context.request.json<{
+      battleId: number;
+      nftId: string;
+      moveId: string;
+    }>();
 
-  const { battleId, nftId, moveId } = body;
-  if (!battleId || !nftId || !moveId) {
-    return errorResponse('Missing required fields: battleId, nftId, moveId');
-  }
+    const { battleId, nftId, moveId } = body;
+    if (!battleId || !nftId || !moveId) {
+      return errorResponse('Missing required fields: battleId, nftId, moveId');
+    }
 
-  const db = context.env.DB;
+    const db = context.env.DB;
 
-  // Verify battle exists and is active
-  const battle = await db.prepare(
-    `SELECT * FROM combat_battles WHERE id = ? AND status IN ('active', 'waiting_moves')`
-  ).bind(battleId).first<any>();
+    // Verify battle exists and is active
+    const battle = await db.prepare(
+      `SELECT * FROM combat_battles WHERE id = ? AND status IN ('active', 'waiting_moves')`
+    ).bind(battleId).first<any>();
 
-  if (!battle) return errorResponse('Battle not found or not active', 404);
+    if (!battle) return errorResponse('Battle not found or not active', 404);
 
-  // Verify nftId is fighter_a or fighter_b
-  const side = battle.fighter_a_nft === nftId ? 'a' : battle.fighter_b_nft === nftId ? 'b' : null;
-  if (!side) return errorResponse('NFT is not a participant in this battle', 403);
+    // Verify nftId is fighter_a or fighter_b
+    const side = battle.fighter_a_nft === nftId ? 'a' : battle.fighter_b_nft === nftId ? 'b' : null;
+    if (!side) return errorResponse('NFT is not a participant in this battle', 403);
 
-  // Verify moveId is in fighter's moveset
-  const fighter = await db.prepare(
-    'SELECT * FROM combat_fighters WHERE nft_id = ?'
-  ).bind(nftId).first<any>();
+    // Verify moveId is in fighter's moveset
+    const fighter = await db.prepare(
+      'SELECT * FROM combat_fighters WHERE nft_id = ?'
+    ).bind(nftId).first<any>();
 
-  if (!fighter) return errorResponse('Fighter not found', 404);
+    if (!fighter) return errorResponse('Fighter not found', 404);
 
-  const validMoves = [fighter.move_1, fighter.move_2, fighter.move_3, fighter.move_4];
-  if (!validMoves.includes(moveId)) {
-    return errorResponse('Invalid move for this fighter');
-  }
+    const validMoves = [fighter.move_1, fighter.move_2, fighter.move_3, fighter.move_4];
+    if (!validMoves.includes(moveId)) {
+      return errorResponse('Invalid move for this fighter');
+    }
 
-  // Get or create current turn record
-  const currentTurn = battle.current_turn;
-  let turnRecord = await db.prepare(
-    'SELECT * FROM combat_turns WHERE battle_id = ? AND turn_number = ?'
-  ).bind(battleId, currentTurn).first<any>();
+    // Get or create current turn record
+    const currentTurn = battle.current_turn;
+    let turnRecord = await db.prepare(
+      'SELECT * FROM combat_turns WHERE battle_id = ? AND turn_number = ?'
+    ).bind(battleId, currentTurn).first<any>();
 
-  if (!turnRecord) {
+    if (!turnRecord) {
+      await db.prepare(
+        'INSERT INTO combat_turns (battle_id, turn_number) VALUES (?, ?)'
+      ).bind(battleId, currentTurn).run();
+      turnRecord = { battle_id: battleId, turn_number: currentTurn };
+    }
+
+    // Store the move
+    const moveCol = side === 'a' ? 'fighter_a_move' : 'fighter_b_move';
+    const timeCol = side === 'a' ? 'fighter_a_submitted_at' : 'fighter_b_submitted_at';
     await db.prepare(
-      'INSERT INTO combat_turns (battle_id, turn_number) VALUES (?, ?)'
-    ).bind(battleId, currentTurn).run();
-    turnRecord = { battle_id: battleId, turn_number: currentTurn };
+      `UPDATE combat_turns SET ${moveCol} = ?, ${timeCol} = datetime('now')
+       WHERE battle_id = ? AND turn_number = ?`
+    ).bind(moveId, battleId, currentTurn).run();
+
+    // Check if both moves are submitted
+    const updatedTurn = await db.prepare(
+      'SELECT * FROM combat_turns WHERE battle_id = ? AND turn_number = ?'
+    ).bind(battleId, currentTurn).first<any>();
+
+    if (updatedTurn?.fighter_a_move && updatedTurn?.fighter_b_move) {
+      // Both moves submitted — resolve turn
+      return await resolveBattleTurn(db, battle, updatedTurn.fighter_a_move, updatedTurn.fighter_b_move);
+    }
+
+    // Only one move submitted — wait for opponent
+    return jsonResponse({
+      status: 'waiting',
+      message: 'Move submitted. Waiting for opponent.',
+    });
+  } catch (error) {
+    console.error('[api/combat/submit-move] Unhandled error:', error);
+    return Response.json(
+      { error: 'Internal server error', code: 'INTERNAL_ERROR' },
+      { status: 500 }
+    );
   }
-
-  // Store the move
-  const moveCol = side === 'a' ? 'fighter_a_move' : 'fighter_b_move';
-  const timeCol = side === 'a' ? 'fighter_a_submitted_at' : 'fighter_b_submitted_at';
-  await db.prepare(
-    `UPDATE combat_turns SET ${moveCol} = ?, ${timeCol} = datetime('now')
-     WHERE battle_id = ? AND turn_number = ?`
-  ).bind(moveId, battleId, currentTurn).run();
-
-  // Check if both moves are submitted
-  const updatedTurn = await db.prepare(
-    'SELECT * FROM combat_turns WHERE battle_id = ? AND turn_number = ?'
-  ).bind(battleId, currentTurn).first<any>();
-
-  if (updatedTurn?.fighter_a_move && updatedTurn?.fighter_b_move) {
-    // Both moves submitted — resolve turn
-    return await resolveBattleTurn(db, battle, updatedTurn.fighter_a_move, updatedTurn.fighter_b_move);
-  }
-
-  // Only one move submitted — wait for opponent
-  return jsonResponse({
-    status: 'waiting',
-    message: 'Move submitted. Waiting for opponent.',
-  });
 };
 
 async function resolveBattleTurn(

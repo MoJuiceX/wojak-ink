@@ -8,16 +8,24 @@ interface Env {
 }
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const url = new URL(context.request.url);
-  const nftId = url.searchParams.get('nftId');
+  try {
+    const url = new URL(context.request.url);
+    const nftId = url.searchParams.get('nftId');
 
-  if (!nftId) return errorResponse('Missing nftId parameter');
+    if (!nftId) return errorResponse('Missing nftId parameter');
 
-  const row = await context.env.DB.prepare(
-    'SELECT * FROM combat_fighters WHERE nft_id = ?'
-  ).bind(nftId).first();
+    const row = await context.env.DB.prepare(
+      'SELECT * FROM combat_fighters WHERE nft_id = ?'
+    ).bind(nftId).first();
 
-  if (!row) return errorResponse('Fighter not found', 404);
+    if (!row) return errorResponse('Fighter not found', 404);
 
-  return jsonResponse(buildFighterResponse(row));
+    return jsonResponse(buildFighterResponse(row));
+  } catch (error) {
+    console.error('[api/combat/fighter] Unhandled error:', error);
+    return Response.json(
+      { error: 'Internal server error', code: 'INTERNAL_ERROR' },
+      { status: 500 }
+    );
+  }
 };
