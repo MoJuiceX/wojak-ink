@@ -174,11 +174,15 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       const winColA = resultA === 'win' ? 'total_combat_wins' : resultA === 'loss' ? 'total_combat_losses' : 'total_combat_draws';
       const winColB = resultB === 'win' ? 'total_combat_wins' : resultB === 'loss' ? 'total_combat_losses' : 'total_combat_draws';
 
+      // Power score changes: win +30, loss -10, draw +5
+      const powerDeltaA = resultA === 'win' ? 30 : resultA === 'loss' ? -10 : 5;
+      const powerDeltaB = resultB === 'win' ? 30 : resultB === 'loss' ? -10 : 5;
+
       statements.push(
-        db.prepare(`UPDATE combat_fighters SET xp = xp + ?, elo_rating = elo_rating + ?, ${winColA} = ${winColA} + 1, level = ?, updated_at = datetime('now') WHERE nft_id = ?`)
-          .bind(xpA, eloA, calculateLevelFromXP(fighterARow.xp + xpA), battle.fighter_a_nft),
-        db.prepare(`UPDATE combat_fighters SET xp = xp + ?, elo_rating = elo_rating + ?, ${winColB} = ${winColB} + 1, level = ?, updated_at = datetime('now') WHERE nft_id = ?`)
-          .bind(xpB, eloB, calculateLevelFromXP(fighterBRow.xp + xpB), battle.fighter_b_nft),
+        db.prepare(`UPDATE combat_fighters SET xp = xp + ?, elo_rating = elo_rating + ?, ${winColA} = ${winColA} + 1, level = ?, battle_power = battle_power + ?, power_score = vote_power + battle_power + ?, updated_at = datetime('now') WHERE nft_id = ?`)
+          .bind(xpA, eloA, calculateLevelFromXP(fighterARow.xp + xpA), powerDeltaA, powerDeltaA, battle.fighter_a_nft),
+        db.prepare(`UPDATE combat_fighters SET xp = xp + ?, elo_rating = elo_rating + ?, ${winColB} = ${winColB} + 1, level = ?, battle_power = battle_power + ?, power_score = vote_power + battle_power + ?, updated_at = datetime('now') WHERE nft_id = ?`)
+          .bind(xpB, eloB, calculateLevelFromXP(fighterBRow.xp + xpB), powerDeltaB, powerDeltaB, battle.fighter_b_nft),
       );
     }
 

@@ -120,6 +120,17 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       likesDelta, dislikesDelta, voteType
     ).run();
 
+    // Update power score in combat_fighters (vote_power: +1 for like, -1 for dislike)
+    // If the fighter doesn't exist yet, this will just not update any rows
+    const votePowerDelta = voteType; // 1 for like, -1 for dislike
+    await context.env.DB.prepare(`
+      UPDATE combat_fighters
+      SET vote_power = vote_power + ?,
+          power_score = vote_power + ? + battle_power,
+          updated_at = datetime('now')
+      WHERE nft_id = ?
+    `).bind(votePowerDelta, votePowerDelta, nftId).run();
+
     // Update player vote count
     const isFirstVote = (player.total_votes_cast as number) === 0;
     const statements = [
