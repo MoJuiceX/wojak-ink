@@ -1044,6 +1044,19 @@ body {
   color: var(--color-purple);
 }
 
+/* Fighter Type Badge - dynamic colors via inline style */
+.fighter-type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    MODAL / DIALOG
