@@ -61,7 +61,7 @@
   gap: 6px;
   padding: 6px 12px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--color-white-6);
   font-size: 1rem;
   font-weight: 600;
   color: var(--color-text);
@@ -89,37 +89,37 @@
 
 /* Streak badge */
 .stat-badge--streak {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-white-5);
   color: var(--color-text-secondary);
 }
 
 .stat-badge--streak.active {
-  background: rgba(249, 115, 22, 0.15);
+  background: var(--color-primary-15);
   color: var(--color-primary);
 }
 
 .stat-badge--streak.active .stat-badge__label {
-  color: rgba(249, 115, 22, 0.7);
+  color: var(--color-primary-70);
 }
 
 /* Best badge */
 .stat-badge--best {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-white-5);
   color: var(--color-text-secondary);
 }
 
 .stat-badge--best.active {
-  background: rgba(255, 215, 0, 0.1);
+  background: var(--color-gold-10);
   color: var(--color-gold);
 }
 
 .stat-badge--best.active .stat-badge__label {
-  color: rgba(255, 215, 0, 0.7);
+  color: var(--color-gold-70);
 }
 
 /* Currency badge */
 .stat-badge--currency {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--color-white-4);
   padding: 6px 10px;
   gap: 5px;
 }
@@ -136,7 +136,7 @@
   left: 50%;
   transform: translateX(-50%);
   padding: 8px 12px;
-  background: rgba(0, 0, 0, 0.9);
+  background: var(--color-black-90);
   color: white;
   font-size: 0.75rem;
   font-weight: 500;
@@ -147,7 +147,7 @@
   transition: opacity 0.15s ease, visibility 0.15s ease;
   z-index: 100;
   pointer-events: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px var(--color-black-30);
 }
 
 .stat-badge[data-tooltip]::before {
@@ -157,7 +157,7 @@
   left: 50%;
   transform: translateX(-50%);
   border: 6px solid transparent;
-  border-top-color: rgba(0, 0, 0, 0.9);
+  border-top-color: var(--color-black-90);
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.15s ease, visibility 0.15s ease;
@@ -173,13 +173,13 @@
 /* Flame glow animation */
 .flame-glow {
   color: #f97316;
-  filter: drop-shadow(0 0 4px rgba(249, 115, 22, 0.6));
+  filter: drop-shadow(0 0 4px var(--color-primary-60));
   animation: flame-pulse 2s ease-in-out infinite;
 }
 
 @keyframes flame-pulse {
-  0%, 100% { filter: drop-shadow(0 0 4px rgba(249, 115, 22, 0.4)); }
-  50% { filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.8)); }
+  0%, 100% { filter: drop-shadow(0 0 4px var(--color-primary-40)); }
+  50% { filter: drop-shadow(0 0 8px var(--color-primary-80)); }
 }
 
 /* Mobile: wrap to next line */
@@ -216,7 +216,7 @@
     bottom: auto;
     top: calc(100% + 2px);
     border-top-color: transparent;
-    border-bottom-color: rgba(0, 0, 0, 0.9);
+    border-bottom-color: var(--color-black-90);
   }
 }
 
@@ -232,7 +232,7 @@
 /* Wallet CTA in header */
 .profile-header__wallet {
   padding-top: 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--color-white-6);
 }
 
 .wallet-cta {
@@ -266,7 +266,7 @@
 
 .wallet-cta__btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+  box-shadow: 0 4px 12px var(--color-primary-30);
 }
 
 /* Wallet connected status - Premium */
@@ -310,7 +310,7 @@
 
 .wallet-status__dot.dot--success {
   background: var(--color-success);
-  box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
+  box-shadow: 0 0 6px var(--color-success-50);
 }
 
 .wallet-status__dot.dot--warning {
@@ -363,7 +363,7 @@
 
 .wallet-disconnect-btn:hover {
   color: #ef4444;
-  background: rgba(239, 68, 68, 0.1);
+  background: var(--color-error-10);
 }
 
 .wallet-error {
@@ -372,8 +372,8 @@
   gap: 0.375rem;
   padding: 0.5rem 0.75rem;
   margin-top: 0.5rem;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: var(--color-error-10);
+  border: 1px solid var(--color-error-20);
   border-radius: 8px;
   font-size: 0.75rem;
   color: #ef4444;
@@ -395,7 +395,7 @@
     padding-top: 0;
     padding-left: 1rem;
     border-top: none;
-    border-left: 1px solid rgba(255, 255, 255, 0.06);
+    border-left: 1px solid var(--color-white-6);
   }
   
   .wallet-cta {
@@ -496,7 +496,7 @@
 }
 
 .badge-nft {
-  background: rgba(255, 215, 0, 0.15);
+  background: var(--color-gold-15);
   color: #FFD700;
 }
 
@@ -540,12 +540,12 @@
   align-items: center;
   padding: 0.75rem 0.5rem;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--color-white-3);
   transition: all 0.2s;
 }
 
 .stat-item:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--color-white-6);
   transform: translateY(-2px);
 }
 
@@ -747,8 +747,8 @@
   width: 28px;
   height: 28px;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--color-white-5);
+  border: 1px solid var(--color-white-10);
   color: var(--color-text-secondary);
   cursor: pointer;
   display: flex;
@@ -758,7 +758,7 @@
 }
 
 .swiper-btn:hover:not(.swiper-btn--disabled) {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-white-10);
   color: var(--color-text);
 }
 
@@ -793,7 +793,7 @@
   height: 80px;
   border-radius: var(--radius-md);
   overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.1);
+  border: 2px solid var(--color-white-10);
   cursor: pointer;
   position: relative;
   box-shadow: var(--shadow-sm);
@@ -801,7 +801,7 @@
 
 .nft-item--active {
   border-color: #ffd700;
-  box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
+  box-shadow: 0 0 12px var(--color-gold-40);
 }
 
 .nft-item img {
@@ -902,7 +902,7 @@
 
 .nft-gallery-item.is-avatar {
   border-color: #FFD700;
-  box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
+  box-shadow: 0 0 12px var(--color-gold-40);
 }
 
 .nft-gallery-item img {
@@ -973,8 +973,8 @@
   justify-content: flex-start;
   gap: 0.625rem;
   padding: 0.75rem;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--color-white-3);
+  border: 1px solid var(--color-white-6);
   border-radius: 12px;
   color: var(--color-text-secondary);
   font-size: 0.75rem;
@@ -993,11 +993,11 @@
 }
 
 .quick-action-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(249, 115, 22, 0.25);
+  background: var(--color-white-6);
+  border-color: var(--color-primary-25);
   color: var(--color-text);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px var(--color-black-20);
 }
 
 .quick-action-btn:hover svg {
@@ -1075,13 +1075,13 @@
 }
 
 .inventory-card:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--color-white-15);
+  background: var(--color-white-3);
 }
 
 .inventory-card.equipped {
   border-color: var(--color-primary);
-  background: rgba(249, 115, 22, 0.05);
+  background: var(--color-primary-5);
 }
 
 /* Tier left-border accent */
@@ -1250,18 +1250,18 @@
   border-radius: 12px;
   font-weight: 600;
   font-size: 0.85rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-white-10);
+  background: var(--color-white-5);
   color: var(--color-text);
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .action-button:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: var(--color-white-8);
+  border-color: var(--color-white-20);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px var(--color-black-20);
 }
 
 .action-button:active {
@@ -1273,11 +1273,11 @@
 .action-button.action-settings {
   background: linear-gradient(135deg, rgba(249, 115, 22, 0.95), rgba(234, 88, 12, 0.95));
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--color-white-15);
   box-shadow: 0 4px 16px rgba(249, 115, 22, 0.35);
   font-weight: 600;
   letter-spacing: 0.02em;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 1px 2px var(--color-black-20);
 }
 
 .action-button.action-settings:hover {
@@ -1291,34 +1291,34 @@
 .action-button.action-settings:active {
   transform: translateY(-1px);
   box-shadow: 
-    0 2px 8px rgba(249, 115, 22, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    0 2px 8px var(--color-primary-30),
+    inset 0 1px 0 var(--color-white-15);
 }
 
 /* Premium Dark Sign Out Button */
 .action-signout {
   background: var(--color-surface);
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  border: 1px solid var(--color-error-20);
   color: rgba(239, 68, 68, 0.85);
   box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    0 2px 8px rgba(0, 0, 0, 0.2);
+    inset 0 1px 0 var(--color-white-5),
+    0 2px 8px var(--color-black-20);
   font-weight: 500;
 }
 
 .action-signout:hover {
-  background: rgba(239, 68, 68, 0.12);
-  border-color: rgba(239, 68, 68, 0.4);
+  background: var(--color-error-12);
+  border-color: var(--color-error-40);
   color: #ef4444;
   transform: translateY(-2px);
   box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 var(--color-white-5),
     0 4px 12px rgba(239, 68, 68, 0.15);
 }
 
 .action-signout:active {
   transform: translateY(0);
-  background: rgba(239, 68, 68, 0.2);
+  background: var(--color-error-20);
 }
 
 /* ============ Profile Loading/Error States ============ */
@@ -1377,7 +1377,7 @@
 
 .streak-card-active {
   border-color: #f97316;
-  background: rgba(249, 115, 22, 0.05);
+  background: var(--color-primary-5);
 }
 
 .streak-icon {
@@ -1441,7 +1441,7 @@
   background: linear-gradient(135deg, #f97316, #ea580c);
   color: white;
   border: none;
-  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.25);
+  box-shadow: 0 2px 8px var(--color-primary-25);
 }
 
 .customize-drawer-btn:hover {
@@ -1450,14 +1450,14 @@
 }
 
 .view-drawer-btn {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--color-white-8);
   color: var(--color-text);
   border: 1px solid var(--color-border);
 }
 
 .view-drawer-btn:hover {
   background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--color-white-20);
 }
 
 .account-page {
@@ -1535,7 +1535,7 @@
   justify-content: space-between;
   margin-bottom: 0.75rem;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid var(--color-white-4);
 }
 
 .account-widget .widget-header h3 {
@@ -1555,7 +1555,7 @@
   color: var(--color-text-tertiary);
   font-weight: 500;
   font-variant-numeric: tabular-nums;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-white-5);
   padding: 0.25rem 0.5rem;
   border-radius: 6px;
 }
@@ -1638,33 +1638,33 @@
   color: white;
   border: none;
   box-shadow: 
-    0 2px 8px rgba(249, 115, 22, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    0 2px 8px var(--color-primary-25),
+    inset 0 1px 0 var(--color-white-15);
 }
 
 .account-widget .widget-btn.primary:hover {
   transform: translateY(-2px);
   box-shadow: 
-    0 4px 16px rgba(249, 115, 22, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    0 4px 16px var(--color-primary-40),
+    inset 0 1px 0 var(--color-white-20);
 }
 
 .account-widget .widget-btn.primary:active {
   transform: translateY(0);
   box-shadow: 
     0 1px 4px rgba(249, 115, 22, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    inset 0 1px 0 var(--color-white-10);
 }
 
 .account-widget .widget-btn.secondary {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-white-5);
   color: var(--color-text-secondary);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--color-white-8);
 }
 
 .account-widget .widget-btn.secondary:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.15);
+  background: var(--color-white-8);
+  border-color: var(--color-white-15);
   color: var(--color-text);
   transform: translateY(-1px);
 }
@@ -1692,8 +1692,8 @@
 }
 
 .friends-widget .friend-avatar.online {
-  border: 1px solid rgba(34, 197, 94, 0.3);
-  background: rgba(34, 197, 94, 0.05);
+  border: 1px solid var(--color-success-30);
+  background: var(--color-success-5);
 }
 
 .friends-widget .friend-avatar.more {
@@ -1801,7 +1801,7 @@
 /* ============ HERO: Game Scores Section ============ */
 .account-dashboard--premium .game-scores-section {
   background: var(--color-surface);
-  border: 1px solid rgba(249, 115, 22, 0.15);
+  border: 1px solid var(--color-primary-15);
   border-radius: var(--radius-xl);
   padding: 1.25rem;
   margin-bottom: 1rem;
@@ -1818,7 +1818,7 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(249, 115, 22, 0.4), transparent);
+  background: linear-gradient(90deg, transparent, var(--color-primary-40), transparent);
 }
 
 .account-dashboard--premium .game-scores-section .section-title {
@@ -1840,7 +1840,7 @@
   height: 8px;
   background: #f97316;
   border-radius: 50%;
-  box-shadow: 0 0 8px rgba(249, 115, 22, 0.6);
+  box-shadow: 0 0 8px var(--color-primary-60);
 }
 
 .account-dashboard--premium .games-grid {
@@ -1849,18 +1849,18 @@
 
 .account-dashboard--premium .game-score-card {
   padding: 0.75rem;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--color-white-4);
+  border: 1px solid var(--color-white-8);
   border-radius: 12px;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 }
 
 .account-dashboard--premium .game-score-card:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(249, 115, 22, 0.3);
+  background: var(--color-white-8);
+  border-color: var(--color-primary-30);
   transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 24px var(--color-black-30);
 }
 
 .account-dashboard--premium .game-score-card:active {
@@ -1869,7 +1869,7 @@
 
 .account-dashboard--premium .game-emoji {
   font-size: 1.5rem;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 2px 4px var(--color-black-30));
 }
 
 .account-dashboard--premium .game-name {
@@ -1919,9 +1919,9 @@
 .skeleton {
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.03) 25%,
-    rgba(255, 255, 255, 0.06) 50%,
-    rgba(255, 255, 255, 0.03) 75%
+    var(--color-white-3) 25%,
+    var(--color-white-6) 50%,
+    var(--color-white-3) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
