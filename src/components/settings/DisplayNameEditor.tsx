@@ -8,6 +8,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { useGame } from '@/contexts/GameContext';
 import { settingsSectionVariants } from '@/config/settingsAnimations';
 import { validateDIDName } from '@/lib/nameGenerator';
+import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch';
 
 const SOURCE_LABELS: Record<string, string> = {
   custom: 'Custom',
@@ -18,6 +19,7 @@ const SOURCE_LABELS: Record<string, string> = {
 export function DisplayNameEditor() {
   const prefersReducedMotion = useReducedMotion();
   const { player, isRegistered } = useGame();
+  const { authenticatedFetch } = useAuthenticatedFetch();
   const did = player?.did;
 
   const [displayName, setDisplayName] = useState('');
@@ -62,16 +64,8 @@ export function DisplayNameEditor() {
     setSuccess(false);
 
     try {
-      // Get auth token
-      const tokenRes = await fetch('/api/auth/token');
-      const tokenData = await tokenRes.json();
-
-      const res = await fetch('/api/profile/display-name', {
+      const res = await authenticatedFetch('/api/profile/display-name', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${tokenData.token}`,
-        },
         body: JSON.stringify({
           did,
           name: inputValue.trim(),
