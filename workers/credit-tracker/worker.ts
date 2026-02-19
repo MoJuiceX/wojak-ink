@@ -789,21 +789,12 @@ async function runIntegrityCheck(
 
 // ─── Burn Detection ───
 // MintGarden event type 3 = burn (NFT sent to burn address)
-// Credit formula: heavily disliked burns earn more credits
+// Simplified burn credits: bottom 25% by power_score, burner != minter = 100 credits
 
 const KV_KEY_LAST_BURN_TIMESTAMP = 'last_burn_event_timestamp';
 
-function calculateBurnCredits(likes: number, dislikes: number): number {
-  // Stored units = display credits × 100
-  // Higher dislike ratio = more credits for burning "bad" NFTs
-  const total = likes + dislikes;
-  if (total === 0) return 1000; // 10 display credits for unvoted NFTs
-  const dislikeRatio = dislikes / total;
-  if (dislikeRatio > 0.7) return 8000;  // 80 display credits
-  if (dislikeRatio > 0.5) return 5000;  // 50 display credits
-  if (dislikeRatio > 0.3) return 2500;  // 25 display credits
-  return 1000;                           // 10 display credits
-}
+// Burn reward: 100 display credits = 10000 stored units
+const BURN_CREDIT_AMOUNT = 10000;
 
 async function detectBurns(env: Env): Promise<{ detected: number; credited: number }> {
   const collectionId = env.COLLECTION_ID;
@@ -865,24 +856,40 @@ async function detectBurns(env: Env): Promise<{ detected: number; credited: numb
         continue;
       }
 
-      // Get vote scores
-      const scores = await env.DB.prepare(
-        'SELECT likes, dislikes, net_score FROM wojak_scores WHERE nft_id = ?'
-      ).bind(nftId).first<{ likes: number; dislikes: number; net_score: number }>();
+      // Get fighter power score for eligibility check
+      const fighter = await env.DB.prepare(
+        'SELECT power_score FROM combat_fighters WHERE nft_id = ?'
+      ).bind(nftId).first<{ power_score: number }>();
 
-      const likes = scores?.likes ?? 0;
-      const dislikes = scores?.dislikes ?? 0;
-      const netScore = scores?.net_score ?? 0;
-      const credits = calculateBurnCredits(likes, dislikes);
+      // Calculate 25th percentile threshold for burn eligibility
+      const thresholdRow = await env.DB.prepare(`
+        WITH ranked AS (
+          SELECT power_score,
+            NTILE(4) OVER (ORDER BY power_score ASC) as quartile
+          FROM combat_fighters
+          WHERE burned_at IS NULL
+        )
+        SELECT MAX(power_score) as threshold FROM ranked WHERE quartile = 1
+      `).first<{ threshold: number }>();
+
+      const powerScore = fighter?.power_score ?? 0;
+      const threshold = thresholdRow?.threshold ?? 0;
+      const isEligible = fighter && powerScore <= threshold;
 
       // Resolve burner wallet: previous_address is who sent the burn
       const burnerWallet = event.previous_address?.encoded_id || mint.wallet_address;
 
-      // Check if burner is the original minter - if so, no credits awarded
+      // Check eligibility: bottom 25% AND burner != minter
       const isSelfBurn = burnerWallet === mint.wallet_address;
-      const creditsToAward = isSelfBurn ? 0 : credits;
-      if (isSelfBurn) {
+      let creditsToAward = 0;
+
+      if (!isEligible) {
+        console.log(`[CreditTracker] Burn not eligible: edition ${mint.mint_number} power ${powerScore} > threshold ${threshold}`);
+      } else if (isSelfBurn) {
         console.log(`[CreditTracker] Self-burn detected: ${burnerWallet.slice(0, 15)}... burned own edition ${mint.mint_number} - no credits`);
+      } else {
+        // Eligible burn by non-minter: award 100 credits
+        creditsToAward = BURN_CREDIT_AMOUNT;
       }
 
       // Resolve DID (if registered game player)
@@ -891,12 +898,12 @@ async function detectBurns(env: Env): Promise<{ detected: number; credited: numb
       ).bind(burnerWallet).first<{ did_id: string }>();
 
       try {
-        // Always record the burn, but only award credits if not self-burn
+        // Always record the burn, but only award credits if eligible
         const statements = [
           env.DB.prepare(`
             INSERT INTO wojak_burns (nft_id, edition_number, burner_did, burner_wallet, net_score_at_burn, credits_awarded, detected_via)
             VALUES (?, ?, ?, ?, ?, ?, 'indexer')
-          `).bind(nftId, mint.mint_number, player?.did_id || null, burnerWallet, netScore, creditsToAward),
+          `).bind(nftId, mint.mint_number, player?.did_id || null, burnerWallet, powerScore, creditsToAward),
           env.DB.prepare(
             'DELETE FROM did_holdings WHERE nft_id = ?'
           ).bind(nftId),
