@@ -37,6 +37,9 @@ export function AchievementUnlockPopup({
           animate={{ scale: 1, y: 0 }}
           exit={{ scale: 0.8, y: 50 }}
           onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Achievement unlocked"
         >
           <button className="popup-close" onClick={onClose} aria-label="Close">
             <X size={20} />

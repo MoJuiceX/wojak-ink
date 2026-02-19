@@ -69,11 +69,11 @@ export const DailyRewardModal: React.FC<DailyRewardModalProps> = ({ isOpen, onCl
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="daily-reward-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="daily-reward-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Daily Rewards">
         <div className="daily-reward-content">
           <div className="daily-header">
             <h2>Daily Rewards</h2>
-            <button className="close-button" onClick={onClose}>
+            <button className="close-button" onClick={onClose} aria-label="Close">
               ✕
             </button>
           </div>

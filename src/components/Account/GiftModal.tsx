@@ -202,8 +202,8 @@ export function GiftModal({
 
   return (
     <div className="gift-modal-overlay" onClick={onClose}>
-      <div className="gift-modal" onClick={e => e.stopPropagation()}>
-        <button className="gift-modal-close" onClick={onClose}>
+      <div className="gift-modal" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Send a Gift">
+        <button className="gift-modal-close" onClick={onClose} aria-label="Close">
           <X size={20} />
         </button>
 
