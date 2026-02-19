@@ -78,8 +78,7 @@ function EditableField({ label, value, icon, placeholder, onSave, validation }: 
   return (
     <div className="space-y-1">
       <label
-        className="text-xs font-medium"
-        style={{ color: 'var(--color-text-tertiary)' }}
+        className="text-xs font-medium text-tertiary"
       >
         {label}
       </label>
@@ -87,8 +86,7 @@ function EditableField({ label, value, icon, placeholder, onSave, validation }: 
         <div className="flex items-center gap-2">
           <div className="flex-1 relative">
             <span
-              className="absolute left-3 top-1/2 -translate-y-1/2"
-              style={{ color: 'var(--color-text-tertiary)' }}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-tertiary"
             >
               {icon}
             </span>
@@ -97,11 +95,10 @@ function EditableField({ label, value, icon, placeholder, onSave, validation }: 
               value={editValue}
               onChange={(e) => setEditValue(e.target.value)}
               placeholder={placeholder}
-              className="w-full pl-10 pr-3 py-2 rounded-lg text-sm"
+              className="w-full pl-10 pr-3 py-2 rounded-lg text-sm text-primary"
               style={{
                 background: 'var(--color-bg)',
                 border: error ? '1px solid #ef4444' : '1px solid var(--color-border)',
-                color: 'var(--color-text)',
               }}
               autoFocus
             />
@@ -119,10 +116,9 @@ function EditableField({ label, value, icon, placeholder, onSave, validation }: 
           </button>
           <button
             onClick={handleCancel}
-            className="p-2 rounded-lg"
+            className="p-2 rounded-lg text-secondary"
             style={{
               background: 'var(--color-elevated)',
-              color: 'var(--color-text-secondary)',
             }}
           >
             <X size={16} />
@@ -137,18 +133,18 @@ function EditableField({ label, value, icon, placeholder, onSave, validation }: 
             border: '1px solid var(--color-border)',
           }}
         >
-          <span style={{ color: 'var(--color-text-tertiary)' }}>{icon}</span>
+          <span className="text-tertiary">{icon}</span>
           <span
             className="flex-1 text-sm"
             style={{ color: value ? 'var(--color-text)' : 'var(--color-text-muted)' }}
           >
             {value || placeholder}
           </span>
-          <Edit3 size={14} style={{ color: 'var(--color-text-tertiary)' }} />
+          <Edit3 size={14} className="text-tertiary" />
         </button>
       )}
       {error && (
-        <p className="text-xs" style={{ color: 'var(--color-error)' }}>{error}</p>
+        <p className="text-xs text-error">{error}</p>
       )}
     </div>
   );
@@ -199,11 +195,10 @@ export function AccountSettings() {
     >
       {/* Section Header */}
       <div className="flex items-center gap-2">
-        <User size={20} style={{ color: 'var(--color-primary)' }} />
+        <User size={20} className="text-accent" />
         <h2
           id="account-section-heading"
-          className="text-lg font-bold"
-          style={{ color: 'var(--color-text)' }}
+          className="text-lg font-bold text-primary"
         >
           Account
         </h2>
@@ -224,11 +219,10 @@ export function AccountSettings() {
               className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
               style={{ background: 'var(--color-elevated)' }}
             >
-              <User size={32} style={{ color: 'var(--color-text-muted)' }} />
+              <User size={32} className="text-muted" />
             </div>
             <p
-              className="text-sm mb-4"
-              style={{ color: 'var(--color-text-secondary)' }}
+              className="text-sm mb-4 text-secondary"
             >
               Sign in to save your profile and compete on leaderboards
             </p>
@@ -248,7 +242,7 @@ export function AccountSettings() {
         <SignedIn>
           {isLoading ? (
             <div className="p-6 flex items-center justify-center">
-              <Loader2 size={24} className="animate-spin" style={{ color: 'var(--color-primary)' }} />
+              <Loader2 size={24} className="animate-spin text-accent" />
             </div>
           ) : (
             <div className="divide-y" style={{ borderColor: 'var(--color-border)' }}>
@@ -270,14 +264,12 @@ export function AccountSettings() {
                 )}
                 <div className="flex-1 min-w-0">
                   <p
-                    className="font-medium truncate"
-                    style={{ color: 'var(--color-text)' }}
+                    className="font-medium truncate text-primary"
                   >
                     {profile?.displayName || clerkUser?.firstName || 'User'}
                   </p>
                   <p
-                    className="text-sm truncate"
-                    style={{ color: 'var(--color-text-secondary)' }}
+                    className="text-sm truncate text-secondary"
                   >
                     {clerkUser?.email}
                   </p>
@@ -321,8 +313,7 @@ export function AccountSettings() {
               {/* Wallet Connection */}
               <div className="p-4">
                 <label
-                  className="text-xs font-medium mb-2 block"
-                  style={{ color: 'var(--color-text-tertiary)' }}
+                  className="text-xs font-medium mb-2 block text-tertiary"
                 >
                   Wallet
                 </label>
@@ -335,21 +326,19 @@ export function AccountSettings() {
                         border: '1px solid #22c55e',
                       }}
                     >
-                      <Wallet size={18} style={{ color: 'var(--color-success)' }} />
+                      <Wallet size={18} className="text-success" />
                       <span
-                        className="flex-1 text-sm"
-                        style={{ color: 'var(--color-text)' }}
+                        className="flex-1 text-sm text-primary"
                       >
                         Sage Wallet Connected
                       </span>
-                      <Check size={16} style={{ color: 'var(--color-success)' }} />
+                      <Check size={16} className="text-success" />
                     </div>
                     <button
                       onClick={() => walletConnect.disconnect()}
-                      className="w-full px-3 py-2 rounded-lg text-sm"
+                      className="w-full px-3 py-2 rounded-lg text-sm text-error"
                       style={{
                         background: 'transparent',
-                        color: 'var(--color-error)',
                         border: '1px solid rgba(239, 68, 68, 0.3)',
                       }}
                     >
@@ -359,10 +348,9 @@ export function AccountSettings() {
                 ) : (
                   <button
                     onClick={handleConnectWallet}
-                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm"
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm text-secondary"
                     style={{
                       background: 'var(--color-elevated)',
-                      color: 'var(--color-text-secondary)',
                       border: '1px solid var(--color-border)',
                     }}
                   >
@@ -378,7 +366,7 @@ export function AccountSettings() {
                 className="w-full p-4 flex items-center gap-3 text-left transition-colors hover:bg-black/5"
               >
                 <div className="relative">
-                  <Bell size={18} style={{ color: 'var(--color-text-secondary)' }} />
+                  <Bell size={18} className="text-secondary" />
                   {unreadMessages > 0 && (
                     <span
                       className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-xs flex items-center justify-center font-medium"
@@ -389,22 +377,20 @@ export function AccountSettings() {
                   )}
                 </div>
                 <span
-                  className="flex-1 text-sm"
-                  style={{ color: 'var(--color-text)' }}
+                  className="flex-1 text-sm text-primary"
                 >
                   Messages
                 </span>
-                <ChevronRight size={16} style={{ color: 'var(--color-text-tertiary)' }} />
+                <ChevronRight size={16} className="text-tertiary" />
               </button>
 
               {/* Sign Out */}
               <div className="p-4">
                 <button
                   onClick={handleSignOut}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-colors"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-error"
                   style={{
                     background: 'transparent',
-                    color: 'var(--color-error)',
                     border: '1px solid rgba(239, 68, 68, 0.3)',
                   }}
                 >

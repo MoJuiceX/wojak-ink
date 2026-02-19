@@ -556,6 +556,7 @@ body {
 .text-primary { color: var(--color-text); }
 .text-secondary { color: var(--color-text-secondary); }
 .text-muted { color: var(--color-text-muted); }
+.text-tertiary { color: var(--color-text-tertiary); }
 .text-accent { color: var(--color-primary); }
 .text-success { color: var(--color-success); }
 .text-warning { color: var(--color-warning); }

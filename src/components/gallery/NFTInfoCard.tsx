@@ -79,16 +79,14 @@ function MainTabContent({
       {/* Name and rank - like desktop */}
       <div className="flex items-center gap-2 flex-wrap">
         <h2
-          className="text-lg font-bold"
-          style={{ color: 'var(--color-text)' }}
+          className="text-lg font-bold text-primary"
         >
           {nft.name}
         </h2>
         <div className="flex items-center gap-1">
-          <Crown size={16} style={{ color: 'var(--color-primary)' }} />
+          <Crown size={16} className="text-accent" />
           <span
-            className="text-sm font-medium"
-            style={{ color: 'var(--color-text-secondary)' }}
+            className="text-sm font-medium text-secondary"
           >
             #{nft.rarityRank}
           </span>
@@ -103,11 +101,10 @@ function MainTabContent({
             return (
               <span
                 key={badge.badge}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-secondary"
                 style={{
                   background: 'var(--color-surface)',
                   border: '1px solid var(--color-border)',
-                  color: 'var(--color-text-secondary)',
                 }}
               >
                 <span>{def?.emoji || '🏅'}</span>
@@ -132,15 +129,14 @@ function MainTabContent({
       )}
 
       {/* Owner */}
-      <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+      <p className="text-sm text-muted">
         Owned by:{' '}
         {ownerInfo ? (
           <a
             href={ownerInfo.profileUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:underline"
-            style={{ color: 'var(--color-primary)' }}
+            className="hover:underline text-accent"
           >
             {ownerInfo.name || truncateAddress(ownerInfo.address)}
           </a>
@@ -154,14 +150,12 @@ function MainTabContent({
         <>
           <div className="flex items-baseline gap-2">
             <p
-              className="text-xl font-bold"
-              style={{ color: 'var(--color-text)' }}
+              className="text-xl font-bold text-primary"
             >
               {formatPriceXCH(nft.listing.priceXCH)}
             </p>
             <p
-              className="text-sm"
-              style={{ color: 'var(--color-text-muted)' }}
+              className="text-sm text-muted"
             >
               ≈ {formatPriceUSD(calculateUsd(nft.listing.priceXCH))}
             </p>
@@ -288,15 +282,13 @@ function TraitRankingPopup({
           style={{ borderBottom: '1px solid var(--color-border)' }}
         >
           <span
-            className="font-bold text-sm uppercase tracking-wide"
-            style={{ color: 'var(--color-accent)' }}
+            className="font-bold text-sm uppercase tracking-wide text-accent"
           >
             {data.category} Rarity
           </span>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg"
-            style={{ color: 'var(--color-text-muted)' }}
+            className="p-1 rounded-lg text-muted"
           >
             <X size={18} />
           </button>
@@ -309,8 +301,7 @@ function TraitRankingPopup({
             <>
               <TraitRankingRow entry={data.rarest} isCurrent={false} />
               <div
-                className="text-center py-1 text-xs"
-                style={{ color: 'var(--color-text-muted)' }}
+                className="text-center py-1 text-xs text-muted"
               >
                 ...
               </div>
@@ -330,8 +321,7 @@ function TraitRankingPopup({
           {data.mostCommon && (
             <>
               <div
-                className="text-center py-1 text-xs"
-                style={{ color: 'var(--color-text-muted)' }}
+                className="text-center py-1 text-xs text-muted"
               >
                 ...
               </div>
@@ -368,16 +358,14 @@ function MetadataTabContent({ nft }: { nft: NFT }) {
             >
               {/* Category label */}
               <p
-                className="text-xs uppercase tracking-wide mb-1"
-                style={{ color: 'var(--color-text-muted)' }}
+                className="text-xs uppercase tracking-wide mb-1 text-muted"
               >
                 {trait.category}
               </p>
               {/* Value + Rank */}
               <div className="flex items-baseline justify-between gap-1">
                 <p
-                  className="text-sm font-medium truncate"
-                  style={{ color: 'var(--color-text)' }}
+                  className="text-sm font-medium truncate text-primary"
                 >
                   {trait.value}
                 </p>
@@ -445,8 +433,7 @@ function HistoryTabContent({ nftId }: { nftId: number }) {
   if (isLoading) {
     return (
       <div
-        className="py-8 text-center text-sm"
-        style={{ color: 'var(--color-text-muted)' }}
+        className="py-8 text-center text-sm text-muted"
       >
         Loading...
       </div>
@@ -464,14 +451,12 @@ function HistoryTabContent({ nftId }: { nftId: number }) {
       >
         <div className="flex items-center justify-between">
           <span
-            className="text-sm font-medium"
-            style={{ color: 'var(--color-text)' }}
+            className="text-sm font-medium text-primary"
           >
             Minted
           </span>
           <span
-            className="text-xs"
-            style={{ color: 'var(--color-text-muted)' }}
+            className="text-xs text-muted"
           >
             {formatDate(COLLECTION_MINT_DATE)}
           </span>
@@ -489,22 +474,19 @@ function HistoryTabContent({ nftId }: { nftId: number }) {
         >
           <div className="flex items-center justify-between">
             <span
-              className="text-sm font-medium"
-              style={{ color: 'var(--color-text)' }}
+              className="text-sm font-medium text-primary"
             >
               Sold for {formatPriceXCH(sale.xchEquivalent)}
             </span>
             <span
-              className="text-xs"
-              style={{ color: 'var(--color-text-muted)' }}
+              className="text-xs text-muted"
             >
               {formatDate(sale.timestamp)}
             </span>
           </div>
           {sale.currency === 'CAT' && (
             <p
-              className="text-xs mt-0.5"
-              style={{ color: 'var(--color-text-muted)' }}
+              className="text-xs mt-0.5 text-muted"
             >
               (Paid in CAT: {sale.amount.toLocaleString()})
             </p>
@@ -515,8 +497,7 @@ function HistoryTabContent({ nftId }: { nftId: number }) {
       {/* No sales message */}
       {sales.length === 0 && (
         <p
-          className="py-2 text-sm"
-          style={{ color: 'var(--color-text-muted)' }}
+          className="py-2 text-sm text-muted"
         >
           No sales history
         </p>
@@ -558,11 +539,7 @@ export function NFTInfoCard({
 
   return (
     <div
-      className="rounded-xl overflow-hidden"
-      style={{
-        background: 'var(--color-surface)',
-        border: '1px solid var(--color-border)',
-      }}
+      className="card-static rounded-xl overflow-hidden"
     >
       {/* Tab bar */}
       <div
