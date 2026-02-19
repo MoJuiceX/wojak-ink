@@ -22,6 +22,7 @@ import { GameErrorBoundary } from '@/components/games/GameError';
 import { GameLoading } from '@/components/games/GameLoading';
 import { FightClubRankings } from '@/components/combat/FightClubRankings';
 import { SubscriptionBanner } from '@/components/combat/SubscriptionBanner';
+import { FightClubHero } from '@/components/combat/FightClubHero';
 import { useUserProfile } from '@/contexts/UserProfileContext';
 import { useSageWallet } from '@/sage-wallet';
 
@@ -396,6 +397,12 @@ export default function FightClub() {
           minHeight: '100%',
         }}
       >
+        {/* Hero Section — always visible */}
+        <FightClubHero
+          isHolder={!!accessData?.hasAccess}
+          hasWojaks={(accessData?.wojakCount ?? 0) > 0}
+        />
+
         {/* Tab Bar */}
         <div className="flex items-center gap-2">
           <div className="fight-club-tabs flex-1">
