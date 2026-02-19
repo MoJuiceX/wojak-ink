@@ -94,6 +94,7 @@ const OrangeSnake = lazy(() => import('./pages/OrangeSnake'));
 const BrickBreaker = lazy(() => import('./pages/BrickBreaker'));
 const WojakWhack = lazy(() => import('./pages/WojakWhack'));
 const CombatArena = lazy(() => import('./pages/CombatArena'));
+const ArenaLeaderboard = lazy(() => import('./pages/ArenaLeaderboard'));
 
 // Skip boot sequence in development for faster testing
 const SKIP_BOOT_IN_DEV = true;
@@ -415,6 +416,9 @@ function AppContent() {
                       }
                     />
                   </Route>
+                  {/* Combat Arena — top-level /arena route */}
+                  <Route path="arena" element={<GameErrorBoundary gameName="Combat Arena"><Suspense fallback={<GameLoading gameName="Combat Arena" />}><CombatArena /></Suspense></GameErrorBoundary>} />
+                  <Route path="arena/leaderboard" element={<GameErrorBoundary gameName="Arena Leaderboard"><Suspense fallback={<GameLoading gameName="Arena Leaderboard" />}><ArenaLeaderboard /></Suspense></GameErrorBoundary>} />
                   {/* Redirects from old routes */}
                   <Route path="your-wojak" element={<Navigate to="/swipe" replace />} />
                   <Route path="your-wojak/dashboard" element={<Navigate to="/swipe/dashboard" replace />} />
@@ -541,17 +545,8 @@ function AppContent() {
                       </GameErrorBoundary>
                     }
                   />
-                  {/* Combat Arena */}
-                  <Route
-                    path="games/combat"
-                    element={
-                      <GameErrorBoundary gameName="Combat Arena">
-                        <Suspense fallback={<GameLoading gameName="Combat Arena" />}>
-                          <CombatArena />
-                        </Suspense>
-                      </GameErrorBoundary>
-                    }
-                  />
+                  {/* Legacy Combat Arena route — redirect to top-level /arena */}
+                  <Route path="games/combat" element={<Navigate to="/arena" replace />} />
                   {/* Legacy game routes - redirect to new paths */}
                   <Route path="media/games/stack" element={<Navigate to="/games/stack" replace />} />
                   <Route path="media/games/memory" element={<Navigate to="/games/memory" replace />} />
