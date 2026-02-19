@@ -16,7 +16,7 @@ interface FriendsWidgetProps {
 }
 
 export function FriendsWidget({ onViewAll, onFindFriends }: FriendsWidgetProps) {
-  const { friendProfiles, isLoading, profilesLoaded, refreshFriends } = useFriends();
+  const { friends: friendIds, friendProfiles, isLoading, profilesLoaded, refreshFriends } = useFriends();
 
   const handleRetry = async () => {
     await refreshFriends();
@@ -25,7 +25,8 @@ export function FriendsWidget({ onViewAll, onFindFriends }: FriendsWidgetProps) 
   // Show loading skeleton while actively loading (before profiles have loaded at least once)
   const loading = isLoading && !profilesLoaded;
   // Show error if profiles attempted to load but we got none despite having friends
-  const error = profilesLoaded && friendProfiles.length === 0 && !isLoading;
+  // (friendIds.length > 0 means we have friend IDs but failed to load their profiles)
+  const error = profilesLoaded && friendIds.length > 0 && friendProfiles.length === 0 && !isLoading;
 
   // Map friendProfiles to expected format for display
   const friends = friendProfiles.map(fp => ({
