@@ -13,8 +13,8 @@ interface GeneratorInfoProps {
 }
 
 const sectionCard: React.CSSProperties = {
-  background: 'rgba(255, 255, 255, 0.015)',
-  border: '1px solid rgba(255, 255, 255, 0.04)',
+  background: 'var(--color-white-3)',
+  border: '1px solid var(--color-white-5)',
   borderRadius: 12,
   padding: '14px 16px',
 };

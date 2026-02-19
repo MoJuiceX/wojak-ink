@@ -188,7 +188,7 @@ export function DesktopNFTImage({
           initial={{ opacity: 0 }}
           whileHover={{ opacity: 1 }}
           style={{
-            background: 'rgba(255, 255, 255, 0.02)',
+            background: 'var(--color-white-3)',
           }}
         />
       </div>

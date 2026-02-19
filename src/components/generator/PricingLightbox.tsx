@@ -160,7 +160,7 @@ function CategoryAccordion({
         }}
         onClick={() => setIsOpen((v) => !v)}
         aria-expanded={isOpen}
-        onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)')}
+        onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-white-3)')}
         onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
       >
         <motion.div
@@ -184,7 +184,7 @@ function CategoryAccordion({
             style={{
               fontSize: '12px',
               fontWeight: 700,
-              background: 'rgba(255, 107, 0, 0.1)',
+              background: 'var(--color-primary-10)',
               padding: '2px 8px',
               borderRadius: '6px',
             }}
@@ -224,7 +224,7 @@ function CategoryAccordion({
                         fontSize: '11px',
                         fontWeight: 600,
                         color: sortMode === mode ? 'var(--color-primary)' : 'var(--color-text-muted)',
-                        background: sortMode === mode ? 'rgba(255, 107, 0, 0.1)' : 'transparent',
+                        background: sortMode === mode ? 'var(--color-primary-10)' : 'transparent',
                         padding: '2px 8px',
                         borderRadius: '6px',
                         cursor: 'pointer',
@@ -301,7 +301,7 @@ function CategoryAccordion({
                           className="h-full rounded-full"
                           style={{
                             width: `${barPct}%`,
-                            background: barPct > 60 ? 'var(--color-primary)' : 'rgba(255, 255, 255, 0.25)',
+                            background: barPct > 60 ? 'var(--color-primary)' : 'var(--color-white-25)',
                             transition: 'width 0.3s ease',
                           }}
                         />

@@ -65,7 +65,7 @@ export const NFTGridItem = memo(function NFTGridItem({
     ? {}
     : {
         scale: 0.95,
-        boxShadow: '0 0 0 3px rgba(249, 115, 22, 0.5)',
+        boxShadow: '0 0 0 3px var(--color-primary-50)',
       };
 
   return (
@@ -85,7 +85,7 @@ export const NFTGridItem = memo(function NFTGridItem({
       {!imageLoaded && (
         <div
           className="absolute inset-0 animate-pulse"
-          style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+          style={{ background: 'var(--color-white-3)' }}
         />
       )}
 
