@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Swords } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { WojakFighterCard } from './WojakFighterCard';
+import { FighterDetailModal } from './FighterDetailModal';
 
 const COMBAT_TYPES = [
   'FIRE', 'WATER', 'ELECTRIC', 'GRASS', 'ICE', 'MARTIAL',
@@ -62,6 +63,7 @@ export function YourWojakSection() {
   const [sort, setSort] = useState<SortOption>('power_desc');
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
   const [limit] = useState(50);
+  const [selectedFighter, setSelectedFighter] = useState<WojakFighter | null>(null);
 
   const { data, isLoading } = useQuery<ApiResponse>({
     queryKey: ['your-wojaks', sort, typeFilter, limit],
@@ -163,10 +165,22 @@ export function YourWojakSection() {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {wojaks.map((wojak) => (
-            <WojakFighterCard key={wojak.nft_id} wojak={wojak} />
+            <WojakFighterCard
+              key={wojak.nft_id}
+              wojak={wojak}
+              onClick={() => setSelectedFighter(wojak)}
+            />
           ))}
         </div>
       )}
+
+      {/* Fighter Detail Modal */}
+      <FighterDetailModal
+        isOpen={selectedFighter !== null}
+        onClose={() => setSelectedFighter(null)}
+        nftId={selectedFighter?.nft_id || ''}
+        edition={selectedFighter?.edition || 0}
+      />
     </div>
   );
 }

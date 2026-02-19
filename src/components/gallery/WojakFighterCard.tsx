@@ -26,14 +26,22 @@ interface WojakFighter {
 
 interface WojakFighterCardProps {
   wojak: WojakFighter;
+  onClick?: () => void;
 }
 
-export function WojakFighterCard({ wojak }: WojakFighterCardProps) {
+export function WojakFighterCard({ wojak, onClick }: WojakFighterCardProps) {
   const typeColor = TYPE_COLORS[wojak.type] || '#a0a0b0';
   const imageUrl = `https://assets.mintgarden.io/thumbnails/medium/${wojak.nft_id}.png`;
 
   return (
-    <div className="wojak-fighter-card">
+    <div
+      className="wojak-fighter-card"
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); } : undefined}
+      style={{ cursor: onClick ? 'pointer' : undefined }}
+    >
       {/* Image */}
       <div className="wojak-fighter-image">
         <img
