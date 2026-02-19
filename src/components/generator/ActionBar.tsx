@@ -86,12 +86,11 @@ function ActionBarTooltip({
       {visible && !disabled &&
         createPortal(
           <div
-            className="fixed px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap pointer-events-none z-[9999] -translate-x-1/2"
+            className="fixed px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap pointer-events-none z-[9999] -translate-x-1/2 text-secondary"
             style={{
               left: pos.x,
               bottom: typeof window !== 'undefined' ? window.innerHeight - pos.y + 8 : 0,
               background: 'rgba(0, 0, 0, 0.9)',
-              color: 'var(--color-text-secondary)',
               border: '1px solid var(--color-border)',
             }}
             role="tooltip"
@@ -454,8 +453,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
               {/* Free Mints / Leaderboard */}
               <button
                 type="button"
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors"
-                style={{ color: 'var(--color-text)' }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-primary"
                 onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)')}
                 onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                 onClick={() => {
@@ -463,7 +461,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
                   window.location.href = '/free-mints.html';
                 }}
               >
-                <Trophy size={16} style={{ color: 'var(--color-primary)' }} />
+                <Trophy size={16} className="text-accent" />
                 <span>Free Mints</span>
                 {isWalletConnected && (credits?.free_mints_available ?? 0) > 0 && (
                   <span
@@ -478,8 +476,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
               {/* Trait Prices */}
               <button
                 type="button"
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors"
-                style={{ color: 'var(--color-text)' }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-primary"
                 onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)')}
                 onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                 onClick={() => {
@@ -487,7 +484,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
                   setShowPricing(true);
                 }}
               >
-                <Tag size={16} style={{ color: 'var(--color-primary)' }} />
+                <Tag size={16} className="text-accent" />
                 <span>Prices</span>
               </button>
 
@@ -495,8 +492,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
               {onToggleRightPanel && (
                 <button
                   type="button"
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors"
-                  style={{ color: 'var(--color-text)' }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-primary"
                   onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)')}
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                   onClick={() => {
@@ -512,8 +508,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
               {/* How It Works */}
               <button
                 type="button"
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors"
-                style={{ color: 'var(--color-text)' }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-primary"
                 onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)')}
                 onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                 onClick={() => {
@@ -521,7 +516,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
                   setShowGeneratorInfo(true);
                 }}
               >
-                <Info size={16} style={{ color: 'var(--color-text-secondary)' }} />
+                <Info size={16} className="text-secondary" />
                 <span>How It Works</span>
               </button>
             </motion.div>
@@ -553,7 +548,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
             const price = getTotalMintPrice();
             const creditCost = Math.ceil(100 * price.totalXch / price.basePrice);
             return (
-              <span className="text-xs font-semibold tabular-nums whitespace-nowrap" style={{ color: 'var(--color-primary)' }}>
+              <span className="text-xs font-semibold tabular-nums whitespace-nowrap text-accent">
                 {creditCost} credits
               </span>
             );
@@ -561,7 +556,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
           // Paid mint (or not connected): show single total XCH
           const price = getTotalMintPrice();
           return (
-            <span className="text-xs font-semibold tabular-nums whitespace-nowrap" style={{ color: 'var(--color-primary)' }}>
+            <span className="text-xs font-semibold tabular-nums whitespace-nowrap text-accent">
               {price.totalXch.toFixed(2)} XCH
             </span>
           );
@@ -594,8 +589,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         {maxSupply > 0 && (
           <ActionBarTooltip content={`${totalMinted > 0 ? Math.max(1, Math.round((totalMinted / maxSupply) * 100)) : 0}% minted \u2022 ${maxSupply - totalMinted} remaining`}>
             <span
-              className="text-[11px] tabular-nums whitespace-nowrap cursor-default"
-              style={{ color: 'var(--color-text-muted)' }}
+              className="text-[11px] tabular-nums whitespace-nowrap cursor-default text-muted"
             >
               {totalMinted}/{maxSupply}
             </span>

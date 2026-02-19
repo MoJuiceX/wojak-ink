@@ -109,7 +109,7 @@ export function MiniLeaderboard() {
                 {player.powerLevel.toLocaleString()}
               </span>
             </div>
-            <span style={{ fontSize: 13, paddingLeft: 28, color: 'var(--color-primary)' }}>
+            <span className="text-accent" style={{ fontSize: 13, paddingLeft: 28 }}>
               You
             </span>
           </div>

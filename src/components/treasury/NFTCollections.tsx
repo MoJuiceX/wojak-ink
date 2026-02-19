@@ -71,16 +71,13 @@ export function NFTCollections({ collections, isLoading = false }: NFTCollection
           className="px-4 py-3"
           style={{ borderBottom: '1px solid var(--color-border)' }}
         >
-          <h3
-            className="text-base font-semibold"
-            style={{ color: 'var(--color-text)' }}
-          >
+          <h3 className="text-base font-semibold text-primary">
             NFT Collections
           </h3>
         </div>
         <div className="p-4 flex-1 flex flex-col items-center justify-center">
-          <ImageIcon size={48} style={{ color: 'var(--color-text-muted)', opacity: 0.5 }} />
-          <p className="mt-3 text-sm" style={{ color: 'var(--color-text-muted)' }}>
+          <ImageIcon size={48} className="text-muted" style={{ opacity: 0.5 }} />
+          <p className="mt-3 text-sm text-muted">
             No NFTs found
           </p>
         </div>
@@ -101,18 +98,14 @@ export function NFTCollections({ collections, isLoading = false }: NFTCollection
         className="px-4 py-3 flex items-center justify-between"
         style={{ borderBottom: '1px solid var(--color-border)' }}
       >
-        <h3
-          className="text-base font-semibold truncate"
-          style={{ color: 'var(--color-text)' }}
-        >
+        <h3 className="text-base font-semibold truncate text-primary">
           {selectedCollection ? selectedCollection.collectionName : 'NFT Collections'}
         </h3>
 
         {selectedCollection && (
           <motion.button
-            className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg transition-colors flex-shrink-0"
+            className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg transition-colors flex-shrink-0 text-accent"
             style={{
-              color: 'var(--color-primary)',
               background: 'var(--color-surface)',
               border: '1px solid var(--color-primary)',
             }}
@@ -168,7 +161,7 @@ export function NFTCollections({ collections, isLoading = false }: NFTCollection
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <ImageIcon size={32} style={{ color: 'var(--color-text-muted)', opacity: 0.5 }} />
+                      <ImageIcon size={32} className="text-muted" style={{ opacity: 0.5 }} />
                     </div>
                   )}
                 </motion.div>
@@ -218,7 +211,7 @@ export function NFTCollections({ collections, isLoading = false }: NFTCollection
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <ImageIcon size={32} style={{ color: 'var(--color-text-muted)', opacity: 0.5 }} />
+                      <ImageIcon size={32} className="text-muted" style={{ opacity: 0.5 }} />
                     </div>
                   )}
                   {/* Overlay */}
@@ -228,16 +221,10 @@ export function NFTCollections({ collections, isLoading = false }: NFTCollection
                       background: 'linear-gradient(transparent, rgba(0,0,0,0.9))',
                     }}
                   >
-                    <p
-                      className="text-sm font-semibold truncate"
-                      style={{ color: 'var(--color-text)' }}
-                    >
+                    <p className="text-sm font-semibold truncate text-primary">
                       {collection.collectionName}
                     </p>
-                    <p
-                      className="text-xs"
-                      style={{ color: 'var(--color-text-muted)' }}
-                    >
+                    <p className="text-xs text-muted">
                       {collection.count} {collection.count === 1 ? 'item' : 'items'}
                     </p>
                   </div>

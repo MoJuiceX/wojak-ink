@@ -95,13 +95,9 @@ export function WalletInfoCard({ wallet, onConnect, isLoading = false }: WalletI
       >
         <Wallet
           size={32}
-          className="mx-auto mb-3"
-          style={{ color: 'var(--color-text-muted)' }}
+          className="mx-auto mb-3 text-muted"
         />
-        <p
-          className="text-sm mb-4"
-          style={{ color: 'var(--color-text-muted)' }}
-        >
+        <p className="text-sm mb-4 text-muted">
           No wallet connected
         </p>
         {onConnect && (
@@ -143,10 +139,7 @@ export function WalletInfoCard({ wallet, onConnect, isLoading = false }: WalletI
           style={{ background: 'var(--color-success)' }}
           aria-label="Connected"
         />
-        <h3
-          className="text-sm font-semibold"
-          style={{ color: 'var(--color-text-secondary)' }}
-        >
+        <h3 className="text-sm font-semibold text-secondary">
           Connected Wallet
         </h3>
       </div>
@@ -155,10 +148,9 @@ export function WalletInfoCard({ wallet, onConnect, isLoading = false }: WalletI
       <div className="p-4 space-y-4">
         {/* Address */}
         <button
-          className="w-full text-left font-mono text-sm break-all p-3 rounded-lg transition-colors"
+          className="w-full text-left font-mono text-sm break-all p-3 rounded-lg transition-colors text-primary"
           style={{
             background: 'var(--color-border)',
-            color: 'var(--color-text)',
           }}
           onClick={() => setShowFullAddress(!showFullAddress)}
           aria-label={showFullAddress ? 'Hide full address' : 'Show full address'}
@@ -219,10 +211,9 @@ export function WalletInfoCard({ wallet, onConnect, isLoading = false }: WalletI
 
           {/* Explorer button */}
           <motion.button
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors text-secondary"
             style={{
               background: 'rgba(255, 255, 255, 0.06)',
-              color: 'var(--color-text-secondary)',
             }}
             onClick={handleExplorerClick}
             whileHover={{ background: 'var(--color-surface)' }}
@@ -236,10 +227,7 @@ export function WalletInfoCard({ wallet, onConnect, isLoading = false }: WalletI
 
         {/* Fingerprint (if available) */}
         {wallet.fingerprint && (
-          <p
-            className="text-xs text-center"
-            style={{ color: 'var(--color-text-muted)' }}
-          >
+          <p className="text-xs text-center text-muted">
             Fingerprint: {wallet.fingerprint}
           </p>
         )}

@@ -171,15 +171,15 @@ export function PortfolioValueCard({
           className="text-3xl md:text-4xl font-bold flex items-center justify-center"
           aria-live="polite"
         >
-          <span style={{ color: 'var(--color-success)' }}>$</span>
+          <span className="text-success">$</span>
           <SplitFlapDisplay text={formatPrice(simulatedTotalUSD)} muted size="lg" />
         </div>
 
         {/* XCH equivalent with split-flap animation */}
         <div className="text-lg flex items-center justify-center">
-          <span style={{ color: 'var(--color-success)' }}>≈ </span>
+          <span className="text-success">≈ </span>
           <SplitFlapDisplay text={formatPrice(simulatedTotalXCH)} muted size="md" />
-          <span className="ml-1 font-bold" style={{ color: 'var(--color-cyan)' }}>XCH</span>
+          <span className="ml-1 font-bold text-cyan">XCH</span>
         </div>
 
         {/* Divider */}
@@ -188,20 +188,20 @@ export function PortfolioValueCard({
         {/* Breakdown with split-flap animation */}
         <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm">
           <div className="flex items-center">
-            <span style={{ color: 'var(--color-text-secondary)' }}>XCH:&nbsp;</span>
-            <span style={{ color: 'var(--color-success)' }}>$</span>
+            <span className="text-secondary">XCH:&nbsp;</span>
+            <span className="text-success">$</span>
             <SplitFlapDisplay text={formatPrice(simulatedXchUSD)} muted size="sm" />
           </div>
-          <span style={{ color: 'var(--color-text-muted)' }}>+</span>
+          <span className="text-muted">+</span>
           <div className="flex items-center">
-            <span style={{ color: 'var(--color-text-secondary)' }}>CATs:&nbsp;</span>
-            <span style={{ color: 'var(--color-success)' }}>$</span>
+            <span className="text-secondary">CATs:&nbsp;</span>
+            <span className="text-success">$</span>
             <SplitFlapDisplay text={formatPrice(simulatedCatsUSD)} muted size="sm" />
           </div>
         </div>
 
         {/* Last updated */}
-        <div className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+        <div className="text-sm text-muted">
           Updated {formatTimeAgo(portfolio.lastUpdated)}
         </div>
       </div>

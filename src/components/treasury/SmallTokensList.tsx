@@ -38,25 +38,16 @@ function TokenRow({ token, index }: { token: WalletToken; index: number }) {
 
       {/* Token info */}
       <div className="flex-1 min-w-0">
-        <p
-          className="text-sm font-semibold truncate"
-          style={{ color: 'var(--color-text)' }}
-        >
+        <p className="text-sm font-semibold truncate text-primary">
           {token.symbol}
         </p>
-        <p
-          className="text-xs truncate"
-          style={{ color: 'var(--color-text-secondary)' }}
-        >
+        <p className="text-xs truncate text-secondary">
           {token.name}
         </p>
       </div>
 
       {/* Value */}
-      <span
-        className="text-sm font-mono flex-shrink-0"
-        style={{ color: 'var(--color-text-secondary)' }}
-      >
+      <span className="text-sm font-mono flex-shrink-0 text-secondary">
         ${token.valueUSD.toFixed(2)}
       </span>
     </motion.div>
@@ -138,7 +129,7 @@ export function SmallTokensList({ tokens, maxDisplay = 5, isLoading = false }: S
           border: '1px solid var(--color-border)',
         }}
       >
-        <p style={{ color: 'var(--color-text-muted)' }}>No small token holdings</p>
+        <p className="text-muted">No small token holdings</p>
       </div>
     );
   }
@@ -159,16 +150,10 @@ export function SmallTokensList({ tokens, maxDisplay = 5, isLoading = false }: S
         className="px-4 py-3 flex items-center justify-between"
         style={{ borderBottom: '1px solid var(--color-border)' }}
       >
-        <h3
-          className="text-sm font-semibold"
-          style={{ color: 'var(--color-text-secondary)' }}
-        >
+        <h3 className="text-sm font-semibold text-secondary">
           Small Holdings ({'<'}$1)
         </h3>
-        <span
-          className="text-xs"
-          style={{ color: 'var(--color-text-muted)' }}
-        >
+        <span className="text-xs text-muted">
           {tokens.length} tokens
         </span>
       </div>
@@ -185,8 +170,7 @@ export function SmallTokensList({ tokens, maxDisplay = 5, isLoading = false }: S
       {/* Show more/less button */}
       {hasMore && (
         <button
-          className="w-full px-4 py-3 flex items-center justify-center gap-2 text-sm transition-colors"
-          style={{ color: 'var(--color-primary)' }}
+          className="w-full px-4 py-3 flex items-center justify-center gap-2 text-sm transition-colors text-accent"
           onClick={() => setIsExpanded(!isExpanded)}
         >
           {isExpanded ? (

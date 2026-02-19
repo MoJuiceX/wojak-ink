@@ -102,11 +102,10 @@ export function FavoritesModal({ className = '' }: FavoritesModalProps) {
               <div className="flex items-center gap-2">
                 <Heart
                   size={20}
-                  style={{ color: 'var(--color-primary)' }}
+                  className="text-accent"
                 />
                 <h2
-                  className="text-lg font-semibold"
-                  style={{ color: 'var(--color-text)' }}
+                  className="text-lg font-semibold text-primary"
                 >
                   Favorites
                 </h2>
@@ -224,8 +223,7 @@ export function FavoritesModal({ className = '' }: FavoritesModalProps) {
                         ) : (
                           <div className="flex items-center gap-1">
                             <span
-                              className="flex-1 text-xs font-medium truncate"
-                              style={{ color: 'var(--color-text)' }}
+                              className="flex-1 text-xs font-medium truncate text-primary"
                             >
                               {favorite.name}
                             </span>
@@ -265,16 +263,12 @@ export function FavoritesModal({ className = '' }: FavoritesModalProps) {
                 <div className="text-center py-12">
                   <Heart
                     size={48}
-                    className="mx-auto mb-4 opacity-30"
-                    style={{ color: 'var(--color-text-muted)' }}
+                    className="mx-auto mb-4 opacity-30 text-muted"
                   />
-                  <p style={{ color: 'var(--color-text-muted)' }}>
+                  <p className="text-muted">
                     No favorites yet
                   </p>
-                  <p
-                    className="text-sm mt-1"
-                    style={{ color: 'var(--color-text-muted)' }}
-                  >
+                  <p className="text-sm mt-1 text-muted">
                     Create a design and save it here
                   </p>
                 </div>
