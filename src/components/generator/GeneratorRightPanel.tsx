@@ -81,23 +81,103 @@ function MilitaryBeretUpgradeSwatches({ onColorPick, disabled }: { onColorPick: 
   );
 }
 
-const MASK_VARIANTS = [
-  { file: 'MedievalBepe_cowboy.png', label: 'Cowboy Bepe' },
-  { file: 'MedievalBepe_emo.png', label: 'Emo Bepe' },
-  { file: 'MedievalBepe_wizard.png', label: 'Wizard Bepe' },
-  { file: 'Skull_mask_love.png', label: 'Skull Love' },
-  { file: 'Skull_mask_orange.png', label: 'Skull Orange' },
-  { file: 'Skull_mask_pink.png', label: 'Skull Pink' },
-  { file: 'Skull_mask_zebra.png', label: 'Skull Zebra' },
-  { file: 'Tanginium_king.png', label: 'Tanginium King' },
-  { file: 'Tanginium_sad.png', label: 'Tanginium Sad' },
-];
 const MASK_BASE_PATH = '/assets/wojak-layers/MASK';
 
-/** All full-face mask path substrings (hand mask + all style variants) */
+/** Mask categories with their variants */
+type MaskCategory = 'tanginium' | 'medievalBepe' | 'skull';
+
+interface MaskVariant {
+  file: string;
+  label: string;
+  subfolder?: string;
+}
+
+const MASK_CATEGORIES: Record<MaskCategory, { label: string; variants: MaskVariant[] }> = {
+  tanginium: {
+    label: 'Tanginium',
+    variants: [
+      { file: 'Tanginium_king.png', label: 'King' },
+      { file: 'Tanginium_sad.png', label: 'Sad' },
+    ],
+  },
+  medievalBepe: {
+    label: 'Medieval Bepe',
+    variants: [
+      { file: 'MedievalBepe_cowboy.png', label: 'Cowboy' },
+      { file: 'MedievalBepe_emo.png', label: 'Emo' },
+      { file: 'MedievalBepe_wizard.png', label: 'Wizard' },
+    ],
+  },
+  skull: {
+    label: 'Skull',
+    variants: [
+      { file: 'Mask-skull-01_Hypno.png', label: 'Hypno', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-02_Mystic.png', label: 'Mystic', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-03_Frost.png', label: 'Frost', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-04_Mayor.png', label: 'Mayor', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-05_Verdant.png', label: 'Verdant', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-06_Sorting.png', label: 'Sorting', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-07_Rally.png', label: 'Rally', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-08_Void.png', label: 'Void', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-09_Love.png', label: 'Love', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-10_Bengal.png', label: 'Bengal', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-11_Pumpkinl.png', label: 'Pumpkin', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-12_Gilded.png', label: 'Gilded', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-13_Goblin.png', label: 'Goblin', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-14_Damask.png', label: 'Damask', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-15_Zebra.png', label: 'Zebra', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-16_Eldritch.png', label: 'Eldritch', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-17_Waldo.png', label: 'Waldo', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-18_Lumos.png', label: 'Lumos', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-19_Gator.png', label: 'Gator', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-20_Mesmerpng.png', label: 'Mesmer', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-21_Arachno.png', label: 'Arachno', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-22_THE.png', label: 'THE', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-23_Storm.png', label: 'Storm', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-24_Inferno.png', label: 'Inferno', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-25_Scream.png', label: 'Scream', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-26_Sandworm.png', label: 'Sandworm', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-27_Voorhees.png', label: 'Voorhees', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-28_Enchanter.png', label: 'Enchanter', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-29_313.png', label: '313', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-30_Magus.png', label: 'Magus', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-31_Astro.png', label: 'Astro', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-32_Nocturnis.png', label: 'Nocturnis', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-33_Ghost.png', label: 'Ghost', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-34_ET.png', label: 'ET', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-35_Cosmic.png', label: 'Cosmic', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-36_Hedera.png', label: 'Hedera', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-37_Martian.png', label: 'Martian', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-38_Magenta.png', label: 'Magenta', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-39_Speechless.png', label: 'Speechless', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-40_Aster.png', label: 'Aster', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-41_Static.png', label: 'Static', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-42_Rage.png', label: 'Rage', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-43_Gooey.png', label: 'Gooey', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-44_Tang.png', label: 'Tang', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-45_9mm.png', label: '9mm', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-46_Skelly.png', label: 'Skelly', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-47_Degen.png', label: 'Degen', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-48_Neck.png', label: 'Neck', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-49_Crown.png', label: 'Crown', subfolder: 'Mask-skull' },
+      { file: 'Mask-skull-50_Bepe.png', label: 'Bepe', subfolder: 'Mask-skull' },
+    ],
+  },
+};
+
+/** Get full path for a mask variant */
+function getMaskPath(variant: MaskVariant): string {
+  return variant.subfolder
+    ? `${MASK_BASE_PATH}/${variant.subfolder}/${variant.file}`
+    : `${MASK_BASE_PATH}/${variant.file}`;
+}
+
+/** All full-face mask path substrings (hand mask + all category variants) */
 const FULL_FACE_MASK_SUBSTRINGS = [
   'Wojak_hand_mask',
-  ...MASK_VARIANTS.map((v) => v.file.replace('.png', '')),
+  ...Object.values(MASK_CATEGORIES).flatMap((cat) =>
+    cat.variants.map((v) => v.file.replace('.png', ''))
+  ),
 ];
 
 function isFullFaceMaskSelected(maskPath: string | undefined): boolean {
@@ -105,48 +185,124 @@ function isFullFaceMaskSelected(maskPath: string | undefined): boolean {
   return FULL_FACE_MASK_SUBSTRINGS.some((s) => maskPath.includes(s));
 }
 
+/** Find which category the selected mask belongs to */
+function getSelectedCategory(selectedPath: string | undefined): MaskCategory | null {
+  if (!selectedPath) return null;
+  for (const [key, cat] of Object.entries(MASK_CATEGORIES)) {
+    if (cat.variants.some((v) => selectedPath.includes(v.file.replace('.png', '')))) {
+      return key as MaskCategory;
+    }
+  }
+  return null;
+}
+
 function MaskVariantPicker({ selectedPath, onSelect }: { selectedPath: string | undefined; onSelect: (path: string) => void }) {
+  const selectedCategory = getSelectedCategory(selectedPath);
+  const [expandedCategory, setExpandedCategory] = useState<MaskCategory | null>(selectedCategory);
+
+  const handleCategoryClick = (category: MaskCategory) => {
+    if (expandedCategory === category) {
+      setExpandedCategory(null);
+    } else {
+      setExpandedCategory(category);
+    }
+  };
+
+  const handleVariantSelect = (variant: MaskVariant) => {
+    onSelect(getMaskPath(variant));
+    setExpandedCategory(null);
+  };
+
   return (
     <div className="flex-shrink-0">
       <div className="text-[10px] font-semibold uppercase tracking-wide mb-1.5 text-muted">Mask style</div>
-      <div className="grid grid-cols-3 gap-2">
-        {MASK_VARIANTS.map(({ file, label }) => {
-          const path = `${MASK_BASE_PATH}/${file}`;
-          const isSelected = selectedPath === path;
+      <div className="flex flex-col gap-2">
+        {(Object.entries(MASK_CATEGORIES) as [MaskCategory, typeof MASK_CATEGORIES[MaskCategory]][]).map(([key, category]) => {
+          const isExpanded = expandedCategory === key;
+          const isSelected = selectedCategory === key;
+          const previewVariant = isSelected
+            ? category.variants.find((v) => selectedPath?.includes(v.file.replace('.png', ''))) ?? category.variants[0]
+            : category.variants[0];
+
           return (
-            <button
-              key={file}
-              type="button"
-              className="aspect-square relative rounded-xl overflow-hidden"
-              style={{
-                background: 'var(--generator-trait-card-bg)',
-                border: isSelected
-                  ? '2px solid var(--generator-selected-color, #F97316)'
-                  : '1px solid var(--generator-trait-card-border)',
-                boxShadow: isSelected
-                  ? '0 0 20px var(--glow-cyan), 0 4px 12px var(--color-black-30)'
-                  : '0 2px 8px var(--color-black-20)',
-              }}
-              onClick={() => onSelect(path)}
-              title={label}
-            >
-              <img
-                src={path}
-                alt={label}
-                className="w-full h-full object-contain"
-                loading="lazy"
-              />
-              {isSelected && (
-                <div
-                  className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center"
-                  style={{ background: 'var(--generator-badge-color, #F97316)' }}
+            <div key={key}>
+              {/* Category header */}
+              <button
+                type="button"
+                className="w-full flex items-center gap-2 p-2 rounded-lg transition-colors"
+                style={{
+                  background: isExpanded ? 'var(--color-white-8)' : 'var(--color-white-5)',
+                  border: isSelected ? '1px solid var(--color-primary)' : '1px solid transparent',
+                }}
+                onClick={() => handleCategoryClick(key)}
+              >
+                <img
+                  src={getMaskPath(previewVariant)}
+                  alt={category.label}
+                  className="w-10 h-10 rounded-lg object-contain"
+                  style={{ background: 'var(--color-surface)' }}
+                  loading="lazy"
+                />
+                <div className="flex-1 text-left">
+                  <div className="text-sm font-medium">{category.label}</div>
+                  <div className="text-xs text-muted">{category.variants.length} styles</div>
+                </div>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="text-muted transition-transform"
+                  style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
                 >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
-                    <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
-                  </svg>
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+
+              {/* Expanded variants grid */}
+              {isExpanded && (
+                <div className="grid grid-cols-4 gap-1.5 mt-2 p-2 rounded-lg" style={{ background: 'var(--color-white-5)' }}>
+                  {category.variants.map((variant) => {
+                    const path = getMaskPath(variant);
+                    const isVariantSelected = selectedPath === path;
+                    return (
+                      <button
+                        key={variant.file}
+                        type="button"
+                        className="aspect-square relative rounded-lg overflow-hidden"
+                        style={{
+                          background: 'var(--color-surface)',
+                          border: isVariantSelected
+                            ? '2px solid var(--color-primary)'
+                            : '1px solid var(--color-border)',
+                        }}
+                        onClick={() => handleVariantSelect(variant)}
+                        title={variant.label}
+                      >
+                        <img
+                          src={path}
+                          alt={variant.label}
+                          className="w-full h-full object-contain"
+                          loading="lazy"
+                        />
+                        {isVariantSelected && (
+                          <div
+                            className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
+                            style={{ background: 'var(--color-primary)' }}
+                          >
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="white">
+                              <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
+                            </svg>
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
-            </button>
+            </div>
           );
         })}
       </div>
