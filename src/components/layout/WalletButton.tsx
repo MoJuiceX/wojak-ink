@@ -143,7 +143,7 @@ export function WalletButton({ className = '', size = 'md' }: WalletButtonProps)
           <motion.div
             className="absolute right-0 top-full mt-2 w-48 rounded-lg overflow-hidden z-20"
             style={{
-              background: 'var(--color-bg-secondary)',
+              background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
               boxShadow: 'var(--shadow-lg)',
             }}

@@ -48,6 +48,25 @@
   --color-gold: #fbbf24;
   --color-green: #22c55e;
 
+  /* Rarity colors */
+  --color-legendary: #fbbf24;
+  --color-epic: #a855f7;
+
+  /* Accent (alias for primary, used in text utilities) */
+  --color-accent: #ff6b00;
+
+  /* Text tertiary (below muted) */
+  --color-text-tertiary: rgba(255, 255, 255, 0.25);
+
+  /* Chrome — header and sidebar surface colors */
+  --color-chrome-bg: rgba(10, 10, 15, 0.85);
+  --color-chrome-bg-scrolled: rgba(10, 10, 15, 0.95);
+  --color-chrome-border: rgba(255, 255, 255, 0.08);
+  --color-chrome-border-glow: rgba(255, 107, 0, 0.12);
+
+  /* Brand glow (orange ambient) */
+  --color-brand-glow: rgba(255, 107, 0, 0.15);
+
   /* ═══════════════════════════════════════════════════════════════════════════
      SHADOWS & GLOWS
      ═══════════════════════════════════════════════════════════════════════════ */

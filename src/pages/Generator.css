@@ -348,7 +348,7 @@
 }
 
 .generator-action-btn:hover {
-  background: var(--color-bg-secondary);
+  background: var(--color-surface);
   color: var(--color-text);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -389,7 +389,7 @@
   overflow: hidden;
   background:
     repeating-conic-gradient(
-      var(--color-bg-secondary) 0% 25%,
+      var(--color-surface) 0% 25%,
       var(--color-bg) 0% 50%
     ) 50% / 20px 20px;
   border: 2px solid var(--color-border);

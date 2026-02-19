@@ -621,7 +621,7 @@ export function DesktopExplorerPanel({
                   maxWidth: 'calc(100vw - 200px)',
                   height: '680px',
                   maxHeight: '90vh',
-                  background: 'var(--color-bg-secondary)',
+                  background: 'var(--color-surface)',
                   border: '1px solid var(--color-border)',
                   boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
                 }}
@@ -720,7 +720,7 @@ export function DesktopExplorerPanel({
                   <div
                     className="w-full p-4 rounded-xl mt-4"
                     style={{
-                      background: 'var(--color-bg-secondary)',
+                      background: 'var(--color-surface)',
                       border: '1px solid var(--color-border)',
                     }}
                   >
@@ -1010,7 +1010,7 @@ export function DesktopExplorerPanel({
                           className="flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors"
                           style={{
                             background: isActive
-                              ? 'var(--color-bg-secondary)'
+                              ? 'var(--color-surface)'
                               : 'transparent',
                             color: isActive
                               ? 'var(--color-text)'

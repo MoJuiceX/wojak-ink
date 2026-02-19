@@ -408,7 +408,7 @@
   display: flex;
   gap: 1.5rem;
   padding: 1.5rem;
-  background: var(--color-bg-secondary);
+  background: var(--color-surface);
   border-radius: 16px;
   border: 1px solid var(--color-border);
   margin-bottom: 1.5rem;
@@ -427,7 +427,7 @@
   border-radius: 50%;
   background: var(--color-primary);
   color: white;
-  border: 2px solid var(--color-bg-secondary);
+  border: 2px solid var(--color-surface);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -602,7 +602,7 @@
   align-items: center;
   gap: 0.75rem;
   padding: 1rem;
-  background: var(--color-bg-secondary);
+  background: var(--color-surface);
   border-radius: 12px;
   border: 1px solid var(--color-border);
 }
@@ -938,7 +938,7 @@
 .nft-gallery-empty {
   padding: 2rem;
   text-align: center;
-  background: var(--color-bg-secondary);
+  background: var(--color-surface);
   border-radius: 12px;
   border: 1px dashed var(--color-border);
 }
@@ -1065,7 +1065,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.625rem;
-  background: var(--color-bg-secondary);
+  background: var(--color-surface);
   border-radius: 10px;
   border: 1px solid var(--color-border);
   position: relative;
@@ -1146,7 +1146,7 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem;
-  background: var(--color-bg-secondary);
+  background: var(--color-surface);
   border-radius: 10px;
 }
 
@@ -1187,7 +1187,7 @@
 .activity-empty {
   padding: 2rem;
   text-align: center;
-  background: var(--color-bg-secondary);
+  background: var(--color-surface);
   border-radius: 12px;
   color: var(--color-text-tertiary);
 }
@@ -1200,7 +1200,7 @@
 .account-signin-prompt {
   text-align: center;
   padding: 3rem 1.5rem;
-  background: var(--color-bg-secondary);
+  background: var(--color-surface);
   border-radius: 16px;
   border: 1px solid var(--color-border);
 }
@@ -1370,7 +1370,7 @@
   align-items: center;
   gap: 0.75rem;
   padding: 1rem;
-  background: var(--color-bg-secondary);
+  background: var(--color-surface);
   border-radius: 12px;
   border: 1px solid var(--color-border);
 }
@@ -1398,7 +1398,7 @@
 /* ============ Drawer Customization Section ============ */
 .drawer-customize-section {
   padding: 1.5rem;
-  background: var(--color-bg-secondary);
+  background: var(--color-surface);
   border-radius: 16px;
   border: 1px solid var(--color-border);
   margin-bottom: 1.5rem;

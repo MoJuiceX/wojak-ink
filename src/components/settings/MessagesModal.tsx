@@ -4,7 +4,7 @@
  * Modal displaying user's messages/notifications.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Mail, MailOpen, Loader2, Bell, Trophy, Info, AlertTriangle } from 'lucide-react';
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch';
@@ -118,7 +118,7 @@ export function MessagesModal({ isOpen, onClose }: MessagesModalProps) {
     }
   };
 
-  const unreadCount = messages.filter(m => !m.read).length;
+  const unreadCount = useMemo(() => messages.filter(m => !m.read).length, [messages]);
 
   return (
     <AnimatePresence>
@@ -137,7 +137,7 @@ export function MessagesModal({ isOpen, onClose }: MessagesModalProps) {
             exit={{ scale: 0.9, opacity: 0 }}
             className="relative rounded-xl max-w-lg w-full mx-4 max-h-[80vh] overflow-hidden flex flex-col"
             style={{
-              background: 'var(--color-bg-secondary)',
+              background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
             }}
             onClick={(e) => e.stopPropagation()}

@@ -54,7 +54,7 @@ export function WalletConnectModal({ isOpen, onClose, walletConnect }: WalletCon
             exit={{ scale: 0.9, opacity: 0 }}
             className="relative p-6 rounded-xl max-w-sm w-full mx-4"
             style={{
-              background: 'var(--color-bg-secondary)',
+              background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
             }}
             onClick={(e) => e.stopPropagation()}

@@ -226,7 +226,7 @@ function NFTListModal({
       <motion.div
         className="w-full sm:w-[90vw] sm:max-w-lg max-h-[85vh] rounded-t-2xl sm:rounded-2xl overflow-hidden flex flex-col"
         style={{
-          background: 'var(--color-bg-secondary)',
+          background: 'var(--color-surface)',
           border: '1px solid var(--color-border)',
         }}
         initial={prefersReducedMotion ? {} : { opacity: 0, y: 50 }}

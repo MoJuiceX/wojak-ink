@@ -129,7 +129,7 @@
 .gift-select,
 .gift-input {
   padding: 12px 16px;
-  background: var(--color-bg-secondary, rgba(255, 255, 255, 0.05));
+  background: var(--color-surface, rgba(255, 255, 255, 0.05));
   border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
   border-radius: 10px;
   color: var(--color-text, #fff);
@@ -152,7 +152,7 @@
 .gift-type-tabs {
   display: flex;
   gap: 8px;
-  background: var(--color-bg-secondary, rgba(255, 255, 255, 0.05));
+  background: var(--color-surface, rgba(255, 255, 255, 0.05));
   padding: 4px;
   border-radius: 12px;
 }
@@ -202,7 +202,7 @@
 .preset-btn {
   flex: 1;
   padding: 8px;
-  background: var(--color-bg-secondary, rgba(255, 255, 255, 0.05));
+  background: var(--color-surface, rgba(255, 255, 255, 0.05));
   border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
   border-radius: 8px;
   color: var(--color-text-secondary, rgba(255, 255, 255, 0.7));
@@ -229,7 +229,7 @@
 
 .gift-item-option {
   padding: 12px 8px;
-  background: var(--color-bg-secondary, rgba(255, 255, 255, 0.05));
+  background: var(--color-surface, rgba(255, 255, 255, 0.05));
   border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
   border-radius: 10px;
   cursor: pointer;
@@ -294,7 +294,7 @@
 /* Preview */
 .gift-preview {
   padding: 12px 16px;
-  background: var(--color-bg-secondary, rgba(255, 255, 255, 0.05));
+  background: var(--color-surface, rgba(255, 255, 255, 0.05));
   border-radius: 10px;
 }
 

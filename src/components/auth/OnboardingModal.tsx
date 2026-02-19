@@ -167,7 +167,7 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
         <motion.div
           className="relative w-full max-w-md mx-4 rounded-xl overflow-hidden"
           style={{
-            background: 'var(--color-bg-secondary)',
+            background: 'var(--color-surface)',
             border: '1px solid var(--color-border)',
           }}
           initial={{ scale: 0.95, opacity: 0 }}

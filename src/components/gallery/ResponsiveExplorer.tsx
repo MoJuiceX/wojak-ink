@@ -43,7 +43,7 @@ function DesktopPanelFallback() {
             maxWidth: 'calc(100vw - 200px)',
             height: '600px',
             maxHeight: '90vh',
-            background: 'var(--color-bg-secondary)',
+            background: 'var(--color-surface)',
             border: '1px solid var(--color-border)',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
           }}

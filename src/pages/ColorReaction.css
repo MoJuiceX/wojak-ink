@@ -20,7 +20,7 @@
   height: 100%;
   min-height: 400px; /* Ensure minimum height for visibility */
   background: var(--color-elevated); /* Solid fallback using CSS variable */
-  background: linear-gradient(180deg, var(--color-elevated) 0%, var(--color-bg-secondary) 100%);
+  background: linear-gradient(180deg, var(--color-elevated) 0%, var(--color-surface) 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2060,7 +2060,7 @@
 .color-reaction-container.pressure-level-1 {
   background: linear-gradient(180deg, 
     rgba(30, 10, 10, 0.95) 0%, 
-    var(--color-bg-secondary) 100%);
+    var(--color-surface) 100%);
 }
 
 .pressure-level-1 .stats-panel {

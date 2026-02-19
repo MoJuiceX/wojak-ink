@@ -181,7 +181,7 @@ export function Dropdown<T extends string>({
             exit="closed"
             className="absolute z-50 w-full mt-1 py-1 rounded-lg overflow-hidden shadow-lg"
             style={{
-              background: 'var(--color-bg-secondary)',
+              background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
             }}
           >

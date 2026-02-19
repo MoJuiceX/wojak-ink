@@ -20,7 +20,7 @@
 /* ===== EMOJI AVATAR - Standard styling ===== */
 .avatar-emoji {
   border: 2px solid var(--color-primary, #F97316);
-  background: var(--color-bg-secondary, rgba(255, 255, 255, 0.1));
+  background: var(--color-surface, rgba(255, 255, 255, 0.1));
   overflow: hidden;
 }
 
