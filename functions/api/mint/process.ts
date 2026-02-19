@@ -23,6 +23,7 @@ import {
   DECAY_HALF_LIFE_DAYS,
 } from './_shared';
 import { calculateCombatIdentity } from '../../../src/lib/combat/identity-calculator';
+import { assignMoves } from '../../../src/lib/combat/move-assigner';
 
 // Re-export MintError for backwards compatibility (callers may import from process.ts)
 export { MintError };
@@ -468,49 +469,49 @@ export async function finalizeJob(env: ProcessEnv, jobId: number): Promise<void>
     ).bind(job.mint_number, customName, fullName)
   );
 
-  // Insert combat fighter record if combat moves were selected
-  if (job.combat_moves_json) {
-    const combatMoves = JSON.parse(job.combat_moves_json) as string[];
-    if (combatMoves.length === 4) {
-      // Re-derive combat identity from the layers/colors
-      const combatTraitEntries: { traitId: string; layer: string }[] = [];
-      const combatColorMap: Record<string, string> = {};
-      const colors = JSON.parse(job.colors_json) as Record<string, string>;
+  // ALWAYS insert combat fighter record with auto-assigned moves
+  // Calculate combat identity from the layers/colors
+  const combatTraitEntries: { traitId: string; layer: string }[] = [];
+  const combatColorMap: Record<string, string> = {};
+  const colors = JSON.parse(job.colors_json) as Record<string, string>;
 
-      for (const [layer, path] of Object.entries(layers)) {
-        if (!path || typeof path !== 'string') continue;
-        const parts = path.split('/');
-        if (parts.length >= 3) {
-          const traitId = `${parts[parts.length - 2]}_${parts[parts.length - 1].replace(/\.[^.]+$/, '')}`;
-          combatTraitEntries.push({ traitId, layer });
-          const hex = colors[layer];
-          if (hex) combatColorMap[traitId] = hex;
-        }
-      }
-
-      const identity = calculateCombatIdentity({
-        traits: combatTraitEntries,
-        colors: combatColorMap,
-        details: {},
-      });
-
-      // Use launcher_id as nft_id (the on-chain NFT identifier)
-      const nftId = launcherId || `pending_${job.mint_number}`;
-
-      const fighterInsert = buildFighterInsertSQL({
-        nft_id: nftId,
-        edition_number: job.mint_number!,
-        owner_did: '', // Will be set when owner claims via DID
-        combat_type: identity.type,
-        nature: identity.nature,
-        ability: identity.ability,
-        moves: combatMoves,
-      });
-
-      batchStmts.push(
-        env.DB.prepare(fighterInsert.query).bind(...fighterInsert.bindings)
-      );
+  for (const [layer, path] of Object.entries(layers)) {
+    if (!path || typeof path !== 'string') continue;
+    const parts = path.split('/');
+    if (parts.length >= 3) {
+      const traitId = `${parts[parts.length - 2]}_${parts[parts.length - 1].replace(/\.[^.]+$/, '')}`;
+      combatTraitEntries.push({ traitId, layer });
+      const hex = colors[layer];
+      if (hex) combatColorMap[traitId] = hex;
     }
+  }
+
+  const identity = calculateCombatIdentity({
+    traits: combatTraitEntries,
+    colors: combatColorMap,
+    details: {},
+  });
+
+  // Auto-assign moves based on combat identity (3 damage + 1 status)
+  const moveAssignment = assignMoves(identity);
+
+  if (moveAssignment.valid) {
+    // Use launcher_id as nft_id (the on-chain NFT identifier)
+    const nftId = launcherId || `pending_${job.mint_number}`;
+
+    const fighterInsert = buildFighterInsertSQL({
+      nft_id: nftId,
+      edition_number: job.mint_number!,
+      owner_did: '', // Will be set when owner claims via DID
+      combat_type: identity.type,
+      nature: identity.nature,
+      ability: identity.ability,
+      moves: moveAssignment.moves,
+    });
+
+    batchStmts.push(
+      env.DB.prepare(fighterInsert.query).bind(...fighterInsert.bindings)
+    );
   }
 
   await env.DB.batch(batchStmts);
