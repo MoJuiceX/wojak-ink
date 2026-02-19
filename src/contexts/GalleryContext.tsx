@@ -40,7 +40,7 @@ export interface GalleryState {
   searchQuery: string;
 
   // UI state
-  activeInfoTab: 'main' | 'metadata' | 'history';
+  activeInfoTab: 'main' | 'metadata' | 'combat' | 'history';
   hasSeenSwipeHint: boolean;
 
   // Preloading
@@ -62,7 +62,7 @@ export interface GalleryActions {
   setMaxPriceFilter: (price: number | null) => void;
   setSearchQuery: (query: string) => void;
 
-  setActiveInfoTab: (tab: 'main' | 'metadata' | 'history') => void;
+  setActiveInfoTab: (tab: 'main' | 'metadata' | 'combat' | 'history') => void;
   dismissSwipeHint: () => void;
 
   preloadImages: (nftIds: string[]) => void;
@@ -145,7 +145,7 @@ export function GalleryProvider({ children }: GalleryProviderProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
   // UI state
-  const [activeInfoTab, setActiveInfoTab] = useState<'main' | 'metadata' | 'history'>('main');
+  const [activeInfoTab, setActiveInfoTab] = useState<'main' | 'metadata' | 'combat' | 'history'>('main');
   const [hasSeenSwipeHint, setHasSeenSwipeHint] = useState(() => {
     if (typeof window === 'undefined') return true;
     return localStorage.getItem(SWIPE_HINT_KEY) === 'true';

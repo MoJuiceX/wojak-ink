@@ -24,8 +24,9 @@ import {
   type NFTBadgeEntry,
   type BadgeSystem,
 } from '@/services/badgeService';
+import { FighterStatsPanel } from '@/components/combat/FighterStatsPanel';
 
-type InfoTab = 'main' | 'metadata' | 'history';
+type InfoTab = 'main' | 'metadata' | 'combat' | 'history';
 
 interface NFTInfoCardProps {
   nft: NFT;
@@ -37,6 +38,7 @@ interface NFTInfoCardProps {
 const tabs: { id: InfoTab; label: string }[] = [
   { id: 'main', label: 'Main' },
   { id: 'metadata', label: 'Attributes' },
+  { id: 'combat', label: 'Combat' },
   { id: 'history', label: 'History' },
 ];
 
@@ -604,6 +606,9 @@ export function NFTInfoCard({
               />
             )}
             {activeTab === 'metadata' && <MetadataTabContent nft={nft} />}
+            {activeTab === 'combat' && (
+              <FighterStatsPanel nftId={nft.id} edition={Number(nft.tokenId)} />
+            )}
             {activeTab === 'history' && <HistoryTabContent nftId={Number(nft.tokenId)} />}
           </motion.div>
         </AnimatePresence>
