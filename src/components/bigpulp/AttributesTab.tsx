@@ -58,8 +58,8 @@ const CATEGORY_COLORS: Record<string, { bg: string; border: string; text: string
     cardBg: 'rgba(251, 191, 36, 0.04)',
   },
   'Mouth': {
-    bg: 'rgba(239, 68, 68, 0.15)',
-    border: 'rgba(239, 68, 68, 0.3)',
+    bg: 'var(--color-error-15)',
+    border: 'var(--color-error-30)',
     text: 'rgb(248, 113, 113)',
     cardBg: 'rgba(239, 68, 68, 0.04)',
   },
@@ -148,7 +148,7 @@ function TableHeader({
     <div
       className={`flex items-center ${px} ${compact ? 'py-1.5' : 'py-2.5'}`}
       style={{
-        background: 'rgba(255,255,255,0.03)',
+        background: 'var(--color-white-3)',
         borderBottom: '1px solid rgba(255,255,255,0.08)',
       }}
     >
@@ -331,7 +331,7 @@ function AttributeRow({
                         key={`${sale.nftId}-${idx}`}
                         className="flex-shrink-0 w-16 rounded-lg overflow-hidden"
                         style={{
-                          background: 'rgba(0,0,0,0.3)',
+                          background: 'var(--color-black-30)',
                           border: '1px solid rgba(255,255,255,0.06)',
                         }}
                       >
@@ -514,7 +514,7 @@ export function AttributesTab({
           style={{
             background: selectedCategory
               ? getCategoryColor(selectedCategory).bg
-              : 'rgba(255,255,255,0.05)',
+              : 'var(--color-white-5)',
             border: `1px solid ${selectedCategory
               ? getCategoryColor(selectedCategory).border
               : 'rgba(255,255,255,0.08)'}`,
@@ -536,7 +536,7 @@ export function AttributesTab({
           disabled={!selectedCategory}
           className="px-2.5 py-1.5 rounded-lg text-xs appearance-none min-w-0"
           style={{
-            background: 'rgba(255,255,255,0.05)',
+            background: 'var(--color-white-5)',
             border: '1px solid rgba(255,255,255,0.08)',
             color: !selectedCategory ? 'var(--color-text-muted)' : 'var(--color-text-secondary)',
             opacity: !selectedCategory ? 0.5 : 1,

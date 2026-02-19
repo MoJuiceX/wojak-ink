@@ -645,14 +645,14 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
           max-width: 600px;
           max-height: 90vh;
           background: rgba(20, 20, 28, 0.98);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          border: 1px solid var(--color-white-10);
           border-radius: 20px;
           display: flex;
           flex-direction: column;
           overflow: hidden;
           box-shadow: 
-            0 20px 60px rgba(0, 0, 0, 0.5),
-            0 0 0 1px rgba(255, 255, 255, 0.05);
+            0 20px 60px var(--color-black-50),
+            0 0 0 1px var(--color-white-5);
         }
 
         .editor-header {
@@ -679,7 +679,7 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
           background: rgba(255, 255, 255, 0.08);
           border: none;
           border-radius: 12px;
-          color: rgba(255, 255, 255, 0.6);
+          color: var(--color-white-60);
           cursor: pointer;
           transition: all 0.2s;
         }
@@ -695,12 +695,12 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
           justify-content: center;
           gap: 8px;
           padding: 12px 20px;
-          background: rgba(249, 115, 22, 0.1);
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          background: var(--color-primary-10);
+          border-bottom: 1px solid var(--color-white-5);
         }
 
         .balance-label {
-          color: rgba(255, 255, 255, 0.5);
+          color: var(--color-white-50);
           font-size: 0.85rem;
         }
 
@@ -730,7 +730,7 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
         }
 
         .editor-message.error {
-          background: rgba(239, 68, 68, 0.15);
+          background: var(--color-error-15);
           color: #ef4444;
         }
 
@@ -741,7 +741,7 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
           justify-content: center;
           padding: 60px 20px;
           gap: 16px;
-          color: rgba(255, 255, 255, 0.5);
+          color: var(--color-white-50);
         }
 
         .editor-content {
@@ -755,8 +755,8 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
           flex-direction: column;
           gap: 4px;
           padding: 12px 8px;
-          background: rgba(0, 0, 0, 0.2);
-          border-right: 1px solid rgba(255, 255, 255, 0.05);
+          background: var(--color-black-20);
+          border-right: 1px solid var(--color-white-5);
           overflow-y: auto;
         }
 
@@ -769,7 +769,7 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
           background: transparent;
           border: none;
           border-radius: 12px;
-          color: rgba(255, 255, 255, 0.5);
+          color: var(--color-white-50);
           font-size: 0.7rem;
           cursor: pointer;
           transition: all 0.2s;
@@ -782,7 +782,7 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
         }
 
         .nav-btn.active {
-          background: rgba(249, 115, 22, 0.15);
+          background: var(--color-primary-15);
           color: #f97316;
         }
 
@@ -808,7 +808,7 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
           margin: 0;
           font-size: 0.85rem;
           font-weight: 600;
-          color: rgba(255, 255, 255, 0.6);
+          color: var(--color-white-60);
           text-transform: uppercase;
           letter-spacing: 0.05em;
         }
@@ -839,12 +839,12 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
         }
 
         .item-btn.owned {
-          border-color: rgba(249, 115, 22, 0.2);
+          border-color: var(--color-primary-20);
         }
 
         .item-btn.selected {
           background: rgba(249, 115, 22, 0.12);
-          border-color: rgba(249, 115, 22, 0.4);
+          border-color: var(--color-primary-40);
         }
 
         .item-btn.unaffordable {
@@ -868,7 +868,7 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
           width: 36px;
           height: 36px;
           border-radius: 8px;
-          border: 2px solid rgba(255, 255, 255, 0.1);
+          border: 2px solid var(--color-white-10);
         }
 
         .preview-gradient {
@@ -891,7 +891,7 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
           width: 48px;
           height: 32px;
           border-radius: 8px;
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          border: 1px solid var(--color-white-10);
         }
 
         .preview-avatar {
@@ -901,7 +901,7 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
           align-items: center;
           justify-content: center;
           border-radius: 50%;
-          background: rgba(255, 255, 255, 0.1);
+          background: var(--color-white-10);
         }
 
         .preview-icon {
@@ -911,7 +911,7 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
 
         .preview-dialogue {
           padding: 4px 10px;
-          background: rgba(255, 255, 255, 0.1);
+          background: var(--color-white-10);
           border-radius: 8px;
           font-size: 0.75rem;
           color: #fff;
@@ -923,9 +923,9 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: rgba(255, 255, 255, 0.05);
+          background: var(--color-white-5);
           border-radius: 8px;
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          border: 1px solid var(--color-white-10);
         }
 
         .preview-tabs {
@@ -935,14 +935,14 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
 
         .preview-tabs .tab {
           padding: 2px 8px;
-          background: rgba(255, 255, 255, 0.1);
+          background: var(--color-white-10);
           border-radius: 6px;
           font-size: 0.65rem;
-          color: rgba(255, 255, 255, 0.6);
+          color: var(--color-white-60);
         }
 
         .preview-tabs .tab.active {
-          background: rgba(249, 115, 22, 0.3);
+          background: var(--color-primary-30);
           color: #fff;
         }
 
@@ -952,7 +952,7 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
 
         .preview-stats {
           padding: 4px 10px;
-          background: rgba(255, 255, 255, 0.1);
+          background: var(--color-white-10);
           border-radius: 8px;
           font-size: 0.85rem;
           font-weight: 700;
@@ -964,10 +964,10 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
           align-items: center;
           gap: 4px;
           padding: 4px 8px;
-          background: rgba(255, 255, 255, 0.1);
+          background: var(--color-white-10);
           border-radius: 6px;
           font-size: 0.7rem;
-          color: rgba(255, 255, 255, 0.6);
+          color: var(--color-white-60);
         }
 
         .preview-compact {
@@ -1027,7 +1027,7 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
           position: absolute;
           top: 8px;
           right: 8px;
-          color: rgba(255, 255, 255, 0.3);
+          color: var(--color-white-30);
         }
 
         .item-loading {
@@ -1036,7 +1036,7 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: rgba(0, 0, 0, 0.5);
+          background: var(--color-black-50);
           border-radius: 14px;
           color: #f97316;
         }
@@ -1056,8 +1056,8 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
           justify-content: center;
           gap: 8px;
           padding: 16px 20px;
-          background: rgba(249, 115, 22, 0.1);
-          border-top: 1px solid rgba(255, 255, 255, 0.05);
+          background: var(--color-primary-10);
+          border-top: 1px solid var(--color-white-5);
           color: #f97316;
           text-decoration: none;
           font-weight: 600;
@@ -1066,7 +1066,7 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
         }
 
         .view-drawer-link:hover {
-          background: rgba(249, 115, 22, 0.15);
+          background: var(--color-primary-15);
         }
 
         /* Mobile adjustments */

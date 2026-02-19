@@ -165,7 +165,7 @@ export function SageConnectButton({
           backdropFilter: 'blur(10px)',
           WebkitBackdropFilter: 'blur(10px)',
           color: isConnected ? '#22c55e' : 'white',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
+          border: '1px solid var(--color-white-10)',
           borderRadius: '12px',
         };
         
@@ -217,7 +217,7 @@ export function SageWalletStatus({
   
   // Glass card base styles
   const cardStyle: React.CSSProperties = {
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: 'var(--color-white-3)',
     backdropFilter: 'blur(10px)',
     WebkitBackdropFilter: 'blur(10px)',
     border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -229,7 +229,7 @@ export function SageWalletStatus({
   };
   
   const labelStyle: React.CSSProperties = {
-    color: 'rgba(255, 255, 255, 0.5)',
+    color: 'var(--color-white-50)',
     fontSize: '12px',
     fontWeight: 500,
     textTransform: 'uppercase',
@@ -301,7 +301,7 @@ export function SageWalletStatus({
             ...valueStyle, 
             fontFamily: 'monospace',
             fontSize: '11px',
-            color: 'rgba(255, 255, 255, 0.5)',
+            color: 'var(--color-white-50)',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
           }}>
@@ -315,8 +315,8 @@ export function SageWalletStatus({
         <div style={{ 
           marginTop: '12px',
           padding: '8px 12px',
-          backgroundColor: 'rgba(239, 68, 68, 0.1)',
-          border: '1px solid rgba(239, 68, 68, 0.3)',
+          backgroundColor: 'var(--color-error-10)',
+          border: '1px solid var(--color-error-30)',
           borderRadius: '8px',
           color: '#ef4444',
           fontSize: '13px',
@@ -358,7 +358,7 @@ export function NFTGate({
   
   // Glassmorphism card styles
   const cardStyle: React.CSSProperties = {
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: 'var(--color-white-3)',
     backdropFilter: 'blur(10px)',
     WebkitBackdropFilter: 'blur(10px)',
     border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -382,7 +382,7 @@ export function NFTGate({
         Connect Your Wallet
       </h3>
       <p style={{ 
-        color: 'rgba(255, 255, 255, 0.6)', 
+        color: 'var(--color-white-60)', 
         fontSize: '14px',
         margin: 0,
       }}>
@@ -404,7 +404,7 @@ export function NFTGate({
         NFT Required
       </h3>
       <p style={{ 
-        color: 'rgba(255, 255, 255, 0.6)', 
+        color: 'var(--color-white-60)', 
         fontSize: '14px',
         margin: 0,
       }}>
@@ -424,7 +424,7 @@ export function NFTGate({
         🔍
       </div>
       <p style={{ 
-        color: 'rgba(255, 255, 255, 0.6)', 
+        color: 'var(--color-white-60)', 
         fontSize: '14px',
         margin: 0,
       }}>
@@ -511,7 +511,7 @@ export function WalletFAB({
     backgroundColor: isConnected ? '#22c55e' : '#ea580c',
     color: 'white',
     border: 'none',
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+    boxShadow: '0 4px 20px var(--color-black-30)',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
@@ -551,7 +551,7 @@ export function WalletFAB({
           backgroundColor: 'rgba(23, 23, 23, 0.95)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
+          border: '1px solid var(--color-white-10)',
           borderRadius: '16px',
           padding: '8px',
           minWidth: '200px',
@@ -560,9 +560,9 @@ export function WalletFAB({
           {/* Address display */}
           <div style={{
             padding: '12px 16px',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            borderBottom: '1px solid var(--color-white-10)',
             fontSize: '12px',
-            color: 'rgba(255, 255, 255, 0.6)',
+            color: 'var(--color-white-60)',
           }}>
             Connected
             <div style={{ 
