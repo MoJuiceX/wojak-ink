@@ -4,7 +4,7 @@
 .confirm-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--color-black-70);
   backdrop-filter: blur(4px);
   z-index: 9998;
   display: flex;
@@ -21,9 +21,9 @@
   max-width: 400px;
   width: 90%;
   z-index: 9999;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--color-white-10);
   text-align: center;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 20px 60px var(--color-black-50);
 }
 
 /* Icon */
@@ -53,7 +53,7 @@
 
 /* Message */
 .confirm-modal-message {
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--color-white-70);
   margin: 0 0 28px 0;
   line-height: 1.5;
   font-size: 15px;
@@ -79,13 +79,13 @@
 }
 
 .confirm-modal-btn-secondary {
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--color-white-10);
+  color: var(--color-white-80);
+  border: 1px solid var(--color-white-10);
 }
 
 .confirm-modal-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--color-white-15);
   color: white;
 }
 
