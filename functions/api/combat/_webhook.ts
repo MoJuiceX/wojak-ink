@@ -7,7 +7,7 @@ import type { CombatType } from '../../../src/lib/combat/types';
 const WEBHOOK_TIMEOUT_MS = 5000;
 
 /** Fire-and-forget webhook. Never throws. */
-async function sendWebhook(webhookUrl: string, payload: any): Promise<void> {
+async function sendWebhook(webhookUrl: string, payload: Record<string, unknown>): Promise<void> {
   try {
     await fetch(webhookUrl, {
       method: 'POST',
@@ -26,8 +26,8 @@ export async function sendBattleStartWebhook(
   battleId: number,
   agentDid: string,
   side: 'A' | 'B',
-  fighterA: any,
-  fighterB: any,
+  fighterA: Record<string, unknown>,
+  fighterB: Record<string, unknown>,
 ): Promise<void> {
   const agent = await db.prepare(
     "SELECT webhook_url FROM combat_agents WHERE owner_did = ? AND status = 'active'"
@@ -73,7 +73,7 @@ export async function sendBattleTurnWebhook(
   battleId: number,
   agentDid: string,
   side: 'A' | 'B',
-  turnResult: any,
+  turnResult: Record<string, unknown>,
   battleStatus: string,
   winnerNft: string | null,
 ): Promise<void> {

@@ -3,7 +3,7 @@
 // Returns a one-time API key (never stored in plaintext)
 
 import {
-  jsonResponse, errorResponse, isValidDid, isValidAgentName,
+  errorResponse, isValidDid, isValidAgentName,
   isValidWebhookUrl, generateApiKey, hashApiKey, randomHex,
   buildFighterResponse,
 } from './_shared';
@@ -61,7 +61,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     'SELECT * FROM combat_fighters WHERE owner_did = ? ORDER BY level DESC'
   ).bind(ownerDid).all();
 
-  const fighterList = (fighters.results ?? []).map((row: any) => buildFighterResponse(row));
+  const fighterList = (fighters.results ?? []).map((row) => buildFighterResponse(row as Record<string, unknown>));
 
   return new Response(JSON.stringify({
     agent_id: agentId,

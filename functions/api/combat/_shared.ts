@@ -18,7 +18,7 @@ export function errorResponse(message: string, status = 400) {
   return jsonResponse({ error: message }, status);
 }
 
-export function buildFighterResponse(row: any) {
+export function buildFighterResponse(row: Record<string, unknown>) {
   const stats = calculateAllStats(row.combat_type as CombatType, row.level, row.nature);
   return {
     nft_id: row.nft_id,
@@ -84,7 +84,7 @@ export function isValidWebhookUrl(url: string): boolean {
 export async function authenticateAgent(
   request: Request,
   db: D1Database
-): Promise<any | null> {
+): Promise<Record<string, unknown> | null> {
   const authHeader = request.headers.get('Authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
 
@@ -100,7 +100,7 @@ export async function authenticateAgent(
 }
 
 /** Check rate limit for agent. Returns { allowed: boolean, retryAfter?: number } */
-export function checkAgentRateLimit(agent: any): { allowed: boolean; retryAfter?: number } {
+export function checkAgentRateLimit(agent: Record<string, unknown>): { allowed: boolean; retryAfter?: number } {
   const now = new Date();
   const utcDate = now.toISOString().slice(0, 10); // YYYY-MM-DD
   const utcHour = now.toISOString().slice(0, 13);  // YYYY-MM-DDTHH

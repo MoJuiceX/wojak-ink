@@ -17,7 +17,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const db = context.env.DB;
 
   // If no battle_id, find active battle for this DID
-  let battle: any;
+  let battle: Record<string, unknown> | null;
   if (battleId) {
     battle = await db.prepare('SELECT * FROM combat_battles WHERE id = ?').bind(battleId).first();
   } else {
@@ -41,11 +41,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     'SELECT turn_number, turn_result FROM combat_turns WHERE battle_id = ? AND turn_result IS NOT NULL ORDER BY turn_number ASC'
   ).bind(battle.id).all();
 
-  const turnLog: any[] = [];
+  const turnLog: Record<string, unknown>[] = [];
   for (const t of (turns.results ?? [])) {
     try {
       turnLog.push({
-        turn: (t as any).turn_number,
+        turn: (t as Record<string, unknown>).turn_number,
         ...(t.turn_result ? JSON.parse(t.turn_result as string) : {}),
       });
     } catch { /* skip corrupted turn data */ }

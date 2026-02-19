@@ -141,7 +141,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     );
 
     // Update battle
-    const newStatus = battleState.status === 'finished' ? 'completed' : battle.status;
+    const _newStatus = battleState.status === 'finished' ? 'completed' : battle.status;
     if (battleState.status === 'finished') {
       statements.push(
         db.prepare(

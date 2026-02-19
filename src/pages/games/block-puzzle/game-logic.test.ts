@@ -260,7 +260,7 @@ describe('clearLines', () => {
 
   it('clears multiple rows at once', () => {
     const grid = createEmptyGrid();
-    for (let row of [0, 1]) {
+    for (const row of [0, 1]) {
       makeGridWithRow(row, '#f00').forEach((r) => {
         grid[row] = r;
       });

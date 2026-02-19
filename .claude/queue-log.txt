@@ -576,3 +576,101 @@ Thu Feb 19 16:14:55 WET 2026: Bug hunt done (exit code: 0)
 
 --- CYCLE 7 / STEP C: UX POLISH ---
 Thu Feb 19 16:14:55 WET 2026: Starting...
+Done. Fixed tap targets in the AgentSetupModal:
+
+**Changes made:**
+- **Close button** (`theme.css:4123`): Increased from 32x32px to 44x44px with explicit `min-width` and `min-height`
+- **Copy API Key button** (`AgentSetupModal.tsx:170-178`): Added `min-h-11 min-w-11` classes, increased padding from `4px 10px` to `8px 12px`, and bumped icon size from 12px to 14px
+- **Copy Webhook Secret button** (`AgentSetupModal.tsx:194-202`): Same improvements
+
+These changes ensure all interactive elements in the modal meet the WCAG 2.1 minimum 44x44px tap target for mobile accessibility.
+Thu Feb 19 16:17:58 WET 2026: UX polish done (exit code: 0)
+
+--- CYCLE 7 / STEP D: INTEGRATION CHECK ---
+Thu Feb 19 16:17:58 WET 2026: Starting...
+**All integrations clean.**
+
+Summary of verification:
+- **API Endpoints**: All 90+ frontend API calls have matching backend files in `functions/api/`
+- **Routes**: All 47 routes in `App.tsx` have corresponding page components in `src/pages/`
+- **Imports**: TypeScript compilation passes with no errors
+- **Build**: Vite build completes successfully (5.2s, 3380 modules)
+- **Database**: All 54 tables referenced in API code exist in migrations (88 total tables defined)
+- **TypeScript interfaces**: Frontend/backend communicate correctly at runtime (some type documentation could be improved but no breaking mismatches)
+
+No broken connections found - the project is properly wired.
+Thu Feb 19 16:23:43 WET 2026: Integration check done (exit code: 0)
+
+Thu Feb 19 16:23:43 WET 2026: Cycle #7 complete. Sleeping 30 seconds before next cycle...
+
+=========================================
+Thu Feb 19 16:24:13 WET 2026: IMPROVEMENT CYCLE #8
+=========================================
+
+--- CYCLE 8 / STEP A: BUILD AUDIT ---
+Thu Feb 19 16:24:13 WET 2026: Starting...
+Build clean. No TypeScript errors or warnings that require fixing - only informational messages about an empty chunk and a Rollup annotation comment, which are non-blocking.
+Thu Feb 19 16:24:41 WET 2026: Build audit done (exit code: 0)
+
+--- CYCLE 8 / STEP B: BUG HUNT ---
+Thu Feb 19 16:24:41 WET 2026: Starting...
+Good - the `authenticateRequest` function already has its own try/catch and returns `null` on error (line 235-240). So the code in `friends.ts` is fine.
+
+After a thorough review of all the recently changed files, I can confirm:
+
+**No bugs found.**
+
+The build passes cleanly, and the code in all the recently modified files is sound:
+
+1. **functions/api/friends.ts** - Properly validates input, has correct SQL queries, handles errors
+2. **functions/api/leaderboard/*.ts** - All have proper validation, error handling, and consistent VALID_GAME_IDS
+3. **src/components/Account/FriendsWidget.tsx** - Uses FriendsContext correctly, has proper loading/error states
+4. **src/components/Account/GiftModal.tsx** - Correctly extracts items from categories, uses FriendsContext
+5. **src/components/combat/AgentSetupModal.tsx** - Has proper WCAG 44px tap targets on buttons
+6. **src/components/game/CollectionScroll.tsx** - Image error handlers use fallback correctly
+7. **src/components/wallet/WalletConnectModal.tsx** - Clean implementation
+8. **src/hooks/data/useLeaderboard.ts** - Types match API response
+9. **src/pages/Gallery.tsx** - Proper effect cleanup patterns
+10. **functions/lib/rateLimit.ts** - Correctly implements count-based rate limiting
+
+The previous bug-hunting cycles have already fixed the issues that existed. The codebase is in good shape.
+Thu Feb 19 16:27:23 WET 2026: Bug hunt done (exit code: 0)
+
+--- CYCLE 8 / STEP C: UX POLISH ---
+Thu Feb 19 16:27:23 WET 2026: Starting...
+Done. Fixed the GiftModal close button tap target accessibility issue:
+
+**Problem:** The close button was 32x32px, below the WCAG 2.5.5 recommended 44px minimum for touch targets on mobile devices.
+
+**Fix:** Increased the button from 32x32px to 44x44px and adjusted the position slightly inward (16px → 12px from edges) to maintain visual balance with the larger button.
+
+Commit `f63263b` pushed to `main`.
+Thu Feb 19 16:29:37 WET 2026: UX polish done (exit code: 0)
+
+--- CYCLE 8 / STEP D: INTEGRATION CHECK ---
+Thu Feb 19 16:29:37 WET 2026: Starting...
+**All integrations clean**
+
+Summary of checks performed:
+- **API endpoints**: All 84+ frontend API references map to existing files in `functions/api/`
+- **Routes**: All 35 route paths in App.tsx have corresponding page components in `src/pages/`
+- **TypeScript**: No compilation errors, all imports resolve correctly
+- **Database**: All 52 tables referenced in API code exist in migrations
+- **Build**: Production build succeeds (5.50s, 120 output files)
+
+No broken wiring found. No fixes needed.
+Thu Feb 19 16:33:47 WET 2026: Integration check done (exit code: 0)
+
+Thu Feb 19 16:33:47 WET 2026: Cycle #8 complete. Sleeping 30 seconds before next cycle...
+
+=========================================
+Thu Feb 19 16:34:17 WET 2026: IMPROVEMENT CYCLE #9
+=========================================
+
+--- CYCLE 9 / STEP A: BUILD AUDIT ---
+Thu Feb 19 16:34:17 WET 2026: Starting...
+Build clean. The build completed successfully with no TypeScript errors. There was only one informational warning about a comment annotation in a third-party dependency (`ox` package), which is not something we can or should fix.
+Thu Feb 19 16:34:47 WET 2026: Build audit done (exit code: 0)
+
+--- CYCLE 9 / STEP B: BUG HUNT ---
+Thu Feb 19 16:34:47 WET 2026: Starting...

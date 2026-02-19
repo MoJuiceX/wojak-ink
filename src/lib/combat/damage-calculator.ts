@@ -70,7 +70,7 @@ export function calculateDamage(input: DamageInput): DamageResult {
   const effectiveDef = baseDef * getStatStageMultiplier(effectiveDefStage);
 
   // Base damage formula
-  let baseDamage = (effectiveAtk / Math.max(effectiveDef, 1)) * move.power * DAMAGE_MULTIPLIER;
+  const baseDamage = (effectiveAtk / Math.max(effectiveDef, 1)) * move.power * DAMAGE_MULTIPLIER;
 
   // STAB — 1.5x if move type matches fighter type (2.0x with Adaptability)
   const stabMultiplier = move.type === attacker.type

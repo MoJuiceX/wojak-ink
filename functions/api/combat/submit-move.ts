@@ -4,7 +4,6 @@
 import { jsonResponse, errorResponse, isValidDid } from './_shared';
 import { resolveTurn } from '../../../src/lib/combat/turn-resolver';
 import { initFighterState, initBattleState } from '../../../src/lib/combat/battle-state';
-import { chooseMove } from '../../../src/lib/combat/ai-strategist';
 import { calculateXPAward, calculateELOChange, calculateLevelFromXP } from '../../../src/lib/combat/xp-elo-calculator';
 import type { CombatType } from '../../../src/lib/combat/types';
 

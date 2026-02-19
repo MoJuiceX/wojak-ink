@@ -108,7 +108,7 @@ export function AgentProvider({ children, ownerDid }: { children: ReactNode; own
       success('Agent created! Save your API key now.');
       await refreshAgent();
       return true;
-    } catch (err) {
+    } catch (_err) {
       showError('Network error creating agent');
       return false;
     } finally {

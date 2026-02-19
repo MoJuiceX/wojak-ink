@@ -116,6 +116,11 @@ export function useGame() {
   return ctx;
 }
 
+/** Safe version that returns null when outside GameProvider */
+export function useOptionalGame() {
+  return useContext(GameContext);
+}
+
 export function GameProvider({ children }: { children: ReactNode }) {
   const [player, setPlayer] = useState<GamePlayer | null>(null);
   const [feed, setFeed] = useState<FeedItem[]>([]);

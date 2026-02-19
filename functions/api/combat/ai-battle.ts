@@ -70,7 +70,7 @@ function generateAiOpponent(playerFighter: FighterRow): FighterData {
   // Random 4 moves for the type (ensure at least 1 damaging move)
   const movePool = getMovePoolForType(aiType);
   const damagingMoves = movePool.filter(m => m.power > 0);
-  const statusMoves = movePool.filter(m => m.power === 0);
+  const _statusMoves = movePool.filter(m => m.power === 0);
 
   // Pick at least 1 damaging move, rest random
   const selectedMoves: string[] = [];
@@ -167,7 +167,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // 6. Determine winner and rewards
     const playerWon = battleResult.winnerId === fighter.nft_id;
     const isDraw = battleResult.winnerId === null;
-    const aiWon = battleResult.winnerId === 'ai_sparring_partner';
+    const _aiWon = battleResult.winnerId === 'ai_sparring_partner';
 
     let powerDelta = 0;
     let xpGained = 0;

@@ -5,7 +5,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { User, RefreshCw, Check, X } from 'lucide-react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { useGame } from '@/contexts/GameContext';
+import { useOptionalGame } from '@/contexts/GameContext';
 import { settingsSectionVariants } from '@/config/settingsAnimations';
 import { validateDIDName } from '@/lib/nameGenerator';
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch';
@@ -18,8 +18,10 @@ const SOURCE_LABELS: Record<string, string> = {
 
 export function DisplayNameEditor() {
   const prefersReducedMotion = useReducedMotion();
-  const { player, isRegistered } = useGame();
+  const game = useOptionalGame();
   const { authenticatedFetch } = useAuthenticatedFetch();
+  const player = game?.player;
+  const isRegistered = game?.isRegistered ?? false;
   const did = player?.did;
 
   const [displayName, setDisplayName] = useState('');
