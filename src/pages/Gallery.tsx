@@ -9,7 +9,7 @@
 import { useCallback, useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './Gallery.css';
-import { ChevronDown, Heart } from 'lucide-react';
+import { ChevronDown, Heart, Palette } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { useLayout } from '@/hooks/useLayout';
@@ -442,6 +442,17 @@ function GalleryContent() {
                         }}
                       />
                     ))}
+                  </div>
+                ) : filteredNfts.length === 0 ? (
+                  // Empty state when no NFTs for this character
+                  <div className="card p-8 flex flex-col items-center gap-4 text-center" style={{ maxWidth: 400, margin: '40px auto' }}>
+                    <Palette size={32} className="text-muted" />
+                    <p className="text-secondary">
+                      No Wojaks found for this character type yet.
+                    </p>
+                    <Link to="/generator" className="btn btn-primary">
+                      Create One in Generator
+                    </Link>
                   </div>
                 ) : (
                   <>
