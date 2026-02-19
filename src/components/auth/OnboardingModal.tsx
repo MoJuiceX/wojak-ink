@@ -213,13 +213,12 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   placeholder={user?.firstName || 'Your display name'}
-                  className="w-full px-3 py-2 rounded-lg text-base"
+                  className="w-full px-3 py-2 rounded-lg text-base text-primary"
                   style={{
                     background: 'var(--color-bg)',
                     border: errors.displayName
                       ? '1px solid var(--color-error, #ef4444)'
                       : '1px solid var(--color-border)',
-                    color: 'var(--color-text)',
                   }}
                 />
                 {errors.displayName && (
@@ -249,13 +248,12 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
                     value={xHandle}
                     onChange={(e) => setXHandle(e.target.value.replace(/^@/, ''))}
                     placeholder="yourhandle"
-                    className="w-full pl-8 pr-3 py-2 rounded-lg text-base"
+                    className="w-full pl-8 pr-3 py-2 rounded-lg text-base text-primary"
                     style={{
                       background: 'var(--color-bg)',
                       border: errors.xHandle
                         ? '1px solid var(--color-error, #ef4444)'
                         : '1px solid var(--color-border)',
-                      color: 'var(--color-text)',
                     }}
                   />
                 </div>
@@ -308,10 +306,9 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
                     type="button"
                     onClick={handleConnectWallet}
                     disabled={!walletInitialized || isWalletConnecting}
-                    className="w-full px-3 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                    className="w-full px-3 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50 text-white"
                     style={{
                       background: 'var(--color-primary)',
-                      color: '#fff',
                     }}
                   >
                     {isWalletConnecting ? (

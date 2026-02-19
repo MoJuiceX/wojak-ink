@@ -79,7 +79,7 @@ export function BattleQueuePanel({ onQueued, queuedNftIds = [] }: BattleQueuePan
       <div className="card-static p-4 text-center">
         <p className="text-secondary text-sm">
           No Wojak NFTs found. Mint one in the{' '}
-          <Link to="/generator" style={{ color: 'var(--color-primary)' }}>Generator</Link>.
+          <Link to="/generator" className="text-accent">Generator</Link>.
         </p>
       </div>
     );

@@ -72,11 +72,10 @@ export default function Settings() {
             aria-labelledby="general-section-heading"
           >
             <div className="flex items-center gap-2">
-              <Monitor size={20} style={{ color: 'var(--color-primary)' }} />
+              <Monitor size={20} className="text-accent" />
               <h2
                 id="general-section-heading"
-                className="text-lg font-bold"
-                style={{ color: 'var(--color-text)' }}
+                className="text-lg font-bold text-primary"
               >
                 General
               </h2>
@@ -92,14 +91,12 @@ export default function Settings() {
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p
-                    className="text-sm font-medium"
-                    style={{ color: 'var(--color-text)' }}
+                    className="text-sm font-medium text-primary"
                   >
                     Skip Boot Sequence
                   </p>
                   <p
-                    className="text-xs mt-0.5"
-                    style={{ color: 'var(--color-text-muted)' }}
+                    className="text-xs mt-0.5 text-muted"
                   >
                     Skip the startup animation on future visits
                   </p>
@@ -164,8 +161,7 @@ export default function Settings() {
 
           {/* Footer */}
           <p
-            className="text-center text-sm pt-4"
-            style={{ color: 'var(--color-text-muted)' }}
+            className="text-center text-sm pt-4 text-muted"
           >
             More settings coming soon.
           </p>

@@ -87,7 +87,7 @@ export function LeaderboardPanel() {
         className="px-4 py-3 flex items-center gap-2"
         style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)' }}
       >
-        <Trophy size={18} style={{ color: 'var(--color-primary)' }} />
+        <Trophy size={18} className="text-accent" />
         <h3
           className="text-sm font-semibold text-primary"
         >
@@ -111,8 +111,7 @@ export function LeaderboardPanel() {
           <div className="text-center py-8">
             <Trophy
               size={32}
-              className="mx-auto mb-2 opacity-30"
-              style={{ color: 'var(--color-text-muted)' }}
+              className="mx-auto mb-2 opacity-30 text-muted"
             />
             <p
               className="text-sm text-muted"

@@ -139,8 +139,8 @@ export function NFTSearchInput({
               disabled={isLoading}
               aria-label="Search NFT by ID number"
               aria-describedby={error ? 'search-error' : undefined}
-              className="flex-1 min-w-0 bg-transparent outline-none text-sm font-mono placeholder:opacity-40"
-              style={{ color: 'var(--color-text)', marginLeft: '-2px' }}
+              className="flex-1 min-w-0 bg-transparent outline-none text-sm font-mono placeholder:opacity-40 text-primary"
+              style={{ marginLeft: '-2px' }}
             />
             <AnimatePresence mode="wait">
               {isLoading && (
@@ -151,8 +151,7 @@ export function NFTSearchInput({
                 >
                   <Loader2
                     size={14}
-                    className="animate-spin"
-                    style={{ color: 'var(--color-primary)' }}
+                    className="animate-spin text-accent"
                   />
                 </motion.div>
               )}

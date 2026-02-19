@@ -134,7 +134,7 @@ function LayerDropdown({
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+      <label className="text-xs font-medium text-secondary">
         {LAYER_META[layer].label}
       </label>
       <select
@@ -269,10 +269,9 @@ function ClipControls({
       <div className="flex flex-col gap-1">
         <button
           type="button"
-          className="text-xs px-2 py-1 rounded-md self-start"
+          className="text-xs px-2 py-1 rounded-md self-start text-secondary"
           style={{
             background: subRule.x.enabled ? 'var(--color-border)' : 'transparent',
-            color: 'var(--color-text-secondary)',
             border: '1px solid var(--color-border)',
             cursor: 'pointer',
           }}
@@ -283,7 +282,7 @@ function ClipControls({
         {subRule.x.enabled && (
           <div className="flex flex-col gap-1 pl-2">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono" style={{ color: 'var(--color-text-muted)', minWidth: '38px' }}>
+              <span className="text-xs font-mono text-muted" style={{ minWidth: '38px' }}>
                 {(subRule.x.clip * 100).toFixed(1)}%
               </span>
               <input
@@ -320,10 +319,9 @@ function ClipControls({
       <div className="flex flex-col gap-1">
         <button
           type="button"
-          className="text-xs px-2 py-1 rounded-md self-start"
+          className="text-xs px-2 py-1 rounded-md self-start text-secondary"
           style={{
             background: subRule.y.enabled ? 'var(--color-border)' : 'transparent',
-            color: 'var(--color-text-secondary)',
             border: '1px solid var(--color-border)',
             cursor: 'pointer',
           }}
@@ -334,7 +332,7 @@ function ClipControls({
         {subRule.y.enabled && (
           <div className="flex flex-col gap-1 pl-2">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono" style={{ color: 'var(--color-text-muted)', minWidth: '38px' }}>
+              <span className="text-xs font-mono text-muted" style={{ minWidth: '38px' }}>
                 {(subRule.y.clip * 100).toFixed(1)}%
               </span>
               <input
@@ -409,10 +407,10 @@ function LayerCard({
       {/* Layer name + color dot + z-index arrows */}
       <div className="flex items-center gap-2">
         <div style={{ width: 10, height: 10, borderRadius: '50%', background: color, flexShrink: 0 }} />
-        <span className="text-sm font-semibold flex-1" style={{ color: 'var(--color-text)' }}>
+        <span className="text-sm font-semibold flex-1">
           {layerName}
         </span>
-        <span className="text-xs font-mono" style={{ color: 'var(--color-text-muted)' }}>
+        <span className="text-xs font-mono text-muted">
           z:{effectiveZ}
         </span>
         <div className="flex gap-0.5">
@@ -455,7 +453,7 @@ function LayerCard({
 
       {/* Opacity slider (visual only) */}
       <div className="flex items-center gap-2">
-        <span className="text-xs" style={{ color: 'var(--color-text-muted)', minWidth: '52px' }}>
+        <span className="text-xs text-muted" style={{ minWidth: '52px' }}>
           Opacity {(opacity * 100).toFixed(0)}%
         </span>
         <input
@@ -536,7 +534,7 @@ function LayerCard({
       )}
 
       {rule.hidden && (
-        <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+        <p className="text-xs text-muted">
           Entire layer is completely hidden (not rendered).
         </p>
       )}
@@ -777,7 +775,7 @@ export default function RuleBuilder() {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-12">
-        <p style={{ color: 'var(--color-text-secondary)' }}>Loading traits...</p>
+        <p>Loading traits...</p>
       </div>
     );
   }
@@ -786,7 +784,7 @@ export default function RuleBuilder() {
     <div className="flex flex-col gap-4 p-4" style={{ maxWidth: '1400px', margin: '0 auto' }}>
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
+        <h1 className="text-lg font-bold">
           Layer Rule Builder
         </h1>
         <div className="flex gap-2">
@@ -892,11 +890,10 @@ export default function RuleBuilder() {
           {/* Layer stack info */}
           {computedLayers.length > 0 && (
             <div
-              className="w-full p-2 rounded-lg text-xs font-mono"
+              className="w-full p-2 rounded-lg text-xs font-mono text-muted"
               style={{
                 background: 'var(--color-surface)',
                 border: '1px solid var(--color-border)',
-                color: 'var(--color-text-muted)',
                 maxHeight: '120px',
                 overflowY: 'auto',
               }}
@@ -916,11 +913,11 @@ export default function RuleBuilder() {
 
         {/* RIGHT: Layer rules (sorted top-to-bottom = highest z-index first) */}
         <div className="flex flex-col gap-2" style={{ maxHeight: '700px', overflowY: 'auto' }}>
-          <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+          <p className="text-xs text-muted">
             Top = rendered on top. Use ▲▼ to reorder.
           </p>
           {sortedEditableLayers.length === 0 ? (
-            <p className="text-xs p-3" style={{ color: 'var(--color-text-muted)' }}>
+            <p className="text-xs p-3 text-muted">
               Select traits on the left to see layer rules here.
             </p>
           ) : (
@@ -956,7 +953,7 @@ export default function RuleBuilder() {
       {exportJson && (
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
+            <h2 className="text-sm font-semibold">
               Exported JSON
             </h2>
             <button type="button" className="btn btn-secondary text-xs" onClick={handleCopy}>
@@ -968,7 +965,6 @@ export default function RuleBuilder() {
             style={{
               background: '#0d0d15',
               border: '1px solid var(--color-border)',
-              color: 'var(--color-text)',
               maxHeight: '300px',
               fontFamily: 'ui-monospace, monospace',
               whiteSpace: 'pre-wrap',

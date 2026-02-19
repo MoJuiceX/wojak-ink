@@ -122,8 +122,8 @@ function MobileGalleryControls() {
             {isActive && (
               <DirectionIcon
                 size={10}
-                className="absolute right-1"
-                style={{ color: 'var(--color-primary)', strokeWidth: 3, bottom: '2px' }}
+                className="absolute right-1 text-accent"
+                style={{ strokeWidth: 3, bottom: '2px' }}
               />
             )}
           </motion.button>
@@ -283,9 +283,8 @@ export function Header({ transparent = false }: HeaderProps) {
                   >
                     <motion.button
                       onClick={headerBreadcrumb.onBack}
-                      className="w-10 h-10 flex items-center justify-center rounded-lg transition-colors hover:bg-[var(--color-surface-hover)]"
+                      className="w-10 h-10 flex items-center justify-center rounded-lg transition-colors hover:bg-[var(--color-surface-hover)] text-secondary"
                       style={{
-                        color: 'var(--color-text-secondary)',
                         background: 'var(--color-surface)',
                         border: '1px solid var(--color-border)',
                       }}
@@ -333,9 +332,8 @@ export function Header({ transparent = false }: HeaderProps) {
                       </h1>
                       {navItem?.id === 'generator' && isWalletConnected && maxSupply > 0 && (
                         <span
-                          className="text-[11px] tabular-nums whitespace-nowrap font-semibold px-2 py-0.5 rounded-md"
+                          className="text-[11px] tabular-nums whitespace-nowrap font-semibold px-2 py-0.5 rounded-md text-muted"
                           style={{
-                            color: 'var(--color-text-muted)',
                             background: 'rgba(255, 255, 255, 0.04)',
                             border: '1px solid rgba(255, 255, 255, 0.06)',
                           }}
@@ -395,8 +393,8 @@ export function Header({ transparent = false }: HeaderProps) {
                       }}
                     >
                       <div
-                        className="px-3 py-2 text-[11px] tabular-nums truncate"
-                        style={{ color: 'var(--color-text-muted)', borderBottom: '1px solid var(--color-border)' }}
+                        className="px-3 py-2 text-[11px] tabular-nums truncate text-muted"
+                        style={{ borderBottom: '1px solid var(--color-border)' }}
                       >
                         {address.slice(0, 12)}…{address.slice(-6)}
                       </div>

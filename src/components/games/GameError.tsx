@@ -93,10 +93,9 @@ export function GameError({ error, gameName, onRetry }: GameErrorProps) {
 
           <motion.button
             onClick={handleBack}
-            className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-medium"
+            className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-medium text-primary"
             style={{
               background: 'rgba(255, 255, 255, 0.1)',
-              color: 'var(--color-text, #fff)',
               border: '1px solid rgba(255, 255, 255, 0.2)',
             }}
             whileHover={{ scale: 1.02 }}

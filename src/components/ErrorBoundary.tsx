@@ -133,10 +133,9 @@ export class ErrorBoundary extends Component<Props, State> {
               </button>
               <button
                 onClick={this.handleGoHome}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all text-primary"
                 style={{
                   background: 'rgba(255, 255, 255, 0.1)',
-                  color: 'var(--color-text, #fff)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                 }}
               >

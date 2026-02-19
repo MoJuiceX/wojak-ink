@@ -616,10 +616,9 @@ function BadgeGalleryContent() {
                           />
                           {/* NFT ID badge - bottom left */}
                           <div
-                            className="absolute bottom-0.5 left-0.5 px-1 py-0.5 rounded text-[8px] font-bold"
+                            className="absolute bottom-0.5 left-0.5 px-1 py-0.5 rounded text-[8px] font-bold text-primary"
                             style={{
                               background: 'rgba(0,0,0,0.7)',
-                              color: 'var(--color-text)',
                             }}
                           >
                             #{nft.id.padStart(4, '0')}
@@ -627,10 +626,9 @@ function BadgeGalleryContent() {
                           {/* HOAMI Edition indicator */}
                           {nft.flags.includes('HOAMI Edition') && (
                             <div
-                              className="absolute top-0.5 right-0.5 px-1 py-0.5 rounded text-[8px]"
+                              className="absolute top-0.5 right-0.5 px-1 py-0.5 rounded text-[8px] text-white"
                               style={{
                                 background: 'rgba(168, 85, 247, 0.9)',
-                                color: 'white',
                               }}
                               title="HOAMI Edition"
                             >

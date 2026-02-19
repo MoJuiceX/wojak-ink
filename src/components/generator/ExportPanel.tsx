@@ -172,10 +172,9 @@ export function ExportPanel({ className = '' }: ExportPanelProps) {
                 value={filename}
                 onChange={(e) => setFilename(e.target.value)}
                 placeholder="Filename"
-                className="w-full px-4 py-2.5 rounded-xl text-sm font-medium"
+                className="w-full px-4 py-2.5 rounded-xl text-sm font-medium text-primary"
                 style={{
                   background: 'rgba(255,255,255,0.05)',
-                  color: 'var(--color-text)',
                   border: '1px solid var(--color-border)',
                   outline: 'none',
                 }}
@@ -241,12 +240,11 @@ export function ExportPanel({ className = '' }: ExportPanelProps) {
 
               {/* Download button */}
               <motion.button
-                className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl font-semibold text-sm"
+                className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl font-semibold text-sm text-white"
                 style={{
                   background: isExporting
                     ? 'rgba(255,149,0,0.7)'
                     : 'var(--color-primary)',
-                  color: 'white',
                   border: 'none',
                   cursor: isExporting ? 'wait' : 'pointer',
                 }}

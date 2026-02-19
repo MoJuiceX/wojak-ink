@@ -172,15 +172,14 @@ function GeneratorContent() {
         {!isDesktop && (
           <div className="text-center py-4 px-4">
             <p
-              className="text-sm"
-              style={{ color: 'var(--color-text-secondary)' }}
+              className="text-sm text-secondary"
             >
               Create your own unique Wojak using layers by{' '}
               <a
                 href="https://x.com/MoJuiceX"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: 'var(--color-primary)' }}
+                className="text-accent"
               >
                 @MoJuiceX
               </a>

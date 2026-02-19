@@ -19,7 +19,7 @@ export function WojakSwipeCard() {
           flexShrink: 0,
         }}
       >
-        <Heart size={22} style={{ color: 'var(--color-primary)' }} />
+        <Heart size={22} className="text-accent" />
       </div>
       <div className="flex flex-col gap-1" style={{ flex: 1 }}>
         <span className="font-bold" style={{ fontSize: 15 }}>Wojak Swipe</span>

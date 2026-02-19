@@ -210,7 +210,7 @@ function TraitRankingRow({
       }}
     >
       {/* Arrow indicator column */}
-      <span className="text-xs" style={{ color: 'var(--color-accent)', textAlign: 'center' }}>
+      <span className="text-xs text-accent" style={{ textAlign: 'center' }}>
         {isCurrent ? '▶' : ''}
       </span>
       {/* Rank column */}

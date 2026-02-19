@@ -88,11 +88,11 @@ function SupplyProgress({ minted, total }: { minted: number; total: number }) {
   const pct = total > 0 ? (minted / total) * 100 : 0;
   return (
     <div className="card-static p-4 flex flex-col gap-3">
-      <h3 className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
+      <h3 className="text-sm font-semibold">
         Supply Progress
       </h3>
       <div className="flex items-baseline gap-2">
-        <span className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>
+        <span className="text-2xl font-bold text-accent">
           {minted.toLocaleString()}
         </span>
         <span className="text-secondary text-sm">/ {total.toLocaleString()} ({pct.toFixed(1)}%)</span>
@@ -132,7 +132,7 @@ function TraitTable({
 
   return (
     <div className="card-static p-4 flex flex-col gap-3">
-      <h3 className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
+      <h3 className="text-sm font-semibold">
         {category}
       </h3>
       <div style={{ overflowX: 'auto' }}>
@@ -152,17 +152,16 @@ function TraitTable({
               const isTop3 = top3.includes(t.name);
               return (
                 <tr key={t.name}>
-                  <td style={{ color: 'var(--color-text)', fontSize: '0.8125rem' }}>
+                  <td style={{ fontSize: '0.8125rem' }}>
                     {t.name}
                     {isTop3 && (
                       <span
-                        className="ml-1.5"
+                        className="ml-1.5 text-accent"
                         style={{
                           fontSize: '0.625rem',
                           padding: '1px 5px',
                           borderRadius: '4px',
                           background: 'rgba(255,107,0,0.15)',
-                          color: 'var(--color-primary)',
                         }}
                       >
                         Top 3
@@ -203,7 +202,7 @@ function TraitTable({
 function RecentMintsTable({ mints }: { mints: RecentMint[] }) {
   return (
     <div className="card-static p-4 flex flex-col gap-3">
-      <h3 className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
+      <h3 className="text-sm font-semibold">
         Recent Mints
       </h3>
       <div style={{ overflowX: 'auto' }}>
@@ -221,7 +220,7 @@ function RecentMintsTable({ mints }: { mints: RecentMint[] }) {
           <tbody>
             {mints.map((m) => (
               <tr key={m.mintNumber}>
-                <td style={{ color: 'var(--color-primary)', fontWeight: 600 }}>
+                <td className="text-accent" style={{ fontWeight: 600 }}>
                   {m.mintNumber}
                 </td>
                 <td style={{ fontFamily: 'monospace', fontSize: '0.75rem' }}>
@@ -266,7 +265,7 @@ function CreditHealth({ stats }: { stats: CreditStats | null }) {
   if (!stats) {
     return (
       <div className="card-static p-4">
-        <h3 className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
+        <h3 className="text-sm font-semibold">
           Credit System Health
         </h3>
         <p className="text-muted text-sm mt-2">Loading...</p>
@@ -284,7 +283,7 @@ function CreditHealth({ stats }: { stats: CreditStats | null }) {
 
   return (
     <div className="card-static p-4 flex flex-col gap-3">
-      <h3 className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
+      <h3 className="text-sm font-semibold">
         Credit System Health
       </h3>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -293,7 +292,7 @@ function CreditHealth({ stats }: { stats: CreditStats | null }) {
             <span className="text-muted" style={{ fontSize: '0.6875rem' }}>
               {r.label}
             </span>
-            <span className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
+            <span className="text-lg font-bold">
               {r.value}
             </span>
           </div>
@@ -390,7 +389,7 @@ function MintSafetyRail({
   return (
     <div className="card-static p-4 flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
+        <h3 className="text-sm font-semibold">
           Mint Safety Rail
           {flaggedMints.length > 0 && (
             <span
@@ -401,7 +400,7 @@ function MintSafetyRail({
             </span>
           )}
         </h3>
-        <label className="flex items-center gap-2" style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', cursor: 'pointer' }}>
+        <label className="flex items-center gap-2 text-secondary" style={{ fontSize: '0.75rem', cursor: 'pointer' }}>
           <input
             type="checkbox"
             checked={autoRefresh}
@@ -429,7 +428,7 @@ function MintSafetyRail({
           <tbody>
             {flaggedMints.map((m) => (
               <tr key={m.id}>
-                <td style={{ color: 'var(--color-primary)', fontWeight: 600 }}>
+                <td className="text-accent" style={{ fontWeight: 600 }}>
                   {m.id}
                 </td>
                 <td>{m.mint_number ?? '—'}</td>
@@ -471,11 +470,10 @@ function MintSafetyRail({
                     </button>
                     {m.mint_type === 'paid' && m.mintgarden_launcher_id && m.phase2_mint_id && (
                       <button
-                        className="btn btn-ghost"
+                        className="btn btn-ghost text-error"
                         style={{
                           fontSize: '0.6875rem',
                           padding: '2px 8px',
-                          color: 'var(--color-error)',
                         }}
                         disabled={!!actionLoading[m.id]}
                         onClick={() => handleMarkRefund(m.id, m.phase2_mint_id!)}
@@ -593,7 +591,7 @@ export default function Admin() {
       <PageTransition>
         <div className="min-h-full flex items-center justify-center" style={{ padding: contentPadding }}>
           <div className="card-static p-6 flex flex-col gap-3" style={{ maxWidth: 400, textAlign: 'center' }}>
-            <h2 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
+            <h2 className="text-lg font-bold">
               Access Denied
             </h2>
             <p className="text-secondary text-sm">
@@ -610,7 +608,7 @@ export default function Admin() {
       <div className="min-h-full" style={{ padding: contentPadding }}>
         <div className="flex flex-col gap-4 pb-24" style={{ maxWidth: 960 }}>
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>
+            <h1 className="text-xl font-bold">
               Admin Dashboard
             </h1>
             <button
@@ -626,7 +624,7 @@ export default function Admin() {
           {error && (
             <div
               className="card-static p-3"
-              style={{ borderColor: 'var(--color-error)', color: 'var(--color-error)' }}
+              style={{ borderColor: 'var(--color-error)' }}
             >
               {error}
             </div>

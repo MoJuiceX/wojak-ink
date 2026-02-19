@@ -64,15 +64,14 @@ export function BurnButton({
   return (
     <>
       <button
-        className="btn btn-ghost text-sm"
-        style={{ color: 'var(--color-error)' }}
+        className="btn btn-ghost text-sm text-error"
         onClick={() => { setShowConfirm(true); setError(null); }}
       >
         Burn
       </button>
 
       {error && (
-        <span className="text-sm" style={{ color: 'var(--color-error)', display: 'block', marginTop: 4 }}>{error}</span>
+        <span className="text-sm text-error" style={{ display: 'block', marginTop: 4 }}>{error}</span>
       )}
       {showConfirm && (
         <BurnConfirmDialog

@@ -367,9 +367,9 @@ function GalleryContent() {
       <div className="min-h-full" data-section="gallery" style={{ padding: pagePadding }}>
         {!bannerDismissed && (
           <Link to="/swipe" className="card p-4 flex items-center gap-4 mb-4" style={{ textDecoration: 'none' }}>
-            <Heart size={24} style={{ color: 'var(--color-error)', flexShrink: 0 }} />
+            <Heart size={24} className="text-error" style={{ flexShrink: 0 }} />
             <div className="flex-1">
-              <span className="font-bold" style={{ color: 'var(--color-text)' }}>Wojak Swipe is live!</span>
+              <span className="font-bold text-primary">Wojak Swipe is live!</span>
               <span className="text-secondary ml-2">Vote, battle, and burn</span>
             </div>
             <span className="badge badge-success">NEW</span>
@@ -471,11 +471,10 @@ function GalleryContent() {
                       <div className="flex justify-center py-2">
                         <button
                           onClick={handleLoadMore}
-                          className="flex items-center gap-2 px-6 py-3 rounded-full transition-all hover:scale-105"
+                          className="flex items-center gap-2 px-6 py-3 rounded-full transition-all hover:scale-105 text-primary"
                           style={{
                             background: 'var(--color-surface)',
                             border: '1px solid var(--color-border)',
-                            color: 'var(--color-text)',
                           }}
                         >
                           <span>Load More</span>

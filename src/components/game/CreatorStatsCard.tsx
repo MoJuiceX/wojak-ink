@@ -66,9 +66,9 @@ export function CreatorStatsCard({ walletAddress }: CreatorStatsCardProps) {
         <div className="flex flex-col">
           <span className="text-muted" style={{ fontSize: 11 }}>Likes / Dislikes</span>
           <span>
-            <span style={{ color: 'var(--color-success)' }}>{stats.totalLikes}</span>
+            <span className="text-success">{stats.totalLikes}</span>
             {' / '}
-            <span style={{ color: 'var(--color-error)' }}>{stats.totalDislikes}</span>
+            <span className="text-error">{stats.totalDislikes}</span>
           </span>
         </div>
       </div>

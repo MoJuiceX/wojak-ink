@@ -82,11 +82,10 @@ export function WalletAddressCard({ address, explorerUrl }: WalletAddressCardPro
 
           {/* SpaceScan button (icon only) */}
           <motion.button
-            className="w-8 h-8 flex items-center justify-center rounded-lg flex-shrink-0"
+            className="w-8 h-8 flex items-center justify-center rounded-lg flex-shrink-0 text-secondary"
             style={{
               background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
-              color: 'var(--color-text-secondary)',
             }}
             onClick={handleOpenExplorer}
             whileHover={{ scale: 1.05 }}

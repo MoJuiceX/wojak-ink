@@ -23,7 +23,7 @@ export function BurnConfirmDialog({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
          style={{ background: 'rgba(0,0,0,0.8)' }}>
       <div className="card-static p-6 max-w-md w-full flex flex-col gap-4">
-        <h2 className="text-xl font-bold" style={{ color: 'var(--color-error)' }}>
+        <h2 className="text-xl font-bold text-error">
           Burn {nftName}?
         </h2>
 
@@ -59,8 +59,8 @@ export function BurnConfirmDialog({
             Cancel
           </button>
           <button
-            className="btn flex-1"
-            style={{ background: 'var(--color-error)', color: 'white' }}
+            className="btn flex-1 text-white"
+            style={{ background: 'var(--color-error)' }}
             onClick={onConfirm}
             disabled={!confirmed || burning}
           >
