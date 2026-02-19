@@ -73,7 +73,7 @@ function ActivityFeed() {
         <p className="text-secondary" style={{ textAlign: 'center' }}>
           Register to see your activity feed.
         </p>
-        <Link to="/swipe" className="btn btn-primary">Go to Swipe</Link>
+        <Link to="/fight-club/vote" className="btn btn-primary">Go to Vote</Link>
       </div>
     );
   }
@@ -122,7 +122,7 @@ function ActivityFeed() {
         <p className="text-secondary" style={{ textAlign: 'center' }}>
           No activity yet. Start voting!
         </p>
-        <Link to="/swipe" className="btn btn-primary">Start Voting</Link>
+        <Link to="/fight-club/vote" className="btn btn-primary">Start Voting</Link>
       </div>
     );
   }

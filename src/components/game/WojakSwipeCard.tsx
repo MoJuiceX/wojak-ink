@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 export function WojakSwipeCard() {
   return (
     <Link
-      to="/swipe"
+      to="/fight-club/vote"
       className="card-static p-4 flex items-center gap-4"
       style={{ borderLeft: '3px solid var(--color-primary)', marginBottom: 16, textDecoration: 'none' }}
     >

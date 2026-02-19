@@ -253,8 +253,8 @@ function LeaderboardContent() {
               <span className="text-muted" style={{ fontSize: 14 }}>
                 {tab === 'players' ? 'No players yet. Start swiping to climb the ranks.' : 'No votes cast yet. Be the first to vote!'}
               </span>
-              <Link to="/swipe" className="btn btn-primary" style={{ fontSize: 13, padding: '8px 16px', textDecoration: 'none' }}>
-                Start Swiping
+              <Link to="/fight-club/vote" className="btn btn-primary" style={{ fontSize: 13, padding: '8px 16px', textDecoration: 'none' }}>
+                Start Voting
               </Link>
             </div>
           )}

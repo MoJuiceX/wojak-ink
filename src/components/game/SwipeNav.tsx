@@ -4,11 +4,10 @@ import { useGame } from '@/contexts/GameContext';
 import './SwipeNav.css';
 
 const NAV_ITEMS = [
-  { to: '/swipe', label: 'Vote', end: true },
-  { to: '/swipe/dashboard', label: 'Dashboard', end: false },
-  { to: '/swipe/battles', label: 'Battles', end: false },
-  { to: '/swipe/leaderboard', label: 'Leaderboard', end: false },
-  { to: '/swipe/activity', label: 'Activity', end: false },
+  { to: '/fight-club/vote', label: 'Vote', end: true },
+  { to: '/fight-club/vote/dashboard', label: 'Dashboard', end: false },
+  { to: '/fight-club/battle', label: 'Battle', end: false },
+  { to: '/fight-club/rankings', label: 'Rankings', end: false },
 ];
 
 export function SwipeNav() {
@@ -29,9 +28,9 @@ export function SwipeNav() {
         </NavLink>
       ))}
       <div className="swipe-nav-divider" />
-      <NavLink to="/arena" className="swipe-nav-link swipe-nav-link--cross">
+      <NavLink to="/fight-club/battle" className="swipe-nav-link swipe-nav-link--cross">
         <Swords size={14} />
-        Arena
+        Battle
       </NavLink>
     </nav>
   );

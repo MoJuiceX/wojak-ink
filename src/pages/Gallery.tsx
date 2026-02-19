@@ -366,11 +366,11 @@ function GalleryContent() {
 
       <div className="min-h-full" data-section="gallery" style={{ padding: pagePadding }}>
         {!bannerDismissed && (
-          <Link to="/swipe" className="card p-4 flex items-center gap-4 mb-4" style={{ textDecoration: 'none' }}>
+          <Link to="/fight-club" className="card p-4 flex items-center gap-4 mb-4" style={{ textDecoration: 'none' }}>
             <Heart size={24} className="text-error" style={{ flexShrink: 0 }} />
             <div className="flex-1">
-              <span className="font-bold text-primary">Wojak Swipe is live!</span>
-              <span className="text-secondary ml-2">Vote, battle, and burn</span>
+              <span className="font-bold text-primary">Fight Club is live!</span>
+              <span className="text-secondary ml-2">Vote, battle, and climb the rankings</span>
             </div>
             <span className="badge badge-success">NEW</span>
             <button

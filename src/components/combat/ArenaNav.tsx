@@ -3,8 +3,8 @@ import { Heart } from 'lucide-react';
 import './ArenaNav.css';
 
 const NAV_ITEMS = [
-  { to: '/arena', label: 'Battle', end: true },
-  { to: '/arena/leaderboard', label: 'Leaderboard', end: false },
+  { to: '/fight-club/battle', label: 'Battle', end: true },
+  { to: '/fight-club/rankings', label: 'Rankings', end: false },
 ];
 
 export function ArenaNav() {
@@ -21,9 +21,9 @@ export function ArenaNav() {
         </NavLink>
       ))}
       <div className="arena-nav-divider" />
-      <NavLink to="/swipe" className="arena-nav-link arena-nav-link--swipe">
+      <NavLink to="/fight-club/vote" className="arena-nav-link arena-nav-link--swipe">
         <Heart size={14} />
-        Swipe
+        Vote
       </NavLink>
     </nav>
   );
