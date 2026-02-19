@@ -260,8 +260,7 @@ function AttributeRow({
 
         {/* Attribute name — flex column */}
         <span
-          className={`flex-1 ${compact ? 'text-[13px]' : 'text-[15px]'} font-medium truncate min-w-0`}
-          style={{ color: 'var(--color-text)' }}
+          className={`flex-1 ${compact ? 'text-[13px]' : 'text-[15px]'} font-medium truncate min-w-0 text-primary`}
         >
           {attribute.value}
         </span>
@@ -312,8 +311,8 @@ function AttributeRow({
               style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
             >
               <div className="flex items-center gap-2 mb-3">
-                <Tag size={12} style={{ color: 'var(--color-text-muted)' }} />
-                <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                <Tag size={12} className="text-muted" />
+                <span className="text-xs text-muted">
                   {attribute.count} NFTs have this trait ({attribute.rarity.toFixed(1)}% rarity)
                   {hasSales && attribute.lastSaleDate && (
                     <> &middot; Last sale {formatRelativeTime(attribute.lastSaleDate)}</>
@@ -323,7 +322,7 @@ function AttributeRow({
 
               {attribute.recentSales && attribute.recentSales.length > 0 ? (
                 <div>
-                  <p className="text-xs mb-2 flex items-center gap-1" style={{ color: 'var(--color-text-muted)' }}>
+                  <p className="text-xs mb-2 flex items-center gap-1 text-muted">
                     <Clock size={10} /> Recent Sales
                   </p>
                   <div className="flex gap-2 overflow-x-auto pb-1">
@@ -343,7 +342,7 @@ function AttributeRow({
                           loading="lazy"
                         />
                         <div className="p-1 text-center">
-                          <p className="text-[10px] font-mono" style={{ color: 'var(--color-primary)' }}>
+                          <p className="text-[10px] font-mono text-accent">
                             {sale.price.toFixed(1)}
                           </p>
                         </div>
@@ -352,7 +351,7 @@ function AttributeRow({
                   </div>
                 </div>
               ) : (
-                <p className="text-xs text-center py-2" style={{ color: 'var(--color-text-muted)' }}>
+                <p className="text-xs text-center py-2 text-muted">
                   No sales recorded
                 </p>
               )}
@@ -581,11 +580,10 @@ export function AttributesTab({
 
       {filteredAttributes.length === 0 && (
         <div
-          className="p-8 text-center rounded-xl mt-3"
+          className="p-8 text-center rounded-xl mt-3 text-muted"
           style={{
             background: 'rgba(255,255,255,0.02)',
             border: '1px solid rgba(255,255,255,0.06)',
-            color: 'var(--color-text-muted)',
           }}
         >
           No attributes found matching your filters

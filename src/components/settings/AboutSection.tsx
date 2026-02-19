@@ -55,11 +55,10 @@ export function AboutSection() {
     >
       {/* Section Header */}
       <div className="flex items-center gap-2">
-        <Info size={20} style={{ color: 'var(--color-primary)' }} />
+        <Info size={20} className="text-accent" />
         <h2
           id="about-section-heading"
-          className="text-lg font-bold"
-          style={{ color: 'var(--color-text)' }}
+          className="text-lg font-bold text-primary"
         >
           About Wojak.ink
         </h2>
@@ -76,8 +75,7 @@ export function AboutSection() {
         {/* Version */}
         <div className="flex items-center justify-center gap-2 mb-4">
           <span
-            className="text-sm font-medium"
-            style={{ color: 'var(--color-text)' }}
+            className="text-sm font-medium text-primary"
           >
             Version {APP_VERSION}
           </span>
@@ -92,22 +90,19 @@ export function AboutSection() {
           </span>
         </div>
         <p
-          className="text-xs mb-4"
-          style={{ color: 'var(--color-text-muted)' }}
+          className="text-xs mb-4 text-muted"
         >
           Build {APP_BUILD_DATE}
         </p>
 
         {/* Description */}
         <p
-          className="text-sm mb-2"
-          style={{ color: 'var(--color-text-secondary)' }}
+          className="text-sm mb-2 text-secondary"
         >
           🍊 4,200 Wojak Farmers Plot NFTs on Chia 🌱
         </p>
         <p
-          className="text-sm"
-          style={{ color: 'var(--color-text-muted)' }}
+          className="text-sm text-muted"
         >
           An Orange Labs production
         </p>
@@ -139,14 +134,12 @@ export function AboutSection() {
                 {link.icon}
               </span>
               <span
-                className="text-xs font-medium"
-                style={{ color: 'var(--color-text)' }}
+                className="text-xs font-medium text-primary"
               >
                 {link.name}
               </span>
               <span
-                className="text-xs flex items-center gap-1"
-                style={{ color: 'var(--color-text-muted)' }}
+                className="text-xs flex items-center gap-1 text-muted"
               >
                 {link.handle}
                 <ExternalLink size={10} />
@@ -163,8 +156,7 @@ export function AboutSection() {
 
         {/* Credits */}
         <p
-          className="text-xs"
-          style={{ color: 'var(--color-text-muted)' }}
+          className="text-xs text-muted"
         >
           2026 Wojak.ink. All rights reserved.
         </p>
@@ -174,10 +166,9 @@ export function AboutSection() {
           <button
             type="button"
             onClick={() => setShowAdminModal(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-colors text-secondary"
             style={{
               background: 'var(--color-border)',
-              color: 'var(--color-text-secondary)',
               border: '1px solid var(--color-border)',
             }}
           >
@@ -212,20 +203,18 @@ export function AboutSection() {
               style={{ borderBottom: '1px solid var(--color-border)' }}
             >
               <div className="flex items-center gap-2">
-                <Shield size={20} style={{ color: 'var(--color-primary)' }} />
+                <Shield size={20} className="text-accent" />
                 <h2
-                  className="text-lg font-semibold"
-                  style={{ color: 'var(--color-text)' }}
+                  className="text-lg font-semibold text-primary"
                 >
                   Admin Panel
                 </h2>
               </div>
               <button
                 type="button"
-                className="p-2 rounded-lg transition-colors"
+                className="p-2 rounded-lg transition-colors text-secondary"
                 style={{
                   background: 'var(--color-surface)',
-                  color: 'var(--color-text-secondary)',
                 }}
                 onClick={handleCloseAdmin}
               >
@@ -239,8 +228,7 @@ export function AboutSection() {
                 /* Password Entry */
                 <div className="space-y-4">
                   <p
-                    className="text-sm text-center"
-                    style={{ color: 'var(--color-text-secondary)' }}
+                    className="text-sm text-center text-secondary"
                   >
                     Enter admin password to continue
                   </p>
@@ -249,10 +237,9 @@ export function AboutSection() {
                     value={adminPassword}
                     onChange={(e) => setAdminPassword(e.target.value)}
                     placeholder="Password"
-                    className="w-full px-4 py-3 rounded-lg text-sm"
+                    className="w-full px-4 py-3 rounded-lg text-sm text-primary"
                     style={{
                       background: 'var(--color-surface)',
-                      color: 'var(--color-text)',
                       border: passwordError
                         ? '2px solid #ef4444'
                         : '1px solid var(--color-border)',
@@ -283,8 +270,7 @@ export function AboutSection() {
                 /* Admin Content */
                 <div className="space-y-6">
                   <p
-                    className="text-sm text-center"
-                    style={{ color: 'var(--color-text-secondary)' }}
+                    className="text-sm text-center text-secondary"
                   >
                     Welcome to the Admin Panel
                   </p>
@@ -298,8 +284,7 @@ export function AboutSection() {
                     }}
                   >
                     <p
-                      className="text-xs"
-                      style={{ color: 'var(--color-text-muted)' }}
+                      className="text-xs text-muted"
                     >
                       Developer Tools
                     </p>

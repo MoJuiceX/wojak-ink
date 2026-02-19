@@ -91,10 +91,9 @@ export function StatsPanel() {
         className="px-4 py-3 flex items-center gap-2"
         style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)' }}
       >
-        <BarChart3 size={18} style={{ color: 'var(--color-primary)' }} />
+        <BarChart3 size={18} className="text-accent" />
         <h3
-          className="text-sm font-semibold"
-          style={{ color: 'var(--color-text)' }}
+          className="text-sm font-semibold text-primary"
         >
           Your High Scores
         </h3>
@@ -116,12 +115,10 @@ export function StatsPanel() {
           <div className="text-center py-8">
             <Gamepad2
               size={32}
-              className="mx-auto mb-2 opacity-30"
-              style={{ color: 'var(--color-text-muted)' }}
+              className="mx-auto mb-2 opacity-30 text-muted"
             />
             <p
-              className="text-sm"
-              style={{ color: 'var(--color-text-muted)' }}
+              className="text-sm text-muted"
             >
               Sign in to track scores
             </p>
@@ -130,18 +127,15 @@ export function StatsPanel() {
           <div className="text-center py-8">
             <Gamepad2
               size={32}
-              className="mx-auto mb-2 opacity-30"
-              style={{ color: 'var(--color-text-muted)' }}
+              className="mx-auto mb-2 opacity-30 text-muted"
             />
             <p
-              className="text-sm"
-              style={{ color: 'var(--color-text-muted)' }}
+              className="text-sm text-muted"
             >
               No scores yet
             </p>
             <p
-              className="text-xs mt-1"
-              style={{ color: 'var(--color-text-muted)' }}
+              className="text-xs mt-1 text-muted"
             >
               Play games to see your high scores!
             </p>
@@ -166,8 +160,7 @@ export function StatsPanel() {
                   {/* Game info */}
                   <div className="flex-1 min-w-0">
                     <p
-                      className="text-xs font-medium truncate"
-                      style={{ color: 'var(--color-text)' }}
+                      className="text-xs font-medium truncate text-primary"
                     >
                       {game.gameName}
                     </p>
@@ -175,8 +168,7 @@ export function StatsPanel() {
                       <div className="flex items-center gap-1 mt-0.5">
                         <Trophy size={10} style={{ color: '#ffd700' }} />
                         <span
-                          className="text-[10px]"
-                          style={{ color: 'var(--color-text-muted)' }}
+                          className="text-[10px] text-muted"
                         >
                           Rank #{game.rank}
                         </span>
@@ -186,8 +178,7 @@ export function StatsPanel() {
 
                   {/* Score */}
                   <span
-                    className="text-sm font-bold cursor-help"
-                    style={{ color: 'var(--color-primary)' }}
+                    className="text-sm font-bold cursor-help text-accent"
                     title={game.nextRank ? `Beat ${game.nextRank.displayName} (${game.nextRank.score.toLocaleString()}) - need ${game.nextRank.pointsNeeded.toLocaleString()} more points` : 'You are #1!'}
                   >
                     {game.highScore.toLocaleString()}
@@ -210,19 +201,17 @@ export function StatsPanel() {
                     <div className="flex items-center gap-2 mb-1">
                       <TrendingUp size={12} style={{ color: '#22c55e' }} />
                       <span
-                        className="text-[10px] font-medium"
-                        style={{ color: 'var(--color-text)' }}
+                        className="text-[10px] font-medium text-primary"
                       >
                         To reach #{game.nextRank.rank}:
                       </span>
                     </div>
                     <div
-                      className="text-[10px]"
-                      style={{ color: 'var(--color-text-secondary)' }}
+                      className="text-[10px] text-secondary"
                     >
                       <span className="font-semibold">{game.nextRank.displayName}</span>
                       <span className="mx-1">has</span>
-                      <span className="font-semibold" style={{ color: 'var(--color-primary)' }}>
+                      <span className="font-semibold text-accent">
                         {game.nextRank.score.toLocaleString()}
                       </span>
                     </div>
@@ -265,8 +254,7 @@ export function StatsPanel() {
               }}
             >
               <p
-                className="text-[10px] uppercase tracking-wide mb-1"
-                style={{ color: 'var(--color-text-muted)' }}
+                className="text-[10px] uppercase tracking-wide mb-1 text-muted"
               >
                 Games Played: {gameScores.length} / 15
               </p>
