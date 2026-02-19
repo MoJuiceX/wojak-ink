@@ -40,9 +40,9 @@ export const UI_ORDER: UILayerName[] = [
   'MouthBase',
   'MouthItem',
   'FacialHair',
+  'Mask',
   'Head',
   'Eyes',
-  'Mask',
   'Clothes',
   'Background',
 ];

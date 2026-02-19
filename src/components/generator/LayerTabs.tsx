@@ -34,11 +34,14 @@ const LAYER_ICONS: Record<string, LucideIcon> = {
   Mask: Scan,
 };
 
+import { isSelectionPathEmpty } from '@/types/generator';
+
 interface LayerTabProps {
   layer: UILayerName;
   isActive: boolean;
   isBlocked: boolean;
   blockedReason?: string | null;
+  hasSelection?: boolean;
   onClick: () => void;
 }
 
@@ -47,6 +50,7 @@ function LayerTab({
   isActive,
   isBlocked,
   blockedReason,
+  hasSelection,
   onClick,
 }: LayerTabProps) {
   const prefersReducedMotion = useReducedMotion();
@@ -62,7 +66,9 @@ function LayerTab({
           ? 'white'
           : isBlocked
             ? 'var(--color-text-muted)'
-            : 'var(--color-text-secondary)',
+            : hasSelection
+              ? 'rgba(255, 255, 255, 0.9)'
+              : 'var(--color-text-secondary)',
         opacity: isBlocked ? 0.5 : 1,
         filter: isBlocked ? 'grayscale(1)' : 'none',
         transition: 'all 0.3s ease',
@@ -113,6 +119,7 @@ export function LayerTabs({ className = '' }: LayerTabsProps) {
     setActiveLayer,
     isLayerDisabled,
     getDisabledReason,
+    selectedLayers,
   } = useGenerator();
 
   // Filter out hidden tabs
@@ -130,16 +137,24 @@ export function LayerTabs({ className = '' }: LayerTabsProps) {
       role="tablist"
       aria-label="Layer selection tabs"
     >
-      {visibleLayers.map((layer) => (
-        <LayerTab
-          key={layer}
-          layer={layer}
-          isActive={activeLayer === layer || (layer === 'MouthBase' && (activeLayer === 'MouthItem' || activeLayer === 'FacialHair'))}
-          isBlocked={isLayerDisabled(layer)}
-          blockedReason={getDisabledReason(layer)}
-          onClick={() => setActiveLayer(layer)}
-        />
-      ))}
+      {visibleLayers.map((layer) => {
+        // Check if this tab (or any hidden sub-tab) has a selection
+        const layerHasSelection = !isSelectionPathEmpty(selectedLayers[layer]);
+        const mouthSubHasSelection = layer === 'MouthBase'
+          ? (!isSelectionPathEmpty(selectedLayers['MouthItem']) || !isSelectionPathEmpty(selectedLayers['FacialHair']))
+          : false;
+        return (
+          <LayerTab
+            key={layer}
+            layer={layer}
+            isActive={activeLayer === layer || (layer === 'MouthBase' && (activeLayer === 'MouthItem' || activeLayer === 'FacialHair'))}
+            isBlocked={isLayerDisabled(layer)}
+            blockedReason={getDisabledReason(layer)}
+            hasSelection={layerHasSelection || mouthSubHasSelection}
+            onClick={() => setActiveLayer(layer)}
+          />
+        );
+      })}
     </div>
   );
 }
