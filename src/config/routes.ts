@@ -22,6 +22,7 @@ import {
   Gamepad2,
   Menu,
   MessageCircle,
+  Swords,
   type LucideIcon
 } from 'lucide-react';
 
@@ -104,6 +105,17 @@ export const PRIMARY_NAV_ITEMS: NavItem[] = [
       { id: 'swipe-battles', path: '/swipe/battles', label: 'Battles', icon: Heart },
       { id: 'swipe-leaderboard', path: '/swipe/leaderboard', label: 'Leaderboard', icon: Heart },
       { id: 'swipe-activity', path: '/swipe/activity', label: 'Activity', icon: Heart },
+    ]
+  },
+  {
+    id: 'arena',
+    path: '/arena',
+    label: 'Arena',
+    shortLabel: 'Arena',
+    icon: Swords,
+    badge: 'dot',
+    children: [
+      { id: 'arena-leaderboard', path: '/arena/leaderboard', label: 'Leaderboard', icon: Swords },
     ]
   },
   {
