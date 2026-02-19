@@ -362,6 +362,15 @@ function GalleryContent() {
       {/* SEO H1 - visually hidden but accessible */}
       <h1 className="sr-only">Wojak Farmers Plot NFT Gallery - Browse 4,200 Unique NFTs</h1>
 
+      {/* Collection Banner */}
+      <div className="gallery-banner">
+        <img
+          src="/images/gallery-banner.webp"
+          alt="Wojak Farmers Plot Collection"
+          loading="eager"
+        />
+      </div>
+
       {/* Animated gradient background */}
       <div className="gallery-page-background" />
 
@@ -504,8 +513,15 @@ function GalleryContent() {
           </AnimatePresence>
         </div>
 
-        {/* Your Wojak Fighters Collection */}
+        {/* Your Wojak Collection */}
         <div className="mt-8">
+          <div className="gallery-banner">
+            <img
+              src="/images/your-wojak-banner.webp"
+              alt="Your Wojak Collection"
+              loading="lazy"
+            />
+          </div>
           <YourWojakSection />
         </div>
 

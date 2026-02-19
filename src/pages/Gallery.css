@@ -2,6 +2,21 @@
    GALLERY PAGE - Premium Cyberpunk Design
    ============================================ */
 
+/* Collection Banner */
+.gallery-banner {
+  width: 100%;
+  margin-bottom: 16px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.gallery-banner img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
 /* Subtle gradient background for gallery page */
 .gallery-page-background {
   position: fixed;
