@@ -16,7 +16,7 @@
   padding: 24px 20px;
   background: linear-gradient(
     180deg,
-    rgba(255, 140, 50, 0.08) 0%,
+    var(--color-primary-8) 0%,
     transparent 100%
   );
   position: relative;
@@ -31,7 +31,7 @@
   transform: translateX(-50%);
   width: 200px;
   height: 200px;
-  background: radial-gradient(circle, rgba(249, 115, 22, 0.1), transparent 70%);
+  background: radial-gradient(circle, var(--color-primary-10), transparent 70%);
   pointer-events: none;
 }
 
@@ -115,9 +115,9 @@
 }
 
 .category-tabs ion-segment-button {
-  --color: rgba(255, 255, 255, 0.6);
+  --color: var(--color-white-60);
   --color-checked: #fff;
-  --indicator-color: rgba(255, 140, 50, 0.8);
+  --indicator-color: var(--color-primary-80);
   min-width: 80px;
   --padding-top: 8px;
   --padding-bottom: 8px;
@@ -167,11 +167,11 @@
 }
 
 .shop-item-card.rarity-legendary {
-  border-color: rgba(255, 215, 0, 0.3);
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), transparent);
+  border-color: var(--color-gold-30);
+  background: linear-gradient(135deg, var(--color-gold-10), transparent);
 }
 .shop-item-card.rarity-legendary:hover {
-  box-shadow: 0 0 40px rgba(255, 215, 0, 0.4);
+  box-shadow: 0 0 40px var(--color-gold-40);
 }
 
 .shop-item-card:hover {
@@ -218,32 +218,32 @@
 }
 
 @keyframes premiumPulse {
-  0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
-  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+  0%, 100% { box-shadow: 0 0 10px var(--color-gold-50); }
+  50% { box-shadow: 0 0 20px var(--color-gold-80); }
 }
 
 /* Tier-based card glows */
 .shop-item-card.tier-basic {
-  border-color: rgba(34, 197, 94, 0.3);
+  border-color: var(--color-success-30);
 }
 .shop-item-card.tier-basic:hover {
-  box-shadow: 0 0 30px rgba(34, 197, 94, 0.3);
+  box-shadow: 0 0 30px var(--color-success-30);
 }
 
 .shop-item-card.tier-premium {
-  border-color: rgba(255, 215, 0, 0.3);
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), transparent);
+  border-color: var(--color-gold-30);
+  background: linear-gradient(135deg, var(--color-gold-10), transparent);
 }
 .shop-item-card.tier-premium:hover {
-  box-shadow: 0 0 40px rgba(255, 215, 0, 0.4);
+  box-shadow: 0 0 40px var(--color-gold-40);
 }
 
 /* Limited edition card styling */
 .shop-item-card.limited {
-  border-color: rgba(239, 68, 68, 0.4);
+  border-color: var(--color-error-40);
 }
 .shop-item-card.limited:hover {
-  box-shadow: 0 0 30px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 0 30px var(--color-error-40);
 }
 
 /* Legacy rarity badges (for backwards compatibility) */
@@ -281,8 +281,8 @@
 }
 
 @keyframes legendaryPulse {
-  0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
-  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+  0%, 100% { box-shadow: 0 0 10px var(--color-gold-50); }
+  50% { box-shadow: 0 0 20px var(--color-gold-80); }
 }
 
 .limited-badge {
@@ -530,10 +530,10 @@
 }
 
 .shop-item-card.rarity-uncommon {
-  border-color: rgba(34, 197, 94, 0.3);
+  border-color: var(--color-success-30);
 }
 .shop-item-card.rarity-uncommon:hover {
-  box-shadow: 0 0 30px rgba(34, 197, 94, 0.3);
+  box-shadow: 0 0 30px var(--color-success-30);
 }
 
 /* Item Info Button Position */
@@ -676,7 +676,7 @@
 /* Sign in button state */
 .buy-button.signin-required {
   background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-white-60);
   border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
@@ -1182,7 +1182,7 @@
 
   /* Tier-based card styling */
   .mobile-card-frame.tier-basic {
-    border-color: rgba(34, 197, 94, 0.3);
+    border-color: var(--color-success-30);
     box-shadow: 
       0 20px 60px rgba(0, 0, 0, 0.4),
       0 0 40px rgba(34, 197, 94, 0.1),
@@ -1374,7 +1374,7 @@
   .carousel-btn.equip {
     background: linear-gradient(135deg, #22c55e, #16a34a);
     color: #fff;
-    box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3);
+    box-shadow: 0 8px 24px var(--color-success-30);
   }
 
   .carousel-btn.equip.unequip {

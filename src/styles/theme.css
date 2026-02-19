@@ -72,6 +72,7 @@
 
   /* Rgba alpha tokens — replaces repeated inline rgba() values */
   --color-primary-5: rgba(249, 115, 22, 0.05);
+  --color-primary-8: rgba(249, 115, 22, 0.08);
   --color-primary-10: rgba(249, 115, 22, 0.1);
   --color-primary-15: rgba(249, 115, 22, 0.15);
   --color-primary-20: rgba(249, 115, 22, 0.2);
@@ -103,8 +104,11 @@
   --color-gold-10: rgba(255, 215, 0, 0.1);
   --color-gold-15: rgba(255, 215, 0, 0.15);
   --color-gold-20: rgba(255, 215, 0, 0.2);
+  --color-gold-30: rgba(255, 215, 0, 0.3);
   --color-gold-40: rgba(255, 215, 0, 0.4);
+  --color-gold-50: rgba(255, 215, 0, 0.5);
   --color-gold-70: rgba(255, 215, 0, 0.7);
+  --color-gold-80: rgba(255, 215, 0, 0.8);
   --color-white-2: rgba(255, 255, 255, 0.02);
   --color-white-3: rgba(255, 255, 255, 0.03);
   --color-white-4: rgba(255, 255, 255, 0.04);
