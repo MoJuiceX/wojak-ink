@@ -196,7 +196,7 @@ export function CreateGuildModal({
                       fontSize: '9px',
                       fontWeight: 600,
                       lineHeight: 1,
-                      color: isPublic ? 'rgba(255,255,255,0.9)' : 'var(--color-white-40)',
+                      color: isPublic ? 'var(--color-text)' : 'var(--color-white-40)',
                       left: isPublic ? '6px' : undefined,
                       right: isPublic ? undefined : '6px',
                       userSelect: 'none',

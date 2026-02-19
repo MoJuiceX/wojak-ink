@@ -126,7 +126,7 @@ export function GuildPage() {
                       y: [0, -10, 0],
                       filter: [
                         'drop-shadow(0 0 20px var(--color-primary-30))',
-                        'drop-shadow(0 0 40px rgba(249, 115, 22, 0.5))',
+                        'drop-shadow(0 0 40px var(--color-primary-50))',
                         'drop-shadow(0 0 20px var(--color-primary-30))',
                       ],
                     }
@@ -149,7 +149,7 @@ export function GuildPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
             style={{
-              background: 'linear-gradient(135deg, var(--color-primary-15), rgba(249, 115, 22, 0.05))',
+              background: 'linear-gradient(135deg, var(--color-primary-15), var(--color-primary-10))',
               border: '1px solid var(--color-primary-30)',
               borderRadius: 16,
               padding: '24px 32px',
@@ -161,7 +161,7 @@ export function GuildPage() {
             <span style={{ fontSize: '2rem', display: 'block', marginBottom: 12 }}>
               🚧
             </span>
-            <p style={{ color: 'rgba(255, 255, 255, 0.8)', margin: 0, lineHeight: 1.6 }}>
+            <p className="text-secondary" style={{ margin: 0, lineHeight: 1.6 }}>
               We're building something epic! Guild features will be available soon.
               Stay tuned for updates.
             </p>

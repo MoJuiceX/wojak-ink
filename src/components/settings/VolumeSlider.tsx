@@ -96,7 +96,7 @@ export function VolumeSlider({
               fontSize: '9px',
               fontWeight: 600,
               lineHeight: 1,
-              color: enabled ? 'rgba(255,255,255,0.9)' : 'var(--color-white-40)',
+              color: enabled ? 'var(--color-text)' : 'var(--color-white-40)',
               left: enabled ? '6px' : undefined,
               right: enabled ? undefined : '6px',
               userSelect: 'none',
