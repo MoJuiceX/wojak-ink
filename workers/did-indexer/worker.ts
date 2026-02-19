@@ -161,7 +161,63 @@ async function run(env: Env) {
   }
 }
 
+// Sync DID profile name from chain — only overrides 'random' names
+async function syncDIDProfileName(env: Env, did: string): Promise<void> {
+  try {
+    // Check current name source — only update if 'random' (user hasn't customized)
+    const profile = await env.DB.prepare(
+      'SELECT name_source FROM did_profiles WHERE did_id = ?'
+    ).bind(did).first<{ name_source: string | null }>();
+
+    // If name_source is 'custom', user has set their own name — don't override
+    if (profile?.name_source === 'custom') {
+      return;
+    }
+
+    // Fetch DID profile from MintGarden
+    const url = `https://api.mintgarden.io/profiles/${encodeURIComponent(did)}`;
+    const response = await fetch(url, {
+      headers: { 'Accept': 'application/json' },
+    });
+
+    if (!response.ok) {
+      // DID profile not found or API error — skip silently
+      return;
+    }
+
+    const data = await response.json() as {
+      name?: string;
+      twitter_handle?: string;
+    };
+
+    // If DID has a name on chain, use it
+    const chainName = data.name?.trim();
+    if (chainName && chainName.length >= 2 && chainName.length <= 20) {
+      // Validate: alphanumeric + spaces only
+      if (/^[a-zA-Z0-9 ]+$/.test(chainName)) {
+        await env.DB.prepare(`
+          INSERT INTO did_profiles (did_id, display_name, name_source, created_at, updated_at)
+          VALUES (?, ?, 'chain', datetime('now'), datetime('now'))
+          ON CONFLICT(did_id) DO UPDATE SET
+            display_name = CASE WHEN name_source = 'random' OR name_source IS NULL THEN ? ELSE display_name END,
+            name_source = CASE WHEN name_source = 'random' OR name_source IS NULL THEN 'chain' ELSE name_source END,
+            updated_at = datetime('now')
+        `).bind(did, chainName, chainName).run();
+
+        console.log(`[DID Indexer] Updated DID ${did.slice(0, 20)}... name from chain: ${chainName}`);
+      }
+    }
+  } catch (err) {
+    // Non-critical — log and continue
+    console.warn(`[DID Indexer] Failed to sync profile name for DID ${did.slice(0, 20)}...:`, err);
+  }
+}
+
 async function syncDIDHoldings(env: Env, did: string): Promise<'changed' | 'unchanged' | 'skipped'> {
+  // Sync DID profile name from chain (if user hasn't customized)
+  await syncDIDProfileName(env, did);
+  await sleep(RATE_LIMIT_MS);
+
   // Fetch Phase 2 NFTs from MintGarden
   const phase2Result = await fetchDIDNfts(did, PHASE2_COLLECTION);
   await sleep(RATE_LIMIT_MS);
