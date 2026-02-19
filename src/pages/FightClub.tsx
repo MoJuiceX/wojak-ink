@@ -304,38 +304,29 @@ export default function FightClub() {
           minHeight: '100%',
         }}
       >
-        {/* Minimal Title Bar */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Swords size={20} className="text-primary" />
-            <h1 className="text-lg font-bold">Fight Club</h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              className="btn btn-ghost text-xs flex items-center gap-1"
-              style={{ padding: '6px 10px', minWidth: 'auto' }}
-              onClick={() => setGuideOpen(true)}
-            >
-              <Info size={14} />
-              Guide
-            </button>
-            {playerDid && <RefreshButton did={playerDid} />}
-          </div>
-        </div>
-
         {/* Tab Bar */}
-        <div className="fight-club-tabs">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              className={`fight-club-tab ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => handleTabClick(tab)}
-            >
-              {tab.label}
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          <div className="fight-club-tabs flex-1">
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                className={`fight-club-tab ${activeTab === tab.id ? 'active' : ''}`}
+                onClick={() => handleTabClick(tab)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            className="btn btn-ghost text-xs flex items-center gap-1"
+            style={{ padding: '6px 10px', minWidth: 'auto' }}
+            onClick={() => setGuideOpen(true)}
+          >
+            <Info size={14} />
+          </button>
+          {playerDid && <RefreshButton did={playerDid} />}
         </div>
 
         {/* Subscription Banner */}
