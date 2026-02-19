@@ -335,10 +335,30 @@ function AbilitiesSection() {
   );
 }
 
+// How Battles Work Section - explains battle mechanics
 function HowBattlesWorkSection() {
   return (
     <CollapsibleSection title="How Battles Work" icon={<Swords size={18} />}>
-      <p className="text-secondary text-sm">Coming soon...</p>
+      <div className="flex flex-col gap-3 text-sm text-secondary">
+        <p>
+          <strong className="text-primary">Turn-Based Combat</strong> — Each turn, both fighters pick a move. Moves resolve based on speed stat.
+        </p>
+        <p>
+          <strong className="text-primary">4 Moves</strong> — Each Wojak has 3 attack moves and 1 skill move (heal, buff, debuff, status effect).
+        </p>
+        <p>
+          <strong className="text-primary">Type Matchups</strong> — Super effective moves deal 2× damage. Not very effective moves deal ½ damage.
+        </p>
+        <p>
+          <strong className="text-primary">Status Effects</strong> — Burns halve attack, paralysis may skip turns, sleep prevents action, poison deals chip damage.
+        </p>
+        <p>
+          <strong className="text-primary">Critical Hits</strong> — Random 1.25× damage multiplier. Some moves have higher crit rates.
+        </p>
+        <p>
+          <strong className="text-primary">Winner</strong> — First fighter to reach 0 HP loses. Winner gains XP, ELO, and Power.
+        </p>
+      </div>
     </CollapsibleSection>
   );
 }
