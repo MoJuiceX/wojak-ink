@@ -96,13 +96,28 @@ export function GiftModal({
         });
         if (res.ok) {
           const data = await res.json();
-          // Filter to only owned items (not equipped, not consumables)
-          const giftable = (data.items || []).filter(
-            (item: { state: string; category: string }) =>
-              item.state === 'owned' &&
-              item.category !== 'consumable'
-          );
-          setGiftableItems(giftable);
+          // API returns { categories: { [category]: items[] }, ... }
+          // Flatten all categories into a single array and filter to giftable items
+          const allItems: GiftItem[] = [];
+          if (data.categories) {
+            for (const category of Object.keys(data.categories)) {
+              // Skip consumables - they can't be gifted
+              if (category === 'consumable') continue;
+              for (const item of data.categories[category]) {
+                // Only include owned items (not equipped)
+                if (item.state === 'owned') {
+                  allItems.push({
+                    id: item.item_id,
+                    name: item.name,
+                    category: item.category,
+                    tier: item.tier,
+                    emoji: item.emoji,
+                  });
+                }
+              }
+            }
+          }
+          setGiftableItems(allItems);
         }
       } catch (err) {
         console.error('[GiftModal] Failed to fetch items:', err);
