@@ -118,7 +118,7 @@ export function BigPulp({
         <div
           className={`bigpulp-body ${config.body} rounded-full bg-gradient-to-br from-orange-400 to-orange-600 shadow-lg relative flex items-center justify-center mx-auto`}
           style={{
-            boxShadow: '0 4px 20px rgba(234, 88, 12, 0.4), inset 0 -4px 10px rgba(0, 0, 0, 0.2)',
+            boxShadow: '0 4px 20px var(--color-primary-40), inset 0 -4px 10px var(--color-black-20)',
           }}
         >
           {/* Glasses */}

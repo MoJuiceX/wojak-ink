@@ -435,7 +435,7 @@ export function GlobalVideoPlayer() {
                   : 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
                 boxShadow: isPlaying
                   ? '0 0 20px rgba(255, 68, 68, 0.5), 0 4px 20px rgba(0,0,0,0.4)'
-                  : '0 0 20px rgba(249, 115, 22, 0.5), 0 4px 20px rgba(0,0,0,0.4)',
+                  : '0 0 20px var(--color-primary-50), 0 4px 20px var(--color-black-40)',
               }}
             >
               {isPlaying ? (

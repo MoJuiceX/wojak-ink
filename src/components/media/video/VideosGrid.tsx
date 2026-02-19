@@ -86,7 +86,7 @@ export function VideosGrid({
           size={24}
           style={{
             color: '#F97316',
-            filter: 'drop-shadow(0 0 10px rgba(249, 115, 22, 0.5))',
+            filter: 'drop-shadow(0 0 10px var(--color-primary-50))',
           }}
         />
         <h2
@@ -167,7 +167,7 @@ export function VideosGrid({
             <Film
               size={48}
               className="mx-auto"
-              style={{ color: 'rgba(249, 115, 22, 0.5)' }}
+              style={{ color: 'var(--color-primary-50)' }}
             />
           </motion.div>
           <h3

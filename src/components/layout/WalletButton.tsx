@@ -66,7 +66,7 @@ export function WalletButton({ className = '', size = 'md' }: WalletButtonProps)
           cursor: 'pointer',
         }}
         whileHover={{
-          boxShadow: '0 0 20px rgba(249, 115, 22, 0.5), 0 10px 30px var(--color-primary-30)',
+          boxShadow: '0 0 20px var(--color-primary-50), 0 10px 30px var(--color-primary-30)',
           y: -2,
         }}
         whileTap={{ scale: 0.98 }}

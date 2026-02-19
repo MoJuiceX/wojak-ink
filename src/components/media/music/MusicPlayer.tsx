@@ -89,7 +89,7 @@ export function MusicPlayer({ tracks }: MusicPlayerProps) {
           size={24}
           style={{
             color: '#F97316',
-            filter: 'drop-shadow(0 0 10px rgba(249, 115, 22, 0.5))',
+            filter: 'drop-shadow(0 0 10px var(--color-primary-50))',
           }}
         />
         <h2
@@ -195,7 +195,7 @@ export function MusicPlayer({ tracks }: MusicPlayerProps) {
           animate={{
             boxShadow: isPlaying
               ? '0 0 20px rgba(239, 68, 68, 0.5)'
-              : '0 0 20px rgba(249, 115, 22, 0.5)',
+              : '0 0 20px var(--color-primary-50)',
           }}
           aria-label={isPlaying ? 'Pause music' : 'Play music'}
         >
