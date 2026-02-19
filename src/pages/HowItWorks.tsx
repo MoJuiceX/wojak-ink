@@ -11,6 +11,29 @@ import { PageTransition } from '@/components/layout/PageTransition';
 import { useLayout } from '@/hooks/useLayout';
 import { COMBAT_TYPES, type CombatType } from '@/lib/combat/types';
 import { TYPE_COLORS, DARK_TEXT_TYPES } from '@/lib/combat/data/type-colors';
+import { TYPE_CHART } from '@/lib/combat/data/type-chart';
+
+// Abbreviated type names for the chart (3-4 chars)
+const TYPE_ABBREV: Record<CombatType, string> = {
+  NEUTRAL: 'NOR',
+  FIRE: 'FIR',
+  WATER: 'WAT',
+  ELECTRIC: 'ELE',
+  GRASS: 'GRS',
+  ICE: 'ICE',
+  MARTIAL: 'MAR',
+  VENOM: 'VEN',
+  EARTH: 'ERT',
+  AIR: 'AIR',
+  PSYCHE: 'PSY',
+  INSECT: 'INS',
+  STONE: 'STN',
+  GHOST: 'GHO',
+  DRAGON: 'DRG',
+  SHADOW: 'SHD',
+  METAL: 'MTL',
+  MYSTIC: 'MYS',
+};
 
 // Type descriptions for the combat types section
 const TYPE_DESCRIPTIONS: Record<CombatType, string> = {
@@ -100,10 +123,92 @@ function CombatTypesSection() {
   );
 }
 
+// Get cell styling based on effectiveness multiplier
+function getEffectivenessStyle(value: number): { bg: string; text: string; display: string } {
+  if (value === 0) return { bg: '#1a1a1a', text: '#666', display: '✕' };
+  if (value === 0.25) return { bg: '#4a1515', text: '#ff6b6b', display: '¼' };
+  if (value === 0.5) return { bg: '#3d2020', text: '#ff8888', display: '½' };
+  if (value === 2) return { bg: '#1a3d1a', text: '#4ade80', display: '2×' };
+  return { bg: 'transparent', text: '#666', display: '' }; // 1.0 = neutral
+}
+
+// Type Matchup Chart - 18x18 grid showing effectiveness
 function TypeMatchupSection() {
   return (
     <CollapsibleSection title="Type Matchups" icon={<Swords size={18} />}>
-      <p className="text-secondary text-sm">Coming soon...</p>
+      <p className="text-secondary text-sm mb-4">
+        Type matchups determine damage multipliers in battle.
+        Green = super effective (2×), red = not very effective (0.5×), black = immune (0×).
+      </p>
+
+      {/* Scrollable type chart table */}
+      <div className="overflow-x-auto" style={{ maxWidth: '100%' }}>
+        <table style={{ borderCollapse: 'collapse', fontSize: '10px' }}>
+          <thead>
+            <tr>
+              <th style={{ padding: '4px', textAlign: 'left', position: 'sticky', left: 0, background: 'var(--color-surface)', zIndex: 1 }}>
+                <span className="text-muted">ATK↓ DEF→</span>
+              </th>
+              {COMBAT_TYPES.map((defType) => (
+                <th
+                  key={defType}
+                  style={{
+                    padding: '4px 2px',
+                    textAlign: 'center',
+                    color: TYPE_COLORS[defType],
+                    fontWeight: 600,
+                    minWidth: '28px',
+                  }}
+                >
+                  {TYPE_ABBREV[defType]}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {COMBAT_TYPES.map((atkType) => (
+              <tr key={atkType}>
+                <td
+                  style={{
+                    padding: '4px 6px',
+                    fontWeight: 600,
+                    color: TYPE_COLORS[atkType],
+                    position: 'sticky',
+                    left: 0,
+                    background: 'var(--color-surface)',
+                    zIndex: 1,
+                  }}
+                >
+                  {TYPE_ABBREV[atkType]}
+                </td>
+                {COMBAT_TYPES.map((defType) => {
+                  const value = TYPE_CHART[atkType][defType];
+                  const style = getEffectivenessStyle(value);
+                  return (
+                    <td
+                      key={defType}
+                      style={{
+                        padding: '3px',
+                        textAlign: 'center',
+                        background: style.bg,
+                        color: style.text,
+                        fontWeight: value !== 1 ? 600 : 400,
+                        minWidth: '28px',
+                      }}
+                    >
+                      {style.display}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <p className="text-xs text-muted mt-2">
+        Scroll horizontally to see all matchups. Attacker is on the left, defender on top.
+      </p>
     </CollapsibleSection>
   );
 }
