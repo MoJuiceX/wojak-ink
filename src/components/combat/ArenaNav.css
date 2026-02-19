@@ -1,0 +1,44 @@
+/* ArenaNav — sticky tab bar for the Arena section */
+
+.arena-nav {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--color-bg);
+}
+
+.arena-nav-link {
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  border-bottom: 2px solid transparent;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: color 150ms, border-color 150ms;
+}
+
+.arena-nav-link--active {
+  color: var(--color-text);
+  border-bottom-color: var(--color-primary);
+}
+
+.arena-nav-link--swipe {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.arena-nav-divider {
+  width: 1px;
+  background: var(--color-border);
+  margin: 8px 4px;
+  flex-shrink: 0;
+}
