@@ -11,21 +11,23 @@ import { PageTransition } from '@/components/layout/PageTransition';
 import { QueuePanel } from '@/components/combat/QueuePanel';
 import { useSageWallet } from '@/sage-wallet';
 import { ArenaNav } from '@/components/combat/ArenaNav';
+import type { CombatType } from '@/lib/combat/types';
 
 interface FighterSummary {
   nft_id: string;
   edition: number;
-  type: string;
+  type: CombatType;
   nature: string;
   ability: string;
   level: number;
   elo: number;
+  imageUrl?: string;
 }
 
 export default function CombatArena() {
   const { status, getDIDs } = useSageWallet();
   const [fighters, setFighters] = useState<FighterSummary[]>([]);
-  const [queueStatus, setQueueStatus] = useState<any>(null);
+  const [queueStatus, setQueueStatus] = useState<{ status: string; position?: number; battleId?: number; opponent?: { nftId: string; elo: number } } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeBattleId, setActiveBattleId] = useState<number | null>(null);
   const [ownerDid, setOwnerDid] = useState<string>('');
@@ -119,7 +121,7 @@ export default function CombatArena() {
         {status === 'connected' && (
           <div className="w-full">
             <QueuePanel
-              fighters={fighters as any}
+              fighters={fighters}
               onQueue={handleQueue}
               onLeaveQueue={handleLeaveQueue}
               queueStatus={queueStatus}

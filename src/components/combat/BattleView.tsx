@@ -20,6 +20,12 @@ interface FighterDisplay {
   imageUrl?: string;
 }
 
+interface TurnData {
+  turn: number;
+  events?: { type: string; message?: string; damage?: number; effectiveness?: string; isCrit?: boolean }[];
+  end_of_turn?: { fighter_a_hp: number; fighter_b_hp: number };
+}
+
 interface BattleData {
   id: number;
   status: string;
@@ -28,7 +34,7 @@ interface BattleData {
   winner: string | null;
   fighterA: FighterDisplay | null;
   fighterB: FighterDisplay | null;
-  turns: any[];
+  turns: TurnData[];
   eloChangeA?: number;
   eloChangeB?: number;
   xpAwardedA?: number;
