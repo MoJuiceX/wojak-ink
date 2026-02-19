@@ -59,6 +59,13 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     try {
       const body = await request.json() as { friendId: string };
 
+      if (!body.friendId || typeof body.friendId !== 'string') {
+        return new Response(JSON.stringify({ error: 'friendId is required' }), {
+          status: 400,
+          headers: corsHeaders,
+        });
+      }
+
       await env.DB.prepare(
         'INSERT OR IGNORE INTO friends (user_id, friend_id, created_at) VALUES (?, ?, ?)'
       ).bind(userId, body.friendId, new Date().toISOString()).run();
