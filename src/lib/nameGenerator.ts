@@ -62,3 +62,40 @@ export function formatFullName(editionNumber: number, customName?: string): stri
   }
   return `Your Wojak #${editionNumber}`;
 }
+
+// DID Display Name Generator — generates names like "BasedHolder42"
+const DID_ADJECTIVES = [
+  'Based', 'Degen', 'Chad', 'Sigma', 'Alpha', 'Mega', 'Ultra', 'Epic',
+  'Turbo', 'Hyper', 'Cosmic', 'Atomic', 'Blazing', 'Frozen', 'Shadow',
+  'Golden', 'Diamond', 'Crystal', 'Iron', 'Toxic', 'Neon', 'Stealth',
+  'Savage', 'Noble', 'Mystic', 'Rogue', 'Swift', 'Mighty', 'Dark', 'Bright',
+];
+
+const DID_NOUNS = [
+  'Wojak', 'Farmer', 'Holder', 'Trader', 'Degen', 'Ape', 'Bull', 'Bear',
+  'Whale', 'Shark', 'Wolf', 'Lion', 'Eagle', 'Dragon', 'Knight', 'King',
+  'Chief', 'Boss', 'Legend', 'Champion', 'Wizard', 'Ninja', 'Samurai',
+  'Viking', 'Spartan', 'Titan', 'Phoenix', 'Ranger', 'Hunter', 'Pilot',
+];
+
+export function generateDIDName(): string {
+  const adj = DID_ADJECTIVES[Math.floor(Math.random() * DID_ADJECTIVES.length)];
+  const noun = DID_NOUNS[Math.floor(Math.random() * DID_NOUNS.length)];
+  const num = Math.floor(Math.random() * 99) + 1;
+  return `${adj}${noun}${num}`;
+}
+
+export function validateDIDName(name: string): { valid: boolean; error?: string } {
+  const trimmed = name.trim();
+  if (trimmed.length < 2) {
+    return { valid: false, error: 'Name must be at least 2 characters' };
+  }
+  if (trimmed.length > 20) {
+    return { valid: false, error: 'Name must be 20 characters or less' };
+  }
+  // Alphanumeric + spaces only
+  if (!/^[a-zA-Z0-9 ]+$/.test(trimmed)) {
+    return { valid: false, error: 'Name can only contain letters, numbers, and spaces' };
+  }
+  return { valid: true };
+}
