@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, Share2, ArrowLeft, Trophy, Sparkles, Crown, Star, ShoppingBag, Package, Zap } from 'lucide-react';
 import { BigPulp } from '@/components/Shop/BigPulp';
 import type { BigPulpMood } from '@/components/Shop/BigPulp';
+import { PageSEO } from '@/components/seo';
 import '@/styles/drawer-customization.css';
 
 interface InventoryItem {
@@ -294,6 +295,12 @@ export default function Drawer() {
 
   return (
     <div className={`drawer-page ${bgClass} ${entranceClass}`}>
+      <PageSEO
+        title="My Collection"
+        description="Browse your Wojak NFTs and manage your collection."
+        path="/drawer"
+        noIndex
+      />
       {/* Animated Background Overlay */}
       <div className="drawer-bg-overlay" />
 

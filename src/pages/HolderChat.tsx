@@ -6,15 +6,24 @@
  */
 
 import ChatRoom from '@/components/chat/ChatRoom';
+import { PageSEO } from '@/components/seo';
 import '@/pages/GatedChat.css';
 
 export default function HolderChat() {
   return (
-    <ChatRoom
-      chatType="holder"
-      welcomeIcon="💬"
-      welcomeTitle="Welcome to Holder Chat"
-      welcomeDescription="Connect with fellow Wojak NFT holders."
-    />
+    <>
+      <PageSEO
+        title="Holder Chat"
+        description="Exclusive chat for Wojak NFT holders. Connect with other Wojak owners."
+        path="/chat"
+        noIndex
+      />
+      <ChatRoom
+        chatType="holder"
+        welcomeIcon="💬"
+        welcomeTitle="Welcome to Holder Chat"
+        welcomeDescription="Connect with fellow Wojak NFT holders."
+      />
+    </>
   );
 }

@@ -6,6 +6,7 @@
  */
 
 import { PageTransition } from '@/components/layout/PageTransition';
+import { PageSEO } from '@/components/seo';
 
 const PREVIEW_ITEMS = [
   { icon: '🖼️', name: 'Profile Frames', desc: 'Stand out in the community' },
@@ -17,6 +18,11 @@ const PREVIEW_ITEMS = [
 const Shop = () => {
   return (
     <PageTransition>
+      <PageSEO
+        title="Shop"
+        description="Buy credits, power-ups, and exclusive items for your Wojak experience."
+        path="/shop"
+      />
       <div className="p-4 md:p-6 max-w-4xl mx-auto flex flex-col items-center gap-8 py-12">
         <div className="flex flex-col items-center gap-3 text-center">
           <h1

@@ -7,6 +7,7 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { Monitor } from 'lucide-react';
 import { PageTransition } from '@/components/layout/PageTransition';
+import { PageSEO } from '@/components/seo';
 import { useLayout } from '@/hooks/useLayout';
 import { useSettings } from '@/contexts/SettingsContext';
 import {
@@ -31,6 +32,11 @@ export default function Settings() {
 
   return (
     <PageTransition>
+      <PageSEO
+        title="Settings"
+        description="Customize your Wojak.ink experience — display preferences, notifications, and account settings."
+        path="/settings"
+      />
       <motion.div
         className="min-h-full"
         style={{ padding: contentPadding }}

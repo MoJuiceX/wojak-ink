@@ -7,6 +7,7 @@
 
 import { useCallback } from 'react';
 import { PageTransition } from '@/components/layout/PageTransition';
+import { PageSEO } from '@/components/seo';
 import { useLayout } from '@/hooks/useLayout';
 import { useMedia } from '@/contexts/MediaContext';
 import { VideosGrid } from '@/components/media/video/VideosGrid';
@@ -35,6 +36,11 @@ export default function Media() {
 
   return (
     <PageTransition>
+      <PageSEO
+        title="Media"
+        description="Browse Wojak.ink media, games, and community content."
+        path="/media"
+      />
       <div className="min-h-full" style={{ padding: pagePadding }}>
         <div
           className="space-y-8 pb-24 pt-4"

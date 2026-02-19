@@ -13,6 +13,7 @@ import { Loader2 } from 'lucide-react';
 import { useLayout } from '@/hooks/useLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { PageTransition } from '@/components/layout/PageTransition';
+import { PageSEO } from '@/components/seo';
 import {
   ProfileHeader,
   ProfileTabs,
@@ -380,6 +381,11 @@ export default function Profile() {
 
   return (
     <PageTransition>
+      <PageSEO
+        title="Profile"
+        description="Your Wojak profile — view your minted NFTs, battle stats, and achievements."
+        path="/profile"
+      />
       <div className="profile-page">
         <div
           className="profile-container"

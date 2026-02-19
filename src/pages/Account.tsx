@@ -28,6 +28,7 @@ import { DrawerEditor } from '@/components/Shop/DrawerEditor';
 import { GiftModal } from '@/components/Account/GiftModal';
 
 import '@/components/Account/Account.css';
+import { PageSEO } from '@/components/seo';
 
 // Check if Clerk is configured
 const CLERK_ENABLED = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -231,6 +232,11 @@ export default function Account() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
     >
+      <PageSEO
+        title="Account"
+        description="Manage your Wojak.ink account, settings, and minting history on Chia blockchain."
+        path="/account"
+      />
       <div
         style={{ padding: contentPadding }}
         className="account-page"

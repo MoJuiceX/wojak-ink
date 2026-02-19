@@ -6,15 +6,23 @@
  */
 
 import ChatRoom from '@/components/chat/ChatRoom';
+import { PageSEO } from '@/components/seo';
 import './GatedChat.css';
 
 export default function GatedChat() {
   return (
-    <ChatRoom
-      chatType="whale"
-      welcomeIcon="🐋"
-      welcomeTitle="Welcome to Whale Chat"
-      welcomeDescription="You're among the top Wojak holders."
-    />
+    <>
+      <PageSEO
+        title="Holder Chat"
+        description="Exclusive chat for Wojak NFT holders. Connect with other Wojak owners."
+        path="/chat"
+      />
+      <ChatRoom
+        chatType="whale"
+        welcomeIcon="🐋"
+        welcomeTitle="Welcome to Whale Chat"
+        welcomeDescription="You're among the top Wojak holders."
+      />
+    </>
   );
 }
