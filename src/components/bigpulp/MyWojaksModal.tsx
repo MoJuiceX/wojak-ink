@@ -96,6 +96,9 @@ export function MyWojaksModal({
           >
             <motion.div
               className="relative w-full max-w-2xl max-h-[80vh] rounded-2xl overflow-hidden"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="my-wojaks-title"
               style={{
                 background: 'var(--color-surface, rgba(20, 15, 10, 0.95))',
                 border: '1px solid var(--color-border, rgba(255, 255, 255, 0.1))',
@@ -120,7 +123,7 @@ export function MyWojaksModal({
                     <Wallet size={20} className="text-white" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold text-primary">
+                    <h2 id="my-wojaks-title" className="text-lg font-bold text-primary">
                       My Wojaks
                     </h2>
                     <p className="text-sm text-muted">
@@ -142,7 +145,7 @@ export function MyWojaksModal({
               <div className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(80vh - 80px)' }}>
                 {isLoading ? (
                   <div className="flex flex-col items-center justify-center py-12 gap-4">
-                    <Loader2 size={40} className="animate-spin text-accent" />
+                    <Loader2 size={40} className="animate-spin text-accent" role="status" aria-label="Loading Wojaks" />
                     <p className="text-muted">Loading your Wojaks...</p>
                   </div>
                 ) : ownedNFTs.length === 0 ? (

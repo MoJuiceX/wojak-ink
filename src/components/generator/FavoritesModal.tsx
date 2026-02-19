@@ -85,6 +85,9 @@ export function FavoritesModal({ className = '' }: FavoritesModalProps) {
           {/* Modal */}
           <motion.div
             className="fixed inset-4 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 z-50 sm:w-full sm:max-w-2xl sm:max-h-[80vh] rounded-2xl overflow-hidden flex flex-col"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="favorites-modal-title"
             style={{
               background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
@@ -105,6 +108,7 @@ export function FavoritesModal({ className = '' }: FavoritesModalProps) {
                   className="text-accent"
                 />
                 <h2
+                  id="favorites-modal-title"
                   className="text-lg font-semibold text-primary"
                 >
                   Favorites
@@ -200,6 +204,7 @@ export function FavoritesModal({ className = '' }: FavoritesModalProps) {
                               }}
                               onClick={() => handleSaveEdit(favorite.id)}
                               title="Save"
+                              aria-label="Save name"
                             >
                               <Check size={14} />
                             </button>
@@ -211,6 +216,7 @@ export function FavoritesModal({ className = '' }: FavoritesModalProps) {
                               }}
                               onClick={handleCancelEdit}
                               title="Cancel"
+                              aria-label="Cancel rename"
                             >
                               <X size={14} />
                             </button>
@@ -230,6 +236,7 @@ export function FavoritesModal({ className = '' }: FavoritesModalProps) {
                               }}
                               onClick={(e) => { e.stopPropagation(); handleStartEdit(favorite); }}
                               title="Edit name"
+                              aria-label={`Rename ${favorite.name}`}
                             >
                               <Pencil size={12} />
                             </button>
@@ -243,6 +250,7 @@ export function FavoritesModal({ className = '' }: FavoritesModalProps) {
                               }}
                               onClick={(e) => handleDelete(e, favorite.id)}
                               title="Delete"
+                              aria-label={`Delete ${favorite.name}`}
                             >
                               <Trash2 size={12} />
                             </button>

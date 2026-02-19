@@ -561,6 +561,7 @@ function BadgeGalleryContent() {
             <button
               className="w-full flex items-center justify-between p-3 text-left transition-colors hover:bg-white/5"
               onClick={() => setExpandedBadge(isExpanded ? null : badge.name)}
+              aria-expanded={isExpanded}
             >
               <div className="flex items-center gap-2">
                 <span className="text-base">{badge.emoji}</span>

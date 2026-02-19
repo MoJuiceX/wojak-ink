@@ -118,6 +118,9 @@ export function ExportPanel({ className = '' }: ExportPanelProps) {
           {/* Modal */}
           <motion.div
             className="fixed inset-4 bottom-24 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 z-50 sm:w-full sm:max-w-md rounded-3xl overflow-hidden flex flex-col"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Export Wojak"
             style={{
               background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
