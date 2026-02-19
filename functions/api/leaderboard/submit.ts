@@ -39,6 +39,7 @@ const VALID_GAME_IDS = [
   'orange-snake',
   'brick-breaker',
   'wojak-whack',
+  'brick-by-brick',
 ];
 
 // CORS headers

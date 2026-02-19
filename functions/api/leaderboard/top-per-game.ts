@@ -35,6 +35,7 @@ const VALID_GAME_IDS = [
   'orange-snake',
   'brick-breaker',
   'wojak-whack',
+  'brick-by-brick',
 ];
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
