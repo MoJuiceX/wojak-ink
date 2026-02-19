@@ -17,6 +17,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { HPBar } from './HPBar';
 import { TurnLog } from './TurnLog';
 import { MoveButtons } from './MoveButtons';
+import { TurnTimer } from './TurnTimer';
 import { BattleCanvas } from './BattleCanvas';
 import { DamageNumber } from './DamageNumber';
 import { StatusIcon } from './StatusIcon';
@@ -274,6 +275,17 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
     }
   }, [battleId, playerNftId, fetchBattle]);
 
+  // ── Timeout handler — auto-submit random move when timer expires ────────
+  const handleTimeout = useCallback(() => {
+    if (!battle?.fighterA || !battle?.fighterB || !playerNftId) return;
+    const isA = playerNftId === battle.fighterA.nft_id;
+    const fighter = isA ? battle.fighterA : battle.fighterB;
+    if (fighter?.moves?.length) {
+      const randomMove = fighter.moves[Math.floor(Math.random() * fighter.moves.length)];
+      handleSubmitMove(randomMove.id);
+    }
+  }, [battle, playerNftId, handleSubmitMove]);
+
   // ── Error state ─────────────────────────────────────────────────────────
   if (error) {
     return (
@@ -452,6 +464,17 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
               {s}x
             </button>
           ))}
+        </div>
+      )}
+
+      {/* Turn timer — 30s countdown when it's your turn */}
+      {!isComplete && !isPlaying && playerFighter?.moves && playerNftId && (
+        <div className="flex items-center justify-center mb-3">
+          <TurnTimer
+            totalSeconds={30}
+            onTimeout={handleTimeout}
+            isPaused={isComplete || isPlaying}
+          />
         </div>
       )}
 
