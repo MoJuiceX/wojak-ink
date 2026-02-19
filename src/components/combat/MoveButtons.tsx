@@ -67,6 +67,7 @@ export function MoveButtons({ moves, onSubmit, disabled = false, timerSeconds = 
         {moves.map((move) => (
           <button
             key={move.id}
+            type="button"
             className={`move-btn ${selectedMove === move.id ? 'selected' : ''}`}
             onClick={() => handleSelect(move.id)}
             disabled={disabled}
@@ -82,6 +83,7 @@ export function MoveButtons({ moves, onSubmit, disabled = false, timerSeconds = 
 
       {/* Confirm button */}
       <button
+        type="button"
         className="btn btn-primary w-full"
         onClick={handleConfirm}
         disabled={disabled || !selectedMove}

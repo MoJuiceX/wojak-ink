@@ -393,6 +393,7 @@ const FloatingVideoPlayer: React.FC<FloatingVideoPlayerProps> = ({
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
             allowFullScreen
+            title="Video player"
           />
         ) : (
           <>
@@ -402,6 +403,7 @@ const FloatingVideoPlayer: React.FC<FloatingVideoPlayerProps> = ({
                 ref={nextVideoRef}
                 playsInline
                 className="crossfade-video"
+                aria-hidden="true"
                 style={{
                   position: 'absolute',
                   top: 0,
@@ -419,6 +421,7 @@ const FloatingVideoPlayer: React.FC<FloatingVideoPlayerProps> = ({
               ref={videoRef}
               src={videoSrc}
               playsInline
+              aria-label="Background music video"
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
               onTimeUpdate={handleTimeUpdate}

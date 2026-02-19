@@ -678,8 +678,8 @@ export function Shop({ onClose }: ShopProps) {
 
       {/* Items Display */}
       {isLoading ? (
-        <div className="loading-state">
-          <Loader2 className="animate-spin" size={32} />
+        <div className="loading-state" role="status" aria-label="Loading shop">
+          <Loader2 className="animate-spin" size={32} aria-hidden="true" />
           <span>Loading shop...</span>
         </div>
       ) : filteredItems.length === 0 ? (
@@ -928,7 +928,13 @@ export function Shop({ onClose }: ShopProps) {
       {/* Preview Modal */}
       {previewItem && (
         <div className="preview-modal" onClick={() => setPreviewItem(null)}>
-          <div className="preview-content" onClick={e => e.stopPropagation()}>
+          <div
+            className="preview-content"
+            onClick={e => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="shop-preview-title"
+          >
             <button className="preview-close" onClick={() => setPreviewItem(null)} aria-label="Close preview">
               ✕
             </button>
@@ -939,7 +945,7 @@ export function Shop({ onClose }: ShopProps) {
               {previewItem.is_limited === 1 && (
                 <span className="limited-badge-preview">Limited Edition</span>
               )}
-              <h2>{previewItem.name}</h2>
+              <h2 id="shop-preview-title">{previewItem.name}</h2>
             </div>
             <div className="preview-large">
               {renderItemPreview(previewItem, true)}

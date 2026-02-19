@@ -15,6 +15,8 @@ export function GameLoading({ gameName }: GameLoadingProps) {
   return (
     <div
       className="fixed inset-0 flex flex-col items-center justify-center z-50"
+      role="status"
+      aria-label={gameName ? `Loading ${gameName}` : 'Loading Game'}
       style={{
         background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)',
       }}
@@ -35,7 +37,7 @@ export function GameLoading({ gameName }: GameLoadingProps) {
         <div
           className="absolute inset-0 rounded-full blur-xl"
           style={{
-            background: 'rgba(249, 115, 22, 0.4)',
+            background: 'var(--color-primary-40)',
             transform: 'scale(1.5)',
           }}
         />

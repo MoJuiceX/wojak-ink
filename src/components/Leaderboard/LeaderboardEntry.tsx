@@ -67,12 +67,16 @@ export const LeaderboardEntry: React.FC<LeaderboardEntryProps> = ({
         className={`podium-card position-${podiumPosition} ${entry.isCurrentUser ? 'is-current-user' : ''}`}
         initial={{ scale: baseScale, y: baseY }}
         animate={{ scale: baseScale, y: baseY }}
-        whileHover={prefersReducedMotion ? {} : { 
+        whileHover={prefersReducedMotion ? {} : {
           scale: podiumPosition === 1 ? 1.15 : 1.03,
           y: podiumPosition === 1 ? -12 : -6
         }}
         transition={{ duration: 0.2, ease: 'easeOut' }}
         onClick={handleClick}
+        role="button"
+        tabIndex={0}
+        aria-label={`View profile of ${entry.displayName}, rank ${entry.rank}`}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } }}
         style={{ cursor: 'pointer' }}
       >
         {/* Crown for 1st place */}
@@ -111,6 +115,10 @@ export const LeaderboardEntry: React.FC<LeaderboardEntryProps> = ({
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.05, duration: 0.3 }}
       onClick={handleClick}
+      role="button"
+      tabIndex={0}
+      aria-label={`View profile of ${entry.displayName}, rank ${entry.rank}`}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } }}
     >
       <div className={`row-rank ${rankClass}`}>
         {entry.rank <= 3 ? (

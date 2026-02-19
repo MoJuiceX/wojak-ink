@@ -77,6 +77,7 @@ export function GameError({ error, gameName, onRetry }: GameErrorProps) {
         {/* Action Buttons */}
         <div className="flex flex-col gap-3">
           <motion.button
+            type="button"
             onClick={handleRetry}
             className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-semibold"
             style={{
@@ -92,6 +93,7 @@ export function GameError({ error, gameName, onRetry }: GameErrorProps) {
           </motion.button>
 
           <motion.button
+            type="button"
             onClick={handleBack}
             className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-medium text-primary"
             style={{

@@ -202,19 +202,19 @@ export function GiftModal({
 
   return (
     <div className="gift-modal-overlay" onClick={onClose}>
-      <div className="gift-modal" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Send a Gift">
+      <div className="gift-modal" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="gift-modal-title">
         <button className="gift-modal-close" onClick={onClose} aria-label="Close">
           <X size={20} />
         </button>
 
         <div className="gift-modal-header">
           <Gift size={24} />
-          <h2>Send a Gift</h2>
+          <h2 id="gift-modal-title">Send a Gift</h2>
         </div>
 
         {isLoading ? (
-          <div className="gift-modal-loading">
-            <Loader2 className="animate-spin" size={32} />
+          <div className="gift-modal-loading" role="status" aria-label="Loading">
+            <Loader2 className="animate-spin" size={32} aria-hidden="true" />
             <span>Loading...</span>
           </div>
         ) : friends.length === 0 ? (
@@ -245,6 +245,7 @@ export function GiftModal({
             {/* Gift Type Tabs */}
             <div className="gift-type-tabs">
               <button
+                type="button"
                 className={`gift-type-tab ${giftType === 'oranges' ? 'active' : ''}`}
                 onClick={() => setGiftType('oranges')}
               >
@@ -252,6 +253,7 @@ export function GiftModal({
                 Oranges
               </button>
               <button
+                type="button"
                 className={`gift-type-tab ${giftType === 'gems' ? 'active' : ''}`}
                 onClick={() => setGiftType('gems')}
               >
@@ -259,6 +261,7 @@ export function GiftModal({
                 Gems
               </button>
               <button
+                type="button"
                 className={`gift-type-tab ${giftType === 'item' ? 'active' : ''}`}
                 onClick={() => setGiftType('item')}
               >
@@ -293,6 +296,7 @@ export function GiftModal({
                     {[100, 500, 1000].map(preset => (
                       <button
                         key={preset}
+                        type="button"
                         className="preset-btn"
                         onClick={() => setAmount(preset)}
                       >
@@ -315,6 +319,7 @@ export function GiftModal({
                     {giftableItems.map(item => (
                       <button
                         key={item.id}
+                        type="button"
                         className={`gift-item-option ${selectedItem?.id === item.id ? 'selected' : ''}`}
                         onClick={() => setSelectedItem(item)}
                       >
@@ -371,6 +376,7 @@ export function GiftModal({
 
             {/* Send Button */}
             <button
+              type="button"
               className="gift-send-btn"
               onClick={handleSend}
               disabled={isSending || !selectedFriend || (giftType === 'item' && !selectedItem)}

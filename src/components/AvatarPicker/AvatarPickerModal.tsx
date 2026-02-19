@@ -193,14 +193,18 @@ export function AvatarPickerModal({ isOpen, onClose }: AvatarPickerModalProps) {
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', duration: 0.3 }}
             onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="avatar-picker-title"
           >
             {/* Header */}
             <div className="avatar-modal-header">
-              <h2>Choose Your Avatar</h2>
+              <h2 id="avatar-picker-title">Choose Your Avatar</h2>
               <button
                 className="avatar-modal-close"
                 onClick={handleClose}
                 type="button"
+                aria-label="Close"
               >
                 <X size={20} />
               </button>

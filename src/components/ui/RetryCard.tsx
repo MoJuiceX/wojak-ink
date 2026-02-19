@@ -42,6 +42,7 @@ export const RetryCard = memo<RetryCardProps>(({
       <span style={{ fontSize: 48 }}>{icon}</span>
       <p style={{ color: 'var(--color-white-60)', margin: 0 }}>{message}</p>
       <motion.button
+        type="button"
         onClick={onRetry}
         whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
         whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
@@ -94,6 +95,7 @@ export const NetworkError: React.FC<{ onRetry?: () => void }> = ({ onRetry }) =>
       </p>
       {onRetry && (
         <motion.button
+          type="button"
           onClick={onRetry}
           whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
           whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}

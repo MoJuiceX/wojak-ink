@@ -74,6 +74,9 @@ export const GameOverOverlay: React.FC<GameOverOverlayProps> = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="game-over-title"
     >
       <motion.div
         className="game-over-card"
@@ -85,6 +88,7 @@ export const GameOverOverlay: React.FC<GameOverOverlayProps> = ({
         <div className="go-header">
           {isNewHighScore ? (
             <motion.div
+              id="game-over-title"
               className="new-record-banner"
               initial={prefersReducedMotion ? {} : { scale: 0 }}
               animate={{ scale: 1 }}
@@ -94,7 +98,7 @@ export const GameOverOverlay: React.FC<GameOverOverlayProps> = ({
               <span>New High Score!</span>
             </motion.div>
           ) : (
-            <h2 className="go-title">Game Over</h2>
+            <h2 id="game-over-title" className="go-title">Game Over</h2>
           )}
         </div>
 
@@ -154,6 +158,7 @@ export const GameOverOverlay: React.FC<GameOverOverlayProps> = ({
         {/* Action buttons */}
         <div className="go-actions">
           <motion.button
+            type="button"
             className="go-play-again"
             onClick={onPlayAgain}
             whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
@@ -164,10 +169,12 @@ export const GameOverOverlay: React.FC<GameOverOverlayProps> = ({
           </motion.button>
 
           <motion.button
+            type="button"
             className="go-exit"
             onClick={onExit}
             whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
             whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
+            aria-label="Exit game"
           >
             <LogOut size={18} />
           </motion.button>
@@ -176,6 +183,7 @@ export const GameOverOverlay: React.FC<GameOverOverlayProps> = ({
         {/* Share button */}
         {onShare && (
           <motion.button
+            type="button"
             className="go-share"
             onClick={onShare}
             whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}

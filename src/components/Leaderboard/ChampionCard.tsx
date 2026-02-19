@@ -54,6 +54,10 @@ export const ChampionCard: React.FC<ChampionCardProps> = ({ entry, timeframe }) 
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
       onClick={handleClick}
+      role="button"
+      tabIndex={0}
+      aria-label={`View profile of ${entry.displayName}`}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } }}
     >
       <span className="champion-label">{timeframeLabel} Champion</span>
       

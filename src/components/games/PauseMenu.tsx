@@ -34,6 +34,9 @@ export const PauseMenu: React.FC<PauseMenuProps> = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="pause-menu-title"
         >
           <motion.div
             className="pause-menu"
@@ -43,12 +46,13 @@ export const PauseMenu: React.FC<PauseMenuProps> = ({
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
           >
             <div className="pause-header">
-              <h2>Paused</h2>
+              <h2 id="pause-menu-title">Paused</h2>
               {gameName && <span className="pause-game-name">{gameName}</span>}
             </div>
 
             <div className="pause-buttons">
               <motion.button
+                type="button"
                 className="pause-btn resume"
                 onClick={onResume}
                 whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
@@ -59,6 +63,7 @@ export const PauseMenu: React.FC<PauseMenuProps> = ({
               </motion.button>
 
               <motion.button
+                type="button"
                 className="pause-btn restart"
                 onClick={onRestart}
                 whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
@@ -69,6 +74,7 @@ export const PauseMenu: React.FC<PauseMenuProps> = ({
               </motion.button>
 
               <motion.button
+                type="button"
                 className="pause-btn exit"
                 onClick={onExit}
                 whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}

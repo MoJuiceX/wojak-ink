@@ -75,6 +75,7 @@ export const GameIdleScreen: React.FC<GameIdleScreenProps> = ({
 
         {/* Start button */}
         <motion.button
+          type="button"
           className="start-btn"
           onClick={onStart}
           whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}

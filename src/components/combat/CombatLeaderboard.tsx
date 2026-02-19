@@ -45,6 +45,7 @@ export function CombatLeaderboard() {
         {(['elo', 'level', 'wins'] as SortBy[]).map((s) => (
           <button
             key={s}
+            type="button"
             className={`btn ${sortBy === s ? 'btn-primary' : 'btn-ghost'} text-sm`}
             onClick={() => setSortBy(s)}
           >
@@ -55,7 +56,7 @@ export function CombatLeaderboard() {
 
       {/* Table */}
       {isLoading ? (
-        <div className="text-muted text-sm text-center py-4">Loading...</div>
+        <div className="text-muted text-sm text-center py-4" role="status" aria-label="Loading">Loading...</div>
       ) : fighters.length === 0 ? (
         <div className="card-static p-4 text-center text-muted text-sm">
           No combat fighters yet.

@@ -64,6 +64,7 @@ export function BattleHistory({ nftId, limit = 20, onSelectBattle }: BattleHisto
         return (
           <button
             key={b.id}
+            type="button"
             className="card p-3 flex items-center gap-3 w-full text-left"
             onClick={() => onSelectBattle?.(b.id)}
           >

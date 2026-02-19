@@ -90,14 +90,17 @@ export const NFTSelectionModal: React.FC<NFTSelectionModalProps> = ({
             exit={{ scale: 0.9, y: 20, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="nft-selection-title"
           >
             {/* Header */}
             <div className="modal-header">
               <div>
-                <h2>Choose Your Avatar</h2>
+                <h2 id="nft-selection-title">Choose Your Avatar</h2>
                 <p>Select a Wojak NFT from your collection</p>
               </div>
-              <button className="close-btn" onClick={onClose}>
+              <button type="button" className="close-btn" onClick={onClose} aria-label="Close">
                 <X size={20} />
               </button>
             </div>
@@ -105,8 +108,8 @@ export const NFTSelectionModal: React.FC<NFTSelectionModalProps> = ({
             {/* Content */}
             <div className="modal-body">
               {isLoading ? (
-                <div className="loading-state">
-                  <Loader2 size={32} className="animate-spin" />
+                <div className="loading-state" role="status" aria-label="Loading">
+                  <Loader2 size={32} className="animate-spin" aria-hidden="true" />
                   <p>Loading your Wojak NFTs...</p>
                 </div>
               ) : nfts.length === 0 ? (
@@ -156,10 +159,11 @@ export const NFTSelectionModal: React.FC<NFTSelectionModalProps> = ({
             {/* Footer */}
             {nfts.length > 0 && (
               <div className="modal-footer">
-                <button className="cancel-btn" onClick={onClose}>
+                <button type="button" className="cancel-btn" onClick={onClose}>
                   Cancel
                 </button>
                 <motion.button
+                  type="button"
                   className="confirm-btn"
                   onClick={handleConfirm}
                   disabled={!selectedNft}

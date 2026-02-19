@@ -401,6 +401,8 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                 className="mobile-loading"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
+                role="status"
+                aria-label="Loading rankings"
               >
                 <motion.div
                   className="loading-trophy"
@@ -466,6 +468,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                     : 'Be the first to set a record!'}
                 </p>
                 <motion.button
+                  type="button"
                   className="play-now-btn"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -487,7 +490,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                 animate={{ opacity: 1 }}
               >
                 <p>Failed to load leaderboard</p>
-                <button onClick={() => fetchLeaderboard(selectedGame, timeframe)}>
+                <button type="button" onClick={() => fetchLeaderboard(selectedGame, timeframe)}>
                   Retry
                 </button>
               </motion.div>
@@ -506,6 +509,8 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
+                  role="status"
+                  aria-label="Loading rankings"
                 >
                   <motion.div
                     className="loading-trophy"
@@ -640,6 +645,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                       : 'Be the first to set a record!'}
                   </p>
                   <motion.button
+                    type="button"
                     className="play-now-btn"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -662,7 +668,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                   exit={{ opacity: 0 }}
                 >
                   <p>Failed to load leaderboard</p>
-                  <button onClick={() => fetchLeaderboard(selectedGame, timeframe)}>
+                  <button type="button" onClick={() => fetchLeaderboard(selectedGame, timeframe)}>
                     Retry
                   </button>
                 </motion.div>

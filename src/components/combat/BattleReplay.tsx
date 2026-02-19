@@ -132,6 +132,7 @@ export function BattleReplay({ battleId }: BattleReplayProps) {
       {/* Navigation */}
       <div className="flex items-center gap-3 justify-center">
         <button
+          type="button"
           className="btn btn-secondary"
           onClick={goPrev}
           disabled={currentStep === 0}
@@ -142,6 +143,7 @@ export function BattleReplay({ battleId }: BattleReplayProps) {
           {currentStep + 1} / {turns.length}
         </span>
         <button
+          type="button"
           className="btn btn-secondary"
           onClick={goNext}
           disabled={currentStep >= turns.length - 1}

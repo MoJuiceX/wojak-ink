@@ -17,13 +17,19 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 
   return (
     <div className="fo-share-modal-overlay" onClick={onClose}>
-      <div className="fo-share-modal" onClick={(e) => e.stopPropagation()}>
-        <button className="fo-share-modal-close" onClick={onClose}>x</button>
-        <h3>Your Score Card</h3>
+      <div
+        className="fo-share-modal"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="share-modal-title"
+      >
+        <button className="fo-share-modal-close" onClick={onClose} aria-label="Close score card">x</button>
+        <h3 id="share-modal-title">Your Score Card</h3>
         {shareImageUrl ? (
-          <img src={shareImageUrl} alt="Score" className="fo-share-preview" />
+          <img src={shareImageUrl} alt="Score card" className="fo-share-preview" />
         ) : (
-          <div className="fo-share-loading">
+          <div className="fo-share-loading" role="status" aria-label="Loading">
             <div className="fo-share-loading-spinner" />
             <span>Generating scorecard...</span>
           </div>

@@ -39,7 +39,7 @@ export function NFTGatePrompt({ onConnectWallet }: NFTGatePromptProps) {
 
         <div className="gate-actions">
           {onConnectWallet && (
-            <button onClick={onConnectWallet} className="connect-button">
+            <button type="button" onClick={onConnectWallet} className="connect-button">
               Connect Wallet & Set NFT Avatar
             </button>
           )}

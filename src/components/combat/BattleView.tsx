@@ -103,7 +103,7 @@ export function BattleView({ battleId, playerNftId }: BattleViewProps) {
 
   if (!battle) {
     return (
-      <div className="card-static p-6 text-center">
+      <div className="card-static p-6 text-center" role="status" aria-label="Loading battle">
         <p className="text-muted text-sm">Loading battle...</p>
       </div>
     );

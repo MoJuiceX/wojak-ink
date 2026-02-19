@@ -63,8 +63,9 @@ export function QueuePanel({ fighters, onQueue, onLeaveQueue, queueStatus, isLoa
 
       {/* Fighter selector */}
       <div className="flex flex-col gap-2">
-        <label className="text-xs text-secondary uppercase tracking-wider">Select Fighter</label>
+        <label htmlFor="queue-fighter-select" className="text-xs text-secondary uppercase tracking-wider">Select Fighter</label>
         <select
+          id="queue-fighter-select"
           className="input"
           value={selectedFighter}
           onChange={(e) => setSelectedFighter(e.target.value)}
@@ -83,6 +84,7 @@ export function QueuePanel({ fighters, onQueue, onLeaveQueue, queueStatus, isLoa
         <label className="text-xs text-secondary uppercase tracking-wider">Battle Mode</label>
         <div className="flex gap-2">
           <button
+            type="button"
             className={`btn flex-1 ${battleMode === 'auto' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setBattleMode('auto')}
             disabled={isQueued || isLoading}
@@ -90,6 +92,7 @@ export function QueuePanel({ fighters, onQueue, onLeaveQueue, queueStatus, isLoa
             Auto
           </button>
           <button
+            type="button"
             className={`btn flex-1 ${battleMode === 'manual' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setBattleMode('manual')}
             disabled={isQueued || isLoading}
@@ -107,6 +110,7 @@ export function QueuePanel({ fighters, onQueue, onLeaveQueue, queueStatus, isLoa
       {/* Queue action */}
       {!isQueued && !isMatched && (
         <button
+          type="button"
           className="btn btn-primary w-full"
           onClick={handleQueue}
           disabled={isLoading || !selectedFighter}
@@ -124,6 +128,7 @@ export function QueuePanel({ fighters, onQueue, onLeaveQueue, queueStatus, isLoa
             </span>
           </div>
           <button
+            type="button"
             className="btn btn-secondary w-full"
             onClick={handleLeave}
             disabled={isLoading}
