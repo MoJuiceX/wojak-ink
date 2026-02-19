@@ -113,6 +113,31 @@ export const LAYER_META: Record<UILayerName, LayerMeta> = {
   },
 };
 
+// ============ Scene Backgrounds (for random default) ============
+
+export const SCENE_BACKGROUNDS: string[] = [
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Bepe Barracks.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Chia Farm.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Hell.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Matrix.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Moms Basement.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Moon.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Nesting Grounds.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_NYSE Dump.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_NYSE Pump.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_One Market.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Orange Grove.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Ronin Dojo.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Route 66.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Silicon.net Data Center.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Spell Room.png',
+  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_White House.png',
+];
+
+export function getRandomSceneBackground(): string {
+  return SCENE_BACKGROUNDS[Math.floor(Math.random() * SCENE_BACKGROUNDS.length)];
+}
+
 // ============ Generator Defaults ============
 
 /** Minimum required layers for export/save */
