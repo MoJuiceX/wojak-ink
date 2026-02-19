@@ -61,8 +61,25 @@ export interface SubmitResult {
   error?: string;
 }
 
+interface UserPosition {
+  rank: number;
+  score: number;
+  totalPlayers: number;
+  nextRival?: {
+    userId: string;
+    displayName: string;
+    avatar: {
+      type: 'emoji' | 'nft';
+      value: string;
+    };
+    score: number;
+    pointsAhead: number;
+  };
+}
+
 interface LeaderboardResponse {
   gameId: string;
+  timeframe: 'weekly' | 'all-time';
   entries: LeaderboardEntry[];
   pagination: {
     limit: number;
@@ -70,6 +87,8 @@ interface LeaderboardResponse {
     total: number;
     hasMore: boolean;
   };
+  userPosition?: UserPosition;
+  resetTime?: string;
 }
 
 /**
