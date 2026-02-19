@@ -2,6 +2,7 @@
 // POST /api/combat/agent-move — submit a move via agent API key
 
 import { jsonResponse, errorResponse, authenticateAgent } from './_shared';
+import { sendBattleTurnWebhook } from './_webhook';
 import { resolveTurn } from '../../../src/lib/combat/turn-resolver';
 import { initFighterState, initBattleState } from '../../../src/lib/combat/battle-state';
 import { calculateXPAward, calculateELOChange, calculateLevelFromXP } from '../../../src/lib/combat/xp-elo-calculator';
@@ -167,6 +168,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     );
 
     await db.batch(statements);
+
+    // Send webhooks to both sides (fire-and-forget)
+    sendBattleTurnWebhook(db, battle_id, battle.fighter_a_did, 'A', turnResult, battleState.status, battleState.winnerId);
+    sendBattleTurnWebhook(db, battle_id, battle.fighter_b_did, 'B', turnResult, battleState.status, battleState.winnerId);
 
     return jsonResponse({
       status: battleState.status === 'finished' ? 'completed' : 'turn_resolved',

@@ -6,6 +6,7 @@ import {
   jsonResponse, errorResponse, authenticateAgent,
   checkAgentRateLimit, incrementAgentFightCount,
 } from './_shared';
+import { sendBattleStartWebhook } from './_webhook';
 
 interface Env {
   DB: D1Database;
@@ -128,6 +129,15 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   const newBattle = await db.prepare(
     'SELECT id FROM combat_battles WHERE fighter_a_nft = ? AND fighter_b_nft = ? ORDER BY id DESC LIMIT 1'
   ).bind(nft_id, opponent.nft_id).first<{ id: number }>();
+
+  // Send webhooks to both sides (fire-and-forget)
+  const fighterARow = await db.prepare('SELECT * FROM combat_fighters WHERE nft_id = ?').bind(nft_id).first<any>();
+  const fighterBRow = await db.prepare('SELECT * FROM combat_fighters WHERE nft_id = ?').bind(opponent.nft_id).first<any>();
+
+  if (fighterARow && fighterBRow && newBattle?.id) {
+    sendBattleStartWebhook(db, newBattle.id, agent.owner_did, 'A', fighterARow, fighterBRow);
+    sendBattleStartWebhook(db, newBattle.id, opponent.owner_did, 'B', fighterARow, fighterBRow);
+  }
 
   return jsonResponse({
     status: 'matched',
