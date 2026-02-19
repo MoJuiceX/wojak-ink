@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { Swords } from 'lucide-react';
 import { useGame } from '@/contexts/GameContext';
 
 const NAV_ITEMS = [
@@ -50,6 +51,14 @@ export function SwipeNav() {
           {item.label}
         </NavLink>
       ))}
+      <div style={{ width: 1, background: 'var(--color-border)', margin: '8px 4px', flexShrink: 0 }} />
+      <NavLink
+        to="/arena"
+        style={{ padding: '12px 16px', fontSize: 13, fontWeight: 500, color: 'var(--color-text-muted)', borderBottom: '2px solid transparent', textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4, transition: 'color 150ms' }}
+      >
+        <Swords size={14} />
+        Arena
+      </NavLink>
     </nav>
   );
 }
