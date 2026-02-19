@@ -363,10 +363,34 @@ function HowBattlesWorkSection() {
   );
 }
 
+// Power Scoring Section - explains power and ranking system
 function PowerScoringSection() {
   return (
     <CollapsibleSection title="Power & Rankings" icon={<Zap size={18} />}>
-      <p className="text-secondary text-sm">Coming soon...</p>
+      <div className="flex flex-col gap-2 text-sm text-secondary">
+        <p>Every Wojak accumulates <strong className="text-primary">Power</strong> from votes and battles:</p>
+        <div className="grid grid-cols-2 gap-2 mt-1">
+          <div className="card-static p-2 text-center">
+            <p className="text-lg font-bold text-success">+30</p>
+            <p className="text-xs">Battle Win</p>
+          </div>
+          <div className="card-static p-2 text-center">
+            <p className="text-lg font-bold text-error">-10</p>
+            <p className="text-xs">Battle Loss</p>
+          </div>
+          <div className="card-static p-2 text-center">
+            <p className="text-lg font-bold text-secondary">+5</p>
+            <p className="text-xs">Draw</p>
+          </div>
+          <div className="card-static p-2 text-center">
+            <p className="text-lg font-bold text-accent">±1</p>
+            <p className="text-xs">Per Vote</p>
+          </div>
+        </div>
+        <p className="mt-2">
+          The <strong>Rankings</strong> tab shows both individual Wojak power and total power per player (sum of all their Wojaks).
+        </p>
+      </div>
     </CollapsibleSection>
   );
 }
