@@ -12,6 +12,17 @@ import { useLayout } from '@/hooks/useLayout';
 import { COMBAT_TYPES, type CombatType } from '@/lib/combat/types';
 import { TYPE_COLORS, DARK_TEXT_TYPES } from '@/lib/combat/data/type-colors';
 import { TYPE_CHART } from '@/lib/combat/data/type-chart';
+import { NATURES } from '@/lib/combat/data/natures';
+import type { StatName } from '@/lib/combat/types';
+
+// Human-readable stat names
+const STAT_DISPLAY: Record<StatName, string> = {
+  attack: 'Attack',
+  defense: 'Defense',
+  sp_atk: 'Sp. Atk',
+  sp_def: 'Sp. Def',
+  speed: 'Speed',
+};
 
 // Abbreviated type names for the chart (3-4 chars)
 const TYPE_ABBREV: Record<CombatType, string> = {
@@ -213,10 +224,55 @@ function TypeMatchupSection() {
   );
 }
 
+// Natures Section - displays all 25 natures with boost/reduce stats
 function NaturesSection() {
+  // Separate balanced natures (no boost/reduce) from stat-modifying ones
+  const balancedNatures = NATURES.filter((n) => n.boost === null && n.reduce === null);
+  const modifyingNatures = NATURES.filter((n) => n.boost !== null || n.reduce !== null);
+
   return (
     <CollapsibleSection title="Natures" icon={<Zap size={18} />}>
-      <p className="text-secondary text-sm">Coming soon...</p>
+      <p className="text-secondary text-sm mb-4">
+        Every Wojak has a Nature that boosts one stat by 10% and reduces another by 10%.
+        Natures are determined by the color balance of your Wojak.
+      </p>
+
+      {/* Stat-modifying natures */}
+      <div className="flex flex-col gap-1 mb-3">
+        {modifyingNatures.map((nature) => (
+          <div
+            key={nature.name}
+            className="flex items-center justify-between p-2 rounded"
+            style={{ background: 'var(--color-white-5)' }}
+          >
+            <span className="text-sm font-medium">{nature.name}</span>
+            <div className="flex gap-3 text-xs">
+              <span className="text-success">+{nature.boost ? STAT_DISPLAY[nature.boost] : ''}</span>
+              <span className="text-error">-{nature.reduce ? STAT_DISPLAY[nature.reduce] : ''}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Balanced natures */}
+      <div className="flex flex-wrap gap-2 mb-3">
+        {balancedNatures.map((nature) => (
+          <span
+            key={nature.name}
+            className="px-2 py-1 rounded text-xs text-secondary"
+            style={{ background: 'var(--color-white-5)' }}
+          >
+            {nature.name} <span className="text-muted">(neutral)</span>
+          </span>
+        ))}
+      </div>
+
+      <div className="card-static p-3" style={{ borderLeft: '3px solid var(--color-primary)' }}>
+        <p className="text-xs text-secondary">
+          <strong className="text-primary">Tip:</strong> Warm colors (red, orange) tend toward Attack.
+          Cool colors (blue, purple) tend toward Special Defense. Bright neon colors boost Speed.
+        </p>
+      </div>
     </CollapsibleSection>
   );
 }
