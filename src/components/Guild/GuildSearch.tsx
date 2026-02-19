@@ -109,16 +109,14 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
               style={{ borderColor: 'var(--color-border)' }}
             >
               <h2
-                className="text-lg font-bold"
-                style={{ color: 'var(--color-text)' }}
+                className="text-lg font-bold text-primary"
               >
                 Find a Guild
               </h2>
               <button
                 type="button"
                 onClick={handleClose}
-                className="p-2 rounded-full transition-colors"
-                style={{ color: 'var(--color-text-muted)' }}
+                className="p-2 rounded-full transition-colors text-muted"
               >
                 <X size={20} />
               </button>
@@ -133,23 +131,22 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
                   border: '1px solid var(--color-border)',
                 }}
               >
-                <Search size={18} style={{ color: 'var(--color-text-muted)' }} />
+                <Search size={18} className="text-muted" />
                 <input
                   type="text"
                   value={query}
                   onChange={(e) => handleSearchChange(e.target.value)}
                   placeholder="Search by name or tag..."
-                  className="flex-1 bg-transparent outline-none text-sm"
-                  style={{ color: 'var(--color-text)' }}
+                  className="flex-1 bg-transparent outline-none text-sm text-primary"
                 />
                 {isSearching && (
-                  <Loader2 size={18} className="animate-spin" style={{ color: 'var(--color-primary)' }} />
+                  <Loader2 size={18} className="animate-spin text-accent" />
                 )}
               </div>
             </div>
 
             {error && (
-              <p className="px-4 py-2 text-sm" style={{ color: '#ef4444' }}>{error}</p>
+              <p className="px-4 py-2 text-sm text-error">{error}</p>
             )}
 
             {/* Results */}
@@ -157,7 +154,7 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
               {!isSearching && results.length === 0 && query.length >= 2 && (
                 <div className="text-center py-8">
                   <span className="text-4xl block mb-2">🔍</span>
-                  <p style={{ color: 'var(--color-text-secondary)' }}>
+                  <p className="text-secondary">
                     No guilds found matching "{query}"
                   </p>
                 </div>
@@ -165,7 +162,7 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
 
               {!isSearching && query.length < 2 && (
                 <div className="text-center py-8">
-                  <p style={{ color: 'var(--color-text-muted)' }}>
+                  <p className="text-muted">
                     Enter at least 2 characters to search
                   </p>
                 </div>
@@ -184,7 +181,7 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
                     style={{ background: 'var(--color-border)' }}
                   >
                     {requestSent.has(guild.id) ? (
-                      <span className="text-sm" style={{ color: '#22c55e' }}>
+                      <span className="text-sm text-success">
                         Request Sent ✓
                       </span>
                     ) : (
@@ -194,10 +191,9 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
                           handleRequestJoin(guild);
                         }}
                         disabled={isRequesting}
-                        className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                        className="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-primary"
                         style={{
                           background: 'var(--color-primary)',
-                          color: '#fff',
                           opacity: isRequesting ? 0.5 : 1,
                         }}
                       >
@@ -236,14 +232,12 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
                     <div className="p-4 space-y-4">
                       <div>
                         <h4
-                          className="text-xs font-medium uppercase tracking-wide mb-2"
-                          style={{ color: 'var(--color-text-muted)' }}
+                          className="text-xs font-medium uppercase tracking-wide mb-2 text-muted"
                         >
                           About
                         </h4>
                         <p
-                          className="text-sm"
-                          style={{ color: 'var(--color-text)' }}
+                          className="text-sm text-primary"
                         >
                           {selectedGuild.description || 'No description provided.'}
                         </p>
@@ -255,42 +249,36 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
                       >
                         <div className="text-center">
                           <p
-                            className="text-sm font-semibold"
-                            style={{ color: 'var(--color-text)' }}
+                            className="text-sm font-semibold text-primary"
                           >
                             {selectedGuild.memberCount}/{selectedGuild.maxMembers}
                           </p>
                           <p
-                            className="text-xs"
-                            style={{ color: 'var(--color-text-muted)' }}
+                            className="text-xs text-muted"
                           >
                             Members
                           </p>
                         </div>
                         <div className="text-center">
                           <p
-                            className="text-sm font-semibold"
-                            style={{ color: 'var(--color-text)' }}
+                            className="text-sm font-semibold text-primary"
                           >
                             {selectedGuild.totalScore.toLocaleString()}
                           </p>
                           <p
-                            className="text-xs"
-                            style={{ color: 'var(--color-text-muted)' }}
+                            className="text-xs text-muted"
                           >
                             Total Score
                           </p>
                         </div>
                         <div className="text-center">
                           <p
-                            className="text-sm font-semibold"
-                            style={{ color: 'var(--color-text)' }}
+                            className="text-sm font-semibold text-primary"
                           >
                             {selectedGuild.weeklyScore.toLocaleString()}
                           </p>
                           <p
-                            className="text-xs"
-                            style={{ color: 'var(--color-text-muted)' }}
+                            className="text-xs text-muted"
                           >
                             Weekly
                           </p>
@@ -306,12 +294,11 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
                               border: '1px solid rgba(34, 197, 94, 0.3)',
                             }}
                           >
-                            <span className="font-semibold" style={{ color: '#22c55e' }}>
+                            <span className="font-semibold text-success">
                               Request Sent
                             </span>
                             <p
-                              className="text-sm mt-1"
-                              style={{ color: 'var(--color-text-muted)' }}
+                              className="text-sm mt-1 text-muted"
                             >
                               Waiting for approval from guild officers
                             </p>
@@ -320,10 +307,9 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
                           <button
                             onClick={() => handleRequestJoin(selectedGuild)}
                             disabled={isRequesting || selectedGuild.memberCount >= selectedGuild.maxMembers}
-                            className="w-full py-3 rounded-lg font-medium transition-colors"
+                            className="w-full py-3 rounded-lg font-medium transition-colors text-primary"
                             style={{
                               background: 'var(--color-primary)',
-                              color: '#fff',
                               opacity: (isRequesting || selectedGuild.memberCount >= selectedGuild.maxMembers) ? 0.5 : 1,
                             }}
                           >
@@ -341,10 +327,9 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
                         )}
                         <button
                           onClick={() => setSelectedGuild(null)}
-                          className="w-full py-3 rounded-lg font-medium transition-colors"
+                          className="w-full py-3 rounded-lg font-medium transition-colors text-secondary"
                           style={{
                             background: 'transparent',
-                            color: 'var(--color-text-secondary)',
                             border: '1px solid var(--color-border)',
                           }}
                         >

@@ -354,10 +354,9 @@ function SolidColorBackgroundCard({ color, isSelected, isDisabled, disabledReaso
         style={{ backgroundColor: color }}
       />
       <div
-        className="absolute bottom-0 left-0 right-0 px-2 py-1 text-xs font-medium truncate"
+        className="absolute bottom-0 left-0 right-0 px-2 py-1 text-xs font-medium truncate text-primary"
         style={{
           background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
-          color: 'white',
         }}
       >
         Solid color
@@ -862,7 +861,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
             border: '1px solid var(--color-border)',
           }}
         >
-          <p style={{ color: 'var(--color-text-muted)' }}>
+          <p className="text-muted">
             This layer is blocked by another trait selection
           </p>
         </div>
@@ -877,10 +876,10 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
             border: '1px solid var(--color-border)',
           }}
         >
-          <p className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+          <p className="text-sm font-medium text-secondary">
             No options for this layer
           </p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
+          <p className="text-xs mt-1 text-muted">
             Select a different layer or try Randomize
           </p>
         </div>
@@ -1101,7 +1100,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
             border: '1px solid var(--color-border)',
           }}
         >
-          <p style={{ color: 'var(--color-text-muted)' }}>
+          <p className="text-muted">
             No traits available for this layer
           </p>
         </div>
