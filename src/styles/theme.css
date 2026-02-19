@@ -339,6 +339,35 @@ body {
   box-shadow: var(--shadow-lg);
 }
 
+/* Error / Retry Card */
+.error-card,
+.retry-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-10);
+  background: var(--color-white-3);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.error-card p,
+.retry-card p {
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Network error - centered column */
+.network-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-10);
+  text-align: center;
+}
+
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    BUTTONS
