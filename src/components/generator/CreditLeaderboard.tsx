@@ -122,7 +122,7 @@ export function CreditLeaderboard({ isOpen, onClose }: CreditLeaderboardProps) {
     >
       <div className="flex flex-col h-full min-h-0">
         {loading && (
-          <div className="flex items-center justify-center py-24 flex-1">
+          <div className="flex items-center justify-center py-24 flex-1" role="status" aria-label="Loading">
             <Loader2 size={40} className="animate-spin text-accent" />
           </div>
         )}
@@ -209,7 +209,7 @@ export function CreditLeaderboard({ isOpen, onClose }: CreditLeaderboardProps) {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2 py-2">
+                  <div className="flex items-center gap-2 py-2" role="status" aria-label="Loading">
                     <Loader2 size={16} className="animate-spin text-muted" />
                     <span className="text-sm text-muted">Loading...</span>
                   </div>

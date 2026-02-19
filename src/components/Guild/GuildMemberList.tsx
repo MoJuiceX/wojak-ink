@@ -131,6 +131,16 @@ export function GuildMemberList({
                   setShowActionSheet(true);
                 }
               }}
+              role={canManageMembers && member.role !== currentUserRole && member.role !== 'leader' ? 'button' : undefined}
+              tabIndex={canManageMembers && member.role !== currentUserRole && member.role !== 'leader' ? 0 : undefined}
+              aria-label={canManageMembers && member.role !== currentUserRole && member.role !== 'leader' ? `Manage ${member.username}` : undefined}
+              onKeyDown={canManageMembers && member.role !== currentUserRole && member.role !== 'leader' ? (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedMember(member);
+                  setShowActionSheet(true);
+                }
+              } : undefined}
             >
               <Avatar
                 type={member.avatar.type}
@@ -168,6 +178,7 @@ export function GuildMemberList({
             {getActionSheetButtons().map((button, index) => (
               <button
                 key={index}
+                type="button"
                 className={`action-menu-button ${button.role === 'destructive' ? 'destructive' : ''} ${button.role === 'cancel' ? 'cancel' : ''}`}
                 onClick={() => {
                   button.handler?.();

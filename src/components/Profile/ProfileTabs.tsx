@@ -46,6 +46,7 @@ export function ProfileTabs({
         return (
           <button
             key={tab.id}
+            type="button"
             className={`profile-tab ${activeTab === tab.id ? 'active' : ''}`}
             onClick={() => onTabChange(tab.id)}
           >

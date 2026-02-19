@@ -71,6 +71,7 @@ export function MoveSelection({ type, selectedMoves, onSelectionChange }: MoveSe
           return (
             <button
               key={move.id}
+              type="button"
               className={`move-btn ${isSelected ? 'selected' : ''}`}
               disabled={isDisabled}
               onClick={() => toggleMove(move.id)}

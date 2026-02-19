@@ -54,12 +54,14 @@ export function GuildLeaderboard({ myGuildId }: GuildLeaderboardProps) {
     <div className="guild-leaderboard">
       <div className="timeframe-selector">
         <button
+          type="button"
           className={`timeframe-tab ${timeframe === 'weekly' ? 'active' : ''}`}
           onClick={() => setTimeframe('weekly')}
         >
           This Week
         </button>
         <button
+          type="button"
           className={`timeframe-tab ${timeframe === 'all-time' ? 'active' : ''}`}
           onClick={() => setTimeframe('all-time')}
         >
@@ -68,7 +70,7 @@ export function GuildLeaderboard({ myGuildId }: GuildLeaderboardProps) {
       </div>
 
       {isLoading ? (
-        <div className="loading-state">
+        <div className="loading-state" role="status" aria-label="Loading">
           <Loader2 className="animate-spin" size={32} />
         </div>
       ) : (

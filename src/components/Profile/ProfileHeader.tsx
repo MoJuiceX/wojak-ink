@@ -117,12 +117,12 @@ export function ProfileHeader({
 
       {/* Action Buttons */}
       {onShare && (
-        <button className="share-profile-btn" onClick={onShare} title="Share profile">
+        <button type="button" className="share-profile-btn" onClick={onShare} title="Share profile" aria-label="Share profile">
           <Share2 size={18} />
         </button>
       )}
       {isOwnProfile && onEdit && (
-        <button className="edit-profile-btn" onClick={onEdit} title="Coming soon" style={{ opacity: 0.5, cursor: 'default' }}>
+        <button type="button" className="edit-profile-btn" onClick={onEdit} title="Coming soon" style={{ opacity: 0.5, cursor: 'default' }}>
           <Edit size={16} />
           Edit Profile
         </button>

@@ -86,6 +86,7 @@ export function CollectionTab({ items, totalSpent = 0 }: CollectionTabProps) {
           return (
             <button
               key={filter.id}
+              type="button"
               className={`collection-filter ${activeFilter === filter.id ? 'active' : ''}`}
               onClick={() => setActiveFilter(filter.id)}
             >

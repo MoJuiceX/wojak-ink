@@ -282,12 +282,14 @@ export function EmojiRingEditor({
         {/* Actions */}
         <div className="flex gap-3">
           <button
+            type="button"
             onClick={handleClearAll}
             className="flex-1 py-2 px-4 rounded-lg bg-white/10 hover:bg-white/20 text-white/70 text-sm transition-colors"
           >
             Clear All
           </button>
           <button
+            type="button"
             onClick={handleSave}
             disabled={!hasChanges || isSaving}
             className={`

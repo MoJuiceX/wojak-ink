@@ -69,6 +69,7 @@ export const DetailSelector = memo(function DetailSelector({
           whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
           onClick={() => onSelect(undefined)}
           title="None"
+          type="button"
         >
           <Ban
             size={20}
@@ -97,6 +98,7 @@ export const DetailSelector = memo(function DetailSelector({
               whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
               onClick={() => onSelect(opt.file)}
               title={opt.name}
+              type="button"
             >
               <img
                 src={`${basePath}/${opt.file}`}

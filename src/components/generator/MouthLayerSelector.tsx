@@ -258,7 +258,7 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
   // Loading skeleton
   if (isLoading || !isInitialized) {
     return (
-      <div className={`space-y-4 ${className}`}>
+      <div className={`space-y-4 ${className}`} role="status" aria-label="Loading">
         <div className="generator-options-grid">
           {Array.from({ length: 12 }).map((_, i) => (
             <TraitCardSkeleton key={i} />

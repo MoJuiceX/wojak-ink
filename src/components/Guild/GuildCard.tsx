@@ -25,6 +25,10 @@ export const GuildCard: React.FC<GuildCardProps> = ({
     <div
       className={`guild-card guild-card-${size} ${onClick ? 'clickable' : ''}`}
       onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      aria-label={onClick ? `${guild.name} guild` : undefined}
+      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } } : undefined}
     >
       <GuildBannerDisplay banner={guild.banner} size={size} />
 
