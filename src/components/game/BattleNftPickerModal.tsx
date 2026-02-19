@@ -194,7 +194,7 @@ export function BattleNftPickerModal({ isOpen, onClose, onQueue, nfts, loading }
             {nfts.length > 0 && (
               <div className="flex flex-col gap-2 p-5" style={{ borderTop: '1px solid var(--color-border)' }}>
                 {error && (
-                  <div className="text-sm text-center" style={{ color: 'var(--color-error)' }}>{error}</div>
+                  <div className="text-sm text-center text-error">{error}</div>
                 )}
                 <div className="flex gap-3">
                   <button className="btn btn-secondary flex-1" onClick={handleClose} disabled={queueing}>

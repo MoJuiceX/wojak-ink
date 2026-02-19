@@ -89,8 +89,7 @@ export function LeaderboardPanel() {
       >
         <Trophy size={18} style={{ color: 'var(--color-primary)' }} />
         <h3
-          className="text-sm font-semibold"
-          style={{ color: 'var(--color-text)' }}
+          className="text-sm font-semibold text-primary"
         >
           Top Scores
         </h3>
@@ -116,14 +115,12 @@ export function LeaderboardPanel() {
               style={{ color: 'var(--color-text-muted)' }}
             />
             <p
-              className="text-sm"
-              style={{ color: 'var(--color-text-muted)' }}
+              className="text-sm text-muted"
             >
               No scores yet
             </p>
             <p
-              className="text-xs mt-1"
-              style={{ color: 'var(--color-text-muted)' }}
+              className="text-xs mt-1 text-muted"
             >
               Play games to see top scores!
             </p>
@@ -151,8 +148,7 @@ export function LeaderboardPanel() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1">
                     <p
-                      className={`text-xs font-semibold truncate ${entry.equipped.nameEffect?.css_class || ''}`}
-                      style={{ color: 'var(--color-text)' }}
+                      className={`text-xs font-semibold truncate text-primary ${entry.equipped.nameEffect?.css_class || ''}`}
                     >
                       {entry.playerName}
                     </p>
@@ -162,8 +158,7 @@ export function LeaderboardPanel() {
                     )}
                   </div>
                   <p
-                    className="text-[10px] truncate"
-                    style={{ color: 'var(--color-text-muted)' }}
+                    className="text-[10px] truncate text-muted"
                   >
                     {entry.gameName}
                   </p>
@@ -171,8 +166,7 @@ export function LeaderboardPanel() {
 
                 {/* Score */}
                 <span
-                  className="text-xs font-bold flex-shrink-0"
-                  style={{ color: 'var(--color-primary)' }}
+                  className="text-xs font-bold flex-shrink-0 text-accent"
                 >
                   {entry.score.toLocaleString()}
                 </span>

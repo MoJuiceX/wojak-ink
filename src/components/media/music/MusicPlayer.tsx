@@ -93,8 +93,7 @@ export function MusicPlayer({ tracks }: MusicPlayerProps) {
           }}
         />
         <h2
-          className="text-xl font-bold relative"
-          style={{ color: 'var(--color-text)' }}
+          className="text-xl font-bold relative text-primary"
         >
           Background Music
           <span
@@ -163,15 +162,13 @@ export function MusicPlayer({ tracks }: MusicPlayerProps) {
         <div className="flex-1 flex items-center gap-4">
           <div>
             <span
-              className="font-medium block"
-              style={{ color: 'var(--color-text)' }}
+              className="font-medium block text-primary"
             >
               {currentTrack?.title || 'Wojak Vibes'}
             </span>
             {currentTrack?.artist && (
               <span
-                className="text-sm"
-                style={{ color: 'var(--color-text-muted)' }}
+                className="text-sm text-muted"
               >
                 {currentTrack.artist}
               </span>

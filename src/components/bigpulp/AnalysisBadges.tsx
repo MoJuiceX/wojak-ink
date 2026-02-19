@@ -104,23 +104,16 @@ function ProvenanceCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <Trophy size={14} style={{ color: impactColors.high }} />
-            <span
-              className="font-medium text-sm truncate"
-              style={{ color: 'var(--color-text)' }}
-            >
+            <span className="font-medium text-sm truncate text-primary">
               {trait.value}
             </span>
           </div>
-          <p
-            className="text-xs mt-1 line-clamp-2"
-            style={{ color: 'var(--color-text-muted)' }}
-          >
+          <p className="text-xs mt-1 line-clamp-2 text-muted">
             {trait.reason}
           </p>
         </div>
         <span
-          className="text-xs font-mono flex-shrink-0"
-          style={{ color: 'var(--color-text-secondary)' }}
+          className="text-xs font-mono flex-shrink-0 text-secondary"
           aria-label={`${trait.rarity} percent rarity`}
         >
           {trait.rarity.toFixed(1)}%
@@ -147,20 +140,14 @@ function RareComboCard({ combo }: { combo: RareCombo }) {
         <Gem size={16} style={{ color: '#ec4899' }} className="flex-shrink-0 mt-0.5" />
         <div className="flex-1 min-w-0">
           {combo.comboName && (
-            <p
-              className="font-medium text-sm"
-              style={{ color: 'var(--color-text)' }}
-            >
+            <p className="font-medium text-sm text-primary">
               "{combo.comboName}"
             </p>
           )}
-          <p
-            className="text-xs"
-            style={{ color: 'var(--color-text-secondary)' }}
-          >
+          <p className="text-xs text-secondary">
             {combo.traits.join(' + ')}
           </p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
+          <p className="text-xs mt-1 text-muted">
             Only {combo.occurrences} NFTs have this combo
           </p>
         </div>
@@ -190,10 +177,7 @@ export function AnalysisBadges({
           initial="initial"
           animate="animate"
         >
-          <h3
-            className="text-sm font-semibold"
-            style={{ color: 'var(--color-text-secondary)' }}
-          >
+          <h3 className="text-sm font-semibold text-secondary">
             Analysis
           </h3>
           <div className="flex flex-wrap gap-2">
@@ -221,10 +205,7 @@ export function AnalysisBadges({
           initial="initial"
           animate="animate"
         >
-          <h3
-            className="text-sm font-semibold"
-            style={{ color: 'var(--color-text-secondary)' }}
-          >
+          <h3 className="text-sm font-semibold text-secondary">
             High Provenance Traits
           </h3>
           <div className="space-y-2">
@@ -243,10 +224,7 @@ export function AnalysisBadges({
           initial="initial"
           animate="animate"
         >
-          <h3
-            className="text-sm font-semibold"
-            style={{ color: 'var(--color-text-secondary)' }}
-          >
+          <h3 className="text-sm font-semibold text-secondary">
             Rare Combos
           </h3>
           <div className="space-y-2">

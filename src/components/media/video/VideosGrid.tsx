@@ -90,8 +90,7 @@ export function VideosGrid({
           }}
         />
         <h2
-          className="text-xl font-bold relative"
-          style={{ color: 'var(--color-text)' }}
+          className="text-xl font-bold relative text-primary"
         >
           Music Videos
           {/* Underline glow */}
@@ -172,12 +171,11 @@ export function VideosGrid({
             />
           </motion.div>
           <h3
-            className="text-lg font-semibold mb-2"
-            style={{ color: 'var(--color-text)' }}
+            className="text-lg font-semibold mb-2 text-primary"
           >
             No videos yet
           </h3>
-          <p style={{ color: 'var(--color-text-muted)' }}>
+          <p className="text-muted">
             Check back soon for new content!
           </p>
         </motion.div>

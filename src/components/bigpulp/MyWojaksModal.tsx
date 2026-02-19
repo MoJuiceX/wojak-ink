@@ -120,10 +120,10 @@ export function MyWojaksModal({
                     <Wallet size={20} className="text-white" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
+                    <h2 className="text-lg font-bold text-primary">
                       My Wojaks
                     </h2>
-                    <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                    <p className="text-sm text-muted">
                       {ownedNFTs.length} Wojak{ownedNFTs.length !== 1 ? 's' : ''} in your wallet
                     </p>
                   </div>
@@ -134,7 +134,7 @@ export function MyWojaksModal({
                   className="p-2 rounded-lg transition-colors hover:bg-white/10"
                   aria-label="Close"
                 >
-                  <X size={24} style={{ color: 'var(--color-text-muted)' }} />
+                  <X size={24} className="text-muted" />
                 </button>
               </div>
 
@@ -142,13 +142,13 @@ export function MyWojaksModal({
               <div className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(80vh - 80px)' }}>
                 {isLoading ? (
                   <div className="flex flex-col items-center justify-center py-12 gap-4">
-                    <Loader2 size={40} className="animate-spin" style={{ color: '#f97316' }} />
-                    <p style={{ color: 'var(--color-text-muted)' }}>Loading your Wojaks...</p>
+                    <Loader2 size={40} className="animate-spin text-accent" />
+                    <p className="text-muted">Loading your Wojaks...</p>
                   </div>
                 ) : ownedNFTs.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-12 gap-4 text-center">
                     <span className="text-5xl opacity-50">😢</span>
-                    <p style={{ color: 'var(--color-text-muted)' }}>
+                    <p className="text-muted">
                       No Wojak Farmers Plot NFTs found in your wallet
                     </p>
                   </div>
@@ -210,10 +210,9 @@ export function MyWojaksModal({
 
               {/* Footer hint */}
               <div
-                className="p-3 border-t text-center text-sm"
+                className="p-3 border-t text-center text-sm text-muted"
                 style={{
                   borderColor: 'var(--color-border, rgba(255, 255, 255, 0.1))',
-                  color: 'var(--color-text-muted)',
                 }}
               >
                 Click a Wojak to get BigPulp's analysis

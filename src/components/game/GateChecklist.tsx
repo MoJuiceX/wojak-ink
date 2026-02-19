@@ -252,7 +252,7 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, o
                           onKeyDown={e => { if (e.key === 'Enter') handleLinkDid(); }}
                           style={{ fontSize: 13 }}
                         />
-                        {didError && <span className="text-sm" style={{ color: 'var(--color-error)' }}>{didError}</span>}
+                        {didError && <span className="text-sm text-error">{didError}</span>}
                         <button
                           className="btn btn-primary text-sm"
                           style={{ padding: '6px 16px' }}
@@ -363,7 +363,7 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, o
                           onKeyDown={e => { if (e.key === 'Enter') handleVerifyNft(); }}
                           style={{ fontSize: 13 }}
                         />
-                        {nftError && <span className="text-sm" style={{ color: 'var(--color-error)' }}>{nftError}</span>}
+                        {nftError && <span className="text-sm text-error">{nftError}</span>}
                         <button
                           className="btn btn-primary text-sm"
                           style={{ padding: '6px 16px' }}

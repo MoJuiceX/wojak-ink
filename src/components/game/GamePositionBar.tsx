@@ -60,7 +60,7 @@ export function GamePositionBar({ mode, isRegistered, playerPosition, wojakPosit
       <div className="flex items-center" style={{ maxWidth: 720, margin: '0 auto', padding: '12px 16px' }}>
         {mode === 'players' && playerPosition && (
           <>
-            <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-primary)', marginRight: 12 }}>You</span>
+            <span className="text-accent" style={{ fontSize: 13, fontWeight: 500, marginRight: 12 }}>You</span>
             <span style={{ fontSize: 14, fontWeight: 700, marginRight: 8 }}>#{playerPosition.rank}</span>
             <span className="text-secondary" style={{ fontSize: 14 }}>
               {playerPosition.powerLevel.toLocaleString()} pts
@@ -81,7 +81,7 @@ export function GamePositionBar({ mode, isRegistered, playerPosition, wojakPosit
               alt={wojakPosition.name}
               style={{ width: 28, height: 28, borderRadius: 'var(--radius-md)', objectFit: 'cover', marginRight: 8 }}
             />
-            <span style={{ fontSize: 13, color: 'var(--color-primary)', marginRight: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <span className="text-accent" style={{ fontSize: 13, marginRight: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {wojakPosition.name}
             </span>
             <span style={{ fontSize: 14, fontWeight: 700 }}>#{wojakPosition.rank}</span>
