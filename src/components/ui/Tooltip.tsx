@@ -72,8 +72,8 @@ export function Tooltip({ children, text, position = 'bottom' }: TooltipProps) {
             <div
               className="px-2 py-1 rounded-md text-xs font-medium whitespace-nowrap"
               style={{
-                background: 'var(--color-bg-primary)',
-                color: 'var(--color-text-primary)',
+                background: 'var(--color-bg)',
+                color: 'var(--color-text)',
                 border: '1px solid var(--color-border)',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
               }}

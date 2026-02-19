@@ -256,7 +256,7 @@ function BottomPanel() {
     <div
       className="rounded-2xl overflow-hidden"
       style={{
-        background: 'var(--color-glass-bg)',
+        background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
       }}
     >

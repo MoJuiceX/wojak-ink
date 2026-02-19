@@ -201,9 +201,9 @@ export function LegacyCacheStatusIndicator({
               animate={{ rotate: 360 }}
               transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
             >
-              <RefreshCw size={12} style={{ color: 'var(--color-brand-primary)' }} />
+              <RefreshCw size={12} style={{ color: 'var(--color-primary)' }} />
             </motion.div>
-            <span style={{ color: 'var(--color-brand-primary)' }}>Updating...</span>
+            <span style={{ color: 'var(--color-primary)' }}>Updating...</span>
           </motion.div>
         ) : refreshState === 'success' ? (
           <motion.div
@@ -272,7 +272,7 @@ export function LegacyCacheStatusIndicator({
                     style={{
                       background: 'var(--color-surface)',
                       border: '1px solid var(--color-border)',
-                      color: 'var(--color-text-primary)',
+                      color: 'var(--color-text)',
                       boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
                       width: '220px',
                       lineHeight: '1.4',
@@ -412,7 +412,7 @@ function BadgeDropdown({
         style={{
           width: '28px',
           height: '28px',
-          color: showInfo ? 'var(--color-brand-primary)' : 'var(--color-text-muted)',
+          color: showInfo ? 'var(--color-primary)' : 'var(--color-text-muted)',
           border: `1px solid ${showInfo ? 'var(--color-border-active)' : 'var(--color-border)'}`,
           boxShadow: showInfo ? 'var(--glow-primary)' : 'none',
         }}
@@ -430,7 +430,7 @@ function BadgeDropdown({
       <motion.button
         className={`bigpulp-btn flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${isFilterActive ? 'bigpulp-btn-active' : ''}`}
         style={{
-          color: isFilterActive ? 'var(--color-brand-primary)' : 'var(--color-text-secondary)',
+          color: isFilterActive ? 'var(--color-primary)' : 'var(--color-text-secondary)',
           border: `1px solid ${isFilterActive ? 'var(--color-border-active)' : 'var(--color-border)'}`,
           boxShadow: isFilterActive ? 'var(--glow-primary)' : 'none',
         }}
@@ -471,8 +471,8 @@ function BadgeDropdown({
             transition={{ duration: 0.15 }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <Award size={16} style={{ color: 'var(--color-brand-primary)' }} />
-              <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+              <Award size={16} style={{ color: 'var(--color-primary)' }} />
+              <span className="font-semibold" style={{ color: 'var(--color-text)' }}>
                 What's a Badge?
               </span>
             </div>
@@ -531,7 +531,7 @@ function BadgeDropdown({
               className="w-full px-3 py-2 text-left text-sm transition-colors flex items-center justify-between hover:bg-white/5"
               style={{
                 background: selectedBadge === ALL_BADGES_FILTER ? 'var(--color-surface)' : 'transparent',
-                color: 'var(--color-text-primary)',
+                color: 'var(--color-text)',
                 borderBottom: '1px solid var(--color-border)',
               }}
               onClick={() => handleSelect(ALL_BADGES_FILTER)}
@@ -543,7 +543,7 @@ function BadgeDropdown({
                 </span>
                 <span
                   className="w-12 text-right text-xs font-medium"
-                  style={{ color: 'var(--color-brand-primary)' }}
+                  style={{ color: 'var(--color-primary)' }}
                 >
                   {totalListed}
                 </span>
@@ -557,7 +557,7 @@ function BadgeDropdown({
                 className="w-full px-3 py-2 text-left text-sm transition-colors flex items-center justify-between hover:bg-white/5"
                 style={{
                   background: selectedBadge === badge.name ? 'var(--color-surface)' : 'transparent',
-                  color: 'var(--color-text-primary)',
+                  color: 'var(--color-text)',
                 }}
                 onClick={() => handleSelect(badge.name)}
               >
@@ -569,7 +569,7 @@ function BadgeDropdown({
                   <span
                     className="w-12 text-right text-xs font-medium"
                     style={{
-                      color: (badge.listedCount || 0) > 0 ? 'var(--color-brand-primary)' : 'var(--color-text-muted)',
+                      color: (badge.listedCount || 0) > 0 ? 'var(--color-primary)' : 'var(--color-text-muted)',
                     }}
                   >
                     {badge.listedCount || 0}
@@ -623,7 +623,7 @@ function CellDetailModal({
           <div>
             <h3
               className="font-semibold"
-              style={{ color: 'var(--color-text-primary)' }}
+              style={{ color: 'var(--color-text)' }}
             >
               {cell.rarityBin.label} • {cell.priceBin.label} XCH
             </h3>
@@ -673,7 +673,7 @@ function CellDetailModal({
                   <div className="p-2">
                     <p
                       className="text-sm font-medium truncate"
-                      style={{ color: 'var(--color-text-primary)' }}
+                      style={{ color: 'var(--color-text)' }}
                     >
                       {nft.name}
                     </p>
@@ -681,7 +681,7 @@ function CellDetailModal({
                       <div className="flex items-baseline gap-1.5">
                         <span
                           className="text-sm font-semibold"
-                          style={{ color: 'var(--color-brand-primary)' }}
+                          style={{ color: 'var(--color-primary)' }}
                         >
                           {nft.priceXch.toFixed(2)} XCH
                         </span>
@@ -740,7 +740,7 @@ function HeatMapCellCompact({
           ? 'transparent'
           : cell.intensity > 0.3
             ? 'white'
-            : 'var(--color-text-primary)',
+            : 'var(--color-text)',
         textShadow: cell.intensity > 0.3 ? '0 1px 1px rgba(0,0,0,0.5)' : 'none',
         border: showZoneBorder && !isEmpty
           ? '2px solid rgba(255,149,0,0.8)'
@@ -823,7 +823,7 @@ function HeatMapCell({
           ? 'var(--color-text-muted)'
           : cell.intensity > 0.4
             ? 'white'
-            : 'var(--color-text-primary)',
+            : 'var(--color-text)',
         textShadow: cell.intensity > 0.4 ? '0 1px 2px rgba(0,0,0,0.5)' : 'none',
         boxShadow: getCellShadow(),
         // Zone border: premium glow effect

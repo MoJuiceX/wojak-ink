@@ -119,7 +119,7 @@ export function Dropdown<T extends string>({
         <label
           htmlFor={id}
           className="block text-sm font-medium mb-1"
-          style={{ color: 'var(--color-text-primary)' }}
+          style={{ color: 'var(--color-text)' }}
         >
           {label}
         </label>
@@ -149,13 +149,13 @@ export function Dropdown<T extends string>({
           w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg
           text-sm text-left transition-colors
           focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
-          focus-visible:ring-[var(--color-brand-primary)]
+          focus-visible:ring-[var(--color-primary)]
           ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
         `}
         style={{
-          background: 'var(--color-glass-bg)',
+          background: 'var(--color-surface)',
           border: '1px solid var(--color-border)',
-          color: 'var(--color-text-primary)',
+          color: 'var(--color-text)',
         }}
       >
         <span className="truncate">{selectedOption?.label || 'Select...'}</span>
@@ -196,14 +196,14 @@ export function Dropdown<T extends string>({
                 onMouseEnter={() => setFocusedIndex(index)}
                 className={`
                   px-3 py-2 cursor-pointer transition-colors
-                  ${focusedIndex === index ? 'bg-[var(--color-glass-hover)]' : ''}
+                  ${focusedIndex === index ? 'bg-[var(--color-surface-hover)]' : ''}
                 `}
                 style={{
                   background:
                     option.value === value
-                      ? 'var(--color-glass-bg)'
+                      ? 'var(--color-surface)'
                       : focusedIndex === index
-                        ? 'var(--color-glass-hover)'
+                        ? 'var(--color-surface-hover)'
                         : 'transparent',
                 }}
               >
@@ -211,7 +211,7 @@ export function Dropdown<T extends string>({
                   <div className="min-w-0">
                     <p
                       className="text-sm font-medium truncate"
-                      style={{ color: 'var(--color-text-primary)' }}
+                      style={{ color: 'var(--color-text)' }}
                     >
                       {option.label}
                     </p>
@@ -227,7 +227,7 @@ export function Dropdown<T extends string>({
                   {option.value === value && (
                     <Check
                       size={16}
-                      style={{ color: 'var(--color-brand-primary)' }}
+                      style={{ color: 'var(--color-primary)' }}
                     />
                   )}
                 </div>

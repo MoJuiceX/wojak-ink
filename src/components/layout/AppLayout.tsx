@@ -70,8 +70,8 @@ export function AppLayout({
       className="flex flex-col"
       style={{
         minHeight: '100dvh',
-        background: 'var(--color-bg-primary)',
-        color: 'var(--color-text-primary)',
+        background: 'var(--color-bg)',
+        color: 'var(--color-text)',
       }}
     >
       {/* Accessibility skip link */}

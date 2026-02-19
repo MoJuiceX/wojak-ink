@@ -180,7 +180,7 @@ function GeneratorContent() {
                 href="https://x.com/MoJuiceX"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: 'var(--color-brand-primary)' }}
+                style={{ color: 'var(--color-primary)' }}
               >
                 @MoJuiceX
               </a>

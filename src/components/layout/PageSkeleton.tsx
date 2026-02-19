@@ -23,7 +23,7 @@ function SkeletonBox({
     <motion.div
       className={`rounded-lg ${className}`}
       style={{
-        background: 'var(--color-glass-bg)',
+        background: 'var(--color-surface)',
         ...style,
       }}
       animate={{

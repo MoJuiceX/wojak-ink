@@ -81,7 +81,7 @@ export function DesktopCharacterCard({
           : 'none',
         transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
         // Focus ring styles
-        outlineColor: 'var(--color-brand-primary)',
+        outlineColor: 'var(--color-primary)',
         outlineOffset: 4,
       }}
       variants={cardVariants}

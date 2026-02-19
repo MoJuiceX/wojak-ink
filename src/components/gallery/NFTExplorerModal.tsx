@@ -188,7 +188,7 @@ export function NFTExplorerModal({ isOpen, onClose }: NFTExplorerModalProps) {
           <motion.button
             className="absolute top-6 right-6 w-12 h-12 flex items-center justify-center rounded-xl transition-colors"
             style={{
-              background: 'var(--color-glass-bg)',
+              background: 'var(--color-surface)',
               color: 'var(--color-text-secondary)',
               border: '1px solid var(--color-border)',
             }}
@@ -196,7 +196,7 @@ export function NFTExplorerModal({ isOpen, onClose }: NFTExplorerModalProps) {
               e.stopPropagation();
               setIsImageExpanded(false);
             }}
-            whileHover={{ background: 'var(--color-glass-hover)', scale: 1.05 }}
+            whileHover={{ background: 'var(--color-surface-hover)', scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             aria-label="Close fullscreen"
           >
@@ -207,13 +207,13 @@ export function NFTExplorerModal({ isOpen, onClose }: NFTExplorerModalProps) {
           <div
             className="absolute top-6 left-6 px-4 py-2 rounded-xl"
             style={{
-              background: 'var(--color-glass-bg)',
+              background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
             }}
           >
             <span
               className="font-bold text-lg"
-              style={{ color: 'var(--color-text-primary)' }}
+              style={{ color: 'var(--color-text)' }}
             >
               {currentNft.name}
             </span>

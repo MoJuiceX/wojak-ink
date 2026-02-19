@@ -189,7 +189,7 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
             <div className="text-center mb-6">
               <h1
                 className="text-2xl font-bold mb-2"
-                style={{ color: 'var(--color-text-primary)' }}
+                style={{ color: 'var(--color-text)' }}
               >
                 Welcome to the Grove
               </h1>
@@ -219,11 +219,11 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
                   placeholder={user?.firstName || 'Your display name'}
                   className="w-full px-3 py-2 rounded-lg text-base"
                   style={{
-                    background: 'var(--color-bg-primary)',
+                    background: 'var(--color-bg)',
                     border: errors.displayName
                       ? '1px solid var(--color-error, #ef4444)'
                       : '1px solid var(--color-border)',
-                    color: 'var(--color-text-primary)',
+                    color: 'var(--color-text)',
                   }}
                 />
                 {errors.displayName && (
@@ -257,11 +257,11 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
                     placeholder="yourhandle"
                     className="w-full pl-8 pr-3 py-2 rounded-lg text-base"
                     style={{
-                      background: 'var(--color-bg-primary)',
+                      background: 'var(--color-bg)',
                       border: errors.xHandle
                         ? '1px solid var(--color-error, #ef4444)'
                         : '1px solid var(--color-border)',
-                      color: 'var(--color-text-primary)',
+                      color: 'var(--color-text)',
                     }}
                   />
                 </div>
@@ -285,12 +285,12 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
                     <div
                       className="px-3 py-2 rounded-lg flex items-center gap-2"
                       style={{
-                        background: 'var(--color-bg-primary)',
+                        background: 'var(--color-bg)',
                         border: '1px solid #22c55e',
                       }}
                     >
                       <Wallet size={18} style={{ color: '#22c55e' }} />
-                      <span style={{ color: 'var(--color-text-primary)' }} className="flex-1 text-sm">
+                      <span style={{ color: 'var(--color-text)' }} className="flex-1 text-sm">
                         {walletAddress.slice(0, 10)}...{walletAddress.slice(-6)}
                       </span>
                       <span style={{ color: '#22c55e' }}>✓</span>
@@ -317,7 +317,7 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
                     disabled={!walletInitialized || isWalletConnecting}
                     className="w-full px-3 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
                     style={{
-                      background: 'var(--color-brand-primary)',
+                      background: 'var(--color-primary)',
                       color: '#fff',
                     }}
                   >

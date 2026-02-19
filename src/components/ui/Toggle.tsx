@@ -80,7 +80,7 @@ export function Toggle({
             <label
               htmlFor={id}
               className="text-sm font-medium cursor-pointer"
-              style={{ color: 'var(--color-text-primary)' }}
+              style={{ color: 'var(--color-text)' }}
             >
               {label}
             </label>
@@ -115,7 +115,7 @@ export function Toggle({
           height: `${config.trackHeight}px`,
           borderRadius: '9999px',
           background: checked
-            ? 'var(--color-brand-primary)'
+            ? 'var(--color-primary)'
             : 'rgba(255,255,255,0.1)',
           flexShrink: 0,
           outline: 'none',

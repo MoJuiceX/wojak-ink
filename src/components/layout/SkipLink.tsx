@@ -26,7 +26,7 @@ export function SkipLink({
         focus:outline-none focus:ring-2
       "
       style={{
-        background: 'var(--color-brand-primary)',
+        background: 'var(--color-primary)',
         color: 'white',
         boxShadow: 'var(--glow-primary)',
       }}

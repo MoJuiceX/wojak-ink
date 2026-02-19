@@ -97,7 +97,7 @@ export function MyWojaksModal({
             <motion.div
               className="relative w-full max-w-2xl max-h-[80vh] rounded-2xl overflow-hidden"
               style={{
-                background: 'var(--color-glass-bg, rgba(20, 15, 10, 0.95))',
+                background: 'var(--color-surface, rgba(20, 15, 10, 0.95))',
                 border: '1px solid var(--color-border, rgba(255, 255, 255, 0.1))',
                 boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
               }}
@@ -120,7 +120,7 @@ export function MyWojaksModal({
                     <Wallet size={20} className="text-white" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                    <h2 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
                       My Wojaks
                     </h2>
                     <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>

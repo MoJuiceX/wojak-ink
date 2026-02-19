@@ -64,7 +64,7 @@ export function AccessibilitySettings({
         <h2
           id="accessibility-section-heading"
           className="text-lg font-bold"
-          style={{ color: 'var(--color-text-primary)' }}
+          style={{ color: 'var(--color-text)' }}
         >
           Accessibility
         </h2>

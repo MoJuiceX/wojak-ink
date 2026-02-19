@@ -86,7 +86,7 @@ export function ExplorerTopBar({
           className="w-10 h-10 flex items-center justify-center rounded-lg transition-colors"
           style={{ color: 'var(--color-text-secondary)' }}
           onClick={onClose}
-          whileHover={{ background: 'var(--color-glass-hover)' }}
+          whileHover={{ background: 'var(--color-surface-hover)' }}
           whileTap={{ scale: 0.95 }}
           aria-label="Close explorer"
         >
@@ -106,11 +106,11 @@ export function ExplorerTopBar({
             className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors"
             style={{
               color: 'var(--color-text-muted)',
-              background: 'var(--color-glass-bg)',
+              background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
             }}
             onClick={onExpand}
-            whileHover={{ background: 'var(--color-glass-hover)' }}
+            whileHover={{ background: 'var(--color-surface-hover)' }}
             whileTap={{ scale: 0.9 }}
             aria-label="Expand image"
           >
@@ -125,11 +125,11 @@ export function ExplorerTopBar({
             className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors"
             style={{
               color: 'var(--color-text-muted)',
-              background: 'var(--color-glass-bg)',
+              background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
             }}
             onClick={onShuffle}
-            whileHover={{ background: 'var(--color-glass-hover)' }}
+            whileHover={{ background: 'var(--color-surface-hover)' }}
             whileTap={{ scale: 0.9 }}
             aria-label="Shuffle to random NFT"
           >
@@ -151,15 +151,15 @@ export function ExplorerTopBar({
                 className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors"
                 style={{
                   color: isActive
-                    ? 'var(--color-brand-primary)'
+                    ? 'var(--color-primary)'
                     : 'var(--color-text-muted)',
-                  background: 'var(--color-glass-bg)',
+                  background: 'var(--color-surface)',
                   border: isActive
-                    ? '1px solid var(--color-brand-primary)'
+                    ? '1px solid var(--color-primary)'
                     : '1px solid var(--color-border)',
                 }}
                 onClick={() => onSortModeChange(toggleSortMode(sortMode, mode.base))}
-                whileHover={{ background: 'var(--color-glass-hover)' }}
+                whileHover={{ background: 'var(--color-surface-hover)' }}
                 whileTap={{ scale: 0.9 }}
                 aria-label={mode.label}
                 aria-pressed={isActive}
@@ -171,7 +171,7 @@ export function ExplorerTopBar({
                       size={10}
                       className="absolute -bottom-1 -right-1"
                       style={{
-                        color: 'var(--color-brand-primary)',
+                        color: 'var(--color-primary)',
                         strokeWidth: 3,
                       }}
                     />
@@ -189,15 +189,15 @@ export function ExplorerTopBar({
             className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors"
             style={{
               color: isPriceSortActive
-                ? 'var(--color-brand-primary)'
+                ? 'var(--color-primary)'
                 : 'var(--color-text-muted)',
-              background: 'var(--color-glass-bg)',
+              background: 'var(--color-surface)',
               border: isPriceSortActive
-                ? '1px solid var(--color-brand-primary)'
+                ? '1px solid var(--color-primary)'
                 : '1px solid var(--color-border)',
             }}
             onClick={handlePriceSort}
-            whileHover={{ background: 'var(--color-glass-hover)' }}
+            whileHover={{ background: 'var(--color-surface-hover)' }}
             whileTap={{ scale: 0.9 }}
             aria-label={sortMode === 'price-asc' ? 'Sort by price (low to high)' : 'Sort by price (high to low)'}
             aria-pressed={isPriceSortActive}
@@ -210,7 +210,7 @@ export function ExplorerTopBar({
                     size={10}
                     className="absolute -bottom-1 -right-1"
                     style={{
-                      color: 'var(--color-brand-primary)',
+                      color: 'var(--color-primary)',
                       strokeWidth: 3,
                     }}
                   />
@@ -219,7 +219,7 @@ export function ExplorerTopBar({
                     size={10}
                     className="absolute -bottom-1 -right-1"
                     style={{
-                      color: 'var(--color-brand-primary)',
+                      color: 'var(--color-primary)',
                       strokeWidth: 3,
                     }}
                   />

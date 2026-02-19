@@ -83,17 +83,17 @@ export function GallerySidebarControls({ showLabels }: GallerySidebarControlsPro
                 key={option.id}
                 className="flex items-center rounded-lg overflow-hidden"
                 style={{
-                  background: 'var(--color-glass-bg)',
-                  color: isActive ? 'var(--color-brand-primary)' : 'var(--color-text-secondary)',
+                  background: 'var(--color-surface)',
+                  color: isActive ? 'var(--color-primary)' : 'var(--color-text-secondary)',
                   border: isActive
-                    ? '1px solid var(--color-brand-primary)'
+                    ? '1px solid var(--color-primary)'
                     : '1px solid var(--color-border)',
                   height: 48,
                   paddingLeft: 14,
                   paddingRight: 14,
                 }}
                 onClick={() => setFilterMode(option.id)}
-                whileHover={{ background: 'var(--color-glass-hover)' }}
+                whileHover={{ background: 'var(--color-surface-hover)' }}
                 whileTap={{ scale: 0.95 }}
                 title={option.label}
               >
@@ -133,17 +133,17 @@ export function GallerySidebarControls({ showLabels }: GallerySidebarControlsPro
                 key={option.base}
                 className="flex items-center rounded-lg overflow-hidden"
                 style={{
-                  background: 'var(--color-glass-bg)',
-                  color: isActive ? 'var(--color-brand-primary)' : 'var(--color-text-secondary)',
+                  background: 'var(--color-surface)',
+                  color: isActive ? 'var(--color-primary)' : 'var(--color-text-secondary)',
                   border: isActive
-                    ? '1px solid var(--color-brand-primary)'
+                    ? '1px solid var(--color-primary)'
                     : '1px solid var(--color-border)',
                   height: 48,
                   paddingLeft: 14,
                   paddingRight: 14,
                 }}
                 onClick={() => setSortMode(toggleSortMode(sortMode, option.base))}
-                whileHover={{ background: 'var(--color-glass-hover)' }}
+                whileHover={{ background: 'var(--color-surface-hover)' }}
                 whileTap={{ scale: 0.95 }}
                 title={`${option.label} (${direction === 'asc' ? 'ascending' : 'descending'})`}
               >
@@ -155,7 +155,7 @@ export function GallerySidebarControls({ showLabels }: GallerySidebarControlsPro
                       size={10}
                       className="absolute -bottom-1 -right-1"
                       style={{
-                        color: 'var(--color-brand-primary)',
+                        color: 'var(--color-primary)',
                         strokeWidth: 3,
                       }}
                     />

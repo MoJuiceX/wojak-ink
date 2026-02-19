@@ -28,7 +28,7 @@
 }
 
 .wallet-compact__icon {
-  color: var(--color-brand-primary);
+  color: var(--color-primary);
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -109,7 +109,7 @@
 .wallet-compact__address {
   font-family: monospace;
   font-size: 0.8rem;
-  color: var(--color-text-primary);
+  color: var(--color-text);
 }
 
 .wallet-compact__divider {
@@ -123,7 +123,7 @@
 }
 
 .wallet-compact__nft-count strong {
-  color: var(--color-text-primary);
+  color: var(--color-text);
   font-weight: 600;
 }
 
@@ -148,8 +148,8 @@
 }
 
 .wallet-compact__icon-btn:hover:not(:disabled) {
-  border-color: var(--color-brand-primary);
-  color: var(--color-brand-primary);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
   background: rgba(249, 115, 22, 0.1);
 }
 

@@ -21,7 +21,7 @@
 }
 
 .gift-modal {
-  background: var(--color-bg-primary, #1a1a2e);
+  background: var(--color-bg, #1a1a2e);
   border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
   border-radius: 20px;
   padding: 24px;
@@ -75,7 +75,7 @@
 .gift-modal-header h2 {
   margin: 0;
   font-size: 1.25rem;
-  color: var(--color-text-primary, #fff);
+  color: var(--color-text, #fff);
 }
 
 .gift-modal-loading,
@@ -92,7 +92,7 @@
 .gift-modal-empty p {
   margin: 0;
   font-size: 1rem;
-  color: var(--color-text-primary, #fff);
+  color: var(--color-text, #fff);
 }
 
 .gift-modal-empty span {
@@ -132,7 +132,7 @@
   background: var(--color-bg-secondary, rgba(255, 255, 255, 0.05));
   border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
   border-radius: 10px;
-  color: var(--color-text-primary, #fff);
+  color: var(--color-text, #fff);
   font-size: 0.95rem;
   width: 100%;
 }
@@ -140,7 +140,7 @@
 .gift-select:focus,
 .gift-input:focus {
   outline: none;
-  border-color: var(--color-brand-primary, #f97316);
+  border-color: var(--color-primary, #f97316);
 }
 
 .gift-select option {
@@ -175,11 +175,11 @@
 }
 
 .gift-type-tab:hover {
-  color: var(--color-text-primary, #fff);
+  color: var(--color-text, #fff);
 }
 
 .gift-type-tab.active {
-  background: var(--color-brand-primary, #f97316);
+  background: var(--color-primary, #f97316);
   color: #fff;
 }
 
@@ -241,11 +241,11 @@
 }
 
 .gift-item-option:hover {
-  border-color: var(--color-brand-primary, #f97316);
+  border-color: var(--color-primary, #f97316);
 }
 
 .gift-item-option.selected {
-  border-color: var(--color-brand-primary, #f97316);
+  border-color: var(--color-primary, #f97316);
   background: rgba(249, 115, 22, 0.15);
 }
 
@@ -309,7 +309,7 @@
 
 .gift-preview p {
   margin: 0;
-  color: var(--color-text-primary, #fff);
+  color: var(--color-text, #fff);
   font-size: 0.9rem;
 }
 

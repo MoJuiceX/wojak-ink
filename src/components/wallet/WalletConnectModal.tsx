@@ -71,7 +71,7 @@ export function WalletConnectModal({ isOpen, onClose, walletConnect }: WalletCon
             <div className="text-center">
               <h2
                 className="text-xl font-bold mb-2"
-                style={{ color: 'var(--color-text-primary)' }}
+                style={{ color: 'var(--color-text)' }}
               >
                 Connect Sage Wallet
               </h2>

@@ -343,7 +343,7 @@
 }
 
 .level-badge {
-  background: var(--color-brand-primary, #ff6b00);
+  background: var(--color-primary, #ff6b00);
   color: white;
   padding: 6px 14px;
   border-radius: 10px;
@@ -357,7 +357,7 @@
 .juggle-titlebar .score {
   font-size: 24px;
   font-weight: 800;
-  color: var(--color-brand-primary, #ff6b00);
+  color: var(--color-primary, #ff6b00);
   font-family: monospace;
 }
 
@@ -645,7 +645,7 @@
 .juggle-content .game-title {
   font-size: 32px;
   font-weight: 800;
-  color: var(--color-text-primary, #fff);
+  color: var(--color-text, #fff);
   margin-top: -28px;
   margin-bottom: 12px;
 }
@@ -668,7 +668,7 @@
 }
 
 .juggle-content .high-score {
-  color: var(--color-brand-primary, #ff6b00);
+  color: var(--color-primary, #ff6b00);
   font-size: 16px;
   font-weight: 600;
   margin-top: 16px;
@@ -731,7 +731,7 @@
 .juggle-content .score-value {
   font-size: 56px;
   font-weight: 800;
-  color: var(--color-brand-primary, #ff6b00);
+  color: var(--color-primary, #ff6b00);
 }
 
 .juggle-content .new-record {
@@ -789,18 +789,18 @@
 }
 
 .juggle-content .info-close:hover {
-  color: var(--color-text-primary, #fff);
+  color: var(--color-text, #fff);
 }
 
 .juggle-content .info-modal h2 {
   margin: 0 0 16px 0;
   font-size: 22px;
   font-weight: 700;
-  color: var(--color-brand-primary, #ff6b00);
+  color: var(--color-primary, #ff6b00);
 }
 
 .juggle-content .info-content {
-  color: var(--color-text-primary, #fff);
+  color: var(--color-text, #fff);
   font-size: 14px;
   line-height: 1.6;
 }
@@ -840,7 +840,7 @@
 .leaderboard-title {
   font-size: 16px;
   font-weight: 700;
-  color: var(--color-brand-primary, #ff6b00);
+  color: var(--color-primary, #ff6b00);
   margin-bottom: 12px;
   text-align: center;
 }
@@ -866,14 +866,14 @@
 .leaderboard-rank {
   font-size: 14px;
   font-weight: 700;
-  color: var(--color-brand-primary, #ff6b00);
+  color: var(--color-primary, #ff6b00);
   width: 32px;
 }
 
 .leaderboard-name {
   flex: 1;
   font-size: 14px;
-  color: var(--color-text-primary, #fff);
+  color: var(--color-text, #fff);
   text-align: left;
   padding: 0 8px;
   overflow: hidden;
@@ -902,14 +902,14 @@
   border: 2px solid rgba(255, 107, 0, 0.4);
   border-radius: 12px;
   background: rgba(0, 0, 0, 0.4);
-  color: var(--color-text-primary, #fff);
+  color: var(--color-text, #fff);
   outline: none;
   margin: 12px 0;
   text-align: center;
 }
 
 .name-input:focus {
-  border-color: var(--color-brand-primary, #ff6b00);
+  border-color: var(--color-primary, #ff6b00);
 }
 
 .name-input::placeholder {
@@ -1015,7 +1015,7 @@
 .game-over-score-value {
   font-size: 72px;
   font-weight: 800;
-  color: var(--color-brand-primary, #ff6b00);
+  color: var(--color-primary, #ff6b00);
   line-height: 1;
   text-shadow: 0 4px 20px rgba(255, 107, 0, 0.4);
 }
@@ -1053,14 +1053,14 @@
   border: 2px solid rgba(255, 107, 0, 0.4);
   border-radius: 14px;
   background: rgba(0, 0, 0, 0.4);
-  color: var(--color-text-primary, #fff);
+  color: var(--color-text, #fff);
   outline: none;
   text-align: center;
   transition: all 0.2s;
 }
 
 .game-over-input:focus {
-  border-color: var(--color-brand-primary, #ff6b00);
+  border-color: var(--color-primary, #ff6b00);
   background: rgba(0, 0, 0, 0.5);
 }
 
@@ -1079,7 +1079,7 @@
   padding: 14px 24px;
   font-size: 16px;
   font-weight: 600;
-  background: var(--color-brand-primary, #ff6b00);
+  background: var(--color-primary, #ff6b00);
   color: white;
   border: none;
   border-radius: 14px;
@@ -1114,13 +1114,13 @@
 
 .game-over-skip:hover {
   background: rgba(255, 255, 255, 0.12);
-  color: var(--color-text-primary, #fff);
+  color: var(--color-text, #fff);
   border-color: rgba(255, 255, 255, 0.25);
 }
 
 /* Score saved confirmation text */
 .game-over-saved {
-  color: var(--color-brand-primary, #ff6b00);
+  color: var(--color-primary, #ff6b00);
   font-size: 14px;
   font-weight: 600;
   text-align: center;
@@ -1139,7 +1139,7 @@
 }
 
 .leaderboard-position strong {
-  color: var(--color-brand-primary, #ff6b00);
+  color: var(--color-primary, #ff6b00);
   font-weight: 700;
 }
 

@@ -56,7 +56,7 @@ export function StickyMiniPreview({
             top: 70,
             width: 140,
             height: 200,
-            background: 'var(--color-glass-bg)',
+            background: 'var(--color-surface)',
             border: '2px solid var(--color-primary)',
           }}
           variants={prefersReducedMotion ? undefined : stickyPreviewVariants}

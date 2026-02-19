@@ -70,7 +70,7 @@ export function PreviewCanvas({
       style={{
         ...sizeStyles,
         aspectRatio: '1 / 1',
-        background: embedded ? 'transparent' : 'var(--color-glass-bg)',
+        background: embedded ? 'transparent' : 'var(--color-surface)',
         border: 'none',
       }}
     >
@@ -135,7 +135,7 @@ export function PreviewCanvas({
       {isRendering && (
         <motion.div
           className="absolute inset-0 flex items-center justify-center"
-          style={{ background: 'var(--color-glass-bg)' }}
+          style={{ background: 'var(--color-surface)' }}
           variants={prefersReducedMotion ? undefined : skeletonPulseVariants}
           initial="initial"
           animate="animate"
@@ -143,7 +143,7 @@ export function PreviewCanvas({
           <Loader2
             className="animate-spin"
             size={32}
-            style={{ color: 'var(--color-brand-primary)' }}
+            style={{ color: 'var(--color-primary)' }}
           />
         </motion.div>
       )}

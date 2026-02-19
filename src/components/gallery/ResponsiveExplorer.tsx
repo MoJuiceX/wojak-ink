@@ -50,7 +50,7 @@ function DesktopPanelFallback() {
         >
           <div
             className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin"
-            style={{ borderColor: 'var(--color-brand-primary)' }}
+            style={{ borderColor: 'var(--color-primary)' }}
           />
         </div>
       </div>

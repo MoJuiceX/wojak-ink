@@ -195,7 +195,7 @@ function TraitRankingRow({
       <span
         className="truncate"
         style={{
-          color: isCurrent ? 'var(--color-accent)' : 'var(--color-text-primary)',
+          color: isCurrent ? 'var(--color-accent)' : 'var(--color-text)',
           fontWeight: isCurrent ? 700 : 400,
         }}
       >
@@ -267,7 +267,7 @@ function AttributeCard({
       <div className="flex items-baseline justify-between gap-2">
         <p
           className="font-medium truncate"
-          style={{ color: 'var(--color-text-primary)' }}
+          style={{ color: 'var(--color-text)' }}
         >
           {trait.value}
         </p>
@@ -356,14 +356,14 @@ function HistoryTab({ nftId }: { nftId: number }) {
           key={`${sale.nftId}-${sale.timestamp}`}
           className="flex items-center justify-between p-3 rounded-lg"
           style={{
-            background: 'var(--color-bg-tertiary)',
+            background: 'var(--color-elevated)',
             border: '1px solid var(--color-border)',
           }}
         >
           <div>
             <p
               className="font-medium text-sm"
-              style={{ color: 'var(--color-text-primary)' }}
+              style={{ color: 'var(--color-text)' }}
             >
               Sold for {formatPriceXCH(sale.xchEquivalent)}
             </p>
@@ -389,13 +389,13 @@ function HistoryTab({ nftId }: { nftId: number }) {
       <div
         className="flex items-center justify-between p-3 rounded-lg"
         style={{
-          background: 'var(--color-bg-tertiary)',
+          background: 'var(--color-elevated)',
           border: '1px solid var(--color-border)',
         }}
       >
         <p
           className="font-medium text-sm"
-          style={{ color: 'var(--color-text-primary)' }}
+          style={{ color: 'var(--color-text)' }}
         >
           Minted
         </p>
@@ -634,7 +634,7 @@ export function DesktopExplorerPanel({
                   style={{
                     width: '45%',
                     paddingTop: '80px',
-                    background: 'var(--color-bg-tertiary)',
+                    background: 'var(--color-elevated)',
                   }}
                 >
                   {/* NFT Image */}
@@ -729,7 +729,7 @@ export function DesktopExplorerPanel({
                         <div className="flex items-baseline gap-2">
                           <span
                             className="text-xl font-bold"
-                            style={{ color: 'var(--color-text-primary)' }}
+                            style={{ color: 'var(--color-text)' }}
                           >
                             {formatPriceXCH(currentNft.listing.priceXCH)}
                           </span>
@@ -783,12 +783,12 @@ export function DesktopExplorerPanel({
                         <motion.button
                           className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors ml-4"
                           style={{
-                            background: 'var(--color-glass-bg)',
+                            background: 'var(--color-surface)',
                             color: 'var(--color-text-secondary)',
                             border: '1px solid var(--color-border)',
                           }}
                           onClick={() => setIsImageExpanded(true)}
-                          whileHover={{ background: 'var(--color-glass-hover)' }}
+                          whileHover={{ background: 'var(--color-surface-hover)' }}
                           whileTap={{ scale: 0.95 }}
                           aria-label="Expand image"
                         >
@@ -802,12 +802,12 @@ export function DesktopExplorerPanel({
                           <motion.button
                             className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors"
                             style={{
-                              background: 'var(--color-glass-bg)',
+                              background: 'var(--color-surface)',
                               color: 'var(--color-text-secondary)',
                               border: '1px solid var(--color-border)',
                             }}
                             onClick={shuffleToRandom}
-                            whileHover={{ background: 'var(--color-glass-hover)' }}
+                            whileHover={{ background: 'var(--color-surface-hover)' }}
                             whileTap={{ scale: 0.95 }}
                             aria-label="Shuffle to random NFT"
                           >
@@ -818,12 +818,12 @@ export function DesktopExplorerPanel({
                           <motion.button
                             className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors"
                             style={{
-                              background: 'var(--color-glass-bg)',
-                              color: getSortBase(sortMode) === 'id' ? 'var(--color-brand-primary)' : 'var(--color-text-secondary)',
-                              border: getSortBase(sortMode) === 'id' ? '1px solid var(--color-brand-primary)' : '1px solid var(--color-border)',
+                              background: 'var(--color-surface)',
+                              color: getSortBase(sortMode) === 'id' ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+                              border: getSortBase(sortMode) === 'id' ? '1px solid var(--color-primary)' : '1px solid var(--color-border)',
                             }}
                             onClick={() => setSortMode(toggleSortMode(sortMode, 'id'))}
-                            whileHover={{ background: 'var(--color-glass-hover)' }}
+                            whileHover={{ background: 'var(--color-surface-hover)' }}
                             whileTap={{ scale: 0.95 }}
                             aria-label="Sort by ID"
                             aria-pressed={getSortBase(sortMode) === 'id'}
@@ -832,9 +832,9 @@ export function DesktopExplorerPanel({
                               <Hash size={18} />
                               {getSortBase(sortMode) === 'id' && (
                                 getSortDirection(sortMode) === 'asc' ? (
-                                  <ChevronUp size={10} className="absolute -bottom-1 -right-1" style={{ color: 'var(--color-brand-primary)', strokeWidth: 3 }} />
+                                  <ChevronUp size={10} className="absolute -bottom-1 -right-1" style={{ color: 'var(--color-primary)', strokeWidth: 3 }} />
                                 ) : (
-                                  <ChevronDown size={10} className="absolute -bottom-1 -right-1" style={{ color: 'var(--color-brand-primary)', strokeWidth: 3 }} />
+                                  <ChevronDown size={10} className="absolute -bottom-1 -right-1" style={{ color: 'var(--color-primary)', strokeWidth: 3 }} />
                                 )
                               )}
                             </div>
@@ -844,12 +844,12 @@ export function DesktopExplorerPanel({
                           <motion.button
                             className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors"
                             style={{
-                              background: 'var(--color-glass-bg)',
-                              color: getSortBase(sortMode) === 'rarity' ? 'var(--color-brand-primary)' : 'var(--color-text-secondary)',
-                              border: getSortBase(sortMode) === 'rarity' ? '1px solid var(--color-brand-primary)' : '1px solid var(--color-border)',
+                              background: 'var(--color-surface)',
+                              color: getSortBase(sortMode) === 'rarity' ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+                              border: getSortBase(sortMode) === 'rarity' ? '1px solid var(--color-primary)' : '1px solid var(--color-border)',
                             }}
                             onClick={() => setSortMode(toggleSortMode(sortMode, 'rarity'))}
-                            whileHover={{ background: 'var(--color-glass-hover)' }}
+                            whileHover={{ background: 'var(--color-surface-hover)' }}
                             whileTap={{ scale: 0.95 }}
                             aria-label="Sort by rarity"
                             aria-pressed={getSortBase(sortMode) === 'rarity'}
@@ -858,9 +858,9 @@ export function DesktopExplorerPanel({
                               <Crown size={18} />
                               {getSortBase(sortMode) === 'rarity' && (
                                 getSortDirection(sortMode) === 'asc' ? (
-                                  <ChevronUp size={10} className="absolute -bottom-1 -right-1" style={{ color: 'var(--color-brand-primary)', strokeWidth: 3 }} />
+                                  <ChevronUp size={10} className="absolute -bottom-1 -right-1" style={{ color: 'var(--color-primary)', strokeWidth: 3 }} />
                                 ) : (
-                                  <ChevronDown size={10} className="absolute -bottom-1 -right-1" style={{ color: 'var(--color-brand-primary)', strokeWidth: 3 }} />
+                                  <ChevronDown size={10} className="absolute -bottom-1 -right-1" style={{ color: 'var(--color-primary)', strokeWidth: 3 }} />
                                 )
                               )}
                             </div>
@@ -870,12 +870,12 @@ export function DesktopExplorerPanel({
                           <motion.button
                             className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors"
                             style={{
-                              background: 'var(--color-glass-bg)',
-                              color: getSortBase(sortMode) === 'price' ? 'var(--color-brand-primary)' : 'var(--color-text-secondary)',
-                              border: getSortBase(sortMode) === 'price' ? '1px solid var(--color-brand-primary)' : '1px solid var(--color-border)',
+                              background: 'var(--color-surface)',
+                              color: getSortBase(sortMode) === 'price' ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+                              border: getSortBase(sortMode) === 'price' ? '1px solid var(--color-primary)' : '1px solid var(--color-border)',
                             }}
                             onClick={() => setSortMode(toggleSortMode(sortMode, 'price'))}
-                            whileHover={{ background: 'var(--color-glass-hover)' }}
+                            whileHover={{ background: 'var(--color-surface-hover)' }}
                             whileTap={{ scale: 0.95 }}
                             aria-label="Sort by price"
                             aria-pressed={getSortBase(sortMode) === 'price'}
@@ -884,9 +884,9 @@ export function DesktopExplorerPanel({
                               <DollarSign size={18} />
                               {getSortBase(sortMode) === 'price' && (
                                 getSortDirection(sortMode) === 'asc' ? (
-                                  <ChevronUp size={10} className="absolute -bottom-1 -right-1" style={{ color: 'var(--color-brand-primary)', strokeWidth: 3 }} />
+                                  <ChevronUp size={10} className="absolute -bottom-1 -right-1" style={{ color: 'var(--color-primary)', strokeWidth: 3 }} />
                                 ) : (
-                                  <ChevronDown size={10} className="absolute -bottom-1 -right-1" style={{ color: 'var(--color-brand-primary)', strokeWidth: 3 }} />
+                                  <ChevronDown size={10} className="absolute -bottom-1 -right-1" style={{ color: 'var(--color-primary)', strokeWidth: 3 }} />
                                 )
                               )}
                             </div>
@@ -903,7 +903,7 @@ export function DesktopExplorerPanel({
                     <span
                       className="text-2xl font-bold"
                       style={{
-                        color: 'var(--color-text-primary)',
+                        color: 'var(--color-text)',
                         minWidth: '180px',
                       }}
                     >
@@ -917,7 +917,7 @@ export function DesktopExplorerPanel({
                     >
                       <Crown
                         size={18}
-                        style={{ color: 'var(--color-brand-primary)' }}
+                        style={{ color: 'var(--color-primary)' }}
                       />
                       <span
                         className="text-sm font-medium"
@@ -948,7 +948,7 @@ export function DesktopExplorerPanel({
                           rel="noopener noreferrer"
                           className="cursor-pointer hover:underline transition-colors relative z-50"
                           style={{
-                            color: 'var(--color-brand-primary)',
+                            color: 'var(--color-primary)',
                             textDecoration: 'none',
                             pointerEvents: 'auto',
                           }}
@@ -971,7 +971,7 @@ export function DesktopExplorerPanel({
                             key={badge.badge}
                             className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
                             style={{
-                              background: 'var(--color-glass-bg)',
+                              background: 'var(--color-surface)',
                               border: '1px solid var(--color-border)',
                               color: 'var(--color-text-secondary)',
                             }}
@@ -1000,7 +1000,7 @@ export function DesktopExplorerPanel({
                   {/* Tabs */}
                   <div
                     className="flex gap-1 mb-4 p-1 rounded-lg"
-                    style={{ background: 'var(--color-bg-tertiary)' }}
+                    style={{ background: 'var(--color-elevated)' }}
                   >
                     {tabs.map((tab) => {
                       const isActive = activeTab === tab.id;
@@ -1013,7 +1013,7 @@ export function DesktopExplorerPanel({
                               ? 'var(--color-bg-secondary)'
                               : 'transparent',
                             color: isActive
-                              ? 'var(--color-text-primary)'
+                              ? 'var(--color-text)'
                               : 'var(--color-text-muted)',
                             border: isActive
                               ? '1px solid var(--color-border)'
@@ -1050,12 +1050,12 @@ export function DesktopExplorerPanel({
                 ref={closeButtonRef}
                 className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-xl transition-colors focus:outline-none focus-visible:ring-2 self-start mt-4"
                 style={{
-                  background: 'var(--color-glass-bg)',
+                  background: 'var(--color-surface)',
                   color: 'var(--color-text-secondary)',
                   border: '1px solid var(--color-border)',
                 }}
                 onClick={onClose}
-                whileHover={{ background: 'var(--color-glass-hover)', scale: 1.05 }}
+                whileHover={{ background: 'var(--color-surface-hover)', scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 aria-label="Close explorer"
                 initial={{ opacity: 0, x: 20 }}
@@ -1090,7 +1090,7 @@ export function DesktopExplorerPanel({
             <motion.button
               className="absolute top-6 right-6 w-12 h-12 flex items-center justify-center rounded-xl transition-colors"
               style={{
-                background: 'var(--color-glass-bg)',
+                background: 'var(--color-surface)',
                 color: 'var(--color-text-secondary)',
                 border: '1px solid var(--color-border)',
               }}
@@ -1098,7 +1098,7 @@ export function DesktopExplorerPanel({
                 e.stopPropagation();
                 setIsImageExpanded(false);
               }}
-              whileHover={{ background: 'var(--color-glass-hover)', scale: 1.05 }}
+              whileHover={{ background: 'var(--color-surface-hover)', scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               aria-label="Close fullscreen"
             >
@@ -1109,13 +1109,13 @@ export function DesktopExplorerPanel({
             <div
               className="absolute top-6 left-6 px-4 py-2 rounded-xl"
               style={{
-                background: 'var(--color-glass-bg)',
+                background: 'var(--color-surface)',
                 border: '1px solid var(--color-border)',
               }}
             >
               <span
                 className="font-bold text-lg"
-                style={{ color: 'var(--color-text-primary)' }}
+                style={{ color: 'var(--color-text)' }}
               >
                 {currentNft.name}
               </span>

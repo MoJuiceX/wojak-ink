@@ -26,7 +26,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  color: var(--color-text-primary, #fff);
+  color: var(--color-text, #fff);
   font-size: 14px;
   font-weight: 500;
 }
@@ -50,8 +50,8 @@
 }
 
 .sound-toggle-btn.active {
-  background: var(--color-brand-primary, #ff6b00);
-  border-color: var(--color-brand-primary, #ff6b00);
+  background: var(--color-primary, #ff6b00);
+  border-color: var(--color-primary, #ff6b00);
 }
 
 .sound-toggle-slider {
@@ -105,7 +105,7 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: var(--color-brand-primary, #ff6b00);
+  background: var(--color-primary, #ff6b00);
   cursor: pointer;
   border: none;
   box-shadow: 0 2px 6px rgba(255, 107, 0, 0.4);
@@ -125,7 +125,7 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: var(--color-brand-primary, #ff6b00);
+  background: var(--color-primary, #ff6b00);
   cursor: pointer;
   border: none;
   box-shadow: 0 2px 6px rgba(255, 107, 0, 0.4);
@@ -137,8 +137,8 @@
   border-radius: 2px;
   background: linear-gradient(
     to right,
-    var(--color-brand-primary, #ff6b00) 0%,
-    var(--color-brand-primary, #ff6b00) var(--value, 50%),
+    var(--color-primary, #ff6b00) 0%,
+    var(--color-primary, #ff6b00) var(--value, 50%),
     rgba(255, 255, 255, 0.15) var(--value, 50%),
     rgba(255, 255, 255, 0.15) 100%
   );

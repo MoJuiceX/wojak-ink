@@ -56,7 +56,7 @@ export function CopyButton({
           ${className}
         `}
         style={{
-          background: copied ? '#22c55e' : 'var(--color-glass-bg)',
+          background: copied ? '#22c55e' : 'var(--color-surface)',
           color: copied ? 'white' : 'var(--color-text-secondary)',
           border: copied ? 'none' : '1px solid var(--color-border)',
         }}
@@ -114,7 +114,7 @@ export function CopyText({
     <div
       className={`flex items-center gap-2 ${className}`}
       style={{
-        background: 'var(--color-glass-bg)',
+        background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
         borderRadius: '8px',
         padding: '8px 12px',

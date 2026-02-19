@@ -103,12 +103,12 @@ export function WalletButton({ className = '', size = 'md' }: WalletButtonProps)
           ${sizeStyles[size]}
         `}
         style={{
-          background: 'var(--color-glass-bg)',
+          background: 'var(--color-surface)',
           border: '1px solid var(--color-border)',
-          color: 'var(--color-text-primary)',
+          color: 'var(--color-text)',
         }}
         whileHover={{
-          borderColor: 'var(--color-brand-primary)',
+          borderColor: 'var(--color-primary)',
         }}
         whileTap={{ scale: 0.98 }}
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -157,7 +157,7 @@ export function WalletButton({ className = '', size = 'md' }: WalletButtonProps)
               style={{ color: copied ? '#22c55e' : 'var(--color-text-secondary)' }}
               onClick={handleCopyAddress}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'var(--color-glass-hover)';
+                e.currentTarget.style.background = 'var(--color-surface-hover)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = 'transparent';
@@ -175,7 +175,7 @@ export function WalletButton({ className = '', size = 'md' }: WalletButtonProps)
               style={{ color: 'var(--color-text-secondary)' }}
               onClick={() => setIsDropdownOpen(false)}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'var(--color-glass-hover)';
+                e.currentTarget.style.background = 'var(--color-surface-hover)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = 'transparent';
@@ -195,7 +195,7 @@ export function WalletButton({ className = '', size = 'md' }: WalletButtonProps)
               style={{ color: 'var(--color-error)' }}
               onClick={handleDisconnect}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'var(--color-glass-hover)';
+                e.currentTarget.style.background = 'var(--color-surface-hover)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = 'transparent';

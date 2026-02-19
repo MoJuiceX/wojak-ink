@@ -858,7 +858,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
         <div
           className="p-4 rounded-xl text-center"
           style={{
-            background: 'var(--color-glass-bg)',
+            background: 'var(--color-surface)',
             border: '1px solid var(--color-border)',
           }}
         >
@@ -873,7 +873,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
         <div
           className="p-6 rounded-xl text-center"
           style={{
-            background: 'var(--color-glass-bg)',
+            background: 'var(--color-surface)',
             border: '1px solid var(--color-border)',
           }}
         >
@@ -1097,7 +1097,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
         <div
           className="p-8 rounded-xl text-center"
           style={{
-            background: 'var(--color-glass-bg)',
+            background: 'var(--color-surface)',
             border: '1px solid var(--color-border)',
           }}
         >

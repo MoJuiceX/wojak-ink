@@ -80,12 +80,12 @@ function MainTabContent({
       <div className="flex items-center gap-2 flex-wrap">
         <h2
           className="text-lg font-bold"
-          style={{ color: 'var(--color-text-primary)' }}
+          style={{ color: 'var(--color-text)' }}
         >
           {nft.name}
         </h2>
         <div className="flex items-center gap-1">
-          <Crown size={16} style={{ color: 'var(--color-brand-primary)' }} />
+          <Crown size={16} style={{ color: 'var(--color-primary)' }} />
           <span
             className="text-sm font-medium"
             style={{ color: 'var(--color-text-secondary)' }}
@@ -105,7 +105,7 @@ function MainTabContent({
                 key={badge.badge}
                 className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
                 style={{
-                  background: 'var(--color-glass-bg)',
+                  background: 'var(--color-surface)',
                   border: '1px solid var(--color-border)',
                   color: 'var(--color-text-secondary)',
                 }}
@@ -140,7 +140,7 @@ function MainTabContent({
             target="_blank"
             rel="noopener noreferrer"
             className="hover:underline"
-            style={{ color: 'var(--color-brand-primary)' }}
+            style={{ color: 'var(--color-primary)' }}
           >
             {ownerInfo.name || truncateAddress(ownerInfo.address)}
           </a>
@@ -155,7 +155,7 @@ function MainTabContent({
           <div className="flex items-baseline gap-2">
             <p
               className="text-xl font-bold"
-              style={{ color: 'var(--color-text-primary)' }}
+              style={{ color: 'var(--color-text)' }}
             >
               {formatPriceXCH(nft.listing.priceXCH)}
             </p>
@@ -233,7 +233,7 @@ function TraitRankingRow({
       <span
         className="truncate"
         style={{
-          color: isCurrent ? 'var(--color-accent)' : 'var(--color-text-primary)',
+          color: isCurrent ? 'var(--color-accent)' : 'var(--color-text)',
           fontWeight: isCurrent ? 700 : 400,
         }}
       >
@@ -273,7 +273,7 @@ function TraitRankingPopup({
       <motion.div
         className="w-full max-w-xs rounded-xl overflow-hidden"
         style={{
-          background: 'var(--color-bg-primary)',
+          background: 'var(--color-bg)',
           border: '1px solid var(--color-border)',
           boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
         }}
@@ -377,7 +377,7 @@ function MetadataTabContent({ nft }: { nft: NFT }) {
               <div className="flex items-baseline justify-between gap-1">
                 <p
                   className="text-sm font-medium truncate"
-                  style={{ color: 'var(--color-text-primary)' }}
+                  style={{ color: 'var(--color-text)' }}
                 >
                   {trait.value}
                 </p>
@@ -465,7 +465,7 @@ function HistoryTabContent({ nftId }: { nftId: number }) {
         <div className="flex items-center justify-between">
           <span
             className="text-sm font-medium"
-            style={{ color: 'var(--color-text-primary)' }}
+            style={{ color: 'var(--color-text)' }}
           >
             Minted
           </span>
@@ -490,7 +490,7 @@ function HistoryTabContent({ nftId }: { nftId: number }) {
           <div className="flex items-center justify-between">
             <span
               className="text-sm font-medium"
-              style={{ color: 'var(--color-text-primary)' }}
+              style={{ color: 'var(--color-text)' }}
             >
               Sold for {formatPriceXCH(sale.xchEquivalent)}
             </span>
@@ -560,7 +560,7 @@ export function NFTInfoCard({
     <div
       className="rounded-xl overflow-hidden"
       style={{
-        background: 'var(--color-glass-bg)',
+        background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
       }}
     >
@@ -578,7 +578,7 @@ export function NFTInfoCard({
               className="flex-1 py-3 text-sm font-medium transition-colors relative"
               style={{
                 color: isActive
-                  ? 'var(--color-brand-primary)'
+                  ? 'var(--color-primary)'
                   : 'var(--color-text-muted)',
               }}
               onClick={() => onTabChange(tab.id)}
@@ -590,7 +590,7 @@ export function NFTInfoCard({
                 <motion.div
                   className="absolute bottom-0 left-1/4 right-1/4 h-0.5 rounded-full"
                   style={{
-                    background: 'var(--color-brand-primary)',
+                    background: 'var(--color-primary)',
                   }}
                   layoutId="tab-indicator"
                 />

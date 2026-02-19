@@ -97,7 +97,7 @@ export function SwipeableNFTImage({
           key={currentNft.id}
           className="absolute inset-0 rounded-xl overflow-hidden"
           style={{
-            background: 'var(--color-glass-bg)',
+            background: 'var(--color-surface)',
             border: '1px solid var(--color-border)',
           }}
           custom={direction}
@@ -115,7 +115,7 @@ export function SwipeableNFTImage({
             <div
               className="absolute inset-0 animate-pulse"
               style={{
-                background: 'var(--color-glass-bg)',
+                background: 'var(--color-surface)',
                 backgroundImage: currentNft.blurDataUrl
                   ? `url(${currentNft.blurDataUrl})`
                   : undefined,
@@ -149,7 +149,7 @@ export function SwipeableNFTImage({
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center"
             style={{
-              background: 'var(--color-glass-bg)',
+              background: 'var(--color-surface)',
               color: 'var(--color-text-secondary)',
             }}
           >
@@ -168,7 +168,7 @@ export function SwipeableNFTImage({
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center"
             style={{
-              background: 'var(--color-glass-bg)',
+              background: 'var(--color-surface)',
               color: 'var(--color-text-secondary)',
             }}
           >
@@ -214,7 +214,7 @@ export function SwipeableNFTImage({
             <div
               className="px-4 py-2 rounded-full text-sm"
               style={{
-                background: 'var(--color-glass-bg)',
+                background: 'var(--color-surface)',
                 color: 'var(--color-text-secondary)',
               }}
             >

@@ -74,8 +74,8 @@ export const toggleThumbVariants: Variants = {
 };
 
 export const toggleTrackVariants: Variants = {
-  off: { backgroundColor: 'var(--color-bg-tertiary)' },
-  on: { backgroundColor: 'var(--color-brand-primary)' },
+  off: { backgroundColor: 'var(--color-elevated)' },
+  on: { backgroundColor: 'var(--color-primary)' },
 };
 
 // ============ Volume Slider Animations ============

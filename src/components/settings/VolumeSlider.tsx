@@ -56,7 +56,7 @@ export function VolumeSlider({
             <label
               htmlFor={`${id}-slider`}
               className="text-sm font-medium"
-              style={{ color: 'var(--color-text-primary)' }}
+              style={{ color: 'var(--color-text)' }}
             >
               {label}
             </label>

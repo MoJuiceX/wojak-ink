@@ -58,7 +58,7 @@ export function Skeleton({
         width: typeof width === 'number' ? `${width}px` : width || '100%',
         height: typeof height === 'number' ? `${height}px` : height || defaultHeight,
         borderRadius,
-        background: 'var(--color-bg-tertiary)',
+        background: 'var(--color-elevated)',
       }}
       aria-hidden="true"
     />
@@ -109,7 +109,7 @@ export function SkeletonCard({ className = '' }: { className?: string }) {
     <div
       className={`rounded-xl overflow-hidden ${className}`}
       style={{
-        background: 'var(--color-glass-bg)',
+        background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
       }}
     >

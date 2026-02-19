@@ -104,9 +104,9 @@
 .skeleton-shimmer {
   background: linear-gradient(
     90deg,
-    var(--color-glass-bg) 0%,
+    var(--color-surface) 0%,
     rgba(249, 115, 22, 0.1) 50%,
-    var(--color-glass-bg) 100%
+    var(--color-surface) 100%
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;

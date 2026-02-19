@@ -142,7 +142,7 @@ function TraitRankingRow({
       <span
         className="text-xs truncate"
         style={{
-          color: isCurrent ? 'var(--color-accent)' : 'var(--color-text-primary)',
+          color: isCurrent ? 'var(--color-accent)' : 'var(--color-text)',
           fontWeight: isCurrent ? 700 : 400,
         }}
       >
@@ -193,7 +193,7 @@ function AttributeRow({
       <div className="flex items-baseline justify-between gap-1">
         <span
           className="text-xs font-medium truncate flex items-center gap-1"
-          style={{ color: value ? (isHpTrait ? 'var(--color-accent)' : 'var(--color-text-primary)') : 'var(--color-text-muted)' }}
+          style={{ color: value ? (isHpTrait ? 'var(--color-accent)' : 'var(--color-text)') : 'var(--color-text-muted)' }}
         >
           {isHpTrait && <span title="High Provenance">★</span>}
           {value || '—'}
@@ -335,7 +335,7 @@ export function NFTPreviewCard({
         {isLoading && (
           <div
             className="w-full h-full animate-pulse rounded-3xl"
-            style={{ background: 'var(--color-bg-tertiary)' }}
+            style={{ background: 'var(--color-elevated)' }}
           />
         )}
 
@@ -344,7 +344,7 @@ export function NFTPreviewCard({
           <div className="text-center p-4">
             <div
               className="w-16 h-16 rounded-xl mx-auto mb-3 flex items-center justify-center"
-              style={{ background: 'var(--color-bg-tertiary)' }}
+              style={{ background: 'var(--color-elevated)' }}
             >
               <Sparkles
                 size={28}
@@ -413,7 +413,7 @@ export function NFTPreviewCard({
         <div className="p-3 pb-2 flex-shrink-0" style={{ borderBottom: '1px solid var(--color-border)', minHeight: '52px' }}>
           <h3
             className="text-sm font-bold truncate"
-            style={{ color: nft ? 'var(--color-text-primary)' : 'var(--color-text-muted)' }}
+            style={{ color: nft ? 'var(--color-text)' : 'var(--color-text-muted)' }}
           >
             {nft?.name || 'Metadata'}
           </h3>

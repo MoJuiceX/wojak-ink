@@ -92,7 +92,7 @@ export const HEATMAP_COLORS = {
   },
 
   // Focus/selected
-  focus: 'var(--color-brand-primary)',
+  focus: 'var(--color-primary)',
   selected: 'var(--color-brand-glow)',
 } as const;
 

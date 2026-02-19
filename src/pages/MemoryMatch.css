@@ -975,7 +975,7 @@
 .memory-container .game-title {
   font-size: 32px;
   font-weight: 800;
-  color: var(--color-text-primary, #fff);
+  color: var(--color-text, #fff);
   margin-bottom: 16px;
 }
 

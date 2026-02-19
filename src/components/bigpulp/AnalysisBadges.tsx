@@ -96,7 +96,7 @@ function ProvenanceCard({
         prefersReducedMotion
           ? undefined
           : {
-              borderColor: 'var(--color-brand-primary)',
+              borderColor: 'var(--color-primary)',
             }
       }
     >
@@ -106,7 +106,7 @@ function ProvenanceCard({
             <Trophy size={14} style={{ color: impactColors.high }} />
             <span
               className="font-medium text-sm truncate"
-              style={{ color: 'var(--color-text-primary)' }}
+              style={{ color: 'var(--color-text)' }}
             >
               {trait.value}
             </span>
@@ -149,7 +149,7 @@ function RareComboCard({ combo }: { combo: RareCombo }) {
           {combo.comboName && (
             <p
               className="font-medium text-sm"
-              style={{ color: 'var(--color-text-primary)' }}
+              style={{ color: 'var(--color-text)' }}
             >
               "{combo.comboName}"
             </p>

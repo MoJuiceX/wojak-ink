@@ -9,7 +9,7 @@
   gap: 0.75rem;
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: var(--color-text);
   margin: 0;
 }
 
@@ -41,17 +41,17 @@
 }
 
 .tab-button:hover {
-  color: var(--color-text-primary);
+  color: var(--color-text);
 }
 
 .tab-button.active {
-  background: var(--color-bg-primary);
-  color: var(--color-text-primary);
+  background: var(--color-bg);
+  color: var(--color-text);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .tab-badge {
-  background: var(--color-brand-primary);
+  background: var(--color-primary);
   color: white;
   font-size: 0.75rem;
   padding: 2px 6px;
@@ -87,7 +87,7 @@
 
 .friend-name {
   font-weight: 500;
-  color: var(--color-text-primary);
+  color: var(--color-text);
 }
 
 .friend-actions {
@@ -100,7 +100,7 @@
   height: 32px;
   border-radius: 8px;
   border: none;
-  background: var(--color-bg-tertiary);
+  background: var(--color-elevated);
   color: var(--color-text-secondary);
   cursor: pointer;
   display: flex;
@@ -111,7 +111,7 @@
 }
 
 .action-button:hover {
-  background: var(--color-bg-primary);
+  background: var(--color-bg);
 }
 
 .action-button.remove-friend:hover {
@@ -149,13 +149,13 @@
   border-radius: 10px;
   border: 1px solid var(--color-border);
   background: var(--color-bg-secondary);
-  color: var(--color-text-primary);
+  color: var(--color-text);
   font-size: 0.875rem;
 }
 
 .search-input:focus {
   outline: none;
-  border-color: var(--color-brand-primary);
+  border-color: var(--color-primary);
 }
 
 .users-grid {
@@ -186,7 +186,7 @@
 
 .user-name {
   font-weight: 500;
-  color: var(--color-text-primary);
+  color: var(--color-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -199,7 +199,7 @@
   padding: 6px 12px;
   border-radius: 6px;
   border: none;
-  background: var(--color-brand-primary);
+  background: var(--color-primary);
   color: white;
   font-size: 0.75rem;
   font-weight: 500;
@@ -212,7 +212,7 @@
 }
 
 .add-friend-button.added {
-  background: var(--color-bg-tertiary);
+  background: var(--color-elevated);
   color: var(--color-text-secondary);
   cursor: default;
 }

@@ -31,7 +31,7 @@ function getTypeIcon(type: string) {
     case 'warning':
       return <AlertTriangle size={18} style={{ color: '#f59e0b' }} />;
     default:
-      return <Info size={18} style={{ color: 'var(--color-brand-primary)' }} />;
+      return <Info size={18} style={{ color: 'var(--color-primary)' }} />;
   }
 }
 
@@ -148,17 +148,17 @@ export function MessagesModal({ isOpen, onClose }: MessagesModalProps) {
               style={{ borderColor: 'var(--color-border)' }}
             >
               <div className="flex items-center gap-2">
-                <Bell size={20} style={{ color: 'var(--color-brand-primary)' }} />
+                <Bell size={20} style={{ color: 'var(--color-primary)' }} />
                 <h2
                   className="text-lg font-bold"
-                  style={{ color: 'var(--color-text-primary)' }}
+                  style={{ color: 'var(--color-text)' }}
                 >
                   Messages
                 </h2>
                 {unreadCount > 0 && (
                   <span
                     className="px-2 py-0.5 rounded-full text-xs font-medium"
-                    style={{ background: 'var(--color-brand-primary)', color: '#fff' }}
+                    style={{ background: 'var(--color-primary)', color: '#fff' }}
                   >
                     {unreadCount} new
                   </span>
@@ -177,13 +177,13 @@ export function MessagesModal({ isOpen, onClose }: MessagesModalProps) {
             <div className="flex-1 overflow-y-auto">
               {isLoading ? (
                 <div className="p-8 flex items-center justify-center">
-                  <Loader2 size={24} className="animate-spin" style={{ color: 'var(--color-brand-primary)' }} />
+                  <Loader2 size={24} className="animate-spin" style={{ color: 'var(--color-primary)' }} />
                 </div>
               ) : messages.length === 0 ? (
                 <div className="p-8 text-center">
                   <div
                     className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
-                    style={{ background: 'var(--color-bg-tertiary)' }}
+                    style={{ background: 'var(--color-elevated)' }}
                   >
                     <Mail size={32} style={{ color: 'var(--color-text-muted)' }} />
                   </div>
@@ -197,7 +197,7 @@ export function MessagesModal({ isOpen, onClose }: MessagesModalProps) {
                   <button
                     onClick={() => setSelectedMessage(null)}
                     className="text-sm mb-4"
-                    style={{ color: 'var(--color-brand-primary)' }}
+                    style={{ color: 'var(--color-primary)' }}
                   >
                     &larr; Back to messages
                   </button>
@@ -210,7 +210,7 @@ export function MessagesModal({ isOpen, onClose }: MessagesModalProps) {
                       <div>
                         <h3
                           className="font-medium"
-                          style={{ color: 'var(--color-text-primary)' }}
+                          style={{ color: 'var(--color-text)' }}
                         >
                           {selectedMessage.title}
                         </h3>
@@ -243,21 +243,21 @@ export function MessagesModal({ isOpen, onClose }: MessagesModalProps) {
                         {message.read ? (
                           <MailOpen size={18} style={{ color: 'var(--color-text-muted)' }} />
                         ) : (
-                          <Mail size={18} style={{ color: 'var(--color-brand-primary)' }} />
+                          <Mail size={18} style={{ color: 'var(--color-primary)' }} />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <p
                             className={`text-sm truncate ${!message.read ? 'font-medium' : ''}`}
-                            style={{ color: 'var(--color-text-primary)' }}
+                            style={{ color: 'var(--color-text)' }}
                           >
                             {message.title}
                           </p>
                           {!message.read && (
                             <span
                               className="w-2 h-2 rounded-full flex-shrink-0"
-                              style={{ background: 'var(--color-brand-primary)' }}
+                              style={{ background: 'var(--color-primary)' }}
                             />
                           )}
                         </div>

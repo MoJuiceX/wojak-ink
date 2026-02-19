@@ -80,9 +80,9 @@ function MobileGalleryControls() {
             key={option.id}
             className="w-9 h-9 flex items-center justify-center rounded-lg"
             style={{
-              background: 'var(--color-glass-bg)',
-              color: isActive ? 'var(--color-brand-primary)' : 'var(--color-text-secondary)',
-              border: isActive ? '1px solid var(--color-brand-primary)' : '1px solid var(--color-border)',
+              background: 'var(--color-surface)',
+              color: isActive ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+              border: isActive ? '1px solid var(--color-primary)' : '1px solid var(--color-border)',
             }}
             onClick={() => setFilterMode(option.id)}
             whileTap={{ scale: 0.95 }}
@@ -111,9 +111,9 @@ function MobileGalleryControls() {
             key={option.base}
             className="w-9 h-9 flex items-center justify-center rounded-lg relative"
             style={{
-              background: 'var(--color-glass-bg)',
-              color: isActive ? 'var(--color-brand-primary)' : 'var(--color-text-secondary)',
-              border: isActive ? '1px solid var(--color-brand-primary)' : '1px solid var(--color-border)',
+              background: 'var(--color-surface)',
+              color: isActive ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+              border: isActive ? '1px solid var(--color-primary)' : '1px solid var(--color-border)',
             }}
             onClick={() => setSortMode(toggleSortMode(sortMode, option.base))}
             whileTap={{ scale: 0.95 }}
@@ -123,7 +123,7 @@ function MobileGalleryControls() {
               <DirectionIcon
                 size={10}
                 className="absolute right-1"
-                style={{ color: 'var(--color-brand-primary)', strokeWidth: 3, bottom: '2px' }}
+                style={{ color: 'var(--color-primary)', strokeWidth: 3, bottom: '2px' }}
               />
             )}
           </motion.button>
@@ -241,8 +241,8 @@ export function Header({ transparent = false }: HeaderProps) {
             {isBigPulpPage ? (
               /* BigPulp page: show BigPulp Intelligence (same size as Wojak.ink) */
               <h1 className="font-bold whitespace-nowrap text-xl">
-                <span style={{ color: 'var(--color-brand-primary)' }}>BigPulp</span>
-                <span style={{ color: 'var(--color-text-primary)' }}> Intelligence</span>
+                <span style={{ color: 'var(--color-primary)' }}>BigPulp</span>
+                <span style={{ color: 'var(--color-text)' }}> Intelligence</span>
               </h1>
             ) : (
               /* Default: Logo with breadcrumb support */
@@ -283,10 +283,10 @@ export function Header({ transparent = false }: HeaderProps) {
                   >
                     <motion.button
                       onClick={headerBreadcrumb.onBack}
-                      className="w-10 h-10 flex items-center justify-center rounded-lg transition-colors hover:bg-[var(--color-glass-hover)]"
+                      className="w-10 h-10 flex items-center justify-center rounded-lg transition-colors hover:bg-[var(--color-surface-hover)]"
                       style={{
                         color: 'var(--color-text-secondary)',
-                        background: 'var(--color-glass-bg)',
+                        background: 'var(--color-surface)',
                         border: '1px solid var(--color-border)',
                       }}
                       aria-label="Go back"
@@ -297,7 +297,7 @@ export function Header({ transparent = false }: HeaderProps) {
                     </motion.button>
                     <h1
                       className="text-3xl font-bold"
-                      style={{ color: 'var(--color-text-primary)' }}
+                      style={{ color: 'var(--color-text)' }}
                     >
                       {headerBreadcrumb.label}
                     </h1>
@@ -314,8 +314,8 @@ export function Header({ transparent = false }: HeaderProps) {
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                     >
-                      <span style={{ color: 'var(--color-brand-primary)' }}>BigPulp</span>
-                      <span style={{ color: 'var(--color-text-primary)' }}> Intelligence</span>
+                      <span style={{ color: 'var(--color-primary)' }}>BigPulp</span>
+                      <span style={{ color: 'var(--color-text)' }}> Intelligence</span>
                     </motion.h1>
                   ) : (
                     /* Regular page title + optional supply counter */
@@ -329,7 +329,7 @@ export function Header({ transparent = false }: HeaderProps) {
                     >
                       <h1
                         className="text-3xl font-bold"
-                        style={{ color: 'var(--color-text-primary)' }}
+                        style={{ color: 'var(--color-text)' }}
                       >
                         {pageTitle}
                       </h1>

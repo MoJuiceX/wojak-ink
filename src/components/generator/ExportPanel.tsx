@@ -175,7 +175,7 @@ export function ExportPanel({ className = '' }: ExportPanelProps) {
                 className="w-full px-4 py-2.5 rounded-xl text-sm font-medium"
                 style={{
                   background: 'rgba(255,255,255,0.05)',
-                  color: 'var(--color-text-primary)',
+                  color: 'var(--color-text)',
                   border: '1px solid var(--color-border)',
                   outline: 'none',
                 }}
@@ -199,7 +199,7 @@ export function ExportPanel({ className = '' }: ExportPanelProps) {
                     height: '24px',
                     borderRadius: '9999px',
                     background: includeBackground
-                      ? 'var(--color-brand-primary)'
+                      ? 'var(--color-primary)'
                       : 'rgba(255,255,255,0.1)',
                     flexShrink: 0,
                     transition: 'background 0.2s ease',
@@ -248,7 +248,7 @@ export function ExportPanel({ className = '' }: ExportPanelProps) {
                 style={{
                   background: isExporting
                     ? 'rgba(255,149,0,0.7)'
-                    : 'var(--color-brand-primary)',
+                    : 'var(--color-primary)',
                   color: 'white',
                   border: 'none',
                   cursor: isExporting ? 'wait' : 'pointer',

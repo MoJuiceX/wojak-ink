@@ -292,7 +292,7 @@
 .runner-container .game-title {
   font-size: 32px;
   font-weight: 800;
-  color: var(--color-text-primary, #fff);
+  color: var(--color-text, #fff);
   margin-bottom: 16px;
 }
 
@@ -314,7 +314,7 @@
 }
 
 .runner-container .high-score {
-  color: var(--color-brand-primary, #ff6b00);
+  color: var(--color-primary, #ff6b00);
   font-size: 16px;
   font-weight: 600;
   margin-top: 16px;
@@ -353,19 +353,19 @@
 .runner-container .score-value {
   font-size: 56px;
   font-weight: 800;
-  color: var(--color-brand-primary, #ff6b00);
+  color: var(--color-primary, #ff6b00);
 }
 
 .runner-container .new-record {
-  color: var(--color-brand-primary, #ff6b00);
+  color: var(--color-primary, #ff6b00);
   font-size: 24px;
   font-weight: 800;
   animation: glow 1s ease-in-out infinite alternate;
 }
 
 @keyframes glow {
-  from { filter: drop-shadow(0 0 5px var(--color-brand-primary, #ff6b00)); }
-  to { filter: drop-shadow(0 0 15px var(--color-brand-primary, #ff6b00)); }
+  from { filter: drop-shadow(0 0 5px var(--color-primary, #ff6b00)); }
+  to { filter: drop-shadow(0 0 15px var(--color-primary, #ff6b00)); }
 }
 
 @keyframes glow-pulse {
@@ -388,7 +388,7 @@
 .runner-container .leaderboard-title {
   font-size: 20px;
   font-weight: 700;
-  color: var(--color-brand-primary, #ff6b00);
+  color: var(--color-primary, #ff6b00);
   margin-bottom: 16px;
   text-align: center;
 }
@@ -409,7 +409,7 @@
 }
 
 .runner-container .leaderboard-rank {
-  color: var(--color-brand-primary, #ff6b00);
+  color: var(--color-primary, #ff6b00);
   font-weight: 700;
   font-size: 14px;
   width: 32px;
@@ -417,7 +417,7 @@
 
 .runner-container .leaderboard-name {
   flex: 1;
-  color: var(--color-text-primary, #fff);
+  color: var(--color-text, #fff);
   font-size: 14px;
 }
 
@@ -515,7 +515,7 @@
 .runner-container .game-over-score-value {
   font-size: 64px;
   font-weight: 800;
-  color: var(--color-brand-primary, #ff6b00);
+  color: var(--color-primary, #ff6b00);
   line-height: 1;
 }
 
@@ -529,7 +529,7 @@
 
 /* Personal best display on menu */
 .runner-container .personal-best {
-  color: var(--color-brand-primary, #ff6b00);
+  color: var(--color-primary, #ff6b00);
   font-size: 16px;
   font-weight: 600;
   margin: 8px 0;
@@ -559,7 +559,7 @@
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   background: rgba(0, 0, 0, 0.5);
-  color: var(--color-text-primary, #fff);
+  color: var(--color-text, #fff);
   font-size: 16px;
   text-align: center;
   outline: none;
@@ -567,7 +567,7 @@
 }
 
 .runner-container .game-over-input:focus {
-  border-color: var(--color-brand-primary, #ff6b00);
+  border-color: var(--color-primary, #ff6b00);
   background: rgba(0, 0, 0, 0.5);
 }
 
@@ -618,12 +618,12 @@
 
 .runner-container .game-over-skip:hover {
   background: rgba(255, 255, 255, 0.1);
-  color: var(--color-text-primary, #fff);
+  color: var(--color-text, #fff);
 }
 
 /* Score saved confirmation text */
 .runner-container .game-over-submitted {
-  color: var(--color-brand-primary, #ff6b00);
+  color: var(--color-primary, #ff6b00);
   font-size: 14px;
   font-weight: 600;
   text-align: center;
@@ -642,7 +642,7 @@
 }
 
 .runner-container .leaderboard-position strong {
-  color: var(--color-brand-primary, #ff6b00);
+  color: var(--color-primary, #ff6b00);
   font-weight: 700;
 }
 

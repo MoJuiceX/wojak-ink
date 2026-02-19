@@ -64,7 +64,7 @@
   background: rgba(255, 255, 255, 0.06);
   font-size: 1rem;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--color-text);
   position: relative;
   cursor: default;
 }
@@ -342,7 +342,7 @@
 }
 
 .wallet-status__nfts {
-  color: var(--color-text-primary);
+  color: var(--color-text);
 }
 
 .wallet-status__nfts strong {
@@ -425,7 +425,7 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--color-brand-primary);
+  background: var(--color-primary);
   color: white;
   border: 2px solid var(--color-bg-secondary);
   display: flex;
@@ -452,7 +452,7 @@
 .profile-display-name {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: var(--color-text);
   margin: 0;
 }
 
@@ -466,12 +466,12 @@
 }
 
 .edit-name-button:hover {
-  color: var(--color-text-primary);
+  color: var(--color-text);
 }
 
 .profile-x-handle {
   display: block;
-  color: var(--color-brand-primary);
+  color: var(--color-primary);
   text-decoration: none;
   font-size: 0.875rem;
   margin-top: 2px;
@@ -491,7 +491,7 @@
   padding: 4px 8px;
   border-radius: 6px;
   font-size: 0.75rem;
-  background: var(--color-bg-tertiary);
+  background: var(--color-elevated);
   color: var(--color-text-secondary);
 }
 
@@ -504,7 +504,7 @@
 .section-title {
   font-size: 1.125rem;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--color-text);
   margin: 0 0 1rem 0;
   display: flex;
   align-items: center;
@@ -563,7 +563,7 @@
 .stat-item .stat-value {
   font-size: 1.125rem;
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: var(--color-text);
   font-variant-numeric: tabular-nums;
 }
 
@@ -619,7 +619,7 @@
 .stat-value {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: var(--color-text);
 }
 
 .stat-label {
@@ -674,7 +674,7 @@
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--color-text-primary);
+  color: var(--color-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -727,7 +727,7 @@
 .nft-gallery__header h2 {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--color-text);
   margin: 0;
 }
 
@@ -759,7 +759,7 @@
 
 .swiper-btn:hover:not(.swiper-btn--disabled) {
   background: rgba(255, 255, 255, 0.1);
-  color: var(--color-text-primary);
+  color: var(--color-text);
 }
 
 .swiper-btn--disabled {
@@ -859,7 +859,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: var(--color-brand-primary);
+  color: var(--color-primary);
   text-decoration: none;
   font-size: 0.8rem;
 }
@@ -954,7 +954,7 @@
   align-items: center;
   gap: 4px;
   margin-top: 0.75rem;
-  color: var(--color-brand-primary);
+  color: var(--color-primary);
   text-decoration: none;
   font-size: 0.875rem;
 }
@@ -995,7 +995,7 @@
 .quick-action-btn:hover {
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(249, 115, 22, 0.25);
-  color: var(--color-text-primary);
+  color: var(--color-text);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
@@ -1080,7 +1080,7 @@
 }
 
 .inventory-card.equipped {
-  border-color: var(--color-brand-primary);
+  border-color: var(--color-primary);
   background: rgba(249, 115, 22, 0.05);
 }
 
@@ -1104,7 +1104,7 @@
   display: block;
   font-size: 0.8rem;
   font-weight: 500;
-  color: var(--color-text-primary);
+  color: var(--color-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1123,7 +1123,7 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: var(--color-brand-primary);
+  background: var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1154,7 +1154,7 @@
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: var(--color-bg-tertiary);
+  background: var(--color-elevated);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1168,7 +1168,7 @@
 .activity-title {
   display: block;
   font-weight: 500;
-  color: var(--color-text-primary);
+  color: var(--color-text);
   font-size: 0.875rem;
 }
 
@@ -1208,7 +1208,7 @@
 .account-signin-prompt h1 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: var(--color-text);
   margin: 0 0 0.5rem 0;
 }
 
@@ -1252,7 +1252,7 @@
   font-size: 0.85rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.05);
-  color: var(--color-text-primary);
+  color: var(--color-text);
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -1335,7 +1335,7 @@
 
 .profile-loading .spin {
   animation: spin 1s linear infinite;
-  color: var(--color-brand-primary);
+  color: var(--color-primary);
 }
 
 @keyframes spin {
@@ -1350,7 +1350,7 @@
 }
 
 .profile-error h2 {
-  color: var(--color-text-primary);
+  color: var(--color-text);
   margin: 0 0 0.5rem 0;
 }
 
@@ -1387,7 +1387,7 @@
 .streak-value {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: var(--color-text);
 }
 
 .streak-label {
@@ -1408,7 +1408,7 @@
   margin: 0 0 0.25rem 0;
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: var(--color-text);
 }
 
 .drawer-customize-section .section-description {
@@ -1451,7 +1451,7 @@
 
 .view-drawer-btn {
   background: rgba(255, 255, 255, 0.08);
-  color: var(--color-text-primary);
+  color: var(--color-text);
   border: 1px solid var(--color-border);
 }
 
@@ -1544,7 +1544,7 @@
   gap: 0.5rem;
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--color-text);
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -1665,7 +1665,7 @@
 .account-widget .widget-btn.secondary:hover {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.15);
-  color: var(--color-text-primary);
+  color: var(--color-text);
   transform: translateY(-1px);
 }
 
@@ -1686,7 +1686,7 @@
   align-items: center;
   gap: 0.25rem;
   padding: 0.375rem;
-  background: var(--color-bg-tertiary);
+  background: var(--color-elevated);
   border-radius: 10px;
   min-width: 44px;
 }
@@ -1733,7 +1733,7 @@
   align-items: center;
   gap: 0.375rem;
   padding: 0.375rem 0.625rem;
-  background: var(--color-bg-tertiary);
+  background: var(--color-elevated);
   border-radius: 8px;
   font-size: 0.75rem;
 }
@@ -1763,7 +1763,7 @@
 }
 
 .achievements-widget .achievement-name {
-  color: var(--color-text-primary);
+  color: var(--color-text);
   font-weight: 500;
 }
 
@@ -1779,7 +1779,7 @@
 
 .achievements-widget .progress-bar {
   height: 8px;
-  background: var(--color-bg-tertiary);
+  background: var(--color-elevated);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -1827,7 +1827,7 @@
   margin-bottom: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--color-text-primary);
+  color: var(--color-text);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -1875,7 +1875,7 @@
 .account-dashboard--premium .game-name {
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--color-text);
 }
 
 .account-dashboard--premium .game-not-played {

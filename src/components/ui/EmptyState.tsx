@@ -43,8 +43,8 @@ export function EmptyState({
       px-4 py-2 rounded-lg text-sm font-medium transition-colors
       ${
         action.variant === 'secondary'
-          ? 'bg-[var(--color-glass-bg)] text-[var(--color-text-primary)] border border-[var(--color-border)]'
-          : 'bg-[var(--color-brand-primary)] text-white'
+          ? 'bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]'
+          : 'bg-[var(--color-primary)] text-white'
       }
     `;
 
@@ -109,7 +109,7 @@ export function EmptyState({
 
       <h3
         className="text-lg font-semibold mb-2"
-        style={{ color: 'var(--color-text-primary)' }}
+        style={{ color: 'var(--color-text)' }}
       >
         {title}
       </h3>

@@ -97,7 +97,7 @@ export function DesktopNFTImage({
         style={{
           aspectRatio: '1 / 1',
           maxHeight: '100%',
-          background: 'var(--color-bg-tertiary)',
+          background: 'var(--color-elevated)',
         }}
       >
         <AnimatePresence mode="wait">
@@ -120,7 +120,7 @@ export function DesktopNFTImage({
               ) : (
                 <div
                   className="w-full h-full animate-pulse"
-                  style={{ background: 'var(--color-glass-bg)' }}
+                  style={{ background: 'var(--color-surface)' }}
                 />
               )}
             </motion.div>
@@ -149,7 +149,7 @@ export function DesktopNFTImage({
                 <button
                   className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                   style={{
-                    background: 'var(--color-glass-bg)',
+                    background: 'var(--color-surface)',
                     border: '1px solid var(--color-border)',
                     color: 'var(--color-text-secondary)',
                   }}

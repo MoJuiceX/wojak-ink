@@ -53,7 +53,7 @@ export const traitCardVariants: Variants = {
   },
   selected: {
     scale: 1,
-    boxShadow: '0 0 0 2px var(--color-brand-primary)',
+    boxShadow: '0 0 0 2px var(--color-primary)',
   },
   blocked: {
     opacity: 0.4,
@@ -371,7 +371,7 @@ export const exportOptionVariants: Variants = {
     transition: smoothTransition,
   },
   selected: {
-    backgroundColor: 'var(--color-brand-primary)',
+    backgroundColor: 'var(--color-primary)',
     color: 'white',
   },
 };
@@ -434,11 +434,11 @@ export const mouthSubtypeVariants: Variants = {
     opacity: 1,
   },
   hover: {
-    backgroundColor: 'var(--color-glass-bg)',
+    backgroundColor: 'var(--color-surface)',
   },
   active: {
     opacity: 1,
-    backgroundColor: 'var(--color-brand-primary)',
+    backgroundColor: 'var(--color-primary)',
     color: 'white',
   },
   inactive: {

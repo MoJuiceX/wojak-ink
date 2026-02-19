@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 
 export function GallerySkeleton() {
   return (
-    <div className="min-h-screen p-4" style={{ background: 'var(--color-bg-primary, #0a0a0a)' }}>
+    <div className="min-h-screen p-4" style={{ background: 'var(--color-bg, #0a0a0a)' }}>
       {/* Character Type Grid Skeleton */}
       <div className="mb-6">
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
@@ -64,7 +64,7 @@ export function GallerySkeleton() {
  */
 export function LeaderboardSkeleton() {
   return (
-    <div className="min-h-screen p-4" style={{ background: 'var(--color-bg-primary, #0a0a0a)' }}>
+    <div className="min-h-screen p-4" style={{ background: 'var(--color-bg, #0a0a0a)' }}>
       {/* Header skeleton */}
       <div
         className="h-12 w-48 rounded-lg mb-6"
@@ -114,7 +114,7 @@ export function PageSkeleton() {
   return (
     <div
       className="min-h-screen flex items-center justify-center"
-      style={{ background: 'var(--color-bg-primary, #0a0a0a)' }}
+      style={{ background: 'var(--color-bg, #0a0a0a)' }}
     >
       <motion.div
         className="text-center"

@@ -105,7 +105,7 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
               className={`bigpulp-btn flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold transition-all relative rounded-lg ${isActive ? 'bigpulp-btn-active' : ''}`}
               style={{
                 color: isActive
-                  ? 'var(--color-brand-primary)'
+                  ? 'var(--color-primary)'
                   : 'var(--color-text-muted)',
                 border: isActive
                   ? '1px solid var(--color-border-active)'
@@ -160,7 +160,7 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
         <motion.div
           className="absolute bottom-0 h-0.5 rounded-full"
           style={{
-            background: 'linear-gradient(90deg, transparent, var(--color-brand-primary), transparent)',
+            background: 'linear-gradient(90deg, transparent, var(--color-primary), transparent)',
             boxShadow: '0 0 12px var(--color-brand-glow)',
             left: indicatorStyle.left + 8,
             width: indicatorStyle.width - 16,

@@ -435,7 +435,7 @@ function GalleryContent() {
                         key={i}
                         className="aspect-square rounded-lg overflow-hidden animate-pulse"
                         style={{
-                          background: 'var(--color-glass-bg)',
+                          background: 'var(--color-surface)',
                           border: '1px solid var(--color-border)',
                         }}
                       />
@@ -473,9 +473,9 @@ function GalleryContent() {
                           onClick={handleLoadMore}
                           className="flex items-center gap-2 px-6 py-3 rounded-full transition-all hover:scale-105"
                           style={{
-                            background: 'var(--color-glass-bg)',
+                            background: 'var(--color-surface)',
                             border: '1px solid var(--color-border)',
-                            color: 'var(--color-text-primary)',
+                            color: 'var(--color-text)',
                           }}
                         >
                           <span>Load More</span>

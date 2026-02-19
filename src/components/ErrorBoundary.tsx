@@ -59,7 +59,7 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <div
           className="min-h-screen flex items-center justify-center p-6"
-          style={{ background: 'var(--color-bg-primary, #0a0a0a)' }}
+          style={{ background: 'var(--color-bg, #0a0a0a)' }}
         >
           <div
             className="max-w-md w-full p-8 rounded-2xl text-center"
@@ -83,7 +83,7 @@ export class ErrorBoundary extends Component<Props, State> {
             {/* Error Title */}
             <h1
               className="text-2xl font-bold mb-3"
-              style={{ color: 'var(--color-text-primary, #fff)' }}
+              style={{ color: 'var(--color-text, #fff)' }}
             >
               Something went wrong
             </h1>
@@ -139,7 +139,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all"
                 style={{
                   background: 'rgba(255, 255, 255, 0.1)',
-                  color: 'var(--color-text-primary, #fff)',
+                  color: 'var(--color-text, #fff)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                 }}
               >

@@ -12,7 +12,7 @@
 export const FOCUS_STYLES = {
   // Default focus ring (orange glow)
   default: {
-    outline: '2px solid var(--color-brand-primary)',
+    outline: '2px solid var(--color-primary)',
     outlineOffset: '2px',
     boxShadow: '0 0 0 4px rgba(255, 107, 0, 0.2)',
   },
@@ -34,14 +34,14 @@ export const FOCUS_STYLES = {
   // Inset focus (for inputs)
   inset: {
     outline: 'none',
-    boxShadow: 'inset 0 0 0 2px var(--color-brand-primary)',
+    boxShadow: 'inset 0 0 0 2px var(--color-primary)',
   },
 
   // Skip link focus
   skipLink: {
-    outline: '3px solid var(--color-brand-primary)',
+    outline: '3px solid var(--color-primary)',
     outlineOffset: '0',
-    backgroundColor: 'var(--color-brand-primary)',
+    backgroundColor: 'var(--color-primary)',
     color: 'white',
     padding: '8px 16px',
   },
@@ -53,9 +53,9 @@ export const FOCUS_CLASSES = {
   ring: `
     focus:outline-none
     focus-visible:ring-2
-    focus-visible:ring-[var(--color-brand-primary)]
+    focus-visible:ring-[var(--color-primary)]
     focus-visible:ring-offset-2
-    focus-visible:ring-offset-[var(--color-bg-primary)]
+    focus-visible:ring-offset-[var(--color-bg)]
   `.trim().replace(/\s+/g, ' '),
 
   // Inset focus for inputs
@@ -63,7 +63,7 @@ export const FOCUS_CLASSES = {
     focus:outline-none
     focus-visible:ring-2
     focus-visible:ring-inset
-    focus-visible:ring-[var(--color-brand-primary)]
+    focus-visible:ring-[var(--color-primary)]
   `.trim().replace(/\s+/g, ' '),
 
   // No visible focus (use sparingly)

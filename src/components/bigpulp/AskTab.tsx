@@ -80,7 +80,7 @@ function StatCard({
     >
       <p
         className="text-xs sm:text-base font-bold whitespace-nowrap"
-        style={{ color: 'var(--color-brand-primary)' }}
+        style={{ color: 'var(--color-primary)' }}
       >
         {value}
         {subValue && (
@@ -143,11 +143,11 @@ function ExpandableSection({
           <Icon
             size={16}
             className="sm:w-[18px] sm:h-[18px]"
-            style={{ color: 'var(--color-brand-primary)' }}
+            style={{ color: 'var(--color-primary)' }}
           />
           <span
             className="font-medium text-sm"
-            style={{ color: 'var(--color-text-primary)' }}
+            style={{ color: 'var(--color-text)' }}
           >
             {section.title}
           </span>
@@ -197,11 +197,11 @@ function ProvenanceContent() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div
           className="p-3 rounded-lg"
-          style={{ background: 'var(--color-bg-tertiary)' }}
+          style={{ background: 'var(--color-elevated)' }}
         >
           <h4
             className="text-sm font-bold mb-2"
-            style={{ color: 'var(--color-brand-primary)' }}
+            style={{ color: 'var(--color-primary)' }}
           >
             High Provenance
           </h4>
@@ -212,11 +212,11 @@ function ProvenanceContent() {
 
         <div
           className="p-3 rounded-lg"
-          style={{ background: 'var(--color-bg-tertiary)' }}
+          style={{ background: 'var(--color-elevated)' }}
         >
           <h4
             className="text-sm font-bold mb-2"
-            style={{ color: 'var(--color-brand-primary)' }}
+            style={{ color: 'var(--color-primary)' }}
           >
             Rarest Attributes
           </h4>
@@ -227,11 +227,11 @@ function ProvenanceContent() {
 
         <div
           className="p-3 rounded-lg"
-          style={{ background: 'var(--color-bg-tertiary)' }}
+          style={{ background: 'var(--color-elevated)' }}
         >
           <h4
             className="text-sm font-bold mb-2"
-            style={{ color: 'var(--color-brand-primary)' }}
+            style={{ color: 'var(--color-primary)' }}
           >
             Bases
           </h4>
@@ -242,11 +242,11 @@ function ProvenanceContent() {
 
         <div
           className="p-3 rounded-lg"
-          style={{ background: 'var(--color-bg-tertiary)' }}
+          style={{ background: 'var(--color-elevated)' }}
         >
           <h4
             className="text-sm font-bold mb-2"
-            style={{ color: 'var(--color-brand-primary)' }}
+            style={{ color: 'var(--color-primary)' }}
           >
             Named Combos
           </h4>
@@ -286,13 +286,13 @@ function TopAttributesContent({ attributes }: { attributes: AttributeStats[] }) 
           <div
             key={`${attr.category}-${attr.value}`}
             className="flex items-center justify-between p-2 rounded-lg"
-            style={{ background: 'var(--color-bg-tertiary)' }}
+            style={{ background: 'var(--color-elevated)' }}
           >
             <div className="flex items-center gap-3">
               <span
                 className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
                 style={{
-                  background: index < 3 ? '#fbbf24' : 'var(--color-brand-primary)',
+                  background: index < 3 ? '#fbbf24' : 'var(--color-primary)',
                   color: index < 3 ? '#1a1a1a' : 'white',
                 }}
               >
@@ -301,7 +301,7 @@ function TopAttributesContent({ attributes }: { attributes: AttributeStats[] }) 
               <div>
                 <p
                   className="text-sm font-medium"
-                  style={{ color: 'var(--color-text-primary)' }}
+                  style={{ color: 'var(--color-text)' }}
                 >
                   {attr.value}
                 </p>
@@ -316,7 +316,7 @@ function TopAttributesContent({ attributes }: { attributes: AttributeStats[] }) 
             <div className="text-right">
               <p
                 className="text-sm font-medium"
-                style={{ color: 'var(--color-brand-primary)' }}
+                style={{ color: 'var(--color-primary)' }}
               >
                 {attr.avgPrice.toFixed(2)} XCH
               </p>
@@ -353,7 +353,7 @@ function TopSalesContent({ sales, isLoading }: { sales: NFTSale[]; isLoading?: b
             <div
               key={i}
               className="flex items-center gap-3 p-2 rounded-lg animate-pulse"
-              style={{ background: 'var(--color-bg-tertiary)' }}
+              style={{ background: 'var(--color-elevated)' }}
             >
               <div
                 className="w-6 h-6 rounded-full flex-shrink-0"
@@ -410,7 +410,7 @@ function TopSalesContent({ sales, isLoading }: { sales: NFTSale[]; isLoading?: b
           <div
             key={`${sale.nft.id}-${index}`}
             className="flex items-center gap-3 p-2 rounded-lg"
-            style={{ background: 'var(--color-bg-tertiary)' }}
+            style={{ background: 'var(--color-elevated)' }}
           >
             <span
               className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
@@ -435,7 +435,7 @@ function TopSalesContent({ sales, isLoading }: { sales: NFTSale[]; isLoading?: b
             <div className="flex-1 min-w-0">
               <p
                 className="text-sm font-medium truncate"
-                style={{ color: 'var(--color-text-primary)' }}
+                style={{ color: 'var(--color-text)' }}
               >
                 {sale.nft.name}
               </p>
@@ -449,7 +449,7 @@ function TopSalesContent({ sales, isLoading }: { sales: NFTSale[]; isLoading?: b
             <div className="text-right flex-shrink-0">
               <p
                 className="text-sm font-bold"
-                style={{ color: 'var(--color-brand-primary)' }}
+                style={{ color: 'var(--color-primary)' }}
               >
                 {sale.price.toFixed(1)} XCH
               </p>
@@ -608,10 +608,10 @@ function BadgeGalleryContent() {
       {/* Summary */}
       <div
         className="p-3 rounded-lg text-center"
-        style={{ background: 'var(--color-bg-tertiary)' }}
+        style={{ background: 'var(--color-elevated)' }}
       >
         <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-          <span className="font-bold" style={{ color: 'var(--color-brand-primary)' }}>
+          <span className="font-bold" style={{ color: 'var(--color-primary)' }}>
             {badgeSystem.nfts_with_badges.toLocaleString()}
           </span>
           {' '}NFTs with badges ({badgeSystem.coverage_percent}% of collection)
@@ -636,7 +636,7 @@ function BadgeGalleryContent() {
             key={badge.name}
             className="rounded-lg overflow-hidden"
             style={{
-              background: 'var(--color-bg-tertiary)',
+              background: 'var(--color-elevated)',
               border: '1px solid var(--color-border)',
             }}
           >
@@ -649,7 +649,7 @@ function BadgeGalleryContent() {
                 <span className="text-base">{badge.emoji}</span>
                 <span
                   className="font-medium text-sm"
-                  style={{ color: 'var(--color-text-primary)' }}
+                  style={{ color: 'var(--color-text)' }}
                 >
                   {badge.name}
                 </span>
@@ -712,7 +712,7 @@ function BadgeGalleryContent() {
                             className="absolute bottom-0.5 left-0.5 px-1 py-0.5 rounded text-[8px] font-bold"
                             style={{
                               background: 'rgba(0,0,0,0.7)',
-                              color: 'var(--color-text-primary)',
+                              color: 'var(--color-text)',
                             }}
                           >
                             #{nft.id.padStart(4, '0')}
@@ -885,11 +885,11 @@ export function AskTab({
             <BarChart3
               size={16}
               className="sm:w-[18px] sm:h-[18px]"
-              style={{ color: 'var(--color-brand-primary)' }}
+              style={{ color: 'var(--color-primary)' }}
             />
             <span
               className="font-medium text-sm"
-              style={{ color: 'var(--color-text-primary)' }}
+              style={{ color: 'var(--color-text)' }}
             >
               Collection Statistics
             </span>

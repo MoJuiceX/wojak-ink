@@ -41,7 +41,7 @@ export function AudioSettings({
         <h2
           id="audio-section-heading"
           className="text-lg font-bold"
-          style={{ color: 'var(--color-text-primary)' }}
+          style={{ color: 'var(--color-text)' }}
         >
           Audio Settings
         </h2>

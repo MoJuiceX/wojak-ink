@@ -3,7 +3,7 @@
 .optimized-image {
   position: relative;
   overflow: hidden;
-  background: var(--color-bg-tertiary, #262626);
+  background: var(--color-elevated, #262626);
 }
 
 /* Placeholder container */
@@ -31,11 +31,11 @@
   height: 100%;
   background: linear-gradient(
     90deg,
-    var(--color-bg-tertiary, #262626) 0%,
-    var(--color-bg-tertiary, #262626) 40%,
+    var(--color-elevated, #262626) 0%,
+    var(--color-elevated, #262626) 40%,
     var(--color-bg-elevated, #2D2D2D) 50%,
-    var(--color-bg-tertiary, #262626) 60%,
-    var(--color-bg-tertiary, #262626) 100%
+    var(--color-elevated, #262626) 60%,
+    var(--color-elevated, #262626) 100%
   );
   background-size: 200% 100%;
   animation: optimizedImageShimmer 1.5s ease-in-out infinite;
@@ -75,7 +75,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-bg-tertiary, #262626);
+  background: var(--color-elevated, #262626);
   color: var(--text-tertiary, rgba(255, 255, 255, 0.5));
   font-size: 12px;
 }
@@ -84,7 +84,7 @@
 @media (prefers-reduced-motion: reduce) {
   .optimized-image-placeholder .placeholder-skeleton {
     animation: none;
-    background: var(--color-bg-tertiary, #262626);
+    background: var(--color-elevated, #262626);
   }
 
   .optimized-image-full,

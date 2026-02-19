@@ -146,5 +146,5 @@ export function getCharacterConfig(id: CharacterType): CharacterTypeConfig | und
  */
 export function getCharacterAccentColor(id: CharacterType): string {
   const config = getCharacterConfig(id);
-  return config?.accentColor || 'var(--color-brand-primary)';
+  return config?.accentColor || 'var(--color-primary)';
 }

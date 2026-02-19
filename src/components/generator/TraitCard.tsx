@@ -38,9 +38,9 @@ export const TraitCard = memo(function TraitCard({
     <motion.button
       className="relative aspect-square rounded-xl overflow-hidden transition-colors"
       style={{
-        background: 'var(--color-glass-bg)',
+        background: 'var(--color-surface)',
         border: isSelected
-          ? '2px solid var(--color-brand-primary)'
+          ? '2px solid var(--color-primary)'
           : '1px solid var(--color-border)',
         opacity: isBlocked ? 0.4 : 1,
         filter: isBlocked ? 'grayscale(1)' : 'none',
@@ -83,7 +83,7 @@ export const TraitCard = memo(function TraitCard({
       {isSelected && (
         <div
           className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center"
-          style={{ background: 'var(--color-brand-primary)' }}
+          style={{ background: 'var(--color-primary)' }}
         >
           <Check size={12} color="white" strokeWidth={3} />
         </div>

@@ -52,8 +52,8 @@ function ClerkUserButton({ showLabel }: { showLabel: boolean }) {
               color: 'var(--color-text-secondary)',
             }}
             whileHover={{
-              background: 'var(--color-glass-hover)',
-              color: 'var(--color-text-primary)',
+              background: 'var(--color-surface-hover)',
+              color: 'var(--color-text)',
             }}
             whileTap={{ scale: 0.98 }}
             title="Sign in with Google"
@@ -70,12 +70,12 @@ function ClerkUserButton({ showLabel }: { showLabel: boolean }) {
           onClick={() => navigate('/account')}
           className="flex items-center gap-3 px-3 py-2 rounded-lg w-full transition-colors"
           style={{
-            color: isActive ? 'var(--color-text-primary)' : 'var(--color-text-secondary)',
-            background: isActive ? 'var(--color-glass-hover)' : 'transparent',
+            color: isActive ? 'var(--color-text)' : 'var(--color-text-secondary)',
+            background: isActive ? 'var(--color-surface-hover)' : 'transparent',
           }}
           whileHover={{
-            background: 'var(--color-glass-hover)',
-            color: 'var(--color-text-primary)',
+            background: 'var(--color-surface-hover)',
+            color: 'var(--color-text)',
           }}
           whileTap={{ scale: 0.98 }}
           title="Account"

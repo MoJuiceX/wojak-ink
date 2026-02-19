@@ -25,7 +25,7 @@ interface AttributesTabProps {
 
 // Column definitions for the table header
 const TABLE_COLUMNS: { field: AttributeSortField; label: string; color: string }[] = [
-  { field: 'avgPrice', label: 'Avg', color: 'var(--color-brand-primary)' },
+  { field: 'avgPrice', label: 'Avg', color: 'var(--color-primary)' },
   { field: 'minPrice', label: 'Min', color: 'rgba(34,197,94,0.9)' },
   { field: 'maxPrice', label: 'Max', color: 'rgba(251,191,36,0.9)' },
   { field: 'totalSales', label: 'Sales', color: 'var(--color-text-secondary)' },
@@ -81,7 +81,7 @@ const CATEGORY_COLORS: Record<string, { bg: string; border: string; text: string
 const DEFAULT_CATEGORY_COLOR = {
   bg: 'rgba(251, 146, 60, 0.15)',
   border: 'rgba(251, 146, 60, 0.3)',
-  text: 'var(--color-brand-primary)',
+  text: 'var(--color-primary)',
   cardBg: 'rgba(251, 146, 60, 0.04)',
 };
 
@@ -157,7 +157,7 @@ function TableHeader({
         type="button"
         className={`${catWidth} flex-shrink-0 pr-1 text-left ${fontSize} font-semibold uppercase tracking-wider outline-none`}
         style={{
-          color: sortState.field === 'category' ? 'var(--color-text-primary)' : 'var(--color-text-muted)',
+          color: sortState.field === 'category' ? 'var(--color-text)' : 'var(--color-text-muted)',
         }}
         onClick={() => onSort('category')}
       >
@@ -170,7 +170,7 @@ function TableHeader({
         type="button"
         className={`flex-1 text-left ${fontSize} font-semibold uppercase tracking-wider outline-none min-w-0`}
         style={{
-          color: sortState.field === 'value' ? 'var(--color-text-primary)' : 'var(--color-text-muted)',
+          color: sortState.field === 'value' ? 'var(--color-text)' : 'var(--color-text-muted)',
         }}
         onClick={() => onSort('value')}
       >
@@ -261,7 +261,7 @@ function AttributeRow({
         {/* Attribute name — flex column */}
         <span
           className={`flex-1 ${compact ? 'text-[13px]' : 'text-[15px]'} font-medium truncate min-w-0`}
-          style={{ color: 'var(--color-text-primary)' }}
+          style={{ color: 'var(--color-text)' }}
         >
           {attribute.value}
         </span>
@@ -270,7 +270,7 @@ function AttributeRow({
         <div className="flex items-center gap-0 flex-shrink-0">
           <span
             className={`${numColWidth} text-right ${compact ? 'text-xs' : 'text-sm'} font-mono font-bold`}
-            style={{ color: hasSales ? 'var(--color-brand-primary)' : 'var(--color-text-muted)' }}
+            style={{ color: hasSales ? 'var(--color-primary)' : 'var(--color-text-muted)' }}
           >
             {hasSales ? attribute.avgPrice.toFixed(2) : '-'}
           </span>
@@ -343,7 +343,7 @@ function AttributeRow({
                           loading="lazy"
                         />
                         <div className="p-1 text-center">
-                          <p className="text-[10px] font-mono" style={{ color: 'var(--color-brand-primary)' }}>
+                          <p className="text-[10px] font-mono" style={{ color: 'var(--color-primary)' }}>
                             {sale.price.toFixed(1)}
                           </p>
                         </div>

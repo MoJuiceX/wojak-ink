@@ -34,7 +34,7 @@ const getVariantStyles = (variant: PremiumButtonVariant, isActive: boolean) => {
   if (isActive || variant === 'active') {
     return {
       border: '1px solid rgba(255,149,0,0.5)',
-      color: 'var(--color-brand-primary)',
+      color: 'var(--color-primary)',
       boxShadow: '0 0 12px rgba(255,149,0,0.2)',
     };
   }
@@ -43,7 +43,7 @@ const getVariantStyles = (variant: PremiumButtonVariant, isActive: boolean) => {
     case 'accent':
       return {
         border: '1px solid rgba(255,149,0,0.6)',
-        color: 'var(--color-brand-primary)',
+        color: 'var(--color-primary)',
         boxShadow: '0 4px 12px rgba(255,149,0,0.3)',
       };
     case 'ghost':
@@ -209,7 +209,7 @@ export function PremiumChip({
         ...(isActive
           ? {
               border: '1px solid rgba(255,149,0,0.5)',
-              color: 'var(--color-brand-primary)',
+              color: 'var(--color-primary)',
               boxShadow: '0 0 12px rgba(255,149,0,0.2)',
             }
           : {

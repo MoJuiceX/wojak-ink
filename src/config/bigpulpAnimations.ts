@@ -236,7 +236,7 @@ export const tableRowVariants: Variants = {
     transition: { duration: 0.15 },
   },
   expanded: {
-    backgroundColor: 'var(--color-glass-hover)',
+    backgroundColor: 'var(--color-surface-hover)',
   },
 };
 

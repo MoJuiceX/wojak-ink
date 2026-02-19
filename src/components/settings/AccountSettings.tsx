@@ -99,9 +99,9 @@ function EditableField({ label, value, icon, placeholder, onSave, validation }: 
               placeholder={placeholder}
               className="w-full pl-10 pr-3 py-2 rounded-lg text-sm"
               style={{
-                background: 'var(--color-bg-primary)',
+                background: 'var(--color-bg)',
                 border: error ? '1px solid #ef4444' : '1px solid var(--color-border)',
-                color: 'var(--color-text-primary)',
+                color: 'var(--color-text)',
               }}
               autoFocus
             />
@@ -121,7 +121,7 @@ function EditableField({ label, value, icon, placeholder, onSave, validation }: 
             onClick={handleCancel}
             className="p-2 rounded-lg"
             style={{
-              background: 'var(--color-bg-tertiary)',
+              background: 'var(--color-elevated)',
               color: 'var(--color-text-secondary)',
             }}
           >
@@ -133,14 +133,14 @@ function EditableField({ label, value, icon, placeholder, onSave, validation }: 
           onClick={() => setIsEditing(true)}
           className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors"
           style={{
-            background: 'var(--color-bg-tertiary)',
+            background: 'var(--color-elevated)',
             border: '1px solid var(--color-border)',
           }}
         >
           <span style={{ color: 'var(--color-text-tertiary)' }}>{icon}</span>
           <span
             className="flex-1 text-sm"
-            style={{ color: value ? 'var(--color-text-primary)' : 'var(--color-text-muted)' }}
+            style={{ color: value ? 'var(--color-text)' : 'var(--color-text-muted)' }}
           >
             {value || placeholder}
           </span>
@@ -203,7 +203,7 @@ export function AccountSettings() {
         <h2
           id="account-section-heading"
           className="text-lg font-bold"
-          style={{ color: 'var(--color-text-primary)' }}
+          style={{ color: 'var(--color-text)' }}
         >
           Account
         </h2>
@@ -222,7 +222,7 @@ export function AccountSettings() {
           <div className="p-6 text-center">
             <div
               className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
-              style={{ background: 'var(--color-bg-tertiary)' }}
+              style={{ background: 'var(--color-elevated)' }}
             >
               <User size={32} style={{ color: 'var(--color-text-muted)' }} />
             </div>
@@ -271,7 +271,7 @@ export function AccountSettings() {
                 <div className="flex-1 min-w-0">
                   <p
                     className="font-medium truncate"
-                    style={{ color: 'var(--color-text-primary)' }}
+                    style={{ color: 'var(--color-text)' }}
                   >
                     {profile?.displayName || clerkUser?.firstName || 'User'}
                   </p>
@@ -331,14 +331,14 @@ export function AccountSettings() {
                     <div
                       className="flex items-center gap-3 px-3 py-2 rounded-lg"
                       style={{
-                        background: 'var(--color-bg-tertiary)',
+                        background: 'var(--color-elevated)',
                         border: '1px solid #22c55e',
                       }}
                     >
                       <Wallet size={18} style={{ color: 'var(--color-success)' }} />
                       <span
                         className="flex-1 text-sm"
-                        style={{ color: 'var(--color-text-primary)' }}
+                        style={{ color: 'var(--color-text)' }}
                       >
                         Sage Wallet Connected
                       </span>
@@ -361,7 +361,7 @@ export function AccountSettings() {
                     onClick={handleConnectWallet}
                     className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm"
                     style={{
-                      background: 'var(--color-bg-tertiary)',
+                      background: 'var(--color-elevated)',
                       color: 'var(--color-text-secondary)',
                       border: '1px solid var(--color-border)',
                     }}
@@ -390,7 +390,7 @@ export function AccountSettings() {
                 </div>
                 <span
                   className="flex-1 text-sm"
-                  style={{ color: 'var(--color-text-primary)' }}
+                  style={{ color: 'var(--color-text)' }}
                 >
                   Messages
                 </span>

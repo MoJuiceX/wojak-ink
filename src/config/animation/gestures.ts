@@ -104,7 +104,7 @@ export const LINK_GESTURES = {
 
   underline: {
     whileHover: {
-      color: 'var(--color-brand-primary)',
+      color: 'var(--color-primary)',
     },
     transition: { duration: 0.15 },
   },

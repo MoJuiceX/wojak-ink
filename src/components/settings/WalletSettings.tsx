@@ -60,7 +60,7 @@ export function WalletSettings() {
         <h2
           id="wallet-section-heading"
           className="text-lg font-bold"
-          style={{ color: 'var(--color-text-primary)' }}
+          style={{ color: 'var(--color-text)' }}
         >
           Wallet
         </h2>
@@ -79,7 +79,7 @@ export function WalletSettings() {
           <div className="text-center py-4">
             <div
               className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
-              style={{ background: 'var(--color-bg-tertiary)' }}
+              style={{ background: 'var(--color-elevated)' }}
             >
               <Wallet size={32} style={{ color: 'var(--color-text-muted)' }} />
             </div>
@@ -118,7 +118,7 @@ export function WalletSettings() {
               <div className="flex-1 min-w-0">
                 <p
                   className="text-sm font-medium"
-                  style={{ color: 'var(--color-text-primary)' }}
+                  style={{ color: 'var(--color-text)' }}
                 >
                   Connected
                 </p>
@@ -136,7 +136,7 @@ export function WalletSettings() {
               <button
                 className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors"
                 style={{
-                  background: 'var(--color-bg-tertiary)',
+                  background: 'var(--color-elevated)',
                   color: copied ? 'var(--color-success)' : 'var(--color-text-secondary)',
                   border: '1px solid var(--color-border)',
                 }}
@@ -151,7 +151,7 @@ export function WalletSettings() {
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors"
                 style={{
-                  background: 'var(--color-bg-tertiary)',
+                  background: 'var(--color-elevated)',
                   color: 'var(--color-text-secondary)',
                   border: '1px solid var(--color-border)',
                 }}

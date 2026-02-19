@@ -44,10 +44,10 @@ export function FilterPills({
             className="h-9 px-5 rounded-full text-sm font-medium transition-colors"
             style={{
               background: isActive
-                ? 'var(--color-brand-primary)'
-                : 'var(--color-glass-bg)',
+                ? 'var(--color-primary)'
+                : 'var(--color-surface)',
               border: `1px solid ${
-                isActive ? 'var(--color-brand-primary)' : 'var(--color-border)'
+                isActive ? 'var(--color-primary)' : 'var(--color-border)'
               }`,
               color: isActive ? 'white' : 'var(--color-text-secondary)',
               boxShadow: isActive ? 'var(--glow-subtle)' : 'none',

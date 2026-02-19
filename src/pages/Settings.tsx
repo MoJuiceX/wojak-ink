@@ -76,7 +76,7 @@ export default function Settings() {
               <h2
                 id="general-section-heading"
                 className="text-lg font-bold"
-                style={{ color: 'var(--color-text-primary)' }}
+                style={{ color: 'var(--color-text)' }}
               >
                 General
               </h2>
@@ -93,7 +93,7 @@ export default function Settings() {
                 <div>
                   <p
                     className="text-sm font-medium"
-                    style={{ color: 'var(--color-text-primary)' }}
+                    style={{ color: 'var(--color-text)' }}
                   >
                     Skip Boot Sequence
                   </p>

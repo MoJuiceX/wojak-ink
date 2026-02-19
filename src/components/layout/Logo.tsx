@@ -262,7 +262,7 @@ export function Logo({ className = '', size = 'md', showText = true, showTagline
               }}
               transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
             >
-              <span style={{ color: 'var(--color-brand-primary)' }}>Orange</span>
+              <span style={{ color: 'var(--color-primary)' }}>Orange</span>
               <span style={{ color: 'white' }}> Labs</span>
             </motion.span>
           </>
@@ -283,11 +283,11 @@ export function Logo({ className = '', size = 'md', showText = true, showTagline
                       e.stopPropagation();
                       breadcrumb.onBack?.();
                     }}
-                    className={`${iconSize.container} flex items-center justify-center rounded-lg transition-colors hover:bg-[var(--color-glass-hover)]`}
+                    className={`${iconSize.container} flex items-center justify-center rounded-lg transition-colors hover:bg-[var(--color-surface-hover)]`}
                     style={{
                       marginRight: '8px',
                       color: 'var(--color-text-secondary)',
-                      background: 'var(--color-glass-bg)',
+                      background: 'var(--color-surface)',
                       border: '1px solid var(--color-border)',
                       flexShrink: 0,
                     }}
@@ -299,13 +299,13 @@ export function Logo({ className = '', size = 'md', showText = true, showTagline
                     <span
                       className={`font-bold tracking-tight ${sizeStyles[size]} truncate`}
                       style={{
-                        color: 'var(--color-text-primary)',
+                        color: 'var(--color-text)',
                         maxWidth: 'min(45vw, 180px)',
                       }}
                     >
                       {breadcrumb.label.startsWith('Bepe ') ? (
                         <>
-                          <span style={{ color: 'var(--color-brand-primary)' }}>Bepe</span>
+                          <span style={{ color: 'var(--color-primary)' }}>Bepe</span>
                           {breadcrumb.label.slice(4)}
                         </>
                       ) : breadcrumb.label.startsWith('Alien ') ? (
@@ -347,10 +347,10 @@ export function Logo({ className = '', size = 'md', showText = true, showTagline
                   {showText && (
                     <span
                       className={`font-bold tracking-tight ${sizeStyles[size]}`}
-                      style={{ color: 'var(--color-text-primary)' }}
+                      style={{ color: 'var(--color-text)' }}
                     >
                       Wojak
-                      <span style={{ color: 'var(--color-brand-primary)' }}>.ink</span>
+                      <span style={{ color: 'var(--color-primary)' }}>.ink</span>
                     </span>
                   )}
                 </>

@@ -391,7 +391,7 @@
 .runner-container .game-title {
   font-size: 32px;
   font-weight: 800;
-  color: var(--color-text-primary, #fff);
+  color: var(--color-text, #fff);
   margin-bottom: 16px;
 }
 
@@ -413,7 +413,7 @@
 }
 
 .runner-container .high-score {
-  color: var(--color-brand-primary, #ff6b00);
+  color: var(--color-primary, #ff6b00);
   font-size: 16px;
   font-weight: 600;
   margin-top: 16px;
@@ -452,19 +452,19 @@
 .runner-container .score-value {
   font-size: 56px;
   font-weight: 800;
-  color: var(--color-brand-primary, #ff6b00);
+  color: var(--color-primary, #ff6b00);
 }
 
 .runner-container .new-record {
-  color: var(--color-brand-primary, #ff6b00);
+  color: var(--color-primary, #ff6b00);
   font-size: 24px;
   font-weight: 800;
   animation: glow 1s ease-in-out infinite alternate;
 }
 
 @keyframes glow {
-  from { filter: drop-shadow(0 0 5px var(--color-brand-primary, #ff6b00)); }
-  to { filter: drop-shadow(0 0 15px var(--color-brand-primary, #ff6b00)); }
+  from { filter: drop-shadow(0 0 5px var(--color-primary, #ff6b00)); }
+  to { filter: drop-shadow(0 0 15px var(--color-primary, #ff6b00)); }
 }
 
 @keyframes glow-pulse {
@@ -487,7 +487,7 @@
 .runner-container .leaderboard-title {
   font-size: 20px;
   font-weight: 700;
-  color: var(--color-brand-primary, #ff6b00);
+  color: var(--color-primary, #ff6b00);
   margin-bottom: 16px;
   text-align: center;
 }
@@ -508,7 +508,7 @@
 }
 
 .runner-container .leaderboard-rank {
-  color: var(--color-brand-primary, #ff6b00);
+  color: var(--color-primary, #ff6b00);
   font-weight: 700;
   font-size: 14px;
   width: 32px;
@@ -516,7 +516,7 @@
 
 .runner-container .leaderboard-name {
   flex: 1;
-  color: var(--color-text-primary, #fff);
+  color: var(--color-text, #fff);
   font-size: 14px;
 }
 

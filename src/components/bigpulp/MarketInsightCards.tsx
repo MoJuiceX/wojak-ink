@@ -158,7 +158,7 @@ function InsightCard({
           style={{
             fontSize: '15px',
             fontWeight: 700,
-            color: 'var(--color-text-primary)',
+            color: 'var(--color-text)',
             marginBottom: '2px',
           }}
         >
@@ -247,7 +247,7 @@ function NFTListModal({
             <div>
               <h3
                 className="font-bold"
-                style={{ color: 'var(--color-text-primary)', fontSize: '16px' }}
+                style={{ color: 'var(--color-text)', fontSize: '16px' }}
               >
                 {config.title}
               </h3>
@@ -300,7 +300,7 @@ function NFTListModal({
                   <div className="p-3">
                     <p
                       className="text-sm font-semibold truncate"
-                      style={{ color: 'var(--color-text-primary)' }}
+                      style={{ color: 'var(--color-text)' }}
                     >
                       {nft.name}
                     </p>
@@ -308,7 +308,7 @@ function NFTListModal({
                       <div className="flex items-baseline gap-1.5 mt-1">
                         <span
                           className="text-sm font-bold"
-                          style={{ color: 'var(--color-brand-primary)' }}
+                          style={{ color: 'var(--color-primary)' }}
                         >
                           {nft.priceXch.toFixed(2)} XCH
                         </span>
@@ -369,12 +369,12 @@ export function MarketInsightCards({ data, onViewModeChange }: MarketInsightCard
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Sparkles size={18} style={{ color: 'var(--color-brand-primary)' }} />
+          <Sparkles size={18} style={{ color: 'var(--color-primary)' }} />
           <span
             style={{
               fontSize: '14px',
               fontWeight: 600,
-              color: 'var(--color-text-primary)',
+              color: 'var(--color-text)',
             }}
           >
             Market Opportunities

@@ -262,7 +262,7 @@
 
 /* Focus state for accessibility */
 .generator-option-item:focus-visible {
-  outline: 2px solid var(--color-brand-primary);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
@@ -310,7 +310,7 @@
 /* Hover state */
 .generator-category-tab:hover {
   background: rgba(255, 255, 255, 0.06);
-  color: var(--color-text-primary);
+  color: var(--color-text);
 }
 
 /* Active/selected state — color only, no background (avoids inner box) */
@@ -349,7 +349,7 @@
 
 .generator-action-btn:hover {
   background: var(--color-bg-secondary);
-  color: var(--color-text-primary);
+  color: var(--color-text);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
@@ -360,9 +360,9 @@
 }
 
 .generator-action-btn.primary {
-  background: var(--color-brand-primary);
+  background: var(--color-primary);
   color: white;
-  border-color: var(--color-brand-primary);
+  border-color: var(--color-primary);
 }
 
 .generator-action-btn.primary:hover {
@@ -372,8 +372,8 @@
 
 .generator-action-btn.toggled {
   background: rgba(255, 140, 0, 0.15);
-  color: var(--color-brand-primary);
-  border-color: var(--color-brand-primary);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
 .generator-action-btn:disabled {
@@ -390,7 +390,7 @@
   background:
     repeating-conic-gradient(
       var(--color-bg-secondary) 0% 25%,
-      var(--color-bg-primary) 0% 50%
+      var(--color-bg) 0% 50%
     ) 50% / 20px 20px;
   border: 2px solid var(--color-border);
   transition: box-shadow 0.3s ease;
@@ -483,7 +483,7 @@
   width: 160px;
   height: 160px;
   border-radius: 16px;
-  background: var(--color-bg-primary);
+  background: var(--color-bg);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
   overflow: hidden;
   z-index: 1000;
@@ -551,7 +551,7 @@
 .selection-ring {
   position: absolute;
   inset: -3px;
-  border: 3px solid var(--color-brand-primary);
+  border: 3px solid var(--color-primary);
   border-radius: 14px;
   pointer-events: none;
   box-shadow: 0 0 20px rgba(255, 140, 0, 0.4);
@@ -564,7 +564,7 @@
   right: 8px;
   width: 24px;
   height: 24px;
-  background: var(--color-brand-primary);
+  background: var(--color-primary);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -589,9 +589,9 @@
   left: 50%;
   width: 8px;
   height: 8px;
-  background: var(--color-brand-primary);
+  background: var(--color-primary);
   border-radius: 50%;
-  box-shadow: 0 0 10px var(--color-brand-primary);
+  box-shadow: 0 0 10px var(--color-primary);
 }
 
 /* Reduced motion preference support */

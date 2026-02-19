@@ -36,7 +36,7 @@
   font-family: 'Courier New', 'Consolas', monospace;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--color-brand-primary, #e8792f);
+  color: var(--color-primary, #e8792f);
   perspective: 200px;
   transform-style: preserve-3d;
 }
@@ -82,7 +82,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-brand-primary, #e8792f);
+  color: var(--color-primary, #e8792f);
 }
 
 /* Bottom half of the character (current, stays) */
@@ -108,7 +108,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-brand-primary, #e8792f);
+  color: var(--color-primary, #e8792f);
 }
 
 /* Folding top half (old character folding away) */
@@ -137,7 +137,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-brand-primary, #e8792f);
+  color: var(--color-primary, #e8792f);
 }
 
 /* Unfolding bottom half (new character unfolding) */
@@ -166,7 +166,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-brand-primary, #e8792f);
+  color: var(--color-primary, #e8792f);
   transform: rotateX(180deg);
 }
 

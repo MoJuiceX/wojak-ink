@@ -40,7 +40,7 @@ function QuickStats({
         icon: BarChart2,
         label: 'Listed',
         value: stats.listedCount.toString(),
-        color: 'var(--color-brand-primary)',
+        color: 'var(--color-primary)',
       },
       {
         icon: TrendingUp,
@@ -187,12 +187,12 @@ function TrendingNFTs({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Sparkles size={16} style={{ color: 'var(--color-brand-primary)' }} />
+          <Sparkles size={16} style={{ color: 'var(--color-primary)' }} />
           <span
             style={{
               fontSize: '14px',
               fontWeight: 600,
-              color: 'var(--color-text-primary)',
+              color: 'var(--color-text)',
             }}
           >
             Recent Top Sales
@@ -257,13 +257,13 @@ function TrendingNFTs({
             <div className="p-2">
               <p
                 className="text-xs font-medium truncate"
-                style={{ color: 'var(--color-text-primary)' }}
+                style={{ color: 'var(--color-text)' }}
               >
                 {nft.name}
               </p>
               <p
                 className="text-xs font-bold"
-                style={{ color: 'var(--color-brand-primary)' }}
+                style={{ color: 'var(--color-primary)' }}
               >
                 {nft.priceXch.toFixed(2)} XCH
               </p>

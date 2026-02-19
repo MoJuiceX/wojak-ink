@@ -105,14 +105,14 @@ export function NFTSearchInput({
             className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 transition-colors"
             style={{
               background: 'var(--color-surface)',
-              border: `1px solid ${error ? 'var(--color-error, #ef4444)' : isFocused ? 'var(--color-brand-primary)' : 'var(--color-border)'}`,
+              border: `1px solid ${error ? 'var(--color-error, #ef4444)' : isFocused ? 'var(--color-primary)' : 'var(--color-border)'}`,
             }}
           >
             <Search
               size={14}
               style={{
                 color: isFocused
-                  ? 'var(--color-brand-primary)'
+                  ? 'var(--color-primary)'
                   : 'var(--color-text-muted)',
               }}
             />
@@ -120,7 +120,7 @@ export function NFTSearchInput({
               size={12}
               style={{
                 color: isFocused
-                  ? 'var(--color-brand-primary)'
+                  ? 'var(--color-primary)'
                   : 'var(--color-text-muted)',
                 marginLeft: '-2px',
               }}
@@ -140,7 +140,7 @@ export function NFTSearchInput({
               aria-label="Search NFT by ID number"
               aria-describedby={error ? 'search-error' : undefined}
               className="flex-1 min-w-0 bg-transparent outline-none text-sm font-mono placeholder:opacity-40"
-              style={{ color: 'var(--color-text-primary)', marginLeft: '-2px' }}
+              style={{ color: 'var(--color-text)', marginLeft: '-2px' }}
             />
             <AnimatePresence mode="wait">
               {isLoading && (
@@ -152,7 +152,7 @@ export function NFTSearchInput({
                   <Loader2
                     size={14}
                     className="animate-spin"
-                    style={{ color: 'var(--color-brand-primary)' }}
+                    style={{ color: 'var(--color-primary)' }}
                   />
                 </motion.div>
               )}

@@ -26,7 +26,7 @@ function DesktopCharacterCardSkeleton() {
       className="w-full overflow-hidden animate-pulse"
       style={{
         aspectRatio: '1 / 1',
-        background: 'var(--color-glass-bg)',
+        background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
         borderRadius: 16,
       }}

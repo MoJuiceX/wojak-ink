@@ -67,7 +67,7 @@ export const SoundSettings: React.FC = () => {
             width: '52px',
             height: '24px',
             borderRadius: '9999px',
-            background: !volumes.muted ? 'var(--color-brand-primary)' : 'rgba(255,255,255,0.1)',
+            background: !volumes.muted ? 'var(--color-primary)' : 'rgba(255,255,255,0.1)',
             flexShrink: 0,
             cursor: 'pointer',
             transition: 'background 0.2s ease',

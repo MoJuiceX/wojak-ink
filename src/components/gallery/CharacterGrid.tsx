@@ -54,7 +54,7 @@ function CharacterCardSkeleton() {
     <div
       className="w-full rounded-xl overflow-hidden animate-pulse aspect-square"
       style={{
-        background: 'var(--color-glass-bg)',
+        background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
       }}
     />

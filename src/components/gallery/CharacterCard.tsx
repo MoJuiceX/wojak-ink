@@ -94,7 +94,7 @@ export function CharacterCard({
           <div
             className="absolute inset-0 animate-pulse"
             style={{
-              background: 'var(--color-glass-bg)',
+              background: 'var(--color-surface)',
             }}
           />
         )}
@@ -118,7 +118,7 @@ export function CharacterCard({
           // Fallback placeholder
           <div
             className="absolute inset-0 flex items-center justify-center text-6xl"
-            style={{ background: 'var(--color-glass-bg)' }}
+            style={{ background: 'var(--color-surface)' }}
           >
             🎭
           </div>

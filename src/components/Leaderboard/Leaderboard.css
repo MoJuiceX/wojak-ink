@@ -1469,8 +1469,8 @@
 }
 
 .filter-tab.active {
-  background: var(--color-brand-primary, #F97316);
-  border-color: var(--color-brand-primary, #F97316);
+  background: var(--color-primary, #F97316);
+  border-color: var(--color-primary, #F97316);
   color: white;
 }
 
@@ -1484,7 +1484,7 @@
 /* Friend indicator in leaderboard row */
 .leaderboard-row.is-friend {
   background: rgba(249, 115, 22, 0.05);
-  border-left: 2px solid var(--color-brand-primary, #F97316);
+  border-left: 2px solid var(--color-primary, #F97316);
 }
 
 .friend-indicator {

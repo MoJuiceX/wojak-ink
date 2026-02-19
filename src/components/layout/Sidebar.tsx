@@ -126,7 +126,7 @@ export function Sidebar({
               width: 23,
               height: 23,
               color: pinnedState === 'minimized'
-                ? 'var(--color-brand-primary)'
+                ? 'var(--color-primary)'
                 : 'var(--color-text-muted)',
               opacity: pinnedState === 'minimized' ? 1 : 0.4,
               background: 'transparent',
@@ -168,12 +168,12 @@ export function Sidebar({
               className="p-2 rounded-lg transition-colors flex items-center justify-center"
               style={{
                 color: pinnedState === 'expanded'
-                  ? 'var(--color-brand-primary)'
+                  ? 'var(--color-primary)'
                   : 'var(--color-text-muted)',
               }}
               onClick={handleTogglePin}
               whileHover={{
-                background: 'var(--color-glass-hover)',
+                background: 'var(--color-surface-hover)',
               }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

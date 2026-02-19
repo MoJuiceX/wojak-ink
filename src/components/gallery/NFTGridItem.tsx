@@ -91,7 +91,7 @@ export const NFTGridItem = memo(function NFTGridItem({
       {imageError && (
         <div
           className="absolute inset-0 flex items-center justify-center"
-          style={{ background: 'var(--color-glass-bg)' }}
+          style={{ background: 'var(--color-surface)' }}
         >
           <span
             className="text-xs"

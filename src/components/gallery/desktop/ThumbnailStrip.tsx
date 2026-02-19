@@ -134,12 +134,12 @@ export function ThumbnailStrip({
                   width: panel.thumbnailSize,
                   height: panel.thumbnailSize,
                   border: isCurrent
-                    ? '2px solid var(--color-brand-primary)'
+                    ? '2px solid var(--color-primary)'
                     : '1px solid var(--color-border)',
                   boxShadow: isCurrent
                     ? '0 0 12px rgba(255, 107, 0, 0.4)'
                     : 'none',
-                  outlineColor: 'var(--color-brand-primary)',
+                  outlineColor: 'var(--color-primary)',
                 }}
                 role="option"
                 aria-selected={isCurrent}
@@ -154,7 +154,7 @@ export function ThumbnailStrip({
                 whileHover={{
                   opacity: isFar ? 0.8 : 1,
                   borderColor: isCurrent
-                    ? 'var(--color-brand-primary)'
+                    ? 'var(--color-primary)'
                     : 'rgba(255, 107, 0, 0.5)',
                 }}
                 whileTap={{ scale: 0.95 }}

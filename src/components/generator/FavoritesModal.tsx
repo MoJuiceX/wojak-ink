@@ -102,18 +102,18 @@ export function FavoritesModal({ className = '' }: FavoritesModalProps) {
               <div className="flex items-center gap-2">
                 <Heart
                   size={20}
-                  style={{ color: 'var(--color-brand-primary)' }}
+                  style={{ color: 'var(--color-primary)' }}
                 />
                 <h2
                   className="text-lg font-semibold"
-                  style={{ color: 'var(--color-text-primary)' }}
+                  style={{ color: 'var(--color-text)' }}
                 >
                   Favorites
                 </h2>
                 <span
                   className="px-2 py-0.5 rounded-full text-xs"
                   style={{
-                    background: 'var(--color-glass-bg)',
+                    background: 'var(--color-surface)',
                     color: 'var(--color-text-muted)',
                   }}
                 >
@@ -125,7 +125,7 @@ export function FavoritesModal({ className = '' }: FavoritesModalProps) {
                 type="button"
                 className="p-2 rounded-lg transition-colors"
                 style={{
-                  background: 'var(--color-glass-bg)',
+                  background: 'var(--color-surface)',
                   color: 'var(--color-text-secondary)',
                 }}
                 onClick={handleClose}
@@ -150,7 +150,7 @@ export function FavoritesModal({ className = '' }: FavoritesModalProps) {
                       key={favorite.id}
                       className="relative rounded-xl overflow-hidden"
                       style={{
-                        background: 'var(--color-glass-bg)',
+                        background: 'var(--color-surface)',
                         border: '1px solid var(--color-border)',
                       }}
                       variants={prefersReducedMotion ? undefined : favoriteCardVariants}
@@ -185,8 +185,8 @@ export function FavoritesModal({ className = '' }: FavoritesModalProps) {
                               onChange={(e) => setEditName(e.target.value)}
                               className="flex-1 px-2 py-1 rounded text-xs min-w-0"
                               style={{
-                                background: 'var(--color-bg-primary)',
-                                color: 'var(--color-text-primary)',
+                                background: 'var(--color-bg)',
+                                color: 'var(--color-text)',
                                 border: '1px solid var(--color-border)',
                               }}
                               autoFocus
@@ -200,7 +200,7 @@ export function FavoritesModal({ className = '' }: FavoritesModalProps) {
                               type="button"
                               className="p-1 rounded transition-colors flex-shrink-0"
                               style={{
-                                background: 'var(--color-brand-primary)',
+                                background: 'var(--color-primary)',
                                 color: 'white',
                               }}
                               onClick={() => handleSaveEdit(favorite.id)}
@@ -212,7 +212,7 @@ export function FavoritesModal({ className = '' }: FavoritesModalProps) {
                               type="button"
                               className="p-1 rounded transition-colors flex-shrink-0"
                               style={{
-                                background: 'var(--color-glass-bg)',
+                                background: 'var(--color-surface)',
                                 color: 'var(--color-text-secondary)',
                               }}
                               onClick={handleCancelEdit}
@@ -225,7 +225,7 @@ export function FavoritesModal({ className = '' }: FavoritesModalProps) {
                           <div className="flex items-center gap-1">
                             <span
                               className="flex-1 text-xs font-medium truncate"
-                              style={{ color: 'var(--color-text-primary)' }}
+                              style={{ color: 'var(--color-text)' }}
                             >
                               {favorite.name}
                             </span>
@@ -233,7 +233,7 @@ export function FavoritesModal({ className = '' }: FavoritesModalProps) {
                               type="button"
                               className="p-1 rounded transition-colors flex-shrink-0"
                               style={{
-                                background: 'var(--color-glass-bg)',
+                                background: 'var(--color-surface)',
                                 color: 'var(--color-text-secondary)',
                               }}
                               onClick={(e) => { e.stopPropagation(); handleStartEdit(favorite); }}
@@ -247,7 +247,7 @@ export function FavoritesModal({ className = '' }: FavoritesModalProps) {
                               style={{
                                 width: '24px',
                                 height: '24px',
-                                background: 'var(--color-glass-bg)',
+                                background: 'var(--color-surface)',
                                 color: 'var(--color-error)',
                               }}
                               onClick={(e) => handleDelete(e, favorite.id)}

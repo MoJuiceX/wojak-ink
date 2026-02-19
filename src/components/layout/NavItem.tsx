@@ -215,10 +215,10 @@ export const NavItem = memo(function NavItem({
         background: featured
           ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(249, 115, 22, 0.05) 100%)'
           : isActive
-            ? 'var(--color-glass-bg)'
+            ? 'var(--color-surface)'
             : 'transparent',
         color: featured || isActive
-          ? 'var(--color-brand-primary)'
+          ? 'var(--color-primary)'
           : 'var(--color-text-secondary)',
       }}
       onClick={handleClick}
@@ -229,8 +229,8 @@ export const NavItem = memo(function NavItem({
           ? undefined
           : {
               background: isActive
-                ? 'var(--color-glass-bg)'
-                : 'var(--color-glass-hover)',
+                ? 'var(--color-surface)'
+                : 'var(--color-surface-hover)',
             }
       }
       whileTap={disabled || prefersReducedMotion ? undefined : { scale: 0.98 }}
@@ -243,7 +243,7 @@ export const NavItem = memo(function NavItem({
           <motion.div
             className="absolute left-full ml-2 px-2 py-1 rounded-md whitespace-nowrap pointer-events-none"
             style={{
-              background: 'var(--color-bg-tertiary)',
+              background: 'var(--color-elevated)',
               border: '1px solid var(--color-border)',
               color: 'var(--color-text-secondary)',
               fontSize: '0.875rem',
@@ -299,7 +299,7 @@ export const NavItem = memo(function NavItem({
           <span
             className="absolute -top-1 -right-1 flex items-center justify-center"
             style={{
-              background: 'var(--color-brand-primary)',
+              background: 'var(--color-primary)',
               minWidth: badge === 'dot' ? 6 : 14,
               height: badge === 'dot' ? 6 : 14,
               borderRadius: badge === 'dot' ? 3 : 7,
@@ -343,7 +343,7 @@ export const NavItem = memo(function NavItem({
             <span
               className="ml-2 flex items-center justify-center flex-shrink-0"
               style={{
-                background: 'var(--color-brand-primary)',
+                background: 'var(--color-primary)',
                 minWidth: badge === 'dot' ? 8 : 18,
                 height: badge === 'dot' ? 8 : 18,
                 borderRadius: badge === 'dot' ? 4 : 9,

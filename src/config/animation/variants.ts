@@ -334,7 +334,7 @@ export const TOAST_SLIDE: Variants = {
 // ============================================
 
 export const GLOW_PULSE = (
-  color: string = 'var(--color-brand-primary)'
+  color: string = 'var(--color-primary)'
 ) => ({
   animate: {
     boxShadow: [

@@ -46,7 +46,7 @@ export function ThemeCard({ theme, isSelected, onSelect }: ThemeCardProps) {
           ? '2px solid var(--color-primary)'
           : '1px solid var(--color-border)',
         boxShadow: isSelected
-          ? '0 0 20px rgba(var(--color-brand-primary-rgb, 255, 107, 0), 0.2)'
+          ? '0 0 20px rgba(var(--color-primary-rgb, 255, 107, 0), 0.2)'
           : 'none',
       }}
     >
@@ -97,7 +97,7 @@ export function ThemeCard({ theme, isSelected, onSelect }: ThemeCardProps) {
       <div className="mt-3 text-center">
         <h3
           className="text-sm font-semibold whitespace-nowrap"
-          style={{ color: 'var(--color-text-primary)' }}
+          style={{ color: 'var(--color-text)' }}
         >
           {theme.name}
         </h3>

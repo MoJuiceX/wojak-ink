@@ -57,7 +57,7 @@
   font-family: var(--font-display);
   font-weight: 700;
   font-size: clamp(1.5rem, 4vw, 2.5rem);
-  color: var(--color-text-primary);
+  color: var(--color-text);
   text-shadow: 0 0 20px var(--color-tang-500-30);
 }
 
@@ -102,9 +102,9 @@
   justify-content: flex-start;
   background: var(--gradient-game-bg,
     linear-gradient(180deg,
-      var(--color-bg-primary) 0%,
+      var(--color-bg) 0%,
       var(--color-bg-secondary) 50%,
-      var(--color-bg-primary) 100%
+      var(--color-bg) 100%
     )
   );
   padding: var(--game-padding, 12px);
