@@ -569,6 +569,7 @@ body {
 }
 
 .fight-club-tab {
+  position: relative;
   flex: 1;
   padding: var(--space-3) var(--space-4);
   font-size: var(--text-sm);
@@ -580,7 +581,12 @@ body {
   cursor: pointer;
   transition:
     background var(--transition-fast),
-    color var(--transition-fast);
+    color var(--transition-fast),
+    transform 0.1s ease;
+}
+
+.fight-club-tab:active {
+  transform: scale(0.97);
 }
 
 .fight-club-tab:hover {
@@ -592,6 +598,21 @@ body {
   color: var(--color-text);
   background: var(--color-primary);
   color: var(--color-text-inverse);
+}
+
+/* Mobile: full-width tabs with tighter padding */
+@media (max-width: 640px) {
+  .fight-club-tabs {
+    gap: var(--space-1);
+    padding: 3px;
+    border-radius: var(--radius-md);
+  }
+
+  .fight-club-tab {
+    padding: var(--space-2) var(--space-3);
+    font-size: 13px;
+    border-radius: calc(var(--radius-md) - 2px);
+  }
 }
 
 
