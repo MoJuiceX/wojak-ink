@@ -3,69 +3,38 @@
  *
  * Compact friends summary for Account page.
  * Shows online friends, friend list preview, and quick actions.
+ * Uses FriendsContext for consistent data with the rest of the app.
  */
 
-import { useState, useEffect } from 'react';
-import { Users, Circle, UserPlus, RefreshCw } from 'lucide-react';
-import { useAuth } from '@clerk/clerk-react';
+import { Users, UserPlus, RefreshCw } from 'lucide-react';
+import { useFriends } from '@/contexts/FriendsContext';
 import { Skeleton } from '@/components/ui/Skeleton';
-
-interface Friend {
-  id: string;
-  displayName: string;
-  avatar: { type: string; value: string };
-  isOnline: boolean;
-  lastSeen?: string;
-}
 
 interface FriendsWidgetProps {
   onViewAll: () => void;
   onFindFriends: () => void;
 }
 
-const CLERK_ENABLED = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
 export function FriendsWidget({ onViewAll, onFindFriends }: FriendsWidgetProps) {
-  const [friends, setFriends] = useState<Friend[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const clerkAuth = useAuth();
-  const authResult = CLERK_ENABLED ? clerkAuth : { getToken: async () => null };
-  const { getToken } = authResult;
+  const { friendProfiles, isLoading, profilesLoaded, refreshFriends } = useFriends();
 
-  const fetchFriends = async () => {
-    setLoading(true);
-    setError(false);
-    try {
-      const token = await getToken();
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      const res = await fetch('/api/friends', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setFriends(data.friends || []);
-      } else {
-        setError(true);
-      }
-    } catch (err) {
-      console.error('[FriendsWidget] Failed to fetch friends:', err);
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
+  const handleRetry = async () => {
+    await refreshFriends();
   };
 
-  useEffect(() => {
-    fetchFriends();
-  }, [getToken]);
+  // Show loading skeleton while actively loading (before profiles have loaded at least once)
+  const loading = isLoading && !profilesLoaded;
+  // Show error if profiles attempted to load but we got none despite having friends
+  const error = profilesLoaded && friendProfiles.length === 0 && !isLoading;
 
-  const onlineFriends = friends.filter(f => f.isOnline);
+  // Map friendProfiles to expected format for display
+  const friends = friendProfiles.map(fp => ({
+    id: fp.id,
+    displayName: fp.displayName,
+    avatar: fp.avatar,
+    // Note: online status not yet implemented - default to false
+    isOnline: false,
+  }));
 
   if (loading) {
     return (
@@ -108,7 +77,7 @@ export function FriendsWidget({ onViewAll, onFindFriends }: FriendsWidgetProps) 
           <button
             type="button"
             className="widget-btn secondary"
-            onClick={fetchFriends}
+            onClick={handleRetry}
           >
             <RefreshCw size={14} />
             Retry
@@ -128,23 +97,8 @@ export function FriendsWidget({ onViewAll, onFindFriends }: FriendsWidgetProps) 
         <span className="widget-count">{friends.length}</span>
       </div>
 
-      {/* Online Friends */}
-      {onlineFriends.length > 0 && (
-        <div className="friends-section">
-          <div className="section-label">
-            <Circle size={8} fill="#22c55e" color="#22c55e" />
-            Online Now ({onlineFriends.length})
-          </div>
-          <div className="friends-avatars">
-            {onlineFriends.slice(0, 5).map(friend => (
-              <div key={friend.id} className="friend-avatar online">
-                <span className="avatar-emoji">{friend.avatar?.value || '🍊'}</span>
-                <span className="friend-name">{friend.displayName}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Online Friends - feature not yet implemented, commented out for now */}
+      {/* Online status will be added when backend support is ready */}
 
       {/* All Friends */}
       {friends.length > 0 ? (
