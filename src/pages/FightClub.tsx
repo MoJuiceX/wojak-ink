@@ -336,13 +336,16 @@ export default function FightClub() {
     navigate(tab.path);
   };
 
-  // Show connect wallet prompt if wallet not connected
-  if (!isWalletConnected) {
+  // Determine if current tab requires wallet/access
+  const isGatedTab = activeTab === 'battle' || activeTab === 'burn';
+
+  // Show connect wallet prompt only for gated tabs when wallet not connected
+  if (!isWalletConnected && isGatedTab) {
     return <ConnectWalletPrompt />;
   }
 
-  // Show loading state while checking access
-  if (accessLoading) {
+  // Show loading state while checking access (only matters for gated tabs)
+  if (accessLoading && isGatedTab) {
     return (
       <PageTransition>
         <div
@@ -378,8 +381,8 @@ export default function FightClub() {
     );
   }
 
-  // Show gate if no Farmers Plot
-  if (!accessData?.hasAccess) {
+  // Show gate only for gated tabs when no Farmers Plot
+  if (!accessData?.hasAccess && isGatedTab) {
     return <FightClubGate />;
   }
 
