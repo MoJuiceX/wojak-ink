@@ -245,6 +245,10 @@
   color: var(--color-text-secondary);
 }
 
+.friend-card-skeleton {
+  pointer-events: none;
+}
+
 .empty-icon {
   font-size: 3rem;
   display: block;

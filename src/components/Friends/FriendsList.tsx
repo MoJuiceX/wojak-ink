@@ -10,6 +10,7 @@ import { UserMinus, ExternalLink, BarChart2 } from 'lucide-react';
 import { useFriends } from '@/contexts/FriendsContext';
 import { Avatar } from '@/components/Avatar/Avatar';
 import { CompareStats } from '@/components/Profile/CompareStats';
+import { Skeleton } from '@/components/ui/Skeleton';
 import './Friends.css';
 
 interface SelectedFriend {
@@ -25,11 +26,23 @@ export function FriendsList() {
   const { friends, friendProfiles, removeFriend, isLoading, profilesLoaded } = useFriends();
   const [compareTarget, setCompareTarget] = useState<SelectedFriend | null>(null);
 
-  // Show loading only while actively loading
+  // Show loading skeleton while actively loading
   if (isLoading && !profilesLoaded) {
     return (
-      <div className="friends-loading">
-        Loading friends...
+      <div className="friends-list" role="status" aria-label="Loading friends">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="friend-card friend-card-skeleton">
+            <div className="friend-info">
+              <Skeleton variant="circular" width={40} height={40} />
+              <Skeleton variant="text" width={100} height={16} />
+            </div>
+            <div className="friend-actions">
+              <Skeleton variant="rounded" width={32} height={32} />
+              <Skeleton variant="rounded" width={32} height={32} />
+              <Skeleton variant="rounded" width={32} height={32} />
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
