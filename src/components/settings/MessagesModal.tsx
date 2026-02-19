@@ -27,9 +27,9 @@ interface MessagesModalProps {
 function getTypeIcon(type: string) {
   switch (type) {
     case 'success':
-      return <Trophy size={18} style={{ color: '#22c55e' }} />;
+      return <Trophy size={18} style={{ color: 'var(--color-success)' }} />;
     case 'warning':
-      return <AlertTriangle size={18} style={{ color: '#f59e0b' }} />;
+      return <AlertTriangle size={18} style={{ color: 'var(--color-warning)' }} />;
     default:
       return <Info size={18} className="text-accent" />;
   }
@@ -40,9 +40,9 @@ function getTypeBg(type: string) {
     case 'success':
       return 'var(--color-success-10)';
     case 'warning':
-      return 'rgba(245, 158, 11, 0.1)';
+      return 'var(--color-warning-10)';
     default:
-      return 'rgba(234, 88, 12, 0.1)';
+      return 'var(--color-primary-10)';
   }
 }
 

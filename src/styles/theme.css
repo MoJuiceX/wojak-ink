@@ -77,6 +77,8 @@
   --color-error-10: rgba(239, 68, 68, 0.1);
   --color-error-15: rgba(239, 68, 68, 0.15);
   --color-error-30: rgba(239, 68, 68, 0.3);
+  --color-success-10: rgba(34, 197, 94, 0.1);
+  --color-warning-10: rgba(251, 191, 36, 0.1);
   --color-white-3: rgba(255, 255, 255, 0.03);
   --color-white-5: rgba(255, 255, 255, 0.05);
   --color-white-10: rgba(255, 255, 255, 0.1);
