@@ -15,7 +15,7 @@ import {
   Settings,
   User,
   MessageCircle,
-  Swords,
+  Lightbulb,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -29,16 +29,16 @@ interface MenuItem {
   iconBg: string;
 }
 
-// Reordered: Fight Club first (main feature), Account, then actions, community, settings last
+// Reordered: BigPulp first (AI feature), Account, then actions, community, settings last
 const menuItems: MenuItem[] = [
   {
-    icon: Swords,
-    label: 'Fight Club',
-    description: 'Vote, battle, and climb the rankings',
-    route: '/fight-club',
-    badge: 'New',
-    iconColor: '#ef4444',
-    iconBg: 'var(--color-error-15)',
+    icon: Lightbulb,
+    label: 'BigPulp',
+    description: 'Chat with the AI oracle',
+    route: '/bigpulp',
+    badge: 'AI',
+    iconColor: '#fbbf24',
+    iconBg: 'rgba(251, 191, 36, 0.15)',
   },
   {
     icon: User,
