@@ -32,8 +32,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--color-black-50);
+  border: 1px solid var(--color-white-20);
   border-radius: 50%;
   color: white;
   font-size: 20px;
@@ -45,8 +45,8 @@
 }
 
 .osn-sound-btn:hover {
-  background: rgba(255, 107, 0, 0.3);
-  border-color: rgba(255, 107, 0, 0.5);
+  background: var(--color-primary-30);
+  border-color: var(--color-primary-50);
 }
 
 .osn-sound-btn:active {
@@ -70,8 +70,8 @@
 .osn-canvas {
   border-radius: 12px;
   box-shadow:
-    0 0 40px rgba(255, 107, 0, 0.2),
-    0 8px 32px rgba(0, 0, 0, 0.4);
+    0 0 40px var(--color-primary-20),
+    0 8px 32px var(--color-black-40);
   cursor: none;
 }
 
@@ -87,7 +87,7 @@
 .osn-game-over-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.9);
+  background: var(--color-black-90);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -182,23 +182,23 @@
   font-size: 3rem;
   font-weight: 800;
   color: #fff;
-  text-shadow: 0 0 30px rgba(255, 107, 0, 0.5);
+  text-shadow: 0 0 30px var(--color-primary-50);
   line-height: 1;
   animation: osn-final-score-pulse 2s ease-in-out infinite;
 }
 
 @keyframes osn-final-score-pulse {
   0%, 100% {
-    text-shadow: 0 0 30px rgba(255, 107, 0, 0.5);
+    text-shadow: 0 0 30px var(--color-primary-50);
   }
   50% {
-    text-shadow: 0 0 50px rgba(255, 107, 0, 0.8), 0 0 80px rgba(255, 107, 0, 0.4);
+    text-shadow: 0 0 50px var(--color-primary-80), 0 0 80px var(--color-primary-40);
   }
 }
 
 .osn-game-over-score .osn-score-label {
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-white-50);
   text-transform: uppercase;
   letter-spacing: 2px;
 }
@@ -223,7 +223,7 @@
 
 .osn-stat-label {
   font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-white-50);
   text-transform: uppercase;
 }
 
@@ -241,7 +241,7 @@
 
 .osn-submitted {
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-white-60);
   min-height: 1.2em;
 }
 
@@ -261,12 +261,12 @@
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 20px rgba(255, 107, 0, 0.4);
+  box-shadow: 0 4px 20px var(--color-primary-40);
 }
 
 .osn-play-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 30px rgba(255, 107, 0, 0.5);
+  box-shadow: 0 6px 30px var(--color-primary-50);
 }
 
 .osn-play-btn:active {
@@ -278,16 +278,16 @@
   font-size: 0.95rem;
   font-weight: 600;
   color: #fff;
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: var(--color-white-15);
+  border: 1px solid var(--color-white-30);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .osn-leaderboard-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.5);
+  background: var(--color-white-25);
+  border-color: var(--color-white-50);
 }
 
 /* Back to Games - positioned in safe area (bottom right corner) */
@@ -298,9 +298,9 @@
   padding: 10px 20px;
   font-size: 0.85rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.6);
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--color-white-60);
+  background: var(--color-black-50);
+  border: 1px solid var(--color-white-20);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -308,9 +308,9 @@
 }
 
 .osn-back-to-games-btn:hover {
-  color: rgba(255, 255, 255, 0.9);
-  background: rgba(0, 0, 0, 0.7);
-  border-color: rgba(255, 255, 255, 0.4);
+  color: var(--color-white-90);
+  background: var(--color-black-70);
+  border-color: var(--color-white-40);
 }
 
 /* ============================================
@@ -320,7 +320,7 @@
 .osn-leaderboard-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--color-black-60);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -337,8 +337,8 @@
   width: 360px;
   max-width: 90%;
   max-height: 80%;
-  background: rgba(20, 20, 30, 0.98);
-  border: 1px solid rgba(255, 107, 0, 0.4);
+  background: var(--color-surface-dark-98);
+  border: 1px solid var(--color-primary-40);
   border-radius: 20px;
   padding: 24px;
   backdrop-filter: blur(20px);
@@ -363,7 +363,7 @@
   align-items: center;
   margin-bottom: 16px;
   padding-bottom: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--color-white-10);
 }
 
 .osn-leaderboard-header h3 {
@@ -374,9 +374,9 @@
 }
 
 .osn-leaderboard-close {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-white-10);
   border: none;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--color-white-70);
   font-size: 1.25rem;
   width: 32px;
   height: 32px;
@@ -390,7 +390,7 @@
 }
 
 .osn-leaderboard-close:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--color-white-20);
   color: #fff;
 }
 
@@ -404,24 +404,24 @@
   display: flex;
   align-items: center;
   padding: 12px 14px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-white-5);
   border-radius: 10px;
   font-size: 0.95rem;
   transition: background 0.2s ease;
 }
 
 .osn-leaderboard-entry:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--color-white-8);
 }
 
 .osn-leaderboard-entry.current-user {
-  background: rgba(255, 107, 0, 0.2);
-  border: 1px solid rgba(255, 107, 0, 0.5);
+  background: var(--color-primary-20);
+  border: 1px solid var(--color-primary-50);
 }
 
 .osn-leaderboard-rank {
   width: 36px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-white-50);
   font-weight: 700;
   font-size: 0.9rem;
 }

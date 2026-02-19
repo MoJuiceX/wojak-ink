@@ -83,6 +83,7 @@
   --color-primary-60: rgba(249, 115, 22, 0.6);
   --color-primary-70: rgba(249, 115, 22, 0.7);
   --color-primary-80: rgba(249, 115, 22, 0.8);
+  --color-primary-90: rgba(249, 115, 22, 0.9);
   --color-error-10: rgba(239, 68, 68, 0.1);
   --color-error-12: rgba(239, 68, 68, 0.12);
   --color-error-15: rgba(239, 68, 68, 0.15);
@@ -181,11 +182,25 @@
   --color-amber-50: rgba(243, 156, 18, 0.5);
   --color-amber-60: rgba(243, 156, 18, 0.6);
   --color-green-forest-50: rgba(74, 124, 35, 0.5);
+  --color-coral-50: rgba(255, 171, 145, 0.5);
+  --color-lime-50: rgba(139, 195, 74, 0.5);
+  --color-amber-light-60: rgba(255, 202, 40, 0.6);
+  --color-primary-dark-30: rgba(255, 140, 0, 0.3);
   --color-surface-dark-95: rgba(15, 10, 30, 0.95);
   --color-surface-dark-purple-95: rgba(25, 15, 50, 0.95);
   --color-surface-dark-98: rgba(20, 20, 30, 0.98);
   --color-surface-dark-deep-98: rgba(20, 20, 35, 0.98);
   --color-surface-dark-purple-98: rgba(30, 30, 50, 0.98);
+  --color-surface-game-95: rgba(30, 30, 40, 0.95);
+  --color-surface-game-98: rgba(25, 25, 35, 0.98);
+  --color-surface-game-99: rgba(15, 15, 25, 0.99);
+  --color-surface-modal-98: rgba(30, 30, 45, 0.98);
+  --color-challenge-purple-95: rgba(100, 50, 150, 0.95);
+  --color-challenge-purple-dark-95: rgba(80, 30, 120, 0.95);
+  --color-challenge-purple-50: rgba(100, 50, 150, 0.5);
+  --color-challenge-green-95: rgba(50, 150, 100, 0.95);
+  --color-challenge-green-dark-95: rgba(30, 120, 80, 0.95);
+  --color-challenge-green-50: rgba(50, 150, 100, 0.5);
 
   /* ═══════════════════════════════════════════════════════════════════════════
      SHADOWS & GLOWS

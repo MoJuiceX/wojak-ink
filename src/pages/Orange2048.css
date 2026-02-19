@@ -10,7 +10,7 @@
   display: flex;
   justify-content: space-around;
   padding: 12px 16px;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--color-black-50);
   z-index: 100;
 }
 
@@ -38,7 +38,7 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   padding: 12px;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--color-black-30);
   border-radius: 12px;
   width: min(90vw, 350px);
   aspect-ratio: 1;
@@ -55,7 +55,7 @@
 }
 
 .cell-empty {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-white-10);
 }
 
 .cell-emoji {
@@ -65,7 +65,7 @@
 .cell-value {
   font-size: 12px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--color-white-80);
 }
 
 /* Tile colors by value */
@@ -95,39 +95,39 @@
 
 .cell-128 {
   background: linear-gradient(135deg, #ffab91 0%, #ff8a65 100%);
-  box-shadow: 0 0 15px rgba(255, 171, 145, 0.5);
+  box-shadow: 0 0 15px var(--color-coral-50);
 }
 
 .cell-256 {
   background: linear-gradient(135deg, #8bc34a 0%, #689f38 100%);
-  box-shadow: 0 0 15px rgba(139, 195, 74, 0.5);
+  box-shadow: 0 0 15px var(--color-lime-50);
 }
 
 .cell-512 {
   background: linear-gradient(135deg, #ffca28 0%, #ffc107 100%);
-  box-shadow: 0 0 20px rgba(255, 202, 40, 0.6);
+  box-shadow: 0 0 20px var(--color-amber-light-60);
 }
 
 .cell-1024 {
   background: linear-gradient(135deg, #ffd700 0%, #ffb700 100%);
-  box-shadow: 0 0 25px rgba(255, 215, 0, 0.7);
+  box-shadow: 0 0 25px var(--color-gold-70);
   animation: pulse-glow 1s ease-in-out infinite alternate;
 }
 
 .cell-2048 {
   background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
-  box-shadow: 0 0 30px rgba(255, 215, 0, 0.9);
+  box-shadow: 0 0 30px var(--color-gold-90);
   animation: pulse-glow 0.5s ease-in-out infinite alternate;
 }
 
 @keyframes pulse-glow {
-  from { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
-  to { box-shadow: 0 0 35px rgba(255, 215, 0, 0.9); }
+  from { box-shadow: 0 0 20px var(--color-gold-50); }
+  to { box-shadow: 0 0 35px var(--color-gold-90); }
 }
 
 .swipe-hint {
   margin-top: 20px;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--color-white-40);
   font-size: 14px;
 }
 
@@ -245,7 +245,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--color-black-80);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -260,8 +260,8 @@
   max-width: 320px;
   width: 100%;
   position: relative;
-  border: 1px solid rgba(255, 140, 0, 0.3);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--color-primary-dark-30);
+  box-shadow: 0 10px 40px var(--color-black-50);
 }
 
 .game2048-content .info-close {
