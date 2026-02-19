@@ -1,14 +1,14 @@
 import { PageTransition } from '@/components/layout/PageTransition';
+import { PageSEO } from '@/components/seo';
 import { ArenaNav } from '@/components/combat/ArenaNav';
 import { CombatLeaderboard } from '@/components/combat/CombatLeaderboard';
-import { PageSEO } from '@/components/seo';
 
 export default function ArenaLeaderboard() {
   return (
     <PageTransition>
       <PageSEO
-        title="Arena Leaderboard"
-        description="The strongest Wojak fighters ranked by XP and level. Battle your way to the top."
+        title="Arena Leaderboard - Strongest Fighters"
+        description="See the top-ranked Wojak fighters by XP, ELO, and wins."
         path="/arena/leaderboard"
       />
       <ArenaNav />

@@ -32,6 +32,7 @@ import { PersonalStatsPanel } from './PersonalStatsPanel';
 import { useIsMobile } from '../../hooks/useMediaQuery';
 import type { GameId } from '../../types/leaderboard';
 import { GAME_NAMES, ACTIVE_GAME_IDS, DISABLED_GAME_IDS } from '../../types/leaderboard';
+import { CombatLeaderboard } from '../combat';
 import './Leaderboard.css';
 import './MobilePodium.css';
 
@@ -98,6 +99,7 @@ const GAME_EMOJIS: Record<GameId, string> = {
   'orange-snake': '🐍',
   'brick-breaker': '🎯',
   'wojak-whack': '🔨',
+  'combat': '⚔️',
 };
 
 interface LeaderboardProps {
@@ -137,6 +139,12 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
 
   // Fetch leaderboard from server API
   const fetchLeaderboard = useCallback(async (gameId: GameId, tf: TimeframeType) => {
+    // Combat leaderboard is rendered by CombatLeaderboard component — skip fetch
+    if (gameId === 'combat') {
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -312,6 +320,11 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
           </div>
         )}
 
+        {/* ===== COMBAT: Custom Leaderboard ===== */}
+        {selectedGame === 'combat' ? (
+          <CombatLeaderboard />
+        ) : (
+        <>
         {/* ===== FILTER BAR ===== */}
         <motion.div
           className="leaderboard-filter-bar"
@@ -715,6 +728,8 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
         {/* Personal Stats - Mobile */}
         {isMobile && user && (
           <PersonalStatsPanel className="mobile-stats" />
+        )}
+        </>
         )}
       </div>
 

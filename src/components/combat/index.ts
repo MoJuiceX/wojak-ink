@@ -13,3 +13,8 @@ export { FighterCard } from './FighterCard';
 export { CombatLeaderboard } from './CombatLeaderboard';
 export { PreCombatMessage } from './PreCombatMessage';
 export { ArenaNav } from './ArenaNav';
+export { BattleCanvas } from './BattleCanvas';
+export type { BattleCanvasRef } from './BattleCanvas';
+export { DamageNumber } from './DamageNumber';
+export { StatusIcon } from './StatusIcon';
+export { EffectivenessCallout } from './EffectivenessCallout';

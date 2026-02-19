@@ -94,6 +94,7 @@ const OrangeSnake = lazy(() => import('./pages/OrangeSnake'));
 const BrickBreaker = lazy(() => import('./pages/BrickBreaker'));
 const WojakWhack = lazy(() => import('./pages/WojakWhack'));
 const CombatArena = lazy(() => import('./pages/CombatArena'));
+const CombatBattle = lazy(() => import('./pages/CombatBattle'));
 const ArenaLeaderboard = lazy(() => import('./pages/ArenaLeaderboard'));
 
 // Skip boot sequence in development for faster testing
@@ -545,8 +546,20 @@ function AppContent() {
                       </GameErrorBoundary>
                     }
                   />
-                  {/* Legacy Combat Arena route — redirect to top-level /arena */}
+                  {/* Combat Battle Detail — /arena/battle/:id */}
+                  <Route
+                    path="arena/battle/:id"
+                    element={
+                      <GameErrorBoundary gameName="Combat Battle">
+                        <Suspense fallback={<GameLoading gameName="Combat Battle" />}>
+                          <CombatBattle />
+                        </Suspense>
+                      </GameErrorBoundary>
+                    }
+                  />
+                  {/* Legacy Combat Arena routes — redirect to top-level /arena */}
                   <Route path="games/combat" element={<Navigate to="/arena" replace />} />
+                  <Route path="games/combat/*" element={<Navigate to="/arena" replace />} />
                   {/* Legacy game routes - redirect to new paths */}
                   <Route path="media/games/stack" element={<Navigate to="/games/stack" replace />} />
                   <Route path="media/games/memory" element={<Navigate to="/games/memory" replace />} />

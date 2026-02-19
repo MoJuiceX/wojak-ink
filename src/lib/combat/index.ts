@@ -25,3 +25,7 @@ export { runAutoBattle } from './battle-runner';
 export type { BattleResult } from './battle-runner';
 export { chooseMove, rankMoves } from './ai-strategist';
 export { calculateXPAward, calculateELOChange, calculateLevelFromXP } from './xp-elo-calculator';
+
+// Phase 4: Battle Visuals
+export { Particle, spawnAttack, resolveAttackPattern, powerScale, ANIM_TIMING, TYPE_EFFECTS } from './particles';
+export type { ParticleShape, AttackPattern, TypeEffect, PowerScaleResult, SpawnAttackConfig } from './particles';

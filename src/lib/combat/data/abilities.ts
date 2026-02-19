@@ -39,25 +39,25 @@ export const ABILITIES: Ability[] = [
   { name: 'Magic Guard',    type: 'PSYCHE',   variant: 'A', description: 'Immune to status damage',                        trigger: 'status_damage' },
   { name: 'Telepathy',      type: 'PSYCHE',   variant: 'B', description: '10% dodge chance',                               trigger: 'before_hit' },
   // INSECT
-  { name: 'Swarm',          type: 'INSECT',   variant: 'A', description: '+30% bug moves when HP < 33%',                   trigger: 'damage_calc' },
+  { name: 'Swarm',          type: 'INSECT',   variant: 'A', description: '+30% insect moves when HP < 33%',                trigger: 'damage_calc' },
   { name: 'Compound Eyes',  type: 'INSECT',   variant: 'B', description: '+30% accuracy',                                  trigger: 'accuracy_calc' },
   // STONE
   { name: 'Sturdy',         type: 'STONE',    variant: 'A', description: 'Survive any hit with 1 HP once',                 trigger: 'before_faint' },
   { name: 'Solid Rock',     type: 'STONE',    variant: 'B', description: 'Super-effective = 1.5x instead of 2.0x',         trigger: 'damage_taken' },
   // GHOST
-  { name: 'Levitate',       type: 'GHOST',    variant: 'A', description: 'Immune to ground',                               trigger: 'before_hit' },
+  { name: 'Levitate',       type: 'GHOST',    variant: 'A', description: 'Immune to earth',                                trigger: 'before_hit' },
   { name: 'Cursed Body',    type: 'GHOST',    variant: 'B', description: '20% reduce opponent best stat by 1',             trigger: 'after_hit_received' },
   // DRAGON
   { name: 'Multiscale',     type: 'DRAGON',   variant: 'A', description: '25% less damage when HP full',                   trigger: 'damage_taken' },
-  { name: 'Dragon Force',   type: 'DRAGON',   variant: 'B', description: '+10% Attack and Claw',                           trigger: 'battle_start' },
+  { name: 'Dragon Force',   type: 'DRAGON',   variant: 'B', description: '+10% Attack and Sp.Atk',                        trigger: 'battle_start' },
   // SHADOW
-  { name: 'Dark Aura',      type: 'SHADOW',   variant: 'A', description: '+15% vs Psychic/Ghost/Fairy',                    trigger: 'damage_calc' },
+  { name: 'Dark Aura',      type: 'SHADOW',   variant: 'A', description: '+15% vs Psyche/Ghost/Mystic',                    trigger: 'damage_calc' },
   { name: 'Intimidate',     type: 'SHADOW',   variant: 'B', description: '-15% opponent atk at start',                     trigger: 'battle_start' },
   // METAL
   { name: 'Filter',         type: 'METAL',    variant: 'A', description: 'Super-effective = 1.5x',                         trigger: 'damage_taken' },
   { name: 'Heavy Metal',    type: 'METAL',    variant: 'B', description: '+20% def, -10% speed',                           trigger: 'battle_start' },
   // MYSTIC
-  { name: 'Pixilate',       type: 'MYSTIC',   variant: 'A', description: '+15% vs Dragon/Dark/Fighting',                   trigger: 'damage_calc' },
+  { name: 'Pixilate',       type: 'MYSTIC',   variant: 'A', description: '+15% vs Dragon/Shadow/Martial',                  trigger: 'damage_calc' },
   { name: 'Charm',          type: 'MYSTIC',   variant: 'B', description: '-15% opponent atk at start',                     trigger: 'battle_start' },
 ];
 

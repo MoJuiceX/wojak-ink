@@ -51,6 +51,15 @@ const menuItems: MenuItem[] = [
     iconBg: 'var(--color-error-15)',
   },
   {
+    icon: Swords,
+    label: 'Arena',
+    description: 'Turn-based battles. Level up, climb the ELO ladder.',
+    route: '/arena',
+    badge: 'New',
+    iconColor: '#ef4444',
+    iconBg: 'rgba(239, 68, 68, 0.15)',
+  },
+  {
     icon: User,
     label: 'Account',
     description: 'Your profile',

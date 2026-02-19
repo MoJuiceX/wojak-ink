@@ -1,0 +1,18 @@
+Hue Range,Hue Degrees,Primary Stat (+2),Secondary Stat (+1),Example
+Red,0-20 and 340-360,Attack,—,#FF0000
+Orange,20-45,Attack,Speed,#FF6600
+Yellow,45-65,Speed,Sp.Atk,#FFD700
+Lime/Chartreuse,65-90,Speed,Attack,#9ACD32
+Green,90-150,Sp.Def,Defense,#228B22
+Teal/Cyan,150-195,Sp.Def,Speed,#00D4FF
+Blue,195-250,Sp.Def,Sp.Atk,#2563EB
+Indigo,250-280,Sp.Atk,Sp.Def,#4B0082
+Purple/Violet,280-320,Sp.Atk,Attack,#9400D3
+Pink/Magenta,320-340,Sp.Atk,Sp.Def,#FF69B4
+White (S<10% L>85%),achromatic,Sp.Def,Sp.Atk,#F0F8FF
+Silver/Light Grey (S<10% L60-85%),achromatic,Defense,Sp.Def,#C0C0C0
+Dark Grey (S<10% L25-60%),achromatic,Defense,Attack,#696969
+Black (S<10% L<25%),achromatic,Attack,Speed,#1A1A1A
+Brown (warm neutral),S10-50% H15-45 L20-50%,Defense,Attack,#8B4513
+Gold (warm neutral),S>50% H40-55 L45-65%,Sp.Atk,Attack,#DAA520
+Neon/Highly Saturated (S>90%),any hue,Speed,+1 to hue's primary,—

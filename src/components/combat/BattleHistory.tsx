@@ -20,6 +20,18 @@ interface BattleHistoryProps {
   onSelectBattle?: (battleId: number) => void;
 }
 
+export function relativeTime(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(dateStr).toLocaleDateString();
+}
+
 const RESULT_STYLES: Record<string, { label: string; badgeClass: string }> = {
   win: { label: 'W', badgeClass: 'badge badge-success' },
   loss: { label: 'L', badgeClass: 'badge badge-error' },
@@ -34,6 +46,7 @@ export function BattleHistory({ nftId, limit = 20, onSelectBattle }: BattleHisto
     (async () => {
       try {
         const res = await fetch(`/api/combat/history?nftId=${nftId}&limit=${limit}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         setBattles(data.battles ?? []);
       } catch (err) {
@@ -72,7 +85,7 @@ export function BattleHistory({ nftId, limit = 20, onSelectBattle }: BattleHisto
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium truncate">vs {b.opponent}</div>
               <div className="text-xs text-muted">
-                {b.turns} turns &middot; {new Date(b.endedAt).toLocaleDateString()}
+                {b.turns} turns &middot; {relativeTime(b.endedAt)}
               </div>
             </div>
             <div className="flex flex-col items-end text-xs">
@@ -81,6 +94,9 @@ export function BattleHistory({ nftId, limit = 20, onSelectBattle }: BattleHisto
               </span>
               <span className="text-muted">+{b.xpAwarded} XP</span>
             </div>
+            <span className="text-xs text-accent" aria-label="Watch replay">
+              &#9654;
+            </span>
           </button>
         );
       })}

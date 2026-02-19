@@ -1,7 +1,7 @@
 // functions/api/combat/submit-move.ts
 // POST /api/combat/submit-move — submit a move for a manual battle turn
 
-import { jsonResponse, errorResponse } from './_shared';
+import { jsonResponse, errorResponse, isValidDid } from './_shared';
 import { resolveTurn } from '../../../src/lib/combat/turn-resolver';
 import { initFighterState, initBattleState } from '../../../src/lib/combat/battle-state';
 import { chooseMove } from '../../../src/lib/combat/ai-strategist';
@@ -14,16 +14,18 @@ interface Env {
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
-    const body = await context.request.json<{
-      battleId: number;
-      nftId: string;
-      moveId: string;
-    }>();
-
-    const { battleId, nftId, moveId } = body;
-    if (!battleId || !nftId || !moveId) {
-      return errorResponse('Missing required fields: battleId, nftId, moveId');
+    let body: { battleId: number; nftId: string; moveId: string; ownerDid: string };
+    try {
+      body = await context.request.json();
+    } catch {
+      return errorResponse('Invalid JSON body', 400);
     }
+
+    const { battleId, nftId, moveId, ownerDid } = body;
+    if (!battleId || !nftId || !moveId || !ownerDid) {
+      return errorResponse('Missing required fields: battleId, nftId, moveId, ownerDid');
+    }
+    if (!isValidDid(ownerDid)) return errorResponse('Invalid DID format');
 
     const db = context.env.DB;
 
@@ -45,6 +47,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     if (!fighter) return errorResponse('Fighter not found', 404);
 
+    // Verify the submitter owns this fighter
+    if (fighter.owner_did !== ownerDid) return errorResponse('Not the owner of this fighter', 403);
+
     const validMoves = [fighter.move_1, fighter.move_2, fighter.move_3, fighter.move_4];
     if (!validMoves.includes(moveId)) {
       return errorResponse('Invalid move for this fighter');
@@ -63,13 +68,18 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       turnRecord = { battle_id: battleId, turn_number: currentTurn };
     }
 
-    // Store the move
+    // Store the move — only if not already submitted (prevents double-submission race)
     const moveCol = side === 'a' ? 'fighter_a_move' : 'fighter_b_move';
     const timeCol = side === 'a' ? 'fighter_a_submitted_at' : 'fighter_b_submitted_at';
-    await db.prepare(
+    // SAFE: moveCol/timeCol are derived from side which is strictly 'a' | 'b'
+    const moveResult = await db.prepare(
       `UPDATE combat_turns SET ${moveCol} = ?, ${timeCol} = datetime('now')
-       WHERE battle_id = ? AND turn_number = ?`
+       WHERE battle_id = ? AND turn_number = ? AND ${moveCol} IS NULL`
     ).bind(moveId, battleId, currentTurn).run();
+
+    if (moveResult.meta.changes === 0) {
+      return errorResponse('Move already submitted for this turn', 409);
+    }
 
     // Check if both moves are submitted
     const updatedTurn = await db.prepare(
@@ -138,12 +148,16 @@ async function resolveBattleTurn(
   if (prevTurns.results && prevTurns.results.length > 0) {
     for (const prev of prevTurns.results) {
       if (prev.turn_result) {
-        const turnResult = JSON.parse(prev.turn_result as string);
-        battleState.fighterA.currentHP = turnResult.end_of_turn.fighter_a_hp;
-        battleState.fighterB.currentHP = turnResult.end_of_turn.fighter_b_hp;
-        battleState.fighterA.status = turnResult.end_of_turn.fighter_a_status;
-        battleState.fighterB.status = turnResult.end_of_turn.fighter_b_status;
-        battleState.turnNumber++;
+        try {
+          const turnResult = JSON.parse(prev.turn_result as string);
+          battleState.fighterA.currentHP = turnResult.end_of_turn.fighter_a_hp;
+          battleState.fighterB.currentHP = turnResult.end_of_turn.fighter_b_hp;
+          battleState.fighterA.status = turnResult.end_of_turn.fighter_a_status;
+          battleState.fighterB.status = turnResult.end_of_turn.fighter_b_status;
+          battleState.turnNumber++;
+        } catch {
+          return errorResponse('Corrupted turn data', 500);
+        }
       }
     }
   }

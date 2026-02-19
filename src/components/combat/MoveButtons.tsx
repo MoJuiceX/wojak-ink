@@ -1,5 +1,6 @@
 /**
  * MoveButtons — 4 move buttons for manual combat + 30s timer.
+ * Selected move glows with its combat type color.
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -10,6 +11,7 @@ interface MoveInfo {
   power: number;
   accuracy: number;
   category: string;
+  type?: string;
 }
 
 interface MoveButtonsProps {
@@ -52,7 +54,36 @@ export function MoveButtons({ moves, onSubmit, disabled = false, timerSeconds = 
     }
   }, [selectedMove, onSubmit]);
 
+  // Keyboard shortcuts: 1-4 to select move, Enter to confirm
+  useEffect(() => {
+    if (disabled) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      if (e.key >= '1' && e.key <= '4') {
+        const index = parseInt(e.key) - 1;
+        if (index < moves.length) {
+          e.preventDefault();
+          handleSelect(moves[index].id);
+        }
+      } else if (e.key === 'Enter' && selectedMove) {
+        e.preventDefault();
+        handleConfirm();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [disabled, moves, selectedMove, handleSelect, handleConfirm]);
+
   const timerClass = timeLeft <= 5 ? 'combat-timer timer-critical' : timeLeft <= 10 ? 'combat-timer timer-warning' : 'combat-timer';
+
+  // Get the type glow class for a move based on its type
+  const getGlowClass = (move: MoveInfo, isSelected: boolean): string => {
+    if (!isSelected || !move.type) return '';
+    return `move-glow move-glow-${move.type.toLowerCase()}`;
+  };
 
   return (
     <div className="flex flex-col gap-3">
@@ -64,21 +95,29 @@ export function MoveButtons({ moves, onSubmit, disabled = false, timerSeconds = 
 
       {/* Move grid */}
       <div className="grid grid-cols-2 gap-2">
-        {moves.map((move) => (
-          <button
-            key={move.id}
-            type="button"
-            className={`move-btn ${selectedMove === move.id ? 'selected' : ''}`}
-            onClick={() => handleSelect(move.id)}
-            disabled={disabled}
-          >
-            <div className="font-medium text-sm">{move.name}</div>
-            <div className="flex items-center gap-2 text-xs text-secondary mt-0.5">
-              {move.power > 0 && <span>Pow {move.power}</span>}
-              <span>Acc {move.accuracy}%</span>
-            </div>
-          </button>
-        ))}
+        {moves.map((move, i) => {
+          const isSelected = selectedMove === move.id;
+          return (
+            <button
+              key={move.id}
+              type="button"
+              className={`move-btn ${isSelected ? 'selected' : ''} ${getGlowClass(move, isSelected)}`}
+              onClick={() => handleSelect(move.id)}
+              disabled={disabled}
+              aria-pressed={selectedMove === move.id}
+              aria-label={`${move.name}${move.power > 0 ? `, Power ${move.power}` : ''}, Accuracy ${move.accuracy}%`}
+            >
+              <div className="font-medium text-sm">
+                <span className="text-muted text-xs mr-1 hidden md:inline">{i + 1}.</span>
+                {move.name}
+              </div>
+              <div className="flex items-center gap-2 text-xs text-secondary mt-0.5">
+                {move.power > 0 && <span>Pow {move.power}</span>}
+                <span>Acc {move.accuracy}%</span>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       {/* Confirm button */}
@@ -90,6 +129,11 @@ export function MoveButtons({ moves, onSubmit, disabled = false, timerSeconds = 
       >
         Confirm Move
       </button>
+
+      {/* Keyboard hint (desktop only) */}
+      <p className="text-xs text-muted text-center hidden md:block">
+        Press 1-4 to select a move, Enter to confirm
+      </p>
     </div>
   );
 }

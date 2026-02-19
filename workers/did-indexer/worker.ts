@@ -96,6 +96,10 @@ async function run(env: Env) {
 
   console.log(`[DID Indexer] Done. Changed: ${updatedCount}, Skipped: ${skippedCount}, Errors: ${errorCount}, Total: ${players.results.length}`);
 
+  if (!env.ADMIN_SECRET) {
+    console.warn('[DID Indexer] ADMIN_SECRET not set — battle-resolve and vote-xp calls will fail with 401');
+  }
+
   // Resolve expired battles (replaces standalone battle-cron worker)
   try {
     const battleHeaders: Record<string, string> = {};
@@ -116,7 +120,7 @@ async function run(env: Env) {
     console.error('[DID Indexer] Battle resolve error:', err);
   }
 
-  // Award vote XP to combat fighters
+  // Award vote XP to combat fighters (bridges swipe votes → combat XP)
   try {
     const voteXpHeaders: Record<string, string> = {};
     if (env.ADMIN_SECRET) {
@@ -134,6 +138,26 @@ async function run(env: Env) {
     }
   } catch (err) {
     console.error('[DID Indexer] Vote XP error:', err);
+  }
+
+  // Check for timed-out combat turns (30s timeout with AI fallback)
+  try {
+    const timeoutHeaders: Record<string, string> = {};
+    if (env.ADMIN_SECRET) {
+      timeoutHeaders['Authorization'] = `Bearer ${env.ADMIN_SECRET}`;
+    }
+    const timeoutRes = await fetch('https://wojak.ink/api/combat/check-timeouts', {
+      method: 'POST',
+      headers: timeoutHeaders,
+    });
+    if (timeoutRes.ok) {
+      const data = await timeoutRes.json() as { resolved?: number; forfeited?: number };
+      console.log(`[DID Indexer] Timeouts: ${data.resolved ?? 0} resolved, ${data.forfeited ?? 0} forfeited`);
+    } else {
+      console.error(`[DID Indexer] Timeout check returned ${timeoutRes.status}`);
+    }
+  } catch (err) {
+    console.error('[DID Indexer] Timeout check error:', err);
   }
 }
 

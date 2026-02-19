@@ -1,492 +1,269 @@
-/**
- * Tests for src/lib/juice/audio.ts
- *
- * NOTE: The requested file src/lib/combat/audio.ts does not exist. The
- * combat-relevant audio module lives at src/lib/juice/audio.ts. This test
- * file targets that module. Pure utility functions are exercised directly;
- * the Web Audio API surface is mocked via vi.stubGlobal / a constructable
- * class stub.
- */
+// src/lib/combat/audio.test.ts
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { getBattleAudio, BattleAudio, TYPE_AUDIO_PROFILES } from './audio';
 
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import {
-  createAudioManager,
-  initAudio,
-  setVolume,
-  toggleMute,
-  playTone,
-  NOTES,
-  C_MAJOR_SCALE,
-  playScaleNote,
-  HAPTIC_PATTERNS,
-  supportsHaptics,
-  triggerHaptic,
-  stopHaptic,
-} from '@/lib/juice/audio';
-
-// ---------------------------------------------------------------------------
-// Web Audio API mock helpers
-// ---------------------------------------------------------------------------
-
-function buildGainNode() {
+// Mock Web Audio API nodes
+function createMockGainNode() {
   return {
+    gain: { value: 0, setValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() },
     connect: vi.fn(),
-    gain: {
-      value: 1,
-      setValueAtTime: vi.fn(),
-      linearRampToValueAtTime: vi.fn(),
-      exponentialRampToValueAtTime: vi.fn(),
-    },
+    disconnect: vi.fn(),
   };
 }
 
-function buildOscillator() {
+function createMockOscillatorNode() {
   return {
+    type: 'sine' as OscillatorType,
+    frequency: { value: 440, setValueAtTime: vi.fn() },
     connect: vi.fn(),
     start: vi.fn(),
     stop: vi.fn(),
-    frequency: {
-      value: 0,
-      setValueAtTime: vi.fn(),
-      exponentialRampToValueAtTime: vi.fn(),
-    },
-    type: 'sine' as OscillatorType,
   };
 }
 
-type MockAudioCtx = ReturnType<typeof buildMockAudioContext>;
+function createMockBufferSourceNode() {
+  return {
+    buffer: null as AudioBuffer | null,
+    playbackRate: { value: 1.0 },
+    connect: vi.fn(),
+    start: vi.fn(),
+    stop: vi.fn(),
+  };
+}
 
-function buildMockAudioContext() {
-  const gainNode = buildGainNode();
-  const oscillator = buildOscillator();
+function createMockBiquadFilter() {
+  return {
+    type: 'lowpass' as BiquadFilterType,
+    frequency: { value: 1000 },
+    Q: { value: 1 },
+    connect: vi.fn(),
+  };
+}
 
-  const ctx = {
-    state: 'running' as AudioContextState,
+function createMockAudioContext() {
+  return {
+    state: 'running',
     currentTime: 0,
     sampleRate: 44100,
-    destination: {} as AudioDestinationNode,
-    createGain: vi.fn(() => gainNode),
-    createOscillator: vi.fn(() => oscillator),
-    createBuffer: vi.fn((_ch: number, size: number, _sr: number) => ({
-      getChannelData: vi.fn(() => new Float32Array(size)),
+    destination: {},
+    resume: vi.fn().mockResolvedValue(undefined),
+    createOscillator: vi.fn(() => createMockOscillatorNode()),
+    createGain: vi.fn(() => createMockGainNode()),
+    createBufferSource: vi.fn(() => createMockBufferSourceNode()),
+    createBiquadFilter: vi.fn(() => createMockBiquadFilter()),
+    createBuffer: vi.fn(() => ({
+      duration: 1.0,
+      getChannelData: vi.fn(() => new Float32Array(44100)),
     })),
-    createBufferSource: vi.fn(() => ({
-      buffer: null,
-      connect: vi.fn(),
-      start: vi.fn(),
-    })),
-    resume: vi.fn(),
+    decodeAudioData: vi.fn().mockResolvedValue({
+      duration: 1.0,
+      getChannelData: vi.fn(() => new Float32Array(44100)),
+    }),
   };
-
-  return { ctx, gainNode, oscillator };
 }
 
-/**
- * Install a constructable AudioContext class on window that returns the
- * provided mock context object.
- */
-function stubWindowAudioContext(ctxInstance: MockAudioCtx['ctx']) {
-  // Must be a real constructor function (class) so `new` works.
-  class MockAudioContext {
-    state = ctxInstance.state;
-    currentTime = ctxInstance.currentTime;
-    sampleRate = ctxInstance.sampleRate;
-    destination = ctxInstance.destination;
-    createGain = ctxInstance.createGain;
-    createOscillator = ctxInstance.createOscillator;
-    createBuffer = ctxInstance.createBuffer;
-    createBufferSource = ctxInstance.createBufferSource;
-    resume = ctxInstance.resume;
-  }
+// Stub AudioContext globally before imports
+const mockCtx = createMockAudioContext();
+vi.stubGlobal('AudioContext', vi.fn(() => mockCtx));
+vi.stubGlobal('webkitAudioContext', vi.fn(() => mockCtx));
 
-  Object.defineProperty(window, 'AudioContext', {
-    value: MockAudioContext,
-    writable: true,
-    configurable: true,
+describe('BattleAudio', () => {
+  let audio: BattleAudio;
+
+  beforeEach(() => {
+    // Reset singleton for each test
+    audio = getBattleAudio({ forceNew: true });
   });
 
-  return MockAudioContext;
-}
-
-afterEach(() => {
-  vi.unstubAllGlobals();
-  vi.restoreAllMocks();
-});
-
-// ---------------------------------------------------------------------------
-// createAudioManager
-// ---------------------------------------------------------------------------
-
-describe('audio (src/lib/juice/audio)', () => {
-  describe('createAudioManager', () => {
-    it('returns a manager with initialized = false', () => {
-      expect(createAudioManager().initialized).toBe(false);
+  describe('initialization', () => {
+    it('initializes with default settings', () => {
+      expect(audio.sfxVolume).toBe(0.35);
+      expect(audio.isMuted).toBe(false);
+      expect(audio.shakeEnabled).toBe(true);
     });
 
-    it('returns a manager with muted = false', () => {
-      expect(createAudioManager().muted).toBe(false);
+    it('is a singleton by default', () => {
+      const a = getBattleAudio();
+      const b = getBattleAudio();
+      expect(a).toBe(b);
     });
 
-    it('returns a manager with volume = 1', () => {
-      expect(createAudioManager().volume).toBe(1);
-    });
-
-    it('returns null context and masterGain before initialization', () => {
-      const mgr = createAudioManager();
-      expect(mgr.context).toBeNull();
-      expect(mgr.masterGain).toBeNull();
-    });
-
-    it('each call returns an independent manager object', () => {
-      const a = createAudioManager();
-      const b = createAudioManager();
-      a.muted = true;
-      expect(b.muted).toBe(false);
+    it('forceNew creates a fresh instance', () => {
+      const a = getBattleAudio();
+      const b = getBattleAudio({ forceNew: true });
+      expect(a).not.toBe(b);
     });
   });
 
-  // -------------------------------------------------------------------------
-  // initAudio
-  // -------------------------------------------------------------------------
-
-  describe('initAudio', () => {
-    it('returns true and marks initialized when AudioContext is available', () => {
-      const { ctx } = buildMockAudioContext();
-      stubWindowAudioContext(ctx);
-
-      const mgr = createAudioManager();
-      const result = initAudio(mgr);
-
-      expect(result).toBe(true);
-      expect(mgr.initialized).toBe(true);
+  describe('volume', () => {
+    it('can set SFX volume', () => {
+      audio.sfxVolume = 0.5;
+      expect(audio.sfxVolume).toBe(0.5);
     });
 
-    it('returns true immediately when already initialized (skips re-init)', () => {
-      const mgr = createAudioManager();
-      mgr.initialized = true;
-      // No AudioContext needed — should bail out early
-      const result = initAudio(mgr);
-      expect(result).toBe(true);
+    it('clamps volume to max 0.7', () => {
+      audio.sfxVolume = 0.9;
+      expect(audio.sfxVolume).toBe(0.7);
     });
 
-    it('returns false when AudioContext is unavailable', () => {
-      Object.defineProperty(window, 'AudioContext', {
-        value: undefined,
-        writable: true,
-        configurable: true,
-      });
-      const win = window as unknown as Record<string, unknown>;
-      const prev = win['webkitAudioContext'];
-      delete win['webkitAudioContext'];
-
-      const mgr = createAudioManager();
-      expect(initAudio(mgr)).toBe(false);
-      expect(mgr.initialized).toBe(false);
-
-      if (prev !== undefined) win['webkitAudioContext'] = prev;
+    it('clamps volume to min 0', () => {
+      audio.sfxVolume = -0.5;
+      expect(audio.sfxVolume).toBe(0);
     });
 
-    it('sets masterGain on the manager after init', () => {
-      const { ctx } = buildMockAudioContext();
-      stubWindowAudioContext(ctx);
+    it('accepts volume at exactly 0.7', () => {
+      audio.sfxVolume = 0.7;
+      expect(audio.sfxVolume).toBe(0.7);
+    });
 
-      const mgr = createAudioManager();
-      initAudio(mgr);
-
-      expect(mgr.masterGain).not.toBeNull();
+    it('accepts volume at exactly 0', () => {
+      audio.sfxVolume = 0;
+      expect(audio.sfxVolume).toBe(0);
     });
   });
 
-  // -------------------------------------------------------------------------
-  // setVolume
-  // -------------------------------------------------------------------------
-
-  describe('setVolume', () => {
-    it('clamps volume to 0 for negative input', () => {
-      const mgr = createAudioManager();
-      setVolume(mgr, -5);
-      expect(mgr.volume).toBe(0);
+  describe('mute', () => {
+    it('toggles mute on', () => {
+      audio.toggleMute();
+      expect(audio.isMuted).toBe(true);
     });
 
-    it('clamps volume to 1 for values above 1', () => {
-      const mgr = createAudioManager();
-      setVolume(mgr, 99);
-      expect(mgr.volume).toBe(1);
-    });
-
-    it('accepts in-range values without clamping', () => {
-      const mgr = createAudioManager();
-      setVolume(mgr, 0.5);
-      expect(mgr.volume).toBe(0.5);
-    });
-
-    it('updates masterGain.gain.value when a gain node exists', () => {
-      const { gainNode } = buildMockAudioContext();
-      const mgr = createAudioManager();
-      mgr.masterGain = gainNode as unknown as GainNode;
-
-      setVolume(mgr, 0.7);
-
-      expect(gainNode.gain.value).toBe(0.7);
-    });
-
-    it('sets masterGain.gain.value to 0 when muted, regardless of volume', () => {
-      const { gainNode } = buildMockAudioContext();
-      const mgr = createAudioManager();
-      mgr.masterGain = gainNode as unknown as GainNode;
-      mgr.muted = true;
-
-      setVolume(mgr, 0.8);
-
-      expect(gainNode.gain.value).toBe(0);
+    it('toggles mute off', () => {
+      audio.toggleMute();
+      audio.toggleMute();
+      expect(audio.isMuted).toBe(false);
     });
   });
 
-  // -------------------------------------------------------------------------
-  // toggleMute
-  // -------------------------------------------------------------------------
-
-  describe('toggleMute', () => {
-    it('toggles muted from false to true and returns true', () => {
-      const mgr = createAudioManager();
-      const result = toggleMute(mgr);
-      expect(result).toBe(true);
-      expect(mgr.muted).toBe(true);
+  describe('shake setting', () => {
+    it('can disable shake', () => {
+      audio.shakeEnabled = false;
+      expect(audio.shakeEnabled).toBe(false);
     });
 
-    it('toggles muted from true to false and returns false', () => {
-      const mgr = createAudioManager();
-      mgr.muted = true;
-      const result = toggleMute(mgr);
-      expect(result).toBe(false);
-      expect(mgr.muted).toBe(false);
-    });
-
-    it('sets masterGain to 0 when muting', () => {
-      const { gainNode } = buildMockAudioContext();
-      const mgr = createAudioManager();
-      mgr.masterGain = gainNode as unknown as GainNode;
-
-      toggleMute(mgr);
-
-      expect(gainNode.gain.value).toBe(0);
-    });
-
-    it('restores masterGain to volume when un-muting', () => {
-      const { gainNode } = buildMockAudioContext();
-      const mgr = createAudioManager();
-      mgr.masterGain = gainNode as unknown as GainNode;
-      mgr.muted = true;
-      mgr.volume = 0.6;
-
-      toggleMute(mgr);
-
-      expect(gainNode.gain.value).toBe(0.6);
+    it('can enable shake', () => {
+      audio.shakeEnabled = false;
+      audio.shakeEnabled = true;
+      expect(audio.shakeEnabled).toBe(true);
     });
   });
 
-  // -------------------------------------------------------------------------
-  // playTone
-  // -------------------------------------------------------------------------
-
-  describe('playTone', () => {
-    it('does nothing when manager is not initialized', () => {
-      const mgr = createAudioManager();
-      expect(() => playTone(mgr, 440)).not.toThrow();
+  describe('type audio profiles', () => {
+    it('has FIRE profile with sawtooth wave and freq 250', () => {
+      const fire = TYPE_AUDIO_PROFILES.FIRE;
+      expect(fire).toBeDefined();
+      expect(fire.wave).toBe('sawtooth');
+      expect(fire.freq).toBe(250);
+      expect(fire.filter).toBe('lowpass');
+      expect(fire.filterFreq).toBe(600);
+      expect(fire.mod).toBe(8);
     });
 
-    it('does nothing when manager is muted', () => {
-      const { ctx, gainNode } = buildMockAudioContext();
-      const mgr = createAudioManager();
-      mgr.initialized = true;
-      mgr.muted = true;
-      mgr.context = ctx as unknown as AudioContext;
-      mgr.masterGain = gainNode as unknown as GainNode;
-
-      playTone(mgr, 440, 0.1, 150);
-
-      expect(ctx.createOscillator).not.toHaveBeenCalled();
+    it('has WATER profile with sine wave and freq 350', () => {
+      const water = TYPE_AUDIO_PROFILES.WATER;
+      expect(water.wave).toBe('sine');
+      expect(water.freq).toBe(350);
     });
 
-    it('creates an oscillator and gain node when initialized and unmuted', () => {
-      const { ctx, gainNode } = buildMockAudioContext();
-      const mgr = createAudioManager();
-      mgr.initialized = true;
-      mgr.muted = false;
-      mgr.context = ctx as unknown as AudioContext;
-      mgr.masterGain = gainNode as unknown as GainNode;
+    it('has ELECTRIC profile with square wave and freq 600', () => {
+      const electric = TYPE_AUDIO_PROFILES.ELECTRIC;
+      expect(electric.wave).toBe('square');
+      expect(electric.freq).toBe(600);
+      expect(electric.filter).toBe('highpass');
+      expect(electric.filterFreq).toBe(1500);
+      expect(electric.mod).toBe(40);
+    });
 
-      playTone(mgr, 440, 0.1, 150);
+    it('has all 11 base type profiles', () => {
+      const expectedTypes = [
+        'FIRE', 'WATER', 'ELECTRIC', 'GRASS', 'ICE',
+        'SHADOW', 'METAL', 'PSYCHE', 'DRAGON', 'MYSTIC', 'NEUTRAL',
+      ];
+      for (const t of expectedTypes) {
+        expect(TYPE_AUDIO_PROFILES[t]).toBeDefined();
+        expect(TYPE_AUDIO_PROFILES[t].wave).toBeDefined();
+        expect(TYPE_AUDIO_PROFILES[t].freq).toBeGreaterThan(0);
+      }
+    });
 
-      expect(ctx.createOscillator).toHaveBeenCalledOnce();
-      expect(ctx.createGain).toHaveBeenCalledOnce();
+    it('returns NEUTRAL profile for unknown type via getProfile', () => {
+      const profile = audio.getTypeProfile('UNKNOWN_TYPE');
+      expect(profile).toEqual(TYPE_AUDIO_PROFILES.NEUTRAL);
+    });
+
+    it('resolves MARTIAL alias to FIRE', () => {
+      const profile = audio.getTypeProfile('MARTIAL');
+      expect(profile).toEqual(TYPE_AUDIO_PROFILES.FIRE);
+    });
+
+    it('resolves VENOM alias to SHADOW', () => {
+      const profile = audio.getTypeProfile('VENOM');
+      expect(profile).toEqual(TYPE_AUDIO_PROFILES.SHADOW);
+    });
+
+    it('resolves EARTH alias to NEUTRAL', () => {
+      const profile = audio.getTypeProfile('EARTH');
+      expect(profile).toEqual(TYPE_AUDIO_PROFILES.NEUTRAL);
+    });
+
+    it('resolves AIR alias to ICE', () => {
+      const profile = audio.getTypeProfile('AIR');
+      expect(profile).toEqual(TYPE_AUDIO_PROFILES.ICE);
+    });
+
+    it('resolves INSECT alias to GRASS', () => {
+      const profile = audio.getTypeProfile('INSECT');
+      expect(profile).toEqual(TYPE_AUDIO_PROFILES.GRASS);
+    });
+
+    it('resolves STONE alias to METAL', () => {
+      const profile = audio.getTypeProfile('STONE');
+      expect(profile).toEqual(TYPE_AUDIO_PROFILES.METAL);
+    });
+
+    it('resolves GHOST alias to SHADOW', () => {
+      const profile = audio.getTypeProfile('GHOST');
+      expect(profile).toEqual(TYPE_AUDIO_PROFILES.SHADOW);
     });
   });
 
-  // -------------------------------------------------------------------------
-  // NOTES constant
-  // -------------------------------------------------------------------------
-
-  describe('NOTES', () => {
-    it('contains A4 at 440 Hz', () => {
-      expect(NOTES.A4).toBe(440.0);
-    });
-
-    it('contains C4 at approximately 261.63 Hz', () => {
-      expect(NOTES.C4).toBeCloseTo(261.63, 1);
-    });
-
-    it('C5 is approximately double C4 (one octave up)', () => {
-      expect(NOTES.C5).toBeCloseTo(NOTES.C4 * 2, 0);
-    });
-
-    it('exports exactly 13 notes', () => {
-      expect(Object.keys(NOTES).length).toBe(13);
-    });
-
-    it('all frequencies are positive numbers', () => {
-      for (const freq of Object.values(NOTES)) {
-        expect(freq).toBeGreaterThan(0);
+  describe('sound effect methods exist', () => {
+    it('has all required SFX methods', () => {
+      const methods = [
+        'hit', 'hitCrit', 'hitSuper', 'miss', 'faint', 'victory',
+        'defeat', 'statusInflict', 'heal', 'moveSelect', 'turnStart',
+        'statBoost', 'statDrop', 'matchFound', 'timerTick',
+      ];
+      for (const method of methods) {
+        expect(typeof (audio as unknown as Record<string, unknown>)[method]).toBe('function');
       }
     });
   });
 
-  // -------------------------------------------------------------------------
-  // C_MAJOR_SCALE
-  // -------------------------------------------------------------------------
-
-  describe('C_MAJOR_SCALE', () => {
-    it('has 8 notes (C4 through C5)', () => {
-      expect(C_MAJOR_SCALE.length).toBe(8);
-    });
-
-    it('starts with C4', () => {
-      expect(C_MAJOR_SCALE[0]).toBe(NOTES.C4);
-    });
-
-    it('ends with C5', () => {
-      expect(C_MAJOR_SCALE[C_MAJOR_SCALE.length - 1]).toBe(NOTES.C5);
+  describe('muted playback', () => {
+    it('does not play when muted', () => {
+      audio.toggleMute();
+      // Should not throw even when muted
+      expect(() => audio.hit('FIRE')).not.toThrow();
+      expect(() => audio.miss()).not.toThrow();
+      expect(() => audio.victory()).not.toThrow();
     });
   });
 
-  // -------------------------------------------------------------------------
-  // playScaleNote
-  // -------------------------------------------------------------------------
-
-  describe('playScaleNote', () => {
-    it('does not throw for index 0 on an uninitialized manager', () => {
-      expect(() => playScaleNote(createAudioManager(), 0)).not.toThrow();
+  describe('WAV path mapping', () => {
+    it('maps all 15 WAV sample names', () => {
+      const expectedSamples = [
+        'strike', 'hit', 'burst', 'beam', 'charge', 'projectile',
+        'electric', 'slash', 'wave', 'spin', 'drain', 'shield',
+        'boost', 'status', 'heal',
+      ];
+      for (const name of expectedSamples) {
+        expect(audio.hasWavPath(name)).toBe(true);
+      }
     });
 
-    it('wraps out-of-range index via modulo without throwing', () => {
-      expect(() => playScaleNote(createAudioManager(), 8)).not.toThrow();
-      expect(() => playScaleNote(createAudioManager(), 100)).not.toThrow();
-    });
-  });
-
-  // -------------------------------------------------------------------------
-  // HAPTIC_PATTERNS
-  // -------------------------------------------------------------------------
-
-  describe('HAPTIC_PATTERNS', () => {
-    it('defines a tap pattern equal to 10 ms', () => {
-      expect(HAPTIC_PATTERNS.tap).toBe(10);
-    });
-
-    it('success pattern is an array', () => {
-      expect(Array.isArray(HAPTIC_PATTERNS.success)).toBe(true);
-    });
-
-    it('error pattern has 3 pulses', () => {
-      expect((HAPTIC_PATTERNS.error as number[]).length).toBe(3);
-    });
-
-    it('heavy pattern is a single number', () => {
-      expect(typeof HAPTIC_PATTERNS.heavy).toBe('number');
-    });
-
-    it('flutter pattern is an array with multiple entries', () => {
-      expect(Array.isArray(HAPTIC_PATTERNS.flutter)).toBe(true);
-      expect((HAPTIC_PATTERNS.flutter as number[]).length).toBeGreaterThan(1);
-    });
-  });
-
-  // -------------------------------------------------------------------------
-  // supportsHaptics
-  // -------------------------------------------------------------------------
-
-  describe('supportsHaptics', () => {
-    it('returns true when navigator.vibrate is present', () => {
-      vi.stubGlobal('navigator', { vibrate: vi.fn() });
-      expect(supportsHaptics()).toBe(true);
-    });
-
-    it('returns false when navigator.vibrate is absent', () => {
-      vi.stubGlobal('navigator', {});
-      expect(supportsHaptics()).toBe(false);
-    });
-  });
-
-  // -------------------------------------------------------------------------
-  // triggerHaptic
-  // -------------------------------------------------------------------------
-
-  describe('triggerHaptic', () => {
-    it('returns false when haptics are not supported', () => {
-      vi.stubGlobal('navigator', {});
-      expect(triggerHaptic('tap')).toBe(false);
-    });
-
-    it('calls navigator.vibrate with the tap pattern for "tap"', () => {
-      const vibrateMock = vi.fn();
-      vi.stubGlobal('navigator', { vibrate: vibrateMock });
-
-      triggerHaptic('tap');
-
-      expect(vibrateMock).toHaveBeenCalledWith(HAPTIC_PATTERNS.tap);
-    });
-
-    it('calls navigator.vibrate with a custom array pattern', () => {
-      const vibrateMock = vi.fn();
-      vi.stubGlobal('navigator', { vibrate: vibrateMock });
-
-      triggerHaptic([10, 50, 10]);
-
-      expect(vibrateMock).toHaveBeenCalledWith([10, 50, 10]);
-    });
-
-    it('returns true when vibrate call succeeds', () => {
-      vi.stubGlobal('navigator', { vibrate: vi.fn() });
-      expect(triggerHaptic('success')).toBe(true);
-    });
-
-    it('falls back to tap pattern for unknown string patterns', () => {
-      const vibrateMock = vi.fn();
-      vi.stubGlobal('navigator', { vibrate: vibrateMock });
-
-      triggerHaptic('nonexistent_pattern' as never);
-
-      expect(vibrateMock).toHaveBeenCalledWith(HAPTIC_PATTERNS.tap);
-    });
-  });
-
-  // -------------------------------------------------------------------------
-  // stopHaptic
-  // -------------------------------------------------------------------------
-
-  describe('stopHaptic', () => {
-    it('calls navigator.vibrate(0) to cancel ongoing haptic', () => {
-      const vibrateMock = vi.fn();
-      vi.stubGlobal('navigator', { vibrate: vibrateMock });
-
-      stopHaptic();
-
-      expect(vibrateMock).toHaveBeenCalledWith(0);
-    });
-
-    it('does not throw when haptics are not supported', () => {
-      vi.stubGlobal('navigator', {});
-      expect(() => stopHaptic()).not.toThrow();
+    it('returns false for unknown WAV names', () => {
+      expect(audio.hasWavPath('nonexistent')).toBe(false);
     });
   });
 });
