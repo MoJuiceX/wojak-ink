@@ -10,6 +10,7 @@ import { PageSEO } from '@/components/seo';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { QueuePanel } from '@/components/combat/QueuePanel';
 import { useSageWallet } from '@/sage-wallet';
+import { ArenaNav } from '@/components/combat/ArenaNav';
 
 interface FighterSummary {
   nft_id: string;
@@ -91,6 +92,7 @@ export default function CombatArena() {
 
   return (
     <PageTransition>
+      <ArenaNav />
       <PageSEO
         title="Combat Arena - Wojak Battles"
         description="Battle your Wojak NFTs in turn-based combat. 18 types, abilities, moves, ELO ranking."
