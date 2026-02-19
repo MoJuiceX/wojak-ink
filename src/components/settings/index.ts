@@ -13,3 +13,4 @@ export { WalletSettings } from './WalletSettings';
 export { AccountSettings } from './AccountSettings';
 export { MessagesModal } from './MessagesModal';
 export { NotificationSettings } from './NotificationSettings';
+export { DisplayNameEditor } from './DisplayNameEditor';

@@ -13,6 +13,7 @@ import { useSettings } from '@/contexts/SettingsContext';
 import {
   AudioSettings,
   AboutSection,
+  DisplayNameEditor,
 } from '@/components/settings';
 import { settingsPageVariants, settingsSectionVariants } from '@/config/settingsAnimations';
 
@@ -56,6 +57,15 @@ export default function Settings() {
             onSfxVolumeChange={setSoundEffectsVolume}
             onSfxToggle={toggleSoundEffects}
           />
+
+          {/* Divider */}
+          <div
+            className="h-px"
+            style={{ background: 'var(--color-border)' }}
+          />
+
+          {/* Display Name (only shown when signed in) */}
+          <DisplayNameEditor />
 
           {/* Divider */}
           <div
