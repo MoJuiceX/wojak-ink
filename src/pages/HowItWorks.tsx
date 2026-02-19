@@ -13,6 +13,7 @@ import { COMBAT_TYPES, type CombatType } from '@/lib/combat/types';
 import { TYPE_COLORS, DARK_TEXT_TYPES } from '@/lib/combat/data/type-colors';
 import { TYPE_CHART } from '@/lib/combat/data/type-chart';
 import { NATURES } from '@/lib/combat/data/natures';
+import { ABILITIES } from '@/lib/combat/data/abilities';
 import type { StatName } from '@/lib/combat/types';
 
 // Human-readable stat names
@@ -277,10 +278,59 @@ function NaturesSection() {
   );
 }
 
+// Abilities Section - displays all 36 abilities grouped by type
 function AbilitiesSection() {
+  // Group abilities by type
+  const abilitiesByType = COMBAT_TYPES.map((type) => ({
+    type,
+    abilities: ABILITIES.filter((a) => a.type === type),
+  }));
+
   return (
     <CollapsibleSection title="Abilities" icon={<Shield size={18} />}>
-      <p className="text-secondary text-sm">Coming soon...</p>
+      <p className="text-secondary text-sm mb-4">
+        Each type has two possible abilities — one offensive (A) and one defensive (B).
+        Your Wojak gets the one that matches its stat profile.
+      </p>
+
+      <div className="flex flex-col gap-3">
+        {abilitiesByType.map(({ type, abilities }) => (
+          <div key={type} className="flex flex-col gap-1">
+            <div
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold w-fit"
+              style={{
+                background: `${TYPE_COLORS[type]}20`,
+                color: TYPE_COLORS[type],
+              }}
+            >
+              {type}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+              {abilities.map((ability) => (
+                <div
+                  key={ability.name}
+                  className="flex flex-col p-2 rounded"
+                  style={{ background: 'var(--color-white-5)' }}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">{ability.name}</span>
+                    <span
+                      className="text-xs px-1 rounded"
+                      style={{
+                        background: ability.variant === 'A' ? 'var(--color-error-15)' : 'var(--color-cyan-15)',
+                        color: ability.variant === 'A' ? 'var(--color-error)' : 'var(--color-cyan)',
+                      }}
+                    >
+                      {ability.variant === 'A' ? 'Off' : 'Def'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-secondary mt-1">{ability.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </CollapsibleSection>
   );
 }
