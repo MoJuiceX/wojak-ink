@@ -106,7 +106,7 @@ function NftDetailModal({ nft, onClose, onBurned }: { nft: CollectionNft; onClos
       >
         <div className="flex items-center justify-between">
           {editing ? (
-            <div className="flex items-center gap-2 flex-1 mr-2">
+            <div className="flex items-center gap-1 flex-1 mr-2">
               <input
                 ref={inputRef}
                 className="input flex-1"
@@ -118,19 +118,19 @@ function NftDetailModal({ nft, onClose, onBurned }: { nft: CollectionNft; onClos
                 maxLength={30}
                 disabled={nameSaving}
               />
-              <button type="button" className="btn btn-ghost" style={{ padding: 4, minWidth: 'auto' }} onClick={saveName} disabled={nameSaving}>
+              <button type="button" className="btn btn-ghost" style={{ padding: 12, minWidth: '44px', minHeight: '44px' }} onClick={saveName} disabled={nameSaving}>
                 <Check size={16} />
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <h3 className="font-bold" style={{ fontSize: 16 }}>{displayName}</h3>
-              <button type="button" className="btn btn-ghost" style={{ padding: 2, minWidth: 'auto' }} onClick={startEditing} aria-label="Rename">
+              <button type="button" className="btn btn-ghost" style={{ padding: 12, minWidth: '44px', minHeight: '44px' }} onClick={startEditing} aria-label="Rename">
                 <Pencil size={14} className="text-muted" />
               </button>
             </div>
           )}
-          <button type="button" className="btn btn-ghost" style={{ padding: 4, minWidth: 'auto' }} onClick={onClose} aria-label="Close">
+          <button type="button" className="btn btn-ghost" style={{ padding: 12, minWidth: '44px', minHeight: '44px' }} onClick={onClose} aria-label="Close">
             <X size={18} />
           </button>
         </div>

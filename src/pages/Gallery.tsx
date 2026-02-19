@@ -384,7 +384,7 @@ function GalleryContent() {
                 setBannerDismissed(true);
               }}
               className="btn btn-ghost"
-              style={{ padding: '4px 8px', fontSize: '14px', minWidth: 'auto' }}
+              style={{ padding: '12px', fontSize: '14px', minWidth: '44px', minHeight: '44px' }}
             >&times;</button>
           </Link>
         )}

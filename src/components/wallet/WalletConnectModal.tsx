@@ -67,7 +67,7 @@ export function WalletConnectModal({ isOpen, onClose, walletConnect }: WalletCon
               type="button"
               aria-label="Close"
               onClick={onClose}
-              className="absolute top-4 right-4 p-1 rounded-full transition-colors text-tertiary"
+              className="absolute top-2 right-2 p-3 rounded-full transition-colors text-tertiary"
             >
               <X size={20} />
             </button>
