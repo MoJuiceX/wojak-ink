@@ -1,0 +1,175 @@
+Type,Current Name,What It Does,Option A (Recommended),Option B,Option C
+NEUTRAL,Pummel,Basic physical hit (40 power),Ratio,Normie Slap,Touch Grass
+NEUTRAL,Lucky Strike,Physical hit + coins theme (40 power),Coin Flip,Degen Toss,Paper Hands Slap
+NEUTRAL,Rapid Jab,Priority physical hit — always goes first (40 power),First Reply,Early Bird,Notification Spam
+NEUTRAL,Lullaby,Status: puts foe to sleep (55% acc),Cope Song,Bedtime Cope,Seethe Lullaby
+NEUTRAL,Dissonance,Status: confuses foe (55% acc),Soyjak Screech,Reee Wave,NPC Noise
+NEUTRAL,Regenerate,Status: heals 50% HP,Hopium Dose,Inhale Copium,Sniff Hopium
+NEUTRAL,War Posture,Status: +2 ATK stages,Gigachad Stance,Chad Up,Sigma Grindset
+NEUTRAL,Mock,Status: lowers foe DEF -1,NPC Stare,Blank Stare,Imagine Coping
+NEUTRAL,Reckless Charge,Big physical hit + 33% recoil (110 power),Full Degen,All In,Yeet Yourself
+FIRE,Blazing Charge,Physical fire + 33% recoil (120 power),Rug Pull Rush,Liquidation Dash,Firesale Charge
+FIRE,Burning Strike,Physical fire + 10% burn (75 power),Liquidation Punch,Pink Wojak Punch,Margin Call
+FIRE,Hot Coal,Special fire + 10% burn (40 power),FUD Spark,Panic Ember,Paper Hands Burn
+FIRE,Ember Ward,Status: protective fire shield,Firewall,Burn Shield,Hot Hands
+FIRE,Ghost Burn,Status: guaranteed burn (85% acc),Spite Flame,Grief Candle,Salt Burn
+FIRE,Thermal Overload,Special fire 110 power but drops own SpAtk -2,Meltdown,Full Tilt,Nuclear Cope
+FIRE,Flamethrower,Special fire + 10% burn (90 power),Flamethrower,Wojak Torch,Market Torcher
+FIRE,Flame Charge,Physical fire + self speed +1 (50 power),FOMO Rush,Buy High,Hype Train
+FIRE,Lava Plume,Special fire + 30% burn (80 power),Market Crash,Plunge Zone,Red Candle Flood
+FIRE,Fire Spin,Special fire + 10% burn low acc (40 power),Dumpster Fire,Trash Blaze,Cope Spiral
+WATER,Tsunami Strike,Physical water + recoil (110 power),Whale Splash,Whale Dump,Liquidity Nuke
+WATER,Splash Shot,Basic special water (40 power),Tears of Joy,Wojak Tears,Cry About It
+WATER,Bubble Burst,Special water + speed drop -1 (65 power),Bubble Pop,Market Bubble,Pop The Top
+WATER,Tide Rush,Priority physical water (40 power),Buy The Dip,First Bid,Flash Buy
+WATER,Drain Bubble,Special water + drain 100% (60 power),Liquidity Drain,Siphon Pool,DeFi Drain
+WATER,Fortify,Status: +1 DEF,HODL,Diamond Shell,Hunker Down
+WATER,Rapids Charge,Physical water + 20% flinch (80 power),Pump It,Momentum Surge,Pump And Dump
+WATER,Claw Crusher,Physical water high crit (100 power / 90% acc),Diamond Hands,Iron Grip,Crush Grip
+ELECTRIC,Storm Charge,Physical electric + 20% paralyze (110 power / 85% acc),Short Squeeze,Overload Rush,Circuit Breaker
+ELECTRIC,Volt Cannon,Special electric (110 power),Lightning Sell,Market Zap,Volt Dump
+ELECTRIC,Arc Cannon,Special electric + guaranteed paralyze (120 power / 50% acc),Zeus Strike,Thunder Judgment,Grid Overload
+ELECTRIC,Lightning Strike,Physical electric + 10% paralyze (75 power),Static Shock,Zap Punch,Live Wire
+ELECTRIC,Spark,Special electric + 10% paralyze (40 power),Zap,Tingle,Quick Zap
+ELECTRIC,Instant Jolt,Priority physical electric — always crits (80 power),Flash Crash,Insta-Rekt,Speed Glitch
+ELECTRIC,Shock Wave,Status: guaranteed paralyze (90% acc),Thunder FUD,System Freeze,Grid Lock
+ELECTRIC,Store Energy,Status: +1 SpDef,Charge Up,Stack Sats,Power Bank
+ELECTRIC,Static Field,Status: drops foe SpAtk -2,Signal Jam,Frequency Kill,Dead Air
+ELECTRIC,Thunder Rush,Physical electric + 33% recoil (120 power),YOLO Charge,Max Leverage,Full Send Bolt
+ELECTRIC,Volt Strike,Physical electric + 30% flinch (80 power),Power Surge,Voltage Spike,Stun Gun
+GRASS,Radiant Edge,Physical grass (110 power),Solar Cope,Green Candle,Photosynthesis Blade
+GRASS,Stem Strike,Basic physical grass (45 power),Touch Grass,Weed Whack,Grass Slap
+GRASS,Life Leech,Special grass + drain 50% (40 power),Siphon Green,Tax Harvest,Leech Seed
+GRASS,Thorn Guard,Status: priority protective thorns,Hedge Fund,Thorn Wall,Prickly Cope
+GRASS,Spore Shock,Status: guaranteed paralyze (75% acc),Grass Roots,Pollen Stun,Spore Stunner
+GRASS,Dream Pollen,Status: guaranteed sleep (75% acc),Touch Grass Nap,Meadow Snooze,Nature Therapy
+GRASS,Drain Root,Special grass + drain 50% (20 power),Tax Farm,Root Canal,Siphon Sprout
+GRASS,Fiber Shield,Status: +3 DEF (massive boost),Bubble Wrap,Padded Cope,Cotton Armor
+GRASS,Fiber Cloud,Status: drops foe speed -2,Slow Meme,Lag Spike,Molasses Cloud
+GRASS,Branch Breaker,Physical grass + 33% recoil (120 power),Timber Yeet,Log Slam,Full Send Branch
+ICE,Frost Pike,Physical ice (110 power),Brain Freeze,Icicle Lance,Cold Take
+ICE,Frozen Knuckle,Physical ice + 10% freeze (75 power),Cold Punch,Frostbite Fist,Ice Cold Cope
+ICE,Northern Light,Special ice + ATK drop -1 (65 power),Aurora Cope,Northern Feels,Boreal Beam
+ICE,Quick Freeze,Priority physical ice (40 power),Ice Cold Take,Flash Freeze,Instant Frost
+ICE,Deep Freeze,Special ice mega nuke (200 power / 30% acc),Absolute Zero,Crypto Winter,Nuclear Winter
+ICE,Frozen Crush,Physical ice + 30% flinch (85 power / 90% acc),Avalanche Drop,Ice Hammer,Frost Slam
+ICE,Chill Blast,Special ice — always crits (60 power / 90% acc),Cold Read,Frost Snipe,Cryo Shot
+ICE,Snowstorm,Special ice + 10% freeze (110 power / 70% acc),Blizzard,Bear Market,Ice Age
+MARTIAL,Chi Burst,Special martial + SpDef drop (120 power / 70% acc),Spirit Bomb,Focused Rage,Inner Fire
+MARTIAL,Edge Strike,Physical martial — high crit (50 power),Karate Chop,Palm Strike,Sigma Slice
+MARTIAL,Blitz Punch,Priority physical martial (40 power),Quick Hands,Reflex Punch,Speed Fist
+MARTIAL,Anticipate,Status: priority dodge,Read The Room,Dodge This,Matrix Mode
+MARTIAL,Vitality Punch,Physical martial + drain 50% (75 power),Gym Bro Punch,Protein Punch,Recovery Blow
+MARTIAL,Power Stance,Status: +1 ATK,Bulk Up,Gains Mode,Flex Protocol
+MARTIAL,Spin Kick,Physical martial + 30% flinch (60 power / 85% acc),Roundhouse Cope,Sweep Kick,Spinning Seethe
+MARTIAL,Scissor Chop,Physical martial — high crit (100 power / 80% acc),Cross Counter,Sigma Strike,Double Handed
+VENOM,Toxin Blast,Physical venom + 30% poison (120 power / 80% acc),Toxic Dump,Sludge Yeet,Poison Nuke
+VENOM,Noxious Burst,Special venom (120 power / 90% acc),Gas Leak,Foul Belch,Noxious Cloud
+VENOM,Poison Wheel,Physical venom (100 power),Toxic Grind,Venom Wheel,Poison Spin
+VENOM,Corrosive,Special venom + SpDef drop -1 (40 power),Acid Take,Dissolving Opinion,Corrode
+VENOM,Sludge Shot,Special venom + 30% poison (65 power),Sewer Water,Sludge Post,Toxic Tweet
+VENOM,Toxic Shield,Status: priority shield + poison contact,Hazmat Suit,Poison Guard,Toxic Barrier
+VENOM,Venom Dust,Status: guaranteed poison (75% acc),Bad Vibes,Pestilence,Toxin Cloud
+VENOM,Deadly Dose,Status: guaranteed heavy poison (90% acc),Lethal Dose,Fatal Drip,Kill Shot Toxin
+VENOM,Detoxify,Status: heals 50% HP,Touch Grass Cure,Cleanse,Purge Toxins
+VENOM,Slime Coat,Status: +2 DEF,Thick Skin,Slime Armor,Goo Shield
+VENOM,Toxin Spray,Status: drops foe ATK -1,Cope Spray,Pepper Spray,Weaken Mist
+EARTH,Earth Cleaver,Physical earth (120 power / 85% acc),Tectonic Cope,Ground Zero,Fault Line
+EARTH,Desert Fury,Special earth + burn (100 power / 80% acc),Sandstorm Rage,Desert Wrath,Scorching Sand
+EARTH,Ground Slam,Physical earth — strong but lowers own DEF (110 power),Face Plant,Belly Flop,Full Send Slam
+EARTH,Earth Stomp,Physical earth — doubles if prev move missed (75 power),Tantrum Stomp,Rage Stomp,Seethe Stomp
+EARTH,Burning Dunes,Special earth + 30% burn (70 power),Hot Sand,Scorched Earth,Heated Ground
+EARTH,Dust Recovery,Status: heals 50% HP,Grounded,Dirt Nap,Earthen Rest
+EARTH,Dust Throw,Status: drops foe accuracy -1,Pocket Sand,Throw Dirt,Blind Side
+EARTH,Earth Splitter,Physical earth mega nuke (200 power / 30% acc),Earthquake,Rift Opener,Chasm
+EARTH,Club Strike,Physical earth + 10% flinch (65 power / 85% acc),Bonk,Club Bonk,Cave Man Swing
+EARTH,Dig Attack,Physical earth — high crit (80 power / 95% acc),Drill Down,Core Dig,Bore Hole
+AIR,Cyclone,Special air + 30% confuse (110 power / 70% acc),Brain Storm,Mind Tornado,Thought Spiral
+AIR,Reckless Swoop,Physical air + 33% recoil (120 power),Dive Bomb,Kamikaze Tweet,Sky Yeet
+AIR,Wind Puff,Basic special air (40 power),Hot Air,Exhale,Breezy Take
+AIR,Sky Strike,Basic physical air (60 power),Wing Slap,Air Strike,Fly Swat
+AIR,Perch,Status: heals 50% HP,Grass Landing,Rest Perch,Cloud Nine
+AIR,Downdraft,Status: drops foe ATK -2,Debunk,Fact Check,Put Down
+AIR,Sky Razor,Special air + 30% flinch (75 power / 95% acc),Air Cutter,Razor Wind,Gust Blade
+AIR,Air Cannon,Special air — high crit (100 power / 95% acc),Pressure Cannon,Wind Cannon,Aero Blast
+AIR,Heaven Charge,Physical air — lowers foe DEF (110 power),Sent To Heaven,Ascension Dive,Sky Slam
+PSYCHE,Mental Crush,Physical psyche (85 power),Brain Rot,Mind Break,Cranium Crack
+PSYCHE,Fate Strike,Special psyche — delayed hit (110 power),I Called It,Prophecy,Told You So
+PSYCHE,Mind Ray,Special psyche + 10% confuse (65 power),Brain Beam,Thought Ray,Mind Laser
+PSYCHE,Perplex,Special psyche + 10% confuse (50 power),Confusion Posting,Mixed Signals,NPC Loop
+PSYCHE,Mirror Mind,Status: priority reflect,Reverse Uno,Mirror Match,No U
+PSYCHE,Mesmerize,Status: sleep (60% acc),Doom Scroll,Hypno Scroll,Screen Addiction
+PSYCHE,Dream Drain,Special psyche + drain 50% (100 power),Nightmare Farm,Sleep Harvest,Dream Tax
+PSYCHE,Concentrate,Status: +1 ATK,Focus Mode,Deep Think,Laser Focus
+PSYCHE,Mind Bend,Status: drops foe accuracy -1 (80% acc),Gaslight,Perception Shift,Reality Warp
+PSYCHE,Sixth Sense,Special psyche + 10% flinch (80 power),Gut Feeling,Premonition,Spider Sense
+PSYCHE,Thought Edge,Physical psyche — high crit (70 power),Mind Blade,Psych Slash,Thought Knife
+INSECT,Exo Lance,Physical insect (120 power / 85% acc),Hive Mind Lance,Swarm Charge,Beetle Ram
+INSECT,Insect Wail,Special insect + SpDef drop (90 power),Bug Report,Cicada Cry,Screech Post
+INSECT,Hive Strike,Physical insect — high crit (90 power),Mob Attack,Brigading,Swarm Strike
+INSECT,Glitter Breeze,Special insect + ATK boost (60 power),Butterfly Effect,Sparkle Dust,Shimmer Wave
+INSECT,Beacon Blast,Special insect + 10% confuse (75 power),Signal Boost,Bait Click,Beacon Flash
+INSECT,Aggro Dust,Status: priority — draws attacks,Rage Bait,Outrage Farm,Aggro Post
+INSECT,Life Drain,Physical insect + drain 50% (80 power),Leech,Parasite,Blood Sucker
+INSECT,Bioluminescence,Status: +3 SpAtk (massive boost),Glow Up,Viral Moment,Main Character
+INSECT,Web Trap,Status: drops foe speed -2 (95% acc),Sticky Thread,Web Snare,Caught In 4K
+INSECT,Exo Slam,Physical insect + 30% flinch (65 power),Bug Squash,Shell Slam,Exo Press
+STONE,Cosmic Stone,Special stone (120 power / 90% acc),Meteor Strike,Space Rock,Cosmic Cope
+STONE,Primal Force,Special stone + ATK boost (60 power),Boomer Power,Ancient Strength,Old School
+STONE,Stone Throw,Basic physical stone (50 power),Throw Rock,Rock Toss,Caveman Throw
+STONE,Geo Barrier,Status: priority shield,Stone Wall,Rock Block,Bunker Mode
+STONE,Stone Sharpen,Status: +2 Speed,Polish Grind,Rock Polish,Smooth Brain
+STONE,Crude Coat,Status: drops foe speed -1,Tar Pit,Sticky Mess,Oil Slick
+STONE,Avalanche,Physical stone + 30% flinch (75 power / 90% acc),Rockslide,Landslide,Rock Tumble
+STONE,Mineral Blade,Physical stone — high crit (100 power / 80% acc),Stone Edge,Crystal Edge,Shard Blade
+GHOST,Phantom Strike,Physical ghost — hits through protect (110 power),Ghost Post,Vanish Strike,Stealth Delete
+GHOST,Spirit Volley,Special ghost (110 power),Doomer Barrage,Ghost Storm,Spirit Spam
+GHOST,Curse Throw,Physical ghost (110 power / 90% acc),Cursed NFT,Poltergeist Throw,Haunted Drop
+GHOST,Phantom Fist,Physical ghost — never misses (60 power),Ghost Punch,Shadow Box,Invisible Slap
+GHOST,Phantom Slash,Physical ghost — high crit (70 power),Spectral Cut,Ghost Slash,Ectoplasm Edge
+GHOST,Ghost Rush,Priority physical ghost (40 power),Spooky Quick,Boo Rush,Ghosted
+GHOST,Bewilderment,Status: guaranteed confuse,Doomer Spiral,Existential Crisis,What Even
+GHOST,Shadow Ball,Special ghost + SpDef drop 20% (80 power),Shadow Ball,Dark Orb,Void Sphere
+GHOST,Hex,Special ghost — extra vs statused (65 power),Bad Omen,Hex,Dark Karma
+GHOST,Curse,Status: burn via life sacrifice,Blood Pact,Soul Tax,Sacrifice Post
+DRAGON,Rampage,Physical dragon — multi-turn + self confuse (110 power),Rage Mode,Full Berserker,Unhinged
+DRAGON,Serpent Fume,Special dragon + 30% paralyze (60 power),Dragon Breath,Seethe Fume,Cope Exhale
+DRAGON,Vortex,Special dragon + 20% flinch (40 power),Whirlwind Cope,Mini Tornado,Tail Spin
+DRAGON,Serpent Form,Status: +1 ATK +1 Speed,Dragon Dance,Power Ritual,Scale Up
+DRAGON,Serpent Tackle,Physical dragon + 20% flinch (100 power / 75% acc),Dragon Rush,Wyrm Tackle,Full Send Dragon
+DRAGON,Reality Rip,Special dragon — high crit (100 power / 95% acc),Reality Check,Dimension Tear,Fabric Rip
+DRAGON,Dragon Claw,Physical dragon — reliable (80 power),Dragon Claw,Talon Rend,Scale Slash
+DRAGON,Dragon Pulse,Special dragon — reliable (85 power),Dragon Pulse,Draconic Wave,Wyrm Blast
+DRAGON,Draco Meteor,Special dragon 110 power — drops own SpAtk -2,Draco Meteor,Extinction Event,Nuke From Orbit
+DRAGON,Dragon Tail,Physical dragon + 20% flinch (60 power / 90% acc),Dragon Tail,Wyrm Whip,Tail Slap
+SHADOW,Shadow Assault,Physical shadow — ignores protect (100 power),Shadow Raid,Dark Blitz,Ambush
+SHADOW,Burning Rage,Special shadow + 20% flinch (90 power),Seethe Flame,Malding Fire,Rage Quit Burn
+SHADOW,Dirty Trick,Physical shadow — uses foe's ATK (95 power),Dirty Play,Exploit,Backstab
+SHADOW,Gnash,Physical shadow + 30% flinch (60 power),Dark Bite,Shadow Chomp,Grudge Bite
+SHADOW,Swipe,Physical shadow — steal theme (60 power),Rug Pull,Yoink,Five Finger Discount
+SHADOW,Hijack,Status: priority — steals foe's next move effect,Account Hack,Phishing,Session Hijack
+SHADOW,Deceive,Status: confuses foe but raises their SpAtk,Bait Post,Misleading Title,Clickbait
+SHADOW,Void Sleep,Status: sleep (50% acc),Doomer Sleep,Void Nap,Blackout
+SHADOW,Malicious Intent,Status: +2 SpAtk,Evil Plan,Dark Scheme,Master Plan
+SHADOW,Final Curse,Status: self faint + drops foe ATK -2,Last Words,Dying Breath,Final Ratio
+SHADOW,Shadow Wave,Special shadow + 20% flinch (80 power),Dark Pulse,Shadow Wave,Doom Scroll Wave
+SHADOW,Shadow Blade,Physical shadow — high crit (70 power),Night Slash,Dark Edge,Stealth Blade
+METAL,Metal Grinder,Physical metal (110 power),Steel Roller,Chrome Grinder,Iron Crusher
+METAL,Iron Fist,Priority physical metal (40 power),Bullet Punch,Quick Steel,Iron Jab
+METAL,Metal Sphere,Physical metal — never misses (60 power),Chrome Ball,Steel Orb,Magnet Bomb
+METAL,Royal Guard,Status: priority shield + ATK drop on contact,Diamond Guard,Platinum Shield,Iron Curtain
+METAL,Steel Skin,Status: +2 DEF,Titanium Hide,Steel Plating,Chrome Armor
+METAL,Iron Wail,Status: drops foe SpDef -2 (85% acc),Metal Screech,Steel Screech,Tin Can Scream
+METAL,Metal Skull,Physical metal + 30% flinch (80 power),Headbutt,Iron Dome,Chrome Dome
+METAL,Flash Cannon,Special metal + SpDef drop (80 power),Flash Cannon,Chrome Beam,Steel Laser
+METAL,Metal Claw,Physical metal + ATK boost chance (50 power / 95% acc),Steel Scratch,Chrome Claw,Iron Rake
+METAL,Steel Wing,Physical metal + DEF boost chance (70 power / 90% acc),Steel Wing,Iron Feather,Chrome Blade
+MYSTIC,Mystic Wheel,Physical mystic (100 power),Fairy Ring,Enchanted Wheel,Magic Circle
+MYSTIC,Bloom Blast,Special mystic — drops opponent SpAtk -2 (110 power / 90% acc),Sparkle Bomb,Glitter Cannon,Dazzle Blast
+MYSTIC,Soothing Cry,Special mystic — never misses (40 power),Soft Uwu,Comfort Sound,Gentle Voice
+MYSTIC,Life Kiss,Special mystic + drain 75% (50 power),Healing Kiss,Smooch Drain,Kiss of Life
+MYSTIC,Trick Guard,Status: priority — blocks status moves,Magic Shield,Spell Block,Ward
+MYSTIC,Addling Kiss,Status: confuse (75% acc),Confusion Kiss,Dizzy Smooch,Bewitch
+MYSTIC,Lunar Glow,Status: heals 50% HP,Moonlight Heal,Celestial Rest,Starlight Recovery
+MYSTIC,Earth Magic,Status: +2 SpAtk (massive),Ancient Ritual,Ley Line Tap,Arcane Surge
+MYSTIC,Captivate,Status: drops foe ATK -2,Charm Offensive,Disarming Smile,Heart Eyes

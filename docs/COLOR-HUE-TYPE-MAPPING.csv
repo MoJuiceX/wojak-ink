@@ -1,0 +1,18 @@
+Hue Range,Hue Degrees,Primary Type (3pts),Secondary Type (1pt),Example Hex,Example Name
+Red,0-20 and 340-360,FIRE,SHADOW,#FF0000,Pure Red
+Orange,20-45,DRAGON,FIRE,#FF6600,Orange
+Yellow,45-65,ELECTRIC,EARTH,#FFD700,Gold Yellow
+Lime/Chartreuse,65-90,INSECT,GRASS,#9ACD32,Yellow-Green
+Green,90-150,GRASS,EARTH,#228B22,Forest Green
+Teal/Cyan,150-195,WATER,ICE,#00D4FF,Cyan
+Blue,195-250,WATER,PSYCHE,#2563EB,Blue
+Indigo,250-280,PSYCHE,GHOST,#4B0082,Indigo
+Purple/Violet,280-320,VENOM,MYSTIC,#9400D3,Purple
+Pink/Magenta,320-340,MYSTIC,FIRE,#FF69B4,Hot Pink
+White (S<10% L>85%),achromatic,ICE,AIR,#F0F8FF,Alice White
+Silver/Light Grey (S<10% L60-85%),achromatic,METAL,STONE,#C0C0C0,Silver
+Dark Grey (S<10% L25-60%),achromatic,STONE,GHOST,#696969,Dim Grey
+Black (S<10% L<25%),achromatic,SHADOW,GHOST,#1A1A1A,Near Black
+Brown (S10-50% H15-45 L20-50%),warm neutral,EARTH,NEUTRAL,#8B4513,Saddle Brown
+Gold (S>50% H40-55 L45-65%),warm neutral,DRAGON,METAL,#DAA520,Goldenrod
+Neon/Highly Saturated (S>90%),any hue,+1 bonus to primary,—,—,Amplifier rule
