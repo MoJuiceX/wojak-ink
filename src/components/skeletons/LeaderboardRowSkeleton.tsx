@@ -35,7 +35,7 @@ interface LeaderboardSkeletonProps {
 export const LeaderboardSkeleton: React.FC<LeaderboardSkeletonProps> = ({
   rows = 10,
 }) => (
-  <div className="leaderboard-skeleton">
+  <div className="leaderboard-skeleton" role="status" aria-label="Loading leaderboard">
     {Array.from({ length: rows }).map((_, i) => (
       <LeaderboardRowSkeleton key={i} delay={i * 0.05} />
     ))}

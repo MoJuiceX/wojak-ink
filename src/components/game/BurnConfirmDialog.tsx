@@ -60,10 +60,11 @@ export function BurnConfirmDialog({
         </label>
 
         <div className="flex gap-3">
-          <button className="btn btn-ghost flex-1" onClick={onCancel} disabled={burning}>
+          <button type="button" className="btn btn-ghost flex-1" onClick={onCancel} disabled={burning}>
             Cancel
           </button>
           <button
+            type="button"
             className="btn flex-1 text-white"
             style={{ background: 'var(--color-error)' }}
             onClick={onConfirm}

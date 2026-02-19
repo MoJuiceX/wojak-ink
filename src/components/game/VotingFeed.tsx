@@ -243,7 +243,7 @@ export function VotingFeed() {
         <p className="text-secondary text-sm text-center">
           Couldn't load the next Wojak. Check your connection and try again.
         </p>
-        <button className="btn btn-primary" onClick={handleRetry}>Try Again</button>
+        <button type="button" className="btn btn-primary" onClick={handleRetry}>Try Again</button>
       </div>
     );
   }

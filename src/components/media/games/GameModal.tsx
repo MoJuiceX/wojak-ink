@@ -525,6 +525,9 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
 
           {/* Modal content - centering wrapper */}
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={game?.name ? `${game.name} game` : "Game"}
             className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none"
             style={{
               // Mobile: no padding for true fullscreen experience
@@ -665,6 +668,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                             {/* Action buttons - stacked and cohesive */}
                             <div className="arcade-buttons-stack">
                               <button
+                                type="button"
                                 className="arcade-play-btn"
                                 onClick={handlePlayClick}
                                 style={{
@@ -678,6 +682,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
 
                               {game.hasHighScores && (
                                 <button
+                                  type="button"
                                   className={`arcade-leaderboard-btn ${showLeaderboard ? 'active' : ''}`}
                                   onClick={() => setShowLeaderboard(!showLeaderboard)}
                                   style={{
@@ -827,6 +832,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                   {/* Premium Glassmorphism Header Bar */}
                   <div className="game-intro-header-bar">
                     <button
+                      type="button"
                       className="game-intro-header-btn"
                       onClick={() => setShowInstructions(true)}
                       aria-label="How to play"
@@ -835,6 +841,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                     </button>
                     <span className="game-intro-header-title">{game.name}</span>
                     <button
+                      type="button"
                       className="game-intro-header-btn"
                       onClick={handleCloseAttempt}
                       aria-label="Close game"
@@ -851,6 +858,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                     </p>
 
                     <button
+                      type="button"
                       className="game-intro-play-btn"
                       onClick={() => setGameStarted(true)}
                       style={{
@@ -863,6 +871,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
 
                     {game.hasHighScores && (
                       <button
+                        type="button"
                         className="game-intro-leaderboard-link"
                         onClick={() => setShowLeaderboard(true)}
                       >

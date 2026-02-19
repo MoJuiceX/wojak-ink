@@ -193,6 +193,7 @@ export function GameLeaderboardList({
           </span>
           {hasMore && (
             <button
+              type="button"
               className="btn btn-ghost"
               onClick={onLoadMore}
               disabled={loading}

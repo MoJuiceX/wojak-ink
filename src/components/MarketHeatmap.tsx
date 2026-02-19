@@ -370,7 +370,7 @@ const MarketHeatmap: React.FC<MarketHeatmapProps> = ({ rankData, onNftClick }) =
     return (
       <div className="heatmap-error">
         <p>{error}</p>
-        <button className="btn btn-primary" onClick={() => window.location.reload()}>Retry</button>
+        <button type="button" className="btn btn-primary" onClick={() => window.location.reload()}>Retry</button>
       </div>
     );
   }
@@ -393,12 +393,14 @@ const MarketHeatmap: React.FC<MarketHeatmapProps> = ({ rankData, onNftClick }) =
         {/* View Type Toggle */}
         <div className="view-toggle">
           <button
+            type="button"
             className={`view-toggle-btn ${viewType === 'heatmap' ? 'active' : ''}`}
             onClick={() => setViewType('heatmap')}
           >
             Heat Map
           </button>
           <button
+            type="button"
             className={`view-toggle-btn ${viewType === 'distribution' ? 'active' : ''}`}
             onClick={() => setViewType('distribution')}
           >
@@ -410,6 +412,7 @@ const MarketHeatmap: React.FC<MarketHeatmapProps> = ({ rankData, onNftClick }) =
         {viewType === 'heatmap' && <div className="heatmap-modes">
           {HEATMAP_MODES.map(m => (
             <button
+              type="button"
               key={m.key}
               className={`mode-btn ${mode === m.key ? 'active' : ''}`}
               onClick={() => setMode(m.key)}
@@ -419,6 +422,7 @@ const MarketHeatmap: React.FC<MarketHeatmapProps> = ({ rankData, onNftClick }) =
           ))}
           <div className="combo-btn-wrapper">
             <button
+              type="button"
               className={`mode-btn badge-toggle ${showBadges ? 'active' : ''}`}
               onClick={() => setShowBadges(!showBadges)}
             >
@@ -550,12 +554,12 @@ const MarketHeatmap: React.FC<MarketHeatmapProps> = ({ rankData, onNftClick }) =
       {/* Cell Detail Modal */}
       {selectedCell && (
         <div className="modal-overlay" onClick={() => setSelectedCell(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="cell-modal-title">
             <header className="modal-header">
-              <h2 className="modal-title">
+              <h2 className="modal-title" id="cell-modal-title">
                 {selectedCell?.count} NFT{selectedCell?.count !== 1 ? 's' : ''}
               </h2>
-              <button className="btn btn-ghost" onClick={() => setSelectedCell(null)}>
+              <button type="button" className="btn btn-ghost" onClick={() => setSelectedCell(null)}>
                 Close
               </button>
             </header>
@@ -606,12 +610,12 @@ const MarketHeatmap: React.FC<MarketHeatmapProps> = ({ rankData, onNftClick }) =
       {/* Bar Detail Modal (for Price Distribution) */}
       {selectedBar && (
         <div className="modal-overlay" onClick={() => setSelectedBar(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="bar-modal-title">
             <header className="modal-header">
-              <h2 className="modal-title">
+              <h2 className="modal-title" id="bar-modal-title">
                 {selectedBar?.listings.length} NFT{selectedBar?.listings.length !== 1 ? 's' : ''} at {selectedBar?.priceRange}
               </h2>
-              <button className="btn btn-ghost" onClick={() => setSelectedBar(null)}>
+              <button type="button" className="btn btn-ghost" onClick={() => setSelectedBar(null)}>
                 Close
               </button>
             </header>

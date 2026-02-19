@@ -187,10 +187,10 @@ export const UsernamePicker: React.FC<UsernamePickerProps> = ({
               <div className="suggestions-list">
                 {suggestions.map((suggestion) => (
                   <button
+                    type="button"
                     key={suggestion}
                     className="suggestion-chip"
                     onClick={() => handleSuggestionClick(suggestion)}
-                    type="button"
                   >
                     {suggestion}
                   </button>
@@ -210,6 +210,7 @@ export const UsernamePicker: React.FC<UsernamePickerProps> = ({
 
           {/* Action Button */}
           <button
+            type="button"
             onClick={handleSave}
             disabled={!username || !!validationError || isAvailable !== true || isSaving}
             className="btn btn-primary continue-button"

@@ -117,6 +117,7 @@ export const SignInButton: React.FC<SignInButtonProps> = ({
     return (
       <>
         <button
+          type="button"
           onClick={handleSignIn}
           disabled={isSigningIn}
           className={`btn btn-primary sign-in-button ${variant}`}
@@ -143,6 +144,7 @@ export const SignInButton: React.FC<SignInButtonProps> = ({
   return (
     <>
       <button
+        type="button"
         ref={triggerRef}
         className="user-avatar-button"
         onClick={() => setShowMenu(!showMenu)}
@@ -179,17 +181,17 @@ export const SignInButton: React.FC<SignInButtonProps> = ({
           </div>
 
           <div className="user-menu-items">
-            <button className="user-menu-item" onClick={handleAvatarClick}>
+            <button type="button" className="user-menu-item" onClick={handleAvatarClick}>
               <Pencil size={18} />
               Change Avatar
             </button>
 
-            <button className="user-menu-item" onClick={handleWalletAction}>
+            <button type="button" className="user-menu-item" onClick={handleWalletAction}>
               <Wallet size={18} />
               {user?.walletAddress ? 'Disconnect Wallet' : 'Connect Wallet'}
             </button>
 
-            <button className="user-menu-item sign-out-item" onClick={handleSignOut}>
+            <button type="button" className="user-menu-item sign-out-item" onClick={handleSignOut}>
               <LogOut size={18} />
               Sign Out
             </button>

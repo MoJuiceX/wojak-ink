@@ -85,7 +85,7 @@ function GatedEntry({
             {'>'} Sign in to access this channel
           </p>
           <SignInButton mode="modal">
-            <button className="gc-terminal-entry-btn">
+            <button type="button" className="gc-terminal-entry-btn">
               [ SIGN IN ]
             </button>
           </SignInButton>
@@ -143,6 +143,7 @@ function GatedEntry({
             {roomConfig.minNfts >= 42 ? 'Welcome to the 1% club!' : 'Welcome, holder!'}
           </p>
           <button
+            type="button"
             className="gc-terminal-entry-btn gc-terminal-entry-btn--enter"
             onClick={onEnter}
             disabled={isLoading}
@@ -262,6 +263,7 @@ function Message({
 
             return (
               <button
+                type="button"
                 key={emoji}
                 className={`gc-action-btn gc-reaction-btn ${userReacted ? 'user-reacted' : ''} ${hasReactions ? 'has-reactions' : ''}`}
                 onClick={(e) => handleReactionClick(emoji, e)}
@@ -273,6 +275,7 @@ function Message({
             );
           })}
           <button
+            type="button"
             className="gc-action-btn gc-reply-btn"
             onClick={(e) => { e.stopPropagation(); onReply(message); }}
             title="Reply"
@@ -284,6 +287,7 @@ function Message({
 
         {isAdmin && (
           <button
+            type="button"
             className="gc-admin-delete"
             onClick={(e) => { e.stopPropagation(); onDelete(message.id); }}
             title="Delete"
@@ -484,7 +488,7 @@ function ChatInterface({ chatToken, userName, userAvatar, roomConfig }: ChatInte
               {chatError && (
                 <span className="text-secondary text-xs">{chatError}</span>
               )}
-              <button className="gc-reconnect-btn" onClick={reconnect} aria-label="Reconnect">
+              <button type="button" className="gc-reconnect-btn" onClick={reconnect} aria-label="Reconnect">
                 Retry
               </button>
             </>
@@ -566,6 +570,7 @@ function ChatInterface({ chatToken, userName, userAvatar, roomConfig }: ChatInte
                 <div className="gc-input-reply-text">{replyingTo.text}</div>
               </div>
               <button
+                type="button"
                 className="gc-input-reply-close"
                 onClick={() => setReplyingTo(null)}
                 aria-label="Cancel reply"
@@ -812,6 +817,7 @@ export default function ChatRoom({
                       : error}
                     {!isRateLimited && (
                       <button
+                        type="button"
                         className="gc-error-retry"
                         onClick={() => setError(null)}
                       >

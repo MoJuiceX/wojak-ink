@@ -80,7 +80,7 @@ export function AchievementCard({ achievement, progress, onClaim }: AchievementC
       </div>
 
       {isCompleted && !isClaimed && onClaim && (
-        <button className="claim-button" onClick={onClaim}>
+        <button type="button" className="claim-button" onClick={onClaim}>
           Claim
         </button>
       )}

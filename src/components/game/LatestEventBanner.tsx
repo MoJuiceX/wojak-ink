@@ -62,6 +62,7 @@ export function LatestEventBanner({ did }: LatestEventBannerProps) {
         View all
       </Link>
       <button
+        type="button"
         onClick={handleDismiss}
         className="btn btn-ghost"
         style={{ padding: 2, minWidth: 'auto' }}

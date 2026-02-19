@@ -64,6 +64,7 @@ export function BurnButton({
   return (
     <>
       <button
+        type="button"
         className="btn btn-ghost text-sm text-error"
         onClick={() => { setShowConfirm(true); setError(null); }}
       >

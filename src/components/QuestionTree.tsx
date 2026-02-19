@@ -150,7 +150,7 @@ const QuestionTree: React.FC<QuestionTreeProps> = ({ onNftClick }) => {
   if (selectedQuestion) {
     return (
       <div className="qt-answer-view">
-        <button className="qt-back-btn" onClick={handleBack}>
+        <button type="button" className="qt-back-btn" onClick={handleBack}>
           ← Back to questions
         </button>
 
@@ -212,6 +212,7 @@ const QuestionTree: React.FC<QuestionTreeProps> = ({ onNftClick }) => {
         <div className="qt-categories">
           {data.categories.map(cat => (
             <button
+              type="button"
               key={cat.id}
               className={`qt-category ${selectedCategory === cat.id ? 'active' : ''}`}
               onClick={() => setSelectedCategory(
@@ -240,6 +241,7 @@ const QuestionTree: React.FC<QuestionTreeProps> = ({ onNftClick }) => {
         ) : (
           filteredQuestions.map(q => (
             <button
+              type="button"
               key={q.id}
               className="qt-question-btn"
               onClick={() => handleQuestionClick(q)}

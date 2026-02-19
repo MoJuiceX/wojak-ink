@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 
 export function GallerySkeleton() {
   return (
-    <div className="min-h-screen p-4" style={{ background: 'var(--color-bg, #0a0a0a)' }}>
+    <div className="min-h-screen p-4" style={{ background: 'var(--color-bg, #0a0a0a)' }} role="status" aria-label="Loading gallery">
       {/* Character Type Grid Skeleton */}
       <div className="mb-6">
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
@@ -124,6 +124,8 @@ export function PageSkeleton() {
         {/* Loading spinner */}
         <motion.div
           className="w-16 h-16 mx-auto mb-4 rounded-full"
+          role="status"
+          aria-label="Loading"
           style={{
             border: '3px solid var(--color-primary-20)',
             borderTopColor: '#F97316',

@@ -17,6 +17,8 @@ export const MediaCardSkeleton: React.FC<MediaCardSkeletonProps> = ({
 }) => (
   <motion.div
     className="media-card-skeleton"
+    role="status"
+    aria-label="Loading media"
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
     transition={{ delay }}

@@ -62,6 +62,9 @@ export function BattleNftPickerModal({ isOpen, onClose, onQueue, nfts, loading }
         >
           <motion.div
             className="modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="battle-picker-title"
             style={{ width: '100%', maxWidth: '560px', display: 'flex', flexDirection: 'column' }}
             initial={{ scale: 0.9, y: 20, opacity: 0 }}
             animate={{ scale: 1, y: 0, opacity: 1 }}
@@ -72,10 +75,11 @@ export function BattleNftPickerModal({ isOpen, onClose, onQueue, nfts, loading }
             {/* Header */}
             <div className="flex items-center justify-between p-5" style={{ borderBottom: '1px solid var(--color-border)' }}>
               <div>
-                <h2 className="text-lg font-bold">Select a Wojak for Battle</h2>
+                <h2 className="text-lg font-bold" id="battle-picker-title">Select a Wojak for Battle</h2>
                 <p className="text-secondary text-sm">Choose your champion</p>
               </div>
               <button
+                type="button"
                 className="btn btn-ghost p-2"
                 onClick={handleClose}
                 style={{ borderRadius: '50%', width: '36px', height: '36px' }}
@@ -197,10 +201,11 @@ export function BattleNftPickerModal({ isOpen, onClose, onQueue, nfts, loading }
                   <div className="text-sm text-center text-error">{error}</div>
                 )}
                 <div className="flex gap-3">
-                  <button className="btn btn-secondary flex-1" onClick={handleClose} disabled={queueing}>
+                  <button type="button" className="btn btn-secondary flex-1" onClick={handleClose} disabled={queueing}>
                     Cancel
                   </button>
                   <button
+                    type="button"
                     className="btn btn-primary flex-1"
                     disabled={!selectedId || queueing}
                     onClick={handleConfirm}

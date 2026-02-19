@@ -232,7 +232,7 @@ export default function BootSequence({
 
       {/* Skip Intro Button - always visible, subtle at bottom */}
       {onSkip && !isFading && (
-        <button className="boot-skip-button" onClick={handleSkip}>
+        <button type="button" className="boot-skip-button" onClick={handleSkip}>
           Skip Intro <span className="boot-skip-icon">››</span>
         </button>
       )}

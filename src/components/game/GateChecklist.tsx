@@ -213,7 +213,7 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, o
                   {step.label}
                 </span>
                 {isCurrent && i === 0 && (
-                  <button className="btn btn-primary mt-2 text-sm" style={{ padding: '6px 16px' }} onClick={connect}>
+                  <button type="button" className="btn btn-primary mt-2 text-sm" style={{ padding: '6px 16px' }} onClick={connect}>
                     Connect Wallet
                   </button>
                 )}
@@ -230,6 +230,7 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, o
                           Could not detect DID automatically.
                         </span>
                         <button
+                          type="button"
                           className="btn btn-ghost text-sm"
                           style={{ padding: '4px 12px', alignSelf: 'flex-start' }}
                           onClick={() => setShowManualDid(true)}
@@ -254,6 +255,7 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, o
                         />
                         {didError && <span className="text-sm text-error">{didError}</span>}
                         <button
+                          type="button"
                           className="btn btn-primary text-sm"
                           style={{ padding: '6px 16px' }}
                           onClick={handleLinkDid}
@@ -291,6 +293,7 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, o
                             : 'No Wojak Farmers Plot found in your DID yet.'}
                         </span>
                         <button
+                          type="button"
                           className="btn btn-primary text-sm"
                           style={{ padding: '6px 16px' }}
                           onClick={handleRetry}
@@ -365,6 +368,7 @@ export function GateChecklist({ walletConnected, hasDid, hasPhase1, onLinkDid, o
                         />
                         {nftError && <span className="text-sm text-error">{nftError}</span>}
                         <button
+                          type="button"
                           className="btn btn-primary text-sm"
                           style={{ padding: '6px 16px' }}
                           onClick={handleVerifyNft}

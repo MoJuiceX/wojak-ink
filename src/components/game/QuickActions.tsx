@@ -58,6 +58,7 @@ export function QuickActions({ votesRemaining, isVerified, hasActiveBattle }: Qu
       </Link>
 
       <button
+        type="button"
         className="btn btn-secondary flex-1 flex flex-col items-center gap-1"
         style={{
           padding: '14px 0',

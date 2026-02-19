@@ -36,6 +36,7 @@ export function PowerLevelDisplay({ level, rank, credits, voteStreak, breakdown 
       <div className="flex items-center gap-2">
         <h2 className="font-bold" style={{ fontSize: 36 }}>{level.toLocaleString()}</h2>
         <button
+          type="button"
           onClick={() => setShowExplainer(!showExplainer)}
           className="btn btn-ghost"
           style={{ padding: 4, opacity: 0.6 }}
@@ -69,6 +70,7 @@ export function PowerLevelDisplay({ level, rank, credits, voteStreak, breakdown 
       {breakdown && (
         <>
           <button
+            type="button"
             onClick={() => setShowBreakdown(!showBreakdown)}
             className="btn btn-ghost flex items-center gap-1"
             style={{ fontSize: 13 }}

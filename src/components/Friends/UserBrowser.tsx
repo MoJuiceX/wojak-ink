@@ -109,6 +109,7 @@ export function UserBrowser() {
                   </Link>
 
                   <button
+                    type="button"
                     className={`add-friend-button ${isAlreadyFriend ? 'added' : ''}`}
                     onClick={() => !isAlreadyFriend && handleAddFriend(user.id)}
                     disabled={isAlreadyFriend}
@@ -132,6 +133,7 @@ export function UserBrowser() {
 
           {hasMore && (
             <button
+              type="button"
               className="load-more-button"
               onClick={loadMore}
               disabled={isLoading}

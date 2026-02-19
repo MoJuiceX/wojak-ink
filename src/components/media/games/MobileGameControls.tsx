@@ -27,6 +27,7 @@ export function MobileGameControls({ onClose }: MobileGameControlsProps) {
     >
       {/* Close button */}
       <button
+        type="button"
         className="mobile-game-btn mobile-game-btn-close"
         onTouchEnd={(e) => {
           e.preventDefault();

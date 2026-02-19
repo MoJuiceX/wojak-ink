@@ -352,6 +352,7 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
       {/* 1. Collection Stats Section */}
       <div className="ask-section">
         <button
+          type="button"
           className={`section-header ${expandedSection === 'stats' ? 'expanded' : ''}`}
           onClick={() => toggleSection('stats')}
         >
@@ -412,6 +413,7 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
       {/* 2. Learn Provenance Section */}
       <div className="ask-section">
         <button
+          type="button"
           className={`section-header ${expandedSection === 'provenance' ? 'expanded' : ''}`}
           onClick={() => toggleSection('provenance')}
         >
@@ -453,6 +455,7 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
       {/* 3. Top 10 Most Valuable Traits Section */}
       <div className="ask-section">
         <button
+          type="button"
           className={`section-header ${expandedSection === 'topTraits' ? 'expanded' : ''}`}
           onClick={() => toggleSection('topTraits')}
         >
@@ -503,6 +506,7 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
       {/* 4. Top 10 Most Valuable Sales Section */}
       <div className="ask-section">
         <button
+          type="button"
           className={`section-header ${expandedSection === 'topSales' ? 'expanded' : ''}`}
           onClick={() => toggleSection('topSales')}
         >
@@ -559,6 +563,7 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
       {/* 5. Rarest Finds Section */}
       <div className="ask-section">
         <button
+          type="button"
           className={`section-header ${expandedSection === 'rarest' ? 'expanded' : ''}`}
           onClick={() => toggleSection('rarest')}
         >
@@ -602,6 +607,7 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
       {/* 6. High Provenance Traits Section */}
       <div className="ask-section">
         <button
+          type="button"
           className={`section-header ${expandedSection === 'stier' ? 'expanded' : ''}`}
           onClick={() => toggleSection('stier')}
         >
@@ -629,6 +635,7 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
                   return (
                     <div key={category} className="hp-category">
                       <button
+                        type="button"
                         className={`hp-category-header ${expandedHpCategory === category ? 'expanded' : ''}`}
                         onClick={() => toggleHpCategory(category)}
                       >
@@ -657,6 +664,7 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
                                   {nfts.length > 0 && (
                                     <div className="hp-carousel">
                                       <button
+                                        type="button"
                                         className="hp-carousel-btn prev"
                                         onClick={(e) => {
                                           e.stopPropagation();
@@ -705,6 +713,7 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
                                       </div>
 
                                       <button
+                                        type="button"
                                         className="hp-carousel-btn next"
                                         onClick={(e) => {
                                           e.stopPropagation();
@@ -742,6 +751,7 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
       {/* 7. Combo Badges Section */}
       <div className="ask-section">
         <button
+          type="button"
           className={`section-header ${expandedSection === 'comboBadges' ? 'expanded' : ''}`}
           onClick={() => toggleSection('comboBadges')}
         >
@@ -768,6 +778,7 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
                   return (
                     <div key={cat.id} className="combo-category">
                       <button
+                        type="button"
                         className={`combo-category-header ${expandedComboCategory === cat.id ? 'expanded' : ''}`}
                         onClick={() => toggleComboCategory(cat.id)}
                       >
@@ -797,6 +808,7 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
                                   {nfts.length > 0 && (
                                     <div className="hp-carousel">
                                       <button
+                                        type="button"
                                         className="hp-carousel-btn prev"
                                         onClick={(e) => {
                                           e.stopPropagation();
@@ -845,6 +857,7 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
                                       </div>
 
                                       <button
+                                        type="button"
                                         className="hp-carousel-btn next"
                                         onClick={(e) => {
                                           e.stopPropagation();

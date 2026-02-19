@@ -91,6 +91,7 @@ export function PatternTester() {
       {/* Mode Toggle */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
         <button
+          type="button"
           onClick={() => setMode('patterns')}
           style={{
             flex: 1,
@@ -106,6 +107,7 @@ export function PatternTester() {
           Direct Patterns
         </button>
         <button
+          type="button"
           onClick={() => setMode('events')}
           style={{
             flex: 1,
@@ -161,6 +163,7 @@ export function PatternTester() {
                     const isActive = activePattern === name;
                     return (
                       <button
+                        type="button"
                         key={name}
                         onClick={() => setPattern(name)}
                         style={{
@@ -204,6 +207,7 @@ export function PatternTester() {
               const mappedPattern = DEFAULT_EVENT_MAPPINGS[event];
               return (
                 <button
+                  type="button"
                   key={event}
                   onClick={() => triggerEvent(event)}
                   style={{

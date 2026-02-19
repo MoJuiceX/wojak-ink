@@ -196,6 +196,7 @@ export function FloatingVideoPlayer() {
                   onClick={handlePlayPause}
                 >
                   <button
+                    type="button"
                     className="flex flex-col items-center gap-2 transition-transform hover:scale-110"
                     aria-label={!hasStarted ? 'Play video' : 'Pause'}
                   >
@@ -228,8 +229,10 @@ export function FloatingVideoPlayer() {
           {isMinimized && (
             <div className="flex items-center gap-2 px-2">
               <button
+                type="button"
                 className="p-1.5 rounded-lg transition-colors text-primary"
                 onClick={handlePlayPause}
+                aria-label={isPlaying ? 'Pause' : 'Play'}
               >
                 {isPlaying ? <Pause size={18} /> : <Play size={18} />}
               </button>
@@ -266,12 +269,14 @@ export function FloatingVideoPlayer() {
             <div className="flex items-center justify-between px-2">
               <div className="flex items-center gap-1">
                 <button
+                  type="button"
                   className="p-1.5 rounded-lg transition-colors text-secondary"
                   aria-label="Previous"
                 >
                   <SkipBack size={16} />
                 </button>
                 <button
+                  type="button"
                   className="p-2 rounded-lg transition-colors"
                   style={{
                     background: 'var(--color-primary)',
@@ -283,6 +288,7 @@ export function FloatingVideoPlayer() {
                   {isPlaying ? <Pause size={18} /> : <Play size={18} />}
                 </button>
                 <button
+                  type="button"
                   className="p-1.5 rounded-lg transition-colors text-secondary"
                   aria-label="Next"
                 >
@@ -294,6 +300,7 @@ export function FloatingVideoPlayer() {
                 {/* Volume */}
                 <div className="flex items-center gap-1">
                   <button
+                    type="button"
                     className="p-1.5 rounded-lg transition-colors text-secondary"
                     onClick={() => setVideoVolume(isMuted ? 0.8 : 0)}
                     aria-label={isMuted ? 'Unmute' : 'Mute'}
@@ -321,6 +328,7 @@ export function FloatingVideoPlayer() {
 
                 {/* PiP button */}
                 <button
+                  type="button"
                   className="p-1.5 rounded-lg transition-colors text-secondary"
                   onClick={togglePictureInPicture}
                   aria-label="Picture in Picture"
@@ -330,6 +338,7 @@ export function FloatingVideoPlayer() {
 
                 {/* Minimize button */}
                 <button
+                  type="button"
                   className="p-1.5 rounded-lg transition-colors text-secondary"
                   onClick={toggleVideoMinimize}
                   aria-label={isMinimized ? 'Expand' : 'Minimize'}
@@ -339,6 +348,7 @@ export function FloatingVideoPlayer() {
 
                 {/* Close button */}
                 <button
+                  type="button"
                   className="p-1.5 rounded-lg transition-colors text-secondary"
                   onClick={closeVideoPlayer}
                   aria-label="Close"
@@ -353,6 +363,7 @@ export function FloatingVideoPlayer() {
           {isMinimized && (
             <div className="flex items-center justify-end gap-1 px-2">
               <button
+                type="button"
                 className="p-1.5 rounded-lg transition-colors text-secondary"
                 onClick={toggleVideoMinimize}
                 aria-label="Expand"
@@ -360,6 +371,7 @@ export function FloatingVideoPlayer() {
                 <Maximize size={14} />
               </button>
               <button
+                type="button"
                 className="p-1.5 rounded-lg transition-colors text-secondary"
                 onClick={closeVideoPlayer}
                 aria-label="Close"

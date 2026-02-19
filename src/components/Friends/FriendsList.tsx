@@ -76,6 +76,7 @@ export function FriendsList() {
 
             <div className="friend-actions">
               <button
+                type="button"
                 className="action-button compare-stats"
                 onClick={() => handleCompare(friend)}
                 title="Compare stats"
@@ -92,6 +93,7 @@ export function FriendsList() {
               </Link>
 
               <button
+                type="button"
                 className="action-button remove-friend"
                 onClick={() => removeFriend(friend.id)}
                 title="Remove friend"

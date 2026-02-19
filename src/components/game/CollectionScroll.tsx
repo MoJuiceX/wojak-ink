@@ -118,19 +118,19 @@ function NftDetailModal({ nft, onClose, onBurned }: { nft: CollectionNft; onClos
                 maxLength={30}
                 disabled={nameSaving}
               />
-              <button className="btn btn-ghost" style={{ padding: 4, minWidth: 'auto' }} onClick={saveName} disabled={nameSaving}>
+              <button type="button" className="btn btn-ghost" style={{ padding: 4, minWidth: 'auto' }} onClick={saveName} disabled={nameSaving}>
                 <Check size={16} />
               </button>
             </div>
           ) : (
             <div className="flex items-center gap-2">
               <h3 className="font-bold" style={{ fontSize: 16 }}>{displayName}</h3>
-              <button className="btn btn-ghost" style={{ padding: 2, minWidth: 'auto' }} onClick={startEditing} aria-label="Rename">
+              <button type="button" className="btn btn-ghost" style={{ padding: 2, minWidth: 'auto' }} onClick={startEditing} aria-label="Rename">
                 <Pencil size={14} className="text-muted" />
               </button>
             </div>
           )}
-          <button className="btn btn-ghost" style={{ padding: 4, minWidth: 'auto' }} onClick={onClose} aria-label="Close">
+          <button type="button" className="btn btn-ghost" style={{ padding: 4, minWidth: 'auto' }} onClick={onClose} aria-label="Close">
             <X size={18} />
           </button>
         </div>
@@ -190,6 +190,7 @@ function NftDetailModal({ nft, onClose, onBurned }: { nft: CollectionNft; onClos
             />
           ) : (
             <button
+              type="button"
               className="btn btn-ghost text-sm text-error"
               disabled={loadingCoinId}
               onClick={fetchCoinId}
@@ -249,7 +250,7 @@ export function CollectionScroll({ did }: CollectionScrollProps) {
         <div className="flex items-center justify-center" style={{ height: 96 }}>
           <div className="flex flex-col items-center gap-2">
             <span className="text-muted" style={{ fontSize: 13 }}>Couldn't load collection</span>
-            <button className="btn btn-secondary" style={{ fontSize: 12, padding: '6px 12px' }} onClick={() => { setError(false); setRefreshKey(k => k + 1); }}>
+            <button type="button" className="btn btn-secondary" style={{ fontSize: 12, padding: '6px 12px' }} onClick={() => { setError(false); setRefreshKey(k => k + 1); }}>
               Retry
             </button>
           </div>
@@ -304,6 +305,7 @@ export function CollectionScroll({ did }: CollectionScrollProps) {
       >
         {nfts.map(nft => (
           <button
+            type="button"
             key={nft.nftId}
             className="flex flex-col items-center gap-1"
             style={{ flexShrink: 0, scrollSnapAlign: 'start', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}

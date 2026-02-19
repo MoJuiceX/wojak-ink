@@ -121,6 +121,7 @@ export class ErrorBoundary extends Component<Props, State> {
             {/* Action Buttons */}
             <div className="flex gap-3">
               <button
+                type="button"
                 onClick={this.handleRetry}
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all"
                 style={{
@@ -132,6 +133,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 Try Again
               </button>
               <button
+                type="button"
                 onClick={this.handleGoHome}
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all text-primary"
                 style={{

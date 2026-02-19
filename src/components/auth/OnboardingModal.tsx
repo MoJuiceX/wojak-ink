@@ -180,6 +180,7 @@ export default function OnboardingModal({ onSkip, onComplete }: OnboardingModalP
         >
           {/* Close button */}
           <button
+            type="button"
             onClick={onSkip}
             className="absolute top-4 right-4 p-1 rounded-full transition-colors hover:bg-white/10 text-tertiary"
             aria-label="Skip onboarding"

@@ -41,7 +41,7 @@ export function AchievementUnlockPopup({
           aria-modal="true"
           aria-label="Achievement unlocked"
         >
-          <button className="popup-close" onClick={onClose} aria-label="Close">
+          <button type="button" className="popup-close" onClick={onClose} aria-label="Close">
             <X size={20} />
           </button>
 

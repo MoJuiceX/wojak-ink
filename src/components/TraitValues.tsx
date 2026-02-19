@@ -242,7 +242,7 @@ const TraitValues: React.FC<TraitValuesProps> = ({ onTraitClick }) => {
     return (
       <div className="trait-values-error">
         <p>{error}</p>
-        <button onClick={loadData} className="btn btn-primary retry-btn">Retry</button>
+        <button type="button" onClick={loadData} className="btn btn-primary retry-btn">Retry</button>
       </div>
     );
   }
@@ -341,6 +341,7 @@ const TraitValues: React.FC<TraitValuesProps> = ({ onTraitClick }) => {
                               <h4>Sales ({selectedTraitSales.length})</h4>
                               <div className="sales-sort-toggles">
                                 <button
+                                  type="button"
                                   className={`sort-toggle ${salesSortMode.startsWith('price') ? 'active' : ''}`}
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -350,6 +351,7 @@ const TraitValues: React.FC<TraitValuesProps> = ({ onTraitClick }) => {
                                   💰{salesSortMode === 'price_desc' ? '↓' : '↑'}
                                 </button>
                                 <button
+                                  type="button"
                                   className={`sort-toggle ${salesSortMode.startsWith('rarity') ? 'active' : ''}`}
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -359,6 +361,7 @@ const TraitValues: React.FC<TraitValuesProps> = ({ onTraitClick }) => {
                                   👑{salesSortMode === 'rarity_desc' ? '↓' : '↑'}
                                 </button>
                                 <button
+                                  type="button"
                                   className={`sort-toggle ${salesSortMode.startsWith('time') ? 'active' : ''}`}
                                   onClick={(e) => {
                                     e.stopPropagation();

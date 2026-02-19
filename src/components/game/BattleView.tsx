@@ -149,12 +149,14 @@ export function BattleView() {
       {/* Tab toggle */}
       <div className="flex gap-2">
         <button
+          type="button"
           className={`btn ${tab === 'active' ? 'btn-primary' : 'btn-secondary'}`}
           onClick={() => setTab('active')}
         >
           Active
         </button>
         <button
+          type="button"
           className={`btn ${tab === 'history' ? 'btn-primary' : 'btn-secondary'}`}
           onClick={() => setTab('history')}
         >
@@ -175,6 +177,7 @@ export function BattleView() {
                   <div className="flex items-center gap-2 shrink-0">
                     <span className="text-muted text-xs">Waiting for opponent...</span>
                     <button
+                      type="button"
                       className="btn btn-ghost text-xs px-2 py-1 text-error"
                       onClick={() => handleCancelQueue(nft.nftId)}
                       disabled={cancellingNft === nft.nftId}
@@ -252,6 +255,7 @@ export function BattleView() {
               ))}
               {historyHasMore && (
                 <button
+                  type="button"
                   className="btn btn-secondary"
                   onClick={handleLoadMoreHistory}
                   disabled={historyLoadingMore}

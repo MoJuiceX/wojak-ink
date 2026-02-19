@@ -53,7 +53,7 @@ export function LeaderboardOverlay({
                 <Trophy size={20} style={{ color: accentColor }} />
                 <span>Leaderboard</span>
               </div>
-              <button className="leaderboard-overlay-close" onClick={onClose}>
+              <button type="button" className="leaderboard-overlay-close" onClick={onClose} aria-label="Close leaderboard">
                 <X size={20} />
               </button>
             </div>

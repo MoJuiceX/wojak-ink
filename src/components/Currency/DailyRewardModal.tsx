@@ -73,7 +73,7 @@ export const DailyRewardModal: React.FC<DailyRewardModalProps> = ({ isOpen, onCl
         <div className="daily-reward-content">
           <div className="daily-header">
             <h2>Daily Rewards</h2>
-            <button className="close-button" onClick={onClose} aria-label="Close">
+            <button type="button" className="close-button" onClick={onClose} aria-label="Close">
               ✕
             </button>
           </div>
@@ -135,6 +135,7 @@ export const DailyRewardModal: React.FC<DailyRewardModalProps> = ({ isOpen, onCl
           <div className="daily-actions">
             {status.canClaim && !claimedReward ? (
               <button
+                type="button"
                 onClick={handleClaim}
                 disabled={isClaiming}
                 className="btn btn-primary claim-button"

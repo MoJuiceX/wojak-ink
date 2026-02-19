@@ -195,7 +195,7 @@ export default function StartupSequence({ onComplete }: StartupSequenceProps) {
         <>
           {/* Skip button for logo/loading stages */}
           {!isSkipping && stage !== 'complete' && (
-            <button className="startup-skip-button" onClick={handleSkipIntro}>
+            <button type="button" className="startup-skip-button" onClick={handleSkipIntro}>
               Skip Intro <span className="startup-skip-icon">››</span>
             </button>
           )}
