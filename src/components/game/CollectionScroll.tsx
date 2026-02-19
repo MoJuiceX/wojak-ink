@@ -134,7 +134,7 @@ function NftDetailModal({ nft, onClose, onBurned }: { nft: CollectionNft; onClos
             <X size={18} />
           </button>
         </div>
-        {nameError && <span className="text-sm" style={{ color: 'var(--color-error)' }}>{nameError}</span>}
+        {nameError && <span className="text-sm text-error">{nameError}</span>}
 
         <img
           src={nft.imageUri || `https://assets.mintgarden.io/thumbnails/medium/${nft.nftId}.png`}
@@ -156,11 +156,11 @@ function NftDetailModal({ nft, onClose, onBurned }: { nft: CollectionNft; onClos
           </div>
           <div className="flex justify-between">
             <span className="text-secondary">Likes</span>
-            <span style={{ color: 'var(--color-success)' }}>{nft.likes}</span>
+            <span className="text-success">{nft.likes}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-secondary">Dislikes</span>
-            <span style={{ color: 'var(--color-error)' }}>{nft.dislikes}</span>
+            <span className="text-error">{nft.dislikes}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-secondary">Net Score</span>
@@ -190,8 +190,7 @@ function NftDetailModal({ nft, onClose, onBurned }: { nft: CollectionNft; onClos
             />
           ) : (
             <button
-              className="btn btn-ghost text-sm"
-              style={{ color: 'var(--color-error)' }}
+              className="btn btn-ghost text-sm text-error"
               disabled={loadingCoinId}
               onClick={fetchCoinId}
             >
@@ -200,7 +199,7 @@ function NftDetailModal({ nft, onClose, onBurned }: { nft: CollectionNft; onClos
           )}
         </div>
         {coinIdError && (
-          <span className="text-sm" style={{ color: 'var(--color-error)' }}>{coinIdError}</span>
+          <span className="text-sm text-error">{coinIdError}</span>
         )}
       </div>
     </div>
