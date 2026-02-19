@@ -70,37 +70,24 @@ function StatCard({
 
   return (
     <motion.div
-      className="p-1.5 sm:p-3 rounded-lg sm:rounded-xl text-center flex flex-col items-center justify-center"
-      style={{
-        background: 'var(--color-surface)',
-        border: '1px solid var(--color-border)',
-      }}
+      className="card-static p-1.5 sm:p-3 rounded-lg sm:rounded-xl text-center flex flex-col items-center justify-center"
       variants={prefersReducedMotion ? undefined : statsCardVariants}
       whileHover="hover"
     >
-      <p
-        className="text-xs sm:text-base font-bold whitespace-nowrap"
-        style={{ color: 'var(--color-primary)' }}
-      >
+      <p className="text-xs sm:text-base font-bold whitespace-nowrap text-accent">
         {value}
         {subValue && (
-          <span
-            className="text-[10px] sm:text-xs font-medium ml-0.5"
-            style={{ color: 'var(--color-text-secondary)' }}
-          >
+          <span className="text-[10px] sm:text-xs font-medium ml-0.5 text-secondary">
             {subValue}
           </span>
         )}
         {usdValue && (
-          <span
-            className="text-[10px] sm:text-xs font-medium ml-0.5 sm:ml-1 hidden sm:inline"
-            style={{ color: 'var(--color-text-muted)' }}
-          >
+          <span className="text-[10px] sm:text-xs font-medium ml-0.5 sm:ml-1 hidden sm:inline text-muted">
             ({usdValue})
           </span>
         )}
       </p>
-      <p className="text-[10px] sm:text-xs" style={{ color: 'var(--color-text-muted)' }}>
+      <p className="text-[10px] sm:text-xs text-muted">
         {label}
       </p>
     </motion.div>
@@ -122,13 +109,7 @@ function ExpandableSection({
   const Icon = section.icon;
 
   return (
-    <div
-      className="rounded-xl overflow-hidden"
-      style={{
-        background: 'var(--color-surface)',
-        border: '1px solid var(--color-border)',
-      }}
-    >
+    <div className="card-static rounded-xl overflow-hidden">
       {/* Header */}
       <button
         className="w-full flex items-center justify-between p-3 sm:p-4 text-left transition-colors"
@@ -142,13 +123,9 @@ function ExpandableSection({
         <div className="flex items-center gap-2 sm:gap-3">
           <Icon
             size={16}
-            className="sm:w-[18px] sm:h-[18px]"
-            style={{ color: 'var(--color-primary)' }}
+            className="sm:w-[18px] sm:h-[18px] text-accent"
           />
-          <span
-            className="font-medium text-sm"
-            style={{ color: 'var(--color-text)' }}
-          >
+          <span className="font-medium text-sm text-primary">
             {section.title}
           </span>
         </div>
@@ -157,10 +134,7 @@ function ExpandableSection({
           animate={isExpanded ? 'expanded' : 'collapsed'}
           transition={{ duration: 0.2 }}
         >
-          <ChevronDown
-            size={18}
-            style={{ color: 'var(--color-text-muted)' }}
-          />
+          <ChevronDown size={18} className="text-muted" />
         </motion.div>
       </button>
 
@@ -195,62 +169,38 @@ function ProvenanceContent() {
   return (
     <div className="space-y-4 pt-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div
-          className="p-3 rounded-lg"
-          style={{ background: 'var(--color-elevated)' }}
-        >
-          <h4
-            className="text-sm font-bold mb-2"
-            style={{ color: 'var(--color-primary)' }}
-          >
+        <div className="card-elevated p-3 rounded-lg">
+          <h4 className="text-sm font-bold mb-2 text-accent">
             High Provenance
           </h4>
-          <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+          <p className="text-xs text-secondary">
             These aren't necessarily the rarest attributes, but they're the most valuable. The community has spoken — Crown, Military Beret, Wizard Hat, Fedora, and Neckbeard command premium prices because of their cultural significance and meme status.
           </p>
         </div>
 
-        <div
-          className="p-3 rounded-lg"
-          style={{ background: 'var(--color-elevated)' }}
-        >
-          <h4
-            className="text-sm font-bold mb-2"
-            style={{ color: 'var(--color-primary)' }}
-          >
+        <div className="card-elevated p-3 rounded-lg">
+          <h4 className="text-sm font-bold mb-2 text-accent">
             Rarest Attributes
           </h4>
-          <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+          <p className="text-xs text-secondary">
             The scarcest attributes in the collection. Piccolo Turban, Piccolo Uniform, Fake It Mask, El Presidente, and Goose Suit are among the rarest pieces you can find. These dominate the top rankings.
           </p>
         </div>
 
-        <div
-          className="p-3 rounded-lg"
-          style={{ background: 'var(--color-elevated)' }}
-        >
-          <h4
-            className="text-sm font-bold mb-2"
-            style={{ color: 'var(--color-primary)' }}
-          >
+        <div className="card-elevated p-3 rounded-lg">
+          <h4 className="text-sm font-bold mb-2 text-accent">
             Bases
           </h4>
-          <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+          <p className="text-xs text-secondary">
             Monkey Zoo represents the OG ape heritage from the early grove — primal energy meets Wojak culture. Papa Tang is the founder energy, the king of the grove himself, inspired by Tales of the Grove and WMC creator lore.
           </p>
         </div>
 
-        <div
-          className="p-3 rounded-lg"
-          style={{ background: 'var(--color-elevated)' }}
-        >
-          <h4
-            className="text-sm font-bold mb-2"
-            style={{ color: 'var(--color-primary)' }}
-          >
+        <div className="card-elevated p-3 rounded-lg">
+          <h4 className="text-sm font-bold mb-2 text-accent">
             Named Combos
           </h4>
-          <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+          <p className="text-xs text-secondary">
             The artist crafted these matching sets with intention. Ronin Helmet pairs with Ronin clothes and Ronin Dojo background. Wizard Hat matches Wizard Drip and Wizard Glasses. These aren't random — they're designed to work together as complete transformations.
           </p>
         </div>
@@ -269,7 +219,7 @@ function TopAttributesContent({ attributes }: { attributes: AttributeStats[] }) 
   if (topTen.length === 0) {
     return (
       <div className="pt-4 text-center">
-        <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+        <p className="text-sm text-muted">
           No trade data available yet.
         </p>
       </div>
@@ -278,15 +228,14 @@ function TopAttributesContent({ attributes }: { attributes: AttributeStats[] }) 
 
   return (
     <div className="pt-4">
-      <p className="text-xs mb-3" style={{ color: 'var(--color-text-muted)' }}>
+      <p className="text-xs mb-3 text-muted">
         Attributes with highest average sale prices
       </p>
       <div className="space-y-2">
         {topTen.map((attr, index) => (
           <div
             key={`${attr.category}-${attr.value}`}
-            className="flex items-center justify-between p-2 rounded-lg"
-            style={{ background: 'var(--color-elevated)' }}
+            className="card-elevated flex items-center justify-between p-2 rounded-lg"
           >
             <div className="flex items-center gap-3">
               <span
@@ -299,31 +248,19 @@ function TopAttributesContent({ attributes }: { attributes: AttributeStats[] }) 
                 {index + 1}
               </span>
               <div>
-                <p
-                  className="text-sm font-medium"
-                  style={{ color: 'var(--color-text)' }}
-                >
+                <p className="text-sm font-medium text-primary">
                   {attr.value}
                 </p>
-                <p
-                  className="text-xs"
-                  style={{ color: 'var(--color-text-muted)' }}
-                >
+                <p className="text-xs text-muted">
                   {attr.category} • {attr.totalSales} sales
                 </p>
               </div>
             </div>
             <div className="text-right">
-              <p
-                className="text-sm font-medium"
-                style={{ color: 'var(--color-primary)' }}
-              >
+              <p className="text-sm font-medium text-accent">
                 {attr.avgPrice.toFixed(2)} XCH
               </p>
-              <p
-                className="text-xs"
-                style={{ color: 'var(--color-text-muted)' }}
-              >
+              <p className="text-xs text-muted">
                 avg price
               </p>
             </div>
@@ -386,7 +323,7 @@ function TopSalesContent({ sales, isLoading }: { sales: NFTSale[]; isLoading?: b
             </div>
           ))}
         </div>
-        <p className="text-xs text-center mt-3" style={{ color: 'var(--color-text-muted)' }}>
+        <p className="text-xs text-center mt-3 text-muted">
           Loading sales data...
         </p>
       </div>
@@ -396,7 +333,7 @@ function TopSalesContent({ sales, isLoading }: { sales: NFTSale[]; isLoading?: b
   if (sales.length === 0) {
     return (
       <div className="py-6 text-center">
-        <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+        <p className="text-sm text-muted">
           No sales data available yet.
         </p>
       </div>
@@ -409,8 +346,7 @@ function TopSalesContent({ sales, isLoading }: { sales: NFTSale[]; isLoading?: b
         {sales.slice(0, 10).map((sale, index) => (
           <div
             key={`${sale.nft.id}-${index}`}
-            className="flex items-center gap-3 p-2 rounded-lg"
-            style={{ background: 'var(--color-elevated)' }}
+            className="card-elevated flex items-center gap-3 p-2 rounded-lg"
           >
             <span
               className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
@@ -433,30 +369,18 @@ function TopSalesContent({ sales, isLoading }: { sales: NFTSale[]; isLoading?: b
               />
             </div>
             <div className="flex-1 min-w-0">
-              <p
-                className="text-sm font-medium truncate"
-                style={{ color: 'var(--color-text)' }}
-              >
+              <p className="text-sm font-medium truncate text-primary">
                 {sale.nft.name}
               </p>
-              <p
-                className="text-xs"
-                style={{ color: 'var(--color-text-muted)' }}
-              >
+              <p className="text-xs text-muted">
                 {formatDate(sale.date)}
               </p>
             </div>
             <div className="text-right flex-shrink-0">
-              <p
-                className="text-sm font-bold"
-                style={{ color: 'var(--color-primary)' }}
-              >
+              <p className="text-sm font-bold text-accent">
                 {sale.price.toFixed(1)} XCH
               </p>
-              <p
-                className="text-xs"
-                style={{ color: 'var(--color-text-muted)' }}
-              >
+              <p className="text-xs text-muted">
                 ${sale.priceUSD.toFixed(0)}
               </p>
             </div>
@@ -596,7 +520,7 @@ function BadgeGalleryContent() {
   if (loading || !badgeSystem) {
     return (
       <div className="pt-4 text-center">
-        <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+        <p className="text-sm text-muted">
           Loading badge gallery...
         </p>
       </div>
@@ -606,12 +530,9 @@ function BadgeGalleryContent() {
   return (
     <div className="pt-4 space-y-3">
       {/* Summary */}
-      <div
-        className="p-3 rounded-lg text-center"
-        style={{ background: 'var(--color-elevated)' }}
-      >
-        <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-          <span className="font-bold" style={{ color: 'var(--color-primary)' }}>
+      <div className="card-elevated p-3 rounded-lg text-center">
+        <p className="text-xs text-secondary">
+          <span className="font-bold text-accent">
             {badgeSystem.nfts_with_badges.toLocaleString()}
           </span>
           {' '}NFTs with badges ({badgeSystem.coverage_percent}% of collection)
@@ -634,11 +555,7 @@ function BadgeGalleryContent() {
         return (
           <div
             key={badge.name}
-            className="rounded-lg overflow-hidden"
-            style={{
-              background: 'var(--color-elevated)',
-              border: '1px solid var(--color-border)',
-            }}
+            className="card-elevated rounded-lg overflow-hidden"
           >
             {/* Badge header */}
             <button
@@ -647,16 +564,10 @@ function BadgeGalleryContent() {
             >
               <div className="flex items-center gap-2">
                 <span className="text-base">{badge.emoji}</span>
-                <span
-                  className="font-medium text-sm"
-                  style={{ color: 'var(--color-text)' }}
-                >
+                <span className="font-medium text-sm text-primary">
                   {badge.name}
                 </span>
-                <span
-                  className="text-xs"
-                  style={{ color: 'var(--color-text-muted)' }}
-                >
+                <span className="text-xs text-muted">
                   ({badge.count})
                 </span>
               </div>
@@ -664,7 +575,7 @@ function BadgeGalleryContent() {
                 animate={{ rotate: isExpanded ? 180 : 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <ChevronDown size={16} style={{ color: 'var(--color-text-muted)' }} />
+                <ChevronDown size={16} className="text-muted" />
               </motion.div>
             </button>
 
@@ -683,10 +594,7 @@ function BadgeGalleryContent() {
                     style={{ borderTop: '1px solid var(--color-border)' }}
                   >
                     {/* Lore */}
-                    <p
-                      className="text-xs italic mt-2 mb-3"
-                      style={{ color: 'var(--color-text-muted)' }}
-                    >
+                    <p className="text-xs italic mt-2 mb-3 text-muted">
                       {definition?.lore || ''}
                     </p>
 
@@ -695,8 +603,7 @@ function BadgeGalleryContent() {
                       {sortedNfts.map((nft) => (
                         <div
                           key={nft.id}
-                          className="relative aspect-square rounded-lg overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-105 hover:z-10"
-                          style={{ background: 'var(--color-surface)' }}
+                          className="card-static relative aspect-square rounded-lg overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-105 hover:z-10"
                           title={`${names[nft.id] || `Wojak #${nft.id.padStart(4, '0')}`}`}
                           onClick={() => handleNftClick(nft.id)}
                         >
@@ -746,13 +653,7 @@ function BadgeGalleryContent() {
 
 function StatCardSkeleton() {
   return (
-    <div
-      className="p-3 rounded-xl animate-pulse"
-      style={{
-        background: 'var(--color-surface)',
-        border: '1px solid var(--color-border)',
-      }}
-    >
+    <div className="card-static p-3 rounded-xl animate-pulse">
       <div
         className="h-6 w-16 rounded mx-auto mb-2"
         style={{ background: 'var(--color-border)' }}
@@ -767,13 +668,7 @@ function StatCardSkeleton() {
 
 function SectionSkeleton() {
   return (
-    <div
-      className="rounded-xl overflow-hidden animate-pulse"
-      style={{
-        background: 'var(--color-surface)',
-        border: '1px solid var(--color-border)',
-      }}
-    >
+    <div className="card-static rounded-xl overflow-hidden animate-pulse">
       <div className="p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div
@@ -866,13 +761,7 @@ export function AskTab({
       exit="exit"
     >
       {/* Collection Statistics - Collapsible like other sections */}
-      <div
-        className="rounded-xl overflow-hidden"
-        style={{
-          background: 'var(--color-surface)',
-          border: '1px solid var(--color-border)',
-        }}
-      >
+      <div className="card-static rounded-xl overflow-hidden">
         <button
           className="w-full flex items-center justify-between p-3 sm:p-4 text-left transition-colors"
           onClick={() => setIsStatsExpanded(!isStatsExpanded)}
@@ -884,13 +773,9 @@ export function AskTab({
           <div className="flex items-center gap-2 sm:gap-3">
             <BarChart3
               size={16}
-              className="sm:w-[18px] sm:h-[18px]"
-              style={{ color: 'var(--color-primary)' }}
+              className="sm:w-[18px] sm:h-[18px] text-accent"
             />
-            <span
-              className="font-medium text-sm"
-              style={{ color: 'var(--color-text)' }}
-            >
+            <span className="font-medium text-sm text-primary">
               Collection Statistics
             </span>
           </div>
@@ -899,10 +784,7 @@ export function AskTab({
             animate={isStatsExpanded ? 'expanded' : 'collapsed'}
             transition={{ duration: 0.2 }}
           >
-            <ChevronDown
-              size={18}
-              style={{ color: 'var(--color-text-muted)' }}
-            />
+            <ChevronDown size={18} className="text-muted" />
           </motion.div>
         </button>
         <AnimatePresence initial={false}>

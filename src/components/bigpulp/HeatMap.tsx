@@ -201,9 +201,9 @@ export function LegacyCacheStatusIndicator({
               animate={{ rotate: 360 }}
               transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
             >
-              <RefreshCw size={12} style={{ color: 'var(--color-primary)' }} />
+              <RefreshCw size={12} className="text-accent" />
             </motion.div>
-            <span style={{ color: 'var(--color-primary)' }}>Updating...</span>
+            <span className="text-accent">Updating...</span>
           </motion.div>
         ) : refreshState === 'success' ? (
           <motion.div
@@ -218,9 +218,9 @@ export function LegacyCacheStatusIndicator({
               animate={{ scale: [0, 1.2, 1] }}
               transition={{ duration: 0.3 }}
             >
-              <Check size={12} style={{ color: 'var(--color-success)' }} strokeWidth={3} />
+              <Check size={12} className="text-success" strokeWidth={3} />
             </motion.div>
-            <span style={{ color: 'var(--color-success)' }}>Updated!</span>
+            <span className="text-success">Updated!</span>
           </motion.div>
         ) : (
           <motion.div
@@ -259,20 +259,19 @@ export function LegacyCacheStatusIndicator({
                 whileTap={isOnCooldown ? {} : { scale: 0.95 }}
               >
                 {isOnCooldown ? (
-                  <span style={{ color: 'var(--color-text-muted)', fontSize: '10px' }}>
+                  <span className="text-muted" style={{ fontSize: '10px' }}>
                     {cooldownSeconds}s
                   </span>
                 ) : (
-                  <RefreshCw size={14} style={{ color: 'var(--color-text-secondary)' }} />
+                  <RefreshCw size={14} className="text-secondary" />
                 )}
                 {/* Custom tooltip on hover when on cooldown */}
                 {isOnCooldown && (
                   <div
-                    className="absolute bottom-full right-0 mb-2 px-3 py-2 rounded-lg text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50"
+                    className="absolute bottom-full right-0 mb-2 px-3 py-2 rounded-lg text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 text-primary"
                     style={{
                       background: 'var(--color-surface)',
                       border: '1px solid var(--color-border)',
-                      color: 'var(--color-text)',
                       boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
                       width: '220px',
                       lineHeight: '1.4',
@@ -455,13 +454,12 @@ function BadgeDropdown({
       <AnimatePresence>
         {showInfo && (
           <motion.div
-            className="absolute top-full left-0 mt-1 z-50 p-3 rounded-lg text-xs"
+            className="absolute top-full left-0 mt-1 z-50 p-3 rounded-lg text-xs text-secondary"
             style={{
               background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
               boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
               width: '280px',
-              color: 'var(--color-text-secondary)',
               lineHeight: '1.5',
               whiteSpace: 'pre-line',
             }}
@@ -471,8 +469,8 @@ function BadgeDropdown({
             transition={{ duration: 0.15 }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <Award size={16} style={{ color: 'var(--color-primary)' }} />
-              <span className="font-semibold" style={{ color: 'var(--color-text)' }}>
+              <Award size={16} className="text-accent" />
+              <span className="font-semibold text-primary">
                 What's a Badge?
               </span>
             </div>
@@ -498,11 +496,10 @@ function BadgeDropdown({
           >
             {/* Header row */}
             <div
-              className="px-3 py-1.5 text-xs flex items-center justify-between"
+              className="px-3 py-1.5 text-xs flex items-center justify-between text-muted"
               style={{
                 background: 'var(--color-surface)',
                 borderBottom: '1px solid var(--color-border)',
-                color: 'var(--color-text-muted)',
               }}
             >
               <span>Badge</span>
@@ -514,10 +511,9 @@ function BadgeDropdown({
 
             {/* No Filter option - clear badge filter */}
             <button
-              className="w-full px-3 py-2 text-left text-sm transition-colors flex items-center justify-between hover:bg-white/5"
+              className="w-full px-3 py-2 text-left text-sm transition-colors flex items-center justify-between hover:bg-white/5 text-muted"
               style={{
                 background: selectedBadge === null ? 'var(--color-surface)' : 'transparent',
-                color: 'var(--color-text-muted)',
                 borderBottom: '1px solid var(--color-border)',
               }}
               onClick={() => handleSelect(null)}
@@ -528,23 +524,19 @@ function BadgeDropdown({
 
             {/* All Badges option - show only NFTs with any badge */}
             <button
-              className="w-full px-3 py-2 text-left text-sm transition-colors flex items-center justify-between hover:bg-white/5"
+              className="w-full px-3 py-2 text-left text-sm transition-colors flex items-center justify-between hover:bg-white/5 text-primary"
               style={{
                 background: selectedBadge === ALL_BADGES_FILTER ? 'var(--color-surface)' : 'transparent',
-                color: 'var(--color-text)',
                 borderBottom: '1px solid var(--color-border)',
               }}
               onClick={() => handleSelect(ALL_BADGES_FILTER)}
             >
               <span className="font-medium">All Badges</span>
               <div className="flex gap-4">
-                <span className="w-12 text-right text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                <span className="w-12 text-right text-xs text-muted">
                   {totalCount}
                 </span>
-                <span
-                  className="w-12 text-right text-xs font-medium"
-                  style={{ color: 'var(--color-primary)' }}
-                >
+                <span className="w-12 text-right text-xs font-medium text-accent">
                   {totalListed}
                 </span>
               </div>
@@ -554,16 +546,15 @@ function BadgeDropdown({
             {badges.map((badge) => (
               <button
                 key={badge.name}
-                className="w-full px-3 py-2 text-left text-sm transition-colors flex items-center justify-between hover:bg-white/5"
+                className="w-full px-3 py-2 text-left text-sm transition-colors flex items-center justify-between hover:bg-white/5 text-primary"
                 style={{
                   background: selectedBadge === badge.name ? 'var(--color-surface)' : 'transparent',
-                  color: 'var(--color-text)',
                 }}
                 onClick={() => handleSelect(badge.name)}
               >
                 <span>{badge.name}</span>
                 <div className="flex gap-4">
-                  <span className="w-12 text-right text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                  <span className="w-12 text-right text-xs text-muted">
                     {badge.count}
                   </span>
                   <span
@@ -621,21 +612,17 @@ function CellDetailModal({
           style={{ borderBottom: '1px solid var(--color-border)' }}
         >
           <div>
-            <h3
-              className="font-semibold"
-              style={{ color: 'var(--color-text)' }}
-            >
+            <h3 className="font-semibold text-primary">
               {cell.rarityBin.label} • {cell.priceBin.label} XCH
             </h3>
-            <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+            <p className="text-sm text-muted">
               {cell.count} NFT{cell.count !== 1 ? 's' : ''} listed
             </p>
           </div>
           <button
-            className="p-2 rounded-lg transition-colors"
+            className="p-2 rounded-lg transition-colors text-secondary"
             style={{
               background: 'var(--color-surface)',
-              color: 'var(--color-text-secondary)',
             }}
             onClick={onClose}
             aria-label="Close modal"
@@ -647,10 +634,7 @@ function CellDetailModal({
         {/* NFT List */}
         <div className="flex-1 overflow-y-auto p-4">
           {cell.nfts.length === 0 ? (
-            <p
-              className="text-center py-8"
-              style={{ color: 'var(--color-text-muted)' }}
-            >
+            <p className="text-center py-8 text-muted">
               No NFTs in this range
             </p>
           ) : (
@@ -671,25 +655,16 @@ function CellDetailModal({
                     loading="lazy"
                   />
                   <div className="p-2">
-                    <p
-                      className="text-sm font-medium truncate"
-                      style={{ color: 'var(--color-text)' }}
-                    >
+                    <p className="text-sm font-medium truncate text-primary">
                       {nft.name}
                     </p>
                     {nft.priceXch !== undefined && (
                       <div className="flex items-baseline gap-1.5">
-                        <span
-                          className="text-sm font-semibold"
-                          style={{ color: 'var(--color-primary)' }}
-                        >
+                        <span className="text-sm font-semibold text-accent">
                           {nft.priceXch.toFixed(2)} XCH
                         </span>
                         {nft.priceUsd !== undefined && (
-                          <span
-                            className="text-xs"
-                            style={{ color: 'var(--color-text-muted)' }}
-                          >
+                          <span className="text-xs text-muted">
                             ${nft.priceUsd.toFixed(0)}
                           </span>
                         )}
@@ -959,7 +934,7 @@ export function HeatMap({
           border: '1px solid var(--color-border)',
         }}
       >
-        <p style={{ color: 'var(--color-text-muted)' }}>
+        <p className="text-muted">
           No heat map data available
         </p>
       </div>
@@ -1019,9 +994,8 @@ export function HeatMap({
           {dynamicPriceBins.map((bin) => (
             <div
               key={bin.index}
-              className="flex-1 text-center font-semibold"
+              className="flex-1 text-center font-semibold text-muted"
               style={{
-                color: 'var(--color-text-muted)',
                 fontSize: '8px',
               }}
             >
@@ -1078,10 +1052,10 @@ export function HeatMap({
         <div className="flex justify-between mt-1.5 ml-5 sm:ml-7" style={{ fontSize: '8px' }}>
           <div className="flex flex-col leading-tight">
             <span style={{ color: 'rgba(251,191,36,0.8)' }}>Rare</span>
-            <span style={{ color: 'var(--color-text-muted)', fontSize: '6px' }}>↓</span>
+            <span className="text-muted" style={{ fontSize: '6px' }}>↓</span>
             <span style={{ color: 'rgba(239,68,68,0.7)' }}>Common</span>
           </div>
-          <div className="flex items-center gap-0.5 mr-1" style={{ color: 'var(--color-text-muted)' }}>
+          <div className="flex items-center gap-0.5 mr-1 text-muted">
             <span style={{ color: 'rgba(34,197,94,0.8)' }}>Cheap</span>
             <span style={{ fontSize: '6px' }}>→</span>
             <span style={{ color: 'rgba(251,191,36,0.8)' }}>Expensive</span>
