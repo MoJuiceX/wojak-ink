@@ -53,6 +53,7 @@ export function WalletButton({ className = '', size = 'md' }: WalletButtonProps)
   if (!wallet.connected) {
     return (
       <motion.button
+        type="button"
         className={`
           relative flex items-center justify-center rounded-xl font-medium overflow-hidden
           ${sizeStyles[size]}
@@ -97,6 +98,7 @@ export function WalletButton({ className = '', size = 'md' }: WalletButtonProps)
   return (
     <div className={`relative ${className}`}>
       <motion.button
+        type="button"
         className={`
           flex items-center justify-center rounded-lg font-medium
           transition-colors duration-200 text-primary
@@ -152,6 +154,7 @@ export function WalletButton({ className = '', size = 'md' }: WalletButtonProps)
             transition={{ duration: 0.15 }}
           >
             <button
+              type="button"
               className="w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors"
               style={{ color: copied ? '#22c55e' : 'var(--color-text-secondary)' }}
               onClick={handleCopyAddress}
@@ -189,6 +192,7 @@ export function WalletButton({ className = '', size = 'md' }: WalletButtonProps)
             />
 
             <button
+              type="button"
               className="w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors text-error"
               onClick={handleDisconnect}
               onMouseEnter={(e) => {

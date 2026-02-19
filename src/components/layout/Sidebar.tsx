@@ -119,6 +119,7 @@ export function Sidebar({
         {!showExpanded && (
           <motion.button
             key="pin-collapsed"
+            type="button"
             className="absolute rounded transition-colors z-10 flex items-center justify-center"
             style={{
               top: -6,
@@ -165,6 +166,7 @@ export function Sidebar({
           {showExpanded && (
             <motion.button
               key="pin-expanded"
+              type="button"
               className="p-2 rounded-lg transition-colors flex items-center justify-center"
               style={{
                 color: pinnedState === 'expanded'

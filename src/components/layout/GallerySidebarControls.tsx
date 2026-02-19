@@ -81,6 +81,7 @@ export function GallerySidebarControls({ showLabels }: GallerySidebarControlsPro
             return (
               <motion.button
                 key={option.id}
+                type="button"
                 className="flex items-center rounded-lg overflow-hidden"
                 style={{
                   background: 'var(--color-surface)',
@@ -131,6 +132,7 @@ export function GallerySidebarControls({ showLabels }: GallerySidebarControlsPro
             return (
               <motion.button
                 key={option.base}
+                type="button"
                 className="flex items-center rounded-lg overflow-hidden"
                 style={{
                   background: 'var(--color-surface)',

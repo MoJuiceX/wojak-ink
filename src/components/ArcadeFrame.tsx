@@ -87,6 +87,7 @@ export function ArcadeFrame({
       {showIntroButtons && !isMobile && (
         <>
           <button
+            type="button"
             className="arcade-frame-btn arcade-frame-btn-help"
             onClick={onHelpClick}
             aria-label="How to play"
@@ -94,6 +95,7 @@ export function ArcadeFrame({
             <HelpCircle size={20} />
           </button>
           <button
+            type="button"
             className="arcade-frame-btn arcade-frame-btn-mute"
             onClick={onMuteClick}
             aria-label={isMuted ? 'Unmute' : 'Mute'}
@@ -101,6 +103,7 @@ export function ArcadeFrame({
             {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
           </button>
           <button
+            type="button"
             className="arcade-frame-btn arcade-frame-btn-close"
             onClick={onCloseClick}
             aria-label="Close game"

@@ -14,6 +14,7 @@ export const GameButton = memo(forwardRef<HTMLButtonElement, GameButtonProps>(
     return (
       <motion.button
         ref={ref}
+        type="button"
         className={`game-btn game-btn-${variant} game-btn-${size} ${className}`}
         whileHover={{ scale: 1.02, y: -1 }}
         whileTap={{ scale: 0.98 }}

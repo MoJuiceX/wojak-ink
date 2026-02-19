@@ -66,6 +66,7 @@ export const NavItem = memo(function NavItem({
     if (featured) {
       return (
         <motion.button
+          type="button"
           className={`
             flex flex-col items-center justify-center gap-1 flex-1 py-2
             transition-colors duration-150 relative
@@ -139,6 +140,7 @@ export const NavItem = memo(function NavItem({
     // Regular mobile item
     return (
       <motion.button
+        type="button"
         className={`
           flex flex-col items-center justify-center gap-1 flex-1 py-2
           transition-colors duration-150 relative
@@ -202,6 +204,7 @@ export const NavItem = memo(function NavItem({
   // Sidebar variant
   return (
     <motion.button
+      type="button"
       className={`
         relative flex items-center w-full rounded-lg overflow-hidden
         ${disabled ? 'opacity-50 cursor-not-allowed' : ''}

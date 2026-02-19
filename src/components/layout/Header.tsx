@@ -78,6 +78,7 @@ function MobileGalleryControls() {
         return (
           <motion.button
             key={option.id}
+            type="button"
             className="w-9 h-9 flex items-center justify-center rounded-lg"
             style={{
               background: 'var(--color-surface)',
@@ -111,6 +112,7 @@ function MobileGalleryControls() {
         return (
           <motion.button
             key={option.base}
+            type="button"
             className="w-9 h-9 flex items-center justify-center rounded-lg relative"
             style={{
               background: 'var(--color-surface)',
@@ -286,6 +288,7 @@ export function Header({ transparent = false }: HeaderProps) {
                     transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                   >
                     <motion.button
+                      type="button"
                       onClick={headerBreadcrumb.onBack}
                       className="w-10 h-10 flex items-center justify-center rounded-lg transition-colors hover:bg-[var(--color-surface-hover)] text-secondary"
                       style={{
