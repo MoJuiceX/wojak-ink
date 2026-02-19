@@ -168,12 +168,12 @@ export function AgentSetupModal({ isOpen, onClose }: AgentSetupModalProps) {
                         Your API Key
                       </span>
                       <motion.button
-                        className="btn btn-ghost"
-                        style={{ padding: '4px 10px', fontSize: '0.75rem' }}
+                        className="btn btn-ghost min-h-11 min-w-11"
+                        style={{ padding: '8px 12px', fontSize: '0.8125rem' }}
                         onClick={handleCopyKey}
                         whileTap={{ scale: 0.95 }}
                       >
-                        {keyCopied ? <Check size={12} /> : <Copy size={12} />}
+                        {keyCopied ? <Check size={14} /> : <Copy size={14} />}
                         <span className="ml-1">{keyCopied ? 'Copied!' : 'Copy'}</span>
                       </motion.button>
                     </div>
@@ -192,12 +192,12 @@ export function AgentSetupModal({ isOpen, onClose }: AgentSetupModalProps) {
                           Webhook Secret
                         </span>
                         <motion.button
-                          className="btn btn-ghost"
-                          style={{ padding: '4px 10px', fontSize: '0.75rem' }}
+                          className="btn btn-ghost min-h-11 min-w-11"
+                          style={{ padding: '8px 12px', fontSize: '0.8125rem' }}
                           onClick={handleCopySecret}
                           whileTap={{ scale: 0.95 }}
                         >
-                          {secretCopied ? <Check size={12} /> : <Copy size={12} />}
+                          {secretCopied ? <Check size={14} /> : <Copy size={14} />}
                           <span className="ml-1">{secretCopied ? 'Copied!' : 'Copy'}</span>
                         </motion.button>
                       </div>
