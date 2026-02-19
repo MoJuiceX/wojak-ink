@@ -20,10 +20,12 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         gp.power_level,
         gp.total_votes_cast,
         gp.created_at,
+        dp.display_name,
         topnft.nft_id AS top_nft_id,
         topnft.edition_number AS top_edition,
         topnft.ipfs_image_uri AS top_image_uri
       FROM game_players gp
+      LEFT JOIN did_profiles dp ON dp.did_id = gp.did_id
       LEFT JOIN (
         SELECT dh.did_id, dh.nft_id, dh.edition_number, pm.ipfs_image_uri,
                ROW_NUMBER() OVER (PARTITION BY dh.did_id ORDER BY COALESCE(ws.net_score, 0) DESC) AS rn
@@ -46,6 +48,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         rank: offset + i + 1,
         did: row.did_id,
         walletAddress: row.wallet_address,
+        displayName: row.display_name || null,
         powerLevel: row.power_level,
         totalVotesCast: row.total_votes_cast,
         topNft: row.top_nft_id ? {

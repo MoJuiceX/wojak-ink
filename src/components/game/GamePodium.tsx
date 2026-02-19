@@ -6,6 +6,7 @@ interface PodiumEntry {
   rank: number;
   did?: string;
   walletAddress?: string;
+  displayName?: string | null;
   name?: string;
   nftId?: string;
   editionNumber?: number;
@@ -150,7 +151,7 @@ function PodiumCard({ entry, mode, isFirst }: { entry: PodiumEntry; mode: 'playe
       {mode === 'players' ? (
         <>
           <span className="text-secondary" style={{ fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>
-            {entry.walletAddress ? truncateWallet(entry.walletAddress) : 'Unknown'}
+            {entry.displayName || (entry.walletAddress ? truncateWallet(entry.walletAddress) : 'Unknown')}
           </span>
           <span style={{ fontSize: scoreSize, fontWeight: 700 }}>
             {(entry.powerLevel || 0).toLocaleString()}
@@ -175,9 +176,9 @@ function PodiumCard({ entry, mode, isFirst }: { entry: PodiumEntry; mode: 'playe
           <span style={{ fontSize: scoreSize, fontWeight: 700 }}>
             +{entry.netScore || 0} votes
           </span>
-          {entry.walletAddress && (
+          {(entry.displayName || entry.walletAddress) && (
             <span className="text-muted" style={{ fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>
-              by {truncateWallet(entry.walletAddress)}
+              by {entry.displayName || (entry.walletAddress ? truncateWallet(entry.walletAddress) : '')}
             </span>
           )}
         </>

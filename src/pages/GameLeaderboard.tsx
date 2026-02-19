@@ -15,6 +15,7 @@ interface PlayerEntry {
   rank: number;
   did: string;
   walletAddress?: string;
+  displayName?: string | null;
   powerLevel: number;
   topNft?: { nftId: string; editionNumber: number; imageUri?: string } | null;
 }
@@ -30,6 +31,7 @@ interface WojakEntry {
   totalVotes: number;
   ownerDid?: string | null;
   ownerWallet?: string | null;
+  ownerDisplayName?: string | null;
   imageUri?: string;
 }
 
@@ -139,6 +141,9 @@ function LeaderboardContent() {
     rank: (e as PlayerEntry | WojakEntry).rank,
     did: 'did' in e ? (e as PlayerEntry).did : (e as WojakEntry).ownerDid || undefined,
     name: 'name' in e ? (e as WojakEntry).name : undefined,
+    displayName: tab === 'players'
+      ? (e as PlayerEntry).displayName
+      : (e as WojakEntry).ownerDisplayName || undefined,
     nftId: tab === 'players'
       ? (e as PlayerEntry).topNft?.nftId
       : (e as WojakEntry).nftId,

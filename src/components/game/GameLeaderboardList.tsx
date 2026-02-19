@@ -6,6 +6,7 @@ interface PlayerEntry {
   rank: number;
   did: string;
   walletAddress?: string;
+  displayName?: string | null;
   powerLevel: number;
   topNft?: { nftId: string; editionNumber: number; imageUri?: string } | null;
 }
@@ -20,6 +21,7 @@ interface WojakEntry {
   totalVotes: number;
   ownerDid?: string | null;
   ownerWallet?: string | null;
+  ownerDisplayName?: string | null;
   imageUri?: string;
 }
 
@@ -79,7 +81,7 @@ function PlayerRow({ entry, isCurrent }: { entry: PlayerEntry; isCurrent: boolea
       )}
       <div className="flex items-center gap-2 flex-1" style={{ minWidth: 0 }}>
         <span className="text-secondary" style={{ fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {entry.walletAddress ? truncateWallet(entry.walletAddress) : entry.did ? truncateWallet(entry.did) : 'Unknown'}
+          {entry.displayName || (entry.walletAddress ? truncateWallet(entry.walletAddress) : entry.did ? truncateWallet(entry.did) : 'Unknown')}
         </span>
         <span
           style={{
