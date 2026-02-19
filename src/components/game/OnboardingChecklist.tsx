@@ -17,7 +17,7 @@ const MILESTONES = [
   { key: 'phase1' as const, label: 'Hold a Phase 1 Wojak', action: { label: 'Get One', href: 'https://mintgarden.io/collections/wojak-farmers-plot' } },
   { key: 'minted' as const, label: 'Create your first Wojak', action: { label: 'Go to Generator', to: '/generator' } },
   { key: 'voted' as const, label: 'Vote on a Wojak', action: { label: 'Vote Now', to: '/swipe' } },
-  { key: 'battled' as const, label: 'Enter and win a battle', action: { label: 'Battle', to: '/swipe/battles' } },
+  { key: 'battled' as const, label: 'Enter a battle in the Arena', action: { label: 'Arena', to: '/arena' } },
 ];
 
 export function OnboardingChecklist({ milestones }: OnboardingChecklistProps) {

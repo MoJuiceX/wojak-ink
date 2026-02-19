@@ -129,8 +129,9 @@ function CombatArenaInner() {
             <Swords size={28} style={{ color: 'var(--color-primary)' }} />
             <h1 className="text-2xl font-bold">Combat Arena</h1>
           </div>
-          <p className="text-secondary text-center text-sm">
-            Send your Wojak into battle. Earn XP, climb the ELO ladder, and prove your fighter is the strongest.
+          <p className="text-secondary text-center text-sm" style={{ maxWidth: 480 }}>
+            Pick a fighter, choose your moves, and battle other Wojaks. Winners earn XP and climb the ELO ladder.
+            Each fighter has a type, ability, and unique moves based on their traits.
           </p>
         </div>
 

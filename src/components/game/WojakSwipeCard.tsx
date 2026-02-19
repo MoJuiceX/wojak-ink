@@ -23,7 +23,7 @@ export function WojakSwipeCard() {
       </div>
       <div className="flex flex-col gap-1" style={{ flex: 1 }}>
         <span className="font-bold" style={{ fontSize: 15 }}>Wojak Swipe</span>
-        <span className="text-secondary" style={{ fontSize: 13 }}>Swipe, battle, and burn — the Wojak metagame</span>
+        <span className="text-secondary" style={{ fontSize: 13 }}>Rate Wojaks, earn XP, and discover the community's favorites</span>
       </div>
       <span className="badge badge-success" style={{ fontSize: 11 }}>NEW</span>
     </Link>
