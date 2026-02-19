@@ -55,22 +55,22 @@
     radial-gradient(
       ellipse at center,
       rgba(0, 0, 0, 0.15) 0%,
-      rgba(0, 0, 0, 0.4) 50%,
-      rgba(0, 0, 0, 0.7) 100%
+      var(--color-black-40) 50%,
+      var(--color-black-70) 100%
     ),
     linear-gradient(
       to bottom,
       rgba(0, 0, 0, 0.2) 0%,
       rgba(0, 0, 0, 0.1) 30%,
       rgba(0, 0, 0, 0.1) 70%,
-      rgba(0, 0, 0, 0.4) 100%
+      var(--color-black-40) 100%
     );
   pointer-events: none;
   z-index: 1;
 }
 
 .arcade-corner-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--color-white-20);
   color: white;
   transform: scale(1.1);
 }
@@ -107,28 +107,28 @@
   margin-top: 0;
   line-height: 1.2;
   background: none;
-  -webkit-text-stroke: 1.5px rgba(0, 0, 0, 0.4);
+  -webkit-text-stroke: 1.5px var(--color-black-40);
   paint-order: stroke fill;
   text-shadow:
-    2px 2px 0 rgba(0, 0, 0, 0.3),
+    2px 2px 0 var(--color-black-30),
     4px 4px 0 rgba(0, 0, 0, 0.2),
-    6px 6px 8px rgba(0, 0, 0, 0.4);
+    6px 6px 8px var(--color-black-40);
   transition: transform 0.3s ease, text-shadow 0.3s ease;
 }
 
 .arcade-game-title:hover {
   transform: scale(1.02);
   text-shadow:
-    3px 3px 0 rgba(0, 0, 0, 0.3),
+    3px 3px 0 var(--color-black-30),
     6px 6px 0 rgba(0, 0, 0, 0.2),
-    8px 8px 12px rgba(0, 0, 0, 0.5);
+    8px 8px 12px var(--color-black-50);
 }
 
 /* Bouncing mascot/emoji */
 .arcade-game-mascot {
   font-size: clamp(80px, 20vw, 120px);
   line-height: 1;
-  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(0 6px 16px var(--color-black-50));
   animation: arcade-mascot-bounce 2s ease-in-out infinite;
   margin-top: 24px;
 }
@@ -167,7 +167,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   pointer-events: auto;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  text-shadow: 0 2px 4px var(--color-black-40);
 }
 
 .arcade-play-btn .play-icon {
@@ -196,8 +196,8 @@
   font-weight: 600;
   letter-spacing: 1px;
   color: rgba(255, 255, 255, 0.9);
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--color-black-30);
+  border: 1px solid var(--color-white-20);
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -209,8 +209,8 @@
 }
 
 .arcade-leaderboard-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: var(--color-white-15);
+  border-color: var(--color-white-30);
 }
 
 /* ============================================================================
@@ -240,7 +240,7 @@
   color: rgba(255, 255, 255, 0.95);
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 8px var(--color-black-30);
 }
 
 /* Header buttons - consistent circular style with 44px touch targets */
@@ -248,8 +248,8 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--color-white-15);
+  background: var(--color-white-8);
   color: rgba(255, 255, 255, 0.9);
   display: flex;
   align-items: center;
@@ -259,7 +259,7 @@
 }
 
 .game-intro-header-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--color-white-15);
   border-color: rgba(255, 255, 255, 0.25);
   transform: scale(1.05);
 }
@@ -284,8 +284,8 @@
   background: linear-gradient(
     to top,
     rgba(0, 0, 0, 0.9) 0%,
-    rgba(0, 0, 0, 0.7) 30%,
-    rgba(0, 0, 0, 0.4) 60%,
+    var(--color-black-70) 30%,
+    var(--color-black-40) 60%,
     rgba(0, 0, 0, 0.2) 100%
   );
 }
@@ -297,7 +297,7 @@
 .game-intro-emoji {
   font-size: 80px;
   margin-bottom: 20px;
-  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.4));
+  filter: drop-shadow(0 8px 24px var(--color-black-40));
   animation: emoji-bounce 2s ease-in-out infinite;
 }
 
@@ -316,7 +316,7 @@
   max-width: 320px;
   margin: 0 0 36px 0;
   line-height: 1.6;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 2px 8px var(--color-black-50);
 }
 
 /* ============================================================================
@@ -502,7 +502,7 @@
 .leaderboard-overlay-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--color-black-60);
   z-index: 100;
   border-radius: inherit;
 }
@@ -515,11 +515,11 @@
   width: 280px;
   max-width: 75%;
   background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
-  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid var(--color-white-15);
   z-index: 101;
   display: flex;
   flex-direction: column;
-  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.6);
+  box-shadow: -8px 0 32px var(--color-black-60);
   border-radius: 0 0 0 12px;
 }
 
@@ -528,7 +528,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--color-white-10);
 }
 
 .leaderboard-overlay-title {
@@ -546,8 +546,8 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-white-20);
+  background: var(--color-white-5);
   color: rgba(255, 255, 255, 0.7);
   display: flex;
   align-items: center;
@@ -557,7 +557,7 @@
 }
 
 .leaderboard-overlay-close:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-white-10);
   color: white;
 }
 
@@ -589,7 +589,7 @@
   padding: 12px 14px;
   background: rgba(255, 255, 255, 0.03);
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-white-5);
   transition: all 0.2s ease;
 }
 
@@ -597,7 +597,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-white-10);
 }
 
 .leaderboard-entry.top-three {
@@ -652,7 +652,7 @@
   width: 340px;
   z-index: 35;
   background: linear-gradient(135deg, rgba(25, 25, 35, 0.98) 0%, rgba(15, 15, 25, 0.99) 100%);
-  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  border-right: 1px solid var(--color-white-15);
   backdrop-filter: blur(20px);
   transform: translateX(-100%);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -688,7 +688,7 @@
   display: flex;
   align-items: center;
   padding: 0 12px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-white-5);
   border-radius: 8px;
   font-size: 0.95rem;
   transition: background 0.2s ease;
@@ -697,7 +697,7 @@
 }
 
 .arcade-leaderboard-entry:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--color-white-8);
 }
 
 /* Rank number */
@@ -722,7 +722,7 @@
   overflow: hidden;
   margin-right: 10px;
   flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-white-10);
 }
 
 .arcade-leaderboard-avatar img {
@@ -737,7 +737,7 @@
   border-radius: 50%;
   margin-right: 10px;
   flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-white-10);
 }
 
 /* Style Avatar component within leaderboard entries */
@@ -780,8 +780,8 @@
 
 /* Leaderboard button active state */
 .arcade-leaderboard-btn.active {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: var(--color-white-15);
+  border-color: var(--color-white-30);
 }
 
 /* ============================================================================

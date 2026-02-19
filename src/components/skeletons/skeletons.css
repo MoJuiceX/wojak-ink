@@ -5,7 +5,7 @@
    ---------------------------------------- */
 
 .skeleton {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-white-5);
   border-radius: 8px;
 }
 
@@ -14,10 +14,10 @@
    ---------------------------------------- */
 
 .nft-card-skeleton {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--color-white-3);
   border-radius: 16px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-white-5);
 }
 
 .nft-card-skeleton .skeleton-image {
@@ -116,7 +116,7 @@
   flex: 1;
   text-align: center;
   padding: 16px;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--color-white-3);
   border-radius: 12px;
 }
 
@@ -154,11 +154,11 @@
 
 .bigpulp-skeleton .thinking-icon {
   font-size: 48px;
-  filter: drop-shadow(0 0 20px rgba(249, 115, 22, 0.5));
+  filter: drop-shadow(0 0 20px var(--color-primary-50));
 }
 
 .bigpulp-skeleton .thinking-text {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-white-60);
   font-size: 14px;
 }
 
@@ -178,7 +178,7 @@
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--color-white-3);
   border-radius: 12px;
 }
 
@@ -212,10 +212,10 @@
    ---------------------------------------- */
 
 .media-card-skeleton {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--color-white-3);
   border-radius: 16px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-white-5);
 }
 
 .media-card-skeleton .skeleton-thumbnail {
@@ -230,12 +230,12 @@
 .media-card-skeleton .skeleton-play-icon {
   width: 48px;
   height: 48px;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--color-black-50);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--color-white-30);
   font-size: 16px;
 }
 
@@ -263,7 +263,7 @@
   border-radius: 16px;
   overflow: hidden;
   position: relative;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--color-white-3);
 }
 
 .character-card-skeleton .skeleton-character-image {
