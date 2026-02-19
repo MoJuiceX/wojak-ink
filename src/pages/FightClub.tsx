@@ -21,6 +21,7 @@ import { GameErrorBoundary } from '@/components/games/GameError';
 import { GameLoading } from '@/components/games/GameLoading';
 import { FightClubRankings } from '@/components/combat/FightClubRankings';
 import { SubscriptionBanner } from '@/components/combat/SubscriptionBanner';
+import { FightClubGuideModal } from '@/components/combat/FightClubGuideModal';
 import { useUserProfile } from '@/contexts/UserProfileContext';
 import { useSageWallet } from '@/sage-wallet';
 
@@ -270,6 +271,7 @@ export default function FightClub() {
   const location = useLocation();
   const navigate = useNavigate();
   const activeTab = getActiveTab(location.pathname);
+  const [guideOpen, setGuideOpen] = useState(false);
   const { profile } = useUserProfile();
   const { address: walletAddress, status: walletStatus } = useSageWallet();
   const isWalletConnected = walletStatus === 'connected' && !!walletAddress;
@@ -309,14 +311,15 @@ export default function FightClub() {
             <h1 className="text-lg font-bold">Fight Club</h1>
           </div>
           <div className="flex items-center gap-2">
-            <Link
-              to="/fight-club/guide"
+            <button
+              type="button"
               className="btn btn-ghost text-xs flex items-center gap-1"
               style={{ padding: '6px 10px', minWidth: 'auto' }}
+              onClick={() => setGuideOpen(true)}
             >
               <Info size={14} />
               Guide
-            </Link>
+            </button>
             {playerDid && <RefreshButton did={playerDid} />}
           </div>
         </div>
@@ -398,6 +401,9 @@ export default function FightClub() {
           {activeTab === 'rankings' && <FightClubRankings currentUserDid={playerDid} />}
         </div>
       </div>
+
+      {/* Guide Modal */}
+      <FightClubGuideModal isOpen={guideOpen} onClose={() => setGuideOpen(false)} />
     </PageTransition>
   );
 }
