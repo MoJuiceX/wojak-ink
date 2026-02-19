@@ -514,7 +514,7 @@ function MintSafetyRail({
 export default function Admin() {
   const { contentPadding } = useLayout();
 
-  const adminSecret = (window as any).__ADMIN_SECRET__ || '';
+  const adminSecret = window.__ADMIN_SECRET__ || '';
 
   const [pricing, setPricing] = useState<PricingResponse | null>(null);
   const [recentMints, setRecentMints] = useState<RecentMint[]>([]);

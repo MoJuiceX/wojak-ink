@@ -103,7 +103,7 @@ async function connect() {
 }
 
 // Expose globally
-(window as any)._sageConnect = connect;
+window._sageConnect = connect;
 
 // Auto-init
 init();

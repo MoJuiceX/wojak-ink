@@ -9,7 +9,7 @@ import App from './App.tsx'
 
 // Capture admin secret from URL before React Router / contexts can strip query params
 if (window.location.pathname === '/admin') {
-  (window as any).__ADMIN_SECRET__ = new URLSearchParams(window.location.search).get('secret') || '';
+  window.__ADMIN_SECRET__ = new URLSearchParams(window.location.search).get('secret') || '';
 }
 
 // Clerk publishable key from environment

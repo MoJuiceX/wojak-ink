@@ -28,14 +28,14 @@ function applyBattleStartAbilities(battle: BattleState): void {
     if (effect?.selfStatMultipliers) {
       for (const [stat, mult] of Object.entries(effect.selfStatMultipliers)) {
         if (stat in fighter.effectiveStats && mult !== undefined) {
-          (fighter.effectiveStats as any)[stat] = Math.floor((fighter.effectiveStats as any)[stat] * mult);
+          (fighter.effectiveStats as Record<string, number>)[stat] = Math.floor((fighter.effectiveStats as Record<string, number>)[stat] * mult);
         }
       }
     }
     if (effect?.opponentStatMultipliers) {
       for (const [stat, mult] of Object.entries(effect.opponentStatMultipliers)) {
         if (stat in opponent.effectiveStats && mult !== undefined) {
-          (opponent.effectiveStats as any)[stat] = Math.floor((opponent.effectiveStats as any)[stat] * mult);
+          (opponent.effectiveStats as Record<string, number>)[stat] = Math.floor((opponent.effectiveStats as Record<string, number>)[stat] * mult);
         }
       }
     }
