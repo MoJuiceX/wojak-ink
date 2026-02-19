@@ -884,6 +884,64 @@ body {
   gap: var(--space-2);
 }
 
+/* Rankings podium - mobile compact */
+@media (max-width: 480px) {
+  .rankings-podium {
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-2);
+  }
+
+  .podium-entry {
+    padding: var(--space-2);
+    min-width: 0; /* prevent overflow */
+  }
+
+  .podium-name {
+    font-size: 12px;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .podium-power {
+    font-size: 13px;
+  }
+
+  .podium-avatar {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* Wojak rankings row - prevent overflow on mobile */
+@media (max-width: 640px) {
+  .wojak-row {
+    flex-wrap: nowrap;
+    gap: var(--space-2);
+  }
+
+  .wojak-row-image img {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+  }
+
+  .wojak-row-info {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .wojak-row-power {
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  .power-breakdown {
+    display: none; /* Hide vote/battle split on very small screens */
+  }
+}
+
 /* Your rank indicator */
 .your-rank-indicator {
   padding: var(--space-2) var(--space-4);
