@@ -12,3 +12,4 @@ export { BattleReplay } from './BattleReplay';
 export { FighterCard } from './FighterCard';
 export { CombatLeaderboard } from './CombatLeaderboard';
 export { PreCombatMessage } from './PreCombatMessage';
+export { ArenaNav } from './ArenaNav';
