@@ -88,93 +88,140 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return Response.json({ error: 'Cannot vote on your own creations' }, { status: 403 });
     }
 
-    // Insert vote (UNIQUE constraint prevents duplicates)
-    try {
+    // Check for existing vote (re-vote after 24h cooldown)
+    const existingVote = await context.env.DB.prepare(
+      'SELECT id, vote_type FROM wojak_votes WHERE voter_did = ? AND nft_id = ?'
+    ).bind(voterDid, nftId).first<{ id: number; vote_type: number }>();
+
+    let likesDelta = 0;
+    let dislikesDelta = 0;
+    let netScoreDelta = 0;
+    let totalVotesDelta = 0;
+    let isReVote = false;
+
+    if (existingVote) {
+      isReVote = true;
+      const previousVoteType = existingVote.vote_type;
+
+      if (previousVoteType === voteType) {
+        // Same direction re-vote: just update timestamp, no power change
+        await context.env.DB.prepare(
+          'UPDATE wojak_votes SET created_at = datetime(\'now\') WHERE id = ?'
+        ).bind(existingVote.id).run();
+        // No score changes needed
+      } else {
+        // Different direction: undo previous + apply new
+        // like→dislike: -2 total (undo +1, apply -1)
+        // dislike→like: +2 total (undo -1, apply +1)
+        if (previousVoteType === 1 && voteType === -1) {
+          // Was like, now dislike
+          likesDelta = -1;
+          dislikesDelta = 1;
+          netScoreDelta = -2;
+        } else {
+          // Was dislike, now like
+          likesDelta = 1;
+          dislikesDelta = -1;
+          netScoreDelta = 2;
+        }
+
+        // Update the existing vote record
+        await context.env.DB.prepare(
+          'UPDATE wojak_votes SET vote_type = ?, created_at = datetime(\'now\') WHERE id = ?'
+        ).bind(voteType, existingVote.id).run();
+      }
+    } else {
+      // New vote
       await context.env.DB.prepare(`
         INSERT INTO wojak_votes (voter_did, nft_id, edition_number, vote_type)
         VALUES (?, ?, ?, ?)
       `).bind(voterDid, nftId, editionNumber, voteType).run();
-    } catch (e: unknown) {
-      if (e instanceof Error && e.message?.includes('UNIQUE')) {
-        return Response.json({ error: 'Already voted on this Wojak' }, { status: 409 });
-      }
-      throw e;
+
+      likesDelta = voteType === 1 ? 1 : 0;
+      dislikesDelta = voteType === -1 ? 1 : 0;
+      netScoreDelta = voteType;
+      totalVotesDelta = 1;
     }
 
-    // Update cached scores
-    const likesDelta = voteType === 1 ? 1 : 0;
-    const dislikesDelta = voteType === -1 ? 1 : 0;
+    // Update cached scores (only if there's a delta)
+    if (likesDelta !== 0 || dislikesDelta !== 0 || totalVotesDelta !== 0) {
+      await context.env.DB.prepare(`
+        INSERT INTO wojak_scores (nft_id, edition_number, creator_wallet, likes, dislikes, net_score, total_votes, first_voted_at, last_voted_at)
+        VALUES (?, ?, COALESCE((SELECT wallet_address FROM phase2_mints WHERE mint_number = ?), 'unknown'), ?, ?, ?, ?, datetime('now'), datetime('now'))
+        ON CONFLICT(nft_id) DO UPDATE SET
+          likes = likes + ?,
+          dislikes = dislikes + ?,
+          net_score = net_score + ?,
+          total_votes = total_votes + ?,
+          last_voted_at = datetime('now')
+      `).bind(
+        nftId, editionNumber, editionNumber,
+        Math.max(0, likesDelta), Math.max(0, dislikesDelta), netScoreDelta, totalVotesDelta,
+        likesDelta, dislikesDelta, netScoreDelta, totalVotesDelta
+      ).run();
+    }
 
-    await context.env.DB.prepare(`
-      INSERT INTO wojak_scores (nft_id, edition_number, creator_wallet, likes, dislikes, net_score, total_votes, first_voted_at, last_voted_at)
-      VALUES (?, ?, COALESCE((SELECT wallet_address FROM phase2_mints WHERE mint_number = ?), 'unknown'), ?, ?, ?, 1, datetime('now'), datetime('now'))
-      ON CONFLICT(nft_id) DO UPDATE SET
-        likes = likes + ?,
-        dislikes = dislikes + ?,
-        net_score = net_score + ?,
-        total_votes = total_votes + 1,
-        last_voted_at = datetime('now')
-    `).bind(
-      nftId, editionNumber, editionNumber,
-      likesDelta, dislikesDelta, voteType,
-      likesDelta, dislikesDelta, voteType
-    ).run();
-
-    // Update power score in combat_fighters (vote_power: +1 for like, -1 for dislike)
-    // If the fighter doesn't exist yet, this will just not update any rows
-    const votePowerDelta = voteType; // 1 for like, -1 for dislike
-    await context.env.DB.prepare(`
-      UPDATE combat_fighters
-      SET vote_power = vote_power + ?,
-          power_score = vote_power + ? + battle_power,
-          updated_at = datetime('now')
-      WHERE nft_id = ?
-    `).bind(votePowerDelta, votePowerDelta, nftId).run();
-
-    // Update player vote count
-    const isFirstVote = (player.total_votes_cast as number) === 0;
-    const statements = [
-      context.env.DB.prepare(`
-        UPDATE game_players
-        SET votes_today = votes_today + 1,
-            total_votes_cast = total_votes_cast + 1,
+    // Update power score in combat_fighters (only if score changed)
+    if (netScoreDelta !== 0) {
+      await context.env.DB.prepare(`
+        UPDATE combat_fighters
+        SET vote_power = vote_power + ?,
+            power_score = vote_power + ? + battle_power,
             updated_at = datetime('now')
-        WHERE did_id = ?
-      `).bind(voterDid),
-    ];
+        WHERE nft_id = ?
+      `).bind(netScoreDelta, netScoreDelta, nftId).run();
+    }
 
-    // Track participation credits (1 credit per 20 votes)
-    const walletAddress = player.wallet_address as string;
-    const voteTracking = await context.env.DB.prepare(
-      'SELECT total_votes, credits_awarded_at FROM vote_credit_tracking WHERE wallet_address = ?'
-    ).bind(walletAddress).first<{ total_votes: number; credits_awarded_at: number }>();
+    // Update player vote count (only increment totals for new votes, not re-votes)
+    const isFirstVote = !isReVote && (player.total_votes_cast as number) === 0;
+    const statements: D1PreparedStatement[] = [];
 
-    const currentTotalVotes = (voteTracking?.total_votes ?? 0) + 1;
-    const lastAwardedAt = voteTracking?.credits_awarded_at ?? 0;
-    const votesSinceLastCredit = currentTotalVotes - lastAwardedAt;
-
-    // Upsert vote tracking
-    statements.push(
-      context.env.DB.prepare(`
-        INSERT INTO vote_credit_tracking (wallet_address, total_votes, last_vote_date)
-        VALUES (?, 1, ?)
-        ON CONFLICT(wallet_address) DO UPDATE SET
-          total_votes = total_votes + 1,
-          last_vote_date = ?
-      `).bind(walletAddress, today, today)
-    );
-
-    // Award participation credit if reached 20 votes since last award
-    if (votesSinceLastCredit >= VOTES_PER_CREDIT) {
+    if (!isReVote) {
       statements.push(
         context.env.DB.prepare(`
-          UPDATE vote_credit_tracking SET credits_awarded_at = ? WHERE wallet_address = ?
-        `).bind(currentTotalVotes, walletAddress),
-        context.env.DB.prepare(`
-          INSERT INTO credit_events (wallet_address, nft_id, event_id, price_xch, floor_at_time, credits_earned, whale_multiplier, source, event_type, event_timestamp)
-          VALUES (?, 'participation_vote', ?, 0, 0, ?, 100, 'participation', 'vote_reward', datetime('now'))
-        `).bind(walletAddress, `vote_credit_${walletAddress}_${currentTotalVotes}`, VOTE_CREDIT_AMOUNT)
+          UPDATE game_players
+          SET votes_today = votes_today + 1,
+              total_votes_cast = total_votes_cast + 1,
+              updated_at = datetime('now')
+          WHERE did_id = ?
+        `).bind(voterDid)
       );
+    }
+
+    // Track participation credits (1 credit per 20 votes) - only for new votes
+    const walletAddress = player.wallet_address as string;
+    if (!isReVote) {
+      const voteTracking = await context.env.DB.prepare(
+        'SELECT total_votes, credits_awarded_at FROM vote_credit_tracking WHERE wallet_address = ?'
+      ).bind(walletAddress).first<{ total_votes: number; credits_awarded_at: number }>();
+
+      const currentTotalVotes = (voteTracking?.total_votes ?? 0) + 1;
+      const lastAwardedAt = voteTracking?.credits_awarded_at ?? 0;
+      const votesSinceLastCredit = currentTotalVotes - lastAwardedAt;
+
+      // Upsert vote tracking
+      statements.push(
+        context.env.DB.prepare(`
+          INSERT INTO vote_credit_tracking (wallet_address, total_votes, last_vote_date)
+          VALUES (?, 1, ?)
+          ON CONFLICT(wallet_address) DO UPDATE SET
+            total_votes = total_votes + 1,
+            last_vote_date = ?
+        `).bind(walletAddress, today, today)
+      );
+
+      // Award participation credit if reached 20 votes since last award
+      if (votesSinceLastCredit >= VOTES_PER_CREDIT) {
+        statements.push(
+          context.env.DB.prepare(`
+            UPDATE vote_credit_tracking SET credits_awarded_at = ? WHERE wallet_address = ?
+          `).bind(currentTotalVotes, walletAddress),
+          context.env.DB.prepare(`
+            INSERT INTO credit_events (wallet_address, nft_id, event_id, price_xch, floor_at_time, credits_earned, whale_multiplier, source, event_type, event_timestamp)
+            VALUES (?, 'participation_vote', ?, 0, 0, ?, 100, 'participation', 'vote_reward', datetime('now'))
+          `).bind(walletAddress, `vote_credit_${walletAddress}_${currentTotalVotes}`, VOTE_CREDIT_AMOUNT)
+        );
+      }
     }
 
     // First vote onboarding milestone + activity log + credits
@@ -258,10 +305,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     return Response.json({
       success: true,
-      votesRemaining,
+      votesRemaining: isReVote ? votesRemaining + 1 : votesRemaining, // Re-votes don't consume daily quota
       voteType,
       editionNumber,
       voteStreak,
+      isReVote,
       onboarding: updated ? {
         phase1: !!updated.onboarding_phase1,
         minted: !!updated.onboarding_minted,
