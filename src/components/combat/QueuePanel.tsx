@@ -4,6 +4,7 @@
  */
 
 import { useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { BattleModeSelector } from './BattleModeSelector';
 import { useAgent } from '@/contexts/AgentContext';
 import type { CombatType } from '@/lib/combat/types';
@@ -48,10 +49,15 @@ export function QueuePanel({ fighters, onQueue, onLeaveQueue, queueStatus, isLoa
 
   if (fighters.length === 0) {
     return (
-      <div className="card-static p-6 text-center">
+      <div className="card-static p-6 flex flex-col items-center gap-3 text-center">
+        <span style={{ fontSize: 40 }}>⚔️</span>
+        <p className="font-semibold">No fighters ready</p>
         <p className="text-secondary text-sm">
-          No combat-ready fighters found. Mint a new Wojak with combat moves to get started.
+          Mint a Wojak with combat moves in the Generator to start battling.
         </p>
+        <Link to="/generator" className="btn btn-primary text-sm mt-1">
+          Create a Fighter
+        </Link>
       </div>
     );
   }
