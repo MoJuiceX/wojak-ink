@@ -210,7 +210,6 @@ function MaskVariantPicker({ selectedPath, onSelect }: { selectedPath: string | 
 
   const handleVariantSelect = (variant: MaskVariant) => {
     onSelect(getMaskPath(variant));
-    setExpandedCategory(null);
   };
 
   return (
@@ -263,7 +262,7 @@ function MaskVariantPicker({ selectedPath, onSelect }: { selectedPath: string | 
 
               {/* Expanded variants grid */}
               {isExpanded && (
-                <div className="grid grid-cols-4 gap-1.5 mt-2 p-2 rounded-lg" style={{ background: 'var(--color-white-5)' }}>
+                <div className="grid grid-cols-3 gap-2 mt-2 p-2 rounded-lg" style={{ background: 'var(--color-white-5)' }}>
                   {category.variants.map((variant) => {
                     const path = getMaskPath(variant);
                     const isVariantSelected = selectedPath === path;
