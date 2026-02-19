@@ -390,58 +390,21 @@ export default function GamesHub() {
     />
   );
 
-  // Tab bar for Play/Scores toggle
+  // Tab bar for Play/Scores toggle — uses fight-club-tabs styling for consistency
   const tabBar = (
-    <div
-      style={{
-        display: 'flex',
-        gap: '8px',
-        marginBottom: '16px',
-        padding: '4px',
-        background: 'var(--color-surface)',
-        borderRadius: 'var(--radius-lg)',
-        border: '1px solid var(--color-border)',
-        width: 'fit-content',
-      }}
-    >
+    <div className="fight-club-tabs" style={{ marginBottom: '16px', width: 'fit-content' }}>
       <button
         type="button"
+        className={`fight-club-tab flex items-center gap-1.5 ${activeTab === 'play' ? 'active' : ''}`}
         onClick={() => setActiveTab('play')}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          padding: '8px 16px',
-          borderRadius: 'var(--radius-md)',
-          border: 'none',
-          background: activeTab === 'play' ? 'var(--color-primary)' : 'transparent',
-          color: activeTab === 'play' ? 'white' : 'var(--color-text-secondary)',
-          fontWeight: 600,
-          fontSize: '14px',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-        }}
       >
         <Gamepad2 size={16} />
         Play
       </button>
       <button
         type="button"
+        className={`fight-club-tab flex items-center gap-1.5 ${activeTab === 'scores' ? 'active' : ''}`}
         onClick={() => setActiveTab('scores')}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          padding: '8px 16px',
-          borderRadius: 'var(--radius-md)',
-          border: 'none',
-          background: activeTab === 'scores' ? 'var(--color-primary)' : 'transparent',
-          color: activeTab === 'scores' ? 'white' : 'var(--color-text-secondary)',
-          fontWeight: 600,
-          fontSize: '14px',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-        }}
       >
         <Trophy size={16} />
         Scores
