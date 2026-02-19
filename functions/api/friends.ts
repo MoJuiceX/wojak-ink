@@ -38,7 +38,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   if (request.method === 'GET') {
     try {
       const results = await env.DB.prepare(
-        'SELECT friend_id FROM friends WHERE user_id = ?'
+        "SELECT friend_id FROM friends WHERE user_id = ? AND status = 'accepted'"
       ).bind(userId).all();
 
       return new Response(JSON.stringify({
