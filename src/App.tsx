@@ -350,6 +350,14 @@ function AppContent() {
                       </Suspense>
                     }
                   />
+                  <Route
+                    path="fight-club/burn"
+                    element={
+                      <Suspense fallback={<PageSkeleton type="media" />}>
+                        <FightClub />
+                      </Suspense>
+                    }
+                  />
                   {/* Redirect /achievements to /account - Achievements feature now uses lightbox */}
                   <Route
                     path="achievements"

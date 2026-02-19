@@ -24,6 +24,7 @@ import { useSageWallet } from '@/sage-wallet';
 // Lazy load tab content
 const CombatArena = lazy(() => import('./CombatArena'));
 const GameVoting = lazy(() => import('./GameVoting'));
+const BurnTab = lazy(() => import('@/components/combat/BurnTab'));
 
 // Gate API response type
 interface GateResponse {
@@ -218,7 +219,7 @@ function MintFighterBanner() {
   );
 }
 
-type TabId = 'battle' | 'vote' | 'rankings';
+type TabId = 'battle' | 'vote' | 'rankings' | 'burn';
 
 interface Tab {
   id: TabId;
@@ -230,12 +231,14 @@ const TABS: Tab[] = [
   { id: 'battle', label: 'Battle', path: '/fight-club/battle' },
   { id: 'vote', label: 'Vote', path: '/fight-club/vote' },
   { id: 'rankings', label: 'Rankings', path: '/fight-club/rankings' },
+  { id: 'burn', label: 'Burn', path: '/fight-club/burn' },
 ];
 
 function getActiveTab(pathname: string): TabId {
   if (pathname.includes('/battle')) return 'battle';
   if (pathname.includes('/vote')) return 'vote';
   if (pathname.includes('/rankings')) return 'rankings';
+  if (pathname.includes('/burn')) return 'burn';
   // Default to battle for /fight-club
   return 'battle';
 }
@@ -318,6 +321,11 @@ export default function FightClub() {
             </GameProvider>
           )}
           {activeTab === 'rankings' && <FightClubRankings />}
+          {activeTab === 'burn' && (
+            <Suspense fallback={<PageSkeleton type="media" />}>
+              <BurnTab />
+            </Suspense>
+          )}
         </div>
       </div>
     </PageTransition>
