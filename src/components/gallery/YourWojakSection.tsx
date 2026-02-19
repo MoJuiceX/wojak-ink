@@ -11,6 +11,7 @@ import { Swords } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { WojakFighterCard } from './WojakFighterCard';
 import { FighterDetailModal } from './FighterDetailModal';
+import { getTypeColor } from '@/lib/combat/data/type-colors';
 
 const COMBAT_TYPES = [
   'FIRE', 'WATER', 'ELECTRIC', 'GRASS', 'ICE', 'MARTIAL',
@@ -18,28 +19,18 @@ const COMBAT_TYPES = [
   'GHOST', 'DRAGON', 'SHADOW', 'METAL', 'MYSTIC', 'NEUTRAL',
 ];
 
-// Type color map (shared with FighterRevealCard)
-export const TYPE_COLORS: Record<string, string> = {
-  FIRE: '#ef4444', WATER: '#3b82f6', ELECTRIC: '#eab308',
-  GRASS: '#22c55e', ICE: '#67e8f9', MARTIAL: '#f97316',
-  VENOM: '#a855f7', EARTH: '#a16207', AIR: '#7dd3fc',
-  PSYCHE: '#ec4899', INSECT: '#84cc16', STONE: '#78716c',
-  GHOST: '#6366f1', DRAGON: '#7c3aed', SHADOW: '#1e293b',
-  METAL: '#94a3b8', MYSTIC: '#f9a8d4', NEUTRAL: '#a0a0b0',
-};
-
 type SortOption = 'power_desc' | 'power_asc' | 'edition_desc' | 'level_desc' | 'elo_desc';
 
 interface WojakFighter {
   nft_id: string;
   edition: number;
-  type: string;
-  nature: string;
-  ability: string;
-  move_1: string;
-  move_2: string;
-  move_3: string;
-  move_4: string;
+  type: string | null;
+  nature: string | null;
+  ability: string | null;
+  move_1: string | null;
+  move_2: string | null;
+  move_3: string | null;
+  move_4: string | null;
   level: number;
   elo: number;
   power: number;
@@ -49,7 +40,9 @@ interface WojakFighter {
   losses: number;
   draws: number;
   ownerName: string;
-  owner_did: string;
+  owner_did: string | null;
+  imageUri?: string | null;
+  customName?: string | null;
 }
 
 interface ApiResponse {
@@ -85,9 +78,9 @@ export function YourWojakSection() {
       {/* Section Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold">Your Wojak Fighters</h2>
+          <h2 className="text-xl font-bold">Your Wojak Collection</h2>
           <p className="text-sm text-secondary">
-            {total} fighters created
+            {total} minted
           </p>
         </div>
         <Link to="/generator" className="btn btn-primary text-sm">
@@ -113,8 +106,8 @@ export function YourWojakSection() {
             onClick={() => setTypeFilter(typeFilter === t ? null : t)}
             style={{
               whiteSpace: 'nowrap',
-              borderColor: typeFilter === t ? TYPE_COLORS[t] : undefined,
-              color: typeFilter === t ? TYPE_COLORS[t] : undefined,
+              borderColor: typeFilter === t ? getTypeColor(t) : undefined,
+              color: typeFilter === t ? getTypeColor(t) : undefined,
             }}
           >
             {t}
@@ -154,12 +147,12 @@ export function YourWojakSection() {
       ) : wojaks.length === 0 ? (
         <div className="card-static p-8 text-center">
           <Swords size={48} className="text-muted mx-auto mb-3" />
-          <p className="font-medium mb-1">No fighters yet</p>
+          <p className="font-medium mb-1">No Wojaks yet</p>
           <p className="text-sm text-secondary mb-4">
-            Create your first Wojak fighter in the Generator.
+            Create your first Wojak in the Generator.
           </p>
           <Link to="/generator" className="btn btn-primary">
-            Create Fighter
+            Create Wojak
           </Link>
         </div>
       ) : (
