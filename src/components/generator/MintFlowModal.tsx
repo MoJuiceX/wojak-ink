@@ -6,7 +6,7 @@
  */
 
 import { createPortal } from 'react-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X, Loader2, CheckCircle, AlertCircle, Copy, ExternalLink, Wallet, Share2, Sparkles } from 'lucide-react';
 import { useMint } from '@/contexts/MintContext';
@@ -76,6 +76,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
     errorMessage,
     credits,
     pendingMintType,
+    pendingMintParams,
     totalMinted,
     maxSupply,
     resetMintFlow,
@@ -92,6 +93,23 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
   const [copied, setCopied] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
   const [nameError, setNameError] = useState('');
+
+  // Image URL for fighter reveal card (from pending mint blob)
+  const revealImageUrl = useMemo(() => {
+    if (pendingMintParams?.imageBlob) {
+      return URL.createObjectURL(pendingMintParams.imageBlob);
+    }
+    return undefined;
+  }, [pendingMintParams?.imageBlob]);
+
+  // Clean up object URL on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (revealImageUrl) {
+        URL.revokeObjectURL(revealImageUrl);
+      }
+    };
+  }, [revealImageUrl]);
 
   const handleNameChange = (value: string) => {
     const validation = validateName(value);
@@ -436,6 +454,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
                       mintNumber={currentJob.mintNumber}
                       customName={customName || undefined}
                       combat={currentJob.combat}
+                      imageUrl={revealImageUrl}
                     />
                   ) : (
                     <>

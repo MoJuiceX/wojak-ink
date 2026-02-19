@@ -85,12 +85,20 @@ export interface TotalMintPrice {
   totalXch: number;
 }
 
+interface PendingMintParams {
+  imageBlob: Blob;
+  selectedLayers: Record<string, string>;
+  selectedColors: Record<string, string>;
+  mintType: 'free' | 'paid';
+}
+
 interface MintContextValue {
   credits: MintCredits | null;
   mintStep: MintStep;
   currentJob: MintJob | null;
   errorMessage: string | null;
   pendingMintType: 'free' | 'paid' | null;
+  pendingMintParams: PendingMintParams | null;
   mintingPaused: boolean;
   customName: string;
   setCustomName: (name: string) => void;
@@ -638,6 +646,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
       currentJob,
       errorMessage,
       pendingMintType: pendingMintParams?.mintType ?? null,
+      pendingMintParams,
       mintingPaused,
       customName,
       setCustomName,
