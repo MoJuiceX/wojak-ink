@@ -23,9 +23,9 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: rgba(255, 255, 255, 0.7);
+  background: var(--color-black-40);
+  border: 1px solid var(--color-white-15);
+  color: var(--color-white-70);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -51,20 +51,20 @@
 
 /* Hover/active states */
 .mobile-game-btn:hover {
-  background: rgba(0, 0, 0, 0.6);
-  border-color: rgba(255, 255, 255, 0.25);
-  color: rgba(255, 255, 255, 0.9);
+  background: var(--color-black-60);
+  border-color: var(--color-white-25);
+  color: var(--color-white-90);
 }
 
 .mobile-game-btn:active {
   transform: scale(0.95);
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--color-black-70);
 }
 
 /* Close button specific styling */
 .mobile-game-btn-close {
   /* Slightly more visible as primary action */
-  background: rgba(0, 0, 0, 0.45);
+  background: var(--color-black-45);
 }
 
 /* Landscape orientation - move buttons slightly lower to avoid camera cutout */
