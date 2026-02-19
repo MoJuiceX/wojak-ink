@@ -27,6 +27,7 @@ import {
   ResponsiveExplorer,
   DesktopCharacterGrid,
 } from '@/components/gallery';
+import { YourWojakSection } from '@/components/gallery/YourWojakSection';
 import { NFTGridItem } from '@/components/gallery/NFTGridItem';
 import type { CharacterType } from '@/types/nft';
 import { PageSEO } from '@/components/seo';
@@ -501,6 +502,11 @@ function GalleryContent() {
               </motion.div>
             )}
           </AnimatePresence>
+        </div>
+
+        {/* Your Wojak Fighters Collection */}
+        <div className="mt-8">
+          <YourWojakSection />
         </div>
 
         {/* Responsive NFT Explorer (Modal on mobile, Panel on desktop) */}
