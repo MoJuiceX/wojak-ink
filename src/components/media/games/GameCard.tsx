@@ -93,7 +93,7 @@ export const GameCard = memo(function GameCard({
       {effects.badge && game.status === 'available' && (
         <div
           className="absolute -top-2 -left-2 text-2xl sm:text-xl pointer-events-none"
-          style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))', zIndex: 10 }}
+          style={{ filter: 'drop-shadow(0 2px 4px var(--color-black-30))', zIndex: 10 }}
           title={`Ranked ${effects.badge.label}`}
         >
           {effects.badge.emoji}
