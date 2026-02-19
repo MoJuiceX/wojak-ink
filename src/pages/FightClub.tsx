@@ -19,6 +19,7 @@ import { SwipeAutoRegister } from '@/components/game/SwipeAutoRegister';
 import { GameErrorBoundary } from '@/components/games/GameError';
 import { GameLoading } from '@/components/games/GameLoading';
 import { FightClubRankings } from '@/components/combat/FightClubRankings';
+import { SubscriptionBanner } from '@/components/combat/SubscriptionBanner';
 import { useUserProfile } from '@/contexts/UserProfileContext';
 import { useSageWallet } from '@/sage-wallet';
 
@@ -375,6 +376,9 @@ export default function FightClub() {
           </div>
           {playerDid && <RefreshButton did={playerDid} />}
         </div>
+
+        {/* Subscription Banner */}
+        <SubscriptionBanner playerDid={playerDid ?? null} />
 
         {/* Tab Content */}
         <div style={{ flex: 1, marginTop: '16px' }}>

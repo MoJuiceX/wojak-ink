@@ -506,6 +506,42 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     return coinId;
   }, []);
 
+  const sendXCH = useCallback(async (address: string, amount: number, fee: number = 0): Promise<string> => {
+    const client = signClientRef.current;
+    const session = currentSessionRef.current;
+
+    if (!client || !session) {
+      throw new Error('No active Sage wallet session');
+    }
+
+    // Amount in mojos (1 XCH = 1e12 mojos)
+    const amountMojos = Math.floor(amount * 1e12);
+    const feeMojos = Math.floor(fee * 1e12);
+
+    const result = await client.request({
+      topic: session.topic,
+      chainId: CHIA_CHAIN,
+      request: {
+        method: ChiaMethod.Send,
+        params: {
+          address,
+          amount: amountMojos,
+          fee: feeMojos,
+        },
+      },
+    });
+
+    // Result should contain transaction ID
+    const txResult = result as { transactionId?: string; transaction_id?: string; id?: string };
+    const txId = txResult.transactionId || txResult.transaction_id || txResult.id;
+
+    if (!txId) {
+      throw new Error('Transaction submitted but no ID returned');
+    }
+
+    return txId;
+  }, []);
+
   const getDIDs = useCallback(async (): Promise<string[]> => {
     const session = currentSessionRef.current;
 
@@ -586,6 +622,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     getNFTs,
     getDIDs,
     getNFTCoinId,
+    sendXCH,
   };
 
   return (

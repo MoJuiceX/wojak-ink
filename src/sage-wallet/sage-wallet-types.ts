@@ -163,6 +163,7 @@ export interface SageWalletActions {
   getNFTs: (collectionId?: string) => Promise<MintGardenNFT[]>;
   getDIDs: () => Promise<string[]>;
   getNFTCoinId: (launcherId: string) => Promise<string>;
+  sendXCH: (address: string, amount: number, fee?: number) => Promise<string>;
 }
 
 // Combined context type
