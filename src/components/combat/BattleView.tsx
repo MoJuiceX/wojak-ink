@@ -14,7 +14,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Bot } from 'lucide-react';
+import { Bot, Swords } from 'lucide-react';
 import { HPBar } from './HPBar';
 import { TurnLog } from './TurnLog';
 import { MoveButtons } from './MoveButtons';
@@ -417,14 +417,38 @@ export function BattleView({ battleId, playerNftId, staticBattleData, autoPlay, 
         <div className="grid grid-cols-2 gap-4 p-4" style={{ position: 'relative', zIndex: 2 }}>
           {/* Player side (left) */}
           <div className="flex flex-col gap-2" style={{ position: 'relative' }}>
-            {playerFighter?.imageUrl && (
+            {playerFighter && (
               <div className={`battle-nft-image battle-slide-left ${playerImgClass}`}>
-                <img
-                  src={playerFighter.imageUrl}
-                  alt="Your fighter"
-                  className="w-full h-full object-cover"
-                  style={{ borderRadius: 'var(--radius-md)' }}
-                />
+                {playerFighter.imageUrl ? (
+                  <img
+                    src={playerFighter.imageUrl}
+                    alt="Your fighter"
+                    className="w-full h-full object-cover"
+                    style={{ borderRadius: 'var(--radius-md)' }}
+                    onError={(e) => {
+                      const img = e.target as HTMLImageElement;
+                      img.style.display = 'none';
+                      img.nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                ) : null}
+                <div
+                  className={playerFighter.imageUrl ? 'hidden' : ''}
+                  style={{
+                    display: playerFighter.imageUrl ? undefined : 'flex',
+                    width: '100%',
+                    height: '100%',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexDirection: 'column',
+                    gap: 4,
+                    background: 'var(--color-surface)',
+                    borderRadius: 'var(--radius-md)',
+                  }}
+                >
+                  <Swords size={32} style={{ color: 'var(--color-text-muted)' }} />
+                  <span className="text-xs text-muted">#{playerFighter.edition}</span>
+                </div>
               </div>
             )}
             <div className="flex items-center justify-between">
@@ -472,14 +496,38 @@ export function BattleView({ battleId, playerNftId, staticBattleData, autoPlay, 
               >
                 <Bot size={48} style={{ color: 'var(--color-cyan)' }} />
               </div>
-            ) : opponentFighter?.imageUrl ? (
+            ) : opponentFighter ? (
               <div className={`battle-nft-image battle-slide-right ${opponentImgClass}`}>
-                <img
-                  src={opponentFighter.imageUrl}
-                  alt="Opponent"
-                  className="w-full h-full object-cover"
-                  style={{ borderRadius: 'var(--radius-md)' }}
-                />
+                {opponentFighter.imageUrl ? (
+                  <img
+                    src={opponentFighter.imageUrl}
+                    alt="Opponent"
+                    className="w-full h-full object-cover"
+                    style={{ borderRadius: 'var(--radius-md)' }}
+                    onError={(e) => {
+                      const img = e.target as HTMLImageElement;
+                      img.style.display = 'none';
+                      img.nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                ) : null}
+                <div
+                  className={opponentFighter.imageUrl ? 'hidden' : ''}
+                  style={{
+                    display: opponentFighter.imageUrl ? undefined : 'flex',
+                    width: '100%',
+                    height: '100%',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexDirection: 'column',
+                    gap: 4,
+                    background: 'var(--color-surface)',
+                    borderRadius: 'var(--radius-md)',
+                  }}
+                >
+                  <Swords size={32} style={{ color: 'var(--color-text-muted)' }} />
+                  <span className="text-xs text-muted">#{opponentFighter.edition}</span>
+                </div>
               </div>
             ) : null}
             <div className="flex items-center justify-between">
