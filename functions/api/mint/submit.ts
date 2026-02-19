@@ -26,9 +26,7 @@ import { checkRateLimit, getRateLimitKey, MINT_RATE_LIMITS } from '../../lib/rat
 import { consolidateTraits } from './traitResolver';
 import { sha256Hex, base64ToUint8Array } from './uploadToIPFS';
 import { logMintStep } from './auditHelper';
-import type { CombatType } from '../../../src/lib/combat/types';
-import { validateMoveSelection } from '../../../src/lib/combat/data/moves';
-import { calculateCombatIdentity } from '../../../src/lib/combat/identity-calculator';
+// Combat moves are now auto-assigned server-side in process.ts
 
 interface Env extends ProcessEnv {
   DB: D1Database;
@@ -58,16 +56,7 @@ interface SubmitBody {
   mintType?: 'paid' | 'free';
   idempotencyKey?: string;
   customName?: string;
-  combatMoves?: string[];
-}
-
-/** Validate combat move selection for a given type. Exported for testing. */
-export function validateCombatMoves(
-  moves: string[],
-  combatType: CombatType,
-): { valid: boolean; error?: string } {
-  const result = validateMoveSelection(moves, combatType);
-  return result;
+  // combatMoves removed — auto-assigned server-side in process.ts
 }
 
 export const onRequest: PagesFunction<Env> = async (context) => {
@@ -154,33 +143,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     }
   }
 
-  // ── Validate combat moves (optional — required for combat-ready mints) ──
-  const combatMoves = body.combatMoves;
-  let combatMovesJson: string | null = null;
-  if (combatMoves && Array.isArray(combatMoves) && combatMoves.length > 0) {
-    // Build trait list from selectedLayers (same logic as CombatPreview)
-    const traits: { traitId: string; layer: string }[] = [];
-    const colorMap: Record<string, string> = {};
-
-    for (const [layer, path] of Object.entries(selectedLayers)) {
-      if (!path || typeof path !== 'string') continue;
-      const parts = path.split('/');
-      if (parts.length >= 3) {
-        const traitId = `${parts[parts.length - 2]}_${parts[parts.length - 1].replace(/\.[^.]+$/, '')}`;
-        traits.push({ traitId, layer });
-        // Map color by traitId (selectedColors is keyed by layer)
-        const hex = selectedColors[layer];
-        if (hex) colorMap[traitId] = hex;
-      }
-    }
-
-    const identity = calculateCombatIdentity({ traits, colors: colorMap, details: {} });
-    const moveValidation = validateCombatMoves(combatMoves, identity.type);
-    if (!moveValidation.valid) {
-      return errorResponse(moveValidation.error || 'Invalid combat moves', 400);
-    }
-    combatMovesJson = JSON.stringify(combatMoves);
-  }
+  // Combat moves are now auto-assigned server-side in process.ts
 
   try {
     // ── Idempotency check ──
@@ -359,9 +322,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
             wallet_address, idempotency_key, layers_json, colors_json,
             image_base64_hash, mint_type, credit_cost, xch_price_mojos,
             surcharge_xch, highest_surcharge_trait,
-            step, wallet_lock, credit_spend_id, expires_at, custom_name,
-            combat_moves_json
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'queued', ?, NULL, ?, ?, ?)`
+            step, wallet_lock, credit_spend_id, expires_at, custom_name
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'queued', ?, NULL, ?, ?)`
         ).bind(
           wallet, idempotencyKey,
           JSON.stringify(selectedLayers), JSON.stringify(selectedColors),
@@ -371,8 +333,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           surchargeStored, highestTrait,
           wallet, // wallet_lock = wallet_address (activates mutex)
           expiresAt,
-          customName || null,
-          combatMovesJson
+          customName || null
         )
       );
 
