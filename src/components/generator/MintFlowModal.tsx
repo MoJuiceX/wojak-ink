@@ -11,6 +11,7 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X, Loader2, CheckCircle, AlertCircle, Copy, ExternalLink, Wallet, Share2, Sparkles } from 'lucide-react';
 import { useMint } from '@/contexts/MintContext';
 import { generateRandomName, validateName, MAX_NAME_LENGTH } from '@/lib/nameGenerator';
+import { FighterRevealCard } from './FighterRevealCard';
 
 interface MintFlowModalProps {
   isOpen: boolean;
@@ -429,15 +430,26 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
               {/* ── Success ── */}
               {isSuccess && currentJob && (
                 <div className="w-full flex flex-col gap-3">
-                  {/* Celebration rings */}
-                  <div className="relative flex items-center justify-center" style={{ height: 0 }}>
-                    <div className="mint-celebrate-ring mint-celebrate-ring-1" style={{ width: 60, height: 60, top: -30, left: 'calc(50% - 30px)' }} />
-                    <div className="mint-celebrate-ring mint-celebrate-ring-2" style={{ width: 60, height: 60, top: -30, left: 'calc(50% - 30px)' }} />
-                    <div className="mint-celebrate-ring mint-celebrate-ring-3" style={{ width: 60, height: 60, top: -30, left: 'calc(50% - 30px)' }} />
-                  </div>
-                  <p className="text-secondary text-sm">
-                    Your Wojak #{currentJob.mintNumber}
-                  </p>
+                  {/* Fighter Reveal Card if combat data available */}
+                  {currentJob.combat && currentJob.mintNumber ? (
+                    <FighterRevealCard
+                      mintNumber={currentJob.mintNumber}
+                      customName={customName || undefined}
+                      combat={currentJob.combat}
+                    />
+                  ) : (
+                    <>
+                      {/* Fallback: Celebration rings for non-combat mints */}
+                      <div className="relative flex items-center justify-center" style={{ height: 0 }}>
+                        <div className="mint-celebrate-ring mint-celebrate-ring-1" style={{ width: 60, height: 60, top: -30, left: 'calc(50% - 30px)' }} />
+                        <div className="mint-celebrate-ring mint-celebrate-ring-2" style={{ width: 60, height: 60, top: -30, left: 'calc(50% - 30px)' }} />
+                        <div className="mint-celebrate-ring mint-celebrate-ring-3" style={{ width: 60, height: 60, top: -30, left: 'calc(50% - 30px)' }} />
+                      </div>
+                      <p className="text-secondary text-sm">
+                        Your Wojak #{currentJob.mintNumber}
+                      </p>
+                    </>
+                  )}
 
                   {/* Free mint credit info */}
                   {isFreeMint && (
