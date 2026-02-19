@@ -139,6 +139,26 @@ async function run(env: Env) {
   } catch (err) {
     console.error('[DID Indexer] Vote XP error:', err);
   }
+
+  // Check for timed-out combat turns (30s timeout with AI fallback)
+  try {
+    const timeoutHeaders: Record<string, string> = {};
+    if (env.ADMIN_SECRET) {
+      timeoutHeaders['Authorization'] = `Bearer ${env.ADMIN_SECRET}`;
+    }
+    const timeoutRes = await fetch('https://wojak.ink/api/combat/check-timeouts', {
+      method: 'POST',
+      headers: timeoutHeaders,
+    });
+    if (timeoutRes.ok) {
+      const data = await timeoutRes.json() as { resolved?: number; forfeited?: number };
+      console.log(`[DID Indexer] Timeouts: ${data.resolved ?? 0} resolved, ${data.forfeited ?? 0} forfeited`);
+    } else {
+      console.error(`[DID Indexer] Timeout check returned ${timeoutRes.status}`);
+    }
+  } catch (err) {
+    console.error('[DID Indexer] Timeout check error:', err);
+  }
 }
 
 async function syncDIDHoldings(env: Env, did: string): Promise<'changed' | 'unchanged' | 'skipped'> {
