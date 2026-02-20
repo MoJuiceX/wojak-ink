@@ -83,14 +83,10 @@ if (missing.length) {
   hasError = true;
 }
 
-if (orphaned.length > 0) {
-  if (strictMode) {
-    console.error('\n❌ Found', orphaned.length, 'orphaned files (not in manifest):\n  ' + orphaned.slice(0, 20).join('\n  '));
-    if (orphaned.length > 20) console.error('  ... and', orphaned.length - 20, 'more');
-    hasError = true;
-  } else {
-    console.warn('\n⚠️  Found', orphaned.length, 'orphaned files (not in manifest). Run with --strict to fail.');
-  }
+if (orphaned.length > 0 && strictMode) {
+  console.error('\n❌ Found', orphaned.length, 'orphaned files (not in manifest):\n  ' + orphaned.slice(0, 20).join('\n  '));
+  if (orphaned.length > 20) console.error('  ... and', orphaned.length - 20, 'more');
+  hasError = true;
 }
 
 if (hasError) {
@@ -101,4 +97,8 @@ console.log('\n✅ Manifest validation passed:');
 console.log('   Referenced files:', referencedFiles.size);
 console.log('   Actual files:', actualFiles.size);
 console.log('   Missing:', missing.length);
-console.log('   Orphaned:', orphaned.length);
+if (strictMode || orphaned.length === 0) {
+  console.log('   Orphaned:', orphaned.length);
+} else {
+  console.log('   Orphaned:', orphaned.length, '(run with --strict to fail)');
+}

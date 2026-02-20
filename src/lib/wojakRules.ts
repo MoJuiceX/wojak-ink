@@ -240,7 +240,8 @@ function ruleMaskBlocksOtherLayers(resolver: SelectionResolver): RuleResult {
   const maskPath = resolver.getPath('Mask');
 
   if (!isSelectionPathEmpty(maskPath)) {
-    const isCopium = maskPath.toLowerCase().includes('copium');
+    const path = maskPath ?? '';
+    const isCopium = path.toLowerCase().includes('copium');
     return {
       disabledLayers: isCopium ? ['MouthItem'] : ['MouthItem', 'FacialHair'],
       reason: 'Deselect Mask',

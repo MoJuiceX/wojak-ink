@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "verify-manifest": "node scripts/verify-manifest-assets.mjs",
-    "build": "npm run verify-manifest && tsc -b && vite build",
+    "build": "node scripts/verify-manifest-assets.mjs && tsc -b && vite build",
     "icons": "node scripts/generate-icons.mjs",
     "build:prerender": "npm run build && node scripts/prerender.mjs",
     "lint": "eslint .",

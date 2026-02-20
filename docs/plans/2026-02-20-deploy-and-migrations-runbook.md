@@ -117,3 +117,9 @@ curl -s -X POST "https://api.cloudflare.com/client/v4/zones/cf75e020a68dcccd8440
 | 076 | `076_burn_power_bonus.sql` | `burn_power_grants` table; required for burn +50 power assign |
 
 Existing mint-related migrations (030, 031, 032, 034) are documented in `docs/LAUNCH-READINESS.md`; ensure those are applied as well before launch.
+
+---
+
+## 5. Troubleshooting
+
+**`npm warn Unknown env config "devdir"`** — This comes from your environment (e.g. `~/.npmrc` or another tool). To silence it for the session: `unset npm_config_devdir` then run `npm run build`. To fix permanently, remove any `devdir` setting from `~/.npmrc`.
