@@ -99,6 +99,8 @@ export const LAYER_Z_INDEX: Record<string, number> = {
   MouthOverBeerHat: 12.5,  // Cig, Joint, Cohiba drawn on top of Beer Hat
   BandanaMaskOverRonin: 13,
   NeckbeardOverRonin: 13.5, // right 50% of neckbeard over Ronin Helmet
+  MouthBaseOverNeckbeard: 13.6, // MouthBase re-drawn on top of NeckbeardOverRonin
+  MouthItemOverNeckbeard: 13.7, // MouthItem re-drawn on top of NeckbeardOverRonin
   EyesOverHead: 14,
   EyesOverStandardCut: 15,
   MaskOverStandardCut: 16,

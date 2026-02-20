@@ -1082,6 +1082,24 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
         layerName: 'NeckbeardOverRonin',
         clipLeftPercent: 0.5, // right 50% renders on top of helmet
       });
+
+      // MouthBase and MouthItem must render on top of NeckbeardOverRonin
+      const mouthBasePath = selectedLayers.MouthBase;
+      if (mouthBasePath) {
+        layers.push({
+          path: mouthBasePath,
+          zIndex: LAYER_Z_INDEX.MouthBaseOverNeckbeard,
+          layerName: 'MouthBaseOverNeckbeard',
+        });
+      }
+      const mouthItemPath = selectedLayers.MouthItem;
+      if (mouthItemPath) {
+        layers.push({
+          path: mouthItemPath,
+          zIndex: LAYER_Z_INDEX.MouthItemOverNeckbeard,
+          layerName: 'MouthItemOverNeckbeard',
+        });
+      }
     }
   }
 
