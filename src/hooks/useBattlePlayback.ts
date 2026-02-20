@@ -2,7 +2,7 @@
 // Battle Playback Engine — orchestrates timed animations, audio, particles, and DOM effects
 // Takes TurnResult[] and plays them back with calculated delays from ANIM_TIMING.
 
-import { useRef, useCallback, useState } from 'react';
+import { useRef, useCallback, useState, useEffect } from 'react';
 import type { TurnResult } from '@/lib/combat/battle-state';
 import type { CombatType } from '@/lib/combat/types';
 import type { AttackPattern } from '@/lib/combat/particles';
@@ -366,6 +366,16 @@ export function useBattlePlayback(
   const setSpeed = useCallback((n: number) => {
     speedRef.current = n;
     setSpeedState(n);
+  }, []);
+
+  // Clean up all timers when component unmounts
+  useEffect(() => {
+    return () => {
+      for (const timer of timersRef.current) {
+        clearTimeout(timer);
+      }
+      timersRef.current = [];
+    };
   }, []);
 
   const stop = useCallback(() => {
