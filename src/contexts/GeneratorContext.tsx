@@ -31,6 +31,13 @@ import { GENERATOR_PALETTE_HEX } from '@/components/generator/ColorPicker';
 import { renderPreview, renderThumbnail, downloadImage } from '@/services/canvasRenderer';
 import { createInitialState, generatorReducer, type GeneratorState } from '@/contexts/generatorReducer';
 import { canExportOrSave, getMissingRequiredLayers, isUILayerName } from '@/contexts/generatorStateUtils';
+import {
+  getWeightedRandomTrait,
+  hasWeightedFrequencies,
+  normalizeName,
+  addTrait as addWeightedTrait,
+  findMatchingTrait as findInFrequencies,
+} from '@/lib/weightedRandomizer';
 
 // ============ Randomizer Helpers ============
 
@@ -571,15 +578,6 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
   const randomize = useCallback(async () => {
     const randomSelections: SelectedLayers = {};
 
-    // Import weighted randomizer utilities
-    const {
-      getWeightedRandomTrait,
-      hasWeightedFrequencies,
-      normalizeName,
-      addTrait: addWeightedTrait,
-      findMatchingTrait: findInFrequencies,
-    } = await import('@/lib/weightedRandomizer');
-
     /**
      * Find a unified trait by weighted trait name
      * Matches trait names to frequency keys using normalization
@@ -773,14 +771,6 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
   }, []);
 
   const randomizeLayer = useCallback(async (layer: UILayerName) => {
-    const {
-      getWeightedRandomTrait,
-      hasWeightedFrequencies,
-      normalizeName,
-      addTrait: addWeightedTrait,
-      findMatchingTrait: findInFrequencies,
-    } = await import('@/lib/weightedRandomizer');
-
     const findUnifiedTraitByName = (
       traits: UnifiedTrait[],
       traitName: string
