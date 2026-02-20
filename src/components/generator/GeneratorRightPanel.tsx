@@ -18,6 +18,7 @@ import { BEER_HAT_COMPATIBLE_HEADS } from '@/lib/generatorTraitIds';
 import type { UILayerName } from '@/lib/wojakRules';
 import type { UnifiedTrait } from '@/services/generatorService';
 import { G2TraitCard } from './TraitSelector';
+import { CombatPreview } from './CombatPreview';
 
 /** Layers where G1 traits can be colored (Base, Mouth, etc. cannot) */
 const LAYERS_WITH_G1_COLOR: UILayerName[] = ['Clothes', 'Head', 'Eyes'];
@@ -540,6 +541,9 @@ export function GeneratorRightPanel() {
         maxHeight: '100%',
       }}
     >
+      {/* Combat Preview — shows type and nature based on current selections */}
+      <CombatPreview />
+
       {/* G1 Military Beret: "Pick a color to use new design" — swatches switch to G2 */}
       {isG1MilitaryBeret && (
         <div className="generator-panel-section flex-shrink-0">

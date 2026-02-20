@@ -17,6 +17,15 @@ const MAX_PAGES = 50;      // Safety cap on pagination
 const D1_BATCH_SIZE = 25;  // Max statements per D1 batch call
 const CIRCUIT_BREAKER_THRESHOLD = 5; // Consecutive API failures before aborting
 
+// Power level calculation constants (same as _powerLevel.ts)
+const POWER_LEVEL_MAX = 10000;
+const QUALITY_WEIGHT = 1.0;
+const VALUE_BASE = 50;
+const VALUE_LOG_SCALE = 30;
+const BREADTH_BONUS = 15;
+const CREATOR_QUALITY_WEIGHT = 0.5;
+const CREATOR_SPREAD_BONUS = 10;
+
 export default {
   async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
     ctx.waitUntil(run(env));
@@ -297,6 +306,17 @@ async function syncDIDHoldings(env: Env, did: string): Promise<'changed' | 'unch
   ).bind(hasPhase1 ? 1 : 0, did).run();
 
   console.log(`[DID Indexer] DID ${did.slice(0, 20)}...: +${toAdd.length} -${toRemove.length} NFTs`);
+
+  // Event-driven power level recalculation
+  try {
+    const newPowerLevel = await recalcPowerLevel(env.DB, did);
+    if (newPowerLevel !== null) {
+      console.log(`[DID Indexer] DID ${did.slice(0, 20)}... power level: ${newPowerLevel}`);
+    }
+  } catch (err) {
+    console.warn(`[DID Indexer] Power level recalc error for DID ${did.slice(0, 20)}...:`, err);
+  }
+
   return 'changed';
 }
 
@@ -371,4 +391,81 @@ async function batchChunked(db: D1Database, statements: D1PreparedStatement[]): 
 
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Recalculate power level for a player after holdings change.
+ * Same algorithm as _powerLevel.ts but inline for worker use.
+ */
+async function recalcPowerLevel(db: D1Database, did: string): Promise<number | null> {
+  const player = await db.prepare(
+    'SELECT wallet_address, phase1_verified FROM game_players WHERE did_id = ?'
+  ).bind(did).first<{ wallet_address: string; phase1_verified: number }>();
+
+  if (!player) return null;
+
+  // Only calculate for verified holders
+  if (!player.phase1_verified) {
+    return 0;
+  }
+
+  const walletAddress = player.wallet_address;
+
+  // Calculate holdings score
+  const holdings = await db.prepare(`
+    SELECT
+      dh.nft_id,
+      dh.creator_wallet,
+      COALESCE(ws.net_score, 0) as net_score,
+      COALESCE(pm.trait_surcharge_xch, 0) as surcharge
+    FROM did_holdings dh
+    LEFT JOIN wojak_scores ws ON ws.nft_id = dh.nft_id
+    LEFT JOIN phase2_mints pm ON pm.mint_number = dh.edition_number
+    WHERE dh.did_id = ? AND dh.collection = 'phase2'
+  `).bind(did).all();
+
+  let holdingsScore = 0;
+  const seenCreators = new Set<string>();
+
+  for (const nft of holdings.results) {
+    const quality = (nft.net_score as number) * QUALITY_WEIGHT;
+    const surchargeXch = (nft.surcharge as number) / 100000;
+    const value = VALUE_BASE + VALUE_LOG_SCALE * Math.log(1 + surchargeXch);
+
+    let breadth = 0;
+    const creator = nft.creator_wallet as string;
+    if (creator && creator !== walletAddress && !seenCreators.has(creator)) {
+      seenCreators.add(creator);
+      breadth = BREADTH_BONUS;
+    }
+
+    holdingsScore += quality + value + breadth;
+  }
+
+  // Calculate creations score
+  const creationStats = await db.prepare(`
+    SELECT
+      COALESCE(SUM(ws.net_score), 0) as total_net_score,
+      COUNT(DISTINCT dh.did_id) as unique_collectors
+    FROM wojak_scores ws
+    LEFT JOIN did_holdings dh ON dh.nft_id = ws.nft_id AND dh.did_id != ?
+    WHERE ws.creator_wallet = ?
+  `).bind(did, walletAddress).first();
+
+  const creatorQuality = ((creationStats?.total_net_score as number) || 0) * CREATOR_QUALITY_WEIGHT;
+  const creatorSpread = ((creationStats?.unique_collectors as number) || 0) * CREATOR_SPREAD_BONUS;
+  const creationsScore = creatorQuality + creatorSpread;
+
+  // Total power level
+  const rawTotal = holdingsScore + creationsScore;
+  const powerLevel = Math.max(0, Math.min(POWER_LEVEL_MAX, Math.round(rawTotal)));
+
+  // Update the database
+  await db.prepare(`
+    UPDATE game_players
+    SET power_level = ?, power_level_updated_at = datetime('now'), updated_at = datetime('now')
+    WHERE did_id = ?
+  `).bind(powerLevel, did).run();
+
+  return powerLevel;
 }

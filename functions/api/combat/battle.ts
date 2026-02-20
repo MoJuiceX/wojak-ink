@@ -7,6 +7,27 @@ interface Env {
   DB: D1Database;
 }
 
+interface CombatBattleRow {
+  id: number;
+  status: string;
+  current_turn: number;
+  max_turns: number;
+  winner_nft: string | null;
+  fighter_a_nft: string;
+  fighter_b_nft: string;
+  elo_change_a: number | null;
+  elo_change_b: number | null;
+  xp_awarded_a: number | null;
+  xp_awarded_b: number | null;
+  started_at: string;
+  ended_at: string | null;
+}
+
+interface TurnRow {
+  turn_number: number;
+  turn_result: string | null;
+}
+
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     const url = new URL(context.request.url);
@@ -18,7 +39,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
     const battle = await db.prepare(
       'SELECT * FROM combat_battles WHERE id = ?'
-    ).bind(id).first<any>();
+    ).bind(id).first<CombatBattleRow>();
 
     if (!battle) return errorResponse('Battle not found', 404);
 
@@ -33,10 +54,12 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       'SELECT turn_number, turn_result FROM combat_turns WHERE battle_id = ? AND turn_result IS NOT NULL ORDER BY turn_number ASC'
     ).bind(id).all();
 
-    const turnLog: any[] = [];
-    for (const t of turns.results ?? []) {
+    const turnLog: Array<{ turn: number; [key: string]: unknown }> = [];
+    for (const t of (turns.results ?? []) as TurnRow[]) {
       try {
-        turnLog.push({ turn: (t as any).turn_number, ...JSON.parse((t as any).turn_result as string) });
+        if (t.turn_result) {
+          turnLog.push({ turn: t.turn_number, ...JSON.parse(t.turn_result) });
+        }
       } catch {
         // Skip corrupted turn data
       }

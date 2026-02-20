@@ -150,7 +150,7 @@ function buildG2Selection(
     }),
     ...(trait.id === 'Head_Beer-Hat' && {
       detailOption: trait.detailOptions?.find(d => d.name === 'Citrus')?.file ?? trait.detailOptions?.[0]?.file,
-      beerHatEditFocus: 'beer' as const,
+      beerHatEditFocus: 'underlayer' as const,
       beerHatUnderlayer: 'Head_Cap',
       beerHatUnderlayerG2: {
         traitId: 'Head_Cap',
@@ -200,7 +200,7 @@ const BEER_HAT_CARD_G2: G2Selection = {
   g2Category: 'Head',
   colors: {},
   detailOption: 'Head_Beer-Hat_detail_Tang.png',
-  beerHatEditFocus: 'beer',
+  beerHatEditFocus: 'underlayer',
   beerHatUnderlayer: 'Head_Cap',
   beerHatUnderlayerG2: {
     traitId: 'Head_Cap',
@@ -508,7 +508,7 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
       }),
       ...(trait.id === 'Head_Beer-Hat' && {
         detailOption: trait.detailOptions?.find(d => d.name === 'Citrus')?.file ?? trait.detailOptions?.[0]?.file,
-        beerHatEditFocus: 'beer' as const,
+        beerHatEditFocus: 'underlayer' as const,
         beerHatUnderlayer: 'Head_Cap',
         beerHatUnderlayerG2: {
           traitId: 'Head_Cap',

@@ -80,15 +80,23 @@ export const DETAIL_COMBAT_MAP: Record<string, Record<string, DetailCombatEntry>
 
   // ── Head_Beer-Hat ──────────────────────────────────────────────────
   'Head_Beer-Hat': {
+    '7up':            d('Head_Beer-Hat', '7up', 'AIR', 1, 'speed', 1),
     'Aw':             d('Head_Beer-Hat', 'Aw', 'NEUTRAL', 1, 'sp_def', 1),
+    'Budweiser':      d('Head_Beer-Hat', 'Budweiser', 'FIRE', 1, null, 0),
+    'Captain Morgan': d('Head_Beer-Hat', 'Captain Morgan', 'VENOM', 1, 'attack', 1),
+    'Citrus':         d('Head_Beer-Hat', 'Citrus', 'GRASS', 1, null, 0),
     'Coffee':         d('Head_Beer-Hat', 'Coffee', 'PSYCHE', 1, 'speed', 1),
     'Coke':           d('Head_Beer-Hat', 'Coke', 'NEUTRAL', 1, null, 0),
-    'Drpepper':       d('Head_Beer-Hat', 'Drpepper', 'VENOM', 1, null, 0),
-    'Mtndew':         d('Head_Beer-Hat', 'Mtndew', 'ELECTRIC', 1, 'speed', 1),
-    'Red-bull':       d('Head_Beer-Hat', 'Red-bull', 'AIR', 1, 'speed', 1),
+    'Corona':         d('Head_Beer-Hat', 'Corona', 'GRASS', 1, null, 0),
+    'Dr Pepper':      d('Head_Beer-Hat', 'Dr Pepper', 'VENOM', 1, null, 0),
+    'Heineken':       d('Head_Beer-Hat', 'Heineken', 'GRASS', 1, 'sp_def', 1),
+    'LaCroix':        d('Head_Beer-Hat', 'LaCroix', 'AIR', 1, null, 0),
+    'Modelo':         d('Head_Beer-Hat', 'Modelo', 'NEUTRAL', 1, 'defense', 1),
     'Monster':        d('Head_Beer-Hat', 'Monster', 'VENOM', 1, 'attack', 1),
-    'Monster-orange': d('Head_Beer-Hat', 'Monster-orange', 'DRAGON', 1, 'attack', 1),
-    'Citrus':         d('Head_Beer-Hat', 'Citrus', 'GRASS', 1, null, 0),
+    'Monster Orange': d('Head_Beer-Hat', 'Monster Orange', 'DRAGON', 1, 'attack', 1),
+    'Mtn Dew':        d('Head_Beer-Hat', 'Mtn Dew', 'ELECTRIC', 1, 'speed', 1),
+    'Red Bull':       d('Head_Beer-Hat', 'Red Bull', 'AIR', 1, 'speed', 1),
+    'Sunny D':        d('Head_Beer-Hat', 'Sunny D', 'FIRE', 1, 'speed', 1),
     'Tang':           d('Head_Beer-Hat', 'Tang', 'FIRE', 1, null, 0),
   },
 
@@ -118,4 +126,67 @@ export function getDetailBonus(
   detailOption: string,
 ): DetailCombatEntry | undefined {
   return DETAIL_COMBAT_MAP[traitId]?.[detailOption];
+}
+
+/**
+ * Logo combat entry — simpler structure since logos are shared across traits.
+ */
+export interface LogoCombatEntry {
+  type: CombatType;
+  typePoints: number;
+  nature: StatName | null;
+  naturePoints: number;
+}
+
+/**
+ * Shared logo combat bonuses — applies to any trait with a logoOption.
+ * Keys match ASTRONAUT_LOGOS values exactly (case-sensitive).
+ * Type reasoning: color/culture/meme association.
+ */
+export const LOGO_COMBAT_MAP: Record<string, LogoCombatEntry> = {
+  'BEPE':        { type: 'VENOM',    typePoints: 1, nature: 'attack',  naturePoints: 1 },
+  'CASTER':      { type: 'PSYCHE',   typePoints: 1, nature: 'speed',   naturePoints: 1 },
+  'CAT':         { type: 'AIR',      typePoints: 1, nature: 'speed',   naturePoints: 1 },
+  'CHAD':        { type: 'FIRE',     typePoints: 1, nature: 'attack',  naturePoints: 1 },
+  'XCH':         { type: 'GRASS',    typePoints: 1, nature: null,      naturePoints: 0 },
+  'CNI':         { type: 'NEUTRAL',  typePoints: 1, nature: 'defense', naturePoints: 1 },
+  'COOKIES':     { type: 'NEUTRAL',  typePoints: 1, nature: null,      naturePoints: 0 },
+  'Dexi Bucks':  { type: 'ELECTRIC', typePoints: 1, nature: 'speed',   naturePoints: 1 },
+  'DIG':         { type: 'GRASS',    typePoints: 1, nature: 'defense', naturePoints: 1 },
+  'DWB':         { type: 'NEUTRAL',  typePoints: 1, nature: null,      naturePoints: 0 },
+  'G4M':         { type: 'ELECTRIC', typePoints: 1, nature: 'attack',  naturePoints: 1 },
+  'GYATT':       { type: 'AIR',      typePoints: 1, nature: null,      naturePoints: 0 },
+  'HOA':         { type: 'NEUTRAL',  typePoints: 1, nature: 'sp_def',  naturePoints: 1 },
+  'HONK':        { type: 'AIR',      typePoints: 1, nature: 'sp_def',  naturePoints: 1 },
+  'JOCK':        { type: 'FIRE',     typePoints: 1, nature: 'defense', naturePoints: 1 },
+  'LOVE':        { type: 'PSYCHE',   typePoints: 1, nature: 'sp_def',  naturePoints: 1 },
+  'MAX':         { type: 'ELECTRIC', typePoints: 1, nature: 'sp_atk',  naturePoints: 1 },
+  'MIRROR':      { type: 'PSYCHE',   typePoints: 1, nature: null,      naturePoints: 0 },
+  'MMM':         { type: 'VENOM',    typePoints: 1, nature: null,      naturePoints: 0 },
+  'MOG':         { type: 'DRAGON',   typePoints: 1, nature: 'attack',  naturePoints: 1 },
+  'MonkeyZoo':   { type: 'GRASS',    typePoints: 1, nature: 'attack',  naturePoints: 1 },
+  'MRMT':        { type: 'NEUTRAL',  typePoints: 1, nature: null,      naturePoints: 0 },
+  'NeckCoin':    { type: 'NEUTRAL',  typePoints: 1, nature: 'sp_def',  naturePoints: 1 },
+  'NWO':         { type: 'VENOM',    typePoints: 1, nature: 'attack',  naturePoints: 1 },
+  'PEPEcoin':    { type: 'VENOM',    typePoints: 1, nature: null,      naturePoints: 0 },
+  'PIZZA':       { type: 'FIRE',     typePoints: 1, nature: null,      naturePoints: 0 },
+  'PP':          { type: 'AIR',      typePoints: 1, nature: null,      naturePoints: 0 },
+  'Spacebucks':  { type: 'ELECTRIC', typePoints: 1, nature: null,      naturePoints: 0 },
+  'SPELLPOWER':  { type: 'PSYCHE',   typePoints: 1, nature: 'sp_atk',  naturePoints: 1 },
+  'SPROUT':      { type: 'GRASS',    typePoints: 1, nature: null,      naturePoints: 0 },
+  'STONKS':      { type: 'NEUTRAL',  typePoints: 1, nature: 'speed',   naturePoints: 1 },
+  'TANG':        { type: 'FIRE',     typePoints: 1, nature: null,      naturePoints: 0 },
+  'TVL':         { type: 'NEUTRAL',  typePoints: 1, nature: 'defense', naturePoints: 1 },
+  'WITCHER':     { type: 'VENOM',    typePoints: 1, nature: 'sp_def',  naturePoints: 1 },
+  'WOJAK':       { type: 'NEUTRAL',  typePoints: 1, nature: null,      naturePoints: 0 },
+};
+
+/**
+ * Look up the combat bonus for a logo option.
+ *
+ * @param logoOption logo name exactly as it appears in ASTRONAUT_LOGOS
+ * @returns the LogoCombatEntry or undefined if no mapping exists
+ */
+export function getLogoBonus(logoOption: string): LogoCombatEntry | undefined {
+  return LOGO_COMBAT_MAP[logoOption];
 }

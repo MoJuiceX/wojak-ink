@@ -8,6 +8,44 @@ import { initFighterState, initBattleState } from '../../../src/lib/combat/battl
 import { calculateXPAward, calculateELOChange, calculateLevelFromXP } from '../../../src/lib/combat/xp-elo-calculator';
 import type { CombatType } from '../../../src/lib/combat/types';
 
+interface CombatBattleRow {
+  id: number;
+  fighter_a_nft: string;
+  fighter_b_nft: string;
+  fighter_a_did: string;
+  fighter_b_did: string;
+  fighter_a_level: number;
+  fighter_b_level: number;
+  fighter_a_elo: number;
+  fighter_b_elo: number;
+  current_turn: number;
+  status: string;
+  winner_nft: string | null;
+}
+
+interface CombatFighterRow {
+  nft_id: string;
+  owner_did: string;
+  combat_type: string;
+  nature: string;
+  ability: string;
+  move_1: string;
+  move_2: string;
+  move_3: string;
+  move_4: string;
+  level: number;
+  xp: number;
+  elo_rating: number;
+}
+
+interface CombatTurnRow {
+  battle_id: number;
+  turn_number: number;
+  fighter_a_move: string | null;
+  fighter_b_move: string | null;
+  turn_result: string | null;
+}
+
 interface Env {
   DB: D1Database;
 }
@@ -31,7 +69,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   // Verify battle
   const battle = await db.prepare(
     "SELECT * FROM combat_battles WHERE id = ? AND status IN ('active', 'waiting_moves')"
-  ).bind(battle_id).first<any>();
+  ).bind(battle_id).first<CombatBattleRow>();
 
   if (!battle) return errorResponse('Battle not found or not active', 404);
 
@@ -44,7 +82,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   const side = isA ? 'a' : 'b';
 
   // Validate move belongs to fighter
-  const fighter = await db.prepare('SELECT * FROM combat_fighters WHERE nft_id = ?').bind(nftId).first<any>();
+  const fighter = await db.prepare('SELECT * FROM combat_fighters WHERE nft_id = ?').bind(nftId).first<CombatFighterRow>();
   if (!fighter) return errorResponse('Fighter not found', 500);
 
   const validMoves = [fighter.move_1, fighter.move_2, fighter.move_3, fighter.move_4];
@@ -54,7 +92,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   const currentTurn = battle.current_turn;
   let turnRecord = await db.prepare(
     'SELECT * FROM combat_turns WHERE battle_id = ? AND turn_number = ?'
-  ).bind(battle_id, currentTurn).first<any>();
+  ).bind(battle_id, currentTurn).first<CombatTurnRow>();
 
   if (!turnRecord) {
     await db.prepare('INSERT INTO combat_turns (battle_id, turn_number) VALUES (?, ?)').bind(battle_id, currentTurn).run();
@@ -76,12 +114,12 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   // Check if both moves submitted
   const updated = await db.prepare(
     'SELECT * FROM combat_turns WHERE battle_id = ? AND turn_number = ?'
-  ).bind(battle_id, currentTurn).first<any>();
+  ).bind(battle_id, currentTurn).first<CombatTurnRow>();
 
   if (updated?.fighter_a_move && updated?.fighter_b_move) {
     // Both moves in — resolve turn (same pattern as submit-move.ts)
-    const fighterARow = await db.prepare('SELECT * FROM combat_fighters WHERE nft_id = ?').bind(battle.fighter_a_nft).first<any>();
-    const fighterBRow = await db.prepare('SELECT * FROM combat_fighters WHERE nft_id = ?').bind(battle.fighter_b_nft).first<any>();
+    const fighterARow = await db.prepare('SELECT * FROM combat_fighters WHERE nft_id = ?').bind(battle.fighter_a_nft).first<CombatFighterRow>();
+    const fighterBRow = await db.prepare('SELECT * FROM combat_fighters WHERE nft_id = ?').bind(battle.fighter_b_nft).first<CombatFighterRow>();
     if (!fighterARow || !fighterBRow) return errorResponse('Fighter data missing', 500);
 
     const stateA = initFighterState({

@@ -1168,6 +1168,22 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
     }
   }
 
+  // Copium mask on top of mouth and neckbeard when all are selected (e.g. Ronin + Copium + neckbeard + mouth)
+  // Ronin case: CopiumMaskOverRonin is at 13.2; NeckbeardOverRonin at 13.5; Mouth*OverNeckbeard at 13.6/13.7.
+  // Re-draw copium (right half) above those so the mask stays on top.
+  if (hasRonin && hasCopium && hasNeckbeard(selectedLayers)) {
+    const maskPathForCopium = selectedLayers.Mask;
+    if (maskPathForCopium) {
+      layers.push({
+        path: maskPathForCopium,
+        zIndex: LAYER_Z_INDEX.CopiumMaskOverMouthAndNeckbeard,
+        layerName: 'CopiumMaskOverMouthAndNeckbeard',
+        clipRightHalf: true,
+      });
+    }
+  }
+  // Non-Ronin: main-loop Mask is at z 7 (above mouth 5/6 and facial hair 4), so copium is already on top.
+
   // MouthOverNeckbeard (general case, not Ronin which is handled above)
   // Ensures mouth traits always render on top of neckbeard
   if (hasNeckbeard(selectedLayers) && !hasRonin) {

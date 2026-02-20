@@ -2,21 +2,35 @@
  * DemoBattle Component
  *
  * Auto-plays the demo battle immediately on mount.
+ * Battle order and first battle are randomized so different users see different demos.
  * Loops automatically: when battle ends, restarts after 3 seconds.
- * Replay button allows manual restart at any time.
  */
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { BattleView } from './BattleView';
-import { DEMO_BATTLE } from '@/lib/combat/demo-battle';
+import { DEMO_BATTLES } from '@/lib/combat/demo-battle';
+import { getBattleAudio } from '@/lib/combat/audio';
+import type { BattleData } from './BattleView';
+
+function shuffle<T>(array: T[]): T[] {
+  const out = [...array];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
 
 export function DemoBattle() {
-  const [key, setKey] = useState(0); // Incrementing remounts BattleView, restarting the demo
+  const [key, setKey] = useState(0);
+  const orderedBattles = useMemo(() => shuffle(DEMO_BATTLES), []);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const replayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const currentBattle: BattleData = orderedBattles[currentIndex];
+
   const handleReplay = useCallback(() => {
-    // Cancel any pending auto-restart
     if (replayTimerRef.current) {
       clearTimeout(replayTimerRef.current);
       replayTimerRef.current = null;
@@ -25,18 +39,20 @@ export function DemoBattle() {
   }, []);
 
   const handleDemoComplete = useCallback(() => {
-    // Auto-restart after 3 seconds
     replayTimerRef.current = setTimeout(() => {
+      setCurrentIndex(i => (i + 1) % orderedBattles.length);
       setKey(k => k + 1);
     }, 3000);
-  }, []);
+  }, [orderedBattles.length]);
 
-  // Clear timer on unmount to prevent memory leaks
+  // Clear timer and suspend audio on unmount
   useEffect(() => {
     return () => {
       if (replayTimerRef.current) {
         clearTimeout(replayTimerRef.current);
       }
+      // Suspend audio when leaving the demo
+      getBattleAudio().suspend();
     };
   }, []);
 
@@ -63,9 +79,9 @@ export function DemoBattle() {
       {/* Battle arena — key prop forces full remount on restart */}
       <BattleView
         key={key}
-        battleId={0}
-        playerNftId={DEMO_BATTLE.fighterA!.nft_id}
-        staticBattleData={DEMO_BATTLE}
+        battleId={currentBattle.id}
+        playerNftId={currentBattle.fighterA!.nft_id}
+        staticBattleData={currentBattle}
         autoPlay
         onDemoComplete={handleDemoComplete}
       />

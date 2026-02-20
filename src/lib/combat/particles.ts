@@ -207,6 +207,9 @@ export interface ParticleConfig {
   targetX?: number;
   targetY?: number;
   travelSpeed?: number;
+  /** Beam effect: line that extends over time (ClawCombat-style) */
+  beamTargetLength?: number;
+  beamAngle?: number;
 }
 
 // ── Particle Class ──────────────────────────────────────────────────────────
@@ -228,6 +231,10 @@ export class Particle {
   travelSpeed: number;
   /** Whether this particle is still approaching its target */
   private traveling: boolean;
+  /** Beam: current length, target length, angle (radians) */
+  beamLength: number;
+  beamTargetLength: number;
+  beamAngle: number;
 
   constructor(x: number, y: number, config: ParticleConfig) {
     this.x = x;
@@ -245,6 +252,9 @@ export class Particle {
     this.targetY = config.targetY ?? null;
     this.travelSpeed = config.travelSpeed ?? 0;
     this.traveling = this.targetX !== null && this.targetY !== null;
+    this.beamLength = 0;
+    this.beamTargetLength = config.beamTargetLength ?? 0;
+    this.beamAngle = config.beamAngle ?? 0;
   }
 
   get alive(): boolean {
@@ -259,6 +269,16 @@ export class Particle {
     if (!this.alive) return;
 
     const step = dt / 16; // normalize to ~60fps frame
+
+    // Beam: extend length then fade
+    if (this.beamTargetLength > 0) {
+      this.beamLength = Math.min(
+        this.beamLength + 15 * step,
+        this.beamTargetLength,
+      );
+      this.life -= 0.012 * step;
+      return;
+    }
 
     if (this.traveling && this.targetX !== null && this.targetY !== null) {
       // Projectile travel — move toward target
@@ -300,6 +320,30 @@ export class Particle {
 
     ctx.save();
     ctx.globalAlpha = this.alpha;
+
+    // Beam: draw stretching line (ClawCombat-style)
+    if (this.beamTargetLength > 0 && this.beamLength > 0) {
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.beamAngle);
+      ctx.strokeStyle = this.color;
+      ctx.lineWidth = this.size;
+      ctx.lineCap = 'round';
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(this.beamLength, 0);
+      ctx.stroke();
+      ctx.globalAlpha = this.alpha * 0.8;
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = this.size * 0.5;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(this.beamLength, 0);
+      ctx.stroke();
+      ctx.restore();
+      return;
+    }
 
     switch (this.shape) {
       case 'circle':
@@ -477,6 +521,74 @@ export interface SpawnAttackConfig {
   pattern: AttackPattern;
 }
 
+// ── Move-specific overrides (ClawCombat-style) ──────────────────────────────
+// Maps exact move name → pattern (and optional count). Checked first in resolveAttackPattern.
+
+export const MOVE_OVERRIDES: Record<string, { pattern: AttackPattern; count?: number }> = {
+  // Charge / rush
+  'Rug Pull Rush': { pattern: 'charge' },
+  'FOMO Rush': { pattern: 'charge' },
+  'Whale Splash': { pattern: 'charge' },
+  'YOLO Charge': { pattern: 'charge' },
+  'Face Plant': { pattern: 'charge' },
+  'Dive Bomb': { pattern: 'charge' },
+  'Pump It': { pattern: 'charge' },
+  // Slash / melee
+  'Diamond Hands': { pattern: 'slash' },
+  'Liquidation Punch': { pattern: 'slash' },
+  'Static Shock': { pattern: 'slash' },
+  'Cold Punch': { pattern: 'slash' },
+  'Karate Chop': { pattern: 'slash' },
+  'Quick Hands': { pattern: 'slash' },
+  'Touch Grass': { pattern: 'slash' },
+  'Solar Cope': { pattern: 'slash' },
+  'Brain Freeze': { pattern: 'slash' },
+  'Cross Counter': { pattern: 'slash' },
+  'Roundhouse Cope': { pattern: 'slash' },
+  'Gym Bro Punch': { pattern: 'slash' },
+  // Beam / strong special
+  'Flamethrower': { pattern: 'beam' },
+  'Meltdown': { pattern: 'beam' },
+  'Market Crash': { pattern: 'beam' },
+  'Dumpster Fire': { pattern: 'beam' },
+  'Zeus Strike': { pattern: 'beam' },
+  'Lightning Sell': { pattern: 'beam' },
+  'Brain Beam': { pattern: 'beam' },
+  'Aurora Cope': { pattern: 'beam' },
+  'Blizzard': { pattern: 'beam' },
+  'Absolute Zero': { pattern: 'beam' },
+  'Spirit Bomb': { pattern: 'beam' },
+  'Pressure Cannon': { pattern: 'beam' },
+  // Wave / pulse
+  'Thunder FUD': { pattern: 'wave' },
+  'Cope Song': { pattern: 'wave' },
+  'Soyjak Screech': { pattern: 'wave' },
+  // Drain
+  'Liquidity Drain': { pattern: 'drain' },
+  'Siphon Green': { pattern: 'drain' },
+  'Tax Farm': { pattern: 'drain' },
+  'Nightmare Farm': { pattern: 'drain' },
+  // Arc / throw
+  'Timber Yeet': { pattern: 'arc' },
+  'Avalanche Drop': { pattern: 'arc' },
+  // Self aura / buff
+  'Hopium Dose': { pattern: 'self_aura' },
+  'Gigachad Stance': { pattern: 'self_aura' },
+  'Charge Up': { pattern: 'self_aura' },
+  'HODL': { pattern: 'self_aura' },
+  'Bubble Wrap': { pattern: 'self_aura' },
+  'Bulk Up': { pattern: 'self_aura' },
+  'Grounded': { pattern: 'self_aura' },
+  'Focus Mode': { pattern: 'self_aura' },
+  'Grass Landing': { pattern: 'self_aura' },
+  'Read The Room': { pattern: 'self_aura' },
+  // Projectile
+  'Tears of Joy': { pattern: 'projectile' },
+  'FUD Spark': { pattern: 'projectile' },
+  'Zap': { pattern: 'projectile' },
+  'Bubble Pop': { pattern: 'projectile' },
+};
+
 // ── Utility ─────────────────────────────────────────────────────────────────
 
 function pick<T>(arr: T[]): T {
@@ -491,13 +603,28 @@ function randRange(min: number, max: number): number {
 
 function spawnBeam(cfg: SpawnAttackConfig, fx: TypeEffect, scale: PowerScaleResult): Particle[] {
   const particles: Particle[] = [];
-  const count = Math.floor(scale.particleCount);
   const dx = cfg.targetX - cfg.startX;
   const dy = cfg.targetY - cfg.startY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
   const baseAngle = Math.atan2(dy, dx);
 
-  for (let i = 0; i < count; i++) {
-    const t = i / count; // 0..1 along path
+  // One stretching beam line (ClawCombat-style)
+  particles.push(new Particle(cfg.startX, cfg.startY, {
+    color: pick(fx.colors),
+    size: (4 + randRange(0, 4)) * scale.particleSize,
+    life: 1.4,
+    speed: 0,
+    angle: baseAngle,
+    shape: 'circle', // unused; draw() uses beam path
+    gravity: 0,
+    beamTargetLength: distance,
+    beamAngle: baseAngle,
+  }));
+
+  // Trail particles along path
+  const trailCount = Math.floor(scale.particleCount * 0.4);
+  for (let i = 0; i < trailCount; i++) {
+    const t = i / trailCount;
     const spread = randRange(-8, 8);
     const perp = baseAngle + Math.PI / 2;
     particles.push(new Particle(
@@ -907,6 +1034,10 @@ export function resolveAttackPattern(
   power: number,
   effects?: MoveEffect[],
 ): AttackPattern {
+  // Move-specific override (ClawCombat-style)
+  const override = MOVE_OVERRIDES[moveName];
+  if (override) return override.pattern;
+
   const nameLower = moveName.toLowerCase();
 
   // Status moves — check effects first
@@ -945,4 +1076,72 @@ export function resolveAttackPattern(
   }
 
   return 'burst';
+}
+
+// ── Intro fog (ClawCombat-style: bottom-up rising mist, optional stagger) ─────
+
+const FOG_COLORS = ['rgba(200,220,255,0.22)', 'rgba(180,200,240,0.18)', 'rgba(220,230,255,0.14)'];
+const FOG_TOTAL = 30;
+
+export function spawnIntroFog(
+  width: number,
+  height: number,
+  batchIndex?: number,
+  totalBatches?: number,
+): Particle[] {
+  const particles: Particle[] = [];
+  const count = totalBatches
+    ? Math.ceil(FOG_TOTAL / totalBatches)
+    : FOG_TOTAL;
+  const startIdx = (batchIndex ?? 0) * count;
+  for (let i = 0; i < count; i++) {
+    const startX = Math.random() * width;
+    const startY = height - 20 + Math.random() * 40;
+    const speed = 0.5 + Math.random() * 0.35;
+    const angle = -Math.PI / 2 + (Math.random() - 0.5) * 0.4;
+    particles.push(new Particle(
+      startX,
+      startY,
+      {
+        color: FOG_COLORS[(startIdx + i) % FOG_COLORS.length],
+        size: randRange(40, 120),
+        life: randRange(80, 160),
+        speed,
+        angle,
+        shape: 'circle',
+        gravity: 0,
+      },
+    ));
+  }
+  return particles;
+}
+
+// ── Victory confetti (ClawCombat-style) ───────────────────────────────────────
+
+const CONFETTI_COLORS = [
+  '#FF6B00', '#FFD060', '#22c55e', '#00d4ff', '#a855f7',
+  '#ef4444', '#fbbf24', '#60a5fa', '#f472b6',
+];
+
+export function spawnVictoryConfetti(centerX: number, centerY: number): Particle[] {
+  const particles: Particle[] = [];
+  const count = 60;
+  for (let i = 0; i < count; i++) {
+    const angle = (Math.PI * 2 * i) / count + Math.random() * 0.5;
+    const speed = randRange(4, 12);
+    particles.push(new Particle(
+      centerX + randRange(-20, 20),
+      centerY,
+      {
+        color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+        size: randRange(4, 10),
+        life: randRange(60, 120),
+        speed,
+        angle,
+        shape: randRange(0, 1) < 0.5 ? 'square' : 'circle',
+        gravity: 0.4,
+      },
+    ));
+  }
+  return particles;
 }

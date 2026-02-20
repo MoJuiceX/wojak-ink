@@ -1051,8 +1051,24 @@
       "outlineFile": "Head_Beer-Hat_outline.png",
       "detailOptions": [
         {
+          "file": "Head_Beer-Hat_detail_7up.png",
+          "name": "7up"
+        },
+        {
           "file": "Head_Beer-Hat_detail_AW.png",
           "name": "Aw"
+        },
+        {
+          "file": "Head_Beer-Hat_detail_budweiser.png",
+          "name": "Budweiser"
+        },
+        {
+          "file": "Head_Beer-Hat_detail_captainmorgan.png",
+          "name": "Captain Morgan"
+        },
+        {
+          "file": "Head_Beer-Hat_detail_citrus.png",
+          "name": "Citrus"
         },
         {
           "file": "Head_Beer-Hat_detail_Coffee.png",
@@ -1063,16 +1079,24 @@
           "name": "Coke"
         },
         {
+          "file": "Head_Beer-Hat_detail_corona.png",
+          "name": "Corona"
+        },
+        {
           "file": "Head_Beer-Hat_detail_DrPepper.png",
-          "name": "Drpepper"
+          "name": "Dr Pepper"
         },
         {
-          "file": "Head_Beer-Hat_detail_MtnDew.png",
-          "name": "Mtndew"
+          "file": "Head_Beer-Hat_detail_Heineken.png",
+          "name": "Heineken"
         },
         {
-          "file": "Head_Beer-Hat_detail_red-bull.png",
-          "name": "Red-bull"
+          "file": "Head_Beer-Hat_detail_LaCroix.png",
+          "name": "LaCroix"
+        },
+        {
+          "file": "Head_Beer-Hat_detail_Modelo.png",
+          "name": "Modelo"
         },
         {
           "file": "Head_Beer-Hat_detail_monster.png",
@@ -1080,11 +1104,19 @@
         },
         {
           "file": "Head_Beer-Hat_detail_monster-orange.png",
-          "name": "Monster-orange"
+          "name": "Monster Orange"
         },
         {
-          "file": "Head_Beer-Hat_detail_citrus.png",
-          "name": "Citrus"
+          "file": "Head_Beer-Hat_detail_MtnDew.png",
+          "name": "Mtn Dew"
+        },
+        {
+          "file": "Head_Beer-Hat_detail_red-bull.png",
+          "name": "Red Bull"
+        },
+        {
+          "file": "Head_Beer-Hat_detail_Sunny-D.png",
+          "name": "Sunny D"
         },
         {
           "file": "Head_Beer-Hat_detail_Tang.png",
@@ -1111,11 +1143,6 @@
         }
       ],
       "variants": [
-        {
-          "file": "Head_Cap_fill_armyl.png",
-          "color": "armyl",
-          "name": "Armyl"
-        },
         {
           "file": "Head_Cap_detail_army.png",
           "color": "army",

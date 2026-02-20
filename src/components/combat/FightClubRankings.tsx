@@ -31,6 +31,8 @@ interface WojakRanking {
   powerScore: number;
   votePower: number;
   battlePower: number;
+  likes: number;
+  dislikes: number;
   wins: number;
   losses: number;
   draws: number;
@@ -108,7 +110,17 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
     );
   }
 
-  if (error || !data?.players?.length) {
+  if (error) {
+    return (
+      <div className="rankings-empty">
+        <Trophy size={48} strokeWidth={1} className="text-muted" />
+        <p>Couldn&apos;t load rankings</p>
+        <span className="text-secondary text-sm">Check the connection and try again.</span>
+      </div>
+    );
+  }
+
+  if (!data?.players?.length) {
     return (
       <div className="rankings-empty">
         <Trophy size={48} strokeWidth={1} className="text-muted" />
@@ -200,7 +212,17 @@ function WojaksTab() {
     );
   }
 
-  if (error || !data?.wojaks?.length) {
+  if (error) {
+    return (
+      <div className="rankings-empty">
+        <Trophy size={48} strokeWidth={1} className="text-muted" />
+        <p>Couldn&apos;t load rankings</p>
+        <span className="text-secondary text-sm">Check the connection and try again.</span>
+      </div>
+    );
+  }
+
+  if (!data?.wojaks?.length) {
     return (
       <div className="rankings-empty">
         <Trophy size={48} strokeWidth={1} className="text-muted" />
@@ -231,10 +253,10 @@ function WojaksTab() {
                   {wojak.combatType}
                 </span>
               </div>
-              <div className="wojak-row-stats">
-                <span className="text-success">{wojak.wins}W</span>
-                <span className="text-error">{wojak.losses}L</span>
-                <span className="text-secondary">{wojak.draws}D</span>
+              <div className="wojak-row-stats flex flex-wrap gap-x-3 gap-y-1 text-xs">
+                <span className="text-success" title="Upvotes">↑ {wojak.likes}</span>
+                <span className="text-error" title="Downvotes">↓ {wojak.dislikes}</span>
+                <span className="text-secondary">{wojak.wins}W / {wojak.losses}L / {wojak.draws}D</span>
               </div>
               <span className="text-secondary text-xs">Owner: {wojak.ownerName || 'Anon'}</span>
             </div>

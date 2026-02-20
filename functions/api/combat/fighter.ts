@@ -21,7 +21,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         'SELECT * FROM combat_fighters WHERE owner_did = ? ORDER BY level DESC, xp DESC'
       ).bind(ownerDid).all();
 
-      const fighters = (results.results ?? []).map((row: any) => buildFighterResponse(row));
+      const fighters = (results.results ?? []).map((row: Record<string, unknown>) => buildFighterResponse(row));
       return jsonResponse({ ownerDid, fighters });
     }
 

@@ -14,7 +14,9 @@ interface Env {
 
 interface PlayerRanking {
   rank: number;
-  did: string;
+  did: string;            // Identity: DID if present, wallet address otherwise (backward compat)
+  identity: string;       // Same as did (explicit naming)
+  isDid: boolean;         // true if identity is a DID, false if wallet address
   displayName: string;
   wojakCount: number;
   totalPower: number;
@@ -30,6 +32,8 @@ interface WojakRanking {
   powerScore: number;
   votePower: number;
   battlePower: number;
+  likes: number;
+  dislikes: number;
   wins: number;
   losses: number;
   draws: number;
@@ -53,98 +57,133 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     const db = context.env.DB;
 
     if (type === 'players') {
-      // Aggregate power by owner DID
-      // Include all players with any votes (positive or negative) or any battles
+      // Players: connected DID; show if they hold ≥1 Farmers Plot OR have power (so existing data shows).
+      // Power = sum of their Wojaks' power only (from combat_fighters), not Farmers Plot.
       const playersQuery = `
         SELECT
-          cf.owner_did,
+          gp.did_id AS did,
           dp.display_name,
-          COUNT(*) as wojak_count,
-          SUM(COALESCE(cf.power_score, 0)) as total_power,
-          MAX(COALESCE(cf.power_score, 0)) as best_wojak_power
-        FROM combat_fighters cf
-        LEFT JOIN did_profiles dp ON cf.owner_did = dp.did_id
-        WHERE cf.owner_did != ''
-        GROUP BY cf.owner_did
-        HAVING SUM(ABS(COALESCE(cf.power_score, 0))) > 0 OR SUM(COALESCE(cf.total_combat_wins, 0) + COALESCE(cf.total_combat_losses, 0)) > 0
+          COUNT(cf.nft_id) as wojak_count,
+          COALESCE(SUM(COALESCE(cf.power_score, 0)), 0) as total_power,
+          COALESCE(MAX(cf.power_score), 0) as best_wojak_power
+        FROM game_players gp
+        LEFT JOIN did_profiles dp ON dp.did_id = gp.did_id
+        LEFT JOIN combat_fighters cf ON cf.owner_did = gp.did_id
+          AND (cf.burned_at IS NULL OR cf.burned_at = '')
+        WHERE gp.did_id IS NOT NULL AND gp.did_id != ''
+          AND (gp.phase1_verified = 1 OR gp.power_level > 0 OR EXISTS (
+            SELECT 1 FROM combat_fighters c2 WHERE c2.owner_did = gp.did_id AND (c2.burned_at IS NULL OR c2.burned_at = '')
+          ))
+        GROUP BY gp.did_id
         ORDER BY total_power DESC
         LIMIT ? OFFSET ?
       `;
 
       const results = await db.prepare(playersQuery).bind(limit, offset).all();
 
-      const players: PlayerRanking[] = (results.results || []).map((row: any, idx: number) => ({
-        rank: offset + idx + 1,
-        did: row.owner_did,
-        displayName: row.display_name || null,
-        wojakCount: row.wojak_count || 0,
-        totalPower: row.total_power || 0,
-        bestWojakPower: row.best_wojak_power || 0,
-      }));
+      const players: PlayerRanking[] = (results.results || []).map((row: Record<string, unknown>, idx: number) => {
+        const did = (row.did as string) || '';
+        let displayName = row.display_name as string | null;
+        if (!displayName) displayName = did ? `${did.slice(0, 12)}...` : 'Anon';
 
-      // Get caller's rank if authenticated
+        return {
+          rank: offset + idx + 1,
+          did,
+          identity: did,
+          isDid: true,
+          displayName,
+          wojakCount: (row.wojak_count as number) || 0,
+          totalPower: (row.total_power as number) || 0,
+          bestWojakPower: (row.best_wojak_power as number) || 0,
+        };
+      });
+
+      // Caller's rank among same set (by Wojak power sum)
       let yourRank: number | null = null;
       if (callerDid) {
         const yourRankQuery = `
           SELECT COUNT(*) + 1 as rank
           FROM (
-            SELECT owner_did, SUM(COALESCE(power_score, 0)) as total_power
-            FROM combat_fighters
-            WHERE owner_did != ''
-            GROUP BY owner_did
-            HAVING SUM(ABS(COALESCE(power_score, 0))) > 0 OR SUM(COALESCE(total_combat_wins, 0) + COALESCE(total_combat_losses, 0)) > 0
+            SELECT gp.did_id,
+                   COALESCE(SUM(COALESCE(cf.power_score, 0)), 0) as total_power
+            FROM game_players gp
+            LEFT JOIN combat_fighters cf ON cf.owner_did = gp.did_id
+              AND (cf.burned_at IS NULL OR cf.burned_at = '')
+            WHERE gp.did_id IS NOT NULL AND gp.did_id != ''
+              AND (gp.phase1_verified = 1 OR gp.power_level > 0 OR EXISTS (
+                SELECT 1 FROM combat_fighters c2 WHERE c2.owner_did = gp.did_id AND (c2.burned_at IS NULL OR c2.burned_at = '')
+              ))
+            GROUP BY gp.did_id
           ) sub
           WHERE sub.total_power > (
-            SELECT COALESCE(SUM(COALESCE(power_score, 0)), 0)
-            FROM combat_fighters
-            WHERE owner_did = ?
+            SELECT COALESCE(SUM(COALESCE(cf.power_score, 0)), 0)
+            FROM combat_fighters cf
+            WHERE cf.owner_did = ? AND (cf.burned_at IS NULL OR cf.burned_at = '')
           )
         `;
         const rankResult = await db.prepare(yourRankQuery).bind(callerDid).first<{ rank: number }>();
-        yourRank = rankResult?.rank || null;
+        yourRank = rankResult?.rank ?? null;
       }
 
       return jsonResponse({ players, yourRank });
     } else if (type === 'wojaks') {
-      // Individual Wojak rankings
-      // Include fighters with any votes (positive or negative) or any battles
+      // All Wojaks: from phase2_mints (minted) UNION wojak_scores (voted) so we always show something.
+      // No requirement for DIDs or verified wallets.
       const wojaksQuery = `
+        WITH all_nfts(nft_id, edition_number, ipfs_image_uri) AS (
+          SELECT mintgarden_launcher_id, mint_number, ipfs_image_uri
+          FROM phase2_mints
+          WHERE status = 'minted' AND mintgarden_launcher_id IS NOT NULL
+          UNION
+          SELECT ws.nft_id, ws.edition_number, pm.ipfs_image_uri
+          FROM wojak_scores ws
+          LEFT JOIN phase2_mints pm ON pm.mintgarden_launcher_id = ws.nft_id AND pm.status = 'minted'
+          WHERE ws.nft_id NOT IN (
+            SELECT mintgarden_launcher_id FROM phase2_mints
+            WHERE status = 'minted' AND mintgarden_launcher_id IS NOT NULL
+          )
+        )
         SELECT
-          cf.nft_id,
-          cf.edition_number,
-          cf.owner_did,
-          cf.combat_type,
+          a.nft_id,
+          a.edition_number,
+          COALESCE(cf.owner_did, dh.did_id) as owner_did,
+          COALESCE(cf.combat_type, 'Unknown') as combat_type,
           COALESCE(cf.power_score, 0) as power_score,
-          COALESCE(cf.vote_power, 0) as vote_power,
+          COALESCE(cf.vote_power, ws.net_score, 0) as vote_power,
           COALESCE(cf.battle_power, 0) as battle_power,
+          COALESCE(ws.likes, 0) as likes,
+          COALESCE(ws.dislikes, 0) as dislikes,
           COALESCE(cf.total_combat_wins, 0) as wins,
           COALESCE(cf.total_combat_losses, 0) as losses,
           COALESCE(cf.total_combat_draws, 0) as draws,
           dp.display_name as owner_name,
-          pm.ipfs_image_uri
-        FROM combat_fighters cf
-        LEFT JOIN did_profiles dp ON cf.owner_did = dp.did_id
-        LEFT JOIN phase2_mints pm ON cf.edition_number = pm.mint_number
-        WHERE cf.power_score != 0 OR cf.vote_power != 0 OR COALESCE(cf.total_combat_wins, 0) + COALESCE(cf.total_combat_losses, 0) + COALESCE(cf.total_combat_draws, 0) > 0
-        ORDER BY cf.power_score DESC
+          a.ipfs_image_uri
+        FROM all_nfts a
+        LEFT JOIN wojak_scores ws ON ws.nft_id = a.nft_id
+        LEFT JOIN combat_fighters cf ON cf.nft_id = a.nft_id AND (cf.burned_at IS NULL OR cf.burned_at = '')
+        LEFT JOIN did_holdings dh ON dh.nft_id = a.nft_id AND dh.collection = 'phase2'
+        LEFT JOIN did_profiles dp ON dp.did_id = COALESCE(cf.owner_did, dh.did_id)
+        ORDER BY COALESCE(cf.power_score, ws.net_score, 0) DESC, a.edition_number ASC
         LIMIT ? OFFSET ?
       `;
 
       const results = await db.prepare(wojaksQuery).bind(limit, offset).all();
 
-      const wojaks: WojakRanking[] = (results.results || []).map((row: any, idx: number) => ({
+      const wojaks: WojakRanking[] = (results.results || []).map((row: Record<string, unknown>, idx: number) => ({
         rank: offset + idx + 1,
         nftId: row.nft_id,
-        edition: row.edition_number,
+        edition: row.edition_number ?? 0,
         imageUrl: row.ipfs_image_uri || null,
-        combatType: row.combat_type,
-        powerScore: row.power_score || 0,
-        votePower: row.vote_power || 0,
-        battlePower: row.battle_power || 0,
-        wins: row.wins || 0,
-        losses: row.losses || 0,
-        draws: row.draws || 0,
-        ownerName: row.owner_name || null,
+        combatType: row.combat_type || 'Unknown',
+        powerScore: (row.power_score as number) || 0,
+        votePower: (row.vote_power as number) || 0,
+        battlePower: (row.battle_power as number) || 0,
+        likes: (row.likes as number) || 0,
+        dislikes: (row.dislikes as number) || 0,
+        wins: (row.wins as number) || 0,
+        losses: (row.losses as number) || 0,
+        draws: (row.draws as number) || 0,
+        ownerName: (row.owner_name as string) || null,
       }));
 
       return jsonResponse({ wojaks });

@@ -12,7 +12,6 @@ import { useLayout } from '@/hooks/useLayout';
 import { useGenerator } from '@/contexts/GeneratorContext';
 import { useMint, type TraitPricingEntry } from '@/contexts/MintContext';
 import { traitGridVariants, traitCardStaggerVariants } from '@/config/generatorAnimations';
-import { getG2DefaultColor } from '@/config/g2DefaultColors';
 import { MouthLayerSelector } from './MouthLayerSelector';
 import { G2TraitPanel } from './G2TraitPanel';
 import { G2TraitCardPreview } from './G2TraitCardPreview';
@@ -20,7 +19,6 @@ import { ColorPicker } from './ColorPicker';
 import type { LayerImage } from '@/services/generatorService';
 import type { UnifiedTrait } from '@/services/generatorService';
 import { BASE_CLOTHES_MAP, DEFAULT_CLOTHES_PATH } from '@/config/layers';
-import { BEER_HAT_COMPATIBLE_HEADS } from '@/lib/generatorTraitIds';
 import { isSelectionPathEmpty } from '@/types/generator';
 
 /** Maps generator layer names to Phase 1 trait_types for pricing lookup */
@@ -836,7 +834,6 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
     selectedColors,
     setColor,
     setG2Color,
-    setG2Detail,
     setBeerHatEditFocus,
     g2Selections,
     beerHatCardThumbnailUrl,
@@ -942,38 +939,12 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
       triggerSelectionGlow(trait.id);
     }
 
-    // Beer Hat special rules (Head layer)
-    if (activeLayer === 'Head' && g2Sel?.traitId === 'Head_Beer-Hat') {
-      if (trait.id === 'Head_Beer-Hat') {
-        setBeerHatEditFocus('beer');
-        return;
-      }
-      if (BEER_HAT_COMPATIBLE_HEADS.includes(trait.id)) {
-        const isCurrentUnderlayer = g2Sel.beerHatUnderlayer === trait.id;
-        if (isCurrentUnderlayer) {
-          setBeerHatEditFocus('underlayer');
-          return;
-        }
-        const defaultColors: Record<string, string> =
-          trait.id === 'Head_viking-helmet'
-            ? { fill1: getG2DefaultColor(trait.id, 'fill1', trait, '#404040') }
-            : trait.id === 'Head_Cap'
-              ? { fill: getG2DefaultColor(trait.id, 'fill', trait, '#228B22') }
-              : {};
-        setG2Detail(activeLayer, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, trait.id, { traitId: trait.id, g2Category: 'Head', colors: defaultColors }, 'underlayer');
-        return;
-      }
-      // Incompatible head: replace Beer Hat with this head
-      const needsG2Panel = trait.colorable || (trait.detailOptions && trait.detailOptions.length > 0);
-      if ((trait.source === 'both' || trait.source === 'g2') && needsG2Panel) {
-        selectG2Layer(activeLayer, trait);
-      } else if (trait.g1Path) {
-        selectLayer(activeLayer, trait.g1Path);
-      } else {
-        selectG2Layer(activeLayer, trait);
-      }
+    // Beer Hat: clicking on Beer Hat itself toggles edit focus to beer
+    if (activeLayer === 'Head' && g2Sel?.traitId === 'Head_Beer-Hat' && trait.id === 'Head_Beer-Hat') {
+      setBeerHatEditFocus('beer');
       return;
     }
+    // Clicking any other head (compatible or not) while Beer Hat is selected replaces Beer Hat
 
     // If selected via G1 path but trait has color/details, upgrade to G2 so color picker works (e.g. Viking helmet)
     const needsG2Panel = trait.colorable || (trait.detailOptions && trait.detailOptions.length > 0);

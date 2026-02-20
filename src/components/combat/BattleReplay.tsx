@@ -153,8 +153,6 @@ export function BattleReplay({ battleId }: BattleReplayProps) {
     canvasRef,
     arenaRef,
     playTurns,
-    speed,
-    setSpeed,
   } = useBattlePlayback(callbacks);
 
   // ── Audio preload ─────────────────────────────────────────────────────
@@ -196,8 +194,11 @@ export function BattleReplay({ battleId }: BattleReplayProps) {
   useEffect(() => {
     if (!battle || initializedRef.current) return;
     initializedRef.current = true;
-    setHpA({ current: maxHpA, ghost: maxHpA });
-    setHpB({ current: maxHpB, ghost: maxHpB });
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- defer HP init to avoid cascading render
+    queueMicrotask(() => {
+      setHpA({ current: maxHpA, ghost: maxHpA });
+      setHpB({ current: maxHpB, ghost: maxHpB });
+    });
   }, [battle, maxHpA, maxHpB]);
 
   // ── Auto-play: start animated playback once battle + fighters loaded ──
@@ -417,21 +418,6 @@ export function BattleReplay({ battleId }: BattleReplayProps) {
             </div>
           </div>
 
-          {/* Speed control */}
-          {isPlaying && (
-            <div className="flex items-center justify-center gap-2">
-              <span className="text-xs text-muted">Speed:</span>
-              {[0.5, 1, 2, 4].map((s) => (
-                <button
-                  key={s}
-                  className={`btn btn-ghost text-xs ${speed === s ? 'text-accent' : ''}`}
-                  onClick={() => setSpeed(s)}
-                >
-                  {s}x
-                </button>
-              ))}
-            </div>
-          )}
         </>
       )}
 

@@ -11,6 +11,39 @@ interface Env {
   DB: D1Database;
 }
 
+interface CombatBattleRow {
+  id: number;
+  status: string;
+  current_turn: number;
+  fighter_a_nft: string;
+  fighter_b_nft: string;
+  fighter_a_level: number;
+  fighter_b_level: number;
+  fighter_a_elo: number;
+  fighter_b_elo: number;
+}
+
+interface CombatFighterRow {
+  nft_id: string;
+  owner_did: string;
+  combat_type: string;
+  nature: string;
+  ability: string;
+  move_1: string;
+  move_2: string;
+  move_3: string;
+  move_4: string;
+  level: number;
+  xp: number;
+}
+
+interface CombatTurnRow {
+  battle_id: number;
+  turn_number: number;
+  fighter_a_move: string | null;
+  fighter_b_move: string | null;
+}
+
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     let body: { battleId: number; nftId: string; moveId: string; ownerDid: string };
@@ -31,7 +64,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // Verify battle exists and is active
     const battle = await db.prepare(
       `SELECT * FROM combat_battles WHERE id = ? AND status IN ('active', 'waiting_moves')`
-    ).bind(battleId).first<any>();
+    ).bind(battleId).first<CombatBattleRow>();
 
     if (!battle) return errorResponse('Battle not found or not active', 404);
 
@@ -42,7 +75,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // Verify moveId is in fighter's moveset
     const fighter = await db.prepare(
       'SELECT * FROM combat_fighters WHERE nft_id = ?'
-    ).bind(nftId).first<any>();
+    ).bind(nftId).first<CombatFighterRow>();
 
     if (!fighter) return errorResponse('Fighter not found', 404);
 
@@ -56,15 +89,15 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     // Get or create current turn record
     const currentTurn = battle.current_turn;
-    let turnRecord = await db.prepare(
+    let turnRecord: CombatTurnRow | null = await db.prepare(
       'SELECT * FROM combat_turns WHERE battle_id = ? AND turn_number = ?'
-    ).bind(battleId, currentTurn).first<any>();
+    ).bind(battleId, currentTurn).first<CombatTurnRow>();
 
     if (!turnRecord) {
       await db.prepare(
         'INSERT INTO combat_turns (battle_id, turn_number) VALUES (?, ?)'
       ).bind(battleId, currentTurn).run();
-      turnRecord = { battle_id: battleId, turn_number: currentTurn };
+      turnRecord = { battle_id: battleId, turn_number: currentTurn, fighter_a_move: null, fighter_b_move: null };
     }
 
     // Store the move — only if not already submitted (prevents double-submission race)
@@ -83,7 +116,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // Check if both moves are submitted
     const updatedTurn = await db.prepare(
       'SELECT * FROM combat_turns WHERE battle_id = ? AND turn_number = ?'
-    ).bind(battleId, currentTurn).first<any>();
+    ).bind(battleId, currentTurn).first<CombatTurnRow>();
 
     if (updatedTurn?.fighter_a_move && updatedTurn?.fighter_b_move) {
       // Both moves submitted — resolve turn
@@ -106,13 +139,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
 async function resolveBattleTurn(
   db: D1Database,
-  battle: any,
+  battle: CombatBattleRow,
   moveA: string,
   moveB: string,
 ) {
   // Load both fighters
-  const fighterARow = await db.prepare('SELECT * FROM combat_fighters WHERE nft_id = ?').bind(battle.fighter_a_nft).first<any>();
-  const fighterBRow = await db.prepare('SELECT * FROM combat_fighters WHERE nft_id = ?').bind(battle.fighter_b_nft).first<any>();
+  const fighterARow = await db.prepare('SELECT * FROM combat_fighters WHERE nft_id = ?').bind(battle.fighter_a_nft).first<CombatFighterRow>();
+  const fighterBRow = await db.prepare('SELECT * FROM combat_fighters WHERE nft_id = ?').bind(battle.fighter_b_nft).first<CombatFighterRow>();
 
   if (!fighterARow || !fighterBRow) return errorResponse('Fighter data missing', 500);
 

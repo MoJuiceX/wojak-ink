@@ -15,6 +15,26 @@ interface Env {
   ADMIN_SECRET?: string;
 }
 
+interface CombatTurnRow {
+  battle_id: number;
+  turn_number: number;
+  fighter_a_move: string | null;
+  fighter_b_move: string | null;
+}
+
+interface CombatFighterRow {
+  nft_id: string;
+  combat_type: string;
+  nature: string;
+  ability: string;
+  move_1: string;
+  move_2: string;
+  move_3: string;
+  move_4: string;
+  level: number;
+  xp: number;
+}
+
 const TURN_TIMEOUT_SECONDS = 30;
 const MAX_CONSECUTIVE_TIMEOUTS = 3;
 
@@ -48,7 +68,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // Check which side(s) timed out
     const turnRecord = await db.prepare(
       'SELECT * FROM combat_turns WHERE battle_id = ? AND turn_number = ?'
-    ).bind(battleId, currentTurn).first<any>();
+    ).bind(battleId, currentTurn).first<CombatTurnRow>();
 
     const moveAMissing = !turnRecord?.fighter_a_move;
     const moveBMissing = !turnRecord?.fighter_b_move;
@@ -76,8 +96,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     // AI picks moves for timed-out sides, then resolve
-    const fighterARow = await db.prepare('SELECT * FROM combat_fighters WHERE nft_id = ?').bind(battle.fighter_a_nft).first<any>();
-    const fighterBRow = await db.prepare('SELECT * FROM combat_fighters WHERE nft_id = ?').bind(battle.fighter_b_nft).first<any>();
+    const fighterARow = await db.prepare('SELECT * FROM combat_fighters WHERE nft_id = ?').bind(battle.fighter_a_nft).first<CombatFighterRow>();
+    const fighterBRow = await db.prepare('SELECT * FROM combat_fighters WHERE nft_id = ?').bind(battle.fighter_b_nft).first<CombatFighterRow>();
     if (!fighterARow || !fighterBRow) continue;
 
     const stateA = initFighterState({

@@ -1,13 +1,13 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
+import { useAuth } from '@clerk/clerk-react';
 
 const SESSION_KEY = 'wojak_game_session';
 const GUEST_ID_KEY = 'wojak_guest_id';
-const GUEST_VOTES_KEY = 'wojak_guest_votes';
+const CLERK_ENABLED = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-// Daily limits
-const DAILY_LIMIT_HOLDER = 20;
-const DAILY_LIMIT_FREE = 5;
+// Unlimited voting - large number for compatibility
+const UNLIMITED_VOTES = 9999;
 
 // Generate or retrieve stable guest ID
 function getGuestId(): string {
@@ -24,41 +24,6 @@ function getGuestId(): string {
   }
 }
 
-// Get today's date string for tracking
-function getTodayString(): string {
-  return new Date().toISOString().split('T')[0];
-}
-
-// Track guest votes in localStorage
-function getGuestVotesToday(): number {
-  try {
-    const data = localStorage.getItem(GUEST_VOTES_KEY);
-    if (!data) return 0;
-    const { date, count } = JSON.parse(data);
-    if (date !== getTodayString()) return 0;
-    return count;
-  } catch {
-    return 0;
-  }
-}
-
-function incrementGuestVotes(): number {
-  try {
-    const today = getTodayString();
-    const data = localStorage.getItem(GUEST_VOTES_KEY);
-    let count = 1;
-    if (data) {
-      const parsed = JSON.parse(data);
-      if (parsed.date === today) {
-        count = parsed.count + 1;
-      }
-    }
-    localStorage.setItem(GUEST_VOTES_KEY, JSON.stringify({ date: today, count }));
-    return count;
-  } catch {
-    return 1;
-  }
-}
 
 interface GamePlayer {
   did: string;
@@ -100,6 +65,7 @@ interface GameContextType {
   feed: FeedItem[];
   feedLoading: boolean;
   register: (did: string, walletAddress: string) => Promise<void>;
+  linkDid: (did: string, walletAddress?: string) => Promise<void>;
   resetPlayer: () => void;
   verifyPhase1: (did: string, nftId?: string) => Promise<boolean>;
   castVote: (nftId: string, editionNumber: number, voteType: 1 | -1) => Promise<boolean>;
@@ -121,25 +87,42 @@ export function useOptionalGame() {
   return useContext(GameContext);
 }
 
+function apiPlayerToPlayer(api: { did: string; powerLevel: number; phase1Verified: boolean; votesToday?: number; voteStreak?: number; onboarding: GamePlayer['onboarding'] }, walletAddress = ''): GamePlayer {
+  return {
+    did: api.did,
+    walletAddress,
+    powerLevel: api.powerLevel ?? 0,
+    phase1Verified: !!api.phase1Verified,
+    votesToday: api.votesToday ?? 0,
+    votesRemaining: UNLIMITED_VOTES,
+    voteStreak: api.voteStreak ?? 0,
+    onboarding: api.onboarding,
+  };
+}
+
 export function GameProvider({ children }: { children: ReactNode }) {
   const [player, setPlayer] = useState<GamePlayer | null>(null);
   const [feed, setFeed] = useState<FeedItem[]>([]);
   const [feedLoading, setFeedLoading] = useState(false);
-  const [guestVotesToday, setGuestVotesToday] = useState(() => getGuestVotesToday());
+
+  const { getToken, isSignedIn, isLoaded: isClerkLoaded } = useAuth();
 
   // Stable guest ID for this browser
   const [guestId] = useState(() => getGuestId());
 
   // Computed values
   const isHolder = !!player?.phase1Verified;
-  const dailyLimit = isHolder ? DAILY_LIMIT_HOLDER : DAILY_LIMIT_FREE;
-  const votesRemaining = player
-    ? player.votesRemaining
-    : Math.max(0, DAILY_LIMIT_FREE - guestVotesToday);
+  const dailyLimit = UNLIMITED_VOTES; // Unlimited voting
+  const votesRemaining = UNLIMITED_VOTES; // Unlimited voting
 
   const getAuthHeaders = useCallback(async (): Promise<Record<string, string>> => {
-    return { 'Content-Type': 'application/json' };
-  }, []);
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (CLERK_ENABLED) {
+      const token = await getToken();
+      if (token) headers.Authorization = `Bearer ${token}`;
+    }
+    return headers;
+  }, [getToken]);
 
   const resetPlayer = useCallback(() => {
     setPlayer(null);
@@ -147,9 +130,37 @@ export function GameProvider({ children }: { children: ReactNode }) {
     try { sessionStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
   }, []);
 
-  // Restore session on mount — re-register with cached DID to get fresh player data
+  // When Clerk is enabled and signed in: fetch /api/game/me and set player; on sign-out clear player
+  useEffect(() => {
+    if (!CLERK_ENABLED || !isClerkLoaded) return;
+    if (!isSignedIn) {
+      setPlayer(null);
+      setFeed([]);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const token = await getToken();
+      if (!token || cancelled) return;
+      const res = await fetch('/api/game/me', {
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      });
+      const data = await res.json();
+      if (cancelled) return;
+      if (data.success && data.player) {
+        setPlayer(apiPlayerToPlayer(data.player, (data.player as { walletAddress?: string }).walletAddress ?? ''));
+      } else {
+        setPlayer(null);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [CLERK_ENABLED, isClerkLoaded, isSignedIn, getToken]);
+
+  // Restore session on mount (wallet path only) — skip when Clerk is enabled and user is signed in
   const restoredRef = useRef(false);
   useEffect(() => {
+    if (!isClerkLoaded) return;
+    if (CLERK_ENABLED && isSignedIn) return; // Player comes from /api/game/me
     if (restoredRef.current || player) return;
     restoredRef.current = true;
     try {
@@ -157,7 +168,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (!raw) return;
       const { did, walletAddress } = JSON.parse(raw) as { did: string; walletAddress: string };
       if (!did || !walletAddress) return;
-      // register is idempotent — just fetches current player state
       fetch('/api/game/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -166,25 +176,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
         .then(r => r.json())
         .then(data => {
           if (data.success) {
-            const isHolderNow = data.player.phase1Verified;
-            const limit = isHolderNow ? DAILY_LIMIT_HOLDER : DAILY_LIMIT_FREE;
-            setPlayer({
-              did: data.player.did,
-              walletAddress,
-              powerLevel: data.player.powerLevel,
-              phase1Verified: isHolderNow,
-              votesToday: data.player.votesToday,
-              votesRemaining: Math.max(0, limit - data.player.votesToday),
-              voteStreak: data.player.voteStreak ?? 0,
-              onboarding: data.player.onboarding,
-            });
+            setPlayer(apiPlayerToPlayer(data.player, walletAddress));
           } else {
             sessionStorage.removeItem(SESSION_KEY);
           }
         })
         .catch(() => { /* network error — will show gate checklist */ });
     } catch { /* corrupt storage — ignore */ }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isClerkLoaded, CLERK_ENABLED, isSignedIn, player]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const register = useCallback(async (did: string, walletAddress: string) => {
     const headers = await getAuthHeaders();
@@ -197,22 +196,25 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (!data.success) {
       throw new Error(data.error || 'Registration failed');
     }
-    const isHolderNow = data.player.phase1Verified;
-    const limit = isHolderNow ? DAILY_LIMIT_HOLDER : DAILY_LIMIT_FREE;
-    setPlayer({
-      did: data.player.did,
-      walletAddress: walletAddress,
-      powerLevel: data.player.powerLevel,
-      phase1Verified: isHolderNow,
-      votesToday: data.player.votesToday,
-      votesRemaining: Math.max(0, limit - data.player.votesToday),
-      voteStreak: data.player.voteStreak ?? 0,
-      onboarding: data.player.onboarding,
-    });
+    setPlayer(apiPlayerToPlayer(data.player, walletAddress));
     try {
       sessionStorage.setItem(SESSION_KEY, JSON.stringify({ did: data.player.did, walletAddress }));
     } catch { /* quota exceeded or private mode — non-critical */ }
-  }, []);
+  }, [getAuthHeaders]);
+
+  const linkDid = useCallback(async (did: string, walletAddress?: string) => {
+    const headers = await getAuthHeaders();
+    const res = await fetch('/api/game/link-did', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ did, walletAddress: walletAddress ?? '' }),
+    });
+    const data = await res.json();
+    if (!data.success) {
+      throw new Error(data.error || 'Link DID failed');
+    }
+    setPlayer(apiPlayerToPlayer(data.player, walletAddress ?? ''));
+  }, [getAuthHeaders]);
 
   const verifyPhase1 = useCallback(async (did: string, nftId?: string) => {
     const headers = await getAuthHeaders();
@@ -225,11 +227,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
     });
     const data = await res.json();
     if (data.verified && player) {
-      // Upgrade to holder: increase daily limit
+      // Upgrade to holder status
       setPlayer({
         ...player,
         phase1Verified: true,
-        votesRemaining: Math.max(0, DAILY_LIMIT_HOLDER - player.votesToday),
+        votesRemaining: UNLIMITED_VOTES,
         onboarding: { ...player.onboarding, phase1: true },
       });
     }
@@ -273,18 +275,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
     if (data.success) {
       if (player) {
-        // Update player state
+        // Update player state (onboarding status may change)
         setPlayer(prev => prev ? {
           ...prev,
-          votesToday: prev.votesToday + 1,
-          votesRemaining: data.votesRemaining,
-          voteStreak: data.voteStreak ?? prev.voteStreak,
           onboarding: data.onboarding ?? prev.onboarding,
         } : null);
-      } else {
-        // Track guest votes locally
-        const newCount = incrementGuestVotes();
-        setGuestVotesToday(newCount);
       }
       // Remove voted item from feed
       setFeed(prev => prev.filter(item => item.nftId !== nftId));
@@ -298,7 +293,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     const res = await fetch(`/api/game/power-level?did=${player.did}`);
     const data = await res.json();
     if (data.success) {
-      setPlayer(prev => prev ? { ...prev, powerLevel: data.powerLevel, voteStreak: data.voteStreak ?? prev.voteStreak } : null);
+      setPlayer(prev => prev ? { ...prev, powerLevel: data.powerLevel } : null);
     }
   }, [player]);
 
@@ -314,6 +309,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       feed,
       feedLoading,
       register,
+      linkDid,
       resetPlayer,
       verifyPhase1,
       castVote,

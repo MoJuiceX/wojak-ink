@@ -3,6 +3,15 @@
 
 import { jsonResponse, errorResponse, isValidDid, buildFighterResponse } from './_shared';
 
+interface AgentRow {
+  id: number;
+  owner_did: string;
+  name: string;
+  status: string;
+  tier: string;
+  created_at: string;
+}
+
 interface Env {
   DB: D1Database;
 }
@@ -13,7 +22,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const agentId = url.searchParams.get('id');
 
   const db = context.env.DB;
-  let agent: any;
+  let agent: AgentRow | null = null;
 
   if (agentId) {
     agent = await db.prepare(
@@ -35,7 +44,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     'SELECT * FROM combat_fighters WHERE owner_did = ? ORDER BY level DESC'
   ).bind(agent.owner_did).all();
 
-  const fighterList = (fighters.results ?? []).map((row: any) => buildFighterResponse(row));
+  const fighterList = (fighters.results ?? []).map((row: Record<string, unknown>) => buildFighterResponse(row));
 
   // Get battle stats
   const statsRow = await db.prepare(`

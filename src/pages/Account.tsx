@@ -8,9 +8,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SignedOut, SignInButton, useClerk, useAuth } from '@clerk/clerk-react';
-import { LogOut, Settings, RefreshCw } from 'lucide-react';
+import { LogOut, Settings, RefreshCw, KeyRound, User, Check, X } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/contexts/ToastContext';
 
 import { useUserProfile } from '@/contexts/UserProfileContext';
@@ -66,9 +66,27 @@ export default function Account() {
   } = useSageWallet();
 
   const toast = useToast();
+  const queryClient = useQueryClient();
 
-  // Get player's DID from wallet address for refresh
-  const { data: playerDid } = useQuery({
+  // Get current user's DID from /api/game/me (Clerk-linked) — primary when signed in
+  const { data: meData } = useQuery({
+    queryKey: ['game-me'],
+    queryFn: async () => {
+      const token = await getToken();
+      if (!token) return null;
+      const res = await fetch('/api/game/me', {
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data;
+    },
+    enabled: !!isSignedIn,
+    staleTime: 300000,
+  });
+
+  // Fallback: DID from wallet lookup (when wallet connected but me might not have DID yet)
+  const { data: walletPlayerDid } = useQuery({
     queryKey: ['player-did', walletAddress],
     queryFn: async () => {
       if (!walletAddress) return null;
@@ -81,8 +99,60 @@ export default function Account() {
     staleTime: 300000,
   });
 
+  const playerDid = (meData?.player?.did as string | undefined) ?? walletPlayerDid ?? null;
+
   // DID refresh state
   const [refreshing, setRefreshing] = useState(false);
+
+  // Link DID form (when user has no linked DID yet)
+  const [didInput, setDidInput] = useState('');
+  const [didWalletInput, setDidWalletInput] = useState('');
+  const [linkingDid, setLinkingDid] = useState(false);
+  const [didLinkError, setDidLinkError] = useState<string | null>(null);
+
+  // Display name (DID profile name) for Account page
+  const [displayName, setDisplayName] = useState<string>('');
+  const [displayNameSource, setDisplayNameSource] = useState<string | null>(null);
+  const [displayNameEditing, setDisplayNameEditing] = useState(false);
+  const [displayNameInput, setDisplayNameInput] = useState('');
+  const [displayNameSaving, setDisplayNameSaving] = useState(false);
+  const [displayNameError, setDisplayNameError] = useState<string | null>(null);
+
+  const handleLinkDid = useCallback(async () => {
+    const did = didInput.trim();
+    if (!did || linkingDid) return;
+    if (!/^did:chia:1[a-z0-9]{58}$/.test(did)) {
+      setDidLinkError('Enter a valid Chia DID (e.g. did:chia:1...)');
+      return;
+    }
+    setDidLinkError(null);
+    setLinkingDid(true);
+    try {
+      const token = await getToken();
+      const res = await fetch('/api/game/link-did', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ did, walletAddress: didWalletInput.trim() || undefined }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setDidLinkError(data.error || 'Failed to link DID');
+        return;
+      }
+      toast.success('DID linked to your account');
+      setDidInput('');
+      setDidWalletInput('');
+      await queryClient.invalidateQueries({ queryKey: ['game-me'] });
+      await queryClient.invalidateQueries({ queryKey: ['player-did'] });
+    } catch {
+      setDidLinkError('Network error');
+    } finally {
+      setLinkingDid(false);
+    }
+  }, [didInput, didWalletInput, linkingDid, getToken, toast, queryClient]);
 
   const handleRefreshDid = useCallback(async () => {
     if (!playerDid || refreshing) return;
@@ -111,6 +181,45 @@ export default function Account() {
     }
   }, [playerDid, refreshing, toast]);
 
+  const handleSaveDisplayName = useCallback(async () => {
+    const name = displayNameInput.trim();
+    if (!playerDid || !name || displayNameSaving) return;
+    if (name.length < 2 || name.length > 20) {
+      setDisplayNameError('Name must be 2–20 characters');
+      return;
+    }
+    if (!/^[a-zA-Z0-9 ]+$/.test(name)) {
+      setDisplayNameError('Only letters, numbers, and spaces');
+      return;
+    }
+    setDisplayNameError(null);
+    setDisplayNameSaving(true);
+    try {
+      const token = await getToken();
+      const res = await fetch('/api/profile/display-name', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ did: playerDid, name, source: 'custom' }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setDisplayName(data.displayName ?? name);
+        setDisplayNameSource('custom');
+        setDisplayNameEditing(false);
+        toast.success('Name saved');
+      } else {
+        setDisplayNameError(data.error || 'Failed to save');
+      }
+    } catch {
+      setDisplayNameError('Network error');
+    } finally {
+      setDisplayNameSaving(false);
+    }
+  }, [playerDid, displayNameInput, displayNameSaving, getToken, toast]);
+
   // Voting consumables - fetch from API
   const [votingCounts, setVotingCounts] = useState({ donuts: 0, poops: 0 });
 
@@ -138,6 +247,27 @@ export default function Account() {
 
     fetchConsumables();
   }, [isSignedIn, getToken]);
+
+  // Fetch DID display name when playerDid is available
+  useEffect(() => {
+    if (!playerDid) {
+      setDisplayName('');
+      setDisplayNameSource(null);
+      return;
+    }
+    let cancelled = false;
+    fetch(`/api/profile/display-name?did=${encodeURIComponent(playerDid)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data) {
+          setDisplayName(data.displayName || '');
+          setDisplayNameSource(data.source || null);
+          setDisplayNameInput(data.displayName || '');
+        }
+      })
+      .catch(() => { /* ignore */ });
+    return () => { cancelled = true; };
+  }, [playerDid]);
 
   // Drawer editor state
   const [isDrawerEditorOpen, setIsDrawerEditorOpen] = useState(false);
@@ -316,6 +446,128 @@ export default function Account() {
               donuts={votingCounts.donuts}
               poops={votingCounts.poops}
             />
+          </motion.div>
+
+          {/* Identity: Link DID + Your name */}
+          <motion.div
+            className="account-identity-section"
+            variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } } }}
+          >
+            <div className="card p-4 flex flex-col gap-4">
+              <h2 className="text-lg font-semibold flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
+                <KeyRound size={20} style={{ color: 'var(--color-primary)' }} />
+                Identity &amp; leaderboard
+              </h2>
+
+              {!playerDid ? (
+                <>
+                  <p className="text-secondary text-sm">
+                    Link your Chia DID so your NFTs count on the voting and combat leaderboards.
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-xs font-medium text-muted">Your DID</label>
+                    <input
+                      type="text"
+                      className="input"
+                      placeholder="did:chia:1..."
+                      value={didInput}
+                      onChange={(e) => { setDidInput(e.target.value); setDidLinkError(null); }}
+                      disabled={linkingDid}
+                    />
+                    <label className="text-xs font-medium text-muted">Wallet address (optional)</label>
+                    <input
+                      type="text"
+                      className="input"
+                      placeholder="xch1..."
+                      value={didWalletInput}
+                      onChange={(e) => setDidWalletInput(e.target.value)}
+                      disabled={linkingDid}
+                    />
+                    {didLinkError && <p className="text-sm" style={{ color: 'var(--color-error)' }}>{didLinkError}</p>}
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={handleLinkDid}
+                      disabled={linkingDid || !didInput.trim()}
+                    >
+                      {linkingDid ? 'Linking...' : 'Link DID to account'}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-xs font-medium text-muted flex items-center gap-1">
+                      <User size={14} />
+                      Your name (for leaderboards &amp; DID)
+                    </label>
+                    {displayNameEditing ? (
+                      <div className="flex flex-col gap-2">
+                        <div className="flex gap-2 flex-wrap">
+                          <input
+                            type="text"
+                            className="input flex-1 min-w-0"
+                            value={displayNameInput}
+                            onChange={(e) => { setDisplayNameInput(e.target.value); setDisplayNameError(null); }}
+                            placeholder="Display name"
+                            maxLength={20}
+                            disabled={displayNameSaving}
+                          />
+                          <button
+                            type="button"
+                            className="btn btn-primary"
+                            onClick={handleSaveDisplayName}
+                            disabled={displayNameSaving || !displayNameInput.trim()}
+                          >
+                            {displayNameSaving ? '...' : <><Check size={16} /> Save</>}
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-ghost"
+                            onClick={() => { setDisplayNameEditing(false); setDisplayNameError(null); setDisplayNameInput(displayName); }}
+                            disabled={displayNameSaving}
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                        {displayNameError && <p className="text-sm" style={{ color: 'var(--color-error)' }}>{displayNameError}</p>}
+                        <p className="text-xs text-muted">2–20 characters, letters, numbers, spaces</p>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between gap-3 flex-wrap">
+                        <p className="font-medium" style={{ color: 'var(--color-text)' }}>
+                          {displayName || 'Not set'}
+                          {displayNameSource && (
+                            <span className="text-muted text-xs ml-2">({displayNameSource})</span>
+                          )}
+                        </p>
+                        <button
+                          type="button"
+                          className="btn btn-secondary"
+                          onClick={() => { setDisplayNameEditing(true); setDisplayNameInput(displayName); setDisplayNameError(null); }}
+                        >
+                          Edit name
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-sm text-secondary">
+                      Sync NFTs from your wallet or DID to contribute to the voting and combat leaderboards.
+                    </p>
+                    <button
+                      type="button"
+                      className="action-button"
+                      onClick={handleRefreshDid}
+                      disabled={refreshing}
+                    >
+                      <RefreshCw size={18} className={refreshing ? 'animate-spin' : ''} />
+                      {refreshing ? 'Syncing...' : 'Sync NFTs'}
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </motion.div>
 
           {/* 2. NFT Collection - Immediately after header */}

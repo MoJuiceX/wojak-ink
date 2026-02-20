@@ -26,12 +26,14 @@ function isMouthOverBeerHat(path: string | undefined): boolean {
 }
 
 // ============ Image Cache (bounded LRU, max 200 entries) ============
+// LRU is achieved by moving accessed items to end of Map on cache hit.
+// Map iteration order = insertion order, so oldest = first key.
 
 const MAX_IMAGE_CACHE = 200;
 const imageCache = new Map<string, HTMLImageElement>();
 const loadingPromises = new Map<string, Promise<HTMLImageElement>>();
 
-/** Evict oldest entry when over capacity (Map iteration order = insertion order). */
+/** Evict least recently used entry when over capacity. */
 function evictOldestIfNeeded(): void {
   if (imageCache.size <= MAX_IMAGE_CACHE) return;
   const firstKey = imageCache.keys().next().value;
@@ -42,7 +44,12 @@ function evictOldestIfNeeded(): void {
 
 async function loadImage(src: string): Promise<HTMLImageElement> {
   const cached = imageCache.get(src);
-  if (cached) return cached;
+  if (cached) {
+    // LRU: move to end by re-inserting (Map maintains insertion order)
+    imageCache.delete(src);
+    imageCache.set(src, cached);
+    return cached;
+  }
 
   const loading = loadingPromises.get(src);
   if (loading) return loading;
@@ -73,6 +80,21 @@ async function loadImage(src: string): Promise<HTMLImageElement> {
 export function clearImageCache(): void {
   imageCache.clear();
   loadingPromises.clear();
+}
+
+/** Cache metrics for debugging (dev tools only) */
+export function getImageCacheMetrics(): {
+  size: number;
+  maxSize: number;
+  loadingCount: number;
+  utilizationPercent: number;
+} {
+  return {
+    size: imageCache.size,
+    maxSize: MAX_IMAGE_CACHE,
+    loadingCount: loadingPromises.size,
+    utilizationPercent: Math.round((imageCache.size / MAX_IMAGE_CACHE) * 100),
+  };
 }
 
 export async function preloadImages(sources: string[]): Promise<void> {

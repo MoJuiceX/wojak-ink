@@ -574,8 +574,9 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     }
 
     try {
+      // Fetch more NFTs to increase chance of finding DIDs
       const response = await fetch(
-        `https://api.mintgarden.io/address/${state.address}/nfts?type=owned&size=5`
+        `https://api.mintgarden.io/address/${state.address}/nfts?type=owned&size=50`
       );
 
       if (!response.ok) return [];

@@ -6,7 +6,7 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Flame, ExternalLink, AlertTriangle, Coins, Swords } from 'lucide-react';
-import { useGame } from '@/contexts/GameContext';
+import { useOptionalGame } from '@/contexts/GameContext';
 import { useUserProfile } from '@/contexts/UserProfileContext';
 import { useToast } from '@/contexts/ToastContext';
 
@@ -51,7 +51,7 @@ function useBurnEligible(ownerDid?: string) {
 }
 
 // Burn mutation
-function useBurnMutation() {
+function useBurnMutation(onSuccessOpenAssign?: () => void) {
   const queryClient = useQueryClient();
   const toast = useToast();
 
@@ -69,7 +69,79 @@ function useBurnMutation() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['burn-eligible'] });
       queryClient.invalidateQueries({ queryKey: ['credits'] });
-      toast.success(data.message);
+      queryClient.invalidateQueries({ queryKey: ['burn-power-bonus'] });
+      toast.success(data.message ?? 'Wojak burned! You earned 100 credits and +50 power to assign.');
+      onSuccessOpenAssign?.();
+    },
+    onError: (err: Error) => {
+      toast.error(err.message);
+    },
+  });
+}
+
+// Unassigned +50 power count
+function useBurnPowerBonus(did: string | null) {
+  return useQuery({
+    queryKey: ['burn-power-bonus', did],
+    queryFn: async () => {
+      if (!did) return { unassignedCount: 0 };
+      const res = await fetch(`/api/combat/burn-power-bonus?did=${encodeURIComponent(did)}`);
+      if (!res.ok) return { unassignedCount: 0 };
+      const data = await res.json();
+      return { unassignedCount: data.unassignedCount ?? 0 };
+    },
+    enabled: !!did,
+    staleTime: 10000,
+  });
+}
+
+// Player's collection (for assign picker)
+interface CollectionNft {
+  nftId: string;
+  editionNumber: number;
+  name: string;
+  imageUri: string | null;
+}
+function useCollection(did: string | null) {
+  return useQuery({
+    queryKey: ['collection', did],
+    queryFn: async () => {
+      if (!did) return { nfts: [] as CollectionNft[] };
+      const res = await fetch(`/api/game/collection?did=${encodeURIComponent(did)}`);
+      if (!res.ok) throw new Error('Failed to load collection');
+      const data = await res.json();
+      return { nfts: (data.nfts ?? []).map((n: { nftId: string; editionNumber: number; name?: string; imageUri?: string | null }) => ({
+        nftId: n.nftId,
+        editionNumber: n.editionNumber,
+        name: n.name ?? `Wojak #${n.editionNumber}`,
+        imageUri: n.imageUri ?? null,
+      })) };
+    },
+    enabled: !!did,
+    staleTime: 30000,
+  });
+}
+
+// Assign +50 power to an NFT
+function useAssignPowerMutation() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: async ({ did, nftId }: { did: string; nftId: string }) => {
+      const res = await fetch('/api/combat/burn-assign-power', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ did, nftId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Assign failed');
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['burn-power-bonus'] });
+      queryClient.invalidateQueries({ queryKey: ['player-did'] });
+      toast.success(data.message ?? '+50 power assigned.');
     },
     onError: (err: Error) => {
       toast.error(err.message);
@@ -180,7 +252,7 @@ function BurnCard({
 // Confirm modal
 function ConfirmBurnModal({
   fighter,
-  canEarnCredits,
+  canEarnCredits: _canEarnCredits,
   onConfirm,
   onCancel,
   isLoading,
@@ -215,19 +287,12 @@ function ConfirmBurnModal({
           This action cannot be undone.
         </p>
 
-        {canEarnCredits && (
-          <div className="flex items-center gap-2 p-3 rounded-lg mb-4" style={{ background: 'var(--color-primary-15)' }}>
-            <Coins size={18} className="text-primary" />
-            <span className="text-sm">You will earn <strong className="text-primary">100 credits</strong></span>
-          </div>
-        )}
-
-        {!canEarnCredits && (
-          <div className="flex items-center gap-2 p-3 rounded-lg mb-4" style={{ background: 'var(--color-white-5)' }}>
-            <Coins size={18} className="text-muted" />
-            <span className="text-sm text-secondary">No credits (you minted this Wojak)</span>
-          </div>
-        )}
+        <div className="flex items-center gap-2 p-3 rounded-lg mb-4" style={{ background: 'var(--color-primary-15)' }}>
+          <Coins size={18} className="text-primary" />
+          <span className="text-sm">
+            You will earn <strong className="text-primary">100 credits</strong> and <strong className="text-primary">+50 power</strong> to assign to one of your Wojaks.
+          </span>
+        </div>
 
         <div className="flex gap-3">
           <button
@@ -253,115 +318,167 @@ function ConfirmBurnModal({
   );
 }
 
-export default function BurnTab() {
-  const { player } = useGame();
+// Assign +50 power modal: pick one Wojak from collection
+function AssignPowerModal({
+  did,
+  onClose,
+  onAssigned,
+}: {
+  did: string;
+  onClose: () => void;
+  onAssigned: () => void;
+}) {
+  const { data: bonusData } = useBurnPowerBonus(did);
+  const { data: collectionData, isLoading: collectionLoading } = useCollection(did);
+  const assignMutation = useAssignPowerMutation();
+
+  const unassignedCount = bonusData?.unassignedCount ?? 0;
+  const nfts = collectionData?.nfts ?? [];
+
+  const handleAssign = useCallback((nftId: string) => {
+    assignMutation.mutate(
+      { did, nftId },
+      {
+        onSuccess: () => {
+          onAssigned();
+          onClose();
+        },
+      }
+    );
+  }, [did, assignMutation, onAssigned, onClose]);
+
+  if (unassignedCount === 0) {
+    return null;
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(0,0,0,0.8)' }}
+      onClick={onClose}
+    >
+      <div
+        className="card p-6 max-w-lg w-full max-h-[85vh] flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-full" style={{ background: 'var(--color-primary-15)' }}>
+              <Swords size={20} className="text-primary" />
+            </div>
+            <h2 className="text-xl font-bold">Assign +50 Power</h2>
+          </div>
+          <button type="button" className="btn btn-ghost" onClick={onClose} aria-label="Close">
+            ×
+          </button>
+        </div>
+        <p className="text-secondary text-sm mb-4">
+          Choose a Wojak to give +50 power to. You have {unassignedCount} unassigned bonus{unassignedCount !== 1 ? 'es' : ''}.
+        </p>
+        {collectionLoading ? (
+          <div className="flex justify-center py-8">
+            <div className="spinner" />
+          </div>
+        ) : nfts.length === 0 ? (
+          <p className="text-muted text-sm py-4">You have no Wojaks in your collection.</p>
+        ) : (
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 overflow-y-auto flex-1 min-h-0">
+            {nfts.map((nft: CollectionNft) => (
+              <button
+                key={nft.nftId}
+                type="button"
+                className="card p-2 flex flex-col gap-1 text-left rounded-lg transition-all"
+                style={{ borderWidth: 2, borderColor: 'transparent' }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--color-primary)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'transparent'; }}
+                onClick={() => handleAssign(nft.nftId)}
+                disabled={assignMutation.isPending}
+              >
+                <div className="aspect-square rounded overflow-hidden" style={{ background: 'var(--color-black-50)' }}>
+                  <img
+                    src={nft.imageUri || `https://assets.mintgarden.io/thumbnails/medium/${nft.nftId}.png`}
+                    alt={nft.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span className="text-xs font-medium truncate">{nft.name}</span>
+                <span className="text-xs text-muted">+50 power</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+interface BurnTabProps {
+  playerDid?: string;
+}
+
+export default function BurnTab({ playerDid: playerDidProp }: BurnTabProps) {
+  const game = useOptionalGame();
+  const player = game?.player ?? null;
   const { profile } = useUserProfile();
+
+  // Use player from GameContext when inside Vote tab, else use DID passed from FightClub
+  const effectiveDid = player?.did ?? playerDidProp ?? null;
 
   // State
   const [confirmFighter, setConfirmFighter] = useState<BurnableFighter | null>(null);
+  const [showAssignModal, setShowAssignModal] = useState(false);
 
   // Queries
-  const { data: myData, isLoading: myLoading } = useBurnEligible(player?.did);
+  const { data: myData, isLoading: myLoading } = useBurnEligible(effectiveDid ?? undefined);
   const { data: allData, isLoading: allLoading } = useBurnEligible();
+  const { data: bonusData } = useBurnPowerBonus(effectiveDid);
 
-  // Burn mutation
-  const burnMutation = useBurnMutation();
+  // Burn mutation — after success open assign modal so user can assign +50 power
+  const burnMutation = useBurnMutation(() => setShowAssignModal(true));
 
   const handleBurn = useCallback((fighter: BurnableFighter) => {
     setConfirmFighter(fighter);
   }, []);
 
   const confirmBurn = useCallback(async () => {
-    if (!confirmFighter || !player?.did) return;
+    if (!confirmFighter || !effectiveDid) return;
 
     try {
       await burnMutation.mutateAsync({
         nftId: confirmFighter.nftId,
-        burnerDid: player.did,
+        burnerDid: effectiveDid,
       });
       setConfirmFighter(null);
     } catch {
       // Error handled by mutation
     }
-  }, [confirmFighter, player?.did, burnMutation]);
+  }, [confirmFighter, effectiveDid, burnMutation]);
 
-  // Determine if burner would earn credits
+  // Determine if burner would earn credits (only others' NFTs are burnable now; API filters)
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- depend on profile for wallet comparison
   const canEarnCredits = useCallback((fighter: BurnableFighter) => {
     if (!profile?.walletAddress) return true;
     return fighter.minterWallet !== profile.walletAddress;
-  }, [profile?.walletAddress]);
+  }, [profile]);
 
   // Filter marketplace to exclude user's own
   const marketplaceFighters = allData?.fighters?.filter(
-    (f) => f.ownerDid !== player?.did
+    (f) => f.ownerDid !== effectiveDid
   ) ?? [];
 
-  if (!player) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-4 py-12">
-        <div className="p-4 rounded-full" style={{ background: 'var(--color-error-15)' }}>
-          <Flame size={32} className="text-error" />
-        </div>
-        <h2 className="text-xl font-bold">Not Registered</h2>
-        <p className="text-secondary text-center max-w-md">
-          Register with the Vote tab first to access burn features.
-        </p>
-      </div>
-    );
-  }
+  const isRegistered = !!effectiveDid;
 
   return (
     <div className="flex flex-col gap-8">
-      {/* Section A: Your Burnable Wojaks */}
-      <section>
-        <div className="flex items-center gap-3 mb-4">
-          <Flame size={20} className="text-error" />
-          <h2 className="text-lg font-bold">Your Burnable Wojaks</h2>
-        </div>
-
-        {myLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="spinner" />
-          </div>
-        ) : myData?.fighters?.length === 0 ? (
-          <div className="card-static p-6 text-center">
-            <p className="text-secondary">
-              None of your Wojaks are in the bottom 25% by Power.
-            </p>
-            <p className="text-muted text-sm mt-2">
-              Threshold: {myData?.threshold ?? 0} Power
-            </p>
-          </div>
-        ) : (
-          <>
-            <p className="text-sm text-muted mb-3">
-              Bottom 25% threshold: {myData?.threshold ?? 0} Power
-            </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {myData?.fighters?.map((fighter) => (
-                <BurnCard
-                  key={fighter.nftId}
-                  fighter={fighter}
-                  isOwner={true}
-                  canEarnCredits={canEarnCredits(fighter)}
-                  onBurn={() => handleBurn(fighter)}
-                  isBurning={burnMutation.isPending && confirmFighter?.nftId === fighter.nftId}
-                />
-              ))}
-            </div>
-          </>
-        )}
-      </section>
-
-      {/* Section B: Burn Marketplace */}
+      {/* Section A: Worst Wojaks (Marketplace) — first so users see buy path */}
       <section>
         <div className="flex items-center gap-3 mb-4">
           <Coins size={20} className="text-primary" />
-          <h2 className="text-lg font-bold">Burn Marketplace</h2>
+          <h2 className="text-lg font-bold">Worst Wojaks (Marketplace)</h2>
         </div>
 
         <p className="text-secondary text-sm mb-4">
-          Buy cheap Wojaks from other players, then burn them for 100 credits.
+          Lowest Power (most downvoted) Wojaks — buy on MintGarden, then burn for 100 credits and +50 assignable power.
         </p>
 
         {allLoading ? (
@@ -390,7 +507,73 @@ export default function BurnTab() {
         )}
       </section>
 
-      {/* Confirm Modal */}
+      {/* Section B: Your Burnable Wojaks (only when registered) */}
+      <section>
+        <div className="flex items-center gap-3 mb-4">
+          <Flame size={20} className="text-error" />
+          <h2 className="text-lg font-bold">Your Burnable Wojaks</h2>
+        </div>
+
+        {!isRegistered ? (
+          <div className="card-static p-6 text-center">
+            <p className="text-secondary">
+              Register in the Vote tab to burn and earn 100 credits + 50 assignable power.
+            </p>
+          </div>
+        ) : myLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="spinner" />
+          </div>
+        ) : myData?.fighters?.length === 0 ? (
+          <div className="card-static p-6 text-center">
+            <p className="text-secondary">
+              None of your Wojaks (that you didn&apos;t create) are in the bottom 25% by Power.
+            </p>
+            <p className="text-muted text-sm mt-2">
+              Threshold: {myData?.threshold ?? 0} Power. Only Wojaks you bought can be burned for rewards.
+            </p>
+          </div>
+        ) : (
+          <>
+            <p className="text-sm text-muted mb-3">
+              Bottom 25% threshold: {myData?.threshold ?? 0} Power. Burn for 100 credits + 50 power (assign to one of your Wojaks).
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {myData?.fighters?.map((fighter) => (
+                <BurnCard
+                  key={fighter.nftId}
+                  fighter={fighter}
+                  isOwner={true}
+                  canEarnCredits={canEarnCredits(fighter)}
+                  onBurn={() => handleBurn(fighter)}
+                  isBurning={burnMutation.isPending && confirmFighter?.nftId === fighter.nftId}
+                />
+              ))}
+            </div>
+          </>
+        )}
+      </section>
+
+      {/* Unassigned +50 power banner */}
+      {isRegistered && (bonusData?.unassignedCount ?? 0) > 0 && (
+        <div
+          className="card-static p-4 flex flex-wrap items-center justify-between gap-3"
+          style={{ background: 'var(--color-primary-15)', borderColor: 'var(--color-primary)' }}
+        >
+          <span className="text-sm">
+            You have <strong className="text-primary">{bonusData!.unassignedCount} unassigned +50 power</strong>. Assign to one of your Wojaks to boost your Power Level.
+          </span>
+          <button
+            type="button"
+            className="btn btn-primary text-sm"
+            onClick={() => setShowAssignModal(true)}
+          >
+            Assign +50 Power
+          </button>
+        </div>
+      )}
+
+      {/* Confirm Burn Modal */}
       {confirmFighter && (
         <ConfirmBurnModal
           fighter={confirmFighter}
@@ -398,6 +581,15 @@ export default function BurnTab() {
           onConfirm={confirmBurn}
           onCancel={() => setConfirmFighter(null)}
           isLoading={burnMutation.isPending}
+        />
+      )}
+
+      {/* Assign +50 Power Modal */}
+      {showAssignModal && effectiveDid && (
+        <AssignPowerModal
+          did={effectiveDid}
+          onClose={() => setShowAssignModal(false)}
+          onAssigned={() => {}}
         />
       )}
     </div>

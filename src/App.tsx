@@ -235,11 +235,13 @@ function AppContent() {
                   <Route
                     path="generator"
                     element={
-                      <GeneratorProvider>
-                        <Suspense fallback={<PageSkeleton type="generator" />}>
-                          <Generator />
-                        </Suspense>
-                      </GeneratorProvider>
+                      <ErrorBoundary>
+                        <GeneratorProvider>
+                          <Suspense fallback={<PageSkeleton type="generator" />}>
+                            <Generator />
+                          </Suspense>
+                        </GeneratorProvider>
+                      </ErrorBoundary>
                     }
                   />
                   <Route

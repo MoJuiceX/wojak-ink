@@ -24,7 +24,8 @@ import { useGenerator } from '@/contexts/GeneratorContext';
 import { useMint } from '@/contexts/MintContext';
 import { useSageWallet } from '@/sage-wallet';
 import { useLayout } from '@/hooks/useLayout';
-import { isSelectionPathEmpty } from '@/types/generator';
+import { isSelectionPathEmpty, isFavoriteV2 } from '@/types/generator';
+import type { SelectionsSnapshot } from '@/types/generator';
 import { exportImage } from '@/services/canvasRenderer';
 import { useMetadataAttributes } from './MetadataPreview';
 import { MintFlowModal } from './MintFlowModal';
@@ -115,6 +116,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
     selectedLayers,
     selectedColors,
     g2Selections,
+    selections,
     favorites,
     saveFavorite,
     canExport,
@@ -133,6 +135,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   const [showPricing, setShowPricing] = useState(false);
   const [showOverflowMenu, setShowOverflowMenu] = useState(false);
   const overflowMenuRef = useRef<HTMLDivElement>(null);
+  const lastRandomizeRef = useRef<number>(0);
 
   // First-visit: auto-open How It Works modal
   useEffect(() => {
@@ -212,6 +215,9 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   const hasSelection = !isSelectionPathEmpty(basePath);
 
   const handleRandomize = () => {
+    const now = Date.now();
+    if (now - lastRandomizeRef.current < 300) return; // Debounce 300ms
+    lastRandomizeRef.current = now;
     setIsRandomizing(true);
     randomize();
     setTimeout(() => setIsRandomizing(false), 500);
@@ -230,19 +236,42 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
     return `Wojak ${nextNumber}`;
   };
 
+  // Check if current selection already exists in favorites
+  const selectionsMatch = (a: SelectionsSnapshot, b: SelectionsSnapshot): boolean => {
+    const keysA = Object.keys(a) as (keyof SelectionsSnapshot)[];
+    const keysB = Object.keys(b) as (keyof SelectionsSnapshot)[];
+    if (keysA.length !== keysB.length) return false;
+    for (const key of keysA) {
+      const selA = a[key];
+      const selB = b[key];
+      if (!selA || !selB) return false;
+      if (selA.path !== selB.path) return false;
+      // Compare G2 data if present
+      if (JSON.stringify(selA.g2) !== JSON.stringify(selB.g2)) return false;
+    }
+    return true;
+  };
+
+  const isAlreadyInFavorites = favorites.some((f) => {
+    if (!isFavoriteV2(f)) return false;
+    return selectionsMatch(selections, f.unifiedSelections);
+  });
+
   const handleSaveAndOpenFavorites = async () => {
     if (!hasSelection || isSaving) return;
 
-    setIsSaving(true);
-    try {
-      // Auto-save with generated name
-      await saveFavorite(getNextProjectName());
-    } catch (error) {
-      console.error('Failed to save favorite:', error);
-    } finally {
-      setIsSaving(false);
+    // Only save if not already in favorites
+    if (!isAlreadyInFavorites) {
+      setIsSaving(true);
+      try {
+        await saveFavorite(getNextProjectName());
+      } catch (error) {
+        console.error('Failed to save favorite:', error);
+      } finally {
+        setIsSaving(false);
+      }
     }
-    // Open favorites modal
+    // Always open favorites modal
     toggleFavorites(true);
   };
 

@@ -1138,10 +1138,6 @@
 }
 
 .your-wojak-filter-menu {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 4px;
   min-width: 200px;
   max-height: 320px;
   overflow-y: auto;
@@ -1149,7 +1145,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-  z-index: 100;
+  /* Position is set via inline styles when using portal */
 }
 
 /* Your Wojak Lightbox Info Panel - Desktop border fix */

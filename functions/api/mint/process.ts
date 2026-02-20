@@ -45,14 +45,14 @@ export function buildCombatAttributes(combat: {
 
 /** Build parameterized INSERT for combat_fighters table. */
 export function buildFighterInsertSQL(fighter: {
-  nft_id: string; edition_number: number; owner_did: string;
+  nft_id: string; edition_number: number; owner_did: string; owner_address: string;
   combat_type: string; nature: string; ability: string; moves: string[];
 }): { query: string; bindings: unknown[] } {
   return {
-    query: `INSERT INTO combat_fighters (nft_id, edition_number, owner_did, combat_type, nature, ability, move_1, move_2, move_3, move_4)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    query: `INSERT INTO combat_fighters (nft_id, edition_number, owner_did, owner_address, combat_type, nature, ability, move_1, move_2, move_3, move_4)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     bindings: [
-      fighter.nft_id, fighter.edition_number, fighter.owner_did,
+      fighter.nft_id, fighter.edition_number, fighter.owner_did, fighter.owner_address,
       fighter.combat_type, fighter.nature, fighter.ability,
       fighter.moves[0], fighter.moves[1], fighter.moves[2], fighter.moves[3],
     ],
@@ -536,6 +536,7 @@ export async function finalizeJob(env: ProcessEnv, jobId: number): Promise<void>
       nft_id: nftId,
       edition_number: job.mint_number!,
       owner_did: '', // Will be set when owner claims via DID
+      owner_address: job.wallet_address, // Minter's wallet for identity fallback
       combat_type: identity.type,
       nature: identity.nature,
       ability: identity.ability,

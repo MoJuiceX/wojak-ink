@@ -8,13 +8,14 @@ interface Env {
   DB: D1Database;
 }
 
-// Scoring weights — tunable constants
+// Scoring weights — tunable constants (must match _powerLevel.ts)
 const QUALITY_WEIGHT = 1.0;         // Net votes (likes - dislikes) per NFT
 const VALUE_BASE = 50;              // Base points per NFT held (regardless of surcharge)
 const VALUE_LOG_SCALE = 30;         // Points from surcharge: VALUE_LOG_SCALE * ln(1 + surcharge_xch)
 const BREADTH_BONUS = 15;           // Points per unique creator held
 const CREATOR_QUALITY_WEIGHT = 0.5; // Net votes across all creations (halved vs holder)
 const CREATOR_SPREAD_BONUS = 10;    // Points per unique DID holding your work
+const BURN_POWER_BONUS = 50;        // +50 per burn power grant assigned to an NFT
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   return calculatePowerLevel(context);
@@ -52,6 +53,21 @@ async function calculatePowerLevel(context: EventContext<Env, string, unknown>) 
     //   value = VALUE_BASE + VALUE_LOG_SCALE * ln(1 + surcharge)
     //   breadth = BREADTH_BONUS per unique creator (first NFT from each creator)
 
+    // Burn power bonuses: +50 per assigned grant per NFT
+    const burnBonusByNft = new Map<string, number>();
+    try {
+      const burnBonusRows = await context.env.DB.prepare(`
+        SELECT nft_id, COUNT(*) as cnt FROM burn_power_grants
+        WHERE did_id = ? AND nft_id IS NOT NULL
+        GROUP BY nft_id
+      `).bind(did).all<{ nft_id: string; cnt: number }>();
+      for (const row of burnBonusRows.results ?? []) {
+        burnBonusByNft.set(row.nft_id, row.cnt);
+      }
+    } catch {
+      // Table may not exist before migration 076
+    }
+
     const holdings = await context.env.DB.prepare(`
       SELECT
         dh.nft_id,
@@ -85,7 +101,8 @@ async function calculatePowerLevel(context: EventContext<Env, string, unknown>) 
         breadth = BREADTH_BONUS;
       }
 
-      holdingsScore += quality + value + breadth;
+      const burnBonus = (burnBonusByNft.get(nft.nft_id as string) ?? 0) * BURN_POWER_BONUS;
+      holdingsScore += quality + value + breadth + burnBonus;
     }
 
     // =============================================

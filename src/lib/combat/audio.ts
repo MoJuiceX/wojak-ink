@@ -133,6 +133,20 @@ export class BattleAudio {
     this._isMuted = !this._isMuted;
   }
 
+  /** Suspend audio context - stops all playing sounds immediately */
+  suspend(): void {
+    if (this._ctx && this._ctx.state === 'running') {
+      this._ctx.suspend().catch(() => {});
+    }
+  }
+
+  /** Resume audio context */
+  resume(): void {
+    if (this._ctx && this._ctx.state === 'suspended') {
+      this._ctx.resume().catch(() => {});
+    }
+  }
+
   // ---- Type profile resolution ----
 
   getTypeProfile(type: string): TypeAudioProfile {

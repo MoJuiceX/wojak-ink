@@ -40,6 +40,11 @@ Migrations are one-way. If one is missing, queries will reference columns that d
 | 031 | `functions/migrations/031_mint_counter.sql` | `mint_counter` table, seeded from existing mints | Yes (2026-02-13) |
 | 032 | `functions/migrations/032_mint_audit_trail.sql` | Audit columns on `phase2_mints` + `mint_audit_log` table + refund tracking columns | Yes (2026-02-13) |
 | 034 | `functions/migrations/034_trait_decay.sql` | Adds `effective_usage`, `last_decay_at` columns to `trait_usage` table. Enables time-based decay of trait popularity. | Apply before launch |
+| 068 | `functions/migrations/068_burn_tracking.sql` | Adds `burned_at`, `burned_by_did` to `combat_fighters`; required for power-leaderboard and burn. | Apply before launch (see runbook) |
+| 075 | `functions/migrations/075_owner_address.sql` | Adds `owner_address` to `combat_fighters`; required for mint pipeline and wallet identity. | Apply before launch (see runbook) |
+| 076 | `functions/migrations/076_burn_power_bonus.sql` | Creates `burn_power_grants` table; required for burn +50 power assign. | Apply before launch (see runbook) |
+
+**Runbook:** `docs/plans/2026-02-20-deploy-and-migrations-runbook.md` — exact commands to apply 068, 075, 076 to production.
 
 ### Verification command
 

@@ -6,7 +6,7 @@ import { COMBAT_TYPES, STAT_NAMES } from './types';
 import { getTraitCombat } from './data/trait-type-map';
 import { getTypePointsForColor } from './data/color-type-map';
 import { getNaturePointsForColor } from './data/color-nature-map';
-import { getDetailBonus } from './data/detail-combat-map';
+import { getDetailBonus, getLogoBonus } from './data/detail-combat-map';
 import { getNatureByStats } from './data/natures';
 import { getAbilitiesForType } from './data/abilities';
 
@@ -19,6 +19,7 @@ interface IdentityInput {
   traits: TraitInput[];
   colors: Record<string, string>;   // traitId → hex color
   details: Record<string, string>;  // traitId → detail option name
+  logoOption?: string;              // Astronaut coin logo name
 }
 
 export function calculateCombatIdentity(input: IdentityInput): CombatIdentity {
@@ -67,6 +68,17 @@ export function calculateCombatIdentity(input: IdentityInput): CombatIdentity {
     }
   }
 
+  // Source 4: Logo points (Astronaut coin logo)
+  if (input.logoOption) {
+    const logoBonus = getLogoBonus(input.logoOption);
+    if (logoBonus) {
+      typeScores[logoBonus.type] += logoBonus.typePoints;
+      if (logoBonus.nature && logoBonus.naturePoints) {
+        statScores[logoBonus.nature] += logoBonus.naturePoints;
+      }
+    }
+  }
+
   // Resolve type: highest score wins
   let type: CombatType = 'NEUTRAL';
   let maxTypeScore = -1;
@@ -90,12 +102,10 @@ export function calculateCombatIdentity(input: IdentityInput): CombatIdentity {
       minStatVal = statScores[s]; lowestStat = s;
     }
   }
-  // Balanced when spread (max − min) ≤ the average stat value.
-  // This self-scales with build complexity and produces Balanced for ~10% of builds,
-  // making it as common as any other frequently-occurring nature.
-  const totalStats = (Object.values(statScores) as number[]).reduce((a, b) => a + b, 0);
-  const avgStat = totalStats / STAT_NAMES.length;
-  const isBalanced = (maxStatVal - minStatVal) <= Math.ceil(avgStat);
+  // Balanced when spread (max − min) ≤ 2 points.
+  // Strict threshold ensures Balanced nature is rare (~5-8% of builds),
+  // allowing more diverse natures to appear naturally.
+  const isBalanced = (maxStatVal - minStatVal) <= 2;
   const nature = isBalanced
     ? getNatureByStats(null, null)
     : getNatureByStats(highestStat, lowestStat);

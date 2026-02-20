@@ -15,7 +15,7 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Bot, Swords } from 'lucide-react';
-import { TurnLog } from './TurnLog';
+import { TurnLog, type FlatLogEntry } from './TurnLog';
 import { MoveButtons } from './MoveButtons';
 import { TurnTimer } from './TurnTimer';
 import { BattleCanvas } from './BattleCanvas';
@@ -25,9 +25,12 @@ import { EffectivenessCallout } from './EffectivenessCallout';
 import { useBattlePlayback } from '@/hooks/useBattlePlayback';
 import { getBattleAudio } from '@/lib/combat/audio';
 import type { CombatType } from '@/lib/combat/types';
+import type { AttackPattern } from '@/lib/combat/particles';
 import type { TurnResult } from '@/lib/combat/battle-state';
 import { getBaseStats } from '@/lib/combat/data/base-stats';
 import { calculateHP } from '@/lib/combat/stat-calculator';
+import { getMoveById } from '@/lib/combat/data/moves';
+import { TYPE_EFFECTS } from '@/lib/combat/particles';
 
 // ── Interfaces ──────────────────────────────────────────────────────────────
 
@@ -77,10 +80,124 @@ function computeMaxHP(type: CombatType, level: number): number {
   return calculateHP(base.hp, level);
 }
 
-// ── Fighter Position Constants (for canvas particle targeting) ──────────────
+/** Resolve when all URLs have loaded (or failed). Never rejects. */
+function preloadImages(urls: (string | undefined)[]): Promise<void> {
+  const valid = urls.filter((u): u is string => Boolean(u));
+  if (valid.length === 0) return Promise.resolve();
+  return Promise.all(
+    valid.map(
+      (url) =>
+        new Promise<void>((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve();
+          img.onerror = () => resolve();
+          img.src = url;
+        }),
+    ),
+  ).then(() => {});
+}
 
-const POS_A = { x: 0.25, y: 0.55 };
-const POS_B = { x: 0.75, y: 0.55 };
+/** Build flat battle-log entries from TurnResult[] for per-event scroll. */
+function buildFlatLogEntries(turns: TurnResult[]): FlatLogEntry[] {
+  const flat: FlatLogEntry[] = [];
+  const damageMsg = (d: number, crit: boolean, eff: TurnResult['fighter_a']['effectiveness']) => {
+    const base = crit ? `Critical! ${d} damage` : `${d} damage`;
+    if (eff === 'super_effective') return `${base} — Super effective!`;
+    if (eff === 'not_very_effective') return `${base} — It's not very effective.`;
+    if (eff === 'immune') return `No effect (immune).`;
+    return base;
+  };
+  for (const t of turns) {
+    flat.push({ kind: 'turn_sep', turn: t.turn });
+    const nameA = getMoveById(t.fighter_a.move)?.name ?? t.fighter_a.move;
+    const nameB = getMoveById(t.fighter_b.move)?.name ?? t.fighter_b.move;
+    if (t.order === 'a_first') {
+      flat.push({ kind: 'chip', type: 'move_a', message: `Used ${nameA}!` });
+      if (t.fighter_a.damage_dealt > 0) {
+        flat.push({
+          kind: 'chip',
+          type: 'damage_b',
+          message: damageMsg(t.fighter_a.damage_dealt, t.fighter_a.critical, t.fighter_a.effectiveness),
+          damage: t.fighter_a.damage_dealt,
+          effectiveness: t.fighter_a.effectiveness,
+          isCrit: t.fighter_a.critical,
+        });
+      }
+      flat.push({ kind: 'chip', type: 'move_b', message: `Used ${nameB}!` });
+      if (t.fighter_b.damage_dealt > 0) {
+        flat.push({
+          kind: 'chip',
+          type: 'damage_a',
+          message: damageMsg(t.fighter_b.damage_dealt, t.fighter_b.critical, t.fighter_b.effectiveness),
+          damage: t.fighter_b.damage_dealt,
+          effectiveness: t.fighter_b.effectiveness,
+          isCrit: t.fighter_b.critical,
+        });
+      }
+    } else {
+      flat.push({ kind: 'chip', type: 'move_b', message: `Used ${nameB}!` });
+      if (t.fighter_b.damage_dealt > 0) {
+        flat.push({
+          kind: 'chip',
+          type: 'damage_a',
+          message: damageMsg(t.fighter_b.damage_dealt, t.fighter_b.critical, t.fighter_b.effectiveness),
+          damage: t.fighter_b.damage_dealt,
+          effectiveness: t.fighter_b.effectiveness,
+          isCrit: t.fighter_b.critical,
+        });
+      }
+      flat.push({ kind: 'chip', type: 'move_a', message: `Used ${nameA}!` });
+      if (t.fighter_a.damage_dealt > 0) {
+        flat.push({
+          kind: 'chip',
+          type: 'damage_b',
+          message: damageMsg(t.fighter_a.damage_dealt, t.fighter_a.critical, t.fighter_a.effectiveness),
+          damage: t.fighter_a.damage_dealt,
+          effectiveness: t.fighter_a.effectiveness,
+          isCrit: t.fighter_a.critical,
+        });
+      }
+    }
+  }
+  return flat;
+}
+
+// ── Fighter positions for canvas particle targeting ─────────────────────────
+// ClawCombat uses actual DOM element centers; we do the same so effects line up.
+
+function getFighterPositions(arena: HTMLDivElement | null): { posA: { x: number; y: number }; posB: { x: number; y: number } } | null {
+  if (!arena) return null;
+  const player = arena.querySelector('.fighter-card.player');
+  const opponent = arena.querySelector('.fighter-card.opponent');
+  if (!player || !opponent) return null;
+  const arenaRect = arena.getBoundingClientRect();
+  const playerRect = (player as HTMLElement).getBoundingClientRect();
+  const opponentRect = (opponent as HTMLElement).getBoundingClientRect();
+  const w = arenaRect.width;
+  const h = arenaRect.height;
+  if (w <= 0 || h <= 0) return null;
+  return {
+    posA: {
+      x: (playerRect.left - arenaRect.left + playerRect.width / 2) / w,
+      y: (playerRect.top - arenaRect.top + playerRect.height / 2) / h,
+    },
+    posB: {
+      x: (opponentRect.left - arenaRect.left + opponentRect.width / 2) / w,
+      y: (opponentRect.top - arenaRect.top + opponentRect.height / 2) / h,
+    },
+  };
+}
+
+const POS_A_FALLBACK = { x: 0.25, y: 0.55 };
+const POS_B_FALLBACK = { x: 0.75, y: 0.55 };
+
+/** Convert hex to rgba with alpha for type-colored flash overlay. */
+function hexToRgba(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
 
 // ── BattleView Component ────────────────────────────────────────────────────
 
@@ -105,10 +222,14 @@ export function BattleView({ battleId, playerNftId, staticBattleData, autoPlay, 
   const [callouts, setCallouts] = useState<CalloutEntry[]>([]);
   const [shakeClass, setShakeClass] = useState('');
   const [flashClass, setFlashClass] = useState('');
+  const [flashStyle, setFlashStyle] = useState<React.CSSProperties | null>(null);
 
   // ── Played turn tracking ────────────────────────────────────────────────
   const [playedTurns, setPlayedTurns] = useState(0);
   const [playbackDone, setPlaybackDone] = useState(false);
+  const introFogPlayedRef = useRef(false);
+  const victoryPlayedRef = useRef(false);
+  const [visibleLogEntryCount, setVisibleLogEntryCount] = useState(0);
 
   // ── Overlay cleanup callbacks ─────────────────────────────────────────
   const removeDamageNumber = useCallback((id: string) => {
@@ -132,7 +253,7 @@ export function BattleView({ battleId, playerNftId, staticBattleData, autoPlay, 
       if (side === 'a') setStatusA(status);
       else setStatusB(status);
     },
-    onDamage: (side: 'a' | 'b', amount: number, isCrit: boolean, effectiveness: string) => {
+    onDamage: (targetSide: 'a' | 'b', amount: number, isCrit: boolean, effectiveness: string, _attackerSide: 'a' | 'b', attackerType?: CombatType, power?: number) => {
       const dmgType = isCrit ? 'crit' as const
         : effectiveness === 'super_effective' ? 'super-effective' as const
         : effectiveness === 'immune' ? 'immune' as const
@@ -141,30 +262,63 @@ export function BattleView({ battleId, playerNftId, staticBattleData, autoPlay, 
         id: `dmg-${Date.now()}-${Math.random()}`,
         value: amount,
         type: dmgType,
-        side,
+        side: targetSide,
       }]);
 
-      // Screen shake
-      const intensity = isCrit ? 'battle-shake-heavy' : amount > 30 ? 'battle-shake' : 'battle-shake-light';
+      const p = power ?? 60;
+      const intensity = isCrit ? 'battle-shake-heavy' : (p >= 80 || amount > 30) ? 'battle-shake' : 'battle-shake-light';
       setShakeClass(intensity);
       setTimeout(() => setShakeClass(''), 500);
 
-      // Screen flash for crits
       if (isCrit) {
         setFlashClass('battle-flash-overlay battle-flash-crit');
+        setFlashStyle(null);
         setTimeout(() => setFlashClass(''), 400);
       } else if (effectiveness === 'super_effective') {
         setFlashClass('battle-flash-overlay battle-flash-super-effective');
+        setFlashStyle(null);
         setTimeout(() => setFlashClass(''), 400);
+      } else if (amount > 0 && p >= 100 && attackerType) {
+        const fx = TYPE_EFFECTS[attackerType];
+        if (fx?.flashColor) {
+          setFlashClass('battle-flash-overlay');
+          setFlashStyle({ background: hexToRgba(fx.flashColor, 0.2) });
+          setTimeout(() => {
+            setFlashClass('');
+            setFlashStyle(null);
+          }, 200);
+        }
       }
 
-      // Effectiveness callout
       if (effectiveness && effectiveness !== 'neutral') {
         setCallouts(prev => [...prev, {
           id: `eff-${Date.now()}-${Math.random()}`,
           type: effectiveness as CalloutEntry['type'],
         }]);
       }
+    },
+    onMoveAnnounce: (side: 'a' | 'b', arena: HTMLDivElement | null) => {
+      if (!arena) return;
+      const card = arena.querySelector(side === 'a' ? '.fighter-card.player' : '.fighter-card.opponent') as HTMLElement | null;
+      if (card) card.classList.add('attacking');
+    },
+    onAttackingEnd: (attackerSide: 'a' | 'b', arena: HTMLDivElement | null) => {
+      if (!arena) return;
+      const card = arena.querySelector(attackerSide === 'a' ? '.fighter-card.player' : '.fighter-card.opponent') as HTMLElement | null;
+      if (card) card.classList.remove('attacking');
+    },
+    onAttackAnim: (side: 'a' | 'b', pattern: AttackPattern, durationMs: number, arena: HTMLDivElement | null) => {
+      if (!arena) return;
+      const card = arena.querySelector(side === 'a' ? '.fighter-card.player' : '.fighter-card.opponent') as HTMLElement | null;
+      if (!card) return;
+      const isCharge = pattern === 'charge';
+      card.classList.add(isCharge ? 'charging' : 'striking');
+      setTimeout(() => {
+        card.classList.remove('charging', 'striking');
+      }, durationMs);
+    },
+    onLogReveal: () => {
+      setVisibleLogEntryCount((c) => c + 1);
     },
     onComplete: () => {
       // Playback finished — mark playback as done for winner/loser state
@@ -181,9 +335,16 @@ export function BattleView({ battleId, playerNftId, staticBattleData, autoPlay, 
     canvasRef,
     arenaRef,
     playTurns,
-    speed,
-    setSpeed,
   } = useBattlePlayback(callbacks);
+
+  // Reset visible log count when playback starts (per-event reveal)
+  const prevPlayingRef = useRef(false);
+  useEffect(() => {
+    if (isPlaying && !prevPlayingRef.current) {
+      setVisibleLogEntryCount(0);
+    }
+    prevPlayingRef.current = isPlaying;
+  }, [isPlaying]);
 
   // ── Audio preload on mount ──────────────────────────────────────────────
   const audioPreloaded = useRef(false);
@@ -269,6 +430,15 @@ export function BattleView({ battleId, playerNftId, staticBattleData, autoPlay, 
     setPlayedTurns(battle.turns.length);
   }, [battle, maxHpA, maxHpB, autoPlay]);
 
+  const victoryDefeatAudioPlayedRef = useRef(false);
+
+  // Reset intro/victory effect refs when battle changes
+  useEffect(() => {
+    introFogPlayedRef.current = false;
+    victoryPlayedRef.current = false;
+    victoryDefeatAudioPlayedRef.current = false;
+  }, [battle?.id]);
+
   // ── Play new turns when they arrive ─────────────────────────────────────
   useEffect(() => {
     if (!battle || isPlaying) return;
@@ -279,9 +449,68 @@ export function BattleView({ battleId, playerNftId, staticBattleData, autoPlay, 
     const typeA = battle.fighterA.type;
     const typeB = battle.fighterB.type;
 
-    playTurns(newTurns, typeA, typeB, POS_A, POS_B);
+    // Demo: 2s delay, preload fighter images, then battle-intro, intro fog, then playback
+    if (autoPlay && playedTurns === 0 && !introFogPlayedRef.current) {
+      introFogPlayedRef.current = true;
+      arenaRef.current?.classList.add('battle-intro');
+      setTimeout(() => arenaRef.current?.classList.remove('battle-intro'), 1500);
+      canvasRef.current?.clear?.();
+      requestAnimationFrame(() => canvasRef.current?.playIntroFog?.());
+
+      let cancelled = false;
+      const delayMs = 2000;
+      const urls = [battle.fighterA?.imageUrl, battle.fighterB?.imageUrl];
+
+      const timeoutId = setTimeout(() => {
+        preloadImages(urls).then(() => {
+          if (cancelled) return;
+          requestAnimationFrame(() => {
+            if (cancelled) return;
+            const positions = getFighterPositions(arenaRef.current);
+            const posA = positions?.posA ?? POS_A_FALLBACK;
+            const posB = positions?.posB ?? POS_B_FALLBACK;
+            playTurns(newTurns, typeA, typeB, posA, posB);
+            setPlayedTurns(battle.turns.length);
+          });
+        });
+      }, delayMs);
+
+      return () => {
+        cancelled = true;
+        clearTimeout(timeoutId);
+      };
+    }
+
+    // Use actual fighter positions when available (ClawCombat style)
+    const positions = getFighterPositions(arenaRef.current);
+    const posA = positions?.posA ?? POS_A_FALLBACK;
+    const posB = positions?.posB ?? POS_B_FALLBACK;
+    playTurns(newTurns, typeA, typeB, posA, posB);
     setPlayedTurns(battle.turns.length);
-  }, [battle, playedTurns, isPlaying, playTurns]);
+  }, [battle, playedTurns, isPlaying, playTurns, autoPlay, canvasRef, arenaRef]);
+
+  // Victory confetti when demo playback completes (defer one frame so winner/loser state is painted)
+  useEffect(() => {
+    if (!playbackDone || !autoPlay || !battle?.winner || victoryPlayedRef.current) return;
+    victoryPlayedRef.current = true;
+    const side = battle.winner === battle.fighterA?.nft_id ? 'a' : 'b';
+    const id = requestAnimationFrame(() => {
+      canvasRef.current?.playVictory(side);
+    });
+    return () => cancelAnimationFrame(id);
+  }, [playbackDone, autoPlay, battle?.winner, battle?.fighterA?.nft_id, canvasRef]);
+
+  // Victory/defeat audio when battle completes (no UI box)
+  useEffect(() => {
+    if (!battle?.winner || victoryDefeatAudioPlayedRef.current) return;
+    victoryDefeatAudioPlayedRef.current = true;
+    const audio = getBattleAudio();
+    if (battle.winner === playerNftId) {
+      audio.victory();
+    } else {
+      audio.defeat();
+    }
+  }, [battle?.winner, playerNftId]);
 
   // ── Submit move handler ─────────────────────────────────────────────────
   const handleSubmitMove = useCallback(async (moveId: string) => {
@@ -314,6 +543,20 @@ export function BattleView({ battleId, playerNftId, staticBattleData, autoPlay, 
       handleSubmitMove(randomMove.id);
     }
   }, [battle, playerNftId, handleSubmitMove]);
+
+  // Battle log: flat entries for per-event scroll (ClawCombat-style).
+  // Sliding window so newest is always on the right; old entries drop off the left.
+  const LOG_WINDOW_SIZE = 24;
+  const flatLogEntries = useMemo(
+    () => (battle?.turns ? buildFlatLogEntries(battle.turns) : []),
+    [battle?.turns]
+  );
+  const visibleLogEntries = isPlaying
+    ? flatLogEntries.slice(
+        Math.max(0, visibleLogEntryCount - LOG_WINDOW_SIZE),
+        visibleLogEntryCount
+      )
+    : flatLogEntries;
 
   // ── Error state ─────────────────────────────────────────────────────────
   if (error) {
@@ -421,11 +664,8 @@ export function BattleView({ battleId, playerNftId, staticBattleData, autoPlay, 
           {/* VS emblem */}
           <div className="vs-emblem">VS</div>
 
-          {/* Canvas particle overlay */}
-          <BattleCanvas ref={canvasRef} />
-
           {/* Flash overlay */}
-          {flashClass && <div className={flashClass} />}
+          {flashClass && <div className={flashClass} style={flashStyle ?? undefined} />}
 
           {/* Effectiveness callouts */}
           {callouts.map(c => (
@@ -452,6 +692,10 @@ export function BattleView({ battleId, playerNftId, staticBattleData, autoPlay, 
                 <div className="frame-node tr" />
                 <div className="frame-node bl" />
                 <div className="frame-node br" />
+                <div className="frame-accent top" />
+                <div className="frame-accent bottom" />
+                <div className="frame-accent left" />
+                <div className="frame-accent right" />
                 {playerFighter.imageUrl ? (
                   <img
                     src={playerFighter.imageUrl}
@@ -547,6 +791,10 @@ export function BattleView({ battleId, playerNftId, staticBattleData, autoPlay, 
                 <div className="frame-node tr" />
                 <div className="frame-node bl" />
                 <div className="frame-node br" />
+                <div className="frame-accent top" />
+                <div className="frame-accent bottom" />
+                <div className="frame-accent left" />
+                <div className="frame-accent right" />
                 {isSparring ? (
                   <div
                     style={{
@@ -643,24 +891,11 @@ export function BattleView({ battleId, playerNftId, staticBattleData, autoPlay, 
                 ))}
             </div>
           )}
+
+          {/* Particle overlay last so it paints on top of fighter cards (see audit plan) */}
+          <BattleCanvas ref={canvasRef} />
         </div>
       </div>
-
-      {/* Speed control (visible during playback) */}
-      {isPlaying && (
-        <div className="flex items-center justify-center gap-2">
-          <span className="text-xs text-muted">Speed:</span>
-          {[0.5, 1, 2, 4].map((s) => (
-            <button
-              key={s}
-              className={`btn btn-ghost text-xs ${speed === s ? 'text-accent' : ''}`}
-              onClick={() => setSpeed(s)}
-            >
-              {s}x
-            </button>
-          ))}
-        </div>
-      )}
 
       {/* Turn timer — 30s countdown when it's your turn (hide in autoPlay mode) */}
       {!autoPlay && !isComplete && !isPlaying && playerFighter?.moves && playerNftId && (
@@ -682,76 +917,8 @@ export function BattleView({ battleId, playerNftId, staticBattleData, autoPlay, 
         />
       )}
 
-      {/* Turn log */}
-      <TurnLog turns={battle.turns} />
-
-      {/* Battle result */}
-      {isComplete && (
-        <BattleResult
-          battle={battle}
-          playerNftId={playerNftId}
-          isPlayerA={isPlayerA}
-        />
-      )}
-    </div>
-  );
-}
-
-// ── BattleResult Sub-component ──────────────────────────────────────────────
-
-function BattleResult({
-  battle,
-  playerNftId,
-  isPlayerA,
-}: {
-  battle: BattleData;
-  playerNftId?: string;
-  isPlayerA: boolean;
-}) {
-  const audioPlayed = useRef(false);
-
-  useEffect(() => {
-    if (audioPlayed.current) return;
-    audioPlayed.current = true;
-    const audio = getBattleAudio();
-    if (battle.winner === playerNftId) {
-      audio.victory();
-    } else if (battle.winner) {
-      audio.defeat();
-    }
-  }, [battle.winner, playerNftId]);
-
-  const eloChange = isPlayerA ? battle.eloChangeA : battle.eloChangeB;
-  const xpAwarded = isPlayerA ? battle.xpAwardedA : battle.xpAwardedB;
-
-  return (
-    <div className="card p-4 text-center">
-      <p className="text-lg font-bold">
-        {battle.winner === playerNftId
-          ? 'Victory!'
-          : battle.winner
-            ? 'Defeat'
-            : 'Draw'}
-      </p>
-      {eloChange != null && (
-        <div className="flex items-center justify-center gap-4 mt-2 text-sm text-secondary">
-          <span>ELO: {eloChange > 0 ? '+' : ''}{eloChange}</span>
-          <span>XP: +{xpAwarded}</span>
-        </div>
-      )}
-      {xpAwarded != null && xpAwarded > 0 && (
-        <div className="mt-3 flex flex-col gap-1">
-          <div className="text-xs text-muted text-center">XP Gained</div>
-          <div className="w-full max-w-48 mx-auto h-2 rounded-full overflow-hidden"
-               style={{ background: 'rgba(255,255,255,0.08)' }}>
-            <div
-              className="xp-gained-bar"
-              style={{ width: `${Math.min(100, xpAwarded)}%` }}
-            />
-          </div>
-          <div className="text-xs text-center text-cyan">+{xpAwarded} XP</div>
-        </div>
-      )}
+      {/* Turn log — progressive per-event during playback, full when idle */}
+      <TurnLog entries={visibleLogEntries} />
     </div>
   );
 }

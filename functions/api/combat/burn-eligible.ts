@@ -52,6 +52,15 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
     const threshold = thresholdRow?.threshold ?? 0;
 
+    // When listing "your" burnable, exclude self-minted (only show Wojaks you bought)
+    let ownerWallet: string | null = null;
+    if (ownerDid) {
+      const ownerRow = await db.prepare(
+        'SELECT wallet_address FROM game_players WHERE did_id = ?'
+      ).bind(ownerDid).first<{ wallet_address: string }>();
+      ownerWallet = ownerRow?.wallet_address ?? null;
+    }
+
     // Build query for eligible fighters
     let query = `
       SELECT
@@ -77,6 +86,10 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       query += ' AND cf.owner_did = ?';
       params.push(ownerDid);
     }
+    if (ownerWallet != null) {
+      query += ' AND (pm.wallet_address IS NULL OR pm.wallet_address != ?)';
+      params.push(ownerWallet);
+    }
 
     query += ' ORDER BY cf.power_score ASC LIMIT ? OFFSET ?';
     params.push(limit, offset);
@@ -87,6 +100,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     let countQuery = `
       SELECT COUNT(*) as total
       FROM combat_fighters cf
+      LEFT JOIN phase2_mints pm ON cf.nft_id = pm.mintgarden_launcher_id
       WHERE cf.power_score <= ?
         AND cf.burned_at IS NULL
     `;
@@ -95,6 +109,10 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     if (ownerDid) {
       countQuery += ' AND cf.owner_did = ?';
       countParams.push(ownerDid);
+    }
+    if (ownerWallet != null) {
+      countQuery += ' AND (pm.wallet_address IS NULL OR pm.wallet_address != ?)';
+      countParams.push(ownerWallet);
     }
 
     const countRow = await db.prepare(countQuery).bind(...countParams).first<{ total: number }>();

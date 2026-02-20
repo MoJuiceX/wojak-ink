@@ -1,53 +1,104 @@
 #!/usr/bin/env node
 /**
  * Verify that every file referenced in YourWojak-layers/manifest.json
- * exists in that directory. Run from repo root: node scripts/verify-manifest-assets.mjs
+ * exists in that directory, and optionally check for orphaned files.
+ *
+ * Run from repo root: node scripts/verify-manifest-assets.mjs [--strict]
+ * --strict: Also fail on orphaned files (files not in manifest)
  */
 
-import { readFileSync, existsSync } from 'fs';
-import { join, dirname } from 'path';
+import { readFileSync, existsSync, readdirSync, statSync } from 'fs';
+import { join, dirname, relative } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const manifestPath = join(__dirname, '../public/assets/wojak-layers/YourWojak-layers/manifest.json');
 const assetDir = join(__dirname, '../public/assets/wojak-layers/YourWojak-layers');
 
+const strictMode = process.argv.includes('--strict');
+
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
-const files = new Set();
+const referencedFiles = new Set();
 
 function collectFiles(obj) {
   if (!obj) return;
   if (typeof obj === 'string') {
-    if (obj.endsWith('.png') || obj.endsWith('.webp')) files.add(obj);
+    // Skip absolute paths (e.g., g1Path references to /assets/wojak-layers/HEAD/)
+    if ((obj.endsWith('.png') || obj.endsWith('.webp')) && !obj.startsWith('/')) {
+      referencedFiles.add(obj);
+    }
     return;
   }
   if (Array.isArray(obj)) {
     obj.forEach((item) => {
-      if (typeof item === 'object' && item !== null && item.file) files.add(item.file);
+      if (typeof item === 'object' && item !== null && item.file) referencedFiles.add(item.file);
       else collectFiles(item);
     });
     return;
   }
+  // Skip g1Path - these are legacy G1 paths in a different directory
   for (const key of ['outlineFile', 'outline2File', 'fillFile', 'fill1File', 'fill2File', 'detailFile', 'layer0File', 'layer1File']) {
-    if (obj[key]) files.add(obj[key]);
+    if (obj[key]) referencedFiles.add(obj[key]);
   }
   for (const key of ['fillFiles', 'outlineFiles']) {
-    if (Array.isArray(obj[key])) obj[key].forEach((f) => files.add(f));
+    if (Array.isArray(obj[key])) obj[key].forEach((f) => referencedFiles.add(f));
   }
   for (const key of ['detailOptions', 'frameFiles']) {
-    if (Array.isArray(obj[key])) obj[key].forEach((item) => item.file && files.add(item.file));
+    if (Array.isArray(obj[key])) obj[key].forEach((item) => item.file && referencedFiles.add(item.file));
   }
   Object.values(obj).forEach(collectFiles);
 }
 
+// Recursively get all PNG/WebP files in directory
+function getFilesRecursive(dir, base = '') {
+  const files = [];
+  for (const entry of readdirSync(dir)) {
+    const fullPath = join(dir, entry);
+    const relPath = base ? `${base}/${entry}` : entry;
+    if (statSync(fullPath).isDirectory()) {
+      files.push(...getFilesRecursive(fullPath, relPath));
+    } else if (entry.endsWith('.png') || entry.endsWith('.webp')) {
+      files.push(relPath);
+    }
+  }
+  return files;
+}
+
 collectFiles(manifest);
+
+// Check for missing files
 const missing = [];
-for (const f of files) {
+for (const f of referencedFiles) {
   if (!existsSync(join(assetDir, f))) missing.push(f);
 }
 
+// Check for orphaned files
+const actualFiles = new Set(getFilesRecursive(assetDir));
+const orphaned = [...actualFiles].filter(f => !referencedFiles.has(f));
+
+let hasError = false;
+
 if (missing.length) {
-  console.error('Missing', missing.length, 'files:\n' + missing.join('\n'));
+  console.error('\n❌ Missing', missing.length, 'files referenced in manifest:\n  ' + missing.join('\n  '));
+  hasError = true;
+}
+
+if (orphaned.length > 0) {
+  if (strictMode) {
+    console.error('\n❌ Found', orphaned.length, 'orphaned files (not in manifest):\n  ' + orphaned.slice(0, 20).join('\n  '));
+    if (orphaned.length > 20) console.error('  ... and', orphaned.length - 20, 'more');
+    hasError = true;
+  } else {
+    console.warn('\n⚠️  Found', orphaned.length, 'orphaned files (not in manifest). Run with --strict to fail.');
+  }
+}
+
+if (hasError) {
   process.exit(1);
 }
-console.log('OK: all', files.size, 'referenced files exist.');
+
+console.log('\n✅ Manifest validation passed:');
+console.log('   Referenced files:', referencedFiles.size);
+console.log('   Actual files:', actualFiles.size);
+console.log('   Missing:', missing.length);
+console.log('   Orphaned:', orphaned.length);

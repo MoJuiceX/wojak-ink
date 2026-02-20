@@ -50,6 +50,16 @@ export interface TimelineEvent {
 export interface PlaybackCallbacks {
   onHpUpdate?: (side: Side, hp: number, maxHp: number) => void;
   onStatusChange?: (side: Side, status: string | null) => void;
+  /** Damage impact: shake, flash, effectiveness; targetSide took damage, attackerSide dealt it. Optional attackerType and power for type-colored flash and power-based shake. */
+  onDamage?: (targetSide: Side, amount: number, isCrit: boolean, effectiveness: string, attackerSide: Side, attackerType?: CombatType, power?: number) => void;
+  /** Move telegraph: add .attacking to attacker card */
+  onMoveAnnounce?: (side: Side, arena: HTMLDivElement | null) => void;
+  /** Remove .attacking from attacker when damage is processed */
+  onAttackingEnd?: (attackerSide: Side, arena: HTMLDivElement | null) => void;
+  /** Attacker charge/strike pose: add .charging or .striking to fighter card for durationMs */
+  onAttackAnim?: (side: Side, pattern: AttackPattern, durationMs: number, arena: HTMLDivElement | null) => void;
+  /** Reveal next battle log entry (for per-event scroll, ClawCombat-style) */
+  onLogReveal?: () => void;
   onComplete?: () => void;
 }
 
@@ -58,6 +68,30 @@ export interface PlaybackCallbacks {
 export interface FighterPosition {
   x: number;
   y: number;
+}
+
+/** Get fighter card centers as normalized 0-1 positions (arena-relative). Called at attack time so layout is settled. */
+function getFighterPositions(arena: HTMLDivElement | null): { posA: FighterPosition; posB: FighterPosition } | null {
+  if (!arena) return null;
+  const player = arena.querySelector('.fighter-card.player');
+  const opponent = arena.querySelector('.fighter-card.opponent');
+  if (!player || !opponent) return null;
+  const arenaRect = arena.getBoundingClientRect();
+  const playerRect = (player as HTMLElement).getBoundingClientRect();
+  const opponentRect = (opponent as HTMLElement).getBoundingClientRect();
+  const w = arenaRect.width;
+  const h = arenaRect.height;
+  if (w <= 0 || h <= 0) return null;
+  return {
+    posA: {
+      x: (playerRect.left - arenaRect.left + playerRect.width / 2) / w,
+      y: (playerRect.top - arenaRect.top + playerRect.height / 2) / h,
+    },
+    posB: {
+      x: (opponentRect.left - arenaRect.left + opponentRect.width / 2) / w,
+      y: (opponentRect.top - arenaRect.top + opponentRect.height / 2) / h,
+    },
+  };
 }
 
 // ── buildTurnTimeline (pure function, exported for testing) ─────────────────
@@ -190,6 +224,8 @@ function emitMoveEvents(
       amount: data.damage_dealt,
       isCrit: data.critical,
       effectiveness: data.effectiveness,
+      moveType: moveType,
+      movePower: power,
     });
   }
 
@@ -293,10 +329,34 @@ function showCritText(arena: HTMLDivElement, side: Side): void {
 }
 
 function triggerShake(arena: HTMLDivElement, amplitude: 'light' | 'heavy'): void {
-  const cls = amplitude === 'heavy' ? 'screen-shake-heavy' : 'screen-shake';
+  const cls = amplitude === 'heavy' ? 'battle-shake-heavy' : 'battle-shake';
   const duration = amplitude === 'heavy' ? 500 : 300;
   arena.classList.add(cls);
   setTimeout(() => arena.classList.remove(cls), duration);
+}
+
+function getFighterCard(arena: HTMLDivElement, side: Side): HTMLElement | null {
+  return arena.querySelector(side === 'a' ? '.fighter-card.player' : '.fighter-card.opponent') as HTMLElement | null;
+}
+
+function triggerHit(arena: HTMLDivElement, targetSide: Side): void {
+  const card = getFighterCard(arena, targetSide);
+  if (!card) return;
+  card.classList.add('hit');
+  setTimeout(() => card.classList.remove('hit'), 300);
+}
+
+function triggerCritZoom(arena: HTMLDivElement, attackerSide: Side): void {
+  const card = getFighterCard(arena, attackerSide);
+  if (!card) return;
+  card.classList.add('crit-zoom');
+  setTimeout(() => card.classList.remove('crit-zoom'), 400);
+}
+
+function addFainted(arena: HTMLDivElement, side: Side): void {
+  const card = getFighterCard(arena, side);
+  if (!card) return;
+  card.classList.add('fainted');
 }
 
 function showEffectivenessCallout(arena: HTMLDivElement, effectiveness: string): void {
@@ -330,8 +390,6 @@ export interface UseBattlePlaybackReturn {
   isPlaying: boolean;
   /** Current turn being played (0-indexed from the turns array) */
   currentTurn: number;
-  /** Playback speed multiplier */
-  speed: number;
   /** Ref to attach to BattleCanvas */
   canvasRef: React.RefObject<BattleCanvasRef | null>;
   /** Ref to attach to the arena container div */
@@ -346,8 +404,6 @@ export interface UseBattlePlaybackReturn {
   ) => void;
   /** Stop all playback, clearing pending timers */
   stop: () => void;
-  /** Set playback speed multiplier (0.5, 1, 2, 4) */
-  setSpeed: (n: number) => void;
 }
 
 export function useBattlePlayback(
@@ -355,18 +411,10 @@ export function useBattlePlayback(
 ): UseBattlePlaybackReturn {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTurn, setCurrentTurn] = useState(0);
-  const [speed, setSpeedState] = useState(1);
 
   const canvasRef = useRef<BattleCanvasRef | null>(null);
   const arenaRef = useRef<HTMLDivElement | null>(null);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const speedRef = useRef(1);
-
-  // Keep speedRef in sync
-  const setSpeed = useCallback((n: number) => {
-    speedRef.current = n;
-    setSpeedState(n);
-  }, []);
 
   // Clean up all timers when component unmounts
   useEffect(() => {
@@ -414,7 +462,7 @@ export function useBattlePlayback(
       const timeline = buildTurnTimeline(turn, typeA, typeB);
 
       for (const event of timeline) {
-        const eventDelay = (turnBaseDelay + event.delay) / speedRef.current;
+        const eventDelay = turnBaseDelay + event.delay;
 
         const timer = setTimeout(() => {
           setCurrentTurn(turnIdx);
@@ -435,7 +483,7 @@ export function useBattlePlayback(
     const completeTimer = setTimeout(() => {
       setIsPlaying(false);
       callbacks?.onComplete?.();
-    }, turnBaseDelay / speedRef.current);
+    }, turnBaseDelay);
     allTimers.push(completeTimer);
 
     timersRef.current = allTimers;
@@ -444,12 +492,10 @@ export function useBattlePlayback(
   return {
     isPlaying,
     currentTurn,
-    speed,
     canvasRef,
     arenaRef,
     playTurns,
     stop,
-    setSpeed,
   };
 }
 
@@ -468,27 +514,34 @@ function processEvent(
   callbacks?: PlaybackCallbacks,
 ): void {
   const resolveType = (side: Side): CombatType => side === 'a' ? typeA : typeB;
-  const resolvePos = (side: Side): FighterPosition => side === 'a' ? posA : posB;
-  const resolveTargetPos = (side: Side): FighterPosition => side === 'a' ? posB : posA;
 
   switch (event.type) {
     case 'turn_start': {
       audio.turnStart();
+      callbacks?.onLogReveal?.();
       break;
     }
 
     case 'move_announce': {
-      // Move telegraph — no visual effect beyond UI state update
-      // Parent can listen via state changes
+      callbacks?.onMoveAnnounce?.(event.side, arena);
+      callbacks?.onLogReveal?.();
       break;
     }
 
     case 'attack_anim': {
-      // Spawn particles
+      const pattern = event.pattern ?? 'burst';
+      const durationMs = ANIM_TIMING.travelTime[pattern] ?? ANIM_TIMING.travelTime.default;
+      callbacks?.onAttackAnim?.(event.side, pattern, durationMs, arena);
+      // Spawn particles — use fresh positions from DOM at attack time so effects start at attacker and hit defender
       if (canvas && event.pattern) {
-        const startPos = resolvePos(event.side);
-        const targetPos = resolveTargetPos(event.side);
-        canvas.playAttack({
+        const positions = getFighterPositions(arena);
+        const startPos = positions
+          ? (event.side === 'a' ? positions.posA : positions.posB)
+          : (event.side === 'a' ? posA : posB);
+        const targetPos = positions
+          ? (event.side === 'a' ? positions.posB : positions.posA)
+          : (event.side === 'a' ? posB : posA);
+        const config = {
           startX: startPos.x,
           startY: startPos.y,
           targetX: targetPos.x,
@@ -496,9 +549,13 @@ function processEvent(
           type: event.moveType ?? resolveType(event.side),
           power: event.movePower ?? 60,
           pattern: event.pattern,
-        });
+        };
+        if (pattern === 'slash') {
+          setTimeout(() => canvas.playAttack(config), 120);
+        } else {
+          canvas.playAttack(config);
+        }
       }
-      // Hit sound
       if (event.moveType) {
         audio.hit(event.moveType);
       }
@@ -509,21 +566,26 @@ function processEvent(
       audio.hitCrit();
       if (arena) {
         showCritText(arena, event.side);
+        triggerCritZoom(arena, event.side === 'a' ? 'b' : 'a');
       }
       break;
     }
 
     case 'damage': {
-      if (arena && event.amount !== undefined) {
-        showDamageNumber(
-          arena,
-          event.side,
-          event.amount,
-          event.isCrit ?? false,
-          event.effectiveness ?? 'neutral',
-        );
+      const targetSide = event.side;
+      const attackerSide = event.side === 'a' ? 'b' : 'a';
+      const amount = event.amount ?? 0;
+      const isCrit = event.isCrit ?? false;
+      const effectiveness = event.effectiveness ?? 'neutral';
+      const attackerType = event.moveType ?? resolveType(attackerSide);
+      const power = event.movePower ?? 60;
+      callbacks?.onDamage?.(targetSide, amount, isCrit, effectiveness, attackerSide, attackerType, power);
+      if (arena) {
+        triggerHit(arena, targetSide);
+        showDamageNumber(arena, targetSide, amount, isCrit, effectiveness);
       }
-      // Super effective sound
+      callbacks?.onAttackingEnd?.(attackerSide, arena);
+      if (amount > 0) callbacks?.onLogReveal?.();
       if (event.effectiveness === 'super_effective') {
         audio.hitSuper(event.moveType);
       }
@@ -572,6 +634,7 @@ function processEvent(
     case 'faint': {
       audio.faint();
       const side = event.side;
+      if (arena) addFainted(arena, side);
       callbacks?.onHpUpdate?.(side, 0, 0);
       break;
     }

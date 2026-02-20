@@ -1,5 +1,56 @@
 # Wojak Ink — Project Intelligence
 
+---
+
+## How We Work — Three-Party Workflow
+
+This project runs a structured loop between three parties:
+
+| Party | Role |
+|-------|------|
+| **User** | Product owner — decisions, priorities, final approval |
+| **Claude (MacOS app)** | Advisor — research, spec writing, reviewing Claude CLI's output |
+| **Claude CLI** | Implementer — reads specs, codes, commits, deploys |
+
+**Claude CLI: this is how you receive and return work.**
+
+### Where to find your work
+All specs are in **`docs/plans/`**.
+
+- Specs follow this naming: `YYYY-MM-DD-[topic]-spec.md`
+- Design docs (decisions + rationale): `YYYY-MM-DD-[topic]-design.md`
+- Full protocol reference: `docs/plans/WORKFLOW.md`
+
+**When you start a session**, check `docs/plans/` for the most recent spec file. That is your task.
+
+### Spec format (what Claude CLI receives)
+Every spec contains:
+- **Context files to read first** — read all of them before touching code
+- **Goal** — exactly what to build or change
+- **Constraints** — CSS rules, anti-patterns, what NOT to touch
+- **Out of scope** — explicit list of things to leave alone
+- **Success criteria** — self-check these before reporting done
+
+### What Claude CLI reports when done
+```
+DONE: [task title]
+Files changed: [list]
+Build: PASS / FAIL
+Self-checks: [each criterion — pass/fail]
+Notes: [anything unexpected]
+```
+
+### The loop
+1. User + Claude (MacOS) write a spec → saved to `docs/plans/`
+2. Claude CLI reads the spec, implements, self-checks, commits, reports
+3. User + Claude review the output against the spec
+4. Approved → next spec released. Failed → correction spec written.
+5. While Claude CLI codes, User + Claude write the next spec (always ahead)
+
+**Claude CLI never expands scope beyond the spec. If you find something that needs fixing outside the spec, note it in your report. Do not fix it.**
+
+---
+
 ## Before Starting Any Task
 
 1. **Read this file** (`CLAUDE.md`) — project conventions, CSS rules, routes

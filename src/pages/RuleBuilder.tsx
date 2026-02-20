@@ -1,115 +1,117 @@
 /**
  * Rule Builder — Dev tool for visually creating layer rendering rules.
  *
- * Each layer card has independent toggles: Crop / Under suit / Hidden.
- * Crop and under-suit each have independent X and Y axes with separate sliders.
- * Layers can be reordered with up/down arrows to adjust z-index.
+ * Select any combination of traits, reorder them in the layer stack,
+ * and configure how each layer renders relative to the one above it.
  */
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { RENDER_ORDER, UI_ORDER, LAYER_META, type UILayerName } from '@/lib/layerRegistry';
+import { type UILayerName } from '@/lib/layerRegistry';
 import { buildRenderLayers } from '@/services/canvasRendererLayerBuilder';
 import { renderToCanvas } from '@/services/canvasRenderer';
 import { getUnifiedTraits, type UnifiedTrait } from '@/services/generatorService';
 import { G2_DEFAULT_COLORS } from '@/config/g2DefaultColors';
-import { LAYER_Z_INDEX } from '@/services/canvasRendererConstants';
 import type { SelectedLayers } from '@/lib/wojakRules';
 import type { G2Selections } from '@/types/generator';
 import type { RenderLayer, LayerRenderOverride } from '@/services/canvasRendererTypes';
 
 // ─── Types ───────────────────────────────────────────────────
 
-interface XClip {
-  enabled: boolean;
-  clip: number;
-  side: 'left' | 'right';
+type RenderMode = 'normal' | 'under' | 'split' | 'crop';
+
+interface SplitConfig {
+  x: { enabled: boolean; clip: number; side: 'left' | 'right' };
+  y: { enabled: boolean; clip: number; side: 'top' | 'bottom' };
 }
 
-interface YClip {
-  enabled: boolean;
-  clip: number;
-  side: 'top' | 'bottom';
-}
-
-interface CropRule {
-  enabled: boolean;
-  x: XClip;
-  y: YClip;
-}
-
-interface UnderSuitRule {
-  enabled: boolean;
-  x: XClip;
-  y: YClip;
-}
-
-interface LayerRule {
-  crop: CropRule;
-  under: UnderSuitRule;
-  hidden: boolean;
-  note: string;
+interface LayerStackItem {
+  id: string; // unique id for React key
+  layerName: UILayerName;
+  traitId: string;
+  traitName: string;
+  path: string;
+  trait: UnifiedTrait | null;
+  renderMode: RenderMode;
+  splitConfig: SplitConfig;
 }
 
 interface ExportedRule {
   id: string;
   description: string;
   timestamp: string;
-  conditions: Record<string, { traitId: string; traitName: string; path: string }>;
-  layerRules: Record<string, {
-    crop?: { x?: { clip: number; side: string }; y?: { clip: number; side: string } };
-    underSuit?: { x?: { clip: number; side: string }; y?: { clip: number; side: string } };
-    hidden?: boolean;
-    zIndex?: number;
-    note?: string;
-  }>;
-  computedLayers: { layerName: string; zIndex: number; clip?: string }[];
+  layers: {
+    layerName: string;
+    traitId: string;
+    traitName: string;
+    path: string;
+    renderMode: RenderMode;
+    splitConfig?: {
+      x?: { clip: number; side: string };
+      y?: { clip: number; side: string };
+    };
+  }[];
 }
 
 // ─── Constants ───────────────────────────────────────────────
 
 const CANVAS_SIZE = 500;
-const LAYER_COLORS: Record<string, string> = {
-  Mask: '#ff6b00',
-  Eyes: '#00d4ff',
-  Head: '#22c55e',
-  MouthBase: '#f59e0b',
-  MouthItem: '#ec4899',
-  FacialHair: '#a855f7',
-  Clothes: '#3b82f6',
-  Base: '#6b7280',
-  Background: '#374151',
+
+const DEFAULT_SPLIT: SplitConfig = {
+  x: { enabled: true, clip: 0.35, side: 'left' },
+  y: { enabled: false, clip: 0.35, side: 'top' },
 };
 
-const DEFAULT_X: XClip = { enabled: true, clip: 0.35, side: 'left' };
-const DEFAULT_Y: YClip = { enabled: false, clip: 0.5, side: 'top' };
-const DEFAULT_CROP: CropRule = { enabled: false, x: { ...DEFAULT_X }, y: { ...DEFAULT_Y } };
-const DEFAULT_UNDER: UnderSuitRule = { enabled: false, x: { ...DEFAULT_X }, y: { ...DEFAULT_Y } };
-const DEFAULT_RULE: LayerRule = { crop: { ...DEFAULT_CROP, x: { ...DEFAULT_X }, y: { ...DEFAULT_Y } }, under: { ...DEFAULT_UNDER, x: { ...DEFAULT_X }, y: { ...DEFAULT_Y } }, hidden: false, note: '' };
-
-const SKIP_IN_EDITOR = new Set(['Base', 'Background']);
-
-// Slider step: 0.1% for fine-grained control
 const SLIDER_STEPS = 1000;
+
+// Layer types to show in the selector (exclude Background for now)
+const SELECTABLE_LAYERS: UILayerName[] = [
+  'Base',
+  'Clothes',
+  'FacialHair',
+  'MouthBase',
+  'MouthItem',
+  'Mask',
+  'Eyes',
+  'Head',
+];
+
+// Layer colors for visual distinction
+const LAYER_COLORS: Record<string, string> = {
+  Base: '#f59e0b',
+  Clothes: '#8b5cf6',
+  FacialHair: '#a78bfa',
+  MouthBase: '#ec4899',
+  MouthItem: '#f472b6',
+  Mask: '#ef4444',
+  Eyes: '#00d4ff',
+  Head: '#22c55e',
+};
 
 // ─── Hooks ───────────────────────────────────────────────────
 
-function useTraitLoader() {
-  const [traitsByLayer, setTraitsByLayer] = useState<Record<string, UnifiedTrait[]>>({});
+function useAllTraitsLoader() {
+  const [traitsByLayer, setTraitsByLayer] = useState<Record<UILayerName, UnifiedTrait[]>>({} as Record<UILayerName, UnifiedTrait[]>);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
-      const result: Record<string, UnifiedTrait[]> = {};
-      for (const layer of UI_ORDER) {
-        try {
-          result[layer] = await getUnifiedTraits(layer);
-        } catch {
-          result[layer] = [];
+      try {
+        const results = await Promise.all(
+          SELECTABLE_LAYERS.map(async (layer) => {
+            const traits = await getUnifiedTraits(layer);
+            return { layer, traits };
+          })
+        );
+        if (!cancelled) {
+          const byLayer: Record<UILayerName, UnifiedTrait[]> = {} as Record<UILayerName, UnifiedTrait[]>;
+          for (const { layer, traits } of results) {
+            byLayer[layer] = traits;
+          }
+          setTraitsByLayer(byLayer);
+          setLoading(false);
         }
-      }
-      if (!cancelled) {
-        setTraitsByLayer(result);
-        setLoading(false);
+      } catch {
+        if (!cancelled) setLoading(false);
       }
     }
     load();
@@ -121,42 +123,380 @@ function useTraitLoader() {
 
 // ─── Components ──────────────────────────────────────────────
 
-function LayerDropdown({
-  layer,
+function LayerSelector({
+  layerName,
   traits,
-  selectedTraitId,
   onSelect,
+  color,
 }: {
-  layer: UILayerName;
+  layerName: UILayerName;
   traits: UnifiedTrait[];
-  selectedTraitId: string;
-  onSelect: (traitId: string, path: string, trait: UnifiedTrait | null) => void;
+  onSelect: (trait: UnifiedTrait, path: string) => void;
+  color: string;
 }) {
+  const [selectedId, setSelectedId] = useState('');
+
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const id = e.target.value;
+    setSelectedId(id);
+    if (id === '') return;
+    const trait = traits.find((t) => t.id === id);
+    if (trait) {
+      const path = trait.g1Path || `/g2/${trait.category}/${trait.name}`;
+      onSelect(trait, path);
+      // Reset dropdown after selection
+      setTimeout(() => setSelectedId(''), 100);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-xs font-medium text-secondary">
-        {LAYER_META[layer].label}
+      <label className="text-xs font-semibold" style={{ color }}>
+        {layerName}
       </label>
       <select
-        className="input text-sm"
-        value={selectedTraitId}
-        onChange={(e) => {
-          const id = e.target.value;
-          if (id === '') { onSelect('', '', null); return; }
-          const trait = traits.find((t) => t.id === id);
-          if (trait) {
-            const path = trait.g1Path || `/g2/${trait.category ?? layer}/${trait.name}`;
-            onSelect(trait.id, path, trait);
-          }
-        }}
+        className="input text-sm py-1.5"
+        value={selectedId}
+        onChange={handleChange}
       >
-        <option value="">None</option>
+        <option value="">+ Add {layerName.toLowerCase()}...</option>
         {traits.map((t) => (
           <option key={t.id} value={t.id}>
             {t.name} {t.source === 'g2' ? '[G2]' : t.source === 'both' ? '[G1+G2]' : '[G1]'}
           </option>
         ))}
       </select>
+    </div>
+  );
+}
+
+/** Layer stack item with move/delete buttons and render config */
+function StackItem({
+  item,
+  index,
+  total,
+  isSelected,
+  onSelect,
+  onMoveUp,
+  onMoveDown,
+  onRemove,
+  onUpdateRenderMode,
+  onUpdateSplitConfig,
+}: {
+  item: LayerStackItem;
+  index: number;
+  total: number;
+  isSelected: boolean;
+  onSelect: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  onRemove: () => void;
+  onUpdateRenderMode: (mode: RenderMode) => void;
+  onUpdateSplitConfig: (config: SplitConfig) => void;
+}) {
+  const color = LAYER_COLORS[item.layerName] || '#888';
+  const canMoveUp = index > 0;
+  const canMoveDown = index < total - 1;
+
+  return (
+    <div
+      className="rounded-lg overflow-hidden"
+      style={{
+        border: isSelected ? `2px solid ${color}` : '2px solid var(--color-border)',
+        background: isSelected ? 'var(--color-surface)' : 'transparent',
+      }}
+    >
+      {/* Header row */}
+      <div
+        className="flex items-center gap-2 px-3 py-2 cursor-pointer"
+        onClick={onSelect}
+        style={{ background: isSelected ? `${color}22` : 'transparent' }}
+      >
+        {/* Layer indicator */}
+        <div
+          className="w-2 h-2 rounded-full flex-shrink-0"
+          style={{ background: color }}
+        />
+
+        {/* Name */}
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-medium truncate">{item.traitName}</div>
+          <div className="text-xs text-muted truncate">{item.layerName}</div>
+        </div>
+
+        {/* Move buttons */}
+        <div className="flex flex-col gap-0.5">
+          <button
+            type="button"
+            className="p-0.5 rounded hover:bg-white/10 disabled:opacity-30"
+            onClick={(e) => { e.stopPropagation(); onMoveUp(); }}
+            disabled={!canMoveUp}
+            title="Move up (render later)"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="p-0.5 rounded hover:bg-white/10 disabled:opacity-30"
+            onClick={(e) => { e.stopPropagation(); onMoveDown(); }}
+            disabled={!canMoveDown}
+            title="Move down (render earlier)"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Remove button */}
+        <button
+          type="button"
+          className="p-1 rounded hover:bg-red-500/20 text-red-400"
+          onClick={(e) => { e.stopPropagation(); onRemove(); }}
+          title="Remove"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Expanded config when selected */}
+      {isSelected && (
+        <div className="px-3 py-3 border-t border-white/10">
+          {index > 0 ? (
+            <>
+              <div className="text-xs text-muted mb-2">
+                Render relative to layer above:
+              </div>
+
+              {/* Render mode buttons */}
+              <div className="grid grid-cols-2 gap-1 mb-3">
+                <button
+                  type="button"
+                  className="text-xs py-1.5 px-2 rounded"
+                  style={{
+                    background: item.renderMode === 'normal' ? color : 'var(--color-surface)',
+                    color: item.renderMode === 'normal' ? '#000' : 'var(--color-text)',
+                    border: '1px solid var(--color-border)',
+                  }}
+                  onClick={() => onUpdateRenderMode('normal')}
+                >
+                  Normal
+                </button>
+                <button
+                  type="button"
+                  className="text-xs py-1.5 px-2 rounded"
+                  style={{
+                    background: item.renderMode === 'under' ? color : 'var(--color-surface)',
+                    color: item.renderMode === 'under' ? '#000' : 'var(--color-text)',
+                    border: '1px solid var(--color-border)',
+                  }}
+                  onClick={() => onUpdateRenderMode('under')}
+                >
+                  Under
+                </button>
+                <button
+                  type="button"
+                  className="text-xs py-1.5 px-2 rounded"
+                  style={{
+                    background: item.renderMode === 'split' ? color : 'var(--color-surface)',
+                    color: item.renderMode === 'split' ? '#000' : 'var(--color-text)',
+                    border: '1px solid var(--color-border)',
+                  }}
+                  onClick={() => onUpdateRenderMode('split')}
+                >
+                  Split
+                </button>
+                <button
+                  type="button"
+                  className="text-xs py-1.5 px-2 rounded"
+                  style={{
+                    background: item.renderMode === 'crop' ? color : 'var(--color-surface)',
+                    color: item.renderMode === 'crop' ? '#000' : 'var(--color-text)',
+                    border: '1px solid var(--color-border)',
+                  }}
+                  onClick={() => onUpdateRenderMode('crop')}
+                >
+                  Crop
+                </button>
+              </div>
+
+              {/* Split/Crop config */}
+              {(item.renderMode === 'split' || item.renderMode === 'crop') && (
+                <SplitConfigPanel
+                  config={item.splitConfig}
+                  onChange={onUpdateSplitConfig}
+                  color={color}
+                />
+              )}
+            </>
+          ) : (
+            <>
+              <div className="text-xs text-muted mb-2">
+                Top layer — can only crop (move layers above to configure under/split)
+              </div>
+              <div className="flex gap-1 mb-3">
+                <button
+                  type="button"
+                  className="flex-1 text-xs py-1.5 px-2 rounded"
+                  style={{
+                    background: item.renderMode === 'normal' ? color : 'var(--color-surface)',
+                    color: item.renderMode === 'normal' ? '#000' : 'var(--color-text)',
+                    border: '1px solid var(--color-border)',
+                  }}
+                  onClick={() => onUpdateRenderMode('normal')}
+                >
+                  Normal
+                </button>
+                <button
+                  type="button"
+                  className="flex-1 text-xs py-1.5 px-2 rounded"
+                  style={{
+                    background: item.renderMode === 'crop' ? color : 'var(--color-surface)',
+                    color: item.renderMode === 'crop' ? '#000' : 'var(--color-text)',
+                    border: '1px solid var(--color-border)',
+                  }}
+                  onClick={() => onUpdateRenderMode('crop')}
+                >
+                  Crop
+                </button>
+              </div>
+              {item.renderMode === 'crop' && (
+                <SplitConfigPanel
+                  config={item.splitConfig}
+                  onChange={onUpdateSplitConfig}
+                  color={color}
+                />
+              )}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SplitConfigPanel({
+  config,
+  onChange,
+  color,
+}: {
+  config: SplitConfig;
+  onChange: (config: SplitConfig) => void;
+  color: string;
+}) {
+  return (
+    <div className="flex flex-col gap-3">
+      {/* X axis */}
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={config.x.enabled}
+            onChange={(e) => onChange({ ...config, x: { ...config.x, enabled: e.target.checked } })}
+          />
+          <span className="text-xs font-medium">X axis</span>
+          <span className="text-xs text-muted">({(config.x.clip * 100).toFixed(1)}%)</span>
+        </div>
+        {config.x.enabled && (
+          <div className="flex flex-col gap-1 pl-5">
+            <input
+              type="range"
+              min="0"
+              max={SLIDER_STEPS}
+              value={config.x.clip * SLIDER_STEPS}
+              onChange={(e) => onChange({
+                ...config,
+                x: { ...config.x, clip: Number(e.target.value) / SLIDER_STEPS }
+              })}
+              style={{ accentColor: color }}
+            />
+            <div className="flex gap-1">
+              <button
+                type="button"
+                className="flex-1 text-xs py-1 rounded"
+                style={{
+                  background: config.x.side === 'left' ? color : 'var(--color-bg)',
+                  color: config.x.side === 'left' ? '#000' : 'var(--color-text)',
+                  border: '1px solid var(--color-border)',
+                }}
+                onClick={() => onChange({ ...config, x: { ...config.x, side: 'left' } })}
+              >
+                Left under
+              </button>
+              <button
+                type="button"
+                className="flex-1 text-xs py-1 rounded"
+                style={{
+                  background: config.x.side === 'right' ? color : 'var(--color-bg)',
+                  color: config.x.side === 'right' ? '#000' : 'var(--color-text)',
+                  border: '1px solid var(--color-border)',
+                }}
+                onClick={() => onChange({ ...config, x: { ...config.x, side: 'right' } })}
+              >
+                Right under
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Y axis */}
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={config.y.enabled}
+            onChange={(e) => onChange({ ...config, y: { ...config.y, enabled: e.target.checked } })}
+          />
+          <span className="text-xs font-medium">Y axis</span>
+          <span className="text-xs text-muted">({(config.y.clip * 100).toFixed(1)}%)</span>
+        </div>
+        {config.y.enabled && (
+          <div className="flex flex-col gap-1 pl-5">
+            <input
+              type="range"
+              min="0"
+              max={SLIDER_STEPS}
+              value={config.y.clip * SLIDER_STEPS}
+              onChange={(e) => onChange({
+                ...config,
+                y: { ...config.y, clip: Number(e.target.value) / SLIDER_STEPS }
+              })}
+              style={{ accentColor: color }}
+            />
+            <div className="flex gap-1">
+              <button
+                type="button"
+                className="flex-1 text-xs py-1 rounded"
+                style={{
+                  background: config.y.side === 'top' ? color : 'var(--color-bg)',
+                  color: config.y.side === 'top' ? '#000' : 'var(--color-text)',
+                  border: '1px solid var(--color-border)',
+                }}
+                onClick={() => onChange({ ...config, y: { ...config.y, side: 'top' } })}
+              >
+                Top under
+              </button>
+              <button
+                type="button"
+                className="flex-1 text-xs py-1 rounded"
+                style={{
+                  background: config.y.side === 'bottom' ? color : 'var(--color-bg)',
+                  color: config.y.side === 'bottom' ? '#000' : 'var(--color-text)',
+                  border: '1px solid var(--color-border)',
+                }}
+                onClick={() => onChange({ ...config, y: { ...config.y, side: 'bottom' } })}
+              >
+                Bottom under
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -169,7 +509,6 @@ function DragLine({
   onChange,
   color,
   label,
-  dashed,
 }: {
   canvasSize: number;
   axis: 'x' | 'y';
@@ -177,7 +516,6 @@ function DragLine({
   onChange: (p: number) => void;
   color: string;
   label: string;
-  dashed?: boolean;
 }) {
   const dragging = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -216,338 +554,30 @@ function DragLine({
         style={{
           position: 'absolute',
           ...(isX
-            ? { left: `${pos}px`, top: 0, bottom: 0, width: '3px', cursor: 'col-resize', transform: 'translateX(-1px)' }
-            : { top: `${pos}px`, left: 0, right: 0, height: '3px', cursor: 'row-resize', transform: 'translateY(-1px)' }),
-          background: dashed ? 'transparent' : color,
-          borderLeft: dashed && isX ? `3px dashed ${color}` : undefined,
-          borderTop: dashed && !isX ? `3px dashed ${color}` : undefined,
+            ? { left: `${pos}px`, top: 0, bottom: 0, width: '4px', cursor: 'col-resize', transform: 'translateX(-2px)' }
+            : { top: `${pos}px`, left: 0, right: 0, height: '4px', cursor: 'row-resize', transform: 'translateY(-2px)' }),
+          background: color,
           pointerEvents: 'auto',
           zIndex: 50,
+          boxShadow: '0 0 8px rgba(0,0,0,0.5)',
         }}
         onPointerDown={handlePointerDown}
       />
       <div
-        className="absolute text-xs font-bold px-1.5 py-0.5 rounded"
+        className="absolute text-xs font-bold px-2 py-1 rounded"
         style={{
           ...(isX
-            ? { left: `${pos + 6}px`, top: '4px' }
-            : { left: '4px', top: `${pos + 6}px` }),
+            ? { left: `${pos + 8}px`, top: '8px' }
+            : { left: '8px', top: `${pos + 8}px` }),
           background: color,
           color: '#000',
           pointerEvents: 'none',
           zIndex: 51,
           whiteSpace: 'nowrap',
-          fontSize: '11px',
-          ...(dashed ? { border: '1px dashed #000' } : {}),
         }}
       >
-        {label} {isX ? 'X' : 'Y'}: {(percent * 100).toFixed(1)}%
+        {label}: {(percent * 100).toFixed(1)}%
       </div>
-    </div>
-  );
-}
-
-/** Controls for a single rule (crop or underSuit) with independent X and Y axis toggles */
-function ClipControls({
-  label,
-  subRule,
-  onChange,
-  color,
-  actionWord,
-}: {
-  label: string;
-  subRule: CropRule | UnderSuitRule;
-  onChange: (r: CropRule | UnderSuitRule) => void;
-  color: string;
-  actionWord: string;
-}) {
-  return (
-    <div className="flex flex-col gap-2 pl-3" style={{ borderLeft: `2px solid ${color}33` }}>
-      <span className="text-xs font-medium" style={{ color }}>{label}</span>
-
-      {/* X axis section */}
-      <div className="flex flex-col gap-1">
-        <button
-          type="button"
-          className="text-xs px-2 py-1 rounded-md self-start text-secondary"
-          style={{
-            background: subRule.x.enabled ? 'var(--color-border)' : 'transparent',
-            border: '1px solid var(--color-border)',
-            cursor: 'pointer',
-          }}
-          onClick={() => onChange({ ...subRule, x: { ...subRule.x, enabled: !subRule.x.enabled } })}
-        >
-          {subRule.x.enabled ? '✓' : '○'} Vertical (left / right)
-        </button>
-        {subRule.x.enabled && (
-          <div className="flex flex-col gap-1 pl-2">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono text-muted" style={{ minWidth: '38px' }}>
-                {(subRule.x.clip * 100).toFixed(1)}%
-              </span>
-              <input
-                type="range" min="0" max={SLIDER_STEPS}
-                value={subRule.x.clip * SLIDER_STEPS}
-                onChange={(e) => onChange({ ...subRule, x: { ...subRule.x, clip: Number(e.target.value) / SLIDER_STEPS } })}
-                className="flex-1" style={{ accentColor: color }}
-              />
-            </div>
-            <div className="flex gap-1">
-              {(['left', 'right'] as const).map((side) => (
-                <button
-                  key={side}
-                  type="button"
-                  className="text-xs px-2 py-1 rounded-md"
-                  style={{
-                    background: subRule.x.side === side ? color : 'transparent',
-                    color: subRule.x.side === side ? '#000' : 'var(--color-text-secondary)',
-                    border: `1px solid ${subRule.x.side === side ? color : 'var(--color-border)'}`,
-                    fontWeight: subRule.x.side === side ? 600 : 400,
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => onChange({ ...subRule, x: { ...subRule.x, side } })}
-                >
-                  {side === 'left' ? 'Left' : 'Right'} {actionWord}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Y axis section */}
-      <div className="flex flex-col gap-1">
-        <button
-          type="button"
-          className="text-xs px-2 py-1 rounded-md self-start text-secondary"
-          style={{
-            background: subRule.y.enabled ? 'var(--color-border)' : 'transparent',
-            border: '1px solid var(--color-border)',
-            cursor: 'pointer',
-          }}
-          onClick={() => onChange({ ...subRule, y: { ...subRule.y, enabled: !subRule.y.enabled } })}
-        >
-          {subRule.y.enabled ? '✓' : '○'} Horizontal (top / bottom)
-        </button>
-        {subRule.y.enabled && (
-          <div className="flex flex-col gap-1 pl-2">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono text-muted" style={{ minWidth: '38px' }}>
-                {(subRule.y.clip * 100).toFixed(1)}%
-              </span>
-              <input
-                type="range" min="0" max={SLIDER_STEPS}
-                value={subRule.y.clip * SLIDER_STEPS}
-                onChange={(e) => onChange({ ...subRule, y: { ...subRule.y, clip: Number(e.target.value) / SLIDER_STEPS } })}
-                className="flex-1" style={{ accentColor: color }}
-              />
-            </div>
-            <div className="flex gap-1">
-              {(['top', 'bottom'] as const).map((side) => (
-                <button
-                  key={side}
-                  type="button"
-                  className="text-xs px-2 py-1 rounded-md"
-                  style={{
-                    background: subRule.y.side === side ? color : 'transparent',
-                    color: subRule.y.side === side ? '#000' : 'var(--color-text-secondary)',
-                    border: `1px solid ${subRule.y.side === side ? color : 'var(--color-border)'}`,
-                    fontWeight: subRule.y.side === side ? 600 : 400,
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => onChange({ ...subRule, y: { ...subRule.y, side } })}
-                >
-                  {side === 'top' ? 'Top' : 'Bottom'} {actionWord}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/** Layer rule card with independent toggles and z-index reordering arrows */
-function LayerCard({
-  layerName,
-  rule,
-  onChange,
-  color,
-  opacity,
-  onOpacityChange,
-  effectiveZ,
-  onMoveUp,
-  onMoveDown,
-  canMoveUp,
-  canMoveDown,
-}: {
-  layerName: string;
-  rule: LayerRule;
-  onChange: (r: LayerRule) => void;
-  color: string;
-  opacity: number;
-  onOpacityChange: (v: number) => void;
-  effectiveZ: number;
-  onMoveUp: () => void;
-  onMoveDown: () => void;
-  canMoveUp: boolean;
-  canMoveDown: boolean;
-}) {
-  const hasActiveRule = rule.crop.enabled || rule.under.enabled || rule.hidden;
-
-  return (
-    <div
-      className="p-3 rounded-lg flex flex-col gap-2"
-      style={{
-        background: 'var(--color-surface)',
-        border: hasActiveRule ? `2px solid ${color}` : '1px solid var(--color-border)',
-      }}
-    >
-      {/* Layer name + color dot + z-index arrows */}
-      <div className="flex items-center gap-2">
-        <div style={{ width: 10, height: 10, borderRadius: '50%', background: color, flexShrink: 0 }} />
-        <span className="text-sm font-semibold flex-1">
-          {layerName}
-        </span>
-        <span className="text-xs font-mono text-muted">
-          z:{effectiveZ}
-        </span>
-        <div className="flex gap-0.5">
-          <button
-            type="button"
-            className="text-xs px-1.5 py-0.5 rounded"
-            style={{
-              background: canMoveUp ? 'var(--color-border)' : 'transparent',
-              color: canMoveUp ? 'var(--color-text)' : 'var(--color-text-muted)',
-              border: '1px solid var(--color-border)',
-              cursor: canMoveUp ? 'pointer' : 'default',
-              opacity: canMoveUp ? 1 : 0.3,
-              lineHeight: 1,
-            }}
-            onClick={onMoveUp}
-            disabled={!canMoveUp}
-            title="Move layer up (render on top)"
-          >
-            ▲
-          </button>
-          <button
-            type="button"
-            className="text-xs px-1.5 py-0.5 rounded"
-            style={{
-              background: canMoveDown ? 'var(--color-border)' : 'transparent',
-              color: canMoveDown ? 'var(--color-text)' : 'var(--color-text-muted)',
-              border: '1px solid var(--color-border)',
-              cursor: canMoveDown ? 'pointer' : 'default',
-              opacity: canMoveDown ? 1 : 0.3,
-              lineHeight: 1,
-            }}
-            onClick={onMoveDown}
-            disabled={!canMoveDown}
-            title="Move layer down (render behind)"
-          >
-            ▼
-          </button>
-        </div>
-      </div>
-
-      {/* Opacity slider (visual only) */}
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-muted" style={{ minWidth: '52px' }}>
-          Opacity {(opacity * 100).toFixed(0)}%
-        </span>
-        <input
-          type="range" min="0" max="100"
-          value={opacity * 100}
-          onChange={(e) => onOpacityChange(Number(e.target.value) / 100)}
-          className="flex-1" style={{ accentColor: 'var(--color-text-muted)' }}
-        />
-      </div>
-
-      {/* Toggle buttons — independent, not mutually exclusive */}
-      <div className="flex flex-wrap gap-1">
-        <button
-          type="button"
-          className="text-xs px-3 py-1.5 rounded-md"
-          style={{
-            background: rule.crop.enabled ? color : 'var(--color-bg)',
-            color: rule.crop.enabled ? '#000' : 'var(--color-text-secondary)',
-            border: `1px solid ${rule.crop.enabled ? color : 'var(--color-border)'}`,
-            fontWeight: rule.crop.enabled ? 600 : 400,
-            cursor: 'pointer',
-          }}
-          onClick={() => onChange({ ...rule, crop: { ...rule.crop, enabled: !rule.crop.enabled } })}
-        >
-          Crop
-        </button>
-
-        <button
-          type="button"
-          className="text-xs px-3 py-1.5 rounded-md"
-          style={{
-            background: rule.under.enabled ? color : 'var(--color-bg)',
-            color: rule.under.enabled ? '#000' : 'var(--color-text-secondary)',
-            border: `1px solid ${rule.under.enabled ? color : 'var(--color-border)'}`,
-            fontWeight: rule.under.enabled ? 600 : 400,
-            cursor: 'pointer',
-            borderStyle: rule.under.enabled ? 'solid' : 'dashed',
-          }}
-          onClick={() => onChange({ ...rule, under: { ...rule.under, enabled: !rule.under.enabled } })}
-        >
-          Under suit
-        </button>
-
-        <button
-          type="button"
-          className="text-xs px-3 py-1.5 rounded-md"
-          style={{
-            background: rule.hidden ? '#ef4444' : 'var(--color-bg)',
-            color: rule.hidden ? '#fff' : 'var(--color-text-secondary)',
-            border: `1px solid ${rule.hidden ? '#ef4444' : 'var(--color-border)'}`,
-            fontWeight: rule.hidden ? 600 : 400,
-            cursor: 'pointer',
-          }}
-          onClick={() => onChange({ ...rule, hidden: !rule.hidden })}
-        >
-          Hidden
-        </button>
-      </div>
-
-      {rule.crop.enabled && !rule.hidden && (
-        <ClipControls
-          label="Crop line"
-          subRule={rule.crop}
-          onChange={(r) => onChange({ ...rule, crop: r as CropRule })}
-          color={color}
-          actionWord="cropped"
-        />
-      )}
-
-      {rule.under.enabled && !rule.hidden && (
-        <ClipControls
-          label="Under suit line"
-          subRule={rule.under}
-          onChange={(r) => onChange({ ...rule, under: r as UnderSuitRule })}
-          color={color + 'aa'}
-          actionWord="under suit"
-        />
-      )}
-
-      {rule.hidden && (
-        <p className="text-xs text-muted">
-          Entire layer is completely hidden (not rendered).
-        </p>
-      )}
-
-      {hasActiveRule && (
-        <input
-          type="text"
-          className="input text-xs"
-          placeholder="Add a note..."
-          value={rule.note}
-          onChange={(e) => onChange({ ...rule, note: e.target.value })}
-        />
-      )}
     </div>
   );
 }
@@ -555,221 +585,336 @@ function LayerCard({
 // ─── Main Page ───────────────────────────────────────────────
 
 export default function RuleBuilder() {
-  const { traitsByLayer, loading } = useTraitLoader();
+  const { traitsByLayer, loading } = useAllTraitsLoader();
 
-  const [selectedTraitIds, setSelectedTraitIds] = useState<Record<string, string>>({});
-  const [selectedPaths, setSelectedPaths] = useState<Record<string, string>>({});
+  // Layer stack (ordered from top to bottom in render order)
+  // Index 0 = renders on top, higher index = renders below
+  const [layerStack, setLayerStack] = useState<LayerStackItem[]>([]);
+
+  // Selected layer in stack for configuration
+  const [selectedStackIndex, setSelectedStackIndex] = useState<number | null>(null);
+
+  // G2 selections for rendering
   const [g2Selections, setG2Selections] = useState<G2Selections>({});
-  const [rules, setRules] = useState<Record<string, LayerRule>>({});
-  const [layerOpacities, setLayerOpacities] = useState<Record<string, number>>({});
-  const [zOverrides, setZOverrides] = useState<Record<string, number>>({});
+
+  // Preview state
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [computedLayers, setComputedLayers] = useState<RenderLayer[]>([]);
+
+  // Export state
   const [exportJson, setExportJson] = useState<string | null>(null);
-  const [ruleDescription, setRuleDescription] = useState('');
   const [copied, setCopied] = useState(false);
 
-  // Layers that have a selection and can be configured
-  const editableLayers = useMemo(() => {
-    return RENDER_ORDER.filter(
-      (l) => selectedPaths[l] && selectedPaths[l] !== '' && !SKIP_IN_EDITOR.has(l)
-    );
-  }, [selectedPaths]);
+  // Auto-generate description based on layer configuration
+  const autoDescription = useMemo(() => {
+    if (layerStack.length === 0) return '';
 
-  // Effective z-index for a layer (override or default)
-  const getEffectiveZ = useCallback((layer: string): number => {
-    return zOverrides[layer] ?? LAYER_Z_INDEX[layer] ?? 0;
-  }, [zOverrides]);
+    // Get all "normal" layers as context triggers
+    const contextLayers = layerStack.filter(l => l.renderMode === 'normal');
+    const contextNames = contextLayers.map(l => l.traitName);
 
-  // Layers sorted by effective z-index descending (topmost first in the card list)
-  const sortedEditableLayers = useMemo(() => {
-    return [...editableLayers].sort((a, b) => getEffectiveZ(b) - getEffectiveZ(a));
-  }, [editableLayers, getEffectiveZ]);
+    const parts: string[] = [];
 
-  // Swap z-indices of two layers
-  const swapZ = useCallback((layerA: string, layerB: string) => {
-    const zA = getEffectiveZ(layerA);
-    const zB = getEffectiveZ(layerB);
-    setZOverrides((prev) => ({ ...prev, [layerA]: zB, [layerB]: zA }));
-    setExportJson(null);
-  }, [getEffectiveZ]);
+    for (let i = 0; i < layerStack.length; i++) {
+      const item = layerStack[i];
+      const aboveItem = i > 0 ? layerStack[i - 1] : null;
 
-  // Select a trait
-  const handleSelect = useCallback((layer: string, traitId: string, path: string, trait: UnifiedTrait | null) => {
-    setSelectedTraitIds((prev) => ({ ...prev, [layer]: traitId }));
-    setSelectedPaths((prev) => ({ ...prev, [layer]: path }));
-    setG2Selections((prev) => {
-      const next = { ...prev };
-      if (!trait || trait.source === 'g1') {
-        delete next[layer as UILayerName];
-      } else {
-        const g2Category = trait.id.split('_')[0] || layer;
+      if (item.renderMode === 'normal') continue;
+
+      const coords: string[] = [];
+      if (item.splitConfig.x.enabled) {
+        coords.push(`X=${(item.splitConfig.x.clip * 100).toFixed(1)}% ${item.splitConfig.x.side}`);
+      }
+      if (item.splitConfig.y.enabled) {
+        coords.push(`Y=${(item.splitConfig.y.clip * 100).toFixed(1)}% ${item.splitConfig.y.side}`);
+      }
+      const coordStr = coords.length > 0 ? ` at ${coords.join(', ')}` : '';
+
+      if (item.renderMode === 'under' && aboveItem) {
+        parts.push(`${item.traitName} under ${aboveItem.traitName}`);
+      } else if (item.renderMode === 'split' && aboveItem) {
+        parts.push(`${item.traitName} split under ${aboveItem.traitName}${coordStr}`);
+      } else if (item.renderMode === 'crop') {
+        // Include context: which other layers trigger this crop
+        if (contextNames.length > 0) {
+          parts.push(`${item.traitName} cropped${coordStr} when ${contextNames.join(' + ')} selected`);
+        } else {
+          parts.push(`${item.traitName} cropped${coordStr}`);
+        }
+      }
+    }
+
+    if (parts.length === 0) {
+      return layerStack.map(l => l.traitName).join(' + ');
+    }
+
+    return parts.join('; ');
+  }, [layerStack]);
+
+  // Add a layer to the stack
+  const handleAddLayer = useCallback((layerName: UILayerName, trait: UnifiedTrait, path: string) => {
+    const newItem: LayerStackItem = {
+      id: `${layerName}-${trait.id}-${Date.now()}`,
+      layerName,
+      traitId: trait.id,
+      traitName: trait.name,
+      path,
+      trait,
+      renderMode: 'normal',
+      splitConfig: { ...DEFAULT_SPLIT },
+    };
+
+    setLayerStack((prev) => [...prev, newItem]);
+
+    // Update G2 selections if needed
+    if (trait.source !== 'g1') {
+      setG2Selections((prev) => {
+        const next = { ...prev };
+        const g2Category = trait.id.split('_')[0] || layerName;
         const defaultColors: Record<string, string> = { ...(G2_DEFAULT_COLORS[trait.id] || {}) };
         if (Object.keys(defaultColors).length === 0 && trait.defaultColor) {
           defaultColors['fill'] = trait.defaultColor;
         }
-        if (Object.keys(defaultColors).length === 0 && trait.defaultColors) {
-          trait.defaultColors.forEach((c, i) => { defaultColors[`fill${i}`] = c; });
-        }
-        next[layer as UILayerName] = { traitId: trait.id, g2Category, colors: defaultColors };
+        next[layerName] = { traitId: trait.id, g2Category, colors: defaultColors };
+        return next;
+      });
+    }
+
+    setExportJson(null);
+  }, []);
+
+  // Remove a layer from the stack
+  const handleRemoveLayer = useCallback((index: number) => {
+    setLayerStack((prev) => {
+      const item = prev[index];
+      const next = prev.filter((_, i) => i !== index);
+
+      // Clean up G2 selections if no more layers of this type
+      if (!next.some((l) => l.layerName === item.layerName)) {
+        setG2Selections((g2) => {
+          const updated = { ...g2 };
+          delete updated[item.layerName];
+          return updated;
+        });
       }
+
+      return next;
+    });
+
+    if (selectedStackIndex === index) {
+      setSelectedStackIndex(null);
+    } else if (selectedStackIndex !== null && selectedStackIndex > index) {
+      setSelectedStackIndex(selectedStackIndex - 1);
+    }
+
+    setExportJson(null);
+  }, [selectedStackIndex]);
+
+  // Move a layer up in the stack (will render later/on top)
+  const handleMoveUp = useCallback((index: number) => {
+    if (index <= 0) return;
+    setLayerStack((prev) => {
+      const next = [...prev];
+      [next[index - 1], next[index]] = [next[index], next[index - 1]];
+      return next;
+    });
+    if (selectedStackIndex === index) {
+      setSelectedStackIndex(index - 1);
+    } else if (selectedStackIndex === index - 1) {
+      setSelectedStackIndex(index);
+    }
+    setExportJson(null);
+  }, [selectedStackIndex]);
+
+  // Move a layer down in the stack (will render earlier/below)
+  const handleMoveDown = useCallback((index: number) => {
+    setLayerStack((prev) => {
+      if (index >= prev.length - 1) return prev;
+      const next = [...prev];
+      [next[index], next[index + 1]] = [next[index + 1], next[index]];
+      return next;
+    });
+    if (selectedStackIndex === index) {
+      setSelectedStackIndex(index + 1);
+    } else if (selectedStackIndex === index + 1) {
+      setSelectedStackIndex(index);
+    }
+    setExportJson(null);
+  }, [selectedStackIndex]);
+
+  // Update render mode for a layer
+  const handleUpdateRenderMode = useCallback((index: number, mode: RenderMode) => {
+    setLayerStack((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], renderMode: mode };
       return next;
     });
     setExportJson(null);
   }, []);
 
-  // Update rule for a layer
-  const handleRuleChange = useCallback((layer: string, rule: LayerRule) => {
-    setRules((prev) => ({ ...prev, [layer]: rule }));
+  // Update split config for a layer
+  const handleUpdateSplitConfig = useCallback((index: number, config: SplitConfig) => {
+    setLayerStack((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], splitConfig: config };
+      return next;
+    });
     setExportJson(null);
   }, []);
 
+  // Get the selected layer's split config for drag lines
+  const selectedItem = selectedStackIndex !== null ? layerStack[selectedStackIndex] : null;
+  const showDragLines = (selectedItem?.renderMode === 'split' || selectedItem?.renderMode === 'crop') && selectedStackIndex !== null;
+
   // Render preview
   useEffect(() => {
+    if (layerStack.length === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Clearing state when stack empties is intentional
+      setPreviewUrl(null);
+      setComputedLayers([]);
+      return;
+    }
+
     let cancelled = false;
-    const sel = selectedPaths as SelectedLayers;
-    const baseLayers = buildRenderLayers(sel);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setComputedLayers(baseLayers);
 
-    const activeOpacities: Record<string, number> = {};
-    for (const [k, v] of Object.entries(layerOpacities)) {
-      if (v < 1) activeOpacities[k] = v;
+    // Build selections from stack
+    const sel: SelectedLayers = {
+      Base: '/assets/wojak-layers/BASE/Wojak-skin-full.png',
+    };
+    for (const item of layerStack) {
+      sel[item.layerName] = item.path;
     }
 
-    // Build clip overrides from active rules
+    // Build base layers (used internally by buildRenderLayers for override merging)
+    buildRenderLayers(sel);
+
+    // Build clip overrides based on render modes AND stack order
+    // Stack order determines z-index: index 0 = highest z-index (renders on top)
     const clipOverrides: Record<string, LayerRenderOverride> = {};
-    for (const [layer, r] of Object.entries(rules)) {
-      const ov: LayerRenderOverride = {};
-      if (r.hidden) ov.hidden = true;
-      if (r.crop.enabled) {
-        const crop: NonNullable<LayerRenderOverride['crop']> = {};
-        if (r.crop.x.enabled) crop.x = { clip: r.crop.x.clip, side: r.crop.x.side };
-        if (r.crop.y.enabled) crop.y = { clip: r.crop.y.clip, side: r.crop.y.side };
-        if (crop.x || crop.y) ov.crop = crop;
+
+    // Assign z-index based on stack position (top of stack = highest z-index)
+    // Base z-index starts at 100, each layer below gets lower z-index
+    for (let i = 0; i < layerStack.length; i++) {
+      const item = layerStack[i];
+      const stackZIndex = 100 - i; // Top of stack = 100, next = 99, etc.
+
+      // Start with stack-based z-index
+      const override: LayerRenderOverride = { zIndex: stackZIndex };
+
+      if (i > 0) {
+        const aboveZ = 100 - (i - 1);
+
+        if (item.renderMode === 'under') {
+          // Render this layer under the one above it
+          override.zIndex = aboveZ - 0.5;
+        } else if (item.renderMode === 'split') {
+          // Split: part under, part on top
+          const underConfig: NonNullable<LayerRenderOverride['underSuit']> = {};
+          if (item.splitConfig.x.enabled) {
+            underConfig.x = { clip: item.splitConfig.x.clip, side: item.splitConfig.x.side };
+          }
+          if (item.splitConfig.y.enabled) {
+            underConfig.y = { clip: item.splitConfig.y.clip, side: item.splitConfig.y.side };
+          }
+          if (underConfig.x || underConfig.y) {
+            override.underSuit = underConfig;
+          }
+        } else if (item.renderMode === 'crop') {
+          // Crop: just clip the layer at the specified position, keep stack z-index
+          const cropConfig: NonNullable<LayerRenderOverride['crop']> = {};
+          if (item.splitConfig.x.enabled) {
+            cropConfig.x = { clip: item.splitConfig.x.clip, side: item.splitConfig.x.side };
+          }
+          if (item.splitConfig.y.enabled) {
+            cropConfig.y = { clip: item.splitConfig.y.clip, side: item.splitConfig.y.side };
+          }
+          if (cropConfig.x || cropConfig.y) {
+            override.crop = cropConfig;
+          }
+        }
+      } else if (item.renderMode === 'crop') {
+        // Top item can also be cropped
+        const cropConfig: NonNullable<LayerRenderOverride['crop']> = {};
+        if (item.splitConfig.x.enabled) {
+          cropConfig.x = { clip: item.splitConfig.x.clip, side: item.splitConfig.x.side };
+        }
+        if (item.splitConfig.y.enabled) {
+          cropConfig.y = { clip: item.splitConfig.y.clip, side: item.splitConfig.y.side };
+        }
+        if (cropConfig.x || cropConfig.y) {
+          override.crop = cropConfig;
+        }
       }
-      if (r.under.enabled) {
-        const under: NonNullable<LayerRenderOverride['underSuit']> = {};
-        if (r.under.x.enabled) under.x = { clip: r.under.x.clip, side: r.under.x.side };
-        if (r.under.y.enabled) under.y = { clip: r.under.y.clip, side: r.under.y.side };
-        if (under.x || under.y) ov.underSuit = under;
-      }
-      if (zOverrides[layer] !== undefined) ov.zIndex = zOverrides[layer];
-      if (ov.hidden || ov.crop || ov.underSuit || ov.zIndex !== undefined) {
-        clipOverrides[layer] = ov;
-      }
+
+      clipOverrides[item.layerName] = override;
     }
 
-    // Also pass z-index overrides for layers without other rules
-    for (const layer of editableLayers) {
-      if (zOverrides[layer] !== undefined && !clipOverrides[layer]) {
-        clipOverrides[layer] = { zIndex: zOverrides[layer] };
-      }
-    }
+    // Update computed layers display with stack-based z-index
+    const stackLayers = layerStack.map((item, i) => ({
+      layerName: item.layerName,
+      path: item.path,
+      zIndex: clipOverrides[item.layerName]?.zIndex ?? (100 - i),
+    }));
+    // Add base layer
+    stackLayers.push({ layerName: 'Base', path: sel.Base!, zIndex: 1 });
+    // Sort by z-index for display
+    stackLayers.sort((a, b) => a.zIndex - b.zIndex);
+    setComputedLayers(stackLayers as RenderLayer[]);
 
     renderToCanvas(sel, {
       size: CANVAS_SIZE,
       includeBackground: true,
       g2Selections: Object.keys(g2Selections).length > 0 ? g2Selections : undefined,
-      layerOpacities: Object.keys(activeOpacities).length > 0 ? activeOpacities : undefined,
       layerClipOverrides: Object.keys(clipOverrides).length > 0 ? clipOverrides : undefined,
     })
       .then((result) => { if (!cancelled) setPreviewUrl(result.dataUrl); })
       .catch(() => { if (!cancelled) setPreviewUrl(null); });
 
     return () => { cancelled = true; };
-  }, [selectedPaths, g2Selections, layerOpacities, rules, zOverrides, editableLayers]);
+  }, [layerStack, g2Selections]);
 
-  // All layers that have any line-based rule
-  const lineLayers = useMemo(() => {
-    return editableLayers.filter((l) => {
-      const r = rules[l];
-      if (!r) return false;
-      return ((r.crop.enabled && (r.crop.x.enabled || r.crop.y.enabled)) ||
-              (r.under.enabled && (r.under.x.enabled || r.under.y.enabled))) && !r.hidden;
-    });
-  }, [editableLayers, rules]);
-
-  // Export
+  // Export handler
   const handleExport = useCallback(() => {
-    const conditions: ExportedRule['conditions'] = {};
-    for (const layer of RENDER_ORDER) {
-      const traitId = selectedTraitIds[layer];
-      const path = selectedPaths[layer];
-      if (traitId && path) {
-        const trait = (traitsByLayer[layer] || []).find((t) => t.id === traitId);
-        conditions[layer] = { traitId, traitName: trait?.name || traitId, path };
-      }
-    }
-
-    const layerRules: ExportedRule['layerRules'] = {};
-    for (const [layer, r] of Object.entries(rules)) {
-      if (!r.crop.enabled && !r.under.enabled && !r.hidden && zOverrides[layer] === undefined) continue;
-      const entry: ExportedRule['layerRules'][string] = {};
-      if (r.hidden) entry.hidden = true;
-      if (r.crop.enabled) {
-        const crop: NonNullable<ExportedRule['layerRules'][string]['crop']> = {};
-        if (r.crop.x.enabled) crop.x = { clip: r.crop.x.clip, side: r.crop.x.side };
-        if (r.crop.y.enabled) crop.y = { clip: r.crop.y.clip, side: r.crop.y.side };
-        if (crop.x || crop.y) entry.crop = crop;
-      }
-      if (r.under.enabled) {
-        const under: NonNullable<ExportedRule['layerRules'][string]['underSuit']> = {};
-        if (r.under.x.enabled) under.x = { clip: r.under.x.clip, side: r.under.x.side };
-        if (r.under.y.enabled) under.y = { clip: r.under.y.clip, side: r.under.y.side };
-        if (under.x || under.y) entry.underSuit = under;
-      }
-      if (zOverrides[layer] !== undefined) entry.zIndex = zOverrides[layer];
-      if (r.note) entry.note = r.note;
-      layerRules[layer] = entry;
-    }
-
-    const computed = computedLayers.map((l) => {
-      const entry: ExportedRule['computedLayers'][number] = { layerName: l.layerName, zIndex: l.zIndex };
-      if (l.clipLeftPercent) entry.clip = `clipLeft:${l.clipLeftPercent}`;
-      if (l.clipRightPercent) entry.clip = `clipRight:${l.clipRightPercent}`;
-      if (l.clipRightHalf) entry.clip = 'clipRightHalf';
-      if (l.clipPolygon) entry.clip = 'polygon';
-      if (l.clipTopPercent) entry.clip = `clipTop:${l.clipTopPercent}`;
-      return entry;
-    });
-
     const rule: ExportedRule = {
       id: `rule-${Date.now()}`,
-      description: ruleDescription || 'No description',
+      description: autoDescription || 'No layers configured',
       timestamp: new Date().toISOString(),
-      conditions,
-      layerRules,
-      computedLayers: computed,
+      layers: layerStack.map((item) => {
+        const layer: ExportedRule['layers'][0] = {
+          layerName: item.layerName,
+          traitId: item.traitId,
+          traitName: item.traitName,
+          path: item.path,
+          renderMode: item.renderMode,
+        };
+        if (item.renderMode === 'split') {
+          layer.splitConfig = {};
+          if (item.splitConfig.x.enabled) {
+            layer.splitConfig.x = { clip: item.splitConfig.x.clip, side: item.splitConfig.x.side };
+          }
+          if (item.splitConfig.y.enabled) {
+            layer.splitConfig.y = { clip: item.splitConfig.y.clip, side: item.splitConfig.y.side };
+          }
+        }
+        return layer;
+      }),
     };
+
     const json = JSON.stringify(rule, null, 2);
     setExportJson(json);
     navigator.clipboard.writeText(json).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
-  }, [selectedTraitIds, selectedPaths, rules, zOverrides, computedLayers, traitsByLayer, ruleDescription]);
-
-  const handleCopy = useCallback(() => {
-    if (exportJson) {
-      navigator.clipboard.writeText(exportJson).then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      });
-    }
-  }, [exportJson]);
+  }, [layerStack, autoDescription]);
 
   const handleClear = useCallback(() => {
-    setSelectedTraitIds({});
-    setSelectedPaths({});
+    setLayerStack([]);
+    setSelectedStackIndex(null);
     setG2Selections({});
-    setRules({});
-    setLayerOpacities({});
-    setZOverrides({});
     setPreviewUrl(null);
     setComputedLayers([]);
     setExportJson(null);
-    setRuleDescription('');
   }, []);
 
   if (loading) {
@@ -781,48 +926,62 @@ export default function RuleBuilder() {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-4" style={{ maxWidth: '1400px', margin: '0 auto' }}>
+    <div className="flex flex-col gap-6 p-6" style={{ maxWidth: '1400px', margin: '0 auto' }}>
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-bold">
-          Layer Rule Builder
-        </h1>
+        <div>
+          <h1 className="text-xl font-bold">Layer Rule Builder</h1>
+          <p className="text-sm text-secondary mt-1">
+            Add layers, reorder them, and configure how each renders relative to the one above
+          </p>
+        </div>
         <div className="flex gap-2">
-          <button type="button" className="btn btn-secondary text-sm" onClick={handleClear}>
-            Clear all
+          <button type="button" className="btn btn-secondary" onClick={handleClear}>
+            Clear All
           </button>
-          <button type="button" className="btn btn-primary text-sm" onClick={handleExport}>
-            {copied ? 'Copied to clipboard!' : 'Export JSON'}
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleExport}
+            disabled={layerStack.length === 0}
+          >
+            {copied ? 'Copied!' : 'Export JSON'}
           </button>
         </div>
       </div>
 
-      {/* Description */}
-      <input
-        type="text"
-        className="input text-sm"
-        placeholder="Describe the rule, e.g. 'Bandana + 3D glasses + Gopher suit: left 35% of mask and eyes under suit'"
-        value={ruleDescription}
-        onChange={(e) => setRuleDescription(e.target.value)}
-      />
+      {/* Auto-generated Description */}
+      <div
+        className="input"
+        style={{
+          background: 'var(--color-surface)',
+          color: autoDescription ? 'var(--color-text)' : 'var(--color-text-muted)',
+          cursor: 'default',
+        }}
+      >
+        {autoDescription || 'Add layers and configure render modes to generate description'}
+      </div>
 
       {/* Main layout */}
-      <div className="grid gap-4" style={{ gridTemplateColumns: '220px 1fr 300px' }}>
-        {/* LEFT: Trait selectors */}
-        <div className="flex flex-col gap-2">
-          {UI_ORDER.map((layer) => (
-            <LayerDropdown
-              key={layer}
-              layer={layer}
-              traits={traitsByLayer[layer] || []}
-              selectedTraitId={selectedTraitIds[layer] || ''}
-              onSelect={(traitId, path, trait) => handleSelect(layer, traitId, path, trait)}
-            />
-          ))}
+      <div className="grid gap-6" style={{ gridTemplateColumns: '280px 1fr 320px' }}>
+        {/* LEFT: Layer selectors */}
+        <div className="flex flex-col gap-3">
+          <div className="card-static p-4 flex flex-col gap-3">
+            <h2 className="text-sm font-semibold text-secondary">Add Layers</h2>
+            {SELECTABLE_LAYERS.map((layerName) => (
+              <LayerSelector
+                key={layerName}
+                layerName={layerName}
+                traits={traitsByLayer[layerName] || []}
+                onSelect={(trait, path) => handleAddLayer(layerName, trait, path)}
+                color={LAYER_COLORS[layerName] || '#888'}
+              />
+            ))}
+          </div>
         </div>
 
         {/* CENTER: Canvas */}
-        <div className="flex flex-col gap-3 items-center">
+        <div className="flex flex-col gap-4 items-center">
           <div
             className="relative"
             style={{
@@ -834,118 +993,110 @@ export default function RuleBuilder() {
               overflow: 'hidden',
             }}
           >
-            {previewUrl && (
+            {previewUrl ? (
               <img src={previewUrl} alt="Preview" width={CANVAS_SIZE} height={CANVAS_SIZE} style={{ display: 'block' }} />
+            ) : (
+              <div className="flex items-center justify-center h-full text-muted">
+                Add layers to preview
+              </div>
             )}
 
-            {/* Drag lines — up to 4 per layer: crop X, crop Y, under X, under Y */}
-            {lineLayers.map((layerName) => {
-              const rule = rules[layerName] || DEFAULT_RULE;
-              const color = LAYER_COLORS[layerName] || '#ff6b00';
-              return (
-                <span key={layerName}>
-                  {rule.crop.enabled && rule.crop.x.enabled && (
-                    <DragLine
-                      canvasSize={CANVAS_SIZE} axis="x"
-                      percent={rule.crop.x.clip}
-                      onChange={(p) => handleRuleChange(layerName, { ...rule, crop: { ...rule.crop, x: { ...rule.crop.x, clip: p } } })}
-                      color={color}
-                      label={`${layerName} crop`}
-                    />
-                  )}
-                  {rule.crop.enabled && rule.crop.y.enabled && (
-                    <DragLine
-                      canvasSize={CANVAS_SIZE} axis="y"
-                      percent={rule.crop.y.clip}
-                      onChange={(p) => handleRuleChange(layerName, { ...rule, crop: { ...rule.crop, y: { ...rule.crop.y, clip: p } } })}
-                      color={color}
-                      label={`${layerName} crop`}
-                    />
-                  )}
-                  {rule.under.enabled && rule.under.x.enabled && (
-                    <DragLine
-                      canvasSize={CANVAS_SIZE} axis="x"
-                      percent={rule.under.x.clip}
-                      onChange={(p) => handleRuleChange(layerName, { ...rule, under: { ...rule.under, x: { ...rule.under.x, clip: p } } })}
-                      color={color}
-                      label={`${layerName} under`}
-                      dashed
-                    />
-                  )}
-                  {rule.under.enabled && rule.under.y.enabled && (
-                    <DragLine
-                      canvasSize={CANVAS_SIZE} axis="y"
-                      percent={rule.under.y.clip}
-                      onChange={(p) => handleRuleChange(layerName, { ...rule, under: { ...rule.under, y: { ...rule.under.y, clip: p } } })}
-                      color={color}
-                      label={`${layerName} under`}
-                      dashed
-                    />
-                  )}
-                </span>
-              );
-            })}
+            {/* Drag lines for split mode */}
+            {showDragLines && selectedItem && (
+              <>
+                {selectedItem.splitConfig.x.enabled && (
+                  <DragLine
+                    canvasSize={CANVAS_SIZE}
+                    axis="x"
+                    percent={selectedItem.splitConfig.x.clip}
+                    onChange={(p) => handleUpdateSplitConfig(selectedStackIndex!, {
+                      ...selectedItem.splitConfig,
+                      x: { ...selectedItem.splitConfig.x, clip: p },
+                    })}
+                    color={LAYER_COLORS[selectedItem.layerName] || '#00d4ff'}
+                    label={`X (${selectedItem.splitConfig.x.side})`}
+                  />
+                )}
+                {selectedItem.splitConfig.y.enabled && (
+                  <DragLine
+                    canvasSize={CANVAS_SIZE}
+                    axis="y"
+                    percent={selectedItem.splitConfig.y.clip}
+                    onChange={(p) => handleUpdateSplitConfig(selectedStackIndex!, {
+                      ...selectedItem.splitConfig,
+                      y: { ...selectedItem.splitConfig.y, clip: p },
+                    })}
+                    color="#f59e0b"
+                    label={`Y (${selectedItem.splitConfig.y.side})`}
+                  />
+                )}
+              </>
+            )}
           </div>
 
-          {/* Layer stack info */}
+          {/* Computed layers debug */}
           {computedLayers.length > 0 && (
             <div
-              className="w-full p-2 rounded-lg text-xs font-mono text-muted"
+              className="w-full p-3 rounded-lg text-xs font-mono text-muted"
               style={{
                 background: 'var(--color-surface)',
                 border: '1px solid var(--color-border)',
-                maxHeight: '120px',
-                overflowY: 'auto',
+                maxHeight: '150px',
+                overflow: 'auto',
               }}
             >
+              <p className="font-semibold mb-2">Computed layers (z-index order):</p>
               {computedLayers.map((l, i) => (
                 <div key={i} className="flex gap-3">
-                  <span style={{ minWidth: '28px' }}>{l.zIndex}</span>
+                  <span style={{ minWidth: '32px' }}>z:{l.zIndex}</span>
                   <span>{l.layerName}</span>
-                  {l.clipLeftPercent ? <span>L{(l.clipLeftPercent * 100).toFixed(0)}%</span> : null}
-                  {l.clipRightPercent ? <span>R{(l.clipRightPercent * 100).toFixed(0)}%</span> : null}
-                  {l.clipRightHalf ? <span>R50%</span> : null}
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* RIGHT: Layer rules (sorted top-to-bottom = highest z-index first) */}
-        <div className="flex flex-col gap-2" style={{ maxHeight: '700px', overflowY: 'auto' }}>
-          <p className="text-xs text-muted">
-            Top = rendered on top. Use ▲▼ to reorder.
-          </p>
-          {sortedEditableLayers.length === 0 ? (
-            <p className="text-xs p-3 text-muted">
-              Select traits on the left to see layer rules here.
-            </p>
-          ) : (
-            sortedEditableLayers.map((layer, idx) => {
-              const rule = rules[layer] || DEFAULT_RULE;
-              const color = LAYER_COLORS[layer] || '#ff6b00';
-              return (
-                <LayerCard
-                  key={layer}
-                  layerName={layer}
-                  rule={rule}
-                  onChange={(r) => handleRuleChange(layer, r)}
-                  color={color}
-                  opacity={layerOpacities[layer] ?? 1}
-                  onOpacityChange={(v) => setLayerOpacities((prev) => ({ ...prev, [layer]: v }))}
-                  effectiveZ={getEffectiveZ(layer)}
-                  onMoveUp={() => {
-                    if (idx > 0) swapZ(layer, sortedEditableLayers[idx - 1]);
-                  }}
-                  onMoveDown={() => {
-                    if (idx < sortedEditableLayers.length - 1) swapZ(layer, sortedEditableLayers[idx + 1]);
-                  }}
-                  canMoveUp={idx > 0}
-                  canMoveDown={idx < sortedEditableLayers.length - 1}
-                />
-              );
-            })
-          )}
+        {/* RIGHT: Layer stack */}
+        <div className="flex flex-col gap-3">
+          <div className="card-static p-4 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-secondary">Layer Stack</h2>
+              <span className="text-xs text-muted">Top renders last</span>
+            </div>
+
+            {layerStack.length === 0 ? (
+              <div className="text-sm text-muted py-4 text-center">
+                Add layers from the left panel
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {layerStack.map((item, index) => (
+                  <StackItem
+                    key={item.id}
+                    item={item}
+                    index={index}
+                    total={layerStack.length}
+                    isSelected={selectedStackIndex === index}
+                    onSelect={() => setSelectedStackIndex(selectedStackIndex === index ? null : index)}
+                    onMoveUp={() => handleMoveUp(index)}
+                    onMoveDown={() => handleMoveDown(index)}
+                    onRemove={() => handleRemoveLayer(index)}
+                    onUpdateRenderMode={(mode) => handleUpdateRenderMode(index, mode)}
+                    onUpdateSplitConfig={(config) => handleUpdateSplitConfig(index, config)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Legend */}
+          <div className="card-static p-3 text-xs">
+            <p className="font-semibold mb-2">Render Modes:</p>
+            <p className="text-muted"><strong>Normal:</strong> Stack order (top = on top)</p>
+            <p className="text-muted"><strong>Under:</strong> Render below layer above</p>
+            <p className="text-muted"><strong>Split:</strong> Part under, part on top</p>
+            <p className="text-muted"><strong>Crop:</strong> Cut off at X/Y position</p>
+          </div>
         </div>
       </div>
 
@@ -953,11 +1104,17 @@ export default function RuleBuilder() {
       {exportJson && (
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold">
-              Exported JSON
-            </h2>
-            <button type="button" className="btn btn-secondary text-xs" onClick={handleCopy}>
-              {copied ? 'Copied!' : 'Copy to clipboard'}
+            <h2 className="text-sm font-semibold">Exported JSON</h2>
+            <button
+              type="button"
+              className="btn btn-secondary text-sm"
+              onClick={() => {
+                navigator.clipboard.writeText(exportJson);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              }}
+            >
+              {copied ? 'Copied!' : 'Copy'}
             </button>
           </div>
           <pre
@@ -965,10 +1122,8 @@ export default function RuleBuilder() {
             style={{
               background: '#0d0d15',
               border: '1px solid var(--color-border)',
-              maxHeight: '300px',
+              maxHeight: '250px',
               fontFamily: 'ui-monospace, monospace',
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word',
             }}
           >
             {exportJson}

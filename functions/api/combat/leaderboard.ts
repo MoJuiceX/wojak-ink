@@ -32,7 +32,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       `SELECT * FROM combat_fighters ORDER BY ${sortColumn} DESC, nft_id ASC LIMIT ?`
     ).bind(limit).all();
 
-    const fighters = (results.results ?? []).map((row: any) => buildFighterResponse(row));
+    const fighters = (results.results ?? []).map((row: Record<string, unknown>) => buildFighterResponse(row));
 
     return jsonResponse({ sortBy, fighters });
   } catch (error) {

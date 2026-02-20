@@ -13,7 +13,7 @@ interface OnboardingChecklistProps {
 }
 
 const MILESTONES = [
-  { key: 'did' as const, label: 'Link your DID to play', action: null as null },
+  { key: 'did' as const, label: 'Link your DID to play', action: { label: 'Refresh', onClick: () => window.location.reload() } },
   { key: 'phase1' as const, label: 'Hold a Phase 1 Wojak', action: { label: 'Get One', href: 'https://mintgarden.io/collections/wojak-farmers-plot' } },
   { key: 'minted' as const, label: 'Create your first Wojak', action: { label: 'Go to Generator', to: '/generator' } },
   { key: 'voted' as const, label: 'Vote on a Wojak', action: { label: 'Vote Now', to: '/swipe' } },
@@ -46,7 +46,9 @@ export function OnboardingChecklist({ milestones }: OnboardingChecklistProps) {
                   ? <Link to={action.to} className="text-accent" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>{action.label}</Link>
                   : 'href' in action && action.href
                     ? <a href={action.href} target="_blank" rel="noopener noreferrer" className="text-accent" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>{action.label}</a>
-                    : null
+                    : 'onClick' in action && action.onClick
+                      ? <button type="button" onClick={action.onClick} className="text-accent" style={{ fontSize: 12, whiteSpace: 'nowrap', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>{action.label}</button>
+                      : null
               )}
             </div>
           );

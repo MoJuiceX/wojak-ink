@@ -4,6 +4,21 @@
 import { jsonResponse, errorResponse, authenticateAgent } from './_shared';
 import { calculateXPAward, calculateELOChange, calculateLevelFromXP } from '../../../src/lib/combat/xp-elo-calculator';
 
+interface CombatBattleRow {
+  id: number;
+  fighter_a_nft: string;
+  fighter_b_nft: string;
+  fighter_a_did: string;
+  fighter_b_did: string;
+  fighter_a_level: number;
+  fighter_b_level: number;
+  fighter_a_elo: number;
+  fighter_b_elo: number;
+  current_turn: number;
+  status: string;
+  winner_nft: string | null;
+}
+
 interface Env {
   DB: D1Database;
 }
@@ -25,7 +40,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
   const battle = await db.prepare(
     "SELECT * FROM combat_battles WHERE id = ? AND status IN ('active', 'waiting_moves')"
-  ).bind(body.battle_id).first<any>();
+  ).bind(body.battle_id).first<CombatBattleRow>();
 
   if (!battle) return errorResponse('Battle not found or not active', 404);
 

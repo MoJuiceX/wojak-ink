@@ -14,6 +14,40 @@ interface Env {
   ADMIN_SECRET?: string;
 }
 
+interface CombatBattleRow {
+  id: number;
+  status: string;
+  current_turn: number;
+  fighter_a_nft: string;
+  fighter_b_nft: string;
+  fighter_a_level: number;
+  fighter_b_level: number;
+  fighter_a_elo: number;
+  fighter_b_elo: number;
+  fighter_a_did: string;
+  fighter_b_did: string;
+}
+
+interface CombatFighterRow {
+  nft_id: string;
+  combat_type: string;
+  nature: string;
+  ability: string;
+  move_1: string;
+  move_2: string;
+  move_3: string;
+  move_4: string;
+  level: number;
+  xp: number;
+}
+
+interface CombatTurnRow {
+  battle_id: number;
+  turn_number: number;
+  fighter_a_move: string | null;
+  fighter_b_move: string | null;
+}
+
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     // Server-only endpoint: require ADMIN_SECRET
@@ -36,13 +70,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     const battle = await db.prepare(
       `SELECT * FROM combat_battles WHERE id = ? AND status IN ('active', 'waiting_moves')`
-    ).bind(battleId).first<any>();
+    ).bind(battleId).first<CombatBattleRow>();
 
     if (!battle) return errorResponse('Battle not found or not active', 404);
 
     // Load fighters
-    const fighterARow = await db.prepare('SELECT * FROM combat_fighters WHERE nft_id = ?').bind(battle.fighter_a_nft).first<any>();
-    const fighterBRow = await db.prepare('SELECT * FROM combat_fighters WHERE nft_id = ?').bind(battle.fighter_b_nft).first<any>();
+    const fighterARow = await db.prepare('SELECT * FROM combat_fighters WHERE nft_id = ?').bind(battle.fighter_a_nft).first<CombatFighterRow>();
+    const fighterBRow = await db.prepare('SELECT * FROM combat_fighters WHERE nft_id = ?').bind(battle.fighter_b_nft).first<CombatFighterRow>();
 
     if (!fighterARow || !fighterBRow) return errorResponse('Fighter data missing', 500);
 
@@ -66,16 +100,18 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     for (const [fighter, opponent] of [[battleState.fighterA, battleState.fighterB], [battleState.fighterB, battleState.fighterA]] as const) {
       const effect = getAbilityEffect(fighter.ability, 'battle_start', { self: fighter, opponent });
       if (effect?.selfStatMultipliers) {
+        const stats = fighter.effectiveStats as Record<string, number>;
         for (const [stat, mult] of Object.entries(effect.selfStatMultipliers)) {
-          if (stat in fighter.effectiveStats) {
-            (fighter.effectiveStats as any)[stat] = Math.floor((fighter.effectiveStats as any)[stat] * mult);
+          if (stat in stats) {
+            stats[stat] = Math.floor(stats[stat] * mult);
           }
         }
       }
       if (effect?.opponentStatMultipliers) {
+        const stats = opponent.effectiveStats as Record<string, number>;
         for (const [stat, mult] of Object.entries(effect.opponentStatMultipliers)) {
-          if (stat in opponent.effectiveStats) {
-            (opponent.effectiveStats as any)[stat] = Math.floor((opponent.effectiveStats as any)[stat] * mult);
+          if (stat in stats) {
+            stats[stat] = Math.floor(stats[stat] * mult);
           }
         }
       }
@@ -106,7 +142,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // Get existing moves for this turn (for timeout scenario)
     const currentTurnRecord = await db.prepare(
       'SELECT * FROM combat_turns WHERE battle_id = ? AND turn_number = ?'
-    ).bind(battleId, battle.current_turn).first<any>();
+    ).bind(battleId, battle.current_turn).first<CombatTurnRow>();
 
     // Determine moves: use AI for auto-mode or missing moves (timeout)
     let moveA = currentTurnRecord?.fighter_a_move;

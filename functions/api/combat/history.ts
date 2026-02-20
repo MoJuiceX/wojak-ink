@@ -27,7 +27,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
        LIMIT ?`
     ).bind(nftId, nftId, limit).all();
 
-    const battles = (results.results ?? []).map((row: any) => {
+    const battles = (results.results ?? []).map((row: Record<string, unknown>) => {
       const side = row.fighter_a_nft === nftId ? 'a' : 'b';
       const isWinner = row.winner_nft === nftId;
       const isDraw = !row.winner_nft;

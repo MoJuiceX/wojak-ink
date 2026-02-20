@@ -93,10 +93,18 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const burnerWallet = burnerPlayer.wallet_address;
     const minterWallet = fighter.minter_wallet;
 
+    // Cannot burn NFTs you created
+    if (minterWallet && minterWallet === burnerWallet) {
+      return errorResponse(
+        "You cannot burn Wojaks you created. Buy others' Wojaks and burn them to earn rewards.",
+        400
+      );
+    }
+
     // Determine if credits should be awarded (burner != minter)
     const earnCredits = minterWallet && burnerWallet !== minterWallet;
 
-    // Execute burn: mark as burned + award credits if eligible
+    // Execute burn: mark as burned + award credits if eligible + grant one +50 power to assign
     const statements: D1PreparedStatement[] = [
       db.prepare(`
         UPDATE combat_fighters
@@ -104,6 +112,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             burned_by_did = ?
         WHERE nft_id = ?
       `).bind(burnerDid, nftId),
+      db.prepare(`
+        INSERT INTO burn_power_grants (did_id, nft_id) VALUES (?, NULL)
+      `).bind(burnerDid),
     ];
 
     if (earnCredits) {
@@ -129,9 +140,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       nftId,
       editionNumber: fighter.edition_number,
       creditsAwarded: earnCredits ? BURN_CREDIT_AMOUNT / 100 : 0,
-      message: earnCredits
-        ? 'Wojak burned! You earned 100 credits.'
-        : 'Wojak burned! No credits awarded (you minted this Wojak).',
+      message: 'Wojak burned! You earned 100 credits and +50 power to assign to one of your Wojaks.',
     });
   } catch (error) {
     console.error('[api/combat/burn] Error:', error);

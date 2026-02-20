@@ -177,94 +177,19 @@ function ruleAstronautDisablesMouthOptions(resolver: SelectionResolver): RuleRes
 
 /**
  * Astronaut and Copium Mask are mutually exclusive
- * Other masks can be used with Astronaut (with different rendering orders)
+ * Now handled by suspend/restore in reducer - no graying out needed.
  */
-function ruleAstronautCopiumMaskMutualExclusion(resolver: SelectionResolver): RuleResult {
-  const hasAstronaut = resolver.getTraitId('Clothes') === KNOWN_TRAIT_IDS.Clothes_Astronaut;
-  const maskPathAstro = resolver.getPath('Mask');
-  const hasCopiumMask = !!maskPathAstro && maskPathAstro.toLowerCase().includes('copium');
-
-  if (hasAstronaut) {
-    if (hasCopiumMask) {
-      return {
-        disabledLayers: [],
-        reason: 'Deselect Astronaut first',
-        forceSelections: { Mask: '' },
-        clearSelections: ['Mask'],
-        disabledOptions: { Mask: ['Copium', 'Copium-Mask', 'Copium Mask'] },
-        disabledOptionReasons: {
-          Mask: {
-            Copium: 'Remove Astronaut',
-            'Copium-Mask': 'Remove Astronaut',
-            'Copium Mask': 'Remove Astronaut',
-          },
-        },
-      };
-    }
-    return {
-      disabledLayers: [],
-      disabledOptions: { Mask: ['Copium', 'Copium-Mask', 'Copium Mask'] },
-      disabledOptionReasons: {
-        Mask: {
-          Copium: 'Remove Astronaut',
-          'Copium-Mask': 'Remove Astronaut',
-          'Copium Mask': 'Remove Astronaut',
-        },
-      },
-    };
-  }
-
-  if (hasCopiumMask) {
-    return {
-      disabledLayers: [],
-      disabledOptions: { Clothes: ['Astronaut'] },
-      disabledOptionReasons: {
-        Clothes: { Astronaut: 'Remove Copium Mask' },
-      },
-      reason: 'Deselect Copium Mask first',
-    };
-  }
-
+function ruleAstronautCopiumMaskMutualExclusion(_resolver: SelectionResolver): RuleResult {
+  // Mutual exclusion now handled by suspend/restore in reducer
   return { disabledLayers: [] };
 }
 
 /**
  * Astronaut disables Night Vision (mutually exclusive).
- * When selected: Night Vision cannot be selected; clear it if currently selected.
+ * Now handled by suspend/restore in reducer - no graying out needed.
  */
-function ruleAstronautDisablesNightVision(resolver: SelectionResolver): RuleResult {
-  const clothesId = resolver.getTraitId('Clothes');
-  const hasAstronaut = clothesId === KNOWN_TRAIT_IDS.Clothes_Astronaut;
-  const hasNightVision = resolver.getTraitId('Eyes') === KNOWN_TRAIT_IDS.Eyes_NightVision;
-
-  if (hasAstronaut) {
-    if (hasNightVision) {
-      return {
-        disabledLayers: [],
-        reason: 'Remove Astronaut',
-        forceSelections: { Eyes: '' },
-        clearSelections: ['Eyes'],
-        disabledOptions: { Eyes: ['Night Vision', 'night vision'] },
-        disabledOptionReasons: {
-          Eyes: {
-            'Night Vision': 'Remove Astronaut',
-            'night vision': 'Remove Astronaut',
-          },
-        },
-      };
-    }
-    return {
-      disabledLayers: [],
-      disabledOptions: { Eyes: ['Night Vision', 'night vision'] },
-      disabledOptionReasons: {
-        Eyes: {
-          'Night Vision': 'Remove Astronaut',
-          'night vision': 'Remove Astronaut',
-        },
-      },
-    };
-  }
-
+function ruleAstronautDisablesNightVision(_resolver: SelectionResolver): RuleResult {
+  // Mutual exclusion now handled by suspend/restore in reducer
   return { disabledLayers: [] };
 }
 
@@ -309,14 +234,15 @@ function ruleFacialHairRequiresMouthBase(resolver: SelectionResolver): RuleResul
 }
 
 /**
- * Mask blocks MouthItem and FacialHair
+ * Mask blocks MouthItem and FacialHair (except Copium: Copium can combine with Neckbeard/Stache; mask draws on top).
  */
 function ruleMaskBlocksOtherLayers(resolver: SelectionResolver): RuleResult {
   const maskPath = resolver.getPath('Mask');
 
   if (!isSelectionPathEmpty(maskPath)) {
+    const isCopium = maskPath.toLowerCase().includes('copium');
     return {
-      disabledLayers: ['MouthItem', 'FacialHair'],
+      disabledLayers: isCopium ? ['MouthItem'] : ['MouthItem', 'FacialHair'],
       reason: 'Deselect Mask',
     };
   }
@@ -663,51 +589,10 @@ function ruleSuitDisablesHannibal(resolver: SelectionResolver): RuleResult {
 
 /**
  * Laser Eyes and Fake Mask are mutually exclusive.
- * - When Fake mask is selected, laser eyes cannot be selected.
- * - When laser eyes are selected, Fake mask cannot be selected.
- * - Other masks (Hannibal, Copium, Bandana) are compatible with Laser Eyes.
+ * Now handled by suspend/restore in reducer - no graying out needed.
  */
-function ruleLaserEyesFakeMaskMutualExclusion(resolver: SelectionResolver): RuleResult {
-  const maskPath = resolver.getPath('Mask');
-  const eyesPath = resolver.getPath('Eyes');
-
-  const hasFakeMask = !!maskPath && pathContains(maskPath, 'fake');
-  const hasLaserEyes = pathContains(eyesPath, 'laser');
-
-  const disabledEyesOptions = ['Laser', 'Laser-Eyes', 'Laser Eyes'];
-  const disabledEyesReasons = buildDisabledReasons(disabledEyesOptions, 'Remove Fake Mask');
-
-  const disabledMaskOptions = ['Fake', 'Fake-Mask', 'Fake Mask'];
-  const disabledMaskReasons = buildDisabledReasons(disabledMaskOptions, 'Remove Laser Eyes');
-
-  // When Fake mask is selected, disable/clear laser eyes
-  if (hasFakeMask) {
-    if (hasLaserEyes) {
-      return {
-        disabledLayers: [],
-        reason: 'Remove Fake Mask',
-        clearSelections: ['Eyes'],
-        forceSelections: { Eyes: '' },
-        disabledOptions: { Eyes: disabledEyesOptions },
-        disabledOptionReasons: { Eyes: disabledEyesReasons },
-      };
-    }
-    return {
-      disabledLayers: [],
-      disabledOptions: { Eyes: disabledEyesOptions },
-      disabledOptionReasons: { Eyes: disabledEyesReasons },
-    };
-  }
-
-  // When laser eyes are selected, disable only the Fake mask option (not all masks)
-  if (hasLaserEyes) {
-    return {
-      disabledLayers: [],
-      disabledOptions: { Mask: disabledMaskOptions },
-      disabledOptionReasons: { Mask: disabledMaskReasons },
-    };
-  }
-
+function ruleLaserEyesFakeMaskMutualExclusion(_resolver: SelectionResolver): RuleResult {
+  // Mutual exclusion now handled by suspend/restore in reducer
   return { disabledLayers: [] };
 }
 
@@ -781,49 +666,10 @@ function ruleSuitDisablesNeckbeard(resolver: SelectionResolver): RuleResult {
 
 /**
  * Firefighter Helmet is mutually exclusive with VR Headset and Night Vision.
- * Selecting one clears the other.
+ * Now handled by suspend/restore in reducer - no graying out needed.
  */
-function ruleFirefighterHelmetEyesExclusion(resolver: SelectionResolver): RuleResult {
-  const headId = resolver.getTraitId('Head');
-  const eyesId = resolver.getTraitId('Eyes');
-  const hasFirefighter = headId === KNOWN_TRAIT_IDS.Head_FirefighterHelmet;
-  const hasVR = eyesId === KNOWN_TRAIT_IDS.Eyes_VRHeadset;
-  const hasNightVision = eyesId === KNOWN_TRAIT_IDS.Eyes_NightVision;
-
-  const blockedEyesOptions = ['VR headset', 'VR Headset', 'VR-headset', 'Night Vision', 'night vision', 'night-vision'];
-  const blockedEyesReasons = buildDisabledReasons(blockedEyesOptions, 'Remove Firefighter Helmet');
-
-  if (hasFirefighter) {
-    if (hasVR || hasNightVision) {
-      return {
-        disabledLayers: [],
-        forceSelections: { Eyes: '' },
-        clearSelections: ['Eyes'],
-        disabledOptions: { Eyes: blockedEyesOptions },
-        disabledOptionReasons: { Eyes: blockedEyesReasons },
-      };
-    }
-    return {
-      disabledLayers: [],
-      disabledOptions: { Eyes: blockedEyesOptions },
-      disabledOptionReasons: { Eyes: blockedEyesReasons },
-    };
-  }
-
-  if (hasVR || hasNightVision) {
-    return {
-      disabledLayers: [],
-      disabledOptions: { Head: ['Firefigther Helmet', 'Firefighter Helmet', 'Firefigther-Helmet'] },
-      disabledOptionReasons: {
-        Head: {
-          'Firefigther Helmet': hasVR ? 'Remove VR Headset' : 'Remove Night Vision',
-          'Firefighter Helmet': hasVR ? 'Remove VR Headset' : 'Remove Night Vision',
-          'Firefigther-Helmet': hasVR ? 'Remove VR Headset' : 'Remove Night Vision',
-        },
-      },
-    };
-  }
-
+function ruleFirefighterHelmetEyesExclusion(_resolver: SelectionResolver): RuleResult {
+  // Mutual exclusion now handled by suspend/restore in reducer
   return { disabledLayers: [] };
 }
 

@@ -11,7 +11,7 @@ import {
   useEffect,
   useCallback,
 } from 'react';
-import { Particle, spawnAttack } from '@/lib/combat/particles';
+import { Particle, spawnAttack, spawnIntroFog, spawnVictoryConfetti } from '@/lib/combat/particles';
 import type { SpawnAttackConfig } from '@/lib/combat/particles';
 
 // ── Constants ───────────────────────────────────────────────────────────────
@@ -25,6 +25,10 @@ export interface BattleCanvasRef {
   playAttack(config: SpawnAttackConfig): void;
   /** Remove all particles immediately */
   clear(): void;
+  /** Spawn intro fog across the arena (demo start) */
+  playIntroFog(): void;
+  /** Spawn victory confetti at winner position; side 'a' = left, 'b' = right */
+  playVictory(side: 'a' | 'b'): void;
 }
 
 // ── Component ───────────────────────────────────────────────────────────────
@@ -39,7 +43,34 @@ export const BattleCanvas = forwardRef<BattleCanvasRef>(function BattleCanvas(_p
 
   useImperativeHandle(ref, () => ({
     playAttack(config: SpawnAttackConfig) {
-      const newParticles = spawnAttack(config);
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      const parent = canvas.parentElement;
+      const rect = parent?.getBoundingClientRect() ?? canvas.getBoundingClientRect();
+      let w = rect.width;
+      let h = rect.height;
+      const useFallback = w <= 0 || h <= 0;
+      if (useFallback) {
+        w = 400;
+        h = 300;
+        canvas.width = w;
+        canvas.height = h;
+        canvas.style.width = `${w}px`;
+        canvas.style.height = `${h}px`;
+        const ctx = canvas.getContext('2d');
+        if (ctx) ctx.setTransform(1, 0, 0, 1, 0, 0);
+      }
+
+      const pixelConfig: SpawnAttackConfig = {
+        ...config,
+        startX: config.startX * w,
+        startY: config.startY * h,
+        targetX: config.targetX * w,
+        targetY: config.targetY * h,
+      };
+
+      const newParticles = spawnAttack(pixelConfig);
       const current = particlesRef.current;
 
       // Evict oldest when exceeding MAX_PARTICLES
@@ -55,6 +86,42 @@ export const BattleCanvas = forwardRef<BattleCanvasRef>(function BattleCanvas(_p
     clear() {
       particlesRef.current = [];
     },
+
+    playIntroFog() {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const parent = canvas.parentElement;
+      const w = parent ? parent.clientWidth : canvas.getBoundingClientRect().width;
+      const h = parent ? parent.clientHeight : canvas.getBoundingClientRect().height;
+      if (w <= 0 || h <= 0) return;
+      const totalBatches = 15;
+      const delayMs = 50;
+      for (let i = 0; i < totalBatches; i++) {
+        setTimeout(() => {
+          const current = particlesRef.current;
+          const newParticles = spawnIntroFog(w, h, i, totalBatches);
+          const total = current.length + newParticles.length;
+          if (total > MAX_PARTICLES) current.splice(0, total - MAX_PARTICLES);
+          current.push(...newParticles);
+        }, i * delayMs);
+      }
+    },
+
+    playVictory(side: 'a' | 'b') {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const parent = canvas.parentElement;
+      const w = parent ? parent.clientWidth : canvas.getBoundingClientRect().width;
+      const h = parent ? parent.clientHeight : canvas.getBoundingClientRect().height;
+      if (w <= 0 || h <= 0) return;
+      const centerX = side === 'a' ? w * 0.25 : w * 0.75;
+      const centerY = h * 0.55;
+      const newParticles = spawnVictoryConfetti(centerX, centerY);
+      const current = particlesRef.current;
+      const total = current.length + newParticles.length;
+      if (total > MAX_PARTICLES) current.splice(0, total - MAX_PARTICLES);
+      current.push(...newParticles);
+    },
   }));
 
   // ── Resize Observer ─────────────────────────────────────────────────
@@ -67,13 +134,15 @@ export const BattleCanvas = forwardRef<BattleCanvasRef>(function BattleCanvas(_p
       const parent = canvas.parentElement;
       if (!parent) return;
       const rect = parent.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      canvas.style.width = `${rect.width}px`;
-      canvas.style.height = `${rect.height}px`;
+      const w = Math.max(1, Math.floor(rect.width));
+      const h = Math.max(1, Math.floor(rect.height));
+      // Match ClawCombat: no DPR, 1:1 CSS pixel = canvas pixel for predictable coords
+      canvas.width = w;
+      canvas.height = h;
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
       const ctx = canvas.getContext('2d');
-      if (ctx) ctx.scale(dpr, dpr);
+      if (ctx) ctx.setTransform(1, 0, 0, 1, 0, 0);
     };
 
     const observer = new ResizeObserver(resizeCanvas);
@@ -104,9 +173,13 @@ export const BattleCanvas = forwardRef<BattleCanvasRef>(function BattleCanvas(_p
     const dt = lastTimeRef.current ? Math.min(time - lastTimeRef.current, 50) : 16;
     lastTimeRef.current = time;
 
-    // Clear canvas (use CSS dimensions, not buffer dimensions)
-    const dpr = window.devicePixelRatio || 1;
-    ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+    const drawW = canvas.width;
+    const drawH = canvas.height;
+    if (drawW <= 0 || drawH <= 0) {
+      animFrameRef.current = requestAnimationFrame(tick);
+      return;
+    }
+    ctx.clearRect(0, 0, drawW, drawH);
 
     // Update and draw particles
     const particles = particlesRef.current;

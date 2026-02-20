@@ -181,4 +181,9 @@ export const GAME_RATE_LIMITS = {
     maxRequests: 10,
     keyPrefix: 'game-bq',
   },
+  linkDid: {
+    windowMs: 300_000,
+    maxRequests: 5,
+    keyPrefix: 'game-link-did',
+  },
 } as const;

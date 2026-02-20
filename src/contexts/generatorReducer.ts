@@ -3,8 +3,16 @@
  * Pure state transitions; rules/history helpers live in generatorStateUtils.
  */
 
-import type { FavoriteWojak, G2Selection, SelectionsSnapshot } from '@/types/generator';
+import type { FavoriteWojak, G2Selection, SelectionsSnapshot, LayerSelection } from '@/types/generator';
 import type { UILayerName } from '@/lib/layerRegistry';
+
+/** Suspended selection: a trait that was temporarily removed due to a conflict */
+interface SuspendedSelection {
+  layer: UILayerName;
+  selection: LayerSelection;
+  conflictLayer: UILayerName;
+  conflictCheck: (path: string | undefined | null) => boolean;
+}
 import {
   DEFAULT_SELECTIONS,
   DEFAULT_CLOTHES_PATH,
@@ -38,6 +46,8 @@ export interface GeneratorState {
   scrollPosition: number;
   /** User-facing error from init, export, or save (cleared on next action or clearError). */
   generatorError: string | null;
+  /** Traits suspended due to conflicts — restored when conflict is resolved */
+  suspendedSelections: SuspendedSelection[];
 }
 
 export type GeneratorAction =
@@ -89,6 +99,7 @@ export function createInitialState(): GeneratorState {
     showStickyPreview: false,
     scrollPosition: 0,
     generatorError: null,
+    suspendedSelections: [],
   };
 }
 
@@ -98,12 +109,199 @@ function pathMapForReducer(): Map<string, string> {
   return getPathToTraitIdMap();
 }
 
+// ============ Trait Conflict Helpers ============
+
+/** Check if a path represents Clown Hair */
+function isClownHair(path: string | undefined | null): boolean {
+  if (!path) return false;
+  return path.toLowerCase().includes('clown');
+}
+
+/** Check if a path represents Night Vision */
+function isNightVision(path: string | undefined | null): boolean {
+  if (!path) return false;
+  const lower = path.toLowerCase();
+  return lower.includes('night-vision') || lower.includes('nightvision') || lower.includes('night_vision');
+}
+
+/** Check if a path represents Firefighter Helmet */
+function isFirefighterHelmet(path: string | undefined | null): boolean {
+  if (!path) return false;
+  const lower = path.toLowerCase();
+  return lower.includes('firefight') || lower.includes('fire-fight');
+}
+
+/** Check if a path represents VR Headset */
+function isVRHeadset(path: string | undefined | null): boolean {
+  if (!path) return false;
+  const lower = path.toLowerCase();
+  return lower.includes('vr') && lower.includes('headset');
+}
+
+/** Check if a path represents Astronaut suit */
+function isAstronaut(path: string | undefined | null): boolean {
+  if (!path) return false;
+  return path.toLowerCase().includes('astronaut');
+}
+
+/** Check if a path represents Copium Mask */
+function isCopiumMask(path: string | undefined | null): boolean {
+  if (!path) return false;
+  return path.toLowerCase().includes('copium');
+}
+
+/** Check if a path represents Laser Eyes */
+function isLaserEyes(path: string | undefined | null): boolean {
+  if (!path) return false;
+  return path.toLowerCase().includes('laser');
+}
+
+/** Check if a path represents Fake Mask */
+function isFakeMask(path: string | undefined | null): boolean {
+  if (!path) return false;
+  const lower = path.toLowerCase();
+  return lower.includes('fake') && (lower.includes('mask') || lower.includes('hand'));
+}
+
+/**
+ * Conflict definition: when traitA is selected, traitB gets suspended (and vice versa).
+ */
+interface ConflictDefinition {
+  layerA: UILayerName;
+  checkA: (path: string | undefined | null) => boolean;
+  layerB: UILayerName;
+  checkB: (path: string | undefined | null) => boolean;
+}
+
+/**
+ * List of mutual exclusion conflicts where selecting one suspends the other.
+ * These conflicts are bidirectional - if A conflicts with B, selecting either will suspend the other.
+ */
+const MUTUAL_EXCLUSION_CONFLICTS: ConflictDefinition[] = [
+  // Head + Eyes conflicts (only for heads that truly can't coexist with certain eyewear)
+  { layerA: 'Head', checkA: isClownHair, layerB: 'Eyes', checkB: isNightVision },
+  { layerA: 'Head', checkA: isFirefighterHelmet, layerB: 'Eyes', checkB: isNightVision },
+  { layerA: 'Head', checkA: isFirefighterHelmet, layerB: 'Eyes', checkB: isVRHeadset },
+  // Note: Tin Foil + Night Vision/VR now coexist via crop rules in layer builder
+  // Clothes + Eyes conflicts
+  { layerA: 'Clothes', checkA: isAstronaut, layerB: 'Eyes', checkB: isNightVision },
+  // Clothes + Mask conflicts
+  { layerA: 'Clothes', checkA: isAstronaut, layerB: 'Mask', checkB: isCopiumMask },
+  // Eyes + Mask conflicts
+  { layerA: 'Eyes', checkA: isLaserEyes, layerB: 'Mask', checkB: isFakeMask },
+];
+
+/**
+ * Process all mutual exclusion conflicts for a layer change.
+ * Returns updated selections and suspended selections.
+ */
+function processConflicts(
+  selections: SelectionsSnapshot,
+  suspended: SuspendedSelection[],
+  changedLayer: UILayerName,
+  newPath: string,
+): { selections: SelectionsSnapshot; suspended: SuspendedSelection[] } {
+  const newSelections = { ...selections };
+  let newSuspended = [...suspended];
+
+  for (const conflict of MUTUAL_EXCLUSION_CONFLICTS) {
+    // Check if we're setting layerA and it conflicts with layerB
+    if (changedLayer === conflict.layerA && conflict.checkA(newPath)) {
+      const otherSel = newSelections[conflict.layerB];
+      if (otherSel && conflict.checkB(otherSel.path)) {
+        // Suspend layerB
+        newSuspended = suspendSelection(newSuspended, conflict.layerB, otherSel, conflict.layerA, conflict.checkA);
+        delete newSelections[conflict.layerB];
+      }
+    }
+    // Check if we're setting layerB and it conflicts with layerA
+    if (changedLayer === conflict.layerB && conflict.checkB(newPath)) {
+      const otherSel = newSelections[conflict.layerA];
+      if (otherSel && conflict.checkA(otherSel.path)) {
+        // Suspend layerA
+        newSuspended = suspendSelection(newSuspended, conflict.layerA, otherSel, conflict.layerB, conflict.checkB);
+        delete newSelections[conflict.layerA];
+      }
+    }
+  }
+
+  return { selections: newSelections, suspended: newSuspended };
+}
+
+/**
+ * Suspend a selection due to a conflict.
+ * Returns updated suspendedSelections array.
+ */
+function suspendSelection(
+  current: SuspendedSelection[],
+  layer: UILayerName,
+  selection: LayerSelection,
+  conflictLayer: UILayerName,
+  conflictCheck: (path: string | undefined | null) => boolean,
+): SuspendedSelection[] {
+  // Remove any existing suspension for this layer (replace with new one)
+  const filtered = current.filter(s => s.layer !== layer);
+  return [...filtered, { layer, selection, conflictLayer, conflictCheck }];
+}
+
+/**
+ * Check if any suspended selections can be restored given the current selections.
+ * Returns { restorable, remaining } where restorable can be added back to selections.
+ */
+function checkRestorableSuspensions(
+  suspended: SuspendedSelection[],
+  selections: SelectionsSnapshot,
+  changedLayer: UILayerName,
+): { restorable: SuspendedSelection[]; remaining: SuspendedSelection[] } {
+  const restorable: SuspendedSelection[] = [];
+  const remaining: SuspendedSelection[] = [];
+
+  for (const s of suspended) {
+    // Only check suspensions that were caused by the layer that just changed
+    if (s.conflictLayer === changedLayer) {
+      const conflictPath = selections[s.conflictLayer]?.path;
+      // If the conflict no longer exists, this selection can be restored
+      if (!s.conflictCheck(conflictPath)) {
+        restorable.push(s);
+      } else {
+        remaining.push(s);
+      }
+    } else {
+      remaining.push(s);
+    }
+  }
+
+  return { restorable, remaining };
+}
+
+/**
+ * Clear suspension for a layer when the user manually selects something for that layer.
+ */
+function clearSuspensionForLayer(suspended: SuspendedSelection[], layer: UILayerName): SuspendedSelection[] {
+  return suspended.filter(s => s.layer !== layer);
+}
+
 export function generatorReducer(state: GeneratorState, action: GeneratorAction): GeneratorState {
   switch (action.type) {
     case 'SET_LAYER': {
       const pathMap = pathMapForReducer();
       const updated: SelectionsSnapshot = { ...state.selections };
       updated[action.layer] = { path: action.path, traitId: pathMap.get(action.path) ?? null };
+
+      // Clear any suspension for the layer being manually set
+      let newSuspended = clearSuspensionForLayer(state.suspendedSelections, action.layer);
+
+      // Process all mutual exclusion conflicts
+      const conflictResult = processConflicts(updated, newSuspended, action.layer, action.path);
+      Object.assign(updated, conflictResult.selections);
+      newSuspended = conflictResult.suspended;
+
+      // Check if any suspended selections can be restored
+      const { restorable, remaining } = checkRestorableSuspensions(newSuspended, updated, action.layer);
+      newSuspended = remaining;
+      for (const r of restorable) {
+        updated[r.layer] = r.selection;
+      }
 
       if (action.layer === 'Base' && action.path) {
         const matchingClothes = getClothesForBase(action.path);
@@ -123,6 +321,7 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
       return {
         ...newState,
         selections: newSelections,
+        suspendedSelections: newSuspended,
         disabledLayers: result.disabledLayers,
         disabledOptions: result.disabledOptions,
         disabledReasons: result.reasons,
@@ -137,6 +336,21 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
       const updatedG2Sel: SelectionsSnapshot = { ...state.selections };
       updatedG2Sel[action.layer] = { path: action.path, traitId: action.g2.traitId, g2: action.g2 };
 
+      // Clear any suspension for the layer being manually set
+      let newSuspended = clearSuspensionForLayer(state.suspendedSelections, action.layer);
+
+      // Process all mutual exclusion conflicts
+      const conflictResult = processConflicts(updatedG2Sel, newSuspended, action.layer, action.path);
+      Object.assign(updatedG2Sel, conflictResult.selections);
+      newSuspended = conflictResult.suspended;
+
+      // Check if any suspended selections can be restored
+      const { restorable, remaining } = checkRestorableSuspensions(newSuspended, updatedG2Sel, action.layer);
+      newSuspended = remaining;
+      for (const r of restorable) {
+        updatedG2Sel[r.layer] = r.selection;
+      }
+
       const { newSelections, result } = applyRulesUnified(updatedG2Sel, pathMap);
       // skipHistory: when called as part of RANDOMIZE, the history entry was already created
       const newState = action.skipHistory ? state : pushHistoryUnified(state, newSelections);
@@ -144,6 +358,7 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
       return {
         ...newState,
         selections: newSelections,
+        suspendedSelections: newSuspended,
         disabledLayers: result.disabledLayers,
         disabledOptions: result.disabledOptions,
         disabledReasons: result.reasons,
@@ -229,6 +444,14 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
       const updatedColors = { ...state.selectedColors };
       delete updatedColors[action.layer];
 
+      // Clear suspension for this layer, and check if clearing this layer allows restoring others
+      let newSuspended = clearSuspensionForLayer(state.suspendedSelections, action.layer);
+      const { restorable, remaining } = checkRestorableSuspensions(newSuspended, updated, action.layer);
+      newSuspended = remaining;
+      for (const r of restorable) {
+        updated[r.layer] = r.selection;
+      }
+
       const pathMap = pathMapForReducer();
       if (action.layer === 'MouthBase') {
         const path = DEFAULT_SELECTIONS.MouthBase ?? DEFAULT_MOUTHBASE_PATH;
@@ -246,6 +469,7 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
         ...newState,
         selections: newSelections,
         selectedColors: updatedColors,
+        suspendedSelections: newSuspended,
         disabledLayers: result.disabledLayers,
         disabledOptions: result.disabledOptions,
         disabledReasons: result.reasons,
@@ -266,6 +490,7 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
       return {
         ...newState,
         selections: newSelections,
+        suspendedSelections: [], // Clear all suspensions on randomize
         disabledLayers: result.disabledLayers,
         disabledOptions: result.disabledOptions,
         disabledReasons: result.reasons,
@@ -284,6 +509,7 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
       return {
         ...newState,
         selections: newSelections,
+        suspendedSelections: [], // Clear all suspensions on clear all
         disabledLayers: result.disabledLayers,
         disabledOptions: result.disabledOptions,
         disabledReasons: result.reasons,
@@ -374,6 +600,7 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
       return {
         ...newState,
         selections: newSelections,
+        suspendedSelections: [], // Clear all suspensions when loading a favorite
         disabledLayers: result.disabledLayers,
         disabledOptions: result.disabledOptions,
         disabledReasons: result.reasons,

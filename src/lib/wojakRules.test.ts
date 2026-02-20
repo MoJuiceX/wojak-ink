@@ -283,6 +283,21 @@ describe('wojakRules', () => {
       expect(result.disabledLayers).toContain('MouthItem');
       expect(result.forceSelections?.MouthBase).toBe(DEFAULT_MOUTHBASE_PATH);
     });
+
+    it('Copium Mask does not disable FacialHair (Neckbeard/Stache can be selected; mask draws on top)', () => {
+      const resolver = createMockResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          MouthBase: DEFAULT_MOUTHBASE_PATH,
+          Clothes: DEFAULT_CLOTHES_PATH,
+          Mask: '/mask/copium-mask.png',
+        },
+        {}
+      );
+      const result = getDisabledLayers(resolver);
+      expect(result.disabledLayers).toContain('MouthItem');
+      expect(result.disabledLayers).not.toContain('FacialHair');
+    });
   });
 
   describe('isLayerDisabled', () => {

@@ -131,8 +131,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   ).bind(nft_id, opponent.nft_id).first<{ id: number }>();
 
   // Send webhooks to both sides (fire-and-forget)
-  const fighterARow = await db.prepare('SELECT * FROM combat_fighters WHERE nft_id = ?').bind(nft_id).first<any>();
-  const fighterBRow = await db.prepare('SELECT * FROM combat_fighters WHERE nft_id = ?').bind(opponent.nft_id).first<any>();
+  const fighterARow = await db.prepare('SELECT * FROM combat_fighters WHERE nft_id = ?').bind(nft_id).first<Record<string, unknown>>();
+  const fighterBRow = await db.prepare('SELECT * FROM combat_fighters WHERE nft_id = ?').bind(opponent.nft_id).first<Record<string, unknown>>();
 
   if (fighterARow && fighterBRow && newBattle?.id) {
     sendBattleStartWebhook(db, newBattle.id, agent.owner_did, 'A', fighterARow, fighterBRow);

@@ -8,6 +8,7 @@
 
 import { Users, UserPlus, RefreshCw } from 'lucide-react';
 import { useFriends } from '@/contexts/FriendsContext';
+import { Avatar } from '@/components/Avatar/Avatar';
 import { Skeleton } from '@/components/ui/Skeleton';
 
 interface FriendsWidgetProps {
@@ -108,7 +109,11 @@ export function FriendsWidget({ onViewAll, onFindFriends }: FriendsWidgetProps) 
           <div className="friends-avatars">
             {friends.slice(0, 6).map(friend => (
               <div key={friend.id} className="friend-avatar">
-                <span className="avatar-emoji">{friend.avatar?.value || '🍊'}</span>
+                <Avatar
+                  avatar={friend.avatar}
+                  size="small"
+                  showBadge={false}
+                />
                 <span className="friend-name">{friend.displayName}</span>
               </div>
             ))}

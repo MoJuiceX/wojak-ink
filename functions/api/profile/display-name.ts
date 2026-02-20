@@ -3,6 +3,7 @@
 // Body: { did: string, name: string, source: 'custom' | 'random' }
 
 import { authenticateRequest } from '../../lib/auth';
+import { isValidDid } from '../game/_shared';
 
 interface Env {
   DB: D1Database;
@@ -91,9 +92,19 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const callerDid = auth.payload?.did as string | undefined;
-    if (!callerDid) {
-      return Response.json({ error: 'Invalid token - missing DID' }, { status: 401 });
+    // Resolve candidate DID: JWT did claim (if valid) or game_players row for this Clerk user
+    let candidateDid: string | null = null;
+    const tokenDid = auth.payload?.did as string | undefined;
+    if (tokenDid && isValidDid(tokenDid)) {
+      candidateDid = tokenDid;
+    } else {
+      const row = await context.env.DB.prepare(
+        'SELECT did_id FROM game_players WHERE clerk_user_id = ?'
+      ).bind(auth.userId).first<{ did_id: string }>();
+      if (row?.did_id) candidateDid = row.did_id;
+    }
+    if (!candidateDid) {
+      return Response.json({ error: 'Link your DID first' }, { status: 403 });
     }
 
     const body = await context.request.json<{
@@ -104,8 +115,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
 
     const { did, name, source } = body;
 
-    // Verify user is updating their own profile
-    if (did !== callerDid) {
+    if (did !== candidateDid) {
       return Response.json({ error: 'Cannot update another user\'s profile' }, { status: 403 });
     }
 

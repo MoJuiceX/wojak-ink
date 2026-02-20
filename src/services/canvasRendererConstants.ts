@@ -113,6 +113,7 @@ export const LAYER_Z_INDEX: Record<string, number> = {
   NeckbeardOverRonin: 13.5, // right 50% of neckbeard over Ronin Helmet
   MouthBaseOverNeckbeard: 13.6, // MouthBase re-drawn on top of NeckbeardOverRonin
   MouthItemOverNeckbeard: 13.7, // MouthItem re-drawn on top of NeckbeardOverRonin
+  CopiumMaskOverMouthAndNeckbeard: 13.8, // Copium mask on top of mouth + neckbeard (Ronin combo)
   EyesOverHead: 14,
   EyesOverStandardCut: 15,
   MaskOverStandardCut: 16,

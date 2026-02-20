@@ -1,13 +1,11 @@
 // POST /api/game/vote
 // Body: { voterDid?: string, guestId?: string, nftId: string, editionNumber: number, voteType: 1 | -1 }
 // Cast a vote on a Your Wojak NFT. 1 = like, -1 = dislike.
-// Supports three tiers:
-// - Guest (no wallet): 5 votes/day, no power/credits
-// - Connected (wallet, no Farmers Plot): 5 votes/day, no power/credits
-// - Holder (has Farmers Plot): 20 votes/day, earns power/credits
+// All users can vote unlimited times. Only holders (DAD + Farmers Plot) earn credits.
 
-import { VOTES_PER_DAY_HOLDER, VOTES_PER_DAY_FREE, getTodayString, getYesterdayString, STREAK_MILESTONES, ONBOARDING_CREDITS, VOTES_PER_CREDIT, VOTE_CREDIT_AMOUNT, isValidGuestId } from './_shared';
+import { getTodayString, ONBOARDING_CREDITS, VOTES_PER_CREDIT, VOTE_CREDIT_AMOUNT, isValidGuestId } from './_shared';
 import { checkRateLimit, getRateLimitKey, GAME_RATE_LIMITS } from '../../lib/rateLimit';
+import { recalcPowerLevel, getNftHolderDid, getNftCreatorDid } from './_powerLevel';
 
 interface Env {
   DB: D1Database;
@@ -61,41 +59,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return Response.json({ error: 'Rate limited. Try again later.' }, { status: 429 });
     }
 
-    // Set daily limit based on tier
-    const dailyLimit = isHolder ? VOTES_PER_DAY_HOLDER : VOTES_PER_DAY_FREE;
-
-    // Get or create vote tracking for this voter
     const today = getTodayString();
-    let votesToday = 0;
-
-    if (player) {
-      // Existing player - use game_players table
-      votesToday = player.votes_today as number;
-      if (player.votes_today_reset !== today) {
-        votesToday = 0;
-        await context.env.DB.prepare(
-          'UPDATE game_players SET votes_today = 0, votes_today_reset = ? WHERE did_id = ?'
-        ).bind(today, voterDid).run();
-      }
-    } else {
-      // Guest or unregistered - track via rate_limits table with daily window
-      const guestKey = `guest_votes:${voterId}`;
-      const guestVotes = await context.env.DB.prepare(
-        'SELECT count FROM rate_limits WHERE key = ? AND window_start >= ?'
-      ).bind(guestKey, today).first<{ count: number }>();
-      votesToday = guestVotes?.count ?? 0;
-    }
-
-    // Check daily limit
-    if (votesToday >= dailyLimit) {
-      return Response.json({
-        error: 'Daily vote limit reached',
-        votesRemaining: 0,
-        dailyLimit,
-        isHolder,
-        resetsAt: new Date(new Date(today + 'T00:00:00Z').getTime() + 86400000).toISOString(),
-      }, { status: 429 });
-    }
 
     // For holders with DID, check not voting on own or held NFT
     if (voterDid && player) {
@@ -189,8 +153,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       ).run();
     }
 
-    // Only update combat_fighters power score if holder
-    if (isHolder && netScoreDelta !== 0) {
+    // Update combat_fighters power score for ALL voters (not just holders)
+    // This allows guests and non-verified users to contribute to leaderboard scoring
+    if (netScoreDelta !== 0) {
       await context.env.DB.prepare(`
         UPDATE combat_fighters
         SET vote_power = vote_power + ?,
@@ -200,34 +165,18 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       `).bind(netScoreDelta, netScoreDelta, nftId).run();
     }
 
-    // Track vote counts
+    // Track vote counts for analytics
     const statements: D1PreparedStatement[] = [];
 
-    if (!isReVote) {
-      if (player) {
-        // Update player vote count
-        statements.push(
-          context.env.DB.prepare(`
-            UPDATE game_players
-            SET votes_today = votes_today + 1,
-                total_votes_cast = total_votes_cast + 1,
-                updated_at = datetime('now')
-            WHERE did_id = ?
-          `).bind(voterDid)
-        );
-      } else {
-        // Track guest daily votes via rate_limits table
-        const guestKey = `guest_votes:${voterId}`;
-        statements.push(
-          context.env.DB.prepare(`
-            INSERT INTO rate_limits (key, count, window_start)
-            VALUES (?, 1, ?)
-            ON CONFLICT(key) DO UPDATE SET
-              count = CASE WHEN window_start = ? THEN count + 1 ELSE 1 END,
-              window_start = ?
-          `).bind(guestKey, today, today, today)
-        );
-      }
+    if (!isReVote && player) {
+      statements.push(
+        context.env.DB.prepare(`
+          UPDATE game_players
+          SET total_votes_cast = total_votes_cast + 1,
+              updated_at = datetime('now')
+          WHERE did_id = ?
+        `).bind(voterDid)
+      );
     }
 
     // Only award credits and track streaks for holders
@@ -299,47 +248,17 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       await context.env.DB.batch(statements);
     }
 
-    // Vote streak tracking: only for holders when all daily votes used
-    let voteStreak = 0;
-    const votesRemaining = dailyLimit - votesToday - (isReVote ? 0 : 1);
-
-    if (isHolder && player && voterDid && votesRemaining === 0) {
-      voteStreak = (player.vote_streak as number) || 0;
-      const yesterday = getYesterdayString();
-      const lastStreakDate = player.vote_streak_last_date as string | null;
-
-      if (lastStreakDate === yesterday) {
-        voteStreak = voteStreak + 1;
-      } else if (lastStreakDate === today) {
-        // Already counted today
-      } else {
-        voteStreak = 1;
+    // Event-driven power level updates
+    // Recalc for holder of voted NFT and creator (their scores changed)
+    if (netScoreDelta !== 0) {
+      try {
+        const holderDid = await getNftHolderDid(context.env.DB, nftId);
+        const creatorDid = await getNftCreatorDid(context.env.DB, nftId);
+        if (holderDid) await recalcPowerLevel(context.env.DB, holderDid);
+        if (creatorDid && creatorDid !== holderDid) await recalcPowerLevel(context.env.DB, creatorDid);
+      } catch (err) {
+        console.warn('Power level recalc error (non-fatal):', err);
       }
-
-      const streakStatements: D1PreparedStatement[] = [
-        context.env.DB.prepare(`
-          UPDATE game_players
-          SET vote_streak = ?,
-              vote_streak_last_date = ?,
-              vote_streak_longest = MAX(COALESCE(vote_streak_longest, 0), ?)
-          WHERE did_id = ?
-        `).bind(voteStreak, today, voteStreak, voterDid),
-      ];
-
-      const milestoneCredits = STREAK_MILESTONES[voteStreak];
-      if (milestoneCredits) {
-        streakStatements.push(
-          context.env.DB.prepare(`
-            INSERT INTO credit_events (wallet_address, nft_id, event_id, price_xch, floor_at_time, credits_earned, whale_multiplier, source, event_type, event_timestamp)
-            VALUES (?, ?, ?, 0, 0, ?, 100, 'streak', 'streak', datetime('now'))
-          `).bind(player.wallet_address, `streak_${voteStreak}`, `streak_${voteStreak}_${voterDid}`, milestoneCredits),
-          context.env.DB.prepare(`
-            INSERT INTO game_activity (did_id, event_type, event_data) VALUES (?, 'streak_milestone', ?)`
-          ).bind(voterDid, JSON.stringify({ days: voteStreak, credits: milestoneCredits }))
-        );
-      }
-
-      await context.env.DB.batch(streakStatements);
     }
 
     // Fetch updated onboarding state for holders
@@ -358,12 +277,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     return Response.json({
       success: true,
-      votesRemaining,
-      dailyLimit,
       isHolder,
       voteType,
       editionNumber,
-      voteStreak,
       isReVote,
       onboarding,
     });
