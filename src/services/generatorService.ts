@@ -35,8 +35,8 @@ const MOUTH_BASE_PATTERNS = ['numb', 'smile', 'screeming', 'teeth', 'gold-teeth'
 // Items from MOUTH folder that belong to MouthItem (EXTRA_MOUTH prefix with these names)
 const MOUTH_ITEM_PATTERNS = ['cig', 'cohiba', 'joint'];
 
-// Items from MOUTH folder that belong to Mask
-const MASK_PATTERNS = ['bandana-mask', 'hannibal-mask', 'copium-mask'];
+// Items from MOUTH folder that belong to Mask (old Copium removed - new G2 colorable version exists)
+const MASK_PATTERNS = ['bandana-mask', 'hannibal-mask'];
 
 // Items from MOUTH folder (EXTRA_MOUTH prefix) that belong to FacialHair
 const FACIAL_HAIR_PATTERNS = ['neckbeard', 'stach'];
