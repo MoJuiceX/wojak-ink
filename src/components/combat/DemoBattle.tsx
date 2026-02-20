@@ -1,64 +1,48 @@
 /**
  * DemoBattle Component
  *
- * A wrapper that presents the demo battle with context.
- * Shows a teaser card before playing, then the actual battle.
+ * Auto-plays the demo battle immediately on mount.
+ * Loops automatically: when battle ends, restarts after 3 seconds.
+ * Replay button allows manual restart at any time.
  */
 
-import { useState, useCallback } from 'react';
-import { Play, RotateCcw, Swords } from 'lucide-react';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { RotateCcw } from 'lucide-react';
 import { BattleView } from './BattleView';
 import { DEMO_BATTLE } from '@/lib/combat/demo-battle';
 
 export function DemoBattle() {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [key, setKey] = useState(0); // Force remount for replay
-
-  const handlePlay = useCallback(() => {
-    setIsPlaying(true);
-  }, []);
+  const [key, setKey] = useState(0); // Incrementing remounts BattleView, restarting the demo
+  const replayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleReplay = useCallback(() => {
-    setKey(k => k + 1); // Remount BattleView to reset
-    setIsPlaying(true);
+    // Cancel any pending auto-restart
+    if (replayTimerRef.current) {
+      clearTimeout(replayTimerRef.current);
+      replayTimerRef.current = null;
+    }
+    setKey(k => k + 1);
   }, []);
 
   const handleDemoComplete = useCallback(() => {
-    // Demo finished — could show CTA here in the future
+    // Auto-restart after 3 seconds
+    replayTimerRef.current = setTimeout(() => {
+      setKey(k => k + 1);
+    }, 3000);
   }, []);
 
-  // Show teaser card before playing
-  if (!isPlaying) {
-    return (
-      <div className="card-static p-6 flex flex-col items-center gap-4 text-center">
-        <div
-          className="p-4 rounded-full"
-          style={{ background: 'var(--color-primary-15)' }}
-        >
-          <Swords size={32} style={{ color: 'var(--color-primary)' }} />
-        </div>
-        <div>
-          <h3 className="text-lg font-bold">See How Battles Work</h3>
-          <p className="text-secondary text-sm mt-1">
-            Watch a demo battle between two Wojak fighters.
-            Type matchups, abilities, critical hits — the full experience.
-          </p>
-        </div>
-        <button
-          type="button"
-          className="btn btn-primary flex items-center gap-2"
-          onClick={handlePlay}
-        >
-          <Play size={16} />
-          Watch Demo Battle
-        </button>
-      </div>
-    );
-  }
+  // Clear timer on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (replayTimerRef.current) {
+        clearTimeout(replayTimerRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Demo badge and replay button */}
+      {/* Demo badge + manual replay button */}
       <div className="flex items-center justify-between">
         <span
           className="badge"
@@ -76,7 +60,7 @@ export function DemoBattle() {
         </button>
       </div>
 
-      {/* The actual battle view */}
+      {/* Battle arena — key prop forces full remount on restart */}
       <BattleView
         key={key}
         battleId={0}

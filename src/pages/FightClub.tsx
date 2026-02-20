@@ -6,19 +6,17 @@
  * Requires holding at least 1 Farmers Plot NFT to access.
  */
 
-import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { MINTGARDEN_COLLECTION_URL } from '@/services/constants';
 import { lazy, Suspense, useState, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Swords, ExternalLink, Wallet, Palette, RefreshCw, Info } from 'lucide-react';
+import { Swords, ExternalLink, Wallet, RefreshCw, Info } from 'lucide-react';
 import { useToast } from '@/contexts/ToastContext';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { PageSkeleton } from '@/components/layout/PageSkeleton';
 import { useLayout } from '@/hooks/useLayout';
 import { GameProvider } from '@/contexts/GameContext';
 import { SwipeAutoRegister } from '@/components/game/SwipeAutoRegister';
-import { GameErrorBoundary } from '@/components/games/GameError';
-import { GameLoading } from '@/components/games/GameLoading';
 import { FightClubRankings } from '@/components/combat/FightClubRankings';
 import { SubscriptionBanner } from '@/components/combat/SubscriptionBanner';
 import { FightClubGuideModal } from '@/components/combat/FightClubGuideModal';
@@ -26,11 +24,11 @@ import { useUserProfile } from '@/contexts/UserProfileContext';
 import { useSageWallet } from '@/sage-wallet';
 
 // Lazy load tab content
-const CombatArena = lazy(() => import('./CombatArena'));
 const GameVoting = lazy(() => import('./GameVoting'));
 const BurnTab = lazy(() => import('@/components/combat/BurnTab'));
-const DemoBattle = lazy(() => import('@/components/combat/DemoBattle').then(m => ({ default: m.DemoBattle })));
-const BattleFeed = lazy(() => import('@/components/combat/BattleFeed').then(m => ({ default: m.BattleFeed })));
+const DemoBattle = lazy(() => import('@/components/combat/DemoBattle'));
+
+import { BattleTeaser } from '@/components/combat/BattleTeaser';
 
 // Gate API response type
 interface GateResponse {
@@ -206,43 +204,6 @@ function FightClubGateInline() {
   );
 }
 
-// Banner shown on Battle tab when user has no Wojaks
-function MintFighterBanner() {
-  return (
-    <div
-      className="card flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-4 mb-4"
-      style={{
-        borderColor: 'var(--color-primary)',
-        borderWidth: 1,
-        borderStyle: 'solid',
-      }}
-    >
-      <div className="flex items-center gap-3 w-full sm:w-auto">
-        <div
-          className="flex items-center justify-center shrink-0"
-          style={{
-            width: 48,
-            height: 48,
-            borderRadius: 'var(--radius-md)',
-            background: 'var(--color-primary-15)',
-          }}
-        >
-          <Palette size={24} className="text-primary" />
-        </div>
-        <div className="flex-1 sm:flex-initial">
-          <p className="font-bold" style={{ fontSize: 15 }}>Mint your first fighter!</p>
-          <p className="text-secondary" style={{ fontSize: 13 }}>
-            Create a Wojak in the Generator to enter the arena.
-          </p>
-        </div>
-      </div>
-      <Link to="/generator" className="btn btn-primary w-full sm:w-auto shrink-0">
-        Generator
-      </Link>
-    </div>
-  );
-}
-
 type TabId = 'battle' | 'vote' | 'rankings' | 'burn';
 
 interface Tab {
@@ -365,30 +326,10 @@ export default function FightClub() {
           {/* Non-gated tabs */}
           {activeTab === 'battle' && (
             <div className="flex flex-col gap-6">
-              {/* Show mint banner only for holders with no wojaks */}
-              {accessData?.hasAccess && accessData?.wojakCount === 0 && <MintFighterBanner />}
-
-              {/* Arena section */}
-              <GameErrorBoundary gameName="Combat Arena">
-                <Suspense fallback={<GameLoading gameName="Combat Arena" />}>
-                  {/* Show full arena for holders with fighters, demo for everyone else */}
-                  {accessData?.hasAccess && accessData?.wojakCount > 0 ? (
-                    <CombatArena />
-                  ) : (
-                    <DemoBattle />
-                  )}
-                </Suspense>
-              </GameErrorBoundary>
-
-              {/* Battle Feed - recent battles */}
-              <div className="flex flex-col gap-3">
-                <div className="battle-feed-header">
-                  <h3>Recent Battles</h3>
-                </div>
-                <Suspense fallback={<div className="text-muted text-sm">Loading battles...</div>}>
-                  <BattleFeed />
-                </Suspense>
-              </div>
+              <Suspense fallback={<PageSkeleton />}>
+                <DemoBattle />
+              </Suspense>
+              <BattleTeaser />
             </div>
           )}
           {activeTab === 'vote' && (
