@@ -101,7 +101,8 @@
       "zIndex": 11,
       "description": "Face masks and covers",
       "traits": [
-        "Mask_Bandana-mask"
+        "Mask_Bandana-mask",
+        "Mask_Copium-mask"
       ]
     },
     "Mouth": {
@@ -1391,6 +1392,40 @@
       "fillFile": "Mask_Bandana-mask_fill.png",
       "outlineFile": "Mask_Bandana-mask_outline.png",
       "defaultColor": "#FF0000"
+    },
+    {
+      "id": "Mask_Copium-mask",
+      "name": "Copium mask",
+      "category": "Mask",
+      "colorable": true,
+      "defaultColors": ["#FFFF00"],
+      "layers": [
+        {
+          "pos": 0,
+          "key": "fill",
+          "type": "fill",
+          "label": "Fill",
+          "file": "EXTRA_MOUTH_Copium-Mask-fill.png",
+          "visible": true,
+          "opacity": 0.33
+        },
+        {
+          "pos": 1,
+          "key": "outline",
+          "type": "outline",
+          "label": "Outline",
+          "file": "EXTRA_MOUTH_Copium-Mask-outline.png",
+          "visible": true
+        },
+        {
+          "pos": 2,
+          "key": "detail",
+          "type": "detail",
+          "label": "Detail",
+          "file": "EXTRA_MOUTH_Copium-Mask-detail.png",
+          "visible": true
+        }
+      ]
     },
     {
       "id": "Mouth_BubbleGum",

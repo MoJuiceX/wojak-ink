@@ -1294,6 +1294,25 @@ function buildG2LayerData(
     return { fills: [], outlines: [], orderedDrawItems: items };
   }
 
+  // Copium Mask: fill (25% opacity), outline, detail. All layers rendered with opacity support.
+  if (trait.id === 'Mask_Copium-mask' && trait.layers?.length) {
+    const items: G2DrawItem[] = [];
+    for (const layer of [...trait.layers].filter(l => l.visible !== false).sort((a, b) => a.pos - b.pos)) {
+      if (layer.type === 'fill') {
+        const color = resolveFillColor(trait.id, 'fill', g2, trait) || trait.defaultColors?.[0] || '#00D4FF';
+        items.push({
+          type: 'fill',
+          file: `${basePath}/${layer.file}`,
+          color,
+          opacity: layer.opacity,
+        });
+      } else if (layer.type === 'outline' || layer.type === 'detail') {
+        items.push({ type: 'outline', path: `${basePath}/${layer.file}` });
+      }
+    }
+    return { fills: [], outlines: [], orderedDrawItems: items };
+  }
+
   // 3D Glasses: fill1 (user), fill2 (split_complementary from fill1), outline. Uses layer keys fill1/fill2.
   if (trait.id === 'Face-wear_3d-glases' && trait.layers?.length) {
     const glassesFillKey: Record<string, string> = { fill1: 'fill1', fill2: 'fill2' };

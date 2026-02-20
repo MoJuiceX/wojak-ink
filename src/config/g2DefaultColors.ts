@@ -70,6 +70,7 @@ export const G2_DEFAULT_COLORS: Record<string, Record<string, string>> = {
   'Mouth_BubbleGum': { fill: '#FF1493' },
   // Mask
   'Mask_Bandana-mask': { fill: '#FF0000' },
+  'Mask_Copium-mask': { fill: '#FFFF00' },
   // Add more as defaults are defined:
   // 'Clothes_Sonic-suit': { fill: '#2563EB' },
   // 'Clothes_Bathrobe': { fill1: '#...', fill2: derived },

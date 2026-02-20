@@ -24,10 +24,10 @@ function Img({ src, alt = '' }: { src: string; alt?: string }) {
 }
 
 /** Color overlay masked to a fill image (multiply blend) */
-function ColorFill({ file, color }: { file: string; color: string }) {
+function ColorFill({ file, color, opacity }: { file: string; color: string; opacity?: number }) {
   const url = `${G2_BASE_PATH}/${file}`;
   return (
-    <div className="absolute inset-0 w-full h-full" style={{ isolation: 'isolate' }}>
+    <div className="absolute inset-0 w-full h-full" style={{ isolation: 'isolate', opacity: opacity ?? 1 }}>
       <Img src={url} />
       <div
         className="absolute inset-0 w-full h-full"
@@ -102,7 +102,7 @@ function renderNinjaTurtleFit(
 
 function renderLayeredColorable(
   trait: UnifiedTrait,
-  layers: { key: string; file: string; type?: string }[],
+  layers: { key: string; file: string; type?: string; opacity?: number }[],
   needsClothesUnderlay?: boolean,
 ) {
   return (
@@ -110,7 +110,7 @@ function renderLayeredColorable(
       <BaseUnderlay needsClothesUnderlay={needsClothesUnderlay} />
       {layers.map((l) =>
         isLayerFill(l) ? (
-          <ColorFill key={l.key} file={l.file} color={getPreviewColorForLayeredFill(trait, l.key)} />
+          <ColorFill key={l.key} file={l.file} color={getPreviewColorForLayeredFill(trait, l.key)} opacity={l.opacity} />
         ) : (
           <Img key={l.key} src={`${G2_BASE_PATH}/${l.file}`} />
         ),

@@ -356,6 +356,37 @@ function ruleHannibalMaskRemovesNeckbeard(resolver: SelectionResolver): RuleResu
 }
 
 /**
+ * Bandana Mask auto-removes Neckbeard (neckbeard renders incorrectly over bandana)
+ */
+function ruleBandanaMaskRemovesNeckbeard(resolver: SelectionResolver): RuleResult {
+  const maskPath = resolver.getPath('Mask');
+  const hasBandana = !!maskPath && maskPath.toLowerCase().includes('bandana');
+  const facialHairPath = resolver.getPath('FacialHair');
+  const hasNeckbeard = pathContains(facialHairPath, 'neckbeard');
+
+  if (hasBandana && hasNeckbeard) {
+    return {
+      disabledLayers: [],
+      reason: 'Deselect Bandana Mask',
+      clearSelections: ['FacialHair'],
+      forceSelections: { FacialHair: '' },
+      disabledOptions: { FacialHair: ['Neckbeard', 'neckbeard'] },
+      disabledOptionReasons: { FacialHair: { Neckbeard: 'Remove Bandana Mask', neckbeard: 'Remove Bandana Mask' } },
+    };
+  }
+
+  if (hasBandana) {
+    return {
+      disabledLayers: [],
+      disabledOptions: { FacialHair: ['Neckbeard', 'neckbeard'] },
+      disabledOptionReasons: { FacialHair: { Neckbeard: 'Remove Bandana Mask', neckbeard: 'Remove Bandana Mask' } },
+    };
+  }
+
+  return { disabledLayers: [] };
+}
+
+/**
  * Copium Mask forces valid MouthBase and disables MouthItem
  * - Blocks: Pizza, Bubble Gum, Pipe (MouthBase)
  * - Blocks: All MouthItem (Cigarette, Cohiba, Joint)
@@ -817,6 +848,7 @@ const RULES = [
   ruleFacialHairRequiresMouthBase,
   ruleMaskBlocksOtherLayers,
   ruleHannibalMaskRemovesNeckbeard,
+  ruleBandanaMaskRemovesNeckbeard,
   ruleLaserEyesFakeMaskMutualExclusion,
   ruleClothesAddonRequiresTeeOrTanktop,
   ruleSuitDisablesNeckbeard,
