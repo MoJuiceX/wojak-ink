@@ -16,44 +16,44 @@ export const COLOR_FAMILIES: { label: string; colors: string[] }[] = [
   // Row 1 — Reds → FIRE
   { label: 'Reds',           colors: ['#FF6347','#FF0000','#DC143C','#C0392B','#B22222','#992222'] },
 
-  // Row 2 — Oranges → DRAGON
+  // Row 2 — Crimsons → MARTIAL (same hue as Reds, darker band)
+  { label: 'Crimsons',       colors: ['#7B1111','#6B0000','#5C0000','#4A0000','#380000','#1A0000'] },
+
+  // Row 3 — Oranges → DRAGON
   { label: 'Oranges',        colors: ['#FFA500','#FF8C00','#FF6B00','#E65C00','#CC5200','#B34400'] },
 
-  // Row 3 — Yellows → ELECTRIC
+  // Row 4 — Yellows → ELECTRIC
   { label: 'Yellows',        colors: ['#FFFF00','#F5FF00','#EEFF00','#D4E500','#C8D600','#A8B800'] },
 
-  // Row 4 — Yellow-Greens → INSECT
+  // Row 5 — Yellow-Greens → INSECT
   { label: 'Yellow-Greens',  colors: ['#ADFF2F','#9ACD32','#8DB600','#7CB518','#6B8E23','#4A6520'] },
 
-  // Row 5 — Greens → GRASS
+  // Row 6 — Greens → GRASS
   { label: 'Greens',         colors: ['#00FF00','#32CD32','#22C55E','#16A34A','#2E8B57','#1A5C38'] },
 
-  // Row 6 — Teals → WATER / ICE
+  // Row 7 — Teals → WATER / ICE
   { label: 'Teals',          colors: ['#00FFFF','#40E0D0','#00CED1','#20B2AA','#0891B2','#0E7490'] },
 
-  // Row 7 — Sky Blues → AIR
+  // Row 8 — Sky Blues → AIR
   { label: 'Sky Blues',      colors: ['#E0F7FF','#BAE6FD','#7DD3FC','#60A5FA','#93C5FD','#38BDF8'] },
 
-  // Row 8 — Blues → WATER / PSYCHE
+  // Row 9 — Blues → WATER / PSYCHE
   { label: 'Blues',          colors: ['#1E90FF','#3B82F6','#2563EB','#1D4ED8','#1E3A8A','#172554'] },
 
-  // Row 9 — Purples → PSYCHE
+  // Row 10 — Purples → PSYCHE
   { label: 'Purples',        colors: ['#C084FC','#A855F7','#9333EA','#7C3AED','#6D28D9','#5B21B6'] },
 
-  // Row 10 — Indigos → GHOST
+  // Row 11 — Indigos → GHOST
   { label: 'Indigos',        colors: ['#4B0082','#3B006B','#2E0054','#210040','#170030','#0D001A'] },
 
-  // Row 11 — Magentas → VENOM
+  // Row 12 — Magentas → VENOM
   { label: 'Magentas',       colors: ['#FF00FF','#E879F9','#D946EF','#A21CAF','#86198F','#6B1278'] },
 
-  // Row 12 — Pinks → MYSTIC
+  // Row 13 — Pinks → MYSTIC
   { label: 'Pinks',          colors: ['#FFB3D9','#FF69B4','#EC4899','#DB2777','#BE185D','#9D174D'] },
 
-  // Row 13 — Earth & Olive → EARTH
+  // Row 14 — Earth & Olive → EARTH
   { label: 'Earth & Olive',  colors: ['#C8A87A','#A67C52','#8B7355','#6B5C3E','#5C4A1E','#3D2B1F'] },
-
-  // Row 14 — Crimsons → MARTIAL
-  { label: 'Crimsons',       colors: ['#7B1111','#6B0000','#5C0000','#4A0000','#380000','#1A0000'] },
 
   // Row 15 — Neutrals (achromatic ramp: ICE → AIR → METAL → NEUTRAL → STONE → SHADOW)
   { label: 'Neutrals',       colors: ['#FFFFFF','#C8C8C8','#999999','#666666','#404040','#171717'] },
@@ -126,7 +126,7 @@ export const ColorPicker = memo(function ColorPicker({
       >
         <button
           type="button"
-          className={`w-full aspect-square rounded-md transition-opacity${isSelected ? ' color-picker-rainbow-swatch' : ''}`}
+          className={`w-full aspect-square transition-opacity${isSelected ? ' color-picker-rainbow-swatch' : ''}`}
           style={{
             background: isSelected
               ? `linear-gradient(${hex}, ${hex}) padding-box, conic-gradient(from var(--rainbow-angle), #ff0000, #ff8800, #ffff00, #00ff00, #00ffff, #0088ff, #8800ff, #ff00ff, #ff0000) border-box`
@@ -139,6 +139,7 @@ export const ColorPicker = memo(function ColorPicker({
                   ? '2px solid var(--color-border)'
                   : '2px solid rgba(255,255,255,0.12)',
             boxSizing: 'border-box',
+            borderRadius: 0,
             cursor: disabled ? 'not-allowed' : 'pointer',
             pointerEvents: disabled ? 'none' : 'auto',
             outline: 'none',
@@ -152,15 +153,19 @@ export const ColorPicker = memo(function ColorPicker({
   };
 
   return (
-    <div className="flex flex-col gap-1.5" style={{ opacity: disabled ? 0.5 : 1 }}>
-      {/* Color swatches by family — 6 columns */}
-      {COLOR_FAMILIES.map((family) => (
-        <div key={family.label} className="grid grid-cols-6 gap-1.5">
-          {family.colors.map((hex, i) => (
-            <Swatch key={`${family.label}-${i}`} hex={hex} />
+    <div style={{ opacity: disabled ? 0.5 : 1 }}>
+      {/* Color swatches — zero-gap color chart, outer corners only via overflow-hidden */}
+      <div className="rounded-lg overflow-hidden">
+        <div className="flex flex-col gap-0">
+          {COLOR_FAMILIES.map((family) => (
+            <div key={family.label} className="grid grid-cols-6 gap-0">
+              {family.colors.map((hex, i) => (
+                <Swatch key={`${family.label}-${i}`} hex={hex} />
+              ))}
+            </div>
           ))}
         </div>
-      ))}
+      </div>
     </div>
   );
 });
