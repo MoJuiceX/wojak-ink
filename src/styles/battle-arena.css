@@ -276,11 +276,11 @@
   transform: translateY(-50%);
 }
 
-/* Opponent fighter (right side) */
+/* Opponent fighter (right side) — mirrored to face center */
 .fighter-card.opponent {
   top: 50%;
   right: 30px;
-  transform: translateY(-50%);
+  transform: translateY(-50%) scaleX(-1);
 }
 
 /* Fighter image container */
@@ -413,6 +413,11 @@
 @keyframes warningFlash {
   0%, 100% { box-shadow: inset 0 0 20px rgba(239, 68, 68, 0); }
   50% { box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.2); }
+}
+
+/* Counter-flip opponent HP container so text reads correctly */
+.fighter-card.opponent .hp-container {
+  transform: scaleX(-1);
 }
 
 /* HP label row */
@@ -1171,6 +1176,79 @@
   padding: 12px;
   max-height: 300px;
   overflow-y: auto;
+}
+
+/* ─── Horizontal battle log tape ─────────────────────────────── */
+
+.battle-log-tape {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 10px 14px;
+  min-height: 52px;
+  scroll-behavior: smooth;
+  /* Hide scrollbar on all browsers */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.battle-log-tape::-webkit-scrollbar {
+  display: none;
+}
+
+/* Group = turn separator + its event chips */
+.battle-log-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* "Turn N" pill separator */
+.battle-log-turn-sep {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  padding: 3px 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+}
+
+/* Individual event chip */
+.battle-log-chip {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  line-height: 1.4;
+  /* Default colours overridden by inline style from getChipStyle() */
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 2px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* Slide in from right for newest turn's chips */
+.battle-log-chip-new {
+  animation: chipSlideIn 0.3s ease-out;
+}
+
+@keyframes chipSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* Turn group */

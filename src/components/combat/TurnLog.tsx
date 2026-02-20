@@ -1,8 +1,10 @@
 /**
- * TurnLog — scrollable turn-by-turn battle results with auto-scroll and entry animations.
+ * TurnLog — horizontal scrolling battle chip ticker.
+ * New events slide in from the right, older events pushed left.
+ * Modelled after ClawCombat's battle history panel.
  */
 
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 
 interface TurnEvent {
   type: string;
@@ -23,49 +25,78 @@ interface TurnEntry {
 
 interface TurnLogProps {
   turns: TurnEntry[];
-  maxHeight?: string;
+  maxHeight?: string; // kept for API compatibility, unused in horizontal layout
 }
 
-function getEntryClass(event: TurnEvent): string {
-  if (!event) return 'turn-entry';
-  if (event.isCrit) return 'turn-entry turn-crit';
-  if (event.effectiveness === 'super_effective') return 'turn-entry turn-super-effective';
-  if (event.effectiveness === 'not_very_effective') return 'turn-entry turn-not-effective';
-  return 'turn-entry';
+/**
+ * Determine chip style based on event type.
+ * type containing 'a' or 'player' = player side (blue tint).
+ * type containing 'b' or 'opponent' = opponent side (orange/red tint).
+ */
+function getChipStyle(event: TurnEvent): React.CSSProperties {
+  const t = event.type?.toLowerCase() ?? '';
+  const isOpponent = t.includes('_b') || t.includes('opponent');
+  const isCrit = event.isCrit;
+  const isSuperEffective = event.effectiveness === 'super_effective';
+
+  if (isCrit) {
+    return {
+      background: 'rgba(251, 191, 36, 0.15)',
+      borderLeft: '2px solid rgba(251, 191, 36, 0.7)',
+      color: 'rgba(255, 255, 255, 0.9)',
+    };
+  }
+  if (isSuperEffective) {
+    return {
+      background: 'rgba(34, 197, 94, 0.15)',
+      borderLeft: '2px solid rgba(34, 197, 94, 0.6)',
+      color: 'rgba(255, 255, 255, 0.85)',
+    };
+  }
+  if (isOpponent) {
+    return {
+      background: 'rgba(239, 68, 68, 0.1)',
+      borderLeft: '2px solid rgba(239, 68, 68, 0.4)',
+      color: 'rgba(255, 255, 255, 0.8)',
+    };
+  }
+  // Player side (default)
+  return {
+    background: 'rgba(59, 130, 246, 0.1)',
+    borderLeft: '2px solid rgba(59, 130, 246, 0.4)',
+    color: 'rgba(255, 255, 255, 0.8)',
+  };
 }
 
-export function TurnLog({ turns, maxHeight = '300px' }: TurnLogProps) {
+export function TurnLog({ turns }: TurnLogProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [prevTurnCount, setPrevTurnCount] = useState(0);
-  const [animatingTurn, setAnimatingTurn] = useState<number | null>(null);
+  const prevTurnCountRef = useRef(0);
 
-  // Auto-scroll to bottom and trigger entry animation on new turns
+  // Auto-scroll to rightmost (newest) entry on new turns
   useEffect(() => {
-    if (turns.length > prevTurnCount) {
-      // Mark newest turn for animation
-      setAnimatingTurn(turns.length > 0 ? turns[turns.length - 1].turn : null);
-
-      // Auto-scroll to bottom
+    if (turns.length > prevTurnCountRef.current) {
       requestAnimationFrame(() => {
         if (scrollRef.current) {
-          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+          scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
         }
       });
-
-      // Clear animation class after animation completes
-      const timer = setTimeout(() => {
-        setAnimatingTurn(null);
-      }, 400);
-
-      setPrevTurnCount(turns.length);
-      return () => clearTimeout(timer);
+      prevTurnCountRef.current = turns.length;
     }
-  }, [turns, prevTurnCount]);
+  }, [turns]);
 
   if (turns.length === 0) {
     return (
-      <div className="text-center text-muted text-sm py-4">
-        No turns yet.
+      <div
+        style={{
+          minHeight: '52px',
+          display: 'flex',
+          alignItems: 'center',
+          paddingLeft: '12px',
+        }}
+      >
+        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+          Battle starting...
+        </span>
       </div>
     );
   }
@@ -73,33 +104,30 @@ export function TurnLog({ turns, maxHeight = '300px' }: TurnLogProps) {
   return (
     <div
       ref={scrollRef}
-      className="flex flex-col gap-2 overflow-y-auto hide-scrollbar"
-      style={{ maxHeight }}
+      className="battle-log-tape"
     >
-      {turns.map((turn) => {
-        const isNewTurn = turn.turn === animatingTurn;
-        return (
-          <div key={turn.turn} className="flex flex-col gap-1">
-            <span className="text-xs text-muted font-semibold">Turn {turn.turn}</span>
-            {turn.events?.map((event, i) => {
-              const baseClass = getEntryClass(event);
-              const animClass = isNewTurn
-                ? `turn-entry-animated stagger-${Math.min(i + 1, 4)}`
-                : '';
-              return (
-                <div key={i} className={`${baseClass} ${animClass}`}>
-                  {event.message ?? `${event.type}: ${event.damage ?? 0} damage`}
-                </div>
-              );
-            })}
-            {turn.end_of_turn && (
-              <div className={`text-xs text-muted pl-3 ${isNewTurn ? 'turn-entry-animated stagger-4' : ''}`}>
-                HP: A={turn.end_of_turn.fighter_a_hp} | B={turn.end_of_turn.fighter_b_hp}
-              </div>
-            )}
+      {turns.map((turn, turnIdx) => (
+        <div key={turn.turn} className="battle-log-group">
+          {/* Turn separator chip */}
+          <div className="battle-log-turn-sep">
+            Turn {turn.turn}
           </div>
-        );
-      })}
+
+          {/* Event chips */}
+          {turn.events?.map((event, i) => {
+            const isNewest = turnIdx === turns.length - 1;
+            return (
+              <div
+                key={i}
+                className={`battle-log-chip${isNewest ? ' battle-log-chip-new' : ''}`}
+                style={getChipStyle(event)}
+              >
+                {event.message ?? `${event.type}: ${event.damage ?? 0} dmg`}
+              </div>
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 }
