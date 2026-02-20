@@ -23,7 +23,7 @@ export const COLOR_FAMILIES: { label: string; colors: string[] }[] = [
   { label: 'Oranges',        colors: ['#FFA500','#FF8C00','#FF6B00','#E65C00','#CC5200','#B34400'] },
 
   // Row 4 — Yellows → ELECTRIC
-  { label: 'Yellows',        colors: ['#FFFF00','#F5FF00','#EEFF00','#D4E500','#C8D600','#A8B800'] },
+  { label: 'Yellows',        colors: ['#FFFF00','#FFD700','#CCFF00','#D4E500','#C8D600','#A8B800'] },
 
   // Row 5 — Yellow-Greens → INSECT
   { label: 'Yellow-Greens',  colors: ['#ADFF2F','#9ACD32','#8DB600','#7CB518','#6B8E23','#4A6520'] },

@@ -325,15 +325,16 @@ function ruleMaskBlocksOtherLayers(resolver: SelectionResolver): RuleResult {
 }
 
 /**
- * Hannibal Mask auto-removes Neckbeard (path check for neckbeard; trait ID for Hannibal)
+ * Hannibal Mask auto-removes Neckbeard and Stache (they render on top of the mask)
  */
-function ruleHannibalMaskRemovesNeckbeard(resolver: SelectionResolver): RuleResult {
+function ruleHannibalMaskRemovesFacialHair(resolver: SelectionResolver): RuleResult {
   const maskPath = resolver.getPath('Mask');
   const hasHannibal = !!maskPath && maskPath.toLowerCase().includes('hannibal');
   const facialHairPath = resolver.getPath('FacialHair');
   const hasNeckbeard = pathContains(facialHairPath, 'neckbeard');
+  const hasStache = pathContains(facialHairPath, 'stach');
 
-  if (hasHannibal && hasNeckbeard) {
+  if (hasHannibal && (hasNeckbeard || hasStache)) {
     return {
       disabledLayers: ['FacialHair'],
       reason: 'Deselect Hannibal Mask',
@@ -347,7 +348,7 @@ function ruleHannibalMaskRemovesNeckbeard(resolver: SelectionResolver): RuleResu
       disabledLayers: ['FacialHair'],
       reason: 'Deselect Hannibal Mask',
       disabledOptions: {
-        FacialHair: ['Neckbeard', 'neckbeard'],
+        FacialHair: ['Neckbeard', 'neckbeard', 'Stache', 'stach'],
       },
     };
   }
@@ -847,7 +848,7 @@ const RULES = [
   ruleFullBodySuitNoHead,
   ruleFacialHairRequiresMouthBase,
   ruleMaskBlocksOtherLayers,
-  ruleHannibalMaskRemovesNeckbeard,
+  ruleHannibalMaskRemovesFacialHair,
   ruleBandanaMaskRemovesNeckbeard,
   ruleLaserEyesFakeMaskMutualExclusion,
   ruleClothesAddonRequiresTeeOrTanktop,

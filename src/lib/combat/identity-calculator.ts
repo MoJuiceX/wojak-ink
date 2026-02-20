@@ -90,9 +90,13 @@ export function calculateCombatIdentity(input: IdentityInput): CombatIdentity {
       minStatVal = statScores[s]; lowestStat = s;
     }
   }
-  // If all stats within 1 point of each other → Balanced
-  const allClose = maxStatVal - minStatVal <= 1;
-  const nature = allClose
+  // Balanced when spread (max − min) ≤ the average stat value.
+  // This self-scales with build complexity and produces Balanced for ~10% of builds,
+  // making it as common as any other frequently-occurring nature.
+  const totalStats = (Object.values(statScores) as number[]).reduce((a, b) => a + b, 0);
+  const avgStat = totalStats / STAT_NAMES.length;
+  const isBalanced = (maxStatVal - minStatVal) <= Math.ceil(avgStat);
+  const nature = isBalanced
     ? getNatureByStats(null, null)
     : getNatureByStats(highestStat, lowestStat);
 

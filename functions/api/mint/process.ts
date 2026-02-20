@@ -147,7 +147,7 @@ export async function processJob(
     await updateJobStep(env.DB, jobId, 'validating');
 
     const layers = JSON.parse(job.layers_json) as Record<string, string>;
-    const _colors = JSON.parse(job.colors_json) as Record<string, string>;
+    const colors = JSON.parse(job.colors_json) as Record<string, string>;
     const consolidated = consolidateTraits(layers);
 
     // ──── STEP 2: Reserve Mint Number ────
@@ -174,6 +174,39 @@ export async function processJob(
         const bi = TRAIT_ORDER.indexOf(b.trait_type);
         return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
       });
+
+    // ── Combat identity → IPFS attributes ──
+    // Calculate here (before metadata build + IPFS upload) so combat attributes
+    // are baked into the on-chain metadata. Also calculated in finalizeJob() for
+    // the combat_fighters DB record — both use the same deterministic function.
+    const combatTraitEntries: { traitId: string; layer: string }[] = [];
+    const combatColorMap: Record<string, string> = {};
+
+    for (const [layer, path] of Object.entries(layers)) {
+      if (!path || typeof path !== 'string') continue;
+      const parts = path.split('/');
+      if (parts.length >= 3) {
+        const traitId = `${parts[parts.length - 2]}_${parts[parts.length - 1].replace(/\.[^.]+$/, '')}`;
+        combatTraitEntries.push({ traitId, layer });
+        const hex = colors[layer];
+        if (hex) combatColorMap[traitId] = hex;
+      }
+    }
+
+    const combatIdentity = calculateCombatIdentity({
+      traits: combatTraitEntries,
+      colors: combatColorMap,
+      details: {},
+    });
+
+    const combatMoveAssignment = assignMoves(combatIdentity);
+
+    attributes.push(...buildCombatAttributes({
+      type: combatIdentity.type,
+      nature: combatIdentity.nature,
+      ability: combatIdentity.ability,
+      moves: combatMoveAssignment.valid ? combatMoveAssignment.moves : ['', '', '', ''],
+    }));
 
     const customName = job.custom_name;
     const fullName = customName
