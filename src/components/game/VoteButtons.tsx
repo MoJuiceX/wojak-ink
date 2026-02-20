@@ -1,5 +1,5 @@
-// Vote buttons: full-width pill buttons for Pass/Like.
-// Keyboard shortcuts: ← dislike, → like (desktop only).
+// Vote buttons: full-width pill buttons for Fade/Glaze.
+// Keyboard shortcuts: ← fade, → glaze (desktop only).
 
 import { motion } from 'framer-motion';
 import { useEffect, useRef } from 'react';
@@ -57,20 +57,20 @@ export function VoteButtons({
         className="btn btn-secondary vote-btn-pill"
         onClick={onDislike}
         disabled={disabled}
-        aria-label="Pass on this Wojak"
+        aria-label="Fade this Wojak"
         whileTap={tapAnimation}
       >
-        👎 Pass
+        🗑️ Fade
       </motion.button>
 
       <motion.button
-        className="btn btn-primary vote-btn-pill"
+        className="btn btn-secondary vote-btn-pill"
         onClick={onLike}
         disabled={disabled}
-        aria-label="Like this Wojak"
+        aria-label="Glaze this Wojak"
         whileTap={tapAnimation}
       >
-        ❤️ Like
+        🍩 Glaze
       </motion.button>
     </div>
   );

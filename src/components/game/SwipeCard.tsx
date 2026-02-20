@@ -16,6 +16,7 @@ interface SwipeCardProps {
   stackPosition?: 0 | 1 | 2;
   isFirst?: boolean;
   reducedMotion?: boolean;
+  exitDirection?: 1 | -1 | null; // 1 = right (like), -1 = left (dislike)
 }
 
 const SWIPE_THRESHOLD = 100;
@@ -54,14 +55,17 @@ export function SwipeCard({
   stackPosition = 0,
   isFirst = false,
   reducedMotion = false,
+  exitDirection = null,
 }: SwipeCardProps) {
   const x = useMotionValue(0);
-  const [exiting, setExiting] = useState(false);
+  const [swipeExiting, setSwipeExiting] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [shouldWiggle, setShouldWiggle] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
+  // Exiting can be triggered by swipe gesture OR parent setting exitDirection
+  const exiting = swipeExiting || (exitDirection !== null && stackPosition === 0);
   const isInteractive = stackPosition === 0 && !exiting;
   const config = STACK_CONFIGS[stackPosition];
 
@@ -114,6 +118,7 @@ export function SwipeCard({
     }
   }, [isFirst, reducedMotion, stackPosition]);
 
+
   const handleWiggleEnd = useCallback(() => {
     setShouldWiggle(false);
     try {
@@ -158,7 +163,7 @@ export function SwipeCard({
     setImageTransform('translate(0, 0) scale(1)');
 
     if (Math.abs(info.offset.x) >= SWIPE_THRESHOLD) {
-      setExiting(true);
+      setSwipeExiting(true);
       const voteType: 1 | -1 = info.offset.x > 0 ? 1 : -1;
       // Fire vote immediately, don't wait for animation
       onVote(voteType);
@@ -167,7 +172,7 @@ export function SwipeCard({
 
   // Programmatic vote (from button/keyboard)
   const triggerVote = useCallback((voteType: 1 | -1) => {
-    setExiting(true);
+    setSwipeExiting(true);
     onVote(voteType);
   }, [onVote]);
 
@@ -175,7 +180,9 @@ export function SwipeCard({
   // (Parent will use button callbacks instead, so this is internal)
   void triggerVote; // used by parent via onVote callback pattern
 
-  const exitX = x.get() >= 0 ? 500 : -500;
+  // Exit direction: from swipe gesture, button click, or default right
+  // Distance is enough to fully exit the card container (clipped by overflow: hidden)
+  const exitX = exitDirection ? exitDirection * 350 : (x.get() >= 0 ? 350 : -350);
 
   return (
     <motion.div
@@ -185,7 +192,7 @@ export function SwipeCard({
         x: isInteractive ? x : undefined,
         rotate: isInteractive ? rotate : undefined,
         boxShadow: isInteractive ? dragShadow : undefined,
-        position: stackPosition > 0 ? 'absolute' : 'relative',
+        position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
@@ -208,6 +215,11 @@ export function SwipeCard({
             ? { opacity: 0 }
             : { x: exitX, opacity: 0, rotate: exitX > 0 ? 15 : -15 }
           : { scale: config.scale, y: config.y, opacity: config.opacity }
+      }
+      exit={
+        reducedMotion
+          ? { opacity: 0 }
+          : { x: exitX, opacity: 0, rotate: exitX > 0 ? 15 : -15 }
       }
       transition={
         exiting

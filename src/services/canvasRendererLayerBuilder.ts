@@ -11,11 +11,17 @@ import {
   LAYER_Z_INDEX,
   CLIP,
   MOUTH_OVER_CENTURION,
+  MOUTH_OVER_PIRATE,
   NINJA_COVERING_MASKS,
   FULL_FACE_MASKS,
   HEADS_NEEDING_EYES_OVERLAY,
   SUITS_NEEDING_EYES_UNDER,
 } from '@/services/canvasRendererConstants';
+
+// Helper for Trump Hair + MOG Glasses + Copium combo
+function isTrumpHair(selectedLayers: SelectedLayers): boolean {
+  return pathContains(selectedLayers.Head, 'trump');
+}
 import type { RenderLayer } from '@/services/canvasRendererTypes';
 import { pathContains } from '@/lib/pathHelpers';
 import { isSelectionPathEmpty } from '@/types/generator';
@@ -28,6 +34,10 @@ function isCenturionSelected(selectedLayers: SelectedLayers): boolean {
 
 function isMouthOverCenturion(path: string): boolean {
   return MOUTH_OVER_CENTURION.some((trait) => pathContains(path, trait));
+}
+
+function isMouthOverPirate(path: string): boolean {
+  return MOUTH_OVER_PIRATE.some((trait) => pathContains(path, trait));
 }
 
 function hasMask(selectedLayers: SelectedLayers): boolean {
@@ -123,6 +133,14 @@ function needsLayersAboveHead(selectedLayers: SelectedLayers): boolean {
   return isStandardCut || isTrumpWave;
 }
 
+function isTrumpWave(selectedLayers: SelectedLayers): boolean {
+  return pathContains(selectedLayers.Head, 'trump') && pathContains(selectedLayers.Head, 'wave');
+}
+
+function isSuperSaiyan(selectedLayers: SelectedLayers): boolean {
+  return pathContains(selectedLayers.Head, 'saiyan');
+}
+
 function isEyePatch(path: string | undefined): boolean {
   if (!path) return false;
   return pathContains(path, 'eye') && pathContains(path, 'patch');
@@ -174,6 +192,10 @@ function isNightVision(path: string | undefined): boolean {
   return pathContains(path, 'night-vision') || pathContains(path, 'nightvision');
 }
 
+function isHardHat(selectedLayers: SelectedLayers): boolean {
+  return pathContains(selectedLayers.Head, 'hard-hat') || pathContains(selectedLayers.Head, 'hard_hat');
+}
+
 function isVRHeadset(path: string | undefined): boolean {
   if (!path) return false;
   return pathContains(path, 'vr') && pathContains(path, 'headset');
@@ -199,6 +221,22 @@ function isPirateHead(selectedLayers: SelectedLayers): boolean {
 
 function isFirefighterHelmet(selectedLayers: SelectedLayers): boolean {
   return pathContains(selectedLayers.Head, 'firefigther') || pathContains(selectedLayers.Head, 'firefighter');
+}
+
+function isTinfoilHead(selectedLayers: SelectedLayers): boolean {
+  return pathContains(selectedLayers.Head, 'tin-foil');
+}
+
+function isBeanieHead(selectedLayers: SelectedLayers): boolean {
+  return pathContains(selectedLayers.Head, 'beanie');
+}
+
+function isPropellerHat(selectedLayers: SelectedLayers): boolean {
+  return pathContains(selectedLayers.Head, 'propeller');
+}
+
+function hasNeckbeard(selectedLayers: SelectedLayers): boolean {
+  return pathContains(selectedLayers.FacialHair, 'neckbeard');
 }
 
 
@@ -513,6 +551,17 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
           skipLayer = true;
           break;
         }
+        // Hard Hat + Night Vision: crop left 24% and top 19.2%
+        if (isHardHat(selectedLayers) && isNightVision(path)) {
+          layers.push({
+            path,
+            zIndex,
+            layerName,
+            clipPolygon: [[0.24, 0.192], [1, 0.192], [1, 1], [0.24, 1]],
+          });
+          skipLayer = true;
+          break;
+        }
         if (hasTyson && hasMaskSelected) skipLayer = true;
         if (hasNinja && maskCoversNinja) skipLayer = true;
         if (hasEyePatchSelected && hasHannibal) skipLayer = true;
@@ -660,25 +709,25 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
           });
           skipLayer = true;
         }
-        // Bepe / Pepe suit + any eyes: same crop as PoP/Goose, but under-suit Y = 37.6%
+        // Bepe / Pepe suit + any eyes: X split at 0.397, Y split at 0.373
         if (!skipLayer && (isBepeSuit(selectedLayers) || isPepeSuit(selectedLayers)) && hasSuitEyesUnder && eyesPath) {
           layers.push({
             path: eyesPath,
             zIndex: LAYER_Z_INDEX.EyesUnderSuit,
             layerName: 'EyesUnderSuit',
-            clipPolygon: [[0.319, 0.171], [0.504, 0.171], [0.504, 1], [0.319, 1]],
+            clipPolygon: [[0.319, 0.171], [0.397, 0.171], [0.397, 1], [0.319, 1]],
           });
           layers.push({
             path: eyesPath,
             zIndex: LAYER_Z_INDEX.EyesUnderSuit,
             layerName: 'EyesUnderSuit2',
-            clipPolygon: [[0.504, 0.171], [1, 0.171], [1, 0.376], [0.504, 0.376]],
+            clipPolygon: [[0.397, 0.171], [1, 0.171], [1, 0.373], [0.397, 0.373]],
           });
           layers.push({
             path: eyesPath,
             zIndex: LAYER_Z_INDEX.Eyes,
             layerName: 'EyesOverSuit',
-            clipPolygon: [[0.504, 0.376], [1, 0.376], [1, 1], [0.504, 1]],
+            clipPolygon: [[0.397, 0.373], [1, 0.373], [1, 1], [0.397, 1]],
           });
           skipLayer = true;
         }
@@ -1119,6 +1168,67 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
     }
   }
 
+  // MouthOverNeckbeard (general case, not Ronin which is handled above)
+  // Ensures mouth traits always render on top of neckbeard
+  if (hasNeckbeard(selectedLayers) && !hasRonin) {
+    const mouthBasePath = selectedLayers.MouthBase;
+    if (mouthBasePath) {
+      layers.push({
+        path: mouthBasePath,
+        zIndex: LAYER_Z_INDEX.MouthBaseOverNeckbeardGeneral,
+        layerName: 'MouthBaseOverNeckbeardGeneral',
+      });
+    }
+    const mouthItemPath = selectedLayers.MouthItem;
+    if (mouthItemPath) {
+      layers.push({
+        path: mouthItemPath,
+        zIndex: LAYER_Z_INDEX.MouthItemOverNeckbeardGeneral,
+        layerName: 'MouthItemOverNeckbeardGeneral',
+      });
+    }
+  }
+
+  // MouthOverPirateHead: Cig, Joint, Cohiba render on top of Pirate Hat
+  if (isPirateHead(selectedLayers)) {
+    const mouthBasePath = selectedLayers.MouthBase;
+    if (mouthBasePath && isMouthOverPirate(mouthBasePath)) {
+      layers.push({
+        path: mouthBasePath,
+        zIndex: LAYER_Z_INDEX.MouthOverPirateHead,
+        layerName: 'MouthOverPirateHead',
+      });
+    }
+    const mouthItemPath = selectedLayers.MouthItem;
+    if (mouthItemPath && isMouthOverPirate(mouthItemPath)) {
+      layers.push({
+        path: mouthItemPath,
+        zIndex: LAYER_Z_INDEX.MouthOverPirateHead + 0.1,
+        layerName: 'MouthItemOverPirateHead',
+      });
+    }
+  }
+
+  // MouthOverRonin: All mouth layers render on top of Ronin Helmet
+  if (hasRonin) {
+    const mouthBasePath = selectedLayers.MouthBase;
+    if (mouthBasePath) {
+      layers.push({
+        path: mouthBasePath,
+        zIndex: LAYER_Z_INDEX.MouthBaseOverRonin,
+        layerName: 'MouthBaseOverRonin',
+      });
+    }
+    const mouthItemPath = selectedLayers.MouthItem;
+    if (mouthItemPath) {
+      layers.push({
+        path: mouthItemPath,
+        zIndex: LAYER_Z_INDEX.MouthItemOverRonin,
+        layerName: 'MouthItemOverRonin',
+      });
+    }
+  }
+
   // EyesOverHead
   if (needsEyesOverlay && eyesPath && !hasTyson && !hasNinja) {
     // Pirate Hat + Night Vision: right half + clip top 32.7% via polygon
@@ -1145,6 +1255,47 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
         layerName: 'EyesOverHead',
         clipLeftPercent: 0.34,
       });
+    // Tinfoil Head + VR Headset: full VR headset renders on top
+    } else if (isTinfoilHead(selectedLayers) && isVRHeadset(eyesPath)) {
+      layers.push({
+        path: eyesPath,
+        zIndex: LAYER_Z_INDEX.EyesOverHead,
+        layerName: 'EyesOverHead',
+      });
+    // Tin Foil Hat + Night Vision: crop left 25.5% and top 26.4%
+    } else if (isTinfoilHead(selectedLayers) && isNightVision(eyesPath)) {
+      layers.push({
+        path: eyesPath,
+        zIndex: LAYER_Z_INDEX.EyesOverHead,
+        layerName: 'EyesOverHead',
+        clipPolygon: [[0.255, 0.264], [1, 0.264], [1, 1], [0.255, 1]],
+      });
+    // Propeller Hat + Night Vision: crop top 20.4%
+    } else if (isPropellerHat(selectedLayers) && isNightVision(eyesPath)) {
+      layers.push({
+        path: eyesPath,
+        zIndex: LAYER_Z_INDEX.EyesOverHead,
+        layerName: 'EyesOverHead',
+        clipPolygon: [[0, 0.204], [1, 0.204], [1, 1], [0, 1]],
+      });
+    // Beanie + Night Vision: crop left 28.2% and top 26%
+    } else if (isBeanieHead(selectedLayers) && isNightVision(eyesPath)) {
+      layers.push({
+        path: eyesPath,
+        zIndex: LAYER_Z_INDEX.EyesOverHead,
+        layerName: 'EyesOverHead',
+        clipPolygon: [[0.282, 0.26], [1, 0.26], [1, 1], [0.282, 1]],
+      });
+    // Beanie + VR Headset: full VR headset renders on top
+    } else if (isBeanieHead(selectedLayers) && isVRHeadset(eyesPath)) {
+      layers.push({
+        path: eyesPath,
+        zIndex: LAYER_Z_INDEX.EyesOverHead,
+        layerName: 'EyesOverHead',
+      });
+    // Super Saiyan + Night Vision: skip EyesOverHead so Saiyan hair renders on top
+    } else if (isSuperSaiyan(selectedLayers) && isNightVision(eyesPath)) {
+      // No EyesOverHead - Night Vision stays fully under Saiyan hair at default Eyes z-index
     } else {
       layers.push({
         path: eyesPath,
@@ -1185,13 +1336,25 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
     });
   }
 
-  // EyesOverStandardCut
-  if (hasLayersAboveHead && eyesPath && !hasTyson && !hasNinja && !hasAstronaut && !hasEyePatchSelected) {
-    layers.push({
-      path: eyesPath,
-      zIndex: LAYER_Z_INDEX.EyesOverStandardCut,
-      layerName: 'EyesOverStandardCut',
-    });
+  // EyesOverStandardCut (or EyesUnderStandardCut for Night Vision + Trump Wave)
+  // Skip when MOG + Copium: MOG will be drawn at MogGlassesOverCopium (z 17) instead
+  const skipEyesOverStandardCut = isMogGlasses(eyesPath) && hasCopium;
+  if (hasLayersAboveHead && eyesPath && !hasTyson && !hasNinja && !hasAstronaut && !hasEyePatchSelected && !skipEyesOverStandardCut) {
+    // Trump Wave + Night Vision: crop left 28.5% and top 17.8%, render UNDER hair
+    if (isTrumpWave(selectedLayers) && isNightVision(eyesPath)) {
+      layers.push({
+        path: eyesPath,
+        zIndex: LAYER_Z_INDEX.EyesUnderStandardCut,
+        layerName: 'EyesUnderStandardCut',
+        clipPolygon: [[0.285, 0.178], [1, 0.178], [1, 1], [0.285, 1]],
+      });
+    } else {
+      layers.push({
+        path: eyesPath,
+        zIndex: LAYER_Z_INDEX.EyesOverStandardCut,
+        layerName: 'EyesOverStandardCut',
+      });
+    }
   }
 
   // MaskOverStandardCut
@@ -1214,6 +1377,29 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
         path: maskPath,
         zIndex: LAYER_Z_INDEX.FullFaceMask,
         layerName: 'FullFaceMask',
+      });
+    }
+  }
+
+  // MOG Glasses always renders on top of Copium Mask
+  const hasMogGlasses = isMogGlasses(eyesPath);
+  if (hasMogGlasses && hasCopium && eyesPath) {
+    layers.push({
+      path: eyesPath,
+      zIndex: LAYER_Z_INDEX.MogGlassesOverCopium,
+      layerName: 'MogGlassesOverCopium',
+    });
+  }
+
+  // Trump Hair renders on top of everything when combined with MOG + Copium
+  const hasTrump = isTrumpHair(selectedLayers);
+  if (hasTrump && hasMogGlasses && hasCopium) {
+    const headPath = selectedLayers.Head;
+    if (headPath) {
+      layers.push({
+        path: headPath,
+        zIndex: LAYER_Z_INDEX.TrumpHairOverAll,
+        layerName: 'TrumpHairOverAll',
       });
     }
   }

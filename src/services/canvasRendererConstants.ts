@@ -41,6 +41,9 @@ export const MOUTH_OVER_CENTURION = ['stach', 'Pizza', 'Bubble-Gum', 'Pipe', 'Jo
 /** Mouth traits that render ON TOP of Beer Hat (cans/straw) */
 export const MOUTH_OVER_BEER_HAT = ['Cig', 'Joint', 'Cohiba'];
 
+/** Mouth traits that render ON TOP of Pirate Hat */
+export const MOUTH_OVER_PIRATE = ['Cig', 'Joint', 'Cohiba'];
+
 /** Masks that cover Ninja Turtle (require NinjaTurtleUnderMask virtual layer) */
 export const NINJA_COVERING_MASKS = ['copium', 'hannibal', 'bandana'];
 
@@ -48,7 +51,7 @@ export const NINJA_COVERING_MASKS = ['copium', 'hannibal', 'bandana'];
 export const FULL_FACE_MASKS = ['skull_mask', 'skull-mask', 'mask-skull', 'hand_mask', 'hand-mask', 'medievalbepe', 'tanginium'];
 
 /** Heads that need EyesOverHead virtual layer (right half of eyes rendered above head) */
-export const HEADS_NEEDING_EYES_OVERLAY = ['clown', 'pirate', 'ronin', 'supa', 'saiyan'];
+export const HEADS_NEEDING_EYES_OVERLAY = ['clown', 'pirate', 'ronin', 'supa', 'saiyan', 'tin-foil', 'beanie'];
 
 /** Full-body suits that render on top of eyewear (path substrings for layer builder). */
 export const SUITS_NEEDING_EYES_UNDER = [
@@ -78,6 +81,8 @@ export const LAYER_Z_INDEX: Record<string, number> = {
   CenturionUnder: 3.5,    // Centurion bottom-right quadrant under facial hair, mouth, mask, eyes
   ClothesAddon: 3,
   FacialHair: 4,
+  MouthBaseOverNeckbeardGeneral: 4.3, // Mouth drawn above neckbeard in general cases
+  MouthItemOverNeckbeardGeneral: 4.4, // MouthItem drawn above neckbeard in general cases
   MouthBase: 5,
   MouthItem: 6,
   TysonTattoo: 6.5,
@@ -93,10 +98,15 @@ export const LAYER_Z_INDEX: Record<string, number> = {
   LaserEyesOverAstronaut: 11.5,
   BeerHatRightBehind: 0.5,   // right can/tube behind base and cap (draw before Base)
   BeerHatUnder: 11.9,  // head under Beer Hat (Cap, Viking, etc.)
+  EyesUnderBeanie: 11.8,  // portion of eyes under Beanie (Night Vision, etc.)
+  EyesUnderStandardCut: 11.85, // portion of eyes under Standard Cut heads (Trump Wave + Night Vision)
   Head: 12,
   BeerHatUnderDetailOver: 12.05, // Underlayer detail/logo drawn ON TOP of Beer Hat cans/outline
   BubbleGumOverHead: 12.1, // Bubble Gum re-drawn on top of Head traits
   MouthOverBeerHat: 12.5,  // Cig, Joint, Cohiba drawn on top of Beer Hat
+  MouthOverPirateHead: 12.6,  // Cig, Joint, Cohiba drawn on top of Pirate Hat
+  MouthBaseOverRonin: 12.7,  // MouthBase drawn on top of Ronin Helmet
+  MouthItemOverRonin: 12.8,  // MouthItem drawn on top of Ronin Helmet
   BandanaMaskOverRonin: 13,
   HannibalMaskOverRonin: 13.1, // right 50% of Hannibal mask over Ronin Helmet
   CopiumMaskOverRonin: 13.2, // right 50% of Copium mask over Ronin Helmet
@@ -106,6 +116,8 @@ export const LAYER_Z_INDEX: Record<string, number> = {
   EyesOverHead: 14,
   EyesOverStandardCut: 15,
   MaskOverStandardCut: 16,
+  MogGlassesOverCopium: 17,      // MOG Glasses always above Copium Mask
+  TrumpHairOverAll: 18,          // Trump Hair on top when combined with MOG + Copium
   BubbleGumOverEyes: 60,
   LaserEyesOverBubbleGum: 61, // Laser Eyes re-drawn on top of BubbleGum
   FullFaceMask: 100,

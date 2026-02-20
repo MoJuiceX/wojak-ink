@@ -1,6 +1,6 @@
 // Core voting orchestrator: card stack, vote handling, state transitions.
-// Supports three tiers: Guest (5/day), Connected (5/day), Holder (20/day).
-// Renders: free tier banner | skeleton | error | summary | empty | card stack + buttons.
+// All users can vote unlimited. Credits are awarded only to DAD + Plot holders (backend).
+// Renders: skeleton | error | empty | card stack + buttons.
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { AnimatePresence } from 'framer-motion';
@@ -11,10 +11,6 @@ import usePrefersReducedMotion from '@/hooks/usePrefersReducedMotion';
 import { SwipeCard } from './SwipeCard';
 import { VoteButtons } from './VoteButtons';
 import { VoteCardSkeleton } from './VoteCardSkeleton';
-import { PostRoundSummary } from './PostRoundSummary';
-
-// Constants
-const DAILY_LIMIT_HOLDER = 20;
 
 // Milestone toast hook — fires when onboarding milestones complete during session
 const MILESTONE_INFO: Record<string, { label: string; credits: number }> = {
@@ -51,23 +47,19 @@ export function VotingFeed() {
   const {
     player,
     feed, feedLoading, loadFeed,
-    castVote, refreshPowerLevel,
-    votesRemaining, dailyLimit, isHolder,
+    castVote,
   } = useGame();
   const toast = useToast();
   const reducedMotion = usePrefersReducedMotion();
 
-  // Milestone toasts (only for holders)
+  // Milestone toasts
   useMilestoneToasts(player?.onboarding);
 
   // Session state
-  const [sessionLikes, setSessionLikes] = useState(0);
-  const [sessionDislikes, setSessionDislikes] = useState(0);
-  const [showSummary, setShowSummary] = useState(false);
   const [voteCount, setVoteCount] = useState(0);
   const [feedError, setFeedError] = useState(false);
   const [cardExiting, setCardExiting] = useState(false);
-  const [powerLevelBefore, setPowerLevelBefore] = useState<number | null>(null);
+  const [exitDirection, setExitDirection] = useState<1 | -1 | null>(null);
 
   // Instruction text visibility
   const [instructionsSeen, setInstructionsSeen] = useState(() => {
@@ -90,13 +82,16 @@ export function VotingFeed() {
   });
 
   // Load feed immediately (no gate)
-  const feedAttempted = useRef(false);
+  // Track player DID to reload when login/logout changes
+  const lastPlayerDid = useRef<string | null>(null);
   useEffect(() => {
-    if (!feedAttempted.current) {
-      feedAttempted.current = true;
+    const currentDid = player?.did ?? null;
+    // Reload if: first load OR player changed (login/logout)
+    if (lastPlayerDid.current !== currentDid) {
+      lastPlayerDid.current = currentDid;
       loadFeed().catch(() => setFeedError(true));
     }
-  }, [loadFeed]);
+  }, [player?.did, loadFeed]);
 
   // Prefetch images for next 3 cards
   useEffect(() => {
@@ -129,24 +124,12 @@ export function VotingFeed() {
     const currentItem = feed[0];
     if (!currentItem || cardExiting) return;
 
-    // Check if out of votes
-    if (votesRemaining <= 0) {
-      toast.error(`Daily limit reached (${dailyLimit} votes)`);
-      return;
-    }
-
     setCardExiting(true);
+    setExitDirection(voteType); // Set direction for exit animation
 
-    // Capture power level on first vote (for delta calculation)
-    if (powerLevelBefore === null && player) {
-      setPowerLevelBefore(player.powerLevel);
-    }
-
-    // Track session stats
+    // Track session vote count
     const newVoteCount = voteCount + 1;
     setVoteCount(newVoteCount);
-    if (voteType === 1) setSessionLikes(prev => prev + 1);
-    else setSessionDislikes(prev => prev + 1);
 
     // Mark instructions seen after 3 votes
     if (newVoteCount >= 3 && !instructionsSeen) {
@@ -161,25 +144,17 @@ export function VotingFeed() {
     // Small delay for exit animation, then advance
     setTimeout(() => {
       setCardExiting(false);
+      setExitDirection(null); // Reset direction
 
       // Refill when running low
       if (feed.length <= 3) {
         loadFeed().catch(() => setFeedError(true));
       }
-
-      // Check for round complete (all votes used)
-      if (votesRemaining <= 1) {
-        setTimeout(() => {
-          if (isHolder) refreshPowerLevel();
-          setShowSummary(true);
-        }, 200);
-      }
     }, 250);
-  }, [feed, cardExiting, castVote, loadFeed, votesRemaining, dailyLimit, isHolder, refreshPowerLevel, toast, voteCount, instructionsSeen, markInstructionsSeen, powerLevelBefore, player]);
+  }, [feed, cardExiting, castVote, loadFeed, toast, voteCount, instructionsSeen, markInstructionsSeen]);
 
   const handleRetry = useCallback(() => {
     setFeedError(false);
-    feedAttempted.current = false;
     loadFeed().catch(() => setFeedError(true));
   }, [loadFeed]);
 
@@ -199,20 +174,6 @@ export function VotingFeed() {
         </p>
         <button type="button" className="btn btn-primary" onClick={handleRetry}>Try Again</button>
       </div>
-    );
-  }
-
-  // Post-round summary
-  if (showSummary) {
-    return (
-      <PostRoundSummary
-        likes={sessionLikes}
-        dislikes={sessionDislikes}
-        powerLevel={player?.powerLevel ?? 0}
-        powerLevelDelta={isHolder && powerLevelBefore !== null ? (player?.powerLevel ?? 0) - powerLevelBefore : 0}
-        voteStreak={isHolder ? player?.voteStreak : undefined}
-        isHolder={isHolder}
-      />
     );
   }
 
@@ -244,29 +205,12 @@ export function VotingFeed() {
   const visibleCards = feed.slice(0, 3);
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      {/* Free tier banner for non-holders */}
-      {!isHolder && (
-        <div
-          className="card-static p-3 flex items-center gap-3 w-full"
-          style={{ borderLeft: '3px solid var(--color-primary)' }}
-        >
-          <span className="text-sm text-secondary">
-            <strong className="text-primary">{votesRemaining}</strong> free vote{votesRemaining !== 1 ? 's' : ''} remaining today.
-            {' '}
-            <Link to="/fight-club" className="text-primary underline">
-              Get a Farmers Plot
-            </Link>
-            {' '}for {DAILY_LIMIT_HOLDER} votes/day + Power rewards.
-          </span>
-        </div>
-      )}
-
+    <div className="flex flex-col gap-4 w-full">
       {/* Card stack */}
       <div
         className="vote-card-stack"
         role="application"
-        aria-label="Vote on Wojak NFTs. Swipe right to like, left to dislike."
+        aria-label="Vote on Wojak NFTs. Swipe right to glaze, left to fade."
       >
         <AnimatePresence mode="popLayout">
           {visibleCards.map((item, i) => (
@@ -280,29 +224,32 @@ export function VotingFeed() {
               stackPosition={i as 0 | 1 | 2}
               isFirst={voteCount === 0 && i === 0}
               reducedMotion={reducedMotion}
+              exitDirection={i === 0 ? exitDirection : null}
             />
           ))}
         </AnimatePresence>
       </div>
 
       {/* Vote buttons */}
-      <VoteButtons
-        onLike={() => handleVote(1)}
-        onDislike={() => handleVote(-1)}
-        disabled={cardExiting || votesRemaining <= 0}
-      />
+      <div className="w-full">
+        <VoteButtons
+          onLike={() => handleVote(1)}
+          onDislike={() => handleVote(-1)}
+          disabled={cardExiting}
+        />
+      </div>
 
       {/* Instruction text */}
       {!instructionsSeen && (
         <div
-          className="text-muted text-center"
+          className="text-muted text-center w-full"
           style={{
             fontSize: 13,
             transition: 'opacity 500ms ease',
             opacity: voteCount >= 3 ? 0 : 1,
           }}
         >
-          <p>Swipe right to like &middot; Swipe left to dislike</p>
+          <p>Swipe right to glaze &middot; Swipe left to fade</p>
           {showKeyboardHint && (
             <p style={{ marginTop: 2 }}>or use &larr; &rarr; arrow keys</p>
           )}
