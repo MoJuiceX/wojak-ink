@@ -275,6 +275,18 @@ export const TRAIT_NAME_MAP: Record<string, string> = {
   'silicon data center': 'Silicon Data Center',
   'spell room': 'Spell Room',
   'white house': 'White House',
+  'casino': 'Casino',
+  'circus': 'Circus',
+  'bunker': 'Bunker',
+  'home office': 'Home Office',
+  'padded cell': 'Padded Cell',
+  'space station': 'Space Station',
+  'swamp': 'Swamp',
+  'tavern': 'Tavern',
+  'vaporwave': 'Vaporwave',
+  'viking ship': 'Viking Ship',
+  'volcano': 'Volcano',
+  'wizard tower': 'Wizard Tower',
 };
 
 /**

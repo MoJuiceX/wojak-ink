@@ -69,6 +69,15 @@ export function getTypePointsForColor(hex: string): TypePoints {
                return { primary: 'SHADOW',  primaryPts: 3, secondary: 'GHOST',   secondaryPts: 1 };
   }
 
+  // --- Near-achromatic stone tints ---
+  // Colors too saturated for the achromatic block (S >= 10%) but too muted
+  // to map meaningfully by hue (S <= 22%). Covers concrete, limestone, slate,
+  // cool khaki, muted blue-gray — real-world stone and mineral colors.
+  // Excludes warm hues (H 15-55°) so those still fall through to EARTH below.
+  if (s >= 10 && s <= 22 && l >= 20 && l <= 55 && !(h >= 15 && h <= 55)) {
+    return { primary: 'STONE', primaryPts: 3, secondary: 'EARTH', secondaryPts: 1 };
+  }
+
   // --- Warm neutrals ---
   // Brown: S 10-50%, H 15-45, L 20-50%
   if (s >= 10 && s <= 50 && h >= 15 && h <= 45 && l >= 20 && l <= 50) {
