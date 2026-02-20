@@ -13,7 +13,7 @@ const frequencies: Record<string, Record<string, number>> = {
     Classic: 2080,
     Rekt: 654,
     Rugged: 413,
-    Bleeding: 1,
+    'Bleeding Bags': 364,  // ~8.7% frequency from collection metadata
     Terminator: 435,
   },
   Clothes: {
