@@ -95,12 +95,14 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const ipKey = getRateLimitKey(request);
   const ipResult = await checkRateLimit(env.DB, ipKey, MINT_RATE_LIMITS.prepareByIP, true);
   if (!ipResult.allowed) {
-    return errorResponse('Too many mint requests. Please wait a moment.', 429);
+    const retryAfterSeconds = Math.max(0, Math.ceil((ipResult.resetAt - Date.now()) / 1000));
+    return jsonResponse({ error: 'Too many mint requests. Please wait a moment.', retryAfterSeconds }, 429);
   }
   const walletKey = getRateLimitKey(request, wallet);
   const walletResult = await checkRateLimit(env.DB, walletKey, MINT_RATE_LIMITS.prepare, true);
   if (!walletResult.allowed) {
-    return errorResponse('Too many mint requests. Please wait a moment.', 429);
+    const retryAfterSeconds = Math.max(0, Math.ceil((walletResult.resetAt - Date.now()) / 1000));
+    return jsonResponse({ error: 'Too many mint requests. Please wait a moment.', retryAfterSeconds }, 429);
   }
 
   const selectedLayers = body.selectedLayers || {};

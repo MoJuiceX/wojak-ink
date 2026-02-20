@@ -137,10 +137,10 @@ export const CHAT_RATE_LIMITS = {
 
 // Rate limits for mint endpoints
 export const MINT_RATE_LIMITS = {
-  /** Per-wallet: 5 submit attempts per minute (each user gets their own quota) */
+  /** Per-wallet: 15 submit attempts per minute (single user should never hit this with normal use) */
   prepare: {
     windowMs: 60 * 1000,
-    maxRequests: 5,
+    maxRequests: 15,
     keyPrefix: 'mint-prepare',
   },
   /** Per-IP cap: 30 submit requests per minute (prevents one IP from exhausting with many wallets) */

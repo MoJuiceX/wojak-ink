@@ -51,6 +51,7 @@ vi.mock('../../lib/rateLimit', () => ({
   getRateLimitKey: vi.fn().mockReturnValue('ip:127.0.0.1'),
   MINT_RATE_LIMITS: {
     prepare: { windowMs: 60000, maxRequests: 5, keyPrefix: 'mint-prepare' },
+    prepareByIP: { windowMs: 60000, maxRequests: 30, keyPrefix: 'mint-prepare-ip' },
     confirm: { windowMs: 60000, maxRequests: 10, keyPrefix: 'mint-confirm' },
     jobPoll: { windowMs: 60000, maxRequests: 120, keyPrefix: 'mint-job' },
   },
@@ -445,7 +446,7 @@ describe('submit.ts', () => {
   it('returns 500 when DB is not configured', async () => {
     const env = { ...createEnvWithQueries({}), DB: undefined };
     const req = makeRequest(VALID_SUBMIT_BODY);
-    const ctx = createContext(env as any, req);
+    const ctx = createContext(env as unknown as ReturnType<typeof createEnvWithQueries>, req);
     const res = await onRequest(ctx);
     expect(res.status).toBe(500);
   });

@@ -74,6 +74,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
     mintStep,
     currentJob,
     errorMessage,
+    rateLimitRetryAfterSeconds,
     credits,
     pendingMintType,
     pendingMintParams,
@@ -95,12 +96,13 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
   const [nameError, setNameError] = useState('');
 
   // Image URL for fighter reveal card (from pending mint blob)
+  const imageBlob = pendingMintParams?.imageBlob;
   const revealImageUrl = useMemo(() => {
-    if (pendingMintParams?.imageBlob) {
-      return URL.createObjectURL(pendingMintParams.imageBlob);
+    if (imageBlob) {
+      return URL.createObjectURL(imageBlob);
     }
     return undefined;
-  }, [pendingMintParams?.imageBlob]);
+  }, [imageBlob]);
 
   // Clean up object URL on unmount to prevent memory leaks
   useEffect(() => {
@@ -429,6 +431,11 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
               {isError && parsedError && (
                 <div className="w-full flex flex-col gap-3">
                   <p className="text-error text-sm">{parsedError.message}</p>
+                  {/rate limit|Too many/i.test(errorMessage ?? '') && rateLimitRetryAfterSeconds != null && rateLimitRetryAfterSeconds > 0 && (
+                    <p className="text-muted text-xs tabular-nums">
+                      Try again in {rateLimitRetryAfterSeconds} second{rateLimitRetryAfterSeconds !== 1 ? 's' : ''}.
+                    </p>
+                  )}
                   {currentJob?.creditsRefunded && (
                     <p className="text-muted text-xs">Your credits have been refunded.</p>
                   )}

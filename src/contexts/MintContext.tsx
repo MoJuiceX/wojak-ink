@@ -97,6 +97,8 @@ interface MintContextValue {
   mintStep: MintStep;
   currentJob: MintJob | null;
   errorMessage: string | null;
+  /** Seconds until rate limit resets (from 429 retryAfterSeconds); 0 or null when not rate limited */
+  rateLimitRetryAfterSeconds: number | null;
   pendingMintType: 'free' | 'paid' | null;
   pendingMintParams: PendingMintParams | null;
   mintingPaused: boolean;
@@ -169,6 +171,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
   const [mintStep, setMintStep] = useState<MintStep>('idle');
   const [currentJob, setCurrentJob] = useState<MintJob | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [rateLimitRetryAfterSeconds, setRateLimitRetryAfterSeconds] = useState<number | null>(null);
   const [totalMinted, setTotalMinted] = useState(0);
   const [maxSupply, setMaxSupply] = useState(DEFAULT_MAX_SUPPLY);
   const [traitPricing, setTraitPricing] = useState<Record<string, { usageCount: number; effectiveUsage: number; surchargeXch: number }>>({});
@@ -208,7 +211,6 @@ export function MintProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (walletStatus !== 'connected' || !address) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCredits(null);
       return;
     }
@@ -321,6 +323,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
   const pollingStartTimeRef = useRef<number>(0);
   const lastConfirmCallRef = useRef<number>(0);
   const currentStepRef = useRef<string>('');
+  const isSubmittingRef = useRef<boolean>(false);
   const CONFIRM_DEDUP_MS = 10_000; // Don't call confirm-payment more than once per 10s
 
   const startPolling = useCallback((jobId: number, walletAddr: string, initialStep?: string) => {
@@ -417,6 +420,15 @@ export function MintProvider({ children }: { children: ReactNode }) {
     pollingTimeoutRef.current = setTimeout(stopPolling, POLL_MAX_DURATION);
   }, [stopPolling, refetchCredits]);
 
+  // Countdown for rate limit retry (so UI can show "Try again in X seconds")
+  useEffect(() => {
+    if (rateLimitRetryAfterSeconds == null || rateLimitRetryAfterSeconds <= 0) return;
+    const id = setInterval(() => {
+      setRateLimitRetryAfterSeconds((prev) => (prev == null || prev <= 1 ? null : prev - 1));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [rateLimitRetryAfterSeconds]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => stopPolling();
@@ -497,6 +509,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
   // ── Mint Flow Actions ──
 
   const resetMintFlow = useCallback(() => {
+    setRateLimitRetryAfterSeconds(null);
     setMintStep('idle');
     setCurrentJob(null);
     setErrorMessage(null);
@@ -512,6 +525,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
     setMintStep('idle');
     setCurrentJob(null);
     setErrorMessage(null);
+    setRateLimitRetryAfterSeconds(null);
     setPendingMintParams(null);
     setIdempotencyKey(null);
     stopPolling();
@@ -537,6 +551,9 @@ export function MintProvider({ children }: { children: ReactNode }) {
   // Step 2: Submit to /api/mint/submit
   const confirmMint = useCallback(async () => {
     if (!pendingMintParams || !address || !isValidChiaAddress(address)) return;
+    if (isSubmittingRef.current) return; // Prevent double-submit (e.g. double-click before state updates)
+    isSubmittingRef.current = true;
+
     const { imageBlob, selectedLayers, selectedColors, mintType } = pendingMintParams;
     const key = idempotencyKey || crypto.randomUUID();
 
@@ -566,6 +583,11 @@ export function MintProvider({ children }: { children: ReactNode }) {
       if (!res.ok || data.error) {
         setMintStep('error');
         setErrorMessage(data.error || 'Mint submission failed');
+        setRateLimitRetryAfterSeconds(
+          res.status === 429 && typeof data.retryAfterSeconds === 'number'
+            ? Math.max(0, data.retryAfterSeconds)
+            : null
+        );
         return;
       }
 
@@ -585,6 +607,8 @@ export function MintProvider({ children }: { children: ReactNode }) {
       console.error('[MintContext] confirmMint error:', err);
       setMintStep('error');
       setErrorMessage(err instanceof Error ? err.message : 'Mint failed');
+    } finally {
+      isSubmittingRef.current = false;
     }
   }, [pendingMintParams, address, idempotencyKey, customName, startPolling]);
 
@@ -645,6 +669,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
       mintStep,
       currentJob,
       errorMessage,
+      rateLimitRetryAfterSeconds,
       pendingMintType: pendingMintParams?.mintType ?? null,
       pendingMintParams,
       mintingPaused,
@@ -664,7 +689,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
       isTop3Trait,
       top3Traits,
     }),
-    [credits, mintStep, currentJob, errorMessage, pendingMintParams, mintingPaused, customName, prepareMint, confirmMint, confirmPayment, acceptOfferInWallet, resetMintFlow, retryMint, totalMinted, maxSupply, refetchCredits, getTraitPricing, getTotalMintPrice, isTop3Trait, top3Traits]
+    [credits, mintStep, currentJob, errorMessage, rateLimitRetryAfterSeconds, pendingMintParams, mintingPaused, customName, prepareMint, confirmMint, confirmPayment, acceptOfferInWallet, resetMintFlow, retryMint, totalMinted, maxSupply, refetchCredits, getTraitPricing, getTotalMintPrice, isTop3Trait, top3Traits]
   );
 
   return <MintContext.Provider value={value}>{children}</MintContext.Provider>;
