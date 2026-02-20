@@ -30,6 +30,7 @@ const CombatArena = lazy(() => import('./CombatArena'));
 const GameVoting = lazy(() => import('./GameVoting'));
 const BurnTab = lazy(() => import('@/components/combat/BurnTab'));
 const DemoBattle = lazy(() => import('@/components/combat/DemoBattle').then(m => ({ default: m.DemoBattle })));
+const BattleFeed = lazy(() => import('@/components/combat/BattleFeed').then(m => ({ default: m.BattleFeed })));
 
 // Gate API response type
 interface GateResponse {
@@ -282,8 +283,8 @@ export default function FightClub() {
     navigate(tab.path);
   };
 
-  // Determine if current tab requires wallet/access
-  const isGatedTab = activeTab === 'battle' || activeTab === 'burn';
+  // Determine if current tab requires wallet/access (only burn is gated now)
+  const isGatedTab = activeTab === 'burn';
 
   // Show connect wallet prompt only for gated tabs when wallet not connected
   if (!isWalletConnected && isGatedTab) {
@@ -354,33 +355,42 @@ export default function FightClub() {
           {/* Show gate when user doesn't have access to gated tabs */}
           {showGate && <FightClubGateInline />}
 
-          {/* Regular tab content when not loading/gated */}
-          {!showGateLoading && !showGate && (
-            <>
-              {activeTab === 'battle' && (
-                <>
-                  {accessData?.wojakCount === 0 && <MintFighterBanner />}
-                  <GameErrorBoundary gameName="Combat Arena">
-                    <Suspense fallback={<GameLoading gameName="Combat Arena" />}>
-                      {/* Show demo when user has no fighters, real arena when they do */}
-                      {accessData?.wojakCount === 0 ? (
-                        <DemoBattle />
-                      ) : (
-                        <CombatArena />
-                      )}
-                    </Suspense>
-                  </GameErrorBoundary>
-                </>
-              )}
-              {activeTab === 'burn' && (
-                <Suspense fallback={<PageSkeleton type="media" />}>
-                  <BurnTab />
-                </Suspense>
-              )}
-            </>
+          {/* Gated tab content (burn only) */}
+          {!showGateLoading && !showGate && activeTab === 'burn' && (
+            <Suspense fallback={<PageSkeleton type="media" />}>
+              <BurnTab />
+            </Suspense>
           )}
 
-          {/* Non-gated tabs always render immediately */}
+          {/* Non-gated tabs */}
+          {activeTab === 'battle' && (
+            <div className="flex flex-col gap-6">
+              {/* Show mint banner only for holders with no wojaks */}
+              {accessData?.hasAccess && accessData?.wojakCount === 0 && <MintFighterBanner />}
+
+              {/* Arena section */}
+              <GameErrorBoundary gameName="Combat Arena">
+                <Suspense fallback={<GameLoading gameName="Combat Arena" />}>
+                  {/* Show full arena for holders with fighters, demo for everyone else */}
+                  {accessData?.hasAccess && accessData?.wojakCount > 0 ? (
+                    <CombatArena />
+                  ) : (
+                    <DemoBattle />
+                  )}
+                </Suspense>
+              </GameErrorBoundary>
+
+              {/* Battle Feed - recent battles */}
+              <div className="flex flex-col gap-3">
+                <div className="battle-feed-header">
+                  <h3>Recent Battles</h3>
+                </div>
+                <Suspense fallback={<div className="text-muted text-sm">Loading battles...</div>}>
+                  <BattleFeed />
+                </Suspense>
+              </div>
+            </div>
+          )}
           {activeTab === 'vote' && (
             <GameProvider>
               <SwipeAutoRegister />

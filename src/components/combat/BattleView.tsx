@@ -15,7 +15,6 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Bot, Swords } from 'lucide-react';
-import { HPBar } from './HPBar';
 import { TurnLog } from './TurnLog';
 import { MoveButtons } from './MoveButtons';
 import { TurnTimer } from './TurnTimer';
@@ -349,11 +348,11 @@ export function BattleView({ battleId, playerNftId, staticBattleData, autoPlay, 
   const isPlayerWinner = isComplete && battle.winner === playerNftId;
   const isOpponentWinner = isComplete && battle.winner != null && battle.winner !== playerNftId;
   const playerImgClass = isPlayerWinner
-    ? 'fighter-winner'
-    : (isOpponentWinner ? 'fighter-loser' : '');
+    ? 'winner-glow'
+    : (isOpponentWinner ? 'loser-fade' : '');
   const opponentImgClass = isOpponentWinner
-    ? 'fighter-winner'
-    : (isPlayerWinner ? 'fighter-loser' : '');
+    ? 'winner-glow'
+    : (isPlayerWinner ? 'loser-fade' : '');
 
   // AI Sparring detection
   const isSparring = opponentFighter?.nft_id === 'ai_sparring_partner';
@@ -393,38 +392,65 @@ export function BattleView({ battleId, playerNftId, staticBattleData, autoPlay, 
       )}
 
       {/* ── Battle Arena ─────────────────────────────────────────────── */}
-      <div
-        ref={arenaRef}
-        className={`battle-arena battle-scanlines ${shakeClass}`}
-      >
-        {/* Canvas particle overlay */}
-        <BattleCanvas ref={canvasRef} />
+      <div className="battle-arena-wrapper">
+        <div
+          ref={arenaRef}
+          className={`battle-arena ${shakeClass}`}
+        >
+          {/* Arena overlays */}
+          <div className="arena-scanlines" />
+          <div className="arena-circuits" />
+          <div className="arena-data-streams">
+            <div className="data-stream" />
+            <div className="data-stream" />
+            <div className="data-stream" />
+            <div className="data-stream" />
+          </div>
 
-        {/* Flash overlay */}
-        {flashClass && <div className={flashClass} />}
+          {/* HUD brackets */}
+          <div className="hud-bracket tl" />
+          <div className="hud-bracket tr" />
+          <div className="hud-bracket bl" />
+          <div className="hud-bracket br" />
 
-        {/* Effectiveness callouts */}
-        {callouts.map(c => (
-          <EffectivenessCallout
-            key={c.id}
-            id={c.id}
-            type={c.type}
-            onComplete={() => removeCallout(c.id)}
-          />
-        ))}
+          {/* VS emblem */}
+          <div className="vs-emblem">VS</div>
 
-        {/* Fighter panels (grid inside arena) */}
-        <div className="grid grid-cols-2 gap-4 p-4" style={{ position: 'relative', zIndex: 2 }}>
-          {/* Player side (left) */}
-          <div className="flex flex-col gap-2" style={{ position: 'relative' }}>
-            {playerFighter && (
-              <div className={`battle-nft-image battle-slide-left ${playerImgClass}`}>
+          {/* Canvas particle overlay */}
+          <BattleCanvas ref={canvasRef} />
+
+          {/* Flash overlay */}
+          {flashClass && <div className={flashClass} />}
+
+          {/* Effectiveness callouts */}
+          {callouts.map(c => (
+            <EffectivenessCallout
+              key={c.id}
+              id={c.id}
+              type={c.type}
+              onComplete={() => removeCallout(c.id)}
+            />
+          ))}
+
+          {/* Player fighter card (left) */}
+          {playerFighter && (
+            <div
+              className={`fighter-card player ${playerImgClass}`}
+              style={{ '--frame-color': `var(--type-${playerFighter.type.toLowerCase()})` } as React.CSSProperties}
+            >
+              {/* Fighter frame with type glow */}
+              <div className="fighter-frame">
+                <div className="frame-glow" />
+                <div className="frame-border-outer" />
+                <div className="frame-border-inner" />
+                <div className="frame-node tl" />
+                <div className="frame-node tr" />
+                <div className="frame-node bl" />
+                <div className="frame-node br" />
                 {playerFighter.imageUrl ? (
                   <img
                     src={playerFighter.imageUrl}
                     alt="Your fighter"
-                    className="w-full h-full object-cover"
-                    style={{ borderRadius: 'var(--radius-md)' }}
                     onError={(e) => {
                       const img = e.target as HTMLImageElement;
                       img.style.display = 'none';
@@ -442,125 +468,176 @@ export function BattleView({ battleId, playerNftId, staticBattleData, autoPlay, 
                     justifyContent: 'center',
                     flexDirection: 'column',
                     gap: 4,
-                    background: 'var(--color-surface)',
-                    borderRadius: 'var(--radius-md)',
+                    background: 'rgba(30, 40, 55, 0.9)',
+                    borderRadius: '4px',
+                    position: 'relative',
+                    zIndex: 1,
                   }}
                 >
                   <Swords size={32} style={{ color: 'var(--color-text-muted)' }} />
                   <span className="text-xs text-muted">#{playerFighter.edition}</span>
                 </div>
               </div>
-            )}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className={`badge badge-${playerFighter?.type.toLowerCase()}`}>
-                  {playerFighter?.type}
-                </span>
-                <StatusIcon status={playerStatus} />
-              </div>
-              <span className="text-xs text-muted">Lv.{playerFighter?.level}</span>
-            </div>
-            <HPBar
-              current={playerHp.current}
-              max={playerMaxHp}
-              ghost={playerHp.ghost}
-              label="HP"
-            />
-            {/* Damage numbers — player side */}
-            {damageNumbers
-              .filter(d => (isPlayerA ? d.side === 'a' : d.side === 'b'))
-              .map(d => (
-                <DamageNumber
-                  key={d.id}
-                  id={d.id}
-                  value={d.value}
-                  type={d.type}
-                  onComplete={() => removeDamageNumber(d.id)}
-                />
-              ))}
-          </div>
 
-          {/* Opponent side (right) */}
-          <div className="flex flex-col gap-2" style={{ position: 'relative' }}>
-            {isSparring ? (
-              /* AI Sparring Partner avatar */
-              <div
-                className={`battle-nft-image battle-slide-right ${opponentImgClass}`}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: 'var(--color-cyan-15)',
-                  borderRadius: 'var(--radius-md)',
-                }}
-              >
-                <Bot size={48} style={{ color: 'var(--color-cyan)' }} />
+              {/* HP container */}
+              <div className={`hp-container ${playerHp.current / playerMaxHp < 0.2 ? 'warning' : ''}`}>
+                <div className="hp-label">
+                  <div className="flex items-center gap-1">
+                    <span className="hp-name" style={{ color: `var(--type-${playerFighter.type.toLowerCase()})` }}>
+                      #{playerFighter.edition}
+                    </span>
+                    <span className="hp-level">Lv.{playerFighter.level}</span>
+                    <StatusIcon status={playerStatus} />
+                  </div>
+                  <span
+                    className="hp-type"
+                    style={{ background: `var(--type-${playerFighter.type.toLowerCase()})` }}
+                  >
+                    {playerFighter.type}
+                  </span>
+                </div>
+                <div className="hp-bar-bg">
+                  <div
+                    className="hp-ghost"
+                    style={{ width: `${(playerHp.ghost / playerMaxHp) * 100}%` }}
+                  />
+                  <div
+                    className={`hp-bar ${
+                      playerHp.current / playerMaxHp < 0.2 ? 'critical' :
+                      playerHp.current / playerMaxHp < 0.5 ? 'low' : ''
+                    }`}
+                    style={{ width: `${(playerHp.current / playerMaxHp) * 100}%` }}
+                  />
+                </div>
+                <span className="hp-text">{Math.ceil(playerHp.current)}/{playerMaxHp}</span>
               </div>
-            ) : opponentFighter ? (
-              <div className={`battle-nft-image battle-slide-right ${opponentImgClass}`}>
-                {opponentFighter.imageUrl ? (
+
+              {/* Damage numbers — player side */}
+              {damageNumbers
+                .filter(d => (isPlayerA ? d.side === 'a' : d.side === 'b'))
+                .map(d => (
+                  <DamageNumber
+                    key={d.id}
+                    id={d.id}
+                    value={d.value}
+                    type={d.type}
+                    onComplete={() => removeDamageNumber(d.id)}
+                  />
+                ))}
+            </div>
+          )}
+
+          {/* Opponent fighter card (right) */}
+          {opponentFighter && (
+            <div
+              className={`fighter-card opponent ${opponentImgClass}`}
+              style={{ '--frame-color': `var(--type-${opponentFighter.type.toLowerCase()})` } as React.CSSProperties}
+            >
+              {/* Fighter frame with type glow */}
+              <div className="fighter-frame">
+                <div className="frame-glow" />
+                <div className="frame-border-outer" />
+                <div className="frame-border-inner" />
+                <div className="frame-node tl" />
+                <div className="frame-node tr" />
+                <div className="frame-node bl" />
+                <div className="frame-node br" />
+                {isSparring ? (
+                  <div
+                    style={{
+                      display: 'flex',
+                      width: '100%',
+                      height: '100%',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'rgba(0, 180, 216, 0.15)',
+                      borderRadius: '4px',
+                      position: 'relative',
+                      zIndex: 1,
+                    }}
+                  >
+                    <Bot size={48} style={{ color: 'var(--color-cyan)' }} />
+                  </div>
+                ) : opponentFighter.imageUrl ? (
                   <img
                     src={opponentFighter.imageUrl}
                     alt="Opponent"
-                    className="w-full h-full object-cover"
-                    style={{ borderRadius: 'var(--radius-md)' }}
                     onError={(e) => {
                       const img = e.target as HTMLImageElement;
                       img.style.display = 'none';
                       img.nextElementSibling?.classList.remove('hidden');
                     }}
                   />
-                ) : null}
-                <div
-                  className={opponentFighter.imageUrl ? 'hidden' : ''}
-                  style={{
-                    display: opponentFighter.imageUrl ? undefined : 'flex',
-                    width: '100%',
-                    height: '100%',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexDirection: 'column',
-                    gap: 4,
-                    background: 'var(--color-surface)',
-                    borderRadius: 'var(--radius-md)',
-                  }}
-                >
-                  <Swords size={32} style={{ color: 'var(--color-text-muted)' }} />
-                  <span className="text-xs text-muted">#{opponentFighter.edition}</span>
+                ) : (
+                  <div
+                    style={{
+                      display: 'flex',
+                      width: '100%',
+                      height: '100%',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexDirection: 'column',
+                      gap: 4,
+                      background: 'rgba(30, 40, 55, 0.9)',
+                      borderRadius: '4px',
+                      position: 'relative',
+                      zIndex: 1,
+                    }}
+                  >
+                    <Swords size={32} style={{ color: 'var(--color-text-muted)' }} />
+                    <span className="text-xs text-muted">#{opponentFighter.edition}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* HP container */}
+              <div className={`hp-container ${opponentHp.current / opponentMaxHp < 0.2 ? 'warning' : ''}`}>
+                <div className="hp-label">
+                  <div className="flex items-center gap-1">
+                    {isSparring && <Bot size={12} style={{ color: 'var(--color-cyan)' }} />}
+                    <span className="hp-name" style={{ color: `var(--type-${opponentFighter.type.toLowerCase()})` }}>
+                      {isSparring ? 'AI Sparring' : `#${opponentFighter.edition}`}
+                    </span>
+                    <span className="hp-level">Lv.{opponentFighter.level}</span>
+                    <StatusIcon status={opponentStatus} />
+                  </div>
+                  <span
+                    className="hp-type"
+                    style={{ background: `var(--type-${opponentFighter.type.toLowerCase()})` }}
+                  >
+                    {opponentFighter.type}
+                  </span>
                 </div>
+                <div className="hp-bar-bg">
+                  <div
+                    className="hp-ghost"
+                    style={{ width: `${(opponentHp.ghost / opponentMaxHp) * 100}%` }}
+                  />
+                  <div
+                    className={`hp-bar ${
+                      opponentHp.current / opponentMaxHp < 0.2 ? 'critical' :
+                      opponentHp.current / opponentMaxHp < 0.5 ? 'low' : ''
+                    }`}
+                    style={{ width: `${(opponentHp.current / opponentMaxHp) * 100}%` }}
+                  />
+                </div>
+                <span className="hp-text">{Math.ceil(opponentHp.current)}/{opponentMaxHp}</span>
               </div>
-            ) : null}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                {isSparring && <Bot size={14} style={{ color: 'var(--color-cyan)' }} />}
-                <span className={`badge badge-${opponentFighter?.type.toLowerCase()}`}>
-                  {opponentFighter?.type}
-                </span>
-                <StatusIcon status={opponentStatus} />
-              </div>
-              <span className="text-xs text-muted">
-                {isSparring ? 'AI' : ''} Lv.{opponentFighter?.level}
-              </span>
+
+              {/* Damage numbers — opponent side */}
+              {damageNumbers
+                .filter(d => (isPlayerA ? d.side === 'b' : d.side === 'a'))
+                .map(d => (
+                  <DamageNumber
+                    key={d.id}
+                    id={d.id}
+                    value={d.value}
+                    type={d.type}
+                    onComplete={() => removeDamageNumber(d.id)}
+                  />
+                ))}
             </div>
-            <HPBar
-              current={opponentHp.current}
-              max={opponentMaxHp}
-              ghost={opponentHp.ghost}
-              label="HP"
-            />
-            {/* Damage numbers — opponent side */}
-            {damageNumbers
-              .filter(d => (isPlayerA ? d.side === 'b' : d.side === 'a'))
-              .map(d => (
-                <DamageNumber
-                  key={d.id}
-                  id={d.id}
-                  value={d.value}
-                  type={d.type}
-                  onComplete={() => removeDamageNumber(d.id)}
-                />
-              ))}
-          </div>
+          )}
         </div>
       </div>
 
@@ -601,10 +678,7 @@ export function BattleView({ battleId, playerNftId, staticBattleData, autoPlay, 
       )}
 
       {/* Turn log */}
-      <div className="flex flex-col gap-2">
-        <h3 className="text-sm font-semibold">Battle Log</h3>
-        <TurnLog turns={battle.turns} />
-      </div>
+      <TurnLog turns={battle.turns} />
 
       {/* Battle result */}
       {isComplete && (

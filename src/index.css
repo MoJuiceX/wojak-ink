@@ -17,6 +17,7 @@
 @import './styles/shop-cosmetics.css';
 @import './styles/profile.css';
 @import './styles/drawer-customization.css';
+@import './styles/battle-arena.css';
 
 /* Tailwind v4 theme tokens */
 @theme {

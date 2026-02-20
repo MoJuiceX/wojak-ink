@@ -47,15 +47,6 @@ function useMilestoneToasts(onboarding: { voted: boolean; minted: boolean; battl
   }, [onboarding, toast]);
 }
 
-interface LastVote {
-  nftId: string;
-  editionNumber: number;
-  name: string;
-  customName: string | null;
-  imageUri: string;
-  voteType: 1 | -1;
-}
-
 export function VotingFeed() {
   const {
     player,
@@ -72,13 +63,11 @@ export function VotingFeed() {
   // Session state
   const [sessionLikes, setSessionLikes] = useState(0);
   const [sessionDislikes, setSessionDislikes] = useState(0);
-  const [lastVote, setLastVote] = useState<LastVote | null>(null);
-  const [undoUsed, setUndoUsed] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [voteCount, setVoteCount] = useState(0);
   const [feedError, setFeedError] = useState(false);
   const [cardExiting, setCardExiting] = useState(false);
-  const powerLevelBefore = useRef(0);
+  const [powerLevelBefore, setPowerLevelBefore] = useState<number | null>(null);
 
   // Instruction text visibility
   const [instructionsSeen, setInstructionsSeen] = useState(() => {
@@ -100,13 +89,6 @@ export function VotingFeed() {
     }
   });
 
-  // Snapshot power level at session start for delta (holders only)
-  useEffect(() => {
-    if (player && powerLevelBefore.current === 0) {
-      powerLevelBefore.current = player.powerLevel;
-    }
-  }, [player]);
-
   // Load feed immediately (no gate)
   const feedAttempted = useRef(false);
   useEffect(() => {
@@ -124,26 +106,24 @@ export function VotingFeed() {
     });
   }, [feed]);
 
-  // Mark instructions seen after 3 votes
-  useEffect(() => {
-    if (voteCount >= 3 && !instructionsSeen) {
-      setInstructionsSeen(true);
-      setShowKeyboardHint(false);
-      try {
-        if (typeof requestIdleCallback !== 'undefined') {
-          requestIdleCallback(() => {
-            localStorage.setItem('wojak_vote_instructions_seen', '1');
-            localStorage.setItem('wojak_vote_kb_hint_seen', '1');
-          });
-        } else {
+  // Helper to mark instructions seen (persists to localStorage)
+  const markInstructionsSeen = useCallback(() => {
+    setInstructionsSeen(true);
+    setShowKeyboardHint(false);
+    try {
+      if (typeof requestIdleCallback !== 'undefined') {
+        requestIdleCallback(() => {
           localStorage.setItem('wojak_vote_instructions_seen', '1');
           localStorage.setItem('wojak_vote_kb_hint_seen', '1');
-        }
-      } catch {
-        // localStorage unavailable
+        });
+      } else {
+        localStorage.setItem('wojak_vote_instructions_seen', '1');
+        localStorage.setItem('wojak_vote_kb_hint_seen', '1');
       }
+    } catch {
+      // localStorage unavailable
     }
-  }, [voteCount, instructionsSeen]);
+  }, []);
 
   const handleVote = useCallback((voteType: 1 | -1) => {
     const currentItem = feed[0];
@@ -157,18 +137,21 @@ export function VotingFeed() {
 
     setCardExiting(true);
 
+    // Capture power level on first vote (for delta calculation)
+    if (powerLevelBefore === null && player) {
+      setPowerLevelBefore(player.powerLevel);
+    }
+
     // Track session stats
-    setLastVote({
-      nftId: currentItem.nftId,
-      editionNumber: currentItem.editionNumber,
-      name: currentItem.name,
-      customName: currentItem.customName,
-      imageUri: currentItem.imageUri,
-      voteType,
-    });
-    setVoteCount(prev => prev + 1);
+    const newVoteCount = voteCount + 1;
+    setVoteCount(newVoteCount);
     if (voteType === 1) setSessionLikes(prev => prev + 1);
     else setSessionDislikes(prev => prev + 1);
+
+    // Mark instructions seen after 3 votes
+    if (newVoteCount >= 3 && !instructionsSeen) {
+      markInstructionsSeen();
+    }
 
     // Optimistic fire-and-forget with error feedback
     castVote(currentItem.nftId, currentItem.editionNumber, voteType)
@@ -192,17 +175,7 @@ export function VotingFeed() {
         }, 200);
       }
     }, 250);
-  }, [feed, cardExiting, castVote, loadFeed, votesRemaining, dailyLimit, isHolder, refreshPowerLevel, toast]);
-
-  const handleUndo = useCallback(() => {
-    if (!lastVote || undoUsed) return;
-    setUndoUsed(true);
-    // UI-only undo: decrement session counter
-    if (lastVote.voteType === 1) setSessionLikes(prev => Math.max(0, prev - 1));
-    else setSessionDislikes(prev => Math.max(0, prev - 1));
-    setVoteCount(prev => Math.max(0, prev - 1));
-    setLastVote(null);
-  }, [lastVote, undoUsed]);
+  }, [feed, cardExiting, castVote, loadFeed, votesRemaining, dailyLimit, isHolder, refreshPowerLevel, toast, voteCount, instructionsSeen, markInstructionsSeen, powerLevelBefore, player]);
 
   const handleRetry = useCallback(() => {
     setFeedError(false);
@@ -236,8 +209,7 @@ export function VotingFeed() {
         likes={sessionLikes}
         dislikes={sessionDislikes}
         powerLevel={player?.powerLevel ?? 0}
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        powerLevelDelta={isHolder ? (player?.powerLevel ?? 0) - powerLevelBefore.current : 0}
+        powerLevelDelta={isHolder && powerLevelBefore !== null ? (player?.powerLevel ?? 0) - powerLevelBefore : 0}
         voteStreak={isHolder ? player?.voteStreak : undefined}
         isHolder={isHolder}
       />
@@ -317,8 +289,6 @@ export function VotingFeed() {
       <VoteButtons
         onLike={() => handleVote(1)}
         onDislike={() => handleVote(-1)}
-        onUndo={handleUndo}
-        undoAvailable={!!lastVote && !undoUsed}
         disabled={cardExiting || votesRemaining <= 0}
       />
 

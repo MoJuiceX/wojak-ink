@@ -270,8 +270,7 @@ export function SwipeCard({
 
       {/* Info bar */}
       <div className="vote-card-info">
-        <span className="vote-card-info-name">{name}</span>
-        <span className="vote-card-info-edition">#{editionNumber}</span>
+        <span className="vote-card-info-name">Your Wojak #{editionNumber} &middot; {name}</span>
       </div>
     </motion.div>
   );
