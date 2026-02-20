@@ -2,27 +2,38 @@
 // Generates fun, meme-culture names. Max 15 characters.
 
 const PREFIXES = [
-  'Moon', 'Chia', 'Degen', 'Cope', 'Sigma', 'Based', 'Mega', 'Ultra',
-  'Pepe', 'Donut', 'Alpha', 'Iron', 'Dark', 'Gold', 'Neon', 'Zen',
-  'Pixel', 'Turbo', 'Lil', 'Big', 'Dr', 'King', 'Lord', 'Ser',
-  'Bro', 'Papa', 'Baby', 'Mad', 'Chill', 'Hype',
+  // Tang Gang — orange / citrus / Chia community
+  'Tang', 'Honk', 'Bepe', 'Pulp', 'Citrus', 'Zesty', 'Tangy', 'Orange',
+  'Peel', 'Rind', 'Juice', 'Juicy', 'Wedge', 'Navel', 'Squeeze',
+  // Wojak / Internet
+  'Doomer', 'Bloomer', 'Coomer', 'Feels', 'Based', 'Cursed', 'Gigachad', 'Brainlet',
+  // Crypto
+  'Degen', 'Diamond', 'Laser', 'HODL', 'Rekt', 'Wagmi', 'Whale', 'Bullish', 'Rugged',
+  // Gaming / Dark
+  'Shadow', 'Iron', 'Ghost', 'Hyper', 'Ultra', 'Void', 'Chaos', 'Neon',
+  // Internet
+  'Turbo', 'Sigma', 'Alpha', 'Omega', 'Clown', 'Cringe', 'NPC',
 ];
 
 const SUFFIXES = [
-  'Boy', 'Chad', 'King', 'Lord', 'Dude', 'Man', 'Bro', 'Ape',
-  'Punk', 'Bear', 'Bull', 'Dev', 'Whale', 'Frog', 'Sage', 'Boss',
-  'Don', 'Sir', 'Mage', 'Chef', 'Monk', 'Slayer', 'Flex',
-  'Rick', 'Sensei', 'Tank', 'Pro', 'Max', 'Rex', 'Ace',
+  'Maxi', 'Lord', 'King', 'OG', 'Fren', 'Sage', 'Wizard', 'Knight', 'Monk', 'Chad',
+  'Hands', 'Eyes', 'Pilled', 'Gang', 'Brain', 'Mode', 'Vibes', '9000', 'IRL', 'Ape',
+  'Slayer', 'Master',
 ];
 
 const FULL_NAMES = [
-  'Moon Boy', 'Chia Chad', 'Degen King', 'Cope Lord',
-  'Sigma Grind', 'Based Dad', 'Paper Hands', 'Donut Lord',
-  'Big Brain', 'Numb Skull', 'Lil Pump', 'Iron Hands',
-  'Turbo Nerd', 'Dark Mage', 'Pixel Punk', 'Zen Master',
-  'Gold Digger', 'Neon Cowboy', 'Mad Lad', 'Hype Beast',
-  'Bag Holder', 'Floor Sniper', 'Rug Puller', 'Chart Wiz',
-  'Vibe Check', 'No Chill', 'NGMI Steve', 'WAGMI Bro',
+  // Tang Gang
+  'Winners Win', 'Orange Maxi', 'Honk Pilled', 'Tang Lord', 'Pulp Gang',
+  'Bepe Maxi', 'Neck Growth', 'Zesty Chad', 'Citrus King', 'Peel Gang',
+  'Juice Wizard', 'Navel Sage',
+  // Wojak / Internet
+  'Feels Good', 'This Is Fine', 'Doomer Mode', 'Gigachad OG', 'Big Brain',
+  'Clown World', 'NPC Brain', 'Touch Grass', 'Brainlet IRL', 'Based Lord',
+  // Crypto
+  'Diamond Hands', 'Paper Hands', 'Laser Eyes', 'Wagmi Fren', 'Rekt Again',
+  'Degen Lord', 'Rug Survivor', 'Whale Alert', 'Moon Soon', 'NGMI Steve',
+  // Gaming / Dark
+  'Void Walker', 'Shadow King', 'Iron Fist', 'Chaos Mode', 'Neon Ghost', 'Coomer IRL',
 ];
 
 export const MAX_NAME_LENGTH = 15;
