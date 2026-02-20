@@ -48,6 +48,7 @@ vi.mock('./uploadToIPFS', () => ({
 // Mock rateLimit
 vi.mock('../../lib/rateLimit', () => ({
   checkRateLimit: vi.fn().mockResolvedValue({ allowed: true, remaining: 4, resetAt: Date.now() + 60000 }),
+  incrementRateLimit: vi.fn().mockResolvedValue(undefined),
   getRateLimitKey: vi.fn().mockReturnValue('ip:127.0.0.1'),
   MINT_RATE_LIMITS: {
     prepare: { windowMs: 60000, maxRequests: 5, keyPrefix: 'mint-prepare' },

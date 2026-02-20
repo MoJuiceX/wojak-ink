@@ -22,7 +22,7 @@ import {
   SURCHARGE_CATEGORIES,
   SURCHARGE_EXEMPT_TRAITS,
 } from './_shared';
-import { checkRateLimit, getRateLimitKey, MINT_RATE_LIMITS } from '../../lib/rateLimit';
+import { checkRateLimit, incrementRateLimit, getRateLimitKey, MINT_RATE_LIMITS } from '../../lib/rateLimit';
 import { consolidateTraits } from './traitResolver';
 import { sha256Hex, base64ToUint8Array } from './uploadToIPFS';
 import { logMintStep } from './auditHelper';
@@ -91,15 +91,16 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     return errorResponse('Missing or invalid walletAddress', 400);
   }
 
-  // Rate limit: per-IP cap (30/min) and per-wallet (5/min) so shared IPs don't block one user
+  // Rate limit: check only (do NOT increment here). We increment only when we create a new job below.
+  // This way idempotent replays (same idempotencyKey) and failed requests don't burn the user's quota.
   const ipKey = getRateLimitKey(request);
-  const ipResult = await checkRateLimit(env.DB, ipKey, MINT_RATE_LIMITS.prepareByIP, true);
+  const ipResult = await checkRateLimit(env.DB, ipKey, MINT_RATE_LIMITS.prepareByIP, true, false);
   if (!ipResult.allowed) {
     const retryAfterSeconds = Math.max(0, Math.ceil((ipResult.resetAt - Date.now()) / 1000));
     return jsonResponse({ error: 'Too many mint requests. Please wait a moment.', retryAfterSeconds }, 429);
   }
   const walletKey = getRateLimitKey(request, wallet);
-  const walletResult = await checkRateLimit(env.DB, walletKey, MINT_RATE_LIMITS.prepare, true);
+  const walletResult = await checkRateLimit(env.DB, walletKey, MINT_RATE_LIMITS.prepare, true, false);
   if (!walletResult.allowed) {
     const retryAfterSeconds = Math.max(0, Math.ceil((walletResult.resetAt - Date.now()) / 1000));
     return jsonResponse({ error: 'Too many mint requests. Please wait a moment.', retryAfterSeconds }, 429);
@@ -421,6 +422,10 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
     // ── Trigger background processing ──
     context.waitUntil(processJob(env, jobId, imageBase64));
+
+    // ── Increment rate limit only now (new job created). Idempotent replays never reach here.
+    await incrementRateLimit(env.DB, ipKey, MINT_RATE_LIMITS.prepareByIP);
+    await incrementRateLimit(env.DB, walletKey, MINT_RATE_LIMITS.prepare);
 
     // ── Return immediately ──
     return jsonResponse({

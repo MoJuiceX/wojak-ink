@@ -19,8 +19,9 @@ interface RateLimitResult {
 }
 
 /**
- * Check and update rate limit for a given key
- * Uses user ID if authenticated, otherwise IP address
+ * Check (and optionally increment) rate limit for a given key.
+ * When increment is false, only reads state and returns allowed/remaining — use for
+ * mint submit so we only increment when we actually create a new job (not on idempotent replay).
  *
  * failClosed: if true, deny requests when DB is unavailable (use for mint endpoints)
  */
@@ -28,7 +29,8 @@ export async function checkRateLimit(
   db: D1Database | undefined,
   key: string,
   config: RateLimitConfig,
-  failClosed = false
+  failClosed = false,
+  increment = true
 ): Promise<RateLimitResult> {
   const now = Date.now();
   const resetAt = now + config.windowMs;
@@ -64,18 +66,20 @@ export async function checkRateLimit(
       };
     }
 
-    // Upsert: reset count if window expired, otherwise increment
-    await db.prepare(`
-      INSERT INTO rate_limits (key, count, timestamp)
-      VALUES (?, 1, ?)
-      ON CONFLICT(key) DO UPDATE SET
-        count = CASE WHEN timestamp < ? THEN 1 ELSE count + 1 END,
-        timestamp = CASE WHEN timestamp < ? THEN ? ELSE timestamp END
-    `).bind(rateLimitKey, nowDate, windowStartDate, windowStartDate, nowDate).run();
+    if (increment) {
+      // Upsert: reset count if window expired, otherwise increment
+      await db.prepare(`
+        INSERT INTO rate_limits (key, count, timestamp)
+        VALUES (?, 1, ?)
+        ON CONFLICT(key) DO UPDATE SET
+          count = CASE WHEN timestamp < ? THEN 1 ELSE count + 1 END,
+          timestamp = CASE WHEN timestamp < ? THEN ? ELSE timestamp END
+      `).bind(rateLimitKey, nowDate, windowStartDate, windowStartDate, nowDate).run();
+    }
 
     return {
       allowed: true,
-      remaining: config.maxRequests - currentCount - 1,
+      remaining: config.maxRequests - currentCount - (increment ? 1 : 0),
       resetAt,
     };
   } catch (error) {
@@ -85,6 +89,28 @@ export async function checkRateLimit(
     }
     return { allowed: true, remaining: config.maxRequests - 1, resetAt };
   }
+}
+
+/**
+ * Increment rate limit for a key (e.g. after successfully creating a mint job).
+ * Call only when a new job is created — not on idempotent replay.
+ */
+export async function incrementRateLimit(
+  db: D1Database,
+  key: string,
+  config: RateLimitConfig
+): Promise<void> {
+  const now = Date.now();
+  const windowStartDate = new Date(now - config.windowMs).toISOString();
+  const nowDate = new Date(now).toISOString();
+  const rateLimitKey = `${config.keyPrefix}:${key}`;
+  await db.prepare(`
+    INSERT INTO rate_limits (key, count, timestamp)
+    VALUES (?, 1, ?)
+    ON CONFLICT(key) DO UPDATE SET
+      count = CASE WHEN timestamp < ? THEN 1 ELSE count + 1 END,
+      timestamp = CASE WHEN timestamp < ? THEN ? ELSE timestamp END
+  `).bind(rateLimitKey, nowDate, windowStartDate, windowStartDate, nowDate).run();
 }
 
 /**
