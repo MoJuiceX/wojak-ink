@@ -29,17 +29,35 @@ So one "click" could send 2+ requests (e.g. double-fire), each one incrementing 
 
 ## Result
 - One user click → 1 or 2 requests (e.g. double-fire).
-- Request 1: check (0 < 15), no existing job, create job, **increment once**, return jobId.
-- Request 2 (same idempotencyKey): check (1 < 15), **existing job**, return existing jobId, **no increment**.
+- Request 1: check (0 < 30), no existing job, create job, **increment once**, return jobId.
+- Request 2 (same idempotencyKey): check (1 < 30), **existing job**, return existing jobId, **no increment**.
 - So quota used = 1 for one logical mint. User no longer hits 429 from a single click.
+
+## If you still see 429 after deploying
+
+1. **Confirm production has the latest code**  
+   The fix only works when deployed: rate limit must be *check-only* at the start and *increment only after job creation*. If production is still on the old code, every request increments and you will keep seeing 429.
+
+2. **Wait for the current window to reset**  
+   If you hit 429 before deploying, your wallet/IP row may already be at the limit (e.g. 30/30). The counter only resets when the 1‑minute window expires. **Wait 60 seconds** (or until "Try again in X seconds" reaches 0), then try again. After that, the next mint uses 1 slot only.
+
+3. **Use the 429 response to debug**  
+   The API now returns `limit: 'wallet'` or `limit: 'ip'` in the 429 body. In the console (Network → select the failed request → Response), check which limit was hit.  
+   - `limit: 'wallet'` → 30 new jobs for that wallet in the last minute (or old code incrementing on every request).  
+   - `limit: 'ip'` → 30 requests from that IP in the last minute.
+
+4. **Per-wallet limit raised to 30**  
+   So even with some double-fires or retries, a single user should not hit the limit under normal use.
 
 ## Deploy
 1. Commit these changes.
 2. `npm run build`
 3. `npx wrangler pages deploy dist --project-name=wojak-ink`
-4. Test mint on wojak.ink/generator.
+4. **Wait 60 seconds** (so any existing rate-limit window can reset).
+5. Test mint on wojak.ink/generator.
 
 ## Files changed
-- `functions/lib/rateLimit.ts` — check-only option + `incrementRateLimit`
-- `functions/api/mint/submit.ts` — check without increment at start; increment only after job creation
+- `functions/lib/rateLimit.ts` — check-only option, `incrementRateLimit`, prepare maxRequests 30
+- `functions/api/mint/submit.ts` — check without increment at start; increment only after job creation; 429 body includes `limit: 'ip' | 'wallet'`
 - `functions/api/mint/submit.test.ts` — mock `incrementRateLimit`
+- `src/contexts/MintContext.tsx` — capture params/key before any setState/await so duplicate calls use same idempotency key

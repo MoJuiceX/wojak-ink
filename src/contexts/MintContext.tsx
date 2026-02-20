@@ -554,7 +554,8 @@ export function MintProvider({ children }: { children: ReactNode }) {
     if (isSubmittingRef.current) return; // Prevent double-submit (e.g. double-click before state updates)
     isSubmittingRef.current = true;
 
-    const { imageBlob, selectedLayers, selectedColors, mintType } = pendingMintParams;
+    // Capture key and params before any setState/await so duplicate calls use same idempotency key
+    const params = pendingMintParams;
     const key = idempotencyKey || crypto.randomUUID();
 
     setMintStep('submitted');
@@ -562,17 +563,17 @@ export function MintProvider({ children }: { children: ReactNode }) {
     setPendingMintParams(null);
 
     try {
-      const imageBase64 = await blobToBase64(imageBlob);
+      const imageBase64 = await blobToBase64(params.imageBlob);
 
       const res = await fetch('/api/mint/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           walletAddress: address,
-          selectedLayers,
-          selectedColors,
+          selectedLayers: params.selectedLayers,
+          selectedColors: params.selectedColors,
           imageBase64,
-          mintType,
+          mintType: params.mintType,
           idempotencyKey: key,
           customName: customName.trim() || undefined,
         }),
@@ -595,10 +596,10 @@ export function MintProvider({ children }: { children: ReactNode }) {
       setCurrentJob({
         jobId: data.jobId,
         step: data.step || 'queued',
-        mintType: data.mintType || mintType,
+        mintType: data.mintType || params.mintType,
         stepLabel: 'Preparing your mint...',
         stepNumber: 1,
-        totalSteps: mintType === 'paid' ? 6 : 5,
+        totalSteps: params.mintType === 'paid' ? 6 : 5,
         creditsSpent: data.creditCost,
       });
 
