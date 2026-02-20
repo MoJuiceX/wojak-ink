@@ -7,7 +7,7 @@ describe('detail-combat-map', () => {
     for (const entries of Object.values(DETAIL_COMBAT_MAP)) {
       count += Object.keys(entries).length;
     }
-    expect(count).toBe(38);
+    expect(count).toBe(46);
   });
 
   it('Comrade Hat + Star gives FIRE +2, Attack +1', () => {
@@ -17,8 +17,8 @@ describe('detail-combat-map', () => {
     expect(bonus!.natureBonus).toEqual({ stat: 'attack', pts: 1 });
   });
 
-  it('Beer Hat + Red-bull gives AIR +1, Speed +1', () => {
-    const bonus = getDetailBonus('Head_Beer-Hat', 'Red-bull');
+  it('Beer Hat + Red Bull gives AIR +1, Speed +1', () => {
+    const bonus = getDetailBonus('Head_Beer-Hat', 'Red Bull');
     expect(bonus).toBeDefined();
     expect(bonus!.typeBonus).toEqual({ type: 'AIR', pts: 1 });
     expect(bonus!.natureBonus).toEqual({ stat: 'speed', pts: 1 });

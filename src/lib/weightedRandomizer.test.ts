@@ -41,7 +41,7 @@ describe('getWeightedRandomTrait', () => {
   });
 
   it('returns a valid trait name from the category', () => {
-    const knownTraits = ['Classic', 'Rekt', 'Rugged', 'Bleeding', 'Terminator'];
+    const knownTraits = ['Classic', 'Rekt', 'Rugged', 'Bleeding Bags', 'Terminator'];
     for (let i = 0; i < 20; i++) {
       const trait = getWeightedRandomTrait('Base');
       expect(knownTraits).toContain(trait);

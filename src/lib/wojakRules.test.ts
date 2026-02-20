@@ -144,8 +144,9 @@ describe('wojakRules', () => {
         }
       );
       const result = getDisabledLayers(resolver);
-      expect(result.disabledOptions?.Mask).toContain('Copium');
-      expect(result.forceSelections?.Mask).toBe('');
+      // Mutual exclusion now handled by suspend/restore in reducer — no graying out
+      expect((result.disabledOptions?.Mask ?? []).includes('Copium')).toBe(false);
+      expect(result.forceSelections?.Mask ?? '').toBe('');
     });
 
     it('Astronaut and Copium: disables Astronaut option when only Copium selected', () => {
@@ -159,7 +160,8 @@ describe('wojakRules', () => {
         { Mask: KNOWN_TRAIT_IDS.Mask_Copium }
       );
       const result = getDisabledLayers(resolver);
-      expect(result.disabledOptions?.Clothes).toContain('Astronaut');
+      // Mutual exclusion now handled by suspend/restore in reducer — no graying out
+      expect((result.disabledOptions?.Clothes ?? []).includes('Astronaut')).toBe(false);
     });
 
     it('Astronaut and Night Vision: clears Eyes and disables Night Vision when Astronaut selected', () => {
@@ -176,9 +178,10 @@ describe('wojakRules', () => {
         }
       );
       const result = getDisabledLayers(resolver);
-      expect(result.forceSelections?.Eyes).toBe('');
-      expect(result.clearSelections).toContain('Eyes');
-      expect(result.disabledOptions?.Eyes).toContain('Night Vision');
+      // Mutual exclusion now handled by suspend/restore in reducer — no graying out
+      expect(result.forceSelections?.Eyes ?? undefined).toBeUndefined();
+      expect((result.clearSelections ?? []).includes('Eyes')).toBe(false);
+      expect((result.disabledOptions?.Eyes ?? []).includes('Night Vision')).toBe(false);
     });
 
     it('Astronaut disables Night Vision option when Astronaut selected (no Eyes)', () => {
@@ -191,7 +194,8 @@ describe('wojakRules', () => {
         { Clothes: KNOWN_TRAIT_IDS.Clothes_Astronaut }
       );
       const result = getDisabledLayers(resolver);
-      expect(result.disabledOptions?.Eyes).toContain('Night Vision');
+      // Mutual exclusion now handled by suspend/restore in reducer — no graying out
+      expect((result.disabledOptions?.Eyes ?? []).includes('Night Vision')).toBe(false);
     });
 
     it('disables MouthItem when Pipe (MouthBase) is selected', () => {
@@ -247,8 +251,9 @@ describe('wojakRules', () => {
         {}
       );
       const result = getDisabledLayers(resolver);
-      expect(result.disabledOptions?.Eyes).toContain('Laser');
-      expect(result.disabledOptionReasons?.Eyes?.['Laser-Eyes']).toBeDefined();
+      // Fake mask / Laser Eyes mutual exclusion now handled by suspend/restore in reducer
+      expect((result.disabledOptions?.Eyes ?? []).includes('Laser')).toBe(false);
+      expect(result.disabledOptionReasons?.Eyes?.['Laser-Eyes'] ?? undefined).toBeUndefined();
     });
 
     it('Mask blocks MouthItem and FacialHair', () => {
@@ -508,8 +513,9 @@ describe('wojakRules (extended)', () => {
         { Head: KNOWN_TRAIT_IDS.Head_FirefighterHelmet }
       );
       const result = getDisabledLayers(resolver as SelectionResolver);
-      expect(result.disabledOptions?.Eyes).toContain('VR headset');
-      expect(result.disabledOptions?.Eyes).toContain('Night Vision');
+      // Firefighter Helmet / Eyes mutual exclusion now handled by suspend/restore in reducer
+      expect((result.disabledOptions?.Eyes ?? []).includes('VR headset')).toBe(false);
+      expect((result.disabledOptions?.Eyes ?? []).includes('Night Vision')).toBe(false);
     });
 
     it('clears Eyes when Firefighter Helmet is selected alongside VR Headset', () => {
@@ -527,8 +533,9 @@ describe('wojakRules (extended)', () => {
         }
       );
       const result = getDisabledLayers(resolver as SelectionResolver);
-      expect(result.clearSelections).toContain('Eyes');
-      expect(result.forceSelections?.Eyes).toBe('');
+      // Mutual exclusion now handled by suspend/restore in reducer
+      expect((result.clearSelections ?? []).includes('Eyes')).toBe(false);
+      expect(result.forceSelections?.Eyes ?? undefined).toBeUndefined();
     });
 
     it('disables Firefighter Helmet option when VR Headset is selected', () => {
@@ -542,7 +549,8 @@ describe('wojakRules (extended)', () => {
         { Eyes: KNOWN_TRAIT_IDS.Eyes_VRHeadset }
       );
       const result = getDisabledLayers(resolver as SelectionResolver);
-      expect(result.disabledOptions?.Head).toContain('Firefighter Helmet');
+      // Mutual exclusion now handled by suspend/restore in reducer
+      expect((result.disabledOptions?.Head ?? []).includes('Firefighter Helmet')).toBe(false);
     });
   });
 
@@ -559,7 +567,8 @@ describe('wojakRules (extended)', () => {
         {}
       );
       const result = getDisabledLayers(resolver as SelectionResolver);
-      expect(result.disabledOptions?.Eyes).toContain('Laser');
+      // Laser Eyes / Fake mask mutual exclusion now handled by suspend/restore in reducer
+      expect((result.disabledOptions?.Eyes ?? []).includes('Laser')).toBe(false);
     });
 
     it('clears Eyes when Fake mask is selected alongside Laser Eyes', () => {
@@ -574,8 +583,9 @@ describe('wojakRules (extended)', () => {
         {}
       );
       const result = getDisabledLayers(resolver as SelectionResolver);
-      expect(result.clearSelections).toContain('Eyes');
-      expect(result.forceSelections?.Eyes).toBe('');
+      // Mutual exclusion now handled by suspend/restore in reducer
+      expect((result.clearSelections ?? []).includes('Eyes')).toBe(false);
+      expect(result.forceSelections?.Eyes ?? undefined).toBeUndefined();
     });
 
     it('allows Laser Eyes with Hannibal mask', () => {
@@ -621,7 +631,8 @@ describe('wojakRules (extended)', () => {
         {}
       );
       const result = getDisabledLayers(resolver as SelectionResolver);
-      expect(result.disabledOptions?.Mask).toContain('Fake');
+      // Laser Eyes / Fake mask mutual exclusion now handled by suspend/restore in reducer
+      expect((result.disabledOptions?.Mask ?? []).includes('Fake')).toBe(false);
       // Other masks should NOT be disabled
       expect(result.disabledLayers).not.toContain('Mask');
     });

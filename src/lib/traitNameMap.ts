@@ -233,6 +233,7 @@ export const TRAIT_NAME_MAP: Record<string, string> = {
   'mask skull 07 rally': 'Fake It Mask',
   'mask skull 08 void': 'Fake It Mask',
   'mask skull 09 love': 'Fake It Mask',
+  'skull mask love': 'Fake It Mask',
   'mask skull 10 bengal': 'Fake It Mask',
   'mask skull 11 pumpkinl': 'Fake It Mask',
   'mask skull 12 gilded': 'Fake It Mask',
@@ -315,7 +316,6 @@ export const TRAIT_NAME_MAP: Record<string, string> = {
   'chia farm': 'Chia Farm',
   'hell': 'Hell',
   'matrix': 'Matrix',
-  "mom\u0192\u00c7\u00d6s basement": 'Moms Basement',
   "mom'''s basement": 'Moms Basement',   // ΓÇÖ → three apostrophes after regex
   'moms basement': 'Moms Basement',
   "mom's basement": 'Moms Basement',

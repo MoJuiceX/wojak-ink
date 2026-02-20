@@ -228,11 +228,10 @@ export function checkLeaderboardBeat(
     return null;
   }
 
-  // Check all entries to see if we just beat someone
-  // Start from lowest ranked (highest index) for natural progression
-  for (let i = leaderboard.length - 1; i >= 0; i--) {
+  // Check all entries to see if we just beat someone.
+  // Return the best (highest) rank we beat — iterate from rank 1 (index 0).
+  for (let i = 0; i < leaderboard.length; i++) {
     const entry = leaderboard[i];
-    // We beat them if: our new score >= their score AND we haven't already celebrated this
     if (newScore >= entry.score && !beatenRanks.has(entry.rank)) {
       return entry;
     }

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   checkSpecialMilestone,
   checkIntervalMilestone,
@@ -15,6 +15,17 @@ import {
   processScore,
 } from './scoring';
 import type { LeaderboardEntry } from '@/hooks/data/useLeaderboard';
+
+// Stub localStorage for getStoredHighScore / saveHighScore tests (happy-dom may omit clear)
+const flappyStorage: Record<string, string> = {};
+const localStorageStub = {
+  getItem: (key: string) => flappyStorage[key] ?? null,
+  setItem: (key: string, value: string) => { flappyStorage[key] = value; },
+  removeItem: (key: string) => { delete flappyStorage[key]; },
+  clear: () => { Object.keys(flappyStorage).forEach(k => delete flappyStorage[k]); },
+  get length() { return Object.keys(flappyStorage).length; },
+  key: () => null,
+};
 
 // Helper to build a minimal LeaderboardEntry
 const makeEntry = (rank: number, score: number, displayName = `Player${rank}`): LeaderboardEntry => ({
@@ -276,7 +287,8 @@ describe('isNewPersonalBest', () => {
 
 describe('getStoredHighScore and saveHighScore', () => {
   beforeEach(() => {
-    localStorage.clear();
+    vi.stubGlobal('localStorage', localStorageStub);
+    localStorageStub.clear();
   });
 
   it('returns 0 when no high score stored', () => {
@@ -297,7 +309,8 @@ describe('getStoredHighScore and saveHighScore', () => {
 
 describe('handleGameOverScore', () => {
   beforeEach(() => {
-    localStorage.clear();
+    vi.stubGlobal('localStorage', localStorageStub);
+    localStorageStub.clear();
   });
 
   it('returns isNewHighScore true when score is higher', () => {

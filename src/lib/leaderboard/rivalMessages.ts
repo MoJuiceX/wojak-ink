@@ -48,10 +48,10 @@ const LARGE_GAP_MESSAGES = [
  * Just got passed messages - Personal vendetta
  */
 const PASSED_MESSAGES = [
-  "😤 {rival} just took YOUR spot. Take it back. NOW.",
-  "😤 {rival} passed you. This is personal now.",
+  "😤 {rival} just took YOUR spot. {gap} pts to take it back. NOW.",
+  "😤 {rival} passed you. {gap} pts to make it personal.",
   "😤 {rival} thinks they're better? {gap} pts says otherwise.",
-  "😤 {rival} stole your rank. Time for revenge.",
+  "😤 {rival} stole your rank. {gap} pts to get it back.",
   "😤 You let {rival} pass you? {gap} pts. FIX THIS.",
 ];
 

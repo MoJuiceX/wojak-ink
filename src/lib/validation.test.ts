@@ -15,7 +15,7 @@ describe('isValidChiaAddress', () => {
   });
 
   it('accepts a valid address mixing letters and digits', () => {
-    const body = 'a1b2c3d4e5f6g7h8i9j0a1b2c3d4e5f6g7h8i9j0a1b2c3d4e5f6g7h8';
+    const body = 'a1b2c3d4e5f6g7h8i9j0a1b2c3d4e5f6g7h8i9j0a1b2c3d4e5f6g7h8ab';
     expect(body.length).toBe(58);
     expect(isValidChiaAddress('xch1' + body)).toBe(true);
   });

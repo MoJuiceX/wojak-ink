@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { TRAIT_COMBAT_MAP, getTraitCombat } from './trait-type-map';
 
 describe('trait-type-map', () => {
-  it('has 129 trait entries', () => {
-    expect(Object.keys(TRAIT_COMBAT_MAP).length).toBe(129);
+  it('has 142 trait entries', () => {
+    expect(Object.keys(TRAIT_COMBAT_MAP).length).toBe(142);
   });
 
   it('Firefighter Uniform gives FIRE 5pts primary', () => {

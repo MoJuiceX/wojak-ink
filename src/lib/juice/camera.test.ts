@@ -282,14 +282,17 @@ describe('updateCamera', () => {
   });
 
   it('applies bounds clamping during update', () => {
-    const bounds: CameraBounds = { minX: 0, minY: 0, maxX: 100, maxY: 100 };
-    const cam = createCamera(800, 600, { bounds, x: 500, y: 500 });
-    cam.targetX = 500;
-    cam.targetY = 500;
+    // Bounds larger than viewport so camera center has a valid range
+    const bounds: CameraBounds = { minX: 0, minY: 0, maxX: 1000, maxY: 800 };
+    const cam = createCamera(800, 600, { bounds, x: 500, y: 400 });
+    cam.targetX = 2000;
+    cam.targetY = 2000;
     updateCamera(cam, 16);
-    // Camera should be clamped within bounds
-    expect(cam.x).toBeLessThanOrEqual(bounds.maxX);
-    expect(cam.y).toBeLessThanOrEqual(bounds.maxY);
+    // Camera center clamped so viewport stays in bounds
+    const maxCamX = bounds.maxX - cam.viewportWidth / (2 * cam.zoom);
+    const maxCamY = bounds.maxY - cam.viewportHeight / (2 * cam.zoom);
+    expect(cam.x).toBeLessThanOrEqual(maxCamX);
+    expect(cam.y).toBeLessThanOrEqual(maxCamY);
   });
 });
 

@@ -224,7 +224,7 @@ export async function processJob(
         attributes: [
           { type: 'description', value: 'Your Wojak puts collectors in control. Choose every layer, every color, every detail.' },
           { type: 'website', value: 'https://wojak.ink' },
-          { type: 'twitter', value: 'https://x.com/WojakInk' },
+          { type: 'twitter', value: 'https://x.com/MoJuiceX' },
         ],
       },
       edition: mintNumber,

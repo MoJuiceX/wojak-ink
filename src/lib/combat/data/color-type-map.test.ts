@@ -92,14 +92,14 @@ describe('getTypePointsForColor', () => {
       expect(result.primary).toBe('ICE');
     });
 
-    it('light gray (#c0c0c0) returns METAL as primary', () => {
+    it('light gray (#c0c0c0) returns AIR as primary', () => {
       const result = getTypePointsForColor('#c0c0c0');
-      expect(result.primary).toBe('METAL');
+      expect(result.primary).toBe('AIR');
     });
 
-    it('mid gray (#808080) returns STONE as primary', () => {
+    it('mid gray (#808080) returns NEUTRAL as primary', () => {
       const result = getTypePointsForColor('#808080');
-      expect(result.primary).toBe('STONE');
+      expect(result.primary).toBe('NEUTRAL');
     });
 
     it('black (#000000) returns SHADOW as primary', () => {

@@ -77,6 +77,7 @@ export const PRIMARY_NAV_ITEMS: NavItem[] = [
     shortLabel: 'BigPulp',
     icon: Lightbulb,
     badge: 'dot', // Draw attention to the AI feature
+    featured: true, // Center FAB in mobile nav
   },
   {
     id: 'generator',
@@ -92,7 +93,6 @@ export const PRIMARY_NAV_ITEMS: NavItem[] = [
     shortLabel: 'Fight',
     icon: Swords,
     badge: 'dot',
-    featured: true, // Center FAB in mobile nav
     children: [
       { id: 'fight-club-battle', path: '/fight-club/battle', label: 'Battle', icon: Swords },
       { id: 'fight-club-vote', path: '/fight-club/vote', label: 'Vote', icon: Heart },
@@ -173,12 +173,12 @@ export const SECONDARY_NAV_ITEMS: NavItem[] = [
 
 /**
  * Mobile bottom nav items (reordered for center FAB placement)
- * Order: Gallery, Generator, Fight Club (center FAB), Games, More
+ * Order: Gallery, Generator, BigPulp (center FAB), Games, More
  */
 export const MOBILE_NAV_ITEMS: NavItem[] = [
   PRIMARY_NAV_ITEMS[0], // Gallery
   PRIMARY_NAV_ITEMS[2], // Generator
-  PRIMARY_NAV_ITEMS[3], // Fight Club (center - featured)
+  PRIMARY_NAV_ITEMS[1], // BigPulp (center - featured)
   PRIMARY_NAV_ITEMS[4], // Games
   MORE_NAV_ITEM,
 ];

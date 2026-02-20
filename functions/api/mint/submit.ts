@@ -26,7 +26,11 @@ import { checkRateLimit, getRateLimitKey, MINT_RATE_LIMITS } from '../../lib/rat
 import { consolidateTraits } from './traitResolver';
 import { sha256Hex, base64ToUint8Array } from './uploadToIPFS';
 import { logMintStep } from './auditHelper';
+import { validateMoveSelection } from '../../../src/lib/combat/data/moves';
 // Combat moves are now auto-assigned server-side in process.ts
+
+/** Re-export for tests; moves are validated server-side in process. */
+export const validateCombatMoves = validateMoveSelection;
 
 interface Env extends ProcessEnv {
   DB: D1Database;
@@ -74,13 +78,6 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     return errorResponse('Service not configured', 500);
   }
 
-  // Rate limit: 5 submit attempts per minute per IP/wallet
-  const rlKey = getRateLimitKey(request);
-  const rlResult = await checkRateLimit(env.DB, rlKey, MINT_RATE_LIMITS.prepare, true);
-  if (!rlResult.allowed) {
-    return errorResponse('Too many mint requests. Please wait a moment.', 429);
-  }
-
   let body: SubmitBody;
   try {
     body = await request.json();
@@ -88,19 +85,30 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     return errorResponse('Invalid JSON', 400);
   }
 
-  // ── Validate inputs ──
-
+  // ── Validate inputs (minimal: we need wallet for rate limit) ──
   const wallet = body.walletAddress;
+  if (!wallet || !isValidChiaAddress(wallet)) {
+    return errorResponse('Missing or invalid walletAddress', 400);
+  }
+
+  // Rate limit: per-IP cap (30/min) and per-wallet (5/min) so shared IPs don't block one user
+  const ipKey = getRateLimitKey(request);
+  const ipResult = await checkRateLimit(env.DB, ipKey, MINT_RATE_LIMITS.prepareByIP, true);
+  if (!ipResult.allowed) {
+    return errorResponse('Too many mint requests. Please wait a moment.', 429);
+  }
+  const walletKey = getRateLimitKey(request, wallet);
+  const walletResult = await checkRateLimit(env.DB, walletKey, MINT_RATE_LIMITS.prepare, true);
+  if (!walletResult.allowed) {
+    return errorResponse('Too many mint requests. Please wait a moment.', 429);
+  }
+
   const selectedLayers = body.selectedLayers || {};
   const selectedColors = body.selectedColors || {};
   const imageBase64 = body.imageBase64;
   const mintType = body.mintType === 'paid' ? 'paid' : 'free';
   const idempotencyKey = body.idempotencyKey;
   const customName = (body.customName || '').trim();
-
-  if (!wallet || !isValidChiaAddress(wallet)) {
-    return errorResponse('Missing or invalid walletAddress', 400);
-  }
   if (!imageBase64 || typeof imageBase64 !== 'string') {
     return errorResponse('Missing imageBase64', 400);
   }
