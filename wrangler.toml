@@ -31,8 +31,9 @@ SECONDARY_SALES_CUTOFF = "2025-12-20T00:00:00Z"
 # Phase 2: Your Wojak — Minting config
 PHASE2_COLLECTION_UUID = "010a0dd7-56af-4016-953e-ef5e20c73d83"
 PHASE2_PROFILE_ID = "did:chia:15j5d0fm0x65nz7w6jr4c5any8mzrkru2x6l9uy2f0vcrc6jfedcqp20n4q"
-PHASE2_ROYALTY_ADDRESS = "DYNAMIC_PER_MINTER"  # Each creator receives royalties for their own NFT
-PHASE2_ROYALTY_PCT = "10"
+PHASE2_ROYALTY_ADDRESS = "DYNAMIC_PER_MINTER"  # split: 10% minter + 2% treasury via SplitXCH
+TREASURY_ADDRESS = "xch13afmxv0xpyz03t3jfdmcrtv5ecwe5n52977vxd3z2x995f9quunsre5vkd"
+PHASE2_ROYALTY_PCT = "12"
 PINATA_GATEWAY = "gold-important-gibbon-467.mypinata.cloud"
 
 # Secrets (set via `wrangler pages secret put` or Cloudflare Dashboard):
