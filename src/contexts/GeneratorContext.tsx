@@ -618,14 +618,23 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
       if (traits.length === 0) return null;
 
       // For Background: filter out special virtual backgrounds (Solid color, Price overlays)
-      // These should only be manually selected, not randomly chosen
+      // and ensure we only select traits that produce valid paths
       if (layerName === 'Background') {
-        traits = traits.filter(t =>
+        traits = traits.filter(t => {
           // Exclude virtual backgrounds that have __solid__ or __price_ in their path
-          // G2-only backgrounds (no g1Path) are fine to include
-          !t.g1Path?.includes('__solid__') &&
-          !t.g1Path?.includes('__price_')
-        );
+          if (t.g1Path?.includes('__solid__') || t.g1Path?.includes('__price_')) {
+            return false;
+          }
+          // Exclude traits with empty/invalid names that would produce empty paths
+          if (!t.name || t.name.trim() === '' || t.name.toLowerCase() === 'none') {
+            return false;
+          }
+          // Ensure the trait has either a valid g1Path or can produce a valid G2 virtual path
+          if (!t.g1Path && (!t.category || !t.name)) {
+            return false;
+          }
+          return true;
+        });
         if (traits.length === 0) return null;
       }
 
@@ -717,19 +726,30 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
     }
 
     // SAFEGUARD: Background must ALWAYS be selected in randomization
-    // If somehow missing, force select a random background (excluding virtual ones)
-    if (!randomSelections.Background) {
+    // If somehow missing or empty, force select a random valid background
+    const bgPath = randomSelections.Background;
+    const bgIsEmpty = !bgPath || bgPath === '' || bgPath.toLowerCase() === 'none';
+    if (bgIsEmpty) {
       const allBgTraits = await getUnifiedTraits('Background');
-      const validBgTraits = allBgTraits.filter(t =>
-        // Exclude virtual backgrounds that have __solid__ or __price_ in their path
-        // G2-only backgrounds (no g1Path) are fine to include
-        !t.g1Path?.includes('__solid__') &&
-        !t.g1Path?.includes('__price_')
-      );
+      const validBgTraits = allBgTraits.filter(t => {
+        // Exclude virtual backgrounds
+        if (t.g1Path?.includes('__solid__') || t.g1Path?.includes('__price_')) {
+          return false;
+        }
+        // Exclude traits with empty/invalid names
+        if (!t.name || t.name.trim() === '' || t.name.toLowerCase() === 'none') {
+          return false;
+        }
+        // Ensure valid path can be constructed
+        if (!t.g1Path && (!t.category || !t.name)) {
+          return false;
+        }
+        return true;
+      });
       if (validBgTraits.length > 0) {
         const randomBg = validBgTraits[Math.floor(Math.random() * validBgTraits.length)];
-        const bgPath = randomBg.g1Path || `/g2/Background/${randomBg.name.replace(/\s+/g, '-')}`;
-        randomSelections.Background = bgPath;
+        const newBgPath = randomBg.g1Path || `/g2/Background/${randomBg.name.replace(/\s+/g, '-')}`;
+        randomSelections.Background = newBgPath;
         if (randomBg.source === 'g2' || randomBg.source === 'both') {
           g2Picks.push({ layer: 'Background', trait: randomBg, colors: buildRandomColors(randomBg) });
         }
@@ -1074,6 +1094,8 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
       setScrollPosition,
       setStickyPreview,
       clearGeneratorError,
+      derived.selectedLayers,
+      derived.g2Selections,
     ]
   );
 
