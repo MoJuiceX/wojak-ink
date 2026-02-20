@@ -108,6 +108,7 @@ export function BattleView({ battleId, playerNftId, staticBattleData, autoPlay, 
 
   // ── Played turn tracking ────────────────────────────────────────────────
   const [playedTurns, setPlayedTurns] = useState(0);
+  const [playbackDone, setPlaybackDone] = useState(false);
 
   // ── Overlay cleanup callbacks ─────────────────────────────────────────
   const removeDamageNumber = useCallback((id: string) => {
@@ -166,7 +167,9 @@ export function BattleView({ battleId, playerNftId, staticBattleData, autoPlay, 
       }
     },
     onComplete: () => {
-      // Playback finished — call onDemoComplete if in autoPlay mode
+      // Playback finished — mark playback as done for winner/loser state
+      setPlaybackDone(true);
+      // Call onDemoComplete if in autoPlay mode
       if (autoPlay && onDemoComplete) {
         onDemoComplete();
       }
@@ -345,8 +348,10 @@ export function BattleView({ battleId, playerNftId, staticBattleData, autoPlay, 
   const opponentStatus = isPlayerA ? statusB : statusA;
 
   // Winner/loser animation classes
-  const isPlayerWinner = isComplete && battle.winner === playerNftId;
-  const isOpponentWinner = isComplete && battle.winner != null && battle.winner !== playerNftId;
+  // In autoPlay mode, don't show winner/loser state until animation finishes
+  const isEffectivelyComplete = autoPlay ? playbackDone : isComplete;
+  const isPlayerWinner = isEffectivelyComplete && battle.winner === playerNftId;
+  const isOpponentWinner = isEffectivelyComplete && battle.winner != null && battle.winner !== playerNftId;
   const playerImgClass = isPlayerWinner
     ? 'winner-glow'
     : (isOpponentWinner ? 'loser-fade' : '');
