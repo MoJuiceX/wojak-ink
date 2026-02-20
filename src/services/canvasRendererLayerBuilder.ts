@@ -1059,16 +1059,32 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
     });
   }
 
-  // BandanaMaskOverRonin
-  if (hasBandana && hasRonin) {
+  // Masks over Ronin Helmet: right 50% renders on top of the helmet
+  if (hasRonin) {
     const maskPath = selectedLayers.Mask;
     if (maskPath) {
-      layers.push({
-        path: maskPath,
-        zIndex: LAYER_Z_INDEX.BandanaMaskOverRonin,
-        layerName: 'BandanaMaskOverRonin',
-        clipRightHalf: true,
-      });
+      if (hasBandana) {
+        layers.push({
+          path: maskPath,
+          zIndex: LAYER_Z_INDEX.BandanaMaskOverRonin,
+          layerName: 'BandanaMaskOverRonin',
+          clipRightHalf: true,
+        });
+      } else if (hasHannibal) {
+        layers.push({
+          path: maskPath,
+          zIndex: LAYER_Z_INDEX.HannibalMaskOverRonin,
+          layerName: 'HannibalMaskOverRonin',
+          clipRightHalf: true,
+        });
+      } else if (hasCopium) {
+        layers.push({
+          path: maskPath,
+          zIndex: LAYER_Z_INDEX.CopiumMaskOverRonin,
+          layerName: 'CopiumMaskOverRonin',
+          clipRightHalf: true,
+        });
+      }
     }
   }
 

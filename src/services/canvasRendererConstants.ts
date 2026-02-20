@@ -98,6 +98,8 @@ export const LAYER_Z_INDEX: Record<string, number> = {
   BubbleGumOverHead: 12.1, // Bubble Gum re-drawn on top of Head traits
   MouthOverBeerHat: 12.5,  // Cig, Joint, Cohiba drawn on top of Beer Hat
   BandanaMaskOverRonin: 13,
+  HannibalMaskOverRonin: 13.1, // right 50% of Hannibal mask over Ronin Helmet
+  CopiumMaskOverRonin: 13.2, // right 50% of Copium mask over Ronin Helmet
   NeckbeardOverRonin: 13.5, // right 50% of neckbeard over Ronin Helmet
   MouthBaseOverNeckbeard: 13.6, // MouthBase re-drawn on top of NeckbeardOverRonin
   MouthItemOverNeckbeard: 13.7, // MouthItem re-drawn on top of NeckbeardOverRonin
