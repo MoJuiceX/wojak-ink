@@ -630,26 +630,30 @@ function ruleSuitDisablesHannibal(resolver: SelectionResolver): RuleResult {
 }
 
 /**
- * Laser Eyes and any Mask are mutually exclusive.
- * - When any mask is selected, laser eyes cannot be selected.
- * - When laser eyes are selected, masks cannot be selected.
+ * Laser Eyes and Fake Mask are mutually exclusive.
+ * - When Fake mask is selected, laser eyes cannot be selected.
+ * - When laser eyes are selected, Fake mask cannot be selected.
+ * - Other masks (Hannibal, Copium, Bandana) are compatible with Laser Eyes.
  */
-function ruleLaserEyesMaskMutualExclusion(resolver: SelectionResolver): RuleResult {
+function ruleLaserEyesFakeMaskMutualExclusion(resolver: SelectionResolver): RuleResult {
   const maskPath = resolver.getPath('Mask');
   const eyesPath = resolver.getPath('Eyes');
 
-  const hasMask = !isSelectionPathEmpty(maskPath);
+  const hasFakeMask = !!maskPath && pathContains(maskPath, 'fake');
   const hasLaserEyes = pathContains(eyesPath, 'laser');
 
   const disabledEyesOptions = ['Laser', 'Laser-Eyes', 'Laser Eyes'];
-  const disabledEyesReasons = buildDisabledReasons(disabledEyesOptions, 'Remove Mask');
+  const disabledEyesReasons = buildDisabledReasons(disabledEyesOptions, 'Remove Fake Mask');
 
-  // When mask is selected, disable/clear laser eyes
-  if (hasMask) {
+  const disabledMaskOptions = ['Fake', 'Fake-Mask', 'Fake Mask'];
+  const disabledMaskReasons = buildDisabledReasons(disabledMaskOptions, 'Remove Laser Eyes');
+
+  // When Fake mask is selected, disable/clear laser eyes
+  if (hasFakeMask) {
     if (hasLaserEyes) {
       return {
         disabledLayers: [],
-        reason: 'Remove Mask',
+        reason: 'Remove Fake Mask',
         clearSelections: ['Eyes'],
         forceSelections: { Eyes: '' },
         disabledOptions: { Eyes: disabledEyesOptions },
@@ -663,11 +667,12 @@ function ruleLaserEyesMaskMutualExclusion(resolver: SelectionResolver): RuleResu
     };
   }
 
-  // When laser eyes are selected, disable the entire Mask layer
+  // When laser eyes are selected, disable only the Fake mask option (not all masks)
   if (hasLaserEyes) {
     return {
-      disabledLayers: ['Mask'],
-      reason: 'Remove Laser Eyes',
+      disabledLayers: [],
+      disabledOptions: { Mask: disabledMaskOptions },
+      disabledOptionReasons: { Mask: disabledMaskReasons },
     };
   }
 
@@ -812,7 +817,7 @@ const RULES = [
   ruleFacialHairRequiresMouthBase,
   ruleMaskBlocksOtherLayers,
   ruleHannibalMaskRemovesNeckbeard,
-  ruleLaserEyesMaskMutualExclusion,
+  ruleLaserEyesFakeMaskMutualExclusion,
   ruleClothesAddonRequiresTeeOrTanktop,
   ruleSuitDisablesNeckbeard,
   ruleFirefighterHelmetEyesExclusion,

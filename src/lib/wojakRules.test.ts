@@ -235,13 +235,13 @@ describe('wojakRules', () => {
       expect(result.disabledLayers).toContain('MouthItem');
     });
 
-    it('full-face mask disables Laser Eyes (Eyes layer)', () => {
+    it('Fake mask disables Laser Eyes (Eyes layer)', () => {
       const resolver = createMockResolver(
         {
           Base: DEFAULT_BASE_PATH,
           MouthBase: DEFAULT_MOUTHBASE_PATH,
           Clothes: DEFAULT_CLOTHES_PATH,
-          Mask: '/mask/skull-mask.png',
+          Mask: '/mask/fake-mask.png',
           Eyes: '/eyes/laser-eyes.png',
         },
         {}
@@ -531,39 +531,29 @@ describe('wojakRules (extended)', () => {
     });
   });
 
-  // ── Full-face mask disables Laser Eyes ────────────────────────────────────
-  describe('ruleFullFaceMaskDisablesLaserEyes', () => {
-    const fullFaceMasks = [
-      '/mask/skull_mask.png',
-      '/mask/skull-mask.png',
-      '/mask/hand_mask.png',
-      '/mask/medievalbepe.png',
-      '/mask/tanginium.png',
-    ];
-
-    for (const maskPath of fullFaceMasks) {
-      it(`disables Laser Eyes option for mask path: ${maskPath}`, () => {
-        const resolver = mkResolver(
-          {
-            Base: DEFAULT_BASE_PATH,
-            MouthBase: DEFAULT_MOUTHBASE_PATH,
-            Clothes: DEFAULT_CLOTHES_PATH,
-            Mask: maskPath,
-          },
-          {}
-        );
-        const result = getDisabledLayers(resolver as SelectionResolver);
-        expect(result.disabledOptions?.Eyes).toContain('Laser');
-      });
-    }
-
-    it('clears Eyes when full-face mask is selected alongside Laser Eyes', () => {
+  // ── Fake mask disables Laser Eyes (other masks allow Laser Eyes) ──────────
+  describe('ruleLaserEyesFakeMaskMutualExclusion', () => {
+    it('disables Laser Eyes option when Fake mask is selected', () => {
       const resolver = mkResolver(
         {
           Base: DEFAULT_BASE_PATH,
           MouthBase: DEFAULT_MOUTHBASE_PATH,
           Clothes: DEFAULT_CLOTHES_PATH,
-          Mask: '/mask/skull_mask.png',
+          Mask: '/mask/fake-mask.png',
+        },
+        {}
+      );
+      const result = getDisabledLayers(resolver as SelectionResolver);
+      expect(result.disabledOptions?.Eyes).toContain('Laser');
+    });
+
+    it('clears Eyes when Fake mask is selected alongside Laser Eyes', () => {
+      const resolver = mkResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          MouthBase: DEFAULT_MOUTHBASE_PATH,
+          Clothes: DEFAULT_CLOTHES_PATH,
+          Mask: '/mask/fake-mask.png',
           Eyes: '/eyes/laser-eyes.png',
         },
         {}
@@ -571,6 +561,54 @@ describe('wojakRules (extended)', () => {
       const result = getDisabledLayers(resolver as SelectionResolver);
       expect(result.clearSelections).toContain('Eyes');
       expect(result.forceSelections?.Eyes).toBe('');
+    });
+
+    it('allows Laser Eyes with Hannibal mask', () => {
+      const resolver = mkResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          MouthBase: DEFAULT_MOUTHBASE_PATH,
+          Clothes: DEFAULT_CLOTHES_PATH,
+          Mask: '/mask/hannibal-mask.png',
+        },
+        {}
+      );
+      const result = getDisabledLayers(resolver as SelectionResolver);
+      // Either Eyes is not in disabledOptions, or it doesn't contain 'Laser'
+      const disabledEyes = result.disabledOptions?.Eyes ?? [];
+      expect(disabledEyes).not.toContain('Laser');
+    });
+
+    it('allows Laser Eyes with Bandana mask', () => {
+      const resolver = mkResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          MouthBase: DEFAULT_MOUTHBASE_PATH,
+          Clothes: DEFAULT_CLOTHES_PATH,
+          Mask: '/mask/bandana-mask.png',
+        },
+        {}
+      );
+      const result = getDisabledLayers(resolver as SelectionResolver);
+      // Either Eyes is not in disabledOptions, or it doesn't contain 'Laser'
+      const disabledEyes = result.disabledOptions?.Eyes ?? [];
+      expect(disabledEyes).not.toContain('Laser');
+    });
+
+    it('disables Fake mask option when Laser Eyes are selected', () => {
+      const resolver = mkResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          MouthBase: DEFAULT_MOUTHBASE_PATH,
+          Clothes: DEFAULT_CLOTHES_PATH,
+          Eyes: '/eyes/laser-eyes.png',
+        },
+        {}
+      );
+      const result = getDisabledLayers(resolver as SelectionResolver);
+      expect(result.disabledOptions?.Mask).toContain('Fake');
+      // Other masks should NOT be disabled
+      expect(result.disabledLayers).not.toContain('Mask');
     });
   });
 
