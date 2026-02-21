@@ -81,6 +81,8 @@ export interface ProcessEnv {
   PHASE2_ROYALTY_PCT?: string;
   MINTGARDEN_API_KEY?: string;
   TREASURY_ADDRESS?: string;
+  /** XCH address that receives paid-mint payments (MintGarden target_address for paid offers). */
+  CREATOR_PAYOUT_ADDRESS?: string;
 }
 
 interface MintJobRow {
@@ -313,7 +315,7 @@ export async function processJob(
         if (!royaltyAddress) {
           console.error('[SplitXCH] CRITICAL: getOrCreateSplitterAddress returned empty! Falling back to wallet.');
         } else {
-          console.log(`[SplitXCH] Using splitter address: ${royaltyAddress}`);
+          console.warn(`[SplitXCH] Using splitter address: ${royaltyAddress}`);
         }
       } catch (err) {
         // Non-fatal: fall back to creator's wallet if SplitXCH is unavailable

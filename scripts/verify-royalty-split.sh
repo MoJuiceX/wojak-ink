@@ -98,9 +98,27 @@ else
   check "TREASURY_ADDRESS guard present in processJob" "fail"
 fi
 
-# ── 4. DB migration exists ────────────────────────────────────────────────────
+# ── 4. prepare.ts — SplitXCH for legacy path (free + paid) ───────────────────
 echo ""
-echo "[4] Database migration"
+echo "[4] functions/api/mint/prepare.ts — SplitXCH wiring"
+
+PREPARE="functions/api/mint/prepare.ts"
+
+if grep -q "getOrCreateSplitterAddress" "$PREPARE"; then
+  check "getOrCreateSplitterAddress is called in prepare" "pass"
+else
+  check "getOrCreateSplitterAddress is called in prepare" "fail" "SplitXCH not used in prepare path"
+fi
+
+if grep -q "royaltyAddress" "$PREPARE"; then
+  check "royaltyAddress passed to callMintGardenMint in prepare" "pass"
+else
+  check "royaltyAddress passed to callMintGardenMint in prepare" "fail"
+fi
+
+# ── 5. DB migration exists ────────────────────────────────────────────────────
+echo ""
+echo "[5] Database migration"
 
 MIGRATION="functions/migrations/047_splitxch.sql"
 
@@ -116,9 +134,9 @@ else
   check "splitter_addresses table defined in migration" "fail"
 fi
 
-# ── 5. SplitXCH API reachability ──────────────────────────────────────────────
+# ── 6. SplitXCH API reachability ──────────────────────────────────────────────
 echo ""
-echo "[5] SplitXCH API reachability"
+echo "[6] SplitXCH API reachability"
 
 HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
   --max-time 10 \
@@ -131,9 +149,9 @@ else
     "Could not reach https://splitxch.com — check network or service status"
 fi
 
-# ── 6. Royalty math sanity check ──────────────────────────────────────────────
+# ── 7. Royalty math sanity check ──────────────────────────────────────────────
 echo ""
-echo "[6] Royalty math (at 12% total on a 100 XCH sale)"
+echo "[7] Royalty math (at 12% total on a 100 XCH sale)"
 
 echo "     Minter share:   8258/10000 × 12 XCH = $(echo "scale=4; 8258/10000*12" | bc) XCH  (~10%)"
 echo "     Treasury share: 1592/10000 × 12 XCH = $(echo "scale=4; 1592/10000*12" | bc) XCH  (~2%)"

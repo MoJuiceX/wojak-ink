@@ -35,3 +35,14 @@ The app failed to start. Try:
 - Open DevTools (F12) → **Console** and note any red errors when the page loads.
 - **Network** tab: ensure the main JS bundle and assets return 200 (not blocked or CORS errors).
 - Session/local storage must be available; private or strict modes that block storage can prevent the app from initializing correctly.
+
+---
+
+## Royalty / treasury
+
+**“I don’t see any transactions on the block explorer for my treasury address.”**
+
+- **Cause:** Paid mints created via the prepare path used to set the NFT’s on-chain **royalty address** to the **minter’s wallet**, not the SplitXCH splitter. So the full 12% royalty on resales went to the minter; the treasury received nothing.
+- **Fix (in code):** The prepare path now resolves the SplitXCH splitter when `TREASURY_ADDRESS` is set and passes it as the royalty address. New paid mints (prepare or queue) will have the splitter on-chain; on resales, ~10% goes to the minter and ~2% to the treasury.
+- **Existing NFTs** (minted before this change) keep their current royalty address (minter). You will not see treasury activity for those resales. Only **new** paid mints will send the treasury its share.
+- **Config:** Ensure `TREASURY_ADDRESS` is set in Cloudflare (Variables and Secrets). Plaintext is fine.

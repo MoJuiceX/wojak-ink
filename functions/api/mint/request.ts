@@ -7,15 +7,17 @@
  * Request body (relevant fields):
  * - profile_id: MintGarden creator profile (DID).
  * - metadata: data_hash, data_uris, metadata_hash, metadata_uris, edition_number, edition_total.
- * - target_address: Chia (XCH) address that receives the NFT (or the offer is for).
- * - royalty_address: Chia address that receives royalties on secondary sales. We set this to the
- *   minter's wallet (Sage-connected) so the creator gets royalties.
+ * - target_address: For FREE = address that receives the NFT (minter). For PAID = address that
+ *   receives the XCH payment. We use CREATOR_PAYOUT_ADDRESS if set, else TREASURY_ADDRESS (so
+ *   primary-sale XCH can go to the same wallet as royalty share).
+ * - royalty_address: Chia address that receives royalties on secondary sales. We set to SplitXCH
+ *   or minter's wallet.
  * - royalty_percentage: e.g. 10 (percent). From env PHASE2_ROYALTY_PCT.
  * - requested_mojos: (paid only) payment amount in mojos; API returns an offer file.
  *
  * Flow:
- * - Free: target_address only → NFT minted directly to that address; response includes launcher/coin ID.
- * - Paid: target_address + requested_mojos → API returns offer file; user accepts in wallet to complete mint.
+ * - Free: target_address = minter → NFT minted directly to that address; response includes launcher ID.
+ * - Paid: target_address = creator payout (XCH recipient); offer taker gets NFT. API returns offer file.
  */
 
 import { MintError } from './errors';
@@ -62,6 +64,10 @@ export interface MintGardenEnv {
   PHASE2_PROFILE_ID?: string;
   PHASE2_ROYALTY_ADDRESS?: string;
   PHASE2_ROYALTY_PCT?: string;
+  /** For paid mints: address that receives the XCH (target_address). Optional: if unset, we use TREASURY_ADDRESS so primary-sale XCH goes to treasury. */
+  CREATOR_PAYOUT_ADDRESS?: string;
+  /** Treasury address (SplitXCH + optional fallback for paid-mint target_address when CREATOR_PAYOUT_ADDRESS is unset). */
+  TREASURY_ADDRESS?: string;
 }
 
 /** Response from MintGarden /mint/dynamic */
@@ -126,6 +132,20 @@ export async function callMintGardenMint(
     throw new Error('MintGarden configuration missing: MINTGARDEN_API_KEY and PHASE2_PROFILE_ID are required');
   }
 
+  // Paid mints: target_address = where primary-sale XCH goes. Use CREATOR_PAYOUT_ADDRESS if set, else TREASURY_ADDRESS (so one address can receive both mint payments and royalty share).
+  const creatorPayout = env.CREATOR_PAYOUT_ADDRESS?.trim();
+  const treasuryAddress = env.TREASURY_ADDRESS?.trim();
+  const paidMintRecipient = creatorPayout || treasuryAddress;
+  if (params.mintType === 'paid') {
+    if (!paidMintRecipient) {
+      throw new Error(
+        'For paid mints set TREASURY_ADDRESS (primary-sale XCH goes there) or CREATOR_PAYOUT_ADDRESS. MintGarden target_address = payment recipient.'
+      );
+    }
+  }
+  const targetAddress =
+    params.mintType === 'paid' && paidMintRecipient ? paidMintRecipient : params.walletAddress;
+
   const body: Record<string, unknown> = {
     profile_id: profileId,
     metadata: {
@@ -136,7 +156,7 @@ export async function callMintGardenMint(
       edition_number: params.editionNumber,
       edition_total: params.editionTotal,
     },
-    target_address: params.walletAddress,
+    target_address: targetAddress,
     royalty_address: params.royaltyAddress || params.walletAddress,
     royalty_percentage: parseInt(royaltyPct ?? '10', 10) || 10,
   };

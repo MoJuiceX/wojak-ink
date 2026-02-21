@@ -23,7 +23,7 @@ Reference for the [MintGarden Dynamic Minting API](https://mintgarden.io/minting
 | `metadata.edition_total` | number | No | For editions (e.g. 100). |
 | `royalty_address` | string | Yes | Minter’s wallet (creator royalty). We set this to the minting user’s address. |
 | `royalty_percentage` | number | Yes | Royalty % (default 10). Set via `PHASE2_ROYALTY_PCT`. |
-| `target_address` | string | Yes | Recipient wallet (xch1...). |
+| `target_address` | string | Yes | **Free:** address that receives the NFT. **Paid:** address that receives the XCH payment (creator). We send `CREATOR_PAYOUT_ADDRESS` for paid, minter for free. |
 | `requested_mojos` | number | No | Price in mojos (1 XCH = 10^12). Omit for free mint. |
 | `requested_asset_id` | string | No | CAT asset ID when charging in a CAT (e.g. SBX). |
 
@@ -46,6 +46,7 @@ Reference for the [MintGarden Dynamic Minting API](https://mintgarden.io/minting
 | `PHASE2_PROFILE_ID` | Creator DID for “Your Wojak” mints. |
 | `PHASE2_COLLECTION_UUID` | Collection UUID (used in metadata; not sent in dynamic mint body). |
 | `PHASE2_ROYALTY_PCT` | Royalty percentage for the creator (default `"10"`). Royalties go to the minter’s wallet; `PHASE2_ROYALTY_ADDRESS` is not used. |
+| `CREATOR_PAYOUT_ADDRESS` | **Required for paid mints.** XCH address that receives primary-sale payments. Sent as `target_address` when creating paid offers (MintGarden: “The wallet that receives the payment is specified in the dynamic mint request”). |
 
 ## Code
 

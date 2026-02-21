@@ -23,6 +23,7 @@
  */
 
 import { callMintGardenMint } from './request';
+import { getOrCreateSplitterAddress } from './splitxch';
 import { logMintStep } from './auditHelper';
 import { getNextMintNumber } from './mintNumberHelper';
 import {
@@ -52,6 +53,9 @@ interface Env {
   PHASE2_ROYALTY_ADDRESS?: string;
   PHASE2_ROYALTY_PCT?: string;
   MINTGARDEN_API_KEY?: string;
+  TREASURY_ADDRESS?: string;
+  /** Paid mints: XCH goes here (MintGarden target_address). Required for paid. */
+  CREATOR_PAYOUT_ADDRESS?: string;
 }
 
 const SUPPLY_TOTAL = TOTAL_SUPPLY; // alias for backwards compat within this file
@@ -411,11 +415,29 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       }
 
       // Step 3: Credits held — now call MintGarden to create the NFT.
+      // Resolve SplitXCH splitter so treasury gets 2% on resales (same as process.ts / paid prepare).
+      let freeRoyaltyAddress: string | undefined;
+      if (env.TREASURY_ADDRESS) {
+        try {
+          freeRoyaltyAddress = await getOrCreateSplitterAddress(
+            { DB: env.DB, TREASURY_ADDRESS: env.TREASURY_ADDRESS },
+            wallet,
+            1,
+          );
+          if (!freeRoyaltyAddress) {
+            console.error('[Prepare Free] SplitXCH returned empty, using minter as royalty_address');
+          }
+        } catch (err) {
+          console.error('[Prepare Free] SplitXCH failed, using minter as royalty_address:', err);
+        }
+      }
+
       let launcherId: string | null = null;
       try {
         const mintResult = await callMintGardenMint(
           {
             walletAddress: wallet,
+            royaltyAddress: freeRoyaltyAddress,
             mintType: 'free',
             ipfsImageUris: uploadData.dataUris,
             ipfsMetadataUris: uploadData.metadataUris,
@@ -559,9 +581,27 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     const surchargeStored = Math.round(maxSurcharge * 100000);
     const expiresAt = new Date(Date.now() + OFFER_EXPIRY_MINUTES * 60 * 1000).toISOString();
 
+    // Resolve SplitXCH splitter for paid mints so treasury gets 2% on resales (same as process.ts)
+    let royaltyAddress: string | undefined;
+    if (env.TREASURY_ADDRESS) {
+      try {
+        royaltyAddress = await getOrCreateSplitterAddress(
+          { DB: env.DB, TREASURY_ADDRESS: env.TREASURY_ADDRESS },
+          wallet,
+          1,
+        );
+        if (!royaltyAddress) {
+          console.error('[Prepare] SplitXCH returned empty, using minter as royalty_address');
+        }
+      } catch (err) {
+        console.error('[Prepare] SplitXCH failed, using minter as royalty_address:', err);
+      }
+    }
+
     const mintResult = await callMintGardenMint(
       {
         walletAddress: wallet,
+        royaltyAddress,
         mintType: 'paid',
         ipfsImageUris: uploadData.dataUris,
         ipfsMetadataUris: uploadData.metadataUris,

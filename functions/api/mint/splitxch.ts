@@ -1,5 +1,7 @@
-// SplitXCH integration
-// Creates deterministic splitter addresses for royalty splitting.
+// SplitXCH integration (https://splitxch.com)
+// API: POST https://splitxch.com/api/compute/fast — recipients[] with address + points.
+// Recipient points must sum to 9,850; API adds 150 bp (1.5%) fee → 10,000 total. See:
+// https://github.com/Koba42Corp/splitxch-builder (API Integration section).
 // One API call per new creator, cached in DB forever.
 
 interface Env {
@@ -26,7 +28,7 @@ export async function getOrCreateSplitterAddress(
   creatorWallet: string,
   wave: number = 1,
 ): Promise<string> {
-  console.log(`[SplitXCH] Looking up splitter for ${creatorWallet.slice(0, 15)}... wave=${wave}`);
+  console.warn(`[SplitXCH] Looking up splitter for ${creatorWallet.slice(0, 15)}... wave=${wave}`);
 
   // Check cache first
   const cached = await env.DB.prepare(
@@ -34,11 +36,11 @@ export async function getOrCreateSplitterAddress(
   ).bind(creatorWallet, wave).first<{ splitter_address: string }>();
 
   if (cached?.splitter_address) {
-    console.log(`[SplitXCH] Cache hit: ${cached.splitter_address}`);
+    console.warn(`[SplitXCH] Cache hit: ${cached.splitter_address}`);
     return cached.splitter_address;
   }
 
-  console.log(`[SplitXCH] Cache miss, creating new splitter...`);
+  console.warn(`[SplitXCH] Cache miss, creating new splitter...`);
 
   // Create new splitter via SplitXCH API
   const config = WAVE_CONFIG[wave];
@@ -83,6 +85,6 @@ export async function getOrCreateSplitterAddress(
     config.creatorPoints, config.treasuryPoints
   ).run();
 
-  console.log(`[SplitXCH] Created splitter for ${creatorWallet.slice(0, 15)}...: ${data.address}`);
+  console.warn(`[SplitXCH] Created splitter for ${creatorWallet.slice(0, 15)}...: ${data.address}`);
   return data.address;
 }
