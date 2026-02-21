@@ -39,7 +39,7 @@ interface ActionBarProps {
 }
 
 /** When true, mint button is disabled and shows "Minting continues soon." on hover. Set to false to re-enable. */
-const GENERATOR_MINTING_PAUSED = true;
+const GENERATOR_MINTING_PAUSED = false;
 
 /** Tooltip that renders in a portal above the trigger, so it's never clipped by overflow */
 function ActionBarTooltip({
