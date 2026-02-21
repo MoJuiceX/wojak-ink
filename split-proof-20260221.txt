@@ -1,0 +1,67 @@
+Fetching mint list and expected splitter addresses from https://wojak.ink ...
+Checking 240 NFTs on MintGarden...
+  50/240
+  100/240
+  150/240
+  200/240
+
+========== SPLITXCH ROYALTY VERIFICATION REPORT ==========
+
+Collection: Your Wojak (Phase 2)
+Expected: Each NFT royalty_address = SplitXCH splitter (10% creator / 2% treasury).
+
+--- Summary ---
+Total mints checked: 240
+Match (on-chain royalty = expected splitter): 226
+No expected splitter in DB (skipped): 0
+Mismatch (on-chain ≠ expected splitter): 14
+Could not fetch NFT from MintGarden: 0
+
+--- Mismatches (first 20) ---
+  #1 862c414e73056cf24b966e3faba6f01ca4272f18315cc7097c91388cf110acdd
+    expected: xch1sgtgjnl652ml6gu9zvjgv4h5n7spmafyk0lu5x5w6t3gsfry6dqs2gvx34
+    on-chain: 3af0423ed362708451bf6f90b50b2c8819c7b454607f701513bb9822a4c4fd22
+  #2 2c2e98ad3e217a4930827636ed4953477212beeb39dd224537d4eae020ce048a
+    expected: xch1sgtgjnl652ml6gu9zvjgv4h5n7spmafyk0lu5x5w6t3gsfry6dqs2gvx34
+    on-chain: 3af0423ed362708451bf6f90b50b2c8819c7b454607f701513bb9822a4c4fd22
+  #3 756c8e553cbb262b22b4206b2c7288c1f6e09aafc1c6780f318501a053fb9305
+    expected: xch1sgtgjnl652ml6gu9zvjgv4h5n7spmafyk0lu5x5w6t3gsfry6dqs2gvx34
+    on-chain: 3af0423ed362708451bf6f90b50b2c8819c7b454607f701513bb9822a4c4fd22
+  #4 dbdc7962427247d8e975403c38f34bf0438f3250442fccff177c864e07622df8
+    expected: xch1sgtgjnl652ml6gu9zvjgv4h5n7spmafyk0lu5x5w6t3gsfry6dqs2gvx34
+    on-chain: 3af0423ed362708451bf6f90b50b2c8819c7b454607f701513bb9822a4c4fd22
+  #5 740a4e2aa9dbcb09f605576b1b11ca857c5fab6df6bae24b8a56e41a1722128d
+    expected: xch1xnws3dhcdlnr76r9dgt65w0ewetd3wurdkud3zamwr7zxl8dtq4sv4ljnz
+    on-chain: 1d08ba2b7c7129f20b193e2c2b28acd7e09a1677f88551b9cb31ac33e41b74a0
+  #6 fa256deb965093b79660f6f5d81758eac920df4ccc0d5e4d419952555bd04c7f
+    expected: xch1xnws3dhcdlnr76r9dgt65w0ewetd3wurdkud3zamwr7zxl8dtq4sv4ljnz
+    on-chain: 1d08ba2b7c7129f20b193e2c2b28acd7e09a1677f88551b9cb31ac33e41b74a0
+  #7 2dec92b42e7b9e0e57362c74698d5785710690d75beb6117a888001ae9e30262
+    expected: xch1xnws3dhcdlnr76r9dgt65w0ewetd3wurdkud3zamwr7zxl8dtq4sv4ljnz
+    on-chain: 1d08ba2b7c7129f20b193e2c2b28acd7e09a1677f88551b9cb31ac33e41b74a0
+  #8 8536f1c82f34ac783d1996ee05b60054fc0c40d4fb4949db5af3b139180fde4d
+    expected: xch1xnws3dhcdlnr76r9dgt65w0ewetd3wurdkud3zamwr7zxl8dtq4sv4ljnz
+    on-chain: 1d08ba2b7c7129f20b193e2c2b28acd7e09a1677f88551b9cb31ac33e41b74a0
+  #9 87e4cc88604146620820595ac7c74c31b31fc9a8466af97af81494302cf13be2
+    expected: xch1xnws3dhcdlnr76r9dgt65w0ewetd3wurdkud3zamwr7zxl8dtq4sv4ljnz
+    on-chain: 1d08ba2b7c7129f20b193e2c2b28acd7e09a1677f88551b9cb31ac33e41b74a0
+  #10 e685944edf484cd7476df8a17967494776d329c312f55b1f2a5c7a6ae15beba0
+    expected: xch1xnws3dhcdlnr76r9dgt65w0ewetd3wurdkud3zamwr7zxl8dtq4sv4ljnz
+    on-chain: 1d08ba2b7c7129f20b193e2c2b28acd7e09a1677f88551b9cb31ac33e41b74a0
+  #11 729647c11b1c1debdb4de9849fe383faeafaeb38fe625b388c34f10f080d31ae
+    expected: xch1xnws3dhcdlnr76r9dgt65w0ewetd3wurdkud3zamwr7zxl8dtq4sv4ljnz
+    on-chain: 1d08ba2b7c7129f20b193e2c2b28acd7e09a1677f88551b9cb31ac33e41b74a0
+  #12 48efcca9fbdf7a52df572f44386c07857fb7c85fbe52f51d612dfe0e4d244f9a
+    expected: xch1xnws3dhcdlnr76r9dgt65w0ewetd3wurdkud3zamwr7zxl8dtq4sv4ljnz
+    on-chain: 1d08ba2b7c7129f20b193e2c2b28acd7e09a1677f88551b9cb31ac33e41b74a0
+  #13 6f3d0c3476fd1c326cd929272612dcc65ba1970efc65d2013ff0a884d6c03796
+    expected: xch1xnws3dhcdlnr76r9dgt65w0ewetd3wurdkud3zamwr7zxl8dtq4sv4ljnz
+    on-chain: 1d08ba2b7c7129f20b193e2c2b28acd7e09a1677f88551b9cb31ac33e41b74a0
+  #14 caf95a204a3a8f7ff270b75cbfa547f90355d66cfe4bd5444df33e7bde2da26a
+    expected: xch1xnws3dhcdlnr76r9dgt65w0ewetd3wurdkud3zamwr7zxl8dtq4sv4ljnz
+    on-chain: 1d08ba2b7c7129f20b193e2c2b28acd7e09a1677f88551b9cb31ac33e41b74a0
+
+--- Conclusion ---
+Some NFTs have a different royalty_address than the expected splitter. Review mismatches above.
+
+Done.

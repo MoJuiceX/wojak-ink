@@ -239,6 +239,74 @@ describe('wojakRules', () => {
       expect(result.disabledLayers).toContain('MouthItem');
     });
 
+    it('disables MouthItem when Vampire (MouthBase) is selected and clears Cig/Joint/Cohiba', () => {
+      const resolver = createMockResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          MouthBase: '/mouth/drac.png',
+          MouthItem: '/mouth/cig.png',
+          Clothes: DEFAULT_CLOTHES_PATH,
+        },
+        { MouthBase: KNOWN_TRAIT_IDS.MouthBase_Vampire, MouthItem: KNOWN_TRAIT_IDS.MouthItem_Cig }
+      );
+      const result = getDisabledLayers(resolver);
+      expect(result.disabledLayers).toContain('MouthItem');
+      expect(result.forceSelections?.MouthItem).toBe('');
+      expect(result.clearSelections).toContain('MouthItem');
+      expect(result.disabledOptions?.MouthItem).toContain('Cig');
+      expect(result.disabledOptions?.MouthItem).toContain('Cohiba');
+      expect(result.disabledOptions?.MouthItem).toContain('Joint');
+    });
+
+    it('Vampire disables only Neckbeard (FacialHair); Stache remains allowed', () => {
+      const resolver = createMockResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          MouthBase: '/mouth/drac.png',
+          Clothes: DEFAULT_CLOTHES_PATH,
+        },
+        { MouthBase: KNOWN_TRAIT_IDS.MouthBase_Vampire }
+      );
+      const result = getDisabledLayers(resolver);
+      expect(result.disabledLayers).not.toContain('FacialHair');
+      expect(result.disabledOptions?.FacialHair).toContain('Neckbeard');
+      expect(result.disabledOptions?.FacialHair).toContain('neckbeard');
+      expect(result.disabledOptionReasons?.FacialHair?.Neckbeard).toBe('Not available with Vampire Teeth');
+    });
+
+    it('Vampire + Neckbeard selected: clears FacialHair and greys out Neckbeard', () => {
+      const resolver = createMockResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          MouthBase: '/mouth/drac.png',
+          FacialHair: '/mouth/neckbeard.png',
+          Clothes: DEFAULT_CLOTHES_PATH,
+        },
+        { MouthBase: KNOWN_TRAIT_IDS.MouthBase_Vampire }
+      );
+      const result = getDisabledLayers(resolver);
+      expect(result.forceSelections?.FacialHair).toBe('');
+      expect(result.clearSelections).toContain('FacialHair');
+      expect(result.disabledOptions?.FacialHair).toContain('Neckbeard');
+    });
+
+    it('Vampire + Stache: FacialHair layer not disabled and Stache not in disabledOptions', () => {
+      const resolver = createMockResolver(
+        {
+          Base: DEFAULT_BASE_PATH,
+          MouthBase: '/mouth/drac.png',
+          FacialHair: '/mouth/stach.png',
+          Clothes: DEFAULT_CLOTHES_PATH,
+        },
+        { MouthBase: KNOWN_TRAIT_IDS.MouthBase_Vampire }
+      );
+      const result = getDisabledLayers(resolver);
+      expect(result.disabledLayers).not.toContain('FacialHair');
+      const facialOpts = result.disabledOptions?.FacialHair ?? [];
+      expect(facialOpts).not.toContain('Stache');
+      expect(facialOpts).not.toContain('stach');
+    });
+
     it('Fake mask disables Laser Eyes (Eyes layer)', () => {
       const resolver = createMockResolver(
         {

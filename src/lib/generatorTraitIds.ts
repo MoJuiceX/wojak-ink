@@ -13,6 +13,7 @@ export const KNOWN_TRAIT_IDS = {
   MouthBase_Pipe: 'Mouth_Pipe',
   MouthBase_Pizza: 'g1_Pizza',
   MouthBase_BubbleGum: 'Mouth_BubbleGum',
+  MouthBase_Vampire: 'g1_Drac',
   MouthItem_Cig: 'g1_EXTRA_MOUTH_Cig',
   MouthItem_Joint: 'g1_EXTRA_MOUTH_Joint',
   MouthItem_Cohiba: 'g1_EXTRA_MOUTH_Cohiba',

@@ -170,7 +170,7 @@ export function GeneratorInfo({ isOpen, onClose }: GeneratorInfoProps) {
           </div>
         </div>
 
-        {/* Explicit close button — ensures modal is always dismissible on mobile */}
+        {/* Explicit close button — Lightbox body padding on mobile keeps it above browser bar */}
         <div style={{ marginTop: 24, display: 'flex', justifyContent: 'center' }}>
           <button
             type="button"

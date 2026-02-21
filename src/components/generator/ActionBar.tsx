@@ -591,7 +591,19 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         })()}
 
         {/* Mint / Connect button */}
-        {!isWalletConnected ? (
+        {mintingPaused ? (
+          <button
+            disabled
+            className="px-4 py-1.5 rounded-lg text-sm font-semibold"
+            style={{
+              background: 'var(--color-white-10)',
+              color: 'var(--color-text-muted)',
+              cursor: 'not-allowed',
+            }}
+          >
+            Soon
+          </button>
+        ) : !isWalletConnected ? (
           <ActionBarTooltip content="Connect to mint">
             <ActionButton
               onClick={handleMintClick}
@@ -601,7 +613,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
           </ActionBarTooltip>
         ) : (
           <ActionBarTooltip
-            content={mintingPaused ? 'Minting opens Friday!' : isSoldOut ? 'All 4,200 Wojaks minted!' : !has7Traits ? 'Select all 7 traits to mint' : 'Mint your Wojak'}
+            content={isSoldOut ? 'All 4,200 Wojaks minted!' : !has7Traits ? 'Select all 7 traits to mint' : 'Mint your Wojak'}
           >
             <ActionButton
               variant="primary"

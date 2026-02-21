@@ -311,6 +311,7 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
     clearLayer,
     isLayerDisabled,
     isOptionDisabled,
+    getOptionDisabledReason,
     isInitialized,
   } = useGenerator();
   const { getTraitPricing } = useMint();
@@ -429,8 +430,11 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
     }
   };
 
-  // Helper to determine why an option is disabled
+  // Helper to determine why an option is disabled (prefer rule-based reason from context)
   const getDisabledReasonForOption = (layer: 'MouthBase' | 'MouthItem' | 'FacialHair', optionName: string): string | undefined => {
+    const ruleReason = getOptionDisabledReason(layer, optionName);
+    if (ruleReason) return ruleReason;
+
     const clothesPath = selectedLayers.Clothes || '';
     const maskPath = selectedLayers.Mask || '';
     const mouthBasePath = selectedLayers.MouthBase || '';

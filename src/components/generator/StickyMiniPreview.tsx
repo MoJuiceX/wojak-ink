@@ -2,6 +2,7 @@
  * Sticky Mini Preview Component
  *
  * Floating preview for mobile when scrolling past the main preview.
+ * Uses scrollContainerRef when provided (e.g. generator page scroll wrapper), otherwise window.
  */
 
 import { useEffect } from 'react';
@@ -13,11 +14,14 @@ import { stickyPreviewVariants } from '@/config/generatorAnimations';
 interface StickyMiniPreviewProps {
   triggerOffset?: number;
   className?: string;
+  /** When provided (e.g. generator mobile scroll wrapper), use this element's scrollTop instead of window.scrollY */
+  scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 export function StickyMiniPreview({
   triggerOffset = 300,
   className = '',
+  scrollContainerRef,
 }: StickyMiniPreviewProps) {
   const {
     previewImage,
@@ -30,21 +34,29 @@ export function StickyMiniPreview({
   const basePath = selectedLayers.Base;
   const hasSelection = !isSelectionPathEmpty(basePath);
 
-  // Track scroll position
+  // Track scroll position (from scroll container or window)
   useEffect(() => {
+    const el = scrollContainerRef?.current ?? null;
+
     const handleScroll = () => {
-      const position = window.scrollY;
+      const position = el ? el.scrollTop : window.scrollY;
       setScrollPosition(position);
       setStickyPreview(position > triggerOffset && hasSelection);
     };
 
+    if (el) {
+      el.addEventListener('scroll', handleScroll, { passive: true });
+      return () => el.removeEventListener('scroll', handleScroll);
+    }
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [triggerOffset, hasSelection, setStickyPreview, setScrollPosition]);
+  }, [triggerOffset, hasSelection, setStickyPreview, setScrollPosition, scrollContainerRef]);
 
-  // Scroll to top when clicking preview
+  // Scroll to top when clicking preview (scroll container or window)
   const handleClick = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const el = scrollContainerRef?.current;
+    if (el) el.scrollTo({ top: 0, behavior: 'smooth' });
+    else window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (

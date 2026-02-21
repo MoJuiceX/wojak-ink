@@ -26,14 +26,19 @@ export async function getOrCreateSplitterAddress(
   creatorWallet: string,
   wave: number = 1,
 ): Promise<string> {
+  console.log(`[SplitXCH] Looking up splitter for ${creatorWallet.slice(0, 15)}... wave=${wave}`);
+
   // Check cache first
   const cached = await env.DB.prepare(
     'SELECT splitter_address FROM splitter_addresses WHERE creator_wallet = ? AND wave = ?'
-  ).bind(creatorWallet, wave).first();
+  ).bind(creatorWallet, wave).first<{ splitter_address: string }>();
 
-  if (cached) {
-    return cached.splitter_address as string;
+  if (cached?.splitter_address) {
+    console.log(`[SplitXCH] Cache hit: ${cached.splitter_address}`);
+    return cached.splitter_address;
   }
+
+  console.log(`[SplitXCH] Cache miss, creating new splitter...`);
 
   // Create new splitter via SplitXCH API
   const config = WAVE_CONFIG[wave];

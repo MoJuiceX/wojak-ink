@@ -13,9 +13,7 @@ import { useGenerator } from '@/contexts/GeneratorContext';
 import { useMint, type TraitPricingEntry } from '@/contexts/MintContext';
 import { traitGridVariants, traitCardStaggerVariants } from '@/config/generatorAnimations';
 import { MouthLayerSelector } from './MouthLayerSelector';
-import { G2TraitPanel } from './G2TraitPanel';
 import { G2TraitCardPreview } from './G2TraitCardPreview';
-import { ColorPicker } from './ColorPicker';
 import type { LayerImage } from '@/services/generatorService';
 import type { UnifiedTrait } from '@/services/generatorService';
 import { BASE_CLOTHES_MAP, DEFAULT_CLOTHES_PATH } from '@/config/layers';
@@ -832,8 +830,8 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
     activeLayer,
     selectedLayers,
     selectedColors,
-    setColor,
-    setG2Color,
+    setColor: _setColor,
+    setG2Color: _setG2Color,
     setBeerHatEditFocus,
     g2Selections,
     beerHatCardThumbnailUrl,
@@ -848,7 +846,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
     isInitialized,
   } = useGenerator();
   const { getTraitPricing, isTop3Trait } = useMint();
-  const { isDesktop } = useLayout();
+  const { isDesktop: _isDesktop } = useLayout();
   const prefersReducedMotion = useReducedMotion();
 
   const [, setImages] = useState<LayerImage[]>([]);
@@ -1221,52 +1219,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
           </motion.div>
       )}
 
-      {/* Phase 2 color picker — below trait grid on mobile only; on desktop it lives in the right column */}
-      {!isDesktop && !isBlocked && (selectedPath || g2Sel) && (() => {
-        // For G2 traits: use setG2Color with the correct fill slot
-        if (g2Sel) {
-          const g2Trait = unifiedTraits.find(t => t.id === g2Sel.traitId);
-          const slot = g2Trait?.id === 'Clothes_Suit'
-            ? (g2Sel?.activeColorSlot ?? 'fill0')
-            : (g2Trait?.fillFile ? 'fill' : g2Trait?.fill1File ? 'fill1' : g2Trait?.fillFiles ? 'fill0' : (g2Trait?.layers && g2Trait?.colorable ? 'fill0' : null));
-          const isColorable = g2Trait?.colorable && slot;
-          // Don't show color picker at all if trait is not colorable
-          if (!isColorable) return null;
-          const defColor = g2Sel.traitId === 'Clothes_Suit' && g2Trait?.defaultColors
-            ? (slot === 'fill0' ? g2Trait.defaultColors[0] : g2Trait.defaultColors[1])
-            : (g2Trait?.defaultColor || (g2Sel.traitId === 'Clothes_Astronaut' ? '#FFFFFF' : undefined));
-          return (
-            <div className="generator-panel-section mt-4">
-              <div className="generator-panel-section-label">Color</div>
-              <ColorPicker
-                selectedColor={g2Sel.colors?.[slot ?? 'fill'] || '#FFFFFF'}
-                onColorChange={(color) => slot && setG2Color(activeLayer, slot, color)}
-                defaultColor={defColor}
-              />
-            </div>
-          );
-        }
-        // For G1 traits: only show for colorable layers (Clothes, Head, Eyes, Background solid)
-        const isBgSolid = activeLayer === 'Background' && (selectedPath === '__solid__' || selectedPath?.includes('__solid__'));
-        const isG1Colorable =
-          (['Clothes', 'Head', 'Eyes'] as string[]).includes(activeLayer) || isBgSolid;
-        if (!isG1Colorable) return null;
-        return (
-          <div className="generator-panel-section mt-4">
-            <div className="generator-panel-section-label">Color</div>
-            <ColorPicker
-              selectedColor={selectedColors?.[activeLayer] || (isBgSolid ? SOLID_BG_DEFAULT_COLOR : '#FFFFFF')}
-              onColorChange={(color) => setColor(activeLayer, color)}
-              defaultColor={isBgSolid ? SOLID_BG_DEFAULT_COLOR : undefined}
-            />
-          </div>
-        );
-      })()}
-
-      {/* G2 Customization Panel — on mobile only; on desktop it lives in the right column */}
-      {!isDesktop && !isBlocked && g2Sel && (
-        <G2TraitPanel />
-      )}
+      {/* Color picker and G2 panel on mobile are rendered in GeneratorMobileColorPanel (below the grid) */}
 
       {/* Empty state */}
       {!isBlocked && !isLoading && unifiedTraits.length === 0 && (

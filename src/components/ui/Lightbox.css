@@ -159,11 +159,12 @@
     padding: 0;
   }
 
+  /* Use dvh so height matches visible area when browser chrome (address bar, nav) is visible */
   .lightbox-wrapper {
     width: 100%;
     max-width: 100%;
-    height: 100vh;
-    max-height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
     flex-direction: column;
     gap: 0;
   }
@@ -175,30 +176,32 @@
     max-width: 100%;
     height: 100%;
     max-height: 100%;
+    min-height: 0;
     border-radius: 0;
     border: none;
   }
 
   .lightbox-header {
     padding: 0.875rem 1rem;
-    /* Safe area for notches */
-    padding-top: calc(0.875rem + env(safe-area-inset-top, 0));
+    /* Safe area for notches + space below browser address bar */
+    padding-top: calc(0.875rem + env(safe-area-inset-top, 0) + 56px);
   }
 
-  /* On mobile, external close goes back inside as absolute positioned; ensure on top of content */
+  /* On mobile, external close below browser address bar; ensure on top of content */
   .lightbox-close--external {
     position: absolute;
-    top: calc(0.75rem + env(safe-area-inset-top, 0));
+    top: calc(0.75rem + env(safe-area-inset-top, 0) + 56px);
     right: 0.75rem;
     z-index: 20;
     margin-top: 0;
     order: 0;
   }
 
+  /* Extra top/bottom padding so content and buttons are never under browser chrome */
   .lightbox-body {
     padding: 1rem;
-    /* Safe area for bottom */
-    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0));
+    padding-top: calc(1rem + env(safe-area-inset-top, 0) + 56px);
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0) + 72px);
   }
 }
 

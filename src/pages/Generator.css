@@ -11,14 +11,25 @@
   overflow: hidden;
 }
 
-/* Mobile: constrain to viewport height to prevent overflow */
+/* Mobile: fixed height so one scroll container can scroll (preview scrolls away, mini preview shows) */
 @media (max-width: 1023px) {
   .generator-page {
+    display: flex;
+    flex-direction: column;
     height: calc(100vh - 56px);
     height: calc(100dvh - 56px);
     max-height: calc(100vh - 56px);
     max-height: calc(100dvh - 56px);
     overflow: hidden;
+  }
+
+  /* Single scroll container: preview, options, and footer all scroll together */
+  .generator-scroll-view {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
   }
 }
 
@@ -46,12 +57,11 @@
   overflow: hidden;
 }
 
-/* Mobile: stack vertically with proper containment */
+/* Mobile: content flows naturally inside scroll view (no height trap) */
 @media (max-width: 1023px) {
   .generator-content {
-    height: 100%;
-    max-height: calc(100vh - 56px);
-    max-height: calc(100dvh - 56px);
+    flex: none;
+    min-height: 0;
   }
 }
 
@@ -86,9 +96,9 @@
   .generator-preview-canvas-wrapper {
     aspect-ratio: 1;
     width: 100%;
-    /* Limit preview to 50% of viewport height to leave room for options grid */
-    max-width: min(100%, calc(50vh - 56px));
-    max-height: calc(50vh - 56px);
+    /* Smaller preview on mobile so trait grid + color panel get enough space (9 items visible) */
+    max-width: min(100%, calc(38vh - 48px));
+    max-height: calc(38vh - 48px);
     margin: 0 auto;
   }
 
@@ -135,12 +145,12 @@
   z-index: 1;
 }
 
-/* Mobile: options section fills remaining space and scrolls */
+/* Mobile: options in flow (no inner scroll); only the trait grid box scrolls internally */
 @media (max-width: 1023px) {
   .generator-options {
-    flex: 1 1 auto;
+    flex: none;
     min-height: 0;
-    overflow: hidden;
+    overflow: visible;
     background: var(--color-bg);
     position: relative;
     z-index: 1;
@@ -203,13 +213,40 @@
   overflow-x: hidden;
 }
 
-/* Mobile: ensure grid container fills available space and scrolls */
+/* Mobile: one endless scroll — preview, then categories + grid (no inner scroll), then color panel */
 @media (max-width: 1023px) {
-  .generator-options-grid-container {
-    flex: 1 1 auto;
+  .generator-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
     min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
+  }
+
+  /* Trait grid: no inner scroll; full grid height is in the page scroll */
+  .generator-options-grid-container {
+    flex: none;
+    min-height: 0;
+    overflow: visible;
+    border-radius: 16px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+  }
+
+  /* Color picker / details panel below the grid in the same scroll */
+  .generator-options-mobile-panel {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 16px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    overflow: visible;
+  }
+
+  .generator-options-mobile-panel .generator-panel-section {
+    flex-shrink: 0;
   }
 }
 
@@ -222,11 +259,14 @@
   align-content: start;
 }
 
-/* Mobile: 3 columns */
+/* Mobile: 3 columns; grid grows with content (part of page scroll) */
 @media (max-width: 1023px) {
   .generator-options-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
+    padding: 12px;
+    flex: none;
+    min-height: 0;
   }
 }
 
@@ -401,10 +441,23 @@
   background: var(--color-bg);
 }
 
-/* Mobile: action bar has proper padding and stays above other content */
+/* Mobile: action bar scrolls horizontally so all buttons (including Connect/Mint) are reachable */
 @media (max-width: 1023px) {
   .generator-actions {
-    padding: 4px 0;
+    padding: 4px 8px 4px 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    /* Allow the bar to extend so user can scroll to see Connect/Mint and supply counter */
+    justify-content: flex-start;
+  }
+
+  /* Single child (ActionBar) takes natural width so the row scrolls */
+  .generator-actions > * {
+    flex: 0 0 auto;
+    width: max-content;
+    min-width: max-content;
   }
 }
 

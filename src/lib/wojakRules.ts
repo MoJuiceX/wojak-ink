@@ -194,13 +194,14 @@ function ruleAstronautDisablesNightVision(_resolver: SelectionResolver): RuleRes
 }
 
 /**
- * FacialHair requires compatible MouthBase (path check for allowed mouths; no trait IDs for all variants)
+ * FacialHair requires compatible MouthBase (path check for allowed mouths; no trait IDs for all variants).
+ * Vampire (drac) is allowed with Stache but not with Neckbeard (handled by ruleVampireDisablesNeckbeard).
  */
 function ruleFacialHairRequiresMouthBase(resolver: SelectionResolver): RuleResult {
   const mouthBasePath = resolver.getPath('MouthBase');
   const facialHairPath = resolver.getPath('FacialHair');
 
-  const allowedMouthBases = ['numb', 'teeth', 'gold', 'smile', 'screeming', 'screaming', 'pizza', 'pipe'];
+  const allowedMouthBases = ['numb', 'teeth', 'gold', 'smile', 'screeming', 'screaming', 'pizza', 'pipe', 'drac'];
 
   if (mouthBasePath && mouthBasePath !== '') {
     const isAllowed = allowedMouthBases.some((allowed) => pathContains(mouthBasePath, allowed));
@@ -450,6 +451,71 @@ function rulePipeDisablesMouthItem(resolver: SelectionResolver): RuleResult {
 }
 
 /**
+ * Vampire (Drac) mouth cannot appear with Cig, Cohiba, or Joint.
+ * When Vampire is selected, MouthItem is disabled and any cig/joint/cohiba selection is cleared.
+ */
+function ruleVampireDisablesCigJointCohiba(resolver: SelectionResolver): RuleResult {
+  if (resolver.getTraitId('MouthBase') !== KNOWN_TRAIT_IDS.MouthBase_Vampire) return { disabledLayers: [] };
+
+  const mouthItemTraitId = resolver.getTraitId('MouthItem');
+  const hasSmokeItem =
+    mouthItemTraitId === KNOWN_TRAIT_IDS.MouthItem_Cig ||
+    mouthItemTraitId === KNOWN_TRAIT_IDS.MouthItem_Joint ||
+    mouthItemTraitId === KNOWN_TRAIT_IDS.MouthItem_Cohiba;
+
+  return {
+    disabledLayers: ['MouthItem'],
+    reason: 'Vampire cannot have cig, cohiba, or joint',
+    clearSelections: hasSmokeItem ? ['MouthItem'] : [],
+    forceSelections: hasSmokeItem ? { MouthItem: '' } : {},
+    disabledOptions: {
+      MouthItem: ['Cig', 'Cohiba', 'Joint'],
+    },
+    disabledOptionReasons: {
+      MouthItem: {
+        Cig: 'Not available with Vampire Teeth',
+        Cohiba: 'Not available with Vampire Teeth',
+        Joint: 'Not available with Vampire Teeth',
+      },
+    },
+  };
+}
+
+/**
+ * Vampire (Drac) mouth cannot appear with Neckbeard; Stache is allowed.
+ * When Vampire is selected, only Neckbeard is disabled (greyed out immediately).
+ */
+function ruleVampireDisablesNeckbeard(resolver: SelectionResolver): RuleResult {
+  if (resolver.getTraitId('MouthBase') !== KNOWN_TRAIT_IDS.MouthBase_Vampire) return { disabledLayers: [] };
+
+  const facialHairPath = resolver.getPath('FacialHair');
+  const hasNeckbeard = pathContains(facialHairPath, 'neckbeard');
+
+  const disabledNeckbeardOptions = ['Neckbeard', 'neckbeard'];
+  const reason = 'Not available with Vampire Teeth';
+
+  if (hasNeckbeard) {
+    return {
+      disabledLayers: [],
+      clearSelections: ['FacialHair'],
+      forceSelections: { FacialHair: '' },
+      disabledOptions: { FacialHair: disabledNeckbeardOptions },
+      disabledOptionReasons: {
+        FacialHair: { Neckbeard: reason, neckbeard: reason },
+      },
+    };
+  }
+
+  return {
+    disabledLayers: [],
+    disabledOptions: { FacialHair: disabledNeckbeardOptions },
+    disabledOptionReasons: {
+      FacialHair: { Neckbeard: reason, neckbeard: reason },
+    },
+  };
+}
+
+/**
  * Cig/Joint/Cohiba requires MouthBase
  */
 function ruleCigJointCohibaRequiresMouthBase(resolver: SelectionResolver): RuleResult {
@@ -683,6 +749,8 @@ const RULES = [
   ruleCopiumMaskForcesValidMouthBase,
   ruleMaskForcesNumbMouth,
   rulePipeDisablesMouthItem,
+  ruleVampireDisablesCigJointCohiba,
+  ruleVampireDisablesNeckbeard,
   ruleCigJointCohibaRequiresMouthBase,
   rulePizzaDisablesMouthItem,
   ruleBubbleGumDisablesMouthItem,

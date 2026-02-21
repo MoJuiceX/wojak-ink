@@ -24,6 +24,7 @@ import {
 } from './_shared';
 import { calculateCombatIdentity } from '../../../src/lib/combat/identity-calculator';
 import { assignMoves } from '../../../src/lib/combat/move-assigner';
+import { getMoveById } from '../../../src/lib/combat/data/moves';
 
 // Re-export MintError for backwards compatibility (callers may import from process.ts)
 export { MintError };
@@ -32,14 +33,19 @@ export { MintError };
 export function buildCombatAttributes(combat: {
   type: string; nature: string; ability: string; moves: string[];
 }): Array<{ trait_type: string; value: string }> {
+  // Look up display names for moves (fall back to ID if not found)
+  const moveNames = combat.moves.map(moveId => {
+    const move = getMoveById(moveId);
+    return move?.name ?? moveId;
+  });
   return [
     { trait_type: 'Combat Type', value: combat.type },
     { trait_type: 'Nature', value: combat.nature },
     { trait_type: 'Ability', value: combat.ability },
-    { trait_type: 'Move 1', value: combat.moves[0] },
-    { trait_type: 'Move 2', value: combat.moves[1] },
-    { trait_type: 'Move 3', value: combat.moves[2] },
-    { trait_type: 'Move 4', value: combat.moves[3] },
+    { trait_type: 'Move 1', value: moveNames[0] },
+    { trait_type: 'Move 2', value: moveNames[1] },
+    { trait_type: 'Move 3', value: moveNames[2] },
+    { trait_type: 'Move 4', value: moveNames[3] },
   ];
 }
 
@@ -304,10 +310,17 @@ export async function processJob(
           job.wallet_address,
           1, // wave 1
         );
+        if (!royaltyAddress) {
+          console.error('[SplitXCH] CRITICAL: getOrCreateSplitterAddress returned empty! Falling back to wallet.');
+        } else {
+          console.log(`[SplitXCH] Using splitter address: ${royaltyAddress}`);
+        }
       } catch (err) {
         // Non-fatal: fall back to creator's wallet if SplitXCH is unavailable
-        console.error('[SplitXCH] Failed to resolve splitter, using creator wallet:', err);
+        console.error('[SplitXCH] CRITICAL: Failed to resolve splitter, using creator wallet:', err);
       }
+    } else {
+      console.warn('[SplitXCH] TREASURY_ADDRESS not set, skipping splitter resolution');
     }
 
     const mintResult = await callMintGardenMint({

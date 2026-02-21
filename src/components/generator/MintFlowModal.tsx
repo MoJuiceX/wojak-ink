@@ -165,9 +165,9 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
   const handleShare = () => {
     if (!currentJob) return;
     const text = `Just minted Wojak #${currentJob.mintNumber} on @WojakInk!`;
-    const url = currentJob.mintgardenUrl || 'https://wojak.ink';
+    const nftUrl = currentJob.mintgardenUrl?.replace('mintgarden.io/nfts', 'nft.one/nft') || 'https://wojak.ink';
     window.open(
-      `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
+      `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(nftUrl)}`,
       '_blank',
       'noopener,noreferrer'
     );
@@ -175,12 +175,13 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
 
   const handleCopyLink = async () => {
     if (!currentJob?.mintgardenUrl) return;
+    const nftUrl = currentJob.mintgardenUrl.replace('mintgarden.io/nfts', 'nft.one/nft');
     try {
-      await navigator.clipboard.writeText(currentJob.mintgardenUrl);
+      await navigator.clipboard.writeText(nftUrl);
       setShareCopied(true);
       setTimeout(() => setShareCopied(false), 2000);
     } catch {
-      window.open(currentJob.mintgardenUrl, '_blank');
+      window.open(nftUrl, '_blank');
     }
   };
 
@@ -495,13 +496,13 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
                   {/* Action buttons */}
                   {currentJob.mintgardenUrl && (
                     <a
-                      href={currentJob.mintgardenUrl}
+                      href={currentJob.mintgardenUrl.replace('mintgarden.io/nfts', 'nft.one/nft')}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn btn-ghost flex items-center justify-center gap-2 text-accent"
                     >
                       <ExternalLink size={16} />
-                      View on MintGarden
+                      View on NFT One
                     </a>
                   )}
 

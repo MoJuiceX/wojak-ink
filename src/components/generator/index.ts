@@ -19,6 +19,7 @@ export { MintFlowModal } from './MintFlowModal';
 export { StickyMiniPreview } from './StickyMiniPreview';
 export { G2TraitPanel } from './G2TraitPanel';
 export { GeneratorRightPanel } from './GeneratorRightPanel';
+export { GeneratorMobileColorPanel } from './GeneratorMobileColorPanel';
 export { MetadataPreview } from './MetadataPreview';
 export { CombatPreview } from './CombatPreview';
 export { MoveSelection } from './MoveSelection';
