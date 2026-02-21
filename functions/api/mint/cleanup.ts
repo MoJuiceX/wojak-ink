@@ -112,10 +112,9 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
     console.error('[Cleanup] Operation 3 (stuck processing) failed:', err);
   }
 
-  // 4. Retry queued (or validating-but-never-processed) jobs that haven't progressed in 30 seconds.
-  //    Submit moves jobs to 'validating' synchronously; if waitUntil(processJob) never runs, job stays there.
+  // 4. Retry jobs stuck in early steps (submit may have run through reserving_number; if waitUntil never runs, retry)
   const staleQueued = await env.DB.prepare(
-    `SELECT id FROM mint_jobs WHERE step IN ('queued', 'validating')
+    `SELECT id FROM mint_jobs WHERE step IN ('queued', 'validating', 'reserving_number')
      AND created_at < datetime('now', '-30 seconds')
      AND retry_count < max_retries
      LIMIT 1`
@@ -152,7 +151,7 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
           await env.DB.prepare(
             `UPDATE mint_jobs SET step = 'failed', error_message = 'Processing timed out during retry',
              error_code = 'TIMEOUT', wallet_lock = NULL, updated_at = datetime('now')
-             WHERE id = ? AND step IN ('queued', 'validating')`
+             WHERE id = ? AND step IN ('queued', 'validating', 'reserving_number')`
           ).bind(row.id).run();
         }
       }

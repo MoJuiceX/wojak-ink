@@ -143,9 +143,9 @@ export async function processJob(
   jobId: number,
   imageBase64: string
 ): Promise<void> {
-  // Load job — process if queued or validating (submit may have moved to validating synchronously so waitUntil still picks it up)
+  // Load job — process if queued, validating, or reserving_number (submit may have run through step 2 in-request)
   const job = await env.DB.prepare(
-    'SELECT * FROM mint_jobs WHERE id = ? AND step IN (\'queued\', \'validating\')'
+    'SELECT * FROM mint_jobs WHERE id = ? AND step IN (\'queued\', \'validating\', \'reserving_number\')'
   ).bind(jobId).first<MintJobRow>();
 
   if (!job) return; // Already picked up or doesn't exist
@@ -160,14 +160,12 @@ export async function processJob(
     const colors = JSON.parse(job.colors_json) as Record<string, string>;
     const consolidated = consolidateTraits(layers);
 
-    // ──── STEP 2: Reserve Mint Number ────
-    await updateJobStep(env.DB, jobId, 'reserving_number');
-
-    // Reuse mint_number from a previous attempt (retry) to avoid wasting supply
+    // ──── STEP 2: Reserve Mint Number (submit may have done this already) ────
     let mintNumber: number;
     if (job.mint_number != null) {
       mintNumber = job.mint_number;
     } else {
+      await updateJobStep(env.DB, jobId, 'reserving_number');
       mintNumber = await getNextMintNumber(env.DB, TOTAL_SUPPLY);
       await env.DB.prepare(
         'UPDATE mint_jobs SET mint_number = ?, updated_at = datetime(\'now\') WHERE id = ?'

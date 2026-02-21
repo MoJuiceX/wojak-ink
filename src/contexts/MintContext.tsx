@@ -592,14 +592,14 @@ export function MintProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Job created — start polling
+      // Job created — start polling (use server step/label when present so we show step 2 right away)
       setCurrentJob({
         jobId: data.jobId,
         step: data.step || 'queued',
         mintType: data.mintType || params.mintType,
-        stepLabel: 'Preparing your mint...',
-        stepNumber: 1,
-        totalSteps: params.mintType === 'paid' ? 6 : 5,
+        stepLabel: data.stepLabel ?? 'Preparing your mint...',
+        stepNumber: data.stepNumber ?? 1,
+        totalSteps: data.totalSteps ?? (params.mintType === 'paid' ? 6 : 5),
         creditsSpent: data.creditCost,
       });
 

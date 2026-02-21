@@ -9,6 +9,7 @@
  */
 
 import { processJob, updateJobStep, type ProcessEnv } from './process';
+import { getNextMintNumber } from './mintNumberHelper';
 import {
   jsonResponse,
   errorResponse,
@@ -426,20 +427,28 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     // ── Store image in KV (2 hour TTL — matches free mint expiry) ──
     await env.MINT_JOBS_KV.put(`job-image:${jobId}`, imageBase64, { expirationTtl: 7200 });
 
-    // ── Move to validating synchronously so job progresses even if waitUntil is delayed or dropped ──
+    // ── Advance to step 2 in-request so UI shows progress even if waitUntil is delayed ──
     await updateJobStep(env.DB, jobId, 'validating');
+    const mintNumber = await getNextMintNumber(env.DB, TOTAL_SUPPLY);
+    await env.DB.prepare(
+      `UPDATE mint_jobs SET mint_number = ?, step = 'reserving_number', updated_at = datetime('now') WHERE id = ?`
+    ).bind(mintNumber, jobId).run();
 
-    // ── Trigger background processing ──
+    // ── Trigger background processing (continues from IPFS upload) ──
     context.waitUntil(processJob(env, jobId, imageBase64));
 
     // ── Increment rate limit only now (new job created). Idempotent replays never reach here.
     await incrementRateLimit(env.DB, ipKey, MINT_RATE_LIMITS.prepareByIP);
     await incrementRateLimit(env.DB, walletKey, MINT_RATE_LIMITS.prepare);
 
-    // ── Return immediately ──
+    // ── Return immediately (job is already at step 2 so UI can show progress) ──
+    const totalSteps = mintType === 'paid' ? 6 : 5;
     return jsonResponse({
       jobId,
-      step: 'queued',
+      step: 'reserving_number',
+      stepLabel: 'Reserving your Wojak number...',
+      stepNumber: 2,
+      totalSteps,
       mintType,
       creditCost: mintType === 'free' ? freeMintCreditCost / 100 : undefined,
       estimatedXch: xchPriceMojos ? xchPriceMojos / 1_000_000_000_000 : undefined,
