@@ -22,6 +22,7 @@ import {
   BASE_PRICE_XCH,
   SURCHARGE_CATEGORIES,
   SURCHARGE_EXEMPT_TRAITS,
+  PREMIUM_TOP_N,
 } from './_shared';
 import { checkRateLimit, incrementRateLimit, getRateLimitKey, MINT_RATE_LIMITS } from '../../lib/rateLimit';
 import { consolidateTraits } from './traitResolver';
@@ -237,11 +238,30 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     }>();
 
     if (mintType === 'free') {
-      // Calculate highest surcharge among selected traits (same logic as paid path)
+      // Free mints: always 100 credits UNLESS the selected trait is
+      // in the top 3 most-used traits for its surcharge category.
+      // Build top-3 lookup per category from DB trait usage data.
+      const top3ByCategory = new Map<string, Set<string>>();
+      for (const cat of SURCHARGE_CATEGORIES) {
+        const catRows = (allTraitRows.results || [])
+          .filter(r => r.trait_category === cat && !SURCHARGE_EXEMPT_TRAITS.has(r.trait_name))
+          .map(r => ({
+            name: r.trait_name,
+            decayed: applyDecay(r.effective_usage, r.last_decay_at),
+          }))
+          .sort((a, b) => b.decayed - a.decayed)
+          .slice(0, PREMIUM_TOP_N);
+        top3ByCategory.set(cat, new Set(catRows.map(r => r.name)));
+      }
+
       let maxSurcharge = 0;
       for (const { traitType, displayName } of consolidated.values()) {
         if (!SURCHARGE_CATEGORIES.has(traitType)) continue;
         if (SURCHARGE_EXEMPT_TRAITS.has(displayName)) continue;
+        // Only apply credit surcharge if this trait is in the top 3 for its category
+        const topTraits = top3ByCategory.get(traitType);
+        if (!topTraits || !topTraits.has(displayName)) continue;
+
         const row = (allTraitRows.results || []).find(
           r => r.trait_category === traitType && r.trait_name === displayName
         );
@@ -253,7 +273,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         }
       }
 
-      // Scale credit cost proportionally: credits = base × (base + surcharge) / base
+      // Scale credit cost proportionally only for top-3 traits
       if (maxSurcharge > 0) {
         freeMintCreditCost = Math.ceil(
           FREE_MINT_CREDITS * (BASE_PRICE_XCH + maxSurcharge) / BASE_PRICE_XCH
