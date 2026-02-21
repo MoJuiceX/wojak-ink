@@ -434,6 +434,50 @@ export function MintProvider({ children }: { children: ReactNode }) {
     return () => stopPolling();
   }, [stopPolling]);
 
+  // ── Stuck-mint detection: auto-fail if no progress for 60 seconds ──
+  // Fix for the "stuck at step 1 of 6" bug: if processJob crashes silently
+  // in waitUntil, the job sits in an intermediate state. Without this guard,
+  // the user sees a spinner until the 10-minute polling timeout expires.
+  // This detector fires after 60s of no step change and treats it as an error.
+  const stuckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastSeenStepRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    // Only monitor during active (non-terminal) states
+    if (mintStep !== 'submitted') {
+      if (stuckTimerRef.current) {
+        clearTimeout(stuckTimerRef.current);
+        stuckTimerRef.current = null;
+      }
+      lastSeenStepRef.current = null;
+      return;
+    }
+
+    const currentStep = currentJob?.step;
+    if (!currentStep) return;
+
+    // Step changed → reset timer
+    if (currentStep !== lastSeenStepRef.current) {
+      lastSeenStepRef.current = currentStep;
+      if (stuckTimerRef.current) clearTimeout(stuckTimerRef.current);
+
+      stuckTimerRef.current = setTimeout(() => {
+        // Still on the same non-terminal step after 60s → likely stuck
+        console.warn(`[MintContext] Mint appears stuck at step '${currentStep}' for 60s — marking as error`);
+        setMintStep('error');
+        setErrorMessage('Minting took too long. Please try again.');
+        stopPolling();
+      }, 60_000);
+    }
+
+    return () => {
+      if (stuckTimerRef.current) {
+        clearTimeout(stuckTimerRef.current);
+        stuckTimerRef.current = null;
+      }
+    };
+  }, [mintStep, currentJob?.step, stopPolling]);
+
   // Immediate re-poll when tab becomes visible (handles backgrounded tabs)
   useEffect(() => {
     if (!currentJob || !address) return;
@@ -457,7 +501,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
               if (data.creditsRefunded) refetchCredits();
             }
           })
-          .catch(() => {});
+          .catch(() => { });
       }
     };
 
@@ -500,7 +544,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
           startPolling(job.jobId, address, job.step);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
     return () => {
       cancelled = true;
     };

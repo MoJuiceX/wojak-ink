@@ -150,246 +150,275 @@ export async function processJob(
 
   if (!job) return; // Already picked up or doesn't exist
 
+  // Outer safety net: catch ANY unhandled error and mark job as failed.
+  // Without this, errors that escape the inner try/catch (e.g. SplitXCH
+  // AbortError, unexpected DB errors) leave the job in limbo state forever
+  // until the cleanup cron (5 min interval) picks it up.
   try {
-    // ──── STEP 1: Validate ────
-    if (job.step === 'queued') {
-      await updateJobStep(env.DB, jobId, 'validating');
-    }
 
-    const layers = JSON.parse(job.layers_json) as Record<string, string>;
-    const colors = JSON.parse(job.colors_json) as Record<string, string>;
-    const consolidated = consolidateTraits(layers);
+    try {
+      // ──── STEP 1: Validate ────
+      if (job.step === 'queued') {
+        await updateJobStep(env.DB, jobId, 'validating');
+      }
 
-    // ──── STEP 2: Reserve Mint Number (submit may have done this already) ────
-    let mintNumber: number;
-    if (job.mint_number != null) {
-      mintNumber = job.mint_number;
-    } else {
-      await updateJobStep(env.DB, jobId, 'reserving_number');
-      mintNumber = await getNextMintNumber(env.DB, TOTAL_SUPPLY);
-      await env.DB.prepare(
-        'UPDATE mint_jobs SET mint_number = ?, updated_at = datetime(\'now\') WHERE id = ?'
-      ).bind(mintNumber, jobId).run();
-    }
+      const layers = JSON.parse(job.layers_json) as Record<string, string>;
+      const colors = JSON.parse(job.colors_json) as Record<string, string>;
+      const consolidated = consolidateTraits(layers);
 
-    // ──── STEP 3: Upload to IPFS (skip if already uploaded from previous attempt) ────
-    const collectionUuid = env.PHASE2_COLLECTION_UUID || '';
-    const TRAIT_ORDER = ['Background', 'Base', 'Clothes', 'Face', 'Face Wear', 'Head', 'Mouth'];
-    const attributes = [...consolidated.values()]
-      .map(({ traitType, displayName }) => ({ trait_type: traitType, value: displayName }))
-      .sort((a, b) => {
-        const ai = TRAIT_ORDER.indexOf(a.trait_type);
-        const bi = TRAIT_ORDER.indexOf(b.trait_type);
-        return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+      // ──── STEP 2: Reserve Mint Number (submit may have done this already) ────
+      let mintNumber: number;
+      if (job.mint_number != null) {
+        mintNumber = job.mint_number;
+      } else {
+        await updateJobStep(env.DB, jobId, 'reserving_number');
+        mintNumber = await getNextMintNumber(env.DB, TOTAL_SUPPLY);
+        await env.DB.prepare(
+          'UPDATE mint_jobs SET mint_number = ?, updated_at = datetime(\'now\') WHERE id = ?'
+        ).bind(mintNumber, jobId).run();
+      }
+
+      // ──── STEP 3: Upload to IPFS (skip if already uploaded from previous attempt) ────
+      const collectionUuid = env.PHASE2_COLLECTION_UUID || '';
+      const TRAIT_ORDER = ['Background', 'Base', 'Clothes', 'Face', 'Face Wear', 'Head', 'Mouth'];
+      const attributes = [...consolidated.values()]
+        .map(({ traitType, displayName }) => ({ trait_type: traitType, value: displayName }))
+        .sort((a, b) => {
+          const ai = TRAIT_ORDER.indexOf(a.trait_type);
+          const bi = TRAIT_ORDER.indexOf(b.trait_type);
+          return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+        });
+
+      // ── Combat identity → IPFS attributes ──
+      // Calculate here (before metadata build + IPFS upload) so combat attributes
+      // are baked into the on-chain metadata. Also calculated in finalizeJob() for
+      // the combat_fighters DB record — both use the same deterministic function.
+      const combatTraitEntries: { traitId: string; layer: string }[] = [];
+      const combatColorMap: Record<string, string> = {};
+
+      for (const [layer, path] of Object.entries(layers)) {
+        if (!path || typeof path !== 'string') continue;
+        const parts = path.split('/');
+        if (parts.length >= 3) {
+          const traitId = `${parts[parts.length - 2]}_${parts[parts.length - 1].replace(/\.[^.]+$/, '')}`;
+          combatTraitEntries.push({ traitId, layer });
+          const hex = colors[layer];
+          if (hex) combatColorMap[traitId] = hex;
+        }
+      }
+
+      const combatIdentity = calculateCombatIdentity({
+        traits: combatTraitEntries,
+        colors: combatColorMap,
+        details: {},
       });
 
-    // ── Combat identity → IPFS attributes ──
-    // Calculate here (before metadata build + IPFS upload) so combat attributes
-    // are baked into the on-chain metadata. Also calculated in finalizeJob() for
-    // the combat_fighters DB record — both use the same deterministic function.
-    const combatTraitEntries: { traitId: string; layer: string }[] = [];
-    const combatColorMap: Record<string, string> = {};
+      const combatMoveAssignment = assignMoves(combatIdentity);
 
-    for (const [layer, path] of Object.entries(layers)) {
-      if (!path || typeof path !== 'string') continue;
-      const parts = path.split('/');
-      if (parts.length >= 3) {
-        const traitId = `${parts[parts.length - 2]}_${parts[parts.length - 1].replace(/\.[^.]+$/, '')}`;
-        combatTraitEntries.push({ traitId, layer });
-        const hex = colors[layer];
-        if (hex) combatColorMap[traitId] = hex;
-      }
-    }
+      attributes.push(...buildCombatAttributes({
+        type: combatIdentity.type,
+        nature: combatIdentity.nature,
+        ability: combatIdentity.ability,
+        moves: combatMoveAssignment.valid ? combatMoveAssignment.moves : ['', '', '', ''],
+      }));
 
-    const combatIdentity = calculateCombatIdentity({
-      traits: combatTraitEntries,
-      colors: combatColorMap,
-      details: {},
-    });
+      const customName = job.custom_name;
+      const fullName = customName
+        ? `Your Wojak #${mintNumber}: ${customName}`
+        : `Your Wojak #${mintNumber}`;
 
-    const combatMoveAssignment = assignMoves(combatIdentity);
-
-    attributes.push(...buildCombatAttributes({
-      type: combatIdentity.type,
-      nature: combatIdentity.nature,
-      ability: combatIdentity.ability,
-      moves: combatMoveAssignment.valid ? combatMoveAssignment.moves : ['', '', '', ''],
-    }));
-
-    const customName = job.custom_name;
-    const fullName = customName
-      ? `Your Wojak #${mintNumber}: ${customName}`
-      : `Your Wojak #${mintNumber}`;
-
-    const metadata = {
-      format: 'CHIP-0007',
-      name: fullName,
-      description: 'Your Wojak puts collectors in control. Same handcrafted layers and lore from the Wojak Farmers Plot collection \u2014 but you choose every layer, every color, every detail using the Wojak Generator on Wojak.ink \uD83C\uDF4A',
-      sensitive_content: false,
-      collection: {
-        name: 'Your Wojak',
-        id: collectionUuid,
-        attributes: [
-          { type: 'description', value: 'Your Wojak puts collectors in control. Choose every layer, every color, every detail.' },
-          { type: 'website', value: 'https://wojak.ink' },
-          { type: 'twitter', value: 'https://x.com/MoJuiceX' },
-        ],
-      },
-      edition: mintNumber,
-      date: Date.now(),
-      compiler: 'Wojak.ink Generator',
-      attributes,
-      edition_number: mintNumber,
-      edition_total: TOTAL_SUPPLY,
-    };
-
-    let uploadResult: IPFSUploadResult;
-
-    if (job.ipfs_image_uris && job.ipfs_metadata_uris && job.image_hash && job.metadata_hash) {
-      // Retry path: IPFS data already exists from a previous attempt
-      uploadResult = {
-        dataUris: JSON.parse(job.ipfs_image_uris) as string[],
-        metadataUris: JSON.parse(job.ipfs_metadata_uris) as string[],
-        dataHash: job.image_hash,
-        metadataHash: job.metadata_hash,
+      const metadata = {
+        format: 'CHIP-0007',
+        name: fullName,
+        description: 'Your Wojak puts collectors in control. Same handcrafted layers and lore from the Wojak Farmers Plot collection \u2014 but you choose every layer, every color, every detail using the Wojak Generator on Wojak.ink \uD83C\uDF4A',
+        sensitive_content: false,
+        collection: {
+          name: 'Your Wojak',
+          id: collectionUuid,
+          attributes: [
+            { type: 'description', value: 'Your Wojak puts collectors in control. Choose every layer, every color, every detail.' },
+            { type: 'website', value: 'https://wojak.ink' },
+            { type: 'twitter', value: 'https://x.com/MoJuiceX' },
+          ],
+        },
+        edition: mintNumber,
+        date: Date.now(),
+        compiler: 'Wojak.ink Generator',
+        attributes,
+        edition_number: mintNumber,
+        edition_total: TOTAL_SUPPLY,
       };
-      console.warn(`[MintProcessor] Job ${jobId} reusing existing IPFS data from previous attempt`);
-    } else {
-      await updateJobStep(env.DB, jobId, 'uploading_ipfs');
 
-      const jwt = env.PINATA_JWT;
-      if (!jwt) {
-        throw new MintError('CONFIG_ERROR', 'IPFS upload not configured (missing PINATA_JWT)');
-      }
+      let uploadResult: IPFSUploadResult;
 
-      try {
-        uploadResult = await uploadToIPFS(imageBase64, metadata as Record<string, unknown>, jwt, env.PINATA_GATEWAY);
-      } catch (err) {
-        throw new MintError('IPFS_UPLOAD_FAILED', err instanceof Error ? err.message : 'IPFS upload failed');
-      }
+      if (job.ipfs_image_uris && job.ipfs_metadata_uris && job.image_hash && job.metadata_hash) {
+        // Retry path: IPFS data already exists from a previous attempt
+        uploadResult = {
+          dataUris: JSON.parse(job.ipfs_image_uris) as string[],
+          metadataUris: JSON.parse(job.ipfs_metadata_uris) as string[],
+          dataHash: job.image_hash,
+          metadataHash: job.metadata_hash,
+        };
+        console.warn(`[MintProcessor] Job ${jobId} reusing existing IPFS data from previous attempt`);
+      } else {
+        await updateJobStep(env.DB, jobId, 'uploading_ipfs');
 
-      await env.DB.prepare(
-        `UPDATE mint_jobs SET
+        const jwt = env.PINATA_JWT;
+        if (!jwt) {
+          throw new MintError('CONFIG_ERROR', 'IPFS upload not configured (missing PINATA_JWT)');
+        }
+
+        try {
+          uploadResult = await uploadToIPFS(imageBase64, metadata as Record<string, unknown>, jwt, env.PINATA_GATEWAY);
+        } catch (err) {
+          throw new MintError('IPFS_UPLOAD_FAILED', err instanceof Error ? err.message : 'IPFS upload failed');
+        }
+
+        await env.DB.prepare(
+          `UPDATE mint_jobs SET
           ipfs_image_uris = ?, ipfs_metadata_uris = ?,
           image_hash = ?, metadata_hash = ?, updated_at = datetime('now')
          WHERE id = ?`
-      ).bind(
-        JSON.stringify(uploadResult.dataUris),
-        JSON.stringify(uploadResult.metadataUris),
-        uploadResult.dataHash,
-        uploadResult.metadataHash,
-        jobId
-      ).run();
-    }
+        ).bind(
+          JSON.stringify(uploadResult.dataUris),
+          JSON.stringify(uploadResult.metadataUris),
+          uploadResult.dataHash,
+          uploadResult.metadataHash,
+          jobId
+        ).run();
+      }
 
-    // Keep image in KV until job completes — needed for retry if MintGarden fails.
-    // KV entry will be cleaned up after finalization (see finalizeJob below).
+      // Keep image in KV until job completes — needed for retry if MintGarden fails.
+      // KV entry will be cleaned up after finalization (see finalizeJob below).
 
-    // ──── CONCURRENCY GATE ────
-    const concurrencyCount = await env.DB.prepare(
-      "SELECT COUNT(*) AS count FROM mint_jobs WHERE step = 'calling_mintgarden'"
-    ).first<{ count: number }>();
+      // ──── CONCURRENCY GATE ────
+      const concurrencyCount = await env.DB.prepare(
+        "SELECT COUNT(*) AS count FROM mint_jobs WHERE step = 'calling_mintgarden'"
+      ).first<{ count: number }>();
 
-    if ((concurrencyCount?.count ?? 0) >= MAX_MINTGARDEN_CONCURRENT) {
-      await updateJobStep(env.DB, jobId, 'mint_queued');
-      console.warn(`[MintProcessor] Job ${jobId} queued — ${concurrencyCount!.count} MintGarden calls in flight`);
-      return;
-    }
+      if ((concurrencyCount?.count ?? 0) >= MAX_MINTGARDEN_CONCURRENT) {
+        await updateJobStep(env.DB, jobId, 'mint_queued');
+        console.warn(`[MintProcessor] Job ${jobId} queued — ${concurrencyCount!.count} MintGarden calls in flight`);
+        return;
+      }
 
-    // ──── STEP 4: Call MintGarden ────
-    await updateJobStep(env.DB, jobId, 'calling_mintgarden');
+      // ──── STEP 4: Call MintGarden ────
+      await updateJobStep(env.DB, jobId, 'calling_mintgarden');
 
-    const totalPriceXch = job.mint_type === 'paid' && job.xch_price_mojos
-      ? job.xch_price_mojos / 1_000_000_000_000
-      : undefined;
+      const totalPriceXch = job.mint_type === 'paid' && job.xch_price_mojos
+        ? job.xch_price_mojos / 1_000_000_000_000
+        : undefined;
 
-    // Resolve SplitXCH splitter address for royalty splitting
-    let royaltyAddress: string | undefined;
-    if (env.TREASURY_ADDRESS) {
-      try {
-        royaltyAddress = await getOrCreateSplitterAddress(
-          { DB: env.DB, TREASURY_ADDRESS: env.TREASURY_ADDRESS },
-          job.wallet_address,
-          1, // wave 1
-        );
-        if (!royaltyAddress) {
-          console.error('[SplitXCH] CRITICAL: getOrCreateSplitterAddress returned empty! Falling back to wallet.');
-        } else {
-          console.warn(`[SplitXCH] Using splitter address: ${royaltyAddress}`);
+      // Resolve SplitXCH splitter address for royalty splitting.
+      // Wrapped in Promise.race with 10s timeout so a hung SplitXCH API
+      // doesn't silently kill the entire mint (the external fetch in
+      // splitxch.ts has its own 10s timeout, but this is a belt-and-suspenders
+      // guard at the processJob level).
+      let royaltyAddress: string | undefined;
+      if (env.TREASURY_ADDRESS) {
+        try {
+          royaltyAddress = await Promise.race([
+            getOrCreateSplitterAddress(
+              { DB: env.DB, TREASURY_ADDRESS: env.TREASURY_ADDRESS },
+              job.wallet_address,
+              1, // wave 1
+            ),
+            new Promise<string>((_, reject) =>
+              setTimeout(() => reject(new Error('SplitXCH lookup timed out (10s)')), 10_000)
+            ),
+          ]);
+          if (!royaltyAddress) {
+            console.error('[SplitXCH] CRITICAL: getOrCreateSplitterAddress returned empty! Falling back to wallet.');
+          } else {
+            console.warn(`[SplitXCH] Using splitter address: ${royaltyAddress}`);
+          }
+        } catch (err) {
+          // Non-fatal: fall back to creator's wallet if SplitXCH is unavailable
+          console.error('[SplitXCH] CRITICAL: Failed to resolve splitter, using creator wallet:', err);
         }
-      } catch (err) {
-        // Non-fatal: fall back to creator's wallet if SplitXCH is unavailable
-        console.error('[SplitXCH] CRITICAL: Failed to resolve splitter, using creator wallet:', err);
+      } else {
+        console.warn('[SplitXCH] TREASURY_ADDRESS not set, skipping splitter resolution');
       }
-    } else {
-      console.warn('[SplitXCH] TREASURY_ADDRESS not set, skipping splitter resolution');
-    }
 
-    const mintResult = await callMintGardenMint({
-      walletAddress: job.wallet_address,
-      royaltyAddress,
-      mintType: job.mint_type,
-      ipfsImageUris: uploadResult.dataUris,
-      ipfsMetadataUris: uploadResult.metadataUris,
-      imageHash: uploadResult.dataHash,
-      metadataHash: uploadResult.metadataHash,
-      priceXch: totalPriceXch,
-      collectionUuid,
-      editionNumber: mintNumber,
-      editionTotal: TOTAL_SUPPLY,
-    }, env);
+      const mintResult = await callMintGardenMint({
+        walletAddress: job.wallet_address,
+        royaltyAddress,
+        mintType: job.mint_type,
+        ipfsImageUris: uploadResult.dataUris,
+        ipfsMetadataUris: uploadResult.metadataUris,
+        imageHash: uploadResult.dataHash,
+        metadataHash: uploadResult.metadataHash,
+        priceXch: totalPriceXch,
+        collectionUuid,
+        editionNumber: mintNumber,
+        editionTotal: TOTAL_SUPPLY,
+      }, env);
 
-    if (job.mint_type === 'free') {
-      // Free mint: MintGarden returns launcherId directly
-      if (!mintResult.launcherId) {
-        throw new MintError('MINTGARDEN_FAILED', 'MintGarden did not return a launcher ID.');
+      if (job.mint_type === 'free') {
+        // Free mint: MintGarden returns launcherId directly
+        if (!mintResult.launcherId) {
+          throw new MintError('MINTGARDEN_FAILED', 'MintGarden did not return a launcher ID.');
+        }
+        await env.DB.prepare(
+          'UPDATE mint_jobs SET mintgarden_launcher_id = ?, updated_at = datetime(\'now\') WHERE id = ?'
+        ).bind(mintResult.launcherId, jobId).run();
+
+      } else {
+        // Paid mint: MintGarden returns offer file (and NFT ID in offer.offered)
+        if (!mintResult.offerFile) {
+          throw new MintError('OFFER_CREATION_FAILED', 'MintGarden did not return an offer.');
+        }
+        // Store offer file + launcher ID (if available from offer.offered).
+        // Having the launcher ID early means confirm-payment can verify directly
+        // instead of relying on slow auto-detection by edition_number.
+        await env.DB.prepare(
+          `UPDATE mint_jobs SET offer_file = ?, mintgarden_launcher_id = ?, expires_at = ?, updated_at = datetime('now') WHERE id = ?`
+        ).bind(
+          mintResult.offerFile,
+          mintResult.launcherId,  // may be null if not in response
+          new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+          jobId
+        ).run();
       }
-      await env.DB.prepare(
-        'UPDATE mint_jobs SET mintgarden_launcher_id = ?, updated_at = datetime(\'now\') WHERE id = ?'
-      ).bind(mintResult.launcherId, jobId).run();
 
-    } else {
-      // Paid mint: MintGarden returns offer file (and NFT ID in offer.offered)
-      if (!mintResult.offerFile) {
-        throw new MintError('OFFER_CREATION_FAILED', 'MintGarden did not return an offer.');
+      // ──── STEP 5: Await Payment (paid only) ────
+      if (job.mint_type === 'paid') {
+        await updateJobStep(env.DB, jobId, 'awaiting_payment');
+        await chainNextQueuedJob(env);
+        return;
       }
-      // Store offer file + launcher ID (if available from offer.offered).
-      // Having the launcher ID early means confirm-payment can verify directly
-      // instead of relying on slow auto-detection by edition_number.
-      await env.DB.prepare(
-        `UPDATE mint_jobs SET offer_file = ?, mintgarden_launcher_id = ?, expires_at = ?, updated_at = datetime('now') WHERE id = ?`
-      ).bind(
-        mintResult.offerFile,
-        mintResult.launcherId,  // may be null if not in response
-        new Date(Date.now() + 15 * 60 * 1000).toISOString(),
-        jobId
-      ).run();
-    }
 
-    // ──── STEP 5: Await Payment (paid only) ────
-    if (job.mint_type === 'paid') {
-      await updateJobStep(env.DB, jobId, 'awaiting_payment');
+      // ──── STEP 6: Finalize (free mints) ────
+      await finalizeJob(env, jobId);
       await chainNextQueuedJob(env);
-      return;
+
+    } catch (error) {
+      // Rate-limited by MintGarden — re-queue instead of failing
+      if (error instanceof MintError && error.code === 'RATE_LIMITED') {
+        const retryAfterMs = error.retryAfterMs ?? 30_000;
+        const notBefore = new Date(Date.now() + retryAfterMs).toISOString();
+        await env.DB.prepare(
+          "UPDATE mint_jobs SET step = 'mint_queued', not_before = ?, error_message = ?, updated_at = datetime('now') WHERE id = ?"
+        ).bind(notBefore, error.message, jobId).run();
+        console.warn(`[MintProcessor] Job ${jobId} rate-limited, re-queued with not_before=${notBefore}`);
+        await chainNextQueuedJob(env);
+        return;
+      }
+      await handleJobFailure(env, jobId, job, error);
     }
 
-    // ──── STEP 6: Finalize (free mints) ────
-    await finalizeJob(env, jobId);
-    await chainNextQueuedJob(env);
-
-  } catch (error) {
-    // Rate-limited by MintGarden — re-queue instead of failing
-    if (error instanceof MintError && error.code === 'RATE_LIMITED') {
-      const retryAfterMs = error.retryAfterMs ?? 30_000;
-      const notBefore = new Date(Date.now() + retryAfterMs).toISOString();
+    // Outer safety net (matches outer try at top of processJob)
+  } catch (outerError) {
+    console.error(`[MintProcessor] OUTER CATCH — Job ${jobId} escaped inner error handling:`, outerError);
+    try {
+      const errMsg = outerError instanceof Error ? outerError.message : String(outerError);
       await env.DB.prepare(
-        "UPDATE mint_jobs SET step = 'mint_queued', not_before = ?, error_message = ?, updated_at = datetime('now') WHERE id = ?"
-      ).bind(notBefore, error.message, jobId).run();
-      console.warn(`[MintProcessor] Job ${jobId} rate-limited, re-queued with not_before=${notBefore}`);
-      await chainNextQueuedJob(env);
-      return;
+        `UPDATE mint_jobs SET step = 'failed', error_message = ?, error_code = 'INTERNAL_ERROR',
+         wallet_lock = NULL, updated_at = datetime('now') WHERE id = ?`
+      ).bind(`Unhandled: ${errMsg}`.slice(0, 500), jobId).run();
+    } catch (dbErr) {
+      console.error(`[MintProcessor] OUTER CATCH — Failed to update job ${jobId} to failed state:`, dbErr);
     }
-    await handleJobFailure(env, jobId, job, error);
   }
 }
 

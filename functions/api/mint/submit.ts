@@ -435,7 +435,13 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     ).bind(mintNumber, jobId).run();
 
     // ── Trigger background processing (continues from IPFS upload) ──
-    context.waitUntil(processJob(env, jobId, imageBase64));
+    // .catch() ensures errors are logged — without it, waitUntil silently
+    // swallows rejections and the job stays in limbo until cleanup cron.
+    context.waitUntil(
+      processJob(env, jobId, imageBase64).catch(err => {
+        console.error(`[Mint Submit] waitUntil processJob error for job ${jobId}:`, err);
+      })
+    );
 
     // ── Increment rate limit only now (new job created). Idempotent replays never reach here.
     await incrementRateLimit(env.DB, ipKey, MINT_RATE_LIMITS.prepareByIP);

@@ -39,7 +39,7 @@ interface ActionBarProps {
 }
 
 /** When true, mint button is disabled and shows "Minting continues soon." on hover. Set to false to re-enable. */
-const GENERATOR_MINTING_PAUSED = true;
+const GENERATOR_MINTING_PAUSED = false;
 
 /** Tooltip that renders in a portal above the trigger, so it's never clipped by overflow */
 function ActionBarTooltip({
@@ -300,9 +300,8 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
     variant?: 'primary' | 'secondary';
   }) => (
     <motion.button
-      className={`relative flex items-center justify-center rounded-lg shrink-0 ${
-        variant === 'primary' ? 'w-9 h-9' : 'w-8 h-8'
-      }`}
+      className={`relative flex items-center justify-center rounded-lg shrink-0 ${variant === 'primary' ? 'w-9 h-9' : 'w-8 h-8'
+        }`}
       style={{
         background: isActive
           ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.25), var(--color-primary-10))'

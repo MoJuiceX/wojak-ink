@@ -60,11 +60,23 @@ export async function getOrCreateSplitterAddress(
     ],
   };
 
-  const response = await fetch('https://splitxch.com/api/compute/fast', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(requestBody),
-  });
+  // 10s timeout to prevent hanging if SplitXCH API is slow/down.
+  // Without this, a hung fetch kills the entire processJob worker via
+  // Cloudflare's CPU limit — silently dropping the mint.
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10_000);
+
+  let response: Response;
+  try {
+    response = await fetch('https://splitxch.com/api/compute/fast', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   if (!response.ok) {
     const text = await response.text();
