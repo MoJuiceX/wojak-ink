@@ -12,6 +12,9 @@ import { SwipeCard } from './SwipeCard';
 import { VoteButtons } from './VoteButtons';
 import { VoteCardSkeleton } from './VoteCardSkeleton';
 
+// When feed is empty, poll this often to pick up new mints
+const REFETCH_WHEN_EMPTY_MS = 3 * 60 * 1000; // 3 minutes
+
 // Milestone toast hook — fires when onboarding milestones complete during session
 const MILESTONE_INFO: Record<string, { label: string; credits: number }> = {
   voted: { label: 'First Vote!', credits: 2 },
@@ -48,6 +51,7 @@ export function VotingFeed() {
     player,
     feed, feedLoading, loadFeed,
     castVote,
+    removeFromFeed,
   } = useGame();
   const toast = useToast();
   const reducedMotion = usePrefersReducedMotion();
@@ -93,6 +97,26 @@ export function VotingFeed() {
     }
   }, [player?.did, loadFeed]);
 
+  // Refetch when tab becomes visible so new mints show up without manual refresh
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') {
+        loadFeed().catch(() => setFeedError(true));
+      }
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [loadFeed]);
+
+  // When feed is empty ("All Caught Up"), poll periodically so new mints appear
+  useEffect(() => {
+    if (feed.length > 0 || feedLoading) return;
+    const t = setInterval(() => {
+      loadFeed().catch(() => setFeedError(true));
+    }, REFETCH_WHEN_EMPTY_MS);
+    return () => clearInterval(t);
+  }, [feed.length, feedLoading, loadFeed]);
+
   // Prefetch images for next 3 cards
   useEffect(() => {
     feed.slice(0, 3).forEach(item => {
@@ -124,8 +148,9 @@ export function VotingFeed() {
     const currentItem = feed[0];
     if (!currentItem || cardExiting) return;
 
+    const votedNftId = currentItem.nftId;
     setCardExiting(true);
-    setExitDirection(voteType); // Set direction for exit animation
+    setExitDirection(voteType); // Set direction for exit animation (only top card has stackPosition 0)
 
     // Track session vote count
     const newVoteCount = voteCount + 1;
@@ -136,22 +161,23 @@ export function VotingFeed() {
       markInstructionsSeen();
     }
 
-    // Optimistic fire-and-forget with error feedback
+    // Fire vote to API (do not remove from feed here — wait for exit animation)
     castVote(currentItem.nftId, currentItem.editionNumber, voteType)
       .then(ok => { if (!ok) toast.error('Vote failed to save'); })
       .catch(() => toast.error('Vote failed to save'));
 
-    // Small delay for exit animation, then advance
+    // After exit animation finishes: remove voted card from feed, then clear state and refill
+    const EXIT_MS = 220;
     setTimeout(() => {
+      removeFromFeed(votedNftId);
       setCardExiting(false);
-      setExitDirection(null); // Reset direction
+      setExitDirection(null);
 
-      // Refill when running low
       if (feed.length <= 3) {
         loadFeed().catch(() => setFeedError(true));
       }
-    }, 250);
-  }, [feed, cardExiting, castVote, loadFeed, toast, voteCount, instructionsSeen, markInstructionsSeen]);
+    }, EXIT_MS);
+  }, [feed, cardExiting, castVote, loadFeed, removeFromFeed, toast, voteCount, instructionsSeen, markInstructionsSeen]);
 
   const handleRetry = useCallback(() => {
     setFeedError(false);
@@ -184,13 +210,22 @@ export function VotingFeed() {
         <span className="text-2xl">&#9203;</span>
         <h2 className="text-lg font-semibold">All Caught Up!</h2>
         <p className="text-secondary text-sm text-center">
-          New Wojaks will appear as cooldowns expire.
+          Each Wojak you vote on is hidden for <strong>24 hours</strong>. New mints from others will appear here automatically—we'll check every few minutes, or when you return to this tab.
           {voteCount > 0 && (
-            <><br /><span className="text-muted">You've voted on {voteCount} Wojak{voteCount !== 1 ? 's' : ''} today.</span></>
+            <><br /><span className="text-muted">You've voted on {voteCount} Wojak{voteCount !== 1 ? 's' : ''} this session.</span></>
           )}
         </p>
-        <div className="flex gap-3">
-          <Link to="/fight-club/rankings" className="btn btn-primary text-sm" style={{ padding: '8px 20px', textDecoration: 'none' }}>
+        <div className="flex flex-wrap gap-3 justify-center">
+          <button
+            type="button"
+            className="btn btn-primary text-sm"
+            style={{ padding: '8px 20px' }}
+            onClick={() => loadFeed().catch(() => setFeedError(true))}
+            disabled={feedLoading}
+          >
+            {feedLoading ? 'Checking…' : 'Check for new Wojaks'}
+          </button>
+          <Link to="/fight-club/rankings" className="btn btn-secondary text-sm" style={{ padding: '8px 20px', textDecoration: 'none' }}>
             View Leaderboard
           </Link>
           <Link to="/generator" className="btn btn-secondary text-sm" style={{ padding: '8px 20px', textDecoration: 'none' }}>

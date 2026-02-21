@@ -47,7 +47,11 @@ function CrossSvg() {
   );
 }
 
+const MINTGARDEN_THUMB = (nftId: string) =>
+  `https://assets.mintgarden.io/thumbnails/medium/${nftId}.png`;
+
 export function SwipeCard({
+  nftId,
   name,
   editionNumber,
   imageUrl,
@@ -63,6 +67,7 @@ export function SwipeCard({
   const [shouldWiggle, setShouldWiggle] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const triedMintGardenRef = useRef(false);
 
   // Exiting can be triggered by swipe gesture OR parent setting exitDirection
   const exiting = swipeExiting || (exitDirection !== null && stackPosition === 0);
@@ -245,7 +250,16 @@ export function SwipeCard({
           draggable={false}
           loading="eager"
           onLoad={() => setImgLoaded(true)}
-          onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMG; setImgLoaded(true); }}
+          onError={(e) => {
+            const el = e.target as HTMLImageElement;
+            if (!triedMintGardenRef.current) {
+              triedMintGardenRef.current = true;
+              el.src = MINTGARDEN_THUMB(nftId);
+            } else {
+              el.src = FALLBACK_IMG;
+            }
+            setImgLoaded(true);
+          }}
           style={{
             opacity: imgLoaded ? 1 : 0,
             transform: isInteractive ? imageTransform : undefined,

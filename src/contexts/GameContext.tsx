@@ -69,6 +69,7 @@ interface GameContextType {
   resetPlayer: () => void;
   verifyPhase1: (did: string, nftId?: string) => Promise<boolean>;
   castVote: (nftId: string, editionNumber: number, voteType: 1 | -1) => Promise<boolean>;
+  removeFromFeed: (nftId: string) => void;
   loadFeed: () => Promise<void>;
   refreshPowerLevel: () => Promise<void>;
   getAuthHeaders: () => Promise<Record<string, string>>;
@@ -76,6 +77,7 @@ interface GameContextType {
 
 const GameContext = createContext<GameContextType | null>(null);
 
+/* eslint-disable react-refresh/only-export-components -- context file exports provider + hooks */
 export function useGame() {
   const ctx = useContext(GameContext);
   if (!ctx) throw new Error('useGame must be inside GameProvider');
@@ -86,6 +88,7 @@ export function useGame() {
 export function useOptionalGame() {
   return useContext(GameContext);
 }
+/* eslint-enable react-refresh/only-export-components */
 
 function apiPlayerToPlayer(api: { did: string; powerLevel: number; phase1Verified: boolean; votesToday?: number; voteStreak?: number; onboarding: GamePlayer['onboarding'] }, walletAddress = ''): GamePlayer {
   return {
@@ -154,7 +157,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }
     })();
     return () => { cancelled = true; };
-  }, [CLERK_ENABLED, isClerkLoaded, isSignedIn, getToken]);
+  }, [isClerkLoaded, isSignedIn, getToken]);
 
   // Restore session on mount (wallet path only) — skip when Clerk is enabled and user is signed in
   const restoredRef = useRef(false);
@@ -236,7 +239,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       });
     }
     return data.verified;
-  }, [player]);
+  }, [player, getAuthHeaders]);
 
   const loadFeed = useCallback(async () => {
     setFeedLoading(true);
@@ -281,12 +284,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
           onboarding: data.onboarding ?? prev.onboarding,
         } : null);
       }
-      // Remove voted item from feed
-      setFeed(prev => prev.filter(item => item.nftId !== nftId));
+      // Feed removal is done by VotingFeed after exit animation
       return true;
     }
     return false;
-  }, [player, guestId]);
+  }, [player, guestId, getAuthHeaders]);
+
+  const removeFromFeed = useCallback((nftId: string) => {
+    setFeed(prev => prev.filter(item => item.nftId !== nftId));
+  }, []);
 
   const refreshPowerLevel = useCallback(async () => {
     if (!player) return;
@@ -313,6 +319,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       resetPlayer,
       verifyPhase1,
       castVote,
+      removeFromFeed,
       loadFeed,
       refreshPowerLevel,
       getAuthHeaders,

@@ -49,7 +49,9 @@ export function VoteButtons({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [disabled, onLike, onDislike]);
 
-  const tapAnimation = reducedMotion ? {} : { scale: 0.85 };
+  const tapAnimation = reducedMotion
+    ? {}
+    : { scale: 0.96, transition: { duration: 0.06, ease: 'easeOut' } };
 
   return (
     <div className="vote-buttons-row">
