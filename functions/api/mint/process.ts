@@ -75,6 +75,10 @@ export interface ProcessEnv {
   MINT_JOBS_KV: KVNamespace;
   PINATA_JWT?: string;
   PINATA_GATEWAY?: string;
+  // Filebase S3 credentials (replaces Pinata)
+  FILEBASE_ACCESS_KEY?: string;
+  FILEBASE_SECRET_KEY?: string;
+  FILEBASE_BUCKET?: string;
   PHASE2_COLLECTION_UUID?: string;
   PHASE2_PROFILE_ID?: string;
   PHASE2_ROYALTY_ADDRESS?: string;
@@ -263,13 +267,22 @@ export async function processJob(
       } else {
         await updateJobStep(env.DB, jobId, 'uploading_ipfs');
 
-        const jwt = env.PINATA_JWT;
-        if (!jwt) {
-          throw new MintError('CONFIG_ERROR', 'IPFS upload not configured (missing PINATA_JWT)');
+        if (!env.FILEBASE_ACCESS_KEY || !env.FILEBASE_SECRET_KEY || !env.FILEBASE_BUCKET) {
+          throw new MintError('CONFIG_ERROR', 'IPFS upload not configured (missing FILEBASE credentials)');
         }
 
         try {
-          uploadResult = await uploadToIPFS(imageBase64, metadata as Record<string, unknown>, jwt, env.PINATA_GATEWAY);
+          uploadResult = await uploadToIPFS(
+            imageBase64,
+            metadata as Record<string, unknown>,
+            '', // pinataJwt (deprecated)
+            undefined, // pinataGateway (deprecated)
+            {
+              accessKey: env.FILEBASE_ACCESS_KEY,
+              secretKey: env.FILEBASE_SECRET_KEY,
+              bucket: env.FILEBASE_BUCKET,
+            },
+          );
         } catch (err) {
           throw new MintError('IPFS_UPLOAD_FAILED', err instanceof Error ? err.message : 'IPFS upload failed');
         }

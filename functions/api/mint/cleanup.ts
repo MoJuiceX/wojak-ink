@@ -15,6 +15,9 @@ interface CleanupEnv extends ProcessEnv {
   DB: D1Database;
   MINT_JOBS_KV: KVNamespace;
   PINATA_JWT?: string;
+  FILEBASE_ACCESS_KEY?: string;
+  FILEBASE_SECRET_KEY?: string;
+  FILEBASE_BUCKET?: string;
   PHASE2_COLLECTION_UUID?: string;
 }
 
@@ -291,7 +294,8 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
   }
 
   // 7. Unpin orphaned IPFS data for failed jobs older than 1 hour
-  if (env.PINATA_JWT) {
+  const hasUnpinCreds = !!(env.FILEBASE_ACCESS_KEY && env.FILEBASE_SECRET_KEY && env.FILEBASE_BUCKET) || !!env.PINATA_JWT;
+  if (hasUnpinCreds) {
     const orphanedJobs = await env.DB.prepare(
       `SELECT id, ipfs_image_uris, ipfs_metadata_uris FROM mint_jobs
        WHERE step IN ('failed', 'refunded')
@@ -310,7 +314,7 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
           for (const uri of uris) {
             const cid = extractCidFromUri(uri);
             if (cid) {
-              await unpinFromIPFS(cid, env.PINATA_JWT!);
+              await unpinFromIPFS(cid, '', env.FILEBASE_ACCESS_KEY, env.FILEBASE_SECRET_KEY, env.FILEBASE_BUCKET);
               unpinned = true;
               break; // Only need to unpin once per CID
             }
@@ -325,7 +329,7 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
           for (const uri of uris) {
             const cid = extractCidFromUri(uri);
             if (cid) {
-              await unpinFromIPFS(cid, env.PINATA_JWT!);
+              await unpinFromIPFS(cid, '', env.FILEBASE_ACCESS_KEY, env.FILEBASE_SECRET_KEY, env.FILEBASE_BUCKET);
               break;
             }
           }
