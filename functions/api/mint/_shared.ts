@@ -34,9 +34,9 @@ export const OFFER_EXPIRY_MINUTES = 15;
 // ─── Surcharge: Universal Power Curve ───
 // Formula: surcharge = SURCHARGE_SCALE × (effectiveUsage - 1) ^ SURCHARGE_EXPONENT
 // Scale is auto-derived: targetSurcharge / (targetUses - 1) ^ exponent
-export const SURCHARGE_TARGET_XCH = 0.8;
+export const SURCHARGE_TARGET_XCH = 0.5;
 export const SURCHARGE_TARGET_USES = 200;
-export const SURCHARGE_EXPONENT = 0.85;
+export const SURCHARGE_EXPONENT = 0.80;
 export const SURCHARGE_SCALE = SURCHARGE_TARGET_XCH / Math.pow(SURCHARGE_TARGET_USES - 1, SURCHARGE_EXPONENT);
 export const DECAY_HALF_LIFE_DAYS = 28;
 
