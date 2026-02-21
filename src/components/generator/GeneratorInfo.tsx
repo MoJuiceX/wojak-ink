@@ -3,8 +3,10 @@
  *
  * Fixed-height scrollable panel explaining the Your Wojak collection:
  * narrative arc from Why → What you get → How → Free mints → Pricing.
+ * Includes an explicit close button so the modal can always be dismissed on mobile.
  */
 
+import { X } from 'lucide-react';
 import { Lightbox } from '@/components/ui/Lightbox';
 
 interface GeneratorInfoProps {
@@ -42,8 +44,27 @@ export function GeneratorInfo({ isOpen, onClose }: GeneratorInfoProps) {
       <div
         className="text-sm leading-relaxed text-secondary"
       >
-        {/* Hero */}
-        <div style={{ textAlign: 'center', marginBottom: 20 }}>
+        {/* Hero + inline close for reliable dismissal on mobile */}
+        <div style={{ textAlign: 'center', marginBottom: 20, position: 'relative' }}>
+          <button
+            type="button"
+            onClick={onClose}
+            className="btn btn-ghost"
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              padding: 8,
+              minWidth: 40,
+              minHeight: 40,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            aria-label="Close"
+          >
+            <X size={22} />
+          </button>
           <h2
             className="text-primary"
             style={{
@@ -147,6 +168,18 @@ export function GeneratorInfo({ isOpen, onClose }: GeneratorInfoProps) {
               (base 0.20 + 0.25 Crown surcharge)
             </p>
           </div>
+        </div>
+
+        {/* Explicit close button — ensures modal is always dismissible on mobile */}
+        <div style={{ marginTop: 24, display: 'flex', justifyContent: 'center' }}>
+          <button
+            type="button"
+            onClick={onClose}
+            className="btn btn-primary"
+            style={{ minWidth: 140 }}
+          >
+            Got it
+          </button>
         </div>
       </div>
     </Lightbox>
