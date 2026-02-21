@@ -1500,9 +1500,12 @@ function buildG2LayerData(
   }
 
   if (trait.fillFiles) {
-    // Multi-fill (e.g. Ninja-turtle-fit: fill1, fill2, fill3)
+    // Multi-fill (e.g. Ninja-turtle-fit: fill1, fill2, fill3). Use layer key when present so
+    // single-fill traits with key "fill" (e.g. Face-wear_Ninja-Turtle-Mask) match the color picker slot.
+    const fillLayers = trait.layers?.filter((l: { type: string }) => l.type === 'fill').sort((a: { pos: number }, b: { pos: number }) => a.pos - b.pos) ?? [];
     trait.fillFiles.forEach((file, i) => {
-      const fillKey = `fill${i}`;
+      const useFillSlot = trait.fillFiles!.length === 1 && fillLayers[0]?.key === 'fill';
+      const fillKey = useFillSlot ? 'fill' : `fill${i}`;
       const color = resolveFillColor(trait.id, fillKey, g2, trait) || trait.defaultColors?.[i] || '#FFFFFF';
       fills.push({ file: `${basePath}/${file}`, color });
     });
