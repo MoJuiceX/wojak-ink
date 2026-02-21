@@ -435,11 +435,13 @@ export function MintProvider({ children }: { children: ReactNode }) {
     return () => stopPolling();
   }, [stopPolling]);
 
-  // ── Stuck-mint detection: auto-fail if no progress for 60 seconds ──
+  // ── Stuck-mint detection: auto-fail if no progress for 3 minutes ──
   // Fix for the "stuck at step 1 of 6" bug: if processJob crashes silently
   // in waitUntil, the job sits in an intermediate state. Without this guard,
   // the user sees a spinner until the 10-minute polling timeout expires.
-  // This detector fires after 60s of no step change and treats it as an error.
+  // We use 180s (3 min) because MintGarden + IPFS + SplitXCH can legitimately
+  // take 60-120s in busy periods.
+  const STUCK_TIMEOUT_MS = 180_000;
   const stuckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSeenStepRef = useRef<string | null>(null);
 
@@ -463,12 +465,12 @@ export function MintProvider({ children }: { children: ReactNode }) {
       if (stuckTimerRef.current) clearTimeout(stuckTimerRef.current);
 
       stuckTimerRef.current = setTimeout(() => {
-        // Still on the same non-terminal step after 60s → likely stuck
-        console.warn(`[MintContext] Mint appears stuck at step '${currentStep}' for 60s — marking as error`);
+        // Still on the same non-terminal step after 3 min → likely stuck
+        console.warn(`[MintContext] Mint appears stuck at step '${currentStep}' for ${STUCK_TIMEOUT_MS / 1000}s — marking as error`);
         setMintStep('error');
         setErrorMessage('Minting took too long. Please try again.');
         stopPolling();
-      }, 60_000);
+      }, STUCK_TIMEOUT_MS);
     }
 
     return () => {
