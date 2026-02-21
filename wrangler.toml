@@ -33,8 +33,7 @@ PHASE2_COLLECTION_UUID = "010a0dd7-56af-4016-953e-ef5e20c73d83"
 PHASE2_PROFILE_ID = "did:chia:15j5d0fm0x65nz7w6jr4c5any8mzrkru2x6l9uy2f0vcrc6jfedcqp20n4q"
 PHASE2_ROYALTY_ADDRESS = "DYNAMIC_PER_MINTER"  # split: 10% minter + 2% treasury via SplitXCH
 TREASURY_ADDRESS = "xch13afmxv0xpyz03t3jfdmcrtv5ecwe5n52977vxd3z2x995f9quunsre5vkd"
-# Where primary-sale XCH goes for paid mints (MintGarden target_address = payment recipient). Set to your wallet.
-CREATOR_PAYOUT_ADDRESS = "xch13afmxv0xpyz03t3jfdmcrtv5ecwe5n52977vxd3z2x995f9quunsre5vkd"
+# CREATOR_PAYOUT_ADDRESS: set in Cloudflare Dashboard (Variables) only — do not add here or deploy fails (binding already in use). For local dev use .dev.vars.
 PHASE2_ROYALTY_PCT = "12"
 PINATA_GATEWAY = "gold-important-gibbon-467.mypinata.cloud"
 
@@ -43,4 +42,4 @@ PINATA_GATEWAY = "gold-important-gibbon-467.mypinata.cloud"
 # - CHAT_JWT_SECRET: Secret for signing chat tokens (generate with: openssl rand -base64 32)
 # - PINATA_JWT: Pinata API JWT for IPFS uploads (already set)
 # - MINTGARDEN_API_KEY: MintGarden Dynamic Minting API key (run: wrangler pages secret put MINTGARDEN_API_KEY)
-# - CREATOR_PAYOUT_ADDRESS: Optional override for paid-mint XCH recipient (otherwise uses [vars] above)
+# - CREATOR_PAYOUT_ADDRESS: set in Dashboard Variables (paid-mint XCH recipient). If unset, code uses TREASURY_ADDRESS.
