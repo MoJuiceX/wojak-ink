@@ -576,7 +576,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         {!showMintingPaused && (() => {
           if (isWalletConnected && hasFreeMintsAvailable && mintType === 'free') {
             // Free mint: show credit cost
-            const price = getTotalMintPrice();
+            const price = getTotalMintPrice(metadataAttributes);
             const creditCost = Math.ceil(100 * price.totalXch / price.basePrice);
             return (
               <span className="text-xs font-semibold tabular-nums whitespace-nowrap text-accent">
@@ -585,7 +585,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
             );
           }
           // Paid mint (or not connected): show single total XCH
-          const price = getTotalMintPrice();
+          const price = getTotalMintPrice(metadataAttributes);
           return (
             <span className="text-xs font-semibold tabular-nums whitespace-nowrap text-accent">
               {price.totalXch.toFixed(2)} XCH

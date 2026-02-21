@@ -26,7 +26,7 @@ import {
 } from 'react';
 import { useSageWallet } from '@/sage-wallet';
 import { fetchCollectionStats } from '@/services/tradeValuesService';
-import { useMetadataAttributes } from '@/components/generator/MetadataPreview';
+import { useMetadataAttributes, type MetadataAttribute } from '@/components/generator/MetadataPreview';
 import { isValidChiaAddress } from '@/lib/validation';
 
 // ============ Types ============
@@ -127,7 +127,7 @@ interface MintContextValue {
 
   // Pricing
   getTraitPricing: (category: string, traitDisplayName: string) => TraitPricingEntry | null;
-  getTotalMintPrice: () => TotalMintPrice;
+  getTotalMintPrice: (attrs?: MetadataAttribute[]) => TotalMintPrice;
   isTop3Trait: (category: string, traitName: string) => boolean;
   top3Traits: Record<string, string[]>;
 }
@@ -276,11 +276,12 @@ export function MintProvider({ children }: { children: ReactNode }) {
     [traitPricing]
   );
 
-  const getTotalMintPrice = useCallback((): TotalMintPrice => {
+  const getTotalMintPrice = useCallback((overrideAttrs?: MetadataAttribute[]): TotalMintPrice => {
+    const attrs = overrideAttrs ?? metadataAttributes;
     let maxSurcharge = 0;
     let maxSurchargeTrait = '';
 
-    for (const attr of metadataAttributes) {
+    for (const attr of attrs) {
       if (attr.trait_type === 'Base') continue;
       const key = `${attr.trait_type}_${attr.value}`;
       const entry = traitPricing[key];
