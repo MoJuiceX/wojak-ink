@@ -38,6 +38,9 @@ interface ActionBarProps {
   onToggleRightPanel?: () => void;
 }
 
+/** When true, mint button is disabled and shows "Minting continues soon." on hover. Set to false to re-enable. */
+const GENERATOR_MINTING_PAUSED = true;
+
 /** Tooltip that renders in a portal above the trigger, so it's never clipped by overflow */
 function ActionBarTooltip({
   content,
@@ -170,7 +173,8 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   const traitCount = metadataAttributes.filter((a) => a.value !== '').length;
   const has7Traits = traitCount >= 7;
   const isSoldOut = totalMinted >= maxSupply && maxSupply > 0;
-  const canMint = canExport && isWalletConnected && has7Traits && !isSoldOut && !mintingPaused;
+  const showMintingPaused = mintingPaused || GENERATOR_MINTING_PAUSED;
+  const canMint = canExport && isWalletConnected && has7Traits && !isSoldOut && !showMintingPaused;
 
   // Auto-default to free mint when credits are available
   useEffect(() => {
@@ -558,7 +562,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         style={{ borderLeft: '1px solid var(--color-border)' }}
       >
         {/* Free/Paid toggle */}
-        {isWalletConnected && hasFreeMintsAvailable && !mintingPaused && (
+        {isWalletConnected && hasFreeMintsAvailable && !showMintingPaused && (
           <ActionBarTooltip content={mintType === 'free' ? 'Switch to paid mint' : 'Switch to free mint'}>
             <ActionButton
               onClick={() => setMintType((t) => (t === 'free' ? 'paid' : 'free'))}
@@ -570,7 +574,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         )}
 
         {/* Price display — always visible */}
-        {!mintingPaused && (() => {
+        {!showMintingPaused && (() => {
           if (isWalletConnected && hasFreeMintsAvailable && mintType === 'free') {
             // Free mint: show credit cost
             const price = getTotalMintPrice();
@@ -591,18 +595,20 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         })()}
 
         {/* Mint / Connect button */}
-        {mintingPaused ? (
-          <button
-            disabled
-            className="px-4 py-1.5 rounded-lg text-sm font-semibold"
-            style={{
-              background: 'var(--color-white-10)',
-              color: 'var(--color-text-muted)',
-              cursor: 'not-allowed',
-            }}
-          >
-            Soon
-          </button>
+        {showMintingPaused ? (
+          <ActionBarTooltip content="Minting continues soon.">
+            <button
+              disabled
+              className="px-4 py-1.5 rounded-lg text-sm font-semibold"
+              style={{
+                background: 'var(--color-white-10)',
+                color: 'var(--color-text-muted)',
+                cursor: 'not-allowed',
+              }}
+            >
+              Soon
+            </button>
+          </ActionBarTooltip>
         ) : !isWalletConnected ? (
           <ActionBarTooltip content="Connect to mint">
             <ActionButton

@@ -12,6 +12,8 @@ interface SwipeCardProps {
   name: string;
   editionNumber: number;
   imageUrl: string;
+  /** MintGarden mainnet CDN (from image_hash). Prefer this when present for reliable load. */
+  thumbnailUri?: string | null;
   onVote: (voteType: 1 | -1) => void;
   stackPosition?: 0 | 1 | 2;
   isFirst?: boolean;
@@ -21,6 +23,9 @@ interface SwipeCardProps {
 
 const SWIPE_THRESHOLD = 100;
 const FALLBACK_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' fill='%2312121a'%3E%3Crect width='200' height='200' rx='14'/%3E%3Ctext x='100' y='108' text-anchor='middle' fill='%23606070' font-size='14' font-family='system-ui'%3EImage unavailable%3C/text%3E%3C/svg%3E";
+/** Working MintGarden CDN (mainnet); launcher-ID URL may 404 but we try as fallback */
+const MINTGARDEN_MAINNET_MEDIUM = (nftId: string) =>
+  `https://assets.mainnet.mintgarden.io/thumbnails/medium/${nftId}.png`;
 
 // Stack positions: current, next, preloaded
 const STACK_CONFIGS = [
@@ -47,14 +52,12 @@ function CrossSvg() {
   );
 }
 
-const MINTGARDEN_THUMB = (nftId: string) =>
-  `https://assets.mintgarden.io/thumbnails/medium/${nftId}.png`;
-
 export function SwipeCard({
   nftId,
   name,
   editionNumber,
   imageUrl,
+  thumbnailUri,
   onVote,
   stackPosition = 0,
   isFirst = false,
@@ -67,7 +70,10 @@ export function SwipeCard({
   const [shouldWiggle, setShouldWiggle] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  const triedMintGardenRef = useRef(false);
+  const fallbackStepRef = useRef(0);
+  const primaryUrl = thumbnailUri || imageUrl;
+  const secondaryUrl = thumbnailUri ? imageUrl : null;
+  const tertiaryUrl = MINTGARDEN_MAINNET_MEDIUM(nftId);
 
   // Exiting can be triggered by swipe gesture OR parent setting exitDirection
   const exiting = swipeExiting || (exitDirection !== null && stackPosition === 0);
@@ -241,20 +247,24 @@ export function SwipeCard({
         </>
       )}
 
-      {/* Image */}
+      {/* Image: prefer thumbnailUri (MintGarden mainnet CDN), then IPFS, then mainnet launcher URL, then placeholder */}
       <div className="vote-card-image">
         <img
           ref={imageRef}
-          src={imageUrl}
+          src={primaryUrl}
           alt={`Your Wojak #${editionNumber}: ${name}`}
           draggable={false}
           loading="eager"
           onLoad={() => setImgLoaded(true)}
           onError={(e) => {
             const el = e.target as HTMLImageElement;
-            if (!triedMintGardenRef.current) {
-              triedMintGardenRef.current = true;
-              el.src = MINTGARDEN_THUMB(nftId);
+            const step = fallbackStepRef.current;
+            if (step === 0 && secondaryUrl) {
+              fallbackStepRef.current = 1;
+              el.src = secondaryUrl;
+            } else if (step <= 1) {
+              fallbackStepRef.current = 2;
+              el.src = tertiaryUrl;
             } else {
               el.src = FALLBACK_IMG;
             }

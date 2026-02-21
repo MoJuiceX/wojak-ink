@@ -138,20 +138,47 @@ const clerkAppearance = {
 // Register service worker for PWA support
 registerServiceWorker({})
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <ErrorBoundary>
-      {CLERK_PUBLISHABLE_KEY ? (
-        <ClerkProvider
-          publishableKey={CLERK_PUBLISHABLE_KEY}
-          afterSignOutUrl="/"
-          appearance={clerkAppearance}
-        >
-          <App />
-        </ClerkProvider>
-      ) : (
-        <App />
-      )}
-    </ErrorBoundary>
-  </StrictMode>,
-)
+function renderLoadError(message: string, detail?: string) {
+  const root = document.getElementById('root')
+  if (!root) return
+  root.innerHTML = ''
+  const wrap = document.createElement('div')
+  wrap.style.cssText = 'position:fixed;inset:0;background:#0a0a0f;color:rgba(255,255,255,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:system-ui,sans-serif;text-align:center;padding:24px;'
+  wrap.innerHTML = `
+    <p style="font-size:20px;font-weight:600;">${message}</p>
+    ${detail ? `<p style="font-size:14px;color:rgba(255,255,255,0.6);max-width:420px;">${detail}</p>` : ''}
+    <button type="button" onclick="window.location.reload()" style="padding:12px 24px;font-size:16px;background:#ea580c;color:#fff;border:none;border-radius:10px;cursor:pointer;">Reload page</button>
+  `
+  root.appendChild(wrap)
+}
+
+try {
+  const rootEl = document.getElementById('root')
+  if (!rootEl) {
+    renderLoadError('App root not found.', '')
+  } else {
+    createRoot(rootEl).render(
+      <StrictMode>
+        <ErrorBoundary>
+          {CLERK_PUBLISHABLE_KEY ? (
+            <ClerkProvider
+              publishableKey={CLERK_PUBLISHABLE_KEY}
+              afterSignOutUrl="/"
+              appearance={clerkAppearance}
+            >
+              <App />
+            </ClerkProvider>
+          ) : (
+            <App />
+          )}
+        </ErrorBoundary>
+      </StrictMode>,
+    )
+  }
+} catch (err) {
+  console.error('[wojak.ink] Failed to start app:', err)
+  renderLoadError(
+    'Something went wrong loading Wojak.ink.',
+    'Try refreshing the page. If you use Brave, try disabling Shields for this site or use another browser.',
+  )
+}

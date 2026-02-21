@@ -4,8 +4,8 @@
  * Centralized route definitions with navigation metadata.
  *
  * Navigation hierarchy:
- * - PRIMARY (Bottom Nav + Sidebar top): Gallery, Generator, Games, Media
- * - SECONDARY (More Menu + Sidebar bottom): Leaderboard, Shop, Guild, Treasury, Settings
+ * - PRIMARY (Bottom Nav + Sidebar top): Gallery, Generator, BigPulp, Fight Club, Games
+ * - SECONDARY (More Menu + Sidebar bottom): Games, Chat, Shop, Guild, Treasury, Settings
  * - Account: Handled separately by UserAccountButton at sidebar bottom
  */
 
@@ -92,7 +92,6 @@ export const PRIMARY_NAV_ITEMS: NavItem[] = [
     label: 'Fight Club',
     shortLabel: 'Fight',
     icon: Swords,
-    badge: 'dot',
     children: [
       { id: 'fight-club-battle', path: '/fight-club/battle', label: 'Battle', icon: Swords },
       { id: 'fight-club-vote', path: '/fight-club/vote', label: 'Vote', icon: Heart },
@@ -173,13 +172,14 @@ export const SECONDARY_NAV_ITEMS: NavItem[] = [
 
 /**
  * Mobile bottom nav items (reordered for center FAB placement)
- * Order: Gallery, Generator, BigPulp (center FAB), Games, More
+ * Order: Gallery, Generator, BigPulp (center FAB), Fight Club, More
+ * Games is in the More menu.
  */
 export const MOBILE_NAV_ITEMS: NavItem[] = [
   PRIMARY_NAV_ITEMS[0], // Gallery
   PRIMARY_NAV_ITEMS[2], // Generator
   PRIMARY_NAV_ITEMS[1], // BigPulp (center - featured)
-  PRIMARY_NAV_ITEMS[4], // Games
+  PRIMARY_NAV_ITEMS[3], // Fight Club
   MORE_NAV_ITEM,
 ];
 

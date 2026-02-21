@@ -1,12 +1,11 @@
 /**
  * Generator Info Panel — "How It Works"
  *
- * Fixed-height scrollable panel explaining the Your Wojak collection:
- * narrative arc from Why → What you get → How → Free mints → Pricing.
- * Includes an explicit close button so the modal can always be dismissed on mobile.
+ * Scrollable panel explaining the Your Wojak collection:
+ * Why mint → How to create → Free mints → Pricing.
+ * Lightbox provides the single close button (top right, fixed when scrolling).
  */
 
-import { X } from 'lucide-react';
 import { Lightbox } from '@/components/ui/Lightbox';
 
 interface GeneratorInfoProps {
@@ -44,27 +43,8 @@ export function GeneratorInfo({ isOpen, onClose }: GeneratorInfoProps) {
       <div
         className="text-sm leading-relaxed text-secondary"
       >
-        {/* Hero + inline close for reliable dismissal on mobile */}
-        <div style={{ textAlign: 'center', marginBottom: 20, position: 'relative' }}>
-          <button
-            type="button"
-            onClick={onClose}
-            className="btn btn-ghost"
-            style={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              padding: 8,
-              minWidth: 40,
-              minHeight: 40,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            aria-label="Close"
-          >
-            <X size={22} />
-          </button>
+        {/* Hero — close is handled by Lightbox (single X, top right, fixed when scrolling) */}
+        <div style={{ textAlign: 'center', marginBottom: 20 }}>
           <h2
             className="text-primary"
             style={{

@@ -114,7 +114,15 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <noscript>
+      <div style="position:fixed;inset:0;background:#0a0a0f;color:rgba(255,255,255,0.9);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:system-ui,sans-serif;text-align:center;padding:24px;">
+        <p style="font-size:18px;">Wojak.ink needs JavaScript to run.</p>
+        <p style="font-size:14px;color:rgba(255,255,255,0.6);">Please enable JavaScript and reload.</p>
+      </div>
+    </noscript>
+    <div id="root">
+      <div class="app-loading-fallback" style="position:fixed;inset:0;background:#0a0a0f;color:rgba(255,255,255,0.9);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font-family:system-ui,sans-serif;font-size:18px;">Loading Wojak.ink…</div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

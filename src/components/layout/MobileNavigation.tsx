@@ -5,7 +5,7 @@
  * Height: 60px + safe area inset.
  * Features animated underline indicator.
  *
- * Shows 5 items: Gallery, Generator, Games, Media, More
+ * Shows 5 items: Gallery, Generator, BigPulp, Fight Club, More
  * "More" opens a slide-up sheet with secondary navigation.
  */
 

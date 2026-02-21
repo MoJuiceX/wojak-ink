@@ -16,6 +16,7 @@ import {
   User,
   MessageCircle,
   Lightbulb,
+  Gamepad2,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -29,7 +30,7 @@ interface MenuItem {
   iconBg: string;
 }
 
-// Reordered: BigPulp first (AI feature), Account, then actions, community, settings last
+// Reordered: BigPulp first (AI feature), Account, Games (moved from bottom nav), then actions, community, settings last
 const menuItems: MenuItem[] = [
   {
     icon: Lightbulb,
@@ -47,6 +48,14 @@ const menuItems: MenuItem[] = [
     route: '/account',
     iconColor: '#60a5fa',
     iconBg: 'rgba(96, 165, 250, 0.15)',
+  },
+  {
+    icon: Gamepad2,
+    label: 'Games',
+    description: 'Arcade games and leaderboards',
+    route: '/games',
+    iconColor: '#22c55e',
+    iconBg: 'rgba(34, 197, 94, 0.15)',
   },
   {
     icon: ShoppingBag,

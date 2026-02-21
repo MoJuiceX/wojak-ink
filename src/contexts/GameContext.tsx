@@ -49,6 +49,8 @@ interface FeedItem {
   name: string;
   customName: string | null;
   imageUri: string;
+  /** MintGarden mainnet CDN URL (from image_hash); use first for reliable thumbnails */
+  thumbnailUri?: string | null;
   totalVotes: number;
   likes: number;
   dislikes: number;
@@ -244,17 +246,24 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const loadFeed = useCallback(async () => {
     setFeedLoading(true);
     try {
-      // Use player DID if available, otherwise use guestId
       const feedUrl = player?.did
         ? `/api/game/feed?did=${encodeURIComponent(player.did)}&limit=10`
         : `/api/game/feed?guestId=${encodeURIComponent(guestId)}&limit=10`;
 
       const res = await fetch(feedUrl);
       const data = await res.json();
-      if (data.success) {
+      if (!data.success) throw new Error(data.error || 'Feed request failed');
+
+      if (Array.isArray(data.feed) && data.feed.length > 0) {
         setFeed(data.feed);
+        return;
+      }
+      const retryRes = await fetch('/api/game/feed?limit=10');
+      const retryData = await retryRes.json();
+      if (retryData.success && Array.isArray(retryData.feed)) {
+        setFeed(retryData.feed);
       } else {
-        throw new Error(data.error || 'Feed request failed');
+        setFeed(data.feed);
       }
     } finally {
       setFeedLoading(false);

@@ -1,10 +1,9 @@
 // Voting page — /swipe
-// Desktop: 3-column (leaderboard | card | stats). Mobile: stats bar + card.
+// Desktop: 2-column (card | stats). Mobile: stats bar + card. Power level / leaderboard is on Rankings tab only.
 
 import { useLayout } from '@/hooks/useLayout';
 import { PageSEO } from '@/components/seo';
 import { VotingFeed } from '@/components/game/VotingFeed';
-import { MiniLeaderboard } from '@/components/game/MiniLeaderboard';
 import { VotingStatsPanel } from '@/components/game/VotingStatsPanel';
 import { MobileStatsBar } from '@/components/game/MobileStatsBar';
 
@@ -13,17 +12,9 @@ function VotingPageDesktop() {
 
   return (
     <div className="voting-page" style={{ paddingTop: 16, paddingBottom: 32 }}>
-      {/* Left panel */}
-      <div className="voting-page-side" style={{ top: headerHeight + 16 }}>
-        <MiniLeaderboard />
-      </div>
-
-      {/* Center */}
       <div className="voting-page-center">
         <VotingFeed />
       </div>
-
-      {/* Right panel */}
       <div className="voting-page-side" style={{ top: headerHeight + 16 }}>
         <VotingStatsPanel />
       </div>
