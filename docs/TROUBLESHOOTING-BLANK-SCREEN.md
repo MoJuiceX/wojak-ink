@@ -46,3 +46,13 @@ The app failed to start. Try:
 - **Fix (in code):** The prepare path now resolves the SplitXCH splitter when `TREASURY_ADDRESS` is set and passes it as the royalty address. New paid mints (prepare or queue) will have the splitter on-chain; on resales, ~10% goes to the minter and ~2% to the treasury.
 - **Existing NFTs** (minted before this change) keep their current royalty address (minter). You will not see treasury activity for those resales. Only **new** paid mints will send the treasury its share.
 - **Config:** Ensure `TREASURY_ADDRESS` is set in Cloudflare (Variables and Secrets). Plaintext is fine.
+
+---
+
+## Paid mint stuck at “Step 1 of 6” / “Preparing your mint…”
+
+**Cause:** The mint job is created but the background worker that runs the next steps (IPFS upload, MintGarden, etc.) sometimes doesn’t run right away (e.g. `waitUntil` delayed or dropped). The job then stays at “queued” or “validating” so the UI stays on step 1.
+
+**What we did:** Submit now moves the job to “validating” in the same request, and the processor accepts jobs in both “queued” and “validating”. The cron cleanup also retries jobs stuck in “validating” (not only “queued”) after 30 seconds. So paid mints should either progress quickly or be retried by the next cron run (every 5 minutes if the mint cron is configured).
+
+**If it still happens:** Wait 1–2 minutes and keep the modal open so polling can pick up “Validating…” or later steps. If you have the mint cron (`POST /api/mint/cron` with `ADMIN_API_KEY`) running every 5 minutes, stuck jobs will be retried automatically.

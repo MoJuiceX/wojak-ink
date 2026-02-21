@@ -112,11 +112,10 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
     console.error('[Cleanup] Operation 3 (stuck processing) failed:', err);
   }
 
-  // 4. Retry queued jobs that haven't been picked up in 30 seconds.
-  //    Limited to 2 jobs to avoid exceeding Cloudflare Pages Functions timeout
-  //    (each processJob involves IPFS + MintGarden calls, 5-30s each).
+  // 4. Retry queued (or validating-but-never-processed) jobs that haven't progressed in 30 seconds.
+  //    Submit moves jobs to 'validating' synchronously; if waitUntil(processJob) never runs, job stays there.
   const staleQueued = await env.DB.prepare(
-    `SELECT id FROM mint_jobs WHERE step = 'queued'
+    `SELECT id FROM mint_jobs WHERE step IN ('queued', 'validating')
      AND created_at < datetime('now', '-30 seconds')
      AND retry_count < max_retries
      LIMIT 1`
@@ -153,7 +152,7 @@ export async function cleanupStaleJobs(env: CleanupEnv): Promise<{
           await env.DB.prepare(
             `UPDATE mint_jobs SET step = 'failed', error_message = 'Processing timed out during retry',
              error_code = 'TIMEOUT', wallet_lock = NULL, updated_at = datetime('now')
-             WHERE id = ? AND step = 'queued'`
+             WHERE id = ? AND step IN ('queued', 'validating')`
           ).bind(row.id).run();
         }
       }

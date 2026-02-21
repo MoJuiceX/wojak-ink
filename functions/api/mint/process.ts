@@ -143,16 +143,18 @@ export async function processJob(
   jobId: number,
   imageBase64: string
 ): Promise<void> {
-  // Load job — only process if still queued
+  // Load job — process if queued or validating (submit may have moved to validating synchronously so waitUntil still picks it up)
   const job = await env.DB.prepare(
-    'SELECT * FROM mint_jobs WHERE id = ? AND step = ?'
-  ).bind(jobId, 'queued').first<MintJobRow>();
+    'SELECT * FROM mint_jobs WHERE id = ? AND step IN (\'queued\', \'validating\')'
+  ).bind(jobId).first<MintJobRow>();
 
   if (!job) return; // Already picked up or doesn't exist
 
   try {
     // ──── STEP 1: Validate ────
-    await updateJobStep(env.DB, jobId, 'validating');
+    if (job.step === 'queued') {
+      await updateJobStep(env.DB, jobId, 'validating');
+    }
 
     const layers = JSON.parse(job.layers_json) as Record<string, string>;
     const colors = JSON.parse(job.colors_json) as Record<string, string>;

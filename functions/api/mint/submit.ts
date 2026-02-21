@@ -8,7 +8,7 @@
  * Returns immediately with { jobId } — frontend polls /api/mint/job.
  */
 
-import { processJob, type ProcessEnv } from './process';
+import { processJob, updateJobStep, type ProcessEnv } from './process';
 import {
   jsonResponse,
   errorResponse,
@@ -425,6 +425,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
     // ── Store image in KV (2 hour TTL — matches free mint expiry) ──
     await env.MINT_JOBS_KV.put(`job-image:${jobId}`, imageBase64, { expirationTtl: 7200 });
+
+    // ── Move to validating synchronously so job progresses even if waitUntil is delayed or dropped ──
+    await updateJobStep(env.DB, jobId, 'validating');
 
     // ── Trigger background processing ──
     context.waitUntil(processJob(env, jobId, imageBase64));
