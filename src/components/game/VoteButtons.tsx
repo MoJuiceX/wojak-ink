@@ -51,7 +51,7 @@ export function VoteButtons({
 
   const tapAnimation = reducedMotion
     ? {}
-    : { scale: 0.96, transition: { duration: 0.06, ease: 'easeOut' } };
+    : { scale: 0.96, transition: { duration: 0.06, ease: 'easeOut' as const } };
 
   return (
     <div className="vote-buttons-row">
