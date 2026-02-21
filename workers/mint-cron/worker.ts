@@ -168,11 +168,14 @@ export default {
       refunded++;
     }
 
-    // 4. Fail queued jobs older than 5 minutes (image likely expired from KV)
+    // 4. Fail queued jobs that haven't progressed for >5 minutes
+    //    Uses updated_at (not created_at) because handleJobFailure resets
+    //    retryable jobs to 'queued' with fresh updated_at. Using created_at
+    //    would incorrectly kill retried jobs whose original submission was >5 min ago.
     const staleQueued = await env.DB.prepare(
       `UPDATE mint_jobs SET step = 'failed', error_message = 'Job timed out in queue',
        error_code = 'QUEUE_TIMEOUT', wallet_lock = NULL, updated_at = datetime('now')
-       WHERE step = 'queued' AND created_at < datetime('now', '-5 minutes')`
+       WHERE step = 'queued' AND updated_at < datetime('now', '-5 minutes')`
     ).run();
 
     // 5. Expire stale legacy phase2_mints pending records
