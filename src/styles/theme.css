@@ -3252,11 +3252,11 @@ body {
 }
 
 .vote-card-info {
-  padding: 12px 14px 13px;
+  padding: 13px 14px 14px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 8px;
+  gap: 6px;
   background:
     linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.06)),
     rgba(16, 16, 24, 0.98);
@@ -3385,10 +3385,10 @@ body {
 /* Vote pill button row */
 .vote-buttons-row {
   display: flex;
-  gap: 12px;
+  gap: 14px;
   width: 100%;
   max-width: 520px;
-  margin: 0 auto;
+  margin: 2px auto 0;
   position: relative;
 }
 
@@ -3849,6 +3849,15 @@ body {
   display: flex;
   align-items: center;
   min-width: 0;
+  flex: 1;
+}
+
+.vote-card-info-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
 }
 
 .vote-card-info-titleline {
@@ -3867,8 +3876,9 @@ body {
 .vote-card-info-stats {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+  gap: 6px;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
 }
 
 .vote-card-stat {
@@ -3879,14 +3889,14 @@ body {
 }
 
 .vote-card-stat-chip {
-  padding: 3px 8px;
+  padding: 4px 8px;
   border-radius: 999px;
   border: 1px solid var(--color-white-10);
   background: linear-gradient(180deg, var(--color-white-5), var(--color-white-3));
 }
 
 .vote-card-stat-label {
-  font-size: 0.62rem;
+  font-size: 0.58rem;
   color: var(--color-text-muted);
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -3956,8 +3966,21 @@ body {
     font-size: 16px;
   }
 
+  .vote-card-info-main {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .vote-card-info-top {
+    width: 100%;
+  }
+
   .vote-card-info-stats {
     gap: 6px;
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
   }
 
   .vote-card-stat {
@@ -3969,21 +3992,7 @@ body {
   }
 
   .vote-card-info-edition {
-    font-size: 0.85rem;
-  }
-
-  .vote-card-status-muted,
-  .vote-card-eligible {
-    margin-left: 0;
-  }
-
-  .vote-card-rank-progress-label {
-    font-size: 0.6rem;
-  }
-
-  .vote-card-status-muted,
-  .vote-card-eligible {
-    font-size: 0.62rem;
+    font-size: 0.8rem;
   }
 }
 
