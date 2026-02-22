@@ -46,8 +46,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     const url = new URL(context.request.url);
     const type = url.searchParams.get('type') || 'players';
-    const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '50', 10)));
+    const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '30', 10)));
     const offset = Math.max(0, parseInt(url.searchParams.get('offset') || '0', 10));
+    const sort = url.searchParams.get('sort') || 'power';
 
     // Get caller's DID if authenticated (for "your rank" indicator)
     let callerDid: string | null = null;
@@ -138,6 +139,33 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
       return jsonResponse({ players, yourRank });
     } else if (type === 'wojaks') {
+      // Determine sort order
+      const sortOrders: Record<string, string> = {
+        power: 'COALESCE(cf.power_score, ws.net_score, 0) DESC, a.edition_number ASC',
+        likes: 'COALESCE(ws.likes, 0) DESC, a.edition_number ASC',
+        hot: '(COALESCE(ws.likes, 0) - COALESCE(ws.dislikes, 0)) DESC, a.edition_number ASC',
+        ratio: 'CASE WHEN COALESCE(ws.likes, 0) + COALESCE(ws.dislikes, 0) > 0 THEN CAST(COALESCE(ws.likes, 0) AS REAL) / (COALESCE(ws.likes, 0) + COALESCE(ws.dislikes, 0)) ELSE 0 END DESC, COALESCE(ws.likes, 0) DESC',
+        battles: 'COALESCE(cf.total_combat_wins, 0) DESC, a.edition_number ASC',
+        newest: 'a.edition_number DESC',
+      };
+      const orderBy = sortOrders[sort] || sortOrders.power;
+
+      // Total count for pagination
+      const countQuery = `
+        SELECT COUNT(*) as total FROM (
+          SELECT mintgarden_launcher_id FROM phase2_mints
+          WHERE status = 'minted' AND mintgarden_launcher_id IS NOT NULL
+          UNION
+          SELECT ws.nft_id FROM wojak_scores ws
+          WHERE ws.nft_id NOT IN (
+            SELECT mintgarden_launcher_id FROM phase2_mints
+            WHERE status = 'minted' AND mintgarden_launcher_id IS NOT NULL
+          )
+        )
+      `;
+      const countResult = await db.prepare(countQuery).first<{ total: number }>();
+      const total = countResult?.total || 0;
+
       // All Wojaks: from phase2_mints (minted) UNION wojak_scores (voted) so we always show something.
       // No requirement for DIDs or verified wallets.
       const wojaksQuery = `
@@ -174,7 +202,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         LEFT JOIN combat_fighters cf ON cf.nft_id = a.nft_id AND (cf.burned_at IS NULL OR cf.burned_at = '')
         LEFT JOIN did_holdings dh ON dh.nft_id = a.nft_id AND dh.collection = 'phase2'
         LEFT JOIN did_profiles dp ON dp.did_id = COALESCE(cf.owner_did, dh.did_id)
-        ORDER BY COALESCE(cf.power_score, ws.net_score, 0) DESC, a.edition_number ASC
+        ORDER BY ${orderBy}
         LIMIT ? OFFSET ?
       `;
 
@@ -197,7 +225,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         ownerName: (row.owner_name as string) || null,
       }));
 
-      return jsonResponse({ wojaks });
+      return jsonResponse({ wojaks, total });
     } else {
       return errorResponse('Invalid type parameter. Use "players" or "wojaks".', 400);
     }
