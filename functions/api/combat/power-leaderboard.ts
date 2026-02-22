@@ -46,7 +46,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     const url = new URL(context.request.url);
     const type = url.searchParams.get('type') || 'players';
-    const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '30', 10)));
+    const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '50', 10)));
     const offset = Math.max(0, parseInt(url.searchParams.get('offset') || '0', 10));
     const sort = url.searchParams.get('sort') || 'power';
 
@@ -169,14 +169,13 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       // All Wojaks: from phase2_mints (minted) UNION wojak_scores (voted) so we always show something.
       // No requirement for DIDs or verified wallets.
       const wojaksQuery = `
-        WITH all_nfts(nft_id, edition_number, ipfs_image_uri) AS (
-          SELECT mintgarden_launcher_id, mint_number, ipfs_image_uri
+        WITH all_nfts(nft_id, edition_number) AS (
+          SELECT mintgarden_launcher_id, mint_number
           FROM phase2_mints
           WHERE status = 'minted' AND mintgarden_launcher_id IS NOT NULL
           UNION
-          SELECT ws.nft_id, ws.edition_number, pm.ipfs_image_uri
+          SELECT ws.nft_id, ws.edition_number
           FROM wojak_scores ws
-          LEFT JOIN phase2_mints pm ON pm.mintgarden_launcher_id = ws.nft_id AND pm.status = 'minted'
           WHERE ws.nft_id NOT IN (
             SELECT mintgarden_launcher_id FROM phase2_mints
             WHERE status = 'minted' AND mintgarden_launcher_id IS NOT NULL
@@ -196,8 +195,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           COALESCE(cf.total_combat_losses, 0) as losses,
           COALESCE(cf.total_combat_draws, 0) as draws,
           dp.display_name as owner_name,
-          a.ipfs_image_uri
+          pm_img.ipfs_image_uri
         FROM all_nfts a
+        LEFT JOIN phase2_mints pm_img ON pm_img.mintgarden_launcher_id = a.nft_id AND pm_img.status = 'minted'
         LEFT JOIN wojak_scores ws ON ws.nft_id = a.nft_id
         LEFT JOIN combat_fighters cf ON cf.nft_id = a.nft_id AND (cf.burned_at IS NULL OR cf.burned_at = '')
         LEFT JOIN did_holdings dh ON dh.nft_id = a.nft_id AND dh.collection = 'phase2'

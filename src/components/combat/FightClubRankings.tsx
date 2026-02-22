@@ -216,7 +216,7 @@ const SORT_OPTIONS: { value: SortOption; label: string; icon: string }[] = [
   { value: 'newest', label: 'Newest', icon: '🆕' },
 ];
 
-const PAGE_SIZE = 30;
+const PAGE_SIZE = 50;
 
 interface WojakLeaderboardResponse {
   wojaks: WojakRanking[];
