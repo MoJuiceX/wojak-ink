@@ -69,6 +69,13 @@ export const PHASE1_RARITY: Record<string, number> = {
  * filename title-cased (for new traits not yet in Phase 1).
  */
 export function resolveTraitName(filepath: string, layerKey: string, bgColorHex?: string): string {
+  // Price overlay backgrounds: always show "Price Up" or "Price Down"
+  if (layerKey === 'Background' && filepath.includes('__price_up__')) {
+    return 'Price Up';
+  }
+  if (layerKey === 'Background' && filepath.includes('__price_down__')) {
+    return 'Price Down';
+  }
   // Solid color backgrounds: use hex color → named color lookup
   if (layerKey === 'Background' && filepath.includes('__solid__')) {
     if (bgColorHex) {

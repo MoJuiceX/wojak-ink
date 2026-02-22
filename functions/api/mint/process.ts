@@ -198,8 +198,19 @@ export async function processJob(
 
       for (const [layer, path] of Object.entries(layers)) {
         if (!path || typeof path !== 'string') continue;
-        // Skip sentinel paths (e.g. __solid__, __price_up__) — not real file paths
-        if (path.startsWith('__') || path.includes('__solid__')) continue;
+        // Solid color / Price overlay backgrounds: inject proper trait entry + color
+        if (path.includes('__solid__')) {
+          // Determine the correct combat trait ID
+          let bgTraitId = 'Background_Solid-Color';
+          if (path.includes('__price_up__')) bgTraitId = 'Background_Price-Up';
+          else if (path.includes('__price_down__')) bgTraitId = 'Background_Price-Down';
+          combatTraitEntries.push({ traitId: bgTraitId, layer });
+          const bgHex = colors[layer];
+          if (bgHex) combatColorMap[bgTraitId] = bgHex;
+          continue;
+        }
+        // Skip other sentinel paths — not real file paths
+        if (path.startsWith('__')) continue;
         const parts = path.split('/');
         if (parts.length >= 3) {
           const traitId = `${parts[parts.length - 2]}_${parts[parts.length - 1].replace(/\.[^.]+$/, '')}`;
@@ -557,8 +568,18 @@ export async function finalizeJob(env: ProcessEnv, jobId: number): Promise<void>
 
   for (const [layer, path] of Object.entries(layers)) {
     if (!path || typeof path !== 'string') continue;
-    // Skip sentinel paths (e.g. __solid__, __price_up__) — not real file paths
-    if (path.startsWith('__') || path.includes('__solid__')) continue;
+    // Solid color / Price overlay backgrounds: inject proper trait entry + color
+    if (path.includes('__solid__')) {
+      let bgTraitId = 'Background_Solid-Color';
+      if (path.includes('__price_up__')) bgTraitId = 'Background_Price-Up';
+      else if (path.includes('__price_down__')) bgTraitId = 'Background_Price-Down';
+      combatTraitEntries.push({ traitId: bgTraitId, layer });
+      const bgHex = colors[layer];
+      if (bgHex) combatColorMap[bgTraitId] = bgHex;
+      continue;
+    }
+    // Skip other sentinel paths — not real file paths
+    if (path.startsWith('__')) continue;
     const parts = path.split('/');
     if (parts.length >= 3) {
       const traitId = `${parts[parts.length - 2]}_${parts[parts.length - 1].replace(/\.[^.]+$/, '')}`;

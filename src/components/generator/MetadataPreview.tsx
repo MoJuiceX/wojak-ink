@@ -167,7 +167,30 @@ export function useMetadataAttributes(): MetadataAttribute[] {
       if (!traitType) continue;
 
       // Solid-color backgrounds: resolve from the hex code, not the path
+      // Price overlays take precedence over color name
       if (key === 'Background' && (value === '__solid__' || value?.includes('__solid__'))) {
+        // Price Up / Price Down: show the overlay name
+        if (value?.includes('__price_up__')) {
+          rawAttrs.push({
+            trait_type: 'Background',
+            value: 'Price Up',
+            source: 'map',
+            raw: value,
+            layerKey: key,
+          });
+          continue;
+        }
+        if (value?.includes('__price_down__')) {
+          rawAttrs.push({
+            trait_type: 'Background',
+            value: 'Price Down',
+            source: 'map',
+            raw: value,
+            layerKey: key,
+          });
+          continue;
+        }
+        // Plain solid color: resolve from hex
         const hex = selectedColors?.Background || SOLID_BG_DEFAULT_COLOR;
         const colorName = lookupBackgroundColorName(hex);
         rawAttrs.push({
