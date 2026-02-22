@@ -366,6 +366,125 @@ body {
   min-height: 100%;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════════
+   CROSS-SITE PREMIUM SHELL (Gallery / Generator / BigPulp / Fight Club-ready)
+   Cohesive ambient glow + card rhythm for marketplace-grade polish.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.brand-premium-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+.brand-premium-shell::before,
+.brand-premium-shell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.brand-premium-shell::before {
+  background:
+    radial-gradient(38rem 26rem at 10% 6%, rgba(255, 107, 0, 0.09), transparent 68%),
+    radial-gradient(34rem 24rem at 92% 8%, rgba(0, 212, 255, 0.055), transparent 70%);
+  opacity: 0.95;
+}
+
+.brand-premium-shell::after {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.018), transparent 22%),
+    radial-gradient(60rem 50rem at 50% 120%, rgba(168, 85, 247, 0.045), transparent 72%);
+  opacity: 0.85;
+}
+
+.brand-premium-shell .card-static {
+  border-color: var(--color-white-10);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.012)),
+    rgba(18, 18, 26, 0.9);
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.brand-premium-shell .btn {
+  transition:
+    transform 160ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease;
+}
+
+@media (hover: hover) {
+  .brand-premium-shell .btn:hover {
+    transform: translateY(-1px);
+  }
+}
+
+.brand-premium-shell .btn.btn-primary {
+  box-shadow: 0 10px 22px rgba(255, 107, 0, 0.16), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.brand-premium-shell .btn.btn-secondary,
+.brand-premium-shell .btn.btn-ghost {
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+}
+
+.brand-premium-gallery::before {
+  background:
+    radial-gradient(42rem 30rem at 12% 8%, rgba(255, 107, 0, 0.08), transparent 70%),
+    radial-gradient(40rem 28rem at 86% 10%, rgba(168, 85, 247, 0.05), transparent 74%);
+}
+
+.brand-premium-generator::before {
+  background:
+    radial-gradient(38rem 28rem at 8% 12%, rgba(255, 107, 0, 0.07), transparent 68%),
+    radial-gradient(34rem 24rem at 92% 15%, rgba(0, 212, 255, 0.05), transparent 72%);
+}
+
+.brand-premium-generator .generator-options-grid-container,
+.brand-premium-generator .generator-details-panel,
+.brand-premium-generator .generator-preview-canvas-wrapper {
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255,255,255,0.03);
+}
+
+.brand-premium-generator .generator-options-grid-container,
+.brand-premium-generator .generator-details-panel {
+  border-color: var(--color-white-10);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)),
+    rgba(18,18,26,0.88);
+}
+
+.brand-premium-bigpulp::before {
+  background:
+    radial-gradient(44rem 30rem at 6% 10%, rgba(255, 107, 0, 0.07), transparent 72%),
+    radial-gradient(40rem 26rem at 95% 12%, rgba(34, 197, 94, 0.04), transparent 70%);
+}
+
+.brand-premium-bigpulp [class*="panel"],
+.brand-premium-bigpulp .ask-section {
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255,255,255,0.03);
+}
+
+@media (max-width: 767px) {
+  .brand-premium-shell::before,
+  .brand-premium-shell::after {
+    opacity: 0.75;
+  }
+
+  .brand-premium-shell .btn.btn-primary {
+    box-shadow: 0 8px 18px rgba(255, 107, 0, 0.14), inset 0 1px 0 rgba(255,255,255,0.07);
+  }
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -3408,6 +3527,74 @@ body {
   isolation: isolate;
 }
 
+/* 24h vote pass progress */
+.vote-pass-strip {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto -2px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--color-white-8);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015)),
+    rgba(14, 14, 22, 0.9);
+  box-shadow: inset 0 1px 0 var(--color-white-5);
+}
+
+.vote-pass-strip-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.vote-pass-strip-label {
+  font-size: 0.66rem;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  font-weight: 700;
+}
+
+.vote-pass-strip-value {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.vote-pass-strip-track {
+  position: relative;
+  margin-top: 8px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  overflow: hidden;
+}
+
+.vote-pass-strip-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255,107,0,0.7), rgba(255,170,0,0.95));
+  box-shadow: 0 0 8px rgba(255, 107, 0, 0.25);
+  transition: width 180ms ease;
+}
+
+.vote-pass-strip-meta {
+  margin-top: 6px;
+  font-size: 0.68rem;
+  color: var(--color-text-secondary);
+  line-height: 1.25;
+}
+
+.vote-pass-strip.is-complete {
+  border-color: rgba(34,197,94,0.2);
+}
+
+.vote-pass-strip.is-complete .vote-pass-strip-fill {
+  background: linear-gradient(90deg, rgba(34,197,94,0.8), rgba(74,222,128,0.95));
+  box-shadow: 0 0 8px rgba(34,197,94,0.22);
+}
+
 /* ── Vote Buttons ── */
 
 .vote-btn {
@@ -3727,6 +3914,25 @@ body {
 
   .vote-card {
     max-width: calc(100vw - 20px);
+  }
+
+  .vote-pass-strip {
+    max-width: calc(100vw - 20px);
+    padding: 9px 10px;
+    border-radius: 12px;
+  }
+
+  .vote-pass-strip-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.65px;
+  }
+
+  .vote-pass-strip-value {
+    font-size: 0.72rem;
+  }
+
+  .vote-pass-strip-meta {
+    font-size: 0.64rem;
   }
 
   .vote-card-stack {

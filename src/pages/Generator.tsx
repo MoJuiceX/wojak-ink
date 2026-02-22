@@ -169,7 +169,7 @@ function GeneratorContent() {
         description="Design your own Wojak avatar with our layer-based customization system. Choose from hundreds of traits including heads, eyes, mouths, clothing, and backgrounds. Save favorites and export high-quality images."
         path="/generator"
       />
-      <div className="generator-page">
+      <div className="generator-page brand-premium-shell brand-premium-generator">
         <GeneratorErrorBanner />
 
         {/* Mobile: single scroll container so preview can scroll away and mini preview can show */}

@@ -56,6 +56,17 @@ interface FeedItem {
   dislikes: number;
 }
 
+interface FeedVotePassProgress {
+  enabled: boolean;
+  windowHours: number;
+  seenCount: number;
+  totalCount: number;
+  remainingCount: number;
+  passComplete: boolean;
+  passLocked?: boolean;
+  unseenOnlyFeed: boolean;
+}
+
 interface GameContextType {
   player: GamePlayer | null;
   guestId: string;
@@ -65,6 +76,7 @@ interface GameContextType {
   votesRemaining: number;
   dailyLimit: number;
   feed: FeedItem[];
+  feedVotePassProgress: FeedVotePassProgress | null;
   feedLoading: boolean;
   register: (did: string, walletAddress: string) => Promise<void>;
   linkDid: (did: string, walletAddress?: string) => Promise<void>;
@@ -108,6 +120,7 @@ function apiPlayerToPlayer(api: { did: string; powerLevel: number; phase1Verifie
 export function GameProvider({ children }: { children: ReactNode }) {
   const [player, setPlayer] = useState<GamePlayer | null>(null);
   const [feed, setFeed] = useState<FeedItem[]>([]);
+  const [feedVotePassProgress, setFeedVotePassProgress] = useState<FeedVotePassProgress | null>(null);
   const [feedLoading, setFeedLoading] = useState(false);
 
   const { getToken, isSignedIn, isLoaded: isClerkLoaded } = useAuth();
@@ -132,6 +145,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const resetPlayer = useCallback(() => {
     setPlayer(null);
     setFeed([]);
+    setFeedVotePassProgress(null);
     try { sessionStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
   }, []);
 
@@ -260,6 +274,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       const res = await fetch(feedUrl);
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Feed request failed');
+      setFeedVotePassProgress(data?.meta?.votePass ?? null);
 
       if (Array.isArray(data.feed) && data.feed.length > 0) {
         setFeed(data.feed);
@@ -269,6 +284,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       const retryData = await retryRes.json();
       if (retryData.success && Array.isArray(retryData.feed)) {
         setFeed(retryData.feed);
+        setFeedVotePassProgress(retryData?.meta?.votePass ?? data?.meta?.votePass ?? null);
       } else {
         setFeed(data.feed);
       }
@@ -329,6 +345,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       votesRemaining,
       dailyLimit,
       feed,
+      feedVotePassProgress,
       feedLoading,
       register,
       linkDid,

@@ -47,6 +47,7 @@ export function VotingFeed() {
   const {
     player,
     feed, feedLoading, loadFeed,
+    feedVotePassProgress,
     castVote,
     removeFromFeed,
   } = useGame();
@@ -65,6 +66,7 @@ export function VotingFeed() {
   const [cardExiting, setCardExiting] = useState(false);
   const [exitDirection, setExitDirection] = useState<1 | -1 | null>(null);
   const [voteFeedbackType, setVoteFeedbackType] = useState<'glaze' | 'fade' | null>(null);
+  const [optimisticSeenCount, setOptimisticSeenCount] = useState<number | null>(null);
 
 
   // Load feed immediately (no gate)
@@ -105,6 +107,11 @@ export function VotingFeed() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset optimistic pass progress when backend feed progress updates
+    setOptimisticSeenCount(null);
+  }, [feedVotePassProgress?.seenCount, feedVotePassProgress?.totalCount, feedVotePassProgress?.passComplete]);
 
   const triggerHaptics = useCallback((voteType: 1 | -1) => {
     // Progressive enhancement only (Android browsers commonly support vibrate; iOS Safari does not).
@@ -167,6 +174,13 @@ export function VotingFeed() {
         return;
       }
 
+      setOptimisticSeenCount(prev => {
+        const progress = feedVotePassProgress;
+        if (!progress?.enabled || progress.passComplete || progress.totalCount <= 0) return prev;
+        const base = prev ?? progress.seenCount;
+        return Math.min(progress.totalCount, base + 1);
+      });
+
       removeFromFeed(votedNftId);
       setCardExiting(false);
       setExitDirection(null);
@@ -175,7 +189,7 @@ export function VotingFeed() {
         loadFeed().catch(() => setFeedError(true));
       }
     }, EXIT_MS);
-  }, [feed, cardExiting, castVote, loadFeed, removeFromFeed, toast, voteCount, triggerHaptics, rollbackSessionCounts, voteErrorMessage]);
+  }, [feed, cardExiting, castVote, loadFeed, removeFromFeed, toast, voteCount, triggerHaptics, rollbackSessionCounts, voteErrorMessage, feedVotePassProgress]);
 
   const handleRetry = useCallback(() => {
     setFeedError(false);
@@ -203,20 +217,27 @@ export function VotingFeed() {
 
   // Feed empty — only when there are no minted Wojaks (or none you can vote on, e.g. all yours)
   if (feed.length === 0) {
+    const passLocked = !!feedVotePassProgress?.enabled && !!feedVotePassProgress?.passLocked && (feedVotePassProgress.totalCount ?? 0) > 0;
     return (
       <div className="card-static flex flex-col items-center justify-center gap-4 p-8" style={{ minHeight: 300 }}>
-        <span className="text-2xl">&#128064;</span>
-        <h2 className="text-lg font-semibold">No Wojaks to vote on yet</h2>
+        <span className="text-2xl">{passLocked ? '✅' : '\u{1F440}'}</span>
+        <h2 className="text-lg font-semibold">
+          {passLocked ? '24h vote pass complete' : 'No Wojaks to vote on yet'}
+        </h2>
         <p className="text-secondary text-sm text-center">
-          Once there are minted Wojaks from others, they’ll show up here. You can always change your vote if you see one again.
+          {passLocked
+            ? `You’ve seen ${feedVotePassProgress?.seenCount ?? 0} / ${feedVotePassProgress?.totalCount ?? 0} eligible Wojaks. Come back as votes age out over the next 24 hours.`
+            : 'Once there are minted Wojaks from others, they’ll show up here. You can always change your vote if you see one again.'}
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
           <Link to="/fight-club/rankings" className="btn btn-primary text-sm" style={{ padding: '8px 20px', textDecoration: 'none' }}>
             View Leaderboard
           </Link>
-          <Link to="/generator" className="btn btn-secondary text-sm" style={{ padding: '8px 20px', textDecoration: 'none' }}>
-            Mint a Wojak
-          </Link>
+          {!passLocked && (
+            <Link to="/generator" className="btn btn-secondary text-sm" style={{ padding: '8px 20px', textDecoration: 'none' }}>
+              Mint a Wojak
+            </Link>
+          )}
         </div>
       </div>
     );
@@ -224,9 +245,33 @@ export function VotingFeed() {
 
   // Active voting
   const visibleCards = feed.slice(0, 3);
+  const passSeen = optimisticSeenCount ?? feedVotePassProgress?.seenCount ?? 0;
+  const passTotal = feedVotePassProgress?.totalCount ?? 0;
+  const passEnabled = !!feedVotePassProgress?.enabled && passTotal > 0;
+  const passComplete = !!feedVotePassProgress?.passComplete || (passEnabled && passSeen >= passTotal);
+  const passProgressPct = passEnabled ? Math.max(0, Math.min(100, (passSeen / passTotal) * 100)) : 0;
 
   return (
     <div className={`flex flex-col gap-4 w-full${voteFeedbackType ? ` vote-feed-${voteFeedbackType}` : ''}`}>
+      {passEnabled && (
+        <div className={`vote-pass-strip${passComplete ? ' is-complete' : ''}`}>
+          <div className="vote-pass-strip-row">
+            <span className="vote-pass-strip-label">24h Vote Pass</span>
+            <span className="vote-pass-strip-value">
+              Seen {passSeen} / {passTotal}
+            </span>
+          </div>
+          <div className="vote-pass-strip-track" aria-hidden>
+            <div className="vote-pass-strip-fill" style={{ width: `${passProgressPct}%` }} />
+          </div>
+          <div className="vote-pass-strip-meta">
+            {passComplete
+              ? 'Pass complete: revotes are open until older votes age out.'
+              : `${Math.max(0, passTotal - passSeen)} left in your 24h pass`}
+          </div>
+        </div>
+      )}
+
       {/* Card stack */}
       <div
         className={`vote-card-stack${voteFeedbackType ? ` vote-card-stack-pulse vote-card-stack-pulse-${voteFeedbackType}` : ''}`}
