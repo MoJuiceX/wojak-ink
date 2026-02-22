@@ -197,7 +197,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         format: 'png',
         includeBackground: true,
         size: { preset: '1024' },
-      }, g2Selections);
+      }, g2Selections, selectedColors);
 
       const effectiveMintType = hasFreeMintsAvailable ? mintType : 'paid';
       const layersForApi: Record<string, string> = {};
