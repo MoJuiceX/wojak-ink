@@ -6,7 +6,6 @@
 
 import { jsonResponse, errorResponse } from './_shared';
 import { authenticateRequest } from '../../lib/auth';
-import { resolveImageUri } from '../game/_shared';
 
 interface Env {
   DB: D1Database;
@@ -174,7 +173,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         rank: offset + idx + 1,
         nftId: row.nft_id,
         edition: row.edition_number ?? 0,
-        imageUrl: resolveImageUri(row.ipfs_image_uri as string | null) || `https://assets.mainnet.mintgarden.io/thumbnails/medium/${row.nft_id}.png`,
+        imageUrl: `https://assets.mintgarden.io/thumbnails/medium/${row.nft_id}.png`,
         combatType: row.combat_type || 'Unknown',
         powerScore: (row.power_score as number) || 0,
         votePower: (row.vote_power as number) || 0,

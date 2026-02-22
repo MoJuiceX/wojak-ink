@@ -242,8 +242,13 @@ function WojaksTab() {
             <RankBadge rank={wojak.rank} />
             <div className="wojak-row-image">
               <img
-                src={wojak.imageUrl || `https://assets.mintgarden.io/thumbnails/medium/${wojak.nftId}.png`}
+                src={wojak.imageUrl || `https://assets.mainnet.mintgarden.io/thumbnails/medium/${wojak.nftId}.png`}
                 alt={`Wojak #${wojak.edition}`}
+                onError={(e) => {
+                  const el = e.target as HTMLImageElement;
+                  const fallback = `https://assets.mainnet.mintgarden.io/thumbnails/medium/${wojak.nftId}.png`;
+                  if (el.src !== fallback) el.src = fallback;
+                }}
               />
             </div>
             <div className="wojak-row-info">

@@ -3,7 +3,6 @@
 // Query params: ownerDid (optional), limit (default 100), offset (default 0)
 
 import { jsonResponse, errorResponse, isValidDid } from './_shared';
-import { resolveImageUri } from '../game/_shared';
 
 interface Env {
   DB: D1Database;
@@ -135,7 +134,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         losses: row.total_combat_losses,
         minterWallet: row.minter_wallet,
         minterDid: row.minter_did,
-        imageUri: resolveImageUri(row.ipfs_image_uri) || `https://assets.mainnet.mintgarden.io/thumbnails/medium/${row.nft_id}.png`,
+        imageUri: `https://assets.mintgarden.io/thumbnails/medium/${row.nft_id}.png`,
         customName: row.custom_name,
       })),
     });

@@ -37,14 +37,21 @@ export function getYesterdayString(): string {
 }
 
 // Resolve IPFS image URI — handles JSON arrays of gateway URLs or plain strings.
+// Skips private Pinata gateways (*.mypinata.cloud) which return 403 from browsers.
 export function resolveImageUri(raw: string | null): string {
   if (!raw) return '';
   if (raw.startsWith('[')) {
     try {
       const urls = JSON.parse(raw) as string[];
+      // Prefer public gateways; skip private Pinata (*.mypinata.cloud → 403 from browsers)
+      const publicUrl = urls.find(u => u.startsWith('https://') && !u.includes('.mypinata.cloud'));
+      if (publicUrl) return publicUrl;
+      // Fallback: any HTTPS URL (even private Pinata, better than nothing)
       return urls.find(u => u.startsWith('https://')) || urls[0] || '';
     } catch { return raw; }
   }
+  // Single URL: skip private Pinata
+  if (raw.includes('.mypinata.cloud')) return '';
   return raw;
 }
 
