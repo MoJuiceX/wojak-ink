@@ -6,7 +6,7 @@
  * consolidates duplicates (rarer trait wins), and applies layer-aware overrides.
  */
 
-import { lookupTraitName } from '../../lib/traitNameMap';
+import { lookupTraitName, lookupBackgroundColorName } from '../../lib/traitNameMap';
 
 /**
  * Maps each generator layer to its Phase 1 trait_type.
@@ -68,7 +68,17 @@ export const PHASE1_RARITY: Record<string, number> = {
  * Fallback: if the map doesn't contain the identifier, use the cleaned
  * filename title-cased (for new traits not yet in Phase 1).
  */
-export function resolveTraitName(filepath: string, layerKey: string): string {
+export function resolveTraitName(filepath: string, layerKey: string, bgColorHex?: string): string {
+  // Solid color backgrounds: use hex color → named color lookup
+  if (layerKey === 'Background' && filepath.includes('__solid__')) {
+    if (bgColorHex) {
+      const colorName = lookupBackgroundColorName(bgColorHex);
+      if (colorName) return colorName;
+      return bgColorHex.toUpperCase(); // Fallback to raw hex
+    }
+    return 'Solid Color';
+  }
+
   const normalized = extractNormalized(filepath);
 
   const mapped = lookupTraitName(normalized);
@@ -106,7 +116,8 @@ export interface ConsolidatedTrait {
  * Always injects "Base: Wojak" as a fixed attribute.
  */
 export function consolidateTraits(
-  layers: Record<string, string>
+  layers: Record<string, string>,
+  colors?: Record<string, string>
 ): Map<string, ConsolidatedTrait> {
   const consolidated = new Map<string, ConsolidatedTrait>();
 
@@ -115,7 +126,8 @@ export function consolidateTraits(
     const traitType = LAYER_TO_TRAIT_TYPE[layer];
     if (!traitType) continue;
 
-    const displayName = resolveTraitName(filepath, layer);
+    const bgColorHex = layer === 'Background' ? colors?.Background : undefined;
+    const displayName = resolveTraitName(filepath, layer, bgColorHex);
 
     const existing = consolidated.get(traitType);
     if (!existing) {

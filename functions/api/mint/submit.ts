@@ -151,7 +151,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       if (parts.length > 6 || parts.some(p => p === '..' || p === '.')) {
         return errorResponse(`Invalid layer path for ${layer}`, 400);
       }
-      if (!/^[a-zA-Z0-9_\-.\s/$,]+$/.test(path)) {
+      if (!/^[a-zA-Z0-9_\-.\s/$,+]+$/.test(path)) {
         return errorResponse(`Invalid characters in layer path for ${layer}`, 400);
       }
     }
@@ -219,7 +219,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     }
 
     // ── Calculate pricing ──
-    const consolidated = consolidateTraits(selectedLayers);
+    const consolidated = consolidateTraits(selectedLayers, selectedColors);
 
     let freeMintCreditCost = FREE_MINT_CREDITS;
     let xchPriceMojos: number | null = null;

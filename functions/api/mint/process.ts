@@ -164,7 +164,7 @@ export async function processJob(
 
       const layers = JSON.parse(job.layers_json) as Record<string, string>;
       const colors = JSON.parse(job.colors_json) as Record<string, string>;
-      const consolidated = consolidateTraits(layers);
+      const consolidated = consolidateTraits(layers, colors);
 
       // ──── STEP 2: Reserve Mint Number (submit may have done this already) ────
       let mintNumber: number;
@@ -198,6 +198,8 @@ export async function processJob(
 
       for (const [layer, path] of Object.entries(layers)) {
         if (!path || typeof path !== 'string') continue;
+        // Skip sentinel paths (e.g. __solid__, __price_up__) — not real file paths
+        if (path.startsWith('__') || path.includes('__solid__')) continue;
         const parts = path.split('/');
         if (parts.length >= 3) {
           const traitId = `${parts[parts.length - 2]}_${parts[parts.length - 1].replace(/\.[^.]+$/, '')}`;
@@ -437,7 +439,8 @@ export async function finalizeJob(env: ProcessEnv, jobId: number): Promise<void>
   if (!job) throw new MintError('JOB_NOT_FOUND', `Job ${jobId} not found during finalization`);
 
   const layers = JSON.parse(job.layers_json) as Record<string, string>;
-  const consolidated = consolidateTraits(layers);
+  const colors = JSON.parse(job.colors_json) as Record<string, string>;
+  const consolidated = consolidateTraits(layers, colors);
   const launcherId = job.mintgarden_launcher_id;
   const ipfsImageUris = job.ipfs_image_uris ? JSON.parse(job.ipfs_image_uris) as string[] : [];
   const ipfsMetadataUris = job.ipfs_metadata_uris ? JSON.parse(job.ipfs_metadata_uris) as string[] : [];
@@ -550,10 +553,12 @@ export async function finalizeJob(env: ProcessEnv, jobId: number): Promise<void>
   // Calculate combat identity from the layers/colors
   const combatTraitEntries: { traitId: string; layer: string }[] = [];
   const combatColorMap: Record<string, string> = {};
-  const colors = JSON.parse(job.colors_json) as Record<string, string>;
+  // colors was already parsed above for consolidateTraits
 
   for (const [layer, path] of Object.entries(layers)) {
     if (!path || typeof path !== 'string') continue;
+    // Skip sentinel paths (e.g. __solid__, __price_up__) — not real file paths
+    if (path.startsWith('__') || path.includes('__solid__')) continue;
     const parts = path.split('/');
     if (parts.length >= 3) {
       const traitId = `${parts[parts.length - 2]}_${parts[parts.length - 1].replace(/\.[^.]+$/, '')}`;
