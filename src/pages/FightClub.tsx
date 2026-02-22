@@ -283,11 +283,12 @@ interface Tab {
   id: TabId;
   label: string;
   path: string;
+  demo?: boolean;
 }
 
 const TABS: Tab[] = [
   { id: 'vote', label: 'Vote', path: '/fight-club/vote' },
-  { id: 'battle', label: 'Battle', path: '/fight-club/battle' },
+  { id: 'battle', label: 'Battle', path: '/fight-club/battle', demo: true },
   { id: 'rankings', label: 'Rankings', path: '/fight-club/rankings' },
   { id: 'burn', label: 'Burn', path: '/fight-club/burn' },
 ];
@@ -367,6 +368,7 @@ function FightClubContent() {
                 onClick={() => handleTabClick(tab)}
               >
                 {tab.label}
+                {tab.demo && <span className="tab-demo-pill">Demo</span>}
               </button>
             ))}
           </div>

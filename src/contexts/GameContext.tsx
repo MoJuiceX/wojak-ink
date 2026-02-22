@@ -136,13 +136,20 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // When Clerk is enabled and signed in: fetch /api/game/me and set player; on sign-out clear player
+  const wasSignedInRef = useRef(false);
   useEffect(() => {
     if (!CLERK_ENABLED || !isClerkLoaded) return;
     if (!isSignedIn) {
-      setPlayer(null);
-      setFeed([]);
+      // Only clear feed if user was previously signed in (explicit sign-out)
+      // Don't clear for initial anonymous state — feed may already be loaded via guest path
+      if (wasSignedInRef.current) {
+        setPlayer(null);
+        setFeed([]);
+      }
+      wasSignedInRef.current = false;
       return;
     }
+    wasSignedInRef.current = true;
     let cancelled = false;
     (async () => {
       const token = await getToken();

@@ -58,9 +58,12 @@ export function VotingFeed() {
 
   // Session state
   const [voteCount, setVoteCount] = useState(0);
+  const [glazeCount, setGlazeCount] = useState(0);
+  const [fadeCount, setFadeCount] = useState(0);
   const [feedError, setFeedError] = useState(false);
   const [cardExiting, setCardExiting] = useState(false);
   const [exitDirection, setExitDirection] = useState<1 | -1 | null>(null);
+  const [voteFeedback, setVoteFeedback] = useState<string | null>(null);
 
   // Instruction text visibility
   const [instructionsSeen, setInstructionsSeen] = useState(() => {
@@ -84,7 +87,7 @@ export function VotingFeed() {
 
   // Load feed immediately (no gate)
   // Track player DID to reload when login/logout changes
-  const lastPlayerDid = useRef<string | null>(null);
+  const lastPlayerDid = useRef<string | null | undefined>(undefined);
   useEffect(() => {
     const currentDid = player?.did ?? null;
     // Reload if: first load OR player changed (login/logout)
@@ -140,9 +143,15 @@ export function VotingFeed() {
     setCardExiting(true);
     setExitDirection(voteType); // Set direction for exit animation (only top card has stackPosition 0)
 
-    // Track session vote count
+    // Track session vote count + type
     const newVoteCount = voteCount + 1;
     setVoteCount(newVoteCount);
+    if (voteType === 1) setGlazeCount(prev => prev + 1);
+    else setFadeCount(prev => prev + 1);
+
+    // Vote feedback flash
+    setVoteFeedback(voteType === 1 ? 'Glaze recorded ✓' : 'Fade recorded ✓');
+    setTimeout(() => setVoteFeedback(null), 1200);
 
     // Mark instructions seen after 3 votes
     if (newVoteCount >= 3 && !instructionsSeen) {
@@ -237,6 +246,9 @@ export function VotingFeed() {
               isFirst={voteCount === 0 && i === 0}
               reducedMotion={reducedMotion}
               exitDirection={i === 0 ? exitDirection : null}
+              likes={item.likes}
+              dislikes={item.dislikes}
+              totalVotes={item.totalVotes}
             />
           ))}
         </AnimatePresence>
@@ -250,6 +262,22 @@ export function VotingFeed() {
           disabled={cardExiting}
         />
       </div>
+
+      {/* Vote feedback flash */}
+      {voteFeedback && (
+        <div className="vote-feedback-flash" key={voteFeedback + voteCount}>
+          {voteFeedback}
+        </div>
+      )}
+
+      {/* Session stats strip */}
+      {voteCount > 0 && (
+        <div className="session-stats-strip">
+          <span>Votes: {voteCount}</span>
+          <span className="text-success">Glazes: {glazeCount}</span>
+          <span className="text-error">Fades: {fadeCount}</span>
+        </div>
+      )}
 
       {/* Instruction text */}
       {!instructionsSeen && (

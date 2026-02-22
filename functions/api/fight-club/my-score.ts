@@ -9,7 +9,7 @@ interface Env {
     CLERK_DOMAIN: string;
 }
 
-const PROVISIONAL_MIN_VOTES = 5;
+const PROVISIONAL_MIN_VOTES = 3;
 const PLAYER_TOP_N = 10;
 
 type Tier = 'Casual' | 'Active' | 'Serious' | 'Strong' | 'Elite' | 'Legend';

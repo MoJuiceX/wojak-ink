@@ -10,9 +10,12 @@
  */
 
 import { useState } from 'react';
-import { Trophy, Crown, Medal, User, ThumbsUp, ThumbsDown, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Trophy, User, ThumbsUp, ThumbsDown, HelpCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@clerk/clerk-react';
+import { Link } from 'react-router-dom';
+import { RankingRulesModal } from './RankingRulesModal';
+import { useFightClubMyScore, getTierColor } from '@/hooks/useFightClubMyScore';
 
 type RankingTab = 'players' | 'wojaks';
 
@@ -63,11 +66,11 @@ interface WojaksResponse {
 
 type SortOption = 'score' | 'glazed' | 'ratio' | 'newest';
 
-const SORT_OPTIONS: { value: SortOption; label: string; icon: string }[] = [
-  { value: 'score', label: 'Score', icon: '⭐' },
-  { value: 'glazed', label: 'Most Glazed', icon: '👍' },
-  { value: 'ratio', label: 'Ratio', icon: '📊' },
-  { value: 'newest', label: 'Newest', icon: '🆕' },
+const SORT_OPTIONS: { value: SortOption; label: string; icon: string; tooltip: string }[] = [
+  { value: 'score', label: 'Score', icon: '⭐', tooltip: 'Glazes − Fades' },
+  { value: 'glazed', label: 'Most Glazed', icon: '👍', tooltip: 'Highest total Glazes' },
+  { value: 'ratio', label: 'Ratio', icon: '📊', tooltip: 'Glaze ratio (best after enough votes)' },
+  { value: 'newest', label: 'Newest', icon: '🆕', tooltip: 'Most recently minted' },
 ];
 
 const PAGE_SIZE = 50;
@@ -101,81 +104,64 @@ function useVoteLeaderboard(type: RankingTab, sort?: SortOption) {
 function RankBadge({ rank }: { rank: number | null }) {
   if (rank === null) return <span className="rank-badge rank-provisional">—</span>;
   if (rank === 1)
-    return <span className="rank-badge rank-1"><Crown size={16} /></span>;
+    return <span className="rank-badge rank-1" style={{ color: '#FFD700', fontWeight: 'bold' }}>#1</span>;
   if (rank === 2)
-    return <span className="rank-badge rank-2"><Medal size={16} /></span>;
+    return <span className="rank-badge rank-2" style={{ color: '#C0C0C0', fontWeight: 'bold' }}>#2</span>;
   if (rank === 3)
-    return <span className="rank-badge rank-3"><Medal size={16} /></span>;
+    return <span className="rank-badge rank-3" style={{ color: '#cd7f32', fontWeight: 'bold' }}>#3</span>;
   return <span className="rank-badge">#{rank}</span>;
 }
 
-// ── Provisional Badge ───────────────────────────────────────────────
+// ── Rising Badge ─────────────────────────────────────────────────────────
 
 function ProvisionalBadge({ votesNeeded }: { votesNeeded: number }) {
   return (
     <span
       className="provisional-badge"
-      title={`Needs ${votesNeeded} more vote${votesNeeded !== 1 ? 's' : ''} to count toward Player Score`}
+      title={`${votesNeeded} more vote${votesNeeded !== 1 ? 's' : ''} to count toward rankings`}
       style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 4,
-        fontSize: '0.65rem',
-        padding: '1px 6px',
+        fontSize: '0.6rem',
+        padding: '1px 5px',
         borderRadius: 8,
-        background: 'var(--color-warning, #f59e0b)',
-        color: '#000',
-        fontWeight: 600,
-        letterSpacing: 0.3,
+        color: 'var(--color-text-muted)',
+        border: '1px solid var(--color-border)',
+        fontWeight: 500,
       }}
     >
-      Provisional · {votesNeeded} more
+      Rising · {votesNeeded} more
     </span>
   );
 }
 
-// ── How Ranking Works ───────────────────────────────────────────────
 
-function HowRankingWorks() {
-  const [open, setOpen] = useState(false);
+
+// ── Your Position Card ──────────────────────────────────────────────
+
+function YourPositionCard() {
+  const { data: scoreData } = useFightClubMyScore();
+
+  if (!scoreData?.registered) return null;
+
+  const { ranked, rank, playerScore, tier, eligibleWojakCount, totalWojakCount, pointsToNextRank, nextRank } = scoreData;
+  const tierColor = getTierColor(tier);
 
   return (
-    <div style={{ marginBottom: 8 }}>
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          background: 'none',
-          border: 'none',
-          color: 'var(--color-text-secondary)',
-          fontSize: '0.75rem',
-          cursor: 'pointer',
-          padding: '4px 0',
-        }}
-      >
-        <HelpCircle size={14} />
-        <span>How Ranking Works</span>
-        {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-      </button>
-      {open && (
-        <div
-          className="card-static"
-          style={{ padding: '10px 12px', fontSize: '0.75rem', lineHeight: 1.5, color: 'var(--color-text-secondary)' }}
-        >
-          <p style={{ margin: 0 }}>
-            <strong>Wojaks</strong> are ranked by <strong>Vote Score</strong> (Glazes − Fades).
-          </p>
-          <p style={{ margin: '6px 0 0' }}>
-            <strong>Players</strong> are ranked by their <strong>Player Score</strong> — the sum of their top 10 Wojak Vote Scores.
-          </p>
-          <p style={{ margin: '6px 0 0' }}>
-            A Wojak needs <strong>5 votes</strong> before it counts toward your Player Score. Until then it&apos;s marked <em>Provisional</em>.
-          </p>
-        </div>
-      )}
+    <div className="your-position-card">
+      <div className="your-position-rank">
+        {ranked ? `#${rank}` : '—'}
+      </div>
+      <div className="your-position-info">
+        <span className="your-position-label">Your Position</span>
+        <span className="your-position-score">
+          {playerScore.toLocaleString()} <span style={{ color: tierColor, fontSize: '0.75rem' }}>{tier}</span>
+        </span>
+        <span className="your-position-meta">
+          {eligibleWojakCount} eligible · {totalWojakCount} total Wojaks
+          {ranked && pointsToNextRank !== null && nextRank !== null && (
+            <> · {pointsToNextRank} pts to #{nextRank}</>
+          )}
+        </span>
+      </div>
     </div>
   );
 }
@@ -216,10 +202,18 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
 
   if (!data?.players?.length) {
     return (
-      <div className="rankings-empty">
-        <Trophy size={48} strokeWidth={1} className="text-muted" />
-        <p>No ranked players yet</p>
-        <span className="text-secondary text-sm">Glaze some Wojaks to climb the ranks!</span>
+      <div className="rankings-content">
+        <div style={{ textAlign: 'center', padding: '32px 16px' }}>
+          <Trophy size={32} style={{ color: 'var(--color-text-muted)', marginBottom: 12 }} />
+          <p style={{ fontWeight: 700, fontSize: '1rem', margin: '0 0 6px' }}>No ranked players yet</p>
+          <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: '0 0 4px' }}>
+            Wojaks need 3 votes to count toward Player Score.
+          </p>
+          <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', margin: '0 0 12px' }}>
+            Glaze some Wojaks to get the leaderboard going!
+          </p>
+          <Link to="/fight-club/vote" className="rankings-go-vote">Go Vote</Link>
+        </div>
       </div>
     );
   }
@@ -230,7 +224,8 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
 
   return (
     <div className="rankings-content">
-      <HowRankingWorks />
+      {/* Your Position */}
+      <YourPositionCard />
 
       {/* Podium for top 3 */}
       <div className="rankings-podium">
@@ -399,8 +394,6 @@ function WojaksTab() {
 
   return (
     <div className="rankings-content">
-      <HowRankingWorks />
-
       {/* Toolbar */}
       <div className="rankings-toolbar">
         <div className="rankings-sort">
@@ -410,7 +403,7 @@ function WojaksTab() {
               type="button"
               className={`sort-chip${sortBy === opt.value ? ' active' : ''}`}
               onClick={() => setSortBy(opt.value)}
-              title={opt.label}
+              title={opt.tooltip}
             >
               <span className="sort-chip-icon">{opt.icon}</span>
               <span className="sort-chip-label">{opt.label}</span>
@@ -440,66 +433,78 @@ function WojaksTab() {
       {/* List View */}
       {viewMode === 'list' && (
         <div className="rankings-list wojak-rankings">
-          {allWojaks.map((wojak, idx) => (
-            <div
-              key={wojak.nftId}
-              className={`rankings-row wojak-row wojak-row-animate${wojak.isProvisional ? ' vojak-provisional' : ''}`}
-              style={{ animationDelay: `${Math.min(idx, 10) * 0.03}s` }}
-            >
-              <RankBadge rank={wojak.rank} />
-              <div className="wojak-row-image">
-                <img
-                  src={wojak.imageUrl}
-                  alt={`Wojak #${wojak.edition}`}
-                  onError={(e) => {
-                    const el = e.target as HTMLImageElement;
-                    el.style.display = 'none';
-                    if (el.parentElement) {
-                      el.parentElement.style.display = 'flex';
-                      el.parentElement.style.alignItems = 'center';
-                      el.parentElement.style.justifyContent = 'center';
-                      el.parentElement.style.background = 'var(--color-white-5)';
-                      el.parentElement.style.fontSize = '0.65rem';
-                      el.parentElement.style.color = 'var(--color-text-secondary)';
-                      el.parentElement.textContent = `#${wojak.edition}`;
-                    }
-                  }}
-                />
-              </div>
-              <div className="wojak-row-info">
-                <div className="wojak-row-header">
-                  <span className="wojak-row-edition">#{wojak.edition}</span>
-                  {wojak.isProvisional && (
-                    <ProvisionalBadge votesNeeded={wojak.provisionalVotesNeeded} />
-                  )}
+          {allWojaks.map((wojak, idx) => {
+            // Insert section divider at ranked → provisional boundary
+            const prevWojak = idx > 0 ? allWojaks[idx - 1] : null;
+            const showDivider = wojak.isProvisional && (!prevWojak || !prevWojak.isProvisional);
+
+            return (
+              <div key={wojak.nftId}>
+                {showDivider && (
+                  <div className="rankings-section-divider">
+                    Rising (need 3 votes to rank)
+                  </div>
+                )}
+                <div
+                  className={`rankings-row wojak-row wojak-row-animate${wojak.isProvisional ? ' vojak-provisional' : ''}`}
+                  style={{ animationDelay: `${Math.min(idx, 10) * 0.03}s` }}
+                >
+                  <RankBadge rank={wojak.rank} />
+                  <div className="wojak-row-image">
+                    <img
+                      src={wojak.imageUrl}
+                      alt={`Wojak #${wojak.edition}`}
+                      onError={(e) => {
+                        const el = e.target as HTMLImageElement;
+                        el.style.display = 'none';
+                        if (el.parentElement) {
+                          el.parentElement.style.display = 'flex';
+                          el.parentElement.style.alignItems = 'center';
+                          el.parentElement.style.justifyContent = 'center';
+                          el.parentElement.style.background = 'var(--color-white-5)';
+                          el.parentElement.style.fontSize = '0.65rem';
+                          el.parentElement.style.color = 'var(--color-text-secondary)';
+                          el.parentElement.textContent = `#${wojak.edition}`;
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="wojak-row-info">
+                    <div className="wojak-row-header">
+                      <span className="wojak-row-edition">#{wojak.edition}</span>
+                      {wojak.isProvisional && (
+                        <ProvisionalBadge votesNeeded={wojak.provisionalVotesNeeded} />
+                      )}
+                    </div>
+                    <div className="wojak-row-stats flex flex-wrap gap-x-3 gap-y-1 text-xs">
+                      <span className="text-success" title="Glazes (upvotes)">
+                        <ThumbsUp size={11} style={{ display: 'inline', marginRight: 2, verticalAlign: -1 }} />
+                        {wojak.likes}
+                      </span>
+                      <span className="text-error" title="Fades (downvotes)">
+                        <ThumbsDown size={11} style={{ display: 'inline', marginRight: 2, verticalAlign: -1 }} />
+                        {wojak.dislikes}
+                      </span>
+                      {wojak.likeRatio !== null && (
+                        <span className="text-secondary" title="Like ratio">
+                          {Math.round(wojak.likeRatio * 100)}%
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-secondary text-xs">Owner: {wojak.ownerName || 'Anon'}</span>
+                  </div>
+                  <div className="wojak-row-power">
+                    <div className="power-total">
+                      <span style={{ fontWeight: 700, fontSize: '1rem' }}>
+                        {wojak.voteScore > 0 ? '+' : ''}{wojak.voteScore}
+                      </span>
+                    </div>
+                    <span className="text-secondary text-xs">Vote Score</span>
+                  </div>
                 </div>
-                <div className="wojak-row-stats flex flex-wrap gap-x-3 gap-y-1 text-xs">
-                  <span className="text-success" title="Glazes (upvotes)">
-                    <ThumbsUp size={11} style={{ display: 'inline', marginRight: 2, verticalAlign: -1 }} />
-                    {wojak.likes}
-                  </span>
-                  <span className="text-error" title="Fades (downvotes)">
-                    <ThumbsDown size={11} style={{ display: 'inline', marginRight: 2, verticalAlign: -1 }} />
-                    {wojak.dislikes}
-                  </span>
-                  {wojak.likeRatio !== null && (
-                    <span className="text-secondary" title="Like ratio">
-                      {Math.round(wojak.likeRatio * 100)}%
-                    </span>
-                  )}
-                </div>
-                <span className="text-secondary text-xs">Owner: {wojak.ownerName || 'Anon'}</span>
               </div>
-              <div className="wojak-row-power">
-                <div className="power-total">
-                  <span style={{ fontWeight: 700, fontSize: '1rem' }}>
-                    {wojak.voteScore > 0 ? '+' : ''}{wojak.voteScore}
-                  </span>
-                </div>
-                <span className="text-secondary text-xs">Vote Score</span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -534,13 +539,6 @@ function WojaksTab() {
                     }}
                   />
                   {wojak.rank !== null && <span className="grid-card-rank">#{wojak.rank}</span>}
-                  {wojak.isProvisional && (
-                    <span className="grid-card-provisional" style={{
-                      position: 'absolute', top: 4, right: 4,
-                      fontSize: '0.55rem', background: 'var(--color-warning, #f59e0b)',
-                      color: '#000', padding: '1px 4px', borderRadius: 4, fontWeight: 700,
-                    }}>P</span>
-                  )}
                 </div>
                 <div className="grid-card-footer">
                   <span className="grid-card-edition">#{wojak.edition}</span>
@@ -550,7 +548,7 @@ function WojaksTab() {
                     </span>
                   </div>
                   <div className="grid-card-power" style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <span style={{ fontSize: '0.65rem', color: 'var(--color-text-secondary)' }}>VS</span>
+                    <span style={{ fontSize: '0.65rem', color: 'var(--color-text-secondary)' }}>Score</span>
                   </div>
                 </div>
               </div>
@@ -588,9 +586,30 @@ interface FightClubRankingsProps {
 
 export function FightClubRankings({ currentUserDid }: FightClubRankingsProps = {}) {
   const [activeTab, setActiveTab] = useState<RankingTab>('players');
+  const [showRules, setShowRules] = useState(false);
 
   return (
     <div className="fight-club-rankings">
+      {/* Rankings header block */}
+      <div className="rankings-header-block">
+        <div className="rankings-header-text">
+          <h2 className="rankings-header-title">Fight Club Rankings</h2>
+          <span className="rankings-header-subtitle">Voting-only season. Battle is demo-only for now.</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link to="/fight-club/vote" className="btn btn-primary" style={{ padding: '6px 16px', fontSize: '0.9rem' }}>Go Vote</Link>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            style={{ padding: '6px 16px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}
+            onClick={() => setShowRules(true)}
+          >
+            <HelpCircle size={14} />
+            Rules
+          </button>
+        </div>
+      </div>
+
       {/* Sub-tabs */}
       <div className="rankings-tabs">
         <button
@@ -613,6 +632,8 @@ export function FightClubRankings({ currentUserDid }: FightClubRankingsProps = {
 
       {/* Tab content */}
       {activeTab === 'players' ? <PlayersTab currentUserDid={currentUserDid} /> : <WojaksTab />}
+
+      {showRules && <RankingRulesModal onClose={() => setShowRules(false)} />}
     </div>
   );
 }

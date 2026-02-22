@@ -1,115 +1,122 @@
 // Your stats panel — desktop right column.
-// Voting-only Player Score + tier, using /api/fight-club/my-score.
+// Voting-only Player Score + tier + rank + progress, using shared hook.
 
 import { Link } from 'react-router-dom';
+import { useFightClubMyScore, getTierColor } from '@/hooks/useFightClubMyScore';
 import { useGame } from '@/contexts/GameContext';
-import { useQuery } from '@tanstack/react-query';
 import { OnboardingChecklist } from './OnboardingChecklist';
-
-interface MyScoreData {
-  success: boolean;
-  registered: boolean;
-  did: string | null;
-  ranked: boolean;
-  rank: number | null;
-  playerScore: number;
-  tier: string;
-  eligibleWojakCount: number;
-  totalWojakCount: number;
-  bestWojakScore: number | null;
-  pointsToNextRank: number | null;
-  nextRank: number | null;
-  meta: { mode: string; provisionalMinVotes: number; playerTopN: number };
-}
-
-function getTierColor(tier: string): string {
-  switch (tier) {
-    case 'Legend': return 'var(--color-primary)';
-    case 'Elite': return 'var(--color-cyan, #06b6d4)';
-    case 'Strong': return 'var(--color-success)';
-    case 'Serious': return 'var(--color-text)';
-    case 'Active': return 'var(--color-text-secondary)';
-    default: return 'var(--color-text-muted)';
-  }
-}
+import { useState } from 'react';
+import { RankingRulesModal } from '@/components/combat/RankingRulesModal';
 
 export function VotingStatsPanel() {
   const { player } = useGame();
-
-  // Fetch voting-only score from dedicated endpoint
-  const { data: scoreData } = useQuery({
-    queryKey: ['fight-club-my-score', player?.did],
-    queryFn: async (): Promise<MyScoreData> => {
-      const params = player?.did ? `?did=${encodeURIComponent(player.did)}` : '';
-      const res = await fetch(`/api/fight-club/my-score${params}`);
-      if (!res.ok) throw new Error('Failed to fetch');
-      return res.json();
-    },
-    enabled: !!player,
-    staleTime: 30000,
-    retry: 2,
-  });
+  const { data: scoreData } = useFightClubMyScore();
+  const [showRules, setShowRules] = useState(false);
 
   if (!player) return null;
 
-  // Use voting-only score if available, fallback to legacy
   const playerScore = scoreData?.playerScore ?? 0;
   const tier = scoreData?.tier ?? 'Casual';
   const tierColor = getTierColor(tier);
   const ranked = scoreData?.ranked ?? false;
   const rank = scoreData?.rank ?? null;
   const eligibleCount = scoreData?.eligibleWojakCount ?? 0;
+  const totalCount = scoreData?.totalWojakCount ?? 0;
+  const pointsToNext = scoreData?.pointsToNextRank ?? null;
+  const nextRank = scoreData?.nextRank ?? null;
+
+  // Next tier info
+  const TIERS = [
+    { name: 'Legend', min: 250 },
+    { name: 'Elite', min: 120 },
+    { name: 'Strong', min: 60 },
+    { name: 'Serious', min: 25 },
+    { name: 'Active', min: 10 },
+    { name: 'Casual', min: 0 },
+  ];
+  const currentTierIdx = TIERS.findIndex(t => t.name === tier);
+  const nextTier = currentTierIdx > 0 ? TIERS[currentTierIdx - 1] : null;
+  const pointsToNextTier = nextTier ? nextTier.min - playerScore : null;
 
   return (
-    <div className="card-static p-4 flex flex-col gap-4">
-      {/* Header */}
-      <div className="text-xs text-muted" style={{ letterSpacing: 1, textTransform: 'uppercase' }}>
-        Your Game
+    <>
+      <div className="stats-panel">
+        {/* Header */}
+        <div className="stats-panel-header">
+          <span className="stats-panel-title">Your Game</span>
+          <button
+            type="button"
+            className="stats-panel-help"
+            onClick={() => setShowRules(true)}
+            title="How scoring works"
+          >
+            ?
+          </button>
+        </div>
+
+        {/* Player Score — hero */}
+        <div className="stats-panel-score">
+          <span className="stats-panel-score-value">{playerScore.toLocaleString()}</span>
+          <span className="stats-panel-score-tier" style={{ color: tierColor }}>{tier}</span>
+          <span className="stats-panel-score-label">Player Score</span>
+        </div>
+
+        {/* Rank + Eligible */}
+        <div className="stats-panel-details">
+          <div className="stats-panel-detail">
+            <span className="stats-panel-detail-value">
+              {ranked ? `#${rank}` : '—'}
+            </span>
+            <span className="stats-panel-detail-label">
+              {ranked ? 'Rank' : 'Unranked'}
+            </span>
+          </div>
+          <div className="stats-panel-detail">
+            <span className="stats-panel-detail-value">
+              {eligibleCount}/{totalCount}
+            </span>
+            <span className="stats-panel-detail-label">Eligible</span>
+          </div>
+        </div>
+
+        {/* Progress to next */}
+        {(pointsToNext !== null || pointsToNextTier !== null) && (
+          <div className="stats-panel-progress">
+            {ranked && pointsToNext !== null && nextRank !== null && (
+              <span className="text-xs text-secondary">
+                {pointsToNext} pt{pointsToNext !== 1 ? 's' : ''} to rank #{nextRank}
+              </span>
+            )}
+            {pointsToNextTier !== null && pointsToNextTier > 0 && nextTier && (
+              <span className="text-xs text-secondary">
+                {pointsToNextTier} pt{pointsToNextTier !== 1 ? 's' : ''} to {nextTier.name}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Helper */}
+        <span className="stats-panel-helper">
+          Top 10 eligible Wojaks in your DID
+        </span>
+
+        {/* Onboarding */}
+        {player.onboarding && (
+          <OnboardingChecklist milestones={player.onboarding} />
+        )}
+
+        {/* Rankings link */}
+        <div className="stats-panel-link">
+          <Link
+            to="/fight-club/rankings"
+            className="stats-panel-cta"
+          >
+            View Rankings &rarr;
+          </Link>
+        </div>
       </div>
 
-      {/* Player Score */}
-      <div className="flex flex-col items-center gap-1">
-        <span className="font-bold" style={{ fontSize: 24 }}>
-          {playerScore.toLocaleString()}
-        </span>
-        <span style={{ fontSize: 14, color: tierColor }}>
-          {tier}
-        </span>
-        <span className="text-secondary text-xs">Player Score</span>
-      </div>
-
-      {/* Rank info */}
-      <div className="flex justify-between text-xs" style={{ borderTop: '1px solid var(--color-border)', paddingTop: 8 }}>
-        <span className="text-secondary">
-          {ranked ? `Rank #${rank}` : 'Unranked'}
-        </span>
-        <span className="text-secondary">
-          {eligibleCount} eligible Wojak{eligibleCount !== 1 ? 's' : ''}
-        </span>
-      </div>
-
-      {/* Helper text */}
-      <span className="text-xs text-muted" style={{ lineHeight: 1.4 }}>
-        Top 10 eligible Wojaks (5+ votes) in your DID
-      </span>
-
-      {/* Onboarding */}
-      {player.onboarding && (
-        <OnboardingChecklist milestones={player.onboarding} />
-      )}
-
-      {/* Rankings link */}
-      <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 8 }}>
-        <Link
-          to="/fight-club/rankings"
-          className="text-muted"
-          style={{ fontSize: 12, transition: 'color 150ms' }}
-          onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-primary)')}
-          onMouseLeave={e => (e.currentTarget.style.color = '')}
-        >
-          View Rankings &rarr;
-        </Link>
-      </div>
-    </div>
+      {showRules && <RankingRulesModal onClose={() => setShowRules(false)} />}
+    </>
   );
 }

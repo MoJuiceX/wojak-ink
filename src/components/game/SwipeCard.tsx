@@ -7,6 +7,8 @@ import { motion, useMotionValue, useTransform } from 'framer-motion';
 import type { PanInfo } from 'framer-motion';
 import { useState, useCallback, useRef, useEffect } from 'react';
 
+const PROVISIONAL_MIN_VOTES = 3;
+
 interface SwipeCardProps {
   nftId: string;
   name: string;
@@ -19,6 +21,10 @@ interface SwipeCardProps {
   isFirst?: boolean;
   reducedMotion?: boolean;
   exitDirection?: 1 | -1 | null; // 1 = right (like), -1 = left (dislike)
+  /** Voting stats for the footer context */
+  likes?: number;
+  dislikes?: number;
+  totalVotes?: number;
 }
 
 const SWIPE_THRESHOLD = 100;
@@ -63,7 +69,13 @@ export function SwipeCard({
   isFirst = false,
   reducedMotion = false,
   exitDirection = null,
+  likes = 0,
+  dislikes = 0,
+  totalVotes = 0,
 }: SwipeCardProps) {
+  const voteScore = likes - dislikes;
+  const isProvisional = totalVotes < PROVISIONAL_MIN_VOTES;
+  const votesNeeded = Math.max(0, PROVISIONAL_MIN_VOTES - totalVotes);
   const x = useMotionValue(0);
   const [swipeExiting, setSwipeExiting] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -192,8 +204,8 @@ export function SwipeCard({
   void triggerVote; // used by parent via onVote callback pattern
 
   // Exit direction: from swipe gesture, button click, or default right
-  // Distance is enough to fully exit the card container (clipped by overflow: hidden)
-  const exitX = exitDirection ? exitDirection * 350 : (x.get() >= 0 ? 350 : -350);
+  // Distance is enough to fully exit the card container (clips handled by overflow)
+  const exitX = exitDirection ? exitDirection * 500 : (x.get() >= 0 ? 500 : -500);
 
   return (
     <motion.div
@@ -304,9 +316,29 @@ export function SwipeCard({
         )}
       </div>
 
-      {/* Info bar */}
+      {/* Info bar — compact voting context */}
       <div className="vote-card-info">
-        <span className="vote-card-info-name">Your Wojak #{editionNumber} &middot; {name}</span>
+        <div className="vote-card-info-top">
+          <span className="vote-card-info-name">#{editionNumber} &middot; {name}</span>
+        </div>
+        <div className="vote-card-info-stats">
+          <span className="vote-card-stat">
+            <span className={voteScore > 0 ? 'text-success' : voteScore < 0 ? 'text-error' : 'text-secondary'}>
+              {voteScore > 0 ? '+' : ''}{voteScore}
+            </span>
+            <span className="vote-card-stat-label">Score</span>
+          </span>
+          <span className="vote-card-stat">
+            <span className="text-secondary">{totalVotes} vote{totalVotes !== 1 ? 's' : ''}</span>
+          </span>
+          {isProvisional ? (
+            <span className="vote-card-provisional">
+              Rising &middot; {votesNeeded} more
+            </span>
+          ) : (
+            <span className="vote-card-eligible">Ranked</span>
+          )}
+        </div>
       </div>
     </motion.div>
   );

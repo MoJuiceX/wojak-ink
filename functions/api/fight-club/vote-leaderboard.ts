@@ -10,99 +10,99 @@ import { resolveImageUri } from '../game/_shared';
 import { authenticateRequest } from '../../lib/auth';
 
 interface Env {
-    DB: D1Database;
-    CLERK_DOMAIN: string;
+  DB: D1Database;
+  CLERK_DOMAIN: string;
 }
 
-const PROVISIONAL_MIN_VOTES = 5;
+const PROVISIONAL_MIN_VOTES = 3;
 const PLAYER_TOP_N = 10;
 
 function json(data: unknown, status = 200) {
-    return new Response(JSON.stringify(data), {
-        status,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-    });
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+  });
 }
 
 function errJson(error: string, code: string, status = 400) {
-    return json({ error, code }, status);
+  return json({ error, code }, status);
 }
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-    const start = Date.now();
-    try {
-        const url = new URL(context.request.url);
-        const type = url.searchParams.get('type') || 'players';
-        if (type !== 'wojaks' && type !== 'players') {
-            return errJson('Invalid type', 'INVALID_TYPE');
-        }
-
-        const limitRaw = parseInt(url.searchParams.get('limit') || '50', 10);
-        if (isNaN(limitRaw) || limitRaw < 1 || limitRaw > 100) {
-            return errJson('Limit must be 1–100', 'INVALID_LIMIT');
-        }
-        const limit = limitRaw;
-        const offset = Math.max(0, parseInt(url.searchParams.get('offset') || '0', 10));
-        const sort = url.searchParams.get('sort') || 'score';
-
-        const db = context.env.DB;
-
-        if (type === 'wojaks') {
-            return await handleWojaks(db, limit, offset, sort, start);
-        } else {
-            // Get caller DID for "yourRank"
-            let callerDid: string | null = null;
-            if (context.env.CLERK_DOMAIN) {
-                const auth = await authenticateRequest(context.request, context.env.CLERK_DOMAIN);
-                callerDid = (auth?.payload?.did as string) || null;
-            }
-            return await handlePlayers(db, limit, offset, callerDid, start);
-        }
-    } catch (err) {
-        console.error('[fight-club.vote-leaderboard] Error:', err);
-        return errJson('Internal error', 'INTERNAL_ERROR', 500);
+  const start = Date.now();
+  try {
+    const url = new URL(context.request.url);
+    const type = url.searchParams.get('type') || 'players';
+    if (type !== 'wojaks' && type !== 'players') {
+      return errJson('Invalid type', 'INVALID_TYPE');
     }
+
+    const limitRaw = parseInt(url.searchParams.get('limit') || '50', 10);
+    if (isNaN(limitRaw) || limitRaw < 1 || limitRaw > 100) {
+      return errJson('Limit must be 1–100', 'INVALID_LIMIT');
+    }
+    const limit = limitRaw;
+    const offset = Math.max(0, parseInt(url.searchParams.get('offset') || '0', 10));
+    const sort = url.searchParams.get('sort') || 'score';
+
+    const db = context.env.DB;
+
+    if (type === 'wojaks') {
+      return await handleWojaks(db, limit, offset, sort, start);
+    } else {
+      // Get caller DID for "yourRank"
+      let callerDid: string | null = null;
+      if (context.env.CLERK_DOMAIN) {
+        const auth = await authenticateRequest(context.request, context.env.CLERK_DOMAIN);
+        callerDid = (auth?.payload?.did as string) || null;
+      }
+      return await handlePlayers(db, limit, offset, callerDid, start);
+    }
+  } catch (err) {
+    console.error('[fight-club.vote-leaderboard] Error:', err);
+    return errJson('Internal error', 'INTERNAL_ERROR', 500);
+  }
 };
 
 // ── Wojaks leaderboard ──────────────────────────────────────────────
 
 async function handleWojaks(db: D1Database, limit: number, offset: number, sort: string, start: number) {
-    const validSorts = ['score', 'glazed', 'ratio', 'newest'];
-    if (!validSorts.includes(sort)) {
-        return errJson('Invalid sort. Must be: score, glazed, ratio, newest', 'INVALID_SORT');
-    }
+  const validSorts = ['score', 'glazed', 'ratio', 'newest'];
+  if (!validSorts.includes(sort)) {
+    return errJson('Invalid sort. Must be: score, glazed, ratio, newest', 'INVALID_SORT');
+  }
 
-    // Build ORDER BY based on sort
-    let orderBy: string;
-    switch (sort) {
-        case 'glazed':
-            orderBy = `
+  // Build ORDER BY based on sort
+  let orderBy: string;
+  switch (sort) {
+    case 'glazed':
+      orderBy = `
         CASE WHEN ws.total_votes >= ${PROVISIONAL_MIN_VOTES} THEN 0 ELSE 1 END ASC,
         ws.likes DESC, ws.net_score DESC, ws.edition_number ASC`;
-            break;
-        case 'ratio':
-            orderBy = `
+      break;
+    case 'ratio':
+      orderBy = `
         CASE WHEN ws.total_votes >= ${PROVISIONAL_MIN_VOTES} THEN 0 ELSE 1 END ASC,
         CASE WHEN ws.total_votes > 0 THEN CAST(ws.likes AS REAL) / ws.total_votes ELSE 0 END DESC,
         ws.likes DESC, ws.edition_number ASC`;
-            break;
-        case 'newest':
-            orderBy = `ws.edition_number DESC`;
-            break;
-        default: // 'score'
-            orderBy = `
+      break;
+    case 'newest':
+      orderBy = `ws.edition_number DESC`;
+      break;
+    default: // 'score'
+      orderBy = `
         CASE WHEN ws.total_votes >= ${PROVISIONAL_MIN_VOTES} THEN 0 ELSE 1 END ASC,
         ws.net_score DESC, ws.total_votes DESC, ws.edition_number ASC`;
-    }
+  }
 
-    // Count total for pagination
-    const countResult = await db.prepare(
-        'SELECT COUNT(*) as cnt FROM wojak_scores'
-    ).first<{ cnt: number }>();
-    const total = countResult?.cnt || 0;
+  // Count total for pagination
+  const countResult = await db.prepare(
+    'SELECT COUNT(*) as cnt FROM wojak_scores'
+  ).first<{ cnt: number }>();
+  const total = countResult?.cnt || 0;
 
-    // Main query: wojak_scores + phase2_mints (for image) + optional did_holdings/did_profiles (for owner)
-    const query = `
+  // Main query: wojak_scores + phase2_mints (for image) + optional did_holdings/did_profiles (for owner)
+  const query = `
     SELECT
       ws.nft_id,
       ws.edition_number,
@@ -121,62 +121,62 @@ async function handleWojaks(db: D1Database, limit: number, offset: number, sort:
     LIMIT ? OFFSET ?
   `;
 
-    const results = await db.prepare(query).bind(limit, offset).all();
+  const results = await db.prepare(query).bind(limit, offset).all();
 
-    // Assign ranks: only non-provisional get numbered ranks (for score/glazed/ratio sorts)
-    // For 'newest', all get null rank since it's not a performance ranking
-    let rankCounter = offset;
-    const wojaks = (results.results || []).map((row: Record<string, unknown>) => {
-        const totalVotes = (row.total_votes as number) || 0;
-        const isProvisional = totalVotes < PROVISIONAL_MIN_VOTES;
-        const likes = (row.likes as number) || 0;
-        const dislikes = (row.dislikes as number) || 0;
-        const voteScore = (row.net_score as number) || 0;
+  // Assign ranks: only non-provisional get numbered ranks (for score/glazed/ratio sorts)
+  // For 'newest', all get null rank since it's not a performance ranking
+  let rankCounter = offset;
+  const wojaks = (results.results || []).map((row: Record<string, unknown>) => {
+    const totalVotes = (row.total_votes as number) || 0;
+    const isProvisional = totalVotes < PROVISIONAL_MIN_VOTES;
+    const likes = (row.likes as number) || 0;
+    const dislikes = (row.dislikes as number) || 0;
+    const voteScore = (row.net_score as number) || 0;
 
-        let rank: number | null = null;
-        if (sort !== 'newest' && !isProvisional) {
-            rankCounter++;
-            rank = rankCounter;
-        }
+    let rank: number | null = null;
+    if (sort !== 'newest' && !isProvisional) {
+      rankCounter++;
+      rank = rankCounter;
+    }
 
-        return {
-            rank,
-            nftId: row.nft_id as string,
-            edition: (row.edition_number as number) || 0,
-            imageUrl: resolveImageUri(row.ipfs_image_uri as string | null),
-            ownerDid: (row.owner_did as string) || null,
-            ownerName: (row.owner_name as string) || null,
-            likes,
-            dislikes,
-            totalVotes,
-            voteScore,
-            likeRatio: totalVotes > 0 ? Math.round((likes / totalVotes) * 100) / 100 : null,
-            isProvisional,
-            provisionalVotesNeeded: Math.max(0, PROVISIONAL_MIN_VOTES - totalVotes),
-            countsTowardPlayer: !isProvisional,
-        };
-    });
+    return {
+      rank,
+      nftId: row.nft_id as string,
+      edition: (row.edition_number as number) || 0,
+      imageUrl: resolveImageUri(row.ipfs_image_uri as string | null),
+      ownerDid: (row.owner_did as string) || null,
+      ownerName: (row.owner_name as string) || null,
+      likes,
+      dislikes,
+      totalVotes,
+      voteScore,
+      likeRatio: totalVotes > 0 ? Math.round((likes / totalVotes) * 100) / 100 : null,
+      isProvisional,
+      provisionalVotesNeeded: Math.max(0, PROVISIONAL_MIN_VOTES - totalVotes),
+      countsTowardPlayer: !isProvisional,
+    };
+  });
 
-    const ms = Date.now() - start;
-    console.warn(`[fight-club.vote-leaderboard] type=wojaks sort=${sort} limit=${limit} offset=${offset} count=${wojaks.length} total=${total} ms=${ms}`);
+  const ms = Date.now() - start;
+  console.warn(`[fight-club.vote-leaderboard] type=wojaks sort=${sort} limit=${limit} offset=${offset} count=${wojaks.length} total=${total} ms=${ms}`);
 
-    return json({
-        wojaks,
-        total,
-        sort,
-        meta: {
-            mode: 'voting_only',
-            provisionalMinVotes: PROVISIONAL_MIN_VOTES,
-        },
-    });
+  return json({
+    wojaks,
+    total,
+    sort,
+    meta: {
+      mode: 'voting_only',
+      provisionalMinVotes: PROVISIONAL_MIN_VOTES,
+    },
+  });
 }
 
 // ── Players leaderboard ─────────────────────────────────────────────
 
 async function handlePlayers(db: D1Database, limit: number, offset: number, callerDid: string | null, start: number) {
-    // Player score = sum of top 10 eligible (total_votes >= 5) Wojak vote scores per DID.
-    // Uses windowed ROW_NUMBER per DID to pick top 10, then aggregates.
-    const playersQuery = `
+  // Player score = sum of top 10 eligible (total_votes >= 5) Wojak vote scores per DID.
+  // Uses windowed ROW_NUMBER per DID to pick top 10, then aggregates.
+  const playersQuery = `
     WITH eligible_wojaks AS (
       SELECT
         dh.did_id,
@@ -235,29 +235,29 @@ async function handlePlayers(db: D1Database, limit: number, offset: number, call
     LIMIT ? OFFSET ?
   `;
 
-    const results = await db.prepare(playersQuery).bind(limit, offset).all();
+  const results = await db.prepare(playersQuery).bind(limit, offset).all();
 
-    const players = (results.results || []).map((row: Record<string, unknown>, idx: number) => {
-        const did = (row.did_id as string) || '';
-        let displayName = row.display_name as string | null;
-        if (!displayName) displayName = did ? `${did.slice(0, 12)}...` : 'Anon';
+  const players = (results.results || []).map((row: Record<string, unknown>, idx: number) => {
+    const did = (row.did_id as string) || '';
+    let displayName = row.display_name as string | null;
+    if (!displayName) displayName = did ? `${did.slice(0, 12)}...` : 'Anon';
 
-        return {
-            rank: offset + idx + 1,
-            did,
-            displayName,
-            playerScore: (row.player_score as number) || 0,
-            eligibleWojakCount: (row.eligible_wojak_count as number) || 0,
-            totalWojakCount: (row.total_wojak_count as number) || 0,
-            bestWojakScore: (row.best_wojak_score as number) ?? null,
-            bestWojakImage: resolveImageUri(row.best_wojak_image as string | null) || null,
-        };
-    });
+    return {
+      rank: offset + idx + 1,
+      did,
+      displayName,
+      playerScore: (row.player_score as number) || 0,
+      eligibleWojakCount: (row.eligible_wojak_count as number) || 0,
+      totalWojakCount: (row.total_wojak_count as number) || 0,
+      bestWojakScore: (row.best_wojak_score as number) ?? null,
+      bestWojakImage: resolveImageUri(row.best_wojak_image as string | null) || null,
+    };
+  });
 
-    // Caller's rank
-    let yourRank: number | null = null;
-    if (callerDid) {
-        const yourRankQuery = `
+  // Caller's rank
+  let yourRank: number | null = null;
+  if (callerDid) {
+    const yourRankQuery = `
       WITH eligible_wojaks AS (
         SELECT
           dh.did_id,
@@ -291,20 +291,20 @@ async function handlePlayers(db: D1Database, limit: number, offset: number, call
         SELECT COALESCE(player_score, 0) FROM player_scores WHERE did_id = ?
       )
     `;
-        const rankResult = await db.prepare(yourRankQuery).bind(callerDid).first<{ rank: number }>();
-        yourRank = rankResult?.rank ?? null;
-    }
+    const rankResult = await db.prepare(yourRankQuery).bind(callerDid).first<{ rank: number }>();
+    yourRank = rankResult?.rank ?? null;
+  }
 
-    const ms = Date.now() - start;
-    console.warn(`[fight-club.vote-leaderboard] type=players limit=${limit} offset=${offset} count=${players.length} ms=${ms}`);
+  const ms = Date.now() - start;
+  console.warn(`[fight-club.vote-leaderboard] type=players limit=${limit} offset=${offset} count=${players.length} ms=${ms}`);
 
-    return json({
-        players,
-        yourRank,
-        meta: {
-            mode: 'voting_only',
-            provisionalMinVotes: PROVISIONAL_MIN_VOTES,
-            playerTopN: PLAYER_TOP_N,
-        },
-    });
+  return json({
+    players,
+    yourRank,
+    meta: {
+      mode: 'voting_only',
+      provisionalMinVotes: PROVISIONAL_MIN_VOTES,
+      playerTopN: PLAYER_TOP_N,
+    },
+  });
 }

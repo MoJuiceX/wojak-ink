@@ -1,5 +1,6 @@
 // Vote buttons: full-width pill buttons for Fade/Glaze.
 // Keyboard shortcuts: ← fade, → glaze (desktop only).
+// Subtitles show vote score impact.
 
 import { motion } from 'framer-motion';
 import { useEffect, useRef } from 'react';
@@ -56,23 +57,23 @@ export function VoteButtons({
   return (
     <div className="vote-buttons-row">
       <motion.button
-        className="btn btn-secondary vote-btn-pill"
+        className="btn vote-btn-pill vote-btn-fade"
         onClick={onDislike}
         disabled={disabled}
         aria-label="Fade this Wojak"
         whileTap={tapAnimation}
       >
-        🗑️ Fade
+        <span className="vote-btn-label">🗑️ Fade</span>
       </motion.button>
 
       <motion.button
-        className="btn btn-secondary vote-btn-pill"
+        className="btn vote-btn-pill vote-btn-glaze"
         onClick={onLike}
         disabled={disabled}
         aria-label="Glaze this Wojak"
         whileTap={tapAnimation}
       >
-        🍩 Glaze
+        <span className="vote-btn-label">🍩 Glaze</span>
       </motion.button>
     </div>
   );
