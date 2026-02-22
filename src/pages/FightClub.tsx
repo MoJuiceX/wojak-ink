@@ -406,6 +406,24 @@ function FightClubContent() {
 
           {activeTab === 'battle' && (
             <div className="flex flex-col gap-6">
+              {/* Demo-only disclaimer — battles do not affect rankings */}
+              <div
+                className="card-static"
+                style={{
+                  padding: '10px 14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  fontSize: '0.8rem',
+                  color: 'var(--color-text-secondary)',
+                  borderLeft: '3px solid var(--color-warning, #f59e0b)',
+                }}
+              >
+                <Swords size={16} style={{ flexShrink: 0 }} />
+                <span>
+                  <strong>Battle is a demo preview.</strong> Results do not affect Fight Club rankings.
+                </span>
+              </div>
               <Suspense fallback={<PageSkeleton />}>
                 <DemoBattle />
               </Suspense>
