@@ -3,6 +3,12 @@
 // Recipient points must sum to 9,850; API adds 150 bp (1.5%) fee → 10,000 total. See:
 // https://github.com/Koba42Corp/splitxch-builder (API Integration section).
 // One API call per new creator, cached in DB forever.
+//
+// IMPORTANT: The /api/compute/fast endpoint returns HTTP 200 + an address immediately,
+// but the actual on-chain puzzle provisioning happens asynchronously. We MUST poll
+// GET /api/compute/{id} to verify {error: false, pctProgress: 100} before using
+// the address. Without verification, the address may point to a non-existent puzzle
+// and royalty coins sent there become unspendable.
 
 interface Env {
   DB: D1Database;
@@ -23,6 +29,49 @@ const WAVE_CONFIG: Record<number, { creatorPoints: number; treasuryPoints: numbe
   4: { creatorPoints: 5447, treasuryPoints: 4403 }, // 7%/5% adjusted for fee
 };
 
+/** Maximum number of status polls before giving up. */
+const MAX_POLL_ATTEMPTS = 6;
+/** Delay between status polls in ms (2s × 6 = 12s max wait). */
+const POLL_INTERVAL_MS = 2_000;
+
+/**
+ * Poll GET /api/compute/{id} until the compute is complete or an error occurs.
+ * Returns the verified address on success, throws on failure.
+ */
+async function waitForCompute(computeId: string): Promise<string> {
+  for (let attempt = 1; attempt <= MAX_POLL_ATTEMPTS; attempt++) {
+    await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL_MS));
+
+    const statusRes = await fetch(`https://splitxch.com/api/compute/${computeId}`);
+    if (!statusRes.ok) {
+      throw new Error(`SplitXCH status check failed: HTTP ${statusRes.status}`);
+    }
+
+    const status = await statusRes.json() as {
+      id: string;
+      address: string | null;
+      error: boolean;
+      message: string | null;
+      pctProgress: number;
+    };
+
+    if (status.error) {
+      throw new Error(
+        `SplitXCH compute ${computeId} failed: ${status.message || 'unknown error'} (attempt ${attempt}/${MAX_POLL_ATTEMPTS})`
+      );
+    }
+
+    if (status.pctProgress === 100 && status.address) {
+      console.warn(`[SplitXCH] Compute ${computeId} verified OK after ${attempt} poll(s): ${status.address}`);
+      return status.address;
+    }
+
+    console.warn(`[SplitXCH] Compute ${computeId} in progress: ${status.pctProgress}% (attempt ${attempt}/${MAX_POLL_ATTEMPTS})`);
+  }
+
+  throw new Error(`SplitXCH compute ${computeId} timed out after ${MAX_POLL_ATTEMPTS} polls`);
+}
+
 export async function getOrCreateSplitterAddress(
   env: Env,
   creatorWallet: string,
@@ -30,13 +79,13 @@ export async function getOrCreateSplitterAddress(
 ): Promise<string> {
   console.warn(`[SplitXCH] Looking up splitter for ${creatorWallet.slice(0, 15)}... wave=${wave}`);
 
-  // Check cache first
+  // Check cache first — but ONLY return if the address was verified (has splitxch_id).
   const cached = await env.DB.prepare(
-    'SELECT splitter_address FROM splitter_addresses WHERE creator_wallet = ? AND wave = ?'
-  ).bind(creatorWallet, wave).first<{ splitter_address: string }>();
+    'SELECT splitter_address, splitxch_id FROM splitter_addresses WHERE creator_wallet = ? AND wave = ?'
+  ).bind(creatorWallet, wave).first<{ splitter_address: string; splitxch_id: string }>();
 
   if (cached?.splitter_address) {
-    console.warn(`[SplitXCH] Cache hit: ${cached.splitter_address}`);
+    console.warn(`[SplitXCH] Cache hit: ${cached.splitter_address} (id: ${cached.splitxch_id})`);
     return cached.splitter_address;
   }
 
@@ -55,8 +104,8 @@ export async function getOrCreateSplitterAddress(
 
   const requestBody = {
     recipients: [
-      { address: creatorWallet, points: config.creatorPoints },
-      { address: treasuryAddress, points: config.treasuryPoints },
+      { name: 'creator', address: creatorWallet, points: config.creatorPoints, id: 1 },
+      { name: 'treasury', address: treasuryAddress, points: config.treasuryPoints, id: 2 },
     ],
   };
 
@@ -86,17 +135,35 @@ export async function getOrCreateSplitterAddress(
   const data = await response.json() as {
     id: string;
     address: string;
+    message: string;
+    pctProgress: number;
   };
 
-  // Cache in DB
+  if (!data.id || !data.address) {
+    throw new Error(`SplitXCH API returned invalid response: ${JSON.stringify(data)}`);
+  }
+
+  console.warn(`[SplitXCH] Compute submitted: id=${data.id}, initial address=${data.address}`);
+
+  // CRITICAL: Verify the compute actually succeeded by polling the status endpoint.
+  // The /api/compute/fast endpoint returns an address immediately, but the on-chain
+  // puzzle provisioning (test transaction) happens in the background and can fail.
+  const verifiedAddress = await waitForCompute(data.id);
+
+  // Sanity check: verified address should match the initial one
+  if (verifiedAddress !== data.address) {
+    console.warn(`[SplitXCH] WARNING: Verified address differs from initial! Using verified: ${verifiedAddress}`);
+  }
+
+  // Cache in DB — only after verification succeeds
   await env.DB.prepare(`
     INSERT INTO splitter_addresses (creator_wallet, wave, splitter_address, splitxch_id, creator_points, treasury_points)
     VALUES (?, ?, ?, ?, ?, ?)
   `).bind(
-    creatorWallet, wave, data.address, data.id,
+    creatorWallet, wave, verifiedAddress, data.id,
     config.creatorPoints, config.treasuryPoints
   ).run();
 
-  console.warn(`[SplitXCH] Created splitter for ${creatorWallet.slice(0, 15)}...: ${data.address}`);
-  return data.address;
+  console.warn(`[SplitXCH] Created & verified splitter for ${creatorWallet.slice(0, 15)}...: ${verifiedAddress}`);
+  return verifiedAddress;
 }

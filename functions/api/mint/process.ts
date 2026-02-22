@@ -15,7 +15,7 @@ import { getNextMintNumber } from './mintNumberHelper';
 import { uploadToIPFS, type IPFSUploadResult } from './uploadToIPFS';
 import { consolidateTraits } from './traitResolver';
 import { MintError } from './errors';
-import { getOrCreateSplitterAddress } from './splitxch';
+// import { getOrCreateSplitterAddress } from './splitxch'; // DISABLED: SplitXCH broken (2026-02-22)
 import {
   TOTAL_SUPPLY,
   SURCHARGE_CATEGORIES,
@@ -322,36 +322,38 @@ export async function processJob(
         ? job.xch_price_mojos / 1_000_000_000_000
         : undefined;
 
-      // Resolve SplitXCH splitter address for royalty splitting.
-      // Wrapped in Promise.race with 10s timeout so a hung SplitXCH API
-      // doesn't silently kill the entire mint (the external fetch in
-      // splitxch.ts has its own 10s timeout, but this is a belt-and-suspenders
-      // guard at the processJob level).
+      // ──── SplitXCH DISABLED (2026-02-22) ────
+      // SplitXCH API backend is broken — /api/compute/fast returns addresses
+      // but the background puzzle provisioning silently fails (error: true on
+      // status check). All previously cached splitter_addresses are invalid.
+      // Bypassed until Lucky8 fixes the backend. When re-enabled, splitxch.ts
+      // now includes verification polling to prevent this from recurring.
+      // Fallback: royalty_address = minter's wallet (request.ts line 160).
       let royaltyAddress: string | undefined;
-      if (env.TREASURY_ADDRESS) {
-        try {
-          royaltyAddress = await Promise.race([
-            getOrCreateSplitterAddress(
-              { DB: env.DB, TREASURY_ADDRESS: env.TREASURY_ADDRESS },
-              job.wallet_address,
-              1, // wave 1
-            ),
-            new Promise<string>((_, reject) =>
-              setTimeout(() => reject(new Error('SplitXCH lookup timed out (10s)')), 10_000)
-            ),
-          ]);
-          if (!royaltyAddress) {
-            console.error('[SplitXCH] CRITICAL: getOrCreateSplitterAddress returned empty! Falling back to wallet.');
-          } else {
-            console.warn(`[SplitXCH] Using splitter address: ${royaltyAddress}`);
-          }
-        } catch (err) {
-          // Non-fatal: fall back to creator's wallet if SplitXCH is unavailable
-          console.error('[SplitXCH] CRITICAL: Failed to resolve splitter, using creator wallet:', err);
-        }
-      } else {
-        console.warn('[SplitXCH] TREASURY_ADDRESS not set, skipping splitter resolution');
-      }
+      // if (env.TREASURY_ADDRESS) {
+      //   try {
+      //     royaltyAddress = await Promise.race([
+      //       getOrCreateSplitterAddress(
+      //         { DB: env.DB, TREASURY_ADDRESS: env.TREASURY_ADDRESS },
+      //         job.wallet_address,
+      //         1, // wave 1
+      //       ),
+      //       new Promise<string>((_, reject) =>
+      //         setTimeout(() => reject(new Error('SplitXCH lookup timed out (30s)')), 30_000)
+      //       ),
+      //     ]);
+      //     if (!royaltyAddress) {
+      //       console.error('[SplitXCH] CRITICAL: getOrCreateSplitterAddress returned empty! Falling back to wallet.');
+      //     } else {
+      //       console.warn(`[SplitXCH] Using splitter address: ${royaltyAddress}`);
+      //     }
+      //   } catch (err) {
+      //     // Non-fatal: fall back to creator's wallet if SplitXCH is unavailable
+      //     console.error('[SplitXCH] CRITICAL: Failed to resolve splitter, using creator wallet:', err);
+      //   }
+      // } else {
+      //   console.warn('[SplitXCH] TREASURY_ADDRESS not set, skipping splitter resolution');
+      // }
 
       const mintResult = await callMintGardenMint({
         walletAddress: job.wallet_address,
