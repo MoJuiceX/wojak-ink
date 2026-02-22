@@ -341,11 +341,13 @@ interface FetchResult {
 
 async function fetchDIDNfts(did: string, collectionId: string): Promise<FetchResult> {
   const nfts: NftInfo[] = [];
-  let page = 1;
+  let cursor: string | null = null;
   const pageSize = 100;
+  let pages = 0;
 
-  while (page <= MAX_PAGES) {
-    const url = `https://api.mintgarden.io/nfts?collection_id=${collectionId}&owner_did=${encodeURIComponent(did)}&size=${pageSize}&page=${page}`;
+  while (pages < MAX_PAGES) {
+    let url = `https://api.mintgarden.io/collections/${collectionId}/nfts?size=${pageSize}&owner_did=${encodeURIComponent(did)}`;
+    if (cursor) url += `&cursor=${encodeURIComponent(cursor)}`;
 
     let response: Response;
     try {
@@ -365,9 +367,10 @@ async function fetchDIDNfts(did: string, collectionId: string): Promise<FetchRes
     const data = await response.json() as {
       items: Array<{
         id: string;
-        data?: { metadata_json?: { edition_number?: number } };
-        minter_address?: string;
+        edition_number?: number;
+        creator_address_encoded_id?: string;
       }>;
+      next?: string | null;
     };
 
     if (!data.items || data.items.length === 0) break;
@@ -375,13 +378,14 @@ async function fetchDIDNfts(did: string, collectionId: string): Promise<FetchRes
     for (const item of data.items) {
       nfts.push({
         id: item.id,
-        edition: item.data?.metadata_json?.edition_number,
-        creator: item.minter_address,
+        edition: item.edition_number,
+        creator: item.creator_address_encoded_id,
       });
     }
 
-    if (data.items.length < pageSize) break;
-    page++;
+    if (!data.next || data.items.length < pageSize) break;
+    cursor = data.next;
+    pages++;
 
     // Rate limit between pages
     await sleep(RATE_LIMIT_MS);
@@ -405,12 +409,14 @@ async function batchChunked(db: D1Database, statements: D1PreparedStatement[]): 
  */
 async function discoverNewHolders(env: Env): Promise<number> {
   const holderDids = new Map<string, { name?: string; wallet?: string }>();
-  let page = 1;
+  let cursor: string | null = null;
   const pageSize = 100;
+  let pages = 0;
 
-  // Paginate all Phase 1 NFTs to collect owner DIDs
-  while (page <= MAX_PAGES) {
-    const url = `https://api.mintgarden.io/collections/${PHASE1_COLLECTION}/nfts?size=${pageSize}&page=${page}`;
+  // Paginate all Phase 1 NFTs to collect owner DIDs (cursor-based)
+  while (pages < MAX_PAGES) {
+    let url = `https://api.mintgarden.io/collections/${PHASE1_COLLECTION}/nfts?size=${pageSize}`;
+    if (cursor) url += `&cursor=${encodeURIComponent(cursor)}`;
 
     let response: Response;
     try {
@@ -418,12 +424,12 @@ async function discoverNewHolders(env: Env): Promise<number> {
         headers: { 'Accept': 'application/json' },
       });
     } catch (err) {
-      console.error(`[DID Indexer] Discovery: network error on page ${page}:`, err);
+      console.error(`[DID Indexer] Discovery: network error on page ${pages + 1}:`, err);
       break;
     }
 
     if (!response.ok) {
-      console.error(`[DID Indexer] Discovery: MintGarden returned ${response.status} on page ${page}`);
+      console.error(`[DID Indexer] Discovery: MintGarden returned ${response.status} on page ${pages + 1}`);
       break;
     }
 
@@ -437,6 +443,7 @@ async function discoverNewHolders(env: Env): Promise<number> {
         owner_address_encoded_id?: string;
         edition_number?: number;
       }>;
+      next?: string | null;
     };
 
     if (!data.items || data.items.length === 0) break;
@@ -454,12 +461,13 @@ async function discoverNewHolders(env: Env): Promise<number> {
       }
     }
 
-    if (data.items.length < pageSize) break;
-    page++;
+    if (!data.next || data.items.length < pageSize) break;
+    cursor = data.next;
+    pages++;
     await sleep(RATE_LIMIT_MS);
   }
 
-  console.log(`[DID Indexer] Discovery: found ${holderDids.size} unique DIDs holding Farmers Plot across ${page} pages`);
+  console.log(`[DID Indexer] Discovery: found ${holderDids.size} unique DIDs holding Farmers Plot across ${pages + 1} pages`);
 
   if (holderDids.size === 0) return 0;
 
