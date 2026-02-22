@@ -64,26 +64,8 @@ export function VotingFeed() {
   const [cardExiting, setCardExiting] = useState(false);
   const [exitDirection, setExitDirection] = useState<1 | -1 | null>(null);
   const [voteFeedback, setVoteFeedback] = useState<string | null>(null);
+  const [voteFeedbackType, setVoteFeedbackType] = useState<'glaze' | 'fade' | null>(null);
 
-  // Instruction text visibility
-  const [instructionsSeen, setInstructionsSeen] = useState(() => {
-    try {
-      return !!localStorage.getItem('wojak_vote_instructions_seen');
-    } catch {
-      return false;
-    }
-  });
-
-  // Desktop keyboard hint (shown once per device)
-  const [showKeyboardHint, setShowKeyboardHint] = useState(() => {
-    try {
-      if (typeof window === 'undefined') return false;
-      const isDesktop = window.matchMedia('(hover: hover)').matches;
-      return isDesktop && !localStorage.getItem('wojak_vote_kb_hint_seen');
-    } catch {
-      return false;
-    }
-  });
 
   // Load feed immediately (no gate)
   // Track player DID to reload when login/logout changes
@@ -116,25 +98,6 @@ export function VotingFeed() {
     });
   }, [feed]);
 
-  // Helper to mark instructions seen (persists to localStorage)
-  const markInstructionsSeen = useCallback(() => {
-    setInstructionsSeen(true);
-    setShowKeyboardHint(false);
-    try {
-      if (typeof requestIdleCallback !== 'undefined') {
-        requestIdleCallback(() => {
-          localStorage.setItem('wojak_vote_instructions_seen', '1');
-          localStorage.setItem('wojak_vote_kb_hint_seen', '1');
-        });
-      } else {
-        localStorage.setItem('wojak_vote_instructions_seen', '1');
-        localStorage.setItem('wojak_vote_kb_hint_seen', '1');
-      }
-    } catch {
-      // localStorage unavailable
-    }
-  }, []);
-
   const handleVote = useCallback((voteType: 1 | -1) => {
     const currentItem = feed[0];
     if (!currentItem || cardExiting) return;
@@ -149,14 +112,21 @@ export function VotingFeed() {
     if (voteType === 1) setGlazeCount(prev => prev + 1);
     else setFadeCount(prev => prev + 1);
 
+    const nextTotalVotes = (currentItem.totalVotes || 0) + 1;
+    const justRanked = nextTotalVotes === 3;
     // Vote feedback flash
-    setVoteFeedback(voteType === 1 ? 'Glaze recorded ✓' : 'Fade recorded ✓');
-    setTimeout(() => setVoteFeedback(null), 1200);
-
-    // Mark instructions seen after 3 votes
-    if (newVoteCount >= 3 && !instructionsSeen) {
-      markInstructionsSeen();
-    }
+    setVoteFeedbackType(voteType === 1 ? 'glaze' : 'fade');
+    setVoteFeedback(
+      justRanked
+        ? `${voteType === 1 ? 'Glaze' : 'Fade'} recorded ✓ · Ranked now`
+        : voteType === 1
+          ? 'Glaze recorded ✓'
+          : 'Fade recorded ✓'
+    );
+    setTimeout(() => {
+      setVoteFeedback(null);
+      setVoteFeedbackType(null);
+    }, 1200);
 
     // Fire vote to API (do not remove from feed here — wait for exit animation)
     castVote(currentItem.nftId, currentItem.editionNumber, voteType)
@@ -174,7 +144,7 @@ export function VotingFeed() {
         loadFeed().catch(() => setFeedError(true));
       }
     }, EXIT_MS);
-  }, [feed, cardExiting, castVote, loadFeed, removeFromFeed, toast, voteCount, instructionsSeen, markInstructionsSeen]);
+  }, [feed, cardExiting, castVote, loadFeed, removeFromFeed, toast, voteCount]);
 
   const handleRetry = useCallback(() => {
     setFeedError(false);
@@ -225,10 +195,10 @@ export function VotingFeed() {
   const visibleCards = feed.slice(0, 3);
 
   return (
-    <div className="flex flex-col gap-4 w-full">
+    <div className={`flex flex-col gap-4 w-full${voteFeedbackType ? ` vote-feed-${voteFeedbackType}` : ''}`}>
       {/* Card stack */}
       <div
-        className="vote-card-stack"
+        className={`vote-card-stack${voteFeedbackType ? ` vote-card-stack-pulse vote-card-stack-pulse-${voteFeedbackType}` : ''}`}
         role="application"
         aria-label="Vote on Wojak NFTs. Swipe right to glaze, left to fade."
       >
@@ -260,39 +230,23 @@ export function VotingFeed() {
           onLike={() => handleVote(1)}
           onDislike={() => handleVote(-1)}
           disabled={cardExiting}
+          feedbackType={voteFeedbackType}
         />
       </div>
 
       {/* Vote feedback flash */}
       {voteFeedback && (
-        <div className="vote-feedback-flash" key={voteFeedback + voteCount}>
+        <div className={`vote-feedback-flash${voteFeedbackType ? ` ${voteFeedbackType}` : ''}`} key={voteFeedback + voteCount}>
           {voteFeedback}
         </div>
       )}
 
       {/* Session stats strip */}
       {voteCount > 0 && (
-        <div className="session-stats-strip">
+        <div className={`session-stats-strip${voteFeedbackType ? ` ${voteFeedbackType}` : ''}`}>
           <span>Votes: {voteCount}</span>
           <span className="text-success">Glazes: {glazeCount}</span>
           <span className="text-error">Fades: {fadeCount}</span>
-        </div>
-      )}
-
-      {/* Instruction text */}
-      {!instructionsSeen && (
-        <div
-          className="text-muted text-center w-full"
-          style={{
-            fontSize: 13,
-            transition: 'opacity 500ms ease',
-            opacity: voteCount >= 3 ? 0 : 1,
-          }}
-        >
-          <p>Swipe right to glaze &middot; Swipe left to fade</p>
-          {showKeyboardHint && (
-            <p style={{ marginTop: 2 }}>or use &larr; &rarr; arrow keys</p>
-          )}
         </div>
       )}
     </div>

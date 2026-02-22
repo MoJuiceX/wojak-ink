@@ -22,7 +22,7 @@ type RankingTab = 'players' | 'wojaks';
 // ── Voting-only interfaces (spec v2 contracts) ──────────────────────
 
 interface VoteLeaderboardPlayerRow {
-  rank: number;
+  rank: number | null;
   did: string;
   displayName: string;
   playerScore: number;
@@ -53,6 +53,17 @@ interface PlayersResponse {
   players: VoteLeaderboardPlayerRow[];
   yourRank: number | null;
   meta: { mode: string; provisionalMinVotes: number; playerTopN: number };
+}
+
+interface LegacyCommunityPlayerRow {
+  rank: number;
+  did: string;
+  displayName: string | null;
+  wojakCount?: number;
+}
+
+interface LegacyCommunityPlayersResponse {
+  players?: LegacyCommunityPlayerRow[];
 }
 
 interface WojaksResponse {
@@ -99,6 +110,20 @@ function useVoteLeaderboard(type: RankingTab, sort?: SortOption) {
   });
 }
 
+function useCommunityPlayersFallback(enabled = true) {
+  return useQuery({
+    queryKey: ['combat-power-community-players-fallback'],
+    queryFn: async (): Promise<LegacyCommunityPlayersResponse> => {
+      const res = await fetch('/api/combat/power-leaderboard?type=players&limit=30');
+      if (!res.ok) throw new Error('Failed to fetch community players');
+      return res.json();
+    },
+    enabled,
+    staleTime: 60000,
+    retry: 1,
+  });
+}
+
 // ── Rank Badge ──────────────────────────────────────────────────────
 
 function RankBadge({ rank }: { rank: number | null }) {
@@ -111,29 +136,6 @@ function RankBadge({ rank }: { rank: number | null }) {
     return <span className="rank-badge rank-3" style={{ color: '#cd7f32', fontWeight: 'bold' }}>#3</span>;
   return <span className="rank-badge">#{rank}</span>;
 }
-
-// ── Rising Badge ─────────────────────────────────────────────────────────
-
-function ProvisionalBadge({ votesNeeded }: { votesNeeded: number }) {
-  return (
-    <span
-      className="provisional-badge"
-      title={`${votesNeeded} more vote${votesNeeded !== 1 ? 's' : ''} to count toward rankings`}
-      style={{
-        fontSize: '0.6rem',
-        padding: '1px 5px',
-        borderRadius: 8,
-        color: 'var(--color-text-muted)',
-        border: '1px solid var(--color-border)',
-        fontWeight: 500,
-      }}
-    >
-      Rising · {votesNeeded} more
-    </span>
-  );
-}
-
-
 
 // ── Your Position Card ──────────────────────────────────────────────
 
@@ -170,6 +172,7 @@ function YourPositionCard() {
 
 function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
   const { data, isLoading, error } = useVoteLeaderboard('players');
+  const { data: communityData } = useCommunityPlayersFallback(!isLoading && !error);
 
   if (isLoading) {
     return (
@@ -201,13 +204,14 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
   }
 
   if (!data?.players?.length) {
+    const minVotes = data?.meta?.provisionalMinVotes ?? 3;
     return (
       <div className="rankings-content">
         <div style={{ textAlign: 'center', padding: '32px 16px' }}>
           <Trophy size={32} style={{ color: 'var(--color-text-muted)', marginBottom: 12 }} />
           <p style={{ fontWeight: 700, fontSize: '1rem', margin: '0 0 6px' }}>No ranked players yet</p>
           <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: '0 0 4px' }}>
-            Wojaks need 3 votes to count toward Player Score.
+            Wojaks need {minVotes} votes to count toward Player Score.
           </p>
           <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', margin: '0 0 12px' }}>
             Glaze some Wojaks to get the leaderboard going!
@@ -219,70 +223,150 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
   }
 
   const players = data.players;
-  const topThree = players.slice(0, 3);
-  const rest = players.slice(3);
+  const provisionalMinVotes = data.meta?.provisionalMinVotes ?? 3;
+  const rankedPlayers = players.filter((p) => p.eligibleWojakCount > 0);
+  const waitingPlayers = players.filter((p) => p.eligibleWojakCount === 0);
+  const showPodium = rankedPlayers.length >= 3;
+  const podiumIds = new Set(showPodium ? rankedPlayers.slice(0, 3).map((p) => p.did) : []);
+  const topThree = showPodium ? rankedPlayers.slice(0, 3) : [];
+  const rankedList = showPodium ? rankedPlayers.filter((p) => !podiumIds.has(p.did)) : rankedPlayers;
+  const rankedDidSet = new Set(players.map((p) => p.did));
+  const communityPlayers = (communityData?.players || [])
+    .filter((p) => p.did && !rankedDidSet.has(p.did))
+    .slice(0, 12);
 
   return (
     <div className="rankings-content">
       {/* Your Position */}
       <YourPositionCard />
 
-      {/* Podium for top 3 */}
-      <div className="rankings-podium">
-        {topThree.map((player, idx) => (
-          <div
-            key={player.did}
-            className={`podium-entry podium-${idx + 1}${player.did === currentUserDid ? ' podium-entry-you' : ''}`}
-          >
-            <RankBadge rank={player.rank} />
-            <div className="podium-avatar">
-              {player.bestWojakImage ? (
-                <img
-                  src={player.bestWojakImage}
-                  alt={player.displayName}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                />
-              ) : (
-                <User size={24} />
-              )}
+      {/* Podium for top 3 ranked players (skip when list is too small/sparse) */}
+      {showPodium && (
+        <div className="rankings-podium">
+          {topThree.map((player, idx) => (
+            <div
+              key={player.did}
+              className={`podium-entry podium-${idx + 1}${player.did === currentUserDid ? ' podium-entry-you' : ''}`}
+            >
+              <RankBadge rank={player.rank} />
+              <div className="podium-avatar">
+                {player.bestWojakImage ? (
+                  <img
+                    src={player.bestWojakImage}
+                    alt={player.displayName}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                ) : (
+                  <User size={24} />
+                )}
+              </div>
+              <span className="podium-name">{player.displayName || 'Anon'}</span>
+              <div className="podium-power">
+                <span style={{ fontWeight: 700 }}>{player.playerScore.toLocaleString()}</span>
+              </div>
+              <span className="podium-count text-secondary text-xs">
+                {player.eligibleWojakCount} eligible · {player.totalWojakCount} total
+              </span>
             </div>
-            <span className="podium-name">{player.displayName || 'Anon'}</span>
-            <div className="podium-power">
-              <span style={{ fontWeight: 700 }}>{player.playerScore.toLocaleString()}</span>
-            </div>
-            <span className="podium-count text-secondary text-xs">
-              {player.eligibleWojakCount} eligible · {player.totalWojakCount} total
-            </span>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Your position indicator */}
-      {data.yourRank && data.yourRank > 3 && (
+      {showPodium && data.yourRank && data.yourRank > 3 && (
         <div className="your-rank-indicator">
           <span>Your rank: #{data.yourRank}</span>
         </div>
       )}
 
-      {/* Rest of the list */}
-      {rest.length > 0 && (
-        <div className="rankings-list">
-          {rest.map((player) => (
-            <div key={player.did} className={`rankings-row${player.did === currentUserDid ? ' rankings-row-you' : ''}`}>
-              <RankBadge rank={player.rank} />
-              <div className="rankings-row-info">
-                <span className="rankings-row-name">{player.displayName || 'Anon'}</span>
-                <span className="text-secondary text-xs">
-                  {player.eligibleWojakCount} eligible · {player.totalWojakCount} total Wojaks
-                </span>
-              </div>
-              <div className="rankings-row-power">
-                <span style={{ fontWeight: 700 }}>{player.playerScore.toLocaleString()}</span>
-                <span className="text-secondary text-xs">Player Score</span>
-              </div>
+      {/* Ranked list */}
+      {rankedList.length > 0 && (
+        <div className="rankings-section-card">
+          <div className="rankings-section-header">
+            <div>
+              <h3 className="rankings-section-title">Ranked Players</h3>
+              <p className="rankings-section-subtitle">
+                Player Score = top {data.meta?.playerTopN ?? 10} eligible Wojak scores in DID
+              </p>
             </div>
-          ))}
+            <span className="rankings-section-count">{rankedPlayers.length} ranked</span>
+          </div>
+          <div className="rankings-list">
+            {rankedList.map((player) => (
+              <div key={player.did} className={`rankings-row${player.did === currentUserDid ? ' rankings-row-you' : ''}`}>
+                <RankBadge rank={player.rank} />
+                <div className="rankings-row-info">
+                  <span className="rankings-row-name">{player.displayName || 'Anon'}</span>
+                  <span className="text-secondary text-xs">
+                    {player.eligibleWojakCount} eligible · {player.totalWojakCount} total Wojaks
+                  </span>
+                </div>
+                <div className="rankings-row-power">
+                  <span style={{ fontWeight: 700 }}>{player.playerScore.toLocaleString()}</span>
+                  <span className="text-secondary text-xs">Player Score</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Verified but not ranked (from same endpoint) */}
+      {waitingPlayers.length > 0 && (
+        <div className="community-players-card">
+          <div className="community-players-header">
+            <div>
+              <h3 className="community-players-title">Verified Players (Waiting to Rank)</h3>
+              <p className="community-players-subtitle">
+                These DIDs are verified and in Fight Club. They need Wojaks in DID with at least {provisionalMinVotes} votes before they enter the ranked leaderboard.
+              </p>
+            </div>
+            <span className="community-players-count">{waitingPlayers.length} in queue</span>
+          </div>
+          <div className="community-players-list">
+            {waitingPlayers.slice(0, 16).map((player) => (
+              <div key={player.did} className={`community-player-row${player.did === currentUserDid ? ' community-player-row-you' : ''}`}>
+                <div className="community-player-rank">—</div>
+                <div className="community-player-main">
+                  <span className="community-player-name">{player.displayName || `${player.did.slice(0, 12)}...`}</span>
+                  <span className="community-player-meta">
+                    {player.totalWojakCount} total Wojaks in DID · Needs ranked Wojaks
+                  </span>
+                </div>
+                <span className="community-player-status">Vote activity needed</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Community fallback (legacy endpoint) only when new endpoint is still sparse */}
+      {communityPlayers.length > 0 && waitingPlayers.length < 6 && (
+        <div className="community-players-card">
+          <div className="community-players-header">
+            <div>
+              <h3 className="community-players-title">Verified Players (Not Ranked Yet)</h3>
+              <p className="community-players-subtitle">
+                These players are verified, but need Wojaks in DID with enough votes to enter the Player Score leaderboard.
+              </p>
+            </div>
+            <span className="community-players-count">{communityPlayers.length} shown</span>
+          </div>
+          <div className="community-players-list">
+            {communityPlayers.map((player) => (
+              <div key={player.did} className="community-player-row">
+                <div className="community-player-rank">#{player.rank}</div>
+                <div className="community-player-main">
+                  <span className="community-player-name">{player.displayName || `${player.did.slice(0, 12)}...`}</span>
+                  <span className="community-player-meta">
+                    Verified DID{typeof player.wojakCount === 'number' ? ` · ${player.wojakCount} Wojaks tracked` : ''}
+                  </span>
+                </div>
+                <span className="community-player-status">Waiting for ranked Wojaks</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
@@ -433,78 +517,70 @@ function WojaksTab() {
       {/* List View */}
       {viewMode === 'list' && (
         <div className="rankings-list wojak-rankings">
-          {allWojaks.map((wojak, idx) => {
-            // Insert section divider at ranked → provisional boundary
-            const prevWojak = idx > 0 ? allWojaks[idx - 1] : null;
-            const showDivider = wojak.isProvisional && (!prevWojak || !prevWojak.isProvisional);
-
-            return (
-              <div key={wojak.nftId}>
-                {showDivider && (
-                  <div className="rankings-section-divider">
-                    Rising (need 3 votes to rank)
+          {allWojaks.map((wojak, idx) => (
+            <div
+              key={wojak.nftId}
+              className={`rankings-row wojak-row wojak-row-animate${wojak.isProvisional ? ' vojak-provisional' : ''}`}
+              style={{ animationDelay: `${Math.min(idx, 10) * 0.03}s` }}
+            >
+              <RankBadge rank={wojak.rank} />
+              <div className="wojak-row-image">
+                <img
+                  src={wojak.imageUrl}
+                  alt={`Wojak #${wojak.edition}`}
+                  onError={(e) => {
+                    const el = e.target as HTMLImageElement;
+                    el.style.display = 'none';
+                    if (el.parentElement) {
+                      el.parentElement.style.display = 'flex';
+                      el.parentElement.style.alignItems = 'center';
+                      el.parentElement.style.justifyContent = 'center';
+                      el.parentElement.style.background = 'var(--color-white-5)';
+                      el.parentElement.style.fontSize = '0.65rem';
+                      el.parentElement.style.color = 'var(--color-text-secondary)';
+                      el.parentElement.textContent = `#${wojak.edition}`;
+                    }
+                  }}
+                />
+              </div>
+              <div className="wojak-row-info">
+                <div className="wojak-row-header">
+                  <div className="wojak-row-title">
+                    <span className="wojak-row-edition">#{wojak.edition}</span>
+                    <span className="wojak-row-owner">Owner: {wojak.ownerName || 'Anon'}</span>
                   </div>
-                )}
-                <div
-                  className={`rankings-row wojak-row wojak-row-animate${wojak.isProvisional ? ' vojak-provisional' : ''}`}
-                  style={{ animationDelay: `${Math.min(idx, 10) * 0.03}s` }}
-                >
-                  <RankBadge rank={wojak.rank} />
-                  <div className="wojak-row-image">
-                    <img
-                      src={wojak.imageUrl}
-                      alt={`Wojak #${wojak.edition}`}
-                      onError={(e) => {
-                        const el = e.target as HTMLImageElement;
-                        el.style.display = 'none';
-                        if (el.parentElement) {
-                          el.parentElement.style.display = 'flex';
-                          el.parentElement.style.alignItems = 'center';
-                          el.parentElement.style.justifyContent = 'center';
-                          el.parentElement.style.background = 'var(--color-white-5)';
-                          el.parentElement.style.fontSize = '0.65rem';
-                          el.parentElement.style.color = 'var(--color-text-secondary)';
-                          el.parentElement.textContent = `#${wojak.edition}`;
-                        }
-                      }}
-                    />
-                  </div>
-                  <div className="wojak-row-info">
-                    <div className="wojak-row-header">
-                      <span className="wojak-row-edition">#{wojak.edition}</span>
-                      {wojak.isProvisional && (
-                        <ProvisionalBadge votesNeeded={wojak.provisionalVotesNeeded} />
-                      )}
-                    </div>
-                    <div className="wojak-row-stats flex flex-wrap gap-x-3 gap-y-1 text-xs">
-                      <span className="text-success" title="Glazes (upvotes)">
-                        <ThumbsUp size={11} style={{ display: 'inline', marginRight: 2, verticalAlign: -1 }} />
-                        {wojak.likes}
-                      </span>
-                      <span className="text-error" title="Fades (downvotes)">
-                        <ThumbsDown size={11} style={{ display: 'inline', marginRight: 2, verticalAlign: -1 }} />
-                        {wojak.dislikes}
-                      </span>
-                      {wojak.likeRatio !== null && (
-                        <span className="text-secondary" title="Like ratio">
-                          {Math.round(wojak.likeRatio * 100)}%
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-secondary text-xs">Owner: {wojak.ownerName || 'Anon'}</span>
-                  </div>
-                  <div className="wojak-row-power">
-                    <div className="power-total">
-                      <span style={{ fontWeight: 700, fontSize: '1rem' }}>
-                        {wojak.voteScore > 0 ? '+' : ''}{wojak.voteScore}
-                      </span>
-                    </div>
-                    <span className="text-secondary text-xs">Vote Score</span>
-                  </div>
+                  <span className="wojak-row-status">
+                    {wojak.isProvisional ? `Needs ${wojak.provisionalVotesNeeded} more` : 'Ranked'}
+                  </span>
+                </div>
+                <div className="wojak-row-stats flex flex-wrap gap-x-3 gap-y-1 text-xs">
+                  <span className="text-success" title="Glazes (upvotes)">
+                    <ThumbsUp size={11} style={{ display: 'inline', marginRight: 2, verticalAlign: -1 }} />
+                    {wojak.likes}
+                  </span>
+                  <span className="text-error" title="Fades (downvotes)">
+                    <ThumbsDown size={11} style={{ display: 'inline', marginRight: 2, verticalAlign: -1 }} />
+                    {wojak.dislikes}
+                  </span>
+                  <span className="text-secondary" title="Total votes">
+                    {wojak.totalVotes} votes
+                  </span>
                 </div>
               </div>
-            );
-          })}
+              <div className="wojak-row-power">
+                <div className="power-total">
+                  <span style={{ fontWeight: 700, fontSize: '1rem' }}>
+                    {wojak.voteScore > 0 ? '+' : ''}{wojak.voteScore}
+                  </span>
+                </div>
+                {wojak.isProvisional && (
+                  <span className="wojak-row-power-note text-secondary text-xs">
+                    Not ranked yet
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -547,9 +623,7 @@ function WojaksTab() {
                       {wojak.voteScore > 0 ? '+' : ''}{wojak.voteScore}
                     </span>
                   </div>
-                  <div className="grid-card-power" style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <span style={{ fontSize: '0.65rem', color: 'var(--color-text-secondary)' }}>Score</span>
-                  </div>
+                  {wojak.isProvisional && <span className="grid-card-status">New</span>}
                 </div>
               </div>
             );

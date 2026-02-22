@@ -76,6 +76,8 @@ export function SwipeCard({
   const voteScore = likes - dislikes;
   const isProvisional = totalVotes < PROVISIONAL_MIN_VOTES;
   const votesNeeded = Math.max(0, PROVISIONAL_MIN_VOTES - totalVotes);
+  const rankProgress = Math.min(totalVotes, PROVISIONAL_MIN_VOTES);
+  const rankProgressPct = (rankProgress / PROVISIONAL_MIN_VOTES) * 100;
   const x = useMotionValue(0);
   const [swipeExiting, setSwipeExiting] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -319,26 +321,38 @@ export function SwipeCard({
       {/* Info bar — compact voting context */}
       <div className="vote-card-info">
         <div className="vote-card-info-top">
-          <span className="vote-card-info-name">#{editionNumber} &middot; {name}</span>
+          <div className="vote-card-info-titleline">
+            <span className="vote-card-info-edition">#{editionNumber}</span>
+            <span className="vote-card-info-separator" aria-hidden>&middot;</span>
+            <span className="vote-card-info-name">{name}</span>
+          </div>
         </div>
         <div className="vote-card-info-stats">
-          <span className="vote-card-stat">
+          <span className="vote-card-stat vote-card-stat-chip">
             <span className={voteScore > 0 ? 'text-success' : voteScore < 0 ? 'text-error' : 'text-secondary'}>
               {voteScore > 0 ? '+' : ''}{voteScore}
             </span>
             <span className="vote-card-stat-label">Score</span>
           </span>
-          <span className="vote-card-stat">
-            <span className="text-secondary">{totalVotes} vote{totalVotes !== 1 ? 's' : ''}</span>
+          <span className="vote-card-stat vote-card-stat-chip">
+            <span className="text-secondary">{totalVotes}</span>
+            <span className="vote-card-stat-label">Votes</span>
           </span>
-          {isProvisional ? (
-            <span className="vote-card-provisional">
-              Rising &middot; {votesNeeded} more
-            </span>
-          ) : (
-            <span className="vote-card-eligible">Ranked</span>
-          )}
+          <span className={isProvisional ? 'vote-card-status-muted' : 'vote-card-eligible'}>
+            {isProvisional ? `Needs ${votesNeeded} more` : 'Ranked'}
+          </span>
         </div>
+        {isProvisional && (
+          <div className="vote-card-rank-progress-wrap">
+            <div className="vote-card-rank-progress-label">
+              Ranks after {PROVISIONAL_MIN_VOTES} votes
+            </div>
+            <div className="vote-card-rank-progress" aria-label={`${rankProgress} of ${PROVISIONAL_MIN_VOTES} votes to rank`}>
+              <div className="vote-card-rank-progress-track" />
+              <div className="vote-card-rank-progress-fill" style={{ width: `${rankProgressPct}%` }} />
+            </div>
+          </div>
+        )}
       </div>
     </motion.div>
   );

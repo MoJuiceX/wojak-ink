@@ -62,8 +62,8 @@ export function RankingRulesModal({ onClose }: RankingRulesModalProps) {
                     <div className="rules-section">
                         <h4 className="rules-section-title">Eligibility</h4>
                         <ul className="rules-list">
-                            <li>Wojaks need <strong>3 votes</strong> to become <em>Ranked</em></li>
-                            <li>Until then, they&apos;re <em>Rising</em> and won&apos;t count toward Player Score</li>
+                            <li>Wojaks need <strong>3 votes</strong> before they count toward Player Score</li>
+                            <li>Before that, they show a simple "needs more votes" note</li>
                         </ul>
                     </div>
 
@@ -72,6 +72,7 @@ export function RankingRulesModal({ onClose }: RankingRulesModalProps) {
                         <ul className="rules-list">
                             <li><strong>Player Score</strong> = sum of your top 10 eligible Wojak scores in your DID</li>
                             <li>Only verified Players (Farmers Plot + DID) appear on the Players leaderboard</li>
+                            <li>Some verified players may be shown as <strong>waiting to rank</strong> until their Wojaks have enough votes</li>
                         </ul>
                     </div>
 

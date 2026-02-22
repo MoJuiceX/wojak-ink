@@ -119,7 +119,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         const totalWojakCount = totalResult?.cnt || 0;
 
         // Compute rank: count players with higher score
-        const ranked = eligibleWojakCount > 0 && playerScore > 0;
+        const ranked = eligibleWojakCount > 0;
         let rank: number | null = null;
 
         if (ranked) {
@@ -149,7 +149,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           WHERE gp.phase1_verified = 1
             AND gp.did_id IS NOT NULL AND gp.did_id != ''
           GROUP BY gp.did_id
-          HAVING eligible_count > 0 AND player_score > 0
+              HAVING eligible_count > 0
         )
         SELECT COUNT(*) + 1 AS rank
         FROM player_scores

@@ -230,8 +230,14 @@ async function handlePlayers(db: D1Database, limit: number, offset: number, call
       ps.best_wojak_image
     FROM player_scores ps
     LEFT JOIN total_wojaks tw ON tw.did_id = ps.did_id
-    WHERE ps.eligible_wojak_count > 0 AND ps.player_score > 0
-    ORDER BY ps.player_score DESC, ps.eligible_wojak_count DESC, ps.best_wojak_score DESC, ps.did_id ASC
+    WHERE 1 = 1
+    ORDER BY
+      CASE WHEN ps.eligible_wojak_count > 0 THEN 0 ELSE 1 END ASC,
+      ps.player_score DESC,
+      ps.eligible_wojak_count DESC,
+      COALESCE(tw.total_count, 0) DESC,
+      COALESCE(ps.best_wojak_score, -999999) DESC,
+      ps.did_id ASC
     LIMIT ? OFFSET ?
   `;
 
@@ -242,12 +248,15 @@ async function handlePlayers(db: D1Database, limit: number, offset: number, call
     let displayName = row.display_name as string | null;
     if (!displayName) displayName = did ? `${did.slice(0, 12)}...` : 'Anon';
 
+    const eligibleWojakCount = (row.eligible_wojak_count as number) || 0;
+    const playerScore = (row.player_score as number) || 0;
+
     return {
       rank: offset + idx + 1,
       did,
       displayName,
-      playerScore: (row.player_score as number) || 0,
-      eligibleWojakCount: (row.eligible_wojak_count as number) || 0,
+      playerScore,
+      eligibleWojakCount,
       totalWojakCount: (row.total_wojak_count as number) || 0,
       bestWojakScore: (row.best_wojak_score as number) ?? null,
       bestWojakImage: resolveImageUri(row.best_wojak_image as string | null) || null,
@@ -283,7 +292,7 @@ async function handlePlayers(db: D1Database, limit: number, offset: number, call
         WHERE gp.phase1_verified = 1
           AND gp.did_id IS NOT NULL AND gp.did_id != ''
         GROUP BY gp.did_id
-        HAVING eligible_wojak_count > 0 AND player_score > 0
+        HAVING eligible_wojak_count > 0
       )
       SELECT COUNT(*) + 1 AS rank
       FROM player_scores

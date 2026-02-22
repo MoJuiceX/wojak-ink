@@ -10,12 +10,14 @@ interface VoteButtonsProps {
   onLike: () => void;
   onDislike: () => void;
   disabled: boolean;
+  feedbackType?: 'glaze' | 'fade' | null;
 }
 
 export function VoteButtons({
   onLike,
   onDislike,
   disabled,
+  feedbackType = null,
 }: VoteButtonsProps) {
   const reducedMotion = usePrefersReducedMotion();
   const supportsHover = useRef(false);
@@ -55,9 +57,9 @@ export function VoteButtons({
     : { scale: 0.96, transition: { duration: 0.06, ease: 'easeOut' as const } };
 
   return (
-    <div className="vote-buttons-row">
+    <div className={`vote-buttons-row${feedbackType ? ` is-${feedbackType}` : ''}`}>
       <motion.button
-        className="btn vote-btn-pill vote-btn-fade"
+        className={`btn vote-btn-pill vote-btn-fade${feedbackType === 'fade' ? ' recently-picked' : ''}`}
         onClick={onDislike}
         disabled={disabled}
         aria-label="Fade this Wojak"
@@ -67,7 +69,7 @@ export function VoteButtons({
       </motion.button>
 
       <motion.button
-        className="btn vote-btn-pill vote-btn-glaze"
+        className={`btn vote-btn-pill vote-btn-glaze${feedbackType === 'glaze' ? ' recently-picked' : ''}`}
         onClick={onLike}
         disabled={disabled}
         aria-label="Glaze this Wojak"
