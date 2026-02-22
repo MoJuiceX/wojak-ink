@@ -178,7 +178,7 @@ function CategoryAccordion({
         <span className="tabular-nums text-secondary" style={{ fontSize: '13px' }}>
           {totalMinted} minted
         </span>
-        {isSurchargeCategory && maxSurcharge > 0 && (
+        {isSurchargeCategory && (
           <span
             className="tabular-nums text-accent"
             style={{
@@ -189,7 +189,9 @@ function CategoryAccordion({
               borderRadius: '6px',
             }}
           >
-            +{maxSurcharge.toFixed(2)}
+            {maxSurcharge > 0
+              ? `${BASE_PRICE.toFixed(2)} – ${(BASE_PRICE + maxSurcharge).toFixed(2)} XCH`
+              : `${BASE_PRICE.toFixed(2)} XCH`}
           </span>
         )}
       </button>
@@ -242,7 +244,7 @@ function CategoryAccordion({
                 {isSurchargeCategory && (
                   <>
                     <span className="text-muted" style={{ width: 80, textAlign: 'right', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                      Price
+                      Total
                     </span>
                     <span className="text-muted" style={{ width: 72, textAlign: 'right', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                       Credits
@@ -314,17 +316,34 @@ function CategoryAccordion({
                     {/* Price + Credits (surcharge categories only) */}
                     {isSurchargeCategory && (
                       <>
-                        <span
-                          className="tabular-nums font-medium"
+                        <div
                           style={{
                             width: 80,
                             textAlign: 'right',
-                            fontSize: '14px',
-                            color: hasSurcharge ? 'var(--color-text)' : 'var(--color-text-muted)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'flex-end',
+                            gap: 1,
                           }}
                         >
-                          {totalPrice.toFixed(2)}
-                        </span>
+                          <span
+                            className="tabular-nums font-medium"
+                            style={{
+                              fontSize: '14px',
+                              color: hasSurcharge ? 'var(--color-text)' : 'var(--color-text-muted)',
+                            }}
+                          >
+                            {totalPrice.toFixed(2)}
+                          </span>
+                          {hasSurcharge && (
+                            <span
+                              className="tabular-nums text-accent"
+                              style={{ fontSize: '11px', fontWeight: 600, opacity: 0.8 }}
+                            >
+                              +{pricing.surchargeXch.toFixed(2)}
+                            </span>
+                          )}
+                        </div>
                         <span
                           className="tabular-nums"
                           style={{
@@ -491,7 +510,7 @@ export function PricingLightbox({ isOpen, onClose }: PricingLightboxProps) {
             Base: {BASE_PRICE} XCH
           </span>
           <span className="text-muted" style={{ fontSize: '13px', lineHeight: 1.5 }}>
-            Popular traits in Head, Clothes & Face Wear add a surcharge. Only the highest applies.
+            All mints cost {BASE_PRICE} XCH base. Popular Head, Clothes & Face Wear traits add a surcharge — only the single highest surcharge applies to your total.
           </span>
         </div>
       </div>
