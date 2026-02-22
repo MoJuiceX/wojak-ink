@@ -60,8 +60,8 @@ export function resolveImageUri(raw: string | null): string {
     return null;
   };
 
-  // Build a reliable URL from a CID
-  const cidToUrl = (cid: string): string => `https://${cid}.ipfs.nftstorage.link`;
+  // Build a reliable URL from a CID — use path-style for CIDv0 (Qm...) compat
+  const cidToUrl = (cid: string): string => `https://ipfs.io/ipfs/${cid}`;
 
   if (raw.startsWith('[')) {
     try {
