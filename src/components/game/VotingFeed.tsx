@@ -63,7 +63,6 @@ export function VotingFeed() {
   const [feedError, setFeedError] = useState(false);
   const [cardExiting, setCardExiting] = useState(false);
   const [exitDirection, setExitDirection] = useState<1 | -1 | null>(null);
-  const [voteFeedback, setVoteFeedback] = useState<string | null>(null);
   const [voteFeedbackType, setVoteFeedbackType] = useState<'glaze' | 'fade' | null>(null);
 
 
@@ -112,21 +111,11 @@ export function VotingFeed() {
     if (voteType === 1) setGlazeCount(prev => prev + 1);
     else setFadeCount(prev => prev + 1);
 
-    const nextTotalVotes = (currentItem.totalVotes || 0) + 1;
-    const justRanked = nextTotalVotes === 3;
-    // Vote feedback flash
+    // Brief visual feedback only (no text toast/flash to avoid layout shift)
     setVoteFeedbackType(voteType === 1 ? 'glaze' : 'fade');
-    setVoteFeedback(
-      justRanked
-        ? `${voteType === 1 ? 'Glaze' : 'Fade'} recorded ✓ · Ranked now`
-        : voteType === 1
-          ? 'Glaze recorded ✓'
-          : 'Fade recorded ✓'
-    );
     setTimeout(() => {
-      setVoteFeedback(null);
       setVoteFeedbackType(null);
-    }, 1200);
+    }, 450);
 
     // Fire vote to API (do not remove from feed here — wait for exit animation)
     castVote(currentItem.nftId, currentItem.editionNumber, voteType)
@@ -233,13 +222,6 @@ export function VotingFeed() {
           feedbackType={voteFeedbackType}
         />
       </div>
-
-      {/* Vote feedback flash */}
-      {voteFeedback && (
-        <div className={`vote-feedback-flash${voteFeedbackType ? ` ${voteFeedbackType}` : ''}`} key={voteFeedback + voteCount}>
-          {voteFeedback}
-        </div>
-      )}
 
       {/* Session stats strip */}
       {voteCount > 0 && (
