@@ -720,6 +720,7 @@ body {
   border-radius: var(--radius-lg);
   background: linear-gradient(180deg, var(--color-white-2), transparent);
   padding: 12px;
+  box-shadow: inset 0 1px 0 var(--color-white-3);
 }
 
 .rankings-section-header {
@@ -877,17 +878,17 @@ body {
 
 @media (max-width: 767px) {
   .rankings-row {
-    padding: 10px 12px;
+    padding: 9px 10px;
     gap: 10px;
     border-radius: 12px;
   }
 
   .rankings-row-name {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
   }
 
   .rankings-row-info .text-xs {
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     line-height: 1.2;
   }
 
@@ -1021,7 +1022,7 @@ body {
 .wojak-row-stats {
   display: flex;
   gap: var(--space-2);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 500;
   line-height: 1.2;
 }
@@ -1117,14 +1118,14 @@ body {
   }
 
   .wojak-row-owner {
-    max-width: 110px;
+    max-width: 100px;
     font-size: 0.68rem;
   }
 
   .wojak-row-status {
-    font-size: 0.62rem;
+    font-size: 0.6rem;
     padding: 1px 6px;
-    max-width: 96px;
+    max-width: 84px;
     overflow: hidden;
     text-overflow: ellipsis;
   }
@@ -3322,11 +3323,11 @@ body {
 }
 
 .vote-card-info {
-  padding: 13px 14px 14px;
+  padding: 12px 14px 13px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 6px;
+  gap: 4px;
   background:
     linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.06)),
     rgba(16, 16, 24, 0.98);
@@ -3334,7 +3335,7 @@ body {
 }
 
 .vote-card-info-name {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--color-text);
   white-space: nowrap;
@@ -3402,8 +3403,8 @@ body {
   max-width: 520px;
   margin: 0 auto;
   /* 1:1 image + compact footer */
-  aspect-ratio: 1 / 1.16;
-  max-height: calc(100vh - 250px);
+  aspect-ratio: 1 / 1.14;
+  max-height: calc(100vh - 228px);
   isolation: isolate;
 }
 
@@ -3458,16 +3459,16 @@ body {
   gap: 14px;
   width: 100%;
   max-width: 520px;
-  margin: 2px auto 0;
+  margin: 6px auto 0;
   position: relative;
 }
 
 .vote-btn-pill {
   flex: 1;
-  min-height: 58px;
-  height: 58px;
+  min-height: 56px;
+  height: 56px;
   border-radius: 50px;
-  font-size: 1.125rem;
+  font-size: 1.06rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -3476,8 +3477,9 @@ body {
 }
 
 .vote-btn-label {
-  font-size: 1.125rem;
+  font-size: 1.05rem;
   line-height: 1;
+  font-weight: 700;
 }
 
 .vote-btn-sub {
@@ -3724,26 +3726,27 @@ body {
   }
 
   .vote-card {
-    max-width: calc(100vw - 32px);
+    max-width: calc(100vw - 20px);
   }
 
   .vote-card-stack {
-    max-width: calc(100vw - 32px);
+    max-width: calc(100vw - 20px);
     max-height: none;
+    aspect-ratio: 1 / 1.18;
   }
 
   .vote-buttons-row {
-    max-width: calc(100vw - 32px);
+    max-width: calc(100vw - 20px);
     position: sticky;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 88px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 86px);
     z-index: 18;
-    padding: 10px;
-    border-radius: 18px;
-    background: rgba(10, 10, 15, 0.84);
+    padding: 10px 10px 11px;
+    border-radius: 20px;
+    background: linear-gradient(180deg, rgba(20, 20, 28, 0.9), rgba(10, 10, 15, 0.86));
     backdrop-filter: blur(14px) saturate(135%);
     -webkit-backdrop-filter: blur(14px) saturate(135%);
     border: 1px solid var(--color-white-8);
-    box-shadow: 0 16px 28px var(--color-black-55), inset 0 1px 0 var(--color-white-5);
+    box-shadow: 0 18px 34px var(--color-black-55), inset 0 1px 0 var(--color-white-5);
   }
 
   .vote-btn {
@@ -3757,14 +3760,14 @@ body {
   }
 
   .vote-btn-pill {
-    min-height: 54px;
-    height: 54px;
-    font-size: 1rem;
+    min-height: 52px;
+    height: 52px;
+    font-size: 0.98rem;
     border-width: 1px;
   }
 
   .vote-btn-label {
-    font-size: 1rem;
+    font-size: 0.98rem;
   }
 
   .vote-feedback-flash {
@@ -3773,10 +3776,13 @@ body {
   }
 
   .session-stats-strip {
-    gap: 12px;
-    flex-wrap: wrap;
-    max-width: calc(100vw - 48px);
-    margin-bottom: 84px;
+    gap: 10px;
+    flex-wrap: nowrap;
+    max-width: calc(100vw - 24px);
+    width: fit-content;
+    margin: 0 auto 4px;
+    font-size: 0.68rem;
+    white-space: nowrap;
   }
 }
 
@@ -3941,7 +3947,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -3950,7 +3956,8 @@ body {
   align-items: baseline;
   gap: 6px;
   min-width: 0;
-  width: 100%;
+  width: auto;
+  flex: 1;
 }
 
 .vote-card-info-separator {
@@ -3964,6 +3971,7 @@ body {
   gap: 6px;
   flex-wrap: nowrap;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .vote-card-stat {
@@ -3974,10 +3982,10 @@ body {
 }
 
 .vote-card-stat-chip {
-  padding: 4px 8px;
+  padding: 3px 8px;
   border-radius: 999px;
   border: 1px solid var(--color-white-10);
-  background: linear-gradient(180deg, var(--color-white-5), var(--color-white-3));
+  background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02));
 }
 
 .vote-card-stat-label {
@@ -4048,28 +4056,30 @@ body {
 
 @media (max-width: 767px) {
   .vote-card-info-name {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   .vote-card-info-main {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 6px;
+    align-items: center;
+    flex-direction: row;
+    gap: 8px;
   }
 
   .vote-card-info-top {
-    width: 100%;
+    width: auto;
+    min-width: 0;
   }
 
   .vote-card-info-stats {
-    gap: 6px;
-    width: 100%;
-    justify-content: flex-start;
-    flex-wrap: wrap;
+    gap: 5px;
+    width: auto;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    margin-left: auto;
   }
 
   .vote-card-stat {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
   }
 
   .vote-card-stat-chip {
@@ -4077,7 +4087,12 @@ body {
   }
 
   .vote-card-info-edition {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
+  }
+
+  .vote-card-stat-label {
+    font-size: 0.52rem;
+    letter-spacing: 0.35px;
   }
 }
 
@@ -4146,8 +4161,9 @@ body {
   padding: 6px 10px;
   border-radius: 999px;
   align-self: center;
-  background: var(--color-white-3);
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
   border: 1px solid var(--color-white-8);
+  box-shadow: inset 0 1px 0 var(--color-white-5);
 }
 
 .session-stats-strip.glaze {
@@ -4294,14 +4310,14 @@ body {
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
 @media (max-width: 767px) {
   .rankings-header-block {
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 12px;
+    margin-bottom: 8px;
   }
 
   .rankings-header-title {
@@ -4315,9 +4331,14 @@ body {
   }
 
   .rankings-header-block .btn {
-    min-height: 38px;
-    padding: 6px 12px !important;
+    min-height: 40px;
+    padding: 7px 12px !important;
     font-size: 0.82rem !important;
+  }
+
+  .rankings-header-block > .flex.items-center.gap-3 {
+    width: 100%;
+    gap: 8px !important;
   }
 }
 
@@ -4612,6 +4633,23 @@ body {
 
   .community-players-header {
     flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .community-players-card {
+    padding: 10px;
+    border-radius: 14px;
+  }
+
+  .community-player-row {
+    border-radius: 10px;
+    padding: 8px 9px;
+  }
+
+  .community-player-meta {
+    font-size: 0.64rem;
+    line-height: 1.25;
   }
 }
 

@@ -70,7 +70,7 @@ interface GameContextType {
   linkDid: (did: string, walletAddress?: string) => Promise<void>;
   resetPlayer: () => void;
   verifyPhase1: (did: string, nftId?: string) => Promise<boolean>;
-  castVote: (nftId: string, editionNumber: number, voteType: 1 | -1) => Promise<boolean>;
+  castVote: (nftId: string, editionNumber: number, voteType: 1 | -1) => Promise<{ ok: boolean; error?: string; status?: number }>;
   removeFromFeed: (nftId: string) => void;
   loadFeed: () => Promise<void>;
   refreshPowerLevel: () => Promise<void>;
@@ -301,9 +301,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
         } : null);
       }
       // Feed removal is done by VotingFeed after exit animation
-      return true;
+      return { ok: true as const };
     }
-    return false;
+    return { ok: false as const, error: data?.error || 'Vote failed', status: res.status };
   }, [player, guestId, getAuthHeaders]);
 
   const removeFromFeed = useCallback((nftId: string) => {

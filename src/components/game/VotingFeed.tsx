@@ -52,6 +52,7 @@ export function VotingFeed() {
   } = useGame();
   const toast = useToast();
   const reducedMotion = usePrefersReducedMotion();
+  const pendingVoteTimeout = useRef<number | null>(null);
 
   // Milestone toasts
   useMilestoneToasts(player?.onboarding);
@@ -97,6 +98,37 @@ export function VotingFeed() {
     });
   }, [feed]);
 
+  useEffect(() => {
+    return () => {
+      if (pendingVoteTimeout.current !== null) {
+        window.clearTimeout(pendingVoteTimeout.current);
+      }
+    };
+  }, []);
+
+  const triggerHaptics = useCallback((voteType: 1 | -1) => {
+    // Progressive enhancement only (Android browsers commonly support vibrate; iOS Safari does not).
+    if (typeof navigator === 'undefined' || typeof navigator.vibrate !== 'function') return;
+    navigator.vibrate(voteType === 1 ? 12 : [8, 10, 8]);
+  }, []);
+
+  const rollbackSessionCounts = useCallback((voteType: 1 | -1) => {
+    setVoteCount(prev => Math.max(0, prev - 1));
+    if (voteType === 1) setGlazeCount(prev => Math.max(0, prev - 1));
+    else setFadeCount(prev => Math.max(0, prev - 1));
+  }, []);
+
+  const voteErrorMessage = useCallback((result: { ok: boolean; error?: string; status?: number }) => {
+    if (result.ok) return '';
+    if (result.status === 429) return 'You are voting too fast. Wait a few seconds and continue.';
+    if (result.status === 403) {
+      if (result.error?.includes('hold')) return 'You can’t vote on Wojaks in your own DID.';
+      if (result.error?.includes('own creations')) return 'You can’t vote on your own Wojaks.';
+      return result.error || 'Vote not allowed';
+    }
+    return result.error || 'Vote failed to save';
+  }, []);
+
   const handleVote = useCallback((voteType: 1 | -1) => {
     const currentItem = feed[0];
     if (!currentItem || cardExiting) return;
@@ -110,6 +142,7 @@ export function VotingFeed() {
     setVoteCount(newVoteCount);
     if (voteType === 1) setGlazeCount(prev => prev + 1);
     else setFadeCount(prev => prev + 1);
+    triggerHaptics(voteType);
 
     // Brief visual feedback only (no text toast/flash to avoid layout shift)
     setVoteFeedbackType(voteType === 1 ? 'glaze' : 'fade');
@@ -118,13 +151,22 @@ export function VotingFeed() {
     }, 450);
 
     // Fire vote to API (do not remove from feed here — wait for exit animation)
-    castVote(currentItem.nftId, currentItem.editionNumber, voteType)
-      .then(ok => { if (!ok) toast.error('Vote failed to save'); })
-      .catch(() => toast.error('Vote failed to save'));
+    const votePromise = castVote(currentItem.nftId, currentItem.editionNumber, voteType)
+      .catch(() => ({ ok: false as const, error: 'Network error', status: 0 }));
 
     // After exit animation finishes: remove voted card from feed, then clear state and refill
     const EXIT_MS = 220;
-    setTimeout(() => {
+    pendingVoteTimeout.current = window.setTimeout(async () => {
+      const result = await votePromise;
+
+      if (!result.ok) {
+        rollbackSessionCounts(voteType);
+        setCardExiting(false);
+        setExitDirection(null);
+        toast.error(voteErrorMessage(result));
+        return;
+      }
+
       removeFromFeed(votedNftId);
       setCardExiting(false);
       setExitDirection(null);
@@ -133,7 +175,7 @@ export function VotingFeed() {
         loadFeed().catch(() => setFeedError(true));
       }
     }, EXIT_MS);
-  }, [feed, cardExiting, castVote, loadFeed, removeFromFeed, toast, voteCount]);
+  }, [feed, cardExiting, castVote, loadFeed, removeFromFeed, toast, voteCount, triggerHaptics, rollbackSessionCounts, voteErrorMessage]);
 
   const handleRetry = useCallback(() => {
     setFeedError(false);
@@ -213,6 +255,15 @@ export function VotingFeed() {
         </AnimatePresence>
       </div>
 
+      {/* Session stats strip (stable, no toast text layout shift) */}
+      {voteCount > 0 && (
+        <div className={`session-stats-strip${voteFeedbackType ? ` ${voteFeedbackType}` : ''}`}>
+          <span>Votes: {voteCount}</span>
+          <span className="text-success">Glazes: {glazeCount}</span>
+          <span className="text-error">Fades: {fadeCount}</span>
+        </div>
+      )}
+
       {/* Vote buttons */}
       <div className="w-full">
         <VoteButtons
@@ -223,14 +274,6 @@ export function VotingFeed() {
         />
       </div>
 
-      {/* Session stats strip */}
-      {voteCount > 0 && (
-        <div className={`session-stats-strip${voteFeedbackType ? ` ${voteFeedbackType}` : ''}`}>
-          <span>Votes: {voteCount}</span>
-          <span className="text-success">Glazes: {glazeCount}</span>
-          <span className="text-error">Fades: {fadeCount}</span>
-        </div>
-      )}
     </div>
   );
 }

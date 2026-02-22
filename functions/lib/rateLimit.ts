@@ -191,7 +191,9 @@ export const MINT_RATE_LIMITS = {
 export const GAME_RATE_LIMITS = {
   vote: {
     windowMs: 60_000,
-    maxRequests: 20,
+    // Mobile swipe sessions can easily exceed 20/min. Keep abuse protection,
+    // but allow continuous human voting without interruption.
+    maxRequests: 180,
     keyPrefix: 'game-vote',
   },
   register: {

@@ -26,7 +26,7 @@ function VotingPageMobile() {
   return (
     <div className="flex flex-col" style={{ minHeight: '100dvh' }}>
       <MobileStatsBar />
-      <div className="flex flex-col items-center p-4 gap-4" style={{ flex: 1, paddingBottom: 176 }}>
+      <div className="flex flex-col items-center gap-3" style={{ flex: 1, padding: '12px 10px 156px' }}>
         <VotingFeed />
       </div>
     </div>

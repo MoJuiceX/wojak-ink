@@ -549,9 +549,11 @@ function WojaksTab() {
                     <span className="wojak-row-edition">#{wojak.edition}</span>
                     <span className="wojak-row-owner">Owner: {wojak.ownerName || 'Anon'}</span>
                   </div>
-                  <span className="wojak-row-status">
-                    {wojak.isProvisional ? `Needs ${wojak.provisionalVotesNeeded} more` : 'Ranked'}
-                  </span>
+                  {wojak.isProvisional && (
+                    <span className="wojak-row-status">
+                      Needs {wojak.provisionalVotesNeeded} more
+                    </span>
+                  )}
                 </div>
                 <div className="wojak-row-stats flex flex-wrap gap-x-3 gap-y-1 text-xs">
                   <span className="text-success" title="Glazes (upvotes)">
