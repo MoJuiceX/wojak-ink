@@ -5,6 +5,7 @@
 // - offset: number (default 0)
 
 import { jsonResponse, errorResponse } from './_shared';
+import { resolveImageUri } from '../game/_shared';
 import { authenticateRequest } from '../../lib/auth';
 
 interface Env {
@@ -21,6 +22,7 @@ interface PlayerRanking {
   wojakCount: number;
   totalPower: number;
   bestWojakPower: number;
+  bestWojakImage: string; // Resolved IPFS image URL of their highest-power Wojak
 }
 
 interface WojakRanking {
@@ -65,7 +67,15 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           dp.display_name,
           COUNT(cf.nft_id) as wojak_count,
           COALESCE(SUM(COALESCE(cf.power_score, 0)), 0) as total_power,
-          COALESCE(MAX(cf.power_score), 0) as best_wojak_power
+          COALESCE(MAX(cf.power_score), 0) as best_wojak_power,
+          (
+            SELECT pm2.ipfs_image_uri
+            FROM combat_fighters cf2
+            JOIN phase2_mints pm2 ON pm2.mintgarden_launcher_id = cf2.nft_id AND pm2.status = 'minted'
+            WHERE cf2.owner_did = gp.did_id AND (cf2.burned_at IS NULL OR cf2.burned_at = '')
+            ORDER BY cf2.power_score DESC
+            LIMIT 1
+          ) as best_wojak_image
         FROM game_players gp
         LEFT JOIN did_profiles dp ON dp.did_id = gp.did_id
         LEFT JOIN combat_fighters cf ON cf.owner_did = gp.did_id
@@ -95,6 +105,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           wojakCount: (row.wojak_count as number) || 0,
           totalPower: (row.total_power as number) || 0,
           bestWojakPower: (row.best_wojak_power as number) || 0,
+          bestWojakImage: resolveImageUri(row.best_wojak_image as string | null),
         };
       });
 
@@ -173,7 +184,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         rank: offset + idx + 1,
         nftId: row.nft_id,
         edition: row.edition_number ?? 0,
-        imageUrl: `https://assets.mainnet.mintgarden.io/thumbnails/medium/${row.nft_id}.png`,
+        imageUrl: resolveImageUri(row.ipfs_image_uri as string | null) || `https://assets.mainnet.mintgarden.io/thumbnails/medium/${row.nft_id}.png`,
         combatType: row.combat_type || 'Unknown',
         powerScore: (row.power_score as number) || 0,
         votePower: (row.vote_power as number) || 0,

@@ -20,6 +20,7 @@ interface PlayerRanking {
   wojakCount: number;
   totalPower: number;
   bestWojakPower: number;
+  bestWojakImage?: string;
 }
 
 interface WojakRanking {
@@ -145,7 +146,16 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
           >
             <RankBadge rank={player.rank} />
             <div className="podium-avatar">
-              <User size={24} />
+              {player.bestWojakImage ? (
+                <img
+                  src={player.bestWojakImage}
+                  alt={player.displayName}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+              ) : (
+                <User size={24} />
+              )}
             </div>
             <span className="podium-name">{player.displayName || 'Anon'}</span>
             <div className="podium-power">
@@ -242,12 +252,20 @@ function WojaksTab() {
             <RankBadge rank={wojak.rank} />
             <div className="wojak-row-image">
               <img
-                src={wojak.imageUrl || `https://assets.mainnet.mintgarden.io/thumbnails/medium/${wojak.nftId}.png`}
+                src={wojak.imageUrl}
                 alt={`Wojak #${wojak.edition}`}
                 onError={(e) => {
                   const el = e.target as HTMLImageElement;
-                  const fallback = `https://assets.mainnet.mintgarden.io/thumbnails/medium/${wojak.nftId}.png`;
-                  if (el.src !== fallback) el.src = fallback;
+                  el.style.display = 'none';
+                  if (el.parentElement) {
+                    el.parentElement.style.display = 'flex';
+                    el.parentElement.style.alignItems = 'center';
+                    el.parentElement.style.justifyContent = 'center';
+                    el.parentElement.style.background = 'var(--color-white-5)';
+                    el.parentElement.style.fontSize = '0.65rem';
+                    el.parentElement.style.color = 'var(--color-text-secondary)';
+                    el.parentElement.textContent = `#${wojak.edition}`;
+                  }
                 }}
               />
             </div>
