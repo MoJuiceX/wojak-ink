@@ -48,7 +48,15 @@ export default {
 async function run(env: Env) {
   console.log('[DID Indexer] Starting run...');
 
-  // Get all registered players
+  // Phase 0: Auto-discover new Farmers Plot holders from MintGarden
+  try {
+    const discovered = await discoverNewHolders(env);
+    console.log(`[DID Indexer] Auto-discovered ${discovered} new holder(s)`);
+  } catch (err) {
+    console.error('[DID Indexer] Holder discovery error (non-fatal):', err);
+  }
+
+  // Get all registered players (now includes auto-discovered ones)
   const players = await env.DB.prepare(
     'SELECT did_id, wallet_address FROM game_players'
   ).all();
@@ -96,7 +104,7 @@ async function run(env: Env) {
       const errMsg = err instanceof Error ? err.message.slice(0, 200) : 'Unknown error';
       await env.DB.prepare(
         "UPDATE game_players SET last_index_error = ?, index_error_count = index_error_count + 1 WHERE did_id = ?"
-      ).bind(errMsg, did).run().catch(() => {});
+      ).bind(errMsg, did).run().catch(() => { });
     }
 
     // Rate limit
@@ -387,6 +395,124 @@ async function batchChunked(db: D1Database, statements: D1PreparedStatement[]): 
     const chunk = statements.slice(i, i + D1_BATCH_SIZE);
     await db.batch(chunk);
   }
+}
+
+/**
+ * Discover new Farmers Plot holders from MintGarden collection listing.
+ * Paginates all Phase 1 NFTs, extracts unique owner DIDs, and auto-creates
+ * game_players rows for any that don't already exist.
+ * Returns the count of newly created players.
+ */
+async function discoverNewHolders(env: Env): Promise<number> {
+  const holderDids = new Map<string, { name?: string; wallet?: string }>();
+  let page = 1;
+  const pageSize = 100;
+
+  // Paginate all Phase 1 NFTs to collect owner DIDs
+  while (page <= MAX_PAGES) {
+    const url = `https://api.mintgarden.io/collections/${PHASE1_COLLECTION}/nfts?size=${pageSize}&page=${page}`;
+
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        headers: { 'Accept': 'application/json' },
+      });
+    } catch (err) {
+      console.error(`[DID Indexer] Discovery: network error on page ${page}:`, err);
+      break;
+    }
+
+    if (!response.ok) {
+      console.error(`[DID Indexer] Discovery: MintGarden returned ${response.status} on page ${page}`);
+      break;
+    }
+
+    const data = await response.json() as {
+      items: Array<{
+        id: string;
+        encoded_id: string;
+        owner_encoded_id?: string;
+        owner_id?: string;
+        owner_name?: string;
+        owner_address_encoded_id?: string;
+        edition_number?: number;
+      }>;
+    };
+
+    if (!data.items || data.items.length === 0) break;
+
+    for (const item of data.items) {
+      const ownerDid = item.owner_encoded_id;
+      // Only process valid DID owners (skip if no DID or not a valid DID)
+      if (ownerDid && ownerDid.startsWith('did:chia:')) {
+        if (!holderDids.has(ownerDid)) {
+          holderDids.set(ownerDid, {
+            name: item.owner_name,
+            wallet: item.owner_address_encoded_id,
+          });
+        }
+      }
+    }
+
+    if (data.items.length < pageSize) break;
+    page++;
+    await sleep(RATE_LIMIT_MS);
+  }
+
+  console.log(`[DID Indexer] Discovery: found ${holderDids.size} unique DIDs holding Farmers Plot across ${page} pages`);
+
+  if (holderDids.size === 0) return 0;
+
+  // Check which DIDs are already registered
+  let newCount = 0;
+  const didEntries = Array.from(holderDids.entries());
+
+  // Process in chunks to avoid overwhelming D1
+  for (let i = 0; i < didEntries.length; i += D1_BATCH_SIZE) {
+    const chunk = didEntries.slice(i, i + D1_BATCH_SIZE);
+    const statements: D1PreparedStatement[] = [];
+
+    for (const [did, info] of chunk) {
+      // Check if player already exists
+      const existing = await env.DB.prepare(
+        'SELECT 1 FROM game_players WHERE did_id = ?'
+      ).bind(did).first();
+
+      if (!existing) {
+        // Auto-create player row
+        const wallet = info.wallet || '';
+        statements.push(
+          env.DB.prepare(`
+            INSERT OR IGNORE INTO game_players (did_id, wallet_address, phase1_verified, votes_today_reset)
+            VALUES (?, ?, 1, ?)
+          `).bind(did, wallet, new Date().toISOString().split('T')[0])
+        );
+
+        // Auto-create profile with MintGarden name if available
+        if (info.name && info.name.trim().length >= 2) {
+          statements.push(
+            env.DB.prepare(`
+              INSERT INTO did_profiles (did_id, display_name, name_source, created_at, updated_at)
+              VALUES (?, ?, 'chain', datetime('now'), datetime('now'))
+              ON CONFLICT(did_id) DO UPDATE SET
+                display_name = CASE WHEN name_source = 'random' OR name_source IS NULL THEN ? ELSE display_name END,
+                name_source = CASE WHEN name_source = 'random' OR name_source IS NULL THEN 'chain' ELSE name_source END,
+                updated_at = datetime('now')
+            `).bind(did, info.name.trim(), info.name.trim())
+          );
+        }
+
+        newCount++;
+        console.log(`[DID Indexer] Auto-enrolled: ${did.slice(0, 25)}... (${info.name || 'unnamed'})`);
+      }
+    }
+
+    if (statements.length > 0) {
+      await batchChunked(env.DB, statements);
+    }
+  }
+
+  return newCount;
 }
 
 function sleep(ms: number): Promise<void> {
