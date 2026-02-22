@@ -36,21 +36,53 @@ export function getYesterdayString(): string {
   return d.toISOString().split('T')[0];
 }
 
-// Resolve IPFS image URI — handles JSON arrays of gateway URLs or plain strings.
-// Skips private Pinata gateways (*.mypinata.cloud) which return 403 from browsers.
+// Resolve IPFS image URI — extracts CID and rebuilds using a CORS-safe gateway.
+// Handles JSON arrays of gateway URLs, plain IPFS URIs (ipfs://), and HTTPS URLs.
+// Private Pinata gateways (*.mypinata.cloud) and public Pinata (gateway.pinata.cloud)
+// both CORS-block browser requests, so we extract the CID and use nftstorage.link.
 export function resolveImageUri(raw: string | null): string {
   if (!raw) return '';
+
+  // Extract CID from a URL or ipfs:// URI
+  const extractCid = (url: string): string | null => {
+    // ipfs://QmXxx or ipfs://bafyxxx
+    const ipfsMatch = url.match(/^ipfs:\/\/(.+)/);
+    if (ipfsMatch) return ipfsMatch[1];
+    // https://gateway.pinata.cloud/ipfs/QmXxx
+    // https://xxx.mypinata.cloud/ipfs/QmXxx
+    // https://nftstorage.link/ipfs/QmXxx
+    // https://xxx.ipfs.w3s.link (subdomain style)
+    const pathMatch = url.match(/\/ipfs\/([a-zA-Z0-9]+)/);
+    if (pathMatch) return pathMatch[1];
+    // Subdomain style: https://bafyxxx.ipfs.w3s.link
+    const subdomainMatch = url.match(/^https?:\/\/(baf[a-z0-9]+)\.ipfs\./);
+    if (subdomainMatch) return subdomainMatch[1];
+    return null;
+  };
+
+  // Build a reliable URL from a CID
+  const cidToUrl = (cid: string): string => `https://${cid}.ipfs.nftstorage.link`;
+
   if (raw.startsWith('[')) {
     try {
       const urls = JSON.parse(raw) as string[];
-      // Prefer public gateways; skip private Pinata (*.mypinata.cloud → 403 from browsers)
+      // Try to extract CID from any URL and use CORS-safe gateway
+      for (const url of urls) {
+        const cid = extractCid(url);
+        if (cid) return cidToUrl(cid);
+      }
+      // Fallback: first HTTPS URL that isn't private Pinata
       const publicUrl = urls.find(u => u.startsWith('https://') && !u.includes('.mypinata.cloud'));
       if (publicUrl) return publicUrl;
-      // Fallback: any HTTPS URL (even private Pinata, better than nothing)
       return urls.find(u => u.startsWith('https://')) || urls[0] || '';
     } catch { return raw; }
   }
-  // Single URL: skip private Pinata
+
+  // Single string
+  const cid = extractCid(raw);
+  if (cid) return cidToUrl(cid);
+
+  // Skip private Pinata
   if (raw.includes('.mypinata.cloud')) return '';
   return raw;
 }
