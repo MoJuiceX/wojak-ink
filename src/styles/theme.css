@@ -613,11 +613,19 @@ body {
     gap: var(--space-1);
     padding: 3px;
     border-radius: var(--radius-md);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .fight-club-tabs::-webkit-scrollbar {
+    display: none;
   }
 
   .fight-club-tab {
-    padding: var(--space-2) var(--space-3);
-    font-size: 13px;
+    flex: 1 0 auto;
+    min-width: 72px;
+    padding: 8px 10px;
+    font-size: 12px;
     border-radius: calc(var(--radius-md) - 2px);
   }
 }
@@ -633,6 +641,13 @@ body {
   gap: var(--space-4);
 }
 
+@media (max-width: 767px) {
+  .fight-club-rankings {
+    gap: 12px;
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 84px);
+  }
+}
+
 .rankings-tabs {
   display: flex;
   gap: var(--space-2);
@@ -640,6 +655,20 @@ body {
   border-radius: var(--radius-md);
   padding: var(--space-1);
   border: 1px solid var(--color-border);
+}
+
+@media (max-width: 767px) {
+  .rankings-tabs {
+    gap: 6px;
+    padding: 6px;
+    border-radius: 14px;
+  }
+
+  .rankings-tab {
+    min-height: 40px;
+    font-size: 0.9rem;
+    gap: 6px;
+  }
 }
 
 .rankings-tab {
@@ -844,6 +873,39 @@ body {
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
   box-shadow: inset 0 1px 0 var(--color-white-3);
+}
+
+@media (max-width: 767px) {
+  .rankings-row {
+    padding: 10px 12px;
+    gap: 10px;
+    border-radius: 12px;
+  }
+
+  .rankings-row-name {
+    font-size: 0.95rem;
+  }
+
+  .rankings-row-info .text-xs {
+    font-size: 0.72rem;
+    line-height: 1.2;
+  }
+
+  .rankings-row-power {
+    min-width: 56px;
+    gap: 1px;
+  }
+
+  .rankings-row-power .text-xs {
+    display: none;
+  }
+
+  .rank-badge {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    font-size: 0.8rem;
+  }
 }
 
 .rankings-row-you {
@@ -1062,11 +1124,19 @@ body {
   .wojak-row-status {
     font-size: 0.62rem;
     padding: 1px 6px;
+    max-width: 96px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .wojak-row-power {
     flex-shrink: 0;
     text-align: right;
+    min-width: 52px;
+  }
+
+  .wojak-row-power-note {
+    display: none;
   }
 
   .power-breakdown {
@@ -3665,13 +3735,15 @@ body {
   .vote-buttons-row {
     max-width: calc(100vw - 32px);
     position: sticky;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
-    z-index: 12;
-    padding: 8px;
-    border-radius: 16px;
-    background: rgba(10, 10, 15, 0.78);
-    backdrop-filter: blur(12px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 88px);
+    z-index: 18;
+    padding: 10px;
+    border-radius: 18px;
+    background: rgba(10, 10, 15, 0.84);
+    backdrop-filter: blur(14px) saturate(135%);
+    -webkit-backdrop-filter: blur(14px) saturate(135%);
     border: 1px solid var(--color-white-8);
+    box-shadow: 0 16px 28px var(--color-black-55), inset 0 1px 0 var(--color-white-5);
   }
 
   .vote-btn {
@@ -3688,10 +3760,23 @@ body {
     min-height: 54px;
     height: 54px;
     font-size: 1rem;
+    border-width: 1px;
   }
 
   .vote-btn-label {
     font-size: 1rem;
+  }
+
+  .vote-feedback-flash {
+    max-width: calc(100vw - 48px);
+    text-align: center;
+  }
+
+  .session-stats-strip {
+    gap: 12px;
+    flex-wrap: wrap;
+    max-width: calc(100vw - 48px);
+    margin-bottom: 84px;
   }
 }
 
@@ -4213,6 +4298,29 @@ body {
   margin-bottom: 16px;
 }
 
+@media (max-width: 767px) {
+  .rankings-header-block {
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .rankings-header-title {
+    font-size: 1.55rem;
+    line-height: 1.05;
+  }
+
+  .rankings-header-subtitle {
+    font-size: 0.75rem;
+    line-height: 1.35;
+  }
+
+  .rankings-header-block .btn {
+    min-height: 38px;
+    padding: 6px 12px !important;
+    font-size: 0.82rem !important;
+  }
+}
+
 .rankings-header-text {
   display: flex;
   flex-direction: column;
@@ -4323,6 +4431,44 @@ body {
   padding: 14px;
 }
 
+@media (max-width: 767px) {
+  .community-players-card {
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .community-players-title {
+    font-size: 0.82rem;
+  }
+
+  .community-players-subtitle {
+    font-size: 0.68rem;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .community-player-row {
+    padding: 8px 9px;
+    gap: 8px;
+    border-radius: 10px;
+  }
+
+  .community-player-name {
+    font-size: 0.78rem;
+  }
+
+  .community-player-meta {
+    font-size: 0.64rem;
+  }
+
+  .community-player-status {
+    display: none;
+  }
+}
+
 .community-players-header {
   display: flex;
   justify-content: space-between;
@@ -4414,6 +4560,43 @@ body {
 
   .rankings-view-toggle {
     align-self: flex-end;
+  }
+}
+
+@media (max-width: 767px) {
+  .rankings-toolbar {
+    gap: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+  }
+
+  .rankings-sort {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+
+  .rankings-sort::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sort-chip {
+    flex-shrink: 0;
+    min-height: 34px;
+    padding: 5px 10px;
+  }
+
+  .rankings-view-toggle {
+    align-self: stretch;
+    justify-content: flex-end;
+    background: transparent;
+    padding: 0;
+  }
+
+  .view-btn {
+    width: 30px;
+    height: 30px;
   }
 }
 
