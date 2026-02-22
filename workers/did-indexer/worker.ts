@@ -16,6 +16,9 @@ const RATE_LIMIT_MS = 500; // 500ms between MintGarden API calls
 const MAX_PAGES = 50;      // Safety cap on pagination
 const D1_BATCH_SIZE = 25;  // Max statements per D1 batch call
 const CIRCUIT_BREAKER_THRESHOLD = 5; // Consecutive API failures before aborting
+const PLAYERS_PER_RUN = 5; // Only sync this many players per cron run (staggered)
+const DISCOVERY_INTERVAL_MS = 12 * 60 * 60 * 1000; // 12 hours between full collection scans
+const SKIP_IF_INDEXED_WITHIN_MS = 2 * 60 * 60 * 1000; // Skip players indexed < 2 hours ago
 
 // Power level calculation constants (same as _powerLevel.ts)
 const POWER_LEVEL_MAX = 10000;
@@ -48,20 +51,43 @@ export default {
 async function run(env: Env) {
   console.log('[DID Indexer] Starting run...');
 
-  // Phase 0: Auto-discover new Farmers Plot holders from MintGarden
-  try {
-    const discovered = await discoverNewHolders(env);
-    console.log(`[DID Indexer] Auto-discovered ${discovered} new holder(s)`);
-  } catch (err) {
-    console.error('[DID Indexer] Holder discovery error (non-fatal):', err);
+  // Phase 0: Auto-discover new Farmers Plot holders — only every 12 hours
+  // Check when discovery last ran via a simple DB flag
+  const lastDiscovery = await env.DB.prepare(
+    "SELECT value FROM kv_meta WHERE key = 'last_discovery_run'"
+  ).first<{ value: string }>();
+
+  const lastDiscoveryTime = lastDiscovery ? new Date(lastDiscovery.value).getTime() : 0;
+  const shouldDiscover = (Date.now() - lastDiscoveryTime) > DISCOVERY_INTERVAL_MS;
+
+  if (shouldDiscover) {
+    try {
+      const discovered = await discoverNewHolders(env);
+      console.log(`[DID Indexer] Auto-discovered ${discovered} new holder(s)`);
+      // Record discovery time
+      await env.DB.prepare(
+        "INSERT INTO kv_meta (key, value) VALUES ('last_discovery_run', datetime('now')) ON CONFLICT(key) DO UPDATE SET value = datetime('now')"
+      ).run();
+    } catch (err) {
+      console.error('[DID Indexer] Holder discovery error (non-fatal):', err);
+    }
+  } else {
+    const hoursAgo = Math.round((Date.now() - lastDiscoveryTime) / 3600000);
+    console.log(`[DID Indexer] Skipping discovery (last ran ${hoursAgo}h ago, interval: 12h)`);
   }
 
-  // Get all registered players (now includes auto-discovered ones)
-  const players = await env.DB.prepare(
-    'SELECT did_id, wallet_address FROM game_players'
-  ).all();
+  // Get the PLAYERS_PER_RUN oldest-indexed players to sync (staggered round-robin)
+  // Skip players indexed within the last 2 hours
+  const players = await env.DB.prepare(`
+    SELECT did_id, wallet_address, last_indexed_at
+    FROM game_players
+    WHERE last_indexed_at IS NULL
+       OR last_indexed_at < datetime('now', '-2 hours')
+    ORDER BY last_indexed_at ASC NULLS FIRST
+    LIMIT ?
+  `).bind(PLAYERS_PER_RUN).all();
 
-  console.log(`[DID Indexer] Processing ${players.results.length} players`);
+  console.log(`[DID Indexer] Syncing ${players.results.length} players (staggered, ${PLAYERS_PER_RUN} per run)`);
 
   let updatedCount = 0;
   let errorCount = 0;
@@ -111,7 +137,7 @@ async function run(env: Env) {
     await sleep(RATE_LIMIT_MS);
   }
 
-  console.log(`[DID Indexer] Done. Changed: ${updatedCount}, Skipped: ${skippedCount}, Errors: ${errorCount}, Total: ${players.results.length}`);
+  console.log(`[DID Indexer] Done. Changed: ${updatedCount}, Skipped: ${skippedCount}, Errors: ${errorCount}, Synced: ${players.results.length}`);
 
   if (!env.ADMIN_SECRET) {
     console.warn('[DID Indexer] ADMIN_SECRET not set — battle-resolve and vote-xp calls will fail with 401');
