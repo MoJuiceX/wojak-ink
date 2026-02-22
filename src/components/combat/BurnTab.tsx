@@ -163,7 +163,7 @@ function BurnCard({
   onBurn: () => void;
   isBurning: boolean;
 }) {
-  const imageUrl = fighter.imageUri || `https://assets.mintgarden.io/thumbnails/medium/${fighter.nftId}.png`;
+  const imageUrl = fighter.imageUri || `https://assets.mainnet.mintgarden.io/thumbnails/medium/${fighter.nftId}.png`;
   const name = fighter.customName || `Wojak #${fighter.editionNumber}`;
   const mintGardenUrl = `https://mintgarden.io/nfts/${fighter.nftId}`;
 
@@ -396,7 +396,7 @@ function AssignPowerModal({
               >
                 <div className="aspect-square rounded overflow-hidden" style={{ background: 'var(--color-black-50)' }}>
                   <img
-                    src={nft.imageUri || `https://assets.mintgarden.io/thumbnails/medium/${nft.nftId}.png`}
+                    src={nft.imageUri || `https://assets.mainnet.mintgarden.io/thumbnails/medium/${nft.nftId}.png`}
                     alt={nft.name}
                     className="w-full h-full object-cover"
                   />

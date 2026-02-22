@@ -173,7 +173,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         rank: offset + idx + 1,
         nftId: row.nft_id,
         edition: row.edition_number ?? 0,
-        imageUrl: `https://assets.mintgarden.io/thumbnails/medium/${row.nft_id}.png`,
+        imageUrl: `https://assets.mainnet.mintgarden.io/thumbnails/medium/${row.nft_id}.png`,
         combatType: row.combat_type || 'Unknown',
         powerScore: (row.power_score as number) || 0,
         votePower: (row.vote_power as number) || 0,

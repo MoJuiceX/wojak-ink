@@ -77,7 +77,7 @@ export function GamePositionBar({ mode, isRegistered, playerPosition, wojakPosit
         {mode === 'wojaks' && wojakPosition && (
           <>
             <img
-              src={`https://assets.mintgarden.io/thumbnails/medium/${wojakPosition.nftId}.png`}
+              src={`https://assets.mainnet.mintgarden.io/thumbnails/medium/${wojakPosition.nftId}.png`}
               alt={wojakPosition.name}
               style={{ width: 28, height: 28, borderRadius: 'var(--radius-md)', objectFit: 'cover', marginRight: 8 }}
             />

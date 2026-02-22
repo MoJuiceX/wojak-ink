@@ -190,7 +190,7 @@ function YourWojakThumbnailStrip({
                 onClick={() => onIndexChange(index)}
               >
                 <img
-                  src={nft.thumbnail_uri || `https://assets.mintgarden.io/thumbnails/medium/${nft.encoded_id}.png`}
+                  src={nft.thumbnail_uri || `https://assets.mainnet.mintgarden.io/thumbnails/medium/${nft.encoded_id}.png`}
                   alt={nft.name}
                   className="w-full h-full object-cover"
                   loading="lazy"
@@ -383,7 +383,7 @@ export function YourWojakExplorer({
 
   if (!currentNft) return null;
 
-  const imageUrl = currentNft.thumbnail_uri || `https://assets.mintgarden.io/thumbnails/medium/${currentNft.encoded_id}.png`;
+  const imageUrl = currentNft.thumbnail_uri || `https://assets.mainnet.mintgarden.io/thumbnails/medium/${currentNft.encoded_id}.png`;
 
   return (
     <>

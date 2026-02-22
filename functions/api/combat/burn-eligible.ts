@@ -134,7 +134,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         losses: row.total_combat_losses,
         minterWallet: row.minter_wallet,
         minterDid: row.minter_did,
-        imageUri: `https://assets.mintgarden.io/thumbnails/medium/${row.nft_id}.png`,
+        imageUri: `https://assets.mainnet.mintgarden.io/thumbnails/medium/${row.nft_id}.png`,
         customName: row.custom_name,
       })),
     });

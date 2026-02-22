@@ -45,7 +45,7 @@ function resolveImageUrl(imageUri: string | null | undefined, nftId: string): st
     }
   }
   // Fallback to MintGarden
-  return `https://assets.mintgarden.io/thumbnails/medium/${nftId}.png`;
+  return `https://assets.mainnet.mintgarden.io/thumbnails/medium/${nftId}.png`;
 }
 
 export function WojakFighterCard({ wojak, onClick }: WojakFighterCardProps) {

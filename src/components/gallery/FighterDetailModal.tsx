@@ -18,7 +18,7 @@ interface FighterDetailModalProps {
 }
 
 export function FighterDetailModal({ isOpen, onClose, nftId, edition }: FighterDetailModalProps) {
-  const imageUrl = `https://assets.mintgarden.io/thumbnails/medium/${nftId}.png`;
+  const imageUrl = `https://assets.mainnet.mintgarden.io/thumbnails/medium/${nftId}.png`;
 
   // Lock body scroll when modal is open
   useEffect(() => {

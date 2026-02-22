@@ -137,7 +137,7 @@ function NftDetailModal({ nft, onClose, onBurned }: { nft: CollectionNft; onClos
         {nameError && <span className="text-sm text-error">{nameError}</span>}
 
         <img
-          src={nft.imageUri || `https://assets.mintgarden.io/thumbnails/medium/${nft.nftId}.png`}
+          src={nft.imageUri || `https://assets.mainnet.mintgarden.io/thumbnails/medium/${nft.nftId}.png`}
           alt={nft.name}
           onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMG; }}
           style={{
@@ -312,7 +312,7 @@ export function CollectionScroll({ did }: CollectionScrollProps) {
             onClick={() => setSelectedNft(nft)}
           >
             <img
-              src={nft.imageUri || `https://assets.mintgarden.io/thumbnails/medium/${nft.nftId}.png`}
+              src={nft.imageUri || `https://assets.mainnet.mintgarden.io/thumbnails/medium/${nft.nftId}.png`}
               alt={nft.name}
               onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMG; }}
               style={{

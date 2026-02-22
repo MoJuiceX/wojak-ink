@@ -560,11 +560,11 @@ export function YourWojakSection() {
               title={`View ${nft.name}`}
             >
               <img
-                src={nft.thumbnail_uri || `https://assets.mintgarden.io/thumbnails/medium/${nft.encoded_id}.png`}
+                src={nft.thumbnail_uri || `https://assets.mainnet.mintgarden.io/thumbnails/medium/${nft.encoded_id}.png`}
                 alt={nft.name}
                 loading="lazy"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = `https://assets.mintgarden.io/thumbnails/medium/${nft.encoded_id}.png`;
+                  (e.target as HTMLImageElement).src = `https://assets.mainnet.mintgarden.io/thumbnails/medium/${nft.encoded_id}.png`;
                 }}
               />
               <div className="your-wojak-nft-overlay">

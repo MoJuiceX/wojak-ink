@@ -91,7 +91,7 @@ export function BattleCard({
           >
             <Link to={`/fight-club/rankings`}>
               <img
-                src={nftA.imageUri || `https://assets.mintgarden.io/thumbnails/medium/${nftA.id}.png`}
+                src={nftA.imageUri || `https://assets.mainnet.mintgarden.io/thumbnails/medium/${nftA.id}.png`}
                 alt={nftA.name}
                 className="w-full rounded-lg"
                 loading="lazy"
@@ -127,7 +127,7 @@ export function BattleCard({
           >
             <Link to={`/fight-club/rankings`}>
               <img
-                src={nftB.imageUri || `https://assets.mintgarden.io/thumbnails/medium/${nftB.id}.png`}
+                src={nftB.imageUri || `https://assets.mainnet.mintgarden.io/thumbnails/medium/${nftB.id}.png`}
                 alt={nftB.name}
                 className="w-full rounded-lg"
                 loading="lazy"
