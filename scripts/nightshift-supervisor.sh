@@ -8,6 +8,7 @@ BRANCH_EXPECTED='^codex/nightly/'
 MAX_HOURS="${MAX_HOURS:-8}"
 PULL_INTERVAL_SECONDS="${PULL_INTERVAL_SECONDS:-600}"   # 10 minutes
 HEARTBEAT_SECONDS="${HEARTBEAT_SECONDS:-1800}"          # 30 minutes
+CYCLE_IDLE_SECONDS="${CYCLE_IDLE_SECONDS:-5}"           # immediate restart cadence
 
 RUNNER_CMD=(node scripts/nightshift.mjs --real)
 
@@ -23,6 +24,7 @@ PROGRESS_FILE="reports/${SESSION_ID}.md"
 START_EPOCH="$(date +%s)"
 END_EPOCH="$((START_EPOCH + MAX_HOURS * 3600))"
 LAST_HEARTBEAT=0
+LAST_PULL=0
 
 log() {
   printf '[%s] %s\n' "$(ts)" "$*" | tee -a "$LOG_FILE"
@@ -121,7 +123,12 @@ while true; do
     break
   fi
 
-  pull_updates
+  if (( LAST_PULL == 0 || now - LAST_PULL >= PULL_INTERVAL_SECONDS )); then
+    pull_updates
+    LAST_PULL="$(date +%s)"
+  else
+    log "Skipping pull (last pull $((now - LAST_PULL))s ago)."
+  fi
 
   log "Starting nightshift runner cycle."
   if "${RUNNER_CMD[@]}" >>"$LOG_FILE" 2>&1; then
@@ -139,20 +146,11 @@ while true; do
     log "Heartbeat written to ${PROGRESS_FILE}"
   fi
 
-  sleep_remaining="$PULL_INTERVAL_SECONDS"
-  while (( sleep_remaining > 0 )); do
-    now="$(date +%s)"
-    if (( now >= END_EPOCH )); then
-      break 2
-    fi
-    if (( sleep_remaining > 60 )); then
-      sleep 60
-      sleep_remaining=$((sleep_remaining - 60))
-    else
-      sleep "$sleep_remaining"
-      sleep_remaining=0
-    fi
-  done
+  now="$(date +%s)"
+  if (( now >= END_EPOCH )); then
+    break
+  fi
+  sleep "$CYCLE_IDLE_SECONDS"
 done
 
 log "Supervisor session ${SESSION_ID} finished."
