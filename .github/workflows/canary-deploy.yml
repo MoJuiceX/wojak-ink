@@ -41,7 +41,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Validate GitHub workflows
-        uses: rhysd/actionlint@v1
+        run: ./scripts/validate-github-workflows.sh
       - name: Validate Kubernetes manifests (syntax/shape)
         run: ./scripts/validate-k8s-manifests.rb
       - name: Explain guarded mode

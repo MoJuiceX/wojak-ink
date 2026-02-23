@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Validate GitHub workflows
-        uses: rhysd/actionlint@v1
+        run: ./scripts/validate-github-workflows.sh
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
