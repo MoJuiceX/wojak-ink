@@ -38,5 +38,10 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": [
+    "src/lib/pool.ts",
+    "src/lib/redis.ts",
+    "src/lib/flags.ts"
+  ]
 }

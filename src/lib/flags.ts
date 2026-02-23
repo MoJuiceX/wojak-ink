@@ -13,7 +13,22 @@ export interface FlagContext {
   userId?: string;
   organizationId?: string;
   environment?: string;
-  custom?: Record<string, any>;
+  custom?: Record<string, unknown>;
+}
+
+interface UnleashStrategy {
+  name: string;
+  parameters: Record<string, string | undefined>;
+}
+
+interface UnleashFeature {
+  name: string;
+  enabled: boolean;
+  strategies?: UnleashStrategy[];
+}
+
+interface UnleashFeatureResponse {
+  features?: UnleashFeature[];
 }
 
 export enum FeatureFlags {
@@ -74,8 +89,8 @@ export class FeatureFlags {
         return defaultValue;
       }
 
-      const data = await response.json();
-      const feature = data.features?.find((f: any) => f.name === flagName);
+      const data = (await response.json()) as UnleashFeatureResponse;
+      const feature = data.features?.find((f) => f.name === flagName);
 
       if (!feature) {
         logger.debug('Feature flag not found', { flagName });
@@ -110,7 +125,7 @@ export class FeatureFlags {
   /**
    * Evaluate feature based on strategies
    */
-  private evaluateFeature(feature: any, context: FlagContext): boolean {
+  private evaluateFeature(feature: UnleashFeature, context: FlagContext): boolean {
     // If feature is not enabled globally
     if (!feature.enabled) {
       return false;
@@ -134,7 +149,7 @@ export class FeatureFlags {
   /**
    * Evaluate individual strategy
    */
-  private evaluateStrategy(strategy: any, context: FlagContext): boolean {
+  private evaluateStrategy(strategy: UnleashStrategy, context: FlagContext): boolean {
     switch (strategy.name) {
       case 'default':
         return true;
@@ -145,17 +160,21 @@ export class FeatureFlags {
           : false;
 
       case 'flexibleRollout':
+      {
         // Percentage-based rollout
         if (!context.userId) return false;
         const percentage = parseInt(strategy.parameters.rollout || '0');
         const hash = this.hashUserId(context.userId);
         return hash % 100 < percentage;
+      }
 
       case 'gradualRollout':
+      {
         // Time-based gradual rollout
         const rolloutPercentage = parseInt(strategy.parameters.percentage || '0');
         const gradualHash = this.hashUserId(context.userId || 'anonymous');
         return gradualHash % 100 < rolloutPercentage;
+      }
 
       default:
         logger.warn('Unknown strategy', { strategy: strategy.name });

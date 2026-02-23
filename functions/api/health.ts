@@ -3,7 +3,7 @@
 // Returns detailed status of all system components
 
 import { writePool, readPool } from '../../src/lib/pool';
-import { redis, cache } from '../../src/lib/redis';
+import { redis } from '../../src/lib/redis';
 import { logger } from '../../src/lib/logger';
 import { metrics } from '../../src/lib/metrics';
 
@@ -38,7 +38,7 @@ async function checkDatabase(): Promise<{ primary: boolean; replica: boolean }> 
 }
 
 async function checkPool(
-  pool: any,
+  pool: { query: (sql: string) => Promise<unknown> },
   name: string
 ): Promise<boolean> {
   try {
@@ -91,7 +91,7 @@ function getUptime(): number {
   return Math.round((Date.now() - startTime) / 1000);
 }
 
-export default async function handler(req: Request): Promise<Response> {
+export default async function handler(_req: Request): Promise<Response> {
   try {
     // Run all health checks in parallel
     const [dbHealth, cacheHealth, memHealth] = await Promise.all([
