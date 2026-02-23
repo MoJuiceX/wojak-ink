@@ -99,6 +99,24 @@ async function main() {
   const softBreaches = budgetChecks.filter((b) => b.level === 'soft');
   const perAssetHardBreaches = jsFiles.filter((f) => f.sizeKb > args.maxJsAssetKb);
 
+  // Detect orphaned JS files (not in explicit groups or budget categories)
+  const budgetedGroups = new Set(Object.keys(BUDGETS));
+  const standaloneGroups = new Set([
+    'standalone-entry',
+    'standalone-runtime',
+    'standalone-wallet-protocol',
+    'standalone-wallet-core',
+    'standalone-wallet-ui',
+    'standalone-wallet-crypto',
+    'standalone-other',
+  ]);
+  const orphanedJsFiles = jsFiles.filter((f) => {
+    if (budgetedGroups.has(f.group)) return false; // Has budget
+    if (standaloneGroups.has(f.group)) return false; // Standalone (tracked separately)
+    return true; // Orphaned!
+  });
+  const orphanedHardBreaches = orphanedJsFiles.filter((f) => f.sizeKb > args.maxJsAssetKb);
+
   const report = {
     generatedAt: new Date().toISOString(),
     distDir: path.relative(repoRoot, args.distDir),
@@ -122,12 +140,22 @@ async function main() {
       group,
       hardKb: args.maxJsAssetKb,
     })),
+    orphanedJs: orphanedJsFiles.map(({ file, bytes, sizeKb, group }) => ({
+      file,
+      bytes,
+      sizeKb,
+      group,
+      hardKb: args.maxJsAssetKb,
+      exceeded: sizeKb > args.maxJsAssetKb,
+    })),
     summary: {
       hardBreaches: hardBreaches.length,
       softBreaches: softBreaches.length,
       perAssetHardBreaches: perAssetHardBreaches.length,
+      orphanedJs: orphanedJsFiles.length,
+      orphanedHardBreaches: orphanedHardBreaches.length,
       status:
-        hardBreaches.length || perAssetHardBreaches.length
+        hardBreaches.length || perAssetHardBreaches.length || orphanedHardBreaches.length
           ? 'hard-fail'
           : softBreaches.length
             ? 'soft-warn'
@@ -146,6 +174,8 @@ async function main() {
   md.push(`- Hard breaches: ${report.summary.hardBreaches}`);
   md.push(`- Soft breaches: ${report.summary.softBreaches}`);
   md.push(`- Per-asset JS hard breaches (>${args.maxJsAssetKb}kB): ${report.summary.perAssetHardBreaches}`);
+  md.push(`- Orphaned JS files (not in budget groups): ${report.summary.orphanedJs}`);
+  md.push(`- Orphaned JS hard breaches (>${args.maxJsAssetKb}kB): ${report.summary.orphanedHardBreaches}`);
   md.push('');
   md.push('## Per-Asset JS Hard Limit');
   md.push(`All shipped JavaScript assets in \`${report.distDir}\` must be <= ${args.maxJsAssetKb} kB.`);
@@ -180,6 +210,18 @@ async function main() {
     md.push('| (none found) | - | - |');
   }
   md.push('');
+  md.push('## Orphaned JS Files');
+  md.push('⚠️ These files are not in explicit budget groups and may have been missed in optimization.');
+  md.push('| File | Group | Size (kB) | Hard Limit | Status |');
+  md.push('|---|---|---:|---:|---|');
+  for (const row of report.orphanedJs) {
+    const status = row.exceeded ? '⚠️ HARD' : 'info';
+    md.push(`| ${row.file} | ${row.group} | ${row.sizeKb.toFixed(2)} | ${row.hardKb} | ${status} |`);
+  }
+  if (!report.orphanedJs.length) {
+    md.push('| (none - all assets accounted for!) | - | - | - | ✓ |');
+  }
+  md.push('');
   md.push('## Top JS Chunks');
   md.push('| File | Group | Size (kB) |');
   md.push('|---|---|---:|');
@@ -197,10 +239,12 @@ async function main() {
 
   await fs.writeFile(args.mdOut, `${md.join('\n')}\n`, 'utf8');
 
-  console.log(`[bundle-budget] status=${report.summary.status} hard=${report.summary.hardBreaches} soft=${report.summary.softBreaches}`);
+  console.log(`[bundle-budget] status=${report.summary.status} hard=${report.summary.hardBreaches} soft=${report.summary.softBreaches} orphaned=${report.summary.orphanedJs}`);
+  console.log(`[bundle-budget] orphaned hard breaches=${report.summary.orphanedHardBreaches}`);
   console.log(`[bundle-budget] wrote ${path.relative(repoRoot, args.jsonOut)} and ${path.relative(repoRoot, args.mdOut)}`);
 
-  if (args.enforceHard && (hardBreaches.length > 0 || perAssetHardBreaches.length > 0)) {
+  if (args.enforceHard && (hardBreaches.length > 0 || perAssetHardBreaches.length > 0 || orphanedHardBreaches.length > 0)) {
+    console.error(`[bundle-budget] FAIL: Found orphaned JS files exceeding ${args.maxJsAssetKb}kB hard limit`);
     process.exitCode = 1;
   }
 }
