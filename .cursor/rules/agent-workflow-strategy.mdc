@@ -1,0 +1,59 @@
+---
+description: AI workflow orchestration — plan first, verify before done, lessons, elegance, autonomous bug fixing
+alwaysApply: true
+---
+
+# Agent Workflow Strategy
+
+Follow this strategy on every session. Read `tasks/lessons.md` at session start when present.
+
+## Workflow Orchestration
+
+### 1. Plan node default
+- **Non-trivial tasks (3+ steps or architectural decisions):** Enter plan mode. Write a plan (e.g. in `tasks/todo.md`) with checkable items before coding.
+- **Re-plan on blockers:** If unforeseen issues arise, STOP and re-plan. Do not push forward with a flawed approach.
+- **Verification in the plan:** Plan verification steps (tests, logs, diff) as well as implementation.
+- **Specs:** Write detailed specs upfront to reduce ambiguity.
+
+### 2. Subagent strategy
+- Use subagents often to keep main context focused.
+- Offload: research, exploration, parallel analysis.
+- For complex problems, use subagents to scale compute.
+- One focused task per subagent.
+
+### 3. Self-improvement loop
+- **After any user correction:** Update `tasks/lessons.md` with the lesson and a rule to prevent recurrence.
+- **Proactive rules:** Write or update internal rules from lessons; iterate until mistake rate drops.
+- **Pre-session:** Review `tasks/lessons.md` (and this rule) before starting a relevant project.
+
+### 4. Verification before done
+- **Proof of work:** Never mark a task complete without proof it works (tests, logs, manual check).
+- **Diff behavior:** Compare behavior of changes vs main/existing code where relevant.
+- **Staff-engineer bar:** Ask "Would a staff engineer approve this?"
+- **Demonstrate:** Run tests, check logs, show correctness.
+
+### 5. Demand elegance (balanced)
+- **Non-trivial changes:** Pause and ask "Is there a more elegant way?"
+- **Hacky fix:** Prefer "Knowing everything I know now, implement the elegant solution."
+- **Simple fixes:** Do not over-engineer; skip deep redesign when the fix is obvious.
+- **Challenge own work:** Critically review before presenting.
+
+### 6. Autonomous bug fixing
+- **Direct fix:** On bug reports, fix directly; use logs, errors, failing tests to find root cause.
+- **Zero context switching:** Resolve without asking for hand-holding.
+- **CI:** Fix failing CI tests proactively when they block the task.
+
+## Task management (6 steps)
+
+1. **Plan first:** Write plan with checkable items in `tasks/todo.md`.
+2. **Verify plan:** Check plan for completeness before implementation.
+3. **Track progress:** Mark items complete in `tasks/todo.md` as you go.
+4. **Explain changes:** Provide a short summary of changes at each step.
+5. **Document results:** Add a review section to `tasks/todo.md` with outcomes.
+6. **Capture lessons:** Update `tasks/lessons.md` after corrections or successful patterns.
+
+## Core principles
+
+- **Simplicity first:** Make every change as simple as possible; minimal code and impact.
+- **No laziness:** Find and fix root causes; avoid temporary fixes; senior developer standards.
+- **Minimal impact:** Change only what is necessary; avoid introducing new bugs.

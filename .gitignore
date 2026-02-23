@@ -19,7 +19,9 @@ dist-ssr
 .vscode/*
 !.vscode/extensions.json
 .idea
-.cursor
+.cursor/*
+!.cursor/skills/
+!.cursor/rules/
 .DS_Store
 *.suo
 *.ntvs*
@@ -27,6 +29,9 @@ dist-ssr
 *.sln
 *.sw?
 public/assets/wojak-layers/*.md
+
+# Temp clone for skill install
+.mattpocock-skills-tmp
 
 # Local Claude context (personal preferences)
 .claude/CLAUDE.local.md
