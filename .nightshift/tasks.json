@@ -452,6 +452,245 @@
       ]
     },
     {
+      "id": "image-optimization-progressive",
+      "title": "Implement progressive image loading and lazy-loading",
+      "enabled": true,
+      "category": "performance",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 3600000,
+      "commands": [
+        "codex --task 'Add progressive image loading (blur→full) to Gallery, Rankings, NFTCard components. Implement loading=\"lazy\" on all image components. Add WebP with PNG fallback. Cache IPFS URLs in localStorage with 24h TTL. Run tests and build. Commit optimizations.'"
+      ],
+      "expectedOutputs": [
+        "git diff with image optimization changes",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Progressive loading + lazy-loading implemented and tested"
+      ]
+    },
+    {
+      "id": "skeleton-loaders-ui",
+      "title": "Add skeleton loaders to high-traffic pages",
+      "enabled": true,
+      "category": "ux",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 3600000,
+      "commands": [
+        "codex --task 'Create SkeletonCard, SkeletonRanking, SkeletonVoteCard components. Add skeleton loaders to Gallery, Rankings, and FightClub pages. Implement progressive reveal (headers first, then content). Run tests. Commit UX improvements.'"
+      ],
+      "expectedOutputs": [
+        "new skeleton component files",
+        "git diff with skeleton usage",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Skeleton loaders added to at least 3 pages"
+      ]
+    },
+    {
+      "id": "api-caching-and-dedup",
+      "title": "Implement smart API caching and request deduplication",
+      "enabled": true,
+      "category": "performance",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 3600000,
+      "commands": [
+        "codex --task 'Create useCachedFetch hook with TTL-based caching (60-300s). Implement in-flight request deduplication. Add localStorage fallback for offline. Update Gallery, Rankings, FightClub to use useCachedFetch. Run tests and build. Commit hook and integrations.'"
+      ],
+      "expectedOutputs": [
+        "src/hooks/useCachedFetch.ts",
+        "git diff with hook usage",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Hook implemented and integrated into 3+ pages"
+      ]
+    },
+    {
+      "id": "error-handling-and-retry",
+      "title": "Add robust error handling and retry logic",
+      "enabled": true,
+      "category": "reliability",
+      "risk": "medium",
+      "runtime": "medium",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 3600000,
+      "commands": [
+        "codex --task 'Add inline error components with Retry buttons to Gallery, FightClub, Rankings. Implement exponential backoff for failed votes. Add toast notifications for success/error. Update IPFS fallback CDN visibility. Run tests. Commit error improvements.'"
+      ],
+      "expectedOutputs": [
+        "git diff with error handling",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Error recovery implemented on 2+ critical pages"
+      ]
+    },
+    {
+      "id": "mobile-responsive-polish",
+      "title": "Polish mobile UX (touch targets, layout, responsive)",
+      "enabled": true,
+      "category": "ux",
+      "risk": "low",
+      "runtime": "long",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 5400000,
+      "commands": [
+        "codex --task 'Audit FightClub vote card on mobile (<600px). Increase button tap zones to 44px minimum. Reorganize vote card layout (vertical on mobile, horizontal on desktop). Stack rankings list appropriately. Test on multiple breakpoints. Commit mobile improvements.'"
+      ],
+      "expectedOutputs": [
+        "git diff with mobile CSS/layout changes",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Mobile FightClub and Rankings polished and tested"
+      ]
+    },
+    {
+      "id": "animations-and-micro-interactions",
+      "title": "Add entrance animations and micro-interactions",
+      "enabled": true,
+      "category": "ux",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 3600000,
+      "commands": [
+        "codex --task 'Add entrance animations (fade-in, slide-up) to pages. Add vote feedback animations (scale pulse on vote submit). Add score tick animations. Create custom Wojak spinner. Add hover effects (card lift, button glow). Respect prefers-reduced-motion. Update src/styles/animations.css. Commit animations.'"
+      ],
+      "expectedOutputs": [
+        "src/styles/animations.css additions",
+        "git diff with animation usage",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "At least 5 animations implemented and working"
+      ]
+    },
+    {
+      "id": "accessibility-audit-and-fixes",
+      "title": "Accessibility audit and remediation (A11y)",
+      "enabled": true,
+      "category": "ux",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 3600000,
+      "commands": [
+        "codex --task 'Run a11y checks: add aria-labels to all icon buttons, verify tab order, check color contrast (≥4.5:1 for text). Fix keyboard nav issues. Associate form labels with inputs. Use axe DevTools checks as reference. Commit a11y fixes.'"
+      ],
+      "expectedOutputs": [
+        "git diff with a11y fixes",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "At least 10 a11y issues identified and fixed"
+      ]
+    },
+    {
+      "id": "css-cleanup-consolidated",
+      "title": "CSS consolidation and theme.css optimization",
+      "enabled": true,
+      "category": "quality",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 3600000,
+      "commands": [
+        "codex --task 'Audit components for inline styles or scattered CSS. Consolidate all visual styles into src/styles/theme.css. Remove !important rules. Use CSS variables consistently. Ensure Tailwind is layout-only (no colors/sizing overrides). Validate build. Commit CSS cleanup.'"
+      ],
+      "expectedOutputs": [
+        "src/styles/theme.css diff",
+        "git diff with consolidated styles",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "All visual styles consolidated to theme.css"
+      ]
+    },
+    {
+      "id": "typescript-strict-mode-audit",
+      "title": "Audit and enable stricter TypeScript checks",
+      "enabled": true,
+      "category": "quality",
+      "risk": "medium",
+      "runtime": "long",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 5400000,
+      "commands": [
+        "codex --task 'Review tsconfig.json. Enable stricter flags (noImplicitAny, exactOptionalPropertyTypes if safe). Identify breaking changes. Fix type issues incrementally. Validate tests and build. Commit TS improvements.'"
+      ],
+      "expectedOutputs": [
+        "tsconfig.json diff",
+        "git diff with type fixes",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Stricter TS checks validated without breaking builds"
+      ]
+    },
+    {
+      "id": "git-cleanup-and-rebase",
+      "title": "Clean up branch history and prepare final PR",
+      "enabled": true,
+      "category": "ops",
+      "risk": "low",
+      "runtime": "short",
+      "mode": "assistant_fix",
+      "mutatesCode": false,
+      "timeoutMs": 1800000,
+      "commands": [
+        "codex --task 'Review all commits on nightly branch. Ensure commit messages are clear and atomic. Prepare PR description with summary of all changes, impact metrics, and testing notes. Create nightshift-FINAL-SUMMARY.md with all achievements.'"
+      ],
+      "expectedOutputs": [
+        "PR description",
+        "reports/nightshift-FINAL-SUMMARY.md"
+      ],
+      "doneCriteria": [
+        "Branch is clean and ready for review/merge"
+      ]
+    },
+    {
+      "id": "final-validation-and-polish",
+      "title": "Final full validation (build, tests, lint, type-check)",
+      "enabled": true,
+      "category": "reliability",
+      "risk": "low",
+      "runtime": "long",
+      "mode": "report",
+      "mutatesCode": false,
+      "timeoutMs": 3600000,
+      "commands": [
+        "npx tsc --noEmit",
+        "npx eslint src functions workers tests scripts --ext .ts,.tsx,.js,.mjs,.cjs",
+        "npm run test:unit",
+        "npm run build"
+      ],
+      "expectedOutputs": [
+        "reports/nightshift-FINAL-VALIDATION.md",
+        "logs/nightshift-<timestamp>.log"
+      ],
+      "doneCriteria": [
+        "All checks pass, no errors or warnings"
+      ]
+    },
+    {
       "id": "queue-expansion-from-findings",
       "title": "Generate next-night queue proposals from findings",
       "enabled": true,
