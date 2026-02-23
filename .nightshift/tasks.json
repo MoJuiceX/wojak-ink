@@ -88,7 +88,9 @@
       "runtime": "short",
       "mode": "report",
       "mutatesCode": false,
-      "dependsOn": ["checks-fast-baseline"],
+      "dependsOn": [
+        "checks-fast-baseline"
+      ],
       "timeoutMs": 120000,
       "commands": [
         "rg -n \"(\\[stdout\\]|\\[stderr\\]).*(FAIL  |Failed Tests|Test Files)\" \"{{LOG_PATH}}\" || true"
@@ -249,7 +251,7 @@
     {
       "id": "security-upgrade-lodash",
       "title": "Upgrade lodash to patched version",
-      "enabled": false,
+      "enabled": true,
       "category": "security",
       "risk": "low",
       "runtime": "medium",
@@ -271,12 +273,12 @@
         "Lodash advisory no longer reported",
         "Checks pass or failure captured"
       ],
-      "disabledReason": "Enable after baseline reports are reviewed"
+      "disabledReason": null
     },
     {
       "id": "security-upgrade-swiper",
       "title": "Upgrade swiper to patched version",
-      "enabled": false,
+      "enabled": true,
       "category": "security",
       "risk": "medium",
       "runtime": "medium",
@@ -298,12 +300,12 @@
         "Swiper advisory no longer reported",
         "Checks pass or failure captured"
       ],
-      "disabledReason": "Enable after baseline reports are reviewed"
+      "disabledReason": null
     },
     {
       "id": "lint-scope-hardening",
       "title": "Add scoped lint commands for night runs",
-      "enabled": false,
+      "enabled": true,
       "category": "ci",
       "risk": "low",
       "runtime": "short",
@@ -320,12 +322,12 @@
       "doneCriteria": [
         "New lint scripts run successfully"
       ],
-      "disabledReason": "Enable after scaffolding is validated"
+      "disabledReason": null
     },
     {
       "id": "playwright-safety-guard",
       "title": "Block production Playwright baseURL for unattended runs",
-      "enabled": false,
+      "enabled": true,
       "category": "safety",
       "risk": "low",
       "runtime": "short",
@@ -342,7 +344,112 @@
       "doneCriteria": [
         "Unattended mode refuses production baseURL"
       ],
-      "disabledReason": "Enable after dry-run policy review"
+      "disabledReason": null
+    },
+    {
+      "id": "bundle-optimization-analysis",
+      "title": "Analyze and optimize large chunks (>600kB)",
+      "enabled": true,
+      "category": "performance",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 3600000,
+      "commands": [
+        "codex --task 'Analyze the 600kB+ chunks (index-C3DoTY4g.js, vendor-wallet-CDY4elrJ.js). Review vite.config for manual chunk splits. Suggest and implement safe code-splitting strategy to reduce chunk sizes. Validate with npm run build. Commit if improvement achieved.'"
+      ],
+      "expectedOutputs": [
+        "vite.config.ts diff",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Chunks analyzed, strategy implemented or documented"
+      ]
+    },
+    {
+      "id": "dead-code-and-unused-deps",
+      "title": "Identify and remove dead code / unused dependencies",
+      "enabled": true,
+      "category": "quality",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 3600000,
+      "commands": [
+        "codex --task 'Use npx depcheck and manual review to find unused dependencies and dead code. Remove safe, unused imports/functions. Run tests and build to validate. Commit safe removals only.'"
+      ],
+      "expectedOutputs": [
+        "git diff showing removals",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "At least one unused dependency or dead code block removed"
+      ]
+    },
+    {
+      "id": "test-coverage-gaps",
+      "title": "Identify and close critical test coverage gaps",
+      "enabled": true,
+      "category": "reliability",
+      "risk": "medium",
+      "runtime": "long",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 5400000,
+      "commands": [
+        "codex --task 'Run npm run test:coverage (if available) or vitest --coverage. Identify critical untested functions in src/pages, src/services, functions/api. Write targeted tests for 2-3 high-impact gaps. Validate coverage improves. Commit tests.'"
+      ],
+      "expectedOutputs": [
+        "new test files or test additions",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Coverage report generated, tests added for high-impact gaps"
+      ]
+    },
+    {
+      "id": "performance-profiling",
+      "title": "Profile and optimize slow components",
+      "enabled": true,
+      "category": "performance",
+      "risk": "medium",
+      "runtime": "long",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 5400000,
+      "commands": [
+        "codex --task 'Review src/pages for performance bottlenecks (useMemo/useCallback misses, unnecessary re-renders). Profile FightClub voting, gallery listing, and arcade games. Add memoization where safe. Validate with build and unit tests. Commit optimizations.'"
+      ],
+      "expectedOutputs": [
+        "git diff with memoization/perf fixes",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "At least 2-3 performance improvements identified and implemented"
+      ]
+    },
+    {
+      "id": "docs-cleanup-and-updates",
+      "title": "Update docs and generate nightshift summary",
+      "enabled": true,
+      "category": "dx",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 1800000,
+      "commands": [
+        "codex --task 'Review docs/ folder. Update CLAUDE.md, PROJECT_DOCUMENTATION.md with latest nightshift findings. Create docs/NIGHTSHIFT-GUIDE.md explaining nightly automation. Generate final summary of all changes and recommendations.'"
+      ],
+      "expectedOutputs": [
+        "docs/*.md diffs",
+        "reports/nightshift-FINAL-SUMMARY.md"
+      ],
+      "doneCriteria": [
+        "Docs updated, final summary generated"
+      ]
     },
     {
       "id": "queue-expansion-from-findings",
