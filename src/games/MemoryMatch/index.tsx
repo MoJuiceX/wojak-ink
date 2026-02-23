@@ -317,12 +317,14 @@ const MemoryMatchGame: React.FC = () => {
       }))
     : localLeaderboard;
 
+  // Intentionally avoid `startGame` dependency to prevent replaying auto-start when callback identity changes.
   useEffect(() => {
     if (gameState === 'loading' && metadata.length > 0 && !devMode && cards.length === 0) {
       queueMicrotask(() => startGame());
     }
-  }, [metadata, gameState, devMode, cards.length]);
+  }, [metadata, gameState, devMode, cards.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Intentionally avoid `completeRound` dependency so round completion only reacts to round state changes.
   useEffect(() => {
     flippedCardsRef.current = flippedCards;
   }, [flippedCards]);
@@ -453,7 +455,7 @@ const MemoryMatchGame: React.FC = () => {
     if (matches === config.pairs && gameState === 'playing') {
       queueMicrotask(() => completeRound());
     }
-  }, [matches, gameState, round, devMode]);
+  }, [matches, gameState, round, devMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (gameState !== 'playing' || devMode) return;

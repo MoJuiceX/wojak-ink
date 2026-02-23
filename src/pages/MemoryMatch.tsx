@@ -671,7 +671,7 @@ const MemoryMatch: React.FC = () => {
     }
 
     isPreloadingRef.current = false;
-  }, [metadata, shuffleCards]);
+  }, [metadata, shuffleCards]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Preload first round when metadata is ready and we're on idle screen
   useEffect(() => {
@@ -845,7 +845,7 @@ const MemoryMatch: React.FC = () => {
     if (gameState === 'loading' && metadata.length > 0 && cards.length === 0) {
       startGame();
     }
-  }, [metadata, gameState, cards.length]);
+  }, [metadata, gameState, cards.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Keep flippedCardsRef in sync with state
   useEffect(() => {
@@ -1250,7 +1250,7 @@ const MemoryMatch: React.FC = () => {
     if (matches === config.pairs && gameState === 'playing') {
       completeRound();
     }
-  }, [matches, gameState, round]);
+  }, [matches, gameState, round]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Timer - time out = game over (pause when exit dialog shown, quit dialog shown, or tab hidden)
   useEffect(() => {
@@ -1416,7 +1416,7 @@ const MemoryMatch: React.FC = () => {
         card.classList.remove('anticipation-1', 'anticipation-2', 'near-win-highlight', 'struggle-shimmer');
       });
     };
-  }, [gameState, round, matches, timeLeft]);
+  }, [gameState, round, matches, timeLeft]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Reset near-win shimmer on round start
   useEffect(() => {
