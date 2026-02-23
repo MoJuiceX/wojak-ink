@@ -8,9 +8,6 @@ test.describe('Wallet Connect Smoke Test', () => {
     // Wait for page to load
     await page.waitForLoadState('networkidle');
 
-    // Look for wallet connect button (common button text patterns)
-    // (Button existence is verified below in buttonCount)
-
     // Button should exist on page
     const buttonCount = await page.locator('button').count();
     expect(buttonCount).toBeGreaterThan(0);
