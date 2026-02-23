@@ -83,6 +83,21 @@ function redact(text, redactors) {
   return out;
 }
 
+function shellQuote(value) {
+  return `'${String(value).replace(/'/g, `'\\''`)}'`;
+}
+
+function normalizeCommand(command) {
+  const legacyTaskMatch = command.match(/^\s*codex\s+--task\s+(['"])([\s\S]*)\1\s*$/);
+  if (legacyTaskMatch) {
+    const prompt = legacyTaskMatch[2];
+    // Queue files authored by humans may still use the legacy `codex --task` form.
+    // Normalize to a non-interactive invocation so Night Shift can execute unattended.
+    return `codex exec --full-auto --cd ${shellQuote(repoRoot)} ${shellQuote(prompt)}`;
+  }
+  return command;
+}
+
 function classifyCommand(command, policy, allowE2E = false) {
   if (allowE2E && /playwright\s+test/.test(command)) {
     return { allowed: true, reason: 'allow-e2e override' };
@@ -113,7 +128,7 @@ function expandCommandTemplate(command, state) {
   for (const [token, value] of Object.entries(replacements)) {
     expanded = expanded.split(token).join(value);
   }
-  return expanded;
+  return normalizeCommand(expanded);
 }
 
 async function runGit(args, { cwd = repoRoot } = {}) {
