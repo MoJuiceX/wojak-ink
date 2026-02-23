@@ -134,14 +134,18 @@
       "mutatesCode": false,
       "timeoutMs": 1800000,
       "commands": [
-        "npm run build"
+        "npm run build",
+        "npm run bundle:report -- --json-out=reports/bundle-budget-{{RUN_ID}}.json --md-out=reports/bundle-budget-{{RUN_ID}}.md"
       ],
       "expectedOutputs": [
         "reports/nightshift-<timestamp>.md",
-        "logs/nightshift-<timestamp>.log"
+        "logs/nightshift-<timestamp>.log",
+        "reports/bundle-budget-<run-id>.json",
+        "reports/bundle-budget-<run-id>.md"
       ],
       "doneCriteria": [
-        "Chunk warnings and largest assets visible in report"
+        "Chunk warnings and largest assets visible in report",
+        "Machine-readable bundle budget report generated"
       ]
     },
     {
