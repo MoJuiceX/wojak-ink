@@ -348,6 +348,13 @@ Theme selection, audio controls, and app configuration.
 # Start dev server (accessible on local network for phone testing)
 npm run dev -- --host
 
+# Predictable linting (automation-friendly scoped commands)
+npm run lint:app
+npm run lint:functions
+npm run lint:workers
+npm run lint:scripts
+npm run lint:scoped
+
 # Production build
 npm run build
 
@@ -360,10 +367,11 @@ npx wrangler pages deploy dist --project-name=wojak-ink
 
 ### Local Testing Workflow
 1. Run `npm run dev -- --host`
-2. Note the Network URL (e.g., `http://192.168.1.143:5177`)
-3. Open on phone (same WiFi network)
-4. Test, iterate, repeat
-5. When satisfied: commit, push, deploy
+2. Run scoped lint as needed (`lint:app`, `lint:functions`, `lint:workers`, `lint:scripts`, or `lint:scoped`)
+3. Note the Network URL (e.g., `http://192.168.1.143:5177`)
+4. Open on phone (same WiFi network)
+5. Test, iterate, repeat
+6. When satisfied: commit, push, deploy
 
 ### Key Files
 | File | Purpose |
