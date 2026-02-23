@@ -3902,6 +3902,266 @@ body {
 
 /* ── Mobile overrides ── */
 
+/* ════════════════════════════════════════════════════════════════════════════
+   PHASE 4 UX POLISH: MOBILE RESPONSIVE ENHANCEMENTS
+   Audit: FightClub vote card on <600px screens
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Extra small screens (<360px) ── */
+@media (max-width: 359px) {
+  .vote-card-stack {
+    max-width: calc(100vw - 16px);
+    aspect-ratio: 1 / 1.2;
+  }
+
+  .vote-buttons-row {
+    max-width: calc(100vw - 16px);
+    gap: 10px;
+    padding: 8px 8px;
+  }
+
+  .vote-btn-pill {
+    min-height: 44px;
+    height: 44px;
+    font-size: 0.9rem;
+  }
+
+  .vote-btn-label {
+    font-size: 0.9rem;
+  }
+
+  .vote-card-info {
+    padding: 10px 12px;
+  }
+
+  .vote-card-info-name {
+    font-size: 15px;
+  }
+}
+
+/* ── Small screens (360px - 599px) ── MAIN MOBILE BREAKPOINT */
+@media (max-width: 599px) {
+  .voting-page {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .voting-page-side {
+    display: none;
+  }
+
+  /* ── Vote Card: Mobile Vertical Layout ── */
+  .vote-card {
+    max-width: calc(100vw - 20px);
+    width: 100%;
+  }
+
+  /* ── Vote Pass Strip: Compact mobile layout ── */
+  .vote-pass-strip {
+    max-width: calc(100vw - 20px);
+    margin: 0 auto -2px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    gap: 4px;
+  }
+
+  .vote-pass-strip-row {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .vote-pass-strip-label {
+    font-size: 0.58rem;
+    letter-spacing: 0.6px;
+  }
+
+  .vote-pass-strip-value {
+    font-size: 0.68rem;
+  }
+
+  .vote-pass-strip-track {
+    margin-top: 4px;
+    height: 4px;
+  }
+
+  .vote-pass-strip-meta {
+    margin-top: 4px;
+    font-size: 0.6rem;
+  }
+
+  /* ── Card Stack: Optimized for mobile ── */
+  .vote-card-stack {
+    max-width: calc(100vw - 20px);
+    max-height: none;
+    aspect-ratio: 1 / 1.18;
+    margin: 0 auto;
+  }
+
+  /* ── Vote Card Info: Enhanced mobile readability ── */
+  .vote-card-info {
+    padding: 11px 13px 12px;
+  }
+
+  .vote-card-info-main {
+    gap: 6px;
+  }
+
+  .vote-card-info-titleline {
+    gap: 6px;
+  }
+
+  .vote-card-info-name {
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .vote-card-info-edition {
+    font-size: 12px;
+  }
+
+  .vote-card-info-stats {
+    gap: 8px;
+  }
+
+  .vote-card-stat {
+    padding: 3px 7px;
+    font-size: 0.7rem;
+  }
+
+  .vote-card-stat-label {
+    font-size: 0.62rem;
+    opacity: 0.7;
+  }
+
+  /* ── Vote Buttons Row: CRITICAL MOBILE ACCESSIBILITY ──
+     Minimum 44px tap zone (WCAG 2.5.5 Level AAA)
+     Uses full-width layout for easier thumb access on mobile
+  */
+  .vote-buttons-row {
+    max-width: calc(100vw - 20px);
+    width: 100%;
+    gap: 12px;
+    position: sticky;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 86px);
+    z-index: 18;
+    padding: 10px 10px 11px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(20, 20, 28, 0.92), rgba(10, 10, 15, 0.88));
+    backdrop-filter: blur(12px) saturate(130%);
+    -webkit-backdrop-filter: blur(12px) saturate(130%);
+    border: 1px solid var(--color-white-7);
+    box-shadow: 0 16px 32px var(--color-black-55), inset 0 1px 0 var(--color-white-5);
+    display: flex;
+    align-items: stretch;
+  }
+
+  /* ── Vote Buttons: MOBILE-OPTIMIZED TAP ZONES ── */
+  .vote-btn-pill {
+    /* Minimum 44px height for WCAG compliance */
+    min-height: 48px;
+    height: 48px;
+    flex: 1;
+    border-radius: 12px;
+    font-size: 1.02rem;
+    font-weight: 700;
+    padding: 4px 8px;
+    /* Enhanced touch feedback */
+    transition: transform 120ms ease-out, 
+                background 120ms ease-out, 
+                box-shadow 120ms ease-out,
+                border-color 120ms ease-out;
+  }
+
+  .vote-btn-pill:active {
+    transform: scale(0.94);
+  }
+
+  .vote-btn-label {
+    font-size: 1rem;
+    line-height: 1;
+    font-weight: 700;
+  }
+
+  .vote-btn-fade {
+    background: linear-gradient(180deg, rgba(239, 68, 68, 0.11), rgba(239, 68, 68, 0.06));
+    border-color: rgba(239, 68, 68, 0.24);
+    color: var(--color-error);
+  }
+
+  .vote-btn-fade:active {
+    background: rgba(239, 68, 68, 0.18);
+    border-color: rgba(239, 68, 68, 0.35);
+  }
+
+  .vote-btn-glaze {
+    background: linear-gradient(180deg, rgba(34, 197, 94, 0.11), rgba(34, 197, 94, 0.06));
+    border-color: rgba(34, 197, 94, 0.24);
+    color: var(--color-success);
+  }
+
+  .vote-btn-glaze:active {
+    background: rgba(34, 197, 94, 0.18);
+    border-color: rgba(34, 197, 94, 0.35);
+  }
+
+  /* ── Session Stats Strip: Mobile layout ── */
+  .session-stats-strip {
+    gap: 8px;
+    flex-wrap: wrap;
+    max-width: calc(100vw - 24px);
+    width: 100%;
+    margin: 0 auto 4px;
+    font-size: 0.66rem;
+    justify-content: center;
+    padding: 0 12px;
+  }
+
+  /* ── Vote feedback flash ── */
+  .vote-feedback-flash {
+    max-width: calc(100vw - 48px);
+    text-align: center;
+  }
+}
+
+/* ── Medium screens (600px - 767px) ── */
+@media (min-width: 600px) and (max-width: 767px) {
+  .voting-page {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .voting-page-side {
+    display: none;
+  }
+
+  .vote-card-stack {
+    max-width: 540px;
+    aspect-ratio: 1 / 1.14;
+    max-height: none;
+  }
+
+  .vote-buttons-row {
+    max-width: 540px;
+    position: relative;
+    bottom: auto;
+    background: transparent;
+    backdrop-filter: none;
+    border: none;
+    box-shadow: none;
+    padding: 16px 0 0;
+  }
+
+  .vote-btn-pill {
+    min-height: 52px;
+    height: 52px;
+  }
+
+  .vote-pass-strip {
+    max-width: 540px;
+  }
+}
+
+/* ── Legacy mobile overrides (768px and below) ── */
 @media (max-width: 767px) {
   .voting-page {
     display: flex;
@@ -3918,81 +4178,367 @@ body {
 
   .vote-pass-strip {
     max-width: calc(100vw - 20px);
-    padding: 9px 10px;
-    border-radius: 12px;
-  }
-
-  .vote-pass-strip-label {
-    font-size: 0.62rem;
-    letter-spacing: 0.65px;
-  }
-
-  .vote-pass-strip-value {
-    font-size: 0.72rem;
-  }
-
-  .vote-pass-strip-meta {
-    font-size: 0.64rem;
   }
 
   .vote-card-stack {
     max-width: calc(100vw - 20px);
-    max-height: none;
-    aspect-ratio: 1 / 1.18;
   }
 
   .vote-buttons-row {
     max-width: calc(100vw - 20px);
-    position: sticky;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 86px);
-    z-index: 18;
-    padding: 10px 10px 11px;
-    border-radius: 20px;
-    background: linear-gradient(180deg, rgba(20, 20, 28, 0.9), rgba(10, 10, 15, 0.86));
-    backdrop-filter: blur(14px) saturate(135%);
-    -webkit-backdrop-filter: blur(14px) saturate(135%);
-    border: 1px solid var(--color-white-8);
-    box-shadow: 0 18px 34px var(--color-black-55), inset 0 1px 0 var(--color-white-5);
-  }
-
-  .vote-btn {
-    width: 64px;
-    height: 64px;
   }
 
   .vote-btn svg {
-    width: 28px;
-    height: 28px;
-  }
-
-  .vote-btn-pill {
-    min-height: 52px;
-    height: 52px;
-    font-size: 0.98rem;
-    border-width: 1px;
-  }
-
-  .vote-btn-label {
-    font-size: 0.98rem;
+    width: 24px;
+    height: 24px;
   }
 
   .vote-feedback-flash {
     max-width: calc(100vw - 48px);
     text-align: center;
   }
+}
 
-  .session-stats-strip {
-    gap: 10px;
-    flex-wrap: nowrap;
-    max-width: calc(100vw - 24px);
-    width: fit-content;
-    margin: 0 auto 4px;
-    font-size: 0.68rem;
-    white-space: nowrap;
+/* ════════════════════════════════════════════════════════════════════════════
+   PHASE 4 UX POLISH: ANIMATIONS & MICRO-INTERACTIONS
+   Premium entrance animations, vote feedback, score ticks, custom spinner
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── ENTRANCE ANIMATIONS ── */
+
+/* Fade-in entrance */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
-/* ── Reduced Motion ── */
+/* Slide-up entrance */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Staggered card entrance */
+@keyframes card-entrance {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ── VOTE FEEDBACK ANIMATIONS ── */
+
+/* Scale pulse on vote submit */
+@keyframes vote-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Glaze feedback (right/like) */
+@keyframes glaze-pulse {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0px rgba(34, 197, 94, 0));
+  }
+  50% {
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 12px rgba(34, 197, 94, 0.4));
+  }
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0px rgba(34, 197, 94, 0));
+  }
+}
+
+/* Fade feedback (left/dislike) */
+@keyframes fade-pulse {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0px rgba(239, 68, 68, 0));
+  }
+  50% {
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.4));
+  }
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0px rgba(239, 68, 68, 0));
+  }
+}
+
+/* ── SCORE TICK ANIMATIONS ── */
+
+/* Score increment tick */
+@keyframes score-tick {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  80% {
+    opacity: 1;
+    transform: scale(1.1) translateY(-8px);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1) translateY(-16px);
+  }
+}
+
+/* Vote count increment */
+@keyframes vote-count-pop {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ── CUSTOM WOJAK SPINNER ── */
+
+/* Rotating spinner */
+@keyframes wojak-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Wobble effect for character */
+@keyframes wojak-wobble {
+  0%, 100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  25% {
+    transform: translateX(-3px) rotate(-2deg);
+  }
+  75% {
+    transform: translateX(3px) rotate(2deg);
+  }
+}
+
+/* Pulse glow for spinner */
+@keyframes spinner-glow-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 0px rgba(255, 107, 0, 0));
+  }
+  50% {
+    filter: drop-shadow(0 0 16px rgba(255, 107, 0, 0.6));
+  }
+}
+
+/* ── HOVER EFFECTS ── */
+
+/* Card lift on hover */
+@keyframes card-lift {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-8px);
+  }
+}
+
+/* Button glow effect */
+@keyframes button-glow {
+  0%, 100% {
+    box-shadow: 0 0 0px rgba(34, 197, 94, 0);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
+  }
+}
+
+/* Button glow for dislike */
+@keyframes button-glow-dislike {
+  0%, 100% {
+    box-shadow: 0 0 0px rgba(239, 68, 68, 0);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+  }
+}
+
+/* ── APPLICATION CLASSES FOR ANIMATIONS ── */
+
+/* Vote card with entrance animation */
+.vote-card-entrance {
+  animation: card-entrance 450ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+/* Vote pass strip entrance */
+.vote-pass-strip-entrance {
+  animation: slide-up 400ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+/* Vote buttons entrance */
+.vote-buttons-entrance {
+  animation: slide-up 500ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+/* Session stats entrance */
+.session-stats-entrance {
+  animation: fade-in 350ms ease-out forwards;
+}
+
+/* Vote feedback - glaze */
+.vote-card-stack-pulse-glaze {
+  animation: glaze-pulse 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Vote feedback - fade */
+.vote-card-stack-pulse-fade {
+  animation: fade-pulse 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Score tick animation */
+.score-tick {
+  animation: score-tick 1000ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  position: absolute;
+  pointer-events: none;
+  font-weight: 700;
+  color: var(--color-success);
+}
+
+/* Vote count pop */
+.vote-count-pop {
+  animation: vote-count-pop 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Custom Wojak spinner */
+.wojak-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.wojak-spinner-ring {
+  width: 48px;
+  height: 48px;
+  border: 3px solid transparent;
+  border-top-color: var(--color-primary);
+  border-right-color: var(--color-primary);
+  border-radius: 50%;
+  animation: wojak-spin 1.2s linear infinite;
+}
+
+.wojak-spinner-wobble {
+  font-size: 32px;
+  animation: wojak-wobble 1.5s ease-in-out infinite;
+}
+
+.wojak-spinner-glow {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: rgba(255, 107, 0, 0.3);
+  animation: wojak-spin 2s linear infinite, spinner-glow-pulse 2s ease-in-out infinite;
+  position: absolute;
+  z-index: -1;
+}
+
+/* ── HOVER EFFECTS ON DESKTOP ── */
+
+@media (hover: hover) {
+  /* Card lift on hover */
+  .vote-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 48px var(--color-black-50);
+  }
+
+  /* Button hover with glow */
+  .vote-btn-glaze:hover {
+    animation: button-glow 1.5s ease-in-out infinite;
+  }
+
+  .vote-btn-fade:hover {
+    animation: button-glow-dislike 1.5s ease-in-out infinite;
+  }
+
+  /* Pill button hover enhancement */
+  .vote-btn-pill:hover {
+    transform: translateY(-2px);
+    transition: transform 120ms ease-out, 
+                background 120ms ease-out, 
+                box-shadow 120ms ease-out;
+  }
+}
+
+/* ── REDUCED MOTION SUPPORT ── */
+
+@media (prefers-reduced-motion: reduce) {
+  /* Disable all animations when reduced motion is preferred */
+  .vote-card-entrance,
+  .vote-pass-strip-entrance,
+  .vote-buttons-entrance,
+  .session-stats-entrance,
+  .vote-card-stack-pulse-glaze,
+  .vote-card-stack-pulse-fade,
+  .score-tick,
+  .vote-count-pop,
+  .wojak-spinner-ring,
+  .wojak-spinner-wobble,
+  .wojak-spinner-glow {
+    animation: none !important;
+  }
+
+  /* Remove hover animations */
+  .vote-card {
+    transform: none !important;
+  }
+
+  .vote-card:hover {
+    transform: none !important;
+  }
+
+  .vote-btn-pill:hover {
+    transform: none !important;
+  }
+
+  .vote-btn-glaze:hover,
+  .vote-btn-fade:hover {
+    animation: none !important;
+  }
+
+  /* Instant state transitions */
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Reduced Motion Legacy ── */
 
 @media (prefers-reduced-motion: reduce) {
   .vote-card-wiggle {
@@ -4827,6 +5373,105 @@ body {
   }
 }
 
+/* ════════════════════════════════════════════════════════════════════════════
+   PHASE 4 UX POLISH: RANKINGS MOBILE RESPONSIVE STACKING
+   Enhanced mobile layout for rankings tab on <600px screens
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Mobile Rankings: <600px Vertical Stacking ── */
+@media (max-width: 599px) {
+  /* Your position card: stacked layout on mobile */
+  .your-position-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .your-position-rank {
+    min-width: 100%;
+    text-align: left;
+    font-size: 1.25rem;
+  }
+
+  .your-position-info {
+    width: 100%;
+  }
+
+  /* Community player row: mobile stacking */
+  .community-player-row {
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+  }
+
+  .community-player-status {
+    grid-column: 2;
+    white-space: normal;
+    line-height: 1.3;
+  }
+
+  /* Rankings header: stack on mobile */
+  .community-players-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  /* Rankings card: reduce padding */
+  .community-players-card {
+    padding: 12px;
+    border-radius: 14px;
+    border: 1px solid var(--color-white-8);
+  }
+
+  /* Player name: truncation for mobile */
+  .community-player-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .community-player-meta {
+    font-size: 0.64rem;
+    line-height: 1.3;
+  }
+
+  /* Player rank badge: centered */
+  .community-player-rank {
+    text-align: center;
+    font-size: 0.7rem;
+  }
+
+  /* Rankings content: full width on mobile */
+  .rankings-content {
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Rank badge: mobile sizing */
+  .rank-badge {
+    min-width: 32px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+}
+
+/* ── Legacy mobile overrides (600px-767px) ── */
+@media (min-width: 600px) and (max-width: 767px) {
+  .community-player-row {
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+    gap: 10px;
+    padding: 9px 11px;
+  }
+
+  .community-players-card {
+    padding: 11px;
+  }
+}
+
+/* ── Fallback for older mobile styles ── */
 @media (max-width: 767px) {
   .community-player-row {
     grid-template-columns: 30px minmax(0, 1fr);

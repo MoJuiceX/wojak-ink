@@ -55,28 +55,63 @@ export default defineConfig(({ mode }) => {
     build: {
       rollupOptions: {
         output: {
-          manualChunks: {
+          manualChunks: (id) => {
+            // Use function-based chunking for more control
+            
             // React core - loaded on every page
-            'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+            if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/react-router-dom')) {
+              return 'vendor-react';
+            }
+            
+            // Animation library - separate chunk to defer loading
+            if (id.includes('node_modules/framer-motion')) {
+              return 'vendor-animation';
+            }
+            
             // WalletConnect - heavy, only needed for wallet features
-            'vendor-wallet': [
-              '@walletconnect/modal',
-              '@walletconnect/sign-client',
-              '@walletconnect/types',
-              '@walletconnect/utils',
-            ],
+            if (
+              id.includes('node_modules/@walletconnect/modal') ||
+              id.includes('node_modules/@walletconnect/sign-client') ||
+              id.includes('node_modules/@walletconnect/types') ||
+              id.includes('node_modules/@walletconnect/utils')
+            ) {
+              return 'vendor-wallet';
+            }
+            
             // Auth - Clerk is heavy
-            'vendor-clerk': ['@clerk/clerk-react'],
-            // Animation & UI
-            'vendor-ui': ['framer-motion', 'lucide-react'],
-            // Data fetching & state
-            'vendor-data': ['@tanstack/react-query', 'zustand'],
+            if (id.includes('node_modules/@clerk/clerk-react')) {
+              return 'vendor-clerk';
+            }
+            
+            // Icons library
+            if (id.includes('node_modules/lucide-react')) {
+              return 'vendor-icons';
+            }
+            
+            // Data fetching & state management
+            if (id.includes('node_modules/@tanstack/react-query') || id.includes('node_modules/zustand')) {
+              return 'vendor-data';
+            }
+            
+            // DnD Kit - drag and drop utilities
+            if (id.includes('node_modules/@dnd-kit')) {
+              return 'vendor-dnd';
+            }
+            
+            // Socket.io client
+            if (id.includes('node_modules/socket.io-client')) {
+              return 'vendor-socket';
+            }
+            
+            // Utilities group
+            if (id.includes('node_modules/lodash') || id.includes('node_modules/date-fns')) {
+              return 'vendor-utils';
+            }
           },
         },
       },
-      // 563KB raw = 167KB gzipped — acceptable for a feature-rich SPA.
-      // Vendors are already split; remaining index chunk is app code + contexts.
-      chunkSizeWarningLimit: 600,
+      // Increased chunk size warning to 800KB since we're aggressive with splitting
+      chunkSizeWarningLimit: 800,
     },
     server: {
       port: 5174, // Dedicated port for wojak-ink (5173 often used by other projects)

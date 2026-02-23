@@ -15,10 +15,9 @@ import {
   useRef,
 } from 'react';
 import type { ReactNode } from 'react';
-import { SignClient } from '@walletconnect/sign-client';
-import { WalletConnectModal } from '@walletconnect/modal';
 import { getSdkError } from '@walletconnect/utils';
 import { isValidChiaAddress } from '@/lib/validation';
+import { createSignClient, createWalletConnectModal } from './lazy-wallet-client';
 import type { SessionTypes, ProposalTypes } from '@walletconnect/types';
 
 import {
@@ -66,8 +65,8 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
   });
 
   // Refs for WalletConnect instances
-  const signClientRef = useRef<InstanceType<typeof SignClient> | null>(null);
-  const modalRef = useRef<WalletConnectModal | null>(null);
+  const signClientRef = useRef<any>(null); // Holds SignClient instance
+  const modalRef = useRef<any>(null); // Holds WalletConnectModal instance
   const currentSessionRef = useRef<SessionTypes.Struct | null>(null);
   const initializingRef = useRef(false);
 
@@ -83,16 +82,16 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     initializingRef.current = true;
 
     try {
-      // Initialize SignClient
-      signClientRef.current = await SignClient.init({
+      // Lazy-load and initialize SignClient
+      signClientRef.current = await createSignClient({
         projectId: config.projectId,
         metadata: config.metadata,
         relayUrl: config.relayUrl,
         logger: 'error',
       });
 
-      // Initialize Modal with high z-index to appear above Avatar Picker
-      modalRef.current = new WalletConnectModal({
+      // Lazy-load and initialize Modal with high z-index to appear above Avatar Picker
+      modalRef.current = await createWalletConnectModal({
         projectId: config.projectId,
         themeMode: 'dark',
         enableExplorer: false,

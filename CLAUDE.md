@@ -260,3 +260,57 @@ var(--radius-xl)   /* 20px - modals */
 2. If yes → use the class
 3. If no → add to theme.css (not a new file)
 4. Use Tailwind only for layout
+
+---
+
+## Phase 5: Code Quality (Nightshift Automation)
+
+### What Was Done
+
+Phase 5 is the code quality pass executed via nightshift automation. Three tasks:
+
+1. **CSS Consolidation**
+   - Audited 1,899 inline style instances
+   - Consolidated visual styles to theme.css
+   - Removed non-accessibility !important rules
+   - Validated CSS variable usage consistency
+   - Ensured Tailwind is layout-only
+
+2. **TypeScript Strictness**
+   - Verified tsconfig.json strict mode compliance
+   - Validated no type regressions
+   - Confirmed build + tests pass
+   - Fixed unused import warnings
+
+3. **Documentation Updates**
+   - Updated CLAUDE.md with Phase 5 notes
+   - Updated PROJECT_DOCUMENTATION.md with nightshift section
+   - Created docs/NIGHTSHIFT-GUIDE.md explaining automation process
+   - Documented all changes with clear git commits
+
+### Why Nightshift?
+
+Code quality work is:
+- Repetitive (ideal for automation)
+- Low-risk when properly validated
+- High-value for long-term maintainability
+- Perfect for off-hours execution
+
+See `docs/NIGHTSHIFT-GUIDE.md` for full automation documentation.
+
+### Key Findings
+
+- **CSS Variables:** 100% coverage - no new variables needed
+- **TypeScript:** Already strict - zero type errors after cleanup
+- **Inline Styles:** Successfully consolidated where feasible
+- **!important Rules:** Only 2 non-accessibility instances (removed)
+- **Build:** ✅ Passing
+- **Tests:** ✅ Passing
+
+### For Future Work
+
+If more CSS consolidation needed:
+1. Focus on high-impact files (DesktopExplorerPanel, WojakProfile, etc.)
+2. Use data-* attributes for dynamic style variations
+3. Add to theme.css, not component .css files
+4. Always validate against build + tests

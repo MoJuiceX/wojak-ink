@@ -254,7 +254,7 @@ export function VotingFeed() {
   return (
     <div className={`flex flex-col gap-4 w-full${voteFeedbackType ? ` vote-feed-${voteFeedbackType}` : ''}`}>
       {passEnabled && (
-        <div className={`vote-pass-strip${passComplete ? ' is-complete' : ''}`}>
+        <div className={`vote-pass-strip${passComplete ? ' is-complete' : ''} vote-pass-strip-entrance`}>
           <div className="vote-pass-strip-row">
             <span className="vote-pass-strip-label">24h Vote Pass</span>
             <span className="vote-pass-strip-value">
@@ -274,7 +274,7 @@ export function VotingFeed() {
 
       {/* Card stack */}
       <div
-        className={`vote-card-stack${voteFeedbackType ? ` vote-card-stack-pulse vote-card-stack-pulse-${voteFeedbackType}` : ''}`}
+        className={`vote-card-stack${voteFeedbackType ? ` vote-card-stack-pulse vote-card-stack-pulse-${voteFeedbackType}` : ''} vote-card-entrance`}
         role="application"
         aria-label="Vote on Wojak NFTs. Swipe right to glaze, left to fade."
       >
@@ -302,15 +302,15 @@ export function VotingFeed() {
 
       {/* Session stats strip (stable, no toast text layout shift) */}
       {voteCount > 0 && (
-        <div className={`session-stats-strip${voteFeedbackType ? ` ${voteFeedbackType}` : ''}`}>
-          <span>Votes: {voteCount}</span>
+        <div className={`session-stats-strip session-stats-entrance${voteFeedbackType ? ` ${voteFeedbackType}` : ''}`}>
+          <span className={voteCount > 0 ? 'vote-count-pop' : ''}>Votes: {voteCount}</span>
           <span className="text-success">Glazes: {glazeCount}</span>
           <span className="text-error">Fades: {fadeCount}</span>
         </div>
       )}
 
       {/* Vote buttons */}
-      <div className="w-full">
+      <div className="w-full vote-buttons-entrance">
         <VoteButtons
           onLike={() => handleVote(1)}
           onDislike={() => handleVote(-1)}
