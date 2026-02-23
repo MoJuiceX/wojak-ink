@@ -99,6 +99,21 @@ function classifyCommand(command, policy, allowE2E = false) {
   return { allowed: true, reason: 'allowed' };
 }
 
+function expandCommandTemplate(command, state) {
+  const replacements = {
+    '{{RUN_ID}}': state.runId,
+    '{{LOG_PATH}}': path.relative(repoRoot, state.logPath),
+    '{{REPORT_PATH}}': path.relative(repoRoot, state.reportPath),
+    '{{STATE_PATH}}': path.relative(repoRoot, state.statePath),
+    '{{REPO_ROOT}}': repoRoot,
+  };
+  let expanded = command;
+  for (const [token, value] of Object.entries(replacements)) {
+    expanded = expanded.split(token).join(value);
+  }
+  return expanded;
+}
+
 async function runGit(args, { cwd = repoRoot } = {}) {
   const result = await runCommand(`git ${args.join(' ')}`, {
     cwd,
@@ -429,8 +444,10 @@ async function main() {
     if (args.dryRun) {
       taskRecord.status = 'planned';
       taskRecord.note = runnable.reason;
-      for (const command of task.commands || []) {
+      for (const rawCommand of task.commands || []) {
+        const command = expandCommandTemplate(rawCommand, state);
         taskRecord.commands.push({
+          template: rawCommand,
           command,
           status: 'planned',
           classification: classifyCommand(command, policy, args.allowE2E),
@@ -448,9 +465,11 @@ async function main() {
     let failedReason = '';
     const nonBlockingFailures = [];
 
-    for (const command of task.commands || []) {
+    for (const rawCommand of task.commands || []) {
+      const command = expandCommandTemplate(rawCommand, state);
       const classification = classifyCommand(command, policy, args.allowE2E);
       const cmdRecord = {
+        template: rawCommand,
         command,
         classification,
         status: 'pending',

@@ -91,7 +91,7 @@
       "dependsOn": ["checks-fast-baseline"],
       "timeoutMs": 120000,
       "commands": [
-        "rg -n \"FAIL  |Failed Tests|Test Files\" logs/nightshift-*.log || true"
+        "rg -n \"(\\[stdout\\]|\\[stderr\\]).*(FAIL  |Failed Tests|Test Files)\" \"{{LOG_PATH}}\" || true"
       ],
       "expectedOutputs": [
         "reports/nightshift-<timestamp>.md"
