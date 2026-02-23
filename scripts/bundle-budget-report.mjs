@@ -13,12 +13,14 @@ function parseArgs(argv) {
     jsonOut: path.join(repoRoot, 'reports', 'bundle-budget-latest.json'),
     mdOut: path.join(repoRoot, 'reports', 'bundle-budget-latest.md'),
     enforceHard: false,
+    maxJsAssetKb: 406,
   };
   for (const arg of argv) {
     if (arg === '--enforce-hard') out.enforceHard = true;
     else if (arg.startsWith('--dist-dir=')) out.distDir = path.resolve(repoRoot, arg.slice('--dist-dir='.length));
     else if (arg.startsWith('--json-out=')) out.jsonOut = path.resolve(repoRoot, arg.slice('--json-out='.length));
     else if (arg.startsWith('--md-out=')) out.mdOut = path.resolve(repoRoot, arg.slice('--md-out='.length));
+    else if (arg.startsWith('--max-js-asset-kb=')) out.maxJsAssetKb = Number(arg.slice('--max-js-asset-kb='.length));
   }
   return out;
 }
@@ -27,8 +29,16 @@ function kb(bytes) {
   return Number((bytes / 1024).toFixed(2));
 }
 
-function classifyChunk(file) {
+function classifyChunk(filePath) {
+  const file = path.basename(filePath);
   if (!file.endsWith('.js')) return 'js-other';
+  if (file === 'wallet-connect-standalone.js') return 'standalone-entry';
+  if (file.startsWith('wallet-connect-standalone-runtime-')) return 'standalone-runtime';
+  if (file.startsWith('wallet-connect-standalone-wallet-protocol-')) return 'standalone-wallet-protocol';
+  if (file.startsWith('wallet-connect-standalone-wallet-core-')) return 'standalone-wallet-core';
+  if (file.startsWith('wallet-connect-standalone-wallet-ui-')) return 'standalone-wallet-ui';
+  if (file.startsWith('wallet-connect-standalone-wallet-crypto-')) return 'standalone-wallet-crypto';
+  if (file.startsWith('wallet-connect-standalone-')) return 'standalone-other';
   if (file.startsWith('index-')) return 'entry-index';
   if (file.startsWith('vendor-react-')) return 'vendor-react';
   if (file.startsWith('vendor-wallet-ui-')) return 'vendor-wallet-ui';
@@ -61,31 +71,20 @@ async function main() {
   await fs.mkdir(path.dirname(args.jsonOut), { recursive: true });
   await fs.mkdir(path.dirname(args.mdOut), { recursive: true });
 
-  let entries;
+  let files;
   try {
-    entries = await fs.readdir(args.distDir, { withFileTypes: true });
+    files = await collectFiles(args.distDir);
   } catch (error) {
     console.error(`[bundle-budget] dist assets dir not found: ${args.distDir}`);
     process.exitCode = 2;
     return;
   }
 
-  const files = [];
-  for (const entry of entries) {
-    if (!entry.isFile()) continue;
-    const abs = path.join(args.distDir, entry.name);
-    const stat = await fs.stat(abs);
-    files.push({
-      file: entry.name,
-      bytes: stat.size,
-      sizeKb: kb(stat.size),
-      type: entry.name.endsWith('.css') ? 'css' : entry.name.endsWith('.js') ? 'js' : 'other',
-      group: classifyChunk(entry.name),
-    });
-  }
-
   const jsFiles = files.filter((f) => f.type === 'js').sort((a, b) => b.bytes - a.bytes);
   const cssFiles = files.filter((f) => f.type === 'css').sort((a, b) => b.bytes - a.bytes);
+  const standaloneJsFiles = jsFiles
+    .filter((f) => f.group.startsWith('standalone-'))
+    .sort((a, b) => b.bytes - a.bytes);
   const groupMax = new Map();
   for (const file of jsFiles) {
     const existing = groupMax.get(file.group);
@@ -98,10 +97,32 @@ async function main() {
 
   const hardBreaches = budgetChecks.filter((b) => b.level === 'hard');
   const softBreaches = budgetChecks.filter((b) => b.level === 'soft');
+  const perAssetHardBreaches = jsFiles.filter((f) => f.sizeKb > args.maxJsAssetKb);
+
+  // Detect orphaned JS files (not in explicit groups or budget categories)
+  const budgetedGroups = new Set(Object.keys(BUDGETS));
+  const standaloneGroups = new Set([
+    'standalone-entry',
+    'standalone-runtime',
+    'standalone-wallet-protocol',
+    'standalone-wallet-core',
+    'standalone-wallet-ui',
+    'standalone-wallet-crypto',
+    'standalone-other',
+  ]);
+  const orphanedJsFiles = jsFiles.filter((f) => {
+    if (budgetedGroups.has(f.group)) return false; // Has budget
+    if (standaloneGroups.has(f.group)) return false; // Standalone (tracked separately)
+    return true; // Orphaned!
+  });
+  const orphanedHardBreaches = orphanedJsFiles.filter((f) => f.sizeKb > args.maxJsAssetKb);
 
   const report = {
     generatedAt: new Date().toISOString(),
     distDir: path.relative(repoRoot, args.distDir),
+    limits: {
+      maxJsAssetKb: args.maxJsAssetKb,
+    },
     totals: {
       jsFiles: jsFiles.length,
       cssFiles: cssFiles.length,
@@ -110,11 +131,35 @@ async function main() {
     },
     topJs: jsFiles.slice(0, 15).map(({ file, bytes, sizeKb, group }) => ({ file, bytes, sizeKb, group })),
     topCss: cssFiles.slice(0, 10).map(({ file, bytes, sizeKb }) => ({ file, bytes, sizeKb })),
+    standaloneJs: standaloneJsFiles.map(({ file, bytes, sizeKb, group }) => ({ file, bytes, sizeKb, group })),
     budgets: budgetChecks,
+    perAssetHardBreaches: perAssetHardBreaches.map(({ file, bytes, sizeKb, group }) => ({
+      file,
+      bytes,
+      sizeKb,
+      group,
+      hardKb: args.maxJsAssetKb,
+    })),
+    orphanedJs: orphanedJsFiles.map(({ file, bytes, sizeKb, group }) => ({
+      file,
+      bytes,
+      sizeKb,
+      group,
+      hardKb: args.maxJsAssetKb,
+      exceeded: sizeKb > args.maxJsAssetKb,
+    })),
     summary: {
       hardBreaches: hardBreaches.length,
       softBreaches: softBreaches.length,
-      status: hardBreaches.length ? 'hard-fail' : softBreaches.length ? 'soft-warn' : 'pass',
+      perAssetHardBreaches: perAssetHardBreaches.length,
+      orphanedJs: orphanedJsFiles.length,
+      orphanedHardBreaches: orphanedHardBreaches.length,
+      status:
+        hardBreaches.length || perAssetHardBreaches.length || orphanedHardBreaches.length
+          ? 'hard-fail'
+          : softBreaches.length
+            ? 'soft-warn'
+            : 'pass',
     },
   };
 
@@ -128,6 +173,22 @@ async function main() {
   md.push(`- Status: **${report.summary.status}**`);
   md.push(`- Hard breaches: ${report.summary.hardBreaches}`);
   md.push(`- Soft breaches: ${report.summary.softBreaches}`);
+  md.push(`- Per-asset JS hard breaches (>${args.maxJsAssetKb}kB): ${report.summary.perAssetHardBreaches}`);
+  md.push(`- Orphaned JS files (not in budget groups): ${report.summary.orphanedJs}`);
+  md.push(`- Orphaned JS hard breaches (>${args.maxJsAssetKb}kB): ${report.summary.orphanedHardBreaches}`);
+  md.push('');
+  md.push('## Per-Asset JS Hard Limit');
+  md.push(`All shipped JavaScript assets in \`${report.distDir}\` must be <= ${args.maxJsAssetKb} kB.`);
+  md.push('');
+  md.push('| File | Group | Size (kB) | Hard Limit | Status |');
+  md.push('|---|---|---:|---:|---|');
+  for (const row of jsFiles.slice(0, 20)) {
+    const status = row.sizeKb > args.maxJsAssetKb ? 'hard' : 'pass';
+    md.push(`| ${row.file} | ${row.group} | ${row.sizeKb.toFixed(2)} | ${args.maxJsAssetKb} | ${status} |`);
+  }
+  if (!jsFiles.length) {
+    md.push('| (none) | - | - | - | info |');
+  }
   md.push('');
   md.push('## Budget Checks');
   md.push('| Group | File | Size (kB) | Soft | Hard | Status |');
@@ -137,6 +198,28 @@ async function main() {
   }
   if (!budgetChecks.length) {
     md.push('| (none) | - | - | - | - | info |');
+  }
+  md.push('');
+  md.push('## Standalone Wallet Assets');
+  md.push('| File | Group | Size (kB) |');
+  md.push('|---|---|---:|');
+  for (const row of report.standaloneJs) {
+    md.push(`| ${row.file} | ${row.group} | ${row.sizeKb.toFixed(2)} |`);
+  }
+  if (!report.standaloneJs.length) {
+    md.push('| (none found) | - | - |');
+  }
+  md.push('');
+  md.push('## Orphaned JS Files');
+  md.push('⚠️ These files are not in explicit budget groups and may have been missed in optimization.');
+  md.push('| File | Group | Size (kB) | Hard Limit | Status |');
+  md.push('|---|---|---:|---:|---|');
+  for (const row of report.orphanedJs) {
+    const status = row.exceeded ? '⚠️ HARD' : 'info';
+    md.push(`| ${row.file} | ${row.group} | ${row.sizeKb.toFixed(2)} | ${row.hardKb} | ${status} |`);
+  }
+  if (!report.orphanedJs.length) {
+    md.push('| (none - all assets accounted for!) | - | - | - | ✓ |');
   }
   md.push('');
   md.push('## Top JS Chunks');
@@ -156,12 +239,40 @@ async function main() {
 
   await fs.writeFile(args.mdOut, `${md.join('\n')}\n`, 'utf8');
 
-  console.log(`[bundle-budget] status=${report.summary.status} hard=${report.summary.hardBreaches} soft=${report.summary.softBreaches}`);
+  console.log(`[bundle-budget] status=${report.summary.status} hard=${report.summary.hardBreaches} soft=${report.summary.softBreaches} orphaned=${report.summary.orphanedJs}`);
+  console.log(`[bundle-budget] orphaned hard breaches=${report.summary.orphanedHardBreaches}`);
   console.log(`[bundle-budget] wrote ${path.relative(repoRoot, args.jsonOut)} and ${path.relative(repoRoot, args.mdOut)}`);
 
-  if (args.enforceHard && hardBreaches.length > 0) {
+  if (args.enforceHard && (hardBreaches.length > 0 || perAssetHardBreaches.length > 0 || orphanedHardBreaches.length > 0)) {
+    console.error(`[bundle-budget] FAIL: Found orphaned JS files exceeding ${args.maxJsAssetKb}kB hard limit`);
     process.exitCode = 1;
   }
+}
+
+async function collectFiles(rootDir) {
+  const out = [];
+  async function walk(dir) {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const abs = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        await walk(abs);
+        continue;
+      }
+      if (!entry.isFile()) continue;
+      const stat = await fs.stat(abs);
+      const rel = path.relative(rootDir, abs).replaceAll(path.sep, '/');
+      out.push({
+        file: rel,
+        bytes: stat.size,
+        sizeKb: kb(stat.size),
+        type: rel.endsWith('.css') ? 'css' : rel.endsWith('.js') ? 'js' : 'other',
+        group: classifyChunk(rel),
+      });
+    }
+  }
+  await walk(rootDir);
+  return out;
 }
 
 main().catch((error) => {

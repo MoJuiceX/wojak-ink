@@ -112,6 +112,17 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks: (id) => {
+            // Keep Vite/Rollup helper modules in a tiny shared runtime chunk.
+            // Otherwise Rollup may place the preload helper inside a manual vendor chunk
+            // (e.g. vendor-wallet-ui), which forces that large chunk onto the startup path.
+            if (
+              id.includes('vite/preload-helper') ||
+              id.includes('commonjsHelpers.js') ||
+              id.includes('vite/modulepreload-polyfill')
+            ) {
+              return 'vendor-runtime'
+            }
+
             // Large generator internals are used by lazy routes (Generator + RuleBuilder),
             // but Rollup may hoist them into the entry chunk as shared code.
             if (

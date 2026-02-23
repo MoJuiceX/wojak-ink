@@ -15,7 +15,6 @@ import {
   useRef,
 } from 'react';
 import type { ReactNode } from 'react';
-import { getSdkError } from '@walletconnect/utils';
 import { isValidChiaAddress } from '@/lib/validation';
 import { createSignClient, createWalletConnectModal } from './lazy-wallet-client';
 import type { SessionTypes, ProposalTypes } from '@walletconnect/types';
@@ -53,6 +52,17 @@ interface SageWalletProviderProps {
 
 type SageSignClientInstance = Awaited<ReturnType<typeof createSignClient>>;
 type SageWalletModalInstance = Awaited<ReturnType<typeof createWalletConnectModal>>;
+type WalletDisconnectReason = { code: number; message: string };
+
+let cachedUserDisconnectedReason: WalletDisconnectReason | null = null;
+
+async function getUserDisconnectedReason(): Promise<WalletDisconnectReason> {
+  if (cachedUserDisconnectedReason) return cachedUserDisconnectedReason;
+
+  const { getSdkError } = await import('@walletconnect/utils');
+  cachedUserDisconnectedReason = getSdkError('USER_DISCONNECTED');
+  return cachedUserDisconnectedReason;
+}
 
 export function SageWalletProvider({ children, config: userConfig }: SageWalletProviderProps) {
   // Merge user config with defaults
@@ -330,7 +340,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
       if (client && session) {
         await client.disconnect({
           topic: session.topic,
-          reason: getSdkError('USER_DISCONNECTED'),
+          reason: await getUserDisconnectedReason(),
         });
       }
     } catch (error) {

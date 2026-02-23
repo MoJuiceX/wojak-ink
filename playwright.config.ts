@@ -46,10 +46,10 @@ export default defineConfig({
     },
   ],
 
-  // Run local dev server before tests (optional)
-  // webServer: {
-  //   command: 'npm run dev',
-  //   url: 'http://localhost:5173',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  // Run local dev server before tests (optional, enabled for smoke tests)
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:5173',
+    reuseExistingServer: !process.env.CI,
+  },
 });

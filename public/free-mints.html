@@ -946,7 +946,7 @@
     loadFromApi();
   </script>
 
-  <script src="/assets/wallet-connect-standalone.js" defer></script>
+  <script type="module" src="/assets/wallet-connect-standalone.js"></script>
   <script>
     window.addEventListener('sage-wallet-connected', function() {
       if (typeof renderTable === 'function' && leaderboard.length > 0) {

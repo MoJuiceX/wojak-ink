@@ -12,7 +12,16 @@
 
 A production web app serving the Wojak Farmers Plot NFT community on Chia. Browse 4,200 unique NFTs, track real-time market data, analyze traits with AI-powered insights, create custom avatars, and play mini-games. Built for collectors, traders, and community members.
 
-**Live:** https://wojak.ink
+**Live:** https://wojak.ink  
+**Version:** v1.0.0 (Launch Release - 2026-02-23)  
+**Status:** 🚀 Ready for production launch
+
+> **Phase 5 - Launch Preparation Complete**
+> - ✅ Performance baseline established (bundle <406kB, FCP <2s)
+> - ✅ Launch readiness checklist created
+> - ✅ Monitoring & observability guide ready
+> - ✅ Rollback procedures documented
+> - See [docs/PERFORMANCE-BASELINE.md](./docs/PERFORMANCE-BASELINE.md), [docs/LAUNCH-CHECKLIST.md](./docs/LAUNCH-CHECKLIST.md), [docs/MONITORING-GUIDE.md](./docs/MONITORING-GUIDE.md)
 
 ---
 
@@ -348,6 +357,13 @@ Theme selection, audio controls, and app configuration.
 # Start dev server (accessible on local network for phone testing)
 npm run dev -- --host
 
+# Predictable linting (automation-friendly scoped commands)
+npm run lint:app
+npm run lint:functions
+npm run lint:workers
+npm run lint:scripts
+npm run lint:scoped
+
 # Production build
 npm run build
 
@@ -360,10 +376,11 @@ npx wrangler pages deploy dist --project-name=wojak-ink
 
 ### Local Testing Workflow
 1. Run `npm run dev -- --host`
-2. Note the Network URL (e.g., `http://192.168.1.143:5177`)
-3. Open on phone (same WiFi network)
-4. Test, iterate, repeat
-5. When satisfied: commit, push, deploy
+2. Run scoped lint as needed (`lint:app`, `lint:functions`, `lint:workers`, `lint:scripts`, or `lint:scoped`)
+3. Note the Network URL (e.g., `http://192.168.1.143:5177`)
+4. Open on phone (same WiFi network)
+5. Test, iterate, repeat
+6. When satisfied: commit, push, deploy
 
 ### Key Files
 | File | Purpose |

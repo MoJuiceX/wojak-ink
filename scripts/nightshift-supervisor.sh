@@ -37,6 +37,22 @@ if [[ ! "$branch" =~ $BRANCH_EXPECTED ]]; then
   exit 1
 fi
 
+# Worktree ownership check: verify current user owns the directory
+WORKTREE_OWNER="$(stat -f '%Su' "$REPO_ROOT" 2>/dev/null || echo 'unknown')"
+CURRENT_USER="$(whoami)"
+if [[ "$WORKTREE_OWNER" != "$CURRENT_USER" ]]; then
+  echo "Refusing to run: worktree owned by ${WORKTREE_OWNER}, current user is ${CURRENT_USER}" | tee -a "$LOG_FILE"
+  exit 1
+fi
+
+# Dirty worktree check: prevent supervisor from running with uncommitted changes
+DIRTY_COUNT="$(git status --short | wc -l | tr -d ' ')"
+if [[ "$DIRTY_COUNT" -gt 0 ]]; then
+  echo "Refusing to run: worktree has ${DIRTY_COUNT} uncommitted changes or untracked files" | tee -a "$LOG_FILE"
+  echo "Clean the worktree before starting nightshift supervisor." | tee -a "$LOG_FILE"
+  exit 1
+fi
+
 cat > "$PROGRESS_FILE" <<EOF
 # Night Shift Supervisor — ${SESSION_ID}
 

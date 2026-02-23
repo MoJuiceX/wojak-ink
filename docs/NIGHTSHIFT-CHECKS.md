@@ -36,6 +36,9 @@ Quick reference for which commands are safe to run unattended, how long they usu
 4. Report tasks (lint hotspots, bundle/chunk review, issue snapshot)
 5. Safe fixes (only after reports are cleanly understood)
 
+## Automation note
+- `precommit` runs `npm run lint:scoped -- --max-warnings=0` to avoid unpredictable repo-wide lint scope drift in unattended runs.
+
 ## Artifact paths
 - Logs: `logs/nightshift-<timestamp>.log`
 - Reports: `reports/nightshift-<timestamp>.md`
