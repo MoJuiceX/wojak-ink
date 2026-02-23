@@ -48,12 +48,7 @@ export function useFlickVoting(pageType: VotePageType) {
   const authResult = CLERK_ENABLED ? clerkAuth : { getToken: async () => null };
   const { getToken } = authResult;
 
-  // Load vote counts on mount
-  useEffect(() => {
-    fetchVoteCounts();
-  }, [pageType]);
-
-  const fetchVoteCounts = async () => {
+  const fetchVoteCounts = useCallback(async () => {
     try {
       const response = await fetch(`${API_BASE}/counts?pageType=${pageType}`);
       if (response.ok) {
@@ -77,7 +72,12 @@ export function useFlickVoting(pageType: VotePageType) {
         // Ignore localStorage errors
       }
     }
-  };
+  }, [pageType]);
+
+  // Load vote counts on mount
+  useEffect(() => {
+    fetchVoteCounts();
+  }, [fetchVoteCounts, pageType]);
 
   const getVotes = useCallback((targetId: string): VoteCounts => {
     return votes[targetId] || { donuts: 0, poops: 0 };
