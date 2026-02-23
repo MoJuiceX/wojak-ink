@@ -29,6 +29,7 @@ import {
 } from '@/components/gallery';
 import { YourWojakSection } from '@/components/gallery/YourWojakSection';
 import { NFTGridItem } from '@/components/gallery/NFTGridItem';
+import { GalleryGridSkeleton } from '@/components/skeletons/GalleryGridSkeleton';
 import type { CharacterType } from '@/types/nft';
 import { PageSEO } from '@/components/seo';
 
@@ -463,26 +464,11 @@ function GalleryContent() {
                 style={isDesktop ? { padding: '24px 24px 0' } : undefined}
               >
                 {isLoading ? (
-                  // Loading skeleton
-                  <div
-                    className={`grid gap-1.5 ${
-                      isDesktop
-                        ? 'grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12'
-                        : 'grid-cols-4 sm:grid-cols-5 lg:grid-cols-6'
-                    }`}
-                    style={isDesktop ? { maxWidth: 1600, margin: '0 auto' } : undefined}
-                  >
-                    {Array.from({ length: isDesktop ? 24 : 16 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="aspect-square rounded-lg overflow-hidden animate-pulse"
-                        style={{
-                          background: 'var(--color-surface)',
-                          border: '1px solid var(--color-border)',
-                        }}
-                      />
-                    ))}
-                  </div>
+                  // Loading skeleton with premium animations
+                  <GalleryGridSkeleton
+                    count={isDesktop ? 24 : 16}
+                    columns={isDesktop ? 4 : 2}
+                  />
                 ) : filteredNfts.length === 0 ? (
                   // Empty state when no NFTs for this character
                   <div className="card p-8 flex flex-col items-center gap-4 text-center" style={{ maxWidth: 400, margin: '40px auto' }}>

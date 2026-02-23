@@ -15,6 +15,7 @@ import { useHoverPreload } from '@/hooks/useImagePreloader';
 import { imagePreloader } from '@/services/imagePreloader';
 import { nftGridItemVariants } from '@/config/galleryAnimations';
 import { usePrefersReducedMotion } from '@/hooks/useMediaQuery';
+import { ProgressiveImage } from '@/components/ui/ProgressiveImage';
 import type { NFT } from '@/types/nft';
 
 interface NFTGridItemProps {
@@ -81,40 +82,16 @@ export const NFTGridItem = memo(function NFTGridItem({
       data-preload-index={index}
       aria-label={`View ${nft.name}`}
     >
-      {/* Loading placeholder */}
-      {!imageLoaded && (
-        <div
-          className="absolute inset-0 animate-pulse"
-          style={{ background: 'var(--color-white-3)' }}
-        />
-      )}
-
-      {/* Error state */}
-      {imageError && (
-        <div
-          className="absolute inset-0 flex items-center justify-center"
-          style={{ background: 'var(--color-surface)' }}
-        >
-          <span
-            className="text-xs text-muted"
-          >
-            Error
-          </span>
-        </div>
-      )}
-
-      {/* Image */}
-      {!imageError && (
-        <img
-          src={nft.thumbnailUrl}
-          alt={nft.name}
-          className="w-full h-full object-cover"
-          style={{ opacity: imageLoaded ? 1 : 0 }}
-          loading={eagerLoad ? 'eager' : 'lazy'}
-          onLoad={handleLoad}
-          onError={handleError}
-        />
-      )}
+      {/* Progressive image with blur→full resolution loading */}
+      <ProgressiveImage
+        src={nft.thumbnailUrl}
+        alt={nft.name}
+        className="w-full h-full"
+        objectFit="cover"
+        onLoad={handleLoad}
+        onError={handleError}
+        eager={eagerLoad}
+      />
 
       {/* Name overlay - appears on hover */}
       <div className="absolute bottom-1.5 left-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-75">
