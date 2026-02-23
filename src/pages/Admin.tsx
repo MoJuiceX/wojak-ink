@@ -554,7 +554,7 @@ export default function Admin() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [adminSecret]);
 
   useEffect(() => {
     fetchAll();

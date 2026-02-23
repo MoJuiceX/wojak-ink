@@ -327,7 +327,6 @@ function FightClubContent() {
   useEffect(() => {
     if (player && !hadPlayerRef.current) {
       hadPlayerRef.current = true;
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time show set-name phase after link
       queueMicrotask(() => setShowSetNamePhase(true));
     }
     if (player) hadPlayerRef.current = true;
