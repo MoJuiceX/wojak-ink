@@ -97,7 +97,8 @@ pull_updates() {
   # `set -e` can terminate the script in headless/nohup contexts on transient git failures,
   # so capture the status explicitly.
   set +e
-  git pull --rebase --autostash >>"$LOG_FILE" 2>&1
+  GIT_TERMINAL_PROMPT=0 GIT_SSH_COMMAND='ssh -o BatchMode=yes -o ConnectTimeout=10' \
+    git pull --rebase --autostash >>"$LOG_FILE" 2>&1
   local rc=$?
   set -e
   if [[ $rc -eq 0 ]]; then
