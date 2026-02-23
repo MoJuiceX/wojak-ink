@@ -71,8 +71,6 @@ export default defineConfig(({ mode }) => {
             'vendor-ui': ['framer-motion', 'lucide-react'],
             // Data fetching & state
             'vendor-data': ['@tanstack/react-query', 'zustand'],
-            // Utilities
-            'vendor-utils': ['lodash', 'date-fns'],
           },
         },
       },

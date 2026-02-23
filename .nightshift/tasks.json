@@ -1,0 +1,374 @@
+{
+  "version": 1,
+  "queueName": "night-1-bootstrap",
+  "defaults": {
+    "timeoutMs": 900000,
+    "retries": 3
+  },
+  "tasks": [
+    {
+      "id": "prepare-worktree-deps",
+      "title": "Install dependencies in nightly worktree if missing",
+      "enabled": true,
+      "category": "ops",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "report",
+      "mutatesCode": false,
+      "timeoutMs": 1800000,
+      "commands": [
+        "test -d node_modules && echo 'node_modules already present' || npm ci"
+      ],
+      "expectedOutputs": [
+        "logs/nightshift-<timestamp>.log"
+      ],
+      "doneCriteria": [
+        "Project dependencies available in isolated worktree"
+      ]
+    },
+    {
+      "id": "preflight-repo-snapshot",
+      "title": "Preflight repo snapshot",
+      "enabled": true,
+      "category": "ops",
+      "risk": "low",
+      "runtime": "short",
+      "mode": "report",
+      "mutatesCode": false,
+      "timeoutMs": 120000,
+      "commands": [
+        "git status --short --branch",
+        "git rev-parse HEAD",
+        "git remote -v",
+        "node -v",
+        "npm -v",
+        "git worktree list",
+        "ls -1 .github/workflows"
+      ],
+      "expectedOutputs": [
+        "reports/nightshift-<timestamp>.md",
+        "logs/nightshift-<timestamp>.log"
+      ],
+      "doneCriteria": [
+        "Snapshot commands complete",
+        "Branch/worktree state captured in report"
+      ]
+    },
+    {
+      "id": "checks-fast-baseline",
+      "title": "Run baseline checks (typecheck/lint/unit/build)",
+      "enabled": true,
+      "category": "reliability",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "report",
+      "mutatesCode": false,
+      "timeoutMs": 3600000,
+      "commands": [
+        "npx tsc --noEmit",
+        "npx eslint src functions workers tests scripts --ext .ts,.tsx,.js,.mjs,.cjs",
+        "npm run test:unit",
+        "npm run build"
+      ],
+      "expectedOutputs": [
+        "reports/nightshift-<timestamp>.md",
+        "logs/nightshift-<timestamp>.log"
+      ],
+      "doneCriteria": [
+        "All commands attempted",
+        "Pass/fail and durations recorded"
+      ]
+    },
+    {
+      "id": "unit-failures-triage-report",
+      "title": "Generate unit failure triage summary",
+      "enabled": true,
+      "category": "reliability",
+      "risk": "low",
+      "runtime": "short",
+      "mode": "report",
+      "mutatesCode": false,
+      "dependsOn": ["checks-fast-baseline"],
+      "timeoutMs": 120000,
+      "commands": [
+        "rg -n \"FAIL  |Failed Tests|Test Files\" logs/nightshift-*.log || true"
+      ],
+      "expectedOutputs": [
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Current failure signatures summarized"
+      ]
+    },
+    {
+      "id": "security-audit-report",
+      "title": "Dependency audit snapshot",
+      "enabled": true,
+      "category": "security",
+      "risk": "low",
+      "runtime": "short",
+      "mode": "report",
+      "mutatesCode": false,
+      "timeoutMs": 300000,
+      "commands": [
+        "npm audit --omit=dev --json"
+      ],
+      "expectedOutputs": [
+        "reports/nightshift-<timestamp>.md",
+        "logs/nightshift-<timestamp>.log"
+      ],
+      "doneCriteria": [
+        "Audit vulnerabilities captured"
+      ]
+    },
+    {
+      "id": "bundle-size-report",
+      "title": "Bundle size and chunk warning report",
+      "enabled": true,
+      "category": "performance",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "report",
+      "mutatesCode": false,
+      "timeoutMs": 1800000,
+      "commands": [
+        "npm run build"
+      ],
+      "expectedOutputs": [
+        "reports/nightshift-<timestamp>.md",
+        "logs/nightshift-<timestamp>.log"
+      ],
+      "doneCriteria": [
+        "Chunk warnings and largest assets visible in report"
+      ]
+    },
+    {
+      "id": "manifest-orphans-report",
+      "title": "Manifest orphaned assets report",
+      "enabled": true,
+      "category": "dx",
+      "risk": "low",
+      "runtime": "short",
+      "mode": "report",
+      "mutatesCode": false,
+      "timeoutMs": 120000,
+      "commands": [
+        "npm run verify-manifest"
+      ],
+      "expectedOutputs": [
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Orphaned and missing asset counts captured"
+      ]
+    },
+    {
+      "id": "lint-debt-hotspots-report",
+      "title": "Lint debt hotspot report",
+      "enabled": true,
+      "category": "quality",
+      "risk": "low",
+      "runtime": "short",
+      "mode": "report",
+      "mutatesCode": false,
+      "timeoutMs": 300000,
+      "commands": [
+        "npx eslint src functions workers tests scripts --ext .ts,.tsx,.js,.mjs,.cjs -f compact || true"
+      ],
+      "expectedOutputs": [
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Top warning/error files identified"
+      ]
+    },
+    {
+      "id": "github-issue-snapshot-report",
+      "title": "GitHub issues snapshot (optional if gh is installed)",
+      "enabled": true,
+      "category": "planning",
+      "risk": "low",
+      "runtime": "short",
+      "mode": "report",
+      "mutatesCode": false,
+      "timeoutMs": 120000,
+      "commands": [
+        "gh issue list --limit 20 || echo 'gh CLI unavailable or unauthenticated'"
+      ],
+      "expectedOutputs": [
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Issue snapshot recorded or availability noted"
+      ]
+    },
+    {
+      "id": "fix-unit-tests-low-hanging",
+      "title": "Fix low-hanging unit test regressions (AI-assisted task)",
+      "enabled": false,
+      "category": "reliability",
+      "risk": "medium",
+      "runtime": "medium",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 5400000,
+      "commands": [
+        "codex --task 'Fix current low-hanging unit test regressions (start with brittle trait count and mint test mock mismatches), run targeted tests, commit safe changes only on nightly branch'"
+      ],
+      "expectedOutputs": [
+        "git diff on nightly branch",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Some failing tests reduced with targeted verification"
+      ],
+      "disabledReason": "Enable after validating assistant CLI invocation policy"
+    },
+    {
+      "id": "fix-eslint-hard-errors",
+      "title": "Fix ESLint hard errors only (AI-assisted task)",
+      "enabled": false,
+      "category": "quality",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 5400000,
+      "commands": [
+        "codex --task 'Fix only ESLint errors (not warnings) in scoped lint run, preserve behavior, run targeted lint/build checks'"
+      ],
+      "expectedOutputs": [
+        "git diff on nightly branch",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Scoped lint error count reduced to zero"
+      ],
+      "disabledReason": "Enable after validating assistant CLI invocation policy"
+    },
+    {
+      "id": "security-upgrade-lodash",
+      "title": "Upgrade lodash to patched version",
+      "enabled": false,
+      "category": "security",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "fix",
+      "mutatesCode": true,
+      "timeoutMs": 1800000,
+      "commands": [
+        "npm install lodash@^4.17.22",
+        "npm audit --omit=dev --json",
+        "npx tsc --noEmit",
+        "npm run test:unit",
+        "npm run build"
+      ],
+      "expectedOutputs": [
+        "package.json/package-lock.json diff",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Lodash advisory no longer reported",
+        "Checks pass or failure captured"
+      ],
+      "disabledReason": "Enable after baseline reports are reviewed"
+    },
+    {
+      "id": "security-upgrade-swiper",
+      "title": "Upgrade swiper to patched version",
+      "enabled": false,
+      "category": "security",
+      "risk": "medium",
+      "runtime": "medium",
+      "mode": "fix",
+      "mutatesCode": true,
+      "timeoutMs": 1800000,
+      "commands": [
+        "npm install swiper@^12.1.2",
+        "npm audit --omit=dev --json",
+        "npx tsc --noEmit",
+        "npm run test:unit",
+        "npm run build"
+      ],
+      "expectedOutputs": [
+        "package.json/package-lock.json diff",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Swiper advisory no longer reported",
+        "Checks pass or failure captured"
+      ],
+      "disabledReason": "Enable after baseline reports are reviewed"
+    },
+    {
+      "id": "lint-scope-hardening",
+      "title": "Add scoped lint commands for night runs",
+      "enabled": false,
+      "category": "ci",
+      "risk": "low",
+      "runtime": "short",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 3600000,
+      "commands": [
+        "codex --task 'Add scoped lint scripts (app/functions/workers/scripts) for predictable automation and update docs'"
+      ],
+      "expectedOutputs": [
+        "package.json diff",
+        "docs/NIGHTSHIFT-CHECKS.md"
+      ],
+      "doneCriteria": [
+        "New lint scripts run successfully"
+      ],
+      "disabledReason": "Enable after scaffolding is validated"
+    },
+    {
+      "id": "playwright-safety-guard",
+      "title": "Block production Playwright baseURL for unattended runs",
+      "enabled": false,
+      "category": "safety",
+      "risk": "low",
+      "runtime": "short",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 3600000,
+      "commands": [
+        "codex --task 'Add a safe guard so unattended night runs cannot default Playwright to https://wojak.ink without explicit override'"
+      ],
+      "expectedOutputs": [
+        "playwright.config.ts diff",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Unattended mode refuses production baseURL"
+      ],
+      "disabledReason": "Enable after dry-run policy review"
+    },
+    {
+      "id": "queue-expansion-from-findings",
+      "title": "Generate next-night queue proposals from findings",
+      "enabled": true,
+      "category": "planning",
+      "risk": "low",
+      "runtime": "short",
+      "mode": "report",
+      "mutatesCode": false,
+      "dependsOn": [
+        "checks-fast-baseline",
+        "security-audit-report",
+        "bundle-size-report",
+        "lint-debt-hotspots-report"
+      ],
+      "timeoutMs": 120000,
+      "commands": [
+        "echo 'Queue expansion is derived from current run findings and listed in the summary report'"
+      ],
+      "expectedOutputs": [
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Next-night tasks listed in report"
+      ]
+    }
+  ]
+}

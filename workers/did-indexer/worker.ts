@@ -18,7 +18,7 @@ const D1_BATCH_SIZE = 25;  // Max statements per D1 batch call
 const CIRCUIT_BREAKER_THRESHOLD = 5; // Consecutive API failures before aborting
 const PLAYERS_PER_RUN = 5; // Only sync this many players per cron run (staggered)
 const DISCOVERY_INTERVAL_MS = 12 * 60 * 60 * 1000; // 12 hours between full collection scans
-const SKIP_IF_INDEXED_WITHIN_MS = 2 * 60 * 60 * 1000; // Skip players indexed < 2 hours ago
+const _SKIP_IF_INDEXED_WITHIN_MS = 2 * 60 * 60 * 1000; // Skip players indexed < 2 hours ago
 
 // Power level calculation constants (same as _powerLevel.ts)
 const POWER_LEVEL_MAX = 10000;

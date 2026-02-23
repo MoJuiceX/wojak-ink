@@ -153,7 +153,7 @@ describe('process.ts', () => {
       let stepCallCount = 0;
       env.DB.prepare = vi.fn((query: string) => {
         // Initial load: job in queued state
-        if (query.includes('step = ?') && stepCallCount === 0) {
+        if (query.includes('SELECT * FROM mint_jobs WHERE id = ? AND step IN') && stepCallCount === 0) {
           stepCallCount++;
           return mockStmt(freeJobRow);
         }
@@ -206,7 +206,7 @@ describe('process.ts', () => {
       const env = createMockEnv();
 
       env.DB.prepare = vi.fn((query: string) => {
-        if (query.includes('step = ?')) return mockStmt(paidJobRow);
+        if (query.includes('SELECT * FROM mint_jobs WHERE id = ? AND step IN')) return mockStmt(paidJobRow);
         // Concurrency gate: under limit, proceed
         if (query.includes("COUNT(*) AS count FROM mint_jobs WHERE step = 'calling_mintgarden'")) {
           return mockStmt({ count: 0 });
@@ -245,7 +245,7 @@ describe('process.ts', () => {
       const env = createMockEnv();
 
       env.DB.prepare = vi.fn((query: string) => {
-        if (query.includes('step = ?')) return mockStmt({ ...freeJobRow, retry_count: 0 });
+        if (query.includes('SELECT * FROM mint_jobs WHERE id = ? AND step IN')) return mockStmt({ ...freeJobRow, retry_count: 0 });
         // For handleJobFailure re-read
         if (query.includes('SELECT * FROM mint_jobs WHERE id')) return mockStmt({ ...freeJobRow, step: 'uploading_ipfs', retry_count: 0 });
         return mockStmt();
@@ -267,7 +267,7 @@ describe('process.ts', () => {
       const exhaustedJob = { ...freeJobRow, retry_count: 3, max_retries: 3 };
 
       env.DB.prepare = vi.fn((query: string) => {
-        if (query.includes('step = ?')) return mockStmt(exhaustedJob);
+        if (query.includes('SELECT * FROM mint_jobs WHERE id = ? AND step IN')) return mockStmt(exhaustedJob);
         if (query.includes('SELECT * FROM mint_jobs WHERE id')) return mockStmt({ ...exhaustedJob, step: 'uploading_ipfs' });
         return mockStmt();
       });
@@ -285,7 +285,7 @@ describe('process.ts', () => {
       const jobWithNumber = { ...freeJobRow, mint_number: 100, retry_count: 1 };
 
       env.DB.prepare = vi.fn((query: string) => {
-        if (query.includes('step = ?')) return mockStmt(jobWithNumber);
+        if (query.includes('SELECT * FROM mint_jobs WHERE id = ? AND step IN')) return mockStmt(jobWithNumber);
         // Concurrency gate: under limit, proceed
         if (query.includes("COUNT(*) AS count FROM mint_jobs WHERE step = 'calling_mintgarden'")) {
           return mockStmt({ count: 0 });
@@ -324,7 +324,7 @@ describe('process.ts', () => {
 
       env.DB.prepare = vi.fn((query: string) => {
         // Initial SELECT load — must match SELECT specifically, not UPDATE
-        if (query.includes('SELECT') && query.includes('step = ?')) return mockStmt(freeJobRow);
+        if (query.includes('SELECT * FROM mint_jobs WHERE id = ? AND step IN')) return mockStmt(freeJobRow);
         if (query.includes("COUNT(*) AS count FROM mint_jobs WHERE step = 'calling_mintgarden'")) {
           return mockStmt({ count: 3 });
         }
@@ -364,7 +364,7 @@ describe('process.ts', () => {
       const env = createMockEnv();
 
       env.DB.prepare = vi.fn((query: string) => {
-        if (query.includes('step = ?')) return mockStmt(freeJobRow);
+        if (query.includes('SELECT * FROM mint_jobs WHERE id = ? AND step IN')) return mockStmt(freeJobRow);
         if (query.includes("COUNT(*) AS count FROM mint_jobs WHERE step = 'calling_mintgarden'")) {
           return mockStmt({ count: 1 });
         }
@@ -401,7 +401,7 @@ describe('process.ts', () => {
       const env = createMockEnv();
 
       env.DB.prepare = vi.fn((query: string) => {
-        if (query.includes('step = ?')) return mockStmt(freeJobRow);
+        if (query.includes('SELECT * FROM mint_jobs WHERE id = ? AND step IN')) return mockStmt(freeJobRow);
         if (query.includes("COUNT(*) AS count FROM mint_jobs WHERE step = 'calling_mintgarden'")) {
           return mockStmt({ count: 0 });
         }
@@ -441,7 +441,7 @@ describe('process.ts', () => {
       env.PINATA_JWT = undefined;
 
       env.DB.prepare = vi.fn((query: string) => {
-        if (query.includes('step = ?')) return mockStmt(freeJobRow);
+        if (query.includes('SELECT * FROM mint_jobs WHERE id = ? AND step IN')) return mockStmt(freeJobRow);
         if (query.includes('SELECT * FROM mint_jobs WHERE id')) return mockStmt(freeJobRow);
         return mockStmt();
       });

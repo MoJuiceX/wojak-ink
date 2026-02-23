@@ -29,7 +29,7 @@ export function MoveButtons({ moves, onSubmit, disabled = false, timerSeconds = 
   // Countdown timer
   useEffect(() => {
     if (disabled) return;
-    setTimeLeft(timerSeconds);
+    queueMicrotask(() => setTimeLeft(timerSeconds));
     const id = setInterval(() => {
       setTimeLeft((t) => {
         if (t <= 1) {
