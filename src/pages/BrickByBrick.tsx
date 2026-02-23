@@ -84,6 +84,14 @@ const SCORING = {
   levelBonus: 100,          // Bonus per level completed
 };
 
+// Stable module constant so callbacks don't capture a new array every render
+const BRICK_BY_BRICK_MUSIC_PLAYLIST = [
+  { src: '/audio/music/brick-by-brick/yoshis-island-final.mp3', name: "Yoshi's Island" },
+  { src: '/audio/music/brick-by-brick/wandering-the-plains-final.mp3', name: 'Wandering the Plains' },
+  { src: '/audio/music/brick-by-brick/valley-of-bowser-final.mp3', name: 'Valley of Bowser' },
+  { src: '/audio/music/brick-by-brick/forest-of-illusion-final.mp3', name: 'Forest of Illusion' },
+];
+
 const BrickByBrick: React.FC = () => {
   const { playBlockLand, playPerfectBonus, playCombo, playWinSound, playGameOver, playLevelUp, playWarning, playWojakChime } = useGameSounds();
   const { hapticScore, hapticCombo, hapticHighScore, hapticGameOver, hapticLevelUp, hapticWarning } = useGameHaptics();
@@ -119,19 +127,11 @@ const BrickByBrick: React.FC = () => {
     setGameId('orange-stack');
   }, [setGameId]);
 
-  // Music playlist - quieter songs that don't overpower sound effects
-  const MUSIC_PLAYLIST = [
-    { src: '/audio/music/brick-by-brick/yoshis-island-final.mp3', name: "Yoshi's Island" },
-    { src: '/audio/music/brick-by-brick/wandering-the-plains-final.mp3', name: 'Wandering the Plains' },
-    { src: '/audio/music/brick-by-brick/valley-of-bowser-final.mp3', name: 'Valley of Bowser' },
-    { src: '/audio/music/brick-by-brick/forest-of-illusion-final.mp3', name: 'Forest of Illusion' },
-  ];
-
   // Local audio element for game music (more reliable on mobile)
   const localAudioRef = useRef<HTMLAudioElement | null>(null);
   const [isMusicPlaying, setIsMusicPlaying] = useState(true); // Sound on by default
   const isMusicPlayingRef = useRef(false); // Ref to avoid stale closure in ended handler
-  const playlistIndexRef = useRef(Math.floor(Math.random() * MUSIC_PLAYLIST.length)); // Start with random track
+  const playlistIndexRef = useRef(Math.floor(Math.random() * BRICK_BY_BRICK_MUSIC_PLAYLIST.length)); // Start with random track
 
   // Keep ref in sync with state
   useEffect(() => {
@@ -149,13 +149,13 @@ const BrickByBrick: React.FC = () => {
       localAudioRef.current = null;
     }
 
-    const track = MUSIC_PLAYLIST[index];
+    const track = BRICK_BY_BRICK_MUSIC_PLAYLIST[index];
     const audio = new Audio(track.src);
     audio.volume = 1.0; // Tracks are already normalized quiet
 
     // When song ends, play next track (use ref to get current state)
     audio.addEventListener('ended', () => {
-      playlistIndexRef.current = (playlistIndexRef.current + 1) % MUSIC_PLAYLIST.length;
+      playlistIndexRef.current = (playlistIndexRef.current + 1) % BRICK_BY_BRICK_MUSIC_PLAYLIST.length;
       if (isMusicPlayingRef.current) {
         playTrack(playlistIndexRef.current);
       }
@@ -310,7 +310,7 @@ const BrickByBrick: React.FC = () => {
         dangerZoneIntervalRef.current = null;
       }
     };
-  }, [isDangerZone, gameState, hapticWarning, playWarning]);
+  }, [isDangerZone, gameState, hapticWarning, playWarning, triggerEvent]);
 
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const [gameAreaRect, setGameAreaRect] = useState<DOMRect | null>(null);
@@ -379,7 +379,7 @@ const BrickByBrick: React.FC = () => {
       }, 50);
       return () => clearTimeout(fixTimer);
     }
-  }, [gameState, blocks.length, isMobile]);
+  }, [gameState, blocks.length, isMobile, blocks]);
 
   const blockSpawnTimeRef = useRef<number>(0);
   const animationRef = useRef<number | undefined>(undefined);
@@ -637,7 +637,7 @@ const BrickByBrick: React.FC = () => {
     setDirection(1);
     blockSpawnTimeRef.current = Date.now();
     bounceCountRef.current = 0; // Reset ref for animation loop
-  }, [isMobile]);
+  }, [isMobile, GAME_WIDTH_RESPONSIVE]);
 
   const dropBlock = useCallback(() => {
     // Use refs for accurate position (avoids stale closure)
@@ -878,7 +878,7 @@ const BrickByBrick: React.FC = () => {
 
     // Spawn next block
     spawnNewBlock(overlapWidth);
-  }, [gameState, score, levelScore, level, highScore, spawnNewBlock, combo, playBlockLand, playPerfectBonus, playCombo, playWinSound, playGameOver, triggerEvent]);
+  }, [gameState, level, combo, isMobile, BLOCK_HEIGHT, score, levelScore, spawnNewBlock, playGameOver, hapticGameOver, triggerScreenShake, triggerVignette, highScore, triggerEvent, playWojakChime, playPerfectBonus, hapticHighScore, playBlockLand, hapticScore, playCombo, hapticCombo, playWinSound, hapticLevelUp]);
 
   // Clear bonus text after a short time
   useEffect(() => {
@@ -901,7 +901,7 @@ const BrickByBrick: React.FC = () => {
 
   // Animation loop - Fixed timestep for consistent physics across devices
   useEffect(() => {
-    if (gameState !== 'playing' || !currentBlock || showExitDialog || isPaused) return;
+    if (gameState !== 'playing' || !currentBlockRef.current || showExitDialog || isPaused) return;
 
     // Use measured game width for consistent block bouncing (handles arcade frame)
     // Fall back to responsive width if not measured yet
@@ -986,7 +986,7 @@ const BrickByBrick: React.FC = () => {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [gameState, currentBlock?.id, showExitDialog, isPaused, isContextPaused, GAME_WIDTH_RESPONSIVE, isMobile]);
+  }, [gameState, currentBlock?.id, showExitDialog, isPaused, isContextPaused, GAME_WIDTH_RESPONSIVE, isMobile, FIXED_DT]);
 
   // Handle tap/click with debounce to prevent double-firing on mobile
   const handleTap = () => {
