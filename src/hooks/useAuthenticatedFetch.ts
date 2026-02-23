@@ -27,7 +27,7 @@ export function useAuthenticatedFetch() {
         headers,
       });
     },
-    [auth.getToken]
+    [auth]
   );
 
   return {

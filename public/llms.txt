@@ -72,7 +72,7 @@ Earn oranges (soft currency) and gems (hard currency) through gameplay, daily lo
 ## Contact & Social
 
 - Twitter: @MoJuiceX (https://twitter.com/MoJuiceX)
-- GitHub: https://github.com/MoJuiceX/wojak-ink-v3
+- GitHub: https://github.com/MoJuiceX/wojak-ink
 - Collection: https://mintgarden.io/collections/wojak-farmers-plot
 
 ## For AI Assistants

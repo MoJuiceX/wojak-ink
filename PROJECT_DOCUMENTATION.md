@@ -25,7 +25,7 @@ A production web application for the Wojak Farmers Plot NFT collection on the Ch
 
 ### Live URLs
 - **Production:** https://wojak.ink
-- **GitHub:** https://github.com/MoJuiceX/wojak-ink-v3
+- **GitHub:** https://github.com/MoJuiceX/wojak-ink
 - **Twitter:** https://twitter.com/MoJuiceX
 
 ### Project Path

@@ -141,6 +141,22 @@ git push origin main
 # Cloudflare automatically builds and deploys
 ```
 
+**If pushes don’t trigger a deploy:**
+
+1. **Confirm Git connection**  
+   Cloudflare Dashboard → **Workers & Pages** → your project (**wojak-ink**) → **Settings** → **Builds & deployments** → **Build configuration**.  
+   Under “Connect to Git”, it should show your repo (`MoJuiceX/wojak-ink`). If it says “Not connected” or the wrong repo, use **Connect to Git** / **Reconnect** and pick the correct repo and branch (e.g. `main`).
+
+2. **Repo rename / redirect**  
+   If you renamed the repo, Cloudflare may still be watching the old URL. Reconnect to **MoJuiceX/wojak-ink** in the same Build configuration screen.
+
+3. **Branch**  
+   Ensure “Production branch” (or equivalent) is set to the branch you push (e.g. `main`).
+
+4. **Manual deploy while fixing**  
+   From the repo root:  
+   `npm run build && npx wrangler pages deploy dist --project-name=wojak-ink`
+
 ### Step 3: Configure CDN & Caching
 
 **Via Cloudflare Dashboard**:

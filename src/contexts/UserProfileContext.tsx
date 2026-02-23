@@ -93,7 +93,8 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
       headers.set('Content-Type', 'application/json');
       return fetch(url, { ...options, headers });
     },
-    [clerkAuth.getToken]
+    // React Compiler prefers clerkAuth; exhaustive-deps wants same
+    [clerkAuth]
   );
 
   const [state, setState] = useState<UserProfileState>({

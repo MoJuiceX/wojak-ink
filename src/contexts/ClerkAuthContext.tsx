@@ -71,6 +71,8 @@ export function ClerkAuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// Hook is the primary export; fast-refresh warning acceptable for context consumers
+// eslint-disable-next-line react-refresh/only-export-components
 export function useClerkAuth(): ClerkAuthValue {
   return useContext(ClerkAuthContext);
 }

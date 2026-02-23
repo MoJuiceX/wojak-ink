@@ -127,13 +127,13 @@ export function SwipeCard({
     supportsHover.current = window.matchMedia('(hover: hover)').matches;
   }, []);
 
-  // First-card wiggle
+  // First-card wiggle (defer setState to avoid set-state-in-effect lint)
   useEffect(() => {
     if (isFirst && !reducedMotion && stackPosition === 0) {
       try {
         if (!localStorage.getItem('wojak_vote_first_visit')) {
-          // eslint-disable-next-line react-hooks/set-state-in-effect
-          setShouldWiggle(true);
+          const id = setTimeout(() => setShouldWiggle(true), 0);
+          return () => clearTimeout(id);
         }
       } catch {
         // localStorage unavailable
@@ -211,8 +211,14 @@ export function SwipeCard({
   // Snappy exit; only transform + opacity (GPU-friendly)
   const exitTransition = reducedMotion
     ? { duration: 0.12 }
-    : { duration: 0.26, ease: [0.22, 0.0, 0.15, 1] };
+    : { duration: 0.26, ease: [0.22, 0.0, 0.15, 1] as const };
   const promoteTransition = { type: 'spring' as const, stiffness: 320, damping: 30 };
+
+  const handleExitCompleteCallback = useCallback(() => {
+    if (exitCompleteFired.current) return;
+    exitCompleteFired.current = true;
+    onExitComplete?.();
+  }, [onExitComplete]);
 
   return (
     <motion.div
@@ -240,12 +246,7 @@ export function SwipeCard({
       onMouseLeave={isInteractive ? handleMouseLeave : undefined}
       onAnimationEnd={shouldWiggle ? handleWiggleEnd : undefined}
       onAnimationComplete={
-        exiting && stackPosition === 0 && onExitComplete && !exitCompleteFired.current
-          ? () => {
-              exitCompleteFired.current = true;
-              onExitComplete();
-            }
-          : undefined
+        exiting && stackPosition === 0 && onExitComplete ? handleExitCompleteCallback : undefined
       }
       initial={stackPosition === 0 ? { opacity: 0, y: 20, scale: 0.96 } : false}
       animate={
@@ -264,7 +265,7 @@ export function SwipeCard({
         exiting
           ? exitTransition
           : stackPosition === 0
-            ? { duration: 0.45, ease: [0.23, 1, 0.32, 1] }
+            ? { duration: 0.45, ease: [0.23, 1, 0.32, 1] as const }
             : promoteTransition
       }
       aria-hidden={stackPosition > 0 ? true : undefined}

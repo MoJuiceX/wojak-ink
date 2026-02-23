@@ -60,13 +60,13 @@ export function VotingFeed() {
 
   // Session state
   const [voteCount, setVoteCount] = useState(0);
-  const [glazeCount, setGlazeCount] = useState(0);
-  const [fadeCount, setFadeCount] = useState(0);
+  const [_glazeCount, setGlazeCount] = useState(0);
+  const [_fadeCount, setFadeCount] = useState(0);
   const [feedError, setFeedError] = useState(false);
   const [cardExiting, setCardExiting] = useState(false);
   const [exitDirection, setExitDirection] = useState<1 | -1 | null>(null);
   const [voteFeedbackType, setVoteFeedbackType] = useState<'glaze' | 'fade' | null>(null);
-  const [optimisticSeenCount, setOptimisticSeenCount] = useState<number | null>(null);
+  const [_optimisticSeenCount, setOptimisticSeenCount] = useState<number | null>(null);
 
 
   // Load feed immediately (no gate)
@@ -102,7 +102,6 @@ export function VotingFeed() {
 
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset optimistic pass progress when backend feed progress updates
     setOptimisticSeenCount(null);
   }, [feedVotePassProgress?.seenCount, feedVotePassProgress?.totalCount, feedVotePassProgress?.passComplete]);
 
@@ -155,6 +154,7 @@ export function VotingFeed() {
       .catch(() => ({ ok: false as const, error: 'Network error', status: 0 }));
 
     pendingVoteRef.current = { nftId: votedNftId, voteType, promise: votePromise };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- stable refs from context; full deps would recreate callback every render
   }, [feed, cardExiting, castVote, loadFeed, removeFromFeed, toast, voteCount, triggerHaptics, rollbackSessionCounts, voteErrorMessage, feedVotePassProgress]);
 
   const handleExitComplete = useCallback(() => {
@@ -186,7 +186,15 @@ export function VotingFeed() {
         toast.error(voteErrorMessage(result));
       }
     });
-  }, [feed.length, feedVotePassProgress, loadFeed, removeFromFeed, rollbackSessionCounts, toast, voteErrorMessage]);
+  }, [
+    feed.length,
+    feedVotePassProgress,
+    loadFeed,
+    removeFromFeed,
+    rollbackSessionCounts,
+    toast,
+    voteErrorMessage,
+  ]);
 
   const handleRetry = useCallback(() => {
     setFeedError(false);

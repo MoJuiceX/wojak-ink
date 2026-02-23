@@ -2,7 +2,7 @@
  * CryptoBubbles Component
  *
  * Interactive DOM-based bubble visualization with physics simulation.
- * Ported from wojak-ink-v3 with improved physics and effects.
+ * Ported from wojak-ink with improved physics and effects.
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
