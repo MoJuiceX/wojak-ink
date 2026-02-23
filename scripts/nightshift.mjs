@@ -133,12 +133,42 @@ function clip(text, max = 1500) {
   return text.length <= max ? text : `${text.slice(0, max)}\n...[truncated ${text.length - max} chars]`;
 }
 
-function summarizeCommandOutput(result) {
+function summarizeCommandOutput(result, command = '') {
   const combined = `${result.stdout || ''}\n${result.stderr || ''}`.trim();
   if (!combined) return '';
   const lines = combined.split(/\r?\n/);
-  const interesting = lines.filter((l) => /error|fail|warning|vulnerab|built in|problems|PASS|FAIL|Test Files|Failed Tests|chunks are larger|chunkSizeWarningLimit|Orphaned:|Intentional non-manifest/i.test(l));
-  const chosen = (interesting.length ? interesting : lines).slice(0, 20).join('\n');
+  const isVitestCommand = /\bvitest\b|npm run test:unit/.test(command);
+  const isBuildCommand = /\bnpm run build\b/.test(command);
+  const testsPassed = /Test Files\s+\d+\s+passed/i.test(combined);
+  const stderrBlockHeaders = lines.filter((l) => /^stderr \|/i.test(l)).length;
+
+  const normalizedLines = lines.filter((l) => {
+    if (!(isVitestCommand && testsPassed)) return true;
+    if (/^stderr \|/i.test(l)) return false;
+    if (/^\(node:\d+\) Warning: `--localstorage-file` was provided without a valid path/i.test(l)) return false;
+    if (/^\(Use `node --trace-warnings \.\.\.`/i.test(l)) return false;
+    return true;
+  });
+
+  const interesting = normalizedLines.filter((l) => /error|fail|warning|vulnerab|built in|problems|PASS|FAIL|Test Files|Failed Tests|chunks are larger|chunkSizeWarningLimit|Orphaned:|Intentional non-manifest/i.test(l));
+  const chosenLines = (interesting.length ? interesting : normalizedLines).slice(0, 20);
+  if (isVitestCommand && testsPassed && stderrBlockHeaders > 0) {
+    chosenLines.unshift(`[NightShift] Suppressed ${stderrBlockHeaders} passing-test stderr block headers in report excerpt (see log for full output).`);
+  }
+  if (isBuildCommand) {
+    const chunkRows = [];
+    for (const l of lines) {
+      const m = l.match(/dist\/assets\/([^\s]+\.js)\s+([\d.]+)\s+kB/);
+      if (!m) continue;
+      chunkRows.push({ file: m[1], sizeKb: Number(m[2]) });
+    }
+    if (chunkRows.length) {
+      const top = chunkRows.sort((a, b) => b.sizeKb - a.sizeKb).slice(0, 3);
+      const summary = top.map((c) => `${c.file} (${c.sizeKb.toFixed(2)}kB)`).join(', ');
+      chosenLines.unshift(`[NightShift] Largest JS chunks: ${summary}`);
+    }
+  }
+  const chosen = chosenLines.join('\n');
   return clip(chosen, 3000);
 }
 
@@ -512,7 +542,7 @@ async function main() {
           log: state.logPath,
         });
         cmdRecord.durationMs += result.durationMs;
-        cmdRecord.summary = summarizeCommandOutput(result);
+        cmdRecord.summary = summarizeCommandOutput(result, command);
 
         if (result.code === 0) {
           cmdRecord.status = 'success';
