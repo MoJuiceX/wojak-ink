@@ -137,7 +137,7 @@ function summarizeCommandOutput(result) {
   const combined = `${result.stdout || ''}\n${result.stderr || ''}`.trim();
   if (!combined) return '';
   const lines = combined.split(/\r?\n/);
-  const interesting = lines.filter((l) => /error|fail|warning|vulnerab|built in|problems|PASS|FAIL|Test Files|Failed Tests/i.test(l));
+  const interesting = lines.filter((l) => /error|fail|warning|vulnerab|built in|problems|PASS|FAIL|Test Files|Failed Tests|chunks are larger|chunkSizeWarningLimit|Orphaned:|Intentional non-manifest/i.test(l));
   const chosen = (interesting.length ? interesting : lines).slice(0, 20).join('\n');
   return clip(chosen, 3000);
 }
@@ -307,8 +307,9 @@ function makeReport(state, policy, args) {
       if (/Failed Tests|Test Files\s+4 failed|9 failed/i.test(s)) nextSteps.push('Fix current unit test regressions (mint pipeline + brittle combat trait-count assertion).');
       const auditHasDirectFindings = /swiper|lodash/i.test(s) || /"total"\s*:\s*[1-9]\d*/i.test(s);
       if (auditHasDirectFindings) nextSteps.push('Patch direct dependency vulnerabilities (`swiper`, `lodash`) with gated checks.');
-      if (/chunks are larger than/i.test(s)) nextSteps.push('Create code-splitting plan for main chunk and review manualChunks strategy.');
-      if (/Orphaned: \d+/i.test(s)) nextSteps.push('Review manifest orphan assets and decide remove vs intentional keep.');
+      if (/chunks are larger than|chunkSizeWarningLimit|Adjust chunk size limit/i.test(s)) nextSteps.push('Create code-splitting plan for main chunk and review manualChunks strategy.');
+      if (/Orphaned:\s*(?!0\b)\d+/i.test(s)) nextSteps.push('Review manifest orphan assets and decide remove vs intentional keep.');
+      if (/Test Files\s+\d+\s+passed/i.test(s) && /stderr \|/i.test(s)) nextSteps.push('Reduce noisy expected test stderr output to keep nightly reports focused on regressions.');
     }
   }
   for (const item of [...new Set(nextSteps)].slice(0, 12)) lines.push(`- ${item}`);
