@@ -13,13 +13,12 @@ import React, { lazy } from 'react';
 describe('Lazy-Load Games Optimization', () => {
   describe('1. React.lazy() Code Splitting', () => {
     it('should create lazy-loadable component with lazy()', () => {
-      const LazyComponent = lazy(
-        () =>
-          new Promise(resolve => {
-            resolve({
-              default: () => React.createElement('div', null, 'Lazy Component'),
-            });
-          })
+      // Create lazy component for testing
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const LazyComponent = lazy((): Promise<{ default: any }> =>
+        Promise.resolve({
+          default: () => React.createElement('div', null, 'Lazy Component'),
+        })
       );
 
       // LazyComponent should be a lazy exotic component
@@ -30,14 +29,14 @@ describe('Lazy-Load Games Optimization', () => {
     it('should defer module import until component is mounted', () => {
       let importCalled = false;
 
-      const trackImport = lazy(
-        () =>
-          new Promise(resolve => {
-            importCalled = true;
-            resolve({
-              default: () => React.createElement('div'),
-            });
-          })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const trackImport = lazy((): Promise<{ default: any }> =>
+        new Promise(resolve => {
+          importCalled = true;
+          resolve({
+            default: () => React.createElement('div'),
+          });
+        })
       );
 
       // Before render, import should not be called
@@ -49,13 +48,16 @@ describe('Lazy-Load Games Optimization', () => {
     });
 
     it('should create independent lazy chunks', () => {
-      const Generator = lazy(() =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const Generator = lazy((): Promise<{ default: any }> =>
         Promise.resolve({ default: () => React.createElement('div') })
       );
-      const BigPulp = lazy(() =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const BigPulp = lazy((): Promise<{ default: any }> =>
         Promise.resolve({ default: () => React.createElement('div') })
       );
-      const BlockPuzzle = lazy(() =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const BlockPuzzle = lazy((): Promise<{ default: any }> =>
         Promise.resolve({ default: () => React.createElement('div') })
       );
 
@@ -107,13 +109,13 @@ describe('Lazy-Load Games Optimization', () => {
 
   describe('3. Suspense Boundary', () => {
     it('should wrap lazy components in Suspense', () => {
-      const LazyGame = lazy(
-        () =>
-          new Promise(resolve => {
-            resolve({
-              default: () => React.createElement('div', null, 'Game'),
-            });
-          })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const LazyGame = lazy((): Promise<{ default: any }> =>
+        new Promise(resolve => {
+          resolve({
+            default: () => React.createElement('div', null, 'Game'),
+          });
+        })
       );
 
       const appWithSuspense = React.createElement(

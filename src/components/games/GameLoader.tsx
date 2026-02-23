@@ -17,7 +17,8 @@
  * - BlockPuzzle, FlappyOrange, etc. → can be added as needed
  */
 
-import { Suspense, ComponentType, ReactNode } from 'react';
+import type { ComponentType, ReactNode } from 'react';
+import { Suspense } from 'react';
 import { GameSkeleton } from '@/components/skeletons/GameSkeleton';
 
 export type GameSkeletonVariant = 'simple' | 'complex' | 'arcade';
@@ -77,91 +78,16 @@ export function GameLoader({
 }
 
 /**
- * Pre-configured loaders for specific games.
- * Use these for consistency and type safety.
+ * Usage Examples:
+ * 
+ * // In App.tsx (already done):
+ * const Generator = lazy(() => import('./pages/Generator'));
+ * const BigPulp = lazy(() => import('./pages/BigPulp'));
+ * 
+ * // In route:
+ * <Suspense fallback={<GameSkeleton variant="complex" />}>
+ *   <Generator />
+ * </Suspense>
  */
-
-/**
- * Generator loader
- * Large bundle (169kB), complex UI with layers and customization
- */
-export function GeneratorLoader(props?: Record<string, unknown>) {
-  const Generator = React.lazy(() =>
-    import('@/pages/Generator').then(m => ({
-      default: m.default,
-    }))
-  );
-
-  return (
-    <GameLoader
-      component={Generator}
-      skeletonVariant="complex"
-      componentProps={props}
-    />
-  );
-}
-
-/**
- * BigPulp loader
- * Medium-large bundle (98kB), AI chat + character system
- */
-export function BigPulpLoader(props?: Record<string, unknown>) {
-  const BigPulp = React.lazy(() =>
-    import('@/pages/BigPulp').then(m => ({
-      default: m.default,
-    }))
-  );
-
-  return (
-    <GameLoader
-      component={BigPulp}
-      skeletonVariant="complex"
-      componentProps={props}
-    />
-  );
-}
-
-/**
- * BlockPuzzle loader
- * Medium bundle, 2D puzzle game
- */
-export function BlockPuzzleLoader(props?: Record<string, unknown>) {
-  const BlockPuzzle = React.lazy(() =>
-    import('@/pages/games/block-puzzle').then(m => ({
-      default: m.default,
-    }))
-  );
-
-  return (
-    <GameLoader
-      component={BlockPuzzle}
-      skeletonVariant="simple"
-      componentProps={props}
-    />
-  );
-}
-
-/**
- * FlappyOrange loader
- * Medium bundle, arcade 2D game
- */
-export function FlappyOrangeLoader(props?: Record<string, unknown>) {
-  const FlappyOrange = React.lazy(() =>
-    import('@/pages/games/flappy-orange').then(m => ({
-      default: m.default,
-    }))
-  );
-
-  return (
-    <GameLoader
-      component={FlappyOrange}
-      skeletonVariant="arcade"
-      componentProps={props}
-    />
-  );
-}
-
-// Import React for lazy()
-import * as React from 'react';
 
 export default GameLoader;
