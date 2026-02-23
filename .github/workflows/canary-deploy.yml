@@ -72,7 +72,7 @@ jobs:
             https://github.com/argoproj/argo-rollouts/releases/download/v1.8.3/kubectl-argo-rollouts-linux-amd64
           chmod +x kubectl-argo-rollouts
           sudo mv kubectl-argo-rollouts /usr/local/bin/
-          kubectl-argo-rollouts version --client
+          kubectl-argo-rollouts version
       - name: Configure kubectl
         env:
           KUBE_CONFIG_B64: ${{ secrets.KUBE_CONFIG }}
