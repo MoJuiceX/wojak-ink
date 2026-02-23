@@ -300,9 +300,11 @@ function makeReport(state, policy, args) {
   for (const task of state.tasks) {
     for (const cmd of task.commands || []) {
       const s = cmd.summary || '';
-      if (/548 problems|ESLint|problems \(/i.test(s)) nextSteps.push('Prioritize ESLint hard errors before warning cleanup.');
+      const lintHasErrors = /\b\d+\s+problems?\s+\(\s*[1-9]\d*\s+errors?/i.test(s);
+      if (lintHasErrors) nextSteps.push('Prioritize ESLint hard errors before warning cleanup.');
       if (/Failed Tests|Test Files\s+4 failed|9 failed/i.test(s)) nextSteps.push('Fix current unit test regressions (mint pipeline + brittle combat trait-count assertion).');
-      if (/swiper|lodash|vulnerab/i.test(s)) nextSteps.push('Patch direct dependency vulnerabilities (`swiper`, `lodash`) with gated checks.');
+      const auditHasDirectFindings = /swiper|lodash/i.test(s) || /"total"\s*:\s*[1-9]\d*/i.test(s);
+      if (auditHasDirectFindings) nextSteps.push('Patch direct dependency vulnerabilities (`swiper`, `lodash`) with gated checks.');
       if (/chunks are larger than/i.test(s)) nextSteps.push('Create code-splitting plan for main chunk and review manualChunks strategy.');
       if (/Orphaned: \d+/i.test(s)) nextSteps.push('Review manifest orphan assets and decide remove vs intentional keep.');
     }
