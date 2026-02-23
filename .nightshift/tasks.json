@@ -173,7 +173,7 @@
       "mutatesCode": false,
       "timeoutMs": 300000,
       "commands": [
-        "npx eslint src functions workers tests scripts --ext .ts,.tsx,.js,.mjs,.cjs -f compact || true"
+        "npx eslint src functions workers tests scripts --ext .ts,.tsx,.js,.mjs,.cjs || true"
       ],
       "expectedOutputs": [
         "reports/nightshift-<timestamp>.md"

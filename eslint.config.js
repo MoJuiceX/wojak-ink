@@ -35,4 +35,11 @@ export default defineConfig([
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },
+  {
+    files: ['workers/**/*.{ts,js}', 'scripts/**/*.{ts,js,mjs,cjs}'],
+    rules: {
+      // Operational workers/scripts intentionally use console logging.
+      'no-console': 'off',
+    },
+  },
 ])
