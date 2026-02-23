@@ -17,17 +17,21 @@ Run a safe unattended maintenance/reliability session on a dedicated nightly bra
 3. Run dry-run:
    - `npm run nightshift:dry-run`
 4. Review generated report and planned queue
-5. Enable/disable tasks in `.nightshift/tasks.json`
-6. Run real mode:
+5. Optional: run report-only real mode first (executes only non-mutating tasks)
+   - `npm run nightshift:report`
+6. Enable/disable tasks in `.nightshift/tasks.json`
+7. Run real mode:
    - `npm run nightshift:run`
-7. Review `/reports/nightshift-<timestamp>.md`
-8. Open PR(s) manually after reviewing diffs and checks
+8. Review `/reports/nightshift-<timestamp>.md`
+9. Open PR(s) manually after reviewing diffs and checks
 
 ## Commands
 - Bootstrap (run from `main` checkout):
   - `bash scripts/nightshift-bootstrap.sh`
 - Dry run (default):
   - `node scripts/nightshift.mjs --dry-run`
+- Report-only real mode (skips mutating tasks):
+  - `node scripts/nightshift.mjs --real --report-only --max-hours=8 --max-tasks=20 --soft-failures=5 --hard-failures=10`
 - Real mode (safe defaults):
   - `node scripts/nightshift.mjs --real --max-hours=8 --max-tasks=20 --soft-failures=5 --hard-failures=10`
 - Resume latest unfinished run:

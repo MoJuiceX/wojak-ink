@@ -20,6 +20,7 @@ function parseArgs(argv) {
     softFailures: 5,
     hardFailures: 10,
     allowE2E: false,
+    reportOnly: false,
     state: null,
   };
 
@@ -28,6 +29,7 @@ function parseArgs(argv) {
     if (arg === '--real') { out.real = true; out.dryRun = false; continue; }
     if (arg === '--resume') { out.resume = true; continue; }
     if (arg === '--allow-e2e') { out.allowE2E = true; continue; }
+    if (arg === '--report-only') { out.reportOnly = true; continue; }
     const [k, v] = arg.split('=');
     if (!v) continue;
     if (k === '--queue') out.queue = v;
@@ -394,7 +396,10 @@ async function main() {
   }
 
   const runStartedMs = Date.now();
-  let reportOnlyMode = state.summary.reportOnlyModeActivated || false;
+  let reportOnlyMode = args.reportOnly || state.summary.reportOnlyModeActivated || false;
+  if (args.reportOnly) {
+    state.summary.reportOnlyModeActivated = true;
+  }
   const taskStatuses = Object.fromEntries(state.tasks.map((t) => [t.id, t.status]));
   const existingTaskIds = new Set(state.tasks.map((t) => t.id));
 
