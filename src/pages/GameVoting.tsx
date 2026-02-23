@@ -1,6 +1,7 @@
 // Voting page — /swipe
 // Desktop: 2-column (card | stats). Mobile: stats bar + card. Power level / leaderboard is on Rankings tab only.
 
+import { memo } from 'react';
 import { useLayout } from '@/hooks/useLayout';
 import { PageSEO } from '@/components/seo';
 import { VotingFeed } from '@/components/game/VotingFeed';
@@ -26,14 +27,14 @@ function VotingPageMobile() {
   return (
     <div className="flex flex-col" style={{ minHeight: '100dvh' }}>
       <MobileStatsBar />
-      <div className="flex flex-col items-center p-4 gap-4" style={{ flex: 1, paddingBottom: 80 }}>
+      <div className="flex flex-col items-center gap-3" style={{ flex: 1, padding: '12px 10px 156px' }}>
         <VotingFeed />
       </div>
     </div>
   );
 }
 
-export default function GameVoting() {
+const GameVoting = memo(function GameVoting() {
   const { isDesktop } = useLayout();
 
   return (
@@ -47,4 +48,6 @@ export default function GameVoting() {
       {isDesktop ? <VotingPageDesktop /> : <VotingPageMobile />}
     </>
   );
-}
+});
+
+export default GameVoting;

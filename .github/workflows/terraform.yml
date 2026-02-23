@@ -1,0 +1,80 @@
+name: Terraform Validate / Manual Plan
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'terraform/**'
+      - '.github/workflows/terraform.yml'
+  workflow_dispatch:
+    inputs:
+      run_plan:
+        description: 'Run terraform plan (manual only)'
+        required: true
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
+      environment:
+        description: 'Target environment for manual plan'
+        required: true
+        default: 'staging'
+        type: choice
+        options: ['dev', 'staging', 'prod']
+      confirm_prod:
+        description: 'Type PLAN_PROD to run prod plan'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: terraform-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.11.4
+      - name: Terraform fmt + init + validate
+        run: ./scripts/validate-terraform.sh
+
+  manual-plan:
+    if: github.event_name == 'workflow_dispatch' && inputs.run_plan == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: ${{ inputs.environment == 'prod' && 'production' || 'staging' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.11.4
+      - name: Guard production plan confirmation
+        run: |
+          if [ "${{ inputs.environment }}" = "prod" ] && [ "${{ inputs.confirm_prod }}" != "PLAN_PROD" ]; then
+            echo "Refusing prod plan without confirm_prod=PLAN_PROD" >&2
+            exit 1
+          fi
+      - name: Terraform init (no backend)
+        run: terraform -chdir=terraform init -backend=false -input=false
+      - name: Terraform plan (no apply)
+        env:
+          TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+          TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          TF_VAR_database_url: ${{ secrets.DATABASE_URL }}
+          TF_VAR_database_replica_url: ${{ secrets.DATABASE_REPLICA_URL }}
+          TF_VAR_environment: ${{ inputs.environment }}
+        run: terraform -chdir=terraform plan -input=false -lock=false -out=tfplan
+      - name: Upload tfplan artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan-${{ inputs.environment }}
+          path: terraform/tfplan
+          if-no-files-found: ignore

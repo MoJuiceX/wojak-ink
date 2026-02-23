@@ -1,0 +1,79 @@
+name: Rollback Helper (Manual, Guarded)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options: ['staging', 'production']
+      namespace:
+        description: 'Kubernetes namespace'
+        required: true
+        default: 'default'
+        type: string
+      rollout_name:
+        description: 'Argo Rollout resource name'
+        required: true
+        default: 'wojak-ink-api'
+        type: string
+      dry_run:
+        description: 'Preview only (no rollback)'
+        required: true
+        default: 'true'
+        type: choice
+        options: ['true', 'false']
+      confirm_production:
+        description: 'Type ROLLBACK_PROD to allow production rollback'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: rollback-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: ${{ inputs.environment == 'production' && 'production' || 'staging' }}
+    steps:
+      - name: Guard production confirmation
+        run: |
+          if [ "${{ inputs.environment }}" = "production" ] && [ "${{ inputs.confirm_production }}" != "ROLLBACK_PROD" ]; then
+            echo "Refusing production rollback without confirm_production=ROLLBACK_PROD" >&2
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+      - uses: azure/setup-kubectl@v4
+      - name: Install Argo Rollouts kubectl plugin
+        run: |
+          curl -fsSL -o kubectl-argo-rollouts \
+            https://github.com/argoproj/argo-rollouts/releases/download/v1.8.3/kubectl-argo-rollouts-linux-amd64
+          chmod +x kubectl-argo-rollouts
+          sudo mv kubectl-argo-rollouts /usr/local/bin/
+          kubectl-argo-rollouts version
+      - name: Configure kubectl
+        env:
+          KUBE_CONFIG_B64: ${{ secrets.KUBE_CONFIG }}
+        run: |
+          test -n "$KUBE_CONFIG_B64"
+          mkdir -p "$HOME/.kube"
+          printf '%s' "$KUBE_CONFIG_B64" | base64 -d > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+      - name: Show rollout history
+        run: kubectl argo rollouts history rollout/${{ inputs.rollout_name }} -n ${{ inputs.namespace }}
+      - name: Rollback preview or execute
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            echo "Dry-run: would rollback rollout/${{ inputs.rollout_name }} in namespace ${{ inputs.namespace }}"
+            exit 0
+          fi
+          kubectl argo rollouts undo rollout/${{ inputs.rollout_name }} -n ${{ inputs.namespace }}
+          kubectl argo rollouts get rollout ${{ inputs.rollout_name }} -n ${{ inputs.namespace }} --watch=false

@@ -124,6 +124,7 @@ const OrangePongGame: React.FC = () => {
     setPlayerName('');
   };
 
+  // One-time auto-start on initial mount only; re-running on callback/state changes would restart gameplay unexpectedly.
   useEffect(() => {
     const timer = setTimeout(() => {
       if (gameState === 'idle') {
@@ -131,7 +132,7 @@ const OrangePongGame: React.FC = () => {
       }
     }, 100);
     return () => clearTimeout(timer);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const saveScoreLocal = () => {
     if (!playerName.trim()) return;
@@ -177,6 +178,7 @@ const OrangePongGame: React.FC = () => {
     : localLeaderboard;
 
   // Game loop
+  // Main animation loop intentionally seeds from round-start state and runs via local mutable loop variables.
   useEffect(() => {
     if (gameState !== 'playing') return;
 
@@ -317,7 +319,7 @@ const OrangePongGame: React.FC = () => {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [gameState, effects]);
+  }, [gameState, effects]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Play time counter
   useEffect(() => {

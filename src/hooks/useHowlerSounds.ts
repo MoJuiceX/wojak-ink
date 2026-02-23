@@ -24,10 +24,11 @@ export const useHowlerSounds = () => {
         preload: true,
       });
     });
+    const sounds = soundsRef.current;
 
     return () => {
       // Cleanup
-      Object.values(soundsRef.current).forEach(sound => sound.unload());
+      Object.values(sounds).forEach(sound => sound.unload());
     };
   }, []);
 

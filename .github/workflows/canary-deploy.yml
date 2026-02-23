@@ -1,0 +1,102 @@
+name: Canary Deploy (Manual, Guarded)
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'validate (default) or deploy'
+        required: true
+        default: 'validate'
+        type: choice
+        options: ['validate', 'deploy']
+      environment:
+        description: 'Deployment target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options: ['staging', 'production']
+      percentage:
+        description: 'Traffic percentage (deploy mode only)'
+        required: true
+        default: '5'
+        type: choice
+        options: ['5', '25', '50', '100']
+      confirm_production:
+        description: 'Type DEPLOY_PROD to allow production deploy mode'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: canary-${{ github.ref }}-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate GitHub workflows
+        run: ./scripts/validate-github-workflows.sh .github/workflows/canary-deploy.yml .github/workflows/auto-rollback.yml .github/workflows/terraform.yml .github/workflows/infra-validate.yml
+      - name: Validate Kubernetes manifests (syntax/shape)
+        run: ./scripts/validate-k8s-manifests.rb
+      - name: Explain guarded mode
+        run: |
+          echo "Mode: ${{ inputs.mode }}"
+          echo "Environment: ${{ inputs.environment }}"
+          echo "Traffic percentage: ${{ inputs.percentage }}"
+          echo "No deployment will occur unless mode=deploy and guard checks pass."
+
+  deploy:
+    if: inputs.mode == 'deploy'
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: ${{ inputs.environment == 'production' && 'production' || 'staging' }}
+    steps:
+      - name: Guard production confirmation
+        run: |
+          if [ "${{ inputs.environment }}" = "production" ] && [ "${{ inputs.confirm_production }}" != "DEPLOY_PROD" ]; then
+            echo "Refusing production deploy without confirm_production=DEPLOY_PROD" >&2
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+      - uses: azure/setup-kubectl@v4
+      - name: Install Argo Rollouts kubectl plugin
+        run: |
+          curl -fsSL -o kubectl-argo-rollouts \
+            https://github.com/argoproj/argo-rollouts/releases/download/v1.8.3/kubectl-argo-rollouts-linux-amd64
+          chmod +x kubectl-argo-rollouts
+          sudo mv kubectl-argo-rollouts /usr/local/bin/
+          kubectl-argo-rollouts version
+      - name: Configure kubectl
+        env:
+          KUBE_CONFIG_B64: ${{ secrets.KUBE_CONFIG }}
+        run: |
+          test -n "$KUBE_CONFIG_B64"
+          mkdir -p "$HOME/.kube"
+          printf '%s' "$KUBE_CONFIG_B64" | base64 -d > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+      - name: Apply rollout manifest (operator controlled)
+        run: |
+          kubectl apply -f k8s/rollout.yaml -n default
+          kubectl argo rollouts get rollout wojak-ink-api -n default --watch
+      - name: Smoke health check
+        env:
+          HEALTH_URL: ${{ secrets.CANARY_HEALTHCHECK_URL }}
+        run: |
+          test -n "$HEALTH_URL"
+          for _ in 1 2 3; do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' "$HEALTH_URL" || true)
+            if [ "$code" = "200" ] || [ "$code" = "206" ]; then
+              echo "Health check passed with $code"
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "Health check failed" >&2
+          exit 1

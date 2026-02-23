@@ -194,7 +194,6 @@ export function BattleReplay({ battleId }: BattleReplayProps) {
   useEffect(() => {
     if (!battle || initializedRef.current) return;
     initializedRef.current = true;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- defer HP init to avoid cascading render
     queueMicrotask(() => {
       setHpA({ current: maxHpA, ghost: maxHpA });
       setHpB({ current: maxHpB, ghost: maxHpB });

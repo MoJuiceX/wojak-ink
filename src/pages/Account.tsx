@@ -5,7 +5,7 @@
  * horizontal NFT scroll, compact stats, and expanded social widgets.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SignedOut, SignInButton, useClerk, useAuth } from '@clerk/clerk-react';
 import { LogOut, Settings, RefreshCw, KeyRound, User, Check, X } from 'lucide-react';
@@ -48,7 +48,10 @@ export default function Account() {
   // Always call useAuth() to comply with rules of hooks
   const authResult = useAuth();
   const userId = CLERK_ENABLED ? authResult.userId : null;
-  const getToken = CLERK_ENABLED ? authResult.getToken : async () => null;
+  const getToken = useMemo(
+    () => (CLERK_ENABLED ? authResult.getToken : async () => null),
+    [authResult.getToken]
+  );
 
   const {
     profile,

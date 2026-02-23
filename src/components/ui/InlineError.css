@@ -1,0 +1,179 @@
+/**
+ * Inline Error Styles
+ */
+
+.inline-error {
+  padding: 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border: 1px solid #fca5a5;
+  color: #7f1d1d;
+  font-size: 0.875rem;
+}
+
+.inline-error-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.inline-error-icon-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.inline-error-icon {
+  color: #dc2626;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.inline-error-title {
+  font-weight: 600;
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+.inline-error-retry-info {
+  font-size: 0.75rem;
+  color: #a16163;
+  margin: 4px 0 0 0;
+}
+
+.inline-error-toggle {
+  background: none;
+  border: none;
+  color: #7f1d1d;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.inline-error-toggle:hover {
+  color: #dc2626;
+}
+
+.inline-error-message {
+  margin: 0 0 12px 0;
+  font-size: 0.875rem;
+  color: #7f1d1d;
+  word-break: break-word;
+}
+
+.inline-error-details {
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.inline-error-stacktrace {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 0.75rem;
+  overflow-x: auto;
+  max-height: 200px;
+  margin: 0;
+  color: #7f1d1d;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.inline-error-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.inline-error-retry,
+.inline-error-fallback {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.inline-error-retry {
+  background: #dc2626;
+  color: white;
+}
+
+.inline-error-retry:hover:not(:disabled) {
+  background: #b91c1c;
+  transform: scale(1.02);
+}
+
+.inline-error-retry:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.inline-error-fallback {
+  background: #7f1d1d;
+  color: white;
+}
+
+.inline-error-fallback:hover {
+  background: #991b1b;
+  transform: scale(1.02);
+}
+
+.inline-error-backoff-info {
+  font-size: 0.75rem;
+  color: #a16163;
+  font-style: italic;
+}
+
+/* Compact Variant */
+
+.inline-error-compact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #7f1d1d;
+  font-size: 0.8125rem;
+}
+
+.inline-error-compact svg {
+  color: #dc2626;
+  flex-shrink: 0;
+}
+
+.inline-error-retry-mini {
+  background: none;
+  border: none;
+  color: #dc2626;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  transition: all 0.2s;
+}
+
+.inline-error-retry-mini:hover:not(:disabled) {
+  transform: rotate(180deg);
+  color: #991b1b;
+}
+
+.inline-error-retry-mini:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}

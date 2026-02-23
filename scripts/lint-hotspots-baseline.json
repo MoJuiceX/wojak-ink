@@ -1,0 +1,40 @@
+{
+  "generated": "2026-02-23T12:10:00Z",
+  "description": "Lint hotspots baseline — identifies files with lint warnings for tracking improvement",
+  "ignorePatterns": [
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/*.d.ts",
+    "**/node_modules/**",
+    "**/dist/**"
+  ],
+  "topOffenders": [
+    {
+      "file": "src/lib/juice/camera.ts",
+      "warnings": 2,
+      "type": "no-console"
+    },
+    {
+      "file": "src/lib/juice/performanceDetector.ts",
+      "warnings": 1,
+      "type": "unused-vars"
+    },
+    {
+      "file": "src/contexts/generatorStateUtils.ts",
+      "warnings": 1,
+      "type": "no-explicit-any"
+    },
+    {
+      "file": ".tmp/wc-vite-out/assets/Sage_wallet-connect/sage-wallet-react/SageWalletProvider.tsx",
+      "warnings": 15,
+      "type": "no-console, react-hooks/exhaustive-deps"
+    },
+    {
+      "file": ".tmp/wc-vite-out/assets/Sage_wallet-connect/sage-wallet-react/useSageWalletStandalone.ts",
+      "warnings": 8,
+      "type": "no-console, react-hooks/exhaustive-deps"
+    }
+  ],
+  "totalWarningsToAddress": 27,
+  "strategy": "Focus on reducing console statements in production code and fixing dependency arrays in React hooks"
+}

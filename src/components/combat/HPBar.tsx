@@ -30,7 +30,7 @@ export function HPBar({ current, max, label, ghost }: HPBarProps) {
   useEffect(() => {
     if (pct < prevPctRef.current) {
       // Damage was taken: trigger shimmer and delay ghost bar
-      setIsShimmering(true);
+      queueMicrotask(() => setIsShimmering(true));
       const shimmerTimer = setTimeout(() => setIsShimmering(false), 800);
 
       const ghostTimer = setTimeout(() => {
@@ -44,7 +44,7 @@ export function HPBar({ current, max, label, ghost }: HPBarProps) {
       };
     } else {
       // Healing: sync ghost immediately
-      setInternalGhostPct(pct);
+      queueMicrotask(() => setInternalGhostPct(pct));
       prevPctRef.current = pct;
     }
   }, [pct]);

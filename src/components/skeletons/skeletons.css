@@ -278,3 +278,168 @@
   height: 24px;
   width: 60%;
 }
+
+/* ----------------------------------------
+   SKELETON RANKING
+   ---------------------------------------- */
+
+.skeleton-ranking {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--color-white-3);
+  border-radius: 12px;
+  border: 1px solid var(--color-white-5);
+}
+
+.skeleton-ranking .skeleton-rank {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.skeleton-ranking .skeleton-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.skeleton-ranking .skeleton-badge {
+  width: 100%;
+  height: 100%;
+}
+
+.skeleton-ranking .skeleton-circle {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.skeleton-ranking .skeleton-ranking-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skeleton-ranking .skeleton-title {
+  height: 18px;
+  width: 70%;
+}
+
+.skeleton-ranking .skeleton-subtitle {
+  height: 14px;
+  width: 50%;
+}
+
+.skeleton-ranking .skeleton-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.skeleton-ranking .skeleton-stat-value {
+  height: 20px;
+  width: 80px;
+}
+
+.skeleton-ranking .skeleton-stat-label {
+  height: 12px;
+  width: 60px;
+}
+
+.skeleton-ranking-mini {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 12px;
+}
+
+.skeleton-ranking-mini .skeleton {
+  flex: 1;
+  height: 20px;
+}
+
+/* ----------------------------------------
+   SKELETON VOTE CARD
+   ---------------------------------------- */
+
+.skeleton-vote-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--color-white-3);
+  border-radius: 16px;
+  border: 1px solid var(--color-white-5);
+  min-height: 300px;
+}
+
+.skeleton-vote-card .skeleton-vote-image {
+  aspect-ratio: 1;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.skeleton-vote-card .skeleton-image {
+  width: 100%;
+  height: 100%;
+}
+
+.skeleton-vote-card .skeleton-vote-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skeleton-vote-card .skeleton-title {
+  height: 20px;
+  width: 80%;
+}
+
+.skeleton-vote-card .skeleton-subtitle {
+  height: 16px;
+  width: 60%;
+}
+
+.skeleton-vote-card .skeleton-vote-description {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skeleton-vote-card .skeleton-text {
+  height: 14px;
+  width: 100%;
+}
+
+.skeleton-vote-card .skeleton-text-short {
+  width: 70%;
+}
+
+.skeleton-vote-card .skeleton-vote-stats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.skeleton-vote-card .skeleton-stat-badge {
+  height: 24px;
+  width: 80px;
+  border-radius: 6px;
+}
+
+.skeleton-vote-card .skeleton-vote-action {
+  margin-top: auto;
+}
+
+.skeleton-vote-card .skeleton-button {
+  height: 44px;
+  width: 100%;
+  border-radius: 10px;
+}

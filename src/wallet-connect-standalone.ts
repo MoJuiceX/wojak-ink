@@ -1,6 +1,6 @@
 /**
  * Standalone WalletConnect bundle for static HTML pages (e.g. free-mints.html).
- * Bundled by Vite into public/assets/wallet-connect-standalone.js
+ * Bundled by Vite into public/assets/wallet-connect-standalone.js + hashed chunks
  * Exposes window._sageConnect() and window._sageDisconnect()
  */
 

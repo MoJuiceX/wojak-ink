@@ -213,7 +213,7 @@ function CombatArenaInner() {
         {isConnected && !isLoadingFighters && (
           <div className="w-full">
             <QueuePanel
-              fighters={fighters as any}
+              fighters={fighters}
               onQueue={handleQueue}
               onLeaveQueue={handleLeaveQueue}
               onFightAi={handleFightAi}

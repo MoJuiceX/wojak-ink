@@ -65,7 +65,7 @@ export const useGameRewards = ({ gameId }: UseGameRewardsOptions) => {
         setIsProcessing(false);
       }
     },
-    [gameId, earnFromGame]
+    [earnFromGame, gameId, recordGamePlayed, checkAchievements, recordLeaderboardRank]
   );
 
   /**

@@ -141,7 +141,7 @@ describe('cleanup.ts', () => {
       if (query.includes('awaiting_payment') && query.includes('mintgarden_launcher_id IS NULL')) {
         return { ...mockStmt(), all: vi.fn().mockResolvedValue({ results: [] }), bind: vi.fn().mockReturnThis() };
       }
-      if (query.includes('step = \'queued\'') && query.includes('created_at')) {
+      if (query.includes("step IN ('queued', 'validating', 'reserving_number')") && query.includes('created_at')) {
         return { ...mockStmt(), all: vi.fn().mockResolvedValue({ results: [{ id: 5 }] }), bind: vi.fn().mockReturnThis() };
       }
       return mockStmt();
@@ -207,7 +207,7 @@ describe('cleanup.ts', () => {
       if (query.includes('awaiting_payment') && query.includes('mintgarden_launcher_id IS NULL')) {
         return { ...mockStmt(), all: vi.fn().mockResolvedValue({ results: [] }), bind: vi.fn().mockReturnThis() };
       }
-      if (query.includes('step = \'queued\'') && query.includes('created_at')) {
+      if (query.includes("step IN ('queued', 'validating', 'reserving_number')") && query.includes('created_at')) {
         return { ...mockStmt(), all: vi.fn().mockResolvedValue({ results: [{ id: 5 }] }), bind: vi.fn().mockReturnThis() };
       }
       if (query.includes('IMAGE_EXPIRED')) {

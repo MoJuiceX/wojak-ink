@@ -19,6 +19,10 @@ interface SwipeCardProps {
   isFirst?: boolean;
   reducedMotion?: boolean;
   exitDirection?: 1 | -1 | null; // 1 = right (like), -1 = left (dislike)
+  /** Voting stats for the footer context */
+  likes?: number;
+  dislikes?: number;
+  totalVotes?: number;
 }
 
 const SWIPE_THRESHOLD = 100;
@@ -63,7 +67,11 @@ export function SwipeCard({
   isFirst = false,
   reducedMotion = false,
   exitDirection = null,
+  likes = 0,
+  dislikes = 0,
+  totalVotes = 0,
 }: SwipeCardProps) {
+  const voteScore = likes - dislikes;
   const x = useMotionValue(0);
   const [swipeExiting, setSwipeExiting] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -192,13 +200,13 @@ export function SwipeCard({
   void triggerVote; // used by parent via onVote callback pattern
 
   // Exit direction: from swipe gesture, button click, or default right
-  // Distance is enough to fully exit the card container (clipped by overflow: hidden)
-  const exitX = exitDirection ? exitDirection * 350 : (x.get() >= 0 ? 350 : -350);
+  // Distance is enough to fully exit the card container (clips handled by overflow)
+  const exitX = exitDirection ? exitDirection * 500 : (x.get() >= 0 ? 500 : -500);
 
   return (
     <motion.div
       ref={cardRef}
-      className={`vote-card ${shouldWiggle ? 'vote-card-wiggle' : ''}`}
+      className={`vote-card ${shouldWiggle ? 'vote-card-wiggle' : ''} ${stackPosition === 0 ? 'vote-card-entrance' : ''}`}
       style={{
         x: isInteractive ? x : undefined,
         rotate: isInteractive ? rotate : undefined,
@@ -219,7 +227,7 @@ export function SwipeCard({
       onMouseMove={isInteractive ? handleMouseMove : undefined}
       onMouseLeave={isInteractive ? handleMouseLeave : undefined}
       onAnimationEnd={shouldWiggle ? handleWiggleEnd : undefined}
-      initial={false}
+      initial={stackPosition === 0 ? { opacity: 0, y: 20, scale: 0.96 } : false}
       animate={
         exiting
           ? reducedMotion
@@ -235,7 +243,9 @@ export function SwipeCard({
       transition={
         exiting
           ? { duration: 0.2, ease: 'easeOut' }
-          : { type: 'spring', stiffness: 200, damping: 20 }
+          : stackPosition === 0
+            ? { duration: 0.45, ease: [0.23, 1, 0.32, 1] }
+            : { type: 'spring', stiffness: 200, damping: 20 }
       }
       aria-hidden={stackPosition > 0 ? true : undefined}
     >
@@ -304,9 +314,29 @@ export function SwipeCard({
         )}
       </div>
 
-      {/* Info bar */}
+      {/* Info bar — compact voting context */}
       <div className="vote-card-info">
-        <span className="vote-card-info-name">Your Wojak #{editionNumber} &middot; {name}</span>
+        <div className="vote-card-info-main">
+          <div className="vote-card-info-top">
+            <div className="vote-card-info-titleline">
+              <span className="vote-card-info-edition">#{editionNumber}</span>
+              <span className="vote-card-info-separator" aria-hidden>&middot;</span>
+              <span className="vote-card-info-name">{name}</span>
+            </div>
+          </div>
+          <div className="vote-card-info-stats" aria-label={`Score ${voteScore}. ${totalVotes} votes.`}>
+            <span className="vote-card-stat vote-card-stat-chip">
+              <span className="vote-card-stat-label">Score</span>
+              <span className={voteScore > 0 ? 'text-success' : voteScore < 0 ? 'text-error' : 'text-secondary'}>
+                {voteScore > 0 ? '+' : ''}{voteScore}
+              </span>
+            </span>
+            <span className="vote-card-stat vote-card-stat-chip">
+              <span className="vote-card-stat-label">Votes</span>
+              <span className="text-secondary">{totalVotes}</span>
+            </span>
+          </div>
+        </div>
       </div>
     </motion.div>
   );

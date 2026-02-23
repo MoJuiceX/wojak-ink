@@ -1,0 +1,140 @@
+# Kubernetes Pod Specification with Health Checks
+# Used in Deployments and StatefulSets
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: wojak-ink-api
+  labels:
+    app: wojak-ink-api
+    version: v1
+spec:
+  serviceAccountName: wojak-ink
+  terminationGracePeriodSeconds: 30
+  
+  containers:
+  - name: api
+    image: wojak-ink:latest
+    imagePullPolicy: IfNotPresent
+    
+    # Container ports
+    ports:
+    - name: http
+      containerPort: 3000
+      protocol: TCP
+    - name: metrics
+      containerPort: 9090
+      protocol: TCP
+    
+    # Environment variables
+    env:
+    - name: NODE_ENV
+      value: "production"
+    - name: PORT
+      value: "3000"
+    - name: DATABASE_URL
+      valueFrom:
+        secretKeyRef:
+          name: database-secrets
+          key: primary-url
+    - name: DATABASE_REPLICA_URL
+      valueFrom:
+        secretKeyRef:
+          name: database-secrets
+          key: replica-url
+    - name: REDIS_HOST
+      valueFrom:
+        configMapKeyRef:
+          name: app-config
+          key: redis-host
+    - name: REDIS_PORT
+      valueFrom:
+        configMapKeyRef:
+          name: app-config
+          key: redis-port
+    - name: UNLEASH_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: feature-flags-secrets
+          key: api-key
+    - name: LOG_LEVEL
+      value: "info"
+    - name: APP_VERSION
+      value: "1.0.0"
+    
+    # Resource limits and requests
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "250m"
+      limits:
+        memory: "512Mi"
+        cpu: "500m"
+    
+    # Startup probe: Give container time to start
+    # Kubernetes will not route traffic until this succeeds
+    startupProbe:
+      httpGet:
+        path: /api/health
+        port: http
+        scheme: HTTP
+      initialDelaySeconds: 0
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 30  # 30 * 10 = 300 seconds max startup time
+      successThreshold: 1
+    
+    # Readiness probe: Is container ready to serve traffic?
+    # If this fails, traffic is removed but container continues running
+    readinessProbe:
+      httpGet:
+        path: /api/health
+        port: http
+        scheme: HTTP
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3  # After 3 failures, remove traffic
+      successThreshold: 1
+    
+    # Liveness probe: Is container still alive?
+    # If this fails, Kubernetes will restart the container
+    livenessProbe:
+      httpGet:
+        path: /api/health
+        port: http
+        scheme: HTTP
+      initialDelaySeconds: 15
+      periodSeconds: 20
+      timeoutSeconds: 5
+      failureThreshold: 3  # After 3 failures, restart pod
+      successThreshold: 1
+    
+    # Lifecycle hooks
+    lifecycle:
+      preStop:
+        exec:
+          command: ["/bin/sh", "-c", "sleep 15"]
+    
+    # Security context
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      readOnlyRootFilesystem: false
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+  
+  # Pod-level security context
+  securityContext:
+    fsGroup: 1000
+  
+  # Volume mounts (if needed)
+  volumes: []
+  
+  # Restart policy
+  restartPolicy: Always
+  
+  # DNS policy
+  dnsPolicy: ClusterFirst

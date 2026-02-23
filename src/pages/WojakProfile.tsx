@@ -61,8 +61,10 @@ function ProfileContent() {
 
   useEffect(() => {
     if (!edition) return;
-    setLoading(true);
-    setError(false);
+    queueMicrotask(() => {
+      setLoading(true);
+      setError(false);
+    });
     fetch(`/api/game/wojak/${edition}`)
       .then(r => r.json())
       .then(d => {

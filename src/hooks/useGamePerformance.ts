@@ -56,7 +56,13 @@ export function useGamePerformance(options: UseGamePerformanceOptions = {}) {
 
       // Warn if FPS drops below threshold
       if (fpsRef.current < warnThreshold) {
-        const metrics = getMetrics();
+        const memory = (performance as unknown as { memory?: { usedJSHeapSize?: number } }).memory;
+        const metrics: PerformanceMetrics = {
+          fps: fpsRef.current,
+          frameTime: 1000 / fpsRef.current,
+          memoryUsage: memory?.usedJSHeapSize,
+          droppedFrames: droppedFramesRef.current,
+        };
         console.warn(`[Performance] FPS dropped to ${fpsRef.current}`, metrics);
         onPerformanceWarning?.(metrics);
       }

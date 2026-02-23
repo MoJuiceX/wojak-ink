@@ -179,6 +179,49 @@ interface G2MouthCardProps {
 /** Default color for Bubble Gum fill */
 const BUBBLE_GUM_DEFAULT_COLOR = '#FF1493';
 
+// Custom sort order for MouthBase traits (exact display names or path keywords)
+const MOUTH_BASE_ORDER = [
+  'numb',
+  'smile',
+  'screem',    // Screaming (file is "screeming")
+  'teeth',     // Regular teeth (must come before gold-teeth)
+  'gold-teeth', // Gold Teeth
+  'drac',      // Vampire Teeth
+  'pipe',
+  'pizza',
+  'bubble',    // Bubble Gum
+  'hannibal',  // Hannibal Mask
+];
+
+function sortMouthBaseTraits(traits: UnifiedTrait[]): UnifiedTrait[] {
+  return [...traits].sort((a, b) => {
+    // Use g1Path if available, otherwise use name
+    const aKey = (a.g1Path || a.name).toLowerCase();
+    const bKey = (b.g1Path || b.name).toLowerCase();
+
+    const getOrderIndex = (key: string): number => {
+      for (let i = 0; i < MOUTH_BASE_ORDER.length; i++) {
+        const keyword = MOUTH_BASE_ORDER[i];
+        // For "teeth", make sure it doesn't match "gold-teeth"
+        if (keyword === 'teeth') {
+          if (key.includes('teeth') && !key.includes('gold')) return i;
+        } else if (key.includes(keyword)) {
+          return i;
+        }
+      }
+      return -1;
+    };
+
+    const aIndex = getOrderIndex(aKey);
+    const bIndex = getOrderIndex(bKey);
+
+    if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+    if (aIndex !== -1) return -1;
+    if (bIndex !== -1) return 1;
+    return aKey.localeCompare(bKey);
+  });
+}
+
 /** G2 mouth trait card with base face + clothes underlay */
 function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick, pricing }: G2MouthCardProps) {
   const prefersReducedMotion = useReducedMotion();
@@ -328,53 +371,6 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
   const [mouthItemImages, setMouthItemImages] = useState<LayerImage[]>([]);
   const [facialHairImages, setFacialHairImages] = useState<LayerImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Custom sort order for MouthBase traits (exact display names or path keywords)
-  const MOUTH_BASE_ORDER = [
-    'numb',
-    'smile',
-    'screem',    // Screaming (file is "screeming")
-    'teeth',     // Regular teeth (must come before gold-teeth)
-    'gold-teeth', // Gold Teeth
-    'drac',      // Vampire Teeth
-    'pipe',
-    'pizza',
-    'bubble',    // Bubble Gum
-    'hannibal',  // Hannibal Mask
-  ];
-
-  const sortMouthBaseTraits = (traits: UnifiedTrait[]): UnifiedTrait[] => {
-    return [...traits].sort((a, b) => {
-      // Use g1Path if available, otherwise use name
-      const aKey = (a.g1Path || a.name).toLowerCase();
-      const bKey = (b.g1Path || b.name).toLowerCase();
-
-      // Find order index - check for exact substring match
-      const getOrderIndex = (key: string): number => {
-        for (let i = 0; i < MOUTH_BASE_ORDER.length; i++) {
-          const keyword = MOUTH_BASE_ORDER[i];
-          // For "teeth", make sure it doesn't match "gold-teeth"
-          if (keyword === 'teeth') {
-            if (key.includes('teeth') && !key.includes('gold')) return i;
-          } else if (key.includes(keyword)) {
-            return i;
-          }
-        }
-        return -1;
-      };
-
-      const aIndex = getOrderIndex(aKey);
-      const bIndex = getOrderIndex(bKey);
-
-      // If both found in order list, sort by that order
-      if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
-      // If only one found, prioritize the one in the list
-      if (aIndex !== -1) return -1;
-      if (bIndex !== -1) return 1;
-      // Otherwise alphabetical
-      return aKey.localeCompare(bKey);
-    });
-  };
 
   const selectedMouthBase = selectedLayers.MouthBase;
   const selectedMouthItem = selectedLayers.MouthItem;

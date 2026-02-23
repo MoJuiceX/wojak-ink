@@ -17,6 +17,19 @@ const assetDir = join(__dirname, '../public/assets/wojak-layers/YourWojak-layers
 
 const strictMode = process.argv.includes('--strict');
 
+// Some generator assets are intentionally referenced directly by UI/canvas code
+// (outside the G2 manifest data model), so they appear "orphaned" from a
+// manifest-only perspective. Keep this allowlist explicit and small.
+const INTENTIONAL_NON_MANIFEST_FILES = new Set([
+  'Clothes_Suite-Bow_fill.png',
+  'Face-wear_MOG-Glasses_blue.png',
+  'Head_Cap_fill_armyl.png',
+  'Marlboro-Menthol.png',
+  'Marlboro-red.png',
+  'McDonalds-Logo.png',
+  'chia-TN.png',
+]);
+
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
 const referencedFiles = new Set();
 
@@ -74,7 +87,10 @@ for (const f of referencedFiles) {
 
 // Check for orphaned files
 const actualFiles = new Set(getFilesRecursive(assetDir));
-const orphaned = [...actualFiles].filter(f => !referencedFiles.has(f));
+const orphaned = [...actualFiles].filter(
+  (f) => !referencedFiles.has(f) && !INTENTIONAL_NON_MANIFEST_FILES.has(f)
+);
+const allowedNonManifestPresent = [...actualFiles].filter((f) => INTENTIONAL_NON_MANIFEST_FILES.has(f));
 
 let hasError = false;
 
@@ -97,6 +113,9 @@ console.log('\n✅ Manifest validation passed:');
 console.log('   Referenced files:', referencedFiles.size);
 console.log('   Actual files:', actualFiles.size);
 console.log('   Missing:', missing.length);
+if (allowedNonManifestPresent.length) {
+  console.log('   Intentional non-manifest files:', allowedNonManifestPresent.length);
+}
 if (strictMode || orphaned.length === 0) {
   console.log('   Orphaned:', orphaned.length);
 } else {

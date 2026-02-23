@@ -534,7 +534,7 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }
       const costOranges = orangesCost || 0;
       const costGems = gemsCost || 0;
 
-      if (!canAfford(costOranges, costGems)) {
+      if ((costOranges > 0 && currency.oranges < costOranges) || (costGems > 0 && currency.gems < costGems)) {
         return { success: false, error: 'Insufficient funds' };
       }
 
@@ -638,7 +638,12 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }
    */
   const spendCurrency = useCallback(
     (oranges: number, gems: number, source: TransactionSource): boolean => {
-      if (!isSignedIn || !userId || !canAfford(oranges, gems)) {
+      if (
+        !isSignedIn ||
+        !userId ||
+        (oranges > 0 && currency.oranges < oranges) ||
+        (gems > 0 && currency.gems < gems)
+      ) {
         return false;
       }
 
@@ -691,7 +696,7 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }
 
       return true;
     },
-    [isSignedIn, userId, apiCall]
+    [isSignedIn, userId, currency, apiCall]
   );
 
   /**

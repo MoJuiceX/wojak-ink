@@ -469,7 +469,6 @@ export function preloadNftImages(): void {
     img.src = url;
   });
 
-  console.debug(`[Treasury] Preloading ${uniqueUrls.length} NFT images`);
 }
 
 /**

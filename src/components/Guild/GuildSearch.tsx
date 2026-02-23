@@ -4,7 +4,7 @@
  * Modal for searching and joining public guilds.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, Loader2 } from 'lucide-react';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,8 +32,8 @@ export const GuildSearch: React.FC<GuildSearchProps> = ({ isOpen, onClose }) => 
   const [requestSent, setRequestSent] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
 
-  const performSearch = useCallback(
-    debounce(async (searchQuery: string) => {
+  const performSearch = useMemo(
+    () => debounce(async (searchQuery: string) => {
       if (searchQuery.length < 2) {
         setResults([]);
         setIsSearching(false);

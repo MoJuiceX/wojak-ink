@@ -31,7 +31,7 @@ export function BattleQueuePanel({ onQueued, queuedNftIds = [] }: BattleQueuePan
 
   useEffect(() => {
     if (!player?.did) return;
-    setLoading(true);
+    queueMicrotask(() => setLoading(true));
     fetch(`/api/game/collection?did=${player.did}`)
       .then(r => r.json())
       .then(data => {

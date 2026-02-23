@@ -16,6 +16,9 @@ const RATE_LIMIT_MS = 500; // 500ms between MintGarden API calls
 const MAX_PAGES = 50;      // Safety cap on pagination
 const D1_BATCH_SIZE = 25;  // Max statements per D1 batch call
 const CIRCUIT_BREAKER_THRESHOLD = 5; // Consecutive API failures before aborting
+const PLAYERS_PER_RUN = 5; // Only sync this many players per cron run (staggered)
+const DISCOVERY_INTERVAL_MS = 12 * 60 * 60 * 1000; // 12 hours between full collection scans
+const _SKIP_IF_INDEXED_WITHIN_MS = 2 * 60 * 60 * 1000; // Skip players indexed < 2 hours ago
 
 // Power level calculation constants (same as _powerLevel.ts)
 const POWER_LEVEL_MAX = 10000;
@@ -48,12 +51,43 @@ export default {
 async function run(env: Env) {
   console.log('[DID Indexer] Starting run...');
 
-  // Get all registered players
-  const players = await env.DB.prepare(
-    'SELECT did_id, wallet_address FROM game_players'
-  ).all();
+  // Phase 0: Auto-discover new Farmers Plot holders — only every 12 hours
+  // Check when discovery last ran via a simple DB flag
+  const lastDiscovery = await env.DB.prepare(
+    "SELECT value FROM kv_meta WHERE key = 'last_discovery_run'"
+  ).first<{ value: string }>();
 
-  console.log(`[DID Indexer] Processing ${players.results.length} players`);
+  const lastDiscoveryTime = lastDiscovery ? new Date(lastDiscovery.value).getTime() : 0;
+  const shouldDiscover = (Date.now() - lastDiscoveryTime) > DISCOVERY_INTERVAL_MS;
+
+  if (shouldDiscover) {
+    try {
+      const discovered = await discoverNewHolders(env);
+      console.log(`[DID Indexer] Auto-discovered ${discovered} new holder(s)`);
+      // Record discovery time
+      await env.DB.prepare(
+        "INSERT INTO kv_meta (key, value) VALUES ('last_discovery_run', datetime('now')) ON CONFLICT(key) DO UPDATE SET value = datetime('now')"
+      ).run();
+    } catch (err) {
+      console.error('[DID Indexer] Holder discovery error (non-fatal):', err);
+    }
+  } else {
+    const hoursAgo = Math.round((Date.now() - lastDiscoveryTime) / 3600000);
+    console.log(`[DID Indexer] Skipping discovery (last ran ${hoursAgo}h ago, interval: 12h)`);
+  }
+
+  // Get the PLAYERS_PER_RUN oldest-indexed players to sync (staggered round-robin)
+  // Skip players indexed within the last 2 hours
+  const players = await env.DB.prepare(`
+    SELECT did_id, wallet_address, last_indexed_at
+    FROM game_players
+    WHERE last_indexed_at IS NULL
+       OR last_indexed_at < datetime('now', '-2 hours')
+    ORDER BY last_indexed_at ASC NULLS FIRST
+    LIMIT ?
+  `).bind(PLAYERS_PER_RUN).all();
+
+  console.log(`[DID Indexer] Syncing ${players.results.length} players (staggered, ${PLAYERS_PER_RUN} per run)`);
 
   let updatedCount = 0;
   let errorCount = 0;
@@ -96,14 +130,14 @@ async function run(env: Env) {
       const errMsg = err instanceof Error ? err.message.slice(0, 200) : 'Unknown error';
       await env.DB.prepare(
         "UPDATE game_players SET last_index_error = ?, index_error_count = index_error_count + 1 WHERE did_id = ?"
-      ).bind(errMsg, did).run().catch(() => {});
+      ).bind(errMsg, did).run().catch(() => { });
     }
 
     // Rate limit
     await sleep(RATE_LIMIT_MS);
   }
 
-  console.log(`[DID Indexer] Done. Changed: ${updatedCount}, Skipped: ${skippedCount}, Errors: ${errorCount}, Total: ${players.results.length}`);
+  console.log(`[DID Indexer] Done. Changed: ${updatedCount}, Skipped: ${skippedCount}, Errors: ${errorCount}, Synced: ${players.results.length}`);
 
   if (!env.ADMIN_SECRET) {
     console.warn('[DID Indexer] ADMIN_SECRET not set — battle-resolve and vote-xp calls will fail with 401');
@@ -333,11 +367,13 @@ interface FetchResult {
 
 async function fetchDIDNfts(did: string, collectionId: string): Promise<FetchResult> {
   const nfts: NftInfo[] = [];
-  let page = 1;
+  let cursor: string | null = null;
   const pageSize = 100;
+  let pages = 0;
 
-  while (page <= MAX_PAGES) {
-    const url = `https://api.mintgarden.io/nfts?collection_id=${collectionId}&owner_did=${encodeURIComponent(did)}&size=${pageSize}&page=${page}`;
+  while (pages < MAX_PAGES) {
+    let url = `https://api.mintgarden.io/collections/${collectionId}/nfts?size=${pageSize}&owner_did=${encodeURIComponent(did)}`;
+    if (cursor) url += `&cursor=${encodeURIComponent(cursor)}`;
 
     let response: Response;
     try {
@@ -357,9 +393,10 @@ async function fetchDIDNfts(did: string, collectionId: string): Promise<FetchRes
     const data = await response.json() as {
       items: Array<{
         id: string;
-        data?: { metadata_json?: { edition_number?: number } };
-        minter_address?: string;
+        edition_number?: number;
+        creator_address_encoded_id?: string;
       }>;
+      next?: string | null;
     };
 
     if (!data.items || data.items.length === 0) break;
@@ -367,13 +404,14 @@ async function fetchDIDNfts(did: string, collectionId: string): Promise<FetchRes
     for (const item of data.items) {
       nfts.push({
         id: item.id,
-        edition: item.data?.metadata_json?.edition_number,
-        creator: item.minter_address,
+        edition: item.edition_number,
+        creator: item.creator_address_encoded_id,
       });
     }
 
-    if (data.items.length < pageSize) break;
-    page++;
+    if (!data.next || data.items.length < pageSize) break;
+    cursor = data.next;
+    pages++;
 
     // Rate limit between pages
     await sleep(RATE_LIMIT_MS);
@@ -387,6 +425,128 @@ async function batchChunked(db: D1Database, statements: D1PreparedStatement[]): 
     const chunk = statements.slice(i, i + D1_BATCH_SIZE);
     await db.batch(chunk);
   }
+}
+
+/**
+ * Discover new Farmers Plot holders from MintGarden collection listing.
+ * Paginates all Phase 1 NFTs, extracts unique owner DIDs, and auto-creates
+ * game_players rows for any that don't already exist.
+ * Returns the count of newly created players.
+ */
+async function discoverNewHolders(env: Env): Promise<number> {
+  const holderDids = new Map<string, { name?: string; wallet?: string }>();
+  let cursor: string | null = null;
+  const pageSize = 100;
+  let pages = 0;
+
+  // Paginate all Phase 1 NFTs to collect owner DIDs (cursor-based)
+  while (pages < MAX_PAGES) {
+    let url = `https://api.mintgarden.io/collections/${PHASE1_COLLECTION}/nfts?size=${pageSize}`;
+    if (cursor) url += `&cursor=${encodeURIComponent(cursor)}`;
+
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        headers: { 'Accept': 'application/json' },
+      });
+    } catch (err) {
+      console.error(`[DID Indexer] Discovery: network error on page ${pages + 1}:`, err);
+      break;
+    }
+
+    if (!response.ok) {
+      console.error(`[DID Indexer] Discovery: MintGarden returned ${response.status} on page ${pages + 1}`);
+      break;
+    }
+
+    const data = await response.json() as {
+      items: Array<{
+        id: string;
+        encoded_id: string;
+        owner_encoded_id?: string;
+        owner_id?: string;
+        owner_name?: string;
+        owner_address_encoded_id?: string;
+        edition_number?: number;
+      }>;
+      next?: string | null;
+    };
+
+    if (!data.items || data.items.length === 0) break;
+
+    for (const item of data.items) {
+      const ownerDid = item.owner_encoded_id;
+      // Only process valid DID owners (skip if no DID or not a valid DID)
+      if (ownerDid && ownerDid.startsWith('did:chia:')) {
+        if (!holderDids.has(ownerDid)) {
+          holderDids.set(ownerDid, {
+            name: item.owner_name,
+            wallet: item.owner_address_encoded_id,
+          });
+        }
+      }
+    }
+
+    if (!data.next || data.items.length < pageSize) break;
+    cursor = data.next;
+    pages++;
+    await sleep(RATE_LIMIT_MS);
+  }
+
+  console.log(`[DID Indexer] Discovery: found ${holderDids.size} unique DIDs holding Farmers Plot across ${pages + 1} pages`);
+
+  if (holderDids.size === 0) return 0;
+
+  // Check which DIDs are already registered
+  let newCount = 0;
+  const didEntries = Array.from(holderDids.entries());
+
+  // Process in chunks to avoid overwhelming D1
+  for (let i = 0; i < didEntries.length; i += D1_BATCH_SIZE) {
+    const chunk = didEntries.slice(i, i + D1_BATCH_SIZE);
+    const statements: D1PreparedStatement[] = [];
+
+    for (const [did, info] of chunk) {
+      // Check if player already exists
+      const existing = await env.DB.prepare(
+        'SELECT 1 FROM game_players WHERE did_id = ?'
+      ).bind(did).first();
+
+      if (!existing) {
+        // Auto-create player row
+        const wallet = info.wallet || '';
+        statements.push(
+          env.DB.prepare(`
+            INSERT OR IGNORE INTO game_players (did_id, wallet_address, phase1_verified, votes_today_reset)
+            VALUES (?, ?, 1, ?)
+          `).bind(did, wallet, new Date().toISOString().split('T')[0])
+        );
+
+        // Auto-create profile with MintGarden name if available
+        if (info.name && info.name.trim().length >= 2) {
+          statements.push(
+            env.DB.prepare(`
+              INSERT INTO did_profiles (did_id, display_name, name_source, created_at, updated_at)
+              VALUES (?, ?, 'chain', datetime('now'), datetime('now'))
+              ON CONFLICT(did_id) DO UPDATE SET
+                display_name = CASE WHEN name_source = 'random' OR name_source IS NULL THEN ? ELSE display_name END,
+                name_source = CASE WHEN name_source = 'random' OR name_source IS NULL THEN 'chain' ELSE name_source END,
+                updated_at = datetime('now')
+            `).bind(did, info.name.trim(), info.name.trim())
+          );
+        }
+
+        newCount++;
+        console.log(`[DID Indexer] Auto-enrolled: ${did.slice(0, 25)}... (${info.name || 'unnamed'})`);
+      }
+    }
+
+    if (statements.length > 0) {
+      await batchChunked(env.DB, statements);
+    }
+  }
+
+  return newCount;
 }
 
 function sleep(ms: number): Promise<void> {

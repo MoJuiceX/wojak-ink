@@ -61,12 +61,13 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
   // Compute effective volumes
   const musicVolume = settings.audio.backgroundMusicVolume;
   const sfxVolume = settings.audio.soundEffectsVolume;
+  const initialMusicVolumeRef = useRef<number>(musicVolume);
 
   // Initialize background music audio element
   useEffect(() => {
     bgMusicRef.current = new Audio();
     bgMusicRef.current.loop = true;
-    bgMusicRef.current.volume = musicVolume;
+    bgMusicRef.current.volume = initialMusicVolumeRef.current;
     bgMusicRef.current.src = MUSIC_TRACKS.default; // Set initial track
 
     return () => {

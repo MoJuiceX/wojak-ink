@@ -1,5 +1,6 @@
 // Vote buttons: full-width pill buttons for Fade/Glaze.
 // Keyboard shortcuts: ← fade, → glaze (desktop only).
+// Subtitles show vote score impact.
 
 import { motion } from 'framer-motion';
 import { useEffect, useRef } from 'react';
@@ -9,12 +10,14 @@ interface VoteButtonsProps {
   onLike: () => void;
   onDislike: () => void;
   disabled: boolean;
+  feedbackType?: 'glaze' | 'fade' | null;
 }
 
 export function VoteButtons({
   onLike,
   onDislike,
   disabled,
+  feedbackType = null,
 }: VoteButtonsProps) {
   const reducedMotion = usePrefersReducedMotion();
   const supportsHover = useRef(false);
@@ -54,25 +57,25 @@ export function VoteButtons({
     : { scale: 0.96, transition: { duration: 0.06, ease: 'easeOut' as const } };
 
   return (
-    <div className="vote-buttons-row">
+    <div className={`vote-buttons-row${feedbackType ? ` is-${feedbackType}` : ''}`}>
       <motion.button
-        className="btn btn-secondary vote-btn-pill"
+        className={`btn vote-btn-pill vote-btn-fade${feedbackType === 'fade' ? ' recently-picked' : ''}`}
         onClick={onDislike}
         disabled={disabled}
         aria-label="Fade this Wojak"
         whileTap={tapAnimation}
       >
-        🗑️ Fade
+        <span className="vote-btn-label">🗑️ Fade</span>
       </motion.button>
 
       <motion.button
-        className="btn btn-secondary vote-btn-pill"
+        className={`btn vote-btn-pill vote-btn-glaze${feedbackType === 'glaze' ? ' recently-picked' : ''}`}
         onClick={onLike}
         disabled={disabled}
         aria-label="Glaze this Wojak"
         whileTap={tapAnimation}
       >
-        🍩 Glaze
+        <span className="vote-btn-label">🍩 Glaze</span>
       </motion.button>
     </div>
   );

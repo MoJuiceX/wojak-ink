@@ -98,9 +98,7 @@ export default function StartupSequence({ onComplete }: StartupSequenceProps) {
       // Play the pre-created PS1 audio (created during user click in BootSequence)
       if (ps1AudioRef.current) {
         ps1AudioRef.current.currentTime = 0.5 // Skip first 0.5 seconds
-        ps1AudioRef.current.play().catch(e => {
-          console.debug('[StartupSequence] PS1 audio play failed:', e)
-        })
+        ps1AudioRef.current.play().catch(() => {})
       }
 
       await delay(3439)

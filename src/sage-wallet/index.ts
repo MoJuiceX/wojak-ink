@@ -29,7 +29,7 @@
  * 
  * @example Standalone Hook (without Provider)
  * ```tsx
- * import { useSageWalletStandalone } from './sage-wallet';
+ * import { useSageWalletStandalone } from './sage-wallet/useSageWalletStandalone';
  * 
  * function WalletButton() {
  *   const { address, isConnected, connect, disconnect, shortenAddress } = useSageWalletStandalone();
@@ -45,9 +45,6 @@
 
 // Provider and main hook
 export { SageWalletProvider, useSageWallet, SageWalletContext } from './SageWalletProvider';
-
-// Standalone hook (no provider needed)
-export { useSageWalletStandalone } from './useSageWalletStandalone';
 
 // Ready-to-use components
 export { SageConnectButton, SageWalletStatus, NFTGate, WalletFAB } from './SageWalletComponents';

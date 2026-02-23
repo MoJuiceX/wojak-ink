@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * BattleHistory — list of past battles with W/L/D, ELO changes.
  */

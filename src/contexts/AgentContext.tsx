@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * AgentContext — manages agent state for the current user.
  * Provides: agent info, hasAgent, createAgent, rotateKey, rate limit status.

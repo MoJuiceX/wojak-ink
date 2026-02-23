@@ -375,10 +375,11 @@ export default function WojakWhack() {
 
   // Cleanup on unmount
   useEffect(() => {
+    const hideTimeouts = hideTimeoutsRef.current;
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
       if (spawnTimeoutRef.current) clearTimeout(spawnTimeoutRef.current);
-      hideTimeoutsRef.current.forEach((timeout) => clearTimeout(timeout));
+      hideTimeouts.forEach((timeout) => clearTimeout(timeout));
     };
   }, []);
 

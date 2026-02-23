@@ -162,19 +162,6 @@ export const GuildProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   }, [myGuild?.id]);
 
-  // Fetch user's guild on mount/user change
-  useEffect(() => {
-    if (user) {
-      fetchMyGuild();
-      fetchMyInvites();
-    } else {
-      setMyGuild(null);
-      setMyGuildMembers([]);
-      setMyRole(null);
-      setIsLoading(false);
-    }
-  }, [user]);
-
   const fetchMyGuild = useCallback(async () => {
     if (!user) {
       setIsLoading(false);
@@ -241,6 +228,19 @@ export const GuildProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       console.error('Failed to fetch invites:', error);
     }
   }, [user]);
+
+  // Fetch user's guild on mount/user change
+  useEffect(() => {
+    if (user) {
+      fetchMyGuild();
+      fetchMyInvites();
+    } else {
+      setMyGuild(null);
+      setMyGuildMembers([]);
+      setMyRole(null);
+      setIsLoading(false);
+    }
+  }, [user, fetchMyGuild, fetchMyInvites]);
 
   // Create a new guild
   const createGuild = useCallback(async (data: CreateGuildData): Promise<Guild> => {

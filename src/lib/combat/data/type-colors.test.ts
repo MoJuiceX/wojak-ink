@@ -16,11 +16,11 @@ describe('TYPE_COLORS', () => {
   });
 
   it('getTypeColor returns fallback for unknown type', () => {
-    expect(getTypeColor('INVALID' as any)).toBe('#666666');
+    expect(getTypeColor('INVALID' as unknown as (typeof COMBAT_TYPES)[number])).toBe('#666666');
   });
 
   it('getTypeColor is case-insensitive', () => {
-    expect(getTypeColor('fire' as any)).toBe('#F08030');
+    expect(getTypeColor('fire' as unknown as (typeof COMBAT_TYPES)[number])).toBe('#F08030');
   });
 
   it('DARK_TEXT_TYPES contains light-background types', () => {

@@ -1,0 +1,209 @@
+{
+  "generatedAt": "2026-02-23T11:11:54.083Z",
+  "distDir": "dist/assets",
+  "totals": {
+    "jsFiles": 83,
+    "cssFiles": 35,
+    "jsKb": 3814.2,
+    "cssKb": 885.29
+  },
+  "topJs": [
+    {
+      "file": "wallet-connect-standalone.js",
+      "bytes": 623975,
+      "sizeKb": 609.35,
+      "group": "js-other"
+    },
+    {
+      "file": "vendor-wallet-CS5OAqh_.js",
+      "bytes": 356074,
+      "sizeKb": 347.73,
+      "group": "vendor-wallet"
+    },
+    {
+      "file": "vendor-react-CHQ8Ntdh.js",
+      "bytes": 310700,
+      "sizeKb": 303.42,
+      "group": "vendor-react"
+    },
+    {
+      "file": "index-C_7Vrq5S.js",
+      "bytes": 274217,
+      "sizeKb": 267.79,
+      "group": "entry-index"
+    },
+    {
+      "file": "html2canvas.esm-DXEQVQnt.js",
+      "bytes": 201041,
+      "sizeKb": 196.33,
+      "group": "js-other"
+    },
+    {
+      "file": "vendor-wallet-ui-2whuy7B0.js",
+      "bytes": 180657,
+      "sizeKb": 176.42,
+      "group": "vendor-wallet-ui"
+    },
+    {
+      "file": "Generator-cu-ToGUZ.js",
+      "bytes": 173694,
+      "sizeKb": 169.62,
+      "group": "js-other"
+    },
+    {
+      "file": "feature-generator-core-BYiojoKV.js",
+      "bytes": 145571,
+      "sizeKb": 142.16,
+      "group": "feature-generator-core"
+    },
+    {
+      "file": "vendor-animation-Bfi7lC5h.js",
+      "bytes": 121007,
+      "sizeKb": 118.17,
+      "group": "js-other"
+    },
+    {
+      "file": "BigPulp-BAU39hzL.js",
+      "bytes": 101226,
+      "sizeKb": 98.85,
+      "group": "js-other"
+    },
+    {
+      "file": "CitrusDrop-ByzStuMK.js",
+      "bytes": 96963,
+      "sizeKb": 94.69,
+      "group": "js-other"
+    },
+    {
+      "file": "vendor-wallet-crypto-CylnypXm.js",
+      "bytes": 91351,
+      "sizeKb": 89.21,
+      "group": "vendor-wallet-crypto"
+    },
+    {
+      "file": "Account-B7kVEoc-.js",
+      "bytes": 87768,
+      "sizeKb": 85.71,
+      "group": "js-other"
+    },
+    {
+      "file": "Gallery-cw5C51lp.js",
+      "bytes": 76473,
+      "sizeKb": 74.68,
+      "group": "js-other"
+    },
+    {
+      "file": "GamesHub-OcezxXyH.js",
+      "bytes": 61284,
+      "sizeKb": 59.85,
+      "group": "js-other"
+    }
+  ],
+  "topCss": [
+    {
+      "file": "index-CMQjcNLv.css",
+      "bytes": 266851,
+      "sizeKb": 260.6
+    },
+    {
+      "file": "GameEffects-CZQMYlwf.css",
+      "bytes": 68984,
+      "sizeKb": 67.37
+    },
+    {
+      "file": "Account-DQ9Q1kLK.css",
+      "bytes": 60913,
+      "sizeKb": 59.49
+    },
+    {
+      "file": "BlockPuzzle-VtexbuqL.css",
+      "bytes": 47347,
+      "sizeKb": 46.24
+    },
+    {
+      "file": "BrickByBrick-Bc6tBAUl.css",
+      "bytes": 46698,
+      "sizeKb": 45.6
+    },
+    {
+      "file": "GamesHub-D0TU5-bZ.css",
+      "bytes": 40564,
+      "sizeKb": 39.61
+    },
+    {
+      "file": "MemoryMatch-C8C2MkPq.css",
+      "bytes": 40386,
+      "sizeKb": 39.44
+    },
+    {
+      "file": "GatedChat-CiWw2_hi.css",
+      "bytes": 39380,
+      "sizeKb": 38.46
+    },
+    {
+      "file": "ColorReaction-Bt8DDKs2.css",
+      "bytes": 35172,
+      "sizeKb": 34.35
+    },
+    {
+      "file": "OrangeJuggle-9vKC8W6R.css",
+      "bytes": 31040,
+      "sizeKb": 30.31
+    }
+  ],
+  "budgets": [
+    {
+      "group": "vendor-wallet",
+      "sizeKb": 347.73,
+      "softKb": 380,
+      "hardKb": 430,
+      "level": "pass",
+      "file": "vendor-wallet-CS5OAqh_.js"
+    },
+    {
+      "group": "vendor-react",
+      "sizeKb": 303.42,
+      "softKb": 330,
+      "hardKb": 380,
+      "level": "pass",
+      "file": "vendor-react-CHQ8Ntdh.js"
+    },
+    {
+      "group": "entry-index",
+      "sizeKb": 267.79,
+      "softKb": 300,
+      "hardKb": 360,
+      "level": "pass",
+      "file": "index-C_7Vrq5S.js"
+    },
+    {
+      "group": "vendor-wallet-ui",
+      "sizeKb": 176.42,
+      "softKb": 220,
+      "hardKb": 280,
+      "level": "pass",
+      "file": "vendor-wallet-ui-2whuy7B0.js"
+    },
+    {
+      "group": "feature-generator-core",
+      "sizeKb": 142.16,
+      "softKb": 180,
+      "hardKb": 240,
+      "level": "pass",
+      "file": "feature-generator-core-BYiojoKV.js"
+    },
+    {
+      "group": "vendor-wallet-crypto",
+      "sizeKb": 89.21,
+      "softKb": 120,
+      "hardKb": 160,
+      "level": "pass",
+      "file": "vendor-wallet-crypto-CylnypXm.js"
+    }
+  ],
+  "summary": {
+    "hardBreaches": 0,
+    "softBreaches": 0,
+    "status": "pass"
+  }
+}

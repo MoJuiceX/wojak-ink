@@ -47,44 +47,31 @@ export function VotingFeed() {
   const {
     player,
     feed, feedLoading, loadFeed,
+    feedVotePassProgress,
     castVote,
     removeFromFeed,
   } = useGame();
   const toast = useToast();
   const reducedMotion = usePrefersReducedMotion();
+  const pendingVoteTimeout = useRef<number | null>(null);
 
   // Milestone toasts
   useMilestoneToasts(player?.onboarding);
 
   // Session state
   const [voteCount, setVoteCount] = useState(0);
+  const [glazeCount, setGlazeCount] = useState(0);
+  const [fadeCount, setFadeCount] = useState(0);
   const [feedError, setFeedError] = useState(false);
   const [cardExiting, setCardExiting] = useState(false);
   const [exitDirection, setExitDirection] = useState<1 | -1 | null>(null);
+  const [voteFeedbackType, setVoteFeedbackType] = useState<'glaze' | 'fade' | null>(null);
+  const [optimisticSeenCount, setOptimisticSeenCount] = useState<number | null>(null);
 
-  // Instruction text visibility
-  const [instructionsSeen, setInstructionsSeen] = useState(() => {
-    try {
-      return !!localStorage.getItem('wojak_vote_instructions_seen');
-    } catch {
-      return false;
-    }
-  });
-
-  // Desktop keyboard hint (shown once per device)
-  const [showKeyboardHint, setShowKeyboardHint] = useState(() => {
-    try {
-      if (typeof window === 'undefined') return false;
-      const isDesktop = window.matchMedia('(hover: hover)').matches;
-      return isDesktop && !localStorage.getItem('wojak_vote_kb_hint_seen');
-    } catch {
-      return false;
-    }
-  });
 
   // Load feed immediately (no gate)
   // Track player DID to reload when login/logout changes
-  const lastPlayerDid = useRef<string | null>(null);
+  const lastPlayerDid = useRef<string | null | undefined>(undefined);
   useEffect(() => {
     const currentDid = player?.did ?? null;
     // Reload if: first load OR player changed (login/logout)
@@ -113,23 +100,40 @@ export function VotingFeed() {
     });
   }, [feed]);
 
-  // Helper to mark instructions seen (persists to localStorage)
-  const markInstructionsSeen = useCallback(() => {
-    setInstructionsSeen(true);
-    setShowKeyboardHint(false);
-    try {
-      if (typeof requestIdleCallback !== 'undefined') {
-        requestIdleCallback(() => {
-          localStorage.setItem('wojak_vote_instructions_seen', '1');
-          localStorage.setItem('wojak_vote_kb_hint_seen', '1');
-        });
-      } else {
-        localStorage.setItem('wojak_vote_instructions_seen', '1');
-        localStorage.setItem('wojak_vote_kb_hint_seen', '1');
+  useEffect(() => {
+    return () => {
+      if (pendingVoteTimeout.current !== null) {
+        window.clearTimeout(pendingVoteTimeout.current);
       }
-    } catch {
-      // localStorage unavailable
+    };
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset optimistic pass progress when backend feed progress updates
+    setOptimisticSeenCount(null);
+  }, [feedVotePassProgress?.seenCount, feedVotePassProgress?.totalCount, feedVotePassProgress?.passComplete]);
+
+  const triggerHaptics = useCallback((voteType: 1 | -1) => {
+    // Progressive enhancement only (Android browsers commonly support vibrate; iOS Safari does not).
+    if (typeof navigator === 'undefined' || typeof navigator.vibrate !== 'function') return;
+    navigator.vibrate(voteType === 1 ? 12 : [8, 10, 8]);
+  }, []);
+
+  const rollbackSessionCounts = useCallback((voteType: 1 | -1) => {
+    setVoteCount(prev => Math.max(0, prev - 1));
+    if (voteType === 1) setGlazeCount(prev => Math.max(0, prev - 1));
+    else setFadeCount(prev => Math.max(0, prev - 1));
+  }, []);
+
+  const voteErrorMessage = useCallback((result: { ok: boolean; error?: string; status?: number }) => {
+    if (result.ok) return '';
+    if (result.status === 429) return 'You are voting too fast. Wait a few seconds and continue.';
+    if (result.status === 403) {
+      if (result.error?.includes('hold')) return 'You can’t vote on Wojaks in your own DID.';
+      if (result.error?.includes('own creations')) return 'You can’t vote on your own Wojaks.';
+      return result.error || 'Vote not allowed';
     }
+    return result.error || 'Vote failed to save';
   }, []);
 
   const handleVote = useCallback((voteType: 1 | -1) => {
@@ -140,23 +144,43 @@ export function VotingFeed() {
     setCardExiting(true);
     setExitDirection(voteType); // Set direction for exit animation (only top card has stackPosition 0)
 
-    // Track session vote count
+    // Track session vote count + type
     const newVoteCount = voteCount + 1;
     setVoteCount(newVoteCount);
+    if (voteType === 1) setGlazeCount(prev => prev + 1);
+    else setFadeCount(prev => prev + 1);
+    triggerHaptics(voteType);
 
-    // Mark instructions seen after 3 votes
-    if (newVoteCount >= 3 && !instructionsSeen) {
-      markInstructionsSeen();
-    }
+    // Brief visual feedback only (no text toast/flash to avoid layout shift)
+    setVoteFeedbackType(voteType === 1 ? 'glaze' : 'fade');
+    setTimeout(() => {
+      setVoteFeedbackType(null);
+    }, 450);
 
     // Fire vote to API (do not remove from feed here — wait for exit animation)
-    castVote(currentItem.nftId, currentItem.editionNumber, voteType)
-      .then(ok => { if (!ok) toast.error('Vote failed to save'); })
-      .catch(() => toast.error('Vote failed to save'));
+    const votePromise = castVote(currentItem.nftId, currentItem.editionNumber, voteType)
+      .catch(() => ({ ok: false as const, error: 'Network error', status: 0 }));
 
     // After exit animation finishes: remove voted card from feed, then clear state and refill
     const EXIT_MS = 220;
-    setTimeout(() => {
+    pendingVoteTimeout.current = window.setTimeout(async () => {
+      const result = await votePromise;
+
+      if (!result.ok) {
+        rollbackSessionCounts(voteType);
+        setCardExiting(false);
+        setExitDirection(null);
+        toast.error(voteErrorMessage(result));
+        return;
+      }
+
+      setOptimisticSeenCount(prev => {
+        const progress = feedVotePassProgress;
+        if (!progress?.enabled || progress.passComplete || progress.totalCount <= 0) return prev;
+        const base = prev ?? progress.seenCount;
+        return Math.min(progress.totalCount, base + 1);
+      });
+
       removeFromFeed(votedNftId);
       setCardExiting(false);
       setExitDirection(null);
@@ -165,7 +189,7 @@ export function VotingFeed() {
         loadFeed().catch(() => setFeedError(true));
       }
     }, EXIT_MS);
-  }, [feed, cardExiting, castVote, loadFeed, removeFromFeed, toast, voteCount, instructionsSeen, markInstructionsSeen]);
+  }, [feed, cardExiting, castVote, loadFeed, removeFromFeed, toast, voteCount, triggerHaptics, rollbackSessionCounts, voteErrorMessage, feedVotePassProgress]);
 
   const handleRetry = useCallback(() => {
     setFeedError(false);
@@ -193,20 +217,27 @@ export function VotingFeed() {
 
   // Feed empty — only when there are no minted Wojaks (or none you can vote on, e.g. all yours)
   if (feed.length === 0) {
+    const passLocked = !!feedVotePassProgress?.enabled && !!feedVotePassProgress?.passLocked && (feedVotePassProgress.totalCount ?? 0) > 0;
     return (
       <div className="card-static flex flex-col items-center justify-center gap-4 p-8" style={{ minHeight: 300 }}>
-        <span className="text-2xl">&#128064;</span>
-        <h2 className="text-lg font-semibold">No Wojaks to vote on yet</h2>
+        <span className="text-2xl">{passLocked ? '✅' : '\u{1F440}'}</span>
+        <h2 className="text-lg font-semibold">
+          {passLocked ? '24h vote pass complete' : 'No Wojaks to vote on yet'}
+        </h2>
         <p className="text-secondary text-sm text-center">
-          Once there are minted Wojaks from others, they’ll show up here. You can always change your vote if you see one again.
+          {passLocked
+            ? `You’ve seen ${feedVotePassProgress?.seenCount ?? 0} / ${feedVotePassProgress?.totalCount ?? 0} eligible Wojaks. Come back as votes age out over the next 24 hours.`
+            : 'Once there are minted Wojaks from others, they’ll show up here. You can always change your vote if you see one again.'}
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
           <Link to="/fight-club/rankings" className="btn btn-primary text-sm" style={{ padding: '8px 20px', textDecoration: 'none' }}>
             View Leaderboard
           </Link>
-          <Link to="/generator" className="btn btn-secondary text-sm" style={{ padding: '8px 20px', textDecoration: 'none' }}>
-            Mint a Wojak
-          </Link>
+          {!passLocked && (
+            <Link to="/generator" className="btn btn-secondary text-sm" style={{ padding: '8px 20px', textDecoration: 'none' }}>
+              Mint a Wojak
+            </Link>
+          )}
         </div>
       </div>
     );
@@ -214,12 +245,36 @@ export function VotingFeed() {
 
   // Active voting
   const visibleCards = feed.slice(0, 3);
+  const passSeen = optimisticSeenCount ?? feedVotePassProgress?.seenCount ?? 0;
+  const passTotal = feedVotePassProgress?.totalCount ?? 0;
+  const passEnabled = !!feedVotePassProgress?.enabled && passTotal > 0;
+  const passComplete = !!feedVotePassProgress?.passComplete || (passEnabled && passSeen >= passTotal);
+  const passProgressPct = passEnabled ? Math.max(0, Math.min(100, (passSeen / passTotal) * 100)) : 0;
 
   return (
-    <div className="flex flex-col gap-4 w-full">
+    <div className={`flex flex-col gap-4 w-full${voteFeedbackType ? ` vote-feed-${voteFeedbackType}` : ''}`}>
+      {passEnabled && (
+        <div className={`vote-pass-strip${passComplete ? ' is-complete' : ''} vote-pass-strip-entrance`}>
+          <div className="vote-pass-strip-row">
+            <span className="vote-pass-strip-label">24h Vote Pass</span>
+            <span className="vote-pass-strip-value">
+              Seen {passSeen} / {passTotal}
+            </span>
+          </div>
+          <div className="vote-pass-strip-track" aria-hidden>
+            <div className="vote-pass-strip-fill" style={{ width: `${passProgressPct}%` }} />
+          </div>
+          <div className="vote-pass-strip-meta">
+            {passComplete
+              ? 'Pass complete: revotes are open until older votes age out.'
+              : `${Math.max(0, passTotal - passSeen)} left in your 24h pass`}
+          </div>
+        </div>
+      )}
+
       {/* Card stack */}
       <div
-        className="vote-card-stack"
+        className={`vote-card-stack${voteFeedbackType ? ` vote-card-stack-pulse vote-card-stack-pulse-${voteFeedbackType}` : ''} vote-card-entrance`}
         role="application"
         aria-label="Vote on Wojak NFTs. Swipe right to glaze, left to fade."
       >
@@ -237,36 +292,33 @@ export function VotingFeed() {
               isFirst={voteCount === 0 && i === 0}
               reducedMotion={reducedMotion}
               exitDirection={i === 0 ? exitDirection : null}
+              likes={item.likes}
+              dislikes={item.dislikes}
+              totalVotes={item.totalVotes}
             />
           ))}
         </AnimatePresence>
       </div>
 
+      {/* Session stats strip (stable, no toast text layout shift) */}
+      {voteCount > 0 && (
+        <div className={`session-stats-strip session-stats-entrance${voteFeedbackType ? ` ${voteFeedbackType}` : ''}`}>
+          <span className={voteCount > 0 ? 'vote-count-pop' : ''}>Votes: {voteCount}</span>
+          <span className="text-success">Glazes: {glazeCount}</span>
+          <span className="text-error">Fades: {fadeCount}</span>
+        </div>
+      )}
+
       {/* Vote buttons */}
-      <div className="w-full">
+      <div className="w-full vote-buttons-entrance">
         <VoteButtons
           onLike={() => handleVote(1)}
           onDislike={() => handleVote(-1)}
           disabled={cardExiting}
+          feedbackType={voteFeedbackType}
         />
       </div>
 
-      {/* Instruction text */}
-      {!instructionsSeen && (
-        <div
-          className="text-muted text-center w-full"
-          style={{
-            fontSize: 13,
-            transition: 'opacity 500ms ease',
-            opacity: voteCount >= 3 ? 0 : 1,
-          }}
-        >
-          <p>Swipe right to glaze &middot; Swipe left to fade</p>
-          {showKeyboardHint && (
-            <p style={{ marginTop: 2 }}>or use &larr; &rarr; arrow keys</p>
-          )}
-        </div>
-      )}
     </div>
   );
 }

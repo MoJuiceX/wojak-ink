@@ -48,6 +48,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     const type = url.searchParams.get('type') || 'players';
     const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '50', 10)));
     const offset = Math.max(0, parseInt(url.searchParams.get('offset') || '0', 10));
+    const sort = url.searchParams.get('sort') || 'power';
 
     // Get caller's DID if authenticated (for "your rank" indicator)
     let callerDid: string | null = null;
@@ -59,31 +60,38 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     const db = context.env.DB;
 
     if (type === 'players') {
-      // Players: connected DID; show if they hold ≥1 Farmers Plot OR have power (so existing data shows).
-      // Power = sum of their Wojaks' power only (from combat_fighters), not Farmers Plot.
+      // Players: auto-discovered via Farmers Plot holdings (phase1_verified = 1).
+      // Power = sum of each Wojak's power: combat_fighters.power_score if available,
+      // otherwise falls back to wojak_scores.net_score (pure vote power).
+      // This ensures even non-combat Wojaks contribute to player ranking.
       const playersQuery = `
         SELECT
           gp.did_id AS did,
           dp.display_name,
-          COUNT(cf.nft_id) as wojak_count,
-          COALESCE(SUM(COALESCE(cf.power_score, 0)), 0) as total_power,
-          COALESCE(MAX(cf.power_score), 0) as best_wojak_power,
+          COUNT(DISTINCT dh.nft_id) as wojak_count,
+          COALESCE(SUM(
+            COALESCE(cf.power_score, ws.net_score, 0)
+          ), 0) as total_power,
+          COALESCE(MAX(
+            COALESCE(cf.power_score, ws.net_score, 0)
+          ), 0) as best_wojak_power,
           (
             SELECT pm2.ipfs_image_uri
-            FROM combat_fighters cf2
-            JOIN phase2_mints pm2 ON pm2.mintgarden_launcher_id = cf2.nft_id AND pm2.status = 'minted'
-            WHERE cf2.owner_did = gp.did_id AND (cf2.burned_at IS NULL OR cf2.burned_at = '')
-            ORDER BY cf2.power_score DESC
+            FROM did_holdings dh2
+            JOIN phase2_mints pm2 ON pm2.mintgarden_launcher_id = dh2.nft_id AND pm2.status = 'minted'
+            LEFT JOIN combat_fighters cf2 ON cf2.nft_id = dh2.nft_id AND (cf2.burned_at IS NULL OR cf2.burned_at = '')
+            LEFT JOIN wojak_scores ws2 ON ws2.nft_id = dh2.nft_id
+            WHERE dh2.did_id = gp.did_id AND dh2.collection = 'phase2'
+            ORDER BY COALESCE(cf2.power_score, ws2.net_score, 0) DESC
             LIMIT 1
           ) as best_wojak_image
         FROM game_players gp
         LEFT JOIN did_profiles dp ON dp.did_id = gp.did_id
-        LEFT JOIN combat_fighters cf ON cf.owner_did = gp.did_id
-          AND (cf.burned_at IS NULL OR cf.burned_at = '')
+        LEFT JOIN did_holdings dh ON dh.did_id = gp.did_id AND dh.collection = 'phase2'
+        LEFT JOIN combat_fighters cf ON cf.nft_id = dh.nft_id AND (cf.burned_at IS NULL OR cf.burned_at = '')
+        LEFT JOIN wojak_scores ws ON ws.nft_id = dh.nft_id
         WHERE gp.did_id IS NOT NULL AND gp.did_id != ''
-          AND (gp.phase1_verified = 1 OR gp.power_level > 0 OR EXISTS (
-            SELECT 1 FROM combat_fighters c2 WHERE c2.owner_did = gp.did_id AND (c2.burned_at IS NULL OR c2.burned_at = '')
-          ))
+          AND gp.phase1_verified = 1
         GROUP BY gp.did_id
         ORDER BY total_power DESC
         LIMIT ? OFFSET ?
@@ -116,20 +124,21 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           SELECT COUNT(*) + 1 as rank
           FROM (
             SELECT gp.did_id,
-                   COALESCE(SUM(COALESCE(cf.power_score, 0)), 0) as total_power
+                   COALESCE(SUM(COALESCE(cf.power_score, ws.net_score, 0)), 0) as total_power
             FROM game_players gp
-            LEFT JOIN combat_fighters cf ON cf.owner_did = gp.did_id
-              AND (cf.burned_at IS NULL OR cf.burned_at = '')
+            LEFT JOIN did_holdings dh ON dh.did_id = gp.did_id AND dh.collection = 'phase2'
+            LEFT JOIN combat_fighters cf ON cf.nft_id = dh.nft_id AND (cf.burned_at IS NULL OR cf.burned_at = '')
+            LEFT JOIN wojak_scores ws ON ws.nft_id = dh.nft_id
             WHERE gp.did_id IS NOT NULL AND gp.did_id != ''
-              AND (gp.phase1_verified = 1 OR gp.power_level > 0 OR EXISTS (
-                SELECT 1 FROM combat_fighters c2 WHERE c2.owner_did = gp.did_id AND (c2.burned_at IS NULL OR c2.burned_at = '')
-              ))
+              AND gp.phase1_verified = 1
             GROUP BY gp.did_id
           ) sub
           WHERE sub.total_power > (
-            SELECT COALESCE(SUM(COALESCE(cf.power_score, 0)), 0)
-            FROM combat_fighters cf
-            WHERE cf.owner_did = ? AND (cf.burned_at IS NULL OR cf.burned_at = '')
+            SELECT COALESCE(SUM(COALESCE(cf.power_score, ws.net_score, 0)), 0)
+            FROM did_holdings dh
+            LEFT JOIN combat_fighters cf ON cf.nft_id = dh.nft_id AND (cf.burned_at IS NULL OR cf.burned_at = '')
+            LEFT JOIN wojak_scores ws ON ws.nft_id = dh.nft_id
+            WHERE dh.did_id = ? AND dh.collection = 'phase2'
           )
         `;
         const rankResult = await db.prepare(yourRankQuery).bind(callerDid).first<{ rank: number }>();
@@ -138,17 +147,43 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
       return jsonResponse({ players, yourRank });
     } else if (type === 'wojaks') {
+      // Determine sort order
+      const sortOrders: Record<string, string> = {
+        power: 'COALESCE(cf.power_score, ws.net_score, 0) DESC, a.edition_number ASC',
+        likes: 'COALESCE(ws.likes, 0) DESC, a.edition_number ASC',
+        hot: '(COALESCE(ws.likes, 0) - COALESCE(ws.dislikes, 0)) DESC, a.edition_number ASC',
+        ratio: 'CASE WHEN COALESCE(ws.likes, 0) + COALESCE(ws.dislikes, 0) > 0 THEN CAST(COALESCE(ws.likes, 0) AS REAL) / (COALESCE(ws.likes, 0) + COALESCE(ws.dislikes, 0)) ELSE 0 END DESC, COALESCE(ws.likes, 0) DESC',
+        battles: 'COALESCE(cf.total_combat_wins, 0) DESC, a.edition_number ASC',
+        newest: 'a.edition_number DESC',
+      };
+      const orderBy = sortOrders[sort] || sortOrders.power;
+
+      // Total count for pagination
+      const countQuery = `
+        SELECT COUNT(*) as total FROM (
+          SELECT mintgarden_launcher_id FROM phase2_mints
+          WHERE status = 'minted' AND mintgarden_launcher_id IS NOT NULL
+          UNION
+          SELECT ws.nft_id FROM wojak_scores ws
+          WHERE ws.nft_id NOT IN (
+            SELECT mintgarden_launcher_id FROM phase2_mints
+            WHERE status = 'minted' AND mintgarden_launcher_id IS NOT NULL
+          )
+        )
+      `;
+      const countResult = await db.prepare(countQuery).first<{ total: number }>();
+      const total = countResult?.total || 0;
+
       // All Wojaks: from phase2_mints (minted) UNION wojak_scores (voted) so we always show something.
       // No requirement for DIDs or verified wallets.
       const wojaksQuery = `
-        WITH all_nfts(nft_id, edition_number, ipfs_image_uri) AS (
-          SELECT mintgarden_launcher_id, mint_number, ipfs_image_uri
+        WITH all_nfts(nft_id, edition_number) AS (
+          SELECT mintgarden_launcher_id, mint_number
           FROM phase2_mints
           WHERE status = 'minted' AND mintgarden_launcher_id IS NOT NULL
           UNION
-          SELECT ws.nft_id, ws.edition_number, pm.ipfs_image_uri
+          SELECT ws.nft_id, ws.edition_number
           FROM wojak_scores ws
-          LEFT JOIN phase2_mints pm ON pm.mintgarden_launcher_id = ws.nft_id AND pm.status = 'minted'
           WHERE ws.nft_id NOT IN (
             SELECT mintgarden_launcher_id FROM phase2_mints
             WHERE status = 'minted' AND mintgarden_launcher_id IS NOT NULL
@@ -168,13 +203,14 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           COALESCE(cf.total_combat_losses, 0) as losses,
           COALESCE(cf.total_combat_draws, 0) as draws,
           dp.display_name as owner_name,
-          a.ipfs_image_uri
+          pm_img.ipfs_image_uri
         FROM all_nfts a
+        LEFT JOIN phase2_mints pm_img ON pm_img.mintgarden_launcher_id = a.nft_id AND pm_img.status = 'minted'
         LEFT JOIN wojak_scores ws ON ws.nft_id = a.nft_id
         LEFT JOIN combat_fighters cf ON cf.nft_id = a.nft_id AND (cf.burned_at IS NULL OR cf.burned_at = '')
         LEFT JOIN did_holdings dh ON dh.nft_id = a.nft_id AND dh.collection = 'phase2'
         LEFT JOIN did_profiles dp ON dp.did_id = COALESCE(cf.owner_did, dh.did_id)
-        ORDER BY COALESCE(cf.power_score, ws.net_score, 0) DESC, a.edition_number ASC
+        ORDER BY ${orderBy}
         LIMIT ? OFFSET ?
       `;
 
@@ -197,7 +233,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         ownerName: (row.owner_name as string) || null,
       }));
 
-      return jsonResponse({ wojaks });
+      return jsonResponse({ wojaks, total });
     } else {
       return errorResponse('Invalid type parameter. Use "players" or "wojaks".', 400);
     }

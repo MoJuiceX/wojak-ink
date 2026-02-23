@@ -56,6 +56,17 @@ interface FeedItem {
   dislikes: number;
 }
 
+interface FeedVotePassProgress {
+  enabled: boolean;
+  windowHours: number;
+  seenCount: number;
+  totalCount: number;
+  remainingCount: number;
+  passComplete: boolean;
+  passLocked?: boolean;
+  unseenOnlyFeed: boolean;
+}
+
 interface GameContextType {
   player: GamePlayer | null;
   guestId: string;
@@ -65,12 +76,13 @@ interface GameContextType {
   votesRemaining: number;
   dailyLimit: number;
   feed: FeedItem[];
+  feedVotePassProgress: FeedVotePassProgress | null;
   feedLoading: boolean;
   register: (did: string, walletAddress: string) => Promise<void>;
   linkDid: (did: string, walletAddress?: string) => Promise<void>;
   resetPlayer: () => void;
   verifyPhase1: (did: string, nftId?: string) => Promise<boolean>;
-  castVote: (nftId: string, editionNumber: number, voteType: 1 | -1) => Promise<boolean>;
+  castVote: (nftId: string, editionNumber: number, voteType: 1 | -1) => Promise<{ ok: boolean; error?: string; status?: number }>;
   removeFromFeed: (nftId: string) => void;
   loadFeed: () => Promise<void>;
   refreshPowerLevel: () => Promise<void>;
@@ -108,6 +120,7 @@ function apiPlayerToPlayer(api: { did: string; powerLevel: number; phase1Verifie
 export function GameProvider({ children }: { children: ReactNode }) {
   const [player, setPlayer] = useState<GamePlayer | null>(null);
   const [feed, setFeed] = useState<FeedItem[]>([]);
+  const [feedVotePassProgress, setFeedVotePassProgress] = useState<FeedVotePassProgress | null>(null);
   const [feedLoading, setFeedLoading] = useState(false);
 
   const { getToken, isSignedIn, isLoaded: isClerkLoaded } = useAuth();
@@ -132,17 +145,25 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const resetPlayer = useCallback(() => {
     setPlayer(null);
     setFeed([]);
+    setFeedVotePassProgress(null);
     try { sessionStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
   }, []);
 
   // When Clerk is enabled and signed in: fetch /api/game/me and set player; on sign-out clear player
+  const wasSignedInRef = useRef(false);
   useEffect(() => {
     if (!CLERK_ENABLED || !isClerkLoaded) return;
     if (!isSignedIn) {
-      setPlayer(null);
-      setFeed([]);
+      // Only clear feed if user was previously signed in (explicit sign-out)
+      // Don't clear for initial anonymous state — feed may already be loaded via guest path
+      if (wasSignedInRef.current) {
+        setPlayer(null);
+        setFeed([]);
+      }
+      wasSignedInRef.current = false;
       return;
     }
+    wasSignedInRef.current = true;
     let cancelled = false;
     (async () => {
       const token = await getToken();
@@ -253,6 +274,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       const res = await fetch(feedUrl);
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Feed request failed');
+      setFeedVotePassProgress(data?.meta?.votePass ?? null);
 
       if (Array.isArray(data.feed) && data.feed.length > 0) {
         setFeed(data.feed);
@@ -262,6 +284,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       const retryData = await retryRes.json();
       if (retryData.success && Array.isArray(retryData.feed)) {
         setFeed(retryData.feed);
+        setFeedVotePassProgress(retryData?.meta?.votePass ?? data?.meta?.votePass ?? null);
       } else {
         setFeed(data.feed);
       }
@@ -294,9 +317,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
         } : null);
       }
       // Feed removal is done by VotingFeed after exit animation
-      return true;
+      return { ok: true as const };
     }
-    return false;
+    return { ok: false as const, error: data?.error || 'Vote failed', status: res.status };
   }, [player, guestId, getAuthHeaders]);
 
   const removeFromFeed = useCallback((nftId: string) => {
@@ -322,6 +345,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       votesRemaining,
       dailyLimit,
       feed,
+      feedVotePassProgress,
       feedLoading,
       register,
       linkDid,

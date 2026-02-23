@@ -151,20 +151,6 @@ export function Shop({ onClose }: ShopProps) {
   // Confetti celebration system
   const CONFETTI_EMOJIS = useMemo(() => ['🎉', '🎊', '✨', '💫', '⭐', '🌟', '🍊'], []);
 
-  const triggerConfetti = useCallback(() => {
-    setShowConfetti(true);
-    const canvas = confettiCanvasRef.current;
-    if (!canvas) {
-      // Canvas not mounted yet — try again next frame
-      requestAnimationFrame(() => {
-        const c = confettiCanvasRef.current;
-        if (c) startConfettiAnimation(c);
-      });
-      return;
-    }
-    startConfettiAnimation(canvas);
-  }, []);
-
   // Pre-render emoji sprites once (expensive text shaping happens only here)
   const emojiSprites = useRef<Map<string, HTMLCanvasElement>>(new Map());
 
@@ -275,6 +261,20 @@ export function Shop({ onClose }: ShopProps) {
     };
     confettiRafRef.current = requestAnimationFrame(animate);
   }, [CONFETTI_EMOJIS, getEmojiSprite]);
+
+  const triggerConfetti = useCallback(() => {
+    setShowConfetti(true);
+    const canvas = confettiCanvasRef.current;
+    if (!canvas) {
+      // Canvas not mounted yet — try again next frame
+      requestAnimationFrame(() => {
+        const c = confettiCanvasRef.current;
+        if (c) startConfettiAnimation(c);
+      });
+      return;
+    }
+    startConfettiAnimation(canvas);
+  }, [startConfettiAnimation]);
 
   // Cleanup confetti on unmount
   useEffect(() => {

@@ -9,6 +9,7 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -18,9 +19,20 @@ jobs:
       - run: npm ci
       - name: Typecheck
         run: npx tsc --noEmit
-      - name: Lint
-        run: npm run lint
+      - name: Lint (scoped)
+        run: npm run lint:scoped
       - name: Unit Tests
         run: npm run test:unit
       - name: Build
         run: npm run build
+      - name: Bundle Budget Report
+        run: npm run bundle:report -- --enforce-hard --json-out=reports/bundle-budget-ci.json --md-out=reports/bundle-budget-ci.md
+      - name: Upload bundle budget report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-budget-report
+          if-no-files-found: ignore
+          path: |
+            reports/bundle-budget-ci.json
+            reports/bundle-budget-ci.md

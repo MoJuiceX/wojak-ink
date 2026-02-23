@@ -4,7 +4,7 @@
  * Displays guild rankings with weekly/all-time views.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useGuild } from '../../contexts/GuildContext';
 import { GuildBannerDisplay } from './GuildCard';
@@ -21,11 +21,7 @@ export function GuildLeaderboard({ myGuildId }: GuildLeaderboardProps) {
   const [entries, setEntries] = useState<GuildLeaderboardEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    loadLeaderboard();
-  }, [timeframe]);
-
-  const loadLeaderboard = async () => {
+  const loadLeaderboard = useCallback(async () => {
     setIsLoading(true);
     try {
       const data = await fetchGuildLeaderboard(timeframe);
@@ -35,7 +31,11 @@ export function GuildLeaderboard({ myGuildId }: GuildLeaderboardProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [fetchGuildLeaderboard, timeframe]);
+
+  useEffect(() => {
+    loadLeaderboard();
+  }, [loadLeaderboard]);
 
   const getRankDisplay = (rank: number) => {
     if (rank === 1) return '🥇';

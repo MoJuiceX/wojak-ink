@@ -526,7 +526,7 @@ const OrangeJuggle: React.FC = () => {
     for (let i = 0; i < config.oranges; i++) {
       setTimeout(() => spawnObject('orange'), i * 500);
     }
-  }, [level, spawnObject, playLevelUp]);
+  }, [level, spawnObject, playLevelUp, hapticLevelUp]);
 
   // Handle paddle movement - free horizontal, anchored at bottom with 10% vertical range
   // Speed modifier affects how quickly paddle reaches target position
@@ -1175,7 +1175,8 @@ const OrangeJuggle: React.FC = () => {
         clearInterval(timerRef.current);
       }
     };
-  }, [gameState, gameMode, level, highScore]);
+  // Timer effect is keyed to coarse game state; audio/haptic callbacks are intentionally not deps to avoid interval resets.
+  }, [gameState, gameMode, level, highScore]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Submit score to global leaderboard (for signed-in users)
   // NOTE: This is now a FALLBACK - primary submission happens synchronously in game loop

@@ -3,6 +3,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { resolveTurn } from './turn-resolver';
 import { initFighterState, initBattleState } from './battle-state';
 import type { BattleState } from './battle-state';
+import type { CombatType } from './types';
 
 // Deterministic RNG that always returns the given value
 const rng = (val: number) => () => val;
@@ -14,7 +15,7 @@ function makeBattle(overrides?: {
 }): BattleState {
   const a = initFighterState({
     nftId: 'nft-a',
-    type: (overrides?.typeA ?? 'FIRE') as any,
+    type: (overrides?.typeA ?? 'FIRE') as unknown as CombatType,
     nature: 'Balanced',
     ability: overrides?.abilityA ?? 'Blaze',
     moves: ['poke_fire_fire-punch', 'poke_fire_flamethrower', 'poke_fire_lava-plume', 'poke_fire_ember'],
@@ -22,7 +23,7 @@ function makeBattle(overrides?: {
   });
   const b = initFighterState({
     nftId: 'nft-b',
-    type: (overrides?.typeB ?? 'WATER') as any,
+    type: (overrides?.typeB ?? 'WATER') as unknown as CombatType,
     nature: 'Balanced',
     ability: overrides?.abilityB ?? 'Torrent',
     moves: ['poke_water_wave-crash', 'poke_water_bubble-beam', 'poke_water_aqua-jet', 'poke_water_bouncy-bubble'],
