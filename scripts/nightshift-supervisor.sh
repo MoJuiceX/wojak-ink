@@ -94,7 +94,13 @@ heartbeat() {
 
 pull_updates() {
   # Rebase pull if clean enough. If pull fails, continue and retry next cycle.
-  if git pull --rebase --autostash >>"$LOG_FILE" 2>&1; then
+  # `set -e` can terminate the script in headless/nohup contexts on transient git failures,
+  # so capture the status explicitly.
+  set +e
+  git pull --rebase --autostash >>"$LOG_FILE" 2>&1
+  local rc=$?
+  set -e
+  if [[ $rc -eq 0 ]]; then
     log "Pulled latest changes."
   else
     log "git pull failed (non-fatal). Will continue current queue and retry later."
