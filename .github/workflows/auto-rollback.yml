@@ -5,15 +5,24 @@ on:
     # GitHub Actions supports a minimum 5-minute schedule interval.
     - cron: '*/5 * * * *'
   workflow_run:
-    workflows: [Canary Deployment]
+    workflows: ['Canary Deployment']
     types: [completed]
 
 jobs:
   monitor-and-rollback:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure'
+    if: github.event_name == 'workflow_run'
     
     steps:
+      - name: Exit unless upstream workflow failed
+        run: |
+          CONCLUSION="${{ github.event.workflow_run.conclusion }}"
+          echo "Upstream workflow conclusion: $CONCLUSION"
+          if [ "$CONCLUSION" != "failure" ]; then
+            echo "No rollback needed."
+            exit 0
+          fi
+
       - name: Checkout code
         uses: actions/checkout@v3
       
