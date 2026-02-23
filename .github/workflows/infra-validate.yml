@@ -1,0 +1,35 @@
+name: Infra Validate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'terraform/**'
+      - 'k8s/**'
+      - '.github/workflows/terraform.yml'
+      - '.github/workflows/canary-deploy.yml'
+      - '.github/workflows/auto-rollback.yml'
+      - 'scripts/validate-terraform.sh'
+      - 'scripts/validate-k8s-manifests.rb'
+      - 'scripts/validate-github-workflows.sh'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  infra-validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate GitHub workflows
+        run: ./scripts/validate-github-workflows.sh .github/workflows/infra-validate.yml .github/workflows/terraform.yml .github/workflows/canary-deploy.yml .github/workflows/auto-rollback.yml
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.11.4
+      - name: Terraform fmt + init + validate
+        run: ./scripts/validate-terraform.sh
+      - name: Validate Kubernetes manifests (syntax/shape)
+        run: ./scripts/validate-k8s-manifests.rb

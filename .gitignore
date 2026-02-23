@@ -40,3 +40,6 @@ test-results/
 .nightshift/state/
 reports/nightshift-*.md
 reports/supervisor-*.md
+
+# Local validation tool cache (terraform/actionlint downloaded binaries)
+.tmp/tools/
