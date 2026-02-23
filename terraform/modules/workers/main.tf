@@ -1,3 +1,11 @@
+terraform {
+  required_providers {
+    cloudflare = {
+      source = "cloudflare/cloudflare"
+    }
+  }
+}
+
 # Cloudflare Workers KV namespaces already defined in cloudflare module
 # This module extends with additional worker-specific configurations
 
