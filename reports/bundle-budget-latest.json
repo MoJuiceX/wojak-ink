@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-02-23T12:11:09.042Z",
+  "generatedAt": "2026-02-23T12:48:25.051Z",
   "distDir": "dist/assets",
   "limits": {
     "maxJsAssetKb": 406
@@ -8,7 +8,7 @@
     "jsFiles": 89,
     "cssFiles": 37,
     "jsKb": 3979.17,
-    "cssKb": 894.88
+    "cssKb": 894.94
   },
   "topJs": [
     {
@@ -24,7 +24,7 @@
       "group": "vendor-react"
     },
     {
-      "file": "index-BN5cWObn.js",
+      "file": "index-D2qwcvzr.js",
       "bytes": 273584,
       "sizeKb": 267.17,
       "group": "entry-index"
@@ -60,7 +60,7 @@
       "group": "vendor-wallet-ui"
     },
     {
-      "file": "Generator-CWr6bHsJ.js",
+      "file": "Generator-BtyRN7du.js",
       "bytes": 173613,
       "sizeKb": 169.54,
       "group": "js-other"
@@ -84,13 +84,13 @@
       "group": "js-other"
     },
     {
-      "file": "BigPulp-BqX2Xyd5.js",
+      "file": "BigPulp-BwiXGj4X.js",
       "bytes": 101145,
       "sizeKb": 98.77,
       "group": "js-other"
     },
     {
-      "file": "CitrusDrop-BOmGvy8J.js",
+      "file": "CitrusDrop-BJjaUTl8.js",
       "bytes": 96887,
       "sizeKb": 94.62,
       "group": "js-other"
@@ -104,9 +104,9 @@
   ],
   "topCss": [
     {
-      "file": "index-CMQjcNLv.css",
-      "bytes": 266851,
-      "sizeKb": 260.6
+      "file": "index-BUtUvGdC.css",
+      "bytes": 266918,
+      "sizeKb": 260.66
     },
     {
       "file": "GameEffects-CZQMYlwf.css",
@@ -215,7 +215,7 @@
       "softKb": 300,
       "hardKb": 360,
       "level": "pass",
-      "file": "index-BN5cWObn.js"
+      "file": "index-D2qwcvzr.js"
     },
     {
       "group": "vendor-wallet-ui",
@@ -253,7 +253,7 @@
       "exceeded": false
     },
     {
-      "file": "Generator-CWr6bHsJ.js",
+      "file": "Generator-BtyRN7du.js",
       "bytes": 173613,
       "sizeKb": 169.54,
       "group": "js-other",
@@ -269,7 +269,7 @@
       "exceeded": false
     },
     {
-      "file": "BigPulp-BqX2Xyd5.js",
+      "file": "BigPulp-BwiXGj4X.js",
       "bytes": 101145,
       "sizeKb": 98.77,
       "group": "js-other",
@@ -277,7 +277,7 @@
       "exceeded": false
     },
     {
-      "file": "CitrusDrop-BOmGvy8J.js",
+      "file": "CitrusDrop-BJjaUTl8.js",
       "bytes": 96887,
       "sizeKb": 94.62,
       "group": "js-other",
@@ -285,7 +285,7 @@
       "exceeded": false
     },
     {
-      "file": "Account-D6vim20A.js",
+      "file": "Account-BNoL-0NH.js",
       "bytes": 87687,
       "sizeKb": 85.63,
       "group": "js-other",
@@ -293,7 +293,7 @@
       "exceeded": false
     },
     {
-      "file": "Gallery-DL2TeYso.js",
+      "file": "Gallery-BkOi_dL0.js",
       "bytes": 76386,
       "sizeKb": 74.6,
       "group": "js-other",
@@ -301,7 +301,7 @@
       "exceeded": false
     },
     {
-      "file": "GamesHub-DLjCzK2S.js",
+      "file": "GamesHub-CL8OjAdR.js",
       "bytes": 61203,
       "sizeKb": 59.77,
       "group": "js-other",
@@ -309,7 +309,7 @@
       "exceeded": false
     },
     {
-      "file": "FlappyOrange-Dy5ZWyHW.js",
+      "file": "FlappyOrange-BrcbXZzf.js",
       "bytes": 59374,
       "sizeKb": 57.98,
       "group": "js-other",
@@ -317,7 +317,7 @@
       "exceeded": false
     },
     {
-      "file": "ArcadeGameOverScreen-BMm9BXNz.js",
+      "file": "ArcadeGameOverScreen-BJdOMZL1.js",
       "bytes": 57622,
       "sizeKb": 56.27,
       "group": "js-other",
@@ -325,7 +325,7 @@
       "exceeded": false
     },
     {
-      "file": "FightClub-DUVFFb8-.js",
+      "file": "FightClub-CAYcLe6b.js",
       "bytes": 42766,
       "sizeKb": 41.76,
       "group": "js-other",
@@ -373,7 +373,7 @@
       "exceeded": false
     },
     {
-      "file": "BlockPuzzle-BTnaEC0u.js",
+      "file": "BlockPuzzle-Dpz_e84Y.js",
       "bytes": 35250,
       "sizeKb": 34.42,
       "group": "js-other",
@@ -381,7 +381,7 @@
       "exceeded": false
     },
     {
-      "file": "ColorReaction-DP4Mppu7.js",
+      "file": "ColorReaction-B-bbCvST.js",
       "bytes": 34417,
       "sizeKb": 33.61,
       "group": "js-other",
@@ -389,7 +389,7 @@
       "exceeded": false
     },
     {
-      "file": "GameEffects-CQg9geVs.js",
+      "file": "GameEffects-BbEyv5ZX.js",
       "bytes": 34254,
       "sizeKb": 33.45,
       "group": "js-other",
@@ -397,7 +397,7 @@
       "exceeded": false
     },
     {
-      "file": "Profile--o0UTK90.js",
+      "file": "Profile-B2PG4iGe.js",
       "bytes": 31286,
       "sizeKb": 30.55,
       "group": "js-other",
@@ -405,7 +405,7 @@
       "exceeded": false
     },
     {
-      "file": "WordleGame-wRf_BJZ8.js",
+      "file": "WordleGame-DVLPKrZj.js",
       "bytes": 28528,
       "sizeKb": 27.86,
       "group": "js-other",
@@ -413,7 +413,7 @@
       "exceeded": false
     },
     {
-      "file": "Merge2048Game-BTTC8iuh.js",
+      "file": "Merge2048Game-CtrQ0jBg.js",
       "bytes": 27473,
       "sizeKb": 26.83,
       "group": "js-other",
@@ -421,7 +421,7 @@
       "exceeded": false
     },
     {
-      "file": "MemoryMatch-CHdmJwJH.js",
+      "file": "MemoryMatch-B-8RfUXs.js",
       "bytes": 27180,
       "sizeKb": 26.54,
       "group": "js-other",
@@ -429,7 +429,7 @@
       "exceeded": false
     },
     {
-      "file": "Treasury--ja3wWN_.js",
+      "file": "Treasury-rAcWHSoJ.js",
       "bytes": 26366,
       "sizeKb": 25.75,
       "group": "js-other",
@@ -445,7 +445,7 @@
       "exceeded": false
     },
     {
-      "file": "BrickBreaker-CBgZvkCZ.js",
+      "file": "BrickBreaker-DiOL3A7I.js",
       "bytes": 24635,
       "sizeKb": 24.06,
       "group": "js-other",
@@ -453,7 +453,7 @@
       "exceeded": false
     },
     {
-      "file": "BrickByBrick-DpLFGkCU.js",
+      "file": "BrickByBrick-mp7FPBfo.js",
       "bytes": 22025,
       "sizeKb": 21.51,
       "group": "js-other",
@@ -461,7 +461,7 @@
       "exceeded": false
     },
     {
-      "file": "DesktopExplorerPanel-DRBH8VdU.js",
+      "file": "DesktopExplorerPanel-BRx_cT9-.js",
       "bytes": 21265,
       "sizeKb": 20.77,
       "group": "js-other",
@@ -469,7 +469,7 @@
       "exceeded": false
     },
     {
-      "file": "ChatRoom-CrbkWw2i.js",
+      "file": "ChatRoom-CxD5HWkr.js",
       "bytes": 20507,
       "sizeKb": 20.03,
       "group": "js-other",
@@ -477,7 +477,7 @@
       "exceeded": false
     },
     {
-      "file": "Drawer-Dizgy0EH.js",
+      "file": "Drawer-CM6y2LH5.js",
       "bytes": 20025,
       "sizeKb": 19.56,
       "group": "js-other",
@@ -485,7 +485,7 @@
       "exceeded": false
     },
     {
-      "file": "GameVoting-jlP7vqfS.js",
+      "file": "GameVoting-C-19bBs7.js",
       "bytes": 19940,
       "sizeKb": 19.47,
       "group": "js-other",
@@ -493,7 +493,7 @@
       "exceeded": false
     },
     {
-      "file": "DemoBattle-D01XBGgZ.js",
+      "file": "DemoBattle-BCWNEib2.js",
       "bytes": 19758,
       "sizeKb": 19.29,
       "group": "js-other",
@@ -509,7 +509,7 @@
       "exceeded": false
     },
     {
-      "file": "Settings-GyQeskwJ.js",
+      "file": "Settings-B7VjfSZN.js",
       "bytes": 18183,
       "sizeKb": 17.76,
       "group": "js-other",
@@ -525,7 +525,7 @@
       "exceeded": false
     },
     {
-      "file": "OrangeJuggle-oKLxyGNX.js",
+      "file": "OrangeJuggle-DpCdu258.js",
       "bytes": 17762,
       "sizeKb": 17.35,
       "group": "js-other",
@@ -533,7 +533,7 @@
       "exceeded": false
     },
     {
-      "file": "Guild-H0wSnalf.js",
+      "file": "Guild-Ycpt-rhX.js",
       "bytes": 14436,
       "sizeKb": 14.1,
       "group": "js-other",
@@ -541,7 +541,7 @@
       "exceeded": false
     },
     {
-      "file": "WojakRunner-s3ySdzA1.js",
+      "file": "WojakRunner-C41Ze40r.js",
       "bytes": 13277,
       "sizeKb": 12.97,
       "group": "js-other",
@@ -549,7 +549,7 @@
       "exceeded": false
     },
     {
-      "file": "Admin-Dbh155Gj.js",
+      "file": "Admin-C3W5SUGi.js",
       "bytes": 11736,
       "sizeKb": 11.46,
       "group": "js-other",
@@ -557,7 +557,7 @@
       "exceeded": false
     },
     {
-      "file": "OrangeSnake-PWsCbJ5I.js",
+      "file": "OrangeSnake-Dxba7RMc.js",
       "bytes": 11575,
       "sizeKb": 11.3,
       "group": "js-other",
@@ -581,7 +581,7 @@
       "exceeded": false
     },
     {
-      "file": "OrangePong-uz0mUdz6.js",
+      "file": "OrangePong-CJ2L7JHK.js",
       "bytes": 10060,
       "sizeKb": 9.82,
       "group": "js-other",
@@ -589,7 +589,7 @@
       "exceeded": false
     },
     {
-      "file": "WojakWhack-Dvpt48Wb.js",
+      "file": "WojakWhack-WVOjCLiU.js",
       "bytes": 8203,
       "sizeKb": 8.01,
       "group": "js-other",
@@ -597,7 +597,7 @@
       "exceeded": false
     },
     {
-      "file": "badgeService-Brrlp2m0.js",
+      "file": "badgeService-UDwjyYD-.js",
       "bytes": 6489,
       "sizeKb": 6.34,
       "group": "js-other",
@@ -605,7 +605,7 @@
       "exceeded": false
     },
     {
-      "file": "Media-CNYA3ESx.js",
+      "file": "Media-DLjPnllJ.js",
       "bytes": 6397,
       "sizeKb": 6.25,
       "group": "js-other",
@@ -621,7 +621,7 @@
       "exceeded": false
     },
     {
-      "file": "KnifeGame-B6n5wMbX.js",
+      "file": "KnifeGame-fm8Prqq6.js",
       "bytes": 4154,
       "sizeKb": 4.06,
       "group": "js-other",
@@ -637,7 +637,7 @@
       "exceeded": false
     },
     {
-      "file": "ChatHub-CBI14oB1.js",
+      "file": "ChatHub-BG16J_zZ.js",
       "bytes": 3974,
       "sizeKb": 3.88,
       "group": "js-other",
@@ -653,7 +653,7 @@
       "exceeded": false
     },
     {
-      "file": "useGameHaptics-CS9ZThca.js",
+      "file": "useGameHaptics-Ct79VIS_.js",
       "bytes": 3468,
       "sizeKb": 3.39,
       "group": "js-other",
@@ -661,7 +661,7 @@
       "exceeded": false
     },
     {
-      "file": "useMediaData-qsrge9kM.js",
+      "file": "useMediaData-Ak-RoFZo.js",
       "bytes": 3255,
       "sizeKb": 3.18,
       "group": "js-other",
@@ -693,7 +693,7 @@
       "exceeded": false
     },
     {
-      "file": "CombatBattle-DT6Fxk5H.js",
+      "file": "CombatBattle-B3WYMRNl.js",
       "bytes": 2226,
       "sizeKb": 2.17,
       "group": "js-other",
@@ -701,7 +701,7 @@
       "exceeded": false
     },
     {
-      "file": "GameEffects-8R_Z_Avu.js",
+      "file": "GameEffects-CCMJEJHA.js",
       "bytes": 2183,
       "sizeKb": 2.13,
       "group": "js-other",
@@ -709,7 +709,7 @@
       "exceeded": false
     },
     {
-      "file": "GameSEO-B6ElwB5t.js",
+      "file": "GameSEO-B8n_l84s.js",
       "bytes": 1997,
       "sizeKb": 1.95,
       "group": "js-other",
@@ -725,7 +725,7 @@
       "exceeded": false
     },
     {
-      "file": "useLeaderboard-BU_mm2Gt.js",
+      "file": "useLeaderboard-l5R8AzIe.js",
       "bytes": 1890,
       "sizeKb": 1.85,
       "group": "js-other",
@@ -733,7 +733,7 @@
       "exceeded": false
     },
     {
-      "file": "Shop-Bbob6W_b.js",
+      "file": "Shop-97tDSvbn.js",
       "bytes": 1856,
       "sizeKb": 1.81,
       "group": "js-other",
@@ -749,7 +749,7 @@
       "exceeded": false
     },
     {
-      "file": "PageSEO-BMNbbR3L.js",
+      "file": "PageSEO-DWqY9VvP.js",
       "bytes": 1324,
       "sizeKb": 1.29,
       "group": "js-other",
@@ -781,7 +781,7 @@
       "exceeded": false
     },
     {
-      "file": "Avatar-DUNQbDrv.js",
+      "file": "Avatar-Bwd_XtUR.js",
       "bytes": 956,
       "sizeKb": 0.93,
       "group": "js-other",
@@ -789,7 +789,7 @@
       "exceeded": false
     },
     {
-      "file": "HolderChat-BHpkarXj.js",
+      "file": "HolderChat-BYvjd8w6.js",
       "bytes": 812,
       "sizeKb": 0.79,
       "group": "js-other",
@@ -797,7 +797,7 @@
       "exceeded": false
     },
     {
-      "file": "GatedChat-Bpq9Tm1v.js",
+      "file": "GatedChat-CspKqD7w.js",
       "bytes": 796,
       "sizeKb": 0.78,
       "group": "js-other",
@@ -821,7 +821,7 @@
       "exceeded": false
     },
     {
-      "file": "wallet-preload-SCZwgYJ6.js",
+      "file": "wallet-preload-CbO8khFZ.js",
       "bytes": 622,
       "sizeKb": 0.61,
       "group": "js-other",
@@ -837,7 +837,7 @@
       "exceeded": false
     },
     {
-      "file": "PageTransition-ByjKVhCz.js",
+      "file": "PageTransition-BN_Obvfi.js",
       "bytes": 398,
       "sizeKb": 0.39,
       "group": "js-other",
