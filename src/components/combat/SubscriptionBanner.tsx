@@ -116,7 +116,7 @@ export function SubscriptionBanner({ playerDid }: SubscriptionBannerProps) {
     const showRenew = daysLeft <= 7;
 
     return (
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2 mb-1">
         <span
           className="badge flex items-center gap-1"
           style={{ background: 'var(--color-gold-15)', color: 'var(--color-gold)' }}
@@ -148,7 +148,7 @@ export function SubscriptionBanner({ playerDid }: SubscriptionBannerProps) {
   if (subscription.tier === 'trial') {
     return (
       <div
-        className="card p-3 mb-4 flex items-center gap-3"
+        className="card p-3 mb-1 flex items-center gap-3"
         style={{ borderColor: 'var(--color-cyan)', borderWidth: 1 }}
       >
         <div
@@ -187,7 +187,7 @@ export function SubscriptionBanner({ playerDid }: SubscriptionBannerProps) {
   return (
     <>
       <div
-        className="card p-3 mb-4 flex items-center gap-3"
+        className="card p-3 mb-1 flex items-center gap-3"
         style={{ borderColor: 'var(--color-primary)', borderWidth: 1 }}
       >
         <div

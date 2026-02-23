@@ -11,6 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ChevronDown, Palette, AlertCircle, RefreshCw, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { YourWojakExplorer } from './YourWojakExplorer';
+import { getCombatTypeFromAttributes } from '@/lib/combat/getCombatTypeFromAttributes';
 
 // Your Wojak collection ID on MintGarden
 const YOUR_WOJAK_COLLECTION_ID = 'col1rhrjj6f28tge783rp0lrj8ct7vnq79xsnklx3up49lgpnge62ensr2tyfx';
@@ -209,25 +210,33 @@ export function YourWojakSection() {
     });
   }, [mintgardenNfts]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Filter NFTs based on selected filters
+  // Filter NFTs based on selected filters (Category + Attribute, then Type)
   const filteredNfts = useMemo(() => {
-    // If no trait filter selected, return all
-    if (!selectedCategory || !selectedTraitValue) {
-      return mintgardenNfts;
+    let result = mintgardenNfts;
+
+    // 1) Trait filter: category + attribute
+    if (selectedCategory && selectedTraitValue) {
+      result = result.filter(nft => {
+        const attrs = attributesCache[nft.encoded_id];
+        if (!attrs) return false;
+        return attrs.some(attr =>
+          attr.trait_type.toLowerCase() === selectedCategory.toLowerCase() &&
+          attr.value === selectedTraitValue
+        );
+      });
     }
 
-    // Filter by trait
-    return mintgardenNfts.filter(nft => {
-      const attrs = attributesCache[nft.encoded_id];
-      if (!attrs) return false; // If we don't have attributes yet, exclude from filtered view
+    // 2) Type filter: combat type from traits (Fire, Water, etc.)
+    if (typeFilter) {
+      result = result.filter(nft => {
+        const attrs = attributesCache[nft.encoded_id] ?? [];
+        const combatType = getCombatTypeFromAttributes(attrs);
+        return combatType === typeFilter;
+      });
+    }
 
-      // Find matching attribute (case-insensitive comparison for category)
-      return attrs.some(attr =>
-        attr.trait_type.toLowerCase() === selectedCategory.toLowerCase() &&
-        attr.value === selectedTraitValue
-      );
-    });
-  }, [mintgardenNfts, selectedCategory, selectedTraitValue, attributesCache]);
+    return result;
+  }, [mintgardenNfts, selectedCategory, selectedTraitValue, typeFilter, attributesCache]);
 
   // Get the label for selected category
   const selectedCategoryLabel = selectedCategory
@@ -472,9 +481,9 @@ export function YourWojakSection() {
       )}
 
       {/* Filter Status - shows count when filtering */}
-      {(selectedCategory && selectedTraitValue) && (
+      {(selectedCategory && selectedTraitValue) || typeFilter ? (
         <div className="text-xs text-secondary flex items-center gap-2">
-          {isLoadingAttributes ? (
+          {isLoadingAttributes && (selectedCategory && selectedTraitValue) ? (
             <span>Loading attributes...</span>
           ) : (
             <span>
@@ -482,7 +491,7 @@ export function YourWojakSection() {
             </span>
           )}
         </div>
-      )}
+      ) : null}
 
       {/* Error State */}
       {error && (
@@ -517,16 +526,24 @@ export function YourWojakSection() {
       ) : filteredNfts.length === 0 && !error ? (
         <div className="card-static p-8 text-center">
           <Palette size={48} className="text-muted mx-auto mb-3" />
-          {selectedCategory && selectedTraitValue ? (
+          {(selectedCategory && selectedTraitValue) || typeFilter ? (
             <>
               <p className="font-medium mb-1">No matches found</p>
               <p className="text-sm text-secondary mb-4">
-                {isLoadingAttributes
+                {isLoadingAttributes && (selectedCategory && selectedTraitValue)
                   ? 'Loading NFT attributes...'
-                  : `No NFTs with ${selectedCategoryLabel}: ${selectedTraitValue}`}
+                  : typeFilter
+                    ? `No NFTs with type ${COMBAT_TYPES.find(t => t.id === typeFilter)?.label ?? typeFilter}`
+                    : `No NFTs with ${selectedCategoryLabel}: ${selectedTraitValue}`}
               </p>
-              <button onClick={clearFilter} className="btn btn-secondary">
-                Clear Filter
+              <button
+                onClick={() => {
+                  clearFilter();
+                  setTypeFilter(null);
+                }}
+                className="btn btn-secondary"
+              >
+                Clear Filters
               </button>
             </>
           ) : (

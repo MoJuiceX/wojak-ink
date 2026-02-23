@@ -330,8 +330,21 @@ function GalleryContent() {
     [visibleCount, filteredNfts.length]
   );
 
+  // Full rows: pad so last row has same column count as others
+  const gridColumns = isDesktop ? 8 : 6;
+  const padCount = useMemo(() => {
+    const n = visibleNfts.length;
+    if (n === 0) return 0;
+    const remainder = n % gridColumns;
+    return remainder === 0 ? 0 : gridColumns - remainder;
+  }, [visibleNfts.length, gridColumns]);
+
+  const loadMoreRef = useRef<HTMLButtonElement>(null);
   const handleLoadMore = useCallback(() => {
     setVisibleCount((prev) => prev + ITEMS_PER_PAGE);
+    queueMicrotask(() => {
+      loadMoreRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
   }, []);
 
   const handleSelectCharacter = useCallback(
@@ -510,11 +523,19 @@ function GalleryContent() {
                           eagerLoad={index < 50}
                         />
                       ))}
+                      {Array.from({ length: padCount }, (_, i) => (
+                        <div
+                          key={`pad-${i}`}
+                          className="gallery-grid-placeholder"
+                          aria-hidden="true"
+                        />
+                      ))}
                     </motion.div>
                     {/* Load more button */}
                     {hasMore && (
                       <div className="flex justify-center py-2">
                         <button
+                          ref={loadMoreRef}
                           type="button"
                           onClick={handleLoadMore}
                           className="flex items-center gap-2 px-6 py-3 rounded-full transition-all hover:scale-105 text-primary"

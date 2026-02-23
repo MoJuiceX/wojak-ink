@@ -12,6 +12,7 @@ import { AudioProvider } from '@/contexts/AudioContext';
 import { HapticProvider } from '@/systems/haptics';
 import { PWAProvider, InstallBanner, OfflineIndicator } from '@/systems/pwa';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { ClerkAuthProvider } from '@/contexts/ClerkAuthContext';
 import { CurrencyProvider } from '@/contexts/CurrencyContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { LeaderboardProvider } from '@/contexts/LeaderboardContext';
@@ -578,6 +579,7 @@ function App() {
             <PWAProvider>
             <MediaProvider>
             <AuthProvider>
+            <ClerkAuthProvider>
             <CurrencyProvider>
             <LeaderboardProvider>
             <GuildProvider>
@@ -610,6 +612,7 @@ function App() {
             </GuildProvider>
             </LeaderboardProvider>
             </CurrencyProvider>
+            </ClerkAuthProvider>
             </AuthProvider>
             </MediaProvider>
             </PWAProvider>

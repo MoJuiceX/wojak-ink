@@ -439,6 +439,13 @@ body {
     radial-gradient(40rem 28rem at 86% 10%, rgba(168, 85, 247, 0.05), transparent 74%);
 }
 
+/* Empty cells to keep last grid row full (same column count as other rows) */
+.gallery-grid-placeholder {
+  aspect-ratio: 1;
+  min-height: 0;
+  pointer-events: none;
+}
+
 .brand-premium-generator::before {
   background:
     radial-gradient(38rem 28rem at 8% 12%, rgba(255, 107, 0, 0.07), transparent 68%),
@@ -3327,12 +3334,15 @@ body {
 
 .voting-page {
   display: grid;
-  grid-template-columns: minmax(160px, 1fr) minmax(460px, 540px) minmax(250px, 300px);
+  /* Equal flank columns so center column is visually centered on screen */
+  grid-template-columns: 1fr minmax(460px, 540px) 1fr;
+  grid-template-rows: 1fr;
   gap: 20px;
   max-width: 1420px;
   margin: 0 auto;
   width: 100%;
   padding: 0 16px;
+  min-height: 0;
 }
 
 .voting-page-center {
@@ -3341,8 +3351,38 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  min-height: 420px;
+  min-height: 0;
   min-width: 0;
+}
+
+/* Desktop: fit vote column in viewport so buttons stay above the fold */
+@media (min-width: 768px) {
+  .vote-feed-layout {
+    flex: 1;
+    min-height: 0;
+    max-width: 520px;
+    width: 100%;
+  }
+
+  .vote-feed-layout .vote-pass-strip {
+    flex-shrink: 0;
+  }
+
+  .vote-feed-layout .session-stats-strip {
+    flex-shrink: 0;
+  }
+
+  .vote-feed-layout .vote-buttons-entrance {
+    flex-shrink: 0;
+    margin-top: 0;
+    padding-top: 0;
+  }
+
+  .vote-feed-layout .vote-card-stack {
+    flex: 1;
+    min-height: 200px;
+    min-width: 0;
+  }
 }
 
 .voting-page-side {
@@ -3355,7 +3395,7 @@ body {
 
 @media (max-width: 1150px) {
   .voting-page {
-    grid-template-columns: minmax(0, 1fr) 260px;
+    grid-template-columns: 1fr 260px;
     max-width: 1080px;
   }
 
@@ -3496,6 +3536,14 @@ body {
   transition: background 100ms ease;
 }
 
+.vote-card-exit-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  border-radius: inherit;
+}
+
 .vote-card-icon-overlay {
   position: absolute;
   top: 50%;
@@ -3516,15 +3564,18 @@ body {
 
 /* ── Card Stack ── */
 
+/* Gap below card is set inline in VotingFeed (marginBottom) so it matches tab→picture */
 .vote-card-stack {
   position: relative;
   width: 100%;
   max-width: 520px;
   margin: 0 auto;
+  margin-bottom: 0;
   /* 1:1 image + compact footer */
   aspect-ratio: 1 / 1.14;
   max-height: calc(100vh - 228px);
   isolation: isolate;
+  overflow: hidden;
 }
 
 /* 24h vote pass progress */
@@ -3640,13 +3691,15 @@ body {
   stroke: var(--color-error);
 }
 
-/* Vote pill button row */
+/* Vote pill button row — no top space; gap above comes only from vote-feed-layout */
 .vote-buttons-row {
   display: flex;
   gap: 14px;
   width: 100%;
   max-width: 520px;
-  margin: 6px auto 0;
+  margin: 0 auto;
+  margin-top: 0;
+  padding-top: 0;
   position: relative;
 }
 
@@ -3917,7 +3970,7 @@ body {
   .vote-buttons-row {
     max-width: calc(100vw - 16px);
     gap: 10px;
-    padding: 8px 8px;
+    padding: 0 8px 8px;
   }
 
   .vote-btn-pill {
@@ -4044,7 +4097,7 @@ body {
     position: sticky;
     bottom: calc(env(safe-area-inset-bottom, 0px) + 86px);
     z-index: 18;
-    padding: 10px 10px 11px;
+    padding: 0 10px 11px;
     border-radius: 18px;
     background: linear-gradient(180deg, rgba(20, 20, 28, 0.92), rgba(10, 10, 15, 0.88));
     backdrop-filter: blur(12px) saturate(130%);
@@ -4148,7 +4201,7 @@ body {
     backdrop-filter: none;
     border: none;
     box-shadow: none;
-    padding: 16px 0 0;
+    padding: 0;
   }
 
   .vote-btn-pill {
@@ -4399,8 +4452,10 @@ body {
   animation: slide-up 400ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
-/* Vote buttons entrance */
+/* Vote buttons entrance — no top space; gap above from vote-feed-layout only */
 .vote-buttons-entrance {
+  margin-top: 0;
+  padding-top: 0;
   animation: slide-up 500ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 

@@ -12,7 +12,10 @@ function VotingPageDesktop() {
   const { headerHeight } = useLayout();
 
   return (
-    <div className="voting-page" style={{ paddingTop: 16, paddingBottom: 32 }}>
+    <div
+      className="voting-page"
+      style={{ paddingTop: 0, paddingBottom: 24, height: '100%', minHeight: 0 }}
+    >
       <div className="voting-page-center">
         <VotingFeed />
       </div>

@@ -8,12 +8,8 @@
  */
 
 import { createContext, useContext, useEffect, useState, useCallback, useRef, useMemo } from 'react';
-import { useAuth, useUser } from '@clerk/clerk-react';
-import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch';
+import { useClerkAuth } from '@/contexts/ClerkAuthContext';
 import { createDefaultAvatar, type UserAvatar } from '@/types/avatar';
-
-// Check if Clerk is configured
-const CLERK_ENABLED = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 // localStorage key for profile fallback
 const PROFILE_STORAGE_KEY = 'wojak_user_profile';
@@ -82,17 +78,23 @@ interface UserProfileContextValue extends UserProfileState {
 const UserProfileContext = createContext<UserProfileContextValue | null>(null);
 
 export function UserProfileProvider({ children }: { children: React.ReactNode }) {
-  // Always call hooks unconditionally (rules of hooks)
-  const clerkAuth = useAuth();
-  const clerkUser = useUser();
-  const authResult = CLERK_ENABLED ? clerkAuth : { isSignedIn: false, isLoaded: true };
-  const userResult = CLERK_ENABLED ? clerkUser : { user: null };
-  const { authenticatedFetch } = useAuthenticatedFetch();
+  const clerkAuth = useClerkAuth();
 
-  // Use Clerk values only if enabled, otherwise use defaults
-  const isSignedIn = CLERK_ENABLED ? authResult.isSignedIn : false;
-  const authLoaded = CLERK_ENABLED ? authResult.isLoaded : true;
-  const user = CLERK_ENABLED ? userResult.user : null;
+  const isSignedIn = clerkAuth.isSignedIn ?? false;
+  const authLoaded = clerkAuth.isLoaded ?? true;
+  const user = clerkAuth.user;
+
+  // Inline authenticated fetch using ClerkAuthContext only (no useAuthenticatedFetch to avoid Clerk useAuth in this tree)
+  const authenticatedFetch = useCallback(
+    async (url: string, options: RequestInit = {}): Promise<Response> => {
+      const token = clerkAuth.getToken ? await clerkAuth.getToken() : null;
+      const headers = new Headers(options.headers);
+      if (token) headers.set('Authorization', `Bearer ${token}`);
+      headers.set('Content-Type', 'application/json');
+      return fetch(url, { ...options, headers });
+    },
+    [clerkAuth.getToken]
+  );
 
   const [state, setState] = useState<UserProfileState>({
     profile: null,
@@ -343,11 +345,9 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
     // Priority: custom display name > Google first name > email prefix > "Player"
     if (state.profile?.displayName) return state.profile.displayName;
     if (user?.firstName) return user.firstName;
-    if (user?.primaryEmailAddress?.emailAddress) {
-      return user.primaryEmailAddress.emailAddress.split('@')[0];
-    }
+    if (user?.email) return user.email.split('@')[0];
     return 'Player';
-  }, [state.profile?.displayName, user?.firstName, user?.primaryEmailAddress?.emailAddress]);
+  }, [state.profile?.displayName, user?.firstName, user?.email]);
 
   // Store refreshProfile in a ref to avoid dependency issues
   const refreshProfileRef = useRef(refreshProfile);
@@ -384,11 +384,11 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
     }
   }, [authLoaded, isSignedIn]);
 
-  // Clerk user info
+  // Clerk user info (from ClerkAuthContext)
   const clerkUserInfo = user ? {
     firstName: user.firstName,
     lastName: user.lastName,
-    email: user.primaryEmailAddress?.emailAddress || null,
+    email: user.email,
     imageUrl: user.imageUrl,
   } : null;
 

@@ -359,10 +359,13 @@ function FightClubContent() {
     <>
       <div
         style={{
-          padding: contentPadding,
+          paddingTop: 8,
+          paddingLeft: contentPadding,
+          paddingRight: contentPadding,
+          paddingBottom: contentPadding,
           display: 'flex',
           flexDirection: 'column',
-          minHeight: '100%',
+          minHeight: '100dvh',
         }}
       >
         {/* Link DID / Set name when Clerk signed in and no player or in set-name phase */}
@@ -397,7 +400,8 @@ function FightClubContent() {
 
         <SubscriptionBanner playerDid={effectivePlayerDid} />
 
-        <div style={{ flex: 1, marginTop: '16px' }}>
+        {/* 6px = same as vote-feed gap so tab→picture and picture→buttons are equal */}
+        <div style={{ flex: 1, minHeight: 0, marginTop: 6 }}>
           {/* Burn tab: always show "Burning coming soon" for now (no gate, no full BurnTab) */}
           {activeTab === 'burn' && <BurningComingSoon />}
 

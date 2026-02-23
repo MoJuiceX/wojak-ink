@@ -12,13 +12,44 @@ if (window.location.pathname === '/admin') {
   window.__ADMIN_SECRET__ = new URLSearchParams(window.location.search).get('secret') || '';
 }
 
-// Clerk publishable key from environment
-const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
-
-// Warn if key is missing (auth will be disabled)
-if (!CLERK_PUBLISHABLE_KEY) {
+// Clerk publishable key from environment. Must be a real key from dashboard.clerk.com.
+// When missing or placeholder, we do NOT wrap with ClerkProvider.
+const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined
+// Optional: override where Clerk loads its script from. On localhost, clerk.wojak.ink does not resolve;
+// set this to your Frontend API URL from Clerk Dashboard → Domains (the *.clerk.accounts.dev URL).
+const CLERK_JS_URL_RAW = import.meta.env.VITE_CLERK_JS_URL as string | undefined
+const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+// Use a CDN for script load on localhost when custom domain (clerk.wojak.ink) is set but doesn't resolve
+const CLERK_JS_CDN_FALLBACK = 'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js'
+const clerkWojakInk = CLERK_JS_URL_RAW === 'https://clerk.wojak.ink' || (CLERK_JS_URL_RAW?.includes?.('clerk.wojak.ink') ?? false)
+const CLERK_JS_URL =
+  isLocalhost && (!CLERK_JS_URL_RAW || clerkWojakInk)
+    ? CLERK_JS_CDN_FALLBACK
+    : CLERK_JS_URL_RAW
+if (isLocalhost && (!CLERK_JS_URL_RAW || clerkWojakInk)) {
   console.warn(
-    '[Clerk] Missing VITE_CLERK_PUBLISHABLE_KEY. Auth features will be disabled.\n' +
+    '[Clerk] clerk.wojak.ink does not resolve on localhost. Script will load from CDN; auth may still fail until you set VITE_CLERK_JS_URL to your Frontend API URL (e.g. https://XXX.clerk.accounts.dev) in .env.local from Clerk Dashboard → Domains.'
+  )
+}
+// When using a resolvable FAPI URL (e.g. *.clerk.accounts.dev), tell Clerk to use it for API calls too
+if (CLERK_JS_URL_RAW && CLERK_JS_URL_RAW.startsWith('https://') && CLERK_JS_URL_RAW.includes('clerk.accounts.dev')) {
+  try {
+    ;(window as unknown as { __clerk_domain?: string }).__clerk_domain = new URL(CLERK_JS_URL_RAW).hostname
+  } catch {
+    // ignore
+  }
+}
+
+const CLERK_PLACEHOLDER = 'pk_test_placeholder_no_real_key'
+const hasClerkKey =
+  typeof CLERK_PUBLISHABLE_KEY === 'string' &&
+  CLERK_PUBLISHABLE_KEY.length > 0 &&
+  CLERK_PUBLISHABLE_KEY !== CLERK_PLACEHOLDER &&
+  (CLERK_PUBLISHABLE_KEY.startsWith('pk_test_') || CLERK_PUBLISHABLE_KEY.startsWith('pk_live_'))
+
+if (!hasClerkKey) {
+  console.warn(
+    '[Clerk] Missing or invalid VITE_CLERK_PUBLISHABLE_KEY. Auth features will be disabled.\n' +
     'Add it to .env.local - see .env.example for details.'
   )
 }
@@ -160,9 +191,10 @@ try {
     createRoot(rootEl).render(
       <StrictMode>
         <ErrorBoundary>
-          {CLERK_PUBLISHABLE_KEY ? (
+          {hasClerkKey && CLERK_PUBLISHABLE_KEY ? (
             <ClerkProvider
               publishableKey={CLERK_PUBLISHABLE_KEY}
+              {...(CLERK_JS_URL ? { clerkJSUrl: CLERK_JS_URL } : {})}
               afterSignOutUrl="/"
               appearance={clerkAppearance}
             >

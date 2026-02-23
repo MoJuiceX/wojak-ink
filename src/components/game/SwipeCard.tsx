@@ -19,6 +19,8 @@ interface SwipeCardProps {
   isFirst?: boolean;
   reducedMotion?: boolean;
   exitDirection?: 1 | -1 | null; // 1 = right (like), -1 = left (dislike)
+  /** Called when exit animation completes (so parent can remove from feed immediately) */
+  onExitComplete?: () => void;
   /** Voting stats for the footer context */
   likes?: number;
   dislikes?: number;
@@ -67,6 +69,7 @@ export function SwipeCard({
   isFirst = false,
   reducedMotion = false,
   exitDirection = null,
+  onExitComplete,
   likes = 0,
   dislikes = 0,
   totalVotes = 0,
@@ -79,6 +82,7 @@ export function SwipeCard({
   const imageRef = useRef<HTMLImageElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const fallbackStepRef = useRef(0);
+  const exitCompleteFired = useRef(false);
   const primaryUrl = thumbnailUri || imageUrl;
   const secondaryUrl = thumbnailUri ? imageUrl : null;
   const tertiaryUrl = MINTGARDEN_MAINNET_MEDIUM(nftId);
@@ -200,8 +204,15 @@ export function SwipeCard({
   void triggerVote; // used by parent via onVote callback pattern
 
   // Exit direction: from swipe gesture, button click, or default right
-  // Distance is enough to fully exit the card container (clips handled by overflow)
-  const exitX = exitDirection ? exitDirection * 500 : (x.get() >= 0 ? 500 : -500);
+  const exitX = exitDirection ? exitDirection * 520 : (x.get() >= 0 ? 520 : -520);
+  // Glaze = card stays vivid (opacity 0.92); fade = card dissolves (opacity 0)
+  const exitOpacity = exitDirection === 1 ? 0.92 : 0;
+
+  // Snappy exit; only transform + opacity (GPU-friendly)
+  const exitTransition = reducedMotion
+    ? { duration: 0.12 }
+    : { duration: 0.26, ease: [0.22, 0.0, 0.15, 1] };
+  const promoteTransition = { type: 'spring' as const, stiffness: 320, damping: 30 };
 
   return (
     <motion.div
@@ -217,6 +228,7 @@ export function SwipeCard({
         right: 0,
         zIndex: 3 - stackPosition,
         pointerEvents: isInteractive ? 'auto' : 'none',
+        willChange: exiting ? 'transform, opacity' : undefined,
       }}
       drag={isInteractive ? 'x' : false}
       dragConstraints={{ left: 0, right: 0 }}
@@ -227,25 +239,33 @@ export function SwipeCard({
       onMouseMove={isInteractive ? handleMouseMove : undefined}
       onMouseLeave={isInteractive ? handleMouseLeave : undefined}
       onAnimationEnd={shouldWiggle ? handleWiggleEnd : undefined}
+      onAnimationComplete={
+        exiting && stackPosition === 0 && onExitComplete && !exitCompleteFired.current
+          ? () => {
+              exitCompleteFired.current = true;
+              onExitComplete();
+            }
+          : undefined
+      }
       initial={stackPosition === 0 ? { opacity: 0, y: 20, scale: 0.96 } : false}
       animate={
         exiting
           ? reducedMotion
             ? { opacity: 0 }
-            : { x: exitX, opacity: 0, rotate: exitX > 0 ? 15 : -15 }
+            : { x: exitX, opacity: exitOpacity, rotate: exitX > 0 ? 12 : -12 }
           : { scale: config.scale, y: config.y, opacity: config.opacity }
       }
       exit={
         reducedMotion
           ? { opacity: 0 }
-          : { x: exitX, opacity: 0, rotate: exitX > 0 ? 15 : -15 }
+          : { x: exitX, opacity: exitOpacity, rotate: exitX > 0 ? 12 : -12 }
       }
       transition={
         exiting
-          ? { duration: 0.2, ease: 'easeOut' }
+          ? exitTransition
           : stackPosition === 0
             ? { duration: 0.45, ease: [0.23, 1, 0.32, 1] }
-            : { type: 'spring', stiffness: 200, damping: 20 }
+            : promoteTransition
       }
       aria-hidden={stackPosition > 0 ? true : undefined}
     >
@@ -259,6 +279,21 @@ export function SwipeCard({
 
       {/* Image: prefer thumbnailUri (MintGarden mainnet CDN), then IPFS, then mainnet launcher URL, then placeholder */}
       <div className="vote-card-image">
+        {/* Brief glaze/fade tint on exit — opacity only for smooth 60fps */}
+        {exiting && stackPosition === 0 && exitDirection && !reducedMotion && (
+          <motion.div
+            className="vote-card-exit-overlay"
+            aria-hidden
+            style={{
+              background: exitDirection === 1
+                ? 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(34, 197, 94, 0.35), transparent 65%)'
+                : 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(30, 30, 40, 0.6), transparent 65%)',
+            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 0.5, 0] }}
+            transition={{ duration: 0.2, times: [0, 0.35, 1], ease: 'easeOut' }}
+          />
+        )}
         <img
           ref={imageRef}
           src={primaryUrl}

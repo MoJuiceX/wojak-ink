@@ -13,6 +13,13 @@ import React, { createContext, useContext, useState, useCallback, useEffect, use
 import type { ReactNode } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { STARTING_BALANCE, SHOP_PRICES } from '../config/economy';
+
+/** Auth shape used by currency logic (Clerk or fallback when Clerk not configured) */
+interface CurrencyAuth {
+  userId: string | null;
+  isSignedIn: boolean;
+  getToken: (() => Promise<string | null>) | undefined;
+}
 import type {
   UserCurrency,
   CurrencyTransaction,
@@ -93,13 +100,14 @@ interface CurrencyContextType {
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
 
-export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Always call hooks unconditionally (rules of hooks)
-  const clerkAuth = useAuth();
-  const authResult = CLERK_ENABLED ? clerkAuth : { userId: null, isSignedIn: false, getToken: async () => null };
-  const userId = authResult.userId;
-  const isSignedIn = authResult.isSignedIn;
-  const getToken = authResult.getToken;
+function CurrencyProviderInner({
+  children,
+  auth,
+}: {
+  children: ReactNode;
+  auth: CurrencyAuth;
+}) {
+  const { userId, isSignedIn, getToken } = auth;
 
   const [currency, setCurrency] = useState<UserCurrency>(DEFAULT_CURRENCY);
   const [isLoading, setIsLoading] = useState(true);
@@ -764,6 +772,35 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }
     >
       {children}
     </CurrencyContext.Provider>
+  );
+}
+
+/** Uses Clerk useAuth – only render when ClerkProvider is present (CLERK_ENABLED). */
+function CurrencyProviderWithClerk({ children }: { children: ReactNode }) {
+  const clerkAuth = useAuth();
+  return (
+    <CurrencyProviderInner
+      auth={{
+        userId: clerkAuth.userId ?? null,
+        isSignedIn: !!clerkAuth.isSignedIn,
+        getToken: clerkAuth.getToken,
+      }}
+    >
+      {children}
+    </CurrencyProviderInner>
+  );
+}
+
+export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  if (CLERK_ENABLED) {
+    return <CurrencyProviderWithClerk>{children}</CurrencyProviderWithClerk>;
+  }
+  return (
+    <CurrencyProviderInner
+      auth={{ userId: null, isSignedIn: false, getToken: undefined }}
+    >
+      {children}
+    </CurrencyProviderInner>
   );
 };
 

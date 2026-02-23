@@ -53,7 +53,7 @@ export function VotingFeed() {
   } = useGame();
   const toast = useToast();
   const reducedMotion = usePrefersReducedMotion();
-  const pendingVoteTimeout = useRef<number | null>(null);
+  const pendingVoteRef = useRef<{ nftId: string; voteType: 1 | -1; promise: Promise<{ ok: boolean; error?: string; status?: number }> } | null>(null);
 
   // Milestone toasts
   useMilestoneToasts(player?.onboarding);
@@ -100,13 +100,6 @@ export function VotingFeed() {
     });
   }, [feed]);
 
-  useEffect(() => {
-    return () => {
-      if (pendingVoteTimeout.current !== null) {
-        window.clearTimeout(pendingVoteTimeout.current);
-      }
-    };
-  }, []);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- reset optimistic pass progress when backend feed progress updates
@@ -161,35 +154,39 @@ export function VotingFeed() {
     const votePromise = castVote(currentItem.nftId, currentItem.editionNumber, voteType)
       .catch(() => ({ ok: false as const, error: 'Network error', status: 0 }));
 
-    // After exit animation finishes: remove voted card from feed, then clear state and refill
-    const EXIT_MS = 220;
-    pendingVoteTimeout.current = window.setTimeout(async () => {
-      const result = await votePromise;
+    pendingVoteRef.current = { nftId: votedNftId, voteType, promise: votePromise };
+  }, [feed, cardExiting, castVote, loadFeed, removeFromFeed, toast, voteCount, triggerHaptics, rollbackSessionCounts, voteErrorMessage, feedVotePassProgress]);
 
+  const handleExitComplete = useCallback(() => {
+    const pending = pendingVoteRef.current;
+    pendingVoteRef.current = null;
+    if (!pending) return;
+
+    const { nftId: votedNftId, voteType, promise } = pending;
+    const currentFeedLength = feed.length;
+
+    // Optimistic: remove card and clear state immediately so next card promotes without waiting for API
+    removeFromFeed(votedNftId);
+    setCardExiting(false);
+    setExitDirection(null);
+    setOptimisticSeenCount(prev => {
+      const progress = feedVotePassProgress;
+      if (!progress?.enabled || progress.passComplete || progress.totalCount <= 0) return prev;
+      const base = prev ?? progress.seenCount;
+      return Math.min(progress.totalCount, base + 1);
+    });
+    if (currentFeedLength <= 3) {
+      loadFeed().catch(() => setFeedError(true));
+    }
+
+    // Handle vote result in background; rollback counts + toast only on error
+    promise.then((result) => {
       if (!result.ok) {
         rollbackSessionCounts(voteType);
-        setCardExiting(false);
-        setExitDirection(null);
         toast.error(voteErrorMessage(result));
-        return;
       }
-
-      setOptimisticSeenCount(prev => {
-        const progress = feedVotePassProgress;
-        if (!progress?.enabled || progress.passComplete || progress.totalCount <= 0) return prev;
-        const base = prev ?? progress.seenCount;
-        return Math.min(progress.totalCount, base + 1);
-      });
-
-      removeFromFeed(votedNftId);
-      setCardExiting(false);
-      setExitDirection(null);
-
-      if (feed.length <= 3) {
-        loadFeed().catch(() => setFeedError(true));
-      }
-    }, EXIT_MS);
-  }, [feed, cardExiting, castVote, loadFeed, removeFromFeed, toast, voteCount, triggerHaptics, rollbackSessionCounts, voteErrorMessage, feedVotePassProgress]);
+    });
+  }, [feed.length, feedVotePassProgress, loadFeed, removeFromFeed, rollbackSessionCounts, toast, voteErrorMessage]);
 
   const handleRetry = useCallback(() => {
     setFeedError(false);
@@ -245,40 +242,22 @@ export function VotingFeed() {
 
   // Active voting
   const visibleCards = feed.slice(0, 3);
-  const passSeen = optimisticSeenCount ?? feedVotePassProgress?.seenCount ?? 0;
-  const passTotal = feedVotePassProgress?.totalCount ?? 0;
-  const passEnabled = !!feedVotePassProgress?.enabled && passTotal > 0;
-  const passComplete = !!feedVotePassProgress?.passComplete || (passEnabled && passSeen >= passTotal);
-  const passProgressPct = passEnabled ? Math.max(0, Math.min(100, (passSeen / passTotal) * 100)) : 0;
 
+  /* Same as tab→picture; use marginBottom on card so no other CSS can add gap */
+  const VERTICAL_GAP_PX = 6;
   return (
-    <div className={`flex flex-col gap-4 w-full${voteFeedbackType ? ` vote-feed-${voteFeedbackType}` : ''}`}>
-      {passEnabled && (
-        <div className={`vote-pass-strip${passComplete ? ' is-complete' : ''} vote-pass-strip-entrance`}>
-          <div className="vote-pass-strip-row">
-            <span className="vote-pass-strip-label">24h Vote Pass</span>
-            <span className="vote-pass-strip-value">
-              Seen {passSeen} / {passTotal}
-            </span>
-          </div>
-          <div className="vote-pass-strip-track" aria-hidden>
-            <div className="vote-pass-strip-fill" style={{ width: `${passProgressPct}%` }} />
-          </div>
-          <div className="vote-pass-strip-meta">
-            {passComplete
-              ? 'Pass complete: revotes are open until older votes age out.'
-              : `${Math.max(0, passTotal - passSeen)} left in your 24h pass`}
-          </div>
-        </div>
-      )}
-
-      {/* Card stack */}
+    <div
+      className={`vote-feed-layout flex flex-col w-full${voteFeedbackType ? ` vote-feed-${voteFeedbackType}` : ''}`}
+      style={{ gap: 0 }}
+    >
+      {/* Card stack — marginBottom is the only space above the buttons */}
       <div
-        className={`vote-card-stack${voteFeedbackType ? ` vote-card-stack-pulse vote-card-stack-pulse-${voteFeedbackType}` : ''} vote-card-entrance`}
+        className="vote-card-stack vote-card-entrance"
         role="application"
         aria-label="Vote on Wojak NFTs. Swipe right to glaze, left to fade."
+        style={{ marginBottom: VERTICAL_GAP_PX }}
       >
-        <AnimatePresence mode="popLayout">
+        <AnimatePresence mode="wait" initial={false}>
           {visibleCards.map((item, i) => (
             <SwipeCard
               key={item.nftId}
@@ -292,6 +271,7 @@ export function VotingFeed() {
               isFirst={voteCount === 0 && i === 0}
               reducedMotion={reducedMotion}
               exitDirection={i === 0 ? exitDirection : null}
+              onExitComplete={i === 0 ? handleExitComplete : undefined}
               likes={item.likes}
               dislikes={item.dislikes}
               totalVotes={item.totalVotes}
@@ -300,16 +280,7 @@ export function VotingFeed() {
         </AnimatePresence>
       </div>
 
-      {/* Session stats strip (stable, no toast text layout shift) */}
-      {voteCount > 0 && (
-        <div className={`session-stats-strip session-stats-entrance${voteFeedbackType ? ` ${voteFeedbackType}` : ''}`}>
-          <span className={voteCount > 0 ? 'vote-count-pop' : ''}>Votes: {voteCount}</span>
-          <span className="text-success">Glazes: {glazeCount}</span>
-          <span className="text-error">Fades: {fadeCount}</span>
-        </div>
-      )}
-
-      {/* Vote buttons */}
+      {/* Vote buttons — visible without scrolling, same gap as above */}
       <div className="w-full vote-buttons-entrance">
         <VoteButtons
           onLike={() => handleVote(1)}
@@ -318,7 +289,6 @@ export function VotingFeed() {
           feedbackType={voteFeedbackType}
         />
       </div>
-
     </div>
   );
 }
