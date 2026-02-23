@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 // Power Level hero card — centered score, tier badge, collapsible breakdown, credits.
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';

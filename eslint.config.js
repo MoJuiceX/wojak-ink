@@ -35,4 +35,18 @@ export default defineConfig([
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },
+  {
+    files: ['functions/**/*.{ts,js}', 'workers/**/*.{ts,js}', 'scripts/**/*.{ts,js,mjs,cjs}'],
+    rules: {
+      // Serverless handlers and operational workers/scripts intentionally use console logging.
+      'no-console': 'off',
+    },
+  },
+  {
+    files: ['scripts/**/*.{ts,js,mjs,cjs}'],
+    rules: {
+      // Analysis/maintenance scripts often process arbitrary JSON payloads.
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
 ])

@@ -532,7 +532,7 @@ const OrangePong: React.FC = () => {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [gameState, ballVX, ballVY, resetBall]);
+  }, [gameState, ballVX, ballVY, resetBall, addHitRipple]);
 
   // Auto-submit score for signed-in users when game ends
   useEffect(() => {

@@ -54,8 +54,10 @@ export function QueuePanel({ fighters, onQueue, onLeaveQueue, onFightAi, queueSt
     if (isQueued && !showAiPrompt) {
       // Start timer
       queueStartRef.current = Date.now();
-      setTimeRemaining(QUEUE_TIMEOUT_MS);
-      setShowAiPrompt(false);
+      queueMicrotask(() => {
+        setTimeRemaining(QUEUE_TIMEOUT_MS);
+        setShowAiPrompt(false);
+      });
 
       timerRef.current = setInterval(() => {
         const elapsed = Date.now() - (queueStartRef.current ?? Date.now());
@@ -77,8 +79,10 @@ export function QueuePanel({ fighters, onQueue, onLeaveQueue, onFightAi, queueSt
         clearInterval(timerRef.current);
         timerRef.current = null;
       }
-      setShowAiPrompt(false);
-      setTimeRemaining(QUEUE_TIMEOUT_MS);
+      queueMicrotask(() => {
+        setShowAiPrompt(false);
+        setTimeRemaining(QUEUE_TIMEOUT_MS);
+      });
     }
 
     return () => {
@@ -96,7 +100,7 @@ export function QueuePanel({ fighters, onQueue, onLeaveQueue, onFightAi, queueSt
         clearInterval(timerRef.current);
         timerRef.current = null;
       }
-      setShowAiPrompt(false);
+      queueMicrotask(() => setShowAiPrompt(false));
     }
   }, [isMatched]);
 

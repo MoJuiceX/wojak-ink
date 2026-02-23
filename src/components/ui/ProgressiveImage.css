@@ -1,0 +1,44 @@
+/**
+ * Progressive Image Styles
+ */
+
+.progressive-image-wrapper {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-bg-secondary, #f3f4f6);
+  border-radius: var(--radius-md, 0.5rem);
+}
+
+.progressive-image-blur {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  filter: blur(10px);
+  scale: 1.1;
+  z-index: 1;
+}
+
+.progressive-image-main {
+  position: relative;
+  z-index: 2;
+  width: 100% !important;
+  height: 100% !important;
+  transition: opacity 0.3s ease-in-out;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.progressive-image-main.error {
+  display: none;
+}
+
+.progressive-image-error {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  color: white;
+  font-size: 0.875rem;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}

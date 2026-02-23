@@ -5,6 +5,7 @@
  * UPDATED: Added voting props support
  */
 
+import { memo } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import type { MiniGame } from '@/types/media';
 import { GameCard } from './GameCard';
@@ -37,7 +38,7 @@ function GameCardSkeleton() {
   );
 }
 
-export function GamesGrid({
+export const GamesGrid = memo(function GamesGrid({
   games,
   onGameSelect,
   isLoading = false,
@@ -86,6 +87,6 @@ export function GamesGrid({
       )}
     </div>
   );
-}
+});
 
 export default GamesGrid;

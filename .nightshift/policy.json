@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "branchPattern": "^codex/nightly\\/[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9-]+$",
+  "requireWorktree": true,
+  "denyCommandPatterns": [
+    "(^|\\s)git\\s+push\\s+origin\\s+(main|master)(\\s|$)",
+    "(^|\\s)git\\s+checkout\\s+(main|master)(\\s|$)",
+    "(^|\\s)git\\s+reset\\s+--hard(\\s|$)",
+    "(^|\\s)rm\\s+-rf\\s+/(\\s|$)",
+    "(^|\\s)wrangler\\s+(deploy|pages\\s+deploy)(\\s|$)",
+    "(^|\\s)wrangler\\s+d1\\s+execute\\b(?!.*\\bSELECT\\b)",
+    "(^|\\s)npx\\s+wrangler\\s+d1\\s+execute\\b(?!.*\\bSELECT\\b)",
+    "(^|\\s)npm\\s+test(\\s|$)",
+    "(^|\\s)playwright\\s+test(\\s|$)"
+  ],
+  "denyIfContains": [
+    "wrangler pages deploy",
+    "wrangler deploy",
+    "git push origin main",
+    "git push origin master",
+    "rm -rf /",
+    "npx playwright test"
+  ],
+  "secretRedactionPatterns": [
+    "(Bearer\\s+)[A-Za-z0-9._-]+",
+    "([A-Z0-9_]*(?:TOKEN|SECRET|KEY|JWT|PASSWORD)[A-Z0-9_]*=)[^\\s]+",
+    "(ghp_[A-Za-z0-9]+)",
+    "(xox[baprs]-[A-Za-z0-9-]+)"
+  ],
+  "safeE2E": {
+    "allow": false,
+    "allowedBaseUrlPrefixes": [
+      "http://localhost",
+      "http://127.0.0.1",
+      "https://staging.",
+      "https://preview."
+    ]
+  }
+}

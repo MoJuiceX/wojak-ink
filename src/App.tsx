@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { QueryProvider } from '@/providers/QueryProvider';
@@ -26,7 +26,6 @@ import { AchievementsProvider } from '@/contexts/AchievementsContext';
 import { PreloadProvider } from '@/components/preload/PreloadProvider';
 import { SageWalletProvider } from '@/sage-wallet';
 import { MintProvider } from '@/contexts/MintContext';
-import { GeneratorProvider } from '@/contexts/GeneratorContext';
 import { SalesProvider } from '@/providers/SalesProvider';
 import { GlobalVideoPlayer } from '@/components/media/video/GlobalVideoPlayer';
 import StartupSequence from '@/components/StartupSequence';
@@ -128,6 +127,20 @@ function AppContent() {
   const [isStartupComplete, setIsStartupComplete] = useState(
     (import.meta.env.DEV && SKIP_BOOT_IN_DEV) || (SKIP_BOOT_IN_DEV && isLocalhost()) || hasSeenBoot() || isPublicRoute || hasSkipBootSetting()
   );
+
+  // Preload wallet dependencies during idle time to reduce perceived latency
+  // when user navigates to wallet-related pages
+  useEffect(() => {
+    if (isStartupComplete && 'requestIdleCallback' in window) {
+      requestIdleCallback(() => {
+        import('@/sage-wallet/wallet-preload').then(mod => {
+          mod.preloadWalletDependencies().catch(err => {
+            console.warn('[Performance] Wallet preload deferred:', err);
+          });
+        });
+      }, { timeout: 5000 });
+    }
+  }, [isStartupComplete]);
 
   const handleStartupComplete = () => {
     // Mark boot as complete for this session
@@ -236,11 +249,9 @@ function AppContent() {
                     path="generator"
                     element={
                       <ErrorBoundary>
-                        <GeneratorProvider>
-                          <Suspense fallback={<PageSkeleton type="generator" />}>
-                            <Generator />
-                          </Suspense>
-                        </GeneratorProvider>
+                        <Suspense fallback={<PageSkeleton type="generator" />}>
+                          <Generator />
+                        </Suspense>
                       </ErrorBoundary>
                     }
                   />

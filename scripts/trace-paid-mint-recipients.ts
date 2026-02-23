@@ -3,8 +3,6 @@
  * Each event has payments; the event's address.encoded_id is one recipient.
  * Run: npx tsx scripts/trace-paid-mint-recipients.ts
  */
-/* eslint-disable no-console */
-
 const YOUR_WOJAK_COLLECTION_ID = 'col1rhrjj6f28tge783rp0lrj8ct7vnq79xsnklx3up49lgpnge62ensr2tyfx';
 const MINTGARDEN_API = 'https://api.mintgarden.io';
 

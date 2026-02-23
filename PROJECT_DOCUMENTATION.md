@@ -583,6 +583,96 @@ npm run build && npx wrangler pages deploy dist --project-name=wojak-ink
 
 ---
 
+## 10. Nightshift Automation
+
+### What is Nightshift?
+
+Wojak.ink uses a **nightshift automation system** for autonomous, unattended code quality improvements. This allows high-value maintenance tasks to run during off-hours without human monitoring.
+
+**Key Feature:** Human-guided autonomous execution - not "set and forget", but continuously fed work via git every 30 minutes.
+
+### How It Works
+
+1. **Task Queue** (`.nightshift/tasks.json`)
+   - Human writes tasks describing what to do
+   - Nightshift loads and executes in order
+   - Each task has clear success criteria
+
+2. **Autonomous Execution**
+   - Nightshift runs for 8-hour cycle
+   - Executes one task at a time
+   - Tests after each change
+   - Auto-commits successful tasks
+
+3. **Human Guidance Loop**
+   - Every 30 mins: Human reviews progress
+   - Enables next batch of tasks
+   - Nightshift pulls new tasks via git
+   - Continues with new work
+
+### Current Implementation
+
+**Runner Script:** `scripts/nightshift.mjs`
+
+**Configuration:**
+```
+.nightshift/
+├── tasks.json          ← Task queue (what to do)
+├── policy.json         ← Safety rules (what NOT to do)
+├── CODEX-INSTRUCTIONS.md
+├── state/              ← Run state (for resume)
+└── README.md
+```
+
+**Commands:**
+```bash
+npm run nightshift:dry-run   # Preview without changes
+npm run nightshift:run       # Execute for real
+npm run nightshift:report    # Audit only, no fixes
+npm run nightshift:resume    # Resume from interruption
+```
+
+### Why Nightshift Improves Quality
+
+Traditional approach: AI implements → Human reviews → Iterate
+**Nightshift approach:**
+- Run 50+ quality checks automatically
+- Generate comprehensive reports
+- Fix low-risk issues autonomously
+- Present curated results to human
+
+Results in:
+- ✅ Better test coverage
+- ✅ Fewer linting issues
+- ✅ Consistent code style
+- ✅ Faster iteration cycles
+- ✅ 24/7 maintenance without fatigue
+
+### Phase Structure
+
+Nightshift typically runs 5-7 phases:
+
+1. **Security** - Patch vulnerabilities
+2. **Linting** - Code style cleanup
+3. **Bundle** - Dead code removal
+4. **Testing** - Coverage improvements
+5. **Quality** - CSS, TypeScript, docs
+6. **Integration** - Build validation
+7. **Publishing** - PR preparation
+
+Each phase gates on previous: Phase 2 waits for Phase 1 ✅
+
+### Documentation
+
+See `docs/NIGHTSHIFT-GUIDE.md` for complete automation documentation including:
+- Detailed task structure
+- Running examples
+- Monitoring & debugging
+- Recovery procedures
+- Best practices
+
+---
+
 ## 10. For AI Assistants
 
 ### Quick Start

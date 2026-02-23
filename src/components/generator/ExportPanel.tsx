@@ -4,7 +4,7 @@
  * Premium export modal — clean, minimal, focused.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X, Download } from 'lucide-react';
 import { useGenerator } from '@/contexts/GeneratorContext';
@@ -23,7 +23,7 @@ export function ExportPanel({ className = '' }: ExportPanelProps) {
   const { isExportOpen, toggleExport, exportWojak, previewImage, favorites, selectedLayers, g2Selections, generatorError, clearGeneratorError } = useGenerator();
   const prefersReducedMotion = useReducedMotion();
 
-  const getNextProjectName = () => {
+  const getNextProjectName = useCallback(() => {
     const projectNumbers = favorites
       .map((f) => {
         const match = f.name.match(/^Wojak\s*(\d+)$/i);
@@ -33,7 +33,7 @@ export function ExportPanel({ className = '' }: ExportPanelProps) {
 
     const nextNumber = projectNumbers.length > 0 ? Math.max(...projectNumbers) + 1 : 1;
     return `Wojak ${nextNumber}`;
-  };
+  }, [favorites]);
 
   const [includeBackground, setIncludeBackground] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
@@ -46,7 +46,7 @@ export function ExportPanel({ className = '' }: ExportPanelProps) {
       setIncludeBackground(true);
       setLocalPreview(null);
     }
-  }, [isExportOpen, favorites.length]);
+  }, [isExportOpen, getNextProjectName]);
 
   // Re-render preview when background toggle changes
   useEffect(() => {

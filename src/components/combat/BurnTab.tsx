@@ -455,7 +455,6 @@ export default function BurnTab({ playerDid: playerDidProp }: BurnTabProps) {
   }, [confirmFighter, effectiveDid, burnMutation]);
 
   // Determine if burner would earn credits (only others' NFTs are burnable now; API filters)
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- depend on profile for wallet comparison
   const canEarnCredits = useCallback((fighter: BurnableFighter) => {
     if (!profile?.walletAddress) return true;
     return fighter.minterWallet !== profile.walletAddress;

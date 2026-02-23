@@ -171,10 +171,11 @@ export function useGridPreload(
 
     // Initial preload for visible items
     setTimeout(updatePreloads, 100);
+    const visibleIndices = visibleIndicesRef.current;
 
     return () => {
       observerRef.current?.disconnect();
-      visibleIndicesRef.current.clear();
+      visibleIndices.clear();
     };
   }, [containerRef, imageUrls, itemSelector, updatePreloads]);
 

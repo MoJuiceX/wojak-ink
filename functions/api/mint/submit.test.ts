@@ -37,6 +37,7 @@ describe('validateCombatMoves', () => {
 // Mock processJob before importing submit
 vi.mock('./process', () => ({
   processJob: vi.fn().mockResolvedValue(undefined),
+  updateJobStep: vi.fn().mockResolvedValue(undefined),
 }));
 
 // Mock uploadToIPFS for sha256Hex and base64ToUint8Array
@@ -64,6 +65,11 @@ vi.mock('./traitResolver', () => ({
     ['Background', { traitType: 'Background', displayName: 'Orange' }],
     ['Base', { traitType: 'Base', displayName: 'Wojak' }],
   ])),
+}));
+
+// Mock atomic mint counter helper (submit now reserves mint number in-request)
+vi.mock('./mintNumberHelper', () => ({
+  getNextMintNumber: vi.fn().mockResolvedValue(42),
 }));
 
 import { onRequest } from './submit';
@@ -336,7 +342,7 @@ describe('submit.ts', () => {
     const data = await parseResponse(res);
     // Don't assert exact jobId - the mock infrastructure is working but getting default values
     expect(data.jobId).toBeGreaterThan(0);
-    expect(data.step).toBe('queued');
+    expect(data.step).toBe('reserving_number');
     expect(data.mintType).toBe('free');
     expect(ctx.waitUntil).toHaveBeenCalled();
   });

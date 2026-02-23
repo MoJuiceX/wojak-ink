@@ -833,6 +833,8 @@ const Merge2048Game: React.FC = () => {
         return newTiles;
       });
     },
+    // `move` is intentionally stable for input handlers and animation timing; exhaustive deps would cause heavy callback churn.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [gameState, keepPlaying, makeTile, isTutorial],
   );
 

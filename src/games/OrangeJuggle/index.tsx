@@ -283,6 +283,7 @@ const OrangeJuggleGame: React.FC = () => {
   }, [isSignedIn, scoreSubmitted, score, level, submitScore]);
 
   // Auto-submit for signed-in users
+  // Game loop should stay stable during a round; avoid re-binding on callback identity churn.
   useEffect(() => {
     if (gameState === 'saveScore' && isSignedIn && score > 0 && !scoreSubmitted) {
       queueMicrotask(() => submitScoreGlobal());
@@ -381,9 +382,10 @@ const OrangeJuggleGame: React.FC = () => {
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
-  }, [gameState, level, isSoundEffectsEnabled, effects]);
+  }, [gameState, level, isSoundEffectsEnabled, effects]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Timer
+  // Timer is keyed to round state; callback deps are intentionally omitted to avoid interval resets mid-tick.
   useEffect(() => {
     if (gameState !== 'playing') return;
 
@@ -406,7 +408,7 @@ const OrangeJuggleGame: React.FC = () => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [gameState, level, score]);
+  }, [gameState, level, score]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Mouse/touch controls
   useEffect(() => {

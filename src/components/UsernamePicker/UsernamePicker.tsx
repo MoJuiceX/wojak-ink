@@ -5,7 +5,7 @@
  * Features real-time validation, availability checking, and suggestions.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function debounce<T extends (...args: any[]) => any>(fn: T, ms: number): T {
   let timer: ReturnType<typeof setTimeout>;
@@ -35,8 +35,8 @@ export const UsernamePicker: React.FC<UsernamePickerProps> = ({
   const [isSaving, setIsSaving] = useState(false);
 
   // Debounced availability check
-  const checkAvailability = useCallback(
-    debounce(async (name: string) => {
+  const checkAvailability = useMemo(
+    () => debounce(async (name: string) => {
       if (!name || name.length < 3) {
         setIsAvailable(null);
         setIsChecking(false);

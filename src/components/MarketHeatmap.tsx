@@ -130,6 +130,7 @@ const MarketHeatmap: React.FC<MarketHeatmapProps> = ({ rankData, onNftClick }) =
     const loadData = async () => {
       // Try cached data first for instant display
       const cached = getCachedListings();
+      const hadCachedListings = !!(cached && cached.length > 0);
       if (cached && cached.length > 0) {
         setListings(cached);
         setLoading(false);
@@ -161,7 +162,7 @@ const MarketHeatmap: React.FC<MarketHeatmapProps> = ({ rankData, onNftClick }) =
       } catch (err) {
         console.error('Heatmap load error:', err);
         // Only show error if we have no data at all
-        if (listings.length === 0) {
+        if (!hadCachedListings) {
           setError('Failed to load market data');
         }
       }

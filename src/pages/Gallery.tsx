@@ -29,6 +29,7 @@ import {
 } from '@/components/gallery';
 import { YourWojakSection } from '@/components/gallery/YourWojakSection';
 import { NFTGridItem } from '@/components/gallery/NFTGridItem';
+import { GalleryGridSkeleton } from '@/components/skeletons/GalleryGridSkeleton';
 import type { CharacterType } from '@/types/nft';
 import { PageSEO } from '@/components/seo';
 
@@ -44,6 +45,7 @@ function GalleryContent() {
     explorerOpen,
     openExplorer,
     closeExplorer,
+    nfts: allCharacterNfts,
     filteredNfts,
     isLoading,
   } = useGallery();
@@ -83,9 +85,6 @@ function GalleryContent() {
 
   // Smart preloading for grid
   useGridPreload(imageUrls, gridRef);
-
-  // Get all NFTs for the character (unfiltered) to preload for all filter/sort options
-  const { nfts: allCharacterNfts } = useGallery();
 
   // BACKGROUND PRELOAD: When Gallery page mounts, start preloading images for ALL character types
   // This ensures images are ready no matter which character the user selects first
@@ -322,8 +321,14 @@ function GalleryContent() {
   }, [selectedCharacter, selectCharacter, setHeaderBreadcrumb]);
 
   // Use frozen grid when explorer is open, otherwise use current filtered list
-  const visibleNfts = frozenGridNfts || filteredNfts.slice(0, visibleCount);
-  const hasMore = visibleCount < filteredNfts.length;
+  const visibleNfts = useMemo(
+    () => frozenGridNfts || filteredNfts.slice(0, visibleCount),
+    [frozenGridNfts, filteredNfts, visibleCount]
+  );
+  const hasMore = useMemo(
+    () => visibleCount < filteredNfts.length,
+    [visibleCount, filteredNfts.length]
+  );
 
   const handleLoadMore = useCallback(() => {
     setVisibleCount((prev) => prev + ITEMS_PER_PAGE);
@@ -342,6 +347,11 @@ function GalleryContent() {
     },
     [openExplorer]
   );
+
+  const handleDismissFightClubBanner = useCallback(() => {
+    localStorage.setItem('wojak_swipe_banner_dismissed', 'true');
+    setBannerDismissed(true);
+  }, []);
 
   // Handle character hover - preload first 50 NFTs for that character
   const handleCharacterHover = useCallback(
@@ -401,10 +411,7 @@ function GalleryContent() {
                 <button
                   type="button"
                   aria-label="Dismiss banner"
-                  onClick={() => {
-                    localStorage.setItem('wojak_swipe_banner_dismissed', 'true');
-                    setBannerDismissed(true);
-                  }}
+                  onClick={handleDismissFightClubBanner}
                   className="fight-club-close"
                 >
                   &times;
@@ -463,26 +470,11 @@ function GalleryContent() {
                 style={isDesktop ? { padding: '24px 24px 0' } : undefined}
               >
                 {isLoading ? (
-                  // Loading skeleton
-                  <div
-                    className={`grid gap-1.5 ${
-                      isDesktop
-                        ? 'grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12'
-                        : 'grid-cols-4 sm:grid-cols-5 lg:grid-cols-6'
-                    }`}
-                    style={isDesktop ? { maxWidth: 1600, margin: '0 auto' } : undefined}
-                  >
-                    {Array.from({ length: isDesktop ? 24 : 16 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="aspect-square rounded-lg overflow-hidden animate-pulse"
-                        style={{
-                          background: 'var(--color-surface)',
-                          border: '1px solid var(--color-border)',
-                        }}
-                      />
-                    ))}
-                  </div>
+                  // Loading skeleton with premium animations
+                  <GalleryGridSkeleton
+                    count={isDesktop ? 24 : 16}
+                    columns={isDesktop ? 4 : 2}
+                  />
                 ) : filteredNfts.length === 0 ? (
                   // Empty state when no NFTs for this character
                   <div className="card p-8 flex flex-col items-center gap-4 text-center" style={{ maxWidth: 400, margin: '40px auto' }}>

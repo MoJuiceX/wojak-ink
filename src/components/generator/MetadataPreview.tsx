@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * MetadataPreview — Dev/QA tool to preview NFT metadata
  *
@@ -153,14 +154,17 @@ export interface MetadataAttribute {
  *  Safe to call outside GeneratorProvider — returns [] when no context available. */
 export function useMetadataAttributes(): MetadataAttribute[] {
   const ctx = useGeneratorOptional();
-  const selectedLayers = ctx?.selectedLayers ?? {};
-  const selectedColors = ctx?.selectedColors ?? {};
+  const selectedLayers = ctx?.selectedLayers;
+  const selectedColors = ctx?.selectedColors;
 
   return useMemo(() => {
+    const selectedLayersMap = selectedLayers ?? {};
+    const selectedColorsMap = selectedColors ?? {};
+
     // Collect all raw attributes from selected layers
     const rawAttrs: MetadataAttribute[] = [];
 
-    for (const [key, value] of Object.entries(selectedLayers)) {
+    for (const [key, value] of Object.entries(selectedLayersMap)) {
       if (isSelectionPathEmpty(value)) continue;
 
       const traitType = LAYER_TO_TRAIT_TYPE[key];
@@ -191,7 +195,7 @@ export function useMetadataAttributes(): MetadataAttribute[] {
           continue;
         }
         // Plain solid color: resolve from hex
-        const hex = selectedColors?.Background || SOLID_BG_DEFAULT_COLOR;
+        const hex = selectedColorsMap.Background || SOLID_BG_DEFAULT_COLOR;
         const colorName = lookupBackgroundColorName(hex);
         rawAttrs.push({
           trait_type: 'Background',

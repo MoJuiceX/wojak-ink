@@ -206,7 +206,7 @@ export function SwipeCard({
   return (
     <motion.div
       ref={cardRef}
-      className={`vote-card ${shouldWiggle ? 'vote-card-wiggle' : ''}`}
+      className={`vote-card ${shouldWiggle ? 'vote-card-wiggle' : ''} ${stackPosition === 0 ? 'vote-card-entrance' : ''}`}
       style={{
         x: isInteractive ? x : undefined,
         rotate: isInteractive ? rotate : undefined,
@@ -227,7 +227,7 @@ export function SwipeCard({
       onMouseMove={isInteractive ? handleMouseMove : undefined}
       onMouseLeave={isInteractive ? handleMouseLeave : undefined}
       onAnimationEnd={shouldWiggle ? handleWiggleEnd : undefined}
-      initial={false}
+      initial={stackPosition === 0 ? { opacity: 0, y: 20, scale: 0.96 } : false}
       animate={
         exiting
           ? reducedMotion
@@ -243,7 +243,9 @@ export function SwipeCard({
       transition={
         exiting
           ? { duration: 0.2, ease: 'easeOut' }
-          : { type: 'spring', stiffness: 200, damping: 20 }
+          : stackPosition === 0
+            ? { duration: 0.45, ease: [0.23, 1, 0.32, 1] }
+            : { type: 'spring', stiffness: 200, damping: 20 }
       }
       aria-hidden={stackPosition > 0 ? true : undefined}
     >

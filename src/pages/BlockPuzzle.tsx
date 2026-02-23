@@ -580,7 +580,7 @@ const BlockPuzzle: React.FC = () => {
     if (trailParticles.length === 0) return;
     const interval = setInterval(() => setTrailParticles(updateTrailParticles), 16);
     return () => clearInterval(interval);
-  }, [trailParticles.length > 0]);
+  }, [trailParticles.length]);
 
   // Placement feedback callbacks
   const triggerMiniShake = useCallback(() => {
@@ -611,7 +611,7 @@ const BlockPuzzle: React.FC = () => {
     spawnDOMParticles(perfectParticles);
 
     setTimeout(() => setShowPerfectClear(false), 2500);
-  }, [playPerfectClearSound, triggerPerfectClearHaptic, showEpicCallout, triggerMassiveConfetti, triggerScreenFlash, GRID_SIZE]);
+  }, [playPerfectClearSound, showEpicCallout, triggerMassiveConfetti, triggerScreenFlash, GRID_SIZE, spawnDOMParticles]);
 
   // Share system callbacks
   const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
@@ -663,7 +663,7 @@ const BlockPuzzle: React.FC = () => {
     triggerMassiveConfetti();
     playPerfectClearSound();
     triggerPerfectClearHaptic();
-  }, [showEpicCallout, triggerMassiveConfetti, playPerfectClearSound, triggerPerfectClearHaptic]);
+  }, [showEpicCallout, triggerMassiveConfetti, playPerfectClearSound]);
 
   // TASK 70: Update danger level based on grid fill
   useEffect(() => {
@@ -750,7 +750,7 @@ const BlockPuzzle: React.FC = () => {
         clearInterval(dangerHapticIntervalRef.current);
       }
     };
-  }, [dangerLevel, gameState, triggerDangerPulse]);
+  }, [dangerLevel, gameState]);
 
   // TASK 78: Calculate moves left when in imminent danger
   useEffect(() => {
@@ -786,7 +786,7 @@ const BlockPuzzle: React.FC = () => {
     } else {
       setStreakState({ count: 0 });
     }
-  }, [playStreakFireSound, triggerStreakFireHaptic, triggerConfetti, showEpicCallout, triggerEvent]);
+  }, [playStreakFireSound, triggerConfetti, showEpicCallout, triggerEvent]);
 
   // TASK 87: Calculate streak bonus — multiplier lookup
   const calculateStreakBonus = useCallback((baseScore: number): number => {
@@ -912,7 +912,7 @@ const BlockPuzzle: React.FC = () => {
     setGameState('playing');
     // Arcade lights: Game started (zen mode - simmer)
     triggerEvent('play:active');
-  }, [soundEnabled, hapticButton, resetAllEffects, stopDangerSound, playNextSong, triggerEvent]);
+  }, [soundEnabled, hapticButton, musicManagedExternally, stopDangerSound, resetAllEffects, triggerEvent, playNextSong]);
 
   // Start game when user clicks PLAY in arcade frame (gameStarted becomes true)
   useEffect(() => {
@@ -1272,7 +1272,7 @@ const BlockPuzzle: React.FC = () => {
     }, linesCleared > 0 ? 600 : 100);
 
     return true;
-  }, [score, combo, soundEnabled, getPieceById, playSnapSound, playLineClearSound, playComboNote, playSpawnSound, playComboBreakSound, triggerSnapHaptic, triggerLineClearHaptic, triggerMiniShake, createPlacementParticles, triggerBigMoment, triggerConfetti, showEpicCallout, showFloatingScore, handleGameOver, triggerFreezeFrame, triggerScreenFlash, createLineClearBurst, triggerShockwave, updateStreak, calculateStreakBonus, triggerPerfectClear, CELL_SIZE]);
+  }, [getPieceById, playSnapSound, triggerEvent, triggerMiniShake, createPlacementParticles, score, playSpawnSound, showFloatingScore, combo, streakState.count, updateStreak, calculateStreakBonus, createLineClearBurst, showEpicCallout, triggerFreezeFrame, triggerScreenFlash, triggerShockwave, playLineClearSound, playComboNote, triggerPerfectClear, triggerBigMoment, triggerConfetti, playComboBreakSound, handleGameOver]);
 
   // Calculate grid position from screen coordinates
   const calculateGridPosition = useCallback((clientX: number, clientY: number, pieceId: string | null) => {
@@ -1413,7 +1413,7 @@ const BlockPuzzle: React.FC = () => {
       container.removeEventListener('touchmove', handleTouchMove);
       container.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [gameState, calculateGridPosition, getPieceById, attemptPlacement, emitTrailParticle, clearTrailParticles, triggerSnapHaptic, playInvalidSound, triggerInvalidHaptic]);
+  }, [gameState, calculateGridPosition, getPieceById, attemptPlacement, emitTrailParticle, clearTrailParticles, playInvalidSound]);
 
   // ============================================
   // MOUSE HANDLERS (Desktop)
@@ -1503,7 +1503,7 @@ const BlockPuzzle: React.FC = () => {
         window.removeEventListener('mouseup', handleMouseUp);
       };
     }
-  }, [draggedPieceId, gameState, calculateGridPosition, getPieceById, attemptPlacement, emitTrailParticle, clearTrailParticles, triggerSnapHaptic, playInvalidSound, triggerInvalidHaptic]);
+  }, [draggedPieceId, gameState, calculateGridPosition, getPieceById, attemptPlacement, emitTrailParticle, clearTrailParticles, playInvalidSound]);
 
   // Get preview cells for current drag
   const previewCells = draggedPieceId && previewPosition

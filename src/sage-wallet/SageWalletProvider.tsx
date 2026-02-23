@@ -15,10 +15,9 @@ import {
   useRef,
 } from 'react';
 import type { ReactNode } from 'react';
-import { SignClient } from '@walletconnect/sign-client';
-import { WalletConnectModal } from '@walletconnect/modal';
 import { getSdkError } from '@walletconnect/utils';
 import { isValidChiaAddress } from '@/lib/validation';
+import { createSignClient, createWalletConnectModal } from './lazy-wallet-client';
 import type { SessionTypes, ProposalTypes } from '@walletconnect/types';
 
 import {
@@ -52,6 +51,9 @@ interface SageWalletProviderProps {
   config?: Partial<SageWalletConfig>;
 }
 
+type SageSignClientInstance = Awaited<ReturnType<typeof createSignClient>>;
+type SageWalletModalInstance = Awaited<ReturnType<typeof createWalletConnectModal>>;
+
 export function SageWalletProvider({ children, config: userConfig }: SageWalletProviderProps) {
   // Merge user config with defaults
   const config = { ...DEFAULT_CONFIG, ...userConfig };
@@ -66,8 +68,8 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
   });
 
   // Refs for WalletConnect instances
-  const signClientRef = useRef<InstanceType<typeof SignClient> | null>(null);
-  const modalRef = useRef<WalletConnectModal | null>(null);
+  const signClientRef = useRef<SageSignClientInstance | null>(null); // Holds SignClient instance
+  const modalRef = useRef<SageWalletModalInstance | null>(null); // Holds WalletConnectModal instance
   const currentSessionRef = useRef<SessionTypes.Struct | null>(null);
   const initializingRef = useRef(false);
 
@@ -83,16 +85,16 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     initializingRef.current = true;
 
     try {
-      // Initialize SignClient
-      signClientRef.current = await SignClient.init({
+      // Lazy-load and initialize SignClient
+      signClientRef.current = await createSignClient({
         projectId: config.projectId,
         metadata: config.metadata,
         relayUrl: config.relayUrl,
         logger: 'error',
       });
 
-      // Initialize Modal with high z-index to appear above Avatar Picker
-      modalRef.current = new WalletConnectModal({
+      // Lazy-load and initialize Modal with high z-index to appear above Avatar Picker
+      modalRef.current = await createWalletConnectModal({
         projectId: config.projectId,
         themeMode: 'dark',
         enableExplorer: false,
@@ -121,7 +123,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     } finally {
       initializingRef.current = false;
     }
-  }, [config.projectId, config.metadata, config.relayUrl, config.autoConnect]);
+  }, [config.projectId, config.metadata, config.relayUrl, config.autoConnect]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // EVENT LISTENERS
@@ -141,7 +143,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
       }
     });
 
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // SESSION MANAGEMENT
@@ -174,7 +176,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     } catch (err) {
       console.error('[SageWallet] Error checking sessions:', err);
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateAddressFromWallet = useCallback(async (): Promise<void> => {
     const client = signClientRef.current;
@@ -227,7 +229,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     // Callback
     config.onConnect?.(address);
     
-  }, [config.storageKey, config.onConnect]);
+  }, [config.storageKey, config.onConnect]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDisconnect = useCallback(() => {
     currentSessionRef.current = null;
@@ -242,7 +244,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     });
     
     config.onDisconnect?.();
-  }, [config.storageKey, config.onDisconnect]);
+  }, [config.storageKey, config.onDisconnect]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // PUBLIC ACTIONS
@@ -317,7 +319,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
       config.onError?.(error instanceof Error ? error : new Error(String(error)));
       throw error;
     }
-  }, [state.address, state.status, updateAddressFromWallet, config.onError]);
+  }, [state.address, state.status, updateAddressFromWallet, config.onError]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const disconnect = useCallback(async (): Promise<void> => {
 

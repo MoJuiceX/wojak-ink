@@ -133,7 +133,7 @@ export function useSageWalletStandalone(
     } finally {
       initializingRef.current = false;
     }
-  }, [config.projectId, config.metadata, config.relayUrl, config.autoConnect]);
+  }, [config.projectId, config.metadata, config.relayUrl, config.autoConnect]); // eslint-disable-line react-hooks/exhaustive-deps
   
   // Update address from wallet via RPC
   const updateAddressFromWallet = useCallback(async () => {
@@ -164,7 +164,7 @@ export function useSageWalletStandalone(
     config.onConnect?.(addr);
     
     return addr;
-  }, [config.storageKey, config.onConnect]);
+  }, [config.storageKey, config.onConnect]); // eslint-disable-line react-hooks/exhaustive-deps
   
   // Handle disconnect
   const handleDisconnect = useCallback(() => {
@@ -175,7 +175,7 @@ export function useSageWalletStandalone(
     setError(null);
     localStorage.removeItem(config.storageKey);
     config.onDisconnect?.();
-  }, [config.storageKey, config.onDisconnect]);
+  }, [config.storageKey, config.onDisconnect]); // eslint-disable-line react-hooks/exhaustive-deps
   
   // Connect to wallet
   const connect = useCallback(async () => {
@@ -223,7 +223,7 @@ export function useSageWalletStandalone(
       config.onError?.(err instanceof Error ? err : new Error('Connection failed'));
       throw err;
     }
-  }, [isConnected, updateAddressFromWallet, config.onError]);
+  }, [isConnected, updateAddressFromWallet, config.onError]); // eslint-disable-line react-hooks/exhaustive-deps
   
   // Disconnect from wallet
   const disconnect = useCallback(async () => {

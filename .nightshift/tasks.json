@@ -1,0 +1,720 @@
+{
+  "version": 1,
+  "queueName": "night-1-bootstrap",
+  "defaults": {
+    "timeoutMs": 900000,
+    "retries": 3
+  },
+  "tasks": [
+    {
+      "id": "prepare-worktree-deps",
+      "title": "Install dependencies in nightly worktree if missing",
+      "enabled": true,
+      "category": "ops",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "report",
+      "mutatesCode": false,
+      "timeoutMs": 1800000,
+      "commands": [
+        "test -d node_modules && echo 'node_modules already present' || npm ci"
+      ],
+      "expectedOutputs": [
+        "logs/nightshift-<timestamp>.log"
+      ],
+      "doneCriteria": [
+        "Project dependencies available in isolated worktree"
+      ]
+    },
+    {
+      "id": "preflight-repo-snapshot",
+      "title": "Preflight repo snapshot",
+      "enabled": true,
+      "category": "ops",
+      "risk": "low",
+      "runtime": "short",
+      "mode": "report",
+      "mutatesCode": false,
+      "timeoutMs": 120000,
+      "commands": [
+        "git status --short --branch",
+        "git rev-parse HEAD",
+        "git remote -v",
+        "node -v",
+        "npm -v",
+        "git worktree list",
+        "ls -1 .github/workflows"
+      ],
+      "expectedOutputs": [
+        "reports/nightshift-<timestamp>.md",
+        "logs/nightshift-<timestamp>.log"
+      ],
+      "doneCriteria": [
+        "Snapshot commands complete",
+        "Branch/worktree state captured in report"
+      ]
+    },
+    {
+      "id": "checks-fast-baseline",
+      "title": "Run baseline checks (typecheck/lint/unit/build)",
+      "enabled": true,
+      "category": "reliability",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "report",
+      "mutatesCode": false,
+      "timeoutMs": 3600000,
+      "commands": [
+        "npx tsc --noEmit",
+        "npx eslint src functions workers tests scripts --ext .ts,.tsx,.js,.mjs,.cjs",
+        "npm run test:unit",
+        "npm run build"
+      ],
+      "expectedOutputs": [
+        "reports/nightshift-<timestamp>.md",
+        "logs/nightshift-<timestamp>.log"
+      ],
+      "doneCriteria": [
+        "All commands attempted",
+        "Pass/fail and durations recorded"
+      ]
+    },
+    {
+      "id": "unit-failures-triage-report",
+      "title": "Generate unit failure triage summary",
+      "enabled": true,
+      "category": "reliability",
+      "risk": "low",
+      "runtime": "short",
+      "mode": "report",
+      "mutatesCode": false,
+      "dependsOn": [
+        "checks-fast-baseline"
+      ],
+      "timeoutMs": 120000,
+      "commands": [
+        "rg -n \"(\\[stdout\\]|\\[stderr\\]).*(FAIL  |Failed Tests|Test Files)\" \"{{LOG_PATH}}\" || true"
+      ],
+      "expectedOutputs": [
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Current failure signatures summarized"
+      ]
+    },
+    {
+      "id": "security-audit-report",
+      "title": "Dependency audit snapshot",
+      "enabled": true,
+      "category": "security",
+      "risk": "low",
+      "runtime": "short",
+      "mode": "report",
+      "mutatesCode": false,
+      "timeoutMs": 300000,
+      "commands": [
+        "npm audit --omit=dev --json"
+      ],
+      "expectedOutputs": [
+        "reports/nightshift-<timestamp>.md",
+        "logs/nightshift-<timestamp>.log"
+      ],
+      "doneCriteria": [
+        "Audit vulnerabilities captured"
+      ]
+    },
+    {
+      "id": "bundle-size-report",
+      "title": "Bundle size and chunk warning report",
+      "enabled": true,
+      "category": "performance",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "report",
+      "mutatesCode": false,
+      "timeoutMs": 1800000,
+      "commands": [
+        "npm run build"
+      ],
+      "expectedOutputs": [
+        "reports/nightshift-<timestamp>.md",
+        "logs/nightshift-<timestamp>.log"
+      ],
+      "doneCriteria": [
+        "Chunk warnings and largest assets visible in report"
+      ]
+    },
+    {
+      "id": "manifest-orphans-report",
+      "title": "Manifest orphaned assets report",
+      "enabled": true,
+      "category": "dx",
+      "risk": "low",
+      "runtime": "short",
+      "mode": "report",
+      "mutatesCode": false,
+      "timeoutMs": 120000,
+      "commands": [
+        "npm run verify-manifest"
+      ],
+      "expectedOutputs": [
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Orphaned and missing asset counts captured"
+      ]
+    },
+    {
+      "id": "lint-debt-hotspots-report",
+      "title": "Lint debt hotspot report",
+      "enabled": true,
+      "category": "quality",
+      "risk": "low",
+      "runtime": "short",
+      "mode": "report",
+      "mutatesCode": false,
+      "timeoutMs": 300000,
+      "commands": [
+        "set -o pipefail; npx eslint src functions workers tests scripts --ext .ts,.tsx,.js,.mjs,.cjs -f json | node scripts/nightshift-lint-hotspots.mjs || true"
+      ],
+      "expectedOutputs": [
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Top warning/error files identified"
+      ]
+    },
+    {
+      "id": "github-issue-snapshot-report",
+      "title": "GitHub issues snapshot (optional if gh is installed)",
+      "enabled": true,
+      "category": "planning",
+      "risk": "low",
+      "runtime": "short",
+      "mode": "report",
+      "mutatesCode": false,
+      "timeoutMs": 120000,
+      "commands": [
+        "gh issue list --limit 20 || echo 'gh CLI unavailable or unauthenticated'"
+      ],
+      "expectedOutputs": [
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Issue snapshot recorded or availability noted"
+      ]
+    },
+    {
+      "id": "fix-unit-tests-low-hanging",
+      "title": "Fix low-hanging unit test regressions (AI-assisted task)",
+      "enabled": false,
+      "category": "reliability",
+      "risk": "medium",
+      "runtime": "medium",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 5400000,
+      "commands": [
+        "codex --task 'Fix current low-hanging unit test regressions (start with brittle trait count and mint test mock mismatches), run targeted tests, commit safe changes only on nightly branch'"
+      ],
+      "expectedOutputs": [
+        "git diff on nightly branch",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Some failing tests reduced with targeted verification"
+      ],
+      "disabledReason": "Enable after validating assistant CLI invocation policy"
+    },
+    {
+      "id": "fix-eslint-hard-errors",
+      "title": "Fix ESLint hard errors only (AI-assisted task)",
+      "enabled": false,
+      "category": "quality",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 5400000,
+      "commands": [
+        "codex --task 'Fix only ESLint errors (not warnings) in scoped lint run, preserve behavior, run targeted lint/build checks'"
+      ],
+      "expectedOutputs": [
+        "git diff on nightly branch",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Scoped lint error count reduced to zero"
+      ],
+      "disabledReason": "Enable after validating assistant CLI invocation policy"
+    },
+    {
+      "id": "security-upgrade-lodash",
+      "title": "Upgrade lodash to patched version",
+      "enabled": true,
+      "category": "security",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "fix",
+      "mutatesCode": true,
+      "timeoutMs": 1800000,
+      "commands": [
+        "npm install lodash@^4.17.22",
+        "npm audit --omit=dev --json",
+        "npx tsc --noEmit",
+        "npm run test:unit",
+        "npm run build"
+      ],
+      "expectedOutputs": [
+        "package.json/package-lock.json diff",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Lodash advisory no longer reported",
+        "Checks pass or failure captured"
+      ],
+      "disabledReason": null
+    },
+    {
+      "id": "security-upgrade-swiper",
+      "title": "Upgrade swiper to patched version",
+      "enabled": true,
+      "category": "security",
+      "risk": "medium",
+      "runtime": "medium",
+      "mode": "fix",
+      "mutatesCode": true,
+      "timeoutMs": 1800000,
+      "commands": [
+        "npm install swiper@^12.1.2",
+        "npm audit --omit=dev --json",
+        "npx tsc --noEmit",
+        "npm run test:unit",
+        "npm run build"
+      ],
+      "expectedOutputs": [
+        "package.json/package-lock.json diff",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Swiper advisory no longer reported",
+        "Checks pass or failure captured"
+      ],
+      "disabledReason": null
+    },
+    {
+      "id": "lint-scope-hardening",
+      "title": "Add scoped lint commands for night runs",
+      "enabled": true,
+      "category": "ci",
+      "risk": "low",
+      "runtime": "short",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 3600000,
+      "commands": [
+        "codex --task 'Add scoped lint scripts (app/functions/workers/scripts) for predictable automation and update docs'"
+      ],
+      "expectedOutputs": [
+        "package.json diff",
+        "docs/NIGHTSHIFT-CHECKS.md"
+      ],
+      "doneCriteria": [
+        "New lint scripts run successfully"
+      ],
+      "disabledReason": null
+    },
+    {
+      "id": "playwright-safety-guard",
+      "title": "Block production Playwright baseURL for unattended runs",
+      "enabled": true,
+      "category": "safety",
+      "risk": "low",
+      "runtime": "short",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 3600000,
+      "commands": [
+        "codex --task 'Add a safe guard so unattended night runs cannot default Playwright to https://wojak.ink without explicit override'"
+      ],
+      "expectedOutputs": [
+        "playwright.config.ts diff",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Unattended mode refuses production baseURL"
+      ],
+      "disabledReason": null
+    },
+    {
+      "id": "bundle-optimization-analysis",
+      "title": "Analyze and optimize large chunks (>600kB)",
+      "enabled": true,
+      "category": "performance",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 3600000,
+      "commands": [
+        "codex --task 'Analyze the 600kB+ chunks (index-C3DoTY4g.js, vendor-wallet-CDY4elrJ.js). Review vite.config for manual chunk splits. Suggest and implement safe code-splitting strategy to reduce chunk sizes. Validate with npm run build. Commit if improvement achieved.'"
+      ],
+      "expectedOutputs": [
+        "vite.config.ts diff",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Chunks analyzed, strategy implemented or documented"
+      ]
+    },
+    {
+      "id": "dead-code-and-unused-deps",
+      "title": "Identify and remove dead code / unused dependencies",
+      "enabled": true,
+      "category": "quality",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 3600000,
+      "commands": [
+        "codex --task 'Use npx depcheck and manual review to find unused dependencies and dead code. Remove safe, unused imports/functions. Run tests and build to validate. Commit safe removals only.'"
+      ],
+      "expectedOutputs": [
+        "git diff showing removals",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "At least one unused dependency or dead code block removed"
+      ]
+    },
+    {
+      "id": "test-coverage-gaps",
+      "title": "Identify and close critical test coverage gaps",
+      "enabled": true,
+      "category": "reliability",
+      "risk": "medium",
+      "runtime": "long",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 5400000,
+      "commands": [
+        "codex --task 'Run npm run test:coverage (if available) or vitest --coverage. Identify critical untested functions in src/pages, src/services, functions/api. Write targeted tests for 2-3 high-impact gaps. Validate coverage improves. Commit tests.'"
+      ],
+      "expectedOutputs": [
+        "new test files or test additions",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Coverage report generated, tests added for high-impact gaps"
+      ]
+    },
+    {
+      "id": "performance-profiling",
+      "title": "Profile and optimize slow components",
+      "enabled": true,
+      "category": "performance",
+      "risk": "medium",
+      "runtime": "long",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 5400000,
+      "commands": [
+        "codex --task 'Review src/pages for performance bottlenecks (useMemo/useCallback misses, unnecessary re-renders). Profile FightClub voting, gallery listing, and arcade games. Add memoization where safe. Validate with build and unit tests. Commit optimizations.'"
+      ],
+      "expectedOutputs": [
+        "git diff with memoization/perf fixes",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "At least 2-3 performance improvements identified and implemented"
+      ]
+    },
+    {
+      "id": "docs-cleanup-and-updates",
+      "title": "Update docs and generate nightshift summary",
+      "enabled": true,
+      "category": "dx",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 1800000,
+      "commands": [
+        "codex --task 'Review docs/ folder. Update CLAUDE.md, PROJECT_DOCUMENTATION.md with latest nightshift findings. Create docs/NIGHTSHIFT-GUIDE.md explaining nightly automation. Generate final summary of all changes and recommendations.'"
+      ],
+      "expectedOutputs": [
+        "docs/*.md diffs",
+        "reports/nightshift-FINAL-SUMMARY.md"
+      ],
+      "doneCriteria": [
+        "Docs updated, final summary generated"
+      ]
+    },
+    {
+      "id": "image-optimization-progressive",
+      "title": "Implement progressive image loading and lazy-loading",
+      "enabled": true,
+      "category": "performance",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 3600000,
+      "commands": [
+        "codex --task 'Add progressive image loading (blur→full) to Gallery, Rankings, NFTCard components. Implement loading=\"lazy\" on all image components. Add WebP with PNG fallback. Cache IPFS URLs in localStorage with 24h TTL. Run tests and build. Commit optimizations.'"
+      ],
+      "expectedOutputs": [
+        "git diff with image optimization changes",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Progressive loading + lazy-loading implemented and tested"
+      ]
+    },
+    {
+      "id": "skeleton-loaders-ui",
+      "title": "Add skeleton loaders to high-traffic pages",
+      "enabled": true,
+      "category": "ux",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 3600000,
+      "commands": [
+        "codex --task 'Create SkeletonCard, SkeletonRanking, SkeletonVoteCard components. Add skeleton loaders to Gallery, Rankings, and FightClub pages. Implement progressive reveal (headers first, then content). Run tests. Commit UX improvements.'"
+      ],
+      "expectedOutputs": [
+        "new skeleton component files",
+        "git diff with skeleton usage",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Skeleton loaders added to at least 3 pages"
+      ]
+    },
+    {
+      "id": "api-caching-and-dedup",
+      "title": "Implement smart API caching and request deduplication",
+      "enabled": true,
+      "category": "performance",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 3600000,
+      "commands": [
+        "codex --task 'Create useCachedFetch hook with TTL-based caching (60-300s). Implement in-flight request deduplication. Add localStorage fallback for offline. Update Gallery, Rankings, FightClub to use useCachedFetch. Run tests and build. Commit hook and integrations.'"
+      ],
+      "expectedOutputs": [
+        "src/hooks/useCachedFetch.ts",
+        "git diff with hook usage",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Hook implemented and integrated into 3+ pages"
+      ]
+    },
+    {
+      "id": "error-handling-and-retry",
+      "title": "Add robust error handling and retry logic",
+      "enabled": true,
+      "category": "reliability",
+      "risk": "medium",
+      "runtime": "medium",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 3600000,
+      "commands": [
+        "codex --task 'Add inline error components with Retry buttons to Gallery, FightClub, Rankings. Implement exponential backoff for failed votes. Add toast notifications for success/error. Update IPFS fallback CDN visibility. Run tests. Commit error improvements.'"
+      ],
+      "expectedOutputs": [
+        "git diff with error handling",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Error recovery implemented on 2+ critical pages"
+      ]
+    },
+    {
+      "id": "mobile-responsive-polish",
+      "title": "Polish mobile UX (touch targets, layout, responsive)",
+      "enabled": true,
+      "category": "ux",
+      "risk": "low",
+      "runtime": "long",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 5400000,
+      "commands": [
+        "codex --task 'Audit FightClub vote card on mobile (<600px). Increase button tap zones to 44px minimum. Reorganize vote card layout (vertical on mobile, horizontal on desktop). Stack rankings list appropriately. Test on multiple breakpoints. Commit mobile improvements.'"
+      ],
+      "expectedOutputs": [
+        "git diff with mobile CSS/layout changes",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Mobile FightClub and Rankings polished and tested"
+      ]
+    },
+    {
+      "id": "animations-and-micro-interactions",
+      "title": "Add entrance animations and micro-interactions",
+      "enabled": true,
+      "category": "ux",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 3600000,
+      "commands": [
+        "codex --task 'Add entrance animations (fade-in, slide-up) to pages. Add vote feedback animations (scale pulse on vote submit). Add score tick animations. Create custom Wojak spinner. Add hover effects (card lift, button glow). Respect prefers-reduced-motion. Update src/styles/animations.css. Commit animations.'"
+      ],
+      "expectedOutputs": [
+        "src/styles/animations.css additions",
+        "git diff with animation usage",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "At least 5 animations implemented and working"
+      ]
+    },
+    {
+      "id": "accessibility-audit-and-fixes",
+      "title": "Accessibility audit and remediation (A11y)",
+      "enabled": true,
+      "category": "ux",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 3600000,
+      "commands": [
+        "codex --task 'Run a11y checks: add aria-labels to all icon buttons, verify tab order, check color contrast (≥4.5:1 for text). Fix keyboard nav issues. Associate form labels with inputs. Use axe DevTools checks as reference. Commit a11y fixes.'"
+      ],
+      "expectedOutputs": [
+        "git diff with a11y fixes",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "At least 10 a11y issues identified and fixed"
+      ]
+    },
+    {
+      "id": "css-cleanup-consolidated",
+      "title": "CSS consolidation and theme.css optimization",
+      "enabled": true,
+      "category": "quality",
+      "risk": "low",
+      "runtime": "medium",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 3600000,
+      "commands": [
+        "codex --task 'Audit components for inline styles or scattered CSS. Consolidate all visual styles into src/styles/theme.css. Remove !important rules. Use CSS variables consistently. Ensure Tailwind is layout-only (no colors/sizing overrides). Validate build. Commit CSS cleanup.'"
+      ],
+      "expectedOutputs": [
+        "src/styles/theme.css diff",
+        "git diff with consolidated styles",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "All visual styles consolidated to theme.css"
+      ]
+    },
+    {
+      "id": "typescript-strict-mode-audit",
+      "title": "Audit and enable stricter TypeScript checks",
+      "enabled": true,
+      "category": "quality",
+      "risk": "medium",
+      "runtime": "long",
+      "mode": "assistant_fix",
+      "mutatesCode": true,
+      "timeoutMs": 5400000,
+      "commands": [
+        "codex --task 'Review tsconfig.json. Enable stricter flags (noImplicitAny, exactOptionalPropertyTypes if safe). Identify breaking changes. Fix type issues incrementally. Validate tests and build. Commit TS improvements.'"
+      ],
+      "expectedOutputs": [
+        "tsconfig.json diff",
+        "git diff with type fixes",
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Stricter TS checks validated without breaking builds"
+      ]
+    },
+    {
+      "id": "git-cleanup-and-rebase",
+      "title": "Clean up branch history and prepare final PR",
+      "enabled": true,
+      "category": "ops",
+      "risk": "low",
+      "runtime": "short",
+      "mode": "assistant_fix",
+      "mutatesCode": false,
+      "timeoutMs": 1800000,
+      "commands": [
+        "codex --task 'Review all commits on nightly branch. Ensure commit messages are clear and atomic. Prepare PR description with summary of all changes, impact metrics, and testing notes. Create nightshift-FINAL-SUMMARY.md with all achievements.'"
+      ],
+      "expectedOutputs": [
+        "PR description",
+        "reports/nightshift-FINAL-SUMMARY.md"
+      ],
+      "doneCriteria": [
+        "Branch is clean and ready for review/merge"
+      ]
+    },
+    {
+      "id": "final-validation-and-polish",
+      "title": "Final full validation (build, tests, lint, type-check)",
+      "enabled": true,
+      "category": "reliability",
+      "risk": "low",
+      "runtime": "long",
+      "mode": "report",
+      "mutatesCode": false,
+      "timeoutMs": 3600000,
+      "commands": [
+        "npx tsc --noEmit",
+        "npx eslint src functions workers tests scripts --ext .ts,.tsx,.js,.mjs,.cjs",
+        "npm run test:unit",
+        "npm run build"
+      ],
+      "expectedOutputs": [
+        "reports/nightshift-FINAL-VALIDATION.md",
+        "logs/nightshift-<timestamp>.log"
+      ],
+      "doneCriteria": [
+        "All checks pass, no errors or warnings"
+      ]
+    },
+    {
+      "id": "queue-expansion-from-findings",
+      "title": "Generate next-night queue proposals from findings",
+      "enabled": true,
+      "category": "planning",
+      "risk": "low",
+      "runtime": "short",
+      "mode": "report",
+      "mutatesCode": false,
+      "dependsOn": [
+        "checks-fast-baseline",
+        "security-audit-report",
+        "bundle-size-report",
+        "lint-debt-hotspots-report"
+      ],
+      "timeoutMs": 120000,
+      "commands": [
+        "echo 'Queue expansion is derived from current run findings and listed in the summary report'"
+      ],
+      "expectedOutputs": [
+        "reports/nightshift-<timestamp>.md"
+      ],
+      "doneCriteria": [
+        "Next-night tasks listed in report"
+      ]
+    }
+  ]
+}

@@ -8,7 +8,7 @@
 
 import { useLocation, useNavigate } from 'react-router-dom';
 import { MINTGARDEN_COLLECTION_URL } from '@/services/constants';
-import { lazy, Suspense, useState, useCallback, useEffect, useRef } from 'react';
+import { lazy, Suspense, memo, useState, useCallback, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Swords, ExternalLink, Wallet, Info } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
@@ -277,6 +277,17 @@ function BurningComingSoon() {
   );
 }
 
+const VoteTabContent = memo(function VoteTabContent() {
+  return (
+    <>
+      <SwipeAutoRegister />
+      <Suspense fallback={<PageSkeleton type="media" />}>
+        <GameVoting />
+      </Suspense>
+    </>
+  );
+});
+
 type TabId = 'battle' | 'vote' | 'rankings' | 'burn';
 
 interface Tab {
@@ -327,16 +338,18 @@ function FightClubContent() {
   useEffect(() => {
     if (player && !hadPlayerRef.current) {
       hadPlayerRef.current = true;
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time show set-name phase after link
       queueMicrotask(() => setShowSetNamePhase(true));
     }
     if (player) hadPlayerRef.current = true;
   }, [player]);
   const showLinkDidCard = CLERK_ENABLED && isSignedIn && (!player || showSetNamePhase);
 
-  const handleTabClick = (tab: Tab) => {
+  const handleTabClick = useCallback((tab: Tab) => {
     navigate(tab.path);
-  };
+  }, [navigate]);
+  const handleGuideOpen = useCallback(() => setGuideOpen(true), []);
+  const handleGuideClose = useCallback(() => setGuideOpen(false), []);
+  const handleLinkDidDone = useCallback(() => setShowSetNamePhase(false), []);
 
   const isGatedTab = activeTab === 'burn';
   const showGateLoading = accessLoading && isGatedTab;
@@ -354,7 +367,7 @@ function FightClubContent() {
       >
         {/* Link DID / Set name when Clerk signed in and no player or in set-name phase */}
         {showLinkDidCard && (
-          <LinkDidCard onDone={() => setShowSetNamePhase(false)} />
+          <LinkDidCard onDone={handleLinkDidDone} />
         )}
 
         {/* Tab Bar */}
@@ -376,7 +389,7 @@ function FightClubContent() {
             type="button"
             className="btn btn-ghost text-xs flex items-center gap-1"
             style={{ padding: '6px 10px', minWidth: 'auto' }}
-            onClick={() => setGuideOpen(true)}
+            onClick={handleGuideOpen}
           >
             <Info size={14} />
           </button>
@@ -433,18 +446,13 @@ function FightClubContent() {
             </div>
           )}
           {activeTab === 'vote' && (
-            <>
-              <SwipeAutoRegister />
-              <Suspense fallback={<PageSkeleton type="media" />}>
-                <GameVoting />
-              </Suspense>
-            </>
+            <VoteTabContent />
           )}
           {activeTab === 'rankings' && <FightClubRankings currentUserDid={effectivePlayerDid} />}
         </div>
       </div>
 
-      <FightClubGuideModal isOpen={guideOpen} onClose={() => setGuideOpen(false)} />
+      <FightClubGuideModal isOpen={guideOpen} onClose={handleGuideClose} />
     </>
   );
 }

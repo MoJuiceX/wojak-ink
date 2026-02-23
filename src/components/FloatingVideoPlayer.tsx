@@ -195,7 +195,7 @@ const FloatingVideoPlayer: React.FC<FloatingVideoPlayerProps> = ({
     }
   }, [isBackgroundMusicEnabled, isPlaying]);
 
-  const togglePlayPause = () => {
+  const togglePlayPause = useCallback(() => {
     if (videoRef.current) {
       if (isPlaying) {
         videoRef.current.pause();
@@ -209,7 +209,7 @@ const FloatingVideoPlayer: React.FC<FloatingVideoPlayerProps> = ({
           });
       }
     }
-  };
+  }, [isPlaying, isBackgroundMusicEnabled]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if ((e.target as HTMLElement).closest('.close-x')) return;
@@ -346,7 +346,7 @@ const FloatingVideoPlayer: React.FC<FloatingVideoPlayerProps> = ({
         window.removeEventListener('mouseup', handleGlobalMouseUp);
       };
     }
-  }, [isDragging, isMinimized, isPlaying]);
+  }, [isDragging, isMinimized, isPlaying, togglePlayPause]);
 
   const handleExpand = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();

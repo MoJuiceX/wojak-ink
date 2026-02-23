@@ -35,3 +35,8 @@ public/assets/wojak-layers/*.md
 # Playwright
 playwright-report/
 test-results/
+
+# Night Shift runtime state (reports are kept)
+.nightshift/state/
+reports/nightshift-*.md
+reports/supervisor-*.md
