@@ -36,10 +36,17 @@ export default defineConfig([
     },
   },
   {
-    files: ['workers/**/*.{ts,js}', 'scripts/**/*.{ts,js,mjs,cjs}'],
+    files: ['functions/**/*.{ts,js}', 'workers/**/*.{ts,js}', 'scripts/**/*.{ts,js,mjs,cjs}'],
     rules: {
-      // Operational workers/scripts intentionally use console logging.
+      // Serverless handlers and operational workers/scripts intentionally use console logging.
       'no-console': 'off',
+    },
+  },
+  {
+    files: ['scripts/**/*.{ts,js,mjs,cjs}'],
+    rules: {
+      // Analysis/maintenance scripts often process arbitrary JSON payloads.
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
 ])

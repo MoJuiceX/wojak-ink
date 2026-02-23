@@ -135,8 +135,6 @@ async function fetchYourWojakNFTs(): Promise<MintGardenNFT[]> {
   const basePath = isDev ? '/mintgarden-api' : '/api/mintgarden';
   const url = `${basePath}/collections/${YOUR_WOJAK_COLLECTION_ID}/nfts?size=100`;
 
-  console.log('[YourWojak] Fetching from:', url, isDev ? '(dev proxy)' : '(prod proxy)');
-
   const response = await fetch(url, {
     headers: {
       'Accept': 'application/json',
@@ -150,8 +148,6 @@ async function fetchYourWojakNFTs(): Promise<MintGardenNFT[]> {
   }
 
   const data = await response.json();
-  console.log('[YourWojak] Received:', data.items?.length, 'NFTs');
-
   return data.items || [];
 }
 
@@ -193,9 +189,7 @@ export function YourWojakSection() {
     const uncachedNfts = mintgardenNfts.filter(nft => !attributesCache[nft.encoded_id]);
     if (uncachedNfts.length === 0) return;
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- loading flag before async fetch
     queueMicrotask(() => setIsLoadingAttributes(true));
-    console.log('[YourWojak] Fetching attributes for', uncachedNfts.length, 'NFTs');
 
     // Fetch attributes for all uncached NFTs in parallel
     Promise.all(
@@ -212,7 +206,6 @@ export function YourWojakSection() {
       });
       setAttributesCache(newCache);
       setIsLoadingAttributes(false);
-      console.log('[YourWojak] Attributes loaded for', results.filter(r => r.attrs).length, 'NFTs');
     });
   }, [mintgardenNfts]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -282,7 +275,6 @@ export function YourWojakSection() {
   // Calculate dropdown position when opened (for portal rendering)
   useEffect(() => {
     if (!openDropdown) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- clear position when dropdown closes
       queueMicrotask(() => setDropdownPos(null));
       return;
     }
