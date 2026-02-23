@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2024-12-30T00:00:00Z",
+  "collection_size": 4200,
+  "required_files": [
+    "all_nft_analysis.json",
+    "all_nft_sentences.json",
+    "question_tree_v2.json",
+    "trait_insights.json",
+    "combo_database.json"
+  ]
+}
+
+

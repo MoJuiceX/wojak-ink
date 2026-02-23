@@ -1,0 +1,194 @@
+.boot-sequence {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+  z-index: 9999999;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  font-family: 'Fixedsys', 'Terminal', 'MS Sans Serif', 'Courier New', monospace;
+  overflow: hidden;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.boot-sequence.fade-out {
+  animation: fadeOut 0.8s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* Click prompt overlay - lightweight orange information box */
+.boot-click-prompt {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000000;
+  cursor: pointer;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.boot-click-prompt-content {
+  background: #ffaa00;
+  border: 2px solid;
+  border-color: #ffffff #cc7700 #cc7700 #ffffff;
+  padding: 20px 30px;
+  text-align: center;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+  font-family: 'MS Sans Serif', sans-serif;
+}
+
+.boot-click-prompt-title {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.boot-click-prompt-message {
+  font-size: 14px;
+  font-weight: bold;
+  color: #000;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.boot-click-prompt-subtitle {
+  font-size: 11px;
+  color: #663300;
+  font-style: italic;
+}
+
+.boot-sequence-container {
+  width: 100%;
+  max-width: 800px;
+  min-height: 100vh;
+  height: auto;
+  overflow-y: auto;
+  padding: 20px;
+  padding-top: 40px;
+  padding-bottom: 20px;
+  font-size: 20px;
+  line-height: 1.6;
+  text-align: left;
+  display: block;
+}
+
+.boot-line {
+  white-space: pre;
+  margin: 0;
+  padding: 2px 0;
+  min-height: 1.2em;
+}
+
+/* Complete lines - green like old boot style */
+.boot-line-complete {
+  color: #00ff00;
+  animation: bootGlitch 0.5s infinite;
+}
+
+/* Incomplete/typing lines - red */
+.boot-line-typing {
+  color: #ff0000;
+  animation: bootGlitch 0.4s infinite;
+}
+
+.boot-cursor {
+  display: inline-block;
+}
+
+.boot-cursor-blink {
+  animation: bootCursorBlink 1s step-end infinite;
+  color: #00ff00;
+}
+
+@keyframes bootCursorBlink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+/* Glitch effect for boot text - very subtle */
+@keyframes bootGlitch {
+  0%, 100% {
+    transform: translate(0);
+  }
+  50% {
+    transform: translate(0.1px, 0);
+  }
+}
+
+/* Scrollbar styling for boot sequence */
+.boot-sequence-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.boot-sequence-container::-webkit-scrollbar-track {
+  background: #000;
+}
+
+.boot-sequence-container::-webkit-scrollbar-thumb {
+  background: #00ff00;
+  border-radius: 4px;
+}
+
+.boot-sequence-container::-webkit-scrollbar-thumb:hover {
+  background: #00cc00;
+}
+
+/* Stationary image on the right side */
+.boot-sequence-right-art {
+  position: absolute;
+  right: 22px;
+  bottom: 22px;
+  width: 260px;
+  height: auto;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  opacity: 0.95;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Orange ASCII art section styling */
+.boot-orange-art {
+  color: #ff6600;
+}
+
+/* Character-specific colors in ASCII art */
+.boot-orange-char {
+  color: #ff6600;
+}
+
+.boot-white-char {
+  color: #ffffff;
+}
+
+.boot-brown-char {
+  color: #8b4513;
+}
+
+/* Green leaf parts in the orange */
+.boot-leaf {
+  color: #00ff00;
+}
+

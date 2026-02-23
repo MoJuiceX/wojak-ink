@@ -1,0 +1,230 @@
+{
+  "head": {
+    "Crown": {
+      "count": 140,
+      "creator": "Bullish0x",
+      "lore": "Bullish0x convinced the entire Tang Gang community that Crown is the most valuable trait in the collection. It wasn't luck—it was a masterclass in social engineering. Royal Club members don't sell; they set unreasonable prices and wait."
+    },
+    "Piccolo Turban": {
+      "count": 9,
+      "creator": "MoJuice",
+      "lore": "The rarest head trait in the collection, and it can ONLY appear on Alien Wojak bases. This is the Green Connection: Chia is green, Piccolo is green, money is green. Namekian royalty for those who understand."
+    },
+    "Tiara": {
+      "count": 24,
+      "creator": "Bullish0x",
+      "lore": "Crown's sister trait, created specifically for the queens of Tang Gang. Bullish0x didn't forget that royalty comes in all forms. If Crown is king energy, Tiara is queen energy."
+    },
+    "Headphones": {
+      "count": 13,
+      "creator": "MoJuice",
+      "lore": "The rarest head trait by count, and 69% landed on Monkey Zoo bases. This honors Monkeyzoo, the educator who teaches Tang Gang in the Twitter Spaces. The apes are always listening."
+    },
+    "Military Beret": {
+      "count": 164,
+      "creator": "TheStakerClass",
+      "lore": "TheStakerClass founded ChiaPhunks—the OG Chia NFT collection. The beret is his signature, and ChiaPhunks face left. 'The beret stays on' isn't a suggestion; it's identity."
+    },
+    "Fedora": {
+      "count": 114,
+      "creator": "DegenWaffle",
+      "lore": "DegenWaffle created Neckbeard Punks, the cyberpunk gambling degens of Tang Gang. The Fedora is part of the Classic Neckbeard loadout. 'The blade has been studied' is the motto."
+    },
+    "Wizard Hat": {
+      "count": 248,
+      "creator": "High Council",
+      "lore": "The High Council of Wizards is a Tang Gang community that takes magic seriously. Whiz nerds don't explain their methods—it just works. Pizza, pizza, pizza."
+    },
+    "Ronin Helmet": {
+      "count": 130,
+      "creator": "OrangeGooey",
+      "lore": "OrangeGooey created the Ronin collection—masterless samurai who answer to no one. 'Accept cookies' is his signature phrase, delivered with tough love and zero sugarcoating."
+    },
+    "Pirate Hat": {
+      "count": 100,
+      "creator": "MoJuice",
+      "lore": "Pirates don't ask permission. They take what they can and give nothing back. The hat alone carries the energy of the high seas."
+    },
+    "Clown": {
+      "count": 143,
+      "creator": "ChiaPhunks tribute",
+      "lore": "They called us clowns for buying JPEGs on a blockchain nobody heard of. We called it alpha. This trait honors everyone who got laughed at before they got rich."
+    },
+    "Trump Wave": {
+      "count": 78,
+      "creator": "MoJuice",
+      "lore": "Political meme culture immortalized on-chain. 'Make bags great again' transcends politics—it's about conviction in your portfolio."
+    },
+    "Spikes": {
+      "count": 100,
+      "creator": "MoJuice",
+      "lore": "Punk rock energy for the rebels of Tang Gang. Not everyone fits the mold, and Spikes wearers don't try to."
+    },
+    "Super Saiyan": {
+      "count": 150,
+      "creator": "MoJuice",
+      "lore": "Dragon Ball Z tribute for the anime degens. When your portfolio pumps, you're not at your final form. Power level: over 9000."
+    },
+    "Centurion": {
+      "count": 100,
+      "creator": "MoJuice",
+      "lore": "Roman warrior energy for those in the trenches. Part of the Full Roman loadout. The empire didn't fall—it moved to crypto."
+    }
+  },
+  "clothes": {
+    "Piccolo Uniform": {
+      "count": 14,
+      "creator": "MoJuice",
+      "lore": "Only appears on Alien bases. When Piccolo removes the weighted training gear, game over. Full Piccolo holders are Namekian royalty—the rarest named combo in the collection."
+    },
+    "El Presidente": {
+      "count": 49,
+      "creator": "MoJuice for TheStakerClass",
+      "lore": "Created specifically as a tribute to TheStakerClass. El Presidente wasn't elected—he was appointed by the blockchain. Benevolent dictatorship of the portfolio."
+    },
+    "Bepe Suit": {
+      "count": 56,
+      "creator": "Tom Bepe",
+      "lore": "Tom Bepe organized the $BEPE movement, the most liquid memecoin on Chia. 'Orange is greater than green' is the battle cry. $BEPE will be on Coinbase first—mark it."
+    },
+    "Straitjacket": {
+      "count": 100,
+      "creator": "MoJuice",
+      "lore": "Part of the Asylum Patient combo. The market tried to break you with rugs, FUD, and panic sells. It failed. Now the straitjacket is a badge of honor."
+    },
+    "Drac": {
+      "count": 97,
+      "creator": "Dracattus tribute",
+      "lore": "Honors Dracattus, the vampire dev who ships code at dawn while others sleep. Bloodline secured. The thirst for building never stops."
+    },
+    "Viking Armor": {
+      "count": 129,
+      "creator": "MoJuice",
+      "lore": "Vikings raided, conquered, and took what they wanted. In crypto, same energy. Part of the Full Viking loadout. Valhalla awaits the diamond hands."
+    },
+    "Ronin": {
+      "count": 169,
+      "creator": "OrangeGooey",
+      "lore": "OrangeGooey's Ronin collection tribute. Masterless samurai don't follow the crowd—they follow discipline. Full Ronin holders walk alone but walk strong."
+    },
+    "Roman Drip": {
+      "count": 130,
+      "creator": "MoJuice",
+      "lore": "Full Roman combo piece. The Roman Empire is a meme, but the grind is real. Those in the trenches understand."
+    },
+    "Wizard Drip": {
+      "count": 200,
+      "creator": "High Council",
+      "lore": "High Council of Wizards tribute. Don't ask how the magic works—just trust the process. Full Wizard holders have Spell Room access."
+    },
+    "Bepe Army": {
+      "count": 150,
+      "creator": "Tom Bepe",
+      "lore": "Tom Bepe's infantry. $BEPE soldiers march in orange, not green. The army grows with every convert."
+    },
+    "Chia Farmer": {
+      "count": 150,
+      "creator": "MoJuice",
+      "lore": "THE collection uniform. 'Farmed, not FOMO'd' is the Chia way. While others panic-bought, Chia Farmers plotted in silence. Plot secured."
+    },
+    "Super Saiyan Uniform": {
+      "count": 150,
+      "creator": "MoJuice",
+      "lore": "Full Super Saiyan transformation complete. DBZ energy for those who power up when the market dips."
+    },
+    "SWAT Gear": {
+      "count": 100,
+      "creator": "MoJuice",
+      "lore": "Full SWAT loadout piece. 'Breach and clear' is the mindset—find the alpha, execute the plan, don't hesitate."
+    },
+    "Astronaut": {
+      "count": 100,
+      "creator": "MoJuice",
+      "lore": "'To the moon' isn't just a meme—it's a destination. Astronaut on Moon combo holders already landed."
+    },
+    "Pickle Suit": {
+      "count": 50,
+      "creator": "MoJuice",
+      "lore": "Rick & Morty tribute. 'I turned myself into a pickle' energy for the absurdist degens who don't take themselves too seriously."
+    },
+    "Goose Suit": {
+      "count": 59,
+      "creator": "Foods",
+      "lore": "Honors Foods, the Goose of Tang Gang. Gene Hoffman promised to honk on Joe Rogan's podcast. This is Tang Gang canon. Peace was never an option."
+    },
+    "Gopher Suit": {
+      "count": 88,
+      "creator": "Josh Painter",
+      "lore": "Gophers are the official mascot of Chia. Josh Painter built the G4M economy around these little diggers. The gophers run the network."
+    },
+    "Proof of Prayer": {
+      "count": 101,
+      "creator": "Wojak meme",
+      "lore": "THE original Wojak pose. Hands together, eyes on the chart, praying the candle turns green. Every crypto holder has been here."
+    },
+    "Leather Jacket": {
+      "count": 100,
+      "creator": "ignoreart tribute",
+      "lore": "Honors ignoreart, whose dank art everybody loves. The Leather Jacket is the uniform of those who let their work speak for itself."
+    }
+  },
+  "faceWear": {
+    "VR Headset": {
+      "count": 100,
+      "creator": "TheStakerClass",
+      "lore": "TheStakerClass wears a VR Headset in his PFP. When the ChiaPhunks founder wears something, it becomes legendary. Already in the metaverse while others argue about it."
+    },
+    "Wizard Glasses": {
+      "count": 146,
+      "creator": "High Council",
+      "lore": "High Council of Wizards tribute. Spell Power vision lets you see alpha others miss. The glasses stay on."
+    },
+    "Laser Eyes": {
+      "count": 149,
+      "creator": "Bitcoin culture",
+      "lore": "Remember when all of crypto Twitter had laser eyes? Pure conviction visualized. Diamond hands don't blink."
+    },
+    "Clown Nose": {
+      "count": 96,
+      "creator": "ChiaPhunks",
+      "lore": "Full Clown combo piece. ChiaPhunks tribute for those who embraced being called clowns. Honk if you're winning."
+    },
+    "MOG Glasses": {
+      "count": 303,
+      "creator": "Tang Gang",
+      "lore": "Tang Gang signature accessory. When the MOG Glasses go on, the conversation is over. You've been mogged. No further discussion needed."
+    },
+    "Fake It Mask": {
+      "count": 39,
+      "creator": "Wojak meme",
+      "lore": "The classic 'I'm fine' Wojak—smiling on the outside, crying on the inside. Portfolio down 80%? 'I'm fine.' The most relatable trait in the collection."
+    },
+    "Cyber Shades": {
+      "count": 100,
+      "creator": "DegenWaffle & OrangeGooey",
+      "lore": "Two Tang Gang legends combined into one accessory. DegenWaffle's cyberpunk aesthetic meets OrangeGooey's style. A flex of community knowledge."
+    }
+  },
+  "mouth": {
+    "Hannibal Mask": {
+      "count": 50,
+      "creator": "MoJuice",
+      "lore": "Asylum Patient combo piece. 'Silence of the degens' energy. You've gone too far down the rabbit hole—and you'd do it again."
+    },
+    "Vampire Teeth": {
+      "count": 146,
+      "creator": "MoJuice",
+      "lore": "Full Vampire combo with Drac outfit. Vampires hunt while others sleep. The thirst is real—for alpha, for gains, for victory."
+    },
+    "Neckbeard": {
+      "count": 184,
+      "creator": "DegenWaffle",
+      "lore": "DegenWaffle's signature trait. 'Winners win, and winners don't shave.' The Neckbeard is monetary policy—never trim, never sell."
+    },
+    "Gold Teeth": {
+      "count": 278,
+      "creator": "MoJuice",
+      "lore": "Mouth full of profit. You don't get Gold Teeth by accident—every tooth represents a win. Already made it, already showing it."
+    }
+  }
+}

@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YourWojak Layer Audit</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a28;
+    --border: rgba(255,255,255,0.08);
+    --text: #ffffff;
+    --text2: #a0a0b0;
+    --text3: #606070;
+    --primary: #ff6b00;
+    --primary-hover: #ff8533;
+    --success: #22c55e;
+    --cyan: #00d4ff;
+    --error: #ef4444;
+    --radius: 10px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ─── Layout ─── */
+  .app { display: grid; grid-template-columns: 240px 1fr 320px; grid-template-rows: 48px 1fr 44px; height: 100vh; }
+  .header { grid-column: 1/-1; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; gap: 12px; }
+  .header h1 { font-size: 16px; font-weight: 700; white-space: nowrap; }
+  .header h1 span { color: var(--primary); }
+  .header .stats { margin-left: auto; font-size: 12px; color: var(--text2); display: flex; gap: 12px; }
+  .header .stats b { color: var(--primary); }
+
+  .sidebar { background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 8px; }
+  .main { display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; padding: 12px; }
+  .config { background: var(--surface); border-left: 1px solid var(--border); overflow-y: auto; padding: 12px; }
+  .footer { grid-column: 1/-1; background: var(--surface); border-top: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; gap: 10px; }
+
+  /* ─── Sidebar ─── */
+  .cat-header { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); padding: 6px 6px 3px; margin-top: 6px; }
+  .cat-header:first-child { margin-top: 0; }
+  .trait-btn {
+    display: flex; align-items: center; gap: 6px; width: 100%; padding: 6px 8px;
+    border: none; background: transparent; color: var(--text2); font-size: 12px;
+    border-radius: 5px; cursor: pointer; text-align: left; transition: all 0.15s;
+  }
+  .trait-btn:hover { background: var(--surface2); color: var(--text); }
+  .trait-btn.active { background: rgba(255,107,0,0.12); color: var(--primary); }
+  .trait-btn .badge {
+    margin-left: auto; font-size: 9px; padding: 1px 5px; border-radius: 3px;
+    background: var(--surface2); color: var(--text3);
+  }
+  .trait-btn.configured .badge { background: rgba(34,197,94,0.15); color: var(--success); }
+
+  /* ─── Canvas Preview ─── */
+  .preview-canvas {
+    width: min(640px, calc(100vh - 120px)); height: min(640px, calc(100vh - 120px));
+    border-radius: var(--radius); border: 1px solid var(--border); background: #1a1a28;
+    image-rendering: pixelated;
+  }
+
+  /* ─── Layer Stack ─── */
+  .layer-row {
+    display: flex; align-items: center; gap: 4px; padding: 4px 6px;
+    border-radius: 6px; border: 1px solid var(--border); background: var(--surface2);
+    margin-bottom: 3px; font-size: 11px; transition: all 0.1s;
+  }
+  .layer-row.global { border-left: 2px solid var(--cyan); opacity: 0.7; }
+  .layer-row.global.has-item { opacity: 1; }
+  .layer-row .pos { color: var(--text3); font-size: 9px; min-width: 14px; text-align: right; }
+  .layer-row .lbl { flex: 1; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .layer-row .lbl.fill-lbl { color: var(--primary); }
+  .layer-row .lbl.outline-lbl { color: var(--cyan); }
+  .lbtn {
+    width: 22px; height: 22px; border: 1px solid var(--border); border-radius: 4px;
+    background: var(--surface); color: var(--text3); font-size: 10px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all 0.1s;
+  }
+  .lbtn:hover { border-color: var(--text2); color: var(--text); }
+  .lbtn.vis-on { border-color: var(--primary); color: var(--primary); background: rgba(255,107,0,0.1); }
+
+  /* ─── Config sections ─── */
+  .cfg-section { margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .cfg-section:last-child { border-bottom: none; }
+  .cfg-title { font-size: 11px; font-weight: 600; color: var(--text2); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .cfg-row { margin-bottom: 6px; }
+  .cfg-label { font-size: 10px; color: var(--text3); margin-bottom: 2px; }
+  .cfg-select, .cfg-input {
+    width: 100%; padding: 5px 7px; border-radius: 5px;
+    border: 1px solid var(--border); background: var(--surface2);
+    color: var(--text); font-size: 11px; outline: none;
+  }
+  .cfg-select:focus, .cfg-input:focus { border-color: var(--primary); }
+  .cfg-textarea { width: 100%; min-height: 40px; resize: vertical; font-family: inherit; padding: 5px 7px; border-radius: 5px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: 11px; outline: none; }
+
+  .fill-card {
+    background: var(--surface2); border-radius: 6px; padding: 8px; margin-bottom: 6px;
+    border: 1px solid var(--border);
+  }
+  .fill-card h3 { font-size: 11px; font-weight: 600; margin-bottom: 5px; color: var(--primary); }
+
+  /* ─── Buttons ─── */
+  .btn { padding: 6px 12px; border-radius: 5px; border: none; cursor: pointer; font-size: 12px; font-weight: 500; transition: all 0.15s; }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: var(--primary-hover); }
+  .btn-success { background: var(--success); color: white; }
+  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text2); }
+  .btn-ghost:hover { border-color: var(--text2); color: var(--text); }
+
+  .footer .progress { font-size: 12px; color: var(--text2); }
+  .footer .progress b { color: var(--success); }
+  .footer .export-area { margin-left: auto; display: flex; gap: 6px; }
+
+  .empty-state { text-align: center; color: var(--text3); }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+
+  /* ─── Toast ─── */
+  .toast {
+    position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--success); color: white; padding: 8px 20px; border-radius: 8px;
+    font-size: 13px; font-weight: 500; opacity: 0; pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 999;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ─── Collapsible ─── */
+  .collapse-toggle { cursor: pointer; user-select: none; }
+  .collapse-toggle::before { content: '▶ '; font-size: 9px; }
+  .collapse-toggle.open::before { content: '▼ '; }
+
+  /* ─── Camo presets ─── */
+  .camo-btn { width: auto; padding: 2px 7px; font-size: 9px; }
+
+  /* ─── Swatch Picker ─── */
+  .swatch-trigger {
+    width: 28px; height: 22px; border-radius: 4px; border: 2px solid var(--border);
+    cursor: pointer; transition: border-color 0.15s; position: relative;
+  }
+  .swatch-trigger:hover { border-color: var(--text2); }
+  .swatch-trigger.active { border-color: var(--primary); }
+  .swatch-dropdown {
+    position: absolute; top: 100%; left: 0; z-index: 50; margin-top: 4px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px; width: 260px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .swatch-group-label { font-size: 9px; color: var(--text3); margin: 4px 0 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .swatch-grid { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 4px; }
+  .sw {
+    width: 22px; height: 22px; border-radius: 4px; border: 2px solid transparent;
+    cursor: pointer; transition: all 0.1s; position: relative;
+  }
+  .sw:hover { transform: scale(1.2); z-index: 1; border-color: white; }
+  .sw.selected { border-color: white; box-shadow: 0 0 6px rgba(255,255,255,0.4); }
+
+  /* ─── Scrollbar ─── */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <h1><span>YourWojak</span> Layer Audit</h1>
+    <div class="stats">
+      <span>Traits: <b id="stat-total">0</b></span>
+      <span>Configured: <b id="stat-configured">0</b></span>
+    </div>
+  </div>
+
+  <div class="sidebar" id="sidebar"></div>
+
+  <div class="main" id="main-area">
+    <div class="empty-state">
+      <div class="icon">🎨</div>
+      <p>Select a trait from the sidebar</p>
+    </div>
+  </div>
+
+  <div class="config" id="config-panel">
+    <div class="empty-state" style="margin-top:40px">
+      <p style="color:var(--text3)">Select a trait to configure</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="progress">Progress: <b id="progress-count">0</b> / <span id="progress-total">0</span></div>
+    <div class="export-area">
+      <button class="btn btn-ghost" onclick="importFullConfig()">Import JSON</button>
+      <button class="btn btn-primary" onclick="copyTraitJson()">Export JSON</button>
+      <button class="btn btn-success" onclick="downloadTraitJson()">Download JSON</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let manifest = null;
+let basePath = '';
+let selectedTraitId = null;
+let configs = {};           // traitId → { fills, group, notes, ... }
+let layerOrder = [];        // array of layer keys in render order (bottom→top)
+let layerVis = {};          // layerKey → boolean
+let fillColors = {};        // traitId:colorIndex → hex
+const imageCache = {};
+
+// Global layer selections
+let selectedBase = 'classic';
+let selectedMouth = 'numb';
+let selectedMouthItem = '';
+let selectedFacialHair = '';
+let selectedMask = '';
+
+// Bepe Army state
+let bepeTexts = { name1: 'MANUEL', name2: 'ARMY' };
+let bepeFontSize = 41;
+let bepeYOffset = 6;
+
+// Camo state
+const CAMO_PRESETS = [
+  { id:'blue',   name:'Blue',   hue:0,    sat:100, bright:100 },
+  { id:'green',  name:'Green',  hue:90,   sat:100, bright:100 },
+  { id:'jungle', name:'Jungle', hue:60,   sat:80,  bright:90 },
+  { id:'desert', name:'Desert', hue:30,   sat:50,  bright:110 },
+  { id:'red',    name:'Red',    hue:-120, sat:100, bright:100 },
+  { id:'purple', name:'Purple', hue:-60,  sat:100, bright:100 },
+  { id:'arctic', name:'Arctic', hue:0,    sat:15,  bright:130 },
+  { id:'urban',  name:'Urban',  hue:0,    sat:0,   bright:100 },
+  { id:'pink',   name:'Pink',   hue:-90,  sat:80,  bright:110 },
+  { id:'orange', name:'Orange', hue:-150, sat:100, bright:105 },
+];
+let selectedCamo = 'blue';
+let camoHue = 0, camoSat = 100, camoBright = 100;
+
+// Astronaut state
+let selectedFlag = 'us';
+let selectedLogo = 'CAT';
+
+// ═══════════════════════════════════════
+// GLOBAL LAYERS
+// ═══════════════════════════════════════
+const GLOBAL_KEYS = ['__BASE__','__FACIAL_HAIR__','__MOUTH__','__MOUTH_ITEM__','__MASK__'];
+
+function getGlobalInfo(key) {
+  switch(key) {
+    case '__BASE__': return { label:'Base', active:!!selectedBase };
+    case '__MOUTH__': return { label:'Mouth', active:!!selectedMouth };
+    case '__MOUTH_ITEM__': return { label:'Mouth Item', active:!!selectedMouthItem };
+    case '__FACIAL_HAIR__': return { label:'Facial Hair', active:!!selectedFacialHair };
+    case '__MASK__': return { label:'Mask', active:!!selectedMask };
+    default: return null;
+  }
+}
+
+function getGlobalPath(key) {
+  const gp = '/assets/wojak-layers/';
+  switch(key) {
+    case '__BASE__': return selectedBase ? `${gp}BASE/BASE_Base-Wojak_${selectedBase}.png` : null;
+    case '__MOUTH__': return selectedMouth ? `${gp}MOUTH/MOUTH_${selectedMouth}.png` : null;
+    case '__MOUTH_ITEM__': return selectedMouthItem ? `${gp}EXTRA/EXTRA_MOUTH_${selectedMouthItem}_.png` : null;
+    case '__FACIAL_HAIR__': return selectedFacialHair ? `${gp}EXTRA/EXTRA_MOUTH_${selectedFacialHair}_.png` : null;
+    case '__MASK__': return selectedMask ? `${gp}MASK/MASK_${selectedMask}.png` : null;
+    default: return null;
+  }
+}
+
+// Z-index defaults
+const Z = { Base:1, Clothes:2, FacialHair:4, MouthBase:5, MouthItem:6, Mask:7, Eyes:10, Head:12 };
+
+// ═══════════════════════════════════════
+// COLOR PALETTE (48 curated colors)
+// ═══════════════════════════════════════
+const PALETTE = [
+  { hex:'#FF0000', name:'Red', g:'Reds' },
+  { hex:'#DC2626', name:'Crimson', g:'Reds' },
+  { hex:'#B91C1C', name:'Dark Red', g:'Reds' },
+  { hex:'#EF4444', name:'Coral Red', g:'Reds' },
+  { hex:'#F87171', name:'Salmon', g:'Reds' },
+  { hex:'#991B1B', name:'Maroon', g:'Reds' },
+  { hex:'#FF6B00', name:'Orange', g:'Oranges' },
+  { hex:'#F97316', name:'Tangerine', g:'Oranges' },
+  { hex:'#EA580C', name:'Burnt Orange', g:'Oranges' },
+  { hex:'#FB923C', name:'Peach', g:'Oranges' },
+  { hex:'#C2410C', name:'Rust', g:'Oranges' },
+  { hex:'#FDBA74', name:'Apricot', g:'Oranges' },
+  { hex:'#FACC15', name:'Yellow', g:'Yellows' },
+  { hex:'#EAB308', name:'Gold', g:'Yellows' },
+  { hex:'#FDE047', name:'Lemon', g:'Yellows' },
+  { hex:'#CA8A04', name:'Amber', g:'Yellows' },
+  { hex:'#A16207', name:'Bronze', g:'Yellows' },
+  { hex:'#FEF08A', name:'Pale Yellow', g:'Yellows' },
+  { hex:'#22C55E', name:'Green', g:'Greens' },
+  { hex:'#16A34A', name:'Emerald', g:'Greens' },
+  { hex:'#15803D', name:'Forest', g:'Greens' },
+  { hex:'#4ADE80', name:'Lime', g:'Greens' },
+  { hex:'#166534', name:'Dark Green', g:'Greens' },
+  { hex:'#86EFAC', name:'Mint', g:'Greens' },
+  { hex:'#3B82F6', name:'Blue', g:'Blues' },
+  { hex:'#2563EB', name:'Royal Blue', g:'Blues' },
+  { hex:'#1D4ED8', name:'Navy Blue', g:'Blues' },
+  { hex:'#60A5FA', name:'Sky Blue', g:'Blues' },
+  { hex:'#1E40AF', name:'Deep Blue', g:'Blues' },
+  { hex:'#93C5FD', name:'Light Blue', g:'Blues' },
+  { hex:'#8B5CF6', name:'Purple', g:'Purples' },
+  { hex:'#7C3AED', name:'Violet', g:'Purples' },
+  { hex:'#6D28D9', name:'Deep Purple', g:'Purples' },
+  { hex:'#A78BFA', name:'Lavender', g:'Purples' },
+  { hex:'#EC4899', name:'Pink', g:'Purples' },
+  { hex:'#DB2777', name:'Hot Pink', g:'Purples' },
+  { hex:'#FFFFFF', name:'White', g:'Neutrals' },
+  { hex:'#E5E5E5', name:'Light Gray', g:'Neutrals' },
+  { hex:'#A3A3A3', name:'Gray', g:'Neutrals' },
+  { hex:'#737373', name:'Dark Gray', g:'Neutrals' },
+  { hex:'#404040', name:'Charcoal', g:'Neutrals' },
+  { hex:'#171717', name:'Near Black', g:'Neutrals' },
+  { hex:'#D4A574', name:'Tan', g:'Earth' },
+  { hex:'#A0522D', name:'Sienna', g:'Earth' },
+  { hex:'#8B4513', name:'Saddle Brown', g:'Earth' },
+  { hex:'#654321', name:'Dark Brown', g:'Earth' },
+  { hex:'#DEB887', name:'Burlywood', g:'Earth' },
+  { hex:'#F5DEB3', name:'Wheat', g:'Earth' },
+];
+const PALETTE_GROUPS = [...new Set(PALETTE.map(p => p.g))];
+
+let openSwatchPicker = null; // currently open picker id
+
+function buildSwatchHtml(tid, ci) {
+  const currentColor = getRawColor(tid, ci);
+  const pickerId = `swatch-${tid}-${ci}`;
+  const isOpen = openSwatchPicker === pickerId;
+
+  let html = `<div style="position:relative;display:inline-block">
+    <div class="swatch-trigger ${isOpen?'active':''}" style="background:${currentColor}"
+      onclick="toggleSwatchPicker('${pickerId}','${tid}',${ci})"></div>`;
+
+  if (isOpen) {
+    html += `<div class="swatch-dropdown" onclick="event.stopPropagation()">`;
+    for (const group of PALETTE_GROUPS) {
+      const colors = PALETTE.filter(p => p.g === group);
+      html += `<div class="swatch-group-label">${group}</div><div class="swatch-grid">`;
+      colors.forEach(c => {
+        const sel = c.hex.toUpperCase() === currentColor.toUpperCase() ? ' selected' : '';
+        html += `<div class="sw${sel}" style="background:${c.hex}" title="${c.name} (${c.hex})"
+          onclick="pickSwatch('${tid}',${ci},'${c.hex}')"></div>`;
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function toggleSwatchPicker(pickerId, tid, ci) {
+  openSwatchPicker = openSwatchPicker === pickerId ? null : pickerId;
+  const t = manifest.traits.find(x => x.id === tid);
+  if (t) renderConfigPanel(t);
+}
+
+function pickSwatch(tid, ci, hex) {
+  openSwatchPicker = null;
+  setColor(tid, ci, hex);
+}
+
+// Close swatch picker when clicking outside
+document.addEventListener('click', (e) => {
+  if (openSwatchPicker && !e.target.closest('.swatch-trigger') && !e.target.closest('.swatch-dropdown')) {
+    openSwatchPicker = null;
+    const t = manifest ? manifest.traits.find(x => x.id === selectedTraitId) : null;
+    if (t) renderConfigPanel(t);
+  }
+});
+
+// ═══════════════════════════════════════
+// COLOR UTILS (HSL)
+// ═══════════════════════════════════════
+function hexToHsl(hex) {
+  let r = parseInt(hex.slice(1,3),16)/255, g = parseInt(hex.slice(3,5),16)/255, b = parseInt(hex.slice(5,7),16)/255;
+  const max = Math.max(r,g,b), min = Math.min(r,g,b), d = max-min;
+  let h=0, s=0, l=(max+min)/2;
+  if (d > 0) {
+    s = l > 0.5 ? d/(2-max-min) : d/(max+min);
+    if (max===r) h = ((g-b)/d + (g<b?6:0))/6;
+    else if (max===g) h = ((b-r)/d + 2)/6;
+    else h = ((r-g)/d + 4)/6;
+  }
+  return [h*360, s*100, l*100];
+}
+
+function hslToHex(h,s,l) {
+  h = ((h%360)+360)%360; s = Math.max(0,Math.min(100,s))/100; l = Math.max(0,Math.min(100,l))/100;
+  const a = s * Math.min(l, 1-l);
+  const f = n => { const k = (n + h/30)%12; return l - a * Math.max(Math.min(k-3, 9-k, 1), -1); };
+  const toHex = x => Math.round(x*255).toString(16).padStart(2,'0');
+  return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
+}
+
+function getDerivedColor(baseHex, treatment, amount) {
+  const [h,s,l] = hexToHsl(baseHex);
+  amount = amount || 30;
+  switch(treatment) {
+    case 'darker_shade': return hslToHex(h, s, Math.max(0, l - amount));
+    case 'lighter_shade': return hslToHex(h, s, Math.min(100, l + amount));
+    case 'complementary': return hslToHex(h + 180, s, l);
+    case 'split_complementary': return hslToHex(h + 150, s, l);
+    case 'warm_shift': return hslToHex(h - 30, s, l);
+    case 'cool_shift': return hslToHex(h + 30, s, l);
+    case 'desaturated': return hslToHex(h, Math.max(0, s - amount), l);
+    case 'same_as': return baseHex;
+    default: return baseHex;
+  }
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+async function init() {
+  try {
+    const resp = await fetch('/assets/wojak-layers/YourWojak-layers/manifest.json');
+    manifest = await resp.json();
+    basePath = manifest.basePath;
+    const saved = localStorage.getItem('layerAuditConfig');
+    if (saved) try { configs = JSON.parse(saved); } catch(e) {}
+    const savedColors = localStorage.getItem('layerAuditColors');
+    if (savedColors) try { fillColors = JSON.parse(savedColors); } catch(e) {}
+    buildSidebar();
+    updateStats();
+  } catch(e) {
+    document.getElementById('main-area').innerHTML =
+      `<div class="empty-state"><div class="icon">⚠️</div><p>Failed to load manifest</p><p style="font-size:11px;color:var(--error)">${e.message}</p></div>`;
+  }
+}
+
+// ═══════════════════════════════════════
+// SIDEBAR
+// ═══════════════════════════════════════
+function getTraitType(t) {
+  if (t.composite) return 'Comp';
+  if (t.layers && t.layers.length) {
+    const n = t.layers.filter(l => l.type === 'fill').length;
+    return n ? n + '-Fill (layers)' : 'Layers';
+  }
+  if (t.fillFiles) return (t.fillFiles.length)+'-Fill';
+  if (t.fill1File) return '2-Fill';
+  if (t.fillFile) return 'Fill';
+  if (t.variants) return 'Var';
+  return 'Outline';
+}
+
+function buildSidebar() {
+  const sb = document.getElementById('sidebar');
+  sb.innerHTML = '';
+  for (const [catName, cat] of Object.entries(manifest.categories)) {
+    const hdr = document.createElement('div');
+    hdr.className = 'cat-header';
+    hdr.textContent = `${catName} (${cat.traits.length})`;
+    sb.appendChild(hdr);
+    for (const tid of cat.traits) {
+      const t = manifest.traits.find(x => x.id === tid);
+      if (!t) continue;
+      const btn = document.createElement('button');
+      btn.className = 'trait-btn' + (configs[tid]?._confirmed ? ' configured' : '');
+      btn.dataset.traitId = tid;
+      btn.innerHTML = `<span>${t.name}</span><span class="badge">${configs[tid]?._confirmed ? '✓' : getTraitType(t)}</span>`;
+      btn.onclick = () => selectTrait(tid);
+      sb.appendChild(btn);
+    }
+  }
+}
+
+// ═══════════════════════════════════════
+// TRAIT LAYERS
+// ═══════════════════════════════════════
+function getTraitLayers(t) {
+  const layers = [], b = basePath;
+  // Generator source of truth: traits with a "layers" array (Ninja-turtle-fit, Military-jacket, Viking helmet, Laser Eyes, etc.)
+  if (t.layers && t.layers.length) {
+    const fillLayers = t.layers.filter(l => l.type === 'fill');
+    t.layers.forEach(ly => {
+      const isFill = ly.type === 'fill';
+      const ci = isFill ? fillLayers.findIndex(l => l.key === ly.key) : 0;
+      layers.push({
+        key: ly.key,
+        label: ly.label || ly.key,
+        path: `${b}/${ly.file}`,
+        color: isFill,
+        ci: ci,
+        isDetail: ly.type === 'detail',
+        isFrame: false,
+        isVariant: false,
+      });
+    });
+    return layers;
+  }
+  if (t.fillFile) layers.push({ key:'fill', label:'Fill', path:`${b}/${t.fillFile}`, color:true, ci:0 });
+  if (t.fill1File) layers.push({ key:'fill1', label:'Fill 1', path:`${b}/${t.fill1File}`, color:true, ci:0 });
+  if (t.fill2File) layers.push({ key:'fill2', label:'Fill 2', path:`${b}/${t.fill2File}`, color:true, ci:1 });
+  if (t.fillFiles) t.fillFiles.forEach((f,i) => layers.push({ key:`mfill${i}`, label:`Fill ${i+1}`, path:`${b}/${f}`, color:true, ci:i }));
+  if (t.detailFile) layers.push({ key:'detail', label:'Detail', path:`${b}/${t.detailFile}`, color:false });
+  if (t.detailOptions) t.detailOptions.forEach((d,i) => layers.push({ key:`dopt${i}`, label:d.name, path:`${b}/${d.file}`, color:false, isDetail:true }));
+  if (t.outlineFile) layers.push({ key:'outline', label:'Outline', path:`${b}/${t.outlineFile}`, color:false });
+  if (t.outline2File) layers.push({ key:'outline2', label:'Outline 2', path:`${b}/${t.outline2File}`, color:false });
+  if (t.outlineFiles) t.outlineFiles.forEach((f,i) => layers.push({ key:`moutline${i}`, label:`Outline ${i+1}`, path:`${b}/${f}`, color:false }));
+  if (t.layer0File) layers.push({ key:'layer0', label:'Layer 0 (body)', path:`${b}/${t.layer0File}`, color:false });
+  if (t.layer1File) layers.push({ key:'layer1', label:'Layer 1 (top)', path:`${b}/${t.layer1File}`, color:false });
+  if (t.frameFiles) t.frameFiles.forEach((f,i) => layers.push({ key:`frame${i}`, label:f.name, path:`${b}/${f.file}`, color:false, isFrame:true }));
+  if (t.variants) t.variants.forEach((v,i) => layers.push({ key:`var${i}`, label:`Var: ${v.name}`, path:`${b}/${v.file}`, color:false, isVariant:true }));
+  return layers;
+}
+
+function getDefaultLayerOrder(t) {
+  const layers = getTraitLayers(t);
+  const entries = [];
+
+  // Global layers at their default z
+  entries.push({ key:'__BASE__', z: Z.Base });
+  entries.push({ key:'__FACIAL_HAIR__', z: Z.FacialHair });
+  entries.push({ key:'__MOUTH__', z: Z.MouthBase });
+  entries.push({ key:'__MOUTH_ITEM__', z: Z.MouthItem });
+  entries.push({ key:'__MASK__', z: Z.Mask });
+
+  const catDef = manifest.categories[t.category];
+  const traitZ = catDef ? catDef.zIndex : 10;
+
+  if (t.composite) {
+    // layer0 right above Base, layer1 right above layer0
+    layers.forEach(l => {
+      const cz = l.key === 'layer0' ? 1.5 : 1.6;
+      entries.push({ key: l.key, z: cz });
+    });
+  } else if (t.layers && t.layers.length) {
+    // Generator source of truth: use pos from manifest layers (same order as Wojak generator)
+    const sorted = [...t.layers].sort((a, b) => a.pos - b.pos);
+    sorted.forEach(ly => entries.push({ key: ly.key, z: traitZ + ly.pos * 0.001 }));
+    if (hasLogoPatch(t)) entries.push({ key:'__LOGO__', z: traitZ + 0.5 });
+    if (isAstronaut(t)) entries.push({ key:'__FLAG__', z: traitZ + 0.51 });
+  } else {
+    let sub = 0;
+    const fills = layers.filter(l => l.color);
+    const details = layers.filter(l => !l.color && (l.key === 'detail' || l.isDetail));
+    const outlines = layers.filter(l => !l.color && (l.key === 'outline' || l.key === 'outline2' || l.key.startsWith('moutline')));
+    const frames = layers.filter(l => l.isFrame);
+    const variants = layers.filter(l => l.isVariant);
+    const composites = layers.filter(l => l.key === 'layer0' || l.key === 'layer1');
+
+    fills.forEach(l => entries.push({ key: l.key, z: traitZ + (sub++ * 0.001) }));
+    details.forEach(l => entries.push({ key: l.key, z: traitZ + 0.1 + (sub++ * 0.001) }));
+
+    if (hasLogoPatch(t)) {
+      entries.push({ key:'__LOGO__', z: traitZ + 0.12 });
+    }
+    if (isAstronaut(t)) {
+      entries.push({ key:'__FLAG__', z: traitZ + 0.13 });
+    }
+
+    outlines.forEach(l => entries.push({ key: l.key, z: traitZ + 0.2 + (sub++ * 0.001) }));
+    frames.forEach(l => entries.push({ key: l.key, z: traitZ + 0.3 + (sub++ * 0.001) }));
+    variants.forEach(l => entries.push({ key: l.key, z: traitZ + 0.4 + (sub++ * 0.001) }));
+  }
+
+  entries.sort((a,b) => a.z - b.z);
+  return entries.map(e => e.key);
+}
+
+function isAstronaut(t) { return t && t.id === 'Clothes_Astronaut'; }
+function isBepeArmy(t) { return t && t.id === 'Clothes_Bepe-army'; }
+function isWizardDrip(t) { return t && t.id === 'Clothes_Wizard-drip'; }
+function hasLogoPatch(t) { return isAstronaut(t) || isWizardDrip(t); }
+
+// Logo patch positions per trait (cx, cy, radius on 1000x1000 canvas)
+// Detail 1 = coin logo (gray circle). Detail 2 = flag (gray rect). Match canvasRenderer.ts
+const LOGO_PATCH_POS = {
+  'Clothes_Astronaut': { cx: 355, cy: 912, r: 68 },
+  'Clothes_Wizard-drip': { cx: 520, cy: 923, r: 77 },
+};
+const ASTRONAUT_FLAG_POS = { x: 626, y: 861, w: 134, h: 92 };
+
+// All available logos
+const ALL_LOGOS = ['BEPE','CASTER','CAT','CHAD','CHIA','CNI','COOKIES','Dexi Bucks','DIG','DWB','G4M','GM','GYATT','HOA','HONK','JOCK','LOVE','MANA','MAX','MIRROR','MMM','MOG','MonkeyZoo','MRMT','NeckCoin','NWO','PEPEcoin','PIZZA','PP','Spacebucks','SPELLPOWER','SPROUT','STONKS','TANG','TVL','WITCHER','WOJAK'];
+
+// ═══════════════════════════════════════
+// SELECT TRAIT
+// ═══════════════════════════════════════
+function selectTrait(tid) {
+  selectedTraitId = tid;
+  document.querySelectorAll('.trait-btn').forEach(b => b.classList.toggle('active', b.dataset.traitId === tid));
+
+  const t = manifest.traits.find(x => x.id === tid);
+  if (!t) return;
+
+  const cfg = getConfig(tid);
+
+  // Init layer order
+  if (cfg.layerOrder && cfg.layerOrder.length > 0) {
+    layerOrder = [...cfg.layerOrder];
+    // Merge any missing keys
+    const def = getDefaultLayerOrder(t);
+    def.forEach(k => { if (!layerOrder.includes(k)) layerOrder.push(k); });
+  } else {
+    layerOrder = getDefaultLayerOrder(t);
+  }
+
+  // Init visibility
+  layerVis = {};
+  getTraitLayers(t).forEach(l => { layerVis[l.key] = true; });
+  GLOBAL_KEYS.forEach(k => layerVis[k] = true);
+  if (hasLogoPatch(t)) { layerVis['__LOGO__'] = true; }
+  if (isAstronaut(t)) { layerVis['__FLAG__'] = true; }
+
+  // Restore saved visibility
+  if (cfg.layerVis) {
+    for (const [k,v] of Object.entries(cfg.layerVis)) layerVis[k] = v;
+  }
+
+  renderPreview(t);
+  renderConfigPanel(t);
+}
+
+// ═══════════════════════════════════════
+// IMAGE LOADING
+// ═══════════════════════════════════════
+function loadImg(src) {
+  if (imageCache[src]) return Promise.resolve(imageCache[src]);
+  return new Promise((r, e) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => { imageCache[src] = img; r(img); };
+    img.onerror = () => e(new Error('Failed: ' + src));
+    img.src = src;
+  });
+}
+
+// ═══════════════════════════════════════
+// FILL COLORS
+// ═══════════════════════════════════════
+function getRawColor(tid, ci) {
+  const key = `${tid}:${ci}`;
+  if (fillColors[key]) return fillColors[key];
+  // Use same defaults as Wojak generator (manifest defaultColor / defaultColors)
+  const t = manifest && manifest.traits ? manifest.traits.find(x => x.id === tid) : null;
+  if (t) {
+    if (t.defaultColors && t.defaultColors[ci] !== undefined) return t.defaultColors[ci];
+    if (t.defaultColor && ci === 0) return t.defaultColor;
+  }
+  const defaults = ['#FF6B00','#00D4FF','#22C55E','#8B5CF6','#EF4444'];
+  return defaults[ci % defaults.length];
+}
+
+function getColor(tid, ci) {
+  // User override: if they've set a color for this slot in the audit, use it (so canvas updates when changing any fill)
+  const key = `${tid}:${ci}`;
+  if (fillColors[key]) return fillColors[key];
+
+  // Check if this fill has a derived treatment (when no override set)
+  const t = manifest.traits.find(x => x.id === tid);
+  if (!t) return getRawColor(tid, ci);
+  const cfg = getConfig(tid);
+  const layers = getTraitLayers(t);
+  const layer = layers.find(l => l.color && l.ci === ci);
+  if (!layer) return getRawColor(tid, ci);
+
+  const fc = cfg.fills[layer.key];
+  if (!fc || fc.treatment === 'free_choice') return getRawColor(tid, ci);
+  if (fc.treatment === 'fixed') return fc.fixedColor || '#808080';
+
+  // Derived from another fill
+  if (fc.source) {
+    const srcLayer = layers.find(l => l.key === fc.source);
+    if (srcLayer) {
+      const srcColor = getRawColor(tid, srcLayer.ci);
+      return getDerivedColor(srcColor, fc.treatment, fc.amount || 30);
+    }
+  }
+  return getRawColor(tid, ci);
+}
+
+function setColor(tid, ci, hex) {
+  fillColors[`${tid}:${ci}`] = hex;
+  localStorage.setItem('layerAuditColors', JSON.stringify(fillColors));
+  renderCanvas();
+  const t = manifest.traits.find(x => x.id === tid);
+  if (t) renderConfigPanel(t);
+}
+
+// ═══════════════════════════════════════
+// CANVAS RENDERING
+// ═══════════════════════════════════════
+function tintDraw(ctx, img, color, sz) {
+  const tc = document.createElement('canvas'); tc.width = sz; tc.height = sz;
+  const tx = tc.getContext('2d');
+  tx.drawImage(img, 0, 0, sz, sz);
+  tx.globalCompositeOperation = 'source-atop';
+  tx.fillStyle = color;
+  tx.fillRect(0, 0, sz, sz);
+  tx.globalCompositeOperation = 'multiply';
+  tx.drawImage(img, 0, 0, sz, sz);
+  tx.globalCompositeOperation = 'source-over';
+  ctx.drawImage(tc, 0, 0, sz, sz);
+}
+
+async function renderCanvas() {
+  const canvas = document.getElementById('preview-canvas');
+  if (!canvas || !selectedTraitId) return;
+  const t = manifest.traits.find(x => x.id === selectedTraitId);
+  if (!t) return;
+
+  const ctx = canvas.getContext('2d');
+  const sz = 800;
+  canvas.width = sz; canvas.height = sz;
+  ctx.clearRect(0, 0, sz, sz);
+
+  // Checkerboard
+  const sq = 20;
+  for (let y = 0; y < sz; y += sq)
+    for (let x = 0; x < sz; x += sq) {
+      ctx.fillStyle = ((x+y)/sq)%2===0 ? '#1a1a28' : '#151520';
+      ctx.fillRect(x, y, sq, sq);
+    }
+
+  const tLayers = getTraitLayers(t);
+
+  for (const key of layerOrder) {
+    if (layerVis[key] === false) continue;
+
+    try {
+      // Global layers
+      if (GLOBAL_KEYS.includes(key)) {
+        const path = getGlobalPath(key);
+        if (path) { const img = await loadImg(path); ctx.drawImage(img,0,0,sz,sz); }
+        continue;
+      }
+      // Astronaut specials
+      if (key === '__LOGO__' && hasLogoPatch(t) && selectedLogo) {
+        const pos = LOGO_PATCH_POS[t.id];
+        if (pos) await drawLogoOnPatch(ctx, selectedLogo, sz, pos);
+        continue;
+      }
+      if (key === '__FLAG__' && isAstronaut(t) && selectedFlag) {
+        await drawFlagOnPatch(ctx, selectedFlag, sz, ASTRONAUT_FLAG_POS); continue;
+      }
+      // Trait layers
+      const l = tLayers.find(x => x.key === key);
+      if (l) {
+        const img = await loadImg(l.path);
+        if (l.color) {
+          tintDraw(ctx, img, getColor(t.id, l.ci), sz);
+        } else if (isBepeArmy(t) && (camoHue !== 0 || camoSat !== 100 || camoBright !== 100)) {
+          const oc = document.createElement('canvas'); oc.width=sz; oc.height=sz;
+          const ox = oc.getContext('2d');
+          ox.filter = `hue-rotate(${camoHue}deg) saturate(${camoSat}%) brightness(${camoBright}%)`;
+          ox.drawImage(img,0,0,sz,sz);
+          ctx.drawImage(oc,0,0);
+        } else {
+          ctx.drawImage(img,0,0,sz,sz);
+        }
+      }
+    } catch(e){}
+  }
+
+  // Bepe Army: custom text
+  if (isBepeArmy(t) && t.textAreas) {
+    const scale = sz / 1000;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#ffffff';
+    t.textAreas.forEach(area => {
+      const txt = bepeTexts[area.id] || '';
+      if (!txt) return;
+      ctx.font = `bold ${Math.round(bepeFontSize * scale)}px "Comic Sans MS", cursive`;
+      const cx = (area.x + area.w / 2) * scale;
+      const cy = (area.y + area.h / 2 + bepeYOffset) * scale;
+      ctx.fillText(txt, cx, cy);
+    });
+  }
+}
+
+function reRender() { renderCanvas(); }
+
+// Astronaut flag — crisp SVG-based rendering (matches canvasRenderer)
+function getFlagSvgDataUrl(code, w, h) {
+  const c = (code || 'us').toLowerCase();
+  const svg = (inner) =>
+    'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">' + inner + '</svg>');
+  if (c === 'us') {
+    const stripeH = h / 13, cantonW = w * 0.4, cantonH = stripeH * 7;
+    let s = '';
+    for (let i = 0; i < 13; i++)
+      s += '<rect x="0" y="' + (i * stripeH) + '" width="' + w + '" height="' + stripeH + '" fill="' + (i % 2 === 0 ? '#B22234' : '#fff') + '"/>';
+    s += '<rect x="0" y="0" width="' + cantonW + '" height="' + cantonH + '" fill="#3C3B6E"/>';
+    const star = (cx, cy, r) => {
+      let pts = [];
+      for (let i = 0; i < 5; i++) {
+        const a = (i * 72 - 90) * Math.PI / 180;
+        pts.push((cx + r * Math.cos(a)) + ',' + (cy + r * Math.sin(a)));
+      }
+      return '<polygon points="' + pts.join(' ') + '" fill="#fff"/>';
+    };
+    const starR = Math.min(cantonW, cantonH) * 0.04;
+    const rows = [6, 5, 6, 5, 6, 5, 6, 5, 6];
+    for (let row = 0; row < 9; row++) {
+      const count = rows[row], dy = cantonH * (0.08 + row * 0.11), dx0 = count === 6 ? cantonW * 0.08 : cantonW * 0.16, step = cantonW * 0.16;
+      for (let col = 0; col < count; col++)
+        s += star(dx0 + col * step, dy, starR);
+    }
+    return svg(s);
+  }
+  if (c === 'uk') {
+    const lw = Math.max(2, w * 0.06), lw2 = Math.max(1, w * 0.03);
+    return svg('<rect width="' + w + '" height="' + h + '" fill="#012169"/>' +
+      '<line x1="0" y1="' + (h/2) + '" x2="' + w + '" y2="' + (h/2) + '" stroke="#fff" stroke-width="' + lw + '"/>' +
+      '<line x1="' + (w/2) + '" y1="0" x2="' + (w/2) + '" y2="' + h + '" stroke="#fff" stroke-width="' + lw + '"/>' +
+      '<line x1="0" y1="0" x2="' + w + '" y2="' + h + '" stroke="#C8102E" stroke-width="' + lw2 + '"/>' +
+      '<line x1="' + w + '" y1="0" x2="0" y2="' + h + '" stroke="#C8102E" stroke-width="' + lw2 + '"/>');
+  }
+  if (c === 'de') return svg('<rect width="' + w + '" height="' + (h/3) + '" fill="#000"/>' +
+    '<rect y="' + (h/3) + '" width="' + w + '" height="' + (h/3) + '" fill="#DD0000"/>' +
+    '<rect y="' + (2*h/3) + '" width="' + w + '" height="' + (h/3) + '" fill="#FFCE00"/>');
+  if (c === 'fr') return svg('<rect width="' + (w/3) + '" height="' + h + '" fill="#0055A4"/>' +
+    '<rect x="' + (w/3) + '" width="' + (w/3) + '" height="' + h + '" fill="#fff"/>' +
+    '<rect x="' + (2*w/3) + '" width="' + (w/3) + '" height="' + h + '" fill="#EF4135"/>');
+  if (c === 'jp') {
+    const r = Math.min(w, h) * 0.2;
+    return svg('<rect width="' + w + '" height="' + h + '" fill="#fff"/>' +
+      '<circle cx="' + (w/2) + '" cy="' + (h/2) + '" r="' + r + '" fill="#BC002D"/>');
+  }
+  if (c === 'ch') {
+    const cw = w * 0.2, cch = h * 0.2;
+    return svg('<rect width="' + w + '" height="' + h + '" fill="#FF0000"/>' +
+      '<rect x="' + ((w-cw)/2) + '" width="' + cw + '" height="' + h + '" fill="#fff"/>' +
+      '<rect y="' + ((h-cch)/2) + '" width="' + w + '" height="' + cch + '" fill="#fff"/>');
+  }
+  if (c === 'cn') {
+    const star = (cx, cy, r, rot) => {
+      rot = rot || 0;
+      let pts = [];
+      for (let i = 0; i < 5; i++) {
+        const a = (i * 72 - 90 + rot) * Math.PI / 180;
+        pts.push((cx + r * Math.cos(a)) + ',' + (cy + r * Math.sin(a)));
+      }
+      return '<polygon points="' + pts.join(' ') + '" fill="#FFDE00"/>';
+    };
+    const cx = w * 0.25, cy = h * 0.3, r = Math.min(w, h) * 0.08, r2 = Math.min(w, h) * 0.03;
+    let s = '<rect width="' + w + '" height="' + h + '" fill="#DE2910"/>' + star(cx, cy, r);
+    for (let i = 0; i < 4; i++) {
+      const a = (i * 72 - 90) * Math.PI / 180;
+      s += star(cx + 0.15 * w * Math.cos(a), cy + 0.15 * w * Math.sin(a), r2, 72);
+    }
+    return svg(s);
+  }
+  if (c === 'eu') {
+    const cx = w / 2, cy = h / 2, r = Math.min(w, h) * 0.35, starR = 3;
+    let s = '<rect width="' + w + '" height="' + h + '" fill="#003399"/>';
+    for (let i = 0; i < 12; i++) {
+      const a = (i * 30 - 90) * Math.PI / 180;
+      const sx = cx + r * Math.cos(a), sy = cy + r * Math.sin(a);
+      const pts = [];
+      for (let j = 0; j < 5; j++) {
+        const b = (j * 72 - 90) * Math.PI / 180;
+        pts.push((sx + starR * Math.cos(b)) + ',' + (sy + starR * Math.sin(b)));
+      }
+      s += '<polygon points="' + pts.join(' ') + '" fill="#FFCC00"/>';
+    }
+    return svg(s);
+  }
+  if (c === 'nl') return svg('<rect width="' + w + '" height="' + (h/3) + '" fill="#AE1C28"/>' +
+    '<rect y="' + (h/3) + '" width="' + w + '" height="' + (h/3) + '" fill="#fff"/>' +
+    '<rect y="' + (2*h/3) + '" width="' + w + '" height="' + (h/3) + '" fill="#21468B"/>');
+  if (c === 'it') return svg('<rect width="' + (w/3) + '" height="' + h + '" fill="#009246"/>' +
+    '<rect x="' + (w/3) + '" width="' + (w/3) + '" height="' + h + '" fill="#fff"/>' +
+    '<rect x="' + (2*w/3) + '" width="' + (w/3) + '" height="' + h + '" fill="#CE2B37"/>');
+  if (c === 'es') return svg('<rect width="' + w + '" height="' + h + '" fill="#AA151B"/>' +
+    '<rect y="' + (h*0.25) + '" width="' + w + '" height="' + (h*0.5) + '" fill="#F1BF00"/>');
+  if (c === 'kr') {
+    const r = Math.min(w, h) * 0.25;
+    return svg('<rect width="' + w + '" height="' + h + '" fill="#fff"/>' +
+      '<circle cx="' + (w/2) + '" cy="' + (h/2) + '" r="' + r + '" fill="#C60C30"/>' +
+      '<circle cx="' + (w/2) + '" cy="' + (h/2) + '" r="' + (r*0.8) + '" fill="#003478"/>' +
+      '<circle cx="' + (w/2) + '" cy="' + (h/2) + '" r="' + (r*0.6) + '" fill="#000"/>');
+  }
+  if (c === 'br') return svg('<rect width="' + w + '" height="' + h + '" fill="#009739"/>' +
+    '<polygon points="' + (w/2) + ',0 ' + w + ',' + (h/2) + ' ' + (w/2) + ',' + h + ' 0,' + (h/2) + '" fill="#FEDD00"/>' +
+    '<circle cx="' + (w/2) + '" cy="' + (h*0.45) + '" r="' + (Math.min(w,h)*0.12) + '" fill="#002776"/>');
+  if (c === 'ca') return svg('<rect width="' + w + '" height="' + h + '" fill="#FF0000"/>' +
+    '<rect x="' + (w*0.25) + '" width="' + (w*0.5) + '" height="' + h + '" fill="#fff"/>' +
+    '<polygon points="' + (w/2) + ',' + (h*0.2) + ' ' + (w/2+w*0.04) + ',' + (h*0.4) + ' ' + (w/2+w*0.03) + ',' + (h*0.6) + ' ' + (w/2) + ',' + (h*0.75) + ' ' + (w/2-w*0.03) + ',' + (h*0.6) + ' ' + (w/2-w*0.04) + ',' + (h*0.4) + '" fill="#FF0000"/>');
+  if (c === 'au') {
+    const star = (cx, cy, r) => {
+      let pts = [];
+      for (let i = 0; i < 5; i++) {
+        const a = (i * 72 - 90) * Math.PI / 180;
+        pts.push((cx + r * Math.cos(a)) + ',' + (cy + r * Math.sin(a)));
+      }
+      return '<polygon points="' + pts.join(' ') + '" fill="#fff"/>';
+    };
+    const cw = w * 0.25, ch = h * 0.5;
+    let s = '<rect width="' + w + '" height="' + h + '" fill="#00008B"/>' +
+      '<rect width="' + cw + '" height="' + ch + '" fill="#012169"/>';
+    s += star(cw * 0.5, ch * 0.4, 4) + star(cw * 1.5, ch * 0.35, 3);
+    s += star(w * 0.62, h * 0.25, 5) + star(w * 0.87, h * 0.3, 4);
+    return svg(s);
+  }
+  if (c === 'ru') return svg('<rect width="' + w + '" height="' + (h/3) + '" fill="#fff"/>' +
+    '<rect y="' + (h/3) + '" width="' + w + '" height="' + (h/3) + '" fill="#0039A6"/>' +
+    '<rect y="' + (2*h/3) + '" width="' + w + '" height="' + (h/3) + '" fill="#D52B1E"/>');
+  return svg('<rect width="' + w + '" height="' + h + '" fill="#E0E0E0"/>' +
+    '<text x="' + (w/2) + '" y="' + (h/2) + '" font-family="sans-serif" font-size="' + (h*0.4) + '" fill="#333" text-anchor="middle" dominant-baseline="central">' + (code || 'US').toUpperCase() + '</text>');
+}
+async function drawFlagOnPatch(ctx, code, sz, pos) {
+  const scale = sz / 1000;
+  const p = pos || ASTRONAUT_FLAG_POS;
+  const x = p.x * scale, y = p.y * scale, w = Math.ceil(p.w * scale), h = Math.ceil(p.h * scale);
+  const dataUrl = getFlagSvgDataUrl(code, w, h);
+  const img = await loadImg(dataUrl);
+  ctx.drawImage(img, x, y, w, h);
+}
+
+async function drawLogoOnPatch(ctx, name, sz, pos) {
+  const scale = sz / 1000;
+  const cx = pos.cx * scale, cy = pos.cy * scale, r = pos.r * scale;
+  try {
+    let logoPath = `/assets/wojak-layers/CHIA_coin_logos/${name}.webp`;
+    let img;
+    try { img = await loadImg(logoPath); } catch(e) {
+      logoPath = `/assets/wojak-layers/CHIA_coin_logos/${name}.png`;
+      img = await loadImg(logoPath);
+    }
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI*2);
+    ctx.clip();
+    ctx.drawImage(img, cx-r, cy-r, r*2, r*2);
+    ctx.restore();
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════
+// MAIN PREVIEW (canvas only)
+// ═══════════════════════════════════════
+function renderPreview(t) {
+  const main = document.getElementById('main-area');
+  main.innerHTML = `<canvas id="preview-canvas" class="preview-canvas" width="800" height="800"></canvas>`;
+  renderCanvas();
+}
+
+// ═══════════════════════════════════════
+// LAYER ORDERING
+// ═══════════════════════════════════════
+function moveLayer(idx, dir) {
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= layerOrder.length) return;
+  [layerOrder[idx], layerOrder[newIdx]] = [layerOrder[newIdx], layerOrder[idx]];
+  saveCfg();
+  renderCanvas();
+  const t = manifest.traits.find(x => x.id === selectedTraitId);
+  if (t) renderConfigPanel(t);
+}
+
+function toggleVis(key) {
+  layerVis[key] = !layerVis[key];
+  saveCfg();
+  renderCanvas();
+  const t = manifest.traits.find(x => x.id === selectedTraitId);
+  if (t) renderConfigPanel(t);
+}
+
+function resetLayerOrder() {
+  const t = manifest.traits.find(x => x.id === selectedTraitId);
+  if (!t) return;
+  layerOrder = getDefaultLayerOrder(t);
+  getTraitLayers(t).forEach(l => { layerVis[l.key] = true; });
+  GLOBAL_KEYS.forEach(k => layerVis[k] = true);
+  saveCfg();
+  renderCanvas();
+  renderConfigPanel(t);
+}
+
+// ═══════════════════════════════════════
+// CONFIG PANEL (right side)
+// ═══════════════════════════════════════
+function renderConfigPanel(t) {
+  const panel = document.getElementById('config-panel');
+  const cfg = getConfig(t.id);
+  const layers = getTraitLayers(t);
+  const colorable = layers.filter(l => l.color);
+  const type = getTraitType(t);
+
+  let html = '';
+
+  // ── Trait header ──
+  html += `<div style="margin-bottom:8px">
+    <div style="font-size:15px;font-weight:700">${t.name}</div>
+    <div style="font-size:10px;color:var(--text3)">${t.category} · ${type} · ${layers.length} layers</div>
+  </div>`;
+
+  // ── Color pickers (palette swatches) ──
+  if (colorable.length > 0) {
+    html += '<div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">';
+    colorable.forEach(l => {
+      const c = getColor(t.id, l.ci);
+      const raw = getRawColor(t.id, l.ci);
+      html += `<div style="display:flex;align-items:center;gap:4px">
+        ${buildSwatchHtml(t.id, l.ci)}
+        <span style="font-size:10px;color:var(--text2)">${l.label}</span>
+        <span style="font-size:9px;color:var(--text3);font-family:monospace">${c}</span>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  // ── Layer stack ──
+  html += `<div class="cfg-section">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div class="cfg-title" style="margin-bottom:0">LAYER ORDER (TOP = FRONT)</div>
+      <button class="lbtn" style="width:auto;padding:1px 6px;font-size:9px" onclick="resetLayerOrder()">Reset</button>
+    </div>`;
+
+  // Render layers top-to-bottom (last in layerOrder = front = top of UI)
+  for (let i = layerOrder.length - 1; i >= 0; i--) {
+    const key = layerOrder[i];
+    const isGlobal = GLOBAL_KEYS.includes(key);
+    const isSpecial = key === '__LOGO__' || key === '__FLAG__';
+    const vis = layerVis[key] !== false;
+
+    let label = key, labelClass = 'lbl';
+    if (isGlobal) {
+      const info = getGlobalInfo(key);
+      label = info ? info.label : key;
+    } else if (isSpecial) {
+      label = key === '__LOGO__' ? 'Coin Logo' : 'Flag Patch';
+    } else {
+      const l = layers.find(x => x.key === key);
+      if (!l) continue; // Skip stale/orphaned keys
+      label = l.label;
+      if (l.color) labelClass = 'lbl fill-lbl';
+      else if (l.key === 'outline' || l.key === 'outline2' || l.key.startsWith('moutline')) labelClass = 'lbl outline-lbl';
+    }
+
+    const rowClass = isGlobal ? 'layer-row global has-item' : (isSpecial ? 'layer-row global has-item' : 'layer-row');
+
+    html += `<div class="${rowClass}">
+      <span class="pos">${i}</span>
+      ${isGlobal ? '<span style="font-size:8px;color:var(--cyan)">G</span>' : ''}
+      <span class="${labelClass}">${label}</span>
+      <button class="lbtn" onclick="moveLayer(${i},1)" ${i===layerOrder.length-1?'disabled':''}">▲</button>
+      <button class="lbtn" onclick="moveLayer(${i},-1)" ${i===0?'disabled':''}">▼</button>
+      <button class="lbtn ${vis?'vis-on':''}" onclick="toggleVis('${key}')">👁</button>
+    </div>`;
+  }
+  html += '</div>';
+
+  // ── Fill behavior ──
+  if (colorable.length > 0) {
+    html += '<div class="cfg-section"><div class="cfg-title">FILL BEHAVIOR</div>';
+    colorable.forEach(l => {
+      const fk = l.key;
+      const fc = cfg.fills[fk] || { treatment:'free_choice' };
+      const others = colorable.filter(f => f.key !== fk);
+
+      html += `<div class="fill-card"><h3>${l.label}</h3>
+        <div class="cfg-row">
+          <select class="cfg-select" onchange="setFillCfg('${t.id}','${fk}','treatment',this.value)">
+            <option value="free_choice" ${fc.treatment==='free_choice'?'selected':''}>User picks</option>
+            <option value="darker_shade" ${fc.treatment==='darker_shade'?'selected':''}>Auto-darker</option>
+            <option value="lighter_shade" ${fc.treatment==='lighter_shade'?'selected':''}>Auto-lighter</option>
+            <option value="complementary" ${fc.treatment==='complementary'?'selected':''}>Complementary</option>
+            <option value="split_complementary" ${fc.treatment==='split_complementary'?'selected':''}>Split-comp</option>
+            <option value="warm_shift" ${fc.treatment==='warm_shift'?'selected':''}>Warm shift</option>
+            <option value="cool_shift" ${fc.treatment==='cool_shift'?'selected':''}>Cool shift</option>
+            <option value="desaturated" ${fc.treatment==='desaturated'?'selected':''}>Desaturated</option>
+            <option value="same_as" ${fc.treatment==='same_as'?'selected':''}>Same as</option>
+            <option value="fixed" ${fc.treatment==='fixed'?'selected':''}>Fixed color</option>
+          </select>
+        </div>`;
+
+      // Source
+      if (['darker_shade','lighter_shade','complementary','split_complementary','warm_shift','cool_shift','desaturated','same_as'].includes(fc.treatment)) {
+        html += `<div class="cfg-row"><div class="cfg-label">From</div>
+          <select class="cfg-select" onchange="setFillCfg('${t.id}','${fk}','source',this.value)">
+            ${others.length === 1 ? '' : '<option value="">-- pick --</option>'}
+            ${others.map(f => `<option value="${f.key}" ${fc.source===f.key?'selected':''}>${f.label}</option>`).join('')}
+          </select></div>`;
+      }
+
+      // Amount slider
+      if (['darker_shade','lighter_shade','desaturated'].includes(fc.treatment)) {
+        const amt = fc.amount || 30;
+        html += `<div class="cfg-row" style="display:flex;align-items:center;gap:4px">
+          <span style="font-size:9px;color:var(--text3);min-width:28px">${amt}%</span>
+          <input type="range" min="5" max="80" value="${amt}" style="flex:1"
+            oninput="slideFill('${t.id}','${fk}',this.value)"
+            onchange="setFillCfg('${t.id}','${fk}','amount',parseInt(this.value))">
+        </div>`;
+      }
+
+      // Fixed color - show palette
+      if (fc.treatment === 'fixed') {
+        const fixedHex = fc.fixedColor || '#808080';
+        html += `<div class="cfg-row"><div class="cfg-label">Fixed color</div><div style="display:flex;flex-wrap:wrap;gap:2px">`;
+        PALETTE.forEach(p => {
+          const sel = p.hex.toUpperCase() === fixedHex.toUpperCase() ? 'border-color:white;box-shadow:0 0 4px white' : '';
+          html += `<div style="width:18px;height:18px;border-radius:3px;background:${p.hex};border:2px solid transparent;cursor:pointer;${sel}" title="${p.name}"
+            onclick="setFillCfg('${t.id}','${fk}','fixedColor','${p.hex}')"></div>`;
+        });
+        html += '</div></div>';
+      }
+
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  // ── Logo Patch selector (Astronaut Detail 1, Wizard Drip) ──
+  if (hasLogoPatch(t)) {
+    html += `<div class="cfg-section">
+      <div class="cfg-title">COIN LOGO (Detail 1)</div>
+      <div style="display:flex;flex-wrap:wrap;gap:3px;max-height:200px;overflow-y:auto">
+        ${ALL_LOGOS.map(name => `<button class="lbtn ${selectedLogo===name?'vis-on':''}" style="width:auto;padding:2px 6px;font-size:9px" onclick="selectedLogo='${name}';reRender();renderConfigPanel(manifest.traits.find(x=>x.id==='${t.id}'))">${name}</button>`).join('')}
+      </div>
+      <div style="font-size:9px;color:var(--text3);margin-top:4px">Selected: <b style="color:var(--primary)">${selectedLogo || 'None'}</b></div>
+    </div>`;
+  }
+
+  // ── Flag selector (Astronaut Detail 2) ──
+  if (isAstronaut(t)) {
+    const FLAG_CODES = ['us','uk','de','fr','jp','cn','kr','ru','br','ca','au','ch','nl','it','es','eu'];
+    html += `<div class="cfg-section">
+      <div class="cfg-title">FLAG PATCH (Detail 2)</div>
+      <div style="display:flex;flex-wrap:wrap;gap:3px">
+        ${FLAG_CODES.map(code => `<button class="lbtn ${selectedFlag===code?'vis-on':''}" style="width:auto;padding:2px 6px;font-size:9px" onclick="selectedFlag='${code}';reRender();renderConfigPanel(manifest.traits.find(x=>x.id==='${t.id}'))">${code.toUpperCase()}</button>`).join('')}
+      </div>
+      <div style="font-size:9px;color:var(--text3);margin-top:4px">Selected: <b style="color:var(--primary)">${selectedFlag || 'None'}</b></div>
+    </div>`;
+  }
+
+  // ── Bepe Army: camo + text ──
+  if (isBepeArmy(t)) {
+    html += `<div class="cfg-section">
+      <div class="cfg-title">CAMO STYLE</div>
+      <div style="display:flex;flex-wrap:wrap;gap:2px;margin-bottom:6px">
+        ${CAMO_PRESETS.map(p => `<button class="lbtn camo-btn ${selectedCamo===p.id?'vis-on':''}" onclick="pickCamo('${p.id}')">${p.name}</button>`).join('')}
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">
+        <span style="font-size:9px;color:var(--text3);min-width:22px">Hue</span>
+        <input type="range" min="-180" max="180" value="${camoHue}" style="flex:1" oninput="camoHue=+this.value;selectedCamo='custom';reRender()">
+        <span style="font-size:9px;color:var(--text3);min-width:26px">${camoHue}°</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">
+        <span style="font-size:9px;color:var(--text3);min-width:22px">Sat</span>
+        <input type="range" min="0" max="200" value="${camoSat}" style="flex:1" oninput="camoSat=+this.value;selectedCamo='custom';reRender()">
+        <span style="font-size:9px;color:var(--text3);min-width:26px">${camoSat}%</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:6px">
+        <span style="font-size:9px;color:var(--text3);min-width:22px">Brt</span>
+        <input type="range" min="50" max="200" value="${camoBright}" style="flex:1" oninput="camoBright=+this.value;selectedCamo='custom';reRender()">
+        <span style="font-size:9px;color:var(--text3);min-width:26px">${camoBright}%</span>
+      </div>
+    </div>
+
+    <div class="cfg-section">
+      <div class="cfg-title">NAME PATCHES (Comic Sans)</div>
+      <div style="display:flex;gap:4px;margin-bottom:4px">
+        <div style="flex:1">
+          <div class="cfg-label">Name 1 <span style="font-size:8px;color:${bepeTexts.name1.length>=3?'var(--text3)':'var(--error)'}">${bepeTexts.name1.length}/8</span></div>
+          <input class="cfg-input" value="${bepeTexts.name1}" placeholder="e.g. MANUEL" maxlength="8"
+            style="text-transform:uppercase;letter-spacing:1px"
+            oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,'').slice(0,8);bepeTexts.name1=this.value;reRender()">
+          ${bepeTexts.name1.length<3?'<div style="font-size:8px;color:var(--error)">Min 3 chars</div>':''}
+        </div>
+        <div style="flex:1">
+          <div class="cfg-label">Name 2 <span style="font-size:8px;color:${bepeTexts.name2.length>=3?'var(--text3)':'var(--error)'}">${bepeTexts.name2.length}/8</span></div>
+          <input class="cfg-input" value="${bepeTexts.name2}" placeholder="e.g. ARMY" maxlength="8"
+            style="text-transform:uppercase;letter-spacing:1px"
+            oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,'').slice(0,8);bepeTexts.name2=this.value;reRender()">
+          ${bepeTexts.name2.length<3?'<div style="font-size:8px;color:var(--error)">Min 3 chars</div>':''}
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">
+        <span style="font-size:9px;color:var(--text3);min-width:40px">Size: ${bepeFontSize}px</span>
+        <input type="range" min="12" max="48" value="${bepeFontSize}" style="flex:1"
+          oninput="bepeFontSize=+this.value;this.previousElementSibling.textContent='Size: '+this.value+'px';reRender()">
+      </div>
+      <div style="display:flex;align-items:center;gap:4px">
+        <span style="font-size:9px;color:var(--text3);min-width:40px">Y: ${bepeYOffset>0?'+':''}${bepeYOffset}px</span>
+        <input type="range" min="-30" max="30" value="${bepeYOffset}" style="flex:1"
+          oninput="bepeYOffset=+this.value;this.previousElementSibling.textContent='Y: '+(this.value>0?'+':'')+this.value+'px';reRender()">
+      </div>
+    </div>`;
+  }
+
+  // ── Collapsible: grouping & notes ──
+  html += `<div class="cfg-section">
+    <div class="cfg-title collapse-toggle ${cfg.notes||cfg.group?'open':''}" onclick="this.classList.toggle('open');this.nextElementSibling.style.display=this.classList.contains('open')?'block':'none'">Grouping & notes</div>
+    <div style="display:${cfg.notes||cfg.group?'block':'none'}">
+      <div class="cfg-row">
+        <div class="cfg-label">Group name</div>
+        <input class="cfg-input" placeholder="e.g. Suit" value="${cfg.group||''}" onchange="updateCfg('${t.id}','group',this.value)">
+      </div>
+      <div class="cfg-row">
+        <textarea class="cfg-textarea" placeholder="Notes..." onchange="updateCfg('${t.id}','notes',this.value)">${cfg.notes||''}</textarea>
+      </div>
+    </div>
+  </div>`;
+
+  panel.innerHTML = html;
+}
+
+// ═══════════════════════════════════════
+// CONFIG HELPERS
+// ═══════════════════════════════════════
+function getConfig(tid) {
+  if (!configs[tid]) {
+    configs[tid] = { fills: {}, group: '', notes: '' };
+    // Seed fill behavior from manifest so audit matches Wojak generator (source of truth)
+    const t = manifest && manifest.traits ? manifest.traits.find(x => x.id === tid) : null;
+    if (t && t.fills && Object.keys(t.fills).length)
+      configs[tid].fills = JSON.parse(JSON.stringify(t.fills));
+  }
+  return configs[tid];
+}
+
+function saveCfg() {
+  if (selectedTraitId) {
+    const cfg = getConfig(selectedTraitId);
+    cfg.layerOrder = [...layerOrder];
+    cfg.layerVis = {...layerVis};
+  }
+  localStorage.setItem('layerAuditConfig', JSON.stringify(configs));
+  updateStats();
+}
+
+function updateCfg(tid, prop, val) {
+  const cfg = getConfig(tid);
+  cfg[prop] = val;
+  saveCfg();
+}
+
+function setFillCfg(tid, fk, prop, val) {
+  const cfg = getConfig(tid);
+  if (!cfg.fills[fk]) cfg.fills[fk] = { treatment:'free_choice' };
+  cfg.fills[fk][prop] = val;
+
+  // Auto-set source if only one other fill
+  if (prop === 'treatment' && val !== 'free_choice' && val !== 'fixed') {
+    const t = manifest.traits.find(x => x.id === tid);
+    if (t) {
+      const colorable = getTraitLayers(t).filter(l => l.color);
+      const others = colorable.filter(f => f.key !== fk);
+      if (others.length === 1) cfg.fills[fk].source = others[0].key;
+    }
+  }
+
+  saveCfg();
+  renderCanvas();
+  const t = manifest.traits.find(x => x.id === tid);
+  if (t) renderConfigPanel(t);
+}
+
+function slideFill(tid, fk, val) {
+  const cfg = getConfig(tid);
+  if (!cfg.fills[fk]) return;
+  cfg.fills[fk].amount = parseInt(val);
+  renderCanvas();
+}
+
+function pickCamo(id) {
+  const p = CAMO_PRESETS.find(x => x.id === id);
+  if (!p) return;
+  selectedCamo = id; camoHue = p.hue; camoSat = p.sat; camoBright = p.bright;
+  renderCanvas();
+  const t = manifest.traits.find(x => x.id === selectedTraitId);
+  if (t) renderConfigPanel(t);
+}
+
+// ═══════════════════════════════════════
+// TRAIT JSON EXPORT (single trait)
+// ═══════════════════════════════════════
+function buildTraitSnapshot() {
+  if (!selectedTraitId || !manifest) return null;
+  const t = manifest.traits.find(x => x.id === selectedTraitId);
+  if (!t) return null;
+  const cfg = getConfig(t.id);
+  const tLayers = getTraitLayers(t);
+
+  const traitLayers = [];
+  let pos = 0;
+  for (const key of layerOrder) {
+    if (GLOBAL_KEYS.includes(key)) continue;
+    if (key === '__LOGO__' || key === '__FLAG__') continue;
+    const vis = layerVis[key] !== false;
+    const l = tLayers.find(x => x.key === key);
+    if (!l) continue;
+
+    const type = l.color ? 'fill' : (l.isFrame ? 'frame' : (l.key === 'detail' || l.isDetail ? 'detail' : (l.key === 'outline' || l.key === 'outline2' || l.key.startsWith('moutline') ? 'outline' : (l.isVariant ? 'variant' : 'other'))));
+    const entry = { pos: pos++, key, type, label: l.label, file: l.path.split('/').pop(), visible: vis };
+    if (l.color) {
+      entry.color = getRawColor(t.id, l.ci);
+      entry.computedColor = getColor(t.id, l.ci);
+    }
+    traitLayers.push(entry);
+  }
+
+  const fills = {};
+  if (cfg.fills) {
+    for (const [fk, fc] of Object.entries(cfg.fills)) {
+      if (fc.treatment && fc.treatment !== 'free_choice') fills[fk] = fc;
+    }
+  }
+
+  const result = { trait: t.id, name: t.name, category: t.category, layers: traitLayers };
+  if (Object.keys(fills).length > 0) result.fills = fills;
+  if (cfg.notes) result.notes = cfg.notes;
+  if (cfg.group) result.group = cfg.group;
+
+  if (isBepeArmy(t)) {
+    result.camo = { preset: selectedCamo, hue: camoHue, saturation: camoSat, brightness: camoBright };
+    result.text = {
+      name1: bepeTexts.name1, name2: bepeTexts.name2,
+      fontSize: bepeFontSize, yOffset: bepeYOffset,
+      rules: { uppercase: true, minLength: 3, maxLength: 8 }
+    };
+  }
+
+  return result;
+}
+
+function copyTraitJson() {
+  const snap = buildTraitSnapshot();
+  if (!snap) { showToast('No trait selected'); return; }
+  const json = JSON.stringify(snap, null, 2);
+  navigator.clipboard.writeText(json).then(() => showToast('Copied to clipboard!')).catch(() => showToast('Copy failed'));
+}
+
+function downloadTraitJson() {
+  const snap = buildTraitSnapshot();
+  if (!snap) return;
+  const json = JSON.stringify(snap, null, 2);
+  const blob = new Blob([json], { type:'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${snap.trait}-audit.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Downloaded!');
+}
+
+function importFullConfig() {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = '.json';
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const imported = JSON.parse(text);
+      for (const [tid, cfg] of Object.entries(imported)) configs[tid] = { ...cfg, _confirmed: true };
+      saveCfg();
+      buildSidebar();
+      updateStats();
+      showToast(`Imported ${Object.keys(imported).length} configs`);
+      if (selectedTraitId) selectTrait(selectedTraitId);
+    } catch(e) { showToast('Import failed: ' + e.message); }
+  };
+  input.click();
+}
+
+// ═══════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+// ═══════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════
+function updateStats() {
+  const total = manifest ? manifest.traits.length : 0;
+  const configured = Object.values(configs).filter(c => c._confirmed).length;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-configured').textContent = configured;
+  document.getElementById('progress-count').textContent = configured;
+  document.getElementById('progress-total').textContent = total;
+}
+
+// ═══════════════════════════════════════
+// KEYBOARD NAV
+// ═══════════════════════════════════════
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+  const ids = manifest ? manifest.traits.map(t => t.id) : [];
+  const idx = ids.indexOf(selectedTraitId);
+  if ((e.key === 'ArrowDown' || e.key === 'j') && idx < ids.length - 1) { e.preventDefault(); selectTrait(ids[idx+1]); }
+  if ((e.key === 'ArrowUp' || e.key === 'k') && idx > 0) { e.preventDefault(); selectTrait(ids[idx-1]); }
+});
+
+// Init
+init();
+</script>
+</body>
+</html>

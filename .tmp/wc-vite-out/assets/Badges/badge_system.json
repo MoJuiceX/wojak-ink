@@ -1,0 +1,477 @@
+{
+  "version": "2.2",
+  "total_collection": 4200,
+  "nfts_with_badges": 1438,
+  "coverage_percent": 34.2,
+  "qualification_rules": {
+    "standard": "1 Primary + 1 Secondary trait OR 2 Primary traits",
+    "primary_only": "Royal Club - Crown or Tiara alone = badge",
+    "both_primaries_required": "Namekian - Must have both Piccolo Turban AND Piccolo Uniform"
+  },
+  "badges_ranked_by_rarity": [
+    {
+      "name": "Namekian",
+      "count": 7,
+      "emoji": "\ud83d\udc9a"
+    },
+    {
+      "name": "Honk Gang",
+      "count": 31,
+      "emoji": "\ud83e\udebf"
+    },
+    {
+      "name": "Unhinged",
+      "count": 38,
+      "emoji": "\ud83e\udd2a"
+    },
+    {
+      "name": "Neckbeard",
+      "count": 57,
+      "emoji": "\ud83e\uddd4"
+    },
+    {
+      "name": "First Responder",
+      "count": 60,
+      "emoji": "\ud83d\ude92"
+    },
+    {
+      "name": "Ronin",
+      "count": 80,
+      "emoji": "\ud83e\udd77"
+    },
+    {
+      "name": "Hellspawn",
+      "count": 91,
+      "emoji": "\ud83d\ude08"
+    },
+    {
+      "name": "Super Saiyan",
+      "count": 99,
+      "emoji": "\u26a1"
+    },
+    {
+      "name": "Pirate",
+      "count": 115,
+      "emoji": "\ud83c\udff4\u200d\u2620\ufe0f"
+    },
+    {
+      "name": "Alien",
+      "count": 147,
+      "emoji": "\ud83d\udc7d"
+    },
+    {
+      "name": "Royal Club",
+      "count": 164,
+      "emoji": "\ud83d\udc51"
+    },
+    {
+      "name": "Winners Win",
+      "count": 164,
+      "emoji": "\ud83c\udfc6"
+    },
+    {
+      "name": "Bepe Army",
+      "count": 171,
+      "emoji": "\ud83d\udc38"
+    },
+    {
+      "name": "High Council",
+      "count": 172,
+      "emoji": "\ud83e\uddd9"
+    },
+    {
+      "name": "Phunky",
+      "count": 176,
+      "emoji": "\ud83e\udd21"
+    }
+  ],
+  "badges": {
+    "Namekian": {
+      "count": 7,
+      "emoji": "\ud83d\udc9a",
+      "type": "both_primaries_required",
+      "primary": {
+        "Head": [
+          "Piccolo Turban"
+        ],
+        "Clothes": [
+          "Piccolo Uniform"
+        ]
+      },
+      "secondary": {},
+      "lore": "Namekian royalty. The rarest badge \u2014 Piccolo Turban + Uniform is legendary."
+    },
+    "Royal Club": {
+      "count": 164,
+      "emoji": "\ud83d\udc51",
+      "type": "primary_only",
+      "primary": {
+        "Head": [
+          "Crown",
+          "Tiara"
+        ]
+      },
+      "secondary": {},
+      "lore": "Bullish0x's kingdom. Crown and Tiara holders are Tang Gang nobility."
+    },
+    "High Council": {
+      "count": 172,
+      "emoji": "\ud83e\uddd9",
+      "type": "primary_plus_secondary",
+      "primary": {
+        "Head": [
+          "Wizard Hat"
+        ],
+        "Clothes": [
+          "Wizard Drip"
+        ]
+      },
+      "secondary": {
+        "Face Wear": [
+          "Wizard Glasses"
+        ],
+        "Background": [
+          "Spell Room",
+          "$PIZZA",
+          "$CASTER",
+          "$LOVE"
+        ],
+        "Mouth": [
+          "Pizza"
+        ]
+      },
+      "lore": "The wizards of the collection. Arcane knowledge, mystical gains, and pizza magic."
+    },
+    "Phunky": {
+      "count": 176,
+      "emoji": "\ud83e\udd21",
+      "type": "primary_plus_secondary",
+      "primary": {
+        "Head": [
+          "Military Beret",
+          "Clown",
+          "Propeller Hat"
+        ],
+        "Clothes": [
+          "El Presidente"
+        ]
+      },
+      "secondary": {
+        "Face Wear": [
+          "Clown Nose",
+          "VR Headset"
+        ],
+        "Background": [
+          "Green Candle",
+          "$CHIA"
+        ]
+      },
+      "lore": "TheStakerClass's military culture. Disciplined soldiers and circus chaos."
+    },
+    "Super Saiyan": {
+      "count": 99,
+      "emoji": "\u26a1",
+      "type": "primary_plus_secondary",
+      "primary": {
+        "Head": [
+          "Super Saiyan"
+        ]
+      },
+      "secondary": {
+        "Clothes": [
+          "Super Saiyan Uniform"
+        ],
+        "Background": [
+          "Sky Shock Blue",
+          "Price Up",
+          "Price Down"
+        ]
+      },
+      "lore": "Power level over 9000. Hair transformed \u2014 full ascension achieved."
+    },
+    "Hellspawn": {
+      "count": 91,
+      "emoji": "\ud83d\ude08",
+      "type": "primary_plus_secondary",
+      "primary": {
+        "Head": [
+          "Devil Horns"
+        ],
+        "Clothes": [
+          "Drac"
+        ]
+      },
+      "secondary": {
+        "Background": [
+          "Hell"
+        ],
+        "Mouth": [
+          "Vampire Teeth"
+        ],
+        "Face": [
+          "Bleeding Bags"
+        ]
+      },
+      "lore": "Creatures of the night. Devil Horns, Drac drip, Vampire Teeth \u2014 they drain liquidity."
+    },
+    "Alien": {
+      "count": 147,
+      "emoji": "\ud83d\udc7d",
+      "type": "primary_plus_secondary",
+      "primary": {
+        "Base": [
+          "Alien Wojak",
+          "Alien Soyjak",
+          "Alien Baddie",
+          "Alien Waifu"
+        ]
+      },
+      "secondary": {
+        "Head": [
+          "No Headgear"
+        ],
+        "Clothes": [
+          "Astronaut"
+        ],
+        "Face Wear": [
+          "Cyber Shades",
+          "Laser Eyes"
+        ],
+        "Background": [
+          "Moon",
+          "Signal Lost",
+          "Matrix"
+        ],
+        "Mouth": [
+          "Stunned"
+        ]
+      },
+      "lore": "Extraterrestrial energy \u2014 they're not from here."
+    },
+    "Pirate": {
+      "count": 115,
+      "emoji": "\ud83c\udff4\u200d\u2620\ufe0f",
+      "type": "primary_plus_secondary",
+      "primary": {
+        "Head": [
+          "Pirate Hat",
+          "Viking Helmet"
+        ]
+      },
+      "secondary": {
+        "Clothes": [
+          "Viking Armor"
+        ],
+        "Face Wear": [
+          "Eye Patch"
+        ],
+        "Background": [
+          "Pirate Ship"
+        ],
+        "Mouth": [
+          "Gold Teeth"
+        ]
+      },
+      "lore": "Raiders of the seven seas and Norse lands. Pirates and Vikings united \u2014 they take what they want."
+    },
+    "Bepe Army": {
+      "count": 171,
+      "emoji": "\ud83d\udc38",
+      "type": "primary_plus_secondary",
+      "primary": {
+        "Clothes": [
+          "Bepe Army",
+          "Bepe Suit"
+        ],
+        "Base": [
+          "Bepe Wojak",
+          "Bepe Soyjak",
+          "Bepe Waifu",
+          "Bepe Baddie"
+        ]
+      },
+      "secondary": {
+        "Head": [
+          "Field Cap",
+          "Hard Hat"
+        ],
+        "Background": [
+          "Bepe Barracks",
+          "$BEPE",
+          "Orange Grove",
+          "$HOA"
+        ]
+      },
+      "lore": "Tom Bepe's frog battalion. Enlisted soldiers in the amphibian army."
+    },
+    "Honk Gang": {
+      "count": 31,
+      "emoji": "\ud83e\udebf",
+      "type": "primary_plus_secondary",
+      "primary": {
+        "Clothes": [
+          "Goose Suit"
+        ]
+      },
+      "secondary": {
+        "Background": [
+          "$HONK",
+          "Nesting Grounds",
+          "Orange Grove"
+        ],
+        "Mouth": [
+          "Screaming"
+        ]
+      },
+      "lore": "Foods' Goose Suit holders. The Goose is sacred. Honk is a way of life."
+    },
+    "Neckbeard": {
+      "count": 57,
+      "emoji": "\ud83e\uddd4",
+      "type": "primary_plus_secondary",
+      "primary": {
+        "Mouth": [
+          "Neckbeard"
+        ]
+      },
+      "secondary": {
+        "Head": [
+          "Fedora"
+        ],
+        "Clothes": [
+          "Tank Top",
+          "Born to Ride"
+        ],
+        "Face Wear": [
+          "Cyber Shades",
+          "MOG Glasses"
+        ],
+        "Mouth": [
+          "Cig"
+        ],
+        "Background": [
+          "$NECKCOIN"
+        ]
+      },
+      "lore": "DegenWaffle's domain. The enlightened ones who studied the blade AND the charts."
+    },
+    "Ronin": {
+      "count": 80,
+      "emoji": "\ud83e\udd77",
+      "type": "primary_plus_secondary",
+      "primary": {
+        "Head": [
+          "Ronin Helmet"
+        ],
+        "Clothes": [
+          "Ronin"
+        ]
+      },
+      "secondary": {
+        "Face Wear": [
+          "Ninja Turtle Mask",
+          "Bandana Mask"
+        ],
+        "Background": [
+          "Ronin Dojo"
+        ],
+        "Mouth": [
+          "Hannibal Mask"
+        ]
+      },
+      "lore": "OrangeGooey's legacy. Masterless warriors with unshakeable discipline."
+    },
+    "Winners Win": {
+      "count": 164,
+      "emoji": "\ud83c\udfc6",
+      "type": "primary_plus_secondary",
+      "primary": {
+        "Base": [
+          "Monkey Zoo",
+          "Papa Tang"
+        ]
+      },
+      "secondary": {
+        "Head": [
+          "Crown"
+        ],
+        "Clothes": [
+          "Chia Farmer"
+        ],
+        "Face Wear": [
+          "Alpha Shades"
+        ],
+        "Background": [
+          "Rainforest",
+          "Orange Grove",
+          "Tangerine Pop",
+          "Chia Farm"
+        ],
+        "Mouth": [
+          "Gold Teeth",
+          "Cohiba"
+        ]
+      },
+      "lore": "OG Tang bloodlines. Monkey Zoo and Papa Tang heritage \u2014 day one holders, original farmers. Winners Win."
+    },
+    "First Responder": {
+      "count": 60,
+      "emoji": "\ud83d\ude92",
+      "type": "primary_plus_secondary",
+      "primary": {
+        "Head": [
+          "Firefighter Helmet"
+        ],
+        "Clothes": [
+          "Firefighter Uniform"
+        ]
+      },
+      "secondary": {
+        "Background": [
+          "Everythings Fine",
+          "Hell"
+        ],
+        "Face Wear": [
+          "Night Vision"
+        ]
+      },
+      "lore": "First responders running toward the fire. 'Everything's Fine' is the ultimate meme combo."
+    },
+    "Unhinged": {
+      "count": 38,
+      "emoji": "\ud83e\udd2a",
+      "type": "primary_plus_secondary",
+      "primary": {
+        "Clothes": [
+          "Straitjacket"
+        ]
+      },
+      "secondary": {
+        "Mouth": [
+          "Hannibal Mask"
+        ],
+        "Background": [
+          "Crazy Room",
+          "NYSE Dump",
+          "NYSE Rug"
+        ],
+        "Head": [
+          "Tin Foil Hat"
+        ],
+        "Face": [
+          "Bleeding Bags",
+          "Rugged"
+        ]
+      },
+      "lore": "Certified unhinged. Straitjacket, padded walls \u2014 contained chaos."
+    }
+  },
+  "special_flags": {
+    "High Five": {
+      "description": "NFTs with 5+ high-provenance traits from the trait ranking system"
+    },
+    "HOAMI Edition": {
+      "description": "Editions 1-35 \u2014 reserved for community members (homie tributes)"
+    }
+  }
+}

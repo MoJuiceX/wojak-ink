@@ -1,0 +1,6 @@
+# Old URL redirect
+/credit-leaderboard-verifier.html /free-mints.html 301
+/credit-leaderboard-verifier /free-mints.html 301
+
+# SPA fallback - handled by Cloudflare Pages automatically
+# No explicit redirect needed - Cloudflare Pages serves index.html for missing routes

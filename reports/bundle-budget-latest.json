@@ -1,0 +1,252 @@
+{
+  "generatedAt": "2026-02-23T11:52:33.895Z",
+  "distDir": "dist/assets",
+  "limits": {
+    "maxJsAssetKb": 406
+  },
+  "totals": {
+    "jsFiles": 89,
+    "cssFiles": 37,
+    "jsKb": 3979.17,
+    "cssKb": 894.88
+  },
+  "topJs": [
+    {
+      "file": "vendor-wallet-D1PXsfn8.js",
+      "bytes": 359683,
+      "sizeKb": 351.25,
+      "group": "vendor-wallet"
+    },
+    {
+      "file": "vendor-react-DAZtKR1J.js",
+      "bytes": 309998,
+      "sizeKb": 302.73,
+      "group": "vendor-react"
+    },
+    {
+      "file": "index-BN5cWObn.js",
+      "bytes": 273584,
+      "sizeKb": 267.17,
+      "group": "entry-index"
+    },
+    {
+      "file": "wallet-connect-standalone-wallet-protocol-C4VxITVL.js",
+      "bytes": 252349,
+      "sizeKb": 246.43,
+      "group": "standalone-wallet-protocol"
+    },
+    {
+      "file": "wallet-connect-standalone-wallet-core-BAVQEmi7.js",
+      "bytes": 203982,
+      "sizeKb": 199.2,
+      "group": "standalone-wallet-core"
+    },
+    {
+      "file": "html2canvas.esm-DXEQVQnt.js",
+      "bytes": 201041,
+      "sizeKb": 196.33,
+      "group": "js-other"
+    },
+    {
+      "file": "wallet-connect-standalone-wallet-ui-DuUfeWJu.js",
+      "bytes": 200048,
+      "sizeKb": 195.36,
+      "group": "standalone-wallet-ui"
+    },
+    {
+      "file": "vendor-wallet-ui-bYn9U32G.js",
+      "bytes": 179557,
+      "sizeKb": 175.35,
+      "group": "vendor-wallet-ui"
+    },
+    {
+      "file": "Generator-CWr6bHsJ.js",
+      "bytes": 173613,
+      "sizeKb": 169.54,
+      "group": "js-other"
+    },
+    {
+      "file": "feature-generator-core-pY8xauW0.js",
+      "bytes": 145571,
+      "sizeKb": 142.16,
+      "group": "feature-generator-core"
+    },
+    {
+      "file": "wallet-connect-standalone-wallet-crypto-CtgPRmL-.js",
+      "bytes": 132874,
+      "sizeKb": 129.76,
+      "group": "standalone-wallet-crypto"
+    },
+    {
+      "file": "vendor-animation-CH6vUjad.js",
+      "bytes": 121007,
+      "sizeKb": 118.17,
+      "group": "js-other"
+    },
+    {
+      "file": "BigPulp-BqX2Xyd5.js",
+      "bytes": 101145,
+      "sizeKb": 98.77,
+      "group": "js-other"
+    },
+    {
+      "file": "CitrusDrop-BOmGvy8J.js",
+      "bytes": 96887,
+      "sizeKb": 94.62,
+      "group": "js-other"
+    },
+    {
+      "file": "vendor-wallet-crypto-CylnypXm.js",
+      "bytes": 91351,
+      "sizeKb": 89.21,
+      "group": "vendor-wallet-crypto"
+    }
+  ],
+  "topCss": [
+    {
+      "file": "index-CMQjcNLv.css",
+      "bytes": 266851,
+      "sizeKb": 260.6
+    },
+    {
+      "file": "GameEffects-CZQMYlwf.css",
+      "bytes": 68984,
+      "sizeKb": 67.37
+    },
+    {
+      "file": "Account-DQ9Q1kLK.css",
+      "bytes": 60913,
+      "sizeKb": 59.49
+    },
+    {
+      "file": "BlockPuzzle-VtexbuqL.css",
+      "bytes": 47347,
+      "sizeKb": 46.24
+    },
+    {
+      "file": "BrickByBrick-Bc6tBAUl.css",
+      "bytes": 46698,
+      "sizeKb": 45.6
+    },
+    {
+      "file": "GamesHub-D0TU5-bZ.css",
+      "bytes": 40564,
+      "sizeKb": 39.61
+    },
+    {
+      "file": "MemoryMatch-C8C2MkPq.css",
+      "bytes": 40386,
+      "sizeKb": 39.44
+    },
+    {
+      "file": "GatedChat-CiWw2_hi.css",
+      "bytes": 39380,
+      "sizeKb": 38.46
+    },
+    {
+      "file": "ColorReaction-Bt8DDKs2.css",
+      "bytes": 35172,
+      "sizeKb": 34.35
+    },
+    {
+      "file": "OrangeJuggle-9vKC8W6R.css",
+      "bytes": 31040,
+      "sizeKb": 30.31
+    }
+  ],
+  "standaloneJs": [
+    {
+      "file": "wallet-connect-standalone-wallet-protocol-C4VxITVL.js",
+      "bytes": 252349,
+      "sizeKb": 246.43,
+      "group": "standalone-wallet-protocol"
+    },
+    {
+      "file": "wallet-connect-standalone-wallet-core-BAVQEmi7.js",
+      "bytes": 203982,
+      "sizeKb": 199.2,
+      "group": "standalone-wallet-core"
+    },
+    {
+      "file": "wallet-connect-standalone-wallet-ui-DuUfeWJu.js",
+      "bytes": 200048,
+      "sizeKb": 195.36,
+      "group": "standalone-wallet-ui"
+    },
+    {
+      "file": "wallet-connect-standalone-wallet-crypto-CtgPRmL-.js",
+      "bytes": 132874,
+      "sizeKb": 129.76,
+      "group": "standalone-wallet-crypto"
+    },
+    {
+      "file": "wallet-connect-standalone.js",
+      "bytes": 2162,
+      "sizeKb": 2.11,
+      "group": "standalone-entry"
+    },
+    {
+      "file": "wallet-connect-standalone-runtime-ByX85dGu.js",
+      "bytes": 991,
+      "sizeKb": 0.97,
+      "group": "standalone-runtime"
+    }
+  ],
+  "budgets": [
+    {
+      "group": "vendor-wallet",
+      "sizeKb": 351.25,
+      "softKb": 380,
+      "hardKb": 430,
+      "level": "pass",
+      "file": "vendor-wallet-D1PXsfn8.js"
+    },
+    {
+      "group": "vendor-react",
+      "sizeKb": 302.73,
+      "softKb": 330,
+      "hardKb": 380,
+      "level": "pass",
+      "file": "vendor-react-DAZtKR1J.js"
+    },
+    {
+      "group": "entry-index",
+      "sizeKb": 267.17,
+      "softKb": 300,
+      "hardKb": 360,
+      "level": "pass",
+      "file": "index-BN5cWObn.js"
+    },
+    {
+      "group": "vendor-wallet-ui",
+      "sizeKb": 175.35,
+      "softKb": 220,
+      "hardKb": 280,
+      "level": "pass",
+      "file": "vendor-wallet-ui-bYn9U32G.js"
+    },
+    {
+      "group": "feature-generator-core",
+      "sizeKb": 142.16,
+      "softKb": 180,
+      "hardKb": 240,
+      "level": "pass",
+      "file": "feature-generator-core-pY8xauW0.js"
+    },
+    {
+      "group": "vendor-wallet-crypto",
+      "sizeKb": 89.21,
+      "softKb": 120,
+      "hardKb": 160,
+      "level": "pass",
+      "file": "vendor-wallet-crypto-CylnypXm.js"
+    }
+  ],
+  "perAssetHardBreaches": [],
+  "summary": {
+    "hardBreaches": 0,
+    "softBreaches": 0,
+    "perAssetHardBreaches": 0,
+    "status": "pass"
+  }
+}

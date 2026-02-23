@@ -1,0 +1,338 @@
+{
+  "combos": [
+    {
+      "id": "namekian_royalty",
+      "name": "Namekian Royalty",
+      "emoji": "🟢",
+      "category": "legendary",
+      "logic": "exact",
+      "requirements": {
+        "Head": "Piccolo Turban",
+        "Clothes": "Piccolo Uniform"
+      },
+      "lore": "The rarest named combo in the entire collection. Only 7 exist. Piccolo Turban can ONLY appear on Alien Wojak bases, making this the ultimate DBZ tribute. When Piccolo removes the weighted training gear, game over."
+    },
+    {
+      "id": "royal_neckbeard",
+      "name": "Royal Neckbeard",
+      "emoji": "👑",
+      "category": "legendary",
+      "logic": "exact",
+      "requirements": {
+        "Head": "Crown",
+        "Mouth": "Neckbeard"
+      },
+      "lore": "Two Tang Gang titans collide. Bullish0x's Crown psyop meets DegenWaffle's 'Winners Win' philosophy. The king who never shaves, never sells."
+    },
+    {
+      "id": "royal_mog",
+      "name": "Royal MOG",
+      "emoji": "👑",
+      "category": "legendary",
+      "logic": "exact",
+      "requirements": {
+        "Head": "Crown",
+        "Face Wear": "MOG Glasses"
+      },
+      "lore": "Royalty that mogs. When Crown meets MOG Glasses, the conversation isn't just over—it was never allowed to start. Peak flex energy."
+    },
+    {
+      "id": "classic_neckbeard",
+      "name": "Classic Neckbeard",
+      "emoji": "🎩",
+      "category": "signature",
+      "logic": "exact",
+      "requirements": {
+        "Head": "Fedora",
+        "Mouth": "Neckbeard"
+      },
+      "lore": "DegenWaffle's original signature loadout. The Fedora tips, the Neckbeard grows, the blade has been studied. Cyberpunk gambling degen royalty."
+    },
+    {
+      "id": "tang_gang_commander",
+      "name": "Tang Gang Commander",
+      "emoji": "🎖️",
+      "category": "signature",
+      "logic": "exact",
+      "requirements": {
+        "Clothes": "El Presidente",
+        "Head": "Military Beret"
+      },
+      "lore": "TheStakerClass tribute combo. El Presidente was created specifically for him, and the Military Beret is his ChiaPhunks signature. Not elected—appointed."
+    },
+    {
+      "id": "full_ronin",
+      "name": "Full Ronin",
+      "emoji": "⚔️",
+      "category": "signature",
+      "logic": "any_two",
+      "requirementPool": [
+        {"Head": "Ronin Helmet"},
+        {"Clothes": "Ronin"},
+        {"Background": "Ronin Dojo"}
+      ],
+      "lore": "OrangeGooey's legacy combo. Masterless samurai who answer to no one. 'Accept cookies' is delivered with tough love. Discipline over chaos."
+    },
+    {
+      "id": "high_council",
+      "name": "High Council",
+      "emoji": "🧙",
+      "category": "signature",
+      "logic": "any_two",
+      "requirementPool": [
+        {"Head": "Wizard Hat"},
+        {"Clothes": "Wizard Drip"},
+        {"Face Wear": "Wizard Glasses"},
+        {"Background": "Spell Room"}
+      ],
+      "lore": "The High Council of Wizards is Tang Gang's magic community. Whiz nerds don't explain their methods—it just works. Pizza, pizza, pizza."
+    },
+    {
+      "id": "full_bepe",
+      "name": "Full Bepe",
+      "emoji": "🍊",
+      "category": "signature",
+      "logic": "trait_plus_base",
+      "requirements": {
+        "Clothes": "Bepe Suit"
+      },
+      "requiredBases": ["Bepe Wojak", "Bepe Soyjak", "Bepe Waifu", "Bepe Baddie"],
+      "lore": "Tom Bepe's true believers. Wearing the Bepe Suit on a Bepe base means you're all-in on orange. $BEPE is the most liquid memecoin on Chia."
+    },
+    {
+      "id": "bepe_army",
+      "name": "Bepe Army",
+      "emoji": "🪖",
+      "category": "military",
+      "logic": "any_two",
+      "requirementPool": [
+        {"Clothes": "Bepe Army"},
+        {"Head": "Field Cap"},
+        {"Head": "Hard Hat"},
+        {"Background": "Bepe Barracks"}
+      ],
+      "lore": "Tom Bepe's infantry division. The army marches in orange, not green. Two pieces and you're enlisted. The army grows with every convert."
+    },
+    {
+      "id": "full_swat",
+      "name": "Full SWAT",
+      "emoji": "🛡️",
+      "category": "military",
+      "logic": "exact",
+      "requirements": {
+        "Head": "SWAT Helmet",
+        "Clothes": "SWAT Gear"
+      },
+      "lore": "Tactical precision loadout. 'Breach and clear' isn't a suggestion—it's the only approach. Find the alpha, execute the plan, don't hesitate."
+    },
+    {
+      "id": "full_firefighter",
+      "name": "Full Firefighter",
+      "emoji": "🔥",
+      "category": "military",
+      "logic": "exact",
+      "requirements": {
+        "Head": "Firefighter Helmet",
+        "Clothes": "Firefighter Uniform"
+      },
+      "lore": "'Buy the fire' mentality. While others panic when the market burns, firefighters run toward it. Red candles don't scare you."
+    },
+    {
+      "id": "full_viking",
+      "name": "Full Viking",
+      "emoji": "⚔️",
+      "category": "military",
+      "logic": "exact",
+      "requirements": {
+        "Head": "Viking Helmet",
+        "Clothes": "Viking Armor"
+      },
+      "lore": "Raiders don't ask permission. Vikings conquered and built legends. Valhalla awaits those with diamond hands. Full armor means full commitment."
+    },
+    {
+      "id": "full_roman",
+      "name": "Full Roman",
+      "emoji": "🏛️",
+      "category": "military",
+      "logic": "exact",
+      "requirements": {
+        "Head": "Centurion",
+        "Clothes": "Roman Drip"
+      },
+      "lore": "The Roman Empire is a meme, but the grind is real. You're in the trenches and looking good doing it. The empire moved to crypto."
+    },
+    {
+      "id": "full_vampire",
+      "name": "Full Vampire",
+      "emoji": "🧛",
+      "category": "character",
+      "logic": "exact",
+      "requirements": {
+        "Clothes": "Drac",
+        "Mouth": "Vampire Teeth"
+      },
+      "lore": "Dracattus tribute complete. Full vampire loadout means you hunt when the market is quiet. The thirst is real. Bloodline secured."
+    },
+    {
+      "id": "full_super_saiyan",
+      "name": "Full Super Saiyan",
+      "emoji": "⚡",
+      "category": "character",
+      "logic": "exact",
+      "requirements": {
+        "Head": "Super Saiyan",
+        "Clothes": "Super Saiyan Uniform"
+      },
+      "lore": "DBZ transformation complete. When your portfolio dips, you power up. 'This isn't even my final form' energy. Power level over 9000."
+    },
+    {
+      "id": "full_clown",
+      "name": "Full Clown",
+      "emoji": "🤡",
+      "category": "character",
+      "logic": "exact",
+      "requirements": {
+        "Head": "Clown",
+        "Face Wear": "Clown Nose"
+      },
+      "lore": "ChiaPhunks tribute complete. They called us clowns for buying JPEGs on Chia. We got the last laugh. Honk honk."
+    },
+    {
+      "id": "full_pirate",
+      "name": "Full Pirate",
+      "emoji": "🏴‍☠️",
+      "category": "character",
+      "logic": "exact",
+      "requirements": {
+        "Head": "Pirate Hat",
+        "Face Wear": "Eye Patch"
+      },
+      "lore": "'Take what you can, give nothing back.' Pirates don't ask permission. The eye patch is a badge of battles survived."
+    },
+    {
+      "id": "full_ninja_turtle",
+      "name": "Full Ninja Turtle",
+      "emoji": "🐢",
+      "category": "character",
+      "logic": "exact",
+      "requirements": {
+        "Face Wear": "Ninja Turtle Mask",
+        "Clothes": "Ninja Turtle Fit"
+      },
+      "lore": "Cowabunga! Heroes in a half shell. Full Ninja Turtle is pure 90s nostalgia for degens who grew up on pizza and cartoons. Shell yeah."
+    },
+    {
+      "id": "asylum_patient",
+      "name": "Asylum Patient",
+      "emoji": "😷",
+      "category": "character",
+      "logic": "exact",
+      "requirements": {
+        "Clothes": "Straitjacket",
+        "Mouth": "Hannibal Mask"
+      },
+      "lore": "'Silence of the degens.' The market tried to break you. It failed. Now you wear the straitjacket as a badge of honor. Too degen for therapy."
+    },
+    {
+      "id": "divine_loadout",
+      "name": "Divine Loadout",
+      "emoji": "😇",
+      "category": "divine",
+      "logic": "exact",
+      "requirements": {
+        "Head": "Halo",
+        "Clothes": "God's Robe"
+      },
+      "lore": "Ascended beyond mortal degen status. Diamond hands so strong they're divine. Blessed gains only. Higher plane portfolio management."
+    },
+    {
+      "id": "angel_in_heaven",
+      "name": "Angel in Heaven",
+      "emoji": "😇",
+      "category": "divine",
+      "logic": "exact",
+      "requirements": {
+        "Head": "Halo",
+        "Background": "Heaven"
+      },
+      "lore": "Found your final resting place—and it's bullish. Angel in Heaven means you've ascended to where the gains are eternal."
+    },
+    {
+      "id": "devil_in_hell",
+      "name": "Devil in Hell",
+      "emoji": "😈",
+      "category": "divine",
+      "logic": "exact",
+      "requirements": {
+        "Head": "Devil Horns",
+        "Background": "Hell"
+      },
+      "lore": "Sold your soul to the blockchain at 3am and you'd do it again. Devil in Hell means you've found your natural habitat. The fire fuels you."
+    },
+    {
+      "id": "lunar_landing",
+      "name": "Lunar Landing",
+      "emoji": "🚀",
+      "category": "location",
+      "logic": "exact",
+      "requirements": {
+        "Clothes": "Astronaut",
+        "Background": "Moon"
+      },
+      "lore": "'To the moon' isn't just a meme—it's a destination. And you've already arrived. While others are still hoping, you've already landed."
+    },
+    {
+      "id": "plot_secured",
+      "name": "Plot Secured",
+      "emoji": "🌾",
+      "category": "location",
+      "logic": "exact",
+      "requirements": {
+        "Clothes": "Chia Farmer",
+        "Background": "Chia Farm"
+      },
+      "lore": "THE Chia combo. 'Farmed, not FOMO'd' is the Chia way. While others panic-bought, you plotted in silence. The plot is secured."
+    },
+    {
+      "id": "honk_gang",
+      "name": "Honk Gang",
+      "emoji": "🪿",
+      "category": "single_trait",
+      "logic": "single",
+      "requirements": {
+        "Clothes": "Goose Suit"
+      },
+      "lore": "Honors Foods, the Goose of Tang Gang. Gene Hoffman promised to honk on Joe Rogan. 'Peace was never an option.' The suit alone joins you to the flock."
+    }
+  ],
+  "categories": {
+    "legendary": {
+      "name": "Legendary Combos",
+      "description": "The rarest and most valuable combinations"
+    },
+    "signature": {
+      "name": "Signature Combos",
+      "description": "Creator tributes and community signatures"
+    },
+    "military": {
+      "name": "Military Combos",
+      "description": "Full loadout gear sets"
+    },
+    "character": {
+      "name": "Character Combos",
+      "description": "Complete character transformations"
+    },
+    "divine": {
+      "name": "Divine Combos",
+      "description": "Spiritual and ethereal combinations"
+    },
+    "location": {
+      "name": "Location Combos",
+      "description": "Trait plus matching background"
+    },
+    "single_trait": {
+      "name": "Single Trait Badges",
+      "description": "Badges earned from a single trait"
+    }
+  }
+}

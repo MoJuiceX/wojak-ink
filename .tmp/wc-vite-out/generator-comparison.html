@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wojak Generator 1 vs 2 – Comparison</title>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --border: rgba(255,255,255,0.1);
+      --text: #fff;
+      --text2: #a0a0b0;
+      --text3: #606070;
+      --primary: #ff6b00;
+      --success: #22c55e;
+      --warn: #eab308;
+      --cyan: #00d4ff;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; }
+    .subtitle { color: var(--text2); font-size: 14px; margin-bottom: 24px; }
+    .load-error { background: #7f1d1d; color: #fecaca; padding: 12px; border-radius: 8px; margin-bottom: 16px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tabs button { padding: 10px 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); cursor: pointer; font-size: 14px; }
+    .tabs button:hover { color: var(--text); border-color: var(--text3); }
+    .tabs button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    section { display: none; margin-bottom: 32px; }
+    section.visible { display: block; }
+    h2 { font-size: 18px; margin-bottom: 12px; color: var(--text2); border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+    th { color: var(--text3); font-weight: 600; }
+    .cat { color: var(--cyan); font-weight: 500; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .badge-g1 { background: rgba(234,179,8,0.2); color: var(--warn); }
+    .badge-g2 { background: rgba(0,212,255,0.2); color: var(--cyan); }
+    .badge-both { background: rgba(34,197,94,0.2); color: var(--success); }
+    .advice { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-top: 16px; }
+    .advice h3 { font-size: 14px; margin-bottom: 8px; color: var(--primary); }
+    .advice ul { margin-left: 20px; color: var(--text2); line-height: 1.6; }
+    .count { font-size: 12px; color: var(--text3); margin-left: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Wojak Generator 1 vs Generator 2 (YourWojak)</h1>
+  <p class="subtitle">Compare traits from the current voltage generator (G1) and the audited layer system (G2).</p>
+
+  <div id="load-error" class="load-error" style="display:none"></div>
+
+  <div class="tabs">
+    <button data-tab="summary" class="active">Summary</button>
+    <button data-tab="both">In Both</button>
+    <button data-tab="g1-only">Only in G1</button>
+    <button data-tab="g2-only">Only in G2</button>
+    <button data-tab="by-category">By Category</button>
+  </div>
+
+  <section id="summary" class="visible">
+    <h2>Summary</h2>
+    <table>
+      <thead>
+        <tr><th>Metric</th><th>Generator 1</th><th>Generator 2</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Clothes</td><td id="sum-clothes-g1">–</td><td id="sum-clothes-g2">–</td></tr>
+        <tr><td>Head</td><td id="sum-head-g1">–</td><td id="sum-head-g2">–</td></tr>
+        <tr><td>Eyes / Face-wear</td><td id="sum-eye-g1">–</td><td id="sum-eye-g2">–</td></tr>
+        <tr><td>Mouth</td><td id="sum-mouth-g1">–</td><td id="sum-mouth-g2">–</td></tr>
+        <tr><td>Base</td><td id="sum-base-g1">–</td><td id="sum-base-g2">–</td></tr>
+        <tr><td>Mask</td><td id="sum-mask-g1">–</td><td id="sum-mask-g2">–</td></tr>
+        <tr><td>Background</td><td id="sum-bg-g1">–</td><td id="sum-bg-g2">–</td></tr>
+      </tbody>
+    </table>
+    <div class="advice">
+      <h3>What needs to be done</h3>
+      <ul id="advice-list"></ul>
+    </div>
+  </section>
+
+  <section id="both">
+    <h2>Traits in both generators <span id="both-count" class="count"></span></h2>
+    <p style="color:var(--text2);font-size:13px;margin-bottom:12px">Same or equivalent trait; G2 adds custom colors / layer audit.</p>
+    <table><thead><tr><th>Category</th><th>Trait (G1 name)</th><th>G1 variants</th><th>G2 id</th></tr></thead><tbody id="both-body"></tbody></table>
+  </section>
+
+  <section id="g1-only">
+    <h2>Only in Generator 1 <span id="g1-only-count" class="count"></span></h2>
+    <p style="color:var(--text2);font-size:13px;margin-bottom:12px">Add to G2 manifest or keep as G1-only.</p>
+    <table><thead><tr><th>Category</th><th>Trait</th><th>Variants / files</th></tr></thead><tbody id="g1-only-body"></tbody></table>
+  </section>
+
+  <section id="g2-only">
+    <h2>Only in Generator 2 (YourWojak) <span id="g2-only-count" class="count"></span></h2>
+    <p style="color:var(--text2);font-size:13px;margin-bottom:12px">New in audit; wire into G1 or keep G2-only.</p>
+    <table><thead><tr><th>Category</th><th>Trait</th><th>G2 id</th></tr></thead><tbody id="g2-only-body"></tbody></table>
+  </section>
+
+  <section id="by-category">
+    <h2>By category</h2>
+    <div id="by-category-body"></div>
+  </section>
+
+  <script>
+    const CAT_MAP_G1_TO_G2 = {
+      'CLOTHES': 'Clothes',
+      'HEAD': 'Head',
+      'EYE': 'Face-wear',
+      'MOUTH': 'Mouth',
+      'BASE': 'Base',
+      'MASK': 'Mask',
+      'BACKGROUND': 'Background'
+    };
+
+    function normalizeKey(cat, name) {
+      const c = (cat || '').toLowerCase().replace(/_/g, '');
+      const n = (name || '').toLowerCase().replace(/-/g, '').replace(/_/g, '').replace(/\s/g, '');
+      return c + ':' + n;
+    }
+
+    function parseG1(manifest) {
+      const byKey = {};
+      const byCat = { CLOTHES: [], HEAD: [], EYE: [], MOUTH: [], BASE: [], MASK: [], BACKGROUND: [] };
+
+      function add(cat, baseName, variant, file) {
+        const key = normalizeKey(cat, baseName);
+        if (!byKey[key]) byKey[key] = { category: cat, baseName, variants: [], files: [] };
+        if (variant) byKey[key].variants.push(variant);
+        byKey[key].files.push(file);
+        if (byCat[cat]) byCat[cat].push({ baseName, variant, file });
+      }
+
+      (manifest.BASE || []).forEach(f => {
+        const m = f.match(/BASE_Base-Wojak_(.+)\.png/);
+        add('BASE', 'Base', m ? m[1] : 'default', f);
+      });
+
+      (manifest.CLOTHES || []).forEach(f => {
+        const name = f.replace(/^CLOTHES_|\.png$/gi, '').replace(/_$/, '');
+        const parts = name.split('_');
+        const base = parts[0] ? parts[0].replace(/-/g, ' ') : name;
+        const variant = parts.length > 1 ? parts.slice(1).join(' ') : null;
+        add('CLOTHES', base, variant, f);
+      });
+
+      (manifest.HEAD || []).forEach(f => {
+        const name = f.replace(/^HEAD_|\.png$/gi, '').replace(/_$/, '');
+        const parts = name.split('_');
+        const base = parts[0] ? parts[0].replace(/-/g, ' ') : name;
+        const variant = parts.length > 1 ? parts.slice(1).join(' ') : null;
+        add('HEAD', base, variant, f);
+      });
+
+      (manifest.EYE || []).forEach(f => {
+        const name = f.replace(/^EYE_|\.png$/gi, '').replace(/_$/, '');
+        const parts = name.split('_');
+        const base = parts[0] ? parts[0].replace(/-/g, ' ') : name;
+        const variant = parts.length > 1 ? parts.slice(1).join(' ') : null;
+        add('EYE', base, variant, f);
+      });
+
+      (manifest.MOUTH || []).forEach(f => {
+        const name = f.replace(/^(MOUTH_|EXTRA_MOUTH_)|\.png$/gi, '').replace(/_$/, '');
+        const base = name.replace(/-/g, ' ');
+        add('MOUTH', base, null, f);
+      });
+
+      (manifest.MASK || []).forEach(f => {
+        const base = f.replace(/\.png$/i, '');
+        add('MASK', base, null, f);
+      });
+
+      (manifest.BACKGROUND || []).forEach(f => add('BACKGROUND', f.replace(/\.png$/i, ''), null, f));
+
+      return { byKey, byCat, keys: Object.keys(byKey) };
+    }
+
+    function parseG2(manifest) {
+      const byKey = {};
+      const byCat = {};
+      const traitById = {};
+      (manifest.traits || []).forEach(t => { traitById[t.id] = t; });
+      Object.keys(manifest.categories || {}).forEach(cat => {
+        (manifest.categories[cat].traits || []).forEach(tid => {
+          const t = traitById[tid] || { id: tid, name: tid.replace(cat + '_', '').replace(/-/g, ' '), category: cat };
+          if (!byCat[cat]) byCat[cat] = [];
+          byCat[cat].push(t);
+          const baseName = (t.name || t.id || '').replace(/-/g, ' ').trim();
+          const key = normalizeKey(cat, baseName);
+          byKey[key] = t;
+        });
+      });
+      (manifest.traits || []).forEach(t => {
+        const cat = t.category || 'Other';
+        const key = normalizeKey(cat, (t.name || t.id || '').replace(/-/g, ' '));
+        if (!byKey[key]) { byKey[key] = t; if (!byCat[cat]) byCat[cat] = []; byCat[cat].push(t); }
+      });
+      return { byKey, byCat, keys: Object.keys(byKey) };
+    }
+
+    function runComparison(g1, g2) {
+      const both = [];
+      const g1Only = [];
+      const g2Only = [];
+      const norm = (s) => (s || '').toLowerCase().replace(/-/g, '').replace(/_/g, '').replace(/\s/g, '');
+
+      g1.keys.forEach(k => {
+        const g1Entry = g1.byKey[k];
+        const [c1, n1] = k.split(':');
+        const match = g2.keys.find(k2 => {
+          const [c2, n2] = k2.split(':');
+          return c1 === c2 && (n1 === n2 || norm(n1) === norm(n2) || norm(g1Entry.baseName) === norm((g2.byKey[k2].name || g2.byKey[k2].id || '')));
+        });
+        if (match) both.push({ key: k, g1: g1Entry, g2: g2.byKey[match] });
+        else g1Only.push({ key: k, g1: g1Entry });
+      });
+
+      g2.keys.forEach(k => {
+        const [c1, n1] = k.split(':');
+        const inG1 = g1.keys.some(k1 => {
+          const [c2, n2] = k1.split(':');
+          const g2Name = (g2.byKey[k].name || g2.byKey[k].id || '').replace(/-/g, ' ');
+          return c1 === c2 && (n1 === n2 || norm(n1) === norm(n2) || norm(g2Name) === norm(g1.byKey[k1].baseName));
+        });
+        if (!inG1) g2Only.push({ key: k, g2: g2.byKey[k] });
+      });
+
+      return { both, g1Only, g2Only };
+    }
+
+    function renderSummary(g1, g2, comp) {
+      const catCount = (obj, cat) => Object.keys(obj.byKey).filter(k => k.startsWith(cat.toLowerCase().replace(/_/g, ''))).length;
+      const g1Cat = (c) => (g1.byCat[c] || []).length;
+      const g2Cat = (c) => Object.values(g2.byKey).filter(t => (t.category || '') === CAT_MAP_G1_TO_G2[c]).length;
+      document.getElementById('sum-clothes-g1').textContent = g1.byCat.CLOTHES ? new Set(g1.byCat.CLOTHES.map(x => x.baseName)).size + ' traits' : '–';
+      document.getElementById('sum-clothes-g2').textContent = (g2.byCat.Clothes || []).length + ' traits';
+      document.getElementById('sum-head-g1').textContent = g1.byCat.HEAD ? new Set(g1.byCat.HEAD.map(x => x.baseName)).size + ' traits' : '–';
+      document.getElementById('sum-head-g2').textContent = (g2.byCat.Head || []).length + ' traits';
+      document.getElementById('sum-eye-g1').textContent = g1.byCat.EYE ? new Set(g1.byCat.EYE.map(x => x.baseName)).size + ' traits' : '–';
+      document.getElementById('sum-eye-g2').textContent = ((g2.byCat['Face-wear'] || []).length + (g2.byCat['Face-laser'] || []).length) + ' traits';
+      document.getElementById('sum-mouth-g1').textContent = g1.byCat.MOUTH ? g1.byCat.MOUTH.length + ' options' : '–';
+      document.getElementById('sum-mouth-g2').textContent = (g2.byCat.Mouth || []).length + ' traits';
+      document.getElementById('sum-base-g1').textContent = g1.byCat.BASE ? new Set(g1.byCat.BASE.map(x => x.baseName)).size + ' bases' : '–';
+      document.getElementById('sum-base-g2').textContent = g2.byCat.Base ? g2.byCat.Base.length + ' traits' : '0 (uses G1 base)';
+      document.getElementById('sum-mask-g1').textContent = (g1.byCat.MASK || []).length + ' masks';
+      document.getElementById('sum-mask-g2').textContent = g2.byCat.Mask ? g2.byCat.Mask.length + ' traits' : '0 (uses G1 mask)';
+      document.getElementById('sum-bg-g1').textContent = (g1.byCat.BACKGROUND || []).length + ' backgrounds';
+      document.getElementById('sum-bg-g2').textContent = g2.byCat.Background ? g2.byCat.Background.length + ' traits' : '0 (uses G1 bg)';
+
+      const advice = [];
+      if (comp.g1Only.length > 0) advice.push('Add to G2 or keep G1-only: ' + comp.g1Only.map(x => x.g1.baseName).slice(0, 10).join(', ') + (comp.g1Only.length > 10 ? '…' : ''));
+      if (comp.g2Only.length > 0) advice.push('G2 has new traits not in G1: wire into main generator or keep as YourWojak-only.');
+      advice.push('G2 uses fill/outline + custom palette; G1 uses pre-colored variant files. Default colors in G2 should match G1 variant names where possible.');
+      document.getElementById('advice-list').innerHTML = advice.map(a => '<li>' + a + '</li>').join('');
+    }
+
+    function renderBoth(comp) {
+      document.getElementById('both-count').textContent = '(' + comp.both.length + ')';
+      document.getElementById('both-body').innerHTML = comp.both.map(({ g1, g2 }) => {
+        const variants = (g1.variants && g1.variants.length) ? g1.variants.join(', ') : '–';
+        const g2Id = g2 ? g2.id : '–';
+        return '<tr><td class="cat">' + (g1.category || '') + '</td><td>' + (g1.baseName || '') + '</td><td>' + variants + '</td><td>' + (g2Id || '') + '</td></tr>';
+      }).join('');
+    }
+
+    function renderG1Only(comp) {
+      document.getElementById('g1-only-count').textContent = '(' + comp.g1Only.length + ')';
+      document.getElementById('g1-only-body').innerHTML = comp.g1Only.map(({ g1 }) => {
+        const variants = (g1.variants && g1.variants.length) ? [...new Set(g1.variants)].join(', ') : '1 variant';
+        return '<tr><td class="cat">' + (g1.category || '') + '</td><td>' + (g1.baseName || '') + '</td><td>' + variants + '</td></tr>';
+      }).join('');
+    }
+
+    function renderG2Only(comp) {
+      document.getElementById('g2-only-count').textContent = '(' + comp.g2Only.length + ')';
+      document.getElementById('g2-only-body').innerHTML = comp.g2Only.map(({ g2 }) => {
+        return '<tr><td class="cat">' + (g2.category || '') + '</td><td>' + (g2.name || g2.id) + '</td><td>' + (g2.id || '') + '</td></tr>';
+      }).join('');
+    }
+
+    function renderByCategory(g1, g2) {
+      const catPairs = [
+        ['Clothes', 'CLOTHES'],
+        ['Head', 'HEAD'],
+        ['Face-wear', 'EYE'],
+        ['Face-laser', 'EYE'],
+        ['Mouth', 'MOUTH'],
+        ['Base', 'BASE'],
+        ['Mask', 'MASK'],
+        ['Background', 'BACKGROUND']
+      ];
+      const html = catPairs.map(([label, g1Cat]) => {
+        const g1Items = g1.byCat[g1Cat] || [];
+        const g2Items = g2.byCat[label] || [];
+        let g1Text;
+        if (g1Cat === 'BASE' && g1Items.length) {
+          const variants = [...new Set(g1Items.map(x => x.variant).filter(Boolean))];
+          g1Text = 'Base (' + (variants.length ? variants.join(', ') : '1 variant') + ')';
+        } else if (g1Cat === 'BACKGROUND') {
+          g1Text = g1Items.length + ' backgrounds';
+        } else {
+          const names = [...new Set(g1Items.map(x => x.baseName))];
+          g1Text = names.slice(0, 60).join(', ') + (names.length > 60 ? '…' : '');
+        }
+        const g2Text = (g2Items.map(t => t.name || t.id).join(', ') || '–');
+        return '<div style="margin-bottom:24px"><h3 style="font-size:14px;color:var(--text2);margin-bottom:8px">' + label + '</h3>' +
+          '<table><tr><th style="width:50%">Generator 1</th><th>Generator 2</th></tr><tr>' +
+          '<td style="vertical-align:top;color:var(--text2);font-size:12px">' + (g1Text || '–') + '</td>' +
+          '<td style="vertical-align:top;color:var(--text2);font-size:12px">' + g2Text + '</td></tr></table></div>';
+      }).join('');
+      document.getElementById('by-category-body').innerHTML = html;
+    }
+
+    document.querySelectorAll('.tabs button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('section').forEach(s => s.classList.remove('visible'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('visible');
+      });
+    });
+
+    (async () => {
+      let g1Manifest, g2Manifest;
+      try {
+        const [r1, r2] = await Promise.all([
+          fetch('/assets/wojak-layers/manifest.json'),
+          fetch('/assets/wojak-layers/YourWojak-layers/manifest.json')
+        ]);
+        if (!r1.ok || !r2.ok) throw new Error('Failed to load manifests');
+        g1Manifest = await r1.json();
+        g2Manifest = await r2.json();
+      } catch (e) {
+        document.getElementById('load-error').style.display = 'block';
+        document.getElementById('load-error').textContent = 'Could not load manifests. Run the dev server (npm run dev) and open this page from localhost. ' + e.message;
+        return;
+      }
+
+      const g1 = parseG1(g1Manifest);
+      const g2 = parseG2(g2Manifest);
+      const comp = runComparison(g1, g2);
+
+      renderSummary(g1, g2, comp);
+      renderBoth(comp);
+      renderG1Only(comp);
+      renderG2Only(comp);
+      renderByCategory(g1, g2);
+    })();
+  </script>
+</body>
+</html>

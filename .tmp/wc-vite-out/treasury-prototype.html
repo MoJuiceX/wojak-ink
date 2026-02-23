@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Treasury - Wojak.ink</title>
+  <style>
+    /* ============================================
+       CSS RESET & BASE STYLES
+       Mobile-first approach: base styles for <768px
+       ============================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      /* Theme colors - unchanged */
+      --color-bg: #000000;
+      --color-bg-card: #111111;
+      --color-bg-hover: #1a1a1a;
+      --color-accent: #ff8800;
+      --color-accent-hover: #ff9922;
+      --color-positive: #22c55e;
+      --color-negative: #ef4444;
+      --color-text: #ffffff;
+      --color-text-muted: #888888;
+      --color-border: #333333;
+
+      /* Spacing */
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+
+      /* Border radius */
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+
+      /* Touch target minimum */
+      --touch-target: 48px;
+    }
+
+    html {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation; /* Prevent double-tap zoom */
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* ============================================
+       MAIN CONTENT AREA
+       Mobile: vertical stack
+       Desktop: 3-column grid
+       ============================================ */
+    .treasury-main {
+      padding: var(--spacing-md);
+      padding-top: 80px; /* Space for header */
+      max-width: 1600px;
+      margin: 0 auto;
+
+      /* Mobile: vertical stack */
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-lg);
+    }
+
+    /* ============================================
+       LEFT SECTION: Treasury Overview
+       Mobile: full width, compact summary
+       Desktop: ~25-30% width column
+       ============================================ */
+    .treasury-overview {
+      background: var(--color-bg-card);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-md);
+      border: 1px solid var(--color-border);
+    }
+
+    .treasury-total {
+      text-align: center;
+      padding: var(--spacing-md) 0;
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .treasury-total-label {
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .treasury-total-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--color-accent);
+      line-height: 1.1;
+    }
+
+    .treasury-total-xch {
+      font-size: 1rem;
+      color: var(--color-text-muted);
+      margin-top: var(--spacing-xs);
+    }
+
+    .treasury-breakdown {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .breakdown-item {
+      background: var(--color-bg);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-md);
+      text-align: center;
+    }
+
+    .breakdown-label {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .breakdown-value {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-text);
+    }
+
+    .breakdown-subtext {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    .treasury-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: var(--spacing-md);
+      border-top: 1px solid var(--color-border);
+    }
+
+    .last-updated {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    .refresh-btn {
+      background: var(--color-accent);
+      color: var(--color-bg);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: var(--spacing-sm) var(--spacing-md);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      min-height: var(--touch-target);
+      min-width: var(--touch-target);
+      transition: all 0.15s ease;
+    }
+
+    .refresh-btn:hover {
+      background: var(--color-accent-hover);
+    }
+
+    .refresh-btn:active {
+      transform: scale(0.95);
+    }
+
+    .refresh-btn.loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    /* XCH Price display */
+    .xch-price-display {
+      background: var(--color-bg);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-md);
+      text-align: center;
+      margin-bottom: var(--spacing-md);
+    }
+
+    .xch-price-label {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+    }
+
+    .xch-price-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-positive);
+    }
+
+    /* ============================================
+       MIDDLE SECTION: Bubble Map (HERO)
+       The star of the page - largest and most prominent
+       Mobile: full width, large vertical space
+       Desktop: ~40-50% width, extra breathing room
+       ============================================ */
+    .bubble-map-section {
+      flex: 1;
+      min-height: 400px; /* Ensure prominence on mobile */
+    }
+
+    .bubble-map-container {
+      position: relative;
+      width: 100%;
+      height: 450px; /* Mobile height */
+      background: linear-gradient(180deg, #1a0f00 0%, #0d0700 100%);
+      background-image: url('/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Orange Grove.png');
+      background-size: cover;
+      background-position: center;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+      touch-action: none; /* Enable custom touch handling */
+    }
+
+    .bubble-map-header {
+      position: absolute;
+      top: var(--spacing-md);
+      left: var(--spacing-md);
+      right: var(--spacing-md);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .bubble-map-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-text);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .bubble-count {
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+      background: rgba(0,0,0,0.5);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border-radius: var(--radius-sm);
+    }
+
+    /* Individual bubble styling */
+    .crypto-bubble {
+      position: absolute;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2), transparent 60%),
+                  linear-gradient(135deg, var(--color-accent) 0%, #cc6600 100%);
+      box-shadow:
+        0 4px 20px rgba(255, 136, 0, 0.3),
+        inset 0 -4px 10px rgba(0,0,0,0.2),
+        inset 0 4px 10px rgba(255,255,255,0.1);
+      transition: transform 0.1s ease;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .crypto-bubble:active {
+      transform: scale(0.95);
+    }
+
+    .crypto-bubble.popping {
+      animation: bubblePop 0.3s ease-out forwards;
+    }
+
+    .crypto-bubble.spawning {
+      animation: bubbleSpawn 0.4s ease-out;
+    }
+
+    .crypto-bubble.breathing {
+      animation: bubbleBreathing 3s ease-in-out infinite;
+    }
+
+    @keyframes bubblePop {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.5; }
+      100% { transform: scale(0); opacity: 0; }
+    }
+
+    @keyframes bubbleSpawn {
+      0% { transform: scale(0); opacity: 0; }
+      60% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes bubbleBreathing {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+
+    .bubble-logo {
+      width: 50%;
+      height: 50%;
+      border-radius: 50%;
+      object-fit: cover;
+      pointer-events: none;
+    }
+
+    .bubble-value {
+      position: absolute;
+      bottom: 8%;
+      font-size: 0.65em;
+      font-weight: 700;
+      color: white;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+      white-space: nowrap;
+    }
+
+    .bubble-symbol {
+      position: absolute;
+      top: 8%;
+      font-size: 0.5em;
+      font-weight: 600;
+      color: rgba(255,255,255,0.9);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+
+    /* Particles (oranges) */
+    .particle {
+      position: absolute;
+      font-size: 1.5rem;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* Hint text below bubble map */
+    .bubble-hint {
+      text-align: center;
+      padding: var(--spacing-md) 0;
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+    }
+
+    /* ============================================
+       RIGHT SECTION: NFTs
+       Mobile: stacks below bubbles
+       Desktop: ~20-30% width column
+       ============================================ */
+    .nft-section {
+      background: var(--color-bg-card);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-md);
+      border: 1px solid var(--color-border);
+    }
+
+    .nft-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--spacing-md);
+    }
+
+    .nft-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+
+    .back-btn {
+      background: transparent;
+      color: var(--color-accent);
+      border: 1px solid var(--color-accent);
+      border-radius: var(--radius-sm);
+      padding: var(--spacing-sm) var(--spacing-md);
+      font-size: 0.875rem;
+      cursor: pointer;
+      min-height: var(--touch-target);
+      transition: all 0.15s ease;
+      display: none; /* Hidden by default, shown when viewing collection */
+    }
+
+    .back-btn:hover {
+      background: var(--color-accent);
+      color: var(--color-bg);
+    }
+
+    .back-btn:active {
+      transform: scale(0.95);
+    }
+
+    .back-btn.visible {
+      display: block;
+    }
+
+    /* Collection thumbnails grid */
+    .nft-collections {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--spacing-md);
+    }
+
+    .collection-thumb {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      cursor: pointer;
+      background: var(--color-bg);
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .collection-thumb:hover {
+      border-color: var(--color-accent);
+      transform: translateY(-2px);
+    }
+
+    .collection-thumb:active {
+      transform: scale(0.95);
+    }
+
+    .collection-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .collection-thumb-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.9));
+      padding: var(--spacing-sm);
+    }
+
+    .collection-name {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--color-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .collection-count {
+      font-size: 0.625rem;
+      color: var(--color-text-muted);
+    }
+
+    /* Expanded collection grid (when viewing single collection) */
+    .nft-grid {
+      display: none;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--spacing-sm);
+    }
+
+    .nft-grid.visible {
+      display: grid;
+    }
+
+    .nft-item {
+      aspect-ratio: 1;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background: var(--color-bg);
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .nft-item:hover {
+      transform: scale(1.02);
+    }
+
+    .nft-item:active {
+      transform: scale(0.98);
+    }
+
+    .nft-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Small holdings list (tokens < $1) */
+    .small-holdings {
+      margin-top: var(--spacing-lg);
+      padding-top: var(--spacing-md);
+      border-top: 1px solid var(--color-border);
+    }
+
+    .small-holdings-title {
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .small-holdings-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-xs);
+    }
+
+    .small-holding-chip {
+      background: var(--color-bg);
+      border-radius: var(--radius-full);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    /* ============================================
+       DESKTOP LAYOUT (min-width: 768px)
+       Three-column grid layout
+       ============================================ */
+    @media (min-width: 768px) {
+      .treasury-main {
+        flex-direction: row;
+        align-items: flex-start;
+        padding: var(--spacing-xl);
+        padding-top: 100px;
+        gap: var(--spacing-xl);
+      }
+
+      /* Left column: ~25% */
+      .treasury-overview {
+        flex: 0 0 280px;
+        min-width: 260px;
+        max-width: 320px;
+        position: sticky;
+        top: 100px;
+      }
+
+      /* Middle column: ~50% (hero - biggest) */
+      .bubble-map-section {
+        flex: 1 1 auto;
+        min-width: 400px;
+      }
+
+      .bubble-map-container {
+        height: 550px; /* Taller on desktop */
+      }
+
+      /* Right column: ~25% */
+      .nft-section {
+        flex: 0 0 280px;
+        min-width: 260px;
+        max-width: 320px;
+        position: sticky;
+        top: 100px;
+        max-height: calc(100vh - 120px);
+        overflow-y: auto;
+      }
+
+      .nft-collections {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .nft-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* ============================================
+       LARGE DESKTOP (min-width: 1200px)
+       Even more breathing room for bubble map
+       ============================================ */
+    @media (min-width: 1200px) {
+      .treasury-overview {
+        flex: 0 0 300px;
+      }
+
+      .bubble-map-container {
+        height: 600px;
+      }
+
+      .nft-section {
+        flex: 0 0 320px;
+      }
+
+      .nft-collections {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-md);
+      }
+
+      .nft-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    /* ============================================
+       CONFETTI OVERLAY
+       Full-screen celebration when all bubbles popped
+       ============================================ */
+    .confetti-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    .confetti-particle {
+      position: absolute;
+      font-size: 1.5rem;
+      animation: confettiFall 4s linear forwards;
+    }
+
+    @keyframes confettiFall {
+      0% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    /* ============================================
+       LOADING SKELETON
+       ============================================ */
+    .skeleton {
+      background: linear-gradient(90deg, var(--color-bg-card) 25%, var(--color-bg-hover) 50%, var(--color-bg-card) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: var(--radius-md);
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  </style>
+</head>
+<body>
+  <!--
+    TREASURY PAGE MAIN CONTENT
+    Header and sidebar are NOT included per requirements.
+    This is just the main content area.
+  -->
+
+  <main class="treasury-main">
+    <!-- ============================================
+         LEFT SECTION: Treasury Overview
+         Shows total value, breakdowns, XCH price
+         Mobile: appears first, full width
+         Desktop: narrow left column
+         ============================================ -->
+    <aside class="treasury-overview" aria-label="Treasury Summary">
+      <div class="xch-price-display">
+        <div class="xch-price-label">XCH Price</div>
+        <div class="xch-price-value" id="xch-price">$0.00</div>
+      </div>
+
+      <div class="treasury-total">
+        <div class="treasury-total-label">Total Treasury Value</div>
+        <div class="treasury-total-value" id="total-usd">$0</div>
+        <div class="treasury-total-xch" id="total-xch">0 XCH</div>
+      </div>
+
+      <div class="treasury-breakdown">
+        <div class="breakdown-item">
+          <div class="breakdown-label">XCH Holdings</div>
+          <div class="breakdown-value" id="xch-value">$0</div>
+          <div class="breakdown-subtext" id="xch-amount">0 XCH</div>
+        </div>
+        <div class="breakdown-item">
+          <div class="breakdown-label">CAT Tokens</div>
+          <div class="breakdown-value" id="cat-value">$0</div>
+          <div class="breakdown-subtext" id="cat-count">0 tokens</div>
+        </div>
+      </div>
+
+      <div class="treasury-meta">
+        <div class="last-updated" id="last-updated">Never updated</div>
+        <button class="refresh-btn" id="refresh-btn" aria-label="Refresh treasury data">
+          Refresh
+        </button>
+      </div>
+    </aside>
+
+    <!-- ============================================
+         MIDDLE SECTION: Bubble Map (HERO)
+         The star of the page - largest and most prominent
+         Bubbles represent token holdings with physics
+         ============================================ -->
+    <section class="bubble-map-section" aria-label="Token Bubble Map">
+      <div class="bubble-map-container" id="bubble-container">
+        <div class="bubble-map-header">
+          <span class="bubble-map-title">Token Holdings</span>
+          <span class="bubble-count" id="bubble-count">0 / 0 popped</span>
+        </div>
+        <!-- Bubbles are dynamically inserted here -->
+      </div>
+      <div class="bubble-hint">
+        Tap bubbles to pop! Shake device to reset.
+      </div>
+    </section>
+
+    <!-- ============================================
+         RIGHT SECTION: NFT Collections
+         Shows collection thumbnails, expands to grid
+         Mobile: stacks below bubbles
+         Desktop: narrow right column
+         ============================================ -->
+    <aside class="nft-section" aria-label="NFT Collections">
+      <div class="nft-header">
+        <h2 class="nft-title" id="nft-title">NFT Collections</h2>
+        <button class="back-btn" id="back-btn" aria-label="Back to collections">
+          &larr; Back
+        </button>
+      </div>
+
+      <!-- Collection thumbnails (default view) -->
+      <div class="nft-collections" id="nft-collections">
+        <!-- Dynamically populated -->
+      </div>
+
+      <!-- Expanded collection grid (shown when collection selected) -->
+      <div class="nft-grid" id="nft-grid">
+        <!-- Dynamically populated -->
+      </div>
+
+      <!-- Small holdings (tokens < $1) -->
+      <div class="small-holdings" id="small-holdings">
+        <div class="small-holdings-title">Small Holdings (&lt;$1)</div>
+        <div class="small-holdings-list" id="small-holdings-list">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Confetti overlay for celebration -->
+  <div class="confetti-overlay" id="confetti-overlay"></div>
+
+  <script>
+    /**
+     * ============================================
+     * TREASURY PAGE JAVASCRIPT
+     *
+     * Handles:
+     * - Data fetching with localStorage cache
+     * - Fallback to dummy data
+     * - Bubble physics simulation
+     * - Bubble pop interactions
+     * - NFT collection view switching
+     * ============================================
+     */
+
+    // ============================================
+    // CONFIGURATION & CONSTANTS
+    // ============================================
+    const CACHE_KEY = 'treasuryCache';
+    const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
+    const RESPAWN_DELAY = 30000; // 30 seconds after pop
+
+    // Bubble size configuration - LARGER for prominence
+    const BUBBLE_CONFIG = {
+      minRadius: 40,   // Increased from 28
+      maxRadius: 90,   // Increased from 58
+      mobileMinRadius: 35,
+      mobileMaxRadius: 75,
+    };
+
+    // ============================================
+    // HARDCODED FALLBACK DATA (from screenshots)
+    // Used when no cache exists and API fails
+    // ============================================
+    const FALLBACK_DATA = {
+      tokens: [
+        { id: 'xch', name: 'Chia', symbol: 'XCH', amount: 146.0, priceUSD: 5.27, valueUSD: 769.42, logoURL: 'https://via.placeholder.com/100/4ade80/000?text=XCH' },
+        { id: 'dbx', name: 'dexie bucks', symbol: 'DBX', amount: 5000, priceUSD: 0.015, valueUSD: 75.00, logoURL: 'https://via.placeholder.com/100/8b5cf6/fff?text=DBX' },
+        { id: 'spx', name: 'SpaceMiles', symbol: 'SPX', amount: 2500, priceUSD: 0.02, valueUSD: 50.00, logoURL: 'https://via.placeholder.com/100/3b82f6/fff?text=SPX' },
+        { id: 'sbt', name: 'Stable Coin', symbol: 'SBT', amount: 25.0, priceUSD: 1.00, valueUSD: 25.00, logoURL: 'https://via.placeholder.com/100/22c55e/fff?text=SBT' },
+        { id: 'hob', name: 'HOA Bucks', symbol: 'HOB', amount: 100, priceUSD: 0.10, valueUSD: 10.00, logoURL: 'https://via.placeholder.com/100/f59e0b/fff?text=HOB' },
+        { id: 'mrm', name: 'Marmot', symbol: 'MRM', amount: 500, priceUSD: 0.008, valueUSD: 4.00, logoURL: 'https://via.placeholder.com/100/ec4899/fff?text=MRM' },
+        { id: 'wjk', name: 'Wojak Token', symbol: 'WJK', amount: 1000, priceUSD: 0.003, valueUSD: 3.00, logoURL: 'https://via.placeholder.com/100/ff8800/fff?text=WJK' },
+        { id: 'pzz', name: 'Pizza Token', symbol: 'PIZZA', amount: 50, priceUSD: 0.02, valueUSD: 1.00, logoURL: 'https://via.placeholder.com/100/ef4444/fff?text=PZZ' },
+        // Small holdings (< $1)
+        { id: 'cat1', name: 'CatCoin', symbol: 'CAT', amount: 100, priceUSD: 0.005, valueUSD: 0.50, logoURL: 'https://via.placeholder.com/100/666/fff?text=CAT' },
+        { id: 'dog1', name: 'DogToken', symbol: 'DOG', amount: 200, priceUSD: 0.001, valueUSD: 0.20, logoURL: 'https://via.placeholder.com/100/666/fff?text=DOG' },
+      ],
+      totalUSD: 938.12,
+      totalXCH: 178.01,
+      xchPriceUSD: 5.27,
+      lastUpdated: Date.now() - (24 * 60 * 60 * 1000), // 1 day ago
+    };
+
+    // Mock NFT collections
+    const NFT_COLLECTIONS = [
+      { id: 'wojaks', name: 'Wojak Originals', count: 24, image: 'https://via.placeholder.com/200/ff8800/fff?text=Wojaks' },
+      { id: 'pepes', name: 'Rare Pepes', count: 12, image: 'https://via.placeholder.com/200/22c55e/fff?text=Pepes' },
+      { id: 'punks', name: 'Chia Punks', count: 8, image: 'https://via.placeholder.com/200/8b5cf6/fff?text=Punks' },
+      { id: 'cats', name: 'Cool Cats', count: 15, image: 'https://via.placeholder.com/200/3b82f6/fff?text=Cats' },
+      { id: 'apes', name: 'Bored Apes', count: 6, image: 'https://via.placeholder.com/200/f59e0b/fff?text=Apes' },
+      { id: 'pixels', name: 'Pixel Art', count: 20, image: 'https://via.placeholder.com/200/ec4899/fff?text=Pixels' },
+    ];
+
+    // ============================================
+    // STATE
+    // ============================================
+    let treasuryData = null;
+    let bubbles = [];
+    let particles = [];
+    let animationFrameId = null;
+    let respawnTimers = new Map();
+    let currentCollection = null;
+
+    // ============================================
+    // DOM ELEMENTS
+    // ============================================
+    const elements = {
+      xchPrice: document.getElementById('xch-price'),
+      totalUsd: document.getElementById('total-usd'),
+      totalXch: document.getElementById('total-xch'),
+      xchValue: document.getElementById('xch-value'),
+      xchAmount: document.getElementById('xch-amount'),
+      catValue: document.getElementById('cat-value'),
+      catCount: document.getElementById('cat-count'),
+      lastUpdated: document.getElementById('last-updated'),
+      refreshBtn: document.getElementById('refresh-btn'),
+      bubbleContainer: document.getElementById('bubble-container'),
+      bubbleCount: document.getElementById('bubble-count'),
+      nftCollections: document.getElementById('nft-collections'),
+      nftGrid: document.getElementById('nft-grid'),
+      nftTitle: document.getElementById('nft-title'),
+      backBtn: document.getElementById('back-btn'),
+      smallHoldingsList: document.getElementById('small-holdings-list'),
+      confettiOverlay: document.getElementById('confetti-overlay'),
+    };
+
+    // ============================================
+    // UTILITY FUNCTIONS
+    // ============================================
+
+    function formatCurrency(value) {
+      if (value >= 1000) {
+        return '$' + (value / 1000).toFixed(1) + 'k';
+      }
+      return '$' + value.toFixed(2);
+    }
+
+    function formatXch(value) {
+      return value.toFixed(2) + ' XCH';
+    }
+
+    function getRelativeTime(timestamp) {
+      const diff = Date.now() - timestamp;
+      const minutes = Math.floor(diff / 60000);
+      const hours = Math.floor(diff / 3600000);
+      const days = Math.floor(diff / 86400000);
+
+      if (minutes < 1) return 'Just now';
+      if (minutes < 60) return `${minutes}m ago`;
+      if (hours < 24) return `${hours}h ago`;
+      return `${days}d ago`;
+    }
+
+    // ============================================
+    // CACHE FUNCTIONS
+    // ============================================
+
+    function loadCache() {
+      try {
+        const cached = localStorage.getItem(CACHE_KEY);
+        return cached ? JSON.parse(cached) : null;
+      } catch (e) {
+        console.warn('Failed to load cache:', e);
+        return null;
+      }
+    }
+
+    function saveCache(data) {
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+      } catch (e) {
+        console.warn('Failed to save cache:', e);
+      }
+    }
+
+    function isCacheFresh(timestamp) {
+      return Date.now() - timestamp < CACHE_DURATION;
+    }
+
+    // ============================================
+    // DATA FETCHING
+    // ============================================
+
+    async function fetchTreasuryData(forceRefresh = false) {
+      // First, try cache
+      const cached = loadCache();
+
+      if (!forceRefresh && cached && isCacheFresh(cached.lastUpdated)) {
+        console.log('[Treasury] Using fresh cache');
+        return cached;
+      }
+
+      // If we have stale cache, use it while fetching
+      if (cached) {
+        console.log('[Treasury] Using stale cache, fetching in background');
+        renderTreasuryData(cached);
+      }
+
+      // Simulate API fetch (in real app, this would be actual API calls)
+      try {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // For demo, just update the fallback data with current timestamp
+        const freshData = {
+          ...FALLBACK_DATA,
+          lastUpdated: Date.now(),
+        };
+
+        saveCache(freshData);
+        console.log('[Treasury] Fresh data fetched and cached');
+        return freshData;
+      } catch (error) {
+        console.warn('[Treasury] Fetch failed, using fallback');
+        // Return cached data or fallback
+        return cached || FALLBACK_DATA;
+      }
+    }
+
+    // ============================================
+    // RENDERING
+    // ============================================
+
+    function renderTreasuryData(data) {
+      treasuryData = data;
+
+      // Update overview section
+      elements.xchPrice.textContent = formatCurrency(data.xchPriceUSD);
+      elements.totalUsd.textContent = formatCurrency(data.totalUSD);
+      elements.totalXch.textContent = formatXch(data.totalXCH);
+
+      // XCH holdings
+      const xchToken = data.tokens.find(t => t.id === 'xch');
+      if (xchToken) {
+        elements.xchValue.textContent = formatCurrency(xchToken.valueUSD);
+        elements.xchAmount.textContent = formatXch(xchToken.amount);
+      }
+
+      // CAT tokens (non-XCH)
+      const catTokens = data.tokens.filter(t => t.id !== 'xch');
+      const catTotalValue = catTokens.reduce((sum, t) => sum + t.valueUSD, 0);
+      elements.catValue.textContent = formatCurrency(catTotalValue);
+      elements.catCount.textContent = `${catTokens.length} tokens`;
+
+      // Last updated
+      elements.lastUpdated.textContent = `Updated ${getRelativeTime(data.lastUpdated)}`;
+
+      // Render small holdings
+      renderSmallHoldings(data.tokens);
+
+      // Initialize bubbles
+      initBubbles(data.tokens);
+    }
+
+    function renderSmallHoldings(tokens) {
+      const smallTokens = tokens.filter(t => t.valueUSD < 1 && t.id !== 'xch');
+
+      elements.smallHoldingsList.innerHTML = smallTokens.map(token => `
+        <span class="small-holding-chip">${token.symbol}</span>
+      `).join('');
+    }
+
+    // ============================================
+    // BUBBLE PHYSICS & RENDERING
+    // ============================================
+
+    function initBubbles(tokens) {
+      // Clear existing bubbles
+      const existingBubbles = elements.bubbleContainer.querySelectorAll('.crypto-bubble');
+      existingBubbles.forEach(b => b.remove());
+      bubbles = [];
+
+      // Filter tokens with value >= $1
+      const visibleTokens = tokens.filter(t => t.valueUSD >= 1);
+
+      // Get container dimensions
+      const rect = elements.bubbleContainer.getBoundingClientRect();
+      const width = rect.width;
+      const height = rect.height;
+
+      // Determine radius range based on screen size
+      const isMobile = window.innerWidth < 768;
+      const minRadius = isMobile ? BUBBLE_CONFIG.mobileMinRadius : BUBBLE_CONFIG.minRadius;
+      const maxRadius = isMobile ? BUBBLE_CONFIG.mobileMaxRadius : BUBBLE_CONFIG.maxRadius;
+
+      // Calculate value range for scaling
+      const values = visibleTokens.map(t => t.valueUSD);
+      const maxValue = Math.max(...values, 1);
+      const minValue = Math.min(...values, 1);
+
+      // Create bubbles
+      visibleTokens.forEach(token => {
+        const radius = calculateRadius(token.valueUSD, minValue, maxValue, minRadius, maxRadius);
+
+        const bubble = {
+          id: token.id,
+          token: token,
+          x: Math.random() * (width - radius * 2) + radius,
+          y: Math.random() * (height - radius * 2 - 60) + radius + 50, // Avoid header
+          vx: (Math.random() - 0.5) * 0.8,
+          vy: (Math.random() - 0.5) * 0.8,
+          radius: radius,
+          element: null,
+          popping: false,
+          hidden: false,
+        };
+
+        bubble.element = createBubbleElement(bubble);
+        elements.bubbleContainer.appendChild(bubble.element);
+        bubbles.push(bubble);
+      });
+
+      // Start physics animation
+      startPhysics();
+      updateBubbleCount();
+    }
+
+    function calculateRadius(value, minValue, maxValue, minRadius, maxRadius) {
+      if (value <= 0) return minRadius;
+
+      // Use logarithmic scale for better visual balance
+      const logMin = Math.log(Math.max(minValue, 1));
+      const logMax = Math.log(Math.max(maxValue, 1));
+      const logValue = Math.log(Math.max(value, 1));
+
+      const ratio = logMax > logMin ? (logValue - logMin) / (logMax - logMin) : 1;
+      return minRadius + ratio * (maxRadius - minRadius);
+    }
+
+    function createBubbleElement(bubble) {
+      const el = document.createElement('div');
+      el.className = 'crypto-bubble breathing';
+      el.setAttribute('role', 'button');
+      el.setAttribute('aria-label', `Pop ${bubble.token.name} bubble worth ${formatCurrency(bubble.token.valueUSD)}`);
+      el.setAttribute('tabindex', '0');
+
+      el.innerHTML = `
+        <span class="bubble-symbol">${bubble.token.symbol}</span>
+        <img class="bubble-logo" src="${bubble.token.logoURL}" alt="${bubble.token.symbol}"
+             onerror="this.src='https://via.placeholder.com/100/ff8800/fff?text=${bubble.token.symbol.charAt(0)}'">
+        <span class="bubble-value">${formatCurrency(bubble.token.valueUSD)}</span>
+      `;
+
+      // Touch/click handler
+      const handlePop = (e) => {
+        e.preventDefault();
+        popBubble(bubble, e);
+      };
+
+      el.addEventListener('click', handlePop);
+      el.addEventListener('touchend', handlePop);
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          popBubble(bubble, e);
+        }
+      });
+
+      return el;
+    }
+
+    function updateBubblePosition(bubble) {
+      if (!bubble.element || bubble.hidden) return;
+
+      bubble.element.style.left = `${bubble.x - bubble.radius}px`;
+      bubble.element.style.top = `${bubble.y - bubble.radius}px`;
+      bubble.element.style.width = `${bubble.radius * 2}px`;
+      bubble.element.style.height = `${bubble.radius * 2}px`;
+      bubble.element.style.fontSize = `${bubble.radius * 0.3}px`;
+    }
+
+    function startPhysics() {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+
+      const rect = elements.bubbleContainer.getBoundingClientRect();
+      const width = rect.width;
+      const height = rect.height;
+
+      const friction = 0.995;
+      const bounce = 0.8;
+      const minSpeed = 0.15;
+
+      function animate() {
+        for (let i = 0; i < bubbles.length; i++) {
+          const bubble = bubbles[i];
+          if (bubble.hidden) continue;
+
+          // Apply velocity
+          bubble.x += bubble.vx;
+          bubble.y += bubble.vy;
+
+          // Apply friction
+          bubble.vx *= friction;
+          bubble.vy *= friction;
+
+          // Add small random force to keep bubbles moving
+          if (Math.abs(bubble.vx) < minSpeed) {
+            bubble.vx += (Math.random() - 0.5) * 0.15;
+          }
+          if (Math.abs(bubble.vy) < minSpeed) {
+            bubble.vy += (Math.random() - 0.5) * 0.15;
+          }
+
+          // Wall collision
+          if (bubble.x - bubble.radius < 0) {
+            bubble.x = bubble.radius;
+            bubble.vx *= -bounce;
+          }
+          if (bubble.x + bubble.radius > width) {
+            bubble.x = width - bubble.radius;
+            bubble.vx *= -bounce;
+          }
+          if (bubble.y - bubble.radius < 50) { // Account for header
+            bubble.y = bubble.radius + 50;
+            bubble.vy *= -bounce;
+          }
+          if (bubble.y + bubble.radius > height) {
+            bubble.y = height - bubble.radius;
+            bubble.vy *= -bounce;
+          }
+
+          // Bubble-to-bubble collision
+          for (let j = i + 1; j < bubbles.length; j++) {
+            const other = bubbles[j];
+            if (other.hidden) continue;
+
+            const dx = other.x - bubble.x;
+            const dy = other.y - bubble.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const minDist = bubble.radius + other.radius;
+
+            if (distance < minDist && distance > 0) {
+              const nx = dx / distance;
+              const ny = dy / distance;
+
+              const dvx = bubble.vx - other.vx;
+              const dvy = bubble.vy - other.vy;
+              const dvn = dvx * nx + dvy * ny;
+
+              if (dvn > 0) {
+                const m1 = bubble.radius;
+                const m2 = other.radius;
+                const totalMass = m1 + m2;
+
+                const impulse = (2 * dvn) / totalMass;
+                bubble.vx -= impulse * m2 * nx * bounce;
+                bubble.vy -= impulse * m2 * ny * bounce;
+                other.vx += impulse * m1 * nx * bounce;
+                other.vy += impulse * m1 * ny * bounce;
+
+                // Separate overlapping bubbles
+                const overlap = minDist - distance;
+                const separationX = (overlap / 2) * nx;
+                const separationY = (overlap / 2) * ny;
+                bubble.x -= separationX;
+                bubble.y -= separationY;
+                other.x += separationX;
+                other.y += separationY;
+              }
+            }
+          }
+
+          updateBubblePosition(bubble);
+        }
+
+        animationFrameId = requestAnimationFrame(animate);
+      }
+
+      animationFrameId = requestAnimationFrame(animate);
+    }
+
+    // ============================================
+    // BUBBLE POP INTERACTIONS
+    // ============================================
+
+    function popBubble(bubble, event) {
+      if (bubble.popping || bubble.hidden) return;
+
+      bubble.popping = true;
+      bubble.element.classList.remove('breathing');
+      bubble.element.classList.add('popping');
+
+      // Play pop sound
+      playPopSound(bubble.token.valueUSD);
+
+      // Trigger haptic feedback
+      if (navigator.vibrate) {
+        navigator.vibrate(15);
+      }
+
+      // Create particles
+      createParticles(bubble.x, bubble.y);
+
+      // After animation, hide bubble
+      setTimeout(() => {
+        bubble.hidden = true;
+        bubble.popping = false;
+        bubble.element.style.display = 'none';
+        updateBubbleCount();
+
+        // Check if all popped
+        const allPopped = bubbles.every(b => b.hidden);
+        if (allPopped) {
+          triggerCelebration();
+        }
+      }, 300);
+
+      // Schedule respawn
+      const timer = setTimeout(() => {
+        respawnBubble(bubble);
+        respawnTimers.delete(bubble.id);
+      }, RESPAWN_DELAY);
+
+      respawnTimers.set(bubble.id, timer);
+    }
+
+    function respawnBubble(bubble) {
+      const rect = elements.bubbleContainer.getBoundingClientRect();
+
+      bubble.hidden = false;
+      bubble.x = Math.random() * (rect.width - bubble.radius * 2) + bubble.radius;
+      bubble.y = Math.random() * (rect.height - bubble.radius * 2 - 60) + bubble.radius + 50;
+      bubble.vx = (Math.random() - 0.5) * 0.6;
+      bubble.vy = (Math.random() - 0.5) * 0.6;
+
+      bubble.element.style.display = '';
+      bubble.element.classList.remove('popping');
+      bubble.element.classList.add('spawning');
+
+      setTimeout(() => {
+        bubble.element.classList.remove('spawning');
+        bubble.element.classList.add('breathing');
+      }, 400);
+
+      updateBubbleCount();
+    }
+
+    function updateBubbleCount() {
+      const popped = bubbles.filter(b => b.hidden).length;
+      const total = bubbles.length;
+      elements.bubbleCount.textContent = `${popped} / ${total} popped`;
+    }
+
+    // ============================================
+    // PARTICLES & EFFECTS
+    // ============================================
+
+    function createParticles(x, y) {
+      const emojis = ['🍊', '🍊', '🍊', '✨', '💫'];
+
+      for (let i = 0; i < 6; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        particle.style.left = `${x}px`;
+        particle.style.top = `${y}px`;
+
+        const angle = (Math.PI * 2 * i) / 6;
+        const speed = 4 + Math.random() * 4;
+        const vx = Math.cos(angle) * speed;
+        const vy = Math.sin(angle) * speed - 3;
+
+        elements.bubbleContainer.appendChild(particle);
+
+        // Animate particle
+        let opacity = 1;
+        let px = x;
+        let py = y;
+        let pvy = vy;
+
+        function animateParticle() {
+          px += vx;
+          py += pvy;
+          pvy += 0.3; // Gravity
+          opacity -= 0.02;
+
+          particle.style.left = `${px}px`;
+          particle.style.top = `${py}px`;
+          particle.style.opacity = opacity;
+
+          if (opacity > 0) {
+            requestAnimationFrame(animateParticle);
+          } else {
+            particle.remove();
+          }
+        }
+
+        requestAnimationFrame(animateParticle);
+      }
+    }
+
+    function triggerCelebration() {
+      // Play celebration sound
+      playCelebrationSound();
+
+      // Haptic pattern
+      if (navigator.vibrate) {
+        navigator.vibrate([50, 30, 50, 30, 50]);
+      }
+
+      // Create confetti
+      const emojis = ['🎉', '🎊', '✨', '💫', '⭐', '🌟', '🍊'];
+
+      for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.className = 'confetti-particle';
+          confetti.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+          confetti.style.left = `${Math.random() * window.innerWidth}px`;
+          confetti.style.top = `-30px`;
+          confetti.style.transform = `scale(${0.8 + Math.random() * 0.8})`;
+
+          elements.confettiOverlay.appendChild(confetti);
+
+          // Animate falling
+          let y = -30;
+          let x = parseFloat(confetti.style.left);
+          const vx = (Math.random() - 0.5) * 3;
+          let vy = 2 + Math.random() * 3;
+
+          function fall() {
+            x += vx;
+            y += vy;
+            vy += 0.1;
+
+            confetti.style.left = `${x}px`;
+            confetti.style.top = `${y}px`;
+
+            if (y < window.innerHeight + 50) {
+              requestAnimationFrame(fall);
+            } else {
+              confetti.remove();
+            }
+          }
+
+          requestAnimationFrame(fall);
+        }, i * 50);
+      }
+    }
+
+    // ============================================
+    // AUDIO
+    // ============================================
+
+    function playPopSound(value) {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioContext = new AudioContext();
+
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        // Higher value = deeper pitch
+        const maxValue = treasuryData ? Math.max(...treasuryData.tokens.map(t => t.valueUSD)) : 1000;
+        const valueRatio = Math.min(value / maxValue, 1);
+        const baseFreq = 800 - valueRatio * 500;
+
+        oscillator.frequency.setValueAtTime(baseFreq, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(80, audioContext.currentTime + 0.12);
+
+        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+
+        oscillator.type = 'sine';
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.15);
+      } catch (e) {
+        // Audio not supported
+      }
+    }
+
+    function playCelebrationSound() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioContext = new AudioContext();
+
+        const notes = [523, 659, 784, 1047];
+        notes.forEach((freq, i) => {
+          const osc = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+          osc.connect(gain);
+          gain.connect(audioContext.destination);
+
+          osc.frequency.value = freq;
+          osc.type = 'sine';
+
+          const startTime = audioContext.currentTime + i * 0.1;
+          gain.gain.setValueAtTime(0.15, startTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.2);
+
+          osc.start(startTime);
+          osc.stop(startTime + 0.2);
+        });
+      } catch (e) {
+        // Audio not supported
+      }
+    }
+
+    // ============================================
+    // NFT COLLECTIONS
+    // ============================================
+
+    function renderNftCollections() {
+      elements.nftCollections.innerHTML = NFT_COLLECTIONS.map(collection => `
+        <div class="collection-thumb"
+             role="button"
+             tabindex="0"
+             aria-label="View ${collection.name} NFTs"
+             data-collection-id="${collection.id}">
+          <img src="${collection.image}" alt="${collection.name}">
+          <div class="collection-thumb-overlay">
+            <div class="collection-name">${collection.name}</div>
+            <div class="collection-count">${collection.count} items</div>
+          </div>
+        </div>
+      `).join('');
+
+      // Add click handlers
+      elements.nftCollections.querySelectorAll('.collection-thumb').forEach(thumb => {
+        thumb.addEventListener('click', () => {
+          const collectionId = thumb.dataset.collectionId;
+          showCollection(collectionId);
+        });
+        thumb.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            const collectionId = thumb.dataset.collectionId;
+            showCollection(collectionId);
+          }
+        });
+      });
+    }
+
+    function showCollection(collectionId) {
+      const collection = NFT_COLLECTIONS.find(c => c.id === collectionId);
+      if (!collection) return;
+
+      currentCollection = collection;
+
+      // Update title
+      elements.nftTitle.textContent = collection.name;
+
+      // Show back button
+      elements.backBtn.classList.add('visible');
+
+      // Hide collections grid, show NFT grid
+      elements.nftCollections.style.display = 'none';
+      elements.nftGrid.classList.add('visible');
+
+      // Generate mock NFTs for this collection
+      const nftCount = Math.min(collection.count, 8);
+      elements.nftGrid.innerHTML = '';
+
+      for (let i = 1; i <= nftCount; i++) {
+        const nftItem = document.createElement('div');
+        nftItem.className = 'nft-item';
+        nftItem.setAttribute('role', 'button');
+        nftItem.setAttribute('tabindex', '0');
+        nftItem.setAttribute('aria-label', `${collection.name} #${i}`);
+        nftItem.innerHTML = `<img src="https://via.placeholder.com/150/${getRandomColor()}/fff?text=${collection.name.charAt(0)}${i}" alt="${collection.name} #${i}">`;
+        elements.nftGrid.appendChild(nftItem);
+      }
+    }
+
+    function hideCollection() {
+      currentCollection = null;
+
+      // Update title
+      elements.nftTitle.textContent = 'NFT Collections';
+
+      // Hide back button
+      elements.backBtn.classList.remove('visible');
+
+      // Show collections grid, hide NFT grid
+      elements.nftCollections.style.display = '';
+      elements.nftGrid.classList.remove('visible');
+    }
+
+    function getRandomColor() {
+      const colors = ['ff8800', '22c55e', '8b5cf6', '3b82f6', 'f59e0b', 'ec4899', 'ef4444'];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    // ============================================
+    // SHAKE DETECTION (Reset bubbles)
+    // ============================================
+
+    function setupShakeDetection() {
+      let lastX = 0, lastY = 0, lastZ = 0;
+      let lastShake = 0;
+      const shakeThreshold = 25;
+
+      window.addEventListener('devicemotion', (event) => {
+        const acc = event.accelerationIncludingGravity;
+        if (!acc || acc.x === null) return;
+
+        const deltaX = Math.abs(acc.x - lastX);
+        const deltaY = Math.abs(acc.y - lastY);
+        const deltaZ = Math.abs(acc.z - lastZ);
+
+        if (deltaX > shakeThreshold || deltaY > shakeThreshold || deltaZ > shakeThreshold) {
+          const now = Date.now();
+          if (now - lastShake > 1000) {
+            lastShake = now;
+            resetAllBubbles();
+          }
+        }
+
+        lastX = acc.x;
+        lastY = acc.y;
+        lastZ = acc.z;
+      });
+    }
+
+    function resetAllBubbles() {
+      // Clear respawn timers
+      respawnTimers.forEach(timer => clearTimeout(timer));
+      respawnTimers.clear();
+
+      // Respawn all hidden bubbles
+      bubbles.forEach(bubble => {
+        if (bubble.hidden) {
+          respawnBubble(bubble);
+        }
+      });
+
+      // Clear confetti
+      elements.confettiOverlay.innerHTML = '';
+
+      if (navigator.vibrate) {
+        navigator.vibrate([50, 30, 50]);
+      }
+    }
+
+    // ============================================
+    // EVENT HANDLERS
+    // ============================================
+
+    elements.refreshBtn.addEventListener('click', async () => {
+      elements.refreshBtn.classList.add('loading');
+      elements.refreshBtn.textContent = 'Loading...';
+
+      const data = await fetchTreasuryData(true);
+      renderTreasuryData(data);
+
+      elements.refreshBtn.classList.remove('loading');
+      elements.refreshBtn.textContent = 'Refresh';
+    });
+
+    elements.backBtn.addEventListener('click', hideCollection);
+
+    // Handle window resize
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        if (treasuryData) {
+          initBubbles(treasuryData.tokens);
+        }
+      }, 250);
+    });
+
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+
+    async function init() {
+      console.log('[Treasury] Initializing...');
+
+      // Render NFT collections
+      renderNftCollections();
+
+      // Setup shake detection
+      setupShakeDetection();
+
+      // Load and render treasury data
+      // First render cached/fallback immediately
+      const cached = loadCache();
+      if (cached) {
+        console.log('[Treasury] Rendering cached data immediately');
+        renderTreasuryData(cached);
+      } else {
+        console.log('[Treasury] No cache, using fallback');
+        renderTreasuryData(FALLBACK_DATA);
+      }
+
+      // Then fetch fresh data if stale
+      if (!cached || !isCacheFresh(cached.lastUpdated)) {
+        console.log('[Treasury] Cache stale, fetching fresh data');
+        const freshData = await fetchTreasuryData();
+        renderTreasuryData(freshData);
+      }
+    }
+
+    // Start the app
+    init();
+  </script>
+</body>
+</html>

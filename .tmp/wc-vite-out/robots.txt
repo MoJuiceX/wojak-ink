@@ -1,0 +1,74 @@
+# Wojak.ink robots.txt
+# https://wojak.ink
+
+# Default - allow all crawlers
+User-agent: *
+Allow: /
+Crawl-delay: 1
+
+# Google (primary search)
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+# Bing
+User-agent: Bingbot
+Allow: /
+
+# AI Crawlers - Welcome for GEO (Generative Engine Optimization)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Cohere-ai
+Allow: /
+
+User-agent: YouBot
+Allow: /
+
+# Social media crawlers
+User-agent: Twitterbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: Discordbot
+Allow: /
+
+# Block internal/private paths
+Disallow: /api/
+Disallow: /admin/
+Disallow: /.env
+Disallow: /node_modules/
+
+# Sitemaps
+Sitemap: https://wojak.ink/sitemap.xml
+
+# AI Content Summary
+# For AI-friendly content, see: https://wojak.ink/llms.txt

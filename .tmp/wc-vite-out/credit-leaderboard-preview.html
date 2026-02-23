@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Credit Leaderboard — Preview (mock data)</title>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --surface-hover: #1a1a24;
+      --border: rgba(255,255,255,0.08);
+      --text: #fff;
+      --text2: #a0a0b0;
+      --text3: #606070;
+      --primary: #ff6b00;
+      --gold: #fbbf24;
+      --silver: #94a3b8;
+      --bronze: #cd7f32;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 20px; }
+    .container { max-width: 900px; margin: 0 auto; }
+
+    .preview-banner {
+      background: rgba(255, 107, 0, 0.12);
+      border: 1px solid rgba(255, 107, 0, 0.3);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: var(--text2);
+    }
+    .preview-banner strong { color: var(--primary); }
+
+    .leaderboard-header { margin-bottom: 24px; }
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.02em; }
+    .header-desc { color: var(--text2); font-size: 14px; line-height: 1.6; }
+
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 14px;
+      background: var(--surface);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { text-align: left; padding: 14px 18px; color: var(--text3); font-weight: 500; font-size: 12px; border-bottom: 1px solid var(--border); }
+    td { padding: 16px 18px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover { background: var(--surface-hover); }
+    .rank { width: 44px; font-variant-numeric: tabular-nums; }
+    .wallet-cell { font-family: ui-monospace, monospace; font-size: 13px; }
+    .credits-cell { font-weight: 600; font-variant-numeric: tabular-nums; }
+    .mints-cell { color: var(--text2); font-variant-numeric: tabular-nums; }
+
+    tr.rank-1 { background: linear-gradient(90deg, rgba(251,191,36,0.08) 0%, transparent 100%); border-left: 3px solid var(--gold); }
+    tr.rank-2 { background: linear-gradient(90deg, rgba(148,163,184,0.06) 0%, transparent 100%); border-left: 3px solid var(--silver); }
+    tr.rank-3 { background: linear-gradient(90deg, rgba(205,127,50,0.06) 0%, transparent 100%); border-left: 3px solid var(--bronze); }
+    tr.rank-1 .rank-num { color: var(--gold); font-weight: 700; }
+    tr.rank-2 .rank-num { color: var(--silver); font-weight: 700; }
+    tr.rank-3 .rank-num { color: var(--bronze); font-weight: 700; }
+
+    .newest-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--primary);
+      background: rgba(255, 107, 0, 0.15);
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    .footer-note {
+      margin-top: 20px;
+      padding: 12px 16px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 10px;
+      font-size: 12px;
+      color: var(--text3);
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="preview-banner">
+      <strong>Preview — mock data.</strong> This page has no API calls. On localhost the real leaderboard fails because <code>/api/credits/leaderboard</code> is a Cloudflare Pages Function (not run by Vite). When deployed, the API and the credit-tracker worker run on Cloudflare; the newest trades (e.g. the one from 3 hours ago) are included after the worker runs every 30 minutes.
+    </div>
+
+    <div class="leaderboard-header">
+      <h1>Credit Leaderboard</h1>
+      <p class="header-desc">
+        Ranked by all-time credits earned. Credits from XCH spent on Wojak Farmers Plot NFTs. 100 credits = 1 free mint.
+      </p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="rank">#</th>
+            <th>Wallet</th>
+            <th style="text-align:right">Credits</th>
+            <th style="text-align:right">Available</th>
+            <th style="text-align:right">Paid mint</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="rank-1">
+            <td class="rank-num">1</td>
+            <td class="wallet-cell">xch18crwn…5qv5a <span class="newest-badge">Newest trade 3h ago</span></td>
+            <td class="credits-cell" style="text-align:right">127,350</td>
+            <td class="mints-cell" style="text-align:right">8</td>
+            <td class="mints-cell" style="text-align:right">2</td>
+          </tr>
+          <tr class="rank-2">
+            <td class="rank-num">2</td>
+            <td class="wallet-cell">xch1dxyvm…nskfn9</td>
+            <td class="credits-cell" style="text-align:right">98,420</td>
+            <td class="mints-cell" style="text-align:right">5</td>
+            <td class="mints-cell" style="text-align:right">4</td>
+          </tr>
+          <tr class="rank-3">
+            <td class="rank-num">3</td>
+            <td class="wallet-cell">xch1fgl5v…c3e3wp</td>
+            <td class="credits-cell" style="text-align:right">76,180</td>
+            <td class="mints-cell" style="text-align:right">3</td>
+            <td class="mints-cell" style="text-align:right">3</td>
+          </tr>
+          <tr>
+            <td class="rank-num" style="color: var(--text3)">4</td>
+            <td class="wallet-cell">xch1pp7zu…73jsxm</td>
+            <td class="credits-cell" style="text-align:right">45,220</td>
+            <td class="mints-cell" style="text-align:right">2</td>
+            <td class="mints-cell" style="text-align:right">1</td>
+          </tr>
+          <tr>
+            <td class="rank-num" style="color: var(--text3)">5</td>
+            <td class="wallet-cell">xch1mhs4e…5acn4k</td>
+            <td class="credits-cell" style="text-align:right">26,980</td>
+            <td class="mints-cell" style="text-align:right">1</td>
+            <td class="mints-cell" style="text-align:right">0</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="footer-note">
+      The row with “Newest trade 3h ago” is how the latest MintGarden trade (e.g. Wojak #1140) would show up once the worker has run: that buyer’s credits and rank update, and on the full verifier page you can expand the wallet to see the purchase with timestamp. Locally you only see this mock; after deploy, real data and the newest cell are included.
+    </p>
+  </div>
+</body>
+</html>

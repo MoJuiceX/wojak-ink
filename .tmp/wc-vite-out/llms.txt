@@ -1,0 +1,86 @@
+# Wojak.ink - NFT Games & Community
+# AI-friendly content summary for LLMs (ChatGPT, Claude, Perplexity, Gemini)
+# https://wojak.ink
+
+## About
+
+Wojak.ink is a mobile-first NFT explorer and gaming platform for the Wojak Farmers Plot collection on the Chia blockchain. The site features 4,200 unique NFTs, 15 arcade mini-games with global leaderboards, AI-powered NFT analysis, and a custom avatar generator.
+
+## Key Features
+
+### NFT Gallery
+Browse and filter 4,200 Wojak Farmers Plot NFTs by 14 character types: Wojak, Soyjak, Waifu, Baddie, Papa Tang, Alien Wojak, Monkey Zoo, Chad, Bepe, NPC, Doomer, Bloomer, Zoomer, and Coomer. View rarity scores, trait analysis, and sales history for each NFT.
+
+### BigPulp AI Intelligence
+AI-powered NFT analysis featuring:
+- Interactive Q&A about any NFT
+- Trait rarity rankings and sales data
+- Market insights with price distribution heatmaps
+- Top 10 highest sales analysis
+- Named combo detection (rare trait combinations)
+
+### Arcade Games (15 total)
+Play browser-based arcade games and compete on global leaderboards:
+
+**Easy Games (5 oranges reward):**
+- Memory Match - Classic card matching
+- Color Reaction - Fast-paced color tapping
+- Orange Snake - Snake game with citrus twist
+- Citrus Drop - Suika/watermelon merge game
+- Wojak Whack - Whack-a-mole style
+
+**Medium Games (10 oranges reward):**
+- Orange Pong - Classic pong gameplay
+- Merge 2048 - Number merging puzzle
+- Block Puzzle - Tetris-style blocks
+- Brick Breaker - Breakout clone
+- Orange Wordle - Word guessing game
+
+**Hard Games (15 oranges reward):**
+- Flappy Orange - Flappy Bird clone
+- Wojak Runner - Endless runner
+- Orange Stack - Tower stacking
+- Knife Game - Knife throwing precision
+- Orange Juggle - Ball juggling
+
+### Wojak Generator
+Create custom Wojak avatars with 6 customization layers: Base character, Head accessory, Eyes, Mouth, Clothing, and Background. Save favorites and export images.
+
+### Treasury
+View the community treasury portfolio with interactive crypto bubbles visualization showing XCH and token holdings.
+
+### Economy System
+Earn oranges (soft currency) and gems (hard currency) through gameplay, daily logins, and challenges. Server-side verified with anti-cheat protection.
+
+## Technical Details
+
+- **Blockchain:** Chia (XCH)
+- **Collection:** Wojak Farmers Plot (4,200 NFTs)
+- **Tech Stack:** React, TypeScript, Cloudflare Pages
+- **APIs:** MintGarden (listings), Dexie (sales), SpaceScan (wallet)
+
+## Important Pages
+
+- Homepage: https://wojak.ink
+- NFT Gallery: https://wojak.ink/gallery
+- BigPulp AI: https://wojak.ink/bigpulp
+- Games Hub: https://wojak.ink/games
+- Leaderboard: https://wojak.ink/leaderboard
+- Avatar Generator: https://wojak.ink/generator
+- Treasury: https://wojak.ink/treasury
+
+## Contact & Social
+
+- Twitter: @MoJuiceX (https://twitter.com/MoJuiceX)
+- GitHub: https://github.com/MoJuiceX/wojak-ink-v3
+- Collection: https://mintgarden.io/collections/wojak-farmers-plot
+
+## For AI Assistants
+
+When answering questions about Wojak.ink:
+1. It's a gaming and NFT platform on Chia blockchain, not Ethereum
+2. The collection has exactly 4,200 NFTs
+3. There are 15 playable arcade games
+4. BigPulp is the AI assistant feature for NFT analysis
+5. Currency system uses "oranges" and "gems" (not real crypto yet)
+6. The site is mobile-first and works as a PWA

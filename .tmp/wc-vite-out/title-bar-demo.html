@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wojak.ink Title Bar Demo</title>
+
+  <style>
+    /* ============================================
+       CSS Reset & Base Styles
+       ============================================ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      /* Dark background matching the theme */
+      background-color: #0a0a0f;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    }
+
+    /* ============================================
+       Title Bar Container
+       ============================================ */
+    .title-bar {
+      /* Fixed position at top of page */
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+
+      /* Dark semi-transparent background with blur */
+      background: rgba(10, 10, 15, 0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+      /* Flexbox for centering the inner content */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      /* Height and padding */
+      height: 64px;
+      padding: 0 20px;
+
+      /* Ensure it's above other content */
+      z-index: 100;
+    }
+
+    /* ============================================
+       Title Content (Inner Flex Container)
+       ============================================ */
+    .title-content {
+      /* Flexbox with EQUAL gaps between ALL items */
+      display: flex;
+      align-items: center;
+      gap: 12px; /* Equal 12px gap between every element */
+    }
+
+    /* ============================================
+       Favicon Image
+       ============================================ */
+    .favicon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: #1a1a2e;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      object-fit: contain;
+      padding: 4px;
+    }
+
+    /* ============================================
+       Brand Name (Wojak.ink)
+       ============================================ */
+    .brand-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-name .highlight {
+      color: #e8792f; /* Orange brand color */
+    }
+
+    /* ============================================
+       Emoji Styles
+       ============================================ */
+    .emoji {
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+
+    /* Pulsating animation for emojis */
+    .emoji-pulse {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .emoji-pulse.delay {
+      animation-delay: 1s;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+
+    /* ============================================
+       Rotating Sentence Container
+       ============================================ */
+    .sentence-container {
+      /* Fixed width to prevent layout shifts */
+      /* This width accommodates the longest sentence */
+      min-width: 200px;
+
+      /* Center text within the container */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      /* For the fade effect positioning */
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sentence {
+      /* Sentence styling */
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #e8792f; /* Orange color */
+      white-space: nowrap;
+
+      /* Transition for smooth fade effect */
+      transition: opacity 0.5s ease-out, transform 0.5s ease-out, filter 0.5s ease-out;
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+
+    /* Fade-out state */
+    .sentence.fade-out {
+      opacity: 0;
+      transform: translateY(-10px);
+      filter: blur(4px);
+    }
+
+    /* Fade-in state (initial) */
+    .sentence.fade-in {
+      opacity: 0;
+      transform: translateY(10px);
+      filter: blur(4px);
+    }
+
+    /* ============================================
+       Responsive Design
+       ============================================ */
+    @media (max-width: 768px) {
+      .title-bar {
+        height: 56px;
+        padding: 0 12px;
+      }
+
+      .title-content {
+        gap: 8px; /* Smaller gap on mobile */
+      }
+
+      .favicon {
+        width: 32px;
+        height: 32px;
+      }
+
+      .brand-name {
+        font-size: 1.25rem;
+      }
+
+      .emoji {
+        font-size: 1rem;
+      }
+
+      .sentence-container {
+        min-width: 160px;
+      }
+
+      .sentence {
+        font-size: 0.875rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .title-content {
+        gap: 6px;
+      }
+
+      .sentence-container {
+        min-width: 140px;
+      }
+
+      .sentence {
+        font-size: 0.75rem;
+      }
+    }
+
+    /* ============================================
+       Demo Content (for testing)
+       ============================================ */
+    .demo-content {
+      padding-top: 100px;
+      text-align: center;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================
+       Title Bar
+       ============================================ -->
+  <header class="title-bar" role="banner">
+    <div class="title-content">
+
+      <!-- 1. Favicon Image -->
+      <img
+        src="/assets/icons/Wojak_logo.png"
+        alt="Wojak Icon"
+        class="favicon"
+        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>W</text></svg>'"
+      >
+
+      <!-- 2. Brand Name -->
+      <span class="brand-name" aria-label="Wojak.ink">
+        Wojak<span class="highlight">.ink</span>
+      </span>
+
+      <!-- 3. Orange Emoji -->
+      <span class="emoji emoji-pulse" aria-hidden="true">🍊</span>
+
+      <!-- 4. Rotating Sentence -->
+      <div
+        class="sentence-container"
+        role="marquee"
+        aria-live="polite"
+        aria-label="Rotating tagline"
+      >
+        <span class="sentence" id="rotating-sentence">Banger NFTs on Chia</span>
+      </div>
+
+      <!-- 5. Seedling Emoji -->
+      <span class="emoji emoji-pulse delay" aria-hidden="true">🌱</span>
+
+    </div>
+  </header>
+
+  <!-- Demo content to show the page scrolls under the fixed header -->
+  <main class="demo-content">
+    <h1>Title Bar Demo</h1>
+    <p>The title bar above demonstrates equal spacing between all elements.</p>
+    <p>Watch the sentence rotate every 4 seconds with a smooth fade effect.</p>
+  </main>
+
+  <!-- ============================================
+       JavaScript for Rotating Sentences
+       ============================================ -->
+  <script>
+    (function() {
+      'use strict';
+
+      // ============================================
+      // Configuration
+      // ============================================
+
+      // Array of sentences to rotate through
+      const sentences = [
+        'Banger NFTs on Chia',
+        'Art for the Grove',
+        'Wojak Farmers Plot'
+      ];
+
+      // Timing configuration (in milliseconds)
+      const DISPLAY_DURATION = 4000;  // How long each sentence is displayed
+      const FADE_DURATION = 500;       // Duration of fade animation (matches CSS)
+
+      // ============================================
+      // State
+      // ============================================
+
+      let currentIndex = 0;
+      const sentenceElement = document.getElementById('rotating-sentence');
+
+      // ============================================
+      // Functions
+      // ============================================
+
+      /**
+       * Calculates and sets the minimum width needed for the longest sentence
+       * This prevents layout shifts when sentences change
+       */
+      function calculateContainerWidth() {
+        const container = sentenceElement.parentElement;
+
+        // Create a temporary element to measure text width
+        const measureEl = document.createElement('span');
+        measureEl.style.cssText = `
+          position: absolute;
+          visibility: hidden;
+          white-space: nowrap;
+          font-size: ${getComputedStyle(sentenceElement).fontSize};
+          font-weight: ${getComputedStyle(sentenceElement).fontWeight};
+          font-family: ${getComputedStyle(sentenceElement).fontFamily};
+        `;
+        document.body.appendChild(measureEl);
+
+        // Find the maximum width among all sentences
+        let maxWidth = 0;
+        sentences.forEach(sentence => {
+          measureEl.textContent = sentence;
+          maxWidth = Math.max(maxWidth, measureEl.offsetWidth);
+        });
+
+        // Clean up and apply the width
+        document.body.removeChild(measureEl);
+        container.style.minWidth = `${maxWidth + 10}px`; // Add small buffer
+      }
+
+      /**
+       * Transitions to the next sentence with fade effect
+       */
+      function transitionToNextSentence() {
+        // Step 1: Fade out current sentence
+        sentenceElement.classList.add('fade-out');
+
+        // Step 2: After fade-out completes, change text and fade in
+        setTimeout(() => {
+          // Update index (cycle through array)
+          currentIndex = (currentIndex + 1) % sentences.length;
+
+          // Update text content
+          sentenceElement.textContent = sentences[currentIndex];
+
+          // Remove fade-out, add fade-in state
+          sentenceElement.classList.remove('fade-out');
+          sentenceElement.classList.add('fade-in');
+
+          // Step 3: Trigger reflow and start fade-in
+          // This forces the browser to apply the fade-in state before removing it
+          void sentenceElement.offsetWidth;
+
+          // Remove fade-in to trigger transition to visible state
+          sentenceElement.classList.remove('fade-in');
+        }, FADE_DURATION);
+      }
+
+      // ============================================
+      // Initialization
+      // ============================================
+
+      // Calculate optimal container width on load
+      calculateContainerWidth();
+
+      // Recalculate on window resize (for responsive design)
+      window.addEventListener('resize', calculateContainerWidth);
+
+      // Start the rotation cycle
+      setInterval(transitionToNextSentence, DISPLAY_DURATION);
+
+      // Log for debugging
+      console.log('Title bar initialized with sentences:', sentences);
+      console.log('Rotation interval:', DISPLAY_DURATION + 'ms');
+      console.log('Fade duration:', FADE_DURATION + 'ms');
+
+    })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,314 @@
+.startup-sequence {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999999;
+  background: #000;
+}
+
+.startup-sequence.fade-out-black {
+  animation: fadeToWebsite 1.5s ease-in-out forwards;
+  pointer-events: none; /* Prevent interaction after fade */
+}
+
+@keyframes fadeToWebsite {
+  0% {
+    opacity: 1;
+    background: #000;
+  }
+  50% {
+    opacity: 0.3;
+    background: #000; /* Keep black background during fade */
+  }
+  100% {
+    opacity: 0;
+    background: #000; /* Keep black background - opacity fade reveals website without white flash */
+  }
+}
+
+.startup-logo-screen {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.8s ease-out, orangePulse 2s ease-in-out infinite;
+  overflow: hidden;
+}
+
+.startup-logo-screen::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Brighter orange background */
+  background: linear-gradient(180deg, #ffaa00 0%, #ff7700 100%);
+  z-index: 1;
+}
+
+.startup-logo-screen::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Vignette effect - red in center transitioning to black at edges */
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 0, 0, 0.2) 0%,
+    rgba(255, 0, 0, 0.3) 20%,
+    rgba(200, 0, 0, 0.5) 40%,
+    rgba(100, 0, 0, 0.7) 60%,
+    rgba(0, 0, 0, 0.8) 80%,
+    rgba(0, 0, 0, 0.95) 100%
+  ),
+  /* Black pixel pattern on top */
+  repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.2) 0px,
+    rgba(0, 0, 0, 0.2) 1px,
+    transparent 1px,
+    transparent 2px
+  ),
+  repeating-linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.2) 0px,
+    rgba(0, 0, 0, 0.2) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.startup-logo-screen.fade-out {
+  animation: fadeOut 1.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.startup-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: logoZoom 1s ease-out;
+  position: relative;
+  z-index: 3;
+}
+
+@keyframes logoZoom {
+  from { transform: scale(0.5); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.startup-logo-emoji {
+  font-size: 120px;
+  text-shadow: 0 0 50px rgba(255, 165, 0, 0.8);
+  animation: pulse 2s ease-in-out infinite;
+  margin-bottom: 0px; /* Moved down - was -20px */
+  margin-top: 20px; /* Added top margin to push orange down */
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes orangePulse {
+  0%, 100% { 
+    filter: brightness(1);
+  }
+  50% { 
+    filter: brightness(1.2);
+  }
+}
+
+@keyframes textPulse {
+  0%, 100% { 
+    transform: scale(1);
+    text-shadow: 3px 3px 0 #000, 0 0 30px rgba(204, 68, 0, 0.7);
+  }
+  50% { 
+    transform: scale(1.05);
+    text-shadow: 3px 3px 0 #000, 0 0 50px rgba(204, 68, 0, 0.9);
+  }
+}
+
+
+.startup-logo-text {
+  font-size: 64px;
+  font-weight: bold;
+  color: #cc4400;
+  text-shadow: 3px 3px 0 #000, 0 0 30px rgba(204, 68, 0, 0.7);
+  margin-top: 150px; /* Pushed down more from 100px */
+  font-family: 'Arial Black', sans-serif;
+  position: relative;
+  animation: textPulse 2s ease-in-out infinite; /* Same frequency as emoji */
+}
+
+.startup-logo-subtitle {
+  font-size: 24px;
+  color: #c0c0c0;
+  margin-top: 10px;
+  animation: textPulse 2s ease-in-out infinite;
+}
+
+.startup-loading-screen {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 40px;
+  animation: fadeIn 0.5s ease-out;
+  position: relative;
+}
+
+.startup-loading-screen.fade-out {
+  /* Don't fade the loading screen separately - let the main container handle the fade */
+  opacity: 1;
+  background: #000 !important; /* Keep black background */
+}
+
+.startup-loading-screen.fade-out::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  z-index: -1;
+}
+
+@keyframes fadeContentOut {
+  from { 
+    opacity: 1;
+    background: #000;
+  }
+  to { 
+    opacity: 0;
+    background: #000; /* Keep black background during fade */
+  }
+}
+
+.startup-logo-small {
+  font-size: 48px; /* 2x bigger (24px * 2 = 48px) */
+  color: #ff6600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px; /* Move down a little bit */
+}
+
+.startup-logo-small span {
+  font-size: 64px; /* Make emoji bigger (48px * 1.33 ≈ 64px) */
+  display: inline-block;
+  transform: translateY(8px); /* Move emoji down a little bit */
+}
+
+.startup-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: -60px; /* Move loading bar and text up */
+}
+
+.startup-loading-text {
+  color: #c0c0c0;
+  font-size: 14px;
+}
+
+.startup-progress-bar {
+  width: 400px;
+  height: 24px;
+  background: #000;
+  border: 2px solid;
+  border-color: #808080 #ffffff #ffffff #808080;
+  padding: 3px;
+}
+
+.startup-progress-fill {
+  height: 100%;
+  display: flex;
+  gap: 2px;
+}
+
+.startup-progress-block {
+  width: 12px;
+  height: 100%;
+  background: #ff6600;
+  flex-shrink: 0;
+}
+
+.startup-loading-subtitle {
+  font-size: 24px;
+  color: #c0c0c0;
+  animation: textPulse 2s ease-in-out infinite;
+}
+
+.startup-loading-subtitle.no-pulse {
+  animation: none; /* Stop pulsing when loading bar appears (Scene 2) */
+}
+
+/* Subtitle container for Stage 1 (logo) - positioned to match Stage 2 */
+.startup-logo-subtitle-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, calc(-50% + 70px)); /* Moved down a bit more for sequence 1 */
+  z-index: 99999999;
+  pointer-events: none;
+}
+
+.startup-logo-subtitle-container.fade-out {
+  animation: fadeOut 1s ease-out forwards;
+}
+
+.startup-copyright {
+  color: #808080;
+  font-size: 11px;
+}
+
+.startup-skip {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: #808080;
+  font-size: 12px;
+  cursor: pointer;
+  animation: blink 1s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.startup-skip:hover {
+  color: var(--text-inverse);
+}
+
+

@@ -1,0 +1,1824 @@
+{
+  "lookup": {
+    "Base": {
+      "Alien Baddie": {
+        "rank": 1,
+        "of": 14,
+        "count": 35
+      },
+      "Alien Waifu": {
+        "rank": 2,
+        "of": 14,
+        "count": 35
+      },
+      "Bepe Baddie": {
+        "rank": 3,
+        "of": 14,
+        "count": 42
+      },
+      "Bepe Waifu": {
+        "rank": 4,
+        "of": 14,
+        "count": 42
+      },
+      "Alien Soyjak": {
+        "rank": 5,
+        "of": 14,
+        "count": 80
+      },
+      "Bepe Soyjak": {
+        "rank": 6,
+        "of": 14,
+        "count": 96
+      },
+      "Alien Wojak": {
+        "rank": 7,
+        "of": 14,
+        "count": 100
+      },
+      "Bepe Wojak": {
+        "rank": 8,
+        "of": 14,
+        "count": 124
+      },
+      "Baddie": {
+        "rank": 9,
+        "of": 14,
+        "count": 200
+      },
+      "Monkey Zoo": {
+        "rank": 10,
+        "of": 14,
+        "count": 200
+      },
+      "Papa Tang": {
+        "rank": 11,
+        "of": 14,
+        "count": 250
+      },
+      "Waifu": {
+        "rank": 12,
+        "of": 14,
+        "count": 250
+      },
+      "Soyjak": {
+        "rank": 13,
+        "of": 14,
+        "count": 750
+      },
+      "Wojak": {
+        "rank": 14,
+        "of": 14,
+        "count": 1996
+      }
+    },
+    "Face": {
+      "NPC": {
+        "rank": 1,
+        "of": 6,
+        "count": 254
+      },
+      "Bleeding Bags": {
+        "rank": 2,
+        "of": 6,
+        "count": 364
+      },
+      "Rugged": {
+        "rank": 3,
+        "of": 6,
+        "count": 413
+      },
+      "Terminator": {
+        "rank": 4,
+        "of": 6,
+        "count": 435
+      },
+      "Rekt": {
+        "rank": 5,
+        "of": 6,
+        "count": 654
+      },
+      "Classic": {
+        "rank": 6,
+        "of": 6,
+        "count": 2080
+      }
+    },
+    "Mouth": {
+      "Sexy Lip Bite": {
+        "rank": 1,
+        "of": 20,
+        "count": 59
+      },
+      "Hannibal Mask": {
+        "rank": 2,
+        "of": 20,
+        "count": 76
+      },
+      "Stunned": {
+        "rank": 3,
+        "of": 20,
+        "count": 90
+      },
+      "Copium Mask": {
+        "rank": 4,
+        "of": 20,
+        "count": 105
+      },
+      "Bandana Mask": {
+        "rank": 5,
+        "of": 20,
+        "count": 106
+      },
+      "Stache": {
+        "rank": 6,
+        "of": 20,
+        "count": 138
+      },
+      "Vampire Teeth": {
+        "rank": 7,
+        "of": 20,
+        "count": 146
+      },
+      "Glossed Lips": {
+        "rank": 8,
+        "of": 20,
+        "count": 147
+      },
+      "Smile": {
+        "rank": 9,
+        "of": 20,
+        "count": 179
+      },
+      "Pipe": {
+        "rank": 10,
+        "of": 20,
+        "count": 183
+      },
+      "Neckbeard": {
+        "rank": 11,
+        "of": 20,
+        "count": 184
+      },
+      "Bubble Gum": {
+        "rank": 12,
+        "of": 20,
+        "count": 187
+      },
+      "Pizza": {
+        "rank": 13,
+        "of": 20,
+        "count": 220
+      },
+      "Teeth": {
+        "rank": 14,
+        "of": 20,
+        "count": 248
+      },
+      "Gold Teeth": {
+        "rank": 15,
+        "of": 20,
+        "count": 275
+      },
+      "Cohiba": {
+        "rank": 16,
+        "of": 20,
+        "count": 302
+      },
+      "Joint": {
+        "rank": 17,
+        "of": 20,
+        "count": 303
+      },
+      "Screaming": {
+        "rank": 18,
+        "of": 20,
+        "count": 348
+      },
+      "Cig": {
+        "rank": 19,
+        "of": 20,
+        "count": 414
+      },
+      "Numb": {
+        "rank": 20,
+        "of": 20,
+        "count": 490
+      }
+    },
+    "Face Wear": {
+      "Fake It Mask": {
+        "rank": 1,
+        "of": 18,
+        "count": 39
+      },
+      "VR Headset": {
+        "rank": 2,
+        "of": 18,
+        "count": 67
+      },
+      "Tyson Tattoo": {
+        "rank": 3,
+        "of": 18,
+        "count": 97
+      },
+      "Night Vision": {
+        "rank": 4,
+        "of": 18,
+        "count": 121
+      },
+      "Eye Patch": {
+        "rank": 5,
+        "of": 18,
+        "count": 122
+      },
+      "Ninja Turtle Mask": {
+        "rank": 6,
+        "of": 18,
+        "count": 143
+      },
+      "Wizard Glasses": {
+        "rank": 7,
+        "of": 18,
+        "count": 145
+      },
+      "Laser Eyes": {
+        "rank": 8,
+        "of": 18,
+        "count": 149
+      },
+      "Cyber Shades": {
+        "rank": 9,
+        "of": 18,
+        "count": 157
+      },
+      "Cool Glasses": {
+        "rank": 10,
+        "of": 18,
+        "count": 161
+      },
+      "3D Glasses": {
+        "rank": 11,
+        "of": 18,
+        "count": 164
+      },
+      "Clown Nose": {
+        "rank": 12,
+        "of": 18,
+        "count": 180
+      },
+      "Matrix Lenses": {
+        "rank": 13,
+        "of": 18,
+        "count": 180
+      },
+      "Aviators": {
+        "rank": 14,
+        "of": 18,
+        "count": 194
+      },
+      "Alpha Shades": {
+        "rank": 15,
+        "of": 18,
+        "count": 222
+      },
+      "Shades": {
+        "rank": 16,
+        "of": 18,
+        "count": 267
+      },
+      "MOG Glasses": {
+        "rank": 17,
+        "of": 18,
+        "count": 302
+      },
+      "No Face Wear": {
+        "rank": 18,
+        "of": 18,
+        "count": 1490
+      }
+    },
+    "Head": {
+      "Piccolo Turban": {
+        "rank": 1,
+        "of": 40,
+        "count": 9
+      },
+      "Headphones": {
+        "rank": 2,
+        "of": 40,
+        "count": 13
+      },
+      "Soy Hair": {
+        "rank": 3,
+        "of": 40,
+        "count": 21
+      },
+      "2Pac Bandana": {
+        "rank": 4,
+        "of": 40,
+        "count": 24
+      },
+      "Tiara": {
+        "rank": 5,
+        "of": 40,
+        "count": 24
+      },
+      "Standard Cut": {
+        "rank": 6,
+        "of": 40,
+        "count": 27
+      },
+      "Power Bob": {
+        "rank": 7,
+        "of": 40,
+        "count": 29
+      },
+      "Twin Braids": {
+        "rank": 8,
+        "of": 40,
+        "count": 29
+      },
+      "Ponytail": {
+        "rank": 9,
+        "of": 40,
+        "count": 33
+      },
+      "Vixen Waves": {
+        "rank": 10,
+        "of": 40,
+        "count": 38
+      },
+      "Mermaid Waves": {
+        "rank": 11,
+        "of": 40,
+        "count": 46
+      },
+      "Hip Hop Hat": {
+        "rank": 12,
+        "of": 40,
+        "count": 64
+      },
+      "Beanie": {
+        "rank": 13,
+        "of": 40,
+        "count": 69
+      },
+      "Halo": {
+        "rank": 14,
+        "of": 40,
+        "count": 71
+      },
+      "Comrade Hat": {
+        "rank": 15,
+        "of": 40,
+        "count": 73
+      },
+      "Trump Wave": {
+        "rank": 16,
+        "of": 40,
+        "count": 78
+      },
+      "Beer Hat": {
+        "rank": 17,
+        "of": 40,
+        "count": 85
+      },
+      "Spikes": {
+        "rank": 18,
+        "of": 40,
+        "count": 85
+      },
+      "Cowboy Hat": {
+        "rank": 19,
+        "of": 40,
+        "count": 88
+      },
+      "Devil Horns": {
+        "rank": 20,
+        "of": 40,
+        "count": 91
+      },
+      "Super Wojak Hat": {
+        "rank": 21,
+        "of": 40,
+        "count": 92
+      },
+      "Hard Hat": {
+        "rank": 22,
+        "of": 40,
+        "count": 94
+      },
+      "Pirate Hat": {
+        "rank": 23,
+        "of": 40,
+        "count": 99
+      },
+      "Firefighter Helmet": {
+        "rank": 24,
+        "of": 40,
+        "count": 108
+      },
+      "Fedora": {
+        "rank": 25,
+        "of": 40,
+        "count": 111
+      },
+      "Tin Foil Hat": {
+        "rank": 26,
+        "of": 40,
+        "count": 117
+      },
+      "SWAT Helmet": {
+        "rank": 27,
+        "of": 40,
+        "count": 124
+      },
+      "Cap": {
+        "rank": 28,
+        "of": 40,
+        "count": 126
+      },
+      "Field Cap": {
+        "rank": 29,
+        "of": 40,
+        "count": 126
+      },
+      "Ronin Helmet": {
+        "rank": 30,
+        "of": 40,
+        "count": 129
+      },
+      "Centurion": {
+        "rank": 31,
+        "of": 40,
+        "count": 132
+      },
+      "Viking Helmet": {
+        "rank": 32,
+        "of": 40,
+        "count": 135
+      },
+      "Propeller Hat": {
+        "rank": 33,
+        "of": 40,
+        "count": 137
+      },
+      "Construction Helmet": {
+        "rank": 34,
+        "of": 40,
+        "count": 140
+      },
+      "Crown": {
+        "rank": 35,
+        "of": 40,
+        "count": 140
+      },
+      "Clown": {
+        "rank": 36,
+        "of": 40,
+        "count": 143
+      },
+      "Military Beret": {
+        "rank": 37,
+        "of": 40,
+        "count": 164
+      },
+      "Super Saiyan": {
+        "rank": 38,
+        "of": 40,
+        "count": 195
+      },
+      "Wizard Hat": {
+        "rank": 39,
+        "of": 40,
+        "count": 248
+      },
+      "No Headgear": {
+        "rank": 40,
+        "of": 40,
+        "count": 643
+      }
+    },
+    "Clothes": {
+      "Piccolo Uniform": {
+        "rank": 1,
+        "of": 36,
+        "count": 14
+      },
+      "School Uniform": {
+        "rank": 2,
+        "of": 36,
+        "count": 31
+      },
+      "Prom Dress": {
+        "rank": 3,
+        "of": 36,
+        "count": 32
+      },
+      "Denim Vest": {
+        "rank": 4,
+        "of": 36,
+        "count": 40
+      },
+      "Sonic Suit": {
+        "rank": 5,
+        "of": 36,
+        "count": 43
+      },
+      "Astronaut": {
+        "rank": 6,
+        "of": 36,
+        "count": 44
+      },
+      "El Presidente": {
+        "rank": 7,
+        "of": 36,
+        "count": 49
+      },
+      "Pickle Suit": {
+        "rank": 8,
+        "of": 36,
+        "count": 50
+      },
+      "Vintage Dress": {
+        "rank": 9,
+        "of": 36,
+        "count": 50
+      },
+      "Bepe Suit": {
+        "rank": 10,
+        "of": 36,
+        "count": 56
+      },
+      "Goose Suit": {
+        "rank": 11,
+        "of": 36,
+        "count": 59
+      },
+      "Sports Bra": {
+        "rank": 12,
+        "of": 36,
+        "count": 59
+      },
+      "Pepe Suit": {
+        "rank": 13,
+        "of": 36,
+        "count": 63
+      },
+      "God's Robe": {
+        "rank": 14,
+        "of": 36,
+        "count": 80
+      },
+      "Straitjacket": {
+        "rank": 15,
+        "of": 36,
+        "count": 86
+      },
+      "Gopher Suit": {
+        "rank": 16,
+        "of": 36,
+        "count": 88
+      },
+      "Firefighter Uniform": {
+        "rank": 17,
+        "of": 36,
+        "count": 93
+      },
+      "Drac": {
+        "rank": 18,
+        "of": 36,
+        "count": 97
+      },
+      "Proof of Prayer": {
+        "rank": 19,
+        "of": 36,
+        "count": 101
+      },
+      "Tank Top": {
+        "rank": 20,
+        "of": 36,
+        "count": 107
+      },
+      "Tee": {
+        "rank": 21,
+        "of": 36,
+        "count": 116
+      },
+      "Bathrobe": {
+        "rank": 22,
+        "of": 36,
+        "count": 124
+      },
+      "SWAT Gear": {
+        "rank": 23,
+        "of": 36,
+        "count": 127
+      },
+      "Viking Armor": {
+        "rank": 24,
+        "of": 36,
+        "count": 129
+      },
+      "Ninja Turtle Fit": {
+        "rank": 25,
+        "of": 36,
+        "count": 142
+      },
+      "Ronin": {
+        "rank": 26,
+        "of": 36,
+        "count": 168
+      },
+      "Super Saiyan Uniform": {
+        "rank": 27,
+        "of": 36,
+        "count": 190
+      },
+      "Roman Drip": {
+        "rank": 28,
+        "of": 36,
+        "count": 194
+      },
+      "Wizard Drip": {
+        "rank": 29,
+        "of": 36,
+        "count": 198
+      },
+      "Leather Jacket": {
+        "rank": 30,
+        "of": 36,
+        "count": 199
+      },
+      "Born to Ride": {
+        "rank": 31,
+        "of": 36,
+        "count": 205
+      },
+      "Bepe Army": {
+        "rank": 32,
+        "of": 36,
+        "count": 208
+      },
+      "Chia Farmer": {
+        "rank": 33,
+        "of": 36,
+        "count": 215
+      },
+      "Sports Jacket": {
+        "rank": 34,
+        "of": 36,
+        "count": 236
+      },
+      "Suit": {
+        "rank": 35,
+        "of": 36,
+        "count": 236
+      },
+      "Topless": {
+        "rank": 36,
+        "of": 36,
+        "count": 271
+      }
+    },
+    "Background": {
+      "Signal Lost": {
+        "rank": 1,
+        "of": 45,
+        "count": 14
+      },
+      "Crazy Room": {
+        "rank": 2,
+        "of": 45,
+        "count": 25
+      },
+      "Rainforest": {
+        "rank": 3,
+        "of": 45,
+        "count": 30
+      },
+      "Morning Routine": {
+        "rank": 4,
+        "of": 45,
+        "count": 36
+      },
+      "$HONK": {
+        "rank": 5,
+        "of": 45,
+        "count": 38
+      },
+      "Everythings Fine": {
+        "rank": 6,
+        "of": 45,
+        "count": 42
+      },
+      "Rome": {
+        "rank": 7,
+        "of": 45,
+        "count": 42
+      },
+      "$CASTER": {
+        "rank": 8,
+        "of": 45,
+        "count": 43
+      },
+      "NYSE Rug": {
+        "rank": 9,
+        "of": 45,
+        "count": 45
+      },
+      "Ronin Dojo": {
+        "rank": 10,
+        "of": 45,
+        "count": 45
+      },
+      "White House": {
+        "rank": 11,
+        "of": 45,
+        "count": 45
+      },
+      "$NECKCOIN": {
+        "rank": 12,
+        "of": 45,
+        "count": 49
+      },
+      "$PIZZA": {
+        "rank": 13,
+        "of": 45,
+        "count": 51
+      },
+      "Nesting Grounds": {
+        "rank": 14,
+        "of": 45,
+        "count": 54
+      },
+      "Spell Room": {
+        "rank": 15,
+        "of": 45,
+        "count": 59
+      },
+      "Moms Basement": {
+        "rank": 16,
+        "of": 45,
+        "count": 61
+      },
+      "NYSE Dump": {
+        "rank": 17,
+        "of": 45,
+        "count": 63
+      },
+      "Silicon Data Center": {
+        "rank": 18,
+        "of": 45,
+        "count": 68
+      },
+      "Route 66": {
+        "rank": 19,
+        "of": 45,
+        "count": 73
+      },
+      "Price Up": {
+        "rank": 20,
+        "of": 45,
+        "count": 74
+      },
+      "NYSE Pump": {
+        "rank": 21,
+        "of": 45,
+        "count": 75
+      },
+      "Pirate Ship": {
+        "rank": 22,
+        "of": 45,
+        "count": 76
+      },
+      "One Market": {
+        "rank": 23,
+        "of": 45,
+        "count": 79
+      },
+      "Price Down": {
+        "rank": 24,
+        "of": 45,
+        "count": 79
+      },
+      "$BEPE": {
+        "rank": 25,
+        "of": 45,
+        "count": 82
+      },
+      "Chia Farm": {
+        "rank": 26,
+        "of": 45,
+        "count": 87
+      },
+      "Golden Hour": {
+        "rank": 27,
+        "of": 45,
+        "count": 87
+      },
+      "Heaven": {
+        "rank": 28,
+        "of": 45,
+        "count": 89
+      },
+      "$LOVE": {
+        "rank": 29,
+        "of": 45,
+        "count": 90
+      },
+      "Hot Coral": {
+        "rank": 30,
+        "of": 45,
+        "count": 94
+      },
+      "Matrix": {
+        "rank": 31,
+        "of": 45,
+        "count": 107
+      },
+      "Hell": {
+        "rank": 32,
+        "of": 45,
+        "count": 113
+      },
+      "Radioactive Forest": {
+        "rank": 33,
+        "of": 45,
+        "count": 114
+      },
+      "Mellow Yellow": {
+        "rank": 34,
+        "of": 45,
+        "count": 127
+      },
+      "$HOA": {
+        "rank": 35,
+        "of": 45,
+        "count": 133
+      },
+      "Orange Grove": {
+        "rank": 36,
+        "of": 45,
+        "count": 140
+      },
+      "Bepe Barracks": {
+        "rank": 37,
+        "of": 45,
+        "count": 145
+      },
+      "Moon": {
+        "rank": 38,
+        "of": 45,
+        "count": 148
+      },
+      "Tangerine Pop": {
+        "rank": 39,
+        "of": 45,
+        "count": 148
+      },
+      "Neo Mint": {
+        "rank": 40,
+        "of": 45,
+        "count": 176
+      },
+      "Green Candle": {
+        "rank": 41,
+        "of": 45,
+        "count": 192
+      },
+      "Sky Shock Blue": {
+        "rank": 42,
+        "of": 45,
+        "count": 205
+      },
+      "Sky Dive": {
+        "rank": 43,
+        "of": 45,
+        "count": 206
+      },
+      "$CHIA": {
+        "rank": 44,
+        "of": 45,
+        "count": 219
+      },
+      "Chia Green": {
+        "rank": 45,
+        "of": 45,
+        "count": 232
+      }
+    }
+  },
+  "leaderboards": {
+    "Base": [
+      {
+        "rank": 1,
+        "trait": "Alien Baddie",
+        "count": 35
+      },
+      {
+        "rank": 2,
+        "trait": "Alien Waifu",
+        "count": 35
+      },
+      {
+        "rank": 3,
+        "trait": "Bepe Baddie",
+        "count": 42
+      },
+      {
+        "rank": 4,
+        "trait": "Bepe Waifu",
+        "count": 42
+      },
+      {
+        "rank": 5,
+        "trait": "Alien Soyjak",
+        "count": 80
+      },
+      {
+        "rank": 6,
+        "trait": "Bepe Soyjak",
+        "count": 96
+      },
+      {
+        "rank": 7,
+        "trait": "Alien Wojak",
+        "count": 100
+      },
+      {
+        "rank": 8,
+        "trait": "Bepe Wojak",
+        "count": 124
+      },
+      {
+        "rank": 9,
+        "trait": "Baddie",
+        "count": 200
+      },
+      {
+        "rank": 10,
+        "trait": "Monkey Zoo",
+        "count": 200
+      },
+      {
+        "rank": 11,
+        "trait": "Papa Tang",
+        "count": 250
+      },
+      {
+        "rank": 12,
+        "trait": "Waifu",
+        "count": 250
+      },
+      {
+        "rank": 13,
+        "trait": "Soyjak",
+        "count": 750
+      },
+      {
+        "rank": 14,
+        "trait": "Wojak",
+        "count": 1996
+      }
+    ],
+    "Face": [
+      {
+        "rank": 1,
+        "trait": "NPC",
+        "count": 254
+      },
+      {
+        "rank": 2,
+        "trait": "Bleeding Bags",
+        "count": 364
+      },
+      {
+        "rank": 3,
+        "trait": "Rugged",
+        "count": 413
+      },
+      {
+        "rank": 4,
+        "trait": "Terminator",
+        "count": 435
+      },
+      {
+        "rank": 5,
+        "trait": "Rekt",
+        "count": 654
+      },
+      {
+        "rank": 6,
+        "trait": "Classic",
+        "count": 2080
+      }
+    ],
+    "Mouth": [
+      {
+        "rank": 1,
+        "trait": "Sexy Lip Bite",
+        "count": 59
+      },
+      {
+        "rank": 2,
+        "trait": "Hannibal Mask",
+        "count": 76
+      },
+      {
+        "rank": 3,
+        "trait": "Stunned",
+        "count": 90
+      },
+      {
+        "rank": 4,
+        "trait": "Copium Mask",
+        "count": 105
+      },
+      {
+        "rank": 5,
+        "trait": "Bandana Mask",
+        "count": 106
+      },
+      {
+        "rank": 6,
+        "trait": "Stache",
+        "count": 138
+      },
+      {
+        "rank": 7,
+        "trait": "Vampire Teeth",
+        "count": 146
+      },
+      {
+        "rank": 8,
+        "trait": "Glossed Lips",
+        "count": 147
+      },
+      {
+        "rank": 9,
+        "trait": "Smile",
+        "count": 179
+      },
+      {
+        "rank": 10,
+        "trait": "Pipe",
+        "count": 183
+      },
+      {
+        "rank": 11,
+        "trait": "Neckbeard",
+        "count": 184
+      },
+      {
+        "rank": 12,
+        "trait": "Bubble Gum",
+        "count": 187
+      },
+      {
+        "rank": 13,
+        "trait": "Pizza",
+        "count": 220
+      },
+      {
+        "rank": 14,
+        "trait": "Teeth",
+        "count": 248
+      },
+      {
+        "rank": 15,
+        "trait": "Gold Teeth",
+        "count": 275
+      },
+      {
+        "rank": 16,
+        "trait": "Cohiba",
+        "count": 302
+      },
+      {
+        "rank": 17,
+        "trait": "Joint",
+        "count": 303
+      },
+      {
+        "rank": 18,
+        "trait": "Screaming",
+        "count": 348
+      },
+      {
+        "rank": 19,
+        "trait": "Cig",
+        "count": 414
+      },
+      {
+        "rank": 20,
+        "trait": "Numb",
+        "count": 490
+      }
+    ],
+    "Face Wear": [
+      {
+        "rank": 1,
+        "trait": "Fake It Mask",
+        "count": 39
+      },
+      {
+        "rank": 2,
+        "trait": "VR Headset",
+        "count": 67
+      },
+      {
+        "rank": 3,
+        "trait": "Tyson Tattoo",
+        "count": 97
+      },
+      {
+        "rank": 4,
+        "trait": "Night Vision",
+        "count": 121
+      },
+      {
+        "rank": 5,
+        "trait": "Eye Patch",
+        "count": 122
+      },
+      {
+        "rank": 6,
+        "trait": "Ninja Turtle Mask",
+        "count": 143
+      },
+      {
+        "rank": 7,
+        "trait": "Wizard Glasses",
+        "count": 145
+      },
+      {
+        "rank": 8,
+        "trait": "Laser Eyes",
+        "count": 149
+      },
+      {
+        "rank": 9,
+        "trait": "Cyber Shades",
+        "count": 157
+      },
+      {
+        "rank": 10,
+        "trait": "Cool Glasses",
+        "count": 161
+      },
+      {
+        "rank": 11,
+        "trait": "3D Glasses",
+        "count": 164
+      },
+      {
+        "rank": 12,
+        "trait": "Clown Nose",
+        "count": 180
+      },
+      {
+        "rank": 13,
+        "trait": "Matrix Lenses",
+        "count": 180
+      },
+      {
+        "rank": 14,
+        "trait": "Aviators",
+        "count": 194
+      },
+      {
+        "rank": 15,
+        "trait": "Alpha Shades",
+        "count": 222
+      },
+      {
+        "rank": 16,
+        "trait": "Shades",
+        "count": 267
+      },
+      {
+        "rank": 17,
+        "trait": "MOG Glasses",
+        "count": 302
+      },
+      {
+        "rank": 18,
+        "trait": "No Face Wear",
+        "count": 1490
+      }
+    ],
+    "Head": [
+      {
+        "rank": 1,
+        "trait": "Piccolo Turban",
+        "count": 9
+      },
+      {
+        "rank": 2,
+        "trait": "Headphones",
+        "count": 13
+      },
+      {
+        "rank": 3,
+        "trait": "Soy Hair",
+        "count": 21
+      },
+      {
+        "rank": 4,
+        "trait": "2Pac Bandana",
+        "count": 24
+      },
+      {
+        "rank": 5,
+        "trait": "Tiara",
+        "count": 24
+      },
+      {
+        "rank": 6,
+        "trait": "Standard Cut",
+        "count": 27
+      },
+      {
+        "rank": 7,
+        "trait": "Power Bob",
+        "count": 29
+      },
+      {
+        "rank": 8,
+        "trait": "Twin Braids",
+        "count": 29
+      },
+      {
+        "rank": 9,
+        "trait": "Ponytail",
+        "count": 33
+      },
+      {
+        "rank": 10,
+        "trait": "Vixen Waves",
+        "count": 38
+      },
+      {
+        "rank": 11,
+        "trait": "Mermaid Waves",
+        "count": 46
+      },
+      {
+        "rank": 12,
+        "trait": "Hip Hop Hat",
+        "count": 64
+      },
+      {
+        "rank": 13,
+        "trait": "Beanie",
+        "count": 69
+      },
+      {
+        "rank": 14,
+        "trait": "Halo",
+        "count": 71
+      },
+      {
+        "rank": 15,
+        "trait": "Comrade Hat",
+        "count": 73
+      },
+      {
+        "rank": 16,
+        "trait": "Trump Wave",
+        "count": 78
+      },
+      {
+        "rank": 17,
+        "trait": "Beer Hat",
+        "count": 85
+      },
+      {
+        "rank": 18,
+        "trait": "Spikes",
+        "count": 85
+      },
+      {
+        "rank": 19,
+        "trait": "Cowboy Hat",
+        "count": 88
+      },
+      {
+        "rank": 20,
+        "trait": "Devil Horns",
+        "count": 91
+      },
+      {
+        "rank": 21,
+        "trait": "Super Wojak Hat",
+        "count": 92
+      },
+      {
+        "rank": 22,
+        "trait": "Hard Hat",
+        "count": 94
+      },
+      {
+        "rank": 23,
+        "trait": "Pirate Hat",
+        "count": 99
+      },
+      {
+        "rank": 24,
+        "trait": "Firefighter Helmet",
+        "count": 108
+      },
+      {
+        "rank": 25,
+        "trait": "Fedora",
+        "count": 111
+      },
+      {
+        "rank": 26,
+        "trait": "Tin Foil Hat",
+        "count": 117
+      },
+      {
+        "rank": 27,
+        "trait": "SWAT Helmet",
+        "count": 124
+      },
+      {
+        "rank": 28,
+        "trait": "Cap",
+        "count": 126
+      },
+      {
+        "rank": 29,
+        "trait": "Field Cap",
+        "count": 126
+      },
+      {
+        "rank": 30,
+        "trait": "Ronin Helmet",
+        "count": 129
+      },
+      {
+        "rank": 31,
+        "trait": "Centurion",
+        "count": 132
+      },
+      {
+        "rank": 32,
+        "trait": "Viking Helmet",
+        "count": 135
+      },
+      {
+        "rank": 33,
+        "trait": "Propeller Hat",
+        "count": 137
+      },
+      {
+        "rank": 34,
+        "trait": "Construction Helmet",
+        "count": 140
+      },
+      {
+        "rank": 35,
+        "trait": "Crown",
+        "count": 140
+      },
+      {
+        "rank": 36,
+        "trait": "Clown",
+        "count": 143
+      },
+      {
+        "rank": 37,
+        "trait": "Military Beret",
+        "count": 164
+      },
+      {
+        "rank": 38,
+        "trait": "Super Saiyan",
+        "count": 195
+      },
+      {
+        "rank": 39,
+        "trait": "Wizard Hat",
+        "count": 248
+      },
+      {
+        "rank": 40,
+        "trait": "No Headgear",
+        "count": 643
+      }
+    ],
+    "Clothes": [
+      {
+        "rank": 1,
+        "trait": "Piccolo Uniform",
+        "count": 14
+      },
+      {
+        "rank": 2,
+        "trait": "School Uniform",
+        "count": 31
+      },
+      {
+        "rank": 3,
+        "trait": "Prom Dress",
+        "count": 32
+      },
+      {
+        "rank": 4,
+        "trait": "Denim Vest",
+        "count": 40
+      },
+      {
+        "rank": 5,
+        "trait": "Sonic Suit",
+        "count": 43
+      },
+      {
+        "rank": 6,
+        "trait": "Astronaut",
+        "count": 44
+      },
+      {
+        "rank": 7,
+        "trait": "El Presidente",
+        "count": 49
+      },
+      {
+        "rank": 8,
+        "trait": "Pickle Suit",
+        "count": 50
+      },
+      {
+        "rank": 9,
+        "trait": "Vintage Dress",
+        "count": 50
+      },
+      {
+        "rank": 10,
+        "trait": "Bepe Suit",
+        "count": 56
+      },
+      {
+        "rank": 11,
+        "trait": "Goose Suit",
+        "count": 59
+      },
+      {
+        "rank": 12,
+        "trait": "Sports Bra",
+        "count": 59
+      },
+      {
+        "rank": 13,
+        "trait": "Pepe Suit",
+        "count": 63
+      },
+      {
+        "rank": 14,
+        "trait": "God's Robe",
+        "count": 80
+      },
+      {
+        "rank": 15,
+        "trait": "Straitjacket",
+        "count": 86
+      },
+      {
+        "rank": 16,
+        "trait": "Gopher Suit",
+        "count": 88
+      },
+      {
+        "rank": 17,
+        "trait": "Firefighter Uniform",
+        "count": 93
+      },
+      {
+        "rank": 18,
+        "trait": "Drac",
+        "count": 97
+      },
+      {
+        "rank": 19,
+        "trait": "Proof of Prayer",
+        "count": 101
+      },
+      {
+        "rank": 20,
+        "trait": "Tank Top",
+        "count": 107
+      },
+      {
+        "rank": 21,
+        "trait": "Tee",
+        "count": 116
+      },
+      {
+        "rank": 22,
+        "trait": "Bathrobe",
+        "count": 124
+      },
+      {
+        "rank": 23,
+        "trait": "SWAT Gear",
+        "count": 127
+      },
+      {
+        "rank": 24,
+        "trait": "Viking Armor",
+        "count": 129
+      },
+      {
+        "rank": 25,
+        "trait": "Ninja Turtle Fit",
+        "count": 142
+      },
+      {
+        "rank": 26,
+        "trait": "Ronin",
+        "count": 168
+      },
+      {
+        "rank": 27,
+        "trait": "Super Saiyan Uniform",
+        "count": 190
+      },
+      {
+        "rank": 28,
+        "trait": "Roman Drip",
+        "count": 194
+      },
+      {
+        "rank": 29,
+        "trait": "Wizard Drip",
+        "count": 198
+      },
+      {
+        "rank": 30,
+        "trait": "Leather Jacket",
+        "count": 199
+      },
+      {
+        "rank": 31,
+        "trait": "Born to Ride",
+        "count": 205
+      },
+      {
+        "rank": 32,
+        "trait": "Bepe Army",
+        "count": 208
+      },
+      {
+        "rank": 33,
+        "trait": "Chia Farmer",
+        "count": 215
+      },
+      {
+        "rank": 34,
+        "trait": "Sports Jacket",
+        "count": 236
+      },
+      {
+        "rank": 35,
+        "trait": "Suit",
+        "count": 236
+      },
+      {
+        "rank": 36,
+        "trait": "Topless",
+        "count": 271
+      }
+    ],
+    "Background": [
+      {
+        "rank": 1,
+        "trait": "Signal Lost",
+        "count": 14
+      },
+      {
+        "rank": 2,
+        "trait": "Crazy Room",
+        "count": 25
+      },
+      {
+        "rank": 3,
+        "trait": "Rainforest",
+        "count": 30
+      },
+      {
+        "rank": 4,
+        "trait": "Morning Routine",
+        "count": 36
+      },
+      {
+        "rank": 5,
+        "trait": "$HONK",
+        "count": 38
+      },
+      {
+        "rank": 6,
+        "trait": "Everythings Fine",
+        "count": 42
+      },
+      {
+        "rank": 7,
+        "trait": "Rome",
+        "count": 42
+      },
+      {
+        "rank": 8,
+        "trait": "$CASTER",
+        "count": 43
+      },
+      {
+        "rank": 9,
+        "trait": "NYSE Rug",
+        "count": 45
+      },
+      {
+        "rank": 10,
+        "trait": "Ronin Dojo",
+        "count": 45
+      },
+      {
+        "rank": 11,
+        "trait": "White House",
+        "count": 45
+      },
+      {
+        "rank": 12,
+        "trait": "$NECKCOIN",
+        "count": 49
+      },
+      {
+        "rank": 13,
+        "trait": "$PIZZA",
+        "count": 51
+      },
+      {
+        "rank": 14,
+        "trait": "Nesting Grounds",
+        "count": 54
+      },
+      {
+        "rank": 15,
+        "trait": "Spell Room",
+        "count": 59
+      },
+      {
+        "rank": 16,
+        "trait": "Moms Basement",
+        "count": 61
+      },
+      {
+        "rank": 17,
+        "trait": "NYSE Dump",
+        "count": 63
+      },
+      {
+        "rank": 18,
+        "trait": "Silicon Data Center",
+        "count": 68
+      },
+      {
+        "rank": 19,
+        "trait": "Route 66",
+        "count": 73
+      },
+      {
+        "rank": 20,
+        "trait": "Price Up",
+        "count": 74
+      },
+      {
+        "rank": 21,
+        "trait": "NYSE Pump",
+        "count": 75
+      },
+      {
+        "rank": 22,
+        "trait": "Pirate Ship",
+        "count": 76
+      },
+      {
+        "rank": 23,
+        "trait": "One Market",
+        "count": 79
+      },
+      {
+        "rank": 24,
+        "trait": "Price Down",
+        "count": 79
+      },
+      {
+        "rank": 25,
+        "trait": "$BEPE",
+        "count": 82
+      },
+      {
+        "rank": 26,
+        "trait": "Chia Farm",
+        "count": 87
+      },
+      {
+        "rank": 27,
+        "trait": "Golden Hour",
+        "count": 87
+      },
+      {
+        "rank": 28,
+        "trait": "Heaven",
+        "count": 89
+      },
+      {
+        "rank": 29,
+        "trait": "$LOVE",
+        "count": 90
+      },
+      {
+        "rank": 30,
+        "trait": "Hot Coral",
+        "count": 94
+      },
+      {
+        "rank": 31,
+        "trait": "Matrix",
+        "count": 107
+      },
+      {
+        "rank": 32,
+        "trait": "Hell",
+        "count": 113
+      },
+      {
+        "rank": 33,
+        "trait": "Radioactive Forest",
+        "count": 114
+      },
+      {
+        "rank": 34,
+        "trait": "Mellow Yellow",
+        "count": 127
+      },
+      {
+        "rank": 35,
+        "trait": "$HOA",
+        "count": 133
+      },
+      {
+        "rank": 36,
+        "trait": "Orange Grove",
+        "count": 140
+      },
+      {
+        "rank": 37,
+        "trait": "Bepe Barracks",
+        "count": 145
+      },
+      {
+        "rank": 38,
+        "trait": "Moon",
+        "count": 148
+      },
+      {
+        "rank": 39,
+        "trait": "Tangerine Pop",
+        "count": 148
+      },
+      {
+        "rank": 40,
+        "trait": "Neo Mint",
+        "count": 176
+      },
+      {
+        "rank": 41,
+        "trait": "Green Candle",
+        "count": 192
+      },
+      {
+        "rank": 42,
+        "trait": "Sky Shock Blue",
+        "count": 205
+      },
+      {
+        "rank": 43,
+        "trait": "Sky Dive",
+        "count": 206
+      },
+      {
+        "rank": 44,
+        "trait": "$CHIA",
+        "count": 219
+      },
+      {
+        "rank": 45,
+        "trait": "Chia Green",
+        "count": 232
+      }
+    ]
+  }
+}

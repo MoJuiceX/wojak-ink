@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="3840" height="2160" viewBox="0 0 3840 2160">
+  <!-- Background -->
+  <rect width="3840" height="2160" fill="#ffffff"/>
+
+  <!-- BLEED AREAS (light red) -->
+  <!-- Top bleed -->
+  <rect x="0" y="0" width="3840" height="360" fill="#ffcccc" stroke="#ff0000" stroke-width="2"/>
+  <text x="1920" y="180" text-anchor="middle" font-size="48" fill="#ff0000" font-weight="bold">TOP BLEED (gets cropped)</text>
+
+  <!-- Bottom bleed -->
+  <rect x="0" y="1800" width="3840" height="360" fill="#ffcccc" stroke="#ff0000" stroke-width="2"/>
+  <text x="1920" y="1980" text-anchor="middle" font-size="48" fill="#ff0000" font-weight="bold">BOTTOM BLEED (gets cropped)</text>
+
+  <!-- Left bleed -->
+  <rect x="0" y="360" width="640" height="1440" fill="#ffcccc" stroke="#ff0000" stroke-width="2"/>
+  <text x="320" y="1080" text-anchor="middle" font-size="36" fill="#ff0000" font-weight="bold" transform="rotate(-90, 320, 1080)">LEFT BLEED</text>
+
+  <!-- Right bleed -->
+  <rect x="3200" y="360" width="640" height="1440" fill="#ffcccc" stroke="#ff0000" stroke-width="2"/>
+  <text x="3520" y="1080" text-anchor="middle" font-size="36" fill="#ff0000" font-weight="bold" transform="rotate(90, 3520, 1080)">RIGHT BLEED</text>
+
+  <!-- SAFE ZONE (light green) -->
+  <rect x="640" y="360" width="2560" height="1440" fill="#ccffcc" stroke="#00aa00" stroke-width="4"/>
+  <text x="1920" y="420" text-anchor="middle" font-size="36" fill="#00aa00" font-weight="bold">SAFE ZONE - 2560x1440 (always visible on 16:9)</text>
+
+  <!-- Safe zone labels for arcade content areas -->
+  <!-- Top safe zone (for bezel) -->
+  <rect x="640" y="360" width="2560" height="180" fill="none" stroke="#0066ff" stroke-width="2" stroke-dasharray="10,5"/>
+  <text x="1920" y="460" text-anchor="middle" font-size="28" fill="#0066ff">Top bezel area</text>
+
+  <!-- Bottom safe zone (for control panel) -->
+  <rect x="640" y="1620" width="2560" height="180" fill="none" stroke="#0066ff" stroke-width="2" stroke-dasharray="10,5"/>
+  <text x="1920" y="1720" text-anchor="middle" font-size="28" fill="#0066ff">Bottom control panel area</text>
+
+  <!-- Left safe zone (for coin slot, buttons) -->
+  <rect x="640" y="540" width="320" height="1080" fill="none" stroke="#0066ff" stroke-width="2" stroke-dasharray="10,5"/>
+  <text x="800" y="1080" text-anchor="middle" font-size="24" fill="#0066ff" transform="rotate(-90, 800, 1080)">Left panel (coin slot)</text>
+
+  <!-- Right safe zone (for buttons) -->
+  <rect x="2880" y="540" width="320" height="1080" fill="none" stroke="#0066ff" stroke-width="2" stroke-dasharray="10,5"/>
+  <text x="3040" y="1080" text-anchor="middle" font-size="24" fill="#0066ff" transform="rotate(90, 3040, 1080)">Right panel (buttons)</text>
+
+  <!-- SCREEN AREA (yellow, centered) - THIS IS WHERE THE GAME SHOWS -->
+  <rect x="960" y="540" width="1920" height="1080" fill="#ffffcc" stroke="#ff9900" stroke-width="6"/>
+  <text x="1920" y="1000" text-anchor="middle" font-size="72" fill="#ff9900" font-weight="bold">SCREEN AREA</text>
+  <text x="1920" y="1080" text-anchor="middle" font-size="48" fill="#ff9900">1920 x 1080 px</text>
+  <text x="1920" y="1140" text-anchor="middle" font-size="36" fill="#ff9900">(Make this TRANSPARENT)</text>
+
+  <!-- Guide lines with measurements -->
+  <!-- Vertical guides -->
+  <line x1="0" y1="0" x2="0" y2="2160" stroke="#000" stroke-width="2"/>
+  <line x1="640" y1="0" x2="640" y2="2160" stroke="#00aa00" stroke-width="3"/>
+  <line x1="960" y1="0" x2="960" y2="2160" stroke="#ff9900" stroke-width="3"/>
+  <line x1="2880" y1="0" x2="2880" y2="2160" stroke="#ff9900" stroke-width="3"/>
+  <line x1="3200" y1="0" x2="3200" y2="2160" stroke="#00aa00" stroke-width="3"/>
+  <line x1="3840" y1="0" x2="3840" y2="2160" stroke="#000" stroke-width="2"/>
+
+  <!-- Horizontal guides -->
+  <line x1="0" y1="0" x2="3840" y2="0" stroke="#000" stroke-width="2"/>
+  <line x1="0" y1="360" x2="3840" y2="360" stroke="#00aa00" stroke-width="3"/>
+  <line x1="0" y1="540" x2="3840" y2="540" stroke="#ff9900" stroke-width="3"/>
+  <line x1="0" y1="1620" x2="3840" y2="1620" stroke="#ff9900" stroke-width="3"/>
+  <line x1="0" y1="1800" x2="3840" y2="1800" stroke="#00aa00" stroke-width="3"/>
+  <line x1="0" y1="2160" x2="3840" y2="2160" stroke="#000" stroke-width="2"/>
+
+  <!-- Pixel measurements on edges -->
+  <!-- Top edge measurements -->
+  <text x="320" y="30" text-anchor="middle" font-size="24" fill="#000">640px</text>
+  <text x="800" y="30" text-anchor="middle" font-size="24" fill="#000">320px</text>
+  <text x="1920" y="30" text-anchor="middle" font-size="24" fill="#000">1920px (screen)</text>
+  <text x="3040" y="30" text-anchor="middle" font-size="24" fill="#000">320px</text>
+  <text x="3520" y="30" text-anchor="middle" font-size="24" fill="#000">640px</text>
+
+  <!-- Left edge measurements -->
+  <text x="30" y="180" font-size="24" fill="#000">360px</text>
+  <text x="30" y="450" font-size="24" fill="#000">180px</text>
+  <text x="30" y="1080" font-size="24" fill="#000">1080px</text>
+  <text x="30" y="1710" font-size="24" fill="#000">180px</text>
+  <text x="30" y="1980" font-size="24" fill="#000">360px</text>
+
+  <!-- Corner coordinates -->
+  <text x="960" y="530" font-size="20" fill="#ff9900">(960, 540)</text>
+  <text x="2750" y="530" font-size="20" fill="#ff9900">(2880, 540)</text>
+  <text x="960" y="1650" font-size="20" fill="#ff9900">(960, 1620)</text>
+  <text x="2750" y="1650" font-size="20" fill="#ff9900">(2880, 1620)</text>
+
+  <!-- Legend -->
+  <rect x="50" y="2050" width="30" height="30" fill="#ffcccc" stroke="#ff0000"/>
+  <text x="90" y="2075" font-size="24" fill="#000">= Bleed area (can be cropped)</text>
+
+  <rect x="500" y="2050" width="30" height="30" fill="#ccffcc" stroke="#00aa00"/>
+  <text x="540" y="2075" font-size="24" fill="#000">= Safe zone (always visible)</text>
+
+  <rect x="1000" y="2050" width="30" height="30" fill="#ffffcc" stroke="#ff9900"/>
+  <text x="1040" y="2075" font-size="24" fill="#000">= Screen area (make TRANSPARENT)</text>
+
+  <!-- Canvas size label -->
+  <text x="3700" y="2130" text-anchor="end" font-size="32" fill="#000" font-weight="bold">Canvas: 3840 x 2160 px</text>
+</svg>
