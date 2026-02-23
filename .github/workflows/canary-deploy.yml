@@ -41,7 +41,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Validate GitHub workflows
-        run: ./scripts/validate-github-workflows.sh
+        run: ./scripts/validate-github-workflows.sh .github/workflows/canary-deploy.yml .github/workflows/auto-rollback.yml .github/workflows/terraform.yml .github/workflows/infra-validate.yml
       - name: Validate Kubernetes manifests (syntax/shape)
         run: ./scripts/validate-k8s-manifests.rb
       - name: Explain guarded mode

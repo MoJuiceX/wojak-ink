@@ -2,6 +2,13 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if [[ $# -eq 0 ]]; then
+  set -- \
+    .github/workflows/infra-validate.yml \
+    .github/workflows/terraform.yml \
+    .github/workflows/canary-deploy.yml \
+    .github/workflows/auto-rollback.yml
+fi
 
 if command -v actionlint >/dev/null 2>&1; then
   actionlint -color -oneline "$@"

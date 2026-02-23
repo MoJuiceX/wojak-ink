@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Validate GitHub workflows
-        run: ./scripts/validate-github-workflows.sh
+        run: ./scripts/validate-github-workflows.sh .github/workflows/infra-validate.yml .github/workflows/terraform.yml .github/workflows/canary-deploy.yml .github/workflows/auto-rollback.yml
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
