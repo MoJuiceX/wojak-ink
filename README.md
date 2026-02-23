@@ -12,7 +12,16 @@
 
 A production web app serving the Wojak Farmers Plot NFT community on Chia. Browse 4,200 unique NFTs, track real-time market data, analyze traits with AI-powered insights, create custom avatars, and play mini-games. Built for collectors, traders, and community members.
 
-**Live:** https://wojak.ink
+**Live:** https://wojak.ink  
+**Version:** v1.0.0 (Launch Release - 2026-02-23)  
+**Status:** 🚀 Ready for production launch
+
+> **Phase 5 - Launch Preparation Complete**
+> - ✅ Performance baseline established (bundle <406kB, FCP <2s)
+> - ✅ Launch readiness checklist created
+> - ✅ Monitoring & observability guide ready
+> - ✅ Rollback procedures documented
+> - See [docs/PERFORMANCE-BASELINE.md](./docs/PERFORMANCE-BASELINE.md), [docs/LAUNCH-CHECKLIST.md](./docs/LAUNCH-CHECKLIST.md), [docs/MONITORING-GUIDE.md](./docs/MONITORING-GUIDE.md)
 
 ---
 
