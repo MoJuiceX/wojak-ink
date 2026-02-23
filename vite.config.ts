@@ -189,8 +189,8 @@ export default defineConfig(({ mode }) => {
           },
         },
       },
-      // Increased chunk size warning to 800KB since we're aggressive with splitting
-      chunkSizeWarningLimit: 800,
+      // Keep a stricter budget signal now that chunk splitting reduced the main entry chunk.
+      chunkSizeWarningLimit: 600,
     },
     server: {
       port: 5174, // Dedicated port for wojak-ink (5173 often used by other projects)

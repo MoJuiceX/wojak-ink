@@ -97,7 +97,7 @@ export const ToastContainer: React.FC = () => {
 
   useEffect(() => {
     const unsubscribe = toastService.subscribe((toast) => {
-      if (toast.id === '') {
+      if (toast.dismissed) {
         // Dismissal event
         setToasts((prev) =>
           prev.filter((t) => t.id !== toast.id)

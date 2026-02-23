@@ -16,6 +16,7 @@ export interface Toast {
   message: string;
   type: ToastType;
   duration?: number;
+  dismissed?: boolean;
   action?: {
     label: string;
     onClick: () => void;
@@ -144,8 +145,9 @@ class ToastService {
     // Remove from map
     this.toasts.delete(id);
 
-    // Notify with empty toast to trigger removal
-    this.notify({ ...toast, id: '' });
+    // Notify dismissal while preserving the original ID so subscribers can
+    // remove the correct toast from local UI state.
+    this.notify({ ...toast, dismissed: true });
   }
 
   /**

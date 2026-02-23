@@ -40,9 +40,10 @@ describe('toastService', () => {
 
     expect(toastService.getAll()).toHaveLength(0);
     expect(events.at(-1)).toMatchObject({
-      id: '',
+      id,
       message: 'Saved changes',
       type: 'success',
+      dismissed: true,
     });
   });
 
@@ -62,7 +63,7 @@ describe('toastService', () => {
 
     vi.advanceTimersByTime(1);
     expect(toastService.getAll()).toHaveLength(0);
-    expect(events.some((toast) => toast.id === '')).toBe(true);
+    expect(events.some((toast) => toast.dismissed === true)).toBe(true);
 
     unsubscribe();
   });

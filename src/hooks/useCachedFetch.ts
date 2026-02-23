@@ -32,11 +32,9 @@ interface UseCachedFetchOptions {
   timeout?: number;
 }
 
-// Global in-flight request tracking
-const inflightRequests = new Map<
-  string,
-  Promise<Response>
->();
+// Global in-flight request tracking. Cache the parsed JSON promise (not the raw
+// Response) so multiple callers don't race to consume the same response body.
+const inflightRequests = new Map<string, Promise<unknown>>();
 
 // Global memory cache
 const memoryCache = new Map<string, CacheEntry<unknown>>();
@@ -202,34 +200,41 @@ export function useCachedFetch<T>(
         }
 
         // Check if request is already in-flight (deduplication)
-        let request: Promise<Response>;
+        let request: Promise<T>;
 
         if (deduplicate && inflightRequests.has(cacheKey)) {
-          request = inflightRequests.get(cacheKey)!;
+          request = inflightRequests.get(cacheKey)! as Promise<T>;
         } else {
           // Create abort controller for timeout
           abortControllerRef.current = new AbortController();
+          const controller = abortControllerRef.current;
           const timeoutId = setTimeout(
-            () => abortControllerRef.current?.abort(),
+            () => controller.abort(),
             timeout
           );
 
-          request = fetch(url, {
-            signal: abortControllerRef.current.signal,
-          }).finally(() => clearTimeout(timeoutId));
+          request = (async () => {
+            try {
+              const response = await fetch(url, {
+                signal: controller.signal,
+              });
+
+              if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+              }
+
+              return (await response.json()) as T;
+            } finally {
+              clearTimeout(timeoutId);
+            }
+          })();
 
           if (deduplicate) {
             inflightRequests.set(cacheKey, request);
           }
         }
 
-        const response = await request;
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const result = (await response.json()) as T;
+        const result = await request;
 
         if (!cancelled) {
           setData(result);
