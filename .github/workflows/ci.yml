@@ -25,3 +25,14 @@ jobs:
         run: npm run test:unit
       - name: Build
         run: npm run build
+      - name: Bundle Budget Report
+        run: npm run bundle:report -- --enforce-hard --json-out=reports/bundle-budget-ci.json --md-out=reports/bundle-budget-ci.md
+      - name: Upload bundle budget report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-budget-report
+          if-no-files-found: ignore
+          path: |
+            reports/bundle-budget-ci.json
+            reports/bundle-budget-ci.md

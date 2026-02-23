@@ -96,15 +96,15 @@ export const ToastContainer: React.FC = () => {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   useEffect(() => {
-    const unsubscribe = toastService.subscribe((toast) => {
-      if (toast.dismissed) {
+    const unsubscribe = toastService.subscribe((event) => {
+      if (event.type === 'dismiss') {
         // Dismissal event
         setToasts((prev) =>
-          prev.filter((t) => t.id !== toast.id)
+          prev.filter((t) => t.id !== event.toast.id)
         );
       } else {
         // New toast
-        setToasts((prev) => [...prev, toast]);
+        setToasts((prev) => [...prev, event.toast]);
       }
     });
 

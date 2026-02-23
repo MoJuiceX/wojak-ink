@@ -16,7 +16,6 @@ export interface Toast {
   message: string;
   type: ToastType;
   duration?: number;
-  dismissed?: boolean;
   action?: {
     label: string;
     onClick: () => void;
@@ -24,8 +23,12 @@ export interface Toast {
   onDismiss?: () => void;
 }
 
+export type ToastEvent =
+  | { type: 'show'; toast: Toast }
+  | { type: 'dismiss'; toast: Toast };
+
 interface ToastListener {
-  (toast: Toast): void;
+  (event: ToastEvent): void;
 }
 
 class ToastService {
@@ -47,8 +50,8 @@ class ToastService {
   /**
    * Notify all listeners
    */
-  private notify(toast: Toast) {
-    this.listeners.forEach((listener) => listener(toast));
+  private notify(event: ToastEvent) {
+    this.listeners.forEach((listener) => listener(event));
   }
 
   /**
@@ -71,7 +74,7 @@ class ToastService {
     };
 
     this.toasts.set(id, toast);
-    this.notify(toast);
+    this.notify({ type: 'show', toast });
 
     // Auto-dismiss
     if (duration > 0) {
@@ -145,9 +148,7 @@ class ToastService {
     // Remove from map
     this.toasts.delete(id);
 
-    // Notify dismissal while preserving the original ID so subscribers can
-    // remove the correct toast from local UI state.
-    this.notify({ ...toast, dismissed: true });
+    this.notify({ type: 'dismiss', toast });
   }
 
   /**

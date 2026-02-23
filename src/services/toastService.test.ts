@@ -1,5 +1,5 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
-import { toastService, type Toast } from './toastService';
+import { toastService, type ToastEvent } from './toastService';
 
 describe('toastService', () => {
   beforeEach(() => {
@@ -15,9 +15,9 @@ describe('toastService', () => {
   });
 
   it('publishes shown toasts and dismissal events to subscribers', () => {
-    const events: Toast[] = [];
-    const unsubscribe = toastService.subscribe((toast) => {
-      events.push(toast);
+    const events: ToastEvent[] = [];
+    const unsubscribe = toastService.subscribe((event) => {
+      events.push(event);
     });
 
     const id = toastService.success('Saved changes');
@@ -30,9 +30,12 @@ describe('toastService', () => {
       duration: 4000,
     });
     expect(events[0]).toMatchObject({
-      id,
-      message: 'Saved changes',
-      type: 'success',
+      type: 'show',
+      toast: {
+        id,
+        message: 'Saved changes',
+        type: 'success',
+      },
     });
 
     toastService.dismiss(id);
@@ -40,19 +43,21 @@ describe('toastService', () => {
 
     expect(toastService.getAll()).toHaveLength(0);
     expect(events.at(-1)).toMatchObject({
-      id,
-      message: 'Saved changes',
-      type: 'success',
-      dismissed: true,
+      type: 'dismiss',
+      toast: {
+        id,
+        message: 'Saved changes',
+        type: 'success',
+      },
     });
   });
 
   it('auto-dismisses toasts after the configured duration', () => {
     vi.useFakeTimers();
 
-    const events: Toast[] = [];
-    const unsubscribe = toastService.subscribe((toast) => {
-      events.push(toast);
+    const events: ToastEvent[] = [];
+    const unsubscribe = toastService.subscribe((event) => {
+      events.push(event);
     });
 
     toastService.info('Queued', { duration: 50 });
@@ -63,7 +68,7 @@ describe('toastService', () => {
 
     vi.advanceTimersByTime(1);
     expect(toastService.getAll()).toHaveLength(0);
-    expect(events.some((toast) => toast.dismissed === true)).toBe(true);
+    expect(events.some((event) => event.type === 'dismiss')).toBe(true);
 
     unsubscribe();
   });

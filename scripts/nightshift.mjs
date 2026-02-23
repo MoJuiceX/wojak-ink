@@ -371,6 +371,8 @@ function makeReport(state, policy, args) {
   for (const task of state.tasks) {
     lines.push(`### ${task.id} — ${task.status}`);
     if (task.note) lines.push(`- Note: ${task.note}`);
+    if (task.expectedOutputs?.length) lines.push(`- Expected outputs: ${task.expectedOutputs.join(', ')}`);
+    if (task.doneCriteria?.length) lines.push(`- Done criteria: ${task.doneCriteria.join('; ')}`);
     for (const cmd of task.commands || []) {
       lines.push(`- Command: \`${cmd.command}\``);
       lines.push(`  - Status: ${cmd.status}`);
@@ -471,6 +473,8 @@ async function main() {
       risk: task.risk,
       mode: task.mode,
       mutatesCode: !!task.mutatesCode,
+      expectedOutputs: task.expectedOutputs || [],
+      doneCriteria: task.doneCriteria || [],
       status: 'pending',
       note: '',
       durationMs: 0,

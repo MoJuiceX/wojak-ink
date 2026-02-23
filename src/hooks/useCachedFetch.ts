@@ -17,7 +17,7 @@ interface CacheEntry<T> {
   ttl: number;
 }
 
-interface UseCachedFetchOptions {
+export interface UseCachedFetchOptions {
   /** Cache TTL in seconds (default: 60, min: 5, max: 3600) */
   ttl?: number;
   /** Use localStorage fallback (default: true) */
@@ -32,9 +32,17 @@ interface UseCachedFetchOptions {
   timeout?: number;
 }
 
+interface InflightRequestEntry {
+  promise: Promise<unknown>;
+  controller: AbortController;
+  timeoutId: ReturnType<typeof setTimeout>;
+  consumers: number;
+  settled: boolean;
+}
+
 // Global in-flight request tracking. Cache the parsed JSON promise (not the raw
 // Response) so multiple callers don't race to consume the same response body.
-const inflightRequests = new Map<string, Promise<unknown>>();
+const inflightRequests = new Map<string, InflightRequestEntry>();
 
 // Global memory cache
 const memoryCache = new Map<string, CacheEntry<unknown>>();
@@ -133,6 +141,79 @@ function setCachedData<T>(
   }
 }
 
+function createInflightRequest<T>(
+  cacheKey: string,
+  url: string,
+  timeout: number
+): InflightRequestEntry {
+  const controller = new AbortController();
+  const entry: InflightRequestEntry = {
+    promise: Promise.resolve(undefined),
+    controller,
+    timeoutId: setTimeout(() => controller.abort(), timeout),
+    consumers: 1,
+    settled: false,
+  };
+
+  const promise = (async () => {
+    try {
+      const response = await fetch(url, { signal: controller.signal });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      return (await response.json()) as T;
+    } finally {
+      clearTimeout(entry.timeoutId);
+      entry.settled = true;
+      if (inflightRequests.get(cacheKey) === entry) {
+        inflightRequests.delete(cacheKey);
+      }
+    }
+  })();
+
+  entry.promise = promise;
+  inflightRequests.set(cacheKey, entry);
+  return entry;
+}
+
+function acquireInflightRequest<T>(
+  cacheKey: string,
+  url: string,
+  timeout: number
+): InflightRequestEntry {
+  const existing = inflightRequests.get(cacheKey);
+  if (existing) {
+    existing.consumers += 1;
+    return existing;
+  }
+  return createInflightRequest<T>(cacheKey, url, timeout);
+}
+
+function releaseInflightRequest(cacheKey: string, entry: InflightRequestEntry | null): void {
+  if (!entry) return;
+  if (inflightRequests.get(cacheKey) !== entry) {
+    return;
+  }
+
+  entry.consumers = Math.max(0, entry.consumers - 1);
+  if (entry.consumers === 0 && !entry.settled) {
+    clearTimeout(entry.timeoutId);
+    entry.controller.abort();
+  }
+}
+
+/** Test-only reset helper for hook cache/inflight state. */
+export function __resetUseCachedFetchStateForTests(): void {
+  for (const entry of inflightRequests.values()) {
+    clearTimeout(entry.timeoutId);
+    if (!entry.settled) {
+      entry.controller.abort();
+    }
+  }
+  inflightRequests.clear();
+  memoryCache.clear();
+}
+
 /**
  * useCachedFetch Hook
  *
@@ -169,6 +250,7 @@ export function useCachedFetch<T>(
 
   const cacheKeyRef = useRef<string>('');
   const abortControllerRef = useRef<AbortController | null>(null);
+  const releaseSharedInflightRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     if (!url) {
@@ -202,8 +284,10 @@ export function useCachedFetch<T>(
         // Check if request is already in-flight (deduplication)
         let request: Promise<T>;
 
-        if (deduplicate && inflightRequests.has(cacheKey)) {
-          request = inflightRequests.get(cacheKey)! as Promise<T>;
+        if (deduplicate) {
+          const entry = acquireInflightRequest<T>(cacheKey, url, timeout);
+          releaseSharedInflightRef.current = () => releaseInflightRequest(cacheKey, entry);
+          request = entry.promise as Promise<T>;
         } else {
           // Create abort controller for timeout
           abortControllerRef.current = new AbortController();
@@ -228,10 +312,6 @@ export function useCachedFetch<T>(
               clearTimeout(timeoutId);
             }
           })();
-
-          if (deduplicate) {
-            inflightRequests.set(cacheKey, request);
-          }
         }
 
         const result = await request;
@@ -260,10 +340,6 @@ export function useCachedFetch<T>(
           setLoading(false);
         }
 
-        // Clean up in-flight request tracking
-        if (deduplicate) {
-          inflightRequests.delete(cacheKey);
-        }
       }
     };
 
@@ -271,7 +347,10 @@ export function useCachedFetch<T>(
 
     return () => {
       cancelled = true;
+      releaseSharedInflightRef.current?.();
+      releaseSharedInflightRef.current = null;
       abortControllerRef.current?.abort();
+      abortControllerRef.current = null;
     };
   }, [url, validTtl, useLocalStorage, keyPrefix, deduplicate, skipCache, timeout]);
 
