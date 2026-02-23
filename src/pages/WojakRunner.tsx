@@ -358,6 +358,7 @@ const WojakRunner: React.FC = () => {
     if (gameStarted && gameState === 'idle') {
       startGame();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- one-time arcade PLAY transition should not depend on unstable startGame
   }, [gameStarted, gameState]);
 
   const startGame = () => {
