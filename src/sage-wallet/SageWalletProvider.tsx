@@ -121,7 +121,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     } finally {
       initializingRef.current = false;
     }
-  }, [config.projectId, config.metadata, config.relayUrl, config.autoConnect]);
+  }, [config.projectId, config.metadata, config.relayUrl, config.autoConnect]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // EVENT LISTENERS
@@ -141,7 +141,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
       }
     });
 
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // SESSION MANAGEMENT
@@ -174,7 +174,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     } catch (err) {
       console.error('[SageWallet] Error checking sessions:', err);
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateAddressFromWallet = useCallback(async (): Promise<void> => {
     const client = signClientRef.current;
@@ -227,7 +227,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     // Callback
     config.onConnect?.(address);
     
-  }, [config.storageKey, config.onConnect]);
+  }, [config.storageKey, config.onConnect]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDisconnect = useCallback(() => {
     currentSessionRef.current = null;
@@ -242,7 +242,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     });
     
     config.onDisconnect?.();
-  }, [config.storageKey, config.onDisconnect]);
+  }, [config.storageKey, config.onDisconnect]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // PUBLIC ACTIONS
@@ -317,7 +317,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
       config.onError?.(error instanceof Error ? error : new Error(String(error)));
       throw error;
     }
-  }, [state.address, state.status, updateAddressFromWallet, config.onError]);
+  }, [state.address, state.status, updateAddressFromWallet, config.onError]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const disconnect = useCallback(async (): Promise<void> => {
 
