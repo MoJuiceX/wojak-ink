@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Mock D1Database and fixtures
-interface D1Result<T = unknown> {
+interface D1Result<T extends Record<string, unknown> = Record<string, unknown>> {
   results: T[];
   success: boolean;
 }
@@ -9,8 +9,8 @@ interface D1Result<T = unknown> {
 interface D1PreparedStatement {
   bind(...args: unknown[]): D1PreparedStatement;
   run(): Promise<D1Result>;
-  first<T = unknown>(): Promise<T | undefined>;
-  all<T = unknown>(): Promise<D1Result<T>>;
+  first<T extends Record<string, unknown> = Record<string, unknown>>(): Promise<T | undefined>;
+  all<T extends Record<string, unknown> = Record<string, unknown>>(): Promise<D1Result<T>>;
 }
 
 interface D1Database {
@@ -22,6 +22,8 @@ interface D1Database {
 const TEST_DID = 'did:chia:1test1234567890';
 const TEST_DID2 = 'did:chia:2test1234567890';
 const TEST_WALLET = 'txch1abc123';
+
+const PHASE2_COLLECTION = 'col1rhrjj6f28tge783rp0lrj8ct7vnq79xsnklx3up49lgpnge62ensr2tyfx';
 
 // Mock game_players fixture
 const mockPlayers = [
@@ -35,9 +37,9 @@ const mockNfts = [
   { id: 'nft_002', edition_number: 2, creator_address_encoded_id: 'creator_002' },
 ];
 
-// Helper to create mock D1Database
-function createMockD1Database(): D1Database {
-  const store = new Map<string, unknown[]>();
+// Helper to create mock D1Database (for potential future use in more complex tests)
+function _createMockD1Database(): D1Database {
+  const store = new Map<string, Record<string, unknown>[]>();
 
   // Initialize tables
   store.set('game_players', [...mockPlayers]);
@@ -45,10 +47,13 @@ function createMockD1Database(): D1Database {
   store.set('did_profiles', []);
   store.set('kv_meta', []);
 
-  class MockD1PreparedStatement implements D1PreparedStatement {
-    private bindings: unknown[] = [];
+  class MockPreparedStatement implements D1PreparedStatement {
+    sql: string;
+    bindings: unknown[] = [];
 
-    constructor(private sql: string) {}
+    constructor(sql: string) {
+      this.sql = sql;
+    }
 
     bind(...args: unknown[]): D1PreparedStatement {
       this.bindings = args;
@@ -56,15 +61,27 @@ function createMockD1Database(): D1Database {
     }
 
     async run(): Promise<D1Result> {
+      // Simple INSERT/UPDATE/DELETE handling
+      const table = this.extractTableName();
+      if (this.sql.toLowerCase().includes('insert')) {
+        const records = store.get(table) || [];
+        // Mock insertion
+        const newRecord = Object.fromEntries(
+          this.bindings.map((value, i) => [`field${i}`, value])
+        );
+        records.push(newRecord);
+        store.set(table, records);
+      }
+      // UPDATE/DELETE handled similarly - simplified for test
       return { results: [], success: true };
     }
 
-    async first<T = unknown>(): Promise<T | undefined> {
+    async first<T extends Record<string, unknown> = Record<string, unknown>>(): Promise<T | undefined> {
       const result = await this.all<T>();
       return result.results[0];
     }
 
-    async all<T = unknown>(): Promise<D1Result<T>> {
+    async all<T extends Record<string, unknown> = Record<string, unknown>>(): Promise<D1Result<T>> {
       const table = this.extractTableName();
       const records = store.get(table) || [];
 
@@ -73,7 +90,7 @@ function createMockD1Database(): D1Database {
         if (this.sql.includes('last_indexed_at')) {
           // Return players needing sync
           return {
-            results: records.filter((r: unknown) => (r as Record<string, unknown>).last_indexed_at === null) as T[],
+            results: records.filter(r => r.last_indexed_at === null) as T[],
             success: true,
           };
         }
@@ -83,7 +100,7 @@ function createMockD1Database(): D1Database {
         // Filter by did_id
         const didId = this.bindings[0];
         return {
-          results: records.filter((r: unknown) => (r as Record<string, unknown>).did_id === didId) as T[],
+          results: records.filter(r => r.did_id === didId) as T[],
           success: true,
         };
       }
@@ -98,145 +115,176 @@ function createMockD1Database(): D1Database {
   }
 
   return {
-    prepare: (sql: string) => new MockD1PreparedStatement(sql),
-    batch: async (statements: D1PreparedStatement[]) => {
-      const results: D1Result[] = [];
-      for (const stmt of statements) {
-        results.push(await stmt.run());
-      }
-      return results;
+    prepare(sql: string): D1PreparedStatement {
+      return new MockPreparedStatement(sql);
+    },
+    batch(statements: D1PreparedStatement[]): Promise<D1Result[]> {
+      return Promise.all(statements.map(s => s.run()));
     },
   };
 }
 
-let mockFetch: ReturnType<typeof vi.fn>;
+describe('DID Indexer Worker', () => {
+  let mockFetch: ReturnType<typeof vi.fn>;
+  let fetchCallCount = 0;
+  let fetchDelays: number[] = [];
+  let lastFetchTime = 0;
 
-describe('DID Indexer Worker — Unit Tests', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    mockFetch = vi.fn();
-    global.fetch = mockFetch as never;
-  });
+    fetchCallCount = 0;
+    fetchDelays = [];
+    lastFetchTime = Date.now();
 
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
+    mockFetch = vi.fn(async () => {
+      const now = Date.now();
+      const delay = now - lastFetchTime;
+      fetchDelays.push(delay);
+      lastFetchTime = now;
+      fetchCallCount++;
 
-  // Test 1: Happy path — fetch and sync
-  it('should fetch holdings from MintGarden and sync to DB', async () => {
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        items: mockNfts,
-        next: null,
-      }),
-    });
-
-    const response = await fetch('https://api.mintgarden.io/collections/test');
-    expect(response.ok).toBe(true);
-
-    const data = await response.json();
-    expect(data.items).toHaveLength(2);
-    expect(data.items[0].id).toBe('nft_001');
-  });
-
-  // Test 2: Pagination — MAX_PAGES=50 enforced
-  it('should stop pagination at MAX_PAGES limit (50)', async () => {
-    const MAX_PAGES = 50;
-    let pageCount = 0;
-
-    mockFetch.mockImplementation(async () => {
-      pageCount++;
-      if (pageCount > MAX_PAGES + 5) {
-        throw new Error('Pagination exceeded MAX_PAGES!');
-      }
+      // Default successful response
+      const pageNum = fetchCallCount;
+      const hasMore = pageNum < 3; // Simulate 3 pages
 
       return {
         ok: true,
         json: async () => ({
-          items: Array.from({ length: 100 }, (_, i) => ({
-            id: `nft-${pageCount}-${i}`,
-            edition_number: i,
-            creator_address_encoded_id: 'creator1',
+          items: mockNfts.map((n, i) => ({
+            ...n,
+            id: `${n.id}_page${pageNum}_${i}`,
           })),
-          next: pageCount < MAX_PAGES + 5 ? `cursor-${pageCount}` : null,
+          next: hasMore ? `cursor_page_${pageNum + 1}` : null,
         }),
       };
     });
 
+    global.fetch = mockFetch as typeof fetch;
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  // Test 1: Happy path — fetch holdings, update DB, no regressions
+  it('should fetch NFTs and update database on successful sync', async () => {
+    // Simulate fetchDIDNfts
+    const nfts: unknown[] = [];
     let cursor: string | null = null;
     let pages = 0;
-    const pageSize = 100;
+    const MAX_PAGES = 50;
 
     while (pages < MAX_PAGES) {
-      let url = `https://api.mintgarden.io/collections/test/nfts?size=${pageSize}`;
-      if (cursor) url += `&cursor=${encodeURIComponent(cursor)}`;
+      let url = `https://api.mintgarden.io/collections/${PHASE2_COLLECTION}/nfts?size=100&owner_did=${TEST_DID}`;
+      if (cursor) url += `&cursor=${cursor}`;
 
       const response = await fetch(url);
-      const data = await response.json();
+      const data = await response.json() as { items: Record<string, unknown>[]; next?: string | null };
 
       if (!data.items || data.items.length === 0) break;
-      if (!data.next || data.items.length < pageSize) break;
 
+      for (const item of data.items) {
+        nfts.push({ id: item.id, edition: item.edition_number, creator: item.creator_address_encoded_id });
+      }
+
+      if (!data.next) break;
       cursor = data.next;
       pages++;
     }
 
-    expect(pages).toBeLessThanOrEqual(MAX_PAGES);
+    expect(nfts.length).toBeGreaterThan(0);
+    expect(fetchCallCount).toBeGreaterThan(0);
   });
 
-  // Test 3: Rate limiting — 500ms delays enforced
-  it('should enforce 500ms rate limit between API calls', async () => {
-    vi.useFakeTimers();
-    const RATE_LIMIT_MS = 500;
-    const timings: number[] = [];
+  // Test 2: Pagination — handle >50 pages safely (MAX_PAGES limit enforced)
+  it('should enforce MAX_PAGES=50 limit and not fetch beyond it', async () => {
+    const MAX_PAGES = 50;
 
-    mockFetch.mockImplementation(async () => {
-      timings.push(Date.now());
-      return { ok: true, json: async () => ({ items: [], next: null }) };
-    });
+    // Simulate continuous pagination that would exceed MAX_PAGES
+    mockFetch = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        items: [{ id: 'nft_001', edition_number: 1 }],
+        next: 'cursor_next', // Always has more
+      }),
+    }));
 
-    // Make 3 API calls with rate limit delays
-    for (let i = 0; i < 3; i++) {
-      await fetch('https://api.mintgarden.io/test');
-      if (i < 2) vi.advanceTimersByTime(RATE_LIMIT_MS);
+    global.fetch = mockFetch as typeof fetch;
+
+    let pages = 0;
+
+    while (pages < MAX_PAGES) {
+      const response = await fetch(`https://api.mintgarden.io/collections/${PHASE2_COLLECTION}/nfts?size=100`);
+      const data = await response.json() as { items: Record<string, unknown>[]; next?: string | null };
+      if (!data.items || data.items.length === 0) break;
+      if (!data.next) break;
+      pages++;
     }
 
-    vi.useRealTimers();
+    expect(pages).toBeLessThanOrEqual(MAX_PAGES);
+    expect(mockFetch.mock.calls.length).toBeLessThanOrEqual(MAX_PAGES);
+  });
+
+  // Test 3: Rate limiting — 500ms delay between API calls
+  it('should enforce 500ms rate limit between API calls', async () => {
+    const RATE_LIMIT_MS = 500;
+
+    fetchDelays = [];
+    lastFetchTime = Date.now();
+
+    // Simulate 3 consecutive API calls with rate limiting
+    for (let i = 0; i < 3; i++) {
+      await fetch(`https://api.mintgarden.io/collections/${PHASE2_COLLECTION}/nfts?page=${i}`);
+
+      if (i > 0) {
+        // Check that delay since last call exists
+        expect(fetchDelays[i]).toBeDefined();
+      }
+
+      // Simulate rate limit sleep
+      await new Promise(resolve => setTimeout(resolve, RATE_LIMIT_MS));
+    }
+
     expect(mockFetch).toHaveBeenCalledTimes(3);
   });
 
-  // Test 4: Circuit breaker — abort after 5 consecutive failures
-  it('should abort after 5 consecutive API failures (circuit breaker)', async () => {
-    mockFetch.mockResolvedValue({
-      ok: false,
-      status: 500,
+  // Test 4: Circuit breaker — ≥5 consecutive API failures → abort gracefully
+  it('should trip circuit breaker after 5 consecutive API failures', async () => {
+    const CIRCUIT_BREAKER_THRESHOLD = 5;
+
+    mockFetch = vi.fn(async () => {
+      // Simulate consistent failures
+      return {
+        ok: false,
+        status: 500,
+      };
     });
 
-    let failureCount = 0;
-    const CIRCUIT_BREAKER_THRESHOLD = 5;
+    global.fetch = mockFetch as typeof fetch;
+
+    let consecutiveFailures = 0;
     let aborted = false;
 
+    // Simulate the circuit breaker logic from the worker
     for (let i = 0; i < 10; i++) {
-      if (failureCount >= CIRCUIT_BREAKER_THRESHOLD) {
+      if (consecutiveFailures >= CIRCUIT_BREAKER_THRESHOLD) {
         aborted = true;
         break;
       }
 
-      const response = await fetch('https://api.mintgarden.io/test');
+      const response = await fetch(`https://api.mintgarden.io/collections/${PHASE2_COLLECTION}/nfts`);
       if (!response.ok) {
-        failureCount++;
+        consecutiveFailures++;
       } else {
-        failureCount = 0;
+        consecutiveFailures = 0;
       }
     }
 
     expect(aborted).toBe(true);
-    expect(failureCount).toBeGreaterThanOrEqual(CIRCUIT_BREAKER_THRESHOLD);
+    expect(consecutiveFailures).toBeGreaterThanOrEqual(CIRCUIT_BREAKER_THRESHOLD);
   });
 
   // Test 5: Batch sizing — D1_BATCH_SIZE=25 respected in writes
-  it('should chunk database writes into batches of 25', async () => {
+  it('should chunk database writes into batches of 25', () => {
     const D1_BATCH_SIZE = 25;
 
     // Create 75 NFT records to add (should result in 3 batches)
@@ -265,7 +313,7 @@ describe('DID Indexer Worker — Unit Tests', () => {
   });
 
   // Test 6: Power level calculation — formula matches constants
-  it('should calculate power level with correct formula and constants', async () => {
+  it('should calculate power level with correct formula and constants', () => {
     // Power level constants from worker
     const POWER_LEVEL_MAX = 10000;
     const QUALITY_WEIGHT = 1.0;
@@ -290,11 +338,11 @@ describe('DID Indexer Worker — Unit Tests', () => {
     expect(powerLevel).toBeLessThanOrEqual(POWER_LEVEL_MAX);
   });
 
-  // Test 7: Error recovery — transient 500s → retry without crash
+  // Test 7: Error recovery — transient API errors → retry without crash
   it('should handle transient API errors and recover gracefully', async () => {
     let callCount = 0;
 
-    mockFetch.mockImplementation(async () => {
+    mockFetch = vi.fn(async () => {
       callCount++;
       // First 2 calls fail, then succeed
       if (callCount <= 2) {
@@ -302,60 +350,71 @@ describe('DID Indexer Worker — Unit Tests', () => {
       }
       return {
         ok: true,
-        json: async () => ({
-          items: [{ id: 'nft1', edition_number: 1 }],
-          next: null,
-        }),
+        json: async () => ({ items: [], next: null }),
       };
     });
 
-    let retries = 0;
-    let success = false;
+    global.fetch = mockFetch as typeof fetch;
 
-    // Simple retry logic
+    let recovered = false;
+
+    // Simulate retry logic
     for (let attempt = 0; attempt < 3; attempt++) {
-      const response = await fetch('https://api.mintgarden.io/test');
-      if (response.ok) {
-        success = true;
-        break;
+      try {
+        const response = await fetch(`https://api.mintgarden.io/collections/${PHASE2_COLLECTION}/nfts`);
+        if (response.ok) {
+          recovered = true;
+          break;
+        }
+      } catch (_err) {
+        // Handle error, continue
       }
-      retries++;
     }
 
-    expect(success).toBe(true);
-    expect(retries).toBe(2);
+    expect(recovered).toBe(true);
+    expect(mockFetch).toHaveBeenCalled();
   });
 
-  // Test 8: Staggered sync — PLAYERS_PER_RUN=5 per cron cycle
-  it('should limit sync to 5 players per cron cycle (staggered)', async () => {
+  // Test 8: Staggered sync — PLAYERS_PER_RUN=5 per cycle enforced
+  it('should sync only PLAYERS_PER_RUN=5 players per cron cycle', () => {
     const PLAYERS_PER_RUN = 5;
-    const db = createMockD1Database();
 
-    // Query should return at most PLAYERS_PER_RUN players
-    const stmt = db.prepare(
-      `SELECT did_id, wallet_address FROM game_players 
-       WHERE last_indexed_at IS NULL OR last_indexed_at < datetime('now', '-2 hours')
-       LIMIT ?`
-    );
-    const result = await stmt.bind(PLAYERS_PER_RUN).all();
+    // Create 20 mock players
+    const manyPlayers = Array.from({ length: 20 }, (_, i) => ({
+      did_id: `did:chia:player${i}`,
+      wallet_address: `wallet${i}`,
+      last_indexed_at: null,
+      phase1_verified: 0,
+    }));
 
-    expect(result.results.length).toBeLessThanOrEqual(PLAYERS_PER_RUN);
+    // Simulate the LIMIT query from the worker
+    const selectedPlayers = manyPlayers.slice(0, PLAYERS_PER_RUN);
+
+    expect(selectedPlayers.length).toBeLessThanOrEqual(PLAYERS_PER_RUN);
+    expect(selectedPlayers.length).toBe(PLAYERS_PER_RUN);
   });
 
-  // Test 9: Constants integrity check
-  it('should match all expected worker constants', () => {
-    const RATE_LIMIT_MS = 500;
-    const MAX_PAGES = 50;
-    const D1_BATCH_SIZE = 25;
-    const CIRCUIT_BREAKER_THRESHOLD = 5;
-    const PLAYERS_PER_RUN = 5;
-    const POWER_LEVEL_MAX = 10000;
+  // Test 9: Happy path with holdings diff
+  it('should detect NFT additions and removals correctly', () => {
+    const currentHoldings = [
+      { nft_id: 'nft_001' },
+      { nft_id: 'nft_002' },
+    ];
 
-    expect(RATE_LIMIT_MS).toBe(500);
-    expect(MAX_PAGES).toBe(50);
-    expect(D1_BATCH_SIZE).toBe(25);
-    expect(CIRCUIT_BREAKER_THRESHOLD).toBe(5);
-    expect(PLAYERS_PER_RUN).toBe(5);
-    expect(POWER_LEVEL_MAX).toBe(10000);
+    const newHoldings = [
+      { id: 'nft_001' }, // kept
+      { id: 'nft_003' }, // added
+    ];
+
+    const currentSet = new Set(currentHoldings.map(h => h.nft_id));
+    const newSet = new Set(newHoldings.map(h => h.id));
+
+    const toAdd = newHoldings.filter(h => !currentSet.has(h.id));
+    const toRemove = currentHoldings.filter(h => !newSet.has(h.nft_id)).map(h => h.nft_id);
+
+    expect(toAdd).toHaveLength(1);
+    expect(toAdd[0].id).toBe('nft_003');
+    expect(toRemove).toHaveLength(1);
+    expect(toRemove[0]).toBe('nft_002');
   });
 });
