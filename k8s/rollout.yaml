@@ -1,0 +1,227 @@
+# Argo Rollouts Configuration for Canary Deployments
+# Automatically handles 5% → 25% → 50% → 100% rollout with monitoring
+
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: wojak-ink-api
+  namespace: default
+  labels:
+    app: wojak-ink-api
+    version: v1
+spec:
+  replicas: 10
+  strategy:
+    canary:
+      # Define the rollout strategy
+      steps:
+      # Step 1: Canary with 5% traffic
+      - setWeight: 5
+        pause:
+          duration: 5m  # Wait 5 minutes, monitoring error rate
+      
+      # Step 2: Gradually increase to 25%
+      - setWeight: 25
+        pause:
+          duration: 5m
+      
+      # Step 3: Increase to 50%
+      - setWeight: 50
+        pause:
+          duration: 5m
+      
+      # Step 4: Go to 100% (complete rollout)
+      - setWeight: 100
+      
+      # Traffic management
+      trafficRouting:
+        istio:
+          virtualService:
+            name: wojak-ink-api
+            routes:
+            - primary
+      
+      # Analysis template for automated rollback
+      analysis:
+        interval: 1m
+        threshold: 3
+        unsuccessful: 3
+        templates:
+        - name: error-rate-analysis
+          requiredForCompletion: true
+      
+      # Failure recovery strategy
+      canaryService: wojak-ink-api-canary
+      stableService: wojak-ink-api-stable
+  
+  # Pod spec
+  selector:
+    matchLabels:
+      app: wojak-ink-api
+  
+  template:
+    metadata:
+      labels:
+        app: wojak-ink-api
+        version: v1
+    
+    spec:
+      serviceAccountName: wojak-ink-api
+      terminationGracePeriodSeconds: 30
+      
+      containers:
+      - name: api
+        image: wojak-ink:latest
+        imagePullPolicy: IfNotPresent
+        
+        ports:
+        - name: http
+          containerPort: 3000
+        - name: metrics
+          containerPort: 9090
+        
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3000"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: database-secrets
+              key: primary-url
+        - name: DATABASE_REPLICA_URL
+          valueFrom:
+            secretKeyRef:
+              name: database-secrets
+              key: replica-url
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: redis-host
+        
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        
+        # Health probes
+        startupProbe:
+          httpGet:
+            path: /api/health
+            port: http
+          failureThreshold: 30
+          periodSeconds: 10
+        
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
+        
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 20
+          failureThreshold: 3
+
+---
+# AnalysisTemplate for monitoring canary deployment health
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: error-rate-analysis
+spec:
+  metrics:
+  - name: error-rate
+    interval: 1m
+    successCriteria: "{{ result | float }} < 0.005"  # < 0.5% error rate
+    failureLimit: 3
+    provider:
+      prometheus:
+        address: http://prometheus:9090
+        query: |
+          rate(http_requests_total{status=~"5.."}[1m]) / rate(http_requests_total[1m])
+  
+  - name: latency-p95
+    interval: 1m
+    successCriteria: "{{ result | float }} < 500"  # < 500ms
+    failureLimit: 3
+    provider:
+      prometheus:
+        address: http://prometheus:9090
+        query: |
+          histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[1m]))
+
+---
+# Service for stable version
+apiVersion: v1
+kind: Service
+metadata:
+  name: wojak-ink-api-stable
+  labels:
+    app: wojak-ink-api
+spec:
+  selector:
+    app: wojak-ink-api
+    status: stable
+  ports:
+  - name: http
+    port: 80
+    targetPort: 3000
+  type: ClusterIP
+
+---
+# Service for canary version
+apiVersion: v1
+kind: Service
+metadata:
+  name: wojak-ink-api-canary
+  labels:
+    app: wojak-ink-api
+spec:
+  selector:
+    app: wojak-ink-api
+    status: canary
+  ports:
+  - name: http
+    port: 80
+    targetPort: 3000
+  type: ClusterIP
+
+---
+# Istio VirtualService for traffic management
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: wojak-ink-api
+spec:
+  hosts:
+  - wojak-ink-api.default.svc.cluster.local
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: wojak-ink-api-stable.default.svc.cluster.local
+        port:
+          number: 80
+      weight: 95
+    - destination:
+        host: wojak-ink-api-canary.default.svc.cluster.local
+        port:
+          number: 80
+      weight: 5
+    timeout: 10s
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
