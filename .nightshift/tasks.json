@@ -173,7 +173,7 @@
       "mutatesCode": false,
       "timeoutMs": 300000,
       "commands": [
-        "npx eslint src functions workers tests scripts --ext .ts,.tsx,.js,.mjs,.cjs || true"
+        "set -o pipefail; npx eslint src functions workers tests scripts --ext .ts,.tsx,.js,.mjs,.cjs -f json | node scripts/nightshift-lint-hotspots.mjs || true"
       ],
       "expectedOutputs": [
         "reports/nightshift-<timestamp>.md"
