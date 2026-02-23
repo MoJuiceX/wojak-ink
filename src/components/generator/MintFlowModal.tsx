@@ -6,7 +6,7 @@
  */
 
 import { createPortal } from 'react-dom';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X, Loader2, CheckCircle, AlertCircle, Copy, ExternalLink, Wallet, Share2, Sparkles } from 'lucide-react';
 import { useMint } from '@/contexts/MintContext';
@@ -96,24 +96,37 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
   const [copied, setCopied] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
   const [nameError, setNameError] = useState('');
+  const [revealImageUrl, setRevealImageUrl] = useState<string>();
+  const revealObjectUrlRef = useRef<string | null>(null);
 
-  // Image URL for fighter reveal card (from pending mint blob)
-  const imageBlob = pendingMintParams?.imageBlob;
-  const revealImageUrl = useMemo(() => {
-    if (imageBlob) {
-      return URL.createObjectURL(imageBlob);
-    }
-    return undefined;
-  }, [imageBlob]);
-
-  // Clean up object URL on unmount to prevent memory leaks
+  // Persist preview image across the whole mint flow (pendingMintParams is cleared on submit).
   useEffect(() => {
-    return () => {
-      if (revealImageUrl) {
-        URL.revokeObjectURL(revealImageUrl);
-      }
-    };
-  }, [revealImageUrl]);
+    const imageBlob = pendingMintParams?.imageBlob;
+    if (!imageBlob) return;
+    const nextUrl = URL.createObjectURL(imageBlob);
+    if (revealObjectUrlRef.current) {
+      URL.revokeObjectURL(revealObjectUrlRef.current);
+    }
+    revealObjectUrlRef.current = nextUrl;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setRevealImageUrl(nextUrl);
+  }, [pendingMintParams?.imageBlob]);
+
+  useEffect(() => {
+    if (!isOpen && revealObjectUrlRef.current) {
+      URL.revokeObjectURL(revealObjectUrlRef.current);
+      revealObjectUrlRef.current = null;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setRevealImageUrl(undefined);
+    }
+  }, [isOpen]);
+
+  useEffect(() => () => {
+    if (revealObjectUrlRef.current) {
+      URL.revokeObjectURL(revealObjectUrlRef.current);
+      revealObjectUrlRef.current = null;
+    }
+  }, []);
 
   const handleNameChange = (value: string) => {
     const validation = validateName(value);
@@ -149,6 +162,11 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
   }, [currentJob?.expiresAt]);
 
   const handleClose = () => {
+    if (revealObjectUrlRef.current) {
+      URL.revokeObjectURL(revealObjectUrlRef.current);
+      revealObjectUrlRef.current = null;
+      setRevealImageUrl(undefined);
+    }
     resetMintFlow();
     onClose();
   };
@@ -166,10 +184,15 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
 
   const handleShare = () => {
     if (!currentJob) return;
-    const text = `Just minted Wojak #${currentJob.mintNumber} on @WojakInk!`;
-    const nftUrl = currentJob.mintgardenUrl?.replace('mintgarden.io/nfts', 'nft.one/nft') || 'https://wojak.ink';
+    const mintgardenUrl = currentJob.mintgardenUrl || 'https://mintgarden.io';
+    const text = [
+      `I minted an NFT on Wojak.ink (${currentJob.mintNumber ? `Wojak #${currentJob.mintNumber}` : 'Wojak'})`,
+      'Check it out on MintGarden.',
+      'Mint your own at wojak.ink/generator.',
+      '@mojuicex',
+    ].join(' ');
     window.open(
-      `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(nftUrl)}`,
+      `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(mintgardenUrl)}`,
       '_blank',
       'noopener,noreferrer'
     );
@@ -177,7 +200,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
 
   const handleCopyLink = async () => {
     if (!currentJob?.mintgardenUrl) return;
-    const nftUrl = currentJob.mintgardenUrl.replace('mintgarden.io/nfts', 'nft.one/nft');
+    const nftUrl = currentJob.mintgardenUrl;
     try {
       await navigator.clipboard.writeText(nftUrl);
       setShareCopied(true);
@@ -240,7 +263,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
           onClick={handleClose}
         >
           <motion.div
-            className="card p-6 max-w-sm w-full"
+            className="card p-4 sm:p-5 max-w-sm w-full max-h-[92vh] overflow-y-auto"
             initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
@@ -250,7 +273,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
             aria-modal="true"
             aria-labelledby="mint-flow-title"
           >
-            <div className="flex items-center justify-between gap-4 mb-4">
+            <div className="sticky top-0 z-10 flex items-center justify-between gap-4 mb-3 -mx-1 px-1 py-1 backdrop-blur-sm">
               <h2 id="mint-flow-title" className="text-lg font-semibold">
                 {title}
               </h2>
@@ -264,7 +287,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
               </button>
             </div>
 
-            <div className="flex flex-col items-center gap-4 text-center">
+            <div className="flex flex-col items-center gap-3 text-center">
               {icon}
 
               {/* ── Progress bar (during submitted/awaiting_payment) ── */}
@@ -432,7 +455,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
 
               {/* ── Error ── */}
               {isError && parsedError && (
-                <div className="w-full flex flex-col gap-3">
+                <div className="w-full flex flex-col gap-2.5">
                   <p className="text-error text-sm">{parsedError.message}</p>
                   {/rate limit|Too many/i.test(errorMessage ?? '') && rateLimitRetryAfterSeconds != null && rateLimitRetryAfterSeconds > 0 && (
                     <p className="text-muted text-xs tabular-nums">

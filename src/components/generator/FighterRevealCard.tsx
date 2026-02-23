@@ -59,7 +59,7 @@ export function FighterRevealCard({ mintNumber, customName, combat, imageUrl }: 
   // Step 2: Type badge
   // Step 3: Nature + Ability
   // Step 4-7: Moves one by one
-  // Step 8: Complete (show CTA)
+  // Step 8: Complete
 
   useEffect(() => {
     // Auto-advance through reveal steps
@@ -176,16 +176,7 @@ export function FighterRevealCard({ mintNumber, customName, combat, imageUrl }: 
         ))}
       </div>
 
-      {/* Ready to Fight CTA */}
-      {revealStep >= 8 && (
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="fighter-reveal-cta"
-        >
-          <p className="text-xs text-muted mb-2">Your fighter is ready!</p>
-        </motion.div>
-      )}
+      {revealStep >= 8 && <div className="fighter-reveal-cta" aria-hidden="true" />}
     </div>
   );
 }
