@@ -197,7 +197,13 @@ async function runCommand(command, opts) {
   } = opts;
 
   return new Promise((resolve) => {
-    const child = spawn(shell, ['-lc', command], { cwd, env: process.env });
+    const childEnv = {
+      ...process.env,
+      // Mark all Night Shift child processes as unattended so downstream tools
+      // (notably Playwright) can enforce production-safe defaults.
+      NIGHTSHIFT_UNATTENDED: '1',
+    };
+    const child = spawn(shell, ['-lc', command], { cwd, env: childEnv });
     let stdout = '';
     let stderr = '';
     let timedOut = false;

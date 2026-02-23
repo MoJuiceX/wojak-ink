@@ -8,6 +8,10 @@ Quick reference for which commands are safe to run unattended, how long they usu
 |---|---:|---|---|---|
 | `npx tsc --noEmit` | `< 1 min` | low | terminal/log output | Fast compile/type safety check |
 | `npm run lint:scoped -- --quiet` | `~10-30s` | low | terminal/log output | Errors only; good gate before commits |
+| `npm run lint:app -- --quiet` | `~5-20s` | low | terminal/log output | App code scope (`src/`) only |
+| `npm run lint:functions -- --quiet` | `~1-5s` | low | terminal/log output | Serverless functions scope only |
+| `npm run lint:workers -- --quiet` | `~1-5s` | low | terminal/log output | Worker scripts scope only |
+| `npm run lint:scripts -- --quiet` | `~1-5s` | low | terminal/log output | Repo automation/tooling scripts only |
 | `node scripts/verify-manifest-assets.mjs` | `< 5s` | low | terminal/log output | Now excludes intentional non-manifest assets |
 
 ## Medium checks (nightly baseline)
@@ -16,7 +20,7 @@ Quick reference for which commands are safe to run unattended, how long they usu
 | `npm run test:unit` | `~6-10s` | low | test output, logs | Current baseline: `129` files / `3971` tests |
 | `npm audit --omit=dev --json` | `< 10s` | low | JSON output | Use report mode unless patching dependencies |
 | `npm run build` | `~10-30s` | low | `dist/`, chunk output | Includes manifest verification + type build + Vite build |
-| `npx eslint src functions workers tests scripts --ext .ts,.tsx,.js,.mjs,.cjs` | `~20-40s` | low | warnings/errors | Use for hotspot reporting, not commit gating |
+| `npm run lint:scoped` | `~20-40s` | low | warnings/errors | Aggregate lint across app/functions/workers/tests/scripts |
 
 ## Slow/risky checks (guarded)
 | Command | Typical runtime | Risk | Produces | Notes |

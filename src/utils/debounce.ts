@@ -4,6 +4,9 @@
  * Prevents rapid function calls (e.g., vote submissions, API requests)
  * from overwhelming the system.
  */
+import { useCallback, useRef } from 'react';
+
+type AnyFn = (...args: unknown[]) => unknown;
 
 /**
  * Debounce a function to prevent rapid calls
@@ -11,7 +14,7 @@
  * @param delayMs Minimum delay between calls in milliseconds
  * @returns Debounced function that accepts same parameters as original
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends AnyFn>(
   fn: T,
   delayMs: number
 ): (...args: Parameters<T>) => void {
@@ -35,7 +38,7 @@ export function debounce<T extends (...args: any[]) => any>(
  * @param intervalMs Minimum time between calls in milliseconds
  * @returns Throttled function that accepts same parameters as original
  */
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends AnyFn>(
   fn: T,
   intervalMs: number
 ): (...args: Parameters<T>) => void {
@@ -72,13 +75,13 @@ export function throttle<T extends (...args: any[]) => any>(
  * React hook for debounced callbacks
  * Prevents rapid API calls on state changes
  */
-export function useDebounce<T extends (...args: any[]) => any>(
+export function useDebounce<T extends AnyFn>(
   callback: T,
   delayMs: number
 ) {
-  const timeoutRef = require('react').useRef<number | null>(null);
+  const timeoutRef = useRef<number | null>(null);
 
-  return require('react').useCallback(
+  return useCallback(
     (...args: Parameters<T>) => {
       if (timeoutRef.current !== null) {
         clearTimeout(timeoutRef.current);
@@ -97,14 +100,14 @@ export function useDebounce<T extends (...args: any[]) => any>(
  * React hook for throttled callbacks
  * Prevents excessive re-renders from rapid state changes
  */
-export function useThrottle<T extends (...args: any[]) => any>(
+export function useThrottle<T extends AnyFn>(
   callback: T,
   intervalMs: number
 ) {
-  const lastCallRef = require('react').useRef(0);
-  const timeoutRef = require('react').useRef<number | null>(null);
+  const lastCallRef = useRef(0);
+  const timeoutRef = useRef<number | null>(null);
 
-  return require('react').useCallback(
+  return useCallback(
     (...args: Parameters<T>) => {
       const now = Date.now();
       const timeSinceLastCall = now - lastCallRef.current;

@@ -45,6 +45,7 @@ function GalleryContent() {
     explorerOpen,
     openExplorer,
     closeExplorer,
+    nfts: allCharacterNfts,
     filteredNfts,
     isLoading,
   } = useGallery();
@@ -84,9 +85,6 @@ function GalleryContent() {
 
   // Smart preloading for grid
   useGridPreload(imageUrls, gridRef);
-
-  // Get all NFTs for the character (unfiltered) to preload for all filter/sort options
-  const { nfts: allCharacterNfts } = useGallery();
 
   // BACKGROUND PRELOAD: When Gallery page mounts, start preloading images for ALL character types
   // This ensures images are ready no matter which character the user selects first
@@ -323,8 +321,14 @@ function GalleryContent() {
   }, [selectedCharacter, selectCharacter, setHeaderBreadcrumb]);
 
   // Use frozen grid when explorer is open, otherwise use current filtered list
-  const visibleNfts = frozenGridNfts || filteredNfts.slice(0, visibleCount);
-  const hasMore = visibleCount < filteredNfts.length;
+  const visibleNfts = useMemo(
+    () => frozenGridNfts || filteredNfts.slice(0, visibleCount),
+    [frozenGridNfts, filteredNfts, visibleCount]
+  );
+  const hasMore = useMemo(
+    () => visibleCount < filteredNfts.length,
+    [visibleCount, filteredNfts.length]
+  );
 
   const handleLoadMore = useCallback(() => {
     setVisibleCount((prev) => prev + ITEMS_PER_PAGE);
@@ -343,6 +347,11 @@ function GalleryContent() {
     },
     [openExplorer]
   );
+
+  const handleDismissFightClubBanner = useCallback(() => {
+    localStorage.setItem('wojak_swipe_banner_dismissed', 'true');
+    setBannerDismissed(true);
+  }, []);
 
   // Handle character hover - preload first 50 NFTs for that character
   const handleCharacterHover = useCallback(
@@ -402,10 +411,7 @@ function GalleryContent() {
                 <button
                   type="button"
                   aria-label="Dismiss banner"
-                  onClick={() => {
-                    localStorage.setItem('wojak_swipe_banner_dismissed', 'true');
-                    setBannerDismissed(true);
-                  }}
+                  onClick={handleDismissFightClubBanner}
                   className="fight-club-close"
                 >
                   &times;

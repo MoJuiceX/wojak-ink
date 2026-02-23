@@ -10,6 +10,7 @@ PULL_INTERVAL_SECONDS="${PULL_INTERVAL_SECONDS:-600}"   # 10 minutes
 HEARTBEAT_SECONDS="${HEARTBEAT_SECONDS:-1800}"          # 30 minutes
 CYCLE_IDLE_SECONDS="${CYCLE_IDLE_SECONDS:-5}"           # immediate restart cadence
 
+export NIGHTSHIFT_UNATTENDED=1
 RUNNER_CMD=(node scripts/nightshift.mjs --real)
 
 mkdir -p logs reports .nightshift/state

@@ -4,6 +4,62 @@ import tailwindcss from '@tailwindcss/vite'
 import basicSsl from '@vitejs/plugin-basic-ssl'
 import path from 'path'
 
+const getNodeModulePackage = (id: string): string | null => {
+  const nodeModulesIndex = id.lastIndexOf('/node_modules/')
+  if (nodeModulesIndex === -1) return null
+
+  const packagePath = id.slice(nodeModulesIndex + '/node_modules/'.length)
+  const parts = packagePath.split('/')
+  if (parts[0]?.startsWith('@') && parts[1]) {
+    return `${parts[0]}/${parts[1]}`
+  }
+  return parts[0] ?? null
+}
+
+const walletUiPackages = new Set([
+  '@walletconnect/modal',
+  '@walletconnect/modal-core',
+  '@walletconnect/modal-ui',
+  '@motionone/animation',
+  '@motionone/dom',
+  '@motionone/easing',
+  '@motionone/utils',
+  '@lit/reactive-element',
+  'lit',
+  'lit-html',
+  'qrcode',
+  'detect-browser',
+  'dijkstrajs',
+  'valtio',
+])
+
+const walletCryptoPackages = new Set([
+  'ox',
+  '@msgpack/msgpack',
+  'multiformats',
+  'uint8arrays',
+  'blakejs',
+])
+
+const walletCorePackages = new Set([
+  '@walletconnect/core',
+  '@walletconnect/environment',
+  '@walletconnect/events',
+  '@walletconnect/keyvaluestorage',
+  '@walletconnect/logger',
+  '@walletconnect/relay-auth',
+  '@walletconnect/safe-json',
+  '@walletconnect/sign-client',
+  '@walletconnect/time',
+  '@walletconnect/types',
+  '@walletconnect/utils',
+  '@walletconnect/window-getters',
+  '@walletconnect/window-metadata',
+  'events',
+  'idb-keyval',
+  'unstorage',
+])
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const useHttps = process.env.HTTPS === 'true'
@@ -56,56 +112,79 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks: (id) => {
-            // Use function-based chunking for more control
-            
-            // React core - loaded on every page
-            if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/react-router-dom')) {
-              return 'vendor-react';
-            }
-            
-            // Animation library - separate chunk to defer loading
-            if (id.includes('node_modules/framer-motion')) {
-              return 'vendor-animation';
-            }
-            
-            // WalletConnect - heavy, only needed for wallet features
+            // Large generator internals are used by lazy routes (Generator + RuleBuilder),
+            // but Rollup may hoist them into the entry chunk as shared code.
             if (
-              id.includes('node_modules/@walletconnect/modal') ||
-              id.includes('node_modules/@walletconnect/sign-client') ||
-              id.includes('node_modules/@walletconnect/types') ||
-              id.includes('node_modules/@walletconnect/utils')
+              id.includes('/src/contexts/GeneratorContext.tsx') ||
+              id.includes('/src/contexts/generatorReducer.ts') ||
+              id.includes('/src/contexts/generatorStateUtils.ts') ||
+              id.includes('/src/services/canvasRenderer') ||
+              id.includes('/src/services/generatorService.ts') ||
+              id.includes('/src/lib/wojakRules.ts') ||
+              id.includes('/src/lib/traitNameMap.ts')
             ) {
-              return 'vendor-wallet';
+              return 'feature-generator-core'
             }
-            
-            // Auth - Clerk is heavy
-            if (id.includes('node_modules/@clerk/clerk-react')) {
-              return 'vendor-clerk';
+
+            const pkg = getNodeModulePackage(id)
+            if (!pkg) return
+
+            // React core - loaded on every page
+            if (
+              pkg === 'react' ||
+              pkg === 'react-dom' ||
+              pkg === 'react-router' ||
+              pkg === 'react-router-dom' ||
+              pkg.startsWith('@clerk/')
+            ) {
+              return 'vendor-react'
             }
-            
+
+            if (pkg === '@react-oauth/google' || pkg === 'jwt-decode') {
+              return 'vendor-auth'
+            }
+
+            // Animation library - separate chunk to defer loading
+            if (pkg === 'framer-motion') {
+              return 'vendor-animation'
+            }
+
+            // WalletConnect ecosystem - split by family so one chunk does not grow >600k
+            if (walletUiPackages.has(pkg)) {
+              return 'vendor-wallet-ui'
+            }
+
+            if (walletCryptoPackages.has(pkg) || pkg.startsWith('@scure/') || pkg.startsWith('@noble/')) {
+              return 'vendor-wallet-crypto'
+            }
+
+            if (walletCorePackages.has(pkg) || pkg.startsWith('@walletconnect/')) {
+              return 'vendor-wallet'
+            }
+
             // Icons library
-            if (id.includes('node_modules/lucide-react')) {
-              return 'vendor-icons';
+            if (pkg === 'lucide-react') {
+              return 'vendor-icons'
             }
-            
+
             // Data fetching & state management
-            if (id.includes('node_modules/@tanstack/react-query') || id.includes('node_modules/zustand')) {
-              return 'vendor-data';
+            if (pkg === '@tanstack/react-query' || pkg === '@tanstack/query-core' || pkg === 'zustand') {
+              return 'vendor-data'
             }
-            
+
             // DnD Kit - drag and drop utilities
-            if (id.includes('node_modules/@dnd-kit')) {
-              return 'vendor-dnd';
+            if (pkg.startsWith('@dnd-kit/')) {
+              return 'vendor-dnd'
             }
-            
+
             // Socket.io client
-            if (id.includes('node_modules/socket.io-client')) {
-              return 'vendor-socket';
+            if (pkg === 'socket.io-client') {
+              return 'vendor-socket'
             }
-            
+
             // Utilities group
-            if (id.includes('node_modules/lodash') || id.includes('node_modules/date-fns')) {
-              return 'vendor-utils';
+            if (pkg === 'lodash' || pkg === 'date-fns') {
+              return 'vendor-utils'
             }
           },
         },

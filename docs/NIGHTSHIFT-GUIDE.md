@@ -1,460 +1,258 @@
-# Wojak.ink Nightshift Automation Guide
+# Nightshift Automation Guide (Current)
 
-## What is Nightshift?
+## Purpose
 
-Nightshift is an autonomous task execution system that runs unattended during off-hours to improve code quality, run maintenance tasks, and execute continuous improvements. It's designed to work alongside human-guided development.
+Nightshift is Wojak.ink's local overnight automation workflow for unattended maintenance on a **dedicated nightly git worktree/branch**.
 
-**Key Principle:** Nightshift works in a loop with human guidance, not in isolation. A human monitoring system (BigP) continuously feeds work to the queue every 30 minutes.
+It is not a CI service and not a deploy system. It is a scripted local runner with guardrails, reports, resume support, and an optional supervisor loop.
 
----
+## What Runs Nightshift
 
-## How Nightshift Works
+### 1. Bootstrap (prepare safe nightly worktree)
+- Script: `scripts/nightshift-bootstrap.sh`
+- Creates:
+  - a safe tag (default: `safe/<date>-pre-nightshift`)
+  - a nightly branch (default: `codex/nightly/<date>-nightshift`)
+  - a sibling worktree (default: `<repo>-nightshift`)
+- Refuses to run unless current branch is `main` or `master` (unless you customize flow)
+- Refuses dirty source worktree unless `--allow-dirty`
 
-### The Loop (8-hour cycle)
+### 2. Runner (executes the task queue)
+- Script: `scripts/nightshift.mjs`
+- Reads:
+  - queue: `.nightshift/tasks.json`
+  - policy: `.nightshift/policy.json`
+- Writes:
+  - logs: `logs/nightshift-<timestamp>.log`
+  - reports: `reports/nightshift-<timestamp>.md`
+  - state: `.nightshift/state/nightshift-<timestamp>.json`
 
-```
-START (e.g., 10 PM)
-  ↓
-1. Load task queue from .nightshift/tasks.json
-  ↓
-2. Execute enabled tasks one-by-one
-  ↓
-3. Each task → test → commit
-  ↓
-4. Every 10-15 mins: git pull for new tasks
-  ↓
-5. Queue empty? → watch for new instructions
-  ↓
-6. Repeat until 8 hours elapsed
-  ↓
-END + Final Report (e.g., 6 AM)
-```
+### 3. Supervisor (optional overnight loop)
+- Script: `scripts/nightshift-supervisor.sh`
+- Repeatedly runs the runner, pulls updates, writes heartbeat progress, and checkpoint-commits changes.
+- This is where periodic `git pull` / checkpoint commits happen (not in `nightshift.mjs`).
 
-### Key Principles
+## Actual Runtime Commands
 
-- **Autonomous:** Runs without human intervention for 8 hours
-- **Staged:** New tasks are enabled by human review every 30 minutes
-- **Safe:** All commands tested in dry-run before execution
-- **Recoverable:** Full state saved for resume if needed
-- **Observable:** Reports generated after each task batch
-
----
-
-## Core Files & Structure
-
-### `.nightshift/` Directory
-
-```
-.nightshift/
-├── README.md                      # Quick overview
-├── CODEX-INSTRUCTIONS.md          # Current run instructions
-├── tasks.json                     # Task queue (THE CONTROL FILE)
-├── policy.json                    # Safety guardrails
-├── CODEX-8HOUR-ROADMAP.md        # What will be done this run
-├── PERFORMANCE-UX-ROADMAP.md     # Longer-term roadmap
-├── NEXT_STEPS.md                 # What's queued next
-└── state/
-    └── <runid>/                   # Per-run state (for resume)
-        ├── completed.json
-        ├── failed.json
-        ├── current.json
-        └── logs/
-```
-
-### tasks.json Structure
-
-The task queue file that controls what runs:
-
-```json
-{
-  "tasks": [
-    {
-      "id": "lint-scope-hardening",
-      "title": "Harden eslint scope",
-      "category": "quality",
-      "enabled": true,
-      "mode": "report",
-      "commands": ["npm run lint -- --max-warnings=0"],
-      "timeoutMs": 60000,
-      "retries": 1,
-      "dependsOn": ["security-upgrade"],
-      "mutatesCode": false,
-      "expectedOutputs": ["PASS", "0 errors"],
-      "doneCriteria": [
-        "Exit code: 0",
-        "No eslint errors in output"
-      ]
-    }
-  ]
-}
-```
-
-### Key Task Fields
-
-| Field | Purpose |
-|-------|---------|
-| `id` | Unique identifier for the task |
-| `title` | Human-readable name |
-| `enabled` | `true` to run, `false` to skip |
-| `category` | security, quality, perf, docs, etc. |
-| `mode` | `report` (info only), `fix` (code changes) |
-| `commands` | Shell commands to execute (array, sequential) |
-| `timeoutMs` | Kill if exceeds this (e.g., 120000 = 2 min) |
-| `dependsOn` | Array of task IDs that must complete first |
-| `mutatesCode` | `true` if task modifies source code |
-| `doneCriteria` | Validation checks (must all pass) |
-
----
-
-## Task Modes
-
-### Mode: `report`
-- Collect information and metrics
-- Non-destructive (no code changes)
-- Used for audits, linting, testing
-- Example: `npm run lint`, `npm run test:unit`
-
-### Mode: `fix`
-- Execute code changes via shell commands
-- Used for upgrades, refactoring, consolidation
-- Example: `npm audit fix`, automated replacements
-
-### Mode: `assistant_fix`
-- AI-assisted code changes (disabled by default)
-- Future: Used for semantic refactoring
-- Requires explicit human approval
-
----
-
-## Running Nightshift Locally
-
-### Commands
+From `package.json` (current):
 
 ```bash
-# Dry run - see what would happen without changes
+npm run nightshift:bootstrap
 npm run nightshift:dry-run
-
-# Real execution - actually make changes
-npm run nightshift:run
-
-# Report only - audit but don't fix
 npm run nightshift:report
-
-# Resume from previous run
-npm run nightshift:resume
-```
-
-### Example: Running a Single Task
-
-Edit `.nightshift/tasks.json`:
-1. Disable all tasks except the one you want: `"enabled": false`
-2. Enable your task: `"enabled": true`
-3. Run: `npm run nightshift:dry-run` (to preview)
-4. Run: `npm run nightshift:run` (to execute)
-
----
-
-## Monitoring & Reports
-
-### During Execution
-
-```bash
-# Watch the runner
-tail -f reports/nightshift-LATEST.txt
-
-# Check state (what's running/completed)
-cat .nightshift/state/latest/current.json
-```
-
-### After Execution
-
-```
-reports/
-├── nightshift-20260223-0120.txt    # Full execution log
-├── PHASE1-SUMMARY.md              # Phase 1 results
-├── PHASE2-SUMMARY.md              # Phase 2 results
-├── PHASE3-SUMMARY.md              # etc.
-└── FINAL-REPORT.md                # Comprehensive summary
-```
-
-### Report Structure
-
-Each phase report includes:
-- ✅ Tasks completed
-- ❌ Tasks failed
-- ⏭️ Tasks skipped
-- 📊 Metrics (lines changed, tests passed, etc.)
-- 🔍 Quality improvements
-- 📝 Recommendations
-
----
-
-## Phase Organization
-
-Nightshift typically runs 5-7 phases in sequence:
-
-1. **Security** - Dependency upgrades, vulnerability fixes
-2. **Linting** - Code style, unused variables
-3. **Bundle** - Dead code removal, optimization
-4. **Testing** - Coverage, broken tests
-5. **Quality** - CSS, TypeScript, docs
-6. **Integration** - Build validation, final checks
-7. **Publishing** - PR prep, commit cleanup
-
-Each phase gates on the previous: if Phase 2 fails, Phase 3 waits.
-
----
-
-## Resume & Recovery
-
-### If a Task Fails
-
-1. Check the report: `cat reports/PHASE-X-SUMMARY.md`
-2. Read the error details in `.nightshift/state/latest/failed.json`
-3. Fix manually if needed or wait for human review
-4. Run: `npm run nightshift:resume` to continue
-
-### If Interrupted
-
-Nightshift saves state after each task. If killed/crashed:
-
-```bash
-npm run nightshift:resume
-# Picks up where it left off
-```
-
-### Full Restart (Clear State)
-
-```bash
-rm -rf .nightshift/state/latest
 npm run nightshift:run
-# Starts fresh from task 1
+npm run nightshift:resume
 ```
 
----
+Equivalent runner invocations:
 
-## Key Safety Guardrails
+```bash
+node scripts/nightshift.mjs --dry-run
+node scripts/nightshift.mjs --real --report-only --max-hours=8 --max-tasks=20 --soft-failures=5 --hard-failures=10
+node scripts/nightshift.mjs --real --max-hours=8 --max-tasks=20 --soft-failures=5 --hard-failures=10
+node scripts/nightshift.mjs --resume --real --max-hours=8 --max-tasks=20 --soft-failures=5 --hard-failures=10
+```
 
-### `.nightshift/policy.json`
+## Queue + Policy (Source of Truth)
+
+### Queue file: `.nightshift/tasks.json`
+Current queue snapshot (2026-02-23):
+- `queueName`: `night-1-bootstrap`
+- `32` total tasks
+- `30` enabled, `2` disabled
+- `11` `report` tasks
+- `19` `assistant_fix` tasks
+- `2` `fix` tasks
+
+Top-level structure:
 
 ```json
 {
-  "allowedBranches": ["codex/nightly/*"],
-  "forbiddenCommands": ["rm -rf /", "git push origin main"],
-  "requiresApproval": ["deploy", "publish"],
-  "autoRedact": ["token", "password", "secret"]
+  "version": 1,
+  "queueName": "night-1-bootstrap",
+  "defaults": {
+    "timeoutMs": 900000,
+    "retries": 3
+  },
+  "tasks": [ ... ]
 }
 ```
 
-Nightshift will **refuse to execute**:
-- Commands on non-nightly branches
-- Destructive commands (rm, git push to main)
-- Commands that leak secrets
+### Important task fields
+- `id`, `title`
+- `enabled`
+- `category`, `risk`, `runtime`
+- `mode`: `report` | `fix` | `assistant_fix`
+- `mutatesCode`: boolean
+- `dependsOn`: task IDs that must be `success` or `planned`
+- `timeoutMs`, `retries`
+- `commands`: shell commands (run sequentially)
+- `failOnCommandError` (optional): report tasks are non-blocking unless this is `true`
+- `disabledReason` (optional)
 
----
+### Policy file: `.nightshift/policy.json`
+Guardrails enforced by the runner include:
+- required nightly branch naming pattern (`^codex/nightly/...$`)
+- linked worktree requirement
+- denied command patterns (deploys, destructive git commands, prod Playwright defaults, etc.)
+- secret redaction patterns for logs/reports
+- `safeE2E.allow: false` by default
 
-## Examples: Common Workflows
+## Runner Behavior (`scripts/nightshift.mjs`)
 
-### Workflow 1: Add a New Task
+### Preflight checks (real mode)
+Before a real run, the runner verifies:
+- current branch matches policy regex
+- execution is in a linked git worktree (not the main checkout)
+- worktree metadata is captured in the report
 
-1. Edit `.nightshift/tasks.json`
-2. Add your task with `"enabled": false`
-3. Push to the nightly branch
-4. Human reviews and enables it
-5. Next `git pull` picks it up
+If preflight fails in real mode, the run aborts.
 
-### Workflow 2: Fix a Failed Task
+### Task execution model
+- Tasks run in queue order.
+- Disabled tasks are recorded and skipped.
+- Dependency-gated tasks are skipped until dependencies are satisfied.
+- `--dry-run` marks tasks as `planned` and classifies commands against policy without executing them.
+- `--real` executes commands and records status per command + per task.
 
-1. Task fails during execution
-2. Report appears in `reports/`
-3. Fix the issue locally:
-   ```bash
-   # Make your fix
-   git add -A
-   git commit -m "Fix task X"
-   ```
-4. Run: `npm run nightshift:resume`
+### Non-blocking report tasks
+For `mode: report` tasks:
+- command failures are treated as `failed_nonblocking` by default
+- task can still finish `success` with a note like `completed with N non-blocking command failure(s)`
 
-### Workflow 3: Monitor Progress
+This is why baseline/report tasks can succeed even with lint/build failures in excerpts.
+
+### Retry + timeout behavior
+- Defaults come from queue (`timeoutMs`, `retries`)
+- Per-task overrides are supported
+- Backoff sequence after failures:
+  - retry 1 -> `5s`
+  - retry 2 -> `15s`
+  - retry 3+ -> `45s`
+
+### Automatic report-only downgrade
+When running in real mode:
+- after `softFailures` threshold (default `5`), runner flips into report-only mode
+- remaining mutating tasks (`mutatesCode: true`) are skipped
+- non-mutating report tasks continue
+
+This is a key safety feature and shows up as:
+- `Report-only mode activated: yes`
+- skipped mutating tasks with note: `mutating task skipped after soft failure threshold (report-only mode)`
+
+### Resume behavior
+`--resume` loads the latest state file from `.nightshift/state/` (or a provided `--state=` path) and continues unfinished queue items.
+
+The state file is a single JSON document for the run, not a `state/latest/current.json` directory layout.
+
+### Command templating tokens
+Runner expands these tokens in commands:
+- `{{RUN_ID}}`
+- `{{LOG_PATH}}`
+- `{{REPORT_PATH}}`
+- `{{STATE_PATH}}`
+- `{{REPO_ROOT}}`
+
+### Output handling and redaction
+- Child processes run with `NIGHTSHIFT_UNATTENDED=1`
+- stdout/stderr are appended to the run log
+- secrets are redacted using regex patterns from policy
+- report excerpts are summarized (not full logs)
+- unit-test excerpts suppress noisy passing-test `stderr |` headers in reports
+
+## Supervisor Behavior (`scripts/nightshift-supervisor.sh`)
+
+Use the supervisor when you want a full unattended overnight loop with periodic sync/checkpoints.
+
+### What it does
+- Verifies current branch matches `^codex/nightly/`
+- Runs `node scripts/nightshift.mjs --real` in a loop
+- `git pull --rebase --autostash` every `PULL_INTERVAL_SECONDS` (default `600`)
+- Writes heartbeat summaries to `reports/supervisor-<timestamp>.md` every `HEARTBEAT_SECONDS` (default `1800`)
+- Creates checkpoint commits (excluding logs/reports/state and operator note files)
+- Attempts `git push` after each checkpoint (non-fatal if push fails)
+
+### Key env overrides
+- `MAX_HOURS` (default `8`)
+- `PULL_INTERVAL_SECONDS` (default `600`)
+- `HEARTBEAT_SECONDS` (default `1800`)
+- `CYCLE_IDLE_SECONDS` (default `5`)
+
+## Recommended Nightly Flow (Current)
+
+1. From main checkout: `npm run nightshift:bootstrap`
+2. In nightly worktree: `npm run nightshift:dry-run`
+3. Review generated plan/report and queue toggles in `.nightshift/tasks.json`
+4. Run a report-only real pass first: `npm run nightshift:report`
+5. Enable only safe mutating tasks after baseline is green enough
+6. Run `npm run nightshift:run` (or supervisor if unattended loop needed)
+7. Review `reports/nightshift-*.md` and `logs/nightshift-*.log`
+8. Resume with `npm run nightshift:resume` if interrupted
+
+## Current Findings (Latest Nightshift Reports)
+
+### Latest verified run snapshot
+From `reports/nightshift-20260223-093950.md` (2026-02-23 09:39:50Z -> 09:45:27Z):
+- Tasks attempted: `17`
+- Succeeded: `11`
+- Failed: `6`
+- Skipped: `15`
+- Report-only mode activated: `yes`
+
+### What is passing in current reports
+- `npx tsc --noEmit` passes in baseline/final validation tasks
+- `npm run test:unit` passes (`129` files, `3971` tests)
+- manifest validation passes with `Orphaned: 0`
+- queue/report generation and policy enforcement are working
+
+### What is currently blocking mutating progress
+1. Assistant tasks fail immediately due CLI invocation mismatch
+   - Queue commands still use legacy `codex --task '...'`
+   - Reports show error: `unexpected argument '--task'`
+   - Result: multiple `assistant_fix` tasks fail after retries and trigger report-only fallback
+
+2. `security-upgrade-lodash` / `security-upgrade-swiper` validation fails on build
+   - `npm install` + `npm audit` + `tsc` + unit tests succeed
+   - `npm run build` fails due repo TS errors in current worktree state:
+     - `src/components/gallery/NFTGridItem.tsx` unused vars (`imageLoaded`, `imageError`)
+     - `src/utils/debounce.ts` TS2347 untyped function calls
+
+3. Report tasks intentionally tolerate command failures
+   - Lint/build failures can appear as `failed_nonblocking` while task status remains `success`
+   - This is expected behavior for observability tasks, not a false positive
+
+### Important timeline note
+An earlier handoff summary (`nightshift-FINAL-SUMMARY.md`, generated around 2026-02-23 02:10 UTC) reports an all-green validation snapshot. Later reports on 2026-02-23 (including `09:24` and `09:39` UTC) show new failures in the current worktree state. Use the latest report for operational decisions.
+
+## Monitoring / Debugging Commands
 
 ```bash
-# Terminal 1: Watch the runner logs
-tail -f reports/nightshift-LATEST.txt
+# newest nightshift report
+ls -1t reports/nightshift-*.md | head -n 1
 
-# Terminal 2: Check current task
-watch -n 5 'cat .nightshift/state/latest/current.json'
+# inspect latest report summary
+latest=$(ls -1t reports/nightshift-*.md | head -n 1)
+sed -n '1,120p' "$latest"
 
-# Terminal 3: Monitor git commits
-git log --oneline -10
+# inspect latest state JSON
+ls -1t .nightshift/state/nightshift-*.json | head -n 1
+
+# inspect latest run log
+ls -1t logs/nightshift-*.log | head -n 1
+
+# check queue toggles quickly
+rg -n '"id"|"enabled"|"mode"|"mutatesCode"' .nightshift/tasks.json
 ```
 
----
+## Operational Recommendations
 
-## Best Practices
+1. Fix current repo build blockers (`NFTGridItem.tsx`, `debounce.ts`) before enabling package-upgrade/fix tasks.
+2. Migrate queue `assistant_fix` commands to the current Codex CLI invocation (`codex exec ...`) or validate/repair runner-side legacy normalization.
+3. Keep `report` tasks first in queue (current ordering is good) so failures produce diagnostics before mutating tasks are attempted.
+4. Use `npm run nightshift:report` after any queue/policy edits to verify policy classification and command syntax before unattended runs.
+5. Use supervisor only on a branch you are comfortable auto-checkpointing/pushing, since it commits and attempts pushes each cycle.
 
-### ✅ DO
-
-- Keep task timeouts realistic (2-5 min for builds/tests)
-- Use `timeoutMs` to prevent hangs
-- Test commands locally before adding to queue
-- Keep `dependsOn` lists short
-- Add clear `doneCriteria` for pass/fail
-- Review reports after each run
-
-### ❌ DON'T
-
-- Create tasks that mutate code without testing
-- Use `mode: fix` for untested commands
-- Push incomplete tasks to the queue
-- Ignore phase failures
-- Add vague `doneCriteria` (must be checkable)
-- Forget to re-enable tasks after testing
-
----
-
-## Architecture: How It Actually Works
-
-### 1. Task Loading
-```
-nightshift.mjs reads .nightshift/tasks.json
-  ↓
-Filters enabled: true tasks
-  ↓
-Respects dependsOn relationships
-```
-
-### 2. Task Execution
-```
-Load task → Log started → Run commands sequentially
-  ↓
-Capture stdout/stderr → Check exit code
-  ↓
-Validate doneCriteria (all must pass)
-  ↓
-If PASS: commit + move next
-If FAIL: save error + check retries
-```
-
-### 3. State Management
-```
-After each task: write to .nightshift/state/latest/
-  ├── completed.json (successful tasks)
-  ├── failed.json (failed tasks)
-  ├── current.json (currently running)
-  └── logs/ (full output)
-```
-
-### 4. Git Integration
-```
-After EACH successful task:
-  ↓
-Stage changes: git add -A
-  ↓
-Commit: git commit -m "Phase X: Task name [nightshift auto]"
-  ↓
-Pull new tasks: git pull (check for new instructions)
-```
-
-### 5. Reporting
-```
-After each phase completes:
-  ↓
-Generate PHASE-X-SUMMARY.md
-  ↓
-Summarize what passed/failed/changed
-  ↓
-Recommend next steps
-```
-
----
-
-## Integration with Human Guidance
-
-**The Human-in-the-Loop Model:**
-
-```
-Human: Commits new tasks to .nightshift/tasks.json
-  ↓
-Nightshift: Detects changes (via git pull)
-  ↓
-Nightshift: Loads new tasks and executes
-  ↓
-Nightshift: Reports results
-  ↓
-Human: Reviews reports and feedback
-  ↓
-Human: Enables next batch of tasks
-  ↓ [Loop repeats]
-```
-
-Nightshift is **not autonomous in the "set and forget" sense**. It's **autonomous in the "keep executing" sense** while humans guide the direction every 30 minutes.
-
----
-
-## Troubleshooting
-
-### "Process is hanging"
-```bash
-# Check what's running
-ps aux | grep nightshift
-ps aux | grep npm
-
-# Kill and resume
-pkill -f nightshift
-npm run nightshift:resume
-```
-
-### "Task failed with exit code 1"
-```bash
-# Read the full output
-cat .nightshift/state/latest/logs/[task-id].log
-```
-
-### "Can't find tasks.json"
-```bash
-# Ensure you're in the right directory
-pwd
-# Should be: /Users/abit_hex/wojak-ink-nightshift
-
-# And branch
-git branch
-# Should be: codex/nightly/2026-02-22-nightshift
-```
-
-### "Tasks won't load after git pull"
-```bash
-# Validate JSON syntax
-node -e "console.log(require('./.nightshift/tasks.json'))"
-# Should print the JSON structure (no error)
-```
-
----
-
-## Phase 5: CSS, TypeScript, Docs (This Run)
-
-This specific nightshift run executes Phase 5 quality improvements:
-
-### Task 1: CSS Consolidation
-- Audit inline styles (1,899 instances)
-- Consolidate to theme.css
-- Remove non-accessibility !important rules
-- Use CSS variables consistently
-
-### Task 2: TypeScript Strictness
-- Validate tsconfig.json settings
-- Check for type issues
-- Ensure build + tests pass
-
-### Task 3: Documentation Updates
-- Update CLAUDE.md with Phase 5 notes
-- Update PROJECT_DOCUMENTATION.md
-- This file explains the nightshift process
-
----
-
-## See Also
-
-- **CLAUDE.md** - Project conventions and CSS architecture
-- **PROJECT_DOCUMENTATION.md** - Complete feature documentation
-- **.nightshift/CODEX-INSTRUCTIONS.md** - Current run instructions
-- **README.md** - Project overview
+## Related Docs
+- `docs/NIGHTSHIFT-RUNBOOK.md` - operator checklist / quick procedure
+- `docs/NIGHTSHIFT-CHECKS.md` - safe command matrix and runtimes
+- `nightshift-FINAL-SUMMARY.md` - earlier all-green handoff snapshot (superseded by later reports for current-state truth)

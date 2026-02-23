@@ -9,10 +9,9 @@
  * - Optimized rendering with GPU acceleration
  */
 
-import { memo, useState, useCallback } from 'react';
+import { memo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useHoverPreload } from '@/hooks/useImagePreloader';
-import { imagePreloader } from '@/services/imagePreloader';
 import { nftGridItemVariants } from '@/config/galleryAnimations';
 import { usePrefersReducedMotion } from '@/hooks/useMediaQuery';
 import { ProgressiveImage } from '@/components/ui/ProgressiveImage';
@@ -31,8 +30,6 @@ export const NFTGridItem = memo(function NFTGridItem({
   onClick,
   eagerLoad = false,
 }: NFTGridItemProps) {
-  const [imageLoaded, setImageLoaded] = useState(() => imagePreloader.isLoaded(nft.thumbnailUrl));
-  const [imageError, setImageError] = useState(false);
   const prefersReducedMotion = usePrefersReducedMotion();
 
   // Preload full image on hover (for when user opens explorer)
@@ -41,15 +38,6 @@ export const NFTGridItem = memo(function NFTGridItem({
   const handleClick = useCallback(() => {
     onClick(nft.id);
   }, [onClick, nft.id]);
-
-  const handleLoad = useCallback(() => {
-    setImageLoaded(true);
-  }, []);
-
-  const handleError = useCallback(() => {
-    setImageError(true);
-    setImageLoaded(true);
-  }, []);
 
   // Snappy hover animation matching character cards
   const hoverAnimation = prefersReducedMotion
@@ -88,8 +76,6 @@ export const NFTGridItem = memo(function NFTGridItem({
         alt={nft.name}
         className="w-full h-full"
         objectFit="cover"
-        onLoad={handleLoad}
-        onError={handleError}
         eager={eagerLoad}
       />
 

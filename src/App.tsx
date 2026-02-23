@@ -26,7 +26,6 @@ import { AchievementsProvider } from '@/contexts/AchievementsContext';
 import { PreloadProvider } from '@/components/preload/PreloadProvider';
 import { SageWalletProvider } from '@/sage-wallet';
 import { MintProvider } from '@/contexts/MintContext';
-import { GeneratorProvider } from '@/contexts/GeneratorContext';
 import { SalesProvider } from '@/providers/SalesProvider';
 import { GlobalVideoPlayer } from '@/components/media/video/GlobalVideoPlayer';
 import StartupSequence from '@/components/StartupSequence';
@@ -134,9 +133,9 @@ function AppContent() {
   useEffect(() => {
     if (isStartupComplete && 'requestIdleCallback' in window) {
       requestIdleCallback(() => {
-        import('@/sage-wallet/lazy-wallet-client').then(mod => {
+        import('@/sage-wallet/wallet-preload').then(mod => {
           mod.preloadWalletDependencies().catch(err => {
-            console.debug('[Performance] Wallet preload deferred:', err);
+            console.warn('[Performance] Wallet preload deferred:', err);
           });
         });
       }, { timeout: 5000 });
@@ -250,11 +249,9 @@ function AppContent() {
                     path="generator"
                     element={
                       <ErrorBoundary>
-                        <GeneratorProvider>
-                          <Suspense fallback={<PageSkeleton type="generator" />}>
-                            <Generator />
-                          </Suspense>
-                        </GeneratorProvider>
+                        <Suspense fallback={<PageSkeleton type="generator" />}>
+                          <Generator />
+                        </Suspense>
                       </ErrorBoundary>
                     }
                   />

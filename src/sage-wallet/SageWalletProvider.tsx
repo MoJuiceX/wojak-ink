@@ -51,6 +51,9 @@ interface SageWalletProviderProps {
   config?: Partial<SageWalletConfig>;
 }
 
+type SageSignClientInstance = Awaited<ReturnType<typeof createSignClient>>;
+type SageWalletModalInstance = Awaited<ReturnType<typeof createWalletConnectModal>>;
+
 export function SageWalletProvider({ children, config: userConfig }: SageWalletProviderProps) {
   // Merge user config with defaults
   const config = { ...DEFAULT_CONFIG, ...userConfig };
@@ -65,8 +68,8 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
   });
 
   // Refs for WalletConnect instances
-  const signClientRef = useRef<any>(null); // Holds SignClient instance
-  const modalRef = useRef<any>(null); // Holds WalletConnectModal instance
+  const signClientRef = useRef<SageSignClientInstance | null>(null); // Holds SignClient instance
+  const modalRef = useRef<SageWalletModalInstance | null>(null); // Holds WalletConnectModal instance
   const currentSessionRef = useRef<SessionTypes.Struct | null>(null);
   const initializingRef = useRef(false);
 

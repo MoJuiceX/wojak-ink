@@ -11,6 +11,9 @@ import type { WalletConnectModal } from '@walletconnect/modal';
 let cachedSignClient: typeof SignClient | null = null;
 let cachedModal: typeof WalletConnectModal | null = null;
 
+export type SignClientInitConfig = Parameters<typeof SignClient.init>[0];
+export type WalletConnectModalConfig = ConstructorParameters<typeof WalletConnectModal>[0];
+
 /**
  * Lazy-load SignClient from @walletconnect/sign-client
  * Returns the class, not an instance
@@ -38,7 +41,7 @@ export async function getWalletConnectModalClass(): Promise<typeof WalletConnect
 /**
  * Create a new SignClient instance with lazy loading
  */
-export async function createSignClient(config: any): Promise<InstanceType<typeof SignClient>> {
+export async function createSignClient(config: SignClientInitConfig): Promise<InstanceType<typeof SignClient>> {
   const SignClientClass = await getSignClientClass();
   return SignClientClass.init(config);
 }
@@ -46,7 +49,7 @@ export async function createSignClient(config: any): Promise<InstanceType<typeof
 /**
  * Create a new WalletConnectModal instance with lazy loading
  */
-export async function createWalletConnectModal(config: any): Promise<InstanceType<typeof WalletConnectModal>> {
+export async function createWalletConnectModal(config: WalletConnectModalConfig): Promise<InstanceType<typeof WalletConnectModal>> {
   const ModalClass = await getWalletConnectModalClass();
   return new ModalClass(config);
 }

@@ -8,7 +8,7 @@
  * UPDATED: Added emoji flick voting system
  */
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useClerk, useAuth } from '@clerk/clerk-react';
 import { Gamepad2, Trophy } from 'lucide-react';
 import { PageTransition } from '@/components/layout/PageTransition';
@@ -34,6 +34,7 @@ import '@/styles/voting.css';
 import { PageSEO } from '@/components/seo';
 
 const CLERK_ENABLED = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const LEADERBOARD_EXCLUDE_GAMES = ['combat'];
 
 export default function GamesHub() {
   const { contentPadding, isDesktop } = useLayout();
@@ -68,6 +69,7 @@ export default function GamesHub() {
   // Track user's vote balances (consumables from the shop)
   const [donutBalance, setDonutBalance] = useState(0);
   const [poopBalance, setPoopBalance] = useState(0);
+  const voteBalancesRef = useRef({ donut: 0, poop: 0 });
   // Always call hooks unconditionally (rules of hooks)
   const clerkAuth = useAuth();
   const authResult = CLERK_ENABLED ? clerkAuth : { getToken: async () => null };
@@ -102,6 +104,10 @@ export default function GamesHub() {
 
     fetchConsumables();
   }, [isSignedIn, getToken]);
+
+  useEffect(() => {
+    voteBalancesRef.current = { donut: donutBalance, poop: poopBalance };
+  }, [donutBalance, poopBalance]);
 
   const toggleRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -147,6 +153,22 @@ export default function GamesHub() {
     targetId: string;
   }>>([]);
 
+  const flyingEmojisRef = useRef(flyingEmojis);
+  const localVotesRef = useRef(localVotes);
+  const heatmapActiveRef = useRef(heatmapState.isActive);
+
+  useEffect(() => {
+    flyingEmojisRef.current = flyingEmojis;
+  }, [flyingEmojis]);
+
+  useEffect(() => {
+    localVotesRef.current = localVotes;
+  }, [localVotes]);
+
+  useEffect(() => {
+    heatmapActiveRef.current = heatmapState.isActive;
+  }, [heatmapState.isActive]);
+
   // === HANDLERS ===
   const handleGameSelect = useCallback((game: MiniGame) => {
     // Don't open game if flick mode is active
@@ -181,7 +203,9 @@ export default function GamesHub() {
     if (!activeMode) return;
 
     // Check if user has balance (use current state for optimistic check)
-    const balance = activeMode === 'donut' ? donutBalance : poopBalance;
+    const balance = activeMode === 'donut'
+      ? voteBalancesRef.current.donut
+      : voteBalancesRef.current.poop;
     if (balance <= 0) return;
 
     const startPos = getTogglePosition();
@@ -210,12 +234,12 @@ export default function GamesHub() {
     } else {
       setPoopBalance(prev => Math.max(0, prev - 1));
     }
-  }, [activeMode, getTogglePosition, donutBalance, poopBalance]);
+  }, [activeMode, getTogglePosition]);
 
   // Handle emoji landing - accepts id to support multiple simultaneous emojis
   const handleEmojiLand = useCallback(async (emojiId: string) => {
     // Find the emoji that landed
-    const landedEmoji = flyingEmojis.find(e => e.id === emojiId);
+    const landedEmoji = flyingEmojisRef.current.find(e => e.id === emojiId);
     if (!landedEmoji) return;
 
     const { type, end, targetId, xPercent, yPercent } = landedEmoji;
@@ -275,7 +299,7 @@ export default function GamesHub() {
         }
       }
     }
-  }, [flyingEmojis, addVote, getToken]);
+  }, [addVote, getToken]);
 
   // Handle splatter completion - remove specific splatter by id
   const handleSplatterComplete = useCallback((splatterId: string) => {
@@ -284,7 +308,7 @@ export default function GamesHub() {
 
   const handleShowHeatmap = useCallback(async (type: 'donut' | 'poop') => {
     // Toggle off if already showing
-    if (heatmapState.isActive) {
+    if (heatmapActiveRef.current) {
       setHeatmapState({ isActive: false, type: 'donut', votes: [] });
       return;
     }
@@ -293,7 +317,7 @@ export default function GamesHub() {
     const apiVotes = await fetchVotesForHeatmap(type);
 
     // Merge with local votes from this session (in case API hasn't synced yet)
-    const localForType = localVotes
+    const localForType = localVotesRef.current
       .filter(v => v.type === type)
       .map(v => ({
         id: v.id,
@@ -320,18 +344,29 @@ export default function GamesHub() {
 
     SoundManager.play('vote-rain');
     setHeatmapState({ isActive: true, type, votes: merged });
-  }, [localVotes, heatmapState.isActive, fetchVotesForHeatmap]);
+  }, [fetchVotesForHeatmap]);
 
   const handleCloseHeatmap = useCallback(() => {
     setHeatmapState(prev => ({ ...prev, isActive: false, votes: [] }));
   }, []);
 
   // Filter games into playable and coming soon
-  const playableGames = games.filter(game => game.status === 'available' && !game.disabled);
-  const comingSoonGames = games.filter(game => game.status === 'coming-soon' || game.disabled);
+  const playableGames = useMemo(
+    () => games.filter(game => game.status === 'available' && !game.disabled),
+    [games]
+  );
+  const comingSoonGames = useMemo(
+    () => games.filter(game => game.status === 'coming-soon' || game.disabled),
+    [games]
+  );
+  const handleToggleComingSoon = useCallback(() => {
+    setShowComingSoon(prev => !prev);
+  }, []);
+  const handleShowPlayTab = useCallback(() => setActiveTab('play'), []);
+  const handleShowScoresTab = useCallback(() => setActiveTab('scores'), []);
 
   // === RENDER ===
-  const gamesGridWithVoting = (
+  const gamesGridWithVoting = useMemo(() => (
     <>
       <GamesGrid
         games={playableGames}
@@ -345,7 +380,7 @@ export default function GamesHub() {
           <button
             type="button"
             className="stats-trigger"
-            onClick={() => setShowComingSoon(prev => !prev)}
+            onClick={handleToggleComingSoon}
             style={{ justifyContent: 'space-between' }}
           >
             <span>More Games Coming Soon ({comingSoonGames.length})</span>
@@ -366,9 +401,18 @@ export default function GamesHub() {
         </div>
       )}
     </>
-  );
+  ), [
+    playableGames,
+    handleGameSelect,
+    isLoading,
+    activeMode,
+    handleCardFlick,
+    comingSoonGames,
+    handleToggleComingSoon,
+    showComingSoon,
+  ]);
 
-  const gameSEO = (
+  const gameSEO = useMemo(() => (
     <PageSEO
       title="Free Arcade Games - 15 Browser Games with Leaderboards"
       description="Play 15 free arcade games including Flappy Orange, Snake, 2048, Memory Match, and more. Compete on global leaderboards, earn rewards, and challenge friends. No download required!"
@@ -388,15 +432,19 @@ export default function GamesHub() {
         ],
       }}
     />
-  );
+  ), []);
+
+  const leaderboardView = useMemo(() => (
+    <Leaderboard gameId="flappy-orange" showGameSelector excludeGames={LEADERBOARD_EXCLUDE_GAMES} />
+  ), []);
 
   // Tab bar for Play/Scores toggle — uses fight-club-tabs styling for consistency
-  const tabBar = (
+  const tabBar = useMemo(() => (
     <div className="fight-club-tabs" style={{ marginBottom: '16px', width: 'fit-content' }}>
       <button
         type="button"
         className={`fight-club-tab flex items-center gap-1.5 ${activeTab === 'play' ? 'active' : ''}`}
-        onClick={() => setActiveTab('play')}
+        onClick={handleShowPlayTab}
       >
         <Gamepad2 size={16} />
         Play
@@ -404,13 +452,13 @@ export default function GamesHub() {
       <button
         type="button"
         className={`fight-club-tab flex items-center gap-1.5 ${activeTab === 'scores' ? 'active' : ''}`}
-        onClick={() => setActiveTab('scores')}
+        onClick={handleShowScoresTab}
       >
         <Trophy size={16} />
         Scores
       </button>
     </div>
-  );
+  ), [activeTab, handleShowPlayTab, handleShowScoresTab]);
 
   // Desktop: 3-column layout that fits viewport
   if (isDesktop) {
@@ -453,7 +501,7 @@ export default function GamesHub() {
             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', minHeight: 0, gridColumn: activeTab === 'scores' ? '1 / -1' : undefined }}>
               {tabBar}
               {activeTab === 'play' ? gamesGridWithVoting : (
-                <Leaderboard gameId="flappy-orange" showGameSelector excludeGames={['combat']} />
+                leaderboardView
               )}
             </div>
             {/* Right column: Stats + Voting Panel (only in Play mode) */}
@@ -552,7 +600,7 @@ export default function GamesHub() {
               </div>
             </>
           ) : (
-            <Leaderboard gameId="flappy-orange" showGameSelector excludeGames={['combat']} />
+            leaderboardView
           )}
         </div>
       </div>
