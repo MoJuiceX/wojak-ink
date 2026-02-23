@@ -2,8 +2,8 @@ name: Auto Rollback on Failure
 
 on:
   schedule:
-    # Check every minute during deployments
-    - cron: '* * * * *'
+    # GitHub Actions supports a minimum 5-minute schedule interval.
+    - cron: '*/5 * * * *'
   workflow_run:
     workflows: [Canary Deployment]
     types: [completed]
@@ -149,7 +149,7 @@ jobs:
     steps:
       - name: Check health every minute during business hours
         run: |
-          # This job runs every minute and checks health
+          # This job runs every 5 minutes and checks health
           # Only alerts if issues detected
           echo "🔍 Periodic health check..."
           
