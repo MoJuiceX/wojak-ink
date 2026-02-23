@@ -12,8 +12,8 @@ Run a safe unattended maintenance/reliability session on a dedicated nightly bra
 - Stop after max hours, max tasks, or hard failure threshold
 
 ## Typical flow
-1. Create safe tag on `main`
-2. Create isolated worktree + nightly branch
+1. Bootstrap safe tag + isolated worktree + nightly branch
+   - From `main`: `npm run nightshift:bootstrap`
 3. Run dry-run:
    - `npm run nightshift:dry-run`
 4. Review generated report and planned queue
@@ -24,6 +24,8 @@ Run a safe unattended maintenance/reliability session on a dedicated nightly bra
 8. Open PR(s) manually after reviewing diffs and checks
 
 ## Commands
+- Bootstrap (run from `main` checkout):
+  - `bash scripts/nightshift-bootstrap.sh`
 - Dry run (default):
   - `node scripts/nightshift.mjs --dry-run`
 - Real mode (safe defaults):
@@ -41,6 +43,9 @@ Run a safe unattended maintenance/reliability session on a dedicated nightly bra
 - Logs: `logs/nightshift-<timestamp>.log`
 - Summary report: `reports/nightshift-<timestamp>.md`
 - State: `.nightshift/state/nightshift-<timestamp>.json`
+
+## References
+- Checks matrix: `docs/NIGHTSHIFT-CHECKS.md`
 
 ## Notes for Night 1
 - Most mutating tasks are intentionally disabled until the dry-run report is reviewed
