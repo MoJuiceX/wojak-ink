@@ -15,6 +15,9 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@clerk/clerk-react';
 import { Link } from 'react-router-dom';
 import { RankingRulesModal } from './RankingRulesModal';
+import { SkeletonRanking } from '@/components/skeletons/SkeletonRanking';
+import { SkeletonVoteCard } from '@/components/skeletons/SkeletonVoteCard';
+import { InlineError } from '@/components/ui/InlineError';
 import { useFightClubMyScore, getTierColor } from '@/hooks/useFightClubMyScore';
 
 type RankingTab = 'players' | 'wojaks';
@@ -179,14 +182,7 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
       <div className="rankings-content">
         <div className="flex flex-col gap-2">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="card-static p-3 flex items-center gap-3 animate-pulse">
-              <div className="w-8 h-8 rounded-full" style={{ background: 'var(--color-white-8)' }} />
-              <div className="flex-1 flex flex-col gap-1">
-                <div className="h-3 w-24 rounded" style={{ background: 'var(--color-white-8)' }} />
-                <div className="h-2 w-16 rounded" style={{ background: 'var(--color-white-5)' }} />
-              </div>
-              <div className="h-4 w-12 rounded" style={{ background: 'var(--color-white-8)' }} />
-            </div>
+            <SkeletonRanking key={i} delay={i * 0.05} />
           ))}
         </div>
       </div>
@@ -196,9 +192,10 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
   if (error) {
     return (
       <div className="rankings-empty">
-        <Trophy size={48} strokeWidth={1} className="text-muted" />
-        <p>Couldn&apos;t load rankings</p>
-        <span className="text-secondary text-sm">Check the connection and try again.</span>
+        <InlineError
+          error={error}
+          compact
+        />
       </div>
     );
   }
@@ -442,14 +439,8 @@ function WojaksTab() {
     return (
       <div className="rankings-content">
         <div className="flex flex-col gap-2">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="card-static p-3 flex items-center gap-3 animate-pulse">
-              <div className="w-12 h-12 rounded-lg" style={{ background: 'var(--color-white-8)' }} />
-              <div className="flex-1 flex flex-col gap-1">
-                <div className="h-3 w-20 rounded" style={{ background: 'var(--color-white-8)' }} />
-                <div className="h-2 w-32 rounded" style={{ background: 'var(--color-white-5)' }} />
-              </div>
-            </div>
+          {[1, 2, 3, 4, 5].map((i) => (
+            <SkeletonVoteCard key={i} delay={i * 0.08} compact />
           ))}
         </div>
       </div>
@@ -459,9 +450,10 @@ function WojaksTab() {
   if (error) {
     return (
       <div className="rankings-empty">
-        <Trophy size={48} strokeWidth={1} className="text-muted" />
-        <p>Couldn&apos;t load rankings</p>
-        <span className="text-secondary text-sm">Check the connection and try again.</span>
+        <InlineError
+          error={error}
+          compact
+        />
       </div>
     );
   }
