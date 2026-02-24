@@ -74,8 +74,6 @@ export function SwipeCard({
   dislikes = 0,
   totalVotes = 0,
 }: SwipeCardProps) {
-  // Debug: Log every render with key props
-  console.log('[SWIPE] Render', { nftId: nftId.slice(0, 8), stackPosition, exitDirection, hasOnExitComplete: !!onExitComplete });
   const voteScore = likes - dislikes;
   const x = useMotionValue(0);
   const [swipeExiting, setSwipeExiting] = useState(false);
@@ -94,10 +92,6 @@ export function SwipeCard({
   const isInteractive = stackPosition === 0 && !exiting;
   const config = STACK_CONFIGS[stackPosition];
 
-  // Debug logging for exit state changes
-  if (stackPosition === 0 && exitDirection !== null) {
-    console.log('[SWIPE] Card exiting', { nftId, exitDirection, exiting, swipeExiting, stackPosition });
-  }
 
   // Rotation on drag (reduced from +-15 to +-12 for subtlety)
   const rotate = useTransform(x, [-200, 200], reducedMotion ? [0, 0] : [-12, 12]);
@@ -222,15 +216,10 @@ export function SwipeCard({
   const promoteTransition = { type: 'spring' as const, stiffness: 320, damping: 30 };
 
   const handleExitCompleteCallback = useCallback(() => {
-    console.log('[SWIPE] handleExitCompleteCallback called', { nftId, exitCompleteFired: exitCompleteFired.current, hasOnExitComplete: !!onExitComplete });
-    if (exitCompleteFired.current) {
-      console.log('[SWIPE] Already fired, skipping');
-      return;
-    }
+    if (exitCompleteFired.current) return;
     exitCompleteFired.current = true;
-    console.log('[SWIPE] Calling onExitComplete');
     onExitComplete?.();
-  }, [onExitComplete, nftId]);
+  }, [onExitComplete]);
 
   return (
     <motion.div
