@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
-import { useAuth } from '@clerk/clerk-react';
+import { useClerkAuth } from '@/contexts/ClerkAuthContext';
 
 const SESSION_KEY = 'wojak_game_session';
 const GUEST_ID_KEY = 'wojak_guest_id';
@@ -123,7 +123,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [feedVotePassProgress, setFeedVotePassProgress] = useState<FeedVotePassProgress | null>(null);
   const [feedLoading, setFeedLoading] = useState(false);
 
-  const { getToken, isSignedIn, isLoaded: isClerkLoaded } = useAuth();
+  const { getToken, isSignedIn, isLoaded: isClerkLoaded } = useClerkAuth();
 
   // Stable guest ID for this browser
   const [guestId] = useState(() => getGuestId());
@@ -135,9 +135,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const getAuthHeaders = useCallback(async (): Promise<Record<string, string>> => {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (CLERK_ENABLED) {
-      const token = await getToken();
-      if (token) headers.Authorization = `Bearer ${token}`;
+    try {
+      if (getToken) {
+        const token = await getToken();
+        if (token) headers.Authorization = `Bearer ${token}`;
+      }
+    } catch {
+      // Auth not ready or Clerk error — proceed without Authorization (guest vote)
     }
     return headers;
   }, [getToken]);

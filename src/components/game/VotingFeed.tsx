@@ -54,6 +54,7 @@ export function VotingFeed() {
   const toast = useToast();
   const reducedMotion = usePrefersReducedMotion();
   const pendingVoteRef = useRef<{ nftId: string; voteType: 1 | -1; promise: Promise<{ ok: boolean; error?: string; status?: number }> } | null>(null);
+  const exitSafetyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Milestone toasts
   useMilestoneToasts(player?.onboarding);
@@ -91,6 +92,16 @@ export function VotingFeed() {
     document.addEventListener('visibilitychange', onVisible);
     return () => document.removeEventListener('visibilitychange', onVisible);
   }, [loadFeed]);
+
+  // Clear safety timeout on unmount so we only run cleanup once
+  useEffect(() => {
+    return () => {
+      if (exitSafetyTimeoutRef.current) {
+        clearTimeout(exitSafetyTimeoutRef.current);
+        exitSafetyTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   // Prefetch images for next 3 cards (prefer CDN thumbnail when available)
   useEffect(() => {
@@ -149,15 +160,49 @@ export function VotingFeed() {
       setVoteFeedbackType(null);
     }, 450);
 
-    // Fire vote to API (do not remove from feed here — wait for exit animation)
-    const votePromise = castVote(currentItem.nftId, currentItem.editionNumber, voteType)
-      .catch(() => ({ ok: false as const, error: 'Network error', status: 0 }));
+    let votePromise: Promise<{ ok: boolean; error?: string; status?: number }>;
+    try {
+      votePromise = castVote(currentItem.nftId, currentItem.editionNumber, voteType)
+        .catch(() => ({ ok: false as const, error: 'Network error', status: 0 }));
+    } catch {
+      rollbackSessionCounts(voteType);
+      setCardExiting(false);
+      setExitDirection(null);
+      toast.error('Vote failed. Try again.');
+      pendingVoteRef.current = null;
+      return;
+    }
 
     pendingVoteRef.current = { nftId: votedNftId, voteType, promise: votePromise };
+
+    // Safety timeout: if onAnimationComplete never fires, unblock UI after a short delay
+    if (exitSafetyTimeoutRef.current) {
+      clearTimeout(exitSafetyTimeoutRef.current);
+      exitSafetyTimeoutRef.current = null;
+    }
+    exitSafetyTimeoutRef.current = setTimeout(() => {
+      const pending = pendingVoteRef.current;
+      if (!pending) return;
+      pendingVoteRef.current = null;
+      exitSafetyTimeoutRef.current = null;
+      removeFromFeed(pending.nftId);
+      setCardExiting(false);
+      setExitDirection(null);
+      pending.promise.then((result) => {
+        if (!result.ok) {
+          rollbackSessionCounts(pending.voteType);
+          toast.error(voteErrorMessage(result));
+        }
+      });
+    }, 450);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- stable refs from context; full deps would recreate callback every render
   }, [feed, cardExiting, castVote, loadFeed, removeFromFeed, toast, voteCount, triggerHaptics, rollbackSessionCounts, voteErrorMessage, feedVotePassProgress]);
 
   const handleExitComplete = useCallback(() => {
+    if (exitSafetyTimeoutRef.current) {
+      clearTimeout(exitSafetyTimeoutRef.current);
+      exitSafetyTimeoutRef.current = null;
+    }
     const pending = pendingVoteRef.current;
     pendingVoteRef.current = null;
     if (!pending) return;
