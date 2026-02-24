@@ -219,7 +219,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         })
         .catch(() => { /* network error — will show gate checklist */ });
     } catch { /* corrupt storage — ignore */ }
-  }, [isClerkLoaded, isSignedIn, player]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isClerkLoaded, isSignedIn, player]);
 
   const register = useCallback(async (did: string, walletAddress: string) => {
     const headers = await getAuthHeaders();
