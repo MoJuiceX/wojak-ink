@@ -67,7 +67,6 @@ export function VotingFeed() {
   const [cardExiting, setCardExiting] = useState(false);
   const [exitDirection, setExitDirection] = useState<1 | -1 | null>(null);
   const [voteFeedbackType, setVoteFeedbackType] = useState<'glaze' | 'fade' | null>(null);
-  const [_optimisticSeenCount, setOptimisticSeenCount] = useState<number | null>(null);
 
 
   // Load feed immediately (no gate)
@@ -112,10 +111,6 @@ export function VotingFeed() {
   }, [feed]);
 
 
-  useEffect(() => {
-    setOptimisticSeenCount(null);
-  }, [feedVotePassProgress?.seenCount, feedVotePassProgress?.totalCount, feedVotePassProgress?.passComplete]);
-
   const triggerHaptics = useCallback((voteType: 1 | -1) => {
     // Progressive enhancement only (Android browsers commonly support vibrate; iOS Safari does not).
     if (typeof navigator === 'undefined' || typeof navigator.vibrate !== 'function') return;
@@ -156,12 +151,6 @@ export function VotingFeed() {
     removeFromFeed(votedNftId);
     setCardExiting(false);
     setExitDirection(null);
-    setOptimisticSeenCount(prev => {
-      const progress = feedVotePassProgress;
-      if (!progress?.enabled || progress.passComplete || progress.totalCount <= 0) return prev;
-      const base = prev ?? progress.seenCount;
-      return Math.min(progress.totalCount, base + 1);
-    });
     if (currentFeedLength <= 3) {
       loadFeed().catch(() => setFeedError(true));
     }
@@ -175,7 +164,6 @@ export function VotingFeed() {
     });
   }, [
     feed.length,
-    feedVotePassProgress,
     loadFeed,
     removeFromFeed,
     rollbackSessionCounts,
