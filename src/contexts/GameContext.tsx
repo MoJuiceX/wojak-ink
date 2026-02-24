@@ -170,6 +170,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     wasSignedInRef.current = true;
     let cancelled = false;
     (async () => {
+      if (!getToken) return;
       const token = await getToken();
       if (!token || cancelled) return;
       const res = await fetch('/api/game/me', {
