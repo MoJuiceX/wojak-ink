@@ -5,7 +5,7 @@
 // Renders nothing — pure side-effect component.
 
 import { useEffect, useRef } from 'react';
-import { useAuth } from '@clerk/clerk-react';
+import { useClerkAuth } from '@/contexts/ClerkAuthContext';
 import { useSageWallet } from '@/sage-wallet';
 import { useGame } from '@/contexts/GameContext';
 
@@ -16,7 +16,7 @@ const CLERK_ENABLED = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 export function SwipeAutoRegister() {
   const { address, status, getDIDs } = useSageWallet();
   const { isRegistered, player, register, resetPlayer } = useGame();
-  const { isSignedIn } = useAuth();
+  const { isSignedIn } = useClerkAuth();
   const attemptedRef = useRef(false);
   const lastAddressRef = useRef<string | null>(null);
 

@@ -11,7 +11,7 @@ import { MINTGARDEN_COLLECTION_URL } from '@/services/constants';
 import { lazy, Suspense, memo, useState, useCallback, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Swords, ExternalLink, Wallet, Info } from 'lucide-react';
-import { useAuth } from '@clerk/clerk-react';
+import { useClerkAuth } from '@/contexts/ClerkAuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { PageSkeleton } from '@/components/layout/PageSkeleton';
@@ -324,7 +324,7 @@ function FightClubContent() {
   const { profile } = useUserProfile();
   const { address: walletAddress } = useSageWallet();
   const { player } = useGame();
-  const { isSignedIn } = useAuth();
+  const { isSignedIn } = useClerkAuth();
   const { data: accessData, isLoading: accessLoading } = useFightClubAccess(walletAddress);
   const { data: playerDidFromWallet } = usePlayerDid(walletAddress ?? profile?.walletAddress ?? null);
 
