@@ -291,6 +291,7 @@ export function VotingFeed() {
 
   // Active voting
   const visibleCards = feed.slice(0, 3);
+  console.log('[FEED] Rendering', { feedLength: feed.length, exitDirection, cardExiting, visibleNftIds: visibleCards.map(c => c.nftId.slice(0, 8)) });
 
   /* Same as tab→picture; use marginBottom on card so no other CSS can add gap */
   const VERTICAL_GAP_PX = 6;
@@ -306,7 +307,7 @@ export function VotingFeed() {
         aria-label="Vote on Wojak NFTs. Swipe right to glaze, left to fade."
         style={{ marginBottom: VERTICAL_GAP_PX }}
       >
-        <AnimatePresence mode="wait" initial={false}>
+        <AnimatePresence mode="sync" initial={false}>
           {visibleCards.map((item, i) => (
             <SwipeCard
               key={item.nftId}

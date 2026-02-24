@@ -74,6 +74,8 @@ export function SwipeCard({
   dislikes = 0,
   totalVotes = 0,
 }: SwipeCardProps) {
+  // Debug: Log every render with key props
+  console.log('[SWIPE] Render', { nftId: nftId.slice(0, 8), stackPosition, exitDirection, hasOnExitComplete: !!onExitComplete });
   const voteScore = likes - dislikes;
   const x = useMotionValue(0);
   const [swipeExiting, setSwipeExiting] = useState(false);
