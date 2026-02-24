@@ -18,8 +18,11 @@ const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as stri
 // Optional: override where Clerk loads its script from. On localhost, clerk.wojak.ink does not resolve;
 // set this to your Frontend API URL from Clerk Dashboard → Domains (the *.clerk.accounts.dev URL).
 const CLERK_JS_URL_RAW = import.meta.env.VITE_CLERK_JS_URL as string | undefined
+// Frontend API domain override — use this to bypass broken custom domain (clerk.wojak.ink)
+// Set to your Frontend API URL from Clerk Dashboard → Domains (e.g. https://pleasant-dog-12.clerk.accounts.dev)
+const CLERK_FRONTEND_API = import.meta.env.VITE_CLERK_FRONTEND_API as string | undefined
 const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-// Use a CDN for script load on localhost when custom domain (clerk.wojak.ink) is set but doesn't resolve
+// Use a CDN for script load when custom domain (clerk.wojak.ink) doesn't resolve
 const CLERK_JS_CDN_FALLBACK = 'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js'
 const clerkWojakInk = CLERK_JS_URL_RAW === 'https://clerk.wojak.ink' || (CLERK_JS_URL_RAW?.includes?.('clerk.wojak.ink') ?? false)
 // Never load Clerk script from clerk.wojak.ink on production: that origin does not send CORS for wojak.ink,
@@ -32,7 +35,7 @@ const CLERK_JS_URL: string | undefined =
       : CLERK_JS_URL_RAW
 if (isLocalhost && (!CLERK_JS_URL_RAW || clerkWojakInk)) {
   console.warn(
-    '[Clerk] clerk.wojak.ink does not resolve on localhost. Script will load from CDN; auth may still fail until you set VITE_CLERK_JS_URL to your Frontend API URL (e.g. https://XXX.clerk.accounts.dev) in .env.local from Clerk Dashboard → Domains.'
+    '[Clerk] clerk.wojak.ink does not resolve. Script will load from CDN. Set VITE_CLERK_FRONTEND_API to your Frontend API URL (e.g. https://XXX.clerk.accounts.dev) for API calls.'
   )
 }
 if (clerkWojakInk && !isLocalhost) {
@@ -40,8 +43,17 @@ if (clerkWojakInk && !isLocalhost) {
     '[Clerk] VITE_CLERK_JS_URL is clerk.wojak.ink, which blocks script load by CORS from wojak.ink. Using Clerk default script URL so auth and voting work.'
   )
 }
-// When using a resolvable FAPI URL (e.g. *.clerk.accounts.dev), tell Clerk to use it for API calls too
-if (CLERK_JS_URL_RAW && CLERK_JS_URL_RAW.startsWith('https://') && CLERK_JS_URL_RAW.includes('clerk.accounts.dev')) {
+// Force Clerk API domain to Frontend API URL if provided — bypasses broken custom domain
+if (CLERK_FRONTEND_API) {
+  try {
+    const fapiHost = new URL(CLERK_FRONTEND_API).hostname
+    ;(window as unknown as { __clerk_domain?: string }).__clerk_domain = fapiHost
+    console.warn('[Clerk] Using Frontend API domain override:', fapiHost)
+  } catch {
+    console.warn('[Clerk] Invalid VITE_CLERK_FRONTEND_API URL:', CLERK_FRONTEND_API)
+  }
+} else if (CLERK_JS_URL_RAW && CLERK_JS_URL_RAW.startsWith('https://') && CLERK_JS_URL_RAW.includes('clerk.accounts.dev')) {
+  // Fallback: extract domain from JS URL if it's a clerk.accounts.dev URL
   try {
     ;(window as unknown as { __clerk_domain?: string }).__clerk_domain = new URL(CLERK_JS_URL_RAW).hostname
   } catch {
