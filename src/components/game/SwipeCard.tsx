@@ -92,6 +92,11 @@ export function SwipeCard({
   const isInteractive = stackPosition === 0 && !exiting;
   const config = STACK_CONFIGS[stackPosition];
 
+  // Debug logging for exit state changes
+  if (stackPosition === 0 && exitDirection !== null) {
+    console.log('[SWIPE] Card exiting', { nftId, exitDirection, exiting, swipeExiting, stackPosition });
+  }
+
   // Rotation on drag (reduced from +-15 to +-12 for subtlety)
   const rotate = useTransform(x, [-200, 200], reducedMotion ? [0, 0] : [-12, 12]);
 
@@ -215,10 +220,15 @@ export function SwipeCard({
   const promoteTransition = { type: 'spring' as const, stiffness: 320, damping: 30 };
 
   const handleExitCompleteCallback = useCallback(() => {
-    if (exitCompleteFired.current) return;
+    console.log('[SWIPE] handleExitCompleteCallback called', { nftId, exitCompleteFired: exitCompleteFired.current, hasOnExitComplete: !!onExitComplete });
+    if (exitCompleteFired.current) {
+      console.log('[SWIPE] Already fired, skipping');
+      return;
+    }
     exitCompleteFired.current = true;
+    console.log('[SWIPE] Calling onExitComplete');
     onExitComplete?.();
-  }, [onExitComplete]);
+  }, [onExitComplete, nftId]);
 
   return (
     <motion.div

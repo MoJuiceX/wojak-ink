@@ -141,21 +141,27 @@ export function VotingFeed() {
 
   // Must be defined before handleVote since handleVote references it
   const handleExitComplete = useCallback(() => {
+    console.log('[VOTE] handleExitComplete called', { hasPending: !!pendingVoteRef.current, pendingNftId: pendingVoteRef.current?.nftId });
     if (exitSafetyTimeoutRef.current) {
       clearTimeout(exitSafetyTimeoutRef.current);
       exitSafetyTimeoutRef.current = null;
     }
     const pending = pendingVoteRef.current;
     pendingVoteRef.current = null;
-    if (!pending) return;
+    if (!pending) {
+      console.log('[VOTE] handleExitComplete early return - no pending');
+      return;
+    }
 
     const { nftId: votedNftId, voteType, promise } = pending;
     const currentFeedLength = feed.length;
 
     // Optimistic: remove card and clear state immediately so next card promotes without waiting for API
+    console.log('[VOTE] Removing card from feed:', votedNftId);
     removeFromFeed(votedNftId);
     setCardExiting(false);
     setExitDirection(null);
+    console.log('[VOTE] Card removed, states reset');
     setOptimisticSeenCount(prev => {
       const progress = feedVotePassProgress;
       if (!progress?.enabled || progress.passComplete || progress.totalCount <= 0) return prev;
@@ -185,7 +191,11 @@ export function VotingFeed() {
 
   const handleVote = useCallback((voteType: 1 | -1) => {
     const currentItem = feed[0];
-    if (!currentItem || cardExiting) return;
+    console.log('[VOTE] handleVote called', { voteType, currentItem: currentItem?.nftId, cardExiting, feedLength: feed.length });
+    if (!currentItem || cardExiting) {
+      console.log('[VOTE] handleVote early return', { hasItem: !!currentItem, cardExiting });
+      return;
+    }
 
     const votedNftId = currentItem.nftId;
     setCardExiting(true);
@@ -215,9 +225,14 @@ export function VotingFeed() {
       clearTimeout(exitSafetyTimeoutRef.current);
       exitSafetyTimeoutRef.current = null;
     }
+    console.log('[VOTE] Setting safety timeout for:', votedNftId);
     exitSafetyTimeoutRef.current = setTimeout(() => {
+      console.log('[VOTE] Safety timeout fired', { pendingNftId: pendingVoteRef.current?.nftId, votedNftId });
       if (pendingVoteRef.current?.nftId === votedNftId) {
+        console.log('[VOTE] Safety timeout calling handleExitComplete');
         handleExitComplete();
+      } else {
+        console.log('[VOTE] Safety timeout skipped - different nftId or already handled');
       }
     }, 600);
   }, [feed, cardExiting, castVote, voteCount, triggerHaptics, handleExitComplete]);

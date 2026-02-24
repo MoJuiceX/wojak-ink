@@ -1,0 +1,13 @@
+---
+description: When editing generator or layer code, read and follow docs/GENERATOR-CODE-HEALTH.md
+globs: "**/Generator*.tsx,**/generator*.ts,**/wojakRules*,**/selectionResolver*,**/selectionAdapter*,**/layerRegistry*,**/generatorTraitIds*,**/canvasRenderer*,**/layers.ts,**/generatorLayerMapping*,**/generator/**"
+alwaysApply: false
+---
+
+# Generator and layer code
+
+When working in these files (generator UI, context, reducer, layer rules, selection, canvas renderer, layer config):
+
+1. **Read `docs/GENERATOR-CODE-HEALTH.md`** before making changes.
+2. Follow its "what to do" and "what not to do" and use the file-role table.
+3. After editing, re-check the doc for tests, `isSelectionPathEmpty` usage, and release checklist if relevant.
