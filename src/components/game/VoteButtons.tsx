@@ -1,6 +1,6 @@
 // Vote buttons: full-width pill buttons for Fade/Glaze.
 // Keyboard shortcuts: ← fade, → glaze (desktop only).
-// Subtitles show vote score impact.
+// Buttons scale in response to swipe direction for visual connection.
 
 import { motion } from 'framer-motion';
 import { useEffect, useRef } from 'react';
@@ -11,6 +11,8 @@ interface VoteButtonsProps {
   onDislike: () => void;
   disabled: boolean;
   feedbackType?: 'glaze' | 'fade' | null;
+  /** Swipe progress from -1 (full left/fade) to 1 (full right/glaze) */
+  swipeProgress?: number;
 }
 
 export function VoteButtons({
@@ -18,9 +20,14 @@ export function VoteButtons({
   onDislike,
   disabled,
   feedbackType = null,
+  swipeProgress = 0,
 }: VoteButtonsProps) {
   const reducedMotion = usePrefersReducedMotion();
   const supportsHover = useRef(false);
+
+  // Calculate button scales based on swipe direction
+  const glazeScale = reducedMotion ? 1 : swipeProgress > 0 ? 1 + swipeProgress * 0.12 : 1;
+  const fadeScale = reducedMotion ? 1 : swipeProgress < 0 ? 1 + Math.abs(swipeProgress) * 0.12 : 1;
 
   useEffect(() => {
     supportsHover.current = window.matchMedia('(hover: hover)').matches;
@@ -64,6 +71,8 @@ export function VoteButtons({
         disabled={disabled}
         aria-label="Fade this Wojak"
         whileTap={tapAnimation}
+        animate={{ scale: fadeScale }}
+        transition={{ type: 'spring', stiffness: 400, damping: 25 }}
       >
         <span className="vote-btn-label">🗑️ Fade</span>
       </motion.button>
@@ -74,6 +83,8 @@ export function VoteButtons({
         disabled={disabled}
         aria-label="Glaze this Wojak"
         whileTap={tapAnimation}
+        animate={{ scale: glazeScale }}
+        transition={{ type: 'spring', stiffness: 400, damping: 25 }}
       >
         <span className="vote-btn-label">🍩 Glaze</span>
       </motion.button>

@@ -3,9 +3,15 @@
 // Border glow + icon reveal feedback (no text stamps).
 // Supports card stack positioning and first-card wiggle.
 
-import { motion, useMotionValue, useTransform } from 'framer-motion';
+import { motion, useMotionValue, useTransform, useMotionValueEvent } from 'framer-motion';
 import type { PanInfo } from 'framer-motion';
 import { useState, useCallback, useRef, useEffect } from 'react';
+
+// Haptic patterns for premium feedback
+const HAPTIC_PATTERNS = {
+  glaze: { light: [5], medium: [8, 30, 15] },
+  fade: { light: [8], medium: [12, 15, 8] },
+} as const;
 
 interface SwipeCardProps {
   nftId: string;
@@ -21,6 +27,8 @@ interface SwipeCardProps {
   exitDirection?: 1 | -1 | null; // 1 = right (like), -1 = left (dislike)
   /** Called when exit animation completes (so parent can remove from feed immediately) */
   onExitComplete?: () => void;
+  /** Called during drag with progress (-1 to 1, negative = left/fade, positive = right/glaze) */
+  onDragProgress?: (progress: number) => void;
   /** Voting stats for the footer context */
   likes?: number;
   dislikes?: number;
@@ -70,6 +78,7 @@ export function SwipeCard({
   reducedMotion = false,
   exitDirection = null,
   onExitComplete,
+  onDragProgress,
   likes = 0,
   dislikes = 0,
   totalVotes = 0,
@@ -79,10 +88,12 @@ export function SwipeCard({
   const [swipeExiting, setSwipeExiting] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [shouldWiggle, setShouldWiggle] = useState(false);
+  const [capturedVelocity, setCapturedVelocity] = useState(0);
   const imageRef = useRef<HTMLImageElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const fallbackStepRef = useRef(0);
   const exitCompleteFired = useRef(false);
+  const thresholdHapticFired = useRef(false);
   const primaryUrl = thumbnailUri || imageUrl;
   const secondaryUrl = thumbnailUri ? imageUrl : null;
   const tertiaryUrl = MINTGARDEN_MAINNET_MEDIUM(nftId);
@@ -96,18 +107,35 @@ export function SwipeCard({
   // Rotation on drag (reduced from +-15 to +-12 for subtlety)
   const rotate = useTransform(x, [-200, 200], reducedMotion ? [0, 0] : [-12, 12]);
 
-  // Right glow opacity (like)
-  const glowRightOpacity = useTransform(x, [0, SWIPE_THRESHOLD], [0, 0.5]);
+  // Card scale on drag - subtle lift effect when dragging
+  const dragScale = useTransform(
+    x,
+    [-200, -50, 0, 50, 200],
+    reducedMotion ? [1, 1, 1, 1, 1] : [1.02, 1.01, 1, 1.01, 1.02]
+  );
+
+  // Right glow opacity (like) - exponential curve for dramatic reveal
+  const glowRightOpacity = useTransform(
+    x,
+    [0, SWIPE_THRESHOLD * 0.3, SWIPE_THRESHOLD * 0.7, SWIPE_THRESHOLD],
+    [0, 0.1, 0.35, 0.65]
+  );
   // Left glow opacity (dislike)
-  const glowLeftOpacity = useTransform(x, [-SWIPE_THRESHOLD, 0], [0.5, 0]);
+  const glowLeftOpacity = useTransform(
+    x,
+    [-SWIPE_THRESHOLD, -SWIPE_THRESHOLD * 0.7, -SWIPE_THRESHOLD * 0.3, 0],
+    [0.65, 0.35, 0.1, 0]
+  );
 
-  // Background tint opacity
-  const tintLikeOpacity = useTransform(x, [0, SWIPE_THRESHOLD], [0, 0.12]);
-  const tintDislikeOpacity = useTransform(x, [-SWIPE_THRESHOLD, 0], [0.12, 0]);
+  // Background tint opacity - stronger tint for clearer feedback
+  const tintLikeOpacity = useTransform(x, [0, SWIPE_THRESHOLD], [0, 0.18]);
+  const tintDislikeOpacity = useTransform(x, [-SWIPE_THRESHOLD, 0], [0.18, 0]);
 
-  // Icon reveal: only past half-threshold
-  const checkOpacity = useTransform(x, [50, SWIPE_THRESHOLD], [0, 1]);
-  const crossOpacity = useTransform(x, [-SWIPE_THRESHOLD, -50], [1, 0]);
+  // Icon reveal with scale - icons "pop" into view
+  const checkOpacity = useTransform(x, [40, SWIPE_THRESHOLD], [0, 1]);
+  const checkScale = useTransform(x, [40, SWIPE_THRESHOLD], [0.5, 1]);
+  const crossOpacity = useTransform(x, [-SWIPE_THRESHOLD, -40], [1, 0]);
+  const crossScale = useTransform(x, [-SWIPE_THRESHOLD, -40], [1, 0.5]);
 
   // Shadow lift during drag
   const dragShadow = useTransform(
@@ -127,6 +155,30 @@ export function SwipeCard({
   useEffect(() => {
     supportsHover.current = window.matchMedia('(hover: hover)').matches;
   }, []);
+
+  // Premium haptics + drag progress callback
+  useMotionValueEvent(x, 'change', (latest) => {
+    // Threshold haptics - fire once when crossing threshold
+    const absX = Math.abs(latest);
+    if (absX >= SWIPE_THRESHOLD && !thresholdHapticFired.current) {
+      thresholdHapticFired.current = true;
+      // Fire light haptic at threshold crossing
+      if (typeof navigator?.vibrate === 'function') {
+        const pattern = latest > 0 ? HAPTIC_PATTERNS.glaze.light : HAPTIC_PATTERNS.fade.light;
+        navigator.vibrate(pattern);
+      }
+    }
+    // Reset when returning below 50% of threshold
+    if (absX < SWIPE_THRESHOLD * 0.5) {
+      thresholdHapticFired.current = false;
+    }
+
+    // Report drag progress to parent (-1 to 1)
+    if (onDragProgress && isInteractive) {
+      const progress = Math.max(-1, Math.min(1, latest / SWIPE_THRESHOLD));
+      onDragProgress(progress);
+    }
+  });
 
   // First-card wiggle (defer setState to avoid set-state-in-effect lint)
   useEffect(() => {
@@ -187,12 +239,14 @@ export function SwipeCard({
     setImageTransform('translate(0, 0) scale(1)');
 
     if (Math.abs(info.offset.x) >= SWIPE_THRESHOLD) {
+      // Capture velocity for exit animation before setting state
+      setCapturedVelocity(x.getVelocity());
       setSwipeExiting(true);
       const voteType: 1 | -1 = info.offset.x > 0 ? 1 : -1;
       // Fire vote immediately, don't wait for animation
       onVote(voteType);
     }
-  }, [onVote]);
+  }, [onVote, x]);
 
   // Programmatic vote (from button/keyboard)
   const triggerVote = useCallback((voteType: 1 | -1) => {
@@ -205,15 +259,29 @@ export function SwipeCard({
   void triggerVote; // used by parent via onVote callback pattern
 
   // Exit direction: from swipe gesture, button click, or default right
-  const exitX = exitDirection ? exitDirection * 520 : (x.get() >= 0 ? 520 : -520);
-  // Glaze = card stays vivid (opacity 0.92); fade = card dissolves (opacity 0)
-  const exitOpacity = exitDirection === 1 ? 0.92 : 0;
+  // Velocity-aware exit distance: faster swipes fling card further
+  const baseExitX = exitDirection ? exitDirection * 400 : (x.get() >= 0 ? 400 : -400);
+  const velocityBonus = Math.min(Math.abs(capturedVelocity) * 0.3, 200);
+  const exitX = baseExitX > 0 ? baseExitX + velocityBonus : baseExitX - velocityBonus;
+  // Glaze = card stays vivid (opacity 0.85); fade = card dissolves (opacity 0.15)
+  const exitOpacity = exitDirection === 1 ? 0.85 : 0.15;
 
-  // Snappy exit; only transform + opacity (GPU-friendly)
+  // Spring-based exit with velocity inheritance for natural feel
   const exitTransition = reducedMotion
     ? { duration: 0.12 }
-    : { duration: 0.26, ease: [0.22, 0.0, 0.15, 1] as const };
-  const promoteTransition = { type: 'spring' as const, stiffness: 320, damping: 30 };
+    : {
+        type: 'spring' as const,
+        stiffness: 600,
+        damping: 35,
+        velocity: capturedVelocity / 100, // Inherit swipe momentum
+      };
+  // Card stack promotion - lighter mass for snappy promotion
+  const promoteTransition = {
+    type: 'spring' as const,
+    stiffness: 400,
+    damping: 28,
+    mass: 0.8,
+  };
 
   const handleExitCompleteCallback = useCallback(() => {
     if (exitCompleteFired.current) return;
@@ -228,6 +296,7 @@ export function SwipeCard({
       style={{
         x: isInteractive ? x : undefined,
         rotate: isInteractive ? rotate : undefined,
+        scale: isInteractive ? dragScale : undefined,
         boxShadow: isInteractive ? dragShadow : undefined,
         position: 'absolute',
         top: 0,
@@ -239,7 +308,8 @@ export function SwipeCard({
       }}
       drag={isInteractive ? 'x' : false}
       dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.7}
+      dragElastic={0.85}
+      dragTransition={{ bounceStiffness: 500, bounceDamping: 25 }}
       dragDirectionLock
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
@@ -281,20 +351,33 @@ export function SwipeCard({
 
       {/* Image: prefer thumbnailUri (MintGarden mainnet CDN), then IPFS, then mainnet launcher URL, then placeholder */}
       <div className="vote-card-image">
-        {/* Brief glaze/fade tint on exit — opacity only for smooth 60fps */}
+        {/* Premium exit overlays: expanding green pulse (glaze) or contracting dark vignette (fade) */}
         {exiting && stackPosition === 0 && exitDirection && !reducedMotion && (
-          <motion.div
-            className="vote-card-exit-overlay"
-            aria-hidden
-            style={{
-              background: exitDirection === 1
-                ? 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(34, 197, 94, 0.35), transparent 65%)'
-                : 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(30, 30, 40, 0.6), transparent 65%)',
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 0.5, 0] }}
-            transition={{ duration: 0.2, times: [0, 0.35, 1], ease: 'easeOut' }}
-          />
+          exitDirection === 1 ? (
+            // Glaze: Green pulse that expands outward
+            <motion.div
+              className="vote-card-exit-overlay"
+              aria-hidden
+              style={{
+                background: 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(34, 197, 94, 0.45), transparent 65%)',
+              }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: [0, 0.6, 0.3], scale: [0.8, 1.1, 1.2] }}
+              transition={{ duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }}
+            />
+          ) : (
+            // Fade: Dark vignette that contracts inward
+            <motion.div
+              className="vote-card-exit-overlay"
+              aria-hidden
+              style={{
+                background: 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(30, 30, 40, 0.7), transparent 65%)',
+              }}
+              initial={{ opacity: 0, scale: 1.2 }}
+              animate={{ opacity: [0, 0.7, 0.4], scale: [1.2, 1, 0.9] }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+            />
+          )
         )}
         <img
           ref={imageRef}
@@ -338,13 +421,13 @@ export function SwipeCard({
           </>
         )}
 
-        {/* Icon overlays */}
+        {/* Icon overlays with scale - icons "pop" into view */}
         {isInteractive && (
           <>
-            <motion.div className="vote-card-icon-overlay" style={{ opacity: checkOpacity }}>
+            <motion.div className="vote-card-icon-overlay" style={{ opacity: checkOpacity, scale: checkScale }}>
               <CheckSvg />
             </motion.div>
-            <motion.div className="vote-card-icon-overlay" style={{ opacity: crossOpacity }}>
+            <motion.div className="vote-card-icon-overlay" style={{ opacity: crossOpacity, scale: crossScale }}>
               <CrossSvg />
             </motion.div>
           </>

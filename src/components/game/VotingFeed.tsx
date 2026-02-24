@@ -67,6 +67,7 @@ export function VotingFeed() {
   const [cardExiting, setCardExiting] = useState(false);
   const [exitDirection, setExitDirection] = useState<1 | -1 | null>(null);
   const [voteFeedbackType, setVoteFeedbackType] = useState<'glaze' | 'fade' | null>(null);
+  const [swipeProgress, setSwipeProgress] = useState(0);
 
 
   // Load feed immediately (no gate)
@@ -117,6 +118,11 @@ export function VotingFeed() {
     navigator.vibrate(voteType === 1 ? 12 : [8, 10, 8]);
   }, []);
 
+  // Handle drag progress from SwipeCard for button sync
+  const handleDragProgress = useCallback((progress: number) => {
+    setSwipeProgress(progress);
+  }, []);
+
   const rollbackSessionCounts = useCallback((voteType: 1 | -1) => {
     setVoteCount(prev => Math.max(0, prev - 1));
     if (voteType === 1) setGlazeCount(prev => Math.max(0, prev - 1));
@@ -151,6 +157,7 @@ export function VotingFeed() {
     removeFromFeed(votedNftId);
     setCardExiting(false);
     setExitDirection(null);
+    setSwipeProgress(0);
     if (currentFeedLength <= 3) {
       loadFeed().catch(() => setFeedError(true));
     }
@@ -294,6 +301,7 @@ export function VotingFeed() {
               reducedMotion={reducedMotion}
               exitDirection={i === 0 ? exitDirection : null}
               onExitComplete={i === 0 ? handleExitComplete : undefined}
+              onDragProgress={i === 0 ? handleDragProgress : undefined}
               likes={item.likes}
               dislikes={item.dislikes}
               totalVotes={item.totalVotes}
@@ -309,6 +317,7 @@ export function VotingFeed() {
           onDislike={() => handleVote(-1)}
           disabled={cardExiting}
           feedbackType={voteFeedbackType}
+          swipeProgress={swipeProgress}
         />
       </div>
     </div>
