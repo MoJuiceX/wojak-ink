@@ -123,6 +123,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [feedVotePassProgress, setFeedVotePassProgress] = useState<FeedVotePassProgress | null>(null);
   const [feedLoading, setFeedLoading] = useState(false);
 
+  // Track voted nftIds this session to filter them from feed responses
+  // (API may return them before vote is processed)
+  const votedNftIdsRef = useRef<Set<string>>(new Set());
+
   const { getToken, isSignedIn, isLoaded: isClerkLoaded } = useClerkAuth();
 
   // Stable guest ID for this browser
@@ -150,6 +154,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setPlayer(null);
     setFeed([]);
     setFeedVotePassProgress(null);
+    votedNftIdsRef.current.clear();
     try { sessionStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
   }, []);
 
@@ -214,7 +219,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         })
         .catch(() => { /* network error — will show gate checklist */ });
     } catch { /* corrupt storage — ignore */ }
-  }, [isClerkLoaded, CLERK_ENABLED, isSignedIn, player]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isClerkLoaded, isSignedIn, player]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const register = useCallback(async (did: string, walletAddress: string) => {
     const headers = await getAuthHeaders();
@@ -281,17 +286,22 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (!data.success) throw new Error(data.error || 'Feed request failed');
       setFeedVotePassProgress(data?.meta?.votePass ?? null);
 
+      // Filter out any nftIds we've already voted on this session
+      // (API may return stale data before vote is fully processed)
+      const filterVoted = (items: FeedItem[]) =>
+        items.filter(item => !votedNftIdsRef.current.has(item.nftId));
+
       if (Array.isArray(data.feed) && data.feed.length > 0) {
-        setFeed(data.feed);
+        setFeed(filterVoted(data.feed));
         return;
       }
       const retryRes = await fetch('/api/game/feed?limit=10');
       const retryData = await retryRes.json();
       if (retryData.success && Array.isArray(retryData.feed)) {
-        setFeed(retryData.feed);
+        setFeed(filterVoted(retryData.feed));
         setFeedVotePassProgress(retryData?.meta?.votePass ?? data?.meta?.votePass ?? null);
       } else {
-        setFeed(data.feed);
+        setFeed(filterVoted(data.feed));
       }
     } finally {
       setFeedLoading(false);
@@ -299,6 +309,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [player, guestId]);
 
   const castVote = useCallback(async (nftId: string, editionNumber: number, voteType: 1 | -1) => {
+    // Immediately track this nftId as voted so it won't reappear if feed reloads
+    votedNftIdsRef.current.add(nftId);
+
     const headers = await getAuthHeaders();
 
     // Build request body based on whether we have a player or not
@@ -324,6 +337,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       // Feed removal is done by VotingFeed after exit animation
       return { ok: true as const };
     }
+    // Vote failed - remove from voted set so it can appear again
+    votedNftIdsRef.current.delete(nftId);
     return { ok: false as const, error: data?.error || 'Vote failed', status: res.status };
   }, [player, guestId, getAuthHeaders]);
 

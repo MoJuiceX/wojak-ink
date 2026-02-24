@@ -132,72 +132,14 @@ export function VotingFeed() {
     if (result.ok) return '';
     if (result.status === 429) return 'You are voting too fast. Wait a few seconds and continue.';
     if (result.status === 403) {
-      if (result.error?.includes('hold')) return 'You can’t vote on Wojaks in your own DID.';
-      if (result.error?.includes('own creations')) return 'You can’t vote on your own Wojaks.';
+      if (result.error?.includes('hold')) return "You can't vote on Wojaks in your own DID.";
+      if (result.error?.includes('own creations')) return "You can't vote on your own Wojaks.";
       return result.error || 'Vote not allowed';
     }
     return result.error || 'Vote failed to save';
   }, []);
 
-  const handleVote = useCallback((voteType: 1 | -1) => {
-    const currentItem = feed[0];
-    if (!currentItem || cardExiting) return;
-
-    const votedNftId = currentItem.nftId;
-    setCardExiting(true);
-    setExitDirection(voteType); // Set direction for exit animation (only top card has stackPosition 0)
-
-    // Track session vote count + type
-    const newVoteCount = voteCount + 1;
-    setVoteCount(newVoteCount);
-    if (voteType === 1) setGlazeCount(prev => prev + 1);
-    else setFadeCount(prev => prev + 1);
-    triggerHaptics(voteType);
-
-    // Brief visual feedback only (no text toast/flash to avoid layout shift)
-    setVoteFeedbackType(voteType === 1 ? 'glaze' : 'fade');
-    setTimeout(() => {
-      setVoteFeedbackType(null);
-    }, 450);
-
-    let votePromise: Promise<{ ok: boolean; error?: string; status?: number }>;
-    try {
-      votePromise = castVote(currentItem.nftId, currentItem.editionNumber, voteType)
-        .catch(() => ({ ok: false as const, error: 'Network error', status: 0 }));
-    } catch {
-      rollbackSessionCounts(voteType);
-      setCardExiting(false);
-      setExitDirection(null);
-      toast.error('Vote failed. Try again.');
-      pendingVoteRef.current = null;
-      return;
-    }
-
-    pendingVoteRef.current = { nftId: votedNftId, voteType, promise: votePromise };
-
-    // Safety timeout: if onAnimationComplete never fires, unblock UI after a short delay
-    if (exitSafetyTimeoutRef.current) {
-      clearTimeout(exitSafetyTimeoutRef.current);
-      exitSafetyTimeoutRef.current = null;
-    }
-    exitSafetyTimeoutRef.current = setTimeout(() => {
-      const pending = pendingVoteRef.current;
-      if (!pending) return;
-      pendingVoteRef.current = null;
-      exitSafetyTimeoutRef.current = null;
-      removeFromFeed(pending.nftId);
-      setCardExiting(false);
-      setExitDirection(null);
-      pending.promise.then((result) => {
-        if (!result.ok) {
-          rollbackSessionCounts(pending.voteType);
-          toast.error(voteErrorMessage(result));
-        }
-      });
-    }, 450);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- stable refs from context; full deps would recreate callback every render
-  }, [feed, cardExiting, castVote, loadFeed, removeFromFeed, toast, voteCount, triggerHaptics, rollbackSessionCounts, voteErrorMessage, feedVotePassProgress]);
-
+  // Must be defined before handleVote since handleVote references it
   const handleExitComplete = useCallback(() => {
     if (exitSafetyTimeoutRef.current) {
       clearTimeout(exitSafetyTimeoutRef.current);
@@ -241,6 +183,45 @@ export function VotingFeed() {
     voteErrorMessage,
   ]);
 
+  const handleVote = useCallback((voteType: 1 | -1) => {
+    const currentItem = feed[0];
+    if (!currentItem || cardExiting) return;
+
+    const votedNftId = currentItem.nftId;
+    setCardExiting(true);
+    setExitDirection(voteType); // Set direction for exit animation (only top card has stackPosition 0)
+
+    // Track session vote count + type
+    const newVoteCount = voteCount + 1;
+    setVoteCount(newVoteCount);
+    if (voteType === 1) setGlazeCount(prev => prev + 1);
+    else setFadeCount(prev => prev + 1);
+    triggerHaptics(voteType);
+
+    // Brief visual feedback only (no text toast/flash to avoid layout shift)
+    setVoteFeedbackType(voteType === 1 ? 'glaze' : 'fade');
+    setTimeout(() => {
+      setVoteFeedbackType(null);
+    }, 450);
+
+    // Fire vote to API (do not remove from feed here — wait for exit animation)
+    const votePromise = castVote(currentItem.nftId, currentItem.editionNumber, voteType)
+      .catch(() => ({ ok: false as const, error: 'Network error', status: 0 }));
+
+    pendingVoteRef.current = { nftId: votedNftId, voteType, promise: votePromise };
+
+    // Safety timeout: if onAnimationComplete never fires, unblock UI after a short delay
+    if (exitSafetyTimeoutRef.current) {
+      clearTimeout(exitSafetyTimeoutRef.current);
+      exitSafetyTimeoutRef.current = null;
+    }
+    exitSafetyTimeoutRef.current = setTimeout(() => {
+      if (pendingVoteRef.current?.nftId === votedNftId) {
+        handleExitComplete();
+      }
+    }, 600);
+  }, [feed, cardExiting, castVote, voteCount, triggerHaptics, handleExitComplete]);
+
   const handleRetry = useCallback(() => {
     setFeedError(false);
     loadFeed().catch(() => setFeedError(true));
@@ -276,8 +257,8 @@ export function VotingFeed() {
         </h2>
         <p className="text-secondary text-sm text-center">
           {passLocked
-            ? `You’ve seen ${feedVotePassProgress?.seenCount ?? 0} / ${feedVotePassProgress?.totalCount ?? 0} eligible Wojaks. Come back as votes age out over the next 24 hours.`
-            : 'Once there are minted Wojaks from others, they’ll show up here. You can always change your vote if you see one again.'}
+            ? `You've seen ${feedVotePassProgress?.seenCount ?? 0} / ${feedVotePassProgress?.totalCount ?? 0} eligible Wojaks. Come back as votes age out over the next 24 hours.`
+            : "Once there are minted Wojaks from others, they'll show up here. You can always change your vote if you see one again."}
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
           <Link to="/fight-club/rankings" className="btn btn-primary text-sm" style={{ padding: '8px 20px', textDecoration: 'none' }}>
