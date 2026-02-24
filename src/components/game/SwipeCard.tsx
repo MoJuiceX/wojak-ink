@@ -88,7 +88,6 @@ export function SwipeCard({
   const [swipeExiting, setSwipeExiting] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [shouldWiggle, setShouldWiggle] = useState(false);
-  const [capturedVelocity, setCapturedVelocity] = useState(0);
   const imageRef = useRef<HTMLImageElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const fallbackStepRef = useRef(0);
@@ -239,14 +238,12 @@ export function SwipeCard({
     setImageTransform('translate(0, 0) scale(1)');
 
     if (Math.abs(info.offset.x) >= SWIPE_THRESHOLD) {
-      // Capture velocity for exit animation before setting state
-      setCapturedVelocity(x.getVelocity());
       setSwipeExiting(true);
       const voteType: 1 | -1 = info.offset.x > 0 ? 1 : -1;
       // Fire vote immediately, don't wait for animation
       onVote(voteType);
     }
-  }, [onVote, x]);
+  }, [onVote]);
 
   // Programmatic vote (from button/keyboard)
   const triggerVote = useCallback((voteType: 1 | -1) => {
@@ -259,29 +256,16 @@ export function SwipeCard({
   void triggerVote; // used by parent via onVote callback pattern
 
   // Exit direction: from swipe gesture, button click, or default right
-  // Velocity-aware exit distance: faster swipes fling card further
-  const baseExitX = exitDirection ? exitDirection * 400 : (x.get() >= 0 ? 400 : -400);
-  const velocityBonus = Math.min(Math.abs(capturedVelocity) * 0.3, 200);
-  const exitX = baseExitX > 0 ? baseExitX + velocityBonus : baseExitX - velocityBonus;
-  // Glaze = card stays vivid (opacity 0.85); fade = card dissolves (opacity 0.15)
-  const exitOpacity = exitDirection === 1 ? 0.85 : 0.15;
+  const exitX = exitDirection ? exitDirection * 520 : (x.get() >= 0 ? 520 : -520);
+  // Both glaze and fade exit to opacity 0 for clean transition (no overlap)
+  const exitOpacity = 0;
 
-  // Spring-based exit with velocity inheritance for natural feel
+  // Fast, snappy exit with predictable timing (no spring - springs cause timing issues)
   const exitTransition = reducedMotion
     ? { duration: 0.12 }
-    : {
-        type: 'spring' as const,
-        stiffness: 600,
-        damping: 35,
-        velocity: capturedVelocity / 100, // Inherit swipe momentum
-      };
-  // Card stack promotion - lighter mass for snappy promotion
-  const promoteTransition = {
-    type: 'spring' as const,
-    stiffness: 400,
-    damping: 28,
-    mass: 0.8,
-  };
+    : { duration: 0.28, ease: [0.32, 0.0, 0.15, 1] as const };
+  // Card stack promotion
+  const promoteTransition = { type: 'spring' as const, stiffness: 320, damping: 30 };
 
   const handleExitCompleteCallback = useCallback(() => {
     if (exitCompleteFired.current) return;
@@ -351,33 +335,20 @@ export function SwipeCard({
 
       {/* Image: prefer thumbnailUri (MintGarden mainnet CDN), then IPFS, then mainnet launcher URL, then placeholder */}
       <div className="vote-card-image">
-        {/* Premium exit overlays: expanding green pulse (glaze) or contracting dark vignette (fade) */}
+        {/* Exit overlay: brief color flash synced with card exit */}
         {exiting && stackPosition === 0 && exitDirection && !reducedMotion && (
-          exitDirection === 1 ? (
-            // Glaze: Green pulse that expands outward
-            <motion.div
-              className="vote-card-exit-overlay"
-              aria-hidden
-              style={{
-                background: 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(34, 197, 94, 0.45), transparent 65%)',
-              }}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: [0, 0.6, 0.3], scale: [0.8, 1.1, 1.2] }}
-              transition={{ duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }}
-            />
-          ) : (
-            // Fade: Dark vignette that contracts inward
-            <motion.div
-              className="vote-card-exit-overlay"
-              aria-hidden
-              style={{
-                background: 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(30, 30, 40, 0.7), transparent 65%)',
-              }}
-              initial={{ opacity: 0, scale: 1.2 }}
-              animate={{ opacity: [0, 0.7, 0.4], scale: [1.2, 1, 0.9] }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
-            />
-          )
+          <motion.div
+            className="vote-card-exit-overlay"
+            aria-hidden
+            style={{
+              background: exitDirection === 1
+                ? 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(34, 197, 94, 0.4), transparent 70%)'
+                : 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(40, 40, 50, 0.5), transparent 70%)',
+            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 0.7, 0] }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+          />
         )}
         <img
           ref={imageRef}
