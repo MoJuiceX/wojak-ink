@@ -22,13 +22,22 @@ const isLocalhost = typeof window !== 'undefined' && (window.location.hostname =
 // Use a CDN for script load on localhost when custom domain (clerk.wojak.ink) is set but doesn't resolve
 const CLERK_JS_CDN_FALLBACK = 'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js'
 const clerkWojakInk = CLERK_JS_URL_RAW === 'https://clerk.wojak.ink' || (CLERK_JS_URL_RAW?.includes?.('clerk.wojak.ink') ?? false)
-const CLERK_JS_URL =
+// Never load Clerk script from clerk.wojak.ink on production: that origin does not send CORS for wojak.ink,
+// so the script is blocked and voting breaks. Use default Clerk CDN (omit clerkJSUrl) or localhost CDN fallback.
+const CLERK_JS_URL: string | undefined =
   isLocalhost && (!CLERK_JS_URL_RAW || clerkWojakInk)
     ? CLERK_JS_CDN_FALLBACK
-    : CLERK_JS_URL_RAW
+    : clerkWojakInk
+      ? undefined
+      : CLERK_JS_URL_RAW
 if (isLocalhost && (!CLERK_JS_URL_RAW || clerkWojakInk)) {
   console.warn(
     '[Clerk] clerk.wojak.ink does not resolve on localhost. Script will load from CDN; auth may still fail until you set VITE_CLERK_JS_URL to your Frontend API URL (e.g. https://XXX.clerk.accounts.dev) in .env.local from Clerk Dashboard → Domains.'
+  )
+}
+if (clerkWojakInk && !isLocalhost) {
+  console.warn(
+    '[Clerk] VITE_CLERK_JS_URL is clerk.wojak.ink, which blocks script load by CORS from wojak.ink. Using Clerk default script URL so auth and voting work.'
   )
 }
 // When using a resolvable FAPI URL (e.g. *.clerk.accounts.dev), tell Clerk to use it for API calls too
