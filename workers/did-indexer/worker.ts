@@ -12,13 +12,17 @@ interface Env {
 const PHASE1_COLLECTION = 'col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah';
 const PHASE2_COLLECTION = 'col1rhrjj6f28tge783rp0lrj8ct7vnq79xsnklx3up49lgpnge62ensr2tyfx';
 
-const RATE_LIMIT_MS = 500; // 500ms between MintGarden API calls
-const MAX_PAGES = 50;      // Safety cap on pagination
+const RATE_LIMIT_MS = 300; // 300ms between MintGarden API calls
+const _MAX_PAGES = 50;     // Safety cap on pagination (unused - search-based approach)
 const D1_BATCH_SIZE = 25;  // Max statements per D1 batch call
 const CIRCUIT_BREAKER_THRESHOLD = 5; // Consecutive API failures before aborting
-const PLAYERS_PER_RUN = 5; // Only sync this many players per cron run (staggered)
+const PLAYERS_PER_RUN = 10; // Only sync this many players per cron run (staggered)
 const DISCOVERY_INTERVAL_MS = 12 * 60 * 60 * 1000; // 12 hours between full collection scans
 const _SKIP_IF_INDEXED_WITHIN_MS = 2 * 60 * 60 * 1000; // Skip players indexed < 2 hours ago
+
+// In-memory cache for collection NFTs (refreshed each run)
+// Key: collection ID, Value: Map<DID, NftInfo[]>
+let collectionCache: Map<string, Map<string, NftInfo[]>> = new Map();
 
 // Power level calculation constants (same as _powerLevel.ts)
 const POWER_LEVEL_MAX = 10000;
@@ -50,6 +54,9 @@ export default {
 
 async function run(env: Env) {
   console.log('[DID Indexer] Starting run...');
+
+  // Clear collection cache at start of each run to get fresh data
+  collectionCache = new Map();
 
   // Phase 0: Auto-discover new Farmers Plot holders — only every 12 hours
   // Check when discovery last ran via a simple DB flag
@@ -365,15 +372,30 @@ interface FetchResult {
   nfts: NftInfo[];
 }
 
-async function fetchDIDNfts(did: string, collectionId: string): Promise<FetchResult> {
-  const nfts: NftInfo[] = [];
-  let cursor: string | null = null;
+/**
+ * Fetch all NFTs from a collection using search-based pagination.
+ * MintGarden's cursor pagination doesn't work properly, so we use search
+ * queries with number prefixes to get different "pages" of data.
+ * Returns a Map of DID -> NFTs owned by that DID.
+ */
+async function fetchCollectionWithSearch(collectionId: string): Promise<Map<string, NftInfo[]> | null> {
+  const didToNfts = new Map<string, NftInfo[]>();
+  const seenIds = new Set<string>();
   const pageSize = 100;
-  let pages = 0;
 
-  while (pages < MAX_PAGES) {
-    let url = `https://api.mintgarden.io/collections/${collectionId}/nfts?size=${pageSize}&owner_did=${encodeURIComponent(did)}`;
-    if (cursor) url += `&cursor=${encodeURIComponent(cursor)}`;
+  // Determine search prefixes based on collection
+  // Phase 1 (Farmer's Plot): ~4200 NFTs numbered #0001-#4200 (4-digit)
+  // Phase 2 (Your Wojak): ~376 NFTs numbered #1-#376 (variable digits)
+  const isPhase1 = collectionId === PHASE1_COLLECTION;
+  const searchPrefixes = isPhase1
+    ? Array.from({ length: 43 }, (_, i) => String(i).padStart(2, '0')) // '00' to '42'
+    : ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']; // Single digits for Phase 2
+
+  console.log(`[DID Indexer] Fetching ${isPhase1 ? 'Phase 1' : 'Phase 2'} collection with ${searchPrefixes.length} search queries...`);
+
+  for (const prefix of searchPrefixes) {
+    const searchParam = encodeURIComponent(`#${prefix}`);
+    const url = `https://api.mintgarden.io/collections/${collectionId}/nfts?size=${pageSize}&search=${searchParam}`;
 
     let response: Response;
     try {
@@ -381,13 +403,13 @@ async function fetchDIDNfts(did: string, collectionId: string): Promise<FetchRes
         headers: { 'Accept': 'application/json' },
       });
     } catch (err) {
-      console.error(`[DID Indexer] Network error fetching ${url}:`, err);
-      return { success: false, nfts: [] };
+      console.error(`[DID Indexer] Network error fetching collection:`, err);
+      return null;
     }
 
     if (!response.ok) {
-      console.error(`[DID Indexer] MintGarden API error: ${response.status} for ${url}`);
-      return { success: false, nfts: [] };
+      console.error(`[DID Indexer] MintGarden API error: ${response.status}`);
+      return null;
     }
 
     const data = await response.json() as {
@@ -395,28 +417,75 @@ async function fetchDIDNfts(did: string, collectionId: string): Promise<FetchRes
         id: string;
         edition_number?: number;
         creator_address_encoded_id?: string;
+        owner_encoded_id?: string;
       }>;
-      next?: string | null;
     };
 
-    if (!data.items || data.items.length === 0) break;
+    if (data.items) {
+      for (const item of data.items) {
+        // Skip duplicates (search queries may overlap)
+        if (seenIds.has(item.id)) continue;
+        seenIds.add(item.id);
 
-    for (const item of data.items) {
-      nfts.push({
-        id: item.id,
-        edition: item.edition_number,
-        creator: item.creator_address_encoded_id,
-      });
+        // Only process NFTs with valid DID owners
+        const ownerDid = item.owner_encoded_id;
+        if (ownerDid && ownerDid.startsWith('did:chia:')) {
+          const nftInfo: NftInfo = {
+            id: item.id,
+            edition: item.edition_number,
+            creator: item.creator_address_encoded_id,
+          };
+
+          const existing = didToNfts.get(ownerDid) || [];
+          existing.push(nftInfo);
+          didToNfts.set(ownerDid, existing);
+        }
+      }
     }
 
-    if (!data.next || data.items.length < pageSize) break;
-    cursor = data.next;
-    pages++;
-
-    // Rate limit between pages
     await sleep(RATE_LIMIT_MS);
   }
 
+  console.log(`[DID Indexer] Fetched ${seenIds.size} NFTs, ${didToNfts.size} unique DIDs`);
+  return didToNfts;
+}
+
+/**
+ * Ensure collection cache is populated for a given collection.
+ */
+async function ensureCollectionCache(collectionId: string): Promise<boolean> {
+  if (collectionCache.has(collectionId)) {
+    return true;
+  }
+
+  const result = await fetchCollectionWithSearch(collectionId);
+  if (result === null) {
+    return false;
+  }
+
+  collectionCache.set(collectionId, result);
+  return true;
+}
+
+/**
+ * Get NFTs owned by a specific DID from a collection.
+ * Uses cached collection data (populated via search-based pagination).
+ * Note: MintGarden's owner_did parameter doesn't work, so we fetch all
+ * collection NFTs and filter locally.
+ */
+async function fetchDIDNfts(did: string, collectionId: string): Promise<FetchResult> {
+  // Ensure collection is cached
+  if (!await ensureCollectionCache(collectionId)) {
+    return { success: false, nfts: [] };
+  }
+
+  const didMap = collectionCache.get(collectionId);
+  if (!didMap) {
+    return { success: false, nfts: [] };
+  }
+
+  // Get NFTs owned by this specific DID
+  const nfts = didMap.get(did) || [];
   return { success: true, nfts };
 }
 
@@ -429,20 +498,24 @@ async function batchChunked(db: D1Database, statements: D1PreparedStatement[]): 
 
 /**
  * Discover new Farmers Plot holders from MintGarden collection listing.
- * Paginates all Phase 1 NFTs, extracts unique owner DIDs, and auto-creates
- * game_players rows for any that don't already exist.
+ * Uses search-based pagination to fetch all NFTs and extract unique owner DIDs.
+ * Auto-creates game_players rows for any DIDs that don't already exist.
  * Returns the count of newly created players.
  */
 async function discoverNewHolders(env: Env): Promise<number> {
   const holderDids = new Map<string, { name?: string; wallet?: string }>();
-  let cursor: string | null = null;
+  const seenIds = new Set<string>();
   const pageSize = 100;
-  let pages = 0;
 
-  // Paginate all Phase 1 NFTs to collect owner DIDs (cursor-based)
-  while (pages < MAX_PAGES) {
-    let url = `https://api.mintgarden.io/collections/${PHASE1_COLLECTION}/nfts?size=${pageSize}`;
-    if (cursor) url += `&cursor=${encodeURIComponent(cursor)}`;
+  // Use search-based pagination (cursor pagination doesn't work)
+  // Phase 1 NFTs are numbered #0001-#4200 (4-digit format)
+  const searchPrefixes = Array.from({ length: 43 }, (_, i) => String(i).padStart(2, '0')); // '00' to '42'
+
+  console.log(`[DID Indexer] Discovery: fetching Phase 1 NFTs with ${searchPrefixes.length} search queries...`);
+
+  for (const prefix of searchPrefixes) {
+    const searchParam = encodeURIComponent(`#${prefix}`);
+    const url = `https://api.mintgarden.io/collections/${PHASE1_COLLECTION}/nfts?size=${pageSize}&search=${searchParam}`;
 
     let response: Response;
     try {
@@ -450,13 +523,13 @@ async function discoverNewHolders(env: Env): Promise<number> {
         headers: { 'Accept': 'application/json' },
       });
     } catch (err) {
-      console.error(`[DID Indexer] Discovery: network error on page ${pages + 1}:`, err);
-      break;
+      console.error(`[DID Indexer] Discovery: network error on search ${prefix}:`, err);
+      continue; // Continue with other prefixes
     }
 
     if (!response.ok) {
-      console.error(`[DID Indexer] Discovery: MintGarden returned ${response.status} on page ${pages + 1}`);
-      break;
+      console.error(`[DID Indexer] Discovery: MintGarden returned ${response.status} on search ${prefix}`);
+      continue;
     }
 
     const data = await response.json() as {
@@ -469,12 +542,15 @@ async function discoverNewHolders(env: Env): Promise<number> {
         owner_address_encoded_id?: string;
         edition_number?: number;
       }>;
-      next?: string | null;
     };
 
-    if (!data.items || data.items.length === 0) break;
+    if (!data.items) continue;
 
     for (const item of data.items) {
+      // Skip duplicates
+      if (seenIds.has(item.id)) continue;
+      seenIds.add(item.id);
+
       const ownerDid = item.owner_encoded_id;
       // Only process valid DID owners (skip if no DID or not a valid DID)
       if (ownerDid && ownerDid.startsWith('did:chia:')) {
@@ -487,13 +563,10 @@ async function discoverNewHolders(env: Env): Promise<number> {
       }
     }
 
-    if (!data.next || data.items.length < pageSize) break;
-    cursor = data.next;
-    pages++;
     await sleep(RATE_LIMIT_MS);
   }
 
-  console.log(`[DID Indexer] Discovery: found ${holderDids.size} unique DIDs holding Farmers Plot across ${pages + 1} pages`);
+  console.log(`[DID Indexer] Discovery: found ${holderDids.size} unique DIDs holding ${seenIds.size} Farmers Plot NFTs`);
 
   if (holderDids.size === 0) return 0;
 
