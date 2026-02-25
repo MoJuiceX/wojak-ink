@@ -6,7 +6,7 @@
 //   offset: >= 0 (default 0)
 //   sort (wojaks only): 'score' | 'glazed' | 'ratio' | 'newest' (default 'score')
 
-import { resolveImageUri, PLOT_POWER_VALUE, PLAYER_TOP_N } from '../game/_shared';
+import { resolveImageUri, PLOT_POWER_VALUE } from '../game/_shared';
 import { authenticateRequest } from '../../lib/auth';
 
 interface Env {
@@ -173,10 +173,10 @@ async function handleWojaks(db: D1Database, limit: number, offset: number, sort:
 // ── Players leaderboard ─────────────────────────────────────────────
 
 async function handlePlayers(db: D1Database, limit: number, offset: number, callerDid: string | null, start: number) {
-  // Player score = sum of top 10 eligible Wojak vote scores per DID + plot power.
-  // Uses windowed ROW_NUMBER per DID to pick top 10, then aggregates.
+  // Player score = sum of ALL Wojak vote scores per DID + plot power.
+  // All Wojaks count toward power (no limit).
   const playersQuery = `
-    WITH eligible_wojaks AS (
+    WITH wojak_scores_by_did AS (
       SELECT
         dh.did_id,
         ws.nft_id,
@@ -203,19 +203,19 @@ async function handlePlayers(db: D1Database, limit: number, offset: number, call
         dp.display_name,
         COALESCE(pc.plot_count, 0) as plot_count,
         COALESCE(pc.plot_count, 0) * ${PLOT_POWER_VALUE} as plot_power,
-        COALESCE(SUM(CASE WHEN ew.rn <= ${PLAYER_TOP_N} THEN ew.net_score ELSE 0 END), 0) AS wojak_power,
-        COUNT(DISTINCT CASE WHEN ew.rn IS NOT NULL THEN ew.nft_id END) AS wojak_count,
-        MAX(CASE WHEN ew.rn = 1 THEN ew.net_score END) AS best_wojak_score,
+        COALESCE(SUM(wsd.net_score), 0) AS wojak_power,
+        COUNT(DISTINCT wsd.nft_id) AS wojak_count,
+        MAX(CASE WHEN wsd.rn = 1 THEN wsd.net_score END) AS best_wojak_score,
         (
           SELECT pm.ipfs_image_uri
-          FROM eligible_wojaks ew2
-          JOIN phase2_mints pm ON pm.mintgarden_launcher_id = ew2.nft_id AND pm.status = 'minted'
-          WHERE ew2.did_id = gp.did_id AND ew2.rn = 1
+          FROM wojak_scores_by_did wsd2
+          JOIN phase2_mints pm ON pm.mintgarden_launcher_id = wsd2.nft_id AND pm.status = 'minted'
+          WHERE wsd2.did_id = gp.did_id AND wsd2.rn = 1
           LIMIT 1
         ) AS best_wojak_image
       FROM game_players gp
       LEFT JOIN did_profiles dp ON dp.did_id = gp.did_id
-      LEFT JOIN eligible_wojaks ew ON ew.did_id = gp.did_id AND ew.rn <= ${PLAYER_TOP_N}
+      LEFT JOIN wojak_scores_by_did wsd ON wsd.did_id = gp.did_id
       LEFT JOIN plot_counts pc ON pc.did_id = gp.did_id
       WHERE gp.phase1_verified = 1
         AND gp.did_id IS NOT NULL AND gp.did_id != ''
@@ -268,19 +268,14 @@ async function handlePlayers(db: D1Database, limit: number, offset: number, call
   let yourRank: number | null = null;
   if (callerDid) {
     const yourRankQuery = `
-      WITH eligible_wojaks AS (
+      WITH wojak_power_by_did AS (
         SELECT
           dh.did_id,
-          ws.net_score,
-          ws.total_votes,
-          ws.edition_number,
-          ROW_NUMBER() OVER (
-            PARTITION BY dh.did_id
-            ORDER BY ws.net_score DESC, ws.total_votes DESC, ws.edition_number ASC
-          ) AS rn
+          COALESCE(SUM(ws.net_score), 0) AS wojak_power
         FROM did_holdings dh
         JOIN wojak_scores ws ON ws.nft_id = dh.nft_id
         WHERE dh.collection = 'phase2'
+        GROUP BY dh.did_id
       ),
       plot_counts AS (
         SELECT did_id, COUNT(*) as plot_count
@@ -292,13 +287,12 @@ async function handlePlayers(db: D1Database, limit: number, offset: number, call
         SELECT
           gp.did_id,
           COALESCE(pc.plot_count, 0) * ${PLOT_POWER_VALUE} as plot_power,
-          COALESCE(SUM(CASE WHEN ew.rn <= ${PLAYER_TOP_N} THEN ew.net_score ELSE 0 END), 0) AS wojak_power
+          COALESCE(wpd.wojak_power, 0) AS wojak_power
         FROM game_players gp
-        LEFT JOIN eligible_wojaks ew ON ew.did_id = gp.did_id AND ew.rn <= ${PLAYER_TOP_N}
+        LEFT JOIN wojak_power_by_did wpd ON wpd.did_id = gp.did_id
         LEFT JOIN plot_counts pc ON pc.did_id = gp.did_id
         WHERE gp.phase1_verified = 1
           AND gp.did_id IS NOT NULL AND gp.did_id != ''
-        GROUP BY gp.did_id
       )
       SELECT COUNT(*) + 1 AS rank
       FROM player_scores
@@ -319,7 +313,6 @@ async function handlePlayers(db: D1Database, limit: number, offset: number, call
     meta: {
       mode: 'voting_only',
       provisionalMinVotes: PROVISIONAL_MIN_VOTES,
-      playerTopN: PLAYER_TOP_N,
     },
   });
 }

@@ -3,7 +3,6 @@
 
 import {
   PLOT_POWER_VALUE,
-  PLAYER_TOP_N,
   COLLECTION_BONUS_CAP,
   getCollectionBonusPerWojak,
 } from '../game/_shared';
@@ -35,28 +34,27 @@ export async function calculatePlotPower(
 }
 
 /**
- * Calculate Your Wojak power from vote scores (top N)
+ * Calculate Your Wojak power from vote scores (all Wojaks count)
  */
 export async function calculateWojakPower(
   db: D1Database,
   didId: string
-): Promise<{ power: number; count: number; topWojaks: Array<{ nftId: string; score: number }> }> {
+): Promise<{ power: number; count: number; wojaks: Array<{ nftId: string; score: number }> }> {
   const result = await db.prepare(`
     SELECT ws.nft_id, ws.net_score
     FROM did_holdings dh
     JOIN wojak_scores ws ON ws.nft_id = dh.nft_id
     WHERE dh.did_id = ? AND dh.collection = 'phase2'
     ORDER BY ws.net_score DESC, ws.total_votes DESC, ws.edition_number ASC
-    LIMIT ?
-  `).bind(didId, PLAYER_TOP_N).all();
+  `).bind(didId).all();
 
-  const topWojaks = (result.results || []).map(w => ({
+  const wojaks = (result.results || []).map(w => ({
     nftId: w.nft_id as string,
     score: (w.net_score as number) || 0,
   }));
 
-  const power = topWojaks.reduce((sum, w) => sum + w.score, 0);
-  return { power, count: topWojaks.length, topWojaks };
+  const power = wojaks.reduce((sum, w) => sum + w.score, 0);
+  return { power, count: wojaks.length, wojaks };
 }
 
 /**

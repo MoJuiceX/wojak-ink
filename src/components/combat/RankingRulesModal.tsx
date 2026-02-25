@@ -63,7 +63,7 @@ export function RankingRulesModal({ onClose }: RankingRulesModalProps) {
                         <ul className="rules-list">
                             <li><strong>Glaze</strong> = <span className="text-success">+1</span> vote score</li>
                             <li><strong>Fade</strong> = <span className="text-error">-1</span> vote score</li>
-                            <li>Your <strong>top 10</strong> Wojak scores count toward power</li>
+                            <li><strong>All</strong> your Wojak scores count toward power</li>
                         </ul>
                     </div>
 

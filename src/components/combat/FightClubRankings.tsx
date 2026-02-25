@@ -58,17 +58,6 @@ interface PlayersResponse {
   meta: { mode: string; provisionalMinVotes: number; playerTopN: number };
 }
 
-interface LegacyCommunityPlayerRow {
-  rank: number;
-  did: string;
-  displayName: string | null;
-  wojakCount?: number;
-}
-
-interface LegacyCommunityPlayersResponse {
-  players?: LegacyCommunityPlayerRow[];
-}
-
 interface WojaksResponse {
   wojaks: VoteLeaderboardWojakRow[];
   total: number;
@@ -113,20 +102,6 @@ function useVoteLeaderboard(type: RankingTab, sort?: SortOption) {
   });
 }
 
-function useCommunityPlayersFallback(enabled = true) {
-  return useQuery({
-    queryKey: ['combat-power-community-players-fallback'],
-    queryFn: async (): Promise<LegacyCommunityPlayersResponse> => {
-      const res = await fetch('/api/combat/power-leaderboard?type=players&limit=30');
-      if (!res.ok) throw new Error('Failed to fetch community players');
-      return res.json();
-    },
-    enabled,
-    staleTime: 60000,
-    retry: 1,
-  });
-}
-
 // ── Rank Badge ──────────────────────────────────────────────────────
 
 function RankBadge({ rank }: { rank: number | null }) {
@@ -147,7 +122,7 @@ function YourPositionCard() {
 
   if (!scoreData?.registered) return null;
 
-  const { ranked, rank, playerScore, tier, eligibleWojakCount, totalWojakCount, pointsToNextRank, nextRank } = scoreData;
+  const { ranked, rank, playerScore, tier, totalWojakCount, pointsToNextRank, nextRank } = scoreData;
   const tierColor = getTierColor(tier);
 
   return (
@@ -161,7 +136,7 @@ function YourPositionCard() {
           {playerScore.toLocaleString()} <span style={{ color: tierColor, fontSize: '0.75rem' }}>{tier}</span>
         </span>
         <span className="your-position-meta">
-          {eligibleWojakCount} eligible · {totalWojakCount} total Wojaks
+          {totalWojakCount} Wojaks in DID
           {ranked && pointsToNextRank !== null && nextRank !== null && (
             <> · {pointsToNextRank} pts to #{nextRank}</>
           )}
@@ -175,7 +150,6 @@ function YourPositionCard() {
 
 function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
   const { data, isLoading, error } = useVoteLeaderboard('players');
-  const { data: communityData } = useCommunityPlayersFallback(!isLoading && !error);
 
   if (isLoading) {
     return (
@@ -201,17 +175,16 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
   }
 
   if (!data?.players?.length) {
-    const minVotes = data?.meta?.provisionalMinVotes ?? 3;
     return (
       <div className="rankings-content">
         <div style={{ textAlign: 'center', padding: '32px 16px' }}>
           <Trophy size={32} style={{ color: 'var(--color-text-muted)', marginBottom: 12 }} />
           <p style={{ fontWeight: 700, fontSize: '1rem', margin: '0 0 6px' }}>No ranked players yet</p>
           <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: '0 0 4px' }}>
-            Wojaks need {minVotes} votes to count toward Player Score.
+            Players need Wojaks in their DID to rank.
           </p>
           <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', margin: '0 0 12px' }}>
-            Glaze some Wojaks to get the leaderboard going!
+            Add your Wojaks to your DID to get started!
           </p>
           <Link to="/fight-club/vote" className="rankings-go-vote">Go Vote</Link>
         </div>
@@ -220,17 +193,12 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
   }
 
   const players = data.players;
-  const provisionalMinVotes = data.meta?.provisionalMinVotes ?? 3;
-  const rankedPlayers = players.filter((p) => p.eligibleWojakCount > 0);
-  const waitingPlayers = players.filter((p) => p.eligibleWojakCount === 0);
+  // All verified players with Wojaks in DID are now ranked automatically
+  const rankedPlayers = players.filter((p) => p.totalWojakCount > 0);
   const showPodium = rankedPlayers.length >= 3;
   const podiumIds = new Set(showPodium ? rankedPlayers.slice(0, 3).map((p) => p.did) : []);
   const topThree = showPodium ? rankedPlayers.slice(0, 3) : [];
   const rankedList = showPodium ? rankedPlayers.filter((p) => !podiumIds.has(p.did)) : rankedPlayers;
-  const rankedDidSet = new Set(players.map((p) => p.did));
-  const communityPlayers = (communityData?.players || [])
-    .filter((p) => p.did && !rankedDidSet.has(p.did))
-    .slice(0, 12);
 
   return (
     <div className="rankings-content">
@@ -263,7 +231,7 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
                 <span style={{ fontWeight: 700 }}>{player.playerScore.toLocaleString()}</span>
               </div>
               <span className="podium-count text-secondary text-xs">
-                {player.eligibleWojakCount} eligible · {player.totalWojakCount} total
+                {player.totalWojakCount} Wojaks
               </span>
             </div>
           ))}
@@ -284,7 +252,7 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
             <div>
               <h3 className="rankings-section-title">Ranked Players</h3>
               <p className="rankings-section-subtitle">
-                Player Score = top {data.meta?.playerTopN ?? 10} eligible Wojak scores in DID
+                Player Score = top {data.meta?.playerTopN ?? 10} Wojak scores in DID
               </p>
             </div>
             <span className="rankings-section-count">{rankedPlayers.length} ranked</span>
@@ -296,7 +264,7 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
                 <div className="rankings-row-info">
                   <span className="rankings-row-name">{player.displayName || 'Anon'}</span>
                   <span className="text-secondary text-xs">
-                    {player.eligibleWojakCount} eligible · {player.totalWojakCount} total Wojaks
+                    {player.totalWojakCount} Wojaks in DID
                   </span>
                 </div>
                 <div className="rankings-row-power">
@@ -309,58 +277,29 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
         </div>
       )}
 
-      {/* Verified but not ranked (from same endpoint) */}
-      {waitingPlayers.length > 0 && (
+      {/* Players without Wojaks in DID shown as "need to add Wojaks" */}
+      {players.filter((p) => p.totalWojakCount === 0).length > 0 && (
         <div className="community-players-card">
           <div className="community-players-header">
             <div>
-              <h3 className="community-players-title">Verified Players (Waiting to Rank)</h3>
+              <h3 className="community-players-title">Verified Players (No Wojaks in DID)</h3>
               <p className="community-players-subtitle">
-                These DIDs are verified and in Fight Club. They need Wojaks in DID with at least {provisionalMinVotes} votes before they enter the ranked leaderboard.
+                These players are verified but need to add Wojaks to their DID to appear on the leaderboard.
               </p>
             </div>
-            <span className="community-players-count">{waitingPlayers.length} in queue</span>
+            <span className="community-players-count">{players.filter((p) => p.totalWojakCount === 0).length} need Wojaks</span>
           </div>
           <div className="community-players-list">
-            {waitingPlayers.slice(0, 16).map((player) => (
+            {players.filter((p) => p.totalWojakCount === 0).slice(0, 16).map((player) => (
               <div key={player.did} className={`community-player-row${player.did === currentUserDid ? ' community-player-row-you' : ''}`}>
                 <div className="community-player-rank">—</div>
                 <div className="community-player-main">
                   <span className="community-player-name">{player.displayName || `${player.did.slice(0, 12)}...`}</span>
                   <span className="community-player-meta">
-                    {player.totalWojakCount} total Wojaks in DID · Needs ranked Wojaks
+                    Verified · Add Wojaks to DID to rank
                   </span>
                 </div>
-                <span className="community-player-status">Vote activity needed</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Community fallback (legacy endpoint) only when new endpoint is still sparse */}
-      {communityPlayers.length > 0 && waitingPlayers.length < 6 && (
-        <div className="community-players-card">
-          <div className="community-players-header">
-            <div>
-              <h3 className="community-players-title">Verified Players (Not Ranked Yet)</h3>
-              <p className="community-players-subtitle">
-                These players are verified, but need Wojaks in DID with enough votes to enter the Player Score leaderboard.
-              </p>
-            </div>
-            <span className="community-players-count">{communityPlayers.length} shown</span>
-          </div>
-          <div className="community-players-list">
-            {communityPlayers.map((player) => (
-              <div key={player.did} className="community-player-row">
-                <div className="community-player-rank">#{player.rank}</div>
-                <div className="community-player-main">
-                  <span className="community-player-name">{player.displayName || `${player.did.slice(0, 12)}...`}</span>
-                  <span className="community-player-meta">
-                    Verified DID{typeof player.wojakCount === 'number' ? ` · ${player.wojakCount} Wojaks tracked` : ''}
-                  </span>
-                </div>
-                <span className="community-player-status">Waiting for ranked Wojaks</span>
+                <span className="community-player-status">No Wojaks in DID</span>
               </div>
             ))}
           </div>

@@ -8,7 +8,6 @@ export const PHASE2_COLLECTION_ID = 'col1rhrjj6f28tge783rp0lrj8ct7vnq79xsnklx3up
 
 // Power System Constants
 export const PLOT_POWER_VALUE = 20; // Flat power per Farmer's Plot NFT
-export const PLAYER_TOP_N = 10; // Top N Wojak vote scores count
 export const COLLECTION_BONUS_CAP = 25; // Max Wojaks for collection bonus
 
 // Collection bonus tiers based on unique creators

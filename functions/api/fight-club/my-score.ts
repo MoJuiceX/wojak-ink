@@ -4,7 +4,7 @@
 
 import { authenticateRequest } from '../../lib/auth';
 import { calculateFullPower } from './_power';
-import { PLOT_POWER_VALUE, PLAYER_TOP_N, COLLECTION_BONUS_CAP } from '../game/_shared';
+import { PLOT_POWER_VALUE, COLLECTION_BONUS_CAP } from '../game/_shared';
 
 interface Env {
     DB: D1Database;
@@ -68,7 +68,6 @@ function unregisteredResponse() {
         meta: {
             mode: 'voting_only',
             plotPowerValue: PLOT_POWER_VALUE,
-            playerTopN: PLAYER_TOP_N,
             collectionBonusCap: COLLECTION_BONUS_CAP,
         },
     });
@@ -120,31 +119,34 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         let rank: number | null = null;
 
         if (ranked) {
+            // Count players with higher total power (all Wojaks count, no limit)
             const rankQuery = `
-        WITH eligible_wojaks AS (
+        WITH player_wojak_power AS (
           SELECT
             dh.did_id,
-            ws.net_score,
-            ws.total_votes,
-            ws.edition_number,
-            ROW_NUMBER() OVER (
-              PARTITION BY dh.did_id
-              ORDER BY ws.net_score DESC, ws.total_votes DESC, ws.edition_number ASC
-            ) AS rn
+            COALESCE(SUM(ws.net_score), 0) AS wojak_power
           FROM did_holdings dh
           JOIN wojak_scores ws ON ws.nft_id = dh.nft_id
           WHERE dh.collection = 'phase2'
+          GROUP BY dh.did_id
+        ),
+        player_plot_power AS (
+          SELECT
+            did_id,
+            COUNT(*) * ${PLOT_POWER_VALUE} AS plot_power
+          FROM did_holdings
+          WHERE collection = 'phase1'
+          GROUP BY did_id
         ),
         player_scores AS (
           SELECT
             gp.did_id,
-            COALESCE(SUM(CASE WHEN ew.rn <= ${PLAYER_TOP_N} THEN ew.net_score ELSE 0 END), 0) AS player_score,
-            COUNT(DISTINCT CASE WHEN ew.rn IS NOT NULL THEN ew.nft_id END) AS eligible_count
+            COALESCE(pwp.wojak_power, 0) + COALESCE(ppp.plot_power, 0) AS player_score
           FROM game_players gp
-          LEFT JOIN eligible_wojaks ew ON ew.did_id = gp.did_id AND ew.rn <= ${PLAYER_TOP_N}
+          LEFT JOIN player_wojak_power pwp ON pwp.did_id = gp.did_id
+          LEFT JOIN player_plot_power ppp ON ppp.did_id = gp.did_id
           WHERE gp.phase1_verified = 1
             AND gp.did_id IS NOT NULL AND gp.did_id != ''
-          GROUP BY gp.did_id
         )
         SELECT COUNT(*) + 1 AS rank
         FROM player_scores
@@ -206,7 +208,6 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
             meta: {
                 mode: 'voting_only',
                 plotPowerValue: PLOT_POWER_VALUE,
-                playerTopN: PLAYER_TOP_N,
                 collectionBonusCap: COLLECTION_BONUS_CAP,
             },
         });
