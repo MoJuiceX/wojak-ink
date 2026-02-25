@@ -6,7 +6,7 @@
 //   offset: >= 0 (default 0)
 //   sort (wojaks only): 'score' | 'glazed' | 'ratio' | 'newest' (default 'score')
 
-import { resolveImageUri } from '../game/_shared';
+import { resolveImageUri, PLOT_POWER_VALUE, PLAYER_TOP_N } from '../game/_shared';
 import { authenticateRequest } from '../../lib/auth';
 
 interface Env {
@@ -15,7 +15,6 @@ interface Env {
 }
 
 const PROVISIONAL_MIN_VOTES = 3;
-const PLAYER_TOP_N = 10;
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -174,7 +173,7 @@ async function handleWojaks(db: D1Database, limit: number, offset: number, sort:
 // ── Players leaderboard ─────────────────────────────────────────────
 
 async function handlePlayers(db: D1Database, limit: number, offset: number, callerDid: string | null, start: number) {
-  // Player score = sum of top 10 eligible (total_votes >= 5) Wojak vote scores per DID.
+  // Player score = sum of top 10 eligible Wojak vote scores per DID + plot power.
   // Uses windowed ROW_NUMBER per DID to pick top 10, then aggregates.
   const playersQuery = `
     WITH eligible_wojaks AS (
@@ -191,14 +190,21 @@ async function handlePlayers(db: D1Database, limit: number, offset: number, call
       FROM did_holdings dh
       JOIN wojak_scores ws ON ws.nft_id = dh.nft_id
       WHERE dh.collection = 'phase2'
-        AND ws.total_votes >= ${PROVISIONAL_MIN_VOTES}
+    ),
+    plot_counts AS (
+      SELECT did_id, COUNT(*) as plot_count
+      FROM did_holdings
+      WHERE collection = 'phase1'
+      GROUP BY did_id
     ),
     player_scores AS (
       SELECT
         gp.did_id,
         dp.display_name,
-        COALESCE(SUM(CASE WHEN ew.rn <= ${PLAYER_TOP_N} THEN ew.net_score ELSE 0 END), 0) AS player_score,
-        COUNT(DISTINCT CASE WHEN ew.rn IS NOT NULL THEN ew.nft_id END) AS eligible_wojak_count,
+        COALESCE(pc.plot_count, 0) as plot_count,
+        COALESCE(pc.plot_count, 0) * ${PLOT_POWER_VALUE} as plot_power,
+        COALESCE(SUM(CASE WHEN ew.rn <= ${PLAYER_TOP_N} THEN ew.net_score ELSE 0 END), 0) AS wojak_power,
+        COUNT(DISTINCT CASE WHEN ew.rn IS NOT NULL THEN ew.nft_id END) AS wojak_count,
         MAX(CASE WHEN ew.rn = 1 THEN ew.net_score END) AS best_wojak_score,
         (
           SELECT pm.ipfs_image_uri
@@ -210,33 +216,26 @@ async function handlePlayers(db: D1Database, limit: number, offset: number, call
       FROM game_players gp
       LEFT JOIN did_profiles dp ON dp.did_id = gp.did_id
       LEFT JOIN eligible_wojaks ew ON ew.did_id = gp.did_id AND ew.rn <= ${PLAYER_TOP_N}
+      LEFT JOIN plot_counts pc ON pc.did_id = gp.did_id
       WHERE gp.phase1_verified = 1
         AND gp.did_id IS NOT NULL AND gp.did_id != ''
       GROUP BY gp.did_id
-    ),
-    total_wojaks AS (
-      SELECT dh.did_id, COUNT(*) AS total_count
-      FROM did_holdings dh
-      WHERE dh.collection = 'phase2'
-      GROUP BY dh.did_id
     )
     SELECT
       ps.did_id,
       ps.display_name,
-      ps.player_score,
-      ps.eligible_wojak_count,
-      COALESCE(tw.total_count, 0) AS total_wojak_count,
+      ps.plot_count,
+      ps.plot_power,
+      ps.wojak_power,
+      ps.wojak_count,
+      (ps.plot_power + ps.wojak_power) as total_power,
       ps.best_wojak_score,
       ps.best_wojak_image
     FROM player_scores ps
-    LEFT JOIN total_wojaks tw ON tw.did_id = ps.did_id
-    WHERE 1 = 1
     ORDER BY
-      CASE WHEN ps.eligible_wojak_count > 0 THEN 0 ELSE 1 END ASC,
-      ps.player_score DESC,
-      ps.eligible_wojak_count DESC,
-      COALESCE(tw.total_count, 0) DESC,
-      COALESCE(ps.best_wojak_score, -999999) DESC,
+      total_power DESC,
+      ps.wojak_count DESC,
+      ps.plot_count DESC,
       ps.did_id ASC
     LIMIT ? OFFSET ?
   `;
@@ -248,16 +247,18 @@ async function handlePlayers(db: D1Database, limit: number, offset: number, call
     let displayName = row.display_name as string | null;
     if (!displayName) displayName = did ? `${did.slice(0, 12)}...` : 'Anon';
 
-    const eligibleWojakCount = (row.eligible_wojak_count as number) || 0;
-    const playerScore = (row.player_score as number) || 0;
-
     return {
       rank: offset + idx + 1,
       did,
       displayName,
-      playerScore,
-      eligibleWojakCount,
-      totalWojakCount: (row.total_wojak_count as number) || 0,
+      // New power fields
+      totalPower: (row.total_power as number) || 0,
+      plotPower: (row.plot_power as number) || 0,
+      plotCount: (row.plot_count as number) || 0,
+      wojakPower: (row.wojak_power as number) || 0,
+      wojakCount: (row.wojak_count as number) || 0,
+      // Legacy field (now equals totalPower)
+      playerScore: (row.total_power as number) || 0,
       bestWojakScore: (row.best_wojak_score as number) ?? null,
       bestWojakImage: resolveImageUri(row.best_wojak_image as string | null) || null,
     };
@@ -280,24 +281,29 @@ async function handlePlayers(db: D1Database, limit: number, offset: number, call
         FROM did_holdings dh
         JOIN wojak_scores ws ON ws.nft_id = dh.nft_id
         WHERE dh.collection = 'phase2'
-          AND ws.total_votes >= ${PROVISIONAL_MIN_VOTES}
+      ),
+      plot_counts AS (
+        SELECT did_id, COUNT(*) as plot_count
+        FROM did_holdings
+        WHERE collection = 'phase1'
+        GROUP BY did_id
       ),
       player_scores AS (
         SELECT
           gp.did_id,
-          COALESCE(SUM(CASE WHEN ew.rn <= ${PLAYER_TOP_N} THEN ew.net_score ELSE 0 END), 0) AS player_score,
-          COUNT(DISTINCT CASE WHEN ew.rn IS NOT NULL THEN ew.nft_id END) AS eligible_wojak_count
+          COALESCE(pc.plot_count, 0) * ${PLOT_POWER_VALUE} as plot_power,
+          COALESCE(SUM(CASE WHEN ew.rn <= ${PLAYER_TOP_N} THEN ew.net_score ELSE 0 END), 0) AS wojak_power
         FROM game_players gp
         LEFT JOIN eligible_wojaks ew ON ew.did_id = gp.did_id AND ew.rn <= ${PLAYER_TOP_N}
+        LEFT JOIN plot_counts pc ON pc.did_id = gp.did_id
         WHERE gp.phase1_verified = 1
           AND gp.did_id IS NOT NULL AND gp.did_id != ''
         GROUP BY gp.did_id
-        HAVING eligible_wojak_count > 0
       )
       SELECT COUNT(*) + 1 AS rank
       FROM player_scores
-      WHERE player_score > (
-        SELECT COALESCE(player_score, 0) FROM player_scores WHERE did_id = ?
+      WHERE (plot_power + wojak_power) > (
+        SELECT COALESCE(plot_power + wojak_power, 0) FROM player_scores WHERE did_id = ?
       )
     `;
     const rankResult = await db.prepare(yourRankQuery).bind(callerDid).first<{ rank: number }>();
