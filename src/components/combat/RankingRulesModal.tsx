@@ -51,39 +51,41 @@ export function RankingRulesModal({ onClose }: RankingRulesModalProps) {
 
                 <div className="rules-modal-body">
                     <div className="rules-section">
-                        <h4 className="rules-section-title">Voting</h4>
+                        <h4 className="rules-section-title">Farmer's Plot Power</h4>
                         <ul className="rules-list">
-                            <li><strong>Glaze</strong> = <span className="text-success">+1</span> Vote Score</li>
-                            <li><strong>Fade</strong> = <span className="text-error">−1</span> Vote Score</li>
-                            <li><strong>Wojak Vote Score</strong> = Glazes − Fades</li>
+                            <li>Each <strong>Wojak Farmer's Plot</strong> in your DID = <span className="text-cyan">+20</span> power</li>
+                            <li>Put all your Plots in your DID to maximize power</li>
                         </ul>
                     </div>
 
                     <div className="rules-section">
-                        <h4 className="rules-section-title">Eligibility</h4>
+                        <h4 className="rules-section-title">Your Wojak Power</h4>
                         <ul className="rules-list">
-                            <li>Wojaks need <strong>3 votes</strong> before they count toward Player Score</li>
-                            <li>Before that, they show a simple "needs more votes" note</li>
+                            <li><strong>Glaze</strong> = <span className="text-success">+1</span> vote score</li>
+                            <li><strong>Fade</strong> = <span className="text-error">-1</span> vote score</li>
+                            <li>Your <strong>top 10</strong> Wojak scores count toward power</li>
                         </ul>
                     </div>
 
                     <div className="rules-section">
-                        <h4 className="rules-section-title">Player Score</h4>
+                        <h4 className="rules-section-title">Collection Bonus</h4>
                         <ul className="rules-list">
-                            <li><strong>Player Score</strong> = sum of your top 10 eligible Wojak scores in your DID</li>
-                            <li>Only verified Players (Farmers Plot + DID) appear on the Players leaderboard</li>
-                            <li>Some verified players may be shown as <strong>waiting to rank</strong> until their Wojaks have enough votes</li>
+                            <li>Buy Wojaks from <strong>other creators</strong> for bonus power</li>
+                            <li>3-5 unique creators: <span className="text-cyan">+3</span> per Wojak</li>
+                            <li>6-10 unique creators: <span className="text-cyan">+5</span> per Wojak</li>
+                            <li>11+ unique creators: <span className="text-cyan">+7</span> per Wojak</li>
+                            <li>Maximum <strong>25 collected Wojaks</strong> count</li>
                         </ul>
                     </div>
 
                     <div className="rules-section rules-section-muted">
                         <p>
-                            <strong>⚔️ Battle is demo-only</strong> and does not affect rankings yet.
+                            <strong>Only verified purchases count</strong> — gifts and transfers don't earn bonus.
                         </p>
                     </div>
 
                     <div className="rules-trust">
-                        Scores update automatically as votes come in.
+                        Power updates automatically as you collect NFTs.
                     </div>
                 </div>
             </div>
