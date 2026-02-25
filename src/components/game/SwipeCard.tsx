@@ -270,7 +270,13 @@ export const SwipeCard = memo(function SwipeCard({
   const handleExitCompleteCallback = useCallback(() => {
     if (exitCompleteFired.current) return;
     exitCompleteFired.current = true;
-    onExitComplete?.();
+    // Double rAF ensures the final animation frame is painted before we signal completion
+    // This prevents race conditions where removeFromFeed happens before visual exit is done
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        onExitComplete?.();
+      });
+    });
   }, [onExitComplete]);
 
   return (
@@ -304,7 +310,7 @@ export const SwipeCard = memo(function SwipeCard({
       }
       initial={false}
       animate={exiting ? controls : { y: config.y, opacity: config.opacity }}
-      exit={{ opacity: 0, transition: { duration: 0 } }}
+      exit={{ opacity: 0, transition: { duration: 0.05 } }}
       transition={promoteTransition}
       aria-hidden={stackPosition > 0 ? true : undefined}
     >
