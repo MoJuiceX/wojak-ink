@@ -6,6 +6,27 @@ export const POWER_LEVEL_MAX = 9000;
 export const PHASE1_COLLECTION_ID = 'col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah'; // Wojak Farmers Plot
 export const PHASE2_COLLECTION_ID = 'col1rhrjj6f28tge783rp0lrj8ct7vnq79xsnklx3up49lgpnge62ensr2tyfx'; // Your Wojak
 
+// Power System Constants
+export const PLOT_POWER_VALUE = 20; // Flat power per Farmer's Plot NFT
+export const PLAYER_TOP_N = 10; // Top N Wojak vote scores count
+export const COLLECTION_BONUS_CAP = 25; // Max Wojaks for collection bonus
+
+// Collection bonus tiers based on unique creators
+export const COLLECTION_BONUS_TIERS = [
+  { minCreators: 11, bonusPerWojak: 7 },
+  { minCreators: 6, bonusPerWojak: 5 },
+  { minCreators: 3, bonusPerWojak: 3 },
+] as const;
+
+export function getCollectionBonusPerWojak(uniqueCreators: number): number {
+  for (const tier of COLLECTION_BONUS_TIERS) {
+    if (uniqueCreators >= tier.minCreators) {
+      return tier.bonusPerWojak;
+    }
+  }
+  return 0;
+}
+
 // Onboarding credit bonuses (in x100 units, matching credit system)
 export const ONBOARDING_CREDITS = {
   phase1: 500,    // 5 credits for verifying Phase 1 NFT
