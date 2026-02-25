@@ -214,7 +214,7 @@ export function VotingFeed() {
       if (pendingVoteRef.current?.nftId === votedNftId) {
         handleExitComplete();
       }
-    }, 600);
+    }, 800);
   }, [feed, cardExiting, castVote, voteCount, triggerHaptics, handleExitComplete]);
 
   const handleRetry = useCallback(() => {
@@ -281,12 +281,12 @@ export function VotingFeed() {
     >
       {/* Card stack — marginBottom is the only space above the buttons */}
       <div
-        className="vote-card-stack vote-card-entrance"
+        className="vote-card-stack"
         role="application"
         aria-label="Vote on Wojak NFTs. Swipe right to glaze, left to fade."
         style={{ marginBottom: VERTICAL_GAP_PX }}
       >
-        <AnimatePresence mode="sync" initial={false}>
+        <AnimatePresence mode="popLayout" initial={false}>
           {visibleCards.map((item, i) => (
             <SwipeCard
               key={item.nftId}

@@ -59,9 +59,14 @@ export function VoteButtons({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [disabled, onLike, onDislike]);
 
+  // Enhanced tap feedback: scale + press down effect
   const tapAnimation = reducedMotion
     ? {}
-    : { scale: 0.96, transition: { duration: 0.06, ease: 'easeOut' as const } };
+    : {
+        scale: 0.92,
+        y: 2,
+        transition: { duration: 0.08, ease: 'easeOut' as const }
+      };
 
   return (
     <div className={`vote-buttons-row${feedbackType ? ` is-${feedbackType}` : ''}`}>

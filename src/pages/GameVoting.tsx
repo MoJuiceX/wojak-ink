@@ -5,22 +5,16 @@ import { memo } from 'react';
 import { useLayout } from '@/hooks/useLayout';
 import { PageSEO } from '@/components/seo';
 import { VotingFeed } from '@/components/game/VotingFeed';
-import { VotingStatsPanel } from '@/components/game/VotingStatsPanel';
 import { MobileStatsBar } from '@/components/game/MobileStatsBar';
 
 function VotingPageDesktop() {
-  const { headerHeight } = useLayout();
-
   return (
     <div
-      className="voting-page"
+      className="voting-page voting-page-clean"
       style={{ paddingTop: 0, paddingBottom: 24, height: '100%', minHeight: 0 }}
     >
       <div className="voting-page-center">
         <VotingFeed />
-      </div>
-      <div className="voting-page-side" style={{ top: headerHeight + 16 }}>
-        <VotingStatsPanel />
       </div>
     </div>
   );

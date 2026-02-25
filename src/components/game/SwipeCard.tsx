@@ -3,14 +3,22 @@
 // Border glow + icon reveal feedback (no text stamps).
 // Supports card stack positioning and first-card wiggle.
 
-import { motion, useMotionValue, useTransform, useMotionValueEvent } from 'framer-motion';
+import { motion, useMotionValue, useTransform, useMotionValueEvent, useAnimationControls } from 'framer-motion';
 import type { PanInfo } from 'framer-motion';
 import { useState, useCallback, useRef, useEffect } from 'react';
 
 // Haptic patterns for premium feedback
 const HAPTIC_PATTERNS = {
-  glaze: { light: [5], medium: [8, 30, 15] },
-  fade: { light: [8], medium: [12, 15, 8] },
+  glaze: {
+    light: [5],
+    medium: [10, 30, 20],
+    strong: [15, 25, 20, 25, 25], // Celebratory rising pattern
+  },
+  fade: {
+    light: [8],
+    medium: [15, 20, 10],
+    strong: [20, 15, 15, 15, 10], // Sharp dismissive pattern
+  },
 } as const;
 
 interface SwipeCardProps {
@@ -41,11 +49,12 @@ const FALLBACK_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
 const MINTGARDEN_MAINNET_MEDIUM = (nftId: string) =>
   `https://assets.mainnet.mintgarden.io/thumbnails/medium/${nftId}.png`;
 
-// Stack positions: current, next, preloaded
+// Stack: all cards same scale, just offset to show stack effect
+// No scale change on promotion = no "growing" animation
 const STACK_CONFIGS = [
   { scale: 1, y: 0, opacity: 1 },
-  { scale: 0.95, y: 8, opacity: 0.7 },
-  { scale: 0.90, y: 16, opacity: 0.4 },
+  { scale: 1, y: 8, opacity: 1 },
+  { scale: 1, y: 16, opacity: 1 },
 ] as const;
 
 // Inline SVG icons for drag feedback
@@ -93,6 +102,9 @@ export function SwipeCard({
   const fallbackStepRef = useRef(0);
   const exitCompleteFired = useRef(false);
   const thresholdHapticFired = useRef(false);
+  const exitVelocityRef = useRef(0);
+  const controls = useAnimationControls();
+  const hasStartedExit = useRef(false);
   const primaryUrl = thumbnailUri || imageUrl;
   const secondaryUrl = thumbnailUri ? imageUrl : null;
   const tertiaryUrl = MINTGARDEN_MAINNET_MEDIUM(nftId);
@@ -100,18 +112,26 @@ export function SwipeCard({
   // Exiting can be triggered by swipe gesture OR parent setting exitDirection
   const exiting = swipeExiting || (exitDirection !== null && stackPosition === 0);
   const isInteractive = stackPosition === 0 && !exiting;
+  const exitSign = exitDirection || (x.get() >= 0 ? 1 : -1);
+
+  // Trigger exit animation imperatively
+  useEffect(() => {
+    if (exiting && !hasStartedExit.current) {
+      hasStartedExit.current = true;
+      controls.start({
+        x: exitSign * 700,
+        rotate: exitSign * 12,
+        transition: { duration: 0.4, ease: 'easeOut' }
+      });
+    }
+  }, [exiting, controls, exitSign]);
+
+
   const config = STACK_CONFIGS[stackPosition];
 
 
-  // Rotation on drag (reduced from +-15 to +-12 for subtlety)
-  const rotate = useTransform(x, [-200, 200], reducedMotion ? [0, 0] : [-12, 12]);
-
-  // Card scale on drag - subtle lift effect when dragging
-  const dragScale = useTransform(
-    x,
-    [-200, -50, 0, 50, 200],
-    reducedMotion ? [1, 1, 1, 1, 1] : [1.02, 1.01, 1, 1.01, 1.02]
-  );
+  // Subtle rotation on drag
+  const rotate = useTransform(x, [-200, 200], [-8, 8]);
 
   // Right glow opacity (like) - exponential curve for dramatic reveal
   const glowRightOpacity = useTransform(
@@ -136,16 +156,8 @@ export function SwipeCard({
   const crossOpacity = useTransform(x, [-SWIPE_THRESHOLD, -40], [1, 0]);
   const crossScale = useTransform(x, [-SWIPE_THRESHOLD, -40], [1, 0.5]);
 
-  // Shadow lift during drag
-  const dragShadow = useTransform(
-    x,
-    [-200, 0, 200],
-    [
-      '0 8px 30px rgba(0,0,0,0.4)',
-      'var(--shadow-card)',
-      '0 8px 30px rgba(0,0,0,0.4)',
-    ]
-  );
+  // Shadow stays consistent
+  const dragShadow = 'var(--shadow-card)';
 
   // Parallax state (desktop only)
   const [imageTransform, setImageTransform] = useState('translate(0, 0) scale(1)');
@@ -238,9 +250,17 @@ export function SwipeCard({
     setImageTransform('translate(0, 0) scale(1)');
 
     if (Math.abs(info.offset.x) >= SWIPE_THRESHOLD) {
+      // Capture velocity for spring exit (swipe momentum)
+      exitVelocityRef.current = info.velocity.x;
       setSwipeExiting(true);
       const voteType: 1 | -1 = info.offset.x > 0 ? 1 : -1;
-      // Fire vote immediately, don't wait for animation
+
+      // Strong haptic on confirmed vote
+      if (typeof navigator?.vibrate === 'function') {
+        const pattern = voteType === 1 ? HAPTIC_PATTERNS.glaze.strong : HAPTIC_PATTERNS.fade.strong;
+        navigator.vibrate(pattern);
+      }
+
       onVote(voteType);
     }
   }, [onVote]);
@@ -255,17 +275,8 @@ export function SwipeCard({
   // (Parent will use button callbacks instead, so this is internal)
   void triggerVote; // used by parent via onVote callback pattern
 
-  // Exit direction: from swipe gesture, button click, or default right
-  const exitX = exitDirection ? exitDirection * 520 : (x.get() >= 0 ? 520 : -520);
-  // Both glaze and fade exit to opacity 0 for clean transition (no overlap)
-  const exitOpacity = 0;
-
-  // Fast, snappy exit with predictable timing (no spring - springs cause timing issues)
-  const exitTransition = reducedMotion
-    ? { duration: 0.12 }
-    : { duration: 0.28, ease: [0.32, 0.0, 0.15, 1] as const };
-  // Card stack promotion
-  const promoteTransition = { type: 'spring' as const, stiffness: 320, damping: 30 };
+  // Transition for stack promotion
+  const promoteTransition = { duration: 0.25, ease: 'easeOut' };
 
   const handleExitCompleteCallback = useCallback(() => {
     if (exitCompleteFired.current) return;
@@ -276,11 +287,10 @@ export function SwipeCard({
   return (
     <motion.div
       ref={cardRef}
-      className={`vote-card ${shouldWiggle ? 'vote-card-wiggle' : ''} ${stackPosition === 0 ? 'vote-card-entrance' : ''}`}
+      className={`vote-card ${shouldWiggle ? 'vote-card-wiggle' : ''}`}
       style={{
         x: isInteractive ? x : undefined,
         rotate: isInteractive ? rotate : undefined,
-        scale: isInteractive ? dragScale : undefined,
         boxShadow: isInteractive ? dragShadow : undefined,
         position: 'absolute',
         top: 0,
@@ -288,7 +298,7 @@ export function SwipeCard({
         right: 0,
         zIndex: 3 - stackPosition,
         pointerEvents: isInteractive ? 'auto' : 'none',
-        willChange: exiting ? 'transform, opacity' : undefined,
+        willChange: exiting ? 'transform' : undefined,
       }}
       drag={isInteractive ? 'x' : false}
       dragConstraints={{ left: 0, right: 0 }}
@@ -303,26 +313,10 @@ export function SwipeCard({
       onAnimationComplete={
         exiting && stackPosition === 0 && onExitComplete ? handleExitCompleteCallback : undefined
       }
-      initial={stackPosition === 0 ? { opacity: 0, y: 20, scale: 0.96 } : false}
-      animate={
-        exiting
-          ? reducedMotion
-            ? { opacity: 0 }
-            : { x: exitX, opacity: exitOpacity, rotate: exitX > 0 ? 12 : -12 }
-          : { scale: config.scale, y: config.y, opacity: config.opacity }
-      }
-      exit={
-        reducedMotion
-          ? { opacity: 0 }
-          : { x: exitX, opacity: exitOpacity, rotate: exitX > 0 ? 12 : -12 }
-      }
-      transition={
-        exiting
-          ? exitTransition
-          : stackPosition === 0
-            ? { duration: 0.45, ease: [0.23, 1, 0.32, 1] as const }
-            : promoteTransition
-      }
+      initial={false}
+      animate={exiting ? controls : { y: config.y, opacity: config.opacity }}
+      exit={{ opacity: 0, transition: { duration: 0 } }}
+      transition={promoteTransition}
       aria-hidden={stackPosition > 0 ? true : undefined}
     >
       {/* Glow overlays */}
@@ -335,19 +329,25 @@ export function SwipeCard({
 
       {/* Image: prefer thumbnailUri (MintGarden mainnet CDN), then IPFS, then mainnet launcher URL, then placeholder */}
       <div className="vote-card-image">
-        {/* Exit overlay: brief color flash synced with card exit */}
+        {/* Exit overlay: smooth color pulse */}
         {exiting && stackPosition === 0 && exitDirection && !reducedMotion && (
           <motion.div
             className="vote-card-exit-overlay"
             aria-hidden
             style={{
               background: exitDirection === 1
-                ? 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(34, 197, 94, 0.4), transparent 70%)'
-                : 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(40, 40, 50, 0.5), transparent 70%)',
+                ? 'radial-gradient(ellipse 85% 75% at 50% 50%, rgba(34, 197, 94, 0.45), rgba(34, 197, 94, 0.15) 50%, transparent 75%)'
+                : 'radial-gradient(ellipse 85% 75% at 50% 50%, rgba(50, 50, 60, 0.5), rgba(35, 35, 45, 0.2) 50%, transparent 75%)',
             }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 0.7, 0] }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{
+              opacity: [0, 0.7, 0.3],
+              scale: [0.95, 1.05, 1.1],
+            }}
+            transition={{
+              duration: 0.35,
+              ease: [0.25, 0.1, 0.25, 1], // Smooth ease
+            }}
           />
         )}
         <img

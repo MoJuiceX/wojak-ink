@@ -4528,9 +4528,8 @@ body {
 /* ── HOVER EFFECTS ON DESKTOP ── */
 
 @media (hover: hover) {
-  /* Card lift on hover */
+  /* Card hover: shadow only (transform handled by Framer Motion) */
   .vote-card:hover {
-    transform: translateY(-4px);
     box-shadow: 0 20px 48px var(--color-black-50);
   }
 
@@ -4570,17 +4569,9 @@ body {
     animation: none !important;
   }
 
-  /* Remove hover animations */
-  .vote-card {
-    transform: none !important;
-  }
-
-  .vote-card:hover {
-    transform: none !important;
-  }
-
+  /* Remove hover animations (vote-card transform handled by Framer Motion reducedMotion prop) */
   .vote-btn-pill:hover {
-    transform: none !important;
+    transform: none;
   }
 
   .vote-btn-glaze:hover,
