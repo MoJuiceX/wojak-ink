@@ -276,7 +276,7 @@ export function SwipeCard({
   void triggerVote; // used by parent via onVote callback pattern
 
   // Transition for stack promotion
-  const promoteTransition = { duration: 0.25, ease: 'easeOut' };
+  const promoteTransition = { duration: 0.25, ease: 'easeOut' as const };
 
   const handleExitCompleteCallback = useCallback(() => {
     if (exitCompleteFired.current) return;
