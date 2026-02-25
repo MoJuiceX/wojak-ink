@@ -5,7 +5,7 @@
 
 import { motion, useMotionValue, useTransform, useMotionValueEvent, useAnimationControls } from 'framer-motion';
 import type { PanInfo } from 'framer-motion';
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useLayoutEffect } from 'react';
 
 // Haptic patterns for premium feedback
 const HAPTIC_PATTERNS = {
@@ -114,8 +114,8 @@ export function SwipeCard({
   const isInteractive = stackPosition === 0 && !exiting;
   const exitSign = exitDirection || (x.get() >= 0 ? 1 : -1);
 
-  // Trigger exit animation imperatively
-  useEffect(() => {
+  // Trigger exit animation imperatively (useLayoutEffect for immediate start, no frame delay)
+  useLayoutEffect(() => {
     if (exiting && !hasStartedExit.current) {
       hasStartedExit.current = true;
       controls.start({
