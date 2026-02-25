@@ -67,10 +67,12 @@ async function run(env: Env) {
   const lastDiscoveryTime = lastDiscovery ? new Date(lastDiscovery.value).getTime() : 0;
   const shouldDiscover = (Date.now() - lastDiscoveryTime) > DISCOVERY_INTERVAL_MS;
 
+  let discoveryRan = false;
   if (shouldDiscover) {
     try {
       const discovered = await discoverNewHolders(env);
       console.log(`[DID Indexer] Auto-discovered ${discovered} new holder(s)`);
+      discoveryRan = true;
       // Record discovery time
       await env.DB.prepare(
         "INSERT INTO kv_meta (key, value) VALUES ('last_discovery_run', datetime('now')) ON CONFLICT(key) DO UPDATE SET value = datetime('now')"
@@ -83,9 +85,17 @@ async function run(env: Env) {
     console.log(`[DID Indexer] Skipping discovery (last ran ${hoursAgo}h ago, interval: 12h)`);
   }
 
+  // Skip sync if discovery ran this cycle (to stay under Cloudflare subrequest limit)
+  // Discovery uses ~43 API calls for Phase 1, sync needs ~10 more for Phase 2 = 53 total (over 50 limit)
+  // Next hourly run will do sync instead
+  if (discoveryRan) {
+    console.log('[DID Indexer] Discovery ran this cycle, skipping player sync (subrequest limit)');
+  }
+
   // Get the PLAYERS_PER_RUN oldest-indexed players to sync (staggered round-robin)
   // Skip players indexed within the last 2 hours
-  const players = await env.DB.prepare(`
+  // Also skip if discovery ran this cycle
+  const players = discoveryRan ? { results: [] } : await env.DB.prepare(`
     SELECT did_id, wallet_address, last_indexed_at
     FROM game_players
     WHERE last_indexed_at IS NULL
@@ -94,7 +104,9 @@ async function run(env: Env) {
     LIMIT ?
   `).bind(PLAYERS_PER_RUN).all();
 
-  console.log(`[DID Indexer] Syncing ${players.results.length} players (staggered, ${PLAYERS_PER_RUN} per run)`);
+  if (!discoveryRan) {
+    console.log(`[DID Indexer] Syncing ${players.results.length} players (staggered, ${PLAYERS_PER_RUN} per run)`);
+  }
 
   let updatedCount = 0;
   let errorCount = 0;
@@ -212,7 +224,8 @@ async function run(env: Env) {
 }
 
 // Sync DID profile name from chain — only overrides 'random' names
-async function syncDIDProfileName(env: Env, did: string): Promise<void> {
+// Currently disabled to save subrequests (profile sync uses MintGarden API)
+async function _syncDIDProfileName(env: Env, did: string): Promise<void> {
   try {
     // Check current name source — only update if 'random' (user hasn't customized)
     const profile = await env.DB.prepare(
@@ -265,23 +278,28 @@ async function syncDIDProfileName(env: Env, did: string): Promise<void> {
 
 async function syncDIDHoldings(env: Env, did: string): Promise<'changed' | 'unchanged' | 'skipped'> {
   // Sync DID profile name from chain (if user hasn't customized)
-  await syncDIDProfileName(env, did);
-  await sleep(RATE_LIMIT_MS);
+  // Skip if we're near subrequest limit (profile sync uses an API call)
+  // await syncDIDProfileName(env, did);
+  // await sleep(RATE_LIMIT_MS);
 
-  // Fetch Phase 2 NFTs from MintGarden
+  // Fetch Phase 2 NFTs from MintGarden (10 search queries)
   const phase2Result = await fetchDIDNfts(did, PHASE2_COLLECTION);
-  await sleep(RATE_LIMIT_MS);
-  // Fetch Phase 1 NFTs from MintGarden
-  const phase1Result = await fetchDIDNfts(did, PHASE1_COLLECTION);
 
-  // Guard: if either fetch failed, skip the diff entirely to avoid data wipe
-  if (!phase2Result.success || !phase1Result.success) {
+  // Guard: if Phase 2 fetch failed, skip entirely
+  if (!phase2Result.success) {
     console.warn(`[DID Indexer] Skipping diff for DID ${did.slice(0, 20)}... — API fetch incomplete`);
     return 'skipped';
   }
 
   const phase2Nfts = phase2Result.nfts;
-  const phase1Nfts = phase1Result.nfts;
+
+  // For Phase 1, use existing DB data instead of re-fetching
+  // Phase 1 holdings are discovered every 12 hours via discoverNewHolders
+  // This avoids the 43 additional API calls that would exceed subrequest limit
+  const existingPhase1 = await env.DB.prepare(
+    'SELECT nft_id FROM did_holdings WHERE did_id = ? AND collection = ?'
+  ).bind(did, 'phase1').all();
+  const phase1Nfts: NftInfo[] = existingPhase1.results.map(r => ({ id: r.nft_id as string }));
 
   // Get current DB holdings
   const currentHoldings = await env.DB.prepare(
@@ -498,79 +516,38 @@ async function batchChunked(db: D1Database, statements: D1PreparedStatement[]): 
 
 /**
  * Discover new Farmers Plot holders from MintGarden collection listing.
- * Uses search-based pagination to fetch all NFTs and extract unique owner DIDs.
+ * Uses the shared collectionCache (populated by fetchCollectionWithSearch).
  * Auto-creates game_players rows for any DIDs that don't already exist.
+ * Also syncs Phase 1 holdings to did_holdings table (so sync phase doesn't need to re-fetch).
  * Returns the count of newly created players.
  */
 async function discoverNewHolders(env: Env): Promise<number> {
-  const holderDids = new Map<string, { name?: string; wallet?: string }>();
-  const seenIds = new Set<string>();
-  const pageSize = 100;
-
-  // Use search-based pagination (cursor pagination doesn't work)
-  // Phase 1 NFTs are numbered #0001-#4200 (4-digit format)
-  const searchPrefixes = Array.from({ length: 43 }, (_, i) => String(i).padStart(2, '0')); // '00' to '42'
-
-  console.log(`[DID Indexer] Discovery: fetching Phase 1 NFTs with ${searchPrefixes.length} search queries...`);
-
-  for (const prefix of searchPrefixes) {
-    const searchParam = encodeURIComponent(`#${prefix}`);
-    const url = `https://api.mintgarden.io/collections/${PHASE1_COLLECTION}/nfts?size=${pageSize}&search=${searchParam}`;
-
-    let response: Response;
-    try {
-      response = await fetch(url, {
-        headers: { 'Accept': 'application/json' },
-      });
-    } catch (err) {
-      console.error(`[DID Indexer] Discovery: network error on search ${prefix}:`, err);
-      continue; // Continue with other prefixes
-    }
-
-    if (!response.ok) {
-      console.error(`[DID Indexer] Discovery: MintGarden returned ${response.status} on search ${prefix}`);
-      continue;
-    }
-
-    const data = await response.json() as {
-      items: Array<{
-        id: string;
-        encoded_id: string;
-        owner_encoded_id?: string;
-        owner_id?: string;
-        owner_name?: string;
-        owner_address_encoded_id?: string;
-        edition_number?: number;
-      }>;
-    };
-
-    if (!data.items) continue;
-
-    for (const item of data.items) {
-      // Skip duplicates
-      if (seenIds.has(item.id)) continue;
-      seenIds.add(item.id);
-
-      const ownerDid = item.owner_encoded_id;
-      // Only process valid DID owners (skip if no DID or not a valid DID)
-      if (ownerDid && ownerDid.startsWith('did:chia:')) {
-        if (!holderDids.has(ownerDid)) {
-          holderDids.set(ownerDid, {
-            name: item.owner_name,
-            wallet: item.owner_address_encoded_id,
-          });
-        }
-      }
-    }
-
-    await sleep(RATE_LIMIT_MS);
+  // Use the shared collection cache (also used by sync)
+  // This avoids duplicate API calls and stays within subrequest limits
+  if (!await ensureCollectionCache(PHASE1_COLLECTION)) {
+    console.error('[DID Indexer] Discovery: failed to fetch Phase 1 collection');
+    return 0;
   }
 
-  console.log(`[DID Indexer] Discovery: found ${holderDids.size} unique DIDs holding ${seenIds.size} Farmers Plot NFTs`);
+  const phase1Cache = collectionCache.get(PHASE1_COLLECTION);
+  if (!phase1Cache) return 0;
+
+  // Extract holder info from cached data
+  const holderDids = new Map<string, { name?: string; wallet?: string; nfts: NftInfo[] }>();
+  let totalNfts = 0;
+
+  for (const [did, nfts] of phase1Cache.entries()) {
+    totalNfts += nfts.length;
+    if (!holderDids.has(did)) {
+      holderDids.set(did, { name: undefined, wallet: undefined, nfts });
+    }
+  }
+
+  console.log(`[DID Indexer] Discovery: found ${holderDids.size} unique DIDs holding ${totalNfts} Farmers Plot NFTs`);
 
   if (holderDids.size === 0) return 0;
 
-  // Check which DIDs are already registered
+  // Process each DID: enroll new players AND sync Phase 1 holdings
   let newCount = 0;
   const didEntries = Array.from(holderDids.entries());
 
@@ -612,11 +589,49 @@ async function discoverNewHolders(env: Env): Promise<number> {
         newCount++;
         console.log(`[DID Indexer] Auto-enrolled: ${did.slice(0, 25)}... (${info.name || 'unnamed'})`);
       }
+
+      // Sync Phase 1 holdings for this DID (insert new, handled by INSERT OR IGNORE)
+      for (const nft of info.nfts) {
+        statements.push(
+          env.DB.prepare(`
+            INSERT OR IGNORE INTO did_holdings (did_id, nft_id, edition_number, collection, creator_wallet)
+            VALUES (?, ?, ?, 'phase1', ?)
+          `).bind(did, nft.id, nft.edition || null, nft.creator || null)
+        );
+      }
     }
 
     if (statements.length > 0) {
       await batchChunked(env.DB, statements);
     }
+  }
+
+  // Remove Phase 1 holdings that are no longer owned (NFT was transferred)
+  // Find orphaned holdings (NFTs no longer in the collection or transferred)
+  const orphanedHoldings = await env.DB.prepare(`
+    SELECT did_id, nft_id FROM did_holdings
+    WHERE collection = 'phase1'
+  `).all();
+
+  const deleteStatements: D1PreparedStatement[] = [];
+  for (const holding of orphanedHoldings.results) {
+    const did = holding.did_id as string;
+    const nftId = holding.nft_id as string;
+
+    // Check if this DID still owns this NFT
+    const didNfts = phase1Cache.get(did);
+    const stillOwns = didNfts?.some(n => n.id === nftId) ?? false;
+
+    if (!stillOwns) {
+      deleteStatements.push(
+        env.DB.prepare('DELETE FROM did_holdings WHERE did_id = ? AND nft_id = ?').bind(did, nftId)
+      );
+    }
+  }
+
+  if (deleteStatements.length > 0) {
+    console.log(`[DID Indexer] Removing ${deleteStatements.length} transferred Phase 1 NFTs`);
+    await batchChunked(env.DB, deleteStatements);
   }
 
   return newCount;
