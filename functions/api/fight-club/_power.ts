@@ -1,0 +1,134 @@
+// Power calculation helpers for the DID power system
+// DID Power = Plot Power + Wojak Power + Collection Bonus
+
+import {
+  PLOT_POWER_VALUE,
+  PLAYER_TOP_N,
+  COLLECTION_BONUS_CAP,
+  getCollectionBonusPerWojak,
+} from '../game/_shared';
+
+interface PowerBreakdown {
+  plotPower: number;
+  plotCount: number;
+  wojakPower: number;
+  wojakCount: number;
+  collectionBonus: number;
+  collectedWojakCount: number;
+  uniqueCreatorsCount: number;
+  totalPower: number;
+}
+
+/**
+ * Calculate Farmer's Plot power (Phase 1 NFTs)
+ */
+export async function calculatePlotPower(
+  db: D1Database,
+  didId: string
+): Promise<{ power: number; count: number }> {
+  const result = await db.prepare(
+    `SELECT COUNT(*) as cnt FROM did_holdings WHERE did_id = ? AND collection = 'phase1'`
+  ).bind(didId).first<{ cnt: number }>();
+
+  const count = result?.cnt || 0;
+  return { power: count * PLOT_POWER_VALUE, count };
+}
+
+/**
+ * Calculate Your Wojak power from vote scores (top N)
+ */
+export async function calculateWojakPower(
+  db: D1Database,
+  didId: string
+): Promise<{ power: number; count: number; topWojaks: Array<{ nftId: string; score: number }> }> {
+  const result = await db.prepare(`
+    SELECT ws.nft_id, ws.net_score
+    FROM did_holdings dh
+    JOIN wojak_scores ws ON ws.nft_id = dh.nft_id
+    WHERE dh.did_id = ? AND dh.collection = 'phase2'
+    ORDER BY ws.net_score DESC, ws.total_votes DESC, ws.edition_number ASC
+    LIMIT ?
+  `).bind(didId, PLAYER_TOP_N).all();
+
+  const topWojaks = (result.results || []).map(w => ({
+    nftId: w.nft_id as string,
+    score: (w.net_score as number) || 0,
+  }));
+
+  const power = topWojaks.reduce((sum, w) => sum + w.score, 0);
+  return { power, count: topWojaks.length, topWojaks };
+}
+
+/**
+ * Calculate collection bonus for bought Wojaks from other creators
+ */
+export async function calculateCollectionBonus(
+  db: D1Database,
+  didId: string,
+  walletAddress: string
+): Promise<{
+  bonus: number;
+  collectedCount: number;
+  uniqueCreators: number;
+  bonusPerWojak: number;
+}> {
+  // Find Wojaks that:
+  // 1. Are in the holder's DID
+  // 2. Were BOUGHT (exist in sales_history with buyer = holder's wallet)
+  // 3. Are from OTHER creators (creator_wallet != holder's wallet)
+  const result = await db.prepare(`
+    SELECT
+      dh.nft_id,
+      pm.wallet_address as creator_wallet,
+      ws.net_score
+    FROM did_holdings dh
+    JOIN phase2_mints pm ON pm.mintgarden_launcher_id = dh.nft_id
+    JOIN wojak_scores ws ON ws.nft_id = dh.nft_id
+    JOIN sales_history sh ON sh.nft_id = dh.nft_id
+      AND sh.buyer_address = ?
+      AND sh.collection = 'phase2'
+    WHERE dh.did_id = ?
+      AND dh.collection = 'phase2'
+      AND pm.wallet_address != ?
+    ORDER BY ws.net_score DESC
+    LIMIT ?
+  `).bind(walletAddress, didId, walletAddress, COLLECTION_BONUS_CAP).all();
+
+  const collected = result.results || [];
+  const collectedCount = collected.length;
+
+  // Count unique creators
+  const uniqueCreators = new Set(collected.map(w => w.creator_wallet as string)).size;
+
+  // Calculate bonus based on diversity tier
+  const bonusPerWojak = getCollectionBonusPerWojak(uniqueCreators);
+  const bonus = collectedCount * bonusPerWojak;
+
+  return { bonus, collectedCount, uniqueCreators, bonusPerWojak };
+}
+
+/**
+ * Calculate full power breakdown for a DID
+ */
+export async function calculateFullPower(
+  db: D1Database,
+  didId: string,
+  walletAddress: string
+): Promise<PowerBreakdown> {
+  const [plotResult, wojakResult, collectionResult] = await Promise.all([
+    calculatePlotPower(db, didId),
+    calculateWojakPower(db, didId),
+    calculateCollectionBonus(db, didId, walletAddress),
+  ]);
+
+  return {
+    plotPower: plotResult.power,
+    plotCount: plotResult.count,
+    wojakPower: wojakResult.power,
+    wojakCount: wojakResult.count,
+    collectionBonus: collectionResult.bonus,
+    collectedWojakCount: collectionResult.collectedCount,
+    uniqueCreatorsCount: collectionResult.uniqueCreators,
+    totalPower: plotResult.power + wojakResult.power + collectionResult.bonus,
+  };
+}
