@@ -8,22 +8,20 @@ export const PHASE2_COLLECTION_ID = 'col1rhrjj6f28tge783rp0lrj8ct7vnq79xsnklx3up
 
 // Power System Constants
 export const PLOT_POWER_VALUE = 20; // Flat power per Farmer's Plot NFT
-export const COLLECTION_BONUS_CAP = 25; // Max Wojaks for collection bonus
+export const COLLECTION_BONUS_PER_WOJAK = 10; // Flat power per bought Your Wojak
+export const COLLECTION_BONUS_MAX = 42; // Max total collection bonus
 
-// Collection bonus tiers based on unique creators
+// Legacy: kept for backward compatibility but no longer used
+export const COLLECTION_BONUS_CAP = 25;
 export const COLLECTION_BONUS_TIERS = [
   { minCreators: 11, bonusPerWojak: 7 },
   { minCreators: 6, bonusPerWojak: 5 },
   { minCreators: 3, bonusPerWojak: 3 },
 ] as const;
 
-export function getCollectionBonusPerWojak(uniqueCreators: number): number {
-  for (const tier of COLLECTION_BONUS_TIERS) {
-    if (uniqueCreators >= tier.minCreators) {
-      return tier.bonusPerWojak;
-    }
-  }
-  return 0;
+// Legacy function - returns flat rate now
+export function getCollectionBonusPerWojak(_uniqueCreators: number): number {
+  return COLLECTION_BONUS_PER_WOJAK;
 }
 
 // Onboarding credit bonuses (in x100 units, matching credit system)

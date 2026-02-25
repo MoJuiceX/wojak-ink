@@ -71,10 +71,8 @@ export function RankingRulesModal({ onClose }: RankingRulesModalProps) {
                         <h4 className="rules-section-title">Collection Bonus</h4>
                         <ul className="rules-list">
                             <li>Buy Wojaks from <strong>other creators</strong> for bonus power</li>
-                            <li>3-5 unique creators: <span className="text-cyan">+3</span> per Wojak</li>
-                            <li>6-10 unique creators: <span className="text-cyan">+5</span> per Wojak</li>
-                            <li>11+ unique creators: <span className="text-cyan">+7</span> per Wojak</li>
-                            <li>Maximum <strong>25 collected Wojaks</strong> count</li>
+                            <li>Each bought Wojak: <span className="text-cyan">+10</span> power</li>
+                            <li>Maximum <strong>42 total bonus</strong></li>
                         </ul>
                     </div>
 

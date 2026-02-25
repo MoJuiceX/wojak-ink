@@ -247,16 +247,20 @@ async function handlePlayers(db: D1Database, limit: number, offset: number, call
     let displayName = row.display_name as string | null;
     if (!displayName) displayName = did ? `${did.slice(0, 12)}...` : 'Anon';
 
+    const wojakCount = (row.wojak_count as number) || 0;
     return {
       rank: offset + idx + 1,
       did,
       displayName,
-      // New power fields
+      // Power fields
       totalPower: (row.total_power as number) || 0,
       plotPower: (row.plot_power as number) || 0,
       plotCount: (row.plot_count as number) || 0,
       wojakPower: (row.wojak_power as number) || 0,
-      wojakCount: (row.wojak_count as number) || 0,
+      wojakCount,
+      // Frontend-expected fields
+      totalWojakCount: wojakCount,
+      eligibleWojakCount: wojakCount,
       // Legacy field (now equals totalPower)
       playerScore: (row.total_power as number) || 0,
       bestWojakScore: (row.best_wojak_score as number) ?? null,

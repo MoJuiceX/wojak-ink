@@ -118,7 +118,7 @@ Hourly Cron Run
 For players with BOTH collections, their Total Power is calculated as:
 - **Plot Power:** 20 per Farmer's Plot NFT
 - **Wojak Power:** Sum of all Your Wojak vote scores (no top-10 limit)
-- **Collection Bonus:** 5 power per bought Your Wojak (max 25 bonus for 5 NFTs)
+- **Collection Bonus:** 10 power per bought Your Wojak (max 42 total bonus)
 
 ## Data Sources
 

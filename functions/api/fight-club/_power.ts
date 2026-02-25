@@ -3,8 +3,8 @@
 
 import {
   PLOT_POWER_VALUE,
-  COLLECTION_BONUS_CAP,
-  getCollectionBonusPerWojak,
+  COLLECTION_BONUS_PER_WOJAK,
+  COLLECTION_BONUS_MAX,
 } from '../game/_shared';
 
 interface PowerBreakdown {
@@ -59,6 +59,7 @@ export async function calculateWojakPower(
 
 /**
  * Calculate collection bonus for bought Wojaks from other creators
+ * Simple formula: 10 power per bought Wojak, max 42 total
  */
 export async function calculateCollectionBonus(
   db: D1Database,
@@ -89,20 +90,19 @@ export async function calculateCollectionBonus(
       AND dh.collection = 'phase2'
       AND pm.wallet_address != ?
     ORDER BY ws.net_score DESC
-    LIMIT ?
-  `).bind(walletAddress, didId, walletAddress, COLLECTION_BONUS_CAP).all();
+  `).bind(walletAddress, didId, walletAddress).all();
 
   const collected = result.results || [];
   const collectedCount = collected.length;
 
-  // Count unique creators
+  // Count unique creators (for display/stats only)
   const uniqueCreators = new Set(collected.map(w => w.creator_wallet as string)).size;
 
-  // Calculate bonus based on diversity tier
-  const bonusPerWojak = getCollectionBonusPerWojak(uniqueCreators);
-  const bonus = collectedCount * bonusPerWojak;
+  // Simple formula: 10 per Wojak, capped at 42 total
+  const rawBonus = collectedCount * COLLECTION_BONUS_PER_WOJAK;
+  const bonus = Math.min(rawBonus, COLLECTION_BONUS_MAX);
 
-  return { bonus, collectedCount, uniqueCreators, bonusPerWojak };
+  return { bonus, collectedCount, uniqueCreators, bonusPerWojak: COLLECTION_BONUS_PER_WOJAK };
 }
 
 /**
