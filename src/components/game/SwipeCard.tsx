@@ -3,7 +3,7 @@
 // Border glow + icon reveal feedback (no text stamps).
 // Supports card stack positioning and first-card wiggle.
 
-import { motion, useMotionValue, useTransform, useMotionValueEvent } from 'framer-motion';
+import { motion, useMotionValue, useTransform, useMotionValueEvent, animate } from 'framer-motion';
 import type { PanInfo } from 'framer-motion';
 import { useState, useCallback, useRef, useEffect, memo } from 'react';
 
@@ -102,17 +102,11 @@ export const SwipeCard = memo(function SwipeCard({
   const secondaryUrl = thumbnailUri ? imageUrl : null;
   const tertiaryUrl = MINTGARDEN_MAINNET_MEDIUM(nftId);
 
-  // LOCAL exit state - stored once when swipe triggers, never recomputed
-  // This ensures consistent exit direction regardless of motion value changes
-  const [localExitX, setLocalExitX] = useState<number | null>(null);
-
-  // Compute effective exit position: prefer local state (swipe), fallback to prop (button)
-  // This avoids setState in useEffect while still handling both swipe and button cases
-  const effectiveExitX = localExitX ?? (exitDirection !== null && stackPosition === 0 ? exitDirection * 700 : null);
-  const exiting = effectiveExitX !== null;
+  // Track exit state with ref (not state) to avoid re-render during animation
+  const isExitingRef = useRef(false);
+  const [exiting, setExiting] = useState(false);
+  const [exitSign, setExitSign] = useState<1 | -1>(1);
   const isInteractive = stackPosition === 0 && !exiting;
-  // Exit sign for AnimatePresence fallback (use stored direction)
-  const exitSign = effectiveExitX !== null ? (effectiveExitX > 0 ? 1 : -1) : (exitDirection ?? 1);
 
 
   const config = STACK_CONFIGS[stackPosition];
@@ -185,7 +179,6 @@ export const SwipeCard = memo(function SwipeCard({
     }
   }, [isFirst, reducedMotion, stackPosition]);
 
-
   const handleWiggleEnd = useCallback(() => {
     setShouldWiggle(false);
     try {
@@ -223,6 +216,46 @@ export const SwipeCard = memo(function SwipeCard({
     }
   }, [reducedMotion]);
 
+  // Animate card to exit position (used by both swipe and button)
+  const animateExit = useCallback((direction: 1 | -1) => {
+    if (isExitingRef.current) return;
+    isExitingRef.current = true;
+    setExitSign(direction);
+    setExiting(true);
+
+    const exitX = direction * 700;
+    const exitRotate = direction * 12;
+
+    // Imperatively animate motion values from CURRENT position to exit
+    // This is the key fix: animate() starts from current value, not from 0
+    animate(x, exitX, {
+      duration: 0.35,
+      ease: [0.32, 0.72, 0, 1],
+    });
+    animate(rotate, exitRotate, {
+      duration: 0.35,
+      ease: [0.32, 0.72, 0, 1],
+      onComplete: () => {
+        // Call exit complete after animation finishes
+        if (!exitCompleteFired.current) {
+          exitCompleteFired.current = true;
+          requestAnimationFrame(() => {
+            onExitComplete?.();
+          });
+        }
+      },
+    });
+  }, [x, rotate, onExitComplete]);
+
+  // Handle button votes (parent sets exitDirection prop)
+  // setTimeout defers setState to avoid lint warning about setState in effect
+  useEffect(() => {
+    if (exitDirection !== null && stackPosition === 0 && !isExitingRef.current) {
+      const id = setTimeout(() => animateExit(exitDirection), 0);
+      return () => clearTimeout(id);
+    }
+  }, [exitDirection, stackPosition, animateExit]);
+
   const handleDragEnd = useCallback((_: unknown, info: PanInfo) => {
     if (cardRef.current) {
       cardRef.current.style.willChange = 'auto';
@@ -232,48 +265,31 @@ export const SwipeCard = memo(function SwipeCard({
     if (Math.abs(info.offset.x) >= SWIPE_THRESHOLD) {
       const voteType: 1 | -1 = info.offset.x > 0 ? 1 : -1;
 
-      // CRITICAL: Set exit position IMMEDIATELY from drag info, BEFORE any re-renders
-      // This locks in the direction so it can't be affected by spring animations
-      setLocalExitX(voteType * 700);
-
       // Strong haptic on confirmed vote
       if (typeof navigator?.vibrate === 'function') {
         const pattern = voteType === 1 ? HAPTIC_PATTERNS.glaze.strong : HAPTIC_PATTERNS.fade.strong;
         navigator.vibrate(pattern);
       }
 
+      // Animate exit from current drag position
+      animateExit(voteType);
       onVote(voteType);
     }
-  }, [onVote]);
+  }, [onVote, animateExit]);
 
-  // Fully declarative animation targets using effective exit position
-  // When exiting, use the stored exit position (locked in at vote time)
-  const animateTarget = effectiveExitX !== null
-    ? { x: effectiveExitX, rotate: exitSign * 12, y: 0, opacity: 1 }
-    : { x: 0, rotate: 0, y: config.y, opacity: config.opacity };
-
-  // Exit animation is faster and uses custom ease; stack promotion is gentler
-  const animateTransition = effectiveExitX !== null
-    ? { duration: 0.35, ease: [0.32, 0.72, 0, 1] as const } // Custom ease for snappy exit
-    : { duration: 0.25, ease: 'easeOut' as const };
-
-  const handleExitCompleteCallback = useCallback(() => {
-    if (exitCompleteFired.current) return;
-    exitCompleteFired.current = true;
-    // Single rAF to ensure final frame is painted
-    requestAnimationFrame(() => {
-      onExitComplete?.();
-    });
-  }, [onExitComplete]);
+  // Stack position animation (y and opacity only - x/rotate handled by motion values)
+  const stackAnimateTarget = { y: config.y, opacity: config.opacity };
+  const stackTransition = { duration: 0.25, ease: 'easeOut' as const };
 
   return (
     <motion.div
       ref={cardRef}
       className={`vote-card ${shouldWiggle ? 'vote-card-wiggle' : ''}`}
       style={{
-        // Keep motion values bound during drag; animate prop takes over during exit
-        x: isInteractive ? x : undefined,
-        rotate: isInteractive ? rotate : undefined,
+        // ALWAYS keep motion values bound - this is the key fix
+        // animate() imperatively animates from current position, no jumps
+        x,
+        rotate,
         boxShadow: isInteractive ? dragShadow : undefined,
         position: 'absolute',
         top: 0,
@@ -281,7 +297,7 @@ export const SwipeCard = memo(function SwipeCard({
         right: 0,
         zIndex: 3 - stackPosition,
         pointerEvents: isInteractive ? 'auto' : 'none',
-        willChange: effectiveExitX !== null ? 'transform' : undefined,
+        willChange: exiting ? 'transform' : undefined,
       }}
       drag={isInteractive ? 'x' : false}
       dragConstraints={{ left: 0, right: 0 }}
@@ -293,18 +309,15 @@ export const SwipeCard = memo(function SwipeCard({
       onMouseMove={isInteractive ? handleMouseMove : undefined}
       onMouseLeave={isInteractive ? handleMouseLeave : undefined}
       onAnimationEnd={shouldWiggle ? handleWiggleEnd : undefined}
-      onAnimationComplete={
-        effectiveExitX !== null && stackPosition === 0 && onExitComplete ? handleExitCompleteCallback : undefined
-      }
       initial={false}
-      animate={animateTarget}
+      animate={stackAnimateTarget}
       exit={{
         x: exitSign * 700,
         rotate: exitSign * 12,
         opacity: 0,
         transition: { duration: 0.3, ease: [0.32, 0.72, 0, 1] }
       }}
-      transition={animateTransition}
+      transition={stackTransition}
       aria-hidden={stackPosition > 0 ? true : undefined}
     >
       {/* Glow overlays */}
@@ -318,7 +331,7 @@ export const SwipeCard = memo(function SwipeCard({
       {/* Image: prefer thumbnailUri (MintGarden mainnet CDN), then IPFS, then mainnet launcher URL, then placeholder */}
       <div className="vote-card-image">
         {/* Exit overlay: smooth color pulse on vote */}
-        {effectiveExitX !== null && stackPosition === 0 && !reducedMotion && (
+        {exiting && stackPosition === 0 && !reducedMotion && (
           <motion.div
             className="vote-card-exit-overlay"
             aria-hidden
