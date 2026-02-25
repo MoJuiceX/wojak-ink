@@ -3,14 +3,13 @@
 // Identity resolution: Clerk auth DID → did query param → unregistered response.
 
 import { authenticateRequest } from '../../lib/auth';
+import { calculateFullPower } from './_power';
+import { PLOT_POWER_VALUE, PLAYER_TOP_N, COLLECTION_BONUS_CAP } from '../game/_shared';
 
 interface Env {
     DB: D1Database;
     CLERK_DOMAIN: string;
 }
-
-const PROVISIONAL_MIN_VOTES = 3;
-const PLAYER_TOP_N = 10;
 
 type Tier = 'Casual' | 'Active' | 'Serious' | 'Strong' | 'Elite' | 'Legend';
 
@@ -49,6 +48,18 @@ function unregisteredResponse() {
         rank: null,
         playerScore: 0,
         tier: 'Casual' as Tier,
+        // Power breakdown (all zeros for unregistered)
+        power: {
+            total: 0,
+            plotPower: 0,
+            plotCount: 0,
+            wojakPower: 0,
+            wojakCount: 0,
+            collectionBonus: 0,
+            collectedWojakCount: 0,
+            uniqueCreatorsCount: 0,
+        },
+        // Legacy fields for backward compat
         eligibleWojakCount: 0,
         totalWojakCount: 0,
         bestWojakScore: null,
@@ -56,8 +67,9 @@ function unregisteredResponse() {
         nextRank: null,
         meta: {
             mode: 'voting_only',
-            provisionalMinVotes: PROVISIONAL_MIN_VOTES,
+            plotPowerValue: PLOT_POWER_VALUE,
             playerTopN: PLAYER_TOP_N,
+            collectionBonusCap: COLLECTION_BONUS_CAP,
         },
     });
 }
@@ -84,42 +96,27 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
             return unregisteredResponse();
         }
 
-        // Check if player exists and is verified
+        // Check if player exists and is verified, also fetch wallet address
         const player = await db.prepare(
-            'SELECT did_id, phase1_verified FROM game_players WHERE did_id = ?'
-        ).bind(did).first<{ did_id: string; phase1_verified: number }>();
+            'SELECT did_id, phase1_verified, wallet_address FROM game_players WHERE did_id = ?'
+        ).bind(did).first<{ did_id: string; phase1_verified: number; wallet_address: string | null }>();
 
         if (!player || player.phase1_verified !== 1) {
             return unregisteredResponse();
         }
 
-        // Compute player score: sum of top 10 eligible Wojak vote scores
-        const wojakScores = await db.prepare(`
-      SELECT
-        ws.nft_id,
-        ws.net_score,
-        ws.total_votes
-      FROM did_holdings dh
-      JOIN wojak_scores ws ON ws.nft_id = dh.nft_id
-      WHERE dh.did_id = ? AND dh.collection = 'phase2'
-        AND ws.total_votes >= ${PROVISIONAL_MIN_VOTES}
-      ORDER BY ws.net_score DESC, ws.total_votes DESC, ws.edition_number ASC
-      LIMIT ${PLAYER_TOP_N}
-    `).bind(did).all();
+        const walletAddress = player.wallet_address || '';
 
-        const eligibleWojaks = wojakScores.results || [];
-        const playerScore = eligibleWojaks.reduce((sum, w) => sum + ((w.net_score as number) || 0), 0);
-        const eligibleWojakCount = eligibleWojaks.length;
-        const bestWojakScore = eligibleWojaks.length > 0 ? (eligibleWojaks[0].net_score as number) : null;
+        // Calculate full power breakdown
+        const power = await calculateFullPower(db, did, walletAddress);
 
-        // Total Wojaks in DID (including provisional)
-        const totalResult = await db.prepare(
-            "SELECT COUNT(*) as cnt FROM did_holdings WHERE did_id = ? AND collection = 'phase2'"
-        ).bind(did).first<{ cnt: number }>();
-        const totalWojakCount = totalResult?.cnt || 0;
+        // Use total power as player score for ranking
+        const playerScore = power.totalPower;
+        const eligibleWojakCount = power.wojakCount;
+        const totalWojakCount = power.plotCount + power.wojakCount;
 
-        // Compute rank: count players with higher score
-        const ranked = eligibleWojakCount > 0;
+        // Compute rank: all verified players with Wojaks are ranked
+        const ranked = totalWojakCount > 0;
         let rank: number | null = null;
 
         if (ranked) {
@@ -137,7 +134,6 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           FROM did_holdings dh
           JOIN wojak_scores ws ON ws.nft_id = dh.nft_id
           WHERE dh.collection = 'phase2'
-            AND ws.total_votes >= ${PROVISIONAL_MIN_VOTES}
         ),
         player_scores AS (
           SELECT
@@ -149,7 +145,6 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           WHERE gp.phase1_verified = 1
             AND gp.did_id IS NOT NULL AND gp.did_id != ''
           GROUP BY gp.did_id
-              HAVING eligible_count > 0
         )
         SELECT COUNT(*) + 1 AS rank
         FROM player_scores
@@ -181,7 +176,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         }
 
         const ms = Date.now() - start;
-        console.warn(`[fight-club.my-score] did=${did.slice(0, 20)}... ranked=${ranked} score=${playerScore} rank=${rank} ms=${ms}`);
+        console.log(`[fight-club.my-score] did=${did.slice(0, 20)}... ranked=${ranked} score=${playerScore} rank=${rank} ms=${ms}`);
 
         return json({
             success: true,
@@ -191,15 +186,28 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
             rank,
             playerScore,
             tier,
+            // Power breakdown
+            power: {
+                total: power.totalPower,
+                plotPower: power.plotPower,
+                plotCount: power.plotCount,
+                wojakPower: power.wojakPower,
+                wojakCount: power.wojakCount,
+                collectionBonus: power.collectionBonus,
+                collectedWojakCount: power.collectedWojakCount,
+                uniqueCreatorsCount: power.uniqueCreatorsCount,
+            },
+            // Legacy fields for backward compat
             eligibleWojakCount,
             totalWojakCount,
-            bestWojakScore,
+            bestWojakScore: null, // Deprecated
             pointsToNextRank,
             nextRank,
             meta: {
                 mode: 'voting_only',
-                provisionalMinVotes: PROVISIONAL_MIN_VOTES,
+                plotPowerValue: PLOT_POWER_VALUE,
                 playerTopN: PLAYER_TOP_N,
+                collectionBonusCap: COLLECTION_BONUS_CAP,
             },
         });
     } catch (err) {
