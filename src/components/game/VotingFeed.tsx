@@ -55,6 +55,8 @@ export function VotingFeed() {
   const reducedMotion = usePrefersReducedMotion();
   const pendingVoteRef = useRef<{ nftId: string; voteType: 1 | -1; promise: Promise<{ ok: boolean; error?: string; status?: number }> } | null>(null);
   const exitSafetyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const feedRef = useRef(feed); // Stable ref to avoid callback recreation
+  useEffect(() => { feedRef.current = feed; }, [feed]);
 
   // Milestone toasts
   useMilestoneToasts(player?.onboarding);
@@ -146,14 +148,19 @@ export function VotingFeed() {
     if (!pending) return;
 
     const { nftId: votedNftId, voteType, promise } = pending;
-    const currentFeedLength = feed.length;
+    const currentFeedLength = feedRef.current.length;
 
     // Optimistic: remove card and clear state immediately so next card promotes without waiting for API
     removeFromFeed(votedNftId);
     setCardExiting(false);
     setExitDirection(null);
+
+    // Defer feed refetch to avoid updating feed array during animation transitions
+    // This prevents AnimatePresence from getting confused about entering/exiting items
     if (currentFeedLength <= 3) {
-      loadFeed().catch(() => setFeedError(true));
+      setTimeout(() => {
+        loadFeed().catch(() => setFeedError(true));
+      }, 100);
     }
 
     // Handle vote result in background; rollback counts + toast only on error
@@ -163,17 +170,10 @@ export function VotingFeed() {
         toast.error(voteErrorMessage(result));
       }
     });
-  }, [
-    feed.length,
-    loadFeed,
-    removeFromFeed,
-    rollbackSessionCounts,
-    toast,
-    voteErrorMessage,
-  ]);
+  }, [loadFeed, removeFromFeed, rollbackSessionCounts, toast, voteErrorMessage]);
 
   const handleVote = useCallback((voteType: 1 | -1) => {
-    const currentItem = feed[0];
+    const currentItem = feedRef.current[0];
     if (!currentItem || cardExiting) return;
 
     const votedNftId = currentItem.nftId;
@@ -206,7 +206,7 @@ export function VotingFeed() {
         handleExitComplete();
       }
     }, 550);
-  }, [feed, cardExiting, castVote, triggerHaptics, handleExitComplete]);
+  }, [cardExiting, castVote, triggerHaptics, handleExitComplete]);
 
   // Stable callbacks for VoteButtons (avoid inline arrow functions that break memo)
   const handleLike = useCallback(() => handleVote(1), [handleVote]);
