@@ -91,7 +91,6 @@ export const SwipeCard = memo(function SwipeCard({
 }: SwipeCardProps) {
   const voteScore = likes - dislikes;
   const x = useMotionValue(0);
-  const [swipeExiting, setSwipeExiting] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [shouldWiggle, setShouldWiggle] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -99,18 +98,21 @@ export const SwipeCard = memo(function SwipeCard({
   const fallbackStepRef = useRef(0);
   const exitCompleteFired = useRef(false);
   const thresholdHapticFired = useRef(false);
-  const exitVelocityRef = useRef(0);
   const primaryUrl = thumbnailUri || imageUrl;
   const secondaryUrl = thumbnailUri ? imageUrl : null;
   const tertiaryUrl = MINTGARDEN_MAINNET_MEDIUM(nftId);
 
-  // Exiting can be triggered by swipe gesture OR parent setting exitDirection
-  const exiting = swipeExiting || (exitDirection !== null && stackPosition === 0);
+  // LOCAL exit state - stored once when swipe triggers, never recomputed
+  // This ensures consistent exit direction regardless of motion value changes
+  const [localExitX, setLocalExitX] = useState<number | null>(null);
+
+  // Compute effective exit position: prefer local state (swipe), fallback to prop (button)
+  // This avoids setState in useEffect while still handling both swipe and button cases
+  const effectiveExitX = localExitX ?? (exitDirection !== null && stackPosition === 0 ? exitDirection * 700 : null);
+  const exiting = effectiveExitX !== null;
   const isInteractive = stackPosition === 0 && !exiting;
-  // For swipe-triggered exits, use current drag position to determine direction
-  // For button-triggered exits, use the exitDirection prop
-  // Default to 1 (right) for AnimatePresence exit when prop has been cleared
-  const exitSign = exitDirection ?? (swipeExiting ? (x.get() >= 0 ? 1 : -1) : 1);
+  // Exit sign for AnimatePresence fallback (use stored direction)
+  const exitSign = effectiveExitX !== null ? (effectiveExitX > 0 ? 1 : -1) : (exitDirection ?? 1);
 
 
   const config = STACK_CONFIGS[stackPosition];
@@ -228,10 +230,11 @@ export const SwipeCard = memo(function SwipeCard({
     setImageTransform('translate(0, 0) scale(1)');
 
     if (Math.abs(info.offset.x) >= SWIPE_THRESHOLD) {
-      // Capture velocity for spring exit (swipe momentum)
-      exitVelocityRef.current = info.velocity.x;
-      setSwipeExiting(true);
       const voteType: 1 | -1 = info.offset.x > 0 ? 1 : -1;
+
+      // CRITICAL: Set exit position IMMEDIATELY from drag info, BEFORE any re-renders
+      // This locks in the direction so it can't be affected by spring animations
+      setLocalExitX(voteType * 700);
 
       // Strong haptic on confirmed vote
       if (typeof navigator?.vibrate === 'function') {
@@ -243,24 +246,14 @@ export const SwipeCard = memo(function SwipeCard({
     }
   }, [onVote]);
 
-  // Programmatic vote (from button/keyboard)
-  const triggerVote = useCallback((voteType: 1 | -1) => {
-    setSwipeExiting(true);
-    onVote(voteType);
-  }, [onVote]);
-
-  // Expose triggerVote for parent to call via ref
-  // (Parent will use button callbacks instead, so this is internal)
-  void triggerVote; // used by parent via onVote callback pattern
-
-  // Fully declarative animation targets - no imperative controls
-  // When exiting, animate to off-screen position; otherwise, animate to stack position
-  const animateTarget = exiting
-    ? { x: exitSign * 700, rotate: exitSign * 12, y: 0, opacity: 1 }
+  // Fully declarative animation targets using effective exit position
+  // When exiting, use the stored exit position (locked in at vote time)
+  const animateTarget = effectiveExitX !== null
+    ? { x: effectiveExitX, rotate: exitSign * 12, y: 0, opacity: 1 }
     : { x: 0, rotate: 0, y: config.y, opacity: config.opacity };
 
-  // Exit animation is faster and uses easeOut; stack promotion is gentler
-  const animateTransition = exiting
+  // Exit animation is faster and uses custom ease; stack promotion is gentler
+  const animateTransition = effectiveExitX !== null
     ? { duration: 0.35, ease: [0.32, 0.72, 0, 1] as const } // Custom ease for snappy exit
     : { duration: 0.25, ease: 'easeOut' as const };
 
@@ -288,7 +281,7 @@ export const SwipeCard = memo(function SwipeCard({
         right: 0,
         zIndex: 3 - stackPosition,
         pointerEvents: isInteractive ? 'auto' : 'none',
-        willChange: exiting ? 'transform' : undefined,
+        willChange: effectiveExitX !== null ? 'transform' : undefined,
       }}
       drag={isInteractive ? 'x' : false}
       dragConstraints={{ left: 0, right: 0 }}
@@ -301,7 +294,7 @@ export const SwipeCard = memo(function SwipeCard({
       onMouseLeave={isInteractive ? handleMouseLeave : undefined}
       onAnimationEnd={shouldWiggle ? handleWiggleEnd : undefined}
       onAnimationComplete={
-        exiting && stackPosition === 0 && onExitComplete ? handleExitCompleteCallback : undefined
+        effectiveExitX !== null && stackPosition === 0 && onExitComplete ? handleExitCompleteCallback : undefined
       }
       initial={false}
       animate={animateTarget}
@@ -324,13 +317,13 @@ export const SwipeCard = memo(function SwipeCard({
 
       {/* Image: prefer thumbnailUri (MintGarden mainnet CDN), then IPFS, then mainnet launcher URL, then placeholder */}
       <div className="vote-card-image">
-        {/* Exit overlay: smooth color pulse */}
-        {exiting && stackPosition === 0 && exitDirection && !reducedMotion && (
+        {/* Exit overlay: smooth color pulse on vote */}
+        {effectiveExitX !== null && stackPosition === 0 && !reducedMotion && (
           <motion.div
             className="vote-card-exit-overlay"
             aria-hidden
             style={{
-              background: exitDirection === 1
+              background: exitSign === 1
                 ? 'radial-gradient(ellipse 85% 75% at 50% 50%, rgba(34, 197, 94, 0.45), rgba(34, 197, 94, 0.15) 50%, transparent 75%)'
                 : 'radial-gradient(ellipse 85% 75% at 50% 50%, rgba(50, 50, 60, 0.5), rgba(35, 35, 45, 0.2) 50%, transparent 75%)',
             }}

@@ -18,10 +18,21 @@ export default function StartupSequence({ onComplete }: StartupSequenceProps) {
   const ps1AudioRef = useRef<HTMLAudioElement | null>(null)
   const bootAudioRef = useRef<HTMLAudioElement | null>(null)
 
-  // Handle skip intro - fade out audio and complete immediately
+  // Handle skip intro - fade out audio, save preference, and complete immediately
   const handleSkipIntro = () => {
     if (isSkipping) return
     setIsSkipping(true)
+
+    // Save preference to skip intro on future visits
+    try {
+      const stored = localStorage.getItem('wojak-settings')
+      const settings = stored ? JSON.parse(stored) : {}
+      settings.app = settings.app || {}
+      settings.app.skipBootSequence = true
+      localStorage.setItem('wojak-settings', JSON.stringify(settings))
+    } catch {
+      // Ignore storage errors
+    }
 
     // Fade out boot audio smoothly over 500ms
     if (bootAudioRef.current) {
