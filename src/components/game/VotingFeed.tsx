@@ -197,6 +197,7 @@ export function VotingFeed() {
     pendingVoteRef.current = { nftId: votedNftId, voteType, promise: votePromise };
 
     // Safety timeout: if onAnimationComplete never fires, unblock UI
+    // Animation is 350ms + 1 rAF (~16ms), so 450ms safety margin
     if (exitSafetyTimeoutRef.current) {
       clearTimeout(exitSafetyTimeoutRef.current);
       exitSafetyTimeoutRef.current = null;
@@ -205,7 +206,7 @@ export function VotingFeed() {
       if (pendingVoteRef.current?.nftId === votedNftId) {
         handleExitComplete();
       }
-    }, 550);
+    }, 450);
   }, [cardExiting, castVote, triggerHaptics, handleExitComplete]);
 
   // Stable callbacks for VoteButtons (avoid inline arrow functions that break memo)

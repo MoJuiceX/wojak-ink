@@ -3,9 +3,9 @@
 // Border glow + icon reveal feedback (no text stamps).
 // Supports card stack positioning and first-card wiggle.
 
-import { motion, useMotionValue, useTransform, useMotionValueEvent, useAnimationControls } from 'framer-motion';
+import { motion, useMotionValue, useTransform, useMotionValueEvent } from 'framer-motion';
 import type { PanInfo } from 'framer-motion';
-import { useState, useCallback, useRef, useEffect, useLayoutEffect, memo } from 'react';
+import { useState, useCallback, useRef, useEffect, memo } from 'react';
 
 // Haptic patterns for premium feedback
 const HAPTIC_PATTERNS = {
@@ -100,8 +100,6 @@ export const SwipeCard = memo(function SwipeCard({
   const exitCompleteFired = useRef(false);
   const thresholdHapticFired = useRef(false);
   const exitVelocityRef = useRef(0);
-  const controls = useAnimationControls();
-  const hasStartedExit = useRef(false);
   const primaryUrl = thumbnailUri || imageUrl;
   const secondaryUrl = thumbnailUri ? imageUrl : null;
   const tertiaryUrl = MINTGARDEN_MAINNET_MEDIUM(nftId);
@@ -109,19 +107,9 @@ export const SwipeCard = memo(function SwipeCard({
   // Exiting can be triggered by swipe gesture OR parent setting exitDirection
   const exiting = swipeExiting || (exitDirection !== null && stackPosition === 0);
   const isInteractive = stackPosition === 0 && !exiting;
-  const exitSign = exitDirection || (x.get() >= 0 ? 1 : -1);
-
-  // Trigger exit animation imperatively (useLayoutEffect for immediate start, no frame delay)
-  useLayoutEffect(() => {
-    if (exiting && !hasStartedExit.current) {
-      hasStartedExit.current = true;
-      controls.start({
-        x: exitSign * 700,
-        rotate: exitSign * 12,
-        transition: { duration: 0.4, ease: 'easeOut' }
-      });
-    }
-  }, [exiting, controls, exitSign]);
+  // For swipe-triggered exits, use current drag position to determine direction
+  // For button-triggered exits, use the exitDirection prop
+  const exitSign = exitDirection ?? (x.get() >= 0 ? 1 : -1);
 
 
   const config = STACK_CONFIGS[stackPosition];
@@ -264,18 +252,23 @@ export const SwipeCard = memo(function SwipeCard({
   // (Parent will use button callbacks instead, so this is internal)
   void triggerVote; // used by parent via onVote callback pattern
 
-  // Transition for stack promotion
-  const promoteTransition = { duration: 0.25, ease: 'easeOut' as const };
+  // Fully declarative animation targets - no imperative controls
+  // When exiting, animate to off-screen position; otherwise, animate to stack position
+  const animateTarget = exiting
+    ? { x: exitSign * 700, rotate: exitSign * 12, y: 0, opacity: 1 }
+    : { x: 0, rotate: 0, y: config.y, opacity: config.opacity };
+
+  // Exit animation is faster and uses easeOut; stack promotion is gentler
+  const animateTransition = exiting
+    ? { duration: 0.35, ease: [0.32, 0.72, 0, 1] as const } // Custom ease for snappy exit
+    : { duration: 0.25, ease: 'easeOut' as const };
 
   const handleExitCompleteCallback = useCallback(() => {
     if (exitCompleteFired.current) return;
     exitCompleteFired.current = true;
-    // Double rAF ensures the final animation frame is painted before we signal completion
-    // This prevents race conditions where removeFromFeed happens before visual exit is done
+    // Single rAF to ensure final frame is painted
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        onExitComplete?.();
-      });
+      onExitComplete?.();
     });
   }, [onExitComplete]);
 
@@ -284,6 +277,7 @@ export const SwipeCard = memo(function SwipeCard({
       ref={cardRef}
       className={`vote-card ${shouldWiggle ? 'vote-card-wiggle' : ''}`}
       style={{
+        // Keep motion values bound during drag; animate prop takes over during exit
         x: isInteractive ? x : undefined,
         rotate: isInteractive ? rotate : undefined,
         boxShadow: isInteractive ? dragShadow : undefined,
@@ -309,9 +303,9 @@ export const SwipeCard = memo(function SwipeCard({
         exiting && stackPosition === 0 && onExitComplete ? handleExitCompleteCallback : undefined
       }
       initial={false}
-      animate={exiting ? controls : { y: config.y, opacity: config.opacity }}
-      exit={{ opacity: 0, transition: { duration: 0.05 } }}
-      transition={promoteTransition}
+      animate={animateTarget}
+      exit={{ opacity: 0, transition: { duration: 0 } }}
+      transition={animateTransition}
       aria-hidden={stackPosition > 0 ? true : undefined}
     >
       {/* Glow overlays */}
