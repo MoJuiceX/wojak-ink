@@ -28,6 +28,10 @@ interface MobileNavigationProps {
 // Minimum scroll distance before hiding nav (prevents flicker)
 const SCROLL_HIDE_THRESHOLD = 60;
 
+// Pages where scroll-based hiding is disabled (exact match only)
+// e.g., voting uses swipe gestures that can trigger false scroll events
+const SCROLL_HIDE_DISABLED_PATHS = ['/fight-club', '/fight-club/vote'];
+
 export function MobileNavigation({ visible = true }: MobileNavigationProps) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -36,9 +40,13 @@ export function MobileNavigation({ visible = true }: MobileNavigationProps) {
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const { scrollDirection, scrollY } = useLayout();
 
+  // Check if current path should disable scroll-based hiding (exact match only)
+  const isScrollHideDisabled = SCROLL_HIDE_DISABLED_PATHS.includes(location.pathname);
+
   // Hide nav when scrolling down (past threshold), show when scrolling up
   // Don't hide while MoreMenu is open (user may scroll while interacting)
-  const isHiddenByScroll = !isMoreMenuOpen && scrollDirection === 'down' && scrollY > SCROLL_HIDE_THRESHOLD;
+  // Don't hide on pages where swipe/vote gestures trigger false scroll events
+  const isHiddenByScroll = !isScrollHideDisabled && !isMoreMenuOpen && scrollDirection === 'down' && scrollY > SCROLL_HIDE_THRESHOLD;
 
   const activeIndex = useMemo(() => {
     return MOBILE_NAV_ITEMS.findIndex((item) =>

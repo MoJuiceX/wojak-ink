@@ -1,61 +1,26 @@
 // Tinder-style swipe card for voting.
-// Swipe right = like, swipe left = dislike.
-// Border glow + icon reveal feedback (no text stamps).
-// Supports card stack positioning and first-card wiggle.
+// Swipe right = glaze, swipe left = fade.
+// Simple AnimatePresence-based exit animation.
 
 import { motion, useMotionValue, useTransform, useMotionValueEvent, animate } from 'framer-motion';
 import type { PanInfo } from 'framer-motion';
-import { useState, useCallback, useRef, useEffect, memo } from 'react';
-
-// Haptic patterns for premium feedback
-const HAPTIC_PATTERNS = {
-  glaze: {
-    light: [5],
-    medium: [10, 30, 20],
-    strong: [15, 25, 20, 25, 25], // Celebratory rising pattern
-  },
-  fade: {
-    light: [8],
-    medium: [15, 20, 10],
-    strong: [20, 15, 15, 15, 10], // Sharp dismissive pattern
-  },
-} as const;
-
-interface SwipeCardProps {
-  nftId: string;
-  name: string;
-  editionNumber: number;
-  imageUrl: string;
-  /** MintGarden mainnet CDN (from image_hash). Prefer this when present for reliable load. */
-  thumbnailUri?: string | null;
-  onVote: (voteType: 1 | -1) => void;
-  stackPosition?: 0 | 1 | 2;
-  isFirst?: boolean;
-  reducedMotion?: boolean;
-  exitDirection?: 1 | -1 | null; // 1 = right (like), -1 = left (dislike)
-  /** Called when exit animation completes (so parent can remove from feed immediately) */
-  onExitComplete?: () => void;
-  /** Voting stats for the footer context */
-  likes?: number;
-  dislikes?: number;
-  totalVotes?: number;
-}
+import { useState, useCallback, useRef, useEffect, useLayoutEffect, memo } from 'react';
 
 const SWIPE_THRESHOLD = 100;
+
 const FALLBACK_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' fill='%2312121a'%3E%3Crect width='200' height='200' rx='14'/%3E%3Ctext x='100' y='108' text-anchor='middle' fill='%23606070' font-size='14' font-family='system-ui'%3EImage unavailable%3C/text%3E%3C/svg%3E";
-/** Working MintGarden CDN (mainnet); launcher-ID URL may 404 but we try as fallback */
 const MINTGARDEN_MAINNET_MEDIUM = (nftId: string) =>
   `https://assets.mainnet.mintgarden.io/thumbnails/medium/${nftId}.png`;
 
-// Stack: all cards same scale, just offset to show stack effect
-// No scale change on promotion = no "growing" animation
 const STACK_CONFIGS = [
-  { scale: 1, y: 0, opacity: 1 },
-  { scale: 1, y: 8, opacity: 1 },
-  { scale: 1, y: 16, opacity: 1 },
+  { y: 0, scale: 1 },
+  { y: 10, scale: 0.97 },
+  { y: 20, scale: 0.94 },
 ] as const;
 
-// Inline SVG icons for drag feedback
+// Haptic patterns
+const HAPTIC_LIGHT = { glaze: [5], fade: [8] } as const;
+
 function CheckSvg() {
   return (
     <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
@@ -73,6 +38,24 @@ function CrossSvg() {
   );
 }
 
+export interface SwipeCardProps {
+  nftId: string;
+  name: string;
+  editionNumber: number;
+  imageUrl: string;
+  thumbnailUri?: string | null;
+  onVote: (voteType: 1 | -1) => void;
+  onExitComplete?: () => void;
+  stackPosition?: 0 | 1 | 2;
+  isFirst?: boolean;
+  reducedMotion?: boolean;
+  likes?: number;
+  dislikes?: number;
+  totalVotes?: number;
+  // Exit direction passed from parent - triggers exit animation
+  exitDirection?: 1 | -1 | null;
+}
+
 export const SwipeCard = memo(function SwipeCard({
   nftId,
   name,
@@ -80,92 +63,126 @@ export const SwipeCard = memo(function SwipeCard({
   imageUrl,
   thumbnailUri,
   onVote,
+  onExitComplete,
   stackPosition = 0,
   isFirst = false,
   reducedMotion = false,
-  exitDirection = null,
-  onExitComplete,
   likes = 0,
   dislikes = 0,
   totalVotes = 0,
+  exitDirection = null,
 }: SwipeCardProps) {
-  const voteScore = likes - dislikes;
+  // Motion values for drag
   const x = useMotionValue(0);
-  const [imgLoaded, setImgLoaded] = useState(false);
-  const [shouldWiggle, setShouldWiggle] = useState(false);
-  const imageRef = useRef<HTMLImageElement>(null);
+  const rotation = useMotionValue(0);
+  const opacity = useMotionValue(1);
+  const rotateFromDrag = useTransform(x, [-200, 200], [-8, 8]);
+
+  // Refs
   const cardRef = useRef<HTMLDivElement>(null);
   const fallbackStepRef = useRef(0);
-  const exitCompleteFired = useRef(false);
   const thresholdHapticFired = useRef(false);
+  const supportsHover = useRef(false);
+
+  // Ref for onExitComplete to avoid dependency changes triggering re-runs
+  const onExitCompleteRef = useRef(onExitComplete);
+  useEffect(() => {
+    onExitCompleteRef.current = onExitComplete;
+  }, [onExitComplete]);
+
+  // Sync rotation with drag when not exiting
+  useMotionValueEvent(rotateFromDrag, 'change', (latest) => {
+    if (exitDirection === null) {
+      rotation.set(latest);
+    }
+  });
+
+  // Handle exit animation with proper cleanup
+  // Use useLayoutEffect to ensure resets happen before paint
+  useLayoutEffect(() => {
+    let cancelled = false;
+
+    if (exitDirection !== null) {
+      // Start exit animations
+      const xAnim = animate(x, exitDirection * 450, {
+        duration: 0.35,
+        ease: [0.4, 0, 0.2, 1],
+      });
+      const rotAnim = animate(rotation, exitDirection * 18, {
+        duration: 0.35,
+        ease: [0.4, 0, 0.2, 1],
+      });
+      const opacAnim = animate(opacity, 0, {
+        duration: 0.35,
+        ease: [0.4, 0, 0.2, 1],
+      });
+
+      // Use fixed timeout for completion - more predictable than promise
+      const timer = setTimeout(() => {
+        if (!cancelled) {
+          onExitCompleteRef.current?.();
+        }
+      }, 370); // Slightly longer than animation (350ms + buffer)
+
+      // Cleanup
+      return () => {
+        cancelled = true;
+        clearTimeout(timer);
+        xAnim.stop();
+        rotAnim.stop();
+        opacAnim.stop();
+      };
+    } else {
+      // Reset instantly when not exiting
+      x.set(0);
+      rotation.set(0);
+      opacity.set(1);
+    }
+  }, [exitDirection, stackPosition, x, rotation, opacity]);
+
+  // State
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [shouldWiggle, setShouldWiggle] = useState(false);
+  const [imageTransform, setImageTransform] = useState('translate(0, 0) scale(1)');
+
+  // Derived
+  const voteScore = likes - dislikes;
+  const isInteractive = stackPosition === 0 && exitDirection === null;
+  const config = STACK_CONFIGS[stackPosition];
   const primaryUrl = thumbnailUri || imageUrl;
   const secondaryUrl = thumbnailUri ? imageUrl : null;
   const tertiaryUrl = MINTGARDEN_MAINNET_MEDIUM(nftId);
 
-  // Track exit state with ref (not state) to avoid re-render during animation
-  const isExitingRef = useRef(false);
-  const [exiting, setExiting] = useState(false);
-  const [exitSign, setExitSign] = useState<1 | -1>(1);
-  const isInteractive = stackPosition === 0 && !exiting;
-
-
-  const config = STACK_CONFIGS[stackPosition];
-
-
-  // Subtle rotation on drag
-  const rotate = useTransform(x, [-200, 200], [-8, 8]);
-
-  // Right glow opacity (like) - exponential curve for dramatic reveal
-  const glowRightOpacity = useTransform(
-    x,
-    [0, SWIPE_THRESHOLD * 0.3, SWIPE_THRESHOLD * 0.7, SWIPE_THRESHOLD],
-    [0, 0.1, 0.35, 0.65]
-  );
-  // Left glow opacity (dislike)
-  const glowLeftOpacity = useTransform(
-    x,
-    [-SWIPE_THRESHOLD, -SWIPE_THRESHOLD * 0.7, -SWIPE_THRESHOLD * 0.3, 0],
-    [0.65, 0.35, 0.1, 0]
-  );
-
-  // Background tint opacity - stronger tint for clearer feedback
+  // Glow/tint transforms based on drag position
+  const glowRightOpacity = useTransform(x, [0, SWIPE_THRESHOLD * 0.3, SWIPE_THRESHOLD * 0.7, SWIPE_THRESHOLD], [0, 0.1, 0.35, 0.65]);
+  const glowLeftOpacity = useTransform(x, [-SWIPE_THRESHOLD, -SWIPE_THRESHOLD * 0.7, -SWIPE_THRESHOLD * 0.3, 0], [0.65, 0.35, 0.1, 0]);
   const tintLikeOpacity = useTransform(x, [0, SWIPE_THRESHOLD], [0, 0.18]);
   const tintDislikeOpacity = useTransform(x, [-SWIPE_THRESHOLD, 0], [0.18, 0]);
-
-  // Icon reveal with scale - icons "pop" into view
   const checkOpacity = useTransform(x, [40, SWIPE_THRESHOLD], [0, 1]);
   const checkScale = useTransform(x, [40, SWIPE_THRESHOLD], [0.5, 1]);
   const crossOpacity = useTransform(x, [-SWIPE_THRESHOLD, -40], [1, 0]);
   const crossScale = useTransform(x, [-SWIPE_THRESHOLD, -40], [1, 0.5]);
 
-  // Shadow stays consistent
-  const dragShadow = 'var(--shadow-card)';
-
-  // Parallax state (desktop only)
-  const [imageTransform, setImageTransform] = useState('translate(0, 0) scale(1)');
-  const supportsHover = useRef(false);
-
+  // Detect hover support
   useEffect(() => {
     supportsHover.current = window.matchMedia('(hover: hover)').matches;
   }, []);
 
-  // Premium haptics on threshold crossing
+  // Haptic on threshold crossing during drag
   useMotionValueEvent(x, 'change', (latest) => {
     const absX = Math.abs(latest);
     if (absX >= SWIPE_THRESHOLD && !thresholdHapticFired.current) {
       thresholdHapticFired.current = true;
       if (typeof navigator?.vibrate === 'function') {
-        const pattern = latest > 0 ? HAPTIC_PATTERNS.glaze.light : HAPTIC_PATTERNS.fade.light;
-        navigator.vibrate(pattern);
+        navigator.vibrate(latest > 0 ? HAPTIC_LIGHT.glaze : HAPTIC_LIGHT.fade);
       }
     }
-    // Reset when returning below 50% of threshold
     if (absX < SWIPE_THRESHOLD * 0.5) {
       thresholdHapticFired.current = false;
     }
   });
 
-  // First-card wiggle (defer setState to avoid set-state-in-effect lint)
+  // First-card wiggle animation
   useEffect(() => {
     if (isFirst && !reducedMotion && stackPosition === 0) {
       try {
@@ -173,33 +190,41 @@ export const SwipeCard = memo(function SwipeCard({
           const id = setTimeout(() => setShouldWiggle(true), 0);
           return () => clearTimeout(id);
         }
-      } catch {
-        // localStorage unavailable
-      }
+      } catch { /* localStorage unavailable */ }
     }
   }, [isFirst, reducedMotion, stackPosition]);
 
   const handleWiggleEnd = useCallback(() => {
     setShouldWiggle(false);
     try {
-      if (typeof requestIdleCallback !== 'undefined') {
-        requestIdleCallback(() => localStorage.setItem('wojak_vote_first_visit', '1'));
-      } else {
-        localStorage.setItem('wojak_vote_first_visit', '1');
-      }
-    } catch {
-      // localStorage unavailable
-    }
+      localStorage.setItem('wojak_vote_first_visit', '1');
+    } catch { /* localStorage unavailable */ }
   }, []);
 
+  // Drag handlers
+  const handleDragStart = useCallback(() => {
+    if (cardRef.current) cardRef.current.style.willChange = 'transform';
+    if (!reducedMotion && supportsHover.current) {
+      setImageTransform('translate(0, 0) scale(1.02)');
+    }
+  }, [reducedMotion]);
+
+  const handleDragEnd = useCallback((_: unknown, info: PanInfo) => {
+    if (cardRef.current) cardRef.current.style.willChange = 'auto';
+    setImageTransform('translate(0, 0) scale(1)');
+
+    if (Math.abs(info.offset.x) >= SWIPE_THRESHOLD) {
+      const voteType: 1 | -1 = info.offset.x > 0 ? 1 : -1;
+      onVote(voteType);
+    }
+  }, [onVote]);
+
+  // Mouse parallax (desktop)
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!supportsHover.current || reducedMotion || stackPosition !== 0) return;
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    // Shift image 2-3px opposite to mouse
-    const dx = -((e.clientX - centerX) / rect.width) * 3;
-    const dy = -((e.clientY - centerY) / rect.height) * 3;
+    const dx = -((e.clientX - rect.left - rect.width / 2) / rect.width) * 3;
+    const dy = -((e.clientY - rect.top - rect.height / 2) / rect.height) * 3;
     setImageTransform(`translate(${dx}px, ${dy}px) scale(1)`);
   }, [reducedMotion, stackPosition]);
 
@@ -207,97 +232,20 @@ export const SwipeCard = memo(function SwipeCard({
     setImageTransform('translate(0, 0) scale(1)');
   }, []);
 
-  const handleDragStart = useCallback(() => {
-    if (cardRef.current) {
-      cardRef.current.style.willChange = 'transform';
-    }
-    if (!reducedMotion && supportsHover.current) {
-      setImageTransform('translate(0, 0) scale(1.02)');
-    }
-  }, [reducedMotion]);
-
-  // Animate card to exit position (used by both swipe and button)
-  const animateExit = useCallback((direction: 1 | -1) => {
-    if (isExitingRef.current) return;
-    isExitingRef.current = true;
-    setExitSign(direction);
-    setExiting(true);
-
-    const exitX = direction * 700;
-    const exitRotate = direction * 12;
-
-    // Imperatively animate motion values from CURRENT position to exit
-    // This is the key fix: animate() starts from current value, not from 0
-    animate(x, exitX, {
-      duration: 0.35,
-      ease: [0.32, 0.72, 0, 1],
-    });
-    animate(rotate, exitRotate, {
-      duration: 0.35,
-      ease: [0.32, 0.72, 0, 1],
-      onComplete: () => {
-        // Call exit complete after animation finishes
-        if (!exitCompleteFired.current) {
-          exitCompleteFired.current = true;
-          requestAnimationFrame(() => {
-            onExitComplete?.();
-          });
-        }
-      },
-    });
-  }, [x, rotate, onExitComplete]);
-
-  // Handle button votes (parent sets exitDirection prop)
-  // setTimeout defers setState to avoid lint warning about setState in effect
-  useEffect(() => {
-    if (exitDirection !== null && stackPosition === 0 && !isExitingRef.current) {
-      const id = setTimeout(() => animateExit(exitDirection), 0);
-      return () => clearTimeout(id);
-    }
-  }, [exitDirection, stackPosition, animateExit]);
-
-  const handleDragEnd = useCallback((_: unknown, info: PanInfo) => {
-    if (cardRef.current) {
-      cardRef.current.style.willChange = 'auto';
-    }
-    setImageTransform('translate(0, 0) scale(1)');
-
-    if (Math.abs(info.offset.x) >= SWIPE_THRESHOLD) {
-      const voteType: 1 | -1 = info.offset.x > 0 ? 1 : -1;
-
-      // Strong haptic on confirmed vote
-      if (typeof navigator?.vibrate === 'function') {
-        const pattern = voteType === 1 ? HAPTIC_PATTERNS.glaze.strong : HAPTIC_PATTERNS.fade.strong;
-        navigator.vibrate(pattern);
-      }
-
-      // Animate exit from current drag position
-      animateExit(voteType);
-      onVote(voteType);
-    }
-  }, [onVote, animateExit]);
-
-  // Stack position animation (y and opacity only - x/rotate handled by motion values)
-  const stackAnimateTarget = { y: config.y, opacity: config.opacity };
-  const stackTransition = { duration: 0.25, ease: 'easeOut' as const };
-
   return (
     <motion.div
       ref={cardRef}
       className={`vote-card ${shouldWiggle ? 'vote-card-wiggle' : ''}`}
       style={{
-        // ALWAYS keep motion values bound - this is the key fix
-        // animate() imperatively animates from current position, no jumps
         x,
-        rotate,
-        boxShadow: isInteractive ? dragShadow : undefined,
+        rotate: rotation,
+        opacity,
         position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
-        zIndex: 3 - stackPosition,
+        zIndex: exitDirection !== null ? 10 : 3 - stackPosition,
         pointerEvents: isInteractive ? 'auto' : 'none',
-        willChange: exiting ? 'transform' : undefined,
       }}
       drag={isInteractive ? 'x' : false}
       dragConstraints={{ left: 0, right: 0 }}
@@ -310,14 +258,14 @@ export const SwipeCard = memo(function SwipeCard({
       onMouseLeave={isInteractive ? handleMouseLeave : undefined}
       onAnimationEnd={shouldWiggle ? handleWiggleEnd : undefined}
       initial={false}
-      animate={stackAnimateTarget}
-      exit={{
-        x: exitSign * 700,
-        rotate: exitSign * 12,
-        opacity: 0,
-        transition: { duration: 0.3, ease: [0.32, 0.72, 0, 1] }
+      animate={{
+        y: config.y,
+        scale: config.scale,
       }}
-      transition={stackTransition}
+      transition={{
+        duration: 0.25,
+        ease: [0.22, 1, 0.36, 1],
+      }}
       aria-hidden={stackPosition > 0 ? true : undefined}
     >
       {/* Glow overlays */}
@@ -328,31 +276,24 @@ export const SwipeCard = memo(function SwipeCard({
         </>
       )}
 
-      {/* Image: prefer thumbnailUri (MintGarden mainnet CDN), then IPFS, then mainnet launcher URL, then placeholder */}
+      {/* Image */}
       <div className="vote-card-image">
-        {/* Exit overlay: smooth color pulse on vote */}
-        {exiting && stackPosition === 0 && !reducedMotion && (
+        {/* Exit overlay */}
+        {exitDirection !== null && stackPosition === 0 && !reducedMotion && (
           <motion.div
             className="vote-card-exit-overlay"
             aria-hidden
             style={{
-              background: exitSign === 1
+              background: exitDirection === 1
                 ? 'radial-gradient(ellipse 85% 75% at 50% 50%, rgba(34, 197, 94, 0.45), rgba(34, 197, 94, 0.15) 50%, transparent 75%)'
                 : 'radial-gradient(ellipse 85% 75% at 50% 50%, rgba(50, 50, 60, 0.5), rgba(35, 35, 45, 0.2) 50%, transparent 75%)',
             }}
             initial={{ opacity: 0, scale: 0.95 }}
-            animate={{
-              opacity: [0, 0.7, 0.3],
-              scale: [0.95, 1.05, 1.1],
-            }}
-            transition={{
-              duration: 0.35,
-              ease: [0.25, 0.1, 0.25, 1], // Smooth ease
-            }}
+            animate={{ opacity: [0, 0.7, 0.3], scale: [0.95, 1.05, 1.1] }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
           />
         )}
         <img
-          ref={imageRef}
           src={primaryUrl}
           alt={`Your Wojak #${editionNumber}: ${name}`}
           draggable={false}
@@ -374,26 +315,20 @@ export const SwipeCard = memo(function SwipeCard({
           }}
           style={{
             opacity: imgLoaded ? 1 : 0,
-            transform: isInteractive ? imageTransform : undefined,
-            transition: 'transform 100ms ease',
+            transform: isInteractive ? imageTransform : 'translate(0, 0) scale(1)',
+            transition: 'opacity 150ms ease, transform 100ms ease',
           }}
         />
 
         {/* Color tint overlay */}
         {isInteractive && (
           <>
-            <motion.div
-              className="vote-card-tint"
-              style={{ background: 'rgba(34, 197, 94, 1)', opacity: tintLikeOpacity }}
-            />
-            <motion.div
-              className="vote-card-tint"
-              style={{ background: 'rgba(239, 68, 68, 1)', opacity: tintDislikeOpacity }}
-            />
+            <motion.div className="vote-card-tint" style={{ background: 'rgba(34, 197, 94, 1)', opacity: tintLikeOpacity }} />
+            <motion.div className="vote-card-tint" style={{ background: 'rgba(239, 68, 68, 1)', opacity: tintDislikeOpacity }} />
           </>
         )}
 
-        {/* Icon overlays with scale - icons "pop" into view */}
+        {/* Icon overlays */}
         {isInteractive && (
           <>
             <motion.div className="vote-card-icon-overlay" style={{ opacity: checkOpacity, scale: checkScale }}>
@@ -406,7 +341,7 @@ export const SwipeCard = memo(function SwipeCard({
         )}
       </div>
 
-      {/* Info bar — compact voting context */}
+      {/* Info bar */}
       <div className="vote-card-info">
         <div className="vote-card-info-main">
           <div className="vote-card-info-top">

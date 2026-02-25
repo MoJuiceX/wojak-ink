@@ -3578,7 +3578,7 @@ body {
   aspect-ratio: 1 / 1.14;
   max-height: calc(100vh - 228px);
   isolation: isolate;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* 24h vote pass progress */
@@ -4096,11 +4096,11 @@ body {
   .vote-buttons-row {
     max-width: calc(100vw - 20px);
     width: 100%;
-    gap: 12px;
+    gap: 10px;
     position: sticky;
     bottom: calc(env(safe-area-inset-bottom, 0px) + 86px);
     z-index: 18;
-    padding: 0 10px 11px;
+    padding: 8px;
     border-radius: 18px;
     background: linear-gradient(180deg, rgba(20, 20, 28, 0.92), rgba(10, 10, 15, 0.88));
     backdrop-filter: blur(12px) saturate(130%);

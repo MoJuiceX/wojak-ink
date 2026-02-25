@@ -9,18 +9,39 @@ const CLERK_ENABLED = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 // Unlimited voting - large number for compatibility
 const UNLIMITED_VOTES = 9999;
 
+// Generate a random 16-char lowercase alphanumeric string
+function generateRandomId(): string {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  // Try crypto.getRandomValues first (works in more contexts than randomUUID)
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    const arr = new Uint8Array(16);
+    crypto.getRandomValues(arr);
+    for (let i = 0; i < 16; i++) {
+      result += chars[arr[i] % chars.length];
+    }
+  } else {
+    // Fallback to Math.random
+    for (let i = 0; i < 16; i++) {
+      result += chars[Math.floor(Math.random() * chars.length)];
+    }
+  }
+  return result;
+}
+
 // Generate or retrieve stable guest ID
 function getGuestId(): string {
   try {
     let id = localStorage.getItem(GUEST_ID_KEY);
-    if (!id) {
-      id = 'guest_' + crypto.randomUUID().replace(/-/g, '').slice(0, 16);
+    if (!id || !/^guest_[a-z0-9]{16}$/.test(id)) {
+      // Generate new ID if missing or invalid format
+      id = 'guest_' + generateRandomId();
       localStorage.setItem(GUEST_ID_KEY, id);
     }
     return id;
   } catch {
-    // Fallback if localStorage not available
-    return 'guest_' + Math.random().toString(36).slice(2, 18);
+    // Fallback if localStorage not available - still generate valid format
+    return 'guest_' + generateRandomId();
   }
 }
 
@@ -282,6 +303,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
         : `/api/game/feed?guestId=${encodeURIComponent(guestId)}&limit=10`;
 
       const res = await fetch(feedUrl);
+
+      if (!res.ok) {
+        throw new Error(`Feed HTTP error: ${res.status} ${res.statusText}`);
+      }
+
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Feed request failed');
       setFeedVotePassProgress(data?.meta?.votePass ?? null);
