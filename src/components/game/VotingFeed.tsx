@@ -150,10 +150,12 @@ export function VotingFeed() {
     const { nftId: votedNftId, voteType, promise } = pending;
     const currentFeedLength = feedRef.current.length;
 
-    // Optimistic: remove card and clear state immediately so next card promotes without waiting for API
+    // Optimistic: remove card immediately so next card promotes without waiting for API
+    // Keep exitDirection set so AnimatePresence exit animation knows which way to slide
+    // It will be overwritten on the next vote anyway
     removeFromFeed(votedNftId);
     setCardExiting(false);
-    setExitDirection(null);
+    // Don't clear exitDirection here - AnimatePresence needs it for the exit animation
 
     // Defer feed refetch to avoid updating feed array during animation transitions
     // This prevents AnimatePresence from getting confused about entering/exiting items
@@ -197,7 +199,8 @@ export function VotingFeed() {
     pendingVoteRef.current = { nftId: votedNftId, voteType, promise: votePromise };
 
     // Safety timeout: if onAnimationComplete never fires, unblock UI
-    // Animation is 350ms + 1 rAF (~16ms), so 450ms safety margin
+    // Animation is 350ms + rAF. Use 800ms to handle slow devices gracefully.
+    // AnimatePresence exit now does a proper slide-off, so early removal looks fine.
     if (exitSafetyTimeoutRef.current) {
       clearTimeout(exitSafetyTimeoutRef.current);
       exitSafetyTimeoutRef.current = null;
@@ -206,7 +209,7 @@ export function VotingFeed() {
       if (pendingVoteRef.current?.nftId === votedNftId) {
         handleExitComplete();
       }
-    }, 450);
+    }, 800);
   }, [cardExiting, castVote, triggerHaptics, handleExitComplete]);
 
   // Stable callbacks for VoteButtons (avoid inline arrow functions that break memo)

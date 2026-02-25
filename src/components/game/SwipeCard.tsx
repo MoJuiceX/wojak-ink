@@ -109,7 +109,8 @@ export const SwipeCard = memo(function SwipeCard({
   const isInteractive = stackPosition === 0 && !exiting;
   // For swipe-triggered exits, use current drag position to determine direction
   // For button-triggered exits, use the exitDirection prop
-  const exitSign = exitDirection ?? (x.get() >= 0 ? 1 : -1);
+  // Default to 1 (right) for AnimatePresence exit when prop has been cleared
+  const exitSign = exitDirection ?? (swipeExiting ? (x.get() >= 0 ? 1 : -1) : 1);
 
 
   const config = STACK_CONFIGS[stackPosition];
@@ -304,7 +305,12 @@ export const SwipeCard = memo(function SwipeCard({
       }
       initial={false}
       animate={animateTarget}
-      exit={{ opacity: 0, transition: { duration: 0 } }}
+      exit={{
+        x: exitSign * 700,
+        rotate: exitSign * 12,
+        opacity: 0,
+        transition: { duration: 0.3, ease: [0.32, 0.72, 0, 1] }
+      }}
       transition={animateTransition}
       aria-hidden={stackPosition > 0 ? true : undefined}
     >
