@@ -5,7 +5,7 @@
 
 import { motion, useMotionValue, useTransform, useMotionValueEvent, useAnimationControls } from 'framer-motion';
 import type { PanInfo } from 'framer-motion';
-import { useState, useCallback, useRef, useEffect, useLayoutEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useLayoutEffect, memo } from 'react';
 
 // Haptic patterns for premium feedback
 const HAPTIC_PATTERNS = {
@@ -35,8 +35,6 @@ interface SwipeCardProps {
   exitDirection?: 1 | -1 | null; // 1 = right (like), -1 = left (dislike)
   /** Called when exit animation completes (so parent can remove from feed immediately) */
   onExitComplete?: () => void;
-  /** Called during drag with progress (-1 to 1, negative = left/fade, positive = right/glaze) */
-  onDragProgress?: (progress: number) => void;
   /** Voting stats for the footer context */
   likes?: number;
   dislikes?: number;
@@ -75,7 +73,7 @@ function CrossSvg() {
   );
 }
 
-export function SwipeCard({
+export const SwipeCard = memo(function SwipeCard({
   nftId,
   name,
   editionNumber,
@@ -87,7 +85,6 @@ export function SwipeCard({
   reducedMotion = false,
   exitDirection = null,
   onExitComplete,
-  onDragProgress,
   likes = 0,
   dislikes = 0,
   totalVotes = 0,
@@ -167,13 +164,11 @@ export function SwipeCard({
     supportsHover.current = window.matchMedia('(hover: hover)').matches;
   }, []);
 
-  // Premium haptics + drag progress callback
+  // Premium haptics on threshold crossing
   useMotionValueEvent(x, 'change', (latest) => {
-    // Threshold haptics - fire once when crossing threshold
     const absX = Math.abs(latest);
     if (absX >= SWIPE_THRESHOLD && !thresholdHapticFired.current) {
       thresholdHapticFired.current = true;
-      // Fire light haptic at threshold crossing
       if (typeof navigator?.vibrate === 'function') {
         const pattern = latest > 0 ? HAPTIC_PATTERNS.glaze.light : HAPTIC_PATTERNS.fade.light;
         navigator.vibrate(pattern);
@@ -182,12 +177,6 @@ export function SwipeCard({
     // Reset when returning below 50% of threshold
     if (absX < SWIPE_THRESHOLD * 0.5) {
       thresholdHapticFired.current = false;
-    }
-
-    // Report drag progress to parent (-1 to 1)
-    if (onDragProgress && isInteractive) {
-      const progress = Math.max(-1, Math.min(1, latest / SWIPE_THRESHOLD));
-      onDragProgress(progress);
     }
   });
 
@@ -431,4 +420,4 @@ export function SwipeCard({
       </div>
     </motion.div>
   );
-}
+});

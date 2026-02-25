@@ -67,7 +67,6 @@ export function VotingFeed() {
   const [cardExiting, setCardExiting] = useState(false);
   const [exitDirection, setExitDirection] = useState<1 | -1 | null>(null);
   const [voteFeedbackType, setVoteFeedbackType] = useState<'glaze' | 'fade' | null>(null);
-  const [swipeProgress, setSwipeProgress] = useState(0);
 
 
   // Load feed immediately (no gate)
@@ -118,10 +117,6 @@ export function VotingFeed() {
     navigator.vibrate(voteType === 1 ? 12 : [8, 10, 8]);
   }, []);
 
-  // Handle drag progress from SwipeCard for button sync
-  const handleDragProgress = useCallback((progress: number) => {
-    setSwipeProgress(progress);
-  }, []);
 
   const rollbackSessionCounts = useCallback((voteType: 1 | -1) => {
     setVoteCount(prev => Math.max(0, prev - 1));
@@ -157,7 +152,6 @@ export function VotingFeed() {
     removeFromFeed(votedNftId);
     setCardExiting(false);
     setExitDirection(null);
-    setSwipeProgress(0);
     if (currentFeedLength <= 3) {
       loadFeed().catch(() => setFeedError(true));
     }
@@ -184,20 +178,17 @@ export function VotingFeed() {
 
     const votedNftId = currentItem.nftId;
     setCardExiting(true);
-    setExitDirection(voteType); // Set direction for exit animation (only top card has stackPosition 0)
+    setExitDirection(voteType);
 
-    // Track session vote count + type
-    const newVoteCount = voteCount + 1;
-    setVoteCount(newVoteCount);
+    // Track session vote count + type (functional updates to avoid dependency)
+    setVoteCount(prev => prev + 1);
     if (voteType === 1) setGlazeCount(prev => prev + 1);
     else setFadeCount(prev => prev + 1);
     triggerHaptics(voteType);
 
-    // Brief visual feedback only (no text toast/flash to avoid layout shift)
+    // Brief visual feedback
     setVoteFeedbackType(voteType === 1 ? 'glaze' : 'fade');
-    setTimeout(() => {
-      setVoteFeedbackType(null);
-    }, 450);
+    setTimeout(() => setVoteFeedbackType(null), 450);
 
     // Fire vote to API (do not remove from feed here — wait for exit animation)
     const votePromise = castVote(currentItem.nftId, currentItem.editionNumber, voteType)
@@ -205,8 +196,7 @@ export function VotingFeed() {
 
     pendingVoteRef.current = { nftId: votedNftId, voteType, promise: votePromise };
 
-    // Safety timeout: if onAnimationComplete never fires, unblock UI after animation duration + margin
-    // Animation is 400ms, add 150ms margin for safety
+    // Safety timeout: if onAnimationComplete never fires, unblock UI
     if (exitSafetyTimeoutRef.current) {
       clearTimeout(exitSafetyTimeoutRef.current);
       exitSafetyTimeoutRef.current = null;
@@ -216,7 +206,11 @@ export function VotingFeed() {
         handleExitComplete();
       }
     }, 550);
-  }, [feed, cardExiting, castVote, voteCount, triggerHaptics, handleExitComplete]);
+  }, [feed, cardExiting, castVote, triggerHaptics, handleExitComplete]);
+
+  // Stable callbacks for VoteButtons (avoid inline arrow functions that break memo)
+  const handleLike = useCallback(() => handleVote(1), [handleVote]);
+  const handleDislike = useCallback(() => handleVote(-1), [handleVote]);
 
   const handleRetry = useCallback(() => {
     setFeedError(false);
@@ -302,7 +296,6 @@ export function VotingFeed() {
               reducedMotion={reducedMotion}
               exitDirection={i === 0 ? exitDirection : null}
               onExitComplete={i === 0 ? handleExitComplete : undefined}
-              onDragProgress={i === 0 ? handleDragProgress : undefined}
               likes={item.likes}
               dislikes={item.dislikes}
               totalVotes={item.totalVotes}
@@ -314,11 +307,10 @@ export function VotingFeed() {
       {/* Vote buttons — visible without scrolling, same gap as above */}
       <div className="w-full vote-buttons-entrance">
         <VoteButtons
-          onLike={() => handleVote(1)}
-          onDislike={() => handleVote(-1)}
+          onLike={handleLike}
+          onDislike={handleDislike}
           disabled={cardExiting}
           feedbackType={voteFeedbackType}
-          swipeProgress={swipeProgress}
         />
       </div>
     </div>

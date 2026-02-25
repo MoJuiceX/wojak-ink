@@ -4121,16 +4121,13 @@ body {
     font-size: 1.02rem;
     font-weight: 700;
     padding: 4px 8px;
-    /* Enhanced touch feedback */
-    transition: transform 120ms ease-out, 
-                background 120ms ease-out, 
+    /* NO transform transition - Framer Motion handles scale via whileTap */
+    transition: background 120ms ease-out,
                 box-shadow 120ms ease-out,
                 border-color 120ms ease-out;
   }
 
-  .vote-btn-pill:active {
-    transform: scale(0.94);
-  }
+  /* Removed CSS :active transform - Framer Motion whileTap handles this */
 
   .vote-btn-label {
     font-size: 1rem;
@@ -4542,11 +4539,9 @@ body {
     animation: button-glow-dislike 1.5s ease-in-out infinite;
   }
 
-  /* Pill button hover enhancement */
+  /* Pill button hover - NO transform, conflicts with Framer Motion */
   .vote-btn-pill:hover {
-    transform: translateY(-2px);
-    transition: transform 120ms ease-out, 
-                background 120ms ease-out, 
+    transition: background 120ms ease-out,
                 box-shadow 120ms ease-out;
   }
 }
