@@ -9,6 +9,7 @@ interface Env {
   TRADE_VALUES_KV: KVNamespace;
   DB: D1Database;
   COLLECTION_ID?: string;
+  PHASE2_COLLECTION_ID?: string;
   ADMIN_PASSWORD?: string;
 }
 
@@ -79,6 +80,8 @@ interface Sale {
   tokenId: string | null;
   catXchRate: number | null;
   traitsJson: string | null;
+  nftId: string | null;  // MintGarden launcher_id
+  collection: 'phase1' | 'phase2';  // Which collection this sale belongs to
 }
 
 interface TraitStats {
@@ -138,6 +141,8 @@ interface MintGardenTrade {
   sellerAddress: string | null;
   blockHeight: number;
   traitsJson: string | null;
+  nftId: string;  // MintGarden launcher_id (nft_id from event)
+  collection: 'phase1' | 'phase2';  // Which collection this sale belongs to
 }
 
 // Token rate with asset_id mapping
@@ -467,7 +472,8 @@ async function fetchAllTrades(
   ratesByCode: Map<string, number>,
   metadataMap: Map<number, NFTMetadata>,
   ratesByAssetId?: Map<string, { tokenCode: string; xchRate: number }>,
-  db?: D1Database
+  db?: D1Database,
+  collection: 'phase1' | 'phase2' = 'phase1'
 ): Promise<Sale[]> {
   const allTrades: Sale[] = [];
   let page = 1;
@@ -572,6 +578,8 @@ async function fetchAllTrades(
           tokenId,
           catXchRate,
           traitsJson,
+          nftId: nftOffer.id || null,  // NFT launcher_id from Dexie
+          collection,
         });
       }
 
@@ -710,7 +718,8 @@ async function fetchMintGardenTrades(
   collectionId: string,
   ratesByAssetId: Map<string, { tokenCode: string; xchRate: number }>,
   metadataMap: Map<number, NFTMetadata>,
-  lastTimestamp: string | null
+  lastTimestamp: string | null,
+  collection: 'phase1' | 'phase2' = 'phase1'
 ): Promise<MintGardenTrade[]> {
   const trades: MintGardenTrade[] = [];
   let cursor: string | null = null;
@@ -789,6 +798,8 @@ async function fetchMintGardenTrades(
             sellerAddress: event.previous_address?.encoded_id || null,
             blockHeight: event.block_height,
             traitsJson,
+            nftId: event.nft_id,
+            collection,
           });
         } else if (hasCat) {
           // CAT trade — aggregate payments by asset_id
@@ -833,6 +844,8 @@ async function fetchMintGardenTrades(
             sellerAddress: event.previous_address?.encoded_id || null,
             blockHeight: event.block_height,
             traitsJson,
+            nftId: event.nft_id,
+            collection,
           });
         }
       }
@@ -913,8 +926,8 @@ async function persistMintGardenToD1(
             `INSERT OR IGNORE INTO sales_history
               (trade_id, nft_edition, nft_name, currency, original_amount, token_code, token_id,
                xch_equivalent, cat_xch_rate, traits_json, completed_at, completed_at_unix, source,
-               mg_event_id, buyer_address, seller_address, block_height)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'mintgarden', ?, ?, ?, ?)`
+               mg_event_id, buyer_address, seller_address, block_height, nft_id, collection)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'mintgarden', ?, ?, ?, ?, ?, ?)`
           ).bind(
             tradeId,
             trade.edition,
@@ -931,7 +944,9 @@ async function persistMintGardenToD1(
             trade.mgEventId,
             trade.buyerAddress,
             trade.sellerAddress,
-            trade.blockHeight
+            trade.blockHeight,
+            trade.nftId,
+            trade.collection
           )
         );
         insertedCount++;
@@ -1132,8 +1147,9 @@ async function persistToD1(db: D1Database, trades: Sale[]): Promise<number> {
           db.prepare(
             `INSERT OR IGNORE INTO sales_history
               (trade_id, nft_edition, nft_name, currency, original_amount, token_code, token_id,
-               xch_equivalent, cat_xch_rate, traits_json, completed_at, completed_at_unix, source)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'dexie')`
+               xch_equivalent, cat_xch_rate, traits_json, completed_at, completed_at_unix, source,
+               buyer_address, seller_address, nft_id, collection)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'dexie', ?, ?, ?, ?)`
           ).bind(
             trade.tradeId,
             trade.edition,
@@ -1146,7 +1162,11 @@ async function persistToD1(db: D1Database, trades: Sale[]): Promise<number> {
             trade.catXchRate,
             trade.traitsJson,
             trade.timestamp,
-            completedAtUnix
+            completedAtUnix,
+            null,  // buyer_address (will be enriched by MintGarden)
+            null,  // seller_address (will be enriched by MintGarden)
+            trade.nftId || null,
+            trade.collection
           )
         );
       }
@@ -1223,8 +1243,20 @@ export default {
       const tokenRates = await loadTokenRates(env.DB);
       console.warn(`${tokenRates.byCode.size} token rates loaded, ${tokenRates.byAssetId.size} asset mappings`);
 
-      // Step 2: Fetch all trades from Dexie (XCH + CAT)
-      const trades = await fetchAllTrades(collectionId, tokenRates.byCode, metadataMap, tokenRates.byAssetId, env.DB);
+      // Step 2: Fetch all trades from Dexie (XCH + CAT) - Phase 1
+      const phase1Trades = await fetchAllTrades(collectionId, tokenRates.byCode, metadataMap, tokenRates.byAssetId, env.DB, 'phase1');
+      console.warn(`Phase 1 trades from Dexie: ${phase1Trades.length}`);
+
+      // Step 2b: Fetch Phase 2 trades from Dexie if configured
+      let phase2Trades: Sale[] = [];
+      const phase2CollectionId = env.PHASE2_COLLECTION_ID;
+      if (phase2CollectionId) {
+        phase2Trades = await fetchAllTrades(phase2CollectionId, tokenRates.byCode, metadataMap, tokenRates.byAssetId, env.DB, 'phase2');
+        console.warn(`Phase 2 trades from Dexie: ${phase2Trades.length}`);
+      }
+
+      // Combine all trades for KV storage and trait stats
+      const trades = [...phase1Trades, ...phase2Trades];
       console.warn(`Total trades from Dexie: ${trades.length}`);
 
       if (trades.length === 0) {
@@ -1284,16 +1316,34 @@ export default {
           'SELECT mg_last_timestamp FROM sales_sync_state WHERE id = 1'
         ).first<{ mg_last_timestamp: string | null }>();
 
+        // Phase 1 MintGarden trades
         const mgTrades = await fetchMintGardenTrades(
           collectionId,
           tokenRates.byAssetId,
           metadataMap,
-          mgSyncState?.mg_last_timestamp ?? null
+          mgSyncState?.mg_last_timestamp ?? null,
+          'phase1'
         );
 
         if (mgTrades.length > 0) {
           const mgResult = await persistMintGardenToD1(env.DB, mgTrades);
-          console.warn(`D1 (MintGarden): ${mgResult.inserted} new, ${mgResult.enriched} enriched with wallet data`);
+          console.warn(`D1 (MintGarden Phase 1): ${mgResult.inserted} new, ${mgResult.enriched} enriched with wallet data`);
+        }
+
+        // Phase 2 MintGarden trades (if configured)
+        if (phase2CollectionId) {
+          const mgPhase2Trades = await fetchMintGardenTrades(
+            phase2CollectionId,
+            tokenRates.byAssetId,
+            metadataMap,
+            null,  // No cursor tracking for Phase 2 yet — fetch all
+            'phase2'
+          );
+
+          if (mgPhase2Trades.length > 0) {
+            const mgResult = await persistMintGardenToD1(env.DB, mgPhase2Trades);
+            console.warn(`D1 (MintGarden Phase 2): ${mgResult.inserted} new, ${mgResult.enriched} enriched with wallet data`);
+          }
         }
       } catch (mgError) {
         // MintGarden is secondary — don't fail the whole sync if it errors

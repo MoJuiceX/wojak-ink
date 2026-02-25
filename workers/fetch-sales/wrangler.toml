@@ -20,6 +20,7 @@ id = "3d3382d37eeb4d4dac250fcf03b3f24d"
 # Environment variables
 [vars]
 COLLECTION_ID = "col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah"
+PHASE2_COLLECTION_ID = "col1rhrjj6f28tge783rp0lrj8ct7vnq79xsnklx3up49lgpnge62ensr2tyfx"
 
 # Secrets (set via `wrangler secret put` in this worker's directory):
 # - ADMIN_PASSWORD: Password for admin endpoints
