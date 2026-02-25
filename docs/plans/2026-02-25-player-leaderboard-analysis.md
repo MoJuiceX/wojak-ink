@@ -58,9 +58,20 @@ xch1w9uwe4wjj4hs7nf0np6m6zx69302vdckz22vqvn6yxl0ghgzd0ush3hqnf
 xch1y8zm6zqnx99vu89c8eyltjfkchd35ltm3m7wnf0rg334w3mqh8nspa9afy
 ```
 
-## DID Indexer Fix Deployed
+## Database Sync Status
 
-The did-indexer worker was fixed and deployed to properly sync NFT holdings:
+Current state of the `did_holdings` table after indexer fixes:
+
+| Collection | NFTs Synced | Unique DIDs | MintGarden Total |
+|------------|-------------|-------------|------------------|
+| Phase 1 | 2,630 | 76 | ~2,679 / 103 DIDs |
+| Phase 2 | 205 | 26 | 362 / 27 DIDs |
+
+**Note:** Not all NFT holders have DIDs. The MintGarden totals represent NFTs owned by DID-enabled wallets only.
+
+## DID Indexer Fixes
+
+### Fix 1: Search-Based Pagination (Initial)
 
 **Root Cause:**
 - MintGarden API's `owner_did` parameter was being ignored (doesn't filter by DID)
@@ -71,8 +82,36 @@ The did-indexer worker was fixed and deployed to properly sync NFT holdings:
 - Collection NFTs are now fetched completely and cached per run
 - DID lookups filter from the cached collection data locally
 
+### Fix 2: Subrequest Limit (Final)
+
+**Root Cause:**
+- Cloudflare Workers have a 50 subrequest limit per invocation
+- Original code tried 53+ API calls (43 for Phase 1 + 10 for Phase 2)
+
+**Fix Applied:**
+- Split discovery and sync into mutually exclusive phases
+- Discovery phase (43 queries): Fetches all Phase 1 NFTs, syncs to DB, enrolls new players
+- Sync phase (10 queries): Fetches Phase 2 NFTs only, uses DB data for Phase 1
+- Each phase stays under the 50 subrequest limit
+
+**Architecture:**
+
+```
+Hourly Cron Run
+    │
+    ├─ Discovery needed? (every 12h)
+    │   ├─ YES: Run discovery (43 API calls) → Skip sync
+    │   └─ NO: Run sync (10 API calls)
+    │
+    └─ Always: Battle resolve, Vote XP, Timeout checks
+```
+
 **Files Changed:**
-- `workers/did-indexer/worker.ts` - Added `fetchCollectionWithSearch()`, modified `fetchDIDNfts()`, fixed `discoverNewHolders()`
+- `workers/did-indexer/worker.ts`
+  - Added `fetchCollectionWithSearch()` for search-based pagination
+  - Modified `discoverNewHolders()` to populate `did_holdings` directly
+  - Modified `syncDIDHoldings()` to use DB for Phase 1 data
+  - Added mutual exclusion between discovery and sync phases
 
 ## DID Power System Impact
 
@@ -89,4 +128,5 @@ For players with BOTH collections, their Total Power is calculated as:
 
 ---
 *Generated: 2026-02-25*
-*Did-indexer fix deployed: 2026-02-25T20:48:58Z*
+*Initial fix deployed: 2026-02-25T20:48:58Z*
+*Subrequest limit fix deployed: 2026-02-25T21:30:00Z*
