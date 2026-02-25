@@ -53,8 +53,6 @@ export function VotingFeed() {
   } = useGame();
   const toast = useToast();
   const reducedMotion = usePrefersReducedMotion();
-  const pendingVoteRef = useRef<{ nftId: string; voteType: 1 | -1; promise: Promise<{ ok: boolean; error?: string; status?: number }> } | null>(null);
-  const exitSafetyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const feedRef = useRef(feed); // Stable ref to avoid callback recreation
   useEffect(() => { feedRef.current = feed; }, [feed]);
 
@@ -66,9 +64,9 @@ export function VotingFeed() {
   const [_glazeCount, setGlazeCount] = useState(0);
   const [_fadeCount, setFadeCount] = useState(0);
   const [feedError, setFeedError] = useState(false);
-  const [cardExiting, setCardExiting] = useState(false);
   const [exitDirection, setExitDirection] = useState<1 | -1 | null>(null);
   const [voteFeedbackType, setVoteFeedbackType] = useState<'glaze' | 'fade' | null>(null);
+  const [isVoting, setIsVoting] = useState(false); // Brief debounce
 
 
   // Load feed immediately (no gate)
@@ -94,16 +92,6 @@ export function VotingFeed() {
     return () => document.removeEventListener('visibilitychange', onVisible);
   }, [loadFeed]);
 
-  // Clear safety timeout on unmount so we only run cleanup once
-  useEffect(() => {
-    return () => {
-      if (exitSafetyTimeoutRef.current) {
-        clearTimeout(exitSafetyTimeoutRef.current);
-        exitSafetyTimeoutRef.current = null;
-      }
-    };
-  }, []);
-
   // Prefetch images for next 3 cards (prefer CDN thumbnail when available)
   useEffect(() => {
     feed.slice(0, 3).forEach(item => {
@@ -118,7 +106,6 @@ export function VotingFeed() {
     if (typeof navigator === 'undefined' || typeof navigator.vibrate !== 'function') return;
     navigator.vibrate(voteType === 1 ? 12 : [8, 10, 8]);
   }, []);
-
 
   const rollbackSessionCounts = useCallback((voteType: 1 | -1) => {
     setVoteCount(prev => Math.max(0, prev - 1));
@@ -137,80 +124,48 @@ export function VotingFeed() {
     return result.error || 'Vote failed to save';
   }, []);
 
-  // Must be defined before handleVote since handleVote references it
-  const handleExitComplete = useCallback(() => {
-    if (exitSafetyTimeoutRef.current) {
-      clearTimeout(exitSafetyTimeoutRef.current);
-      exitSafetyTimeoutRef.current = null;
-    }
-    const pending = pendingVoteRef.current;
-    pendingVoteRef.current = null;
-    if (!pending) return;
-
-    const { nftId: votedNftId, voteType, promise } = pending;
-    const currentFeedLength = feedRef.current.length;
-
-    // Optimistic: remove card immediately so next card promotes without waiting for API
-    // Keep exitDirection set so AnimatePresence exit animation knows which way to slide
-    // It will be overwritten on the next vote anyway
-    removeFromFeed(votedNftId);
-    setCardExiting(false);
-    // Don't clear exitDirection here - AnimatePresence needs it for the exit animation
-
-    // Defer feed refetch to avoid updating feed array during animation transitions
-    // This prevents AnimatePresence from getting confused about entering/exiting items
-    if (currentFeedLength <= 3) {
-      setTimeout(() => {
-        loadFeed().catch(() => setFeedError(true));
-      }, 100);
-    }
-
-    // Handle vote result in background; rollback counts + toast only on error
-    promise.then((result) => {
-      if (!result.ok) {
-        rollbackSessionCounts(voteType);
-        toast.error(voteErrorMessage(result));
-      }
-    });
-  }, [loadFeed, removeFromFeed, rollbackSessionCounts, toast, voteErrorMessage]);
-
+  // Simplified vote handler - AnimatePresence handles ALL exit animations
   const handleVote = useCallback((voteType: 1 | -1) => {
     const currentItem = feedRef.current[0];
-    if (!currentItem || cardExiting) return;
+    if (!currentItem || isVoting) return;
 
-    const votedNftId = currentItem.nftId;
-    setCardExiting(true);
+    // Brief debounce to prevent double-taps
+    setIsVoting(true);
+    setTimeout(() => setIsVoting(false), 500);
+
+    // Set exit direction BEFORE removing so AnimatePresence knows which way to slide
     setExitDirection(voteType);
 
-    // Track session vote count + type (functional updates to avoid dependency)
+    // Track session counts (optimistic)
     setVoteCount(prev => prev + 1);
     if (voteType === 1) setGlazeCount(prev => prev + 1);
     else setFadeCount(prev => prev + 1);
     triggerHaptics(voteType);
 
-    // Brief visual feedback
+    // Visual feedback on buttons
     setVoteFeedbackType(voteType === 1 ? 'glaze' : 'fade');
     setTimeout(() => setVoteFeedbackType(null), 450);
 
-    // Fire vote to API (do not remove from feed here — wait for exit animation)
-    const votePromise = castVote(currentItem.nftId, currentItem.editionNumber, voteType)
-      .catch(() => ({ ok: false as const, error: 'Network error', status: 0 }));
+    // Remove from feed → AnimatePresence triggers exit animation automatically
+    removeFromFeed(currentItem.nftId);
 
-    pendingVoteRef.current = { nftId: votedNftId, voteType, promise: votePromise };
+    // Fire API call in background
+    castVote(currentItem.nftId, currentItem.editionNumber, voteType)
+      .catch(() => ({ ok: false as const, error: 'Network error', status: 0 }))
+      .then((result) => {
+        if (!result.ok) {
+          rollbackSessionCounts(voteType);
+          toast.error(voteErrorMessage(result));
+        }
+      });
 
-    // Safety timeout: if onAnimationComplete never fires, unblock UI
-    // Animation is 350ms + rAF. Use 800ms to handle slow devices gracefully.
-    // AnimatePresence exit now does a proper slide-off, so early removal looks fine.
-    if (exitSafetyTimeoutRef.current) {
-      clearTimeout(exitSafetyTimeoutRef.current);
-      exitSafetyTimeoutRef.current = null;
+    // Refetch feed if running low (defer slightly to not disrupt animation)
+    if (feedRef.current.length <= 3) {
+      setTimeout(() => {
+        loadFeed().catch(() => setFeedError(true));
+      }, 500);
     }
-    exitSafetyTimeoutRef.current = setTimeout(() => {
-      if (pendingVoteRef.current?.nftId === votedNftId) {
-        handleExitComplete();
-      }
-    }, 800);
-  }, [cardExiting, castVote, triggerHaptics, handleExitComplete]);
+  }, [isVoting, castVote, triggerHaptics, removeFromFeed, rollbackSessionCounts, toast, voteErrorMessage, loadFeed]);
 
   // Stable callbacks for VoteButtons (avoid inline arrow functions that break memo)
   const handleLike = useCallback(() => handleVote(1), [handleVote]);
@@ -299,7 +254,6 @@ export function VotingFeed() {
               isFirst={voteCount === 0 && i === 0}
               reducedMotion={reducedMotion}
               exitDirection={i === 0 ? exitDirection : null}
-              onExitComplete={i === 0 ? handleExitComplete : undefined}
               likes={item.likes}
               dislikes={item.dislikes}
               totalVotes={item.totalVotes}
@@ -313,7 +267,7 @@ export function VotingFeed() {
         <VoteButtons
           onLike={handleLike}
           onDislike={handleDislike}
-          disabled={cardExiting}
+          disabled={isVoting}
           feedbackType={voteFeedbackType}
         />
       </div>
