@@ -1,8 +1,8 @@
 // POST /api/game/recalc-power-levels
-// Batch recalculates power levels for all phase1_verified players.
-// Called by cron every 15 minutes or manually by admin.
+// Batch recalculates power levels for all phase1_verified players using simple formula.
+// Called manually by admin when needed.
 
-import { recalcPowerLevel } from './_powerLevel';
+import { calculateFullPower } from '../fight-club/_power';
 
 interface Env {
   DB: D1Database;
@@ -10,14 +10,12 @@ interface Env {
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
-  // Admin auth
   const authHeader = context.request.headers.get('Authorization');
   if (!context.env.ADMIN_SECRET || authHeader !== `Bearer ${context.env.ADMIN_SECRET}`) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
-    // Get all phase1_verified players
     const players = await context.env.DB.prepare(`
       SELECT did_id FROM game_players WHERE phase1_verified = 1
     `).all();
@@ -33,8 +31,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     for (const player of playerList) {
       const did = player.did_id as string;
       try {
-        const newLevel = await recalcPowerLevel(context.env.DB, did);
-        if (newLevel !== null) updated += 1;
+        const power = await calculateFullPower(context.env.DB, did);
+        await context.env.DB.prepare(`
+          UPDATE game_players
+          SET power_level = ?, power_level_updated_at = datetime('now'), updated_at = datetime('now')
+          WHERE did_id = ?
+        `).bind(power.totalPower, did).run();
+        updated += 1;
       } catch (err) {
         errors.push(`${did}: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
