@@ -8,11 +8,10 @@
 
 import { useLocation, useNavigate } from 'react-router-dom';
 import { MINTGARDEN_COLLECTION_URL } from '@/services/constants';
-import { lazy, Suspense, memo, useState, useCallback, useEffect, useRef } from 'react';
+import { lazy, Suspense, memo, useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Swords, ExternalLink, Wallet, Info } from 'lucide-react';
 import { useClerkAuth } from '@/contexts/ClerkAuthContext';
-import { useToast } from '@/contexts/ToastContext';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { PageSkeleton } from '@/components/layout/PageSkeleton';
 import { useLayout } from '@/hooks/useLayout';
@@ -23,7 +22,6 @@ import { SubscriptionBanner } from '@/components/combat/SubscriptionBanner';
 import { FightClubGuideModal } from '@/components/combat/FightClubGuideModal';
 import { useUserProfile } from '@/contexts/UserProfileContext';
 import { useSageWallet } from '@/sage-wallet';
-import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch';
 
 const CLERK_ENABLED = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -85,113 +83,6 @@ function usePlayerDid(walletAddress: string | null) {
   });
 }
 
-// Link DID + Set name when Clerk signed in and no linked player (or show set-name after link)
-function LinkDidCard({ onDone }: { onDone?: () => void }) {
-  const { linkDid, player } = useGame();
-  const { authenticatedFetch } = useAuthenticatedFetch();
-  const toast = useToast();
-  const [did, setDid] = useState('');
-  const [walletAddress, setWalletAddress] = useState('');
-  const [linking, setLinking] = useState(false);
-  const [linkedDid, setLinkedDid] = useState<string | null>(null);
-  const [displayName, setDisplayName] = useState('');
-  const [savingName, setSavingName] = useState(false);
-
-  const handleLink = useCallback(async () => {
-    const d = did.trim();
-    if (!d || !/^did:chia:1[a-z0-9]{58}$/.test(d)) {
-      toast.error('Please enter a valid DID (did:chia:1...)');
-      return;
-    }
-    setLinking(true);
-    try {
-      await linkDid(d, walletAddress.trim() || undefined);
-      setLinkedDid(d);
-    } catch (e) {
-      toast.error((e as Error).message || 'Link failed');
-    } finally {
-      setLinking(false);
-    }
-  }, [did, walletAddress, linkDid, toast]);
-
-  const handleSetName = useCallback(async () => {
-    const name = displayName.trim();
-    if (name.length < 2 || name.length > 20 || !/^[a-zA-Z0-9 ]+$/.test(name)) {
-      toast.error('Name must be 2–20 characters, letters and numbers only');
-      return;
-    }
-    const targetDid = player?.did ?? linkedDid;
-    if (!targetDid) return;
-    setSavingName(true);
-    try {
-      const res = await authenticatedFetch('/api/profile/display-name', {
-        method: 'PUT',
-        body: JSON.stringify({ did: targetDid, name, source: 'custom' as const }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Failed to set name');
-      }
-      toast.success('Name saved');
-      onDone?.();
-    } catch (e) {
-      toast.error((e as Error).message || 'Failed to set name');
-    } finally {
-      setSavingName(false);
-    }
-  }, [displayName, player?.did, linkedDid, authenticatedFetch, toast, onDone]);
-
-  return (
-    <div className="card-static p-6 max-w-md mx-auto mb-6">
-      <h3 className="text-lg font-bold mb-2">Link your DID</h3>
-      <p className="text-secondary text-sm mb-4">
-        Connect your Chia DID to this account to vote and appear on the leaderboard.
-      </p>
-      {!linkedDid && !player ? (
-        <>
-          <input
-            className="input w-full mb-2"
-            placeholder="did:chia:1..."
-            value={did}
-            onChange={e => setDid(e.target.value)}
-          />
-          <input
-            className="input w-full mb-3"
-            placeholder="Wallet address (optional)"
-            value={walletAddress}
-            onChange={e => setWalletAddress(e.target.value)}
-          />
-          <button
-            type="button"
-            className="btn btn-primary w-full"
-            onClick={handleLink}
-            disabled={linking || !did.trim()}
-          >
-            {linking ? 'Linking...' : 'Link DID'}
-          </button>
-        </>
-      ) : (
-        <>
-          <p className="text-secondary text-sm mb-3">DID linked. Set your leaderboard name (optional):</p>
-          <input
-            className="input w-full mb-2"
-            placeholder="Display name (2–20 chars)"
-            value={displayName}
-            onChange={e => setDisplayName(e.target.value)}
-          />
-          <button
-            type="button"
-            className="btn btn-primary w-full"
-            onClick={handleSetName}
-            disabled={savingName || displayName.trim().length < 2}
-          >
-            {savingName ? 'Saving...' : 'Set name'}
-          </button>
-        </>
-      )}
-    </div>
-  );
-}
 
 // Prompt shown when user hasn't connected wallet (exported for use by routing or future callers)
 export function ConnectWalletPrompt() {
@@ -320,7 +211,6 @@ function FightClubContent() {
   const navigate = useNavigate();
   const activeTab = getActiveTab(location.pathname);
   const [guideOpen, setGuideOpen] = useState(false);
-  const [showSetNamePhase, setShowSetNamePhase] = useState(false);
   const { profile } = useUserProfile();
   const { address: walletAddress } = useSageWallet();
   const { player } = useGame();
@@ -333,23 +223,11 @@ function FightClubContent() {
     ? player.did
     : (playerDidFromWallet ?? null);
 
-  // After linking DID, show set-name step once (only when we just got player, not on every load)
-  const hadPlayerRef = useRef(!!player);
-  useEffect(() => {
-    if (player && !hadPlayerRef.current) {
-      hadPlayerRef.current = true;
-      queueMicrotask(() => setShowSetNamePhase(true));
-    }
-    if (player) hadPlayerRef.current = true;
-  }, [player]);
-  const showLinkDidCard = CLERK_ENABLED && isSignedIn && (!player || showSetNamePhase);
-
   const handleTabClick = useCallback((tab: Tab) => {
     navigate(tab.path);
   }, [navigate]);
   const handleGuideOpen = useCallback(() => setGuideOpen(true), []);
   const handleGuideClose = useCallback(() => setGuideOpen(false), []);
-  const handleLinkDidDone = useCallback(() => setShowSetNamePhase(false), []);
 
   const isGatedTab = activeTab === 'burn';
   const showGateLoading = accessLoading && isGatedTab;
@@ -368,11 +246,6 @@ function FightClubContent() {
           minHeight: '100dvh',
         }}
       >
-        {/* Link DID / Set name when Clerk signed in and no player or in set-name phase */}
-        {showLinkDidCard && (
-          <LinkDidCard onDone={handleLinkDidDone} />
-        )}
-
         {/* Tab Bar */}
         <div className="flex items-center gap-2">
           <div className="fight-club-tabs flex-1">
