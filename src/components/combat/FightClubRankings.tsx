@@ -33,6 +33,7 @@ interface VoteLeaderboardPlayerRow {
   // Collection counts
   plotCount: number;      // Wojak Farmer's Plot NFTs
   wojakCount: number;     // Your Wojak NFTs
+  collectionBonus: number; // Collection bonus from other creators' Wojaks
   eligibleWojakCount: number;
   totalWojakCount: number;
   bestWojakScore: number | null;
@@ -357,6 +358,12 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
                       <span className="back-stat-value collection-wojak">{player.wojakCount || 0}</span>
                       <span className="back-stat-label">Your Wojaks</span>
                     </div>
+                    {(player.collectionBonus ?? 0) > 0 && (
+                      <div className="back-stat">
+                        <span className="back-stat-value text-accent">+{player.collectionBonus}</span>
+                        <span className="back-stat-label">Bonus</span>
+                      </div>
+                    )}
                   </div>
                   <div className="top-ten-back-actions">
                     <button
@@ -419,6 +426,12 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
                     <span className="collection-plot">{player.plotCount || 0} Farmers</span>
                     <span className="collection-divider">·</span>
                     <span className="collection-wojak">{player.wojakCount || 0} Your Wojaks</span>
+                    {(player.collectionBonus ?? 0) > 0 && (
+                      <>
+                        <span className="collection-divider">·</span>
+                        <span className="text-accent">+{player.collectionBonus} bonus</span>
+                      </>
+                    )}
                   </span>
                 </div>
                 <div className="rankings-row-power">

@@ -9,18 +9,22 @@ interface PowerLevelDisplayProps {
   credits?: number;
   voteStreak?: number;
   breakdown?: {
-    holdings: { score: number; nftCount: number; uniqueCreators: number };
-    creations: { score: number; quality: number; spread: number; uniqueCollectors: number };
+    plotPower: number;
+    plotCount: number;
+    wojakPower: number;
+    wojakCount: number;
+    collectionBonus: number;
+    collectedCount: number;
   };
 }
 
 function getTier(level: number) {
-  if (level >= 9000) return { name: 'Legend', class: 'tier-legend', label: "IT'S OVER 9,000!" };
-  if (level >= 5000) return { name: 'Top Tier', class: 'tier-top', label: 'Top Tier' };
-  if (level >= 2000) return { name: 'Serious', class: 'tier-serious', label: 'Serious' };
-  if (level >= 500)  return { name: 'Active', class: 'tier-active', label: 'Active' };
-  if (level >= 100)  return { name: 'Casual', class: 'tier-casual', label: 'Casual' };
-  return { name: 'New', class: 'tier-casual', label: 'New Player' };
+  if (level >= 250) return { name: 'Legend', class: 'tier-legend', label: 'Legend' };
+  if (level >= 120) return { name: 'Elite', class: 'tier-top', label: 'Elite' };
+  if (level >= 60) return { name: 'Strong', class: 'tier-serious', label: 'Strong' };
+  if (level >= 25) return { name: 'Serious', class: 'tier-active', label: 'Serious' };
+  if (level >= 10) return { name: 'Active', class: 'tier-casual', label: 'Active' };
+  return { name: 'Casual', class: 'tier-casual', label: 'Casual' };
 }
 
 export function PowerLevelDisplay({ level, rank, credits, voteStreak, breakdown }: PowerLevelDisplayProps) {
@@ -50,8 +54,9 @@ export function PowerLevelDisplay({ level, rank, credits, voteStreak, breakdown 
       {showExplainer && (
         <div className="text-secondary w-full" style={{ fontSize: 13 }}>
           <p>Your Power Level reflects your standing in the Wojak ecosystem.</p>
-          <p className="mt-1"><strong className="text-primary">Holdings:</strong> Quality and diversity of NFTs you collect</p>
-          <p><strong className="text-primary">Creations:</strong> How well your minted Wojaks perform in votes</p>
+          <p className="mt-1"><strong className="text-primary">Plots:</strong> 20 power per Farmer's Plot NFT</p>
+          <p><strong className="text-primary">Wojaks:</strong> Net vote score of Your Wojaks you hold</p>
+          <p><strong className="text-primary">Collection:</strong> 10% bonus from top Wojaks by other creators</p>
         </div>
       )}
 
@@ -83,13 +88,19 @@ export function PowerLevelDisplay({ level, rank, credits, voteStreak, breakdown 
           {showBreakdown && (
             <div className="flex flex-col gap-1 w-full" style={{ fontSize: 13 }}>
               <div className="flex justify-between text-secondary">
-                <span>From holdings:</span>
-                <span>+{breakdown.holdings.score} ({breakdown.holdings.nftCount} NFTs, {breakdown.holdings.uniqueCreators} creators)</span>
+                <span>Farmer's Plots:</span>
+                <span>+{breakdown.plotPower} ({breakdown.plotCount} plots)</span>
               </div>
               <div className="flex justify-between text-secondary">
-                <span>From creations:</span>
-                <span>+{breakdown.creations.score} ({breakdown.creations.uniqueCollectors} collectors)</span>
+                <span>Your Wojaks:</span>
+                <span>+{breakdown.wojakPower} ({breakdown.wojakCount} Wojaks)</span>
               </div>
+              {breakdown.collectionBonus > 0 && (
+                <div className="flex justify-between text-accent">
+                  <span>Collection Bonus:</span>
+                  <span>+{breakdown.collectionBonus} ({breakdown.collectedCount} top Wojaks)</span>
+                </div>
+              )}
             </div>
           )}
         </>

@@ -18,8 +18,12 @@ interface PowerData {
   credits?: number;
   voteStreak?: number;
   breakdown?: {
-    holdings: { score: number; nftCount: number; uniqueCreators: number };
-    creations: { score: number; quality: number; spread: number; uniqueCollectors: number };
+    plotPower: number;
+    plotCount: number;
+    wojakPower: number;
+    wojakCount: number;
+    collectionBonus: number;
+    collectedCount: number;
   };
 }
 
@@ -30,15 +34,20 @@ function DashboardContent() {
 
   useEffect(() => {
     if (isRegistered && player?.did) {
-      fetch(`/api/game/power-level?did=${player.did}`)
+      fetch(`/api/fight-club/my-score?did=${player.did}`)
         .then(r => r.json())
         .then(data => {
           if (data.success) {
             setPowerData({
               rank: data.rank,
-              credits: data.credits,
-              voteStreak: data.voteStreak,
-              breakdown: data.breakdown,
+              breakdown: data.power ? {
+                plotPower: data.power.plotPower || 0,
+                plotCount: data.power.plotCount || 0,
+                wojakPower: data.power.wojakPower || 0,
+                wojakCount: data.power.wojakCount || 0,
+                collectionBonus: data.power.collectionBonus || 0,
+                collectedCount: data.power.collectedWojakCount || 0,
+              } : undefined,
             });
           }
         })
@@ -68,7 +77,9 @@ function DashboardContent() {
       <LatestEventBanner did={player.did} />
 
       <PowerLevelDisplay
-        level={player.powerLevel}
+        level={powerData.breakdown ?
+          (powerData.breakdown.plotPower + powerData.breakdown.wojakPower + powerData.breakdown.collectionBonus) :
+          player.powerLevel}
         rank={powerData.rank}
         credits={powerData.credits}
         voteStreak={powerData.voteStreak}
