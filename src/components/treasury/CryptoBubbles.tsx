@@ -481,7 +481,7 @@ export function CryptoBubbles({
       return;
     }
 
-    const visibleTokens = tokens.filter((t) => t.valueUSD >= 1);
+    const visibleTokens = tokens.filter((t) => t.valueUSD >= 10);
     const values = visibleTokens.map((t) => t.valueUSD);
     const maxValue = Math.max(...values, 1);
     const minValue = Math.min(...values, 1);
@@ -779,6 +779,7 @@ export function CryptoBubbles({
                 }}
               />
               <div className="bubble-label">
+                <span className="bubble-symbol">{bubble.token.symbol}</span>
                 <span className="bubble-value">{formatValue(bubble.token.valueUSD)}</span>
               </div>
             </div>

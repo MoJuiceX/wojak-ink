@@ -78,6 +78,9 @@ function TreasuryContent() {
               isLoading={isLoading && !portfolio}
               soundEnabled={soundEnabled}
             />
+            <p className="text-xs text-center py-1" style={{ color: 'var(--color-text-muted)' }}>
+              Bubbles show tokens valued over $10
+            </p>
           </div>
 
           {/* Other Tokens (small holdings) */}

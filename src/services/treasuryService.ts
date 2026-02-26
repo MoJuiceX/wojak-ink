@@ -7,11 +7,9 @@
 
 import {
   WALLET_ADDRESS,
-  WALLET_PUZZLE_HASH,
   SPACESCAN_API,
   COINGECKO_API,
   SPACESCAN_WALLET_URL,
-  MINTGARDEN_API,
 } from './constants';
 import { spacescanQueue, coingeckoQueue } from '@/utils/rateLimiter';
 import {
@@ -347,53 +345,48 @@ function getCachedNFTCollections(): NFTCollection[] {
 }
 
 /**
- * Fetch NFTs from MintGarden API and group by collection
- * Handles pagination to fetch all NFTs
+ * Derive a collection name from NFT names in the group.
+ * SpaceScan doesn't return collection_name, so we extract it
+ * from the NFT name by stripping trailing "#NUMBER" or edition numbers.
+ */
+function deriveCollectionName(nftNames: string[]): string {
+  if (nftNames.length === 0) return 'Unknown Collection';
+  const firstName = nftNames[0];
+  // Strip trailing #NUMBER (e.g., "Mojo Friends #2573" → "Mojo Friends")
+  const stripped = firstName.replace(/\s*#\d+\s*$/, '').trim();
+  return stripped || firstName;
+}
+
+/**
+ * Fetch NFTs from SpaceScan API (returns ALL NFTs, unlike MintGarden which caps at ~50).
+ * Groups by collection_id and derives collection names from NFT names.
  */
 async function fetchNFTCollections(): Promise<NFTCollection[]> {
   // Get cached/fallback collections to use if API fails
   const fallbackCollections = getCachedNFTCollections();
 
   try {
-    const allNfts: Record<string, unknown>[] = [];
-    let nextCursor: string | null = null;
-    let pageCount = 0;
-    const maxPages = 5; // Safety limit to prevent infinite loops
-
-    // Fetch all pages of NFTs
-    do {
-      const url: string = nextCursor
-        ? `${MINTGARDEN_API}/address/${WALLET_PUZZLE_HASH}/nfts?size=100&type=owned&cursor=${encodeURIComponent(nextCursor)}`
-        : `${MINTGARDEN_API}/address/${WALLET_PUZZLE_HASH}/nfts?size=100&type=owned`;
-
-      const response: Response = await fetch(url);
-
+    const data = await spacescanQueue.add(async () => {
+      const response = await fetch(
+        `${SPACESCAN_API}/address/nft-balance/${WALLET_ADDRESS}`
+      );
       if (!response.ok) {
-        throw new Error(`MintGarden NFT API error: ${response.status}`);
+        throw new Error(`SpaceScan NFT API error: ${response.status}`);
       }
+      return response.json();
+    });
 
-      const data: { items?: Record<string, unknown>[]; data?: Record<string, unknown>[]; nfts?: Record<string, unknown>[]; next?: string } = await response.json();
-      const nfts = data.items || data.data || data.nfts || [];
-
-      if (Array.isArray(nfts) && nfts.length > 0) {
-        allNfts.push(...nfts);
-      }
-
-      nextCursor = data.next || null;
-      pageCount++;
-    } while (nextCursor && pageCount < maxPages);
-
-    if (allNfts.length === 0) {
-      // No NFTs from API - use fallback
+    const nfts = data.balance || data.data || [];
+    if (!Array.isArray(nfts) || nfts.length === 0) {
       return fallbackCollections;
     }
 
     // Group NFTs by collection with deduplication
     const collectionMap = new Map<string, NFTCollection>();
-    const seenNftIds = new Set<string>(); // Track seen NFT IDs to avoid duplicates
+    const seenNftIds = new Set<string>();
 
-    for (const nft of allNfts) {
-      const nftId = (nft.encoded_id as string) || (nft.id as string) || '';
+    for (const nft of nfts) {
+      const nftId = (nft.nft_id as string) || (nft.encoded_id as string) || '';
 
       // Skip if we've already seen this NFT (deduplication)
       if (!nftId || seenNftIds.has(nftId)) {
@@ -401,15 +394,16 @@ async function fetchNFTCollections(): Promise<NFTCollection[]> {
       }
       seenNftIds.add(nftId);
 
-      const collectionId = (nft.collection_id as string) || 'unknown';
-      const collectionName = (nft.collection_name as string) || 'Unknown Collection';
+      const collectionId = (nft.collection_id as string) || 'uncategorized';
+      const nftName = (nft.name as string) || 'Unknown NFT';
+      const previewUrl = (nft.preview_url as string) || '';
 
       const nftItem: NFTItem = {
         nftId,
-        name: (nft.name as string) || `NFT #${nft.edition_number || 'Unknown'}`,
-        imageUrl: (nft.thumbnail_uri as string) || (nft.data_uris as string[])?.[0] || '',
+        name: nftName,
+        imageUrl: previewUrl,
         collectionId,
-        collectionName,
+        collectionName: '', // Set after grouping
       };
 
       if (collectionMap.has(collectionId)) {
@@ -419,11 +413,29 @@ async function fetchNFTCollections(): Promise<NFTCollection[]> {
       } else {
         collectionMap.set(collectionId, {
           collectionId,
-          collectionName,
-          previewImage: nftItem.imageUrl,
+          collectionName: '', // Set after grouping
+          previewImage: previewUrl,
           count: 1,
           nfts: [nftItem],
         });
+      }
+    }
+
+    // Derive collection names from NFT names and update all entries
+    for (const collection of collectionMap.values()) {
+      const names = collection.nfts.map(n => n.name);
+      const derivedName = deriveCollectionName(names);
+      collection.collectionName = derivedName;
+      for (const nft of collection.nfts) {
+        nft.collectionName = derivedName;
+      }
+
+      // Ensure preview image uses first NFT with a valid URL
+      if (!collection.previewImage) {
+        const nftWithImage = collection.nfts.find(n => n.imageUrl);
+        if (nftWithImage) {
+          collection.previewImage = nftWithImage.imageUrl;
+        }
       }
     }
 

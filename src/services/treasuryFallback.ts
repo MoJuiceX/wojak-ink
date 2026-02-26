@@ -24,8 +24,8 @@ const WALLET_ADDRESS = 'xch13afmxv0xpyz03t3jfdmcrtv5ecwe5n52977vxd3z2x995f9quuns
 // LocalStorage key for treasury cache
 const CACHE_KEY = 'treasuryCache';
 
-// Cache freshness threshold (15 minutes in milliseconds)
-const CACHE_FRESH_DURATION = 15 * 60 * 1000;
+// Cache freshness threshold (5 minutes in milliseconds)
+const CACHE_FRESH_DURATION = 5 * 60 * 1000;
 
 // API timeout (15 seconds)
 const API_TIMEOUT = 15000;

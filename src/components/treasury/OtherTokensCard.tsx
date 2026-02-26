@@ -89,18 +89,25 @@ export function OtherTokensCard({ tokens, isLoading = false }: OtherTokensCardPr
                 }}
               />
 
-              {/* Token name - full width, no truncation */}
-              <span
-                className="text-sm font-medium flex-1 text-primary"
-              >
-                {token.symbol}
-              </span>
+              {/* Token name and balance */}
+              <div className="flex flex-col flex-1 min-w-0">
+                <span className="text-sm font-medium text-primary truncate">
+                  {token.symbol}
+                </span>
+                <span className="text-xs text-muted truncate">
+                  {token.balanceFormatted < 0.01
+                    ? '<0.01'
+                    : token.balanceFormatted < 1
+                      ? token.balanceFormatted.toFixed(4)
+                      : token.balanceFormatted.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                </span>
+              </div>
 
               {/* Token value */}
               <span
                 className="text-sm font-semibold flex-shrink-0 text-secondary"
               >
-                ${token.valueUSD.toFixed(2)}
+                {token.valueUSD < 0.01 ? '<$0.01' : `$${token.valueUSD.toFixed(2)}`}
               </span>
             </motion.div>
           ))}

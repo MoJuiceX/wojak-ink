@@ -43,7 +43,7 @@ export function useTreasuryWalletData() {
     initialDataUpdatedAt: hasActualNfts ? undefined : 0,
     // Only refetch if cache is stale or no actual NFTs
     refetchOnMount: isCacheStale || !hasActualNfts,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
     refetchOnReconnect: false,
     retry: false, // Don't retry on failure - just use cache
   });
