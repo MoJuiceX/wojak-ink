@@ -5,7 +5,6 @@
 
 import { getTodayString, ONBOARDING_CREDITS, VOTES_PER_CREDIT, VOTE_CREDIT_AMOUNT, isValidGuestId } from './_shared';
 import { checkRateLimit, getRateLimitKey, GAME_RATE_LIMITS } from '../../lib/rateLimit';
-import { recalcPowerLevel, getNftHolderDid, getNftCreatorDid } from './_powerLevel';
 
 interface Env {
   DB: D1Database;
@@ -246,19 +245,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     if (statements.length > 0) {
       await context.env.DB.batch(statements);
-    }
-
-    // Event-driven power level updates
-    // Recalc for holder of voted NFT and creator (their scores changed)
-    if (netScoreDelta !== 0) {
-      try {
-        const holderDid = await getNftHolderDid(context.env.DB, nftId);
-        const creatorDid = await getNftCreatorDid(context.env.DB, nftId);
-        if (holderDid) await recalcPowerLevel(context.env.DB, holderDid);
-        if (creatorDid && creatorDid !== holderDid) await recalcPowerLevel(context.env.DB, creatorDid);
-      } catch (err) {
-        console.warn('Power level recalc error (non-fatal):', err);
-      }
     }
 
     // Fetch updated onboarding state for holders

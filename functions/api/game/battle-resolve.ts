@@ -10,8 +10,6 @@
 // - Winner gets organic likes proportional to margin (clamped 1-10)
 // - Loser gets organic dislikes of the same magnitude
 
-import { recalcPowerLevel, getNftHolderDid, getNftCreatorDid } from './_powerLevel';
-
 interface Env {
   DB: D1Database;
   ADMIN_SECRET?: string;
@@ -202,27 +200,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       } catch (err) {
         // Non-fatal: log but don't fail the resolution
         console.error(`[Battle Resolve] Failed to award combat XP for battle ${battleId}:`, err);
-      }
-
-      // Event-driven power level recalculation
-      // Battle scores changed, so recalc for holders and creators
-      try {
-        const affectedDids = new Set<string>();
-        // Get holders and creators for both NFTs
-        const winnerHolderDid = await getNftHolderDid(context.env.DB, winnerNftId);
-        const winnerCreatorDid = await getNftCreatorDid(context.env.DB, winnerNftId);
-        const loserHolderDid = await getNftHolderDid(context.env.DB, loserNftId);
-        const loserCreatorDid = await getNftCreatorDid(context.env.DB, loserNftId);
-        if (winnerHolderDid) affectedDids.add(winnerHolderDid);
-        if (winnerCreatorDid) affectedDids.add(winnerCreatorDid);
-        if (loserHolderDid) affectedDids.add(loserHolderDid);
-        if (loserCreatorDid) affectedDids.add(loserCreatorDid);
-        // Recalc each affected player
-        for (const did of affectedDids) {
-          await recalcPowerLevel(context.env.DB, did);
-        }
-      } catch (err) {
-        console.warn('[Battle Resolve] Power level recalc error (non-fatal):', err);
       }
 
       resolved++;

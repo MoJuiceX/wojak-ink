@@ -4,7 +4,7 @@
 
 import { authenticateRequest } from '../../lib/auth';
 import { calculateFullPower } from './_power';
-import { PLOT_POWER_VALUE, COLLECTION_BONUS_CAP } from '../game/_shared';
+import { PLOT_POWER_VALUE } from '../game/_shared';
 
 interface Env {
     DB: D1Database;
@@ -68,7 +68,7 @@ function unregisteredResponse() {
         meta: {
             mode: 'voting_only',
             plotPowerValue: PLOT_POWER_VALUE,
-            collectionBonusCap: COLLECTION_BONUS_CAP,
+            collectionBonusCap: 25, // Legacy: was COLLECTION_BONUS_CAP
         },
     });
 }
@@ -208,7 +208,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
             meta: {
                 mode: 'voting_only',
                 plotPowerValue: PLOT_POWER_VALUE,
-                collectionBonusCap: COLLECTION_BONUS_CAP,
+                collectionBonusCap: 25, // Legacy: was COLLECTION_BONUS_CAP
             },
         });
     } catch (err) {

@@ -3,7 +3,6 @@
 // Assigns one unassigned +50 burn power bonus to an NFT the DID owns.
 
 import { jsonResponse, errorResponse, isValidDid } from './_shared';
-import { recalcPowerLevel } from '../game/_powerLevel';
 
 interface Env {
   DB: D1Database;
@@ -48,12 +47,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       'UPDATE burn_power_grants SET nft_id = ? WHERE id = ?'
     ).bind(nftId, grant.id).run();
 
-    const newPowerLevel = await recalcPowerLevel(db, did);
-
     return jsonResponse({
       success: true,
       nftId,
-      powerLevel: newPowerLevel ?? 0,
       message: '+50 power assigned.',
     });
   } catch (error) {

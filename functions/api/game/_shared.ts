@@ -2,27 +2,11 @@
 export const VOTES_PER_DAY = 20; // For holders (legacy constant)
 export const VOTES_PER_DAY_HOLDER = 20; // Holders with Farmers Plot NFT
 export const VOTES_PER_DAY_FREE = 5; // Guests and connected users without NFT
-export const POWER_LEVEL_MAX = 9000;
 export const PHASE1_COLLECTION_ID = 'col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah'; // Wojak Farmers Plot
 export const PHASE2_COLLECTION_ID = 'col1rhrjj6f28tge783rp0lrj8ct7vnq79xsnklx3up49lgpnge62ensr2tyfx'; // Your Wojak
 
 // Power System Constants
 export const PLOT_POWER_VALUE = 20; // Flat power per Farmer's Plot NFT
-export const COLLECTION_BONUS_PER_WOJAK = 10; // Flat power per bought Your Wojak
-export const COLLECTION_BONUS_MAX = 42; // Max total collection bonus
-
-// Legacy: kept for backward compatibility but no longer used
-export const COLLECTION_BONUS_CAP = 25;
-export const COLLECTION_BONUS_TIERS = [
-  { minCreators: 11, bonusPerWojak: 7 },
-  { minCreators: 6, bonusPerWojak: 5 },
-  { minCreators: 3, bonusPerWojak: 3 },
-] as const;
-
-// Legacy function - returns flat rate now
-export function getCollectionBonusPerWojak(_uniqueCreators: number): number {
-  return COLLECTION_BONUS_PER_WOJAK;
-}
 
 // Onboarding credit bonuses (in x100 units, matching credit system)
 export const ONBOARDING_CREDITS = {
