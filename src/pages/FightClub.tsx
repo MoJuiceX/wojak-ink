@@ -18,7 +18,7 @@ import { PageSkeleton } from '@/components/layout/PageSkeleton';
 import { GameProvider, useGame } from '@/contexts/GameContext';
 import { SwipeAutoRegister } from '@/components/game/SwipeAutoRegister';
 import { FightClubRankings } from '@/components/combat/FightClubRankings';
-import { SubscriptionBanner } from '@/components/combat/SubscriptionBanner';
+// import { SubscriptionBanner } from '@/components/combat/SubscriptionBanner';
 import { FightClubGuideModal } from '@/components/combat/FightClubGuideModal';
 import { useUserProfile } from '@/contexts/UserProfileContext';
 import { useSageWallet } from '@/sage-wallet';
@@ -289,7 +289,8 @@ function FightClubContent() {
           )}
         </div>
 
-        <SubscriptionBanner playerDid={effectivePlayerDid} />
+        {/* SubscriptionBanner hidden until battling is live */}
+        {/* <SubscriptionBanner playerDid={effectivePlayerDid} /> */}
 
         {/* 6px = same as vote-feed gap so tab→picture and picture→buttons are equal */}
         <div style={{ flex: 1, minHeight: 0, marginTop: 6 }}>
