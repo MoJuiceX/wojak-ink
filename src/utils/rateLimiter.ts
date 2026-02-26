@@ -44,18 +44,18 @@ const DOMAIN_CONFIGS: Record<string, Partial<RateLimitConfig>> = {
     minDelayMs: 500,
   },
   'api.spacescan.io': {
-    requestsPerSecond: 0.33,  // SpaceScan: ~1 request per 3 seconds (treasury makes only 3 calls per refresh)
-    minDelayMs: 3000,
+    requestsPerSecond: 0.5,   // SpaceScan: ~1 request per 2 seconds (treasury makes 3 calls per refresh)
+    minDelayMs: 2000,         // 2s between calls — total ~4s for 3 calls
     maxRetries: 2,
-    baseBackoffMs: 15000,     // 15 second initial backoff on 429
-    maxBackoffMs: 120000,     // Up to 2 minutes backoff
+    baseBackoffMs: 10000,     // 10 second initial backoff on 429
+    maxBackoffMs: 60000,      // Up to 1 minute backoff
   },
   'api2.spacescan.io': {
-    requestsPerSecond: 0.33,
-    minDelayMs: 3000,
+    requestsPerSecond: 0.5,
+    minDelayMs: 2000,
     maxRetries: 2,
-    baseBackoffMs: 15000,
-    maxBackoffMs: 120000,
+    baseBackoffMs: 10000,
+    maxBackoffMs: 60000,
   },
   'api.coingecko.com': {
     requestsPerSecond: 0.1,   // CoinGecko free tier - 1 request per 10 seconds (very conservative)
@@ -68,7 +68,7 @@ const DOMAIN_CONFIGS: Record<string, Partial<RateLimitConfig>> = {
 
 // Global cooldown tracking per domain (triggered by 429 errors)
 const domainCooldowns = new Map<string, number>();
-const COOLDOWN_DURATION = 120000; // 120 second cooldown after 429 (was 60)
+const COOLDOWN_DURATION = 30000; // 30 second cooldown after 429
 
 // ============================================
 // REQUEST QUEUE

@@ -202,70 +202,11 @@ export function getFallbackLogo(symbol: string): string {
  * Last updated: 2025-01-21
  */
 /**
- * Hardcoded NFT collection data for instant display.
- * These are the main NFT collections held by the treasury wallet.
- * Preview images use MintGarden mainnet CDN (assets.mainnet.mintgarden.io).
- * Collection IDs and counts verified against actual treasury holdings.
- * Last updated: 2025-01-21
+ * No hardcoded NFT collections — data is fetched dynamically from SpaceScan.
+ * Keeping an empty array ensures the UI shows a loading state until fresh data arrives,
+ * instead of displaying stale collection data with wrong counts.
  */
-const FALLBACK_NFT_COLLECTIONS: CachedNFTCollection[] = [
-  {
-    collectionId: 'col1dxaskla4hrqyp9vxvg7vz3sc8mgfaw3q93hcmmtc4yr0e688tx2qd7tu7d',
-    collectionName: 'Mojo Friends',
-    previewImage: 'https://assets.mainnet.mintgarden.io/thumbnails/col1dxaskla4hrqyp9vxvg7vz3sc8mgfaw3q93hcmmtc4yr0e688tx2qd7tu7d.webp',
-    count: 50,
-    nfts: [],
-  },
-  {
-    collectionId: 'col10j9r3aqx6qunaxg0ldy08ypjvnn7thnrw835uzllf2tafxpxqx4syn5uyg',
-    collectionName: 'NeckLords',
-    previewImage: 'https://assets.mainnet.mintgarden.io/thumbnails/col10j9r3aqx6qunaxg0ldy08ypjvnn7thnrw835uzllf2tafxpxqx4syn5uyg.webp',
-    count: 7,
-    nfts: [],
-  },
-  {
-    collectionId: 'col1usgumm07jjcvu9mtjhk0uy952v93dcgm9rstyzqvs3hl40f88a7qnhzjug',
-    collectionName: 'PIXEL WIzNerdz',
-    previewImage: 'https://assets.mainnet.mintgarden.io/thumbnails/col1usgumm07jjcvu9mtjhk0uy952v93dcgm9rstyzqvs3hl40f88a7qnhzjug.webp',
-    count: 2,
-    nfts: [],
-  },
-  {
-    collectionId: 'col14kh39nze5e0c3l4w45d5r5jnm36kxe5zzasmlsqqqhwnphu3edfsh8wl49',
-    collectionName: 'Spellbeaks',
-    previewImage: 'https://assets.mainnet.mintgarden.io/thumbnails/col14kh39nze5e0c3l4w45d5r5jnm36kxe5zzasmlsqqqhwnphu3edfsh8wl49.webp',
-    count: 2,
-    nfts: [],
-  },
-  {
-    collectionId: 'col1tezjkmzhnry4uhy3xpg0f2n2twdxy6mdrcsfknt5y845wut5jazqlv80yt',
-    collectionName: 'TangBears on Chia',
-    previewImage: 'https://assets.mainnet.mintgarden.io/thumbnails/col1tezjkmzhnry4uhy3xpg0f2n2twdxy6mdrcsfknt5y845wut5jazqlv80yt.webp',
-    count: 1,
-    nfts: [],
-  },
-  {
-    collectionId: 'col1plry33gyzls4hds5e0kfd4tqv455rgm5u3gw8ww444m7w5jq2lrs4tqhfy',
-    collectionName: 'The Casting',
-    previewImage: 'https://assets.mainnet.mintgarden.io/thumbnails/col1plry33gyzls4hds5e0kfd4tqv455rgm5u3gw8ww444m7w5jq2lrs4tqhfy.webp',
-    count: 1,
-    nfts: [],
-  },
-  {
-    collectionId: 'col1dvgy0lmaqx765hcjauwt492pj967cgcd2qtrzfq9kwuhkpl0nyks42fe2f',
-    collectionName: 'ÆTHERSPAWN',
-    previewImage: 'https://assets.mainnet.mintgarden.io/thumbnails/col1dvgy0lmaqx765hcjauwt492pj967cgcd2qtrzfq9kwuhkpl0nyks42fe2f.webp',
-    count: 1,
-    nfts: [],
-  },
-  {
-    collectionId: 'col1h8rvc3pcsjsr4632nts2x5v4pvqm583p40gfhv0u84j8mseju5vqy4j6ul',
-    collectionName: 'LORDTS',
-    previewImage: 'https://assets.mainnet.mintgarden.io/thumbnails/col1h8rvc3pcsjsr4632nts2x5v4pvqm583p40gfhv0u84j8mseju5vqy4j6ul.webp',
-    count: 1,
-    nfts: [],
-  },
-];
+const FALLBACK_NFT_COLLECTIONS: CachedNFTCollection[] = [];
 
 const FALLBACK_DATA: TreasuryCache = {
   tokens: [

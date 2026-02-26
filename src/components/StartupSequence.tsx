@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import './StartupSequence.css'
 import BootSequence, { TANGY_BOOT_LINES } from './BootSequence'
-import { prefetchTreasuryWithImages } from '@/services/treasuryApi'
+// Treasury prefetch removed — was clogging the SpaceScan rate limiter queue,
+// causing the Treasury page's own API calls to fail silently.
+// TanStack Query in useTreasuryData.ts handles all data fetching.
 
 interface StartupSequenceProps {
   onComplete: () => void
@@ -123,18 +125,12 @@ export default function StartupSequence({ onComplete }: StartupSequenceProps) {
       setLoadingFading(false)
 
       let ps1FadeStarted = false
-      let prefetchStarted = false
 
       for (let i = 0; i <= 100; i += 2) {
         setProgress(i)
 
-        // Start treasury prefetch at 10% - loads data while user watches progress bar
-        if (i >= 10 && !prefetchStarted) {
-          prefetchStarted = true
-          prefetchTreasuryWithImages().catch(() => {
-            // Silently fail - will retry when user visits Treasury
-          })
-        }
+        // Treasury data is fetched by TanStack Query when user visits the Treasury page.
+        // No prefetch needed — was causing SpaceScan queue contention.
 
         // Start PS1 fadeout at 10% for a long obvious fadeout
         if (i >= 10 && !ps1FadeStarted) {

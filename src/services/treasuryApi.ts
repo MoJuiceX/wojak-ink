@@ -270,8 +270,8 @@ async function fetchWalletNfts(): Promise<NFTCollection[]> {
       return response.json();
     });
 
-    // Response is array of NFTs directly or nested in data/nfts
-    const nfts = Array.isArray(data) ? data : (data.nfts || data.data || []);
+    // SpaceScan response: { status: "success", balance: [...nfts] }
+    const nfts = Array.isArray(data) ? data : (data.balance || data.nfts || data.data || []);
 
     // Group NFTs by collection
     const collectionMap = new Map<string, NFTCollection>();

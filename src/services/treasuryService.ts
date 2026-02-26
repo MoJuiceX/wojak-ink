@@ -242,68 +242,37 @@ async function fetchXchBalance(): Promise<{ xch: number; mojo: number }> {
 }
 
 async function fetchTokenBalances(): Promise<TokenBalance[]> {
-  // First check localStorage for recent tokens
-  const cached = loadCache();
-  const cachedTokens: TokenBalance[] = cached
-    ? cached.tokens
-        .filter((t) => t.id !== 'xch')
-        .map((t) => ({
-          assetId: t.id,
-          name: t.name,
-          symbol: t.symbol,
-          balance: t.amount,
-          valueUsd: t.valueUSD,
-          priceUsd: t.priceUSD,
-          logoUrl: t.logoURL,
-        }))
-    : FALLBACK_DATA.tokens
-        .filter((t) => t.id !== 'xch')
-        .map((t) => ({
-          assetId: t.id,
-          name: t.name,
-          symbol: t.symbol,
-          balance: t.amount,
-          valueUsd: t.valueUSD,
-          priceUsd: t.priceUSD,
-          logoUrl: t.logoURL,
-        }));
-
-  try {
-    const data = await spacescanQueue.add(async () => {
-      const response = await fetch(
-        `${SPACESCAN_API}/address/token-balance/${WALLET_ADDRESS}`
-      );
-      if (!response.ok) {
-        throw new Error(`SpaceScan token API error: ${response.status}`);
-      }
-      return response.json();
-    });
-
-    const tokens = data.data || data || [];
-
-    const tokenBalances: TokenBalance[] = tokens
-      .filter((token: Record<string, unknown>) => token.name)
-      .map((token: Record<string, unknown>) => ({
-        assetId: token.asset_id as string,
-        name: token.name as string,
-        symbol: (token.symbol || token.name) as string,
-        balance: (token.balance || 0) as number,
-        valueUsd: (token.total_value || 0) as number,
-        priceUsd: (token.price || 0) as number,
-        logoUrl: token.preview_url as string | undefined,
-      }))
-      .sort((a: TokenBalance, b: TokenBalance) => b.valueUsd - a.valueUsd);
-
-    if (tokenBalances.length > 0) {
-      return tokenBalances;
+  // Throws on failure — caller (Promise.allSettled) handles fallback
+  const data = await spacescanQueue.add(async () => {
+    const response = await fetch(
+      `${SPACESCAN_API}/address/token-balance/${WALLET_ADDRESS}`
+    );
+    if (!response.ok) {
+      throw new Error(`SpaceScan token API error: ${response.status}`);
     }
+    return response.json();
+  });
 
-    // No tokens returned - use cached
-    return cachedTokens;
-  } catch {
-    console.warn('[Treasury] Token fetch failed, using cached:', cachedTokens.length, 'tokens');
-    return cachedTokens;
+  const tokens = data.data || data || [];
+
+  const tokenBalances: TokenBalance[] = tokens
+    .filter((token: Record<string, unknown>) => token.name)
+    .map((token: Record<string, unknown>) => ({
+      assetId: token.asset_id as string,
+      name: token.name as string,
+      symbol: (token.symbol || token.name) as string,
+      balance: (token.balance || 0) as number,
+      valueUsd: (token.total_value || 0) as number,
+      priceUsd: (token.price || 0) as number,
+      logoUrl: token.preview_url as string | undefined,
+    }))
+    .sort((a: TokenBalance, b: TokenBalance) => b.valueUsd - a.valueUsd);
+
+  if (tokenBalances.length === 0) {
+    throw new Error('SpaceScan returned 0 tokens');
   }
+
+  return tokenBalances;
 }
 
 /**
@@ -357,90 +326,83 @@ function deriveCollectionName(nftNames: string[]): string {
  * Groups by collection_id and derives collection names from NFT names.
  */
 async function fetchNFTCollections(): Promise<NFTCollection[]> {
-  // Get cached/fallback collections to use if API fails
-  const fallbackCollections = getCachedNFTCollections();
-
-  try {
-    const data = await spacescanQueue.add(async () => {
-      const response = await fetch(
-        `${SPACESCAN_API}/address/nft-balance/${WALLET_ADDRESS}`
-      );
-      if (!response.ok) {
-        throw new Error(`SpaceScan NFT API error: ${response.status}`);
-      }
-      return response.json();
-    });
-
-    const nfts = data.balance || data.data || [];
-    if (!Array.isArray(nfts) || nfts.length === 0) {
-      return fallbackCollections;
+  // Throws on failure — caller (Promise.allSettled) handles fallback
+  const data = await spacescanQueue.add(async () => {
+    const response = await fetch(
+      `${SPACESCAN_API}/address/nft-balance/${WALLET_ADDRESS}`
+    );
+    if (!response.ok) {
+      throw new Error(`SpaceScan NFT API error: ${response.status}`);
     }
+    return response.json();
+  });
 
-    // Group NFTs by collection with deduplication
-    const collectionMap = new Map<string, NFTCollection>();
-    const seenNftIds = new Set<string>();
+  const nfts = data.balance || data.data || [];
+  if (!Array.isArray(nfts) || nfts.length === 0) {
+    throw new Error('SpaceScan returned 0 NFTs');
+  }
 
-    for (const nft of nfts) {
-      const nftId = (nft.nft_id as string) || (nft.encoded_id as string) || '';
+  // Group NFTs by collection with deduplication
+  const collectionMap = new Map<string, NFTCollection>();
+  const seenNftIds = new Set<string>();
 
-      // Skip if we've already seen this NFT (deduplication)
-      if (!nftId || seenNftIds.has(nftId)) {
-        continue;
-      }
-      seenNftIds.add(nftId);
+  for (const nft of nfts) {
+    const nftId = (nft.nft_id as string) || (nft.encoded_id as string) || '';
 
-      const collectionId = (nft.collection_id as string) || 'uncategorized';
-      const nftName = (nft.name as string) || 'Unknown NFT';
-      const previewUrl = (nft.preview_url as string) || '';
+    // Skip if we've already seen this NFT (deduplication)
+    if (!nftId || seenNftIds.has(nftId)) {
+      continue;
+    }
+    seenNftIds.add(nftId);
 
-      const nftItem: NFTItem = {
-        nftId,
-        name: nftName,
-        imageUrl: previewUrl,
+    const collectionId = (nft.collection_id as string) || 'uncategorized';
+    const nftName = (nft.name as string) || 'Unknown NFT';
+    const previewUrl = (nft.preview_url as string) || '';
+
+    const nftItem: NFTItem = {
+      nftId,
+      name: nftName,
+      imageUrl: previewUrl,
+      collectionId,
+      collectionName: '', // Set after grouping
+    };
+
+    if (collectionMap.has(collectionId)) {
+      const collection = collectionMap.get(collectionId)!;
+      collection.nfts.push(nftItem);
+      collection.count = collection.nfts.length;
+    } else {
+      collectionMap.set(collectionId, {
         collectionId,
         collectionName: '', // Set after grouping
-      };
-
-      if (collectionMap.has(collectionId)) {
-        const collection = collectionMap.get(collectionId)!;
-        collection.nfts.push(nftItem);
-        collection.count = collection.nfts.length;
-      } else {
-        collectionMap.set(collectionId, {
-          collectionId,
-          collectionName: '', // Set after grouping
-          previewImage: previewUrl,
-          count: 1,
-          nfts: [nftItem],
-        });
-      }
+        previewImage: previewUrl,
+        count: 1,
+        nfts: [nftItem],
+      });
     }
-
-    // Derive collection names from NFT names and update all entries
-    for (const collection of collectionMap.values()) {
-      const names = collection.nfts.map(n => n.name);
-      const derivedName = deriveCollectionName(names);
-      collection.collectionName = derivedName;
-      for (const nft of collection.nfts) {
-        nft.collectionName = derivedName;
-      }
-
-      // Ensure preview image uses first NFT with a valid URL
-      if (!collection.previewImage) {
-        const nftWithImage = collection.nfts.find(n => n.imageUrl);
-        if (nftWithImage) {
-          collection.previewImage = nftWithImage.imageUrl;
-        }
-      }
-    }
-
-    // Convert to array and sort by count descending
-    return Array.from(collectionMap.values())
-      .sort((a, b) => b.count - a.count);
-  } catch (error) {
-    console.warn('[Treasury] NFT fetch failed, using fallback:', error);
-    return fallbackCollections;
   }
+
+  // Derive collection names from NFT names and update all entries
+  for (const collection of collectionMap.values()) {
+    const names = collection.nfts.map(n => n.name);
+    const derivedName = deriveCollectionName(names);
+    collection.collectionName = derivedName;
+    for (const nft of collection.nfts) {
+      nft.collectionName = derivedName;
+    }
+
+    // Ensure preview image uses first NFT with a valid URL
+    if (!collection.previewImage) {
+      const nftWithImage = collection.nfts.find(n => n.imageUrl);
+      if (nftWithImage) {
+        collection.previewImage = nftWithImage.imageUrl;
+      }
+    }
+  }
+
+  // Convert to array and sort by count descending
+  return Array.from(collectionMap.values())
+    .sort((a, b) => b.count - a.count);
 }
 
 function getDefaultWalletData(): WalletData {
@@ -471,7 +433,8 @@ class TreasuryService implements ITreasuryService {
 
     // TanStack Query handles all cache timing (staleTime, refetchOnMount, etc.)
     // This function just fetches fresh data from APIs.
-    // Use Promise.allSettled to fetch all data in parallel and handle partial failures
+    // Use Promise.allSettled to fetch all data in parallel and handle partial failures.
+    // Inner functions THROW on failure — allSettled reports them as 'rejected'.
     const [xchPriceResult, xchBalanceResult, tokensResult, nftsResult] = await Promise.allSettled([
       fetchXchPrice(),
       fetchXchBalance(),
@@ -479,7 +442,19 @@ class TreasuryService implements ITreasuryService {
       fetchNFTCollections(),
     ]);
 
-    // Extract values with fallbacks
+    // Track which calls actually returned fresh data
+    const gotFreshTokens = tokensResult.status === 'fulfilled';
+    const gotFreshNfts = nftsResult.status === 'fulfilled';
+
+    // Log failures so we can debug production issues
+    if (tokensResult.status === 'rejected') {
+      console.warn('[Treasury] Token fetch failed:', tokensResult.reason);
+    }
+    if (nftsResult.status === 'rejected') {
+      console.warn('[Treasury] NFT fetch failed:', nftsResult.reason);
+    }
+
+    // Extract values with fallbacks for rejected calls
     const xchPrice =
       xchPriceResult.status === 'fulfilled'
         ? xchPriceResult.value
@@ -491,7 +466,7 @@ class TreasuryService implements ITreasuryService {
         : { xch: localCache?.tokens.find((t) => t.id === 'xch')?.amount || 0, mojo: 0 };
 
     const tokens =
-      tokensResult.status === 'fulfilled'
+      gotFreshTokens
         ? tokensResult.value
         : localCache
           ? localCache.tokens
@@ -508,9 +483,18 @@ class TreasuryService implements ITreasuryService {
           : [];
 
     const nftCollections =
-      nftsResult.status === 'fulfilled' ? nftsResult.value : getCachedNFTCollections();
+      gotFreshNfts ? nftsResult.value : getCachedNFTCollections();
 
     const totalTokenValue = tokens.reduce((sum, token) => sum + token.valueUsd, 0);
+
+    // Only use "now" as timestamp if we got at least SOME fresh data.
+    // Otherwise, keep the old timestamp so the UI shows when data was actually fresh.
+    const gotAnyFreshData = gotFreshTokens || gotFreshNfts;
+    const lastUpdated = gotAnyFreshData
+      ? new Date()
+      : localCache?.lastUpdated
+        ? new Date(localCache.lastUpdated)
+        : new Date();
 
     const walletData: WalletData = {
       xchBalance: xchData.xch,
@@ -519,14 +503,14 @@ class TreasuryService implements ITreasuryService {
       tokens,
       totalTokenValueUsd: totalTokenValue,
       nftCollections,
-      lastUpdated: new Date(),
+      lastUpdated,
     };
 
-    // Update memory cache
-    cachedWalletData = walletData;
-
-    // Persist to localStorage
-    saveCache(convertWalletDataToCache(walletData));
+    // Only update caches if we got fresh data
+    if (gotAnyFreshData) {
+      cachedWalletData = walletData;
+      saveCache(convertWalletDataToCache(walletData));
+    }
 
     return walletData;
   }
