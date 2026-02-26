@@ -131,13 +131,13 @@ function createParticles(bubbleId: string, x: number, y: number): Particle[] {
 
   for (let i = 0; i < PARTICLE_CONFIG.count; i++) {
     const angle = (Math.PI * 2 * i) / PARTICLE_CONFIG.count + (Math.random() - 0.5) * 0.5;
-    const speed = 4 + Math.random() * 5;
+    const speed = 7 + Math.random() * 8;
     particles.push({
       id: `${bubbleId}-particle-${i}-${Date.now()}`,
       x,
       y,
       vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed - 3, // Upward bias
+      vy: Math.sin(angle) * speed - 5, // Upward bias
       emoji: PARTICLE_CONFIG.emoji,
       opacity: 1,
       scale: 1.5 + Math.random() * 0.5,
@@ -160,8 +160,8 @@ function createConfetti(): Particle[] {
       id: `confetti-top-${i}-${Date.now()}`,
       x: Math.random() * screenWidth,
       y: -30 - Math.random() * 150,
-      vx: (Math.random() - 0.5) * 3,
-      vy: 2 + Math.random() * 3,
+      vx: (Math.random() - 0.5) * 4,
+      vy: 4 + Math.random() * 5,
       emoji: emojis[Math.floor(Math.random() * emojis.length)],
       opacity: 1,
       scale: 0.8 + Math.random() * 0.8,
@@ -174,8 +174,8 @@ function createConfetti(): Particle[] {
       id: `confetti-left-${i}-${Date.now()}`,
       x: -20,
       y: Math.random() * (screenHeight * 0.6),
-      vx: 5 + Math.random() * 4,
-      vy: 0.5 + Math.random() * 2,
+      vx: 8 + Math.random() * 6,
+      vy: 1 + Math.random() * 3,
       emoji: emojis[Math.floor(Math.random() * emojis.length)],
       opacity: 1,
       scale: 0.8 + Math.random() * 0.8,
@@ -188,8 +188,8 @@ function createConfetti(): Particle[] {
       id: `confetti-right-${i}-${Date.now()}`,
       x: screenWidth + 20,
       y: Math.random() * (screenHeight * 0.6),
-      vx: -(5 + Math.random() * 4),
-      vy: 0.5 + Math.random() * 2,
+      vx: -(8 + Math.random() * 6),
+      vy: 1 + Math.random() * 3,
       emoji: emojis[Math.floor(Math.random() * emojis.length)],
       opacity: 1,
       scale: 0.8 + Math.random() * 0.8,
@@ -525,9 +525,9 @@ export function CryptoBubbles({
   useEffect(() => {
     if (isLoading || bubblesRef.current.length === 0 || !isContainerReady) return;
 
-    const friction = 0.995;
-    const bounce = 0.8;
-    const minSpeed = 0.2;
+    const friction = 0.992;
+    const bounce = 0.85;
+    const minSpeed = 0.5;
 
     const animate = () => {
       // Get real-time container dimensions
@@ -552,12 +552,12 @@ export function CryptoBubbles({
         bubble.vx *= friction;
         bubble.vy *= friction;
 
-        // Add small random force to keep bubbles moving
+        // Add random force to keep bubbles moving
         if (Math.abs(bubble.vx) < minSpeed) {
-          bubble.vx += (Math.random() - 0.5) * 0.15;
+          bubble.vx += (Math.random() - 0.5) * 0.4;
         }
         if (Math.abs(bubble.vy) < minSpeed) {
-          bubble.vy += (Math.random() - 0.5) * 0.15;
+          bubble.vy += (Math.random() - 0.5) * 0.4;
         }
 
         // Wall collision
@@ -649,9 +649,9 @@ export function CryptoBubbles({
             ...p,
             x: p.x + p.vx,
             y: p.y + p.vy,
-            vy: p.vy + 0.3,
-            opacity: p.opacity - 0.02,
-            scale: p.scale * 0.98,
+            vy: p.vy + 0.5,
+            opacity: p.opacity - 0.035,
+            scale: p.scale * 0.97,
           }))
           .filter((p) => p.opacity > 0);
 
@@ -680,7 +680,7 @@ export function CryptoBubbles({
     const timeout = setTimeout(() => {
       setShowConfetti(false);
       setConfettiParticles([]);
-    }, 8000);
+    }, 4000);
 
     return () => clearTimeout(timeout);
   }, [showConfetti]);
@@ -697,9 +697,9 @@ export function CryptoBubbles({
             ...p,
             x: p.x + p.vx,
             y: p.y + p.vy,
-            vx: p.vx * 0.995,
-            vy: p.vy + 0.1,
-            opacity: p.opacity - 0.003,
+            vx: p.vx * 0.99,
+            vy: p.vy + 0.25,
+            opacity: p.opacity - 0.006,
           }))
           .filter((p) => p.opacity > 0 && p.y < window.innerHeight + 50);
 

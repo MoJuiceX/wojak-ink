@@ -44,18 +44,18 @@ const DOMAIN_CONFIGS: Record<string, Partial<RateLimitConfig>> = {
     minDelayMs: 500,
   },
   'api.spacescan.io': {
-    requestsPerSecond: 0.05,  // SpaceScan is EXTREMELY strict - 1 request per 20 seconds
-    minDelayMs: 20000,
-    maxRetries: 3,
-    baseBackoffMs: 30000,     // 30 second initial backoff on failure
-    maxBackoffMs: 300000,     // Up to 5 minutes backoff
+    requestsPerSecond: 0.33,  // SpaceScan: ~1 request per 3 seconds (treasury makes only 3 calls per refresh)
+    minDelayMs: 3000,
+    maxRetries: 2,
+    baseBackoffMs: 15000,     // 15 second initial backoff on 429
+    maxBackoffMs: 120000,     // Up to 2 minutes backoff
   },
   'api2.spacescan.io': {
-    requestsPerSecond: 0.05,  // SpaceScan is EXTREMELY strict - 1 request per 20 seconds
-    minDelayMs: 20000,
-    maxRetries: 3,
-    baseBackoffMs: 30000,
-    maxBackoffMs: 300000,
+    requestsPerSecond: 0.33,
+    minDelayMs: 3000,
+    maxRetries: 2,
+    baseBackoffMs: 15000,
+    maxBackoffMs: 120000,
   },
   'api.coingecko.com': {
     requestsPerSecond: 0.1,   // CoinGecko free tier - 1 request per 10 seconds (very conservative)
