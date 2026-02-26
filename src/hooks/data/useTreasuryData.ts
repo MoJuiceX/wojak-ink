@@ -26,26 +26,27 @@ export const treasuryKeys = {
 export function useTreasuryWalletData() {
   // Get cached data synchronously for instant display (always returns data, never null)
   const cachedData = treasuryService.getCachedWalletData();
-  const isCacheStale = treasuryService.isCacheStale();
-  // Check if we have actual NFTs (not just empty collections)
-  const totalNfts = cachedData?.nftCollections?.reduce((sum, c) => sum + (c.nfts?.length ?? 0), 0) ?? 0;
-  const hasActualNfts = totalNfts > 0;
+
+  // Tell TanStack Query the REAL age of cached data so it knows when to refetch.
+  // Without this, TanStack thinks initialData is "just now" and won't refetch for staleTime.
+  const cacheTimestamp = cachedData?.lastUpdated
+    ? cachedData.lastUpdated.getTime()
+    : 0; // 0 = epoch = always stale → triggers immediate refetch
 
   return useQuery({
     queryKey: treasuryKeys.walletData(),
     queryFn: () => treasuryService.fetchWalletData(),
-    // If we have no actual NFTs, set staleTime to 0 to force refetch
-    staleTime: hasActualNfts ? DATA_CACHE_MAP.walletBalance.staleTime : 0,
+    staleTime: DATA_CACHE_MAP.walletBalance.staleTime, // 5 minutes
     gcTime: DATA_CACHE_MAP.walletBalance.gcTime,
     // Show cached/fallback data immediately - NEVER show loading state
     initialData: cachedData,
-    // Mark initialData as stale if we have no actual NFTs
-    initialDataUpdatedAt: hasActualNfts ? undefined : 0,
-    // Only refetch if cache is stale or no actual NFTs
-    refetchOnMount: isCacheStale || !hasActualNfts,
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: false,
-    retry: false, // Don't retry on failure - just use cache
+    // Critical: use actual cache timestamp so TanStack knows data age
+    initialDataUpdatedAt: cacheTimestamp,
+    // Always refetch on mount — cached data is shown instantly anyway
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: 'always',
+    refetchOnReconnect: true,
+    retry: 1, // One retry on failure
   });
 }
 

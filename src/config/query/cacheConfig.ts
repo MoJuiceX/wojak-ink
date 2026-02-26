@@ -19,10 +19,10 @@ export const CACHE_CONFIG = {
     gcTime: 30 * 60 * 1000, // 30 minutes in cache
   },
 
-  // Treasury - rarely changes, aggressive caching to avoid rate limits
+  // Treasury - refreshes every 5 minutes so new tokens/NFTs show up quickly
   treasury: {
-    staleTime: 6 * 60 * 60 * 1000, // 6 hours fresh
-    gcTime: 12 * 60 * 60 * 1000, // 12 hours in cache
+    staleTime: 5 * 60 * 1000, // 5 minutes fresh
+    gcTime: 30 * 60 * 1000, // 30 minutes in cache
   },
 
   // Price data - needs to be relatively fresh

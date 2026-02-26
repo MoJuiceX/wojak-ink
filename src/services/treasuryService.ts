@@ -61,13 +61,9 @@ export interface WalletData {
   lastUpdated: Date;
 }
 
-// ============ Cache (in-memory for React Query) ============
+// ============ Cache (in-memory for instant display) ============
 
 let cachedWalletData: WalletData | null = null;
-let cacheTimestamp = 0;
-
-// Cache duration for React Query layer (shorter than localStorage)
-const MEMORY_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // ============ Initialize from localStorage ============
 
@@ -75,7 +71,6 @@ function initializeFromLocalStorage(): void {
   const cached = loadCache();
   if (cached) {
     cachedWalletData = convertCacheToWalletData(cached);
-    cacheTimestamp = cached.lastUpdated;
   }
 }
 
@@ -471,38 +466,11 @@ export interface ITreasuryService {
 }
 
 class TreasuryService implements ITreasuryService {
-  private lastApiCall = 0;
-  private readonly minApiInterval = 60 * 1000; // 1 minute between API calls
-
-  async fetchWalletData(forceRefresh = false): Promise<WalletData> {
-    const now = Date.now();
-
-    // Check memory cache first (for React Query)
-    // BUT: Skip if memory cache has no NFT collections
-    if (!forceRefresh && cachedWalletData && now - cacheTimestamp < MEMORY_CACHE_DURATION) {
-      if (cachedWalletData.nftCollections?.length > 0) {
-        return cachedWalletData;
-      }
-    }
-
-    // Check localStorage cache
+  async fetchWalletData(_forceRefresh = false): Promise<WalletData> {
     const localCache = loadCache();
-    // Skip localStorage cache since it doesn't include NFT collections
-    // Always fetch fresh if we have no NFT collections in memory
-    if (!forceRefresh && localCache && isCacheFresh(localCache.lastUpdated) && (cachedWalletData?.nftCollections?.length ?? 0) > 0) {
-      cachedWalletData = convertCacheToWalletData(localCache);
-      cacheTimestamp = localCache.lastUpdated;
-      return cachedWalletData!;
-    }
 
-    // Rate limit protection - prevent hammering APIs
-    // BUT: Allow refetch if we have no NFT collections
-    if (now - this.lastApiCall < this.minApiInterval && (cachedWalletData?.nftCollections?.length ?? 0) > 0) {
-      return cachedWalletData!;
-    }
-    this.lastApiCall = now;
-
-    // Fetch fresh data from APIs
+    // TanStack Query handles all cache timing (staleTime, refetchOnMount, etc.)
+    // This function just fetches fresh data from APIs.
     // Use Promise.allSettled to fetch all data in parallel and handle partial failures
     const [xchPriceResult, xchBalanceResult, tokensResult, nftsResult] = await Promise.allSettled([
       fetchXchPrice(),
@@ -556,7 +524,6 @@ class TreasuryService implements ITreasuryService {
 
     // Update memory cache
     cachedWalletData = walletData;
-    cacheTimestamp = now;
 
     // Persist to localStorage
     saveCache(convertWalletDataToCache(walletData));
@@ -574,7 +541,6 @@ class TreasuryService implements ITreasuryService {
     const localCache = loadCache();
     if (localCache) {
       cachedWalletData = convertCacheToWalletData(localCache);
-      cacheTimestamp = localCache.lastUpdated;
       return cachedWalletData;
     }
 
@@ -585,9 +551,6 @@ class TreasuryService implements ITreasuryService {
   isCacheStale(): boolean {
     const localCache = loadCache();
     if (!localCache) return true;
-    // Check if we have actual NFTs (not just empty collections)
-    const totalNfts = cachedWalletData?.nftCollections?.reduce((sum, c) => sum + (c.nfts?.length ?? 0), 0) ?? 0;
-    if (totalNfts === 0) return true;
     return !isCacheFresh(localCache.lastUpdated);
   }
 
