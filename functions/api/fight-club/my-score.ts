@@ -95,19 +95,17 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
             return unregisteredResponse();
         }
 
-        // Check if player exists and is verified, also fetch wallet address
+        // Check if player exists and is verified
         const player = await db.prepare(
-            'SELECT did_id, phase1_verified, wallet_address FROM game_players WHERE did_id = ?'
-        ).bind(did).first<{ did_id: string; phase1_verified: number; wallet_address: string | null }>();
+            'SELECT did_id, phase1_verified FROM game_players WHERE did_id = ?'
+        ).bind(did).first<{ did_id: string; phase1_verified: number }>();
 
         if (!player || player.phase1_verified !== 1) {
             return unregisteredResponse();
         }
 
-        const walletAddress = player.wallet_address || '';
-
         // Calculate full power breakdown
-        const power = await calculateFullPower(db, did, walletAddress);
+        const power = await calculateFullPower(db, did);
 
         // Use total power as player score for ranking
         const playerScore = power.totalPower;
@@ -119,9 +117,17 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         let rank: number | null = null;
 
         if (ranked) {
-            // Count players with higher total power (all Wojaks count, no limit)
+            // Count players with higher total power (includes collection bonus)
             const rankQuery = `
-        WITH player_wojak_power AS (
+        WITH top_threshold AS (
+          SELECT COALESCE(
+            (SELECT net_score FROM wojak_scores
+             ORDER BY net_score DESC
+             LIMIT 1 OFFSET (SELECT CAST(COUNT(*) * 0.42 AS INTEGER) FROM wojak_scores)),
+            0
+          ) as threshold
+        ),
+        player_wojak_power AS (
           SELECT
             dh.did_id,
             COALESCE(SUM(ws.net_score), 0) AS wojak_power
@@ -138,13 +144,33 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           WHERE collection = 'phase1'
           GROUP BY did_id
         ),
+        collection_bonus AS (
+          SELECT
+            dh.did_id,
+            SUM(
+              CASE
+                WHEN ws.net_score >= (SELECT threshold FROM top_threshold)
+                     AND (creator_gp.did_id IS NULL OR creator_gp.did_id != dh.did_id)
+                     AND CAST(ws.net_score * 0.10 AS INTEGER) > 0
+                THEN CAST(ws.net_score * 0.10 AS INTEGER)
+                ELSE 0
+              END
+            ) as bonus
+          FROM did_holdings dh
+          JOIN wojak_scores ws ON ws.nft_id = dh.nft_id
+          JOIN phase2_mints pm ON pm.mintgarden_launcher_id = dh.nft_id
+          LEFT JOIN game_players creator_gp ON creator_gp.wallet_address = pm.wallet_address
+          WHERE dh.collection = 'phase2'
+          GROUP BY dh.did_id
+        ),
         player_scores AS (
           SELECT
             gp.did_id,
-            COALESCE(pwp.wojak_power, 0) + COALESCE(ppp.plot_power, 0) AS player_score
+            COALESCE(pwp.wojak_power, 0) + COALESCE(ppp.plot_power, 0) + COALESCE(cb.bonus, 0) AS player_score
           FROM game_players gp
           LEFT JOIN player_wojak_power pwp ON pwp.did_id = gp.did_id
           LEFT JOIN player_plot_power ppp ON ppp.did_id = gp.did_id
+          LEFT JOIN collection_bonus cb ON cb.did_id = gp.did_id
           WHERE gp.phase1_verified = 1
             AND gp.did_id IS NOT NULL AND gp.did_id != ''
         )
