@@ -769,9 +769,23 @@ body {
 
 @media (max-width: 767px) {
   .fight-club-rankings {
-    gap: 12px;
+    gap: 8px;
     padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 84px);
+    overflow: hidden;
   }
+}
+
+/* Wrapper: tabs + optional rules icon on mobile */
+.rankings-tabs-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.rankings-tabs-row .rankings-tabs {
+  flex: 1;
+  min-width: 0;
 }
 
 .rankings-tabs {
@@ -1126,6 +1140,71 @@ body {
   color: var(--color-text);
 }
 
+/* Mobile: top-3 showcase — aligned content, different card heights */
+@media (max-width: 767px) {
+  .top-ten-showcase {
+    gap: 8px;
+    padding: 6px 0 4px;
+    justify-content: center;
+  }
+
+  .top-ten-card {
+    padding: 10px 8px 10px;
+    gap: 5px;
+    overflow: hidden;
+    /* Content alignment: rank at top, avatar/name/power at bottom */
+    justify-content: flex-start;
+  }
+
+  /* Push rank to top, avatar/name/score stick to bottom = aligned across cards */
+  .top-ten-rank {
+    font-size: 0.75rem;
+    line-height: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    margin-bottom: auto; /* KEY: pushes everything below to the bottom */
+  }
+
+  .top-ten-card-premium .top-ten-rank {
+    font-size: 0.85rem;
+  }
+
+  /* All avatars same size on mobile for alignment */
+  .top-ten-avatar,
+  .top-ten-card-premium .top-ten-avatar {
+    width: 52px;
+    height: 52px;
+  }
+
+  .top-ten-name,
+  .top-ten-card-premium .top-ten-name {
+    font-size: 0.75rem;
+    text-align: center;
+    line-height: 1.2;
+    min-height: 1.2em; /* Reserve space even for short names */
+  }
+
+  .top-ten-power,
+  .top-ten-card-premium .top-ten-power {
+    font-size: 1rem;
+  }
+
+  /* Back face compact */
+  .top-ten-back-stats {
+    gap: 6px;
+  }
+
+  .back-stat-label {
+    font-size: 0.55rem;
+  }
+
+  .back-stat-value {
+    font-size: 0.75rem;
+  }
+}
+
 /* Rankings row action icons */
 .rankings-row-actions {
   display: flex;
@@ -1305,14 +1384,34 @@ body {
 }
 
 @media (max-width: 767px) {
+  /* Edge-to-edge section cards */
+  .rankings-section-card {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    padding: 10px 0;
+    margin: 0 -2px;
+  }
+
+  .rankings-section-header {
+    padding: 0 12px;
+  }
+
+  /* Tighter row spacing */
+  .rankings-list {
+    gap: 4px;
+  }
+
   .rankings-row {
-    padding: 9px 10px;
-    gap: 10px;
-    border-radius: 12px;
+    padding: 8px 12px;
+    gap: 8px;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
   }
 
   .rankings-row-name {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
   }
 
   .rankings-row-info .text-xs {
@@ -1320,12 +1419,28 @@ body {
     line-height: 1.2;
   }
 
-  .rankings-row-power {
-    min-width: 56px;
-    gap: 1px;
+  /* Smaller avatars on mobile */
+  .rankings-row-avatar {
+    width: 32px;
+    height: 32px;
   }
 
-  .rankings-row-power .text-xs {
+  /* Compact power display, hide POWER label */
+  .rankings-row-power {
+    min-width: auto;
+    gap: 0;
+  }
+
+  .rankings-row-power .power-label {
+    display: none;
+  }
+
+  .rankings-row-power .power-value {
+    font-size: 1rem;
+  }
+
+  /* Hide action buttons on mobile — whole row is tappable */
+  .rankings-row-actions {
     display: none;
   }
 
@@ -1333,7 +1448,13 @@ body {
     width: 24px;
     height: 24px;
     min-width: 24px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
+  }
+
+  /* Collection counts: tighter */
+  .collection-counts {
+    gap: 4px;
+    font-size: 0.65rem;
   }
 }
 
@@ -1552,16 +1673,17 @@ body {
   }
 }
 
-/* Wojak rankings row - prevent overflow on mobile */
+/* Wojak rankings row - compact mobile layout */
 @media (max-width: 640px) {
   .wojak-row {
     flex-wrap: nowrap;
-    gap: var(--space-2);
+    gap: 8px;
+    padding: 8px 12px;
   }
 
   .wojak-row-image {
-    width: 46px;
-    height: 46px;
+    width: 40px;
+    height: 40px;
     border-radius: var(--radius-sm);
   }
 
@@ -1574,29 +1696,51 @@ body {
   .wojak-row-info {
     min-width: 0;
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
   }
 
-  .wojak-row-title {
-    gap: 6px;
+  /* Mobile: edition · owner on one line */
+  .wojak-row-info .wojak-row-title {
+    display: flex;
+    align-items: baseline;
+    gap: 0;
+    flex-wrap: nowrap;
   }
 
-  .wojak-row-owner {
+  .wojak-row-info .wojak-row-edition {
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  .wojak-row-owner-dot {
+    color: var(--color-text-muted);
+    margin: 0 5px;
+    font-size: 0.7rem;
+  }
+
+  .wojak-row-info .wojak-row-owner {
+    font-size: 0.72rem;
     max-width: 100px;
-    font-size: 0.68rem;
-  }
-
-  .wojak-row-status {
-    font-size: 0.6rem;
-    padding: 1px 6px;
-    max-width: 84px;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Compact vote stats: 6/1 format */
+  .wojak-row-votes-compact {
+    font-size: 0.7rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 2px;
   }
 
   .wojak-row-power {
     flex-shrink: 0;
     text-align: right;
-    min-width: 52px;
+    min-width: 40px;
   }
 
   .wojak-row-power-note {
@@ -1605,7 +1749,6 @@ body {
 
   .power-breakdown {
     display: none;
-    /* Hide vote/battle split on very small screens */
   }
 }
 
@@ -1699,6 +1842,11 @@ body {
 .sort-chip-icon {
   font-size: 13px;
   line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
 }
 
 .sort-chip-label {
@@ -6095,7 +6243,7 @@ body {
   }
 
   .did-collection-column {
-    max-height: 42vh;
+    max-height: 35vh;
   }
 
   .did-collection-column-header {
@@ -6151,29 +6299,29 @@ body {
 
 @media (max-width: 767px) {
   .rankings-header-block {
-    gap: 12px;
-    margin-bottom: 8px;
+    gap: 6px;
+    margin-bottom: 4px;
+    align-items: center;
   }
 
   .rankings-header-title {
-    font-size: 1.55rem;
-    line-height: 1.05;
+    font-size: 1.1rem;
+    line-height: 1.15;
   }
 
-  .rankings-header-subtitle {
-    font-size: 0.75rem;
-    line-height: 1.35;
+  /* Compact section headers on mobile */
+  .rankings-section-header-compact {
+    margin-bottom: 6px;
+    align-items: center;
   }
 
-  .rankings-header-block .btn {
-    min-height: 40px;
-    padding: 7px 12px !important;
-    font-size: 0.82rem !important;
+  .rankings-section-header-compact .rankings-section-title {
+    font-size: 0.8rem;
   }
 
-  .rankings-header-block > .flex.items-center.gap-3 {
-    width: 100%;
-    gap: 8px !important;
+  .rankings-section-header-compact .rankings-section-count {
+    padding: 2px 6px;
+    font-size: 0.65rem;
   }
 }
 
@@ -6192,6 +6340,27 @@ body {
 .rankings-header-subtitle {
   font-size: 0.7rem;
   color: var(--color-text-muted);
+}
+
+/* Small circular rules icon button (mobile) */
+.rankings-rules-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: var(--color-white-5);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.rankings-rules-icon:hover {
+  background: var(--color-white-10);
+  color: var(--color-text);
 }
 
 .rankings-header-actions {
@@ -6409,50 +6578,66 @@ body {
 }
 
 @media (max-width: 900px) {
-  .rankings-toolbar {
+  .rankings-toolbar:not(.rankings-toolbar-inline) {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .rankings-view-toggle {
+  .rankings-toolbar:not(.rankings-toolbar-inline) .rankings-view-toggle {
     align-self: flex-end;
   }
 }
 
+/* Mobile Wojaks toolbar: single tight row */
 @media (max-width: 767px) {
-  .rankings-toolbar {
-    gap: 10px;
-    margin-bottom: 10px;
-    padding-bottom: 10px;
-  }
-
-  .rankings-sort {
+  .rankings-toolbar-inline {
+    flex-direction: row;
     flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 2px;
-    scrollbar-width: none;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 6px;
+    padding-bottom: 6px;
+    border-bottom: none;
   }
 
-  .rankings-sort::-webkit-scrollbar {
-    display: none;
+  .rankings-toolbar-inline .rankings-sort {
+    display: flex;
+    flex: 1;
+    flex-wrap: nowrap;
+    gap: 6px;
+    overflow: visible;
   }
 
-  .sort-chip {
+  /* Icon-only compact chips on mobile */
+  .rankings-toolbar-inline .sort-chip {
     flex-shrink: 0;
-    min-height: 34px;
-    padding: 5px 10px;
-  }
-
-  .rankings-view-toggle {
-    align-self: stretch;
-    justify-content: flex-end;
-    background: transparent;
+    width: 34px;
+    height: 34px;
     padding: 0;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .view-btn {
+  .rankings-toolbar-inline .sort-chip .sort-chip-icon {
+    font-size: 15px;
+    width: auto;
+    height: auto;
+  }
+
+  .rankings-toolbar-inline .rankings-view-toggle {
+    flex-shrink: 0;
+    margin-left: auto;
+    background: var(--color-white-5);
+    border-radius: 8px;
+    padding: 2px;
+  }
+
+  .rankings-toolbar-inline .view-btn {
     width: 30px;
     height: 30px;
+    font-size: 14px;
   }
 }
 
@@ -6527,15 +6712,16 @@ body {
     font-size: 0.7rem;
   }
 
-  /* Rankings content: full width on mobile */
+  /* Rankings content: full width, tight gaps on mobile */
   .rankings-content {
     padding: 0;
     margin: 0;
+    gap: 8px;
   }
 
-  /* Rank badge: mobile sizing */
+  /* Rank badge: mobile sizing (matches rankings-row override) */
   .rank-badge {
-    min-width: 32px;
+    min-width: 24px;
     font-size: 0.75rem;
     font-weight: 700;
   }

@@ -11,10 +11,10 @@ import { MINTGARDEN_COLLECTION_URL } from '@/services/constants';
 import { lazy, Suspense, memo, useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Swords, ExternalLink, Wallet, Info } from 'lucide-react';
+import { useLayout } from '@/hooks/useLayout';
 import { useClerkAuth } from '@/contexts/ClerkAuthContext';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { PageSkeleton } from '@/components/layout/PageSkeleton';
-import { useLayout } from '@/hooks/useLayout';
 import { GameProvider, useGame } from '@/contexts/GameContext';
 import { SwipeAutoRegister } from '@/components/game/SwipeAutoRegister';
 import { FightClubRankings } from '@/components/combat/FightClubRankings';
@@ -206,7 +206,7 @@ function getActiveTab(pathname: string): TabId {
 
 // Inner content: must be inside GameProvider so we can use useGame() and effectivePlayerDid
 function FightClubContent() {
-  const { contentPadding } = useLayout();
+  const { contentPadding, isMobile } = useLayout();
   const location = useLocation();
   const navigate = useNavigate();
   const activeTab = getActiveTab(location.pathname);
@@ -261,14 +261,16 @@ function FightClubContent() {
               </button>
             ))}
           </div>
-          <button
-            type="button"
-            className="btn btn-ghost text-xs flex items-center gap-1"
-            style={{ padding: '6px 10px', minWidth: 'auto' }}
-            onClick={handleGuideOpen}
-          >
-            <Info size={14} />
-          </button>
+          {!isMobile && (
+            <button
+              type="button"
+              className="btn btn-ghost text-xs flex items-center gap-1"
+              style={{ padding: '8px 12px', minWidth: '40px', minHeight: '40px' }}
+              onClick={handleGuideOpen}
+            >
+              <Info size={16} />
+            </button>
+          )}
         </div>
 
         <SubscriptionBanner playerDid={effectivePlayerDid} />

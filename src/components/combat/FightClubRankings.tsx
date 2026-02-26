@@ -19,7 +19,8 @@ import { DIDCollectionModal } from './DIDCollectionModal';
 import { SkeletonRanking } from '@/components/skeletons/SkeletonRanking';
 import { SkeletonVoteCard } from '@/components/skeletons/SkeletonVoteCard';
 import { InlineError } from '@/components/ui/InlineError';
-import { useFightClubMyScore, getTierColor } from '@/hooks/useFightClubMyScore';
+import { useFightClubMyScore } from '@/hooks/useFightClubMyScore';
+import { useLayout } from '@/hooks/useLayout';
 
 type RankingTab = 'players' | 'wojaks';
 
@@ -52,22 +53,19 @@ interface VoteLeaderboardWojakRow {
   totalVotes: number;
   voteScore: number;
   likeRatio: number | null;
-  isProvisional: boolean;
-  provisionalVotesNeeded: number;
-  countsTowardPlayer: boolean;
 }
 
 interface PlayersResponse {
   players: VoteLeaderboardPlayerRow[];
   yourRank: number | null;
-  meta: { mode: string; provisionalMinVotes: number; playerTopN: number };
+  meta: { mode: string; playerTopN: number };
 }
 
 interface WojaksResponse {
   wojaks: VoteLeaderboardWojakRow[];
   total: number;
   sort: string;
-  meta: { mode: string; provisionalMinVotes: number };
+  meta: { mode: string };
 }
 
 // ── Sorting ─────────────────────────────────────────────────────────
@@ -110,7 +108,7 @@ function useVoteLeaderboard(type: RankingTab, sort?: SortOption) {
 // ── Rank Badge ──────────────────────────────────────────────────────
 
 function RankBadge({ rank }: { rank: number | null }) {
-  if (rank === null) return <span className="rank-badge rank-provisional">—</span>;
+  if (rank === null) return <span className="rank-badge">—</span>;
   if (rank === 1)
     return <span className="rank-badge rank-1" style={{ color: '#FFD700', fontWeight: 'bold' }}>#1</span>;
   if (rank === 2)
@@ -127,8 +125,7 @@ function YourPositionCard() {
 
   if (!scoreData?.registered) return null;
 
-  const { ranked, rank, playerScore, tier, totalWojakCount, pointsToNextRank, nextRank } = scoreData;
-  const tierColor = getTierColor(tier);
+  const { ranked, rank, playerScore, totalWojakCount, pointsToNextRank, nextRank } = scoreData;
 
   return (
     <div className="your-position-card">
@@ -138,7 +135,7 @@ function YourPositionCard() {
       <div className="your-position-info">
         <span className="your-position-label">Your Power Level</span>
         <span className="your-position-score">
-          {playerScore.toLocaleString()} <span style={{ color: tierColor, fontSize: '0.75rem' }}>{tier}</span>
+          {playerScore.toLocaleString()}
         </span>
         <span className="your-position-meta">
           {totalWojakCount} Wojaks
@@ -155,6 +152,7 @@ function YourPositionCard() {
 
 function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
   const { data, isLoading, error } = useVoteLeaderboard('players');
+  const { isMobile } = useLayout();
   const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
   const flipTimers = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const [selectedPlayer, setSelectedPlayer] = useState<{ did: string; name: string } | null>(null);
@@ -255,15 +253,18 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
     .filter((p) => p.totalWojakCount > 0)
     .map((p, idx) => ({ ...p, rank: idx + 1 })); // Re-assign continuous ranks
 
-  const showTopTen = rankedPlayers.length >= 3;
-  const topTen = showTopTen ? rankedPlayers.slice(0, 10) : [];
-  const rankedList = showTopTen ? rankedPlayers.slice(10) : rankedPlayers;
+  // Mobile: top 3 in showcase (trophy mode), Desktop: top 10
+  const showcaseCount = isMobile ? 3 : 10;
+  const showTopShowcase = rankedPlayers.length >= 3;
+  const topShowcase = showTopShowcase ? rankedPlayers.slice(0, showcaseCount) : [];
+  const rankedList = showTopShowcase ? rankedPlayers.slice(showcaseCount) : rankedPlayers;
 
-  // Card height varies by rank: #1 = 220px, #10 = 175px (noticeable but names fit)
+  // Card height varies by rank. Mobile: taller to fit names (195→165). Desktop: (220→175).
   const getCardHeight = (rank: number) => {
-    const maxHeight = 220;
-    const minHeight = 175;
-    const step = (maxHeight - minHeight) / 9; // ~5px per position
+    const maxHeight = isMobile ? 195 : 220;
+    const minHeight = isMobile ? 165 : 175;
+    const steps = isMobile ? 2 : 9; // 3 cards on mobile, 10 on desktop
+    const step = (maxHeight - minHeight) / steps;
     return Math.round(maxHeight - (rank - 1) * step);
   };
 
@@ -287,10 +288,10 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
       {/* Your Position */}
       <YourPositionCard />
 
-      {/* Top 10 Showcase - flippable cards */}
-      {showTopTen && (
+      {/* Top Showcase - flippable cards (top 3 on mobile, top 10 on desktop) */}
+      {showTopShowcase && (
         <div className="top-ten-showcase">
-          {topTen.map((player) => {
+          {topShowcase.map((player) => {
             const rank = player.rank || 1;
             const cardHeight = getCardHeight(rank);
             const rankColor = getRankColor(rank);
@@ -315,9 +316,9 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
                   }}
                 >
                   <div className="top-ten-rank" style={{ color: rankColor }}>
-                    {rank === 1 && <Crown size={18} style={{ marginBottom: 2 }} />}
-                    {rank === 2 && <Medal size={16} style={{ marginBottom: 2 }} />}
-                    {rank === 3 && <Medal size={16} style={{ marginBottom: 2 }} />}
+                    {rank === 1 && <Crown size={isMobile ? 14 : 18} style={{ marginBottom: 2 }} />}
+                    {rank === 2 && <Medal size={isMobile ? 12 : 16} style={{ marginBottom: 2 }} />}
+                    {rank === 3 && <Medal size={isMobile ? 12 : 16} style={{ marginBottom: 2 }} />}
                     #{rank}
                   </div>
                   <div
@@ -398,15 +399,18 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
       {/* Ranked list */}
       {rankedList.length > 0 && (
         <div className="rankings-section-card">
-          <div className="rankings-section-header">
-            <h3 className="rankings-section-title">All Players</h3>
-            <span className="rankings-section-count">{rankedPlayers.length} ranked</span>
-          </div>
+          {!isMobile && (
+            <div className="rankings-section-header rankings-section-header-compact">
+              <h3 className="rankings-section-title">All Players</h3>
+              <span className="rankings-section-count">{rankedPlayers.length}</span>
+            </div>
+          )}
           <div className="rankings-list">
             {rankedList.map((player) => (
               <div
                 key={player.did}
                 className={`rankings-row${player.did === currentUserDid ? ' rankings-row-you' : ''}`}
+                onClick={() => isMobile && setSelectedPlayer({ did: player.did, name: player.displayName || 'Anon' })}
               >
                 <RankBadge rank={player.rank} />
                 <div className="rankings-row-avatar">
@@ -425,7 +429,7 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
                   <span className="collection-counts">
                     <span className="collection-plot">{player.plotCount || 0} Farmers</span>
                     <span className="collection-divider">·</span>
-                    <span className="collection-wojak">{player.wojakCount || 0} Your Wojaks</span>
+                    <span className="collection-wojak">{player.wojakCount || 0} Wojaks</span>
                     {(player.collectionBonus ?? 0) > 0 && (
                       <>
                         <span className="collection-divider">·</span>
@@ -443,7 +447,7 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
                     type="button"
                     className="rankings-action-icon"
                     title="View Collection"
-                    onClick={() => setSelectedPlayer({ did: player.did, name: player.displayName || 'Anon' })}
+                    onClick={(e) => { e.stopPropagation(); setSelectedPlayer({ did: player.did, name: player.displayName || 'Anon' }); }}
                   >
                     <Grid3X3 size={16} />
                   </button>
@@ -483,8 +487,9 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
               <div
                 key={player.did}
                 className={`rankings-row${player.did === currentUserDid ? ' rankings-row-you' : ''}`}
+                onClick={() => isMobile && setSelectedPlayer({ did: player.did, name: player.displayName || 'Anon' })}
               >
-                <span className="rank-badge rank-provisional">—</span>
+                <span className="rank-badge">—</span>
                 <div className="rankings-row-avatar">
                   {player.bestWojakImage ? (
                     <img
@@ -499,7 +504,7 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
                 <div className="rankings-row-info">
                   <span className="rankings-row-name">{player.displayName || 'Anon'}</span>
                   <span className="text-secondary text-xs">
-                    No Your Wojaks in DID
+                    No Wojaks in DID
                   </span>
                 </div>
                 <div className="rankings-row-power">
@@ -511,7 +516,7 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
                     type="button"
                     className="rankings-action-icon"
                     title="View Collection"
-                    onClick={() => setSelectedPlayer({ did: player.did, name: player.displayName || 'Anon' })}
+                    onClick={(e) => { e.stopPropagation(); setSelectedPlayer({ did: player.did, name: player.displayName || 'Anon' }); }}
                   >
                     <Grid3X3 size={16} />
                   </button>
@@ -550,6 +555,7 @@ type ViewMode = 'list' | 'grid';
 
 function WojaksTab() {
   const { getToken } = useAuth();
+  const { isMobile } = useLayout();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [sortBy, setSortBy] = useState<SortOption>('score');
   const [allWojaks, setAllWojaks] = useState<VoteLeaderboardWojakRow[]>([]);
@@ -644,8 +650,8 @@ function WojaksTab() {
 
   return (
     <div className="rankings-content">
-      {/* Toolbar */}
-      <div className="rankings-toolbar">
+      {/* Toolbar — single row: sort chips + view toggle */}
+      <div className="rankings-toolbar rankings-toolbar-inline">
         <div className="rankings-sort">
           {SORT_OPTIONS.map((opt) => (
             <button
@@ -686,7 +692,7 @@ function WojaksTab() {
           {allWojaks.map((wojak, idx) => (
             <div
               key={wojak.nftId}
-              className={`rankings-row wojak-row wojak-row-animate${wojak.isProvisional ? ' vojak-provisional' : ''}`}
+              className="rankings-row wojak-row wojak-row-animate"
               style={{ animationDelay: `${Math.min(idx, 10) * 0.03}s` }}
             >
               <RankBadge rank={wojak.rank} />
@@ -710,42 +716,51 @@ function WojaksTab() {
                 />
               </div>
               <div className="wojak-row-info">
-                <div className="wojak-row-header">
-                  <div className="wojak-row-title">
-                    <span className="wojak-row-edition">#{wojak.edition}</span>
-                    <span className="wojak-row-owner">Owner: {wojak.ownerName || 'Anon'}</span>
-                  </div>
-                  {wojak.isProvisional && (
-                    <span className="wojak-row-status">
-                      Needs {wojak.provisionalVotesNeeded} more
+                {isMobile ? (
+                  /* Mobile: compact single-line layout */
+                  <>
+                    <div className="wojak-row-title">
+                      <span className="wojak-row-edition">#{wojak.edition}</span>
+                      <span className="wojak-row-owner-dot">·</span>
+                      <span className="wojak-row-owner">{wojak.ownerName || 'Anon'}</span>
+                    </div>
+                    <span className="wojak-row-votes-compact">
+                      <span className="text-success">{wojak.likes}</span>
+                      <span className="text-muted">/</span>
+                      <span className="text-error">{wojak.dislikes}</span>
                     </span>
-                  )}
-                </div>
-                <div className="wojak-row-stats flex flex-wrap gap-x-3 gap-y-1 text-xs">
-                  <span className="text-success" title="Glazes (upvotes)">
-                    <ThumbsUp size={11} style={{ display: 'inline', marginRight: 2, verticalAlign: -1 }} />
-                    {wojak.likes}
-                  </span>
-                  <span className="text-error" title="Fades (downvotes)">
-                    <ThumbsDown size={11} style={{ display: 'inline', marginRight: 2, verticalAlign: -1 }} />
-                    {wojak.dislikes}
-                  </span>
-                  <span className="text-secondary" title="Total votes">
-                    {wojak.totalVotes} votes
-                  </span>
-                </div>
+                  </>
+                ) : (
+                  /* Desktop: full layout */
+                  <>
+                    <div className="wojak-row-header">
+                      <div className="wojak-row-title">
+                        <span className="wojak-row-edition">#{wojak.edition}</span>
+                        <span className="wojak-row-owner">Owner: {wojak.ownerName || 'Anon'}</span>
+                      </div>
+                    </div>
+                    <div className="wojak-row-stats flex flex-wrap gap-x-3 gap-y-1 text-xs">
+                      <span className="text-success" title="Glazes (upvotes)">
+                        <ThumbsUp size={11} style={{ display: 'inline', marginRight: 2, verticalAlign: -1 }} />
+                        {wojak.likes}
+                      </span>
+                      <span className="text-error" title="Fades (downvotes)">
+                        <ThumbsDown size={11} style={{ display: 'inline', marginRight: 2, verticalAlign: -1 }} />
+                        {wojak.dislikes}
+                      </span>
+                      <span className="text-secondary" title="Total votes">
+                        {wojak.totalVotes} votes
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
               <div className="wojak-row-power">
                 <div className="power-total">
-                  <span style={{ fontWeight: 700, fontSize: '1rem' }}>
+                  <span style={{ fontWeight: 700, fontSize: isMobile ? '0.95rem' : '1rem' }}>
                     {wojak.voteScore > 0 ? '+' : ''}{wojak.voteScore}
                   </span>
                 </div>
-                {wojak.isProvisional && (
-                  <span className="wojak-row-power-note text-secondary text-xs">
-                    Not ranked yet
-                  </span>
-                )}
               </div>
             </div>
           ))}
@@ -760,9 +775,9 @@ function WojaksTab() {
             return (
               <div
                 key={wojak.nftId}
-                className={`wojak-grid-card ${glowClass}${wojak.isProvisional ? ' grid-provisional' : ''}`}
+                className={`wojak-grid-card ${glowClass}`}
                 style={{ animationDelay: `${Math.min(idx, 20) * 0.03}s` }}
-                title={`#${wojak.edition}\nGlazes: ${wojak.likes} · Fades: ${wojak.dislikes}\nVote Score: ${wojak.voteScore}\nOwner: ${wojak.ownerName || 'Anon'}${wojak.isProvisional ? '\n⚠ Provisional' : ''}`}
+                title={`#${wojak.edition}\nGlazes: ${wojak.likes} · Fades: ${wojak.dislikes}\nVote Score: ${wojak.voteScore}\nOwner: ${wojak.ownerName || 'Anon'}`}
               >
                 <div className="grid-card-image">
                   <img
@@ -791,7 +806,6 @@ function WojaksTab() {
                       {wojak.voteScore > 0 ? '+' : ''}{wojak.voteScore}
                     </span>
                   </div>
-                  {wojak.isProvisional && <span className="grid-card-status">New</span>}
                 </div>
               </div>
             );
@@ -829,50 +843,65 @@ interface FightClubRankingsProps {
 export function FightClubRankings({ currentUserDid }: FightClubRankingsProps = {}) {
   const [activeTab, setActiveTab] = useState<RankingTab>('players');
   const [showRules, setShowRules] = useState(false);
+  const { isMobile } = useLayout();
 
   return (
     <div className="fight-club-rankings">
-      {/* Rankings header block */}
-      <div className="rankings-header-block">
-        <div className="rankings-header-text">
-          <h2 className="rankings-header-title">
-            <Trophy size={22} style={{ color: 'var(--color-gold-bright)', marginRight: 8, verticalAlign: -3 }} />
-            Fight Club Rankings
-          </h2>
-          <span className="rankings-header-subtitle">Voting-only season. Battle is demo-only for now.</span>
+      {/* Rankings header block — hidden on mobile (redundant with tab) */}
+      {!isMobile && (
+        <div className="rankings-header-block">
+          <div className="rankings-header-text">
+            <h2 className="rankings-header-title">
+              <Trophy size={22} style={{ color: 'var(--color-gold-bright)', marginRight: 8, verticalAlign: -3 }} />
+              Fight Club Rankings
+            </h2>
+            <span className="rankings-header-subtitle">Voting-only season. Battle is demo-only for now.</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link to="/fight-club/vote" className="btn btn-primary" style={{ padding: '6px 16px', fontSize: '0.9rem' }}>Go Vote</Link>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ padding: '6px 16px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}
+              onClick={() => setShowRules(true)}
+            >
+              <HelpCircle size={14} />
+              Rules
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          <Link to="/fight-club/vote" className="btn btn-primary" style={{ padding: '6px 16px', fontSize: '0.9rem' }}>Go Vote</Link>
+      )}
+
+      {/* Sub-tabs + rules icon (mobile) */}
+      <div className="rankings-tabs-row">
+        <div className="rankings-tabs">
           <button
             type="button"
-            className="btn btn-secondary"
-            style={{ padding: '6px 16px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}
-            onClick={() => setShowRules(true)}
+            className={`rankings-tab ${activeTab === 'players' ? 'active' : ''}`}
+            onClick={() => setActiveTab('players')}
           >
-            <HelpCircle size={14} />
-            Rules
+            <User size={16} />
+            Players
+          </button>
+          <button
+            type="button"
+            className={`rankings-tab ${activeTab === 'wojaks' ? 'active' : ''}`}
+            onClick={() => setActiveTab('wojaks')}
+          >
+            <ThumbsUp size={16} />
+            Wojaks
           </button>
         </div>
-      </div>
-
-      {/* Sub-tabs */}
-      <div className="rankings-tabs">
-        <button
-          type="button"
-          className={`rankings-tab ${activeTab === 'players' ? 'active' : ''}`}
-          onClick={() => setActiveTab('players')}
-        >
-          <User size={16} />
-          Players
-        </button>
-        <button
-          type="button"
-          className={`rankings-tab ${activeTab === 'wojaks' ? 'active' : ''}`}
-          onClick={() => setActiveTab('wojaks')}
-        >
-          <ThumbsUp size={16} />
-          Wojaks
-        </button>
+        {isMobile && (
+          <button
+            type="button"
+            className="rankings-rules-icon"
+            onClick={() => setShowRules(true)}
+            title="Rules"
+          >
+            <HelpCircle size={16} />
+          </button>
+        )}
       </div>
 
       {/* Tab content */}
