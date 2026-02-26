@@ -24,14 +24,6 @@ const _SKIP_IF_INDEXED_WITHIN_MS = 2 * 60 * 60 * 1000; // Skip players indexed <
 // Key: collection ID, Value: Map<DID, NftInfo[]>
 let collectionCache: Map<string, Map<string, NftInfo[]>> = new Map();
 
-// Power level calculation constants (same as _powerLevel.ts)
-const POWER_LEVEL_MAX = 10000;
-const QUALITY_WEIGHT = 1.0;
-const VALUE_BASE = 50;
-const VALUE_LOG_SCALE = 30;
-const BREADTH_BONUS = 15;
-const CREATOR_QUALITY_WEIGHT = 0.5;
-const CREATOR_SPREAD_BONUS = 10;
 
 export default {
   async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
@@ -223,41 +215,56 @@ async function run(env: Env) {
   }
 }
 
-// Sync DID profile name from chain — only overrides 'random' names
-// Currently disabled to save subrequests (profile sync uses MintGarden API)
-async function _syncDIDProfileName(env: Env, did: string): Promise<void> {
+// Name validation regex — shared between sync and discovery
+const NAME_REGEX = /^[a-zA-Z0-9 '\-._]+$/;
+
+// Sync DID profile name from chain — only overrides 'random' or missing names.
+// Uses 1 MintGarden API call per player (fetches any NFT they own, reads owner.name).
+// The /profiles/{did} endpoint returns 404 for all DIDs, so we use the NFT→owner approach.
+// Budget: sync runs use ~13 subrequests + 10 profile fetches = 23 (well under 50 limit).
+async function syncDIDProfileName(env: Env, did: string): Promise<void> {
   try {
-    // Check current name source — only update if 'random' (user hasn't customized)
+    // Check current name source — only update if 'random' or missing (user hasn't customized)
     const profile = await env.DB.prepare(
-      'SELECT name_source FROM did_profiles WHERE did_id = ?'
-    ).bind(did).first<{ name_source: string | null }>();
+      'SELECT name_source, display_name FROM did_profiles WHERE did_id = ?'
+    ).bind(did).first<{ name_source: string | null; display_name: string | null }>();
 
     // If name_source is 'custom', user has set their own name — don't override
     if (profile?.name_source === 'custom') {
       return;
     }
 
-    // Fetch DID profile from MintGarden
-    const url = `https://api.mintgarden.io/profiles/${encodeURIComponent(did)}`;
-    const response = await fetch(url, {
+    // If already has a chain name, skip (no need to re-fetch every cycle)
+    if (profile?.name_source === 'chain' && profile?.display_name) {
+      return;
+    }
+
+    // Find any NFT this DID owns (to look up owner.name from MintGarden)
+    const holding = await env.DB.prepare(
+      'SELECT nft_id FROM did_holdings WHERE did_id = ? LIMIT 1'
+    ).bind(did).first<{ nft_id: string }>();
+
+    if (!holding) {
+      return; // No NFTs to look up — skip
+    }
+
+    // Fetch NFT from MintGarden — the owner object includes the DID's on-chain name
+    const response = await fetch(`https://api.mintgarden.io/nfts/${holding.nft_id}`, {
       headers: { 'Accept': 'application/json' },
     });
 
     if (!response.ok) {
-      // DID profile not found or API error — skip silently
-      return;
+      return; // API error — skip silently
     }
 
     const data = await response.json() as {
-      name?: string;
-      twitter_handle?: string;
+      owner?: { name?: string };
     };
 
-    // If DID has a name on chain, use it
-    const chainName = data.name?.trim();
+    const chainName = data.owner?.name?.trim();
     if (chainName && chainName.length >= 2 && chainName.length <= 20) {
-      // Validate: alphanumeric + spaces only
-      if (/^[a-zA-Z0-9 ]+$/.test(chainName)) {
+      // Validate: alphanumeric + spaces + common punctuation
+      if (NAME_REGEX.test(chainName)) {
         await env.DB.prepare(`
           INSERT INTO did_profiles (did_id, display_name, name_source, created_at, updated_at)
           VALUES (?, ?, 'chain', datetime('now'), datetime('now'))
@@ -278,9 +285,8 @@ async function _syncDIDProfileName(env: Env, did: string): Promise<void> {
 
 async function syncDIDHoldings(env: Env, did: string): Promise<'changed' | 'unchanged' | 'skipped'> {
   // Sync DID profile name from chain (if user hasn't customized)
-  // Skip if we're near subrequest limit (profile sync uses an API call)
-  // await syncDIDProfileName(env, did);
-  // await sleep(RATE_LIMIT_MS);
+  await syncDIDProfileName(env, did);
+  await sleep(RATE_LIMIT_MS);
 
   // Fetch Phase 2 NFTs from MintGarden (10 search queries)
   const phase2Result = await fetchDIDNfts(did, PHASE2_COLLECTION);
@@ -332,7 +338,16 @@ async function syncDIDHoldings(env: Env, did: string): Promise<'changed' | 'unch
     }
   }
 
+  // Always update phase1_verified status, even when holdings haven't changed.
+  // Bug fix: previously this was after the early return below, so players whose
+  // holdings didn't change on a given sync cycle never got phase1_verified set.
+  const hasPhase1 = phase1Nfts.length > 0;
+  await env.DB.prepare(
+    "UPDATE game_players SET phase1_verified = ?, updated_at = datetime('now') WHERE did_id = ?"
+  ).bind(hasPhase1 ? 1 : 0, did).run();
+
   if (toAdd.length === 0 && toRemove.length === 0) {
+    // Power level is computed live by the API — no caching needed
     return 'unchanged';
   }
 
@@ -358,23 +373,7 @@ async function syncDIDHoldings(env: Env, did: string): Promise<'changed' | 'unch
     await batchChunked(env.DB, statements);
   }
 
-  // Check Phase 1 verification status
-  const hasPhase1 = phase1Nfts.length > 0;
-  await env.DB.prepare(
-    "UPDATE game_players SET phase1_verified = ?, updated_at = datetime('now') WHERE did_id = ?"
-  ).bind(hasPhase1 ? 1 : 0, did).run();
-
   console.log(`[DID Indexer] DID ${did.slice(0, 20)}...: +${toAdd.length} -${toRemove.length} NFTs`);
-
-  // Event-driven power level recalculation
-  try {
-    const newPowerLevel = await recalcPowerLevel(env.DB, did);
-    if (newPowerLevel !== null) {
-      console.log(`[DID Indexer] DID ${did.slice(0, 20)}... power level: ${newPowerLevel}`);
-    }
-  } catch (err) {
-    console.warn(`[DID Indexer] Power level recalc error for DID ${did.slice(0, 20)}...:`, err);
-  }
 
   return 'changed';
 }
@@ -550,6 +549,10 @@ async function discoverNewHolders(env: Env): Promise<number> {
   // Process each DID: enroll new players AND sync Phase 1 holdings
   let newCount = 0;
   const didEntries = Array.from(holderDids.entries());
+  // Discovery uses ~43 API calls for collection fetch + 3 side tasks = 46.
+  // We can spend a few more on profile name fetches for NEW players only.
+  let profileFetchesUsed = 0;
+  const MAX_PROFILE_FETCHES = 4; // Stay well under 50 subrequest limit
 
   // Process in chunks to avoid overwhelming D1
   for (let i = 0; i < didEntries.length; i += D1_BATCH_SIZE) {
@@ -564,16 +567,40 @@ async function discoverNewHolders(env: Env): Promise<number> {
 
       if (!existing) {
         // Auto-create player row
-        const wallet = info.wallet || '';
         statements.push(
           env.DB.prepare(`
             INSERT OR IGNORE INTO game_players (did_id, wallet_address, phase1_verified, votes_today_reset)
             VALUES (?, ?, 1, ?)
-          `).bind(did, wallet, new Date().toISOString().split('T')[0])
+          `).bind(did, '', new Date().toISOString().split('T')[0])
         );
 
-        // Auto-create profile with MintGarden name if available
-        if (info.name && info.name.trim().length >= 2) {
+        // Try to fetch MintGarden profile name via NFT→owner lookup (if budget allows).
+        // The /profiles/{did} endpoint returns 404, so we use the NFT approach instead.
+        let profileName: string | undefined;
+        if (profileFetchesUsed < MAX_PROFILE_FETCHES && info.nfts.length > 0) {
+          try {
+            const sampleNft = info.nfts[0];
+            const profileRes = await fetch(
+              `https://api.mintgarden.io/nfts/${sampleNft.id}`,
+              { headers: { 'Accept': 'application/json' } }
+            );
+            profileFetchesUsed++;
+            if (profileRes.ok) {
+              const nftData = await profileRes.json() as { owner?: { name?: string } };
+              const chainName = nftData.owner?.name?.trim();
+              if (chainName && chainName.length >= 2 && chainName.length <= 20
+                  && NAME_REGEX.test(chainName)) {
+                profileName = chainName;
+              }
+            }
+            await sleep(RATE_LIMIT_MS);
+          } catch {
+            // Non-critical: continue without name
+          }
+        }
+
+        // Auto-create profile with chain name if available
+        if (profileName) {
           statements.push(
             env.DB.prepare(`
               INSERT INTO did_profiles (did_id, display_name, name_source, created_at, updated_at)
@@ -582,12 +609,12 @@ async function discoverNewHolders(env: Env): Promise<number> {
                 display_name = CASE WHEN name_source = 'random' OR name_source IS NULL THEN ? ELSE display_name END,
                 name_source = CASE WHEN name_source = 'random' OR name_source IS NULL THEN 'chain' ELSE name_source END,
                 updated_at = datetime('now')
-            `).bind(did, info.name.trim(), info.name.trim())
+            `).bind(did, profileName, profileName)
           );
         }
 
         newCount++;
-        console.log(`[DID Indexer] Auto-enrolled: ${did.slice(0, 25)}... (${info.name || 'unnamed'})`);
+        console.log(`[DID Indexer] Auto-enrolled: ${did.slice(0, 25)}... (${profileName || 'unnamed'})`);
       }
 
       // Sync Phase 1 holdings for this DID (insert new, handled by INSERT OR IGNORE)
@@ -641,79 +668,3 @@ function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-/**
- * Recalculate power level for a player after holdings change.
- * Same algorithm as _powerLevel.ts but inline for worker use.
- */
-async function recalcPowerLevel(db: D1Database, did: string): Promise<number | null> {
-  const player = await db.prepare(
-    'SELECT wallet_address, phase1_verified FROM game_players WHERE did_id = ?'
-  ).bind(did).first<{ wallet_address: string; phase1_verified: number }>();
-
-  if (!player) return null;
-
-  // Only calculate for verified holders
-  if (!player.phase1_verified) {
-    return 0;
-  }
-
-  const walletAddress = player.wallet_address;
-
-  // Calculate holdings score
-  const holdings = await db.prepare(`
-    SELECT
-      dh.nft_id,
-      dh.creator_wallet,
-      COALESCE(ws.net_score, 0) as net_score,
-      COALESCE(pm.trait_surcharge_xch, 0) as surcharge
-    FROM did_holdings dh
-    LEFT JOIN wojak_scores ws ON ws.nft_id = dh.nft_id
-    LEFT JOIN phase2_mints pm ON pm.mint_number = dh.edition_number
-    WHERE dh.did_id = ? AND dh.collection = 'phase2'
-  `).bind(did).all();
-
-  let holdingsScore = 0;
-  const seenCreators = new Set<string>();
-
-  for (const nft of holdings.results) {
-    const quality = (nft.net_score as number) * QUALITY_WEIGHT;
-    const surchargeXch = (nft.surcharge as number) / 100000;
-    const value = VALUE_BASE + VALUE_LOG_SCALE * Math.log(1 + surchargeXch);
-
-    let breadth = 0;
-    const creator = nft.creator_wallet as string;
-    if (creator && creator !== walletAddress && !seenCreators.has(creator)) {
-      seenCreators.add(creator);
-      breadth = BREADTH_BONUS;
-    }
-
-    holdingsScore += quality + value + breadth;
-  }
-
-  // Calculate creations score
-  const creationStats = await db.prepare(`
-    SELECT
-      COALESCE(SUM(ws.net_score), 0) as total_net_score,
-      COUNT(DISTINCT dh.did_id) as unique_collectors
-    FROM wojak_scores ws
-    LEFT JOIN did_holdings dh ON dh.nft_id = ws.nft_id AND dh.did_id != ?
-    WHERE ws.creator_wallet = ?
-  `).bind(did, walletAddress).first();
-
-  const creatorQuality = ((creationStats?.total_net_score as number) || 0) * CREATOR_QUALITY_WEIGHT;
-  const creatorSpread = ((creationStats?.unique_collectors as number) || 0) * CREATOR_SPREAD_BONUS;
-  const creationsScore = creatorQuality + creatorSpread;
-
-  // Total power level
-  const rawTotal = holdingsScore + creationsScore;
-  const powerLevel = Math.max(0, Math.min(POWER_LEVEL_MAX, Math.round(rawTotal)));
-
-  // Update the database
-  await db.prepare(`
-    UPDATE game_players
-    SET power_level = ?, power_level_updated_at = datetime('now'), updated_at = datetime('now')
-    WHERE did_id = ?
-  `).bind(powerLevel, did).run();
-
-  return powerLevel;
-}
