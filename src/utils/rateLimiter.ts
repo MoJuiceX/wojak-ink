@@ -44,16 +44,16 @@ const DOMAIN_CONFIGS: Record<string, Partial<RateLimitConfig>> = {
     minDelayMs: 500,
   },
   'api.spacescan.io': {
-    requestsPerSecond: 0.5,   // SpaceScan: ~1 request per 2 seconds (treasury makes 3 calls per refresh)
-    minDelayMs: 2000,         // 2s between calls — total ~4s for 3 calls
-    maxRetries: 2,
+    requestsPerSecond: 0.33,  // SpaceScan: ~1 request per 3 seconds (treasury makes 3 calls per refresh)
+    minDelayMs: 3000,         // 3s between calls — total ~9s for 3 calls. Avoids 429.
+    maxRetries: 3,            // 3 retries (works now that errors have .status)
     baseBackoffMs: 10000,     // 10 second initial backoff on 429
     maxBackoffMs: 60000,      // Up to 1 minute backoff
   },
   'api2.spacescan.io': {
-    requestsPerSecond: 0.5,
-    minDelayMs: 2000,
-    maxRetries: 2,
+    requestsPerSecond: 0.33,
+    minDelayMs: 3000,
+    maxRetries: 3,
     baseBackoffMs: 10000,
     maxBackoffMs: 60000,
   },

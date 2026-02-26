@@ -37,6 +37,11 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     // Get the response body
     const data = await response.text();
 
+    // Only cache successful responses — NEVER cache 429/5xx errors.
+    const cacheHeader = response.status >= 200 && response.status < 400
+      ? 'public, max-age=900' // Cache successful responses for 15 minutes (demo API key: 10k calls/month)
+      : 'no-store, no-cache'; // Never cache errors
+
     // Return with CORS headers
     return new Response(data, {
       status: response.status,
@@ -45,7 +50,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         'Access-Control-Allow-Origin': 'https://wojak.ink',
         'Access-Control-Allow-Methods': 'GET, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type',
-        'Cache-Control': 'public, max-age=900', // Cache for 15 minutes (demo API key: 10k calls/month)
+        'Cache-Control': cacheHeader,
       },
     });
   } catch {

@@ -179,6 +179,37 @@ function convertWalletDataToCache(data: WalletData): TreasuryCache {
 
 // ============ API Fetchers ============
 
+/** Fetch timeout in milliseconds. Prevents hanging requests from blocking the entire queue. */
+const FETCH_TIMEOUT = 15_000;
+
+/**
+ * Create an error with `.status` property so the rate limiter can detect 429/5xx and retry.
+ * Without `.status`, the rate limiter treats ALL errors as non-retryable.
+ */
+function apiError(message: string, status: number): Error & { status: number } {
+  return Object.assign(new Error(message), { status });
+}
+
+/**
+ * Fetch with AbortController timeout. Prevents requests from hanging forever
+ * (e.g., if Cloudflare proxy or upstream API stalls without responding).
+ */
+async function fetchWithTimeout(url: string, timeoutMs = FETCH_TIMEOUT): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if ((error as Error).name === 'AbortError') {
+      throw apiError(`Request timeout after ${timeoutMs}ms: ${url}`, 408);
+    }
+    throw error;
+  }
+}
+
 async function fetchXchPrice(): Promise<number> {
   // First check localStorage for recent price
   const cached = loadCache();
@@ -186,11 +217,11 @@ async function fetchXchPrice(): Promise<number> {
 
   try {
     const data = await coingeckoQueue.add(async () => {
-      const response = await fetch(
+      const response = await fetchWithTimeout(
         `${COINGECKO_API}/api/v3/simple/price?ids=chia&vs_currencies=usd`
       );
       if (!response.ok) {
-        throw new Error(`CoinGecko API error: ${response.status}`);
+        throw apiError(`CoinGecko API error: ${response.status}`, response.status);
       }
       return response.json();
     });
@@ -218,11 +249,11 @@ async function fetchXchBalance(): Promise<{ xch: number; mojo: number }> {
 
   try {
     const data = await spacescanQueue.add(async () => {
-      const response = await fetch(
+      const response = await fetchWithTimeout(
         `${SPACESCAN_API}/address/xch-balance/${WALLET_ADDRESS}`
       );
       if (!response.ok) {
-        throw new Error(`SpaceScan API error: ${response.status}`);
+        throw apiError(`SpaceScan API error: ${response.status}`, response.status);
       }
       return response.json();
     });
@@ -244,11 +275,11 @@ async function fetchXchBalance(): Promise<{ xch: number; mojo: number }> {
 async function fetchTokenBalances(): Promise<TokenBalance[]> {
   // Throws on failure — caller (Promise.allSettled) handles fallback
   const data = await spacescanQueue.add(async () => {
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `${SPACESCAN_API}/address/token-balance/${WALLET_ADDRESS}`
     );
     if (!response.ok) {
-      throw new Error(`SpaceScan token API error: ${response.status}`);
+      throw apiError(`SpaceScan token API error: ${response.status}`, response.status);
     }
     return response.json();
   });
@@ -269,7 +300,7 @@ async function fetchTokenBalances(): Promise<TokenBalance[]> {
     .sort((a: TokenBalance, b: TokenBalance) => b.valueUsd - a.valueUsd);
 
   if (tokenBalances.length === 0) {
-    throw new Error('SpaceScan returned 0 tokens');
+    throw apiError('SpaceScan returned 0 tokens', 502);
   }
 
   return tokenBalances;
@@ -328,18 +359,18 @@ function deriveCollectionName(nftNames: string[]): string {
 async function fetchNFTCollections(): Promise<NFTCollection[]> {
   // Throws on failure — caller (Promise.allSettled) handles fallback
   const data = await spacescanQueue.add(async () => {
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `${SPACESCAN_API}/address/nft-balance/${WALLET_ADDRESS}`
     );
     if (!response.ok) {
-      throw new Error(`SpaceScan NFT API error: ${response.status}`);
+      throw apiError(`SpaceScan NFT API error: ${response.status}`, response.status);
     }
     return response.json();
   });
 
   const nfts = data.balance || data.data || [];
   if (!Array.isArray(nfts) || nfts.length === 0) {
-    throw new Error('SpaceScan returned 0 NFTs');
+    throw apiError('SpaceScan returned 0 NFTs', 502);
   }
 
   // Group NFTs by collection with deduplication
@@ -428,12 +459,39 @@ export interface ITreasuryService {
 }
 
 class TreasuryService implements ITreasuryService {
+  /**
+   * Fetch fresh wallet data from all APIs.
+   *
+   * Strategy:
+   * - CoinGecko (XCH price) runs on its own queue — no conflict
+   * - SpaceScan calls share one queue with mandatory delays between calls
+   * - All fetches have 15s timeouts to prevent hanging
+   * - Overall 45s timeout ensures this function ALWAYS returns
+   * - Partial success: uses localStorage/fallback for failed calls
+   */
   async fetchWalletData(_forceRefresh = false): Promise<WalletData> {
+    // Overall timeout: if the entire fetch takes longer than 45s, bail out.
+    // This prevents TanStack Query's queryFn from hanging forever.
+    const OVERALL_TIMEOUT = 45_000;
+
+    return Promise.race([
+      this._doFetchWalletData(),
+      new Promise<WalletData>((_, reject) =>
+        setTimeout(() => reject(apiError('[Treasury] Overall fetch timeout (45s)', 408)), OVERALL_TIMEOUT)
+      ),
+    ]).catch((error) => {
+      console.warn('[Treasury] fetchWalletData failed completely:', error);
+      // Return cached/fallback data so TanStack Query gets SOMETHING
+      return this.getCachedWalletData();
+    });
+  }
+
+  private async _doFetchWalletData(): Promise<WalletData> {
     const localCache = loadCache();
 
-    // TanStack Query handles all cache timing (staleTime, refetchOnMount, etc.)
-    // This function just fetches fresh data from APIs.
-    // Use Promise.allSettled to fetch all data in parallel and handle partial failures.
+    // Use Promise.allSettled to fetch all data.
+    // CoinGecko is on a separate queue so it runs in parallel with SpaceScan.
+    // SpaceScan calls are serialized by the queue with delays to avoid 429.
     // Inner functions THROW on failure — allSettled reports them as 'rejected'.
     const [xchPriceResult, xchBalanceResult, tokensResult, nftsResult] = await Promise.allSettled([
       fetchXchPrice(),
@@ -448,10 +506,10 @@ class TreasuryService implements ITreasuryService {
 
     // Log failures so we can debug production issues
     if (tokensResult.status === 'rejected') {
-      console.warn('[Treasury] Token fetch failed:', tokensResult.reason);
+      console.warn('[Treasury] Token fetch failed:', (tokensResult.reason as Error)?.message || tokensResult.reason);
     }
     if (nftsResult.status === 'rejected') {
-      console.warn('[Treasury] NFT fetch failed:', nftsResult.reason);
+      console.warn('[Treasury] NFT fetch failed:', (nftsResult.reason as Error)?.message || nftsResult.reason);
     }
 
     // Extract values with fallbacks for rejected calls
