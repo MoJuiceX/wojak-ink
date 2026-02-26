@@ -9,12 +9,13 @@
  * Battle does NOT affect rankings in this mode.
  */
 
-import { useState } from 'react';
-import { Trophy, User, ThumbsUp, ThumbsDown, HelpCircle } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Trophy, User, ThumbsUp, ThumbsDown, HelpCircle, Crown, Medal, ExternalLink, Grid3X3 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@clerk/clerk-react';
 import { Link } from 'react-router-dom';
 import { RankingRulesModal } from './RankingRulesModal';
+import { DIDCollectionModal } from './DIDCollectionModal';
 import { SkeletonRanking } from '@/components/skeletons/SkeletonRanking';
 import { SkeletonVoteCard } from '@/components/skeletons/SkeletonVoteCard';
 import { InlineError } from '@/components/ui/InlineError';
@@ -29,6 +30,9 @@ interface VoteLeaderboardPlayerRow {
   did: string;
   displayName: string;
   playerScore: number;
+  // Collection counts
+  plotCount: number;      // Wojak Farmer's Plot NFTs
+  wojakCount: number;     // Your Wojak NFTs
   eligibleWojakCount: number;
   totalWojakCount: number;
   bestWojakScore: number | null;
@@ -131,14 +135,14 @@ function YourPositionCard() {
         {ranked ? `#${rank}` : '—'}
       </div>
       <div className="your-position-info">
-        <span className="your-position-label">Your Position</span>
+        <span className="your-position-label">Your Power Level</span>
         <span className="your-position-score">
           {playerScore.toLocaleString()} <span style={{ color: tierColor, fontSize: '0.75rem' }}>{tier}</span>
         </span>
         <span className="your-position-meta">
-          {totalWojakCount} Wojaks in DID
+          {totalWojakCount} Wojaks
           {ranked && pointsToNextRank !== null && nextRank !== null && (
-            <> · {pointsToNextRank} pts to #{nextRank}</>
+            <> · {pointsToNextRank} to #{nextRank}</>
           )}
         </span>
       </div>
@@ -150,6 +154,58 @@ function YourPositionCard() {
 
 function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
   const { data, isLoading, error } = useVoteLeaderboard('players');
+  const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
+  const flipTimers = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const [selectedPlayer, setSelectedPlayer] = useState<{ did: string; name: string } | null>(null);
+
+  // Clear all timers on unmount
+  useEffect(() => {
+    const timers = flipTimers.current;
+    return () => {
+      timers.forEach(timer => clearTimeout(timer));
+      timers.clear();
+    };
+  }, []);
+
+  const toggleFlip = useCallback((did: string) => {
+    setFlippedCards(prev => {
+      const next = new Set(prev);
+      const wasFlipped = next.has(did);
+
+      // Clear any existing timer for this card
+      const existingTimer = flipTimers.current.get(did);
+      if (existingTimer) {
+        clearTimeout(existingTimer);
+        flipTimers.current.delete(did);
+      }
+
+      if (wasFlipped) {
+        // Flip back
+        next.delete(did);
+      } else {
+        // Flip to back, set auto-flip timer (8 seconds)
+        next.add(did);
+        const timer = setTimeout(() => {
+          setFlippedCards(current => {
+            const updated = new Set(current);
+            updated.delete(did);
+            return updated;
+          });
+          flipTimers.current.delete(did);
+        }, 8000);
+        flipTimers.current.set(did, timer);
+      }
+      return next;
+    });
+  }, []);
+
+  const getMintGardenUrl = (did: string, name: string) => {
+    // MintGarden profile URL format: /profile/{name-slug}-{did-id}
+    const nameSlug = (name || 'anon').toLowerCase().replace(/[^a-z0-9]/g, '');
+    // DID may have 0x prefix, strip it for the URL
+    const didId = did.startsWith('0x') ? did.slice(2) : did;
+    return `https://mintgarden.io/profile/${nameSlug}-${didId}`;
+  };
 
   if (isLoading) {
     return (
@@ -181,10 +237,10 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
           <Trophy size={32} style={{ color: 'var(--color-text-muted)', marginBottom: 12 }} />
           <p style={{ fontWeight: 700, fontSize: '1rem', margin: '0 0 6px' }}>No ranked players yet</p>
           <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: '0 0 4px' }}>
-            Players need Wojaks in their DID to rank.
+            Players need Your Wojaks in their DID to rank.
           </p>
           <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', margin: '0 0 12px' }}>
-            Add your Wojaks to your DID to get started!
+            Add Your Wojaks to your DID to get started!
           </p>
           <Link to="/fight-club/vote" className="rankings-go-vote">Go Vote</Link>
         </div>
@@ -193,55 +249,142 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
   }
 
   const players = data.players;
-  // All verified players with Wojaks in DID are now ranked automatically
-  const rankedPlayers = players.filter((p) => p.totalWojakCount > 0);
-  const showPodium = rankedPlayers.length >= 3;
-  const podiumIds = new Set(showPodium ? rankedPlayers.slice(0, 3).map((p) => p.did) : []);
-  const topThree = showPodium ? rankedPlayers.slice(0, 3) : [];
-  const rankedList = showPodium ? rankedPlayers.filter((p) => !podiumIds.has(p.did)) : rankedPlayers;
+  // Filter to players with Wojaks, then RE-RANK them 1, 2, 3... (no gaps)
+  const rankedPlayers = players
+    .filter((p) => p.totalWojakCount > 0)
+    .map((p, idx) => ({ ...p, rank: idx + 1 })); // Re-assign continuous ranks
+
+  const showTopTen = rankedPlayers.length >= 3;
+  const topTen = showTopTen ? rankedPlayers.slice(0, 10) : [];
+  const rankedList = showTopTen ? rankedPlayers.slice(10) : rankedPlayers;
+
+  // Card height varies by rank: #1 = 220px, #10 = 175px (noticeable but names fit)
+  const getCardHeight = (rank: number) => {
+    const maxHeight = 220;
+    const minHeight = 175;
+    const step = (maxHeight - minHeight) / 9; // ~5px per position
+    return Math.round(maxHeight - (rank - 1) * step);
+  };
+
+  // Colors for ranks
+  const getRankColor = (rank: number) => {
+    if (rank === 1) return '#FFD700'; // Gold
+    if (rank === 2) return '#C0C0C0'; // Silver
+    if (rank === 3) return '#CD7F32'; // Bronze
+    return 'var(--color-text-muted)';
+  };
+
+  const getRankGlow = (rank: number) => {
+    if (rank === 1) return '0 0 20px rgba(255, 215, 0, 0.4)';
+    if (rank === 2) return '0 0 15px rgba(192, 192, 192, 0.3)';
+    if (rank === 3) return '0 0 12px rgba(205, 127, 50, 0.3)';
+    return 'none';
+  };
 
   return (
     <div className="rankings-content">
       {/* Your Position */}
       <YourPositionCard />
 
-      {/* Podium for top 3 ranked players (skip when list is too small/sparse) */}
-      {showPodium && (
-        <div className="rankings-podium">
-          {topThree.map((player, idx) => (
-            <div
-              key={player.did}
-              className={`podium-entry podium-${idx + 1}${player.did === currentUserDid ? ' podium-entry-you' : ''}`}
-            >
-              <RankBadge rank={player.rank} />
-              <div className="podium-avatar">
-                {player.bestWojakImage ? (
-                  <img
-                    src={player.bestWojakImage}
-                    alt={player.displayName}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                  />
-                ) : (
-                  <User size={24} />
-                )}
-              </div>
-              <span className="podium-name">{player.displayName || 'Anon'}</span>
-              <div className="podium-power">
-                <span style={{ fontWeight: 700 }}>{player.playerScore.toLocaleString()}</span>
-              </div>
-              <span className="podium-count text-secondary text-xs">
-                {player.totalWojakCount} Wojaks
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Top 10 Showcase - flippable cards */}
+      {showTopTen && (
+        <div className="top-ten-showcase">
+          {topTen.map((player) => {
+            const rank = player.rank || 1;
+            const cardHeight = getCardHeight(rank);
+            const rankColor = getRankColor(rank);
+            const glow = getRankGlow(rank);
+            const isYou = player.did === currentUserDid;
+            const isTop3 = rank <= 3;
+            const isFlipped = flippedCards.has(player.did);
 
-      {/* Your position indicator */}
-      {showPodium && data.yourRank && data.yourRank > 3 && (
-        <div className="your-rank-indicator">
-          <span>Your rank: #{data.yourRank}</span>
+            return (
+              <div
+                key={player.did}
+                className={`top-ten-card-container${isFlipped ? ' flipped' : ''}`}
+                style={{ height: cardHeight }}
+                onClick={() => toggleFlip(player.did)}
+              >
+                {/* Front face */}
+                <div
+                  className={`top-ten-card top-ten-card-front${isYou ? ' top-ten-card-you' : ''}${isTop3 ? ' top-ten-card-premium' : ''}`}
+                  style={{
+                    boxShadow: glow,
+                    borderColor: isTop3 ? rankColor : undefined,
+                  }}
+                >
+                  <div className="top-ten-rank" style={{ color: rankColor }}>
+                    {rank === 1 && <Crown size={18} style={{ marginBottom: 2 }} />}
+                    {rank === 2 && <Medal size={16} style={{ marginBottom: 2 }} />}
+                    {rank === 3 && <Medal size={16} style={{ marginBottom: 2 }} />}
+                    #{rank}
+                  </div>
+                  <div
+                    className="top-ten-avatar"
+                    style={{ borderColor: isTop3 ? rankColor : undefined }}
+                  >
+                    {player.bestWojakImage ? (
+                      <img
+                        src={player.bestWojakImage}
+                        alt={player.displayName}
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      />
+                    ) : (
+                      <User size={24} style={{ color: 'var(--color-text-muted)' }} />
+                    )}
+                  </div>
+                  <span className="top-ten-name">{player.displayName || 'Anon'}</span>
+                  <div className="top-ten-power" style={{ color: isTop3 ? rankColor : undefined }}>
+                    {player.playerScore.toLocaleString()}
+                  </div>
+                </div>
+
+                {/* Back face - collection breakdown */}
+                <div
+                  className={`top-ten-card top-ten-card-back${isYou ? ' top-ten-card-you' : ''}${isTop3 ? ' top-ten-card-premium' : ''}`}
+                  style={{
+                    boxShadow: glow,
+                    borderColor: isTop3 ? rankColor : undefined,
+                  }}
+                >
+                  <span className="top-ten-back-name">{player.displayName || 'Anon'}</span>
+                  <div className="top-ten-back-stats">
+                    <div className="back-stat">
+                      <span className="back-stat-value collection-plot">{player.plotCount || 0}</span>
+                      <span className="back-stat-label">Farmers</span>
+                    </div>
+                    <div className="back-stat">
+                      <span className="back-stat-value collection-wojak">{player.wojakCount || 0}</span>
+                      <span className="back-stat-label">Your Wojaks</span>
+                    </div>
+                  </div>
+                  <div className="top-ten-back-actions">
+                    <button
+                      type="button"
+                      className="top-ten-back-icon"
+                      title="View Collection"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedPlayer({ did: player.did, name: player.displayName || 'Anon' });
+                      }}
+                    >
+                      <Grid3X3 size={14} />
+                    </button>
+                    <a
+                      href={getMintGardenUrl(player.did, player.displayName)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="top-ten-back-icon"
+                      title="View on MintGarden"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <ExternalLink size={14} />
+                    </a>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -249,27 +392,58 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
       {rankedList.length > 0 && (
         <div className="rankings-section-card">
           <div className="rankings-section-header">
-            <div>
-              <h3 className="rankings-section-title">Ranked Players</h3>
-              <p className="rankings-section-subtitle">
-                Player Score = top {data.meta?.playerTopN ?? 10} Wojak scores in DID
-              </p>
-            </div>
+            <h3 className="rankings-section-title">All Players</h3>
             <span className="rankings-section-count">{rankedPlayers.length} ranked</span>
           </div>
           <div className="rankings-list">
             {rankedList.map((player) => (
-              <div key={player.did} className={`rankings-row${player.did === currentUserDid ? ' rankings-row-you' : ''}`}>
+              <div
+                key={player.did}
+                className={`rankings-row${player.did === currentUserDid ? ' rankings-row-you' : ''}`}
+              >
                 <RankBadge rank={player.rank} />
+                <div className="rankings-row-avatar">
+                  {player.bestWojakImage ? (
+                    <img
+                      src={player.bestWojakImage}
+                      alt={player.displayName}
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
+                  ) : (
+                    <User size={18} style={{ color: 'var(--color-text-muted)' }} />
+                  )}
+                </div>
                 <div className="rankings-row-info">
                   <span className="rankings-row-name">{player.displayName || 'Anon'}</span>
-                  <span className="text-secondary text-xs">
-                    {player.totalWojakCount} Wojaks in DID
+                  <span className="collection-counts">
+                    <span className="collection-plot">{player.plotCount || 0} Farmers</span>
+                    <span className="collection-divider">·</span>
+                    <span className="collection-wojak">{player.wojakCount || 0} Your Wojaks</span>
                   </span>
                 </div>
                 <div className="rankings-row-power">
-                  <span style={{ fontWeight: 700 }}>{player.playerScore.toLocaleString()}</span>
-                  <span className="text-secondary text-xs">Player Score</span>
+                  <span className="power-value">{player.playerScore.toLocaleString()}</span>
+                  <span className="power-label">Power</span>
+                </div>
+                <div className="rankings-row-actions">
+                  <button
+                    type="button"
+                    className="rankings-action-icon"
+                    title="View Collection"
+                    onClick={() => setSelectedPlayer({ did: player.did, name: player.displayName || 'Anon' })}
+                  >
+                    <Grid3X3 size={16} />
+                  </button>
+                  <a
+                    href={getMintGardenUrl(player.did, player.displayName)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rankings-action-icon"
+                    title="View on MintGarden"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <ExternalLink size={16} />
+                  </a>
                 </div>
               </div>
             ))}
@@ -277,33 +451,81 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
         </div>
       )}
 
-      {/* Players without Wojaks in DID shown as "need to add Wojaks" */}
+      {/* Unranked players - verified but no Wojaks in DID */}
       {players.filter((p) => p.totalWojakCount === 0).length > 0 && (
-        <div className="community-players-card">
-          <div className="community-players-header">
+        <div className="rankings-section-card" style={{ opacity: 0.7 }}>
+          <div className="rankings-section-header">
             <div>
-              <h3 className="community-players-title">Verified Players (No Wojaks in DID)</h3>
-              <p className="community-players-subtitle">
-                These players are verified but need to add Wojaks to their DID to appear on the leaderboard.
+              <h3 className="rankings-section-title">Not Ranked</h3>
+              <p className="rankings-section-subtitle">
+                Add Your Wojaks to your DID to get ranked
               </p>
             </div>
-            <span className="community-players-count">{players.filter((p) => p.totalWojakCount === 0).length} need Wojaks</span>
+            <span className="rankings-section-count">
+              {players.filter((p) => p.totalWojakCount === 0).length} players
+            </span>
           </div>
-          <div className="community-players-list">
-            {players.filter((p) => p.totalWojakCount === 0).slice(0, 16).map((player) => (
-              <div key={player.did} className={`community-player-row${player.did === currentUserDid ? ' community-player-row-you' : ''}`}>
-                <div className="community-player-rank">—</div>
-                <div className="community-player-main">
-                  <span className="community-player-name">{player.displayName || `${player.did.slice(0, 12)}...`}</span>
-                  <span className="community-player-meta">
-                    Verified · Add Wojaks to DID to rank
+          <div className="rankings-list">
+            {players.filter((p) => p.totalWojakCount === 0).slice(0, 10).map((player) => (
+              <div
+                key={player.did}
+                className={`rankings-row${player.did === currentUserDid ? ' rankings-row-you' : ''}`}
+              >
+                <span className="rank-badge rank-provisional">—</span>
+                <div className="rankings-row-avatar">
+                  {player.bestWojakImage ? (
+                    <img
+                      src={player.bestWojakImage}
+                      alt={player.displayName}
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
+                  ) : (
+                    <User size={18} style={{ color: 'var(--color-text-muted)' }} />
+                  )}
+                </div>
+                <div className="rankings-row-info">
+                  <span className="rankings-row-name">{player.displayName || 'Anon'}</span>
+                  <span className="text-secondary text-xs">
+                    No Your Wojaks in DID
                   </span>
                 </div>
-                <span className="community-player-status">No Wojaks in DID</span>
+                <div className="rankings-row-power">
+                  <span className="power-value" style={{ color: 'var(--color-text-muted)' }}>0</span>
+                  <span className="power-label">Power</span>
+                </div>
+                <div className="rankings-row-actions">
+                  <button
+                    type="button"
+                    className="rankings-action-icon"
+                    title="View Collection"
+                    onClick={() => setSelectedPlayer({ did: player.did, name: player.displayName || 'Anon' })}
+                  >
+                    <Grid3X3 size={16} />
+                  </button>
+                  <a
+                    href={getMintGardenUrl(player.did, player.displayName)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rankings-action-icon"
+                    title="View on MintGarden"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <ExternalLink size={16} />
+                  </a>
+                </div>
               </div>
             ))}
           </div>
         </div>
+      )}
+
+      {/* DID Collection Modal */}
+      {selectedPlayer && (
+        <DIDCollectionModal
+          did={selectedPlayer.did}
+          displayName={selectedPlayer.name}
+          onClose={() => setSelectedPlayer(null)}
+        />
       )}
     </div>
   );
@@ -600,7 +822,10 @@ export function FightClubRankings({ currentUserDid }: FightClubRankingsProps = {
       {/* Rankings header block */}
       <div className="rankings-header-block">
         <div className="rankings-header-text">
-          <h2 className="rankings-header-title">Fight Club Rankings</h2>
+          <h2 className="rankings-header-title">
+            <Trophy size={22} style={{ color: 'var(--color-gold-bright)', marginRight: 8, verticalAlign: -3 }} />
+            Fight Club Rankings
+          </h2>
           <span className="rankings-header-subtitle">Voting-only season. Battle is demo-only for now.</span>
         </div>
         <div className="flex items-center gap-3">

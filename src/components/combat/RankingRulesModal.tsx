@@ -37,7 +37,7 @@ export function RankingRulesModal({ onClose }: RankingRulesModalProps) {
         >
             <div className="rules-modal">
                 <div className="rules-modal-header">
-                    <h3 className="rules-modal-title">How Ranking Works</h3>
+                    <h3 className="rules-modal-title">Power Level</h3>
                     <button
                         ref={closeRef}
                         type="button"
@@ -54,7 +54,7 @@ export function RankingRulesModal({ onClose }: RankingRulesModalProps) {
                         <h4 className="rules-section-title">Farmer's Plot Power</h4>
                         <ul className="rules-list">
                             <li>Each <strong>Wojak Farmer's Plot</strong> in your DID = <span className="text-cyan">+20</span> power</li>
-                            <li>Put all your Plots in your DID to maximize power</li>
+                            <li>Put all your Farmers in your DID to maximize power</li>
                         </ul>
                     </div>
 
