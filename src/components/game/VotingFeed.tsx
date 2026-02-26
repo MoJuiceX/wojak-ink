@@ -107,9 +107,9 @@ export function VotingFeed() {
     };
   }, []);
 
-  // Prefetch images for next 3 cards
+  // Prefetch images for next 5 cards so swiping feels instant
   useEffect(() => {
-    feed.slice(0, 3).forEach(item => {
+    feed.slice(0, 5).forEach(item => {
       const img = new Image();
       img.src = item.thumbnailUri || item.imageUri;
     });

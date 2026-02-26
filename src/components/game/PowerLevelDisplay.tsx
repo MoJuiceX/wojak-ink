@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 // Power Level hero card — centered score, tier badge, collapsible breakdown, credits.
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
@@ -18,17 +17,7 @@ interface PowerLevelDisplayProps {
   };
 }
 
-function getTier(level: number) {
-  if (level >= 250) return { name: 'Legend', class: 'tier-legend', label: 'Legend' };
-  if (level >= 120) return { name: 'Elite', class: 'tier-top', label: 'Elite' };
-  if (level >= 60) return { name: 'Strong', class: 'tier-serious', label: 'Strong' };
-  if (level >= 25) return { name: 'Serious', class: 'tier-active', label: 'Serious' };
-  if (level >= 10) return { name: 'Active', class: 'tier-casual', label: 'Active' };
-  return { name: 'Casual', class: 'tier-casual', label: 'Casual' };
-}
-
 export function PowerLevelDisplay({ level, rank, credits, voteStreak, breakdown }: PowerLevelDisplayProps) {
-  const tier = getTier(level);
   const [showBreakdown, setShowBreakdown] = useState(false);
   const [showExplainer, setShowExplainer] = useState(false);
 
@@ -59,10 +48,6 @@ export function PowerLevelDisplay({ level, rank, credits, voteStreak, breakdown 
           <p><strong className="text-primary">Collection:</strong> 10% bonus from top Wojaks by other creators</p>
         </div>
       )}
-
-      <div className={`power-level-badge ${tier.class}`}>
-        {tier.label}
-      </div>
 
       <div className="flex items-center gap-3" style={{ fontSize: 13 }}>
         {credits != null && credits > 0 && (
@@ -108,5 +93,3 @@ export function PowerLevelDisplay({ level, rank, credits, voteStreak, breakdown 
     </div>
   );
 }
-
-export { getTier };

@@ -7,6 +7,8 @@ export const PHASE2_COLLECTION_ID = 'col1rhrjj6f28tge783rp0lrj8ct7vnq79xsnklx3up
 
 // Power System Constants
 export const PLOT_POWER_VALUE = 20; // Flat power per Farmer's Plot NFT
+export const COLLECTION_BONUS_TOP_PERCENT = 0.42; // Top 42% of Wojaks qualify for collection bonus
+export const COLLECTION_BONUS_RATE = 0.10;        // 10% of net_score as bonus
 
 // Onboarding credit bonuses (in x100 units, matching credit system)
 export const ONBOARDING_CREDITS = {

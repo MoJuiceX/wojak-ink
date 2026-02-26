@@ -104,9 +104,9 @@ export function validateDIDName(name: string): { valid: boolean; error?: string 
   if (trimmed.length > 20) {
     return { valid: false, error: 'Name must be 20 characters or less' };
   }
-  // Alphanumeric + spaces only
-  if (!/^[a-zA-Z0-9 ]+$/.test(trimmed)) {
-    return { valid: false, error: 'Name can only contain letters, numbers, and spaces' };
+  // Alphanumeric + spaces + common punctuation (apostrophes, hyphens, periods, underscores)
+  if (!/^[a-zA-Z0-9 '\-._]+$/.test(trimmed)) {
+    return { valid: false, error: 'Name can only contain letters, numbers, spaces, and basic punctuation' };
   }
   return { valid: true };
 }

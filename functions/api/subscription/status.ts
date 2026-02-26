@@ -59,10 +59,14 @@ export async function getSubscriptionStatus(db: D1Database, did: string): Promis
     const trialStart = now.toISOString();
     const trialExpires = addDays(now, TRIAL_DURATION_DAYS).toISOString();
 
-    await db.prepare(`
-      INSERT INTO subscriptions (did_id, tier, trial_started_at, trial_expires_at)
-      VALUES (?, 'trial', ?, ?)
-    `).bind(did, trialStart, trialExpires).run();
+    try {
+      await db.prepare(`
+        INSERT INTO subscriptions (did_id, tier, trial_started_at, trial_expires_at)
+        VALUES (?, 'trial', ?, ?)
+      `).bind(did, trialStart, trialExpires).run();
+    } catch {
+      // INSERT may fail if subscription already exists (race condition) — ignore
+    }
 
     sub = {
       did_id: did,
@@ -75,13 +79,18 @@ export async function getSubscriptionStatus(db: D1Database, did: string): Promis
     };
   }
 
-  // Count battles today
-  const battleCount = await db.prepare(`
-    SELECT COUNT(*) as cnt FROM battles
-    WHERE (fighter_a_did = ? OR fighter_b_did = ?)
-    AND DATE(created_at) = ?
-  `).bind(did, did, today).first<{ cnt: number }>();
-  const battlesToday = battleCount?.cnt ?? 0;
+  // Count battles today (combat_battles table, not legacy battles)
+  let battlesToday = 0;
+  try {
+    const battleCount = await db.prepare(`
+      SELECT COUNT(*) as cnt FROM combat_battles
+      WHERE (fighter_a_did = ? OR fighter_b_did = ?)
+      AND DATE(created_at) = ?
+    `).bind(did, did, today).first<{ cnt: number }>();
+    battlesToday = battleCount?.cnt ?? 0;
+  } catch {
+    // Table may not exist yet — default to 0
+  }
 
   // Determine current tier and battles per day
   let tier: 'trial' | 'free' | 'premium' = 'free';

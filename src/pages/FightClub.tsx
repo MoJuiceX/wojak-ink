@@ -8,7 +8,7 @@
 
 import { useLocation, useNavigate } from 'react-router-dom';
 import { MINTGARDEN_COLLECTION_URL } from '@/services/constants';
-import { lazy, Suspense, memo, useState, useCallback } from 'react';
+import { lazy, Suspense, memo, useState, useCallback, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Swords, ExternalLink, Wallet, Info } from 'lucide-react';
 import { useLayout } from '@/hooks/useLayout';
@@ -233,6 +233,22 @@ function FightClubContent() {
   const showGateLoading = accessLoading && isGatedTab;
   const showGate = !accessLoading && !accessData?.hasAccess && isGatedTab;
 
+  // Tab bar scroll hint: remove fade when scrolled to end
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const [tabsScrolledEnd, setTabsScrolledEnd] = useState(false);
+
+  useEffect(() => {
+    const el = tabsRef.current;
+    if (!el) return;
+    const check = () => {
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+      setTabsScrolledEnd(atEnd);
+    };
+    check();
+    el.addEventListener('scroll', check, { passive: true });
+    return () => el.removeEventListener('scroll', check);
+  }, []);
+
   return (
     <>
       <div
@@ -248,7 +264,7 @@ function FightClubContent() {
       >
         {/* Tab Bar */}
         <div className="flex items-center gap-2">
-          <div className="fight-club-tabs flex-1">
+          <div ref={tabsRef} className={`fight-club-tabs flex-1${tabsScrolledEnd ? ' scrolled-end' : ''}`}>
             {TABS.map((tab) => (
               <button
                 key={tab.id}

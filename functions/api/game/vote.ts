@@ -152,18 +152,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       ).run();
     }
 
-    // Update combat_fighters power score for ALL voters (not just holders)
-    // This allows guests and non-verified users to contribute to leaderboard scoring
-    if (netScoreDelta !== 0) {
-      await context.env.DB.prepare(`
-        UPDATE combat_fighters
-        SET vote_power = vote_power + ?,
-            power_score = vote_power + ? + battle_power,
-            updated_at = datetime('now')
-        WHERE nft_id = ?
-      `).bind(netScoreDelta, netScoreDelta, nftId).run();
-    }
-
     // Track vote counts for analytics
     const statements: D1PreparedStatement[] = [];
 

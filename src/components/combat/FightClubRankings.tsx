@@ -11,7 +11,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Trophy, User, ThumbsUp, ThumbsDown, HelpCircle, Crown, Medal, ExternalLink, Grid3X3 } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { useAuth } from '@clerk/clerk-react';
 import { Link } from 'react-router-dom';
 import { RankingRulesModal } from './RankingRulesModal';
@@ -70,13 +70,12 @@ interface WojaksResponse {
 
 // ── Sorting ─────────────────────────────────────────────────────────
 
-type SortOption = 'score' | 'glazed' | 'ratio' | 'newest';
+type SortOption = 'score' | 'glazed' | 'newest';
 
-const SORT_OPTIONS: { value: SortOption; label: string; icon: string; tooltip: string }[] = [
-  { value: 'score', label: 'Score', icon: '⭐', tooltip: 'Glazes − Fades' },
-  { value: 'glazed', label: 'Most Glazed', icon: '👍', tooltip: 'Highest total Glazes' },
-  { value: 'ratio', label: 'Ratio', icon: '📊', tooltip: 'Glaze ratio (best after enough votes)' },
-  { value: 'newest', label: 'Newest', icon: '🆕', tooltip: 'Most recently minted' },
+const SORT_OPTIONS: { value: SortOption; label: string; tooltip: string }[] = [
+  { value: 'score', label: 'Top', tooltip: 'Best vote score (Glazes − Fades)' },
+  { value: 'glazed', label: 'Glazed', tooltip: 'Most Glazes (upvotes)' },
+  { value: 'newest', label: 'New', tooltip: 'Most recently minted' },
 ];
 
 const PAGE_SIZE = 50;
@@ -122,11 +121,40 @@ function RankBadge({ rank }: { rank: number | null }) {
 
 function YourPositionCard() {
   const { data: scoreData } = useFightClubMyScore();
+  const { isMobile } = useLayout();
 
   if (!scoreData?.registered) return null;
 
   const { ranked, rank, playerScore, totalWojakCount, pointsToNextRank, nextRank } = scoreData;
 
+  if (isMobile) {
+    // Mobile: single compact row — #rank · power · wojaks
+    return (
+      <div className="your-position-card your-position-compact">
+        <span className="your-position-rank-inline">
+          {ranked ? `#${rank}` : '—'}
+        </span>
+        <span className="your-position-divider">·</span>
+        <span className="your-position-score-inline">
+          ⚡ {playerScore.toLocaleString()}
+        </span>
+        <span className="your-position-divider">·</span>
+        <span className="your-position-meta-inline">
+          {totalWojakCount} Wojak{totalWojakCount !== 1 ? 's' : ''}
+        </span>
+        {ranked && pointsToNextRank !== null && nextRank !== null && (
+          <>
+            <span className="your-position-divider">·</span>
+            <span className="your-position-next-inline">
+              {pointsToNextRank} to #{nextRank}
+            </span>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  // Desktop: original layout
   return (
     <div className="your-position-card">
       <div className="your-position-rank">
@@ -156,6 +184,18 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
   const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
   const flipTimers = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const [selectedPlayer, setSelectedPlayer] = useState<{ did: string; name: string } | null>(null);
+
+  // Preload player avatar images once data arrives
+  useEffect(() => {
+    if (data?.players) {
+      data.players.slice(0, 15).forEach(p => {
+        if (p.bestWojakImage) {
+          const img = new Image();
+          img.src = p.bestWojakImage;
+        }
+      });
+    }
+  }, [data]);
 
   // Clear all timers on unmount
   useEffect(() => {
@@ -376,7 +416,7 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
                         setSelectedPlayer({ did: player.did, name: player.displayName || 'Anon' });
                       }}
                     >
-                      <Grid3X3 size={14} />
+                      <Grid3X3 size={isMobile ? 18 : 14} />
                     </button>
                     <a
                       href={getMintGardenUrl(player.did, player.displayName)}
@@ -386,7 +426,7 @@ function PlayersTab({ currentUserDid }: { currentUserDid?: string | null }) {
                       title="View on MintGarden"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <ExternalLink size={14} />
+                      <ExternalLink size={isMobile ? 18 : 14} />
                     </a>
                   </div>
                 </div>
@@ -555,38 +595,75 @@ type ViewMode = 'list' | 'grid';
 
 function WojaksTab() {
   const { getToken } = useAuth();
+  const queryClient = useQueryClient();
   const { isMobile } = useLayout();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [sortBy, setSortBy] = useState<SortOption>('score');
-  const [allWojaks, setAllWojaks] = useState<VoteLeaderboardWojakRow[]>([]);
+  const [extraWojaks, setExtraWojaks] = useState<VoteLeaderboardWojakRow[]>([]);
   const [total, setTotal] = useState(0);
-  const [offset, setOffset] = useState(0);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  // Initial load
-  const { isLoading, error } = useQuery({
+  // Reset pagination when sort changes
+  useEffect(() => {
+    setExtraWojaks([]);
+  }, [sortBy]);
+
+  // Shared fetch function for both the main query and prefetching
+  const fetchWojaks = useCallback(async (sort: SortOption): Promise<WojaksResponse> => {
+    const token = await getToken();
+    const params = new URLSearchParams({
+      type: 'wojaks',
+      sort,
+      limit: String(PAGE_SIZE),
+      offset: '0',
+    });
+    const res = await fetch(`/api/fight-club/vote-leaderboard?${params}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (!res.ok) throw new Error('Failed to fetch');
+    return res.json();
+  }, [getToken]);
+
+  // Prefetch all sort variants on mount — switching sorts is instant
+  useEffect(() => {
+    for (const opt of SORT_OPTIONS) {
+      if (opt.value !== sortBy) {
+        queryClient.prefetchQuery({
+          queryKey: ['wojak-vote-leaderboard', opt.value],
+          queryFn: () => fetchWojaks(opt.value),
+          staleTime: 30000,
+        });
+      }
+    }
+  // Only prefetch on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Initial load — data comes from query, NOT from side-effect state
+  // keepPreviousData shows the old sort's data while the new sort loads (no flash)
+  const { data: queryData, isLoading, isFetching, error } = useQuery({
     queryKey: ['wojak-vote-leaderboard', sortBy],
     queryFn: async (): Promise<WojaksResponse> => {
-      const token = await getToken();
-      const params = new URLSearchParams({
-        type: 'wojaks',
-        sort: sortBy,
-        limit: String(PAGE_SIZE),
-        offset: '0',
-      });
-      const res = await fetch(`/api/fight-club/vote-leaderboard?${params}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (!res.ok) throw new Error('Failed to fetch');
-      const data: WojaksResponse = await res.json();
-      setAllWojaks(data.wojaks || []);
+      const data = await fetchWojaks(sortBy);
       setTotal(data.total || 0);
-      setOffset(data.wojaks?.length || 0);
+      // Preload images for the first 10 results
+      (data.wojaks || []).slice(0, 10).forEach(w => {
+        if (w.imageUrl) {
+          const img = new Image();
+          img.src = w.imageUrl;
+        }
+      });
       return data;
     },
     staleTime: 30000,
     retry: 2,
+    placeholderData: keepPreviousData,
   });
+
+  // Derive displayed wojaks from query data + any extra pages loaded
+  const firstPage = queryData?.wojaks || [];
+  const allWojaks = extraWojaks.length > 0 ? [...firstPage, ...extraWojaks] : firstPage;
+  const offset = allWojaks.length;
 
   const loadMore = async () => {
     if (loadingMore) return;
@@ -604,8 +681,7 @@ function WojaksTab() {
       });
       if (!res.ok) throw new Error('Failed to fetch');
       const data: WojaksResponse = await res.json();
-      setAllWojaks(prev => [...prev, ...(data.wojaks || [])]);
-      setOffset(prev => prev + (data.wojaks?.length || 0));
+      setExtraWojaks(prev => [...prev, ...(data.wojaks || [])]);
     } catch (err) {
       console.error('Load more failed:', err);
     } finally {
@@ -661,8 +737,7 @@ function WojaksTab() {
               onClick={() => setSortBy(opt.value)}
               title={opt.tooltip}
             >
-              <span className="sort-chip-icon">{opt.icon}</span>
-              <span className="sort-chip-label">{opt.label}</span>
+              {opt.label}
             </button>
           ))}
         </div>
@@ -686,9 +761,9 @@ function WojaksTab() {
         </div>
       </div>
 
-      {/* List View */}
+      {/* List View — subtle dim while switching sorts */}
       {viewMode === 'list' && (
-        <div className="rankings-list wojak-rankings">
+        <div className="rankings-list wojak-rankings" style={isFetching ? { opacity: 0.6, transition: 'opacity 0.15s' } : { opacity: 1, transition: 'opacity 0.15s' }}>
           {allWojaks.map((wojak, idx) => (
             <div
               key={wojak.nftId}
@@ -767,9 +842,9 @@ function WojaksTab() {
         </div>
       )}
 
-      {/* Grid View */}
+      {/* Grid View — subtle dim while switching sorts */}
       {viewMode === 'grid' && (
-        <div className="wojak-grid">
+        <div className="wojak-grid" style={isFetching ? { opacity: 0.6, transition: 'opacity 0.15s' } : { opacity: 1, transition: 'opacity 0.15s' }}>
           {allWojaks.map((wojak, idx) => {
             const glowClass = wojak.voteScore >= 5 ? 'glow-gold' : wojak.voteScore >= 3 ? 'glow-silver' : '';
             return (
@@ -844,6 +919,44 @@ export function FightClubRankings({ currentUserDid }: FightClubRankingsProps = {
   const [activeTab, setActiveTab] = useState<RankingTab>('players');
   const [showRules, setShowRules] = useState(false);
   const { isMobile } = useLayout();
+  const queryClient = useQueryClient();
+  const { getToken } = useAuth();
+
+  // Prefetch the OTHER tab's data so switching is instant
+  useEffect(() => {
+    const otherType = activeTab === 'players' ? 'wojaks' : 'players';
+    const prefetchFn = async () => {
+      const token = await getToken();
+      const params = new URLSearchParams({ type: otherType, limit: String(PAGE_SIZE), offset: '0' });
+      if (otherType === 'wojaks') params.set('sort', 'score');
+      const res = await fetch(`/api/fight-club/vote-leaderboard?${params}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error('Failed to fetch');
+      const data = await res.json();
+      // Preload top images
+      const items = otherType === 'wojaks' ? data.wojaks : data.players;
+      (items || []).slice(0, 10).forEach((item: Record<string, unknown>) => {
+        const url = (item.imageUrl || item.bestWojakImage) as string | null;
+        if (url) { const img = new Image(); img.src = url; }
+      });
+      return data;
+    };
+
+    if (otherType === 'wojaks') {
+      queryClient.prefetchQuery({
+        queryKey: ['wojak-vote-leaderboard', 'score'],
+        queryFn: prefetchFn,
+        staleTime: 30000,
+      });
+    } else {
+      queryClient.prefetchQuery({
+        queryKey: ['vote-leaderboard', 'players', undefined],
+        queryFn: prefetchFn,
+        staleTime: 30000,
+      });
+    }
+  }, [activeTab, queryClient, getToken]);
 
   return (
     <div className="fight-club-rankings">

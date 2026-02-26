@@ -2,5 +2,7 @@ name = "wojak-battle-cron"
 main = "worker.ts"
 compatibility_date = "2024-12-01"
 
-[triggers]
-crons = ["0 * * * *"]
+# Cron disabled — DID indexer already calls battle-resolve hourly (worker.ts line 165-183).
+# This worker was redundant. Disabling frees a cron slot (4/5 used → room for credits-alert).
+# [triggers]
+# crons = ["0 * * * *"]

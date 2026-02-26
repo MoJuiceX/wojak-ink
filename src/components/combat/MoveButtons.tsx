@@ -107,11 +107,11 @@ export function MoveButtons({ moves, onSubmit, disabled = false, timerSeconds = 
               aria-pressed={selectedMove === move.id}
               aria-label={`${move.name}${move.power > 0 ? `, Power ${move.power}` : ''}, Accuracy ${move.accuracy}%`}
             >
-              <div className="font-medium text-sm">
+              <div className="move-name font-medium text-sm">
                 <span className="text-muted text-xs mr-1 hidden md:inline">{i + 1}.</span>
                 {move.name}
               </div>
-              <div className="flex items-center gap-2 text-xs text-secondary mt-0.5">
+              <div className="move-stats flex items-center gap-2 text-xs text-secondary mt-0.5">
                 {move.power > 0 && <span>Pow {move.power}</span>}
                 <span>Acc {move.accuracy}%</span>
               </div>

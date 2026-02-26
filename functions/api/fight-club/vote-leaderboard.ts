@@ -6,15 +6,15 @@
 //   offset: >= 0 (default 0)
 //   sort (wojaks only): 'score' | 'glazed' | 'ratio' | 'newest' (default 'score')
 
-import { resolveImageUri, PLOT_POWER_VALUE } from '../game/_shared';
+import { resolveImageUri, PLOT_POWER_VALUE, COLLECTION_BONUS_TOP_PERCENT, COLLECTION_BONUS_RATE } from '../game/_shared';
 import { authenticateRequest } from '../../lib/auth';
+import { getPlayerRankByDid } from './_rank';
 
 interface Env {
   DB: D1Database;
   CLERK_DOMAIN: string;
 }
 
-const PROVISIONAL_MIN_VOTES = 3;
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -76,12 +76,10 @@ async function handleWojaks(db: D1Database, limit: number, offset: number, sort:
   switch (sort) {
     case 'glazed':
       orderBy = `
-        CASE WHEN ws.total_votes >= ${PROVISIONAL_MIN_VOTES} THEN 0 ELSE 1 END ASC,
         ws.likes DESC, ws.net_score DESC, ws.edition_number ASC`;
       break;
     case 'ratio':
       orderBy = `
-        CASE WHEN ws.total_votes >= ${PROVISIONAL_MIN_VOTES} THEN 0 ELSE 1 END ASC,
         CASE WHEN ws.total_votes > 0 THEN CAST(ws.likes AS REAL) / ws.total_votes ELSE 0 END DESC,
         ws.likes DESC, ws.edition_number ASC`;
       break;
@@ -90,7 +88,6 @@ async function handleWojaks(db: D1Database, limit: number, offset: number, sort:
       break;
     default: // 'score'
       orderBy = `
-        CASE WHEN ws.total_votes >= ${PROVISIONAL_MIN_VOTES} THEN 0 ELSE 1 END ASC,
         ws.net_score DESC, ws.total_votes DESC, ws.edition_number ASC`;
   }
 
@@ -98,7 +95,7 @@ async function handleWojaks(db: D1Database, limit: number, offset: number, sort:
   const countResult = await db.prepare(
     'SELECT COUNT(*) as cnt FROM wojak_scores'
   ).first<{ cnt: number }>();
-  const total = countResult?.cnt || 0;
+  const total = countResult?.cnt ?? 0;
 
   // Main query: wojak_scores + phase2_mints (for image) + optional did_holdings/did_profiles (for owner)
   const query = `
@@ -127,13 +124,12 @@ async function handleWojaks(db: D1Database, limit: number, offset: number, sort:
   let rankCounter = offset;
   const wojaks = (results.results || []).map((row: Record<string, unknown>) => {
     const totalVotes = (row.total_votes as number) || 0;
-    const isProvisional = totalVotes < PROVISIONAL_MIN_VOTES;
     const likes = (row.likes as number) || 0;
     const dislikes = (row.dislikes as number) || 0;
     const voteScore = (row.net_score as number) || 0;
 
     let rank: number | null = null;
-    if (sort !== 'newest' && !isProvisional) {
+    if (sort !== 'newest') {
       rankCounter++;
       rank = rankCounter;
     }
@@ -150,9 +146,6 @@ async function handleWojaks(db: D1Database, limit: number, offset: number, sort:
       totalVotes,
       voteScore,
       likeRatio: totalVotes > 0 ? Math.round((likes / totalVotes) * 100) / 100 : null,
-      isProvisional,
-      provisionalVotesNeeded: Math.max(0, PROVISIONAL_MIN_VOTES - totalVotes),
-      countsTowardPlayer: !isProvisional,
     };
   });
 
@@ -163,10 +156,7 @@ async function handleWojaks(db: D1Database, limit: number, offset: number, sort:
     wojaks,
     total,
     sort,
-    meta: {
-      mode: 'voting_only',
-      provisionalMinVotes: PROVISIONAL_MIN_VOTES,
-    },
+    meta: { mode: 'voting_only' },
   });
 }
 
@@ -180,7 +170,7 @@ async function handlePlayers(db: D1Database, limit: number, offset: number, call
       SELECT COALESCE(
         (SELECT net_score FROM wojak_scores
          ORDER BY net_score DESC
-         LIMIT 1 OFFSET (SELECT CAST(COUNT(*) * 0.42 AS INTEGER) FROM wojak_scores)),
+         LIMIT 1 OFFSET (SELECT CAST(COUNT(*) * ${COLLECTION_BONUS_TOP_PERCENT} AS INTEGER) FROM wojak_scores)),
         0
       ) as threshold
     ),
@@ -212,8 +202,8 @@ async function handlePlayers(db: D1Database, limit: number, offset: number, call
           CASE
             WHEN ws.net_score >= (SELECT threshold FROM top_threshold)
                  AND (creator_gp.did_id IS NULL OR creator_gp.did_id != dh.did_id)
-                 AND CAST(ws.net_score * 0.10 AS INTEGER) > 0
-            THEN CAST(ws.net_score * 0.10 AS INTEGER)
+                 AND CAST(ws.net_score * ${COLLECTION_BONUS_RATE} AS INTEGER) > 0
+            THEN CAST(ws.net_score * ${COLLECTION_BONUS_RATE} AS INTEGER)
             ELSE 0
           END
         ) as bonus,
@@ -312,70 +302,7 @@ async function handlePlayers(db: D1Database, limit: number, offset: number, call
   // Caller's rank
   let yourRank: number | null = null;
   if (callerDid) {
-    const yourRankQuery = `
-      WITH top_threshold AS (
-        SELECT COALESCE(
-          (SELECT net_score FROM wojak_scores
-           ORDER BY net_score DESC
-           LIMIT 1 OFFSET (SELECT CAST(COUNT(*) * 0.42 AS INTEGER) FROM wojak_scores)),
-          0
-        ) as threshold
-      ),
-      wojak_power_by_did AS (
-        SELECT
-          dh.did_id,
-          COALESCE(SUM(ws.net_score), 0) AS wojak_power
-        FROM did_holdings dh
-        JOIN wojak_scores ws ON ws.nft_id = dh.nft_id
-        WHERE dh.collection = 'phase2'
-        GROUP BY dh.did_id
-      ),
-      plot_counts AS (
-        SELECT did_id, COUNT(*) as plot_count
-        FROM did_holdings
-        WHERE collection = 'phase1'
-        GROUP BY did_id
-      ),
-      collection_bonus AS (
-        SELECT
-          dh.did_id,
-          SUM(
-            CASE
-              WHEN ws.net_score >= (SELECT threshold FROM top_threshold)
-                   AND (creator_gp.did_id IS NULL OR creator_gp.did_id != dh.did_id)
-                   AND CAST(ws.net_score * 0.10 AS INTEGER) > 0
-              THEN CAST(ws.net_score * 0.10 AS INTEGER)
-              ELSE 0
-            END
-          ) as bonus
-        FROM did_holdings dh
-        JOIN wojak_scores ws ON ws.nft_id = dh.nft_id
-        JOIN phase2_mints pm ON pm.mintgarden_launcher_id = dh.nft_id
-        LEFT JOIN game_players creator_gp ON creator_gp.wallet_address = pm.wallet_address
-        WHERE dh.collection = 'phase2'
-        GROUP BY dh.did_id
-      ),
-      player_scores AS (
-        SELECT
-          gp.did_id,
-          COALESCE(pc.plot_count, 0) * ${PLOT_POWER_VALUE} as plot_power,
-          COALESCE(wpd.wojak_power, 0) AS wojak_power,
-          COALESCE(cb.bonus, 0) AS collection_bonus
-        FROM game_players gp
-        LEFT JOIN wojak_power_by_did wpd ON wpd.did_id = gp.did_id
-        LEFT JOIN plot_counts pc ON pc.did_id = gp.did_id
-        LEFT JOIN collection_bonus cb ON cb.did_id = gp.did_id
-        WHERE gp.phase1_verified = 1
-          AND gp.did_id IS NOT NULL AND gp.did_id != ''
-      )
-      SELECT COUNT(*) + 1 AS rank
-      FROM player_scores
-      WHERE (plot_power + wojak_power + collection_bonus) > (
-        SELECT COALESCE(plot_power + wojak_power + collection_bonus, 0) FROM player_scores WHERE did_id = ?
-      )
-    `;
-    const rankResult = await db.prepare(yourRankQuery).bind(callerDid).first<{ rank: number }>();
-    yourRank = rankResult?.rank ?? null;
+    yourRank = await getPlayerRankByDid(db, callerDid);
   }
 
   const ms = Date.now() - start;
@@ -384,9 +311,6 @@ async function handlePlayers(db: D1Database, limit: number, offset: number, call
   return json({
     players,
     yourRank,
-    meta: {
-      mode: 'voting_only',
-      provisionalMinVotes: PROVISIONAL_MIN_VOTES,
-    },
+    meta: { mode: 'voting_only' },
   });
 }

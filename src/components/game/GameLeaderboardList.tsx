@@ -1,6 +1,6 @@
 // Game Leaderboard List — rank #4+ rows with pagination.
 import { Link } from 'react-router-dom';
-import { getTier } from '@/components/game/PowerLevelDisplay';
+import { getTier } from '@/lib/tiers';
 
 interface PlayerEntry {
   rank: number;

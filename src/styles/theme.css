@@ -736,11 +736,21 @@ body {
 /* Mobile: full-width tabs with tighter padding */
 @media (max-width: 640px) {
   .fight-club-tabs {
+    position: relative;
     gap: var(--space-1);
     padding: 3px;
     border-radius: var(--radius-md);
     overflow-x: auto;
     scrollbar-width: none;
+    /* Scroll hint: fade right edge to signal more tabs */
+    -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+    mask-image: linear-gradient(to right, black 85%, transparent 100%);
+  }
+
+  /* Remove fade once scrolled to end */
+  .fight-club-tabs.scrolled-end {
+    -webkit-mask-image: none;
+    mask-image: none;
   }
 
   .fight-club-tabs::-webkit-scrollbar {
@@ -1102,8 +1112,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   color: var(--color-cyan);
   text-decoration: none;
   border-radius: var(--radius-md);
@@ -1451,10 +1461,16 @@ body {
     font-size: 0.75rem;
   }
 
-  /* Collection counts: tighter */
+  /* Collection counts: tighter but still readable */
   .collection-counts {
     gap: 4px;
-    font-size: 0.65rem;
+    font-size: 0.75rem;
+  }
+
+  /* Tap feedback on rankings rows (mobile has no hover) */
+  .rankings-row:active {
+    background: var(--color-white-5);
+    transition: none;
   }
 }
 
@@ -1839,25 +1855,7 @@ body {
   box-shadow: inset 0 1px 0 var(--color-primary-20);
 }
 
-.sort-chip-icon {
-  font-size: 13px;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-}
-
-.sort-chip-label {
-  display: none;
-}
-
-@media (min-width: 640px) {
-  .sort-chip-label {
-    display: inline;
-  }
-}
+/* sort-chip-icon and sort-chip-label removed — chips now use text-only labels */
 
 .rankings-view-toggle {
   display: flex;
@@ -3927,7 +3925,7 @@ body {
 }
 
 .voting-stats-bar-label {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--color-text-muted);
   line-height: 1;
 }
@@ -4063,7 +4061,10 @@ body {
   aspect-ratio: 1 / 1.14;
   max-height: calc(100vh - 228px);
   isolation: isolate;
-  overflow: visible;
+  /* Clip horizontal exit animations so rightward swipe (Glaze) doesn't widen the viewport.
+     Keep vertical overflow visible for stack offsets (y:10, y:20) and pulse pseudo-elements. */
+  overflow-x: hidden; /* fallback for older browsers */
+  overflow-x: clip;
 }
 
 /* 24h vote pass progress */
@@ -6447,6 +6448,44 @@ body {
   color: var(--color-text-secondary);
 }
 
+/* Mobile compact: single inline row, wraps gracefully on ultra-narrow screens */
+.your-position-compact {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 0;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.your-position-rank-inline {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.your-position-divider {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  margin: 0 6px;
+}
+
+.your-position-score-inline {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.your-position-meta-inline {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.your-position-next-inline {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+}
+
 /* ── Community Players Fallback Section ── */
 
 .community-players-card {
@@ -6588,13 +6627,13 @@ body {
   }
 }
 
-/* Mobile Wojaks toolbar: single tight row */
+/* Mobile Wojaks toolbar: single tight row with text-label chips */
 @media (max-width: 767px) {
   .rankings-toolbar-inline {
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
-    gap: 0;
+    gap: 8px;
     margin-bottom: 6px;
     padding-bottom: 6px;
     border-bottom: none;
@@ -6608,22 +6647,11 @@ body {
     overflow: visible;
   }
 
-  /* Icon-only compact chips on mobile */
   .rankings-toolbar-inline .sort-chip {
     flex-shrink: 0;
-    width: 34px;
-    height: 34px;
-    padding: 0;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .rankings-toolbar-inline .sort-chip .sort-chip-icon {
-    font-size: 15px;
-    width: auto;
-    height: auto;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
   }
 
   .rankings-toolbar-inline .rankings-view-toggle {
@@ -6648,25 +6676,6 @@ body {
 
 /* ── Mobile Rankings: <600px Vertical Stacking ── */
 @media (max-width: 599px) {
-  /* Your position card: stacked layout on mobile */
-  .your-position-card {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 12px;
-    border-radius: 14px;
-  }
-
-  .your-position-rank {
-    min-width: 100%;
-    text-align: left;
-    font-size: 1.25rem;
-  }
-
-  .your-position-info {
-    width: 100%;
-  }
-
   /* Community player row: mobile stacking */
   .community-player-row {
     grid-template-columns: 32px minmax(0, 1fr);
@@ -7027,6 +7036,22 @@ body {
 .move-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+/* Mobile: tighter move buttons for small screens */
+@media (max-width: 767px) {
+  .move-btn {
+    padding: 8px 10px;
+  }
+
+  .move-btn .move-name {
+    font-size: 0.8rem;
+    line-height: 1.2;
+  }
+
+  .move-btn .move-stats {
+    font-size: 0.65rem;
+  }
 }
 
 /* Turn Log */

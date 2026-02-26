@@ -191,8 +191,8 @@ export default function Account() {
       setDisplayNameError('Name must be 2–20 characters');
       return;
     }
-    if (!/^[a-zA-Z0-9 ]+$/.test(name)) {
-      setDisplayNameError('Only letters, numbers, and spaces');
+    if (!/^[a-zA-Z0-9 '\-._]+$/.test(name)) {
+      setDisplayNameError('Only letters, numbers, spaces, and basic punctuation');
       return;
     }
     setDisplayNameError(null);

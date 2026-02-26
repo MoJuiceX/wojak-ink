@@ -8,9 +8,6 @@ interface Env {
   DB: D1Database;
 }
 
-// Phase 2 collection ID for Wojaks
-const PHASE2_COLLECTION_ID = 'col1ggwv83p4tnhw5edw5t9dkmnvz4h0x8a8k2r8rlk4r5u5hvzlgqqsp5rk0r';
-
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     const url = new URL(context.request.url);
@@ -31,10 +28,10 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       // Player is registered, check phase1 verification
       const hasAccess = player.phase1_verified === 1 || (player.phase1_nft_count ?? 0) > 0;
 
-      // Count Wojaks (phase2 NFTs)
+      // Count Wojaks (phase2 NFTs) — column is `collection`, not `collection_id`
       const wojakRow = await db.prepare(
-        'SELECT COUNT(*) as cnt FROM did_holdings WHERE did_id = ? AND collection_id = ?'
-      ).bind(player.did_id, PHASE2_COLLECTION_ID).first<{ cnt: number }>();
+        "SELECT COUNT(*) as cnt FROM did_holdings WHERE did_id = ? AND collection = 'phase2'"
+      ).bind(player.did_id).first<{ cnt: number }>();
 
       return jsonResponse({
         hasAccess,
@@ -60,16 +57,13 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
     // Check did_holdings for Farmers Plot NFTs
     const holdings = await db.prepare(
-      `SELECT COUNT(*) as cnt FROM did_holdings
-       WHERE did_id = ? AND collection_id = (
-         SELECT value FROM kv_store WHERE key = 'phase1_collection_id' LIMIT 1
-       )`
+      "SELECT COUNT(*) as cnt FROM did_holdings WHERE did_id = ? AND collection = 'phase1'"
     ).bind(didRow.did_id).first<{ cnt: number }>();
 
-    // Count Wojaks
+    // Count Wojaks (phase2 NFTs)
     const wojakRow = await db.prepare(
-      'SELECT COUNT(*) as cnt FROM did_holdings WHERE did_id = ? AND collection_id = ?'
-    ).bind(didRow.did_id, PHASE2_COLLECTION_ID).first<{ cnt: number }>();
+      "SELECT COUNT(*) as cnt FROM did_holdings WHERE did_id = ? AND collection = 'phase2'"
+    ).bind(didRow.did_id).first<{ cnt: number }>();
 
     const count = holdings?.cnt ?? 0;
     return jsonResponse({

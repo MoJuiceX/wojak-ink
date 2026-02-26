@@ -16,7 +16,9 @@ import type { SpawnAttackConfig } from '@/lib/combat/particles';
 
 // ── Constants ───────────────────────────────────────────────────────────────
 
-const MAX_PARTICLES = 500;
+// Reduce particle count on mobile to prevent jank on low-end phones
+const IS_MOBILE = typeof window !== 'undefined' && window.innerWidth < 768;
+const MAX_PARTICLES = IS_MOBILE ? 150 : 500;
 
 // ── Public Ref API ──────────────────────────────────────────────────────────
 

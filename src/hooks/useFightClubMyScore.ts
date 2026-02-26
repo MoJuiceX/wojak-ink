@@ -11,24 +11,12 @@ export interface MyScoreData {
     ranked: boolean;
     rank: number | null;
     playerScore: number;
-    tier: 'Casual' | 'Active' | 'Serious' | 'Strong' | 'Elite' | 'Legend';
     eligibleWojakCount: number;
     totalWojakCount: number;
     bestWojakScore: number | null;
     pointsToNextRank: number | null;
     nextRank: number | null;
-    meta: { mode: string; provisionalMinVotes: number; playerTopN: number };
-}
-
-export function getTierColor(tier: string): string {
-    switch (tier) {
-        case 'Legend': return 'var(--color-primary)';
-        case 'Elite': return 'var(--color-cyan, #06b6d4)';
-        case 'Strong': return 'var(--color-success)';
-        case 'Serious': return 'var(--color-text)';
-        case 'Active': return 'var(--color-text-secondary)';
-        default: return 'var(--color-text-muted)';
-    }
+    meta: { mode: string };
 }
 
 export function useFightClubMyScore() {

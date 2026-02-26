@@ -1,6 +1,6 @@
 // Game Podium — top 3 display with classic podium arrangement.
 import { Link } from 'react-router-dom';
-import { getTier } from '@/components/game/PowerLevelDisplay';
+import { getTier } from '@/lib/tiers';
 
 interface PodiumEntry {
   rank: number;

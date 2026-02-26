@@ -129,9 +129,9 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       return Response.json({ error: 'Name must be 2-20 characters' }, { status: 400 });
     }
 
-    // Only allow alphanumeric and spaces
-    if (!/^[a-zA-Z0-9 ]+$/.test(trimmedName)) {
-      return Response.json({ error: 'Name can only contain letters, numbers, and spaces' }, { status: 400 });
+    // Allow alphanumeric, spaces, and common punctuation (apostrophes, hyphens, periods, underscores)
+    if (!/^[a-zA-Z0-9 '\-._]+$/.test(trimmedName)) {
+      return Response.json({ error: 'Name can only contain letters, numbers, spaces, and basic punctuation' }, { status: 400 });
     }
 
     const db = context.env.DB;

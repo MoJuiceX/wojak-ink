@@ -4,33 +4,13 @@
 
 import { authenticateRequest } from '../../lib/auth';
 import { calculateFullPower } from './_power';
+import { getPlayerRankByScore } from './_rank';
 import { PLOT_POWER_VALUE } from '../game/_shared';
 
 interface Env {
     DB: D1Database;
     CLERK_DOMAIN: string;
 }
-
-type Tier = 'Casual' | 'Active' | 'Serious' | 'Strong' | 'Elite' | 'Legend';
-
-function getTier(score: number): Tier {
-    if (score >= 250) return 'Legend';
-    if (score >= 120) return 'Elite';
-    if (score >= 60) return 'Strong';
-    if (score >= 25) return 'Serious';
-    if (score >= 10) return 'Active';
-    return 'Casual';
-}
-
-// Tier thresholds for "points to next tier" calculation
-const TIER_THRESHOLDS: { tier: Tier; min: number }[] = [
-    { tier: 'Legend', min: 250 },
-    { tier: 'Elite', min: 120 },
-    { tier: 'Strong', min: 60 },
-    { tier: 'Serious', min: 25 },
-    { tier: 'Active', min: 10 },
-    { tier: 'Casual', min: 0 },
-];
 
 function json(data: unknown, status = 200) {
     return new Response(JSON.stringify(data), {
@@ -47,7 +27,6 @@ function unregisteredResponse() {
         ranked: false,
         rank: null,
         playerScore: 0,
-        tier: 'Casual' as Tier,
         // Power breakdown (all zeros for unregistered)
         power: {
             total: 0,
@@ -68,7 +47,6 @@ function unregisteredResponse() {
         meta: {
             mode: 'voting_only',
             plotPowerValue: PLOT_POWER_VALUE,
-            collectionBonusCap: 25, // Legacy: was COLLECTION_BONUS_CAP
         },
     });
 }
@@ -117,69 +95,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         let rank: number | null = null;
 
         if (ranked) {
-            // Count players with higher total power (includes collection bonus)
-            const rankQuery = `
-        WITH top_threshold AS (
-          SELECT COALESCE(
-            (SELECT net_score FROM wojak_scores
-             ORDER BY net_score DESC
-             LIMIT 1 OFFSET (SELECT CAST(COUNT(*) * 0.42 AS INTEGER) FROM wojak_scores)),
-            0
-          ) as threshold
-        ),
-        player_wojak_power AS (
-          SELECT
-            dh.did_id,
-            COALESCE(SUM(ws.net_score), 0) AS wojak_power
-          FROM did_holdings dh
-          JOIN wojak_scores ws ON ws.nft_id = dh.nft_id
-          WHERE dh.collection = 'phase2'
-          GROUP BY dh.did_id
-        ),
-        player_plot_power AS (
-          SELECT
-            did_id,
-            COUNT(*) * ${PLOT_POWER_VALUE} AS plot_power
-          FROM did_holdings
-          WHERE collection = 'phase1'
-          GROUP BY did_id
-        ),
-        collection_bonus AS (
-          SELECT
-            dh.did_id,
-            SUM(
-              CASE
-                WHEN ws.net_score >= (SELECT threshold FROM top_threshold)
-                     AND (creator_gp.did_id IS NULL OR creator_gp.did_id != dh.did_id)
-                     AND CAST(ws.net_score * 0.10 AS INTEGER) > 0
-                THEN CAST(ws.net_score * 0.10 AS INTEGER)
-                ELSE 0
-              END
-            ) as bonus
-          FROM did_holdings dh
-          JOIN wojak_scores ws ON ws.nft_id = dh.nft_id
-          JOIN phase2_mints pm ON pm.mintgarden_launcher_id = dh.nft_id
-          LEFT JOIN game_players creator_gp ON creator_gp.wallet_address = pm.wallet_address
-          WHERE dh.collection = 'phase2'
-          GROUP BY dh.did_id
-        ),
-        player_scores AS (
-          SELECT
-            gp.did_id,
-            COALESCE(pwp.wojak_power, 0) + COALESCE(ppp.plot_power, 0) + COALESCE(cb.bonus, 0) AS player_score
-          FROM game_players gp
-          LEFT JOIN player_wojak_power pwp ON pwp.did_id = gp.did_id
-          LEFT JOIN player_plot_power ppp ON ppp.did_id = gp.did_id
-          LEFT JOIN collection_bonus cb ON cb.did_id = gp.did_id
-          WHERE gp.phase1_verified = 1
-            AND gp.did_id IS NOT NULL AND gp.did_id != ''
-        )
-        SELECT COUNT(*) + 1 AS rank
-        FROM player_scores
-        WHERE player_score > ?
-      `;
-            const rankResult = await db.prepare(rankQuery).bind(playerScore).first<{ rank: number }>();
-            rank = rankResult?.rank ?? null;
+            rank = await getPlayerRankByScore(db, playerScore);
         }
 
         // Points to next rank: find the player just above
@@ -189,18 +105,6 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
             // Points needed = score of player at (rank - 1) minus our score + 1
             pointsToNextRank = 1; // At minimum 1 point to overtake
             nextRank = rank - 1;
-        }
-
-        const tier = getTier(playerScore);
-
-        // Points to next tier
-        const currentTierIdx = TIER_THRESHOLDS.findIndex(t => t.tier === tier);
-        if (currentTierIdx > 0) {
-            const nextTierMin = TIER_THRESHOLDS[currentTierIdx - 1].min;
-            const pointsToNextTier = nextTierMin - playerScore;
-            if (pointsToNextRank === null || pointsToNextTier < pointsToNextRank) {
-                pointsToNextRank = pointsToNextTier;
-            }
         }
 
         const ms = Date.now() - start;
@@ -213,7 +117,6 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
             ranked,
             rank,
             playerScore,
-            tier,
             // Power breakdown
             power: {
                 total: power.totalPower,
@@ -234,7 +137,6 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
             meta: {
                 mode: 'voting_only',
                 plotPowerValue: PLOT_POWER_VALUE,
-                collectionBonusCap: 25, // Legacy: was COLLECTION_BONUS_CAP
             },
         });
     } catch (err) {

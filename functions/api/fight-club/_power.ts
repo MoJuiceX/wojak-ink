@@ -2,7 +2,7 @@
 // DID Power = Plot Power + Wojak Power + Collection Bonus
 // Single source of truth — used by my-score, vote-leaderboard, recalc-power-levels.
 
-import { PLOT_POWER_VALUE } from '../game/_shared';
+import { PLOT_POWER_VALUE, COLLECTION_BONUS_TOP_PERCENT, COLLECTION_BONUS_RATE } from '../game/_shared';
 
 interface PowerBreakdown {
   plotPower: number;
@@ -26,7 +26,7 @@ export async function calculatePlotPower(
     `SELECT COUNT(*) as cnt FROM did_holdings WHERE did_id = ? AND collection = 'phase1'`
   ).bind(didId).first<{ cnt: number }>();
 
-  const count = result?.cnt || 0;
+  const count = result?.cnt ?? 0;
   return { power: count * PLOT_POWER_VALUE, count };
 }
 
@@ -71,7 +71,7 @@ export async function calculateCollectionBonus(
   const thresholdResult = await db.prepare(`
     SELECT net_score as threshold FROM wojak_scores
     ORDER BY net_score DESC
-    LIMIT 1 OFFSET (SELECT CAST(COUNT(*) * 0.42 AS INTEGER) FROM wojak_scores)
+    LIMIT 1 OFFSET (SELECT CAST(COUNT(*) * ${COLLECTION_BONUS_TOP_PERCENT} AS INTEGER) FROM wojak_scores)
   `).first<{ threshold: number }>();
   const threshold = thresholdResult?.threshold ?? 0;
 
@@ -102,7 +102,7 @@ export async function calculateCollectionBonus(
   // 3. Sum bonus: 10% of net_score per qualifying Wojak, floored at 0
   const bonus = collected.reduce((sum, w) => {
     const score = (w.net_score as number) || 0;
-    return sum + Math.max(0, Math.floor(score * 0.10));
+    return sum + Math.max(0, Math.floor(score * COLLECTION_BONUS_RATE));
   }, 0);
 
   return { bonus, collectedCount: collected.length, uniqueCreators };
