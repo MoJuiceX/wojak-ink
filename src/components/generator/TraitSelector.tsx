@@ -871,7 +871,6 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
   const { isDesktop: _isDesktop } = useLayout();
   const prefersReducedMotion = useReducedMotion();
 
-  const [, setImages] = useState<LayerImage[]>([]);
   const [unifiedTraits, setUnifiedTraits] = useState<UnifiedTrait[]>([]);
   const [imagesForLayer, setImagesForLayer] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -907,8 +906,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
       getLayerImages(activeLayer),
       getUnifiedTraitsForLayer(activeLayer),
     ])
-      .then(([imgs, traits]) => {
-        setImages(imgs);
+      .then(([_imgs, traits]) => {
         // Apply custom sort order for Clothes layer
         const sortedTraits = activeLayer === 'Clothes' ? sortClothesTraits(traits) : traits;
         setUnifiedTraits(sortedTraits);
@@ -917,7 +915,6 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
       })
       .catch((err) => {
         console.error('Failed to load layer images:', err);
-        setImages([]);
         setUnifiedTraits([]);
         setImagesForLayer(activeLayer);
         setIsLoading(false);
