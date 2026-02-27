@@ -289,9 +289,15 @@ export function useMetadataAttributes(): MetadataAttribute[] {
       };
     });
 
-    // Append extras at the end (only when selected — no placeholder)
-    for (const extra of extraAttrs) {
-      result.push(extra);
+    // Append extras collapsed into a single row (comma-separated values)
+    if (extraAttrs.length > 0) {
+      result.push({
+        trait_type: extraAttrs.length === 1 ? 'Extra' : 'Extras',
+        value: extraAttrs.map(e => e.value).join(', '),
+        source: extraAttrs.some(e => e.source === 'fallback') ? 'fallback' : 'map',
+        raw: extraAttrs.map(e => e.raw).join(' | '),
+        layerKey: 'Extra',
+      });
     }
 
     return result;
