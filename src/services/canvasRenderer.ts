@@ -1179,12 +1179,14 @@ function buildG2LayerData(
 
   // BEPA Army: default = original green only; colored = tinted fill + outline (no outline2)
   if (trait.id === 'Clothes_Bepe-army') {
+    const name1 = g2.options.name1 as string | undefined;
+    const name2 = g2.options.name2 as string | undefined;
     const defaultColor = trait.defaultColor || '#4a5d23';
     const color = resolveFillColor(trait.id, 'fill', g2, trait) || defaultColor;
     const isDefault = (c: string) => (c || '').toUpperCase().replace('#', '') === (defaultColor || '').toUpperCase().replace('#', '');
     if (trait.defaultFile && isDefault(color)) {
       fills.push({ file: `${basePath}/${trait.defaultFile}`, color: defaultColor, noTint: true });
-      return { fills, outlines: [], name1: g2.options.name1 as string | undefined, name2: g2.options.name2 as string | undefined };
+      return { fills, outlines: [], name1, name2 };
     }
     if (trait.fillFile) {
       fills.push({ file: `${basePath}/${trait.fillFile}`, color });
@@ -1207,8 +1209,8 @@ function buildG2LayerData(
       fills,
       outlines,
       detailOverlay: detailOverlay ? `${basePath}/${detailOverlay}` : undefined,
-      name1: g2.options.name1 as string | undefined,
-      name2: g2.options.name2 as string | undefined,
+      name1,
+      name2,
     };
   }
 
@@ -1223,13 +1225,15 @@ function buildG2LayerData(
       fills.push({ file: `${basePath}/${trait.fillFile}`, color });
     }
     if (trait.outlineFile) outlines.push(`${basePath}/${trait.outlineFile}`);
+    const logoOption = g2.options.logo as string | undefined;
+    const flagOption = g2.options.flag as string | undefined;
     const frame1 = trait.frameFiles?.find(f => f.over === 'Detail 1');
     const frame2 = trait.frameFiles?.find(f => f.over === 'Detail 2');
     return {
       fills,
       outlines,
-      logoOption: g2.options.logo as string | undefined,
-      flagOption: g2.options.flag as string | undefined,
+      logoOption,
+      flagOption,
       frame1: frame1 ? `${basePath}/${frame1.file}` : undefined,
       frame2: frame2 ? `${basePath}/${frame2.file}` : undefined,
     };
@@ -1247,8 +1251,9 @@ function buildG2LayerData(
   // Beer Hat: outline must always render on top of detail (can logo). Default can = Citrus.
   if (trait.id === 'Head_Beer-Hat' && trait.outlineFile && trait.detailOptions?.length) {
     const items: G2DrawItem[] = [];
+    const detail = g2.options.detail as string | undefined;
     const defaultCan = trait.detailOptions.find(d => d.name === 'Tang')?.file ?? trait.detailOptions[0]?.file;
-    const detailFile = (g2.options.detail as string | undefined && g2.options.detail as string | undefined !== '') ? g2.options.detail as string | undefined : defaultCan;
+    const detailFile = (detail && detail !== '') ? detail : defaultCan;
     if (detailFile) {
       items.push({ type: 'outline', path: `${basePath}/${detailFile}` });
     }
@@ -1355,8 +1360,9 @@ function buildG2LayerData(
 
   // MOG Glasses: detail (default rainbow or selected) under outline, outline on top
   if (trait.id === 'Face-wear_MOG-Glasses' && trait.outlineFile) {
+    const detail = g2.options.detail as string | undefined;
     const defaultDetailFile = trait.detailOptions?.find(d => d.name === 'Default (Rainbow)')?.file ?? 'Face-wear_MOG-Glasses_detail_default.png';
-    const detailFile = g2.options.detail as string | undefined || defaultDetailFile;
+    const detailFile = detail || defaultDetailFile;
     const items: G2DrawItem[] = [
       { type: 'outline', path: `${basePath}/${detailFile}` }, // detail draws first (under)
       { type: 'outline', path: `${basePath}/${trait.outlineFile}` }, // outline on top
@@ -1366,7 +1372,8 @@ function buildG2LayerData(
 
   // Chia Farmer: under layer (Tee or Tank top) with fill1, then outfit with fill0
   if (trait.id === 'Clothes_Chia-farmer') {
-    const underlayer = g2.options.chiaFarmerUnderlayer as string | undefined ?? 'tee';
+    const chiaFarmerUnderlayer = g2.options.chiaFarmerUnderlayer as string | undefined;
+    const underlayer = chiaFarmerUnderlayer ?? 'tee';
     const underFillFile = underlayer === 'tee' ? 'Clothes_Tee_fill.png' : 'Clothes_Tank-top_fill.png';
     const underOutlineFile = underlayer === 'tee' ? 'Clothes_Tee_outline.png' : 'Clothes_Tank-top_outline.png';
     const underColor = resolveFillColor(trait.id, 'fill1', g2, trait) || getG2DefaultColor(trait.id, 'fill1', trait, '#2563EB');
@@ -1384,7 +1391,8 @@ function buildG2LayerData(
   if (trait.id === 'Clothes_Suit' && trait.fillFiles && trait.outlineFiles) {
     const defaultSuit = trait.defaultColors?.[0] ?? '#171717';
     const defaultTieBow = trait.defaultColors?.[1] ?? '#2563EB';
-    const isBow = (g2.options.detail as string | undefined)?.toLowerCase().includes('suite-bow') ?? false;
+    const detail = g2.options.detail as string | undefined;
+    const isBow = detail?.toLowerCase().includes('suite-bow') ?? false;
     const suitColor = resolveFillColor(trait.id, 'fill0', g2, trait) || defaultSuit;
     const tieBowColor = resolveFillColor(trait.id, 'fill1', g2, trait) || defaultTieBow;
     const items: G2DrawItem[] = [
@@ -1426,11 +1434,12 @@ function buildG2LayerData(
     const detail1File = trait.detailOptions?.[0]?.file; // Star fill (colorable as fill3)
     const detail1Overlay = trait.detail1OverlayFile;     // Star outline (detail1.1)
 
+    const logoOption = g2.options.logo as string | undefined;
     const items: G2DrawItem[] = [
       { type: 'fill', file: `${basePath}/${trait.fill1File}`, color: fill1Color },
       { type: 'fill', file: `${basePath}/${trait.fill2File}`, color: fill2Color },
     ];
-    if (g2.options.logo as string | undefined) {
+    if (logoOption) {
       // Coin logo selected: skip detail1 (star fill) + detail1.1 (star outline) + detail2 (gray patch)
       // Only the coin logo renders at the patch position
     } else {
@@ -1440,8 +1449,8 @@ function buildG2LayerData(
     items.push({ type: 'outline', path: `${basePath}/${trait.outlineFile}` });
 
     const result: G2LayerData = { fills: [], outlines: [], orderedDrawItems: items };
-    if (g2.options.logo as string | undefined) {
-      result.logoOption = g2.options.logo as string | undefined;
+    if (logoOption) {
+      result.logoOption = logoOption;
       result.logoPos = COMRAD_HAT_LOGO_POS;
     }
     return result;
@@ -1456,24 +1465,29 @@ function buildG2LayerData(
       { type: 'fill', file: `${basePath}/${trait.fill2File}`, color: fill2Color },
       { type: 'outline', path: `${basePath}/${trait.outlineFile}` },
     ];
+    const logoOption = g2.options.logo as string | undefined;
     const result: G2LayerData = { fills: [], outlines: [], orderedDrawItems: items };
-    if (g2.options.logo as string | undefined) {
-      result.logoOption = g2.options.logo as string | undefined;
+    if (logoOption) {
+      result.logoOption = logoOption;
       result.logoPos = HARD_HAT_LOGO_POS;
     }
     return result;
   }
 
   // Cap: coin logo support — let generic path handle fill/outline/detail, just add logo when selected
-  if (trait.id === 'Head_Cap' && g2.options.logo as string | undefined) {
-    const variantFile = g2.options.variant as string | undefined && trait.variants?.find(v => v.file === g2.options.variant as string | undefined)?.file;
-    const color = resolveFillColor(trait.id, 'fill', g2, trait) || getG2DefaultColor(trait.id, 'fill', trait, trait.defaultColor || '#228B22');
-    const fills: G2LayerData['fills'] = [];
-    const outlines: string[] = [];
-    const fillSrc = variantFile ? `${basePath}/${variantFile}` : (trait.fillFile ? `${basePath}/${trait.fillFile}` : undefined);
-    if (fillSrc) fills.push({ file: fillSrc, color });
-    if (trait.outlineFile) outlines.push(`${basePath}/${trait.outlineFile}`);
-    return { fills, outlines, logoOption: g2.options.logo as string | undefined, logoPos: CAP_LOGO_POS };
+  if (trait.id === 'Head_Cap') {
+    const logoOption = g2.options.logo as string | undefined;
+    if (logoOption) {
+      const variant = g2.options.variant as string | undefined;
+      const variantFile = variant && trait.variants?.find(v => v.file === variant)?.file;
+      const color = resolveFillColor(trait.id, 'fill', g2, trait) || getG2DefaultColor(trait.id, 'fill', trait, trait.defaultColor || '#228B22');
+      const fills: G2LayerData['fills'] = [];
+      const outlines: string[] = [];
+      const fillSrc = variantFile ? `${basePath}/${variantFile}` : (trait.fillFile ? `${basePath}/${trait.fillFile}` : undefined);
+      if (fillSrc) fills.push({ file: fillSrc, color });
+      if (trait.outlineFile) outlines.push(`${basePath}/${trait.outlineFile}`);
+      return { fills, outlines, logoOption, logoPos: CAP_LOGO_POS };
+    }
   }
 
   // Wizard drip: Detail 1, Detail 2, or coin logos (no None). Default to Detail 1 when neither set.
@@ -1484,16 +1498,18 @@ function buildG2LayerData(
     const frameForLogo = trait.frameFiles?.find(f => f.over === 'Logo Patch');
     const frameFile = frameForLogo ? `${basePath}/${frameForLogo.file}` : undefined;
 
+    const logoOption = g2.options.logo as string | undefined;
+    const detail = g2.options.detail as string | undefined;
     const result: G2LayerData = {
       fills: [{ file: `${basePath}/${trait.fillFile}`, color }],
       outlines: [`${basePath}/${trait.outlineFile}`],
     };
-    if (g2.options.logo as string | undefined) {
-      result.logoOption = g2.options.logo as string | undefined;
+    if (logoOption) {
+      result.logoOption = logoOption;
       result.logoPos = WIZARD_LOGO_POS;
       if (frameFile) result.logoFrame = frameFile;
     } else {
-      const detailFile = g2.options.detail as string | undefined || detail1File;
+      const detailFile = detail || detail1File;
       if (detailFile) result.detail = `${basePath}/${detailFile}`;
     }
     return result;
@@ -1512,6 +1528,7 @@ function buildG2LayerData(
   } else if (trait.fill1File && trait.fill2File) {
     // Dual fill (e.g. Bathrobe: fill1, fill2) — SWAT gets special orderedDrawItems with details under outline
     if (trait.id === 'Clothes_SWAT' && trait.detailOptions && trait.detailOptions.length >= 2) {
+      const selectedDetail = g2.options.detail as string | undefined;
       const detail1File = trait.detailOptions[0]!.file;
       const detail2File = trait.detailOptions[1]!.file;
       const fill1Color = resolveFillColor(trait.id, 'fill1', g2, trait) || getG2DefaultColor(trait.id, 'fill1', trait, trait.defaultColor || '#FFFFFF');
@@ -1521,7 +1538,7 @@ function buildG2LayerData(
         { type: 'fill', file: `${basePath}/${trait.fill2File}`, color: fill2Color },
         { type: 'outline', path: `${basePath}/${detail1File}` },
       ];
-      if (g2.options.detail as string | undefined === detail2File) {
+      if (selectedDetail === detail2File) {
         items.push({ type: 'outline', path: `${basePath}/${detail2File}` });
       }
       if (trait.outlineFile) items.push({ type: 'outline', path: `${basePath}/${trait.outlineFile}` });
@@ -1537,7 +1554,8 @@ function buildG2LayerData(
     });
   } else if (trait.fillFile) {
     // Single fill — variant swaps the fill image but still tints with user color
-    const variantFile = g2.options.variant as string | undefined && trait.variants?.find(v => v.file === g2.options.variant as string | undefined)?.file;
+    const variant = g2.options.variant as string | undefined;
+    const variantFile = variant && trait.variants?.find(v => v.file === variant)?.file;
     if (variantFile) {
       const fillColor = resolveFillColor(trait.id, 'fill', g2, trait) || getG2DefaultColor(trait.id, 'fill', trait, trait.defaultColor || '#FFFFFF');
       fills.push({ file: `${basePath}/${variantFile}`, color: fillColor });
@@ -1579,17 +1597,19 @@ function buildG2LayerData(
     if (parts.length) details = parts;
   }
   if (!details) {
-    if (g2.options.detail as string | undefined) {
-      detail = `${basePath}/${g2.options.detail as string | undefined}`;
+    const selectedDetail = g2.options.detail as string | undefined;
+    if (selectedDetail) {
+      detail = `${basePath}/${selectedDetail}`;
     } else if (trait.detailFile) {
       detail = `${basePath}/${trait.detailFile}`;
     }
   }
 
   // Frame
+  const selectedFrame = g2.options.frame as string | undefined;
   let frame: string | undefined;
-  if (g2.options.frame as string | undefined) {
-    frame = `${basePath}/${g2.options.frame as string | undefined}`;
+  if (selectedFrame) {
+    frame = `${basePath}/${selectedFrame}`;
   }
 
   const result: G2LayerData = { fills, outlines, detail, details, frame };
