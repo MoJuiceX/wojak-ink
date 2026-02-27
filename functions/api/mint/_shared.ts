@@ -88,3 +88,9 @@ export function applyDecay(effectiveUsage: number, lastDecayAt: string): number 
  * Prevents public abuse of the upload endpoint.
  */
 export const INTERNAL_API_HEADER = 'X-Internal-Mint-Request';
+
+/** Valid layer names accepted by mint endpoints. Single source of truth. */
+export const VALID_LAYER_NAMES = new Set([
+  'Background', 'Base', 'Clothes', 'FacialHair', 'MouthBase', 'MouthItem', 'Mask', 'Eyes', 'Head',
+  'Extra1', 'Extra2', 'Extra3',
+]);

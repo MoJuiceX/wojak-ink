@@ -23,6 +23,7 @@ import {
   SURCHARGE_CATEGORIES,
   SURCHARGE_EXEMPT_TRAITS,
   PREMIUM_TOP_N,
+  VALID_LAYER_NAMES,
 } from './_shared';
 import { checkRateLimit, incrementRateLimit, getRateLimitKey, MINT_RATE_LIMITS } from '../../lib/rateLimit';
 import { consolidateTraits } from './traitResolver';
@@ -45,11 +46,6 @@ interface Env extends ProcessEnv {
   PHASE2_ROYALTY_PCT?: string;
   MINTGARDEN_API_KEY?: string;
 }
-
-const VALID_LAYER_NAMES = new Set([
-  'Background', 'Base', 'Clothes', 'FacialHair', 'MouthBase', 'MouthItem', 'Mask', 'Eyes', 'Head',
-  'Extra1', 'Extra2', 'Extra3',
-]);
 
 function isValidHex(color: string): boolean {
   return /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(color);

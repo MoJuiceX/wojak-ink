@@ -40,6 +40,7 @@ import {
   FREE_MINT_CREDITS,
   BASE_PRICE_XCH,
   OFFER_EXPIRY_MINUTES,
+  VALID_LAYER_NAMES,
 } from './_shared';
 import { checkRateLimit, getRateLimitKey, MINT_RATE_LIMITS } from '../../lib/rateLimit';
 import { uploadToIPFS, IPFSUploadResult } from './uploadToIPFS';
@@ -59,11 +60,6 @@ interface Env {
 }
 
 const SUPPLY_TOTAL = TOTAL_SUPPLY; // alias for backwards compat within this file
-
-const VALID_LAYER_NAMES = new Set([
-  'Background', 'Base', 'Clothes', 'FacialHair', 'MouthBase', 'MouthItem', 'Mask', 'Eyes', 'Head',
-  'Extra1', 'Extra2', 'Extra3',
-]);
 
 function isValidHex(color: string): boolean {
   return /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(color);
