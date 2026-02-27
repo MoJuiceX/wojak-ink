@@ -262,10 +262,14 @@ describe('LAYER_Z_INDEX', () => {
     expect(LAYER_Z_INDEX.MouthItem).toBeGreaterThan(LAYER_Z_INDEX.MouthBase);
   });
 
-  it('FullFaceMask has the highest zIndex (100)', () => {
+  it('FullFaceMask has zIndex 100', () => {
     expect(LAYER_Z_INDEX.FullFaceMask).toBe(100);
+  });
+
+  it('ExtraHands has the highest zIndex (101)', () => {
+    expect(LAYER_Z_INDEX.ExtraHands).toBe(101);
     const maxVal = Math.max(...Object.values(LAYER_Z_INDEX));
-    expect(LAYER_Z_INDEX.FullFaceMask).toBe(maxVal);
+    expect(LAYER_Z_INDEX.ExtraHands).toBe(maxVal);
   });
 
   it('BubbleGumOverEyes has a high zIndex (60)', () => {
