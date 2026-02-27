@@ -120,7 +120,7 @@ export const TRAIT_NAME_MAP: Record<string, string> = {
   'super mario red': 'Super Wojak Hat',
   'super wojak': 'Super Wojak Hat',
   'super wojak hat': 'Super Wojak Hat',
-  'super saiyan': 'Super Saiyan',           // Head value; Clothes override via LAYER_OVERRIDES
+  'super saiyan': 'Super Saiyan',           // Head value; Clothes override in MetadataPreview
   'swat helmet': 'SWAT Helmet',
   'tin foil': 'Tin Foil Hat',
   'tin foil hat': 'Tin Foil Hat',
@@ -224,6 +224,7 @@ export const TRAIT_NAME_MAP: Record<string, string> = {
   'mask skull 07 rally': 'Fake It Mask',
   'mask skull 08 void': 'Fake It Mask',
   'mask skull 09 love': 'Fake It Mask',
+  'skull mask love': 'Fake It Mask',
   'mask skull 10 bengal': 'Fake It Mask',
   'mask skull 11 pumpkinl': 'Fake It Mask',
   'mask skull 12 gilded': 'Fake It Mask',
@@ -318,7 +319,6 @@ export const TRAIT_NAME_MAP: Record<string, string> = {
   'chia farm': 'Chia Farm',
   'hell': 'Hell',
   'matrix': 'Matrix',
-  "mom\u0192\u00c7\u00d6s basement": 'Moms Basement',
   "mom'''s basement": 'Moms Basement',   // ΓÇÖ → three apostrophes after regex
   'moms basement': 'Moms Basement',
   "mom's basement": 'Moms Basement',
@@ -353,82 +353,157 @@ export const TRAIT_NAME_MAP: Record<string, string> = {
  * Background color names — maps hex codes to trait display names.
  * Used when the user selects "Solid color" background in the generator.
  * Keys are uppercase hex (e.g. "#FF0000"). Names follow Phase 1 naming style.
+ *
+ * IMPORTANT: Every color in GENERATOR_PALETTE_HEX (ColorPicker.tsx) MUST have
+ * an entry here. If you add a color to the palette, add a name here too.
  */
 export const BACKGROUND_COLOR_NAMES: Record<string, string> = {
-  // Default
-  '#1A1A2E': 'Midnight Void',
-
-  // Reds
-  '#FFC0CB': 'Blush',
-  '#FF69B4': 'Hot Pink',
+  // ── Row 1: Reds (FIRE) ──
   '#FF6347': 'Tomato Red',
   '#FF0000': 'Red Candle',
-  '#FF1493': 'Deep Pink',
-  '#8B0000': 'Blood Red',
+  '#DC143C': 'Crimson',
+  '#C0392B': 'Brick Red',
+  '#B22222': 'Firebrick',
+  '#992222': 'Blood Moon',
 
-  // Oranges
-  '#FFFF00': 'Canary Yellow',
-  '#FFD700': 'Gold Rush',
-  '#FACC15': 'Sunflower',
+  // ── Row 2: Crimsons (MARTIAL) ──
+  '#7B1111': 'Dark Crimson',
+  '#6B0000': 'Maroon',
+  '#5C0000': 'Wine',
+  '#4A0000': 'Oxblood',
+  '#380000': 'Black Cherry',
+  '#1A0000': 'Void Red',
+
+  // ── Row 3: Oranges (DRAGON) ──
   '#FFA500': 'Pure Orange',
   '#FF8C00': 'Dark Orange',
   '#FF6B00': 'Wojak Orange',
+  '#E65C00': 'Burnt Orange',
+  '#CC5200': 'Rust',
+  '#B34400': 'Copper',
 
-  // Greens
+  // ── Row 4: Yellows (ELECTRIC) ──
+  '#FFFF00': 'Canary Yellow',
+  '#FFD700': 'Gold Rush',
+  '#CCFF00': 'Chartreuse',
+  '#D4E500': 'Acid Yellow',
+  '#C8D600': 'Pear',
+  '#A8B800': 'Olive Gold',
+
+  // ── Row 5: Yellow-Greens (INSECT) ──
+  '#ADFF2F': 'Green Yellow',
+  '#9ACD32': 'Yellow Green',
+  '#8DB600': 'Apple Green',
+  '#7CB518': 'Sap Green',
+  '#6B8E23': 'Olive Drab',
+  '#4A6520': 'Dark Olive',
+
+  // ── Row 6: Greens (GRASS) ──
   '#00FF00': 'Neon Green',
-  '#7CFC00': 'Lawn Green',
   '#32CD32': 'Lime Green',
+  '#22C55E': 'Green Candle',
   '#16A34A': 'Emerald',
   '#2E8B57': 'Sea Green',
-  '#228B22': 'Forest Green',
+  '#1A5C38': 'Deep Forest',
 
-  // Teals & Cyan
+  // ── Row 7: Teals (WATER / ICE) ──
   '#00FFFF': 'Cyan',
-  '#00D4FF': 'Electric Blue',
   '#40E0D0': 'Turquoise',
   '#00CED1': 'Dark Turquoise',
   '#20B2AA': 'Light Sea Green',
   '#0891B2': 'Deep Teal',
+  '#0E7490': 'Ocean Teal',
 
-  // Blues
-  '#00BFFF': 'Sky Blue',
+  // ── Row 8: Sky Blues (AIR) ──
+  '#E0F7FF': 'Ice Mist',
+  '#BAE6FD': 'Powder Blue',
+  '#7DD3FC': 'Sky Blue',
+  '#60A5FA': 'Cornflower',
+  '#93C5FD': 'Baby Blue',
+  '#38BDF8': 'Bright Sky',
+
+  // ── Row 9: Blues (WATER / PSYCHE) ──
   '#1E90FF': 'Dodger Blue',
   '#3B82F6': 'Royal Blue',
   '#2563EB': 'Cobalt',
+  '#1D4ED8': 'Sapphire',
+  '#1E3A8A': 'Deep Navy',
+  '#172554': 'Midnight Blue',
+
+  // ── Row 10: Purples (PSYCHE) ──
+  '#C084FC': 'Lavender',
+  '#A855F7': 'Amethyst',
+  '#9333EA': 'Vivid Purple',
+  '#7C3AED': 'Violet',
+  '#6D28D9': 'Royal Purple',
+  '#5B21B6': 'Deep Violet',
+
+  // ── Row 11: Indigos (GHOST) ──
+  '#4B0082': 'Indigo',
+  '#3B006B': 'Dark Indigo',
+  '#2E0054': 'Midnight Purple',
+  '#210040': 'Deep Plum',
+  '#170030': 'Abyss Violet',
+  '#0D001A': 'Void',
+
+  // ── Row 12: Magentas (VENOM) ──
+  '#FF00FF': 'Magenta',
+  '#E879F9': 'Orchid',
+  '#D946EF': 'Fuchsia',
+  '#A21CAF': 'Purple Poison',
+  '#86198F': 'Dark Magenta',
+  '#6B1278': 'Deep Fuchsia',
+
+  // ── Row 13: Pinks (MYSTIC) ──
+  '#FFB3D9': 'Cotton Candy',
+  '#FF69B4': 'Hot Pink',
+  '#EC4899': 'Rose',
+  '#DB2777': 'Deep Rose',
+  '#BE185D': 'Ruby',
+  '#9D174D': 'Wine Rose',
+
+  // ── Row 14: Earth & Olive (EARTH) ──
+  '#C8A87A': 'Sand',
+  '#A67C52': 'Mocha',
+  '#8B7355': 'Earth Brown',
+  '#6B5C3E': 'Dark Earth',
+  '#5C4A1E': 'Raw Umber',
+  '#3D2B1F': 'Dark Chocolate',
+
+  // ── Row 15: Neutrals ──
+  '#FFFFFF': 'White',
+  '#C8C8C8': 'Light Gray',
+  '#999999': 'Gray',
+  '#666666': 'Slate',
+  '#404040': 'Charcoal',
+  '#171717': 'Near Black',
+
+  // ── Legacy / extras (keep for backward compat) ──
+  '#1A1A2E': 'Midnight Void',
+  '#FFC0CB': 'Blush',
+  '#FF1493': 'Deep Pink',
+  '#8B0000': 'Blood Red',
+  '#FACC15': 'Sunflower',
+  '#7CFC00': 'Lawn Green',
+  '#228B22': 'Forest Green',
+  '#00D4FF': 'Electric Blue',
+  '#00BFFF': 'Sky Blue',
   '#0000CD': 'Medium Blue',
   '#000080': 'Navy',
-
-  // Purples
   '#BA55D3': 'Medium Orchid',
-  '#A855F7': 'Amethyst',
   '#A020F0': 'Purple Rain',
-  '#7C3AED': 'Violet',
   '#800080': 'Deep Purple',
-  '#6D28D9': 'Royal Purple',
-
-  // Pinks & Magenta
   '#F9A8D4': 'Cotton Candy',
-  '#EC4899': 'Rose',
-  '#FF00FF': 'Magenta',
-
-  // Browns
   '#D2B48C': 'Tan',
   '#D4AF37': 'Metallic Gold',
   '#CD7F32': 'Bronze',
   '#A0522D': 'Sienna',
   '#8B4513': 'Saddle Brown',
   '#633800': 'Dark Chocolate',
-
-  // Neutrals
-  '#FFFFFF': 'White',
   '#F5F5DC': 'Beige',
   '#C0C0C0': 'Silver',
   '#808080': 'Gray',
-  '#404040': 'Charcoal',
   '#262626': 'Near Black',
-
-  // Quick-access extras (not already covered above)
-  '#22C55E': 'Green Candle',
 };
 
 /**
@@ -441,7 +516,7 @@ export function lookupTraitName(rawIdentifier: string): string | null {
 
 /**
  * Look up a background color name from a hex code.
- * Returns the named background if found, or null as fallback.
+ * Returns the named background if found, or a formatted hex string as fallback.
  */
 export function lookupBackgroundColorName(hex: string): string | null {
   return BACKGROUND_COLOR_NAMES[hex.toUpperCase().trim()] ?? null;
