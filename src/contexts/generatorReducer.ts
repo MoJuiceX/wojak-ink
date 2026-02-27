@@ -22,6 +22,7 @@ import { DEFAULT_MOUTHBASE_PATH } from '@/lib/layerRegistry';
 import { getPathToTraitIdMap } from '@/services/generatorService';
 import { fromExternal } from '@/lib/selectionAdapter';
 import { applyRulesUnified, pushHistoryUnified, getClothesForBase } from '@/contexts/generatorStateUtils';
+import { KNOWN_TRAIT_IDS } from '@/lib/generatorTraitIds';
 
 // ============ Types ============
 
@@ -475,7 +476,7 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
 
       const updated: SelectionsSnapshot = { ...state.selections };
       const isBeerHatUnderlayer =
-        existing.traitId === 'Head_Beer-Hat' && existing.beerHatEditFocus === 'underlayer' && existing.beerHatUnderlayerG2;
+        existing.traitId === KNOWN_TRAIT_IDS.Head_BeerHat && existing.beerHatEditFocus === 'underlayer' && existing.beerHatUnderlayerG2;
       const targetG2 = isBeerHatUnderlayer ? existing.beerHatUnderlayerG2! : existing;
       const newColors = { ...(targetG2.colors || {}), [action.slot]: action.color };
       const g2 = isBeerHatUnderlayer
@@ -495,7 +496,7 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
       // (allows callers to force-route to main selection or underlayer regardless of current focus)
       const effectiveFocus = action.beerHatEditFocus ?? existing.beerHatEditFocus;
       const isBeerHatUnderlayer =
-        existing.traitId === 'Head_Beer-Hat' && effectiveFocus === 'underlayer' && existing.beerHatUnderlayerG2;
+        existing.traitId === KNOWN_TRAIT_IDS.Head_BeerHat && effectiveFocus === 'underlayer' && existing.beerHatUnderlayerG2;
       const targetG2 = isBeerHatUnderlayer && existing.beerHatUnderlayerG2 ? existing.beerHatUnderlayerG2 : existing;
       const g2: G2Selection = { ...existing };
 

@@ -22,6 +22,7 @@ import { MaskVariantPicker } from './MaskVariantPicker';
 import { isFullFaceMaskSelected } from './maskData';
 import { BeerHatUnderlayerPicker } from './BeerHatUnderlayerPicker';
 import { usePrimarySlot } from '@/hooks/usePrimarySlot';
+import { KNOWN_TRAIT_IDS } from '@/lib/generatorTraitIds';
 
 /** Layers where G1 traits can be colored (Base, Mouth, etc. cannot) */
 const LAYERS_WITH_G1_COLOR: UILayerName[] = ['Clothes', 'Head', 'Eyes'];
@@ -46,7 +47,7 @@ export function GeneratorRightPanel() {
   let g2Sel = g2Selections[activeLayer];
   const isBeerHatWithUnderlayerFocus =
     activeLayer === 'Head' &&
-    g2Sel?.traitId === 'Head_Beer-Hat' &&
+    g2Sel?.traitId === KNOWN_TRAIT_IDS.Head_BeerHat &&
     g2Sel.beerHatEditFocus === 'underlayer' &&
     g2Sel.beerHatUnderlayerG2;
   if (isBeerHatWithUnderlayerFocus && g2Sel) {
@@ -69,7 +70,7 @@ export function GeneratorRightPanel() {
 
   useEffect(() => {
     if (isG1MilitaryBeret) {
-      getUnifiedTraitById('Head_military-beret').then(setMilitaryBeretTrait).catch(() => setMilitaryBeretTrait(null));
+      getUnifiedTraitById(KNOWN_TRAIT_IDS.Head_MilitaryBeret).then(setMilitaryBeretTrait).catch(() => setMilitaryBeretTrait(null));
     } else {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setMilitaryBeretTrait(null);
@@ -116,14 +117,14 @@ export function GeneratorRightPanel() {
     : [];
   // Viking helmet, 3D glasses: use layers (fill1/fill2); ensure fill1 when rawColorSlots empty so color picker works
   const allColorSlots =
-    (g2Sel?.traitId === 'Head_viking-helmet' || g2Sel?.traitId === 'Face-wear_3d-glases') && rawColorSlots.length === 0
+    (g2Sel?.traitId === KNOWN_TRAIT_IDS.Head_VikingHelmet || g2Sel?.traitId === KNOWN_TRAIT_IDS.Facewear_3dGlasses) && rawColorSlots.length === 0
       ? ['fill1']
       : rawColorSlots;
 
   // Color picker always in same position; controls G1 layer color or G2 trait color.
   // For multi-fill traits: activeColorSlot selects which fill the picker edits; else first slot.
   const primarySlot = usePrimarySlot(g2Sel, allColorSlots, g2Trait, hasG2Selection);
-  const isG2Colorable = hasG2Selection && (!!g2Trait?.colorable || g2Sel?.traitId === 'Clothes_Astronaut' || g2Sel?.traitId === 'Clothes_Chia-farmer' || g2Sel?.traitId === 'Head_viking-helmet' || g2Sel?.traitId === 'Face-wear_3d-glases') && primarySlot !== null;
+  const isG2Colorable = hasG2Selection && (!!g2Trait?.colorable || g2Sel?.traitId === KNOWN_TRAIT_IDS.Clothes_Astronaut || g2Sel?.traitId === KNOWN_TRAIT_IDS.Clothes_ChiaFarmer || g2Sel?.traitId === KNOWN_TRAIT_IDS.Head_VikingHelmet || g2Sel?.traitId === KNOWN_TRAIT_IDS.Facewear_3dGlasses) && primarySlot !== null;
   const isG1Colorable =
     !hasG2Selection &&
     (LAYERS_WITH_G1_COLOR.includes(activeLayer) ||
@@ -135,17 +136,17 @@ export function GeneratorRightPanel() {
   };
   const slotIndex = primarySlot ? allColorSlots.indexOf(primarySlot) : -1;
   const defaultColor =
-    g2Sel?.traitId === 'Clothes_Suit' && g2Trait?.defaultColors
+    g2Sel?.traitId === KNOWN_TRAIT_IDS.Clothes_Suit && g2Trait?.defaultColors
       ? (primarySlot === 'fill0' ? g2Trait.defaultColors[0] : g2Trait.defaultColors[1])
-      : g2Sel?.traitId === 'Head_viking-helmet'
+      : g2Sel?.traitId === KNOWN_TRAIT_IDS.Head_VikingHelmet
         ? (g2Trait?.defaultColors?.[0] ?? g2Sel?.colors?.fill1 ?? '#FF6B00')
-        : g2Sel?.traitId === 'Clothes_Chia-farmer'
+        : g2Sel?.traitId === KNOWN_TRAIT_IDS.Clothes_ChiaFarmer
           ? getG2DefaultColor(g2Sel.traitId, primarySlot === 'fill0' ? 'fill0' : 'fill1', g2Trait ?? null, '#FFFFFF')
           : primarySlot && allColorSlots.length > 0
             ? defaultColorForSlot(primarySlot, slotIndex >= 0 ? slotIndex : 0)
-            : (g2Trait?.defaultColor || (g2Sel?.traitId === 'Clothes_Astronaut' ? '#FFFFFF' : undefined));
+            : (g2Trait?.defaultColor || (g2Sel?.traitId === KNOWN_TRAIT_IDS.Clothes_Astronaut ? '#FFFFFF' : undefined));
 
-  const isMilitaryBeretG2 = g2Sel?.traitId === 'Head_military-beret';
+  const isMilitaryBeretG2 = g2Sel?.traitId === KNOWN_TRAIT_IDS.Head_MilitaryBeret;
 
   const colorPickerProps = hasG2Selection
     ? {
@@ -155,7 +156,7 @@ export function GeneratorRightPanel() {
         defaultColor: isG2Colorable ? defaultColor : undefined,
         onReset: isMilitaryBeretG2 && g2Trait?.g1Path
           ? () => selectLayer('Head', g2Trait.g1Path!)
-          : g2Sel?.traitId === 'Head_Cap'
+          : g2Sel?.traitId === KNOWN_TRAIT_IDS.Head_Cap
             ? () => {
                 if (primarySlot) setG2Color(activeLayer, primarySlot, defaultColor ?? '#228B22');
                 setG2Detail(activeLayer, '');
@@ -287,8 +288,8 @@ export function GeneratorRightPanel() {
       {hasSelection &&
         hasG2Selection &&
         allColorSlots.length > 1 &&
-        g2Sel?.traitId !== 'Clothes_Suit' &&
-        g2Sel?.traitId !== 'Clothes_Chia-farmer' && (
+        g2Sel?.traitId !== KNOWN_TRAIT_IDS.Clothes_Suit &&
+        g2Sel?.traitId !== KNOWN_TRAIT_IDS.Clothes_ChiaFarmer && (
           <div className="generator-panel-section flex-shrink-0">
             <div className="generator-panel-section-label">Color Part</div>
             <div className="flex flex-wrap gap-2">
@@ -304,7 +305,7 @@ export function GeneratorRightPanel() {
                     }`}
                     onClick={() => {
                       // Comrad Hat: clicking star fill (fill3) clears coin logo so the star reappears
-                      const clearLogo = g2Sel?.traitId === 'Head_Comrad-Hat' && slot === 'fill3' ? '' : undefined;
+                      const clearLogo = g2Sel?.traitId === KNOWN_TRAIT_IDS.Head_ComradHat && slot === 'fill3' ? '' : undefined;
                       setG2Detail(activeLayer, undefined, undefined, clearLogo, undefined, undefined, undefined, slot);
                     }}
                   >
@@ -317,14 +318,14 @@ export function GeneratorRightPanel() {
         )}
 
       {/* Beer Hat: under layer picker — select which head goes under the cans */}
-      {activeLayer === 'Head' && g2Selections.Head?.traitId === 'Head_Beer-Hat' && (
+      {activeLayer === 'Head' && g2Selections.Head?.traitId === KNOWN_TRAIT_IDS.Head_BeerHat && (
         <BeerHatUnderlayerPicker
-          selectedTraitId={g2Selections.Head?.beerHatUnderlayer ?? 'Head_Cap'}
+          selectedTraitId={g2Selections.Head?.beerHatUnderlayer ?? KNOWN_TRAIT_IDS.Head_Cap}
           onSelect={(traitId) => {
             const defaultColors: Record<string, string> =
-              traitId === 'Head_viking-helmet'
+              traitId === KNOWN_TRAIT_IDS.Head_VikingHelmet
                 ? { fill1: getG2DefaultColor(traitId, 'fill1', null, '#404040') }
-                : traitId === 'Head_Cap'
+                : traitId === KNOWN_TRAIT_IDS.Head_Cap
                   ? { fill: getG2DefaultColor(traitId, 'fill', null, '#228B22') }
                   : {};
             setG2Detail(
@@ -349,7 +350,7 @@ export function GeneratorRightPanel() {
       )}
 
       {/* Bepe suit: toggle Bepe / Pepe variant (under color picker) */}
-      {hasSelection && hasG2Selection && g2Sel?.traitId === 'Clothes_Bepe-suit' && (
+      {hasSelection && hasG2Selection && g2Sel?.traitId === KNOWN_TRAIT_IDS.Clothes_BepeSuit && (
         <div className="generator-panel-section flex-shrink-0">
           <div className="generator-panel-section-label">Suit style</div>
           <div className="flex gap-2">
@@ -380,7 +381,7 @@ export function GeneratorRightPanel() {
       )}
 
       {/* Chia Farmer: one row — pick which part to color (also switches visible under layer) */}
-      {hasSelection && hasG2Selection && g2Sel?.traitId === 'Clothes_Chia-farmer' && (
+      {hasSelection && hasG2Selection && g2Sel?.traitId === KNOWN_TRAIT_IDS.Clothes_ChiaFarmer && (
         <div className="generator-panel-section flex-shrink-0">
           <div className="generator-panel-section-label">Color</div>
           <div className="flex flex-wrap gap-2">
@@ -421,7 +422,7 @@ export function GeneratorRightPanel() {
 
       {/* G2 details: when Beer Hat + underlayer focus, show both can options and underlayer details; otherwise single panel */}
       <div className="flex flex-col gap-3">
-        {activeLayer === 'Head' && g2Selections.Head?.traitId === 'Head_Beer-Hat' && (
+        {activeLayer === 'Head' && g2Selections.Head?.traitId === KNOWN_TRAIT_IDS.Head_BeerHat && (
           <>
             {/* Can options — always visible when Beer Hat is selected */}
             <G2TraitPanel
@@ -465,7 +466,7 @@ export function GeneratorRightPanel() {
             )}
           </>
         )}
-        {!(activeLayer === 'Head' && g2Selections.Head?.traitId === 'Head_Beer-Hat') && (
+        {!(activeLayer === 'Head' && g2Selections.Head?.traitId === KNOWN_TRAIT_IDS.Head_BeerHat) && (
           <G2TraitPanel />
         )}
       </div>

@@ -13,6 +13,7 @@ import type { G2Selection } from '@/types/generator';
 import type { UnifiedTrait } from '@/services/generatorService';
 import { isUserPickableFill, getAllUserPickableFillSlots } from '@/lib/g2FillTreatments';
 import { G2_DEFAULT_COLORS, getG2DefaultColor } from '@/config/g2DefaultColors';
+import { KNOWN_TRAIT_IDS } from '@/lib/generatorTraitIds';
 
 // ============ Color Building ============
 
@@ -64,11 +65,11 @@ export function buildG2ColorsFromTrait(trait: UnifiedTrait): Record<string, stri
   }
 
   // Special cases: ensure fill1 is always set so color picker and renderer have a value
-  if (trait.id === 'Head_viking-helmet') {
+  if (trait.id === KNOWN_TRAIT_IDS.Head_VikingHelmet) {
     colors.fill1 = colors.fill1 ?? trait.defaultColors?.[0] ?? '#FF6B00';
   }
-  if (trait.id === 'Face-wear_3d-glases') {
-    colors.fill1 = colors.fill1 ?? trait.defaultColors?.[0] ?? getG2DefaultColor('Face-wear_3d-glases', 'fill1', trait, '#2563EB');
+  if (trait.id === KNOWN_TRAIT_IDS.Facewear_3dGlasses) {
+    colors.fill1 = colors.fill1 ?? trait.defaultColors?.[0] ?? getG2DefaultColor(KNOWN_TRAIT_IDS.Facewear_3dGlasses, 'fill1', trait, '#2563EB');
   }
 
   return colors;
@@ -96,52 +97,52 @@ export function assembleG2Selection(
     g2Category: trait.id.split('_')[0],
     colors: initialColors ? { ...colors, ...initialColors } : colors,
     detailOption: trait.detailOptions?.[0]?.file,
-    ...(trait.id === 'Head_Cap' && {
+    ...(trait.id === KNOWN_TRAIT_IDS.Head_Cap && {
       detailOption: undefined,
     }),
-    ...(trait.id === 'Head_Construction-Helmet' && {
+    ...(trait.id === KNOWN_TRAIT_IDS.Head_ConstructionHelmet && {
       detailOption: undefined,
       constructionHelmetChiaLogo: true,
       constructionHelmetCigPack: trait.detailOptions?.find(d => d.file.endsWith('cig-pack.png'))?.file ?? 'Head_Construction-Helmet_detail_cig-pack.png',
     }),
-    ...(trait.id === 'Clothes_Suit' && {
+    ...(trait.id === KNOWN_TRAIT_IDS.Clothes_Suit && {
       detailOption: trait.detailOptions?.[0]?.file,
       activeColorSlot: 'fill0' as const,
     }),
-    ...(trait.id === 'Clothes_Astronaut' && {
+    ...(trait.id === KNOWN_TRAIT_IDS.Clothes_Astronaut && {
       logoOption: 'CAT',
       flagOption: 'us',
     }),
-    ...(trait.id === 'Clothes_Bepe-army' && {
+    ...(trait.id === KNOWN_TRAIT_IDS.Clothes_BepeArmy && {
       name1: '',
       name2: '',
     }),
-    ...(trait.id === 'Clothes_Bepe-suit' && {
+    ...(trait.id === KNOWN_TRAIT_IDS.Clothes_BepeSuit && {
       suitVariant: 'bepe' as const,
     }),
-    ...(trait.id === 'Clothes_Chia-farmer' && {
+    ...(trait.id === KNOWN_TRAIT_IDS.Clothes_ChiaFarmer && {
       chiaFarmerUnderlayer: 'tee' as const,
       activeColorSlot: 'fill0' as const,
     }),
-    ...(trait.id === 'Clothes_Wizard-drip' && {
+    ...(trait.id === KNOWN_TRAIT_IDS.Clothes_WizardDrip && {
       detailOption: trait.detailOptions?.[0]?.file,
     }),
-    ...(trait.id === 'Head_Beer-Hat' && {
+    ...(trait.id === KNOWN_TRAIT_IDS.Head_BeerHat && {
       detailOption: trait.detailOptions?.find(d => d.name === 'Citrus')?.file ?? trait.detailOptions?.[0]?.file,
       beerHatEditFocus: 'underlayer' as const,
-      beerHatUnderlayer: 'Head_Cap',
+      beerHatUnderlayer: KNOWN_TRAIT_IDS.Head_Cap,
       beerHatUnderlayerG2: {
-        traitId: 'Head_Cap',
+        traitId: KNOWN_TRAIT_IDS.Head_Cap,
         g2Category: 'Head',
-        colors: { fill: G2_DEFAULT_COLORS['Head_Cap']?.fill ?? '#228B22' },
+        colors: { fill: G2_DEFAULT_COLORS[KNOWN_TRAIT_IDS.Head_Cap]?.fill ?? '#228B22' },
       },
     }),
-    ...(trait.id === 'Face-wear_MOG-Glasses' && {
+    ...(trait.id === KNOWN_TRAIT_IDS.Facewear_MOGGlasses && {
       detailOption: trait.detailOptions?.find(d => d.name === 'Default (Rainbow)')?.file ?? trait.detailOptions?.[0]?.file,
     }),
     ...(() => {
       const slots = getAllUserPickableFillSlots(trait.id, trait);
-      return slots.length > 1 && trait.id !== 'Clothes_Suit' && trait.id !== 'Clothes_Chia-farmer'
+      return slots.length > 1 && trait.id !== KNOWN_TRAIT_IDS.Clothes_Suit && trait.id !== KNOWN_TRAIT_IDS.Clothes_ChiaFarmer
         ? { activeColorSlot: slots[0] }
         : {};
     })(),
@@ -154,7 +155,7 @@ export function assembleG2Selection(
       if (initialColors?.[slot] !== undefined) continue;
       g2.colors = { ...g2.colors, [slot]: hex };
     }
-    if (trait.id === 'Clothes_Chia-farmer') delete g2.colors.fill;
+    if (trait.id === KNOWN_TRAIT_IDS.Clothes_ChiaFarmer) delete g2.colors.fill;
   }
   // Fallback: use getG2DefaultColor for any user-pickable slot without initialColors
   if (trait.fillFile && g2.colors.fill === undefined && initialColors?.fill === undefined) {

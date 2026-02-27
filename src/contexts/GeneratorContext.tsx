@@ -31,6 +31,7 @@ import { GENERATOR_PALETTE_HEX } from '@/components/generator/ColorPicker';
 import { assembleG2Selection } from '@/contexts/generatorG2Helpers';
 import { renderPreview, renderThumbnail, downloadImage } from '@/services/canvasRenderer';
 import { createInitialState, generatorReducer, type GeneratorState } from '@/contexts/generatorReducer';
+import { KNOWN_TRAIT_IDS } from '@/lib/generatorTraitIds';
 import { canExportOrSave, getMissingRequiredLayers, isUILayerName } from '@/contexts/generatorStateUtils';
 import {
   getWeightedRandomTrait,
@@ -76,16 +77,16 @@ function buildG2Selection(
 
 /** Full Beer Hat g2 for card thumbnail when Head is not Beer Hat (so grid card shows correct cans + underlayer) */
 const BEER_HAT_CARD_G2: G2Selection = {
-  traitId: 'Head_Beer-Hat',
+  traitId: KNOWN_TRAIT_IDS.Head_BeerHat,
   g2Category: 'Head',
   colors: {},
   detailOption: 'Head_Beer-Hat_detail_Tang.png',
   beerHatEditFocus: 'underlayer',
-  beerHatUnderlayer: 'Head_Cap',
+  beerHatUnderlayer: KNOWN_TRAIT_IDS.Head_Cap,
   beerHatUnderlayerG2: {
-    traitId: 'Head_Cap',
+    traitId: KNOWN_TRAIT_IDS.Head_Cap,
     g2Category: 'Head',
-    colors: { fill: G2_DEFAULT_COLORS['Head_Cap']?.fill ?? '#228B22' },
+    colors: { fill: G2_DEFAULT_COLORS[KNOWN_TRAIT_IDS.Head_Cap]?.fill ?? '#228B22' },
   },
 };
 
@@ -214,17 +215,17 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
   // Normalize Beer Hat g2 so preview/export always get complete can + underlayer (avoids empty cans on first paint)
   const g2SelectionsForRender = useMemo(() => {
     const head = derived.g2Selections?.Head;
-    if (head?.traitId !== 'Head_Beer-Hat') return derived.g2Selections;
+    if (head?.traitId !== KNOWN_TRAIT_IDS.Head_BeerHat) return derived.g2Selections;
     const defaultCan = 'Head_Beer-Hat_detail_citrus.png';
     const defaultUnderlayerG2: G2Selection = {
-      traitId: 'Head_Cap',
+      traitId: KNOWN_TRAIT_IDS.Head_Cap,
       g2Category: 'Head',
-      colors: { fill: G2_DEFAULT_COLORS['Head_Cap']?.fill ?? '#228B22' },
+      colors: { fill: G2_DEFAULT_COLORS[KNOWN_TRAIT_IDS.Head_Cap]?.fill ?? '#228B22' },
     };
     const normalizedHead: G2Selection = {
       ...head,
       detailOption: head.detailOption && head.detailOption !== '' ? head.detailOption : defaultCan,
-      beerHatUnderlayer: head.beerHatUnderlayer ?? 'Head_Cap',
+      beerHatUnderlayer: head.beerHatUnderlayer ?? KNOWN_TRAIT_IDS.Head_Cap,
       beerHatUnderlayerG2: head.beerHatUnderlayerG2 ?? defaultUnderlayerG2,
     };
     return { ...derived.g2Selections, Head: normalizedHead };

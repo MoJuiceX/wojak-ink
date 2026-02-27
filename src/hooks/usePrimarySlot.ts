@@ -10,6 +10,7 @@ import { useMemo } from 'react';
 import { isUserPickableFill, getAllUserPickableFillSlots } from '@/lib/g2FillTreatments';
 import type { UnifiedTrait } from '@/services/generatorService';
 import type { G2Selection } from '@/types/generator';
+import { KNOWN_TRAIT_IDS } from '@/lib/generatorTraitIds';
 
 /** Get the primary color slot key for a G2 trait (first user-pickable fill).
  * For layered traits (Viking helmet, 3D glasses) only considers slots that exist on the trait's layers,
@@ -40,10 +41,10 @@ export function usePrimarySlot(
   return useMemo(() => {
     if (!hasG2Selection) return null;
 
-    if (g2Sel?.traitId === 'Clothes_Suit') {
+    if (g2Sel?.traitId === KNOWN_TRAIT_IDS.Clothes_Suit) {
       return g2Sel.activeColorSlot ?? 'fill0';
     }
-    if (g2Sel?.traitId === 'Clothes_Chia-farmer') {
+    if (g2Sel?.traitId === KNOWN_TRAIT_IDS.Clothes_ChiaFarmer) {
       return g2Sel.activeColorSlot ?? 'fill0';
     }
     if (allColorSlots.length > 1) {
@@ -54,13 +55,13 @@ export function usePrimarySlot(
     // Single or zero color slots — use helper or hard-coded fallbacks
     return (
       getPrimaryColorSlot(g2Trait) ??
-      (g2Sel?.traitId === 'Clothes_Astronaut'
+      (g2Sel?.traitId === KNOWN_TRAIT_IDS.Clothes_Astronaut
         ? 'fill'
-        : g2Sel?.traitId === 'Clothes_Ninja-turtle-fit'
+        : g2Sel?.traitId === KNOWN_TRAIT_IDS.Clothes_NinjaTurtleFit
           ? 'fill0'
-          : g2Sel?.traitId === 'Head_viking-helmet'
+          : g2Sel?.traitId === KNOWN_TRAIT_IDS.Head_VikingHelmet
             ? 'fill1'
-            : g2Sel?.traitId === 'Face-wear_3d-glases'
+            : g2Sel?.traitId === KNOWN_TRAIT_IDS.Facewear_3dGlasses
               ? 'fill1'
               : null)
     );

@@ -6,8 +6,13 @@
 
 export const KNOWN_TRAIT_IDS = {
   Clothes_Astronaut: 'Clothes_Astronaut',
-  Clothes_StraightJacket: 'Clothes_Straigth-jacket',
+  Clothes_BepeArmy: 'Clothes_Bepe-army',
+  Clothes_BepeSuit: 'Clothes_Bepe-suit',
   Clothes_ChiaFarmer: 'Clothes_Chia-farmer',
+  Clothes_NinjaTurtleFit: 'Clothes_Ninja-turtle-fit',
+  Clothes_StraightJacket: 'Clothes_Straigth-jacket',
+  Clothes_Suit: 'Clothes_Suit',
+  Clothes_WizardDrip: 'Clothes_Wizard-drip',
   Mask_Hannibal: 'Mask_Hannibal-Mask',
   Mask_Copium: 'Mask_Copium-mask',
   Mask_Bandana: 'Mask_Bandana-mask',
@@ -24,13 +29,17 @@ export const KNOWN_TRAIT_IDS = {
   Eyes_NightVision: 'Face-wear_night-vision',
   Eyes_VRHeadset: 'Face-wear_VR-headset',
   Eyes_LaserEyes: 'Face-laser_Laser-Eyes',
+  Facewear_3dGlasses: 'Face-wear_3d-glases',
+  Facewear_MOGGlasses: 'Face-wear_MOG-Glasses',
   Head_FirefighterHelmet: 'Head_Firefigther-Helmet',
   Head_Ronin: 'Head_Ronin-helmet',
   Head_BeerHat: 'Head_Beer-Hat',
   Head_Cap: 'Head_Cap',
   Head_Centurion: 'Head_Centurion',
+  Head_ComradHat: 'Head_Comrad-Hat',
   Head_ConstructionHelmet: 'Head_Construction-Helmet',
   Head_HardHat: 'Head_Hard-hat',
+  Head_MilitaryBeret: 'Head_military-beret',
   Head_PropellerHat: 'Head_Propeller-Hat',
   Head_SWATHelmet: 'Head_SWAT-helmet',
   Head_Spikes: 'Head_Spikes',
@@ -41,12 +50,12 @@ export const KNOWN_TRAIT_IDS = {
 } as const;
 
 /** Bepe suit and Pepe suit: VR Headset cannot be selected (mutually exclusive). */
-export const CLOTHES_NO_VR_HEADSET: readonly string[] = ['Clothes_Bepe-suit', 'Clothes_Pepe-suit'];
+export const CLOTHES_NO_VR_HEADSET: readonly string[] = [KNOWN_TRAIT_IDS.Clothes_BepeSuit, 'Clothes_Pepe-suit'];
 
 /** Full-body suits that include a helmet/hood — Head layer disabled when any of these is selected. */
 export const CLOTHES_NO_HEAD_SUITS: readonly string[] = [
   KNOWN_TRAIT_IDS.Clothes_Astronaut,
-  'Clothes_Bepe-suit',
+  KNOWN_TRAIT_IDS.Clothes_BepeSuit,
   'Clothes_Pepe-suit',
   'Clothes_Goose-suit',
   'Clothes_Pickle-suit',
