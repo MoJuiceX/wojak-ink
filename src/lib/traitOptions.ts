@@ -333,6 +333,7 @@ export function formatDisplayLabel(rawLabel: string | undefined): string {
     'hand tangtalk': 'TangTalk',
     'hand coffee': 'Coffee',
     'hand gun left': 'Handgun',
+    'hand left seedling': 'Seedling',
     'hand gfy right': 'GFY Right',
     'hand gfy left': 'GFY Left',
   };

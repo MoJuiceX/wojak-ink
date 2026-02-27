@@ -747,7 +747,7 @@ function ruleFirefighterHelmetEyesExclusion(_resolver: SelectionResolver): RuleR
  */
 const STRAITJACKET_DISABLED_EXTRAS = [
   'Coffee', 'Diamond', 'GFY Left', 'GFY Right', 'Goose',
-  'Handgun', 'Hand Guns', 'Hand Seedling', 'Orange', 'TangTalk',
+  'Handgun', 'Hand Guns', 'Seedling', 'Orange', 'TangTalk',
   'Hand Mask',
 ];
 
