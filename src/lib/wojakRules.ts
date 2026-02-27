@@ -11,7 +11,7 @@ import type { UILayerName } from '@/lib/layerRegistry';
 import { DEFAULT_BASE_PATH, DEFAULT_MOUTHBASE_PATH, DEFAULT_CLOTHES_PATH } from '@/lib/layerRegistry';
 import { UI_ORDER } from '@/lib/layerRegistry';
 import type { SelectionResolver } from '@/lib/selectionResolver';
-import { KNOWN_TRAIT_IDS, CLOTHES_NO_HEAD_SUITS } from '@/lib/generatorTraitIds';
+import { KNOWN_TRAIT_IDS, CLOTHES_NO_HEAD_SUITS, FACIAL_HAIR_ALLOWED_MOUTHS, MASK_ALLOWED_MOUTHS } from '@/lib/generatorTraitIds';
 import { pathContains } from '@/lib/pathHelpers';
 import { isSelectionPathEmpty } from '@/types/generator';
 
@@ -184,10 +184,8 @@ function ruleFacialHairRequiresMouthBase(resolver: SelectionResolver): RuleResul
   const mouthBasePath = resolver.getPath('MouthBase');
   const facialHairPath = resolver.getPath('FacialHair');
 
-  const allowedMouthBases = ['numb', 'teeth', 'gold', 'smile', 'screeming', 'screaming', 'pizza', 'pipe', 'drac'];
-
   if (mouthBasePath && mouthBasePath !== '') {
-    const isAllowed = allowedMouthBases.some((allowed) => pathContains(mouthBasePath, allowed));
+    const isAllowed = FACIAL_HAIR_ALLOWED_MOUTHS.some((allowed) => pathContains(mouthBasePath, allowed));
     if (!isAllowed && facialHairPath) {
       return {
         disabledLayers: ['FacialHair'],
@@ -201,7 +199,7 @@ function ruleFacialHairRequiresMouthBase(resolver: SelectionResolver): RuleResul
     const hasAllowedMouthBase =
       mouthBasePath &&
       mouthBasePath !== '' &&
-      allowedMouthBases.some((allowed) => pathContains(mouthBasePath, allowed));
+      FACIAL_HAIR_ALLOWED_MOUTHS.some((allowed) => pathContains(mouthBasePath, allowed));
 
     if (!hasAllowedMouthBase) {
       return {
@@ -399,8 +397,7 @@ function ruleMaskForcesNumbMouth(resolver: SelectionResolver): RuleResult {
   }
 
   // Bandana / other masks: allow Numb, Gold Teeth, Teeth, Smile, Screaming
-  const allowedWithMask = ['numb', 'gold-teeth', 'teeth', 'smile', 'screeming'];
-  const hasAllowedMouth = !!mouthBasePath && allowedWithMask.some((m) => mouthBasePath.toLowerCase().includes(m));
+  const hasAllowedMouth = !!mouthBasePath && MASK_ALLOWED_MOUTHS.some((m) => mouthBasePath.toLowerCase().includes(m));
 
   if (!hasAllowedMouth) {
     return {

@@ -10,6 +10,7 @@ import { UI_LAYER_NAMES, type UILayerName } from '@/lib/memeLayers';
 import { formatDisplayLabel, cleanDisplayName } from '@/lib/traitOptions';
 import { G1_TO_G2_MAP, normalizeTraitName } from '@/lib/traitMapping';
 import { G2_CATEGORY_TO_UI, G1_FOLDER_TO_UI } from '@/config/generatorLayerMapping';
+import { MOUTH_BASE_PATTERNS, MOUTH_ITEM_PATTERNS, MASK_PATTERNS, FACIAL_HAIR_PATTERNS } from '@/lib/generatorTraitIds';
 
 // ============ Types ============
 
@@ -28,18 +29,8 @@ let manifestCache: ManifestData | null = null;
 const layerImagesCache: Map<UILayerName, LayerImage[]> = new Map();
 
 // ============ Mouth Item Classification ============
-
-// Items from MOUTH folder that belong to MouthBase
-const MOUTH_BASE_PATTERNS = ['numb', 'smile', 'screeming', 'teeth', 'gold-teeth', 'pizza', 'pipe', 'bubble-gum', 'drac'];
-
-// Items from MOUTH folder that belong to MouthItem (EXTRA_MOUTH prefix with these names)
-const MOUTH_ITEM_PATTERNS = ['cig', 'cohiba', 'joint'];
-
-// Items from MOUTH folder that belong to Mask (old Copium removed - new G2 colorable version exists)
-const MASK_PATTERNS = ['bandana-mask', 'hannibal-mask'];
-
-// Items from MOUTH folder (EXTRA_MOUTH prefix) that belong to FacialHair
-const FACIAL_HAIR_PATTERNS = ['neckbeard', 'stach'];
+// Classification patterns imported from generatorTraitIds.ts:
+// MOUTH_BASE_PATTERNS, MOUTH_ITEM_PATTERNS, MASK_PATTERNS, FACIAL_HAIR_PATTERNS
 
 // Base layer sort order
 const BASE_SORT_ORDER = ['classic', 'rekt', 'rugged', 'bleeding', 'terminator'];

@@ -73,3 +73,29 @@ export const BEER_HAT_COMPATIBLE_HEADS: readonly string[] = [
   KNOWN_TRAIT_IDS.Head_SWATHelmet,
   KNOWN_TRAIT_IDS.Head_VikingHelmet,
 ];
+
+// ============ Mouth/Mask Classification Patterns ============
+// Used by generatorService.ts to classify MOUTH folder items into UI layers,
+// and by wojakRules.ts for compatibility checks.
+
+/** Mouth base trait patterns — the mouth expression/shape (used for MOUTH folder classification). */
+export const MOUTH_BASE_PATTERNS = [
+  'numb', 'smile', 'screeming', 'teeth', 'gold-teeth', 'pizza', 'pipe', 'bubble-gum', 'drac',
+] as const;
+
+/** Mouth item trait patterns — items held in mouth (cig, joint, cohiba). */
+export const MOUTH_ITEM_PATTERNS = ['cig', 'cohiba', 'joint'] as const;
+
+/** Mask patterns from MOUTH folder — face coverings (bandana, hannibal). */
+export const MASK_PATTERNS = ['bandana-mask', 'hannibal-mask'] as const;
+
+/** Facial hair patterns — neckbeard, stache. */
+export const FACIAL_HAIR_PATTERNS = ['neckbeard', 'stach'] as const;
+
+/** Mouth bases compatible with facial hair (path-based matching, includes 'gold' for 'gold-teeth'). */
+export const FACIAL_HAIR_ALLOWED_MOUTHS = [
+  'numb', 'teeth', 'gold', 'smile', 'screeming', 'screaming', 'pizza', 'pipe', 'drac',
+] as const;
+
+/** Mouth bases compatible with bandana/non-copium masks (path-based matching). */
+export const MASK_ALLOWED_MOUTHS = ['numb', 'gold-teeth', 'teeth', 'smile', 'screeming'] as const;
