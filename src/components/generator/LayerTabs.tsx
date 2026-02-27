@@ -59,18 +59,7 @@ function LayerTab({
 
   return (
     <motion.button
-      className="generator-layer-tab relative flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg flex-1 sm:flex-none sm:px-3 sm:py-2 sm:gap-1 sm:min-w-[60px]"
-      style={{
-        background: 'transparent',
-        color: isActive
-          ? 'white'
-          : isBlocked
-            ? 'var(--color-text-muted)'
-            : 'rgba(255, 255, 255, 0.85)',
-        opacity: isBlocked ? 0.5 : 1,
-        filter: isBlocked ? 'grayscale(1)' : 'none',
-        transition: 'all 0.3s ease',
-      }}
+      className={`generator-layer-tab relative flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg flex-1 sm:flex-none sm:px-3 sm:py-2 sm:gap-1 sm:min-w-[60px]${isActive ? ' generator-layer-tab--active' : ''}${isBlocked ? ' generator-layer-tab--blocked' : ''}`}
       variants={prefersReducedMotion ? undefined : layerTabVariants}
       whileHover={isBlocked ? undefined : 'hover'}
       whileTap={isBlocked ? undefined : 'tap'}
@@ -90,11 +79,7 @@ function LayerTab({
         )}
         {isActive && !isBlocked && (
           <div
-            className="absolute -top-0.5 -right-1 w-1.5 h-1.5 rounded-full layer-tab-active-dot"
-            style={{
-              background: 'var(--color-primary)',
-              boxShadow: '0 0 6px var(--color-primary)',
-            }}
+            className="generator-layer-tab__active-dot absolute -top-0.5 -right-1 w-1.5 h-1.5 rounded-full layer-tab-active-dot"
           />
         )}
       </div>
@@ -124,13 +109,7 @@ export function LayerTabs({ className = '' }: LayerTabsProps) {
 
   return (
     <div
-      className={`flex justify-between p-2 rounded-2xl overflow-x-auto w-full ${className}`}
-      style={{
-        background: 'var(--color-black-30)',
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)',
-        border: '1px solid var(--color-border)',
-      }}
+      className={`generator-layer-tab-bar flex justify-between p-2 rounded-2xl overflow-x-auto w-full ${className}`}
       role="tablist"
       aria-label="Layer selection tabs"
     >

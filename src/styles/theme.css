@@ -583,6 +583,120 @@ body {
   margin-bottom: 6px;
 }
 
+/* ── Generator Trait Cards ────────────────────────────────────────────────── */
+
+.generator-trait-card {
+  background: var(--generator-trait-card-bg);
+  border: 1px solid var(--generator-trait-card-border);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px var(--color-black-20);
+}
+
+.generator-trait-card--selected {
+  border: 2px solid var(--generator-selected-color, #F97316);
+}
+
+.generator-trait-card--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.generator-trait-card__disabled-badge {
+  background: var(--color-black-70);
+  border: 1px solid var(--color-border);
+}
+
+.generator-trait-card__check-badge {
+  background: var(--generator-badge-color, #F97316);
+}
+
+/* ── Generator Layer Tabs ─────────────────────────────────────────────────── */
+
+.generator-layer-tab {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.85);
+  transition: all 0.3s ease;
+}
+
+.generator-layer-tab--active {
+  color: white;
+}
+
+.generator-layer-tab--blocked {
+  color: var(--color-text-muted);
+  opacity: 0.5;
+  filter: grayscale(1);
+}
+
+.generator-layer-tab__active-dot {
+  background: var(--color-primary);
+  box-shadow: 0 0 6px var(--color-primary);
+}
+
+/* ── Generator Layer Tab Bar ──────────────────────────────────────────────── */
+
+.generator-layer-tab-bar {
+  background: var(--color-black-30);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--color-border);
+}
+
+/* ── Metadata Preview ─────────────────────────────────────────────────────── */
+
+.metadata-count-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.metadata-count-badge--complete {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--color-success);
+}
+
+.metadata-count-badge--incomplete {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-muted);
+}
+
+.metadata-switch-btn {
+  font-size: 0.5625rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.metadata-attribute-row {
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--color-white-5);
+}
+
+.metadata-attribute-row--empty {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.03);
+  opacity: 0.3;
+}
+
+.metadata-attribute-label {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 1px;
+}
+
+.metadata-attribute-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.metadata-attribute-value--empty {
+  color: var(--color-text-muted);
+}
+
 .card-elevated {
   background: var(--color-elevated);
   border-radius: var(--radius-lg);

@@ -26,7 +26,6 @@ interface TraitCardShellProps {
 
 const DEFAULT_SELECTED_BOX_SHADOW =
   '0 0 20px var(--generator-selected-glow, var(--color-primary-50)), 0 4px 12px var(--color-black-30)';
-const UNSELECTED_BOX_SHADOW = '0 2px 8px var(--color-black-20)';
 
 export const TraitCardShell = memo(function TraitCardShell({
   isSelected,
@@ -43,17 +42,8 @@ export const TraitCardShell = memo(function TraitCardShell({
   return (
     <motion.button
       type="button"
-      className={`w-full aspect-square relative rounded-xl overflow-hidden p-1${className ? ` ${className}` : ''}`}
-      style={{
-        background: 'var(--generator-trait-card-bg)',
-        border: isSelected
-          ? '2px solid var(--generator-selected-color, #F97316)'
-          : '1px solid var(--generator-trait-card-border)',
-        opacity: isDisabled ? 0.5 : 1,
-        cursor: isDisabled ? 'not-allowed' : 'pointer',
-        boxShadow: isSelected ? selectedBoxShadow : UNSELECTED_BOX_SHADOW,
-        transition: 'all 0.3s ease',
-      }}
+      className={`generator-trait-card w-full aspect-square relative rounded-xl overflow-hidden p-1${isSelected ? ' generator-trait-card--selected' : ''}${isDisabled ? ' generator-trait-card--disabled' : ''}${className ? ` ${className}` : ''}`}
+      style={isSelected ? { boxShadow: selectedBoxShadow } : undefined}
       whileHover={prefersReducedMotion || isDisabled ? undefined : { scale: 1.03 }}
       whileTap={prefersReducedMotion || isDisabled ? undefined : { scale: 0.98 }}
       transition={{ duration: 0.2 }}
@@ -65,8 +55,7 @@ export const TraitCardShell = memo(function TraitCardShell({
       {/* Disabled info badge */}
       {isDisabled && disabledReason && (
         <div
-          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
-          style={{ background: 'var(--color-black-70)', border: '1px solid var(--color-border)' }}
+          className="generator-trait-card__disabled-badge absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
           title={disabledReason}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">
@@ -77,8 +66,7 @@ export const TraitCardShell = memo(function TraitCardShell({
       {/* Check mark with pop animation */}
       {isSelected && !isDisabled && (
         <motion.div
-          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
-          style={{ background: 'var(--generator-badge-color, #F97316)' }}
+          className="generator-trait-card__check-badge absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: 'spring', stiffness: 500, damping: 25 }}

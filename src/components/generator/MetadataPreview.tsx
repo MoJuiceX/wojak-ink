@@ -317,31 +317,18 @@ export function MetadataPreview({ onSwitchToColors }: MetadataPreviewProps) {
   return (
     <div className="generator-panel-section flex flex-col h-full overflow-hidden">
       {/* Header — matches color picker section label */}
-      <div className="generator-panel-section-label flex items-center justify-between" style={{ height: '14px', marginBottom: 10 }}>
+      <div className="generator-panel-section-label flex items-center justify-between h-[14px] mb-[10px]">
         <div className="flex items-center gap-2">
           <span>Traits</span>
           <span
-            className="px-1.5 py-px rounded-sm"
-            style={{
-              background: selectedCount >= 7 ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.06)',
-              color: selectedCount >= 7 ? 'var(--color-success)' : 'var(--color-text-muted)',
-              fontSize: '9px',
-              fontWeight: 700,
-              letterSpacing: '0.03em',
-            }}
+            className={`metadata-count-badge px-1.5 py-px rounded-sm${selectedCount >= 7 ? ' metadata-count-badge--complete' : ' metadata-count-badge--incomplete'}`}
           >
             {selectedCount}/{totalCount}
           </span>
         </div>
         <button
           type="button"
-          className="flex items-center gap-0.5 transition-colors text-accent"
-          style={{
-            fontSize: '0.5625rem',
-            fontWeight: 600,
-            lineHeight: 1,
-            cursor: 'pointer',
-          }}
+          className="metadata-switch-btn flex items-center gap-0.5 transition-colors text-accent"
           onClick={onSwitchToColors}
         >
           Colors
@@ -349,38 +336,19 @@ export function MetadataPreview({ onSwitchToColors }: MetadataPreviewProps) {
       </div>
 
       {/* Attributes list — always shows all 7 trait types */}
-      <div className="flex-1 overflow-y-auto" style={{ minHeight: 0 }}>
+      <div className="flex-1 overflow-y-auto min-h-0">
         <div className="flex flex-col gap-1.5">
           {attributes.map((attr, i) => {
             const isEmpty = attr.value === '';
             return (
               <div
                 key={i}
-                className="flex flex-col rounded-md"
-                style={{
-                  padding: '6px 8px',
-                  background: isEmpty ? 'transparent' : 'rgba(255, 255, 255, 0.025)',
-                  border: isEmpty ? '1px solid rgba(255, 255, 255, 0.03)' : '1px solid var(--color-white-5)',
-                  opacity: isEmpty ? 0.3 : 1,
-                }}
+                className={`metadata-attribute-row flex flex-col rounded-md${isEmpty ? ' metadata-attribute-row--empty' : ''}`}
               >
-                <span
-                  className="text-muted"
-                  style={{
-                    fontSize: '9px',
-                    fontWeight: 600,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.06em',
-                    marginBottom: 1,
-                  }}
-                >
+                <span className="metadata-attribute-label text-muted">
                   {attr.trait_type}
                 </span>
-                <span style={{
-                  color: isEmpty ? 'var(--color-text-muted)' : 'var(--color-primary)',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                }}>
+                <span className={`metadata-attribute-value${isEmpty ? ' metadata-attribute-value--empty' : ''}`}>
                   {isEmpty ? '—' : attr.value}
                 </span>
               </div>
