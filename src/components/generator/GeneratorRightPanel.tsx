@@ -8,17 +8,20 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { RotateCcw, Copy, Check } from 'lucide-react';
 import { useGenerator } from '@/contexts/GeneratorContext';
-import { ColorPicker, COLOR_FAMILIES, QUICK_ACCESS_COLORS } from './ColorPicker';
+import { ColorPicker } from './ColorPicker';
 import { G2TraitPanel } from './G2TraitPanel';
 import { getUnifiedTraitById, getPathToTraitIdMap } from '@/services/generatorService';
 import { isSelectionPathEmpty } from '@/types/generator';
-import { isUserPickableFill, getAllUserPickableFillSlots } from '@/lib/g2FillTreatments';
+import { getAllUserPickableFillSlots } from '@/lib/g2FillTreatments';
 import { getG2DefaultColor } from '@/config/g2DefaultColors';
-import { BEER_HAT_COMPATIBLE_HEADS } from '@/lib/generatorTraitIds';
 import type { UILayerName } from '@/lib/wojakRules';
 import type { UnifiedTrait } from '@/services/generatorService';
-import { G2TraitCard } from './TraitSelector';
 import { CombatPreview } from './CombatPreview';
+import { MilitaryBeretSwatches } from './MilitaryBeretSwatches';
+import { MaskVariantPicker } from './MaskVariantPicker';
+import { isFullFaceMaskSelected } from './maskData';
+import { BeerHatUnderlayerPicker } from './BeerHatUnderlayerPicker';
+import { usePrimarySlot } from '@/hooks/usePrimarySlot';
 
 /** Layers where G1 traits can be colored (Base, Mouth, etc. cannot) */
 const LAYERS_WITH_G1_COLOR: UILayerName[] = ['Clothes', 'Head', 'Eyes'];
@@ -29,336 +32,6 @@ const isBackgroundSolidColor = (path: string | undefined) =>
 
 /** Default color for solid color backgrounds - sky blue */
 const SOLID_BG_DEFAULT_COLOR = '#38BDF8';
-
-/** Get the primary color slot key for a G2 trait (first user-pickable fill).
- * For layered traits (Viking helmet, 3D glasses) only considers slots that exist on the trait's layers,
- * so we don't pick fill0 when the trait only has fill1/fill2 (which would write to a slot the renderer never reads). */
-function getPrimaryColorSlot(trait: UnifiedTrait | null): string | null {
-  if (!trait) return null;
-  // Layered colorable: use only slots that exist on the trait (from layers), then first user-pickable
-  if (trait.layers && trait.colorable) {
-    const slots = getAllUserPickableFillSlots(trait.id, trait);
-    return slots[0] ?? null;
-  }
-  if (trait.fillFile && isUserPickableFill(trait.id, 'fill')) return 'fill';
-  if (trait.fill1File && isUserPickableFill(trait.id, 'fill1')) return 'fill1';
-  if (trait.fillFiles) {
-    for (let i = 0; i < trait.fillFiles.length; i++) {
-      if (isUserPickableFill(trait.id, `fill${i}`)) return `fill${i}`;
-    }
-  }
-  return null;
-}
-
-function MilitaryBeretUpgradeSwatches({ onColorPick, disabled }: { onColorPick: (color: string) => void; disabled?: boolean }) {
-  const Swatch = ({ hex }: { hex: string }) => (
-    <button
-      type="button"
-      className="w-5 h-5 rounded flex-shrink-0 transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-      style={{
-        background: hex,
-        border: '2px solid var(--color-border)',
-        boxSizing: 'border-box',
-        cursor: disabled ? 'not-allowed' : 'pointer',
-      }}
-      onClick={() => !disabled && onColorPick(hex)}
-      disabled={disabled}
-      aria-label={`Use new design with color ${hex}`}
-    />
-  );
-  return (
-    <div className="flex flex-col gap-1.5">
-      {/* Quick-access row — matches ColorPicker layout */}
-      <div className="grid grid-cols-5 gap-1">
-        {QUICK_ACCESS_COLORS.map((hex) => (
-          <Swatch key={hex} hex={hex} />
-        ))}
-      </div>
-      {COLOR_FAMILIES.map((family) => (
-        <div key={family.label} className="grid grid-cols-6 gap-1">
-          {family.colors.map((hex) => (
-            <Swatch key={hex} hex={hex} />
-          ))}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-const MASK_BASE_PATH = '/assets/wojak-layers/MASK';
-
-/** Mask categories with their variants */
-type MaskCategory = 'tanginium' | 'medievalBepe' | 'skull';
-
-interface MaskVariant {
-  file: string;
-  label: string;
-  subfolder?: string;
-}
-
-const MASK_CATEGORIES: Record<MaskCategory, { label: string; variants: MaskVariant[] }> = {
-  tanginium: {
-    label: 'Tanginium',
-    variants: [
-      { file: 'Tanginium_king.png', label: 'King' },
-      { file: 'Tanginium_sad.png', label: 'Sad' },
-    ],
-  },
-  medievalBepe: {
-    label: 'Medieval Bepe',
-    variants: [
-      { file: 'MedievalBepe_cowboy.png', label: 'Cowboy' },
-      { file: 'MedievalBepe_emo.png', label: 'Emo' },
-      { file: 'MedievalBepe_wizard.png', label: 'Wizard' },
-    ],
-  },
-  skull: {
-    label: 'Skull',
-    variants: [
-      { file: 'Mask-skull-01_Hypno.png', label: 'Hypno', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-02_Mystic.png', label: 'Mystic', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-03_Frost.png', label: 'Frost', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-04_Mayor.png', label: 'Mayor', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-05_Verdant.png', label: 'Verdant', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-06_Sorting.png', label: 'Sorting', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-07_Rally.png', label: 'Rally', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-08_Void.png', label: 'Void', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-09_Love.png', label: 'Love', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-10_Bengal.png', label: 'Bengal', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-11_Pumpkinl.png', label: 'Pumpkin', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-12_Gilded.png', label: 'Gilded', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-13_Goblin.png', label: 'Goblin', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-14_Damask.png', label: 'Damask', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-15_Zebra.png', label: 'Zebra', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-16_Eldritch.png', label: 'Eldritch', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-17_Waldo.png', label: 'Waldo', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-18_Lumos.png', label: 'Lumos', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-19_Gator.png', label: 'Gator', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-20_Mesmerpng.png', label: 'Mesmer', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-21_Arachno.png', label: 'Arachno', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-22_THE.png', label: 'THE', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-23_Storm.png', label: 'Storm', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-24_Inferno.png', label: 'Inferno', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-25_Scream.png', label: 'Scream', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-26_Sandworm.png', label: 'Sandworm', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-27_Voorhees.png', label: 'Voorhees', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-28_Enchanter.png', label: 'Enchanter', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-29_313.png', label: '313', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-30_Magus.png', label: 'Magus', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-31_Astro.png', label: 'Astro', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-32_Nocturnis.png', label: 'Nocturnis', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-33_Ghost.png', label: 'Ghost', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-34_ET.png', label: 'ET', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-35_Cosmic.png', label: 'Cosmic', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-36_Hedera.png', label: 'Hedera', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-37_Martian.png', label: 'Martian', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-38_Magenta.png', label: 'Magenta', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-39_Speechless.png', label: 'Speechless', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-40_Aster.png', label: 'Aster', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-41_Static.png', label: 'Static', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-42_Rage.png', label: 'Rage', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-43_Gooey.png', label: 'Gooey', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-44_Tang.png', label: 'Tang', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-45_9mm.png', label: '9mm', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-46_Skelly.png', label: 'Skelly', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-47_Degen.png', label: 'Degen', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-48_Neck.png', label: 'Neck', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-49_Crown.png', label: 'Crown', subfolder: 'Mask-skull' },
-      { file: 'Mask-skull-50_Bepe.png', label: 'Bepe', subfolder: 'Mask-skull' },
-    ],
-  },
-};
-
-/** Get full path for a mask variant */
-function getMaskPath(variant: MaskVariant): string {
-  return variant.subfolder
-    ? `${MASK_BASE_PATH}/${variant.subfolder}/${variant.file}`
-    : `${MASK_BASE_PATH}/${variant.file}`;
-}
-
-/** All full-face mask path substrings (hand mask + all category variants) */
-const FULL_FACE_MASK_SUBSTRINGS = [
-  'Wojak_hand_mask',
-  ...Object.values(MASK_CATEGORIES).flatMap((cat) =>
-    cat.variants.map((v) => v.file.replace('.png', ''))
-  ),
-];
-
-function isFullFaceMaskSelected(maskPath: string | undefined): boolean {
-  if (!maskPath) return false;
-  return FULL_FACE_MASK_SUBSTRINGS.some((s) => maskPath.includes(s));
-}
-
-/** Find which category the selected mask belongs to */
-function getSelectedCategory(selectedPath: string | undefined): MaskCategory | null {
-  if (!selectedPath) return null;
-  for (const [key, cat] of Object.entries(MASK_CATEGORIES)) {
-    if (cat.variants.some((v) => selectedPath.includes(v.file.replace('.png', '')))) {
-      return key as MaskCategory;
-    }
-  }
-  return null;
-}
-
-function MaskVariantPicker({ selectedPath, onSelect }: { selectedPath: string | undefined; onSelect: (path: string) => void }) {
-  const selectedCategory = getSelectedCategory(selectedPath);
-  const [expandedCategory, setExpandedCategory] = useState<MaskCategory | null>(selectedCategory);
-
-  const handleCategoryClick = (category: MaskCategory) => {
-    if (expandedCategory === category) {
-      setExpandedCategory(null);
-    } else {
-      setExpandedCategory(category);
-    }
-  };
-
-  const handleVariantSelect = (variant: MaskVariant) => {
-    onSelect(getMaskPath(variant));
-  };
-
-  return (
-    <div className="flex-shrink-0">
-      <div className="text-[10px] font-semibold uppercase tracking-wide mb-1.5 text-muted">Mask style</div>
-      <div className="flex flex-col gap-2">
-        {(Object.entries(MASK_CATEGORIES) as [MaskCategory, typeof MASK_CATEGORIES[MaskCategory]][]).map(([key, category]) => {
-          const isExpanded = expandedCategory === key;
-          const isSelected = selectedCategory === key;
-          const previewVariant = isSelected
-            ? category.variants.find((v) => selectedPath?.includes(v.file.replace('.png', ''))) ?? category.variants[0]
-            : category.variants[0];
-
-          return (
-            <div key={key}>
-              {/* Category header */}
-              <button
-                type="button"
-                className="w-full flex items-center gap-2 p-2 rounded-lg transition-colors"
-                style={{
-                  background: isExpanded ? 'var(--color-white-8)' : 'var(--color-white-5)',
-                  border: isSelected ? '1px solid var(--color-primary)' : '1px solid transparent',
-                }}
-                onClick={() => handleCategoryClick(key)}
-              >
-                <img
-                  src={getMaskPath(previewVariant)}
-                  alt={category.label}
-                  className="w-10 h-10 rounded-lg object-contain"
-                  style={{ background: 'var(--color-surface)' }}
-                  loading="lazy"
-                />
-                <div className="flex-1 text-left">
-                  <div className="text-sm font-medium">{category.label}</div>
-                  <div className="text-xs text-muted">{category.variants.length} styles</div>
-                </div>
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="text-muted transition-transform"
-                  style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                >
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
-              </button>
-
-              {/* Expanded variants grid */}
-              {isExpanded && (
-                <div className="grid grid-cols-3 gap-2 mt-2 p-2 rounded-lg" style={{ background: 'var(--color-white-5)' }}>
-                  {category.variants.map((variant) => {
-                    const path = getMaskPath(variant);
-                    const isVariantSelected = selectedPath === path;
-                    return (
-                      <button
-                        key={variant.file}
-                        type="button"
-                        className="aspect-square relative rounded-lg overflow-hidden"
-                        style={{
-                          background: 'var(--color-surface)',
-                          border: isVariantSelected
-                            ? '2px solid var(--color-primary)'
-                            : '1px solid var(--color-border)',
-                        }}
-                        onClick={() => handleVariantSelect(variant)}
-                        title={variant.label}
-                      >
-                        <img
-                          src={path}
-                          alt={variant.label}
-                          className="w-full h-full object-contain"
-                          loading="lazy"
-                        />
-                        {isVariantSelected && (
-                          <div
-                            className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
-                            style={{ background: 'var(--color-primary)' }}
-                          >
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="white">
-                              <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
-                            </svg>
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function BeerHatUnderlayerPicker({ selectedTraitId, onSelect }: { selectedTraitId: string; onSelect: (traitId: string) => void }) {
-  const [traits, setTraits] = useState<Map<string, UnifiedTrait>>(new Map());
-
-  useEffect(() => {
-    const load = async () => {
-      const map = new Map<string, UnifiedTrait>();
-      await Promise.all(
-        BEER_HAT_COMPATIBLE_HEADS.map(async (id) => {
-          const t = await getUnifiedTraitById(id);
-          if (t) map.set(id, t);
-        })
-      );
-      setTraits(map);
-    };
-    load();
-  }, []);
-
-  return (
-    <div className="generator-panel-section flex-shrink-0">
-      <div className="generator-panel-section-label">Under layer</div>
-      <div className="grid grid-cols-3 gap-2">
-        {BEER_HAT_COMPATIBLE_HEADS.map((traitId) => {
-          const trait = traits.get(traitId);
-          const isSelected = selectedTraitId === traitId;
-          if (!trait) {
-            return (
-              <div key={traitId} className="w-16 h-16 rounded-lg flex-shrink-0 flex items-center justify-center" style={{ background: 'var(--color-surface)' }}>
-                <span className="text-xs text-muted">…</span>
-              </div>
-            );
-          }
-          return (
-            <div key={traitId} className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden">
-              <G2TraitCard
-                trait={trait}
-                isSelected={isSelected}
-                onClick={() => onSelect(traitId)}
-                needsClothesUnderlay
-              />
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
 
 export function GeneratorRightPanel() {
   const { activeLayer, selectedLayers, g2Selections, selectedColors, setColor, setG2Color, setG2Detail, selectLayer, selectG2Layer, isInitialized } = useGenerator();
@@ -449,17 +122,7 @@ export function GeneratorRightPanel() {
 
   // Color picker always in same position; controls G1 layer color or G2 trait color.
   // For multi-fill traits: activeColorSlot selects which fill the picker edits; else first slot.
-  const primarySlot = hasG2Selection
-    ? (g2Sel?.traitId === 'Clothes_Suit'
-        ? (g2Sel.activeColorSlot ?? 'fill0')
-        : g2Sel?.traitId === 'Clothes_Chia-farmer'
-          ? (g2Sel.activeColorSlot ?? 'fill0')
-          : allColorSlots.length > 1
-            ? (g2Sel?.activeColorSlot && allColorSlots.includes(g2Sel.activeColorSlot)
-                ? g2Sel.activeColorSlot
-                : allColorSlots[0])
-            : (getPrimaryColorSlot(g2Trait) ?? (g2Sel?.traitId === 'Clothes_Astronaut' ? 'fill' : g2Sel?.traitId === 'Clothes_Ninja-turtle-fit' ? 'fill0' : g2Sel?.traitId === 'Head_viking-helmet' ? 'fill1' : g2Sel?.traitId === 'Face-wear_3d-glases' ? 'fill1' : null)))
-    : null;
+  const primarySlot = usePrimarySlot(g2Sel, allColorSlots, g2Trait, hasG2Selection);
   const isG2Colorable = hasG2Selection && (!!g2Trait?.colorable || g2Sel?.traitId === 'Clothes_Astronaut' || g2Sel?.traitId === 'Clothes_Chia-farmer' || g2Sel?.traitId === 'Head_viking-helmet' || g2Sel?.traitId === 'Face-wear_3d-glases') && primarySlot !== null;
   const isG1Colorable =
     !hasG2Selection &&
@@ -548,7 +211,7 @@ export function GeneratorRightPanel() {
       {isG1MilitaryBeret && (
         <div className="generator-panel-section flex-shrink-0">
           <div className="generator-panel-section-label">Pick a color to use new design</div>
-          <MilitaryBeretUpgradeSwatches
+          <MilitaryBeretSwatches
             onColorPick={(color) => militaryBeretTrait && selectG2Layer(activeLayer, militaryBeretTrait, { fill: color })}
             disabled={!militaryBeretTrait}
           />
