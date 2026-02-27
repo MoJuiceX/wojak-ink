@@ -347,131 +347,127 @@ function getExtraHand(path: string | undefined | null): 'left' | 'right' | 'none
 /** Extra slot keys for iteration */
 const EXTRA_SLOTS: readonly SelectionKey[] = ['Extra1', 'Extra2', 'Extra3'] as const;
 
+/**
+ * Shared logic for SET_LAYER and SET_G2_LAYER.
+ * Handles: suspension clearing, mutual-exclusion conflicts, suspension restoration,
+ * Base→Clothes auto-match, hand-mask↔extra conflicts, straitjacket→extras clearing,
+ * rule application, and history push.
+ */
+function processLayerUpdate(
+  state: GeneratorState,
+  layer: UILayerName,
+  path: string,
+  options?: {
+    g2?: G2Selection;
+    skipHistory?: boolean;
+    skipBaseAutoMatch?: boolean;
+  },
+): GeneratorState {
+  const pathMap = pathMapForReducer();
+  const updated: SelectionsSnapshot = { ...state.selections };
+
+  // Build the selection entry — G2 traits carry their own traitId and g2 data
+  if (options?.g2) {
+    updated[layer] = { path, traitId: options.g2.traitId, g2: options.g2 };
+  } else {
+    updated[layer] = { path, traitId: pathMap.get(path) ?? null };
+  }
+
+  // Clear any suspension for the layer being manually set
+  let newSuspended = clearSuspensionForLayer(state.suspendedSelections, layer);
+
+  // Process all mutual exclusion conflicts
+  const conflictResult = processConflicts(updated, newSuspended, layer, path);
+  Object.assign(updated, conflictResult.selections);
+  newSuspended = conflictResult.suspended;
+
+  // Check if any suspended selections can be restored
+  const { restorable, remaining } = checkRestorableSuspensions(newSuspended, updated, layer);
+  newSuspended = remaining;
+  for (const r of restorable) {
+    updated[r.layer] = r.selection;
+  }
+
+  // Base → Clothes auto-match (G1 only, when changing Base layer)
+  if (!options?.skipBaseAutoMatch && layer === 'Base' && path) {
+    const matchingClothes = getClothesForBase(path);
+    const currentPath = state.selections.Clothes?.path || '';
+    const isDefaultClothes =
+      Object.values(BASE_CLOTHES_MAP).includes(currentPath) ||
+      currentPath === DEFAULT_CLOTHES_PATH ||
+      currentPath === '';
+    if (isDefaultClothes) {
+      updated.Clothes = { path: matchingClothes, traitId: pathMap.get(matchingClothes) ?? null };
+    }
+  }
+
+  // Hand mask ↔ hand extras conflict (G1 only)
+  let newSuspendedMaskByExtra = state.suspendedMaskByExtra;
+  let newSuspendedExtrasByMask = state.suspendedExtrasByMask;
+  if (!options?.skipBaseAutoMatch && layer === 'Mask') {
+    if (isHandMask(path)) {
+      // Selecting hand mask → suspend conflicting extras
+      const toSuspend: typeof newSuspendedExtrasByMask = [];
+      for (const slot of EXTRA_SLOTS) {
+        if (updated[slot] && extraConflictsWithHandMask(updated[slot]?.path)) {
+          toSuspend.push({ slot, selection: updated[slot]! });
+          delete updated[slot];
+        }
+      }
+      newSuspendedExtrasByMask = toSuspend.length > 0 ? toSuspend : [];
+      // Clear any suspended mask (user is manually selecting mask)
+      newSuspendedMaskByExtra = null;
+    } else {
+      // Selecting a non-hand-mask → restore any extras that were suspended by hand mask
+      if (newSuspendedExtrasByMask.length > 0) {
+        for (const { slot, selection } of newSuspendedExtrasByMask) {
+          if (!updated[slot]) updated[slot] = selection;
+        }
+        newSuspendedExtrasByMask = [];
+      }
+      newSuspendedMaskByExtra = null;
+    }
+  }
+
+  // Straitjacket → clear all hand extras (hands are tied) (G1 only)
+  if (!options?.skipBaseAutoMatch && layer === 'Clothes' && isStraightJacket(path)) {
+    for (const slot of EXTRA_SLOTS) {
+      if (updated[slot] && isHandExtra(updated[slot]?.path)) {
+        delete updated[slot];
+      }
+    }
+  }
+
+  const { newSelections, result } = applyRulesUnified(updated, pathMap);
+  // skipHistory: when called as part of RANDOMIZE, the history entry was already created
+  const newState = options?.skipHistory ? state : pushHistoryUnified(state, newSelections);
+
+  return {
+    ...newState,
+    selections: newSelections,
+    suspendedSelections: newSuspended,
+    suspendedMaskByExtra: newSuspendedMaskByExtra,
+    suspendedExtrasByMask: newSuspendedExtrasByMask,
+    disabledLayers: result.disabledLayers,
+    disabledOptions: result.disabledOptions,
+    disabledReasons: result.reasons,
+    disabledOptionReasons: result.disabledOptionReasons,
+    isPreviewStale: true,
+    generatorError: null,
+  };
+}
+
 export function generatorReducer(state: GeneratorState, action: GeneratorAction): GeneratorState {
   switch (action.type) {
-    case 'SET_LAYER': {
-      const pathMap = pathMapForReducer();
-      const updated: SelectionsSnapshot = { ...state.selections };
-      updated[action.layer] = { path: action.path, traitId: pathMap.get(action.path) ?? null };
+    case 'SET_LAYER':
+      return processLayerUpdate(state, action.layer, action.path);
 
-      // Clear any suspension for the layer being manually set
-      let newSuspended = clearSuspensionForLayer(state.suspendedSelections, action.layer);
-
-      // Process all mutual exclusion conflicts
-      const conflictResult = processConflicts(updated, newSuspended, action.layer, action.path);
-      Object.assign(updated, conflictResult.selections);
-      newSuspended = conflictResult.suspended;
-
-      // Check if any suspended selections can be restored
-      const { restorable, remaining } = checkRestorableSuspensions(newSuspended, updated, action.layer);
-      newSuspended = remaining;
-      for (const r of restorable) {
-        updated[r.layer] = r.selection;
-      }
-
-      if (action.layer === 'Base' && action.path) {
-        const matchingClothes = getClothesForBase(action.path);
-        const currentPath = state.selections.Clothes?.path || '';
-        const isDefaultClothes =
-          Object.values(BASE_CLOTHES_MAP).includes(currentPath) ||
-          currentPath === DEFAULT_CLOTHES_PATH ||
-          currentPath === '';
-        if (isDefaultClothes) {
-          updated.Clothes = { path: matchingClothes, traitId: pathMap.get(matchingClothes) ?? null };
-        }
-      }
-
-      // Hand mask ↔ hand extras conflict
-      let newSuspendedMaskByExtra = state.suspendedMaskByExtra;
-      let newSuspendedExtrasByMask = state.suspendedExtrasByMask;
-      if (action.layer === 'Mask') {
-        if (isHandMask(action.path)) {
-          // Selecting hand mask → suspend conflicting extras
-          const toSuspend: typeof newSuspendedExtrasByMask = [];
-          for (const slot of EXTRA_SLOTS) {
-            if (updated[slot] && extraConflictsWithHandMask(updated[slot]?.path)) {
-              toSuspend.push({ slot, selection: updated[slot]! });
-              delete updated[slot];
-            }
-          }
-          newSuspendedExtrasByMask = toSuspend.length > 0 ? toSuspend : [];
-          // Clear any suspended mask (user is manually selecting mask)
-          newSuspendedMaskByExtra = null;
-        } else {
-          // Selecting a non-hand-mask → restore any extras that were suspended by hand mask
-          if (newSuspendedExtrasByMask.length > 0) {
-            for (const { slot, selection } of newSuspendedExtrasByMask) {
-              if (!updated[slot]) updated[slot] = selection;
-            }
-            newSuspendedExtrasByMask = [];
-          }
-          newSuspendedMaskByExtra = null;
-        }
-      }
-
-      // Straitjacket → clear all hand extras (hands are tied)
-      if (action.layer === 'Clothes' && isStraightJacket(action.path)) {
-        for (const slot of EXTRA_SLOTS) {
-          if (updated[slot] && isHandExtra(updated[slot]?.path)) {
-            delete updated[slot];
-          }
-        }
-      }
-
-      const { newSelections, result } = applyRulesUnified(updated, pathMap);
-      const newState = pushHistoryUnified(state, newSelections);
-
-      return {
-        ...newState,
-        selections: newSelections,
-        suspendedSelections: newSuspended,
-        suspendedMaskByExtra: newSuspendedMaskByExtra,
-        suspendedExtrasByMask: newSuspendedExtrasByMask,
-        disabledLayers: result.disabledLayers,
-        disabledOptions: result.disabledOptions,
-        disabledReasons: result.reasons,
-        disabledOptionReasons: result.disabledOptionReasons,
-        isPreviewStale: true,
-        generatorError: null,
-      };
-    }
-
-    case 'SET_G2_LAYER': {
-      const pathMap = pathMapForReducer();
-      const updatedG2Sel: SelectionsSnapshot = { ...state.selections };
-      updatedG2Sel[action.layer] = { path: action.path, traitId: action.g2.traitId, g2: action.g2 };
-
-      // Clear any suspension for the layer being manually set
-      let newSuspended = clearSuspensionForLayer(state.suspendedSelections, action.layer);
-
-      // Process all mutual exclusion conflicts
-      const conflictResult = processConflicts(updatedG2Sel, newSuspended, action.layer, action.path);
-      Object.assign(updatedG2Sel, conflictResult.selections);
-      newSuspended = conflictResult.suspended;
-
-      // Check if any suspended selections can be restored
-      const { restorable, remaining } = checkRestorableSuspensions(newSuspended, updatedG2Sel, action.layer);
-      newSuspended = remaining;
-      for (const r of restorable) {
-        updatedG2Sel[r.layer] = r.selection;
-      }
-
-      const { newSelections, result } = applyRulesUnified(updatedG2Sel, pathMap);
-      // skipHistory: when called as part of RANDOMIZE, the history entry was already created
-      const newState = action.skipHistory ? state : pushHistoryUnified(state, newSelections);
-
-      return {
-        ...newState,
-        selections: newSelections,
-        suspendedSelections: newSuspended,
-        disabledLayers: result.disabledLayers,
-        disabledOptions: result.disabledOptions,
-        disabledReasons: result.reasons,
-        disabledOptionReasons: result.disabledOptionReasons,
-        isPreviewStale: true,
-        generatorError: null,
-      };
-    }
+    case 'SET_G2_LAYER':
+      return processLayerUpdate(state, action.layer, action.path, {
+        g2: action.g2,
+        skipHistory: action.skipHistory,
+        skipBaseAutoMatch: true,
+      });
 
     case 'SET_G2_COLOR': {
       const existing = state.selections[action.layer]?.g2;
