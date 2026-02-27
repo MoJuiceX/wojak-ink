@@ -3,7 +3,7 @@
  * Pure state transitions; rules/history helpers live in generatorStateUtils.
  */
 
-import type { FavoriteWojak, G2Selection, SelectionsSnapshot, LayerSelection } from '@/types/generator';
+import type { FavoriteWojak, G2Selection, SelectionsSnapshot, LayerSelection, SelectionKey } from '@/types/generator';
 import type { UILayerName } from '@/lib/layerRegistry';
 
 /** Suspended selection: a trait that was temporarily removed due to a conflict */
@@ -48,6 +48,10 @@ export interface GeneratorState {
   generatorError: string | null;
   /** Traits suspended due to conflicts — restored when conflict is resolved */
   suspendedSelections: SuspendedSelection[];
+  /** Mask selection suspended because a hand extra was selected */
+  suspendedMaskByExtra: LayerSelection | null;
+  /** Extra selections suspended because hand mask was selected */
+  suspendedExtrasByMask: Array<{ slot: SelectionKey; selection: LayerSelection }>;
 }
 
 export type GeneratorAction =
@@ -74,7 +78,9 @@ export type GeneratorAction =
   | { type: 'LOAD_FAVORITES'; favorites: FavoriteWojak[] }
   | { type: 'INITIALIZE' }
   | { type: 'SET_COLOR'; layer: UILayerName; color: string }
-  | { type: 'SET_ERROR'; error: string | null };
+  | { type: 'SET_ERROR'; error: string | null }
+  | { type: 'TOGGLE_EXTRA'; path: string }
+  | { type: 'CLEAR_EXTRAS' };
 
 // ============ Initial State ============
 
@@ -100,6 +106,8 @@ export function createInitialState(): GeneratorState {
     scrollPosition: 0,
     generatorError: null,
     suspendedSelections: [],
+    suspendedMaskByExtra: null,
+    suspendedExtrasByMask: [],
   };
 }
 
@@ -142,6 +150,19 @@ function isVRHeadset(path: string | undefined | null): boolean {
 function isAstronaut(path: string | undefined | null): boolean {
   if (!path) return false;
   return path.toLowerCase().includes('astronaut');
+}
+
+/** Check if a path represents Straitjacket */
+function isStraightJacket(path: string | undefined | null): boolean {
+  if (!path) return false;
+  return path.toLowerCase().includes('straigth-jacket');
+}
+
+/** Check if an extra path is a hand item (not wings) */
+function isHandExtra(path: string | undefined | null): boolean {
+  if (!path) return false;
+  const lower = path.toLowerCase();
+  return lower.includes('extra_hand');
 }
 
 /** Check if a path represents Copium Mask */
@@ -281,6 +302,51 @@ function clearSuspensionForLayer(suspended: SuspendedSelection[], layer: UILayer
   return suspended.filter(s => s.layer !== layer);
 }
 
+// ============ Hand Mask ↔ Hand Extra Conflict Helpers ============
+
+/** Check if a path represents the Wojak hand mask */
+function isHandMask(path: string | undefined | null): boolean {
+  if (!path) return false;
+  return path.toLowerCase().includes('hand_mask');
+}
+
+/**
+ * Check if an extra path conflicts with the Wojak hand mask.
+ * Conflicting: Diamond, GFY Left, Goose, Gun Left, Orange, TangTalk (all left-hand or both-hand items).
+ * Non-conflicting: Coffee, GFY Right (right-hand items), Wings (no hands).
+ */
+function extraConflictsWithHandMask(path: string | undefined | null): boolean {
+  if (!path) return false;
+  const lower = path.toLowerCase();
+  if (!lower.includes('extra_hand')) return false; // wings and non-hand items never conflict
+  // Right-hand items don't conflict with the hand mask (left hand holds mask)
+  if (lower.includes('coffee')) return false;
+  if (lower.includes('gfy_right')) return false;
+  return true;
+}
+
+// ============ Extra Item Conflict Helpers ============
+
+/**
+ * Determine which hand an extra uses.
+ * Left hand: Diamond, GFY Left, Goose, Handgun, Orange, TangTalk Phone
+ * Right hand: Coffee, GFY Right
+ * None: Wings
+ */
+function getExtraHand(path: string | undefined | null): 'left' | 'right' | 'none' | null {
+  if (!path) return null;
+  const lower = path.toLowerCase();
+  if (lower.includes('extra_wings')) return 'none';
+  if (!lower.includes('extra_hand')) return null;
+  // Right-hand items
+  if (lower.includes('coffee') || lower.includes('gfy_right')) return 'right';
+  // All other hand items are left-hand
+  return 'left';
+}
+
+/** Extra slot keys for iteration */
+const EXTRA_SLOTS: readonly SelectionKey[] = ['Extra1', 'Extra2', 'Extra3'] as const;
+
 export function generatorReducer(state: GeneratorState, action: GeneratorAction): GeneratorState {
   switch (action.type) {
     case 'SET_LAYER': {
@@ -315,6 +381,43 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
         }
       }
 
+      // Hand mask ↔ hand extras conflict
+      let newSuspendedMaskByExtra = state.suspendedMaskByExtra;
+      let newSuspendedExtrasByMask = state.suspendedExtrasByMask;
+      if (action.layer === 'Mask') {
+        if (isHandMask(action.path)) {
+          // Selecting hand mask → suspend conflicting extras
+          const toSuspend: typeof newSuspendedExtrasByMask = [];
+          for (const slot of EXTRA_SLOTS) {
+            if (updated[slot] && extraConflictsWithHandMask(updated[slot]?.path)) {
+              toSuspend.push({ slot, selection: updated[slot]! });
+              delete updated[slot];
+            }
+          }
+          newSuspendedExtrasByMask = toSuspend.length > 0 ? toSuspend : [];
+          // Clear any suspended mask (user is manually selecting mask)
+          newSuspendedMaskByExtra = null;
+        } else {
+          // Selecting a non-hand-mask → restore any extras that were suspended by hand mask
+          if (newSuspendedExtrasByMask.length > 0) {
+            for (const { slot, selection } of newSuspendedExtrasByMask) {
+              if (!updated[slot]) updated[slot] = selection;
+            }
+            newSuspendedExtrasByMask = [];
+          }
+          newSuspendedMaskByExtra = null;
+        }
+      }
+
+      // Straitjacket → clear all hand extras (hands are tied)
+      if (action.layer === 'Clothes' && isStraightJacket(action.path)) {
+        for (const slot of EXTRA_SLOTS) {
+          if (updated[slot] && isHandExtra(updated[slot]?.path)) {
+            delete updated[slot];
+          }
+        }
+      }
+
       const { newSelections, result } = applyRulesUnified(updated, pathMap);
       const newState = pushHistoryUnified(state, newSelections);
 
@@ -322,6 +425,8 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
         ...newState,
         selections: newSelections,
         suspendedSelections: newSuspended,
+        suspendedMaskByExtra: newSuspendedMaskByExtra,
+        suspendedExtrasByMask: newSuspendedExtrasByMask,
         disabledLayers: result.disabledLayers,
         disabledOptions: result.disabledOptions,
         disabledReasons: result.reasons,
@@ -462,6 +567,15 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
         updated.Clothes = { path, traitId: pathMap.get(path) ?? null };
       }
 
+      // Clearing Mask → restore extras that were suspended by hand mask
+      let newSuspendedExtrasByMaskClear = state.suspendedExtrasByMask;
+      if (action.layer === 'Mask' && newSuspendedExtrasByMaskClear.length > 0) {
+        for (const { slot, selection } of newSuspendedExtrasByMaskClear) {
+          if (!updated[slot]) updated[slot] = selection;
+        }
+        newSuspendedExtrasByMaskClear = [];
+      }
+
       const { newSelections, result } = applyRulesUnified(updated, pathMap);
       const newState = pushHistoryUnified(state, newSelections);
 
@@ -470,6 +584,8 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
         selections: newSelections,
         selectedColors: updatedColors,
         suspendedSelections: newSuspended,
+        suspendedMaskByExtra: action.layer === 'Mask' ? null : state.suspendedMaskByExtra,
+        suspendedExtrasByMask: newSuspendedExtrasByMaskClear,
         disabledLayers: result.disabledLayers,
         disabledOptions: result.disabledOptions,
         disabledReasons: result.reasons,
@@ -491,6 +607,8 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
         ...newState,
         selections: newSelections,
         suspendedSelections: [], // Clear all suspensions on randomize
+        suspendedMaskByExtra: null,
+        suspendedExtrasByMask: [],
         disabledLayers: result.disabledLayers,
         disabledOptions: result.disabledOptions,
         disabledReasons: result.reasons,
@@ -510,6 +628,8 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
         ...newState,
         selections: newSelections,
         suspendedSelections: [], // Clear all suspensions on clear all
+        suspendedMaskByExtra: null,
+        suspendedExtrasByMask: [],
         disabledLayers: result.disabledLayers,
         disabledOptions: result.disabledOptions,
         disabledReasons: result.reasons,
@@ -601,6 +721,8 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
         ...newState,
         selections: newSelections,
         suspendedSelections: [], // Clear all suspensions when loading a favorite
+        suspendedMaskByExtra: null,
+        suspendedExtrasByMask: [],
         disabledLayers: result.disabledLayers,
         disabledOptions: result.disabledOptions,
         disabledReasons: result.reasons,
@@ -628,6 +750,144 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
 
     case 'SET_ERROR':
       return { ...state, generatorError: action.error };
+
+    case 'TOGGLE_EXTRA': {
+      const pathMap = pathMapForReducer();
+      const updated: SelectionsSnapshot = { ...state.selections };
+      const newPath = action.path;
+      let suspendedMask = state.suspendedMaskByExtra;
+      let suspendedExtras = state.suspendedExtrasByMask;
+
+      // Straitjacket blocks hand extras (hands are tied) — allow deselect but reject new selection
+      if (isStraightJacket(updated.Clothes?.path) && isHandExtra(newPath)) {
+        // Allow deselecting an already-selected hand extra
+        const isDeselect = EXTRA_SLOTS.some(slot => updated[slot]?.path === newPath);
+        if (!isDeselect) return state;
+      }
+
+      // 1. If already selected in any Extra slot, deselect it
+      for (const slot of EXTRA_SLOTS) {
+        if (updated[slot]?.path === newPath) {
+          delete updated[slot];
+
+          // Check if mask should be restored (no remaining conflicting extras)
+          if (suspendedMask) {
+            const hasConflicting = EXTRA_SLOTS.some(s =>
+              updated[s] && extraConflictsWithHandMask(updated[s]?.path)
+            );
+            if (!hasConflicting) {
+              updated.Mask = suspendedMask;
+              suspendedMask = null;
+            }
+          }
+
+          const { newSelections, result } = applyRulesUnified(updated, pathMap);
+          const newState = pushHistoryUnified(state, newSelections);
+          return {
+            ...newState,
+            selections: newSelections,
+            suspendedMaskByExtra: suspendedMask,
+            suspendedExtrasByMask: suspendedExtras,
+            disabledLayers: result.disabledLayers,
+            disabledOptions: result.disabledOptions,
+            disabledReasons: result.reasons,
+            disabledOptionReasons: result.disabledOptionReasons,
+            isPreviewStale: true,
+            generatorError: null,
+          };
+        }
+      }
+
+      // 2. Place the new extra: find existing same-hand item to replace, or find an empty slot
+      const newHand = getExtraHand(newPath);
+      const newSel: LayerSelection = { path: newPath, traitId: pathMap.get(newPath) ?? null };
+
+      // Check if there's an existing extra with the same hand category → replace it
+      let placed = false;
+      if (newHand && newHand !== 'none') {
+        for (const slot of EXTRA_SLOTS) {
+          if (updated[slot] && getExtraHand(updated[slot]?.path) === newHand) {
+            updated[slot] = newSel;
+            placed = true;
+            break;
+          }
+        }
+      }
+
+      // If not placed by replacement, find first empty slot
+      if (!placed) {
+        for (const slot of EXTRA_SLOTS) {
+          if (!updated[slot]?.path) {
+            updated[slot] = newSel;
+            placed = true;
+            break;
+          }
+        }
+      }
+
+      // If still not placed (all 3 slots full, no same-hand conflict), replace the last slot
+      if (!placed) {
+        updated.Extra3 = newSel;
+      }
+
+      // 3. If the new extra conflicts with hand mask, suspend mask
+      if (extraConflictsWithHandMask(newPath) && isHandMask(updated.Mask?.path)) {
+        suspendedMask = updated.Mask!;
+        delete updated.Mask;
+      }
+
+      // 4. Adding an extra clears any extras-suspended-by-mask (user chose extra over mask)
+      if (suspendedExtras.length > 0) {
+        suspendedExtras = [];
+      }
+
+      const { newSelections, result } = applyRulesUnified(updated, pathMap);
+      const newState = pushHistoryUnified(state, newSelections);
+
+      return {
+        ...newState,
+        selections: newSelections,
+        suspendedMaskByExtra: suspendedMask,
+        suspendedExtrasByMask: suspendedExtras,
+        disabledLayers: result.disabledLayers,
+        disabledOptions: result.disabledOptions,
+        disabledReasons: result.reasons,
+        disabledOptionReasons: result.disabledOptionReasons,
+        isPreviewStale: true,
+        generatorError: null,
+      };
+    }
+
+    case 'CLEAR_EXTRAS': {
+      const pathMap = pathMapForReducer();
+      const updated: SelectionsSnapshot = { ...state.selections };
+      delete updated.Extra1;
+      delete updated.Extra2;
+      delete updated.Extra3;
+
+      // Restore mask if it was suspended by extras
+      let suspendedMask = state.suspendedMaskByExtra;
+      if (suspendedMask) {
+        updated.Mask = suspendedMask;
+        suspendedMask = null;
+      }
+
+      const { newSelections, result } = applyRulesUnified(updated, pathMap);
+      const newState = pushHistoryUnified(state, newSelections);
+
+      return {
+        ...newState,
+        selections: newSelections,
+        suspendedMaskByExtra: suspendedMask,
+        suspendedExtrasByMask: [],
+        disabledLayers: result.disabledLayers,
+        disabledOptions: result.disabledOptions,
+        disabledReasons: result.reasons,
+        disabledOptionReasons: result.disabledOptionReasons,
+        isPreviewStale: true,
+        generatorError: null,
+      };
+    }
 
     default:
       return state;

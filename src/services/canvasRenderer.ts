@@ -1778,7 +1778,7 @@ function parseSolidBackgroundPath(path: string): { isSolid: boolean; overlay: 'u
 /** Map virtual/composite layer names back to their parent UI layer name. */
 function getUIParentLayer(name: string): string {
   if (name.startsWith('Eyes') || name === 'NinjaTurtleUnderMask' || name === 'LaserEyesOverBubbleGum' || name === 'LaserEyesOverAstronaut') return 'Eyes';
-  if (name.startsWith('Mask') || name === 'HannibalMask' || name === 'FullFaceMask') return 'Mask';
+  if (name.startsWith('Mask') || name === 'HannibalMask' || name === 'FullFaceMask' || name === 'CopiumFillOutlineUnderAstronaut' || name === 'CopiumDetailOverAstronaut') return 'Mask';
   if (name.startsWith('Clothes') || name === 'Astronaut' || name.startsWith('NinjaTurtle')) return 'Clothes';
   if (name.startsWith('BeerHat') || name === 'CenturionUnder') return 'Head';
   if (name === 'BubbleGumRekt' || name === 'BubbleGumOverEyes' || name === 'BubbleGumOverHead') return 'MouthBase';
@@ -2116,6 +2116,40 @@ export async function renderToCanvas(
           console.warn(`[G2] Failed to resolve Beer Hat layers:`, err);
         }
       }
+      // Copium + Astronaut: fill+outline under suit (and under eyes) — detail excluded
+      if (layerNameStr === 'CopiumFillOutlineUnderAstronaut' && g2Sel) {
+        try {
+          const trait = await getUnifiedTraitById(g2Sel.traitId);
+          if (trait && (trait.source === 'g2' || trait.source === 'both')) {
+            const fullG2 = buildG2LayerData(trait, g2Sel, basePath);
+            // Copium uses orderedDrawItems; filter out the detail file so only fill+outline render here
+            const fillOutlineItems = (fullG2.orderedDrawItems ?? []).filter(
+              item => item.type === 'fill' || (item.type === 'outline' && !item.path.includes('-detail.')),
+            );
+            expanded.push({ ...layer, g2: { fills: [], outlines: [], orderedDrawItems: fillOutlineItems } });
+          }
+        } catch (err) {
+          console.warn(`[G2] Failed to resolve CopiumFillOutlineUnderAstronaut:`, err);
+        }
+        continue;
+      }
+      // Copium + Astronaut: detail only over suit
+      if (layerNameStr === 'CopiumDetailOverAstronaut' && g2Sel) {
+        try {
+          const trait = await getUnifiedTraitById(g2Sel.traitId);
+          if (trait && (trait.source === 'g2' || trait.source === 'both')) {
+            const fullG2 = buildG2LayerData(trait, g2Sel, basePath);
+            // Copium uses orderedDrawItems; keep only the detail file to render on top of Astronaut
+            const detailItems = (fullG2.orderedDrawItems ?? []).filter(
+              item => item.type === 'outline' && item.path.includes('-detail.'),
+            );
+            expanded.push({ ...layer, g2: { fills: [], outlines: [], orderedDrawItems: detailItems } });
+          }
+        } catch (err) {
+          console.warn(`[G2] Failed to resolve CopiumDetailOverAstronaut:`, err);
+        }
+        continue;
+      }
       if (g2Sel) {
         try {
           const trait = await getUnifiedTraitById(g2Sel.traitId);
@@ -2440,6 +2474,36 @@ export async function exportImage(
         } catch {
           // fall through
         }
+      }
+      // Copium + Astronaut: fill+outline under suit (and under eyes) — detail excluded
+      if (layerNameStr === 'CopiumFillOutlineUnderAstronaut' && g2Sel) {
+        try {
+          const trait = await getUnifiedTraitById(g2Sel.traitId);
+          if (trait && (trait.source === 'g2' || trait.source === 'both')) {
+            const fullG2 = buildG2LayerData(trait, g2Sel, basePath);
+            // Copium uses orderedDrawItems; filter out the detail file so only fill+outline render here
+            const fillOutlineItems = (fullG2.orderedDrawItems ?? []).filter(
+              item => item.type === 'fill' || (item.type === 'outline' && !item.path.includes('-detail.')),
+            );
+            expanded.push({ ...layer, g2: { fills: [], outlines: [], orderedDrawItems: fillOutlineItems } });
+          }
+        } catch { /* skip */ }
+        continue;
+      }
+      // Copium + Astronaut: detail only over suit
+      if (layerNameStr === 'CopiumDetailOverAstronaut' && g2Sel) {
+        try {
+          const trait = await getUnifiedTraitById(g2Sel.traitId);
+          if (trait && (trait.source === 'g2' || trait.source === 'both')) {
+            const fullG2 = buildG2LayerData(trait, g2Sel, basePath);
+            // Copium uses orderedDrawItems; keep only the detail file to render on top of Astronaut
+            const detailItems = (fullG2.orderedDrawItems ?? []).filter(
+              item => item.type === 'outline' && item.path.includes('-detail.'),
+            );
+            expanded.push({ ...layer, g2: { fills: [], outlines: [], orderedDrawItems: detailItems } });
+          }
+        } catch { /* skip */ }
+        continue;
       }
       if (g2Sel) {
         try {

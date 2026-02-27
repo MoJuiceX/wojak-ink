@@ -9,6 +9,7 @@ import {
   WALLET_ADDRESS,
   SPACESCAN_API,
   COINGECKO_API,
+  MINTGARDEN_API,
   SPACESCAN_WALLET_URL,
 } from './constants';
 import { spacescanQueue, coingeckoQueue } from '@/utils/rateLimiter';
@@ -340,6 +341,79 @@ function getCachedNFTCollections(): NFTCollection[] {
 }
 
 /**
+ * For NFTs missing preview images, fetch thumbnails from MintGarden one by one.
+ * Uses direct fetch (no queue) since this only runs for a handful of NFTs.
+ * Mutates the items in place — non-critical, failures are silently skipped.
+ */
+async function backfillMissingThumbnails(collections: NFTCollection[]): Promise<void> {
+  // Gather all NFTs missing images
+  const missing: NFTItem[] = [];
+  for (const col of collections) {
+    for (const nft of col.nfts) {
+      if (!nft.imageUrl) {
+        missing.push(nft);
+      }
+    }
+  }
+
+  if (missing.length === 0) return;
+
+  console.warn(`[Treasury] ${missing.length} NFTs missing images — fetching from MintGarden`);
+
+  let filled = 0;
+  for (const nft of missing) {
+    try {
+      const url = `${MINTGARDEN_API}/nfts/${encodeURIComponent(nft.nftId)}`;
+      console.warn(`[Treasury] Fetching MintGarden thumbnail: ${url}`);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+      const response = await fetch(url, {
+        signal: controller.signal,
+        headers: { 'Accept': 'application/json' },
+      });
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        console.warn(`[Treasury] MintGarden returned ${response.status} for ${nft.nftId}`);
+        continue;
+      }
+
+      const json = await response.json();
+      const thumbnailUri = json?.data?.thumbnail_uri as string | undefined;
+
+      if (thumbnailUri) {
+        nft.imageUrl = thumbnailUri;
+        filled++;
+        console.warn(`[Treasury] Got thumbnail for "${nft.name}": ${thumbnailUri}`);
+      } else {
+        console.warn(`[Treasury] No thumbnail_uri in MintGarden response for "${nft.name}"`);
+      }
+    } catch (err) {
+      console.warn(`[Treasury] MintGarden fetch failed for "${nft.name}":`, err);
+    }
+
+    // Small delay between requests to be polite to MintGarden
+    if (missing.indexOf(nft) < missing.length - 1) {
+      await new Promise(r => setTimeout(r, 300));
+    }
+  }
+
+  console.warn(`[Treasury] MintGarden backfill complete: ${filled}/${missing.length} filled`);
+
+  // Update collection preview images for any that were missing
+  for (const col of collections) {
+    if (!col.previewImage) {
+      const nftWithImage = col.nfts.find(n => n.imageUrl);
+      if (nftWithImage) {
+        col.previewImage = nftWithImage.imageUrl;
+      }
+    }
+  }
+}
+
+/**
  * Derive a collection name from NFT names in the group.
  * SpaceScan doesn't return collection_name, so we extract it
  * from the NFT name by stripping trailing "#NUMBER" or edition numbers.
@@ -432,8 +506,16 @@ async function fetchNFTCollections(): Promise<NFTCollection[]> {
   }
 
   // Convert to array and sort by count descending
-  return Array.from(collectionMap.values())
+  const sorted = Array.from(collectionMap.values())
     .sort((a, b) => b.count - a.count);
+
+  // Fire-and-forget: fill missing thumbnails from MintGarden in the background.
+  // Don't await — this would eat into the 45s overall timeout budget.
+  // The backfill mutates the NFT objects in place; if the data gets saved to
+  // localStorage later, the MintGarden URLs persist for future loads.
+  backfillMissingThumbnails(sorted).catch(() => {});
+
+  return sorted;
 }
 
 function getDefaultWalletData(): WalletData {

@@ -6,6 +6,7 @@
 
 export const KNOWN_TRAIT_IDS = {
   Clothes_Astronaut: 'Clothes_Astronaut',
+  Clothes_StraightJacket: 'Clothes_Straigth-jacket',
   Clothes_ChiaFarmer: 'Clothes_Chia-farmer',
   Mask_Hannibal: 'Mask_Hannibal-Mask',
   Mask_Copium: 'Mask_Copium-mask',

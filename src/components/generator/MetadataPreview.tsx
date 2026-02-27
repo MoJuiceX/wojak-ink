@@ -46,6 +46,9 @@ const LAYER_TO_TRAIT_TYPE: Record<string, string> = {
   Head: 'Head',
   Clothes: 'Clothes',
   Background: 'Background',
+  Extra1: 'Extra',
+  Extra2: 'Extra',
+  Extra3: 'Extra',
 };
 
 /** Default color for solid color backgrounds - sky blue */
@@ -217,10 +220,21 @@ export function useMetadataAttributes(): MetadataAttribute[] {
       });
     }
 
-    // Consolidate: when multiple layers map to the same trait_type,
+    // Separate extras (don't consolidate — can have up to 2)
+    const extraAttrs: MetadataAttribute[] = [];
+    const nonExtraAttrs: MetadataAttribute[] = [];
+    for (const attr of rawAttrs) {
+      if (attr.trait_type === 'Extra') {
+        extraAttrs.push(attr);
+      } else {
+        nonExtraAttrs.push(attr);
+      }
+    }
+
+    // Consolidate non-extras: when multiple layers map to the same trait_type,
     // keep the rarer trait (lower Phase 1 count wins). Unknown traits default to 0 (rarest).
     const byTraitType = new Map<string, MetadataAttribute>();
-    for (const attr of rawAttrs) {
+    for (const attr of nonExtraAttrs) {
       const existing = byTraitType.get(attr.trait_type);
       if (!existing) {
         byTraitType.set(attr.trait_type, attr);
@@ -260,7 +274,7 @@ export function useMetadataAttributes(): MetadataAttribute[] {
       });
     }
 
-    // Always return all 7 trait types in canonical order.
+    // Always return all 7 core trait types in canonical order.
     // Background is the only trait that can be empty (grayed out until selected).
     const ORDER = ['Base', 'Face', 'Head', 'Face Wear', 'Mouth', 'Clothes', 'Background'];
     const result: MetadataAttribute[] = ORDER.map((traitType) => {
@@ -275,6 +289,11 @@ export function useMetadataAttributes(): MetadataAttribute[] {
       };
     });
 
+    // Append extras at the end (only when selected — no placeholder)
+    for (const extra of extraAttrs) {
+      result.push(extra);
+    }
+
     return result;
   }, [selectedLayers, selectedColors]);
 }
@@ -287,6 +306,7 @@ export function MetadataPreview({ onSwitchToColors }: MetadataPreviewProps) {
   const attributes = useMetadataAttributes();
 
   const selectedCount = attributes.filter((a) => a.value !== '').length;
+  const totalCount = attributes.length;
 
   return (
     <div className="generator-panel-section flex flex-col h-full overflow-hidden">
@@ -304,7 +324,7 @@ export function MetadataPreview({ onSwitchToColors }: MetadataPreviewProps) {
               letterSpacing: '0.03em',
             }}
           >
-            {selectedCount}/7
+            {selectedCount}/{totalCount}
           </span>
         </div>
         <button

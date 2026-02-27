@@ -1,57 +1,97 @@
 /**
  * SpaceScan API Proxy
- * Proxies requests to api.spacescan.io to avoid CORS issues in production
+ * Proxies requests to api.spacescan.io to avoid CORS issues in production.
+ *
+ * Uses Cloudflare's Cache API for edge caching:
+ *   - Successful responses (2xx/3xx) are cached at the edge for 5 minutes.
+ *   - All users share the same edge cache, so SpaceScan is only called
+ *     once per 5 minutes per unique URL — no matter how many visitors.
+ *   - Error responses (429, 5xx) are NEVER cached.
  */
 
 type Env = Record<string, unknown>;
 
+const EDGE_CACHE_TTL = 300; // 5 minutes (seconds)
+
 export const onRequest: PagesFunction<Env> = async (context) => {
-  const { params } = context;
+  const { params, request } = context;
+
+  // Only proxy GET requests
+  if (request.method !== 'GET') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: corsHeaders(),
+    });
+  }
 
   // Get the path from the catch-all parameter
   const pathSegments = params.path as string[];
   const path = pathSegments ? pathSegments.join('/') : '';
 
-  // Build the SpaceScan URL
+  // ── Edge Cache: check first ──────────────────────────────────────
+  // Use the incoming request URL as the cache key (includes path + query).
+  const cacheKey = new Request(request.url, { method: 'GET' });
+  const cache = caches.default;
+
+  try {
+    const cached = await cache.match(cacheKey);
+    if (cached) {
+      // Clone so we can add our own header without mutating the stored copy.
+      const hit = new Response(cached.body, cached);
+      hit.headers.set('X-Cache', 'HIT');
+      return hit;
+    }
+  } catch {
+    // Cache API unavailable (e.g. local dev) — fall through to origin.
+  }
+
+  // ── Origin fetch ─────────────────────────────────────────────────
   const spacescanUrl = `https://api.spacescan.io/${path}`;
 
   try {
-    // Forward the request to SpaceScan
     const response = await fetch(spacescanUrl, {
-      method: context.request.method,
       headers: {
         'Accept': 'application/json',
         'User-Agent': 'wojak.ink/1.0',
       },
     });
 
-    // Get the response body
     const data = await response.text();
+    const ok = response.status >= 200 && response.status < 400;
 
-    // Only cache successful responses — NEVER cache 429/5xx errors.
-    // Caching error responses causes the browser to serve stale 429s for minutes,
-    // making retries useless and blocking all API calls until the cache expires.
-    const cacheHeader = response.status >= 200 && response.status < 400
-      ? 'public, max-age=300' // Cache successful responses for 5 minutes
-      : 'no-store, no-cache'; // Never cache errors
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...corsHeaders(),
+      'Cache-Control': ok
+        ? `public, max-age=${EDGE_CACHE_TTL}` // Browser + CDN cache
+        : 'no-store, no-cache',               // Never cache errors
+      'X-Cache': 'MISS',
+    };
 
-    // Return with CORS headers
-    return new Response(data, {
+    const freshResponse = new Response(data, {
       status: response.status,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': 'https://wojak.ink',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Cache-Control': cacheHeader,
-      },
+      headers,
     });
+
+    // ── Edge Cache: store successful responses ────────────────────
+    if (ok) {
+      try {
+        // waitUntil keeps the function alive while the cache write completes,
+        // but doesn't block the response to the user.
+        context.waitUntil(cache.put(cacheKey, freshResponse.clone()));
+      } catch {
+        // Cache write failed — not critical, next request will try again.
+      }
+    }
+
+    return freshResponse;
   } catch {
     return new Response(JSON.stringify({ error: 'Failed to fetch from SpaceScan' }), {
-      status: 500,
+      status: 502,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': 'https://wojak.ink',
+        ...corsHeaders(),
+        'Cache-Control': 'no-store, no-cache',
       },
     });
   }
@@ -59,11 +99,13 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
 // Handle CORS preflight
 export const onRequestOptions: PagesFunction<Env> = async () => {
-  return new Response(null, {
-    headers: {
-      'Access-Control-Allow-Origin': 'https://wojak.ink',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  });
+  return new Response(null, { headers: corsHeaders() });
 };
+
+function corsHeaders(): Record<string, string> {
+  return {
+    'Access-Control-Allow-Origin': 'https://wojak.ink',
+    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
+}

@@ -44,18 +44,18 @@ const DOMAIN_CONFIGS: Record<string, Partial<RateLimitConfig>> = {
     minDelayMs: 500,
   },
   'api.spacescan.io': {
-    requestsPerSecond: 0.33,  // SpaceScan: ~1 request per 3 seconds (treasury makes 3 calls per refresh)
-    minDelayMs: 3000,         // 3s between calls — total ~9s for 3 calls. Avoids 429.
-    maxRetries: 3,            // 3 retries (works now that errors have .status)
-    baseBackoffMs: 10000,     // 10 second initial backoff on 429
-    maxBackoffMs: 60000,      // Up to 1 minute backoff
+    requestsPerSecond: 2,     // Client hits our edge-cached proxy, NOT SpaceScan directly.
+    minDelayMs: 500,          // 500ms between calls — total ~1.5s for 3 calls. Edge cache serves most.
+    maxRetries: 1,            // One retry on 429 (edge cache miss), then fail fast.
+    baseBackoffMs: 3000,      // 3s backoff — short, since next attempt likely hits fresh edge cache.
+    maxBackoffMs: 5000,       // Cap at 5 seconds
   },
   'api2.spacescan.io': {
-    requestsPerSecond: 0.33,
-    minDelayMs: 3000,
-    maxRetries: 3,
-    baseBackoffMs: 10000,
-    maxBackoffMs: 60000,
+    requestsPerSecond: 2,
+    minDelayMs: 500,
+    maxRetries: 1,
+    baseBackoffMs: 3000,
+    maxBackoffMs: 5000,
   },
   'api.coingecko.com': {
     requestsPerSecond: 0.1,   // CoinGecko free tier - 1 request per 10 seconds (very conservative)

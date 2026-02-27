@@ -58,7 +58,6 @@ export const TRAIT_COMBAT_MAP: Record<string, TraitCombatEntry> = {
   'Background_Jungle-Canopy': e('Background_Jungle-Canopy', 'Background', 'Jungle Canopy', false, 'GRASS', 6, 'INSECT', 2, 'sp_atk', 3),
   'Background_Sky-Fortress': e('Background_Sky-Fortress', 'Background', 'Sky Fortress', false, 'AIR', 5, 'DRAGON', 2, 'speed', 3),
   'Background_Ancient-Quarry': e('Background_Ancient-Quarry', 'Background', 'Ancient Quarry', false, 'STONE', 8, 'EARTH', 2, 'defense', 3),
-  'Background_Hive-Nest': e('Background_Hive-Nest', 'Background', 'Hive Nest', false, 'INSECT', 8, 'VENOM', 2, 'speed', 3),
   'Background_Thunderstorm': e('Background_Thunderstorm', 'Background', 'Thunderstorm', false, 'ELECTRIC', 5, 'AIR', 2, 'sp_atk', 3),
   'Background_Toxic-Swamp': e('Background_Toxic-Swamp', 'Background', 'Toxic Swamp', false, 'VENOM', 8, 'GRASS', 2, 'sp_atk', 3),
   'Background_Dragons-Lair': e('Background_Dragons-Lair', 'Background', 'Dragons Lair', false, 'DRAGON', 6, 'FIRE', 2, 'attack', 3),
@@ -228,6 +227,17 @@ export const TRAIT_COMBAT_MAP: Record<string, TraitCombatEntry> = {
   'Head_Trump-Wave': e('Head_Trump-Wave', 'Head', 'Trump Wave', false, 'DRAGON', 6, 'NEUTRAL', 2, 'sp_atk', 3),
   'Head_viking-helmet': e('Head_viking-helmet', 'Head', 'Viking Helmet', true, 'ICE', 6, 'MARTIAL', 2, 'attack', 3),
   'Head_Wiz-Hat': e('Head_Wiz-Hat', 'Head', 'Wiz Hat', true, 'PSYCHE', 5, 'MYSTIC', 2, 'sp_atk', 3),
+
+  // ── Extras (hand items + wings) (9) ────────────────────────────────
+  'EXTRA_EXTRA_hand_diamond': e('EXTRA_EXTRA_hand_diamond', 'Extra', 'Diamond', false, 'DRAGON', 3, 'METAL', 1, 'defense', 2),
+  'EXTRA_EXTRA_hand_goose': e('EXTRA_EXTRA_hand_goose', 'Extra', 'Goose', false, 'WATER', 3, 'AIR', 1, 'attack', 2),
+  'EXTRA_EXTRA_hand_orange': e('EXTRA_EXTRA_hand_orange', 'Extra', 'Orange', false, 'GRASS', 3, 'EARTH', 1, 'sp_def', 2),
+  'EXTRA_EXTRA_hand_TangTalk': e('EXTRA_EXTRA_hand_TangTalk', 'Extra', 'TangTalk', false, 'ELECTRIC', 3, 'NEUTRAL', 1, 'sp_atk', 2),
+  'EXTRA_EXTRA_hand_coffee': e('EXTRA_EXTRA_hand_coffee', 'Extra', 'Coffee', false, 'FIRE', 3, 'NEUTRAL', 1, 'speed', 2),
+  'EXTRA_EXTRA_hand_gun_left': e('EXTRA_EXTRA_hand_gun_left', 'Extra', 'Handgun', false, 'METAL', 3, 'SHADOW', 1, 'attack', 2),
+  'EXTRA_EXTRA_hand_gfy_right': e('EXTRA_EXTRA_hand_gfy_right', 'Extra', 'GFY Right', false, 'MARTIAL', 3, 'SHADOW', 1, 'attack', 2),
+  'EXTRA_EXTRA_hand_gfy_left': e('EXTRA_EXTRA_hand_gfy_left', 'Extra', 'GFY Left', false, 'MARTIAL', 3, 'SHADOW', 1, 'attack', 2),
+  'EXTRA_EXTRA_wings': e('EXTRA_EXTRA_wings', 'Extra', 'Wings', false, 'AIR', 3, 'MYSTIC', 1, 'speed', 2),
 };
 
 // ---------- accessor ----------

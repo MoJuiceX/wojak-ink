@@ -14,7 +14,7 @@ import {
   Crown,
   Lock,
   Cigarette,
-  Scan,
+  Sparkles,
   type LucideIcon,
 } from 'lucide-react';
 import { useGenerator } from '@/contexts/GeneratorContext';
@@ -31,7 +31,7 @@ const LAYER_ICONS: Record<string, LucideIcon> = {
   Eye,
   Crown,
   Cigarette,
-  Mask: Scan,
+  Sparkles,
 };
 
 import { isSelectionPathEmpty } from '@/types/generator';

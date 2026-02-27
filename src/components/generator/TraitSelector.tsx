@@ -58,6 +58,13 @@ const CLOTHES_TOP_ORDER = [
   'fire-figther',    // Firefighter
 ];
 
+/** Check if a trait path is an extra item (hand items or wings) — uses multi-select toggle behavior */
+function isExtraItem(path: string | undefined): boolean {
+  if (!path) return false;
+  const lower = path.toLowerCase();
+  return lower.includes('extra_hand') || lower.includes('extra_wings');
+}
+
 /**
  * Character suits - these appear at the very end, alphabetically sorted among themselves.
  * Keywords matched case-insensitively against trait ID.
@@ -560,10 +567,12 @@ interface LayerWithBaseMouthCardProps {
   onClick: () => void;
   pricing?: TraitPricingEntry | null;
   isTop3?: boolean;
+  /** When true, render the trait image behind the base (e.g. wings) */
+  renderBehindBase?: boolean;
 }
 
 /** Card for Head, Mask, Eyes, Background: base + mouth rendered under the trait. */
-function LayerWithBaseMouthCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing, isTop3 }: LayerWithBaseMouthCardProps) {
+function LayerWithBaseMouthCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing, isTop3, renderBehindBase }: LayerWithBaseMouthCardProps) {
   const prefersReducedMotion = useReducedMotion();
 
   return (
@@ -591,6 +600,15 @@ function LayerWithBaseMouthCard({ image, isSelected, isDisabled, disabledReason,
       <div
         className="relative w-full h-full rounded-lg overflow-hidden trait-card-image-bg"
       >
+        {/* Trait rendered behind base (e.g. wings) */}
+        {renderBehindBase && (
+          <img
+            src={image.path}
+            alt={image.displayName}
+            className="absolute inset-0 w-full h-full object-cover"
+            loading="lazy"
+          />
+        )}
         {/* Base layer */}
         <img
           src={DEFAULT_BASE_PATH}
@@ -613,12 +631,14 @@ function LayerWithBaseMouthCard({ image, isSelected, isDisabled, disabledReason,
           loading="lazy"
         />
         {/* Trait layer (Head, Mask, Eyes, Background) on top */}
-        <img
-          src={image.path}
-          alt={image.displayName}
-          className="absolute inset-0 w-full h-full object-cover"
-          loading="lazy"
-        />
+        {!renderBehindBase && (
+          <img
+            src={image.path}
+            alt={image.displayName}
+            className="absolute inset-0 w-full h-full object-cover"
+            loading="lazy"
+          />
+        )}
         <TraitUsageBadge pricing={pricing ?? null} isTop3={isTop3} />
         <div className="trait-label-overlay">
           <span className="trait-label-text">{image.displayName}</span>
@@ -840,6 +860,8 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
     selectLayer,
     selectG2Layer,
     clearLayer,
+    toggleExtra,
+    clearExtras,
     isLayerDisabled,
     isOptionDisabled,
     getOptionDisabledReason,
@@ -929,6 +951,17 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
   const handleTraitClick = (trait: UnifiedTrait) => {
     if (isBlocked || isOptionDisabled(activeLayer, trait.name)) return;
 
+    // Extra items (hand items, wings) use multi-select toggle instead of single-select
+    if (trait.g1Path && isExtraItem(trait.g1Path)) {
+      const isAlreadySelected =
+        selectedLayers['Extra1'] === trait.g1Path || selectedLayers['Extra2'] === trait.g1Path || selectedLayers['Extra3'] === trait.g1Path;
+      if (!isAlreadySelected) {
+        triggerSelectionGlow(trait.id);
+      }
+      toggleExtra(trait.g1Path);
+      return;
+    }
+
     const isG2Selected = g2Sel?.traitId === trait.id;
     const isG1Selected = trait.g1Path && (selectedPath === trait.g1Path || (selectedPath != null && trait.g1Variants?.includes(selectedPath)));
 
@@ -985,6 +1018,10 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
 
   const handleClearSelection = () => {
     clearLayer(activeLayer);
+    // Also clear extras when clearing the Extras tab
+    if (activeLayer === 'Mask') {
+      clearExtras();
+    }
   };
 
   return (
@@ -1037,7 +1074,10 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                 variants={prefersReducedMotion ? undefined : traitCardStaggerVariants}
               >
                 <NoneCard
-                  isSelected={isSelectionPathEmpty(selectedPath)}
+                  isSelected={
+                    isSelectionPathEmpty(selectedPath) &&
+                    (activeLayer !== 'Mask' || (!selectedLayers['Extra1'] && !selectedLayers['Extra2'] && !selectedLayers['Extra3']))
+                  }
                   onClick={handleClearSelection}
                 />
               </motion.div>
@@ -1045,9 +1085,11 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
             {unifiedTraits.map((trait) => {
               const disabled = isOptionDisabled(activeLayer, trait.name);
               const reason = disabled ? getOptionDisabledReason(activeLayer, trait.name) : null;
-              const isSelected =
-                g2Sel?.traitId === trait.id ||
-                (!!trait.g1Path && (selectedPath === trait.g1Path || (selectedPath != null && trait.g1Variants?.includes(selectedPath))));
+              // Extra items check Extra1/Extra2/Extra3 slots; traditional items check the layer's selectedPath
+              const isSelected = (trait.g1Path && isExtraItem(trait.g1Path))
+                ? (selectedLayers['Extra1'] === trait.g1Path || selectedLayers['Extra2'] === trait.g1Path || selectedLayers['Extra3'] === trait.g1Path)
+                : (g2Sel?.traitId === trait.id ||
+                   (!!trait.g1Path && (selectedPath === trait.g1Path || (selectedPath != null && trait.g1Variants?.includes(selectedPath)))));
 
               const traitIsTop3 = isTop3Trait(traitType, trait.name);
               const isGlowing = glowingTraitId === trait.id;
@@ -1201,6 +1243,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                       onClick={() => handleTraitClick(trait)}
                       pricing={lookupPricing(trait.name)}
                       isTop3={traitIsTop3}
+                      renderBehindBase={image.path.toLowerCase().includes('extra_wings')}
                     />
                   ) : (
                     <ImageCard

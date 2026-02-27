@@ -740,6 +740,40 @@ function ruleFirefighterHelmetEyesExclusion(_resolver: SelectionResolver): RuleR
   return { disabledLayers: [] };
 }
 
+/**
+ * Straitjacket disables all hand extras (hands are tied).
+ * Wings remain selectable. Grays out hand items in Extras tab.
+ * Also disables Hand Mask (full face mask) since it implies free hands.
+ */
+const STRAITJACKET_DISABLED_EXTRAS = [
+  'Coffee', 'Diamond', 'GFY Left', 'GFY Right', 'Goose',
+  'Handgun', 'Hand Guns', 'Hand Seedling', 'Orange', 'TangTalk',
+  'Hand Mask',
+];
+
+function ruleStraightJacketDisablesHandExtras(resolver: SelectionResolver): RuleResult {
+  const clothesId = resolver.getTraitId('Clothes');
+  if (clothesId !== KNOWN_TRAIT_IDS.Clothes_StraightJacket) {
+    return { disabledLayers: [] };
+  }
+
+  const reason = 'Deselect Straitjacket';
+  const result: RuleResult = {
+    disabledLayers: [],
+    disabledOptions: { Mask: STRAITJACKET_DISABLED_EXTRAS },
+    disabledOptionReasons: { Mask: buildDisabledReasons(STRAITJACKET_DISABLED_EXTRAS, reason) },
+  };
+
+  // If Hand Mask is currently selected, clear it (it's in the Mask slot, not Extra slots)
+  const maskPath = resolver.getPath('Mask');
+  if (maskPath && (pathContains(maskPath, 'hand_mask') || pathContains(maskPath, 'hand-mask'))) {
+    result.clearSelections = ['Mask'];
+    result.forceSelections = { Mask: '' };
+  }
+
+  return result;
+}
+
 // ============ Rules Array ============
 
 const RULES = [
@@ -769,6 +803,7 @@ const RULES = [
   ruleClothesAddonRequiresTeeOrTanktop,
   ruleSuitDisablesNeckbeard,
   ruleFirefighterHelmetEyesExclusion,
+  ruleStraightJacketDisablesHandExtras,
 ];
 
 // ============ Public API ============

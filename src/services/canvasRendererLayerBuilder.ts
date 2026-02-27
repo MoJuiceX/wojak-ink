@@ -343,6 +343,11 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
           layers.push({ path, zIndex, layerName: 'Mask', clipLeftPercent: 0.27 });
           skipLayer = true;
         }
+        // Bandana + Centurion: crop left 25%
+        else if (hasBandana && hasCenturion) {
+          layers.push({ path, zIndex, layerName: 'Mask', clipLeftPercent: 0.25 });
+          skipLayer = true;
+        }
         // Bandana + incompatible suit (Sonic, Pickle, Goose): skip entirely
         else if (hasBandanaRaw && isSuitIncompatibleWithBandana(selectedLayers)) skipLayer = true;
         // Bandana + Gopher suit + Ninja Turtle: crop left 30.1%, then 30.1%-41.5% under suit, 41.5%+ on top
@@ -965,6 +970,18 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
           zIndex: LAYER_Z_INDEX.MaskUnderAstronaut,
           layerName: 'MaskUnderAstronaut',
         });
+      } else if (pathContains(maskPath, 'copium')) {
+        // Copium + Astronaut: fill+outline render under suit AND under eyes (z=Mask=7), detail renders on top
+        layers.push({
+          path: maskPath,
+          zIndex: LAYER_Z_INDEX.Mask,
+          layerName: 'CopiumFillOutlineUnderAstronaut',
+        });
+        layers.push({
+          path: maskPath,
+          zIndex: LAYER_Z_INDEX.CopiumDetailOverAstronaut,
+          layerName: 'CopiumDetailOverAstronaut',
+        });
       } else {
         layers.push({
           path: maskPath,
@@ -1418,6 +1435,19 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
         layerName: 'TrumpHairOverAll',
       });
     }
+  }
+
+  // Extra1, Extra2, Extra3 (hand items + wings) — multi-select extra accessories
+  for (const extraKey of ['Extra1', 'Extra2', 'Extra3'] as const) {
+    const extraPath = selectedLayers[extraKey];
+    if (isSelectionPathEmpty(extraPath)) continue;
+    const path = extraPath as string;
+    const isWings = pathContains(path, 'extra_wings');
+    layers.push({
+      path,
+      zIndex: isWings ? LAYER_Z_INDEX.ExtraWings : LAYER_Z_INDEX.ExtraHands,
+      layerName: extraKey,
+    });
   }
 
   return layers.sort((a, b) => a.zIndex - b.zIndex);

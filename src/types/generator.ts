@@ -170,8 +170,11 @@ export interface LayerSelection {
   g2?: G2Selection;
 }
 
-/** In-memory state: one structure per layer. */
-export type SelectionsSnapshot = Partial<Record<UILayerName, LayerSelection>>;
+/** Keys that can appear in SelectionsSnapshot: UI layers + Extra1/Extra2/Extra3 slots. */
+export type SelectionKey = UILayerName | 'Extra1' | 'Extra2' | 'Extra3';
+
+/** In-memory state: one structure per layer (includes extra slots for multi-select extras). */
+export type SelectionsSnapshot = Partial<Record<SelectionKey, LayerSelection>>;
 
 /** True if path means "no selection" (used by adapter, resolver, rules, UI). */
 export function isSelectionPathEmpty(path: string | undefined): boolean {
@@ -180,7 +183,7 @@ export function isSelectionPathEmpty(path: string | undefined): boolean {
 
 // ============ Generator State (legacy external shape) ============
 
-export type SelectedLayers = Partial<Record<UILayerName, string>>;
+export type SelectedLayers = Partial<Record<SelectionKey, string>>;
 
 export interface GeneratorState {
   selectedLayers: SelectedLayers;

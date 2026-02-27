@@ -95,6 +95,7 @@ export const LAYER_Z_INDEX: Record<string, number> = {
   MaskUnderAstronaut: 10.8,
   Astronaut: 11,
   MaskOverAstronaut: 11.3,
+  CopiumDetailOverAstronaut: 11.4, // Copium detail renders over Astronaut suit; fill+outline stay under
   LaserEyesOverAstronaut: 11.5,
   BeerHatRightBehind: 0.5,   // right can/tube behind base and cap (draw before Base)
   BeerHatUnder: 11.9,  // head under Beer Hat (Cap, Viking, etc.)
@@ -122,4 +123,6 @@ export const LAYER_Z_INDEX: Record<string, number> = {
   BubbleGumOverEyes: 60,
   LaserEyesOverBubbleGum: 61, // Laser Eyes re-drawn on top of BubbleGum
   FullFaceMask: 100,
+  ExtraHands: 101,    // Extra hand items — render on top of everything
+  ExtraWings: 0.8,    // Extra wings — between Background (0) and Base (1)
 };

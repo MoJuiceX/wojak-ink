@@ -72,7 +72,10 @@ export type GeneratorLayerName =
   | 'BandanaMaskOverRonin'
   | 'NeckbeardOverRonin'
   | 'EyesOverHead'
-  | 'BubbleGumOverEyes';
+  | 'BubbleGumOverEyes'
+  | 'Extra1'
+  | 'Extra2'
+  | 'Extra3';
 
 // Re-export from single source of truth (layerRegistry)
 import type { UILayerName } from '@/lib/layerRegistry';

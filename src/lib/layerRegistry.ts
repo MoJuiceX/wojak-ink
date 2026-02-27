@@ -94,10 +94,10 @@ export const LAYER_META: Record<UILayerName, LayerMeta> = {
     description: 'Cigarettes, Joint, Cohiba - renders on top of mouth',
   },
   Mask: {
-    label: 'Mask',
+    label: 'Extras',
     required: false,
-    icon: 'Mask',
-    description: 'Masks and face coverings',
+    icon: 'Sparkles',
+    description: 'Masks, hand items, wings, and extra accessories',
   },
   Eyes: {
     label: 'Eyes',
@@ -155,7 +155,6 @@ export const SCENE_BACKGROUNDS: string[] = [
   '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Graveyard.png',
   '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Heaven.png',
   '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Hell.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Hive Nest.png',
   '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Jungle.png',
   '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Matrix.png',
   '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Moms Basement.png',

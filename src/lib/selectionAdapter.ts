@@ -10,8 +10,12 @@ import {
   type SelectedLayers,
   type G2Selections,
   type SelectionsSnapshot,
+  type SelectionKey,
 } from '@/types/generator';
 import type { PathToTraitIdMap } from '@/lib/selectionResolver';
+
+/** Extra slot keys (not UI layers, used for multi-select extras) */
+const EXTRA_KEYS: ReadonlySet<string> = new Set(['Extra1', 'Extra2', 'Extra3']);
 
 /**
  * Convert unified selections to the dual shape expected by mint API, renderer, and v1 favorites.
@@ -23,14 +27,15 @@ export function toExternal(selections: SelectionsSnapshot): {
   const selectedLayers: SelectedLayers = {};
   const g2Selections: G2Selections = {};
 
-  for (const layer of Object.keys(selections) as UILayerName[]) {
+  for (const layer of Object.keys(selections) as SelectionKey[]) {
     const sel = selections[layer];
     if (!sel) continue;
     if (sel.path && !isSelectionPathEmpty(sel.path)) {
       selectedLayers[layer] = sel.path;
     }
-    if (sel.g2) {
-      g2Selections[layer] = sel.g2;
+    // Only UILayerName keys can have G2 data (extras are G1 only)
+    if (sel.g2 && !EXTRA_KEYS.has(layer)) {
+      g2Selections[layer as UILayerName] = sel.g2;
     }
   }
 

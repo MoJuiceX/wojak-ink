@@ -237,7 +237,15 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     }
 
     const consolidated = new Map<string, { trait_type: string; value: string; layerKey: string }>();
+    let extraCount = 0;
     for (const attr of rawAttrs) {
+      // Extras don't consolidate — each gets its own slot (can have up to 2)
+      if (attr.trait_type === 'Extra') {
+        extraCount++;
+        const key = extraCount === 1 ? 'Extra' : `Extra${extraCount}`;
+        consolidated.set(key, attr);
+        continue;
+      }
       const existing = consolidated.get(attr.trait_type);
       if (!existing) {
         consolidated.set(attr.trait_type, attr);

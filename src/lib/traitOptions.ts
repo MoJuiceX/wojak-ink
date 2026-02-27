@@ -325,6 +325,21 @@ export function formatDisplayLabel(rawLabel: string | undefined): string {
 
   const lowerLabel = rawLabel.toLowerCase().trim();
 
+  // Extra item (hand items + wings) overrides
+  const extraOverrides: Record<string, string> = {
+    'hand diamond': 'Diamond',
+    'hand goose': 'Goose',
+    'hand orange': 'Orange',
+    'hand tangtalk': 'TangTalk',
+    'hand coffee': 'Coffee',
+    'hand gun left': 'Handgun',
+    'hand gfy right': 'GFY Right',
+    'hand gfy left': 'GFY Left',
+  };
+  if (extraOverrides[lowerLabel]) {
+    return extraOverrides[lowerLabel];
+  }
+
   if (overrides[lowerLabel]) {
     return overrides[lowerLabel];
   }

@@ -265,6 +265,17 @@ function buildLayerImages(manifest: ManifestData): void {
     }));
     layerImagesCache.set(maskLayer, [...existingMaskImages, ...newMaskImages]);
   }
+
+  // Process EXTRA folder (hand items, wings) - add to existing Mask images (shown in Extras tab)
+  if (manifest['EXTRA']) {
+    const existingMaskImages = layerImagesCache.get('Mask') || [];
+    const newExtraImages: LayerImage[] = manifest['EXTRA'].map((filepath) => ({
+      path: `/assets/wojak-layers/EXTRA/${filepath}`,
+      name: filepath.split('/').pop()?.replace(/\.(png|jpg|jpeg|webp)$/i, '') || '',
+      displayName: parseDisplayName(filepath),
+    }));
+    layerImagesCache.set('Mask', [...existingMaskImages, ...newExtraImages]);
+  }
 }
 
 // ============ Public API ============

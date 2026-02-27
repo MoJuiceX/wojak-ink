@@ -23,6 +23,9 @@ export const LAYER_TO_TRAIT_TYPE: Record<string, string> = {
   Head: 'Head',
   Clothes: 'Clothes',
   Background: 'Background',
+  Extra1: 'Extra',
+  Extra2: 'Extra',
+  Extra3: 'Extra',
 };
 
 /**
@@ -127,6 +130,7 @@ export function consolidateTraits(
   colors?: Record<string, string>
 ): Map<string, ConsolidatedTrait> {
   const consolidated = new Map<string, ConsolidatedTrait>();
+  let extraCount = 0;
 
   for (const [layer, filepath] of Object.entries(layers)) {
     if (!filepath) continue;
@@ -135,6 +139,14 @@ export function consolidateTraits(
 
     const bgColorHex = layer === 'Background' ? colors?.Background : undefined;
     const displayName = resolveTraitName(filepath, layer, bgColorHex);
+
+    // Extras don't consolidate — each gets its own slot (can have up to 2)
+    if (traitType === 'Extra') {
+      extraCount++;
+      const key = extraCount === 1 ? 'Extra' : `Extra${extraCount}`;
+      consolidated.set(key, { traitType: 'Extra', displayName });
+      continue;
+    }
 
     const existing = consolidated.get(traitType);
     if (!existing) {

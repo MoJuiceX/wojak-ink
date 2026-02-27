@@ -283,6 +283,17 @@ export const TRAIT_NAME_MAP: Record<string, string> = {
   'wojakfakemask4': 'Fake It Mask',
   'wojakfakemask5': 'Fake It Mask',
 
+  // === Extras (hand items + wings) ===
+  'hand diamond': 'Diamond',
+  'hand goose': 'Goose',
+  'hand orange': 'Orange',
+  'hand tangtalk': 'TangTalk',
+  'hand coffee': 'Coffee',
+  'hand gun left': 'Handgun',
+  'hand gfy right': 'GFY Right',
+  'hand gfy left': 'GFY Left',
+  'wings': 'Wings',
+
   // === Clothes EXTRA overlays (Chia Farmer composites on tee/tank-top) ===
   'extra on tee,tank top clothes chia farmer blue': 'Chia Farmer',
   'extra on tee,tank top clothes chia farmer brown': 'Chia Farmer',

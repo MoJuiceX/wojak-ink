@@ -1,64 +1,103 @@
 /**
  * CoinGecko API Proxy
- * Proxies requests to api.coingecko.com to avoid CORS issues in production
+ * Proxies requests to api.coingecko.com to avoid CORS issues in production.
+ *
+ * Uses Cloudflare's Cache API for edge caching:
+ *   - Successful responses cached at the edge for 15 minutes.
+ *   - All users share the same edge cache — CoinGecko called once per
+ *     15 minutes per unique URL (conserves demo API key: 10k calls/month).
+ *   - Error responses (429, 5xx) are NEVER cached.
  */
 
 interface Env {
   COINGECKO_API_KEY?: string;
 }
 
+const EDGE_CACHE_TTL = 900; // 15 minutes (seconds)
+
 export const onRequest: PagesFunction<Env> = async (context) => {
   const { params, request, env } = context;
+
+  // Only proxy GET requests
+  if (request.method !== 'GET') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: corsHeaders(),
+    });
+  }
 
   // Get the path from the catch-all parameter
   const pathSegments = params.path as string[];
   const path = pathSegments ? pathSegments.join('/') : '';
 
-  // Get query string from original request, append demo API key if available
+  // ── Edge Cache: check first ──────────────────────────────────────
+  // Use the incoming request URL as the cache key (path + query, minus
+  // the API key which gets appended below for the upstream call only).
+  const cacheKey = new Request(request.url, { method: 'GET' });
+  const cache = caches.default;
+
+  try {
+    const cached = await cache.match(cacheKey);
+    if (cached) {
+      const hit = new Response(cached.body, cached);
+      hit.headers.set('X-Cache', 'HIT');
+      return hit;
+    }
+  } catch {
+    // Cache API unavailable (e.g. local dev) — fall through to origin.
+  }
+
+  // ── Origin fetch ─────────────────────────────────────────────────
+  // Append demo API key (if set) to the upstream URL only — not the cache key.
   const url = new URL(request.url);
   if (env.COINGECKO_API_KEY) {
     url.searchParams.set('x_cg_demo_api_key', env.COINGECKO_API_KEY);
   }
   const queryString = url.search;
-
-  // Build the CoinGecko URL
   const coingeckoUrl = `https://api.coingecko.com/${path}${queryString}`;
 
   try {
-    // Forward the request to CoinGecko
     const response = await fetch(coingeckoUrl, {
-      method: request.method,
       headers: {
         'Accept': 'application/json',
         'User-Agent': 'wojak.ink/1.0',
       },
     });
 
-    // Get the response body
     const data = await response.text();
+    const ok = response.status >= 200 && response.status < 400;
 
-    // Only cache successful responses — NEVER cache 429/5xx errors.
-    const cacheHeader = response.status >= 200 && response.status < 400
-      ? 'public, max-age=900' // Cache successful responses for 15 minutes (demo API key: 10k calls/month)
-      : 'no-store, no-cache'; // Never cache errors
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...corsHeaders(),
+      'Cache-Control': ok
+        ? `public, max-age=${EDGE_CACHE_TTL}`
+        : 'no-store, no-cache',
+      'X-Cache': 'MISS',
+    };
 
-    // Return with CORS headers
-    return new Response(data, {
+    const freshResponse = new Response(data, {
       status: response.status,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': 'https://wojak.ink',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Cache-Control': cacheHeader,
-      },
+      headers,
     });
+
+    // ── Edge Cache: store successful responses ────────────────────
+    if (ok) {
+      try {
+        context.waitUntil(cache.put(cacheKey, freshResponse.clone()));
+      } catch {
+        // Cache write failed — not critical.
+      }
+    }
+
+    return freshResponse;
   } catch {
     return new Response(JSON.stringify({ error: 'Failed to fetch from CoinGecko' }), {
-      status: 500,
+      status: 502,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': 'https://wojak.ink',
+        ...corsHeaders(),
+        'Cache-Control': 'no-store, no-cache',
       },
     });
   }
@@ -66,11 +105,13 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
 // Handle CORS preflight
 export const onRequestOptions: PagesFunction<Env> = async () => {
-  return new Response(null, {
-    headers: {
-      'Access-Control-Allow-Origin': 'https://wojak.ink',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  });
+  return new Response(null, { headers: corsHeaders() });
 };
+
+function corsHeaders(): Record<string, string> {
+  return {
+    'Access-Control-Allow-Origin': 'https://wojak.ink',
+    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
+}

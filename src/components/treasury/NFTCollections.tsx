@@ -10,6 +10,54 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Image as ImageIcon } from 'lucide-react';
 import type { NFTCollection } from '@/services/treasuryService';
 
+/**
+ * Deterministic hue from a string — same name always gets the same color.
+ */
+function nameToHue(name: string): number {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return Math.abs(hash) % 360;
+}
+
+/**
+ * Renders an image with a colored fallback behind it.
+ * - If imageUrl exists and loads → image covers the fallback.
+ * - If imageUrl exists but fails → image hidden, fallback shows.
+ * - If imageUrl missing → fallback shows immediately.
+ */
+function NFTImage({ src, name }: { src: string; name: string }) {
+  const hue = nameToHue(name);
+  const bg = `hsl(${hue}, 35%, 20%)`;
+
+  return (
+    <div className="relative w-full h-full" style={{ background: bg }}>
+      {/* Fallback: always rendered behind the image */}
+      <div className="absolute inset-0 flex items-center justify-center p-2">
+        <span
+          className="text-xs font-medium text-center leading-tight"
+          style={{ color: `hsl(${hue}, 40%, 65%)`, maxWidth: '100%', wordBreak: 'break-word' }}
+        >
+          {name.length > 24 ? name.slice(0, 22) + '…' : name}
+        </span>
+      </div>
+      {/* Image overlay — covers fallback when loaded */}
+      {src && (
+        <img
+          src={src}
+          alt={name}
+          className="absolute inset-0 w-full h-full object-cover"
+          loading="lazy"
+          onError={(e) => {
+            (e.target as HTMLImageElement).style.display = 'none';
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
 interface NFTCollectionsProps {
   collections: NFTCollection[];
   isLoading?: boolean;
@@ -149,21 +197,7 @@ export function NFTCollections({ collections, isLoading = false }: NFTCollection
                   role="listitem"
                   aria-label={nft.name}
                 >
-                  {nft.imageUrl ? (
-                    <img
-                      src={nft.imageUrl}
-                      alt={nft.name}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <ImageIcon size={32} className="text-muted" style={{ opacity: 0.5 }} />
-                    </div>
-                  )}
+                  <NFTImage src={nft.imageUrl} name={nft.name} />
                 </motion.div>
               ))}
             </motion.div>
@@ -199,21 +233,7 @@ export function NFTCollections({ collections, isLoading = false }: NFTCollection
                   role="listitem"
                   aria-label={`View ${collection.collectionName} NFTs (${collection.count} items)`}
                 >
-                  {collection.previewImage ? (
-                    <img
-                      src={collection.previewImage}
-                      alt={collection.collectionName}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <ImageIcon size={32} className="text-muted" style={{ opacity: 0.5 }} />
-                    </div>
-                  )}
+                  <NFTImage src={collection.previewImage} name={collection.collectionName} />
                   {/* Overlay */}
                   <div
                     className="absolute inset-x-0 bottom-0 p-2"

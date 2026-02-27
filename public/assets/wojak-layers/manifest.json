@@ -14,7 +14,6 @@
     "Scene/BACKGROUND_Graveyard.png",
     "Scene/BACKGROUND_Heaven.png",
     "Scene/BACKGROUND_Hell.png",
-    "Scene/BACKGROUND_Hive Nest.png",
     "Scene/BACKGROUND_Jungle.png",
     "Scene/BACKGROUND_Matrix.png",
     "Scene/BACKGROUND_Moms Basement.png",
@@ -175,5 +174,16 @@
   ],
   "MASK": [
     "Wojak_hand_mask.png"
+  ],
+  "EXTRA": [
+    "EXTRA_hand_coffee.png",
+    "EXTRA_hand_diamond.png",
+    "EXTRA_hand_gfy_left.png",
+    "EXTRA_hand_gfy_right.png",
+    "EXTRA_hand_goose.png",
+    "EXTRA_hand_gun_left.png",
+    "EXTRA_hand_orange.png",
+    "EXTRA_hand_TangTalk.png",
+    "EXTRA_wings.png"
   ]
 }

@@ -230,6 +230,8 @@ interface GeneratorContextValue extends GeneratorState {
   setBeerHatEditFocus: (focus: 'beer' | 'underlayer') => void;
   clearLayer: (layer: UILayerName) => void;
   setActiveLayer: (layer: UILayerName) => void;
+  toggleExtra: (path: string) => void;
+  clearExtras: () => void;
   randomize: () => void;
   randomizeLayer: (layer: UILayerName) => Promise<void>;
   clearAll: () => void;
@@ -414,6 +416,15 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
   const selectLayer = useCallback((layer: UILayerName, path: string) => {
     if (!isUILayerName(layer) || !path || path.trim() === '') return;
     dispatch({ type: 'SET_LAYER', layer, path });
+  }, []);
+
+  const toggleExtra = useCallback((path: string) => {
+    if (!path || path.trim() === '') return;
+    dispatch({ type: 'TOGGLE_EXTRA', path });
+  }, []);
+
+  const clearExtras = useCallback(() => {
+    dispatch({ type: 'CLEAR_EXTRAS' });
   }, []);
 
   /**
@@ -1024,6 +1035,8 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
       setBeerHatEditFocus,
       clearLayer,
       setActiveLayer,
+      toggleExtra,
+      clearExtras,
       randomize,
       randomizeLayer,
       clearAll,
@@ -1061,6 +1074,8 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
       setBeerHatEditFocus,
       clearLayer,
       setActiveLayer,
+      toggleExtra,
+      clearExtras,
       randomize,
       randomizeLayer,
       clearAll,
