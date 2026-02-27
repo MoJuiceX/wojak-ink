@@ -675,7 +675,7 @@ export default function RuleBuilder() {
         if (Object.keys(defaultColors).length === 0 && trait.defaultColor) {
           defaultColors['fill'] = trait.defaultColor;
         }
-        next[layerName] = { traitId: trait.id, g2Category, colors: defaultColors };
+        next[layerName] = { traitId: trait.id, g2Category, colors: defaultColors, options: {} };
         return next;
       });
     }

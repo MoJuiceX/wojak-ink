@@ -59,7 +59,7 @@ export type GeneratorAction =
   | { type: 'SET_LAYER'; layer: UILayerName; path: string }
   | { type: 'SET_G2_LAYER'; layer: UILayerName; path: string; g2: G2Selection; skipHistory?: boolean }
   | { type: 'SET_G2_COLOR'; layer: UILayerName; slot: string; color: string }
-  | { type: 'SET_G2_DETAIL'; layer: UILayerName; detailOption?: string; frameOption?: string; logoOption?: string; flagOption?: string; name1?: string; name2?: string; activeColorSlot?: string; suitVariant?: 'bepe' | 'pepe'; chiaFarmerUnderlayer?: 'tee' | 'tanktop'; constructionHelmetChiaLogo?: boolean; constructionHelmetCigPack?: string; beerHatUnderlayer?: string; beerHatUnderlayerG2?: G2Selection; beerHatEditFocus?: 'beer' | 'underlayer'; variant?: string }
+  | { type: 'SET_G2_DETAIL'; layer: UILayerName; activeColorSlot?: string; options?: Partial<Record<string, string | boolean | G2Selection | undefined>> }
   | { type: 'CLEAR_LAYER'; layer: UILayerName }
   | { type: 'SET_ACTIVE_LAYER'; layer: UILayerName }
   | { type: 'RANDOMIZE'; selections: SelectionsSnapshot }
@@ -476,11 +476,11 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
 
       const updated: SelectionsSnapshot = { ...state.selections };
       const isBeerHatUnderlayer =
-        existing.traitId === KNOWN_TRAIT_IDS.Head_BeerHat && existing.beerHatEditFocus === 'underlayer' && existing.beerHatUnderlayerG2;
-      const targetG2 = isBeerHatUnderlayer ? existing.beerHatUnderlayerG2! : existing;
+        existing.traitId === KNOWN_TRAIT_IDS.Head_BeerHat && existing.options.beerHatEditFocus === 'underlayer' && existing.options.beerHatUnderlayerG2;
+      const targetG2 = isBeerHatUnderlayer ? (existing.options.beerHatUnderlayerG2 as G2Selection) : existing;
       const newColors = { ...(targetG2.colors || {}), [action.slot]: action.color };
-      const g2 = isBeerHatUnderlayer
-        ? { ...existing, beerHatUnderlayerG2: { ...targetG2, colors: newColors } }
+      const g2: G2Selection = isBeerHatUnderlayer
+        ? { ...existing, options: { ...existing.options, beerHatUnderlayerG2: { ...targetG2, colors: newColors } } }
         : { ...existing, colors: newColors };
 
       updated[action.layer] = { ...state.selections[action.layer]!, g2 };
@@ -492,42 +492,49 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
       const existing = state.selections[action.layer]?.g2;
       if (!existing) return state;
 
+      const actionOpts = action.options ?? {};
+
       // When the action explicitly provides beerHatEditFocus, use it for routing
       // (allows callers to force-route to main selection or underlayer regardless of current focus)
-      const effectiveFocus = action.beerHatEditFocus ?? existing.beerHatEditFocus;
+      const effectiveFocus = (actionOpts.beerHatEditFocus as string | undefined) ?? (existing.options.beerHatEditFocus as string | undefined);
       const isBeerHatUnderlayer =
-        existing.traitId === KNOWN_TRAIT_IDS.Head_BeerHat && effectiveFocus === 'underlayer' && existing.beerHatUnderlayerG2;
-      const targetG2 = isBeerHatUnderlayer && existing.beerHatUnderlayerG2 ? existing.beerHatUnderlayerG2 : existing;
-      const g2: G2Selection = { ...existing };
+        existing.traitId === KNOWN_TRAIT_IDS.Head_BeerHat && effectiveFocus === 'underlayer' && existing.options.beerHatUnderlayerG2;
+      const targetG2 = isBeerHatUnderlayer && existing.options.beerHatUnderlayerG2
+        ? (existing.options.beerHatUnderlayerG2 as G2Selection)
+        : existing;
 
-      if (action.beerHatUnderlayer !== undefined) g2.beerHatUnderlayer = action.beerHatUnderlayer;
-      if (action.beerHatUnderlayerG2 !== undefined) g2.beerHatUnderlayerG2 = action.beerHatUnderlayerG2;
-      if (action.beerHatEditFocus !== undefined) g2.beerHatEditFocus = action.beerHatEditFocus;
+      const newOptions = { ...existing.options };
 
-      if (isBeerHatUnderlayer && targetG2 && action.beerHatUnderlayerG2 === undefined) {
+      if (actionOpts.beerHatUnderlayer !== undefined) newOptions.beerHatUnderlayer = actionOpts.beerHatUnderlayer;
+      if (actionOpts.beerHatUnderlayerG2 !== undefined) newOptions.beerHatUnderlayerG2 = actionOpts.beerHatUnderlayerG2;
+      if (actionOpts.beerHatEditFocus !== undefined) newOptions.beerHatEditFocus = actionOpts.beerHatEditFocus;
+
+      if (isBeerHatUnderlayer && targetG2 && actionOpts.beerHatUnderlayerG2 === undefined) {
         // Only merge into the existing underlayer when we're NOT replacing it wholesale
-        const updatedUnder: G2Selection = { ...targetG2 };
-        if (action.detailOption !== undefined) updatedUnder.detailOption = action.detailOption;
-        if (action.frameOption !== undefined) updatedUnder.frameOption = action.frameOption;
-        if (action.activeColorSlot !== undefined) updatedUnder.activeColorSlot = action.activeColorSlot;
-        if (action.constructionHelmetChiaLogo !== undefined) updatedUnder.constructionHelmetChiaLogo = action.constructionHelmetChiaLogo;
-        if (action.constructionHelmetCigPack !== undefined) updatedUnder.constructionHelmetCigPack = action.constructionHelmetCigPack;
-        if (action.variant !== undefined) updatedUnder.variant = action.variant;
-        g2.beerHatUnderlayerG2 = updatedUnder;
+        const updatedUnderOpts = { ...targetG2.options };
+        if (actionOpts.detail !== undefined) updatedUnderOpts.detail = actionOpts.detail;
+        if (actionOpts.frame !== undefined) updatedUnderOpts.frame = actionOpts.frame;
+        if (actionOpts.constructionHelmetChiaLogo !== undefined) updatedUnderOpts.constructionHelmetChiaLogo = actionOpts.constructionHelmetChiaLogo;
+        if (actionOpts.constructionHelmetCigPack !== undefined) updatedUnderOpts.constructionHelmetCigPack = actionOpts.constructionHelmetCigPack;
+        if (actionOpts.variant !== undefined) updatedUnderOpts.variant = actionOpts.variant;
+        const updatedUnder: G2Selection = {
+          ...targetG2,
+          ...(action.activeColorSlot !== undefined && { activeColorSlot: action.activeColorSlot }),
+          options: updatedUnderOpts,
+        };
+        newOptions.beerHatUnderlayerG2 = updatedUnder;
       } else {
-        if (action.detailOption !== undefined) g2.detailOption = action.detailOption;
-        if (action.frameOption !== undefined) g2.frameOption = action.frameOption;
-        if (action.logoOption !== undefined) g2.logoOption = action.logoOption;
-        if (action.flagOption !== undefined) g2.flagOption = action.flagOption;
-        if (action.name1 !== undefined) g2.name1 = action.name1;
-        if (action.name2 !== undefined) g2.name2 = action.name2;
-        if (action.activeColorSlot !== undefined) g2.activeColorSlot = action.activeColorSlot;
-        if (action.suitVariant !== undefined) g2.suitVariant = action.suitVariant;
-        if (action.chiaFarmerUnderlayer !== undefined) g2.chiaFarmerUnderlayer = action.chiaFarmerUnderlayer;
-        if (action.constructionHelmetChiaLogo !== undefined) g2.constructionHelmetChiaLogo = action.constructionHelmetChiaLogo;
-        if (action.constructionHelmetCigPack !== undefined) g2.constructionHelmetCigPack = action.constructionHelmetCigPack;
-        if (action.variant !== undefined) g2.variant = action.variant;
+        // Merge action options into main G2 options
+        for (const [key, val] of Object.entries(actionOpts)) {
+          if (val !== undefined) newOptions[key] = val;
+        }
       }
+
+      const g2: G2Selection = {
+        ...existing,
+        ...(action.activeColorSlot !== undefined && { activeColorSlot: action.activeColorSlot }),
+        options: newOptions,
+      };
 
       const updated: SelectionsSnapshot = { ...state.selections };
       updated[action.layer] = { ...state.selections[action.layer]!, g2 };

@@ -80,13 +80,16 @@ const BEER_HAT_CARD_G2: G2Selection = {
   traitId: KNOWN_TRAIT_IDS.Head_BeerHat,
   g2Category: 'Head',
   colors: {},
-  detailOption: 'Head_Beer-Hat_detail_Tang.png',
-  beerHatEditFocus: 'underlayer',
-  beerHatUnderlayer: KNOWN_TRAIT_IDS.Head_Cap,
-  beerHatUnderlayerG2: {
-    traitId: KNOWN_TRAIT_IDS.Head_Cap,
-    g2Category: 'Head',
-    colors: { fill: G2_DEFAULT_COLORS[KNOWN_TRAIT_IDS.Head_Cap]?.fill ?? '#228B22' },
+  options: {
+    detail: 'Head_Beer-Hat_detail_Tang.png',
+    beerHatEditFocus: 'underlayer',
+    beerHatUnderlayer: KNOWN_TRAIT_IDS.Head_Cap,
+    beerHatUnderlayerG2: {
+      traitId: KNOWN_TRAIT_IDS.Head_Cap,
+      g2Category: 'Head',
+      colors: { fill: G2_DEFAULT_COLORS[KNOWN_TRAIT_IDS.Head_Cap]?.fill ?? '#228B22' },
+      options: {},
+    },
   },
 };
 
@@ -107,7 +110,7 @@ interface GeneratorContextValue extends GeneratorState {
   selectG2Layer: (layer: UILayerName, trait: UnifiedTrait, initialColors?: Record<string, string>) => void;
   setG2Color: (layer: UILayerName, slot: string, color: string) => void;
   setColor: (layer: UILayerName, color: string) => void;
-  setG2Detail: (layer: UILayerName, detailOption?: string, frameOption?: string, logoOption?: string, flagOption?: string, name1?: string, name2?: string, activeColorSlot?: string, suitVariant?: 'bepe' | 'pepe', chiaFarmerUnderlayer?: 'tee' | 'tanktop', constructionHelmetChiaLogo?: boolean, constructionHelmetCigPack?: string, beerHatUnderlayer?: string, beerHatUnderlayerG2?: G2Selection, beerHatEditFocus?: 'beer' | 'underlayer', variant?: string) => void;
+  setG2Detail: (layer: UILayerName, activeColorSlot?: string, options?: Partial<Record<string, string | boolean | G2Selection | undefined>>) => void;
   setBeerHatEditFocus: (focus: 'beer' | 'underlayer') => void;
   clearLayer: (layer: UILayerName) => void;
   setActiveLayer: (layer: UILayerName) => void;
@@ -221,12 +224,17 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
       traitId: KNOWN_TRAIT_IDS.Head_Cap,
       g2Category: 'Head',
       colors: { fill: G2_DEFAULT_COLORS[KNOWN_TRAIT_IDS.Head_Cap]?.fill ?? '#228B22' },
+      options: {},
     };
+    const headDetail = head.options.detail as string | undefined;
     const normalizedHead: G2Selection = {
       ...head,
-      detailOption: head.detailOption && head.detailOption !== '' ? head.detailOption : defaultCan,
-      beerHatUnderlayer: head.beerHatUnderlayer ?? KNOWN_TRAIT_IDS.Head_Cap,
-      beerHatUnderlayerG2: head.beerHatUnderlayerG2 ?? defaultUnderlayerG2,
+      options: {
+        ...head.options,
+        detail: headDetail && headDetail !== '' ? headDetail : defaultCan,
+        beerHatUnderlayer: (head.options.beerHatUnderlayer as string | undefined) ?? KNOWN_TRAIT_IDS.Head_Cap,
+        beerHatUnderlayerG2: (head.options.beerHatUnderlayerG2 as G2Selection | undefined) ?? defaultUnderlayerG2,
+      },
     };
     return { ...derived.g2Selections, Head: normalizedHead };
   }, [derived.g2Selections]);
@@ -326,12 +334,12 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
     dispatch({ type: 'SET_COLOR', layer, color });
   }, []);
 
-  const setG2Detail = useCallback((layer: UILayerName, detailOption?: string, frameOption?: string, logoOption?: string, flagOption?: string, name1?: string, name2?: string, activeColorSlot?: string, suitVariant?: 'bepe' | 'pepe', chiaFarmerUnderlayer?: 'tee' | 'tanktop', constructionHelmetChiaLogo?: boolean, constructionHelmetCigPack?: string, beerHatUnderlayer?: string, beerHatUnderlayerG2?: G2Selection, beerHatEditFocus?: 'beer' | 'underlayer', variant?: string) => {
-    dispatch({ type: 'SET_G2_DETAIL', layer, detailOption, frameOption, logoOption, flagOption, name1, name2, activeColorSlot, suitVariant, chiaFarmerUnderlayer, constructionHelmetChiaLogo, constructionHelmetCigPack, beerHatUnderlayer, beerHatUnderlayerG2, beerHatEditFocus, variant });
+  const setG2Detail = useCallback((layer: UILayerName, activeColorSlot?: string, options?: Partial<Record<string, string | boolean | G2Selection | undefined>>) => {
+    dispatch({ type: 'SET_G2_DETAIL', layer, activeColorSlot, options });
   }, []);
 
   const setBeerHatEditFocus = useCallback((focus: 'beer' | 'underlayer') => {
-    dispatch({ type: 'SET_G2_DETAIL', layer: 'Head', beerHatEditFocus: focus });
+    dispatch({ type: 'SET_G2_DETAIL', layer: 'Head', options: { beerHatEditFocus: focus } });
   }, []);
 
   const clearLayer = useCallback((layer: UILayerName) => {

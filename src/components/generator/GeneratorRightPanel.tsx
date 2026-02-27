@@ -11,7 +11,7 @@ import { useGenerator } from '@/contexts/GeneratorContext';
 import { ColorPicker } from './ColorPicker';
 import { G2TraitPanel } from './G2TraitPanel';
 import { getUnifiedTraitById, getPathToTraitIdMap } from '@/services/generatorService';
-import { isSelectionPathEmpty } from '@/types/generator';
+import { isSelectionPathEmpty, type G2Selection } from '@/types/generator';
 import { getAllUserPickableFillSlots } from '@/lib/g2FillTreatments';
 import { getG2DefaultColor } from '@/config/g2DefaultColors';
 import type { UILayerName } from '@/lib/wojakRules';
@@ -37,7 +37,7 @@ const SOLID_BG_DEFAULT_COLOR = '#38BDF8';
 export function GeneratorRightPanel() {
   const { activeLayer, selectedLayers, g2Selections, selectedColors, setColor, setG2Color, setG2Detail, selectLayer, selectG2Layer, isInitialized } = useGenerator();
   const setChiaFarmerDetail = (activeColorSlot?: 'fill0' | 'fill1', chiaFarmerUnderlayer?: 'tee' | 'tanktop') => {
-    setG2Detail(activeLayer, undefined, undefined, undefined, undefined, undefined, undefined, activeColorSlot, undefined, chiaFarmerUnderlayer);
+    setG2Detail(activeLayer, activeColorSlot, chiaFarmerUnderlayer ? { chiaFarmerUnderlayer } : undefined);
   };
   const [g2Trait, setG2Trait] = useState<UnifiedTrait | null>(null);
   const [militaryBeretTrait, setMilitaryBeretTrait] = useState<UnifiedTrait | null>(null);
@@ -48,10 +48,10 @@ export function GeneratorRightPanel() {
   const isBeerHatWithUnderlayerFocus =
     activeLayer === 'Head' &&
     g2Sel?.traitId === KNOWN_TRAIT_IDS.Head_BeerHat &&
-    g2Sel.beerHatEditFocus === 'underlayer' &&
-    g2Sel.beerHatUnderlayerG2;
+    g2Sel.options.beerHatEditFocus === 'underlayer' &&
+    g2Sel.options.beerHatUnderlayerG2;
   if (isBeerHatWithUnderlayerFocus && g2Sel) {
-    g2Sel = g2Sel.beerHatUnderlayerG2!;
+    g2Sel = g2Sel.options.beerHatUnderlayerG2 as G2Selection;
   }
 
   const isG1MilitaryBeret =
@@ -306,7 +306,7 @@ export function GeneratorRightPanel() {
                     onClick={() => {
                       // Comrad Hat: clicking star fill (fill3) clears coin logo so the star reappears
                       const clearLogo = g2Sel?.traitId === KNOWN_TRAIT_IDS.Head_ComradHat && slot === 'fill3' ? '' : undefined;
-                      setG2Detail(activeLayer, undefined, undefined, clearLogo, undefined, undefined, undefined, slot);
+                      setG2Detail(activeLayer, slot, clearLogo !== undefined ? { logo: clearLogo } : undefined);
                     }}
                   >
                     {label}
@@ -320,7 +320,7 @@ export function GeneratorRightPanel() {
       {/* Beer Hat: under layer picker — select which head goes under the cans */}
       {activeLayer === 'Head' && g2Selections.Head?.traitId === KNOWN_TRAIT_IDS.Head_BeerHat && (
         <BeerHatUnderlayerPicker
-          selectedTraitId={g2Selections.Head?.beerHatUnderlayer ?? KNOWN_TRAIT_IDS.Head_Cap}
+          selectedTraitId={g2Selections.Head?.options.beerHatUnderlayer as string ?? KNOWN_TRAIT_IDS.Head_Cap}
           onSelect={(traitId) => {
             const defaultColors: Record<string, string> =
               traitId === KNOWN_TRAIT_IDS.Head_VikingHelmet
@@ -328,23 +328,11 @@ export function GeneratorRightPanel() {
                 : traitId === KNOWN_TRAIT_IDS.Head_Cap
                   ? { fill: getG2DefaultColor(traitId, 'fill', null, '#228B22') }
                   : {};
-            setG2Detail(
-              activeLayer,
-              undefined,
-              undefined,
-              undefined,
-              undefined,
-              undefined,
-              undefined,
-              undefined,
-              undefined,
-              undefined,
-              undefined,
-              undefined,
-              traitId,
-              { traitId, g2Category: 'Head', colors: defaultColors },
-              'underlayer'
-            );
+            setG2Detail(activeLayer, undefined, {
+              beerHatUnderlayer: traitId,
+              beerHatUnderlayerG2: { traitId, g2Category: 'Head', colors: defaultColors, options: {} },
+              beerHatEditFocus: 'underlayer',
+            });
           }}
         />
       )}
@@ -357,22 +345,22 @@ export function GeneratorRightPanel() {
             <button
               type="button"
               className={`flex-1 whitespace-nowrap px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                (g2Sel.suitVariant ?? 'bepe') === 'bepe'
+                ((g2Sel.options.suitVariant as string | undefined) ?? 'bepe') === 'bepe'
                   ? 'btn btn-primary'
                   : 'btn btn-ghost'
               }`}
-              onClick={() => setG2Detail(activeLayer, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 'bepe')}
+              onClick={() => setG2Detail(activeLayer, undefined, { suitVariant: 'bepe' })}
             >
               Bepe suit
             </button>
             <button
               type="button"
               className={`flex-1 whitespace-nowrap px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                g2Sel.suitVariant === 'pepe'
+                g2Sel.options.suitVariant === 'pepe'
                   ? 'btn btn-primary'
                   : 'btn btn-ghost'
               }`}
-              onClick={() => setG2Detail(activeLayer, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 'pepe')}
+              onClick={() => setG2Detail(activeLayer, undefined, { suitVariant: 'pepe' })}
             >
               Pepe suit
             </button>
@@ -397,7 +385,7 @@ export function GeneratorRightPanel() {
             <button
               type="button"
               className={`flex-1 whitespace-nowrap min-w-[calc(33%-4px)] px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                g2Sel.activeColorSlot === 'fill1' && (g2Sel.chiaFarmerUnderlayer ?? 'tee') === 'tee'
+                g2Sel.activeColorSlot === 'fill1' && ((g2Sel.options.chiaFarmerUnderlayer as string | undefined) ?? 'tee') === 'tee'
                   ? 'btn btn-primary'
                   : 'btn btn-ghost'
               }`}
@@ -408,7 +396,7 @@ export function GeneratorRightPanel() {
             <button
               type="button"
               className={`flex-1 whitespace-nowrap min-w-[calc(33%-4px)] px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                g2Sel.activeColorSlot === 'fill1' && g2Sel.chiaFarmerUnderlayer === 'tanktop'
+                g2Sel.activeColorSlot === 'fill1' && g2Sel.options.chiaFarmerUnderlayer === 'tanktop'
                   ? 'btn btn-primary'
                   : 'btn btn-ghost'
               }`}
@@ -429,38 +417,38 @@ export function GeneratorRightPanel() {
               onDetailSelect={(file, frameFile) => {
                 // Always update the Beer Hat's own detailOption (can flavor), regardless of beerHatEditFocus.
                 // Pass beerHatEditFocus='beer' to force the reducer to route to the main selection.
-                setG2Detail('Head', file ?? '', frameFile ?? '', undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 'beer');
+                setG2Detail('Head', undefined, { detail: file ?? '', frame: frameFile ?? '', beerHatEditFocus: 'beer' });
               }}
             />
-            {g2Selections.Head?.beerHatUnderlayerG2 && (
+            {g2Selections.Head?.options.beerHatUnderlayerG2 && (
               /* Under layer details (Cap / Construction Helmet) — always visible */
               <G2TraitPanel
-                overrideG2Selection={g2Selections.Head.beerHatUnderlayerG2}
+                overrideG2Selection={g2Selections.Head.options.beerHatUnderlayerG2 as G2Selection}
                 onDetailSelect={(file, frameFile) => {
-                  const underG2 = g2Selections.Head?.beerHatUnderlayerG2;
+                  const underG2 = g2Selections.Head?.options.beerHatUnderlayerG2 as G2Selection | undefined;
                   if (!underG2) return;
                   // Atomic: set detail AND clear logoOption in one dispatch
-                  const updated = { ...underG2, detailOption: file ?? '', frameOption: frameFile ?? '', logoOption: file ? '' : underG2.logoOption };
-                  setG2Detail('Head', undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, updated);
+                  const updated: G2Selection = { ...underG2, options: { ...underG2.options, detail: file ?? '', frame: frameFile ?? '', logo: file ? '' : underG2.options.logo } };
+                  setG2Detail('Head', undefined, { beerHatUnderlayerG2: updated });
                 }}
                 onLogoSelect={(logoName) => {
-                  const underG2 = g2Selections.Head?.beerHatUnderlayerG2;
+                  const underG2 = g2Selections.Head?.options.beerHatUnderlayerG2 as G2Selection | undefined;
                   if (!underG2) return;
                   // Atomic: set logoOption AND clear detailOption in one dispatch
-                  const updated = { ...underG2, logoOption: logoName, detailOption: logoName ? '' : underG2.detailOption };
-                  setG2Detail('Head', undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, updated);
+                  const updated: G2Selection = { ...underG2, options: { ...underG2.options, logo: logoName, detail: logoName ? '' : underG2.options.detail } };
+                  setG2Detail('Head', undefined, { beerHatUnderlayerG2: updated });
                 }}
                 onVariantSelect={(variantFile) => {
-                  const underG2 = g2Selections.Head?.beerHatUnderlayerG2;
+                  const underG2 = g2Selections.Head?.options.beerHatUnderlayerG2 as G2Selection | undefined;
                   if (!underG2) return;
-                  const updated = { ...underG2, variant: variantFile };
-                  setG2Detail('Head', undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, updated);
+                  const updated: G2Selection = { ...underG2, options: { ...underG2.options, variant: variantFile } };
+                  setG2Detail('Head', undefined, { beerHatUnderlayerG2: updated });
                 }}
                 onConstructionHelmetUpdate={(chiaLogo, cigPack) => {
-                  const underG2 = g2Selections.Head?.beerHatUnderlayerG2;
+                  const underG2 = g2Selections.Head?.options.beerHatUnderlayerG2 as G2Selection | undefined;
                   if (!underG2) return;
-                  const updated = { ...underG2, constructionHelmetChiaLogo: chiaLogo, constructionHelmetCigPack: cigPack };
-                  setG2Detail('Head', undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, updated);
+                  const updated: G2Selection = { ...underG2, options: { ...underG2.options, constructionHelmetChiaLogo: chiaLogo, constructionHelmetCigPack: cigPack } };
+                  setG2Detail('Head', undefined, { beerHatUnderlayerG2: updated });
                 }}
               />
             )}

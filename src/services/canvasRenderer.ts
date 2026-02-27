@@ -1184,7 +1184,7 @@ function buildG2LayerData(
     const isDefault = (c: string) => (c || '').toUpperCase().replace('#', '') === (defaultColor || '').toUpperCase().replace('#', '');
     if (trait.defaultFile && isDefault(color)) {
       fills.push({ file: `${basePath}/${trait.defaultFile}`, color: defaultColor, noTint: true });
-      return { fills, outlines: [], name1: g2.name1, name2: g2.name2 };
+      return { fills, outlines: [], name1: g2.options.name1 as string | undefined, name2: g2.options.name2 as string | undefined };
     }
     if (trait.fillFile) {
       fills.push({ file: `${basePath}/${trait.fillFile}`, color });
@@ -1207,8 +1207,8 @@ function buildG2LayerData(
       fills,
       outlines,
       detailOverlay: detailOverlay ? `${basePath}/${detailOverlay}` : undefined,
-      name1: g2.name1,
-      name2: g2.name2,
+      name1: g2.options.name1 as string | undefined,
+      name2: g2.options.name2 as string | undefined,
     };
   }
 
@@ -1228,8 +1228,8 @@ function buildG2LayerData(
     return {
       fills,
       outlines,
-      logoOption: g2.logoOption,
-      flagOption: g2.flagOption,
+      logoOption: g2.options.logo as string | undefined,
+      flagOption: g2.options.flag as string | undefined,
       frame1: frame1 ? `${basePath}/${frame1.file}` : undefined,
       frame2: frame2 ? `${basePath}/${frame2.file}` : undefined,
     };
@@ -1248,7 +1248,7 @@ function buildG2LayerData(
   if (trait.id === 'Head_Beer-Hat' && trait.outlineFile && trait.detailOptions?.length) {
     const items: G2DrawItem[] = [];
     const defaultCan = trait.detailOptions.find(d => d.name === 'Tang')?.file ?? trait.detailOptions[0]?.file;
-    const detailFile = (g2.detailOption && g2.detailOption !== '') ? g2.detailOption : defaultCan;
+    const detailFile = (g2.options.detail as string | undefined && g2.options.detail as string | undefined !== '') ? g2.options.detail as string | undefined : defaultCan;
     if (detailFile) {
       items.push({ type: 'outline', path: `${basePath}/${detailFile}` });
     }
@@ -1356,7 +1356,7 @@ function buildG2LayerData(
   // MOG Glasses: detail (default rainbow or selected) under outline, outline on top
   if (trait.id === 'Face-wear_MOG-Glasses' && trait.outlineFile) {
     const defaultDetailFile = trait.detailOptions?.find(d => d.name === 'Default (Rainbow)')?.file ?? 'Face-wear_MOG-Glasses_detail_default.png';
-    const detailFile = g2.detailOption || defaultDetailFile;
+    const detailFile = g2.options.detail as string | undefined || defaultDetailFile;
     const items: G2DrawItem[] = [
       { type: 'outline', path: `${basePath}/${detailFile}` }, // detail draws first (under)
       { type: 'outline', path: `${basePath}/${trait.outlineFile}` }, // outline on top
@@ -1366,7 +1366,7 @@ function buildG2LayerData(
 
   // Chia Farmer: under layer (Tee or Tank top) with fill1, then outfit with fill0
   if (trait.id === 'Clothes_Chia-farmer') {
-    const underlayer = g2.chiaFarmerUnderlayer ?? 'tee';
+    const underlayer = g2.options.chiaFarmerUnderlayer as string | undefined ?? 'tee';
     const underFillFile = underlayer === 'tee' ? 'Clothes_Tee_fill.png' : 'Clothes_Tank-top_fill.png';
     const underOutlineFile = underlayer === 'tee' ? 'Clothes_Tee_outline.png' : 'Clothes_Tank-top_outline.png';
     const underColor = resolveFillColor(trait.id, 'fill1', g2, trait) || getG2DefaultColor(trait.id, 'fill1', trait, '#2563EB');
@@ -1384,7 +1384,7 @@ function buildG2LayerData(
   if (trait.id === 'Clothes_Suit' && trait.fillFiles && trait.outlineFiles) {
     const defaultSuit = trait.defaultColors?.[0] ?? '#171717';
     const defaultTieBow = trait.defaultColors?.[1] ?? '#2563EB';
-    const isBow = g2.detailOption?.toLowerCase().includes('suite-bow') ?? false;
+    const isBow = (g2.options.detail as string | undefined)?.toLowerCase().includes('suite-bow') ?? false;
     const suitColor = resolveFillColor(trait.id, 'fill0', g2, trait) || defaultSuit;
     const tieBowColor = resolveFillColor(trait.id, 'fill1', g2, trait) || defaultTieBow;
     const items: G2DrawItem[] = [
@@ -1430,7 +1430,7 @@ function buildG2LayerData(
       { type: 'fill', file: `${basePath}/${trait.fill1File}`, color: fill1Color },
       { type: 'fill', file: `${basePath}/${trait.fill2File}`, color: fill2Color },
     ];
-    if (g2.logoOption) {
+    if (g2.options.logo as string | undefined) {
       // Coin logo selected: skip detail1 (star fill) + detail1.1 (star outline) + detail2 (gray patch)
       // Only the coin logo renders at the patch position
     } else {
@@ -1440,8 +1440,8 @@ function buildG2LayerData(
     items.push({ type: 'outline', path: `${basePath}/${trait.outlineFile}` });
 
     const result: G2LayerData = { fills: [], outlines: [], orderedDrawItems: items };
-    if (g2.logoOption) {
-      result.logoOption = g2.logoOption;
+    if (g2.options.logo as string | undefined) {
+      result.logoOption = g2.options.logo as string | undefined;
       result.logoPos = COMRAD_HAT_LOGO_POS;
     }
     return result;
@@ -1457,23 +1457,23 @@ function buildG2LayerData(
       { type: 'outline', path: `${basePath}/${trait.outlineFile}` },
     ];
     const result: G2LayerData = { fills: [], outlines: [], orderedDrawItems: items };
-    if (g2.logoOption) {
-      result.logoOption = g2.logoOption;
+    if (g2.options.logo as string | undefined) {
+      result.logoOption = g2.options.logo as string | undefined;
       result.logoPos = HARD_HAT_LOGO_POS;
     }
     return result;
   }
 
   // Cap: coin logo support — let generic path handle fill/outline/detail, just add logo when selected
-  if (trait.id === 'Head_Cap' && g2.logoOption) {
-    const variantFile = g2.variant && trait.variants?.find(v => v.file === g2.variant)?.file;
+  if (trait.id === 'Head_Cap' && g2.options.logo as string | undefined) {
+    const variantFile = g2.options.variant as string | undefined && trait.variants?.find(v => v.file === g2.options.variant as string | undefined)?.file;
     const color = resolveFillColor(trait.id, 'fill', g2, trait) || getG2DefaultColor(trait.id, 'fill', trait, trait.defaultColor || '#228B22');
     const fills: G2LayerData['fills'] = [];
     const outlines: string[] = [];
     const fillSrc = variantFile ? `${basePath}/${variantFile}` : (trait.fillFile ? `${basePath}/${trait.fillFile}` : undefined);
     if (fillSrc) fills.push({ file: fillSrc, color });
     if (trait.outlineFile) outlines.push(`${basePath}/${trait.outlineFile}`);
-    return { fills, outlines, logoOption: g2.logoOption, logoPos: CAP_LOGO_POS };
+    return { fills, outlines, logoOption: g2.options.logo as string | undefined, logoPos: CAP_LOGO_POS };
   }
 
   // Wizard drip: Detail 1, Detail 2, or coin logos (no None). Default to Detail 1 when neither set.
@@ -1488,12 +1488,12 @@ function buildG2LayerData(
       fills: [{ file: `${basePath}/${trait.fillFile}`, color }],
       outlines: [`${basePath}/${trait.outlineFile}`],
     };
-    if (g2.logoOption) {
-      result.logoOption = g2.logoOption;
+    if (g2.options.logo as string | undefined) {
+      result.logoOption = g2.options.logo as string | undefined;
       result.logoPos = WIZARD_LOGO_POS;
       if (frameFile) result.logoFrame = frameFile;
     } else {
-      const detailFile = g2.detailOption || detail1File;
+      const detailFile = g2.options.detail as string | undefined || detail1File;
       if (detailFile) result.detail = `${basePath}/${detailFile}`;
     }
     return result;
@@ -1521,7 +1521,7 @@ function buildG2LayerData(
         { type: 'fill', file: `${basePath}/${trait.fill2File}`, color: fill2Color },
         { type: 'outline', path: `${basePath}/${detail1File}` },
       ];
-      if (g2.detailOption === detail2File) {
+      if (g2.options.detail as string | undefined === detail2File) {
         items.push({ type: 'outline', path: `${basePath}/${detail2File}` });
       }
       if (trait.outlineFile) items.push({ type: 'outline', path: `${basePath}/${trait.outlineFile}` });
@@ -1537,7 +1537,7 @@ function buildG2LayerData(
     });
   } else if (trait.fillFile) {
     // Single fill — variant swaps the fill image but still tints with user color
-    const variantFile = g2.variant && trait.variants?.find(v => v.file === g2.variant)?.file;
+    const variantFile = g2.options.variant as string | undefined && trait.variants?.find(v => v.file === g2.options.variant as string | undefined)?.file;
     if (variantFile) {
       const fillColor = resolveFillColor(trait.id, 'fill', g2, trait) || getG2DefaultColor(trait.id, 'fill', trait, trait.defaultColor || '#FFFFFF');
       fills.push({ file: `${basePath}/${variantFile}`, color: fillColor });
@@ -1572,15 +1572,15 @@ function buildG2LayerData(
     const cig1File = trait.detailOptions.find(d => d.file.endsWith('cig-pack.png'))?.file;
     const cig2File = trait.detailOptions.find(d => d.file.includes('cig-pack-2'))?.file;
     const parts: string[] = [];
-    if (g2.constructionHelmetChiaLogo && chiaFile) parts.push(`${basePath}/${chiaFile}`);
-    const cigPack = g2.constructionHelmetCigPack;
+    if (g2.options.constructionHelmetChiaLogo && chiaFile) parts.push(`${basePath}/${chiaFile}`);
+    const cigPack = g2.options.constructionHelmetCigPack as string | undefined;
     if (cigPack === cig1File) parts.push(`${basePath}/${cig1File}`);
     else if (cigPack === cig2File) parts.push(`${basePath}/${cig2File}`);
     if (parts.length) details = parts;
   }
   if (!details) {
-    if (g2.detailOption) {
-      detail = `${basePath}/${g2.detailOption}`;
+    if (g2.options.detail as string | undefined) {
+      detail = `${basePath}/${g2.options.detail as string | undefined}`;
     } else if (trait.detailFile) {
       detail = `${basePath}/${trait.detailFile}`;
     }
@@ -1588,8 +1588,8 @@ function buildG2LayerData(
 
   // Frame
   let frame: string | undefined;
-  if (g2.frameOption) {
-    frame = `${basePath}/${g2.frameOption}`;
+  if (g2.options.frame as string | undefined) {
+    frame = `${basePath}/${g2.options.frame as string | undefined}`;
   }
 
   const result: G2LayerData = { fills, outlines, detail, details, frame };
@@ -2021,7 +2021,7 @@ export async function renderToCanvas(
       if (layerNameStr === 'Clothes' && g2Sel) {
         try {
           let trait = await getUnifiedTraitById(g2Sel.traitId);
-          if (trait?.id === 'Clothes_Bepe-suit' && g2Sel.suitVariant === 'pepe') {
+          if (trait?.id === 'Clothes_Bepe-suit' && g2Sel.options.suitVariant === 'pepe') {
             const pepeTrait = await getUnifiedTraitById('Clothes_Pepe-suit');
             if (pepeTrait) trait = pepeTrait;
           }
@@ -2079,10 +2079,10 @@ export async function renderToCanvas(
               clipTopHalfOnly: true,
             });
           }
-          if (g2Sel.beerHatUnderlayer && g2Sel.beerHatUnderlayerG2) {
-            const underTrait = await getUnifiedTraitById(g2Sel.beerHatUnderlayer);
+          if (g2Sel.options.beerHatUnderlayer && g2Sel.options.beerHatUnderlayerG2) {
+            const underTrait = await getUnifiedTraitById(g2Sel.options.beerHatUnderlayer as string);
             if (underTrait && (underTrait.source === 'g2' || underTrait.source === 'both')) {
-              const underG2 = buildG2LayerData(underTrait, g2Sel.beerHatUnderlayerG2, basePath);
+              const underG2 = buildG2LayerData(underTrait, g2Sel.options.beerHatUnderlayerG2 as G2Selection, basePath);
               // Split: detail/logo renders ABOVE Beer Hat so it's not hidden by cans/outline
               const hasDetailOrLogo = underG2.detail || underG2.logoOption;
               if (hasDetailOrLogo) {
@@ -2382,7 +2382,7 @@ export async function exportImage(
       if (layerNameStr === 'Clothes' && g2Sel) {
         try {
           let trait = await getUnifiedTraitById(g2Sel.traitId);
-          if (trait?.id === 'Clothes_Bepe-suit' && g2Sel.suitVariant === 'pepe') {
+          if (trait?.id === 'Clothes_Bepe-suit' && g2Sel.options.suitVariant === 'pepe') {
             const pepeTrait = await getUnifiedTraitById('Clothes_Pepe-suit');
             if (pepeTrait) trait = pepeTrait;
           }
@@ -2440,10 +2440,10 @@ export async function exportImage(
               clipTopHalfOnly: true,
             });
           }
-          if (g2Sel.beerHatUnderlayer && g2Sel.beerHatUnderlayerG2) {
-            const underTrait = await getUnifiedTraitById(g2Sel.beerHatUnderlayer);
+          if (g2Sel.options.beerHatUnderlayer && g2Sel.options.beerHatUnderlayerG2) {
+            const underTrait = await getUnifiedTraitById(g2Sel.options.beerHatUnderlayer as string);
             if (underTrait && (underTrait.source === 'g2' || underTrait.source === 'both')) {
-              const underG2 = buildG2LayerData(underTrait, g2Sel.beerHatUnderlayerG2, basePath);
+              const underG2 = buildG2LayerData(underTrait, g2Sel.options.beerHatUnderlayerG2 as G2Selection, basePath);
               // Split: detail/logo renders ABOVE Beer Hat so it's not hidden by cans/outline
               const hasDetailOrLogo = underG2.detail || underG2.logoOption;
               if (hasDetailOrLogo) {

@@ -92,60 +92,77 @@ export function assembleG2Selection(
   // Build default colors only for user-pickable fill slots
   const colors = buildG2ColorsFromTrait(trait);
 
+  // Build trait-specific options
+  const options: Record<string, string | boolean | G2Selection | undefined> = {};
+
+  // Default: first detail option
+  if (trait.detailOptions?.[0]?.file) {
+    options.detail = trait.detailOptions[0].file;
+  }
+
+  // Trait-specific overrides
+  if (trait.id === KNOWN_TRAIT_IDS.Head_Cap) {
+    options.detail = undefined;
+  }
+  if (trait.id === KNOWN_TRAIT_IDS.Head_ConstructionHelmet) {
+    options.detail = undefined;
+    options.constructionHelmetChiaLogo = true;
+    options.constructionHelmetCigPack = trait.detailOptions?.find(d => d.file.endsWith('cig-pack.png'))?.file ?? 'Head_Construction-Helmet_detail_cig-pack.png';
+  }
+  if (trait.id === KNOWN_TRAIT_IDS.Clothes_Suit) {
+    options.detail = trait.detailOptions?.[0]?.file;
+  }
+  if (trait.id === KNOWN_TRAIT_IDS.Clothes_Astronaut) {
+    options.logo = 'CAT';
+    options.flag = 'us';
+  }
+  if (trait.id === KNOWN_TRAIT_IDS.Clothes_BepeArmy) {
+    options.name1 = '';
+    options.name2 = '';
+  }
+  if (trait.id === KNOWN_TRAIT_IDS.Clothes_BepeSuit) {
+    options.suitVariant = 'bepe';
+  }
+  if (trait.id === KNOWN_TRAIT_IDS.Clothes_ChiaFarmer) {
+    options.chiaFarmerUnderlayer = 'tee';
+  }
+  if (trait.id === KNOWN_TRAIT_IDS.Clothes_WizardDrip) {
+    options.detail = trait.detailOptions?.[0]?.file;
+  }
+  if (trait.id === KNOWN_TRAIT_IDS.Head_BeerHat) {
+    options.detail = trait.detailOptions?.find(d => d.name === 'Citrus')?.file ?? trait.detailOptions?.[0]?.file;
+    options.beerHatEditFocus = 'underlayer';
+    options.beerHatUnderlayer = KNOWN_TRAIT_IDS.Head_Cap;
+    options.beerHatUnderlayerG2 = {
+      traitId: KNOWN_TRAIT_IDS.Head_Cap,
+      g2Category: 'Head',
+      colors: { fill: G2_DEFAULT_COLORS[KNOWN_TRAIT_IDS.Head_Cap]?.fill ?? '#228B22' },
+      options: {},
+    };
+  }
+  if (trait.id === KNOWN_TRAIT_IDS.Facewear_MOGGlasses) {
+    options.detail = trait.detailOptions?.find(d => d.name === 'Default (Rainbow)')?.file ?? trait.detailOptions?.[0]?.file;
+  }
+
+  // Determine activeColorSlot
+  let activeColorSlot: string | undefined;
+  if (trait.id === KNOWN_TRAIT_IDS.Clothes_Suit) {
+    activeColorSlot = 'fill0';
+  } else if (trait.id === KNOWN_TRAIT_IDS.Clothes_ChiaFarmer) {
+    activeColorSlot = 'fill0';
+  } else {
+    const slots = getAllUserPickableFillSlots(trait.id, trait);
+    if (slots.length > 1) {
+      activeColorSlot = slots[0];
+    }
+  }
+
   const g2: G2Selection = {
     traitId: trait.id,
     g2Category: trait.id.split('_')[0],
     colors: initialColors ? { ...colors, ...initialColors } : colors,
-    detailOption: trait.detailOptions?.[0]?.file,
-    ...(trait.id === KNOWN_TRAIT_IDS.Head_Cap && {
-      detailOption: undefined,
-    }),
-    ...(trait.id === KNOWN_TRAIT_IDS.Head_ConstructionHelmet && {
-      detailOption: undefined,
-      constructionHelmetChiaLogo: true,
-      constructionHelmetCigPack: trait.detailOptions?.find(d => d.file.endsWith('cig-pack.png'))?.file ?? 'Head_Construction-Helmet_detail_cig-pack.png',
-    }),
-    ...(trait.id === KNOWN_TRAIT_IDS.Clothes_Suit && {
-      detailOption: trait.detailOptions?.[0]?.file,
-      activeColorSlot: 'fill0' as const,
-    }),
-    ...(trait.id === KNOWN_TRAIT_IDS.Clothes_Astronaut && {
-      logoOption: 'CAT',
-      flagOption: 'us',
-    }),
-    ...(trait.id === KNOWN_TRAIT_IDS.Clothes_BepeArmy && {
-      name1: '',
-      name2: '',
-    }),
-    ...(trait.id === KNOWN_TRAIT_IDS.Clothes_BepeSuit && {
-      suitVariant: 'bepe' as const,
-    }),
-    ...(trait.id === KNOWN_TRAIT_IDS.Clothes_ChiaFarmer && {
-      chiaFarmerUnderlayer: 'tee' as const,
-      activeColorSlot: 'fill0' as const,
-    }),
-    ...(trait.id === KNOWN_TRAIT_IDS.Clothes_WizardDrip && {
-      detailOption: trait.detailOptions?.[0]?.file,
-    }),
-    ...(trait.id === KNOWN_TRAIT_IDS.Head_BeerHat && {
-      detailOption: trait.detailOptions?.find(d => d.name === 'Citrus')?.file ?? trait.detailOptions?.[0]?.file,
-      beerHatEditFocus: 'underlayer' as const,
-      beerHatUnderlayer: KNOWN_TRAIT_IDS.Head_Cap,
-      beerHatUnderlayerG2: {
-        traitId: KNOWN_TRAIT_IDS.Head_Cap,
-        g2Category: 'Head',
-        colors: { fill: G2_DEFAULT_COLORS[KNOWN_TRAIT_IDS.Head_Cap]?.fill ?? '#228B22' },
-      },
-    }),
-    ...(trait.id === KNOWN_TRAIT_IDS.Facewear_MOGGlasses && {
-      detailOption: trait.detailOptions?.find(d => d.name === 'Default (Rainbow)')?.file ?? trait.detailOptions?.[0]?.file,
-    }),
-    ...(() => {
-      const slots = getAllUserPickableFillSlots(trait.id, trait);
-      return slots.length > 1 && trait.id !== KNOWN_TRAIT_IDS.Clothes_Suit && trait.id !== KNOWN_TRAIT_IDS.Clothes_ChiaFarmer
-        ? { activeColorSlot: slots[0] }
-        : {};
-    })(),
+    ...(activeColorSlot && { activeColorSlot }),
+    options,
   };
 
   // Apply centralized defaults from g2DefaultColors

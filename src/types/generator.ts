@@ -120,36 +120,28 @@ export interface G2Selection {
   g2Category: string;
   /** User-chosen colors keyed by fill slot name */
   colors: Record<string, string>;
-  /** Selected detail option filename (if any) */
-  detailOption?: string;
-  /** Selected frame filename (if any) */
-  frameOption?: string;
-  /** Selected variant filename (if any) */
-  variant?: string;
-  /** Astronaut: coin logo name (Detail 1) from CHIA_coin_logos */
-  logoOption?: string;
-  /** Astronaut: flag code (Detail 2) e.g. "us" */
-  flagOption?: string;
-  /** BEPA Army: name tag 1 text (max 8 chars, caps) */
-  name1?: string;
-  /** BEPA Army: name tag 2 text (max 8 chars, caps) */
-  name2?: string;
   /** Which fill slot the single color picker edits (fill, fill0, fill1, fill2, etc.) */
   activeColorSlot?: string;
-  /** Bepe suit: toggle between Bepe and Pepe variant (same layers, different art) */
-  suitVariant?: 'bepe' | 'pepe';
-  /** Chia Farmer: under-layer shown under the outfit — 'tee' or 'tanktop' */
-  chiaFarmerUnderlayer?: 'tee' | 'tanktop';
-  /** Construction Helmet: Chia logo on/off (can combine with cig pack) */
-  constructionHelmetChiaLogo?: boolean;
-  /** Construction Helmet: cigarette pack — '' | cig-pack file | cig-pack-2 file (mutually exclusive) */
-  constructionHelmetCigPack?: string;
-  /** Beer Hat: trait ID of head rendered underneath (Cap, Viking, etc.) */
-  beerHatUnderlayer?: string;
-  /** Beer Hat: full G2 selection for the under head (colors, details) */
-  beerHatUnderlayerG2?: G2Selection;
-  /** Beer Hat: when 'underlayer', right panel shows under head options; else shows Beer Hat can selector */
-  beerHatEditFocus?: 'beer' | 'underlayer';
+  /**
+   * Trait-specific customization options.
+   *
+   * Known keys:
+   * - detail: string — selected detail option filename
+   * - frame: string — selected frame filename
+   * - variant: string — selected variant filename
+   * - logo: string — coin logo name (Astronaut, Cap, Comrad Hat, Hard Hat, Wizard Drip)
+   * - flag: string — flag code (Astronaut)
+   * - name1: string — BEPA Army name tag 1 (max 8 chars, caps)
+   * - name2: string — BEPA Army name tag 2 (max 8 chars, caps)
+   * - suitVariant: string — 'bepe' | 'pepe' (Bepe suit)
+   * - chiaFarmerUnderlayer: string — 'tee' | 'tanktop' (Chia Farmer)
+   * - constructionHelmetChiaLogo: boolean — Chia logo on/off (Construction Helmet)
+   * - constructionHelmetCigPack: string — cig pack file (Construction Helmet)
+   * - beerHatUnderlayer: string — trait ID of head under Beer Hat
+   * - beerHatUnderlayerG2: G2Selection — full G2 selection for under head
+   * - beerHatEditFocus: string — 'beer' | 'underlayer' (Beer Hat panel routing)
+   */
+  options: Record<string, string | boolean | G2Selection | undefined>;
 }
 
 /**

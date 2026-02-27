@@ -9,6 +9,7 @@ function makeG2(traitId: string): G2Selection {
     traitId,
     g2Category: 'Clothes',
     colors: {},
+    options: {},
   };
 }
 

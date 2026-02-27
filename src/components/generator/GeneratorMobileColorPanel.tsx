@@ -92,18 +92,18 @@ export function GeneratorMobileColorPanel() {
           <button
             type="button"
             className={`flex-1 whitespace-nowrap px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-              (g2Sel?.suitVariant ?? 'bepe') === 'bepe' ? 'btn btn-primary' : 'btn btn-ghost'
+              (g2Sel?.options.suitVariant ?? 'bepe') === 'bepe' ? 'btn btn-primary' : 'btn btn-ghost'
             }`}
-            onClick={() => setG2Detail(activeLayer, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 'bepe')}
+            onClick={() => setG2Detail(activeLayer, undefined, { suitVariant: 'bepe' })}
           >
             Bepe suit
           </button>
           <button
             type="button"
             className={`flex-1 whitespace-nowrap px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-              g2Sel?.suitVariant === 'pepe' ? 'btn btn-primary' : 'btn btn-ghost'
+              g2Sel?.options.suitVariant === 'pepe' ? 'btn btn-primary' : 'btn btn-ghost'
             }`}
-            onClick={() => setG2Detail(activeLayer, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 'pepe')}
+            onClick={() => setG2Detail(activeLayer, undefined, { suitVariant: 'pepe' })}
           >
             Pepe suit
           </button>

@@ -835,7 +835,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                       disabledReason={reason}
                       onClick={() => handleTraitClick(trait)}
                       needsClothesUnderlay={['Head', 'Mask', 'Eyes'].includes(activeLayer)}
-                      isBeerHatUnderlayer={activeLayer === 'Head' && g2Sel?.traitId === 'Head_Beer-Hat' && g2Sel.beerHatUnderlayer === trait.id}
+                      isBeerHatUnderlayer={activeLayer === 'Head' && g2Sel?.traitId === 'Head_Beer-Hat' && g2Sel.options.beerHatUnderlayer === trait.id}
                       livePreviewUrl={beerHatCardPreviewUrl}
                       pricing={lookupPricing(trait.name)}
                       isTop3={traitIsTop3}

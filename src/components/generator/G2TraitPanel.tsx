@@ -146,8 +146,8 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
 
   // BEPA Army: name tag inputs — limited by pixel width to fit the tag area
   if (isBepeArmy) {
-    const name1 = g2Sel.name1 ?? '';
-    const name2 = g2Sel.name2 ?? '';
+    const name1 = (g2Sel.options.name1 as string | undefined) ?? '';
+    const name2 = (g2Sel.options.name2 as string | undefined) ?? '';
     const handleNameChange = (which: 'name1' | 'name2', value: string) => {
       const capped = value.slice(0, 8).toUpperCase().replace(/[^A-Z0-9\s]/g, '');
       // Measure pixel width with the same font used on canvas (38px bold Comic Sans).
@@ -158,7 +158,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
         ctx.font = 'bold 38px "Comic Sans MS", "Comic Sans", cursive';
         if (ctx.measureText(capped).width > 210) return;
       }
-      setG2Detail(activeLayer, undefined, undefined, undefined, undefined, which === 'name1' ? capped : name1, which === 'name2' ? capped : name2);
+      setG2Detail(activeLayer, undefined, { name1: which === 'name1' ? capped : name1, name2: which === 'name2' ? capped : name2 });
     };
     return (
       <div
@@ -202,8 +202,8 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
 
   // Astronaut: coin logo (Detail 1) + flag (Detail 2)
   if (isAstronaut) {
-    const logo = g2Sel.logoOption || 'CAT';
-    const flag = g2Sel.flagOption || 'us';
+    const logo = (g2Sel.options.logo as string | undefined) || 'CAT';
+    const flag = (g2Sel.options.flag as string | undefined) || 'us';
     return (
       <div
         className="rounded-xl p-3 flex flex-col gap-3"
@@ -218,7 +218,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
                 key={name}
                 name={name}
                 isSelected={logo === name}
-                onClick={() => setG2Detail(activeLayer, undefined, undefined, name, g2Sel.flagOption)}
+                onClick={() => setG2Detail(activeLayer, undefined, { logo: name })}
               />
             ))}
           </div>
@@ -229,7 +229,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
                 key={code}
                 code={code}
                 isSelected={flag === code}
-                onClick={() => setG2Detail(activeLayer, undefined, undefined, g2Sel.logoOption, code)}
+                onClick={() => setG2Detail(activeLayer, undefined, { flag: code })}
               />
             ))}
         </div>
@@ -241,13 +241,13 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
   if (isSuit) {
     const tieFile = trait.detailOptions?.find(d => d.name === 'Tie')?.file;
     const bowFile = trait.detailOptions?.find(d => d.name === 'Bow')?.file;
-    const isTie = g2Sel.detailOption === tieFile;
-    const isBow = g2Sel.detailOption === bowFile;
+    const isTie = g2Sel.options.detail === tieFile;
+    const isBow = g2Sel.options.detail === bowFile;
     const activeSlot = g2Sel.activeColorSlot ?? 'fill0';
 
-    const handleSuitClick = () => setG2Detail(activeLayer, undefined, undefined, undefined, undefined, undefined, undefined, 'fill0');
-    const handleTieClick = () => setG2Detail(activeLayer, tieFile, undefined, undefined, undefined, undefined, undefined, 'fill1');
-    const handleBowClick = () => setG2Detail(activeLayer, bowFile, undefined, undefined, undefined, undefined, undefined, 'fill1');
+    const handleSuitClick = () => setG2Detail(activeLayer, 'fill0');
+    const handleTieClick = () => setG2Detail(activeLayer, 'fill1', { detail: tieFile });
+    const handleBowClick = () => setG2Detail(activeLayer, 'fill1', { detail: bowFile });
 
     const btn = (label: string, isActive: boolean, onClick: () => void) => (
       <button
@@ -287,11 +287,11 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
     const detail2File = trait.detailOptions[1]!.file;
     const frameForLogo = trait.frameFiles?.find(f => f.over === 'Logo Patch');
     const frameFile = frameForLogo?.file;
-    const isDetail1 = g2Sel.detailOption === detail1File && !g2Sel.logoOption;
-    const isDetail2 = g2Sel.detailOption === detail2File && !g2Sel.logoOption;
-    const handleDetail1 = () => setG2Detail(activeLayer, detail1File, undefined, '');
-    const handleDetail2 = () => setG2Detail(activeLayer, detail2File, undefined, '');
-    const handleLogo = (name: string) => setG2Detail(activeLayer, '', frameFile, name);
+    const isDetail1 = g2Sel.options.detail === detail1File && !g2Sel.options.logo;
+    const isDetail2 = g2Sel.options.detail === detail2File && !g2Sel.options.logo;
+    const handleDetail1 = () => setG2Detail(activeLayer, undefined, { detail: detail1File, logo: '' });
+    const handleDetail2 = () => setG2Detail(activeLayer, undefined, { detail: detail2File, logo: '' });
+    const handleLogo = (name: string) => setG2Detail(activeLayer, undefined, { detail: '', frame: frameFile, logo: name });
 
     return (
       <div
@@ -332,7 +332,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
             <LogoButton
               key={name}
               name={name}
-              isSelected={!!g2Sel.logoOption && g2Sel.logoOption === name}
+              isSelected={!!g2Sel.options.logo && g2Sel.options.logo === name}
               onClick={() => handleLogo(name)}
             />
           ))}
@@ -343,11 +343,11 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
 
   // Comrad Hat / Hard Hat: coin logo picker (no detail options)
   if (trait.id === 'Head_Comrad-Hat' || trait.id === 'Head_Hard-hat') {
-    const currentLogo = g2Sel.logoOption || '';
+    const currentLogo = (g2Sel.options.logo as string | undefined) || '';
     const handleLogo = (name: string) => {
       // Toggle: clicking same logo deselects
       const newLogo = currentLogo === name ? '' : name;
-      setG2Detail(activeLayer, undefined, undefined, newLogo);
+      setG2Detail(activeLayer, undefined, { logo: newLogo });
     };
     return (
       <div
@@ -381,16 +381,16 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
     'Head_Cap_detail_chia.png': `${basePath}/chia-TN.png`,
   };
   if (trait.id === 'Head_Cap' && trait.detailOptions) {
-    const currentLogo = g2Sel.logoOption || '';
-    const currentDetail = g2Sel.detailOption || '';
-    const currentVariant = g2Sel.variant || '';
+    const currentLogo = (g2Sel.options.logo as string | undefined) || '';
+    const currentDetail = (g2Sel.options.detail as string | undefined) || '';
+    const currentVariant = (g2Sel.options.variant as string | undefined) || '';
     const handleDetail = (file: string) => {
       const newDetail = currentDetail === file ? '' : file;
       // Selecting a detail clears coin logo — single atomic callback to avoid stale-state race
       if (onDetailSelect) {
         onDetailSelect(newDetail || undefined, undefined);
       } else {
-        setG2Detail(activeLayer, newDetail, undefined, newDetail ? '' : undefined);
+        setG2Detail(activeLayer, undefined, { detail: newDetail, logo: newDetail ? '' : undefined });
       }
     };
     const handleLogo = (name: string) => {
@@ -399,7 +399,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
       if (onLogoSelect) {
         onLogoSelect(newLogo);
       } else {
-        setG2Detail(activeLayer, newLogo ? '' : undefined, undefined, newLogo);
+        setG2Detail(activeLayer, undefined, { detail: newLogo ? '' : undefined, logo: newLogo });
       }
     };
     const handleVariant = (file: string) => {
@@ -407,7 +407,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
       if (onVariantSelect) {
         onVariantSelect(newVariant);
       } else {
-        setG2Detail(activeLayer, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, newVariant);
+        setG2Detail(activeLayer, undefined, { variant: newVariant });
       }
     };
     return (
@@ -490,15 +490,15 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
   if (isConstructionHelmet && detailOpts && detailOpts.length >= 3) {
     const cig1Opt = detailOpts.find(d => d.file.endsWith('cig-pack.png'));
     const cig2Opt = detailOpts.find(d => d.file.includes('cig-pack-2'));
-    const chiaOn = g2Sel.constructionHelmetChiaLogo ?? false;
-    const cigPack = g2Sel.constructionHelmetCigPack ?? '';
+    const chiaOn = (g2Sel.options.constructionHelmetChiaLogo as boolean | undefined) ?? false;
+    const cigPack = (g2Sel.options.constructionHelmetCigPack as string | undefined) ?? '';
 
     // Helper: always pass both values for reliable updates (avoids param-order bugs)
     const setConstructionHelmet = (chia: boolean, cig: string) => {
       if (onConstructionHelmetUpdate) {
         onConstructionHelmetUpdate(chia, cig);
       } else {
-        setG2Detail(activeLayer, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, chia, cig);
+        setG2Detail(activeLayer, undefined, { constructionHelmetChiaLogo: chia, constructionHelmetCigPack: cig });
       }
     };
 
@@ -595,11 +595,11 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
         options={trait.detailOptions!}
         basePath={basePath}
         selectedOption={
-          (trait.id === 'Clothes_SWAT' && !g2Sel.detailOption)
+          (trait.id === 'Clothes_SWAT' && !g2Sel.options.detail)
             ? trait.detailOptions![0].file
-            : (trait.id === 'Head_Beer-Hat' && (!g2Sel.detailOption || g2Sel.detailOption === ''))
+            : (trait.id === 'Head_Beer-Hat' && (!g2Sel.options.detail || g2Sel.options.detail === ''))
               ? (trait.detailOptions?.find(d => d.name === 'Citrus')?.file ?? trait.detailOptions?.[0]?.file)
-              : g2Sel.detailOption
+              : (g2Sel.options.detail as string | undefined)
         }
         allowNone={trait.id !== 'Clothes_SWAT' && trait.id !== 'Head_Beer-Hat'}
         zoom={trait.id === 'Head_Beer-Hat' ? 6 : undefined}
@@ -614,7 +614,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
             onDetailSelect(file, frameFile);
           } else {
             // Use '' for None so reducer stores it (undefined is ignored)
-            setG2Detail(activeLayer, file ?? '', frameFile);
+            setG2Detail(activeLayer, undefined, { detail: file ?? '', frame: frameFile });
           }
         }}
         label=""

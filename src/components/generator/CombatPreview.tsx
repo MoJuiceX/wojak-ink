@@ -82,13 +82,13 @@ export function CombatPreview() {
         }
 
         // Collect detail option
-        if (sel.detailOption) {
-          details[sel.traitId] = sel.detailOption;
+        if (sel.options.detail) {
+          details[sel.traitId] = sel.options.detail as string;
         }
 
         // Collect logo option (Astronaut coin logo)
-        if (sel.logoOption) {
-          logoOption = sel.logoOption;
+        if (sel.options.logo) {
+          logoOption = sel.options.logo as string;
         }
       }
     }

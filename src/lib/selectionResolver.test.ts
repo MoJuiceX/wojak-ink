@@ -16,7 +16,7 @@ describe('createSelectionResolver — getTraitId', () => {
 
   it('returns traitId from g2Selections when present', () => {
     const g2: G2Selections = {
-      Clothes: { traitId: 'Clothes_Bathrobe', g2Category: 'Clothes', colors: {} },
+      Clothes: { traitId: 'Clothes_Bathrobe', g2Category: 'Clothes', colors: {}, options: {} },
     };
     const resolver = createSelectionResolver({}, g2);
     expect(resolver.getTraitId('Clothes')).toBe('Clothes_Bathrobe');
@@ -26,7 +26,7 @@ describe('createSelectionResolver — getTraitId', () => {
     const selectedLayers: SelectedLayers = { Clothes: 'layers/Clothes/Bathrobe.png' };
     const pathMap: PathToTraitIdMap = new Map([['layers/Clothes/Bathrobe.png', 'g1_Bathrobe']]);
     const g2: G2Selections = {
-      Clothes: { traitId: 'Clothes_Bathrobe', g2Category: 'Clothes', colors: {} },
+      Clothes: { traitId: 'Clothes_Bathrobe', g2Category: 'Clothes', colors: {}, options: {} },
     };
     const resolver = createSelectionResolver(selectedLayers, g2, pathMap);
     expect(resolver.getTraitId('Clothes')).toBe('Clothes_Bathrobe');
