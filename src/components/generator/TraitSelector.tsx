@@ -5,7 +5,7 @@
  * Renders MouthLayerSelector for mouth-related layers.
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Ban } from 'lucide-react';
 import { useLayout } from '@/hooks/useLayout';
@@ -210,7 +210,7 @@ interface ImageCardProps {
   isTop3?: boolean;
 }
 
-function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing, isTop3 }: ImageCardProps) {
+const ImageCard = memo(function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing, isTop3 }: ImageCardProps) {
   const prefersReducedMotion = useReducedMotion();
 
   return (
@@ -277,7 +277,7 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pri
       )}
     </motion.button>
   );
-}
+});
 
 // Default layer paths for preview composites
 const DEFAULT_BASE_PATH = '/assets/wojak-layers/BASE/BASE_Base-Wojak_classic.png';
@@ -303,7 +303,7 @@ interface BaseImageCardProps {
   isTop3?: boolean;
 }
 
-function BaseImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing, isTop3 }: BaseImageCardProps) {
+const BaseImageCard = memo(function BaseImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing, isTop3 }: BaseImageCardProps) {
   const prefersReducedMotion = useReducedMotion();
 
   return (
@@ -385,7 +385,7 @@ function BaseImageCard({ image, isSelected, isDisabled, disabledReason, onClick,
       )}
     </motion.button>
   );
-}
+});
 
 interface ClothesImageCardProps {
   image: LayerImage;
@@ -405,7 +405,7 @@ interface SolidColorBackgroundCardProps {
   onClick: () => void;
 }
 
-function SolidColorBackgroundCard({ color, isSelected, isDisabled, disabledReason, onClick }: SolidColorBackgroundCardProps) {
+const SolidColorBackgroundCard = memo(function SolidColorBackgroundCard({ color, isSelected, isDisabled, disabledReason, onClick }: SolidColorBackgroundCardProps) {
   const prefersReducedMotion = useReducedMotion();
 
   return (
@@ -470,7 +470,7 @@ function SolidColorBackgroundCard({ color, isSelected, isDisabled, disabledReaso
       )}
     </motion.button>
   );
-}
+});
 
 interface PriceOverlayCardProps {
   overlayType: 'up' | 'down';
@@ -482,7 +482,7 @@ interface PriceOverlayCardProps {
 }
 
 /** Card for Price up/down overlays that work on top of solid color backgrounds */
-function PriceOverlayCard({ overlayType, bgColor, isSelected, isDisabled, disabledReason, onClick }: PriceOverlayCardProps) {
+const PriceOverlayCard = memo(function PriceOverlayCard({ overlayType, bgColor, isSelected, isDisabled, disabledReason, onClick }: PriceOverlayCardProps) {
   const prefersReducedMotion = useReducedMotion();
   const overlayPath = `/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Price-${overlayType}.png`;
   const label = overlayType === 'up' ? 'Price up' : 'Price down';
@@ -557,7 +557,7 @@ function PriceOverlayCard({ overlayType, bgColor, isSelected, isDisabled, disabl
       )}
     </motion.button>
   );
-}
+});
 
 interface LayerWithBaseMouthCardProps {
   image: LayerImage;
@@ -572,7 +572,7 @@ interface LayerWithBaseMouthCardProps {
 }
 
 /** Card for Head, Mask, Eyes, Background: base + mouth rendered under the trait. */
-function LayerWithBaseMouthCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing, isTop3, renderBehindBase }: LayerWithBaseMouthCardProps) {
+const LayerWithBaseMouthCard = memo(function LayerWithBaseMouthCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing, isTop3, renderBehindBase }: LayerWithBaseMouthCardProps) {
   const prefersReducedMotion = useReducedMotion();
 
   return (
@@ -671,9 +671,9 @@ function LayerWithBaseMouthCard({ image, isSelected, isDisabled, disabledReason,
       )}
     </motion.button>
   );
-}
+});
 
-function ClothesImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing, isTop3 }: ClothesImageCardProps) {
+const ClothesImageCard = memo(function ClothesImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing, isTop3 }: ClothesImageCardProps) {
   const prefersReducedMotion = useReducedMotion();
 
   return (
@@ -755,7 +755,7 @@ function ClothesImageCard({ image, isSelected, isDisabled, disabledReason, onCli
       )}
     </motion.button>
   );
-}
+});
 
 // ============ G2 Trait Card ============
 
@@ -775,7 +775,7 @@ interface G2TraitCardProps {
   isTop3?: boolean;
 }
 
-export function G2TraitCard({ trait, isSelected, isDisabled, disabledReason, onClick, needsClothesUnderlay, isBeerHatUnderlayer, livePreviewUrl, pricing, isTop3 }: G2TraitCardProps) {
+export const G2TraitCard = memo(function G2TraitCard({ trait, isSelected, isDisabled, disabledReason, onClick, needsClothesUnderlay, isBeerHatUnderlayer, livePreviewUrl, pricing, isTop3 }: G2TraitCardProps) {
   const prefersReducedMotion = useReducedMotion();
   return (
     <motion.button
@@ -843,7 +843,7 @@ export function G2TraitCard({ trait, isSelected, isDisabled, disabledReason, onC
       )}
     </motion.button>
   );
-}
+});
 
 export function TraitSelector({ className = '' }: TraitSelectorProps) {
   const {
@@ -879,12 +879,19 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
   const [glowingTraitId, setGlowingTraitId] = useState<string | null>(null);
   const glowTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  const triggerSelectionGlow = (traitId: string) => {
+  const triggerSelectionGlow = useCallback((traitId: string) => {
     if (glowTimerRef.current) clearTimeout(glowTimerRef.current);
     setGlowingTraitId(traitId);
     navigator.vibrate?.(10);
     glowTimerRef.current = setTimeout(() => setGlowingTraitId(null), 300);
-  };
+  }, []);
+
+  // Cleanup glow timer on unmount
+  useEffect(() => {
+    return () => {
+      if (glowTimerRef.current) clearTimeout(glowTimerRef.current);
+    };
+  }, []);
 
   // Check if this is a mouth layer (must be before any conditional returns but after hooks)
   const isMouthLayer = activeLayer === 'MouthBase' || activeLayer === 'MouthItem' || activeLayer === 'FacialHair';
@@ -893,59 +900,10 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
   const g2Sel = g2Selections[activeLayer];
   const isBlocked = isLayerDisabled(activeLayer);
 
-  // Check if images are stale (loaded for a different layer)
-  const imagesAreStale = imagesForLayer !== activeLayer;
-
-  // Load images and unified traits when layer changes (only for non-mouth layers)
-  useEffect(() => {
-    if (!isInitialized || isMouthLayer) return;
-
-    queueMicrotask(() => setIsLoading(true));
-
-    Promise.all([
-      getLayerImages(activeLayer),
-      getUnifiedTraitsForLayer(activeLayer),
-    ])
-      .then(([_imgs, traits]) => {
-        // Apply custom sort order for Clothes layer
-        const sortedTraits = activeLayer === 'Clothes' ? sortClothesTraits(traits) : traits;
-        setUnifiedTraits(sortedTraits);
-        setImagesForLayer(activeLayer);
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.error('Failed to load layer images:', err);
-        setUnifiedTraits([]);
-        setImagesForLayer(activeLayer);
-        setIsLoading(false);
-      });
-  }, [activeLayer, isInitialized, getLayerImages, getUnifiedTraitsForLayer, isMouthLayer]);
-
-  // All traits in one grid (no separate Customizable section)
-
-  // Use MouthLayerSelector for mouth-related layers (combines MouthBase + MouthItem)
-  if (isMouthLayer) {
-    return <MouthLayerSelector className={className} />;
-  }
-
-  // Loading skeleton - also show when data is stale (from a different layer)
-  if (isLoading || !isInitialized || imagesAreStale) {
-    return (
-      <div className={`space-y-4 ${className}`}>
-        <div className="generator-options-grid">
-          {Array.from({ length: 12 }).map((_, i) => (
-            <TraitCardSkeleton key={i} />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   // Layers that cannot be deselected (only switched to another option)
-  const nonDeselectableLayers = ['Base', 'Clothes', 'MouthBase'];
-  const canDeselect = !nonDeselectableLayers.includes(activeLayer);
+  const canDeselect = !['Base', 'Clothes', 'MouthBase'].includes(activeLayer);
 
-  const handleTraitClick = (trait: UnifiedTrait) => {
+  const handleTraitClick = useCallback((trait: UnifiedTrait) => {
     if (isBlocked || isOptionDisabled(activeLayer, trait.name)) return;
 
     // Extra items (hand items, wings) use multi-select toggle instead of single-select
@@ -1001,7 +959,55 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
     } else {
       selectG2Layer(activeLayer, trait);
     }
-  };
+  }, [isBlocked, isOptionDisabled, activeLayer, selectedLayers, triggerSelectionGlow, toggleExtra, g2Sel, selectedPath, setBeerHatEditFocus, selectG2Layer, canDeselect, clearLayer, selectLayer]);
+
+  // Check if images are stale (loaded for a different layer)
+  const imagesAreStale = imagesForLayer !== activeLayer;
+
+  // Load images and unified traits when layer changes (only for non-mouth layers)
+  useEffect(() => {
+    if (!isInitialized || isMouthLayer) return;
+
+    queueMicrotask(() => setIsLoading(true));
+
+    Promise.all([
+      getLayerImages(activeLayer),
+      getUnifiedTraitsForLayer(activeLayer),
+    ])
+      .then(([_imgs, traits]) => {
+        // Apply custom sort order for Clothes layer
+        const sortedTraits = activeLayer === 'Clothes' ? sortClothesTraits(traits) : traits;
+        setUnifiedTraits(sortedTraits);
+        setImagesForLayer(activeLayer);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.error('Failed to load layer images:', err);
+        setUnifiedTraits([]);
+        setImagesForLayer(activeLayer);
+        setIsLoading(false);
+      });
+  }, [activeLayer, isInitialized, getLayerImages, getUnifiedTraitsForLayer, isMouthLayer]);
+
+  // All traits in one grid (no separate Customizable section)
+
+  // Use MouthLayerSelector for mouth-related layers (combines MouthBase + MouthItem)
+  if (isMouthLayer) {
+    return <MouthLayerSelector className={className} />;
+  }
+
+  // Loading skeleton - also show when data is stale (from a different layer)
+  if (isLoading || !isInitialized || imagesAreStale) {
+    return (
+      <div className={`space-y-4 ${className}`}>
+        <div className="generator-options-grid">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <TraitCardSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const traitType = LAYER_TO_TRAIT_TYPE[activeLayer] || '';
   const lookupPricing = (traitName: string): TraitPricingEntry | null => {
