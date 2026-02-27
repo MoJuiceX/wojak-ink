@@ -293,9 +293,15 @@ function tintDraw(
   } else if (clipBottomHalfFull && clipRightPercent && clipRightPercent > 0) {
     const clipW = size * (1 - clipRightPercent);
     ctx.save();
+    // Single L-shaped polygon instead of compound rect path (mobile Safari OffscreenCanvas compat)
     ctx.beginPath();
-    ctx.rect(0, 0, clipW, halfH);
-    ctx.rect(0, halfH, size, halfH);
+    ctx.moveTo(0, 0);
+    ctx.lineTo(clipW, 0);
+    ctx.lineTo(clipW, halfH);
+    ctx.lineTo(size, halfH);
+    ctx.lineTo(size, size);
+    ctx.lineTo(0, size);
+    ctx.closePath();
     ctx.clip();
     ctx.drawImage(tc, 0, 0, size, size);
     ctx.restore();
@@ -921,9 +927,15 @@ async function drawG2Layer(
     } else if (clipBottomHalfFull && clipRightPercent && clipRightPercent > 0) {
       let clipW = size * (1 - clipRightPercent);
       if (clipBoundaryOffsetPx != null) clipW = Math.max(0, clipW - clipBoundaryOffsetPx);
+      // Single L-shaped polygon instead of compound rect path (mobile Safari OffscreenCanvas compat)
       ctx.beginPath();
-      ctx.rect(0, 0, clipW, halfH);
-      ctx.rect(0, halfH, size, halfH);
+      ctx.moveTo(0, 0);
+      ctx.lineTo(clipW, 0);
+      ctx.lineTo(clipW, halfH);
+      ctx.lineTo(size, halfH);
+      ctx.lineTo(size, size);
+      ctx.lineTo(0, size);
+      ctx.closePath();
       ctx.clip();
     } else if (clipTopHalfOnly && clipLeftPercent && clipLeftPercent > 0) {
       let clipX = size * clipLeftPercent;
@@ -1658,9 +1670,15 @@ function drawColoredLayer(
     mainCtx.clip();
   } else if (clipBottomHalfFull && clipRightPercent && clipRightPercent > 0) {
     const clipW = size * (1 - clipRightPercent);
+    // Single L-shaped polygon instead of compound rect path (mobile Safari OffscreenCanvas compat)
     mainCtx.beginPath();
-    mainCtx.rect(0, 0, clipW, halfH);
-    mainCtx.rect(0, halfH, size, halfH);
+    mainCtx.moveTo(0, 0);
+    mainCtx.lineTo(clipW, 0);
+    mainCtx.lineTo(clipW, halfH);
+    mainCtx.lineTo(size, halfH);
+    mainCtx.lineTo(size, size);
+    mainCtx.lineTo(0, size);
+    mainCtx.closePath();
     mainCtx.clip();
   } else if (clipTopHalfOnly && clipLeftPercent && clipLeftPercent > 0) {
     const clipX = size * clipLeftPercent;
@@ -1725,9 +1743,15 @@ function drawLayer(
     let clipW = size * (1 - clipRightPercent);
     if (clipBoundaryOffsetPx != null) clipW = Math.max(0, clipW - clipBoundaryOffsetPx);
     ctx.save();
+    // Single L-shaped polygon instead of compound rect path (mobile Safari OffscreenCanvas compat)
     ctx.beginPath();
-    ctx.rect(0, 0, clipW, halfH);
-    ctx.rect(0, halfH, size, halfH);
+    ctx.moveTo(0, 0);
+    ctx.lineTo(clipW, 0);
+    ctx.lineTo(clipW, halfH);
+    ctx.lineTo(size, halfH);
+    ctx.lineTo(size, size);
+    ctx.lineTo(0, size);
+    ctx.closePath();
     ctx.clip();
     ctx.drawImage(image, 0, 0, size, size);
     ctx.restore();
