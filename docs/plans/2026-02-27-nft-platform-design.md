@@ -194,24 +194,34 @@ Collection {
 
 ### Upload Requirements (Enforced by Platform)
 
-- **All PNGs must be the same resolution** (set once per collection, e.g., 1000×1000)
+- **All PNGs must be 1:1 aspect ratio** (square) — platform normalizes to 1000×1000 internally
 - **Transparent backgrounds** (PNG with alpha)
 - **Consistent positioning** — layers stack on the same canvas, so a "hat" must be positioned where it would sit on the "head"
 - **File naming convention** — platform generates trait IDs from filenames but artist can rename in dashboard
 
-### Upload Flow (Artist Dashboard)
+### Upload Flow: Setup Wizard
 
-1. Artist creates a new category (e.g., "Hats")
-2. Sets z-index via drag-and-drop ordering of categories
-3. Uploads PNGs for that category — each PNG becomes a trait
-4. Platform validates: resolution matches, alpha channel present, file size reasonable
-5. Artist names each trait, marks colorable (yes/no), sets default color
-6. Repeat for each category
-7. Platform auto-generates manifest.json and stores in D1
+The upload flow is a **step-by-step wizard** that walks artists through each category:
 
-### Resolution Validation
+1. **Step 1: Collection basics** — Name, description, subdomain
+2. **Step 2: "Upload your Base layers"** — Artist uploads all base/body PNGs
+3. **Step 3: "Upload your Head layers"** — Hats, hair, helmets, etc.
+4. **Step 4: "Upload your Mouth layers"** — Expressions, accessories
+5. **Step 5: "Upload your [next category]..."** — Continue for each category
+6. **Step 6: Set layer order** — Drag-and-drop categories to set z-index
+7. **Step 7: Name & configure traits** — Name each trait, mark colorable, set defaults
+8. **Step 8: Preview & test** — See the generator working with uploaded layers
 
-On first upload, platform detects resolution from the first image and locks it for the collection. All subsequent uploads must match. If an artist uploads a 500×500 PNG to a 1000×1000 collection, the platform rejects it with a clear error: "This image is 500×500 but your collection uses 1000×1000. Please resize and re-upload."
+Each step validates uploads immediately. Categories are pre-suggested but artist can add custom categories.
+
+### Resolution Handling
+
+**Flexible input, consistent output:**
+- All uploads must be **square (1:1 ratio)** — platform rejects non-square images
+- Platform auto-scales all images to the internal render resolution (1000×1000)
+- If artist uploads 2000×2000, platform scales down. If 500×500, platform scales up
+- All images within a collection must be the same resolution (enforced per-upload)
+- On first upload, platform detects the source resolution and locks it for the collection — subsequent uploads must match
 
 ### Layer Storage
 
@@ -289,28 +299,35 @@ User clicks "Mint" →
 
 ### MintGarden Credits
 
-The platform holds a pool of MintGarden dynamic minting credits. Each mint from any collection burns one credit.
+The platform holds a pool of MintGarden dynamic minting credits. Each mint from any collection burns one credit. Credits are only consumed at mint time (not upfront).
 
 **Cost absorption model:**
-- Platform buys credits in bulk (cheaper per-unit)
-- Credit cost is factored into the platform's rev share percentage
-- Artists don't need to know about or manage credits
-- If credit pool runs low, platform buys more (operational cost)
+- Platform buys credits in bulk (cheaper per-unit) — this is a platform operational expense
+- Artists never see or manage credits — completely invisible to them
+- Credit cost is recouped through the platform's rev share on each mint
+- The per-mint rev share covers: MintGarden credit + IPFS pinning + hosting + margin
+- If credit pool runs low, platform buys more (routine ops)
 
 ### Royalty Splits (SplitXCH)
 
-When a collection launches, the platform automatically creates a SplitXCH address with the negotiated split:
+Artists configure royalties through simple UI controls — they never need to understand SplitXCH mechanics. The wizard asks:
+
+1. **"What royalty % do you want on secondary sales?"** → Slider (1-10%, default 5%)
+2. **"Enter your XCH wallet address"** → Text field
+3. **"Want to add additional royalty recipients?"** → Optional: add more addresses + percentages
+
+The platform treasury address is **always** included automatically (artist doesn't see this as a choice — it's part of the platform terms). The platform's share of royalty is small and fixed (e.g., 1-2% of sale price).
 
 ```
-Collection "CoolCats" royalty: 5%
-├── Artist wallet:    80% → xch1artist...
-├── Platform treasury: 15% → xch1platform...
-└── Minter reward:     5% → (per-mint, embedded in metadata)
+Example: Artist sets 5% royalty, adds one collaborator
+
+Secondary sale: 10 XCH → 0.5 XCH royalty total
+├── Artist wallet:       60% → 0.30 XCH
+├── Collaborator wallet: 20% → 0.10 XCH
+└── Platform treasury:   20% → 0.10 XCH (always included)
 ```
 
-The SplitXCH address is generated once and stored in the collection config. The artist provides their XCH address during setup; the platform treasury address is fixed.
-
-**Flexible splits:** Each collection stores its own split percentages. Defaults are configurable, and individual artists can negotiate different terms during white-glove onboarding.
+**Implementation:** Platform auto-generates the SplitXCH address when collection launches. Stored in collection config. Artist just sees "Royalties: 5%" in their dashboard — the split math happens behind the scenes.
 
 ### Per-Collection Database
 
@@ -339,13 +356,15 @@ CREATE TABLE trait_usage (...collection_id, trait_category, usage_count...);
 8. **Analytics** — Mints over time, revenue, popular traits, wallet stats
 9. **Settings** — Collection status (draft/testing/live/paused), danger zone
 
-### Preview & Testing (Gap #5 Solution)
+### Preview & Testing
 
-Before launching, artists MUST test their generator:
-- "Preview" mode loads the generator with their layers
+Built into the setup wizard (Step 8) and available anytime from the dashboard:
+- "Preview" mode loads the generator with their actual layers
 - Artist can try all combinations, verify alignment, test rules
+- If it looks right in the generator preview, it will mint correctly (same renderer)
 - Collection stays in "testing" status until artist clicks "Go Live"
 - Platform runs automated checks: all layer resolutions match, at least one trait per required category, rules don't create impossible states
+- Artist can also do a "test mint" (no blockchain, just generates the final image + metadata preview)
 
 ---
 
