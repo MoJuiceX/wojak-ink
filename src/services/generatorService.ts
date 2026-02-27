@@ -686,9 +686,11 @@ export async function getUnifiedTraits(layer: UILayerName): Promise<UnifiedTrait
   const cached = unifiedTraitsCache.get(layer);
   if (cached) return cached;
 
-  // Ensure both manifests are loaded
-  await generatorService.prefetchLayers();
-  const g2Manifest = await loadG2Manifest();
+  // Ensure both manifests are loaded (parallel — they are independent)
+  const [, g2Manifest] = await Promise.all([
+    generatorService.prefetchLayers(),
+    loadG2Manifest(),
+  ]);
 
   // Get G1 images for this layer
   const g1Images = getAllLayerImages(layer);
