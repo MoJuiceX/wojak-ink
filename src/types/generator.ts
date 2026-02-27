@@ -203,7 +203,7 @@ export interface GeneratorState {
 
   // Disabled state from rules engine
   disabledLayers: UILayerName[];
-  disabledOptions: Partial<Record<UILayerName, string[]>>;
+  disabledOptions: Partial<Record<UILayerName, Set<string>>>;
   disabledReasons: Record<string, string>;
 }
 

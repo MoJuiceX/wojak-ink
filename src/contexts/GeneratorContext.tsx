@@ -880,7 +880,7 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
     (layer: UILayerName, optionName: string) => {
       const options = state.disabledOptions[layer];
       if (!options) return false;
-      return options.some((opt) => optionName.toLowerCase().includes(opt.toLowerCase()));
+      return options.has(optionName.toLowerCase());
     },
     [state.disabledOptions]
   );

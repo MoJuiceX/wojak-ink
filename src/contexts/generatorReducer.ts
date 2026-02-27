@@ -34,7 +34,7 @@ export interface GeneratorState {
   previewImage: string | null;
   isPreviewStale: boolean;
   disabledLayers: UILayerName[];
-  disabledOptions: Partial<Record<UILayerName, string[]>>;
+  disabledOptions: Partial<Record<UILayerName, Set<string>>>;
   disabledReasons: Record<string, string>;
   disabledOptionReasons: Partial<Record<UILayerName, Record<string, string>>>;
   history: SelectionsSnapshot[];

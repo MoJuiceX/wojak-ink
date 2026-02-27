@@ -35,7 +35,7 @@ export interface DisabledLayersResult {
   reasons: Record<string, string>;
   clearSelections: UILayerName[];
   forceSelections: Partial<Record<UILayerName, string>>;
-  disabledOptions: Partial<Record<UILayerName, string[]>>;
+  disabledOptions: Partial<Record<UILayerName, Set<string>>>;
   /** Reasons for specific disabled options: { LayerName: { OptionName: "reason" } } */
   disabledOptionReasons: Partial<Record<UILayerName, Record<string, string>>>;
 }
@@ -780,7 +780,7 @@ export function getDisabledLayers(resolver: SelectionResolver): DisabledLayersRe
   const reasons: Record<string, string> = {};
   const clearSet = new Set<UILayerName>();
   const forceSelections: Partial<Record<UILayerName, string>> = {};
-  const disabledOptions: Partial<Record<UILayerName, string[]>> = {};
+  const disabledOptions: Partial<Record<UILayerName, Set<string>>> = {};
   const disabledOptionReasons: Partial<Record<UILayerName, Record<string, string>>> = {};
 
   for (const rule of RULES) {
@@ -807,14 +807,12 @@ export function getDisabledLayers(resolver: SelectionResolver): DisabledLayersRe
       Object.keys(result.disabledOptions).forEach((layerName) => {
         const key = layerName as UILayerName;
         if (!disabledOptions[key]) {
-          disabledOptions[key] = [];
+          disabledOptions[key] = new Set();
         }
         const newOptions = result.disabledOptions![key];
         if (Array.isArray(newOptions)) {
           newOptions.forEach((option) => {
-            if (!disabledOptions[key]!.includes(option)) {
-              disabledOptions[key]!.push(option);
-            }
+            disabledOptions[key]!.add(option.toLowerCase());
           });
         }
       });

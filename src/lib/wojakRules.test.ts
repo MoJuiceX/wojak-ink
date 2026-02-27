@@ -103,7 +103,7 @@ describe('wojakRules', () => {
       );
       const result = getDisabledLayers(resolver);
       expect(result.forceSelections?.MouthBase).toBe(DEFAULT_MOUTHBASE_PATH);
-      expect(result.disabledOptions?.MouthBase).toContain('Pizza');
+      expect(result.disabledOptions?.MouthBase).toContain('pizza');
     });
 
     it('disables Head when Bepe suit, Pepe suit, Goose suit, Pickle suit, Proof of Prayer, Sonic suit, or Gopher suit is selected', () => {
@@ -145,7 +145,7 @@ describe('wojakRules', () => {
       );
       const result = getDisabledLayers(resolver);
       // Mutual exclusion now handled by suspend/restore in reducer — no graying out
-      expect((result.disabledOptions?.Mask ?? []).includes('Copium')).toBe(false);
+      expect((result.disabledOptions?.Mask ?? new Set()).has('copium')).toBe(false);
       expect(result.forceSelections?.Mask ?? '').toBe('');
     });
 
@@ -161,7 +161,7 @@ describe('wojakRules', () => {
       );
       const result = getDisabledLayers(resolver);
       // Mutual exclusion now handled by suspend/restore in reducer — no graying out
-      expect((result.disabledOptions?.Clothes ?? []).includes('Astronaut')).toBe(false);
+      expect((result.disabledOptions?.Clothes ?? new Set()).has('astronaut')).toBe(false);
     });
 
     it('Astronaut and Night Vision: clears Eyes and disables Night Vision when Astronaut selected', () => {
@@ -181,7 +181,7 @@ describe('wojakRules', () => {
       // Mutual exclusion now handled by suspend/restore in reducer — no graying out
       expect(result.forceSelections?.Eyes ?? undefined).toBeUndefined();
       expect((result.clearSelections ?? []).includes('Eyes')).toBe(false);
-      expect((result.disabledOptions?.Eyes ?? []).includes('Night Vision')).toBe(false);
+      expect((result.disabledOptions?.Eyes ?? new Set()).has('night vision')).toBe(false);
     });
 
     it('Astronaut disables Night Vision option when Astronaut selected (no Eyes)', () => {
@@ -195,7 +195,7 @@ describe('wojakRules', () => {
       );
       const result = getDisabledLayers(resolver);
       // Mutual exclusion now handled by suspend/restore in reducer — no graying out
-      expect((result.disabledOptions?.Eyes ?? []).includes('Night Vision')).toBe(false);
+      expect((result.disabledOptions?.Eyes ?? new Set()).has('night vision')).toBe(false);
     });
 
     it('disables MouthItem when Pipe (MouthBase) is selected', () => {
@@ -253,9 +253,9 @@ describe('wojakRules', () => {
       expect(result.disabledLayers).toContain('MouthItem');
       expect(result.forceSelections?.MouthItem).toBe('');
       expect(result.clearSelections).toContain('MouthItem');
-      expect(result.disabledOptions?.MouthItem).toContain('Cig');
-      expect(result.disabledOptions?.MouthItem).toContain('Cohiba');
-      expect(result.disabledOptions?.MouthItem).toContain('Joint');
+      expect(result.disabledOptions?.MouthItem).toContain('cig');
+      expect(result.disabledOptions?.MouthItem).toContain('cohiba');
+      expect(result.disabledOptions?.MouthItem).toContain('joint');
     });
 
     it('Vampire disables only Neckbeard (FacialHair); Stache remains allowed', () => {
@@ -269,7 +269,6 @@ describe('wojakRules', () => {
       );
       const result = getDisabledLayers(resolver);
       expect(result.disabledLayers).not.toContain('FacialHair');
-      expect(result.disabledOptions?.FacialHair).toContain('Neckbeard');
       expect(result.disabledOptions?.FacialHair).toContain('neckbeard');
       expect(result.disabledOptionReasons?.FacialHair?.Neckbeard).toBe('Not available with Vampire Teeth');
     });
@@ -287,7 +286,7 @@ describe('wojakRules', () => {
       const result = getDisabledLayers(resolver);
       expect(result.forceSelections?.FacialHair).toBe('');
       expect(result.clearSelections).toContain('FacialHair');
-      expect(result.disabledOptions?.FacialHair).toContain('Neckbeard');
+      expect(result.disabledOptions?.FacialHair).toContain('neckbeard');
     });
 
     it('Vampire + Stache: FacialHair layer not disabled and Stache not in disabledOptions', () => {
@@ -302,8 +301,8 @@ describe('wojakRules', () => {
       );
       const result = getDisabledLayers(resolver);
       expect(result.disabledLayers).not.toContain('FacialHair');
-      const facialOpts = result.disabledOptions?.FacialHair ?? [];
-      expect(facialOpts).not.toContain('Stache');
+      const facialOpts = result.disabledOptions?.FacialHair ?? new Set();
+      expect(facialOpts).not.toContain('stache');
       expect(facialOpts).not.toContain('stach');
     });
 
@@ -320,7 +319,7 @@ describe('wojakRules', () => {
       );
       const result = getDisabledLayers(resolver);
       // Fake mask / Laser Eyes mutual exclusion now handled by suspend/restore in reducer
-      expect((result.disabledOptions?.Eyes ?? []).includes('Laser')).toBe(false);
+      expect((result.disabledOptions?.Eyes ?? new Set()).has('laser')).toBe(false);
       expect(result.disabledOptionReasons?.Eyes?.['Laser-Eyes'] ?? undefined).toBeUndefined();
     });
 
@@ -439,7 +438,7 @@ describe('wojakRules (extended)', () => {
         { Clothes: 'Clothes_Sonic-suit' }
       );
       const result = getDisabledLayers(resolver as SelectionResolver);
-      expect(result.disabledOptions?.Mask).toContain('Bandana');
+      expect(result.disabledOptions?.Mask).toContain('bandana');
     });
 
     it('clears Bandana selection when Pickle suit is selected', () => {
@@ -463,7 +462,7 @@ describe('wojakRules (extended)', () => {
         { Clothes: 'Clothes_Goose-suit' }
       );
       const result = getDisabledLayers(resolver as SelectionResolver);
-      expect(result.disabledOptions?.Mask).toContain('Bandana');
+      expect(result.disabledOptions?.Mask).toContain('bandana');
     });
   });
 
@@ -475,7 +474,7 @@ describe('wojakRules (extended)', () => {
         { Clothes: 'Clothes_Sonic-suit' }
       );
       const result = getDisabledLayers(resolver as SelectionResolver);
-      expect(result.disabledOptions?.Mask).toContain('Hannibal');
+      expect(result.disabledOptions?.Mask).toContain('hannibal');
     });
 
     it('disables suit options when Hannibal mask is selected', () => {
@@ -484,7 +483,7 @@ describe('wojakRules (extended)', () => {
         {}
       );
       const result = getDisabledLayers(resolver as SelectionResolver);
-      expect(result.disabledOptions?.Clothes).toContain('Sonic');
+      expect(result.disabledOptions?.Clothes).toContain('sonic');
     });
 
     it('clears Hannibal selection when Goose suit is selected with Hannibal mask', () => {
@@ -531,7 +530,7 @@ describe('wojakRules (extended)', () => {
         {}
       );
       const result = getDisabledLayers(resolver as SelectionResolver);
-      expect(result.disabledOptions?.FacialHair).toContain('Neckbeard');
+      expect(result.disabledOptions?.FacialHair).toContain('neckbeard');
     });
   });
 
@@ -563,8 +562,8 @@ describe('wojakRules (extended)', () => {
         {}
       );
       const result = getDisabledLayers(resolver as SelectionResolver);
-      expect(result.disabledOptions?.Clothes).toContain('Sonic');
-      expect(result.disabledOptions?.Clothes).toContain('Pickle');
+      expect(result.disabledOptions?.Clothes).toContain('sonic');
+      expect(result.disabledOptions?.Clothes).toContain('pickle');
     });
   });
 
@@ -582,8 +581,8 @@ describe('wojakRules (extended)', () => {
       );
       const result = getDisabledLayers(resolver as SelectionResolver);
       // Firefighter Helmet / Eyes mutual exclusion now handled by suspend/restore in reducer
-      expect((result.disabledOptions?.Eyes ?? []).includes('VR headset')).toBe(false);
-      expect((result.disabledOptions?.Eyes ?? []).includes('Night Vision')).toBe(false);
+      expect((result.disabledOptions?.Eyes ?? new Set()).has('vr headset')).toBe(false);
+      expect((result.disabledOptions?.Eyes ?? new Set()).has('night vision')).toBe(false);
     });
 
     it('clears Eyes when Firefighter Helmet is selected alongside VR Headset', () => {
@@ -618,7 +617,7 @@ describe('wojakRules (extended)', () => {
       );
       const result = getDisabledLayers(resolver as SelectionResolver);
       // Mutual exclusion now handled by suspend/restore in reducer
-      expect((result.disabledOptions?.Head ?? []).includes('Firefighter Helmet')).toBe(false);
+      expect((result.disabledOptions?.Head ?? new Set()).has('firefighter helmet')).toBe(false);
     });
   });
 
@@ -636,7 +635,7 @@ describe('wojakRules (extended)', () => {
       );
       const result = getDisabledLayers(resolver as SelectionResolver);
       // Laser Eyes / Fake mask mutual exclusion now handled by suspend/restore in reducer
-      expect((result.disabledOptions?.Eyes ?? []).includes('Laser')).toBe(false);
+      expect((result.disabledOptions?.Eyes ?? new Set()).has('laser')).toBe(false);
     });
 
     it('clears Eyes when Fake mask is selected alongside Laser Eyes', () => {
@@ -667,9 +666,9 @@ describe('wojakRules (extended)', () => {
         {}
       );
       const result = getDisabledLayers(resolver as SelectionResolver);
-      // Either Eyes is not in disabledOptions, or it doesn't contain 'Laser'
-      const disabledEyes = result.disabledOptions?.Eyes ?? [];
-      expect(disabledEyes).not.toContain('Laser');
+      // Either Eyes is not in disabledOptions, or it doesn't contain 'laser'
+      const disabledEyes = result.disabledOptions?.Eyes ?? new Set();
+      expect(disabledEyes).not.toContain('laser');
     });
 
     it('allows Laser Eyes with Bandana mask', () => {
@@ -683,9 +682,9 @@ describe('wojakRules (extended)', () => {
         {}
       );
       const result = getDisabledLayers(resolver as SelectionResolver);
-      // Either Eyes is not in disabledOptions, or it doesn't contain 'Laser'
-      const disabledEyes = result.disabledOptions?.Eyes ?? [];
-      expect(disabledEyes).not.toContain('Laser');
+      // Either Eyes is not in disabledOptions, or it doesn't contain 'laser'
+      const disabledEyes = result.disabledOptions?.Eyes ?? new Set();
+      expect(disabledEyes).not.toContain('laser');
     });
 
     it('disables Fake mask option when Laser Eyes are selected', () => {
@@ -700,7 +699,7 @@ describe('wojakRules (extended)', () => {
       );
       const result = getDisabledLayers(resolver as SelectionResolver);
       // Laser Eyes / Fake mask mutual exclusion now handled by suspend/restore in reducer
-      expect((result.disabledOptions?.Mask ?? []).includes('Fake')).toBe(false);
+      expect((result.disabledOptions?.Mask ?? new Set()).has('fake')).toBe(false);
       // Other masks should NOT be disabled
       expect(result.disabledLayers).not.toContain('Mask');
     });
