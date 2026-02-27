@@ -2,12 +2,19 @@
 
 Quick reference for keeping the generator maintainable and what to do next. See [GENERATOR-ARCHITECTURE.md](./GENERATOR-ARCHITECTURE.md) for data flow and [GENERATOR-CHECKLIST.md](./GENERATOR-CHECKLIST.md) for adding layers/traits.
 
-## Current state (post-refactor)
+## Current state (post-refactor, 2026-02-27)
 
 - **Single source of truth:** Layer names and order in `layerRegistry`; G1/G2 mapping in `generatorLayerMapping`; trait IDs in `generatorTraitIds`; virtual layers in `canvasRendererLayerBuilder`.
 - **Unified state:** Context holds `SelectionsSnapshot`; adapter converts to/from `selectedLayers` + `g2Selections` for mint, renderer, and v1 favorites.
-- **Rules:** All in `wojakRules.ts`; they use only `SelectionResolver` (getTraitId / getPath). No trait identity from path substrings.
+- **Rules:** All in `wojakRules.ts`; they use only `SelectionResolver` (getTraitId / getPath). No trait identity from path substrings. Disabled options stored as `Set<string>` for O(1) lookups.
 - **Shared convention:** “Empty” selection path is defined once as `isSelectionPathEmpty(path)` in `types/generator.ts` and used in adapter, resolver, and state utils.
+- **G2 color logic:** Shared in `generatorG2Helpers.ts` — both `buildG2Selection()` and `selectG2Layer()` delegate to `assembleG2Selection()`.
+- **Reducer:** `processLayerUpdate()` handles both G1 and G2 layer selection (merged SET_LAYER + SET_G2_LAYER logic).
+- **G2Selection type:** Trait-specific fields grouped under `options` bag — new customizable traits don't require interface changes.
+- **Performance:** G2 manifest indexed with `Map` for O(1) trait lookup; G1/G2 manifests load in parallel; card components memoized with `React.memo`.
+- **Constants:** `generatorTraitIds.ts` has all G2 trait IDs and mouth/mask classification patterns — no scattered magic strings.
+- **UI components:** `TraitCardShell` wraps all 7 card types; `MilitaryBeretSwatches`, `MaskVariantPicker`, `BeerHatUnderlayerPicker` extracted from RightPanel; `usePrimarySlot` hook extracted.
+- **Styles:** Generator card/tab/metadata styles in `theme.css` classes (not inline).
 - **Error handling:** Init/export/save errors set `generatorError`; banner and ExportPanel show it; init failure shows refresh prompt.
 - **Tests:** Unit tests for rules, layer builder, state utils, and reducer; E2E smoke tests for generator page.
 
@@ -45,8 +52,11 @@ Quick reference for keeping the generator maintainable and what to do next. See 
 | Area            | Files |
 |-----------------|--------|
 | Layer definitions | `layerRegistry`, `config/layers` |
-| Rules & trait IDs | `wojakRules`, `generatorTraitIds` |
+| Rules & trait IDs | `wojakRules`, `generatorTraitIds` (includes mouth/mask constants) |
 | Resolver & adapter | `selectionResolver`, `selectionAdapter` |
-| State & reducer   | `generatorReducer`, `generatorStateUtils`, `GeneratorContext` |
+| State & reducer   | `generatorReducer`, `generatorStateUtils`, `GeneratorContext`, `generatorG2Helpers` |
 | Render pipeline   | `canvasRendererLayerBuilder`, `canvasRendererConstants`, `canvasRenderer` |
+| UI components     | `TraitCardShell`, `MilitaryBeretSwatches`, `MaskVariantPicker`, `BeerHatUnderlayerPicker` |
+| Hooks             | `usePrimarySlot` |
+| Styles            | `theme.css` (generator card/tab/metadata classes) |
 | Docs              | `GENERATOR-ARCHITECTURE`, `GENERATOR-CHECKLIST`, this file |
