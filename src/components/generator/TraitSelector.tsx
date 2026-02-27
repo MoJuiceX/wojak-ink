@@ -14,6 +14,7 @@ import { useMint, type TraitPricingEntry } from '@/contexts/MintContext';
 import { traitGridVariants, traitCardStaggerVariants } from '@/config/generatorAnimations';
 import { MouthLayerSelector } from './MouthLayerSelector';
 import { G2TraitCardPreview } from './G2TraitCardPreview';
+import { TraitCardShell } from './TraitCardShell';
 import type { LayerImage } from '@/services/generatorService';
 import type { UnifiedTrait } from '@/services/generatorService';
 import { BASE_CLOTHES_MAP, DEFAULT_CLOTHES_PATH } from '@/config/layers';
@@ -211,29 +212,14 @@ interface ImageCardProps {
 }
 
 const ImageCard = memo(function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing, isTop3 }: ImageCardProps) {
-  const prefersReducedMotion = useReducedMotion();
-
   return (
-    <motion.button
-      className="w-full aspect-square relative rounded-xl overflow-hidden p-1 trait-card-hover"
-      style={{
-        background: 'var(--generator-trait-card-bg)',
-        border: isSelected
-          ? '2px solid var(--generator-selected-color, #F97316)'
-          : '1px solid var(--generator-trait-card-border)',
-        opacity: isDisabled ? 0.5 : 1,
-        cursor: isDisabled ? 'not-allowed' : 'pointer',
-        boxShadow: isSelected
-          ? '0 0 20px var(--generator-selected-glow, var(--color-primary-50)), 0 4px 12px var(--color-black-30)'
-          : '0 2px 8px var(--color-black-20)',
-        transition: 'all 0.3s ease',
-      }}
-      whileHover={prefersReducedMotion || isDisabled ? undefined : { scale: 1.03 }}
-      whileTap={prefersReducedMotion || isDisabled ? undefined : { scale: 0.98 }}
-      transition={{ duration: 0.2 }}
+    <TraitCardShell
+      isSelected={isSelected}
+      isDisabled={isDisabled}
+      disabledReason={disabledReason}
       onClick={onClick}
-      disabled={isDisabled}
       title={isDisabled && disabledReason ? disabledReason : undefined}
+      className="trait-card-hover"
     >
       <div
         className="relative w-full h-full rounded-lg overflow-hidden trait-card-image-bg"
@@ -249,33 +235,7 @@ const ImageCard = memo(function ImageCard({ image, isSelected, isDisabled, disab
           <span className="trait-label-text">{image.displayName}</span>
         </div>
       </div>
-      {/* Disabled info badge */}
-      {isDisabled && disabledReason && (
-        <div
-          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
-          style={{ background: 'var(--color-black-70)', border: '1px solid var(--color-border)' }}
-          title={disabledReason}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
-          </svg>
-        </div>
-      )}
-      {/* Check mark with pop animation */}
-      {isSelected && !isDisabled && (
-        <motion.div
-          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
-          style={{ background: 'var(--generator-badge-color, #F97316)' }}
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
-            <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
-          </svg>
-        </motion.div>
-      )}
-    </motion.button>
+    </TraitCardShell>
   );
 });
 
@@ -304,29 +264,14 @@ interface BaseImageCardProps {
 }
 
 const BaseImageCard = memo(function BaseImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing, isTop3 }: BaseImageCardProps) {
-  const prefersReducedMotion = useReducedMotion();
-
   return (
-    <motion.button
-      className="w-full aspect-square relative rounded-xl overflow-hidden p-1 trait-card-hover"
-      style={{
-        background: 'var(--generator-trait-card-bg)',
-        border: isSelected
-          ? '2px solid var(--generator-selected-color, #F97316)'
-          : '1px solid var(--generator-trait-card-border)',
-        opacity: isDisabled ? 0.5 : 1,
-        cursor: isDisabled ? 'not-allowed' : 'pointer',
-        boxShadow: isSelected
-          ? '0 0 20px var(--generator-selected-glow, var(--color-primary-50)), 0 4px 12px var(--color-black-30)'
-          : '0 2px 8px var(--color-black-20)',
-        transition: 'all 0.3s ease',
-      }}
-      whileHover={prefersReducedMotion || isDisabled ? undefined : { scale: 1.03 }}
-      whileTap={prefersReducedMotion || isDisabled ? undefined : { scale: 0.98 }}
-      transition={{ duration: 0.2 }}
+    <TraitCardShell
+      isSelected={isSelected}
+      isDisabled={isDisabled}
+      disabledReason={disabledReason}
       onClick={onClick}
-      disabled={isDisabled}
       title={isDisabled && disabledReason ? disabledReason : undefined}
+      className="trait-card-hover"
     >
       <div
         className="relative w-full h-full rounded-lg overflow-hidden trait-card-image-bg"
@@ -357,33 +302,7 @@ const BaseImageCard = memo(function BaseImageCard({ image, isSelected, isDisable
           <span className="trait-label-text">{image.displayName}</span>
         </div>
       </div>
-      {/* Disabled info badge */}
-      {isDisabled && disabledReason && (
-        <div
-          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
-          style={{ background: 'var(--color-black-70)', border: '1px solid var(--color-border)' }}
-          title={disabledReason}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
-          </svg>
-        </div>
-      )}
-      {/* Check mark with pop animation */}
-      {isSelected && !isDisabled && (
-        <motion.div
-          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
-          style={{ background: 'var(--generator-badge-color, #F97316)' }}
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
-            <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
-          </svg>
-        </motion.div>
-      )}
-    </motion.button>
+    </TraitCardShell>
   );
 });
 
@@ -406,29 +325,12 @@ interface SolidColorBackgroundCardProps {
 }
 
 const SolidColorBackgroundCard = memo(function SolidColorBackgroundCard({ color, isSelected, isDisabled, disabledReason, onClick }: SolidColorBackgroundCardProps) {
-  const prefersReducedMotion = useReducedMotion();
-
   return (
-    <motion.button
-      type="button"
-      className="w-full aspect-square relative rounded-xl overflow-hidden p-1"
-      style={{
-        background: 'var(--generator-trait-card-bg)',
-        border: isSelected
-          ? '2px solid var(--generator-selected-color, #F97316)'
-          : '1px solid var(--generator-trait-card-border)',
-        opacity: isDisabled ? 0.5 : 1,
-        cursor: isDisabled ? 'not-allowed' : 'pointer',
-        boxShadow: isSelected
-          ? '0 0 20px var(--generator-selected-glow, var(--color-primary-50)), 0 4px 12px var(--color-black-30)'
-          : '0 2px 8px var(--color-black-20)',
-        transition: 'all 0.3s ease',
-      }}
-      whileHover={prefersReducedMotion || isDisabled ? undefined : { scale: 1.03 }}
-      whileTap={prefersReducedMotion || isDisabled ? undefined : { scale: 0.98 }}
-      transition={{ duration: 0.2 }}
+    <TraitCardShell
+      isSelected={isSelected}
+      isDisabled={isDisabled}
+      disabledReason={disabledReason}
       onClick={onClick}
-      disabled={isDisabled}
       title={isDisabled && disabledReason ? disabledReason : 'Solid color — pick with color picker'}
     >
       <div
@@ -443,32 +345,7 @@ const SolidColorBackgroundCard = memo(function SolidColorBackgroundCard({ color,
       >
         Solid color
       </div>
-      {/* Disabled info badge */}
-      {isDisabled && disabledReason && (
-        <div
-          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
-          style={{ background: 'var(--color-black-70)', border: '1px solid var(--color-border)' }}
-          title={disabledReason}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
-          </svg>
-        </div>
-      )}
-      {isSelected && !isDisabled && (
-        <motion.div
-          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
-          style={{ background: 'var(--generator-badge-color, #F97316)' }}
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
-            <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
-          </svg>
-        </motion.div>
-      )}
-    </motion.button>
+    </TraitCardShell>
   );
 });
 
@@ -483,31 +360,15 @@ interface PriceOverlayCardProps {
 
 /** Card for Price up/down overlays that work on top of solid color backgrounds */
 const PriceOverlayCard = memo(function PriceOverlayCard({ overlayType, bgColor, isSelected, isDisabled, disabledReason, onClick }: PriceOverlayCardProps) {
-  const prefersReducedMotion = useReducedMotion();
   const overlayPath = `/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Price-${overlayType}.png`;
   const label = overlayType === 'up' ? 'Price up' : 'Price down';
 
   return (
-    <motion.button
-      type="button"
-      className="w-full aspect-square relative rounded-xl overflow-hidden p-1"
-      style={{
-        background: 'var(--generator-trait-card-bg)',
-        border: isSelected
-          ? '2px solid var(--generator-selected-color, #F97316)'
-          : '1px solid var(--generator-trait-card-border)',
-        opacity: isDisabled ? 0.5 : 1,
-        cursor: isDisabled ? 'not-allowed' : 'pointer',
-        boxShadow: isSelected
-          ? '0 0 20px var(--generator-selected-glow, var(--color-primary-50)), 0 4px 12px var(--color-black-30)'
-          : '0 2px 8px var(--color-black-20)',
-        transition: 'all 0.3s ease',
-      }}
-      whileHover={prefersReducedMotion || isDisabled ? undefined : { scale: 1.03 }}
-      whileTap={prefersReducedMotion || isDisabled ? undefined : { scale: 0.98 }}
-      transition={{ duration: 0.2 }}
+    <TraitCardShell
+      isSelected={isSelected}
+      isDisabled={isDisabled}
+      disabledReason={disabledReason}
       onClick={onClick}
-      disabled={isDisabled}
       title={isDisabled && disabledReason ? disabledReason : label}
     >
       <div
@@ -530,32 +391,7 @@ const PriceOverlayCard = memo(function PriceOverlayCard({ overlayType, bgColor, 
       >
         {label}
       </div>
-      {/* Disabled info badge */}
-      {isDisabled && disabledReason && (
-        <div
-          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
-          style={{ background: 'var(--color-black-70)', border: '1px solid var(--color-border)' }}
-          title={disabledReason}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
-          </svg>
-        </div>
-      )}
-      {isSelected && !isDisabled && (
-        <motion.div
-          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
-          style={{ background: 'var(--generator-badge-color, #F97316)' }}
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
-            <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
-          </svg>
-        </motion.div>
-      )}
-    </motion.button>
+    </TraitCardShell>
   );
 });
 
@@ -573,29 +409,14 @@ interface LayerWithBaseMouthCardProps {
 
 /** Card for Head, Mask, Eyes, Background: base + mouth rendered under the trait. */
 const LayerWithBaseMouthCard = memo(function LayerWithBaseMouthCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing, isTop3, renderBehindBase }: LayerWithBaseMouthCardProps) {
-  const prefersReducedMotion = useReducedMotion();
-
   return (
-    <motion.button
-      className="w-full aspect-square relative rounded-xl overflow-hidden p-1 trait-card-hover"
-      style={{
-        background: 'var(--generator-trait-card-bg)',
-        border: isSelected
-          ? '2px solid var(--generator-selected-color, #F97316)'
-          : '1px solid var(--generator-trait-card-border)',
-        opacity: isDisabled ? 0.5 : 1,
-        cursor: isDisabled ? 'not-allowed' : 'pointer',
-        boxShadow: isSelected
-          ? '0 0 20px var(--generator-selected-glow, var(--color-primary-50)), 0 4px 12px var(--color-black-30)'
-          : '0 2px 8px var(--color-black-20)',
-        transition: 'all 0.3s ease',
-      }}
-      whileHover={prefersReducedMotion || isDisabled ? undefined : { scale: 1.03 }}
-      whileTap={prefersReducedMotion || isDisabled ? undefined : { scale: 0.98 }}
-      transition={{ duration: 0.2 }}
+    <TraitCardShell
+      isSelected={isSelected}
+      isDisabled={isDisabled}
+      disabledReason={disabledReason}
       onClick={onClick}
-      disabled={isDisabled}
       title={isDisabled && disabledReason ? disabledReason : undefined}
+      className="trait-card-hover"
     >
       <div
         className="relative w-full h-full rounded-lg overflow-hidden trait-card-image-bg"
@@ -644,59 +465,19 @@ const LayerWithBaseMouthCard = memo(function LayerWithBaseMouthCard({ image, isS
           <span className="trait-label-text">{image.displayName}</span>
         </div>
       </div>
-      {/* Disabled info badge */}
-      {isDisabled && disabledReason && (
-        <div
-          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
-          style={{ background: 'var(--color-black-70)', border: '1px solid var(--color-border)' }}
-          title={disabledReason}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
-          </svg>
-        </div>
-      )}
-      {isSelected && !isDisabled && (
-        <motion.div
-          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
-          style={{ background: 'var(--generator-badge-color, #F97316)' }}
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
-            <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
-          </svg>
-        </motion.div>
-      )}
-    </motion.button>
+    </TraitCardShell>
   );
 });
 
 const ClothesImageCard = memo(function ClothesImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing, isTop3 }: ClothesImageCardProps) {
-  const prefersReducedMotion = useReducedMotion();
-
   return (
-    <motion.button
-      className="w-full aspect-square relative rounded-xl overflow-hidden p-1 trait-card-hover"
-      style={{
-        background: 'var(--generator-trait-card-bg)',
-        border: isSelected
-          ? '2px solid var(--generator-selected-color, #F97316)'
-          : '1px solid var(--generator-trait-card-border)',
-        opacity: isDisabled ? 0.5 : 1,
-        cursor: isDisabled ? 'not-allowed' : 'pointer',
-        boxShadow: isSelected
-          ? '0 0 20px var(--generator-selected-glow, var(--color-primary-50)), 0 4px 12px var(--color-black-30)'
-          : '0 2px 8px var(--color-black-20)',
-        transition: 'all 0.3s ease',
-      }}
-      whileHover={prefersReducedMotion || isDisabled ? undefined : { scale: 1.03 }}
-      whileTap={prefersReducedMotion || isDisabled ? undefined : { scale: 0.98 }}
-      transition={{ duration: 0.2 }}
+    <TraitCardShell
+      isSelected={isSelected}
+      isDisabled={isDisabled}
+      disabledReason={disabledReason}
       onClick={onClick}
-      disabled={isDisabled}
       title={isDisabled && disabledReason ? disabledReason : undefined}
+      className="trait-card-hover"
     >
       <div
         className="relative w-full h-full rounded-lg overflow-hidden trait-card-image-bg"
@@ -727,33 +508,7 @@ const ClothesImageCard = memo(function ClothesImageCard({ image, isSelected, isD
           <span className="trait-label-text">{image.displayName}</span>
         </div>
       </div>
-      {/* Disabled info badge */}
-      {isDisabled && disabledReason && (
-        <div
-          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
-          style={{ background: 'var(--color-black-70)', border: '1px solid var(--color-border)' }}
-          title={disabledReason}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
-          </svg>
-        </div>
-      )}
-      {/* Check mark with pop animation */}
-      {isSelected && !isDisabled && (
-        <motion.div
-          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
-          style={{ background: 'var(--generator-badge-color, #F97316)' }}
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
-            <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
-          </svg>
-        </motion.div>
-      )}
-    </motion.button>
+    </TraitCardShell>
   );
 });
 
@@ -775,29 +530,19 @@ interface G2TraitCardProps {
   isTop3?: boolean;
 }
 
+/** Cyan glow for G2 trait cards when selected */
+const G2_SELECTED_BOX_SHADOW = '0 0 20px rgba(0, 212, 255, 0.4), 0 4px 12px var(--color-black-30)';
+
 export const G2TraitCard = memo(function G2TraitCard({ trait, isSelected, isDisabled, disabledReason, onClick, needsClothesUnderlay, isBeerHatUnderlayer, livePreviewUrl, pricing, isTop3 }: G2TraitCardProps) {
-  const prefersReducedMotion = useReducedMotion();
   return (
-    <motion.button
-      className="w-full aspect-square relative rounded-xl overflow-hidden p-1 trait-card-hover"
-      style={{
-        background: 'var(--generator-trait-card-bg)',
-        border: isSelected
-          ? '2px solid var(--generator-selected-color, #F97316)'
-          : '1px solid var(--generator-trait-card-border)',
-        boxShadow: isSelected
-          ? '0 0 20px rgba(0, 212, 255, 0.4), 0 4px 12px var(--color-black-30)'
-          : '0 2px 8px var(--color-black-20)',
-        opacity: isDisabled ? 0.5 : 1,
-        cursor: isDisabled ? 'not-allowed' : 'pointer',
-        transition: 'all 0.3s ease',
-      }}
-      whileHover={prefersReducedMotion || isDisabled ? undefined : { scale: 1.03 }}
-      whileTap={prefersReducedMotion || isDisabled ? undefined : { scale: 0.98 }}
-      transition={{ duration: 0.2 }}
+    <TraitCardShell
+      isSelected={isSelected}
+      isDisabled={!!isDisabled}
+      disabledReason={disabledReason}
       onClick={onClick}
-      disabled={isDisabled}
       title={isDisabled && disabledReason ? disabledReason : undefined}
+      className="trait-card-hover"
+      selectedBoxShadow={G2_SELECTED_BOX_SHADOW}
     >
       <div className="relative w-full h-full rounded-lg overflow-hidden trait-card-image-bg">
         <G2TraitCardPreview trait={trait} needsClothesUnderlay={needsClothesUnderlay} livePreviewUrl={livePreviewUrl} />
@@ -815,33 +560,7 @@ export const G2TraitCard = memo(function G2TraitCard({ trait, isSelected, isDisa
           Under
         </span>
       )}
-      {/* Disabled info badge */}
-      {isDisabled && disabledReason && (
-        <div
-          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
-          style={{ background: 'var(--color-black-70)', border: '1px solid var(--color-border)' }}
-          title={disabledReason}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
-          </svg>
-        </div>
-      )}
-      {/* Selected check */}
-      {isSelected && !isDisabled && (
-        <motion.div
-          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
-          style={{ background: 'var(--generator-badge-color, #F97316)' }}
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
-            <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
-          </svg>
-        </motion.div>
-      )}
-    </motion.button>
+    </TraitCardShell>
   );
 });
 
