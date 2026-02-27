@@ -494,9 +494,12 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
 
       const actionOpts = action.options ?? {};
 
-      // When the action explicitly provides beerHatEditFocus, use it for routing
-      // (allows callers to force-route to main selection or underlayer regardless of current focus)
-      const effectiveFocus = (actionOpts.beerHatEditFocus as string | undefined) ?? (existing.options.beerHatEditFocus as string | undefined);
+      // When the action explicitly provides beerHatEditFocus, use it for routing.
+      // When 'detail' changes without explicit focus, default to 'beer' (main selection) —
+      // Beer Hat can flavor changes always target the main selection, never the underlayer.
+      // Underlayer detail changes go through beerHatUnderlayerG2 wholesale replacement instead.
+      const effectiveFocus = (actionOpts.beerHatEditFocus as string | undefined)
+        ?? (actionOpts.detail !== undefined ? 'beer' : (existing.options.beerHatEditFocus as string | undefined));
       const isBeerHatUnderlayer =
         existing.traitId === KNOWN_TRAIT_IDS.Head_BeerHat && effectiveFocus === 'underlayer' && existing.options.beerHatUnderlayerG2;
       const targetG2 = isBeerHatUnderlayer && existing.options.beerHatUnderlayerG2

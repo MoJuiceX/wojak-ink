@@ -12,6 +12,10 @@ import { useGenerator } from '@/contexts/GeneratorContext';
 import { ColorPicker } from './ColorPicker';
 import { G2TraitPanel } from './G2TraitPanel';
 import type { UnifiedTrait } from '@/services/generatorService';
+import { BeerHatUnderlayerPicker } from './BeerHatUnderlayerPicker';
+import { KNOWN_TRAIT_IDS } from '@/lib/generatorTraitIds';
+import { getG2DefaultColor } from '@/config/g2DefaultColors';
+import type { G2Selection } from '@/types/generator';
 
 const SOLID_BG_DEFAULT_COLOR = '#38BDF8';
 
@@ -41,8 +45,14 @@ export function GeneratorMobileColorPanel() {
   if (isDesktop) return null;
 
   const selectedPath = selectedLayers[activeLayer];
-  const g2Sel = g2Selections[activeLayer];
+  const rawG2Sel = g2Selections[activeLayer];
   const isBlocked = isLayerDisabled(activeLayer);
+
+  // Beer Hat: swap g2Sel to underlayer when focus is 'underlayer' (same as desktop)
+  const isBeerHat = activeLayer === 'Head' && rawG2Sel?.traitId === KNOWN_TRAIT_IDS.Head_BeerHat;
+  const isBeerHatWithUnderlayerFocus =
+    isBeerHat && rawG2Sel?.options.beerHatEditFocus === 'underlayer' && !!rawG2Sel?.options.beerHatUnderlayerG2;
+  const g2Sel = isBeerHatWithUnderlayerFocus ? (rawG2Sel!.options.beerHatUnderlayerG2 as G2Selection) : rawG2Sel;
 
   if (isBlocked || (!selectedPath && !g2Sel)) return null;
 
@@ -111,13 +121,117 @@ export function GeneratorMobileColorPanel() {
       </div>
     ) : null;
 
-  if (!colorSection && !g2Sel && !suitStyleSection) return null;
+  // Beer Hat: under layer picker (Cap, Viking, Centurion, etc.)
+  const beerHatUnderlayerSection = isBeerHat ? (
+    <BeerHatUnderlayerPicker
+      selectedTraitId={rawG2Sel!.options.beerHatUnderlayer as string ?? KNOWN_TRAIT_IDS.Head_Cap}
+      onSelect={(traitId) => {
+        const defaultColors: Record<string, string> =
+          traitId === KNOWN_TRAIT_IDS.Head_VikingHelmet
+            ? { fill1: getG2DefaultColor(traitId, 'fill1', null, '#404040') }
+            : traitId === KNOWN_TRAIT_IDS.Head_Cap
+              ? { fill: getG2DefaultColor(traitId, 'fill', null, '#228B22') }
+              : {};
+        setG2Detail(activeLayer, undefined, {
+          beerHatUnderlayer: traitId,
+          beerHatUnderlayerG2: { traitId, g2Category: 'Head', colors: defaultColors, options: {} },
+          beerHatEditFocus: 'underlayer',
+        });
+      }}
+    />
+  ) : null;
+
+  // Beer Hat: dedicated color section for the underlayer — always visible when underlayer is colorable.
+  // Bypasses the generic g2Sel swap and slot detection (which can miss on initial render)
+  // and directly reads/writes the beerHatUnderlayerG2 colors.
+  const beerHatColorSection: React.ReactNode = isBeerHat && rawG2Sel?.options.beerHatUnderlayerG2 ? (() => {
+    const underlayerG2 = rawG2Sel.options.beerHatUnderlayerG2 as G2Selection;
+    const underlayerTraitId = underlayerG2.traitId;
+
+    // Known colorable underlayers with their fill slots
+    let slot: string | null = null;
+    let defColor: string | undefined;
+    if (underlayerTraitId === KNOWN_TRAIT_IDS.Head_Cap) {
+      slot = 'fill';
+      defColor = getG2DefaultColor(underlayerTraitId, 'fill', null, '#228B22');
+    } else if (underlayerTraitId === KNOWN_TRAIT_IDS.Head_VikingHelmet) {
+      slot = 'fill1';
+      defColor = getG2DefaultColor(underlayerTraitId, 'fill1', null, '#404040');
+    } else {
+      // Fallback: check unifiedTraits for other potentially colorable underlayers
+      const underlayerTrait = unifiedTraits.find((t) => t.id === underlayerTraitId);
+      if (underlayerTrait?.colorable) {
+        slot = underlayerTrait.fillFile ? 'fill' : underlayerTrait.fill1File ? 'fill1' : null;
+        defColor = underlayerTrait.defaultColor;
+      }
+    }
+
+    if (!slot) return null;
+
+    return (
+      <div className="generator-panel-section">
+        <div className="generator-panel-section-label">Color</div>
+        <ColorPicker
+          selectedColor={underlayerG2.colors?.[slot] || defColor || '#FFFFFF'}
+          onColorChange={(color) => {
+            const updated: G2Selection = { ...underlayerG2, colors: { ...underlayerG2.colors, [slot!]: color } };
+            setG2Detail('Head', undefined, { beerHatUnderlayerG2: updated });
+          }}
+          defaultColor={defColor}
+        />
+      </div>
+    );
+  })() : null;
+
+  if (!colorSection && !g2Sel && !suitStyleSection && !isBeerHat) return null;
 
   return (
     <div className="generator-options-mobile-panel">
-      {colorSection}
+      {isBeerHat ? beerHatColorSection : colorSection}
+      {beerHatUnderlayerSection}
       {suitStyleSection}
-      {g2Sel && <G2TraitPanel />}
+      {isBeerHat ? (
+        <>
+          {/* Can options — always visible when Beer Hat is selected */}
+          <G2TraitPanel
+            onDetailSelect={(file, frameFile) => {
+              setG2Detail('Head', undefined, { detail: file ?? '', frame: frameFile ?? '', beerHatEditFocus: 'beer' });
+            }}
+          />
+          {rawG2Sel?.options.beerHatUnderlayerG2 && (
+            /* Under layer details (Cap logos, Construction Helmet stickers, etc.) */
+            <G2TraitPanel
+              overrideG2Selection={rawG2Sel.options.beerHatUnderlayerG2 as G2Selection}
+              onDetailSelect={(file, frameFile) => {
+                const underG2 = rawG2Sel?.options.beerHatUnderlayerG2 as G2Selection | undefined;
+                if (!underG2) return;
+                const updated: G2Selection = { ...underG2, options: { ...underG2.options, detail: file ?? '', frame: frameFile ?? '', logo: file ? '' : underG2.options.logo } };
+                setG2Detail('Head', undefined, { beerHatUnderlayerG2: updated });
+              }}
+              onLogoSelect={(logoName) => {
+                const underG2 = rawG2Sel?.options.beerHatUnderlayerG2 as G2Selection | undefined;
+                if (!underG2) return;
+                const updated: G2Selection = { ...underG2, options: { ...underG2.options, logo: logoName, detail: logoName ? '' : underG2.options.detail } };
+                setG2Detail('Head', undefined, { beerHatUnderlayerG2: updated });
+              }}
+              onVariantSelect={(variantFile) => {
+                const underG2 = rawG2Sel?.options.beerHatUnderlayerG2 as G2Selection | undefined;
+                if (!underG2) return;
+                const updated: G2Selection = { ...underG2, options: { ...underG2.options, variant: variantFile } };
+                setG2Detail('Head', undefined, { beerHatUnderlayerG2: updated });
+              }}
+              onConstructionHelmetUpdate={(chiaLogo, cigPack) => {
+                const underG2 = rawG2Sel?.options.beerHatUnderlayerG2 as G2Selection | undefined;
+                if (!underG2) return;
+                const updated: G2Selection = { ...underG2, options: { ...underG2.options, constructionHelmetChiaLogo: chiaLogo, constructionHelmetCigPack: cigPack } };
+                setG2Detail('Head', undefined, { beerHatUnderlayerG2: updated });
+              }}
+            />
+          )}
+        </>
+      ) : (
+        g2Sel && <G2TraitPanel />
+      )}
     </div>
   );
 }

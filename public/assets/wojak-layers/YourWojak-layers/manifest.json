@@ -1049,77 +1049,115 @@
       "category": "Head",
       "colorable": false,
       "outlineFile": "Head_Beer-Hat_outline.png",
+      "outlineSplitLeft": "Head_Beer-Hat_outline_left.png",
+      "outlineSplitRight": "Head_Beer-Hat_outline_right.png",
       "detailOptions": [
         {
           "file": "Head_Beer-Hat_detail_7up.png",
+          "splitLeft": "Head_Beer-Hat_detail_7up_left.png",
+          "splitRight": "Head_Beer-Hat_detail_7up_right.png",
           "name": "7up"
         },
         {
           "file": "Head_Beer-Hat_detail_AW.png",
+          "splitLeft": "Head_Beer-Hat_detail_AW_left.png",
+          "splitRight": "Head_Beer-Hat_detail_AW_right.png",
           "name": "Aw"
         },
         {
           "file": "Head_Beer-Hat_detail_budweiser.png",
+          "splitLeft": "Head_Beer-Hat_detail_budweiser_left.png",
+          "splitRight": "Head_Beer-Hat_detail_budweiser_right.png",
           "name": "Budweiser"
         },
         {
           "file": "Head_Beer-Hat_detail_captainmorgan.png",
+          "splitLeft": "Head_Beer-Hat_detail_captainmorgan_left.png",
+          "splitRight": "Head_Beer-Hat_detail_captainmorgan_right.png",
           "name": "Captain Morgan"
         },
         {
           "file": "Head_Beer-Hat_detail_citrus.png",
+          "splitLeft": "Head_Beer-Hat_detail_citrus_left.png",
+          "splitRight": "Head_Beer-Hat_detail_citrus_right.png",
           "name": "Citrus"
         },
         {
           "file": "Head_Beer-Hat_detail_Coffee.png",
+          "splitLeft": "Head_Beer-Hat_detail_Coffee_left.png",
+          "splitRight": "Head_Beer-Hat_detail_Coffee_right.png",
           "name": "Coffee"
         },
         {
           "file": "Head_Beer-Hat_detail_Coke.png",
+          "splitLeft": "Head_Beer-Hat_detail_Coke_left.png",
+          "splitRight": "Head_Beer-Hat_detail_Coke_right.png",
           "name": "Coke"
         },
         {
           "file": "Head_Beer-Hat_detail_corona.png",
+          "splitLeft": "Head_Beer-Hat_detail_corona_left.png",
+          "splitRight": "Head_Beer-Hat_detail_corona_right.png",
           "name": "Corona"
         },
         {
           "file": "Head_Beer-Hat_detail_DrPepper.png",
+          "splitLeft": "Head_Beer-Hat_detail_DrPepper_left.png",
+          "splitRight": "Head_Beer-Hat_detail_DrPepper_right.png",
           "name": "Dr Pepper"
         },
         {
           "file": "Head_Beer-Hat_detail_Heineken.png",
+          "splitLeft": "Head_Beer-Hat_detail_Heineken_left.png",
+          "splitRight": "Head_Beer-Hat_detail_Heineken_right.png",
           "name": "Heineken"
         },
         {
           "file": "Head_Beer-Hat_detail_LaCroix.png",
+          "splitLeft": "Head_Beer-Hat_detail_LaCroix_left.png",
+          "splitRight": "Head_Beer-Hat_detail_LaCroix_right.png",
           "name": "LaCroix"
         },
         {
           "file": "Head_Beer-Hat_detail_Modelo.png",
+          "splitLeft": "Head_Beer-Hat_detail_Modelo_left.png",
+          "splitRight": "Head_Beer-Hat_detail_Modelo_right.png",
           "name": "Modelo"
         },
         {
           "file": "Head_Beer-Hat_detail_monster.png",
+          "splitLeft": "Head_Beer-Hat_detail_monster_left.png",
+          "splitRight": "Head_Beer-Hat_detail_monster_right.png",
           "name": "Monster"
         },
         {
           "file": "Head_Beer-Hat_detail_monster-orange.png",
+          "splitLeft": "Head_Beer-Hat_detail_monster-orange_left.png",
+          "splitRight": "Head_Beer-Hat_detail_monster-orange_right.png",
           "name": "Monster Orange"
         },
         {
           "file": "Head_Beer-Hat_detail_MtnDew.png",
+          "splitLeft": "Head_Beer-Hat_detail_MtnDew_left.png",
+          "splitRight": "Head_Beer-Hat_detail_MtnDew_right.png",
           "name": "Mtn Dew"
         },
         {
           "file": "Head_Beer-Hat_detail_red-bull.png",
+          "splitLeft": "Head_Beer-Hat_detail_red-bull_left.png",
+          "splitRight": "Head_Beer-Hat_detail_red-bull_right.png",
           "name": "Red Bull"
         },
         {
           "file": "Head_Beer-Hat_detail_Sunny-D.png",
+          "splitLeft": "Head_Beer-Hat_detail_Sunny-D_left.png",
+          "splitRight": "Head_Beer-Hat_detail_Sunny-D_right.png",
           "name": "Sunny D"
         },
         {
           "file": "Head_Beer-Hat_detail_Tang.png",
+          "splitLeft": "Head_Beer-Hat_detail_Tang_left.png",
+          "splitRight": "Head_Beer-Hat_detail_Tang_right.png",
           "name": "Tang"
         }
       ]

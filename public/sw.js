@@ -10,7 +10,7 @@
 
 const CACHE_NAME = 'wojak-games-v3';
 const STATIC_CACHE = 'wojak-static-v3';
-const DYNAMIC_CACHE = 'wojak-dynamic-v4';
+const DYNAMIC_CACHE = 'wojak-dynamic-v5';
 const NFT_IMAGE_CACHE = 'wojak-nft-images-v1';
 const NFT_CACHE_MAX = 500;
 
@@ -153,6 +153,22 @@ self.addEventListener('fetch', (event) => {
           return networkResponse;
         })
         .catch(() => caches.match('/index.html').then((cached) => cached || new Response('Offline', { status: 503 })))
+    );
+    return;
+  }
+
+  // Manifest files — network-first (updated frequently with new traits/fields)
+  if (url.pathname.endsWith('/manifest.json') && url.pathname.startsWith('/assets/')) {
+    event.respondWith(
+      fetch(request)
+        .then((networkResponse) => {
+          if (networkResponse.ok) {
+            const clone = networkResponse.clone();
+            caches.open(DYNAMIC_CACHE).then((cache) => cache.put(request, clone));
+          }
+          return networkResponse;
+        })
+        .catch(() => caches.match(request).then((cached) => cached || new Response('Offline', { status: 503 })))
     );
     return;
   }

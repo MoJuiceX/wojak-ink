@@ -375,9 +375,12 @@ interface G2ManifestTrait {
   outlineFiles?: string[];
   // Details
   detailFile?: string;
-  detailOptions?: { file: string; name: string }[];
+  detailOptions?: { file: string; name: string; splitLeft?: string; splitRight?: string }[];
   /** Outline overlay for detail1 (e.g. Comrad Hat star outline) — renders on top of detail1 fill */
   detail1OverlayFile?: string;
+  // Pre-split images (Beer Hat: left-main and right-behind halves to avoid runtime clipping)
+  outlineSplitLeft?: string;
+  outlineSplitRight?: string;
   // Composite
   composite?: boolean;
   layer0File?: string;
@@ -437,8 +440,11 @@ export interface UnifiedTrait {
   detailOverlayFile?: string;
   outlineFiles?: string[];
   detailFile?: string;
-  detailOptions?: { file: string; name: string }[];
+  detailOptions?: { file: string; name: string; splitLeft?: string; splitRight?: string }[];
   detail1OverlayFile?: string;
+  // Pre-split images (Beer Hat: left-main and right-behind halves to avoid runtime clipping)
+  outlineSplitLeft?: string;
+  outlineSplitRight?: string;
   composite?: boolean;
   layer0File?: string;
   layer1File?: string;
@@ -586,6 +592,8 @@ function g2TraitToUnified(g2: G2ManifestTrait, uiLayer: UILayerName): UnifiedTra
     detailFile: g2.detailFile,
     detailOptions: detailOptions ?? g2.detailOptions,
     detail1OverlayFile: g2.detail1OverlayFile,
+    outlineSplitLeft: g2.outlineSplitLeft,
+    outlineSplitRight: g2.outlineSplitRight,
     composite: g2.composite,
     layer0File: g2.layer0File,
     layer1File: g2.layer1File,

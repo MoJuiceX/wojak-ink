@@ -103,12 +103,22 @@ export async function preloadImages(sources: string[]): Promise<void> {
 
 // ============ Rendering ============
 
+/**
+ * Detect iOS (all iOS browsers use WebKit, including Chrome/Firefox).
+ * WebKit's OffscreenCanvas 2D context has clip/render bugs that break
+ * Beer Hat and other clipped multi-layer traits. Fall back to regular canvas.
+ */
+const isIOSWebKit: boolean = typeof navigator !== 'undefined' && (
+  /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+  (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent))
+);
 function createOffscreenCanvas(width: number, height: number): {
   canvas: HTMLCanvasElement | OffscreenCanvas;
   ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 } {
   const contextOptions: CanvasRenderingContext2DSettings = { willReadFrequently: true };
-  if (typeof OffscreenCanvas !== 'undefined') {
+  // Skip OffscreenCanvas on iOS — WebKit's OffscreenCanvas 2D has clip bugs
+  if (!isIOSWebKit && typeof OffscreenCanvas !== 'undefined') {
     const canvas = new OffscreenCanvas(width, height);
     const ctx = canvas.getContext('2d', contextOptions);
     if (ctx) return { canvas, ctx };
@@ -120,6 +130,92 @@ function createOffscreenCanvas(width: number, height: number): {
   const ctx = canvas.getContext('2d', contextOptions);
   if (!ctx) throw new Error('Failed to get canvas context');
   return { canvas, ctx };
+}
+
+// ============ iOS clip() workaround ============
+// WebKit on iOS has broken ctx.clip() on both OffscreenCanvas AND regular canvas.
+// Workaround: render to a temp canvas unclipped, then composite to the main canvas
+// using drawImage source rectangles — which work reliably on all browsers.
+
+interface ClipRegion {
+  clipRightHalf?: boolean;
+  clipLeftPercent?: number;
+  clipRightPercent?: number;
+  clipTopHalfOnly?: boolean;
+  clipBottomHalfFull?: boolean;
+  clipBoundaryOffsetPx?: number;
+  clipTopPercent?: number;
+  clipPolygon?: [number, number][];
+}
+
+function hasActiveClip(c: ClipRegion): boolean {
+  return !!(
+    (c.clipPolygon && c.clipPolygon.length >= 3) ||
+    (c.clipTopPercent && c.clipTopPercent > 0) ||
+    (c.clipBottomHalfFull && c.clipRightPercent && c.clipRightPercent > 0) ||
+    (c.clipTopHalfOnly && c.clipLeftPercent && c.clipLeftPercent > 0) ||
+    c.clipRightHalf ||
+    (c.clipLeftPercent && c.clipLeftPercent > 0) ||
+    (c.clipRightPercent && c.clipRightPercent > 0)
+  );
+}
+
+/**
+ * Composite a source canvas onto the destination using drawImage sub-rectangles
+ * instead of ctx.clip(). Avoids WebKit canvas clip() bugs on iOS.
+ */
+function compositeClipped(
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
+  src: HTMLCanvasElement | OffscreenCanvas,
+  size: number,
+  c: ClipRegion
+): void {
+  const halfH = size / 2;
+
+  if (c.clipPolygon && c.clipPolygon.length >= 3) {
+    // Polygon clip can't be expressed as drawImage sub-rects.
+    // Use a temp canvas + clearRect approach: draw src, then erase outside polygon via inverse mask.
+    // For now, fall back to ctx.clip() — polygon clips are rarely used on iOS-affected traits.
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(c.clipPolygon[0][0] * size, c.clipPolygon[0][1] * size);
+    for (let i = 1; i < c.clipPolygon.length; i++) {
+      ctx.lineTo(c.clipPolygon[i][0] * size, c.clipPolygon[i][1] * size);
+    }
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(src, 0, 0, size, size);
+    ctx.restore();
+  } else if (c.clipTopPercent && c.clipTopPercent > 0) {
+    const clipY = size * c.clipTopPercent;
+    const h = size - clipY;
+    ctx.drawImage(src, 0, clipY, size, h, 0, clipY, size, h);
+  } else if (c.clipBottomHalfFull && c.clipRightPercent && c.clipRightPercent > 0) {
+    let clipW = size * (1 - c.clipRightPercent);
+    if (c.clipBoundaryOffsetPx != null) clipW = Math.max(0, clipW - c.clipBoundaryOffsetPx);
+    // L-shape: top-left portion + full bottom
+    ctx.drawImage(src, 0, 0, clipW, halfH, 0, 0, clipW, halfH);
+    ctx.drawImage(src, 0, halfH, size, halfH, 0, halfH, size, halfH);
+  } else if (c.clipTopHalfOnly && c.clipLeftPercent && c.clipLeftPercent > 0) {
+    let clipX = size * c.clipLeftPercent;
+    if (c.clipBoundaryOffsetPx != null) clipX = Math.max(0, clipX - c.clipBoundaryOffsetPx);
+    const w = size - clipX;
+    ctx.drawImage(src, clipX, 0, w, halfH, clipX, 0, w, halfH);
+  } else if (c.clipRightHalf) {
+    const half = size / 2;
+    ctx.drawImage(src, half, 0, half, size, half, 0, half, size);
+  } else if (c.clipLeftPercent && c.clipLeftPercent > 0) {
+    let clipX = size * c.clipLeftPercent;
+    if (c.clipBoundaryOffsetPx != null) clipX = Math.max(0, clipX - c.clipBoundaryOffsetPx);
+    const w = size - clipX;
+    ctx.drawImage(src, clipX, 0, w, size, clipX, 0, w, size);
+  } else if (c.clipRightPercent && c.clipRightPercent > 0) {
+    let clipW = size * (1 - c.clipRightPercent);
+    if (c.clipBoundaryOffsetPx != null) clipW = Math.max(0, clipW - c.clipBoundaryOffsetPx);
+    ctx.drawImage(src, 0, 0, clipW, size, 0, 0, clipW, size);
+  } else {
+    ctx.drawImage(src, 0, 0, size, size);
+  }
 }
 
 // ============ G2 Color Tinting ============
@@ -233,10 +329,7 @@ function tintDraw(
   clipTopPercent?: number,
   clipPolygon?: [number, number][]
 ): void {
-  const tc = document.createElement('canvas');
-  tc.width = size;
-  tc.height = size;
-  const tx = tc.getContext('2d', { willReadFrequently: true })!;
+  const { canvas: tc, ctx: tx } = createOffscreenCanvas(size, size);
 
   // 1. Draw gray fill
   tx.drawImage(fillImg, 0, 0, size, size);
@@ -911,6 +1004,104 @@ async function drawG2Layer(
   clipTopPercent?: number,
   clipPolygon?: [number, number][]
 ): Promise<void> {
+  // iOS WebKit clip() workaround: render to temp canvas unclipped, composite with drawImage sub-rects.
+  // Strategy: draw each image INDIVIDUALLY through compositeClipped (per-item).
+  // A shared temp canvas has compositing bugs on iOS WebKit (detail bleeds through outline).
+  const clipRegion: ClipRegion = { clipRightHalf, clipLeftPercent, clipRightPercent, clipTopHalfOnly, clipBottomHalfFull, clipBoundaryOffsetPx, clipTopPercent, clipPolygon };
+  if (isIOSWebKit && hasActiveClip(clipRegion)) {
+    // === iOS WebKit workaround: bypass clip() entirely ===
+    // Use drawImage sub-rectangles (compositeClipped) instead of ctx.clip().
+    // Each item is drawn to its own temp canvas then compositeClipped to main.
+    // Note: Beer Hat no longer reaches this code path — it uses pre-split images with no clip props.
+    if (g2.orderedDrawItems?.length) {
+      for (const item of g2.orderedDrawItems) {
+        if (item.type === 'fill') {
+          try {
+            const fillImg = await loadImage(item.file);
+            const { canvas: itemCanvas, ctx: itemCtx } = createOffscreenCanvas(size, size);
+            if (item.opacity !== undefined && item.opacity < 1) {
+              itemCtx.globalAlpha = item.opacity;
+            }
+            tintDraw(itemCtx, fillImg, item.color, size);
+            compositeClipped(ctx, itemCanvas, size, clipRegion);
+          } catch (err) {
+            console.warn(`[iOS-clip] Failed to load fill: ${item.file}`, err);
+          }
+        } else {
+          try {
+            const img = await loadImage(item.path);
+            const { canvas: itemCanvas, ctx: itemCtx } = createOffscreenCanvas(size, size);
+            itemCtx.drawImage(img, 0, 0, size, size);
+            compositeClipped(ctx, itemCanvas, size, clipRegion);
+          } catch (err) {
+            console.warn(`[iOS-clip] Failed to load outline: ${item.path}`, err);
+          }
+        }
+      }
+    }
+    // fills (non-orderedDrawItems) — each gets its own temp canvas
+    for (const fill of g2.fills) {
+      try {
+        const fillImg = await loadImage(fill.file);
+        const { canvas: itemCanvas, ctx: itemCtx } = createOffscreenCanvas(size, size);
+        if (fill.noTint) {
+          itemCtx.drawImage(fillImg, 0, 0, size, size);
+        } else {
+          tintDraw(itemCtx, fillImg, fill.color, size, undefined, undefined, undefined, fill.flatTint);
+        }
+        compositeClipped(ctx, itemCanvas, size, clipRegion);
+      } catch (err) {
+        console.warn(`[iOS-clip] Failed to load fill: ${fill.file}`, err);
+      }
+    }
+    // outlines (non-orderedDrawItems)
+    for (const outlinePath of g2.outlines) {
+      try {
+        const outlineImg = await loadImage(outlinePath);
+        const { canvas: itemCanvas, ctx: itemCtx } = createOffscreenCanvas(size, size);
+        itemCtx.drawImage(outlineImg, 0, 0, size, size);
+        compositeClipped(ctx, itemCanvas, size, clipRegion);
+      } catch (err) {
+        console.warn(`[iOS-clip] Failed to load outline: ${outlinePath}`, err);
+      }
+    }
+    // detail
+    if (g2.details?.length) {
+      for (const d of g2.details) {
+        try {
+          const detailImg = await loadImage(d);
+          const { canvas: itemCanvas, ctx: itemCtx } = createOffscreenCanvas(size, size);
+          itemCtx.drawImage(detailImg, 0, 0, size, size);
+          compositeClipped(ctx, itemCanvas, size, clipRegion);
+        } catch (err) {
+          console.warn(`[iOS-clip] Failed to load detail: ${d}`, err);
+        }
+      }
+    } else if (g2.detail) {
+      try {
+        const detailImg = await loadImage(g2.detail);
+        const { canvas: itemCanvas, ctx: itemCtx } = createOffscreenCanvas(size, size);
+        itemCtx.drawImage(detailImg, 0, 0, size, size);
+        compositeClipped(ctx, itemCanvas, size, clipRegion);
+      } catch (err) {
+        console.warn(`[iOS-clip] Failed to load detail: ${g2.detail}`, err);
+      }
+    }
+    // frame
+    if (g2.frame) {
+      try {
+        const frameImg = await loadImage(g2.frame);
+        const { canvas: itemCanvas, ctx: itemCtx } = createOffscreenCanvas(size, size);
+        itemCtx.drawImage(frameImg, 0, 0, size, size);
+        compositeClipped(ctx, itemCanvas, size, clipRegion);
+      } catch (err) {
+        console.warn(`[iOS-clip] Failed to load frame: ${g2.frame}`, err);
+      }
+    }
+    // logoOption / flagOption handled by normal path (no clip needed for these)
+    return;
+  }
+
   const halfH = size / 2;
   const applyClip = () => {
     if (clipPolygon && clipPolygon.length >= 3) {
@@ -1185,6 +1376,8 @@ function buildG2LayerData(
   g2: G2Selection,
   basePath: string,
   layerPosFilter?: number[],
+  /** When set, use pre-split images for Beer Hat instead of full images (eliminates runtime clipping) */
+  splitSide?: 'left' | 'right',
 ): G2LayerData {
   const fills: { file: string; color: string; noTint?: boolean }[] = [];
   const outlines: string[] = [];
@@ -1260,16 +1453,34 @@ function buildG2LayerData(
     return { fills: [], outlines, detail: undefined, frame: undefined };
   }
 
-  // Beer Hat: outline must always render on top of detail (can logo). Default can = Citrus.
+  // Beer Hat: outline must always render on top of detail (can logo). Default can = Tang.
+  // When splitSide is set, use pre-split images (left/right halves) to avoid runtime clipping.
   if (trait.id === 'Head_Beer-Hat' && trait.outlineFile && trait.detailOptions?.length) {
     const items: G2DrawItem[] = [];
     const detail = g2.options.detail as string | undefined;
-    const defaultCan = trait.detailOptions.find(d => d.name === 'Tang')?.file ?? trait.detailOptions[0]?.file;
-    const detailFile = (detail && detail !== '') ? detail : defaultCan;
-    if (detailFile) {
-      items.push({ type: 'outline', path: `${basePath}/${detailFile}` });
+    const defaultOption = trait.detailOptions.find(d => d.name === 'Tang') ?? trait.detailOptions[0];
+    const selectedOption = (detail && detail !== '')
+      ? trait.detailOptions.find(d => d.file === detail) ?? defaultOption
+      : defaultOption;
+
+    if (splitSide && selectedOption) {
+      // Pre-split images: no runtime clipping needed
+      const detailSplitFile = splitSide === 'left' ? selectedOption.splitLeft : selectedOption.splitRight;
+      const outlineSplitFile = splitSide === 'left' ? trait.outlineSplitLeft : trait.outlineSplitRight;
+      if (detailSplitFile) {
+        items.push({ type: 'outline', path: `${basePath}/${detailSplitFile}` });
+      }
+      if (outlineSplitFile) {
+        items.push({ type: 'outline', path: `${basePath}/${outlineSplitFile}` });
+      }
+    } else {
+      // Full images (fallback / non-split context)
+      const detailFile = selectedOption?.file;
+      if (detailFile) {
+        items.push({ type: 'outline', path: `${basePath}/${detailFile}` });
+      }
+      items.push({ type: 'outline', path: `${basePath}/${trait.outlineFile}` });
     }
-    items.push({ type: 'outline', path: `${basePath}/${trait.outlineFile}` });
     return { fills: [], outlines: [], orderedDrawItems: items };
   }
 
@@ -1648,6 +1859,15 @@ function drawColoredLayer(
   clipTopPercent?: number,
   clipPolygon?: [number, number][]
 ): void {
+  // iOS WebKit clip() workaround: render unclipped to temp canvas, composite with drawImage sub-rects
+  const clipRegion: ClipRegion = { clipRightHalf, clipLeftPercent, clipRightPercent, clipTopHalfOnly, clipBottomHalfFull, clipTopPercent, clipPolygon };
+  if (isIOSWebKit && hasActiveClip(clipRegion)) {
+    const { canvas: tmpCanvas, ctx: tmpCtx } = createOffscreenCanvas(size, size);
+    drawColoredLayer(tmpCtx, fillImage, outlineImage, color, size); // recurse without clip
+    compositeClipped(mainCtx, tmpCanvas, size, clipRegion);
+    return;
+  }
+
   const halfH = size / 2;
   const { canvas: tempCanvas, ctx: tempCtx } = createOffscreenCanvas(size, size);
   tempCtx.drawImage(fillImage, 0, 0, size, size);
@@ -1721,6 +1941,15 @@ function drawLayer(
   clipTopPercent?: number,
   clipPolygon?: [number, number][]
 ): void {
+  // iOS WebKit clip() workaround: draw to temp canvas, composite with drawImage sub-rects
+  const clipRegion: ClipRegion = { clipRightHalf, clipLeftPercent, clipRightPercent, clipTopHalfOnly, clipBottomHalfFull, clipBoundaryOffsetPx, clipTopPercent, clipPolygon };
+  if (isIOSWebKit && hasActiveClip(clipRegion)) {
+    const { canvas: tmpCanvas, ctx: tmpCtx } = createOffscreenCanvas(size, size);
+    tmpCtx.drawImage(image, 0, 0, size, size);
+    compositeClipped(ctx, tmpCanvas, size, clipRegion);
+    return;
+  }
+
   const halfH = size / 2;
   if (clipPolygon && clipPolygon.length >= 3) {
     ctx.save();
@@ -2109,19 +2338,22 @@ export async function renderToCanvas(
         }
       }
       // Beer Hat: right can behind base/cap, then under head (cap), then left can on top
+      // Uses pre-split images to avoid runtime canvas clipping (broken on iOS WebKit).
       if (layerNameStr === 'Head' && g2Sel?.traitId === 'Head_Beer-Hat') {
         try {
           const beerHatTrait = await getUnifiedTraitById('Head_Beer-Hat');
           if (beerHatTrait && beerHatTrait.outlineFile && beerHatTrait.detailOptions?.length) {
-            const beerHatG2 = buildG2LayerData(beerHatTrait, g2Sel, basePath);
+            // Right-behind: pre-split right image, NO clipping needed
+            const rightG2 = buildG2LayerData(beerHatTrait, g2Sel, basePath, undefined, 'right');
             expanded.push({
               path: layer.path,
               zIndex: LAYER_Z_INDEX.BeerHatRightBehind,
               layerName: 'BeerHatRightBehind',
-              g2: beerHatG2,
-              clipLeftPercent: 0.62,
-              clipTopHalfOnly: true,
+              g2: rightG2,
             });
+            // Left-main: store for Head layer below (set on the layer before push)
+            const leftG2 = buildG2LayerData(beerHatTrait, g2Sel, basePath, undefined, 'left');
+            (layer as RenderLayer).g2 = leftG2;
           }
           if (g2Sel.options.beerHatUnderlayer && g2Sel.options.beerHatUnderlayerG2) {
             const underTrait = await getUnifiedTraitById(g2Sel.options.beerHatUnderlayer as string);
@@ -2194,7 +2426,8 @@ export async function renderToCanvas(
         }
         continue;
       }
-      if (g2Sel) {
+      // Generic G2 resolution — skip Beer Hat Head (already resolved above with pre-split images)
+      if (g2Sel && !(layerNameStr === 'Head' && g2Sel.traitId === 'Head_Beer-Hat')) {
         try {
           const trait = await getUnifiedTraitById(g2Sel.traitId);
           if (trait && (trait.source === 'g2' || trait.source === 'both')) {
@@ -2214,7 +2447,8 @@ export async function renderToCanvas(
         continue;
       }
       if (layerNameStr === 'Head' && g2Sel?.traitId === 'Head_Beer-Hat') {
-        expanded.push({ ...layer, clipRightPercent: 0.37, clipBottomHalfFull: true });
+        // Pre-split images: g2 was already set above with left-split data, no clip props needed
+        expanded.push({ ...layer });
       } else {
         expanded.push(layer);
       }
@@ -2470,19 +2704,21 @@ export async function exportImage(
         }
       }
       // Beer Hat: right can behind base/cap, then under head (cap), then left can on top
+      // Uses pre-split images to avoid runtime canvas clipping (broken on iOS WebKit).
       if (layerNameStr === 'Head' && g2Sel?.traitId === 'Head_Beer-Hat') {
         try {
           const beerHatTrait = await getUnifiedTraitById('Head_Beer-Hat');
           if (beerHatTrait && beerHatTrait.outlineFile && beerHatTrait.detailOptions?.length) {
-            const beerHatG2 = buildG2LayerData(beerHatTrait, g2Sel, basePath);
+            // Right-behind: pre-split right image, NO clipping needed
+            const rightG2 = buildG2LayerData(beerHatTrait, g2Sel, basePath, undefined, 'right');
             expanded.push({
               path: layer.path,
               zIndex: LAYER_Z_INDEX.BeerHatRightBehind,
               layerName: 'BeerHatRightBehind',
-              g2: beerHatG2,
-              clipLeftPercent: 0.62,
-              clipTopHalfOnly: true,
+              g2: rightG2,
             });
+            // Left-main: store for Head layer below (set on the layer before push)
+            (layer as RenderLayer).g2 = buildG2LayerData(beerHatTrait, g2Sel, basePath, undefined, 'left');
           }
           if (g2Sel.options.beerHatUnderlayer && g2Sel.options.beerHatUnderlayerG2) {
             const underTrait = await getUnifiedTraitById(g2Sel.options.beerHatUnderlayer as string);
@@ -2549,7 +2785,8 @@ export async function exportImage(
         } catch { /* skip */ }
         continue;
       }
-      if (g2Sel) {
+      // Generic G2 resolution — skip Beer Hat Head (already resolved above with pre-split images)
+      if (g2Sel && !(layerNameStr === 'Head' && g2Sel.traitId === 'Head_Beer-Hat')) {
         try {
           const trait = await getUnifiedTraitById(g2Sel.traitId);
           if (trait && (trait.source === 'g2' || trait.source === 'both')) {
@@ -2569,7 +2806,8 @@ export async function exportImage(
         continue;
       }
       if (layerNameStr === 'Head' && g2Sel?.traitId === 'Head_Beer-Hat') {
-        expanded.push({ ...layer, clipRightPercent: 0.37, clipBottomHalfFull: true });
+        // Pre-split images: g2 was already set above with left-split data, no clip props needed
+        expanded.push({ ...layer });
       } else {
         expanded.push(layer);
       }
