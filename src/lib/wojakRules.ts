@@ -175,23 +175,6 @@ function ruleAstronautDisablesMouthOptions(resolver: SelectionResolver): RuleRes
   return result;
 }
 
-/**
- * Astronaut and Copium Mask are mutually exclusive
- * Now handled by suspend/restore in reducer - no graying out needed.
- */
-function ruleAstronautCopiumMaskMutualExclusion(_resolver: SelectionResolver): RuleResult {
-  // Mutual exclusion now handled by suspend/restore in reducer
-  return { disabledLayers: [] };
-}
-
-/**
- * Astronaut disables Night Vision (mutually exclusive).
- * Now handled by suspend/restore in reducer - no graying out needed.
- */
-function ruleAstronautDisablesNightVision(_resolver: SelectionResolver): RuleResult {
-  // Mutual exclusion now handled by suspend/restore in reducer
-  return { disabledLayers: [] };
-}
 
 /**
  * FacialHair requires compatible MouthBase (path check for allowed mouths; no trait IDs for all variants).
@@ -654,14 +637,6 @@ function ruleSuitDisablesHannibal(resolver: SelectionResolver): RuleResult {
   return { disabledLayers: [] };
 }
 
-/**
- * Laser Eyes and Fake Mask are mutually exclusive.
- * Now handled by suspend/restore in reducer - no graying out needed.
- */
-function ruleLaserEyesFakeMaskMutualExclusion(_resolver: SelectionResolver): RuleResult {
-  // Mutual exclusion now handled by suspend/restore in reducer
-  return { disabledLayers: [] };
-}
 
 /**
  * Legacy ClothesAddon (G1) required Tee or Tanktop. G2 Chia Farmer is selectable as Clothes
@@ -731,14 +706,6 @@ function ruleSuitDisablesNeckbeard(resolver: SelectionResolver): RuleResult {
   return { disabledLayers: [] };
 }
 
-/**
- * Firefighter Helmet is mutually exclusive with VR Headset and Night Vision.
- * Now handled by suspend/restore in reducer - no graying out needed.
- */
-function ruleFirefighterHelmetEyesExclusion(_resolver: SelectionResolver): RuleResult {
-  // Mutual exclusion now handled by suspend/restore in reducer
-  return { disabledLayers: [] };
-}
 
 /**
  * Straitjacket disables all hand extras (hands are tied).
@@ -790,8 +757,6 @@ const RULES = [
   ruleBubbleGumDisablesMouthItem,
   ruleBubbleGumDisablesFacialHair,
   ruleAstronautDisablesMouthOptions,
-  ruleAstronautCopiumMaskMutualExclusion,
-  ruleAstronautDisablesNightVision,
   ruleSuitDisablesBandana,
   ruleSuitDisablesHannibal,
   ruleFullBodySuitNoHead,
@@ -799,10 +764,8 @@ const RULES = [
   ruleMaskBlocksOtherLayers,
   ruleHannibalMaskRemovesFacialHair,
   ruleBandanaMaskRemovesNeckbeard,
-  ruleLaserEyesFakeMaskMutualExclusion,
   ruleClothesAddonRequiresTeeOrTanktop,
   ruleSuitDisablesNeckbeard,
-  ruleFirefighterHelmetEyesExclusion,
   ruleStraightJacketDisablesHandExtras,
 ];
 
