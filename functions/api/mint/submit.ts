@@ -48,6 +48,7 @@ interface Env extends ProcessEnv {
 
 const VALID_LAYER_NAMES = new Set([
   'Background', 'Base', 'Clothes', 'FacialHair', 'MouthBase', 'MouthItem', 'Mask', 'Eyes', 'Head',
+  'Extra1', 'Extra2', 'Extra3',
 ]);
 
 function isValidHex(color: string): boolean {

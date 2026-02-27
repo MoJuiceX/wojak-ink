@@ -62,6 +62,7 @@ const SUPPLY_TOTAL = TOTAL_SUPPLY; // alias for backwards compat within this fil
 
 const VALID_LAYER_NAMES = new Set([
   'Background', 'Base', 'Clothes', 'FacialHair', 'MouthBase', 'MouthItem', 'Mask', 'Eyes', 'Head',
+  'Extra1', 'Extra2', 'Extra3',
 ]);
 
 function isValidHex(color: string): boolean {
@@ -126,7 +127,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     // Validate path format: prevent directory traversal and restrict to known patterns
     if (path) {
       const parts = path.split('/');
-      if (parts.length > 4 || parts.some(p => p === '..' || p === '.')) {
+      if (parts.length > 6 || parts.some(p => p === '..' || p === '.')) {
         return errorResponse(`Invalid layer path for ${layer}`, 400);
       }
       // Paths must only contain alphanumeric, hyphens, underscores, spaces, dots, $, commas
