@@ -17,7 +17,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { FavoriteWojak, ExportOptions, G2Selection, G2Selections } from '@/types/generator';
+import type { FavoriteWojak, ExportOptions, G2Selection, G2Selections, SelectionsSnapshot, SelectionKey } from '@/types/generator';
 import { isFavoriteV2, isSelectionPathEmpty } from '@/types/generator';
 import { getDisabledLayers, type SelectedLayers, type UILayerName } from '@/lib/wojakRules';
 import { DEFAULT_SELECTIONS } from '@/config/layers';
@@ -25,7 +25,7 @@ import { SCENE_BACKGROUNDS } from '@/lib/layerRegistry';
 import { G2_DEFAULT_COLORS } from '@/config/g2DefaultColors';
 import { generatorService, type LayerImage, type UnifiedTrait, getUnifiedTraits, getPathToTraitIdMap, ensurePathToTraitIdMapReady } from '@/services/generatorService';
 import { createSelectionResolver } from '@/lib/selectionResolver';
-import { toExternal, fromExternal } from '@/lib/selectionAdapter';
+import { toExternal, fromExternal, normalizeG2Selection } from '@/lib/selectionAdapter';
 import { getAllUserPickableFillSlots } from '@/lib/g2FillTreatments';
 import { GENERATOR_PALETTE_HEX } from '@/components/generator/ColorPicker';
 import { assembleG2Selection } from '@/contexts/generatorG2Helpers';
@@ -737,10 +737,27 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
   }, []);
 
   const loadFavorite = useCallback((favorite: FavoriteWojak) => {
-    const unified = isFavoriteV2(favorite)
-      ? favorite.unifiedSelections
-      : fromExternal(favorite.selections, favorite.g2Selections, getPathToTraitIdMap());
-    dispatch({ type: 'LOAD_FAVORITE_UNIFIED', unifiedSelections: unified });
+    if (isFavoriteV2(favorite)) {
+      // V2 favorites store unifiedSelections directly — normalize any embedded G2
+      // objects that may use the old flat-field format (pre-options-bag refactor).
+      const raw = favorite.unifiedSelections;
+      const unified: SelectionsSnapshot = {};
+      for (const [key, sel] of Object.entries(raw)) {
+        if (sel?.g2) {
+          unified[key as SelectionKey] = {
+            ...sel,
+            g2: normalizeG2Selection(sel.g2 as unknown as Record<string, unknown>),
+          };
+        } else if (sel) {
+          unified[key as SelectionKey] = sel;
+        }
+      }
+      dispatch({ type: 'LOAD_FAVORITE_UNIFIED', unifiedSelections: unified });
+    } else {
+      // V1 favorites use dual shape — fromExternal already normalizes via normalizeG2Selection
+      const unified = fromExternal(favorite.selections, favorite.g2Selections, getPathToTraitIdMap());
+      dispatch({ type: 'LOAD_FAVORITE_UNIFIED', unifiedSelections: unified });
+    }
   }, []);
 
   // Export
