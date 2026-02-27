@@ -58,6 +58,11 @@
   ! Cache-Control
   Cache-Control: public, max-age=3600, must-revalidate
 
+# Layer manifest (can change when new layers are added) - short cache
+/assets/wojak-layers/manifest.json
+  ! Cache-Control
+  Cache-Control: public, max-age=3600, must-revalidate
+
 # G2 layer images (can be updated) - override immutable with short cache
 /assets/wojak-layers/YourWojak-layers/*
   ! Cache-Control
