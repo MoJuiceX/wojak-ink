@@ -465,6 +465,7 @@ export interface UnifiedTrait {
 // ============ G2 Loader ============
 
 let g2ManifestCache: G2Manifest | null = null;
+let g2TraitIndex: Map<string, G2ManifestTrait> | null = null;
 const unifiedTraitsCache: Map<UILayerName, UnifiedTrait[]> = new Map();
 
 const G2_BASE_PATH = '/assets/wojak-layers/YourWojak-layers';
@@ -476,6 +477,9 @@ async function loadG2Manifest(): Promise<G2Manifest | null> {
     const response = await fetch(`${G2_BASE_PATH}/manifest.json`);
     if (!response.ok) throw new Error('Failed to load G2 manifest');
     g2ManifestCache = await response.json();
+    if (g2ManifestCache) {
+      g2TraitIndex = new Map(g2ManifestCache.traits.map(t => [t.id, t]));
+    }
     return g2ManifestCache;
   } catch (error) {
     console.error('[GeneratorService] Failed to load G2 manifest:', error);
@@ -528,7 +532,7 @@ function findG2Match(g1BaseName: string, g2Traits: G2ManifestTrait[]): G2Manifes
   // 1. Check hardcoded mapping
   const g2Id = G1_TO_G2_MAP[g1BaseName];
   if (g2Id) {
-    const match = g2Traits.find(t => t.id === g2Id);
+    const match = g2TraitIndex?.get(g2Id);
     if (match) return match;
   }
 
@@ -697,7 +701,7 @@ export async function getUnifiedTraits(layer: UILayerName): Promise<UnifiedTrait
       if (G2_CATEGORY_TO_UI[catName] === layer) {
         // Get full trait data for each trait id in this category
         for (const traitId of catData.traits) {
-          const traitData = g2Manifest.traits.find(t => t.id === traitId);
+          const traitData = g2TraitIndex?.get(traitId);
           if (traitData) g2Traits.push(traitData);
         }
       }
@@ -723,7 +727,7 @@ export async function getUnifiedTraitById(id: string): Promise<UnifiedTrait | nu
   // Fallback: trait may exist in manifest but not in any category (e.g. Clothes_Pepe-suit)
   const g2Manifest = await loadG2Manifest();
   if (g2Manifest) {
-    const g2Trait = g2Manifest.traits.find(t => t.id === id);
+    const g2Trait = g2TraitIndex?.get(id);
     if (g2Trait) {
       const catPart = id.includes('_') ? id.split('_')[0] : id;
       const uiLayer = (G2_CATEGORY_TO_UI[catPart] ?? 'Clothes') as UILayerName;
@@ -777,6 +781,7 @@ export function clearUnifiedTraitsCache(): void {
   unifiedTraitsCache.clear();
   pathToTraitIdMapCache = null;
   g2ManifestCache = null;
+  g2TraitIndex = null;
 }
 
 // ============ Path → TraitId Map (for selection resolver) ============
