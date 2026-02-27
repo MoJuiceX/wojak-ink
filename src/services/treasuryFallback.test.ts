@@ -56,8 +56,8 @@ describe('FALLBACK_LOGO', () => {
 // ─── CACHE_FRESH_DURATION ────────────────────────────────────────────────────
 
 describe('CACHE_FRESH_DURATION', () => {
-  it('is 15 minutes in milliseconds', () => {
-    expect(CACHE_FRESH_DURATION).toBe(15 * 60 * 1000);
+  it('is 5 minutes in milliseconds', () => {
+    expect(CACHE_FRESH_DURATION).toBe(5 * 60 * 1000);
   });
 });
 
@@ -109,12 +109,12 @@ describe('isCacheFresh', () => {
     expect(isCacheFresh(Date.now())).toBe(true);
   });
 
-  it('returns true for a timestamp 5 minutes ago', () => {
-    expect(isCacheFresh(Date.now() - 5 * 60_000)).toBe(true);
+  it('returns true for a timestamp 3 minutes ago', () => {
+    expect(isCacheFresh(Date.now() - 3 * 60_000)).toBe(true);
   });
 
-  it('returns false for a timestamp 16 minutes ago (past 15 min threshold)', () => {
-    expect(isCacheFresh(Date.now() - 16 * 60_000)).toBe(false);
+  it('returns false for a timestamp 6 minutes ago (past 5 min threshold)', () => {
+    expect(isCacheFresh(Date.now() - 6 * 60_000)).toBe(false);
   });
 
   it('returns false for a timestamp 1 hour ago', () => {
@@ -344,13 +344,13 @@ describe('isDataStale', () => {
     expect(isDataStale(cache)).toBe(false);
   });
 
-  it('returns false for cache updated 10 minutes ago', () => {
-    const cache = makeCache([], Date.now() - 10 * 60_000);
+  it('returns false for cache updated 3 minutes ago', () => {
+    const cache = makeCache([], Date.now() - 3 * 60_000);
     expect(isDataStale(cache)).toBe(false);
   });
 
-  it('returns true for cache updated 20 minutes ago (past 15 min threshold)', () => {
-    const cache = makeCache([], Date.now() - 20 * 60_000);
+  it('returns true for cache updated 6 minutes ago (past 5 min threshold)', () => {
+    const cache = makeCache([], Date.now() - 6 * 60_000);
     expect(isDataStale(cache)).toBe(true);
   });
 
