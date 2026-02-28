@@ -29,8 +29,11 @@ dist-ssr
 *.sln
 *.sw?
 public/assets/wojak-layers/*.md
-# Uncomment after R2 migration is deployed (layers served from layers.wojak.ink)
-# public/assets/wojak-layers/
+# Layer assets served from R2 (layers.wojak.ink) — keep only the CSS background image
+public/assets/wojak-layers/
+!public/assets/wojak-layers/BACKGROUND/
+!public/assets/wojak-layers/BACKGROUND/Scene/
+!public/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Orange Grove.png
 
 # Temp clone for skill install
 .mattpocock-skills-tmp
