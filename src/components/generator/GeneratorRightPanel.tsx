@@ -196,7 +196,7 @@ export function GeneratorRightPanel() {
 
   return (
     <div
-      className="flex flex-col gap-3 overflow-y-auto"
+      className="generator-right-panel flex flex-col gap-3 overflow-y-auto"
       style={{
         padding: '12px',
         borderRadius: 'var(--radius-lg)',

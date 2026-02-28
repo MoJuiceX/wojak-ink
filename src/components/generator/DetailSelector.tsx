@@ -51,7 +51,7 @@ export const DetailSelector = memo(function DetailSelector({
           {label}
         </span>
       )}
-      <div className="flex flex-wrap gap-2">
+      <div className="detail-selector-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, 56px)', gap: 10, justifyContent: 'center' }}>
         {/* None option */}
         {allowNone && (
         <motion.button

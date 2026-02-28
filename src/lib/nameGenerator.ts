@@ -1,54 +1,37 @@
 // Random name generator for Your Wojak NFTs
-// Generates fun, meme-culture names. Max 15 characters.
+// Generates fun, meme-culture names themed to the selected clothing. Max 15 characters.
 
-const PREFIXES = [
-  // Tang Gang — orange / citrus / Chia community
-  'Tang', 'Honk', 'Bepe', 'Pulp', 'Citrus', 'Zesty', 'Tangy', 'Orange',
-  'Peel', 'Rind', 'Juice', 'Juicy', 'Wedge', 'Navel', 'Squeeze',
-  // Wojak / Internet
-  'Doomer', 'Bloomer', 'Coomer', 'Feels', 'Based', 'Cursed', 'Gigachad', 'Brainlet',
-  // Crypto
-  'Degen', 'Diamond', 'Laser', 'HODL', 'Rekt', 'Wagmi', 'Whale', 'Bullish', 'Rugged',
-  // Gaming / Dark
-  'Shadow', 'Iron', 'Ghost', 'Hyper', 'Ultra', 'Void', 'Chaos', 'Neon',
-  // Internet
-  'Turbo', 'Sigma', 'Alpha', 'Omega', 'Clown', 'Cringe', 'NPC',
-];
-
-const SUFFIXES = [
-  'Maxi', 'Lord', 'King', 'OG', 'Fren', 'Sage', 'Wizard', 'Knight', 'Monk', 'Chad',
-  'Hands', 'Eyes', 'Pilled', 'Gang', 'Brain', 'Mode', 'Vibes', '9000', 'IRL', 'Ape',
-  'Slayer', 'Master',
-];
-
-const FULL_NAMES = [
-  // Tang Gang
-  'Winners Win', 'Orange Maxi', 'Honk Pilled', 'Tang Lord', 'Pulp Gang',
-  'Bepe Maxi', 'Neck Growth', 'Zesty Chad', 'Citrus King', 'Peel Gang',
-  'Juice Wizard', 'Navel Sage',
-  // Wojak / Internet
-  'Feels Good', 'This Is Fine', 'Doomer Mode', 'Gigachad OG', 'Big Brain',
-  'Clown World', 'NPC Brain', 'Touch Grass', 'Brainlet IRL', 'Based Lord',
-  // Crypto
-  'Diamond Hands', 'Paper Hands', 'Laser Eyes', 'Wagmi Fren', 'Rekt Again',
-  'Degen Lord', 'Rug Survivor', 'Whale Alert', 'Moon Soon', 'NGMI Steve',
-  // Gaming / Dark
-  'Void Walker', 'Shadow King', 'Iron Fist', 'Chaos Mode', 'Neon Ghost', 'Coomer IRL',
-];
+import { getNameTheme } from './nameThemes';
+import type { NameTheme } from './nameThemes';
 
 export const MAX_NAME_LENGTH = 15;
 
-export function generateRandomName(): string {
-  // 50% chance to use a full premade name, 50% to combine
-  if (Math.random() < 0.5 && FULL_NAMES.length > 0) {
-    const name = FULL_NAMES[Math.floor(Math.random() * FULL_NAMES.length)];
+/**
+ * Generate a random name, optionally themed to the selected clothing.
+ * @param clothingName - Display name of the clothing (e.g. "Bepe Army", "Astronaut")
+ */
+export function generateRandomName(clothingName?: string): string {
+  const theme: NameTheme = getNameTheme(clothingName);
+
+  // 50% chance to use a full premade name, 50% to combine prefix+suffix
+  if (Math.random() < 0.5 && theme.fullNames.length > 0) {
+    const name = theme.fullNames[Math.floor(Math.random() * theme.fullNames.length)];
     return name.slice(0, MAX_NAME_LENGTH);
   }
 
-  const prefix = PREFIXES[Math.floor(Math.random() * PREFIXES.length)];
-  const suffix = SUFFIXES[Math.floor(Math.random() * SUFFIXES.length)];
+  const prefix = theme.prefixes[Math.floor(Math.random() * theme.prefixes.length)];
+  const suffix = theme.suffixes[Math.floor(Math.random() * theme.suffixes.length)];
   const name = `${prefix} ${suffix}`;
   return name.slice(0, MAX_NAME_LENGTH);
+}
+
+/**
+ * Get a placeholder hint name for the input field, themed to clothing.
+ * @param clothingName - Display name of the clothing
+ */
+export function getPlaceholderHint(clothingName?: string): string {
+  const theme = getNameTheme(clothingName);
+  return theme.hint;
 }
 
 export function validateName(name: string): { valid: boolean; error?: string } {

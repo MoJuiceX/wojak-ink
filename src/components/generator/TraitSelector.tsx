@@ -6,8 +6,8 @@
  */
 
 import { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
-import { Ban } from 'lucide-react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { Ban, Grid2X2, Grid3X3 } from 'lucide-react';
 import { useLayout } from '@/hooks/useLayout';
 import { useGenerator } from '@/contexts/GeneratorContext';
 import { useMint } from '@/contexts/MintContext';
@@ -133,33 +133,10 @@ function sortTraitsByMode(
   traits: UnifiedTrait[],
   mode: TraitSortMode,
   lookupUsage: (traitName: string) => number,
-  layer: string,
+  _layer: string,
 ): UnifiedTrait[] {
-  // Background special cards should not be reordered
-  const isSpecialBgCard = (trait: UnifiedTrait): boolean => {
-    if (layer !== 'Background' || !trait.g1Path) return false;
-    return (
-      trait.g1Path === '__solid__' ||
-      trait.g1Path.includes('__solid__') ||
-      trait.g1Path === '__price_up__' ||
-      trait.g1Path === '__price_down__'
-    );
-  };
-
-  // Separate special cards from sortable ones
-  const specialCards: { index: number; trait: UnifiedTrait }[] = [];
-  const sortableTraits: UnifiedTrait[] = [];
-
-  traits.forEach((trait, index) => {
-    if (isSpecialBgCard(trait)) {
-      specialCards.push({ index, trait });
-    } else {
-      sortableTraits.push(trait);
-    }
-  });
-
-  // Sort the sortable traits (sortableTraits is already a fresh array)
-  const sorted = sortableTraits.sort((a, b) => {
+  // All traits participate in sorting equally (no pinned positions)
+  const sorted = [...traits].sort((a, b) => {
     if (mode === 'az') {
       return a.name.localeCompare(b.name);
     }
@@ -174,19 +151,11 @@ function sortTraitsByMode(
       return mode === 'hot' ? bUsage - aUsage : aUsage - bUsage;
     }
 
-    // Tiebreaker: preserve existing custom order (stable sort)
-    return 0;
+    // Tiebreaker: alphabetical for deterministic order
+    return a.name.localeCompare(b.name);
   });
 
-  // Re-insert special cards at their original positions
-  if (specialCards.length === 0) return sorted;
-
-  const result = [...sorted];
-  for (const { index, trait } of specialCards) {
-    const insertAt = Math.min(index, result.length);
-    result.splice(insertAt, 0, trait);
-  }
-  return result;
+  return sorted;
 }
 
 interface TraitSelectorProps {
@@ -214,9 +183,12 @@ export interface SortControlsProps {
   combatType?: string;
   combatTypeEmoji?: string;
   combatNature?: string;
+  /** Mobile grid columns (2 or 3) */
+  gridCols?: 2 | 3;
+  onGridColsChange?: (cols: 2 | 3) => void;
 }
 
-export function SortControls({ sortMode, onSortChange, canClear, isCleared, onClear, combatType, combatTypeEmoji, combatNature }: SortControlsProps) {
+export function SortControls({ sortMode, onSortChange, canClear, isCleared, onClear, combatType, combatTypeEmoji, combatNature, gridCols, onGridColsChange }: SortControlsProps) {
   const isAlpha = sortMode === 'az' || sortMode === 'za';
 
   const handleAlphaClick = () => {
@@ -231,18 +203,17 @@ export function SortControls({ sortMode, onSortChange, canClear, isCleared, onCl
 
   return (
     <div className="trait-sort-bar" role="toolbar" aria-label="Trait controls">
-      {/* Clear button — left side */}
-      {canClear && onClear && (
-        <button
-          type="button"
-          className={`trait-sort-clear ${isCleared ? 'trait-sort-clear--active' : ''}`}
-          onClick={onClear}
-          aria-label="Clear selection"
-          title="Clear selection"
-        >
-          <Ban size={14} />
-        </button>
-      )}
+      {/* Clear button — always rendered for layout stability, disabled when layer is required */}
+      <button
+        type="button"
+        className={`trait-sort-clear ${isCleared ? 'trait-sort-clear--active' : ''} ${!canClear ? 'trait-sort-clear--disabled' : ''}`}
+        onClick={canClear && onClear ? onClear : undefined}
+        disabled={!canClear}
+        aria-label="Clear selection"
+        title={canClear ? 'Clear selection' : 'This layer is required'}
+      >
+        <Ban size={14} />
+      </button>
 
       {/* Combat type — center */}
       {combatType && (
@@ -286,6 +257,19 @@ export function SortControls({ sortMode, onSortChange, canClear, isCleared, onCl
         >
           {sortMode === 'za' ? 'Z→A' : 'A→Z'}
         </button>
+
+        {/* Grid column toggle — mobile only */}
+        {onGridColsChange && (
+          <button
+            type="button"
+            className="trait-sort-btn lg:hidden"
+            onClick={() => onGridColsChange(gridCols === 2 ? 3 : 2)}
+            aria-label={gridCols === 2 ? 'Switch to 3 columns' : 'Switch to 2 columns'}
+            title={gridCols === 2 ? '3 columns' : '2 columns'}
+          >
+            {gridCols === 2 ? <Grid3X3 size={14} /> : <Grid2X2 size={14} />}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -310,7 +294,7 @@ const ImageCard = memo(function ImageCard({ image, isSelected, isDisabled, disab
       className="trait-card-hover"
     >
       <div
-        className="relative w-full h-full rounded-lg overflow-hidden trait-card-image-bg"
+        className="relative w-full h-full overflow-hidden trait-card-image-bg"
       >
         <img
           src={image.path}
@@ -359,7 +343,7 @@ const BaseImageCard = memo(function BaseImageCard({ image, isSelected, isDisable
       className="trait-card-hover"
     >
       <div
-        className="relative w-full h-full rounded-lg overflow-hidden trait-card-image-bg"
+        className="relative w-full h-full overflow-hidden trait-card-image-bg"
       >
         {/* Base layer */}
         <img
@@ -503,7 +487,7 @@ const LayerWithBaseMouthCard = memo(function LayerWithBaseMouthCard({ image, isS
       className="trait-card-hover"
     >
       <div
-        className="relative w-full h-full rounded-lg overflow-hidden trait-card-image-bg"
+        className="relative w-full h-full overflow-hidden trait-card-image-bg"
       >
         {/* Trait rendered behind base (e.g. wings) */}
         {renderBehindBase && (
@@ -568,7 +552,7 @@ const ClothesImageCard = memo(function ClothesImageCard({ image, isSelected, isD
       className="trait-card-hover"
     >
       <div
-        className="relative w-full h-full rounded-lg overflow-hidden trait-card-image-bg"
+        className="relative w-full h-full overflow-hidden trait-card-image-bg"
       >
         {/* Base layer (Classic) */}
         <img
@@ -616,12 +600,14 @@ interface G2TraitCardProps {
   isBeerHatUnderlayer?: boolean;
   /** When set, show this image as the card preview (e.g. live preview so grid matches big preview) */
   livePreviewUrl?: string | null;
+  /** When true, hide the checkmark badge (border selection is sufficient) */
+  hideCheckBadge?: boolean;
 }
 
 /** Cyan glow for G2 trait cards when selected */
 const G2_SELECTED_BOX_SHADOW = '0 0 20px rgba(0, 212, 255, 0.4), 0 4px 12px var(--color-black-30)';
 
-export const G2TraitCard = memo(function G2TraitCard({ trait, isSelected, isDisabled, disabledReason, onClick, needsClothesUnderlay, isBeerHatUnderlayer, livePreviewUrl }: G2TraitCardProps) {
+export const G2TraitCard = memo(function G2TraitCard({ trait, isSelected, isDisabled, disabledReason, onClick, needsClothesUnderlay, isBeerHatUnderlayer, livePreviewUrl, hideCheckBadge }: G2TraitCardProps) {
   return (
     <TraitCardShell
       isSelected={isSelected}
@@ -631,8 +617,9 @@ export const G2TraitCard = memo(function G2TraitCard({ trait, isSelected, isDisa
       title={isDisabled && disabledReason ? disabledReason : undefined}
       className="trait-card-hover"
       selectedBoxShadow={G2_SELECTED_BOX_SHADOW}
+      hideCheckBadge={hideCheckBadge}
     >
-      <div className="relative w-full h-full rounded-lg overflow-hidden trait-card-image-bg">
+      <div className="relative w-full h-full overflow-hidden trait-card-image-bg">
         <G2TraitCardPreview trait={trait} needsClothesUnderlay={needsClothesUnderlay} livePreviewUrl={livePreviewUrl} />
         <div className="trait-label-overlay">
           <span className="trait-label-text">{trait.name}</span>
@@ -681,6 +668,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
   const [imagesForLayer, setImagesForLayer] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [sortMode, setSortMode] = useState<TraitSortMode>('hot');
+  const [mobileGridCols, setMobileGridCols] = useState<2 | 3>(3);
 
   // Glow animation state for trait selection micro-interaction
   const [glowingTraitId, setGlowingTraitId] = useState<string | null>(null);
@@ -803,7 +791,9 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
     const traitType = LAYER_TO_TRAIT_TYPE[activeLayer] || '';
     const lookupUsage = (traitName: string): number => {
       const p = getTraitPricing(traitType, traitName);
-      return p?.usageCount ?? 0;
+      // Use surchargeXch for sorting — it reflects effectiveUsage with decay,
+      // so sort order matches what users see in the price display
+      return p?.surchargeXch ?? 0;
     };
 
     return sortTraitsByMode(rawTraits, sortMode, lookupUsage, activeLayer);
@@ -941,17 +931,23 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
           combatType={combatIdentity ? TYPE_NAME[combatIdentity.type] : undefined}
           combatTypeEmoji={combatIdentity ? TYPE_EMOJI[combatIdentity.type] : undefined}
           combatNature={combatIdentity?.nature}
+          gridCols={mobileGridCols}
+          onGridColsChange={setMobileGridCols}
         />
       )}
 
-      {/* Single unified trait grid */}
+      {/* Single unified trait grid — crossfade on category switch */}
+      <AnimatePresence mode="wait">
       {!isBlocked && unifiedTraits.length > 0 && (
           <motion.div
             key={activeLayer}
             className="generator-options-grid"
+            data-grid-cols={mobileGridCols}
             variants={prefersReducedMotion ? undefined : traitGridVariants}
-            initial="initial"
-            animate="animate"
+            initial={prefersReducedMotion ? undefined : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={prefersReducedMotion ? undefined : { opacity: 0 }}
+            transition={{ duration: 0.12 }}
           >
             {unifiedTraits.map((trait) => {
               const disabled = isOptionDisabled(activeLayer, trait.name);
@@ -1121,6 +1117,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
             })}
           </motion.div>
       )}
+      </AnimatePresence>
 
       {/* Color picker and G2 panel on mobile are rendered in GeneratorMobileColorPanel (below the grid) */}
 

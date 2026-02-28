@@ -48,12 +48,13 @@ export function BeerHatUnderlayerPicker({ selectedTraitId, onSelect }: BeerHatUn
             );
           }
           return (
-            <div key={traitId} className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden">
+            <div key={traitId} className="w-16 h-16 flex-shrink-0">
               <G2TraitCard
                 trait={trait}
                 isSelected={isSelected}
                 onClick={() => onSelect(traitId)}
                 needsClothesUnderlay
+                hideCheckBadge
               />
             </div>
           );

@@ -22,6 +22,8 @@ interface TraitCardShellProps {
   className?: string;
   /** Override the selected-state boxShadow (G2TraitCard uses a cyan glow) */
   selectedBoxShadow?: string;
+  /** When true, hide the checkmark badge on selected cards (border is sufficient) */
+  hideCheckBadge?: boolean;
 }
 
 const DEFAULT_SELECTED_BOX_SHADOW =
@@ -36,13 +38,14 @@ export const TraitCardShell = memo(function TraitCardShell({
   children,
   className,
   selectedBoxShadow = DEFAULT_SELECTED_BOX_SHADOW,
+  hideCheckBadge = false,
 }: TraitCardShellProps) {
   const prefersReducedMotion = useReducedMotion();
 
   return (
     <motion.button
       type="button"
-      className={`generator-trait-card w-full aspect-square relative rounded-xl overflow-hidden p-1${isSelected ? ' generator-trait-card--selected' : ''}${isDisabled ? ' generator-trait-card--disabled' : ''}${className ? ` ${className}` : ''}`}
+      className={`generator-trait-card w-full aspect-square relative rounded-xl overflow-hidden${isSelected ? ' generator-trait-card--selected' : ''}${isDisabled ? ' generator-trait-card--disabled' : ''}${className ? ` ${className}` : ''}`}
       style={isSelected ? { boxShadow: selectedBoxShadow } : undefined}
       whileHover={prefersReducedMotion || isDisabled ? undefined : { scale: 1.03 }}
       whileTap={prefersReducedMotion || isDisabled ? undefined : { scale: 0.98 }}
@@ -64,7 +67,7 @@ export const TraitCardShell = memo(function TraitCardShell({
         </div>
       )}
       {/* Check mark with pop animation */}
-      {isSelected && !isDisabled && (
+      {isSelected && !isDisabled && !hideCheckBadge && (
         <motion.div
           className="generator-trait-card__check-badge absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
           initial={{ scale: 0 }}

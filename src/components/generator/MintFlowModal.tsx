@@ -11,7 +11,7 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X, Loader2, CheckCircle, AlertCircle, Copy, ExternalLink, Wallet, Share2, Sparkles } from 'lucide-react';
 import { useMint } from '@/contexts/MintContext';
 import { useMetadataAttributes } from './MetadataPreview';
-import { generateRandomName, validateName, MAX_NAME_LENGTH } from '@/lib/nameGenerator';
+import { generateRandomName, validateName, MAX_NAME_LENGTH, getPlaceholderHint } from '@/lib/nameGenerator';
 import { FighterRevealCard } from './FighterRevealCard';
 import { MintPreviewPanel } from './MintPreviewPanel';
 
@@ -135,12 +135,6 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
     if (value.length <= MAX_NAME_LENGTH) {
       setCustomName(value);
     }
-  };
-
-  const handleGenerateRandom = () => {
-    const name = generateRandomName();
-    setCustomName(name);
-    setNameError('');
   };
 
   // Countdown timer for paid mints
@@ -288,8 +282,9 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
               </button>
             </div>
 
-            <div className="flex flex-col items-center gap-3 text-center">
-              {icon}
+            <div className="flex flex-col items-center gap-2.5 text-center">
+              {/* Icon — hidden for confirming step (title is sufficient) */}
+              {!isConfirming && icon}
 
               {/* ── Progress bar (during submitted/awaiting_payment) ── */}
               {(isSubmitted || isAwaitingPayment) && currentJob && (
@@ -315,9 +310,11 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
                 const balance = Math.round((credits?.balance ?? 0) / 100);
                 const creditCost = Math.ceil(100 * price.totalXch / price.basePrice);
                 const isFreeConfirm = pendingMintType === 'free';
+                const clothingAttr = metadataAttributes.find(a => a.trait_type === 'Clothes');
+                const clothingName = clothingAttr?.value || '';
                 return (
-                  <div className="w-full flex flex-col gap-3">
-                    {/* NFT Preview Panel — image, traits, price, supply */}
+                  <div className="w-full flex flex-col gap-2.5">
+                    {/* NFT Preview Panel — image, headline, traits + price */}
                     <MintPreviewPanel
                       imageUrl={revealImageUrl}
                       attributes={metadataAttributes}
@@ -328,22 +325,10 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
                       maxSupply={maxSupply}
                     />
 
-                    {/* Mint type context */}
-                    {isFreeConfirm ? (
-                      <p className="text-muted text-xs text-center">
-                        Uses <span className="font-semibold text-accent">{creditCost} credits</span> from your balance of {balance}.
-                        {' '}No wallet signing needed.
-                      </p>
-                    ) : (
-                      <p className="text-muted text-xs text-center">
-                        You'll have 15 minutes to accept the offer in your Sage Wallet.
-                      </p>
-                    )}
-
-                    {/* Name your Wojak */}
-                    <div className="flex flex-col gap-2 w-full">
-                      <label className="text-xs text-secondary uppercase tracking-wider">
-                        Name your Wojak (optional)
+                    {/* Name your Wojak — simplified, centered label */}
+                    <div className="flex flex-col gap-1.5 w-full">
+                      <label className="text-xs text-muted text-center">
+                        Name (optional)
                       </label>
                       <div className="flex gap-2">
                         <div className="flex-1 relative">
@@ -352,7 +337,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
                             type="text"
                             value={customName}
                             onChange={(e) => handleNameChange(e.target.value)}
-                            placeholder="e.g. Moon Boy"
+                            placeholder={getPlaceholderHint(clothingName)}
                             maxLength={MAX_NAME_LENGTH}
                           />
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted">
@@ -361,21 +346,28 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
                         </div>
                         <button
                           className="btn btn-ghost text-xs"
-                          onClick={handleGenerateRandom}
+                          onClick={() => {
+                            const name = generateRandomName(clothingName);
+                            setCustomName(name);
+                            setNameError('');
+                          }}
                           type="button"
                         >
                           Random
                         </button>
                       </div>
                       {nameError && <p className="text-xs text-error">{nameError}</p>}
-                      {customName && (
-                        <p className="text-xs text-secondary">
-                          Preview: Your Wojak #___: {customName}
-                        </p>
-                      )}
                     </div>
 
-                    <div className="flex gap-2 mt-2">
+                    {/* Condensed context footnote */}
+                    <p className="text-[11px] text-muted text-center">
+                      {isFreeConfirm
+                        ? <>{creditCost} of {balance} credits · No wallet signing</>
+                        : <>15 min to accept in your Sage Wallet</>
+                      }
+                    </p>
+
+                    <div className="flex gap-2">
                       <button type="button" className="btn btn-secondary flex-1" onClick={handleClose}>
                         Cancel
                       </button>

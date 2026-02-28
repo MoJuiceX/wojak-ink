@@ -63,13 +63,14 @@ export function StickyMiniPreview({
     <AnimatePresence>
       {showStickyPreview && previewImage && (
         <motion.div
-          className={`fixed left-4 z-40 rounded-xl overflow-hidden cursor-pointer ${className}`}
+          className={`fixed right-3 z-40 rounded-xl overflow-hidden cursor-pointer ${className}`}
           style={{
-            top: 70,
-            width: 140,
-            height: 200,
+            top: 64,
+            width: 100,
+            height: 100,
             background: 'var(--color-surface)',
             border: '2px solid var(--color-primary)',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4), 0 0 16px rgba(255, 107, 0, 0.15)',
           }}
           variants={prefersReducedMotion ? undefined : stickyPreviewVariants}
           initial="hidden"
@@ -83,9 +84,8 @@ export function StickyMiniPreview({
           <img
             src={previewImage}
             alt="Mini preview"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
             crossOrigin="anonymous"
-            style={{ objectPosition: '55% center' }}
           />
 
           {/* Pulse ring */}

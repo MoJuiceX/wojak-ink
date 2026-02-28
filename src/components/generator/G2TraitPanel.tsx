@@ -41,11 +41,9 @@ function FlagButton({ code, isSelected, onClick }: { code: string; isSelected: b
   return (
     <button
       type="button"
-      className="overflow-hidden flex-shrink-0"
+      className="overflow-hidden flex-shrink-0 w-full"
       style={{
-        width: 'calc(25% - 4px)',
-        height: 0,
-        paddingBottom: 'calc(25% * 2 / 3 - 3px)',
+        aspectRatio: '3 / 2',
         borderRadius: 3,
         border: `2px solid ${isSelected ? 'var(--color-primary)' : 'transparent'}`,
         boxShadow: isSelected ? '0 0 4px rgba(255,107,0,0.5)' : 'none',
@@ -78,11 +76,8 @@ function LogoButton({ name, isSelected, onClick }: { name: string; isSelected: b
   return (
     <button
       type="button"
-      className="overflow-hidden flex-shrink-0 flex items-center justify-center"
+      className="overflow-hidden flex items-center justify-center w-full aspect-square"
       style={{
-        width: 'calc(25% - 4px)',
-        height: 0,
-        paddingBottom: 'calc(25% - 4px)',
         borderRadius: 6,
         border: `2px solid ${isSelected ? 'var(--color-primary)' : 'var(--color-border)'}`,
         boxShadow: isSelected ? '0 0 4px rgba(255,107,0,0.5)' : 'none',
@@ -213,7 +208,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
           border: '1px solid var(--color-border)',
         }}
       >
-        <div className="flex flex-wrap" style={{ gap: 4 }}>
+        <div className="grid grid-cols-4 gap-1">
             {ASTRONAUT_LOGOS.map((name) => (
               <LogoButton
                 key={name}
@@ -224,7 +219,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
             ))}
           </div>
 
-        <div className="flex flex-wrap" style={{ gap: 4 }}>
+        <div className="grid grid-cols-4 gap-1">
             {ASTRONAUT_FLAGS.map((code) => (
               <FlagButton
                 key={code}
@@ -328,7 +323,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
             Detail 2
           </button>
         </div>
-        <div className="flex flex-wrap" style={{ gap: 4 }}>
+        <div className="grid grid-cols-4 gap-1">
           {ASTRONAUT_LOGOS.map((name) => (
             <LogoButton
               key={name}
@@ -361,7 +356,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
         <p className="text-xs font-medium text-secondary">
           Logo
         </p>
-        <div className="flex flex-wrap" style={{ gap: 4 }}>
+        <div className="grid grid-cols-4 gap-1">
           {ASTRONAUT_LOGOS.map((name) => (
             <LogoButton
               key={name}
@@ -419,46 +414,37 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
           border: '1px solid var(--color-border)',
         }}
       >
-        {trait.variants && trait.variants.length > 0 && (
-          <>
-            <p className="text-xs font-medium text-secondary">
-              Style
-            </p>
-            <div className="flex flex-wrap" style={{ gap: 4 }}>
-              {trait.variants.map((v) => {
-                const isSelected = currentVariant === v.file;
-                return (
-                  <button
-                    key={v.file}
-                    type="button"
-                    className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center"
-                    style={{
-                      border: isSelected ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
-                      background: 'var(--color-surface)',
-                    }}
-                    onClick={() => handleVariant(v.file)}
-                    title={v.name}
-                  >
-                    <img src={`${basePath}/${v.file}`} alt={v.name} className="w-full h-full object-contain" crossOrigin="anonymous" loading="lazy" />
-                  </button>
-                );
-              })}
-            </div>
-          </>
-        )}
-        <p className="text-xs font-medium text-secondary">
-          Logo
-        </p>
-        <div className="flex flex-wrap" style={{ gap: 4 }}>
+        {/* Unified grid: style variants + detail options + coin logos */}
+        <div className="grid grid-cols-4 gap-1">
+          {/* Style variants (e.g. army camo) */}
+          {trait.variants?.map((v) => {
+            const isVarSelected = currentVariant === v.file;
+            return (
+              <button
+                key={v.file}
+                type="button"
+                className="w-full aspect-square rounded-lg overflow-hidden flex items-center justify-center"
+                style={{
+                  border: isVarSelected ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
+                  background: 'var(--color-surface)',
+                }}
+                onClick={() => handleVariant(v.file)}
+                title={v.name}
+              >
+                <img src={`${basePath}/${v.file}`} alt={v.name} className="w-full h-full object-contain" crossOrigin="anonymous" loading="lazy" />
+              </button>
+            );
+          })}
+          {/* Detail options (McD, Chia) */}
           {trait.detailOptions.map((d) => {
-            const isSelected = !currentLogo && currentDetail === d.file;
+            const isDetSelected = !currentLogo && currentDetail === d.file;
             return (
               <button
                 key={d.file}
                 type="button"
-                className={`w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center ${isSelected ? '' : ''}`}
+                className="w-full aspect-square rounded-lg overflow-hidden flex items-center justify-center"
                 style={{
-                  border: isSelected ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
+                  border: isDetSelected ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
                   background: 'var(--color-surface)',
                 }}
                 onClick={() => handleDetail(d.file)}
@@ -468,6 +454,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
               </button>
             );
           })}
+          {/* Coin logos */}
           {ASTRONAUT_LOGOS.filter(n => n !== 'XCH').map((name) => (
             <LogoButton
               key={name}

@@ -91,14 +91,18 @@
     position: relative;
     z-index: 2;
     background: var(--color-bg);
+    /* Subtle separator between preview section and trait grid below */
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 4px;
   }
 
   .generator-preview-canvas-wrapper {
     aspect-ratio: 1;
     width: 100%;
-    /* Smaller preview on mobile so trait grid + color panel get enough space (9 items visible) */
-    max-width: min(100%, calc(38vh - 48px));
-    max-height: calc(38vh - 48px);
+    /* Smaller preview on mobile so trait grid + color panel get enough space (9+ items visible) */
+    max-width: min(100%, calc(32vh - 48px));
+    max-height: calc(32vh - 48px);
     margin: 0 auto;
   }
 
@@ -180,8 +184,31 @@
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    scrollbar-gutter: stable;
   }
+}
+
+/* Right panel thin scrollbar */
+.generator-right-panel {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.generator-right-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.generator-right-panel::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 8px 0;
+}
+
+.generator-right-panel::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.generator-right-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 /* === CATEGORY TABS — transparent wrapper, pill is rendered by LayerTabs component === */
@@ -211,6 +238,27 @@
   flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
+  /* Thin inset scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.generator-options-grid-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.generator-options-grid-container::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 8px 0;
+}
+
+.generator-options-grid-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.generator-options-grid-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 /* Mobile: one endless scroll — preview, then categories + grid (no inner scroll), then color panel */
@@ -259,7 +307,7 @@
   align-content: start;
 }
 
-/* Mobile: 3 columns; grid grows with content (part of page scroll) */
+/* Mobile: 3 columns by default; grid grows with content (part of page scroll) */
 @media (max-width: 1023px) {
   .generator-options-grid {
     grid-template-columns: repeat(3, 1fr);
@@ -267,6 +315,12 @@
     padding: 12px;
     flex: none;
     min-height: 0;
+  }
+
+  /* 2-column mode — larger trait previews, toggled via sort bar */
+  .generator-options-grid[data-grid-cols="2"] {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
 }
 
@@ -441,23 +495,13 @@
   background: var(--color-bg);
 }
 
-/* Mobile: action bar scrolls horizontally so all buttons (including Connect/Mint) are reachable */
+/* Desktop: no margin-top:auto — action bar sits tight under canvas */
+
+/* Mobile: action bar fits all items without horizontal scroll (Save + Info moved to overflow) */
 @media (max-width: 1023px) {
   .generator-actions {
-    padding: 4px 8px 4px 0;
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-    /* Allow the bar to extend so user can scroll to see Connect/Mint and supply counter */
-    justify-content: flex-start;
-  }
-
-  /* Single child (ActionBar) takes natural width so the row scrolls */
-  .generator-actions > * {
-    flex: 0 0 auto;
-    width: max-content;
-    min-width: max-content;
+    padding: 4px 4px;
+    overflow: hidden;
   }
 }
 
@@ -513,19 +557,33 @@
 
 /* === PREVIEW CANVAS === */
 .generator-preview-canvas {
-  border-radius: 16px;
+  border-radius: 20px;
   overflow: hidden;
-  background:
-    repeating-conic-gradient(
-      var(--color-surface) 0% 25%,
-      var(--color-bg) 0% 50%
-    ) 50% / 20px 20px;
   border: 2px solid var(--color-border);
   transition: box-shadow 0.3s ease;
+  box-shadow:
+    0 0 60px rgba(255, 107, 0, 0.06),
+    0 0 120px rgba(255, 107, 0, 0.03),
+    0 8px 40px rgba(0, 0, 0, 0.35),
+    0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* Mobile: reduce glow radius to avoid overwhelming smaller viewport */
+@media (max-width: 1023px) {
+  .generator-preview-canvas {
+    box-shadow:
+      0 0 36px rgba(255, 107, 0, 0.05),
+      0 0 72px rgba(255, 107, 0, 0.02),
+      0 6px 28px rgba(0, 0, 0, 0.3),
+      0 2px 6px rgba(0, 0, 0, 0.2);
+  }
 }
 
 .generator-preview-canvas.updated {
-  box-shadow: 0 0 30px var(--color-primary-30);
+  box-shadow:
+    0 0 40px var(--color-primary-40),
+    0 0 80px var(--color-primary-15),
+    0 8px 40px rgba(0, 0, 0, 0.35);
 }
 
 
@@ -555,23 +613,27 @@
   }
 }
 
-/* One-shot selection pulse — plays once when a trait card becomes selected */
+/* One-shot selection pulse — plays once when a trait card becomes selected.
+   Enhanced: brighter glow burst + scale micro-bounce for "click reward" feel. */
 @keyframes selectPulse {
   0% {
     box-shadow:
       0 0 20px var(--color-primary-50),
       inset 0 0 20px var(--color-primary-10);
+    transform: scale(1);
   }
-  50% {
+  40% {
     box-shadow:
-      0 0 30px var(--color-primary-70),
-      0 0 60px var(--color-primary-20),
+      0 0 40px var(--color-primary-80),
+      0 0 80px var(--color-primary-25),
       inset 0 0 25px var(--color-primary-15);
+    transform: scale(1.03);
   }
   100% {
     box-shadow:
       0 0 20px var(--color-primary-50),
       inset 0 0 20px var(--color-primary-10);
+    transform: scale(1);
   }
 }
 

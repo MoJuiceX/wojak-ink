@@ -346,7 +346,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
 
   return (
     <div
-      className={`flex items-center justify-between px-2 py-1.5 rounded-2xl flex-nowrap w-full ${className}`}
+      className={`flex items-center justify-between px-1 lg:px-2 py-1.5 rounded-2xl flex-nowrap w-full ${className}`}
       style={{
         background: 'var(--color-black-30)',
         backdropFilter: 'blur(12px)',
@@ -354,6 +354,8 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         border: '1px solid var(--color-border)',
       }}
     >
+      {/* Left group — utility icons (grouped to prevent layout shift when mint section changes) */}
+      <div className="flex items-center gap-0.5">
       {/* Randomize button — always randomizes all layers + colors */}
       <ActionBarTooltip content="Randomize">
         <motion.button
@@ -405,16 +407,18 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         style={{ background: 'var(--color-border)' }}
       />
 
-      {/* Save to favorites */}
-      <ActionBarTooltip content="Save">
-        <ActionButton
-          onClick={handleSaveAndOpenFavorites}
-          disabled={!hasSelection || isSaving}
-          icon={<Heart size={18} />}
-          label="Save"
-          badge={favorites.length}
-        />
-      </ActionBarTooltip>
+      {/* Save to favorites — desktop only in main bar (mobile: in overflow) */}
+      {isDesktop && (
+        <ActionBarTooltip content="Save">
+          <ActionButton
+            onClick={handleSaveAndOpenFavorites}
+            disabled={!hasSelection || isSaving}
+            icon={<Heart size={18} />}
+            label="Save"
+            badge={favorites.length}
+          />
+        </ActionBarTooltip>
+      )}
 
       {/* Export button - primary */}
       <div className="download-btn-container relative">
@@ -455,7 +459,16 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         </AnimatePresence>
       </div>
 
-      {/* Copy button removed — users can export/download instead */}
+      {/* How It Works — desktop only in main bar (mobile: in overflow) */}
+      {isDesktop && (
+        <ActionBarTooltip content="How It Works">
+          <ActionButton
+            onClick={() => setShowGeneratorInfo(true)}
+            icon={<Info size={18} />}
+            label="How It Works"
+          />
+        </ActionBarTooltip>
+      )}
 
       {/* Overflow menu — secondary actions */}
       <div className="relative" ref={overflowMenuRef}>
@@ -480,6 +493,49 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
                 boxShadow: '0 8px 32px var(--color-black-40)',
               }}
             >
+              {/* Save — mobile only (desktop shows in main bar) */}
+              {!isDesktop && (
+                <button
+                  type="button"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-primary"
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-white-5)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                  onClick={() => {
+                    setShowOverflowMenu(false);
+                    handleSaveAndOpenFavorites();
+                  }}
+                  disabled={!hasSelection || isSaving}
+                >
+                  <Heart size={16} className="text-accent" />
+                  <span>Save</span>
+                  {favorites.length > 0 && (
+                    <span
+                      className="ml-auto text-xs font-bold px-1.5 py-0.5 rounded-full"
+                      style={{ background: 'var(--color-primary)', color: 'white' }}
+                    >
+                      {favorites.length}
+                    </span>
+                  )}
+                </button>
+              )}
+
+              {/* How It Works — mobile only (desktop shows in main bar) */}
+              {!isDesktop && (
+                <button
+                  type="button"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-primary"
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-white-5)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                  onClick={() => {
+                    setShowOverflowMenu(false);
+                    setShowGeneratorInfo(true);
+                  }}
+                >
+                  <Info size={16} className="text-accent" />
+                  <span>How It Works</span>
+                </button>
+              )}
+
               {/* Free Mints / Leaderboard */}
               <button
                 type="button"
@@ -535,32 +591,20 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
                 </button>
               )}
 
-              {/* How It Works */}
-              <button
-                type="button"
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-primary"
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-white-5)')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                onClick={() => {
-                  setShowOverflowMenu(false);
-                  setShowGeneratorInfo(true);
-                }}
-              >
-                <Info size={16} className="text-secondary" />
-                <span>How It Works</span>
-              </button>
+              {/* How It Works moved to main bar */}
             </motion.div>
           )}
         </AnimatePresence>
       </div>
+      </div>{/* end left group */}
 
       {/* ── Mint Section ── */}
       <div
-        className="flex items-center gap-2 pl-2 ml-1"
+        className="flex items-center gap-1 lg:gap-3 pl-1 lg:pl-2 ml-0.5 lg:ml-1"
         style={{ borderLeft: '1px solid var(--color-border)' }}
       >
-        {/* Free/Paid toggle */}
-        {isWalletConnected && hasFreeMintsAvailable && !showMintingPaused && (
+        {/* Free/Paid toggle — desktop: visibility:hidden to keep layout stable; mobile: display:none to save space */}
+        {(isWalletConnected && hasFreeMintsAvailable && !showMintingPaused) ? (
           <ActionBarTooltip content={mintType === 'free' ? 'Switch to paid mint' : 'Switch to free mint'}>
             <ActionButton
               onClick={() => setMintType((t) => (t === 'free' ? 'paid' : 'free'))}
@@ -569,16 +613,18 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
               label={mintType === 'free' ? 'Free' : 'Paid'}
             />
           </ActionBarTooltip>
-        )}
+        ) : isDesktop ? (
+          <div style={{ width: 32, height: 32, flexShrink: 0 }} />
+        ) : null}
 
-        {/* Price display — always visible */}
+        {/* Price display — always visible, min-width prevents layout shift */}
         {!showMintingPaused && (() => {
           if (isWalletConnected && hasFreeMintsAvailable && mintType === 'free') {
             // Free mint: show credit cost
             const price = getTotalMintPrice(metadataAttributes);
             const creditCost = Math.ceil(100 * price.totalXch / price.basePrice);
             return (
-              <span className="text-xs font-semibold tabular-nums whitespace-nowrap text-accent">
+              <span className="text-xs font-semibold tabular-nums whitespace-nowrap text-accent" style={{ minWidth: isDesktop ? 80 : undefined, textAlign: 'center', flexShrink: 0 }}>
                 {creditCost} credits
               </span>
             );
@@ -586,7 +632,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
           // Paid mint (or not connected): show single total XCH
           const price = getTotalMintPrice(metadataAttributes);
           return (
-            <span className="text-xs font-semibold tabular-nums whitespace-nowrap text-accent">
+            <span className="text-xs font-semibold tabular-nums whitespace-nowrap text-accent" style={{ minWidth: isDesktop ? 80 : undefined, textAlign: 'center', flexShrink: 0 }}>
               {price.totalXch.toFixed(2)} XCH
             </span>
           );
@@ -619,26 +665,20 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
           <ActionBarTooltip
             content={isSoldOut ? 'All 4,200 Wojaks minted!' : !has7Traits ? 'Select all 7 traits to mint' : 'Mint your Wojak'}
           >
-            <ActionButton
-              variant="primary"
+            <motion.button
+              className="action-bar-mint-btn relative flex items-center justify-center rounded-lg shrink-0 w-8 h-8"
+              whileHover={!canMint || prefersReducedMotion ? undefined : { scale: 1.05 }}
+              whileTap={!canMint || prefersReducedMotion ? undefined : { scale: 0.95 }}
               onClick={handleMintClick}
               disabled={!canMint}
-              icon={<Sparkles size={18} />}
-              label="Mint"
-            />
+              aria-label="Mint"
+            >
+              <Sparkles size={18} />
+            </motion.button>
           </ActionBarTooltip>
         )}
 
-        {/* Supply counter with hover tooltip */}
-        {maxSupply > 0 && (
-          <ActionBarTooltip content={`${totalMinted > 0 ? Math.max(1, Math.round((totalMinted / maxSupply) * 100)) : 0}% minted \u2022 ${maxSupply - totalMinted} remaining`}>
-            <span
-              className="text-[11px] tabular-nums whitespace-nowrap cursor-default text-muted"
-            >
-              {totalMinted}/{maxSupply}
-            </span>
-          </ActionBarTooltip>
-        )}
+        {/* Supply counter removed — shown in title bar instead */}
       </div>
 
       {/* Mint Flow Modal */}

@@ -5,11 +5,12 @@
  * Phase 1: Redesigned layout - 45/55 split on desktop, 3-col mobile grid.
  */
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './Generator.css';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { useLayout } from '@/hooks/useLayout';
 import { GeneratorProvider, useGenerator } from '@/contexts/GeneratorContext';
 import {
   PreviewWithControls,
@@ -55,9 +56,18 @@ function GeneratorErrorBanner() {
 function GeneratorContent() {
   // Use 1024px breakpoint to match Generator.css media queries
   const isDesktop = useMediaQuery('(min-width: 1024px)');
+  const { setMobileNavVisible } = useLayout();
   const { isInitialized, generatorError } = useGenerator();
   const [rightPanelMode, setRightPanelMode] = useState<RightPanelMode>('colors');
   const mobileScrollRef = useRef<HTMLDivElement>(null);
+
+  // Hide mobile bottom nav on generator page to maximize vertical space
+  useEffect(() => {
+    if (!isDesktop) {
+      setMobileNavVisible(false);
+      return () => setMobileNavVisible(true);
+    }
+  }, [isDesktop, setMobileNavVisible]);
 
   const hasError = !isInitialized && generatorError;
 

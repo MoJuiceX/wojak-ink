@@ -4,7 +4,7 @@
  * Horizontal tabs for switching between layers.
  */
 
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion, LayoutGroup, useReducedMotion } from 'framer-motion';
 import {
   Image,
   User,
@@ -21,6 +21,13 @@ import { useGenerator } from '@/contexts/GeneratorContext';
 import { LAYER_CONFIG, LAYER_ORDER } from '@/config/layers';
 import type { UILayerName } from '@/lib/wojakRules';
 import { layerTabVariants } from '@/config/generatorAnimations';
+
+/** Shorter labels for mobile to prevent tab crowding */
+const MOBILE_SHORT_LABELS: Partial<Record<string, string>> = {
+  Background: 'BG',
+  Clothes: 'Outfit',
+  Extras: 'Extra',
+};
 
 // Icon mapping
 const LAYER_ICONS: Record<string, LucideIcon> = {
@@ -42,6 +49,8 @@ interface LayerTabProps {
   isBlocked: boolean;
   blockedReason?: string | null;
   hasSelection?: boolean;
+  /** Short label for mobile viewports */
+  mobileLabel?: string;
   onClick: () => void;
 }
 
@@ -51,6 +60,7 @@ function LayerTab({
   isBlocked,
   blockedReason,
   hasSelection: _hasSelection,
+  mobileLabel,
   onClick,
 }: LayerTabProps) {
   const prefersReducedMotion = useReducedMotion();
@@ -69,6 +79,14 @@ function LayerTab({
       aria-disabled={isBlocked}
       title={isBlocked ? (blockedReason || `${config.label} is blocked`) : config.description}
     >
+      {/* Sliding pill indicator — animates between tabs via layoutId */}
+      {isActive && !isBlocked && (
+        <motion.div
+          className="generator-layer-tab-pill absolute inset-0 rounded-lg"
+          layoutId="activeTabPill"
+          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        />
+      )}
       <div className="relative">
         <Icon strokeWidth={2} />
         {isBlocked && (
@@ -77,13 +95,10 @@ function LayerTab({
             className="absolute -top-1 -right-1 lg:w-2.5 lg:h-2.5 text-muted"
           />
         )}
-        {isActive && !isBlocked && (
-          <div
-            className="generator-layer-tab__active-dot absolute -top-0.5 -right-1 w-1.5 h-1.5 rounded-full layer-tab-active-dot"
-          />
-        )}
       </div>
-      <span className="text-[10px] lg:text-xs font-medium">{config.label}</span>
+      {/* Short label on mobile, full label on desktop */}
+      <span className="relative text-[10px] lg:text-xs font-medium lg:hidden">{mobileLabel || config.label}</span>
+      <span className="relative text-xs font-medium hidden lg:block">{config.label}</span>
     </motion.button>
   );
 }
@@ -108,6 +123,7 @@ export function LayerTabs({ className = '' }: LayerTabsProps) {
   const visibleLayers = LAYER_ORDER.filter((layer) => !HIDDEN_TABS.includes(layer));
 
   return (
+    <LayoutGroup>
     <div
       className={`generator-layer-tab-bar flex justify-between px-2 py-1.5 rounded-2xl overflow-x-auto w-full ${className}`}
       role="tablist"
@@ -127,11 +143,13 @@ export function LayerTabs({ className = '' }: LayerTabsProps) {
             isBlocked={isLayerDisabled(layer)}
             blockedReason={getDisabledReason(layer)}
             hasSelection={layerHasSelection || mouthSubHasSelection}
+            mobileLabel={MOBILE_SHORT_LABELS[LAYER_CONFIG[layer].label]}
             onClick={() => setActiveLayer(layer)}
           />
         );
       })}
     </div>
+    </LayoutGroup>
   );
 }
 

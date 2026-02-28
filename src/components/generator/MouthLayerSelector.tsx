@@ -95,7 +95,7 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, bad
         </div>
       )}
       <div
-        className="relative w-full h-full rounded-lg overflow-hidden trait-card-image-bg"
+        className="relative w-full h-full overflow-hidden trait-card-image-bg"
       >
         {/* Zoomed container to focus on mouth area */}
         <div
@@ -268,7 +268,7 @@ function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick }:
       disabled={isDisabled}
       title={disabledReason || trait.name}
     >
-      <div className="relative w-full h-full rounded-lg overflow-hidden trait-card-image-bg">
+      <div className="relative w-full h-full overflow-hidden trait-card-image-bg">
         {/* Zoomed container to focus on mouth area */}
         <div
           className="absolute inset-0 w-full h-full"
@@ -409,7 +409,8 @@ export function MouthLayerSelector({ className = '', sortMode = 'hot', onSortCha
 
     const lookupUsage = (traitName: string): number => {
       const p = getTraitPricing('Mouth', traitName);
-      return p?.usageCount ?? 0;
+      // Use surchargeXch for sorting — matches visible price order
+      return p?.surchargeXch ?? 0;
     };
 
     if (sortMode === 'az') {
@@ -425,7 +426,7 @@ export function MouthLayerSelector({ className = '', sortMode = 'hot', onSortCha
       if (aUsage !== bUsage) {
         return sortMode === 'hot' ? bUsage - aUsage : aUsage - bUsage;
       }
-      return 0; // tiebreaker: preserve MOUTH_BASE_ORDER
+      return a.name.localeCompare(b.name); // tiebreaker: alphabetical
     });
   }, [rawMouthBase, sortMode, getTraitPricing]);
 

@@ -1,12 +1,10 @@
 /**
  * Mint Preview Panel
  *
- * Shows a complete NFT preview before minting:
- * - Full-resolution preview image
- * - Trait list (from metadata attributes)
- * - Price breakdown (base + surcharge)
- * - Supply context
- * - "What happens next" explainer
+ * Compact NFT confirmation card:
+ * - Preview image
+ * - Headline: mint number + total price
+ * - Unified details card: collapsible traits + price breakdown
  *
  * Displayed in the confirming step of MintFlowModal.
  */
@@ -40,24 +38,25 @@ export const MintPreviewPanel = memo(function MintPreviewPanel({
   isFree,
   creditCost,
   totalMinted,
-  maxSupply,
+  maxSupply: _maxSupply,
 }: MintPreviewPanelProps) {
   const [traitsExpanded, setTraitsExpanded] = useState(false);
 
   const mintNumber = totalMinted + 1;
 
   return (
-    <div className="mint-preview-panel flex flex-col gap-3 w-full">
-      {/* Preview image (compact on mobile, centered) */}
+    <div className="mint-preview-panel flex flex-col gap-2 w-full">
+      {/* Preview image — centered, 100px */}
       {imageUrl && (
         <div className="flex justify-center">
           <div
             className="mint-preview-image rounded-xl overflow-hidden"
             style={{
-              width: 120,
-              height: 120,
+              width: 140,
+              height: 140,
               background: 'var(--color-surface)',
               border: '2px solid var(--color-border)',
+              boxShadow: '0 0 24px rgba(255, 107, 0, 0.08), 0 4px 20px rgba(0, 0, 0, 0.25)',
             }}
           >
             <img
@@ -70,15 +69,22 @@ export const MintPreviewPanel = memo(function MintPreviewPanel({
         </div>
       )}
 
-      {/* Supply context */}
+      {/* Headline: mint number + total price on one line */}
       <div className="text-center">
-        <p className="text-xs text-muted">
-          Wojak #{mintNumber} of {maxSupply}
+        <p className="text-sm font-medium">
+          <span className="text-secondary">Wojak #{mintNumber}</span>
+          <span className="text-muted mx-1.5">·</span>
+          <span className="text-accent font-semibold">
+            {isFree
+              ? `${creditCost} credits`
+              : `${price.totalXch.toFixed(3)} XCH`}
+          </span>
         </p>
       </div>
 
-      {/* Trait list (collapsible on mobile) */}
-      <div className="mint-preview-traits rounded-lg overflow-hidden" style={{ background: 'var(--color-surface)' }}>
+      {/* Unified details card: traits (collapsible) + price breakdown */}
+      <div className="rounded-lg overflow-hidden" style={{ background: 'var(--color-surface)' }}>
+        {/* Traits — collapsible */}
         <button
           type="button"
           className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-secondary"
@@ -99,42 +105,33 @@ export const MintPreviewPanel = memo(function MintPreviewPanel({
             ))}
           </div>
         )}
-      </div>
 
-      {/* Price breakdown */}
-      <div className="mint-preview-price rounded-lg px-3 py-2" style={{ background: 'var(--color-surface)' }}>
-        {isFree ? (
-          <div className="flex flex-col gap-1">
+        {/* Divider between traits and price */}
+        <div className="mx-3" style={{ borderTop: '1px solid var(--color-border)' }} />
+
+        {/* Price breakdown — compact rows */}
+        <div className="px-3 py-2 flex flex-col gap-1">
+          {isFree ? (
             <div className="flex justify-between text-xs">
               <span className="text-muted">Credit cost</span>
               <span className="text-accent font-semibold">{creditCost} credits</span>
             </div>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-1">
-            <div className="flex justify-between text-xs">
-              <span className="text-muted">Base price</span>
-              <span className="text-secondary">{price.basePrice.toFixed(3)} XCH</span>
-            </div>
-            {price.surchargeXch > 0 && (
+          ) : (
+            <>
               <div className="flex justify-between text-xs">
-                <span className="text-muted">Surcharge ({price.surchargeTraitName})</span>
-                <span className="text-secondary">+{price.surchargeXch.toFixed(3)} XCH</span>
+                <span className="text-muted">Base price</span>
+                <span className="text-secondary">{price.basePrice.toFixed(3)} XCH</span>
               </div>
-            )}
-            <div className="flex justify-between text-xs pt-1" style={{ borderTop: '1px solid var(--color-border)' }}>
-              <span className="text-secondary font-medium">Total</span>
-              <span className="text-accent font-semibold">{price.totalXch.toFixed(3)} XCH</span>
-            </div>
-          </div>
-        )}
+              {price.surchargeXch > 0 && (
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted">Surcharge ({price.surchargeTraitName})</span>
+                  <span className="text-secondary">+{price.surchargeXch.toFixed(3)} XCH</span>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
-
-      {/* What happens next */}
-      <p className="text-[10px] text-muted text-center leading-relaxed">
-        Your Wojak will appear on MintGarden within ~5 minutes.
-        {!isFree && ' Network fee is minimal (<0.001 XCH).'}
-      </p>
     </div>
   );
 });
