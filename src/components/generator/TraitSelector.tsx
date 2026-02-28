@@ -124,53 +124,6 @@ function sortClothesTraits(traits: UnifiedTrait[]): UnifiedTrait[] {
   });
 }
 
-/**
- * Popularity badge — shows "Hot" for top 3 traits and "Rare" for low-usage traits.
- *
- * Only renders for surcharge categories (Head, Clothes, Face Wear).
- * Positioned at top-left to avoid conflict with the check/disabled badges at top-right.
- *
- * Badge strategy:
- * - "Hot" (fire emoji): Top 3 most popular traits per category — social proof
- * - "Rare" (gem emoji): Traits with 0–2 mints — uniqueness signal
- * - Badge hysteresis: thresholds use margin to prevent rapid toggling
- */
-export function TraitUsageBadge({ pricing, isTop3 }: {
-  pricing: TraitPricingEntry | null;
-  isTop3?: boolean;
-}) {
-  if (!pricing) return null;
-
-  const isHot = isTop3 === true;
-  // Rare threshold: 2 mints or fewer (with hysteresis — once a trait exceeds 3,
-  // it won't re-appear as rare until it drops to 1, which doesn't happen in practice
-  // since usage only grows. The hysteresis is for future collection mechanics.)
-  const isRare = pricing.usageCount <= 2;
-
-  // Don't badge if neither hot nor rare
-  if (!isHot && !isRare) return null;
-
-  // Hot takes priority over rare (a top-3 trait with 2 uses shows as hot)
-  const badgeType = isHot ? 'hot' : 'rare';
-  const emoji = isHot ? '🔥' : '💎';
-  const label = isHot ? 'Hot' : 'Rare';
-  const ariaText = isHot
-    ? `Trending: used by ${pricing.usageCount} creators`
-    : `Rare: only ${pricing.usageCount} minted`;
-
-  return (
-    <span
-      className={`trait-popularity-badge trait-popularity-badge--${badgeType}`}
-      role="img"
-      aria-label={ariaText}
-      title={ariaText}
-    >
-      <span className="trait-popularity-badge__emoji" aria-hidden="true">{emoji}</span>
-      <span className="trait-popularity-badge__label">{label}</span>
-    </span>
-  );
-}
-
 interface TraitSelectorProps {
   className?: string;
 }
@@ -249,10 +202,9 @@ interface ImageCardProps {
   disabledReason?: string | null;
   onClick: () => void;
   pricing?: TraitPricingEntry | null;
-  isTop3?: boolean;
 }
 
-const ImageCard = memo(function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing, isTop3 }: ImageCardProps) {
+const ImageCard = memo(function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing: _pricing }: ImageCardProps) {
   return (
     <TraitCardShell
       isSelected={isSelected}
@@ -272,7 +224,6 @@ const ImageCard = memo(function ImageCard({ image, isSelected, isDisabled, disab
           crossOrigin="anonymous"
           loading="lazy"
         />
-        <TraitUsageBadge pricing={pricing ?? null} isTop3={isTop3} />
         <div className="trait-label-overlay">
           <span className="trait-label-text">{image.displayName}</span>
         </div>
@@ -301,10 +252,9 @@ interface BaseImageCardProps {
   disabledReason?: string | null;
   onClick: () => void;
   pricing?: TraitPricingEntry | null;
-  isTop3?: boolean;
 }
 
-const BaseImageCard = memo(function BaseImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing, isTop3 }: BaseImageCardProps) {
+const BaseImageCard = memo(function BaseImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing: _pricing }: BaseImageCardProps) {
   return (
     <TraitCardShell
       isSelected={isSelected}
@@ -341,7 +291,6 @@ const BaseImageCard = memo(function BaseImageCard({ image, isSelected, isDisable
           crossOrigin="anonymous"
           loading="lazy"
         />
-        <TraitUsageBadge pricing={pricing ?? null} isTop3={isTop3} />
         <div className="trait-label-overlay">
           <span className="trait-label-text">{image.displayName}</span>
         </div>
@@ -357,7 +306,6 @@ interface ClothesImageCardProps {
   disabledReason?: string | null;
   onClick: () => void;
   pricing?: TraitPricingEntry | null;
-  isTop3?: boolean;
 }
 
 interface SolidColorBackgroundCardProps {
@@ -447,13 +395,12 @@ interface LayerWithBaseMouthCardProps {
   disabledReason?: string | null;
   onClick: () => void;
   pricing?: TraitPricingEntry | null;
-  isTop3?: boolean;
   /** When true, render the trait image behind the base (e.g. wings) */
   renderBehindBase?: boolean;
 }
 
 /** Card for Head, Mask, Eyes, Background: base + mouth rendered under the trait. */
-const LayerWithBaseMouthCard = memo(function LayerWithBaseMouthCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing, isTop3, renderBehindBase }: LayerWithBaseMouthCardProps) {
+const LayerWithBaseMouthCard = memo(function LayerWithBaseMouthCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing: _pricing, renderBehindBase }: LayerWithBaseMouthCardProps) {
   return (
     <TraitCardShell
       isSelected={isSelected}
@@ -510,7 +457,6 @@ const LayerWithBaseMouthCard = memo(function LayerWithBaseMouthCard({ image, isS
             loading="lazy"
           />
         )}
-        <TraitUsageBadge pricing={pricing ?? null} isTop3={isTop3} />
         <div className="trait-label-overlay">
           <span className="trait-label-text">{image.displayName}</span>
         </div>
@@ -519,7 +465,7 @@ const LayerWithBaseMouthCard = memo(function LayerWithBaseMouthCard({ image, isS
   );
 });
 
-const ClothesImageCard = memo(function ClothesImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing, isTop3 }: ClothesImageCardProps) {
+const ClothesImageCard = memo(function ClothesImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing: _pricing }: ClothesImageCardProps) {
   return (
     <TraitCardShell
       isSelected={isSelected}
@@ -556,7 +502,6 @@ const ClothesImageCard = memo(function ClothesImageCard({ image, isSelected, isD
           crossOrigin="anonymous"
           loading="lazy"
         />
-        <TraitUsageBadge pricing={pricing ?? null} isTop3={isTop3} />
         <div className="trait-label-overlay">
           <span className="trait-label-text">{image.displayName}</span>
         </div>
@@ -580,13 +525,12 @@ interface G2TraitCardProps {
   /** When set, show this image as the card preview (e.g. live preview so grid matches big preview) */
   livePreviewUrl?: string | null;
   pricing?: TraitPricingEntry | null;
-  isTop3?: boolean;
 }
 
 /** Cyan glow for G2 trait cards when selected */
 const G2_SELECTED_BOX_SHADOW = '0 0 20px rgba(0, 212, 255, 0.4), 0 4px 12px var(--color-black-30)';
 
-export const G2TraitCard = memo(function G2TraitCard({ trait, isSelected, isDisabled, disabledReason, onClick, needsClothesUnderlay, isBeerHatUnderlayer, livePreviewUrl, pricing, isTop3 }: G2TraitCardProps) {
+export const G2TraitCard = memo(function G2TraitCard({ trait, isSelected, isDisabled, disabledReason, onClick, needsClothesUnderlay, isBeerHatUnderlayer, livePreviewUrl, pricing: _pricing }: G2TraitCardProps) {
   return (
     <TraitCardShell
       isSelected={isSelected}
@@ -599,7 +543,6 @@ export const G2TraitCard = memo(function G2TraitCard({ trait, isSelected, isDisa
     >
       <div className="relative w-full h-full rounded-lg overflow-hidden trait-card-image-bg">
         <G2TraitCardPreview trait={trait} needsClothesUnderlay={needsClothesUnderlay} livePreviewUrl={livePreviewUrl} />
-        <TraitUsageBadge pricing={pricing ?? null} isTop3={isTop3} />
         <div className="trait-label-overlay">
           <span className="trait-label-text">{trait.name}</span>
         </div>
@@ -639,7 +582,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
     getOptionDisabledReason,
     isInitialized,
   } = useGenerator();
-  const { getTraitPricing, isTop3Trait } = useMint();
+  const { getTraitPricing } = useMint();
   const { isDesktop: _isDesktop } = useLayout();
   const prefersReducedMotion = useReducedMotion();
 
@@ -866,7 +809,6 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                 : (g2Sel?.traitId === trait.id ||
                    (!!trait.g1Path && (selectedPath === trait.g1Path || (selectedPath != null && trait.g1Variants?.includes(selectedPath)))));
 
-              const traitIsTop3 = isTop3Trait(traitType, trait.name);
               const isGlowing = glowingTraitId === trait.id;
 
               if (trait.source === 'g2') {
@@ -891,7 +833,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                       isBeerHatUnderlayer={activeLayer === 'Head' && g2Sel?.traitId === 'Head_Beer-Hat' && g2Sel.options.beerHatUnderlayer === trait.id}
                       livePreviewUrl={beerHatCardPreviewUrl}
                       pricing={lookupPricing(trait.name)}
-                      isTop3={traitIsTop3}
+
                     />
                   </motion.div>
                 );
@@ -917,7 +859,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                       disabledReason={reason}
                       onClick={() => handleTraitClick(trait)}
                       pricing={lookupPricing(trait.name)}
-                      isTop3={traitIsTop3}
+
                     />
                   </motion.div>
                 );
@@ -936,7 +878,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                       disabledReason={reason}
                       onClick={() => handleTraitClick(trait)}
                       pricing={lookupPricing(trait.name)}
-                      isTop3={traitIsTop3}
+
                     />
                   </motion.div>
                 );
@@ -1017,7 +959,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                       disabledReason={reason}
                       onClick={() => handleTraitClick(trait)}
                       pricing={lookupPricing(trait.name)}
-                      isTop3={traitIsTop3}
+
                       renderBehindBase={image.path.toLowerCase().includes('extra_wings')}
                     />
                   ) : (
@@ -1028,7 +970,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                       disabledReason={reason}
                       onClick={() => handleTraitClick(trait)}
                       pricing={lookupPricing(trait.name)}
-                      isTop3={traitIsTop3}
+
                     />
                   )}
                 </motion.div>

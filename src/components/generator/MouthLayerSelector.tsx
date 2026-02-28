@@ -9,7 +9,6 @@ import { useState, useEffect } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useGenerator } from '@/contexts/GeneratorContext';
 import { useMint, type TraitPricingEntry } from '@/contexts/MintContext';
-import { TraitUsageBadge } from '@/components/generator/TraitSelector';
 import { traitGridVariants, traitCardStaggerVariants } from '@/config/generatorAnimations';
 import type { LayerImage } from '@/services/generatorService';
 import type { UnifiedTrait } from '@/services/generatorService';
@@ -51,7 +50,7 @@ interface ImageCardProps {
 }
 
 /** Mouth trait card with base face + clothes underlay */
-function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, badge, pricing, showMouthUnderlay }: ImageCardProps) {
+function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, badge, pricing: _pricing, showMouthUnderlay }: ImageCardProps) {
   const prefersReducedMotion = useReducedMotion();
 
   // Get zoom transform from centralized positions file
@@ -136,7 +135,6 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, bad
             loading="lazy"
           />
         </div>
-        <TraitUsageBadge pricing={pricing ?? null} />
         <div className="trait-label-overlay">
           <span className="trait-label-text">{image.displayName}</span>
         </div>
@@ -227,7 +225,7 @@ function sortMouthBaseTraits(traits: UnifiedTrait[]): UnifiedTrait[] {
 }
 
 /** G2 mouth trait card with base face + clothes underlay */
-function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick, pricing }: G2MouthCardProps) {
+function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick, pricing: _pricing }: G2MouthCardProps) {
   const prefersReducedMotion = useReducedMotion();
 
   // Get fill and outline paths
@@ -317,7 +315,6 @@ function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick, p
             />
           )}
         </div>
-        <TraitUsageBadge pricing={pricing ?? null} />
         <div className="trait-label-overlay">
           <span className="trait-label-text">{trait.name}</span>
         </div>
