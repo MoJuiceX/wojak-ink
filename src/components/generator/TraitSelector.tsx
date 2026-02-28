@@ -10,7 +10,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { Ban } from 'lucide-react';
 import { useLayout } from '@/hooks/useLayout';
 import { useGenerator } from '@/contexts/GeneratorContext';
-import { useMint, type TraitPricingEntry } from '@/contexts/MintContext';
+import { useMint } from '@/contexts/MintContext';
 import { traitGridVariants, traitCardStaggerVariants } from '@/config/generatorAnimations';
 import { MouthLayerSelector } from './MouthLayerSelector';
 import { G2TraitCardPreview } from './G2TraitCardPreview';
@@ -36,9 +36,6 @@ const LAYER_TO_TRAIT_TYPE: Record<string, string> = {
   Clothes: 'Clothes',
   Background: 'Background',
 };
-
-/** Surcharge categories — only these show "+X.XX XCH" badges */
-const SURCHARGE_CATEGORIES = new Set(['Head', 'Clothes', 'Face Wear']);
 
 /** Default color for solid color backgrounds - sky blue */
 const SOLID_BG_DEFAULT_COLOR = '#38BDF8';
@@ -137,13 +134,15 @@ function sortTraitsByMode(
   layer: string,
 ): UnifiedTrait[] {
   // Background special cards should not be reordered
-  const isSpecialBgCard = (trait: UnifiedTrait): boolean =>
-    layer === 'Background' && !!(
+  const isSpecialBgCard = (trait: UnifiedTrait): boolean => {
+    if (layer !== 'Background' || !trait.g1Path) return false;
+    return (
       trait.g1Path === '__solid__' ||
-      trait.g1Path?.includes('__solid__') ||
+      trait.g1Path.includes('__solid__') ||
       trait.g1Path === '__price_up__' ||
       trait.g1Path === '__price_down__'
     );
+  };
 
   // Separate special cards from sortable ones
   const specialCards: { index: number; trait: UnifiedTrait }[] = [];
@@ -157,8 +156,8 @@ function sortTraitsByMode(
     }
   });
 
-  // Sort the sortable traits
-  const sorted = [...sortableTraits].sort((a, b) => {
+  // Sort the sortable traits (sortableTraits is already a fresh array)
+  const sorted = sortableTraits.sort((a, b) => {
     if (mode === 'az') {
       return a.name.localeCompare(b.name);
     }
@@ -293,10 +292,9 @@ interface ImageCardProps {
   isDisabled: boolean;
   disabledReason?: string | null;
   onClick: () => void;
-  pricing?: TraitPricingEntry | null;
 }
 
-const ImageCard = memo(function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing: _pricing }: ImageCardProps) {
+const ImageCard = memo(function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick }: ImageCardProps) {
   return (
     <TraitCardShell
       isSelected={isSelected}
@@ -343,10 +341,9 @@ interface BaseImageCardProps {
   isDisabled: boolean;
   disabledReason?: string | null;
   onClick: () => void;
-  pricing?: TraitPricingEntry | null;
 }
 
-const BaseImageCard = memo(function BaseImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing: _pricing }: BaseImageCardProps) {
+const BaseImageCard = memo(function BaseImageCard({ image, isSelected, isDisabled, disabledReason, onClick }: BaseImageCardProps) {
   return (
     <TraitCardShell
       isSelected={isSelected}
@@ -397,7 +394,6 @@ interface ClothesImageCardProps {
   isDisabled: boolean;
   disabledReason?: string | null;
   onClick: () => void;
-  pricing?: TraitPricingEntry | null;
 }
 
 interface SolidColorBackgroundCardProps {
@@ -486,13 +482,12 @@ interface LayerWithBaseMouthCardProps {
   isDisabled: boolean;
   disabledReason?: string | null;
   onClick: () => void;
-  pricing?: TraitPricingEntry | null;
   /** When true, render the trait image behind the base (e.g. wings) */
   renderBehindBase?: boolean;
 }
 
 /** Card for Head, Mask, Eyes, Background: base + mouth rendered under the trait. */
-const LayerWithBaseMouthCard = memo(function LayerWithBaseMouthCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing: _pricing, renderBehindBase }: LayerWithBaseMouthCardProps) {
+const LayerWithBaseMouthCard = memo(function LayerWithBaseMouthCard({ image, isSelected, isDisabled, disabledReason, onClick, renderBehindBase }: LayerWithBaseMouthCardProps) {
   return (
     <TraitCardShell
       isSelected={isSelected}
@@ -557,7 +552,7 @@ const LayerWithBaseMouthCard = memo(function LayerWithBaseMouthCard({ image, isS
   );
 });
 
-const ClothesImageCard = memo(function ClothesImageCard({ image, isSelected, isDisabled, disabledReason, onClick, pricing: _pricing }: ClothesImageCardProps) {
+const ClothesImageCard = memo(function ClothesImageCard({ image, isSelected, isDisabled, disabledReason, onClick }: ClothesImageCardProps) {
   return (
     <TraitCardShell
       isSelected={isSelected}
@@ -616,13 +611,12 @@ interface G2TraitCardProps {
   isBeerHatUnderlayer?: boolean;
   /** When set, show this image as the card preview (e.g. live preview so grid matches big preview) */
   livePreviewUrl?: string | null;
-  pricing?: TraitPricingEntry | null;
 }
 
 /** Cyan glow for G2 trait cards when selected */
 const G2_SELECTED_BOX_SHADOW = '0 0 20px rgba(0, 212, 255, 0.4), 0 4px 12px var(--color-black-30)';
 
-export const G2TraitCard = memo(function G2TraitCard({ trait, isSelected, isDisabled, disabledReason, onClick, needsClothesUnderlay, isBeerHatUnderlayer, livePreviewUrl, pricing: _pricing }: G2TraitCardProps) {
+export const G2TraitCard = memo(function G2TraitCard({ trait, isSelected, isDisabled, disabledReason, onClick, needsClothesUnderlay, isBeerHatUnderlayer, livePreviewUrl }: G2TraitCardProps) {
   return (
     <TraitCardShell
       isSelected={isSelected}
@@ -830,16 +824,6 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
     );
   }
 
-  const traitType = LAYER_TO_TRAIT_TYPE[activeLayer] || '';
-  const lookupPricing = (traitName: string): TraitPricingEntry | null => {
-    const p = getTraitPricing(traitType, traitName);
-    // Only include surcharge for surcharge categories
-    if (p && !SURCHARGE_CATEGORIES.has(traitType)) {
-      return { usageCount: p.usageCount, surchargeXch: 0 };
-    }
-    return p;
-  };
-
   const handleClearSelection = () => {
     clearLayer(activeLayer);
     // Also clear extras when clearing the Extras tab
@@ -943,8 +927,6 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                       needsClothesUnderlay={['Head', 'Mask', 'Eyes'].includes(activeLayer)}
                       isBeerHatUnderlayer={activeLayer === 'Head' && g2Sel?.traitId === 'Head_Beer-Hat' && g2Sel.options.beerHatUnderlayer === trait.id}
                       livePreviewUrl={beerHatCardPreviewUrl}
-                      pricing={lookupPricing(trait.name)}
-
                     />
                   </motion.div>
                 );
@@ -969,8 +951,6 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                       isDisabled={!!disabled}
                       disabledReason={reason}
                       onClick={() => handleTraitClick(trait)}
-                      pricing={lookupPricing(trait.name)}
-
                     />
                   </motion.div>
                 );
@@ -988,8 +968,6 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                       isDisabled={!!disabled}
                       disabledReason={reason}
                       onClick={() => handleTraitClick(trait)}
-                      pricing={lookupPricing(trait.name)}
-
                     />
                   </motion.div>
                 );
@@ -1069,8 +1047,6 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                       isDisabled={!!disabled}
                       disabledReason={reason}
                       onClick={() => handleTraitClick(trait)}
-                      pricing={lookupPricing(trait.name)}
-
                       renderBehindBase={image.path.toLowerCase().includes('extra_wings')}
                     />
                   ) : (
@@ -1080,8 +1056,6 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
                       isDisabled={!!disabled}
                       disabledReason={reason}
                       onClick={() => handleTraitClick(trait)}
-                      pricing={lookupPricing(trait.name)}
-
                     />
                   )}
                 </motion.div>

@@ -8,7 +8,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useGenerator } from '@/contexts/GeneratorContext';
-import { useMint, type TraitPricingEntry } from '@/contexts/MintContext';
+import { useMint } from '@/contexts/MintContext';
 import { traitGridVariants, traitCardStaggerVariants } from '@/config/generatorAnimations';
 import type { LayerImage } from '@/services/generatorService';
 import type { UnifiedTrait } from '@/services/generatorService';
@@ -47,13 +47,12 @@ interface ImageCardProps {
   disabledReason?: string;
   onClick: () => void;
   badge?: string;
-  pricing?: TraitPricingEntry | null;
   /** If true, show numb mouth under the trait (for add-on items like cig, joint, neckbeard) */
   showMouthUnderlay?: boolean;
 }
 
 /** Mouth trait card with base face + clothes underlay */
-function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, badge, pricing: _pricing, showMouthUnderlay }: ImageCardProps) {
+function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, badge, showMouthUnderlay }: ImageCardProps) {
   const prefersReducedMotion = useReducedMotion();
 
   // Get zoom transform from centralized positions file
@@ -178,7 +177,6 @@ interface G2MouthCardProps {
   isDisabled: boolean;
   disabledReason?: string;
   onClick: () => void;
-  pricing?: TraitPricingEntry | null;
 }
 
 /** Default color for Bubble Gum fill */
@@ -228,7 +226,7 @@ function sortMouthBaseTraits(traits: UnifiedTrait[]): UnifiedTrait[] {
 }
 
 /** G2 mouth trait card with base face + clothes underlay */
-function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick, pricing: _pricing }: G2MouthCardProps) {
+function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick }: G2MouthCardProps) {
   const prefersReducedMotion = useReducedMotion();
 
   // Get fill and outline paths
@@ -366,13 +364,6 @@ export function MouthLayerSelector({ className = '', sortMode = 'hot', onSortCha
   } = useGenerator();
   const { getTraitPricing } = useMint();
   const prefersReducedMotion = useReducedMotion();
-
-  // All mouth layers map to "Mouth" trait_type — no surcharge category
-  const lookupPricing = (traitName: string): TraitPricingEntry | null => {
-    const p = getTraitPricing('Mouth', traitName);
-    if (p) return { usageCount: p.usageCount, surchargeXch: 0 };
-    return p;
-  };
 
   const [rawMouthBase, setRawMouthBase] = useState<UnifiedTrait[]>([]);
   const [mouthItemImages, setMouthItemImages] = useState<LayerImage[]>([]);
@@ -568,7 +559,6 @@ export function MouthLayerSelector({ className = '', sortMode = 'hot', onSortCha
                       isDisabled={isDisabled}
                       disabledReason={isDisabled ? getDisabledReasonForOption('MouthBase', displayName) : undefined}
                       onClick={() => selectG2Layer('MouthBase', trait)}
-                      pricing={lookupPricing(trait.name)}
                     />
                   </motion.div>
                 );
@@ -591,7 +581,6 @@ export function MouthLayerSelector({ className = '', sortMode = 'hot', onSortCha
                         ? selectLayer('MouthBase', g1Path)
                         : selectG2Layer('MouthBase', trait)
                     }
-                    pricing={lookupPricing(trait.name)}
                   />
                 </motion.div>
               );
@@ -611,7 +600,6 @@ export function MouthLayerSelector({ className = '', sortMode = 'hot', onSortCha
                     disabledReason={isDisabled ? getDisabledReasonForOption('MouthItem', image.displayName) : undefined}
                     onClick={() => handleMouthItemClick(image)}
                     badge="+"
-                    pricing={lookupPricing(image.displayName)}
                     showMouthUnderlay
                   />
                 </motion.div>
@@ -632,7 +620,6 @@ export function MouthLayerSelector({ className = '', sortMode = 'hot', onSortCha
                     disabledReason={isDisabled ? getDisabledReasonForOption('FacialHair', image.displayName) : undefined}
                     onClick={() => handleFacialHairClick(image)}
                     badge="+"
-                    pricing={lookupPricing(image.displayName)}
                     showMouthUnderlay
                   />
                 </motion.div>
