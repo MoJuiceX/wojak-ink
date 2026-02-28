@@ -5,7 +5,7 @@
  * Users can select a base mouth (numb, smile, etc.) AND a mouth item (cig, joint, cohiba).
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useGenerator } from '@/contexts/GeneratorContext';
 import { useMint, type TraitPricingEntry } from '@/contexts/MintContext';
@@ -15,6 +15,7 @@ import type { UnifiedTrait } from '@/services/generatorService';
 import { getG1MouthTransform, getG2MouthTransform } from './mouthPreviewPositions';
 import { DEFAULT_BASE_PATH, DEFAULT_CLOTHES_PATH, DEFAULT_MOUTHBASE_PATH } from '@/lib/layerRegistry';
 import { G2_LAYER_BASE } from '@/config/layerAssetBase';
+import { SortControls, type TraitSortMode } from '@/components/generator/TraitSelector';
 
 const G2_BASE_PATH = G2_LAYER_BASE;
 
@@ -23,6 +24,8 @@ const DEFAULT_MOUTH_PATH = DEFAULT_MOUTHBASE_PATH;
 
 interface MouthLayerSelectorProps {
   className?: string;
+  sortMode?: TraitSortMode;
+  onSortChange?: (mode: TraitSortMode) => void;
 }
 
 function TraitCardSkeleton() {
@@ -347,7 +350,7 @@ function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick, p
   );
 }
 
-export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) {
+export function MouthLayerSelector({ className = '', sortMode = 'hot', onSortChange }: MouthLayerSelectorProps) {
   const {
     selectedLayers,
     g2Selections,
@@ -371,7 +374,7 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
     return p;
   };
 
-  const [mouthBaseUnified, setMouthBaseUnified] = useState<UnifiedTrait[]>([]);
+  const [rawMouthBase, setRawMouthBase] = useState<UnifiedTrait[]>([]);
   const [mouthItemImages, setMouthItemImages] = useState<LayerImage[]>([]);
   const [facialHairImages, setFacialHairImages] = useState<LayerImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -392,19 +395,42 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
       getLayerImages('FacialHair'),
     ])
       .then(([baseUnified, itemImages, facialImages]) => {
-        setMouthBaseUnified(sortMouthBaseTraits(baseUnified));
+        setRawMouthBase(sortMouthBaseTraits(baseUnified));
         setMouthItemImages(itemImages);
         setFacialHairImages(facialImages);
         setIsLoading(false);
       })
       .catch((err) => {
         console.error('Failed to load mouth options:', err);
-        setMouthBaseUnified([]);
+        setRawMouthBase([]);
         setMouthItemImages([]);
         setFacialHairImages([]);
         setIsLoading(false);
       });
   }, [isInitialized, getUnifiedTraitsForLayer, getLayerImages]);
+
+  // Derive sorted mouthBaseUnified from rawMouthBase + sortMode (no extra effect needed)
+  const mouthBaseUnified = useMemo(() => {
+    if (rawMouthBase.length === 0) return [];
+
+    const lookupUsage = (traitName: string): number => {
+      const p = getTraitPricing('Mouth', traitName);
+      return p?.usageCount ?? 0;
+    };
+
+    if (sortMode === 'az') {
+      return [...rawMouthBase].sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    return [...rawMouthBase].sort((a, b) => {
+      const aUsage = lookupUsage(a.name);
+      const bUsage = lookupUsage(b.name);
+      if (aUsage !== bUsage) {
+        return sortMode === 'hot' ? bUsage - aUsage : aUsage - bUsage;
+      }
+      return 0; // tiebreaker: preserve MOUTH_BASE_ORDER
+    });
+  }, [rawMouthBase, sortMode, getTraitPricing]);
 
   // Loading skeleton
   if (isLoading || !isInitialized) {
@@ -503,6 +529,11 @@ export function MouthLayerSelector({ className = '' }: MouthLayerSelectorProps) 
             Mouth layers are blocked by another trait selection
           </p>
         </div>
+      )}
+
+      {/* Sort controls — above grid, only when traits are loaded */}
+      {!isBlocked && hasAnyOptions && onSortChange && (
+        <SortControls sortMode={sortMode} onSortChange={onSortChange} />
       )}
 
       {/* Combined mouth trait grid */}

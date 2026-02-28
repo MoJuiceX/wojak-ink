@@ -256,12 +256,12 @@ function NoneCard({ isSelected, onClick }: NoneCardProps) {
   );
 }
 
-interface SortControlsProps {
+export interface SortControlsProps {
   sortMode: TraitSortMode;
   onSortChange: (mode: TraitSortMode) => void;
 }
 
-function SortControls({ sortMode, onSortChange }: SortControlsProps) {
+export function SortControls({ sortMode, onSortChange }: SortControlsProps) {
   const modes: { mode: TraitSortMode; icon: string; label: string }[] = [
     { mode: 'hot', icon: '\u{1F525}', label: 'Most used first' },
     { mode: 'not', icon: '\u{1F48E}', label: 'Least used first' },
@@ -814,7 +814,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
 
   // Use MouthLayerSelector for mouth-related layers (combines MouthBase + MouthItem)
   if (isMouthLayer) {
-    return <MouthLayerSelector className={className} />;
+    return <MouthLayerSelector className={className} sortMode={sortMode} onSortChange={setSortMode} />;
   }
 
   // Loading skeleton - also show when data is stale (from a different layer)
