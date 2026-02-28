@@ -190,7 +190,7 @@
   flex-shrink: 0;
   position: relative;
   z-index: 5;
-  background: var(--color-bg);
+  background: transparent;
 }
 
 /* Mobile: category tabs stay fixed at bottom of preview section */
